@@ -25,7 +25,7 @@ AD / UC (xem `business-rules.md`).
 |---|---|---|
 | M0 · Development harness | done | Skills, checklist và enforcement script đã có |
 | M1 · Product definition (Phase 0–1) | **done** | Đặc tả MVP đã frozen: AD-01…11, BR-01…87, UC-01…09, data model đầy đủ |
-| M2 · Project foundation (Phase 2–3, 6) | in-progress | M2.1 / M2.1a / M2.1b done. **M2.2 done trừ `custom_lint` + `riverpod_lint`** — xung đột `analyzer` của hệ sinh thái, xem Blocker. Flutter đã pin ở `.fvmrc`. Tiếp theo: M2.3 |
+| M2 · Project foundation (Phase 2–3, 6) | in-progress | M2.1 / M2.1a / M2.1b / **M2.2 done**. `custom_lint` + `riverpod_lint` đã descoped (quyết định của chủ dự án). Flutter đã pin ở `.fvmrc`. Tiếp theo: M2.3 |
 | M3 · Architecture & design system (Phase 4–5, 7, 12–13) | todo | |
 | M4 · Router & Drift foundation (Phase 8, 11) | todo | **Phase 10 (networking) hoãn** — AD-01, AD-05 |
 | M5 · First vertical slice: luồng ôn tập (Phase 14) | todo | UC-05 |
@@ -260,13 +260,10 @@ bộ, không phải chỉnh sửa tiện tay.
   đó ở `Editable documents`.
 - **MUST** viết test trong cùng task. M6 chỉ bổ sung độ phủ còn thiếu, **không**
   phải nơi bắt đầu viết test.
-- Mọi task **MUST** kết thúc với `flutter analyze` sạch (0 error, 0 warning) và
-  `dart run custom_lint` exit 0. Không lặp lại điều này ở từng acceptance
-  criteria; nó là điều kiện cần của mọi task có code.
-  **Tạm hoãn phần `custom_lint` kể từ M2.2:** package này chưa cài được vì xung
-  đột `analyzer` (xem Blocker). Cho tới khi gỡ được, phần `flutter analyze`
-  vẫn **MUST** đạt; phần `custom_lint` được coi là hoãn, **không** phải được
-  miễn — nó quay lại thành bắt buộc ngay khi M2.3 cài được package.
+- Mọi task **MUST** kết thúc với `flutter analyze` sạch (0 error, 0 warning).
+  Không lặp lại điều này ở từng acceptance criteria; nó là điều kiện cần của mọi
+  task có code. `custom_lint` **đã descoped** ở M2.2 — xem `Deferred and
+  descoped`; đừng thêm lại nó vào acceptance criteria của task mới.
 - `.claude/skills/flutter-architecture/scripts/check_architecture.sh` **MUST**
   exit 0 sau mọi task tạo file trong `lib/`.
 
@@ -411,7 +408,7 @@ và Web, analyzer sạch, code generation chạy được.
 
 ### M2.2 · Dependency nền tảng và code generation
 
-- **Status:** done — **trừ `custom_lint` và `riverpod_lint`**, xem Blocker
+- **Status:** done
 - **Goal:** Cài đúng bộ dependency của MVP, làm `build_runner` chạy sạch, và
   **pin phiên bản Flutter**.
 - **Scope:** runtime + dev dependency theo
@@ -436,16 +433,19 @@ và Web, analyzer sạch, code generation chạy được.
   - [x] Phiên bản Flutter được pin ở đúng **một** vị trí gốc và lý do được ghi
         lại (§5 — không chép con số ra hai chỗ). → con số ở `.fvmrc`, lý do ở
         mục Toolchain của `architecture.md`, mục đó **không** chép lại con số.
-  - [ ] **Chưa đạt** — `custom_lint` và `riverpod_lint` không cài được. Không
-        phải lỗi cấu hình mà là xung đột có thật của hệ sinh thái, xem Blocker.
+  - [x] `custom_lint` + `riverpod_lint` — **descoped**, không còn là tiêu chí.
 - **Hai điểm lệch so với `dependencies.md`, cả hai đều có lý do:**
 
-  1. **`custom_lint` + `riverpod_lint` bị bỏ lại.** Mọi phiên bản `custom_lint`
-     đã publish đều yêu cầu `analyzer ^7` hoặc `^8`; trong khi
+  1. **`custom_lint` + `riverpod_lint` — descoped khỏi MVP.** Mọi phiên bản
+     `custom_lint` đã publish đều yêu cầu `analyzer ^7` hoặc `^8`; trong khi
      `json_serializable 6.14`, `freezed 3.2.5` và `drift_dev 2.34` đều yêu cầu
-     `analyzer >=10`. Cách duy nhất để cài được `custom_lint` là hạ **toàn bộ**
-     stack generator xuống một thế hệ — kể cả `freezed_annotation` về `^2.2.0`
-     và `uuid` về `^3.0.6`, tức là đi ngược AD-03. Cái giá đó không xứng.
+     `analyzer >=10`. Cách duy nhất để cài được là hạ **toàn bộ** stack
+     generator xuống một thế hệ — kể cả `freezed_annotation` về `^2.2.0` và
+     `uuid` về `^3.0.6`, tức đi ngược AD-03.
+
+     Chủ dự án đã quyết định **không cần `custom_lint`**; nếu cần sẽ phát triển
+     guard bên ngoài. Đây là quyết định descope, **không** phải blocker đang
+     chờ gỡ — xem `Deferred and descoped` để biết chính xác mất gì.
   2. **`sqlite3_flutter_libs` bị **loại bỏ**.** Phiên bản duy nhất tương thích
      là `0.6.0+eol`, và đó là một **tombstone release**: mô tả của chính nó là
      *"Not used anymore, update to version 3.x of package:sqlite3 instead"*, và
@@ -463,24 +463,28 @@ và Web, analyzer sạch, code generation chạy được.
   sạch và analyzer sạch
 - **Checklist phases:** 3.1, 3.2, 3.3
 
-### M2.3 · analysis_options.yaml và custom_lint
+### M2.3 · analysis_options.yaml
 
 - **Status:** todo
 - **Goal:** Áp bộ lint đã viết sẵn và xác nhận **từng rule** được analyzer công
   nhận.
 - **Scope:** copy `analysis_options.yaml` từ
-  `.claude/skills/flutter-architecture/references/`, bật plugin `custom_lint`,
-  sửa những rule sai tên hoặc đã deprecated.
+  `.claude/skills/flutter-architecture/references/`, sửa những rule sai tên hoặc
+  đã deprecated, **gỡ khối `analyzer: plugins: - custom_lint`** vì package đó đã
+  descoped ở M2.2.
 - **Out of scope:** nới lỏng rule để code hiện tại pass. Nếu một rule quá chặt,
-  ghi lý do vào WBS rồi mới đổi.
+  ghi lý do vào WBS rồi mới đổi. Cũng ngoài phạm vi: guard thay thế cho
+  `riverpod_lint` — nếu làm thì là task riêng, xem `Deferred and descoped`.
 - **Editable documents:** `docs/wbs.md`,
   `.claude/skills/flutter-architecture/references/analysis_options.yaml`
 - **Output:** `analysis_options.yaml` ở gốc project
 - **Acceptance criteria:**
   - [ ] `flutter analyze` → 0 error, 0 warning.
-  - [ ] `dart run custom_lint` exit 0.
   - [ ] `flutter analyze` **không** in cảnh báo dạng
         `unrecognized/removed lint rule` cho bất kỳ rule nào trong file.
+  - [ ] Không còn tham chiếu `custom_lint` trong `analysis_options.yaml` ở gốc
+        project — một plugin khai báo mà không cài được sẽ làm analyzer im lặng
+        bỏ qua, đúng kiểu "cấu hình trông như đang chạy nhưng không chạy".
   - [ ] Mỗi rule bị bỏ so với bản trong skill được ghi vào WBS kèm lý do.
   - [ ] Mục technical debt "analysis_options.yaml chưa được áp dụng" được đánh
         dấu đã trả.
@@ -629,8 +633,7 @@ slice UC-05 cần. Không xây trọn design system trước khi có feature th�
 - **Editable documents:** `docs/wbs.md`
 - **Output:** `lib/core/providers/`, `test/helpers/container.dart`
 - **Acceptance criteria:**
-  - [ ] `dart run build_runner build` sinh provider, `dart run custom_lint`
-        exit 0.
+  - [ ] `dart run build_runner build` sinh provider và `flutter analyze` exit 0.
   - [ ] Provider dùng `Ref` (Riverpod 3), **không** dùng `*Ref` sinh riêng.
   - [ ] `makeContainer()` trong `test/helpers/` tự `addTearDown(dispose)`.
   - [ ] Test khẳng định `envConfigProvider` throw khi chưa override.
@@ -1081,7 +1084,6 @@ viện starter deck.
 
 | Blocker | Ảnh hưởng | Cách gỡ |
 |---|---|---|
-| **`custom_lint` không tương thích với stack generator hiện tại** | Mọi phiên bản `custom_lint` đã publish đều cần `analyzer ^7`/`^8`; `json_serializable 6.14`, `freezed 3.2.5` và `drift_dev 2.34` đều cần `analyzer >=10`. Kéo theo `riverpod_lint` cũng không cài được. Chặn M2.3 (tiêu chí `dart run custom_lint` exit 0) và làm quy tắc chung M2–M5 về `custom_lint` **tạm thời không thoả mãn được** | Chờ `custom_lint` hỗ trợ `analyzer >=10` rồi thêm lại ở M2.3. **Không** hạ stack generator để chiều nó — cái giá là `freezed_annotation` về `^2.2.0` và `uuid` về `^3.0.6`, đi ngược AD-03. Kiểm lại bằng `flutter pub add --dev custom_lint riverpod_lint` ở mỗi lần chạm dependency |
 | Flutter SDK không tồn tại sẵn trong container | Mỗi phiên phải cài lại (~1.5 GB, vài phút) | Đã cài thủ công vào `/opt/flutter` ở M2.1. Container là ephemeral nên cần **SessionStart hook** để phiên sau tự dựng lại — chưa làm, xếp vào M2.2. **Chỉ áp dụng cho môi trường cloud**; máy local có Flutter cài sẵn |
 | **WebGL không khả dụng trong Chromium headless của container** | Flutter 3.44 chỉ còn renderer CanvasKit/skwasm, cả hai cần WebGL; HTML renderer đã bị gỡ từ 3.29. App build được nhưng **không render** — screenshot ra trang trắng. Chặn visual regression và E2E bằng Playwright ngay trong container | **Không còn là blocker của kiến trúc — chỉ là ràng buộc môi trường.** Đã kiểm chứng ở máy local: WebGL2 khả dụng (`ANGLE (AMD Radeon, D3D11)`) và app render đúng ở cả hai viewport. AD-04 giữ nguyên, phần Consequences đã ghi rõ runner E2E MUST có WebGL (GPU thật hoặc SwiftShader) và job MUST assert app đã render thật trước khi so ảnh |
 
@@ -1101,9 +1103,27 @@ của M2.
 
 | Item | Decision | Reason | Revisit when |
 |---|---|---|---|
+| `custom_lint` + `riverpod_lint` | descoped khỏi MVP | Không có phiên bản `custom_lint` nào tương thích `analyzer >=10`, trong khi `json_serializable`, `freezed` và `drift_dev` đều đòi mức đó. Cài được chỉ bằng cách hạ toàn bộ stack generator một thế hệ, kể cả `uuid` về `^3.0.6` — đi ngược AD-03. Chủ dự án quyết định không cần; nếu cần sẽ làm guard bên ngoài | Khi `custom_lint` hỗ trợ `analyzer >=10`, **hoặc** khi một guard ngoài được viết. Xem mục bên dưới về việc mất gì |
 | Flutter toolchain verification | **đã xong** | Từng hoãn vì `flutter` chưa có trong môi trường cloud | Đã kiểm chứng ở M2.1 trên máy local: `flutter doctor -v` → `No issues found!` |
 | Đưa deck con lên thành root deck | descoped khỏi MVP | Cần quyết định scheduler mới; là tính năng riêng chứ không phải phép di chuyển | Sau MVP (UC-09 A2) |
 | Media và tag | descoped khỏi MVP | Kéo theo lưu trữ file và đồng bộ file | Sau MVP; quy tắc reset và lưu trữ đã đặt sẵn (BR-41, AD-08) |
+
+### Bỏ `riverpod_lint` thì mất chính xác cái gì
+
+Ghi lại cụ thể, vì "mất một bộ lint" là câu quá mơ hồ để ai đó sau này biết
+guard ngoài phải nhắm vào đâu. `flutter analyze` **không** bắt được những lỗi
+dưới đây, và từ giờ **không có gì** bắt chúng:
+
+| Lỗi | Vì sao nguy hiểm |
+|---|---|
+| `ref.read` bên trong `build()` | Đọc giá trị mà **không** subscribe, nên widget âm thầm ngừng cập nhật. Biểu hiện ra ngoài là "dữ liệu bị cũ" — rất khó lần ngược về nguyên nhân. Đây là rule đáng giá nhất trong bộ |
+| Provider thiếu khai báo dependency | Provider bị scope sai, lỗi chỉ lộ khi override trong test hoặc khi scope thay đổi |
+| Dùng `ref` sau `await` mà không kiểm `ref.mounted` | Ghi state vào controller đã dispose |
+| Notifier có public property ngoài `state` | State thoát khỏi kênh duy nhất được theo dõi, làm rebuild không kích hoạt |
+
+Hệ quả: những lỗi này nay thuộc trách nhiệm **code review**, và ba trong bốn cái
+có thể bắt được bằng `grep` nếu muốn làm guard rẻ tiền — ví dụ tìm `ref.read`
+trong phạm vi hàm `build`. Nếu viết guard ngoài, đây là danh sách mục tiêu.
 
 ## Known technical debt
 
@@ -1113,6 +1133,7 @@ của M2.
 | `analysis_options.yaml` chưa được áp dụng | T0.1 | Bộ lint đã viết nhưng chưa được enforce; nhiều khả năng có tên rule sai hoặc đã deprecated | Copy vào project ở Phase 2.3 và xác nhận từng rule được analyzer công nhận |
 | 14 query bất biến chưa chạy trên **dữ liệu người dùng thật** | T1.3 | Bất biến mới được verify trên fixture, chưa enforce trên DB sản xuất | Chạy `check_docs.sh --db <path>` trong test tích hợp khi Drift schema tồn tại (M4) |
 | Pin Flutter ở `.fvmrc` **khai báo** chứ không **cưỡng chế** | M2.2 | Chạy `flutter` trực tiếp trên máy có version khác vẫn build được và không cảnh báo. Đây đúng là lỗi đã xảy ra: M2.1 chạy 3.44.8, phiên sau khởi động trên 3.44.6, không có gì phát hiện ra | Thêm một check so `flutter --version` với `.fvmrc` vào `dod_check.sh`, và dùng `flutter-version-file: .fvmrc` ở job CI của M7 |
+| 7 file skill vẫn bảo chạy `dart run custom_lint` | M2.2 | `custom_lint` đã descoped nhưng skill vẫn hướng dẫn cài và chạy nó, kể cả `feature_checklist.md` để nó thành checkbox của **mọi** feature. Phiên sau sẽ tin skill và loay hoay với một package không cài được | Sửa: `flutter-architecture/references/analysis_options.yaml` (M2.3 đã nhận việc này) + `SKILL.md`, `flutter-project-setup/references/dependencies.md`, `flutter-ship/references/ci.md` + `SKILL.md`, `flutter-state-riverpod/SKILL.md`, `flutter-feature-slice/SKILL.md` + `assets/feature_checklist.md`, `docs/checklist.md` |
 | `dependencies.md` vẫn liệt kê `sqlite3_flutter_libs` | M2.2 | Package đó nay là tombstone (`0.6.0+eol`, không có native code). Skill nói sai còn tệ hơn không có skill — phiên sau sẽ cài lại nó | Sửa `.claude/skills/flutter-project-setup/references/dependencies.md`: thay bằng ghi chú rằng `sqlite3` 3.x cấp native lib qua native assets. Ngoài `Editable documents` của M2.2 nên chưa sửa ở đây |
 | Nội dung starter là fixture, không phải nội dung production | T1.3 | Không phát hành được với nội dung này | Tìm nguồn nội dung có bản quyền rõ ràng trước M8 (BR-87) |
 | Bản build web MUST dùng `--no-web-resources-cdn` | M2.1a | Mặc định Flutter tải CanvasKit từ `gstatic.com` lúc **runtime** dù đã bundle sẵn cục bộ. Trong môi trường chặn CDN, app im lặng không render — không có lỗi build nào cảnh báo | Đưa cờ này vào job `build-web` của CI ở M7, và vào mọi hướng dẫn chạy web |
