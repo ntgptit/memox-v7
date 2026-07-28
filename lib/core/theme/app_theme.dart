@@ -23,7 +23,13 @@ ThemeData buildDarkTheme() => _buildTheme(
 );
 
 ThemeData _buildTheme(ColorScheme scheme, AppSemanticColors semantic) {
-  final base = ThemeData(colorScheme: scheme, useMaterial3: true);
+  final base = ThemeData(
+    colorScheme: scheme,
+    useMaterial3: true,
+    // Anything that builds its own TextStyle without going through the text
+    // theme still lands on the body face rather than the platform default.
+    fontFamily: AppTypography.bodyFamily,
+  );
 
   return base.copyWith(
     scaffoldBackgroundColor: scheme.surface,

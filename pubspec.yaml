@@ -82,6 +82,22 @@ flutter:
   # Runs gen-l10n on `flutter pub get` (config in l10n.yaml).
   generate: true
 
+  # Bundled rather than pulled at runtime: a study app must render the same
+  # offline, and `google_fonts` would add a dependency plus a first-run network
+  # fetch for something that never changes. Both faces are OFL — the licences
+  # sit next to them in assets/fonts/.
+  #
+  # Variable fonts. Google Fonts no longer ships static instances for either
+  # family, so weight is selected along the `wght` axis; app_typography.dart
+  # sets it through `fontVariations` so it works the same on every renderer.
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Variable.ttf
+    - family: PlusJakartaSans
+      fonts:
+        - asset: assets/fonts/PlusJakartaSans-Variable.ttf
+
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
