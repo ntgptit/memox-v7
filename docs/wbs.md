@@ -886,11 +886,34 @@ slice UC-05 cần. Không xây trọn design system trước khi có feature th�
         kết quả — guard rule `design_token.no_raw_color` enforce, exit 0
   - [x] `grep -rn 'TextStyle(' lib/features` không có kết quả — guard rule
         `design_token.no_raw_text_style` enforce, exit 0
-- **Phong cách:** Professional Learning Minimalism — một sắc indigo duy nhất
-  mang nhận diện, còn lại gần trung tính, để nội dung thẻ là thứ duy nhất tranh
-  sự chú ý. Màu dark **không** phải màu light tối đi: trên nền tối, một màu bão
-  hoà đọc ra sáng hơn chính nó trên nền trắng, nên từng màu được làm nhạt và
-  giảm bão hoà để giữ contrast tương đương mà không bị chói.
+- **Phong cách:** Professional Learning Minimalism — một sắc violet-indigo duy
+  nhất mang nhận diện, còn lại gần trung tính, để nội dung thẻ là thứ duy nhất
+  tranh sự chú ý. Màu dark **không** phải màu light tối đi: trên nền tối, một
+  màu bão hoà đọc ra sáng hơn chính nó trên nền trắng, nên từng màu được làm
+  nhạt và giảm bão hoà để giữ contrast tương đương mà không bị chói.
+- **Nguồn giá trị màu:** hue accent theo thang Tailwind, vốn được chỉnh sao cho
+  mỗi bậc giữ được contrast trên cả nền trắng lẫn nền gần đen — đúng thuộc tính
+  cần ở đây vì mọi màu này phải chạy được ở hai brightness. Cặp light/dark lấy
+  cách nhau một bậc thang thay vì làm tối một giá trị duy nhất. Có **định** dùng
+  thang Radix (iris) nhưng hex của họ render client-side nên không trích được;
+  nguyên tắc phân bậc của Radix (bậc 9 = nền đặc, 11 = chữ tương phản thấp) vẫn
+  được dùng làm khung. **Trọng tài cuối cùng là test contrast WCAG**, không phải
+  nguồn — palette mới được kiểm lại và pass toàn bộ.
+- **Font (bổ sung sau M3.6):** hai họ, mỗi họ làm việc nó giỏi.
+  **Plus Jakarta Sans** cho display/title — hình học pha humanist, để một từ vựng
+  đặt lớn đọc ra như có thiết kế thay vì như chữ hệ thống mặc định; đây là chữ
+  ký thị giác duy nhất của app. **Inter** cho body/UI — vẽ riêng cho màn hình,
+  x-height cao, `l`/`I`/`1` phân biệt được, đúng thứ một định nghĩa đọc ở 14sp
+  trên điện thoại cần.
+
+  **Bundle vào repo** (`assets/fonts/`, kèm OFL) chứ không dùng `google_fonts`:
+  app học tập phải render y hệt khi offline, và package đó thêm một dependency
+  cùng một lần tải mạng ở lần chạy đầu cho thứ không bao giờ đổi.
+
+  Cả hai là **variable font** — Google Fonts không còn ship bản static cho hai họ
+  này. `fontWeight` một mình **không** dịch chuyển trục `wght` một cách nhất quán
+  giữa các renderer, nên trọng số được đặt thêm qua `fontVariations`, và
+  `fontWeight` vẫn giữ đồng bộ để công cụ a11y và `copyWith` đọc đúng giá trị.
 - **Dependencies:** M3.1
 - **Tests required:** unit test khẳng định thang spacing và bộ token bắt buộc
   tồn tại — **đã có**, `test/core/theme/design_tokens_test.dart`, 7 test
@@ -973,7 +996,9 @@ slice UC-05 cần. Không xây trọn design system trước khi có feature th�
   2. **Không** golden cho `AppLoadingStateWidget`. `CircularProgressIndicator`
      luôn ở giữa animation, nên golden của nó flaky theo thiết kế. Hành vi của
      nó được phủ bằng test semantics.
-  3. **Nạp font thật** qua `test/flutter_test_config.dart`. Mặc định
+  3. **Nạp font thật** qua `test/flutter_test_config.dart` — nạp **font của
+     chính app** (`assets/fonts/`) chứ không phải font hệ thống, nếu không golden
+     sẽ ghi lại kiểu chữ mà app không bao giờ render. Mặc định
      `flutter_test` thay font bằng một placeholder vẽ mọi glyph thành ô vuông
      giống hệt nhau — khi đó golden chỉ ghi lại **hình dạng layout** và không
      ghi gì về chữ: sai font weight, sai màu chữ, label bị cắt và lỗi
@@ -991,6 +1016,12 @@ slice UC-05 cần. Không xây trọn design system trước khi có feature th�
   runner Linux sẽ khác antialiasing. M7 phải hoặc chạy suite này trên một nền
   tảng duy nhất, hoặc sinh lại theo nền tảng. File test gắn tag `golden` nên
   loại trừ được bằng `--exclude-tags golden`.
+- **Golden bổ sung sau khi đổi font:** thêm `typography` và `card_prompt`. Lý do
+  cụ thể: hai họ font có thể được khai báo trong `pubspec`, **im lặng không nạp
+  được**, và mọi golden còn lại vẫn pass trên font fallback. Hai ảnh này là thứ
+  duy nhất làm hỏng đó lộ ra — `typography` phơi từng vai trò chữ để thiếu họ
+  font hay kẹt trục trọng số nhìn thấy được, `card_prompt` cho thấy màn hình
+  chủ đạo thật.
 - **App shell:** `ReviewPlaceholderScreen` nay dựng từ `AppScaffoldWidget` +
   `AppEmptyStateWidget`, tức bộ component được chứng minh chạy end-to-end trước
   khi có màn hình thật phụ thuộc vào nó. Chưa triển khai màn review (M5.4).

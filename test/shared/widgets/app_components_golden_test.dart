@@ -63,6 +63,18 @@ void main() {
   /// golden would be flaky by construction. Its behaviour is covered by the
   /// semantics test instead.
   final cases = <String, Widget>{
+    // Proves the bundled faces actually render and that the variable-font
+    // weight axis moves. Without this, two families could be declared in
+    // pubspec, silently fail to load, and every other golden would still pass
+    // on the fallback face.
+    'typography': const Scaffold(body: _TypographySpecimen()),
+    // The app's hero: a vocabulary prompt in the display face on a card.
+    'card_prompt': const Scaffold(
+      body: Padding(
+        padding: EdgeInsets.all(16),
+        child: Center(child: AppCardSurface(child: _CardPrompt())),
+      ),
+    ),
     'card_surface': const Scaffold(
       body: Padding(
         padding: EdgeInsets.all(16),
@@ -122,3 +134,50 @@ void main() {
 }
 
 void _noop() {}
+
+/// One line per text role, so a missing family or a stuck weight axis is
+/// visible rather than inferred.
+class _TypographySpecimen extends StatelessWidget {
+  const _TypographySpecimen();
+
+  @override
+  Widget build(BuildContext context) {
+    final texts = Theme.of(context).textTheme;
+
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Text('Ephemeral', style: texts.headlineMedium),
+          const SizedBox(height: 12),
+          Text('Display / Jakarta 600', style: texts.titleLarge),
+          Text('Title / Inter 600', style: texts.titleMedium),
+          Text('Body / Inter 400 — 0123456789', style: texts.bodyMedium),
+          Text('Label / Inter 600', style: texts.labelLarge),
+          Text('Caption / Inter 400', style: texts.bodySmall),
+        ],
+      ),
+    );
+  }
+}
+
+class _CardPrompt extends StatelessWidget {
+  const _CardPrompt();
+
+  @override
+  Widget build(BuildContext context) {
+    final texts = Theme.of(context).textTheme;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text('ephemeral', style: texts.headlineMedium),
+        const SizedBox(height: 8),
+        Text('adjective · /ɪˈfem(ə)rəl/', style: texts.bodyMedium),
+      ],
+    );
+  }
+}

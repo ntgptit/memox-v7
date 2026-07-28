@@ -19,23 +19,51 @@ import 'package:flutter_test/flutter_test.dart';
 /// machine already builds with.
 Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   TestWidgetsFlutterBinding.ensureInitialized();
+  await _loadAppFonts();
   await _loadSdkFonts();
 
   return testMain();
 }
 
+/// Loads the bundled Inter and Plus Jakarta Sans.
+///
+/// Read straight from `assets/fonts/` rather than through the asset bundle:
+/// `flutter test` does not populate the bundle with declared fonts, which is
+/// the reason a golden of a themed screen otherwise falls back to the default
+/// face and silently stops testing the typography.
+Future<void> _loadAppFonts() async {
+  for (final entry in _appFonts.entries) {
+    final file = File(entry.value);
+    if (!file.existsSync()) {
+      throw StateError(
+        'Bundled font missing: ${file.path}. Goldens would render the fallback '
+        'face and stop testing the app typography.',
+      );
+    }
+
+    final loader = FontLoader(
+      entry.key,
+    )..addFont(file.readAsBytes().then((bytes) => ByteData.sublistView(bytes)));
+    await loader.load();
+  }
+}
+
+/// The app's own faces, loaded from `assets/fonts/` exactly as the app ships
+/// them. Loading anything else here would make goldens record type the app
+/// never renders.
+const Map<String, String> _appFonts = <String, String>{
+  'Inter': 'assets/fonts/Inter-Variable.ttf',
+  'PlusJakartaSans': 'assets/fonts/PlusJakartaSans-Variable.ttf',
+};
+
 /// Family name to the SDK font files that make it up.
 ///
 /// `MaterialIcons` matters as much as the text font: without it every `Icon`
 /// renders as an empty square, which is exactly what the empty-state and
-/// error-state goldens are meant to show.
+/// error-state goldens are meant to show. Roboto stays as the fallback the
+/// framework reaches for when a style names no family.
 const Map<String, List<String>> _families = <String, List<String>>{
-  'Roboto': <String>[
-    'roboto-regular.ttf',
-    'roboto-medium.ttf',
-    'roboto-bold.ttf',
-    'roboto-italic.ttf',
-  ],
+  'Roboto': <String>['roboto-regular.ttf', 'roboto-medium.ttf'],
   'MaterialIcons': <String>['materialicons-regular.otf'],
 };
 
