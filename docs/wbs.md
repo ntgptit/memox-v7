@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | T1.4 |
+| **Updated by task** | M2.1 |
 | **Last updated** | 2026-07-28 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -25,7 +25,7 @@ AD / UC (xem `business-rules.md`).
 |---|---|---|
 | M0 · Development harness | done | Skills, checklist và enforcement script đã có |
 | M1 · Product definition (Phase 0–1) | **done** | Đặc tả MVP đã frozen: AD-01…11, BR-01…87, UC-01…09, data model đầy đủ |
-| M2 · Project foundation (Phase 2–3, 6) | in-progress | **M2.1 blocked** ở đúng một bước: build APK. Flutter đã cài, code đã xong, analyze/test/web build pass — xem Blocker |
+| M2 · Project foundation (Phase 2–3, 6) | in-progress | **M2.1 done trọn vẹn** — hai tiêu chí Android đã kiểm chứng trên máy local: doctor sạch, APK build exit 0, app chạy trên emulator. M2.1a done. Tiếp theo: M2.2 |
 | M3 · Architecture & design system (Phase 4–5, 7, 12–13) | todo | |
 | M4 · Router & Drift foundation (Phase 8, 11) | todo | **Phase 10 (networking) hoãn** — AD-01, AD-05 |
 | M5 · First vertical slice: luồng ôn tập (Phase 14) | todo | UC-05 |
@@ -275,7 +275,7 @@ và Web, analyzer sạch, code generation chạy được.
 
 ### M2.1 · Khởi tạo Flutter project và xác nhận toolchain
 
-- **Status:** done — **hai tiêu chí Android được hoãn có chủ đích**, xem ghi chú cuối mục
+- **Status:** done
 - **Goal:** Tạo Flutter project chạy được và xác nhận toolchain đủ để build
   Android lẫn Web.
 - **Scope:** `flutter create` với org/package đúng, xoá code demo, thu `main.dart`
@@ -287,11 +287,13 @@ và Web, analyzer sạch, code generation chạy được.
   `lib/main.dart`, `lib/app/app.dart`, `test/widget_test.dart`, `README.md`,
   `android/`, `web/`, `.metadata`
 - **Acceptance criteria:**
-  - [ ] **[hoãn]** `flutter doctor` không có mục nào ở trạng thái lỗi cho Android
-        toolchain. → chưa đạt: `[✗] Android toolchain — Unable to locate Android SDK.`
+  - [x] `flutter doctor` không có mục nào ở trạng thái lỗi cho Android
+        toolchain. → `[√] Android toolchain — develop for Android devices
+        (Android SDK version 36.0.0)`, platform android-36, build-tools 36.0.0,
+        JDK 21, all licenses accepted; `flutter doctor -v` → `No issues found!`
   - [x] `flutter analyze` → 0 error, 0 warning. → `No issues found!`, exit 0
-  - [ ] **[hoãn]** `flutter build apk --debug` exit 0. → chưa đạt:
-        `[!] No Android SDK found.`, exit 1
+  - [x] `flutter build apk --debug` exit 0. →
+        `√ Built build\app\outputs\flutter-apk\app-debug.apk`, exit 0
   - [x] `flutter build web` exit 0. → `✓ Built build/web`, exit 0
   - [x] `flutter test` exit 0. → `All tests passed!`, 1 test
   - [x] `lib/main.dart` ≤ 10 dòng và không chứa widget nào. → 7 dòng, 0 widget
@@ -307,13 +309,12 @@ và Web, analyzer sạch, code generation chạy được.
   - [x] `.gitignore`, `docs/` và `.claude/` không bị `flutter create` ghi đè.
 - **Dependencies:** T1.4
 - **Tests required:** smoke test dựng app và tìm được root widget — **đã có**,
-  `test/widget_test.dart`, pass
+  `test/widget_test.dart`, pass. Ngoài ra APK đã được cài và chạy trên emulator
+  `Medium_Phone` (Android 16, API 36): activity `com.ntgptit.memox/.MainActivity`
+  giành được `mCurrentFocus` sau 7s và screenshot cho thấy app **render thật**
+  — nền Material 3 sáng, chữ `memox` căn giữa. Build xong không đồng nghĩa với
+  hiển thị được; đây là bước xác nhận điều thứ hai.
 - **Checklist phases:** 2.1, 2.3
-- **Ghi chú về trạng thái:** hai tiêu chí Android ở trên **chưa được kiểm chứng**
-  và MUST NOT được đọc là đã đạt. Chủ dự án đã quyết định đi tiếp vì Web — kênh
-  E2E theo AD-04 — vẫn build được, và phần Android sẽ xác minh ở môi trường
-  local. Việc còn lại: chạy `flutter doctor -v` và `flutter build apk --debug`
-  trên máy có Android SDK. Không cần sửa code.
 
 ### M2.1a · Khung màn hình mobile cho bản build Web
 
@@ -981,24 +982,26 @@ viện starter deck.
 
 | Blocker | Ảnh hưởng | Cách gỡ |
 |---|---|---|
-| **`dl.google.com` bị chính sách mạng của môi trường chặn** (403 CONNECT) | Không cài được Android SDK, và Gradle không tải được Android Gradle Plugin. `flutter build apk` và `flutter doctor` phần Android **không thể** pass. Chặn tiêu chí APK của M2.1, và sẽ chặn mọi task cần build Android sau này | Cho phép `dl.google.com` trong network policy của environment, hoặc chạy các build Android trên runner CI có sẵn Android SDK |
-| Flutter SDK không tồn tại sẵn trong container | Mỗi phiên phải cài lại (~1.5 GB, vài phút) | Đã cài thủ công vào `/opt/flutter` ở M2.1. Container là ephemeral nên cần **SessionStart hook** để phiên sau tự dựng lại — chưa làm, xếp vào M2.2 |
+| Flutter SDK không tồn tại sẵn trong container | Mỗi phiên phải cài lại (~1.5 GB, vài phút) | Đã cài thủ công vào `/opt/flutter` ở M2.1. Container là ephemeral nên cần **SessionStart hook** để phiên sau tự dựng lại — chưa làm, xếp vào M2.2. **Chỉ áp dụng cho môi trường cloud**; máy local có Flutter cài sẵn |
 | **WebGL không khả dụng trong Chromium headless của container** | Flutter 3.44 chỉ còn renderer CanvasKit/skwasm, cả hai cần WebGL; HTML renderer đã bị gỡ từ 3.29. App build được nhưng **không render** — screenshot ra trang trắng. Chặn visual regression và E2E bằng Playwright ngay trong container | Chạy E2E trên runner có GPU/WebGL, hoặc dùng emulator Android cho integration test. Cần quyết định trước M7 vì AD-04 đặt cược kênh E2E vào Flutter Web |
 
-Blocker thứ nhất **không** chặn phần còn lại của M2: `flutter analyze`, `flutter
-test`, `flutter build web` và `build_runner` đều chạy được. Nó chỉ chặn đúng
-bước build APK.
+**Đã gỡ — `dl.google.com` bị chính sách mạng chặn (403 CONNECT).** Blocker này
+chặn việc cài Android SDK và việc Gradle tải Android Gradle Plugin, khiến hai
+tiêu chí Android của M2.1 không kiểm chứng được. Nó **chỉ áp dụng cho môi trường
+cloud** nơi network policy chặn `dl.google.com`, **không** phải khuyết tật của
+project: trên máy local có Android SDK, `flutter doctor -v` sạch và
+`flutter build apk --debug` exit 0 mà không sửa một dòng code nào — đúng như dự
+đoán lúc hoãn.
 
-**Kế hoạch đã chốt:** phần Android của M2.1 sẽ được hoàn tất trong một phiên chạy
-ở **môi trường local** có sẵn Android SDK. Phiên đó chỉ cần chạy lại
-`flutter doctor -v` và `flutter build apk --debug`, rồi chuyển M2.1 sang `done`
-— không cần sửa code, vì mọi tiêu chí khác đã đạt và đã commit.
+Hệ quả còn lại cho M7: mọi job build Android **MUST** chạy ở môi trường truy cập
+được `dl.google.com`. Đây là ràng buộc khi chọn CI runner, không còn là blocker
+của M2.
 
 ## Deferred and descoped
 
 | Item | Decision | Reason | Revisit when |
 |---|---|---|---|
-| Flutter toolchain verification | deferred | `flutter` chưa có trong môi trường; `flutter doctor` và build sạch chưa chạy được | Phase 2.1 |
+| Flutter toolchain verification | **đã xong** | Từng hoãn vì `flutter` chưa có trong môi trường cloud | Đã kiểm chứng ở M2.1 trên máy local: `flutter doctor -v` → `No issues found!` |
 | Đưa deck con lên thành root deck | descoped khỏi MVP | Cần quyết định scheduler mới; là tính năng riêng chứ không phải phép di chuyển | Sau MVP (UC-09 A2) |
 | Media và tag | descoped khỏi MVP | Kéo theo lưu trữ file và đồng bộ file | Sau MVP; quy tắc reset và lưu trữ đã đặt sẵn (BR-41, AD-08) |
 
