@@ -142,6 +142,36 @@ void main() {
     });
   });
 
+  group('primary as a fill', () {
+    test('the dark primary is not a glare source', () {
+      // Material 3's tone-80 default sits at luminance 0.565 — over half of
+      // pure white. As the fill of a large button on a deep page that is
+      // visual noise, and it drags the eye off the card content, which is the
+      // one thing a review screen exists to show.
+      final darkPrimary = themes['dark']!.colorScheme.primary;
+
+      expect(
+        _luminance(darkPrimary),
+        lessThan(0.25),
+        reason: 'dark primary is bright enough to read as a light source',
+      );
+    });
+
+    test('label on a primary fill is readable in both themes', () {
+      // The failure this catches is specific: M3's light-on-light pairing gives
+      // white text 1.71:1 on the tone-80 lavender, which passes no standard.
+      for (final entry in themes.entries) {
+        final scheme = entry.value.colorScheme;
+
+        expect(
+          _contrast(scheme.onPrimary, scheme.primary),
+          greaterThanOrEqualTo(4.5),
+          reason: '${entry.key}: onPrimary on primary',
+        );
+      }
+    });
+  });
+
   group('surface ladder', () {
     test('three distinct levels in both themes', () {
       // Two levels forces every inset element to borrow the card colour and

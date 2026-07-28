@@ -916,6 +916,16 @@ slice UC-05 cần. Không xây trọn design system trước khi có feature th�
 - **Chữ không dùng đầu mút thuần.** `#EDECFE` thay vì trắng, `#17162D` thay vì
   đen: trên nền bão hoà một giá trị thuần bị rung, còn mang theo chút hue của
   surface là thứ làm chữ **nằm trong** giao diện chứ không dán lên trên.
+- **`primary` ở dark bị override khỏi mặc định Material 3.** M3 đặt dark
+  `primary` ở tone 80 — một sắc lavender gần pastel, **luminance 0.565**, tức
+  sáng hơn nửa màu trắng thuần. Đúng cho vai trò M3 giả định (chữ và icon trên
+  nền tối) và **sai** cho vai trò app này dùng (nền của một nút lớn): trên trang
+  luminance 0.004 nó chói, kéo mắt khỏi thẻ từ vựng, và chữ trắng trên nó chỉ
+  đạt **1.71:1** — dưới mọi ngưỡng đọc được.
+
+  Dùng chính seed hạ nền nút xuống luminance 0.118 và nâng chữ trắng lên 6.25:1.
+  Có test ghim cả hai: `primary` dark phải dưới luminance 0.25, và `onPrimary`
+  trên `primary` phải ≥ 4.5:1 ở **cả hai** theme.
 - **Focus của ô nhập đổi *hue*, không đổi độ dày.** Material mặc định nhảy 1px →
   2px, làm ô nhảy và đẩy mọi thứ bên cạnh. Giữ nét 1.5 ở **mọi** trạng thái và
   chuyển màu sang `focusRing` (periwinkle `#A8B1FF` ở dark) — đây chính là điểm

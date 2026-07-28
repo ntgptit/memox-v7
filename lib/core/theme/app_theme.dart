@@ -34,6 +34,18 @@ ThemeData buildDarkTheme() => _buildTheme(
     seedColor: AppColors.seed,
     brightness: Brightness.dark,
   ).copyWith(
+    // Material 3 puts dark `primary` at tone 80 — a near-pastel lavender at
+    // luminance 0.565, more than half of pure white. That is correct for the
+    // role M3 assumes (text and icons on a dark surface) and wrong for the role
+    // this app uses it in (the fill of a large button). On a page at luminance
+    // 0.004 it glares, it pulls the eye off the vocabulary card, and white text
+    // on it only reaches 1.71:1 — below the readable threshold.
+    //
+    // Using the seed itself drops the fill to luminance 0.118 and lifts white
+    // text to 6.25:1. `test/core/theme/app_theme_test.dart` pins the bound so a
+    // future scheme change cannot quietly reintroduce the glare.
+    primary: AppColors.seed,
+    onPrimary: AppColors.onSurfaceDark,
     surface: AppColors.surfaceDark,
     surfaceContainerHighest: AppColors.surfaceMutedDark,
     onSurface: AppColors.onSurfaceDark,
