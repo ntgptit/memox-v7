@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | T1.3a |
+| **Updated by task** | T1.4 |
 | **Last updated** | 2026-07-28 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -25,7 +25,7 @@ AD / UC (xem `business-rules.md`).
 |---|---|---|
 | M0 · Development harness | done | Skills, checklist và enforcement script đã có |
 | M1 · Product definition (Phase 0–1) | **done** | Đặc tả MVP đã frozen: AD-01…11, BR-01…87, UC-01…09, data model đầy đủ |
-| M2 · Project foundation (Phase 2–3, 6) | todo | Chặn bởi việc Flutter chưa có trong môi trường — xem Blocker |
+| M2 · Project foundation (Phase 2–3, 6) | todo | **M2.1 là việc tiếp theo.** Chặn bởi Flutter chưa có trong môi trường — xem Blocker |
 | M3 · Architecture & design system (Phase 4–5, 7, 12–13) | todo | |
 | M4 · Router & Drift foundation (Phase 8, 11) | todo | **Phase 10 (networking) hoãn** — AD-01, AD-05 |
 | M5 · First vertical slice: luồng ôn tập (Phase 14) | todo | UC-05 |
@@ -229,7 +229,7 @@ bộ, không phải chỉnh sửa tiện tay.
 
 ### T1.4 · Chia WBS chi tiết cho M2–M5
 
-- **Status:** todo — **việc tiếp theo, chưa thực hiện**
+- **Status:** done
 - **Goal:** Chia M2–M4 thành task có acceptance criteria và dependency; chốt phạm
   vi vertical slice đầu tiên.
 - **Scope:** chỉ file này. Không tạo source code.
@@ -237,15 +237,703 @@ bộ, không phải chỉnh sửa tiện tay.
 - **Editable documents:** `docs/wbs.md`
 - **Output:** `docs/wbs.md`, mở rộng
 - **Acceptance criteria:**
-  - [ ] M2–M4 chia tới task, mỗi task có goal, scope, output, acceptance
-        criteria, dependency và test yêu cầu.
-  - [ ] M5 chốt phạm vi đúng luồng UC-05, xuyên từ Drift tới màn hình.
-  - [ ] Milestone sau M5 để ở mức feature — chia tới task lúc này chắc chắn phải
+  - [x] M2–M4 chia tới task, mỗi task có goal, scope, out of scope, output,
+        acceptance criteria, dependency và test yêu cầu.
+  - [x] M5 chốt phạm vi đúng luồng UC-05, xuyên từ Drift tới màn hình.
+  - [x] Milestone sau M5 để ở mức feature — chia tới task lúc này chắc chắn phải
         lập lại kế hoạch sau khi M2 dạy vài điều.
-  - [ ] Không task ID nào trùng.
+  - [x] Không task ID nào trùng; không dependency nào trỏ tới task không tồn tại.
+  - [x] Mọi acceptance criteria kiểm được bằng lệnh hoặc hành vi cụ thể.
 - **Dependencies:** T1.3a
 - **Tests required:** `check_docs.sh` pass
 - **Checklist phases:** 1.1, 1.2
+
+---
+
+## Quy tắc chung cho mọi task M2–M5
+
+Áp cho tất cả task bên dưới, nêu một lần ở đây thay vì lặp lại 24 lần
+(`document-conventions.md` §5):
+
+- **MUST** cập nhật `docs/wbs.md` trong **cùng commit** với code mà nó mô tả.
+- **MUST NOT** sửa tài liệu có `Status: frozen for MVP` trừ khi task nêu tên file
+  đó ở `Editable documents`.
+- **MUST** viết test trong cùng task. M6 chỉ bổ sung độ phủ còn thiếu, **không**
+  phải nơi bắt đầu viết test.
+- Mọi task **MUST** kết thúc với `flutter analyze` sạch (0 error, 0 warning) và
+  `dart run custom_lint` exit 0. Không lặp lại điều này ở từng acceptance
+  criteria; nó là điều kiện cần của mọi task có code.
+- `.claude/skills/flutter-architecture/scripts/check_architecture.sh` **MUST**
+  exit 0 sau mọi task tạo file trong `lib/`.
+
+---
+
+## M2 · Project foundation
+
+Mục tiêu: từ repo chỉ có tài liệu → một Flutter project build được trên Android
+và Web, analyzer sạch, code generation chạy được.
+
+### M2.1 · Khởi tạo Flutter project và xác nhận toolchain
+
+- **Status:** todo — **việc tiếp theo**
+- **Goal:** Tạo Flutter project chạy được và xác nhận toolchain đủ để build
+  Android lẫn Web.
+- **Scope:** `flutter create` với org/package đúng, xoá code demo, thu `main.dart`
+  về đúng một lệnh bootstrap, xác nhận `flutter doctor`.
+- **Out of scope:** dependency ngoài mặc định, flavor, l10n, theme, router,
+  database. Tất cả có task riêng.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `pubspec.yaml`, `lib/main.dart`, `android/`, `web/`, `test/`
+- **Acceptance criteria:**
+  - [ ] `flutter doctor` không có mục nào ở trạng thái lỗi cho Android toolchain.
+  - [ ] `flutter analyze` → 0 error, 0 warning.
+  - [ ] `flutter build apk --debug` exit 0.
+  - [ ] `flutter build web` exit 0.
+  - [ ] `flutter test` exit 0 (test mặc định đã xoá hoặc thay bằng smoke test
+        thật).
+  - [ ] `lib/main.dart` ≤ 10 dòng và không chứa widget nào.
+  - [ ] Không còn counter demo trong `lib/` hay `test/`.
+  - [ ] `applicationId` và tên package khớp giá trị ghi trong task này, không phải
+        `com.example`.
+- **Dependencies:** T1.4
+- **Tests required:** smoke test dựng app và tìm được một widget gốc
+- **Checklist phases:** 2.1, 2.3
+
+### M2.2 · Dependency nền tảng và code generation
+
+- **Status:** todo
+- **Goal:** Cài đúng bộ dependency của MVP và làm `build_runner` chạy sạch.
+- **Scope:** runtime + dev dependency theo
+  `.claude/skills/flutter-project-setup/references/dependencies.md`; cấu hình
+  `build.yaml` nếu cần; commit `pubspec.lock`.
+- **Out of scope:** `dio`, `connectivity_plus`, `flutter_secure_storage` — hoãn
+  theo AD-05 và AD-03. Thêm chúng ở M9.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `pubspec.yaml`, `pubspec.lock`, `build.yaml` nếu cần
+- **Acceptance criteria:**
+  - [ ] `flutter pub get` exit 0.
+  - [ ] `dart run build_runner build --delete-conflicting-outputs` exit 0.
+  - [ ] Chạy `build_runner` lần hai không sinh diff (`git status --porcelain`
+        rỗng cho file không bị `.gitignore`).
+  - [ ] `flutter pub deps --style=compact | grep -c '^.*dio'` = 0.
+  - [ ] `uuid` có trong dependency (bắt buộc từ đầu theo AD-03).
+  - [ ] `pubspec.lock` được commit.
+- **Dependencies:** M2.1
+- **Tests required:** none — cấu hình; đã được cover bởi việc `build_runner` chạy
+  sạch và analyzer sạch
+- **Checklist phases:** 3.1, 3.2, 3.3
+
+### M2.3 · analysis_options.yaml và custom_lint
+
+- **Status:** todo
+- **Goal:** Áp bộ lint đã viết sẵn và xác nhận **từng rule** được analyzer công
+  nhận.
+- **Scope:** copy `analysis_options.yaml` từ
+  `.claude/skills/flutter-architecture/references/`, bật plugin `custom_lint`,
+  sửa những rule sai tên hoặc đã deprecated.
+- **Out of scope:** nới lỏng rule để code hiện tại pass. Nếu một rule quá chặt,
+  ghi lý do vào WBS rồi mới đổi.
+- **Editable documents:** `docs/wbs.md`,
+  `.claude/skills/flutter-architecture/references/analysis_options.yaml`
+- **Output:** `analysis_options.yaml` ở gốc project
+- **Acceptance criteria:**
+  - [ ] `flutter analyze` → 0 error, 0 warning.
+  - [ ] `dart run custom_lint` exit 0.
+  - [ ] `flutter analyze` **không** in cảnh báo dạng
+        `unrecognized/removed lint rule` cho bất kỳ rule nào trong file.
+  - [ ] Mỗi rule bị bỏ so với bản trong skill được ghi vào WBS kèm lý do.
+  - [ ] Mục technical debt "analysis_options.yaml chưa được áp dụng" được đánh
+        dấu đã trả.
+- **Dependencies:** M2.2
+- **Tests required:** none — cấu hình lint; acceptance criteria đã là lệnh kiểm
+- **Checklist phases:** 5.1
+
+### M2.4 · Localization ARB foundation
+
+- **Status:** todo
+- **Goal:** Dựng hạ tầng l10n để **không chuỗi hiển thị nào** phải hardcode từ
+  task sau trở đi.
+- **Scope:** `l10n.yaml`, `lib/l10n/app_en.arb`, `lib/l10n/app_vi.arb`,
+  `flutter: generate: true`, `localizationsDelegates`, `supportedLocales`,
+  fallback locale.
+- **Out of scope:** dịch đầy đủ. Chỉ cần đủ chuỗi cho smoke test.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `l10n.yaml`, `lib/l10n/*.arb`, wiring trong `app.dart`
+- **Acceptance criteria:**
+  - [ ] `flutter gen-l10n` (hoặc `flutter pub get`) sinh `AppLocalizations`
+        thành công.
+  - [ ] App hiển thị ít nhất một chuỗi lấy từ ARB, không hardcode.
+  - [ ] `app_vi.arb` có đủ key của `app_en.arb`; thiếu key thì fail.
+  - [ ] Đặt locale không hỗ trợ → app rơi về locale mặc định, không hiện chuỗi
+        rỗng.
+  - [ ] Mỗi key trong ARB có `description`.
+- **Dependencies:** M2.2
+- **Tests required:** widget test dựng app ở `en` và `vi`, assert chuỗi lấy từ
+  ARB; test parity key giữa hai file ARB
+- **Checklist phases:** 12
+
+### M2.5 · Flavor Android và entrypoint theo môi trường
+
+- **Status:** todo
+- **Goal:** Ba flavor cài song song được trên một máy, mỗi flavor có config
+  riêng.
+- **Scope:** `EnvConfig`, `main_development.dart` / `main_staging.dart` /
+  `main_production.dart`, `productFlavors` trong Gradle, `applicationIdSuffix`,
+  `resValue` app name.
+- **Out of scope:** signing key production, iOS scheme (AD-04 hoãn iOS), secret
+  thật.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/app/config/env_config.dart`, ba entrypoint,
+  `android/app/build.gradle`
+- **Acceptance criteria:**
+  - [ ] `flutter build apk --debug --flavor development -t lib/main_development.dart`
+        exit 0; tương tự cho `staging` và `production`.
+  - [ ] Ba APK có `applicationId` khác nhau (verify bằng `aapt dump badging`
+        hoặc tương đương).
+  - [ ] Ba APK cài song song được trên cùng một thiết bị/emulator.
+  - [ ] `EnvConfig` được đọc qua provider bị override trong bootstrap; provider
+        gốc throw khi thiếu override.
+  - [ ] Không có secret nào trong repo; `env/` nằm trong `.gitignore`.
+- **Dependencies:** M2.1
+- **Tests required:** unit test khẳng định ba `EnvConfig` có `apiBaseUrl`,
+  `logLevel` và `appName` khác nhau; test provider gốc throw khi chưa override
+- **Checklist phases:** 6.2
+
+### M2.6 · Bootstrap, error boundary và cổng build ba mặt
+
+- **Status:** todo
+- **Goal:** Một hàm `bootstrap()` duy nhất sở hữu khởi động, và không lỗi khởi
+  động nào biến thành màn hình trắng.
+- **Scope:** `bootstrap.dart` với thứ tự khởi tạo logging → config → storage →
+  error boundary → `runApp` trong `ProviderScope`; `FlutterError.onError`,
+  `PlatformDispatcher.instance.onError`, `ErrorWidget.builder` cho release.
+- **Out of scope:** logging abstraction đầy đủ (M7), crash reporting (M8),
+  khởi tạo database (M4.2 sẽ cắm vào đây).
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/app/bootstrap.dart`, `lib/app/app.dart`
+- **Acceptance criteria:**
+  - [ ] Ném exception trong `runApp` → hiển thị màn hình lỗi có nội dung, **không**
+        phải màn trắng và **không** phải red screen mặc định ở release.
+  - [ ] Uncaught async error được bắt và log, app không crash.
+  - [ ] `flutter build apk --debug --flavor development -t lib/main_development.dart`
+        exit 0.
+  - [ ] `flutter build web` exit 0 — cổng giữ kênh E2E còn sống (AD-04).
+  - [ ] `flutter analyze` → 0 error, 0 warning.
+  - [ ] `main.dart` và ba entrypoint không chứa logic khởi tạo nào.
+- **Dependencies:** M2.5, M2.4, M2.3
+- **Tests required:** widget test cho `ErrorWidget.builder`; test `bootstrap()`
+  gọi được với fake config và không throw
+- **Checklist phases:** 6.1
+
+---
+
+## M3 · Architecture and design foundation
+
+Mục tiêu: dựng ranh giới layer và **đúng lượng** design foundation mà vertical
+slice UC-05 cần. Không xây trọn design system trước khi có feature thật.
+
+### M3.1 · Cấu trúc feature-first và ranh giới layer
+
+- **Status:** todo
+- **Goal:** Tạo bộ khung thư mục và làm `check_architecture.sh` chạy có ý nghĩa
+  trên code thật.
+- **Scope:** `lib/app/`, `lib/core/`, `lib/shared/`, `lib/features/` theo Phase
+  4.1; một feature `review` rỗng đúng cấu trúc để script có gì để kiểm.
+- **Out of scope:** logic nghiệp vụ; thư mục `data/remote/` (AD-01 — chưa có
+  network, không tạo thư mục rỗng).
+- **Editable documents:** `docs/wbs.md`
+- **Output:** cây thư mục `lib/`, `docs/architecture.md` **không** đổi
+- **Acceptance criteria:**
+  - [ ] `.claude/skills/flutter-architecture/scripts/check_architecture.sh`
+        exit 0.
+  - [ ] Không tồn tại `lib/features/*/data/remote/`.
+  - [ ] Thêm một file vi phạm cố ý (domain import Flutter) → script exit 1; xoá
+        đi → exit 0. Ghi kết quả kiểm chứng này vào WBS.
+  - [ ] Mọi file trong `lib/` đặt tên theo suffix quy ước ở `CLAUDE.md`.
+- **Dependencies:** M2.6
+- **Tests required:** none — kiểm chứng bằng fault injection ở acceptance
+  criteria
+- **Checklist phases:** 4.1, 4.2, 4.3, 5.3
+
+### M3.2 · Core error và failure model
+
+- **Status:** todo
+- **Goal:** Có một hệ `Failure` sealed để mọi lớp trên data nói cùng một ngôn
+  ngữ lỗi.
+- **Scope:** `core/error/failure.dart` (sealed class: Network, Unauthorized,
+  Forbidden, Validation, NotFound, Conflict, Database, Cancelled, Unknown),
+  `core/error/drift_error_mapper.dart`.
+- **Out of scope:** `dio_error_mapper.dart` — chưa có network (AD-05).
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/core/error/`
+- **Acceptance criteria:**
+  - [ ] `Failure` là sealed class; `switch` trên nó không cần `default`.
+  - [ ] `ValidationFailure` mang `Map<String, String> fieldErrors`.
+  - [ ] `Failure.message` không chứa SQL, stack trace hay đường dẫn file — có
+        test khẳng định.
+  - [ ] Drift exception → `DatabaseFailure`, giữ nguyên gốc ở `cause`.
+  - [ ] `core/error/` không import Flutter.
+- **Dependencies:** M3.1
+- **Tests required:** unit test bảng cho mapper Drift→Failure; test khẳng định
+  không message nào lộ thông tin kỹ thuật
+- **Checklist phases:** 6.3
+
+### M3.3 · Riverpod foundation
+
+- **Status:** todo
+- **Goal:** Có khuôn provider chuẩn để mọi task sau viết giống nhau.
+- **Scope:** `ProviderScope` trong bootstrap, quy ước `@riverpod` codegen, một
+  provider hạ tầng thật (`envConfigProvider` override trong bootstrap),
+  `ProviderContainer` helper cho test.
+- **Out of scope:** provider của feature — thuộc M5.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/core/providers/`, `test/helpers/container.dart`
+- **Acceptance criteria:**
+  - [ ] `dart run build_runner build` sinh provider, `dart run custom_lint`
+        exit 0.
+  - [ ] Provider dùng `Ref` (Riverpod 3), **không** dùng `*Ref` sinh riêng.
+  - [ ] `makeContainer()` trong `test/helpers/` tự `addTearDown(dispose)`.
+  - [ ] Test khẳng định `envConfigProvider` throw khi chưa override.
+- **Dependencies:** M3.1, M2.6
+- **Tests required:** unit test cho provider hạ tầng và cho helper container
+- **Checklist phases:** 9.1
+
+### M3.4 · Design tokens
+
+- **Status:** todo
+- **Goal:** Mọi giá trị hình thức có tên, để feature không hardcode.
+- **Scope:** `core/theme/app_spacing.dart`, `app_radius.dart`,
+  `app_icon_size.dart`, `app_durations.dart`, `app_breakpoints.dart`,
+  `app_colors.dart` (seed + semantic), `app_typography.dart`.
+- **Out of scope:** component (M3.6), animation phức tạp.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/core/theme/`
+- **Acceptance criteria:**
+  - [ ] Token dùng `abstract final class`, không instantiate được.
+  - [ ] Spacing đúng thang 4 / 8 / 12 / 16 / 24 / 32, không có giá trị ngoài
+        thang.
+  - [ ] Tên token là semantic (`danger`), không phải vật lý (`red`).
+  - [ ] `grep -rE 'Colors\.[a-z]|Color\(0x' lib/features lib/shared` không có
+        kết quả.
+  - [ ] `grep -rn 'TextStyle(' lib/features` không có kết quả.
+- **Dependencies:** M3.1
+- **Tests required:** unit test khẳng định thang spacing và bộ token bắt buộc tồn
+  tại
+- **Checklist phases:** 7.1
+
+### M3.5 · Light theme và dark theme
+
+- **Status:** todo
+- **Goal:** Hai theme Material 3 hoàn chỉnh cho phạm vi UC-05.
+- **Scope:** `buildLightTheme()`, `buildDarkTheme()`, `ColorScheme.fromSeed`,
+  `AppSemanticColors` dạng `ThemeExtension`, component theme cho những widget
+  UC-05 dùng: AppBar, Card, FilledButton, OutlinedButton, Snackbar.
+- **Out of scope:** theme cho Dialog, BottomSheet, Chip, Input — chưa dùng ở
+  UC-05; thêm khi feature cần.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/core/theme/app_theme.dart`,
+  `lib/core/theme/app_semantic_colors.dart`
+- **Acceptance criteria:**
+  - [ ] `useMaterial3: true` ở cả hai theme.
+  - [ ] `AppSemanticColors` có `lerp` và `copyWith` đúng, đăng ký ở `extensions`.
+  - [ ] Contrast text chính ≥ 4.5:1 ở cả hai theme — có test tính toán, không
+        phải mắt thường.
+  - [ ] Trạng thái disabled, pressed và focused đều có style ở button.
+  - [ ] `context.colors` / `context.texts` / `context.semanticColors` là extension
+        duy nhất trên `BuildContext`.
+- **Dependencies:** M3.4
+- **Tests required:** unit test contrast ratio cho cặp màu chính ở hai theme;
+  widget test dựng cùng widget ở light và dark không throw
+- **Checklist phases:** 7.2
+
+### M3.6 · Base component tối thiểu và app shell
+
+- **Status:** todo
+- **Goal:** Đúng bộ component mà UC-05 cần, không hơn.
+- **Scope:** `AppScaffold`, `AppButton` (variant + loading + disabled),
+  `AppLoadingState`, `AppEmptyState`, `AppErrorState` (nhận `String`, không nhận
+  `Failure`), `AppCardSurface` cho mặt card.
+- **Out of scope:** TextField, SearchField, ListItem, Dialog, BottomSheet — UC-05
+  không dùng. Tạo khi có caller thật (`CLAUDE.md`: không tạo shared component ở
+  lần dùng đầu).
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/shared/widgets/`
+- **Acceptance criteria:**
+  - [ ] Mỗi component có `const` constructor.
+  - [ ] `AppButton` có enum variant, **không** nhận `Color` hay `TextStyle`.
+  - [ ] `AppButton` ở trạng thái loading thì bị disable và giữ nguyên chiều rộng.
+  - [ ] Mọi control chỉ có icon đều có semantic label — widget test dùng
+        `find.bySemanticsLabel` chứng minh.
+  - [ ] Touch target ≥ 48×48 — có test đo.
+  - [ ] Mỗi component render được ở 320×568 và ở `textScaler` 2.0 mà
+        `tester.takeException()` trả về null.
+  - [ ] Golden test light + dark cho từng component.
+- **Dependencies:** M3.5, M2.4
+- **Tests required:** widget test cho từng state; golden test light/dark; test
+  overflow ở màn nhỏ và text scale 2.0
+- **Checklist phases:** 7.3, 7.4, 13, 15.3, 15.4
+
+---
+
+## M4 · Router and Drift foundation
+
+Mục tiêu: có router và một database chạy được, đúng schema đã frozen, kèm
+migration test và enforcement cho các bất biến.
+
+### M4.1 · GoRouter foundation
+
+- **Status:** todo
+- **Goal:** Điều hướng tập trung, có sẵn chỗ cắm auth guard mà chưa xây auth.
+- **Scope:** `app/router/route_paths.dart`, `route_names.dart`,
+  `app_router.dart`, `errorBuilder` 404, một hàm `redirect` rỗng có comment nói
+  rõ đây là điểm cắm guard (AD-03).
+- **Out of scope:** auth guard thật, deep link config, `StatefulShellRoute` —
+  MVP chưa có bottom navigation.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/app/router/`
+- **Acceptance criteria:**
+  - [ ] `MaterialApp.router` được dùng; không còn `MaterialApp` thường.
+  - [ ] `grep -rnE "context\.(go|push)\('/" lib/` không có kết quả — mọi điều
+        hướng đi qua tên route.
+  - [ ] Route không tồn tại → màn 404 có nút quay về, không phải red screen.
+  - [ ] `redirect` trả `null` và có comment chỉ rõ điểm cắm guard.
+  - [ ] Widget test điều hướng tới một route bằng tên và assert màn đích.
+- **Dependencies:** M3.6
+- **Tests required:** widget test cho điều hướng theo tên và cho màn 404
+- **Checklist phases:** 8.1, 8.2
+
+### M4.2 · Drift connection và schema `.drift`
+
+- **Status:** todo
+- **Goal:** Database mở được, schema khớp `data-model.md`, SQL nằm trong file
+  `.drift`.
+- **Scope:** `core/database/connection.dart` (một chỗ duy nhất mở kết nối —
+  AD-08), `app_database.dart`, `tables/*.drift` cho `decks`, `cards`,
+  `card_review_states`, `review_history`, `study_sessions`; index; `PRAGMA
+  foreign_keys = ON` trong `beforeOpen`.
+- **Out of scope:** named query nghiệp vụ (M4.3), DAO và repository (M4.6),
+  bảng `deck_templates` (AD-07: là asset ở MVP).
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/core/database/`
+- **Acceptance criteria:**
+  - [ ] `dart run build_runner build` sinh code Drift, exit 0.
+  - [ ] Mọi bảng và cột khớp `data-model.md` — kiểm bằng test so tên cột thực tế
+        với danh sách mong đợi.
+  - [ ] Không có Dart table class nào; toàn bộ khai báo nằm trong `.drift`
+        (AD-02).
+  - [ ] Xoá root deck → deck con, card, review state, history và session của nó
+        đều biến mất (test khẳng định cascade thật sự chạy).
+  - [ ] `grep -rn 'COALESCE(' lib/core/database/` không trả về dạng
+        `COALESCE(...parent_deck_id...)` (BR-57).
+  - [ ] `lib/core/database/connection.dart` là **file duy nhất** gọi
+        `NativeDatabase`/`driftDatabase`.
+- **Dependencies:** M3.2, M2.2
+- **Tests required:** test schema (tên bảng/cột), test cascade delete, test
+  `PRAGMA foreign_keys` đang bật
+- **Checklist phases:** 11.1
+
+### M4.3 · Named query và migration foundation
+
+- **Status:** todo
+- **Goal:** Có query nghiệp vụ dùng chung và hạ tầng test migration ngay từ v1.
+- **Scope:** `queries/study.drift` với `cardsDueForReview` và
+  `dueCountPerRootDeck` (dùng `root_deck_id`, nhận `:now` làm tham số — BR-57,
+  AD-06); `MigrationStrategy` với `schemaVersion = 1`; export schema v1 bằng
+  `drift_dev schema dump`; test migration harness.
+- **Out of scope:** migration v2 — chưa có thay đổi schema nào.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/core/database/queries/`, `drift_schemas/`,
+  `test/drift/generated/`, `test/database/migration_test.dart`
+- **Acceptance criteria:**
+  - [ ] `drift_schemas/drift_schema_v1.json` tồn tại và **được commit** (không bị
+        `.gitignore` nuốt).
+  - [ ] Test migration chạy `onCreate` từ rỗng lên v1 và assert đủ bảng.
+  - [ ] `cardsDueForReview` và `dueCountPerRootDeck` dùng **cùng một** định nghĩa
+        "đến hạn" — test khẳng định hai query trả cùng số card cho cùng dữ liệu
+        (BR-22, UC-06).
+  - [ ] Không số ngày nào của bảng interval xuất hiện trong `.drift` (BR-16 thuộc
+        scheduler, không thuộc SQL).
+  - [ ] `:now` là tham số, không dùng `CURRENT_TIMESTAMP`.
+- **Dependencies:** M4.2
+- **Tests required:** migration test từ rỗng lên v1; test đồng nhất giữa hai
+  query đếm/lấy card đến hạn
+- **Checklist phases:** 11.1, 15.1
+
+### M4.4 · Enforcement cho bất biến dữ liệu
+
+- **Status:** todo
+- **Goal:** Biến 14 query bất biến trong `data-model.md` thành test chạy trên
+  database thật.
+- **Scope:** test tích hợp nạp fixture hợp lệ và fixture vi phạm cho từng bất
+  biến; nối `check_docs.sh --db` vào một database tạm.
+- **Out of scope:** sửa nội dung bất biến — `data-model.md` đang frozen.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `test/database/invariants_test.dart`
+- **Acceptance criteria:**
+  - [ ] Cả 14 bất biến có test; mỗi test kiểm **hai chiều**: sạch trên dữ liệu
+        hợp lệ, và bắt được đúng vi phạm của nó.
+  - [ ] Bất biến cây deck có case ở **cấp 3 trở lên** (BR-55, BR-57).
+  - [ ] `.claude/skills/flutter-workflow/scripts/check_docs.sh --db <db tạm>`
+        exit 0.
+  - [ ] Mục technical debt "14 query bất biến chưa chạy trên dữ liệu người dùng
+        thật" được cập nhật.
+- **Dependencies:** M4.3
+- **Tests required:** đây **là** task test; 14 test bất biến, mỗi cái hai chiều
+- **Checklist phases:** 11.1, 15.1
+
+### M4.5 · Domain entity và repository contract
+
+- **Status:** todo
+- **Goal:** Có hợp đồng domain viết theo nhu cầu presentation, không theo hình
+  dạng Drift.
+- **Scope:** `features/review/domain/entity/` (`DeckEntity`, `CardEntity`,
+  `CardReviewStateEntity`, `StudySessionEntity`, `ReviewHistoryEntity`), enum
+  `SchedulerType`, `ReviewAction`, `ReviewKind`, `SessionStatus`,
+  `SessionEndReason`, `DeckContentType`; repository contract dạng abstract.
+- **Out of scope:** implementation (M4.6), use case (M5.2).
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/features/review/domain/`
+- **Acceptance criteria:**
+  - [ ] `check_architecture.sh` exit 0 — domain không import Flutter, Drift,
+        `json_annotation`.
+  - [ ] Mọi trạng thái hữu hạn là enum hoặc sealed class, không phải `String`
+        (BR-79, BR-80, BR-75).
+  - [ ] Entity immutable, có value equality — test khẳng định hai instance cùng
+        dữ liệu thì bằng nhau.
+  - [ ] Không method nào trong contract nhận hoặc trả kiểu sinh bởi Drift
+        (AD-01).
+  - [ ] Contract có method mà UC-05 cần và **không** có method chưa ai gọi.
+- **Dependencies:** M4.2
+- **Tests required:** unit test equality của entity; test khẳng định enum phủ
+  đúng tập giá trị của BR-79/BR-80
+- **Checklist phases:** 14.2
+
+### M4.6 · Data layer — DAO, mapper, repository implementation
+
+- **Status:** todo
+- **Goal:** Nối domain xuống Drift, và chặn mọi exception ở đúng ranh giới
+  repository.
+- **Scope:** DAO theo feature, mapper Drift row ↔ entity, repository
+  implementation, mapping exception → `Failure`, transaction cho thao tác nhiều
+  bước.
+- **Out of scope:** remote data source, cache TTL, sync (AD-01, AD-05).
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/features/review/data/`
+- **Acceptance criteria:**
+  - [ ] `check_architecture.sh` exit 0 — presentation chưa tồn tại, nhưng
+        `data/` không được import ngược lên.
+  - [ ] Không `DriftWrappedException` nào thoát khỏi repository — test khẳng
+        định repository ném `DatabaseFailure`.
+  - [ ] Repository đọc bằng `watch()` stream, không phải `Future` một lần
+        (AD-01) — test khẳng định stream phát lại khi dữ liệu đổi.
+  - [ ] Mapper xử lý enum lạ bằng cách map về giá trị `unknown` thay vì throw.
+  - [ ] Tạo card sinh đúng một `card_review_states` trong cùng transaction
+        (BR-09) — test khẳng định.
+- **Dependencies:** M4.5, M4.3
+- **Tests required:** repository test với database in-memory: happy path, failure
+  path, cascade, stream phát lại; mapper test gồm case enum lạ
+- **Checklist phases:** 14.3, 15.1
+
+### M4.7 · Fixture cho development và test
+
+- **Status:** todo
+- **Goal:** Có dữ liệu thật để chạy vertical slice, đánh dấu rõ là fixture.
+- **Scope:** `assets/templates/manifest.json` + một template cây deck nhiều cấp
+  (root → deck con → deck chứa card) cho cả `eight_box` và `sm2`; loader nạp vào
+  database; helper `seedTestDatabase()` cho test.
+- **Out of scope:** nội dung production (BR-87 — thay trước M8); UI thư viện
+  starter (UC-01 không thuộc M5).
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `assets/templates/`, `lib/features/review/data/template_loader.dart`,
+  `test/helpers/seed.dart`
+- **Acceptance criteria:**
+  - [ ] Fixture có cây **ít nhất 3 cấp** để chứng minh `root_deck_id` hoạt động
+        (BR-55).
+  - [ ] Fixture có ít nhất một root `eight_box` và một root `sm2`.
+  - [ ] Mọi deck trong fixture có `content_type` hợp lệ; không deck nào vừa chứa
+        card vừa chứa deck con (BR-65).
+  - [ ] Nạp fixture hai lần **không** tạo bản sao trùng (BR-37).
+  - [ ] Manifest ghi rõ nội dung là fixture cho development/test (BR-87).
+  - [ ] Sau khi nạp, toàn bộ 14 bất biến của M4.4 vẫn pass.
+- **Dependencies:** M4.6, M4.4
+- **Tests required:** test nạp fixture rồi chạy lại bộ bất biến; test idempotency
+  khi nạp hai lần
+- **Checklist phases:** 11.1, 14.3
+
+---
+
+## M5 · First vertical slice — UC-05 luồng ôn tập
+
+Mục tiêu: chứng minh kiến trúc chạy xuyên suốt Drift → data source → repository
+→ use case → controller/state → router → màn hình → ghi kết quả → UI cập nhật.
+
+**Ngoài phạm vi M5** (nêu một lần, áp cho mọi task bên dưới): CRUD deck/card đầy
+đủ, import/export, login, backend, sync, media, statistics, settings, và UI thư
+viện starter deck.
+
+### M5.1 · `ReviewScheduler` và hai implementation
+
+- **Status:** todo
+- **Goal:** Logic xếp lịch là hàm thuần khiết, test được toàn bộ ma trận.
+- **Scope:** `domain/scheduler/review_scheduler.dart` với `supportedActions`,
+  `EightBoxScheduler` (BR-15, BR-16), `Sm2Scheduler` (BR-17, BR-18, BR-19), bảng
+  interval trong scheduler config.
+- **Out of scope:** dùng scheduler trong controller (M5.3) hay ghi DB (M5.2).
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/features/review/domain/scheduler/`
+- **Acceptance criteria:**
+  - [ ] `next()` không gọi `DateTime.now()`; `now` là tham số (AD-06).
+  - [ ] `EightBoxScheduler.supportedActions` = `[forgotten, remembered]`;
+        `Sm2Scheduler.supportedActions` = `[again, hard, good, easy]` (BR-30).
+  - [ ] Ma trận 8 box × 2 action của `eight_box` đều có test và khớp BR-15,
+        BR-16.
+  - [ ] `sm2`: `ease_factor` không bao giờ xuống dưới 1.3 kể cả sau 50 lượt
+        `again` liên tiếp (BR-19) — có test.
+  - [ ] `sm2`: `repetitions` 0 → interval 1; 1 → 6; ≥2 → `round(interval * ef)`
+        (BR-18) — có test.
+  - [ ] Card box 8 trả lời `remembered` vẫn ở box 8, hạn +128 ngày (BR-16).
+  - [ ] `domain/scheduler/` không import Flutter hay Drift.
+- **Dependencies:** M4.5
+- **Tests required:** unit test toàn ma trận `eight_box`; unit test công thức
+  `sm2` gồm biên sàn ease factor; test `supportedActions` của cả hai
+- **Checklist phases:** 14.2, 15.1
+
+### M5.2 · Use case phiên ôn và ghi kết quả
+
+- **Status:** todo
+- **Goal:** Logic phiên ôn nằm ở domain: mở phiên, lấy card đến hạn, ghi đánh
+  giá đúng `review_kind`, từ chối generation cũ.
+- **Scope:** `StartStudySessionUseCase`, `SubmitReviewUseCase`,
+  `EndStudySessionUseCase`; xác định `review_kind` tường minh (BR-76);
+  kiểm `scheduler_generation` (BR-46, BR-84); giới hạn 50 card (BR-24).
+- **Out of scope:** hàng đợi và thứ tự trong phiên (M5.3 — đó là trạng thái tạm
+  của controller).
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/features/review/domain/usecase/`
+- **Acceptance criteria:**
+  - [ ] Lượt đầu của một card trong phiên ghi `review_kind = scheduled`; lượt sau
+        ghi `relearning` (BR-77, BR-78) — test khẳng định.
+  - [ ] Lượt `relearning` **không** đổi `current_box`, `ease_factor`,
+        `interval_days`, `due_at`; **có** đổi `last_reviewed_at` (BR-78).
+  - [ ] Card box 8 + `remembered` vẫn được ghi `scheduled` dù box không đổi
+        (BR-76) — test khẳng định, đây là ca mà suy luận sẽ sai.
+  - [ ] Ghi review từ session có generation cũ → ném `Failure`, **không** ghi
+        `review_history`, session chuyển `invalidated`/`stale_generation`
+        (BR-84).
+  - [ ] `review_count` chỉ tăng ở lượt `scheduled`; `lapse_count` tăng khi
+        `forgotten`/`again` ở lượt `scheduled` (BR-20).
+  - [ ] Một phiên lấy tối đa 50 card riêng biệt (BR-24).
+- **Dependencies:** M5.1, M4.6
+- **Tests required:** unit test cho từng acceptance criteria ở trên, dùng
+  repository fake; test riêng cho ca box-8 và ca generation cũ
+- **Checklist phases:** 14.2, 15.1
+
+### M5.3 · Controller, state và hàng đợi phiên ôn
+
+- **Status:** todo
+- **Goal:** State immutable tách dữ liệu khỏi trạng thái tác vụ, hàng đợi xử lý
+  đúng luật `relearning`.
+- **Scope:** `ReviewSessionState` (freezed), `ReviewSessionController`
+  (`@riverpod`), hàng đợi với luật đưa card `forgotten`/`again` quay lại sau ít
+  nhất 3 card (BR-26, BR-28), chống bấm đúp.
+- **Out of scope:** widget (M5.4).
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/features/review/presentation/state/`,
+  `lib/features/review/presentation/controller/`
+- **Acceptance criteria:**
+  - [ ] State immutable, có value equality; **không** có một `isLoading` chung
+        cho mọi thao tác.
+  - [ ] Controller không giữ `BuildContext`.
+  - [ ] Card `forgotten` quay lại sau ít nhất 3 card khác, hoặc cuối hàng đợi nếu
+        không đủ 3 (BR-26) — test khẳng định cả hai nhánh.
+  - [ ] Bấm hai lần liên tiếp cùng một action chỉ ghi **một** review — test
+        khẳng định.
+  - [ ] Đánh giá sau khi controller bị dispose không throw (`ref.mounted`).
+  - [ ] Test chuyển trạng thái: initial → loading → loaded; loading → error;
+        submitting thành công; submitting thất bại.
+- **Dependencies:** M5.2, M3.3
+- **Tests required:** controller test cho toàn bộ chuyển trạng thái ở trên, chạy
+  bằng `ProviderContainer`, không cần widget
+- **Checklist phases:** 9.2, 9.3, 15.2
+
+### M5.4 · Màn hình ôn tập và route
+
+- **Status:** todo
+- **Goal:** Màn hình render đủ mọi trạng thái và nút đánh giá đúng theo
+  scheduler.
+- **Scope:** `ReviewSessionScreen`, route theo tên, widget con tách theo section,
+  render nút từ `supportedActions` (BR-30), chuỗi lấy từ ARB.
+- **Out of scope:** màn danh sách deck đầy đủ — chỉ cần một lối vào tối thiểu để
+  mở phiên ôn từ fixture.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/features/review/presentation/screen/`,
+  `lib/features/review/presentation/widget/`, route mới trong `app/router/`
+- **Acceptance criteria:**
+  - [ ] Deck `eight_box` hiện đúng **2** nút; deck `sm2` hiện đúng **4** nút
+        (BR-30) — widget test cho cả hai.
+  - [ ] Bốn trạng thái loading, empty, error, loaded đều có widget test.
+  - [ ] Empty state khi không còn card đến hạn là thông điệp tích cực, **không**
+        phải màn lỗi (BR-29).
+  - [ ] Trong lúc ghi đánh giá, nội dung card vẫn hiện và các nút bị khoá.
+  - [ ] `grep -rn "Text('" lib/features/review/presentation` không có kết quả —
+        mọi chuỗi từ ARB.
+  - [ ] Render ở 320×568 và `textScaler` 2.0 → `tester.takeException()` là null.
+  - [ ] Light mode và dark mode đều có widget test.
+- **Dependencies:** M5.3, M4.1, M3.6
+- **Tests required:** widget test cho 4 trạng thái × 2 scheduler; test overflow
+  màn nhỏ và text scale 2.0; test dark mode
+- **Checklist phases:** 14.4, 15.3
+
+### M5.5 · Vòng đời phiên và kết thúc đúng trạng thái
+
+- **Status:** todo
+- **Goal:** Phiên luôn kết thúc ở đúng `status` và `end_reason`, và review đã ghi
+  không bao giờ mất.
+- **Scope:** chuyển trạng thái `completed` / `abandoned` / `invalidated` /
+  `failed` kèm `end_reason` (BR-81…BR-86), màn tổng kết phiên tối thiểu.
+- **Out of scope:** thống kê đầy đủ (ngoài MVP slice).
+- **Editable documents:** `docs/wbs.md`
+- **Output:** cập nhật use case và controller của M5.2, M5.3; widget tổng kết
+- **Acceptance criteria:**
+  - [ ] Hết hàng đợi → `completed`, `end_reason` NULL, `ended_at` được đặt
+        (BR-81).
+  - [ ] Người dùng thoát → `abandoned` / `user_exit` (BR-82).
+  - [ ] Reset deck khi phiên đang mở → `invalidated` / `scheduler_reset`
+        (BR-83).
+  - [ ] Ghi thất bại không thể tiếp tục → `failed` / `persistence_error`
+        (BR-85).
+  - [ ] Ở **cả bốn** trường hợp, review đã ghi thành công vẫn còn trong
+        `review_history` (BR-86) — test khẳng định từng trường hợp.
+  - [ ] Không tổ hợp `status` × `end_reason` nào ngoài ma trận ở `data-model.md`
+        — bất biến Q12 của M4.4 vẫn pass sau khi chạy các luồng này.
+- **Dependencies:** M5.3, M4.4
+- **Tests required:** repository/use case test cho bốn cách kết thúc; test khẳng
+  định `review_history` được giữ ở cả bốn
+- **Checklist phases:** 14.4, 15.1, 15.2
+
+### M5.6 · Integration test luồng UC-05
+
+- **Status:** todo
+- **Goal:** Chứng minh slice chạy thật xuyên suốt trên thiết bị, không chỉ ở
+  unit test.
+- **Scope:** `integration_test/review_flow_test.dart` chạy đúng luồng chính của
+  UC-05 trên fixture của M4.7.
+- **Out of scope:** Playwright + Flutter Web (M7 sẽ nối vào CI).
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `integration_test/`
+- **Acceptance criteria:**
+  - [ ] Cold start → mở deck fixture → phiên ôn → đánh giá một card → thoát →
+        mở lại → card đã ôn **không** còn đến hạn.
+  - [ ] Đánh giá `forgotten` → card quay lại trong phiên → đánh giá
+        `remembered` → hôm sau vẫn ở box 1 (BR-77) — assert trên database.
+  - [ ] Chạy trên deck `eight_box` và deck `sm2`, đúng số nút mỗi loại.
+  - [ ] `flutter test integration_test/` exit 0 trên emulator Android.
+  - [ ] `flutter build web` vẫn exit 0 sau toàn bộ M5 — kênh E2E còn sống
+        (AD-04).
+- **Dependencies:** M5.4, M5.5, M4.7
+- **Tests required:** đây **là** task test — integration test luồng chính
+- **Checklist phases:** 15.5
+
 
 ---
 
@@ -273,3 +961,4 @@ Blocker này **không** chặn T1.4 — đó là task chỉ sửa tài liệu.
 | `analysis_options.yaml` chưa được áp dụng | T0.1 | Bộ lint đã viết nhưng chưa được enforce; nhiều khả năng có tên rule sai hoặc đã deprecated | Copy vào project ở Phase 2.3 và xác nhận từng rule được analyzer công nhận |
 | 14 query bất biến chưa chạy trên **dữ liệu người dùng thật** | T1.3 | Bất biến mới được verify trên fixture, chưa enforce trên DB sản xuất | Chạy `check_docs.sh --db <path>` trong test tích hợp khi Drift schema tồn tại (M4) |
 | Nội dung starter là fixture, không phải nội dung production | T1.3 | Không phát hành được với nội dung này | Tìm nguồn nội dung có bản quyền rõ ràng trước M8 (BR-87) |
+| `check_docs.sh` chỉ đếm task ID dạng `T*`, bỏ sót `M*` | T1.4 | Báo "no duplicate WBS task IDs (8 tasks)" trong khi có 33 — **pass gây hiểu nhầm**, 25 task M2–M5 không được bảo vệ khỏi trùng ID | Sửa regex task ID trong `check_docs.sh` thành `[TM][0-9]+...`; thêm check dependency resolve và acceptance-criteria rỗng. Đã verify thủ công ở T1.4, nhưng cần thành check thường trực. Làm cùng M2.1 |
