@@ -18,15 +18,20 @@ import 'package:memox/shared/widgets/app_scaffold_widget.dart';
 /// instead of a capability.
 ///
 /// Everything that can move a pixel is pinned below: surface size, device pixel
-/// ratio, text scale and locale. `flutter_test` already substitutes a fixed
-/// test font for the platform font, so text renders identically regardless of
-/// what is installed on the machine.
+/// ratio, text scale and locale. Fonts are pinned too, but not here —
+/// `test/flutter_test_config.dart` loads Roboto and MaterialIcons from the
+/// pinned Flutter SDK before any test runs. Without it `flutter_test`
+/// substitutes a placeholder font that draws every glyph as an identical box,
+/// and a golden then records the shape of the layout and nothing about the
+/// text: a wrong weight, a wrong colour, a truncated label and a line-height
+/// regression all produce byte-identical boxes.
 ///
-/// Platform caveat worth knowing before CI: Flutter goldens are not portable
-/// across operating systems. These were generated on Windows; a Linux runner
-/// will produce different antialiasing. M7 must either run this suite on one
-/// platform or regenerate per platform — it is tagged `golden` so it can be
-/// excluded with `--exclude-tags golden`.
+/// Platform caveat worth knowing before CI: text now renders with real glyphs,
+/// but glyph *rasterisation* still differs between operating systems. These
+/// were generated on Windows; a Linux runner will produce different
+/// antialiasing. M7 must either run this suite on one platform or regenerate
+/// per platform — it is tagged `golden` so it can be excluded with
+/// `--exclude-tags golden`.
 void main() {
   const surface = Size(360, 640);
 
