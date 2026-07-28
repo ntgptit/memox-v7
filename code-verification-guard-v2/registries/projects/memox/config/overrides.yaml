@@ -1,0 +1,54 @@
+version: 1
+
+overrides:
+  disabled_rules:
+    - common.no_large_source_file
+  severity: {}
+  rule_options:
+    memox.coding.provider_file_naming:
+      exclude:
+        - '**/*.g.dart'
+        - '**/*.freezed.dart'
+    memox.testing.max_test_file_lines:
+      exclude:
+        # drift_dev-generated schema helpers are regenerated, never split.
+        - test/data/database/generated_migrations/**
+    memox.coding.string_normalization_via_string_utils:
+      exclude:
+        - '**/*.g.dart'
+        - '**/*.freezed.dart'
+        - lib/core/utils/string_utils.dart
+        - lib/data/datasources/local/tables/*.dart
+    memox.coding.boolean_name_length:
+      exclude:
+        - lib/presentation/shared/hooks/mx_search_hooks.dart
+    # MxText deliberately mirrors Flutter's idiomatic `Text(String)` content API
+    # (positional `data`), used app-wide; named-only here would degrade every
+    # call site for no readability gain. Scoped exception, like the case above.
+    memox.flutter_convention.widget_constructor_named_params:
+      exclude:
+        - lib/presentation/shared/widgets/mx_text.dart
+    common.no_placeholder_implementation:
+      exclude:
+        - test/**
+        - integration_test/**
+    common.max_file_lines:
+      include:
+        - lib/**/*.dart
+      exclude:
+        - '**/*.g.dart'
+        - '**/*.freezed.dart'
+        - lib/l10n/generated/**
+        - test/**
+        - integration_test/**
+      max_lines: 500
+      count_mode: logical
+    flutter.max_build_lines:
+      count_mode: logical
+      exclude:
+        - lib/presentation/shared/**
+    flutter.no_hardcoded_duration:
+      exclude:
+        - lib/core/**
+        - lib/data/**
+        - lib/domain/**
