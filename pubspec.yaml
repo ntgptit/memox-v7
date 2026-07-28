@@ -42,9 +42,14 @@ dependencies:
   path: ^1.9.1
   freezed_annotation: ^3.1.0
   json_annotation: ^4.12.0
-  intl: ^0.20.3
+  # Constraint left open on purpose: flutter_localizations pins intl to an
+  # exact version, and pinning it here by hand is a recurring resolution
+  # conflict. pubspec.lock is what makes the build reproducible.
+  intl: any
   collection: ^1.19.1
   uuid: ^4.6.0
+  flutter_localizations:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:
@@ -73,6 +78,9 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  # Runs gen-l10n on `flutter pub get` (config in l10n.yaml).
+  generate: true
 
   # To add assets to your application, add an assets section, like this:
   # assets:

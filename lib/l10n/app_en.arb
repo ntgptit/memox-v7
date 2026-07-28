@@ -1,0 +1,33 @@
+{
+  "@@locale": "en",
+
+  "appTitle": "MemoX",
+  "@appTitle": {
+    "description": "Application name. Shown as the MaterialApp title and in the Android task switcher. Not translated — it is a product name."
+  },
+
+  "homePlaceholderMessage": "MemoX is starting up.",
+  "@homePlaceholderMessage": {
+    "description": "Text on the temporary placeholder screen shown before any real feature exists. Removed when the first screen lands (M5.4)."
+  },
+
+  "startupErrorTitle": "MemoX could not start",
+  "@startupErrorTitle": {
+    "description": "Heading of the screen shown when bootstrap fails before the app can render. Must not contain technical detail."
+  },
+
+  "startupErrorMessage": "Something went wrong while starting the app. Please close it and open it again.",
+  "@startupErrorMessage": {
+    "description": "Body of the startup failure screen. Tells the user what to do; deliberately carries no stack trace, URL or error code."
+  },
+
+  "unexpectedErrorTitle": "Something went wrong",
+  "@unexpectedErrorTitle": {
+    "description": "Heading shown in place of Flutter's red error screen when a widget fails to build."
+  },
+
+  "unexpectedErrorMessage": "This part of the app could not be displayed.",
+  "@unexpectedErrorMessage": {
+    "description": "Body shown in place of Flutter's red error screen. Deliberately carries no stack trace or widget name."
+  }
+}

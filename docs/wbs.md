@@ -597,7 +597,7 @@ và Web, analyzer sạch, code generation chạy được.
 
 ### M2.4 · Localization ARB foundation
 
-- **Status:** todo
+- **Status:** done
 - **Goal:** Dựng hạ tầng l10n để **không chuỗi hiển thị nào** phải hardcode từ
   task sau trở đi.
 - **Scope:** `l10n.yaml`, `lib/l10n/app_en.arb`, `lib/l10n/app_vi.arb`,
@@ -607,16 +607,32 @@ và Web, analyzer sạch, code generation chạy được.
 - **Editable documents:** `docs/wbs.md`
 - **Output:** `l10n.yaml`, `lib/l10n/*.arb`, wiring trong `app.dart`
 - **Acceptance criteria:**
-  - [ ] `flutter gen-l10n` (hoặc `flutter pub get`) sinh `AppLocalizations`
-        thành công.
-  - [ ] App hiển thị ít nhất một chuỗi lấy từ ARB, không hardcode.
-  - [ ] `app_vi.arb` có đủ key của `app_en.arb`; thiếu key thì fail.
-  - [ ] Đặt locale không hỗ trợ → app rơi về locale mặc định, không hiện chuỗi
-        rỗng.
-  - [ ] Mỗi key trong ARB có `description`.
+  - [x] `flutter gen-l10n` (hoặc `flutter pub get`) sinh `AppLocalizations`
+        thành công. → exit 0; sinh `app_localizations.dart` + `_en` + `_vi`
+  - [x] App hiển thị ít nhất một chuỗi lấy từ ARB, không hardcode. → màn
+        placeholder dùng `context.l10n.homePlaceholderMessage`; hai literal cũ
+        trong `app.dart` đã bị xoá
+  - [x] `app_vi.arb` có đủ key của `app_en.arb`; thiếu key thì fail. → test đọc
+        **thẳng file ARB**, không qua binding sinh ra
+  - [x] Đặt locale không hỗ trợ → app rơi về locale mặc định, không hiện chuỗi
+        rỗng. → test `ja` render chuỗi `en` và assert không có chuỗi rỗng
+  - [x] Mỗi key trong ARB có `description`. → test khẳng định cho **cả hai** file
+- **Ghi chú kỹ thuật, hai điều đáng nhớ:**
+  1. **Test parity phải đọc file ARB, không đọc binding sinh ra.** gen-l10n
+     fallback về template, nên `app_vi.arb` có thể mất key mà mọi widget test
+     vẫn xanh trong khi người dùng tiếng Việt lặng lẽ đọc tiếng Anh. Chỗ duy
+     nhất nhìn thấy khoảng trống đó là chính file ARB.
+  2. **Đã viết `localeResolutionCallback` rồi bỏ đi.** Test chứng minh nó không
+     đổi gì: resolution mặc định của Flutter đã fallback về
+     `supportedLocales.first`. Giữ lại là một tầng thừa (`CLAUDE.md`). Hành vi
+     fallback vẫn được test ghim.
+  3. `intl` phải để constraint mở. `flutter_localizations` ghim `intl` ở một
+     version chính xác, và pin tay ở `pubspec.yaml` gây xung đột resolution —
+     đúng cái bẫy `dependencies.md` đã nêu. `pubspec.lock` mới là thứ bảo đảm
+     build lặp lại được.
 - **Dependencies:** M2.2
 - **Tests required:** widget test dựng app ở `en` và `vi`, assert chuỗi lấy từ
-  ARB; test parity key giữa hai file ARB
+  ARB; test parity key giữa hai file ARB — **đã có**, `test/l10n/`, 11 test pass
 - **Checklist phases:** 12
 
 ### M2.5 · Flavor Android và entrypoint theo môi trường

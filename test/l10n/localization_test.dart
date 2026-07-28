@@ -1,0 +1,81 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/app/app.dart';
+import 'package:memox/l10n/generated/app_localizations.dart';
+import 'package:memox/l10n/generated/app_localizations_en.dart';
+import 'package:memox/l10n/generated/app_localizations_vi.dart';
+
+void main() {
+  final en = AppLocalizationsEn();
+  final vi = AppLocalizationsVi();
+
+  /// Builds the real app under a forced locale.
+  ///
+  /// `MemoxApp` owns the delegates and the resolution callback, so driving the
+  /// locale through `tester.platformDispatcher` exercises the same path a real
+  /// device takes rather than a test-only shortcut.
+  Future<void> pumpAppInLocale(WidgetTester tester, Locale locale) async {
+    tester.platformDispatcher.localesTestValue = <Locale>[locale];
+    addTearDown(tester.platformDispatcher.clearLocalesTestValue);
+
+    await tester.pumpWidget(const MemoxApp());
+    await tester.pumpAndSettle();
+  }
+
+  group('locale resolution', () {
+    testWidgets('en renders the English string', (tester) async {
+      await pumpAppInLocale(tester, const Locale('en'));
+
+      expect(find.text(en.homePlaceholderMessage), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('vi renders the Vietnamese string', (tester) async {
+      await pumpAppInLocale(tester, const Locale('vi'));
+
+      expect(find.text(vi.homePlaceholderMessage), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('an unsupported locale falls back to en, not to a blank', (
+      tester,
+    ) async {
+      await pumpAppInLocale(tester, const Locale('ja'));
+
+      // The failure this guards against is a silently empty screen: an
+      // unresolved locale renders nothing rather than announcing itself.
+      expect(find.text(en.homePlaceholderMessage), findsOneWidget);
+      expect(find.text(''), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('a supported language with an unknown country still resolves', (
+      tester,
+    ) async {
+      await pumpAppInLocale(tester, const Locale('vi', 'US'));
+
+      expect(find.text(vi.homePlaceholderMessage), findsOneWidget);
+    });
+  });
+
+  group('generated bindings', () {
+    test('both locales are advertised as supported', () {
+      final languages = AppLocalizations.supportedLocales
+          .map((locale) => locale.languageCode)
+          .toSet();
+
+      expect(languages, containsAll(<String>['en', 'vi']));
+    });
+
+    test('every string differs between en and vi except the product name', () {
+      // appTitle is deliberately identical — it is a product name, not prose.
+      expect(en.appTitle, vi.appTitle);
+
+      expect(en.homePlaceholderMessage, isNot(vi.homePlaceholderMessage));
+      expect(en.startupErrorTitle, isNot(vi.startupErrorTitle));
+      expect(en.startupErrorMessage, isNot(vi.startupErrorMessage));
+      expect(en.unexpectedErrorTitle, isNot(vi.unexpectedErrorTitle));
+      expect(en.unexpectedErrorMessage, isNot(vi.unexpectedErrorMessage));
+    });
+  });
+}
