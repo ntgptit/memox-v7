@@ -336,8 +336,24 @@ và Web, analyzer sạch, code generation chạy được.
   - [x] Trên Android là no-op (`kIsWeb` false).
   - [x] `flutter analyze` 0 issue; `flutter test` 4/4 pass;
         `flutter build web --no-web-resources-cdn` exit 0.
+- **Kiểm chứng bằng screenshot thật:** widget test khẳng định được logic nhưng
+  **không ai từng nhìn thấy** khung này render. Đã dựng
+  `flutter build web --no-web-resources-cdn`, phục vụ `build/web` và chụp bằng
+  Playwright ở hai viewport:
+
+  | Viewport | Nhìn thấy | Đo được |
+  |---|---|---|
+  | 1440×900 | App nằm giữa trong khung dọc hình điện thoại, nền tối bao quanh | Nền `rgb(30,30,30)` = đúng `0xFF1E1E1E`; khung cao **852**, lề trái/phải **524/524**, lề trên/dưới **24/24** — căn giữa chính xác |
+  | 393×852 | Không đóng khung, app tràn đầy viewport, không có dải tối | `scrollWidth` 393 = `innerWidth` 393 → **không** tràn ngang; canvas 393×852 |
+
+  Bề rộng khung đo được 392 thay vì 393 là do pixel biên bị antialias rơi dưới
+  ngưỡng lọc màu, không phải sai layout — chiều cao 852 và hai lề 524/524 khớp
+  tuyệt đối.
+
+  Khung hiển thị **đúng**; không cần sửa `mobile_frame_widget.dart`.
 - **Dependencies:** M2.1
-- **Tests required:** 3 widget test cho ba nhánh của widget — đã có, pass
+- **Tests required:** 3 widget test cho ba nhánh của widget — đã có, pass; cộng
+  thêm kiểm chứng bằng screenshot thật ở hai viewport (bảng trên)
 - **Checklist phases:** 7.4, 15.5
 
 ### M2.1b · Sửa `check_docs.sh` — task ID `M*` không được kiểm
