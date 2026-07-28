@@ -15,8 +15,10 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     required this.danger,
     required this.info,
     required this.surfaceMuted,
+    required this.surfaceElevated,
     required this.borderSubtle,
     required this.focusRing,
+    required this.secondaryAction,
   });
 
   const AppSemanticColors.light()
@@ -25,8 +27,10 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       danger = AppColors.dangerLight,
       info = AppColors.infoLight,
       surfaceMuted = AppColors.surfaceMutedLight,
+      surfaceElevated = AppColors.surfaceElevatedLight,
       borderSubtle = AppColors.borderSubtleLight,
-      focusRing = AppColors.focusRingLight;
+      focusRing = AppColors.focusRingLight,
+      secondaryAction = AppColors.secondaryActionLight;
 
   const AppSemanticColors.dark()
     : success = AppColors.successDark,
@@ -34,16 +38,31 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       danger = AppColors.dangerDark,
       info = AppColors.infoDark,
       surfaceMuted = AppColors.surfaceMutedDark,
+      surfaceElevated = AppColors.surfaceElevatedDark,
       borderSubtle = AppColors.borderSubtleDark,
-      focusRing = AppColors.focusRingDark;
+      focusRing = AppColors.focusRingDark,
+      secondaryAction = AppColors.secondaryActionDark;
 
   final Color success;
   final Color warning;
   final Color danger;
   final Color info;
+
+  /// Inset tile, chip, icon container — a step above the card.
   final Color surfaceMuted;
+
+  /// The most prominent surface. In dark this is the fill of a primary action:
+  /// the button is the top of the surface ladder rather than a block of colour,
+  /// which leaves every saturated hue free to carry meaning.
+  final Color surfaceElevated;
+
   final Color borderSubtle;
+
+  /// Input border while focused. Focus shifts hue, never stroke width.
   final Color focusRing;
+
+  /// Label of a secondary (outlined) action.
+  final Color secondaryAction;
 
   @override
   AppSemanticColors copyWith({
@@ -52,8 +71,10 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     Color? danger,
     Color? info,
     Color? surfaceMuted,
+    Color? surfaceElevated,
     Color? borderSubtle,
     Color? focusRing,
+    Color? secondaryAction,
   }) {
     return AppSemanticColors(
       success: success ?? this.success,
@@ -61,8 +82,10 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       danger: danger ?? this.danger,
       info: info ?? this.info,
       surfaceMuted: surfaceMuted ?? this.surfaceMuted,
+      surfaceElevated: surfaceElevated ?? this.surfaceElevated,
       borderSubtle: borderSubtle ?? this.borderSubtle,
       focusRing: focusRing ?? this.focusRing,
+      secondaryAction: secondaryAction ?? this.secondaryAction,
     );
   }
 
@@ -82,8 +105,10 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       danger: Color.lerp(danger, other.danger, t)!,
       info: Color.lerp(info, other.info, t)!,
       surfaceMuted: Color.lerp(surfaceMuted, other.surfaceMuted, t)!,
+      surfaceElevated: Color.lerp(surfaceElevated, other.surfaceElevated, t)!,
       borderSubtle: Color.lerp(borderSubtle, other.borderSubtle, t)!,
       focusRing: Color.lerp(focusRing, other.focusRing, t)!,
+      secondaryAction: Color.lerp(secondaryAction, other.secondaryAction, t)!,
     );
   }
 }

@@ -14,21 +14,53 @@ import 'app_typography.dart';
 /// still need revisiting when one exists.
 ThemeData buildLightTheme() => _buildTheme(
   ColorScheme.fromSeed(seedColor: AppColors.seed).copyWith(
-    // Surfaces and text are declared, not derived. `fromSeed` tints every
-    // neutral with the seed, and that lavender cast over the whole app is what
-    // made the previous palette read as dated. The seed still drives primary,
-    // secondary and the rest of the tonal ramp.
+    // Every role is declared. `fromSeed` had been generating a neutral-grey
+    // surfaceContainer ladder, a pink `tertiary` and a second red for `error` —
+    // none visible yet only because the MVP has no Dialog, BottomSheet,
+    // NavigationBar, Menu or Chip. See AppColors for the audit.
+    primary: AppColors.primaryLight,
+    onPrimary: AppColors.onPrimaryLight,
+    primaryContainer: AppColors.primaryContainerLight,
+    onPrimaryContainer: AppColors.onPrimaryContainerLight,
+    secondary: AppColors.secondaryLight,
+    onSecondary: AppColors.onSecondaryLight,
+    secondaryContainer: AppColors.secondaryContainerLight,
+    onSecondaryContainer: AppColors.onSecondaryContainerLight,
+    tertiary: AppColors.tertiaryLight,
+    onTertiary: AppColors.onTertiaryLight,
+    tertiaryContainer: AppColors.tertiaryContainerLight,
+    onTertiaryContainer: AppColors.onTertiaryContainerLight,
+    // `error` is `danger`, not a second red system.
+    error: AppColors.dangerLight,
+    onError: AppColors.onErrorLight,
+    errorContainer: AppColors.errorContainerLight,
+    onErrorContainer: AppColors.onErrorContainerLight,
     surface: AppColors.surfaceLight,
-    surfaceContainerHighest: AppColors.surfaceMutedLight,
-    onSurface: AppColors.onSurfaceLight,
-    onSurfaceVariant: AppColors.onSurfaceVariantLight,
+    onSurface: AppColors.textPrimaryLight,
+    onSurfaceVariant: AppColors.textSecondaryLight,
+    surfaceDim: AppColors.surfaceDimLight,
+    surfaceBright: AppColors.surfaceBrightLight,
+    surfaceContainerLowest: AppColors.surfaceContainerLowestLight,
+    surfaceContainerLow: AppColors.surfaceContainerLowLight,
+    surfaceContainer: AppColors.surfaceContainerLight,
+    surfaceContainerHigh: AppColors.surfaceContainerHighLight,
+    surfaceContainerHighest: AppColors.surfaceContainerHighestLight,
     outline: AppColors.borderSubtleLight,
     outlineVariant: AppColors.borderSubtleLight,
+    inverseSurface: AppColors.inverseSurfaceLight,
+    onInverseSurface: AppColors.onInverseSurfaceLight,
+    inversePrimary: AppColors.inversePrimaryLight,
+    surfaceTint: AppColors.primaryLight,
+    shadow: AppColors.shadowLight,
+    scrim: AppColors.scrimLight,
   ),
   const AppSemanticColors.light(),
   background: AppColors.backgroundLight,
-  actionFill: AppColors.actionFillLight,
-  outlineLabel: AppColors.actionOutlineLabelLight,
+  // Light cannot promote a button above white, so the brand colour carries the
+  // prominence instead. Dark uses the surface ladder — see below.
+  actionFill: AppColors.primaryLight,
+  actionLabel: AppColors.onPrimaryLight,
+  outlineLabel: AppColors.secondaryActionLight,
 );
 
 ThemeData buildDarkTheme() => _buildTheme(
@@ -36,29 +68,53 @@ ThemeData buildDarkTheme() => _buildTheme(
     seedColor: AppColors.seed,
     brightness: Brightness.dark,
   ).copyWith(
-    // Material 3 puts dark `primary` at tone 80 — a near-pastel lavender at
-    // luminance 0.565, more than half of pure white. That is correct for the
-    // role M3 assumes (text and icons on a dark surface) and wrong for the role
-    // this app uses it in (the fill of a large button). On a page at luminance
-    // 0.004 it glares, it pulls the eye off the vocabulary card, and white text
-    // on it only reaches 1.71:1 — below the readable threshold.
-    //
-    // Using the seed itself drops the fill to luminance 0.118 and lifts white
-    // text to 6.25:1. `test/core/theme/app_theme_test.dart` pins the bound so a
-    // future scheme change cannot quietly reintroduce the glare.
-    primary: AppColors.seed,
-    onPrimary: AppColors.onSurfaceDark,
+    primary: AppColors.primaryDark,
+    onPrimary: AppColors.onPrimaryDark,
+    primaryContainer: AppColors.primaryContainerDark,
+    onPrimaryContainer: AppColors.onPrimaryContainerDark,
+    secondary: AppColors.secondaryDark,
+    onSecondary: AppColors.onSecondaryDark,
+    secondaryContainer: AppColors.secondaryContainerDark,
+    onSecondaryContainer: AppColors.onSecondaryContainerDark,
+    tertiary: AppColors.tertiaryDark,
+    onTertiary: AppColors.onTertiaryDark,
+    tertiaryContainer: AppColors.tertiaryContainerDark,
+    onTertiaryContainer: AppColors.onTertiaryContainerDark,
+    error: AppColors.dangerDark,
+    onError: AppColors.onErrorDark,
+    errorContainer: AppColors.errorContainerDark,
+    onErrorContainer: AppColors.onErrorContainerDark,
     surface: AppColors.surfaceDark,
-    surfaceContainerHighest: AppColors.surfaceMutedDark,
-    onSurface: AppColors.onSurfaceDark,
-    onSurfaceVariant: AppColors.onSurfaceVariantDark,
+    onSurface: AppColors.textPrimaryDark,
+    onSurfaceVariant: AppColors.textSecondaryDark,
+    surfaceDim: AppColors.surfaceDimDark,
+    surfaceBright: AppColors.surfaceBrightDark,
+    surfaceContainerLowest: AppColors.surfaceContainerLowestDark,
+    surfaceContainerLow: AppColors.surfaceContainerLowDark,
+    surfaceContainer: AppColors.surfaceContainerDark,
+    surfaceContainerHigh: AppColors.surfaceContainerHighDark,
+    surfaceContainerHighest: AppColors.surfaceContainerHighestDark,
     outline: AppColors.borderSubtleDark,
     outlineVariant: AppColors.borderSubtleDark,
+    inverseSurface: AppColors.inverseSurfaceDark,
+    onInverseSurface: AppColors.onInverseSurfaceDark,
+    inversePrimary: AppColors.inversePrimaryDark,
+    // Not the generated tone-80 lavender: Material paints this over elevated
+    // surfaces, and a near-pastel tint there undoes the neutral canvas.
+    surfaceTint: AppColors.surfaceElevatedDark,
+    shadow: AppColors.shadowDark,
+    scrim: AppColors.scrimDark,
   ),
   const AppSemanticColors.dark(),
   background: AppColors.backgroundDark,
-  actionFill: AppColors.actionFillDark,
-  outlineLabel: AppColors.actionOutlineLabelDark,
+  // The action is the top of the surface ladder, not a block of colour. That
+  // keeps every saturated hue free to mean something — which matters because
+  // the review verdicts (`forgotten` / `remembered`) are colour-coded, and a
+  // brand-coloured CTA beside them would compete with the two colours carrying
+  // the user's actual decision.
+  actionFill: AppColors.surfaceElevatedDark,
+  actionLabel: AppColors.textPrimaryDark,
+  outlineLabel: AppColors.secondaryActionDark,
 );
 
 ThemeData _buildTheme(
@@ -66,6 +122,7 @@ ThemeData _buildTheme(
   AppSemanticColors semantic, {
   required Color background,
   required Color actionFill,
+  required Color actionLabel,
   required Color outlineLabel,
 }) {
   final base = ThemeData(
@@ -123,7 +180,7 @@ ThemeData _buildTheme(
             return scheme.onSurface.withValues(alpha: 0.38);
           }
 
-          return scheme.onPrimary;
+          return actionLabel;
         }),
       ),
     ),

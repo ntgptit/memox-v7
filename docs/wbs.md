@@ -1030,33 +1030,54 @@ slice UC-05 cần. Không xây trọn design system trước khi có feature th�
 
 ### M3.5a · Review và tái hiệu chỉnh color system
 
-- **Status:** in-progress — **chờ chủ dự án chọn candidate**
+- **Status:** done — candidate **A · Slate Indigo** đã được duyệt và áp
 - **Goal:** Đánh giá lại **chiến lược** màu trên màn hình render thật, thay vì
   tiếp tục sửa từng mã hex.
-- **Scope:** audit palette hiện tại; ba candidate đầy đủ role cho light + dark;
-  harness render **test-only**; chấm điểm; đề xuất.
-- **Out of scope:** đổi palette production, đổi golden chính thức, typography,
-  spacing, radius, component structure, router, Drift.
+- **Scope:** audit; ba candidate đầy đủ role; harness render; chấm điểm; áp
+  candidate được duyệt.
+- **Out of scope:** typography, spacing, radius, component structure, router,
+  Drift.
 - **Editable documents:** `docs/wbs.md`
-- **Output:** `test/review/review_palettes.dart`,
-  `test/review/color_review_test.dart`, 8 ảnh trong `test/review/goldens/`
+- **Output:** `test/review/` (harness + 8 ảnh), và sau khi duyệt:
+  `lib/core/theme/{app_colors,app_semantic_colors,app_theme}.dart`,
+  `test/core/theme/`, 22 golden của shared widgets
 - **Acceptance criteria:**
   - [x] Audit chỉ ra vấn đề ở **cấp hệ thống**, không chỉ nhận xét từng mã hex.
-  - [x] Ba candidate, mỗi cái đủ 15 role × 2 brightness, **không** để
-        `ColorScheme.fromSeed` tự quyết phần còn lại.
+  - [x] Ba candidate, mỗi cái đủ 15 role × 2 brightness.
   - [x] 8 ảnh cùng viewport / typography / spacing / radius / locale / dữ liệu.
-  - [x] Bảng điểm 9 tiêu chí.
-  - [ ] **Chủ dự án chọn candidate** — chưa làm, đây là điểm dừng của task.
-- **Phát hiện lớn nhất của audit:** chỉ **6 trên ~30** role của `ColorScheme`
-  đang được kiểm soát. Phần còn lại do `fromSeed` sinh ra ở **họ màu khác**:
-  thang `surfaceContainer*` ở dark là **xám trung tính** (S 9–15%) trong khi app
-  là navy S 70%; `tertiary` là **hồng** (H 328); `error` là một hệ đỏ **thứ hai**
-  cạnh tranh với `danger`; `surfaceTint` vẫn còn đúng sắc lavender chói đã bị gỡ
-  khỏi `primary`. Chúng chưa lộ ra vì MVP chưa có Dialog, BottomSheet,
-  NavigationBar, Menu hay Chip — **sẽ lộ ngay ở Library/Settings/Statistics**.
+  - [x] Bảng điểm 9 tiêu chí. A 43 · C 41 · B 36 · baseline 26.
+  - [x] Chủ dự án duyệt A và giao lại quyết định CTA.
+  - [x] **Mọi role của `ColorScheme` được khai báo** — 40 role × 2 brightness.
+        `fromSeed` không còn quyết định bất cứ thứ gì.
+- **Phát hiện lớn nhất của audit:** chỉ **6 trên ~30** role đang được kiểm soát.
+  Phần còn lại `fromSeed` sinh ở **họ màu khác**: thang `surfaceContainer*` ở
+  dark là **xám trung tính** (S 9–15%) trong khi app là navy S 70%; `tertiary`
+  là **hồng** (H 328); `error` là hệ đỏ **thứ hai** cạnh tranh với `danger`;
+  `surfaceTint` vẫn giữ đúng sắc lavender chói đã bị gỡ khỏi `primary`. Chưa lộ
+  vì MVP chưa có Dialog, BottomSheet, NavigationBar, Menu hay Chip — **sẽ lộ
+  ngay ở Library/Settings/Statistics**, lúc sửa đắt hơn nhiều.
+- **Vì sao chọn canvas trung tính.** Đây là app mở **mỗi ngày**, vài phút, suốt
+  nhiều tháng. Trên chân trời đó thứ quan trọng không phải ấn tượng đầu mà là
+  **không gây mỏi**, nên không có mảng bão hoà nào nằm ở vùng ngoại vi thị giác:
+  canvas graphite S 6–16%, đúng một điểm nhấn indigo muted. Palette bị thay phủ
+  navy bão hoà lên **mọi** bề mặt — bắt mắt ở ảnh chụp đầu, mệt ở phiên thứ ba.
+- **CTA ở dark là tầng bề mặt cao nhất, không mang màu** (`surfaceElevated`).
+  Để dành trọn ngân sách màu cho `forgotten`/`remembered` ở M5.4 — một CTA mang
+  màu thương hiệu ngồi cạnh hai nút đó sẽ tranh chấp với chính hai màu đang mang
+  quyết định của người dùng. Light không làm được vậy (trắng đã là đỉnh thang)
+  nên dùng màu thương hiệu.
+- **Ngân sách chroma cho semantic:** `danger` cao nhất (báo động), `info` thấp
+  nhất (chỉ báo), không màu nào chạm bão hoà tối đa — cao nhất 62%. Bản trước có
+  `warning` S=100% ở **cả hai** mode.
+- **Hai điều chỉnh trong lúc áp:** `surfaceElevated` ở dark nâng từ L28 lên L34
+  vì nút chỉ tách khỏi card **1.49×** (tham chiếu tách 2.64×) — nâng ngưỡng chứ
+  không hạ test. Và `app_theme_test.dart` vượt 400 dòng nên tách phần kiểm hành
+  vi `ThemeExtension` sang file riêng; hai file trả lời hai câu hỏi khác nhau.
 - **Dependencies:** M3.5
-- **Tests required:** none — đây là task review; harness là công cụ nhìn, không
-  phải test hồi quy. Gắn tag `review` để loại trừ được.
+- **Tests required:** none mới — bộ test contrast hiện có phủ toàn bộ; thêm
+  kiểm `surfaceTint`/`surfaceBright`/`surfaceContainerHighest` không được trở
+  thành nguồn sáng ở dark, vì lần trước chỉ kiểm `primary` và bỏ lọt
+  `surfaceTint`
 - **Checklist phases:** 7.2
 
 ### M3.6 · Base component tối thiểu và app shell
