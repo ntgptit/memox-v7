@@ -8,8 +8,31 @@
 # Run it:
 #   python code-verification-guard-v2/guard/run.py check --project . --ruleset memox-v7
 #
+# ---------------------------------------------------------------------------
+# About the vendored copy in code-verification-guard-v2/
+# ---------------------------------------------------------------------------
+# It is a byte-for-byte copy of https://github.com/ntgptit/code-verification-guard-v2
+# at its main branch. It is committed here so a fresh clone can run the project's
+# main gate without a second checkout — CI and dod_check.sh both depend on that.
+#
+# MUST NOT edit anything under code-verification-guard-v2/. That directory is
+# owned by the guard repository (see its AGENTS.md: "Commit and push guard
+# changes from this directory, not from the parent MemoX repository"). A local
+# edit makes the tree impossible to refresh safely, because a refresh silently
+# discards it.
+#
+# Rule changes — including changes to the memox-v7 ruleset — go upstream first,
+# then come back here as a refresh:
+#
+#   rm -rf code-verification-guard-v2
+#   git clone --depth 1 https://github.com/ntgptit/code-verification-guard-v2.git tmp-guard
+#   rm -rf tmp-guard/.git && mv tmp-guard code-verification-guard-v2
+#
+# This file is the one piece of guard configuration that DOES belong to this
+# repository.
+#
 # The ruleset itself lives in
-# code-verification-guard-v2/registries/projects/memox-v7/.
+# code-verification-guard-v2/registries/projects/memox-v7/ (upstream canonical).
 version: 1
 
 project:

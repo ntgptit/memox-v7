@@ -1,0 +1,157 @@
+# MemoX guard rules — domain: hooks
+# Flutter hooks contract: hooks live in presentation only, custom hooks use the useMx prefix,
+# and text/search/submit/focus wiring goes through the shared useMx* hooks.
+#
+# Rule ID convention: memox.<domain>.<rule_name> — <domain> matches this file's slug.
+# Scopes are defined in registries/projects/memox/config/scopes.yaml (and scopes/memox-scopes.yaml
+# for the root-manifest ruleset). See README.md in this directory for the full authoring guide.
+version: 1
+
+metadata:
+  id: memox-hooks
+  name: MemoX Hook Rules
+  description: MemoX shared-hook usage rules.
+  owner: code-verification-guard
+
+rules:
+  - id: memox.hooks.custom_hooks_use_mx_prefix
+    type: regex
+    mode: line
+    severity: error
+    enabled: true
+    message: Shared hook declarations must use the useMx prefix so custom hooks stay easy to match and grep.
+    include:
+      - lib/presentation/shared/hooks/**/*.dart
+    exclude:
+      - "**/*.g.dart"
+      - "**/*.freezed.dart"
+      - lib/l10n/generated/**
+    patterns:
+      - '^\s*(?:[A-Za-z_][A-Za-z0-9_<>, ?]*\s+)+use(?!Mx)[A-Z]\w*\s*\('
+    tags:
+      - memox
+      - hooks
+      - naming
+      - architecture
+    fix:
+      hint: Rename the custom shared hook to useMx<FeatureName>... and keep built-in hook calls unchanged.
+
+  - id: memox.hooks.presentation_only
+    type: regex
+    mode: line
+    severity: error
+    enabled: true
+    message: Hooks are presentation-only in MemoX. Keep hook widgets and hook APIs inside lib/presentation/**.
+    include:
+      - lib/app/**/*.dart
+      - lib/core/**/*.dart
+      - lib/data/**/*.dart
+      - lib/domain/**/*.dart
+      - lib/main.dart
+    exclude:
+      - "**/*.g.dart"
+      - "**/*.freezed.dart"
+      - lib/l10n/generated/**
+    patterns:
+      - 'package:flutter_hooks/flutter_hooks\.dart'
+      - 'package:hooks_riverpod/hooks_riverpod\.dart'
+      - '\bHook(?:Consumer)?Widget\b'
+      - '\buse[A-Z]\w*\s*\('
+    tags:
+      - memox
+      - hooks
+      - architecture
+    fix:
+      hint: Move hook usage into presentation widgets or replace it with a non-hook abstraction outside lib/presentation/**.
+
+  - id: memox.hooks.search_field_uses_shared_hook
+    type: regex
+    mode: file
+    severity: error
+    enabled: true
+    message: Files that own search controller state around MxSearchField must use useMxSearchController.
+    include:
+      - lib/presentation/**/*.dart
+    exclude:
+      - "**/*.g.dart"
+      - "**/*.freezed.dart"
+      - lib/l10n/generated/**
+      - lib/presentation/shared/widgets/inputs/mx_search_field.dart
+    patterns:
+      - '(?s)\A(?=.*\bMxSearchField\b)(?=.*(?:\buseTextEditingController\b|\bTextEditingController\b|\bsearchQueryProvider\b))(?!.*\buseMxSearchController\b)[\s\S]*\Z'
+    tags:
+      - memox
+      - hooks
+      - ui
+      - search
+    fix:
+      hint: Replace local search controller wiring with useMxSearchController so clear/query sync stays centralized.
+
+  - id: memox.hooks.text_controller_requires_mx_hook
+    type: regex
+    mode: file
+    severity: error
+    enabled: true
+    message: Files that use TextEditingController must use a MemoX shared/custom hook with the useMx prefix.
+    include:
+      - lib/presentation/**/*.dart
+    exclude:
+      - "**/*.g.dart"
+      - "**/*.freezed.dart"
+      - lib/l10n/generated/**
+      - lib/presentation/shared/hooks/**/*.dart
+      - lib/presentation/shared/widgets/inputs/mx_field_scaffold.dart
+      - lib/presentation/shared/widgets/inputs/mx_search_field.dart
+    patterns:
+      - '(?s)\A(?=.*=\s*(?:useTextEditingController|TextEditingController)\s*\()(?!.*\buseMx[A-Z]\w*\s*\()[\s\S]*\Z'
+    tags:
+      - memox
+      - hooks
+      - text-controller
+      - ui
+    fix:
+      hint: Move TextEditingController ownership into a useMx... hook or use an existing MemoX hook such as useMxTextValue, useMxTextSubmitState, or useMxSearchController instead.
+
+  - id: memox.hooks.submit_state_uses_shared_hook
+    type: regex
+    mode: file
+    severity: warning
+    enabled: true
+    message: Hook-based single-field submit forms should use useMxTextSubmitState for derived button state.
+    include:
+      - lib/presentation/**/*.dart
+    exclude:
+      - "**/*.g.dart"
+      - "**/*.freezed.dart"
+      - lib/l10n/generated/**
+    patterns:
+      - '(?s)\A(?=.*\bHook(?:Consumer)?Widget\b)(?=.*\bText(?:Form)?Field\b)(?=.*(?:\buseTextEditingController\b|\bTextEditingController\b))(?=.*\bonPressed\s*:)(?=.*(?:\.trim\b|\bStringUtils\.trimmed\b))(?=.*\bnull\b)(?!.*\buseMxTextSubmitState\b)[\s\S]*\Z'
+    tags:
+      - memox
+      - hooks
+      - ui
+      - forms
+    fix:
+      hint: Derive submit enabled state with useMxTextSubmitState so hook-based forms stay consistent.
+
+  - id: memox.hooks.post_frame_focus_uses_shared_hook
+    type: regex
+    mode: file
+    severity: warning
+    enabled: true
+    message: Post-frame focus handoff in presentation code should use useMxRequestFocusAfterFrame.
+    include:
+      - lib/presentation/**/*.dart
+    exclude:
+      - "**/*.g.dart"
+      - "**/*.freezed.dart"
+      - lib/l10n/generated/**
+    patterns:
+      - '(?s)\A(?=.*\bWidgetsBinding\.instance\.addPostFrameCallback\b)(?=.*\brequestFocus\b)(?!.*\buseMxRequestFocusAfterFrame\b)[\s\S]*\Z'
+    tags:
+      - memox
+      - hooks
+      - ui
+      - focus
+    fix:
+      hint: Replace manual post-frame focus wiring with useMxRequestFocusAfterFrame.

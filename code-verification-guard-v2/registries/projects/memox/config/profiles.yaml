@@ -1,0 +1,37 @@
+version: 1
+
+profiles:
+  local:
+    failure:
+      fail_on:
+        - error
+      warning_as_error: false
+    report:
+      format: console
+      show_code_line: true
+      show_fix_hint: true
+    overrides:
+      disabled_rules: []
+      severity: {}
+      rule_options: {}
+
+  ci:
+    failure:
+      fail_on:
+        - error
+      warning_as_error: true
+    report:
+      format: console
+      show_code_line: true
+      show_fix_hint: true
+    overrides:
+      # ci treats warnings as errors. The remaining warnings are all
+      # guard.config.* coverage meta-diagnostics for rules whose target
+      # paths are future wave-5 features (WBS 1.8 cleanup, 2026-07-19:
+      # every stale path with a real counterpart was fixed and zero
+      # memox.* warnings remain). The verifier flips to this profile
+      # when rule_without_targets reaches zero as features land, or the
+      # guard learns to scope config meta-diagnostics.
+      disabled_rules: []
+      severity: {}
+      rule_options: {}

@@ -476,6 +476,12 @@ và Web, analyzer sạch, code generation chạy được.
 - **Output:** `code-verification-guard-v2/` (vendored),
   `code-verification-guard-v2/registries/projects/memox-v7/`,
   `code-verification-guard.yaml`, `dod_check.sh`
+- **Ranh giới sở hữu (từ `AGENTS.md` của repo guard):** thư mục
+  `code-verification-guard-v2/` thuộc về repo guard, **MUST NOT sửa tại chỗ**.
+  Mọi thay đổi rule đi upstream trước rồi refresh về. Bản vendor được commit vào
+  đây có chủ đích để một lần clone mới chạy được cổng chính ngay — CI và
+  `dod_check.sh` đều dựa vào điều đó. `code-verification-guard.yaml` ở gốc là
+  phần cấu hình **duy nhất** thuộc về repo này.
 - **Vì sao phải tạo ruleset mới thay vì dùng `memox` sẵn có:** `memox` và
   `memox-v4` là Flutter nhưng theo cây **layer-first**
   (`lib/presentation/features/**`, `lib/data/datasources/**`). memox-v7 là
@@ -488,8 +494,12 @@ và Web, analyzer sạch, code generation chạy được.
   - [x] Guard chạy được và **exit 0** trên code hiện tại: `Errors: 0`.
   - [x] **Mỗi rule trụ cột được verify bằng test tiêm lỗi** — 6/6 đạt, xem bảng.
   - [x] Guard là một bước trong `dod_check.sh`; `dod_check.sh` exit 0.
-  - [x] Các ruleset memox cũ **không** được vendor vào repo, để không ai chạy
-        nhầm bản lỗi thời.
+  - [x] Ruleset `memox-v7` đã merge **upstream** vào
+        `ntgptit/code-verification-guard-v2` (PR #6) — đó là vị trí gốc, cùng
+        chỗ với `memox-v4` / `memox-v5`.
+  - [x] Bản vendor trong repo **byte-identical với upstream** (`diff -r` sạch),
+        nên refresh được bằng cách copy lại. Lệnh refresh ghi ở đầu
+        `code-verification-guard.yaml`.
   - [x] Mọi skill từng bảo chạy `dart run custom_lint` nay trỏ sang guard.
 - **Kết quả test tiêm lỗi:**
 
