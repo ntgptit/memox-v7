@@ -28,6 +28,18 @@ double _contrast(Color foreground, Color background) {
   return (math.max(a, b) + 0.05) / (math.min(a, b) + 0.05);
 }
 
+/// The colour a FilledButton actually paints in its resting state.
+///
+/// Read from the theme rather than from a token, so the test fails if the
+/// button stops using what the palette intends for it.
+Color _filledButtonFill(ThemeData theme) {
+  final resolved = theme.filledButtonTheme.style!.backgroundColor!.resolve(
+    <WidgetState>{},
+  );
+
+  return resolved!;
+}
+
 void main() {
   final themes = <String, ThemeData>{
     'light': buildLightTheme(),
@@ -155,6 +167,46 @@ void main() {
         lessThan(0.25),
         reason: 'dark primary is bright enough to read as a light source',
       );
+    });
+
+    test('the action fill is the top of the surface ladder in dark', () {
+      // The reference builds its CTA out of the neutral ladder rather than out
+      // of the brand hue: page -> card -> tile -> action, each step brighter.
+      // Asserting the ORDER, not the values, so a future palette can move all
+      // four without this test dictating the colours.
+      final dark = themes['dark']!;
+      final semantic = dark.extension<AppSemanticColors>()!;
+      final ladder = <double>[
+        _luminance(dark.scaffoldBackgroundColor),
+        _luminance(dark.colorScheme.surface),
+        _luminance(semantic.surfaceMuted),
+        _luminance(_filledButtonFill(dark)),
+      ];
+
+      for (var i = 1; i < ladder.length; i++) {
+        expect(
+          ladder[i],
+          greaterThan(ladder[i - 1]),
+          reason: 'tier $i is not brighter than tier ${i - 1}',
+        );
+      }
+    });
+
+    test('the action fill is legible against the card it sits on', () {
+      for (final entry in themes.entries) {
+        final fill = _filledButtonFill(entry.value);
+
+        expect(
+          _contrast(fill, entry.value.colorScheme.surface),
+          greaterThanOrEqualTo(1.5),
+          reason: '${entry.key}: the button disappears into the card',
+        );
+        expect(
+          _contrast(entry.value.colorScheme.onPrimary, fill),
+          greaterThanOrEqualTo(4.5),
+          reason: '${entry.key}: label on the action fill',
+        );
+      }
     });
 
     test('label on a primary fill is readable in both themes', () {

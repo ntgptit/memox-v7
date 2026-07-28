@@ -27,6 +27,7 @@ ThemeData buildLightTheme() => _buildTheme(
   ),
   const AppSemanticColors.light(),
   background: AppColors.backgroundLight,
+  actionFill: AppColors.actionFillLight,
 );
 
 ThemeData buildDarkTheme() => _buildTheme(
@@ -55,12 +56,14 @@ ThemeData buildDarkTheme() => _buildTheme(
   ),
   const AppSemanticColors.dark(),
   background: AppColors.backgroundDark,
+  actionFill: AppColors.actionFillDark,
 );
 
 ThemeData _buildTheme(
   ColorScheme scheme,
   AppSemanticColors semantic, {
   required Color background,
+  required Color actionFill,
 }) {
   final base = ThemeData(
     colorScheme: scheme,
@@ -107,10 +110,10 @@ ThemeData _buildTheme(
             return scheme.onSurface.withValues(alpha: 0.12);
           }
           if (states.contains(WidgetState.pressed)) {
-            return scheme.primary.withValues(alpha: 0.88);
+            return Color.lerp(actionFill, scheme.onSurface, 0.12);
           }
 
-          return scheme.primary;
+          return actionFill;
         }),
         foregroundColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.disabled)) {
