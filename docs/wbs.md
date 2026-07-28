@@ -25,7 +25,7 @@ AD / UC (xem `business-rules.md`).
 |---|---|---|
 | M0 · Development harness | done | Skills, checklist và enforcement script đã có |
 | M1 · Product definition (Phase 0–1) | **done** | Đặc tả MVP đã frozen: AD-01…11, BR-01…87, UC-01…09, data model đầy đủ |
-| M2 · Project foundation (Phase 2–3, 6) | todo | **M2.1 là việc tiếp theo.** Chặn bởi Flutter chưa có trong môi trường — xem Blocker |
+| M2 · Project foundation (Phase 2–3, 6) | in-progress | **M2.1 blocked** ở đúng một bước: build APK. Flutter đã cài, code đã xong, analyze/test/web build pass — xem Blocker |
 | M3 · Architecture & design system (Phase 4–5, 7, 12–13) | todo | |
 | M4 · Router & Drift foundation (Phase 8, 11) | todo | **Phase 10 (networking) hoãn** — AD-01, AD-05 |
 | M5 · First vertical slice: luồng ôn tập (Phase 14) | todo | UC-05 |
@@ -275,7 +275,7 @@ và Web, analyzer sạch, code generation chạy được.
 
 ### M2.1 · Khởi tạo Flutter project và xác nhận toolchain
 
-- **Status:** todo — **việc tiếp theo**
+- **Status:** **blocked** — Android SDK không tải được trong môi trường này
 - **Goal:** Tạo Flutter project chạy được và xác nhận toolchain đủ để build
   Android lẫn Web.
 - **Scope:** `flutter create` với org/package đúng, xoá code demo, thu `main.dart`
@@ -283,21 +283,34 @@ và Web, analyzer sạch, code generation chạy được.
 - **Out of scope:** dependency ngoài mặc định, flavor, l10n, theme, router,
   database. Tất cả có task riêng.
 - **Editable documents:** `docs/wbs.md`
-- **Output:** `pubspec.yaml`, `lib/main.dart`, `android/`, `web/`, `test/`
+- **Output:** `pubspec.yaml`, `pubspec.lock`, `analysis_options.yaml`,
+  `lib/main.dart`, `lib/app/app.dart`, `test/widget_test.dart`, `README.md`,
+  `android/`, `web/`, `.metadata`
 - **Acceptance criteria:**
   - [ ] `flutter doctor` không có mục nào ở trạng thái lỗi cho Android toolchain.
-  - [ ] `flutter analyze` → 0 error, 0 warning.
+        → **FAIL:** `[✗] Android toolchain — Unable to locate Android SDK.`
+  - [x] `flutter analyze` → 0 error, 0 warning. → `No issues found!`, exit 0
   - [ ] `flutter build apk --debug` exit 0.
-  - [ ] `flutter build web` exit 0.
-  - [ ] `flutter test` exit 0 (test mặc định đã xoá hoặc thay bằng smoke test
-        thật).
-  - [ ] `lib/main.dart` ≤ 10 dòng và không chứa widget nào.
-  - [ ] Không còn counter demo trong `lib/` hay `test/`.
-  - [ ] `applicationId` và tên package khớp giá trị ghi trong task này, không phải
+        → **FAIL:** `[!] No Android SDK found.`, exit 1
+  - [x] `flutter build web` exit 0. → `✓ Built build/web`, exit 0
+  - [x] `flutter test` exit 0. → `All tests passed!`, 1 test
+  - [x] `lib/main.dart` ≤ 10 dòng và không chứa widget nào. → 7 dòng, 0 widget
+  - [x] Không còn counter demo trong `lib/` hay `test/`.
+  - [x] `applicationId` và `namespace` = `com.ntgptit.memox`, không phải
         `com.example`.
+  - [x] Chỉ có `android/` và `web/`; không có `ios/`, `linux/`, `macos/`,
+        `windows/`.
+  - [x] Dependency chỉ gồm bộ mặc định của Flutter: `cupertino_icons`,
+        `flutter_test`, `flutter_lints`.
+  - [x] `check_architecture.sh` exit 0.
+  - [x] `check_docs.sh` exit 0.
+  - [x] `.gitignore`, `docs/` và `.claude/` không bị `flutter create` ghi đè.
 - **Dependencies:** T1.4
-- **Tests required:** smoke test dựng app và tìm được một widget gốc
+- **Tests required:** smoke test dựng app và tìm được root widget — **đã có**,
+  `test/widget_test.dart`, pass
 - **Checklist phases:** 2.1, 2.3
+- **Phần còn lại để chuyển sang `done`:** cài Android SDK rồi chạy lại
+  `flutter doctor -v` và `flutter build apk --debug`. Không cần sửa code.
 
 ### M2.2 · Dependency nền tảng và code generation
 
@@ -941,9 +954,12 @@ viện starter deck.
 
 | Blocker | Ảnh hưởng | Cách gỡ |
 |---|---|---|
-| `flutter` không có trong môi trường tạo tài liệu | M2 trở đi không chạy được `flutter create`, `pub get`, `build_runner`, `flutter analyze` | Cài Flutter SDK, và tạo SessionStart hook để phiên sau không phải cài lại |
+| **`dl.google.com` bị chính sách mạng của môi trường chặn** (403 CONNECT) | Không cài được Android SDK, và Gradle không tải được Android Gradle Plugin. `flutter build apk` và `flutter doctor` phần Android **không thể** pass. Chặn tiêu chí APK của M2.1, và sẽ chặn mọi task cần build Android sau này | Cho phép `dl.google.com` trong network policy của environment, hoặc chạy các build Android trên runner CI có sẵn Android SDK |
+| Flutter SDK không tồn tại sẵn trong container | Mỗi phiên phải cài lại (~1.5 GB, vài phút) | Đã cài thủ công vào `/opt/flutter` ở M2.1. Container là ephemeral nên cần **SessionStart hook** để phiên sau tự dựng lại — chưa làm, xếp vào M2.2 |
 
-Blocker này **không** chặn T1.4 — đó là task chỉ sửa tài liệu.
+Blocker thứ nhất **không** chặn phần còn lại của M2: `flutter analyze`, `flutter
+test`, `flutter build web` và `build_runner` đều chạy được. Nó chỉ chặn đúng
+bước build APK.
 
 ## Deferred and descoped
 
