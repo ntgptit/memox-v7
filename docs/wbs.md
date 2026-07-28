@@ -8,20 +8,23 @@ work it describes. A task is `done` only when it meets the Definition of Done in
 
 Status values: `todo` · `in-progress` · `blocked` · `done` · `descoped`
 
+**Task ID là định danh vĩnh viễn và không được trùng**, cùng chính sách với BR /
+AD / UC (xem `business-rules.md`).
+
 ## Progress summary
 
 | Milestone | Status | Notes |
 |---|---|---|
-| M0 · Development harness | done | Skills, checklist and enforcement scripts in place |
-| M1 · Product definition (Phase 0–1) | **in-progress** | T1.1 done; T1.2 blocked on 3 câu hỏi trong `product.md` |
-| M2 · Project foundation (Phase 2–3, 6) | todo | Unblocked — platform/data/auth đã chốt. Không cài `dio` (AD-05) |
+| M0 · Development harness | done | Skills, checklist và enforcement script đã có |
+| M1 · Product definition (Phase 0–1) | **done** | Đặc tả MVP đã frozen: AD-01…11, BR-01…87, UC-01…09, data model đầy đủ |
+| M2 · Project foundation (Phase 2–3, 6) | todo | Chặn bởi việc Flutter chưa có trong môi trường — xem Blocker |
 | M3 · Architecture & design system (Phase 4–5, 7, 12–13) | todo | |
-| M4 · Router & Drift foundation (Phase 8, 11) | todo | **Phase 10 (networking) bị hoãn** — xem AD-01/AD-05 |
-| M5 · First vertical slice: luồng ôn tập (Phase 14) | todo | Luồng 2 trong `product.md` |
+| M4 · Router & Drift foundation (Phase 8, 11) | todo | **Phase 10 (networking) hoãn** — AD-01, AD-05 |
+| M5 · First vertical slice: luồng ôn tập (Phase 14) | todo | UC-05 |
 | M6 · Test suite (Phase 15) | todo | Chạy song song M5, không phải sau |
 | M7 · CI/CD (Phase 19) | todo | Bắt đầu được ngay sau M2. Job Android + Web, chưa có iOS (AD-04) |
 | M8 · Release Android (Phase 16–18, 20–22) | todo | |
-| M9 · Backend Spring Boot + auth + sync (Phase 10) | todo | Sau khi M8 ổn định. Kích hoạt phần networking của harness |
+| M9 · Backend Spring Boot + auth + sync (Phase 10) | todo | Sau khi M8 ổn định |
 
 ---
 
@@ -35,56 +38,30 @@ Status values: `todo` · `in-progress` · `blocked` · `done` · `descoped`
   remembered.
 - **Scope:** 11 skills under `.claude/skills/`, the canonical checklist,
   root `CLAUDE.md`, document templates. Out of scope: any Flutter source code.
-- **Output:**
-  - `docs/checklist.md`, `docs/README.md`, `docs/wbs.md`
-  - `CLAUDE.md` — non-negotiables that apply in every phase
-  - `.claude/skills/flutter-workflow` — router, phase index, Definition of Done,
-    `scripts/dod_check.sh`
-  - `.claude/skills/flutter-product-spec` — Phase 0–1 + four document templates
-  - `.claude/skills/flutter-project-setup` — Phase 2, 3, 6 + dependency and
-    flavor references
-  - `.claude/skills/flutter-architecture` — Phase 4–5, `analysis_options.yaml`,
-    `scripts/check_architecture.sh`
-  - `.claude/skills/flutter-design-system` — Phase 7, 12, 13 + token, component
-    and a11y/l10n references
-  - `.claude/skills/flutter-navigation` — Phase 8
-  - `.claude/skills/flutter-state-riverpod` — Phase 9
-  - `.claude/skills/flutter-data-layer` — Phase 10–11 + networking and
-    persistence references
-  - `.claude/skills/flutter-feature-slice` — Phase 14 + per-feature checklist
-  - `.claude/skills/flutter-testing` — Phase 15
-  - `.claude/skills/flutter-ship` — Phase 16–22 + CI reference
+- **Output:** `docs/checklist.md`, `docs/README.md`, `docs/wbs.md`, `CLAUDE.md`,
+  và 11 skill dưới `.claude/skills/` (workflow, product-spec, project-setup,
+  architecture, design-system, navigation, state-riverpod, data-layer,
+  feature-slice, testing, ship).
 - **Acceptance criteria:**
-  - [x] Every checklist phase maps to exactly one owning skill
-        (`flutter-workflow/references/phase-index.md`).
-  - [x] `check_architecture.sh` detects domain→framework imports,
-        presentation→data imports, cross-feature imports, core/shared→feature
-        imports, swallowed exceptions, `print` in `lib/`, naming-suffix
-        violations and oversized files — verified against a fixture.
-  - [x] `check_architecture.sh` reports zero violations on conforming code —
-        verified against a fixture.
-  - [x] Both scripts exit 0 with a clear message when the Flutter project does
-        not exist yet.
+  - [x] Mỗi phase trong checklist map tới đúng một skill sở hữu.
+  - [x] `check_architecture.sh` phát hiện domain→framework import,
+        presentation→data import, cross-feature import, core/shared→feature
+        import, swallowed exception, `print` trong `lib/`, sai suffix và file quá
+        lớn — verify bằng fixture.
+  - [x] `check_architecture.sh` báo 0 vi phạm trên code đúng chuẩn — verify bằng
+        fixture.
+  - [x] Cả hai script exit 0 kèm thông báo rõ khi project Flutter chưa tồn tại.
 - **Dependencies:** none
-- **Tests required:** fixture-based verification of both scripts (done manually
-  during authoring; see the note under Technical debt).
-- **Checklist phases:** meta — supports all
+- **Tests required:** fixture-based verification của cả hai script
+- **Checklist phases:** meta — hỗ trợ tất cả
 
 ---
 
-## M1 · Product definition — next
+## M1 · Product definition — done
 
-Blocked on input only the product owner can give. The five answers that unblock
-the most downstream work, in order of leverage:
-
-1. **Offline-first, online-first, or hybrid?** Decides whether Drift is the
-   source of truth or a cache, and therefore the shape of every repository.
-2. **Which platforms ship at launch?** Decides plugin choices and responsive scope.
-3. **Is there authentication, and are there roles?** Reaches into the router,
-   the network layer, storage and the whole test setup.
-4. **What data is sensitive?** Decides secure storage, database encryption and
-   log redaction.
-5. **What is genuinely in the MVP?**
+Đặc tả MVP đã **frozen**. Mọi tài liệu trong `docs/` đánh dấu frozen là hợp đồng
+mà code sẽ được viết theo; đổi chúng là quyết định có chủ đích kèm cập nhật đồng
+bộ, không phải chỉnh sửa tiện tay.
 
 ### T1.1 · Product requirements và quyết định kiến trúc
 
@@ -94,9 +71,9 @@ the most downstream work, in order of leverage:
 - **Acceptance criteria:**
   - [x] Problem, users, core value.
   - [x] Quyết định platform / data posture / auth / sensitive data kèm hệ quả.
-  - [x] Feature phân loại must / should / nice / out, mỗi cái có điều kiện hoàn thành.
-  - [x] Quyết định kiến trúc ghi thành AD-01…06 kèm lý do và đánh đổi.
-  - [x] Harness được chỉnh lại cho khớp quyết định (xem T1.1b).
+  - [x] Feature phân loại must / should / nice / out, mỗi cái có điều kiện hoàn
+        thành.
+  - [x] Quyết định kiến trúc ghi thành AD kèm lý do và đánh đổi.
 - **Dependencies:** product owner input — đã nhận
 - **Tests required:** none — document only
 - **Checklist phases:** 0.1, 0.2, và một phần 4.3
@@ -107,115 +84,142 @@ the most downstream work, in order of leverage:
 - **Goal:** Loại bỏ hướng dẫn đã thành sai sau khi chốt local-first / `.drift` /
   no-auth / Android-only. Một skill nói sai còn tệ hơn không có skill, vì phiên
   sau sẽ tin nó.
-- **Output:**
-  - `flutter-data-layer/references/persistence.md` — schema viết lại theo file
-    `.drift` (bảng, index, named query, `@DriftDatabase(include:)`); mục cache
-    đánh dấu chưa áp dụng
-  - `flutter-data-layer/SKILL.md` — source of truth đã chốt, networking là tài
-    liệu cho phase sau
-  - `flutter-project-setup/references/dependencies.md` — `dio` và
-    `flutter_secure_storage` hoãn; `uuid` bắt buộc từ đầu
-  - `flutter-ship/references/ci.md` — thêm job `build-web` (kênh E2E),
-    comment out `build-ios`
-  - `CLAUDE.md` — tóm tắt quyết định, bỏ Dio khỏi stack
+- **Output:** `flutter-data-layer/references/persistence.md`,
+  `flutter-data-layer/SKILL.md`,
+  `flutter-project-setup/references/dependencies.md`,
+  `flutter-ship/references/ci.md`, `CLAUDE.md`
 - **Acceptance criteria:**
   - [x] Không còn ví dụ Dart table class trong tài liệu Drift.
   - [x] Mọi chỗ nhắc `dio` đều nói rõ là hoãn và vì sao.
   - [x] Frontmatter và tham chiếu chéo vẫn hợp lệ sau khi sửa.
 - **Dependencies:** T1.1
-- **Tests required:** chạy lại kiểm tra frontmatter + tham chiếu chéo
+- **Tests required:** kiểm tra frontmatter + tham chiếu chéo
 - **Checklist phases:** meta
 
 ### T1.2 · Use cases and business rules
 
 - **Status:** done
 - **Goal:** Đặc tả must-have đủ chi tiết để code mà không phải hỏi thêm.
-- **Output:** `docs/use-cases.md` (UC-01…06), `docs/business-rules.md` (BR-01…23)
+- **Output:** `docs/use-cases.md`, `docs/business-rules.md`
 - **Acceptance criteria:**
-  - [x] Mỗi must-have M1–M6 có use case đủ actor, trigger, preconditions,
+  - [x] Mỗi must-have có use case đủ actor, trigger, preconditions,
         main / alternative / error flows, postconditions.
-  - [x] Business rules đánh số BR-01…23.
-  - [x] Thuật toán 8-box đặc tả chính xác: ánh xạ 4 mức → hộp (BR-10), bảng
-        khoảng cách 8 hộp (BR-11).
+  - [x] Business rules đánh số và không trùng.
+  - [x] Cả hai scheduler đặc tả chính xác, gồm công thức SM-2 và bảng interval
+        8-box.
   - [x] Validation rules kèm message hiển thị chính xác.
-  - [x] Card state machine suy ra từ `box`/`due_at`, có liệt kê chuyển đổi không
-        hợp lệ.
-  - [x] 11 edge case liệt kê kèm hành vi mong đợi.
+  - [x] Card state machine suy ra từ `due_at`, có liệt kê chuyển đổi không hợp lệ.
+  - [x] Edge case liệt kê kèm hành vi mong đợi.
 - **Dependencies:** T1.1
 - **Tests required:** none — document only
 - **Checklist phases:** 0.3
-- **Ghi chú:** các mục `[suy luận]` là chỗ tôi tự quyết vì không có đặc tả. Đáng
-  rà lại: BR-24 (giới hạn 50 card/phiên), BR-26 (số 3 card cách quãng trước khi
-  card quay lại), BR-27 (luyện lại trong phiên không đổi lịch) — cả ba ảnh hưởng
-  trực tiếp đến cảm nhận khi dùng. Ngoài ra BR-19 dùng công thức SM-2 gốc, cập
-  nhật ease factor ở mọi lượt kể cả q < 3.
 
 ### T1.2b · Sửa thiết kế scheduler theo phản hồi
 
 - **Status:** done
-- **Goal:** Áp thiết kế mới: scheduler theo deck, khoá sau review đầu, reset +
-  generation, hai tập action khác nhau, sub-deck kế thừa.
+- **Goal:** Áp thiết kế: scheduler theo deck, khoá sau review đầu, reset +
+  generation, hai tập action khác nhau.
 - **Output:** `docs/architecture.md` (AD-06 viết lại, AD-09 mới),
-  `docs/business-rules.md` (BR-01…54, đánh số lại), `docs/data-model.md` (viết
-  lại), `docs/use-cases.md` (UC-07 mới, UC-02/03/05 sửa), `docs/product.md`,
-  `CLAUDE.md`, `flutter-data-layer/references/persistence.md`
-- **Những gì bị đảo so với bản trước, và vì sao đáng ghi lại:**
-  - SM-2 **vào lại MVP** — trước đó tôi đã loại nó khỏi MVP.
-  - 8-box đổi từ 4 mức đánh giá sang **2 action** `forgotten`/`remembered`. Toàn
-    bộ bảng ánh xạ cũ bị thay.
-  - Scheduler chuyển từ "không cho đổi" sang "đổi tự do trước review đầu, khoá
-    sau đó, mở lại bằng reset".
+  `docs/business-rules.md`, `docs/data-model.md`, `docs/use-cases.md`,
+  `docs/product.md`, `CLAUDE.md`,
+  `flutter-data-layer/references/persistence.md`
+- **Những gì bị đảo so với bản trước:**
+  - SM-2 **vào lại MVP**.
+  - 8-box đổi từ 4 mức đánh giá sang **2 action** `forgotten`/`remembered`.
+  - Scheduler chuyển sang "đổi tự do trước review đầu, khoá sau đó, mở lại bằng
+    reset".
   - Thêm `scheduler_generation` vào deck, card state, session và history.
-  - Thêm sub-deck (`parent_deck_id`) với quy tắc kế thừa scheduler.
 - **Acceptance criteria:**
-  - [x] BR-01…54 liên tục, không trùng, không thiếu.
-  - [x] Mọi trích dẫn BR/AD trong các tài liệu đều resolve (kiểm bằng script).
-  - [x] Hai bất biến của AD-09 diễn đạt được thành một câu query kiểm tra.
-  - [x] Không còn chỗ nào nói MVP chỉ có một scheduler.
+  - [x] BR liên tục, không trùng, không thiếu.
+  - [x] Mọi trích dẫn BR/AD resolve.
+  - [x] Hai bất biến của AD-09 diễn đạt được thành query kiểm tra.
 - **Dependencies:** T1.2
 - **Tests required:** none — document only
 - **Checklist phases:** 0.3, 4.3, 11.1
 
-### T1.3 · WBS chi tiết cho M2–M5
+### T1.3 · Freeze MVP specification và sửa tính nhất quán tài liệu
 
-- **Status:** todo — **việc tiếp theo**
-- **Goal:** Chia M2–M4 thành task có acceptance criteria; chốt phạm vi vertical
-  slice đầu tiên.
-- **Output:** file này, mở rộng
+- **Status:** done
+- **Goal:** Chốt mô hình cây deck nhiều cấp, hoàn thiện review history và session
+  lifecycle, chốt các rule còn mở, và sửa mọi mâu thuẫn giữa các tài liệu. Không
+  tạo source code.
+- **Scope:** chỉ tài liệu, WBS và validation script. Ngoài phạm vi: Flutter
+  source, UI, Drift runtime schema, dependency mới, backend.
+- **Output:**
+  - `docs/business-rules.md` — thêm BR-55…BR-87, chính sách đánh số vĩnh viễn
+  - `docs/data-model.md` — viết lại: `root_deck_id`, `content_type`,
+    `review_kind`, session `status`/`end_reason`, 14 query bất biến
+  - `docs/use-cases.md` — UC-08 (xác lập `content_type`), UC-09 (di chuyển deck);
+    UC-02…07 cập nhật
+  - `docs/architecture.md` — AD-10 (cây deck), AD-11 (trạng thái tường minh)
+  - `docs/product.md`, `docs/README.md`, `CLAUDE.md`
+  - `.claude/skills/flutter-data-layer/references/persistence.md`
+  - `.claude/skills/flutter-workflow/scripts/check_docs.sh` — validation script
+  - `.claude/skills/flutter-workflow/scripts/verify_invariants.py` — self-test
+    cho 14 query bất biến, trích thẳng từ `data-model.md`
 - **Acceptance criteria:**
-  - [ ] M2–M4 chia tới task, mỗi task có acceptance criteria và dependency.
-  - [ ] M5 chốt phạm vi đúng luồng UC-05 (ôn tập), xuyên từ Drift tới màn hình.
-  - [ ] Milestone sau để ở mức feature — chia tới task lúc này chắc chắn phải
-        lập lại kế hoạch.
-- **Dependencies:** T1.2
-- **Tests required:** none
-- **Checklist phases:** 1.1, 1.2
+  - [x] Root deck chỉ tạo được deck con (BR-58, BR-59).
+  - [x] Sub-deck mới có `content_type = unset` (BR-60).
+  - [x] Lần tạo phần tử con đầu tiên xác lập `content_type` (BR-62).
+  - [x] Một deck không thể chứa đồng thời card và deck con (BR-65).
+  - [x] Cây deck hỗ trợ nhiều cấp; `COALESCE(parent_deck_id, id)` bị cấm và không
+        còn xuất hiện (BR-55, BR-57).
+  - [x] Cây deck không có cycle — có query phát hiện (BR-69).
+  - [x] Scheduler chỉ thuộc root và được descendant kế thừa (BR-05, BR-06).
+  - [x] `review_history` phân biệt `scheduled` và `relearning` bằng cột tường
+        minh (BR-75, BR-76).
+  - [x] `study_sessions` có lifecycle rõ ràng với ma trận `status` × `end_reason`
+        (BR-79…BR-86).
+  - [x] Không còn marker chưa xác nhận trong phạm vi MVP.
+  - [x] Các tài liệu không mâu thuẫn — audit ngữ nghĩa toàn bộ tham chiếu BR/AD.
+  - [x] Validation script chạy thành công.
+  - [x] Hai task T1.3 trùng đã bị xoá; `data-model.md` đã ra khỏi "Not written
+        yet"; progress summary đã sửa.
+- **Dependencies:** T1.2b
+- **Tests required:** `check_docs.sh` pass
+- **Checklist phases:** 0.3, 1.1, 1.2, 4.3, 11.1
 
-### T1.3 · WBS for M2–M5
+### T1.4 · Chia WBS chi tiết cho M2–M5
 
-- **Status:** todo
-- **Goal:** Break the first milestones into task-level detail.
-- **Output:** this file, extended
+- **Status:** todo — **việc tiếp theo, chưa thực hiện**
+- **Goal:** Chia M2–M4 thành task có acceptance criteria và dependency; chốt phạm
+  vi vertical slice đầu tiên.
+- **Scope:** chỉ file này. Không tạo source code.
+- **Output:** `docs/wbs.md`, mở rộng
 - **Acceptance criteria:**
-  - [ ] M2–M4 broken to tasks with acceptance criteria and dependencies.
-  - [ ] M5 scoped to one vertical slice that exercises database → screen.
-  - [ ] Later milestones left at feature granularity — planning them to task
-        level now guarantees replanning.
-- **Dependencies:** T1.2
-- **Tests required:** none
+  - [ ] M2–M4 chia tới task, mỗi task có goal, scope, output, acceptance
+        criteria, dependency và test yêu cầu.
+  - [ ] M5 chốt phạm vi đúng luồng UC-05, xuyên từ Drift tới màn hình.
+  - [ ] Milestone sau M5 để ở mức feature — chia tới task lúc này chắc chắn phải
+        lập lại kế hoạch sau khi M2 dạy vài điều.
+  - [ ] Không task ID nào trùng.
+- **Dependencies:** T1.3
+- **Tests required:** `check_docs.sh` pass
 - **Checklist phases:** 1.1, 1.2
 
 ---
+
+## Blocker
+
+| Blocker | Ảnh hưởng | Cách gỡ |
+|---|---|---|
+| `flutter` không có trong môi trường tạo tài liệu | M2 trở đi không chạy được `flutter create`, `pub get`, `build_runner`, `flutter analyze` | Cài Flutter SDK, và tạo SessionStart hook để phiên sau không phải cài lại |
+
+Blocker này **không** chặn T1.4 — đó là task chỉ sửa tài liệu.
 
 ## Deferred and descoped
 
 | Item | Decision | Reason | Revisit when |
 |---|---|---|---|
-| Flutter toolchain verification | deferred | `flutter` is not installed in the authoring environment; `flutter doctor` and a clean build could not be run | Phase 2.1, in an environment with Flutter |
+| Flutter toolchain verification | deferred | `flutter` chưa có trong môi trường; `flutter doctor` và build sạch chưa chạy được | Phase 2.1 |
+| Đưa deck con lên thành root deck | descoped khỏi MVP | Cần quyết định scheduler mới; là tính năng riêng chứ không phải phép di chuyển | Sau MVP (UC-09 A2) |
+| Media và tag | descoped khỏi MVP | Kéo theo lưu trữ file và đồng bộ file | Sau MVP; quy tắc reset và lưu trữ đã đặt sẵn (BR-41, AD-08) |
 
 ## Known technical debt
 
 | Item | Incurred in | Cost of leaving it | Planned repayment |
 |---|---|---|---|
-| `check_architecture.sh` has no automated test of its own | T0.1 | A regression in the checker silently stops enforcing boundaries | Add `test/tools/` fixtures running the script over known-good and known-bad trees, once `test/` exists (M6) |
-| `analysis_options.yaml` not yet applied | T0.1 | The lint set is written but unenforced until a project exists | Copy from `flutter-architecture/references/` during Phase 2.3 and confirm every listed rule is recognised by the analyzer version in use |
+| `check_architecture.sh` chưa có test tự động | T0.1 | Regression trong checker âm thầm ngừng enforce boundary | Fixture trong `test/tools/` khi `test/` tồn tại (M6) |
+| `analysis_options.yaml` chưa được áp dụng | T0.1 | Bộ lint đã viết nhưng chưa được enforce; nhiều khả năng có tên rule sai hoặc đã deprecated | Copy vào project ở Phase 2.3 và xác nhận từng rule được analyzer công nhận |
+| 14 query bất biến chưa chạy trên **dữ liệu người dùng thật** | T1.3 | Bất biến mới được verify trên fixture, chưa enforce trên DB sản xuất | Chạy `check_docs.sh --db <path>` trong test tích hợp khi Drift schema tồn tại (M4) |
+| Nội dung starter là fixture, không phải nội dung production | T1.3 | Không phát hành được với nội dung này | Tìm nguồn nội dung có bản quyền rõ ràng trước M8 (BR-87) |

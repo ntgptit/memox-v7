@@ -23,16 +23,38 @@ lib/core/database/
 ```sql
 -- tables/decks.drift
 CREATE TABLE decks (
-  id         TEXT     NOT NULL PRIMARY KEY,
-  name       TEXT     NOT NULL,
+  id             TEXT     NOT NULL PRIMARY KEY,
+  name           TEXT     NOT NULL,
+  parent_deck_id TEXT     NULL REFERENCES decks(id) ON DELETE CASCADE,
+  -- Denormalized root pointer. Every descendant carries the root's id; the root
+  -- carries its own. This exists because resolving the root by walking
+  -- parent_deck_id needs recursion, and the resolution sits inside the hottest
+  -- query in the app.
+  --
+  -- NEVER write COALESCE(parent_deck_id, id) to find the root. It means
+  -- "parent, or self if no parent", so at depth 3 it returns the level-2 deck.
+  -- It is correct for a one-level tree, which is exactly what makes it
+  -- dangerous — it works until someone nests one level deeper.
+  root_deck_id   TEXT     NOT NULL,
+  -- 'unset' | 'card' | 'deck'. A deck holds one kind of child, never both.
+  -- Set by the first child created, not chosen at creation time.
+  content_type   TEXT     NOT NULL,
   -- NULL means "belongs to the local profile". Nullable from day one so that
   -- adding auth later can backfill it without discarding offline-created data
   -- (AD-03).
-  owner_id   TEXT     NULL,
-  created_at DATETIME NOT NULL,
-  updated_at DATETIME NOT NULL
+  owner_id       TEXT     NULL,
+  created_at     DATETIME NOT NULL,
+  updated_at     DATETIME NOT NULL
 ) AS Deck;
+
+CREATE INDEX idx_decks_parent ON decks (parent_deck_id);
+CREATE INDEX idx_decks_root ON decks (root_deck_id);
 ```
+
+Moving a subtree has to rewrite `root_deck_id` for every node in it, inside one
+transaction. Missing a node produces a descendant pointing at the wrong root —
+silent corruption, because queries still run and merely return less than they
+should. `docs/data-model.md` carries the query that detects it.
 
 ```sql
 -- tables/cards.drift
@@ -87,22 +109,25 @@ Named queries live beside the tables and generate typed methods:
 
 ```sql
 -- queries/study.drift
+-- Both queries aggregate over the whole tree via root_deck_id, so they work at
+-- any nesting depth without recursion.
 cardsDueForReview:
 SELECT c.*, s.current_box AS current_box
 FROM cards c
 INNER JOIN card_review_states s ON s.card_id = c.id
-WHERE c.deck_id = :deckId
+INNER JOIN decks d ON d.id = c.deck_id
+WHERE d.root_deck_id = :rootDeckId
   AND (s.due_at IS NULL OR s.due_at <= :now)
 ORDER BY s.due_at ASC NULLS FIRST
 LIMIT :limit;
 
-dueCountPerDeck:
-SELECT d.id AS deck_id, COUNT(s.card_id) AS due_count
+dueCountPerRootDeck:
+SELECT d.root_deck_id AS root_deck_id, COUNT(s.card_id) AS due_count
 FROM decks d
 LEFT JOIN cards c ON c.deck_id = d.id
 LEFT JOIN card_review_states s
   ON s.card_id = c.id AND (s.due_at IS NULL OR s.due_at <= :now)
-GROUP BY d.id;
+GROUP BY d.root_deck_id;
 ```
 
 Both queries share one definition of "due". They must — a list screen counting

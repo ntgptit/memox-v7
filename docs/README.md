@@ -6,11 +6,19 @@
 |---|---|---|
 | [`checklist.md`](checklist.md) | The canonical 22-phase development plan | complete, stable |
 | [`wbs.md`](wbs.md) | Live progress ledger — the source of truth for what is done | active |
-| [`product.md`](product.md) | Problem, users, platform/data/auth decisions, **and MVP scope** | draft |
-| [`architecture.md`](architecture.md) | Architecture decisions AD-01…09 with reasoning | active |
-| [`use-cases.md`](use-cases.md) | UC-01…07 cho must-have MVP | draft |
-| [`business-rules.md`](business-rules.md) | BR-01…54: hai scheduler, reset/generation, starter template, validation, edge cases | draft |
-| [`data-model.md`](data-model.md) | Schema: decks (+sub-deck), cards, card_review_states, review_history, study_sessions, templates | draft |
+| [`product.md`](product.md) | Problem, users, platform/data/auth decisions, **and MVP scope** | **frozen for MVP** |
+| [`architecture.md`](architecture.md) | Architecture decisions AD-01…11 with reasoning | active |
+| [`use-cases.md`](use-cases.md) | UC-01…09 cho must-have MVP | **frozen for MVP** |
+| [`business-rules.md`](business-rules.md) | BR-01…87: cây deck, hai scheduler, review_kind, session lifecycle, reset/generation, starter template | **frozen for MVP** |
+| [`data-model.md`](data-model.md) | Schema + 14 câu query bất biến: decks (cây nhiều cấp), cards, card_review_states, review_history, study_sessions, templates | **frozen for MVP** |
+
+"Frozen for MVP" nghĩa là đặc tả đã chốt và code được viết theo nó. Đổi một tài
+liệu frozen là một quyết định có chủ đích, phải kèm cập nhật mọi tài liệu tham
+chiếu tới nó trong cùng commit — không phải một chỉnh sửa tiện tay.
+
+**ID là vĩnh viễn.** BR, AD và UC không bao giờ được đánh số lại; rule mới append
+vào số tiếp theo. Lần renumber trước đã làm hỏng tham chiếu ngầm mà không có gì
+báo lỗi — xem mục "Chính sách đánh số" trong `business-rules.md`.
 
 MVP scope lives inside `product.md` rather than a separate `mvp.md` — it is
 short, and splitting it would mean two files that must agree about the same
@@ -24,7 +32,6 @@ needed", which is worse than an obvious gap.
 
 | Document | Created during | Owning skill |
 |---|---|---|
-| `data-model.md` | Phase 11.1 | `flutter-data-layer` |
 | `api-spec.md` | Phase 10.2 — **not until the Spring Boot backend exists** (AD-05) | `flutter-data-layer` |
 | `design-system.md` | Phase 7 | `flutter-design-system` |
 | `testing-strategy.md` | Phase 15 | `flutter-testing` |

@@ -211,11 +211,18 @@ không phải chờ thời gian trôi.
 trong UI, controller, hay SQL query. Một số ngày trong câu `WHERE` là số ma thuật
 nằm ngoài tầm với của test thuật toán — và là chỗ nó sẽ lệch khỏi bảng thật.
 
-**Sub-deck kế thừa scheduler của root deck.** Sub-deck chỉ là cấu trúc phân cấp;
-nó **không** chọn scheduler riêng. Cột scheduler chỉ có giá trị trên root deck,
-sub-deck để NULL và tra ngược lên root. Cho sub-deck chọn riêng sẽ khiến một phiên
-ôn trải trên nhiều sub-deck phải hiển thị nhiều tập action cùng lúc — vô nghĩa với
-người dùng.
+**Scheduler thuộc về root deck; toàn bộ cây kế thừa.** Deck lồng được nhiều cấp
+(AD-10), và ở mọi cấp, descendant kế thừa `scheduler_type`, `scheduler_version`
+và `scheduler_generation` từ root. Cột scheduler chỉ có giá trị trên root; deck
+không phải root để NULL và tra qua `root_deck_id`.
+
+Cho deck con chọn riêng sẽ khiến một phiên ôn trải trên nhiều nhánh phải hiển thị
+nhiều tập action cùng lúc — vô nghĩa với người dùng, vì `forgotten`/`remembered`
+và `again`/`hard`/`good`/`easy` không quy đổi được cho nhau.
+
+Hệ quả khi di chuyển subtree giữa hai root khác scheduler: **chặn, hoặc yêu cầu
+reset tường minh** (BR-74). Không im lặng chuyển đổi state — không có ánh xạ nào
+có cơ sở giữa box và ease factor (BR-73).
 
 ---
 
@@ -301,6 +308,82 @@ không được tạo deck trùng. Cụ thể:
 asset JSON đóng gói theo app, đọc khi hiển thị danh sách starter deck. Nhưng khi
 đưa vào database, ranh giới giữa template gốc và bản sao của người dùng phải rõ
 ràng — đó là điều quan trọng, không phải việc nó nằm ở bảng hay ở file.
+
+---
+
+## AD-10 · Cây deck nhiều cấp, `root_deck_id`, và `content_type`
+
+**Quyết định.** Deck lồng được nhiều cấp. Root deck chỉ chứa deck con — không bao
+giờ chứa card trực tiếp. Mỗi deck không phải root mang `content_type` với ba giá
+trị `unset` / `card` / `deck`, xác lập bởi lần tạo phần tử con đầu tiên và sau đó
+không đổi trừ khi reset tường minh.
+
+### Vì sao `content_type` thay vì cho phép trộn
+
+Một deck vừa chứa card vừa chứa deck con nghe linh hoạt, nhưng nó làm hỏng mọi
+câu hỏi đơn giản về sau: "deck này có bao nhiêu card" phải trả lời theo hai
+nghĩa; màn hình deck phải render hai loại danh sách; phiên ôn phải quyết định có
+đi xuống nhánh con không. Ràng buộc "chỉ một loại" khiến mỗi màn hình có đúng một
+hình dạng.
+
+**Người dùng không chọn `content_type` khi tạo deck.** Bắt chọn trước là bắt quyết
+định khi chưa có thông tin — lúc tạo deck "Unit 5" người dùng chưa biết nó sẽ chứa
+card hay chia nhỏ tiếp. Lần tạo phần tử con đầu tiên tự nói lên điều đó, nên đó là
+lúc xác lập.
+
+**Xoá hết nội dung không đưa `content_type` về `unset`.** Tự động quay về nghe
+tiện nhưng khiến cấu trúc đổi âm thầm sau một thao tác xoá. Reset `content_type`
+là thao tác riêng, có xác nhận, chỉ khi deck rỗng (BR-68).
+
+### Vì sao `root_deck_id` chứ không phải tra ngược từng cấp
+
+Xác định root bằng cách đi ngược `parent_deck_id` cần đệ quy hoặc CTE, và **không
+diễn đạt được thành một điều kiện JOIN đơn giản** — mà JOIN đó nằm trong query
+nóng nhất của app (đếm card đến hạn theo deck).
+
+Biểu thức `COALESCE(parent_deck_id, id)` từng xuất hiện trong tài liệu này và
+**bị cấm** (BR-57): nó có nghĩa "cha, hoặc chính nó nếu không có cha", nên với
+deck ở cấp 3 nó trả về deck cấp 2 chứ không phải root. Với cây một cấp nó đúng, và
+đó chính là điều khiến nó nguy hiểm — nó chạy đúng cho đến khi ai đó tạo cấp thứ
+ba.
+
+`root_deck_id` là **denormalization có chủ đích**: root có `root_deck_id = id`,
+mọi descendant mang cùng giá trị. Tra root là một phép so sánh cột, không phải
+đệ quy.
+
+Cái giá phải trả, và nó là cái giá thật: **di chuyển subtree phải cập nhật
+`root_deck_id` cho toàn bộ subtree, trong một transaction** (BR-71). Bỏ sót một
+node là tạo ra descendant trỏ sai root — dữ liệu hỏng im lặng, vì query vẫn chạy
+và chỉ trả về kết quả thiếu. Validation phải kiểm tra được bất biến này (BR-72).
+
+**Cycle bị cấm** (BR-69) và không được di chuyển deck vào chính nó hoặc descendant
+của nó (BR-70). Một cycle khiến mọi phép duyệt cây thành vòng lặp vô hạn, và nó
+tạo ra được chỉ bằng một thao tác kéo-thả sai.
+
+---
+
+## AD-11 · Trạng thái là dữ liệu tường minh, không phải suy luận
+
+**Quyết định.** `review_history.review_kind` và `study_sessions.status` /
+`end_reason` được **lưu tường minh** tại thời điểm ghi. Cấm suy ra chúng bằng cách
+so sánh trạng thái trước và sau, hoặc bằng cách đoán từ dữ liệu khác.
+
+**Vì sao, cụ thể.** Suy luận `review_kind` nghe rất hợp lý: "trước và sau giống
+nhau thì là `relearning`". Nó sai ở đúng một trường hợp, và trường hợp đó không
+hiếm — lượt `scheduled` trên card đang ở box 8 trả lời `remembered` cũng có
+`previous_box == 8` và `next_box == 8` (BR-16). Suy luận sẽ gắn nhãn nó
+`relearning`, và mọi thống kê về sau đều lệch mà không có gì báo lỗi.
+
+Đây là một mẫu chung đáng nhận ra: **suy luận từ dữ liệu là đúng cho đến khi gặp
+ca biên, và ca biên trong dữ liệu lịch sử thì không sửa lại được.** Một cột đã ghi
+sai nhãn suốt sáu tháng không có cách nào tính lại, vì thông tin cần để tính đã
+không được ghi.
+
+Cùng lý do đó áp cho session: `abandoned` và `invalidated` đều là "session không
+`completed`", nhưng chúng nói hai chuyện khác nhau về sản phẩm — một cái là người
+dùng bỏ giữa chừng, một cái là hệ thống vô hiệu hoá. Gộp lại rồi đoán sau là mất
+vĩnh viễn sự phân biệt đó. `end_reason` giữ nguyên nguyên nhân thay vì để lại một
+mã lỗi chung.
 
 ---
 

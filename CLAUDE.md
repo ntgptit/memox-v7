@@ -26,10 +26,23 @@ and they are the ones most likely to be violated by accident:
 - **Android is the release target.** Web must keep building because it is the
   E2E channel (Flutter Web + Playwright), but it is not a production target.
   iOS is deferred.
-- **Scheduler is chosen per deck and locked after the first review.** MVP ships
-  both `eight_box` and `sm2`; every deck must pick one at creation. Sub-decks
-  inherit the root deck's scheduler and never choose their own. After the first
-  review the choice is locked — changing it requires Reset learning progress.
+- **Decks nest to any depth, and each holds one kind of thing.** A root deck
+  holds only sub-decks — never cards. A new sub-deck starts `content_type =
+  unset`; the first child created sets it to `card` or `deck`, and from then on
+  it holds only that. Emptying a deck does not reset the type; that is a separate
+  confirmed action. Resolve the root via `root_deck_id` — **never**
+  `COALESCE(parent_deck_id, id)`, which silently returns the wrong deck from the
+  third level down.
+- **Scheduler belongs to the root deck and is locked after the first review.**
+  MVP ships both `eight_box` and `sm2`; every root deck must pick one at
+  creation. Every descendant inherits type, version and generation. After the
+  first `scheduled` review the choice is locked — changing it requires Reset
+  learning progress. Moving a subtree under a root with a different scheduler or
+  generation is blocked, never silently converted.
+- **`review_kind` and session `status`/`end_reason` are stored, never inferred.**
+  Deriving `review_kind` by diffing before/after state is wrong for a `scheduled`
+  review of a box-8 card, and history written with the wrong label cannot be
+  recomputed later.
 - **The two schedulers have different action sets** — `eight_box` uses
   `forgotten`/`remembered`, `sm2` uses `again`/`hard`/`good`/`easy`. The review
   UI renders buttons from the scheduler's `supportedActions`; hardcoding four
