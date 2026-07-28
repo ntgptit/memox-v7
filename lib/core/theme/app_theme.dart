@@ -13,16 +13,41 @@ import 'app_typography.dart';
 /// would be a decision made without a screen to check it against, and it would
 /// still need revisiting when one exists.
 ThemeData buildLightTheme() => _buildTheme(
-  ColorScheme.fromSeed(seedColor: AppColors.seed),
+  ColorScheme.fromSeed(seedColor: AppColors.seed).copyWith(
+    // Surfaces and text are declared, not derived. `fromSeed` tints every
+    // neutral with the seed, and that lavender cast over the whole app is what
+    // made the previous palette read as dated. The seed still drives primary,
+    // secondary and the rest of the tonal ramp.
+    surface: AppColors.surfaceLight,
+    onSurface: AppColors.onSurfaceLight,
+    onSurfaceVariant: AppColors.onSurfaceVariantLight,
+    outline: AppColors.borderSubtleLight,
+    outlineVariant: AppColors.borderSubtleLight,
+  ),
   const AppSemanticColors.light(),
+  background: AppColors.backgroundLight,
 );
 
 ThemeData buildDarkTheme() => _buildTheme(
-  ColorScheme.fromSeed(seedColor: AppColors.seed, brightness: Brightness.dark),
+  ColorScheme.fromSeed(
+    seedColor: AppColors.seed,
+    brightness: Brightness.dark,
+  ).copyWith(
+    surface: AppColors.surfaceDark,
+    onSurface: AppColors.onSurfaceDark,
+    onSurfaceVariant: AppColors.onSurfaceVariantDark,
+    outline: AppColors.borderSubtleDark,
+    outlineVariant: AppColors.borderSubtleDark,
+  ),
   const AppSemanticColors.dark(),
+  background: AppColors.backgroundDark,
 );
 
-ThemeData _buildTheme(ColorScheme scheme, AppSemanticColors semantic) {
+ThemeData _buildTheme(
+  ColorScheme scheme,
+  AppSemanticColors semantic, {
+  required Color background,
+}) {
   final base = ThemeData(
     colorScheme: scheme,
     useMaterial3: true,
@@ -32,12 +57,14 @@ ThemeData _buildTheme(ColorScheme scheme, AppSemanticColors semantic) {
   );
 
   return base.copyWith(
-    scaffoldBackgroundColor: scheme.surface,
+    // The page sits a step below the card, so a card reads as a card without
+    // needing a shadow to say so.
+    scaffoldBackgroundColor: background,
     textTheme: AppTypography.buildTextTheme(base.textTheme),
     extensions: <ThemeExtension<Object?>>[semantic],
 
     appBarTheme: AppBarTheme(
-      backgroundColor: scheme.surface,
+      backgroundColor: background,
       foregroundColor: scheme.onSurface,
       // No tint on scroll: during a review the header must stay still, because
       // a colour shift behind the card reads as the card itself changing.
