@@ -1,15 +1,27 @@
 # Copy to the project root as analysis_options.yaml.
+# This file and the root copy are kept identical apart from these two lines.
 #
-# Two things to know before editing:
-#   1. There is deliberately NO `plugins: - custom_lint` block. custom_lint and
+# Three things to know before editing:
+#
+#   1. `linter: rules:` ENABLES a lint. `analyzer: errors:` only changes the
+#      SEVERITY of a diagnostic that is already being produced. A lint listed
+#      only under `errors:` never runs — the severity mapping applies to a
+#      diagnostic that is never generated. Every lint this project wants is
+#      therefore listed under `rules:`, and appears under `errors:` only to be
+#      promoted. Verified by probe: `prefer_const_constructors: error` alone
+#      reported nothing on a non-const constructor call; adding it to `rules:`
+#      made it fire.
+#
+#   2. There is deliberately NO `plugins: - custom_lint` block. custom_lint and
 #      riverpod_lint are descoped (see `Deferred and descoped` in docs/wbs.md):
 #      no published custom_lint supports analyzer >=10, which the generator
-#      stack requires. Do not add the block back — a plugin that is declared
-#      but not installed is silently ignored by the analyzer, which is worse
-#      than not configuring it, because the rules look active and never run.
-#      The Riverpod checks it used to provide are now owned by
-#      code-verification-guard (`python code-verification-guard-v2/guard/run.py check --ruleset memox-v7`).
-#   2. Rules promoted to `error` under `errors:` are what "analyzer clean"
+#      stack requires. Do not add it back — a plugin declared but not installed
+#      is silently ignored, which is worse than not configuring it, because the
+#      rules look active and never run. Those checks now belong to
+#      code-verification-guard:
+#      `python code-verification-guard-v2/guard/run.py check --project . --ruleset memox-v7`
+#
+#   3. Rules promoted to `error` under `errors:` are what "analyzer clean"
 #      means here. Demoting one is a project decision, not a local fix.
 
 include: package:flutter_lints/flutter.yaml
@@ -21,12 +33,14 @@ analyzer:
     strict-raw-types: true   # no bare List / Map / Future
 
   errors:
-    # Correctness — these are bugs, not style.
+    # --- Analyzer diagnostics (not lints — these need no `rules:` entry) ---
     invalid_annotation_target: ignore   # noisy false positives with freezed + json
     missing_required_param: error
     missing_return: error
     body_might_complete_normally: error
+    must_be_immutable: error            # @immutable class with a mutable field
 
+    # --- Severity promotion for lints enabled under `rules:` below ---
     # Async mistakes. Unawaited futures are the top source of "it worked
     # locally" race conditions, and of errors that vanish without a trace.
     unawaited_futures: error
@@ -56,6 +70,7 @@ analyzer:
   exclude:
     - "**/*.g.dart"
     - "**/*.freezed.dart"
+    - "**/*.drift.dart"
     - "**/*.mocks.dart"
     - "**/generated_plugin_registrant.dart"
     - "lib/l10n/generated/**"
@@ -63,46 +78,62 @@ analyzer:
 
 linter:
   rules:
-    # Immutability — state that can be mutated in place breaks Riverpod's
-    # change detection in ways that look like "the UI didn't update".
+    # --- Async ---
+    - unawaited_futures
+    - discarded_futures
+    - avoid_void_async
+    - unnecessary_await_in_return
+    - avoid_slow_async_io
+
+    # --- Error handling ---
+    - empty_catches
+    - avoid_catches_without_on_clauses
+    - only_throw_errors
+    - throw_in_finally
+
+    # --- Exhaustiveness. Matters for sealed-class state: without it a new
+    #     variant compiles fine and is silently unhandled at runtime. ---
+    - exhaustive_cases
+
+    # --- Immutability. State mutated in place breaks Riverpod's change
+    #     detection in ways that look like "the UI didn't update". ---
+    - prefer_const_constructors
+    - prefer_const_constructors_in_immutables
+    - prefer_const_declarations
+    - prefer_const_literals_to_create_immutables
+    - prefer_final_locals
+    - prefer_final_fields
     - prefer_final_in_for_each
     - avoid_setters_without_getters
-    - immutable_classes
 
-    # Control flow, matching the guard-clause style.
+    # --- Control flow, matching the guard-clause style ---
     - always_declare_return_types
     - avoid_bool_literals_in_conditional_expressions
     - curly_braces_in_flow_control_structures
     - no_leading_underscores_for_local_identifiers
     - prefer_null_aware_operators
     - unnecessary_null_checks
-    - use_if_null_to_convert_nulls_to_bools
 
-    # Exhaustiveness. Both matter for sealed-class state: without them a new
-    # variant compiles fine and is silently unhandled at runtime.
-    - exhaustive_cases
-    - avoid_slow_async_io
-
-    # Widgets and performance.
+    # --- Widgets and performance ---
     - use_key_in_widget_constructors
     - sized_box_for_whitespace
     - use_colored_box
     - use_decorated_box
     - avoid_unnecessary_containers
-    - prefer_const_constructors_in_immutables
+    - use_build_context_synchronously   # the context-after-await trap
 
-    # Naming and structure.
+    # --- Naming and structure ---
     - camel_case_types
     - file_names
     - library_prefixes
     - non_constant_identifier_names
     - constant_identifier_names
 
-    # Hygiene.
+    # --- Hygiene ---
+    - avoid_print
+    - avoid_dynamic_calls
     - avoid_redundant_argument_values
     - cancel_subscriptions
     - close_sinks
     - test_types_in_equals
-    - throw_in_finally
     - unnecessary_statements
-    - use_build_context_synchronously   # the context-after-await trap

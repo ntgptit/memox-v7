@@ -25,7 +25,7 @@ AD / UC (xem `business-rules.md`).
 |---|---|---|
 | M0 · Development harness | done | Skills, checklist và enforcement script đã có |
 | M1 · Product definition (Phase 0–1) | **done** | Đặc tả MVP đã frozen: AD-01…11, BR-01…87, UC-01…09, data model đầy đủ |
-| M2 · Project foundation (Phase 2–3, 6) | in-progress | M2.1 / M2.1a / M2.1b / M2.2 / **M2.2b done**. `custom_lint` descoped, thay bằng **guard `memox-v7`** — cổng chính, đã nối vào `dod_check.sh`. Flutter pin ở `.fvmrc`. Tiếp theo: M2.3 |
+| M2 · Project foundation (Phase 2–3, 6) | in-progress | M2.1 / M2.1a / M2.1b / M2.2 / M2.2b / **M2.3 done**. Bộ lint nghiêm ngặt đã áp và **kiểm chứng có hiệu lực**; `custom_lint` descoped, thay bằng guard `memox-v7`. Tiếp theo: **M2.4 · Localization ARB foundation** |
 | M3 · Architecture & design system (Phase 4–5, 7, 12–13) | todo | |
 | M4 · Router & Drift foundation (Phase 8, 11) | todo | **Phase 10 (networking) hoãn** — AD-01, AD-05 |
 | M5 · First vertical slice: luồng ôn tập (Phase 14) | todo | UC-05 |
@@ -525,7 +525,7 @@ và Web, analyzer sạch, code generation chạy được.
 
 ### M2.3 · analysis_options.yaml
 
-- **Status:** todo
+- **Status:** done
 - **Goal:** Áp bộ lint đã viết sẵn và xác nhận **từng rule** được analyzer công
   nhận.
 - **Scope:** copy `analysis_options.yaml` từ
@@ -539,17 +539,60 @@ và Web, analyzer sạch, code generation chạy được.
   `.claude/skills/flutter-architecture/references/analysis_options.yaml`
 - **Output:** `analysis_options.yaml` ở gốc project
 - **Acceptance criteria:**
-  - [ ] `flutter analyze` → 0 error, 0 warning.
-  - [ ] `flutter analyze` **không** in cảnh báo dạng
-        `unrecognized/removed lint rule` cho bất kỳ rule nào trong file.
-  - [ ] Không còn tham chiếu `custom_lint` trong `analysis_options.yaml` ở gốc
+  - [x] `flutter analyze` → 0 error, 0 warning. → `No issues found!`
+  - [x] `flutter analyze` **không** in cảnh báo dạng
+        `unrecognized/removed lint rule` cho bất kỳ rule nào trong file. → grep
+        `undefined_lint|deprecated_lint|unrecognized_error_code` không có kết quả
+  - [x] Không có khối `analyzer: plugins:` trong `analysis_options.yaml` ở gốc
         project — một plugin khai báo mà không cài được sẽ làm analyzer im lặng
-        bỏ qua, đúng kiểu "cấu hình trông như đang chạy nhưng không chạy".
-  - [ ] Mỗi rule bị bỏ so với bản trong skill được ghi vào WBS kèm lý do.
-  - [ ] Mục technical debt "analysis_options.yaml chưa được áp dụng" được đánh
+        bỏ qua, đúng kiểu "cấu hình trông như đang chạy nhưng không chạy". Hai
+        lần nhắc `custom_lint` còn lại đều nằm trong **comment cảnh báo đừng
+        thêm lại**, và được giữ có chủ đích vì đó chính là thứ chặn tái phạm.
+  - [x] `strict-casts`, `strict-inference`, `strict-raw-types` đều bật **và
+        được kiểm chứng là có hiệu lực**, không chỉ có mặt trong file.
+  - [x] Mỗi rule bị bỏ hoặc thay so với bản trong skill được ghi vào WBS kèm lý
+        do — xem bảng dưới.
+  - [x] Mục technical debt "analysis_options.yaml chưa được áp dụng" được đánh
         dấu đã trả.
+
+- **Phát hiện chính của task này — 11 rule chưa bao giờ chạy.** Bản reference
+  liệt kê phần lớn lint chỉ ở `analyzer: errors:`. Nhưng `errors:` chỉ **đổi mức
+  độ** của một chẩn đoán *đã được sinh ra*; nó **không bật** lint. Rule nào
+  `flutter_lints` không bật sẵn thì nằm im, và severity mapping áp lên một chẩn
+  đoán không bao giờ tồn tại.
+
+  Kiểm chứng trực tiếp: file chứa `SizedBox(child: Text('x'))` với
+  `prefer_const_constructors: error` trong `errors:` → `No issues found!`. Thêm
+  đúng rule đó vào `linter: rules:` → bắn ngay 2 lỗi.
+
+  Đây cùng một họ lỗi với bug `check_docs.sh` ở M2.1b và với plugin `custom_lint`
+  khai báo mà không cài: **cấu hình trông như đang chạy nhưng không chạy**. 11
+  rule bị ảnh hưởng, gồm `unawaited_futures`, `discarded_futures`,
+  `prefer_const_constructors`, `prefer_final_locals`, `avoid_dynamic_calls`,
+  `only_throw_errors`. Nay mọi lint đều nằm ở `rules:`, `errors:` chỉ để nâng mức.
+
+- **Rule đã thay hoặc loại bỏ:**
+
+  | Rule | Xử lý | Lý do |
+  |---|---|---|
+  | `immutable_classes` | **thay** bằng `must_be_immutable: error` | Không phải tên rule có thật — analyzer báo `undefined_lint`. `must_be_immutable` là chẩn đoán tương đương và đúng ý định ban đầu: class `@immutable` (mọi widget) có field mutable. Đã kiểm chứng nó bắn thật |
+  | `use_if_null_to_convert_nulls_to_bools` | **xoá** | Analyzer báo `deprecated_lint`, không có rule kế nhiệm |
+  | `exhaustive_cases` | **giữ** | Vẫn được nhận diện trên Dart 3.12.2; suýt bị rơi khi sắp xếp lại file, đã kiểm tra bằng cách diff danh sách rule giữa hai bản |
+
+- **Kiểm chứng cấu hình có hiệu lực** (không chỉ tồn tại trong file):
+
+  | Kiểm | Cách | Kết quả |
+  |---|---|---|
+  | analyzer có bắt mã lỗi lạ không | tiêm `totally_bogus_diagnostic_code` vào `errors:` | báo `unrecognized_error_code` → im lặng ở phần `errors:` là kiểm thật |
+  | `strict-casts` | bật/tắt cờ trên cùng một file `final int x = d;` | `true` → `invalid_assignment`; `false` → sạch |
+  | `strict-raw-types` | `List makeIt() => <int>[1];` | báo `strict_raw_type` |
+  | `prefer_const_constructors` | constructor không `const` | bắn sau khi thêm vào `rules:` |
+  | `avoid_print` · `empty_catches` · `must_be_immutable` | file vi phạm tương ứng | cả ba bắn đúng |
+
 - **Dependencies:** M2.2
-- **Tests required:** none — cấu hình lint; acceptance criteria đã là lệnh kiểm
+- **Tests required:** none — cấu hình lint; acceptance criteria đã là lệnh kiểm.
+  Ngoài ra đã kiểm chứng bằng tiêm lỗi như bảng trên, vì "analyze sạch" trên 3
+  file nguồn không phân biệt được cấu hình đúng với cấu hình chết
 - **Checklist phases:** 5.1
 
 ### M2.4 · Localization ARB foundation
@@ -1200,7 +1243,7 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 | Item | Incurred in | Cost of leaving it | Planned repayment |
 |---|---|---|---|
 | `check_architecture.sh` chưa có test tự động | T0.1 | Regression trong checker âm thầm ngừng enforce boundary | Fixture trong `test/tools/` khi `test/` tồn tại (M6) |
-| `analysis_options.yaml` chưa được áp dụng | T0.1 | Bộ lint đã viết nhưng chưa được enforce; nhiều khả năng có tên rule sai hoặc đã deprecated | Copy vào project ở Phase 2.3 và xác nhận từng rule được analyzer công nhận |
+| ~~`analysis_options.yaml` chưa được áp dụng~~ | T0.1 | Bộ lint đã viết nhưng chưa được enforce; nhiều khả năng có tên rule sai hoặc đã deprecated | **Đã trả ở M2.3.** Dự đoán đúng: `immutable_classes` không tồn tại, `use_if_null_to_convert_nulls_to_bools` đã deprecated. Nghiêm trọng hơn cả hai: 11 rule chỉ nằm ở `errors:` nên **chưa bao giờ chạy** — đã chuyển hết sang `linter: rules:` và kiểm chứng bằng tiêm lỗi |
 | 14 query bất biến chưa chạy trên **dữ liệu người dùng thật** | T1.3 | Bất biến mới được verify trên fixture, chưa enforce trên DB sản xuất | Chạy `check_docs.sh --db <path>` trong test tích hợp khi Drift schema tồn tại (M4) |
 | Pin Flutter ở `.fvmrc` **khai báo** chứ không **cưỡng chế** | M2.2 | Chạy `flutter` trực tiếp trên máy có version khác vẫn build được và không cảnh báo. Đây đúng là lỗi đã xảy ra: M2.1 chạy 3.44.8, phiên sau khởi động trên 3.44.6, không có gì phát hiện ra | Thêm một check so `flutter --version` với `.fvmrc` vào `dod_check.sh`, và dùng `flutter-version-file: .fvmrc` ở job CI của M7 |
 | ~~7 file skill vẫn bảo chạy `dart run custom_lint`~~ | M2.2 | Skill vẫn hướng dẫn cài và chạy một package không cài được; phiên sau sẽ tin skill và loay hoay | **Đã trả ở M2.2b.** Cả 7 file đã trỏ sang guard. `docs/checklist.md` **cố ý giữ nguyên**: nó `frozen for MVP`, và mục "Ngoài phạm vi: mọi quyết định riêng của memox" nói rõ nó mô tả quy trình 22 phase chung — `custom_lint` ở đó là khuyến nghị Flutter phổ thông, còn quyết định riêng của memox sống ở file này (§5 canonical location) |

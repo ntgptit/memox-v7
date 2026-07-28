@@ -1,28 +1,138 @@
-# This file configures the analyzer, which statically analyzes Dart code to
-# check for errors, warnings, and lints.
+# Analyzer configuration for memox-v7.
 #
-# The issues identified by the analyzer are surfaced in the UI of Dart-enabled
-# IDEs (https://dart.dev/tools#ides-and-editors). The analyzer can also be
-# invoked from the command line by running `flutter analyze`.
+# Three things to know before editing:
+#
+#   1. `linter: rules:` ENABLES a lint. `analyzer: errors:` only changes the
+#      SEVERITY of a diagnostic that is already being produced. A lint listed
+#      only under `errors:` never runs — the severity mapping applies to a
+#      diagnostic that is never generated. Every lint this project wants is
+#      therefore listed under `rules:`, and appears under `errors:` only to be
+#      promoted. Verified by probe: `prefer_const_constructors: error` alone
+#      reported nothing on a non-const constructor call; adding it to `rules:`
+#      made it fire.
+#
+#   2. There is deliberately NO `plugins: - custom_lint` block. custom_lint and
+#      riverpod_lint are descoped (see `Deferred and descoped` in docs/wbs.md):
+#      no published custom_lint supports analyzer >=10, which the generator
+#      stack requires. Do not add it back — a plugin declared but not installed
+#      is silently ignored, which is worse than not configuring it, because the
+#      rules look active and never run. Those checks now belong to
+#      code-verification-guard:
+#      `python code-verification-guard-v2/guard/run.py check --project . --ruleset memox-v7`
+#
+#   3. Rules promoted to `error` under `errors:` are what "analyzer clean"
+#      means here. Demoting one is a project decision, not a local fix.
 
-# The following line activates a set of recommended lints for Flutter apps,
-# packages, and plugins designed to encourage good coding practices.
 include: package:flutter_lints/flutter.yaml
 
-linter:
-  # The lint rules applied to this project can be customized in the
-  # section below to disable rules from the `package:flutter_lints/flutter.yaml`
-  # included above or to enable additional rules. A list of all available lints
-  # and their documentation is published at https://dart.dev/lints.
-  #
-  # Instead of disabling a lint rule for the entire project in the
-  # section below, it can also be suppressed for a single line of code
-  # or a specific dart file by using the `// ignore: name_of_lint` and
-  # `// ignore_for_file: name_of_lint` syntax on the line or in the file
-  # producing the lint.
-  rules:
-    # avoid_print: false  # Uncomment to disable the `avoid_print` rule
-    # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
+analyzer:
+  language:
+    strict-casts: true       # no implicit downcast from dynamic
+    strict-inference: true   # no silently-inferred dynamic
+    strict-raw-types: true   # no bare List / Map / Future
 
-# Additional information about this file can be found at
-# https://dart.dev/guides/language/analysis-options
+  errors:
+    # --- Analyzer diagnostics (not lints — these need no `rules:` entry) ---
+    invalid_annotation_target: ignore   # noisy false positives with freezed + json
+    missing_required_param: error
+    missing_return: error
+    body_might_complete_normally: error
+    must_be_immutable: error            # @immutable class with a mutable field
+
+    # --- Severity promotion for lints enabled under `rules:` below ---
+    # Async mistakes. Unawaited futures are the top source of "it worked
+    # locally" race conditions, and of errors that vanish without a trace.
+    unawaited_futures: error
+    discarded_futures: error
+    avoid_void_async: error
+    unnecessary_await_in_return: warning
+
+    # Error handling. A swallowed exception is a defect that reports as
+    # "nothing happened", which is the hardest kind to diagnose.
+    empty_catches: error
+    avoid_catches_without_on_clauses: warning
+    only_throw_errors: error
+
+    # Style rules the project treats as binding.
+    prefer_const_constructors: error
+    prefer_const_declarations: error
+    prefer_const_literals_to_create_immutables: error
+    prefer_final_locals: error
+    prefer_final_fields: error
+    avoid_print: error
+    avoid_dynamic_calls: error
+
+    # Deliberately relaxed.
+    lines_longer_than_80_chars: ignore
+    public_member_api_docs: ignore
+
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "**/*.drift.dart"
+    - "**/*.mocks.dart"
+    - "**/generated_plugin_registrant.dart"
+    - "lib/l10n/generated/**"
+    - "build/**"
+
+linter:
+  rules:
+    # --- Async ---
+    - unawaited_futures
+    - discarded_futures
+    - avoid_void_async
+    - unnecessary_await_in_return
+    - avoid_slow_async_io
+
+    # --- Error handling ---
+    - empty_catches
+    - avoid_catches_without_on_clauses
+    - only_throw_errors
+    - throw_in_finally
+
+    # --- Exhaustiveness. Matters for sealed-class state: without it a new
+    #     variant compiles fine and is silently unhandled at runtime. ---
+    - exhaustive_cases
+
+    # --- Immutability. State mutated in place breaks Riverpod's change
+    #     detection in ways that look like "the UI didn't update". ---
+    - prefer_const_constructors
+    - prefer_const_constructors_in_immutables
+    - prefer_const_declarations
+    - prefer_const_literals_to_create_immutables
+    - prefer_final_locals
+    - prefer_final_fields
+    - prefer_final_in_for_each
+    - avoid_setters_without_getters
+
+    # --- Control flow, matching the guard-clause style ---
+    - always_declare_return_types
+    - avoid_bool_literals_in_conditional_expressions
+    - curly_braces_in_flow_control_structures
+    - no_leading_underscores_for_local_identifiers
+    - prefer_null_aware_operators
+    - unnecessary_null_checks
+
+    # --- Widgets and performance ---
+    - use_key_in_widget_constructors
+    - sized_box_for_whitespace
+    - use_colored_box
+    - use_decorated_box
+    - avoid_unnecessary_containers
+    - use_build_context_synchronously   # the context-after-await trap
+
+    # --- Naming and structure ---
+    - camel_case_types
+    - file_names
+    - library_prefixes
+    - non_constant_identifier_names
+    - constant_identifier_names
+
+    # --- Hygiene ---
+    - avoid_print
+    - avoid_dynamic_calls
+    - avoid_redundant_argument_values
+    - cancel_subscriptions
+    - close_sinks
+    - test_types_in_equals
+    - unnecessary_statements
