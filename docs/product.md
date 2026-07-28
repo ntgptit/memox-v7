@@ -44,16 +44,22 @@ kênh E2E.
 
 | Data | Why sensitive | Protection |
 |---|---|---|
-| Nội dung deck/card người dùng tạo | Dữ liệu cá nhân, có thể chứa thông tin riêng tư | Chỉ nằm trên thiết bị ở giai đoạn MVP. Không log nội dung card ở bất kỳ level nào |
-| Lịch sử ôn tập | Suy ra được thói quen sử dụng | Không gửi ra ngoài ở MVP; không đưa vào analytics |
-| Auth token | — | Chưa tồn tại ở MVP. Khi có backend: `flutter_secure_storage`, xoá khi logout |
+| Nội dung deck và flashcard người dùng tạo | Dữ liệu cá nhân | Chỉ trên thiết bị ở MVP. **Không log nội dung ở bất kỳ level nào** |
+| Ghi chú | Dữ liệu cá nhân | Như trên |
+| Lịch sử học (`review_history`) | Suy ra được thói quen và thời gian sử dụng | Không gửi ra ngoài ở MVP; không đưa vào analytics |
+| File import | Có thể chứa nội dung ngoài phạm vi app | Xử lý trong bộ nhớ ứng dụng; không để lại bản sao ở thư mục dùng chung |
+| Hình ảnh, audio | Media cá nhân | Lưu trong **thư mục riêng của ứng dụng**, không phải bộ nhớ dùng chung |
+| Dữ liệu backup / export | Chứa toàn bộ những thứ trên | **Chỉ tạo khi người dùng chủ động yêu cầu** — không tự động, không chạy nền |
+| Email, access token, refresh token | Định danh và quyền truy cập | Chưa tồn tại ở MVP. Khi có backend: `flutter_secure_storage`, **không** lưu trong Drift, không xuất hiện trong log, xoá khi logout |
 
-Ở MVP không có dữ liệu rời khỏi thiết bị, nên rủi ro chủ yếu là **log**. Nguyên
-tắc: không log nội dung card, kể cả ở `debug`. Log ID thì được.
+Ở MVP không có dữ liệu rời khỏi thiết bị, nên rủi ro chủ yếu là **log** — và đó
+là chỗ dễ vi phạm nhất, vì log nội dung là phản xạ tự nhiên khi debug. Vì thế nó
+là quy tắc (BR-32), không phải sự cẩn thận.
 
-**Chưa cần** mã hoá database ở MVP — dữ liệu học từ vựng không đủ nhạy cảm để
-trả giá bằng độ phức tạp của SQLCipher. Đây là quyết định cần xem lại nếu sau
-này app lưu ghi chú cá nhân tự do.
+**Chưa mã hoá database ở MVP** — dữ liệu học từ vựng không đủ nhạy cảm để trả giá
+bằng độ phức tạp của SQLCipher. Nhưng việc mở kết nối database nằm sau một chỗ
+duy nhất, để bổ sung mã hoá sau là sửa một hàm (AD-08). Cần xem lại quyết định
+này nếu app hỗ trợ ghi chú cá nhân tự do hoặc tài liệu công việc.
 
 ---
 
@@ -115,29 +121,44 @@ trạng thái người dùng gặp thường xuyên nhất sau vài tuần).
 
 ## Quyết định đã chốt (2026-07-28)
 
-**Thuật toán SRS — người dùng chọn được, có hai lựa chọn:**
+**Thuật toán SRS: hai lựa chọn, chọn theo deck.** MVP hỗ trợ `eight_box` và
+`sm2`. Mỗi deck **bắt buộc chọn một** khi tạo. Sub-deck kế thừa scheduler của
+root deck và không chọn riêng.
 
-- **8-box** (biến thể Leitner 8 hộp) — **làm trước, là mặc định của MVP**.
-- **SM-2** — làm sau, không thuộc MVP.
+**Scheduler bị khoá sau lượt review đầu tiên.** Trước đó đổi tự do; sau đó muốn
+đổi phải **Reset learning progress**. Lý do: đổi thuật toán giữa chừng đặt ra
+những câu hỏi không có câu trả lời trung thực — box 5 tương ứng ease factor nào,
+history theo luật cũ còn giá trị gì. Mọi ánh xạ đều là bịa đặt. Khoá-và-reset
+thừa nhận điều đó thẳng thắn và để người dùng biết rõ mình đánh đổi cái gì.
 
-Đây là lý do duy nhất trong dự án đủ mạnh để tạo abstraction ngay từ đầu dù chỉ
-có một implementation: implementation thứ hai đã được đặc tả, không phải phỏng
-đoán. Xem AD-06.
+**Reset giữ nguyên** deck, sub-deck, flashcard, media, tag và nội dung; **xoá**
+lịch ôn, ngày đến hạn, box/ease factor/interval, trạng thái thành thạo và phiên
+đang dở. Review history cũ được giữ để tham khảo nhưng không dùng cho chu kỳ mới.
+Mỗi deck có `scheduler_generation` tăng sau mỗi lần reset, và kết quả từ session
+thuộc generation cũ bị từ chối. Xem AD-09.
 
-**Thang đánh giá: 4 mức — Again / Hard / Good / Easy**, dùng chung cho cả hai
-thuật toán. Lưu ý 8-box theo truyền thống chỉ có đúng/sai, nên cách 4 mức ánh xạ
-sang chuyển hộp là một quyết định thiết kế, không phải mặc định — xem BR-10.
+**Hai scheduler có hai tập action khác nhau** — đây là điểm dễ làm sai nhất:
 
-**Nội dung: có bộ deck dựng sẵn tặng người dùng.** Đóng gói theo app, chèn vào
-lần chạy đầu. Sau khi chèn, chúng thuộc về người dùng: sửa được, xoá được. Xem
-AD-07 và UC-01.
+| Scheduler | Action |
+|---|---|
+| `eight_box` | `forgotten`, `remembered` |
+| `sm2` | `again`, `hard`, `good`, `easy` |
 
-Hệ quả lên MVP scope: **M6 (deck quà tặng) trở thành must-have**, vì nó là thứ
-người dùng thấy đầu tiên và nó thay đổi hoàn toàn màn hình mở app lần đầu.
+UI phải render nút từ `supportedActions` của scheduler thuộc deck, không hardcode.
+Mỗi lượt đánh giá — kể cả lượt luyện lại trong phiên — được ghi vào review
+history kèm scheduler type và generation.
+
+**Nội dung: starter deck quản lý như template.** Người dùng chọn dùng thì app tạo
+một **bản sao** vào dữ liệu cá nhân; bản sao là deck bình thường. Cập nhật
+template ở bản app mới không ghi đè nội dung người dùng đã sửa. Xem AD-07 và
+UC-01.
+
+Hệ quả lên MVP scope: **M6 trở thành must-have**, vì thư viện starter là thứ
+người dùng thấy đầu tiên và nó định hình toàn bộ trải nghiệm mở app lần đầu.
 
 | # | Feature | Done when |
 |---|---|---|
-| M6 | Deck dựng sẵn được tặng lúc khởi động lần đầu | Cài mới → mở app → thấy deck có sẵn, ôn được ngay mà không cần tạo gì. Xoá deck quà rồi cập nhật app thì deck đó **không** quay lại |
+| M6 | Thư viện starter deck với sao chép vào dữ liệu cá nhân | Cài mới → mở app → chọn một starter deck → ôn được ngay. Sửa bản sao rồi cập nhật app lên version template mới thì nội dung đã sửa **không** bị ghi đè. Mở lại app **không** tạo deck trùng |
 
-Import/export CSV (N1) vẫn ở nice-to-have — deck quà đã giải quyết vấn đề "app
-trống lúc mới cài", vốn là lý do chính khiến N1 hấp dẫn.
+Import/export CSV (N1) vẫn ở nice-to-have — thư viện starter đã giải quyết vấn đề
+"app trống lúc mới cài", vốn là lý do chính khiến N1 hấp dẫn.

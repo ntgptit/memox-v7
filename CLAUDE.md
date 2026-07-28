@@ -8,7 +8,7 @@ Flutter application, rebuilt from scratch against `docs/checklist.md`.
 ## What memox is, and what it is not yet
 
 Flashcard / spaced-repetition vocabulary app. The decisions below are settled;
-the reasoning and the full consequences are in `docs/architecture.md` (AD-01…06),
+the reasoning and the full consequences are in `docs/architecture.md` (AD-01…08),
 and they are the ones most likely to be violated by accident:
 
 - **Local-first, backend-ready.** Drift is the source of truth; repositories read
@@ -26,9 +26,33 @@ and they are the ones most likely to be violated by accident:
 - **Android is the release target.** Web must keep building because it is the
   E2E channel (Flutter Web + Playwright), but it is not a production target.
   iOS is deferred.
+- **Scheduler is chosen per deck and locked after the first review.** MVP ships
+  both `eight_box` and `sm2`; every deck must pick one at creation. Sub-decks
+  inherit the root deck's scheduler and never choose their own. After the first
+  review the choice is locked — changing it requires Reset learning progress.
+- **The two schedulers have different action sets** — `eight_box` uses
+  `forgotten`/`remembered`, `sm2` uses `again`/`hard`/`good`/`easy`. The review
+  UI renders buttons from the scheduler's `supportedActions`; hardcoding four
+  buttons is wrong for half the decks.
+- **`scheduler_generation` is on the deck, the card state, the session and every
+  history row.** Reset increments it. A review written from a session whose
+  generation is stale must be rejected, not applied — otherwise a reset silently
+  un-resets itself.
+- **Content, schedule and history are three tables.** `cards` holds content only
+  — no SRS columns, no generation; content survives every reset.
+  `card_review_states` holds the schedule, `review_history` is append-only and is
+  kept across resets. Editing a card must never touch a review state.
+- **Reset and scheduler change run in one Drift transaction.** A deck must never
+  have two active schedulers, or card state from two generations.
+- **Starter decks are templates; users get a copy.** Template updates never
+  overwrite a user's copy, and re-opening the app never creates a duplicate.
+- **Private data is broader than it looks:** card content, notes, learning
+  history, imports, media and backups. Never log card content at any level.
+  Media lives in the app-private directory. Export only on explicit request.
 
 Deliberately deferred, and cheap to add later because migration testing is in
-place from the start: sync bookkeeping columns (`isPendingSync`, `version`).
+place from the start: sync bookkeeping columns (`isPendingSync`, `version`),
+SM-2 parameters, database encryption.
 
 ## How work is driven here
 

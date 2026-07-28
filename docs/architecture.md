@@ -150,87 +150,191 @@ retrofit.
 
 ---
 
-## AD-06 · Scheduler là strategy thuần khiết, chọn được theo deck
+## AD-06 · Scheduler chọn theo deck, khoá sau lượt review đầu tiên
 
-**Quyết định.** Logic xếp lịch ôn tập là một **strategy** ở `domain/`, thuần
-khiết: nhận trạng thái card hiện tại + đánh giá của người dùng + thời điểm hiện
-tại, trả về trạng thái card mới. Không đọc database, không gọi `DateTime.now()`.
+**Quyết định.** MVP hỗ trợ **hai** scheduler: `eight_box` và `sm2`. Mỗi deck
+**bắt buộc chọn một** khi tạo. Lựa chọn ở cấp deck, không phải cấp app.
+
+Scheduler đổi trực tiếp được **chừng nào deck chưa có lượt review nào**. Sau lượt
+review đầu tiên, `scheduler_type`, `scheduler_version` và `scheduler_config` của
+deck bị **khoá**. Muốn đổi sau đó, người dùng phải thực hiện **Reset learning
+progress** (AD-09).
 
 ```dart
 // domain/scheduler/review_scheduler.dart
 abstract interface class ReviewScheduler {
-  SchedulingState next({
-    required SchedulingState current,
-    required ReviewRating rating,
+  SchedulerType get type;
+  int get version;
+
+  /// Tập action mà scheduler này chấp nhận. UI render nút từ đây,
+  /// không hardcode — hai scheduler có hai tập action khác nhau.
+  List<ReviewAction> get supportedActions;
+
+  ReviewOutcome next({
+    required ReviewState current,
+    required ReviewAction action,
     required DateTime now,
   });
 }
 ```
 
-Hai implementation: `EightBoxScheduler` (MVP) và `Sm2Scheduler` (sau MVP). Người
-dùng chọn theo **deck**, không phải theo app — deck từ vựng cơ bản và deck ngữ
-pháp phức tạp hợp với chế độ khác nhau, và lưu ở deck chỉ tốn một cột.
+**Hai scheduler có hai tập action khác nhau, và đây là điểm dễ làm sai nhất:**
 
-**Vì sao đây là ngoại lệ hợp lệ của quy tắc "không tạo interface cho một
-implementation".** CLAUDE.md cấm bọc interface quanh thứ không có nhu cầu thay
-thế. Ở đây implementation thứ hai **đã được đặc tả**, không phải phỏng đoán —
-người dùng chọn được là một yêu cầu sản phẩm, không phải khả năng tưởng tượng.
-Nếu SM-2 chỉ là "có thể sau này làm", quyết định đúng sẽ là viết thẳng 8-box
-không interface.
+| Scheduler | Action |
+|---|---|
+| `eight_box` | `forgotten`, `remembered` |
+| `sm2` | `again`, `hard`, `good`, `easy` |
 
-**Vì sao thuần khiết.** Đây là phần logic duy nhất trong app thực sự phức tạp và
-bắt buộc phải đúng — sai thuật toán thì người dùng không nhận ra ngay, chỉ thấy
-"app không hiệu quả" sau vài tuần. Hàm thuần khiết nghĩa là test được toàn bộ ma
-trận (8 hộp × 4 mức đánh giá = 32 trường hợp) mà không cần database, không cần
-widget, không phải chờ thời gian trôi.
+UI **phải** render nút đánh giá từ `supportedActions` của scheduler thuộc deck.
+Không hardcode bốn nút, không hiện nút mà scheduler hiện tại không hiểu. Một màn
+ôn tập hardcode 4 nút sẽ vừa sai với 8-box vừa khiến việc thêm scheduler thứ ba
+phải sửa UI — đúng thứ abstraction này tồn tại để tránh.
 
-Truyền `DateTime now` vào như tham số là điều kiện để test "card đến hạn sau 64
-ngày" trong một mili giây.
+**Vì sao khoá sau review đầu tiên thay vì cho đổi tự do.** Đổi thuật toán giữa
+chừng đặt ra những câu hỏi không có câu trả lời trung thực: box 5 tương ứng ease
+factor nào, review history theo luật cũ còn giá trị gì cho chu kỳ mới, đổi ngược
+lại có khôi phục trạng thái cũ không. Mọi ánh xạ đều là bịa đặt và nó âm thầm làm
+hỏng lịch ôn.
 
-**Trạng thái lưu ở đâu.** `due_at` là **cột chung**, độc lập thuật toán — vì đó
-là cột duy nhất mà query nóng ("card nào đến hạn") cần, và nó phải được đánh
-index. Tham số riêng của từng thuật toán nằm ở các cột nullable riêng:
+Khoá-và-reset thừa nhận điều đó thẳng thắn: trước lượt review đầu, không có gì để
+mất nên đổi tự do; sau đó, đổi nghĩa là bắt đầu lại, và người dùng biết rõ điều
+mình đánh đổi.
 
-| Cột | Thuộc về | Ghi chú |
-|---|---|---|
-| `due_at` | chung | index cùng `deck_id`; NULL = card mới |
-| `box` | 8-box | 1..8 |
-| `ease_factor`, `interval_days`, `repetitions` | SM-2 | NULL khi deck dùng 8-box |
+**Vì sao thuần khiết.** `next()` không đọc database, không gọi `DateTime.now()` —
+`now` truyền vào như tham số. Đây là phần logic duy nhất trong app thực sự phức
+tạp và bắt buộc phải đúng: sai thuật toán thì người dùng không nhận ra ngay, chỉ
+thấy "app không hiệu quả" sau vài tuần. Thuần khiết nghĩa là test toàn bộ ma trận
+của cả hai scheduler trong vài mili giây, không cần database, không cần widget,
+không phải chờ thời gian trôi.
 
-**Phương án đã cân nhắc và loại:** gói trạng thái vào một cột JSON. Linh hoạt
-hơn, nhưng mất type-safety và không query được — mâu thuẫn trực tiếp với lý do
-chọn AD-02. Vài cột NULL là cái giá rẻ hơn nhiều.
+**Bảng interval và tham số thuật toán nằm ở scheduler config**, không hardcode
+trong UI, controller, hay SQL query. Một số ngày trong câu `WHERE` là số ma thuật
+nằm ngoài tầm với của test thuật toán — và là chỗ nó sẽ lệch khỏi bảng thật.
 
-**Đổi thuật toán trên deck đã có tiến độ:** giữ nguyên `due_at`, reset tham số
-riêng về mặc định. Xem BR-13 — ánh xạ box ↔ ease factor là bịa đặt, và nó âm
-thầm làm hỏng lịch ôn của người dùng.
+**Sub-deck kế thừa scheduler của root deck.** Sub-deck chỉ là cấu trúc phân cấp;
+nó **không** chọn scheduler riêng. Cột scheduler chỉ có giá trị trên root deck,
+sub-deck để NULL và tra ngược lên root. Cho sub-deck chọn riêng sẽ khiến một phiên
+ôn trải trên nhiều sub-deck phải hiển thị nhiều tập action cùng lúc — vô nghĩa với
+người dùng.
 
 ---
 
-## AD-07 · Deck quà tặng đóng gói theo app, chèn một lần
+## AD-09 · Reset learning progress và scheduler generation
 
-**Quyết định.** Bộ deck dựng sẵn nằm trong `assets/seed/` dạng JSON, chèn vào DB
-ở lần chạy đầu. Sau khi chèn, chúng là dữ liệu bình thường của người dùng: sửa
-được, xoá được, ôn được như deck tự tạo.
+**Quyết định.** Đổi scheduler trên deck đã có review chỉ thực hiện được qua thao
+tác **Reset learning progress**. Mỗi deck có `scheduler_generation`, tăng sau mỗi
+lần reset.
 
-**Vì sao chèn vào DB thay vì đọc thẳng từ asset.** Nếu deck quà là read-only đọc
-từ asset, chúng phải là một loại deck thứ hai trong toàn bộ code — repository
-phải hợp nhất hai nguồn, xoá và sửa phải có nhánh riêng, query "card đến hạn"
-phải chạy hai lần. Chèn một lần rồi coi như dữ liệu thường giữ cho **chỉ có một
-loại deck** trong hệ thống.
+**Reset giữ gì và xoá gì:**
 
-**Cái bẫy phải tránh, và nó không hiển nhiên:** bản cập nhật app sau thêm deck
-quà mới. Cách làm ngây thơ — "chèn seed nếu chưa có" — sẽ **chèn lại deck mà
-người dùng đã cố tình xoá**. Người dùng xoá nó lần nữa, bản cập nhật sau lại chèn
-lại. Đó là lỗi làm người dùng mất niềm tin vào việc xoá.
+| Giữ nguyên | Xoá / đặt lại |
+|---|---|
+| Deck và sub-deck | Active scheduler state của mọi card |
+| Flashcard và nội dung | `due_at`, interval |
+| Media, tag | `current_box`, ease factor, repetitions |
+| Review history cũ | Mastery state |
+| | Session đang dở |
 
-Cách làm: bảng `applied_seeds(seed_id TEXT PRIMARY KEY, applied_at DATETIME)`.
-Mỗi deck quà có `seed_id` cố định. Khởi động: chỉ chèn seed nào **chưa từng**
-xuất hiện trong `applied_seeds`, và ghi nhận ngay cả khi sau đó người dùng xoá.
-Đã tặng một lần là đã tặng — không tặng lại.
+**Review history cũ được giữ lại để tham khảo, nhưng không được dùng cho chu kỳ
+mới.** Đó chính là việc `scheduler_generation` làm: mỗi dòng history, mỗi card
+schedule và mỗi study session đều mang generation, nên "thuộc chu kỳ nào" là dữ
+kiện có trong dữ liệu chứ không phải quy ước ngầm.
 
-Việc chèn seed chạy trong **một transaction** cùng với ghi `applied_seeds`, để
-app bị kill giữa chừng không để lại nửa bộ deck và một cờ đã đánh dấu.
+**Không chấp nhận kết quả từ session thuộc generation cũ.** Tình huống thật: người
+dùng mở phiên ôn, để đó, vào Settings reset deck, rồi quay lại phiên cũ và bấm
+đánh giá. Nếu không kiểm tra generation, kết quả đó sẽ ghi đè trạng thái vừa được
+làm mới. Vì thế mọi thao tác ghi đánh giá phải so `session.scheduler_generation`
+với generation hiện tại của deck và **từ chối** nếu lệch.
+
+**Bất biến phải giữ:**
+
+1. Một deck có đúng **một** active scheduler tại một thời điểm.
+2. Toàn bộ card state của một deck thuộc **cùng một** generation — generation hiện
+   tại của deck.
+
+**Reset và đổi scheduler chạy trong một Drift transaction duy nhất.** Không có
+trạng thái trung gian nào mà app bị kill có thể để lại. Nửa vời ở đây nghĩa là
+một deck có card thuộc hai generation, hoặc scheduler mới với card state theo luật
+cũ — cả hai đều là dữ liệu hỏng không tự phục hồi, và tệ hơn nhiều so với việc
+reset thất bại sạch sẽ.
+
+Sau reset, deck lại ở trạng thái "chưa có review", nên scheduler mở khoá và chọn
+lại được — đó là cơ chế duy nhất để đổi, và nó rơi ra tự nhiên từ định nghĩa của
+khoá.
+
+---
+
+## AD-07 · Starter deck là template, người dùng nhận bản sao
+
+**Quyết định.** Deck dựng sẵn là **template**, quản lý tách biệt với deck thuộc
+sở hữu người dùng. Khi người dùng chọn dùng một starter deck, app **tạo một bản
+sao** vào dữ liệu cá nhân. Bản sao đó sau đấy là deck bình thường: sửa, xoá, học
+như mọi deck khác.
+
+Template mang metadata ổn định: `template_id`, `version`, `locale`, `title`,
+`content_source`. Deck bản sao giữ `source_template_id` và
+`source_template_version` để biết nó bắt nguồn từ đâu và từ phiên bản nào.
+
+**Vì sao copy-on-use thay vì chèn thẳng lúc khởi động.**
+
+1. Ranh giới sở hữu rõ ràng. Template là nội dung do app phát hành; bản sao là
+   dữ liệu của người dùng. Trộn hai thứ vào một bảng khiến mọi câu hỏi về quyền
+   ghi trở nên mơ hồ.
+2. **Cập nhật template không được ghi đè nội dung người dùng đã sửa.** Đây là
+   ràng buộc cứng. Với mô hình copy, nó đúng một cách tự nhiên: bản sao không có
+   liên kết ghi ngược về template, nên nâng version template không chạm vào nó.
+   Mô hình chèn-thẳng phải tự chống lại chính nó ở mỗi lần cập nhật.
+3. Người dùng không bị ép nhận thứ họ không muốn. Chèn thẳng lúc khởi động là
+   ghi vào dữ liệu cá nhân mà không hỏi.
+
+**Idempotency là ràng buộc, không phải tối ưu.** Mở lại app hoặc nâng version
+không được tạo deck trùng. Cụ thể:
+
+- Quá trình seed/import kiểm tra theo `(source_template_id, source_template_version)`
+  trước khi tạo — đã có bản sao từ đúng template và version đó thì không tạo nữa.
+- Người dùng **cố ý** thêm cùng một starter deck lần thứ hai là hành động hợp lệ
+  và khác hoàn toàn với việc app tự tạo trùng; luồng đó phải hỏi xác nhận rõ.
+- Toàn bộ việc tạo bản sao (deck + card + review state) nằm trong **một
+  transaction**, để app bị kill giữa chừng không để lại deck nửa vời.
+
+**Ở MVP, `deck_templates` không cần là bảng runtime.** Template có thể chỉ là
+asset JSON đóng gói theo app, đọc khi hiển thị danh sách starter deck. Nhưng khi
+đưa vào database, ranh giới giữa template gốc và bản sao của người dùng phải rõ
+ràng — đó là điều quan trọng, không phải việc nó nằm ở bảng hay ở file.
+
+---
+
+## AD-08 · Dữ liệu riêng tư và đường mở cho mã hoá
+
+**Quyết định.** MVP chưa có tài khoản, chưa có token, chưa mã hoá database. Nhưng
+phạm vi "dữ liệu riêng tư" được định nghĩa rộng ngay từ đầu, và database layer
+phải cho phép bổ sung mã hoá sau mà không viết lại.
+
+**Coi là dữ liệu riêng tư ngay ở MVP:** nội dung deck và flashcard do người dùng
+tạo, ghi chú, lịch sử học, file import, hình ảnh, audio, và dữ liệu backup.
+
+Hệ quả cụ thể lên code:
+
+- **Không log nội dung flashcard hoặc ghi chú, ở bất kỳ level nào.** Log ID thì
+  được. Đây là ràng buộc dễ vi phạm nhất vì log nội dung là phản xạ tự nhiên khi
+  debug — nên nó phải là quy tắc, không phải sự cẩn thận.
+- **Media nằm trong thư mục riêng của ứng dụng**, không phải thư mục dùng chung
+  hay bộ nhớ ngoài nơi app khác đọc được.
+- **Export và backup chỉ chạy khi người dùng chủ động yêu cầu.** Không tự động,
+  không nền, không "để cho tiện".
+
+Khi Spring Boot xuất hiện: email, access token và refresh token là dữ liệu nhạy
+cảm. Token lưu bằng secure storage, **không** lưu trong Drift, không xuất hiện
+trong log. Lý do không để trong Drift là nó nằm ngoài vùng bảo vệ của keystore
+nền tảng, và nó sẽ đi theo mọi bản backup của database.
+
+**Đường mở cho mã hoá.** Chưa mã hoá ở MVP — dữ liệu học từ vựng không đủ nhạy
+cảm để trả giá bằng độ phức tạp của SQLCipher. Nhưng việc mở kết nối database
+phải nằm sau **một chỗ duy nhất** (`core/database/connection.dart`), để chuyển
+sang `sqlcipher_flutter_libs` là sửa một hàm chứ không phải rà toàn bộ code.
+
+Quyết định này cần xem lại nếu app hỗ trợ nội dung cá nhân tự do hoặc tài liệu
+công việc — lúc đó phạm vi rủi ro khác hẳn từ vựng.
 
 ---
 

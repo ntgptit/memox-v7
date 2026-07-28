@@ -7,9 +7,10 @@
 | [`checklist.md`](checklist.md) | The canonical 22-phase development plan | complete, stable |
 | [`wbs.md`](wbs.md) | Live progress ledger — the source of truth for what is done | active |
 | [`product.md`](product.md) | Problem, users, platform/data/auth decisions, **and MVP scope** | draft |
-| [`architecture.md`](architecture.md) | Architecture decisions AD-01…07 with reasoning | active |
-| [`use-cases.md`](use-cases.md) | UC-01…06 cho must-have MVP | draft |
-| [`business-rules.md`](business-rules.md) | BR-01…23, thuật toán 8-box, validation, edge cases | draft |
+| [`architecture.md`](architecture.md) | Architecture decisions AD-01…09 with reasoning | active |
+| [`use-cases.md`](use-cases.md) | UC-01…07 cho must-have MVP | draft |
+| [`business-rules.md`](business-rules.md) | BR-01…54: hai scheduler, reset/generation, starter template, validation, edge cases | draft |
+| [`data-model.md`](data-model.md) | Schema: decks (+sub-deck), cards, card_review_states, review_history, study_sessions, templates | draft |
 
 MVP scope lives inside `product.md` rather than a separate `mvp.md` — it is
 short, and splitting it would mean two files that must agree about the same

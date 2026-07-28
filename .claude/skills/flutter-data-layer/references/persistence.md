@@ -36,18 +36,49 @@ CREATE TABLE decks (
 
 ```sql
 -- tables/cards.drift
+-- Content only. No scheduling columns — editing a card must not be able to
+-- touch its schedule (BR-09), and separating the tables is what makes that
+-- structurally impossible rather than merely intended.
 CREATE TABLE cards (
   id         TEXT     NOT NULL PRIMARY KEY,
   deck_id    TEXT     NOT NULL REFERENCES decks(id) ON DELETE CASCADE,
   front      TEXT     NOT NULL,
   back       TEXT     NOT NULL,
-  due_at     DATETIME NULL,
   created_at DATETIME NOT NULL,
   updated_at DATETIME NOT NULL
 ) AS Card;
 
-CREATE INDEX idx_cards_deck_due ON cards (deck_id, due_at);
+CREATE INDEX idx_cards_deck ON cards (deck_id);
 ```
+
+```sql
+-- tables/card_review_states.drift
+-- One row per card, created with the card, destroyed and recreated on reset.
+-- scheduler_type and scheduler_generation are duplicated from the root deck on
+-- purpose: they turn "no card state from a stale generation" into something a
+-- query can check, rather than something you have to trust.
+CREATE TABLE card_review_states (
+  card_id              TEXT     NOT NULL PRIMARY KEY REFERENCES cards(id) ON DELETE CASCADE,
+  scheduler_type       TEXT     NOT NULL,
+  scheduler_version    INTEGER  NOT NULL,
+  scheduler_generation INTEGER  NOT NULL,
+  due_at               DATETIME NULL,
+  last_reviewed_at     DATETIME NULL,
+  review_count         INTEGER  NOT NULL DEFAULT 0,
+  lapse_count          INTEGER  NOT NULL DEFAULT 0,
+  current_box          INTEGER  NULL,   -- eight_box only
+  ease_factor          REAL     NULL,   -- sm2 only
+  interval_days        INTEGER  NULL,   -- sm2 only
+  repetitions          INTEGER  NULL    -- sm2 only
+) AS CardReviewState;
+
+CREATE INDEX idx_review_states_due ON card_review_states (due_at);
+```
+
+Per-scheduler columns are nullable and only the active scheduler's are filled.
+The alternative — one JSON column holding scheduler state — is more flexible but
+loses type-safety and cannot be queried, which contradicts the reason for
+choosing `.drift` in the first place. A few NULL columns are much cheaper.
 
 `AS Deck` names the generated row class. Without it you get `DecksData`, which
 reads badly at every call site.
@@ -57,19 +88,31 @@ Named queries live beside the tables and generate typed methods:
 ```sql
 -- queries/study.drift
 cardsDueForReview:
-SELECT * FROM cards
-WHERE deck_id = :deckId
-  AND (due_at IS NULL OR due_at <= :now)
-ORDER BY due_at ASC NULLS FIRST
+SELECT c.*, s.current_box AS current_box
+FROM cards c
+INNER JOIN card_review_states s ON s.card_id = c.id
+WHERE c.deck_id = :deckId
+  AND (s.due_at IS NULL OR s.due_at <= :now)
+ORDER BY s.due_at ASC NULLS FIRST
 LIMIT :limit;
 
 dueCountPerDeck:
-SELECT d.id AS deck_id, COUNT(c.id) AS due_count
+SELECT d.id AS deck_id, COUNT(s.card_id) AS due_count
 FROM decks d
-LEFT JOIN cards c
-  ON c.deck_id = d.id AND (c.due_at IS NULL OR c.due_at <= :now)
+LEFT JOIN cards c ON c.deck_id = d.id
+LEFT JOIN card_review_states s
+  ON s.card_id = c.id AND (s.due_at IS NULL OR s.due_at <= :now)
 GROUP BY d.id;
 ```
+
+Both queries share one definition of "due". They must — a list screen counting
+due cards differently from the session that fetches them produces a badge that
+disagrees with reality, and it is the kind of bug nobody reports precisely.
+
+Note what is **not** in this SQL: the interval table, and the rating→box mapping.
+Those live in the scheduler config (AD-06). A day count inside a `WHERE` clause
+is a magic number sitting outside the reach of the scheduler's unit tests, and it
+is exactly where it will drift from the real table.
 
 Name queries after the business verb (`cardsDueForReview`), not after the SQL
 shape (`selectCardsWhereDue`) — the caller cares about the former.

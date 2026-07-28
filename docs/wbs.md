@@ -144,10 +144,37 @@ the most downstream work, in order of leverage:
 - **Dependencies:** T1.1
 - **Tests required:** none — document only
 - **Checklist phases:** 0.3
-- **Ghi chú:** các mục `[suy luận]` trong hai tài liệu là chỗ tôi tự quyết vì
-  không có đặc tả. Đáng rà lại: BR-16 (giới hạn 50 card/phiên), BR-18 (`Again`
-  không quay lại trong phiên), BR-10 (`Again` reset thẳng về hộp 1 thay vì lùi
-  một bậc) — cả ba đều ảnh hưởng trực tiếp đến cảm nhận khi dùng.
+- **Ghi chú:** các mục `[suy luận]` là chỗ tôi tự quyết vì không có đặc tả. Đáng
+  rà lại: BR-24 (giới hạn 50 card/phiên), BR-26 (số 3 card cách quãng trước khi
+  card quay lại), BR-27 (luyện lại trong phiên không đổi lịch) — cả ba ảnh hưởng
+  trực tiếp đến cảm nhận khi dùng. Ngoài ra BR-19 dùng công thức SM-2 gốc, cập
+  nhật ease factor ở mọi lượt kể cả q < 3.
+
+### T1.2b · Sửa thiết kế scheduler theo phản hồi
+
+- **Status:** done
+- **Goal:** Áp thiết kế mới: scheduler theo deck, khoá sau review đầu, reset +
+  generation, hai tập action khác nhau, sub-deck kế thừa.
+- **Output:** `docs/architecture.md` (AD-06 viết lại, AD-09 mới),
+  `docs/business-rules.md` (BR-01…54, đánh số lại), `docs/data-model.md` (viết
+  lại), `docs/use-cases.md` (UC-07 mới, UC-02/03/05 sửa), `docs/product.md`,
+  `CLAUDE.md`, `flutter-data-layer/references/persistence.md`
+- **Những gì bị đảo so với bản trước, và vì sao đáng ghi lại:**
+  - SM-2 **vào lại MVP** — trước đó tôi đã loại nó khỏi MVP.
+  - 8-box đổi từ 4 mức đánh giá sang **2 action** `forgotten`/`remembered`. Toàn
+    bộ bảng ánh xạ cũ bị thay.
+  - Scheduler chuyển từ "không cho đổi" sang "đổi tự do trước review đầu, khoá
+    sau đó, mở lại bằng reset".
+  - Thêm `scheduler_generation` vào deck, card state, session và history.
+  - Thêm sub-deck (`parent_deck_id`) với quy tắc kế thừa scheduler.
+- **Acceptance criteria:**
+  - [x] BR-01…54 liên tục, không trùng, không thiếu.
+  - [x] Mọi trích dẫn BR/AD trong các tài liệu đều resolve (kiểm bằng script).
+  - [x] Hai bất biến của AD-09 diễn đạt được thành một câu query kiểm tra.
+  - [x] Không còn chỗ nào nói MVP chỉ có một scheduler.
+- **Dependencies:** T1.2
+- **Tests required:** none — document only
+- **Checklist phases:** 0.3, 4.3, 11.1
 
 ### T1.3 · WBS chi tiết cho M2–M5
 
