@@ -1,0 +1,18 @@
+# Localization codegen config. `flutter pub get` runs gen-l10n automatically
+# because pubspec.yaml sets `flutter: generate: true`.
+#
+# Output lands in lib/l10n/generated/, which is gitignored — generated code is
+# not committed in this repo (see .gitignore and CLAUDE.md). A fresh clone
+# produces it on the first `flutter pub get`.
+arb-dir: lib/l10n
+template-arb-file: app_en.arb
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+output-dir: lib/l10n/generated
+
+# English is the template and the fallback. A key missing from app_vi.arb would
+# silently fall back to English, which is why the ARB parity test exists.
+nullable-getter: false
+
+# Untranslated keys must fail the build rather than degrade silently.
+required-resource-attributes: true

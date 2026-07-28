@@ -15,14 +15,45 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.ntgptit.memox"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+    }
+
+    // Required for the per-flavor `resValue("string", "app_name", ...)` below:
+    // recent AGP defaults this off, and a flavor that declares a resource value
+    // without it fails the build outright rather than ignoring the value.
+    buildFeatures {
+        resValues = true
+    }
+
+    // Three flavors so all three builds install side by side on one device.
+    // Distinct applicationIds are the whole point: without the suffix,
+    // installing staging replaces production, and a tester loses their data
+    // without being told why.
+    //
+    // `app_name` is a resource rather than a literal in the manifest, so the
+    // launcher label is chosen per flavor in exactly one place.
+    flavorDimensions += "environment"
+
+    productFlavors {
+        create("development") {
+            dimension = "environment"
+            applicationIdSuffix = ".dev"
+            resValue("string", "app_name", "MemoX Dev")
+        }
+        create("staging") {
+            dimension = "environment"
+            applicationIdSuffix = ".staging"
+            resValue("string", "app_name", "MemoX Staging")
+        }
+        create("production") {
+            dimension = "environment"
+            // No suffix: production owns the base applicationId.
+            resValue("string", "app_name", "MemoX")
+        }
     }
 
     buildTypes {
