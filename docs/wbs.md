@@ -743,7 +743,7 @@ slice UC-05 cần. Không xây trọn design system trước khi có feature th�
 
 ### M3.1 · Cấu trúc feature-first và ranh giới layer
 
-- **Status:** todo
+- **Status:** done
 - **Goal:** Tạo bộ khung thư mục và làm `check_architecture.sh` chạy có ý nghĩa
   trên code thật.
 - **Scope:** `lib/app/`, `lib/core/`, `lib/shared/`, `lib/features/` theo Phase
@@ -753,19 +753,44 @@ slice UC-05 cần. Không xây trọn design system trước khi có feature th�
 - **Editable documents:** `docs/wbs.md`
 - **Output:** cây thư mục `lib/`, `docs/architecture.md` **không** đổi
 - **Acceptance criteria:**
-  - [ ] `.claude/skills/flutter-architecture/scripts/check_architecture.sh`
-        exit 0.
-  - [ ] Không tồn tại `lib/features/*/data/remote/`.
-  - [ ] Thêm một file vi phạm cố ý (domain import Flutter) → script exit 1; xoá
-        đi → exit 0. Ghi kết quả kiểm chứng này vào WBS.
-  - [ ] Mọi file trong `lib/` đặt tên theo suffix quy ước ở `CLAUDE.md`.
-  - [ ] **Siết guard**: đổi cả hai profile của ruleset `memox-v7` và
-        `code-verification-guard.yaml` về `fail_on: [error, warning]` +
-        `warning_as_error: true`, và xác nhận 26 cảnh báo
-        `rule_without_targets` đã hết sau khi cây feature-first tồn tại (M2.2b).
+  - [x] `check_architecture.sh` exit 0.
+  - [x] Không tồn tại `lib/features/*/data/remote/`.
+  - [x] Thêm một file vi phạm cố ý (domain import Flutter) → script exit 1; xoá
+        đi → exit 0. → guard báo `memox.architecture.domain_no_infrastructure_import`,
+        exit 1; xoá file → exit 0
+  - [x] Mọi file trong `lib/` đặt tên theo suffix quy ước ở `CLAUDE.md`. → rule
+        `naming.*_file_role_suffix` của guard nay **có target thật** và pass
+  - [x] **Siết guard**: cả hai profile và `code-verification-guard.yaml` về
+        `fail_on: [error, warning]` + `warning_as_error: true`. → guard báo
+        `No violations found`, exit 0
+- **Ba file khung, mỗi file một trách nhiệm rõ ràng:** `review_repository.dart`
+  (contract, pure Dart), `review_repository_impl.dart` (implement nó), và
+  `review_placeholder_screen.dart` — màn placeholder **chuyển từ `app.dart` vào
+  feature**, nên nó có caller thật chứ không phải file giả để lấp chỗ. Contract
+  cố ý rỗng: method được viết ở M4.5 **từ nhu cầu của presentation**, đoán trước
+  là viết code và test cho một lời gọi không tồn tại.
+- **Phát hiện khi siết guard — ba rule đang bảo vệ tập rỗng.** Đây là lý do
+  `rule_without_targets` **không được** bịt: nó không phải nhiễu chờ code tới.
+  - `provider_files` khớp `lib/**/providers/**` và `*_controller.dart`, nhưng
+    quy ước của dự án là provider nằm cạnh thứ nó cấu hình, tên `*_provider.dart`.
+    Provider duy nhất đang có — `lib/app/config/env_config_provider.dart` —
+    **không khớp gì cả**, nên `controller_no_build_context` và
+    `notifier_no_public_mutable_field` bảo vệ một tập rỗng.
+  - `single_database_connection_site` exclude một **đường dẫn literal** chưa tồn
+    tại; đổi sang glob.
+  - `scheduler_no_ambient_now` chỉ nhìn `domain/scheduler/**`, hẹp hơn tính chất
+    nó bảo vệ: **mọi** code domain đọc đồng hồ môi trường đều không test được ở
+    một thời điểm cố định. Mở rộng sang `domain_files`; scope `scheduler_files`
+    thành vô dụng nên bị xoá thay vì để lại mục rữa dần.
+
+  Hai rule SQL của Drift cũng được mở sang `dart_source`: SQL không chỉ nằm
+  trong `.drift`, Drift còn nhận SQL thô qua `customStatement`/`customSelect`.
+
+  Sửa ở **upstream** `ntgptit/code-verification-guard-v2` (PR #7, đã merge), rồi
+  re-vendor bản **byte-identical** (`diff -r` sạch) — không sửa trong bản vendor.
 - **Dependencies:** M2.6
 - **Tests required:** none — kiểm chứng bằng fault injection ở acceptance
-  criteria
+  criteria; **đã chạy**
 - **Checklist phases:** 4.1, 4.2, 4.3, 5.3
 
 ### M3.2 · Core error và failure model

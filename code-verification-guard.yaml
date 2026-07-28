@@ -59,13 +59,14 @@ overrides:
   severity: {}
   rule_options: {}
 
-# Gates on errors today; warnings stay visible as a backlog. See the comment in
-# the ruleset's config/profiles.yaml for why, and for the M3.1 flip back to
-# failing on warnings too.
+# Warnings are failures. Every rule carries real targets as of M3.1 — see the
+# comment in the ruleset's config/profiles.yaml for what the softer gate was
+# for, and what it caught on the way out.
 failure:
   fail_on:
     - error
-  warning_as_error: false
+    - warning
+  warning_as_error: true
 
 report:
   format: console

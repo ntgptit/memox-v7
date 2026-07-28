@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import '../features/review/presentation/review_placeholder_screen.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../l10n/l10n_extension.dart';
 import 'mobile_frame_widget.dart';
@@ -37,23 +38,7 @@ class MemoxApp extends StatelessWidget {
       // Phone-sized surface on web (AD-04). No-op on Android.
       builder: (context, child) =>
           MobileFrameWidget(child: child ?? const SizedBox.shrink()),
-      home: const _HomePlaceholderView(),
-    );
-  }
-}
-
-/// Temporary landing surface, shown until the first real screen exists (M5.4).
-///
-/// It reads its text from the ARB files so that the "no user-visible string
-/// outside ARB" rule holds from the very first screen rather than being
-/// retrofitted.
-class _HomePlaceholderView extends StatelessWidget {
-  const _HomePlaceholderView();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(child: Text(context.l10n.homePlaceholderMessage)),
+      home: const ReviewPlaceholderScreen(),
     );
   }
 }
