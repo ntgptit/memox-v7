@@ -1,5 +1,17 @@
 # 🚀 Flutter Project Development Checklist
 
+| | |
+|---|---|
+| **Status** | frozen for MVP |
+| **Purpose** | Quy trình 22 phase — tra cứu khi cần biết một phase yêu cầu gì |
+| **Scope** | Quy trình phát triển. Ngoài phạm vi: mọi quyết định riêng của memox |
+| **Source of truth for** | Danh sách 22 phase · Definition of Done · thứ tự triển khai khuyến nghị |
+| **Depends on** | `document-conventions.md` |
+| **Updated by task** | T1.3a |
+| **Last updated** | 2026-07-28 |
+
+Tài liệu tra cứu, MUST NOT đọc tuần tự. Tiến độ thật ở [`wbs.md`](wbs.md).
+
 > **Architecture:** Pragmatic Clean Architecture — Feature First
 > **State Management & DI:** Riverpod 3.x + Code Generation
 > **Navigation:** GoRouter

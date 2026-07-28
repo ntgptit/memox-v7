@@ -1,6 +1,14 @@
 # Data model — memox
 
-_Status: **frozen for MVP** · Last updated: 2026-07-28_
+| | |
+|---|---|
+| **Status** | frozen for MVP |
+| **Purpose** | Chốt hình dạng dữ liệu và các bất biến phải luôn đúng |
+| **Scope** | Bảng, cột, index, quan hệ, query bất biến. Ngoài phạm vi: SQL runtime (`lib/core/database/`, chưa tồn tại) |
+| **Source of truth for** | Schema · cột và kiểu · index · query bất biến · thứ tự migration |
+| **Depends on** | `document-conventions.md`, `architecture.md`, `business-rules.md` |
+| **Updated by task** | T1.3a |
+| **Last updated** | 2026-07-28 |
 
 Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; SQL thật nằm
 ở `lib/core/database/tables/` và **chưa được tạo** — task này chỉ chốt đặc tả.

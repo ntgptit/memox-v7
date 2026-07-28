@@ -1,10 +1,23 @@
 # Documentation
 
+| | |
+|---|---|
+| **Status** | active |
+| **Purpose** | Chỉ mục tài liệu — cái gì tồn tại, cái gì cố ý chưa viết, và ai sở hữu cái gì |
+| **Scope** | Toàn bộ `docs/`. Ngoài phạm vi: nội dung của từng tài liệu |
+| **Source of truth for** | Danh mục tài liệu · trạng thái từng tài liệu · tài liệu chưa viết và phase sở hữu |
+| **Depends on** | `document-conventions.md` |
+| **Updated by task** | T1.3a |
+| **Last updated** | 2026-07-28 |
+
+Format và thứ tự đọc: [`document-conventions.md`](document-conventions.md).
+
 ## What exists
 
 | Document | Purpose | Status |
 |---|---|---|
-| [`checklist.md`](checklist.md) | The canonical 22-phase development plan | complete, stable |
+| [`document-conventions.md`](document-conventions.md) | Hợp đồng tài liệu: thứ tự đọc, header bắt buộc, template AD/BR/UC/WBS, MUST/SHOULD/MAY | **frozen for MVP** |
+| [`checklist.md`](checklist.md) | The canonical 22-phase development plan | **frozen for MVP** |
 | [`wbs.md`](wbs.md) | Live progress ledger — the source of truth for what is done | active |
 | [`product.md`](product.md) | Problem, users, platform/data/auth decisions, **and MVP scope** | **frozen for MVP** |
 | [`architecture.md`](architecture.md) | Architecture decisions AD-01…11 with reasoning | active |

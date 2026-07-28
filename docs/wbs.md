@@ -1,6 +1,14 @@
 # WBS — work breakdown and progress ledger
 
-_Last updated: 2026-07-28_
+| | |
+|---|---|
+| **Status** | active |
+| **Purpose** | Sổ tiến độ — nguồn duy nhất cho việc gì đã xong, đang làm, bị chặn |
+| **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
+| **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
+| **Depends on** | `document-conventions.md` |
+| **Updated by task** | T1.3a |
+| **Last updated** | 2026-07-28 |
 
 Single source of truth for project progress. Update it in the same commit as the
 work it describes. A task is `done` only when it meets the Definition of Done in
@@ -143,8 +151,12 @@ bộ, không phải chỉnh sửa tiện tay.
 - **Goal:** Chốt mô hình cây deck nhiều cấp, hoàn thiện review history và session
   lifecycle, chốt các rule còn mở, và sửa mọi mâu thuẫn giữa các tài liệu. Không
   tạo source code.
-- **Scope:** chỉ tài liệu, WBS và validation script. Ngoài phạm vi: Flutter
-  source, UI, Drift runtime schema, dependency mới, backend.
+- **Scope:** chỉ tài liệu, WBS và validation script.
+- **Out of scope:** Flutter source, UI, Drift runtime schema, dependency mới,
+  backend.
+- **Editable documents:** `docs/*.md`, `CLAUDE.md`,
+  `.claude/skills/flutter-data-layer/references/persistence.md`,
+  `.claude/skills/flutter-workflow/scripts/`
 - **Output:**
   - `docs/business-rules.md` — thêm BR-55…BR-87, chính sách đánh số vĩnh viễn
   - `docs/data-model.md` — viết lại: `root_deck_id`, `content_type`,
@@ -179,12 +191,50 @@ bộ, không phải chỉnh sửa tiện tay.
 - **Tests required:** `check_docs.sh` pass
 - **Checklist phases:** 0.3, 1.1, 1.2, 4.3, 11.1
 
+### T1.3a · Chuẩn hoá format tài liệu cho AI agent
+
+- **Status:** done
+- **Goal:** Thiết lập hợp đồng tài liệu cố định để mọi agent biết đọc theo thứ tự
+  nào, đâu là quyết định chính thức, và không tự diễn giải prose thành rule mới.
+- **Scope:** format, header, template, thứ tự đọc, validation. Chuẩn hoá tài liệu
+  hiện có theo format mới.
+- **Out of scope:** **thay đổi nghiệp vụ**. Không rule nào đổi nghĩa; không AD,
+  BR hay UC nào được thêm, bỏ hay đánh số lại. Không Flutter source.
+- **Editable documents:** toàn bộ `docs/*.md`, `CLAUDE.md`,
+  `.claude/skills/flutter-workflow/scripts/check_docs.sh`
+- **Output:**
+  - `docs/document-conventions.md` — hợp đồng tài liệu: thứ tự đọc, header bắt
+    buộc 7 field, template AD/BR/UC/data-model/WBS, MUST/SHOULD/MAY, canonical
+    location, quy tắc superseded, quy tắc tài liệu frozen
+  - Header 7 field cho cả 9 tài liệu trong `docs/`
+  - `business-rules.md` — bảng BR thêm cột `Status`, `Enforced by`, `Related`
+  - `architecture.md` — AD sắp lại theo số, mỗi AD có `Status` +
+    `Affected documents`
+  - `use-cases.md` — mỗi UC có khối `Status`
+  - `CLAUDE.md` — mục Reading order
+  - `check_docs.sh` — nhóm kiểm tra A2 cho hợp đồng format
+- **Acceptance criteria:**
+  - [x] Mọi tài liệu trong `docs/` có đủ 7 field header.
+  - [x] Không hai tài liệu nào cùng nhận là source of truth của một chủ đề.
+  - [x] Mọi dòng BR có đủ ID / Status / Rule / Enforced by / Related.
+  - [x] Mọi UC có đủ chín mục bắt buộc.
+  - [x] Mọi AD có Status, Affected documents và Decision.
+  - [x] Reading order có trong `CLAUDE.md` và `document-conventions.md`.
+  - [x] Năm check mới đều verify bằng test tiêm lỗi.
+  - [x] **Không nghiệp vụ nào đổi** — số lượng AD/BR/UC không đổi (11/87/9), nội
+        dung rule giữ nguyên nghĩa.
+- **Dependencies:** T1.3
+- **Tests required:** `check_docs.sh` pass; fault-injection cho mỗi check mới
+- **Checklist phases:** 1.2
+
 ### T1.4 · Chia WBS chi tiết cho M2–M5
 
 - **Status:** todo — **việc tiếp theo, chưa thực hiện**
 - **Goal:** Chia M2–M4 thành task có acceptance criteria và dependency; chốt phạm
   vi vertical slice đầu tiên.
 - **Scope:** chỉ file này. Không tạo source code.
+- **Out of scope:** Flutter source, sửa tài liệu frozen.
+- **Editable documents:** `docs/wbs.md`
 - **Output:** `docs/wbs.md`, mở rộng
 - **Acceptance criteria:**
   - [ ] M2–M4 chia tới task, mỗi task có goal, scope, output, acceptance
@@ -193,7 +243,7 @@ bộ, không phải chỉnh sửa tiện tay.
   - [ ] Milestone sau M5 để ở mức feature — chia tới task lúc này chắc chắn phải
         lập lại kế hoạch sau khi M2 dạy vài điều.
   - [ ] Không task ID nào trùng.
-- **Dependencies:** T1.3
+- **Dependencies:** T1.3a
 - **Tests required:** `check_docs.sh` pass
 - **Checklist phases:** 1.1, 1.2
 
