@@ -1,0 +1,55 @@
+# Flutter / Dart
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+pubspec_overrides.yaml
+
+# Generated code — CI regenerates and verifies freshness (see flutter-ship/references/ci.md).
+# If this project later decides to commit generated output instead, remove these
+# three lines and drop the "generated code is stale" CI step together.
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+lib/l10n/generated/
+
+# Secrets — never commit. See flutter-project-setup/references/flavors.md.
+env/
+*.jks
+*.keystore
+key.properties
+*.p8
+*.p12
+*.mobileprovision
+.env
+.env.*
+
+# Symbols from obfuscated release builds — archived as build artifacts, not in git
+build/symbols/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Platform
+**/ios/Flutter/.last_build_id
+**/ios/Pods/
+**/ios/.symlinks/
+**/android/.gradle/
+**/android/local.properties
+**/android/key.properties
+**/macos/Pods/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test output
+coverage/
+**/failures/
