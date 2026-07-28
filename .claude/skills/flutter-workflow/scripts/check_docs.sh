@@ -1,0 +1,262 @@
+#!/usr/bin/env bash
+# Specification integrity checker.
+#
+# The docs in docs/ are a contract that code will be written against, and the
+# failure mode that matters is a reference that points at the wrong thing —
+# BR-13 citing "BR-36" for reset after a renumber moved reset to BR-44. Nothing
+# catches that at runtime; it only surfaces when a human reads it and complies.
+#
+# Three groups of checks:
+#   A. Document integrity      — runs always
+#   B. Invariant coverage      — runs always; verifies data-model.md actually
+#                                specifies a query for each data invariant
+#   C. Data invariants         — runs only when a SQLite database exists
+#
+# Usage:
+#   check_docs.sh [--db <path-to-sqlite-db>] [--quiet]
+# Exit: 0 clean, 1 problems found.
+
+set -uo pipefail
+
+DB=""
+QUIET=0
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --db) DB="${2:-}"; shift 2 ;;
+    --quiet) QUIET=1; shift ;;
+    *) echo "unknown argument: $1" >&2; exit 2 ;;
+  esac
+done
+
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+cd "$REPO_ROOT" || exit 1
+
+RED=$'\033[31m'; YEL=$'\033[33m'; GRN=$'\033[32m'; DIM=$'\033[2m'; OFF=$'\033[0m'
+[[ -t 1 ]] || { RED=""; YEL=""; GRN=""; DIM=""; OFF=""; }
+
+PROBLEMS=0
+fail() { PROBLEMS=$((PROBLEMS + 1)); printf '%s✗%s %s\n    %s\n' "$RED" "$OFF" "$1" "$2"; }
+warn() { [[ $QUIET -eq 1 ]] || printf '%s!%s %s\n    %s\n' "$YEL" "$OFF" "$1" "$2"; }
+ok()   { [[ $QUIET -eq 1 ]] || printf '%s✓%s %s\n' "$GRN" "$OFF" "$1"; }
+head_() { printf '\n%s── %s %s\n' "$DIM" "$1" "$OFF"; }
+
+BR_FILE="docs/business-rules.md"
+AD_FILE="docs/architecture.md"
+UC_FILE="docs/use-cases.md"
+WBS_FILE="docs/wbs.md"
+README_FILE="docs/README.md"
+
+for f in "$BR_FILE" "$AD_FILE" "$UC_FILE" "$WBS_FILE" "$README_FILE"; do
+  [[ -f "$f" ]] || { fail "missing document" "$f"; }
+done
+[[ $PROBLEMS -eq 0 ]] || { echo; echo "cannot continue without the core documents"; exit 1; }
+
+# Files that may cite an ID. Templates under assets/ are excluded: they contain
+# placeholder rows like "| BR-01 | |" that are examples, not citations.
+ref_files() {
+  { ls docs/*.md 2>/dev/null
+    echo CLAUDE.md
+    find .claude/skills -name 'SKILL.md' -o -path '*/references/*.md' 2>/dev/null
+  } | sort -u
+}
+
+# ---------------------------------------------------------------------------
+# A. Document integrity
+# ---------------------------------------------------------------------------
+head_ "A. Document integrity"
+
+# Definitions: table rows "| BR-07 |" and headings "### BR-15 ·"
+defined_ids() { # defined_ids <file> <prefix>
+  grep -ohE "^(\| |#{2,4} )$2-[0-9]+" "$1" 2>/dev/null | grep -ohE "$2-[0-9]+" | sort
+}
+BR_DEFINED="$(defined_ids "$BR_FILE" BR | sort -u)"
+AD_DEFINED="$(defined_ids "$AD_FILE" AD | sort -u)"
+UC_DEFINED="$(defined_ids "$UC_FILE" UC | sort -u)"
+
+# --- duplicates ---
+for pair in "BR:$BR_FILE" "AD:$AD_FILE" "UC:$UC_FILE"; do
+  prefix="${pair%%:*}"; file="${pair#*:}"
+  dupes="$(defined_ids "$file" "$prefix" | uniq -d)"
+  if [[ -n "$dupes" ]]; then
+    while read -r d; do fail "duplicate ID definition" "$d defined more than once in $file"; done <<< "$dupes"
+  fi
+done
+[[ $PROBLEMS -eq 0 ]] && ok "no duplicate BR / AD / UC definitions"
+
+# --- dangling references ---
+CITED="$(ref_files | xargs grep -ohE '\b(BR|AD|UC)-[0-9]+' 2>/dev/null | sort -u)"
+ALL_DEFINED="$(printf '%s\n%s\n%s\n' "$BR_DEFINED" "$AD_DEFINED" "$UC_DEFINED" | grep -v '^$' | sort -u)"
+DANGLING="$(comm -13 <(echo "$ALL_DEFINED") <(echo "$CITED"))"
+if [[ -n "$DANGLING" ]]; then
+  while read -r id; do
+    where="$(ref_files | xargs grep -lE "\b$id\b" 2>/dev/null | tr '\n' ' ')"
+    fail "reference to an ID that does not exist" "$id cited in: $where"
+  done <<< "$DANGLING"
+else
+  ok "every cited BR / AD / UC id resolves ($(echo "$CITED" | wc -l | tr -d ' ') distinct ids)"
+fi
+
+# --- numbering continuity (gaps are legal under the append-only policy, but a
+#     gap usually means a rule was deleted instead of marked BÃI BỎ) ---
+for pair in "BR:$BR_DEFINED" "AD:$AD_DEFINED" "UC:$UC_DEFINED"; do
+  prefix="${pair%%:*}"; ids="${pair#*:}"
+  gaps="$(echo "$ids" | grep -ohE '[0-9]+' | sed 's/^0*//' | sort -n | awk '
+    {if(p && $1!=p+1) for(i=p+1;i<$1;i++) print i; p=$1}')"
+  [[ -n "$gaps" ]] && warn "numbering gap in $prefix" "missing: $(echo "$gaps" | tr '\n' ' ')— deleted instead of marked BÃI BỎ?"
+done
+
+# --- WBS task id duplicates ---
+TASK_IDS="$(grep -ohE '^### T[0-9]+(\.[0-9]+)?[a-z]? ' "$WBS_FILE" | awk '{print $2}' | sort)"
+TASK_DUPES="$(echo "$TASK_IDS" | uniq -d)"
+if [[ -n "$TASK_DUPES" ]]; then
+  while read -r t; do fail "duplicate WBS task ID" "$t appears more than once in $WBS_FILE"; done <<< "$TASK_DUPES"
+else
+  ok "no duplicate WBS task IDs ($(echo "$TASK_IDS" | wc -l | tr -d ' ') tasks)"
+fi
+
+# --- unresolved markers inside MVP scope ---
+MARKERS="$(grep -rnE '\[cần xác nhận\]|\[TODO\]|\[TBD\]' docs/*.md CLAUDE.md 2>/dev/null || true)"
+if [[ -n "$MARKERS" ]]; then
+  while read -r m; do fail "unresolved marker in MVP scope" "$m"; done <<< "$MARKERS"
+else
+  ok "no unresolved [cần xác nhận] / [TODO] / [TBD] markers"
+fi
+
+# --- documents listed as "Not written yet" that actually exist ---
+if grep -q '^## Not written yet' "$README_FILE"; then
+  listed="$(sed -n '/^## Not written yet/,/^## /p' "$README_FILE" \
+            | grep -ohE '`[a-z-]+\.md`' | tr -d '`' | sort -u)"
+  for doc in $listed; do
+    [[ -f "docs/$doc" ]] && fail "document exists but is listed as not written" \
+      "docs/$doc is in the 'Not written yet' section of $README_FILE"
+  done
+  [[ $PROBLEMS -eq 0 ]] && ok "'Not written yet' section matches reality"
+fi
+
+# --- banned pattern: single-level root resolution (BR-57) ---
+#
+# Only actual USAGE counts. Prose that forbids the pattern necessarily contains
+# it, and so does this script — a linter that flags the rule forbidding X is
+# noise. So: look inside fenced code blocks in the docs, and in real SQL/Dart
+# sources, never in prose.
+sql_lines_in_docs() {
+  local f
+  for f in $(ls docs/*.md 2>/dev/null) $(find .claude/skills -path '*/references/*.md' 2>/dev/null); do
+    awk -v F="$f" '
+      /^```/ { infence = !infence; next }
+      # Comment lines inside a fence are still prose — a schema comment saying
+      # "never write COALESCE(...)" must not trip the check it documents.
+      infence && $0 !~ /^[[:space:]]*(--|\/\/|#)/ { print F ":" NR ":" $0 }
+    ' "$f"
+  done
+}
+BANNED="$( { sql_lines_in_docs
+             grep -rn 'COALESCE([[:space:]]*parent_deck_id' lib/ test/ 2>/dev/null || true
+           } | grep -E 'COALESCE\([[:space:]]*([A-Za-z_][A-Za-z_0-9]*\.)?parent_deck_id' || true )"
+if [[ -n "$BANNED" ]]; then
+  while read -r b; do
+    fail "banned root-resolution pattern used in SQL (BR-57)" "$b
+    COALESCE(parent_deck_id, id) returns the level-2 deck at depth 3. Use root_deck_id."
+  done <<< "$BANNED"
+else
+  ok "no COALESCE(parent_deck_id, …) used in any SQL or source"
+fi
+
+# ---------------------------------------------------------------------------
+# B. Invariant coverage — is each data invariant actually specified?
+# ---------------------------------------------------------------------------
+head_ "B. Invariant coverage in docs/data-model.md"
+
+DM="docs/data-model.md"
+if [[ ! -f "$DM" ]]; then
+  fail "missing document" "$DM"
+else
+  # Each entry: <label>|<regex that must appear in the invariant section>
+  INVARIANTS=(
+    "root deck has direct cards|WHERE d\.parent_deck_id IS NULL"
+    "content_type=unset but has content|content_type = 'unset'"
+    "content_type=card but has sub-decks|content_type = 'card'"
+    "content_type=deck but has direct cards|content_type = 'deck'"
+    "descendant points at wrong root|root_deck_id <> p\.root_deck_id"
+    "cycle in the deck tree|WITH RECURSIVE"
+    "card state scheduler/generation mismatch|s\.scheduler_generation <> root\.scheduler_generation"
+    "session status × end_reason matrix|status = 'invalidated'"
+    "relearning must not change schedule|review_kind = 'relearning'"
+  )
+  missing=0
+  for entry in "${INVARIANTS[@]}"; do
+    label="${entry%%|*}"; pattern="${entry#*|}"
+    grep -qE "$pattern" "$DM" || { fail "invariant not specified" "no query in $DM for: $label"; missing=1; }
+  done
+  [[ $missing -eq 0 ]] && ok "all ${#INVARIANTS[@]} data invariants have a query in $DM"
+fi
+
+# ---------------------------------------------------------------------------
+# C. Data invariants — only when a database exists
+# ---------------------------------------------------------------------------
+head_ "C1. Invariant queries — do they parse and discriminate?"
+
+# Runs against an in-memory fixture, so it works before any real database
+# exists. A query that never returns rows would pass a "no violations found"
+# check perfectly while enforcing nothing; this catches that.
+VERIFIER=".claude/skills/flutter-workflow/scripts/verify_invariants.py"
+if ! command -v python3 >/dev/null 2>&1; then
+  warn "python3 not on PATH" "cannot self-test the invariant queries"
+elif [[ ! -f "$VERIFIER" ]]; then
+  warn "verifier missing" "$VERIFIER"
+elif out="$(python3 "$VERIFIER" 2>&1)"; then
+  n="$(echo "$out" | grep -cE '^\s+✓ Q[0-9]+')"
+  ok "$n invariant queries parse, stay clean on valid data, and each fires on its own violation"
+else
+  fail "invariant query self-test failed" "$(echo "$out" | grep -E '✗|LỖI' | head -5)"
+fi
+
+head_ "C2. Data invariants against a real database"
+
+if [[ -z "$DB" ]]; then
+  echo "  skipped — no --db given. The Drift schema does not exist yet (M4)."
+  echo "  Once it does, run: $0 --db <path>"
+elif [[ ! -f "$DB" ]]; then
+  fail "database not found" "$DB"
+elif ! command -v sqlite3 >/dev/null 2>&1; then
+  warn "sqlite3 not on PATH" "cannot run data invariants"
+else
+  run_inv() { # run_inv <label> <sql>
+    local label="$1" sql="$2" out
+    out="$(sqlite3 "$DB" "$sql" 2>&1)"
+    [[ -z "$out" ]] && return 0
+    fail "invariant violated: $label" "offending ids: $(echo "$out" | head -5 | tr '\n' ' ')"
+  }
+  run_inv "root deck has direct cards (BR-58)" \
+    "SELECT c.id FROM cards c JOIN decks d ON d.id=c.deck_id WHERE d.parent_deck_id IS NULL;"
+  run_inv "content_type=unset but has content (BR-60)" \
+    "SELECT d.id FROM decks d WHERE d.content_type='unset' AND (EXISTS(SELECT 1 FROM cards c WHERE c.deck_id=d.id) OR EXISTS(SELECT 1 FROM decks s WHERE s.parent_deck_id=d.id));"
+  run_inv "content_type=card but has sub-decks (BR-63)" \
+    "SELECT d.id FROM decks d WHERE d.content_type='card' AND EXISTS(SELECT 1 FROM decks s WHERE s.parent_deck_id=d.id);"
+  run_inv "content_type=deck but has direct cards (BR-64)" \
+    "SELECT d.id FROM decks d WHERE d.content_type='deck' AND EXISTS(SELECT 1 FROM cards c WHERE c.deck_id=d.id);"
+  run_inv "descendant points at wrong root (BR-72)" \
+    "SELECT d.id FROM decks d JOIN decks p ON p.id=d.parent_deck_id WHERE d.root_deck_id<>p.root_deck_id;"
+  run_inv "root does not point at itself (BR-56)" \
+    "SELECT d.id FROM decks d WHERE d.parent_deck_id IS NULL AND d.root_deck_id<>d.id;"
+  run_inv "cycle in the deck tree (BR-69)" \
+    "WITH RECURSIVE up(start_id,node_id,depth) AS (SELECT id,parent_deck_id,1 FROM decks WHERE parent_deck_id IS NOT NULL UNION ALL SELECT u.start_id,d.parent_deck_id,u.depth+1 FROM up u JOIN decks d ON d.id=u.node_id WHERE u.node_id IS NOT NULL AND u.depth<64) SELECT DISTINCT start_id FROM up WHERE node_id=start_id;"
+  run_inv "card state scheduler/generation mismatch (BR-48, BR-49)" \
+    "SELECT s.card_id FROM card_review_states s JOIN cards c ON c.id=s.card_id JOIN decks d ON d.id=c.deck_id JOIN decks root ON root.id=d.root_deck_id WHERE s.scheduler_generation<>root.scheduler_generation OR s.scheduler_type<>root.scheduler_type;"
+  run_inv "invalid session status × end_reason (BR-79…BR-85)" \
+    "SELECT id FROM study_sessions WHERE NOT ((status='in_progress' AND end_reason IS NULL) OR (status='completed' AND end_reason IS NULL) OR (status='abandoned' AND end_reason='user_exit') OR (status='invalidated' AND end_reason IN ('scheduler_reset','stale_generation')) OR (status='failed' AND end_reason='persistence_error'));"
+  run_inv "relearning changed the schedule (BR-78)" \
+    "SELECT id FROM review_history WHERE review_kind='relearning' AND (previous_box IS NOT next_box OR previous_ease_factor IS NOT next_ease_factor OR previous_interval_days IS NOT next_interval_days);"
+fi
+
+# ---------------------------------------------------------------------------
+printf '\n%s\n' "------------------------------------------------------------"
+if [[ $PROBLEMS -eq 0 ]]; then
+  printf '%s✓%s specification is internally consistent\n' "$GRN" "$OFF"
+  echo
+  echo "Not checked here: whether a rule is a good rule, and whether a citation"
+  echo "points at the semantically right rule. Both still need a human."
+  exit 0
+fi
+printf '%s✗%s %d problem(s)\n' "$RED" "$OFF" "$PROBLEMS"
+exit 1

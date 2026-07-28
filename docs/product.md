@@ -1,6 +1,6 @@
 # Product requirements — memox
 
-_Status: draft — awaiting confirmation on the items marked **[cần xác nhận]** ·
+_Status: **frozen for MVP** — không còn mục chờ xác nhận ·
 Last updated: 2026-07-28_
 
 ## Problem
@@ -16,8 +16,10 @@ nào, nên người học hoặc ôn quá sớm (lãng phí) hoặc quá muộn 
 | Người tự học từ vựng | Học lẻ trên điện thoại, thời gian rời rạc, kết nối không ổn định | Ôn đúng thời điểm, dùng được mọi lúc kể cả offline | Lớp học có giáo viên quản lý |
 | Người ôn thi | Khối lượng từ lớn, có deadline | Theo dõi tiến độ, ưu tiên từ sắp quên | Người cần nội dung biên soạn sẵn |
 
-**[cần xác nhận]** Người dùng tự tạo nội dung, hay app cần cung cấp bộ từ có sẵn?
-Điều này quyết định có cần import/export và nguồn nội dung ban đầu hay không.
+**Đã chốt:** người dùng tự tạo nội dung, **và** app cung cấp starter deck dưới
+dạng template để người dùng sao chép về (AD-07). Nội dung starter hiện tại là
+fixture của dự án, chỉ phục vụ development và test — không phải nội dung
+production (BR-87). Import/export vẫn ở nice-to-have.
 
 ## Core value
 
@@ -151,7 +153,12 @@ history kèm scheduler type và generation.
 **Nội dung: starter deck quản lý như template.** Người dùng chọn dùng thì app tạo
 một **bản sao** vào dữ liệu cá nhân; bản sao là deck bình thường. Cập nhật
 template ở bản app mới không ghi đè nội dung người dùng đã sửa. Xem AD-07 và
-UC-01.
+UC-01. Nội dung starter hiện tại là fixture cho development/test (BR-87).
+
+**Cấu trúc deck: cây nhiều cấp, mỗi deck chỉ chứa một loại.** Root deck chỉ chứa
+deck con. Deck con mới tạo chưa xác định loại; lần tạo phần tử con đầu tiên xác
+lập nó thành "chứa card" hoặc "chứa deck con", và sau đó không trộn lẫn. Người
+dùng không phải chọn loại lúc tạo deck — lúc đó họ chưa biết. Xem AD-10, UC-08.
 
 Hệ quả lên MVP scope: **M6 trở thành must-have**, vì thư viện starter là thứ
 người dùng thấy đầu tiên và nó định hình toàn bộ trải nghiệm mở app lần đầu.
