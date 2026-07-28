@@ -961,6 +961,11 @@ Blocker thứ nhất **không** chặn phần còn lại của M2: `flutter anal
 test`, `flutter build web` và `build_runner` đều chạy được. Nó chỉ chặn đúng
 bước build APK.
 
+**Kế hoạch đã chốt:** phần Android của M2.1 sẽ được hoàn tất trong một phiên chạy
+ở **môi trường local** có sẵn Android SDK. Phiên đó chỉ cần chạy lại
+`flutter doctor -v` và `flutter build apk --debug`, rồi chuyển M2.1 sang `done`
+— không cần sửa code, vì mọi tiêu chí khác đã đạt và đã commit.
+
 ## Deferred and descoped
 
 | Item | Decision | Reason | Revisit when |
