@@ -1,6 +1,14 @@
 # Use cases — memox (MVP)
 
-_Status: **frozen for MVP** · Last updated: 2026-07-28_
+| | |
+|---|---|
+| **Status** | frozen for MVP |
+| **Purpose** | Đặc tả luồng người dùng đủ chi tiết để xây mà không phải hỏi thêm |
+| **Scope** | Must-have của MVP. Ngoài phạm vi: should/nice-to-have, và mọi thứ ở mục "Điều đã cố ý không đặc tả" |
+| **Source of truth for** | UC-xx · main/alternative/error flow · UI state matrix của từng màn |
+| **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md` |
+| **Updated by task** | T1.3a |
+| **Last updated** | 2026-07-28 |
 
 Chỉ đặc tả must-have. Should-have và nice-to-have viết khi tới lượt — đặc tả
 trước những thứ có thể bị cắt là lãng phí.
@@ -14,6 +22,10 @@ hình sẽ đổi; luồng thì không.
 ---
 
 ## UC-01 · Khởi động lần đầu và chọn starter deck
+
+| | |
+|---|---|
+| **Status** | active |
 
 **Actor:** Người dùng mới cài app
 **Trigger:** Mở app lần đầu sau khi cài
@@ -71,6 +83,10 @@ hình sẽ đổi; luồng thì không.
 
 ## UC-02 · Tạo root deck
 
+| | |
+|---|---|
+| **Status** | active |
+
 **Actor:** Người dùng
 **Trigger:** Bấm tạo deck ở màn hình danh sách deck
 **Preconditions:** Không có
@@ -109,6 +125,10 @@ chọn: Create deck (BR-59). Việc tạo phần tử con nằm ở UC-08.
 ---
 
 ## UC-03 · Sửa và xoá deck
+
+| | |
+|---|---|
+| **Status** | active |
 
 **Actor:** Người dùng
 **Trigger:** Chọn sửa hoặc xoá trên một deck
@@ -165,6 +185,10 @@ chọn: Create deck (BR-59). Việc tạo phần tử con nằm ở UC-08.
 
 ## UC-04 · Quản lý card trong deck
 
+| | |
+|---|---|
+| **Status** | active |
+
 **Actor:** Người dùng
 **Trigger:** Mở một deck có `content_type = 'card'`
 **Preconditions:** Deck tồn tại và `content_type = 'card'` (BR-63)
@@ -202,6 +226,10 @@ Card đầu tiên của một deck `unset` được tạo qua UC-08, và chính 
 ---
 
 ## UC-05 · Ôn tập một deck — luồng chính
+
+| | |
+|---|---|
+| **Status** | active |
 
 **Actor:** Người dùng
 **Trigger:** Bấm ôn tập trên một deck có card đến hạn
@@ -290,6 +318,10 @@ khoá để tránh bấm đúp.
 
 ## UC-06 · Xem danh sách deck với tiến độ
 
+| | |
+|---|---|
+| **Status** | active |
+
 **Actor:** Người dùng
 **Trigger:** Mở app, hoặc quay về từ màn khác
 **Preconditions:** Không có
@@ -325,6 +357,10 @@ named query. Ngoài ra BR-56, BR-57, BR-65.
 ---
 
 ## UC-07 · Reset learning progress
+
+| | |
+|---|---|
+| **Status** | active |
 
 **Actor:** Người dùng
 **Trigger:** Chọn "Đặt lại tiến độ học" trên một **root deck** — thường từ chỗ
@@ -386,6 +422,10 @@ giải thích vì sao chế độ ôn tập đang bị khoá (UC-03 A1)
 
 ## UC-08 · Tạo phần tử con và xác lập `content_type`
 
+| | |
+|---|---|
+| **Status** | active |
+
 **Actor:** Người dùng
 **Trigger:** Bấm Create bên trong một deck
 **Preconditions:** Deck tồn tại
@@ -442,6 +482,10 @@ Create có ba hành vi khác nhau tuỳ trạng thái deck.
 ---
 
 ## UC-09 · Di chuyển deck trong cây
+
+| | |
+|---|---|
+| **Status** | active |
 
 **Actor:** Người dùng
 **Trigger:** Chọn di chuyển một deck sang deck cha khác

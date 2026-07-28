@@ -5,6 +5,31 @@ Flutter application, rebuilt from scratch against `docs/checklist.md`.
 **Stack:** Flutter (stable) · Riverpod 3.x + codegen · GoRouter · Drift/SQLite · Material 3 + design tokens
 **Architecture:** Pragmatic Clean Architecture, feature-first.
 
+## Reading order
+
+Read these two before anything else, in this order:
+
+1. **this file** — constraints that apply in every phase
+2. **`docs/document-conventions.md`** — how documents are written and read: the
+   MUST/SHOULD/MAY keywords, the required header, the templates, and the rule
+   that one fact lives in exactly one place
+
+Then, only what the task actually touches:
+
+`docs/product.md` → `docs/architecture.md` (AD-xx) → `docs/business-rules.md`
+(BR-xx) → `docs/data-model.md` → `docs/use-cases.md` (UC-xx) → `docs/wbs.md`.
+
+`docs/checklist.md` is reference — look things up, do not read it end to end.
+
+Two rules that prevent the most damage:
+
+- **Prose without a MUST/SHOULD/MAY keyword is explanation, not a rule.** Do not
+  derive a new constraint from it, and do not treat a code example as a spec.
+- **Do not edit a document whose Status is `frozen for MVP`** unless the task
+  names that file explicitly. Those documents are the contract the code is
+  written against; a convenience edit made while doing something else is how
+  spec and code drift apart without anyone noticing.
+
 ## What memox is, and what it is not yet
 
 Flashcard / spaced-repetition vocabulary app. The decisions below are settled;

@@ -1,6 +1,16 @@
 # Architecture decisions
 
-_Last updated: 2026-07-28_
+| | |
+|---|---|
+| **Status** | active |
+| **Purpose** | Ghi lại quyết định kiến trúc và lý do, để phiên sau đọc được quyết định chứ không phải đoán từ code |
+| **Scope** | Quyết định ràng buộc nhiều tài liệu hoặc nhiều layer. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), hình dạng dữ liệu (`data-model.md`) |
+| **Source of truth for** | AD-xx · đánh đổi kiến trúc · phương án đã bị loại |
+| **Depends on** | `document-conventions.md`, `product.md` |
+| **Updated by task** | T1.3a |
+| **Last updated** | 2026-07-28 |
+
+Format theo `document-conventions.md` §6.1. AD xếp theo số; ID vĩnh viễn (§7).
 
 Ghi lại các quyết định kiến trúc và **lý do**, để phiên làm việc sau đọc được
 quyết định chứ không phải đoán từ code. Mỗi quyết định có ID `AD-xx` để code
@@ -14,6 +24,11 @@ chiều nhau.
 ---
 
 ## AD-01 · Local-first, backend-ready
+
+| | |
+|---|---|
+| **Status** | accepted |
+| **Affected documents** | `data-model.md` · `business-rules.md` · `flutter-data-layer` skill |
 
 **Quyết định.** Drift/SQLite là source of truth. Toàn bộ MVP không có network.
 Backend Spring Boot sẽ được thêm sau, khi app đã ổn định về UX, migration và
@@ -42,6 +57,11 @@ kiểu Drift, hoặc trả về kiểu sinh bởi Drift, thì AD-01 đã bị vi
 ---
 
 ## AD-02 · SQL viết trong file `.drift`, tách khỏi Dart
+
+| | |
+|---|---|
+| **Status** | accepted |
+| **Affected documents** | `data-model.md` · `flutter-data-layer/references/persistence.md` |
 
 **Quyết định.** Bảng và query khai báo trong file `.drift`, không dùng Dart table
 class.
@@ -78,6 +98,11 @@ dạng SQL (`selectCardsWhereDue`).
 
 ## AD-03 · Auth-ready, chưa có auth
 
+| | |
+|---|---|
+| **Status** | accepted |
+| **Affected documents** | `data-model.md` · `product.md` · BR-56 |
+
 **Quyết định.** MVP không có đăng nhập. Một local profile duy nhất trên thiết bị.
 Nhưng kiến trúc chuẩn bị sẵn cho auth.
 
@@ -109,6 +134,11 @@ thay vì `NOT NULL DEFAULT ''`.
 
 ## AD-04 · Android là target release, Web chỉ để development
 
+| | |
+|---|---|
+| **Status** | accepted |
+| **Affected documents** | `product.md` · `flutter-ship/references/ci.md` · `flutter-project-setup` |
+
 **Quyết định.** Release đầu chỉ Android. Web build được giữ hoạt động nhưng
 **không phát hành** — dùng để review UI nhanh và chạy E2E/visual regression bằng
 Flutter Web + Playwright. iOS sau khi Android ổn định.
@@ -131,6 +161,11 @@ CI giai đoạn này: bỏ job `build-ios` (tiết kiệm macOS runner minutes),
 
 ## AD-05 · Chưa thêm dependency mạng
 
+| | |
+|---|---|
+| **Status** | accepted |
+| **Affected documents** | `flutter-project-setup/references/dependencies.md` · `flutter-data-layer` |
+
 **Quyết định.** Chưa cài `dio`, `connectivity_plus` và các package liên quan
 mạng, dù chúng có trong checklist Phase 3.1.
 
@@ -151,6 +186,11 @@ retrofit.
 ---
 
 ## AD-06 · Scheduler chọn theo deck, khoá sau lượt review đầu tiên
+
+| | |
+|---|---|
+| **Status** | accepted |
+| **Affected documents** | `business-rules.md` (BR-05, BR-06, BR-11…BR-19, BR-30, BR-73, BR-74) · `use-cases.md` (UC-02, UC-03, UC-05) · `data-model.md` |
 
 **Quyết định.** MVP hỗ trợ **hai** scheduler: `eight_box` và `sm2`. Mỗi deck
 **bắt buộc chọn một** khi tạo. Lựa chọn ở cấp deck, không phải cấp app.
@@ -226,7 +266,96 @@ có cơ sở giữa box và ease factor (BR-73).
 
 ---
 
+## AD-07 · Starter deck là template, người dùng nhận bản sao
+
+| | |
+|---|---|
+| **Status** | accepted |
+| **Affected documents** | `business-rules.md` (BR-31…BR-39, BR-87) · `use-cases.md` (UC-01) · `data-model.md` |
+
+**Quyết định.** Deck dựng sẵn là **template**, quản lý tách biệt với deck thuộc
+sở hữu người dùng. Khi người dùng chọn dùng một starter deck, app **tạo một bản
+sao** vào dữ liệu cá nhân. Bản sao đó sau đấy là deck bình thường: sửa, xoá, học
+như mọi deck khác.
+
+Template mang metadata ổn định: `template_id`, `version`, `locale`, `title`,
+`content_source`. Deck bản sao giữ `source_template_id` và
+`source_template_version` để biết nó bắt nguồn từ đâu và từ phiên bản nào.
+
+**Vì sao copy-on-use thay vì chèn thẳng lúc khởi động.**
+
+1. Ranh giới sở hữu rõ ràng. Template là nội dung do app phát hành; bản sao là
+   dữ liệu của người dùng. Trộn hai thứ vào một bảng khiến mọi câu hỏi về quyền
+   ghi trở nên mơ hồ.
+2. **Cập nhật template không được ghi đè nội dung người dùng đã sửa.** Đây là
+   ràng buộc cứng. Với mô hình copy, nó đúng một cách tự nhiên: bản sao không có
+   liên kết ghi ngược về template, nên nâng version template không chạm vào nó.
+   Mô hình chèn-thẳng phải tự chống lại chính nó ở mỗi lần cập nhật.
+3. Người dùng không bị ép nhận thứ họ không muốn. Chèn thẳng lúc khởi động là
+   ghi vào dữ liệu cá nhân mà không hỏi.
+
+**Idempotency là ràng buộc, không phải tối ưu.** Mở lại app hoặc nâng version
+không được tạo deck trùng. Cụ thể:
+
+- Quá trình seed/import kiểm tra theo `(source_template_id, source_template_version)`
+  trước khi tạo — đã có bản sao từ đúng template và version đó thì không tạo nữa.
+- Người dùng **cố ý** thêm cùng một starter deck lần thứ hai là hành động hợp lệ
+  và khác hoàn toàn với việc app tự tạo trùng; luồng đó phải hỏi xác nhận rõ.
+- Toàn bộ việc tạo bản sao (deck + card + review state) nằm trong **một
+  transaction**, để app bị kill giữa chừng không để lại deck nửa vời.
+
+**Ở MVP, `deck_templates` không cần là bảng runtime.** Template có thể chỉ là
+asset JSON đóng gói theo app, đọc khi hiển thị danh sách starter deck. Nhưng khi
+đưa vào database, ranh giới giữa template gốc và bản sao của người dùng phải rõ
+ràng — đó là điều quan trọng, không phải việc nó nằm ở bảng hay ở file.
+
+---
+
+## AD-08 · Dữ liệu riêng tư và đường mở cho mã hoá
+
+| | |
+|---|---|
+| **Status** | accepted |
+| **Affected documents** | `business-rules.md` (BR-51…BR-54) · `product.md` |
+
+**Quyết định.** MVP chưa có tài khoản, chưa có token, chưa mã hoá database. Nhưng
+phạm vi "dữ liệu riêng tư" được định nghĩa rộng ngay từ đầu, và database layer
+phải cho phép bổ sung mã hoá sau mà không viết lại.
+
+**Coi là dữ liệu riêng tư ngay ở MVP:** nội dung deck và flashcard do người dùng
+tạo, ghi chú, lịch sử học, file import, hình ảnh, audio, và dữ liệu backup.
+
+Hệ quả cụ thể lên code:
+
+- **Không log nội dung flashcard hoặc ghi chú, ở bất kỳ level nào.** Log ID thì
+  được. Đây là ràng buộc dễ vi phạm nhất vì log nội dung là phản xạ tự nhiên khi
+  debug — nên nó phải là quy tắc, không phải sự cẩn thận.
+- **Media nằm trong thư mục riêng của ứng dụng**, không phải thư mục dùng chung
+  hay bộ nhớ ngoài nơi app khác đọc được.
+- **Export và backup chỉ chạy khi người dùng chủ động yêu cầu.** Không tự động,
+  không nền, không "để cho tiện".
+
+Khi Spring Boot xuất hiện: email, access token và refresh token là dữ liệu nhạy
+cảm. Token lưu bằng secure storage, **không** lưu trong Drift, không xuất hiện
+trong log. Lý do không để trong Drift là nó nằm ngoài vùng bảo vệ của keystore
+nền tảng, và nó sẽ đi theo mọi bản backup của database.
+
+**Đường mở cho mã hoá.** Chưa mã hoá ở MVP — dữ liệu học từ vựng không đủ nhạy
+cảm để trả giá bằng độ phức tạp của SQLCipher. Nhưng việc mở kết nối database
+phải nằm sau **một chỗ duy nhất** (`core/database/connection.dart`), để chuyển
+sang `sqlcipher_flutter_libs` là sửa một hàm chứ không phải rà toàn bộ code.
+
+Quyết định này cần xem lại nếu app hỗ trợ nội dung cá nhân tự do hoặc tài liệu
+công việc — lúc đó phạm vi rủi ro khác hẳn từ vựng.
+
+---
+
 ## AD-09 · Reset learning progress và scheduler generation
+
+| | |
+|---|---|
+| **Status** | accepted |
+| **Affected documents** | `business-rules.md` (BR-40…BR-50, BR-83, BR-84) · `use-cases.md` (UC-05, UC-07) · `data-model.md` |
 
 **Quyết định.** Đổi scheduler trên deck đã có review chỉ thực hiện được qua thao
 tác **Reset learning progress**. Mỗi deck có `scheduler_generation`, tăng sau mỗi
@@ -271,47 +400,12 @@ khoá.
 
 ---
 
-## AD-07 · Starter deck là template, người dùng nhận bản sao
-
-**Quyết định.** Deck dựng sẵn là **template**, quản lý tách biệt với deck thuộc
-sở hữu người dùng. Khi người dùng chọn dùng một starter deck, app **tạo một bản
-sao** vào dữ liệu cá nhân. Bản sao đó sau đấy là deck bình thường: sửa, xoá, học
-như mọi deck khác.
-
-Template mang metadata ổn định: `template_id`, `version`, `locale`, `title`,
-`content_source`. Deck bản sao giữ `source_template_id` và
-`source_template_version` để biết nó bắt nguồn từ đâu và từ phiên bản nào.
-
-**Vì sao copy-on-use thay vì chèn thẳng lúc khởi động.**
-
-1. Ranh giới sở hữu rõ ràng. Template là nội dung do app phát hành; bản sao là
-   dữ liệu của người dùng. Trộn hai thứ vào một bảng khiến mọi câu hỏi về quyền
-   ghi trở nên mơ hồ.
-2. **Cập nhật template không được ghi đè nội dung người dùng đã sửa.** Đây là
-   ràng buộc cứng. Với mô hình copy, nó đúng một cách tự nhiên: bản sao không có
-   liên kết ghi ngược về template, nên nâng version template không chạm vào nó.
-   Mô hình chèn-thẳng phải tự chống lại chính nó ở mỗi lần cập nhật.
-3. Người dùng không bị ép nhận thứ họ không muốn. Chèn thẳng lúc khởi động là
-   ghi vào dữ liệu cá nhân mà không hỏi.
-
-**Idempotency là ràng buộc, không phải tối ưu.** Mở lại app hoặc nâng version
-không được tạo deck trùng. Cụ thể:
-
-- Quá trình seed/import kiểm tra theo `(source_template_id, source_template_version)`
-  trước khi tạo — đã có bản sao từ đúng template và version đó thì không tạo nữa.
-- Người dùng **cố ý** thêm cùng một starter deck lần thứ hai là hành động hợp lệ
-  và khác hoàn toàn với việc app tự tạo trùng; luồng đó phải hỏi xác nhận rõ.
-- Toàn bộ việc tạo bản sao (deck + card + review state) nằm trong **một
-  transaction**, để app bị kill giữa chừng không để lại deck nửa vời.
-
-**Ở MVP, `deck_templates` không cần là bảng runtime.** Template có thể chỉ là
-asset JSON đóng gói theo app, đọc khi hiển thị danh sách starter deck. Nhưng khi
-đưa vào database, ranh giới giữa template gốc và bản sao của người dùng phải rõ
-ràng — đó là điều quan trọng, không phải việc nó nằm ở bảng hay ở file.
-
----
-
 ## AD-10 · Cây deck nhiều cấp, `root_deck_id`, và `content_type`
+
+| | |
+|---|---|
+| **Status** | accepted |
+| **Affected documents** | `business-rules.md` (BR-55…BR-72) · `use-cases.md` (UC-08, UC-09) · `data-model.md` |
 
 **Quyết định.** Deck lồng được nhiều cấp. Root deck chỉ chứa deck con — không bao
 giờ chứa card trực tiếp. Mỗi deck không phải root mang `content_type` với ba giá
@@ -364,6 +458,11 @@ tạo ra được chỉ bằng một thao tác kéo-thả sai.
 
 ## AD-11 · Trạng thái là dữ liệu tường minh, không phải suy luận
 
+| | |
+|---|---|
+| **Status** | accepted |
+| **Affected documents** | `business-rules.md` (BR-75…BR-86) · `data-model.md` |
+
 **Quyết định.** `review_history.review_kind` và `study_sessions.status` /
 `end_reason` được **lưu tường minh** tại thời điểm ghi. Cấm suy ra chúng bằng cách
 so sánh trạng thái trước và sau, hoặc bằng cách đoán từ dữ liệu khác.
@@ -384,40 +483,6 @@ Cùng lý do đó áp cho session: `abandoned` và `invalidated` đều là "ses
 dùng bỏ giữa chừng, một cái là hệ thống vô hiệu hoá. Gộp lại rồi đoán sau là mất
 vĩnh viễn sự phân biệt đó. `end_reason` giữ nguyên nguyên nhân thay vì để lại một
 mã lỗi chung.
-
----
-
-## AD-08 · Dữ liệu riêng tư và đường mở cho mã hoá
-
-**Quyết định.** MVP chưa có tài khoản, chưa có token, chưa mã hoá database. Nhưng
-phạm vi "dữ liệu riêng tư" được định nghĩa rộng ngay từ đầu, và database layer
-phải cho phép bổ sung mã hoá sau mà không viết lại.
-
-**Coi là dữ liệu riêng tư ngay ở MVP:** nội dung deck và flashcard do người dùng
-tạo, ghi chú, lịch sử học, file import, hình ảnh, audio, và dữ liệu backup.
-
-Hệ quả cụ thể lên code:
-
-- **Không log nội dung flashcard hoặc ghi chú, ở bất kỳ level nào.** Log ID thì
-  được. Đây là ràng buộc dễ vi phạm nhất vì log nội dung là phản xạ tự nhiên khi
-  debug — nên nó phải là quy tắc, không phải sự cẩn thận.
-- **Media nằm trong thư mục riêng của ứng dụng**, không phải thư mục dùng chung
-  hay bộ nhớ ngoài nơi app khác đọc được.
-- **Export và backup chỉ chạy khi người dùng chủ động yêu cầu.** Không tự động,
-  không nền, không "để cho tiện".
-
-Khi Spring Boot xuất hiện: email, access token và refresh token là dữ liệu nhạy
-cảm. Token lưu bằng secure storage, **không** lưu trong Drift, không xuất hiện
-trong log. Lý do không để trong Drift là nó nằm ngoài vùng bảo vệ của keystore
-nền tảng, và nó sẽ đi theo mọi bản backup của database.
-
-**Đường mở cho mã hoá.** Chưa mã hoá ở MVP — dữ liệu học từ vựng không đủ nhạy
-cảm để trả giá bằng độ phức tạp của SQLCipher. Nhưng việc mở kết nối database
-phải nằm sau **một chỗ duy nhất** (`core/database/connection.dart`), để chuyển
-sang `sqlcipher_flutter_libs` là sửa một hàm chứ không phải rà toàn bộ code.
-
-Quyết định này cần xem lại nếu app hỗ trợ nội dung cá nhân tự do hoặc tài liệu
-công việc — lúc đó phạm vi rủi ro khác hẳn từ vựng.
 
 ---
 

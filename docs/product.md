@@ -1,7 +1,14 @@
 # Product requirements — memox
 
-_Status: **frozen for MVP** — không còn mục chờ xác nhận ·
-Last updated: 2026-07-28_
+| | |
+|---|---|
+| **Status** | frozen for MVP |
+| **Purpose** | Xác định sản phẩm là gì, cho ai, chạy trên đâu, và phạm vi MVP đến đâu |
+| **Scope** | Vấn đề, người dùng, quyết định nền tảng, phạm vi MVP, luồng nghiệp vụ chính. Ngoài phạm vi: cách triển khai |
+| **Source of truth for** | Phạm vi MVP · phân loại must/should/nice/out · quyết định platform, data posture, auth, dữ liệu nhạy cảm |
+| **Depends on** | `document-conventions.md` |
+| **Updated by task** | T1.3a |
+| **Last updated** | 2026-07-28 |
 
 ## Problem
 

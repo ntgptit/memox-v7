@@ -165,6 +165,98 @@ fi
 # ---------------------------------------------------------------------------
 # B. Invariant coverage — is each data invariant actually specified?
 # ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# A2. Document contract — docs/document-conventions.md
+# ---------------------------------------------------------------------------
+head_ "A2. Document contract (document-conventions.md)"
+
+REQUIRED_HEADER=("Status" "Purpose" "Scope" "Source of truth for" "Depends on" "Updated by task" "Last updated")
+
+# --- every document declares the full header ---
+hdr_bad=0
+for f in docs/*.md; do
+  for k in "${REQUIRED_HEADER[@]}"; do
+    head -20 "$f" | grep -qF "| **$k**" && continue
+    fail "document header missing a field" "$f is missing: **$k**  (§4)"
+    hdr_bad=1
+  done
+done
+[[ $hdr_bad -eq 0 ]] && ok "all $(ls docs/*.md | wc -l | tr -d ' ') documents declare the full 7-field header"
+
+# --- canonical location: no two documents claim the same source of truth ---
+# Each "Source of truth for" cell is a "·"-separated list of topics.
+dupe_sot="$(for f in docs/*.md; do
+    line="$(grep -m1 -F '| **Source of truth for**' "$f" | sed 's/.*truth for\*\* | //; s/ |$//')"
+    [[ -z "$line" ]] && continue
+    echo "$line" | tr '·' '\n' | sed 's/^ *//; s/ *$//' | grep -v '^$' \
+      | while read -r topic; do echo "$topic|$f"; done
+  done | sort | awk -F'|' '{if($1==prev && $2!=prevf) print $1" → "prevf" AND "$2; prev=$1; prevf=$2}')"
+if [[ -n "$dupe_sot" ]]; then
+  while read -r d; do fail "two documents claim the same source of truth" "$d  (§5)"; done <<< "$dupe_sot"
+else
+  ok "no topic is claimed as source of truth by two documents"
+fi
+
+# --- BR rows carry the required columns ---
+br_bad="$(awk -F'|' '/^\| BR-[0-9]+ \|/ { if (NF < 7) print FILENAME":"NR": "$2" has "NF-2" columns, needs 5" }' "$BR_FILE")"
+if [[ -n "$br_bad" ]]; then
+  while read -r b; do fail "BR row missing required columns" "$b  (§6.2: ID | Status | Rule | Enforced by | Related)"; done <<< "$br_bad"
+else
+  ok "every BR table row carries ID / Status / Rule / Enforced by / Related"
+fi
+
+# --- section-form BR entries declare Status / Enforced by / Related ---
+sec_bad="$(awk '
+  /^### BR-[0-9]+ /       { id=$2; found=0; next }
+  id != "" && /\*\*Status:\*\*/ && /\*\*Enforced by:\*\*/ { found=1 }
+  id != "" && /^### |^## /{ if(!found) print id; id="" }
+  END { if(id != "" && !found) print id }
+' "$BR_FILE")"
+if [[ -n "$sec_bad" ]]; then
+  while read -r s; do fail "section-form BR missing Status / Enforced by" "$s in $BR_FILE  (§6.2)"; done <<< "$sec_bad"
+else
+  ok "every section-form BR declares Status and Enforced by"
+fi
+
+# --- UC sections carry all nine required parts ---
+uc_bad="$(awk '
+  BEGIN { split("Actor|Trigger|Preconditions|Main flow|Alternative flows|Error flows|Postconditions|Business rules|UI states", req, "|") }
+  /^## UC-[0-9]+ / { if (id != "") check(); id=$2; delete seen; next }
+  id != "" { for (i in req) if (index($0, "**" req[i])) seen[req[i]]=1 }
+  END { if (id != "") check() }
+  function check(  i, miss) {
+    miss=""
+    for (i in req) if (!(req[i] in seen)) miss = miss (miss?", ":"") req[i]
+    if (miss != "") print id ": " miss
+  }
+' "$UC_FILE")"
+if [[ -n "$uc_bad" ]]; then
+  while read -r u; do fail "UC missing required section" "$u  (§6.3)"; done <<< "$uc_bad"
+else
+  ok "every UC carries all nine required sections"
+fi
+
+# --- AD sections carry Status, Affected documents and a Decision ---
+ad_bad="$(awk '
+  /^## AD-[0-9]+ / { if (id != "") check(); id=$2; s=a=d=0; next }
+  id != "" && /^\| \*\*Status\*\*/            { s=1 }
+  id != "" && /^\| \*\*Affected documents\*\*/{ a=1 }
+  id != "" && /\*\*Quyết định|\*\*Decision/   { d=1 }
+  END { if (id != "") check() }
+  function check(  m) {
+    m=""
+    if (!s) m = m "Status "
+    if (!a) m = m "Affected-documents "
+    if (!d) m = m "Decision "
+    if (m != "") print id ": missing " m
+  }
+' "$AD_FILE")"
+if [[ -n "$ad_bad" ]]; then
+  while read -r a; do fail "AD missing required field" "$a  (§6.1)"; done <<< "$ad_bad"
+else
+  ok "every AD declares Status, Affected documents and a Decision"
+fi
+
 head_ "B. Invariant coverage in docs/data-model.md"
 
 DM="docs/data-model.md"
