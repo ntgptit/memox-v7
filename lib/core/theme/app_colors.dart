@@ -6,90 +6,102 @@ import 'package:flutter/material.dart';
 /// survives a redesign that turns it amber; `red` becomes a lie the moment
 /// someone changes it, and nobody renames a constant used in forty files.
 ///
-/// **Source: Radix Colors**, read from the published package rather than picked
-/// by eye — accents are step 9 (solid fill) and step 11 (text on a surface),
-/// neutrals are steps 2/3/4/6/11/12. Radix tunes each step to hold its contrast
-/// against the surfaces it is meant to sit on, which is the property that
-/// matters here since every colour has to work in both brightnesses. The WCAG
-/// tests in `test/core/theme/app_theme_test.dart` verify it anyway: the source
-/// is a starting point, not the authority.
+/// **Where these come from.** The dark palette is sampled pixel-by-pixel from a
+/// reference the project owner chose as looking right — not approximated by
+/// eye, and not a stock Material scheme. The light palette is *derived* from
+/// it rather than picked separately: same hues, lightness ladder mirrored. That
+/// is what keeps the two modes recognisably one product instead of two designs
+/// that happen to ship together.
 ///
-/// The family is **violet + mauve**. Violet carries identity; mauve is the
-/// neutral tuned to sit beside it, so surfaces stay quiet without looking like
-/// a different app's grey.
+/// Every pair below is verified by `test/core/theme/app_theme_test.dart`, which
+/// computes WCAG contrast. The reference is a starting point, not the authority.
+///
+/// The identity hue is a deep indigo-navy around 243°, with a cyan accent for
+/// informational marks.
 abstract final class AppColors {
-  /// Source colour for both `ColorScheme.fromSeed` calls. Radix `violet-9`.
-  static const Color seed = Color(0xFF6E56CF);
+  /// Source colour for both `ColorScheme.fromSeed` calls.
+  ///
+  /// Derived from the reference's own hue rather than borrowed from a palette
+  /// library, so the seed and the surfaces belong to each other.
+  static const Color seed = Color(0xFF5049DF);
 
-  // --- Neutral surfaces -----------------------------------------------------
+  // --- Surface ladder -------------------------------------------------------
   //
-  // Two levels, not one: the page sits a step below the card, so a card reads
-  // as a card without needing a shadow. Material would derive these from the
-  // seed, which tints every surface — that lavender cast is what made the old
-  // palette look dated, so the neutrals are declared instead of inherited.
+  // Three levels, not two. The reference separates page, card and inset tile,
+  // and that third step is what lets a chip or an icon container read as raised
+  // without a shadow. Two levels forces every inset element to borrow the card
+  // colour and vanish into it.
+  //
+  // Material would derive all of these from the seed, which tints every
+  // neutral. That washed lavender cast is exactly what the previous palette was
+  // criticised for, so these are declared rather than inherited.
 
-  /// Page background, light. Radix `mauve-2`.
-  static const Color backgroundLight = Color(0xFFFAF9FB);
+  /// Page background — the deepest, most-used surface. Sampled: 59% of the
+  /// reference screens are this exact colour.
+  static const Color backgroundDark = Color(0xFF0A082D);
+
+  /// Card and sheet, one step up from the page.
+  static const Color surfaceDark = Color(0xFF201F3E);
+
+  /// Inset tile, chip, icon container — one step above the card.
+  static const Color surfaceMutedDark = Color(0xFF2E3756);
+
+  /// Page background, light. Mirrors [backgroundDark]'s role: a hair off white,
+  /// so a white card still reads as a card.
+  static const Color backgroundLight = Color(0xFFF6F6FB);
 
   /// Card and sheet, light.
   static const Color surfaceLight = Color(0xFFFFFFFF);
 
-  /// Primary text, light. Radix `mauve-12`.
-  static const Color onSurfaceLight = Color(0xFF211F26);
+  /// Inset tile, chip, icon container, light.
+  static const Color surfaceMutedLight = Color(0xFFEAEAF6);
 
-  /// Secondary text, light. Radix `mauve-11`.
-  static const Color onSurfaceVariantLight = Color(0xFF65636D);
-
-  /// Hairline between rows and around cards, light. Radix `mauve-6`.
-  static const Color borderSubtleLight = Color(0xFFDBD8E0);
-
-  // Dark surfaces are deliberately NOT Radix steps 1–2.
+  // --- Text -----------------------------------------------------------------
   //
-  // Radix step 1 is `#121113` — effectively black. On an OLED phone that reads
-  // as a hole rather than a surface: elevation stops being legible, borders
-  // have nothing to separate, and long reading sessions get harsher because the
-  // contrast against white text is at its maximum. Steps 3 and 4 keep the same
-  // hue relationship while giving the interface a floor to stand on.
+  // Neither end of the scale is pure. `#EDECFE` rather than white, `#17162D`
+  // rather than black: on a saturated ground a pure value buzzes, and carrying
+  // a trace of the surface hue is what makes text sit *in* the interface rather
+  // than on top of it.
 
-  /// Page background, dark. Radix `mauve-3`.
-  static const Color backgroundDark = Color(0xFF232225);
+  static const Color onSurfaceDark = Color(0xFFEDECFE);
+  static const Color onSurfaceVariantDark = Color(0xFFABB0C4);
 
-  /// Card and sheet, dark — a step above the page. Radix `mauve-4`.
-  static const Color surfaceDark = Color(0xFF2B292D);
+  static const Color onSurfaceLight = Color(0xFF17162D);
+  static const Color onSurfaceVariantLight = Color(0xFF585B74);
 
-  /// Primary text, dark. Radix `mauve-12`.
-  static const Color onSurfaceDark = Color(0xFFEEEEF0);
+  // --- Lines ----------------------------------------------------------------
 
-  /// Secondary text, dark. Radix `mauve-11`.
-  static const Color onSurfaceVariantDark = Color(0xFFB5B2BC);
+  /// Hairline between rows and around cards.
+  static const Color borderSubtleDark = Color(0xFF3B4268);
+  static const Color borderSubtleLight = Color(0xFFD9D9E8);
 
-  /// Hairline, dark. Radix `mauve-7` — one step up from light's 6, because a
-  /// border needs more separation against a lifted surface than against white.
-  static const Color borderSubtleDark = Color(0xFF49474E);
+  /// Border of an input while it has focus.
+  ///
+  /// Focus is signalled by a shift in *hue*, not by a jump in thickness.
+  /// Material's default doubles the stroke, which reads as the field shouting;
+  /// the reference keeps the stroke and moves the colour to a soft periwinkle.
+  static const Color focusRingDark = Color(0xFFA8B1FF);
+  static const Color focusRingLight = Color(0xFF5252E0);
 
   // --- Semantic accents -----------------------------------------------------
-  //
-  // Step 11 in both brightnesses: the step Radix tunes for text and icons on a
-  // surface, which is exactly how these are used — an icon and a label, not a
-  // filled block.
 
-  /// Answer remembered, session completed, saved. Radix `jade-11`.
-  static const Color successLight = Color(0xFF208368);
-  static const Color successDark = Color(0xFF1FD8A4);
+  /// Answer remembered, session completed, saved.
+  static const Color successLight = Color(0xFF13795B);
+  static const Color successDark = Color(0xFF3DDCA5);
 
-  /// Card due soon, streak at risk — informative, not alarming. `amber-11`.
-  static const Color warningLight = Color(0xFFAB6400);
-  static const Color warningDark = Color(0xFFFFCA16);
+  /// Card due soon, streak at risk — informative, not alarming.
+  static const Color warningLight = Color(0xFF9A5B00);
+  static const Color warningDark = Color(0xFFFFC94D);
 
-  /// Answer forgotten, destructive action, reset. Radix `ruby-11`.
-  static const Color dangerLight = Color(0xFFCA244D);
-  static const Color dangerDark = Color(0xFFFF949D);
+  /// Answer forgotten, destructive action, reset.
+  static const Color dangerLight = Color(0xFFC32148);
+  static const Color dangerDark = Color(0xFFFF8FA3);
 
-  /// Neutral emphasis: hints, counters, "3 of 20". Radix `violet-11`.
-  static const Color infoLight = Color(0xFF6550B9);
-  static const Color infoDark = Color(0xFFBAA7FF);
-
-  /// Behind a card, to separate it from the page without a border.
-  static const Color surfaceMutedLight = backgroundLight;
-  static const Color surfaceMutedDark = backgroundDark;
+  /// Neutral emphasis: counters, hints, "3 of 20".
+  ///
+  /// Cyan, sampled from the reference's own iconography. It is the one accent
+  /// that is not the brand hue, which is exactly why it reads as information
+  /// rather than as an action.
+  static const Color infoLight = Color(0xFF097FAA);
+  static const Color infoDark = Color(0xFF50D0FF);
 }

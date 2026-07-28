@@ -101,6 +101,7 @@ void main() {
       expect(changed.info, base.info);
       expect(changed.surfaceMuted, base.surfaceMuted);
       expect(changed.borderSubtle, base.borderSubtle);
+      expect(changed.focusRing, base.focusRing);
     });
 
     test('lerp interpolates every field, not just some', () {
@@ -123,6 +124,7 @@ void main() {
         mid.borderSubtle,
         Color.lerp(light.borderSubtle, dark.borderSubtle, 0.5),
       );
+      expect(mid.focusRing, Color.lerp(light.focusRing, dark.focusRing, 0.5));
     });
 
     test('lerp at the endpoints returns the endpoints', () {
@@ -137,6 +139,78 @@ void main() {
       const light = AppSemanticColors.light();
 
       expect(light.lerp(null, 0.5), same(light));
+    });
+  });
+
+  group('surface ladder', () {
+    test('three distinct levels in both themes', () {
+      // Two levels forces every inset element to borrow the card colour and
+      // vanish into it; the third step is what lets a chip read as raised.
+      for (final entry in themes.entries) {
+        final scheme = entry.value.colorScheme;
+        final semantic = entry.value.extension<AppSemanticColors>()!;
+
+        final levels = <Color>{
+          entry.value.scaffoldBackgroundColor,
+          scheme.surface,
+          semantic.surfaceMuted,
+        };
+
+        expect(levels, hasLength(3), reason: entry.key);
+      }
+    });
+
+    test('page and card are separated enough to be seen apart', () {
+      for (final entry in themes.entries) {
+        final step = _contrast(
+          entry.value.scaffoldBackgroundColor,
+          entry.value.colorScheme.surface,
+        );
+
+        // Below roughly 1.05 the step stops being visible on a phone in
+        // daylight, which is where a card silently becomes a flat region.
+        expect(step, greaterThan(1.05), reason: entry.key);
+      }
+    });
+  });
+
+  group('input focus', () {
+    test('focus changes the border colour, never its weight', () {
+      // Material's default goes 1px -> 2px on focus. That makes the field jump
+      // and nudges whatever is laid out beside it.
+      for (final entry in themes.entries) {
+        final input = entry.value.inputDecorationTheme;
+        final enabled = input.enabledBorder! as OutlineInputBorder;
+        final focused = input.focusedBorder! as OutlineInputBorder;
+
+        expect(
+          focused.borderSide.width,
+          enabled.borderSide.width,
+          reason: '${entry.key}: focus changed the stroke width',
+        );
+        expect(
+          focused.borderSide.color,
+          isNot(enabled.borderSide.color),
+          reason: '${entry.key}: focus is not visible at all',
+        );
+        expect(
+          focused.borderRadius,
+          enabled.borderRadius,
+          reason: '${entry.key}: focus changed the shape',
+        );
+      }
+    });
+
+    test('the focus ring is visible against the field it outlines', () {
+      for (final entry in themes.entries) {
+        final semantic = entry.value.extension<AppSemanticColors>()!;
+
+        expect(
+          _contrast(semantic.focusRing, semantic.surfaceMuted),
+          greaterThanOrEqualTo(3.0),
+          reason: entry.key,
+        );
+      }
     });
   });
 
