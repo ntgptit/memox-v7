@@ -26,7 +26,7 @@ AD / UC (xem `business-rules.md`).
 | M0 · Development harness | done | Skills, checklist và enforcement script đã có |
 | M1 · Product definition (Phase 0–1) | **done** | Đặc tả MVP đã frozen: AD-01…11, BR-01…87, UC-01…09, data model đầy đủ |
 | M2 · Project foundation (Phase 2–3, 6) | **done** | Toàn bộ 9 task đóng: M2.1 · M2.1a · M2.1b · M2.2 · M2.2b · M2.3 · M2.4 · M2.5 · M2.6. App build được trên Android (3 flavor cài song song) và Web, l10n en/vi, bootstrap có error boundary, lint + guard đều enforce. Tiếp theo: **M3.1 · Cấu trúc feature-first và ranh giới layer** |
-| M3 · Architecture & design system (Phase 4–5, 7, 12–13) | todo | |
+| M3 · Architecture & design system (Phase 4–5, 7, 12–13) | **done** | Sáu task đóng: M3.1…M3.6. Cây feature-first + guard siết về `fail_on: [error, warning]`, Failure model, Riverpod foundation, design token, hai theme M3, sáu base component kèm 14 golden. Tiếp theo: **M4.1 · GoRouter foundation** |
 | M4 · Router & Drift foundation (Phase 8, 11) | todo | **Phase 10 (networking) hoãn** — AD-01, AD-05 |
 | M5 · First vertical slice: luồng ôn tập (Phase 14) | todo | UC-05 |
 | M6 · Test suite (Phase 15) | todo | Chạy song song M5, không phải sau |
@@ -795,7 +795,7 @@ slice UC-05 cần. Không xây trọn design system trước khi có feature th�
 
 ### M3.2 · Core error và failure model
 
-- **Status:** todo
+- **Status:** done
 - **Goal:** Có một hệ `Failure` sealed để mọi lớp trên data nói cùng một ngôn
   ngữ lỗi.
 - **Scope:** `core/error/failure.dart` (sealed class: Network, Unauthorized,
@@ -805,39 +805,67 @@ slice UC-05 cần. Không xây trọn design system trước khi có feature th�
 - **Editable documents:** `docs/wbs.md`
 - **Output:** `lib/core/error/`
 - **Acceptance criteria:**
-  - [ ] `Failure` là sealed class; `switch` trên nó không cần `default`.
-  - [ ] `ValidationFailure` mang `Map<String, String> fieldErrors`.
-  - [ ] `Failure.message` không chứa SQL, stack trace hay đường dẫn file — có
-        test khẳng định.
-  - [ ] Drift exception → `DatabaseFailure`, giữ nguyên gốc ở `cause`.
-  - [ ] `core/error/` không import Flutter.
+  - [x] `Failure` là sealed class; `switch` trên nó không cần `default`. → test
+        có một `switch` phủ đủ 9 nhánh, **không** `default`
+  - [x] `ValidationFailure` mang `Map<String, String> fieldErrors`, mặc định
+        rỗng để call site không phải null-check.
+  - [x] `Failure.message` không chứa SQL, stack trace hay đường dẫn file — có
+        test quét cả 9 loại với danh sách chuỗi cấm.
+  - [x] Drift exception → `DatabaseFailure`, giữ nguyên gốc ở `cause`.
+  - [x] `core/error/failure.dart` không import Flutter — có test đọc source.
+- **Hai quyết định đáng ghi:**
+  1. **Mapper vứt bỏ nguyên văn exception.** SQLite báo
+     `UNIQUE constraint failed: decks.name` — tên bảng và tên cột. Có test
+     khẳng định `message` **không** chứa `decks` hay `constraint`; bản gốc nằm
+     ở `cause` cho log.
+  2. **`Failure.message` không được localize, có chủ đích.** `domain/` và
+     `core/` không import Flutter nên không với tới ARB. Đây là fallback an
+     toàn; màn hình hiển thị lỗi SHOULD lấy copy từ ARB theo loại failure —
+     việc đó thuộc màn đầu tiên thật sự hiện lỗi (M5.4), không phải một phỏng
+     đoán đặt ở đây.
 - **Dependencies:** M3.1
 - **Tests required:** unit test bảng cho mapper Drift→Failure; test khẳng định
-  không message nào lộ thông tin kỹ thuật
+  không message nào lộ thông tin kỹ thuật — **đã có**, `test/core/error/`, 8 test
 - **Checklist phases:** 6.3
 
 ### M3.3 · Riverpod foundation
 
-- **Status:** todo
+- **Status:** done
 - **Goal:** Có khuôn provider chuẩn để mọi task sau viết giống nhau.
 - **Scope:** `ProviderScope` trong bootstrap, quy ước `@riverpod` codegen, một
-  provider hạ tầng thật (`envConfigProvider` override trong bootstrap),
-  `ProviderContainer` helper cho test.
+  provider hạ tầng thật, `ProviderContainer` helper cho test.
 - **Out of scope:** provider của feature — thuộc M5.
 - **Editable documents:** `docs/wbs.md`
-- **Output:** `lib/core/providers/`, `test/helpers/container.dart`
+- **Output:** `test/helpers/container.dart`. **Không** tạo `lib/core/providers/`:
+  provider hạ tầng duy nhất — `envConfigProvider` — đã tồn tại từ M2.5 tại
+  `lib/app/config/env_config_provider.dart`, nằm cạnh thứ nó cấu hình. Di
+  chuyển nó chỉ để khớp một đường dẫn viết trước khi code tồn tại là đổi lấy
+  rủi ro mà không được gì; WBS được sửa theo code, không ngược lại.
 - **Acceptance criteria:**
-  - [ ] `dart run build_runner build` sinh provider và `flutter analyze` exit 0.
-  - [ ] Provider dùng `Ref` (Riverpod 3), **không** dùng `*Ref` sinh riêng.
-  - [ ] `makeContainer()` trong `test/helpers/` tự `addTearDown(dispose)`.
-  - [ ] Test khẳng định `envConfigProvider` throw khi chưa override.
+  - [x] `dart run build_runner build` sinh provider sạch; lần chạy thứ hai
+        `wrote 0 outputs`, không sinh diff.
+  - [x] Provider dùng `Ref` (Riverpod 3), **không** dùng `*Ref` sinh riêng. →
+        rule `no_generated_ref_subclass` của guard enforce điều này
+  - [x] `makeContainer()` trong `test/helpers/` tự `addTearDown(dispose)`.
+  - [x] Test khẳng định `envConfigProvider` throw khi chưa override, và trả
+        đúng config khi được override (M2.5 đã có, vẫn pass).
+- **Cách chứng minh `addTearDown` thật sự chạy:** không quan sát được từ trong
+  chính test tạo container, vì dispose xảy ra sau khi thân test kết thúc. Nên
+  một test giữ lại tham chiếu, và **test kế tiếp** khẳng định đọc nó thì throw.
+  Nếu quên `addTearDown`, lần đọc đó sẽ im lặng thành công.
+- **Một giới hạn của thư viện, đã ghi lại:** `makeContainer` **không** có tham
+  số `overrides`. Kiểu `Override` của Riverpod không được export bởi `riverpod`
+  lẫn `flutter_riverpod`, nên không hàm nào khai báo được nó trong chữ ký. Test
+  cần override thêm thì tự dựng `ProviderContainer` và tự `addTearDown` — đã ghi
+  kèm ví dụ trong doc comment của helper.
 - **Dependencies:** M3.1, M2.6
-- **Tests required:** unit test cho provider hạ tầng và cho helper container
+- **Tests required:** unit test cho provider hạ tầng và cho helper container —
+  **đã có**, `test/helpers/container_test.dart` 4 test + `test/app/env_config_test.dart`
 - **Checklist phases:** 9.1
 
 ### M3.4 · Design tokens
 
-- **Status:** todo
+- **Status:** done
 - **Goal:** Mọi giá trị hình thức có tên, để feature không hardcode.
 - **Scope:** `core/theme/app_spacing.dart`, `app_radius.dart`,
   `app_icon_size.dart`, `app_durations.dart`, `app_breakpoints.dart`,
@@ -846,68 +874,116 @@ slice UC-05 cần. Không xây trọn design system trước khi có feature th�
 - **Editable documents:** `docs/wbs.md`
 - **Output:** `lib/core/theme/`
 - **Acceptance criteria:**
-  - [ ] Token dùng `abstract final class`, không instantiate được.
-  - [ ] Spacing đúng thang 4 / 8 / 12 / 16 / 24 / 32, không có giá trị ngoài
-        thang.
-  - [ ] Tên token là semantic (`danger`), không phải vật lý (`red`).
-  - [ ] `grep -rE 'Colors\.[a-z]|Color\(0x' lib/features lib/shared` không có
-        kết quả.
-  - [ ] `grep -rn 'TextStyle(' lib/features` không có kết quả.
+  - [x] Token dùng `abstract final class`, không instantiate được — có test đọc
+        source cho cả 7 file.
+  - [x] Spacing đúng thang 4 / 8 / 12 / 16 / 24 / 32, không có giá trị ngoài
+        thang. → test khẳng định `scale` đúng, tăng nghiêm ngặt, và **mọi hằng
+        khai báo đều nằm trên thang** — chặn đúng cái nó sinh ra để chặn: một
+        hằng thứ bảy lệch thang thêm lặng lẽ cho một màn hình
+  - [x] Tên token là semantic (`danger`), không phải vật lý (`red`). → test quét
+        tên hằng `Color` với danh sách từ vật lý
+  - [x] `grep -rE 'Colors\.[a-z]|Color\(0x' lib/features lib/shared` không có
+        kết quả — guard rule `design_token.no_raw_color` enforce, exit 0
+  - [x] `grep -rn 'TextStyle(' lib/features` không có kết quả — guard rule
+        `design_token.no_raw_text_style` enforce, exit 0
+- **Phong cách:** Professional Learning Minimalism — một sắc indigo duy nhất
+  mang nhận diện, còn lại gần trung tính, để nội dung thẻ là thứ duy nhất tranh
+  sự chú ý. Màu dark **không** phải màu light tối đi: trên nền tối, một màu bão
+  hoà đọc ra sáng hơn chính nó trên nền trắng, nên từng màu được làm nhạt và
+  giảm bão hoà để giữ contrast tương đương mà không bị chói.
 - **Dependencies:** M3.1
-- **Tests required:** unit test khẳng định thang spacing và bộ token bắt buộc tồn
-  tại
+- **Tests required:** unit test khẳng định thang spacing và bộ token bắt buộc
+  tồn tại — **đã có**, `test/core/theme/design_tokens_test.dart`, 7 test
 - **Checklist phases:** 7.1
 
 ### M3.5 · Light theme và dark theme
 
-- **Status:** todo
+- **Status:** done
 - **Goal:** Hai theme Material 3 hoàn chỉnh cho phạm vi UC-05.
 - **Scope:** `buildLightTheme()`, `buildDarkTheme()`, `ColorScheme.fromSeed`,
-  `AppSemanticColors` dạng `ThemeExtension`, component theme cho những widget
-  UC-05 dùng: AppBar, Card, FilledButton, OutlinedButton, Snackbar.
+  `AppSemanticColors` dạng `ThemeExtension`, component theme cho AppBar, Card,
+  FilledButton, OutlinedButton, Snackbar.
 - **Out of scope:** theme cho Dialog, BottomSheet, Chip, Input — chưa dùng ở
-  UC-05; thêm khi feature cần.
+  UC-05.
 - **Editable documents:** `docs/wbs.md`
 - **Output:** `lib/core/theme/app_theme.dart`,
-  `lib/core/theme/app_semantic_colors.dart`
+  `lib/core/theme/app_semantic_colors.dart`,
+  `lib/core/theme/theme_context_extension.dart`
 - **Acceptance criteria:**
-  - [ ] `useMaterial3: true` ở cả hai theme.
-  - [ ] `AppSemanticColors` có `lerp` và `copyWith` đúng, đăng ký ở `extensions`.
-  - [ ] Contrast text chính ≥ 4.5:1 ở cả hai theme — có test tính toán, không
-        phải mắt thường.
-  - [ ] Trạng thái disabled, pressed và focused đều có style ở button.
-  - [ ] `context.colors` / `context.texts` / `context.semanticColors` là extension
-        duy nhất trên `BuildContext`.
+  - [x] `useMaterial3: true` ở cả hai theme.
+  - [x] `AppSemanticColors` có `lerp` và `copyWith` đúng, đăng ký ở `extensions`.
+        → test so **từng field** với `Color.lerp` thay vì spot-check một màu:
+        một field bị bỏ quên trong `lerp` sẽ giật khi đổi theme, và chỉ nhìn
+        thấy trên đúng màn hình dùng nó
+  - [x] Contrast text chính ≥ 4.5:1 ở cả hai theme — **tính bằng công thức WCAG**,
+        không phải mắt thường. Hàm contrast được **hiệu chuẩn trước** khi tin
+        (đen trên trắng = 21:1, màu trên chính nó = 1:1) rồi mới đem chấm palette
+  - [x] Trạng thái disabled, pressed và focused đều có style ở button.
+  - [x] `context.colors` / `context.texts` / `context.semanticColors` là
+        extension duy nhất trên `BuildContext`. `semanticColors` **throw** khi
+        thiếu extension thay vì trả mặc định — mặc định im lặng sẽ vẽ sai màu
+        trên màn hình không ai kiểm lại
+- **Một điểm lệch so với đề bài, có lý do:** `MemoxApp` **không** truyền
+  `themeMode: ThemeMode.system` tường minh. Đó đúng là mặc định của
+  `MaterialApp`, nên viết ra sẽ kích `avoid_redundant_argument_values` — lint mà
+  chính dự án này promote lên `error` ở M2.3. Suppress lint của chính mình để
+  nhắc lại một mặc định là đánh đổi tệ hơn. Hành vi được **ghim bằng test**
+  (`app.themeMode == ThemeMode.system`), nên việc bỏ vẫn là cố ý chứ không thành
+  tai nạn.
 - **Dependencies:** M3.4
 - **Tests required:** unit test contrast ratio cho cặp màu chính ở hai theme;
-  widget test dựng cùng widget ở light và dark không throw
+  widget test dựng cùng widget ở light và dark không throw — **đã có**,
+  `test/core/theme/app_theme_test.dart`, 17 test
 - **Checklist phases:** 7.2
 
 ### M3.6 · Base component tối thiểu và app shell
 
-- **Status:** todo
+- **Status:** done
 - **Goal:** Đúng bộ component mà UC-05 cần, không hơn.
-- **Scope:** `AppScaffold`, `AppButton` (variant + loading + disabled),
-  `AppLoadingState`, `AppEmptyState`, `AppErrorState` (nhận `String`, không nhận
-  `Failure`), `AppCardSurface` cho mặt card.
-- **Out of scope:** TextField, SearchField, ListItem, Dialog, BottomSheet — UC-05
-  không dùng. Tạo khi có caller thật (`CLAUDE.md`: không tạo shared component ở
-  lần dùng đầu).
+- **Scope:** `AppScaffoldWidget`, `AppButtonWidget` (variant + loading +
+  disabled), `AppLoadingStateWidget`, `AppEmptyStateWidget`,
+  `AppErrorStateWidget` (nhận `String`, không nhận `Failure`), `AppCardSurface`.
+- **Out of scope:** TextField, SearchField, ListItem, Dialog, BottomSheet —
+  UC-05 không dùng. Tạo khi có caller thật.
 - **Editable documents:** `docs/wbs.md`
 - **Output:** `lib/shared/widgets/`
 - **Acceptance criteria:**
-  - [ ] Mỗi component có `const` constructor.
-  - [ ] `AppButton` có enum variant, **không** nhận `Color` hay `TextStyle`.
-  - [ ] `AppButton` ở trạng thái loading thì bị disable và giữ nguyên chiều rộng.
-  - [ ] Mọi control chỉ có icon đều có semantic label — widget test dùng
-        `find.bySemanticsLabel` chứng minh.
-  - [ ] Touch target ≥ 48×48 — có test đo.
-  - [ ] Mỗi component render được ở 320×568 và ở `textScaler` 2.0 mà
-        `tester.takeException()` trả về null.
-  - [ ] Golden test light + dark cho từng component.
+  - [x] Mỗi component có `const` constructor.
+  - [x] `AppButtonWidget` có enum variant, **không** nhận `Color` hay
+        `TextStyle`. Ngay khi caller truyền được màu, design system hết cưỡng
+        chế được: mọi màn hình tự do bịa một sắc, và người review không phân
+        biệt được biến thể cố ý với lỗi gõ.
+  - [x] `AppButtonWidget` ở trạng thái loading thì bị disable và **giữ nguyên
+        chiều rộng** — có test đo hai lần và so bằng nhau. Label vẫn được layout
+        nhưng `Opacity(0)`; thay child bằng spinner sẽ làm nút co lại và đẩy mọi
+        thứ bên cạnh đúng lúc người dùng đang nhìn.
+  - [x] Mọi control chỉ có icon đều có semantic label — `AppLoadingStateWidget`
+        bắt buộc truyền `semanticsLabel`, có test `find.bySemanticsLabel`.
+  - [x] Touch target ≥ 48×48 — có test đo; ràng buộc đặt ở `ButtonStyle` trong
+        theme nên không component nào dựng được nút thấp hơn.
+  - [x] Mỗi component render được ở 320×568 và ở `textScaler` 2.0 mà
+        `tester.takeException()` trả về null — 6/6 component.
+  - [x] Golden test light + dark cho từng component — 14 file
+        (`test/shared/widgets/goldens/`).
+- **Golden — hai quyết định:**
+  1. Dùng `matchesGoldenFile` có sẵn của `flutter_test`. **Không** thêm
+     `golden_toolkit` hay `alchemist`: với snapshot cố định kích thước, một
+     locale, chúng không mua thêm năng lực nào mà chỉ thêm dependency phải bảo
+     trì.
+  2. **Không** golden cho `AppLoadingStateWidget`. `CircularProgressIndicator`
+     luôn ở giữa animation, nên golden của nó flaky theo thiết kế. Hành vi của
+     nó được phủ bằng test semantics.
+- **Ràng buộc cho M7 (CI):** golden của Flutter **không** portable giữa hệ điều
+  hành. Bộ này sinh trên Windows; runner Linux sẽ khác antialiasing. M7 phải
+  hoặc chạy suite này trên một nền tảng duy nhất, hoặc sinh lại theo nền tảng.
+  File test được gắn tag `golden` nên loại trừ được bằng `--exclude-tags golden`.
+- **App shell:** `ReviewPlaceholderScreen` nay dựng từ `AppScaffoldWidget` +
+  `AppEmptyStateWidget`, tức bộ component được chứng minh chạy end-to-end trước
+  khi có màn hình thật phụ thuộc vào nó. Chưa triển khai màn review (M5.4).
 - **Dependencies:** M3.5, M2.4
 - **Tests required:** widget test cho từng state; golden test light/dark; test
-  overflow ở màn nhỏ và text scale 2.0
+  overflow ở màn nhỏ và text scale 2.0 — **đã có**, `test/shared/widgets/`,
+  12 widget test + 14 golden
 - **Checklist phases:** 7.3, 7.4, 13, 15.3, 15.4
 
 ---
