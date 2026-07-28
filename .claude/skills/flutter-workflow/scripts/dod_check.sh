@@ -60,6 +60,23 @@ else
   SKIPPED+=("architecture (script not executable at $ARCH_CHECK)")
 fi
 
+# ------------------------------------------------ code verification guard
+# The project's main guard. Owns every check flutter analyze cannot express —
+# layer boundaries, Riverpod usage, design tokens, memox data invariants —
+# including the rules riverpod_lint covered before it was descoped.
+GUARD_RUNNER="$REPO_ROOT/code-verification-guard-v2/guard/run.py"
+if [[ -f "$GUARD_RUNNER" ]]; then
+  if command -v python >/dev/null 2>&1; then
+    step "code verification guard (memox-v7)"
+    python "$GUARD_RUNNER" check --project "$REPO_ROOT" --ruleset memox-v7 \
+      || FAILED+=("guard — see the rule ids above")
+  else
+    SKIPPED+=("guard (python not on PATH)")
+  fi
+else
+  SKIPPED+=("guard (not vendored at $GUARD_RUNNER)")
+fi
+
 # ------------------------------------------------------------------ test
 if command -v flutter >/dev/null 2>&1; then
   if [[ -d test ]]; then

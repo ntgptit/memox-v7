@@ -159,3 +159,8 @@ Desktop.ini
 *.bak
 *.tmp
 scratch/
+
+# Vendored code-verification-guard (Python) build artifacts
+__pycache__/
+*.py[cod]
+.playwright-mcp/
