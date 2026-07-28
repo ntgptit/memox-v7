@@ -46,8 +46,10 @@ rebuild scope.
 
 `ref.watch` in build, `ref.read` in callbacks. `ref.read` inside `build` reads a
 value without subscribing, so the widget silently stops updating — a bug that
-looks like "the data is stale" and is hard to trace back. `riverpod_lint` catches
-it, which is why `custom_lint` must actually run.
+looks like "the data is stale" and is hard to trace back. `riverpod_lint` used to
+catch this; it is descoped (`docs/wbs.md`), so the check now lives in
+**code-verification-guard** (`memox.state_management.no_ref_read_in_build`).
+Nothing in `flutter analyze` covers it.
 
 ## Modelling screen state
 
@@ -187,4 +189,5 @@ changes, which is what you want for search-as-you-type.
 - [ ] Side effects in `ref.listen`, not `build`.
 - [ ] One-shot events consumed so they do not re-fire.
 - [ ] `select` used where only part of a state object is needed.
-- [ ] `dart run custom_lint` clean — `flutter analyze` does not cover these rules.
+- [ ] `python code-verification-guard-v2/guard/run.py check --project . --ruleset memox-v7` clean —
+      `flutter analyze` does not cover these rules.

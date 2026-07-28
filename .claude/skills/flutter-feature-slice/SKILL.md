@@ -141,7 +141,8 @@ Minimum for a feature to be done:
 ## Step 5 — Close it out
 
 - [ ] `.claude/skills/flutter-workflow/scripts/dod_check.sh` passes.
-- [ ] `dart run custom_lint` clean (`flutter analyze` does not run Riverpod rules).
+- [ ] `python code-verification-guard-v2/guard/run.py check --project . --ruleset memox-v7` clean
+      (`flutter analyze` does not cover the Riverpod and layering rules).
 - [ ] `docs/wbs.md` updated in this commit — status, and anything descoped with
       the reason.
 - [ ] Docs the feature changed (data model, API spec, architecture decisions)

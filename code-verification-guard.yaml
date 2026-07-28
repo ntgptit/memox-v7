@@ -1,0 +1,50 @@
+# Project-side selector for code-verification-guard.
+#
+# This is the project's MAIN guard. It owns every check that `flutter analyze`
+# cannot express — layer boundaries, Riverpod usage, design tokens, memox data
+# invariants — including the rules riverpod_lint used to provide before it was
+# descoped (see "Deferred and descoped" in docs/wbs.md).
+#
+# Run it:
+#   python code-verification-guard-v2/guard/run.py check --project . --ruleset memox-v7
+#
+# The ruleset itself lives in
+# code-verification-guard-v2/registries/projects/memox-v7/.
+version: 1
+
+project:
+  name: memox-v7
+  root: .
+  source_roots:
+    - lib
+
+profile: local
+
+rule_sets:
+  common: true
+  languages:
+    - dart
+    - flutter
+  projects:
+    - memox-v7
+
+scopes: []
+registries: []
+
+overrides:
+  disabled_rules: []
+  severity: {}
+  rule_options: {}
+
+# Gates on errors today; warnings stay visible as a backlog. See the comment in
+# the ruleset's config/profiles.yaml for why, and for the M3.1 flip back to
+# failing on warnings too.
+failure:
+  fail_on:
+    - error
+  warning_as_error: false
+
+report:
+  format: console
+  show_code_line: true
+  show_fix_hint: true
