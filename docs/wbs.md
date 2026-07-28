@@ -916,6 +916,24 @@ slice UC-05 cần. Không xây trọn design system trước khi có feature th�
 - **Chữ không dùng đầu mút thuần.** `#EDECFE` thay vì trắng, `#17162D` thay vì
   đen: trên nền bão hoà một giá trị thuần bị rung, còn mang theo chút hue của
   surface là thứ làm chữ **nằm trong** giao diện chứ không dán lên trên.
+- **Nút hành động ở dark là *tầng bề mặt thứ tư*, không phải một vật thể có
+  màu.** Thang của tham chiếu là page 0.004 → card 0.016 → tile 0.040 → action
+  0.125 (luminance), mỗi bậc gấp khoảng 2.5 lần bậc trước, **cùng một họ trung
+  tính**. Nút dựng theo cách đó đọc ra là đỉnh của chồng bề mặt chứ không phải
+  một mảng màu — nhờ vậy **mọi sắc bão hoà được để dành cho ý nghĩa**. Điều này
+  quan trọng đúng ở đây: nút review sẽ được mã màu `forgotten`/`remembered`, và
+  một CTA mang màu thương hiệu ngồi cạnh chúng sẽ tranh chấp với đúng hai màu
+  đang mang quyết định.
+
+  Light **không** dùng được thủ pháp đó: trắng đã là đỉnh thang, không còn bậc
+  nào phía trên card để đẩy nút lên. Ở đó màu thương hiệu làm việc này. Sự bất
+  đối xứng là cố ý — quy tắc là "hành động là bề mặt nổi bật nhất", còn *nổi bật*
+  được tạo ra bằng cách khác nhau ở hai đầu thang.
+
+  Có test khẳng định **thứ tự** bốn bậc ở dark (không khẳng định giá trị, để
+  palette sau còn đổi được), và khẳng định nhãn trên nút đạt ≥ 4.5:1 ở cả hai
+  theme. Màu nút được đọc **từ theme** chứ không từ token, nên test sẽ fail nếu
+  nút thôi dùng thứ palette dành cho nó.
 - **`primary` ở dark bị override khỏi mặc định Material 3.** M3 đặt dark
   `primary` ở tone 80 — một sắc lavender gần pastel, **luminance 0.565**, tức
   sáng hơn nửa màu trắng thuần. Đúng cho vai trò M3 giả định (chữ và icon trên

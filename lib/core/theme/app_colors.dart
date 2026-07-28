@@ -56,6 +56,25 @@ abstract final class AppColors {
   /// Inset tile, chip, icon container, light.
   static const Color surfaceMutedLight = Color(0xFFEAEAF6);
 
+  /// Fill of a primary action.
+  ///
+  /// In dark this is the **fourth surface tier**, not a coloured object. The
+  /// reference's ladder is page 0.004 → card 0.016 → tile 0.040 → action 0.125
+  /// in luminance, each step roughly 2.5x the last, all in one neutral family.
+  /// A button built that way reads as the top of the stack rather than as a
+  /// splash of colour, which leaves every saturated hue free to mean something
+  /// — and that matters here, because the review buttons will be colour-coded
+  /// `forgotten` / `remembered`. A brand-coloured CTA sitting next to them
+  /// would compete with the two colours that carry the actual decision.
+  ///
+  /// Light cannot use the same device: white is already the top of the ladder,
+  /// so there is no tier above the card to promote a button into. There the
+  /// brand colour does the job instead. The asymmetry is deliberate — the rule
+  /// is "the action is the most prominent surface", and prominence is built
+  /// differently at each end.
+  static const Color actionFillDark = Color(0xFF58637F);
+  static const Color actionFillLight = seed;
+
   // --- Text -----------------------------------------------------------------
   //
   // Neither end of the scale is pure. `#EDECFE` rather than white, `#17162D`
