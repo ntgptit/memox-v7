@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import '../core/theme/app_theme.dart';
 import '../features/review/presentation/review_placeholder_screen.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../l10n/l10n_extension.dart';
@@ -29,6 +30,13 @@ class MemoxApp extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: AppLocalizations.supportedLocales,
+      theme: buildLightTheme(),
+      darkTheme: buildDarkTheme(),
+      // `themeMode` is deliberately not passed: MaterialApp already defaults
+      // to ThemeMode.system, and stating it trips avoid_redundant_argument_values
+      // — a lint this project promoted to error on purpose. Suppressing our own
+      // lint to restate a default would be the worse trade. The behaviour is
+      // pinned by test instead.
       // No `localeResolutionCallback` on purpose. Flutter's default resolution
       // already falls back to `supportedLocales.first` — which is `en`, the
       // template ARB — for an unsupported locale. A custom callback here was
