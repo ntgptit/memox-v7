@@ -5,7 +5,7 @@
 | **Status** | active |
 | **Purpose** | Ghi lại quyết định kiến trúc và lý do, để phiên sau đọc được quyết định chứ không phải đoán từ code |
 | **Scope** | Quyết định ràng buộc nhiều tài liệu hoặc nhiều layer. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), hình dạng dữ liệu (`data-model.md`) |
-| **Source of truth for** | AD-xx · đánh đổi kiến trúc · phương án đã bị loại |
+| **Source of truth for** | AD-xx · đánh đổi kiến trúc · phương án đã bị loại · lý do pin toolchain |
 | **Depends on** | `document-conventions.md`, `product.md` |
 | **Updated by task** | M2.1a |
 | **Last updated** | 2026-07-28 |
@@ -521,3 +521,34 @@ Các quyết định trên **không** nới lỏng bất kỳ ranh giới nào:
 Cám dỗ lớn nhất ở dự án local-first là dùng thẳng class do Drift sinh ra làm
 entity, vì chúng "trông giống nhau". Đừng — đó chính xác là cách AD-01 mất giá
 trị, và nó chỉ lộ ra khi backend xuất hiện, lúc chi phí sửa cao nhất.
+
+---
+
+## Toolchain
+
+**Phiên bản Flutter được pin. Con số nằm ở `.fvmrc` ở gốc repo — đó là vị trí
+gốc duy nhất, tài liệu này MUST NOT chép lại nó** (§5). Chép ra chỗ thứ hai thì
+sớm muộn hai chỗ lệch nhau, và lúc đó không ai biết chỗ nào đúng — đúng loại lỗi
+mà việc pin sinh ra để phòng.
+
+**Vì sao cần pin.** `pubspec.lock` khoá được dependency nhưng **không** khoá
+được Flutter SDK. Trước M2.2 không có chỗ nào ghi phiên bản, nên hai máy có thể
+dựng ra hai kết quả khác nhau mà không có tín hiệu nào báo. Đây không phải rủi
+ro lý thuyết: M2.1 chạy trên 3.44.8 còn phiên hoàn tất phần Android của nó khởi
+động trên 3.44.6, và không có gì phát hiện ra chênh lệch — nó lộ ra chỉ vì có
+người đi so tay với commit message.
+
+**Vì sao chọn `.fvmrc`** thay vì chỉ ghi vào tài liệu:
+
+- máy đọc được. `subosito/flutter-action` nhận thẳng qua `flutter-version-file`,
+  nên job CI ở M7 lấy đúng con số này mà không phải chép lại lần nữa
+- là quy ước sẵn có của FVM để đổi SDK theo project, không phải định dạng tự
+  nghĩ ra
+- một dòng JSON, không kéo theo tooling nào nếu chưa dùng FVM
+
+**Điều cần biết:** file này **khai báo**, không **cưỡng chế**. Chạy `flutter`
+trực tiếp trên máy có version khác vẫn build được và không cảnh báo gì. Việc
+biến pin này thành check thường trực nằm ở technical debt trong `wbs.md`.
+
+**MUST** cập nhật `.fvmrc` trong cùng commit với lần nâng SDK, và ghi lý do nâng
+vào WBS.
