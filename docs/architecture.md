@@ -5,9 +5,9 @@
 | **Status** | active |
 | **Purpose** | Ghi lại quyết định kiến trúc và lý do, để phiên sau đọc được quyết định chứ không phải đoán từ code |
 | **Scope** | Quyết định ràng buộc nhiều tài liệu hoặc nhiều layer. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), hình dạng dữ liệu (`data-model.md`) |
-| **Source of truth for** | AD-xx · đánh đổi kiến trúc · phương án đã bị loại |
+| **Source of truth for** | AD-xx · đánh đổi kiến trúc · phương án đã bị loại · lý do pin toolchain |
 | **Depends on** | `document-conventions.md`, `product.md` |
-| **Updated by task** | T1.3a |
+| **Updated by task** | M2.1a |
 | **Last updated** | 2026-07-28 |
 
 Format theo `document-conventions.md` §6.1. AD xếp theo số; ID vĩnh viễn (§7).
@@ -156,6 +156,28 @@ mobile-first như Phase 7.4; desktop breakpoint chưa cần.
 
 CI giai đoạn này: bỏ job `build-ios` (tiết kiệm macOS runner minutes), giữ
 `build-android` và thêm `build-web` như một cổng kiểm tra rằng kênh E2E còn sống.
+
+**Kênh E2E phụ thuộc WebGL — ràng buộc bắt buộc cho runner CI (M7).** Từ Flutter
+3.29 renderer HTML đã bị gỡ; 3.44 chỉ còn CanvasKit và skwasm, **cả hai đều cần
+WebGL**. Hệ quả cụ thể và nguy hiểm: ở môi trường không có WebGL, `flutter build
+web` vẫn **exit 0** và Playwright vẫn điều hướng thành công, nhưng app **không
+render** — screenshot ra trang trắng. Không có lỗi build nào cảnh báo, nên một
+job visual-regression sẽ so sánh hai trang trắng với nhau và báo pass.
+
+Vì vậy runner chạy E2E/visual regression **MUST** có WebGL — GPU thật, hoặc
+SwiftShader/ANGLE làm software fallback. Job này **MUST** có một assert rằng app
+đã render thật (ví dụ: tồn tại `<canvas>` do Flutter tạo, kích thước khác 0)
+trước khi so sánh ảnh; nếu không, "pass" của nó không mang thông tin.
+
+Lưu ý khi viết assert đó: Flutter đặt `<canvas>` bên trong **shadow DOM** của
+`flutter-view`. `document.querySelectorAll('canvas')` trả về 0 ngay cả khi app
+đang render bình thường — phải duyệt xuyên `shadowRoot`.
+
+Kiểm chứng đã chạy (M2.1a, máy local Windows + Chrome 150): WebGL2 khả dụng,
+renderer `ANGLE (AMD Radeon, Direct3D11)`, và bản build web render đúng ở cả
+1440×900 lẫn 393×852. Giả định của quyết định này **đứng vững** ở môi trường có
+GPU; nó chỉ đổ ở container headless không WebGL, và đó là thuộc tính của môi
+trường chứ không phải của lựa chọn kiến trúc.
 
 ---
 
@@ -499,3 +521,34 @@ Các quyết định trên **không** nới lỏng bất kỳ ranh giới nào:
 Cám dỗ lớn nhất ở dự án local-first là dùng thẳng class do Drift sinh ra làm
 entity, vì chúng "trông giống nhau". Đừng — đó chính xác là cách AD-01 mất giá
 trị, và nó chỉ lộ ra khi backend xuất hiện, lúc chi phí sửa cao nhất.
+
+---
+
+## Toolchain
+
+**Phiên bản Flutter được pin. Con số nằm ở `.fvmrc` ở gốc repo — đó là vị trí
+gốc duy nhất, tài liệu này MUST NOT chép lại nó** (§5). Chép ra chỗ thứ hai thì
+sớm muộn hai chỗ lệch nhau, và lúc đó không ai biết chỗ nào đúng — đúng loại lỗi
+mà việc pin sinh ra để phòng.
+
+**Vì sao cần pin.** `pubspec.lock` khoá được dependency nhưng **không** khoá
+được Flutter SDK. Trước M2.2 không có chỗ nào ghi phiên bản, nên hai máy có thể
+dựng ra hai kết quả khác nhau mà không có tín hiệu nào báo. Đây không phải rủi
+ro lý thuyết: M2.1 chạy trên 3.44.8 còn phiên hoàn tất phần Android của nó khởi
+động trên 3.44.6, và không có gì phát hiện ra chênh lệch — nó lộ ra chỉ vì có
+người đi so tay với commit message.
+
+**Vì sao chọn `.fvmrc`** thay vì chỉ ghi vào tài liệu:
+
+- máy đọc được. `subosito/flutter-action` nhận thẳng qua `flutter-version-file`,
+  nên job CI ở M7 lấy đúng con số này mà không phải chép lại lần nữa
+- là quy ước sẵn có của FVM để đổi SDK theo project, không phải định dạng tự
+  nghĩ ra
+- một dòng JSON, không kéo theo tooling nào nếu chưa dùng FVM
+
+**Điều cần biết:** file này **khai báo**, không **cưỡng chế**. Chạy `flutter`
+trực tiếp trên máy có version khác vẫn build được và không cảnh báo gì. Việc
+biến pin này thành check thường trực nằm ở technical debt trong `wbs.md`.
+
+**MUST** cập nhật `.fvmrc` trong cùng commit với lần nâng SDK, và ghi lý do nâng
+vào WBS.

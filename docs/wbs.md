@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | T1.4 |
+| **Updated by task** | M2.1 |
 | **Last updated** | 2026-07-28 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -25,7 +25,7 @@ AD / UC (xem `business-rules.md`).
 |---|---|---|
 | M0 · Development harness | done | Skills, checklist và enforcement script đã có |
 | M1 · Product definition (Phase 0–1) | **done** | Đặc tả MVP đã frozen: AD-01…11, BR-01…87, UC-01…09, data model đầy đủ |
-| M2 · Project foundation (Phase 2–3, 6) | in-progress | **M2.1 blocked** ở đúng một bước: build APK. Flutter đã cài, code đã xong, analyze/test/web build pass — xem Blocker |
+| M2 · Project foundation (Phase 2–3, 6) | in-progress | M2.1 / M2.1a / M2.1b done. **M2.2 done trừ `custom_lint` + `riverpod_lint`** — xung đột `analyzer` của hệ sinh thái, xem Blocker. Flutter đã pin ở `.fvmrc`. Tiếp theo: M2.3 |
 | M3 · Architecture & design system (Phase 4–5, 7, 12–13) | todo | |
 | M4 · Router & Drift foundation (Phase 8, 11) | todo | **Phase 10 (networking) hoãn** — AD-01, AD-05 |
 | M5 · First vertical slice: luồng ôn tập (Phase 14) | todo | UC-05 |
@@ -263,6 +263,10 @@ bộ, không phải chỉnh sửa tiện tay.
 - Mọi task **MUST** kết thúc với `flutter analyze` sạch (0 error, 0 warning) và
   `dart run custom_lint` exit 0. Không lặp lại điều này ở từng acceptance
   criteria; nó là điều kiện cần của mọi task có code.
+  **Tạm hoãn phần `custom_lint` kể từ M2.2:** package này chưa cài được vì xung
+  đột `analyzer` (xem Blocker). Cho tới khi gỡ được, phần `flutter analyze`
+  vẫn **MUST** đạt; phần `custom_lint` được coi là hoãn, **không** phải được
+  miễn — nó quay lại thành bắt buộc ngay khi M2.3 cài được package.
 - `.claude/skills/flutter-architecture/scripts/check_architecture.sh` **MUST**
   exit 0 sau mọi task tạo file trong `lib/`.
 
@@ -275,7 +279,7 @@ và Web, analyzer sạch, code generation chạy được.
 
 ### M2.1 · Khởi tạo Flutter project và xác nhận toolchain
 
-- **Status:** done — **hai tiêu chí Android được hoãn có chủ đích**, xem ghi chú cuối mục
+- **Status:** done
 - **Goal:** Tạo Flutter project chạy được và xác nhận toolchain đủ để build
   Android lẫn Web.
 - **Scope:** `flutter create` với org/package đúng, xoá code demo, thu `main.dart`
@@ -287,11 +291,13 @@ và Web, analyzer sạch, code generation chạy được.
   `lib/main.dart`, `lib/app/app.dart`, `test/widget_test.dart`, `README.md`,
   `android/`, `web/`, `.metadata`
 - **Acceptance criteria:**
-  - [ ] **[hoãn]** `flutter doctor` không có mục nào ở trạng thái lỗi cho Android
-        toolchain. → chưa đạt: `[✗] Android toolchain — Unable to locate Android SDK.`
+  - [x] `flutter doctor` không có mục nào ở trạng thái lỗi cho Android
+        toolchain. → `[√] Android toolchain — develop for Android devices
+        (Android SDK version 36.0.0)`, platform android-36, build-tools 36.0.0,
+        JDK 21, all licenses accepted; `flutter doctor -v` → `No issues found!`
   - [x] `flutter analyze` → 0 error, 0 warning. → `No issues found!`, exit 0
-  - [ ] **[hoãn]** `flutter build apk --debug` exit 0. → chưa đạt:
-        `[!] No Android SDK found.`, exit 1
+  - [x] `flutter build apk --debug` exit 0. →
+        `√ Built build\app\outputs\flutter-apk\app-debug.apk`, exit 0
   - [x] `flutter build web` exit 0. → `✓ Built build/web`, exit 0
   - [x] `flutter test` exit 0. → `All tests passed!`, 1 test
   - [x] `lib/main.dart` ≤ 10 dòng và không chứa widget nào. → 7 dòng, 0 widget
@@ -307,13 +313,12 @@ và Web, analyzer sạch, code generation chạy được.
   - [x] `.gitignore`, `docs/` và `.claude/` không bị `flutter create` ghi đè.
 - **Dependencies:** T1.4
 - **Tests required:** smoke test dựng app và tìm được root widget — **đã có**,
-  `test/widget_test.dart`, pass
+  `test/widget_test.dart`, pass. Ngoài ra APK đã được cài và chạy trên emulator
+  `Medium_Phone` (Android 16, API 36): activity `com.ntgptit.memox/.MainActivity`
+  giành được `mCurrentFocus` sau 7s và screenshot cho thấy app **render thật**
+  — nền Material 3 sáng, chữ `memox` căn giữa. Build xong không đồng nghĩa với
+  hiển thị được; đây là bước xác nhận điều thứ hai.
 - **Checklist phases:** 2.1, 2.3
-- **Ghi chú về trạng thái:** hai tiêu chí Android ở trên **chưa được kiểm chứng**
-  và MUST NOT được đọc là đã đạt. Chủ dự án đã quyết định đi tiếp vì Web — kênh
-  E2E theo AD-04 — vẫn build được, và phần Android sẽ xác minh ở môi trường
-  local. Việc còn lại: chạy `flutter doctor -v` và `flutter build apk --debug`
-  trên máy có Android SDK. Không cần sửa code.
 
 ### M2.1a · Khung màn hình mobile cho bản build Web
 
@@ -335,29 +340,124 @@ và Web, analyzer sạch, code generation chạy được.
   - [x] Trên Android là no-op (`kIsWeb` false).
   - [x] `flutter analyze` 0 issue; `flutter test` 4/4 pass;
         `flutter build web --no-web-resources-cdn` exit 0.
+- **Kiểm chứng bằng screenshot thật:** widget test khẳng định được logic nhưng
+  **không ai từng nhìn thấy** khung này render. Đã dựng
+  `flutter build web --no-web-resources-cdn`, phục vụ `build/web` và chụp bằng
+  Playwright ở hai viewport:
+
+  | Viewport | Nhìn thấy | Đo được |
+  |---|---|---|
+  | 1440×900 | App nằm giữa trong khung dọc hình điện thoại, nền tối bao quanh | Nền `rgb(30,30,30)` = đúng `0xFF1E1E1E`; khung cao **852**, lề trái/phải **524/524**, lề trên/dưới **24/24** — căn giữa chính xác |
+  | 393×852 | Không đóng khung, app tràn đầy viewport, không có dải tối | `scrollWidth` 393 = `innerWidth` 393 → **không** tràn ngang; canvas 393×852 |
+
+  Bề rộng khung đo được 392 thay vì 393 là do pixel biên bị antialias rơi dưới
+  ngưỡng lọc màu, không phải sai layout — chiều cao 852 và hai lề 524/524 khớp
+  tuyệt đối.
+
+  Khung hiển thị **đúng**; không cần sửa `mobile_frame_widget.dart`.
 - **Dependencies:** M2.1
-- **Tests required:** 3 widget test cho ba nhánh của widget — đã có, pass
+- **Tests required:** 3 widget test cho ba nhánh của widget — đã có, pass; cộng
+  thêm kiểm chứng bằng screenshot thật ở hai viewport (bảng trên)
 - **Checklist phases:** 7.4, 15.5
+
+### M2.1b · Sửa `check_docs.sh` — task ID `M*` không được kiểm
+
+- **Status:** done
+- **Goal:** Làm cho check WBS trong `check_docs.sh` kiểm đúng thứ nó nói là đang
+  kiểm, và mở rộng sang hai lỗi mà nó chưa bắt được.
+- **Scope:** regex task ID; check dependency resolve; check `M*` đủ field và
+  acceptance criteria không rỗng; test tiêm lỗi cho từng check mới.
+- **Out of scope:** đổi nội dung WBS để chiều script. Nếu một check mới bắt được
+  vi phạm có thật trong WBS hiện tại thì **sửa WBS**, và ghi lại là đã sửa gì.
+- **Editable documents:** `docs/wbs.md`,
+  `.claude/skills/flutter-workflow/scripts/check_docs.sh`
+- **Output:** `.claude/skills/flutter-workflow/scripts/check_docs.sh`
+- **Vấn đề:** regex cũ là `^### T[0-9]+...`, chỉ khớp tiền tố `T`. Nó in
+  `no duplicate WBS task IDs (8 tasks)` trong khi WBS có 33 task. Đây là **pass
+  gây hiểu nhầm**: 25 task `M2`–`M5` không được bảo vệ khỏi trùng ID, nhưng
+  output đọc như đã kiểm hết. Một check im lặng bỏ sót còn tệ hơn không có
+  check, vì nó tạo ra niềm tin sai.
+- **Acceptance criteria:**
+  - [x] Regex task ID là `[TM][0-9]+(\.[0-9]+)?[a-z]?`; số task báo ra khớp số
+        task thật trong `wbs.md`. → báo `35 tasks`; `grep -c '^### '` = 35 và
+        **mọi** heading `###` đều khớp shape task ID, không sót cái nào.
+  - [x] Check mới: mọi `Dependencies` trỏ tới task **có tồn tại**. → `47 edges`
+        resolve. Chỉ token có shape ID mới bị kiểm, nên `none` và
+        `product owner input — đã nhận` không bị báo nhầm.
+  - [x] Check mới: mọi task `M*` có đủ 9 field bắt buộc của §6.5 và khối
+        acceptance criteria **không rỗng**. Giới hạn ở `M*` có chủ đích: `T*` có
+        trước template §6.5 và một số task thiếu `Editable documents` một cách
+        hợp lệ. `Out of scope` không nằm trong 9 field vì §6.5 đánh dấu nó là có
+        điều kiện.
+  - [x] **Mỗi** check mới được verify bằng **test tiêm lỗi** — 4/4 case đạt, xem
+        bảng dưới.
+  - [x] `check_docs.sh` exit 0 trên `wbs.md` hiện tại.
+- **Kết quả test tiêm lỗi:**
+
+  | Case | Vi phạm được tiêm | Sau khi tiêm | Sau khi khôi phục |
+  |---|---|---|---|
+  | 1 | Thêm heading `### M4.2` trùng | exit 1 · `duplicate WBS task ID` | exit 0 |
+  | 2 | Đổi dependency của M4.6 thành `M9.9` | exit 1 · `dependency points at a task that does not exist` | exit 0 |
+  | 3a | Xoá field `Tests required` của M2.3 | exit 1 · `missing field(s)` | exit 0 |
+  | 3b | Xoá hết checkbox acceptance criteria của M3.4 | exit 1 · `Acceptance criteria block is empty` | exit 0 |
+
+  Case 1 cũng là bằng chứng cho việc regex cũ mù: với đúng cùng một vi phạm,
+  regex `T`-only thấy **8 task, 0 trùng** — pass sạch. Regex mới thấy 36 task và
+  bắt được `M4.2`.
+- **Dependencies:** M2.1
+- **Tests required:** fault injection cho cả ba check (regex trùng ID,
+  dependency chết, field thiếu / acceptance criteria rỗng) — **đã chạy, 4/4 đạt**
+- **Checklist phases:** 1.2
 
 ### M2.2 · Dependency nền tảng và code generation
 
-- **Status:** todo
-- **Goal:** Cài đúng bộ dependency của MVP và làm `build_runner` chạy sạch.
+- **Status:** done — **trừ `custom_lint` và `riverpod_lint`**, xem Blocker
+- **Goal:** Cài đúng bộ dependency của MVP, làm `build_runner` chạy sạch, và
+  **pin phiên bản Flutter**.
 - **Scope:** runtime + dev dependency theo
   `.claude/skills/flutter-project-setup/references/dependencies.md`; cấu hình
-  `build.yaml` nếu cần; commit `pubspec.lock`.
+  `build.yaml` nếu cần; commit `pubspec.lock`; pin Flutter SDK.
 - **Out of scope:** `dio`, `connectivity_plus`, `flutter_secure_storage` — hoãn
-  theo AD-05 và AD-03. Thêm chúng ở M9.
-- **Editable documents:** `docs/wbs.md`
-- **Output:** `pubspec.yaml`, `pubspec.lock`, `build.yaml` nếu cần
+  theo AD-05 và AD-03. Thêm chúng ở M9. `golden_toolkit`/`alchemist` — thêm khi
+  Phase 15.4 bắt đầu.
+- **Editable documents:** `docs/wbs.md`, `docs/architecture.md`
+- **Output:** `pubspec.yaml`, `pubspec.lock`, `build.yaml` nếu cần, `.fvmrc`,
+  mục Toolchain trong `docs/architecture.md`
 - **Acceptance criteria:**
-  - [ ] `flutter pub get` exit 0.
-  - [ ] `dart run build_runner build --delete-conflicting-outputs` exit 0.
-  - [ ] Chạy `build_runner` lần hai không sinh diff (`git status --porcelain`
-        rỗng cho file không bị `.gitignore`).
-  - [ ] `flutter pub deps --style=compact | grep -c '^.*dio'` = 0.
-  - [ ] `uuid` có trong dependency (bắt buộc từ đầu theo AD-03).
-  - [ ] `pubspec.lock` được commit.
+  - [x] `flutter pub get` exit 0. → `Got dependencies!`
+  - [x] `dart run build_runner build --delete-conflicting-outputs` exit 0. →
+        `Built with build_runner/aot in 39s; wrote 8 outputs.`
+  - [x] Chạy `build_runner` lần hai không sinh diff (`git status --porcelain`
+        rỗng cho file không bị `.gitignore`). → lần hai `wrote 0 outputs`, và
+        `git status --porcelain` **giống hệt** trước/sau.
+  - [x] `flutter pub deps --style=compact | grep -c '^.*dio'` = 0. → `0`
+  - [x] `uuid` có trong dependency (bắt buộc từ đầu theo AD-03). → `uuid: ^4.6.0`
+  - [x] `pubspec.lock` được commit.
+  - [x] Phiên bản Flutter được pin ở đúng **một** vị trí gốc và lý do được ghi
+        lại (§5 — không chép con số ra hai chỗ). → con số ở `.fvmrc`, lý do ở
+        mục Toolchain của `architecture.md`, mục đó **không** chép lại con số.
+  - [ ] **Chưa đạt** — `custom_lint` và `riverpod_lint` không cài được. Không
+        phải lỗi cấu hình mà là xung đột có thật của hệ sinh thái, xem Blocker.
+- **Hai điểm lệch so với `dependencies.md`, cả hai đều có lý do:**
+
+  1. **`custom_lint` + `riverpod_lint` bị bỏ lại.** Mọi phiên bản `custom_lint`
+     đã publish đều yêu cầu `analyzer ^7` hoặc `^8`; trong khi
+     `json_serializable 6.14`, `freezed 3.2.5` và `drift_dev 2.34` đều yêu cầu
+     `analyzer >=10`. Cách duy nhất để cài được `custom_lint` là hạ **toàn bộ**
+     stack generator xuống một thế hệ — kể cả `freezed_annotation` về `^2.2.0`
+     và `uuid` về `^3.0.6`, tức là đi ngược AD-03. Cái giá đó không xứng.
+  2. **`sqlite3_flutter_libs` bị **loại bỏ**.** Phiên bản duy nhất tương thích
+     là `0.6.0+eol`, và đó là một **tombstone release**: mô tả của chính nó là
+     *"Not used anymore, update to version 3.x of package:sqlite3 instead"*, và
+     nội dung là đúng một file Dart, **không có native code nào**. Từ
+     `sqlite3` 3.x, thư viện native được cung cấp qua **native assets**
+     (`hook/build.dart`) — feature flag `enable-native-assets` đã bật sẵn trong
+     Flutter 3.44. Giữ lại package này sẽ tạo cảm giác sai rằng native lib đã
+     được lo, đúng vào chỗ nguy hiểm nhất: Drift hỏng ở **runtime**, không phải
+     lúc build.
+
+     **M4.2 MUST kiểm chứng** SQLite thật sự nạp được trên thiết bị Android
+     thật, vì cơ chế đã đổi từ Flutter plugin sang native assets.
 - **Dependencies:** M2.1
 - **Tests required:** none — cấu hình; đã được cover bởi việc `build_runner` chạy
   sạch và analyzer sạch
@@ -981,24 +1081,27 @@ viện starter deck.
 
 | Blocker | Ảnh hưởng | Cách gỡ |
 |---|---|---|
-| **`dl.google.com` bị chính sách mạng của môi trường chặn** (403 CONNECT) | Không cài được Android SDK, và Gradle không tải được Android Gradle Plugin. `flutter build apk` và `flutter doctor` phần Android **không thể** pass. Chặn tiêu chí APK của M2.1, và sẽ chặn mọi task cần build Android sau này | Cho phép `dl.google.com` trong network policy của environment, hoặc chạy các build Android trên runner CI có sẵn Android SDK |
-| Flutter SDK không tồn tại sẵn trong container | Mỗi phiên phải cài lại (~1.5 GB, vài phút) | Đã cài thủ công vào `/opt/flutter` ở M2.1. Container là ephemeral nên cần **SessionStart hook** để phiên sau tự dựng lại — chưa làm, xếp vào M2.2 |
-| **WebGL không khả dụng trong Chromium headless của container** | Flutter 3.44 chỉ còn renderer CanvasKit/skwasm, cả hai cần WebGL; HTML renderer đã bị gỡ từ 3.29. App build được nhưng **không render** — screenshot ra trang trắng. Chặn visual regression và E2E bằng Playwright ngay trong container | Chạy E2E trên runner có GPU/WebGL, hoặc dùng emulator Android cho integration test. Cần quyết định trước M7 vì AD-04 đặt cược kênh E2E vào Flutter Web |
+| **`custom_lint` không tương thích với stack generator hiện tại** | Mọi phiên bản `custom_lint` đã publish đều cần `analyzer ^7`/`^8`; `json_serializable 6.14`, `freezed 3.2.5` và `drift_dev 2.34` đều cần `analyzer >=10`. Kéo theo `riverpod_lint` cũng không cài được. Chặn M2.3 (tiêu chí `dart run custom_lint` exit 0) và làm quy tắc chung M2–M5 về `custom_lint` **tạm thời không thoả mãn được** | Chờ `custom_lint` hỗ trợ `analyzer >=10` rồi thêm lại ở M2.3. **Không** hạ stack generator để chiều nó — cái giá là `freezed_annotation` về `^2.2.0` và `uuid` về `^3.0.6`, đi ngược AD-03. Kiểm lại bằng `flutter pub add --dev custom_lint riverpod_lint` ở mỗi lần chạm dependency |
+| Flutter SDK không tồn tại sẵn trong container | Mỗi phiên phải cài lại (~1.5 GB, vài phút) | Đã cài thủ công vào `/opt/flutter` ở M2.1. Container là ephemeral nên cần **SessionStart hook** để phiên sau tự dựng lại — chưa làm, xếp vào M2.2. **Chỉ áp dụng cho môi trường cloud**; máy local có Flutter cài sẵn |
+| **WebGL không khả dụng trong Chromium headless của container** | Flutter 3.44 chỉ còn renderer CanvasKit/skwasm, cả hai cần WebGL; HTML renderer đã bị gỡ từ 3.29. App build được nhưng **không render** — screenshot ra trang trắng. Chặn visual regression và E2E bằng Playwright ngay trong container | **Không còn là blocker của kiến trúc — chỉ là ràng buộc môi trường.** Đã kiểm chứng ở máy local: WebGL2 khả dụng (`ANGLE (AMD Radeon, D3D11)`) và app render đúng ở cả hai viewport. AD-04 giữ nguyên, phần Consequences đã ghi rõ runner E2E MUST có WebGL (GPU thật hoặc SwiftShader) và job MUST assert app đã render thật trước khi so ảnh |
 
-Blocker thứ nhất **không** chặn phần còn lại của M2: `flutter analyze`, `flutter
-test`, `flutter build web` và `build_runner` đều chạy được. Nó chỉ chặn đúng
-bước build APK.
+**Đã gỡ — `dl.google.com` bị chính sách mạng chặn (403 CONNECT).** Blocker này
+chặn việc cài Android SDK và việc Gradle tải Android Gradle Plugin, khiến hai
+tiêu chí Android của M2.1 không kiểm chứng được. Nó **chỉ áp dụng cho môi trường
+cloud** nơi network policy chặn `dl.google.com`, **không** phải khuyết tật của
+project: trên máy local có Android SDK, `flutter doctor -v` sạch và
+`flutter build apk --debug` exit 0 mà không sửa một dòng code nào — đúng như dự
+đoán lúc hoãn.
 
-**Kế hoạch đã chốt:** phần Android của M2.1 sẽ được hoàn tất trong một phiên chạy
-ở **môi trường local** có sẵn Android SDK. Phiên đó chỉ cần chạy lại
-`flutter doctor -v` và `flutter build apk --debug`, rồi chuyển M2.1 sang `done`
-— không cần sửa code, vì mọi tiêu chí khác đã đạt và đã commit.
+Hệ quả còn lại cho M7: mọi job build Android **MUST** chạy ở môi trường truy cập
+được `dl.google.com`. Đây là ràng buộc khi chọn CI runner, không còn là blocker
+của M2.
 
 ## Deferred and descoped
 
 | Item | Decision | Reason | Revisit when |
 |---|---|---|---|
-| Flutter toolchain verification | deferred | `flutter` chưa có trong môi trường; `flutter doctor` và build sạch chưa chạy được | Phase 2.1 |
+| Flutter toolchain verification | **đã xong** | Từng hoãn vì `flutter` chưa có trong môi trường cloud | Đã kiểm chứng ở M2.1 trên máy local: `flutter doctor -v` → `No issues found!` |
 | Đưa deck con lên thành root deck | descoped khỏi MVP | Cần quyết định scheduler mới; là tính năng riêng chứ không phải phép di chuyển | Sau MVP (UC-09 A2) |
 | Media và tag | descoped khỏi MVP | Kéo theo lưu trữ file và đồng bộ file | Sau MVP; quy tắc reset và lưu trữ đã đặt sẵn (BR-41, AD-08) |
 
@@ -1009,6 +1112,8 @@ bước build APK.
 | `check_architecture.sh` chưa có test tự động | T0.1 | Regression trong checker âm thầm ngừng enforce boundary | Fixture trong `test/tools/` khi `test/` tồn tại (M6) |
 | `analysis_options.yaml` chưa được áp dụng | T0.1 | Bộ lint đã viết nhưng chưa được enforce; nhiều khả năng có tên rule sai hoặc đã deprecated | Copy vào project ở Phase 2.3 và xác nhận từng rule được analyzer công nhận |
 | 14 query bất biến chưa chạy trên **dữ liệu người dùng thật** | T1.3 | Bất biến mới được verify trên fixture, chưa enforce trên DB sản xuất | Chạy `check_docs.sh --db <path>` trong test tích hợp khi Drift schema tồn tại (M4) |
+| Pin Flutter ở `.fvmrc` **khai báo** chứ không **cưỡng chế** | M2.2 | Chạy `flutter` trực tiếp trên máy có version khác vẫn build được và không cảnh báo. Đây đúng là lỗi đã xảy ra: M2.1 chạy 3.44.8, phiên sau khởi động trên 3.44.6, không có gì phát hiện ra | Thêm một check so `flutter --version` với `.fvmrc` vào `dod_check.sh`, và dùng `flutter-version-file: .fvmrc` ở job CI của M7 |
+| `dependencies.md` vẫn liệt kê `sqlite3_flutter_libs` | M2.2 | Package đó nay là tombstone (`0.6.0+eol`, không có native code). Skill nói sai còn tệ hơn không có skill — phiên sau sẽ cài lại nó | Sửa `.claude/skills/flutter-project-setup/references/dependencies.md`: thay bằng ghi chú rằng `sqlite3` 3.x cấp native lib qua native assets. Ngoài `Editable documents` của M2.2 nên chưa sửa ở đây |
 | Nội dung starter là fixture, không phải nội dung production | T1.3 | Không phát hành được với nội dung này | Tìm nguồn nội dung có bản quyền rõ ràng trước M8 (BR-87) |
 | Bản build web MUST dùng `--no-web-resources-cdn` | M2.1a | Mặc định Flutter tải CanvasKit từ `gstatic.com` lúc **runtime** dù đã bundle sẵn cục bộ. Trong môi trường chặn CDN, app im lặng không render — không có lỗi build nào cảnh báo | Đưa cờ này vào job `build-web` của CI ở M7, và vào mọi hướng dẫn chạy web |
-| `check_docs.sh` chỉ đếm task ID dạng `T*`, bỏ sót `M*` | T1.4 | Báo "no duplicate WBS task IDs (8 tasks)" trong khi có 33 — **pass gây hiểu nhầm**, 25 task M2–M5 không được bảo vệ khỏi trùng ID | Sửa regex task ID trong `check_docs.sh` thành `[TM][0-9]+...`; thêm check dependency resolve và acceptance-criteria rỗng. Đã verify thủ công ở T1.4, nhưng cần thành check thường trực. Làm cùng M2.1 |
+| ~~`check_docs.sh` chỉ đếm task ID dạng `T*`, bỏ sót `M*`~~ | T1.4 | Báo "no duplicate WBS task IDs (8 tasks)" trong khi có 33 — **pass gây hiểu nhầm**, 25 task M2–M5 không được bảo vệ khỏi trùng ID | **Đã trả ở M2.1b.** Regex sửa thành `[TM][0-9]+(\.[0-9]+)?[a-z]?` (giờ báo 35 task), thêm check dependency resolve và check `M*` đủ field + acceptance criteria không rỗng. Cả ba verify bằng test tiêm lỗi, 4/4 case đạt |
