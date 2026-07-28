@@ -106,12 +106,89 @@ for pair in "BR:$BR_DEFINED" "AD:$AD_DEFINED" "UC:$UC_DEFINED"; do
 done
 
 # --- WBS task id duplicates ---
-TASK_IDS="$(grep -ohE '^### T[0-9]+(\.[0-9]+)?[a-z]? ' "$WBS_FILE" | awk '{print $2}' | sort)"
+#
+# The pattern must cover both prefixes. It was `T`-only until M2.1b, which made
+# the check report "no duplicate WBS task IDs (8 tasks)" while the WBS held 33:
+# a pass that reads like coverage while 25 M-tasks go unchecked. A check that
+# silently skips most of its input is worse than no check, because the green
+# tick is what the next session trusts.
+TASK_ID_RE='[TM][0-9]+(\.[0-9]+)?[a-z]?'
+TASK_IDS="$(grep -ohE "^### $TASK_ID_RE " "$WBS_FILE" | awk '{print $2}' | sort)"
 TASK_DUPES="$(echo "$TASK_IDS" | uniq -d)"
 if [[ -n "$TASK_DUPES" ]]; then
   while read -r t; do fail "duplicate WBS task ID" "$t appears more than once in $WBS_FILE"; done <<< "$TASK_DUPES"
 else
   ok "no duplicate WBS task IDs ($(echo "$TASK_IDS" | wc -l | tr -d ' ') tasks)"
+fi
+
+# --- WBS dependencies point at a task that exists ---
+#
+# A dependency on a task ID that was renamed or never written reads as a real
+# ordering constraint and silently isn't one. Only ID-shaped tokens are checked,
+# so prose values like "none" or "product owner input" pass through untouched.
+DEP_PAIRS="$(awk '
+  /^### / {
+    cur = ($2 ~ /^[TM][0-9]+(\.[0-9]+)?[a-z]?$/) ? $2 : ""
+    next
+  }
+  cur != "" && /^- \*\*Dependencies:\*\*/ {
+    line = $0
+    sub(/^- \*\*Dependencies:\*\*[[:space:]]*/, "", line)
+    n = split(line, toks, /[^A-Za-z0-9.]+/)
+    for (i = 1; i <= n; i++) {
+      t = toks[i]
+      gsub(/\.+$/, "", t)
+      if (t ~ /^[TM][0-9]+(\.[0-9]+)?[a-z]?$/) print cur "|" t
+    }
+  }
+' "$WBS_FILE")"
+dep_bad=0
+if [[ -n "$DEP_PAIRS" ]]; then
+  while IFS='|' read -r task dep; do
+    [[ -z "$dep" ]] && continue
+    grep -qxF "$dep" <<< "$TASK_IDS" && continue
+    fail "WBS dependency points at a task that does not exist" \
+      "$task depends on $dep, which is not defined in $WBS_FILE"
+    dep_bad=1
+  done <<< "$DEP_PAIRS"
+fi
+[[ $dep_bad -eq 0 ]] && ok "every WBS dependency resolves to a defined task ($(echo "$DEP_PAIRS" | grep -c . ) edges)"
+
+# --- M-tasks carry the required fields and a non-empty acceptance block ---
+#
+# Scoped to M* deliberately: the T-tasks predate the §6.5 template and several
+# legitimately lack `Editable documents`. `Out of scope` is excluded because
+# §6.5 marks it conditional. An empty acceptance-criteria block is called out
+# separately from a missing field — a task with the heading but no boxes looks
+# specified and is not.
+task_bad="$(awk '
+  BEGIN {
+    split("Status|Goal|Scope|Editable documents|Output|Acceptance criteria|Dependencies|Tests required|Checklist phases", req, "|")
+  }
+  /^### / {
+    if (id != "") check()
+    id = ($2 ~ /^M[0-9]+(\.[0-9]+)?[a-z]?$/) ? $2 : ""
+    delete seen; ac = 0; inac = 0
+    next
+  }
+  id != "" {
+    for (i in req) if (index($0, "- **" req[i] ":**")) seen[req[i]] = 1
+    if ($0 ~ /^- \*\*Acceptance criteria:\*\*/) { inac = 1; next }
+    if ($0 ~ /^- \*\*/) inac = 0
+    if (inac && $0 ~ /^[[:space:]]*- \[[ x]\]/) ac++
+  }
+  END { if (id != "") check() }
+  function check(   i, miss) {
+    miss = ""
+    for (i in req) if (!(req[i] in seen)) miss = miss (miss ? ", " : "") req[i]
+    if (miss != "") print id ": missing field(s): " miss
+    else if (ac == 0) print id ": Acceptance criteria block is empty"
+  }
+' "$WBS_FILE")"
+if [[ -n "$task_bad" ]]; then
+  while read -r t; do fail "M-task does not meet the WBS template" "$t  (§6.5)"; done <<< "$task_bad"
+else
+  ok "every M-task carries the 9 required fields and a non-empty acceptance block"
 fi
 
 # --- unresolved markers inside MVP scope ---

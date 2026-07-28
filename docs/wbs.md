@@ -340,6 +340,55 @@ và Web, analyzer sạch, code generation chạy được.
 - **Tests required:** 3 widget test cho ba nhánh của widget — đã có, pass
 - **Checklist phases:** 7.4, 15.5
 
+### M2.1b · Sửa `check_docs.sh` — task ID `M*` không được kiểm
+
+- **Status:** done
+- **Goal:** Làm cho check WBS trong `check_docs.sh` kiểm đúng thứ nó nói là đang
+  kiểm, và mở rộng sang hai lỗi mà nó chưa bắt được.
+- **Scope:** regex task ID; check dependency resolve; check `M*` đủ field và
+  acceptance criteria không rỗng; test tiêm lỗi cho từng check mới.
+- **Out of scope:** đổi nội dung WBS để chiều script. Nếu một check mới bắt được
+  vi phạm có thật trong WBS hiện tại thì **sửa WBS**, và ghi lại là đã sửa gì.
+- **Editable documents:** `docs/wbs.md`,
+  `.claude/skills/flutter-workflow/scripts/check_docs.sh`
+- **Output:** `.claude/skills/flutter-workflow/scripts/check_docs.sh`
+- **Vấn đề:** regex cũ là `^### T[0-9]+...`, chỉ khớp tiền tố `T`. Nó in
+  `no duplicate WBS task IDs (8 tasks)` trong khi WBS có 33 task. Đây là **pass
+  gây hiểu nhầm**: 25 task `M2`–`M5` không được bảo vệ khỏi trùng ID, nhưng
+  output đọc như đã kiểm hết. Một check im lặng bỏ sót còn tệ hơn không có
+  check, vì nó tạo ra niềm tin sai.
+- **Acceptance criteria:**
+  - [x] Regex task ID là `[TM][0-9]+(\.[0-9]+)?[a-z]?`; số task báo ra khớp số
+        task thật trong `wbs.md`. → báo `35 tasks`; `grep -c '^### '` = 35 và
+        **mọi** heading `###` đều khớp shape task ID, không sót cái nào.
+  - [x] Check mới: mọi `Dependencies` trỏ tới task **có tồn tại**. → `47 edges`
+        resolve. Chỉ token có shape ID mới bị kiểm, nên `none` và
+        `product owner input — đã nhận` không bị báo nhầm.
+  - [x] Check mới: mọi task `M*` có đủ 9 field bắt buộc của §6.5 và khối
+        acceptance criteria **không rỗng**. Giới hạn ở `M*` có chủ đích: `T*` có
+        trước template §6.5 và một số task thiếu `Editable documents` một cách
+        hợp lệ. `Out of scope` không nằm trong 9 field vì §6.5 đánh dấu nó là có
+        điều kiện.
+  - [x] **Mỗi** check mới được verify bằng **test tiêm lỗi** — 4/4 case đạt, xem
+        bảng dưới.
+  - [x] `check_docs.sh` exit 0 trên `wbs.md` hiện tại.
+- **Kết quả test tiêm lỗi:**
+
+  | Case | Vi phạm được tiêm | Sau khi tiêm | Sau khi khôi phục |
+  |---|---|---|---|
+  | 1 | Thêm heading `### M4.2` trùng | exit 1 · `duplicate WBS task ID` | exit 0 |
+  | 2 | Đổi dependency của M4.6 thành `M9.9` | exit 1 · `dependency points at a task that does not exist` | exit 0 |
+  | 3a | Xoá field `Tests required` của M2.3 | exit 1 · `missing field(s)` | exit 0 |
+  | 3b | Xoá hết checkbox acceptance criteria của M3.4 | exit 1 · `Acceptance criteria block is empty` | exit 0 |
+
+  Case 1 cũng là bằng chứng cho việc regex cũ mù: với đúng cùng một vi phạm,
+  regex `T`-only thấy **8 task, 0 trùng** — pass sạch. Regex mới thấy 36 task và
+  bắt được `M4.2`.
+- **Dependencies:** M2.1
+- **Tests required:** fault injection cho cả ba check (regex trùng ID,
+  dependency chết, field thiếu / acceptance criteria rỗng) — **đã chạy, 4/4 đạt**
+- **Checklist phases:** 1.2
+
 ### M2.2 · Dependency nền tảng và code generation
 
 - **Status:** todo
@@ -1014,4 +1063,4 @@ của M2.
 | 14 query bất biến chưa chạy trên **dữ liệu người dùng thật** | T1.3 | Bất biến mới được verify trên fixture, chưa enforce trên DB sản xuất | Chạy `check_docs.sh --db <path>` trong test tích hợp khi Drift schema tồn tại (M4) |
 | Nội dung starter là fixture, không phải nội dung production | T1.3 | Không phát hành được với nội dung này | Tìm nguồn nội dung có bản quyền rõ ràng trước M8 (BR-87) |
 | Bản build web MUST dùng `--no-web-resources-cdn` | M2.1a | Mặc định Flutter tải CanvasKit từ `gstatic.com` lúc **runtime** dù đã bundle sẵn cục bộ. Trong môi trường chặn CDN, app im lặng không render — không có lỗi build nào cảnh báo | Đưa cờ này vào job `build-web` của CI ở M7, và vào mọi hướng dẫn chạy web |
-| `check_docs.sh` chỉ đếm task ID dạng `T*`, bỏ sót `M*` | T1.4 | Báo "no duplicate WBS task IDs (8 tasks)" trong khi có 33 — **pass gây hiểu nhầm**, 25 task M2–M5 không được bảo vệ khỏi trùng ID | Sửa regex task ID trong `check_docs.sh` thành `[TM][0-9]+...`; thêm check dependency resolve và acceptance-criteria rỗng. Đã verify thủ công ở T1.4, nhưng cần thành check thường trực. Làm cùng M2.1 |
+| ~~`check_docs.sh` chỉ đếm task ID dạng `T*`, bỏ sót `M*`~~ | T1.4 | Báo "no duplicate WBS task IDs (8 tasks)" trong khi có 33 — **pass gây hiểu nhầm**, 25 task M2–M5 không được bảo vệ khỏi trùng ID | **Đã trả ở M2.1b.** Regex sửa thành `[TM][0-9]+(\.[0-9]+)?[a-z]?` (giờ báo 35 task), thêm check dependency resolve và check `M*` đủ field + acceptance criteria không rỗng. Cả ba verify bằng test tiêm lỗi, 4/4 case đạt |
