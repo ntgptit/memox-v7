@@ -113,20 +113,31 @@ kiến trúc: Drift query có index theo hạn ôn, business logic SRS ở domai
 matrix đầy đủ ở presentation (kể cả empty — "hôm nay không còn gì để ôn", là
 trạng thái người dùng gặp thường xuyên nhất sau vài tuần).
 
-## Câu hỏi mở — chặn T1.2 (use cases)
+## Quyết định đã chốt (2026-07-28)
 
-1. **[cần xác nhận]** **Thuật toán SRS nào?** Ảnh hưởng trực tiếp đến schema
-   (cột nào cần lưu trên mỗi card) và business rules:
-   - **Leitner** (hộp 1–5, nhân đôi khoảng cách): đơn giản nhất, dễ test, dễ
-     giải thích cho người dùng.
-   - **SM-2** (thuật toán kinh điển của Anki): cần lưu `easeFactor`, `interval`,
-     `repetitions`. Cân bằng tốt giữa hiệu quả và độ phức tạp.
-   - **FSRS**: hiện đại và chính xác hơn, nhưng nhiều tham số và khó test hơn
-     đáng kể.
+**Thuật toán SRS — người dùng chọn được, có hai lựa chọn:**
 
-   Với mục tiêu "chạy ổn định, test ổn định trước khi làm backend", tôi nghiêng
-   về **SM-2**: đủ tốt để dùng thật, thuần tuý là hàm thuần khiết nên unit test
-   rất sạch, và có thể đổi sang FSRS sau nếu tách đúng thành một `use_case`.
-2. **[cần xác nhận]** Người dùng tự tạo nội dung hay cần bộ từ có sẵn?
-3. **[cần xác nhận]** Thang đánh giá khi ôn: 2 mức (nhớ/quên) hay 4 mức (Again/
-   Hard/Good/Easy)? SM-2 thường dùng 4 mức.
+- **8-box** (biến thể Leitner 8 hộp) — **làm trước, là mặc định của MVP**.
+- **SM-2** — làm sau, không thuộc MVP.
+
+Đây là lý do duy nhất trong dự án đủ mạnh để tạo abstraction ngay từ đầu dù chỉ
+có một implementation: implementation thứ hai đã được đặc tả, không phải phỏng
+đoán. Xem AD-06.
+
+**Thang đánh giá: 4 mức — Again / Hard / Good / Easy**, dùng chung cho cả hai
+thuật toán. Lưu ý 8-box theo truyền thống chỉ có đúng/sai, nên cách 4 mức ánh xạ
+sang chuyển hộp là một quyết định thiết kế, không phải mặc định — xem BR-10.
+
+**Nội dung: có bộ deck dựng sẵn tặng người dùng.** Đóng gói theo app, chèn vào
+lần chạy đầu. Sau khi chèn, chúng thuộc về người dùng: sửa được, xoá được. Xem
+AD-07 và UC-01.
+
+Hệ quả lên MVP scope: **M6 (deck quà tặng) trở thành must-have**, vì nó là thứ
+người dùng thấy đầu tiên và nó thay đổi hoàn toàn màn hình mở app lần đầu.
+
+| # | Feature | Done when |
+|---|---|---|
+| M6 | Deck dựng sẵn được tặng lúc khởi động lần đầu | Cài mới → mở app → thấy deck có sẵn, ôn được ngay mà không cần tạo gì. Xoá deck quà rồi cập nhật app thì deck đó **không** quay lại |
+
+Import/export CSV (N1) vẫn ở nice-to-have — deck quà đã giải quyết vấn đề "app
+trống lúc mới cài", vốn là lý do chính khiến N1 hấp dẫn.

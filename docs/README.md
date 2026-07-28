@@ -6,8 +6,10 @@
 |---|---|---|
 | [`checklist.md`](checklist.md) | The canonical 22-phase development plan | complete, stable |
 | [`wbs.md`](wbs.md) | Live progress ledger — the source of truth for what is done | active |
-| [`product.md`](product.md) | Problem, users, platform/data/auth decisions, **and MVP scope** | draft — 3 open questions |
-| [`architecture.md`](architecture.md) | Architecture decisions AD-01…06 with reasoning | active |
+| [`product.md`](product.md) | Problem, users, platform/data/auth decisions, **and MVP scope** | draft |
+| [`architecture.md`](architecture.md) | Architecture decisions AD-01…07 with reasoning | active |
+| [`use-cases.md`](use-cases.md) | UC-01…06 cho must-have MVP | draft |
+| [`business-rules.md`](business-rules.md) | BR-01…23, thuật toán 8-box, validation, edge cases | draft |
 
 MVP scope lives inside `product.md` rather than a separate `mvp.md` — it is
 short, and splitting it would mean two files that must agree about the same
@@ -21,8 +23,6 @@ needed", which is worse than an obvious gap.
 
 | Document | Created during | Owning skill |
 |---|---|---|
-| `use-cases.md` | Phase 0.3 | `flutter-product-spec` |
-| `business-rules.md` | Phase 0.3 | `flutter-product-spec` |
 | `data-model.md` | Phase 11.1 | `flutter-data-layer` |
 | `api-spec.md` | Phase 10.2 — **not until the Spring Boot backend exists** (AD-05) | `flutter-data-layer` |
 | `design-system.md` | Phase 7 | `flutter-design-system` |

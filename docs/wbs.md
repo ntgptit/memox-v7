@@ -128,24 +128,41 @@ the most downstream work, in order of leverage:
 
 ### T1.2 · Use cases and business rules
 
-- **Status:** blocked — cần 3 câu trả lời ở cuối `docs/product.md`
-- **Blocker:** thuật toán SRS (Leitner / SM-2 / FSRS), nguồn nội dung (tự tạo hay
-  có sẵn), thang đánh giá (2 mức hay 4 mức). Cả ba đều quyết định trực tiếp cột
-  của bảng `cards` và business rules của luồng ôn tập — viết use case trước khi
-  chốt là đúng loại rework mà Phase 14.1 tồn tại để ngăn.
-- **Goal:** Specify each must-have feature to the point where it can be built
-  without further questions.
-- **Output:** `docs/use-cases.md`, `docs/business-rules.md`
+- **Status:** done
+- **Goal:** Đặc tả must-have đủ chi tiết để code mà không phải hỏi thêm.
+- **Output:** `docs/use-cases.md` (UC-01…06), `docs/business-rules.md` (BR-01…23)
 - **Acceptance criteria:**
-  - [ ] Every must-have feature has a use case with actor, trigger,
-        preconditions, main / alternative / error flows, and postconditions.
-  - [ ] Business rules numbered `BR-xx`.
-  - [ ] Validation rules carry the exact user-facing message.
-  - [ ] Every entity has an explicit state machine with illegal transitions
-        listed.
+  - [x] Mỗi must-have M1–M6 có use case đủ actor, trigger, preconditions,
+        main / alternative / error flows, postconditions.
+  - [x] Business rules đánh số BR-01…23.
+  - [x] Thuật toán 8-box đặc tả chính xác: ánh xạ 4 mức → hộp (BR-10), bảng
+        khoảng cách 8 hộp (BR-11).
+  - [x] Validation rules kèm message hiển thị chính xác.
+  - [x] Card state machine suy ra từ `box`/`due_at`, có liệt kê chuyển đổi không
+        hợp lệ.
+  - [x] 11 edge case liệt kê kèm hành vi mong đợi.
 - **Dependencies:** T1.1
 - **Tests required:** none — document only
 - **Checklist phases:** 0.3
+- **Ghi chú:** các mục `[suy luận]` trong hai tài liệu là chỗ tôi tự quyết vì
+  không có đặc tả. Đáng rà lại: BR-16 (giới hạn 50 card/phiên), BR-18 (`Again`
+  không quay lại trong phiên), BR-10 (`Again` reset thẳng về hộp 1 thay vì lùi
+  một bậc) — cả ba đều ảnh hưởng trực tiếp đến cảm nhận khi dùng.
+
+### T1.3 · WBS chi tiết cho M2–M5
+
+- **Status:** todo — **việc tiếp theo**
+- **Goal:** Chia M2–M4 thành task có acceptance criteria; chốt phạm vi vertical
+  slice đầu tiên.
+- **Output:** file này, mở rộng
+- **Acceptance criteria:**
+  - [ ] M2–M4 chia tới task, mỗi task có acceptance criteria và dependency.
+  - [ ] M5 chốt phạm vi đúng luồng UC-05 (ôn tập), xuyên từ Drift tới màn hình.
+  - [ ] Milestone sau để ở mức feature — chia tới task lúc này chắc chắn phải
+        lập lại kế hoạch.
+- **Dependencies:** T1.2
+- **Tests required:** none
+- **Checklist phases:** 1.1, 1.2
 
 ### T1.3 · WBS for M2–M5
 

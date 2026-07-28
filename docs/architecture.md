@@ -150,27 +150,87 @@ retrofit.
 
 ---
 
-## AD-06 · Thuật toán SRS là một use case thuần khiết
+## AD-06 · Scheduler là strategy thuần khiết, chọn được theo deck
 
-**Quyết định.** Logic xếp lịch ôn tập nằm trong một use case ở `domain/`, là
-**hàm thuần khiết**: nhận trạng thái card hiện tại + đánh giá của người dùng +
-thời điểm hiện tại, trả về trạng thái card mới. Không đọc database, không đọc
-đồng hồ hệ thống.
+**Quyết định.** Logic xếp lịch ôn tập là một **strategy** ở `domain/`, thuần
+khiết: nhận trạng thái card hiện tại + đánh giá của người dùng + thời điểm hiện
+tại, trả về trạng thái card mới. Không đọc database, không gọi `DateTime.now()`.
 
-**Lý do.** Đây là phần logic duy nhất trong app thực sự phức tạp, và là phần bắt
-buộc phải đúng — sai thuật toán thì người dùng không nhận ra ngay mà chỉ thấy
+```dart
+// domain/scheduler/review_scheduler.dart
+abstract interface class ReviewScheduler {
+  SchedulingState next({
+    required SchedulingState current,
+    required ReviewRating rating,
+    required DateTime now,
+  });
+}
+```
+
+Hai implementation: `EightBoxScheduler` (MVP) và `Sm2Scheduler` (sau MVP). Người
+dùng chọn theo **deck**, không phải theo app — deck từ vựng cơ bản và deck ngữ
+pháp phức tạp hợp với chế độ khác nhau, và lưu ở deck chỉ tốn một cột.
+
+**Vì sao đây là ngoại lệ hợp lệ của quy tắc "không tạo interface cho một
+implementation".** CLAUDE.md cấm bọc interface quanh thứ không có nhu cầu thay
+thế. Ở đây implementation thứ hai **đã được đặc tả**, không phải phỏng đoán —
+người dùng chọn được là một yêu cầu sản phẩm, không phải khả năng tưởng tượng.
+Nếu SM-2 chỉ là "có thể sau này làm", quyết định đúng sẽ là viết thẳng 8-box
+không interface.
+
+**Vì sao thuần khiết.** Đây là phần logic duy nhất trong app thực sự phức tạp và
+bắt buộc phải đúng — sai thuật toán thì người dùng không nhận ra ngay, chỉ thấy
 "app không hiệu quả" sau vài tuần. Hàm thuần khiết nghĩa là test được toàn bộ ma
-trận đầu vào mà không cần database, không cần widget, và không bị phụ thuộc thời
-gian thực.
+trận (8 hộp × 4 mức đánh giá = 32 trường hợp) mà không cần database, không cần
+widget, không phải chờ thời gian trôi.
 
-Truyền `DateTime now` vào như tham số, **không** gọi `DateTime.now()` bên trong.
-Đây là điều kiện để test được "card đến hạn sau 6 ngày" mà không phải chờ 6 ngày
-hay giả lập đồng hồ.
+Truyền `DateTime now` vào như tham số là điều kiện để test "card đến hạn sau 64
+ngày" trong một mili giây.
 
-Tách như vậy cũng là điều kiện để đổi SM-2 → FSRS sau này mà không đụng đến
-repository hay UI.
+**Trạng thái lưu ở đâu.** `due_at` là **cột chung**, độc lập thuật toán — vì đó
+là cột duy nhất mà query nóng ("card nào đến hạn") cần, và nó phải được đánh
+index. Tham số riêng của từng thuật toán nằm ở các cột nullable riêng:
 
-**Chưa chốt:** thuật toán cụ thể. Xem câu hỏi mở trong `product.md`.
+| Cột | Thuộc về | Ghi chú |
+|---|---|---|
+| `due_at` | chung | index cùng `deck_id`; NULL = card mới |
+| `box` | 8-box | 1..8 |
+| `ease_factor`, `interval_days`, `repetitions` | SM-2 | NULL khi deck dùng 8-box |
+
+**Phương án đã cân nhắc và loại:** gói trạng thái vào một cột JSON. Linh hoạt
+hơn, nhưng mất type-safety và không query được — mâu thuẫn trực tiếp với lý do
+chọn AD-02. Vài cột NULL là cái giá rẻ hơn nhiều.
+
+**Đổi thuật toán trên deck đã có tiến độ:** giữ nguyên `due_at`, reset tham số
+riêng về mặc định. Xem BR-13 — ánh xạ box ↔ ease factor là bịa đặt, và nó âm
+thầm làm hỏng lịch ôn của người dùng.
+
+---
+
+## AD-07 · Deck quà tặng đóng gói theo app, chèn một lần
+
+**Quyết định.** Bộ deck dựng sẵn nằm trong `assets/seed/` dạng JSON, chèn vào DB
+ở lần chạy đầu. Sau khi chèn, chúng là dữ liệu bình thường của người dùng: sửa
+được, xoá được, ôn được như deck tự tạo.
+
+**Vì sao chèn vào DB thay vì đọc thẳng từ asset.** Nếu deck quà là read-only đọc
+từ asset, chúng phải là một loại deck thứ hai trong toàn bộ code — repository
+phải hợp nhất hai nguồn, xoá và sửa phải có nhánh riêng, query "card đến hạn"
+phải chạy hai lần. Chèn một lần rồi coi như dữ liệu thường giữ cho **chỉ có một
+loại deck** trong hệ thống.
+
+**Cái bẫy phải tránh, và nó không hiển nhiên:** bản cập nhật app sau thêm deck
+quà mới. Cách làm ngây thơ — "chèn seed nếu chưa có" — sẽ **chèn lại deck mà
+người dùng đã cố tình xoá**. Người dùng xoá nó lần nữa, bản cập nhật sau lại chèn
+lại. Đó là lỗi làm người dùng mất niềm tin vào việc xoá.
+
+Cách làm: bảng `applied_seeds(seed_id TEXT PRIMARY KEY, applied_at DATETIME)`.
+Mỗi deck quà có `seed_id` cố định. Khởi động: chỉ chèn seed nào **chưa từng**
+xuất hiện trong `applied_seeds`, và ghi nhận ngay cả khi sau đó người dùng xoá.
+Đã tặng một lần là đã tặng — không tặng lại.
+
+Việc chèn seed chạy trong **một transaction** cùng với ghi `applied_seeds`, để
+app bị kill giữa chừng không để lại nửa bộ deck và một cờ đã đánh dấu.
 
 ---
 
