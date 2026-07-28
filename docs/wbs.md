@@ -637,7 +637,7 @@ và Web, analyzer sạch, code generation chạy được.
 
 ### M2.5 · Flavor Android và entrypoint theo môi trường
 
-- **Status:** todo
+- **Status:** done
 - **Goal:** Ba flavor cài song song được trên một máy, mỗi flavor có config
   riêng.
 - **Scope:** `EnvConfig`, `main_development.dart` / `main_staging.dart` /
@@ -646,20 +646,45 @@ và Web, analyzer sạch, code generation chạy được.
 - **Out of scope:** signing key production, iOS scheme (AD-04 hoãn iOS), secret
   thật.
 - **Editable documents:** `docs/wbs.md`
-- **Output:** `lib/app/config/env_config.dart`, ba entrypoint,
-  `android/app/build.gradle`
+- **Output:** `lib/app/config/env_config.dart`,
+  `lib/app/config/env_config_provider.dart`, ba entrypoint,
+  `android/app/build.gradle.kts` (Kotlin DSL, không tạo bản Groovy)
 - **Acceptance criteria:**
-  - [ ] `flutter build apk --debug --flavor development -t lib/main_development.dart`
-        exit 0; tương tự cho `staging` và `production`.
-  - [ ] Ba APK có `applicationId` khác nhau (verify bằng `aapt dump badging`
-        hoặc tương đương).
-  - [ ] Ba APK cài song song được trên cùng một thiết bị/emulator.
-  - [ ] `EnvConfig` được đọc qua provider bị override trong bootstrap; provider
+  - [x] `flutter build apk --debug --flavor <f> -t lib/main_<f>.dart` exit 0 cho
+        cả ba. → `app-development-debug.apk`, `app-staging-debug.apk`,
+        `app-production-debug.apk`
+  - [x] Ba APK có `applicationId` khác nhau — verify bằng `aapt dump badging`:
+
+        | Flavor | package | label |
+        |---|---|---|
+        | development | `com.ntgptit.memox.dev` | `MemoX Dev` |
+        | staging | `com.ntgptit.memox.staging` | `MemoX Staging` |
+        | production | `com.ntgptit.memox` | `MemoX` |
+
+  - [x] Ba APK cài song song được trên cùng một thiết bị/emulator. → cài cả ba
+        lên emulator `Medium_Phone` (Android 16), `pm list packages` trả về
+        **đồng thời** cả ba package ở trên
+  - [x] `EnvConfig` được đọc qua provider bị override trong bootstrap; provider
         gốc throw khi thiếu override.
-  - [ ] Không có secret nào trong repo; `env/` nằm trong `.gitignore`.
+  - [x] Không có secret nào trong repo; `env/` nằm trong `.gitignore`. →
+        `env/`, `.env`, `.env.*` đã có sẵn từ M2.1; `apiBaseUrl` của cả ba
+        flavor đều là placeholder `.invalid`
+- **Ghi chú kỹ thuật:**
+  - `resValue` cần `buildFeatures { resValues = true }`. AGP hiện tại **tắt mặc
+    định**, và flavor khai báo resource value mà không bật cờ này thì build
+    **fail hẳn** với `custom resource values, but the feature is disabled` —
+    không phải bỏ qua giá trị đó trong im lặng.
+  - `apiBaseUrl` dùng TLD `.invalid` (RFC 2606 dành riêng, không bao giờ resolve
+    được). Có chủ đích: nếu code gọi mạng trước khi backend được chốt, nó fail
+    ngay ở DNS thay vì lặng lẽ chạm vào thứ gì đó có thật.
+  - `Override` là sealed class nội bộ của `riverpod`, **không** nằm trong public
+    API của `flutter_riverpod` — không chú thích kiểu cho list `overrides`.
+  - Riverpod 3 bọc lỗi provider trong `ProviderException`, nên test khẳng định
+    theo **nội dung thông báo** chứ không theo kiểu; `throwsStateError` fail.
 - **Dependencies:** M2.1
 - **Tests required:** unit test khẳng định ba `EnvConfig` có `apiBaseUrl`,
   `logLevel` và `appName` khác nhau; test provider gốc throw khi chưa override
+  — **đã có**, `test/app/env_config_test.dart`, 6 test pass
 - **Checklist phases:** 6.2
 
 ### M2.6 · Bootstrap, error boundary và cổng build ba mặt
