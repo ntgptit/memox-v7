@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'mobile_frame_widget.dart';
+
 /// Root widget of the application.
 ///
 /// Deliberately minimal. Each foundation piece arrives in its own task rather
@@ -18,11 +20,12 @@ class MemoxApp extends StatelessWidget {
     // and exist purely so the app renders something before M2.4 introduces ARB.
     // M2.4 must remove them; `CLAUDE.md` forbids user-visible strings outside
     // the ARB files.
-    return const MaterialApp(
+    return MaterialApp(
       title: 'memox',
-      home: Scaffold(
-        body: Center(child: Text('memox')),
-      ),
+      // Phone-sized surface on web (AD-04). No-op on Android.
+      builder: (context, child) =>
+          MobileFrameWidget(child: child ?? const SizedBox.shrink()),
+      home: const Scaffold(body: Center(child: Text('memox'))),
     );
   }
 }
