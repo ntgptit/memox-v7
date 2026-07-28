@@ -965,7 +965,7 @@ slice UC-05 cần. Không xây trọn design system trước khi có feature th�
         `tester.takeException()` trả về null — 6/6 component.
   - [x] Golden test light + dark cho từng component — 14 file
         (`test/shared/widgets/goldens/`).
-- **Golden — hai quyết định:**
+- **Golden — ba quyết định:**
   1. Dùng `matchesGoldenFile` có sẵn của `flutter_test`. **Không** thêm
      `golden_toolkit` hay `alchemist`: với snapshot cố định kích thước, một
      locale, chúng không mua thêm năng lực nào mà chỉ thêm dependency phải bảo
@@ -973,10 +973,24 @@ slice UC-05 cần. Không xây trọn design system trước khi có feature th�
   2. **Không** golden cho `AppLoadingStateWidget`. `CircularProgressIndicator`
      luôn ở giữa animation, nên golden của nó flaky theo thiết kế. Hành vi của
      nó được phủ bằng test semantics.
-- **Ràng buộc cho M7 (CI):** golden của Flutter **không** portable giữa hệ điều
-  hành. Bộ này sinh trên Windows; runner Linux sẽ khác antialiasing. M7 phải
-  hoặc chạy suite này trên một nền tảng duy nhất, hoặc sinh lại theo nền tảng.
-  File test được gắn tag `golden` nên loại trừ được bằng `--exclude-tags golden`.
+  3. **Nạp font thật** qua `test/flutter_test_config.dart`. Mặc định
+     `flutter_test` thay font bằng một placeholder vẽ mọi glyph thành ô vuông
+     giống hệt nhau — khi đó golden chỉ ghi lại **hình dạng layout** và không
+     ghi gì về chữ: sai font weight, sai màu chữ, label bị cắt và lỗi
+     line-height đều cho ra ảnh **giống hệt nhau từng byte**. Nạp Roboto và
+     MaterialIcons mới làm golden có khả năng fail vì đúng những lý do golden
+     sinh ra để bắt. Font lấy từ **Flutter SDK đã pin** (`.fvmrc` → 3.44.8), nên
+     repo không phải chứa file font lẫn giấy phép của nó, và glyph gắn với đúng
+     version SDK mà mọi máy đã build bằng.
+
+     Phụ phẩm đáng giá: test overflow ở `textScaler` 2.0 nay mới thật sự có ý
+     nghĩa. Font hộp có metric đồng đều, còn font thật xuống dòng khác hẳn —
+     6/6 component vẫn pass sau khi đổi.
+- **Ràng buộc cho M7 (CI):** chữ nay render bằng glyph thật, nhưng **cách
+  rasterise glyph vẫn khác nhau giữa hệ điều hành**. Bộ này sinh trên Windows;
+  runner Linux sẽ khác antialiasing. M7 phải hoặc chạy suite này trên một nền
+  tảng duy nhất, hoặc sinh lại theo nền tảng. File test gắn tag `golden` nên
+  loại trừ được bằng `--exclude-tags golden`.
 - **App shell:** `ReviewPlaceholderScreen` nay dựng từ `AppScaffoldWidget` +
   `AppEmptyStateWidget`, tức bộ component được chứng minh chạy end-to-end trước
   khi có màn hình thật phụ thuộc vào nó. Chưa triển khai màn review (M5.4).
