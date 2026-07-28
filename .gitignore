@@ -1,4 +1,48 @@
-# Flutter / Dart
+# =============================================================================
+# Generated code — NOT committed.
+#
+# CI runs `dart run build_runner build --delete-conflicting-outputs` and then
+# fails if the tree is dirty (see flutter-ship/references/ci.md), so generated
+# output is verified fresh on every PR instead of being reviewed as a diff.
+#
+# Consequence to know about: a fresh clone will NOT analyze or run until you
+# generate. First command after `flutter pub get` is always:
+#     dart run build_runner build --delete-conflicting-outputs
+#
+# If the project ever reverses this decision, remove this whole block AND drop
+# the "generated code is stale" CI step — keeping one without the other gives
+# you the downsides of both.
+#
+# Note: comments must be on their own line. A trailing "# ..." becomes part of
+# the pattern and silently stops it matching anything.
+# =============================================================================
+
+# riverpod_generator, json_serializable, drift
+*.g.dart
+# freezed
+*.freezed.dart
+# drift modular codegen from .drift files (AD-02)
+*.drift.dart
+# mockito, if it is ever added alongside mocktail
+*.mocks.dart
+*.config.dart
+# flutter gen-l10n output (l10n.yaml: output-dir)
+lib/l10n/generated/
+
+# Drift migration fixtures are NOT generated output in the disposable sense —
+# they are snapshots of released schema versions, and once the source schema
+# moves on they cannot be regenerated. Losing them means migration tests can no
+# longer run against old versions, which is the one test that only ever fails
+# for real users.
+#
+# These negations are load-bearing: drift names some helpers *.g.dart, and the
+# blanket rule above would otherwise swallow them silently.
+!drift_schemas/**
+!test/drift/generated/**
+
+# =============================================================================
+# Dart / Flutter tooling
+# =============================================================================
 .dart_tool/
 .packages
 .pub-cache/
@@ -7,49 +51,111 @@ build/
 .flutter-plugins
 .flutter-plugins-dependencies
 pubspec_overrides.yaml
+.fvm/flutter_sdk
+doc/api/
 
-# Generated code — CI regenerates and verifies freshness (see flutter-ship/references/ci.md).
-# If this project later decides to commit generated output instead, remove these
-# three lines and drop the "generated code is stale" CI step together.
-*.g.dart
-*.freezed.dart
-*.mocks.dart
-lib/l10n/generated/
+# pubspec.lock IS committed — this is an application, not a package, so builds
+# must be reproducible. Do not add it here.
 
+# =============================================================================
 # Secrets — never commit. See flutter-project-setup/references/flavors.md.
+# =============================================================================
 env/
+.env
+.env.*
 *.jks
 *.keystore
 key.properties
 *.p8
 *.p12
+*.pem
 *.mobileprovision
-.env
-.env.*
+*.cer
+*.certSigningRequest
+android/key.properties
+android/app/upload-keystore.jks
 
-# Symbols from obfuscated release builds — archived as build artifacts, not in git
+# google-services.json / GoogleService-Info.plist: uncomment if they ever carry
+# more than public client config for this project.
+# **/google-services.json
+# **/GoogleService-Info.plist
+
+# Symbols from obfuscated release builds — archive as build artifacts per
+# version, not in git. Without the matching symbols a crash report is unreadable.
 build/symbols/
+*.symbols
 
-# IDE
-.idea/
-.vscode/
+# =============================================================================
+# Android
+# =============================================================================
+**/android/.gradle/
+**/android/captures/
+**/android/local.properties
+**/android/.cxx/
+**/android/app/debug/
+**/android/app/profile/
+**/android/app/release/
+.gradle/
 *.iml
 *.ipr
 *.iws
 
-# Platform
-**/ios/Flutter/.last_build_id
+# =============================================================================
+# iOS / macOS — deferred targets (AD-04), kept so the tree stays clean if enabled
+# =============================================================================
 **/ios/Pods/
 **/ios/.symlinks/
-**/android/.gradle/
-**/android/local.properties
-**/android/key.properties
+**/ios/Flutter/.last_build_id
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Flutter/ephemeral/
+**/ios/Runner.app.dSYM.zip
 **/macos/Pods/
+**/macos/Flutter/ephemeral/
+**/*.xcworkspace/xcuserdata/
+**/*.xcodeproj/xcuserdata/
 
-# OS
-.DS_Store
-Thumbs.db
+# =============================================================================
+# Web — not a release target, but the E2E channel (AD-04), so it must keep building
+# =============================================================================
+/web/flutter_service_worker.js
+.playwright/
+playwright-report/
+test-results/
+node_modules/
 
-# Test output
+# =============================================================================
+# Tests
+# =============================================================================
 coverage/
+*.lcov
+# golden test diffs — inspect locally, upload as artifacts from CI
 **/failures/
+
+# =============================================================================
+# IDE
+# =============================================================================
+.idea/
+.vscode/*
+# ...except shared run configurations. With three flavors and three entrypoints,
+# nobody should have to reconstruct these by hand.
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# =============================================================================
+# OS
+# =============================================================================
+.DS_Store
+._*
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# =============================================================================
+# Scratch
+# =============================================================================
+*.log
+*.bak
+*.tmp
+scratch/

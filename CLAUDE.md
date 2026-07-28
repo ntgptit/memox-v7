@@ -54,6 +54,19 @@ Deliberately deferred, and cheap to add later because migration testing is in
 place from the start: sync bookkeeping columns (`isPendingSync`, `version`),
 SM-2 parameters, database encryption.
 
+## Before anything runs
+
+Generated code is not committed (`.gitignore` explains why). A fresh clone will
+not analyze, test or run until you generate it:
+
+```bash
+flutter pub get
+dart run build_runner build --delete-conflicting-outputs
+```
+
+Hundreds of analyzer errors right after cloning almost always means this step
+was skipped, not that the code is broken.
+
 ## How work is driven here
 
 `docs/checklist.md` is the canonical 22-phase plan. `docs/wbs.md` is the live
