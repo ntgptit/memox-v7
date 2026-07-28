@@ -934,6 +934,21 @@ slice UC-05 cần. Không xây trọn design system trước khi có feature th�
   palette sau còn đổi được), và khẳng định nhãn trên nút đạt ≥ 4.5:1 ở cả hai
   theme. Màu nút được đọc **từ theme** chứ không từ token, nên test sẽ fail nếu
   nút thôi dùng thứ palette dành cho nó.
+- **Nhãn nút phụ (outlined) có token riêng, không dùng chung `primary`.** Một
+  màu không gánh được hai vai. Material 3 bắt `primary` vừa làm **nền** vừa làm
+  **chữ trên nền tối**, và ở dark hai vai kéo ngược nhau: sửa nền cho hết chói
+  đã đẩy nhãn xuống **3.09:1 trên nền trang** và **2.53:1 trên card** — không
+  đọc được, chứ không chỉ là xấu.
+
+  Dark dùng đầu sáng trung tính, đồng thời giữ đúng quy tắc mà nút hành động
+  theo: sắc bão hoà để dành cho ý nghĩa. Light dùng màu thương hiệu, nơi nó đủ
+  tương phản để xứng đáng.
+
+  **Lỗ hổng đã để lọt lỗi này:** mọi test contrast trước đó kiểm một *nền* hoặc
+  một màu trong *text theme*, **không** cái nào kiểm thứ `OutlinedButton` thật
+  sự vẽ ra. Test mới đọc màu từ theme và kiểm trên **cả** nền trang lẫn card —
+  card là nền khắc nghiệt hơn ở dark. Đã tiêm lại màu cũ để xác nhận test fail
+  đúng ở `3.09`.
 - **`primary` ở dark bị override khỏi mặc định Material 3.** M3 đặt dark
   `primary` ở tone 80 — một sắc lavender gần pastel, **luminance 0.565**, tức
   sáng hơn nửa màu trắng thuần. Đúng cho vai trò M3 giả định (chữ và icon trên

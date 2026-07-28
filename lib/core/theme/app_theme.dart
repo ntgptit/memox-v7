@@ -28,6 +28,7 @@ ThemeData buildLightTheme() => _buildTheme(
   const AppSemanticColors.light(),
   background: AppColors.backgroundLight,
   actionFill: AppColors.actionFillLight,
+  outlineLabel: AppColors.actionOutlineLabelLight,
 );
 
 ThemeData buildDarkTheme() => _buildTheme(
@@ -57,6 +58,7 @@ ThemeData buildDarkTheme() => _buildTheme(
   const AppSemanticColors.dark(),
   background: AppColors.backgroundDark,
   actionFill: AppColors.actionFillDark,
+  outlineLabel: AppColors.actionOutlineLabelDark,
 );
 
 ThemeData _buildTheme(
@@ -64,6 +66,7 @@ ThemeData _buildTheme(
   AppSemanticColors semantic, {
   required Color background,
   required Color actionFill,
+  required Color outlineLabel,
 }) {
   final base = ThemeData(
     colorScheme: scheme,
@@ -132,7 +135,7 @@ ThemeData _buildTheme(
             return scheme.onSurface.withValues(alpha: 0.38);
           }
 
-          return scheme.primary;
+          return outlineLabel;
         }),
         side: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.disabled)) {

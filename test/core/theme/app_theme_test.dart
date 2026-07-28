@@ -28,6 +28,10 @@ double _contrast(Color foreground, Color background) {
   return (math.max(a, b) + 0.05) / (math.min(a, b) + 0.05);
 }
 
+/// The colour an OutlinedButton actually paints its label in, at rest.
+Color _outlinedButtonLabel(ThemeData theme) =>
+    theme.outlinedButtonTheme.style!.foregroundColor!.resolve(<WidgetState>{})!;
+
 /// The colour a FilledButton actually paints in its resting state.
 ///
 /// Read from the theme rather than from a token, so the test fails if the
@@ -206,6 +210,28 @@ void main() {
           greaterThanOrEqualTo(4.5),
           reason: '${entry.key}: label on the action fill',
         );
+      }
+    });
+
+    test('the outlined label is readable on page AND on card', () {
+      // The gap that let a 3.09:1 label ship: every contrast test here checked
+      // a *fill* or a *text theme* colour, and none checked what an
+      // OutlinedButton actually paints. Both surfaces are checked because a
+      // secondary button sits on either one, and the card is the harsher of the
+      // two in dark.
+      for (final entry in themes.entries) {
+        final label = _outlinedButtonLabel(entry.value);
+
+        for (final background in <(String, Color)>[
+          ('page', entry.value.scaffoldBackgroundColor),
+          ('card', entry.value.colorScheme.surface),
+        ]) {
+          expect(
+            _contrast(label, background.$2),
+            greaterThanOrEqualTo(4.5),
+            reason: '${entry.key}: outlined label on ${background.$1}',
+          );
+        }
       }
     });
 

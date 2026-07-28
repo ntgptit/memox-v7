@@ -75,6 +75,20 @@ abstract final class AppColors {
   static const Color actionFillDark = Color(0xFF58637F);
   static const Color actionFillLight = seed;
 
+  /// Label of a secondary (outlined) action.
+  ///
+  /// A separate token from [actionFillLight] because one colour cannot do both
+  /// jobs. Material 3 asks `primary` to be a *fill* and a *label on a dark
+  /// surface* at once, and in dark mode those pull in opposite directions:
+  /// fixing the fill so it stops glaring drove the label down to 3.09:1 on the
+  /// page and 2.53:1 on a card — unreadable, not merely ugly.
+  ///
+  /// Dark therefore uses the neutral light end, which also keeps the rule the
+  /// action fill follows: saturated colour is reserved for meaning. Light uses
+  /// the brand colour, where it has the contrast to earn it.
+  static const Color actionOutlineLabelDark = onSurfaceDark;
+  static const Color actionOutlineLabelLight = seed;
+
   // --- Text -----------------------------------------------------------------
   //
   // Neither end of the scale is pure. `#EDECFE` rather than white, `#17162D`
