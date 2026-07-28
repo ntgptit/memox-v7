@@ -25,7 +25,7 @@ AD / UC (xem `business-rules.md`).
 |---|---|---|
 | M0 · Development harness | done | Skills, checklist và enforcement script đã có |
 | M1 · Product definition (Phase 0–1) | **done** | Đặc tả MVP đã frozen: AD-01…11, BR-01…87, UC-01…09, data model đầy đủ |
-| M2 · Project foundation (Phase 2–3, 6) | in-progress | M2.1 / M2.1a / M2.1b / **M2.2 done**. `custom_lint` + `riverpod_lint` đã descoped (quyết định của chủ dự án). Flutter đã pin ở `.fvmrc`. Tiếp theo: M2.3 |
+| M2 · Project foundation (Phase 2–3, 6) | in-progress | M2.1 / M2.1a / M2.1b / M2.2 / **M2.2b done**. `custom_lint` descoped, thay bằng **guard `memox-v7`** — cổng chính, đã nối vào `dod_check.sh`. Flutter pin ở `.fvmrc`. Tiếp theo: M2.3 |
 | M3 · Architecture & design system (Phase 4–5, 7, 12–13) | todo | |
 | M4 · Router & Drift foundation (Phase 8, 11) | todo | **Phase 10 (networking) hoãn** — AD-01, AD-05 |
 | M5 · First vertical slice: luồng ôn tập (Phase 14) | todo | UC-05 |
@@ -463,6 +463,56 @@ và Web, analyzer sạch, code generation chạy được.
   sạch và analyzer sạch
 - **Checklist phases:** 3.1, 3.2, 3.3
 
+### M2.2b · Guard chính cho dự án — ruleset `memox-v7`
+
+- **Status:** done
+- **Goal:** Thay thứ đã mất khi descope `custom_lint` bằng một guard thật sự
+  chạy được, và làm nó thành cổng cơ học chính của dự án.
+- **Scope:** vendor `code-verification-guard-v2` vào repo; tạo ruleset
+  `memox-v7`; nối vào `dod_check.sh`; cập nhật skill đang trỏ tới `custom_lint`.
+- **Out of scope:** viết rule cho code chưa tồn tại ngoài phạm vi đã chốt của
+  MVP; sửa engine Python (chính sách nằm ở YAML, engine giữ generic).
+- **Editable documents:** `docs/wbs.md`, `.claude/skills/**`
+- **Output:** `code-verification-guard-v2/` (vendored),
+  `code-verification-guard-v2/registries/projects/memox-v7/`,
+  `code-verification-guard.yaml`, `dod_check.sh`
+- **Vì sao phải tạo ruleset mới thay vì dùng `memox` sẵn có:** `memox` và
+  `memox-v4` là Flutter nhưng theo cây **layer-first**
+  (`lib/presentation/features/**`, `lib/data/datasources/**`). memox-v7 là
+  **feature-first** (`lib/features/<f>/{domain,data,presentation}`). Mọi đường
+  dẫn scope đều khác, nên nếu dùng lại thì rule **không match file nào** và
+  guard báo pass sạch — đúng loại lỗi mà M2.1b vừa sửa. `memox-v5` là React
+  Native, khác hẳn ngôn ngữ.
+- **Acceptance criteria:**
+  - [x] Ruleset `memox-v7` tồn tại với scope khớp layout thật của repo.
+  - [x] Guard chạy được và **exit 0** trên code hiện tại: `Errors: 0`.
+  - [x] **Mỗi rule trụ cột được verify bằng test tiêm lỗi** — 6/6 đạt, xem bảng.
+  - [x] Guard là một bước trong `dod_check.sh`; `dod_check.sh` exit 0.
+  - [x] Các ruleset memox cũ **không** được vendor vào repo, để không ai chạy
+        nhầm bản lỗi thời.
+  - [x] Mọi skill từng bảo chạy `dart run custom_lint` nay trỏ sang guard.
+- **Kết quả test tiêm lỗi:**
+
+  | Rule | Vi phạm được tiêm | Kết quả |
+  |---|---|---|
+  | `state_management.no_ref_read_in_build` | `ref.read` trong `build()` | fires → exit 1; xoá → exit 0 |
+  | `architecture.domain_no_infrastructure_import` | domain import `package:flutter` | fires → exit 1; xoá → exit 0 |
+  | `data_model.no_coalesce_parent_deck_id` | `COALESCE(parent_deck_id, id)` (BR-57) | fires → exit 1; xoá → exit 0 |
+  | `design_token.no_raw_color` | `Color(0xFF112233)` trong presentation | fires → exit 1; xoá → exit 0 |
+  | `error_handling.no_swallowed_exception` | `catch (e) {}` | fires → exit 1; xoá → exit 0 |
+  | `state_management.controller_no_build_context` | controller giữ `BuildContext` | fires → exit 1; xoá → exit 0 |
+
+- **Một điều cố ý chưa siết:** guard hiện `fail_on: [error]`, chưa fail trên
+  warning. Phần lớn `lib/` chưa tồn tại (features ở M3.1, database ở M4.2, l10n
+  ở M2.4), nên engine báo 26 `guard.config.rule_without_targets` — nó **từ chối**
+  để một rule không match file nào lặng lẽ pass. Diagnostic đó đúng và **MUST
+  NOT** bị bịt; nó chính là lỗi mà M2.1b vừa sửa. Vì vậy cổng chặn trên `error`,
+  còn 26 warning kia đứng đó như một backlog trung thực. **M3.1 siết lại thành
+  `fail_on: [error, warning]`.**
+- **Dependencies:** M2.2
+- **Tests required:** fault injection cho từng rule trụ cột — **đã chạy, 6/6 đạt**
+- **Checklist phases:** 5.1, 19.1
+
 ### M2.3 · analysis_options.yaml
 
 - **Status:** todo
@@ -594,6 +644,10 @@ slice UC-05 cần. Không xây trọn design system trước khi có feature th�
   - [ ] Thêm một file vi phạm cố ý (domain import Flutter) → script exit 1; xoá
         đi → exit 0. Ghi kết quả kiểm chứng này vào WBS.
   - [ ] Mọi file trong `lib/` đặt tên theo suffix quy ước ở `CLAUDE.md`.
+  - [ ] **Siết guard**: đổi cả hai profile của ruleset `memox-v7` và
+        `code-verification-guard.yaml` về `fail_on: [error, warning]` +
+        `warning_as_error: true`, và xác nhận 26 cảnh báo
+        `rule_without_targets` đã hết sau khi cây feature-first tồn tại (M2.2b).
 - **Dependencies:** M2.6
 - **Tests required:** none — kiểm chứng bằng fault injection ở acceptance
   criteria
@@ -1121,9 +1175,15 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 | Dùng `ref` sau `await` mà không kiểm `ref.mounted` | Ghi state vào controller đã dispose |
 | Notifier có public property ngoài `state` | State thoát khỏi kênh duy nhất được theo dõi, làm rebuild không kích hoạt |
 
-Hệ quả: những lỗi này nay thuộc trách nhiệm **code review**, và ba trong bốn cái
-có thể bắt được bằng `grep` nếu muốn làm guard rẻ tiền — ví dụ tìm `ref.read`
-trong phạm vi hàm `build`. Nếu viết guard ngoài, đây là danh sách mục tiêu.
+**Đã có guard thay thế (M2.2b).** Ba trong bốn mục trên nay được
+`code-verification-guard` bắt bằng ruleset `memox-v7`, gồm cả cái đáng giá nhất:
+
+| Lỗi | Rule thay thế |
+|---|---|
+| `ref.read` trong `build()` | `memox.state_management.no_ref_read_in_build` |
+| `ref` sau `await` không kiểm `ref.mounted` | `memox.state_management.state_write_after_await_requires_mounted` |
+| Notifier có public mutable property | `memox.state_management.notifier_no_public_mutable_field` |
+| Provider thiếu khai báo dependency | **chưa có** — cần phân tích graph, không diễn đạt được bằng regex; vẫn thuộc code review |
 
 ## Known technical debt
 
@@ -1133,7 +1193,7 @@ trong phạm vi hàm `build`. Nếu viết guard ngoài, đây là danh sách m�
 | `analysis_options.yaml` chưa được áp dụng | T0.1 | Bộ lint đã viết nhưng chưa được enforce; nhiều khả năng có tên rule sai hoặc đã deprecated | Copy vào project ở Phase 2.3 và xác nhận từng rule được analyzer công nhận |
 | 14 query bất biến chưa chạy trên **dữ liệu người dùng thật** | T1.3 | Bất biến mới được verify trên fixture, chưa enforce trên DB sản xuất | Chạy `check_docs.sh --db <path>` trong test tích hợp khi Drift schema tồn tại (M4) |
 | Pin Flutter ở `.fvmrc` **khai báo** chứ không **cưỡng chế** | M2.2 | Chạy `flutter` trực tiếp trên máy có version khác vẫn build được và không cảnh báo. Đây đúng là lỗi đã xảy ra: M2.1 chạy 3.44.8, phiên sau khởi động trên 3.44.6, không có gì phát hiện ra | Thêm một check so `flutter --version` với `.fvmrc` vào `dod_check.sh`, và dùng `flutter-version-file: .fvmrc` ở job CI của M7 |
-| 7 file skill vẫn bảo chạy `dart run custom_lint` | M2.2 | `custom_lint` đã descoped nhưng skill vẫn hướng dẫn cài và chạy nó, kể cả `feature_checklist.md` để nó thành checkbox của **mọi** feature. Phiên sau sẽ tin skill và loay hoay với một package không cài được | Sửa: `flutter-architecture/references/analysis_options.yaml` (M2.3 đã nhận việc này) + `SKILL.md`, `flutter-project-setup/references/dependencies.md`, `flutter-ship/references/ci.md` + `SKILL.md`, `flutter-state-riverpod/SKILL.md`, `flutter-feature-slice/SKILL.md` + `assets/feature_checklist.md`, `docs/checklist.md` |
+| ~~7 file skill vẫn bảo chạy `dart run custom_lint`~~ | M2.2 | Skill vẫn hướng dẫn cài và chạy một package không cài được; phiên sau sẽ tin skill và loay hoay | **Đã trả ở M2.2b.** Cả 7 file đã trỏ sang guard. `docs/checklist.md` **cố ý giữ nguyên**: nó `frozen for MVP`, và mục "Ngoài phạm vi: mọi quyết định riêng của memox" nói rõ nó mô tả quy trình 22 phase chung — `custom_lint` ở đó là khuyến nghị Flutter phổ thông, còn quyết định riêng của memox sống ở file này (§5 canonical location) |
 | `dependencies.md` vẫn liệt kê `sqlite3_flutter_libs` | M2.2 | Package đó nay là tombstone (`0.6.0+eol`, không có native code). Skill nói sai còn tệ hơn không có skill — phiên sau sẽ cài lại nó | Sửa `.claude/skills/flutter-project-setup/references/dependencies.md`: thay bằng ghi chú rằng `sqlite3` 3.x cấp native lib qua native assets. Ngoài `Editable documents` của M2.2 nên chưa sửa ở đây |
 | Nội dung starter là fixture, không phải nội dung production | T1.3 | Không phát hành được với nội dung này | Tìm nguồn nội dung có bản quyền rõ ràng trước M8 (BR-87) |
 | Bản build web MUST dùng `--no-web-resources-cdn` | M2.1a | Mặc định Flutter tải CanvasKit từ `gstatic.com` lúc **runtime** dù đã bundle sẵn cục bộ. Trong môi trường chặn CDN, app im lặng không render — không có lỗi build nào cảnh báo | Đưa cờ này vào job `build-web` của CI ở M7, và vào mọi hướng dẫn chạy web |

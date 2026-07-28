@@ -46,9 +46,10 @@ jobs:
       - name: Analyze
         run: flutter analyze
 
-      # Separate step on purpose: flutter analyze does NOT run riverpod_lint.
-      - name: Custom lint (riverpod_lint)
-        run: dart run custom_lint
+      # Separate step on purpose: flutter analyze cannot express these rules.
+      # This is the project's main guard; it replaced custom_lint/riverpod_lint.
+      - name: Code verification guard
+        run: python code-verification-guard-v2/guard/run.py check --project . --ruleset memox-v7 --profile ci
 
       - name: Architecture boundaries
         run: .claude/skills/flutter-architecture/scripts/check_architecture.sh

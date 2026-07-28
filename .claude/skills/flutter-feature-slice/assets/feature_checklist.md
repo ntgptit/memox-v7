@@ -67,7 +67,7 @@ WBS task: `T<x.y>` · Use cases: `UC-xx` · Business rules: `BR-xx`
 
 ## Done
 - [ ] `dod_check.sh` passes
-- [ ] `dart run custom_lint` clean
+- [ ] `python code-verification-guard-v2/guard/run.py check --project . --ruleset memox-v7` clean
 - [ ] `docs/wbs.md` updated in this commit
 - [ ] Affected docs updated in this commit
 - [ ] Descoped items recorded with reasons

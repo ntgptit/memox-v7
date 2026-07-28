@@ -91,8 +91,10 @@ The pipeline gates, in order (details in `references/ci.md`):
 
 1. `dart format --output=none --set-exit-if-changed .`
 2. `flutter analyze`
-3. `dart run custom_lint` — **separate step**; `flutter analyze` does not run
-   `riverpod_lint`.
+3. `python code-verification-guard-v2/guard/run.py check --project . --ruleset memox-v7 --profile ci` —
+   **separate step**. This is the project's main guard and owns the checks
+   `flutter analyze` cannot express, including the Riverpod rules that
+   `riverpod_lint` used to cover (descoped — see `docs/wbs.md`).
 4. `dart run build_runner build --delete-conflicting-outputs`, then fail if the
    tree is dirty — this is what catches stale committed generated code.
 5. `.claude/skills/flutter-architecture/scripts/check_architecture.sh`

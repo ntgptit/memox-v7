@@ -1,9 +1,14 @@
 # Copy to the project root as analysis_options.yaml.
 #
 # Two things to know before editing:
-#   1. `flutter analyze` does NOT run riverpod_lint. The custom_lint plugin
-#      below registers it, but it only executes via `dart run custom_lint`.
-#      Both must be in CI or the Riverpod rules silently never run.
+#   1. There is deliberately NO `plugins: - custom_lint` block. custom_lint and
+#      riverpod_lint are descoped (see `Deferred and descoped` in docs/wbs.md):
+#      no published custom_lint supports analyzer >=10, which the generator
+#      stack requires. Do not add the block back — a plugin that is declared
+#      but not installed is silently ignored by the analyzer, which is worse
+#      than not configuring it, because the rules look active and never run.
+#      The Riverpod checks it used to provide are now owned by
+#      code-verification-guard (`python code-verification-guard-v2/guard/run.py check --ruleset memox-v7`).
 #   2. Rules promoted to `error` under `errors:` are what "analyzer clean"
 #      means here. Demoting one is a project decision, not a local fix.
 
@@ -55,9 +60,6 @@ analyzer:
     - "**/generated_plugin_registrant.dart"
     - "lib/l10n/generated/**"
     - "build/**"
-
-  plugins:
-    - custom_lint
 
 linter:
   rules:

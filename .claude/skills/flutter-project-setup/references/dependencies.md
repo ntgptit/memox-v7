@@ -47,8 +47,8 @@ Add only when the need is real:
 |---|---|
 | `build_runner` | Runs all generators. |
 | `riverpod_generator` | `@riverpod` → providers. |
-| `riverpod_lint` | Catches the Riverpod mistakes the analyzer cannot see. |
-| `custom_lint` | Host required by `riverpod_lint`. |
+| ~~`riverpod_lint`~~ | **Descoped** — it needs `custom_lint` as its host. Its checks moved to code-verification-guard. |
+| ~~`custom_lint`~~ | **Descoped.** No published version supports `analyzer >=10`, which `json_serializable`, `freezed` and `drift_dev` all require. Its job is now code-verification-guard's — see `docs/wbs.md`. |
 | `drift_dev` | Drift table and DAO codegen. |
 | `freezed` | Data class codegen. |
 | `json_serializable` | `fromJson` / `toJson`. |
@@ -74,9 +74,14 @@ generated file committed stale (Phase 19.1).
 
 - **Riverpod 3 dropped the generated per-provider `Ref` subclasses.** Write
   `Ref ref`, not `MyThingRef ref`. Examples written for 2.x will not compile.
-- **`riverpod_lint` needs `custom_lint` enabled** in `analysis_options.yaml`
-  (`analyzer: plugins: - custom_lint`) or its rules silently do nothing. Run
-  `dart run custom_lint` in CI, because `flutter analyze` does not run them.
+- **`riverpod_lint` and `custom_lint` are descoped** — do not try to add them.
+  Every published `custom_lint` caps at `analyzer ^8`, while the generator stack
+  needs `analyzer >=10`; installing them means downgrading `freezed_annotation`
+  to `^2.2.0` and `uuid` to `^3.0.6`, which contradicts AD-03. Their checks are
+  owned by **code-verification-guard** — see `docs/wbs.md`.
+  Do **not** put `analyzer: plugins: - custom_lint` in `analysis_options.yaml`:
+  a plugin declared but not installed is silently ignored, so the rules look
+  configured and never run.
 - **Drift needs `sqlite3_flutter_libs`** on mobile or it fails at runtime, not
   build time — an easy one to miss until a device test.
 - **`flutter_secure_storage` on Android** needs `minSdkVersion` 23+ for the

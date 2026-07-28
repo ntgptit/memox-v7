@@ -157,13 +157,21 @@ because nothing is out of scope for a name that means nothing.
 ## Lint
 
 `references/analysis_options.yaml` is the configuration to copy into the project
-root. It turns on `strict-casts`, `strict-inference`, `strict-raw-types`,
-promotes the rules that matter to `error`, and enables the `custom_lint` plugin
-that `riverpod_lint` needs.
+root. It turns on `strict-casts`, `strict-inference`, `strict-raw-types`, and
+promotes the rules that matter to `error`.
 
-Note that `flutter analyze` does **not** run `riverpod_lint` — that needs
-`dart run custom_lint` as a separate step, in CI too. This trips people up: the
-rules appear configured, and silently never run.
+It deliberately does **not** declare a `custom_lint` plugin. `custom_lint` and
+`riverpod_lint` are descoped — see `Deferred and descoped` in `docs/wbs.md`. Do
+not add the block back: a plugin declared but not installed is silently ignored,
+so the rules look configured and never run.
+
+The Riverpod checks that `riverpod_lint` used to provide — `ref.read` inside
+`build()` being the one that matters most — are now owned by
+**code-verification-guard**, run as a separate gate:
+
+```bash
+python code-verification-guard-v2/guard/run.py check --project . --ruleset memox-v7
+```
 
 Nothing merges with an analyzer error. A warning you intend to keep needs an
 `// ignore:` with a comment saying why — a bare ignore is a defect with a lid on
