@@ -7,7 +7,7 @@
 | **Scope** | Quyết định ràng buộc nhiều tài liệu hoặc nhiều layer. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), hình dạng dữ liệu (`data-model.md`) |
 | **Source of truth for** | AD-xx · đánh đổi kiến trúc · phương án đã bị loại |
 | **Depends on** | `document-conventions.md`, `product.md` |
-| **Updated by task** | T1.3a |
+| **Updated by task** | M2.1a |
 | **Last updated** | 2026-07-28 |
 
 Format theo `document-conventions.md` §6.1. AD xếp theo số; ID vĩnh viễn (§7).
@@ -156,6 +156,28 @@ mobile-first như Phase 7.4; desktop breakpoint chưa cần.
 
 CI giai đoạn này: bỏ job `build-ios` (tiết kiệm macOS runner minutes), giữ
 `build-android` và thêm `build-web` như một cổng kiểm tra rằng kênh E2E còn sống.
+
+**Kênh E2E phụ thuộc WebGL — ràng buộc bắt buộc cho runner CI (M7).** Từ Flutter
+3.29 renderer HTML đã bị gỡ; 3.44 chỉ còn CanvasKit và skwasm, **cả hai đều cần
+WebGL**. Hệ quả cụ thể và nguy hiểm: ở môi trường không có WebGL, `flutter build
+web` vẫn **exit 0** và Playwright vẫn điều hướng thành công, nhưng app **không
+render** — screenshot ra trang trắng. Không có lỗi build nào cảnh báo, nên một
+job visual-regression sẽ so sánh hai trang trắng với nhau và báo pass.
+
+Vì vậy runner chạy E2E/visual regression **MUST** có WebGL — GPU thật, hoặc
+SwiftShader/ANGLE làm software fallback. Job này **MUST** có một assert rằng app
+đã render thật (ví dụ: tồn tại `<canvas>` do Flutter tạo, kích thước khác 0)
+trước khi so sánh ảnh; nếu không, "pass" của nó không mang thông tin.
+
+Lưu ý khi viết assert đó: Flutter đặt `<canvas>` bên trong **shadow DOM** của
+`flutter-view`. `document.querySelectorAll('canvas')` trả về 0 ngay cả khi app
+đang render bình thường — phải duyệt xuyên `shadowRoot`.
+
+Kiểm chứng đã chạy (M2.1a, máy local Windows + Chrome 150): WebGL2 khả dụng,
+renderer `ANGLE (AMD Radeon, Direct3D11)`, và bản build web render đúng ở cả
+1440×900 lẫn 393×852. Giả định của quyết định này **đứng vững** ở môi trường có
+GPU; nó chỉ đổ ở container headless không WebGL, và đó là thuộc tính của môi
+trường chứ không phải của lựa chọn kiến trúc.
 
 ---
 
