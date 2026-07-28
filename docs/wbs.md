@@ -1028,6 +1028,37 @@ slice UC-05 cần. Không xây trọn design system trước khi có feature th�
   `test/core/theme/app_theme_test.dart`, 17 test
 - **Checklist phases:** 7.2
 
+### M3.5a · Review và tái hiệu chỉnh color system
+
+- **Status:** in-progress — **chờ chủ dự án chọn candidate**
+- **Goal:** Đánh giá lại **chiến lược** màu trên màn hình render thật, thay vì
+  tiếp tục sửa từng mã hex.
+- **Scope:** audit palette hiện tại; ba candidate đầy đủ role cho light + dark;
+  harness render **test-only**; chấm điểm; đề xuất.
+- **Out of scope:** đổi palette production, đổi golden chính thức, typography,
+  spacing, radius, component structure, router, Drift.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `test/review/review_palettes.dart`,
+  `test/review/color_review_test.dart`, 8 ảnh trong `test/review/goldens/`
+- **Acceptance criteria:**
+  - [x] Audit chỉ ra vấn đề ở **cấp hệ thống**, không chỉ nhận xét từng mã hex.
+  - [x] Ba candidate, mỗi cái đủ 15 role × 2 brightness, **không** để
+        `ColorScheme.fromSeed` tự quyết phần còn lại.
+  - [x] 8 ảnh cùng viewport / typography / spacing / radius / locale / dữ liệu.
+  - [x] Bảng điểm 9 tiêu chí.
+  - [ ] **Chủ dự án chọn candidate** — chưa làm, đây là điểm dừng của task.
+- **Phát hiện lớn nhất của audit:** chỉ **6 trên ~30** role của `ColorScheme`
+  đang được kiểm soát. Phần còn lại do `fromSeed` sinh ra ở **họ màu khác**:
+  thang `surfaceContainer*` ở dark là **xám trung tính** (S 9–15%) trong khi app
+  là navy S 70%; `tertiary` là **hồng** (H 328); `error` là một hệ đỏ **thứ hai**
+  cạnh tranh với `danger`; `surfaceTint` vẫn còn đúng sắc lavender chói đã bị gỡ
+  khỏi `primary`. Chúng chưa lộ ra vì MVP chưa có Dialog, BottomSheet,
+  NavigationBar, Menu hay Chip — **sẽ lộ ngay ở Library/Settings/Statistics**.
+- **Dependencies:** M3.5
+- **Tests required:** none — đây là task review; harness là công cụ nhìn, không
+  phải test hồi quy. Gắn tag `review` để loại trừ được.
+- **Checklist phases:** 7.2
+
 ### M3.6 · Base component tối thiểu và app shell
 
 - **Status:** done
