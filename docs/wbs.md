@@ -891,14 +891,30 @@ slice UC-05 cần. Không xây trọn design system trước khi có feature th�
   tranh sự chú ý. Màu dark **không** phải màu light tối đi: trên nền tối, một
   màu bão hoà đọc ra sáng hơn chính nó trên nền trắng, nên từng màu được làm
   nhạt và giảm bão hoà để giữ contrast tương đương mà không bị chói.
-- **Nguồn giá trị màu:** hue accent theo thang Tailwind, vốn được chỉnh sao cho
-  mỗi bậc giữ được contrast trên cả nền trắng lẫn nền gần đen — đúng thuộc tính
-  cần ở đây vì mọi màu này phải chạy được ở hai brightness. Cặp light/dark lấy
-  cách nhau một bậc thang thay vì làm tối một giá trị duy nhất. Có **định** dùng
-  thang Radix (iris) nhưng hex của họ render client-side nên không trích được;
-  nguyên tắc phân bậc của Radix (bậc 9 = nền đặc, 11 = chữ tương phản thấp) vẫn
-  được dùng làm khung. **Trọng tài cuối cùng là test contrast WCAG**, không phải
-  nguồn — palette mới được kiểm lại và pass toàn bộ.
+- **Nguồn giá trị màu: Radix Colors**, đọc từ package đã publish qua CDN chứ
+  không chọn bằng mắt — accent lấy bậc 9 (nền đặc) và 11 (chữ trên surface),
+  neutral lấy bậc 2/3/4/6/11/12. Radix chỉnh từng bậc để giữ contrast trên đúng
+  surface nó định ngồi lên, là thuộc tính cần ở đây vì mọi màu phải chạy được ở
+  hai brightness. **Trọng tài cuối cùng vẫn là test contrast WCAG**, không phải
+  nguồn.
+- **Họ màu: violet + mauve.** Violet mang nhận diện; mauve là neutral được chỉnh
+  để ngồi cạnh violet.
+
+  Lần chọn trước (`iris`) là một sai lầm đáng ghi lại: `iris-9` = `#5b5bd6`,
+  lệch đúng **15/255** so với indigo cũ `#4c5bd4`. Đổi bậc trong cùng một họ thì
+  mắt không phân biệt được — muốn thấy khác thì phải đổi **họ màu**.
+- **Neutral được khai báo, không để `fromSeed` sinh ra.** `ColorScheme.fromSeed`
+  nhuộm mọi surface theo seed, và chính lớp ngả tím phủ toàn app là thứ làm
+  palette cũ trông cũ kỹ. Seed vẫn lo primary/secondary và phần còn lại của tonal
+  ramp; `surface`, `onSurface`, `onSurfaceVariant`, `outline` được override.
+- **Nền dark cố ý KHÔNG dùng bậc 1–2 của Radix.** Bậc 1 là `#121113`, gần như
+  đen tuyền. Trên màn OLED nó đọc ra như một cái lỗ chứ không phải một mặt phẳng:
+  elevation hết đọc được, viền không còn gì để tách, và đọc lâu thì gắt hơn vì
+  contrast với chữ trắng ở mức tối đa. Dùng bậc 3 (`#232225`) cho nền trang và
+  bậc 4 (`#2b292d`) cho card — giữ nguyên quan hệ hue nhưng cho giao diện một
+  cái sàn để đứng.
+- **Hai mức surface, không phải một:** trang thấp hơn card một bậc, nên card đọc
+  ra là card mà không cần đổ bóng.
 - **Font (bổ sung sau M3.6):** hai họ, mỗi họ làm việc nó giỏi.
   **Plus Jakarta Sans** cho display/title — hình học pha humanist, để một từ vựng
   đặt lớn đọc ra như có thiết kế thay vì như chữ hệ thống mặc định; đây là chữ
