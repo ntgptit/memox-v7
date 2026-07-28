@@ -25,7 +25,7 @@ AD / UC (xem `business-rules.md`).
 |---|---|---|
 | M0 · Development harness | done | Skills, checklist và enforcement script đã có |
 | M1 · Product definition (Phase 0–1) | **done** | Đặc tả MVP đã frozen: AD-01…11, BR-01…87, UC-01…09, data model đầy đủ |
-| M2 · Project foundation (Phase 2–3, 6) | in-progress | M2.1 / M2.1a / M2.1b / M2.2 / M2.2b / **M2.3 done**. Bộ lint nghiêm ngặt đã áp và **kiểm chứng có hiệu lực**; `custom_lint` descoped, thay bằng guard `memox-v7`. Tiếp theo: **M2.4 · Localization ARB foundation** |
+| M2 · Project foundation (Phase 2–3, 6) | **done** | Toàn bộ 9 task đóng: M2.1 · M2.1a · M2.1b · M2.2 · M2.2b · M2.3 · M2.4 · M2.5 · M2.6. App build được trên Android (3 flavor cài song song) và Web, l10n en/vi, bootstrap có error boundary, lint + guard đều enforce. Tiếp theo: **M3.1 · Cấu trúc feature-first và ranh giới layer** |
 | M3 · Architecture & design system (Phase 4–5, 7, 12–13) | todo | |
 | M4 · Router & Drift foundation (Phase 8, 11) | todo | **Phase 10 (networking) hoãn** — AD-01, AD-05 |
 | M5 · First vertical slice: luồng ôn tập (Phase 14) | todo | UC-05 |
@@ -689,7 +689,7 @@ và Web, analyzer sạch, code generation chạy được.
 
 ### M2.6 · Bootstrap, error boundary và cổng build ba mặt
 
-- **Status:** todo
+- **Status:** done
 - **Goal:** Một hàm `bootstrap()` duy nhất sở hữu khởi động, và không lỗi khởi
   động nào biến thành màn hình trắng.
 - **Scope:** `bootstrap.dart` với thứ tự khởi tạo logging → config → storage →
@@ -698,19 +698,40 @@ và Web, analyzer sạch, code generation chạy được.
 - **Out of scope:** logging abstraction đầy đủ (M7), crash reporting (M8),
   khởi tạo database (M4.2 sẽ cắm vào đây).
 - **Editable documents:** `docs/wbs.md`
-- **Output:** `lib/app/bootstrap.dart`, `lib/app/app.dart`
+- **Output:** `lib/app/bootstrap.dart`, `lib/app/error_screen_widget.dart`
 - **Acceptance criteria:**
-  - [ ] Ném exception trong `runApp` → hiển thị màn hình lỗi có nội dung, **không**
-        phải màn trắng và **không** phải red screen mặc định ở release.
-  - [ ] Uncaught async error được bắt và log, app không crash.
-  - [ ] `flutter build apk --debug --flavor development -t lib/main_development.dart`
-        exit 0.
-  - [ ] `flutter build web` exit 0 — cổng giữ kênh E2E còn sống (AD-04).
-  - [ ] `flutter analyze` → 0 error, 0 warning.
-  - [ ] `main.dart` và ba entrypoint không chứa logic khởi tạo nào.
+  - [x] Ném exception trong `runApp` → hiển thị màn hình lỗi có nội dung, **không**
+        phải màn trắng và **không** phải red screen mặc định ở release. →
+        `runApp` bọc trong `try/on Object catch`; thất bại → `ErrorScreenWidget`
+  - [x] Uncaught async error được bắt và log, app không crash. → cả
+        `PlatformDispatcher.instance.onError` (trả `true` để nhận trách nhiệm)
+        lẫn `runZonedGuarded`; mỗi cái bắt thứ cái kia bỏ sót
+  - [x] `flutter build apk --debug --flavor <f>` exit 0 cho cả ba flavor.
+  - [x] `flutter build web` exit 0 — cổng giữ kênh E2E còn sống (AD-04).
+  - [x] `flutter analyze` → 0 error, 0 warning.
+  - [x] `main.dart` và ba entrypoint không chứa logic khởi tạo nào. → có **test**
+        quét source, cấm `runApp(`, `ProviderScope(`, `FlutterError.onError`,
+        `ensureInitialized(` trong cả bốn file
+- **Ba điều học được, đáng ghi vì tốn thời gian:**
+  1. **Không gọi `bootstrap()` trong widget test.** Nó bọc startup trong
+     `runZonedGuarded` rồi gọi `runApp`, trong khi `flutter_test` sở hữu zone và
+     binding riêng — test **treo** chứ không fail, và `pumpAndSettle` mặc định
+     chờ tới 10 phút trước khi bỏ cuộc. Đã tách `buildRootWidget(config)` ra để
+     test mount đúng cây thật mà không đụng zone. Đây là lý do file này có
+     `buildRootWidget`.
+  2. **`AppLocalizations.maybeOf` không tồn tại** khi `nullable-getter: false`.
+     Tra cứu an toàn phải qua `Localizations.of<AppLocalizations>(...)`, trả
+     `null` thay vì assert. Quan trọng vì `ErrorScreenWidget` có thể phải thay
+     cho một widget hỏng **phía trên** delegates — nếu nó cần Localizations thì
+     nó sẽ throw trong lúc đang báo cáo một throw, và người dùng nhận màn trắng.
+  3. **`ProviderScope.containerOf` cần context là con của scope.** Truyền chính
+     element của `ProviderScope` → `No ProviderScope found`.
 - **Dependencies:** M2.5, M2.4, M2.3
 - **Tests required:** widget test cho `ErrorWidget.builder`; test `bootstrap()`
-  gọi được với fake config và không throw
+  gọi được với fake config và không throw — **đã có**,
+  `test/app/bootstrap_test.dart`, 9 test pass, gồm test khẳng định
+  `installErrorHandlers` **khôi phục** cả ba handler toàn cục và test khẳng định
+  màn lỗi không lộ chi tiết kỹ thuật
 - **Checklist phases:** 6.1
 
 ---

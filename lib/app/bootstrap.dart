@@ -1,27 +1,130 @@
+import 'dart:async';
+import 'dart:developer' as developer;
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app.dart';
 import 'config/env_config.dart';
 import 'config/env_config_provider.dart';
+import 'error_screen_widget.dart';
+
+/// Restores the error handlers that were installed before
+/// [installErrorHandlers] replaced them.
+typedef RestoreErrorHandlers = void Function();
 
 /// Single owner of application startup.
 ///
 /// The entrypoints pick a config and call this; they hold no initialisation
-/// logic of their own. Keeping startup in one function is what makes three
-/// flavors share one path, and what lets a test drive startup with a fake
-/// config instead of reproducing it.
+/// logic of their own. One startup path is what lets three flavors share the
+/// same behaviour, and what lets a test drive startup with a fake config
+/// instead of reproducing it.
 ///
-/// M4.2 will open the database here, between config and `runApp`.
+/// Order matters, because later steps report their failures through earlier
+/// ones: bindings, then error handlers, then the app. M4.2 will open the
+/// database between the handlers and `runApp` — a database that fails to open
+/// is a startup failure the user must see, not a silent crash loop.
 Future<void> bootstrap(EnvConfig config) async {
-  WidgetsFlutterBinding.ensureInitialized();
+  // The zone catches async errors raised outside the Flutter framework, which
+  // `PlatformDispatcher.onError` does not always see. Both are installed
+  // because each misses what the other catches.
+  runZonedGuarded<void>(() {
+    WidgetsFlutterBinding.ensureInitialized();
+    installErrorHandlers(logLevel: config.logLevel);
 
-  runApp(
-    ProviderScope(
-      // No explicit type argument: `Override` is internal to riverpod and is
-      // not part of flutter_riverpod's public API.
-      overrides: [envConfigProvider.overrideWithValue(config)],
-      child: const MemoxApp(),
-    ),
+    try {
+      runApp(buildRootWidget(config));
+    } on Object catch (error, stackTrace) {
+      // `on Object` rather than a bare `catch`: the analyzer requires the
+      // clause, and the width is deliberate — nothing thrown during startup may
+      // escape, whatever its type.
+      //
+      // A startup failure must reach the user as a screen. A white window is
+      // the worst available outcome because it is indistinguishable from a
+      // hang, and the user has nothing to report.
+      logStartupFailure(error, stackTrace);
+      runApp(const ErrorScreenWidget(kind: AppErrorKind.startup));
+    }
+  }, (error, stackTrace) => _log('uncaught async error', error, stackTrace));
+}
+
+/// The widget tree `bootstrap` hands to `runApp`.
+///
+/// Separated from [bootstrap] so a widget test can mount the real root — and
+/// assert the config override actually reached it — without going through
+/// `runZonedGuarded` and `runApp`. `flutter_test` owns its own zone and its own
+/// binding; calling `runApp` inside a fresh zone from a test hangs instead of
+/// failing, which costs minutes per run to discover.
+Widget buildRootWidget(EnvConfig config) => ProviderScope(
+  // No explicit type argument: `Override` is internal to riverpod and is not
+  // part of flutter_riverpod's public API.
+  overrides: [envConfigProvider.overrideWithValue(config)],
+  child: const MemoxApp(),
+);
+
+/// Installs the three error boundaries and returns a callback that puts the
+/// previous ones back.
+///
+/// The restore callback exists for tests: these are global, so a test that
+/// installs them without restoring changes the behaviour of every test that
+/// runs afterwards, and the resulting failure appears in an unrelated file.
+RestoreErrorHandlers installErrorHandlers({required LogLevel logLevel}) {
+  final previousFlutterOnError = FlutterError.onError;
+  final previousPlatformOnError = PlatformDispatcher.instance.onError;
+  final previousErrorWidgetBuilder = ErrorWidget.builder;
+
+  // Framework errors, including build errors.
+  FlutterError.onError = (details) {
+    _log('flutter error', details.exception, details.stack);
+    // Keep the framework's own reporting in debug: it prints the widget
+    // hierarchy, which is the part that actually locates the bug.
+    if (kDebugMode) FlutterError.presentError(details);
+  };
+
+  // Uncaught async errors that reach the platform.
+  PlatformDispatcher.instance.onError = (error, stackTrace) {
+    _log('platform error', error, stackTrace);
+    return true;
+  };
+
+  // Replaces the red screen. In release it would otherwise show the exception
+  // text to the user; in debug the red screen is genuinely useful, so it stays.
+  ErrorWidget.builder = (details) {
+    _log('widget build error', details.exception, details.stack);
+    if (kDebugMode) return _debugErrorWidget(details);
+
+    return const ErrorScreenWidget(kind: AppErrorKind.render);
+  };
+
+  return () {
+    FlutterError.onError = previousFlutterOnError;
+    PlatformDispatcher.instance.onError = previousPlatformOnError;
+    ErrorWidget.builder = previousErrorWidgetBuilder;
+  };
+}
+
+/// Reports a failure that happened before the app could render.
+@visibleForTesting
+void logStartupFailure(Object error, StackTrace? stackTrace) =>
+    _log('startup failure', error, stackTrace);
+
+/// In debug builds the developer is the audience, so show the real error.
+Widget _debugErrorWidget(FlutterErrorDetails details) =>
+    ErrorWidget(details.exception);
+
+/// Minimal structured logging via `dart:developer`.
+///
+/// Deliberately not a logging abstraction — that is M7's job, and building one
+/// now would be a guess at requirements that do not exist yet. `print` is
+/// banned by `analysis_options.yaml`; this is the supported alternative and it
+/// is stripped from release output by the VM service being absent.
+void _log(String context, Object error, StackTrace? stackTrace) {
+  developer.log(
+    context,
+    name: 'memox.bootstrap',
+    error: error,
+    stackTrace: stackTrace,
+    level: 1000, // SEVERE
   );
 }
