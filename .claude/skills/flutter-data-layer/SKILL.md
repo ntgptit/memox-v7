@@ -15,11 +15,20 @@ what keeps the UI testable and the domain framework-free.
 Read `references/networking.md` for the Dio client and interceptor setup, and
 `references/persistence.md` for Drift schema, migrations, cache and sync.
 
-## Decide the source of truth first
+## Source of truth — already decided for this project
 
-Before writing any repository, answer one question from `docs/product.md`: is
-this app **offline-first** or **online-first**? Everything below follows from it,
-and changing the answer later means rewriting every repository.
+**memox is local-first with no backend yet (AD-01 in `docs/architecture.md`).**
+Drift is the source of truth; reads come from `watch()` streams; there is no
+remote data source and no cache layer. The Spring Boot backend arrives later,
+and the repository contract is what lets it arrive without touching `domain/`
+or `presentation/`.
+
+That means the networking half of this skill —
+`references/networking.md` — is **reference material for a later phase**, not
+something to build now. `dio` is deliberately not a dependency yet (AD-05).
+
+The generic reasoning below is kept because it is what makes the decision
+reviewable when the backend lands.
 
 **Offline-first** — the database is the source of truth. Reads always come from
 Drift and are exposed as a stream, so the UI updates when data changes for any

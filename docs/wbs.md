@@ -13,14 +13,15 @@ Status values: `todo` · `in-progress` · `blocked` · `done` · `descoped`
 | Milestone | Status | Notes |
 |---|---|---|
 | M0 · Development harness | done | Skills, checklist and enforcement scripts in place |
-| M1 · Product definition (Phase 0–1) | **todo — next** | Blocked on product input from the owner |
-| M2 · Project foundation (Phase 2–3, 6) | todo | Needs M1: platforms and offline/online decide the dependency set |
+| M1 · Product definition (Phase 0–1) | **in-progress** | T1.1 done; T1.2 blocked on 3 câu hỏi trong `product.md` |
+| M2 · Project foundation (Phase 2–3, 6) | todo | Unblocked — platform/data/auth đã chốt. Không cài `dio` (AD-05) |
 | M3 · Architecture & design system (Phase 4–5, 7, 12–13) | todo | |
-| M4 · Router & data foundation (Phase 8, 10–11) | todo | |
-| M5 · First vertical slice (Phase 14) | todo | Scope decided in M1 |
-| M6 · Test suite (Phase 15) | todo | Runs alongside M5, not after |
-| M7 · CI/CD (Phase 19) | todo | Can start once M2 lands |
-| M8 · Release (Phase 16–18, 20–22) | todo | |
+| M4 · Router & Drift foundation (Phase 8, 11) | todo | **Phase 10 (networking) bị hoãn** — xem AD-01/AD-05 |
+| M5 · First vertical slice: luồng ôn tập (Phase 14) | todo | Luồng 2 trong `product.md` |
+| M6 · Test suite (Phase 15) | todo | Chạy song song M5, không phải sau |
+| M7 · CI/CD (Phase 19) | todo | Bắt đầu được ngay sau M2. Job Android + Web, chưa có iOS (AD-04) |
+| M8 · Release Android (Phase 16–18, 20–22) | todo | |
+| M9 · Backend Spring Boot + auth + sync (Phase 10) | todo | Sau khi M8 ổn định. Kích hoạt phần networking của harness |
 
 ---
 
@@ -85,24 +86,53 @@ the most downstream work, in order of leverage:
    log redaction.
 5. **What is genuinely in the MVP?**
 
-### T1.1 · Product requirements
+### T1.1 · Product requirements và quyết định kiến trúc
 
-- **Status:** todo
-- **Goal:** Answer the five questions above and record them.
-- **Output:** `docs/product.md`, `docs/mvp.md`
+- **Status:** done
+- **Goal:** Chốt các quyết định nền tảng và ghi lại kèm lý do.
+- **Output:** `docs/product.md` (gồm cả MVP scope), `docs/architecture.md`
 - **Acceptance criteria:**
-  - [ ] Problem, users and core value stated.
-  - [ ] Platform, data-posture, auth and sensitive-data decisions recorded with
-        their consequences.
-  - [ ] Features classified must / should / nice / out, each with a completion
-        condition.
-- **Dependencies:** product owner input
+  - [x] Problem, users, core value.
+  - [x] Quyết định platform / data posture / auth / sensitive data kèm hệ quả.
+  - [x] Feature phân loại must / should / nice / out, mỗi cái có điều kiện hoàn thành.
+  - [x] Quyết định kiến trúc ghi thành AD-01…06 kèm lý do và đánh đổi.
+  - [x] Harness được chỉnh lại cho khớp quyết định (xem T1.1b).
+- **Dependencies:** product owner input — đã nhận
 - **Tests required:** none — document only
-- **Checklist phases:** 0.1, 0.2
+- **Checklist phases:** 0.1, 0.2, và một phần 4.3
+
+### T1.1b · Chỉnh harness theo quyết định đã chốt
+
+- **Status:** done
+- **Goal:** Loại bỏ hướng dẫn đã thành sai sau khi chốt local-first / `.drift` /
+  no-auth / Android-only. Một skill nói sai còn tệ hơn không có skill, vì phiên
+  sau sẽ tin nó.
+- **Output:**
+  - `flutter-data-layer/references/persistence.md` — schema viết lại theo file
+    `.drift` (bảng, index, named query, `@DriftDatabase(include:)`); mục cache
+    đánh dấu chưa áp dụng
+  - `flutter-data-layer/SKILL.md` — source of truth đã chốt, networking là tài
+    liệu cho phase sau
+  - `flutter-project-setup/references/dependencies.md` — `dio` và
+    `flutter_secure_storage` hoãn; `uuid` bắt buộc từ đầu
+  - `flutter-ship/references/ci.md` — thêm job `build-web` (kênh E2E),
+    comment out `build-ios`
+  - `CLAUDE.md` — tóm tắt quyết định, bỏ Dio khỏi stack
+- **Acceptance criteria:**
+  - [x] Không còn ví dụ Dart table class trong tài liệu Drift.
+  - [x] Mọi chỗ nhắc `dio` đều nói rõ là hoãn và vì sao.
+  - [x] Frontmatter và tham chiếu chéo vẫn hợp lệ sau khi sửa.
+- **Dependencies:** T1.1
+- **Tests required:** chạy lại kiểm tra frontmatter + tham chiếu chéo
+- **Checklist phases:** meta
 
 ### T1.2 · Use cases and business rules
 
-- **Status:** todo
+- **Status:** blocked — cần 3 câu trả lời ở cuối `docs/product.md`
+- **Blocker:** thuật toán SRS (Leitner / SM-2 / FSRS), nguồn nội dung (tự tạo hay
+  có sẵn), thang đánh giá (2 mức hay 4 mức). Cả ba đều quyết định trực tiếp cột
+  của bảng `cards` và business rules của luồng ôn tập — viết use case trước khi
+  chốt là đúng loại rework mà Phase 14.1 tồn tại để ngăn.
 - **Goal:** Specify each must-have feature to the point where it can be built
   without further questions.
 - **Output:** `docs/use-cases.md`, `docs/business-rules.md`

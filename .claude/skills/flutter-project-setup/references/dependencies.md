@@ -9,12 +9,18 @@ project targets, not exact pins.
 
 ## Runtime
 
+**Not yet for memox:** `dio` is deliberately absent until the Spring Boot
+integration begins (AD-05 in `docs/architecture.md`) — the MVP makes no network
+calls, and an unused HTTP client still costs build time, still needs upgrading,
+and still suggests a network layer exists. Add it when the first real request
+does.
+
 | Package | Line | Why it is here |
 |---|---|---|
 | `flutter_riverpod` | 3.x | State + DI. Compile-safe, testable without a widget tree. |
 | `riverpod_annotation` | 3.x | Annotations for the generator. |
 | `go_router` | 14+ | Declarative routing, deep links, redirect guards. |
-| `dio` | 5.x | HTTP with interceptors, cancellation and typed errors. |
+| `dio` | 5.x | HTTP with interceptors, cancellation and typed errors. **Deferred — see above.** |
 | `drift` | 2.x | Typed SQLite with migrations and reactive queries. |
 | `sqlite3_flutter_libs` | — | Ships the SQLite binary. Required by Drift on mobile. |
 | `path_provider` | — | Locates the database directory. |
@@ -23,8 +29,8 @@ project targets, not exact pins.
 | `json_annotation` | — | JSON codegen annotations. |
 | `intl` | — | Locale-aware dates and numbers. |
 | `collection` | — | `firstWhereOrNull`, equality helpers. Avoids hand-rolled bugs. |
-| `uuid` | — | Client-generated IDs — needed for offline-first creates. |
-| `flutter_secure_storage` | — | Keychain / EncryptedSharedPreferences for tokens. |
+| `uuid` | — | Client-generated IDs. Needed **from day one** even without sync: changing the primary-key strategy later means rewriting every foreign key (AD-03). |
+| `flutter_secure_storage` | — | Keychain / EncryptedSharedPreferences for tokens. **Deferred** — memox has no tokens until auth arrives. |
 
 Add only when the need is real:
 

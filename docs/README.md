@@ -6,6 +6,12 @@
 |---|---|---|
 | [`checklist.md`](checklist.md) | The canonical 22-phase development plan | complete, stable |
 | [`wbs.md`](wbs.md) | Live progress ledger — the source of truth for what is done | active |
+| [`product.md`](product.md) | Problem, users, platform/data/auth decisions, **and MVP scope** | draft — 3 open questions |
+| [`architecture.md`](architecture.md) | Architecture decisions AD-01…06 with reasoning | active |
+
+MVP scope lives inside `product.md` rather than a separate `mvp.md` — it is
+short, and splitting it would mean two files that must agree about the same
+feature list.
 
 ## Not written yet
 
@@ -15,13 +21,10 @@ needed", which is worse than an obvious gap.
 
 | Document | Created during | Owning skill |
 |---|---|---|
-| `product.md` | Phase 0.1–0.2 | `flutter-product-spec` |
-| `mvp.md` | Phase 0.2 | `flutter-product-spec` |
 | `use-cases.md` | Phase 0.3 | `flutter-product-spec` |
 | `business-rules.md` | Phase 0.3 | `flutter-product-spec` |
-| `architecture.md` | Phase 4, updated as decisions are made | `flutter-architecture` |
 | `data-model.md` | Phase 11.1 | `flutter-data-layer` |
-| `api-spec.md` | Phase 10.2 | `flutter-data-layer` |
+| `api-spec.md` | Phase 10.2 — **not until the Spring Boot backend exists** (AD-05) | `flutter-data-layer` |
 | `design-system.md` | Phase 7 | `flutter-design-system` |
 | `testing-strategy.md` | Phase 15 | `flutter-testing` |
 | `release-checklist.md` | Phase 20–21 | `flutter-ship` |

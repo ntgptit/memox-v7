@@ -75,17 +75,37 @@ jobs:
       - run: dart run build_runner build --delete-conflicting-outputs
       - run: flutter build apk --debug --flavor development -t lib/main_development.dart
 
-  build-ios:
+  # Web is not a release target for memox, but it IS the E2E channel
+  # (Flutter Web + Playwright, AD-04). This job exists to catch a dependency
+  # that breaks the web build — which would cost the test channel, not a
+  # platform.
+  build-web:
     needs: verify
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with: { flutter-version: '3.x.x', channel: stable, cache: true }
       - run: flutter pub get
       - run: dart run build_runner build --delete-conflicting-outputs
-      # --no-codesign: PR validation needs a compile check, not a signed artifact.
-      - run: flutter build ios --no-codesign --flavor development -t lib/main_development.dart
+      - run: flutter build web
+
+  # Not enabled for memox yet — iOS is deferred until Android is stable
+  # (AD-04). macos-latest bills at several times the Linux rate, so leaving
+  # this out is a deliberate saving, not an oversight. Enable when iOS enters
+  # scope.
+  #
+  # build-ios:
+  #   needs: verify
+  #   runs-on: macos-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: subosito/flutter-action@v2
+  #       with: { flutter-version: '3.x.x', channel: stable, cache: true }
+  #     - run: flutter pub get
+  #     - run: dart run build_runner build --delete-conflicting-outputs
+  #     # --no-codesign: PR validation needs a compile check, not a signed artifact.
+  #     - run: flutter build ios --no-codesign --flavor development -t lib/main_development.dart
 ```
 
 Notes on choices that are easy to get wrong:

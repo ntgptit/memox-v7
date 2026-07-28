@@ -2,8 +2,33 @@
 
 Flutter application, rebuilt from scratch against `docs/checklist.md`.
 
-**Stack:** Flutter (stable) · Riverpod 3.x + codegen · GoRouter · Dio · Drift/SQLite · Material 3 + design tokens
+**Stack:** Flutter (stable) · Riverpod 3.x + codegen · GoRouter · Drift/SQLite · Material 3 + design tokens
 **Architecture:** Pragmatic Clean Architecture, feature-first.
+
+## What memox is, and what it is not yet
+
+Flashcard / spaced-repetition vocabulary app. The decisions below are settled;
+the reasoning and the full consequences are in `docs/architecture.md` (AD-01…06),
+and they are the ones most likely to be violated by accident:
+
+- **Local-first, backend-ready.** Drift is the source of truth; repositories read
+  from `watch()` streams. A Spring Boot backend comes later — the repository
+  contract exists so that it can, without `domain/` or `presentation/` changing.
+  Never let a Drift-generated type serve as a domain entity; that is exactly what
+  destroys this property, and it only shows up when the backend lands.
+- **SQL lives in `.drift` files**, not Dart table classes, so `drift_dev`
+  type-checks queries at build time.
+- **No auth yet, auth-ready.** One local profile. Tables carry a nullable
+  `owner_id`; IDs are client-generated UUIDs from day one. No login screen, no
+  token storage, no `AuthRepository` — do not build them.
+- **No network yet.** `dio` is deliberately not a dependency. Add it with the
+  first real request.
+- **Android is the release target.** Web must keep building because it is the
+  E2E channel (Flutter Web + Playwright), but it is not a production target.
+  iOS is deferred.
+
+Deliberately deferred, and cheap to add later because migration testing is in
+place from the start: sync bookkeeping columns (`isPendingSync`, `version`).
 
 ## How work is driven here
 

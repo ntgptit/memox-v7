@@ -3,35 +3,98 @@
 Location: `core/database/` for the database and migrations; DAOs live with their
 feature in `features/<f>/data/local/`.
 
-## Schema
+## Schema — SQL in `.drift` files
+
+This project declares tables and queries in `.drift` files rather than Dart
+table classes (decision AD-02 in `docs/architecture.md`). The reason worth
+remembering: `drift_dev` analyses the SQL **at build time**, so a wrong column,
+wrong type or bad join is a compile error rather than a runtime one.
+
+```
+lib/core/database/
+├── app_database.dart      # @DriftDatabase, migration strategy
+├── tables/
+│   ├── decks.drift
+│   └── cards.drift
+└── queries/
+    └── study.drift        # named queries for the review flow
+```
+
+```sql
+-- tables/decks.drift
+CREATE TABLE decks (
+  id         TEXT     NOT NULL PRIMARY KEY,
+  name       TEXT     NOT NULL,
+  -- NULL means "belongs to the local profile". Nullable from day one so that
+  -- adding auth later can backfill it without discarding offline-created data
+  -- (AD-03).
+  owner_id   TEXT     NULL,
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL
+) AS Deck;
+```
+
+```sql
+-- tables/cards.drift
+CREATE TABLE cards (
+  id         TEXT     NOT NULL PRIMARY KEY,
+  deck_id    TEXT     NOT NULL REFERENCES decks(id) ON DELETE CASCADE,
+  front      TEXT     NOT NULL,
+  back       TEXT     NOT NULL,
+  due_at     DATETIME NULL,
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL
+) AS Card;
+
+CREATE INDEX idx_cards_deck_due ON cards (deck_id, due_at);
+```
+
+`AS Deck` names the generated row class. Without it you get `DecksData`, which
+reads badly at every call site.
+
+Named queries live beside the tables and generate typed methods:
+
+```sql
+-- queries/study.drift
+cardsDueForReview:
+SELECT * FROM cards
+WHERE deck_id = :deckId
+  AND (due_at IS NULL OR due_at <= :now)
+ORDER BY due_at ASC NULLS FIRST
+LIMIT :limit;
+
+dueCountPerDeck:
+SELECT d.id AS deck_id, COUNT(c.id) AS due_count
+FROM decks d
+LEFT JOIN cards c
+  ON c.deck_id = d.id AND (c.due_at IS NULL OR c.due_at <= :now)
+GROUP BY d.id;
+```
+
+Name queries after the business verb (`cardsDueForReview`), not after the SQL
+shape (`selectCardsWhereDue`) — the caller cares about the former.
+
+Note `:now` is a **parameter**, not `CURRENT_TIMESTAMP`. Passing the time in is
+what makes the query testable at an arbitrary point in time, and it matches the
+same rule applied to the SRS use case (AD-06).
+
+Wire them into the database:
 
 ```dart
-class Decks extends Table {
-  TextColumn get id => text()();
-  TextColumn get name => text().withLength(min: 1, max: 200)();
-  DateTimeColumn get createdAt => dateTime()();
-  DateTimeColumn get updatedAt => dateTime()();
-  // Offline-first bookkeeping — see "Sync" below.
-  BoolColumn get isPendingSync => boolean().withDefault(const Constant(false))();
-  IntColumn get version => integer().withDefault(const Constant(0))();
-
-  @override
-  Set<Column> get primaryKey => {id};
-}
-
-class Cards extends Table {
-  TextColumn get id => text()();
-  TextColumn get deckId => text().references(Decks, #id, onDelete: KeyAction.cascade)();
-  DateTimeColumn get dueAt => dateTime().nullable()();
-
-  @override
-  Set<Column> get primaryKey => {id};
-}
+@DriftDatabase(
+  include: {
+    'tables/decks.drift',
+    'tables/cards.drift',
+    'queries/study.drift',
+  },
+)
+class AppDatabase extends _$AppDatabase { ... }
 ```
 
 Use **client-generatable IDs** (UUID/ULID) rather than server auto-increment
-integers. Offline creation needs an ID before the server has seen the row, and
-retrofitting this later means rewriting every foreign key.
+integers. Offline creation needs an ID before any server has seen the row, and
+retrofitting this later means rewriting every foreign key — which is why `uuid`
+is a dependency from day one even though sync is far off.
 
 Foreign keys need enabling per connection — Drift does not do it for you:
 
@@ -41,8 +104,8 @@ beforeOpen: (details) async {
 }
 ```
 
-Without that, `references` and `onDelete: cascade` are documentation, not
-behaviour.
+Without that, `REFERENCES` and `ON DELETE CASCADE` are documentation, not
+behaviour. Worth testing explicitly: delete a deck, assert its cards are gone.
 
 ## Indexes
 
@@ -50,10 +113,7 @@ Index the columns you actually filter, sort or join on. On a table of a few
 hundred rows nothing is noticeable; at ten thousand, an unindexed filter is a
 visible stutter.
 
-```dart
-@TableIndex(name: 'idx_cards_deck_due', columns: {#deckId, #dueAt})
-class Cards extends Table { ... }
-```
+Declare them in the `.drift` file next to the table, as shown above.
 
 A composite index serves queries that use its columns left-to-right, so order
 the columns by how you query. Verify rather than guess:
@@ -115,6 +175,15 @@ MigrationStrategy get migration => MigrationStrategy(
 Sequential `if (from < n)` blocks — not `else if`, and not a switch on `from`.
 A user upgrading from version 1 to 3 must run both steps.
 
+The `isPendingSync` step above is illustrative of exactly the migration this
+project has deliberately deferred (AD-03): the sync bookkeeping columns are
+cheap to add later precisely because this migration path is tested from the
+start, which is what makes deferring them the right call rather than a gamble.
+
+With `.drift` files, the migration API is unchanged — drift generates the same
+Dart table symbols from SQL, so `m.addColumn(decks, decks.ownerId)` works
+whether the table was declared in Dart or in SQL.
+
 **Test migrations from every released version.** Drift's
 `drift_dev schema dump` / `generate-migrations` produce fixtures for exactly
 this. A migration bug only appears for users with existing data, which is
@@ -122,7 +191,13 @@ everyone except you.
 
 ## Cache strategy
 
-Write this in `docs/architecture.md` — per data type, not once for the app:
+**Not applicable while the project is local-first (AD-01).** There is no cache
+because there is no remote — Drift is the source of truth, and a "TTL" on the
+only copy of the data would be meaningless. This section applies from the
+Spring Boot integration onward.
+
+When that arrives, write the table below into `docs/architecture.md` — per data
+type, not once for the whole app:
 
 | Data | Cached | TTL | Source of truth | Stale behaviour |
 |---|---|---|---|---|
