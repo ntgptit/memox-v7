@@ -16,6 +16,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     required this.info,
     required this.surfaceMuted,
     required this.borderSubtle,
+    required this.focusRing,
   });
 
   const AppSemanticColors.light()
@@ -24,7 +25,8 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       danger = AppColors.dangerLight,
       info = AppColors.infoLight,
       surfaceMuted = AppColors.surfaceMutedLight,
-      borderSubtle = AppColors.borderSubtleLight;
+      borderSubtle = AppColors.borderSubtleLight,
+      focusRing = AppColors.focusRingLight;
 
   const AppSemanticColors.dark()
     : success = AppColors.successDark,
@@ -32,7 +34,8 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       danger = AppColors.dangerDark,
       info = AppColors.infoDark,
       surfaceMuted = AppColors.surfaceMutedDark,
-      borderSubtle = AppColors.borderSubtleDark;
+      borderSubtle = AppColors.borderSubtleDark,
+      focusRing = AppColors.focusRingDark;
 
   final Color success;
   final Color warning;
@@ -40,6 +43,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   final Color info;
   final Color surfaceMuted;
   final Color borderSubtle;
+  final Color focusRing;
 
   @override
   AppSemanticColors copyWith({
@@ -49,6 +53,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     Color? info,
     Color? surfaceMuted,
     Color? borderSubtle,
+    Color? focusRing,
   }) {
     return AppSemanticColors(
       success: success ?? this.success,
@@ -57,6 +62,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       info: info ?? this.info,
       surfaceMuted: surfaceMuted ?? this.surfaceMuted,
       borderSubtle: borderSubtle ?? this.borderSubtle,
+      focusRing: focusRing ?? this.focusRing,
     );
   }
 
@@ -77,6 +83,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       info: Color.lerp(info, other.info, t)!,
       surfaceMuted: Color.lerp(surfaceMuted, other.surfaceMuted, t)!,
       borderSubtle: Color.lerp(borderSubtle, other.borderSubtle, t)!,
+      focusRing: Color.lerp(focusRing, other.focusRing, t)!,
     );
   }
 }

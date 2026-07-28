@@ -891,30 +891,40 @@ slice UC-05 cần. Không xây trọn design system trước khi có feature th�
   tranh sự chú ý. Màu dark **không** phải màu light tối đi: trên nền tối, một
   màu bão hoà đọc ra sáng hơn chính nó trên nền trắng, nên từng màu được làm
   nhạt và giảm bão hoà để giữ contrast tương đương mà không bị chói.
-- **Nguồn giá trị màu: Radix Colors**, đọc từ package đã publish qua CDN chứ
-  không chọn bằng mắt — accent lấy bậc 9 (nền đặc) và 11 (chữ trên surface),
-  neutral lấy bậc 2/3/4/6/11/12. Radix chỉnh từng bậc để giữ contrast trên đúng
-  surface nó định ngồi lên, là thuộc tính cần ở đây vì mọi màu phải chạy được ở
-  hai brightness. **Trọng tài cuối cùng vẫn là test contrast WCAG**, không phải
-  nguồn.
-- **Họ màu: violet + mauve.** Violet mang nhận diện; mauve là neutral được chỉnh
-  để ngồi cạnh violet.
+- **Nguồn giá trị màu: ảnh tham chiếu chủ dự án chọn, sample từng pixel.**
+  Không phỏng theo bằng mắt, không lấy nguyên một scheme Material. Bảng dark
+  được đo trực tiếp; bảng light **suy ra từ dark** — giữ nguyên hue, soi gương
+  thang lightness — chứ không chọn riêng. Đó là thứ giữ cho hai mode là **một
+  sản phẩm** thay vì hai thiết kế tình cờ ship cùng nhau.
+- **Thang surface ba tầng, không phải hai.** Tham chiếu tách bạch trang / card /
+  ô lồng, và chính bậc thứ ba mới cho một chip hay một icon container đọc ra là
+  nổi lên mà không cần đổ bóng. Hai tầng buộc mọi phần tử lồng phải mượn màu
+  card rồi tan vào nó.
 
-  Lần chọn trước (`iris`) là một sai lầm đáng ghi lại: `iris-9` = `#5b5bd6`,
-  lệch đúng **15/255** so với indigo cũ `#4c5bd4`. Đổi bậc trong cùng một họ thì
-  mắt không phân biệt được — muốn thấy khác thì phải đổi **họ màu**.
-- **Neutral được khai báo, không để `fromSeed` sinh ra.** `ColorScheme.fromSeed`
-  nhuộm mọi surface theo seed, và chính lớp ngả tím phủ toàn app là thứ làm
-  palette cũ trông cũ kỹ. Seed vẫn lo primary/secondary và phần còn lại của tonal
-  ramp; `surface`, `onSurface`, `onSurfaceVariant`, `outline` được override.
-- **Nền dark cố ý KHÔNG dùng bậc 1–2 của Radix.** Bậc 1 là `#121113`, gần như
-  đen tuyền. Trên màn OLED nó đọc ra như một cái lỗ chứ không phải một mặt phẳng:
-  elevation hết đọc được, viền không còn gì để tách, và đọc lâu thì gắt hơn vì
-  contrast với chữ trắng ở mức tối đa. Dùng bậc 3 (`#232225`) cho nền trang và
-  bậc 4 (`#2b292d`) cho card — giữ nguyên quan hệ hue nhưng cho giao diện một
-  cái sàn để đứng.
-- **Hai mức surface, không phải một:** trang thấp hơn card một bậc, nên card đọc
-  ra là card mà không cần đổ bóng.
+  | | Trang | Card | Ô lồng |
+  |---|---|---|---|
+  | Dark | `#0A082D` | `#201F3E` | `#2E3756` |
+  | Light | `#F6F6FB` | `#FFFFFF` | `#EAEAF6` |
+
+- **Bài học đo được, ngược với trực giác.** Nền tham chiếu `#0A082D` có luminance
+  0.004 — **tối hơn** bản `#232225` từng bị chê là "quá tối", và card của họ sáng
+  đúng bằng nền của bản đó. Nó vẫn dễ nhìn hơn vì hai lý do không liên quan tới
+  độ sáng tuyệt đối: **hue navy bão hoà** đọc ra là sâu chứ không phải trống
+  (đen trung tính đọc ra như một sự vắng mặt), và **khoảng cách nền↔card rộng
+  hơn** (1.22× so với 1.10×). Thứ làm một card đọc ra là card là *bậc thang*,
+  không phải *độ cao*.
+- **Chữ không dùng đầu mút thuần.** `#EDECFE` thay vì trắng, `#17162D` thay vì
+  đen: trên nền bão hoà một giá trị thuần bị rung, còn mang theo chút hue của
+  surface là thứ làm chữ **nằm trong** giao diện chứ không dán lên trên.
+- **Focus của ô nhập đổi *hue*, không đổi độ dày.** Material mặc định nhảy 1px →
+  2px, làm ô nhảy và đẩy mọi thứ bên cạnh. Giữ nét 1.5 ở **mọi** trạng thái và
+  chuyển màu sang `focusRing` (periwinkle `#A8B1FF` ở dark) — đây chính là điểm
+  chủ dự án chỉ ra. Có test khẳng định độ dày và bo góc **không đổi** giữa hai
+  trạng thái, còn màu thì phải đổi.
+- **Lần chọn `iris` trước đó là một sai lầm đáng ghi lại:** `iris-9` = `#5b5bd6`,
+  lệch đúng **15/255** so với indigo cũ. Đổi bậc trong cùng một họ thì mắt không
+  phân biệt được — muốn thấy khác thì phải đổi **họ màu**, và phải đụng tới cả
+  neutral chứ không chỉ màu nhấn.
 - **Font (bổ sung sau M3.6):** hai họ, mỗi họ làm việc nó giỏi.
   **Plus Jakarta Sans** cho display/title — hình học pha humanist, để một từ vựng
   đặt lớn đọc ra như có thiết kế thay vì như chữ hệ thống mặc định; đây là chữ

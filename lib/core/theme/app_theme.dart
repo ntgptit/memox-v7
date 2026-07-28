@@ -19,6 +19,7 @@ ThemeData buildLightTheme() => _buildTheme(
     // made the previous palette read as dated. The seed still drives primary,
     // secondary and the rest of the tonal ramp.
     surface: AppColors.surfaceLight,
+    surfaceContainerHighest: AppColors.surfaceMutedLight,
     onSurface: AppColors.onSurfaceLight,
     onSurfaceVariant: AppColors.onSurfaceVariantLight,
     outline: AppColors.borderSubtleLight,
@@ -34,6 +35,7 @@ ThemeData buildDarkTheme() => _buildTheme(
     brightness: Brightness.dark,
   ).copyWith(
     surface: AppColors.surfaceDark,
+    surfaceContainerHighest: AppColors.surfaceMutedDark,
     onSurface: AppColors.onSurfaceDark,
     onSurfaceVariant: AppColors.onSurfaceVariantDark,
     outline: AppColors.borderSubtleDark,
@@ -130,6 +132,36 @@ ThemeData _buildTheme(
       ),
     ),
 
+    // Focus changes the border's COLOUR, not its weight. Material's default
+    // goes 1px -> 2px on focus, which makes the field jump and nudges anything
+    // laid out beside it; keeping the stroke at 1.5 in every state and moving
+    // the hue to `focusRing` is the difference between a field answering and a
+    // field shouting.
+    inputDecorationTheme: InputDecorationTheme(
+      // Outlined, not filled. A fill makes the field a block that competes with
+      // the cards around it; the reference defines the field with a stroke
+      // alone and lets the page show through, so the field reads as an opening
+      // rather than an object. `filled: false` means it sits correctly on
+      // whatever surface it lands on — page or card — with no per-screen
+      // override.
+      filled: false,
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.md,
+      ),
+      border: _inputBorder(semantic.borderSubtle),
+      enabledBorder: _inputBorder(semantic.borderSubtle),
+      focusedBorder: _inputBorder(semantic.focusRing),
+      errorBorder: _inputBorder(semantic.danger),
+      focusedErrorBorder: _inputBorder(semantic.danger),
+      disabledBorder: _inputBorder(
+        semantic.borderSubtle.withValues(alpha: 0.5),
+      ),
+      hintStyle: base.textTheme.bodyMedium?.copyWith(
+        color: scheme.onSurfaceVariant,
+      ),
+    ),
+
     snackBarTheme: SnackBarThemeData(
       backgroundColor: scheme.inverseSurface,
       contentTextStyle: base.textTheme.bodyMedium?.copyWith(
@@ -142,6 +174,13 @@ ThemeData _buildTheme(
     ),
   );
 }
+
+/// Same geometry and the same 1.5 stroke in every state — only the colour
+/// carries the meaning.
+OutlineInputBorder _inputBorder(Color color) => OutlineInputBorder(
+  borderRadius: BorderRadius.circular(AppRadius.md),
+  borderSide: BorderSide(color: color, width: 1.5),
+);
 
 ButtonStyle _buttonStyle(ColorScheme scheme) => ButtonStyle(
   // 48 high before padding: the minimum touch target, enforced here rather

@@ -75,6 +75,22 @@ void main() {
         child: Center(child: AppCardSurface(child: _CardPrompt())),
       ),
     ),
+    // The input states the palette change was actually about: focus moves the
+    // border's hue and leaves its weight alone.
+    'input_resting': const Scaffold(
+      body: Padding(
+        padding: EdgeInsets.all(16),
+        child: Center(
+          child: TextField(decoration: InputDecoration(hintText: 'Search')),
+        ),
+      ),
+    ),
+    'input_focused': const Scaffold(
+      body: Padding(
+        padding: EdgeInsets.all(16),
+        child: Center(child: _AutoFocusedField()),
+      ),
+    ),
     'card_surface': const Scaffold(
       body: Padding(
         padding: EdgeInsets.all(16),
@@ -134,6 +150,32 @@ void main() {
 }
 
 void _noop() {}
+
+/// Takes focus on its first frame, so the golden captures the focused border
+/// rather than the resting one.
+class _AutoFocusedField extends StatefulWidget {
+  const _AutoFocusedField();
+
+  @override
+  State<_AutoFocusedField> createState() => _AutoFocusedFieldState();
+}
+
+class _AutoFocusedFieldState extends State<_AutoFocusedField> {
+  final FocusNode _node = FocusNode();
+
+  @override
+  void dispose() {
+    _node.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => TextField(
+    focusNode: _node,
+    autofocus: true,
+    decoration: const InputDecoration(hintText: 'Search'),
+  );
+}
 
 /// One line per text role, so a missing family or a stuck weight axis is
 /// visible rather than inferred.
