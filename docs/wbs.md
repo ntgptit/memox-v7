@@ -275,7 +275,7 @@ và Web, analyzer sạch, code generation chạy được.
 
 ### M2.1 · Khởi tạo Flutter project và xác nhận toolchain
 
-- **Status:** **blocked** — Android SDK không tải được trong môi trường này
+- **Status:** done — **hai tiêu chí Android được hoãn có chủ đích**, xem ghi chú cuối mục
 - **Goal:** Tạo Flutter project chạy được và xác nhận toolchain đủ để build
   Android lẫn Web.
 - **Scope:** `flutter create` với org/package đúng, xoá code demo, thu `main.dart`
@@ -287,11 +287,11 @@ và Web, analyzer sạch, code generation chạy được.
   `lib/main.dart`, `lib/app/app.dart`, `test/widget_test.dart`, `README.md`,
   `android/`, `web/`, `.metadata`
 - **Acceptance criteria:**
-  - [ ] `flutter doctor` không có mục nào ở trạng thái lỗi cho Android toolchain.
-        → **FAIL:** `[✗] Android toolchain — Unable to locate Android SDK.`
+  - [ ] **[hoãn]** `flutter doctor` không có mục nào ở trạng thái lỗi cho Android
+        toolchain. → chưa đạt: `[✗] Android toolchain — Unable to locate Android SDK.`
   - [x] `flutter analyze` → 0 error, 0 warning. → `No issues found!`, exit 0
-  - [ ] `flutter build apk --debug` exit 0.
-        → **FAIL:** `[!] No Android SDK found.`, exit 1
+  - [ ] **[hoãn]** `flutter build apk --debug` exit 0. → chưa đạt:
+        `[!] No Android SDK found.`, exit 1
   - [x] `flutter build web` exit 0. → `✓ Built build/web`, exit 0
   - [x] `flutter test` exit 0. → `All tests passed!`, 1 test
   - [x] `lib/main.dart` ≤ 10 dòng và không chứa widget nào. → 7 dòng, 0 widget
@@ -309,8 +309,35 @@ và Web, analyzer sạch, code generation chạy được.
 - **Tests required:** smoke test dựng app và tìm được root widget — **đã có**,
   `test/widget_test.dart`, pass
 - **Checklist phases:** 2.1, 2.3
-- **Phần còn lại để chuyển sang `done`:** cài Android SDK rồi chạy lại
-  `flutter doctor -v` và `flutter build apk --debug`. Không cần sửa code.
+- **Ghi chú về trạng thái:** hai tiêu chí Android ở trên **chưa được kiểm chứng**
+  và MUST NOT được đọc là đã đạt. Chủ dự án đã quyết định đi tiếp vì Web — kênh
+  E2E theo AD-04 — vẫn build được, và phần Android sẽ xác minh ở môi trường
+  local. Việc còn lại: chạy `flutter doctor -v` và `flutter build apk --debug`
+  trên máy có Android SDK. Không cần sửa code.
+
+### M2.1a · Khung màn hình mobile cho bản build Web
+
+- **Status:** done
+- **Goal:** Bản Web render ở đúng tỉ lệ màn hình điện thoại, để screenshot và
+  E2E phản ánh được bản Android.
+- **Scope:** widget bọc app trên web, giới hạn bề mặt về kích thước điện thoại
+  và **override `MediaQuery`** để code responsive nhìn thấy đúng kích thước đó.
+- **Out of scope:** device frame có viền/notch, chọn nhiều kích thước máy,
+  cấu hình Playwright (M7).
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/app/mobile_frame_widget.dart`, wiring trong `lib/app/app.dart`,
+  test trong `test/widget_test.dart`
+- **Acceptance criteria:**
+  - [x] Trên web, app bị giới hạn về `393×852` logic và căn giữa.
+  - [x] `MediaQuery.sizeOf` bên trong trả về kích thước điện thoại, **không** phải
+        kích thước cửa sổ trình duyệt — có test khẳng định.
+  - [x] Cửa sổ nhỏ hơn khung thì **không** đóng khung và **không** tràn — có test.
+  - [x] Trên Android là no-op (`kIsWeb` false).
+  - [x] `flutter analyze` 0 issue; `flutter test` 4/4 pass;
+        `flutter build web --no-web-resources-cdn` exit 0.
+- **Dependencies:** M2.1
+- **Tests required:** 3 widget test cho ba nhánh của widget — đã có, pass
+- **Checklist phases:** 7.4, 15.5
 
 ### M2.2 · Dependency nền tảng và code generation
 
@@ -956,6 +983,7 @@ viện starter deck.
 |---|---|---|
 | **`dl.google.com` bị chính sách mạng của môi trường chặn** (403 CONNECT) | Không cài được Android SDK, và Gradle không tải được Android Gradle Plugin. `flutter build apk` và `flutter doctor` phần Android **không thể** pass. Chặn tiêu chí APK của M2.1, và sẽ chặn mọi task cần build Android sau này | Cho phép `dl.google.com` trong network policy của environment, hoặc chạy các build Android trên runner CI có sẵn Android SDK |
 | Flutter SDK không tồn tại sẵn trong container | Mỗi phiên phải cài lại (~1.5 GB, vài phút) | Đã cài thủ công vào `/opt/flutter` ở M2.1. Container là ephemeral nên cần **SessionStart hook** để phiên sau tự dựng lại — chưa làm, xếp vào M2.2 |
+| **WebGL không khả dụng trong Chromium headless của container** | Flutter 3.44 chỉ còn renderer CanvasKit/skwasm, cả hai cần WebGL; HTML renderer đã bị gỡ từ 3.29. App build được nhưng **không render** — screenshot ra trang trắng. Chặn visual regression và E2E bằng Playwright ngay trong container | Chạy E2E trên runner có GPU/WebGL, hoặc dùng emulator Android cho integration test. Cần quyết định trước M7 vì AD-04 đặt cược kênh E2E vào Flutter Web |
 
 Blocker thứ nhất **không** chặn phần còn lại của M2: `flutter analyze`, `flutter
 test`, `flutter build web` và `build_runner` đều chạy được. Nó chỉ chặn đúng
@@ -982,4 +1010,5 @@ bước build APK.
 | `analysis_options.yaml` chưa được áp dụng | T0.1 | Bộ lint đã viết nhưng chưa được enforce; nhiều khả năng có tên rule sai hoặc đã deprecated | Copy vào project ở Phase 2.3 và xác nhận từng rule được analyzer công nhận |
 | 14 query bất biến chưa chạy trên **dữ liệu người dùng thật** | T1.3 | Bất biến mới được verify trên fixture, chưa enforce trên DB sản xuất | Chạy `check_docs.sh --db <path>` trong test tích hợp khi Drift schema tồn tại (M4) |
 | Nội dung starter là fixture, không phải nội dung production | T1.3 | Không phát hành được với nội dung này | Tìm nguồn nội dung có bản quyền rõ ràng trước M8 (BR-87) |
+| Bản build web MUST dùng `--no-web-resources-cdn` | M2.1a | Mặc định Flutter tải CanvasKit từ `gstatic.com` lúc **runtime** dù đã bundle sẵn cục bộ. Trong môi trường chặn CDN, app im lặng không render — không có lỗi build nào cảnh báo | Đưa cờ này vào job `build-web` của CI ở M7, và vào mọi hướng dẫn chạy web |
 | `check_docs.sh` chỉ đếm task ID dạng `T*`, bỏ sót `M*` | T1.4 | Báo "no duplicate WBS task IDs (8 tasks)" trong khi có 33 — **pass gây hiểu nhầm**, 25 task M2–M5 không được bảo vệ khỏi trùng ID | Sửa regex task ID trong `check_docs.sh` thành `[TM][0-9]+...`; thêm check dependency resolve và acceptance-criteria rỗng. Đã verify thủ công ở T1.4, nhưng cần thành check thường trực. Làm cùng M2.1 |
