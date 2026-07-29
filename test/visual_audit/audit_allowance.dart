@@ -30,7 +30,9 @@ class AuditSkipAllowance {
     required this.reason,
     required this.detailContains,
     required this.rationale,
-  }) : assert(itemId != '', 'An allowance must name the item it applies to.'),
+    this.expectedMatches = 1,
+  }) : assert(expectedMatches >= 1, 'An allowance must expect to allow one.'),
+       assert(itemId != '', 'An allowance must name the item it applies to.'),
        assert(
          detailContains != '',
          'An allowance must name what it allows. Matching every skip of a '
@@ -55,6 +57,19 @@ class AuditSkipAllowance {
   final String detailContains;
 
   final String rationale;
+
+  /// How many skips this allowance is supposed to cover. One, unless stated.
+  ///
+  /// Substring matching is broader than it looks, and the direction nobody was
+  /// checking is one allowance quietly covering many skips. It was already
+  /// happening here: an allowance written for `RenderEditable` also swallowed
+  /// two `_RenderEditableCustomPaint` nodes, because the second string contains
+  /// the first. Three nodes excused, one of them examined.
+  ///
+  /// A mismatch in **either** direction is reported. Covering fewer than
+  /// declared means the permission no longer describes the screen, which is the
+  /// same staleness that makes an unused allowance fatal.
+  final int expectedMatches;
 
   bool matches(AuditSkip skip) {
     if (skip.itemId != itemId) return false;
@@ -128,4 +143,23 @@ class AuditAllowanceConflict {
   String toString() =>
       '${skip.reason.name}: ${skip.detail}  [${skip.itemId}]  matched by '
       '${allowances.length}: ${allowances.join(' | ')}';
+}
+
+/// An allowance that covered a different number of skips than it declared.
+@immutable
+class AuditAllowanceMiscount {
+  const AuditAllowanceMiscount({
+    required this.allowance,
+    required this.actualMatches,
+  });
+
+  final AuditSkipAllowance allowance;
+  final int actualMatches;
+
+  bool get isOverbroad => actualMatches > allowance.expectedMatches;
+
+  @override
+  String toString() =>
+      '$allowance expected ${allowance.expectedMatches}, matched '
+      '$actualMatches — ${isOverbroad ? 'covering nodes nobody examined' : 'no longer describes the screen'}';
 }

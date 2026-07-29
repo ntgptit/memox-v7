@@ -1,51 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_theme.dart';
 
 import 'audit_model.dart';
-import 'screen_auditor.dart';
+import 'marker_probe.dart';
 
 /// What the walk visits, and what it refuses to.
 ///
-/// Two failure directions, and they are not symmetric. Auditing something that
-/// never reaches the screen produces findings about pixels nobody sees — noise
-/// that trains people to ignore the report. Pruning something that *is* on
-/// screen produces silence, which reads as a pass. The tests below cover both,
-/// because a policy tuned only against noise will happily hide a visible widget.
+/// Visibility only: `Offstage`, opacity, layout position, transforms. Clipping
+/// is a separate question with a separate failure mode, and lives in
+/// `audit_clip_test.dart`.
 void main() {
-  const marker = Color(0xFF123456);
-
-  Future<ScreenAudit> auditOf(WidgetTester tester, Widget body) async {
-    tester.view.physicalSize = const Size(300, 300);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
-
-    await tester.pumpWidget(
-      AuditSurface(
-        child: MaterialApp(theme: buildLightTheme(), home: body),
-      ),
-    );
-    await tester.pump();
-
-    return auditScreen(tester, screen: 'probe', theme: 'light');
-  }
-
-  bool sawMarker(ScreenAudit audit) => audit.allPaints.any(
-    (paint) =>
-        paint.source == PaintSource.declared &&
-        paint.color.toARGB32() == marker.toARGB32(),
-  );
-
-  /// A 40×40 block in a colour nothing else uses, easy to find in the inventory.
-  ///
-  /// `DecoratedBox`, not `Container(color:)`: the latter builds a `ColoredBox`,
-  /// whose render object is private and therefore classified raster-only — the
-  /// marker would vanish for a reason that has nothing to do with traversal.
-  Widget markerBox() => const SizedBox(
-    width: 40,
-    height: 40,
-    child: DecoratedBox(decoration: BoxDecoration(color: marker)),
-  );
+  Future<ScreenAudit> auditOf(WidgetTester tester, Widget body) =>
+      auditMarker(tester, body);
 
   testWidgets('a visible child is audited', (tester) async {
     final audit = await auditOf(tester, Center(child: markerBox()));
@@ -104,169 +70,6 @@ void main() {
 
     expect(sawMarker(audit), isFalse);
     expect(audit.outsideCaptureNodes, greaterThan(0));
-  });
-
-  testWidgets('a child outside an ancestor ClipRect is not audited', (
-    tester,
-  ) async {
-    // The gap effective clip closes. The child sits inside the 300×300 capture
-    // rectangle, so a check against the capture alone calls it visible — while
-    // the ClipRect above it means no pixel of it was ever drawn.
-    final audit = await auditOf(
-      tester,
-      Align(
-        alignment: Alignment.topLeft,
-        child: SizedBox(
-          width: 50,
-          height: 50,
-          child: ClipRect(
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: <Widget>[
-                Positioned(left: 100, top: 0, child: markerBox()),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-
-    expect(sawMarker(audit), isFalse);
-  });
-
-  testWidgets('a child partly overlapping a ClipRect is audited', (
-    tester,
-  ) async {
-    final audit = await auditOf(
-      tester,
-      Align(
-        alignment: Alignment.topLeft,
-        child: SizedBox(
-          width: 50,
-          height: 50,
-          child: ClipRect(
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: <Widget>[
-                Positioned(left: 30, top: 0, child: markerBox()),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-
-    expect(sawMarker(audit), isTrue);
-  });
-
-  testWidgets('a child fully inside a ClipRect is audited', (tester) async {
-    final audit = await auditOf(
-      tester,
-      Align(
-        alignment: Alignment.topLeft,
-        child: SizedBox(
-          width: 50,
-          height: 50,
-          child: ClipRect(child: markerBox()),
-        ),
-      ),
-    );
-
-    expect(sawMarker(audit), isTrue);
-  });
-
-  testWidgets('Stack(Clip.none) lets a deliberate overflow stay visible', (
-    tester,
-  ) async {
-    // A badge hanging off the corner of a tile is the everyday case. Treating
-    // every Stack as a clip would prune it and report nothing about it.
-    final audit = await auditOf(
-      tester,
-      Align(
-        alignment: Alignment.topLeft,
-        child: SizedBox(
-          width: 50,
-          height: 50,
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: <Widget>[
-              Positioned(left: 40, top: 0, child: markerBox()),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    expect(sawMarker(audit), isTrue);
-  });
-
-  testWidgets('Stack(hardEdge) removes a child beyond its bounds', (
-    tester,
-  ) async {
-    final audit = await auditOf(
-      tester,
-      Align(
-        alignment: Alignment.topLeft,
-        child: SizedBox(
-          width: 50,
-          height: 50,
-          child: Stack(
-            // Stack's default, named anyway: this test only means anything
-            // beside the `Clip.none` case above it.
-            // ignore: avoid_redundant_argument_values
-            clipBehavior: Clip.hardEdge,
-            children: <Widget>[
-              Positioned(left: 100, top: 0, child: markerBox()),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    expect(sawMarker(audit), isFalse);
-    expect(audit.clippedNodes + audit.outsideCaptureNodes, greaterThan(0));
-  });
-
-  testWidgets('a child scrolled out of a viewport is not audited', (
-    tester,
-  ) async {
-    final audit = await auditOf(
-      tester,
-      SizedBox(
-        height: 100,
-        child: ListView(
-          children: <Widget>[const SizedBox(height: 2000), markerBox()],
-        ),
-      ),
-    );
-
-    expect(sawMarker(audit), isFalse);
-  });
-
-  testWidgets('a transform that pushes a child OUT of the clip is pruned', (
-    tester,
-  ) async {
-    // The mirror of the test below. A child laid out inside the clip but moved
-    // out of it by a transform must not be audited — its rect is computed
-    // through the final transform, so the check sees where it actually lands.
-    final audit = await auditOf(
-      tester,
-      Align(
-        alignment: Alignment.topLeft,
-        child: SizedBox(
-          width: 50,
-          height: 50,
-          child: ClipRect(
-            child: Transform.translate(
-              offset: const Offset(200, 0),
-              child: markerBox(),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    expect(sawMarker(audit), isFalse);
   });
 
   testWidgets('a transform that pulls a child into view is NOT pruned', (

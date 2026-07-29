@@ -31,13 +31,26 @@ void main() {
     () => const _DeckListScreen(),
     anchors: <AuditAnchor>[AuditAnchor.type('search', TextField)],
     allowances: const <AuditSkipAllowance>[
+      // `'RenderEditable'` alone also matched `_RenderEditableCustomPaint`
+      // twice — one permission, three nodes, one of them examined. The trailing
+      // word is what keeps the two apart, and `expectedMatches` is what makes a
+      // future third node fail instead of joining quietly.
       AuditSkipAllowance(
         itemId: 'search',
         reason: SkipReason.rasterOnly,
-        detailContains: 'RenderEditable',
+        detailContains: 'RenderEditable paints',
         rationale:
             'Typed text and caret are raster-only; covered when the field gets '
             'its own focused/error state audit in M5.',
+      ),
+      AuditSkipAllowance(
+        itemId: 'search',
+        reason: SkipReason.rasterOnly,
+        detailContains: '_RenderEditableCustomPaint',
+        expectedMatches: 2,
+        rationale:
+            'The two painters behind the field draw selection and caret, both '
+            'raster-only and both covered by the same M5 state audit.',
       ),
       AuditSkipAllowance(
         itemId: 'search',

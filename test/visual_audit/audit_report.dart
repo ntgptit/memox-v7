@@ -30,6 +30,7 @@ class AuditOutcome {
     required this.allowedSkips,
     required this.allowanceConflicts,
     required this.unusedAllowances,
+    required this.miscountedAllowances,
     required this.coverage,
   });
 
@@ -64,6 +65,12 @@ class AuditOutcome {
   /// read as coverage by whoever comes next.
   final List<AuditSkipAllowance> unusedAllowances;
 
+  /// Allowances that covered a different number of skips than they declared.
+  ///
+  /// The direction nobody was checking: substring matching lets one permission
+  /// quietly cover several nodes, only one of which anyone looked at.
+  final List<AuditAllowanceMiscount> miscountedAllowances;
+
   final AuditCoverage coverage;
 
   Iterable<AuditFinding> get blocking =>
@@ -88,7 +95,9 @@ class AuditOutcome {
         '${coverage.nonBlockingFindings} notes · '
         '${coverage.unresolvedSkips} unresolved · '
         '${coverage.allowedSkips} allowed · '
+        '${coverage.unusedAllowances} unused · '
         '${coverage.allowanceConflicts} conflicts · '
+        '${coverage.miscountedAllowances} miscounted · '
         '${coverage.hiddenNodes} hidden · '
         '${coverage.outsideCaptureNodes} off-surface · '
         '${coverage.clippedNodes} clipped',
@@ -108,6 +117,9 @@ class AuditOutcome {
     }
     for (final conflict in allowanceConflicts) {
       report.writeln('  AMBIGUOUS ALLOWANCE  $conflict');
+    }
+    for (final miscount in miscountedAllowances) {
+      report.writeln('  MISCOUNTED ALLOWANCE  $miscount');
     }
     for (final allowance in unusedAllowances) {
       report.writeln('  UNUSED ALLOWANCE  $allowance');
@@ -159,9 +171,26 @@ AuditOutcome evaluateAudit(
     allowed.add(AuditAllowedSkip(skip: skip, allowance: matched.single));
   }
 
-  final unused = allowances
-      .where((allowance) => !accountedFor.contains(allowance))
-      .toList();
+  final unused = <AuditSkipAllowance>[];
+  final miscounted = <AuditAllowanceMiscount>[];
+
+  for (final allowance in allowances) {
+    // Counted against every skip, not just the ones it resolved: an allowance
+    // that also matched a skip somebody else claimed has still widened its
+    // reach, and that is exactly what this number exists to show.
+    final actual = audit.skips.where(allowance.matches).length;
+
+    if (actual == 0) {
+      unused.add(allowance);
+
+      continue;
+    }
+    if (actual == allowance.expectedMatches) continue;
+
+    miscounted.add(
+      AuditAllowanceMiscount(allowance: allowance, actualMatches: actual),
+    );
+  }
 
   // A non-blocking finding is something the audit could not settle, so it counts
   // toward "unresolved" exactly like an unread node does. Treating it as clean
@@ -171,6 +200,7 @@ AuditOutcome evaluateAudit(
       unresolved.isEmpty &&
       unused.isEmpty &&
       conflicts.isEmpty &&
+      miscounted.isEmpty &&
       notes.isEmpty;
 
   final status = blocking.isNotEmpty
@@ -187,6 +217,7 @@ AuditOutcome evaluateAudit(
     allowedSkips: allowed,
     allowanceConflicts: conflicts,
     unusedAllowances: unused,
+    miscountedAllowances: miscounted,
     coverage: AuditCoverage(
       items: audit.items.length,
       paints: audit.allPaints.length,
@@ -196,6 +227,7 @@ AuditOutcome evaluateAudit(
       allowedSkips: allowed.length,
       unusedAllowances: unused.length,
       allowanceConflicts: conflicts.length,
+      miscountedAllowances: miscounted.length,
       hiddenNodes: audit.hiddenNodes,
       outsideCaptureNodes: audit.outsideCaptureNodes,
       clippedNodes: audit.clippedNodes,
@@ -329,7 +361,17 @@ String auditToJson(AuditOutcome outcome) {
         <String, Object?>{
           'item': allowance.itemId,
           'reason': allowance.reason.name,
+          'detailContains': allowance.detailContains,
           'rationale': allowance.rationale,
+        },
+    ],
+    'miscountedAllowances': <Object>[
+      for (final miscount in outcome.miscountedAllowances)
+        <String, Object?>{
+          'item': miscount.allowance.itemId,
+          'detailContains': miscount.allowance.detailContains,
+          'expected': miscount.allowance.expectedMatches,
+          'actual': miscount.actualMatches,
         },
     ],
     'findings': <Object>[

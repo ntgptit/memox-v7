@@ -121,6 +121,7 @@ class AuditCoverage {
     required this.allowedSkips,
     required this.unusedAllowances,
     required this.allowanceConflicts,
+    required this.miscountedAllowances,
     required this.hiddenNodes,
     required this.outsideCaptureNodes,
     required this.clippedNodes,
@@ -136,6 +137,9 @@ class AuditCoverage {
 
   /// Skips more than one allowance claimed. Neither resolved them.
   final int allowanceConflicts;
+
+  /// Allowances covering a different number of skips than they declared.
+  final int miscountedAllowances;
 
   /// Pruned because nothing below them paints — `Offstage`, opacity 0. Counted
   /// for debugging, never as something left unmeasured: there was nothing there
@@ -161,6 +165,7 @@ class AuditCoverage {
     'allowedSkips': allowedSkips,
     'unusedAllowances': unusedAllowances,
     'allowanceConflicts': allowanceConflicts,
+    'miscountedAllowances': miscountedAllowances,
     'hiddenNodes': hiddenNodes,
     'outsideCaptureNodes': outsideCaptureNodes,
     'clippedNodes': clippedNodes,
