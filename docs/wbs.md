@@ -26,7 +26,7 @@ AD / UC (xem `business-rules.md`).
 | M0 · Development harness | done | Skills, checklist và enforcement script đã có |
 | M1 · Product definition (Phase 0–1) | **done** | Đặc tả MVP đã frozen: AD-01…11, BR-01…87, UC-01…09, data model đầy đủ |
 | M2 · Project foundation (Phase 2–3, 6) | **done** | Toàn bộ 9 task đóng: M2.1 · M2.1a · M2.1b · M2.2 · M2.2b · M2.3 · M2.4 · M2.5 · M2.6. App build được trên Android (3 flavor cài song song) và Web, l10n en/vi, bootstrap có error boundary, lint + guard đều enforce. Tiếp theo: **M3.1 · Cấu trúc feature-first và ranh giới layer** |
-| M3 · Architecture & design system (Phase 4–5, 7, 12–13) | **done** | Tám task đóng: M3.1…M3.6 cộng M3.5a (review color system) và M3.5b (áp A2 Quizlet Navy Indigo — 46 role `ColorScheme` khai báo tường minh). Cây feature-first + guard siết về `fail_on: [error, warning]`, Failure model, Riverpod foundation, design token, hai theme M3, sáu base component kèm 14 golden. Tiếp theo: **M4.1 · GoRouter foundation** |
+| M3 · Architecture & design system (Phase 4–5, 7, 12–13) | **done** | Tám task đóng: M3.1…M3.6 cộng M3.5a (review color system), M3.5b (áp A2 Quizlet Navy Indigo — 46 role `ColorScheme` khai báo tường minh) và M3.5c (visual audit harness). Cây feature-first + guard siết về `fail_on: [error, warning]`, Failure model, Riverpod foundation, design token, hai theme M3, sáu base component kèm 14 golden. Tiếp theo: **M4.1 · GoRouter foundation** |
 | M4 · Router & Drift foundation (Phase 8, 11) | todo | **Phase 10 (networking) hoãn** — AD-01, AD-05 |
 | M5 · First vertical slice: luồng ôn tập (Phase 14) | todo | UC-05 |
 | M6 · Test suite (Phase 15) | todo | Chạy song song M5, không phải sau |
@@ -1127,6 +1127,55 @@ slice UC-05 cần. Không xây trọn design system trước khi có feature th�
   trung tính; ngân sách chroma; light canvas không nhiễm; **mọi role thuộc
   palette** và thuộc họ màu A2
 - **Checklist phases:** 7.2
+
+### M3.5c · Visual audit harness dùng chung
+
+- **Status:** done
+- **Goal:** Đo được **màu màn hình thật sự sơn ra**, thay vì đo token rồi tin
+  rằng UI dùng đúng token đó.
+- **Scope:** `test/visual_audit/` — model, extractor registry, phân loại render
+  node, raster capture, rule, report; `test/support/` gom `color_math` và danh
+  sách token đang bị nhân bản; nối vào ba màn hình preview.
+- **Out of scope:** overlay image, integration test trên thiết bị, M4.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `test/visual_audit/*.dart` (7 file), `test/support/app_palette.dart`,
+  `test/visual_audit/audit_core_test.dart`, audit gắn vào 3 preview screen
+- **Acceptance criteria:**
+  - [x] Foreground đọc từ `RenderParagraph`, **merge style theo nhánh
+        `InlineSpan`** — không đọc từ `ThemeData`.
+  - [x] Fill/border đọc từ `RenderDecoratedBox`/`RenderPhysicalShape`/
+        `RenderPhysicalModel`/`RenderImage`.
+  - [x] Raster đọc một lần, `pixelRatio: 1`, **trừ origin của boundary** khi map
+        toạ độ.
+  - [x] Node không nhận diện được → **báo cáo**, không im lặng.
+  - [x] Contrast 4.5/3.0 cho text, 3.0 cho non-text mang thông tin.
+  - [x] Palette closure; blend của hai token được chấp nhận.
+  - [x] 10 self-test, mỗi khẳng định có một cặp làm nó fail.
+- **Vì sao không đọc màu từ `ThemeData`.** Đó chính là lỗi đã ship: test đọc
+  token, `OutlinedButton` sơn màu khác, nhãn ra 3.09:1, mọi test xanh. `ButtonStyle
+  .foregroundColor.resolve(states)` bắt phải **đoán** `states` và đọc từ style
+  *mình nghĩ* widget đang dùng — trong khi widget có thể nhận style từ theme, từ
+  tham số, hoặc từ `styleFrom`.
+- **Vì sao vẫn cần raster.** `Ink` và `InkFeature` được vẽ **lên `Material`**,
+  không tồn tại như render node. `overlayColor` của `_buttonStyle` (pressed 12%,
+  focused 10%) vì thế **không có render object nào để đọc**. Audit thuần render
+  tree sẽ báo nút pressed giống hệt nút idle và báo xanh.
+- **Giới hạn đã biết:** `flutter_test` đặt `debugDisableShadows = true`, nên mọi
+  capture ở đây là màn hình **không có shadow**. Vô hại với A2 vì thang bề mặt tự
+  gánh hierarchy, nhưng màn nào dựa vào elevation sẽ khác trên thiết bị.
+  Ngoài ra `RenderEditable`, `_RenderDecoration` và `_ShapeBorderPainter` là
+  raster-only — **viền input và viền `OutlinedButton` không đọc được** từ render
+  tree.
+- **Lỗi thật harness bắt được ngay lần chạy đầu:** nhãn semantic trên verdict
+  selected ở **4.23:1** (dark) và **4.40:1** (light). Nhãn và fill cùng hue nên
+  mỗi điểm alpha ăn vào contrast của nhãn; hạ state layer 18% → **6%**, để
+  selection dựa vào độ dày viền. Không test token nào bắt được, vì không token
+  nào mang giá trị đã blend.
+- **Dependencies:** M3.5b
+- **Tests required:** self-test cho từng extractor kèm fault injection; raster
+  thấy được ink overlay; rule pass ở 21:1 và fail ở 1:1; blend của hai token
+  không bị coi là màu lạ; audit chạy trên cả ba màn hình preview, light và dark
+- **Checklist phases:** 7.2, 14.1
 
 ### M3.6 · Base component tối thiểu và app shell
 

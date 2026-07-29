@@ -6,6 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_spacing.dart';
 
+import '../visual_audit/memox_audit.dart';
+import '../visual_audit/screen_auditor.dart';
 import 'preview_harness.dart';
 
 /// The review screen — the one that decides the palette.
@@ -15,6 +17,17 @@ import 'preview_harness.dart';
 /// other screens look.
 void main() {
   previewTest('review', () => const _ReviewScreen());
+  // Anchors name the parts worth reading in a report; they do not bound what is
+  // covered. Everything outside them still belongs to the implicit `screen`
+  // item, so a widget added later is audited whether or not anyone lists it.
+  memoxAuditTest(
+    'review',
+    () => const _ReviewScreen(),
+    anchors: <AuditAnchor>[
+      AuditAnchor.type('flashcard', PreviewCard),
+      AuditAnchor.type('verdict', VerdictAction),
+    ],
+  );
 }
 
 class _ReviewScreen extends StatelessWidget {

@@ -5,8 +5,8 @@ import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/core/theme/theme_context_extension.dart';
 
-import 'color_math.dart';
-import 'theme_probe.dart';
+import '../../support/color_math.dart';
+import '../../support/theme_probe.dart';
 
 /// Readability and wiring. What the palette *is* — the ladder, the saturation
 /// discipline, the chroma budget — is asserted in `app_palette_test.dart`.
