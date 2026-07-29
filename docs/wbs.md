@@ -26,7 +26,7 @@ AD / UC (xem `business-rules.md`).
 | M0 · Development harness | done | Skills, checklist và enforcement script đã có |
 | M1 · Product definition (Phase 0–1) | **done** | Đặc tả MVP đã frozen: AD-01…11, BR-01…87, UC-01…09, data model đầy đủ |
 | M2 · Project foundation (Phase 2–3, 6) | **done** | Toàn bộ 9 task đóng: M2.1 · M2.1a · M2.1b · M2.2 · M2.2b · M2.3 · M2.4 · M2.5 · M2.6. App build được trên Android (3 flavor cài song song) và Web, l10n en/vi, bootstrap có error boundary, lint + guard đều enforce. Tiếp theo: **M3.1 · Cấu trúc feature-first và ranh giới layer** |
-| M3 · Architecture & design system (Phase 4–5, 7, 12–13) | **done** | Mười một task đóng: M3.1…M3.6 cộng M3.5a (review color system), M3.5b (áp A2 Quizlet Navy Indigo — 46 role `ColorScheme` khai báo tường minh), M3.5c (visual audit harness), M3.5d (siết tính đúng đắn của audit core) và M3.5e (anchor, clip và allowance). Cây feature-first + guard siết về `fail_on: [error, warning]`, Failure model, Riverpod foundation, design token, hai theme M3, sáu base component kèm 14 golden. Tiếp theo: **M4.1 · GoRouter foundation** |
+| M3 · Architecture & design system (Phase 4–5, 7, 12–13) | **done** | Mười hai task đóng: M3.1…M3.6 cộng M3.5a (review color system), M3.5b (áp A2 Quizlet Navy Indigo — 46 role `ColorScheme` khai báo tường minh), M3.5c (visual audit harness), M3.5d (siết tính đúng đắn của audit core), M3.5e (anchor, clip và allowance) và M3.5f (clip hỏi Flutter thay vì đoán). Cây feature-first + guard siết về `fail_on: [error, warning]`, Failure model, Riverpod foundation, design token, hai theme M3, sáu base component kèm 14 golden. Tiếp theo: **M4.1 · GoRouter foundation** |
 | M4 · Router & Drift foundation (Phase 8, 11) | todo | **Phase 10 (networking) hoãn** — AD-01, AD-05 |
 | M5 · First vertical slice: luồng ôn tập (Phase 14) | todo | UC-05 |
 | M6 · Test suite (Phase 15) | todo | Chạy song song M5, không phải sau |
@@ -1275,6 +1275,57 @@ slice UC-05 cần. Không xây trọn design system trước khi có feature th�
   clip ngoài/một phần/trong, `Clip.none` overflow, `Clip.hardEdge`, viewport,
   transform hai chiều; allowance rỗng và whitespace bị reject, ambiguous, allowed
   pairing, rationale trong text report và JSON
+- **Checklist phases:** 7.2, 14.1
+
+### M3.5f · Clip hỏi Flutter, visible rect, và cardinality của allowance
+
+- **Status:** done
+- **Goal:** Bịt lỗ hổng cuối còn tạo được **green giả**: audit prune một widget
+  mà Flutter đang sơn. Corrective task cho M3.5e.
+- **Scope:** thay type-based clip policy bằng `describeApproximatePaintClip`;
+  đo bằng `visibleRect`; validate namespace anchor ID; `expectedMatches` cho
+  allowance; thêm `unused` vào dòng summary.
+- **Out of scope:** state matrix, overlay image, extractor SVG/ImageIcon,
+  integration test, **palette production**, **component production**, **`lib/`**,
+  **golden**, M4, **CI (M7)**.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `test/visual_audit/{traversal_policy,screen_auditor,audit_allowance,audit_report,audit_model}.dart`,
+  ba file tách mới (`raster_cross_check`, `marker_probe`, `audit_clip_test`,
+  `audit_allowance_test`), `test/review/deck_list_preview_test.dart`
+- **Acceptance criteria:**
+  - [x] Clip lấy từ `describeApproximatePaintClip(child)`, hỏi **theo từng child**.
+  - [x] `Stack`/`Flex` `hardEdge` **không** overflow → không clip.
+  - [x] `visibleRect = rect ∩ clip` dùng cho extractor, raster, paint rect.
+  - [x] Anchor ID: cấm rỗng, cấm trùng, cấm `screen`, cấm dạng `name[i]`.
+  - [x] `expectedMatches` mặc định 1; lệch **hai chiều** đều report và chặn
+        `complete`.
+  - [x] Dòng summary có `unused` và `miscounted`.
+  - [x] Fault injection: khôi phục policy cũ làm đúng test P0 fail.
+- **Green giả đã bịt được, đo bằng probe:**
+  `Stack` mặc định `Clip.hardEdge`, **không** overflow, bên trong có `Transform`
+  vẽ ra ngoài → `describeApproximatePaintClip` trả **null** (Flutter không clip),
+  nhưng audit cũ vẫn prune. Một widget **đang được sơn** bị bỏ **im lặng**.
+  Nguyên nhân: `RenderStack.paint` chỉ push clip khi **layout** thấy visual
+  overflow, mà layout chỉ nhìn positioned children.
+- **Vì sao 68 self-test cũ không bắt được:** test `Stack(hardEdge)` dùng
+  `Positioned(left: 100)` trong stack 50×50 — tức **có** overflow thật, Flutter
+  clip thật, test pass **đúng lý do**. Nó chỉ phủ một nửa không gian.
+- **Phản biện một phần của review:** `describeApproximatePaintClip` **không**
+  phản ánh vùng thật của custom clipper. Đo được: `ClipRect` với clipper thu về
+  10px vẫn trả **50px** (toàn bộ node). API là xấp xỉ **theo hướng**, không theo
+  độ chính xác — nó over-report. Đây là hướng sai an toàn (nhiễu trong danh sách
+  người đọc, thay vì widget bị bỏ im lặng), và đã được pin bằng test kèm doc.
+- **Lỗi allowance đang sống trong repo:** `detailContains: 'RenderEditable'` cũng
+  nuốt hai node `_RenderEditableCustomPaint`, vì chuỗi sau chứa chuỗi trước. Ba
+  node được miễn, một node được xem. Rule mới báo ngay `expected 1, matched 3`.
+- **Còn mở, không thuộc task này:** repo **chưa có CI** (`.github/workflows`
+  không tồn tại). Mọi con số test trong các PR M3.5* đều chạy trên máy local,
+  không ai xác minh độc lập được. M7 ghi *"bắt đầu được ngay sau M2"* — đáng đặt
+  lại thứ tự.
+- **Dependencies:** M3.5e
+- **Tests required:** `Stack`/`Flex` hardEdge không overflow; custom clipper
+  over-report; visible rect của widget bị cắt một nửa; anchor id rỗng/trùng/
+  `screen`/`name[i]`; allowance over- và under-match; summary có `unused`
 - **Checklist phases:** 7.2, 14.1
 
 ### M3.6 · Base component tối thiểu và app shell

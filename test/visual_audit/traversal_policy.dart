@@ -13,6 +13,9 @@ Rect globalRect(RenderObject node) =>
     MatrixUtils.transformRect(node.getTransformTo(null), node.paintBounds);
 
 /// Nothing under this node reaches the screen at all.
+///
+/// Neither case shows up as a clip — Flutter simply does not paint the subtree —
+/// so this stays a separate question from [clipForChild].
 bool isHidden(RenderObject node) {
   if (node is RenderOffstage && node.offstage) return true;
   if (node is RenderOpacity && node.opacity == 0) return true;
@@ -21,54 +24,36 @@ bool isHidden(RenderObject node) {
   return false;
 }
 
-/// The region a child of [node] can still paint into.
+/// The region [child] can still paint into, given what its ancestors allow.
 ///
-/// Carrying this down the walk is what makes "is this on screen" answerable. A
-/// node inside the capture rectangle can be entirely hidden by a `ClipRect`
-/// halfway up the tree, and checking each node against the capture alone reports
-/// colours for pixels that were never drawn.
-Rect clipForChildren(RenderObject node, Rect inherited) {
-  final own = clipRectOf(node);
-  if (own == null) return inherited;
-
-  return inherited.intersect(own);
-}
-
-/// The global rectangle this node clips its children to, or null if it does not
-/// clip.
+/// **Asks the render object instead of guessing from its type.** The previous
+/// version decided by type and `clipBehavior`, on the assumption that a `Stack`
+/// with `Clip.hardEdge` always clips. It does not: `RenderStack.paint` pushes a
+/// clip only when layout found visual overflow, and layout only sees positioned
+/// children — a `Transform` further down that paints outside the stack produces
+/// no overflow and therefore no clip. The audit was pruning a widget Flutter was
+/// plainly painting, which is a silent drop, which reads as a pass.
 ///
-/// **Approximate on purpose, and only in the safe direction.** For `ClipOval`,
-/// `ClipPath` and any clipper-driven `ClipRect` this returns the bounding
-/// rectangle, which is a *superset* of what is actually visible. That is enough
-/// to prune a subtree lying entirely outside it, and it is deliberately not
-/// enough to conclude that something inside the bounding box is visible — the
-/// audit keeps such nodes and measures them rather than pruning on a shape it
-/// cannot see.
-Rect? clipRectOf(RenderObject node) {
-  // `clipBehavior`, not the type. `Stack(clipBehavior: Clip.none)` is how a
-  // badge is deliberately allowed to overflow its parent; treating every Stack
-  // as a clip would prune widgets that are plainly on screen.
-  if (node is RenderStack) {
-    return node.clipBehavior == Clip.none ? null : globalRect(node);
-  }
-  if (node is RenderFlex) {
-    return node.clipBehavior == Clip.none ? null : globalRect(node);
-  }
-  if (node is RenderClipRect) {
-    return node.clipBehavior == Clip.none ? null : globalRect(node);
-  }
-  if (node is RenderClipRRect) {
-    return node.clipBehavior == Clip.none ? null : globalRect(node);
-  }
-  if (node is RenderClipOval) {
-    return node.clipBehavior == Clip.none ? null : globalRect(node);
-  }
-  if (node is RenderClipPath) {
-    return node.clipBehavior == Clip.none ? null : globalRect(node);
-  }
-  // A viewport always clips to itself; that is what makes it a viewport.
-  if (node is RenderViewport) return globalRect(node);
-  if (node is RenderShrinkWrappingViewport) return globalRect(node);
+/// `describeApproximatePaintClip` is the render object's own answer to exactly
+/// this question. It returns null when the child is not clipped, accounts for
+/// overflow state, and honours `Clip.none`.
+///
+/// **Approximate is a promise about direction, not precision.** Measured: a
+/// `ClipRect` with a custom clipper narrowed to 10 logical pixels still answers
+/// with the node's full 50, so a widget the clipper removes stays in the
+/// inventory and gets measured. That is over-reporting, and it is the direction
+/// to fail in — noise in a list somebody reads, rather than a widget dropped in
+/// silence. Nothing here may treat the returned rect as exact.
+///
+/// The result is in [parent]'s coordinate space. Note that
+/// `parent.getTransformTo(null)` does **not** include a `RenderTransform`'s own
+/// transform — harmless here, because a transform reports no clip at all, but it
+/// is the kind of detail that has bitten this file before.
+Rect clipForChild(RenderObject parent, RenderObject child, Rect inherited) {
+  final local = parent.describeApproximatePaintClip(child);
+  if (local == null) return inherited;
 
-  return null;
+  return inherited.intersect(
+    MatrixUtils.transformRect(parent.getTransformTo(null), local),
+  );
 }

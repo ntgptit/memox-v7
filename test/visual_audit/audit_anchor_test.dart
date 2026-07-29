@@ -119,4 +119,54 @@ void main() {
 
     expect(outcome.satisfies(AuditExpectation.complete), isFalse);
   });
+
+  group('id namespace', () {
+    // Sinks are keyed by the id string, so two anchors sharing a name merge two
+    // different pieces of UI into one item: wrong background pairing, wrong
+    // allowance scope, and a report describing something that does not exist.
+    // A hidden internal key would not help — allowances scope by the id string
+    // and people read the report by that same string, so the ambiguity would
+    // just move somewhere nobody can see it.
+    AuditAnchor named(String id) => AuditAnchor(id, find.byType(Slider));
+
+    test('a blank id is rejected', () {
+      for (final id in <String>['', '   ']) {
+        expect(
+          () => validateAnchors(<AuditAnchor>[named(id)]),
+          throwsA(isA<ArgumentError>()),
+          reason: 'id "$id"',
+        );
+      }
+    });
+
+    test('the root item name is reserved', () {
+      expect(
+        () => validateAnchors(<AuditAnchor>[named(rootItemId)]),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+
+    test('the generated "name[i]" shape is reserved', () {
+      // An explicit `tile[0]` would collide with the id an anchor named `tile`
+      // generates for its first match.
+      expect(
+        () => validateAnchors(<AuditAnchor>[named('tile[0]')]),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+
+    test('two anchors cannot share a name', () {
+      expect(
+        () => validateAnchors(<AuditAnchor>[named('tile'), named('tile')]),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+
+    test('distinct, well-formed names are accepted', () {
+      expect(
+        () => validateAnchors(<AuditAnchor>[named('tile'), named('card')]),
+        returnsNormally,
+      );
+    });
+  });
 }
