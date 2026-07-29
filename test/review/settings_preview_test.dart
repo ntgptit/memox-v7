@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_spacing.dart';
 
+import '../visual_audit/memox_audit.dart';
 import 'preview_harness.dart';
 
 /// Settings — the screen that shows whether the palette survives density.
@@ -17,6 +18,7 @@ import 'preview_harness.dart';
 /// without turning the row into a warning.
 void main() {
   previewTest('settings', () => const _SettingsScreen());
+  memoxAuditTest('settings', () => const _SettingsScreen());
 }
 
 class _SettingsScreen extends StatelessWidget {

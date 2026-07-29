@@ -3,8 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_theme.dart';
 
-import 'color_math.dart';
-import 'theme_probe.dart';
+import '../../support/color_math.dart';
+import '../../support/theme_probe.dart';
 
 /// The structural rules of **A2 Quizlet Navy Indigo**.
 ///

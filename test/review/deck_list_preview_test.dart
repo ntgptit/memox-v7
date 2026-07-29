@@ -7,6 +7,7 @@ import 'package:memox/core/theme/app_radius.dart';
 import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_spacing.dart';
 
+import '../visual_audit/memox_audit.dart';
 import 'preview_harness.dart';
 
 /// The deck list — where the primary action lives.
@@ -17,6 +18,7 @@ import 'preview_harness.dart';
 /// reads as the content.
 void main() {
   previewTest('deck_list', () => const _DeckListScreen());
+  memoxAuditTest('deck_list', () => const _DeckListScreen());
 }
 
 const List<_Deck> _decks = <_Deck>[

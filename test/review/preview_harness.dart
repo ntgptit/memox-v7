@@ -80,7 +80,12 @@ class VerdictAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final semantic = Theme.of(context).extension<AppSemanticColors>()!;
-    const selectedFillAlpha = 0.18;
+    // 6%. The label and the fill are the same hue by design, so every extra
+    // point of fill eats the label's contrast: 18% put it at 4.23:1 in dark and
+    // 10% at 4.40:1 in light — both caught by the visual audit, neither by any
+    // token-level test, because no token has these values. Selection leans on
+    // the border weight instead, which costs no contrast at all.
+    const selectedFillAlpha = 0.06;
 
     return Container(
       height: 52,
