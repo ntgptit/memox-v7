@@ -2173,7 +2173,11 @@ phần có caller thật.
         `verify_invariants.py` (BAD case), pair test hai chiều pass — 15/15.
   - [x] `.gitattributes`: hai cặp asset cùng attribute (`binary` cho wasm,
         `-text` cho worker JS), `git ls-files --eol` xác nhận tương đương,
-        copy `test/` byte-identical với `web/`.
+        copy `test/` byte-identical với `web/`. Bản LF là bản chính: banner
+        provenance một dòng ở đầu cả hai bản worker đổi blob, nên mọi
+        checkout — kể cả worktree Windows đã smudge CRLF trước khi có
+        attribute — được git checkout lại thành LF ngay lần pull kế
+        (`web/WEB_ASSETS.md`); không còn bước re-smudge thủ công.
 - **Tests đã chạy:** `test/features/deck` 93 pass (thêm 9 depth + 5 boundary);
   `test/database` 69 pass (15 invariant hai chiều);
   `verify_invariants.py` 15/15 "TẤT CẢ ĐẠT"; web runtime Chrome pass; format /

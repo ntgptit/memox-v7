@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/database/app_database.dart';
 import 'package:memox/features/deck/data/card_repository_impl.dart';
 import 'package:memox/features/deck/data/deck_repository_impl.dart';
-import 'package:memox/features/deck/data/local/card_dao.dart';
 import 'package:memox/features/deck/data/local/deck_dao.dart';
 import 'package:memox/features/deck/domain/deck_entity.dart';
 import 'package:memox/features/deck/domain/scheduler_type_model.dart';
@@ -120,8 +119,7 @@ DeckRepositoryHarness installDeckRepositoryHarness() {
       clock: clock,
     );
     harness.cardRepository = CardRepositoryImpl(
-      CardDao(harness.db),
-      DeckDao(harness.db),
+      harness.db,
       idGenerator: nextId,
       clock: clock,
     );

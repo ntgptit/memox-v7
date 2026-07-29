@@ -22,8 +22,14 @@ const int _sm2InitialRepetitions = 0;
 ///
 /// Uses both DAOs deliberately: `createCard` has a cross-entity invariant —
 /// validate the target deck, lock an `unset` deck to `card` (BR-62), resolve
-/// the scheduler from the root (BR-09) — and both DAOs wrap the same open
-/// [AppDatabase], so one drift transaction covers the whole write.
+/// the scheduler from the root (BR-09) — and one drift transaction covers the
+/// whole write **because both DAOs wrap the same open [AppDatabase]**. That
+/// sameness is structural, not conventional: the constructor takes the one
+/// database and builds both DAOs from it itself. An API accepting two
+/// ready-made DAOs would let a composition root hand it DAOs from two
+/// databases, and the BR-62 content lock would then sit outside the
+/// transaction that rolls the card back — a bug no test with a correctly
+/// wired harness can see.
 ///
 /// Same boundary rule as `DeckRepositoryImpl`: below this class, rows,
 /// companions and Drift exceptions; above it, entities and [Failure]. The
@@ -31,11 +37,12 @@ const int _sm2InitialRepetitions = 0;
 /// its boundary rather than sharing one through a hidden coupling.
 final class CardRepositoryImpl implements CardRepository {
   CardRepositoryImpl(
-    this._cardDao,
-    this._deckDao, {
+    AppDatabase database, {
     String Function()? idGenerator,
     DateTime Function()? clock,
-  }) : _idGenerator = idGenerator ?? const Uuid().v4,
+  }) : _cardDao = CardDao(database),
+       _deckDao = DeckDao(database),
+       _idGenerator = idGenerator ?? const Uuid().v4,
        _clock = clock ?? _utcNow;
 
   final CardDao _cardDao;

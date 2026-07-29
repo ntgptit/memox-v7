@@ -48,10 +48,14 @@ void main() {
   });
 
   test('drift_worker.js is compiled Dart, not an error page', () {
+    // The provenance banner comes first (it also forces stale worktrees to be
+    // re-checked out with the LF attributes — see WEB_ASSETS.md), then the
+    // dart2js output.
     final head = File(
       'web/drift_worker.js',
-    ).readAsStringSync().substring(0, 64);
+    ).readAsStringSync().substring(0, 256);
 
+    expect(head, contains('// Compiled drift worker for memox'));
     expect(head, contains('dartProgram'));
   });
 
