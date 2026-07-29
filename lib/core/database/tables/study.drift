@@ -1,0 +1,89 @@
+import 'decks.drift';
+import 'cards.drift';
+
+-- Study sessions and the append-only record of every review.
+
+CREATE TABLE study_sessions (
+    id TEXT NOT NULL PRIMARY KEY,
+
+    -- The deck being studied; often a root, sometimes a branch.
+    deck_id TEXT NOT NULL REFERENCES decks (id) ON DELETE CASCADE,
+
+    -- The root at the moment the session opened.
+    root_deck_id TEXT NOT NULL,
+
+    -- The generation at the moment the session opened (BR-45). This is what
+    -- stops the AD-09 situation: a session opened before a reset, and a user
+    -- who comes back and grades a card after it. Every write compares this with
+    -- the root's current generation and refuses when they differ (BR-84).
+    scheduler_generation INTEGER NOT NULL,
+
+    status TEXT NOT NULL CHECK (
+        status IN ('in_progress', 'completed', 'abandoned', 'invalidated', 'failed')
+    ),
+
+    -- NULL while in progress or after a normal completion (BR-80).
+    end_reason TEXT NULL CHECK (
+        end_reason IS NULL
+        OR end_reason IN (
+            'user_exit', 'scheduler_reset', 'stale_generation', 'persistence_error'
+        )
+    ),
+
+    started_at DATETIME NOT NULL,
+    ended_at DATETIME NULL
+);
+
+-- The status × end_reason PAIR is deliberately not a CHECK constraint.
+--
+-- `data-model.md` is frozen and names invariant 12 as the enforcement for that
+-- combination. Encoding it here as well would make invariant 12 impossible to
+-- violate — and an invariant test that cannot construct its own violation is a
+-- test that proves nothing, which is exactly the kind of green this project has
+-- had to dig back out of several times. The single-column enumerations above
+-- are safe: no invariant needs a value outside them.
+
+-- Append-only. Never updated, never deleted — not even by a reset (BR-43).
+-- Only a cascade from a deleted card removes a row.
+CREATE TABLE review_history (
+    id TEXT NOT NULL PRIMARY KEY,
+    card_id TEXT NOT NULL REFERENCES cards (id) ON DELETE CASCADE,
+    session_id TEXT NOT NULL REFERENCES study_sessions (id),
+
+    -- The scheduler and generation AT THE TIME of the review, not the deck's
+    -- current ones. A deck knows only its current generation; a history row has
+    -- to be able to say which cycle and which rules it belongs to.
+    scheduler_type TEXT NOT NULL CHECK (scheduler_type IN ('eight_box', 'sm2')),
+    scheduler_generation INTEGER NOT NULL,
+
+    -- A stored column, never derived by diffing previous_* against next_*
+    -- (BR-76, AD-11). The inference is wrong in a case that is not rare: a
+    -- `scheduled` review answered `remembered` on a box-8 card also has
+    -- previous_box == next_box == 8.
+    review_kind TEXT NOT NULL CHECK (review_kind IN ('scheduled', 'relearning')),
+
+    -- eight_box uses forgotten/remembered, sm2 uses again/hard/good/easy.
+    --
+    -- Quoted because ACTION is a keyword to drift's SQL parser, which drops the
+    -- column WITHOUT an error when it is written bare: the build succeeded, the
+    -- generated code compiled, and `review_history` simply had no `action`.
+    -- Only reading the columns back out of SQLite caught it — asserting against
+    -- this file would have agreed with itself.
+    "action" TEXT NOT NULL CHECK (
+        "action" IN ('forgotten', 'remembered', 'again', 'hard', 'good', 'easy')
+    ),
+
+    reviewed_at DATETIME NOT NULL,
+    next_due_at DATETIME NULL,
+
+    previous_box INTEGER NULL,
+    next_box INTEGER NULL,
+    previous_ease_factor REAL NULL,
+    next_ease_factor REAL NULL,
+    previous_interval_days INTEGER NULL,
+    next_interval_days INTEGER NULL
+);
+
+CREATE INDEX idx_history_card ON review_history (card_id, reviewed_at);
+
+CREATE INDEX idx_history_session ON review_history (session_id);

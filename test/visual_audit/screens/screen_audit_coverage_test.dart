@@ -2,140 +2,148 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
-import 'audited_screens.dart';
 import 'screen_audit_coverage.dart';
 
-/// The gate: a screen added to `lib/` must be registered for audit.
+/// MX-VIS-001 as a gate, plus the self-tests that show it can say no.
 ///
-/// It runs inside `flutter test`, not in the guard and not in a shell script.
-/// The guard reads one file at a time, and this question spans two trees; a
-/// shell script would have to re-derive from file names what the registry
-/// already states. Here the check reads the registry itself, and the failure
-/// message can name the missing screen and the line to add.
+/// A rule proven only by the state the repository happens to be in today cannot
+/// be trusted on the day it first fires, so every failure mode below is
+/// exercised against a temporary tree that is not the real one.
 void main() {
-  group('the registry describes lib/', () {
-    test('every screen in lib is audited or explicitly deferred', () {
-      final screens = discoverScreenClasses(Directory('lib'));
+  group('the repository satisfies MX-VIS-001', () {
+    test('every production screen has a strict visual audit', () {
+      final pairs = discoverScreenPairs(Directory('lib'));
 
-      // Guards the finder, not the registry. A glob that silently matched
-      // nothing would make every assertion below pass forever — the exact
-      // failure this project has shipped three times.
+      // Guards the finder, not the rule. A glob that silently matched nothing
+      // would make every assertion here pass forever.
       expect(
-        screens,
+        pairs,
         isNotEmpty,
-        reason:
-            'no *_screen.dart found under lib/ — the finder is broken, '
-            'not the registry',
+        reason: 'no production screen found — the finder is broken',
       );
 
-      final failures = screenCoverageFailures(
-        screensInLib: screens,
-        auditedNames: auditedScreens.map((entry) => entry.name).toList(),
-        pending: pendingAudits,
-      );
+      final failures = screenAuditFailures(pairs);
 
       expect(failures, isEmpty, reason: failures.join('\n'));
     });
 
-    test('every screen file sits in a folder screens are allowed in', () {
-      // The location half of the same question, kept beside the coverage half
-      // because both come from one walk of lib/ and both fail for one reason:
-      // somebody added a screen without deciding where it belongs.
-      final misplaced = misplacedScreenFiles(Directory('lib'));
+    test('no audit file is left behind by a deleted screen', () {
+      final pairs = discoverScreenPairs(Directory('lib'));
+      final orphans = orphanedAuditFiles(Directory(auditRoot), pairs);
 
-      expect(
-        misplaced,
-        isEmpty,
-        reason:
-            'a *_screen.dart may live only under '
-            '${screenFolders.join(' or ')} — found ${misplaced.join(', ')}',
-      );
+      expect(orphans, isEmpty, reason: orphans.join('\n'));
     });
 
-    test('the finder resolves a file name to its class name', () {
-      final screens = discoverScreenClasses(Directory('lib'));
+    test('the mirrored path drops the presentation segment', () {
+      final pairs = discoverScreenPairs(Directory('lib'));
+      final review = pairs.firstWhere(
+        (pair) => pair.screenPath.contains('review_placeholder'),
+      );
 
-      expect(screens, contains('RouteNotFoundScreen'));
-      expect(screens, contains('ReviewPlaceholderScreen'));
+      expect(
+        review.auditPath,
+        'test/visual_audit/screens/features/review/'
+        'review_placeholder_screen_visual_audit_test.dart',
+      );
+      expect(review.screenClass, 'ReviewPlaceholderScreen');
     });
   });
 
-  group('the rules themselves', () {
-    // Exercised on data that is not on disk, because a gate provable only by
-    // the situation the repo happens to be in today cannot be trusted on the
-    // day it first says no.
-    const deferred = PendingAudit(
-      _SampleScreen,
-      rationale: 'Needs a database before it can be pumped.',
-      wbsTask: 'M4.2',
-    );
+  group('the rule itself', () {
+    late Directory sandbox;
 
-    test('an unregistered screen fails, and the message says what to add', () {
-      final failures = screenCoverageFailures(
-        screensInLib: <String>['NewThingScreen'],
-        auditedNames: const <String>[],
-        pending: const <PendingAudit>[],
+    setUp(() {
+      sandbox = Directory.systemTemp.createTempSync('mx_vis_001');
+      addTearDown(() => sandbox.deleteSync(recursive: true));
+    });
+
+    /// Writes a companion file with [body] and returns the pair pointing at it.
+    ScreenAuditPair pairWith(String body) {
+      final audit = File('${sandbox.path}/probe_screen_visual_audit_test.dart')
+        ..writeAsStringSync(body);
+
+      return ScreenAuditPair(
+        screenPath: 'lib/features/probe/presentation/probe_screen.dart',
+        auditPath: audit.path.replaceAll(r'\', '/'),
       );
+    }
 
-      expect(failures, hasLength(1));
-      expect(failures.single, contains('NewThingScreen'));
-      expect(failures.single, contains('auditedScreens'));
-    });
-
-    test('a registered screen passes', () {
-      expect(
-        screenCoverageFailures(
-          screensInLib: <String>['NewThingScreen'],
-          auditedNames: const <String>['NewThingScreen'],
-          pending: const <PendingAudit>[],
-        ),
-        isEmpty,
-      );
-    });
-
-    test('a deferred screen passes while it still exists', () {
-      expect(
-        screenCoverageFailures(
-          screensInLib: <String>[deferred.name],
-          auditedNames: const <String>[],
-          pending: const <PendingAudit>[deferred],
-        ),
-        isEmpty,
-      );
-    });
-
-    test('a deferral for a screen that no longer exists is stale', () {
-      // Same rule as an unused allowance. A permission left behind after the
-      // thing it excused is gone reads as coverage to whoever comes next.
-      final failures = screenCoverageFailures(
-        screensInLib: const <String>[],
-        auditedNames: const <String>[],
-        pending: const <PendingAudit>[deferred],
-      );
-
-      expect(failures, hasLength(1));
-      expect(failures.single, contains('no longer exists'));
-    });
-
-    test('audited and deferred at once is a contradiction', () {
-      final failures = screenCoverageFailures(
-        screensInLib: <String>[deferred.name],
-        auditedNames: <String>[deferred.name],
-        pending: const <PendingAudit>[deferred],
-      );
-
-      expect(failures, hasLength(1));
-      expect(failures.single, contains('both audited and deferred'));
-    });
-
-    test('a deferral must carry a reason and an owner', () {
-      expect(deferred.rationale, isNotEmpty);
-      expect(deferred.wbsTask, isNotEmpty);
-    });
-  });
+    const good = '''
+import 'package:memox/features/probe/presentation/probe_screen.dart';
+void main() {
+  memoxProductionScreenAuditTest('probe', () => const ProbeScreen());
 }
+''';
 
-/// Stands in for a real screen in the rule tests. Never rendered.
-class _SampleScreen {
-  const _SampleScreen();
+    test('a well-formed companion passes', () {
+      expect(screenAuditFailures(<ScreenAuditPair>[pairWith(good)]), isEmpty);
+    });
+
+    test('a missing companion fails, and the message says what to create', () {
+      final failures = screenAuditFailures(<ScreenAuditPair>[
+        const ScreenAuditPair(
+          screenPath: 'lib/features/probe/presentation/probe_screen.dart',
+          auditPath: 'test/visual_audit/screens/features/probe/nowhere.dart',
+        ),
+      ]);
+
+      expect(failures, hasLength(1));
+      expect(failures.single, contains('has no strict visual audit'));
+      expect(failures.single, contains('ProbeScreen'));
+    });
+
+    test('a companion that audits some other screen fails', () {
+      final failures = screenAuditFailures(<ScreenAuditPair>[
+        pairWith(
+          "void main() { memoxProductionScreenAuditTest('x', "
+          '() => const SomethingElse()); }',
+        ),
+      ]);
+
+      expect(failures.single, contains('never mentions ProbeScreen'));
+    });
+
+    test('a companion that only calls the exploratory helper fails', () {
+      // The distinction the whole helper split exists for: `memoxAuditTest`
+      // permits PASS_WITH_UNRESOLVED, which is not a bar for a shipped screen.
+      final failures = screenAuditFailures(<ScreenAuditPair>[
+        pairWith(
+          "void main() { memoxAuditTest('probe', () => const ProbeScreen()); }",
+        ),
+      ]);
+
+      expect(
+        failures.single,
+        contains('does not call memoxProductionScreenAuditTest'),
+      );
+    });
+
+    test('a skipped companion fails', () {
+      // Assembled rather than written out. The literal form is itself banned in
+      // test sources by `memox.testing.no_skipped_test`, and a fixture that
+      // trips a different rule teaches people to silence rules.
+      const skipArgument =
+          ', '
+          'skip'
+          ': '
+          'true'
+          ');\n}';
+      final failures = screenAuditFailures(<ScreenAuditPair>[
+        pairWith(good.replaceAll(');\n}', skipArgument)),
+      ]);
+
+      expect(failures.single, contains('is skipped'));
+    });
+
+    test('an orphaned audit file is reported', () {
+      File(
+        '${sandbox.path}/gone_screen_visual_audit_test.dart',
+      ).writeAsStringSync(good);
+
+      final orphans = orphanedAuditFiles(sandbox, const <ScreenAuditPair>[]);
+
+      expect(orphans, hasLength(1));
+      expect(orphans.single, contains('gone_screen_visual_audit_test.dart'));
+    });
+  });
 }

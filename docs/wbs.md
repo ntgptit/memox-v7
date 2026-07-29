@@ -27,7 +27,7 @@ AD / UC (xem `business-rules.md`).
 | M1 · Product definition (Phase 0–1) | **done** | Đặc tả MVP đã frozen: AD-01…11, BR-01…87, UC-01…09, data model đầy đủ |
 | M2 · Project foundation (Phase 2–3, 6) | **done** | Toàn bộ 9 task đóng: M2.1 · M2.1a · M2.1b · M2.2 · M2.2b · M2.3 · M2.4 · M2.5 · M2.6. App build được trên Android (3 flavor cài song song) và Web, l10n en/vi, bootstrap có error boundary, lint + guard đều enforce. Tiếp theo: **M3.1 · Cấu trúc feature-first và ranh giới layer** |
 | M3 · Architecture & design system (Phase 4–5, 7, 12–13) | **done** | Mười hai task đóng: M3.1…M3.6 cộng M3.5a (review color system), M3.5b (áp A2 Quizlet Navy Indigo — 46 role `ColorScheme` khai báo tường minh), M3.5c (visual audit harness), M3.5d (siết tính đúng đắn của audit core), M3.5e (anchor, clip và allowance) và M3.5f (clip hỏi Flutter thay vì đoán). Cây feature-first + guard siết về `fail_on: [error, warning]`, Failure model, Riverpod foundation, design token, hai theme M3, sáu base component kèm 14 golden. Tiếp theo: **M4.2 · Drift connection và schema `.drift`** |
-| M4 · Router & Drift foundation (Phase 8, 11) | in progress | M4.1 **done** — GoRouter tập trung, `MaterialApp.router`, 404 ở `app/fallback/`, redirect là no-op auth hook (AD-03). M4.1a **done** — cổng ép mọi màn mới phải được visual audit. Tiếp theo: **M4.2 · Drift connection và schema `.drift`**. **Phase 10 (networking) hoãn** — AD-01, AD-05 |
+| M4 · Router & Drift foundation (Phase 8, 11) | in progress | M4.1, M4.1a, M4.2, M4.3, M4.4 **done** — GoRouter tập trung với `MaterialApp.router` và 404 ở `app/fallback/`; MX-VIS-001 ép mọi production screen có strict visual audit; schema v1 toàn bộ trong `.drift`; hai named query dùng chung một định nghĩa "đến hạn"; schema v1 đã dump và commit; cả 14 bất biến chạy trên database thật, mỗi cái hai chiều. **M4.5, M4.6, M4.7 vẫn todo.** Tiếp theo: **M4.5 · Domain entity và repository contract**. **Phase 10 (networking) hoãn** — AD-01, AD-05 |
 | M5 · First vertical slice: luồng ôn tập (Phase 14) | todo | UC-05 |
 | M6 · Test suite (Phase 15) | todo | Chạy song song M5, không phải sau |
 | M7 · CI/CD (Phase 19) | todo | Bắt đầu được ngay sau M2. Job Android + Web, chưa có iOS (AD-04) |
@@ -1458,7 +1458,7 @@ migration test và enforcement cho các bất biến.
 
 ### M4.1a · Screen audit coverage gate
 
-- **Status:** done
+- **Status:** done — cơ chế registry đã được **MX-VIS-001 thay thế** ở batch M4
 - **Goal:** Ép mọi màn hình mới trong `lib/` phải được visual audit, bằng một
   cổng không thoả mãn được bằng file rỗng.
 - **Scope:** registry `audited_screens.dart` lái cả audit lẫn coverage check;
@@ -1507,7 +1507,7 @@ migration test và enforcement cho các bất biến.
 
 ### M4.2 · Drift connection và schema `.drift`
 
-- **Status:** todo
+- **Status:** done
 - **Goal:** Database mở được, schema khớp `data-model.md`, SQL nằm trong file
   `.drift`.
 - **Scope:** `core/database/connection.dart` (một chỗ duy nhất mở kết nối —
@@ -1517,27 +1517,36 @@ migration test và enforcement cho các bất biến.
 - **Out of scope:** named query nghiệp vụ (M4.3), DAO và repository (M4.6),
   bảng `deck_templates` (AD-07: là asset ở MVP).
 - **Editable documents:** `docs/wbs.md`
-- **Output:** `lib/core/database/`
+- **Output:** `lib/core/database/{connection,app_database}.dart`,
+  `tables/{decks,cards,study}.drift`, `test/database/{schema,cascade}_test.dart`
 - **Acceptance criteria:**
-  - [ ] `dart run build_runner build` sinh code Drift, exit 0.
-  - [ ] Mọi bảng và cột khớp `data-model.md` — kiểm bằng test so tên cột thực tế
-        với danh sách mong đợi.
-  - [ ] Không có Dart table class nào; toàn bộ khai báo nằm trong `.drift`
-        (AD-02).
-  - [ ] Xoá root deck → deck con, card, review state, history và session của nó
-        đều biến mất (test khẳng định cascade thật sự chạy).
-  - [ ] `grep -rn 'COALESCE(' lib/core/database/` không trả về dạng
-        `COALESCE(...parent_deck_id...)` (BR-57).
-  - [ ] `lib/core/database/connection.dart` là **file duy nhất** gọi
-        `NativeDatabase`/`driftDatabase`.
+  - [x] `dart run build_runner build` sinh code Drift, exit 0.
+  - [x] Mọi bảng và cột khớp `data-model.md` — kiểm bằng `PRAGMA table_info`
+        **đọc ngược từ SQLite**, không đọc file `.drift`.
+  - [x] Không có Dart table class hand-written; toàn bộ khai báo nằm trong
+        `.drift` (AD-02).
+  - [x] Xoá root deck → deck con, card, review state, history và session đều
+        biến mất, trên cây **ba cấp** với dữ liệu thật.
+  - [x] `COALESCE(` không xuất hiện trong `lib/core/database/` (BR-57).
+  - [x] `connection.dart` là **file duy nhất** gọi `driftDatabase`.
+- **Cột `action` bị drift âm thầm bỏ.** `ACTION` là keyword với SQL parser của
+  drift: viết trần thì build **thành công**, code sinh ra **compile được**, và
+  `review_history` đơn giản là không có cột đó. Chỉ test đọc ngược cột từ SQLite
+  bắt được — assert vào file `.drift` sẽ tự đồng ý với chính nó. Nay quote lại.
+- **Không đặt CHECK cho cặp `status` × `end_reason`.** `data-model.md` frozen chỉ
+  định invariant 12 là cơ chế cưỡng chế; thêm CHECK ở đây sẽ khiến invariant đó
+  **không thể vi phạm được**, và một invariant test không dựng nổi vi phạm của
+  chính nó thì không chứng minh gì. CHECK cho enum từng cột thì an toàn và có.
+- **`root_deck_id` cố ý không phải foreign key** — tài liệu khai báo tham chiếu
+  cho `parent_deck_id` và không cho cột này; invariant 6 và 7 là cơ chế nó nêu.
 - **Dependencies:** M3.2, M2.2
-- **Tests required:** test schema (tên bảng/cột), test cascade delete, test
-  `PRAGMA foreign_keys` đang bật
+- **Tests required:** 16 test schema (bảng, cột, nullability, PK, FK, index,
+  không Dart table class, opener duy nhất) + 3 test cascade
 - **Checklist phases:** 11.1
 
 ### M4.3 · Named query và migration foundation
 
-- **Status:** todo
+- **Status:** done
 - **Goal:** Có query nghiệp vụ dùng chung và hạ tầng test migration ngay từ v1.
 - **Scope:** `queries/study.drift` với `cardsDueForReview` và
   `dueCountPerRootDeck` (dùng `root_deck_id`, nhận `:now` làm tham số — BR-57,
@@ -1548,40 +1557,58 @@ migration test và enforcement cho các bất biến.
 - **Output:** `lib/core/database/queries/`, `drift_schemas/`,
   `test/drift/generated/`, `test/database/migration_test.dart`
 - **Acceptance criteria:**
-  - [ ] `drift_schemas/drift_schema_v1.json` tồn tại và **được commit** (không bị
-        `.gitignore` nuốt).
-  - [ ] Test migration chạy `onCreate` từ rỗng lên v1 và assert đủ bảng.
-  - [ ] `cardsDueForReview` và `dueCountPerRootDeck` dùng **cùng một** định nghĩa
-        "đến hạn" — test khẳng định hai query trả cùng số card cho cùng dữ liệu
-        (BR-22, UC-06).
-  - [ ] Không số ngày nào của bảng interval xuất hiện trong `.drift` (BR-16 thuộc
-        scheduler, không thuộc SQL).
-  - [ ] `:now` là tham số, không dùng `CURRENT_TIMESTAMP`.
+  - [x] `drift_schemas/drift_schema_v1.json` tồn tại và **được commit**
+        (`.gitignore` đã có negation `!drift_schemas/**`).
+  - [x] Test migration chạy `onCreate` từ rỗng lên v1, assert đủ bảng, và
+        `SchemaVerifier` xác nhận snapshot khớp thứ code dựng.
+  - [x] Hai query dùng **cùng một** định nghĩa "đến hạn" — test lặp qua từng root
+        và so số card của hai bên (BR-22, UC-06).
+  - [x] Không số ngày interval nào trong `.drift` (BR-16 thuộc scheduler).
+  - [x] `:now` là tham số; grep clock function trong `lib/core/database` rỗng.
+- **`drift_dev 2.34.0` không tương thích với `drift 2.34.3`.** `schema dump` nổ ở
+  `verifier_common.dart` (`allSchemaEntities` không tồn tại trên
+  `drift3_preview.GeneratedDatabase`). Nâng `drift_dev` bất khả thi:
+  `>=2.34.1` cần `analyzer ^13`, mà `freezed ^3.2.5` chặn dưới đó. Cách thoát là
+  **pin `drift: 2.34.0`** cho khớp dev tool — hạ runtime, có chủ đích, ghi ở đây
+  để lần nâng sau biết ràng buộc thật nằm ở `freezed`.
 - **Dependencies:** M4.2
-- **Tests required:** migration test từ rỗng lên v1; test đồng nhất giữa hai
-  query đếm/lấy card đến hạn
+- **Tests required:** 5 migration test; 6 query test gồm biên "đến hạn đúng
+  bằng now", `now` thật sự điều khiển kết quả, và card không có review state
+  không được phát
 - **Checklist phases:** 11.1, 15.1
 
 ### M4.4 · Enforcement cho bất biến dữ liệu
 
-- **Status:** todo
+- **Status:** done
 - **Goal:** Biến 14 query bất biến trong `data-model.md` thành test chạy trên
   database thật.
 - **Scope:** test tích hợp nạp fixture hợp lệ và fixture vi phạm cho từng bất
   biến; nối `check_docs.sh --db` vào một database tạm.
 - **Out of scope:** sửa nội dung bất biến — `data-model.md` đang frozen.
 - **Editable documents:** `docs/wbs.md`
-- **Output:** `test/database/invariants_test.dart`
+- **Output:** `test/database/{invariant_queries,invariants_test,fixture_db_test}.dart`
 - **Acceptance criteria:**
-  - [ ] Cả 14 bất biến có test; mỗi test kiểm **hai chiều**: sạch trên dữ liệu
-        hợp lệ, và bắt được đúng vi phạm của nó.
-  - [ ] Bất biến cây deck có case ở **cấp 3 trở lên** (BR-55, BR-57).
-  - [ ] `.claude/skills/flutter-workflow/scripts/check_docs.sh --db <db tạm>`
-        exit 0.
-  - [ ] Mục technical debt "14 query bất biến chưa chạy trên dữ liệu người dùng
-        thật" được cập nhật.
+  - [x] Cả 14 bất biến có test; mỗi cái **hai chiều** — 30 test tổng.
+  - [x] Fixture là cây **ba cấp** (root → branch → leaf); Q6 dùng đúng case cấp 3
+        (BR-55, BR-57).
+  - [x] `check_docs.sh --db <db sạch>` exit 0; `--db <db vi phạm>` exit 1 và gọi
+        đúng tên `Q10`.
+  - [x] Mục technical debt được cập nhật — **trả một phần**, không tuyên bố đã
+        chạy trên dữ liệu người dùng thật.
+- **`check_docs.sh` chỉ chạy 10 trên 14.** Bốn bất biến (Q5, Q10, Q11, Q13) thiếu
+  hẳn, và lần chạy vẫn báo thành công. Nguyên nhân là chúng được **chép tay** vào
+  script. Sửa tận gốc: script uỷ quyền cho `verify_invariants.py`, vốn đã trích
+  query thẳng từ `data-model.md`. Một bộ luật có hai bản sao là hai thứ để quên.
+- **Bỏ luôn phụ thuộc vào `sqlite3` CLI.** Nó không có trên máy này, và khi vắng
+  thì mục đó `warn` rồi bỏ qua — exit 0 mà không chạy gì. Verifier dùng
+  `sqlite3` của Python stdlib.
+- **Một khiếm khuyết có thể vi phạm hai bất biến, đúng như tài liệu nói.** Card
+  gắn vào root vi phạm cả BR-58 (Q1) lẫn BR-64 (Q4), vì root luôn mang
+  `content_type = 'deck'`. Test cô lập ghi nhận đúng cặp đó thay vì làm yếu một
+  trong hai query.
 - **Dependencies:** M4.3
-- **Tests required:** đây **là** task test; 14 test bất biến, mỗi cái hai chiều
+- **Tests required:** 30 test bất biến (14 × 2 chiều + danh sách đủ 14 + test cô
+  lập); 2 test sinh database fixture cho `check_docs.sh --db`
 - **Checklist phases:** 11.1, 15.1
 
 ### M4.5 · Domain entity và repository contract
@@ -1897,7 +1924,7 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 |---|---|---|---|
 | `check_architecture.sh` chưa có test tự động | T0.1 | Regression trong checker âm thầm ngừng enforce boundary | Fixture trong `test/tools/` khi `test/` tồn tại (M6) |
 | ~~`analysis_options.yaml` chưa được áp dụng~~ | T0.1 | Bộ lint đã viết nhưng chưa được enforce; nhiều khả năng có tên rule sai hoặc đã deprecated | **Đã trả ở M2.3.** Dự đoán đúng: `immutable_classes` không tồn tại, `use_if_null_to_convert_nulls_to_bools` đã deprecated. Nghiêm trọng hơn cả hai: 11 rule chỉ nằm ở `errors:` nên **chưa bao giờ chạy** — đã chuyển hết sang `linter: rules:` và kiểm chứng bằng tiêm lỗi |
-| 14 query bất biến chưa chạy trên **dữ liệu người dùng thật** | T1.3 | Bất biến mới được verify trên fixture, chưa enforce trên DB sản xuất | Chạy `check_docs.sh --db <path>` trong test tích hợp khi Drift schema tồn tại (M4) |
+| ~~14 query bất biến chưa chạy trên database thật~~ | T1.3 | Bất biến mới được verify trên fixture Python, chưa chạm schema Drift nào | **Đã trả một phần ở M4.4.** Cả 14 chạy trên database SQLite thật do schema production tạo — 30 test, mỗi bất biến hai chiều, cộng một test chứng minh một khiếm khuyết chỉ kích hoạt đúng những bất biến thật sự phủ nó. `check_docs.sh --db` cũng chạy đủ 14 (trước đó chép tay **10/14** và vẫn báo thành công). **Chưa trả:** vẫn là database tạm trong test, chưa phải dữ liệu người dùng thật — cái đó cần M8 |
 | Pin Flutter ở `.fvmrc` **khai báo** chứ không **cưỡng chế** | M2.2 | Chạy `flutter` trực tiếp trên máy có version khác vẫn build được và không cảnh báo. Đây đúng là lỗi đã xảy ra: M2.1 chạy 3.44.8, phiên sau khởi động trên 3.44.6, không có gì phát hiện ra | Thêm một check so `flutter --version` với `.fvmrc` vào `dod_check.sh`, và dùng `flutter-version-file: .fvmrc` ở job CI của M7 |
 | ~~7 file skill vẫn bảo chạy `dart run custom_lint`~~ | M2.2 | Skill vẫn hướng dẫn cài và chạy một package không cài được; phiên sau sẽ tin skill và loay hoay | **Đã trả ở M2.2b.** Cả 7 file đã trỏ sang guard. `docs/checklist.md` **cố ý giữ nguyên**: nó `frozen for MVP`, và mục "Ngoài phạm vi: mọi quyết định riêng của memox" nói rõ nó mô tả quy trình 22 phase chung — `custom_lint` ở đó là khuyến nghị Flutter phổ thông, còn quyết định riêng của memox sống ở file này (§5 canonical location) |
 | `dependencies.md` vẫn liệt kê `sqlite3_flutter_libs` | M2.2 | Package đó nay là tombstone (`0.6.0+eol`, không có native code). Skill nói sai còn tệ hơn không có skill — phiên sau sẽ cài lại nó | Sửa `.claude/skills/flutter-project-setup/references/dependencies.md`: thay bằng ghi chú rằng `sqlite3` 3.x cấp native lib qua native assets. Ngoài `Editable documents` của M2.2 nên chưa sửa ở đây |

@@ -24,8 +24,14 @@ overrides:
         - '**/*.freezed.dart'
         - '**/*.drift.dart'
         - lib/l10n/**
+        # drift's migration helper. Committed because a released schema cannot
+        # be regenerated once the source moves on, but nobody writes it.
+        - test/drift/generated/**
       max_lines: 500
       count_mode: logical
+    common.no_large_source_file:
+      exclude:
+        - test/drift/generated/**
     flutter.max_build_lines:
       count_mode: logical
     # Placeholder detection is meaningful in lib/, but test fixtures legitimately

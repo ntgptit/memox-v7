@@ -387,35 +387,21 @@ if [[ -z "$DB" ]]; then
   echo "  Once it does, run: $0 --db <path>"
 elif [[ ! -f "$DB" ]]; then
   fail "database not found" "$DB"
-elif ! command -v sqlite3 >/dev/null 2>&1; then
-  warn "sqlite3 not on PATH" "cannot run data invariants"
+elif ! command -v python3 >/dev/null 2>&1; then
+  fail "python3 not on PATH" "cannot run the data invariants against $DB"
 else
-  run_inv() { # run_inv <label> <sql>
-    local label="$1" sql="$2" out
-    out="$(sqlite3 "$DB" "$sql" 2>&1)"
-    [[ -z "$out" ]] && return 0
-    fail "invariant violated: $label" "offending ids: $(echo "$out" | head -5 | tr '\n' ' ')"
-  }
-  run_inv "root deck has direct cards (BR-58)" \
-    "SELECT c.id FROM cards c JOIN decks d ON d.id=c.deck_id WHERE d.parent_deck_id IS NULL;"
-  run_inv "content_type=unset but has content (BR-60)" \
-    "SELECT d.id FROM decks d WHERE d.content_type='unset' AND (EXISTS(SELECT 1 FROM cards c WHERE c.deck_id=d.id) OR EXISTS(SELECT 1 FROM decks s WHERE s.parent_deck_id=d.id));"
-  run_inv "content_type=card but has sub-decks (BR-63)" \
-    "SELECT d.id FROM decks d WHERE d.content_type='card' AND EXISTS(SELECT 1 FROM decks s WHERE s.parent_deck_id=d.id);"
-  run_inv "content_type=deck but has direct cards (BR-64)" \
-    "SELECT d.id FROM decks d WHERE d.content_type='deck' AND EXISTS(SELECT 1 FROM cards c WHERE c.deck_id=d.id);"
-  run_inv "descendant points at wrong root (BR-72)" \
-    "SELECT d.id FROM decks d JOIN decks p ON p.id=d.parent_deck_id WHERE d.root_deck_id<>p.root_deck_id;"
-  run_inv "root does not point at itself (BR-56)" \
-    "SELECT d.id FROM decks d WHERE d.parent_deck_id IS NULL AND d.root_deck_id<>d.id;"
-  run_inv "cycle in the deck tree (BR-69)" \
-    "WITH RECURSIVE up(start_id,node_id,depth) AS (SELECT id,parent_deck_id,1 FROM decks WHERE parent_deck_id IS NOT NULL UNION ALL SELECT u.start_id,d.parent_deck_id,u.depth+1 FROM up u JOIN decks d ON d.id=u.node_id WHERE u.node_id IS NOT NULL AND u.depth<64) SELECT DISTINCT start_id FROM up WHERE node_id=start_id;"
-  run_inv "card state scheduler/generation mismatch (BR-48, BR-49)" \
-    "SELECT s.card_id FROM card_review_states s JOIN cards c ON c.id=s.card_id JOIN decks d ON d.id=c.deck_id JOIN decks root ON root.id=d.root_deck_id WHERE s.scheduler_generation<>root.scheduler_generation OR s.scheduler_type<>root.scheduler_type;"
-  run_inv "invalid session status × end_reason (BR-79…BR-85)" \
-    "SELECT id FROM study_sessions WHERE NOT ((status='in_progress' AND end_reason IS NULL) OR (status='completed' AND end_reason IS NULL) OR (status='abandoned' AND end_reason='user_exit') OR (status='invalidated' AND end_reason IN ('scheduler_reset','stale_generation')) OR (status='failed' AND end_reason='persistence_error'));"
-  run_inv "relearning changed the schedule (BR-78)" \
-    "SELECT id FROM review_history WHERE review_kind='relearning' AND (previous_box IS NOT next_box OR previous_ease_factor IS NOT next_ease_factor OR previous_interval_days IS NOT next_interval_days);"
+  # Delegated, not re-implemented. The queries live in docs/data-model.md and
+  # the verifier reads them from there; this file used to carry a hand-copied
+  # subset, and four of the fourteen were simply missing — ten ran, and the run
+  # reported success. A second copy of a rule set is a second thing to forget.
+  #
+  # Also removes the dependency on the sqlite3 CLI, which is not installed
+  # everywhere and made this section skip silently when it was absent.
+  if out="$(python3 "$VERIFIER" --db "$DB" 2>&1)"; then
+    ok "all 14 data invariants ran clean against $DB"
+  else
+    fail "data invariants violated" "$(echo "$out" | grep -E '✗' | head -6)"
+  fi
 fi
 
 # ---------------------------------------------------------------------------
