@@ -383,8 +383,10 @@ fi
 head_ "C2. Data invariants against a real database"
 
 if [[ -z "$DB" ]]; then
-  echo "  skipped — no --db given. The Drift schema does not exist yet (M4)."
-  echo "  Once it does, run: $0 --db <path>"
+  echo "  skipped — no --db given. Nothing here has been checked."
+  echo "  Build the fixtures, then point this section at them:"
+  echo "    flutter test test/database/fixture_db_test.dart"
+  echo "    $0 --db build/invariant_fixture_clean.db"
 elif [[ ! -f "$DB" ]]; then
   fail "database not found" "$DB"
 elif ! command -v python3 >/dev/null 2>&1; then

@@ -10,5 +10,17 @@ abstract final class AppBreakpoints {
   static const double compact = 360;
 
   /// Tablet and the framed web surface at its widest.
+  ///
+  /// Unused by production code, and deliberately kept that way: the project
+  /// ships no large-screen layout, so nothing may branch on this. It exists as
+  /// the documented upper edge of the phone range.
   static const double medium = 600;
+
+  /// Whether [width] is narrow enough to need the compact scale.
+  ///
+  /// Width, not height. A 320-wide screen is short of horizontal room for text
+  /// and gutters; a short screen is handled by scrolling instead, because
+  /// shrinking type to win vertical space would apply on every device the
+  /// moment a keyboard opened.
+  static bool isCompact(double width) => width < compact;
 }

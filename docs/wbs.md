@@ -27,7 +27,7 @@ AD / UC (xem `business-rules.md`).
 | M1 · Product definition (Phase 0–1) | **done** | Đặc tả MVP đã frozen: AD-01…11, BR-01…87, UC-01…09, data model đầy đủ |
 | M2 · Project foundation (Phase 2–3, 6) | **done** | Toàn bộ 9 task đóng: M2.1 · M2.1a · M2.1b · M2.2 · M2.2b · M2.3 · M2.4 · M2.5 · M2.6. App build được trên Android (3 flavor cài song song) và Web, l10n en/vi, bootstrap có error boundary, lint + guard đều enforce. Tiếp theo: **M3.1 · Cấu trúc feature-first và ranh giới layer** |
 | M3 · Architecture & design system (Phase 4–5, 7, 12–13) | **done** | Mười hai task đóng: M3.1…M3.6 cộng M3.5a (review color system), M3.5b (áp A2 Quizlet Navy Indigo — 46 role `ColorScheme` khai báo tường minh), M3.5c (visual audit harness), M3.5d (siết tính đúng đắn của audit core), M3.5e (anchor, clip và allowance) và M3.5f (clip hỏi Flutter thay vì đoán). Cây feature-first + guard siết về `fail_on: [error, warning]`, Failure model, Riverpod foundation, design token, hai theme M3, sáu base component kèm 14 golden. Milestone đóng — không quyết định next task |
-| M4 · Router, Database & Content Management (Phase 8, 11, 14) | in progress | M4.1, M4.1a, M4.2, M4.3, M4.4 **done** — GoRouter tập trung với `MaterialApp.router` và 404 ở `app/fallback/`; MX-VIS-001 ép mọi production screen có strict visual audit; schema v1 toàn bộ trong `.drift`; hai named query dùng chung một định nghĩa "đến hạn"; schema v1 đã dump và commit; cả 14 bất biến chạy trên database thật. M4.4a **done** — sắp xếp lại kế hoạch theo vertical slice. **M4.5, M4.6, M4.7 `descoped` trước khi triển khai** — không dòng code nào từng được viết dưới ba ID đó. M4.8–M4.12 là kế hoạch mới: shared component → Deck/Card domain+data → Deck full-stack → Card full-stack → demo hardening. **Next task: M4.8 · Shared components cho content management.** M4 chỉ `done` khi Deck/Card demo slice hoàn thành. **Phase 10 (networking) hoãn** — AD-01, AD-05 |
+| M4 · Router, Database & Content Management (Phase 8, 11, 14) | in progress | M4.1, M4.1a, M4.2, M4.3, M4.4 **done** — GoRouter tập trung với `MaterialApp.router` và 404 ở `app/fallback/`; MX-VIS-001 ép mọi production screen có strict visual audit; schema v1 toàn bộ trong `.drift`; hai named query dùng chung một định nghĩa "đến hạn"; schema v1 đã dump và commit; cả 14 bất biến chạy trên database thật. M4.4a **done** — sắp xếp lại kế hoạch theo vertical slice. M4.8 **done** — 11 shared component mang prefix `Mx` (5 mới, 6 đổi tên), 26 golden mới, rename không đổi pixel; vòng review UI/UX đóng thêm 4 lỗi accessibility có đo đạc. M4.8a **done** — responsive hardening: `MxContentShell` overflow 135px/167px ở landscape đã đóng, bốn component còn lại đã tự cuộn sẵn; màn rộng chốt giữ kéo căng. M4.8b **done** — compact scale cho màn 320: hàng list 88→80px, padding ngang button 24→12 (bốn action `sm2` từ "Ag" thành "Again"), body/label giữ nguyên cỡ, phát hiện harness test báo màn hình 0×0 từ M3.6. **M4.5, M4.6, M4.7 `descoped` trước khi triển khai** — không dòng code nào từng được viết dưới ba ID đó. M4.8–M4.12 là kế hoạch mới: shared component → Deck/Card domain+data → Deck full-stack → Card full-stack → demo hardening. **Next task: M4.9 · Deck/Card domain và data vertical foundation.** M4 chỉ `done` khi Deck/Card demo slice hoàn thành. **Phase 10 (networking) hoãn** — AD-01, AD-05 |
 | M5 · Review vertical slice — UC-05 (Phase 14) | todo | Bắt đầu **sau M4.12**. Không còn là vertical slice đầu tiên — Deck/Card CRUD đã hoàn thành trong M4.8–M4.12 và M5 không triển khai lại. Review MUST NOT bắt đầu khi M4.12 chưa `done` |
 | M6 · Test suite (Phase 15) | todo | Chạy song song **từ M4.8 trở đi**, không đợi tới sau Review |
 | M7 · CI/CD (Phase 19) | todo | Bắt đầu được ngay sau M2. Job Android + Web, chưa có iOS (AD-04) |
@@ -1771,41 +1771,260 @@ phần có caller thật.
 
 ### M4.8 · Shared components cho content management
 
-- **Status:** todo
+- **Status:** done
 - **Goal:** Mở rộng design system từ token và theme đã có, để Deck/Card UI không
   phải tự dựng TextField, list item, dialog hay action sheet ở từng màn.
-- **Scope:** `AppTextFieldWidget`, `AppIconButtonWidget`, `AppListTileWidget`,
-  `AppConfirmDialogWidget`, `AppActionSheetWidget` (hoặc component chọn lựa
-  tương đương trên mobile); feedback component **chỉ khi** có từ hai caller thật;
-  theme/component state mà Deck/Card form cần.
+- **Scope:** `MxTextField`, `MxIconButton`, `MxListTile`, `MxConfirmDialog`,
+  `MxActionSheet`; feedback component **chỉ khi** có từ hai caller thật;
+  theme/component state mà Deck/Card form cần. Cộng **migration toàn bộ shared
+  widget hiện có từ prefix `App*` sang `Mx*`** — quyết định của chủ dự án: mọi
+  shared widget của MemoX dùng prefix `Mx`.
 - **Out of scope:** Deck screen, Card screen (M4.10, M4.11); repository;
   controller; review verdict control và Review screen (M5).
 - **Editable documents:** `docs/wbs.md`
-- **Output:** `lib/shared/widgets/`, `test/shared/widgets/`
+- **Output:** `lib/shared/widgets/mx_*.dart` (5 component mới + 6 component đổi
+  tên), `lib/core/theme/app_theme.dart` (component theme mới),
+  `test/shared/widgets/`
 - **Acceptance criteria:**
-  - [ ] Dùng `AppSpacing`, `AppRadius`, `AppIconSize`, `AppTypography`,
+  - [x] Dùng `AppSpacing`, `AppRadius`, `AppIconSize`, `AppTypography`,
         `ColorScheme` và `AppSemanticColors` hiện có.
-  - [ ] Không nhận raw `Color` hay `TextStyle` từ caller.
-  - [ ] `const` constructor ở mọi chỗ có thể.
-  - [ ] Light và dark.
-  - [ ] Focus, error, disabled và loading — với component có state đó.
-  - [ ] Touch target tối thiểu 48×48.
-  - [ ] Semantic label cho mọi action chỉ có icon.
-  - [ ] Render ở 320×568 và ở `textScaler` 2.0 không overflow.
-  - [ ] Widget test cho từng state; golden light/dark cho state ổn định.
-  - [ ] Không golden cho animation không tất định.
+  - [x] Không nhận raw `Color` hay `TextStyle` từ caller.
+  - [x] `const` constructor ở mọi chỗ có thể.
+  - [x] Light và dark.
+  - [x] Focus, error, disabled và loading — với component có state đó.
+  - [x] Touch target tối thiểu 48×48.
+  - [x] Semantic label cho mọi action chỉ có icon.
+  - [x] Render ở 320×568 và ở `textScaler` 2.0 không overflow.
+  - [x] Widget test cho từng state; golden light/dark cho state ổn định.
+  - [x] Không golden cho animation không tất định.
+  - [x] Toàn bộ public shared widget dùng prefix `Mx`.
+  - [x] Không còn production usage hoặc public shared class dùng prefix `App`.
+  - [x] Không có compatibility wrapper `App*` — mọi consumer đều nằm trong repo.
+  - [x] Import và test đã migrate sang file/class `Mx`.
+  - [x] Migration naming **không** làm đổi hành vi ngoài phạm vi M4.8.
 - **Cái này đáng lẽ đã có ở M3.6, và có lý do nó không có.** M3.6 loại text field,
   list item, dialog và bottom sheet vì lúc đó **chưa có caller** — đúng quy tắc
   "không tạo abstraction chưa có caller". Nay Deck/Card cho chúng caller thật, nên
   chúng được dựng ở đây chứ không phải trong từng feature. Vẫn giữ nguyên quy
   tắc: component nào **chưa** có caller trong M4.10 hoặc M4.11 thì không tạo.
+- **Vì sao `Mx` chứ không `App`.** `App*` là tên chung, không nói được đây là
+  taxonomy của MemoX Design System. Giữ song song cả `App*` lẫn `Mx*` sẽ tạo hai
+  API shared cùng lúc, và feature mới sẽ không biết cái nào là canonical — nên
+  migration là **cơ học và trọn vẹn**, không để lại typedef hay wrapper. Prefix
+  `App` **giữ nguyên** cho token và core (`AppSpacing`, `AppRadius`,
+  `AppIconSize`, `AppTypography`, `AppSemanticColors`, `AppTheme`,
+  `AppDatabase`): quy tắc `Mx` áp cho widget, không áp cho namespace token.
 - **DeckTile, CardTile và SchedulerSelector KHÔNG vào shared.** Chúng mang ngữ
   nghĩa nghiệp vụ của một feature; đưa vào `shared/` sẽ kéo domain của Deck vào
   mọi widget test của dự án, đúng lỗi mà `RouteNotFoundScreen` đã tránh ở M4.1.
+- **Kết quả kiểm chứng.** 346 test pass; `flutter analyze` sạch; guard sạch;
+  26 golden mới (13 state × light/dark). Rename `App*` → `Mx*` **không đổi một
+  pixel nào**: 14 golden cũ pass mà không cần update — đó là bằng chứng cho
+  tiêu chí "migration không đổi hành vi", không phải lời hứa.
+- **Bảy boolean phải đổi tên sau khi guard bắt.** `enabled`, `readOnly`,
+  `selected`, `autofocus` được đặt theo tên tham số của Flutter, nhưng repo đã
+  có quy ước `isEnabled` / `isLoading` / `isSubmitting` từ trước. Đổi guard cho
+  code mới lọt qua là đúng thứ mà cả M2.1b lẫn M4.4 đã phải sửa; nên đổi tên
+  code, không đổi guard: `isEnabled`, `isReadOnly`, `isSelected`,
+  `shouldAutofocus`.
+- **`MxActionSheet` không tự vẽ surface.** Nền, bo góc, drag handle và elevation
+  đến từ `bottomSheetTheme`, nghĩa là nó là child của `showModalBottomSheet`.
+  Golden phơi ra điều này và doc comment đã nói rõ; đặt nó ở chỗ khác thì nó vẽ
+  thẳng lên nền phía sau.
+- **Không có `show()` helper cho sheet và dialog.** Cả hai cố ý không tự đóng:
+  component không biết action vừa bắn có thành công hay không, nên quyền đóng
+  route thuộc caller. Một helper `show()` sẽ mâu thuẫn với chính quyết định đó.
+- **Vòng review UI/UX sau khi đóng task — bốn lỗi thật, hai luận điểm bị bác.**
+  Review ngoài nêu bảy điểm; kiểm chứng trên code và trên ảnh thì:
+  - **Đúng — nút đang submit mất tên.** `Opacity(opacity: 0)` không chỉ ẩn
+    label mà còn **bỏ nó khỏi semantics tree**: node chỉ còn `isButton,
+    hasEnabledState`, không có `label`. Screen reader đọc "nút, bị vô hiệu"
+    mà không nói được là nút gì. Sửa bằng `alwaysIncludeSemantics: true`;
+    trạng thái bận đã có sẵn qua `role: loadingSpinner` của spinner, nên
+    không phải bịa thêm chuỗi nào ngoài ARB.
+  - **Đúng — golden của action sheet không kiểm tra UI thật.** Sheet cố ý
+    không tự vẽ surface, nên mount trực tiếp trong `Scaffold` chỉ chụp được
+    các hàng trôi trên nền, một bố cục không bao giờ ship. Golden giờ đi qua
+    `showModalBottomSheet` thật: pin cả surface, bo góc trên, drag handle và
+    scrim. `MxConfirmDialog` không cần tương tự — `AlertDialog` tự mang
+    `Material` của nó.
+  - **Đúng — dialog cắt chữ ở text scale lớn.** Và test cũ chính là loại
+    "xanh mà không che gì": `takeException()` trả về null, test pass, còn người
+    dùng đọc được đúng "Dies entfernt 4 Unterstape" rồi bị cắt giữa từ. Text
+    tràn thì **clip chứ không throw**. Sửa bằng `scrollable: true`; đã đo
+    `maxScrollExtent = 1013` và kéo đến được phần dưới.
+  - **Đúng — fixture dialog normal dùng hành động nguy hiểm.** Baseline normal
+    đang là ảnh một nút Delete tô màu primary. Đổi sang "Save changes?".
+  - **Bác — `MxListTile` không ổn định chiều cao.** Đo thật: tile ngắn 80px,
+    tile 2 dòng tiêu đề + 2 dòng phụ 112px, không exception, không overflow.
+    `ListTile` giãn theo nội dung. `isThreeLine` là phân loại của Material
+    spec, không phải lỗi bố cục — không đổi API dựa trên một lỗi không tái hiện.
+  - **Bác — `MxIconButton` bị đọc hai lần.** Dump semantics cho thấy đúng
+    **một** node mang cả `label` lẫn `tooltip`, và finder khớp đúng 1. Bằng
+    chứng mà review đưa ra (`findsWidgets`) chỉ là matcher lỏng của chính
+    mình, không phải dấu hiệu trùng lặp. Đã siết về `findsOneWidget` cộng
+    assert trên node. Thử nghiệm bỏ `Icon.semanticLabel` cho kết quả **tệ hơn**:
+    node mất hẳn `label`, chỉ còn `tooltip` — đúng cái nút trắng tên mà
+    `MxIconButton` sinh ra để chặn.
+- **Một lỗi review không bắt, tìm được nhờ nhìn ảnh.** Ở textScaler 3.0 nhãn
+  nút bị ellipsis thành `"End..."` cho "Endgültig löschen" — trên dialog
+  destructive, người dùng đang duyệt một hành động họ không còn đọc được. Cho
+  nhãn xuống 2 dòng trước khi ellipsis.
+- **Một lỗi nữa chỉ lộ ra khi đo pixel.** Golden focus mới thêm cho thấy
+  indicator bàn phím của icon button chỉ là mảng tint **1.15:1** so với nền ở
+  cả hai chế độ; WCAG 1.4.11 đòi 3:1. Đã thêm focus ring vào
+  `IconButtonThemeData`, đo lại: **6.87:1** (light) và **3.64:1** (dark).
+- **Hai golden cũ đổi 40 pixel.** `button_secondary` light/dark, bbox 8×9 quanh
+  một glyph — dấu vết dịch nửa pixel do `textAlign: center`, không phải đổi nội
+  dung. Đã diff từng pixel trước khi nhận.
+- **Ba trong năm test mới đã được kiểm chứng bằng mutation:** gỡ fix ra thì
+  chúng đỏ. Hai cái còn lại là chốt chống hồi quy, không phải bắt lỗi — nói rõ
+  để không ai nhầm.
 - **Dependencies:** M3.4, M3.5, M3.6, M4.4a
 - **Tests required:** widget test theo state, semantics, responsive 320×568,
   text scaling 2.0, golden light/dark cho state tất định
 - **Checklist phases:** 7.3, 7.4, 13, 15.3, 15.4
+
+### M4.8a · Responsive hardening cho shared component
+
+- **Status:** done
+- **Goal:** Đóng bốn điều kiện mà Phase 7.4 nêu — màn hình nhỏ, text scale
+  lớn, bàn phím mở, landscape — ở tầng token, theme và shared widget, trước
+  khi M4.9+ dựng màn hình thật lên trên chúng.
+- **Scope:** `MxContentShell.isScrollable`; test responsive cho toàn bộ shared
+  component.
+- **Out of scope:** layout tablet/desktop (AD-04) · giới hạn bề rộng nội dung
+  trên màn rộng (chủ dự án chọn giữ kéo căng) · áp `isScrollable` cho hai màn
+  hình hiện có · màn hình Deck/Card (M4.10, M4.11).
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/shared/widgets/mx_content_shell.dart`,
+  `test/shared/widgets/mx_responsive_test.dart`
+- **Acceptance criteria:**
+  - [x] Đo trước khi sửa: landscape và bàn phím được thử trên **mọi** shared
+        component, không chỉ cái bị nghi.
+  - [x] Không component nào overflow ở landscape 852×393, textScaler 2.0,
+        hoặc bàn phím mở.
+  - [x] Đường không cuộn vẫn được giữ và **được test là vẫn overflow** — cờ
+        này chỉ có nghĩa nếu chứng minh được nó là thứ sửa vấn đề.
+  - [x] Body ngắn vẫn chiếm hết viewport, không co lại lên đầu màn hình.
+  - [x] Body vừa khít không sinh ra scroll offset thừa.
+  - [x] Không thêm breakpoint hay nhánh màn hình lớn nào.
+- **Landscape là điều kiện duy nhất chưa từng được test, và đúng là chỗ có
+  lỗi.** Portrait cao 852 điểm nên form nào cũng vừa; xoay ngang còn 393 —
+  chưa tới một nửa — và bàn phím lấy thêm 200. Đo được, tái hiện được:
+  `MxContentShell` chứa card editor **overflow 135px** ở landscape textScaler
+  2.0, và **167px** ở landscape khi bàn phím mở. Bốn component còn lại
+  (`MxEmptyState`, `MxErrorState`, `MxConfirmDialog`, `MxActionSheet`) sống sót
+  mọi ca vì đã tự cuộn từ trước.
+- **`isScrollable` phải là opt-in, không thể mặc định bật.** Body đã tự cuộn —
+  `ListView`, `CustomScrollView` — mà lồng thêm một scroll view nữa thì nhận
+  chiều cao vô hạn và chết ngay. Mặc định tắt giữ nguyên hành vi cũ cho mọi
+  caller hiện tại.
+- **`ConstrainedBox(minHeight:)` là phần dễ bị gỡ nhất.** `SingleChildScrollView`
+  trần sẽ shrink-wrap, và mọi body trông đợi chiều cao viewport — `Center`,
+  `Spacer`, action ghim đáy — sẽ lặng lẽ trôi lên đầu màn hình **trên mọi
+  thiết bị**, không riêng máy màn ngắn. `minHeight` trừ đi padding, nếu không
+  màn nào cũng cuộn thừa đúng bằng chiều cao padding. Cả hai đều có test riêng.
+- **Tầng token và tầng theme không cần thêm gì, và đó là kết luận có bằng
+  chứng chứ không phải bỏ sót.** Trục rủi ro của app này là **chiều dọc**
+  (text scale × bàn phím × landscape), không phải chiều ngang; cách sửa đúng
+  là ràng buộc layout, không phải breakpoint theo bề rộng. Thêm token chỉ để
+  cho đủ ba tầng sẽ là abstraction không caller — đúng lỗi đã làm mất ba ID
+  M4.5/M4.6/M4.7.
+- **Quyết định của chủ dự án: màn rộng giữ nguyên kéo căng.** Đã dựng ảnh
+  landscape thật để cân nhắc: nội dung trải hết 852px, chevron của list tile
+  cách tiêu đề gần 700px và hàng đọc như bị rời. Không phải lỗi, là lựa chọn.
+  Chốt lại ở đây để phiên sau không mở lại: **không** thêm `maxContentWidth`,
+  **không** canh giữa nội dung. Muốn đổi thì mở task riêng.
+- **Nợ kỹ thuật đã biết: `AppBreakpoints` không có caller production nào.**
+  `compact = 360` và `medium = 600` chỉ được `design_tokens_test.dart` đọc.
+  Với quyết định giữ kéo căng thì `medium` vẫn là nhánh không code nào đi —
+  đúng thứ mà chính doc comment của file cảnh báo. Chưa xoá vì xoá token là
+  thay đổi output của M3.4; ứng viên dọn ở M4.12 hoặc M6.
+- **Dependencies:** M3.4, M3.6, M4.8
+- **Tests required:** landscape 852×393 ở scale 1 và 2, bàn phím mở ở cả hai
+  chiều, body ngắn/vừa/tràn cho `MxContentShell`
+- **Checklist phases:** 7.4
+
+### M4.8b · Compact scale cho màn hình hẹp
+
+- **Status:** done
+- **Goal:** Màn 320 không còn bị thừa gutter và wrap chữ ở mọi hàng, trong khi
+  cỡ chữ đọc được và ngưỡng chạm 48dp giữ nguyên.
+- **Scope:** `AppBreakpoints.isCompact`, `AppTypography.compactCardPromptSize`,
+  `applyCompactScale` (file `app_compact_scale.dart`), `CompactScaleWidget`
+  trong app root, padding màn hình theo bề rộng ở `MxContentShell`.
+- **Out of scope:** thu cỡ chữ body/label · `VisualDensity` · layout
+  tablet/desktop · giới hạn bề rộng trên màn rộng (M4.8a đã chốt giữ kéo căng).
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/core/theme/app_compact_scale.dart`, `app_breakpoints.dart`,
+  `app_typography.dart`, `lib/app/app.dart`,
+  `lib/shared/widgets/mx_content_shell.dart`,
+  `test/core/theme/compact_scale_test.dart`, 4 golden compact
+- **Acceptance criteria:**
+  - [x] Đo trước và sau trên cùng một màn dựng thật, không chỉ nhìn cảm tính.
+  - [x] Hàng list ở 320 cao bằng ở 393.
+  - [x] Cỡ chữ body và label **không đổi** giữa compact và thường — có test.
+  - [x] Ngưỡng chạm 48×48 vẫn giữ dưới compact — có test.
+  - [x] Ngưỡng 360 là loại trừ: 360 nằm phía rộng, không phải phía compact.
+  - [x] Golden ở đúng 320, light và dark.
+- **Số đo, trước → sau, ở 320×568.** Hàng list **88 → 80px** (bằng 393); bề
+  rộng tile 288 → 296; hộp chữ tiêu đề 176 → 192; tổng nội dung 392 → 368.
+  Hai trong ba subtitle hết wrap. Nguyên nhân không phải chữ to mà là **gutter**:
+  16dp mỗi bên chiếm 10% của màn 320 và 8% của màn 393 — cùng một con số,
+  khác nhau về tỉ lệ.
+- **Cái không làm, và đây là phần quan trọng nhất của task.** Body và label
+  giữ nguyên cỡ. Thu chữ đọc được theo bề rộng thiết bị sẽ **lặng lẽ huỷ**
+  `MediaQuery.textScaler` — thiết lập trợ năng của chính người dùng — và huỷ
+  mạnh nhất với đúng nhóm cần nó, vì cỡ chữ lớn phổ biến trên máy nhỏ giá rẻ
+  không kém gì trên máy lớn. Bề rộng thiết bị không phải là chỉ dấu của thị
+  lực. Cái được thu là type mà **app tự chọn cho to**: `titleLarge` 22→20 và
+  card prompt 30→26.
+- **Không dùng `VisualDensity.compact`.** Nó là đường ngắn hơn một dòng, và nó
+  trừ 8dp khỏi mọi button — đưa icon button về 40×40, dưới ngưỡng ngón tay và
+  dưới đúng ngưỡng vừa được đo ở vòng review M4.8. Có test riêng chốt 48dp.
+- **Tiêu đề AppBar dài vẫn cắt, và đó là hành vi đúng.** 22→20 chỉ mua thêm
+  khoảng hai ký tự; không cỡ chữ nào làm vừa một tên deck dài tuỳ ý. Với một
+  action thì "Academic Word List" vừa trọn ở 320; với hai action thì không.
+- **`CompactScaleWidget` nằm trong `MobileFrameWidget`, không bọc ngoài.** Trên
+  web frame ghi đè `MediaQuery` xuống 393×852; một phép thử bề rộng đặt phía
+  trên sẽ đọc cửa sổ trình duyệt và kết luận app đang rộng rãi trong khi nó
+  render ở cỡ điện thoại.
+- **Phát hiện phụ, và nó lớn hơn cái golden nó làm hỏng: harness test nói dối
+  về kích thước màn hình.** Sáu file test dựng `MediaQueryData(textScaler: ...)`
+  mới toanh thay vì `copyWith`, nên `size`, `padding` và `viewInsets` đều bị
+  zero — mọi widget trong golden suốt từ M3.6 đã được báo màn hình **0×0**,
+  kể cả các test tự đặt `tester.view.physicalSize = 320×568`. Không ai đọc tới
+  nên không lộ. Đã sửa cả sáu; sau khi sửa, golden `scaffold` **không cần sinh
+  lại** — golden vốn đúng, chỉ harness sai.
+- **`AppBreakpoints` hết nợ.** `isCompact` là caller production đầu tiên, đóng
+  lại khoản nợ ghi ở M4.8a. `medium = 600` vẫn cố ý không có caller và doc đã
+  nói rõ vì sao.
+- **Button: giảm chiều cao thì không, giảm padding ngang thì có — và ca ép
+  phải làm là màn Review.** Chiều cao đang **đúng ở sàn** 48dp
+  (`minimumSize: Size(64, 48)`), không có gì để cắt; hạ xuống 40 chỉ tiết kiệm
+  8px trên màn cao 568 — 1,4% — đổi lấy ngưỡng chạm. Trong dialog thì cũng
+  không chật: hai nút ở 320 dùng 233 trên 280px khả dụng, và kích thước y hệt
+  ở 393 vì nút ôm nội dung chứ không giãn.
+  
+  Nhưng với **bốn action của `sm2`** (again/hard/good/easy) trên một hàng ở
+  320, mỗi nút chỉ được 68px. Padding 24 mỗi bên ăn 48, chừa **20px cho chữ**:
+  "Again" render thành **"Ag"**, ba nhãn còn lại vỡ giữa từ — ở **text scale
+  bình thường**, `exception: null`, không overflow, không có gì để một widget
+  test nhận ra. Giảm còn 12 mỗi bên thì nhãn được 44px, cả bốn hiện đủ và nút
+  về lại đúng 48 cao (trước đó là 64 vì nhãn xuống hai dòng).
+  
+  Áp cho `filledButtonTheme`, `outlinedButtonTheme`, `textButtonTheme`.
+  `minimumSize` không đụng tới, nên ngưỡng chạm nguyên vẹn — có test.
+- **Bốn nút một hàng vẫn là bố cục sai ở 320, kể cả sau khi sửa.** 44px cho
+  nhãn là vừa đủ cho "Again", không đủ cho bản dịch dài hơn, và ở textScaler
+  2.0 nút cao 104. Câu trả lời đúng là **bố cục** — 2×2 hoặc `Wrap` — chứ
+  không phải token, và nó thuộc **M5** khi màn Review được dựng. Ghi lại ở đây
+  để M5 không bắt đầu bằng một hàng bốn nút.
+- **Dependencies:** M3.4, M3.5, M3.6, M4.8, M4.8a
+- **Tests required:** cỡ chữ compact vs thường theo từng role, padding theo
+  bề rộng, ngưỡng chạm, biên 360 loại trừ, golden 320 light/dark
+- **Checklist phases:** 7.1, 7.4
 
 ### M4.9 · Deck/Card domain và data vertical foundation
 

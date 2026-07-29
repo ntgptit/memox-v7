@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../l10n/l10n_extension.dart';
-import '../../../shared/widgets/app_empty_state_widget.dart';
-import '../../../shared/widgets/app_scaffold_widget.dart';
+import '../../../shared/widgets/mx_empty_state.dart';
+import '../../../shared/widgets/mx_content_shell.dart';
 
 /// The review feature's entry surface until the real session screen exists.
 ///
@@ -19,9 +19,9 @@ class ReviewPlaceholderScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppScaffoldWidget(
+    return MxContentShell(
       title: context.l10n.appTitle,
-      body: AppEmptyStateWidget(title: context.l10n.homePlaceholderMessage),
+      body: MxEmptyState(title: context.l10n.homePlaceholderMessage),
     );
   }
 }

@@ -8,10 +8,11 @@ import 'app_typography.dart';
 
 /// Material 3 themes for the app.
 ///
-/// Only the components UC-05 actually renders are themed: AppBar, Card,
-/// FilledButton, OutlinedButton and SnackBar. Theming a Dialog or a Chip now
-/// would be a decision made without a screen to check it against, and it would
-/// still need revisiting when one exists.
+/// Only components something actually renders are themed: AppBar, Card,
+/// FilledButton, OutlinedButton, TextField and SnackBar from UC-05, plus
+/// IconButton, ListTile, Dialog and BottomSheet added in M4.8 when the Mx
+/// shared components gave them callers. Theming a Chip now would still be a
+/// decision made without a screen to check it against.
 ThemeData buildLightTheme() => _buildTheme(
   ColorScheme.fromSeed(seedColor: AppColors.seed).copyWith(
     // Every role is declared. `fromSeed` had been generating a neutral-grey
@@ -265,6 +266,75 @@ ThemeData _buildTheme(
       ),
       hintStyle: base.textTheme.bodyMedium?.copyWith(
         color: scheme.onSurfaceVariant,
+      ),
+    ),
+
+    // Four component themes added in M4.8, one per shared component that
+    // actually renders through them. Nothing speculative: a theme for a
+    // component nobody builds is a decision made without a screen to check it
+    // against, and it still needs revisiting when one exists.
+    iconButtonTheme: IconButtonThemeData(
+      style:
+          IconButton.styleFrom(
+            // The 48×48 minimum lives here rather than in `MxIconButton`, so no
+            // screen can pass a smaller one — there is no parameter to pass.
+            minimumSize: const Size.square(AppSpacing.minimumTouchTarget),
+            foregroundColor: scheme.onSurfaceVariant,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppRadius.md),
+            ),
+          ).copyWith(
+            // Keyboard focus draws a ring, not just the default tint. Measured
+            // off the goldens, that tint alone is 1.15:1 against the surface
+            // behind it in both modes — WCAG 1.4.11 asks 3:1 of a focus
+            // indicator, so on its own it marks the focused control for people
+            // who can already see where they are and for nobody else.
+            side: WidgetStateProperty.resolveWith((states) {
+              if (!states.contains(WidgetState.focused)) return null;
+              return BorderSide(color: scheme.primary, width: 2);
+            }),
+          ),
+    ),
+
+    listTileTheme: ListTileThemeData(
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.xs,
+      ),
+      minVerticalPadding: AppSpacing.sm,
+      iconColor: scheme.onSurfaceVariant,
+      textColor: scheme.onSurface,
+      selectedColor: scheme.primary,
+      selectedTileColor: semantic.surfaceMuted,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.md),
+      ),
+    ),
+
+    dialogTheme: DialogThemeData(
+      backgroundColor: scheme.surface,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        side: BorderSide(color: semantic.borderSubtle),
+      ),
+      titleTextStyle: base.textTheme.titleMedium?.copyWith(
+        color: scheme.onSurface,
+      ),
+      contentTextStyle: base.textTheme.bodyMedium?.copyWith(
+        color: scheme.onSurfaceVariant,
+      ),
+    ),
+
+    bottomSheetTheme: BottomSheetThemeData(
+      backgroundColor: scheme.surface,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      showDragHandle: true,
+      dragHandleColor: semantic.borderSubtle,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
       ),
     ),
 

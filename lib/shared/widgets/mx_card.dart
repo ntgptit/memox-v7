@@ -8,8 +8,8 @@ import '../../core/theme/theme_context_extension.dart';
 ///
 /// Flat by design. During a review the card content is the task, and elevation
 /// shadows in a stack of surfaces add depth cues that compete with it.
-class AppCardSurface extends StatelessWidget {
-  const AppCardSurface({
+class MxCard extends StatelessWidget {
+  const MxCard({
     required this.child,
     this.padding = const EdgeInsets.all(AppSpacing.lg),
     super.key,

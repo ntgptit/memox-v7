@@ -30,6 +30,11 @@ abstract final class AppTypography {
   /// large, because that text is the task.
   static const double cardPromptSize = 30;
 
+  /// The same prompt on a screen narrower than `AppBreakpoints.compact`. 30
+  /// forces a two-word prompt onto three lines at 320 wide, which pushes the
+  /// answer below the fold — the one thing the review screen must not do.
+  static const double compactCardPromptSize = 26;
+
   /// Pairs a [FontWeight] with the matching variable-axis setting.
   static List<FontVariation> _wght(FontWeight weight) => <FontVariation>[
     FontVariation('wght', weight.value.toDouble()),

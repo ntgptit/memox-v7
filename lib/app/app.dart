@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/theme/app_breakpoints.dart';
+import '../core/theme/app_compact_scale.dart';
 import '../core/theme/app_theme.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../l10n/l10n_extension.dart';
@@ -61,8 +63,37 @@ class MemoxApp extends StatelessWidget {
       // `test/l10n/localization_test.dart` pins the behaviour either way.
       //
       // Phone-sized surface on web (AD-04). No-op on Android.
-      builder: (context, child) =>
-          MobileFrameWidget(child: child ?? const SizedBox.shrink()),
+      //
+      // The compact scale sits *inside* the frame, not around it: on web the
+      // frame overrides `MediaQuery` down to 393x852, and a width test placed
+      // above it would read the browser window and decide the app is roomy
+      // even though it renders at phone size.
+      builder: (context, child) => MobileFrameWidget(
+        child: CompactScaleWidget(child: child ?? const SizedBox.shrink()),
+      ),
     );
+  }
+}
+
+/// Applies [applyCompactScale] when the surface is narrower than
+/// [AppBreakpoints.compact].
+///
+/// A widget rather than a branch in `buildLightTheme()`, because the theme is
+/// built once at startup and the width is not known then — and on a foldable it
+/// changes while the app is running.
+class CompactScaleWidget extends StatelessWidget {
+  const CompactScaleWidget({required this.child, super.key});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    // `sizeOf`, so this rebuilds on rotation and unfold rather than reading a
+    // width captured on the first frame.
+    if (!AppBreakpoints.isCompact(MediaQuery.sizeOf(context).width)) {
+      return child;
+    }
+
+    return Theme(data: applyCompactScale(Theme.of(context)), child: child);
   }
 }

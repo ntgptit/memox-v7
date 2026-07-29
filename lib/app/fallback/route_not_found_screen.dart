@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../l10n/l10n_extension.dart';
-import '../../shared/widgets/app_error_state_widget.dart';
-import '../../shared/widgets/app_scaffold_widget.dart';
+import '../../shared/widgets/mx_error_state.dart';
+import '../../shared/widgets/mx_content_shell.dart';
 import '../router/route_names.dart';
 
 /// Shown when a location matches no route.
@@ -15,7 +15,7 @@ import '../router/route_names.dart';
 /// [RouteNames], and anything in `shared/widgets/` that knew those would drag
 /// routing into every widget test in the project.
 ///
-/// It builds nothing of its own. `AppScaffoldWidget` and `AppErrorStateWidget`
+/// It builds nothing of its own. `MxContentShell` and `MxErrorState`
 /// already decide padding, typography and the danger colour; re-implementing the
 /// layout here is how a 404 ends up looking like a different app than the one it
 /// interrupts.
@@ -28,8 +28,8 @@ class RouteNotFoundScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppScaffoldWidget(
-      body: AppErrorStateWidget(
+    return MxContentShell(
+      body: MxErrorState(
         title: context.l10n.pageNotFoundTitle,
         message: context.l10n.pageNotFoundMessage,
         retryLabel: context.l10n.goHomeAction,

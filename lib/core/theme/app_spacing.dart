@@ -25,4 +25,11 @@ abstract final class AppSpacing {
   /// The permitted values, in order. `AppSpacing` is the only source of
   /// spacing, so a test can assert the scale did not quietly grow a step.
   static const List<double> scale = <double>[xs, sm, md, lg, xl, xxl];
+
+  /// Smallest side of anything a finger has to hit.
+  ///
+  /// Not part of [scale] — it is a floor, not a step. A control below this is
+  /// reachable on a desk and missed on a bus, and the miss looks like the app
+  /// ignoring the tap rather than the user hitting beside it.
+  static const double minimumTouchTarget = 48;
 }

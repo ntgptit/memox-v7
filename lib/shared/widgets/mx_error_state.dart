@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_icon_size.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/theme_context_extension.dart';
-import 'app_button_widget.dart';
+import 'mx_action_button.dart';
 
 /// Shown when something failed and the user may be able to retry.
 ///
@@ -12,8 +12,8 @@ import 'app_button_widget.dart';
 /// into every UI test, and — more importantly — it would decide how a failure
 /// reads, which is the screen's job. The screen picks localized copy for the
 /// failure it got; this widget only renders it.
-class AppErrorStateWidget extends StatelessWidget {
-  const AppErrorStateWidget({
+class MxErrorState extends StatelessWidget {
+  const MxErrorState({
     required this.title,
     required this.message,
     this.retryLabel,
@@ -56,10 +56,10 @@ class AppErrorStateWidget extends StatelessWidget {
             ),
             if (retryLabel != null && onRetry != null) ...<Widget>[
               const SizedBox(height: AppSpacing.xl),
-              AppButtonWidget(
+              MxActionButton(
                 label: retryLabel!,
                 onPressed: onRetry,
-                variant: AppButtonVariant.secondary,
+                variant: MxActionButtonVariant.secondary,
               ),
             ],
           ],
