@@ -7,8 +7,8 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M2.1 |
-| **Last updated** | 2026-07-28 |
+| **Updated by task** | M4.4a |
+| **Last updated** | 2026-07-29 |
 
 Single source of truth for project progress. Update it in the same commit as the
 work it describes. A task is `done` only when it meets the Definition of Done in
@@ -26,10 +26,10 @@ AD / UC (xem `business-rules.md`).
 | M0 · Development harness | done | Skills, checklist và enforcement script đã có |
 | M1 · Product definition (Phase 0–1) | **done** | Đặc tả MVP đã frozen: AD-01…11, BR-01…87, UC-01…09, data model đầy đủ |
 | M2 · Project foundation (Phase 2–3, 6) | **done** | Toàn bộ 9 task đóng: M2.1 · M2.1a · M2.1b · M2.2 · M2.2b · M2.3 · M2.4 · M2.5 · M2.6. App build được trên Android (3 flavor cài song song) và Web, l10n en/vi, bootstrap có error boundary, lint + guard đều enforce. Tiếp theo: **M3.1 · Cấu trúc feature-first và ranh giới layer** |
-| M3 · Architecture & design system (Phase 4–5, 7, 12–13) | **done** | Mười hai task đóng: M3.1…M3.6 cộng M3.5a (review color system), M3.5b (áp A2 Quizlet Navy Indigo — 46 role `ColorScheme` khai báo tường minh), M3.5c (visual audit harness), M3.5d (siết tính đúng đắn của audit core), M3.5e (anchor, clip và allowance) và M3.5f (clip hỏi Flutter thay vì đoán). Cây feature-first + guard siết về `fail_on: [error, warning]`, Failure model, Riverpod foundation, design token, hai theme M3, sáu base component kèm 14 golden. Tiếp theo: **M4.2 · Drift connection và schema `.drift`** |
-| M4 · Router & Drift foundation (Phase 8, 11) | in progress | M4.1, M4.1a, M4.2, M4.3, M4.4 **done** — GoRouter tập trung với `MaterialApp.router` và 404 ở `app/fallback/`; MX-VIS-001 ép mọi production screen có strict visual audit; schema v1 toàn bộ trong `.drift`; hai named query dùng chung một định nghĩa "đến hạn"; schema v1 đã dump và commit; cả 14 bất biến chạy trên database thật, mỗi cái hai chiều. **M4.5, M4.6, M4.7 vẫn todo.** Tiếp theo: **M4.5 · Domain entity và repository contract**. **Phase 10 (networking) hoãn** — AD-01, AD-05 |
-| M5 · First vertical slice: luồng ôn tập (Phase 14) | todo | UC-05 |
-| M6 · Test suite (Phase 15) | todo | Chạy song song M5, không phải sau |
+| M3 · Architecture & design system (Phase 4–5, 7, 12–13) | **done** | Mười hai task đóng: M3.1…M3.6 cộng M3.5a (review color system), M3.5b (áp A2 Quizlet Navy Indigo — 46 role `ColorScheme` khai báo tường minh), M3.5c (visual audit harness), M3.5d (siết tính đúng đắn của audit core), M3.5e (anchor, clip và allowance) và M3.5f (clip hỏi Flutter thay vì đoán). Cây feature-first + guard siết về `fail_on: [error, warning]`, Failure model, Riverpod foundation, design token, hai theme M3, sáu base component kèm 14 golden. Milestone đóng — không quyết định next task |
+| M4 · Router, Database & Content Management (Phase 8, 11, 14) | in progress | M4.1, M4.1a, M4.2, M4.3, M4.4 **done** — GoRouter tập trung với `MaterialApp.router` và 404 ở `app/fallback/`; MX-VIS-001 ép mọi production screen có strict visual audit; schema v1 toàn bộ trong `.drift`; hai named query dùng chung một định nghĩa "đến hạn"; schema v1 đã dump và commit; cả 14 bất biến chạy trên database thật. M4.4a **done** — sắp xếp lại kế hoạch theo vertical slice. **M4.5, M4.6, M4.7 `descoped` trước khi triển khai** — không dòng code nào từng được viết dưới ba ID đó. M4.8–M4.12 là kế hoạch mới: shared component → Deck/Card domain+data → Deck full-stack → Card full-stack → demo hardening. **Next task: M4.8 · Shared components cho content management.** M4 chỉ `done` khi Deck/Card demo slice hoàn thành. **Phase 10 (networking) hoãn** — AD-01, AD-05 |
+| M5 · Review vertical slice — UC-05 (Phase 14) | todo | Bắt đầu **sau M4.12**. Không còn là vertical slice đầu tiên — Deck/Card CRUD đã hoàn thành trong M4.8–M4.12 và M5 không triển khai lại. Review MUST NOT bắt đầu khi M4.12 chưa `done` |
+| M6 · Test suite (Phase 15) | todo | Chạy song song **từ M4.8 trở đi**, không đợi tới sau Review |
 | M7 · CI/CD (Phase 19) | todo | Bắt đầu được ngay sau M2. Job Android + Web, chưa có iOS (AD-04) |
 | M8 · Release Android (Phase 16–18, 20–22) | todo | |
 | M9 · Backend Spring Boot + auth + sync (Phase 10) | todo | Sau khi M8 ổn định |
@@ -767,7 +767,7 @@ slice UC-05 cần. Không xây trọn design system trước khi có feature th�
   (contract, pure Dart), `review_repository_impl.dart` (implement nó), và
   `review_placeholder_screen.dart` — màn placeholder **chuyển từ `app.dart` vào
   feature**, nên nó có caller thật chứ không phải file giả để lấp chỗ. Contract
-  cố ý rỗng: method được viết ở M4.5 **từ nhu cầu của presentation**, đoán trước
+  cố ý rỗng: method được viết ở **M4.9** **từ nhu cầu của presentation**, đoán trước
   là viết code và test cho một lời gọi không tồn tại.
 - **Phát hiện khi siết guard — ba rule đang bảo vệ tập rỗng.** Đây là lý do
   `rule_without_targets` **không được** bịt: nó không phải nhiễu chờ code tới.
@@ -1514,7 +1514,7 @@ migration test và enforcement cho các bất biến.
   AD-08), `app_database.dart`, `tables/*.drift` cho `decks`, `cards`,
   `card_review_states`, `review_history`, `study_sessions`; index; `PRAGMA
   foreign_keys = ON` trong `beforeOpen`.
-- **Out of scope:** named query nghiệp vụ (M4.3), DAO và repository (M4.6),
+- **Out of scope:** named query nghiệp vụ (M4.3), DAO và repository (M4.9 cho Deck/Card, M5.0 cho Review),
   bảng `deck_templates` (AD-07: là asset ở MVP).
 - **Editable documents:** `docs/wbs.md`
 - **Output:** `lib/core/database/{connection,app_database}.dart`,
@@ -1547,7 +1547,7 @@ migration test và enforcement cho các bất biến.
   đúng MIME (`application/wasm`, `text/javascript`), wasm compile trong trình
   duyệt, worker chạy không lỗi. **Chưa kiểm:** drift thật sự mở một database —
   `driftDatabase()` kết nối lazy ở query đầu tiên, mà chưa có gì trong app phát
-  query. Việc đó thuộc M4.5/M4.6 khi repository có caller thật.
+  query. Việc đó thuộc **M4.9**, khi repository Deck/Card có caller thật.
 - **Dependencies:** M3.2, M2.2
 - **Tests required:** 16 test schema (bảng, cột, nullability, PK, FK, index,
   không Dart table class, opener duy nhất) + 3 test cascade
@@ -1620,11 +1620,67 @@ migration test và enforcement cho các bất biến.
   lập); 2 test sinh database fixture cho `check_docs.sh --db`
 - **Checklist phases:** 11.1, 15.1
 
+### M4.4a · Reorder WBS theo Deck/Card vertical slice
+
+- **Status:** done
+- **Goal:** Chuyển phần chưa triển khai từ layer-first sang vertical-slice-first,
+  để app có luồng quản lý nội dung demo được trước khi làm Review.
+- **Scope:** sắp xếp lại M4 sau M4.4; giữ nguyên ID vĩnh viễn; thay M4.5–M4.7 cũ
+  bằng task kế nhiệm có caller UI thật; buộc Deck/Card hoàn chỉnh trước Review.
+- **Out of scope:** sửa code; sửa frozen business rules; thay đổi phạm vi MVP;
+  triển khai bất kỳ task mới nào.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `docs/wbs.md`
+- **Acceptance criteria:**
+  - [x] Không có task ID trùng.
+  - [x] Không renumber ID cũ — M5.1…M5.6 giữ nguyên số.
+  - [x] Không dependency nào của task **active** trỏ tới task đã `descoped`.
+  - [x] Task tiếp theo là **M4.8**.
+  - [x] Review chỉ bắt đầu sau **M4.12**.
+  - [x] `check_docs.sh` exit 0.
+- **Vấn đề đã sửa.** Kế hoạch cũ tiếp tục theo tầng: M4.5–M4.7 dựng toàn bộ domain
+  và data cho **cả** Deck/Card lẫn Review, rồi M5 mới có UI — mà CRUD Deck/Card
+  lại nằm **ngoài** phạm vi M5. Kết quả là backend lớn dần trong khi app không có
+  luồng nào demo được, và shared component thì chỉ đủ cho UC-05 vì text field,
+  list item, dialog và bottom sheet đã bị loại khỏi M3.6 lúc chưa có caller.
+- **Vì sao không renumber.** Task ID là định danh vĩnh viễn (cùng chính sách với
+  BR/AD/UC). Đổi M5.1 cũ thành M6.1 sẽ làm mọi tham chiếu trong commit message,
+  PR và ghi chép phiên trước trỏ sai — im lặng, vì ID mới vẫn tồn tại và vẫn đọc
+  được. Nên ID cũ giữ nguyên, và ba task bị thay dùng status `descoped` kèm task
+  kế nhiệm.
+- **Dependencies:** M4.4
+- **Tests required:** document validation — `check_docs.sh`
+- **Checklist phases:** meta / planning
+
+#### Bảng chuyển nội dung
+
+| Task cũ | Trạng thái | Nội dung được chuyển tới |
+|---|---|---|
+| M4.5 | `descoped` | Deck/Card → **M4.9** · Review → **M5.0** |
+| M4.6 | `descoped` | Deck/Card → **M4.9** · Review → **M5.0** |
+| M4.7 | `descoped` | Fixture/demo → **M4.12** |
+| M5.1–M5.6 | giữ nguyên ID | Thực hiện sau **M4.12** |
+
+Quyết định: **reordered before implementation.** Không có production
+implementation nào từng được tuyên bố hoàn thành dưới M4.5, M4.6 hay M4.7. Phạm
+vi MVP không đổi — chỉ đổi thứ tự và cách chia task để có sản phẩm demo được
+sớm. Chiến lược mới là vertical-slice-first, **không** phải bỏ ranh giới kiến
+trúc: mỗi slice vẫn đi qua domain → data → state → UI, chỉ là hẹp lại còn đúng
+phần có caller thật.
+
 ### M4.5 · Domain entity và repository contract
 
-- **Status:** todo
-- **Goal:** Có hợp đồng domain viết theo nhu cầu presentation, không theo hình
-  dạng Drift.
+- **Status:** descoped
+- **Decision:** descoped **before implementation** (M4.4a). Không dòng code nào
+  từng được viết dưới ID này.
+- **Reason:** scope gộp Deck/Card và Review vào **một** domain batch, tức là tiếp
+  tục layer-first trong khi app chưa có luồng quản lý nội dung nào để demo. Một
+  contract viết cho cả hai slice cùng lúc buộc phải đoán nhu cầu của presentation
+  chưa tồn tại — đúng cái mà acceptance criteria của chính task này cấm.
+- **Superseded by:** **M4.9** cho Deck/Card domain và repository contract ·
+  **M5.0** cho domain và repository contract riêng của Review.
+- **Goal:** _(lịch sử)_ Có hợp đồng domain viết theo nhu cầu presentation,
+  không theo hình dạng Drift.
 - **Scope:** `features/review/domain/entity/` (`DeckEntity`, `CardEntity`,
   `CardReviewStateEntity`, `StudySessionEntity`, `ReviewHistoryEntity`), enum
   `SchedulerType`, `ReviewAction`, `ReviewKind`, `SessionStatus`,
@@ -1642,16 +1698,24 @@ migration test và enforcement cho các bất biến.
   - [ ] Không method nào trong contract nhận hoặc trả kiểu sinh bởi Drift
         (AD-01).
   - [ ] Contract có method mà UC-05 cần và **không** có method chưa ai gọi.
-- **Dependencies:** M4.2
-- **Tests required:** unit test equality của entity; test khẳng định enum phủ
-  đúng tập giá trị của BR-79/BR-80
+- **Dependencies:** M4.2 _(lịch sử — task đã descoped, không ai được phụ thuộc
+  vào nó)_
+- **Tests required:** _(không áp dụng — descoped trước khi triển khai)_
 - **Checklist phases:** 14.2
 
 ### M4.6 · Data layer — DAO, mapper, repository implementation
 
-- **Status:** todo
-- **Goal:** Nối domain xuống Drift, và chặn mọi exception ở đúng ranh giới
-  repository.
+- **Status:** descoped
+- **Decision:** descoped **before implementation** (M4.4a). Không dòng code nào
+  từng được viết dưới ID này.
+- **Reason:** data layer phải lớn lên cùng caller UI/use case của từng vertical
+  slice. Triển khai tràn toàn bộ review domain trước khi có màn hình nào gọi tới
+  sinh ra code không ai chứng minh được là đúng — nó chỉ được chứng minh là
+  *compile được*.
+- **Superseded by:** **M4.9** cho Deck/Card data layer · **M5.0** cho data layer
+  riêng của Review.
+- **Goal:** _(lịch sử)_ Nối domain xuống Drift, và chặn mọi exception ở đúng
+  ranh giới repository.
 - **Scope:** DAO theo feature, mapper Drift row ↔ entity, repository
   implementation, mapping exception → `Failure`, transaction cho thao tác nhiều
   bước.
@@ -1668,15 +1732,22 @@ migration test và enforcement cho các bất biến.
   - [ ] Mapper xử lý enum lạ bằng cách map về giá trị `unknown` thay vì throw.
   - [ ] Tạo card sinh đúng một `card_review_states` trong cùng transaction
         (BR-09) — test khẳng định.
-- **Dependencies:** M4.5, M4.3
-- **Tests required:** repository test với database in-memory: happy path, failure
-  path, cascade, stream phát lại; mapper test gồm case enum lạ
+- **Dependencies:** M4.5, M4.3 _(lịch sử — task đã descoped)_
+- **Tests required:** _(không áp dụng — descoped trước khi triển khai)_
 - **Checklist phases:** 14.3, 15.1
 
 ### M4.7 · Fixture cho development và test
 
-- **Status:** todo
-- **Goal:** Có dữ liệu thật để chạy vertical slice, đánh dấu rõ là fixture.
+- **Status:** descoped
+- **Decision:** descoped **before implementation** (M4.4a). Không dòng code nào
+  từng được viết dưới ID này.
+- **Reason:** fixture phải chứng minh một luồng demo **chạy thật**, không tồn tại
+  như một backend artifact đứng riêng. Seed dữ liệu mà không có màn hình nào đọc
+  nó chỉ chứng minh insert chạy được.
+- **Superseded by:** **M4.12** cho Deck/Card development fixture, seed và demo
+  E2E. Fixture riêng cho Review, nếu cần, mở rộng ở M5.
+- **Goal:** _(lịch sử)_ Có dữ liệu thật để chạy vertical slice, đánh dấu rõ là
+  fixture.
 - **Scope:** `assets/templates/manifest.json` + một template cây deck nhiều cấp
   (root → deck con → deck chứa card) cho cả `eight_box` và `sm2`; loader nạp vào
   database; helper `seedTestDatabase()` cho test.
@@ -1694,21 +1765,254 @@ migration test và enforcement cho các bất biến.
   - [ ] Nạp fixture hai lần **không** tạo bản sao trùng (BR-37).
   - [ ] Manifest ghi rõ nội dung là fixture cho development/test (BR-87).
   - [ ] Sau khi nạp, toàn bộ 14 bất biến của M4.4 vẫn pass.
-- **Dependencies:** M4.6, M4.4
-- **Tests required:** test nạp fixture rồi chạy lại bộ bất biến; test idempotency
-  khi nạp hai lần
+- **Dependencies:** M4.6, M4.4 _(lịch sử — task đã descoped)_
+- **Tests required:** _(không áp dụng — descoped trước khi triển khai)_
 - **Checklist phases:** 11.1, 14.3
+
+### M4.8 · Shared components cho content management
+
+- **Status:** todo
+- **Goal:** Mở rộng design system từ token và theme đã có, để Deck/Card UI không
+  phải tự dựng TextField, list item, dialog hay action sheet ở từng màn.
+- **Scope:** `AppTextFieldWidget`, `AppIconButtonWidget`, `AppListTileWidget`,
+  `AppConfirmDialogWidget`, `AppActionSheetWidget` (hoặc component chọn lựa
+  tương đương trên mobile); feedback component **chỉ khi** có từ hai caller thật;
+  theme/component state mà Deck/Card form cần.
+- **Out of scope:** Deck screen, Card screen (M4.10, M4.11); repository;
+  controller; review verdict control và Review screen (M5).
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/shared/widgets/`, `test/shared/widgets/`
+- **Acceptance criteria:**
+  - [ ] Dùng `AppSpacing`, `AppRadius`, `AppIconSize`, `AppTypography`,
+        `ColorScheme` và `AppSemanticColors` hiện có.
+  - [ ] Không nhận raw `Color` hay `TextStyle` từ caller.
+  - [ ] `const` constructor ở mọi chỗ có thể.
+  - [ ] Light và dark.
+  - [ ] Focus, error, disabled và loading — với component có state đó.
+  - [ ] Touch target tối thiểu 48×48.
+  - [ ] Semantic label cho mọi action chỉ có icon.
+  - [ ] Render ở 320×568 và ở `textScaler` 2.0 không overflow.
+  - [ ] Widget test cho từng state; golden light/dark cho state ổn định.
+  - [ ] Không golden cho animation không tất định.
+- **Cái này đáng lẽ đã có ở M3.6, và có lý do nó không có.** M3.6 loại text field,
+  list item, dialog và bottom sheet vì lúc đó **chưa có caller** — đúng quy tắc
+  "không tạo abstraction chưa có caller". Nay Deck/Card cho chúng caller thật, nên
+  chúng được dựng ở đây chứ không phải trong từng feature. Vẫn giữ nguyên quy
+  tắc: component nào **chưa** có caller trong M4.10 hoặc M4.11 thì không tạo.
+- **DeckTile, CardTile và SchedulerSelector KHÔNG vào shared.** Chúng mang ngữ
+  nghĩa nghiệp vụ của một feature; đưa vào `shared/` sẽ kéo domain của Deck vào
+  mọi widget test của dự án, đúng lỗi mà `RouteNotFoundScreen` đã tránh ở M4.1.
+- **Dependencies:** M3.4, M3.5, M3.6, M4.4a
+- **Tests required:** widget test theo state, semantics, responsive 320×568,
+  text scaling 2.0, golden light/dark cho state tất định
+- **Checklist phases:** 7.3, 7.4, 13, 15.3, 15.4
+
+### M4.9 · Deck/Card domain và data vertical foundation
+
+- **Status:** todo
+- **Goal:** Chỉ xây domain và data mà Deck/Card management có caller thật, đủ để
+  UI chạy xuyên suốt xuống Drift.
+- **Scope:** **Domain** — `DeckEntity`, `CardEntity`, phần
+  `CardReviewStateEntity` cần để tạo card đúng BR-09, `SchedulerType`,
+  `DeckContentType`, command/value object khi có caller thật, repository contract
+  theo UC-02, UC-03, UC-04, UC-08, UC-09. **Data** — DAO Deck/Card, mapper,
+  repository implementation, mapping `Failure`, `watch()` stream, transaction cho
+  thao tác nhiều bước.
+- **Out of scope:** `StudySessionEntity`, `ReviewHistoryEntity`, `ReviewKind`,
+  `ReviewAction`, `SessionStatus`, `SessionEndReason`, review persistence,
+  scheduler formula, review use case (tất cả → **M5.0**, **M5.1**); controller UI.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/features/deck/domain/`, `lib/features/deck/data/`
+- **Acceptance criteria:**
+  - [ ] `domain/` không import Flutter hay Drift; contract không nhận/trả kiểu
+        sinh bởi Drift (AD-01).
+  - [ ] Entity immutable, value equality; trạng thái hữu hạn là enum.
+  - [ ] Enum lạ đọc từ database map về `unknown`, và `unknown` **không** được ghi
+        ngược xuống database.
+  - [ ] Repository đọc bằng `watch()` — test khẳng định stream phát lại.
+  - [ ] Không exception thô của Drift/SQLite thoát khỏi repository; conflict đã
+        biết map thành `ConflictFailure`, không phải `DatabaseFailure` chung.
+  - [ ] Tạo card sinh **đúng một** review state, atomic (BR-09); insert state lỗi
+        thì card rollback.
+  - [ ] Lần tạo child đầu tiên khoá `content_type` **trong cùng transaction**
+        (BR-62).
+  - [ ] Move subtree cập nhật `root_deck_id` cho **toàn bộ** subtree, atomic
+        (BR-71).
+  - [ ] Reset `content_type` bị chặn khi deck chưa rỗng (BR-68).
+  - [ ] Toàn bộ 14 bất biến của M4.4 vẫn pass sau bộ repository test.
+  - [ ] Web phát được query Drift **thật**, không chỉ compile asset — đóng phần
+        chưa kiểm còn lại của M4.2.
+- **Operation phải đủ cho:** đọc cây root và descendant · tạo root deck kèm chọn
+  scheduler · tạo sub-deck · khoá `content_type` ở child đầu tiên · đổi tên · đếm
+  descendant/card trước khi xoá · xoá cascade · reset `content_type` khi rỗng ·
+  di chuyển subtree · đọc card theo deck · tạo card kèm đúng một review state ·
+  sửa card không đụng review state/history · xoá card · stream phát lại.
+- **Dependencies:** M4.3, M4.4, M4.8
+- **Tests required:** unit domain, mapper (gồm enum lạ), repository integration
+  trên database thật, transaction, rollback, stream, và chạy lại 14 bất biến
+- **Checklist phases:** 11.1, 14.2, 14.3, 15.1
+
+### M4.10 · Deck management full-stack
+
+- **Status:** todo
+- **Goal:** Người dùng quản lý được toàn bộ cây deck từ UI xuống Drift, không cần
+  fixture hay thao tác database thủ công.
+- **Scope:** named route; root deck list; điều hướng deck lồng nhau; deck detail;
+  tạo root deck kèm chọn scheduler; tạo sub-deck; đổi tên; xác nhận xoá kèm số
+  deck/card sẽ mất; action theo `content_type`; reset `content_type` khi rỗng;
+  move subtree trong phạm vi MVP; Riverpod state/controller; loading, loaded,
+  empty, submitting, error; ARB en/vi; widget riêng của feature.
+- **Out of scope:** card editor (M4.11); review session (M5); UI thư viện starter
+  (UC-01); sync/backend; media và tag.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/features/deck/presentation/`, `lib/l10n/`,
+  `test/features/deck/`, `test/visual_audit/screens/features/deck/`
+- **Acceptance criteria:**
+  - [ ] Cold start mở **root deck list**, không phải review placeholder.
+  - [ ] Root chỉ cho tạo deck (BR-58); tạo root **bắt buộc** chọn scheduler
+        (BR-11).
+  - [ ] Sub-deck `unset` cho chọn *Create card* hoặc *Create deck*; deck đã có
+        `content_type` chỉ hiện đúng một action (BR-63, BR-64).
+  - [ ] Đổi tên validate trim, tối đa 200 ký tự (BR-01).
+  - [ ] Xác nhận xoá hiển thị số deck và card sẽ mất (BR-03).
+  - [ ] Cây hỗ trợ **ít nhất ba cấp** (BR-55).
+  - [ ] Move không cho vào chính nó hoặc descendant (BR-69); move sang root khác
+        scheduler/generation bị chặn (BR-70).
+  - [ ] Dữ liệu tự cập nhật qua stream — không cần refresh thủ công.
+  - [ ] Toàn bộ copy từ ARB; không raw color, text style, spacing hay radius.
+  - [ ] 320×568 và `textScaler` 2.0 không overflow.
+  - [ ] Mọi production screen đăng ký strict visual audit (MX-VIS-001), và đạt
+        **PASS** ở light lẫn dark — không chấp nhận `PASS_WITH_UNRESOLVED`.
+  - [ ] Screen có design reference đạt pixel difference **dưới 3%** trước merge.
+- **Dependencies:** M4.9, M4.1, M4.1a
+- **Tests required:** domain, repository, controller, widget, route, visual audit
+  strict, responsive, flow test
+- **Checklist phases:** 8.2, 9.2, 9.3, 14.4, 15.2, 15.3, 15.4
+
+### M4.11 · Card management full-stack
+
+- **Status:** todo
+- **Goal:** Người dùng quản lý card hoàn chỉnh trong deck loại `card`, từ UI
+  xuống transaction Drift.
+- **Scope:** card list; empty state; tạo card; tạo card **đầu tiên** trong deck
+  `unset`; editor front/back; sửa; xoá; luồng *add another*; validation; Riverpod
+  state/controller; route; ARB en/vi; `CardTile`/`CardEditor` đặt trong feature.
+- **Out of scope:** review scheduler (M5.1); review history UI; import/export;
+  media; rich text.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/features/card/`, `lib/l10n/`, `test/features/card/`,
+  `test/visual_audit/screens/features/card/`
+- **Acceptance criteria:**
+  - [ ] `front`/`back` trim không được rỗng, tối đa 2000 ký tự (BR-07, BR-08).
+  - [ ] Card đầu tiên khoá `content_type = card` **trong cùng transaction**
+        (BR-62, BR-63).
+  - [ ] Tạo card sinh **đúng một** review state, khớp scheduler và generation của
+        root (BR-09); cả `eight_box` lẫn `sm2` khởi tạo đúng.
+  - [ ] Sửa card **không** đụng review state hay history (BR-10).
+  - [ ] Xoá card kéo theo review state và history bằng cascade.
+  - [ ] Xoá card cuối **không** tự chuyển `content_type` về `unset` (BR-67).
+  - [ ] *Add another* giữ editor mở và xoá form sau khi lưu.
+  - [ ] Lỗi persistence **giữ lại** nội dung form.
+  - [ ] Double-submit không tạo hai card.
+  - [ ] Card list tự cập nhật qua stream.
+  - [ ] Toàn bộ copy từ ARB; không raw style hay token.
+  - [ ] 320×568 và `textScaler` 2.0 không overflow.
+  - [ ] Mọi production screen có strict visual audit **PASS** ở light và dark.
+  - [ ] Screen có design reference đạt pixel difference **dưới 3%**.
+- **Dependencies:** M4.10
+- **Tests required:** domain, repository transaction và rollback, controller,
+  form validation, widget, visual audit strict, route
+- **Checklist phases:** 9.2, 9.3, 14.4, 15.1, 15.2, 15.3, 15.4
+
+### M4.12 · Deck/Card demo hardening, fixture và E2E
+
+- **Status:** todo
+- **Goal:** Đưa app tới trạng thái **demo được** bằng luồng Deck/Card hoàn chỉnh,
+  trước khi bắt đầu Review.
+- **Scope:** fixture cho development/test; seed helper dùng **chính** repository
+  và loader thật; persistence qua restart; Flutter Web + Playwright ở mobile
+  viewport với thao tác trực tiếp trên UI; visual state matrix; regression toàn
+  slice; thay `ReviewPlaceholderScreen` làm entrypoint nếu còn; dọn placeholder
+  và navigation demo-only không còn caller.
+- **Out of scope:** Review session (M5); nội dung production (BR-87, trước M8);
+  sync/backend.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `assets/templates/`, `lib/features/deck/data/template_loader.dart`,
+  `test/helpers/seed.dart`, `integration_test/`
+- **Acceptance criteria:**
+  - [ ] App demo được **không** cần sửa database bằng tay.
+  - [ ] App không còn chỉ hiện placeholder.
+  - [ ] Fixture: một root `eight_box`, một root `sm2`, cây **ít nhất ba cấp**,
+        leaf chứa card; manifest ghi rõ là fixture development/test (BR-87).
+  - [ ] Nạp fixture **hai lần** không nhân bản (BR-37).
+  - [ ] Đủ 14 bất biến pass **sau seed** và **sau E2E**.
+  - [ ] Playwright resize đúng mobile viewport và click trực tiếp trên UI.
+  - [ ] Luồng chính chạy qua Flutter Web; persistence còn sau reload/restart theo
+        khả năng của target.
+  - [ ] Mọi production screen strict visual audit **PASS** ở light và dark.
+  - [ ] State matrix phủ loading, empty, loaded, submitting, error và confirmation
+        — với screen có state đó.
+  - [ ] Design parity dưới 3% cho screen có baseline.
+  - [ ] `flutter test` full pass; **một** `flutter build web` ở integration gate;
+        không build APK như validation mặc định.
+  - [ ] Báo cáo demo flow kèm bằng chứng từng bước.
+- **Luồng E2E bắt buộc:** cold start app trống → tạo root deck và chọn scheduler
+  → tạo branch → tạo leaf deck → chọn *Create card* → tạo card → sửa card → quay
+  lại cây → đóng và mở lại app → **dữ liệu vẫn còn** → xoá card → xoá deck.
+- **Luồng kiểm thêm:** `content_type = deck` · `content_type = card` · reset
+  `content_type` khi rỗng · thao tác trên cây ba cấp · persistence thật trên Web
+  · cả `eight_box` lẫn `sm2`.
+- **Dependencies:** M4.11, M4.4
+- **Tests required:** integration, Playwright E2E, persistence, fixture,
+  invariant, visual audit, full regression
+- **Checklist phases:** 11.1, 14.4, 15.1–15.5
 
 ---
 
-## M5 · First vertical slice — UC-05 luồng ôn tập
+## M5 · Review vertical slice — UC-05
 
-Mục tiêu: chứng minh kiến trúc chạy xuyên suốt Drift → data source → repository
-→ use case → controller/state → router → màn hình → ghi kết quả → UI cập nhật.
+Mục tiêu: luồng ôn tập chạy xuyên suốt Drift → data source → repository → use
+case → controller/state → router → màn hình → ghi kết quả → UI cập nhật.
 
-**Ngoài phạm vi M5** (nêu một lần, áp cho mọi task bên dưới): CRUD deck/card đầy
-đủ, import/export, login, backend, sync, media, statistics, settings, và UI thư
-viện starter deck.
+**Không còn là vertical slice đầu tiên.** Quản lý Deck/Card đã hoàn thành ở
+M4.8–M4.12, và M5 **không** triển khai lại phần đó — nó xây đúng phần Review.
+Điều kiện bắt đầu: **M4.12 `done`**. Review MUST NOT bắt đầu trước mốc đó, vì
+không có cây deck và card thật thì phiên ôn không có gì để ôn, và mọi test của nó
+sẽ phải dựng dữ liệu bằng tay — thứ M4.12 tồn tại để thay thế.
+
+**Ngoài phạm vi M5** (nêu một lần, áp cho mọi task bên dưới): import/export,
+login, backend, sync, media, statistics, settings, và UI thư viện starter deck.
+CRUD deck/card **đã xong ở M4**, không lặp lại ở đây.
+
+### M5.0 · Review-specific domain và data completion
+
+- **Status:** todo
+- **Goal:** Bổ sung đúng phần domain và data mà **chỉ Review** cần, sau khi
+  Deck/Card demo slice đã hoàn thành.
+- **Scope:** `StudySessionEntity`, `ReviewHistoryEntity`, `ReviewAction`,
+  `ReviewKind`, `SessionStatus`, `SessionEndReason`; phần `CardReviewStateEntity`
+  dành cho review; repository contract mở rộng cho UC-05; DAO/mapper/repository
+  cho session, history và ghi review atomic.
+- **Out of scope:** scheduler formula (M5.1); review use case (M5.2); controller
+  và UI (M5.3, M5.4).
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/features/review/domain/`, `lib/features/review/data/`
+- **Acceptance criteria:**
+  - [ ] `domain/` là Dart thuần — không Flutter, không Drift.
+  - [ ] Enum phủ **đúng** tập giá trị của BR-75, BR-79, BR-80.
+  - [ ] Repository contract không nhận hay trả kiểu sinh bởi Drift (AD-01).
+  - [ ] Cập nhật card state và insert history là **một** transaction — nửa vời
+        không tồn tại được (BR-86).
+  - [ ] Chuyển trạng thái session enforce đúng ma trận `status` × `end_reason`
+        (BR-79…BR-85), và bất biến 12 vẫn pass sau bộ test.
+  - [ ] Không exception persistence thô nào thoát khỏi repository.
+  - [ ] Không thêm API nào chưa có caller trong M5.1–M5.5.
+- **Vì sao tách khỏi M4.9.** Domain của Review chỉ có caller khi scheduler và use
+  case tồn tại. Gộp nó vào M4.9 sẽ lặp lại đúng sai lầm của M4.5: viết contract
+  cho một presentation chưa có mặt.
+- **Dependencies:** M4.12
+- **Tests required:** entity, enum, mapper, repository transaction, rollback
+- **Checklist phases:** 14.2, 14.3, 15.1
 
 ### M5.1 · `ReviewScheduler` và hai implementation
 
@@ -1732,7 +2036,7 @@ viện starter deck.
         (BR-18) — có test.
   - [ ] Card box 8 trả lời `remembered` vẫn ở box 8, hạn +128 ngày (BR-16).
   - [ ] `domain/scheduler/` không import Flutter hay Drift.
-- **Dependencies:** M4.5
+- **Dependencies:** M5.0
 - **Tests required:** unit test toàn ma trận `eight_box`; unit test công thức
   `sm2` gồm biên sàn ease factor; test `supportedActions` của cả hai
 - **Checklist phases:** 14.2, 15.1
@@ -1762,7 +2066,7 @@ viện starter deck.
   - [ ] `review_count` chỉ tăng ở lượt `scheduled`; `lapse_count` tăng khi
         `forgotten`/`again` ở lượt `scheduled` (BR-20).
   - [ ] Một phiên lấy tối đa 50 card riêng biệt (BR-24).
-- **Dependencies:** M5.1, M4.6
+- **Dependencies:** M5.1, M5.0
 - **Tests required:** unit test cho từng acceptance criteria ở trên, dùng
   repository fake; test riêng cho ca box-8 và ca generation cũ
 - **Checklist phases:** 14.2, 15.1
@@ -1856,7 +2160,7 @@ viện starter deck.
 - **Goal:** Chứng minh slice chạy thật xuyên suốt trên thiết bị, không chỉ ở
   unit test.
 - **Scope:** `integration_test/review_flow_test.dart` chạy đúng luồng chính của
-  UC-05 trên fixture của M4.7.
+  UC-05 trên fixture của M4.12.
 - **Out of scope:** Playwright + Flutter Web (M7 sẽ nối vào CI).
 - **Editable documents:** `docs/wbs.md`
 - **Output:** `integration_test/`
@@ -1869,7 +2173,7 @@ viện starter deck.
   - [ ] `flutter test integration_test/` exit 0 trên emulator Android.
   - [ ] `flutter build web` vẫn exit 0 sau toàn bộ M5 — kênh E2E còn sống
         (AD-04).
-- **Dependencies:** M5.4, M5.5, M4.7
+- **Dependencies:** M5.4, M5.5, M4.12
 - **Tests required:** đây **là** task test — integration test luồng chính
 - **Checklist phases:** 15.5
 
