@@ -55,6 +55,21 @@ void main() {
     expect(head, contains('dartProgram'));
   });
 
+  test('the test/ copies are byte-identical to the web/ originals', () {
+    // `flutter test --platform chrome` serves test/ at the site root, so the
+    // web runtime test reaches the production asset URLs through these
+    // copies. A stale copy would test yesterday's binaries and say nothing.
+    for (final name in <String>['sqlite3.wasm', 'drift_worker.js']) {
+      expect(
+        File('test/$name').readAsBytesSync(),
+        File('web/$name').readAsBytesSync(),
+        reason:
+            'test/$name must be the same bytes as web/$name — '
+            're-copy it (see web/WEB_ASSETS.md)',
+      );
+    }
+  });
+
   test('the vendored assets match the locked package versions', () {
     // The check that matters. Upgrading drift without re-downloading the worker
     // leaves a version mismatch that only shows up in a browser.

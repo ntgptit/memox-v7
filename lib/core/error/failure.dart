@@ -7,7 +7,11 @@
 ///
 /// Pure Dart — no Flutter, no Drift, no Dio. Data-layer exceptions are mapped
 /// here at the repository boundary and never travel further.
-sealed class Failure {
+///
+/// Implements [Exception] because repositories throw failures across the
+/// boundary (M4.9) and `only_throw_errors` rightly refuses anything that is
+/// neither an Error nor an Exception.
+sealed class Failure implements Exception {
   const Failure({required this.message, this.cause});
 
   /// Safe to show to a user as-is.

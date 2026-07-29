@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -19,6 +20,12 @@ import 'package:flutter_test/flutter_test.dart';
 /// machine already builds with.
 Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   TestWidgetsFlutterBinding.ensureInitialized();
+  // Fonts are loaded for goldens, and goldens run on the VM only. Under
+  // `--platform chrome` (the web runtime test, M4.9) `dart:io` is a stub that
+  // throws, and there is no golden comparison to feed — so skip the loading
+  // rather than crash every browser test at startup.
+  if (kIsWeb) return testMain();
+
   await _loadAppFonts();
   await _loadSdkFonts();
 

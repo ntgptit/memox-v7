@@ -17,9 +17,11 @@ import 'failure.dart';
 /// is kept in [Failure.cause] for the log.
 Failure mapDatabaseError(Object error) {
   // A conflict is worth distinguishing: it is the one database failure a user
-  // can usually act on, by choosing a different name.
+  // can usually act on, by choosing a different name. It maps to
+  // ConflictFailure, not the generic DatabaseFailure, so a screen can offer a
+  // way out instead of a shrug (M4.9).
   if (_isConstraintViolation(error)) {
-    return DatabaseFailure(
+    return ConflictFailure(
       message: 'That change conflicts with something already saved.',
       cause: error,
     );
