@@ -14,6 +14,7 @@ import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
 import 'package:memox/shared/widgets/mx_icon_button.dart';
 import 'package:memox/shared/widgets/mx_list_tile.dart';
+import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
 
 import 'golden_specimens.dart';
@@ -190,6 +191,26 @@ void main() {
             onPressed: noop,
           ),
         ),
+      ),
+    ),
+    // The bottom bar in both of its selections. Two entries rather than one
+    // because the selected state is the whole point of the component, and a
+    // single golden would pin the idle destination's look while leaving the
+    // selected indicator — the thing that moves — unchecked.
+    'mx_navigation_bar_decks': const Scaffold(
+      body: SizedBox.expand(),
+      bottomNavigationBar: MxNavigationBar(
+        selectedIndex: 0,
+        onDestinationSelected: noopIndex,
+        destinations: navigationDestinations,
+      ),
+    ),
+    'mx_navigation_bar_review': const Scaffold(
+      body: SizedBox.expand(),
+      bottomNavigationBar: MxNavigationBar(
+        selectedIndex: 1,
+        onDestinationSelected: noopIndex,
+        destinations: navigationDestinations,
       ),
     ),
     'mx_list_tile_selected': const Scaffold(

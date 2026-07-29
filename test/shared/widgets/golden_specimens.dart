@@ -12,6 +12,32 @@ import 'package:memox/shared/widgets/mx_text_field.dart';
 /// the same file pushed it past the size the guard allows.
 void noop() {}
 
+/// Swallows a destination index.
+///
+/// A golden is a still frame: the specimen must render the selection it was
+/// given, not react to a tap that never happens.
+void noopIndex(int index) {}
+
+/// The two destinations the app ships, as the shell builds them.
+///
+/// Copy is hardcoded English here on purpose: a golden pins pixels, and reading
+/// it from ARB would make every future copy edit a golden failure in a file
+/// about layout. The real screen takes its labels from ARB — asserted in the
+/// router and shell tests.
+const List<NavigationDestination> navigationDestinations =
+    <NavigationDestination>[
+      NavigationDestination(
+        icon: Icon(Icons.folder_outlined),
+        selectedIcon: Icon(Icons.folder),
+        label: 'Decks',
+      ),
+      NavigationDestination(
+        icon: Icon(Icons.school_outlined),
+        selectedIcon: Icon(Icons.school),
+        label: 'Review',
+      ),
+    ];
+
 /// Takes focus on its first frame, so the golden captures the focused border
 /// rather than the resting one.
 class AutoFocusedField extends StatefulWidget {

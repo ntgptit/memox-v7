@@ -6,9 +6,54 @@
     "description": "Application name. Shown as the MaterialApp title and in the Android task switcher. Not translated — it is a product name."
   },
 
-  "homePlaceholderMessage": "MemoX đang khởi động.",
-  "@homePlaceholderMessage": {
-    "description": "Text on the temporary placeholder screen shown before any real feature exists. Removed when the first screen lands (M5.4)."
+  "navigationDecksLabel": "Bộ thẻ",
+  "@navigationDecksLabel": {
+    "description": "Bottom navigation label for the Decks destination. Kept separate from decksTitle even though the English words match: a tab label is competing for width with another label and may need to be shortened in a language where the screen title cannot be."
+  },
+
+  "navigationReviewLabel": "Ôn tập",
+  "@navigationReviewLabel": {
+    "description": "Bottom navigation label for the Review destination, where the user studies due cards."
+  },
+
+  "reviewPlaceholderMessage": "MemoX đang khởi động.",
+  "@reviewPlaceholderMessage": {
+    "description": "Text on the temporary Review screen shown until the real review session screen lands (M5.4)."
+  },
+
+  "decksTitle": "Bộ thẻ",
+  "@decksTitle": {
+    "description": "App bar title of the home screen, which lists the user's root decks. A deck is a folder of flashcards."
+  },
+
+  "decksLoadingLabel": "Đang tải bộ thẻ",
+  "@decksLoadingLabel": {
+    "description": "Screen-reader label announced while the deck list is loading. A bare progress spinner announces nothing at all, so the user is told neither that something is happening nor when it stops."
+  },
+
+  "decksEmptyTitle": "Chưa có bộ thẻ",
+  "@decksEmptyTitle": {
+    "description": "Heading of the empty state on the deck list, shown when the user has no root decks. Not an error — an account with no decks is a normal starting point."
+  },
+
+  "decksEmptyMessage": "Tạo một bộ thẻ để bắt đầu sắp xếp các thẻ ghi nhớ.",
+  "@decksEmptyMessage": {
+    "description": "Body of the deck list empty state. Explains what a deck is for; it carries no button because creating a deck is not built yet."
+  },
+
+  "decksLoadErrorTitle": "Không thể tải bộ thẻ",
+  "@decksLoadErrorTitle": {
+    "description": "Heading shown when reading the deck list from the local database fails. Carries no database detail — the user cannot act on it."
+  },
+
+  "decksLoadErrorMessage": "Vui lòng thử lại.",
+  "@decksLoadErrorMessage": {
+    "description": "Body of the deck list error state. Deliberately free of the exception, the SQL and the file path."
+  },
+
+  "retryAction": "Thử lại",
+  "@retryAction": {
+    "description": "Button that re-runs a failed read. On the deck list it re-subscribes to the database stream."
   },
 
   "startupErrorTitle": "Không khởi động được MemoX",

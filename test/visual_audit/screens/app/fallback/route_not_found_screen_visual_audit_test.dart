@@ -43,8 +43,13 @@ void main() {
         reason: SkipReason.rasterOnly,
         detailContains: '_RenderColoredBox',
         rationale:
-            'Scaffold paints its background through a private ColoredBox. The '
-            'value is scaffoldBackgroundColor, asserted in app_theme_test.dart.',
+            'The page-transition backdrop of this route. '
+            '_FadeForwardsPageTransition wraps every opaque route in a '
+            'ColoredBox that paints Colors.transparent at rest and '
+            'ColorScheme.surface only mid-transition — verified in '
+            'page_transitions_theme.dart of the pinned SDK. It is NOT the '
+            'Scaffold background, which a Material paints into its own ink '
+            'layer; that value is asserted in app_theme_test.dart.',
       ),
       AuditSkipAllowance(
         itemId: 'shell',

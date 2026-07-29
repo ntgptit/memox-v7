@@ -7,8 +7,8 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M4.9b |
-| **Last updated** | 2026-07-29 |
+| **Updated by task** | M4.10a |
+| **Last updated** | 2026-07-30 |
 
 Single source of truth for project progress. Update it in the same commit as the
 work it describes. A task is `done` only when it meets the Definition of Done in
@@ -27,7 +27,7 @@ AD / UC (xem `business-rules.md`).
 | M1 · Product definition (Phase 0–1) | **done** | Đặc tả MVP đã frozen: AD-01…11, BR-01…87, UC-01…09, data model đầy đủ |
 | M2 · Project foundation (Phase 2–3, 6) | **done** | Toàn bộ 9 task đóng: M2.1 · M2.1a · M2.1b · M2.2 · M2.2b · M2.3 · M2.4 · M2.5 · M2.6. App build được trên Android (3 flavor cài song song) và Web, l10n en/vi, bootstrap có error boundary, lint + guard đều enforce. Tiếp theo: **M3.1 · Cấu trúc feature-first và ranh giới layer** |
 | M3 · Architecture & design system (Phase 4–5, 7, 12–13) | **done** | Mười hai task đóng: M3.1…M3.6 cộng M3.5a (review color system), M3.5b (áp A2 Quizlet Navy Indigo — 46 role `ColorScheme` khai báo tường minh), M3.5c (visual audit harness), M3.5d (siết tính đúng đắn của audit core), M3.5e (anchor, clip và allowance) và M3.5f (clip hỏi Flutter thay vì đoán). Cây feature-first + guard siết về `fail_on: [error, warning]`, Failure model, Riverpod foundation, design token, hai theme M3, sáu base component kèm 14 golden. Milestone đóng — không quyết định next task |
-| M4 · Router, Database & Content Management (Phase 8, 11, 14) | in progress | M4.1, M4.1a, M4.2, M4.3, M4.4 **done** — GoRouter tập trung với `MaterialApp.router` và 404 ở `app/fallback/`; MX-VIS-001 ép mọi production screen có strict visual audit; schema v1 toàn bộ trong `.drift`; hai named query dùng chung một định nghĩa "đến hạn"; schema v1 đã dump và commit; cả 14 bất biến chạy trên database thật. M4.4a **done** — sắp xếp lại kế hoạch theo vertical slice. M4.8 **done** — 11 shared component mang prefix `Mx` (5 mới, 6 đổi tên), 26 golden mới, rename không đổi pixel; vòng review UI/UX đóng thêm 4 lỗi accessibility có đo đạc. M4.8a **done** — responsive hardening: `MxContentShell` overflow 135px/167px ở landscape đã đóng, bốn component còn lại đã tự cuộn sẵn; màn rộng chốt giữ kéo căng. M4.8b **done** — compact scale cho màn 320: hàng list 88→80px, padding ngang button 24→12 (bốn action `sm2` từ "Ag" thành "Again"), body/label giữ nguyên cỡ, phát hiện harness test báo màn hình 0×0 từ M3.6. **M4.5, M4.6, M4.7 `descoped` trước khi triển khai** — không dòng code nào từng được viết dưới ba ID đó. M4.8–M4.12 là kế hoạch mới: shared component → Deck/Card domain+data → Deck full-stack → Card full-stack → demo hardening. M4.9 **done** — Deck/Card domain + data vertical: 6 file domain (entity/enum/contract), DAO + 3 mapper + repository impl với transaction thật, `deck.drift` recursive query, constraint conflict → `ConflictFailure`, 78 test mới (49 integration trên SQLite thật + 1 web runtime trên Chrome), cả 14 bất biến pass trên dữ liệu do repository ghi; đồng thời **đóng lỗ hổng web của M4.2**: `driftDatabase` thiếu `web:` options và `drift_worker.js` prebuilt lệch ABI với `sqlite3.wasm` — connection đã sửa, worker compile từ đúng lockfile. M4.9a **done** — giới hạn cây 10 cấp enforce ở `createSubDeck`/`moveDeck` trước mutation, subtree traversal cycle-safe bằng recursive `UNION` (bỏ cap `depth < 64` production), bất biến thứ 15 (deck sâu hơn 10 cấp), và tách `CardRepository`/`CardRepositoryImpl`/`CardDao` khỏi Deck boundary. M4.9b **done** — hoàn tất ownership vật lý: toàn bộ Card domain/data chuyển sang `lib/features/card/`, không import Deck data layer, vẫn giữ một transaction chung cho BR-09/BR-62. **Next task: M4.10 · Deck management full-stack.** M4 chỉ `done` khi Deck/Card demo slice hoàn thành. **Phase 10 (networking) hoãn** — AD-01, AD-05 |
+| M4 · Router, Database & Content Management (Phase 8, 11, 14) | in progress | M4.1, M4.1a, M4.2, M4.3, M4.4 **done** — GoRouter tập trung với `MaterialApp.router` và 404 ở `app/fallback/`; MX-VIS-001 ép mọi production screen có strict visual audit; schema v1 toàn bộ trong `.drift`; hai named query dùng chung một định nghĩa "đến hạn"; schema v1 đã dump và commit; cả 14 bất biến chạy trên database thật. M4.4a **done** — sắp xếp lại kế hoạch theo vertical slice. M4.8 **done** — 11 shared component mang prefix `Mx` (5 mới, 6 đổi tên), 26 golden mới, rename không đổi pixel; vòng review UI/UX đóng thêm 4 lỗi accessibility có đo đạc. M4.8a **done** — responsive hardening: `MxContentShell` overflow 135px/167px ở landscape đã đóng, bốn component còn lại đã tự cuộn sẵn; màn rộng chốt giữ kéo căng. M4.8b **done** — compact scale cho màn 320: hàng list 88→80px, padding ngang button 24→12 (bốn action `sm2` từ "Ag" thành "Again"), body/label giữ nguyên cỡ, phát hiện harness test báo màn hình 0×0 từ M3.6. **M4.5, M4.6, M4.7 `descoped` trước khi triển khai** — không dòng code nào từng được viết dưới ba ID đó. M4.8–M4.12 là kế hoạch mới: shared component → Deck/Card domain+data → Deck full-stack → Card full-stack → demo hardening. M4.9 **done** — Deck/Card domain + data vertical: 6 file domain (entity/enum/contract), DAO + 3 mapper + repository impl với transaction thật, `deck.drift` recursive query, constraint conflict → `ConflictFailure`, 78 test mới (49 integration trên SQLite thật + 1 web runtime trên Chrome), cả 14 bất biến pass trên dữ liệu do repository ghi; đồng thời **đóng lỗ hổng web của M4.2**: `driftDatabase` thiếu `web:` options và `drift_worker.js` prebuilt lệch ABI với `sqlite3.wasm` — connection đã sửa, worker compile từ đúng lockfile. M4.9a **done** — giới hạn cây 10 cấp enforce ở `createSubDeck`/`moveDeck` trước mutation, subtree traversal cycle-safe bằng recursive `UNION` (bỏ cap `depth < 64` production), bất biến thứ 15 (deck sâu hơn 10 cấp), và tách `CardRepository`/`CardRepositoryImpl`/`CardDao` khỏi Deck boundary. M4.9b **done** — hoàn tất ownership vật lý: toàn bộ Card domain/data chuyển sang `lib/features/card/`, không import Deck data layer, vẫn giữ một transaction chung cho BR-09/BR-62. **M4.10 `in-progress` — slice 1 xong:** Deck root list thay review placeholder ở route `/`, `rootDecksProvider` nối `watchRootDecks()` vào UI với loading/empty/loaded/error, DI đặt ở `lib/app/di/`, `ReviewPlaceholderScreen` đã xoá, 6 strict visual audit PASS. Auto-retry của Riverpod 3 bị tắt cho provider này vì trong lúc retry state là `AsyncLoading` — một lần đọc lỗi sẽ quay spinner ~13 giây. **M4.10a `done` — quyết định product mới supersede M4.1:** MVP có Bottom Navigation Material 3, `StatefulShellRoute.indexedStack` với hai branch Decks/Review, `AppNavigationShell` + `MxNavigationBar`, `ReviewPlaceholderScreen` khôi phục làm branch 1; chuyển tab giữ branch state (đo bằng số lần subscribe), deep link `/review` mở đúng tab. **Next: slice 2 của M4.10 · tạo root deck kèm chọn scheduler (UC-02).** M4 chỉ `done` khi Deck/Card demo slice hoàn thành. **Phase 10 (networking) hoãn** — AD-01, AD-05 |
 | M5 · Review vertical slice — UC-05 (Phase 14) | todo | Bắt đầu **sau M4.12**. Không còn là vertical slice đầu tiên — Deck/Card CRUD đã hoàn thành trong M4.8–M4.12 và M5 không triển khai lại. Review MUST NOT bắt đầu khi M4.12 chưa `done` |
 | M6 · Test suite (Phase 15) | todo | Chạy song song **từ M4.8 trở đi**, không đợi tới sau Review |
 | M7 · CI/CD (Phase 19) | todo | Bắt đầu được ngay sau M2. Job Android + Web, chưa có iOS (AD-04) |
@@ -2218,7 +2218,8 @@ phần có caller thật.
 
 ### M4.10 · Deck management full-stack
 
-- **Status:** todo
+- **Status:** in-progress — slice 1 (root deck list là Home) đã xong; các slice
+  ghi dữ liệu chưa bắt đầu
 - **Goal:** Người dùng quản lý được toàn bộ cây deck từ UI xuống Drift, không cần
   fixture hay thao tác database thủ công.
 - **Scope:** named route; root deck list; điều hướng deck lồng nhau; deck detail;
@@ -2232,7 +2233,7 @@ phần có caller thật.
 - **Output:** `lib/features/deck/presentation/`, `lib/l10n/`,
   `test/features/deck/`, `test/visual_audit/screens/features/deck/`
 - **Acceptance criteria:**
-  - [ ] Cold start mở **root deck list**, không phải review placeholder.
+  - [x] Cold start mở **root deck list**, không phải review placeholder.
   - [ ] Root chỉ cho tạo deck (BR-58); tạo root **bắt buộc** chọn scheduler
         (BR-11).
   - [ ] Sub-deck `unset` cho chọn *Create card* hoặc *Create deck*; deck đã có
@@ -2248,10 +2249,138 @@ phần có caller thật.
   - [ ] Mọi production screen đăng ký strict visual audit (MX-VIS-001), và đạt
         **PASS** ở light lẫn dark — không chấp nhận `PASS_WITH_UNRESOLVED`.
   - [ ] Screen có design reference đạt pixel difference **dưới 3%** trước merge.
+- **Slice 1 — root deck list là Home (xong).** Chỉ luồng **đọc**. Route `/` đổi
+  từ `RouteNames.review` sang `RouteNames.decks` và render `RootDeckListScreen`;
+  `rootDecksProvider` nối `DeckRepository.watchRootDecks()` vào UI qua bốn
+  trạng thái loading / empty / loaded / error; retry trên error state
+  `invalidate` provider nên thực sự mở `watch()` mới. ARB en/vi thêm bảy key,
+  bỏ `homePlaceholderMessage`. Test: 8 route, 8 controller, 15 widget, 6 strict
+  visual audit — cả sáu **PASS**, không có `PASS_WITH_UNRESOLVED`. Toàn bộ suite
+  498 test xanh.
+  - **~~Không có Bottom Navigation và không có `StatefulShellRoute`~~** —
+    **superseded bởi M4.10a.** Tại thời điểm slice 1, quyết định này giữ nguyên
+    từ M4.1 và đúng: app chỉ có một destination thật. Chủ dự án sau đó quyết
+    định MVP có Bottom Navigation; xem M4.10a.
+  - **~~`ReviewPlaceholderScreen` đã xoá~~** — **khôi phục ở M4.10a**, nơi nó
+    trở thành branch 1 của navigation shell. Tại thời điểm slice 1 nó không còn
+    production caller, và MX-VIS-001 coi audit của một screen đã biến mất là
+    orphan, nên xoá là đúng. `features/review/` vẫn giữ domain + data anchor
+    cho M5 suốt cả hai lần.
+  - **DI đặt ở `lib/app/di/`**, không ở feature: `presentation/` không được import
+    `data/`, `domain/` không được import Riverpod, `core/` không được import
+    feature — composition root là chỗ duy nhất nhìn thấy cả contract lẫn
+    implementation. `appDatabaseProvider` (keepAlive) nằm cạnh database ở
+    `core/database/`.
+  - **`rootDecksProvider` tắt auto-retry của Riverpod 3.** Mặc định
+    `ProviderContainer.defaultRetry` chạy lại 10 lần với backoff 200ms→6.4s, và
+    **trong lúc retry state là `AsyncLoading`, không phải `AsyncError`** — nghĩa
+    là một lần đọc lỗi sẽ quay spinner ~13 giây trước khi người dùng biết có
+    chuyện gì. Đây là một truy vấn SQLite local, không phải network chập chờn:
+    retry đúng chỗ là nút người dùng bấm được. Có test khoá hành vi này.
+  - **Chưa có `DeckTile`.** Hàng danh sách hiện chỉ là tên deck, tức một
+    passthrough thuần tới `MxListTile`; nó sẽ có file riêng khi có trách nhiệm
+    thứ hai (tap target, due count). Lưu ý naming guard bắt file dưới
+    `presentation/` phải kết thúc bằng `_widget`, nên tên file sẽ là
+    `deck_tile_widget.dart` chứ không phải `deck_tile.dart`.
+  - **Không có due count / card count** — `watchRootDecks()` trả deck, và tính
+    các con số đó theo từng hàng trong Dart chính là N+1 mà UC-06 nêu đích danh.
+    Chúng đi cùng query gộp, không sớm hơn.
+  - **Hai phát hiện ngoài phạm vi, ghi lại để xử lý đúng chỗ:**
+    - `_RenderListTile` đã thêm vào `_privateAndTransparent` của visual audit
+      harness — `paint` của nó chỉ gọi `context.paintChild` cho bốn slot, đã đối
+      chiếu với SDK 3.44.8. Đây là sự thật về Flutter nên thuộc về classification
+      chung, không phải allowance lặp lại ở mọi màn có list.
+    - Guard rule `memox.state_management.no_generated_ref_subclass` **báo sai**
+      với signature `build` hai tham số của `ConsumerWidget`: nó đọc kiểu ref
+      phía widget của Riverpod 3 như thể là `Ref` subclass sinh ra của Riverpod
+      2. Rule này sẽ bắt sai mọi `ConsumerWidget` trong dự án. Fix thuộc repo
+      guard upstream, repo này không được sửa. Slice 1 dùng `Consumer` bọc riêng
+      phần body — vốn cũng đúng hơn về rebuild scoping, vì title app bar là hằng.
+- **Còn lại của M4.10 (chưa bắt đầu):** tạo root deck kèm chọn scheduler (UC-02);
+  tạo sub-deck (UC-08); deck detail và điều hướng lồng nhau; đổi tên; xác nhận
+  xoá kèm số deck/card; reset `content_type`; move subtree; action theo
+  `content_type`; due/card count.
 - **Dependencies:** M4.9, M4.1, M4.1a
 - **Tests required:** domain, repository, controller, widget, route, visual audit
   strict, responsive, flow test
 - **Checklist phases:** 8.2, 9.2, 9.3, 14.4, 15.2, 15.3, 15.4
+
+### M4.10a · App shell và Bottom Navigation
+
+- **Status:** done
+- **Goal:** MVP có Bottom Navigation Material 3 với hai destination — Decks và
+  Review — thay vì một route đơn.
+- **Quyết định product mới, supersede M4.1 và slice 1 của M4.10.** M4.1 ghi
+  `StatefulShellRoute` và bottom navigation là out-of-scope, và slice 1 của
+  M4.10 giữ nguyên quyết định đó; **cả hai đều đúng tại thời điểm được triển
+  khai** — lúc ấy app chỉ có một destination thật, và một shell một tab là một
+  shell phải dựng lại. Chủ dự án hiện quyết định MVP có Bottom Navigation với
+  Review là destination thứ hai. Mục M4.1 **không** được sửa để giả vờ bottom
+  navigation từng nằm trong scope của nó; nó là ghi chép tại thời điểm đó.
+- **Scope:** `StatefulShellRoute.indexedStack` với hai branch; `AppNavigationShell`
+  ở `lib/app/shell/`; `MxNavigationBar` shared component; route `review` được
+  khôi phục; ARB en/vi cho nhãn điều hướng; `navigationBarTheme`; router/shared/
+  shell test; 4 golden; visual audit của Deck screen chụp qua router thật.
+- **Out of scope:** Settings, Statistics, Library; FAB hoặc create action; nội
+  dung thật của Review (M5.4); deep-link platform configuration.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/app/shell/app_navigation_shell.dart`,
+  `lib/shared/widgets/mx_navigation_bar.dart`, `lib/app/router/`,
+  `lib/core/theme/app_theme.dart`, `lib/l10n/`, `test/app/shell/`,
+  `test/shared/widgets/mx_navigation_bar_test.dart`,
+  `test/visual_audit/screens/features/deck/`
+- **Acceptance criteria:**
+  - [x] Bottom Navigation hiển thị trên Deck screen ở cả bốn trạng thái.
+  - [x] Component tên `MxNavigationBar`, dùng Material 3 `NavigationBar`; không
+        dùng `BottomNavigationBar` (có test khẳng định cả hai).
+  - [x] Decks là tab mặc định; Review là tab thứ hai.
+  - [x] Deep link `/review` mở đúng tab Review, không mở Decks rồi nhảy.
+  - [x] Chuyển tab giữ branch state — đo bằng số lần `watchRootDecks()` được
+        gọi: một lần cho cả vòng Decks → Review → Decks.
+  - [x] Reselect tab được xử lý, không throw và không điều hướng sai chỗ.
+  - [x] 404 vẫn hoạt động; nút Home vẫn về Decks.
+  - [x] Nhãn lấy từ ARB en/vi; không hardcode route name hay path.
+  - [x] Shared widget không biết feature, không biết GoRouter, không tự điều
+        hướng — có test.
+  - [x] Không overflow ở `320×568` và `textScaler` 2.0; light/dark pass.
+  - [x] 4 golden mới; strict visual audit của Deck screen **PASS** ở cả ba
+        trạng thái × hai theme, ảnh đã chứa Bottom Navigation.
+  - [x] Deck root list của slice 1 không bị rollback.
+- **`ReviewPlaceholderScreen` được khôi phục.** Slice 1 của M4.10 đã xoá nó vì
+  không còn production caller; giờ nó là branch 1 nên quay lại, cùng strict
+  visual audit. ARB key đổi từ `homePlaceholderMessage` sang
+  `reviewPlaceholderMessage` — tên cũ mô tả một vai trò màn hình này không còn
+  giữ.
+- **Hai `Scaffold` là cố ý.** Shell mang bottom bar, mỗi màn mang
+  `MxContentShell` với app bar. Đó là cấu trúc `StatefulShellRoute` được thiết
+  kế quanh, và là thứ làm inset đúng: `Scaffold` có `bottomNavigationBar` trừ
+  chiều cao đó khỏi `MediaQuery` của body, nên hàng cuối danh sách dừng **trên**
+  thanh bar. Có test đo `list.bottom <= bar.top` với 30 deck.
+- **Text scaling của bar không cần xử lý riêng.** Flutter's `NavigationBar` tự
+  clamp text scale của nhãn (`_kMaxLabelTextScaleFactor`), đã kiểm tra trong SDK
+  3.44.8 — nên không hardcode height và cũng không overflow ở `textScaler` 2.0.
+  Có test khoá điều này để nếu Flutter bỏ clamp thì suite đỏ.
+- **Visual audit của Deck screen giờ chụp qua router thật.** `Router.withConfig`
+  gắn route table production vào trong `MaterialApp` của harness, nên shell,
+  branch và bar đều là đồ thật. Audit một màn trần sẽ tạo ra tấm ảnh không người
+  dùng nào nhìn thấy và để màu của bar không được đo.
+- **Một sai sót có sẵn được sửa nhân tiện:** allowance của
+  `_RenderColoredBox` trong hai audit cũ ghi rằng đó là nền `Scaffold` vẽ qua
+  `ColoredBox` riêng. **Sai.** Node đó là backdrop chuyển trang của
+  `_FadeForwardsPageTransition`, và ở trạng thái nghỉ nó vẽ `Colors.transparent`
+  — đã kiểm chứng bằng cách dựng lại cây render và đối chiếu
+  `page_transitions_theme.dart` của SDK 3.44.8. Số lượng bằng số `Navigator`
+  trong cây, nên bản audit qua router thấy 3 còn bản một màn thấy 1. Rationale
+  đã sửa ở cả ba file.
+- **Hai render type nữa vào `_privateAndTransparent`:** `_RenderVisibility` và
+  `_RenderLayoutSurrogateProxyBox`. Cả hai là `RenderProxyBox` không có màu của
+  riêng mình — đã đối chiếu SDK. Chúng xuất hiện trên **mọi** màn audit qua
+  router (`StatefulShellRoute` ẩn branch bằng `Visibility`; mỗi `Navigator` có
+  một `Overlay`), nên thuộc classification chung chứ không phải allowance lặp.
+- **Dependencies:** M4.10 (slice 1), M4.1, M4.8
+- **Tests required:** router/branch, shared component, app shell layout,
+  golden, strict visual audit
+- **Checklist phases:** 8.1, 8.2, 12.1, 14.4, 15.2, 15.3
 
 ### M4.11 · Card management full-stack
 

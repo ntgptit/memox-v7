@@ -36,7 +36,7 @@ class RouteNotFoundScreen extends StatelessWidget {
         // By name. The literal `'/'` would work today and break silently the
         // first time home stops being the root — landing the user on this same
         // screen, from the button meant to escape it.
-        onRetry: () => context.goNamed(RouteNames.review),
+        onRetry: () => context.goNamed(RouteNames.decks),
       ),
     );
   }
