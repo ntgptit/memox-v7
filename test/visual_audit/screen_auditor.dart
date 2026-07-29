@@ -6,6 +6,7 @@ import 'audit_model.dart';
 import 'audit_raster.dart';
 import 'paint_extractors.dart';
 import 'render_classification.dart';
+import 'traversal_policy.dart';
 
 /// Key of the boundary every audit captures through.
 const Key auditSurfaceKey = ValueKey<String>('visual_audit.surface');
@@ -68,47 +69,52 @@ Future<ScreenAudit> auditScreen(
   );
 
   const rootId = 'screen';
-  final owners = _resolveAnchors(anchors);
+  final resolved = _resolveAnchors(anchors);
+  final owners = resolved.owners;
   final sinks = <String, AuditSink>{rootId: AuditSink(rootId)};
-  final captureRect = _globalRect(root);
+  final captureRect = globalRect(root);
   var hiddenNodes = 0;
   var outsideCaptureNodes = 0;
+  var clippedNodes = 0;
 
-  void walk(RenderObject node, String owner) {
+  void walk(RenderObject node, String owner, Rect clip) {
     final id = owners[node] ?? owner;
-    final rect = _globalRect(node);
+    final rect = globalRect(node);
 
-    switch (_presenceOf(node, rect, captureRect)) {
-      case _Presence.hidden:
-        // Nothing below an `Offstage` or a zero-opacity layer reaches the
-        // screen, so the whole subtree is pruned. A hidden node is NOT an
-        // unresolved one: there was nothing there to measure, and counting it
-        // as unread would inflate the very number that is supposed to mean
-        // "part of this screen went unchecked".
-        hiddenNodes++;
+    if (isHidden(node)) {
+      // Nothing below an `Offstage` or a zero-opacity layer reaches the screen,
+      // so the whole subtree is pruned. A hidden node is NOT an unresolved one:
+      // there was nothing there to measure, and counting it as unread would
+      // inflate the very number that is supposed to mean "part of this screen
+      // went unchecked".
+      hiddenNodes++;
 
-        return;
-
-      case _Presence.outsideCapture:
-        outsideCaptureNodes++;
-        // Pruned only when this node clips. `RenderTransform` does not appear
-        // in its own `getTransformTo`, so its rect is the *untransformed* one:
-        // a transform that pulls a child into view looks off-screen itself, and
-        // pruning on it would drop a subtree that is plainly visible.
-        if (_clipsChildren(node)) return;
-
-        node.visitChildren((child) => walk(child, id));
-
-        return;
-
-      case _Presence.visible:
-        final sink = sinks.putIfAbsent(id, () => AuditSink(id));
-        _extract(node, rect, sink, extractors);
-        node.visitChildren((child) => walk(child, id));
+      return;
     }
+
+    final childClip = clipForChildren(node, clip);
+    if (childClip.isEmpty) {
+      clippedNodes++;
+
+      return;
+    }
+
+    // The node's OWN rect is judged against the clip it inherits; its children
+    // are judged against `childClip`. A node can sit outside the visible region
+    // and still have children inside it: a transform is not included in the
+    // matrix returned for the transform node itself, so that node's rect is the
+    // untransformed one. Pruning on it drops a subtree that is on screen.
+    if (rect.isEmpty || !rect.overlaps(clip)) {
+      outsideCaptureNodes++;
+    } else {
+      final sink = sinks.putIfAbsent(id, () => AuditSink(id));
+      _extract(node, rect, sink, extractors);
+    }
+
+    node.visitChildren((child) => walk(child, id, childClip));
   }
 
-  walk(root, rootId);
+  walk(root, rootId, captureRect);
 
   final items = <AuditItem>[];
   final skips = <AuditSkip>[];
@@ -127,7 +133,12 @@ Future<ScreenAudit> auditScreen(
   }
 
   for (final anchor in anchors) {
-    if (owners.values.contains(anchor.id)) continue;
+    // Asks the resolver whether it matched, rather than searching the owner
+    // map by bare id. An anchor matching four widgets writes four indexed
+    // names, none of which equals the anchor's own name, so the old check
+    // reported "matched no widget" about an anchor that had matched four — a
+    // phantom unresolved skip that made PASS unreachable in strict mode.
+    if (resolved.matchedAnchorIds.contains(anchor.id)) continue;
 
     skips.add(
       AuditSkip(
@@ -138,6 +149,8 @@ Future<ScreenAudit> auditScreen(
     );
   }
 
+  skips.addAll(resolved.collisions);
+
   return ScreenAudit(
     screen: screen,
     theme: theme,
@@ -147,53 +160,76 @@ Future<ScreenAudit> auditScreen(
     skips: List<AuditSkip>.unmodifiable(skips),
     hiddenNodes: hiddenNodes,
     outsideCaptureNodes: outsideCaptureNodes,
+    clippedNodes: clippedNodes,
   );
 }
 
-/// Whether a node reaches the captured surface at all.
-enum _Presence { visible, hidden, outsideCapture }
+/// What the anchors resolved to, including what they failed to resolve to.
+///
+/// [matchedAnchorIds] is tracked rather than inferred from [owners], because an
+/// anchor matching several widgets writes indexed ids and its bare name appears
+/// nowhere in the map.
+@immutable
+class _ResolvedAnchors {
+  const _ResolvedAnchors({
+    required this.owners,
+    required this.matchedAnchorIds,
+    required this.collisions,
+  });
 
-_Presence _presenceOf(RenderObject node, Rect rect, Rect capture) {
-  if (node is RenderOffstage && node.offstage) return _Presence.hidden;
-  if (node is RenderOpacity && node.opacity == 0) return _Presence.hidden;
-  if (node is RenderAnimatedOpacity && node.opacity.value == 0) {
-    return _Presence.hidden;
-  }
-  // A node with no area paints nothing, but its children still can — an
-  // overflowing child of a zero-size box is laid out and painted — so this
-  // marks the node, never the subtree.
-  if (rect.isEmpty) return _Presence.outsideCapture;
-  if (!rect.overlaps(capture)) return _Presence.outsideCapture;
-
-  return _Presence.visible;
+  final Map<RenderObject, String> owners;
+  final Set<String> matchedAnchorIds;
+  final List<AuditSkip> collisions;
 }
 
-/// True when children cannot paint outside this node's bounds.
-///
-/// The only case where an out-of-capture rect proves the subtree is out too.
-bool _clipsChildren(RenderObject node) =>
-    node is RenderClipRect ||
-    node is RenderClipRRect ||
-    node is RenderClipOval ||
-    node is RenderClipPath ||
-    node is RenderViewport ||
-    node is RenderShrinkWrappingViewport;
-
-Map<RenderObject, String> _resolveAnchors(List<AuditAnchor> anchors) {
+_ResolvedAnchors _resolveAnchors(List<AuditAnchor> anchors) {
   final owners = <RenderObject, String>{};
+  final claimedBy = <RenderObject, String>{};
+  final matched = <String>{};
+  final collisions = <AuditSkip>[];
 
   for (final anchor in anchors) {
     final elements = anchor.finder.evaluate().toList();
+    final nodes = <RenderObject>[
+      for (final element in elements)
+        if (element.renderObject != null) element.renderObject!,
+    ];
 
-    for (var i = 0; i < elements.length; i++) {
-      final node = elements[i].renderObject;
-      if (node == null) continue;
+    if (nodes.isEmpty) continue;
 
-      owners[node] = elements.length == 1 ? anchor.id : '${anchor.id}[$i]';
+    matched.add(anchor.id);
+
+    for (var i = 0; i < nodes.length; i++) {
+      final node = nodes[i];
+      final id = nodes.length == 1 ? anchor.id : '${anchor.id}[$i]';
+
+      final existing = claimedBy[node];
+      if (existing != null) {
+        // Assigning anyway would let the later anchor overwrite the earlier one
+        // and take its half of the report with it, silently.
+        collisions.add(
+          AuditSkip(
+            itemId: anchor.id,
+            reason: SkipReason.anchorCollision,
+            detail:
+                'anchors "$existing" and "$id" both claim the same '
+                '${node.runtimeType}; the report can only name it once',
+          ),
+        );
+
+        continue;
+      }
+
+      claimedBy[node] = id;
+      owners[node] = id;
     }
   }
 
-  return owners;
+  return _ResolvedAnchors(
+    owners: owners,
+    matchedAnchorIds: matched,
+    collisions: collisions,
+  );
 }
 
 void _extract(
@@ -311,12 +347,6 @@ void _crossCheckAgainstRaster(AuditSink sink, RasterCapture raster) {
       rect: declared.rect,
     );
   }
-}
-
-Rect _globalRect(RenderObject node) {
-  final bounds = node.paintBounds;
-
-  return MatrixUtils.transformRect(node.getTransformTo(null), bounds);
 }
 
 Rect _itemRect(List<AuditPaint> paints) {

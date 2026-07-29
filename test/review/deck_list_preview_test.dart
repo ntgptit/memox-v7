@@ -7,6 +7,7 @@ import 'package:memox/core/theme/app_radius.dart';
 import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_spacing.dart';
 
+import '../visual_audit/audit_allowance.dart';
 import '../visual_audit/audit_model.dart';
 import '../visual_audit/memox_audit.dart';
 import '../visual_audit/screen_auditor.dart';

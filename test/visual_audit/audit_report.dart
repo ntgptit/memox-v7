@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'audit_allowance.dart';
 import 'audit_model.dart';
 import 'audit_rules.dart';
 
@@ -27,6 +28,7 @@ class AuditOutcome {
     required this.findings,
     required this.unresolvedSkips,
     required this.allowedSkips,
+    required this.allowanceConflicts,
     required this.unusedAllowances,
     required this.coverage,
   });
@@ -39,7 +41,21 @@ class AuditOutcome {
   /// from [AuditStatus.passWithUnresolved].
   final List<AuditSkip> unresolvedSkips;
 
-  final List<AuditSkip> allowedSkips;
+  /// Each accounted-for skip **with the allowance that accounted for it**.
+  ///
+  /// The pairing is the point: the rationale is the only part of an allowance
+  /// anyone will need later, and dropping it at match time leaves a report that
+  /// can say "four allowed" and nothing about whether those four permissions are
+  /// still true.
+  final List<AuditAllowedSkip> allowedSkips;
+
+  /// Skips that more than one allowance claimed.
+  ///
+  /// Left unresolved rather than settled by picking the first: with two
+  /// overlapping permissions nobody can say which promise is being relied on,
+  /// and a broad allowance behind a narrow one keeps working long after the
+  /// narrow one stops being true.
+  final List<AuditAllowanceConflict> allowanceConflicts;
 
   /// Allowances that matched nothing.
   ///
@@ -72,8 +88,10 @@ class AuditOutcome {
         '${coverage.nonBlockingFindings} notes · '
         '${coverage.unresolvedSkips} unresolved · '
         '${coverage.allowedSkips} allowed · '
+        '${coverage.allowanceConflicts} conflicts · '
         '${coverage.hiddenNodes} hidden · '
-        '${coverage.outsideCaptureNodes} off-surface',
+        '${coverage.outsideCaptureNodes} off-surface · '
+        '${coverage.clippedNodes} clipped',
       );
 
     for (final finding in findings) {
@@ -81,6 +99,15 @@ class AuditOutcome {
     }
     for (final skip in unresolvedSkips) {
       report.writeln('  unresolved  $skip');
+    }
+    // Printed in full, rationale included. An allowance is a claim that someone
+    // verified this another way, and a claim only stays honest while it is
+    // visible next to the thing it excuses.
+    for (final allowed in allowedSkips) {
+      report.writeln('  allowed  $allowed');
+    }
+    for (final conflict in allowanceConflicts) {
+      report.writeln('  AMBIGUOUS ALLOWANCE  $conflict');
     }
     for (final allowance in unusedAllowances) {
       report.writeln('  UNUSED ALLOWANCE  $allowance');
@@ -96,13 +123,16 @@ AuditOutcome evaluateAudit(
   List<AuditRule> rules, {
   List<AuditSkipAllowance> allowances = const <AuditSkipAllowance>[],
 }) {
+  validateAllowances(allowances);
+
   final findings = runAuditRules(audit, rules);
   final blocking = findings.where((finding) => finding.isBlocking).toList();
   final notes = findings.where((finding) => !finding.isBlocking).toList();
 
-  final allowed = <AuditSkip>[];
+  final allowed = <AuditAllowedSkip>[];
+  final conflicts = <AuditAllowanceConflict>[];
   final unresolved = <AuditSkip>[];
-  final used = <AuditSkipAllowance>{};
+  final accountedFor = <AuditSkipAllowance>{};
 
   for (final skip in audit.skips) {
     final matched = allowances
@@ -115,19 +145,33 @@ AuditOutcome evaluateAudit(
       continue;
     }
 
-    used.addAll(matched);
-    allowed.add(skip);
+    if (matched.length > 1) {
+      conflicts.add(AuditAllowanceConflict(skip: skip, allowances: matched));
+      // Recorded as involved so they do not ALSO appear as unused — the
+      // conflict entry already names them, and listing the same allowance twice
+      // under two headings trains people to skim.
+      accountedFor.addAll(matched);
+
+      continue;
+    }
+
+    accountedFor.add(matched.single);
+    allowed.add(AuditAllowedSkip(skip: skip, allowance: matched.single));
   }
 
   final unused = allowances
-      .where((allowance) => !used.contains(allowance))
+      .where((allowance) => !accountedFor.contains(allowance))
       .toList();
 
   // A non-blocking finding is something the audit could not settle, so it counts
   // toward "unresolved" exactly like an unread node does. Treating it as clean
   // would let a screen reach PASS while the report still says the image shows a
   // colour nobody can explain.
-  final isComplete = unresolved.isEmpty && unused.isEmpty && notes.isEmpty;
+  final isComplete =
+      unresolved.isEmpty &&
+      unused.isEmpty &&
+      conflicts.isEmpty &&
+      notes.isEmpty;
 
   final status = blocking.isNotEmpty
       ? AuditStatus.fail
@@ -141,6 +185,7 @@ AuditOutcome evaluateAudit(
     findings: findings,
     unresolvedSkips: unresolved,
     allowedSkips: allowed,
+    allowanceConflicts: conflicts,
     unusedAllowances: unused,
     coverage: AuditCoverage(
       items: audit.items.length,
@@ -150,8 +195,10 @@ AuditOutcome evaluateAudit(
       unresolvedSkips: unresolved.length,
       allowedSkips: allowed.length,
       unusedAllowances: unused.length,
+      allowanceConflicts: conflicts.length,
       hiddenNodes: audit.hiddenNodes,
       outsideCaptureNodes: audit.outsideCaptureNodes,
+      clippedNodes: audit.clippedNodes,
     ),
   );
 }
@@ -251,11 +298,30 @@ String auditToJson(AuditOutcome outcome) {
         },
     ],
     'allowedSkips': <Object>[
-      for (final skip in outcome.allowedSkips)
+      for (final allowed in outcome.allowedSkips)
         <String, Object?>{
-          'item': skip.itemId,
-          'reason': skip.reason.name,
-          'detail': skip.detail,
+          'item': allowed.skip.itemId,
+          'reason': allowed.skip.reason.name,
+          'detail': allowed.skip.detail,
+          'allowance': <String, Object?>{
+            'detailContains': allowed.allowance.detailContains,
+            'rationale': allowed.allowance.rationale,
+          },
+        },
+    ],
+    'allowanceConflicts': <Object>[
+      for (final conflict in outcome.allowanceConflicts)
+        <String, Object?>{
+          'item': conflict.skip.itemId,
+          'reason': conflict.skip.reason.name,
+          'detail': conflict.skip.detail,
+          'matchedBy': <Object>[
+            for (final allowance in conflict.allowances)
+              <String, Object?>{
+                'detailContains': allowance.detailContains,
+                'rationale': allowance.rationale,
+              },
+          ],
         },
     ],
     'unusedAllowances': <Object>[

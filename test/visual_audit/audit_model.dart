@@ -77,6 +77,13 @@ enum SkipReason {
   /// An anchor named a piece of UI that is not on screen. Not a colour problem
   /// — a report that silently loses an item someone asked for by name.
   anchorNotFound,
+
+  /// Two anchors claim the same render object.
+  ///
+  /// One of them would win the map and the other would vanish without a word,
+  /// taking its half of the report with it. Reported instead, because a naming
+  /// scheme that silently drops a name is worse than one that has none.
+  anchorCollision,
 }
 
 /// Whether the screen was judged, and whether it was judged completely.
@@ -102,48 +109,6 @@ enum AuditStatus {
   };
 }
 
-/// Permission for one specific unreadable node to stay unreadable.
-///
-/// Scoped on purpose. `{SkipReason.customPainter}` would wave through every
-/// `CustomPainter` on the screen including ones added next year, which is the
-/// same shape of mistake as a lint rule whose scope matches no files: it reads
-/// as coverage and provides none.
-///
-/// [rationale] is required because an allowance is a promise that someone
-/// checked this by other means, and a promise with no author is a silence.
-@immutable
-class AuditSkipAllowance {
-  const AuditSkipAllowance({
-    required this.itemId,
-    required this.reason,
-    required this.rationale,
-    this.detailContains,
-  });
-
-  final String itemId;
-  final SkipReason reason;
-
-  /// Substring the skip's detail must contain. Omitting it allows every skip of
-  /// this reason on this item, which is broad — name the painter if you can.
-  final String? detailContains;
-
-  final String rationale;
-
-  bool matches(AuditSkip skip) {
-    if (skip.itemId != itemId) return false;
-    if (skip.reason != reason) return false;
-
-    final needle = detailContains;
-
-    return needle == null || skip.detail.contains(needle);
-  }
-
-  @override
-  String toString() =>
-      '$itemId/${reason.name}'
-      '${detailContains == null ? '' : ' ~ "$detailContains"'}';
-}
-
 /// The numbers that say how much of the screen was actually measured.
 @immutable
 class AuditCoverage {
@@ -155,8 +120,10 @@ class AuditCoverage {
     required this.unresolvedSkips,
     required this.allowedSkips,
     required this.unusedAllowances,
+    required this.allowanceConflicts,
     required this.hiddenNodes,
     required this.outsideCaptureNodes,
+    required this.clippedNodes,
   });
 
   final int items;
@@ -167,13 +134,23 @@ class AuditCoverage {
   final int allowedSkips;
   final int unusedAllowances;
 
+  /// Skips more than one allowance claimed. Neither resolved them.
+  final int allowanceConflicts;
+
   /// Pruned because nothing below them paints — `Offstage`, opacity 0. Counted
   /// for debugging, never as something left unmeasured: there was nothing there
   /// to measure.
   final int hiddenNodes;
 
-  /// Outside the captured surface.
+  /// Laid out beyond the surface being audited.
   final int outsideCaptureNodes;
+
+  /// Pruned because an ancestor's clip removes everything below them.
+  ///
+  /// Kept apart from [outsideCaptureNodes] because the two send a debugger to
+  /// different places: one means "this widget is somewhere else", the other
+  /// means "something above it is hiding it".
+  final int clippedNodes;
 
   Map<String, int> toJson() => <String, int>{
     'items': items,
@@ -183,8 +160,10 @@ class AuditCoverage {
     'unresolvedSkips': unresolvedSkips,
     'allowedSkips': allowedSkips,
     'unusedAllowances': unusedAllowances,
+    'allowanceConflicts': allowanceConflicts,
     'hiddenNodes': hiddenNodes,
     'outsideCaptureNodes': outsideCaptureNodes,
+    'clippedNodes': clippedNodes,
   };
 }
 
@@ -283,6 +262,7 @@ class ScreenAudit {
     required this.skips,
     this.hiddenNodes = 0,
     this.outsideCaptureNodes = 0,
+    this.clippedNodes = 0,
   });
 
   final String screen;
@@ -301,6 +281,9 @@ class ScreenAudit {
 
   /// Subtrees outside the captured surface.
   final int outsideCaptureNodes;
+
+  /// Subtrees an ancestor's clip removes entirely.
+  final int clippedNodes;
 
   String get label => '$screen/$theme/$state';
 
