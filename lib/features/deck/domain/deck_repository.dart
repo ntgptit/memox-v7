@@ -1,10 +1,9 @@
-import 'card_entity.dart';
 import 'deck_deletion_impact_model.dart';
 import 'deck_entity.dart';
 import 'scheduler_type_model.dart';
 
-/// Contract the Deck/Card management vertical depends on (UC-02, UC-03, UC-04,
-/// UC-08, UC-09).
+/// Contract for deck-tree management (UC-02, UC-03, UC-08, UC-09). Card CRUD
+/// lives in `CardRepository` — one contract per responsibility (M4.9a).
 ///
 /// Written from what presentation needs, not from the shape of the `decks`
 /// table (AD-01): no method accepts or returns a Drift row, companion or DAO
@@ -12,12 +11,13 @@ import 'scheduler_type_model.dart';
 /// surface as the domain `Failure` hierarchy, thrown from the returned
 /// futures/streams:
 ///
-/// - `ValidationFailure` — input broke BR-01/BR-07/BR-08 or no scheduler was
-///   chosen (BR-11);
-/// - `NotFoundFailure` — the referenced deck or card does not exist;
+/// - `ValidationFailure` — input broke BR-01 or no scheduler was chosen
+///   (BR-11);
+/// - `NotFoundFailure` — the referenced deck does not exist;
 /// - `ConflictFailure` — the operation contradicts the current tree state:
 ///   content-type rules (BR-58, BR-63, BR-64), a non-empty reset (BR-68), an
-///   illegal move (BR-70, BR-74), or a database constraint conflict;
+///   illegal move (BR-70, BR-74), a tree deeper than
+///   `DeckEntity.maxTreeDepth` (BR-55), or a database constraint conflict;
 /// - `DatabaseFailure` — any other persistence error.
 ///
 /// Reads are `watch()` streams (AD-01): they emit the current value on listen
@@ -26,7 +26,7 @@ abstract interface class DeckRepository {
   /// All root decks, re-emitted on every change.
   Stream<List<DeckEntity>> watchRootDecks();
 
-  /// A root deck and every descendant at every depth (BR-55).
+  /// A root deck and every descendant, to the allowed depth (BR-55).
   Stream<List<DeckEntity>> watchDeckTree(String rootDeckId);
 
   /// The direct children of one deck.
@@ -47,7 +47,8 @@ abstract interface class DeckRepository {
 
   /// Creates a sub-deck under [parentDeckId] (UC-08, BR-62): the child starts
   /// `unset` with no scheduler columns; a parent still `unset` becomes `deck`
-  /// in the same transaction.
+  /// in the same atomic step. Refused when the child would sit deeper than
+  /// `DeckEntity.maxTreeDepth` (BR-55) — nothing is written in that case.
   Future<DeckEntity> createSubDeck({
     required String name,
     required String parentDeckId,
@@ -70,34 +71,10 @@ abstract interface class DeckRepository {
 
   /// Moves [deckId] and its whole subtree under [targetParentDeckId]
   /// (UC-09, BR-69…BR-74), rewriting `root_deck_id` for every node
-  /// atomically — BR-71.
+  /// atomically — BR-71. Refused when the deepest resulting level would
+  /// exceed `DeckEntity.maxTreeDepth` (BR-55) — nothing moves in that case.
   Future<void> moveDeck({
     required String deckId,
     required String targetParentDeckId,
   });
-
-  /// The cards of one deck, re-emitted on every change.
-  Stream<List<CardEntity>> watchCardsByDeck(String deckId);
-
-  /// Creates a card and exactly one review state atomically — BR-09,
-  /// BR-62. The state carries the root's scheduler, version and current
-  /// generation, `due_at = NULL`, and the scheduler's initial values; a deck
-  /// still `unset` becomes `card` in the same atomic step.
-  Future<CardEntity> createCard({
-    required String deckId,
-    required String front,
-    required String back,
-  });
-
-  /// Updates card content only (BR-10) — the review state and history are
-  /// untouched, structurally, because this writes only to `cards`.
-  Future<CardEntity> updateCard({
-    required String cardId,
-    required String front,
-    required String back,
-  });
-
-  /// Deletes a card; its review state and history cascade. The deck's
-  /// `content_type` stays as it is, even for the last card (BR-67).
-  Future<void> deleteCard(String cardId);
 }

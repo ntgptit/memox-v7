@@ -1,5 +1,10 @@
-# Vendored, downloaded verbatim from upstream releases. Line-ending
-# normalisation would rewrite bytes git did not produce and this repository
-# cannot regenerate — see web/WEB_ASSETS.md.
+# Vendored binaries and their byte-for-byte copies in test/ (served at the
+# site root by `flutter test --platform chrome`). Line-ending normalisation
+# would rewrite bytes git did not produce and this repository cannot
+# regenerate — see web/WEB_ASSETS.md. Both pairs carry the SAME attributes:
+# a Windows checkout that CRLF-normalised only one copy would fail the
+# byte-parity test in web_assets_test.dart for no real reason.
 web/sqlite3.wasm binary
+test/sqlite3.wasm binary
 web/drift_worker.js -text
+test/drift_worker.js -text

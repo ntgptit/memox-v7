@@ -4,7 +4,7 @@ import 'package:memox/core/database/app_database.dart';
 import 'invariant_queries.dart';
 import 'support/test_database.dart';
 
-/// The 14 data invariants, run against a real database.
+/// The 15 data invariants, run against a real database.
 ///
 /// Each is checked **both ways**. Clean on valid data proves the query does not
 /// cry wolf; firing on its own violation proves it is connected to anything at
@@ -84,13 +84,13 @@ void main() {
     });
   }
 
-  test('all fourteen invariants are present', () {
-    // The list itself is a claim. Losing one would leave thirteen green tests
-    // and no sign that the fourteenth ever existed.
-    expect(invariantQueries.keys, hasLength(14));
+  test('all fifteen invariants are present', () {
+    // The list itself is a claim. Losing one would leave fourteen green tests
+    // and no sign that the fifteenth ever existed.
+    expect(invariantQueries.keys, hasLength(15));
     expect(
       invariantQueries.keys,
-      containsAll(<String>[for (var i = 1; i <= 14; i++) 'Q$i']),
+      containsAll(<String>[for (var i = 1; i <= 15; i++) 'Q$i']),
     );
   });
 
@@ -241,6 +241,30 @@ void main() {
       nextBox: 5,
     ),
     expectOffenders: <String>['history-bad'],
+  );
+
+  invariant(
+    'Q15',
+    'a deck deeper than 10 levels (BR-55)',
+    breakIt: (db) async {
+      // Extend the valid tree to level 11. `branch` sits at level 2 (leaf
+      // holds cards, so the chain goes under branch): d3 is level 3 … d11 is
+      // level 11.
+      var parent = 'branch';
+      for (var level = 3; level <= 11; level++) {
+        final id = 'd$level';
+        await insertSubDeck(
+          db,
+          id: id,
+          parentId: parent,
+          rootDeckId: 'root',
+          contentType: level == 11 ? 'unset' : 'deck',
+        );
+        parent = id;
+      }
+    },
+    // Only the node past the limit — levels 3..10 are legal.
+    expectOffenders: <String>['d11'],
   );
 
   test('one defect trips only the invariants that genuinely cover it', () async {

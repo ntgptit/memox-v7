@@ -7,8 +7,8 @@
 | **Scope** | Bảng, cột, index, quan hệ, query bất biến. Ngoài phạm vi: SQL runtime (`lib/core/database/`, chưa tồn tại) |
 | **Source of truth for** | Schema · cột và kiểu · index · query bất biến · thứ tự migration |
 | **Depends on** | `document-conventions.md`, `architecture.md`, `business-rules.md` |
-| **Updated by task** | T1.3a |
-| **Last updated** | 2026-07-28 |
+| **Updated by task** | M4.9a |
+| **Last updated** | 2026-07-29 |
 
 Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; SQL thật nằm
 ở `lib/core/database/tables/` và **chưa được tạo** — task này chỉ chốt đặc tả.
@@ -63,6 +63,29 @@ deck_templates (asset JSON ở MVP)
 | `source_template_version` | INTEGER NULL | version tại thời điểm sao chép |
 | `created_at` | DATETIME NOT NULL | UTC |
 | `updated_at` | DATETIME NOT NULL | UTC |
+
+### Duyệt cây — hai loại query, hai quy tắc
+
+Cây có tối đa **10 cấp**, root là cấp 1 (BR-55). Hai giới hạn khác nhau chi
+phối cách viết query duyệt cây:
+
+1. **Query duyệt subtree** (`subtreeDeckIds`, `subtreeCardCount`,
+   `updateSubtreeRootDeck` trong `queries/deck.drift`) MUST cycle-safe bằng
+   recursive `UNION` — mỗi node chỉ đi qua một lần vì dòng trùng bị loại — và
+   MUST NOT dùng depth cap để cắt kết quả. Một cap biến dữ liệu hỏng thành kết
+   quả thiếu trong im lặng: card count nói dối dialog xoá, root rewrite bỏ sót
+   node — chính là vi phạm mà bất biến 6 tồn tại để bắt.
+2. **Query probe độ sâu** (`deckDepthProbe` — cấp của một deck, chính nó là
+   bước 1; `subtreeHeightProbe` — chiều cao subtree, chính nó là 1) mang cột
+   depth nên `UNION` không khử trùng được; chúng MUST nhận giới hạn duyệt qua
+   **parameter** do caller suy từ hằng số domain duy nhất
+   (`DeckEntity.maxTreeDepth`), và chạm giới hạn MUST được caller coi là lỗi
+   (từ chối thao tác), không phải một câu trả lời ngắn hơn.
+
+Giới hạn 10 cấp được cưỡng chế ở repository (`createSubDeck`, `moveDeck` —
+kiểm trước mọi mutation), và kiểm tra được bằng bất biến 15. Cycle protection
+là concern riêng: bất biến 8 phát hiện cycle, với safety cap riêng của một
+diagnostic checker.
 
 ### `root_deck_id` — vì sao tồn tại
 
@@ -300,10 +323,23 @@ WITH RECURSIVE up(start_id, node_id, depth) AS (
   WHERE u.node_id IS NOT NULL AND u.depth < 64
 )
 SELECT DISTINCT start_id FROM up WHERE node_id = start_id;
+
+-- 15. Deck sâu hơn 10 cấp (BR-55)
+--     Đi xuống từ mỗi root, root là cấp 1.
+WITH RECURSIVE levels(id, depth) AS (
+  SELECT id, 1 FROM decks WHERE parent_deck_id IS NULL
+  UNION ALL
+  SELECT d.id, l.depth + 1
+  FROM decks d JOIN levels l ON d.parent_deck_id = l.id
+  WHERE l.depth < 64
+)
+SELECT id FROM levels WHERE depth > 10;
 ```
 
-Query 8 giới hạn `depth < 64` để bản thân nó không thành vòng lặp vô hạn khi dữ
-liệu đã hỏng — một checker treo là checker vô dụng.
+Query 8 và 15 giới hạn `depth < 64` để bản thân chúng không thành vòng lặp vô
+hạn khi dữ liệu đã hỏng — một checker treo là checker vô dụng. Cap đó là của
+diagnostic checker; query production không dùng cap để cắt subtree (xem "Duyệt
+cây" ở trên).
 
 ### Scheduler và generation
 

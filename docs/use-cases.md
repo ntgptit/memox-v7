@@ -7,8 +7,8 @@
 | **Scope** | Must-have của MVP. Ngoài phạm vi: should/nice-to-have, và mọi thứ ở mục "Điều đã cố ý không đặc tả" |
 | **Source of truth for** | UC-xx · main/alternative/error flow · UI state matrix của từng màn |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md` |
-| **Updated by task** | T1.3a |
-| **Last updated** | 2026-07-28 |
+| **Updated by task** | M4.9a |
+| **Last updated** | 2026-07-29 |
 
 Chỉ đặc tả must-have. Should-have và nice-to-have viết khi tới lượt — đặc tả
 trước những thứ có thể bị cắt là lãng phí.
@@ -470,13 +470,16 @@ Create có ba hành vi khác nhau tuỳ trạng thái deck.
 - **E3 — Cố tạo card trong root deck:** không có đường nào tới được trạng thái
   này qua UI (BR-59). Nếu xảy ra qua deep link hoặc lỗi lập trình, từ chối và log
   — đây là vi phạm BR-58 và validation phải bắt được.
+- **E4 — Deck cha đã ở cấp 10:** tạo deck con bị chặn trước khi ghi (BR-55).
+  Không tạo gì và không đổi `content_type` của deck cha — kể cả khi nó đang
+  `unset`. Tạo card không bị giới hạn này: card không thêm cấp cho cây.
 
 **Postconditions:**
 - Deck có `content_type` khác `unset`, khớp với loại phần tử con vừa tạo.
 - Deck không đồng thời chứa card và deck con (BR-65).
 - Deck con mới có `root_deck_id` đúng bằng root của cha (BR-56, BR-72).
 
-**Business rules:** BR-09, BR-56, BR-58…BR-68, BR-72
+**Business rules:** BR-09, BR-55, BR-56, BR-58…BR-68, BR-72
 **UI states:** initial · submitting · error
 
 ---
@@ -498,7 +501,10 @@ Create có ba hành vi khác nhau tuỳ trạng thái deck.
    - đích có `content_type = 'deck'` hoặc `'unset'` (BR-64) — không thể đưa deck
      vào một deck chỉ chứa card;
    - root của đích có cùng `scheduler_type` và `scheduler_generation` với root
-     của nguồn (BR-74).
+     của nguồn (BR-74);
+   - độ sâu sau move không vượt giới hạn (BR-55): với `targetDepth` là cấp của
+     deck đích (root là cấp 1) và `subtreeHeight` là chiều cao subtree nguồn
+     (deck nguồn tính là 1), MUST có `targetDepth + subtreeHeight <= 10`.
 3. Hệ thống thực hiện **trong một transaction** (BR-71):
    - đặt `parent_deck_id` của deck nguồn thành deck đích;
    - cập nhật `root_deck_id` cho **toàn bộ subtree** của deck nguồn;
@@ -521,6 +527,9 @@ Create có ba hành vi khác nhau tuỳ trạng thái deck.
   có ánh xạ nào có cơ sở giữa box và ease factor (BR-73).
 - **E4 — Thất bại giữa chừng:** transaction rollback (BR-71). Không có descendant
   nào trỏ sai root (BR-72).
+- **E5 — Vượt độ sâu tối đa:** `targetDepth + subtreeHeight > 10` → chặn trước
+  khi ghi (BR-55). Không đổi `parent_deck_id`, `root_deck_id`, `content_type`
+  của đích hay bất kỳ timestamp nào.
 
 **Postconditions:**
 - Cây không có cycle (BR-69).
@@ -530,7 +539,7 @@ Create có ba hành vi khác nhau tuỳ trạng thái deck.
 - Không có card review state nào lệch scheduler hoặc generation so với root
   (BR-48, BR-49).
 
-**Business rules:** BR-56, BR-62, BR-64, BR-69…BR-74
+**Business rules:** BR-55, BR-56, BR-62, BR-64, BR-69…BR-74
 **UI states:** loaded · submitting · error
 
 ---

@@ -1,0 +1,19 @@
+import '../tables/cards.drift';
+
+-- Typed queries for the Card side of the Deck/Card vertical (M4.9a).
+--
+-- Pure card reads live here; queries a Deck use case needs about cards —
+-- `directCardCount` for the content-type reset, `subtreeCardCount` for the
+-- deletion confirm — stay in deck.drift with the deck boundary that calls
+-- them.
+
+cardsByDeck:
+SELECT * FROM cards
+WHERE deck_id = :deckId
+ORDER BY created_at ASC, id ASC;
+
+cardById:
+SELECT * FROM cards WHERE id = :cardId;
+
+reviewStateByCard:
+SELECT * FROM card_review_states WHERE card_id = :cardId;

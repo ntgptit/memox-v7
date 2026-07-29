@@ -88,6 +88,12 @@ BAD = {
  12:"INSERT INTO study_sessions VALUES('s2','r','r',1,'completed','user_exit','t','t');",
  13:"INSERT INTO study_sessions VALUES('s3','r','r',1,'abandoned','user_exit','t',NULL);",
  14:"INSERT INTO review_history VALUES('h2','c1','s1','eight_box',1,'relearning','forgotten','t',NULL,1,5,NULL,NULL,NULL,NULL);",
+ # A chain from the valid tree's 'a' (level 2) down to level 11 (BR-55).
+ 15:"".join(
+    "INSERT INTO decks VALUES('x%d','X','%s','r','deck',NULL,NULL,NULL,NULL,"
+    "NULL,NULL,NULL,NULL,'t','t');" % (n, 'a' if n == 3 else 'x%d' % (n - 1))
+    for n in range(3, 12)
+ ),
 }
 
 ap = argparse.ArgumentParser(add_help=True)

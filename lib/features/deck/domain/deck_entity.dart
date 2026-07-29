@@ -39,6 +39,13 @@ abstract class DeckEntity with _$DeckEntity {
   /// Longest allowed deck name after trimming (BR-01).
   static const int maxNameLength = 200;
 
+  /// Deepest allowed level in the deck tree (BR-55). The root counts as
+  /// level 1, so a chain of root → … → leaf may hold at most this many decks.
+  ///
+  /// The single owner of the number 10: repository guards derive their SQL
+  /// walk bounds from it instead of repeating it.
+  static const int maxTreeDepth = 10;
+
   bool get isRoot => parentDeckId == null;
 
   /// Validates and normalises a deck name (BR-01).

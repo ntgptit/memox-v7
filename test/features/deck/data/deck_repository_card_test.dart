@@ -18,7 +18,7 @@ void main() {
   group('createCard', () {
     test('creates the card and exactly one review state (BR-09)', () async {
       final tree = await h.seedTree();
-      final card = await h.repository.createCard(
+      final card = await h.cardRepository.createCard(
         deckId: tree.leaf.id,
         front: ' front ',
         back: ' back ',
@@ -37,7 +37,7 @@ void main() {
       'eight_box initialisation: box 1, SM-2 columns NULL (BR-09)',
       () async {
         final tree = await h.seedTree();
-        final card = await h.repository.createCard(
+        final card = await h.cardRepository.createCard(
           deckId: tree.leaf.id,
           front: 'f',
           back: 'b',
@@ -59,7 +59,7 @@ void main() {
 
     test('sm2 initialisation: 2.5 / 0 / 0, box NULL (BR-09)', () async {
       final tree = await h.seedTree(scheduler: SchedulerType.sm2);
-      final card = await h.repository.createCard(
+      final card = await h.cardRepository.createCard(
         deckId: tree.leaf.id,
         front: 'f',
         back: 'b',
@@ -89,7 +89,11 @@ void main() {
         );
 
         await expectLater(
-          h.repository.createCard(deckId: tree.leaf.id, front: 'f', back: 'b'),
+          h.cardRepository.createCard(
+            deckId: tree.leaf.id,
+            front: 'f',
+            back: 'b',
+          ),
           throwsA(isA<Failure>()),
         );
 
@@ -105,7 +109,11 @@ void main() {
       final tree = await h.seedTree();
 
       await expectLater(
-        h.repository.createCard(deckId: tree.root.id, front: 'f', back: 'b'),
+        h.cardRepository.createCard(
+          deckId: tree.root.id,
+          front: 'f',
+          back: 'b',
+        ),
         throwsA(isA<ConflictFailure>()),
       );
       expect(await h.countAll('cards'), 0);
@@ -115,7 +123,11 @@ void main() {
       final tree = await h.seedTree();
       // branch holds leaf, so it is 'deck'.
       await expectLater(
-        h.repository.createCard(deckId: tree.branch.id, front: 'f', back: 'b'),
+        h.cardRepository.createCard(
+          deckId: tree.branch.id,
+          front: 'f',
+          back: 'b',
+        ),
         throwsA(isA<ConflictFailure>()),
       );
     });
@@ -124,7 +136,7 @@ void main() {
   group('updateCard and deleteCard', () {
     Future<({DeckEntity leaf, CardEntity card})> seedCard() async {
       final tree = await h.seedTree();
-      final card = await h.repository.createCard(
+      final card = await h.cardRepository.createCard(
         deckId: tree.leaf.id,
         front: 'front v1',
         back: 'back v1',
@@ -140,7 +152,7 @@ void main() {
         final before = (await h.rawStates(seeded.card.id)).single.data;
 
         h.currentInstant = testNow.add(const Duration(minutes: 5));
-        final updated = await h.repository.updateCard(
+        final updated = await h.cardRepository.updateCard(
           cardId: seeded.card.id,
           front: 'front v2',
           back: 'back v2',
@@ -172,7 +184,7 @@ void main() {
               .map((QueryRow r) => r.data)
               .toList();
 
-      await h.repository.updateCard(
+      await h.cardRepository.updateCard(
         cardId: seeded.card.id,
         front: 'new front',
         back: 'new back',
@@ -200,7 +212,7 @@ void main() {
         sessionId: 'session-1',
       );
 
-      await h.repository.deleteCard(seeded.card.id);
+      await h.cardRepository.deleteCard(seeded.card.id);
 
       expect(await h.rawCard(seeded.card.id), isNull);
       expect(await h.countAll('card_review_states'), 0);
@@ -211,7 +223,7 @@ void main() {
       'deleting the last card does NOT reset content_type (BR-67)',
       () async {
         final seeded = await seedCard();
-        await h.repository.deleteCard(seeded.card.id);
+        await h.cardRepository.deleteCard(seeded.card.id);
 
         expect(await h.contentTypeOf(seeded.leaf.id), 'card');
       },
@@ -221,7 +233,11 @@ void main() {
       final seeded = await seedCard();
 
       await expectLater(
-        h.repository.updateCard(cardId: seeded.card.id, front: '  ', back: 'b'),
+        h.cardRepository.updateCard(
+          cardId: seeded.card.id,
+          front: '  ',
+          back: 'b',
+        ),
         throwsA(isA<ValidationFailure>()),
       );
       expect(
