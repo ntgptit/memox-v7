@@ -1,17 +1,16 @@
 import 'package:drift/drift.dart' show QueryRow;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/error/failure.dart';
-import 'package:memox/features/deck/domain/card_entity.dart';
+import 'package:memox/features/card/domain/card_entity.dart';
 import 'package:memox/features/deck/domain/deck_entity.dart';
 import 'package:memox/features/deck/domain/scheduler_type_model.dart';
 
 import '../../../database/support/test_database.dart';
-import 'support/deck_repository_harness.dart';
+import '../../deck/data/support/deck_repository_harness.dart';
 
 /// Card integration tests on a real SQLite database: create with exactly one
 /// review state (BR-09), per-scheduler initialisation, edit isolation (BR-10)
-/// and delete cascade (BR-67). Part of the suite rooted in
-/// `deck_repository_impl_test.dart`.
+/// and delete cascade (BR-67).
 void main() {
   final h = installDeckRepositoryHarness();
 

@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/error/failure.dart';
-import 'package:memox/features/deck/domain/card_entity.dart';
-import 'package:memox/features/deck/domain/card_review_state_entity.dart';
+import 'package:memox/features/card/domain/card_entity.dart';
+import 'package:memox/features/card/domain/card_review_state_entity.dart';
 import 'package:memox/features/deck/domain/deck_content_type_model.dart';
 import 'package:memox/features/deck/domain/deck_deletion_impact_model.dart';
 import 'package:memox/features/deck/domain/deck_entity.dart';

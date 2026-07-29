@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M4.9a |
+| **Updated by task** | M4.9b |
 | **Last updated** | 2026-07-29 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -27,7 +27,7 @@ AD / UC (xem `business-rules.md`).
 | M1 · Product definition (Phase 0–1) | **done** | Đặc tả MVP đã frozen: AD-01…11, BR-01…87, UC-01…09, data model đầy đủ |
 | M2 · Project foundation (Phase 2–3, 6) | **done** | Toàn bộ 9 task đóng: M2.1 · M2.1a · M2.1b · M2.2 · M2.2b · M2.3 · M2.4 · M2.5 · M2.6. App build được trên Android (3 flavor cài song song) và Web, l10n en/vi, bootstrap có error boundary, lint + guard đều enforce. Tiếp theo: **M3.1 · Cấu trúc feature-first và ranh giới layer** |
 | M3 · Architecture & design system (Phase 4–5, 7, 12–13) | **done** | Mười hai task đóng: M3.1…M3.6 cộng M3.5a (review color system), M3.5b (áp A2 Quizlet Navy Indigo — 46 role `ColorScheme` khai báo tường minh), M3.5c (visual audit harness), M3.5d (siết tính đúng đắn của audit core), M3.5e (anchor, clip và allowance) và M3.5f (clip hỏi Flutter thay vì đoán). Cây feature-first + guard siết về `fail_on: [error, warning]`, Failure model, Riverpod foundation, design token, hai theme M3, sáu base component kèm 14 golden. Milestone đóng — không quyết định next task |
-| M4 · Router, Database & Content Management (Phase 8, 11, 14) | in progress | M4.1, M4.1a, M4.2, M4.3, M4.4 **done** — GoRouter tập trung với `MaterialApp.router` và 404 ở `app/fallback/`; MX-VIS-001 ép mọi production screen có strict visual audit; schema v1 toàn bộ trong `.drift`; hai named query dùng chung một định nghĩa "đến hạn"; schema v1 đã dump và commit; cả 14 bất biến chạy trên database thật. M4.4a **done** — sắp xếp lại kế hoạch theo vertical slice. M4.8 **done** — 11 shared component mang prefix `Mx` (5 mới, 6 đổi tên), 26 golden mới, rename không đổi pixel; vòng review UI/UX đóng thêm 4 lỗi accessibility có đo đạc. M4.8a **done** — responsive hardening: `MxContentShell` overflow 135px/167px ở landscape đã đóng, bốn component còn lại đã tự cuộn sẵn; màn rộng chốt giữ kéo căng. M4.8b **done** — compact scale cho màn 320: hàng list 88→80px, padding ngang button 24→12 (bốn action `sm2` từ "Ag" thành "Again"), body/label giữ nguyên cỡ, phát hiện harness test báo màn hình 0×0 từ M3.6. **M4.5, M4.6, M4.7 `descoped` trước khi triển khai** — không dòng code nào từng được viết dưới ba ID đó. M4.8–M4.12 là kế hoạch mới: shared component → Deck/Card domain+data → Deck full-stack → Card full-stack → demo hardening. M4.9 **done** — Deck/Card domain + data vertical: 6 file domain (entity/enum/contract), DAO + 3 mapper + repository impl với transaction thật, `deck.drift` recursive query, constraint conflict → `ConflictFailure`, 78 test mới (49 integration trên SQLite thật + 1 web runtime trên Chrome), cả 14 bất biến pass trên dữ liệu do repository ghi; đồng thời **đóng lỗ hổng web của M4.2**: `driftDatabase` thiếu `web:` options và `drift_worker.js` prebuilt lệch ABI với `sqlite3.wasm` — connection đã sửa, worker compile từ đúng lockfile. M4.9a **done** — giới hạn cây 10 cấp enforce ở `createSubDeck`/`moveDeck` trước mutation, subtree traversal cycle-safe bằng recursive `UNION` (bỏ cap `depth < 64` production), bất biến thứ 15 (deck sâu hơn 10 cấp), và tách `CardRepository`/`CardRepositoryImpl`/`CardDao` khỏi Deck boundary. **Next task: M4.10 · Deck management full-stack.** M4 chỉ `done` khi Deck/Card demo slice hoàn thành. **Phase 10 (networking) hoãn** — AD-01, AD-05 |
+| M4 · Router, Database & Content Management (Phase 8, 11, 14) | in progress | M4.1, M4.1a, M4.2, M4.3, M4.4 **done** — GoRouter tập trung với `MaterialApp.router` và 404 ở `app/fallback/`; MX-VIS-001 ép mọi production screen có strict visual audit; schema v1 toàn bộ trong `.drift`; hai named query dùng chung một định nghĩa "đến hạn"; schema v1 đã dump và commit; cả 14 bất biến chạy trên database thật. M4.4a **done** — sắp xếp lại kế hoạch theo vertical slice. M4.8 **done** — 11 shared component mang prefix `Mx` (5 mới, 6 đổi tên), 26 golden mới, rename không đổi pixel; vòng review UI/UX đóng thêm 4 lỗi accessibility có đo đạc. M4.8a **done** — responsive hardening: `MxContentShell` overflow 135px/167px ở landscape đã đóng, bốn component còn lại đã tự cuộn sẵn; màn rộng chốt giữ kéo căng. M4.8b **done** — compact scale cho màn 320: hàng list 88→80px, padding ngang button 24→12 (bốn action `sm2` từ "Ag" thành "Again"), body/label giữ nguyên cỡ, phát hiện harness test báo màn hình 0×0 từ M3.6. **M4.5, M4.6, M4.7 `descoped` trước khi triển khai** — không dòng code nào từng được viết dưới ba ID đó. M4.8–M4.12 là kế hoạch mới: shared component → Deck/Card domain+data → Deck full-stack → Card full-stack → demo hardening. M4.9 **done** — Deck/Card domain + data vertical: 6 file domain (entity/enum/contract), DAO + 3 mapper + repository impl với transaction thật, `deck.drift` recursive query, constraint conflict → `ConflictFailure`, 78 test mới (49 integration trên SQLite thật + 1 web runtime trên Chrome), cả 14 bất biến pass trên dữ liệu do repository ghi; đồng thời **đóng lỗ hổng web của M4.2**: `driftDatabase` thiếu `web:` options và `drift_worker.js` prebuilt lệch ABI với `sqlite3.wasm` — connection đã sửa, worker compile từ đúng lockfile. M4.9a **done** — giới hạn cây 10 cấp enforce ở `createSubDeck`/`moveDeck` trước mutation, subtree traversal cycle-safe bằng recursive `UNION` (bỏ cap `depth < 64` production), bất biến thứ 15 (deck sâu hơn 10 cấp), và tách `CardRepository`/`CardRepositoryImpl`/`CardDao` khỏi Deck boundary. M4.9b **done** — hoàn tất ownership vật lý: toàn bộ Card domain/data chuyển sang `lib/features/card/`, không import Deck data layer, vẫn giữ một transaction chung cho BR-09/BR-62. **Next task: M4.10 · Deck management full-stack.** M4 chỉ `done` khi Deck/Card demo slice hoàn thành. **Phase 10 (networking) hoãn** — AD-01, AD-05 |
 | M5 · Review vertical slice — UC-05 (Phase 14) | todo | Bắt đầu **sau M4.12**. Không còn là vertical slice đầu tiên — Deck/Card CRUD đã hoàn thành trong M4.8–M4.12 và M5 không triển khai lại. Review MUST NOT bắt đầu khi M4.12 chưa `done` |
 | M6 · Test suite (Phase 15) | todo | Chạy song song **từ M4.8 trở đi**, không đợi tới sau Review |
 | M7 · CI/CD (Phase 19) | todo | Bắt đầu được ngay sau M2. Job Android + Web, chưa có iOS (AD-04) |
@@ -2187,6 +2187,34 @@ phần có caller thật.
   rollback atomic, cycle-safe traversal trên dữ liệu corrupt, boundary
   separation, invariant Q15 hai chiều, web runtime
 - **Checklist phases:** 11.1, 14.2, 14.3, 15.1
+
+### M4.9b · Chuyển ownership vật lý Card sang feature riêng
+
+- **Status:** done
+- **Goal:** Ranh giới Card đã tách về trách nhiệm ở M4.9a cũng được phản ánh
+  đúng trên cây thư mục feature-first, không còn source Card nằm dưới Deck.
+- **Scope:** chuyển Card entity, repository contract/implementation, mapper và
+  DAO từ `lib/features/deck/` sang `lib/features/card/`; thay phụ thuộc
+  `CardRepositoryImpl -> DeckDao` bằng adapter deck-context hẹp do Card sở hữu,
+  dùng cùng `AppDatabase`; cập nhật import, test ownership và WBS.
+- **Out of scope:** schema/query `.drift`; hành vi CRUD; controller/UI (M4.10,
+  M4.11); Review domain (M5).
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/features/card/domain/`, `lib/features/card/data/`,
+  `test/features/card/data/card_repository_test.dart`, cập nhật boundary test
+- **Acceptance criteria:**
+  - [x] Không còn Card entity/repository/mapper/DAO source dưới
+        `lib/features/deck/`.
+  - [x] `lib/features/card/data/` không import `lib/features/deck/data/` hoặc
+        presentation của Deck; chỉ dùng Deck domain model cho invariant chung.
+  - [x] `createCard` vẫn nhận một `AppDatabase` duy nhất và transaction vẫn bao
+        trọn content-type lock + card + đúng một review state (BR-09, BR-62).
+  - [x] Card integration test nằm dưới `test/features/card/`; boundary test
+        chặn việc đưa source Card trở lại Deck.
+- **Dependencies:** M4.9a
+- **Tests required:** Card repository transaction/rollback; Deck/Card source
+  boundary; architecture guard; full repository DoD
+- **Checklist phases:** 4.1, 11.1, 14.2, 14.3, 15.1
 
 ### M4.10 · Deck management full-stack
 

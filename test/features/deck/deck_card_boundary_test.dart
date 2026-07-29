@@ -2,8 +2,9 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
-/// The Deck/Card boundary introduced in M4.9a, pinned as source facts so a
-/// convenience method cannot quietly re-merge the two responsibilities.
+/// The Deck/Card boundary introduced in M4.9a and completed in M4.9b, pinned
+/// as source facts so a convenience method cannot quietly re-merge the two
+/// responsibilities.
 ///
 /// Complements the guard: these are cross-file claims ("this contract does
 /// not mention that operation") that a per-file regex rule cannot own.
@@ -30,7 +31,7 @@ void main() {
   });
 
   test('CardRepository owns exactly the card operations', () {
-    final contract = read('lib/features/deck/domain/card_repository.dart');
+    final contract = read('lib/features/card/domain/card_repository.dart');
 
     for (final operation in cardOperations) {
       expect(contract, contains('$operation('));
@@ -61,11 +62,16 @@ void main() {
       ).existsSync(),
       isFalse,
       reason:
-          'card operations live in card_repository_impl.dart, '
+          'card operations live in features/card, '
           'not in a part of DeckRepositoryImpl',
     );
-    final cardImpl = read('lib/features/deck/data/card_repository_impl.dart');
+    final cardImpl = read('lib/features/card/data/card_repository_impl.dart');
     expect(cardImpl, isNot(contains('part of')));
+    expect(
+      cardImpl,
+      isNot(anyOf(contains('features/deck/data/'), contains('../deck/data/'))),
+      reason: 'Card data must not import Deck data',
+    );
   });
 
   test('DeckDao carries no card CRUD; CardDao carries it all', () {
@@ -85,7 +91,7 @@ void main() {
       );
     }
 
-    final cardDao = read('lib/features/deck/data/local/card_dao.dart');
+    final cardDao = read('lib/features/card/data/local/card_dao.dart');
     for (final member in <String>[
       'insertCard(',
       'updateCardById(',
@@ -96,6 +102,24 @@ void main() {
       'watchCardsByDeck(',
     ]) {
       expect(cardDao, contains(member));
+    }
+  });
+
+  test('Card source ownership lives outside features/deck', () {
+    for (final path in <String>[
+      'lib/features/deck/domain/card_entity.dart',
+      'lib/features/deck/domain/card_repository.dart',
+      'lib/features/deck/domain/card_review_state_entity.dart',
+      'lib/features/deck/data/card_mapper.dart',
+      'lib/features/deck/data/card_repository_impl.dart',
+      'lib/features/deck/data/card_review_state_mapper.dart',
+      'lib/features/deck/data/local/card_dao.dart',
+    ]) {
+      expect(
+        File(path).existsSync(),
+        isFalse,
+        reason: '$path belongs under lib/features/card',
+      );
     }
   });
 

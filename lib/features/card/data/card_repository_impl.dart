@@ -4,13 +4,13 @@ import 'package:uuid/uuid.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/error/drift_error_mapper.dart';
 import '../../../core/error/failure.dart';
+import '../../deck/domain/deck_content_type_model.dart';
+import '../../deck/domain/scheduler_type_model.dart';
 import '../domain/card_entity.dart';
 import '../domain/card_repository.dart';
-import '../domain/deck_content_type_model.dart';
-import '../domain/scheduler_type_model.dart';
 import 'card_mapper.dart';
 import 'local/card_dao.dart';
-import 'local/deck_dao.dart';
+import 'local/card_deck_context_dao.dart';
 
 /// Review-state initialisation per scheduler (BR-09 table).
 const int _eightBoxInitialBox = 1;
@@ -20,13 +20,14 @@ const int _sm2InitialRepetitions = 0;
 
 /// Drift-backed [CardRepository].
 ///
-/// Uses both DAOs deliberately: `createCard` has a cross-entity invariant —
-/// validate the target deck, lock an `unset` deck to `card` (BR-62), resolve
-/// the scheduler from the root (BR-09) — and one drift transaction covers the
-/// whole write **because both DAOs wrap the same open [AppDatabase]**. That
+/// Uses both Card-owned adapters deliberately: `createCard` has a cross-entity
+/// invariant — validate the target deck, lock an `unset` deck to `card`
+/// (BR-62), resolve the scheduler from the root (BR-09) — and one drift
+/// transaction covers the whole write **because both adapters wrap the same
+/// open [AppDatabase]**. That
 /// sameness is structural, not conventional: the constructor takes the one
-/// database and builds both DAOs from it itself. An API accepting two
-/// ready-made DAOs would let a composition root hand it DAOs from two
+/// database and builds both adapters from it itself. An API accepting two
+/// ready-made adapters would let a composition root hand it instances from two
 /// databases, and the BR-62 content lock would then sit outside the
 /// transaction that rolls the card back — a bug no test with a correctly
 /// wired harness can see.
@@ -41,7 +42,7 @@ final class CardRepositoryImpl implements CardRepository {
     String Function()? idGenerator,
     DateTime Function()? clock,
   }) : _cardDao = CardDao(database),
-       _deckDao = DeckDao(database),
+       _deckContextDao = CardDeckContextDao(database),
        _idGenerator = idGenerator ?? const Uuid().v4,
        _clock = clock ?? _utcNow;
 
@@ -49,7 +50,7 @@ final class CardRepositoryImpl implements CardRepository {
 
   /// For the deck side of the createCard invariant only — deck mutations
   /// beyond the BR-62 content lock belong to `DeckRepositoryImpl`.
-  final DeckDao _deckDao;
+  final CardDeckContextDao _deckContextDao;
 
   /// Client-generated UUIDs (AD-03); injectable so tests are deterministic.
   final String Function() _idGenerator;
@@ -95,7 +96,7 @@ final class CardRepositoryImpl implements CardRepository {
       final now = _clock();
       if (deckType == DeckContentType.unset) {
         // First card locks the deck to 'card' — same atomic step (BR-62).
-        await _deckDao.updateDeckById(
+        await _deckContextDao.updateDeckById(
           deck.id,
           DecksCompanion(
             contentType: Value<String>(DeckContentType.card.dbValue),
@@ -172,7 +173,7 @@ final class CardRepositoryImpl implements CardRepository {
   }
 
   Future<Deck> _requireDeckRow(String deckId) async {
-    final row = await _deckDao.deckById(deckId);
+    final row = await _deckContextDao.deckById(deckId);
     if (row == null) {
       throw const NotFoundFailure(message: 'That deck no longer exists.');
     }

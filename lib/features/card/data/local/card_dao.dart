@@ -2,10 +2,10 @@ import '../../../../core/database/app_database.dart';
 
 /// Data access for the Card side of the vertical.
 ///
-/// Receives the same already-open [AppDatabase] instance as `DeckDao` — one
-/// opener (AD-08), one database. Because drift transactions are scoped to the
-/// database rather than to a DAO, `CardRepositoryImpl` can run a write that
-/// spans both DAOs atomically (BR-09 + BR-62).
+/// Receives the same already-open [AppDatabase] instance as the Card feature's
+/// deck-context adapter — one opener (AD-08), one database. Drift transactions
+/// are scoped to that database, so `CardRepositoryImpl` can apply BR-09 and
+/// BR-62 atomically without importing Deck's data layer.
 ///
 /// This class speaks Drift rows and companions. They stop here: the
 /// repository maps them to domain entities and never lets one across (AD-01).
