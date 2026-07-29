@@ -15,7 +15,7 @@ data checks.
 Run:  python3 .claude/skills/flutter-workflow/scripts/verify_invariants.py
 Exit: 0 all good, 1 otherwise.
 """
-import sqlite3, re, sys, pathlib
+import sqlite3, re, sys, pathlib, argparse
 
 SCHEMA = """
 CREATE TABLE decks (id TEXT PRIMARY KEY, name TEXT NOT NULL,
@@ -89,6 +89,46 @@ BAD = {
  13:"INSERT INTO study_sessions VALUES('s3','r','r',1,'abandoned','user_exit','t',NULL);",
  14:"INSERT INTO review_history VALUES('h2','c1','s1','eight_box',1,'relearning','forgotten','t',NULL,1,5,NULL,NULL,NULL,NULL);",
 }
+
+ap = argparse.ArgumentParser(add_help=True)
+ap.add_argument("--db", metavar="PATH",
+                help="run the invariants against a real database file instead "
+                     "of the built-in fixture")
+args = ap.parse_args()
+
+if args.db:
+    # Same queries, same source. The 14 are read out of the frozen document
+    # rather than copied into the caller — the four that used to be missing from
+    # check_docs.sh were missing precisely BECAUSE they had been hand-copied,
+    # and ten of fourteen running still reported success.
+    db_path = pathlib.Path(args.db)
+    if not db_path.exists():
+        print(f"✗ không tìm thấy database: {db_path}")
+        sys.exit(1)
+
+    con = sqlite3.connect(str(db_path))
+    violated = 0
+    for n, (label, sql) in sorted(queries.items()):
+        try:
+            rows = con.execute(sql).fetchall()
+        except sqlite3.Error as e:
+            print(f"  ✗ Q{n:<2} SQL LỖI: {e}   [{label[:48]}]")
+            violated += 1
+            continue
+        if rows:
+            # Ids only. Never a row's content: card text, notes and learning
+            # history are private (AD-08), and a checker's output ends up in
+            # logs and CI transcripts.
+            ids = ", ".join(str(r[0]) for r in rows[:5])
+            print(f"  ✗ Q{n:<2} {label[:56]}  → {len(rows)} dòng: {ids}")
+            violated += 1
+        else:
+            print(f"  ✓ Q{n:<2} {label[:60]}")
+
+    verdict = "SẠCH" if violated == 0 else str(violated) + " VI PHẠM"
+    print("")
+    print(str(len(queries)) + " invariant chạy trên " + str(db_path) + ": " + verdict)
+    sys.exit(1 if violated else 0)
 
 fails = 0
 # 1) all queries must parse and return nothing on valid data

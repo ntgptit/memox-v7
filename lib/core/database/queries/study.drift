@@ -1,0 +1,47 @@
+import '../tables/decks.drift';
+import '../tables/cards.drift';
+
+-- Business queries for a study session.
+--
+-- **One definition of "due", used by both.** BR-22 says a session takes cards
+-- where `due_at IS NULL OR due_at <= now`, and the count shown before a session
+-- has to agree with the list the session then hands out. Two spellings of the
+-- same predicate drift apart the first time one of them is edited, and the
+-- symptom is a badge that says 12 while the session offers 11 — which reads as
+-- a scheduler bug and is not one. `query_test.dart` asserts the two agree on
+-- the same data and the same `now`.
+--
+-- **`:now` is a parameter, never the SQL clock function.** A query that reads
+-- the clock itself cannot be tested at a boundary, and "due exactly at now" is
+-- a boundary that has to work.
+--
+-- **No scheduler interval appears here.** The eight-box day table and the SM-2
+-- factors belong to the scheduler (BR-16); SQL only asks whether the stored
+-- due_at has arrived.
+
+-- Cards due in one root deck's whole tree, descendants included.
+--
+-- Joins through `root_deck_id` rather than walking parents (BR-57, AD-10).
+-- Coalescing the parent column with the id would mean "my parent, or me if I
+-- have none", which returns the level-2 deck for anything at level 3 — right
+-- for a one-level tree, which is what makes it dangerous.
+cardsDueForReview:
+SELECT c.**
+FROM cards c
+INNER JOIN decks d ON d.id = c.deck_id
+INNER JOIN card_review_states s ON s.card_id = c.id
+WHERE d.root_deck_id = :rootDeckId
+  AND (s.due_at IS NULL OR s.due_at <= :now)
+ORDER BY s.due_at IS NOT NULL, s.due_at ASC, c.id ASC;
+
+-- How many cards are due, per root deck.
+--
+-- The predicate below is character-for-character the one above.
+dueCountPerRootDeck:
+SELECT d.root_deck_id AS rootDeckId, COUNT(*) AS dueCount
+FROM cards c
+INNER JOIN decks d ON d.id = c.deck_id
+INNER JOIN card_review_states s ON s.card_id = c.id
+WHERE (s.due_at IS NULL OR s.due_at <= :now)
+GROUP BY d.root_deck_id
+ORDER BY d.root_deck_id ASC;

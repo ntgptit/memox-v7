@@ -70,6 +70,10 @@ analyzer:
     - "**/*.g.dart"
     - "**/*.freezed.dart"
     - "**/*.drift.dart"
+    # drift's migration helper. Committed rather than disposable — a released
+    # schema cannot be regenerated once the source moves on — but nobody edits
+    # it, so lint findings here are noise somebody learns to scroll past.
+    - "test/drift/generated/**"
     - "**/*.mocks.dart"
     - "**/generated_plugin_registrant.dart"
     - "lib/l10n/generated/**"

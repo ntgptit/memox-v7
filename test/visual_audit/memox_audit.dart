@@ -135,3 +135,32 @@ void memoxAuditTest(
     });
   }
 }
+
+/// The bar a **production** screen is held to: [AuditExpectation.complete].
+///
+/// Two helpers instead of a flag, because a bar that can be lowered at the call
+/// site is not a bar. `memoxAuditTest` is for design preview and exploration and
+/// may end at PASS_WITH_UNRESOLVED; this one may not, and it takes no parameter
+/// that could relax it.
+///
+/// Every unresolved node on a production screen therefore has to be either
+/// measurable or covered by a scoped allowance carrying a reason — which is the
+/// difference between "we looked at this screen" and "this screen was in a list".
+void memoxProductionScreenAuditTest(
+  String name,
+  Widget Function() build, {
+  String state = 'idle',
+  List<AuditAnchor> anchors = const <AuditAnchor>[],
+  List<AuditSkipAllowance> allowances = const <AuditSkipAllowance>[],
+  Future<void> Function(WidgetTester tester)? drive,
+}) {
+  memoxAuditTest(
+    name,
+    build,
+    state: state,
+    anchors: anchors,
+    allowances: allowances,
+    expectation: AuditExpectation.complete,
+    drive: drive,
+  );
+}

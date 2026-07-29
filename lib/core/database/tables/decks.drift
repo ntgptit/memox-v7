@@ -1,0 +1,68 @@
+-- The deck tree.
+--
+-- Schema lives in SQL, not in Dart table classes (AD-02): drift_dev type-checks
+-- every query against these declarations at build time, which a Dart-side
+-- definition cannot do.
+--
+-- Enumerated columns carry a CHECK; the session status/end_reason PAIR
+-- deliberately does not — see study.drift for why.
+
+CREATE TABLE decks (
+    -- Client-generated UUID. Offline creation needs an id before a server
+    -- exists, and changing a primary key type later is the most expensive
+    -- migration there is (AD-03).
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+
+    -- NULL marks a root deck.
+    parent_deck_id TEXT NULL REFERENCES decks (id) ON DELETE CASCADE,
+
+    -- Every deck carries the id of its root; a root carries its own (BR-56).
+    --
+    -- Walking `parent_deck_id` upwards needs recursion and cannot be written as
+    -- a JOIN condition — and that JOIN sits in the app's hottest query. The
+    -- price is that moving a subtree must rewrite this column for the whole
+    -- subtree in one transaction (BR-71).
+    --
+    -- Deliberately NOT a foreign key: `data-model.md` declares the reference for
+    -- `parent_deck_id` and not for this one. Invariants 6 and 7 are the
+    -- specified enforcement.
+    root_deck_id TEXT NOT NULL,
+
+    -- NOT NULL for every deck, root included. A root is created as 'deck' and
+    -- never changes, which is what turns "a root holds only sub-decks" (BR-58)
+    -- into the same query as every other content rule instead of a special case
+    -- somebody has to remember.
+    content_type TEXT NOT NULL CHECK (content_type IN ('unset', 'card', 'deck')),
+
+    -- NULL is the local profile. No auth yet, auth-ready (AD-03).
+    owner_id TEXT NULL,
+
+    -- Scheduler columns live on the ROOT only; a sub-deck leaves them NULL and
+    -- resolves through root_deck_id (BR-06). That makes "a sub-deck cannot pick
+    -- its own scheduler" structurally impossible rather than a convention.
+    scheduler_type TEXT NULL
+        CHECK (scheduler_type IS NULL OR scheduler_type IN ('eight_box', 'sm2')),
+    scheduler_version INTEGER NULL,
+    scheduler_config TEXT NULL,
+
+    -- Starts at 1, +1 on every reset (BR-40).
+    scheduler_generation INTEGER NULL,
+
+    -- NULL means no `scheduled` review in the current generation, so the
+    -- scheduler choice is still unlocked (AD-06).
+    first_review_at DATETIME NULL,
+
+    source_template_id TEXT NULL,
+    source_template_version INTEGER NULL,
+
+    -- UTC. A due_at compared in the wrong zone makes a card due a day early or
+    -- late, and only for users who cross a time zone — almost never caught in
+    -- development.
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL
+);
+
+CREATE INDEX idx_decks_parent ON decks (parent_deck_id);
+
+CREATE INDEX idx_decks_root ON decks (root_deck_id);

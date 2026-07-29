@@ -1,0 +1,59 @@
+import 'decks.drift';
+
+-- Card content, and the schedule that is kept apart from it.
+--
+-- Content, schedule and history have three different lifetimes, so they are
+-- three tables: content is edited without touching the schedule (BR-10), the
+-- schedule changes on every review, and history is append-only.
+
+CREATE TABLE cards (
+    id TEXT NOT NULL PRIMARY KEY,
+
+    -- Only a deck whose content_type is 'card' may hold cards (BR-63).
+    deck_id TEXT NOT NULL REFERENCES decks (id) ON DELETE CASCADE,
+
+    front TEXT NOT NULL,
+    back TEXT NOT NULL,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL
+);
+
+CREATE INDEX idx_cards_deck ON cards (deck_id);
+
+-- One row per card, created with the card (BR-09); dropped and recreated on
+-- reset (BR-41).
+--
+-- No SRS column appears in `cards` and no `scheduler_generation` appears here
+-- by accident: content survives every reset, the schedule does not.
+CREATE TABLE card_review_states (
+    -- Primary key because the relationship is 1–1.
+    card_id TEXT NOT NULL PRIMARY KEY REFERENCES cards (id) ON DELETE CASCADE,
+
+    -- Repeated from the root deck on purpose. The denormalisation is what turns
+    -- two AD-09 invariants into something a query can check instead of
+    -- something the code is trusted to maintain — invariant 9 is that query.
+    scheduler_type TEXT NOT NULL CHECK (scheduler_type IN ('eight_box', 'sm2')),
+    scheduler_version INTEGER NOT NULL,
+    scheduler_generation INTEGER NOT NULL,
+
+    -- Shared by every scheduler. NULL means due immediately, which is why the
+    -- due predicate has to test for NULL and not only for a timestamp (BR-22).
+    due_at DATETIME NULL,
+
+    -- Updated by `scheduled` and by `relearning` alike (BR-20).
+    last_reviewed_at DATETIME NULL,
+
+    -- Counts `scheduled` reviews only (BR-20).
+    review_count INTEGER NOT NULL DEFAULT 0,
+    lapse_count INTEGER NOT NULL DEFAULT 0,
+
+    -- Per-scheduler columns, NULL when they do not apply. A JSON blob would be
+    -- more flexible and would lose type safety and queryability — the two
+    -- reasons AD-02 exists.
+    current_box INTEGER NULL,
+    ease_factor REAL NULL,
+    interval_days INTEGER NULL,
+    repetitions INTEGER NULL
+);
+
+CREATE INDEX idx_review_states_due ON card_review_states (due_at);

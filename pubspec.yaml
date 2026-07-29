@@ -37,7 +37,7 @@ dependencies:
   flutter_riverpod: any
   riverpod_annotation: any
   go_router: ^17.3.0
-  drift: ^2.34.3
+  drift: 2.34.0
   path_provider: ^2.1.6
   path: ^1.9.1
   freezed_annotation: ^3.1.0
@@ -50,6 +50,7 @@ dependencies:
   uuid: ^4.6.0
   flutter_localizations:
     sdk: flutter
+  drift_flutter: ^0.3.1
 
 dev_dependencies:
   flutter_test:

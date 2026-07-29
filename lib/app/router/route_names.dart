@@ -2,7 +2,7 @@
 ///
 /// UI navigates by name, never by path. A path is a public URL contract that
 /// changes for reasons that have nothing to do with the code — a marketing
-/// redirect, a deep-link scheme, a nesting change — and `context.go('/decks/3')`
+/// redirect, a deep-link scheme, a nesting change — and a hardcoded deck path
 /// spread over twenty screens turns each of those into a twenty-file edit that
 /// the compiler cannot help with.
 ///

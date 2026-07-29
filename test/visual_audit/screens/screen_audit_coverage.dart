@@ -1,119 +1,145 @@
 import 'dart:io';
 
-import 'audited_screens.dart';
-
-/// Finds the screens `lib/` actually contains, and compares them to the registry.
+/// MX-VIS-001, the half that spans two trees.
 ///
-/// Kept as plain functions with explicit inputs so the rules can be tested on
-/// data that does not exist on disk. A gate whose logic can only be exercised by
-/// the one situation the repository happens to be in is a gate nobody can prove
-/// works — and this one has to keep working on the day it first says no.
-
-/// Folders a screen may live in.
+/// A production screen must have a companion strict visual audit at the mirrored
+/// path, and that companion must actually audit that screen. Both halves matter:
+/// the file existing is trivially satisfiable, and a file full of the right
+/// calls is worthless if nothing points it at the screen.
 ///
-/// A screen anywhere else belongs to no feature and no app shell — both are
-/// decisions worth making on purpose rather than by where a file landed.
-const List<String> screenFolders = <String>[
-  'lib/features/', // .../<feature>/presentation/
+/// The content checks also exist as guard rules, which read one file at a time.
+/// This is the part the guard cannot express — "for each screen, somewhere else,
+/// there is a file" is a question about two trees at once.
+
+/// Folders a production screen may live in.
+const List<String> productionScreenRoots = <String>[
+  'lib/features/',
   'lib/app/fallback/',
 ];
 
-/// Screen files sitting outside [screenFolders].
-///
-/// Lives here rather than in the guard on purpose. The guard reads one file at
-/// a time and would have to express this as "this set of files must be empty",
-/// which it cannot tell apart from a rule whose scope has silently stopped
-/// matching — it reports `rule_without_targets` forever, and silencing that
-/// diagnostic is how three dead rules survived in this repository already.
-List<String> misplacedScreenFiles(Directory libRoot) {
-  return <String>[
-    for (final path in _screenFilePaths(libRoot))
-      if (!screenFolders.any(path.startsWith)) path,
-  ];
-}
+/// Where companions live.
+const String auditRoot = 'test/visual_audit/screens/';
 
-List<String> _screenFilePaths(Directory libRoot) {
-  const suffix = '_screen.dart';
+/// One screen and the companion it is required to have.
+class ScreenAuditPair {
+  const ScreenAuditPair({required this.screenPath, required this.auditPath});
 
-  return <String>[
-    for (final entity in libRoot.listSync(recursive: true))
-      if (entity is File)
-        // Windows hands back backslashes; every comparison below is written in
-        // forward slashes, so normalise once at the boundary rather than
-        // letting the separator leak into `screenFolders`.
-        if (_posix(entity.path).endsWith(suffix)) _posix(entity.path),
-  ];
+  final String screenPath;
+  final String auditPath;
+
+  /// `ReviewPlaceholderScreen`, derived from the file name.
+  String get screenClass {
+    final base = screenPath.split('/').last.replaceAll('.dart', '');
+
+    return base
+        .split('_')
+        .map((p) => p.isEmpty ? p : p[0].toUpperCase() + p.substring(1))
+        .join();
+  }
 }
 
 String _posix(String path) => path.replaceAll(r'\', '/');
 
-/// Every screen class `lib/` declares, derived from file names.
+/// Every production screen file, with the companion path it requires.
 ///
-/// The name comes from the file rather than from parsing Dart: the project
-/// already forces `*_screen.dart` under `presentation/` and forces snake_case,
-/// so `route_not_found_screen.dart` can only be `RouteNotFoundScreen`. Parsing
-/// would add a Dart grammar to a check whose whole value is being obvious.
-List<String> discoverScreenClasses(Directory libRoot) {
-  final names = <String>[
-    for (final path in _screenFilePaths(libRoot))
-      _classNameOf(path.split('/').last),
+/// `lib/features/review/presentation/review_placeholder_screen.dart`
+/// →  `test/visual_audit/screens/features/review/
+///     review_placeholder_screen_visual_audit_test.dart`
+List<ScreenAuditPair> discoverScreenPairs(Directory libRoot) {
+  final pairs = <ScreenAuditPair>[];
+
+  for (final entity in libRoot.listSync(recursive: true)) {
+    if (entity is! File) continue;
+
+    final path = _posix(entity.path);
+    if (!path.endsWith('_screen.dart')) continue;
+    if (!productionScreenRoots.any(path.startsWith)) continue;
+
+    // Mirror the path minus `lib/`, and minus the `presentation/` segment: the
+    // layer is a lib-side concern and repeating it in the test tree buys
+    // nothing but depth.
+    final segments = path.substring('lib/'.length).split('/')
+      ..removeWhere((segment) => segment == 'presentation');
+    final file = segments.removeLast().replaceAll(
+      '.dart',
+      '_visual_audit_test.dart',
+    );
+
+    pairs.add(
+      ScreenAuditPair(
+        screenPath: path,
+        auditPath: '$auditRoot${segments.join('/')}/$file',
+      ),
+    );
+  }
+  pairs.sort((a, b) => a.screenPath.compareTo(b.screenPath));
+
+  return pairs;
+}
+
+/// Companion files that audit a screen which no longer exists.
+///
+/// Same rule as an unused allowance: a test left behind after its subject is
+/// gone reads as coverage to whoever counts the files.
+List<String> orphanedAuditFiles(
+  Directory auditDir,
+  List<ScreenAuditPair> pairs,
+) {
+  if (!auditDir.existsSync()) return const <String>[];
+
+  final expected = pairs.map((pair) => pair.auditPath).toSet();
+
+  return <String>[
+    for (final entity in auditDir.listSync(recursive: true))
+      if (entity is File)
+        if (_posix(entity.path).endsWith('_visual_audit_test.dart'))
+          if (!expected.contains(_posix(entity.path))) _posix(entity.path),
   ];
-  names.sort();
-
-  return names;
 }
 
-String _classNameOf(String fileName) {
-  final base = fileName.substring(0, fileName.length - '.dart'.length);
-
-  return base
-      .split('_')
-      .map(
-        (part) =>
-            part.isEmpty ? part : part[0].toUpperCase() + part.substring(1),
-      )
-      .join();
-}
-
-/// What is wrong with the registry, in the words the reader needs.
-///
-/// Empty means the registry describes `lib/` exactly.
-List<String> screenCoverageFailures({
-  required List<String> screensInLib,
-  required List<String> auditedNames,
-  required List<PendingAudit> pending,
-}) {
+/// Everything wrong with the pairing, phrased for the person who has to fix it.
+List<String> screenAuditFailures(List<ScreenAuditPair> pairs) {
   final failures = <String>[];
-  final pendingNames = pending.map((entry) => entry.name).toSet();
-  final audited = auditedNames.toSet();
 
-  for (final screen in screensInLib) {
-    if (audited.contains(screen)) continue;
-    if (pendingNames.contains(screen)) continue;
+  for (final pair in pairs) {
+    final companion = File(pair.auditPath);
 
-    failures.add(
-      '$screen has no entry in auditedScreens. Add one, or add a PendingAudit '
-      'with a rationale and the WBS task that will close it.',
-    );
-  }
+    if (!companion.existsSync()) {
+      failures.add(
+        '${pair.screenPath} has no strict visual audit. Create '
+        '${pair.auditPath} calling memoxProductionScreenAuditTest with '
+        '${pair.screenClass}.',
+      );
 
-  for (final entry in pending) {
-    if (screensInLib.contains(entry.name)) continue;
+      continue;
+    }
 
-    failures.add(
-      '${entry.name} is deferred by a PendingAudit but no longer exists in '
-      'lib/. Remove the entry — a permission for a screen nobody can find '
-      'reads as coverage.',
-    );
-  }
+    final source = companion.readAsStringSync();
 
-  for (final entry in pending) {
-    if (!audited.contains(entry.name)) continue;
+    // Points at the right screen. Without this a companion can sit at the
+    // correct path and audit something else entirely.
+    if (!source.contains(pair.screenClass)) {
+      failures.add(
+        '${pair.auditPath} never mentions ${pair.screenClass}, so it is not '
+        'auditing the screen it is named after.',
+      );
+    }
 
-    failures.add(
-      '${entry.name} is both audited and deferred. One of the two is a leftover, '
-      'and whichever it is, the registry currently claims two different things.',
-    );
+    // Strict, not exploratory. `memoxAuditTest` alone permits
+    // PASS_WITH_UNRESOLVED, which is the exploratory bar.
+    if (!source.contains('memoxProductionScreenAuditTest')) {
+      failures.add(
+        '${pair.auditPath} does not call memoxProductionScreenAuditTest. A '
+        'production screen is held to AuditExpectation.complete.',
+      );
+    }
+
+    if (RegExp(r'\bskip\s*:').hasMatch(source)) {
+      failures.add(
+        '${pair.auditPath} is skipped. A skipped audit still counts as a '
+        'passing suite, so the lost coverage is invisible.',
+      );
+    }
   }
 
   return failures;
