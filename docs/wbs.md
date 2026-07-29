@@ -1529,6 +1529,10 @@ migration test và enforcement cho các bất biến.
         biến mất, trên cây **ba cấp** với dữ liệu thật.
   - [x] `COALESCE(` không xuất hiện trong `lib/core/database/` (BR-57).
   - [x] `connection.dart` là **file duy nhất** gọi `driftDatabase`.
+  - [x] Web không bị âm thầm tắt: `web/sqlite3.wasm` và `web/drift_worker.js`
+        được vendor kèm test khoá version. Kiểm trong trình duyệt thật — wasm
+        **compile được** (86 export, có symbol sqlite3), worker **khởi động
+        được**, không console error.
 - **Cột `action` bị drift âm thầm bỏ.** `ACTION` là keyword với SQL parser của
   drift: viết trần thì build **thành công**, code sinh ra **compile được**, và
   `review_history` đơn giản là không có cột đó. Chỉ test đọc ngược cột từ SQLite
@@ -1539,6 +1543,11 @@ migration test và enforcement cho các bất biến.
   chính nó thì không chứng minh gì. CHECK cho enum từng cột thì an toàn và có.
 - **`root_deck_id` cố ý không phải foreign key** — tài liệu khai báo tham chiếu
   cho `parent_deck_id` và không cho cột này; invariant 6 và 7 là cơ chế nó nêu.
+- **Đã kiểm tới đâu trên Web, và chưa tới đâu.** Kiểm được: hai asset phục vụ
+  đúng MIME (`application/wasm`, `text/javascript`), wasm compile trong trình
+  duyệt, worker chạy không lỗi. **Chưa kiểm:** drift thật sự mở một database —
+  `driftDatabase()` kết nối lazy ở query đầu tiên, mà chưa có gì trong app phát
+  query. Việc đó thuộc M4.5/M4.6 khi repository có caller thật.
 - **Dependencies:** M3.2, M2.2
 - **Tests required:** 16 test schema (bảng, cột, nullability, PK, FK, index,
   không Dart table class, opener duy nhất) + 3 test cascade
@@ -1929,5 +1938,7 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 | ~~7 file skill vẫn bảo chạy `dart run custom_lint`~~ | M2.2 | Skill vẫn hướng dẫn cài và chạy một package không cài được; phiên sau sẽ tin skill và loay hoay | **Đã trả ở M2.2b.** Cả 7 file đã trỏ sang guard. `docs/checklist.md` **cố ý giữ nguyên**: nó `frozen for MVP`, và mục "Ngoài phạm vi: mọi quyết định riêng của memox" nói rõ nó mô tả quy trình 22 phase chung — `custom_lint` ở đó là khuyến nghị Flutter phổ thông, còn quyết định riêng của memox sống ở file này (§5 canonical location) |
 | `dependencies.md` vẫn liệt kê `sqlite3_flutter_libs` | M2.2 | Package đó nay là tombstone (`0.6.0+eol`, không có native code). Skill nói sai còn tệ hơn không có skill — phiên sau sẽ cài lại nó | Sửa `.claude/skills/flutter-project-setup/references/dependencies.md`: thay bằng ghi chú rằng `sqlite3` 3.x cấp native lib qua native assets. Ngoài `Editable documents` của M2.2 nên chưa sửa ở đây |
 | Nội dung starter là fixture, không phải nội dung production | T1.3 | Không phát hành được với nội dung này | Tìm nguồn nội dung có bản quyền rõ ràng trước M8 (BR-87) |
+| `sqlite3.wasm` và `drift_worker.js` là binary vendored trong `web/` | M4.2 | Không có bước build nào sinh ra chúng và không có bước build nào báo khi chúng cũ: app compile, load, rồi **không mở được database**. Nâng `drift` mà quên tải lại worker không có triệu chứng nào cho tới khi ai đó mở trình duyệt | `test/database/web_assets_test.dart` so version trong `pubspec.lock` với version đã pin, kèm `web/WEB_ASSETS.md` ghi URL tải. Đã kiểm tiêm lỗi: đổi `drift` thành 2.99.0 làm test đỏ |
+| Server phát web chưa gửi COOP/COEP | M4.2 | `crossOriginIsolated` là `false`, nên drift chọn backend lưu trữ kém hơn OPFS. Không có lỗi nào — chỉ là hiệu năng và độ bền khác đi, âm thầm | Thêm `Cross-Origin-Opener-Policy: same-origin` và `Cross-Origin-Embedder-Policy: require-corp` vào server phát web ở M7, và kiểm lại `crossOriginIsolated` trong E2E |
 | Bản build web MUST dùng `--no-web-resources-cdn` | M2.1a | Mặc định Flutter tải CanvasKit từ `gstatic.com` lúc **runtime** dù đã bundle sẵn cục bộ. Trong môi trường chặn CDN, app im lặng không render — không có lỗi build nào cảnh báo | Đưa cờ này vào job `build-web` của CI ở M7, và vào mọi hướng dẫn chạy web |
 | ~~`check_docs.sh` chỉ đếm task ID dạng `T*`, bỏ sót `M*`~~ | T1.4 | Báo "no duplicate WBS task IDs (8 tasks)" trong khi có 33 — **pass gây hiểu nhầm**, 25 task M2–M5 không được bảo vệ khỏi trùng ID | **Đã trả ở M2.1b.** Regex sửa thành `[TM][0-9]+(\.[0-9]+)?[a-z]?` (giờ báo 35 task), thêm check dependency resolve và check `M*` đủ field + acceptance criteria không rỗng. Cả ba verify bằng test tiêm lỗi, 4/4 case đạt |

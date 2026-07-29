@@ -1,0 +1,5 @@
+# Vendored, downloaded verbatim from upstream releases. Line-ending
+# normalisation would rewrite bytes git did not produce and this repository
+# cannot regenerate — see web/WEB_ASSETS.md.
+web/sqlite3.wasm binary
+web/drift_worker.js -text
