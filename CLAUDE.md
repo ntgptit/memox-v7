@@ -51,13 +51,14 @@ and they are the ones most likely to be violated by accident:
 - **Android is the release target.** Web must keep building because it is the
   E2E channel (Flutter Web + Playwright), but it is not a production target.
   iOS is deferred.
-- **Decks nest to any depth, and each holds one kind of thing.** A root deck
-  holds only sub-decks — never cards. A new sub-deck starts `content_type =
-  unset`; the first child created sets it to `card` or `deck`, and from then on
-  it holds only that. Emptying a deck does not reset the type; that is a separate
-  confirmed action. Resolve the root via `root_deck_id` — **never**
-  `COALESCE(parent_deck_id, id)`, which silently returns the wrong deck from the
-  third level down.
+- **Decks nest up to 10 levels — the root is level 1 — and each holds one kind
+  of thing.** Creating or moving a deck past level 10 is refused before
+  anything is written (BR-55). A root deck holds only sub-decks — never cards.
+  A new sub-deck starts `content_type = unset`; the first child created sets it
+  to `card` or `deck`, and from then on it holds only that. Emptying a deck
+  does not reset the type; that is a separate confirmed action. Resolve the
+  root via `root_deck_id` — **never** `COALESCE(parent_deck_id, id)`, which
+  silently returns the wrong deck from the third level down.
 - **Scheduler belongs to the root deck and is locked after the first review.**
   MVP ships both `eight_box` and `sm2`; every root deck must pick one at
   creation. Every descendant inherits type, version and generation. After the

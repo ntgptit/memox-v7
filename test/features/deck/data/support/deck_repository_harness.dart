@@ -1,7 +1,9 @@
 import 'package:drift/drift.dart' show QueryRow, Variable;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/database/app_database.dart';
+import 'package:memox/features/deck/data/card_repository_impl.dart';
 import 'package:memox/features/deck/data/deck_repository_impl.dart';
+import 'package:memox/features/deck/data/local/card_dao.dart';
 import 'package:memox/features/deck/data/local/deck_dao.dart';
 import 'package:memox/features/deck/domain/deck_entity.dart';
 import 'package:memox/features/deck/domain/scheduler_type_model.dart';
@@ -10,14 +12,15 @@ import '../../../../database/support/test_database.dart';
 
 /// Shared harness for the repository integration tests.
 ///
-/// One real in-memory SQLite database and one repository per test, with a
-/// deterministic id sequence (`gen-1`, `gen-2`, …) and a mutable fixed clock —
-/// no test ever reads the wall clock. Raw readers go through `customSelect` on
-/// purpose: asserting what is *in the table* must not depend on the mappers
-/// under test.
+/// One real in-memory SQLite database per test, with both repositories on
+/// top of it, a deterministic id sequence (`gen-1`, `gen-2`, …) shared across
+/// them, and a mutable fixed clock — no test ever reads the wall clock. Raw
+/// readers go through `customSelect` on purpose: asserting what is *in the
+/// table* must not depend on the mappers under test.
 final class DeckRepositoryHarness {
   late AppDatabase db;
-  late DeckRepositoryImpl repository;
+  late DeckRepositoryImpl deckRepository;
+  late CardRepositoryImpl cardRepository;
   int idCounter = 0;
   DateTime currentInstant = testNow;
 
@@ -59,24 +62,49 @@ final class DeckRepositoryHarness {
     SchedulerType scheduler = SchedulerType.eightBox,
     String prefix = '',
   }) async {
-    final root = await repository.createRootDeck(
+    final root = await deckRepository.createRootDeck(
       name: '${prefix}Root',
       schedulerType: scheduler,
     );
-    final branch = await repository.createSubDeck(
+    final branch = await deckRepository.createSubDeck(
       name: '${prefix}Branch',
       parentDeckId: root.id,
     );
-    final leaf = await repository.createSubDeck(
+    final leaf = await deckRepository.createSubDeck(
       name: '${prefix}Leaf',
       parentDeckId: branch.id,
     );
 
     return (root: root, branch: branch, leaf: leaf);
   }
+
+  /// A root with a strictly linear chain of sub-decks below it, [totalLevels]
+  /// decks tall counting the root as level 1 (BR-55). Returns the chain from
+  /// root (index 0) to deepest leaf.
+  Future<List<DeckEntity>> seedChain(
+    int totalLevels, {
+    String prefix = 'chain-',
+  }) async {
+    final decks = <DeckEntity>[
+      await deckRepository.createRootDeck(
+        name: '${prefix}1',
+        schedulerType: SchedulerType.eightBox,
+      ),
+    ];
+    for (var level = 2; level <= totalLevels; level++) {
+      decks.add(
+        await deckRepository.createSubDeck(
+          name: '$prefix$level',
+          parentDeckId: decks.last.id,
+        ),
+      );
+    }
+
+    return decks;
+  }
 }
 
-/// Registers a fresh database + repository per test and returns the harness
+/// Registers a fresh database + repositories per test and returns the harness
 /// whose fields each test reads.
 DeckRepositoryHarness installDeckRepositoryHarness() {
   final harness = DeckRepositoryHarness();
@@ -84,10 +112,18 @@ DeckRepositoryHarness installDeckRepositoryHarness() {
     harness.db = openTestDatabase();
     harness.idCounter = 0;
     harness.currentInstant = testNow;
-    harness.repository = DeckRepositoryImpl(
+    String nextId() => 'gen-${++harness.idCounter}';
+    DateTime clock() => harness.currentInstant;
+    harness.deckRepository = DeckRepositoryImpl(
       DeckDao(harness.db),
-      idGenerator: () => 'gen-${++harness.idCounter}',
-      clock: () => harness.currentInstant,
+      idGenerator: nextId,
+      clock: clock,
+    );
+    harness.cardRepository = CardRepositoryImpl(
+      CardDao(harness.db),
+      DeckDao(harness.db),
+      idGenerator: nextId,
+      clock: clock,
     );
   });
 

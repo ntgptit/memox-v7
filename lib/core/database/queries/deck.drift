@@ -1,16 +1,28 @@
 import '../tables/decks.drift';
 import '../tables/cards.drift';
 
--- Typed queries for the Deck/Card management vertical (M4.9).
+-- Typed queries for the Deck management vertical (M4.9, M4.9a).
 --
 -- Tree reads resolve through `root_deck_id`, never by coalescing the parent
 -- column with the id (BR-57): that expression means "my parent, or me if I
 -- have none" and returns the wrong deck from the third level down.
 --
--- Subtree walks that genuinely need recursion — an arbitrary deck's
--- descendants for a move or a deletion count — use a recursive CTE bounded to
--- depth 64, the same guard invariant Q8 uses: a walker that can loop forever
--- on already-broken data is a walker that hangs instead of reporting.
+-- Subtree walks use a recursive CTE with UNION — not UNION ALL — so a node is
+-- visited once even if the stored tree is cyclic (corrupt): the duplicate row
+-- is discarded and the recursion terminates with the COMPLETE reachable set.
+-- No depth cap appears here on purpose. A cap turns corrupt data into a
+-- silently truncated result — a card count that lies to the delete dialog, a
+-- root rewrite that skips nodes (exactly the Q6 violation) — where the UNION
+-- walk returns everything or, for genuinely unreachable data, nothing at all.
+-- Cycle DETECTION stays where it lives: invariant Q8, whose diagnostic cap is
+-- its own concern.
+--
+-- The two *probe* queries walk with a :maxWalk bound instead, because their
+-- rows carry a depth column that defeats UNION deduplication. The bound is a
+-- parameter, derived by the caller from the single domain constant
+-- (`DeckEntity.maxTreeDepth`, BR-55) — hitting it is reported to the caller
+-- (`reachedRoot` false / height at the bound) and treated as a failure, never
+-- as a shorter answer.
 
 -- Root decks for the list screen (UC-06 reads it; M4.9 provides it).
 rootDecks:
@@ -21,8 +33,8 @@ ORDER BY created_at ASC, id ASC;
 deckById:
 SELECT * FROM decks WHERE id = :deckId;
 
--- One root's whole tree, root included, at any depth. No recursion needed:
--- every descendant already carries the root's id (BR-56).
+-- One root's whole tree, root included, at any allowed depth. No recursion
+-- needed: every descendant already carries the root's id (BR-56).
 decksInTree:
 SELECT * FROM decks
 WHERE root_deck_id = :rootDeckId
@@ -33,18 +45,50 @@ SELECT * FROM decks
 WHERE parent_deck_id = :parentDeckId
 ORDER BY created_at ASC, id ASC;
 
--- An arbitrary deck's subtree — itself plus every descendant. This is the one
--- place recursion is required, because the argument need not be a root.
+-- An arbitrary deck's subtree — itself plus every descendant.
 subtreeDeckIds:
-WITH RECURSIVE subtree (id, depth) AS (
-    SELECT id, 0 FROM decks WHERE id = :deckId
-    UNION ALL
-    SELECT d.id, s.depth + 1
+WITH RECURSIVE subtree (id) AS (
+    SELECT id FROM decks WHERE id = :deckId
+    UNION
+    SELECT d.id
     FROM decks d
     INNER JOIN subtree s ON d.parent_deck_id = s.id
-    WHERE s.depth < 64
 )
 SELECT id FROM subtree;
+
+-- How deep a deck sits, walking parents upward. The deck itself is step 1, so
+-- for an intact chain the greatest depth equals the deck's level with the
+-- root as level 1 (BR-55), and the row holding it has a NULL parent —
+-- `reachedRoot`. A walk that exhausts :maxWalk without reaching a root means
+-- the chain is longer than the caller allows, or cyclic; either way the
+-- caller must refuse, not guess.
+deckDepthProbe:
+WITH RECURSIVE ancestry (node_id, parent_id, depth) AS (
+    SELECT id, parent_deck_id, 1 FROM decks WHERE id = :deckId
+    UNION ALL
+    SELECT d.id, d.parent_deck_id, a.depth + 1
+    FROM decks d
+    INNER JOIN ancestry a ON d.id = a.parent_id
+    WHERE a.depth < :maxWalk
+)
+SELECT depth AS depth, parent_id IS NULL AS reachedRoot
+FROM ancestry
+ORDER BY depth DESC
+LIMIT 1;
+
+-- How tall a subtree is, with the deck itself as height 1. A result equal to
+-- :maxWalk means "at least this tall" — taller than any tree the caller
+-- permits, or cyclic — and the caller must refuse.
+subtreeHeightProbe:
+WITH RECURSIVE walk (id, height) AS (
+    SELECT id, 1 FROM decks WHERE id = :deckId
+    UNION ALL
+    SELECT d.id, w.height + 1
+    FROM decks d
+    INNER JOIN walk w ON d.parent_deck_id = w.id
+    WHERE w.height < :maxWalk
+)
+SELECT MAX(height) AS height FROM walk;
 
 -- Direct children only — the emptiness check for BR-68.
 directChildDeckCount:
@@ -55,13 +99,12 @@ SELECT COUNT(*) AS cardCount FROM cards WHERE deck_id = :deckId;
 
 -- Cards in a whole subtree, for the deletion confirm (BR-04).
 subtreeCardCount:
-WITH RECURSIVE subtree (id, depth) AS (
-    SELECT id, 0 FROM decks WHERE id = :deckId
-    UNION ALL
-    SELECT d.id, s.depth + 1
+WITH RECURSIVE subtree (id) AS (
+    SELECT id FROM decks WHERE id = :deckId
+    UNION
+    SELECT d.id
     FROM decks d
     INNER JOIN subtree s ON d.parent_deck_id = s.id
-    WHERE s.depth < 64
 )
 SELECT COUNT(*) AS cardCount
 FROM cards c
@@ -73,24 +116,12 @@ updateSubtreeRootDeck:
 UPDATE decks
 SET root_deck_id = :newRootDeckId, updated_at = :updatedAt
 WHERE id IN (
-    WITH RECURSIVE subtree (id, depth) AS (
-        SELECT id, 0 FROM decks WHERE id = :deckId
-        UNION ALL
-        SELECT d.id, s.depth + 1
+    WITH RECURSIVE subtree (id) AS (
+        SELECT id FROM decks WHERE id = :deckId
+        UNION
+        SELECT d.id
         FROM decks d
         INNER JOIN subtree s ON d.parent_deck_id = s.id
-        WHERE s.depth < 64
     )
     SELECT id FROM subtree
 );
-
-cardsByDeck:
-SELECT * FROM cards
-WHERE deck_id = :deckId
-ORDER BY created_at ASC, id ASC;
-
-cardById:
-SELECT * FROM cards WHERE id = :cardId;
-
-reviewStateByCard:
-SELECT * FROM card_review_states WHERE card_id = :cardId;

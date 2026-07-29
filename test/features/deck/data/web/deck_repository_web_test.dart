@@ -3,7 +3,9 @@ library;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/database/app_database.dart';
+import 'package:memox/features/deck/data/card_repository_impl.dart';
 import 'package:memox/features/deck/data/deck_repository_impl.dart';
+import 'package:memox/features/deck/data/local/card_dao.dart';
 import 'package:memox/features/deck/data/local/deck_dao.dart';
 import 'package:memox/features/deck/domain/deck_entity.dart';
 import 'package:memox/features/deck/domain/scheduler_type_model.dart';
@@ -33,10 +35,18 @@ void main() {
     final db = AppDatabase.open();
 
     var nextIdIndex = 0;
+    String nextId() => fixtureIds[nextIdIndex++];
+    DateTime clock() => fixedInstant;
     final repository = DeckRepositoryImpl(
       DeckDao(db),
-      idGenerator: () => fixtureIds[nextIdIndex++],
-      clock: () => fixedInstant,
+      idGenerator: nextId,
+      clock: clock,
+    );
+    final cardRepository = CardRepositoryImpl(
+      CardDao(db),
+      DeckDao(db),
+      idGenerator: nextId,
+      clock: clock,
     );
 
     // A previous run may have left the fixture behind (web storage is
@@ -59,7 +69,7 @@ void main() {
         name: 'Web smoke leaf',
         parentDeckId: branch.id,
       );
-      final card = await repository.createCard(
+      final card = await cardRepository.createCard(
         deckId: leaf.id,
         front: 'web front',
         back: 'web back',

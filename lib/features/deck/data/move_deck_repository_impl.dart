@@ -9,6 +9,8 @@ mixin _MoveDeckOperation implements DeckRepository {
   Future<T> _guard<T>(Future<T> Function() action);
   Future<Deck> _requireDeckRow(String deckId);
   DeckContentType _knownContentType(Deck deck);
+  Future<int> _requireDeckDepth(String deckId);
+  Future<int> _requireSubtreeHeight(String deckId);
 
   @override
   Future<void> moveDeck({
@@ -16,7 +18,9 @@ mixin _MoveDeckOperation implements DeckRepository {
     required String targetParentDeckId,
   }) => _guard(
     () => _dao.runInTransaction(() async {
-      // Validation order follows UC-09 step 2 exactly.
+      // Validation order follows UC-09 step 2 exactly; every check runs
+      // BEFORE the first mutation, so a refused move changes nothing —
+      // no parent pointer, no root pointer, no content type, no timestamp.
       final source = await _requireDeckRow(deckId);
       final target = await _requireDeckRow(targetParentDeckId);
       if (source.parentDeckId == null) {
@@ -56,6 +60,17 @@ mixin _MoveDeckOperation implements DeckRepository {
       if (sourceRoot.schedulerGeneration != targetRoot.schedulerGeneration) {
         throw const ConflictFailure(
           message: 'The target is on a different learning cycle.',
+        );
+      }
+      // BR-55 — the deepest resulting level is the target's level plus the
+      // subtree's height (source itself = height 1).
+      final targetDepth = await _requireDeckDepth(target.id);
+      final subtreeHeight = await _requireSubtreeHeight(source.id);
+      if (targetDepth + subtreeHeight > DeckEntity.maxTreeDepth) {
+        throw const ConflictFailure(
+          message:
+              'Moving here would nest decks deeper than the allowed '
+              '${DeckEntity.maxTreeDepth} levels.',
         );
       }
 

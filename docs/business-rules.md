@@ -7,8 +7,8 @@
 | **Scope** | Luật nghiệp vụ, validation rule, state machine, edge case của phạm vi MVP. Ngoài phạm vi: quyết định kiến trúc (`architecture.md`), hình dạng dữ liệu (`data-model.md`), luồng người dùng (`use-cases.md`) |
 | **Source of truth for** | BR-xx · validation rule · entity state machine · edge case |
 | **Depends on** | `document-conventions.md`, `product.md`, `architecture.md` |
-| **Updated by task** | T1.3a |
-| **Last updated** | 2026-07-28 |
+| **Updated by task** | M4.9a |
+| **Last updated** | 2026-07-29 |
 
 Format tuân theo `document-conventions.md` §6.2. Từ khoá MUST / SHOULD / MAY
 theo §3. Prose **không** chứa từ khoá là giải thích, không phải rule (§9).
@@ -37,7 +37,7 @@ Nền tảng của mô hình dữ liệu, nên đặt đầu tiên dù ID cao h�
 
 | ID | Status | Rule | Enforced by | Related |
 |---|---|---|---|---|
-| BR-55 | active | Deck MUST được phép lồng nhiều cấp. Thiết kế MUST NOT giả định cây chỉ có một cấp. | db | AD-10 |
+| BR-55 | active | Deck MUST được phép lồng nhiều cấp, tối đa **10 cấp** với root là cấp 1; tạo hoặc di chuyển deck vượt cấp 10 MUST bị chặn trước khi ghi. Thiết kế MUST NOT giả định cây chỉ có một cấp. | repository + invariant Q15 | AD-10, UC-08, UC-09 |
 | BR-56 | active | Mỗi deck MUST mang `root_deck_id`. Root deck có `root_deck_id = id`; mọi descendant mang đúng `root_deck_id` của root. | db + invariant Q6, Q7 | AD-10, UC-08, UC-09 |
 | BR-57 | active | Xác định root MUST qua `root_deck_id`. MUST NOT dùng `COALESCE(parent_deck_id, id)`. | script | AD-10 |
 | BR-58 | active | Root deck MUST chỉ chứa deck con; MUST NOT chứa card trực tiếp. | db + invariant Q1 | AD-10, UC-02, UC-08 |
@@ -327,6 +327,8 @@ hỏng không tự phục hồi, tệ hơn nhiều so với reset thất bại s
 | Deck.schedulerType | bắt buộc chọn khi tạo root deck | "Hãy chọn chế độ ôn tập cho deck" | domain |
 | Deck.move | đích không phải chính nó hoặc descendant | "Không thể di chuyển deck vào chính nó" | domain |
 | Deck.move | đích cùng root scheduler và generation | "Deck đích dùng chế độ ôn tập khác. Hãy đặt lại tiến độ học trước khi di chuyển" | domain |
+| Deck.create (sub-deck) | cấp của deck mới ≤ 10 (BR-55) | "Deck đã ở độ sâu tối đa (10 cấp)" | repository |
+| Deck.move | cấp đích + chiều cao subtree nguồn ≤ 10 (BR-55) | "Di chuyển vào đây sẽ vượt độ sâu tối đa (10 cấp)" | repository |
 | Card.front | không rỗng sau trim | "Mặt trước không được để trống" | domain |
 | Card.back | không rỗng sau trim | "Mặt sau không được để trống" | domain |
 | Card.front/back | ≤ 2000 ký tự | "Nội dung tối đa 2000 ký tự" | domain |
@@ -423,6 +425,8 @@ Trạng thái kết thúc là terminal — không có đường quay lại `in_p
 | Kéo deck vào descendant của chính nó | Chặn, lỗi rõ ràng (BR-70) |
 | Di chuyển subtree sang root khác scheduler | Chặn, đề nghị reset (BR-74) |
 | Cây sâu 4–5 cấp | Hoạt động bình thường; root tra qua `root_deck_id` (BR-56, BR-57) |
+| Tạo deck con dưới deck đang ở cấp 10 | Chặn trước khi ghi; parent giữ nguyên `content_type` (BR-55, BR-62) |
+| Move khiến cấp sâu nhất sau move vượt 10 | Chặn; không đổi parent, root pointer hay `content_type` của đích (BR-55, BR-71) |
 | Tạo root deck không chọn scheduler | Chặn, lỗi inline (BR-11) |
 | Đổi scheduler khi chưa có review | Cho phép, khởi tạo lại review state toàn cây (BR-14) |
 | Đổi scheduler khi đã có review | Chặn; đề nghị Reset learning progress (BR-13) |

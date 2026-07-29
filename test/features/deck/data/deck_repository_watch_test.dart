@@ -18,13 +18,15 @@ void main() {
 
   group('watch()', () {
     test('emits the current value on listen', () async {
-      await h.repository.createRootDeck(
+      await h.deckRepository.createRootDeck(
         name: 'Existing',
         schedulerType: SchedulerType.eightBox,
       );
 
       final emissions = <List<DeckEntity>>[];
-      final subscription = h.repository.watchRootDecks().listen(emissions.add);
+      final subscription = h.deckRepository.watchRootDecks().listen(
+        emissions.add,
+      );
       addTearDown(subscription.cancel);
       await pumpEventQueue();
 
@@ -36,12 +38,14 @@ void main() {
 
     test('re-emits after an insert', () async {
       final emissions = <List<DeckEntity>>[];
-      final subscription = h.repository.watchRootDecks().listen(emissions.add);
+      final subscription = h.deckRepository.watchRootDecks().listen(
+        emissions.add,
+      );
       addTearDown(subscription.cancel);
       await pumpEventQueue();
       expect(emissions.last, isEmpty);
 
-      await h.repository.createRootDeck(
+      await h.deckRepository.createRootDeck(
         name: 'Fresh',
         schedulerType: SchedulerType.sm2,
       );
@@ -51,33 +55,37 @@ void main() {
     });
 
     test('re-emits after an update', () async {
-      final root = await h.repository.createRootDeck(
+      final root = await h.deckRepository.createRootDeck(
         name: 'Before',
         schedulerType: SchedulerType.eightBox,
       );
       final emissions = <List<DeckEntity>>[];
-      final subscription = h.repository.watchRootDecks().listen(emissions.add);
+      final subscription = h.deckRepository.watchRootDecks().listen(
+        emissions.add,
+      );
       addTearDown(subscription.cancel);
       await pumpEventQueue();
 
-      await h.repository.renameDeck(deckId: root.id, name: 'After');
+      await h.deckRepository.renameDeck(deckId: root.id, name: 'After');
       await pumpEventQueue();
 
       expect(emissions.last.single.name, 'After');
     });
 
     test('re-emits after a delete', () async {
-      final root = await h.repository.createRootDeck(
+      final root = await h.deckRepository.createRootDeck(
         name: 'Doomed',
         schedulerType: SchedulerType.eightBox,
       );
       final emissions = <List<DeckEntity>>[];
-      final subscription = h.repository.watchRootDecks().listen(emissions.add);
+      final subscription = h.deckRepository.watchRootDecks().listen(
+        emissions.add,
+      );
       addTearDown(subscription.cancel);
       await pumpEventQueue();
       expect(emissions.last, hasLength(1));
 
-      await h.repository.deleteDeck(root.id);
+      await h.deckRepository.deleteDeck(root.id);
       await pumpEventQueue();
 
       expect(emissions.last, isEmpty);
@@ -86,14 +94,14 @@ void main() {
     test('watchCardsByDeck follows card writes', () async {
       final tree = await h.seedTree();
       final emissions = <List<CardEntity>>[];
-      final subscription = h.repository
+      final subscription = h.cardRepository
           .watchCardsByDeck(tree.leaf.id)
           .listen(emissions.add);
       addTearDown(subscription.cancel);
       await pumpEventQueue();
       expect(emissions.last, isEmpty);
 
-      final card = await h.repository.createCard(
+      final card = await h.cardRepository.createCard(
         deckId: tree.leaf.id,
         front: 'f',
         back: 'b',
@@ -101,7 +109,7 @@ void main() {
       await pumpEventQueue();
       expect(emissions.last.single.front, 'f');
 
-      await h.repository.deleteCard(card.id);
+      await h.cardRepository.deleteCard(card.id);
       await pumpEventQueue();
       expect(emissions.last, isEmpty);
     });
@@ -109,7 +117,7 @@ void main() {
     test('watchDeckTree covers every depth of one root', () async {
       final tree = await h.seedTree();
       final emissions = <List<DeckEntity>>[];
-      final subscription = h.repository
+      final subscription = h.deckRepository
           .watchDeckTree(tree.root.id)
           .listen(emissions.add);
       addTearDown(subscription.cancel);
@@ -133,7 +141,7 @@ void main() {
 
       Object? caught;
       try {
-        await h.repository.createCard(
+        await h.cardRepository.createCard(
           deckId: tree.leaf.id,
           front: 'f',
           back: 'b',
@@ -169,39 +177,47 @@ void main() {
 
     test('a missing deck surfaces as NotFoundFailure', () async {
       await expectLater(
-        h.repository.getDeckById('nope'),
+        h.deckRepository.getDeckById('nope'),
         throwsA(isA<NotFoundFailure>()),
       );
       await expectLater(
-        h.repository.deleteCard('nope'),
+        h.cardRepository.deleteCard('nope'),
         throwsA(isA<NotFoundFailure>()),
       );
     });
   });
 
-  test('a full repository scenario leaves all 14 invariants clean', () async {
+  test('a full repository scenario leaves all 15 invariants clean', () async {
     final treeA = await h.seedTree(prefix: 'A-');
-    final grandLeaf = await h.repository.createSubDeck(
+    final grandLeaf = await h.deckRepository.createSubDeck(
       name: 'A-GrandLeaf',
       parentDeckId: treeA.leaf.id,
     );
-    await h.repository.createCard(deckId: grandLeaf.id, front: 'a', back: 'a');
+    await h.cardRepository.createCard(
+      deckId: grandLeaf.id,
+      front: 'a',
+      back: 'a',
+    );
     final treeB = await h.seedTree(prefix: 'B-', scheduler: SchedulerType.sm2);
-    final cardB = await h.repository.createCard(
+    final cardB = await h.cardRepository.createCard(
       deckId: treeB.leaf.id,
       front: 'b',
       back: 'b',
     );
-    await h.repository.updateCard(cardId: cardB.id, front: 'b2', back: 'b2');
-    await h.repository.renameDeck(deckId: treeA.root.id, name: 'A-Renamed');
+    await h.cardRepository.updateCard(
+      cardId: cardB.id,
+      front: 'b2',
+      back: 'b2',
+    );
+    await h.deckRepository.renameDeck(deckId: treeA.root.id, name: 'A-Renamed');
 
     // Same-scheduler move plus a delete, then check every invariant.
     final treeC = await h.seedTree(prefix: 'C-');
-    await h.repository.moveDeck(
+    await h.deckRepository.moveDeck(
       deckId: treeA.branch.id,
       targetParentDeckId: treeC.leaf.id,
     );
-    await h.repository.deleteDeck(treeB.branch.id);
+    await h.deckRepository.deleteDeck(treeB.branch.id);
 
     for (final entry in invariantQueries.entries) {
       expect(

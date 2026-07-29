@@ -1,4 +1,4 @@
-/// The 14 invariant queries, copied verbatim from `data-model.md`.
+/// The 15 invariant queries, copied verbatim from `data-model.md`.
 ///
 /// Frozen source. Nothing here may be reworded to make a test pass — the
 /// document is the specification, and a query edited to suit a fixture stops
@@ -97,4 +97,14 @@ const Map<String, String> invariantQueries = <String, String>{
       'AND (previous_box IS NOT next_box '
       'OR previous_ease_factor IS NOT next_ease_factor '
       'OR previous_interval_days IS NOT next_interval_days)',
+
+  // ---- Deck tree, depth ---------------------------------------------------
+  'Q15': // A deck deeper than 10 levels, root as level 1 (BR-55)
+      'WITH RECURSIVE levels(id, depth) AS ('
+      'SELECT id, 1 FROM decks WHERE parent_deck_id IS NULL '
+      'UNION ALL '
+      'SELECT d.id, l.depth + 1 '
+      'FROM decks d JOIN levels l ON d.parent_deck_id = l.id '
+      'WHERE l.depth < 64) '
+      'SELECT id FROM levels WHERE depth > 10',
 };

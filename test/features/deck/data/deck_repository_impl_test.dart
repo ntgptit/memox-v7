@@ -18,7 +18,7 @@ void main() {
 
   group('createRootDeck', () {
     test('creates a root with the mandatory scheduler, generation 1', () async {
-      final root = await h.repository.createRootDeck(
+      final root = await h.deckRepository.createRootDeck(
         name: '  My deck  ',
         schedulerType: SchedulerType.sm2,
       );
@@ -40,7 +40,7 @@ void main() {
       'refuses the unknown scheduler — the choice is mandatory (BR-11)',
       () async {
         await expectLater(
-          h.repository.createRootDeck(
+          h.deckRepository.createRootDeck(
             name: 'No mode',
             schedulerType: SchedulerType.unknown,
           ),
@@ -51,7 +51,7 @@ void main() {
     );
 
     test('a root points at itself: root_deck_id = id (BR-56)', () async {
-      final root = await h.repository.createRootDeck(
+      final root = await h.deckRepository.createRootDeck(
         name: 'Self',
         schedulerType: SchedulerType.eightBox,
       );
@@ -61,7 +61,7 @@ void main() {
     });
 
     test('a root is born content_type = deck (BR-58)', () async {
-      final root = await h.repository.createRootDeck(
+      final root = await h.deckRepository.createRootDeck(
         name: 'Typed',
         schedulerType: SchedulerType.eightBox,
       );
@@ -74,7 +74,7 @@ void main() {
       'an invalid name is refused before anything is written (BR-01)',
       () async {
         await expectLater(
-          h.repository.createRootDeck(
+          h.deckRepository.createRootDeck(
             name: '   ',
             schedulerType: SchedulerType.eightBox,
           ),
@@ -131,7 +131,7 @@ void main() {
         );
 
         await expectLater(
-          h.repository.createSubDeck(
+          h.deckRepository.createSubDeck(
             name: 'Doomed',
             parentDeckId: tree.leaf.id,
           ),
@@ -151,21 +151,24 @@ void main() {
 
     test('a card deck refuses sub-decks (BR-63)', () async {
       final tree = await h.seedTree();
-      await h.repository.createCard(
+      await h.cardRepository.createCard(
         deckId: tree.leaf.id,
         front: 'f',
         back: 'b',
       );
 
       await expectLater(
-        h.repository.createSubDeck(name: 'Nope', parentDeckId: tree.leaf.id),
+        h.deckRepository.createSubDeck(
+          name: 'Nope',
+          parentDeckId: tree.leaf.id,
+        ),
         throwsA(isA<ConflictFailure>()),
       );
     });
 
     test('a missing parent is NotFound, not a database error', () async {
       await expectLater(
-        h.repository.createSubDeck(name: 'Orphan', parentDeckId: 'absent'),
+        h.deckRepository.createSubDeck(name: 'Orphan', parentDeckId: 'absent'),
         throwsA(isA<NotFoundFailure>()),
       );
     });

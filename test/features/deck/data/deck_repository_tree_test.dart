@@ -17,29 +17,39 @@ void main() {
       'impact counts descendants and cards across the whole subtree (BR-04)',
       () async {
         final tree = await h.seedTree();
-        final leaf2 = await h.repository.createSubDeck(
+        final leaf2 = await h.deckRepository.createSubDeck(
           name: 'Leaf2',
           parentDeckId: tree.branch.id,
         );
-        await h.repository.createCard(
+        await h.cardRepository.createCard(
           deckId: tree.leaf.id,
           front: 'a',
           back: 'a',
         );
-        await h.repository.createCard(deckId: leaf2.id, front: 'b', back: 'b');
-        await h.repository.createCard(deckId: leaf2.id, front: 'c', back: 'c');
+        await h.cardRepository.createCard(
+          deckId: leaf2.id,
+          front: 'b',
+          back: 'b',
+        );
+        await h.cardRepository.createCard(
+          deckId: leaf2.id,
+          front: 'c',
+          back: 'c',
+        );
 
-        final rootImpact = await h.repository.getDeletionImpact(tree.root.id);
+        final rootImpact = await h.deckRepository.getDeletionImpact(
+          tree.root.id,
+        );
         expect(rootImpact.descendantDeckCount, 3);
         expect(rootImpact.cardCount, 3);
 
-        final branchImpact = await h.repository.getDeletionImpact(
+        final branchImpact = await h.deckRepository.getDeletionImpact(
           tree.branch.id,
         );
         expect(branchImpact.descendantDeckCount, 2);
         expect(branchImpact.cardCount, 3);
 
-        final leafImpact = await h.repository.getDeletionImpact(leaf2.id);
+        final leafImpact = await h.deckRepository.getDeletionImpact(leaf2.id);
         expect(leafImpact.descendantDeckCount, 0);
         expect(leafImpact.cardCount, 2);
       },
@@ -47,7 +57,7 @@ void main() {
 
     test('deleting a root cascades the entire tree (BR-03)', () async {
       final tree = await h.seedTree();
-      await h.repository.createCard(
+      await h.cardRepository.createCard(
         deckId: tree.leaf.id,
         front: 'f',
         back: 'b',
@@ -59,7 +69,7 @@ void main() {
         rootDeckId: tree.root.id,
       );
 
-      await h.repository.deleteDeck(tree.root.id);
+      await h.deckRepository.deleteDeck(tree.root.id);
 
       expect(await h.countAll('decks'), 0);
       expect(await h.countAll('cards'), 0);
@@ -69,13 +79,13 @@ void main() {
 
     test('deleting a branch keeps the rest of the tree', () async {
       final tree = await h.seedTree();
-      await h.repository.createCard(
+      await h.cardRepository.createCard(
         deckId: tree.leaf.id,
         front: 'f',
         back: 'b',
       );
 
-      await h.repository.deleteDeck(tree.branch.id);
+      await h.deckRepository.deleteDeck(tree.branch.id);
 
       expect(await h.rawDeck(tree.root.id), isNotNull);
       expect(await h.rawDeck(tree.branch.id), isNull);
@@ -87,30 +97,30 @@ void main() {
   group('resetContentType', () {
     test('succeeds on an empty sub-deck (BR-68)', () async {
       final tree = await h.seedTree();
-      final card = await h.repository.createCard(
+      final card = await h.cardRepository.createCard(
         deckId: tree.leaf.id,
         front: 'f',
         back: 'b',
       );
-      await h.repository.deleteCard(card.id);
+      await h.cardRepository.deleteCard(card.id);
       // BR-67: still 'card' after the delete...
       expect(await h.contentTypeOf(tree.leaf.id), 'card');
 
       // ...until the explicit reset (BR-68).
-      await h.repository.resetContentType(tree.leaf.id);
+      await h.deckRepository.resetContentType(tree.leaf.id);
       expect(await h.contentTypeOf(tree.leaf.id), 'unset');
     });
 
     test('is blocked while the deck still has a card', () async {
       final tree = await h.seedTree();
-      await h.repository.createCard(
+      await h.cardRepository.createCard(
         deckId: tree.leaf.id,
         front: 'f',
         back: 'b',
       );
 
       await expectLater(
-        h.repository.resetContentType(tree.leaf.id),
+        h.deckRepository.resetContentType(tree.leaf.id),
         throwsA(isA<ConflictFailure>()),
       );
       expect(await h.contentTypeOf(tree.leaf.id), 'card');
@@ -120,27 +130,27 @@ void main() {
       final tree = await h.seedTree();
 
       await expectLater(
-        h.repository.resetContentType(tree.branch.id),
+        h.deckRepository.resetContentType(tree.branch.id),
         throwsA(isA<ConflictFailure>()),
       );
       expect(await h.contentTypeOf(tree.branch.id), 'deck');
     });
 
     test('is blocked on a root — a root is deck forever (BR-58)', () async {
-      final root = await h.repository.createRootDeck(
+      final root = await h.deckRepository.createRootDeck(
         name: 'Root',
         schedulerType: SchedulerType.eightBox,
       );
 
       await expectLater(
-        h.repository.resetContentType(root.id),
+        h.deckRepository.resetContentType(root.id),
         throwsA(isA<ConflictFailure>()),
       );
     });
 
     test('deleting the last child deck does not auto-reset (BR-67)', () async {
       final tree = await h.seedTree();
-      await h.repository.deleteDeck(tree.leaf.id);
+      await h.deckRepository.deleteDeck(tree.leaf.id);
 
       expect(await h.contentTypeOf(tree.branch.id), 'deck');
     });

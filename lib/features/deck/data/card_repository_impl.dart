@@ -1,22 +1,62 @@
-part of 'deck_repository_impl.dart';
+import 'package:drift/drift.dart';
+import 'package:uuid/uuid.dart';
 
-/// The card half of [DeckRepositoryImpl] — same class, same library, split
-/// out only so each source file stays readable. The abstract private members
-/// below are satisfied by the class in `deck_repository_impl.dart`.
-mixin _CardWriteOperations implements DeckRepository {
-  DeckDao get _dao;
-  String Function() get _idGenerator;
-  DateTime Function() get _clock;
+import '../../../core/database/app_database.dart';
+import '../../../core/error/drift_error_mapper.dart';
+import '../../../core/error/failure.dart';
+import '../domain/card_entity.dart';
+import '../domain/card_repository.dart';
+import '../domain/deck_content_type_model.dart';
+import '../domain/scheduler_type_model.dart';
+import 'card_mapper.dart';
+import 'local/card_dao.dart';
+import 'local/deck_dao.dart';
 
-  Future<T> _guard<T>(Future<T> Function() action);
-  Stream<T> _guardStream<T>(Stream<T> source);
-  Future<Deck> _requireDeckRow(String deckId);
-  Future<Card> _requireCardRow(String cardId);
-  DeckContentType _knownContentType(Deck deck);
+/// Review-state initialisation per scheduler (BR-09 table).
+const int _eightBoxInitialBox = 1;
+const double _sm2InitialEaseFactor = 2.5;
+const int _sm2InitialIntervalDays = 0;
+const int _sm2InitialRepetitions = 0;
+
+/// Drift-backed [CardRepository].
+///
+/// Uses both DAOs deliberately: `createCard` has a cross-entity invariant —
+/// validate the target deck, lock an `unset` deck to `card` (BR-62), resolve
+/// the scheduler from the root (BR-09) — and both DAOs wrap the same open
+/// [AppDatabase], so one drift transaction covers the whole write.
+///
+/// Same boundary rule as `DeckRepositoryImpl`: below this class, rows,
+/// companions and Drift exceptions; above it, entities and [Failure]. The
+/// guard helpers are intentionally this class's own — each repository owns
+/// its boundary rather than sharing one through a hidden coupling.
+final class CardRepositoryImpl implements CardRepository {
+  CardRepositoryImpl(
+    this._cardDao,
+    this._deckDao, {
+    String Function()? idGenerator,
+    DateTime Function()? clock,
+  }) : _idGenerator = idGenerator ?? const Uuid().v4,
+       _clock = clock ?? _utcNow;
+
+  final CardDao _cardDao;
+
+  /// For the deck side of the createCard invariant only — deck mutations
+  /// beyond the BR-62 content lock belong to `DeckRepositoryImpl`.
+  final DeckDao _deckDao;
+
+  /// Client-generated UUIDs (AD-03); injectable so tests are deterministic.
+  final String Function() _idGenerator;
+
+  /// Injectable clock; timestamps are stored in UTC, always.
+  final DateTime Function() _clock;
+
+  static DateTime _utcNow() => DateTime.now().toUtc();
 
   @override
-  Stream<List<CardEntity>> watchCardsByDeck(String deckId) =>
-      _guardStream(_dao.watchCardsByDeck(deckId)).map(
+  Stream<List<CardEntity>> watchCardsByDeck(String deckId) => _cardDao
+      .watchCardsByDeck(deckId)
+      .handleError(_rethrowMapped)
+      .map(
         (List<Card> rows) =>
             rows.map(cardEntityFromRow).toList(growable: false),
       );
@@ -27,7 +67,7 @@ mixin _CardWriteOperations implements DeckRepository {
     required String front,
     required String back,
   }) => _guard(
-    () => _dao.runInTransaction(() async {
+    () => _cardDao.runInTransaction(() async {
       final validFront = CardEntity.validateSide(front, side: 'front');
       final validBack = CardEntity.validateSide(back, side: 'back');
       final deck = await _requireDeckRow(deckId);
@@ -48,7 +88,7 @@ mixin _CardWriteOperations implements DeckRepository {
       final now = _clock();
       if (deckType == DeckContentType.unset) {
         // First card locks the deck to 'card' — same atomic step (BR-62).
-        await _dao.updateDeckById(
+        await _deckDao.updateDeckById(
           deck.id,
           DecksCompanion(
             contentType: Value<String>(DeckContentType.card.dbValue),
@@ -58,7 +98,7 @@ mixin _CardWriteOperations implements DeckRepository {
       }
 
       final id = _idGenerator();
-      await _dao.insertCard(
+      await _cardDao.insertCard(
         CardsCompanion.insert(
           id: id,
           deckId: deck.id,
@@ -70,7 +110,7 @@ mixin _CardWriteOperations implements DeckRepository {
       );
       // Exactly one review state, born with the card (BR-09). due_at stays
       // NULL — a new card is due immediately. Counters default to 0.
-      await _dao.insertReviewState(_initialReviewState(id, scheduler));
+      await _cardDao.insertReviewState(_initialReviewState(id, scheduler));
 
       return cardEntityFromRow(await _requireCardRow(id));
     }),
@@ -87,7 +127,7 @@ mixin _CardWriteOperations implements DeckRepository {
     await _requireCardRow(cardId);
     // Writes to `cards` only — the review state and history cannot change
     // here because nothing else is touched (BR-10).
-    await _dao.updateCardById(
+    await _cardDao.updateCardById(
       cardId,
       CardsCompanion(
         front: Value<String>(validFront),
@@ -104,8 +144,57 @@ mixin _CardWriteOperations implements DeckRepository {
     await _requireCardRow(cardId);
     // The review state and history cascade; the deck's content_type is
     // deliberately left alone, even for the last card (BR-67).
-    await _dao.deleteCardById(cardId);
+    await _cardDao.deleteCardById(cardId);
   });
+
+  // ---- helpers -----------------------------------------------------------
+
+  Future<T> _guard<T>(Future<T> Function() action) async {
+    try {
+      return await action();
+    } on Failure {
+      rethrow;
+    } on Object catch (error) {
+      throw mapDatabaseError(error);
+    }
+  }
+
+  Never _rethrowMapped(Object error) {
+    if (error is Failure) throw error;
+    throw mapDatabaseError(error);
+  }
+
+  Future<Deck> _requireDeckRow(String deckId) async {
+    final row = await _deckDao.deckById(deckId);
+    if (row == null) {
+      throw const NotFoundFailure(message: 'That deck no longer exists.');
+    }
+
+    return row;
+  }
+
+  Future<Card> _requireCardRow(String cardId) async {
+    final row = await _cardDao.cardById(cardId);
+    if (row == null) {
+      throw const NotFoundFailure(message: 'That card no longer exists.');
+    }
+
+    return row;
+  }
+
+  /// Reads a deck's content type, refusing to operate on a value this build
+  /// does not understand — altering such a deck could contradict rules a
+  /// newer schema attached to it.
+  DeckContentType _knownContentType(Deck deck) {
+    final type = DeckContentType.fromDbValue(deck.contentType);
+    if (type == DeckContentType.unknown) {
+      throw const ConflictFailure(
+        message: 'This deck was made by a newer version of the app.',
+      );
+    }
+
+    return type;
+  }
 
   /// The root's scheduler columns, resolved through `root_deck_id` (BR-57)
   /// for the review state a new card must carry (BR-09).

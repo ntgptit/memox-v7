@@ -15,11 +15,11 @@ void main() {
     'moves a three-level subtree and rewrites every root pointer (BR-71)',
     () async {
       final treeA = await h.seedTree(prefix: 'A-');
-      final grandLeaf = await h.repository.createSubDeck(
+      final grandLeaf = await h.deckRepository.createSubDeck(
         name: 'A-GrandLeaf',
         parentDeckId: treeA.leaf.id,
       );
-      await h.repository.createCard(
+      await h.cardRepository.createCard(
         deckId: grandLeaf.id,
         front: 'f',
         back: 'b',
@@ -27,7 +27,7 @@ void main() {
       final treeB = await h.seedTree(prefix: 'B-');
 
       // Move branch (level 2 of A, itself three levels deep) under B's leaf.
-      await h.repository.moveDeck(
+      await h.deckRepository.moveDeck(
         deckId: treeA.branch.id,
         targetParentDeckId: treeB.leaf.id,
       );
@@ -54,12 +54,12 @@ void main() {
 
   test('a move within the same root keeps pointers and stays atomic', () async {
     final tree = await h.seedTree();
-    final branch2 = await h.repository.createSubDeck(
+    final branch2 = await h.deckRepository.createSubDeck(
       name: 'Branch2',
       parentDeckId: tree.root.id,
     );
 
-    await h.repository.moveDeck(
+    await h.deckRepository.moveDeck(
       deckId: tree.leaf.id,
       targetParentDeckId: branch2.id,
     );
@@ -74,7 +74,7 @@ void main() {
     final tree = await h.seedTree();
 
     await expectLater(
-      h.repository.moveDeck(
+      h.deckRepository.moveDeck(
         deckId: tree.branch.id,
         targetParentDeckId: tree.branch.id,
       ),
@@ -86,7 +86,7 @@ void main() {
     final tree = await h.seedTree();
 
     await expectLater(
-      h.repository.moveDeck(
+      h.deckRepository.moveDeck(
         deckId: tree.branch.id,
         targetParentDeckId: tree.leaf.id,
       ),
@@ -102,10 +102,14 @@ void main() {
   test('into a card deck is blocked (BR-64)', () async {
     final treeA = await h.seedTree(prefix: 'A-');
     final treeB = await h.seedTree(prefix: 'B-');
-    await h.repository.createCard(deckId: treeB.leaf.id, front: 'f', back: 'b');
+    await h.cardRepository.createCard(
+      deckId: treeB.leaf.id,
+      front: 'f',
+      back: 'b',
+    );
 
     await expectLater(
-      h.repository.moveDeck(
+      h.deckRepository.moveDeck(
         deckId: treeA.branch.id,
         targetParentDeckId: treeB.leaf.id,
       ),
@@ -118,7 +122,7 @@ void main() {
     final treeB = await h.seedTree(prefix: 'B-', scheduler: SchedulerType.sm2);
 
     await expectLater(
-      h.repository.moveDeck(
+      h.deckRepository.moveDeck(
         deckId: treeA.branch.id,
         targetParentDeckId: treeB.branch.id,
       ),
@@ -135,7 +139,7 @@ void main() {
     );
 
     await expectLater(
-      h.repository.moveDeck(
+      h.deckRepository.moveDeck(
         deckId: treeA.branch.id,
         targetParentDeckId: treeB.branch.id,
       ),
@@ -148,7 +152,7 @@ void main() {
     final treeB = await h.seedTree(prefix: 'B-');
 
     await expectLater(
-      h.repository.moveDeck(
+      h.deckRepository.moveDeck(
         deckId: treeA.root.id,
         targetParentDeckId: treeB.branch.id,
       ),
@@ -174,7 +178,7 @@ void main() {
       );
 
       await expectLater(
-        h.repository.moveDeck(
+        h.deckRepository.moveDeck(
           deckId: treeA.branch.id,
           targetParentDeckId: treeB.leaf.id,
         ),

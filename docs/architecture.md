@@ -7,8 +7,8 @@
 | **Scope** | Quyết định ràng buộc nhiều tài liệu hoặc nhiều layer. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), hình dạng dữ liệu (`data-model.md`) |
 | **Source of truth for** | AD-xx · đánh đổi kiến trúc · phương án đã bị loại · lý do pin toolchain |
 | **Depends on** | `document-conventions.md`, `product.md` |
-| **Updated by task** | M2.1a |
-| **Last updated** | 2026-07-28 |
+| **Updated by task** | M4.9a |
+| **Last updated** | 2026-07-29 |
 
 Format theo `document-conventions.md` §6.1. AD xếp theo số; ID vĩnh viễn (§7).
 
@@ -429,8 +429,8 @@ khoá.
 | **Status** | accepted |
 | **Affected documents** | `business-rules.md` (BR-55…BR-72) · `use-cases.md` (UC-08, UC-09) · `data-model.md` |
 
-**Quyết định.** Deck lồng được nhiều cấp. Root deck chỉ chứa deck con — không bao
-giờ chứa card trực tiếp. Mỗi deck không phải root mang `content_type` với ba giá
+**Quyết định.** Deck lồng được nhiều cấp — tối đa 10, root là cấp 1 (BR-55).
+Root deck chỉ chứa deck con — không bao giờ chứa card trực tiếp. Mỗi deck không phải root mang `content_type` với ba giá
 trị `unset` / `card` / `deck`, xác lập bởi lần tạo phần tử con đầu tiên và sau đó
 không đổi trừ khi reset tường minh.
 

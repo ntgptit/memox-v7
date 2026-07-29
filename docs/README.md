@@ -7,8 +7,8 @@
 | **Scope** | Toàn bộ `docs/`. Ngoài phạm vi: nội dung của từng tài liệu |
 | **Source of truth for** | Danh mục tài liệu · trạng thái từng tài liệu · tài liệu chưa viết và phase sở hữu |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | T1.3a |
-| **Last updated** | 2026-07-28 |
+| **Updated by task** | M4.9a |
+| **Last updated** | 2026-07-29 |
 
 Format và thứ tự đọc: [`document-conventions.md`](document-conventions.md).
 
@@ -23,7 +23,7 @@ Format và thứ tự đọc: [`document-conventions.md`](document-conventions.m
 | [`architecture.md`](architecture.md) | Architecture decisions AD-01…11 with reasoning | active |
 | [`use-cases.md`](use-cases.md) | UC-01…09 cho must-have MVP | **frozen for MVP** |
 | [`business-rules.md`](business-rules.md) | BR-01…87: cây deck, hai scheduler, review_kind, session lifecycle, reset/generation, starter template | **frozen for MVP** |
-| [`data-model.md`](data-model.md) | Schema + 14 câu query bất biến: decks (cây nhiều cấp), cards, card_review_states, review_history, study_sessions, templates | **frozen for MVP** |
+| [`data-model.md`](data-model.md) | Schema + 15 câu query bất biến: decks (cây nhiều cấp), cards, card_review_states, review_history, study_sessions, templates | **frozen for MVP** |
 
 "Frozen for MVP" nghĩa là đặc tả đã chốt và code được viết theo nó. Đổi một tài
 liệu frozen là một quyết định có chủ đích, phải kèm cập nhật mọi tài liệu tham

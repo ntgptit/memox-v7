@@ -4,43 +4,35 @@ import 'package:uuid/uuid.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/error/drift_error_mapper.dart';
 import '../../../core/error/failure.dart';
-import '../domain/card_entity.dart';
 import '../domain/deck_content_type_model.dart';
 import '../domain/deck_deletion_impact_model.dart';
 import '../domain/deck_entity.dart';
 import '../domain/deck_repository.dart';
 import '../domain/scheduler_type_model.dart';
-import 'card_mapper.dart';
 import 'deck_mapper.dart';
 import 'local/deck_dao.dart';
 
-part 'card_write_deck_repository_impl.dart';
 part 'move_deck_repository_impl.dart';
 
 /// A fresh root deck starts at scheduler version 1, generation 1 (BR-40).
 const int _initialSchedulerVersion = 1;
 const int _initialSchedulerGeneration = 1;
 
-/// Review-state initialisation per scheduler (BR-09 table).
-const int _eightBoxInitialBox = 1;
-const double _sm2InitialEaseFactor = 2.5;
-const int _sm2InitialIntervalDays = 0;
-const int _sm2InitialRepetitions = 0;
-
-/// Drift-backed [DeckRepository].
+/// Drift-backed [DeckRepository]. Card CRUD lives in `CardRepositoryImpl`.
 ///
 /// This class is the boundary of two languages: below it, rows, companions and
 /// Drift exceptions; above it, entities and [Failure]. Nothing from below
 /// crosses up — every method runs inside [_guard], which rethrows domain
 /// failures untouched and maps anything else through `mapDatabaseError`.
 ///
-/// Multi-step writes — first-child content lock (BR-62), card + review state
-/// (BR-09), subtree move (BR-71) — each run atomically: a thrown failure
-/// anywhere inside rolls back every step. The card and move operations live in
-/// the two part files as private mixins, purely to keep each source file
+/// Multi-step writes — first-child content lock (BR-62), subtree move
+/// (BR-71) — each run atomically: a thrown failure anywhere inside rolls back
+/// every step. Depth guards (BR-55) run BEFORE any mutation, so a refused
+/// write leaves no trace even mid-transaction. The move operation lives in
+/// the part file as a private mixin, purely to keep each source file
 /// readable; it is one class and one library.
 final class DeckRepositoryImpl
-    with _CardWriteOperations, _MoveDeckOperation
+    with _MoveDeckOperation
     implements DeckRepository {
   DeckRepositoryImpl(
     this._dao, {
@@ -53,7 +45,6 @@ final class DeckRepositoryImpl
   final DeckDao _dao;
 
   /// Client-generated UUIDs (AD-03); injectable so tests are deterministic.
-  @override
   final String Function() _idGenerator;
 
   /// Injectable clock; timestamps are stored in UTC, always.
@@ -80,7 +71,7 @@ final class DeckRepositoryImpl
   Future<DeckEntity> getDeckById(String deckId) =>
       _guard(() async => deckEntityFromRow(await _requireDeckRow(deckId)));
 
-  // ---- deck writes -------------------------------------------------------
+  // ---- writes ------------------------------------------------------------
 
   @override
   Future<DeckEntity> createRootDeck({
@@ -121,6 +112,16 @@ final class DeckRepositoryImpl
       if (parentType == DeckContentType.card) {
         throw const ConflictFailure(
           message: 'This deck holds cards, so it cannot hold decks.',
+        );
+      }
+      // BR-55 — refused BEFORE the content lock below, so a rejected create
+      // mutates nothing at all.
+      final parentDepth = await _requireDeckDepth(parent.id);
+      if (parentDepth >= DeckEntity.maxTreeDepth) {
+        throw const ConflictFailure(
+          message:
+              'This deck already sits at the deepest allowed level '
+              '(${DeckEntity.maxTreeDepth}).',
         );
       }
 
@@ -236,7 +237,6 @@ final class DeckRepositoryImpl
 
   /// Re-throws stream errors through the same boundary as [_guard], so a
   /// watcher never sees a raw Drift exception either.
-  @override
   Stream<T> _guardStream<T>(Stream<T> source) =>
       source.handleError(_rethrowMapped);
 
@@ -253,16 +253,6 @@ final class DeckRepositoryImpl
     final row = await _dao.deckById(deckId);
     if (row == null) {
       throw const NotFoundFailure(message: 'That deck no longer exists.');
-    }
-
-    return row;
-  }
-
-  @override
-  Future<Card> _requireCardRow(String cardId) async {
-    final row = await _dao.cardById(cardId);
-    if (row == null) {
-      throw const NotFoundFailure(message: 'That card no longer exists.');
     }
 
     return row;
@@ -293,5 +283,47 @@ final class DeckRepositoryImpl
     }
 
     return type;
+  }
+
+  /// The deck's level with the root as level 1 (BR-55).
+  ///
+  /// The walk is bounded one step past the allowed maximum: an intact chain
+  /// within the limit always reaches its root inside that bound, so a probe
+  /// that does not is a chain deeper than the app supports or a cyclic one —
+  /// refused, never guessed at.
+  @override
+  Future<int> _requireDeckDepth(String deckId) async {
+    final probe = await _dao.deckDepthProbe(
+      deckId: deckId,
+      maxWalk: DeckEntity.maxTreeDepth + 1,
+    );
+    if (probe == null || !probe.reachedRoot) {
+      throw const ConflictFailure(
+        message: 'This deck sits deeper than the app supports.',
+      );
+    }
+
+    return probe.depth;
+  }
+
+  /// The subtree's height with the deck itself as height 1 (BR-55).
+  ///
+  /// Same bounding rule as [_requireDeckDepth]: a height at the walk bound
+  /// means "at least this tall" — taller than any tree the limit permits, or
+  /// cyclic — and is refused.
+  @override
+  Future<int> _requireSubtreeHeight(String deckId) async {
+    const maxWalk = DeckEntity.maxTreeDepth + 1;
+    final height = await _dao.subtreeHeightProbe(
+      deckId: deckId,
+      maxWalk: maxWalk,
+    );
+    if (height == null || height >= maxWalk) {
+      throw const ConflictFailure(
+        message: 'This deck holds more nested levels than the app supports.',
+      );
+    }
+
+    return height;
   }
 }
