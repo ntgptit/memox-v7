@@ -5,7 +5,16 @@ import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_spacing.dart';
 import 'package:memox/core/theme/app_theme.dart';
 
-/// Renders real screens under the **production** theme, light and dark.
+/// Design exploration: composition studies under the **production** theme.
+///
+/// **These are look-alikes, not the app.** `_ReviewScreen`, `_DeckListScreen`
+/// and `_SettingsScreen` are private replicas built to argue about colour before
+/// the real screens existed. Auditing a replica proves only that the replica is
+/// correct — the production screens are audited from
+/// `test/visual_audit/screens/audited_screens.dart`, and the coverage gate there
+/// is what makes sure none is forgotten. The folder is named `design_preview`
+/// rather than `review` so the two are not mistaken for each other, which they
+/// were.
 ///
 /// Not a design-system component and not shipped: nothing here is imported by
 /// `lib/`. It exists because the questions that decide a palette cannot be

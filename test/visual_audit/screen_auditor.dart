@@ -301,6 +301,16 @@ void _extract(
   AuditSink sink,
   List<PaintExtractor> extractors,
 ) {
+  if (renderIsErrorBox(node)) {
+    sink.skip(
+      SkipReason.errorWidget,
+      'the widget threw while building and Flutter is rendering its error box',
+      rect: rect,
+    );
+
+    return;
+  }
+
   // Layout scaffolding first: a zero-height spacer is not a finding, and ten
   // of them per screen is how a real skip gets scrolled past.
   if (renderPaintsNothing(node)) return;

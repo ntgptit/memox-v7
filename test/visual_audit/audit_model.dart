@@ -74,6 +74,15 @@ enum SkipReason {
   /// the comparison is not attempted. Reported rather than guessed at.
   rasterNotFlat,
 
+  /// Flutter's error box is on screen: the widget threw while building.
+  ///
+  /// Recorded as a skip so the walk can carry on, but promoted to a blocking
+  /// finding by a rule — a screen that failed to build has no colours worth
+  /// discussing, and the first run of this harness against production widgets
+  /// filed exactly that as "unrecognised render type" and reported
+  /// PASS_WITH_UNRESOLVED.
+  errorWidget,
+
   /// An anchor named a piece of UI that is not on screen. Not a colour problem
   /// — a report that silently loses an item someone asked for by name.
   anchorNotFound,

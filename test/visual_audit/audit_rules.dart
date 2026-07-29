@@ -294,3 +294,31 @@ Color? _backgroundBehind(ScreenAudit audit, AuditPaint paint) {
 
 String _where(Rect rect) =>
     '${rect.left.toStringAsFixed(0)},${rect.top.toStringAsFixed(0)}';
+
+/// A screen that failed to build is a failure, not an unread node.
+///
+/// The walk records the error box as a skip so it can keep going; without this
+/// rule that skip lands in the same list as "this painter is raster-only" and
+/// the run reports PASS_WITH_UNRESOLVED. Which it did, on both production
+/// screens, the first time this harness was pointed at `lib/` — every colour
+/// assertion passed because there were no colours.
+class NoErrorWidgetRule implements AuditRule {
+  const NoErrorWidgetRule();
+
+  @override
+  String get name => 'build.no_error_widget';
+
+  @override
+  Iterable<AuditFinding> check(ScreenAudit audit) sync* {
+    for (final skip in audit.skipsBecause(SkipReason.errorWidget)) {
+      yield AuditFinding(
+        rule: name,
+        itemId: skip.itemId,
+        message:
+            'the screen did not build — every colour check below passed only '
+            'because nothing was painted',
+        isBlocking: true,
+      );
+    }
+  }
+}

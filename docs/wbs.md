@@ -27,7 +27,7 @@ AD / UC (xem `business-rules.md`).
 | M1 · Product definition (Phase 0–1) | **done** | Đặc tả MVP đã frozen: AD-01…11, BR-01…87, UC-01…09, data model đầy đủ |
 | M2 · Project foundation (Phase 2–3, 6) | **done** | Toàn bộ 9 task đóng: M2.1 · M2.1a · M2.1b · M2.2 · M2.2b · M2.3 · M2.4 · M2.5 · M2.6. App build được trên Android (3 flavor cài song song) và Web, l10n en/vi, bootstrap có error boundary, lint + guard đều enforce. Tiếp theo: **M3.1 · Cấu trúc feature-first và ranh giới layer** |
 | M3 · Architecture & design system (Phase 4–5, 7, 12–13) | **done** | Mười hai task đóng: M3.1…M3.6 cộng M3.5a (review color system), M3.5b (áp A2 Quizlet Navy Indigo — 46 role `ColorScheme` khai báo tường minh), M3.5c (visual audit harness), M3.5d (siết tính đúng đắn của audit core), M3.5e (anchor, clip và allowance) và M3.5f (clip hỏi Flutter thay vì đoán). Cây feature-first + guard siết về `fail_on: [error, warning]`, Failure model, Riverpod foundation, design token, hai theme M3, sáu base component kèm 14 golden. Tiếp theo: **M4.2 · Drift connection và schema `.drift`** |
-| M4 · Router & Drift foundation (Phase 8, 11) | in progress | M4.1 **done** — GoRouter tập trung, `MaterialApp.router`, 404 ở `app/fallback/`, redirect là no-op auth hook (AD-03). Tiếp theo: **M4.2 · Drift connection và schema `.drift`**. **Phase 10 (networking) hoãn** — AD-01, AD-05 |
+| M4 · Router & Drift foundation (Phase 8, 11) | in progress | M4.1 **done** — GoRouter tập trung, `MaterialApp.router`, 404 ở `app/fallback/`, redirect là no-op auth hook (AD-03). M4.1a **done** — cổng ép mọi màn mới phải được visual audit. Tiếp theo: **M4.2 · Drift connection và schema `.drift`**. **Phase 10 (networking) hoãn** — AD-01, AD-05 |
 | M5 · First vertical slice: luồng ôn tập (Phase 14) | todo | UC-05 |
 | M6 · Test suite (Phase 15) | todo | Chạy song song M5, không phải sau |
 | M7 · CI/CD (Phase 19) | todo | Bắt đầu được ngay sau M2. Job Android + Web, chưa có iOS (AD-04) |
@@ -1455,6 +1455,55 @@ migration test và enforcement cho các bất biến.
   screen, copy đã localization và không lộ URL, nút quay về, fallback dùng
   `AppScaffoldWidget` + `AppErrorStateWidget`
 - **Checklist phases:** 8.1, 8.2
+
+### M4.1a · Screen audit coverage gate
+
+- **Status:** done
+- **Goal:** Ép mọi màn hình mới trong `lib/` phải được visual audit, bằng một
+  cổng không thoả mãn được bằng file rỗng.
+- **Scope:** registry `audited_screens.dart` lái cả audit lẫn coverage check;
+  `PendingAudit` có rationale và WBS task; kiểm vị trí file screen; audit thật
+  cho hai màn đang có; đổi tên `test/review/` → `test/design_preview/`.
+- **Out of scope:** state matrix, golden cho màn mới, M4.2.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `test/visual_audit/screens/{audited_screens,screen_audit_coverage}.dart`,
+  `screen_audit_test.dart`, `screen_audit_coverage_test.dart`;
+  `test/design_preview/` (đổi tên từ `test/review/`)
+- **Acceptance criteria:**
+  - [x] Màn mới trong `lib/` không đăng ký → `flutter test` **đỏ**, thông báo nêu
+        đúng tên class và dòng cần thêm.
+  - [x] Một registry lái **cả hai**: entry sinh ra audit đang chạy, và coverage
+        check đòi entry.
+  - [x] `PendingAudit` bắt buộc có rationale + WBS task; entry cũ trỏ vào màn
+        không còn tồn tại → fail.
+  - [x] `*_screen.dart` chỉ được nằm ở `lib/features/*/presentation/` hoặc
+        `lib/app/fallback/`.
+  - [x] Fault injection cả hai nhánh: màn đặt sai chỗ, và màn hợp lệ chưa đăng ký.
+- **Vì sao không dùng luật "mỗi screen phải có file test cùng tên":** luật đó
+  **thoả mãn được bằng một file rỗng**. Ép sự *tồn tại* của file không ép được sự
+  *chạy* của audit. Registry đóng lỗ đó vì không còn file nào để tạo rỗng.
+- **Vì sao kiểm vị trí nằm ở Dart chứ không ở guard:** guard đọc từng file một,
+  nên phải diễn đạt thành *"tập file này phải rỗng"* — mà nó không phân biệt được
+  với một rule có scope đã chết, và báo `rule_without_targets` **vĩnh viễn**. Tôi
+  đã viết rule đó, chạy được, rồi bỏ: im lặng diagnostic ấy chính là cách ba rule
+  chết sống sót trong repo này. Kiểm trong Dart có full path và không có vấn đề
+  scope rỗng.
+- **Hai lỗi cổng này bắt được ngay lần chạy đầu:** harness `auditMemoxScreen`
+  pump một `MaterialApp` **không có localization delegate**, nên cả hai màn
+  production ném lỗi và render error box của Flutter — 0 paint, mà audit vẫn báo
+  `PASS_WITH_UNRESOLVED`. Ba màn replica trong `test/review/` dùng chuỗi cứng nên
+  chưa bao giờ chạm vào. Đã thêm delegate, và thêm `NoErrorWidgetRule` để một màn
+  không build được **không bao giờ** pass — trước đó nó chỉ là
+  `unknownRenderType`.
+- **`test/review/` đổi tên thành `test/design_preview/`:** ba màn trong đó là bản
+  sao private để tranh luận về màu trước khi có màn thật. Audit một bản sao chỉ
+  chứng minh bản sao đúng. Các mục M3.5a–M3.5f vẫn ghi đường dẫn cũ vì chúng là
+  ghi chép tại thời điểm đó — không sửa lại lịch sử.
+- **Dependencies:** M4.1
+- **Tests required:** coverage gate trên dữ liệu thật; năm luật của gate trên dữ
+  liệu tổng hợp (chưa đăng ký, đã đăng ký, hoãn hợp lệ, hoãn cũ, vừa audit vừa
+  hoãn); kiểm vị trí file; audit thật hai màn × light/dark
+- **Checklist phases:** 8.1, 14.1
 
 ### M4.2 · Drift connection và schema `.drift`
 
