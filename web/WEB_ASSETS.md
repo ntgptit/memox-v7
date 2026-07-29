@@ -49,23 +49,18 @@ site root, so the root-absolute production URLs in
 `lib/core/database/connection.dart` resolve during the web runtime test.
 `web_assets_test.dart` asserts the copies stay identical to the originals.
 
-## One-time fix for checkouts that predate the `.gitattributes` entries
+## The LF blob is canonical — and the provenance banner enforces it
 
-The `test/` copies landed one commit before their `.gitattributes` entries, so
-a Windows checkout with `core.autocrlf` smudged `test/drift_worker.js` to CRLF
-at that first checkout. The attributes commit did not change the blob, so
-`git pull` never re-checked the file out — the worktree copy stays CRLF and
-the byte-parity test fails, even though the committed blob is correct and
-identical to `web/`'s.
+Both worker copies start with a one-line `// Compiled drift worker for memox…`
+banner. It records provenance, and it exists for a second, deliberate reason:
+the `test/` copies originally landed one commit before their `.gitattributes`
+entries, so a Windows checkout with `core.autocrlf` smudged
+`test/drift_worker.js` to CRLF at that first checkout — and because the
+attributes commit changed no blob, `git pull` never re-checked the file out.
+Prepending the banner **changed the blob**, so every checkout — stale Windows
+worktrees included — rewrites the file on pull and gets the canonical LF bytes
+under the `-text` attribute. No manual re-smudge step is needed.
 
-Fresh clones are unaffected. On an existing checkout, re-smudge the four
-asset paths once with the current attributes:
-
-```bash
-rm test/drift_worker.js web/drift_worker.js test/sqlite3.wasm web/sqlite3.wasm
-git checkout -- test/drift_worker.js web/drift_worker.js \
-  test/sqlite3.wasm web/sqlite3.wasm
-```
-
-`git status` stays clean afterwards (the blobs never changed), and
-`git ls-files --eol` shows `w/lf` for both worker copies.
+When rebuilding the worker (commands above), re-add the banner line first and
+re-copy to `test/` — `web_assets_test.dart` asserts both the banner and the
+byte parity.
