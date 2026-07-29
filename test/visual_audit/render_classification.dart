@@ -110,3 +110,6 @@ const Set<String> _privateAndPainting = <String>{
 /// True when the node paints something the render tree cannot report.
 bool renderPaintsRasterOnly(RenderObject node) =>
     _privateAndPainting.contains(node.runtimeType.toString());
+
+/// Flutter's red error screen, in render-object form.
+bool renderIsErrorBox(RenderObject node) => node is RenderErrorBox;

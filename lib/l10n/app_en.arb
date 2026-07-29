@@ -29,5 +29,19 @@
   "unexpectedErrorMessage": "This part of the app could not be displayed.",
   "@unexpectedErrorMessage": {
     "description": "Body shown in place of Flutter's red error screen. Deliberately carries no stack trace or widget name."
+  },
+  "pageNotFoundTitle": "Page not found",
+  "@pageNotFoundTitle": {
+    "description": "Heading of the screen shown when a location matches no route. Carries no URL — the user cannot act on it, and a location can hold private content once deep links exist."
+  },
+
+  "pageNotFoundMessage": "The page you requested does not exist.",
+  "@pageNotFoundMessage": {
+    "description": "Body of the 404 screen. Deliberately free of the failed path, the router state and any technical detail."
+  },
+
+  "goHomeAction": "Go home",
+  "@goHomeAction": {
+    "description": "Button on the 404 screen that returns to the app's main route."
   }
 }

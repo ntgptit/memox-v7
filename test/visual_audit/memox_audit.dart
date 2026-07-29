@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_theme.dart';
+import 'package:memox/l10n/generated/app_localizations.dart';
 
 import '../support/app_palette.dart';
 import 'audit_allowance.dart';
@@ -23,6 +25,8 @@ List<AuditRule> memoxAuditRules({required bool isDark}) {
       : const AppSemanticColors.light();
 
   return <AuditRule>[
+    // First, because everything after it is meaningless if the screen threw.
+    const NoErrorWidgetRule(),
     const TextContrastRule(),
     NonTextContrastRule(<Color>[
       semantic.focusRing,
@@ -58,6 +62,19 @@ Future<ScreenAudit> auditMemoxScreen(
     AuditSurface(
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
+        // The delegates are not optional scenery. A real screen reads its copy
+        // through `context.l10n`, and without them every one of them throws and
+        // renders Flutter's error box — which the first run of this harness
+        // against production widgets did, on both screens, while the replica
+        // screens it had been developed on used hardcoded strings and never
+        // noticed.
+        localizationsDelegates: const <LocalizationsDelegate<Object>>[
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
         theme: isDark ? buildDarkTheme() : buildLightTheme(),
         home: screen,
       ),
