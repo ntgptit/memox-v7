@@ -1,0 +1,96 @@
+import '../tables/decks.drift';
+import '../tables/cards.drift';
+
+-- Typed queries for the Deck/Card management vertical (M4.9).
+--
+-- Tree reads resolve through `root_deck_id`, never by coalescing the parent
+-- column with the id (BR-57): that expression means "my parent, or me if I
+-- have none" and returns the wrong deck from the third level down.
+--
+-- Subtree walks that genuinely need recursion — an arbitrary deck's
+-- descendants for a move or a deletion count — use a recursive CTE bounded to
+-- depth 64, the same guard invariant Q8 uses: a walker that can loop forever
+-- on already-broken data is a walker that hangs instead of reporting.
+
+-- Root decks for the list screen (UC-06 reads it; M4.9 provides it).
+rootDecks:
+SELECT * FROM decks
+WHERE parent_deck_id IS NULL
+ORDER BY created_at ASC, id ASC;
+
+deckById:
+SELECT * FROM decks WHERE id = :deckId;
+
+-- One root's whole tree, root included, at any depth. No recursion needed:
+-- every descendant already carries the root's id (BR-56).
+decksInTree:
+SELECT * FROM decks
+WHERE root_deck_id = :rootDeckId
+ORDER BY created_at ASC, id ASC;
+
+childDecks:
+SELECT * FROM decks
+WHERE parent_deck_id = :parentDeckId
+ORDER BY created_at ASC, id ASC;
+
+-- An arbitrary deck's subtree — itself plus every descendant. This is the one
+-- place recursion is required, because the argument need not be a root.
+subtreeDeckIds:
+WITH RECURSIVE subtree (id, depth) AS (
+    SELECT id, 0 FROM decks WHERE id = :deckId
+    UNION ALL
+    SELECT d.id, s.depth + 1
+    FROM decks d
+    INNER JOIN subtree s ON d.parent_deck_id = s.id
+    WHERE s.depth < 64
+)
+SELECT id FROM subtree;
+
+-- Direct children only — the emptiness check for BR-68.
+directChildDeckCount:
+SELECT COUNT(*) AS childCount FROM decks WHERE parent_deck_id = :deckId;
+
+directCardCount:
+SELECT COUNT(*) AS cardCount FROM cards WHERE deck_id = :deckId;
+
+-- Cards in a whole subtree, for the deletion confirm (BR-04).
+subtreeCardCount:
+WITH RECURSIVE subtree (id, depth) AS (
+    SELECT id, 0 FROM decks WHERE id = :deckId
+    UNION ALL
+    SELECT d.id, s.depth + 1
+    FROM decks d
+    INNER JOIN subtree s ON d.parent_deck_id = s.id
+    WHERE s.depth < 64
+)
+SELECT COUNT(*) AS cardCount
+FROM cards c
+WHERE c.deck_id IN (SELECT id FROM subtree);
+
+-- Rewrites the root pointer for a whole subtree in one statement (BR-71).
+-- Runs inside the move transaction; a failure anywhere rolls the lot back.
+updateSubtreeRootDeck:
+UPDATE decks
+SET root_deck_id = :newRootDeckId, updated_at = :updatedAt
+WHERE id IN (
+    WITH RECURSIVE subtree (id, depth) AS (
+        SELECT id, 0 FROM decks WHERE id = :deckId
+        UNION ALL
+        SELECT d.id, s.depth + 1
+        FROM decks d
+        INNER JOIN subtree s ON d.parent_deck_id = s.id
+        WHERE s.depth < 64
+    )
+    SELECT id FROM subtree
+);
+
+cardsByDeck:
+SELECT * FROM cards
+WHERE deck_id = :deckId
+ORDER BY created_at ASC, id ASC;
+
+cardById:
+SELECT * FROM cards WHERE id = :cardId;
+
+reviewStateByCard:
+SELECT * FROM card_review_states WHERE card_id = :cardId;

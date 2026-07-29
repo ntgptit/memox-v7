@@ -26,7 +26,28 @@ import 'package:drift_flutter/drift_flutter.dart';
 /// every existing user's data behind a file nobody opens.
 const String kDatabaseName = 'memox';
 
+/// The two vendored web assets, served from the site root (see `web/` and
+/// `web/WEB_ASSETS.md`). Paths are migration-relevant the same way the
+/// database name is: moving either strands the web build without storage.
+///
+/// Root-absolute on purpose: a relative URI resolves against the *page*
+/// URL, so it works from `index.html` and silently 404s from any nested
+/// page — which is exactly where the web test harness hosts its page.
+const String kSqlite3WasmPath = '/sqlite3.wasm';
+const String kDriftWorkerPath = '/drift_worker.js';
+
 /// Opens the app's database for the current platform.
+///
+/// The `web` options are not optional decoration: `driftDatabase` throws on
+/// web without them. That gap survived until M4.9's web runtime test actually
+/// opened the database in a browser — a build that compiles is not a build
+/// that persists.
 QueryExecutor openAppDatabaseConnection() {
-  return driftDatabase(name: kDatabaseName);
+  return driftDatabase(
+    name: kDatabaseName,
+    web: DriftWebOptions(
+      sqlite3Wasm: Uri.parse(kSqlite3WasmPath),
+      driftWorker: Uri.parse(kDriftWorkerPath),
+    ),
+  );
 }

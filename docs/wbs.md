@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M4.4a |
+| **Updated by task** | M4.9 |
 | **Last updated** | 2026-07-29 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -27,7 +27,7 @@ AD / UC (xem `business-rules.md`).
 | M1 · Product definition (Phase 0–1) | **done** | Đặc tả MVP đã frozen: AD-01…11, BR-01…87, UC-01…09, data model đầy đủ |
 | M2 · Project foundation (Phase 2–3, 6) | **done** | Toàn bộ 9 task đóng: M2.1 · M2.1a · M2.1b · M2.2 · M2.2b · M2.3 · M2.4 · M2.5 · M2.6. App build được trên Android (3 flavor cài song song) và Web, l10n en/vi, bootstrap có error boundary, lint + guard đều enforce. Tiếp theo: **M3.1 · Cấu trúc feature-first và ranh giới layer** |
 | M3 · Architecture & design system (Phase 4–5, 7, 12–13) | **done** | Mười hai task đóng: M3.1…M3.6 cộng M3.5a (review color system), M3.5b (áp A2 Quizlet Navy Indigo — 46 role `ColorScheme` khai báo tường minh), M3.5c (visual audit harness), M3.5d (siết tính đúng đắn của audit core), M3.5e (anchor, clip và allowance) và M3.5f (clip hỏi Flutter thay vì đoán). Cây feature-first + guard siết về `fail_on: [error, warning]`, Failure model, Riverpod foundation, design token, hai theme M3, sáu base component kèm 14 golden. Milestone đóng — không quyết định next task |
-| M4 · Router, Database & Content Management (Phase 8, 11, 14) | in progress | M4.1, M4.1a, M4.2, M4.3, M4.4 **done** — GoRouter tập trung với `MaterialApp.router` và 404 ở `app/fallback/`; MX-VIS-001 ép mọi production screen có strict visual audit; schema v1 toàn bộ trong `.drift`; hai named query dùng chung một định nghĩa "đến hạn"; schema v1 đã dump và commit; cả 14 bất biến chạy trên database thật. M4.4a **done** — sắp xếp lại kế hoạch theo vertical slice. M4.8 **done** — 11 shared component mang prefix `Mx` (5 mới, 6 đổi tên), 26 golden mới, rename không đổi pixel; vòng review UI/UX đóng thêm 4 lỗi accessibility có đo đạc. M4.8a **done** — responsive hardening: `MxContentShell` overflow 135px/167px ở landscape đã đóng, bốn component còn lại đã tự cuộn sẵn; màn rộng chốt giữ kéo căng. M4.8b **done** — compact scale cho màn 320: hàng list 88→80px, padding ngang button 24→12 (bốn action `sm2` từ "Ag" thành "Again"), body/label giữ nguyên cỡ, phát hiện harness test báo màn hình 0×0 từ M3.6. **M4.5, M4.6, M4.7 `descoped` trước khi triển khai** — không dòng code nào từng được viết dưới ba ID đó. M4.8–M4.12 là kế hoạch mới: shared component → Deck/Card domain+data → Deck full-stack → Card full-stack → demo hardening. **Next task: M4.9 · Deck/Card domain và data vertical foundation.** M4 chỉ `done` khi Deck/Card demo slice hoàn thành. **Phase 10 (networking) hoãn** — AD-01, AD-05 |
+| M4 · Router, Database & Content Management (Phase 8, 11, 14) | in progress | M4.1, M4.1a, M4.2, M4.3, M4.4 **done** — GoRouter tập trung với `MaterialApp.router` và 404 ở `app/fallback/`; MX-VIS-001 ép mọi production screen có strict visual audit; schema v1 toàn bộ trong `.drift`; hai named query dùng chung một định nghĩa "đến hạn"; schema v1 đã dump và commit; cả 14 bất biến chạy trên database thật. M4.4a **done** — sắp xếp lại kế hoạch theo vertical slice. M4.8 **done** — 11 shared component mang prefix `Mx` (5 mới, 6 đổi tên), 26 golden mới, rename không đổi pixel; vòng review UI/UX đóng thêm 4 lỗi accessibility có đo đạc. M4.8a **done** — responsive hardening: `MxContentShell` overflow 135px/167px ở landscape đã đóng, bốn component còn lại đã tự cuộn sẵn; màn rộng chốt giữ kéo căng. M4.8b **done** — compact scale cho màn 320: hàng list 88→80px, padding ngang button 24→12 (bốn action `sm2` từ "Ag" thành "Again"), body/label giữ nguyên cỡ, phát hiện harness test báo màn hình 0×0 từ M3.6. **M4.5, M4.6, M4.7 `descoped` trước khi triển khai** — không dòng code nào từng được viết dưới ba ID đó. M4.8–M4.12 là kế hoạch mới: shared component → Deck/Card domain+data → Deck full-stack → Card full-stack → demo hardening. M4.9 **done** — Deck/Card domain + data vertical: 6 file domain (entity/enum/contract), DAO + 3 mapper + repository impl với transaction thật, `deck.drift` recursive query, constraint conflict → `ConflictFailure`, 78 test mới (49 integration trên SQLite thật + 1 web runtime trên Chrome), cả 14 bất biến pass trên dữ liệu do repository ghi; đồng thời **đóng lỗ hổng web của M4.2**: `driftDatabase` thiếu `web:` options và `drift_worker.js` prebuilt lệch ABI với `sqlite3.wasm` — connection đã sửa, worker compile từ đúng lockfile. **Next task: M4.10 · Deck management full-stack.** M4 chỉ `done` khi Deck/Card demo slice hoàn thành. **Phase 10 (networking) hoãn** — AD-01, AD-05 |
 | M5 · Review vertical slice — UC-05 (Phase 14) | todo | Bắt đầu **sau M4.12**. Không còn là vertical slice đầu tiên — Deck/Card CRUD đã hoàn thành trong M4.8–M4.12 và M5 không triển khai lại. Review MUST NOT bắt đầu khi M4.12 chưa `done` |
 | M6 · Test suite (Phase 15) | todo | Chạy song song **từ M4.8 trở đi**, không đợi tới sau Review |
 | M7 · CI/CD (Phase 19) | todo | Bắt đầu được ngay sau M2. Job Android + Web, chưa có iOS (AD-04) |
@@ -2028,7 +2028,7 @@ phần có caller thật.
 
 ### M4.9 · Deck/Card domain và data vertical foundation
 
-- **Status:** todo
+- **Status:** done
 - **Goal:** Chỉ xây domain và data mà Deck/Card management có caller thật, đủ để
   UI chạy xuyên suốt xuống Drift.
 - **Scope:** **Domain** — `DeckEntity`, `CardEntity`, phần
@@ -2043,24 +2043,75 @@ phần có caller thật.
 - **Editable documents:** `docs/wbs.md`
 - **Output:** `lib/features/deck/domain/`, `lib/features/deck/data/`
 - **Acceptance criteria:**
-  - [ ] `domain/` không import Flutter hay Drift; contract không nhận/trả kiểu
-        sinh bởi Drift (AD-01).
-  - [ ] Entity immutable, value equality; trạng thái hữu hạn là enum.
-  - [ ] Enum lạ đọc từ database map về `unknown`, và `unknown` **không** được ghi
-        ngược xuống database.
-  - [ ] Repository đọc bằng `watch()` — test khẳng định stream phát lại.
-  - [ ] Không exception thô của Drift/SQLite thoát khỏi repository; conflict đã
-        biết map thành `ConflictFailure`, không phải `DatabaseFailure` chung.
-  - [ ] Tạo card sinh **đúng một** review state, atomic (BR-09); insert state lỗi
-        thì card rollback.
-  - [ ] Lần tạo child đầu tiên khoá `content_type` **trong cùng transaction**
-        (BR-62).
-  - [ ] Move subtree cập nhật `root_deck_id` cho **toàn bộ** subtree, atomic
-        (BR-71).
-  - [ ] Reset `content_type` bị chặn khi deck chưa rỗng (BR-68).
-  - [ ] Toàn bộ 14 bất biến của M4.4 vẫn pass sau bộ repository test.
-  - [ ] Web phát được query Drift **thật**, không chỉ compile asset — đóng phần
-        chưa kiểm còn lại của M4.2.
+  - [x] `domain/` không import Flutter hay Drift; contract không nhận/trả kiểu
+        sinh bởi Drift (AD-01). → `check_architecture.sh` + guard pass; test
+        purity trong `deck_domain_test.dart` grep import từng file domain.
+  - [x] Entity immutable, value equality; trạng thái hữu hạn là enum. → Freezed
+        cho 4 type; `SchedulerType`/`DeckContentType` là enum có `unknown`.
+  - [x] Enum lạ đọc từ database map về `unknown`, và `unknown` **không** được ghi
+        ngược xuống database. → `fromDbValue('sm18') == unknown`;
+        `unknown.dbValue` throws `StateError` — có test cả hai chiều.
+  - [x] Repository đọc bằng `watch()` — test khẳng định stream phát lại. → 6
+        test trong `deck_repository_watch_test.dart`: initial emit, re-emit sau
+        insert/update/delete, card stream, tree stream.
+  - [x] Không exception thô của Drift/SQLite thoát khỏi repository; conflict đã
+        biết map thành `ConflictFailure`. → trigger `RAISE(ABORT)` thật trên
+        `cards` → bắt được `Failure`; PK trùng thật → `ConflictFailure`;
+        `drift_error_mapper.dart` đổi constraint → `ConflictFailure`, có
+        table-driven test 7 case.
+  - [x] Tạo card sinh **đúng một** review state, atomic (BR-09); insert state
+        lỗi thì card rollback. → trigger `RAISE(ABORT)` trên
+        `card_review_states`: card **và** content-type lock cùng rollback;
+        `eight_box` khởi tạo box 1, `sm2` khởi tạo 2.5/0/0 — đều đọc lại từ row
+        thật.
+  - [x] Lần tạo child đầu tiên khoá `content_type` **trong cùng transaction**
+        (BR-62). → trigger chặn insert child: parent giữ nguyên `unset`.
+  - [x] Move subtree cập nhật `root_deck_id` cho **toàn bộ** subtree, atomic
+        (BR-71). → cây 3 cấp + grand-leaf move sang root khác, mọi node trỏ root
+        mới; trigger chặn node sâu nhất → parent pointer, root pointer và
+        content-type của target đều rollback.
+  - [x] Reset `content_type` bị chặn khi deck chưa rỗng (BR-68). →
+        `ConflictFailure` khi còn card, còn child deck, và trên root.
+  - [x] Toàn bộ 14 bất biến của M4.4 vẫn pass sau bộ repository test. → suite
+        `test/database/` 67 test pass; thêm sweep 14 query trên dữ liệu do
+        chính repository ghi (2 root khác scheduler, move, rename, delete).
+  - [x] Web phát được query Drift **thật** — đóng phần chưa kiểm còn lại của
+        M4.2. → `deck_repository_web_test.dart` chạy `flutter test --platform
+        chrome`: mở production `AppDatabase.open()`, insert cây 3 cấp + card,
+        chạy `deckById`/`subtreeDeckIds` (recursive CTE)/`reviewStateByCard`
+        typed query và `watchRootDecks()` thật, dọn fixture, đóng database.
+        Phát hiện và sửa hai lỗi production: `driftDatabase()` thiếu `web:`
+        options (web chưa từng mở được database), và `drift_worker.js` prebuilt
+        từ release drift 2.34.0 lệch ABI với `sqlite3.wasm` 3.5.0
+        (`LinkError: xFileControl`) — worker nay compile từ đúng lockfile, quy
+        trình ghi ở `web/WEB_ASSETS.md`.
+- **Files:** domain — `deck_entity.dart`, `card_entity.dart`,
+  `card_review_state_entity.dart`, `scheduler_type_model.dart`,
+  `deck_content_type_model.dart` (hai enum mang hậu tố `_model` vì guard
+  `memox.naming.domain_file_role_suffix` bắt buộc hậu tố role),
+  `deck_deletion_impact_model.dart`, `deck_repository.dart`. Data —
+  `local/deck_dao.dart`, `deck_mapper.dart`, `card_mapper.dart`,
+  `card_review_state_mapper.dart`, `deck_repository_impl.dart` (+ 2 part
+  `card_write_deck_repository_impl.dart`, `move_deck_repository_impl.dart` để
+  giữ mỗi file dưới giới hạn của guard). Query —
+  `lib/core/database/queries/deck.drift` (include vào `app_database.dart`,
+  schema v1 không đổi). Core sửa: `failure.dart` (`implements Exception` để
+  throw được dưới `only_throw_errors`), `drift_error_mapper.dart`
+  (constraint → `ConflictFailure`), `connection.dart` (web options + đường dẫn
+  asset root-absolute). Test — `test/features/deck/**` (harness + 8 file),
+  `test/flutter_test_config.dart` (bỏ nạp font khi `kIsWeb`),
+  `test/database/web_assets_test.dart` (+2 test parity), `test/sqlite3.wasm`
+  + `test/drift_worker.js` (bản sao được test parity giữ đồng bộ).
+- **Tests đã chạy:** 77 test `test/features/deck` trên VM (17 domain + 11
+  mapper + 49 integration trên SQLite thật, không mock) + 1 web runtime trên
+  Chrome + 67 `test/database` (gồm 14 bất biến hai chiều) + 9
+  `test/core/error`. Verification: `dart format` sạch · `flutter analyze` 0/0
+  · `check_architecture.sh` pass · guard `memox-v7` 0 violation ·
+  `check_docs.sh` pass · `flutter test --platform chrome
+  test/features/deck/data/web/deck_repository_web_test.dart` pass.
+- **Ghi chú môi trường:** bộ golden pixel-comparison (M3/M4.8, baseline sinh
+  trên Windows) fail y hệt trên checkout sạch ở Linux vì khác font
+  rasterization — không liên quan M4.9; mọi test không-golden pass 100%.
 - **Operation phải đủ cho:** đọc cây root và descendant · tạo root deck kèm chọn
   scheduler · tạo sub-deck · khoá `content_type` ở child đầu tiên · đổi tên · đếm
   descendant/card trước khi xoá · xoá cascade · reset `content_type` khi rỗng ·

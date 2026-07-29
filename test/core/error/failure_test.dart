@@ -90,13 +90,65 @@ void main() {
       expect(failure.cause, same(original));
     });
 
-    test('maps a constraint violation to a conflict the user can act on', () {
+    test('maps a constraint violation to ConflictFailure (M4.9)', () {
       final failure = mapDatabaseError(
         Exception('UNIQUE constraint failed: decks.name'),
       );
 
-      expect(failure, isA<DatabaseFailure>());
+      // A conflict is the one database failure a user can act on, so it gets
+      // its own type rather than the generic DatabaseFailure.
+      expect(failure, isA<ConflictFailure>());
       expect(failure.message.toLowerCase(), contains('conflict'));
+    });
+
+    test('table-driven: every known error shape maps to its failure type', () {
+      final cases = <({Object error, Type expected})>[
+        // Known conflicts → ConflictFailure.
+        (
+          error: Exception('UNIQUE constraint failed: decks.id'),
+          expected: ConflictFailure,
+        ),
+        (
+          error: Exception('FOREIGN KEY constraint failed'),
+          expected: ConflictFailure,
+        ),
+        (
+          error: Exception('CHECK constraint failed: content_type'),
+          expected: ConflictFailure,
+        ),
+        (
+          error: DriftWrappedException(
+            message: 'insert failed',
+            cause: Exception('UNIQUE constraint failed: cards.id'),
+            trace: StackTrace.empty,
+          ),
+          expected: ConflictFailure,
+        ),
+        // Other persistence errors → DatabaseFailure.
+        (
+          error: DriftWrappedException(
+            message: 'writing to decks',
+            cause: Exception('disk I/O error'),
+            trace: StackTrace.empty,
+          ),
+          expected: DatabaseFailure,
+        ),
+        // Anything unrecognised → UnknownFailure, never a raw escape.
+        (error: const FormatException('nonsense'), expected: UnknownFailure),
+        (error: StateError('bad state'), expected: UnknownFailure),
+      ];
+
+      for (final testCase in cases) {
+        final failure = mapDatabaseError(testCase.error);
+
+        expect(
+          failure.runtimeType,
+          testCase.expected,
+          reason: '${testCase.error} should map to ${testCase.expected}',
+        );
+        // The original always survives into the log path.
+        expect(failure.cause, same(testCase.error));
+      }
     });
 
     test('an unrecognised error still yields a Failure, never escapes', () {
