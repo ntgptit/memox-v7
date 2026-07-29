@@ -4,6 +4,7 @@ import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_theme.dart';
 
 import '../support/app_palette.dart';
+import 'audit_allowance.dart';
 import 'audit_model.dart';
 import 'audit_report.dart';
 import 'audit_rules.dart';

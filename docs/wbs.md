@@ -26,7 +26,7 @@ AD / UC (xem `business-rules.md`).
 | M0 · Development harness | done | Skills, checklist và enforcement script đã có |
 | M1 · Product definition (Phase 0–1) | **done** | Đặc tả MVP đã frozen: AD-01…11, BR-01…87, UC-01…09, data model đầy đủ |
 | M2 · Project foundation (Phase 2–3, 6) | **done** | Toàn bộ 9 task đóng: M2.1 · M2.1a · M2.1b · M2.2 · M2.2b · M2.3 · M2.4 · M2.5 · M2.6. App build được trên Android (3 flavor cài song song) và Web, l10n en/vi, bootstrap có error boundary, lint + guard đều enforce. Tiếp theo: **M3.1 · Cấu trúc feature-first và ranh giới layer** |
-| M3 · Architecture & design system (Phase 4–5, 7, 12–13) | **done** | Tám task đóng: M3.1…M3.6 cộng M3.5a (review color system), M3.5b (áp A2 Quizlet Navy Indigo — 46 role `ColorScheme` khai báo tường minh) , M3.5c (visual audit harness) và M3.5d (siết tính đúng đắn của audit core). Cây feature-first + guard siết về `fail_on: [error, warning]`, Failure model, Riverpod foundation, design token, hai theme M3, sáu base component kèm 14 golden. Tiếp theo: **M4.1 · GoRouter foundation** |
+| M3 · Architecture & design system (Phase 4–5, 7, 12–13) | **done** | Mười một task đóng: M3.1…M3.6 cộng M3.5a (review color system), M3.5b (áp A2 Quizlet Navy Indigo — 46 role `ColorScheme` khai báo tường minh), M3.5c (visual audit harness), M3.5d (siết tính đúng đắn của audit core) và M3.5e (anchor, clip và allowance). Cây feature-first + guard siết về `fail_on: [error, warning]`, Failure model, Riverpod foundation, design token, hai theme M3, sáu base component kèm 14 golden. Tiếp theo: **M4.1 · GoRouter foundation** |
 | M4 · Router & Drift foundation (Phase 8, 11) | todo | **Phase 10 (networking) hoãn** — AD-01, AD-05 |
 | M5 · First vertical slice: luồng ôn tập (Phase 14) | todo | UC-05 |
 | M6 · Test suite (Phase 15) | todo | Chạy song song M5, không phải sau |
@@ -1225,6 +1225,56 @@ slice UC-05 cần. Không xây trọn design system trước khi có feature th�
   raster exact/blend/ngoài palette); traversal 7 case kèm transform trap; status
   và hai mode expectation; allowance scope, detail matcher, unused; raster
   dispose order
+- **Checklist phases:** 7.2, 14.1
+
+### M3.5e · Visual audit anchor, clip và allowance correctness
+
+- **Status:** done
+- **Goal:** Sửa năm lỗi correctness còn lại trước khi `expectAuditComplete()` có
+  thể dùng làm production gate. Corrective task cho M3.5d.
+- **Scope:** resolve anchor lặp; phát hiện anchor collision; truyền effective
+  clip qua traversal; siết validation của allowance; giữ cặp allowed skip ↔
+  allowance kèm rationale; sửa số task trong WBS.
+- **Out of scope:** state matrix, pressed/focused/disabled, raster diff theo
+  state, overlay image, extractor SVG/ImageIcon, shadow fidelity, integration
+  test, **palette production**, **component production**, **`lib/`**,
+  **golden**, M4.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `test/visual_audit/{audit_model,audit_report,screen_auditor}.dart`,
+  `audit_anchor_test.dart` (mới), `audit_traversal_test.dart`,
+  `audit_status_test.dart`
+- **Acceptance criteria:**
+  - [x] Anchor khớp nhiều widget **không** còn sinh `anchorNotFound` giả.
+  - [x] Hai anchor cùng trỏ một render object → `anchorCollision`, không ghi đè
+        âm thầm; strict mode không đạt PASS.
+  - [x] Traversal mang `effectiveClip` từ ancestor xuống child.
+  - [x] `Clip.none` **không** thu hẹp clip; `Clip.hardEdge` và viewport thì có.
+  - [x] Transform kéo child vào tầm nhìn không bị prune; kéo ra ngoài thì bị.
+  - [x] `detailContains` bắt buộc; itemId / detailContains / rationale không
+        được rỗng hoặc chỉ whitespace.
+  - [x] 0 allowance → unresolved · 1 → allowed · >1 → **ambiguous**, chặn
+        `complete`.
+  - [x] Allowed entry giữ cả skip lẫn allowance; text report và JSON in
+        rationale và `detailContains`.
+  - [x] 55 self-test trong `test/visual_audit/`.
+- **Lỗi anchor lặp:** owner ID được sinh thành `verdict[0]`…`verdict[3]`, nhưng
+  kiểm tra "đã match chưa" lại tìm `owners.values.contains('verdict')` — luôn
+  false. Audit báo "matched no widget" về một anchor đã match **bốn** widget.
+  Nay resolver trả về `matchedAnchorIds` riêng, không suy từ ID đã index.
+- **Vì sao effective clip:** một node nằm trong capture rectangle vẫn có thể bị
+  `ClipRect` ở giữa cây che hoàn toàn. Kiểm từng node với capture rect thôi sẽ
+  báo màu cho những pixel chưa từng được vẽ.
+- **Giới hạn đã ghi:** với `ClipOval`, `ClipPath` và `ClipRect` có clipper, core
+  dùng **bounding rect** — là **superset** của vùng thật. Đủ để prune subtree
+  nằm hoàn toàn ngoài, và **cố ý** không đủ để kết luận thứ nằm trong bounding
+  box là hiển thị. Trường hợp không chắc thì giữ node và đo, không prune.
+- **Ghi chú về số task:** brief yêu cầu sửa thành "Mười task đóng"; sau khi đóng
+  M3.5e thì danh sách có **mười một** mục, nên summary ghi mười một.
+- **Dependencies:** M3.5d
+- **Tests required:** anchor 1/4/0 match, collision, collision chặn strict;
+  clip ngoài/một phần/trong, `Clip.none` overflow, `Clip.hardEdge`, viewport,
+  transform hai chiều; allowance rỗng và whitespace bị reject, ambiguous, allowed
+  pairing, rationale trong text report và JSON
 - **Checklist phases:** 7.2, 14.1
 
 ### M3.6 · Base component tối thiểu và app shell

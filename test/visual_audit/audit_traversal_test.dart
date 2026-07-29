@@ -106,6 +106,169 @@ void main() {
     expect(audit.outsideCaptureNodes, greaterThan(0));
   });
 
+  testWidgets('a child outside an ancestor ClipRect is not audited', (
+    tester,
+  ) async {
+    // The gap effective clip closes. The child sits inside the 300×300 capture
+    // rectangle, so a check against the capture alone calls it visible — while
+    // the ClipRect above it means no pixel of it was ever drawn.
+    final audit = await auditOf(
+      tester,
+      Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 50,
+          height: 50,
+          child: ClipRect(
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: <Widget>[
+                Positioned(left: 100, top: 0, child: markerBox()),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(sawMarker(audit), isFalse);
+  });
+
+  testWidgets('a child partly overlapping a ClipRect is audited', (
+    tester,
+  ) async {
+    final audit = await auditOf(
+      tester,
+      Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 50,
+          height: 50,
+          child: ClipRect(
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: <Widget>[
+                Positioned(left: 30, top: 0, child: markerBox()),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(sawMarker(audit), isTrue);
+  });
+
+  testWidgets('a child fully inside a ClipRect is audited', (tester) async {
+    final audit = await auditOf(
+      tester,
+      Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 50,
+          height: 50,
+          child: ClipRect(child: markerBox()),
+        ),
+      ),
+    );
+
+    expect(sawMarker(audit), isTrue);
+  });
+
+  testWidgets('Stack(Clip.none) lets a deliberate overflow stay visible', (
+    tester,
+  ) async {
+    // A badge hanging off the corner of a tile is the everyday case. Treating
+    // every Stack as a clip would prune it and report nothing about it.
+    final audit = await auditOf(
+      tester,
+      Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 50,
+          height: 50,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: <Widget>[
+              Positioned(left: 40, top: 0, child: markerBox()),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(sawMarker(audit), isTrue);
+  });
+
+  testWidgets('Stack(hardEdge) removes a child beyond its bounds', (
+    tester,
+  ) async {
+    final audit = await auditOf(
+      tester,
+      Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 50,
+          height: 50,
+          child: Stack(
+            // Stack's default, named anyway: this test only means anything
+            // beside the `Clip.none` case above it.
+            // ignore: avoid_redundant_argument_values
+            clipBehavior: Clip.hardEdge,
+            children: <Widget>[
+              Positioned(left: 100, top: 0, child: markerBox()),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(sawMarker(audit), isFalse);
+    expect(audit.clippedNodes + audit.outsideCaptureNodes, greaterThan(0));
+  });
+
+  testWidgets('a child scrolled out of a viewport is not audited', (
+    tester,
+  ) async {
+    final audit = await auditOf(
+      tester,
+      SizedBox(
+        height: 100,
+        child: ListView(
+          children: <Widget>[const SizedBox(height: 2000), markerBox()],
+        ),
+      ),
+    );
+
+    expect(sawMarker(audit), isFalse);
+  });
+
+  testWidgets('a transform that pushes a child OUT of the clip is pruned', (
+    tester,
+  ) async {
+    // The mirror of the test below. A child laid out inside the clip but moved
+    // out of it by a transform must not be audited — its rect is computed
+    // through the final transform, so the check sees where it actually lands.
+    final audit = await auditOf(
+      tester,
+      Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 50,
+          height: 50,
+          child: ClipRect(
+            child: Transform.translate(
+              offset: const Offset(200, 0),
+              child: markerBox(),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(sawMarker(audit), isFalse);
+  });
+
   testWidgets('a transform that pulls a child into view is NOT pruned', (
     tester,
   ) async {
