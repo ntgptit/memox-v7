@@ -103,10 +103,10 @@ ap.add_argument("--db", metavar="PATH",
 args = ap.parse_args()
 
 if args.db:
-    # Same queries, same source. The 14 are read out of the frozen document
-    # rather than copied into the caller — the four that used to be missing from
-    # check_docs.sh were missing precisely BECAUSE they had been hand-copied,
-    # and ten of fourteen running still reported success.
+    # Same queries, same source. Every invariant is read out of the frozen
+    # document rather than copied into the caller — four used to be missing
+    # from check_docs.sh precisely BECAUSE they had been hand-copied, and ten
+    # of the then-fourteen running still reported success.
     db_path = pathlib.Path(args.db)
     if not db_path.exists():
         print(f"✗ không tìm thấy database: {db_path}")

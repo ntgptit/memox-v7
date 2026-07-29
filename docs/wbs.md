@@ -2173,7 +2173,10 @@ phần có caller thật.
         `verify_invariants.py` (BAD case), pair test hai chiều pass — 15/15.
   - [x] `.gitattributes`: hai cặp asset cùng attribute (`binary` cho wasm,
         `-text` cho worker JS), `git ls-files --eol` xác nhận tương đương,
-        copy `test/` byte-identical với `web/`.
+        copy `test/` byte-identical với `web/`. **Giới hạn đã biết:** blob
+        không đổi nên checkout Windows có sẵn (đã smudge CRLF trước khi có
+        attribute) không được git checkout lại khi pull — cần bước re-smudge
+        một lần, ghi ở `web/WEB_ASSETS.md`; fresh clone/CI không bị ảnh hưởng.
 - **Tests đã chạy:** `test/features/deck` 93 pass (thêm 9 depth + 5 boundary);
   `test/database` 69 pass (15 invariant hai chiều);
   `verify_invariants.py` 15/15 "TẤT CẢ ĐẠT"; web runtime Chrome pass; format /

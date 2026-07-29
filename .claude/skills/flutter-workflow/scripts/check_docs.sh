@@ -400,7 +400,10 @@ else
   # Also removes the dependency on the sqlite3 CLI, which is not installed
   # everywhere and made this section skip silently when it was absent.
   if out="$(python3 "$VERIFIER" --db "$DB" 2>&1)"; then
-    ok "all 14 data invariants ran clean against $DB"
+    # Count reported by the verifier itself — a hardcoded number here went
+    # stale the day invariant 15 landed and quietly under-reported the run.
+    inv_count="$(echo "$out" | grep -cE '^  ✓ Q[0-9]+')"
+    ok "all $inv_count data invariants ran clean against $DB"
   else
     fail "data invariants violated" "$(echo "$out" | grep -E '✗' | head -6)"
   fi
