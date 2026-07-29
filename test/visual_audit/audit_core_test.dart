@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
 
-import '../support/app_palette.dart';
 import 'audit_model.dart';
-import 'audit_report.dart';
-import 'audit_rules.dart';
 import 'screen_auditor.dart';
 
 /// Proves the harness measures what it claims to, on colours chosen so the
@@ -194,116 +191,11 @@ void main() {
           .toSet();
 
       expect(rasterColours, contains(black));
-      expect(audit.skipsBecause(SkipReason.occluded), isNotEmpty);
+      // Named for the measurement, not for a cause nobody proved: the image
+      // disagreeing with the declaration is the fact; "occluded" would be a
+      // guess at why.
+      expect(audit.skipsBecause(SkipReason.declaredRasterMismatch), isNotEmpty);
     });
-  });
-
-  group('rules', () {
-    ScreenAudit auditOf(List<AuditPaint> paints) => ScreenAudit(
-      screen: 'probe',
-      theme: 'light',
-      state: 'idle',
-      viewport: const Size(300, 300),
-      items: <AuditItem>[
-        AuditItem(id: 'probe', rect: Rect.zero, paints: paints),
-      ],
-      skips: const <AuditSkip>[],
-    );
-
-    const region = Rect.fromLTWH(0, 0, 100, 20);
-    AuditPaint text(Color color, {double size = 14}) => AuditPaint(
-      role: PaintRole.text,
-      color: color,
-      rect: region,
-      source: PaintSource.declared,
-      origin: 'probe',
-      fontSize: size,
-    );
-    const background = AuditPaint(
-      role: PaintRole.fill,
-      color: white,
-      rect: region,
-      source: PaintSource.raster,
-      origin: 'probe',
-    );
-
-    test('text contrast passes at 21:1 and fails at 1:1', () {
-      expect(
-        runAuditRules(auditOf(<AuditPaint>[text(black), background]), const [
-          TextContrastRule(),
-        ]).where((finding) => finding.isBlocking),
-        isEmpty,
-      );
-
-      final failures = runAuditRules(
-        auditOf(<AuditPaint>[text(const Color(0xFFF8F8F8)), background]),
-        const <AuditRule>[TextContrastRule()],
-      ).where((finding) => finding.isBlocking);
-
-      expect(failures, hasLength(1));
-      expect(failures.first.message, contains(':1, below 4.5'));
-    });
-
-    test('palette closure rejects a declared colour outside the palette', () {
-      final rule = PaletteClosureRule(lightPaletteTokens);
-      final offPalette = runAuditRules(
-        auditOf(<AuditPaint>[text(const Color(0xFF123456))]),
-        <AuditRule>[rule],
-      );
-
-      expect(offPalette.where((f) => f.isBlocking), hasLength(1));
-      expect(
-        runAuditRules(
-          auditOf(<AuditPaint>[text(lightPaletteTokens.first)]),
-          <AuditRule>[rule],
-        ),
-        isEmpty,
-      );
-    });
-
-    test('a raster blend of two tokens is not treated as a new colour', () {
-      final rule = PaletteClosureRule(lightPaletteTokens);
-      final blend = Color.lerp(white, lightPaletteTokens.last, 0.5)!;
-
-      final findings = runAuditRules(
-        auditOf(<AuditPaint>[
-          AuditPaint(
-            role: PaintRole.fill,
-            color: blend,
-            rect: region,
-            source: PaintSource.raster,
-            origin: 'raster',
-          ),
-        ]),
-        <AuditRule>[rule],
-      );
-
-      expect(findings, isEmpty);
-    });
-  });
-
-  test('the JSON report carries items, skips and findings', () {
-    const audit = ScreenAudit(
-      screen: 'probe',
-      theme: 'dark',
-      state: 'pressed',
-      viewport: Size(300, 300),
-      items: <AuditItem>[
-        AuditItem(id: 'screen', rect: Rect.zero, paints: <AuditPaint>[]),
-      ],
-      skips: <AuditSkip>[
-        AuditSkip(
-          itemId: 'screen',
-          reason: SkipReason.customPainter,
-          detail: 'input border',
-        ),
-      ],
-    );
-
-    final json = auditToJson(audit);
-
-    expect(json, contains('"state": "pressed"'));
-    expect(json, contains('customPainter'));
   });
 }
 

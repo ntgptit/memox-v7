@@ -70,14 +70,42 @@ Future<ScreenAudit> auditScreen(
   const rootId = 'screen';
   final owners = _resolveAnchors(anchors);
   final sinks = <String, AuditSink>{rootId: AuditSink(rootId)};
+  final captureRect = _globalRect(root);
+  var hiddenNodes = 0;
+  var outsideCaptureNodes = 0;
 
   void walk(RenderObject node, String owner) {
     final id = owners[node] ?? owner;
-    final sink = sinks.putIfAbsent(id, () => AuditSink(id));
     final rect = _globalRect(node);
 
-    _extract(node, rect, sink, extractors);
-    node.visitChildren((child) => walk(child, id));
+    switch (_presenceOf(node, rect, captureRect)) {
+      case _Presence.hidden:
+        // Nothing below an `Offstage` or a zero-opacity layer reaches the
+        // screen, so the whole subtree is pruned. A hidden node is NOT an
+        // unresolved one: there was nothing there to measure, and counting it
+        // as unread would inflate the very number that is supposed to mean
+        // "part of this screen went unchecked".
+        hiddenNodes++;
+
+        return;
+
+      case _Presence.outsideCapture:
+        outsideCaptureNodes++;
+        // Pruned only when this node clips. `RenderTransform` does not appear
+        // in its own `getTransformTo`, so its rect is the *untransformed* one:
+        // a transform that pulls a child into view looks off-screen itself, and
+        // pruning on it would drop a subtree that is plainly visible.
+        if (_clipsChildren(node)) return;
+
+        node.visitChildren((child) => walk(child, id));
+
+        return;
+
+      case _Presence.visible:
+        final sink = sinks.putIfAbsent(id, () => AuditSink(id));
+        _extract(node, rect, sink, extractors);
+        node.visitChildren((child) => walk(child, id));
+    }
   }
 
   walk(root, rootId);
@@ -104,7 +132,7 @@ Future<ScreenAudit> auditScreen(
     skips.add(
       AuditSkip(
         itemId: anchor.id,
-        reason: SkipReason.zeroSize,
+        reason: SkipReason.anchorNotFound,
         detail: 'anchor matched no widget',
       ),
     );
@@ -117,8 +145,39 @@ Future<ScreenAudit> auditScreen(
     viewport: tester.view.physicalSize / tester.view.devicePixelRatio,
     items: List<AuditItem>.unmodifiable(items),
     skips: List<AuditSkip>.unmodifiable(skips),
+    hiddenNodes: hiddenNodes,
+    outsideCaptureNodes: outsideCaptureNodes,
   );
 }
+
+/// Whether a node reaches the captured surface at all.
+enum _Presence { visible, hidden, outsideCapture }
+
+_Presence _presenceOf(RenderObject node, Rect rect, Rect capture) {
+  if (node is RenderOffstage && node.offstage) return _Presence.hidden;
+  if (node is RenderOpacity && node.opacity == 0) return _Presence.hidden;
+  if (node is RenderAnimatedOpacity && node.opacity.value == 0) {
+    return _Presence.hidden;
+  }
+  // A node with no area paints nothing, but its children still can — an
+  // overflowing child of a zero-size box is laid out and painted — so this
+  // marks the node, never the subtree.
+  if (rect.isEmpty) return _Presence.outsideCapture;
+  if (!rect.overlaps(capture)) return _Presence.outsideCapture;
+
+  return _Presence.visible;
+}
+
+/// True when children cannot paint outside this node's bounds.
+///
+/// The only case where an out-of-capture rect proves the subtree is out too.
+bool _clipsChildren(RenderObject node) =>
+    node is RenderClipRect ||
+    node is RenderClipRRect ||
+    node is RenderClipOval ||
+    node is RenderClipPath ||
+    node is RenderViewport ||
+    node is RenderShrinkWrappingViewport;
 
 Map<RenderObject, String> _resolveAnchors(List<AuditAnchor> anchors) {
   final owners = <RenderObject, String>{};
@@ -157,16 +216,6 @@ void _extract(
     return;
   }
 
-  if (rect.isEmpty) {
-    sink.skip(
-      SkipReason.zeroSize,
-      '${node.runtimeType} has no area',
-      rect: rect,
-    );
-
-    return;
-  }
-
   for (final extractor in extractors) {
     if (!extractor.handles(node)) continue;
 
@@ -182,33 +231,47 @@ void _extract(
   );
 }
 
-/// Adds what the raster actually shows, and flags where it disagrees.
+/// Adds what the raster actually shows, and says where it disagrees — without
+/// claiming to know why.
 ///
-/// The disagreement is the point. A declared fill that the image does not
-/// confirm means something is on top — an ink splash, an opacity layer, another
-/// widget — and that is precisely the class of bug neither source finds alone.
+/// Three thresholds rather than one, because the same number cannot answer three
+/// different questions. A rectangle only needs to be half one colour to serve as
+/// the background a glyph sits on; it has to be almost entirely one colour before
+/// "the image shows something else" is a statement about the fill rather than
+/// about the children drawn inside it. Using the background threshold for both is
+/// what turns every card nested in a page into a false accusation against the
+/// page.
 void _crossCheckAgainstRaster(AuditSink sink, RasterCapture raster) {
-  const flatEnough = 0.5;
+  /// Enough of one colour to stand in as what a glyph is drawn on.
+  const usableAsBackground = 0.5;
+
+  /// Enough of one colour that a different dominant is about the fill itself.
+  const flatEnoughToJudge = 0.9;
+
+  /// The declared colour is still plainly on screen, just not dominant —
+  /// the ordinary shape of a surface with things drawn on top of it.
+  const stillPresent = 0.15;
+
   final declaredFills = sink.paints
       .where((paint) => paint.role == PaintRole.fill)
       .toList();
-  final measured = <Rect, ColorFrequency>{};
+  final measured = <Rect, RegionSample?>{};
 
   for (final paint in <AuditPaint>[
     ...declaredFills,
     ...sink.paints.where((paint) => paint.role == PaintRole.text),
   ]) {
-    measured[paint.rect] ??= raster.dominant(paint.rect) ?? _empty;
+    measured[paint.rect] ??= raster.sample(paint.rect);
   }
 
   measured.forEach((rect, sample) {
-    if (identical(sample, _empty)) return;
-    if (sample.coverage < flatEnough) return;
+    if (sample == null) return;
+    if (sample.coverage < usableAsBackground) return;
 
     sink.add(
       AuditPaint(
         role: PaintRole.fill,
-        color: sample.color,
+        color: sample.dominant,
         rect: rect,
         source: PaintSource.raster,
         origin: 'raster ${(sample.coverage * 100).toStringAsFixed(0)}%',
@@ -218,28 +281,37 @@ void _crossCheckAgainstRaster(AuditSink sink, RasterCapture raster) {
 
   for (final declared in declaredFills) {
     final sample = measured[declared.rect];
-    if (sample == null || identical(sample, _empty)) continue;
+    if (sample == null) continue;
     // Packed ARGB, not `==`: `Color` compares float channels, and a colour
     // built by `alphaBlend` never equals the integer one a raster reports
     // even when both render to the same pixel.
-    if (sample.color.toARGB32() == declared.color.toARGB32()) continue;
-    if (sample.coverage < flatEnough) continue;
+    if (sample.dominant.toARGB32() == declared.color.toARGB32()) continue;
+
+    if (sample.coverage >= flatEnoughToJudge) {
+      sink.skip(
+        SkipReason.declaredRasterMismatch,
+        'declared ${hexOf(declared.color)} from ${declared.origin}, but the '
+        'image is ${hexOf(sample.dominant)} across '
+        '${(sample.coverage * 100).toStringAsFixed(0)}% of the area',
+        rect: declared.rect,
+      );
+
+      continue;
+    }
+
+    if (sample.shareOf(declared.color) >= stillPresent) continue;
 
     sink.skip(
-      SkipReason.occluded,
-      'declared ${hexOf(declared.color)} from ${declared.origin}, but the '
-      'image shows ${hexOf(sample.color)} over '
-      '${(sample.coverage * 100).toStringAsFixed(0)}% of the area',
+      SkipReason.rasterNotFlat,
+      'declared ${hexOf(declared.color)} covers only '
+      '${(sample.shareOf(declared.color) * 100).toStringAsFixed(0)}% of its '
+      'own rect and no colour reaches '
+      '${(flatEnoughToJudge * 100).toStringAsFixed(0)}%, so the image cannot '
+      'confirm or contradict it',
       rect: declared.rect,
     );
   }
 }
-
-const ColorFrequency _empty = ColorFrequency(
-  color: Color(0x00000000),
-  coverage: 0,
-  sampled: 0,
-);
 
 Rect _globalRect(RenderObject node) {
   final bounds = node.paintBounds;

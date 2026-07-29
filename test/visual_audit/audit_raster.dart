@@ -56,11 +56,16 @@ class RasterCapture {
 
     final captured = await tester.runAsync(() async {
       final image = await boundary.toImage(pixelRatio: pixelRatio);
+      // Dimensions BEFORE dispose. Reading them afterwards is use-after-free:
+      // it happens to return stale values today, which is worse than crashing,
+      // because a wrong width silently shifts every pixel index by a row.
+      final width = image.width;
+      final height = image.height;
       // Default format is rawRgba, which is PREMULTIPLIED — see `_rawAt`.
       final data = await image.toByteData();
       image.dispose();
 
-      return (data!.buffer.asUint8List(), image.width, image.height);
+      return (data!.buffer.asUint8List(), width, height);
     });
 
     if (captured == null) {
@@ -92,7 +97,7 @@ class RasterCapture {
   /// exactly the token we meant*.
   ///
   /// [inset] pulls the sample away from the edges so a border does not vote.
-  ColorFrequency? dominant(Rect global, {double inset = 4}) {
+  RegionSample? sample(Rect global, {double inset = 4}) {
     final counts = _histogram(global, inset);
     if (counts.isEmpty) return null;
 
@@ -108,10 +113,11 @@ class RasterCapture {
       bestCount = count;
     });
 
-    return ColorFrequency(
-      color: Color(bestValue),
+    return RegionSample._(
+      dominant: Color(bestValue),
       coverage: bestCount / total,
       sampled: total,
+      counts: counts,
     );
   }
 
@@ -191,20 +197,41 @@ class RasterCapture {
   }
 }
 
+/// What the image holds inside one rectangle.
+///
+/// More than "the dominant colour", because a rectangle that contains nested
+/// surfaces has no single answer, and reporting the dominant as if it did is how
+/// a card sitting inside a page turns into a false claim that the page is the
+/// wrong colour. [shareOf] is what lets the caller ask the narrower question it
+/// actually has: *is the colour I declared still present here.*
 @immutable
-class ColorFrequency {
-  const ColorFrequency({
-    required this.color,
+class RegionSample {
+  const RegionSample._({
+    required this.dominant,
     required this.coverage,
     required this.sampled,
-  });
+    required Map<int, int> counts,
+    // Dart forbids a named parameter starting with an underscore, so the
+    // initialising-formal form the lint asks for does not exist for a private
+    // field reached through a named argument.
+    // ignore: prefer_initializing_formals
+  }) : _counts = counts;
 
-  final Color color;
+  final Color dominant;
 
-  /// Share of sampled pixels holding exactly this colour. A flat fill sits near
+  /// Share of sampled pixels holding exactly [dominant]. A flat fill sits near
   /// 1.0; anything low means the region is not one colour and a single value
   /// should not be reported as if it were.
   final double coverage;
 
   final int sampled;
+
+  final Map<int, int> _counts;
+
+  /// Share of sampled pixels holding exactly [color], 0.0 to 1.0.
+  double shareOf(Color color) {
+    if (sampled == 0) return 0;
+
+    return (_counts[color.toARGB32()] ?? 0) / sampled;
+  }
 }

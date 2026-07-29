@@ -147,11 +147,21 @@ class NonTextContrastRule implements AuditRule {
 
 /// Every colour on screen must be one the palette approved.
 ///
-/// Declared colours are held to it exactly — a hardcoded value has no excuse.
-/// Raster colours get one allowance: a blend that lies on the line between two
-/// tokens is antialiasing or a legitimate overlay, not a new colour. Anything
-/// off that line is reported, non-blocking, because it may be a real composite
-/// worth knowing about rather than a defect.
+/// **Declared and raster are judged by different rules, and the asymmetry is the
+/// whole point.**
+///
+/// A declared colour must be an exact token. Nothing else — a blend of two
+/// tokens does *not* pass. Letting it pass was a hole: `#123456` typed at a call
+/// site sails through the moment it happens to land on the segment between two
+/// palette entries, which is not rare with forty tokens, and the rule then
+/// certifies a hardcoded colour as on-palette. Code that genuinely wants a state
+/// layer computes it *from* tokens, and that computed value belongs in the
+/// palette or in a component, not in an exemption.
+///
+/// A raster colour is a different kind of object: it is the outcome of
+/// antialiasing and alpha compositing, so a blend on the line between two tokens
+/// is the expected result rather than a defect. Anything off that line is
+/// reported non-blocking, because it may be a real composite worth knowing about.
 class PaletteClosureRule implements AuditRule {
   const PaletteClosureRule(this.tokens);
 
@@ -166,14 +176,11 @@ class PaletteClosureRule implements AuditRule {
   Iterable<AuditFinding> check(ScreenAudit audit) sync* {
     for (final item in audit.items) {
       for (final paint in item.paints) {
-        if (_isToken(paint.color)) continue;
-        // A state layer — `semantic @ 10%` over a tile — is a blend of two
-        // tokens, and it is the intended way to build a selected state. The
-        // allowance is narrower than it sounds: BOTH endpoints must be tokens,
-        // so a hand-typed colour still has nowhere to hide.
-        if (_isBlendOfTokens(paint.color)) continue;
-
         if (paint.source == PaintSource.declared) {
+          // Exact token or nothing. The blend test is deliberately NOT consulted
+          // here — see the class doc for the hole that opened when it was.
+          if (_isToken(paint.color)) continue;
+
           yield AuditFinding(
             rule: name,
             itemId: item.id,
@@ -185,6 +192,9 @@ class PaletteClosureRule implements AuditRule {
 
           continue;
         }
+
+        if (_isToken(paint.color)) continue;
+        if (_isBlendOfTokens(paint.color)) continue;
 
         yield AuditFinding(
           rule: name,

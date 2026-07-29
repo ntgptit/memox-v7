@@ -62,12 +62,130 @@ enum SkipReason {
   /// An opacity or filter layer: every declared colour below it is not final.
   compositedLayer,
 
-  /// The declared fill disagrees with what the raster shows in the same rect —
-  /// something is painted over it.
-  occluded,
+  /// The declared fill and the image disagree in the same rect.
+  ///
+  /// Deliberately **not** called "occluded". Something being painted over is
+  /// only one explanation; a nested surface covering most of the parent's
+  /// rectangle produces the same reading, and naming the symptom after one
+  /// cause turns a measurement into a conclusion nobody verified.
+  declaredRasterMismatch,
 
-  /// Nothing to measure.
-  zeroSize,
+  /// The region holds several colours, so no single value can stand for it and
+  /// the comparison is not attempted. Reported rather than guessed at.
+  rasterNotFlat,
+
+  /// An anchor named a piece of UI that is not on screen. Not a colour problem
+  /// — a report that silently loses an item someone asked for by name.
+  anchorNotFound,
+}
+
+/// Whether the screen was judged, and whether it was judged completely.
+///
+/// Two different questions, and a red/green test can only answer the first.
+/// A run with no violations and eleven unread nodes is not the same result as a
+/// run with no violations and nothing left unread, and CI has to be able to tell
+/// them apart without someone reading the log.
+enum AuditStatus {
+  /// No blocking finding, and nothing left unresolved.
+  pass,
+
+  /// No blocking finding, but part of the screen could not be measured.
+  passWithUnresolved,
+
+  /// At least one blocking finding.
+  fail;
+
+  String get label => switch (this) {
+    AuditStatus.pass => 'PASS',
+    AuditStatus.passWithUnresolved => 'PASS_WITH_UNRESOLVED',
+    AuditStatus.fail => 'FAIL',
+  };
+}
+
+/// Permission for one specific unreadable node to stay unreadable.
+///
+/// Scoped on purpose. `{SkipReason.customPainter}` would wave through every
+/// `CustomPainter` on the screen including ones added next year, which is the
+/// same shape of mistake as a lint rule whose scope matches no files: it reads
+/// as coverage and provides none.
+///
+/// [rationale] is required because an allowance is a promise that someone
+/// checked this by other means, and a promise with no author is a silence.
+@immutable
+class AuditSkipAllowance {
+  const AuditSkipAllowance({
+    required this.itemId,
+    required this.reason,
+    required this.rationale,
+    this.detailContains,
+  });
+
+  final String itemId;
+  final SkipReason reason;
+
+  /// Substring the skip's detail must contain. Omitting it allows every skip of
+  /// this reason on this item, which is broad — name the painter if you can.
+  final String? detailContains;
+
+  final String rationale;
+
+  bool matches(AuditSkip skip) {
+    if (skip.itemId != itemId) return false;
+    if (skip.reason != reason) return false;
+
+    final needle = detailContains;
+
+    return needle == null || skip.detail.contains(needle);
+  }
+
+  @override
+  String toString() =>
+      '$itemId/${reason.name}'
+      '${detailContains == null ? '' : ' ~ "$detailContains"'}';
+}
+
+/// The numbers that say how much of the screen was actually measured.
+@immutable
+class AuditCoverage {
+  const AuditCoverage({
+    required this.items,
+    required this.paints,
+    required this.blockingFindings,
+    required this.nonBlockingFindings,
+    required this.unresolvedSkips,
+    required this.allowedSkips,
+    required this.unusedAllowances,
+    required this.hiddenNodes,
+    required this.outsideCaptureNodes,
+  });
+
+  final int items;
+  final int paints;
+  final int blockingFindings;
+  final int nonBlockingFindings;
+  final int unresolvedSkips;
+  final int allowedSkips;
+  final int unusedAllowances;
+
+  /// Pruned because nothing below them paints — `Offstage`, opacity 0. Counted
+  /// for debugging, never as something left unmeasured: there was nothing there
+  /// to measure.
+  final int hiddenNodes;
+
+  /// Outside the captured surface.
+  final int outsideCaptureNodes;
+
+  Map<String, int> toJson() => <String, int>{
+    'items': items,
+    'paints': paints,
+    'blockingFindings': blockingFindings,
+    'nonBlockingFindings': nonBlockingFindings,
+    'unresolvedSkips': unresolvedSkips,
+    'allowedSkips': allowedSkips,
+    'unusedAllowances': unusedAllowances,
+    'hiddenNodes': hiddenNodes,
+    'outsideCaptureNodes': outsideCaptureNodes,
+  };
 }
 
 /// One colour, at one place, with the provenance needed to judge it.
@@ -163,6 +281,8 @@ class ScreenAudit {
     required this.viewport,
     required this.items,
     required this.skips,
+    this.hiddenNodes = 0,
+    this.outsideCaptureNodes = 0,
   });
 
   final String screen;
@@ -175,6 +295,12 @@ class ScreenAudit {
   final Size viewport;
   final List<AuditItem> items;
   final List<AuditSkip> skips;
+
+  /// Subtrees the walk pruned because they paint nothing at all.
+  final int hiddenNodes;
+
+  /// Subtrees outside the captured surface.
+  final int outsideCaptureNodes;
 
   String get label => '$screen/$theme/$state';
 
