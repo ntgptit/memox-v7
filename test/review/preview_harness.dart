@@ -80,23 +80,20 @@ class VerdictAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final semantic = Theme.of(context).extension<AppSemanticColors>()!;
-    // 6%. The label and the fill are the same hue by design, so every extra
-    // point of fill eats the label's contrast: 18% put it at 4.23:1 in dark and
-    // 10% at 4.40:1 in light — both caught by the visual audit, neither by any
-    // token-level test, because no token has these values. Selection leans on
-    // the border weight instead, which costs no contrast at all.
-    const selectedFillAlpha = 0.06;
+    // Selection is a step up the neutral ladder plus a heavier border — never a
+    // tint of the verdict's own hue. Two reasons, both measured rather than
+    // assumed. Label and fill sharing a hue means every point of tint eats the
+    // label's contrast: 18% landed at 4.23:1 in dark, 10% at 4.40:1 in light.
+    // And an `alphaBlend` produces a colour that is in no palette, which the
+    // audit now rejects outright — a state layer has to be built from tokens
+    // somewhere the palette can see it, not computed at the call site.
+    final selectedFill = Theme.of(context).colorScheme.secondaryContainer;
 
     return Container(
       height: 52,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: isSelected
-            ? Color.alphaBlend(
-                tint.withValues(alpha: selectedFillAlpha),
-                semantic.surfaceMuted,
-              )
-            : semantic.surfaceMuted,
+        color: isSelected ? selectedFill : semantic.surfaceMuted,
         borderRadius: BorderRadius.circular(AppRadius.md),
         border: Border.all(color: tint, width: isSelected ? 2 : 1.5),
       ),

@@ -7,7 +7,9 @@ import 'package:memox/core/theme/app_radius.dart';
 import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_spacing.dart';
 
+import '../visual_audit/audit_model.dart';
 import '../visual_audit/memox_audit.dart';
+import '../visual_audit/screen_auditor.dart';
 import 'preview_harness.dart';
 
 /// The deck list — where the primary action lives.
@@ -18,7 +20,35 @@ import 'preview_harness.dart';
 /// reads as the content.
 void main() {
   previewTest('deck_list', () => const _DeckListScreen());
-  memoxAuditTest('deck_list', () => const _DeckListScreen());
+  // The search field is the one part of this screen the render tree cannot
+  // describe: `RenderEditable` paints its own glyphs and `_RenderDecoration`
+  // positions a border drawn by a CustomPainter. Each is allowed BY NAME and
+  // BY ITEM, with a reason — a blanket `{SkipReason.customPainter}` would also
+  // wave through every painter added to this screen from now on.
+  memoxAuditTest(
+    'deck_list',
+    () => const _DeckListScreen(),
+    anchors: <AuditAnchor>[AuditAnchor.type('search', TextField)],
+    allowances: const <AuditSkipAllowance>[
+      AuditSkipAllowance(
+        itemId: 'search',
+        reason: SkipReason.rasterOnly,
+        detailContains: 'RenderEditable',
+        rationale:
+            'Typed text and caret are raster-only; covered when the field gets '
+            'its own focused/error state audit in M5.',
+      ),
+      AuditSkipAllowance(
+        itemId: 'search',
+        reason: SkipReason.rasterOnly,
+        detailContains: '_RenderDecoration',
+        rationale:
+            'InputDecorator lays out a border painted by a CustomPainter; the '
+            'stroke colour is asserted from InputDecorationTheme in '
+            'app_theme_test.dart instead.',
+      ),
+    ],
+  );
 }
 
 const List<_Deck> _decks = <_Deck>[

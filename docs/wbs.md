@@ -26,7 +26,7 @@ AD / UC (xem `business-rules.md`).
 | M0 · Development harness | done | Skills, checklist và enforcement script đã có |
 | M1 · Product definition (Phase 0–1) | **done** | Đặc tả MVP đã frozen: AD-01…11, BR-01…87, UC-01…09, data model đầy đủ |
 | M2 · Project foundation (Phase 2–3, 6) | **done** | Toàn bộ 9 task đóng: M2.1 · M2.1a · M2.1b · M2.2 · M2.2b · M2.3 · M2.4 · M2.5 · M2.6. App build được trên Android (3 flavor cài song song) và Web, l10n en/vi, bootstrap có error boundary, lint + guard đều enforce. Tiếp theo: **M3.1 · Cấu trúc feature-first và ranh giới layer** |
-| M3 · Architecture & design system (Phase 4–5, 7, 12–13) | **done** | Tám task đóng: M3.1…M3.6 cộng M3.5a (review color system), M3.5b (áp A2 Quizlet Navy Indigo — 46 role `ColorScheme` khai báo tường minh) và M3.5c (visual audit harness). Cây feature-first + guard siết về `fail_on: [error, warning]`, Failure model, Riverpod foundation, design token, hai theme M3, sáu base component kèm 14 golden. Tiếp theo: **M4.1 · GoRouter foundation** |
+| M3 · Architecture & design system (Phase 4–5, 7, 12–13) | **done** | Tám task đóng: M3.1…M3.6 cộng M3.5a (review color system), M3.5b (áp A2 Quizlet Navy Indigo — 46 role `ColorScheme` khai báo tường minh) , M3.5c (visual audit harness) và M3.5d (siết tính đúng đắn của audit core). Cây feature-first + guard siết về `fail_on: [error, warning]`, Failure model, Riverpod foundation, design token, hai theme M3, sáu base component kèm 14 golden. Tiếp theo: **M4.1 · GoRouter foundation** |
 | M4 · Router & Drift foundation (Phase 8, 11) | todo | **Phase 10 (networking) hoãn** — AD-01, AD-05 |
 | M5 · First vertical slice: luồng ôn tập (Phase 14) | todo | UC-05 |
 | M6 · Test suite (Phase 15) | todo | Chạy song song M5, không phải sau |
@@ -1175,6 +1175,56 @@ slice UC-05 cần. Không xây trọn design system trước khi có feature th�
 - **Tests required:** self-test cho từng extractor kèm fault injection; raster
   thấy được ink overlay; rule pass ở 21:1 và fail ở 1:1; blend của hai token
   không bị coi là màu lạ; audit chạy trên cả ba màn hình preview, light và dark
+- **Checklist phases:** 7.2, 14.1
+
+### M3.5d · Visual audit core correctness hardening
+
+- **Status:** done
+- **Goal:** Sửa bốn chỗ audit core v1 có thể **báo xanh sai**. Đây là corrective
+  hardening cho M3.5c, không phải tính năng mới.
+- **Scope:** palette closure tách declared/raster; traversal policy prune subtree
+  không được sơn; `AuditStatus` ba mức; scoped allowance; coverage summary;
+  dispose order của raster; đổi tên `occluded` thành finding trung thực.
+- **Out of scope:** state matrix đầy đủ, pressed/focused/disabled cho màn
+  production, overlay image, integration test trên thiết bị, shadow fidelity,
+  extractor SVG/ImageIcon, **palette production**, **component production**,
+  **golden chính thức**, M4.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `test/visual_audit/{audit_model,audit_rules,audit_report,screen_auditor,audit_raster,memox_audit}.dart`,
+  ba file self-test mới, `test/review/` chuyển sang scoped allowance
+- **Acceptance criteria:**
+  - [x] Declared color **chỉ** exact token mới pass. Blend của hai token **fail**.
+  - [x] Raster: exact token pass, blend hợp lệ pass, còn lại report non-blocking.
+  - [x] `Offstage(true)`, `Opacity(0)` và subtree ngoài capture bị prune, **không**
+        tính vào skip.
+  - [x] Transform kéo child vào tầm nhìn **không** bị prune nhầm.
+  - [x] `PASS` / `PASS_WITH_UNRESOLVED` / `FAIL`, report bắt đầu bằng status.
+  - [x] Allowance scoped theo `itemId` + `reason` + `detailContains` + rationale.
+  - [x] Unused allowance được report và chặn `complete`.
+  - [x] `image.width/height` đọc **trước** `dispose()`.
+  - [x] 34 self-test trong `test/visual_audit/`, mỗi hành vi có cặp positive/negative.
+- **Lỗ hổng lớn nhất đã bịt:** `_isBlendOfTokens()` chạy **trước** khi phân biệt
+  declared với raster, nên một màu hardcode tại call site vẫn pass nếu nó tình cờ
+  nằm trên đoạn nối hai token. Với 40 token, các đoạn đó phủ khá nhiều không gian
+  màu. Rule khi đó **chứng nhận** màu hardcode là on-palette — đúng loại dấu tick
+  xanh không phủ gì.
+- **Vì sao prune phải cẩn thận với transform:** `RenderTransform` không xuất hiện
+  trong `getTransformTo` của chính nó, nên rect của nó là rect **chưa biến đổi**.
+  Prune theo rect của ancestor sẽ bỏ mất một widget đang hiển thị rõ ràng — và
+  audit sẽ im lặng, tức là báo xanh. Chỉ prune khi node **clip** children.
+- **Vì sao đổi tên `occluded`:** vật thể che chỉ là **một** cách giải thích;
+  một surface con phủ phần lớn rect của cha cho ra cùng số liệu. Nay là
+  `declaredRasterMismatch` (đủ phẳng để kết luận) và `rasterNotFlat` (không đủ
+  dữ liệu — report unresolved thay vì đoán).
+- **Hệ quả trên preview:** `VerdictAction` selected đang dùng `Color.alphaBlend`
+  — một màu không thuộc palette nào. Chuyển sang `secondaryContainer` (token) +
+  viền dày hơn. Đây là code preview trong `test/`, không phải component
+  production.
+- **Dependencies:** M3.5c
+- **Tests required:** palette closure 6 case (declared exact/blend/hardcode,
+  raster exact/blend/ngoài palette); traversal 7 case kèm transform trap; status
+  và hai mode expectation; allowance scope, detail matcher, unused; raster
+  dispose order
 - **Checklist phases:** 7.2, 14.1
 
 ### M3.6 · Base component tối thiểu và app shell
