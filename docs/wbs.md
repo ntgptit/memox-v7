@@ -26,8 +26,8 @@ AD / UC (xem `business-rules.md`).
 | M0 · Development harness | done | Skills, checklist và enforcement script đã có |
 | M1 · Product definition (Phase 0–1) | **done** | Đặc tả MVP đã frozen: AD-01…11, BR-01…87, UC-01…09, data model đầy đủ |
 | M2 · Project foundation (Phase 2–3, 6) | **done** | Toàn bộ 9 task đóng: M2.1 · M2.1a · M2.1b · M2.2 · M2.2b · M2.3 · M2.4 · M2.5 · M2.6. App build được trên Android (3 flavor cài song song) và Web, l10n en/vi, bootstrap có error boundary, lint + guard đều enforce. Tiếp theo: **M3.1 · Cấu trúc feature-first và ranh giới layer** |
-| M3 · Architecture & design system (Phase 4–5, 7, 12–13) | **done** | Mười hai task đóng: M3.1…M3.6 cộng M3.5a (review color system), M3.5b (áp A2 Quizlet Navy Indigo — 46 role `ColorScheme` khai báo tường minh), M3.5c (visual audit harness), M3.5d (siết tính đúng đắn của audit core), M3.5e (anchor, clip và allowance) và M3.5f (clip hỏi Flutter thay vì đoán). Cây feature-first + guard siết về `fail_on: [error, warning]`, Failure model, Riverpod foundation, design token, hai theme M3, sáu base component kèm 14 golden. Tiếp theo: **M4.1 · GoRouter foundation** |
-| M4 · Router & Drift foundation (Phase 8, 11) | todo | **Phase 10 (networking) hoãn** — AD-01, AD-05 |
+| M3 · Architecture & design system (Phase 4–5, 7, 12–13) | **done** | Mười hai task đóng: M3.1…M3.6 cộng M3.5a (review color system), M3.5b (áp A2 Quizlet Navy Indigo — 46 role `ColorScheme` khai báo tường minh), M3.5c (visual audit harness), M3.5d (siết tính đúng đắn của audit core), M3.5e (anchor, clip và allowance) và M3.5f (clip hỏi Flutter thay vì đoán). Cây feature-first + guard siết về `fail_on: [error, warning]`, Failure model, Riverpod foundation, design token, hai theme M3, sáu base component kèm 14 golden. Tiếp theo: **M4.2 · Drift connection và schema `.drift`** |
+| M4 · Router & Drift foundation (Phase 8, 11) | in progress | M4.1 **done** — GoRouter tập trung, `MaterialApp.router`, 404 ở `app/fallback/`, redirect là no-op auth hook (AD-03). Tiếp theo: **M4.2 · Drift connection và schema `.drift`**. **Phase 10 (networking) hoãn** — AD-01, AD-05 |
 | M5 · First vertical slice: luồng ôn tập (Phase 14) | todo | UC-05 |
 | M6 · Test suite (Phase 15) | todo | Chạy song song M5, không phải sau |
 | M7 · CI/CD (Phase 19) | todo | Bắt đầu được ngay sau M2. Job Android + Web, chưa có iOS (AD-04) |
@@ -1409,7 +1409,7 @@ migration test và enforcement cho các bất biến.
 
 ### M4.1 · GoRouter foundation
 
-- **Status:** todo
+- **Status:** done
 - **Goal:** Điều hướng tập trung, có sẵn chỗ cắm auth guard mà chưa xây auth.
 - **Scope:** `app/router/route_paths.dart`, `route_names.dart`,
   `app_router.dart`, `errorBuilder` 404, một hàm `redirect` rỗng có comment nói
@@ -1417,16 +1417,43 @@ migration test và enforcement cho các bất biến.
 - **Out of scope:** auth guard thật, deep link config, `StatefulShellRoute` —
   MVP chưa có bottom navigation.
 - **Editable documents:** `docs/wbs.md`
-- **Output:** `lib/app/router/`
+- **Output:** `lib/app/router/{route_paths,route_names,app_router}.dart`,
+  `lib/app/fallback/route_not_found_screen.dart`, `lib/app/app.dart`,
+  3 key ARB × 2 locale, `test/app/router/app_router_test.dart`
 - **Acceptance criteria:**
-  - [ ] `MaterialApp.router` được dùng; không còn `MaterialApp` thường.
-  - [ ] `grep -rnE "context\.(go|push)\('/" lib/` không có kết quả — mọi điều
-        hướng đi qua tên route.
-  - [ ] Route không tồn tại → màn 404 có nút quay về, không phải red screen.
-  - [ ] `redirect` trả `null` và có comment chỉ rõ điểm cắm guard.
-  - [ ] Widget test điều hướng tới một route bằng tên và assert màn đích.
+  - [x] `MaterialApp.router` được dùng; `home` là `null` — có test khẳng định cả hai.
+  - [x] `git grep -nE "context\.(go|push)\('/" -- lib` **rỗng**; và
+        `context\.(goNamed|pushNamed)\('...'` cũng rỗng — không có route name
+        viết thẳng tại call site.
+  - [x] Route không tồn tại → `RouteNotFoundScreen` có nút quay về, không red
+        screen, `takeException()` là `null`.
+  - [x] `redirect` trả `null` và có comment chỉ rõ điểm cắm guard (AD-03).
+  - [x] Widget test điều hướng bằng **tên** và assert màn đích.
+- **RouteNotFoundScreen nằm ở `app/fallback/`, không phải feature.** Nó không có
+  domain, use case, repository hay data source — `features/not_found/` sẽ là ba
+  tầng rỗng bọc quanh một widget. Cũng không phải shared widget: nó biết
+  `GoRouter` và `RouteNames`, mà thứ gì trong `shared/widgets/` biết hai cái đó
+  sẽ kéo routing vào mọi widget test của dự án.
+- **`app/router/` không chứa screen UI.** Layout viết bên trong định nghĩa route
+  thì không pump riêng được, nên bài test đầu tiên của màn đó buộc phải đi qua
+  router mới với tới.
+- **Router tạo một lần.** `appRouter` là top-level `final`, không dựng trong
+  `build()` — một `GoRouter` tạo lại lúc rebuild là một router mới với navigation
+  stack mới, biểu hiện ra ngoài là màn hình nhảy về đầu mỗi khi thứ gì ở trên
+  rebuild. Test truyền router riêng vì `GoRouter` mang lịch sử điều hướng.
+- **Không hiển thị URL lỗi trên màn 404.** Người dùng không làm gì được với nó,
+  và khi có deep link thì một location có thể mang nội dung thẻ.
+- **Không làm:** auth guard thật, login, onboarding, deep link, URL strategy,
+  `StatefulShellRoute`, bottom navigation, route observer, Riverpod router
+  provider, `go_router_builder`, M4.2.
+- **Một điều chỉnh ngoài brief:** ARB tiếng Việt phải kèm `description` cho cả ba
+  key, vì `test/l10n/arb_parity_test.dart` (M2.4) bắt buộc mọi message ở **cả
+  hai** file có description. Đây là cổng sẵn có, không phải copy mới.
 - **Dependencies:** M3.6
-- **Tests required:** widget test cho điều hướng theo tên và cho màn 404
+- **Tests required:** 8 widget test — root đi qua router, `MaterialApp.router`
+  với `home == null`, `goNamed` tới review, redirect không chặn, 404 thay red
+  screen, copy đã localization và không lộ URL, nút quay về, fallback dùng
+  `AppScaffoldWidget` + `AppErrorStateWidget`
 - **Checklist phases:** 8.1, 8.2
 
 ### M4.2 · Drift connection và schema `.drift`
