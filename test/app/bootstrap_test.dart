@@ -9,8 +9,12 @@ import 'package:memox/app/app.dart';
 import 'package:memox/app/bootstrap.dart';
 import 'package:memox/app/config/env_config.dart';
 import 'package:memox/app/config/env_config_provider.dart';
+import 'package:memox/app/di/deck_repository_provider.dart';
 import 'package:memox/app/error_screen_widget.dart';
+import 'package:memox/features/deck/domain/deck_entity.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
+
+import '../features/deck/presentation/support/fake_deck_repository.dart';
 
 void main() {
   final en = AppLocalizationsEn();
@@ -126,7 +130,23 @@ void main() {
       // inside flutter_test — which owns its own zone and binding — hangs
       // rather than failing, so the test would take minutes to tell you
       // nothing.
-      await tester.pumpWidget(buildRootWidget(EnvConfig.staging));
+      //
+      // Wrapped in an outer scope carrying a fake repository. The home route
+      // is now a screen that reads decks, so the untouched root would open the
+      // on-device database and leave a pending timer in the test. Riverpod
+      // resolves a provider the inner scope does not override against its
+      // parent, so the fake reaches the screen while `buildRootWidget` keeps
+      // owning the `envConfigProvider` override this test is actually about.
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            deckRepositoryProvider.overrideWithValue(
+              FakeDeckRepository.emitting(const <DeckEntity>[]),
+            ),
+          ],
+          child: buildRootWidget(EnvConfig.staging),
+        ),
+      );
       await tester.pump();
 
       // Read through the real element tree: this proves the override reached

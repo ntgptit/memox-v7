@@ -182,6 +182,19 @@ ThemeData _buildTheme(
       centerTitle: false,
     ),
 
+    // The bottom bar sits on the page colour, like the app bar above it, so the
+    // chrome reads as one frame rather than three surfaces stacked on the
+    // content. M3's default would tint it with `surfaceContainer` and give it
+    // elevation, which reintroduces exactly the shifting background the app bar
+    // deliberately turned off.
+    navigationBarTheme: NavigationBarThemeData(
+      backgroundColor: background,
+      indicatorColor: scheme.secondaryContainer,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+    ),
+
     cardTheme: CardThemeData(
       color: scheme.surface,
       elevation: 0,

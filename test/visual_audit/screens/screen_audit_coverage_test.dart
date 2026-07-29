@@ -36,16 +36,16 @@ void main() {
 
     test('the mirrored path drops the presentation segment', () {
       final pairs = discoverScreenPairs(Directory('lib'));
-      final review = pairs.firstWhere(
-        (pair) => pair.screenPath.contains('review_placeholder'),
+      final deckList = pairs.firstWhere(
+        (pair) => pair.screenPath.contains('root_deck_list'),
       );
 
       expect(
-        review.auditPath,
-        'test/visual_audit/screens/features/review/'
-        'review_placeholder_screen_visual_audit_test.dart',
+        deckList.auditPath,
+        'test/visual_audit/screens/features/deck/'
+        'root_deck_list_screen_visual_audit_test.dart',
       );
-      expect(review.screenClass, 'ReviewPlaceholderScreen');
+      expect(deckList.screenClass, 'RootDeckListScreen');
     });
   });
 

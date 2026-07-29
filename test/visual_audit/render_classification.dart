@@ -77,6 +77,25 @@ const Set<String> _privateAndTransparent = <String>{
   '_RenderCompositionCallback',
   '_RenderSizeChangedWithCallback',
   '_RenderAppBarTitleBox', // layout only; the title's own paragraph is read
+  // `ListTile`'s render object. Its paint method is four `context.paintChild`
+  // calls — one per slot, leading then title then subtitle then trailing — and
+  // nothing else. Verified against the pinned SDK (3.44.8), not assumed. A row's
+  // own surface, when it has one, is painted by the Material above it and is
+  // reported separately; the label's colour is read from its paragraph.
+  // Listed here rather than allowed per screen because it is a fact about
+  // Flutter, not about one list — and an allowance repeated on every list
+  // screen is one nobody reads by the third copy.
+  '_RenderListTile',
+  // `Visibility`. A `RenderProxyBox` whose `paint` either returns early or
+  // delegates straight to the child — it has no colour of its own either way.
+  // It reaches every screen audited through the router: `StatefulShellRoute`
+  // hides the inactive branches with it.
+  '_RenderVisibility',
+  // `Overlay`'s depth-fixing proxy. It overrides only `redepthChildren` and
+  // `performLayout` and never touches `paint`, so `RenderProxyBox.paint` paints
+  // the child and nothing else. Every `Navigator` has an `Overlay`, so it
+  // appears twice on any screen inside a shell route.
+  '_RenderLayoutSurrogateProxyBox',
   'RenderCustomSingleChildLayoutBox',
   'RenderCustomMultiChildLayoutBox',
 };

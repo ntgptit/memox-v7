@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/app/app.dart';
+import 'package:memox/app/di/deck_repository_provider.dart';
 import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/core/theme/theme_context_extension.dart';
+import 'package:memox/features/deck/domain/deck_entity.dart';
 
+import '../../features/deck/presentation/support/fake_deck_repository.dart';
 import '../../support/color_math.dart';
 import '../../support/theme_probe.dart';
 
@@ -224,7 +228,20 @@ void main() {
       // `themeMode` is not passed explicitly — it would be a redundant argument
       // and this project promotes that lint to error. Pin the behaviour here so
       // the omission stays deliberate rather than becoming an accident.
-      await tester.pumpWidget(const MemoxApp());
+      //
+      // The scope is not scenery: the home route reads decks, so a bare
+      // `MemoxApp` would fail to find a container and — with a real repository
+      // behind it — would open the on-device database from a theme test.
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            deckRepositoryProvider.overrideWithValue(
+              FakeDeckRepository.emitting(const <DeckEntity>[]),
+            ),
+          ],
+          child: const MemoxApp(),
+        ),
+      );
 
       final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
 

@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/app/app.dart';
+import 'package:memox/app/config/env_config.dart';
+import 'package:memox/app/config/env_config_provider.dart';
+import 'package:memox/app/di/deck_repository_provider.dart';
+import 'package:memox/features/deck/domain/deck_entity.dart';
 import 'package:memox/l10n/generated/app_localizations.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/l10n/generated/app_localizations_vi.dart';
+
+import '../features/deck/presentation/support/fake_deck_repository.dart';
 
 void main() {
   final en = AppLocalizationsEn();
@@ -14,11 +21,25 @@ void main() {
   /// `MemoxApp` owns the delegates and the resolution callback, so driving the
   /// locale through `tester.platformDispatcher` exercises the same path a real
   /// device takes rather than a test-only shortcut.
+  ///
+  /// The home route reads decks, so the repository is faked with an empty tree:
+  /// the empty state is the one that renders localized prose without depending
+  /// on any fixture content.
   Future<void> pumpAppInLocale(WidgetTester tester, Locale locale) async {
     tester.platformDispatcher.localesTestValue = <Locale>[locale];
     addTearDown(tester.platformDispatcher.clearLocalesTestValue);
 
-    await tester.pumpWidget(const MemoxApp());
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          envConfigProvider.overrideWithValue(EnvConfig.development),
+          deckRepositoryProvider.overrideWithValue(
+            FakeDeckRepository.emitting(const <DeckEntity>[]),
+          ),
+        ],
+        child: const MemoxApp(),
+      ),
+    );
     await tester.pumpAndSettle();
   }
 
@@ -26,14 +47,14 @@ void main() {
     testWidgets('en renders the English string', (tester) async {
       await pumpAppInLocale(tester, const Locale('en'));
 
-      expect(find.text(en.homePlaceholderMessage), findsOneWidget);
+      expect(find.text(en.decksEmptyTitle), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
     testWidgets('vi renders the Vietnamese string', (tester) async {
       await pumpAppInLocale(tester, const Locale('vi'));
 
-      expect(find.text(vi.homePlaceholderMessage), findsOneWidget);
+      expect(find.text(vi.decksEmptyTitle), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
@@ -44,7 +65,7 @@ void main() {
 
       // The failure this guards against is a silently empty screen: an
       // unresolved locale renders nothing rather than announcing itself.
-      expect(find.text(en.homePlaceholderMessage), findsOneWidget);
+      expect(find.text(en.decksEmptyTitle), findsOneWidget);
       expect(find.text(''), findsNothing);
       expect(tester.takeException(), isNull);
     });
@@ -54,7 +75,7 @@ void main() {
     ) async {
       await pumpAppInLocale(tester, const Locale('vi', 'US'));
 
-      expect(find.text(vi.homePlaceholderMessage), findsOneWidget);
+      expect(find.text(vi.decksEmptyTitle), findsOneWidget);
     });
   });
 
@@ -71,7 +92,13 @@ void main() {
       // appTitle is deliberately identical — it is a product name, not prose.
       expect(en.appTitle, vi.appTitle);
 
-      expect(en.homePlaceholderMessage, isNot(vi.homePlaceholderMessage));
+      expect(en.decksTitle, isNot(vi.decksTitle));
+      expect(en.decksLoadingLabel, isNot(vi.decksLoadingLabel));
+      expect(en.decksEmptyTitle, isNot(vi.decksEmptyTitle));
+      expect(en.decksEmptyMessage, isNot(vi.decksEmptyMessage));
+      expect(en.decksLoadErrorTitle, isNot(vi.decksLoadErrorTitle));
+      expect(en.decksLoadErrorMessage, isNot(vi.decksLoadErrorMessage));
+      expect(en.retryAction, isNot(vi.retryAction));
       expect(en.startupErrorTitle, isNot(vi.startupErrorTitle));
       expect(en.startupErrorMessage, isNot(vi.startupErrorMessage));
       expect(en.unexpectedErrorTitle, isNot(vi.unexpectedErrorTitle));
