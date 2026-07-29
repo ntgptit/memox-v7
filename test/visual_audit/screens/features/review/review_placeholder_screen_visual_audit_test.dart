@@ -3,8 +3,8 @@ library;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/review/presentation/review_placeholder_screen.dart';
-import 'package:memox/shared/widgets/app_empty_state_widget.dart';
-import 'package:memox/shared/widgets/app_scaffold_widget.dart';
+import 'package:memox/shared/widgets/mx_empty_state.dart';
+import 'package:memox/shared/widgets/mx_content_shell.dart';
 
 import '../../../memox_audit.dart';
 import '../../../audit_allowance.dart';
@@ -25,8 +25,8 @@ void main() {
     'review_placeholder_screen',
     () => const ReviewPlaceholderScreen(),
     anchors: <AuditAnchor>[
-      AuditAnchor.type('shell', AppScaffoldWidget),
-      AuditAnchor.type('empty_state', AppEmptyStateWidget),
+      AuditAnchor.type('shell', MxContentShell),
+      AuditAnchor.type('empty_state', MxEmptyState),
     ],
     allowances: const <AuditSkipAllowance>[
       // Every allowance below names one node, on one item, with a count. The

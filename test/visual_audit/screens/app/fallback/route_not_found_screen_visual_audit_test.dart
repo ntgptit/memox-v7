@@ -3,8 +3,8 @@ library;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/app/fallback/route_not_found_screen.dart';
-import 'package:memox/shared/widgets/app_error_state_widget.dart';
-import 'package:memox/shared/widgets/app_scaffold_widget.dart';
+import 'package:memox/shared/widgets/mx_error_state.dart';
+import 'package:memox/shared/widgets/mx_content_shell.dart';
 
 import '../../../memox_audit.dart';
 import '../../../audit_allowance.dart';
@@ -25,8 +25,8 @@ void main() {
     'route_not_found_screen',
     () => const RouteNotFoundScreen(),
     anchors: <AuditAnchor>[
-      AuditAnchor.type('shell', AppScaffoldWidget),
-      AuditAnchor.type('error_state', AppErrorStateWidget),
+      AuditAnchor.type('shell', MxContentShell),
+      AuditAnchor.type('error_state', MxErrorState),
     ],
     allowances: const <AuditSkipAllowance>[
       // Every allowance below names one node, on one item, with a count. The

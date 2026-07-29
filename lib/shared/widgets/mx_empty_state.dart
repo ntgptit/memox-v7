@@ -3,15 +3,15 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_icon_size.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/theme_context_extension.dart';
-import 'app_button_widget.dart';
+import 'mx_action_button.dart';
 
 /// Shown when there is nothing to display and that is fine.
 ///
-/// Deliberately distinct from [AppErrorStateWidget]: "you have finished
+/// Deliberately distinct from [MxErrorState]: "you have finished
 /// everything due today" is good news, and rendering it in error styling tells
 /// the user something is broken when nothing is (BR-29).
-class AppEmptyStateWidget extends StatelessWidget {
-  const AppEmptyStateWidget({
+class MxEmptyState extends StatelessWidget {
+  const MxEmptyState({
     required this.title,
     this.message,
     this.actionLabel,
@@ -54,7 +54,7 @@ class AppEmptyStateWidget extends StatelessWidget {
             ],
             if (actionLabel != null && onAction != null) ...<Widget>[
               const SizedBox(height: AppSpacing.xl),
-              AppButtonWidget(label: actionLabel!, onPressed: onAction),
+              MxActionButton(label: actionLabel!, onPressed: onAction),
             ],
           ],
         ),

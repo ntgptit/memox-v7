@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
-import 'package:memox/shared/widgets/app_button_widget.dart';
-import 'package:memox/shared/widgets/app_card_surface_widget.dart';
-import 'package:memox/shared/widgets/app_empty_state_widget.dart';
-import 'package:memox/shared/widgets/app_error_state_widget.dart';
-import 'package:memox/shared/widgets/app_loading_state_widget.dart';
-import 'package:memox/shared/widgets/app_scaffold_widget.dart';
+import 'package:memox/shared/widgets/mx_action_button.dart';
+import 'package:memox/shared/widgets/mx_card.dart';
+import 'package:memox/shared/widgets/mx_empty_state.dart';
+import 'package:memox/shared/widgets/mx_error_state.dart';
+import 'package:memox/shared/widgets/mx_loading_state.dart';
+import 'package:memox/shared/widgets/mx_content_shell.dart';
 
 /// Mounts a component in a real theme so `context.colors` and
 /// `context.semanticColors` resolve exactly as they do in the app.
@@ -16,7 +16,7 @@ Widget host(Widget child, {bool isDark = false}) => MaterialApp(
 );
 
 void main() {
-  group('AppButtonWidget', () {
+  group('MxActionButton', () {
     testWidgets('primary renders a FilledButton, secondary an OutlinedButton', (
       tester,
     ) async {
@@ -25,11 +25,11 @@ void main() {
           const Scaffold(
             body: Column(
               children: <Widget>[
-                AppButtonWidget(label: 'Primary', onPressed: null),
-                AppButtonWidget(
+                MxActionButton(label: 'Primary', onPressed: null),
+                MxActionButton(
                   label: 'Secondary',
                   onPressed: null,
-                  variant: AppButtonVariant.secondary,
+                  variant: MxActionButtonVariant.secondary,
                 ),
               ],
             ),
@@ -46,7 +46,7 @@ void main() {
       await tester.pumpWidget(
         host(
           Scaffold(
-            body: AppButtonWidget(
+            body: MxActionButton(
               label: 'Submit',
               isLoading: true,
               onPressed: () => taps++,
@@ -55,7 +55,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byType(AppButtonWidget));
+      await tester.tap(find.byType(MxActionButton));
       await tester.pump();
 
       // The double-submit bug in its most common form: a second tap while the
@@ -74,7 +74,7 @@ void main() {
           host(
             Scaffold(
               body: Center(
-                child: AppButtonWidget(
+                child: MxActionButton(
                   label: 'Remembered',
                   isLoading: isLoading,
                   onPressed: () {},
@@ -100,7 +100,7 @@ void main() {
       await tester.pumpWidget(
         host(
           Scaffold(
-            body: AppButtonWidget(label: 'Ok', onPressed: () {}),
+            body: MxActionButton(label: 'Ok', onPressed: () {}),
           ),
         ),
       );
@@ -112,13 +112,11 @@ void main() {
     });
   });
 
-  group('AppLoadingStateWidget', () {
+  group('MxLoadingState', () {
     testWidgets('announces itself to a screen reader', (tester) async {
       await tester.pumpWidget(
         host(
-          const Scaffold(
-            body: AppLoadingStateWidget(semanticsLabel: 'Loading cards'),
-          ),
+          const Scaffold(body: MxLoadingState(semanticsLabel: 'Loading cards')),
         ),
       );
 
@@ -128,14 +126,14 @@ void main() {
     });
   });
 
-  group('AppErrorStateWidget', () {
+  group('MxErrorState', () {
     testWidgets('takes a String, and renders retry only when wired', (
       tester,
     ) async {
       await tester.pumpWidget(
         host(
           const Scaffold(
-            body: AppErrorStateWidget(
+            body: MxErrorState(
               title: 'Something went wrong',
               message: 'This part could not be displayed.',
             ),
@@ -144,13 +142,13 @@ void main() {
       );
 
       expect(find.text('Something went wrong'), findsOneWidget);
-      expect(find.byType(AppButtonWidget), findsNothing);
+      expect(find.byType(MxActionButton), findsNothing);
 
       var retried = 0;
       await tester.pumpWidget(
         host(
           Scaffold(
-            body: AppErrorStateWidget(
+            body: MxErrorState(
               title: 'Something went wrong',
               message: 'This part could not be displayed.',
               retryLabel: 'Try again',
@@ -159,7 +157,7 @@ void main() {
           ),
         ),
       );
-      await tester.tap(find.byType(AppButtonWidget));
+      await tester.tap(find.byType(MxActionButton));
 
       expect(retried, 1);
     });
@@ -168,25 +166,23 @@ void main() {
   group('small screen and large text', () {
     /// Every component, in the two conditions that actually break layouts.
     final cases = <String, Widget>{
-      'AppCardSurface': const AppCardSurface(
+      'MxCard': const MxCard(
         child: Text('A prompt long enough to wrap on a narrow phone screen'),
       ),
-      'AppScaffoldWidget': const AppScaffoldWidget(
+      'MxContentShell': const MxContentShell(
         title: 'MemoX',
         body: Text('Body'),
       ),
-      'AppButtonWidget': const AppButtonWidget(
+      'MxActionButton': const MxActionButton(
         label: 'Remembered',
         onPressed: null,
       ),
-      'AppLoadingStateWidget': const AppLoadingStateWidget(
-        semanticsLabel: 'Loading',
-      ),
-      'AppEmptyStateWidget': const AppEmptyStateWidget(
+      'MxLoadingState': const MxLoadingState(semanticsLabel: 'Loading'),
+      'MxEmptyState': const MxEmptyState(
         title: 'Nothing due today',
         message: 'You have finished every card scheduled for now.',
       ),
-      'AppErrorStateWidget': const AppErrorStateWidget(
+      'MxErrorState': const MxErrorState(
         title: 'Something went wrong',
         message: 'This part could not be displayed.',
       ),
@@ -202,12 +198,19 @@ void main() {
 
         await tester.pumpWidget(
           host(
-            MediaQuery(
-              data: const MediaQueryData(textScaler: TextScaler.linear(2)),
-              // Scaffold-less components need a Material ancestor for text.
-              child: entry.value is AppScaffoldWidget
-                  ? entry.value
-                  : Scaffold(body: entry.value),
+            Builder(
+              // `copyWith`, never a fresh `MediaQueryData`: constructing one
+              // zeroes `size`, so this test would set a 320-wide view and then
+              // tell the widget the screen is 0 wide.
+              builder: (context) => MediaQuery(
+                data: MediaQuery.of(
+                  context,
+                ).copyWith(textScaler: const TextScaler.linear(2)),
+                // Scaffold-less components need a Material ancestor for text.
+                child: entry.value is MxContentShell
+                    ? entry.value
+                    : Scaffold(body: entry.value),
+              ),
             ),
           ),
         );

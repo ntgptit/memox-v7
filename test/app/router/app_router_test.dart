@@ -7,8 +7,8 @@ import 'package:memox/app/router/app_router.dart';
 import 'package:memox/app/router/route_names.dart';
 import 'package:memox/features/review/presentation/review_placeholder_screen.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
-import 'package:memox/shared/widgets/app_error_state_widget.dart';
-import 'package:memox/shared/widgets/app_scaffold_widget.dart';
+import 'package:memox/shared/widgets/mx_error_state.dart';
+import 'package:memox/shared/widgets/mx_content_shell.dart';
 
 /// The route table, exercised through the real app root.
 ///
@@ -130,14 +130,14 @@ void main() {
       expect(
         find.descendant(
           of: find.byType(RouteNotFoundScreen),
-          matching: find.byType(AppScaffoldWidget),
+          matching: find.byType(MxContentShell),
         ),
         findsOneWidget,
       );
       expect(
         find.descendant(
           of: find.byType(RouteNotFoundScreen),
-          matching: find.byType(AppErrorStateWidget),
+          matching: find.byType(MxErrorState),
         ),
         findsOneWidget,
       );

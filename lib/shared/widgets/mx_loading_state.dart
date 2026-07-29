@@ -8,8 +8,8 @@ import '../../core/theme/theme_context_extension.dart';
 /// Takes an already-localized [semanticsLabel] because a bare spinner is
 /// invisible to a screen reader — it announces nothing at all, so the user is
 /// told neither that something is happening nor when it stops.
-class AppLoadingStateWidget extends StatelessWidget {
-  const AppLoadingStateWidget({required this.semanticsLabel, super.key});
+class MxLoadingState extends StatelessWidget {
+  const MxLoadingState({required this.semanticsLabel, super.key});
 
   final String semanticsLabel;
 
