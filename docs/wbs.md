@@ -26,7 +26,7 @@ AD / UC (xem `business-rules.md`).
 | M0 · Development harness | done | Skills, checklist và enforcement script đã có |
 | M1 · Product definition (Phase 0–1) | **done** | Đặc tả MVP đã frozen: AD-01…11, BR-01…87, UC-01…09, data model đầy đủ |
 | M2 · Project foundation (Phase 2–3, 6) | **done** | Toàn bộ 9 task đóng: M2.1 · M2.1a · M2.1b · M2.2 · M2.2b · M2.3 · M2.4 · M2.5 · M2.6. App build được trên Android (3 flavor cài song song) và Web, l10n en/vi, bootstrap có error boundary, lint + guard đều enforce. Tiếp theo: **M3.1 · Cấu trúc feature-first và ranh giới layer** |
-| M3 · Architecture & design system (Phase 4–5, 7, 12–13) | **done** | Sáu task đóng: M3.1…M3.6. Cây feature-first + guard siết về `fail_on: [error, warning]`, Failure model, Riverpod foundation, design token, hai theme M3, sáu base component kèm 14 golden. Tiếp theo: **M4.1 · GoRouter foundation** |
+| M3 · Architecture & design system (Phase 4–5, 7, 12–13) | **done** | Tám task đóng: M3.1…M3.6 cộng M3.5a (review color system) và M3.5b (áp A2 Quizlet Navy Indigo — 46 role `ColorScheme` khai báo tường minh). Cây feature-first + guard siết về `fail_on: [error, warning]`, Failure model, Riverpod foundation, design token, hai theme M3, sáu base component kèm 14 golden. Tiếp theo: **M4.1 · GoRouter foundation** |
 | M4 · Router & Drift foundation (Phase 8, 11) | todo | **Phase 10 (networking) hoãn** — AD-01, AD-05 |
 | M5 · First vertical slice: luồng ôn tập (Phase 14) | todo | UC-05 |
 | M6 · Test suite (Phase 15) | todo | Chạy song song M5, không phải sau |
@@ -1078,6 +1078,54 @@ slice UC-05 cần. Không xây trọn design system trước khi có feature th�
   kiểm `surfaceTint`/`surfaceBright`/`surfaceContainerHighest` không được trở
   thành nguồn sáng ở dark, vì lần trước chỉ kiểm `primary` và bỏ lọt
   `surfaceTint`
+- **Checklist phases:** 7.2
+
+### M3.5b · Áp A2 Quizlet Navy Indigo
+
+- **Status:** done
+- **Goal:** Giữ nền navy sâu của giao diện tham chiếu, nhưng dựng lại thang bề
+  mặt phía trên nó để flashcard nổi rõ mà không cần shadow.
+- **Scope:** thang bề mặt 4 tầng; primary indigo cho cả hai mode; secondary
+  action trung tính; verdict idle/selected; ngân sách chroma; light mode suy ra
+  từ dark; **46 role** của `ColorScheme` khai báo tường minh; harness render lại
+  ba màn hình thật.
+- **Out of scope:** typography, spacing, radius, component structure, router,
+  Drift, M4.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/core/theme/{app_colors,app_theme}.dart`,
+  `test/core/theme/{color_math,theme_probe,app_palette_test,color_scheme_roles_test}.dart`,
+  `test/review/` (harness + 6 ảnh), 22 golden của shared widgets
+- **Acceptance criteria:**
+  - [x] `backgroundDark` giữ `#0A082D`. Không graphite hoá dark canvas.
+  - [x] Bốn tầng phân biệt bằng lightness, **không** bù bằng shadow.
+  - [x] Mọi surface có saturation ≤ 60% saturation của page.
+  - [x] `onPrimary/primary` ≥ 4.5:1 ở cả hai mode. Primary hai mode cùng hue 240.
+  - [x] Secondary action trung tính (S ≤ 20%), không phải primary, không semantic.
+  - [x] Verdict idle: nền tile trung tính + viền semantic. Selected: fill nhẹ.
+  - [x] `danger` chroma cao nhất, `info` thấp nhất, đỉnh 67.8% (không màu nào 100%).
+  - [x] Light canvas chroma ≤ 6% — không nhiễm lavender.
+  - [x] **46/46 role** đều là token của palette; không role nào ngoài họ màu A2.
+- **Vì sao thang bề mặt đo bằng L\* chứ không bằng contrast ratio.** Page navy
+  sâu nằm ở luminance **0.004**, và ở đáy thang hằng số `+0.05` của WCAG nén mọi
+  bước thật thành "1.1 gì đó": card sáng **gấp 3 lần** page mà vẫn chỉ chấm
+  **1.17:1**. Ngưỡng cũ `> 1.25` sẽ loại đúng một palette đang tốt. L\* là thang
+  cảm nhận và không nói dối ở đáy — ba bước dark là **7.70 / 7.41 / 7.28 L\***.
+- **Điều test bắt được mà audit trước bỏ lọt:** `fromSeed` sinh `tertiaryFixed`
+  ở **hue 329 — hồng**. Họ `*Fixed` chưa được component Material nào đọc, đúng
+  cái lý do từng để `tertiary` hồng nằm đó không ai thấy. Nay cả 12 role `*Fixed`
+  được khai báo (giá trị light cho cả hai theme, vì "fixed" nghĩa là không đổi
+  theo brightness).
+- **CTA ở dark đổi hướng so với M3.5a:** dùng **indigo**, không dùng
+  `surfaceElevated` trung tính nữa — quyết định của chủ dự án. Ngân sách màu vẫn
+  được bảo vệ, nhưng bằng cách khác: `secondaryAction` giữ trung tính, nên trên
+  màn review chỉ có đúng hai mảng bão hoà là `forgotten` và `remembered`.
+- **Fault injection:** đặt `surfaceDark` gần page (`#0F0C3A`) làm ba assertion
+  fail đúng chỗ — bước L\* còn 2.19, và saturation card 65.7% vượt trần 41.9%.
+- **Dependencies:** M3.5a
+- **Tests required:** thang bề mặt theo L\*; saturation surface so với page;
+  primary không vượt độ sáng và không lấn át nội dung card; secondary action
+  trung tính; ngân sách chroma; light canvas không nhiễm; **mọi role thuộc
+  palette** và thuộc họ màu A2
 - **Checklist phases:** 7.2
 
 ### M3.6 · Base component tối thiểu và app shell

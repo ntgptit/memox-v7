@@ -1,18 +1,25 @@
 import 'package:flutter/material.dart';
 
-/// Colour tokens — **Slate Indigo**, chosen in M3.5a from three candidates
-/// rendered side by side under an identical composition.
+/// Colour tokens — **A2 Quizlet Navy Indigo**, applied in M3.5b.
 ///
 /// Every name says what the colour *means*, never what it looks like. `danger`
 /// survives a redesign that turns it amber; `red` becomes a lie the moment
 /// someone changes it, and nobody renames a constant used in forty files.
 ///
-/// **Why a neutral canvas.** This is an app opened every day, for a few minutes,
-/// for months. Over that horizon what matters is not first-impression appeal but
-/// not being tiring, so nothing saturated sits in peripheral vision: the canvas
-/// is graphite at 6–16% saturation and the only accent is a single muted indigo.
-/// The palette this replaced tinted every surface a saturated navy — striking in
-/// a screenshot, wearing by the third session.
+/// **The page is the only place saturated navy is allowed.** [backgroundDark]
+/// sits at 70% saturation, which is what gives dark mode its identity. Every
+/// surface above it drops to 20–30% while climbing in lightness, so the navy
+/// reads as the room the content sits in rather than as a tint applied to the
+/// content itself. A palette where card, tile and input are all as navy as the
+/// page has no hierarchy left to spend — everything is equally coloured, so
+/// nothing is emphasised.
+///
+/// **Why the ladder is measured in L\*, not in contrast ratio.** A deep navy
+/// page is at luminance 0.004, and down there WCAG's `+0.05` constant compresses
+/// every real step into "1.1-something": the card is 3× the page's luminance and
+/// still scores 1.17:1. L\* is the perceptual scale and stays honest at the
+/// bottom, so `test/core/theme/app_theme_test.dart` asserts the ladder in L\*.
+/// The three dark steps are ~7.4 L\* each.
 ///
 /// **Why every role is declared.** `ColorScheme.fromSeed` generates ~30 roles,
 /// and an audit found it had produced a neutral-grey `surfaceContainer` ladder, a
@@ -20,8 +27,6 @@ import 'package:flutter/material.dart';
 /// families the app never uses. None had surfaced only because the MVP has no
 /// Dialog, BottomSheet, NavigationBar, Menu or Chip yet. Leaving them generated
 /// meant those screens would render as a different app.
-///
-/// Contrast for every pair is verified in `test/core/theme/app_theme_test.dart`.
 abstract final class AppColors {
   /// Seed for `ColorScheme.fromSeed`. Every role it would generate is
   /// overridden below; the seed remains only because Material requires one.
@@ -29,138 +34,149 @@ abstract final class AppColors {
 
   // --- Surface ladder ------------------------------------------------------
   //
-  // Four tiers. In dark they climb (0.008 -> 0.016 -> 0.031 -> 0.048 luminance)
-  // so a card reads as a card and an inset tile as an inset, without a shadow.
-  // In light the card is white and the others sit below it — the same ordering
-  // of *prominence*, built the only way white allows.
+  // Four tiers. Dark climbs L* 3.9 -> 11.6 -> 19.0 -> 26.3 so a card reads as a
+  // card and an inset tile as an inset without a shadow being asked to carry
+  // the hierarchy. Light inverts it — the card is white and the rest sit below
+  // — which is the same ordering of PROMINENCE, built the only way white allows.
 
-  /// Page background.
-  static const Color backgroundLight = Color(0xFFF7F7F8);
-  static const Color backgroundDark = Color(0xFF13151B);
+  /// Page background. The one component allowed a strong navy saturation.
+  static const Color backgroundLight = Color(0xFFF4F5F8);
+  static const Color backgroundDark = Color(0xFF0A082D);
 
-  /// Card and sheet.
+  /// Card and sheet — the flashcard surface.
   static const Color surfaceLight = Color(0xFFFFFFFF);
-  static const Color surfaceDark = Color(0xFF20222A);
+  static const Color surfaceDark = Color(0xFF1B1D32);
 
   /// Inset tile, chip, icon container.
-  static const Color surfaceMutedLight = Color(0xFFEDEEF0);
-  static const Color surfaceMutedDark = Color(0xFF2E313B);
+  static const Color surfaceMutedLight = Color(0xFFEAECF1);
+  static const Color surfaceMutedDark = Color(0xFF292D42);
 
-  /// The most prominent surface: fill of a primary action in dark.
+  /// Top of the ladder: a raised or selected surface.
   static const Color surfaceElevatedLight = Color(0xFFFFFFFF);
-  static const Color surfaceElevatedDark = Color(0xFF4C5161);
+  static const Color surfaceElevatedDark = Color(0xFF383D55);
 
   // --- Text and lines ------------------------------------------------------
   //
-  // Neither end is pure. `#EEEFF2` rather than white, `#191C24` rather than
+  // Neither end is pure. `#EDEEF5` rather than white, `#16182B` rather than
   // black: a pure value buzzes against a tinted ground, and carrying a trace of
   // the surface hue makes text sit *in* the interface rather than on top of it.
-  static const Color textPrimaryLight = Color(0xFF191C24);
-  static const Color textPrimaryDark = Color(0xFFEEEFF2);
-  static const Color textSecondaryLight = Color(0xFF555B6D);
-  static const Color textSecondaryDark = Color(0xFFB0B4BF);
+  static const Color textPrimaryLight = Color(0xFF16182B);
+  static const Color textPrimaryDark = Color(0xFFEDEEF5);
+  static const Color textSecondaryLight = Color(0xFF565C72);
+  static const Color textSecondaryDark = Color(0xFFA6ABC2);
 
   /// Hairline between rows, around cards, and an input at rest.
-  static const Color borderSubtleLight = Color(0xFFDADCE2);
-  static const Color borderSubtleDark = Color(0xFF434856);
+  static const Color borderSubtleLight = Color(0xFFD7DAE3);
+  static const Color borderSubtleDark = Color(0xFF414762);
 
   /// Input border while focused. Focus shifts *hue*, never stroke width —
   /// Material's default doubles the stroke, which reads as the field shouting.
-  static const Color focusRingLight = Color(0xFF3B3BC4);
-  static const Color focusRingDark = Color(0xFF9E9ED1);
+  static const Color focusRingLight = Color(0xFF4141C0);
+  static const Color focusRingDark = Color(0xFF8A8AE0);
 
   // --- Brand and actions ---------------------------------------------------
 
-  /// The single accent. Muted on purpose.
-  static const Color primaryLight = Color(0xFF3D3DA4);
-  static const Color primaryDark = Color(0xFF4444A7);
-  static const Color onPrimaryLight = Color(0xFFFFFFFF);
-  static const Color onPrimaryDark = Color(0xFFF3F4F6);
-
-  /// Label of a secondary (outlined) action.
+  /// The single accent, on hue 240 in both brightnesses.
   ///
-  /// A separate token from [primaryLight] because one colour cannot be both a
-  /// fill and a label on a dark surface; in dark those pull opposite ways, and
-  /// conflating them once shipped a label at 3.09:1.
-  static const Color secondaryActionLight = Color(0xFF3F3F8D);
-  static const Color secondaryActionDark = Color(0xFFB8B8D5);
+  /// It fills the primary action in *both* modes. The dark value is held at
+  /// luminance 0.13 — bright enough to read as the brand against the navy page,
+  /// far enough below the card's headline text that the CTA never becomes the
+  /// brightest thing on screen. That relationship is asserted, not assumed:
+  /// `primary` against the page must score lower than `onSurface` against the
+  /// page.
+  static const Color primaryLight = Color(0xFF4646B4);
+  static const Color primaryDark = Color(0xFF5656C9);
+  static const Color onPrimaryLight = Color(0xFFFFFFFF);
+  static const Color onPrimaryDark = Color(0xFFFFFFFF);
+
+  /// Label of a secondary (outlined) action — *End session*, *Cancel*.
+  ///
+  /// Deliberately neutral (saturation under 20%) rather than the brand colour.
+  /// A secondary action sits next to the review verdicts, and anything with a
+  /// hue there competes with the two colours carrying the user's actual
+  /// decision. Keeping it a separate token from [primaryLight] also stops the
+  /// pairing that once shipped a label at 3.09:1 — one colour cannot be both a
+  /// fill and a label on a dark surface.
+  static const Color secondaryActionLight = Color(0xFF454B5E);
+  static const Color secondaryActionDark = Color(0xFFC3C6D2);
 
   // --- Semantic ------------------------------------------------------------
   //
   // On a chroma budget, and deliberately not equal: `danger` is the alarm and
-  // carries the most, `info` is only an indicator and carries the least. None
-  // reaches full saturation — four hues all shouting is how a study tool starts
-  // looking like a game.
+  // carries the most saturation, `info` is only an indicator and carries the
+  // least. None reaches full saturation — four hues all shouting is how a study
+  // tool starts looking like a game.
 
   /// Answer remembered, session completed, saved.
-  static const Color successLight = Color(0xFF227758);
-  static const Color successDark = Color(0xFF72CAAA);
+  static const Color successLight = Color(0xFF1E7156);
+  static const Color successDark = Color(0xFF68BB9C);
 
   /// Card due soon, streak at risk — informative, not alarming.
-  static const Color warningLight = Color(0xFF8C6521);
-  static const Color warningDark = Color(0xFFDCB674);
+  static const Color warningLight = Color(0xFF856520);
+  static const Color warningDark = Color(0xFFD2AC76);
 
   /// Answer forgotten, destructive action, reset.
-  static const Color dangerLight = Color(0xFFAB2B3C);
-  static const Color dangerDark = Color(0xFFDD8894);
+  static const Color dangerLight = Color(0xFFB02233);
+  static const Color dangerDark = Color(0xFFE88794);
 
-  /// Neutral emphasis: counters, hints, "3 of 20".
-  static const Color infoLight = Color(0xFF38688A);
-  static const Color infoDark = Color(0xFF92B2C9);
+  /// Status that genuinely carries information: streak, counters, "3 of 20".
+  /// Not a decorative accent — plain metadata uses `textSecondary`.
+  static const Color infoLight = Color(0xFF456480);
+  static const Color infoDark = Color(0xFF8FAEC6);
 
   // --- Material roles ------------------------------------------------------
   //
   // Declared, not generated. See the class doc for what `fromSeed` produced
   // here before, and why none of it was visible until it would have been
   // expensive to discover.
-  static const Color primaryContainerLight = Color(0xFFDDDDEE);
-  static const Color primaryContainerDark = Color(0xFF32325D);
-  static const Color onPrimaryContainerLight = Color(0xFF1E1E52);
-  static const Color onPrimaryContainerDark = Color(0xFFD8D8E8);
-  static const Color secondaryLight = Color(0xFF535A6E);
-  static const Color secondaryDark = Color(0xFFB9BECA);
+  static const Color primaryContainerLight = Color(0xFFDCDCF2);
+  static const Color primaryContainerDark = Color(0xFF2B2B6E);
+  static const Color onPrimaryContainerLight = Color(0xFF1B1B5C);
+  static const Color onPrimaryContainerDark = Color(0xFFD8D8F0);
+  static const Color secondaryLight = Color(0xFF4E5468);
+  static const Color secondaryDark = Color(0xFFB4B9CC);
   static const Color onSecondaryLight = Color(0xFFFFFFFF);
-  static const Color onSecondaryDark = Color(0xFF1F2129);
-  static const Color secondaryContainerLight = Color(0xFFE8E9ED);
-  static const Color secondaryContainerDark = Color(0xFF3A3E4A);
-  static const Color onSecondaryContainerLight = Color(0xFF2F3441);
-  static const Color onSecondaryContainerDark = Color(0xFFDDDFE4);
-  static const Color tertiaryLight = Color(0xFF4B6681);
-  static const Color tertiaryDark = Color(0xFFABBDCE);
+  static const Color onSecondaryDark = Color(0xFF1E2033);
+  static const Color secondaryContainerLight = Color(0xFFE4E6EC);
+  static const Color secondaryContainerDark = Color(0xFF333852);
+  static const Color onSecondaryContainerLight = Color(0xFF2C3141);
+  static const Color onSecondaryContainerDark = Color(0xFFD9DCE7);
+  static const Color tertiaryLight = Color(0xFF45647F);
+  static const Color tertiaryDark = Color(0xFFA2BAD0);
   static const Color onTertiaryLight = Color(0xFFFFFFFF);
-  static const Color onTertiaryDark = Color(0xFF1C242C);
-  static const Color tertiaryContainerLight = Color(0xFFE6EBEF);
-  static const Color tertiaryContainerDark = Color(0xFF384757);
-  static const Color onTertiaryContainerLight = Color(0xFF283848);
-  static const Color onTertiaryContainerDark = Color(0xFFD9E0E8);
+  static const Color onTertiaryDark = Color(0xFF17232E);
+  static const Color tertiaryContainerLight = Color(0xFFE1E9F0);
+  static const Color tertiaryContainerDark = Color(0xFF33465A);
+  static const Color onTertiaryContainerLight = Color(0xFF22394B);
+  static const Color onTertiaryContainerDark = Color(0xFFD5E0EA);
   static const Color onErrorLight = Color(0xFFFFFFFF);
-  static const Color onErrorDark = Color(0xFF281518);
-  static const Color errorContainerLight = Color(0xFFF7DEE2);
-  static const Color errorContainerDark = Color(0xFF5D282F);
-  static const Color onErrorContainerLight = Color(0xFF621822);
-  static const Color onErrorContainerDark = Color(0xFFF1D0D4);
+  static const Color onErrorDark = Color(0xFF2C1319);
+  static const Color errorContainerLight = Color(0xFFF8DDE1);
+  static const Color errorContainerDark = Color(0xFF5E2831);
+  static const Color onErrorContainerLight = Color(0xFF641421);
+  static const Color onErrorContainerDark = Color(0xFFF5D3D8);
   static const Color surfaceContainerLowestLight = Color(0xFFFFFFFF);
-  static const Color surfaceContainerLowestDark = Color(0xFF0F1015);
-  static const Color surfaceContainerLowLight = Color(0xFFF9FAFA);
-  static const Color surfaceContainerLowDark = Color(0xFF1A1C23);
-  static const Color surfaceContainerLight = Color(0xFFF4F4F6);
-  static const Color surfaceContainerDark = Color(0xFF23262F);
-  static const Color surfaceContainerHighLight = Color(0xFFEEEFF1);
-  static const Color surfaceContainerHighDark = Color(0xFF2F323D);
-  static const Color surfaceContainerHighestLight = Color(0xFFE9EAED);
-  static const Color surfaceContainerHighestDark = Color(0xFF3A3E4A);
-  static const Color surfaceDimLight = Color(0xFFE0E2E6);
-  static const Color surfaceDimDark = Color(0xFF111318);
+  static const Color surfaceContainerLowestDark = Color(0xFF07061F);
+  static const Color surfaceContainerLowLight = Color(0xFFFAFAFC);
+  static const Color surfaceContainerLowDark = Color(0xFF12142B);
+  static const Color surfaceContainerLight = Color(0xFFF1F2F6);
+  static const Color surfaceContainerDark = Color(0xFF1F2237);
+  static const Color surfaceContainerHighLight = Color(0xFFEAECF1);
+  static const Color surfaceContainerHighDark = Color(0xFF292D42);
+  static const Color surfaceContainerHighestLight = Color(0xFFE3E5EC);
+  static const Color surfaceContainerHighestDark = Color(0xFF333852);
+  static const Color surfaceDimLight = Color(0xFFDEE0E7);
+  static const Color surfaceDimDark = Color(0xFF08061F);
   static const Color surfaceBrightLight = Color(0xFFFFFFFF);
-  static const Color surfaceBrightDark = Color(0xFF434856);
-  static const Color inverseSurfaceLight = Color(0xFF2E3038);
-  static const Color inverseSurfaceDark = Color(0xFFE9EAEC);
-  static const Color onInverseSurfaceLight = Color(0xFFF1F2F3);
-  static const Color onInverseSurfaceDark = Color(0xFF292C32);
-  static const Color inversePrimaryLight = Color(0xFFA5A5D5);
-  static const Color inversePrimaryDark = Color(0xFF34348D);
-  static const Color shadowLight = Color(0xFF0C0E12);
+  static const Color surfaceBrightDark = Color(0xFF383D55);
+  static const Color inverseSurfaceLight = Color(0xFF2A2C3E);
+  static const Color inverseSurfaceDark = Color(0xFFE7E8F0);
+  static const Color onInverseSurfaceLight = Color(0xFFF1F2F6);
+  static const Color onInverseSurfaceDark = Color(0xFF23253A);
+  static const Color inversePrimaryLight = Color(0xFFA9A9E0);
+  static const Color inversePrimaryDark = Color(0xFF3A3A9B);
+  static const Color shadowLight = Color(0xFF0B0C18);
   static const Color shadowDark = Color(0xFF000000);
-  static const Color scrimLight = Color(0xFF0C0E12);
+  static const Color scrimLight = Color(0xFF0B0C18);
   static const Color scrimDark = Color(0xFF000000);
 }

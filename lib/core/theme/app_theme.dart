@@ -51,13 +51,28 @@ ThemeData buildLightTheme() => _buildTheme(
     onInverseSurface: AppColors.onInverseSurfaceLight,
     inversePrimary: AppColors.inversePrimaryLight,
     surfaceTint: AppColors.primaryLight,
+    // The M3 `*Fixed` family: brightness-independent by definition, so both
+    // themes get the same light-container values. No Material component reads
+    // them today — which is exactly the argument that left a PINK `tertiary`
+    // undetected until an audit went looking. `fromSeed` still generates
+    // `tertiaryFixed` at hue 329.
+    primaryFixed: AppColors.primaryContainerLight,
+    primaryFixedDim: AppColors.primaryContainerLight,
+    onPrimaryFixed: AppColors.onPrimaryContainerLight,
+    onPrimaryFixedVariant: AppColors.primaryLight,
+    secondaryFixed: AppColors.secondaryContainerLight,
+    secondaryFixedDim: AppColors.secondaryContainerLight,
+    onSecondaryFixed: AppColors.onSecondaryContainerLight,
+    onSecondaryFixedVariant: AppColors.secondaryLight,
+    tertiaryFixed: AppColors.tertiaryContainerLight,
+    tertiaryFixedDim: AppColors.tertiaryContainerLight,
+    onTertiaryFixed: AppColors.onTertiaryContainerLight,
+    onTertiaryFixedVariant: AppColors.tertiaryLight,
     shadow: AppColors.shadowLight,
     scrim: AppColors.scrimLight,
   ),
   const AppSemanticColors.light(),
   background: AppColors.backgroundLight,
-  // Light cannot promote a button above white, so the brand colour carries the
-  // prominence instead. Dark uses the surface ladder — see below.
   actionFill: AppColors.primaryLight,
   actionLabel: AppColors.onPrimaryLight,
   outlineLabel: AppColors.secondaryActionLight,
@@ -100,20 +115,36 @@ ThemeData buildDarkTheme() => _buildTheme(
     onInverseSurface: AppColors.onInverseSurfaceDark,
     inversePrimary: AppColors.inversePrimaryDark,
     // Not the generated tone-80 lavender: Material paints this over elevated
-    // surfaces, and a near-pastel tint there undoes the neutral canvas.
+    // surfaces, and a near-pastel tint there undoes the navy canvas.
     surfaceTint: AppColors.surfaceElevatedDark,
+    // The M3 `*Fixed` family: brightness-independent by definition, so both
+    // themes get the same light-container values. No Material component reads
+    // them today — which is exactly the argument that left a PINK `tertiary`
+    // undetected until an audit went looking. `fromSeed` still generates
+    // `tertiaryFixed` at hue 329.
+    primaryFixed: AppColors.primaryContainerLight,
+    primaryFixedDim: AppColors.primaryContainerLight,
+    onPrimaryFixed: AppColors.onPrimaryContainerLight,
+    onPrimaryFixedVariant: AppColors.primaryLight,
+    secondaryFixed: AppColors.secondaryContainerLight,
+    secondaryFixedDim: AppColors.secondaryContainerLight,
+    onSecondaryFixed: AppColors.onSecondaryContainerLight,
+    onSecondaryFixedVariant: AppColors.secondaryLight,
+    tertiaryFixed: AppColors.tertiaryContainerLight,
+    tertiaryFixedDim: AppColors.tertiaryContainerLight,
+    onTertiaryFixed: AppColors.onTertiaryContainerLight,
+    onTertiaryFixedVariant: AppColors.tertiaryLight,
     shadow: AppColors.shadowDark,
     scrim: AppColors.scrimDark,
   ),
   const AppSemanticColors.dark(),
   background: AppColors.backgroundDark,
-  // The action is the top of the surface ladder, not a block of colour. That
-  // keeps every saturated hue free to mean something — which matters because
-  // the review verdicts (`forgotten` / `remembered`) are colour-coded, and a
-  // brand-coloured CTA beside them would compete with the two colours carrying
-  // the user's actual decision.
-  actionFill: AppColors.surfaceElevatedDark,
-  actionLabel: AppColors.textPrimaryDark,
+  // Indigo in both modes, so the brand is the same object in light and dark.
+  // The colour it does NOT compete with is the review verdict pair: those are
+  // the only two saturated fills on a review screen, and `secondaryAction` is
+  // kept neutral precisely so nothing else in the row has a hue.
+  actionFill: AppColors.primaryDark,
+  actionLabel: AppColors.onPrimaryDark,
   outlineLabel: AppColors.secondaryActionDark,
 );
 
