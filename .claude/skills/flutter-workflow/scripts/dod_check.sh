@@ -78,16 +78,23 @@ fi
 # layer boundaries, Riverpod usage, design tokens, memox data invariants —
 # including the rules riverpod_lint covered before it was descoped.
 GUARD_RUNNER="$REPO_ROOT/code-verification-guard-v2/guard/run.py"
-if [[ -f "$GUARD_RUNNER" ]]; then
-  if command -v python >/dev/null 2>&1; then
-    step "code verification guard (memox-v7)"
-    python "$GUARD_RUNNER" check --project "$REPO_ROOT" --ruleset memox-v7 \
-      || FAILED+=("guard — see the rule ids above")
-  else
-    SKIPPED+=("guard (python not on PATH)")
-  fi
-else
+# `python3` as well as `python`. Only `python` was tried, so on a machine where the
+# interpreter is named `python3` — most Linux distributions, and the CI runner — the
+# project's main guard was *skipped* and this script still printed success. A skip
+# that reads as a pass is the same defect as a rule that scans nothing.
+GUARD_PY=""
+for candidate in python python3; do
+  command -v "$candidate" >/dev/null 2>&1 && { GUARD_PY="$candidate"; break; }
+done
+
+if [[ ! -f "$GUARD_RUNNER" ]]; then
   SKIPPED+=("guard (not vendored at $GUARD_RUNNER)")
+elif [[ -z "$GUARD_PY" ]]; then
+  SKIPPED+=("guard (neither python nor python3 on PATH)")
+else
+  step "code verification guard (memox-v7)"
+  "$GUARD_PY" "$GUARD_RUNNER" check --project "$REPO_ROOT" --ruleset memox-v7 \
+    || FAILED+=("guard — see the rule ids above")
 fi
 
 # ------------------------------------------------------------------ test
