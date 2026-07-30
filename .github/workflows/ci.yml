@@ -61,7 +61,7 @@ jobs:
           # needs the material fonts a widget test renders with, the web job needs
           # the web SDK — and with a shared key whichever finished first saved a
           # cache the other then restored. That is how run 3 lost its fonts.
-          cache-key: flutter-verify-:os:-:channel:-:version:-:arch:
+          cache-key: 'flutter-verify-:os:-:channel:-:version:-:arch:'
 
       # `Expected SDK font not found: material_fonts/roboto-regular.ttf` failed
       # **every** widget test on runs 3 and 4. Nothing in the project was wrong; the
@@ -168,7 +168,7 @@ jobs:
         with:
           flutter-version-file: .fvmrc
           cache: true
-          cache-key: flutter-web-:os:-:channel:-:version:-:arch:
+          cache-key: 'flutter-web-:os:-:channel:-:version:-:arch:'
 
       - name: pub get
         run: flutter pub get
