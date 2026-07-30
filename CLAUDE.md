@@ -140,8 +140,17 @@ repository. Each feature is laid out as:
 lib/features/<feature>/
 ├── domain/       entities/ · repositories/ · models/ · usecases/ · failures/
 ├── data/         repositories/ · mappers/ · datasources/ · models/
+├── di/           one provider per contract the feature needs
 └── presentation/ screens/ · controllers/ · states/ · widgets/ · providers/
 ```
+
+**`features/` never imports `app/`** (AD-13). The composition root sees a feature;
+the reverse makes a feature depend on the shell it happens to be mounted in, and
+cloning it then means editing `app/` too. So `di/` declares the provider as the
+*domain contract* and `app/di/repository_bindings.dart` binds the implementation;
+a constant both the router and a screen speak — a route name — lives in `core/`.
+`check_architecture.sh` rule 4b and `test/app/architecture_boundary_test.dart`
+both enforce it.
 
 Plural folder names, and **the folder does not replace the suffix** —
 `entities/deck_entity.dart`, not `entities/deck.dart`. The guards match on the
@@ -151,9 +160,22 @@ silently leaves the scope of the rules meant to cover it.
 
 **A use case per interaction**, and this overrides the older "only when it holds
 real logic" guidance: uniformity is what makes a new feature a clone rather than a
-judgement call at every operation. Six of Deck's ten hold the input validation
-that used to run twice — once in a controller and again in the repository. The
-four read ones are thin, and that is the accepted cost (AD-12).
+judgement call at every operation. Six of Deck's ten apply the input validation
+that used to run three times — in a controller, again in the repository, and a
+third time in the widget that re-derived which field was wrong. The four read ones
+are thin, and that is the accepted cost (AD-12).
+
+**One interaction is not one statement** (AD-13). A screen that needs two facts at
+once gets **one** read returning both, not two use cases composed in a controller —
+two reads are two snapshots, and the screen can then render one fact from before a
+write and the other from after it. A count that expires carries its expiry from the
+same statement.
+
+**An input rule belongs to a type, not a layer** (AD-13). Moving validation into
+one layer stops it being duplicated by convention; moving it into a value object
+with a private constructor stops it structurally, and the repository contract's
+signature then answers "has this been validated?" without anyone reading the
+implementation.
 
 **What must NOT move into a use case:** any rule that needs the data *as it stands
 at the moment of writing*. Depth limits, first-child locks, emptiness checks and
@@ -180,7 +202,15 @@ comes from design tokens. No user-visible string outside the ARB files.
 
 **State.** Immutable. Data and task-status are separate concerns — one
 `isLoading` boolean for every operation on a screen is a bug waiting to happen.
-Controllers never hold a `BuildContext`.
+Controllers never hold a `BuildContext`; `command_query_separation_test.dart`
+checks that by parsing the AST, because the words appear in the prose of every file
+that explains the rule.
+
+**Nothing in a feature reads the wall clock.** `clockProvider` is passed in from the
+composition root, and `lib/features/` contains no `DateTime.now()`. A private
+fallback inside a repository made "now" two things — a provider the whole tree can
+override, and a static nothing can reach — and the unreachable one is what wins in
+production (AD-13).
 
 **Errors.** Data-layer exceptions map to a domain `Failure` at the repository
 boundary. The UI never sees a `DioException`. User-facing messages never leak
@@ -199,6 +229,7 @@ suffix removes a file from the rules meant to cover it.
 |---|---|
 | `domain/` | `_entity` · `_repository` · `_use_case` · `_model` · `_failure` · `_scheduler` |
 | `data/` | `_repository_impl` · `_mapper` · `_dao` · `_data_source` · `_model` · `_loader` |
+| `di/` | `_provider` · `_bindings` |
 | `presentation/` | `_screen` · `_controller` · `_state` · `_widget` · `_provider` · `_page` · `_view` |
 
 Two that bite:

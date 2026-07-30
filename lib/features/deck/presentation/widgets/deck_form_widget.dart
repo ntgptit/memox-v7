@@ -6,9 +6,10 @@ import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_action_button.dart';
 import '../../../../shared/widgets/mx_confirm_dialog.dart';
 import '../../../../shared/widgets/mx_text_field.dart';
-import '../../domain/entities/deck_entity.dart';
 import '../../domain/models/scheduler_type_model.dart';
 import 'deck_labels_widget.dart';
+import '../../domain/failures/deck_validation_failure.dart';
+import '../../domain/models/deck_name_model.dart';
 import '../states/deck_submit_state.dart';
 
 /// The one deck form, used for create-root, create-sub-deck and rename.
@@ -110,7 +111,7 @@ class _DeckFormWidgetState extends State<DeckFormWidget> {
           // says never truncate silently, and `maxLength` refuses further input
           // instead of trimming what is already there. The over-length error
           // still exists for text arriving by paste on platforms that allow it.
-          maxLength: DeckEntity.maxNameLength,
+          maxLength: DeckName.maxLength,
           textInputAction: TextInputAction.done,
           onSubmitted: (_) => _submit(),
         ),
@@ -120,7 +121,7 @@ class _DeckFormWidgetState extends State<DeckFormWidget> {
             selected: _scheduler,
             isEnabled: !state.isSubmitting,
             errorText: state.isSchedulerMissing
-                ? context.deckFormError(DeckFormProblem.schedulerMissing)
+                ? context.deckFormError(DeckValidationProblem.schedulerMissing)
                 : null,
             onChanged: (value) => setState(() => _scheduler = value),
           ),

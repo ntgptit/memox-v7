@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart' show QueryRow, Variable;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/features/deck/domain/models/deck_name_model.dart';
 import 'package:memox/core/database/app_database.dart';
 import 'package:memox/features/card/data/card_repository_impl.dart';
 import 'package:memox/features/deck/data/repositories/deck_repository_impl.dart';
@@ -62,15 +63,15 @@ final class DeckRepositoryHarness {
     String prefix = '',
   }) async {
     final root = await deckRepository.createRootDeck(
-      name: '${prefix}Root',
+      name: DeckName.parseOrThrow('${prefix}Root'),
       schedulerType: scheduler,
     );
     final branch = await deckRepository.createSubDeck(
-      name: '${prefix}Branch',
+      name: DeckName.parseOrThrow('${prefix}Branch'),
       parentDeckId: root.id,
     );
     final leaf = await deckRepository.createSubDeck(
-      name: '${prefix}Leaf',
+      name: DeckName.parseOrThrow('${prefix}Leaf'),
       parentDeckId: branch.id,
     );
 
@@ -86,14 +87,14 @@ final class DeckRepositoryHarness {
   }) async {
     final decks = <DeckEntity>[
       await deckRepository.createRootDeck(
-        name: '${prefix}1',
+        name: DeckName.parseOrThrow('${prefix}1'),
         schedulerType: SchedulerType.eightBox,
       ),
     ];
     for (var level = 2; level <= totalLevels; level++) {
       decks.add(
         await deckRepository.createSubDeck(
-          name: '$prefix$level',
+          name: DeckName.parseOrThrow('$prefix$level'),
           parentDeckId: decks.last.id,
         ),
       );

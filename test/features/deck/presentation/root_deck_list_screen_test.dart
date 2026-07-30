@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/error/failure.dart';
+import 'package:memox/features/deck/domain/models/root_deck_list_snapshot_model.dart';
 import 'package:memox/features/deck/domain/models/root_deck_summary_model.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 import 'package:memox/features/deck/presentation/widgets/deck_tile_widget.dart';
@@ -136,7 +137,7 @@ void main() {
       tester,
     ) async {
       // UC-06 A2, the reason the read is a stream.
-      final controller = StreamController<List<RootDeckSummary>>();
+      final controller = StreamController<RootDeckListSnapshot>();
       addTearDown(controller.close);
 
       await pumpDeckScreen(
@@ -145,11 +146,11 @@ void main() {
         screen: const RootDeckListScreen(),
       );
 
-      controller.add(const <RootDeckSummary>[]);
+      controller.add(fakeListSnapshot(const <RootDeckSummary>[]));
       await tester.pump();
       expect(find.byType(MxEmptyState), findsOneWidget);
 
-      controller.add(threeSummaries());
+      controller.add(fakeListSnapshot(threeSummaries()));
       await tester.pump();
 
       expect(find.byType(DeckTileWidget), findsNWidgets(3));
@@ -185,12 +186,14 @@ void main() {
         summaries: () {
           attempt += 1;
           if (attempt == 1) {
-            return Stream<List<RootDeckSummary>>.error(
+            return Stream<RootDeckListSnapshot>.error(
               const DatabaseFailure(message: 'read failed'),
             );
           }
 
-          return Stream<List<RootDeckSummary>>.value(threeSummaries());
+          return Stream<RootDeckListSnapshot>.value(
+            fakeListSnapshot(threeSummaries()),
+          );
         },
       );
 

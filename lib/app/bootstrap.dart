@@ -6,6 +6,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/state/provider_observer.dart';
+import '../features/deck/di/deck_repository_provider.dart';
+import 'di/repository_bindings.dart';
 import 'app.dart';
 import 'config/env_config.dart';
 import 'config/env_config_provider.dart';
@@ -60,7 +62,13 @@ Future<void> bootstrap(EnvConfig config) async {
 Widget buildRootWidget(EnvConfig config) => ProviderScope(
   // No explicit type argument: `Override` is internal to riverpod and is not
   // part of flutter_riverpod's public API.
-  overrides: [envConfigProvider.overrideWithValue(config)],
+  overrides: [
+    envConfigProvider.overrideWithValue(config),
+    // The composition root binding a contract to an implementation. The deck
+    // feature declares `deckRepositoryProvider` as the domain type and never
+    // names `DeckRepositoryImpl`; this is the one line that does.
+    deckRepositoryProvider.overrideWith(deckRepositoryBinding),
+  ],
   // Provider failures are always reported: Riverpod 3 retries a failed provider
   // ten times and shows `AsyncLoading` throughout, so without this a broken read
   // is thirteen seconds of spinner and no exception anywhere. State transitions

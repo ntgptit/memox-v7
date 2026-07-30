@@ -1,4 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/features/deck/domain/failures/deck_validation_failure.dart';
+import 'package:memox/features/deck/domain/models/deck_name_model.dart';
 import 'package:memox/features/deck/domain/models/deck_content_type_model.dart';
 import 'package:memox/features/deck/domain/entities/deck_entity.dart';
 import 'package:memox/features/deck/domain/failures/deck_move_failure.dart';
@@ -311,18 +313,16 @@ void main() {
   });
 
   group('BR-01 name rule', () {
-    test('nameProblem and validateName agree', () {
-      // One implementation, two entry points. If they diverged, a form would
-      // accept a name the repository then rejects — an error with no field to
-      // point at.
-      expect(DeckEntity.nameProblem('  '), DeckNameProblem.empty);
-      expect(
-        DeckEntity.nameProblem('a' * (DeckEntity.maxNameLength + 1)),
-        DeckNameProblem.tooLong,
-      );
-      expect(DeckEntity.nameProblem('  Japanese  '), isNull);
-      expect(DeckEntity.validateName('  Japanese  '), 'Japanese');
-      expect(() => DeckEntity.validateName('   '), throwsA(isA<Object>()));
+    test('the name rule has exactly one entry point', () {
+      // This used to assert that `nameProblem` and `validateName` agreed with each
+      // other — two entry points that had to be kept in step by hand. There is one
+      // now, and `deck_name_test.dart` owns its cases; what is worth asserting
+      // here is that the old pair is gone.
+      final parsed = DeckName.parse('  Japanese  ');
+
+      expect(parsed.problem, isNull);
+      expect(parsed.name?.value, 'Japanese');
+      expect(DeckName.parse('   ').problem, DeckValidationProblem.nameEmpty);
     });
   });
 }

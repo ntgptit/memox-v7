@@ -6,11 +6,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/app/app.dart';
 import 'package:memox/app/config/env_config.dart';
 import 'package:memox/app/config/env_config_provider.dart';
-import 'package:memox/app/di/deck_repository_provider.dart';
+import 'package:memox/features/deck/di/deck_repository_provider.dart';
 import 'package:memox/app/router/app_router.dart';
 import 'package:memox/app/router/route_paths.dart';
 import 'package:memox/app/shell/app_navigation_shell.dart';
 import 'package:memox/core/error/failure.dart';
+import 'package:memox/features/deck/domain/models/root_deck_list_snapshot_model.dart';
 import 'package:memox/features/deck/domain/models/root_deck_summary_model.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
@@ -245,7 +246,7 @@ void main() {
     testWidgets('a later emission still updates the list under the bar', (
       tester,
     ) async {
-      final controller = StreamController<List<RootDeckSummary>>();
+      final controller = StreamController<RootDeckListSnapshot>();
       addTearDown(controller.close);
 
       await pumpShell(
@@ -253,11 +254,11 @@ void main() {
         FakeDeckRepository(summaries: () => controller.stream),
       );
 
-      controller.add(const <RootDeckSummary>[]);
+      controller.add(fakeListSnapshot(const <RootDeckSummary>[]));
       await tester.pump();
       expect(find.byType(MxEmptyState), findsOneWidget);
 
-      controller.add(manySummaries());
+      controller.add(fakeListSnapshot(manySummaries()));
       await tester.pump();
 
       expect(find.byType(MxListTile), findsWidgets);

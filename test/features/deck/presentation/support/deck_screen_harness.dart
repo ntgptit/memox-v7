@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/app/app.dart';
 import 'package:memox/app/config/env_config.dart';
 import 'package:memox/app/config/env_config_provider.dart';
-import 'package:memox/app/di/deck_repository_provider.dart';
+import 'package:memox/features/deck/di/deck_repository_provider.dart';
 import 'package:memox/core/time/clock_provider.dart';
 import 'package:memox/app/router/app_router.dart';
 import 'package:memox/core/theme/app_theme.dart';

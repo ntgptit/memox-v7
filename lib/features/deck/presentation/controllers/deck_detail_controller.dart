@@ -1,50 +1,12 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/state/retry_policy.dart';
 import '../../domain/models/deck_deletion_impact_model.dart';
+import '../../domain/models/deck_detail_model.dart';
 import '../providers/deck_use_case_provider.dart';
-import '../../domain/entities/deck_entity.dart';
 
-part 'deck_detail_controller.freezed.dart';
 part 'deck_detail_controller.g.dart';
 
-/// One deck plus the children it is allowed to show (UC-06 step 4, UC-08).
-///
-/// Both facts arrive together because every action on the screen needs both: the
-/// action set comes from the deck's `content_type`, and whether reset is
-/// available comes from the children being empty. Two separate providers would
-/// let the screen render an action matrix computed from a deck and a child list
-/// captured at different instants.
-@freezed
-abstract class DeckDetail with _$DeckDetail {
-  const factory DeckDetail({
-    required DeckEntity deck,
-    required List<DeckEntity> childDecks,
-  }) = _DeckDetail;
-
-  const DeckDetail._();
-
-  /// Whether the content type can be put back to `unset` (BR-68).
-  ///
-  /// Direct children only, and only for a sub-deck: a root's content type is
-  /// invariant (BR-58). Cards are **not** counted here — this screen does not
-  /// read the card feature (M4.11 owns that), so it can only say "no child
-  /// decks", and the repository is what refuses a reset on a deck that still
-  /// holds cards. That is the right split: the UI offers, the repository
-  /// decides.
-  bool get mayOfferReset => !deck.isRoot && childDecks.isEmpty;
-}
-
-/// Watches one deck and its direct children.
-///
-/// `family` on the deck id, so opening a second deck does not disturb the first
-/// — which matters because the shell keeps the branch alive behind a pushed
-/// route.
-///
-/// A `NotFoundFailure` from the repository surfaces as the provider's error, and
-/// the screen renders a not-found state from it rather than a database message
-/// (UC-03 E1: a deck deleted on another screen must not crash this one).
 /// What deleting a deck would take with it (BR-04).
 ///
 /// A future, not a stream: the confirmation dialog is a snapshot of a decision
@@ -55,18 +17,23 @@ abstract class DeckDetail with _$DeckDetail {
 Future<DeckDeletionImpact> deckDeletionImpact(Ref ref, String deckId) =>
     ref.watch(getDeckDeletionImpactUseCaseProvider)(deckId);
 
+/// Watches one deck and its direct children.
+///
+/// **One use case, one read, one snapshot.** This provider used to compose two
+/// use cases — watch the children, then ask for the deck per emission — and a
+/// comment here claimed the two facts "arrive together". They did not: they were
+/// two statements against two snapshots, so the screen could show a deck read
+/// before a rename beside a child list read after it. `watchDeckDetail` is one
+/// contract method backed by one statement, and the composition is gone rather
+/// than moved.
+///
+/// `family` on the deck id, so opening a second deck does not disturb the first
+/// — which matters because the shell keeps the branch alive behind a pushed
+/// route.
+///
+/// A `NotFoundFailure` from the repository surfaces as the provider's error, and
+/// the screen renders a not-found state from it rather than a database message
+/// (UC-03 E1: a deck deleted on another screen must not crash this one).
 @Riverpod(retry: noAutomaticRetry)
-Stream<DeckDetail> deckDetail(Ref ref, String deckId) {
-  // Two use cases, composed here. Composition is the controller's job: the
-  // screen needs a read model, and neither use case should know about the other.
-  final children = ref.watch(watchDeckChildrenUseCaseProvider);
-  final deckById = ref.watch(getDeckByIdUseCaseProvider);
-
-  // The children stream is the one that re-emits on every write in this
-  // subtree; the deck itself is re-read on each emission so a rename made
-  // elsewhere shows up without a second subscription.
-  return children(deckId).asyncMap(
-    (childDecks) async =>
-        DeckDetail(deck: await deckById(deckId), childDecks: childDecks),
-  );
-}
+Stream<DeckDetail> deckDetail(Ref ref, String deckId) =>
+    ref.watch(watchDeckDetailUseCaseProvider)(deckId);

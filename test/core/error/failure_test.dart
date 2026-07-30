@@ -39,16 +39,16 @@ void main() {
       expect(failures.map(describe).toSet(), hasLength(failures.length));
     });
 
-    test('ValidationFailure carries per-field errors', () {
+    test('ValidationFailure carries typed problems, not field strings', () {
       const failure = ValidationFailure(
         message: 'Please check the highlighted fields.',
-        fieldErrors: <String, String>{'name': 'Name is required.'},
+        problems: <Enum>{_TestProblem.nameEmpty},
       );
 
-      expect(failure.fieldErrors['name'], 'Name is required.');
+      expect(failure.problems, <Enum>{_TestProblem.nameEmpty});
       // Defaulting to empty keeps every call site from null-checking a map.
       expect(const NotFoundFailure(message: 'x').cause, isNull);
-      expect(const ValidationFailure(message: 'x').fieldErrors, isEmpty);
+      expect(const ValidationFailure(message: 'x').problems, isEmpty);
     });
 
     test('no message leaks technical detail', () {
@@ -196,3 +196,9 @@ void main() {
     }
   });
 }
+
+/// A stand-in for a feature's problem enum.
+///
+/// `core/` must not import a feature, which is why `ValidationFailure.problems` is
+/// typed `Set<Enum>`: the concrete values are declared by whichever feature threw.
+enum _TestProblem { nameEmpty }

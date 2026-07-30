@@ -6,6 +6,7 @@ import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/deck/domain/models/deck_content_type_model.dart';
 import 'package:memox/features/deck/domain/models/deck_deletion_impact_model.dart';
 import 'package:memox/features/deck/domain/entities/deck_entity.dart';
+import 'package:memox/features/deck/domain/models/deck_detail_model.dart';
 import 'package:memox/features/deck/presentation/screens/deck_detail_screen.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 
@@ -27,8 +28,10 @@ void main() {
     List<DeckEntity>? allDecks,
     Failure? writeFailure,
   }) => FakeDeckRepository(
-    deckById: (id) async => deck,
-    childDecks: (_) => Stream<List<DeckEntity>>.value(children),
+    // One builder for the pair, because the contract returns the pair. A deck and
+    // a child list from different snapshots is no longer expressible here.
+    deckDetail: (_) =>
+        Stream<DeckDetail>.value(DeckDetail(deck: deck, childDecks: children)),
     allDecks: () =>
         Stream<List<DeckEntity>>.value(allDecks ?? <DeckEntity>[deck]),
     writeFailure: writeFailure,

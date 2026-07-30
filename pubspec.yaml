@@ -34,8 +34,21 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
-  flutter_riverpod: any
-  riverpod_annotation: any
+  # Pinned to the major the code is written against, from the versions actually
+  # resolved in pubspec.lock. They were `any`, and `any` is not a small
+  # imprecision here: the whole state layer is codegen against a version-specific
+  # contract — the generated `$Notifier` base, `@Riverpod(retry:)`,
+  # `Notifier.listenSelf`, and `noAutomaticRetry`, which exists only because
+  # Riverpod 3 retries a failed provider ten times with backoff and reports
+  # `AsyncLoading` for the ~13 seconds it spends doing so. A resolver free to pick
+  # the next major would change runtime behaviour with no code change and no
+  # review, on whichever machine hit a cold cache first.
+  #
+  # The majors differ on purpose: `riverpod_annotation` 4 is the annotation set
+  # for `flutter_riverpod` 3. Keep the three below in step with each other and
+  # with `riverpod_generator`.
+  flutter_riverpod: ^3.3.2
+  riverpod_annotation: ^4.0.3
   go_router: ^17.3.0
   drift: 2.34.0
   # Direct because core/error/drift_error_mapper.dart reads SqliteException.
@@ -66,12 +79,20 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  # Direct because test/app/command_query_separation_test.dart parses lib/ into a
+  # real AST. It was reachable transitively through build_runner; depending on it
+  # by accident means a build_runner upgrade could remove it, so it is declared.
+  # Version tracked to what `flutter analyze` itself resolves — a parser ahead of
+  # the SDK's would reject syntax the SDK accepts.
+  analyzer: ^12.1.0
   build_runner: ^2.15.1
   freezed: ^3.2.5
   json_serializable: ^6.14.0
   mocktail: ^1.0.5
   drift_dev: ^2.34.0
-  riverpod_generator: any
+  # Same reason as `riverpod_annotation` above: it emits the code the app is
+  # compiled from, so a major bump here rewrites every provider in the tree.
+  riverpod_generator: ^4.0.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

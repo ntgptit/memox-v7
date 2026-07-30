@@ -1,5 +1,6 @@
 import '../entities/deck_entity.dart';
 import '../failures/deck_validation_failure.dart';
+import '../models/deck_name_model.dart';
 import '../models/scheduler_type_model.dart';
 import '../repositories/deck_repository.dart';
 
@@ -9,29 +10,35 @@ import '../repositories/deck_repository.dart';
 /// real state the form starts in, and passing `eight_box` as a placeholder is
 /// exactly the implicit default the rule exists to prevent.
 ///
-/// The name check used to run twice — once in the controller and once again in
-/// the repository — with nothing to catch the two disagreeing. It runs here now,
-/// in the layer that owns BR-01.
+/// **This is the only place the deck name rule is applied for this interaction.**
+/// [DeckName.parse] trims once and reports the rule it broke; the repository
+/// contract then takes the parsed value, so it has nothing left to check.
 class CreateRootDeckUseCase {
   const CreateRootDeckUseCase(this._repository);
 
   final DeckRepository _repository;
 
   Future<DeckEntity> call({
-    required String name,
+    required String rawName,
     required SchedulerType? schedulerType,
   }) {
-    // Both checks run, so one attempt reports both problems. Reporting only the
-    // first would send the user round twice.
-    refuseInvalidDeckForm(<String, String>{
-      ...?deckNameFieldError(name),
-      if (schedulerType == null) DeckField.schedulerType: 'missing',
-    });
+    // Both fields are evaluated before anything is reported, so one attempt
+    // reports both problems. Reporting only the first would send the user round
+    // twice.
+    final parsed = DeckName.parse(rawName);
+    final problems = <DeckValidationProblem>{
+      ?parsed.problem,
+      if (schedulerType == null) DeckValidationProblem.schedulerMissing,
+    };
+    refuseInvalidDeckForm(problems);
 
-    return _repository.createRootDeck(
-      name: name,
-      // Non-null past the refusal above, which is what makes it so.
-      schedulerType: schedulerType!,
-    );
+    // Both non-null past the refusal above, and the analyser can see it: the set
+    // is empty only when `parsed.problem` was null and `schedulerType` was not.
+    final name = parsed.name;
+    if (name == null || schedulerType == null) {
+      throw StateError('unreachable: refuseInvalidDeckForm would have thrown');
+    }
+
+    return _repository.createRootDeck(name: name, schedulerType: schedulerType);
   }
 }

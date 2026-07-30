@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../l10n/l10n_extension.dart';
 import '../../shared/widgets/mx_error_state.dart';
 import '../../shared/widgets/mx_content_shell.dart';
-import '../router/route_names.dart';
+import '../../core/navigation/route_names.dart';
 
 /// Shown when a location matches no route.
 ///

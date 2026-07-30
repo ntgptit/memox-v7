@@ -1,5 +1,17 @@
 /// The names every navigation call uses.
 ///
+/// **In `core/` because both sides of a navigation need it and neither owns it.**
+/// `app/router/` registers these names on the route table; a feature screen passes
+/// one to `goNamed`. They used to live under `app/router/`, which made every
+/// screen that navigates import `app/` — a feature depending on the shell.
+/// Inverting it was not an option either: the router cannot take its names *from*
+/// the features, because a route belongs to the table, not to one screen.
+///
+/// So the names are a vocabulary in `core/`, which no feature owns and every
+/// feature may read, exactly like `clockProvider`. `RoutePaths` deliberately did
+/// **not** come along: a path is the app's URL contract and only the route table
+/// asserts it, so no feature has any business seeing one.
+///
 /// UI navigates by name, never by path. A path is a public URL contract that
 /// changes for reasons that have nothing to do with the code — a marketing
 /// redirect, a deep-link scheme, a nesting change — and a hardcoded deck path

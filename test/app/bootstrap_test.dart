@@ -9,7 +9,11 @@ import 'package:memox/app/app.dart';
 import 'package:memox/app/bootstrap.dart';
 import 'package:memox/app/config/env_config.dart';
 import 'package:memox/app/config/env_config_provider.dart';
-import 'package:memox/app/di/deck_repository_provider.dart';
+import 'package:memox/features/deck/di/deck_repository_provider.dart';
+import 'package:memox/core/database/app_database_provider.dart';
+import 'package:memox/core/database/app_database.dart';
+import 'package:drift/native.dart';
+import 'package:memox/features/deck/data/repositories/deck_repository_impl.dart';
 import 'package:memox/app/error_screen_widget.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 
@@ -157,6 +161,62 @@ void main() {
 
       expect(container.read(envConfigProvider), same(EnvConfig.staging));
       expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('the root binds every repository the features declare', (
+      tester,
+    ) async {
+      // The one thing the feature-declares/root-binds split gives up: a missing
+      // binding is a `StateError` on first read rather than a compile error. This
+      // buys it back, and it goes through the real `buildRootWidget` — asserting
+      // that a test's own override works would prove nothing about production.
+      //
+      // `appDatabaseProvider` is substituted and `deckRepositoryProvider` is
+      // **not**: the binding under test is the thing that must come from the root,
+      // and its dependency on a real database file is not what this asserts.
+      final database = AppDatabase(NativeDatabase.memory());
+      addTearDown(database.close);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [appDatabaseProvider.overrideWithValue(database)],
+          child: buildRootWidget(EnvConfig.staging),
+        ),
+      );
+      await tester.pump();
+
+      final context = tester.element(find.byType(MemoxApp));
+      final container = ProviderScope.containerOf(context, listen: false);
+
+      // Reading it is the assertion: the declaration's body throws, so anything
+      // other than a real repository here means the root did not bind it.
+      expect(container.read(deckRepositoryProvider), isA<DeckRepositoryImpl>());
+    });
+
+    test('the declaration refuses to be read unbound', () {
+      // The other side of the same contract. A silent default here would be worse
+      // than the throw: the app would run against a repository nobody chose, and
+      // the first sign would be data going to the wrong place.
+      final container = ProviderContainer(
+        overrides: [envConfigProvider.overrideWithValue(EnvConfig.staging)],
+      );
+      addTearDown(container.dispose);
+
+      // Matched on the message and not on the type: Riverpod 3 wraps anything a
+      // provider's build throws in a `ProviderException`, which lives in its
+      // `src/` and is not part of the public API — so `isA<StateError>()` cannot
+      // be written here. What matters anyway is that the failure tells the reader
+      // where the binding goes, which the wrapper's `toString` carries through.
+      expect(
+        () => container.read(deckRepositoryProvider),
+        throwsA(
+          isA<Object>().having(
+            (Object error) => error.toString(),
+            'toString()',
+            allOf(contains('override'), contains('repository_bindings')),
+          ),
+        ),
+      );
     });
 
     test('bootstrap is the single startup entry the entrypoints call', () {

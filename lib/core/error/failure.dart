@@ -93,17 +93,29 @@ final class ForbiddenFailure extends Failure {
 final class ValidationFailure extends Failure {
   const ValidationFailure({
     required super.message,
-    this.fieldErrors = const <String, String>{},
+    this.problems = const <Enum>{},
     super.cause,
     super.reason,
   });
 
-  /// Field name to the message for that field.
+  /// Every rule the input broke, as values.
   ///
-  /// Carried separately from [message] so a form can put each error next to the
-  /// input that caused it instead of showing one summary line — the difference
-  /// between "something is wrong" and "this field is wrong".
-  final Map<String, String> fieldErrors;
+  /// A `Set` and not [Failure.reason] because a form can fail on two inputs at
+  /// once — a blank name *and* an unchosen mandatory option — and `reason` holds
+  /// one value. A set of enums rather than a `Map<String, String>` of field names
+  /// to messages, because both halves of that map were wrong: the key was a
+  /// string literal repeated at every site, and the value was a message the UI is
+  /// forbidden to render, so the screen had to *re-derive* the problem from the
+  /// raw input to find out which field to mark. Re-deriving made the presentation
+  /// layer a second owner of the rule.
+  ///
+  /// Each value names the field **and** the reason — `nameEmpty`, `nameTooLong`,
+  /// `schedulerMissing` — so the screen switches on it exhaustively and the ARB
+  /// copy is chosen without the rule being evaluated again.
+  ///
+  /// Typed `Enum` rather than a feature type for the same reason as
+  /// [Failure.reason]: `core/` must not import a feature.
+  final Set<Enum> problems;
 }
 
 /// The requested thing does not exist.

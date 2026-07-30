@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/deck/domain/models/deck_content_type_model.dart';
 import 'package:memox/features/deck/domain/entities/deck_entity.dart';
+import 'package:memox/features/deck/domain/models/deck_detail_model.dart';
 import 'package:memox/features/deck/presentation/screens/deck_detail_screen.dart';
 import 'package:memox/features/deck/presentation/widgets/deck_tile_widget.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
@@ -31,8 +32,8 @@ void main() {
     List<DeckEntity>? allDecks,
     Failure? writeFailure,
   }) => FakeDeckRepository(
-    deckById: (id) async => deck,
-    childDecks: (_) => Stream<List<DeckEntity>>.value(children),
+    deckDetail: (_) =>
+        Stream<DeckDetail>.value(DeckDetail(deck: deck, childDecks: children)),
     allDecks: () =>
         Stream<List<DeckEntity>>.value(allDecks ?? <DeckEntity>[deck]),
     writeFailure: writeFailure,
@@ -113,12 +114,12 @@ void main() {
       );
 
       await pumpDetail(tester, repository);
-      final int readsBeforeRetry = repository.childDecksCalls.length;
+      final int readsBeforeRetry = repository.deckDetailCalls.length;
 
       await tester.tap(find.text(english.retryAction));
       await tester.pump();
 
-      expect(repository.childDecksCalls.length, greaterThan(readsBeforeRetry));
+      expect(repository.deckDetailCalls.length, greaterThan(readsBeforeRetry));
     });
 
     testWidgets('children are listed and the title is the deck name', (
@@ -138,25 +139,27 @@ void main() {
     });
 
     testWidgets('a later emission updates the child list', (tester) async {
-      final controller = StreamController<List<DeckEntity>>();
+      final controller = StreamController<DeckDetail>();
       addTearDown(controller.close);
       final deck = fakeRootDeck(id: 'deck-1', name: 'Japanese');
 
       await pumpDetail(
         tester,
-        FakeDeckRepository(
-          deckById: (_) async => deck,
-          childDecks: (_) => controller.stream,
-        ),
+        FakeDeckRepository(deckDetail: (_) => controller.stream),
       );
 
-      controller.add(const <DeckEntity>[]);
+      controller.add(DeckDetail(deck: deck, childDecks: const <DeckEntity>[]));
       await tester.pump();
       expect(find.byType(MxEmptyState), findsOneWidget);
 
-      controller.add(<DeckEntity>[
-        fakeSubDeck(id: 'c1', name: 'Hiragana', parentId: 'deck-1'),
-      ]);
+      controller.add(
+        DeckDetail(
+          deck: deck,
+          childDecks: <DeckEntity>[
+            fakeSubDeck(id: 'c1', name: 'Hiragana', parentId: 'deck-1'),
+          ],
+        ),
+      );
       await tester.pump();
 
       expect(find.byType(DeckChildTileWidget), findsOneWidget);

@@ -21,8 +21,9 @@ part 'deck_write_controller.g.dart';
 ///
 /// * refuses a second submit while the first is in flight ([DeckSubmitState
 ///   .canSubmit]), so a double tap cannot create two decks;
-/// * validates against BR-01 locally before touching the database, so an empty
-///   name is an inline error rather than a round trip;
+/// * calls a use case, which is where BR-01 and BR-11 are applied — the
+///   controller does **not** validate, and neither does the repository. Delete,
+///   reset and move validate nothing at all: they have no field to check;
 /// * checks `ref.mounted` after the await, because a sheet can be dismissed
 ///   mid-write and writing state into a disposed controller is a crash;
 /// * keeps the user's input on failure — none of them clears anything, the
@@ -60,14 +61,14 @@ class CreateRootDeckController extends _$CreateRootDeckController {
     state = const DeckSubmitState(isSubmitting: true);
     try {
       await ref.read(createRootDeckUseCaseProvider)(
-        name: name,
+        rawName: name,
         schedulerType: schedulerType,
       );
       if (!ref.mounted) return;
       state = DeckSubmitState(outcome: disposition.outcome);
     } on Failure catch (failure) {
       if (!ref.mounted) return;
-      state = deckSubmitFailure(failure, name: name);
+      state = deckSubmitFailure(failure);
     }
   }
 
@@ -95,14 +96,14 @@ class CreateSubDeckController extends _$CreateSubDeckController {
     state = const DeckSubmitState(isSubmitting: true);
     try {
       await ref.read(createSubDeckUseCaseProvider)(
-        name: name,
+        rawName: name,
         parentDeckId: parentDeckId,
       );
       if (!ref.mounted) return;
       state = DeckSubmitState(outcome: disposition.outcome);
     } on Failure catch (failure) {
       if (!ref.mounted) return;
-      state = deckSubmitFailure(failure, name: name);
+      state = deckSubmitFailure(failure);
     }
   }
 
@@ -124,12 +125,12 @@ class RenameDeckController extends _$RenameDeckController {
 
     state = const DeckSubmitState(isSubmitting: true);
     try {
-      await ref.read(renameDeckUseCaseProvider)(deckId: deckId, name: name);
+      await ref.read(renameDeckUseCaseProvider)(deckId: deckId, rawName: name);
       if (!ref.mounted) return;
       state = const DeckSubmitState(outcome: SubmitOutcome.savedAndClose);
     } on Failure catch (failure) {
       if (!ref.mounted) return;
-      state = deckSubmitFailure(failure, name: name);
+      state = deckSubmitFailure(failure);
     }
   }
 

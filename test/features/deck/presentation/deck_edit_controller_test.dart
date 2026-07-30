@@ -1,8 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/features/deck/domain/failures/deck_validation_failure.dart';
 import 'package:memox/app/config/env_config.dart';
 import 'package:memox/app/config/env_config_provider.dart';
-import 'package:memox/app/di/deck_repository_provider.dart';
+import 'package:memox/features/deck/di/deck_repository_provider.dart';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/deck/presentation/states/deck_submit_state.dart';
 import 'package:memox/features/deck/presentation/controllers/deck_write_controller.dart';
@@ -53,7 +54,7 @@ void main() {
       expect(repository.renames, isEmpty);
       expect(
         container.read(renameDeckControllerProvider('deck-1')).nameProblem,
-        DeckFormProblem.nameEmpty,
+        DeckValidationProblem.nameEmpty,
       );
     });
 

@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/features/deck/domain/models/deck_name_model.dart';
 import 'package:memox/features/deck/domain/models/root_deck_summary_model.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 
@@ -19,15 +20,15 @@ void main() {
   /// touches the wall clock, so `due_at == now` is constructible.
   final now = testNow;
 
-  Future<List<RootDeckSummary>> readSummaries() =>
-      harness.deckRepository.watchRootDeckSummaries(now: now).first;
+  Future<List<RootDeckSummary>> readSummaries() async =>
+      (await harness.deckRepository.watchRootDeckList(now: now).first).decks;
 
   group('counting', () {
     test('a root with no cards still appears, with zeroes', () async {
       // The COALESCE branch. Without it an inner join would drop empty decks and
       // a brand-new deck would vanish from the list that just created it.
       await harness.deckRepository.createRootDeck(
-        name: 'Empty',
+        name: DeckName.parseOrThrow('Empty'),
         schedulerType: SchedulerType.eightBox,
       );
 
@@ -77,7 +78,7 @@ void main() {
       'the scheduler comes back on the root, for the row to display',
       () async {
         await harness.deckRepository.createRootDeck(
-          name: 'SM-2 deck',
+          name: DeckName.parseOrThrow('SM-2 deck'),
           schedulerType: SchedulerType.sm2,
         );
 
@@ -148,10 +149,108 @@ void main() {
       await seedDueCases();
 
       final later = await harness.deckRepository
-          .watchRootDeckSummaries(now: now.add(const Duration(hours: 1)))
+          .watchRootDeckList(now: now.add(const Duration(hours: 1)))
           .first;
 
-      expect(later.single.dueCardCount, 4);
+      expect(later.decks.single.dueCardCount, 4);
+    });
+
+    test('nextDueAt is the earliest card NOT already due', () async {
+      // `> :now`, strictly, and it matters. The fixture has a card due at exactly
+      // `now`, which the count above already treats as due; if the boundary
+      // included it the delay would be zero, the controller's guard would refuse
+      // to arm anything, and the genuinely-next boundary a minute later would
+      // never get a wake-up. The screen would go stale again, silently — the same
+      // bug the boundary exists to fix, reintroduced by one character.
+      await seedDueCases();
+
+      final snapshot = await harness.deckRepository
+          .watchRootDeckList(now: now)
+          .first;
+
+      expect(snapshot.nextDueAt, now.add(const Duration(minutes: 1)));
+    });
+
+    test('nextDueAt is null when every card is already due', () async {
+      await seedDueCases();
+
+      final snapshot = await harness.deckRepository
+          .watchRootDeckList(now: now.add(const Duration(hours: 1)))
+          .first;
+
+      // Nothing left to wait for. The controller must arm no timer here, and a
+      // non-null value would have it wait for a boundary in the past.
+      expect(snapshot.nextDueAt, isNull);
+      expect(snapshot.decks.single.dueCardCount, 4);
+    });
+
+    test('nextDueAt is null when there are no cards at all', () async {
+      await harness.deckRepository.createRootDeck(
+        name: DeckName.parseOrThrow('Empty'),
+        schedulerType: SchedulerType.eightBox,
+      );
+
+      final snapshot = await harness.deckRepository
+          .watchRootDeckList(now: now)
+          .first;
+
+      expect(snapshot.decks, hasLength(1));
+      expect(snapshot.nextDueAt, isNull);
+    });
+
+    test('nextDueAt is null when there are no decks at all', () async {
+      // The no-rows case in the mapper: with nothing to join against there is no
+      // row to read the scalar off, and `null` is the truth rather than a value
+      // that went missing.
+      final snapshot = await harness.deckRepository
+          .watchRootDeckList(now: now)
+          .first;
+
+      expect(snapshot.decks, isEmpty);
+      expect(snapshot.nextDueAt, isNull);
+    });
+
+    test('nextDueAt is the earliest across every tree, not per root', () async {
+      // One timer for the screen, so one boundary for the screen. Per-root
+      // boundaries would mean one timer per row, which is the N+1 this design
+      // avoids everywhere else.
+      final treeA = await harness.seedTree(prefix: 'A-');
+      final treeB = await harness.seedTree(prefix: 'B-');
+      await insertCard(harness.db, id: 'a-late', deckId: treeA.leaf.id);
+      await insertReviewState(
+        harness.db,
+        cardId: 'a-late',
+        dueAt: now.add(const Duration(hours: 5)),
+      );
+      await insertCard(harness.db, id: 'b-soon', deckId: treeB.leaf.id);
+      await insertReviewState(
+        harness.db,
+        cardId: 'b-soon',
+        dueAt: now.add(const Duration(minutes: 7)),
+      );
+
+      final snapshot = await harness.deckRepository
+          .watchRootDeckList(now: now)
+          .first;
+
+      expect(snapshot.nextDueAt, now.add(const Duration(minutes: 7)));
+    });
+
+    test('reading again at nextDueAt raises the count', () async {
+      // The boundary and the counts describing the same data, which is why they
+      // come from one statement. If reading at `nextDueAt` did not move the count,
+      // the timer would be waking the screen for nothing.
+      await seedDueCases();
+      final before = await harness.deckRepository
+          .watchRootDeckList(now: now)
+          .first;
+
+      final after = await harness.deckRepository
+          .watchRootDeckList(now: before.nextDueAt!)
+          .first;
+
+      expect(before.decks.single.dueCardCount, 3);
+      expect(after.decks.single.dueCardCount, 4);
     });
   });
 
@@ -161,19 +260,19 @@ void main() {
       // write touches `decks`, and Drift invalidates the aggregate on that.
       final emissions = <List<RootDeckSummary>>[];
       final subscription = harness.deckRepository
-          .watchRootDeckSummaries(now: now)
-          .listen(emissions.add);
+          .watchRootDeckList(now: now)
+          .listen((snapshot) => emissions.add(snapshot.decks));
       addTearDown(subscription.cancel);
 
       await pumpEventQueue();
       final first = await harness.deckRepository.createRootDeck(
-        name: 'First',
+        name: DeckName.parseOrThrow('First'),
         schedulerType: SchedulerType.eightBox,
       );
       await pumpEventQueue();
       await harness.deckRepository.renameDeck(
         deckId: first.id,
-        name: 'Renamed',
+        name: DeckName.parseOrThrow('Renamed'),
       );
       await pumpEventQueue();
       await harness.deckRepository.deleteDeck(first.id);
@@ -199,8 +298,8 @@ void main() {
       final tree = await harness.seedTree();
       final emissions = <List<RootDeckSummary>>[];
       final subscription = harness.deckRepository
-          .watchRootDeckSummaries(now: now)
-          .listen(emissions.add);
+          .watchRootDeckList(now: now)
+          .listen((snapshot) => emissions.add(snapshot.decks));
       addTearDown(subscription.cancel);
 
       await pumpEventQueue();

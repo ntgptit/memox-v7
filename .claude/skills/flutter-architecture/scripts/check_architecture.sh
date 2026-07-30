@@ -17,7 +17,17 @@ cd "$REPO_ROOT" || exit 1
 
 LIB="lib"
 if [[ ! -d "$LIB" ]]; then
-  echo "No lib/ directory — nothing to check yet (expected before Phase 2.3)."
+  # A skip before the project exists is honest; a skip after it exists is this
+  # script reporting success for having looked at nothing. `pubspec.yaml` is what
+  # tells the two apart, and CI is where the difference matters: a wrong working
+  # directory would otherwise produce a green guard.
+  if [[ -f pubspec.yaml ]]; then
+    echo "No lib/ directory, but pubspec.yaml exists — the project is created and" >&2
+    echo "this script found nothing to inspect. That is a failure, not a skip." >&2
+    exit 1
+  fi
+  echo "No lib/ directory and no pubspec.yaml — nothing to check yet"
+  echo "(expected before Phase 2.3)."
   exit 0
 fi
 
@@ -118,6 +128,27 @@ while IFS= read -r file; do
 done < <(dart_files | grep -E '^lib/(core|shared)/')
 
 # ---------------------------------------------------------------------------
+# 4b. features/ must not depend on app/. The composition root may see a feature;
+#     a feature may not see the shell it happens to be mounted in.
+#
+#     Both halves of this were live. `features/deck/presentation/providers/`
+#     imported `app/di/deck_repository_provider.dart`, so the feature's wiring was
+#     partly outside the feature — cloning it meant editing `app/` too, and
+#     forgetting to would fail inside the *new* feature rather than at the root.
+#     Two screens imported `app/router/route_names.dart` for constants the router
+#     and the screens both speak; those moved to `core/navigation/`, which is what
+#     `core/` is for.
+# ---------------------------------------------------------------------------
+while IFS= read -r file; do
+  [[ -z "$file" ]] && continue
+  while IFS=: read -r lineno line; do
+    [[ -z "$lineno" ]] && continue
+    report error "a feature depends on app/" "$file:$lineno" \
+      "app/ composes features, never the reverse. A provider the feature needs belongs in its own di/, declared as the domain contract and bound at the root; a constant both sides speak belongs in core/."
+  done < <(grep -nE "^\s*import\s+'([^']*/)?(\.\./)*app/" "$file" 2>/dev/null)
+done < <(dart_files | grep '^lib/features/')
+
+# ---------------------------------------------------------------------------
 # 5. Swallowed exceptions. `catch (_) {}` reports a failure as "nothing
 #    happened", which is the hardest defect class to diagnose in the field.
 # ---------------------------------------------------------------------------
@@ -190,6 +221,11 @@ check_suffix '/data/models/'              '_model.dart'
 # guard's widget scope exempts files by that suffix, so the distinction decides
 # which rules apply.
 check_suffix '/presentation/providers/'   '_provider.dart'
+# A feature's dependency seam: one provider per contract the feature needs,
+# declared as the domain type and bound at the composition root. It is not
+# `presentation/` because `provider_convention_test.dart` forbids `keepAlive`
+# there, and a repository handle has to be keepAlive.
+check_suffix '/di/'                       '_provider.dart' '_bindings.dart'
 
 # ---------------------------------------------------------------------------
 # 8. Oversized files. Not a hard failure — a legitimately long generated-ish
@@ -203,6 +239,35 @@ while IFS= read -r file; do
   report warn "large file" "$file" \
     "$lines lines — likely more than one responsibility. Split by section or by role."
 done < <(dart_files)
+
+# ---------------------------------------------------------------------------
+# 9. Scope. Every rule above selects its files by path fragment or by grep, so a
+#    folder rename turns the whole script into checks that pass because they
+#    looked at nothing — which reads as coverage. Six of the suffix checks did
+#    exactly that until M4.10, matching zero files while reporting success.
+#
+#    The numbers are printed on every run so a shrinking scope is visible before
+#    it reaches zero, and zero is a hard failure.
+# ---------------------------------------------------------------------------
+printf '%s\n' "------------------------------------------------------------"
+SCANNED_ALL=$(dart_files | wc -l | tr -d ' ')
+SCANNED_FEATURES=$(dart_files | grep -c '/features/' || true)
+SCANNED_DOMAIN=$(dart_files | grep -c '/domain/' || true)
+SCANNED_DATA=$(dart_files | grep -c '/data/' || true)
+SCANNED_PRESENTATION=$(dart_files | grep -c '/presentation/' || true)
+SCANNED_DI=$(dart_files | grep -c '/di/' || true)
+printf 'scanned %s files under %s — features %s (domain %s, data %s, presentation %s, di %s)\n' \
+  "$SCANNED_ALL" "$LIB" "$SCANNED_FEATURES" "$SCANNED_DOMAIN" "$SCANNED_DATA" \
+  "$SCANNED_PRESENTATION" "$SCANNED_DI"
+
+for scope in "all:$SCANNED_ALL" "features:$SCANNED_FEATURES" \
+             "domain:$SCANNED_DOMAIN" "data:$SCANNED_DATA" \
+             "presentation:$SCANNED_PRESENTATION" "di:$SCANNED_DI"; do
+  name="${scope%%:*}"; count="${scope##*:}"
+  [[ "$count" -gt 0 ]] && continue
+  report error "zero scope: $name" "$LIB" \
+    "No file matched, so every rule scoped to it passed without inspecting anything. Either the layer was removed or the path changed."
+done
 
 # ---------------------------------------------------------------------------
 printf '%s\n' "------------------------------------------------------------"

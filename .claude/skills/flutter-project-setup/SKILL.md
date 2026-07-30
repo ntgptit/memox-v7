@@ -158,8 +158,8 @@ final class NetworkFailure extends Failure { ... }
 final class UnauthorizedFailure extends Failure { ... }
 final class ForbiddenFailure extends Failure { ... }
 final class ValidationFailure extends Failure {
-  const ValidationFailure({required super.message, required this.fieldErrors});
-  final Map<String, String> fieldErrors;  // drives inline form errors
+  const ValidationFailure({required super.message, this.problems = const <Enum>{}});
+  final Set<Enum> problems;  // typed field problems; drives inline form errors
 }
 final class NotFoundFailure extends Failure { ... }
 final class ConflictFailure extends Failure { ... }
@@ -167,9 +167,21 @@ final class DatabaseFailure extends Failure { ... }
 final class UnknownFailure extends Failure { ... }
 ```
 
-`ValidationFailure` carries field errors because that is what the UI needs to
-show an error under the right input. A validation failure flattened to one
-string forces the UI to guess.
+`ValidationFailure` carries a **set of typed problems** because that is what the
+UI needs to show an error under the right input. Flattened to one string, the UI has
+to guess which field is wrong.
+
+Two details memox learned the hard way, both worth copying:
+
+* a `Set`, not a single value, because a form can fail in two places at once — a
+  blank name *and* an unchosen option — and one reason means the user is sent round
+  twice;
+* `Enum` values, not `Map<String, String>`. The map's key was a repeated string
+  literal nothing checked, and its value was a message the UI is forbidden to
+  render — so presentation ignored the value and re-derived the problem from the raw
+  input, which quietly gave the validation rule a second owner. `Enum` rather than a
+  feature type because `core/` may not import a feature, and on the *base* class
+  because `Failure` is `sealed`, so a feature cannot add a subtype.
 
 **Result type or exceptions?** Either works. Pick one and hold to it —
 `Result<T>` makes failure explicit in the signature at the cost of ceremony;

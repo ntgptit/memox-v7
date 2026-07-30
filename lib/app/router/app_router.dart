@@ -6,7 +6,7 @@ import '../../features/deck/presentation/screens/root_deck_list_screen.dart';
 import '../../features/review/presentation/review_placeholder_screen.dart';
 import '../fallback/route_not_found_screen.dart';
 import '../shell/app_navigation_shell.dart';
-import 'route_names.dart';
+import '../../core/navigation/route_names.dart';
 import 'route_paths.dart';
 
 /// Composition of the route table, and nothing else.

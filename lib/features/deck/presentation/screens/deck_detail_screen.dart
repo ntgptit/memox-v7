@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../app/router/route_names.dart';
+import '../../../../core/navigation/route_names.dart';
 import '../../../../core/error/failure.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
@@ -11,6 +11,7 @@ import '../../../../shared/widgets/mx_empty_state.dart';
 import '../../../../shared/widgets/mx_error_state.dart';
 import '../../../../shared/widgets/mx_icon_button.dart';
 import '../../domain/models/deck_content_type_model.dart';
+import '../../domain/models/deck_detail_model.dart';
 import '../../domain/entities/deck_entity.dart';
 import '../widgets/deck_actions_widget.dart';
 import '../controllers/deck_detail_controller.dart';

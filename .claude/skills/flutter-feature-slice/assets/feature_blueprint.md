@@ -68,6 +68,7 @@ The `screens/` folder is preserved, not flattened.
 | `domain/usecases/` | **10 files** — one per interaction. See below. |
 | `domain/failures/` | **3 files** — reason enums plus the refusal helper every write use case shares. |
 | `presentation/providers/` | **1 file** — the use-case wiring. |
+| `di/` | **1 file per contract the feature needs.** Declares the provider as the *domain type*, with a body that throws; the composition root binds it. Not `presentation/providers/`, because `provider_convention_test.dart` forbids `keepAlive` there and a repository handle has to be `keepAlive`. |
 | `data/datasources/` | the DAO. An abstract `LocalDataSource` over a Drift DAO would be an interface with one implementation and no second candidate. |
 | `data/models/` | **empty.** Drift's generated row class *is* the data model, and it lives in `core/database/` because the schema is shared across features. A per-feature DTO would be a second shape for one row, and `dio` is not a dependency (AD-05), so there is no wire format to model either. It gets files with the first real request. |
 
@@ -76,10 +77,22 @@ The `screens/` folder is preserved, not flattened.
 Ten use cases, one per interaction, each taking the repository contract and
 exposing `call`. Two things make them more than indirection:
 
-**They hold the validation, and it used to run twice.** `DeckEntity.nameProblem`
-ran in the controller *and* again inside the repository, in two layers, with
-nothing to catch the two disagreeing. It runs in the use case now — the layer that
-owns BR-01 — and both the controller and the repository stopped duplicating it.
+**They hold the validation, and it used to run three times.** For one submit,
+`DeckEntity.nameProblem` ran in the controller, `DeckEntity.validateName` ran again
+inside the repository, and the screen re-derived the problem from the raw text to
+decide which field to mark. Three owners, free to disagree, while the documentation
+said there was one.
+
+The rule now lives in a **value object**. `DeckName` has a private constructor and
+a `parse` that returns either the value or a typed problem, so an invalid deck name
+cannot be constructed at all; the repository contract asks for a `DeckName`, and
+"has this been validated?" is answered by the signature rather than by reading the
+implementation. That is the shape to copy: moving a rule into one layer stops it
+being duplicated by *convention*, and moving it into a type stops it structurally.
+
+Only the use case calls `parse`. Presentation reads the typed problems back off the
+failure — `deckSubmitFailure` takes the `Failure` and nothing else, so re-deriving
+cannot be reintroduced without changing its signature.
 
 **A controller keeps only what is presentation:** the double-submit guard, the
 submitting flag, the `ref.mounted` check after an await, and turning a `Failure`
@@ -93,11 +106,18 @@ transaction, which is a race between the check and the write — so the rule wou
 in a tidier place and wrong. The use case is the entry point; the transaction is
 where a tree-shaped rule belongs.
 
-**Refusal travels as `ValidationFailure.fieldErrors`, not `Failure.reason`.** A
-form can fail on two fields at once — a blank name *and* no scheduler chosen — and
-`reason` holds one value. The keys come from `DeckField`, are identifiers rather
-than copy, and `deckSubmitFailure` maps them to the per-field problems the screen
-renders.
+**Refusal travels as `ValidationFailure.problems`, a `Set<Enum>`, not as
+`Failure.reason`.** A form can fail on two fields at once — a blank name *and* no
+scheduler chosen — and `reason` holds one value, so one attempt would send the user
+round twice.
+
+It was a `Map<String, String> fieldErrors` first, and **both halves of that were
+wrong**: the key was a repeated string literal (`'name'`, `'schedulerType'`) with
+no compiler checking either spelling, and the value was a human-readable message
+that the UI is forbidden to render. Presentation therefore ignored the value and
+re-derived the problem from the raw input — which is *why* BR-01 ended up with a
+third owner. A `Set` of enum values fixes both: the identifier is typed, and there
+is no message for anyone to be tempted by.
 
 ### `presentation/providers/` versus `controllers/`
 
@@ -108,10 +128,25 @@ presentation suffixes *and* to that scope's exclusions at M4.10 — a file whose
 is dependency wiring reads a repository by definition, and must not have to borrow
 the `_controller` exemption to do it.
 
-`app/di/` still holds the repository provider. That is the composition root: the
-one place `DeckRepositoryImpl` is named, so a test can substitute the
-implementation from outside the feature. A use case has no implementation to choose
-between, so its wiring travels with the feature.
+**The repository provider is declared in the feature and bound at the root.**
+`features/<feature>/di/<feature>_repository_provider.dart` declares it as the
+domain contract with a body that throws; `app/di/repository_bindings.dart` supplies
+the implementation and `buildRootWidget` installs it with one line.
+
+It was declared in `app/di/` until M4.10b, which meant `features/deck/presentation/`
+imported `app/` — a feature depending on the shell it happens to be mounted in. The
+cost was concrete: cloning meant editing `app/di/` as well, and forgetting to would
+surface as a compile error inside the *new feature* rather than at the root where
+the omission actually was. `check_architecture.sh` rule 4b and
+`test/app/architecture_boundary_test.dart` now make the old direction an error.
+
+What that shape gives up: a missing binding is a `StateError` on first read rather
+than a compile error. It is bounded — the first read happens as the feature's first
+screen mounts, so a forgotten binding fails on launch and in every widget test —
+and `bootstrap_test.dart` asserts the real root supplies it.
+
+A use case has no implementation to choose between, so its wiring stays in
+`presentation/providers/` with the controllers that read it.
 
 Use-case providers are `autoDispose`, like everything else under
 `features/*/presentation/`. Constructing one is a field assignment, so an exception
@@ -221,15 +256,39 @@ isSubmitting · Set<P> problems · Failure? failure · SubmitOutcome? outcome
                                               → canSubmit · shouldClose · shouldClearDraft
 ```
 
-Every `submit` follows the same five steps, in this order:
+### The submit flow, all nine steps
 
-1. `if (!state.canSubmit) return;` — the double-submit guard
-2. validate locally against the domain rule, and return with a field problem set
-3. `state = const XSubmitState(isSubmitting: true);`
-4. `await` the repository; `if (!ref.mounted) return;` **before** touching state
-5. success → `outcome: disposition.outcome`; `on Failure` → map onto a problem or
-   `failure`. A failure sets **no outcome at all**, so neither success transition
-   fires and the input survives.
+The controller owns three of them. That is the whole point of writing the flow out:
+five of the other six are the parts people put in the controller by reflex, and the
+list is what makes "this belongs one layer down" a fact rather than an opinion.
+
+1. **Widget** calls `controller.submit(...)` with the raw text the user typed.
+2. **Controller** `if (!state.canSubmit) return;` — the double-submit guard, so a
+   double tap cannot write twice.
+3. **Controller** `state = const XSubmitState(isSubmitting: true);` — which also
+   clears the previous attempt's problems and failure.
+4. **Controller** calls the use case with the **raw** string. It does not validate
+   and it does not trim.
+5. **Use case** parses the input into its value object, collecting *every* problem
+   — a blank name and an unchosen scheduler are both reported from one attempt —
+   then throws one `ValidationFailure` carrying the whole `Set`.
+6. **Use case** calls the repository with validated values. Nothing below this line
+   re-checks the input rule; the signature is what says so.
+7. **Repository** runs inside its `_guard`, and inside `runInTransaction` when the
+   write is multi-step. This is where the rules that need the data *as it stands at
+   the moment of writing* live, and where a driver exception becomes a domain
+   `Failure`.
+8. **Controller** `if (!ref.mounted) return;` after the await, **before** touching
+   state; then success → `outcome: disposition.outcome`, or `on Failure` → split a
+   `ValidationFailure` into typed per-field problems and leave anything else opaque.
+   A failure sets **no outcome at all**, so neither success transition fires and the
+   input survives.
+9. **Widget** renders ARB copy chosen from the problems or from `failure.reason`,
+   and performs the side effect — pop, clear draft — once, on the *transition*.
+
+Step 4 is the one worth staring at. An earlier version of this feature validated in
+step 4 *and* in step 7 *and* re-derived the problem in step 9, which is three owners
+for one rule and nothing to catch them disagreeing.
 
 Never clear the user's input on failure. The widget owns the text, so a failed
 write cannot destroy it — that is the point of keeping the controller out of it.
@@ -244,9 +303,15 @@ controller, repository and domain file in the feature: `BuildContext`, the route
 (`goNamed`/`context.go`/`Navigator`), a dialog (`showDialog`/`showModalBottomSheet`),
 a snackbar (`ScaffoldMessenger`/`SnackBar`), and an `AnimationController`. All five
 return nothing. The only `package:flutter` import in a controller is
-`root_decks_controller.dart` taking `AppLifecycleListener` — not a widget, holds no
-context, and the alternative was a controller keeping a reference into the widget
+`deck_list_now_controller.dart` taking `AppLifecycleListener` — not a widget, holds
+no context, and the alternative was a controller keeping a reference into the widget
 tree.
+
+**Verified by AST, not by grep.** `command_query_separation_test.dart` parses these
+files and asserts no controller or use case names `BuildContext` in any type
+annotation. A grep over source text cannot express that: the words appear in the
+prose of every file that explains the rule, and the regex version of this check
+reported its own comment as a violation.
 
 The direction is the point: a controller reports, the widget decides. Success pops,
 failure renders, created navigates — and each of those is a line in a widget, where
@@ -279,16 +344,20 @@ for the database and the repositories.
 policy getters. A feature supplies only its own problem enum:
 
 ```dart
-enum DeckFormProblem { nameEmpty, nameTooLong, schedulerMissing }
+enum DeckValidationProblem { nameEmpty, nameTooLong, schedulerMissing }
 
-typedef DeckSubmitState = SubmitState<DeckFormProblem>;
+typedef DeckSubmitState = SubmitState<DeckValidationProblem>;
 
 extension DeckSubmitProblems on DeckSubmitState {
-  DeckFormProblem? get nameProblem => firstProblemOf(kDeckNameProblems);
+  DeckValidationProblem? get nameProblem => firstProblemOf(kDeckNameProblems);
   bool get isSchedulerMissing =>
-      problems.contains(DeckFormProblem.schedulerMissing);
+      problems.contains(DeckValidationProblem.schedulerMissing);
 }
 ```
+
+One enum, shared by `domain/` and `presentation/`. It is declared in
+`domain/failures/` because the domain is what decides a form is invalid; the screen
+maps each value to ARB copy and adds nothing of its own.
 
 The extension is what keeps the questions specific while the storage is shared: a
 widget still asks `state.nameProblem`, so **no widget changed** when this was
@@ -310,7 +379,7 @@ including that the equality is by value, because a widget detects the success
 transition by comparing the old state with the new one, and identity equality on
 the `Set` would fire the side effect on every rebuild.
 
-**The five steps stay written out per operation.** Six times in Deck, about eight
+**The nine steps stay written out per operation.** Six times in Deck, about eight
 lines each. Three extractions were tried and rejected:
 
 - an extension on the generated base couples app code to riverpod's
@@ -859,8 +928,10 @@ work. A new feature touches these, and only these:
 | Path | Why |
 |---|---|
 | `lib/features/<feature>/` | the slice itself |
-| `lib/app/di/<feature>_repository_provider.dart` | the composition root — `presentation/` may not import `data/`, `domain/` may not import Riverpod, `core/` may not import a feature, so nothing else *can* hold it |
-| `lib/app/router/route_names.dart` · `route_paths.dart` · `app_router.dart` | the route, its name, and its path-parameter constants |
+| `lib/features/<feature>/di/<feature>_repository_provider.dart` | the feature's own declaration, typed as the domain contract. Inside the slice, so cloning does not start by editing `app/`. |
+| `lib/app/di/repository_bindings.dart` | **one function** binding that contract to its implementation, plus one line in `buildRootWidget`. The only place an implementation is named outside its own layer. |
+| `lib/app/router/route_paths.dart` · `app_router.dart` | the URL and the route table. A feature never sees a path — only the app asserts URLs. |
+| `lib/core/navigation/route_names.dart` | the route **name** and its path parameters, which a screen passes to `goNamed`. In `core/` because the router registers them and a feature uses them, and neither owns them — the same argument as `clockProvider`. |
 | `lib/l10n/app_en.arb` · `app_vi.arb` | every user-visible string, both locales, each with a description |
 | `test/features/<feature>/` | domain · data on real SQLite · controller · widget |
 | `test/visual_audit/screens/features/<feature>/` | one strict companion per production screen (MX-VIS-001) |
@@ -1066,5 +1137,21 @@ type as a Riverpod 2 generated `Ref` subclass. It fires on every `ConsumerWidget
 anyone writes.
 
 Work around it the way Deck does — a plain widget wrapping `Consumer`, which is
-better rebuild scoping anyway — and fix the rule upstream in the guard
-repository, which this repo may not edit.
+better rebuild scoping anyway.
+
+**The advice that used to be here — "fix the rule upstream in the guard repository,
+which this repo may not edit" — was wrong.** `code-verification-guard-v2/` is
+vendored *in this repo*, rules and all, so a false positive here is a rule this
+project can and should fix. Two were fixed in M4.10b:
+
+- `memox.testing.no_real_clock_in_test` flagged a doc comment that *named*
+  `DateTime.now()` in order to explain why the clock is injected;
+- `common.no_commented_out_code` flagged `// for this assertion.`, a wrapped prose
+  comment, because the pattern asked only for a bare keyword.
+
+Both are the same defect: a rule that reads text rather than code punishes
+explaining things. When a guard rule fires on prose, fix the rule. Rewording the
+comment to get past it hides the defect and leaves the next person to rediscover it.
+
+The rule above is a genuine exception only because it needs Riverpod-version
+awareness the pattern language cannot express.

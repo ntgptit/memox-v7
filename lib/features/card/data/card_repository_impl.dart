@@ -39,12 +39,16 @@ const int _sm2InitialRepetitions = 0;
 final class CardRepositoryImpl implements CardRepository {
   CardRepositoryImpl(
     AppDatabase database, {
+    required DateTime Function() clock,
     String Function()? idGenerator,
-    DateTime Function()? clock,
   }) : _cardDao = CardDao(database),
        _deckContextDao = CardDeckContextDao(database),
        _idGenerator = idGenerator ?? const Uuid().v4,
-       _clock = clock ?? _utcNow;
+       // The initializing formal the lint asks for would be
+       // `required this._clock`, and Dart forbids a named parameter starting
+       // with an underscore.
+       // ignore: prefer_initializing_formals
+       _clock = clock;
 
   final CardDao _cardDao;
 
@@ -55,10 +59,14 @@ final class CardRepositoryImpl implements CardRepository {
   /// Client-generated UUIDs (AD-03); injectable so tests are deterministic.
   final String Function() _idGenerator;
 
-  /// Injectable clock; timestamps are stored in UTC, always.
+  /// The clock, injected — there is no default.
+  ///
+  /// A `?? DateTime.now()` fallback here would make "now" have two owners: this
+  /// private static, and `clockProvider` which the whole tree can override. The
+  /// one that is harder to reach is the one that silently wins in production, so
+  /// it is gone and the composition root passes the provider's clock in.
+  /// Timestamps are stored in UTC, always.
   final DateTime Function() _clock;
-
-  static DateTime _utcNow() => DateTime.now().toUtc();
 
   @override
   Stream<List<CardEntity>> watchCardsByDeck(String deckId) => _cardDao
@@ -76,8 +84,8 @@ final class CardRepositoryImpl implements CardRepository {
     required String back,
   }) => _guard(
     () => _cardDao.runInTransaction(() async {
-      final validFront = CardEntity.validateSide(front, side: 'front');
-      final validBack = CardEntity.validateSide(back, side: 'back');
+      final validFront = CardEntity.validateSide(front, side: CardSide.front);
+      final validBack = CardEntity.validateSide(back, side: CardSide.back);
       final deck = await _requireDeckRow(deckId);
       if (deck.parentDeckId == null) {
         // BR-58 — no card ever sits directly under a root.
@@ -130,8 +138,8 @@ final class CardRepositoryImpl implements CardRepository {
     required String front,
     required String back,
   }) => _guard(() async {
-    final validFront = CardEntity.validateSide(front, side: 'front');
-    final validBack = CardEntity.validateSide(back, side: 'back');
+    final validFront = CardEntity.validateSide(front, side: CardSide.front);
+    final validBack = CardEntity.validateSide(back, side: CardSide.back);
     await _requireCardRow(cardId);
     // Writes to `cards` only — the review state and history cannot change
     // here because nothing else is touched (BR-10).

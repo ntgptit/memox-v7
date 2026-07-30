@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/features/deck/domain/models/deck_name_model.dart';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 
@@ -16,7 +17,7 @@ void main() {
     () async {
       final treeA = await h.seedTree(prefix: 'A-');
       final grandLeaf = await h.deckRepository.createSubDeck(
-        name: 'A-GrandLeaf',
+        name: DeckName.parseOrThrow('A-GrandLeaf'),
         parentDeckId: treeA.leaf.id,
       );
       await h.cardRepository.createCard(
@@ -55,7 +56,7 @@ void main() {
   test('a move within the same root keeps pointers and stays atomic', () async {
     final tree = await h.seedTree();
     final branch2 = await h.deckRepository.createSubDeck(
-      name: 'Branch2',
+      name: DeckName.parseOrThrow('Branch2'),
       parentDeckId: tree.root.id,
     );
 

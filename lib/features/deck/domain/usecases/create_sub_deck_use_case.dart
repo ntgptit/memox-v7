@@ -1,5 +1,6 @@
 import '../entities/deck_entity.dart';
 import '../failures/deck_validation_failure.dart';
+import '../models/deck_name_model.dart';
 import '../repositories/deck_repository.dart';
 
 /// Creates a sub-deck under a parent (UC-08).
@@ -15,10 +16,15 @@ class CreateSubDeckUseCase {
   final DeckRepository _repository;
 
   Future<DeckEntity> call({
-    required String name,
+    required String rawName,
     required String parentDeckId,
   }) {
-    refuseInvalidDeckForm(<String, String>{...?deckNameFieldError(name)});
+    final parsed = DeckName.parse(rawName);
+    refuseInvalidDeckForm(<DeckValidationProblem>{?parsed.problem});
+    final name = parsed.name;
+    if (name == null) {
+      throw StateError('unreachable: refuseInvalidDeckForm would have thrown');
+    }
 
     return _repository.createSubDeck(name: name, parentDeckId: parentDeckId);
   }

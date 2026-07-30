@@ -6,11 +6,13 @@ import '../../../../core/error/drift_error_mapper.dart';
 import '../../../../core/error/failure.dart';
 import '../../domain/models/deck_content_type_model.dart';
 import '../../domain/models/deck_deletion_impact_model.dart';
+import '../../domain/models/deck_detail_model.dart';
 import '../../domain/entities/deck_entity.dart';
 import '../../domain/failures/deck_conflict_failure.dart';
 import '../../domain/failures/deck_move_failure.dart';
+import '../../domain/models/deck_name_model.dart';
 import '../../domain/repositories/deck_repository.dart';
-import '../../domain/models/root_deck_summary_model.dart';
+import '../../domain/models/root_deck_list_snapshot_model.dart';
 import '../../domain/models/scheduler_type_model.dart';
 import '../mappers/deck_mapper.dart';
 import '../datasources/deck_dao.dart';
@@ -39,10 +41,15 @@ final class DeckRepositoryImpl
     implements DeckRepository {
   DeckRepositoryImpl(
     this._dao, {
+    required DateTime Function() clock,
     String Function()? idGenerator,
-    DateTime Function()? clock,
   }) : _idGenerator = idGenerator ?? const Uuid().v4,
-       _clock = clock ?? _utcNow;
+       // The initializing formal the lint asks for would be
+       // `required this._clock`, and Dart forbids a named parameter starting
+       // with an underscore. The field has to stay private — the move operation
+       // is a `part of` this library and reads it.
+       // ignore: prefer_initializing_formals
+       _clock = clock;
 
   @override
   final DeckDao _dao;
@@ -50,11 +57,15 @@ final class DeckRepositoryImpl
   /// Client-generated UUIDs (AD-03); injectable so tests are deterministic.
   final String Function() _idGenerator;
 
-  /// Injectable clock; timestamps are stored in UTC, always.
+  /// The clock, injected — there is no default.
+  ///
+  /// A `?? DateTime.now()` fallback here would make "now" have two owners: this
+  /// private static, and `clockProvider` which the whole tree can override. The
+  /// one that is harder to reach is the one that silently wins in production, so
+  /// it is gone and the composition root passes the provider's clock in.
+  /// Timestamps are stored in UTC, always.
   @override
   final DateTime Function() _clock;
-
-  static DateTime _utcNow() => DateTime.now().toUtc();
 
   // ---- reads -------------------------------------------------------------
 
@@ -63,11 +74,8 @@ final class DeckRepositoryImpl
       _guardStream(_dao.watchRootDecks()).map(_mapDeckRows);
 
   @override
-  Stream<List<RootDeckSummary>> watchRootDeckSummaries({
-    required DateTime now,
-  }) => _guardStream(
-    _dao.watchRootDeckSummaries(now),
-  ).map((rows) => rows.map(rootDeckSummaryFromRow).toList(growable: false));
+  Stream<RootDeckListSnapshot> watchRootDeckList({required DateTime now}) =>
+      _guardStream(_dao.watchRootDeckSummaries(now)).map(rootDeckListFromRows);
 
   @override
   Stream<List<DeckEntity>> watchAllDecks() =>
@@ -78,29 +86,33 @@ final class DeckRepositoryImpl
       _guardStream(_dao.watchDecksInTree(rootDeckId)).map(_mapDeckRows);
 
   @override
-  Stream<List<DeckEntity>> watchChildDecks(String parentDeckId) =>
-      _guardStream(_dao.watchChildDecks(parentDeckId)).map(_mapDeckRows);
-
-  @override
-  Future<DeckEntity> getDeckById(String deckId) =>
-      _guard(() async => deckEntityFromRow(await _requireDeckRow(deckId)));
+  Stream<DeckDetail> watchDeckDetail(String deckId) =>
+      _guardStream(_dao.watchDeckDetail(deckId)).map(deckDetailFromRows);
 
   // ---- writes ------------------------------------------------------------
 
   @override
   Future<DeckEntity> createRootDeck({
-    required String name,
+    required DeckName name,
     required SchedulerType schedulerType,
   }) => _guard(() async {
-    final validName = DeckEntity.validateName(name);
-    _requireRealScheduler(schedulerType);
-
+    // No input checks at all. BR-01 was applied when the `DeckName` was
+    // constructed, and BR-11 — "a scheduler must be chosen, and `unknown` is not
+    // a choice" — is enforced by `SchedulerType.dbValue`, which throws for
+    // `unknown` a few lines below rather than persisting a value no scheduler
+    // owns.
+    //
+    // There was a `_requireRealScheduler` guard here reporting
+    // `DeckValidationProblem.schedulerMissing`. It was the second owner of BR-11
+    // and it was wrong twice over: the type already made the write impossible, and
+    // reporting a *form* problem for a state the user cannot cause would have put
+    // "please choose a scheduler" on screen in response to a programming error.
     final id = _idGenerator();
     final now = _clock();
     await _dao.insertDeck(
       DecksCompanion.insert(
         id: id,
-        name: validName,
+        name: name.value,
         rootDeckId: id,
         contentType: DeckContentType.deck.dbValue,
         schedulerType: Value<String?>(schedulerType.dbValue),
@@ -116,11 +128,10 @@ final class DeckRepositoryImpl
 
   @override
   Future<DeckEntity> createSubDeck({
-    required String name,
+    required DeckName name,
     required String parentDeckId,
   }) => _guard(
     () => _dao.runInTransaction(() async {
-      final validName = DeckEntity.validateName(name);
       final parent = await _requireDeckRow(parentDeckId);
       final parentType = _knownContentType(parent);
       if (parentType == DeckContentType.card) {
@@ -155,7 +166,7 @@ final class DeckRepositoryImpl
       await _dao.insertDeck(
         DecksCompanion.insert(
           id: id,
-          name: validName,
+          name: name.value,
           parentDeckId: Value<String?>(parent.id),
           rootDeckId: parent.rootDeckId,
           contentType: DeckContentType.unset.dbValue,
@@ -169,14 +180,13 @@ final class DeckRepositoryImpl
   );
 
   @override
-  Future<void> renameDeck({required String deckId, required String name}) =>
+  Future<void> renameDeck({required String deckId, required DeckName name}) =>
       _guard(() async {
-        final validName = DeckEntity.validateName(name);
         await _requireDeckRow(deckId);
         await _dao.updateDeckById(
           deckId,
           DecksCompanion(
-            name: Value<String>(validName),
+            name: Value<String>(name.value),
             updatedAt: Value<DateTime>(_clock()),
           ),
         );
@@ -273,18 +283,6 @@ final class DeckRepositoryImpl
     }
 
     return row;
-  }
-
-  void _requireRealScheduler(SchedulerType schedulerType) {
-    if (schedulerType != SchedulerType.unknown) return;
-
-    // BR-11 — the choice is mandatory and `unknown` is not a choice.
-    throw const ValidationFailure(
-      message: 'Please choose a study mode for the deck.',
-      fieldErrors: <String, String>{
-        'schedulerType': 'A study mode must be chosen.',
-      },
-    );
   }
 
   /// Reads a deck's content type, refusing to operate on a value this build

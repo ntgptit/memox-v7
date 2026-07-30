@@ -4,11 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/app/config/env_config.dart';
 import 'package:memox/app/config/env_config_provider.dart';
-import 'package:memox/app/di/deck_repository_provider.dart';
+import 'package:memox/features/deck/di/deck_repository_provider.dart';
 import 'package:memox/core/time/clock_provider.dart';
 import 'package:memox/core/error/failure.dart';
+import 'package:memox/features/deck/domain/models/root_deck_list_snapshot_model.dart';
 import 'package:memox/features/deck/domain/models/root_deck_summary_model.dart';
-import 'package:memox/features/deck/presentation/controllers/root_decks_controller.dart';
+import 'package:memox/features/deck/presentation/controllers/deck_list_now_controller.dart';
+import 'package:memox/features/deck/presentation/controllers/root_deck_list_controller.dart';
 
 import 'support/fake_deck_repository.dart';
 
@@ -35,68 +37,57 @@ void main() {
     return container;
   }
 
+  /// A container whose clock the test can move, for the cases that need a
+  /// re-measure to land at a genuinely different instant.
+  ({ProviderContainer container, void Function(DateTime) setNow}) containerAt(
+    DateTime start,
+    FakeDeckRepository repository,
+  ) {
+    var current = start;
+    final container = ProviderContainer(
+      overrides: [
+        envConfigProvider.overrideWithValue(EnvConfig.development),
+        deckRepositoryProvider.overrideWithValue(repository),
+        clockProvider.overrideWithValue(() => current),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    return (container: container, setNow: (DateTime at) => current = at);
+  }
+
   /// Subscribes so the provider stays alive for the length of the test.
   void keepAlive(ProviderContainer container) {
-    final subscription = container.listen<AsyncValue<List<RootDeckSummary>>>(
-      rootDeckSummariesProvider,
+    final subscription = container.listen<AsyncValue<RootDeckListSnapshot>>(
+      rootDeckListProvider,
       (previous, next) {},
     );
     addTearDown(subscription.close);
   }
 
-  group('the clock', () {
-    test('is injected, never read from the wall clock', () {
-      final container = containerWith(FakeDeckRepository());
-
-      expect(container.read(deckListNowProvider), fixedNow);
-    });
-
-    test('refresh re-measures it', () {
-      var current = fixedNow;
-      final container = ProviderContainer(
-        overrides: [
-          envConfigProvider.overrideWithValue(EnvConfig.development),
-          deckRepositoryProvider.overrideWithValue(FakeDeckRepository()),
-          clockProvider.overrideWithValue(() => current),
-        ],
-      );
-      addTearDown(container.dispose);
-      container.listen<DateTime>(deckListNowProvider, (previous, next) {});
-
-      current = fixedNow.add(const Duration(hours: 3));
-      container.read(deckListNowProvider.notifier).refresh();
-
-      expect(
-        container.read(deckListNowProvider),
-        fixedNow.add(const Duration(hours: 3)),
-      );
-    });
-
+  group('re-measuring', () {
     test('a new boundary re-reads the aggregate', () async {
-      // What makes a resume update the due counts: the summary provider watches
-      // the instant, so moving it opens a new read.
-      var current = fixedNow;
+      // What makes both triggers work — resume and the due-boundary timer. Neither
+      // does anything unless moving the instant opens a new read, and this is that
+      // link on its own.
       final repository = FakeDeckRepository();
-      final container = ProviderContainer(
-        overrides: [
-          envConfigProvider.overrideWithValue(EnvConfig.development),
-          deckRepositoryProvider.overrideWithValue(repository),
-          clockProvider.overrideWithValue(() => current),
-        ],
+      final fixture = containerAt(fixedNow, repository);
+      fixture.container.listen<AsyncValue<RootDeckListSnapshot>>(
+        rootDeckListProvider,
+        (_, _) {},
       );
-      addTearDown(container.dispose);
-      container.listen<AsyncValue<List<RootDeckSummary>>>(
-        rootDeckSummariesProvider,
-        (previous, next) {},
-      );
-      await container.read(rootDeckSummariesProvider.future);
+      await fixture.container.read(rootDeckListProvider.future);
       expect(repository.summariesCallCount, 1);
 
-      current = fixedNow.add(const Duration(hours: 3));
-      container.read(deckListNowProvider.notifier).refresh();
-      await container.read(rootDeckSummariesProvider.future);
+      fixture.setNow(fixedNow.add(const Duration(hours: 3)));
+      fixture.container.read(deckListNowProvider.notifier).refresh();
+      await fixture.container.read(rootDeckListProvider.future);
 
       expect(repository.summariesCallCount, 2);
+      expect(repository.readInstants, <DateTime>[
+        fixedNow,
+        fixedNow.add(const Duration(hours: 3)),
+      ]);
     });
   });
 
@@ -106,8 +97,8 @@ void main() {
       keepAlive(container);
 
       expect(
-        container.read(rootDeckSummariesProvider),
-        isA<AsyncLoading<List<RootDeckSummary>>>(),
+        container.read(rootDeckListProvider),
+        isA<AsyncLoading<RootDeckListSnapshot>>(),
       );
     });
 
@@ -125,26 +116,26 @@ void main() {
       );
       keepAlive(container);
 
-      final value = await container.read(rootDeckSummariesProvider.future);
+      final value = await container.read(rootDeckListProvider.future);
 
-      expect(value.map((summary) => summary.deck.name), <String>[
-        'Japanese',
-        'Spanish',
-      ]);
-      expect(value.first.totalCardCount, 12);
-      expect(value.first.dueCardCount, 3);
-      expect(value.first.hasDueCards, isTrue);
-      expect(value.last.hasDueCards, isFalse);
+      expect(
+        value.decks.map((RootDeckSummary summary) => summary.deck.name),
+        <String>['Japanese', 'Spanish'],
+      );
+      expect(value.decks.first.totalCardCount, 12);
+      expect(value.decks.first.dueCardCount, 3);
+      expect(value.decks.first.hasDueCards, isTrue);
+      expect(value.decks.last.hasDueCards, isFalse);
     });
 
     test('an empty tree is data, not an error (BR-29)', () async {
       final container = containerWith(FakeDeckRepository());
       keepAlive(container);
 
-      final value = await container.read(rootDeckSummariesProvider.future);
+      final value = await container.read(rootDeckListProvider.future);
 
-      expect(value, isEmpty);
-      expect(container.read(rootDeckSummariesProvider).hasError, isFalse);
+      expect(value.decks, isEmpty);
+      expect(container.read(rootDeckListProvider).hasError, isFalse);
     });
 
     test(
@@ -160,12 +151,12 @@ void main() {
         keepAlive(container);
 
         await expectLater(
-          container.read(rootDeckSummariesProvider.future),
+          container.read(rootDeckListProvider.future),
           throwsA(same(failure)),
         );
         expect(
-          container.read(rootDeckSummariesProvider),
-          isA<AsyncError<List<RootDeckSummary>>>(),
+          container.read(rootDeckListProvider),
+          isA<AsyncError<RootDeckListSnapshot>>(),
         );
       },
     );
@@ -177,9 +168,9 @@ void main() {
       final container = containerWith(repository);
       keepAlive(container);
 
-      await container.read(rootDeckSummariesProvider.future);
-      container.read(rootDeckSummariesProvider);
-      container.read(rootDeckSummariesProvider);
+      await container.read(rootDeckListProvider.future);
+      container.read(rootDeckListProvider);
+      container.read(rootDeckListProvider);
 
       expect(repository.summariesCallCount, 1);
     });
@@ -191,9 +182,9 @@ void main() {
         final container = containerWith(repository);
         keepAlive(container);
 
-        await container.read(rootDeckSummariesProvider.future);
-        container.invalidate(rootDeckSummariesProvider);
-        await container.read(rootDeckSummariesProvider.future);
+        await container.read(rootDeckListProvider.future);
+        container.invalidate(rootDeckListProvider);
+        await container.read(rootDeckListProvider.future);
 
         expect(repository.summariesCallCount, 2);
       },
@@ -205,32 +196,34 @@ void main() {
         summaries: () {
           attempt += 1;
           if (attempt == 1) {
-            return Stream<List<RootDeckSummary>>.error(
+            return Stream<RootDeckListSnapshot>.error(
               const DatabaseFailure(message: 'read failed'),
             );
           }
 
-          return Stream<List<RootDeckSummary>>.value(<RootDeckSummary>[
-            fakeSummary(id: '1', name: 'Japanese'),
-          ]);
+          return Stream<RootDeckListSnapshot>.value(
+            fakeListSnapshot(<RootDeckSummary>[
+              fakeSummary(id: '1', name: 'Japanese'),
+            ]),
+          );
         },
       );
       final container = containerWith(repository);
       keepAlive(container);
 
       await expectLater(
-        container.read(rootDeckSummariesProvider.future),
+        container.read(rootDeckListProvider.future),
         throwsA(isA<DatabaseFailure>()),
       );
 
-      container.invalidate(rootDeckSummariesProvider);
-      final value = await container.read(rootDeckSummariesProvider.future);
+      container.invalidate(rootDeckListProvider);
+      final value = await container.read(rootDeckListProvider.future);
 
-      expect(value.single.deck.name, 'Japanese');
+      expect(value.decks.single.deck.name, 'Japanese');
     });
 
     test('disposing while the stream is still open throws nothing', () async {
-      final controller = StreamController<List<RootDeckSummary>>();
+      final controller = StreamController<RootDeckListSnapshot>();
       addTearDown(controller.close);
 
       final container = ProviderContainer(
@@ -242,15 +235,15 @@ void main() {
           ),
         ],
       );
-      container.listen<AsyncValue<List<RootDeckSummary>>>(
-        rootDeckSummariesProvider,
+      container.listen<AsyncValue<RootDeckListSnapshot>>(
+        rootDeckListProvider,
         (previous, next) {},
       );
 
       expect(container.dispose, returnsNormally);
 
       // An emission after disposal must not reach a torn-down provider.
-      controller.add(const <RootDeckSummary>[]);
+      controller.add(fakeListSnapshot(const <RootDeckSummary>[]));
       await Future<void>.delayed(Duration.zero);
     });
   });
