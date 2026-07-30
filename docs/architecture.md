@@ -7,8 +7,8 @@
 | **Scope** | Quyết định ràng buộc nhiều tài liệu hoặc nhiều layer. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), hình dạng dữ liệu (`data-model.md`) |
 | **Source of truth for** | AD-xx · đánh đổi kiến trúc · phương án đã bị loại · lý do pin toolchain |
 | **Depends on** | `document-conventions.md`, `product.md` |
-| **Updated by task** | M4.9a |
-| **Last updated** | 2026-07-29 |
+| **Updated by task** | M4.10 (AD-12) |
+| **Last updated** | 2026-07-30 |
 
 Format theo `document-conventions.md` §6.1. AD xếp theo số; ID vĩnh viễn (§7).
 
@@ -552,3 +552,89 @@ biến pin này thành check thường trực nằm ở technical debt trong `wb
 
 **MUST** cập nhật `.fvmrc` trong cùng commit với lần nâng SDK, và ghi lý do nâng
 vào WBS.
+
+---
+
+## AD-12 · Clean Architecture lồng, và tầng use case
+
+| | |
+|---|---|
+| **Status** | accepted |
+| **Affected documents** | `feature_blueprint.md` · `flutter-feature-slice` skill · `flutter-architecture` skill · `CLAUDE.md` |
+
+**Quyết định.** Mỗi feature dùng cấu trúc thư mục Clean Architecture lồng, tên
+**số nhiều**, và có tầng use case đầy đủ — một use case cho mỗi interaction.
+
+```
+lib/features/<feature>/
+├── domain/       entities/ · repositories/ · models/ · usecases/ · failures/
+├── data/         repositories/ · mappers/ · datasources/ · models/
+└── presentation/ screens/ · controllers/ · states/ · widgets/ · providers/
+```
+
+**Hướng phụ thuộc:** `presentation → domain use case → domain contract ← data
+impl`. Không tầng nào nhảy qua tầng nào. Controller **không** đọc repository.
+
+**Vì sao số nhiều.** Đây là quy ước ngành (Clean Architecture, template Flutter
+của Reso Coder, Very Good Ventures, Android architecture guide). Số ít từng là kỳ
+vọng của `check_suffix` trong `check_architecture.sh`, và vì layout phẳng cũng
+không có thư mục nào tên `/domain/entity/`, **cả sáu check khớp 0 file** — chúng
+chạy, không thấy gì để kiểm, và pass. Một check không thể đỏ thì đọc như là có
+bảo vệ. Script đã trỏ lại sang tên số nhiều và mở rộng thành 14 check.
+
+**Thư mục không thay được suffix.** `entities/deck_entity.dart`, không phải
+`entities/deck.dart`. Guard khớp trên **tên file**, và nhiều scope chọn file theo
+đó, nên file lệch suffix rời khỏi phạm vi đúng những rule dành cho nó.
+
+### Tầng use case: cái gì vào, cái gì không
+
+**Vào use case: validation.** Trước AD-12, `DeckEntity.nameProblem` chạy trong
+controller *và* lần nữa trong repository — cùng một BR-01 thực thi ở hai tầng, và
+không gì bắt được nếu hai bên lệch. Giờ chạy một lần, ở tầng sở hữu luật.
+
+Controller chỉ giữ phần thực sự là presentation: double-submit guard, cờ
+submitting, kiểm `ref.mounted` sau await, và map `Failure` sang state per-field.
+
+**KHÔNG vào use case: luật cần cây tại thời điểm ghi.** BR-55 (độ sâu), BR-62
+(content lock của con đầu), BR-68 (điều kiện rỗng) và bộ rule move UC-09 đều chạy
+trong `runInTransaction`. Đặt chúng lên use case là đẩy phần kiểm ra **ngoài**
+transaction — tạo race giữa lúc kiểm và lúc ghi. Luật sẽ nằm ở chỗ gọn hơn và
+**sai**. Use case là điểm vào; luật hình cây thuộc về nơi có transaction.
+
+**Refusal đi bằng `ValidationFailure.fieldErrors`, không phải `Failure.reason`.**
+Một form có thể sai hai field cùng lúc — tên trống *và* chưa chọn scheduler — mà
+`reason` chỉ giữ một giá trị. Key lấy từ hằng số (`DeckField`), là identifier
+không phải copy; screen map key sang ARB.
+
+**`Failure.reason` là `Enum?` trên base type.** `Enum` vì `core/` không được
+import feature; trên base vì `Failure` là `sealed` nên feature **không thể** tự
+thêm subtype — đó cũng là lý do `domain/failures/` không bao giờ chứa được một
+`Failure` con, và thứ nó chứa là enum lý do cùng hàm rule thuần sinh ra chúng.
+
+**Hệ quả cụ thể lên code:**
+
+- Use case nhận contract ở `domain/repositories/`, không nhận implementation.
+- `presentation/providers/` chỉ làm dependency wiring. `_provider` đã được thêm
+  vào suffix cho phép của `presentation/` **và** loại khỏi scope
+  `widget_ui_files`, vì một file làm wiring thì đọc repository là đúng định nghĩa
+  của nó. Thứ gì giữ state hay lệnh là `_controller`.
+- `app/di/` vẫn là composition root — chỗ duy nhất `*RepositoryImpl` được gọi
+  tên, nên test thay được implementation từ ngoài feature. Use case không có
+  implementation nào để chọn, nên wiring của nó đi cùng feature.
+- Provider trong `features/*/presentation/` phải `autoDispose`
+  (`test/app/provider_convention_test.dart` cưỡng chế).
+
+**Đánh đổi đã nhận.** Sáu use case write giữ validation; bốn use case read thì
+mỏng — chúng gần như chỉ chuyển tiếp. Chúng tồn tại vì **tính nhất quán**: một
+feature mới là một lần clone chứ không phải một lần phán xét ở từng operation.
+Đây là chỗ lệch có ý thức với dòng "tạo use case chỉ khi nó có logic thật" trong
+CLAUDE.md, và CLAUDE.md đã được sửa để nói ra điều đó thay vì để hai tài liệu mâu
+thuẫn.
+
+**Phương án đã bị loại:** giữ layout phẳng (bỏ, vì chủ dự án muốn Clean
+Architecture đầy đủ trước khi clone sang feature thứ hai); tạo
+`features/_feature_template/` (bỏ — một thư mục dưới `lib/` không thể trơ:
+`flutter analyze` compile nó, 66 rule của guard chạy trên nó,
+`no_hardcoded_strings_test` quét nó, và một `*_screen.dart` bên trong sẽ đòi
+strict visual audit riêng; Deck kèm README của nó là ví dụ đã compile và đã được
+gate).

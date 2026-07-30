@@ -32,9 +32,9 @@ lib/
 │   └── extensions/
 ├── features/
 │   └── <feature>/
-│       ├── data/           # local/, remote/, model/, repository/
-│       ├── domain/         # entity/, repository/, usecase/
-│       └── presentation/   # screen/, widget/, state/, controller/
+│       ├── data/           # repositories/, mappers/, datasources/, models/
+│       ├── domain/         # entities/, repositories/, models/, usecases/, failures/
+│       └── presentation/   # screens/, controllers/, states/, widgets/, providers/
 └── main.dart
 ```
 
@@ -78,9 +78,23 @@ explicitly, and it is the part most often ignored:
 - **Not every feature needs every layer.** A settings screen that toggles a
   local preference does not need an entity, a contract, an implementation and a
   use case to wrap one boolean. It needs a controller and a storage call.
-- **Create a use case when it holds business logic or has more than one caller.**
-  A use case whose entire body is `return repository.getThings()` adds a file,
-  an indirection and a test for nothing. Call the repository.
+- **A feature that has a `usecases/` folder gets one use case per interaction**
+  (AD-12). This is a deliberate change from the older rule below, made by the
+  project owner before the second feature was cloned: uniformity is what turns a
+  new feature into a clone rather than a judgement call at every operation. Six of
+  Deck's ten hold the input validation that used to run twice — once in a
+  controller and once again in the repository. Four are thin, and that is the
+  accepted cost.
+
+  The older rule still applies to a feature small enough not to have the folder at
+  all: a settings toggle needs a controller and a storage call, not five layers.
+  What changed is that *within* a Clean Architecture feature, the layer is uniform.
+
+- **A rule that needs the data as it stands at the moment of writing does not go
+  in a use case.** Depth limits, first-child locks, emptiness checks and subtree
+  moves run inside `runInTransaction`. Hoisting one above the repository puts the
+  check outside the transaction — a race between the check and the write. Tidier
+  place, wrong answer.
 - **Do not write an interface for a single implementation you will never
   swap.** The exception that earns its keep is the repository contract, because
   it is what lets domain stay framework-free and lets tests substitute fakes.

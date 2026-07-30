@@ -129,28 +129,41 @@ while IFS= read -r hit; do
 done < <(dart_files | xargs grep -nE 'catch\s*\([^)]*\)\s*\{\s*\}' 2>/dev/null)
 
 # ---------------------------------------------------------------------------
-# 6. print() in library code. Logging goes through core/logging so that level
-#    and redaction are enforced in one place.
+# 6. print() in library code. `print` is banned by analysis_options.yaml; the
+#    supported alternative is `dart:developer`'s `log`, which the two diagnostics
+#    in core/ already use (core/state/provider_observer.dart,
+#    core/database/query_log_interceptor.dart). There is deliberately no
+#    core/logging abstraction — bootstrap.dart records why, and this message used
+#    to point at that directory as though it existed.
 # ---------------------------------------------------------------------------
 while IFS= read -r hit; do
   [[ -z "$hit" ]] && continue
   file="${hit%%:*}"; rest="${hit#*:}"; lineno="${rest%%:*}"
   report error "print() in lib/" "$file:$lineno" \
-    "use the logger from core/logging so level and redaction apply."
+    "use dart:developer's log(). print() is banned and cannot be filtered or redacted."
 done < <(dart_files | xargs grep -nE '(^|[^.\w])print\s*\(' 2>/dev/null | grep -v 'debugPrint')
 
 # ---------------------------------------------------------------------------
 # 7. File naming. Files in a role-specific directory should carry the matching
 #    suffix, so the role is readable from an import line.
 # ---------------------------------------------------------------------------
-check_suffix() { # check_suffix <dir-fragment> <required-suffix>
+check_suffix() { # check_suffix <dir-fragment> <suffix> [more suffixes...]
+  local fragment="$1"; shift
+  local allowed=("$@")
+  # Joined before the loop: `while IFS= read` leaves IFS empty inside the body,
+  # so expanding the array there would print only its first element.
+  local expected="${allowed[*]}"
   while IFS= read -r file; do
     [[ -z "$file" ]] && continue
     base="$(basename "$file")"
-    [[ "$base" == *"$2" ]] && continue
+    local ok=0
+    for suffix in "${allowed[@]}"; do
+      if [[ "$base" == *"$suffix" ]]; then ok=1; break; fi
+    done
+    [[ $ok -eq 1 ]] && continue
     report warn "naming convention" "$file" \
-      "files under $1 should end in $2 so the role is visible at the import site."
-  done < <(dart_files | grep "$1")
+      "files under $fragment should end in one of: $expected — so the role is visible at the import site."
+  done < <(dart_files | grep "$fragment")
 }
 # Plural, because that is the folder naming the features use and the industry
 # convention they follow. These were singular until M4.10 and therefore matched
@@ -167,6 +180,16 @@ check_suffix '/domain/models/'            '_model.dart'
 check_suffix '/domain/failures/'          '_failure.dart'
 check_suffix '/data/mappers/'             '_mapper.dart'
 check_suffix '/data/repositories/'        '_repository_impl.dart'
+# Two suffixes because the guard's data list admits both, and which one is right
+# depends on what the source is: a Drift DAO is a `_dao`, anything else is a
+# `_data_source`.
+check_suffix '/data/datasources/'         '_dao.dart' '_data_source.dart'
+check_suffix '/data/models/'              '_model.dart'
+# `_provider` is for dependency wiring only. Anything holding submit state or a
+# command is a `_controller` and belongs in `presentation/controllers/` — the
+# guard's widget scope exempts files by that suffix, so the distinction decides
+# which rules apply.
+check_suffix '/presentation/providers/'   '_provider.dart'
 
 # ---------------------------------------------------------------------------
 # 8. Oversized files. Not a hard failure — a legitimately long generated-ish

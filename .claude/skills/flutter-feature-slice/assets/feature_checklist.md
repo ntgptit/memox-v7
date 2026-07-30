@@ -12,12 +12,26 @@ WBS task: `T<x.y>` · Use cases: `UC-xx` · Business rules: `BR-xx`
 - [ ] Acceptance criteria written and externally checkable
 - [ ] Dependencies on other features identified and available
 
+## Layout (AD-12)
+- [ ] `domain/{entities,repositories,models,usecases,failures}/`
+- [ ] `data/{repositories,mappers,datasources,models}/`
+- [ ] `presentation/{screens,controllers,states,widgets,providers}/`
+- [ ] Every file carries the suffix its folder admits — the folder does not
+      replace the suffix
+- [ ] No controller reads a repository; the dependency direction is
+      `presentation → use case → contract ← impl`
+
 ## Domain
 - [ ] Entity / value objects, immutable, value equality
 - [ ] Entity state as enum or sealed class
 - [ ] Repository contract, shaped by what presentation needs
-- [ ] Business validation
-- [ ] Use cases only where they hold logic or have >1 caller
+- [ ] One use case per interaction, taking the contract
+- [ ] Input validation lives in the use case — not also in the controller, and
+      not also in the repository
+- [ ] Any rule needing the data *as it stands at write time* stays in the
+      repository, inside its transaction
+- [ ] Failure reasons are enums in `domain/failures/`, never sentences in
+      `Failure.message`
 - [ ] No Flutter / Dio / Drift / json_annotation imports
 
 ## Data

@@ -42,9 +42,24 @@ SQLite → watch() Stream → mapper → entity → AsyncValue → MxAsyncView �
 Reads are `Stream` (`watch`), writes are `Future`. Nothing refreshes manually: a
 write lands in SQLite, the stream re-emits, every screen watching it rebuilds.
 
-There is no use-case layer here. A `Future<List<X>> call() => repo.getAll()` is a
-file, an indirection and a test for no benefit — the controller calls the
-repository. Add a use case when it holds real logic or has a second caller.
+Ten use cases in `domain/usecases/`, one per interaction (AD-12). Each takes the
+repository **contract**, never an implementation.
+
+The six write use cases hold the input validation, and that is why they are not
+indirection: `DeckEntity.nameProblem` used to run in the controller *and* again
+inside the repository — the same BR-01 rule in two layers, with nothing to catch
+them disagreeing. The four read ones are thin, which is the accepted cost of having
+the layer be uniform.
+
+What a controller keeps is presentation only: the double-submit guard, the
+submitting flag, the `ref.mounted` check after an await, and turning a `Failure`
+into per-field state. **It does not read a repository.**
+
+What deliberately stays in the repository: BR-55 depth, BR-62's first-child content
+lock, BR-68's emptiness checks and UC-09's move rules. Each needs the tree as it
+stands at the moment of writing and runs inside `runInTransaction`; a use case
+above the repository would put the check outside the transaction, which is a race
+between the check and the write.
 
 ## 4 · Providers, by role
 
@@ -203,8 +218,12 @@ Two things people get wrong on the first clone:
   not `domain/entities/deck.dart`. The role is carried by the file name, which
   `memox.naming.domain_file_role_suffix` enforces and which
   `check_architecture.sh` pairs with the folder it sits in.
-- **Four folders are empty on purpose** — `domain/usecases/`, `domain/failures/`,
-  `data/models/`, `presentation/providers/`. Each has a reason recorded in the
-  blueprint; none is a place to put something that does not belong there.
+- **`data/models/` is the one empty folder, and the reason is not laziness.**
+  Drift's generated row class *is* the data model and lives in `core/database/`
+  because the schema is shared; a per-feature DTO would be a second shape for one
+  row, and with no `dio` (AD-05) there is no wire format to model either.
+- **`presentation/providers/` is wiring only.** Anything holding state or a command
+  is a `_controller` — the guard's widget scope exempts files by that suffix, so
+  putting a controller in `providers/` would change which rules apply to it.
 - **Promote to `shared/` on the second caller, not the first.** One caller is a
   guess at what varies; the second one shows you.
