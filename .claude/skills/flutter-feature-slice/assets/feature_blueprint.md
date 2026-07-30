@@ -353,6 +353,49 @@ list is diffed against `lib/shared/widgets/`, so a new component cannot join the
 folder without joining the suite. That assertion caught a missing `MxContentShell`
 on its first run.
 
+**6 · A component that animates forever gets a `RepaintBoundary`.** Two do:
+`MxLoadingState` and a submitting `MxActionButton`. A `markNeedsPaint` travels up
+to the nearest repaint boundary, so without one that is the enclosing layer and
+*everything sharing it* repaints on every frame of the spin, at 60fps, for as long
+as the spinner is on screen.
+
+Measured rather than assumed. A sibling `CustomPaint` beside `MxLoadingState`, over
+10 animation frames:
+
+| | extra sibling paints |
+|---|---|
+| before | **10** — one per frame |
+| after | **0** |
+
+The button case matters more than the full-screen one: that spinner sits inside a
+form or a dialog, so the fields the user is still looking at were being repainted
+to move an arc. `mx_repaint_isolation_test.dart` pins both, and counts paints
+rather than measuring milliseconds — a paint count is deterministic, and a timing
+assertion in CI is a flaky test with a performance-shaped name. It also asserts the
+idle button as a control, so the test cannot pass by measuring nothing. The 56
+goldens are unchanged: a repaint boundary alters layers, not pixels.
+
+`const` needs no rule here. `analysis_options.yaml` promotes
+`prefer_const_constructors`, `prefer_const_declarations` and
+`prefer_const_literals_to_create_immutables` to **error**, so a missing `const` is a
+failed build rather than a review comment.
+
+`Opacity` needs no rule either, and the usual advice to avoid it does not apply to
+the one use in `shared/`. `MxActionButton` wraps its hidden label in
+`Opacity(opacity: 0, alwaysIncludeSemantics: true)`, and `RenderOpacity.paint`
+returns before painting the child when alpha is 0 (`proxy_box.dart`) — no
+`saveLayer`, no child paint. The saveLayer cost the advice is about belongs to
+*fractional* opacity. `alwaysIncludeSemantics` is not optional there: at alpha 0 the
+subtree leaves the semantics tree, and the button announced as "button, disabled"
+with no name.
+
+Nothing in `shared/` owns a controller. `MxTextField` takes a
+`TextEditingController` from the caller, which is correct rather than lazy — the
+draft belongs to the widget that owns the form, for the reasons in the success
+policy above. If a shared component ever needs an `AnimationController`, it becomes
+a `StatefulWidget` and disposes it there; a caller must never be handed a lifecycle
+it did not ask for.
+
 One asymmetry to keep in mind while reading it: **components pass, and screens are
 where the caller can still get it wrong.** `MxContentShell.isScrollable` defaults
 to `false` and has to — a body that already scrolls (`ListView`) must not be nested
@@ -360,6 +403,54 @@ in another scroll view, which fails outright rather than overflowing. A fixed bo
 that forgets to opt in overflows silently, and only at large text scale or on a
 short screen. The Deck screens each carry a `320 x 2.0` case for this reason; a new
 screen should too, and nothing currently forces it.
+
+### Platform adaptivity — not now, and the reason is not preference
+
+**There is no `ios/` directory.** Only `android/` and `web/` (AD-04: Android is the
+release target, web is the E2E channel, iOS is deferred). A `Switch.adaptive` or a
+`CupertinoAlertDialog` branch would be a code path that no build target can produce
+and no test can execute — dead code that looks like diligence, and that doubles the
+golden and audit surface for a platform the project does not ship.
+
+What is *not* deferred, because web is a real build target:
+
+- **Safe area** is handled: `MxActionSheet` and `MxContentShell` wrap in `SafeArea`,
+  and the navigation bar is a Scaffold `bottomNavigationBar`, which subtracts its
+  own height from the body's `MediaQuery` and pads for the home indicator.
+- **Focus** is themed explicitly — `app_theme.dart` resolves `WidgetState.focused`
+  for buttons, inputs and the nav indicator, and `app_theme_test.dart` asserts the
+  focus-ring colour. That is the keyboard story, and it is the one that matters for
+  a Playwright suite driving the web build.
+- **Hover** falls back to Material's default overlay. It works and it is not
+  asserted anywhere — a deliberate gap, not an oversight, since no production
+  target has a pointer.
+- **Scrollbars** come from `MaterialScrollBehavior`, which adds them on web and
+  desktop without configuration.
+
+When iOS is picked up, the seam is the theme and the `.adaptive()` constructors —
+not a `Platform.isIOS` branch inside a component. Nothing in `shared/` reads
+`Platform` or `defaultTargetPlatform` today, and that is worth keeping.
+
+### Localization inside a shared component
+
+**A shared component never reads ARB and never carries a default string.** Every
+label is a required or optional parameter documented "already-localized", including
+the ones most likely to be defaulted — `confirmLabel`, `cancelLabel`, `retryLabel`,
+`actionLabel`. `git grep -nE "this\.[a-zA-Z]+ = '" -- lib/shared` returns nothing,
+and it must keep returning nothing: a default `'Cancel'` is a string that ships in
+English to every locale and that no ARB file owns, so no translator ever sees it.
+
+Two enforcers, and they cover different ground: the guard's i18n rule runs on
+`lib/features/*/presentation` and `lib/shared`, while
+`test/l10n/no_hardcoded_strings_test.dart` scans **all** of `lib/` — including
+`lib/app/**`, which the guard rule deliberately skips and which is where the two
+hardcoded strings it once had actually lived.
+
+Counts go through ICU plurals in the ARB (`{count, plural, =0{} =1{} other{}}`), not
+through string concatenation in Dart. There is no `NumberFormat` or `DateFormat`
+anywhere yet because no component displays a formatted number or date — Review (M5)
+is where intervals, due dates and streaks arrive, and that is when locale-aware
+formatting becomes a real requirement rather than a precaution.
 
 ## Tests, and the level each belongs at
 
