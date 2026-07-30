@@ -48,8 +48,8 @@ void main() {
       );
 
       expect(repository.createdRootDecks, hasLength(1));
-      // Trimming is the repository's job via `validateName`; the controller
-      // passes what was typed so the rule has one owner.
+      // The controller passes the raw typed string onward; trim and BR-01 run
+      // once, in `DeckName.parse` inside the use case, so the rule has one owner.
       // Normalised, not raw: trim happened once, in `DeckName.parse`, and what
       // reached the repository was already applied. Asserting the raw string here
       // would be asserting that some layer downstream still has trimming to do.

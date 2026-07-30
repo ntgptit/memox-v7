@@ -28,7 +28,7 @@ void main() {
       // The COALESCE branch. Without it an inner join would drop empty decks and
       // a brand-new deck would vanish from the list that just created it.
       await harness.deckRepository.createRootDeck(
-        name: DeckName.parseOrThrow('Empty'),
+        name: DeckName.parse('Empty').name!,
         schedulerType: SchedulerType.eightBox,
       );
 
@@ -78,7 +78,7 @@ void main() {
       'the scheduler comes back on the root, for the row to display',
       () async {
         await harness.deckRepository.createRootDeck(
-          name: DeckName.parseOrThrow('SM-2 deck'),
+          name: DeckName.parse('SM-2 deck').name!,
           schedulerType: SchedulerType.sm2,
         );
 
@@ -186,7 +186,7 @@ void main() {
 
     test('nextDueAt is null when there are no cards at all', () async {
       await harness.deckRepository.createRootDeck(
-        name: DeckName.parseOrThrow('Empty'),
+        name: DeckName.parse('Empty').name!,
         schedulerType: SchedulerType.eightBox,
       );
 
@@ -266,13 +266,13 @@ void main() {
 
       await pumpEventQueue();
       final first = await harness.deckRepository.createRootDeck(
-        name: DeckName.parseOrThrow('First'),
+        name: DeckName.parse('First').name!,
         schedulerType: SchedulerType.eightBox,
       );
       await pumpEventQueue();
       await harness.deckRepository.renameDeck(
         deckId: first.id,
-        name: DeckName.parseOrThrow('Renamed'),
+        name: DeckName.parse('Renamed').name!,
       );
       await pumpEventQueue();
       await harness.deckRepository.deleteDeck(first.id);

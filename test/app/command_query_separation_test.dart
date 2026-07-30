@@ -1,9 +1,7 @@
-import 'dart:io';
-
-import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:analyzer/dart/ast/ast.dart';
-import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'support/command_query_scan.dart';
 
 /// Command and query stay apart, enforced instead of reviewed.
 ///
@@ -13,103 +11,13 @@ import 'package:flutter_test/flutter_test.dart';
 /// It never arrives as one commit, so a review will not catch it; a method count
 /// will.
 ///
-/// **Parsed, not matched.** This file used to work on source text with regular
-/// expressions, and that cost it real coverage twice:
+/// **Parsed, not matched.** The scanning machinery — which walks a real Dart AST
+/// so a comment or a string literal cannot produce a false hit — lives in
+/// `support/command_query_scan.dart`. This file is the checks themselves.
 ///
-/// * it counted public methods **per file**. A file holding two notifiers — a
-///   query controller and the input-state notifier it reads — looked like one
-///   class with four methods, and the check failed on correct code. The
-///   controller file was split partly to appease it.
-/// * a rule that forbade the *word* `navigateTo` matched the word wherever it
-///   appeared, including in the comment explaining the rule.
-///
-/// Both are properties of text, not of code. So the checks below walk a real Dart
-/// AST: comments and string literals are not nodes, classes are separate objects,
-/// and a return type is a type rather than a line that starts a certain way.
-///
-/// Six checks, each a number rather than a judgement, plus one that fails if the
+/// Seven checks, each a number rather than a judgement, plus one that fails if the
 /// scan found nothing to look at.
 void main() {
-  // ---------------------------------------------------------------- plumbing
-
-  List<File> dartFilesUnder(String path) {
-    final directory = Directory(path);
-    if (!directory.existsSync()) return <File>[];
-
-    return directory
-        .listSync(recursive: true)
-        .whereType<File>()
-        .where(
-          (File file) =>
-              file.path.endsWith('.dart') &&
-              !file.path.endsWith('.g.dart') &&
-              !file.path.endsWith('.freezed.dart'),
-        )
-        .toList();
-  }
-
-  String relative(File file) =>
-      file.path.replaceAll(r'\', '/').replaceFirst(RegExp('^.*?lib/'), 'lib/');
-
-  /// Every class declared in [file].
-  ///
-  /// `throwIfDiagnostics: false` because this parses without resolution, so an
-  /// unresolved import is reported as a diagnostic and is not a problem here —
-  /// the syntax is all these checks read. A genuine syntax error still yields no
-  /// declarations, which the coverage check at the bottom would notice.
-  List<ClassDeclaration> classesIn(File file) => parseString(
-    content: file.readAsStringSync(),
-    throwIfDiagnostics: false,
-  ).unit.declarations.whereType<ClassDeclaration>().toList();
-
-  /// Public methods on [type] — not getters, setters or operators.
-  ///
-  /// A getter is not an interaction: reading a value is not a command and not a
-  /// query against the data layer. Operators cannot be a command either.
-  List<String> publicMethods(ClassDeclaration type) => type.body.members
-      .whereType<MethodDeclaration>()
-      .where(
-        (MethodDeclaration m) =>
-            !m.isGetter &&
-            !m.isSetter &&
-            !m.isOperator &&
-            !m.name.lexeme.startsWith('_'),
-      )
-      .map((MethodDeclaration m) => m.name.lexeme)
-      .toList();
-
-  /// Whether [type] is a generated-base Riverpod notifier (`extends _$Foo`).
-  bool isNotifier(ClassDeclaration type) =>
-      type.extendsClause?.superclass.toSource().startsWith(r'_$') ?? false;
-
-  /// The declared return type of `build`, as written.
-  ///
-  /// `null` when there is no `build` or it has no annotation. Read from the type
-  /// node, so `SubmitState<DeckValidationProblem>` and a line that merely begins
-  /// with the word are not the same thing — which is what the old regex compared.
-  String? buildReturnType(ClassDeclaration type) => type.body.members
-      .whereType<MethodDeclaration>()
-      .where((MethodDeclaration m) => m.name.lexeme == 'build')
-      .map((MethodDeclaration m) => m.returnType?.toSource())
-      .firstOrNull;
-
-  /// Classes in files whose path contains [fragment].
-  List<({String path, ClassDeclaration type})> classesUnder(
-    String fragment, {
-    String root = 'lib/features',
-  }) {
-    final found = <({String path, ClassDeclaration type})>[];
-    for (final File file in dartFilesUnder(root)) {
-      final path = relative(file);
-      if (!path.contains(fragment)) continue;
-      for (final ClassDeclaration type in classesIn(file)) {
-        found.add((path: path, type: type));
-      }
-    }
-
-    return found;
-  }
-
   // Recorded as the checks run, and asserted at the end. A rule that inspects
   // nothing passes, which reads as coverage — six suffix checks in
   // `check_architecture.sh` did exactly that until M4.10.
@@ -271,6 +179,46 @@ void main() {
     );
   });
 
+  test('no use case or controller exposes a setter, operator, getter or '
+      'mutable field', () {
+    // The bypass this closes. Every check above counts *methods*; a setter, an
+    // operator and a getter are none, so `set selectedDeck(String id) {}` on a
+    // controller or `int get operationCount => 0` on a use case slipped past all
+    // of them. Read the members the counts cannot, and reject them.
+    //
+    // Scoped to the interaction types — every use case, and every generated-base
+    // notifier under `/controllers/` — because those are what the counts bound. A
+    // plain value class that happened to live under one of these folders and
+    // legitimately overrode `operator ==` is not one of them; there are none, and
+    // this stays aimed at the classes the rule is about.
+    final subjects = <({String path, ClassDeclaration type})>[
+      ...classesUnder('/usecases/'),
+      ...classesUnder('/controllers/').where((e) => isNotifier(e.type)),
+    ];
+    scanned['setter/operator surface subjects'] = subjects.length;
+    final offenders = <String>[];
+
+    for (final entry in subjects) {
+      for (final member in forbiddenSurface(entry.type)) {
+        offenders.add(
+          '${entry.path}: ${entry.type.namePart.typeName.lexeme} — '
+          '${member.kind}: ${member.name}',
+        );
+      }
+    }
+
+    expect(
+      offenders,
+      isEmpty,
+      reason:
+          'Use cases and controllers expose plain methods only. A public setter '
+          'or operator is an interaction wearing a different syntax; a public '
+          'getter is state read off a bespoke surface instead of `state`; a '
+          'public mutable field is exposed mutable state. Each is a way around '
+          'the count checks.\n${offenders.join('\n')}',
+    );
+  });
+
   test('no controller or use case declares selection, search or navigation', () {
     // The four members of the example that are not commands at all: UI-local state
     // and side effects. Selection and search belong to the widget or to their own
@@ -330,7 +278,7 @@ void main() {
       ...classesUnder('/controllers/'),
       ...classesUnder('/usecases/'),
     ]) {
-      final visitor = _NamedTypeCollector();
+      final visitor = NamedTypeCollector();
       entry.type.accept(visitor);
       for (final String type in visitor.types) {
         if (type != 'BuildContext') continue;
@@ -377,24 +325,13 @@ void main() {
       greaterThan(0),
       reason: 'no class matched the remaining notifier kind',
     );
+    expect(
+      scanned['setter/operator surface subjects'],
+      greaterThan(0),
+      reason:
+          'the setter/operator/getter check inspected no use cases or notifiers '
+          '— its scope has moved and it now guards nothing',
+    );
     expect(scanned['controller and use-case members'], greaterThan(0));
   });
-}
-
-/// Collects every named type written inside a class.
-///
-/// Type annotations, type arguments and constructor names all arrive as
-/// `NamedType`, which is exactly the set a "does this class mention type X"
-/// question is about. Comments and string literals are not AST nodes, so neither
-/// can produce a hit.
-class _NamedTypeCollector extends RecursiveAstVisitor<void> {
-  final Set<String> types = <String>{};
-
-  @override
-  void visitNamedType(NamedType node) {
-    // The bare name, so `BuildContext?` and a qualified `widgets.BuildContext`
-    // both reduce to the identifier being looked for.
-    types.add(node.name.lexeme);
-    super.visitNamedType(node);
-  }
 }

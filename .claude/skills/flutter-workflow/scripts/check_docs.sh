@@ -410,6 +410,64 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+# D. Deck validation-flow ownership drift
+# ---------------------------------------------------------------------------
+# The Deck refactor made `DeckName.parse`, called in the use case, the single
+# owner of trim + BR-01. The widget sends raw input, the controller manages the
+# submit lifecycle without validating, and the repository takes a `DeckName` it
+# never re-checks. A comment or doc that still says otherwise describes a flow
+# that no longer exists — and the next feature copies comments before it copies
+# code, so the drift propagates.
+#
+# This catches the specific present-tense claims, deliberately not the history
+# around them: "it used to be `DeckEntity.nameProblem`" is correct and must pass,
+# while "the name check comes from `DeckEntity.nameProblem`" must fail. The
+# patterns are adjacency- and word-bounded for that reason — `controller
+# validates` fires, `controller does not validate` and `controller that
+# validates` (the shape being described as replaced) do not.
+head_ "D. Deck validation-flow ownership drift"
+
+deck_flow_files() {
+  { find lib/features/deck test/features/deck -name '*.dart' 2>/dev/null
+    ls docs/*.md CLAUDE.md 2>/dev/null
+    find .claude/skills -name '*.md' 2>/dev/null
+    [[ -f .vscode/memox.code-snippets ]] && echo .vscode/memox.code-snippets
+  } | sort -u
+}
+
+# label|regex. Each regex is a present-tense claim that a layer other than
+# `DeckName`/the use case owns trim or BR-01.
+DECK_FLOW_PATTERNS=(
+  "widget trims/normalises the name|trimmed-as-typed"
+  "controller validates or trims|\\bcontrollers?[[:space:]]+(validates|trims)\\b"
+  "widget sends a normalised name|\\bwidget[[:space:]]+[^.]{0,30}normali[sz]ed[[:space:]]+name"
+  "repository re-validates the name|\\b(re-?validates)\\b[^.]{0,20}\\b(name|BR-01)\\b"
+  "removed BR-01 API cited as live|(from|via)[[:space:]]+[^.]{0,4}(DeckEntity\\.nameProblem|DeckEntity\\.validateName|\`validateName)"
+)
+
+DECK_FLOW_SCANNED=0
+DECK_FLOW_HITS=0
+while IFS= read -r f; do
+  [[ -f "$f" ]] || continue
+  DECK_FLOW_SCANNED=$((DECK_FLOW_SCANNED + 1))
+  for entry in "${DECK_FLOW_PATTERNS[@]}"; do
+    label="${entry%%|*}"; pat="${entry#*|}"
+    while IFS= read -r hit; do
+      [[ -z "$hit" ]] && continue
+      DECK_FLOW_HITS=$((DECK_FLOW_HITS + 1))
+      fail "stale deck validation-flow claim ($label)" "$f:$hit
+    DeckName.parse in the use case owns trim + BR-01; no other layer validates or trims the name."
+    done < <(grep -niE "$pat" "$f" 2>/dev/null)
+  done
+done < <(deck_flow_files)
+
+if [[ "$DECK_FLOW_SCANNED" -eq 0 ]]; then
+  fail "zero scope" "the deck validation-flow guard scanned no files — deck paths moved, so it now checks nothing"
+elif [[ "$DECK_FLOW_HITS" -eq 0 ]]; then
+  ok "no stale deck validation-flow claims ($DECK_FLOW_SCANNED files scanned; DeckName.parse is the one owner)"
+fi
+
+# ---------------------------------------------------------------------------
 printf '\n%s\n' "------------------------------------------------------------"
 if [[ $PROBLEMS -eq 0 ]]; then
   printf '%s✓%s specification is internally consistent\n' "$GRN" "$OFF"

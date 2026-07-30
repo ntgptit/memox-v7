@@ -17,7 +17,7 @@ void main() {
     () async {
       final treeA = await h.seedTree(prefix: 'A-');
       final grandLeaf = await h.deckRepository.createSubDeck(
-        name: DeckName.parseOrThrow('A-GrandLeaf'),
+        name: DeckName.parse('A-GrandLeaf').name!,
         parentDeckId: treeA.leaf.id,
       );
       await h.cardRepository.createCard(
@@ -56,7 +56,7 @@ void main() {
   test('a move within the same root keeps pointers and stays atomic', () async {
     final tree = await h.seedTree();
     final branch2 = await h.deckRepository.createSubDeck(
-      name: DeckName.parseOrThrow('Branch2'),
+      name: DeckName.parse('Branch2').name!,
       parentDeckId: tree.root.id,
     );
 

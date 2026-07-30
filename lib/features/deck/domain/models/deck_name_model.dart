@@ -44,23 +44,6 @@ final class DeckName {
     return (name: DeckName._(trimmed), problem: null);
   }
 
-  /// For a caller that has no form in front of it and wants the failure.
-  ///
-  /// Used by nothing in the Deck feature today — every write goes through a use
-  /// case that collects problems across fields first. Kept because a future
-  /// importer or background job has no form to report into, and its absence would
-  /// invite that caller to re-implement the rule.
-  static DeckName parseOrThrow(String raw) {
-    final result = parse(raw);
-    final name = result.name;
-    if (name != null) return name;
-
-    refuseInvalidDeckForm(<DeckValidationProblem>{result.problem!});
-    // `refuseInvalidDeckForm` always throws when the set is non-empty; this is
-    // unreachable and exists only because the analyser cannot see that.
-    throw StateError('unreachable');
-  }
-
   @override
   bool operator ==(Object other) => other is DeckName && other.value == value;
 

@@ -28,7 +28,7 @@ void main() {
 
       await expectLater(
         h.deckRepository.createSubDeck(
-          name: DeckName.parseOrThrow('Too deep'),
+          name: DeckName.parse('Too deep').name!,
           parentDeckId: chain.last.id,
         ),
         throwsA(isA<ConflictFailure>()),
@@ -49,7 +49,7 @@ void main() {
 
         await expectLater(
           h.deckRepository.createSubDeck(
-            name: DeckName.parseOrThrow('Too deep'),
+            name: DeckName.parse('Too deep').name!,
             parentDeckId: chain.last.id,
           ),
           throwsA(isA<ConflictFailure>()),
@@ -229,7 +229,7 @@ void main() {
         // Any depth-guarded write on the corrupt chain must refuse cleanly.
         await expectLater(
           h.deckRepository.createSubDeck(
-            name: DeckName.parseOrThrow('On a cycle'),
+            name: DeckName.parse('On a cycle').name!,
             parentDeckId: tree.leaf.id,
           ),
           throwsA(isA<ConflictFailure>()),

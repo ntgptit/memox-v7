@@ -95,6 +95,14 @@ jobs:
       - name: architecture boundaries
         run: bash .claude/skills/flutter-architecture/scripts/check_architecture.sh
 
+      # Which vendored guard this run enforced, printed so the pinned version is
+      # visible in the CI log rather than inferred. The guard is owned here as a
+      # vendored copy (see code-verification-guard-v2/AGENTS.md), so this is the
+      # single source of truth's version.
+      - name: guard version
+        run: |
+          echo "Guard registry version: $(cat code-verification-guard-v2/VERSION)"
+
       - name: code verification guard
         run: python code-verification-guard-v2/guard/run.py check --project . --ruleset memox-v7
 
@@ -194,6 +202,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Python for the count-floor parser below. windows-latest ships a Python,
+      # but pinning it here is what makes the parser step reproducible rather than
+      # dependent on whatever the runner image happens to carry.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
       - uses: subosito/flutter-action@v2
         with:
           flutter-version-file: .fvmrc
@@ -206,11 +221,28 @@ jobs:
       - name: generate
         run: dart run build_runner build --delete-conflicting-outputs
 
-      # `compact` rather than `expanded`: a golden failure buried in hundreds of
-      # lines is a golden failure nobody reads, and the diff artifact below is what
-      # makes it reviewable.
+      # `--reporter json`, not `compact`. A golden compares rasterised pixels, so
+      # a real failure still fails this step (`flutter test` exits non-zero and
+      # `pipefail` propagates it) — but the machine-readable stream is what the
+      # count floor below reads. The compact reporter's animation cannot be
+      # counted, and a suite that runs *zero* golden tests exits 0, so without a
+      # count a broken tag or a renamed path would pass this job silently.
+      #
+      # `shell: bash` on windows-latest (Git Bash ships with the runner) so the
+      # pipe, `tee` and `pipefail` behave as they do everywhere else in this file.
       - name: golden tests
-        run: flutter test --tags golden --reporter compact
+        shell: bash
+        run: |
+          set -o pipefail
+          flutter test --tags golden --reporter json | tee golden-report.jsonl
+
+      # The tripwire. It counts test-completion events, not files, so a suite that
+      # is discovered but empty, or a tag that stopped matching, trips it. The floor
+      # sits well below the current count (~88) and is raised deliberately; it is
+      # here to catch scope collapse, not to track the exact number.
+      - name: golden count floor
+        shell: bash
+        run: python .claude/skills/flutter-workflow/scripts/count_golden_tests.py golden-report.jsonl 70
 
       - name: upload golden diffs
         if: failure()

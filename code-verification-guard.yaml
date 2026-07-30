@@ -11,28 +11,28 @@
 # ---------------------------------------------------------------------------
 # About the vendored copy in code-verification-guard-v2/
 # ---------------------------------------------------------------------------
-# It is a byte-for-byte copy of https://github.com/ntgptit/code-verification-guard-v2
-# at its main branch. It is committed here so a fresh clone can run the project's
-# main gate without a second checkout — CI and dod_check.sh both depend on that.
+# The guard is VENDORED INTO and OWNED BY this repository. The copy under
+# code-verification-guard-v2/ is the single source of truth — engine, common
+# rules, and the memox-v7 ruleset alike. It is committed here so a fresh clone
+# runs the project's main gate with no second checkout; CI and dod_check.sh both
+# depend on that. Its vendored version is recorded in
+# code-verification-guard-v2/VERSION.
 #
-# MUST NOT edit anything under code-verification-guard-v2/. That directory is
-# owned by the guard repository (see its AGENTS.md: "Commit and push guard
-# changes from this directory, not from the parent MemoX repository"). A local
-# edit makes the tree impossible to refresh safely, because a refresh silently
-# discards it.
+# Editing it is expected. Change the rules or the engine in place, run its tests
+# from that directory (`python -m pytest -q`), and commit the change together
+# with the MemoX change that motivated it — the same as any other file here.
 #
-# Rule changes — including changes to the memox-v7 ruleset — go upstream first,
-# then come back here as a refresh:
+# Do NOT re-clone an external guard remote over this directory. A refresh from a
+# separate repository silently discards fixes that live only in this copy — the
+# `common.no_commented_out_code` false-positive fix and the `DateTime.now()`-in-
+# comment fix among them — which is the two-source-of-truth trap the earlier
+# "refresh from upstream" note created. Those fixes are pinned by
+# code-verification-guard-v2/tests/test_memox_false_positive_regressions.py so a
+# careless re-vendor fails the guard's own suite. See that directory's AGENTS.md
+# for the full ownership statement.
 #
-#   rm -rf code-verification-guard-v2
-#   git clone --depth 1 https://github.com/ntgptit/code-verification-guard-v2.git tmp-guard
-#   rm -rf tmp-guard/.git && mv tmp-guard code-verification-guard-v2
-#
-# This file is the one piece of guard configuration that DOES belong to this
-# repository.
-#
-# The ruleset itself lives in
-# code-verification-guard-v2/registries/projects/memox-v7/ (upstream canonical).
+# The memox-v7 ruleset lives in
+# code-verification-guard-v2/registries/projects/memox-v7/.
 version: 1
 
 project:

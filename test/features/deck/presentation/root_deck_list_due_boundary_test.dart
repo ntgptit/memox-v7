@@ -152,6 +152,113 @@ void main() {
       );
     });
 
+    testWidgets(
+      'a boundary already crossed when the emission lands refreshes at once',
+      (tester) async {
+        // The race this closes. The query opened at `fixedNow`; by the time its
+        // snapshot is processed the clock has passed `nextDueAt`, so a future
+        // timer would be armed for a moment already gone. The old code returned
+        // and the count sat stale until the next resume. It must refresh now.
+        //
+        // Driven without an intervening pump: `driven` builds and subscribes
+        // synchronously, so the first read has already run at `fixedNow` while
+        // its `Stream.value` is still in flight. Advancing the clock before the
+        // pump is exactly the gap between reading a snapshot and processing it.
+        final DateTime boundary = fixedNow.add(const Duration(milliseconds: 5));
+        final repository = servingBoundary(boundary);
+        final fixture = driven(repository, start: fixedNow);
+        expect(repository.summariesCallCount, 1);
+        expect(repository.readInstants.single, fixedNow);
+
+        fixture.setNow(fixedNow.add(const Duration(milliseconds: 10)));
+        await tester.pump();
+        await tester.pump();
+
+        expect(
+          repository.summariesCallCount,
+          2,
+          reason: 'the crossed boundary must trigger exactly one refresh',
+        );
+        expect(
+          repository.readInstants.last,
+          fixedNow.add(const Duration(milliseconds: 10)),
+          reason: 'the refresh must re-measure against the new instant',
+        );
+      },
+    );
+
+    testWidgets('a boundary exactly at the current instant refreshes once', (
+      tester,
+    ) async {
+      // BR-22's equality case, on the wake-up side: `nextDueAt == now` is a
+      // crossing, not a future boundary, so it takes the immediate path.
+      final DateTime boundary = fixedNow.add(const Duration(minutes: 5));
+      final repository = servingBoundary(boundary);
+      final fixture = driven(repository, start: fixedNow);
+      expect(repository.summariesCallCount, 1);
+
+      fixture.setNow(boundary);
+      await tester.pump();
+      await tester.pump();
+
+      expect(repository.summariesCallCount, 2);
+      expect(repository.readInstants.last, boundary);
+    });
+
+    testWidgets(
+      'a repository stuck on a past boundary refreshes once, not forever',
+      (tester) async {
+        // The degenerate input the loop guard exists for: a read that keeps
+        // reporting the same already-past boundary however new `now` is. A
+        // healthy read advances past it; this one never does, so without the
+        // guard the immediate refresh would re-arm on every rebuild.
+        final DateTime boundary = fixedNow.add(const Duration(milliseconds: 5));
+        final repository = servingBoundary(boundary);
+        final fixture = driven(repository, start: fixedNow);
+        expect(repository.summariesCallCount, 1);
+
+        fixture.setNow(fixedNow.add(const Duration(milliseconds: 10)));
+        await tester.pump();
+        await tester.pump();
+
+        // One immediate refresh — the second read — and then silence.
+        expect(repository.summariesCallCount, 2);
+
+        // Pump far past any schedule. The count must not climb: the guard has to
+        // refuse a second refresh for a boundary it already chased.
+        await tester.pump(const Duration(minutes: 5));
+        expect(
+          repository.summariesCallCount,
+          2,
+          reason: 'the loop guard must stop a stuck boundary re-refreshing',
+        );
+      },
+    );
+
+    testWidgets('disposing before a stale emission lands mutates nothing', (
+      tester,
+    ) async {
+      // Dispose while a crossed-boundary snapshot is in flight — the exact state
+      // that arms an immediate refresh. The torn-down provider must not be read
+      // or mutated, and no timer may be left to fail the pending-timer check.
+      final DateTime boundary = fixedNow.add(const Duration(milliseconds: 5));
+      final repository = servingBoundary(boundary);
+      final fixture = driven(repository, start: fixedNow);
+      expect(repository.summariesCallCount, 1);
+
+      fixture.setNow(fixedNow.add(const Duration(milliseconds: 10)));
+      fixture.container.dispose();
+
+      await tester.pump();
+      await tester.pump(const Duration(minutes: 1));
+
+      expect(
+        repository.summariesCallCount,
+        1,
+        reason: 'a disposed provider must not re-read from a late emission',
+      );
+    });
+
     testWidgets('one emission never leaves two timers pending', (tester) async {
       // Each rebuild re-arms. If the previous timer were not cancelled, the
       // wake-ups would multiply with every re-read — the failure mode that makes a

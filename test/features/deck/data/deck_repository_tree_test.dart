@@ -19,7 +19,7 @@ void main() {
       () async {
         final tree = await h.seedTree();
         final leaf2 = await h.deckRepository.createSubDeck(
-          name: DeckName.parseOrThrow('Leaf2'),
+          name: DeckName.parse('Leaf2').name!,
           parentDeckId: tree.branch.id,
         );
         await h.cardRepository.createCard(
@@ -139,7 +139,7 @@ void main() {
 
     test('is blocked on a root — a root is deck forever (BR-58)', () async {
       final root = await h.deckRepository.createRootDeck(
-        name: DeckName.parseOrThrow('Root'),
+        name: DeckName.parse('Root').name!,
         schedulerType: SchedulerType.eightBox,
       );
 

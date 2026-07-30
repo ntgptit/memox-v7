@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from textwrap import dedent
 
@@ -455,9 +456,15 @@ def test_ruleset_runtime_exposes_load_info(tmp_path: Path):
     assert load_info["ruleset_root"] == str(
         tool_root / "registries" / "projects" / "memox"
     )
-    assert load_info["manifest"].endswith("registries\\projects\\memox\\guard-manifest.yaml")
+    # Built with os.sep, not a hardcoded '\\': the load-info paths use the host
+    # separator, so a literal Windows suffix passed only on Windows and failed
+    # every Linux CI run. This is the same defect the guard exists to prevent —
+    # a check that is really a platform assumption — so the test is now portable.
+    assert load_info["manifest"].endswith(
+        os.path.join("registries", "projects", "memox", "guard-manifest.yaml")
+    )
     assert load_info["config"][ConfigKeys.SCOPES].endswith(
-        "registries\\projects\\memox\\config\\scopes.yaml"
+        os.path.join("registries", "projects", "memox", "config", "scopes.yaml")
     )
     assert load_info["ruleset_registries"] == [
         str(

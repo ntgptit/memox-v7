@@ -40,8 +40,19 @@ const Duration kMaxDueBoundaryDelay = Duration(days: 1);
 /// more than one pending, and a screen with nothing scheduled to come due has none
 /// at all.
 ///
-/// It cannot loop: `nextDueAt` is strictly after the `now` it was read with, so
-/// each firing moves the clock strictly forward.
+/// **The boundary that has already passed.** A snapshot is read at one `now` and
+/// processed a few instants later. If the clock crosses `nextDueAt` in that gap —
+/// `delay <= 0` — a future timer would be armed for a moment already gone, so
+/// instead the notifier refreshes *immediately*: it re-opens the query at the new
+/// `now`, where the card that just came due is finally counted. Without this the
+/// count could sit stale until the next resume or unrelated rebuild.
+///
+/// It still cannot loop. A healthy repository answers the re-opened query
+/// (`due_at > now`) with a *later* boundary or none, so the immediate refresh
+/// fires at most once per real crossing. The one degenerate case — a repository
+/// that keeps re-emitting the *same* past boundary regardless of `now` — is held
+/// by [_immediateRefreshBoundary], which refuses to arm a second refresh for a
+/// boundary it has already chased.
 ///
 /// The timer is armed in `listenSelf` rather than inside the stream's transform,
 /// because arming it is a side effect and a `map` is not where side effects
@@ -62,7 +73,18 @@ const Duration kMaxDueBoundaryDelay = Duration(days: 1);
 class RootDeckList extends _$RootDeckList {
   /// At most one pending wake-up, ever. Held on the notifier rather than in the
   /// build closure so cancelling it does not depend on which closure won a race.
+  /// Carries either the future-boundary timer or the one-shot immediate refresh —
+  /// they never coexist, so one field and one [_cancelBoundary] cover both, and
+  /// the `onDispose` that cancels it cancels whichever is armed.
   Timer? _boundaryTimer;
+
+  /// The past-or-equal boundary an immediate refresh has already been armed for,
+  /// or `null` when the last emission carried a healthy (future or absent) one.
+  ///
+  /// This is the loop guard. A stale emission triggers one immediate refresh and
+  /// records its boundary here; a repository that re-emits the *same* past
+  /// boundary then finds it already recorded and does not arm again.
+  DateTime? _immediateRefreshBoundary;
 
   @override
   Stream<RootDeckListSnapshot> build() {
@@ -85,17 +107,37 @@ class RootDeckList extends _$RootDeckList {
     _cancelBoundary();
 
     final DateTime? nextDueAt = next.value?.nextDueAt;
-    if (nextDueAt == null) return;
+    if (nextDueAt == null) {
+      _immediateRefreshBoundary = null;
+      return;
+    }
 
     final Duration delay = nextDueAt.difference(ref.read(clockProvider)());
-    // Unreachable through the query, which selects `due_at > :now`. Guarded
-    // anyway because the alternative to a guard here is a zero-delay timer that
-    // re-arms itself forever, and a clock that jumps backwards is not something
-    // this code gets to rule out.
-    if (delay <= Duration.zero) return;
 
+    if (delay > Duration.zero) {
+      // The boundary is still ahead: one one-shot at that instant, capped for the
+      // web `setTimeout` limit. A healthy boundary ends any stale streak.
+      _immediateRefreshBoundary = null;
+      _boundaryTimer = Timer(
+        delay < kMaxDueBoundaryDelay ? delay : kMaxDueBoundaryDelay,
+        ref.read(deckListNowProvider.notifier).refresh,
+      );
+      return;
+    }
+
+    // `delay <= 0`: the clock reached `nextDueAt` before this emission was
+    // processed, so the boundary was crossed with no timer to catch it. Refresh
+    // now — re-open the query at the new `now`, where the newly-due card is
+    // counted — instead of dropping the update until the next resume.
+    //
+    // Guarded so it cannot spin: recorded once per boundary, and refused for a
+    // boundary already chased. A healthy repository advances past `nextDueAt` on
+    // the reopened read, so this fires once; only a repository stuck on the same
+    // past boundary would try again, and that is what the guard stops.
+    if (_immediateRefreshBoundary == nextDueAt) return;
+    _immediateRefreshBoundary = nextDueAt;
     _boundaryTimer = Timer(
-      delay < kMaxDueBoundaryDelay ? delay : kMaxDueBoundaryDelay,
+      Duration.zero,
       ref.read(deckListNowProvider.notifier).refresh,
     );
   }
