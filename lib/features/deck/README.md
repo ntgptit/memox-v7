@@ -83,9 +83,46 @@ notifier would need one `isSubmitting` and one `failure` for six operations, so 
 failed rename would light up the delete button's error — and the file would grow
 a method per use case forever.
 
-**UI-local state**: none yet. The deck screens hold no search or filter. When one
-arrives it is widget state or its own small provider, never a field on a command
-controller.
+**Input state** — `autoDispose`, one entry:
+
+- `deckListNowProvider` — a `DateTime`, the instant the due counts are measured
+  against. Neither a query nor a mutation: a value the UI owns that a query is
+  parameterized by. It refreshes on app resume (via `AppLifecycleListener`, not a
+  periodic timer) because that is the moment hours have passed and cards became
+  due while nothing was watching.
+
+No search or filter state exists yet. When one arrives it is widget state or its
+own small provider, never a field on a command controller.
+
+### The two properties that make this classification worth keeping
+
+**Nothing mixes roles, and it is structural rather than disciplined.** A query is a
+top-level function returning `Stream`/`Future` — it has no `state` setter, so it
+*cannot* mutate. A command is a `Notifier` holding only its submit state — it reads
+no query. Verified: the six write controllers reference exactly one provider between
+them, `deckRepositoryProvider`.
+
+**Every dependency edge runs from a shorter-lived provider to a longer-lived one.**
+
+```
+appDatabase ← deckRepository ← { 4 queries, 6 commands }      (keepAlive ← autoDispose)
+clock       ← deckListNow    ← rootDeckSummaries              (the one autoDispose ← autoDispose edge, one-way)
+```
+
+Maximum depth three, and a cycle would need an edge back up the lifetime order. So
+keeping the layers honest is also what keeps the graph acyclic — otherwise Riverpod
+tells you at runtime, on the path nobody exercised.
+
+**`test/app/provider_convention_test.dart` enforces three of these**, because a
+convention in a README decays at the first clone: no `keepAlive` under
+`features/*/presentation/`, every family key a `String` or `int` (an object key is
+compared by identity, so a fresh instance is cached on every rebuild), and every
+async provider carrying `noAutomaticRetry`. All three were fault-injected to prove
+they fail.
+
+`ref.invalidate` appears at exactly **two** sites, both the retry button on an error
+state. `ref.refresh` appears nowhere — a refresh keeps the previous value while
+re-reading, which is wrong for a retry: the previous value is the error.
 
 ## 5 · Where the business rules are
 
