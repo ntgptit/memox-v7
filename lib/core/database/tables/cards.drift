@@ -18,7 +18,24 @@ CREATE TABLE cards (
     updated_at DATETIME NOT NULL
 );
 
-CREATE INDEX idx_cards_deck ON cards (deck_id);
+-- Composite, and in exactly the order `cardsByDeck` filters and sorts:
+-- `WHERE deck_id = ? ORDER BY created_at ASC, id ASC`.
+--
+-- Measured with `EXPLAIN QUERY PLAN` on 5,000 cards in one deck. A plain
+-- `(deck_id)` index served the filter and left `USE TEMP B-TREE FOR ORDER BY`,
+-- so SQLite read every matching row and sorted it before applying any `LIMIT`.
+-- With the sort columns in the index the temp B-tree disappears and a page of 50
+-- went from 1193us to 102us — the difference between sorting a deck to show the
+-- top of it and seeking straight to the rows.
+--
+-- This is what makes the keyset pagination M4.11 owes (`WHERE deck_id = ? AND
+-- (created_at, id) > (?, ?)`) a range scan rather than a full sort with a lid on
+-- it.
+--
+-- It *replaces* `(deck_id)` rather than joining it: a composite index with the
+-- same leading column answers every lookup the single-column one did, and
+-- keeping both would make every insert maintain two B-trees for no gain.
+CREATE INDEX idx_cards_deck_created ON cards (deck_id, created_at, id);
 
 -- One row per card, created with the card (BR-09); dropped and recreated on
 -- reset (BR-41).

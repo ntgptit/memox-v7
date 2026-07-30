@@ -233,13 +233,63 @@ void main() {
     );
 
     expect(rows.map((row) => row['name']), <String>[
-      'idx_cards_deck',
-      'idx_decks_parent',
-      'idx_decks_root',
+      'idx_cards_deck_created',
+      'idx_decks_parent_created',
+      'idx_decks_root_created',
       'idx_history_card',
       'idx_history_session',
       'idx_review_states_due',
     ]);
+  });
+
+  test('the deck and card reads need no temp B-tree to sort', () async {
+    // The check that gives the composite indexes their value. An index can exist
+    // and go unused: change an `ORDER BY` and SQLite silently falls back to
+    // sorting every matching row before applying any `LIMIT`, which is what
+    // `USE TEMP B-TREE FOR ORDER BY` in a query plan means. Asserting the index
+    // *exists* would not catch that; asserting the plan does.
+    //
+    // These four are every deck/card read whose row count a user controls. The
+    // SQL is copied from the `.drift` queries rather than called through the
+    // generated API because `EXPLAIN QUERY PLAN` needs the statement text.
+    final db = openTestDatabase();
+
+    // Literals rather than `?`: `EXPLAIN QUERY PLAN` is prepared without bound
+    // values, and the plan for an equality on an indexed column is the same
+    // either way.
+    const reads = <String, String>{
+      'cardsByDeck':
+          "SELECT * FROM cards WHERE deck_id = 'd' "
+          'ORDER BY created_at ASC, id ASC',
+      'rootDecks':
+          'SELECT * FROM decks WHERE parent_deck_id IS NULL '
+          'ORDER BY created_at ASC, id ASC',
+      'childDecks':
+          "SELECT * FROM decks WHERE parent_deck_id = 'p' "
+          'ORDER BY created_at ASC, id ASC',
+      'decksInTree':
+          "SELECT * FROM decks WHERE root_deck_id = 'r' "
+          'ORDER BY created_at ASC, id ASC',
+    };
+
+    for (final MapEntry<String, String> read in reads.entries) {
+      final plan = await pragma(db, 'EXPLAIN QUERY PLAN ${read.value}');
+      final detail = plan.map((row) => row['detail']).join(' | ');
+
+      expect(
+        detail,
+        isNot(contains('TEMP B-TREE')),
+        reason:
+            '${read.key} is sorting rather than reading in index order. Either '
+            'its ORDER BY no longer matches the composite index, or the index '
+            'was changed. See docs/data-model.md.',
+      );
+      expect(
+        detail,
+        contains('USING'),
+        reason: '${read.key} is not using any index at all.',
+      );
+    }
   });
 
   group('source rules', () {

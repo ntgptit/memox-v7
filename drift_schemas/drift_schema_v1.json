@@ -751,8 +751,8 @@
       "type": "index",
       "data": {
         "on": 1,
-        "name": "idx_cards_deck",
-        "sql": "CREATE INDEX idx_cards_deck ON cards (deck_id);",
+        "name": "idx_cards_deck_created",
+        "sql": "CREATE INDEX idx_cards_deck_created ON cards (deck_id, created_at, id);",
         "unique": false,
         "columns": []
       }
@@ -779,8 +779,8 @@
       "type": "index",
       "data": {
         "on": 0,
-        "name": "idx_decks_parent",
-        "sql": "CREATE INDEX idx_decks_parent ON decks (parent_deck_id);",
+        "name": "idx_decks_parent_created",
+        "sql": "CREATE INDEX idx_decks_parent_created ON decks (parent_deck_id, created_at, id);",
         "unique": false,
         "columns": []
       }
@@ -793,8 +793,8 @@
       "type": "index",
       "data": {
         "on": 0,
-        "name": "idx_decks_root",
-        "sql": "CREATE INDEX idx_decks_root ON decks (root_deck_id);",
+        "name": "idx_decks_root_created",
+        "sql": "CREATE INDEX idx_decks_root_created ON decks (root_deck_id, created_at, id);",
         "unique": false,
         "columns": []
       }
@@ -865,11 +865,11 @@
       ]
     },
     {
-      "name": "idx_cards_deck",
+      "name": "idx_cards_deck_created",
       "sql": [
         {
           "dialect": "sqlite",
-          "sql": "CREATE INDEX idx_cards_deck ON cards (deck_id)"
+          "sql": "CREATE INDEX idx_cards_deck_created ON cards (deck_id, created_at, id)"
         }
       ]
     },
@@ -883,20 +883,20 @@
       ]
     },
     {
-      "name": "idx_decks_parent",
+      "name": "idx_decks_parent_created",
       "sql": [
         {
           "dialect": "sqlite",
-          "sql": "CREATE INDEX idx_decks_parent ON decks (parent_deck_id)"
+          "sql": "CREATE INDEX idx_decks_parent_created ON decks (parent_deck_id, created_at, id)"
         }
       ]
     },
     {
-      "name": "idx_decks_root",
+      "name": "idx_decks_root_created",
       "sql": [
         {
           "dialect": "sqlite",
-          "sql": "CREATE INDEX idx_decks_root ON decks (root_deck_id)"
+          "sql": "CREATE INDEX idx_decks_root_created ON decks (root_deck_id, created_at, id)"
         }
       ]
     }
