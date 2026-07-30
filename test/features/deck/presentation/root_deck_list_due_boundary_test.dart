@@ -206,8 +206,11 @@ void main() {
         // finally lands.
         fixture.setNow(fixedNow.add(const Duration(milliseconds: 10)));
         f.emit(boundary);
+        // `pump()` drains the emission microtask and arms the immediate-refresh
+        // `Timer(Duration.zero)`; a short non-zero pump is then needed to advance
+        // fake time to its deadline and fire it — a zero-duration pump never does.
         await tester.pump();
-        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 1));
 
         expect(
           f.repository.summariesCallCount,
@@ -235,7 +238,7 @@ void main() {
       fixture.setNow(boundary);
       f.emit(boundary);
       await tester.pump();
-      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 1));
 
       expect(f.repository.summariesCallCount, 2);
       expect(f.repository.readInstants.last, boundary);
@@ -255,8 +258,11 @@ void main() {
 
         fixture.setNow(fixedNow.add(const Duration(milliseconds: 10)));
         f.emit(boundary);
+        // `pump()` drains the emission microtask and arms the immediate-refresh
+        // `Timer(Duration.zero)`; a short non-zero pump is then needed to advance
+        // fake time to its deadline and fire it — a zero-duration pump never does.
         await tester.pump();
-        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 1));
 
         // One immediate refresh — the second read — and then silence, even
         // though the re-read still reports the same past boundary.
