@@ -199,10 +199,12 @@ outside its own folder, and the extractions that were tried and rejected.
 
 Two things people get wrong on the first clone:
 
-- **The layout is flat.** `domain/deck_entity.dart`, not
-  `domain/entities/deck.dart`. The role is carried by the file *suffix*, which
-  `memox.naming.domain_file_role_suffix` enforces, and MX-VIS-001 derives each
-  screen's audit path by stripping only the `presentation` segment — a
-  `screens/` subfolder relocates every companion file.
+- **The folder does not replace the suffix.** `domain/entities/deck_entity.dart`,
+  not `domain/entities/deck.dart`. The role is carried by the file name, which
+  `memox.naming.domain_file_role_suffix` enforces and which
+  `check_architecture.sh` pairs with the folder it sits in.
+- **Four folders are empty on purpose** — `domain/usecases/`, `domain/failures/`,
+  `data/models/`, `presentation/providers/`. Each has a reason recorded in the
+  blueprint; none is a place to put something that does not belong there.
 - **Promote to `shared/` on the second caller, not the first.** One caller is a
   guess at what varies; the second one shows you.

@@ -10,18 +10,18 @@ import 'package:memox/app/di/deck_repository_provider.dart';
 import 'package:memox/core/time/clock_provider.dart';
 import 'package:memox/app/router/app_router.dart';
 import 'package:memox/core/error/failure.dart';
-import 'package:memox/features/deck/domain/deck_content_type_model.dart';
-import 'package:memox/features/deck/domain/deck_entity.dart';
-import 'package:memox/features/deck/presentation/deck_detail_screen.dart';
+import 'package:memox/features/deck/domain/models/deck_content_type_model.dart';
+import 'package:memox/features/deck/domain/entities/deck_entity.dart';
+import 'package:memox/features/deck/presentation/screens/deck_detail_screen.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 
-import '../../../../features/deck/presentation/support/fake_deck_repository.dart';
-import '../../../audit_allowance.dart';
-import '../../../deck_audit_allowances.dart';
-import '../../../memox_audit.dart';
-import '../../../screen_auditor.dart';
+import '../../../../../features/deck/presentation/support/fake_deck_repository.dart';
+import '../../../../audit_allowance.dart';
+import '../../../../deck_audit_allowances.dart';
+import '../../../../memox_audit.dart';
+import '../../../../screen_auditor.dart';
 
 /// Strict visual audit for `DeckDetailScreen`.
 ///

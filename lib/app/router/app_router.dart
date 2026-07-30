@@ -1,8 +1,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../features/deck/presentation/deck_detail_screen.dart';
-import '../../features/deck/presentation/root_deck_list_screen.dart';
+import '../../features/deck/presentation/screens/deck_detail_screen.dart';
+import '../../features/deck/presentation/screens/root_deck_list_screen.dart';
 import '../../features/review/presentation/review_placeholder_screen.dart';
 import '../fallback/route_not_found_screen.dart';
 import '../shell/app_navigation_shell.dart';

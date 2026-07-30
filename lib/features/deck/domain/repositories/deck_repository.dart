@@ -1,7 +1,7 @@
-import 'deck_deletion_impact_model.dart';
-import 'deck_entity.dart';
-import 'root_deck_summary_model.dart';
-import 'scheduler_type_model.dart';
+import '../models/deck_deletion_impact_model.dart';
+import '../entities/deck_entity.dart';
+import '../models/root_deck_summary_model.dart';
+import '../models/scheduler_type_model.dart';
 
 /// Contract for deck-tree management (UC-02, UC-03, UC-08, UC-09). Card CRUD
 /// lives in `CardRepository` — one contract per responsibility (M4.9a).

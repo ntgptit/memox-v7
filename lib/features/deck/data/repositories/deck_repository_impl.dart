@@ -1,17 +1,17 @@
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../../core/database/app_database.dart';
-import '../../../core/error/drift_error_mapper.dart';
-import '../../../core/error/failure.dart';
-import '../domain/deck_content_type_model.dart';
-import '../domain/deck_deletion_impact_model.dart';
-import '../domain/deck_entity.dart';
-import '../domain/deck_repository.dart';
-import '../domain/root_deck_summary_model.dart';
-import '../domain/scheduler_type_model.dart';
-import 'deck_mapper.dart';
-import 'local/deck_dao.dart';
+import '../../../../core/database/app_database.dart';
+import '../../../../core/error/drift_error_mapper.dart';
+import '../../../../core/error/failure.dart';
+import '../../domain/models/deck_content_type_model.dart';
+import '../../domain/models/deck_deletion_impact_model.dart';
+import '../../domain/entities/deck_entity.dart';
+import '../../domain/repositories/deck_repository.dart';
+import '../../domain/models/root_deck_summary_model.dart';
+import '../../domain/models/scheduler_type_model.dart';
+import '../mappers/deck_mapper.dart';
+import '../datasources/deck_dao.dart';
 
 part 'move_deck_repository_impl.dart';
 

@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../app/router/route_names.dart';
-import '../../../l10n/l10n_extension.dart';
-import '../../../shared/widgets/mx_async_view.dart';
-import '../../../shared/widgets/mx_content_shell.dart';
-import '../../../shared/widgets/mx_empty_state.dart';
-import '../../../shared/widgets/mx_error_state.dart';
-import '../../../shared/widgets/mx_icon_button.dart';
-import '../domain/root_deck_summary_model.dart';
-import 'deck_actions_widget.dart';
-import 'deck_tile_widget.dart';
-import 'root_decks_controller.dart';
+import '../../../../app/router/route_names.dart';
+import '../../../../l10n/l10n_extension.dart';
+import '../../../../shared/widgets/mx_async_view.dart';
+import '../../../../shared/widgets/mx_content_shell.dart';
+import '../../../../shared/widgets/mx_empty_state.dart';
+import '../../../../shared/widgets/mx_error_state.dart';
+import '../../../../shared/widgets/mx_icon_button.dart';
+import '../../domain/models/root_deck_summary_model.dart';
+import '../widgets/deck_actions_widget.dart';
+import '../widgets/deck_tile_widget.dart';
+import '../controllers/root_decks_controller.dart';
 
 /// The app's home: every root deck with its progress (UC-06).
 ///

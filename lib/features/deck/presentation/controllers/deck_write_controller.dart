@@ -1,10 +1,10 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../app/di/deck_repository_provider.dart';
-import '../../../core/error/failure.dart';
-import '../../../core/state/submit_outcome.dart';
-import '../domain/scheduler_type_model.dart';
-import 'deck_submit_state.dart';
+import '../../../../app/di/deck_repository_provider.dart';
+import '../../../../core/error/failure.dart';
+import '../../../../core/state/submit_outcome.dart';
+import '../../domain/models/scheduler_type_model.dart';
+import '../states/deck_submit_state.dart';
 
 part 'deck_write_controller.g.dart';
 

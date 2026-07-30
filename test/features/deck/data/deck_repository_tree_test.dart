@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/error/failure.dart';
-import 'package:memox/features/deck/domain/scheduler_type_model.dart';
+import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 
 import '../../../database/support/test_database.dart';
 import 'support/deck_repository_harness.dart';

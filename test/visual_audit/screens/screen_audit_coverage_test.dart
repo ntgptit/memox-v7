@@ -42,7 +42,10 @@ void main() {
 
       expect(
         deckList.auditPath,
-        'test/visual_audit/screens/features/deck/'
+        // Only `presentation` is stripped. Everything below it — here the
+        // `screens/` folder the nested layout introduced — is kept, so the
+        // companion sits at the mirrored depth rather than being flattened.
+        'test/visual_audit/screens/features/deck/screens/'
         'root_deck_list_screen_visual_audit_test.dart',
       );
       expect(deckList.screenClass, 'RootDeckListScreen');

@@ -9,7 +9,7 @@ import 'package:memox/app/di/deck_repository_provider.dart';
 import 'package:memox/core/time/clock_provider.dart';
 import 'package:memox/app/router/app_router.dart';
 import 'package:memox/core/theme/app_theme.dart';
-import 'package:memox/features/deck/domain/deck_repository.dart';
+import 'package:memox/features/deck/domain/repositories/deck_repository.dart';
 import 'package:memox/l10n/generated/app_localizations.dart';
 
 import '../../../../database/support/test_database.dart';

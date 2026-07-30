@@ -1,12 +1,12 @@
 import 'dart:async';
 
 import 'package:memox/core/error/failure.dart';
-import 'package:memox/features/deck/domain/deck_content_type_model.dart';
-import 'package:memox/features/deck/domain/deck_deletion_impact_model.dart';
-import 'package:memox/features/deck/domain/deck_entity.dart';
-import 'package:memox/features/deck/domain/deck_repository.dart';
-import 'package:memox/features/deck/domain/root_deck_summary_model.dart';
-import 'package:memox/features/deck/domain/scheduler_type_model.dart';
+import 'package:memox/features/deck/domain/models/deck_content_type_model.dart';
+import 'package:memox/features/deck/domain/models/deck_deletion_impact_model.dart';
+import 'package:memox/features/deck/domain/entities/deck_entity.dart';
+import 'package:memox/features/deck/domain/repositories/deck_repository.dart';
+import 'package:memox/features/deck/domain/models/root_deck_summary_model.dart';
+import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 
 /// A [DeckRepository] a presentation test can drive.
 ///

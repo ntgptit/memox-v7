@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../l10n/l10n_extension.dart';
-import '../../../shared/widgets/mx_confirm_dialog.dart';
-import '../domain/deck_deletion_impact_model.dart';
-import '../domain/deck_entity.dart';
-import 'deck_detail_controller.dart';
+import '../../../../l10n/l10n_extension.dart';
+import '../../../../shared/widgets/mx_confirm_dialog.dart';
+import '../../domain/models/deck_deletion_impact_model.dart';
+import '../../domain/entities/deck_entity.dart';
+import '../controllers/deck_detail_controller.dart';
 import 'deck_labels_widget.dart';
-import 'deck_submit_state.dart';
-import 'deck_write_controller.dart';
+import '../states/deck_submit_state.dart';
+import '../controllers/deck_write_controller.dart';
 
 /// The two confirmations a deck action can lead to: delete, and putting an empty
 /// sub-deck's content type back to `unset`.

@@ -5,9 +5,9 @@ import 'package:memox/app/config/env_config_provider.dart';
 import 'package:memox/app/di/deck_repository_provider.dart';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/core/state/submit_outcome.dart';
-import 'package:memox/features/deck/domain/scheduler_type_model.dart';
-import 'package:memox/features/deck/presentation/deck_submit_state.dart';
-import 'package:memox/features/deck/presentation/deck_write_controller.dart';
+import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
+import 'package:memox/features/deck/presentation/states/deck_submit_state.dart';
+import 'package:memox/features/deck/presentation/controllers/deck_write_controller.dart';
 
 import 'support/fake_deck_repository.dart';
 

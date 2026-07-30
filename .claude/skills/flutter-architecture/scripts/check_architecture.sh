@@ -152,12 +152,20 @@ check_suffix() { # check_suffix <dir-fragment> <required-suffix>
       "files under $1 should end in $2 so the role is visible at the import site."
   done < <(dart_files | grep "$1")
 }
-check_suffix '/presentation/screen/'     '_screen.dart'
-check_suffix '/presentation/controller/' '_controller.dart'
-check_suffix '/presentation/state/'      '_state.dart'
-check_suffix '/domain/entity/'           '_entity.dart'
-check_suffix '/domain/usecase/'          '_use_case.dart'
-check_suffix '/data/model/'              '_model.dart'
+# Plural, because that is the folder naming the features use and the industry
+# convention they follow. These were singular until M4.10 and therefore matched
+# **zero files** — the check ran, found nothing to look at, and passed. A check
+# that cannot fail is worse than no check: it reads as coverage.
+check_suffix '/presentation/screens/'     '_screen.dart'
+check_suffix '/presentation/controllers/' '_controller.dart'
+check_suffix '/presentation/states/'      '_state.dart'
+check_suffix '/presentation/widgets/'     '_widget.dart'
+check_suffix '/domain/entities/'          '_entity.dart'
+check_suffix '/domain/repositories/'      '_repository.dart'
+check_suffix '/domain/usecases/'          '_use_case.dart'
+check_suffix '/domain/models/'            '_model.dart'
+check_suffix '/data/mappers/'             '_mapper.dart'
+check_suffix '/data/repositories/'        '_repository_impl.dart'
 
 # ---------------------------------------------------------------------------
 # 8. Oversized files. Not a hard failure — a legitimately long generated-ish

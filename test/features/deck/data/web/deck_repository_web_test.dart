@@ -4,10 +4,10 @@ library;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/database/app_database.dart';
 import 'package:memox/features/card/data/card_repository_impl.dart';
-import 'package:memox/features/deck/data/deck_repository_impl.dart';
-import 'package:memox/features/deck/data/local/deck_dao.dart';
-import 'package:memox/features/deck/domain/deck_entity.dart';
-import 'package:memox/features/deck/domain/scheduler_type_model.dart';
+import 'package:memox/features/deck/data/repositories/deck_repository_impl.dart';
+import 'package:memox/features/deck/data/datasources/deck_dao.dart';
+import 'package:memox/features/deck/domain/entities/deck_entity.dart';
+import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 
 /// The web runtime proof M4.2 left open: the production web connection —
 /// `sqlite3.wasm` plus the drift worker, opened by `AppDatabase.open()` —

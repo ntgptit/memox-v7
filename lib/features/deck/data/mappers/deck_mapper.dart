@@ -1,8 +1,8 @@
-import '../../../core/database/app_database.dart';
-import '../domain/deck_content_type_model.dart';
-import '../domain/deck_entity.dart';
-import '../domain/root_deck_summary_model.dart';
-import '../domain/scheduler_type_model.dart';
+import '../../../../core/database/app_database.dart';
+import '../../domain/models/deck_content_type_model.dart';
+import '../../domain/entities/deck_entity.dart';
+import '../../domain/models/root_deck_summary_model.dart';
+import '../../domain/models/scheduler_type_model.dart';
 
 /// Maps a `decks` row to the domain entity.
 ///

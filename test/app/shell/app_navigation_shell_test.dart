@@ -11,7 +11,7 @@ import 'package:memox/app/router/app_router.dart';
 import 'package:memox/app/router/route_paths.dart';
 import 'package:memox/app/shell/app_navigation_shell.dart';
 import 'package:memox/core/error/failure.dart';
-import 'package:memox/features/deck/domain/root_deck_summary_model.dart';
+import 'package:memox/features/deck/domain/models/root_deck_summary_model.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';

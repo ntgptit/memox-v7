@@ -1,10 +1,10 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../app/di/deck_repository_provider.dart';
-import '../../../core/state/retry_policy.dart';
-import '../domain/deck_deletion_impact_model.dart';
-import '../domain/deck_entity.dart';
+import '../../../../app/di/deck_repository_provider.dart';
+import '../../../../core/state/retry_policy.dart';
+import '../../domain/models/deck_deletion_impact_model.dart';
+import '../../domain/entities/deck_entity.dart';
 
 part 'deck_detail_controller.freezed.dart';
 part 'deck_detail_controller.g.dart';

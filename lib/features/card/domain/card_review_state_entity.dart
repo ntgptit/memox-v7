@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../../deck/domain/scheduler_type_model.dart';
+import '../../deck/domain/models/scheduler_type_model.dart';
 
 part 'card_review_state_entity.freezed.dart';
 

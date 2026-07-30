@@ -2,10 +2,10 @@ import 'package:drift/drift.dart' show QueryRow, Variable;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/database/app_database.dart';
 import 'package:memox/features/card/data/card_repository_impl.dart';
-import 'package:memox/features/deck/data/deck_repository_impl.dart';
-import 'package:memox/features/deck/data/local/deck_dao.dart';
-import 'package:memox/features/deck/domain/deck_entity.dart';
-import 'package:memox/features/deck/domain/scheduler_type_model.dart';
+import 'package:memox/features/deck/data/repositories/deck_repository_impl.dart';
+import 'package:memox/features/deck/data/datasources/deck_dao.dart';
+import 'package:memox/features/deck/domain/entities/deck_entity.dart';
+import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 
 import '../../../../database/support/test_database.dart';
 

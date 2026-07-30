@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/error/failure.dart';
-import 'package:memox/features/deck/domain/deck_entity.dart';
+import 'package:memox/features/deck/domain/entities/deck_entity.dart';
 
 import 'support/deck_repository_harness.dart';
 
