@@ -132,9 +132,16 @@ class MxActionButton extends StatelessWidget {
         // contributes `role: loadingSpinner` to the same node, so the busy
         // state is carried without inventing a string that no ARB file owns.
         Opacity(opacity: 0, alwaysIncludeSemantics: true, child: content),
-        const SizedBox.square(
-          dimension: AppIconSize.sm,
-          child: CircularProgressIndicator(strokeWidth: 2),
+        // Its own layer, so the spin repaints the arc and not the form around
+        // it. This one matters more than the full-screen loading state: a
+        // submitting button sits inside a form or a dialog, so without the
+        // boundary every frame of the animation repaints the fields the user is
+        // still looking at.
+        const RepaintBoundary(
+          child: SizedBox.square(
+            dimension: AppIconSize.sm,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
         ),
       ],
     );
