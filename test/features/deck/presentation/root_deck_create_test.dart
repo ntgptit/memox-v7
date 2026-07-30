@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/error/failure.dart';
-import 'package:memox/features/deck/domain/scheduler_type_model.dart';
+import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 

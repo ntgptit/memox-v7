@@ -8,9 +8,9 @@ import 'package:memox/app/di/deck_repository_provider.dart';
 import 'package:memox/app/router/app_router.dart';
 import 'package:memox/app/router/route_names.dart';
 import 'package:memox/core/error/failure.dart';
-import 'package:memox/features/deck/domain/deck_entity.dart';
-import 'package:memox/features/deck/presentation/deck_detail_screen.dart';
-import 'package:memox/features/deck/presentation/root_deck_list_screen.dart';
+import 'package:memox/features/deck/domain/entities/deck_entity.dart';
+import 'package:memox/features/deck/presentation/screens/deck_detail_screen.dart';
+import 'package:memox/features/deck/presentation/screens/root_deck_list_screen.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 

@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/app_spacing.dart';
-import '../../../core/theme/theme_context_extension.dart';
-import '../../../l10n/l10n_extension.dart';
-import '../../../shared/widgets/mx_action_button.dart';
-import '../../../shared/widgets/mx_confirm_dialog.dart';
-import '../../../shared/widgets/mx_text_field.dart';
-import '../domain/deck_entity.dart';
-import '../domain/scheduler_type_model.dart';
+import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/theme_context_extension.dart';
+import '../../../../l10n/l10n_extension.dart';
+import '../../../../shared/widgets/mx_action_button.dart';
+import '../../../../shared/widgets/mx_confirm_dialog.dart';
+import '../../../../shared/widgets/mx_text_field.dart';
+import '../../domain/entities/deck_entity.dart';
+import '../../domain/models/scheduler_type_model.dart';
 import 'deck_labels_widget.dart';
-import 'deck_submit_state.dart';
+import '../states/deck_submit_state.dart';
 
 /// The one deck form, used for create-root, create-sub-deck and rename.
 ///

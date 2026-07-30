@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import 'deck_entity.dart';
+import '../entities/deck_entity.dart';
 
 part 'root_deck_summary_model.freezed.dart';
 

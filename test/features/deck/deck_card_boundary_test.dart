@@ -19,7 +19,9 @@ void main() {
   ];
 
   test('DeckRepository exposes no card CRUD', () {
-    final contract = read('lib/features/deck/domain/deck_repository.dart');
+    final contract = read(
+      'lib/features/deck/domain/repositories/deck_repository.dart',
+    );
 
     for (final operation in cardOperations) {
       expect(
@@ -52,13 +54,15 @@ void main() {
   });
 
   test('the implementations do not cross-implement', () {
-    final deckImpl = read('lib/features/deck/data/deck_repository_impl.dart');
+    final deckImpl = read(
+      'lib/features/deck/data/repositories/deck_repository_impl.dart',
+    );
     expect(deckImpl, isNot(contains('implements CardRepository')));
     expect(deckImpl, isNot(contains('CardDao')));
     // The old shape must not come back: card writes as a part of deck impl.
     expect(
       File(
-        'lib/features/deck/data/card_write_deck_repository_impl.dart',
+        'lib/features/deck/data/repositories/card_write_deck_repository_impl.dart',
       ).existsSync(),
       isFalse,
       reason:
@@ -75,7 +79,7 @@ void main() {
   });
 
   test('DeckDao carries no card CRUD; CardDao carries it all', () {
-    final deckDao = read('lib/features/deck/data/local/deck_dao.dart');
+    final deckDao = read('lib/features/deck/data/datasources/deck_dao.dart');
     for (final member in <String>[
       'insertCard(',
       'updateCardById(',
@@ -107,11 +111,11 @@ void main() {
 
   test('Card source ownership lives outside features/deck', () {
     for (final path in <String>[
-      'lib/features/deck/domain/card_entity.dart',
-      'lib/features/deck/domain/card_repository.dart',
-      'lib/features/deck/domain/card_review_state_entity.dart',
-      'lib/features/deck/data/card_mapper.dart',
-      'lib/features/deck/data/card_repository_impl.dart',
+      'lib/features/deck/domain/entities/card_entity.dart',
+      'lib/features/deck/domain/repositories/card_repository.dart',
+      'lib/features/deck/domain/entities/card_review_state_entity.dart',
+      'lib/features/deck/data/mappers/card_mapper.dart',
+      'lib/features/deck/data/repositories/card_repository_impl.dart',
       'lib/features/deck/data/card_review_state_mapper.dart',
       'lib/features/deck/data/local/card_dao.dart',
     ]) {

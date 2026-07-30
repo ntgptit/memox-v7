@@ -7,8 +7,8 @@ import 'package:memox/app/config/env_config_provider.dart';
 import 'package:memox/app/di/deck_repository_provider.dart';
 import 'package:memox/core/time/clock_provider.dart';
 import 'package:memox/core/error/failure.dart';
-import 'package:memox/features/deck/domain/root_deck_summary_model.dart';
-import 'package:memox/features/deck/presentation/root_decks_controller.dart';
+import 'package:memox/features/deck/domain/models/root_deck_summary_model.dart';
+import 'package:memox/features/deck/presentation/controllers/root_decks_controller.dart';
 
 import 'support/fake_deck_repository.dart';
 

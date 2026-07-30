@@ -8,37 +8,68 @@ It is not a folder template to scaffold blindly. The repo's guards select files 
 *suffix*, and MX-VIS-001 derives an audit path from a screen's location, so the
 layout below is load-bearing — a plausible-looking alternative breaks a gate.
 
-## The layout, and why it is flat
+## The layout
 
 ```
 lib/features/<feature>/
-├── domain/          <name>_entity.dart · <name>_repository.dart · <name>_model.dart
-├── data/            <name>_repository_impl.dart · <name>_mapper.dart
-│   └── local/       <name>_dao.dart
-└── presentation/    <name>_screen.dart · <name>_controller.dart
-                     <name>_widget.dart · <name>_state.dart
+├── domain/
+│   ├── entities/       <name>_entity.dart
+│   ├── repositories/   <name>_repository.dart          (the contract)
+│   ├── models/         <name>_model.dart               (read models, enums)
+│   ├── usecases/       <name>_use_case.dart            (only when warranted)
+│   └── failures/       <name>_failure.dart             (only when feature-specific)
+├── data/
+│   ├── repositories/   <name>_repository_impl.dart
+│   ├── mappers/        <name>_mapper.dart
+│   ├── datasources/    <name>_dao.dart
+│   └── models/         <name>_model.dart               (DTOs — none yet, AD-05)
+└── presentation/
+    ├── screens/        <name>_screen.dart
+    ├── controllers/    <name>_controller.dart
+    ├── states/         <name>_state.dart
+    ├── widgets/        <name>_widget.dart
+    └── providers/      (only when a provider is not a controller)
 ```
 
-**No `entities/` / `usecases/` / `pages/` subfolders.** Three enforcers disagree
-with them:
+Plural folder names, which is both the industry convention (Clean Architecture,
+Reso Coder's Flutter template, Very Good Ventures, the Android architecture guide)
+and what `check_architecture.sh` now checks.
 
-- `memox.naming.{domain,data,presentation}_file_role_suffix` — a file's *role* is
-  carried by its suffix, and several guard scopes select by that suffix. A
-  mis-suffixed file silently escapes the rules meant to cover it.
-- `check_architecture.sh` `check_suffix` checks the **singular** folder names
-  `/domain/entity/`, `/domain/usecase/`, `/presentation/screen/`,
-  `/presentation/controller/`, `/data/model/` — plural folders match nothing and
-  the check quietly passes on them.
-- `test/visual_audit/screens/screen_audit_coverage.dart` builds the required
-  audit path by stripping **only** the `presentation` segment. A `pages/`
-  subfolder moves every companion to `…/features/<f>/pages/…`.
+**The folder does not replace the suffix.** `domain/entities/deck_entity.dart`, not
+`domain/entities/deck.dart`. Two enforcers depend on the suffix and neither looks
+at the folder:
 
-Add a subfolder only when a layer genuinely has enough files to need one, and
-then use the singular names the suffix check knows.
+- `memox.naming.{domain,data,presentation}_file_role_suffix` match on the file
+  name, and other guard scopes select files by that same suffix. A mis-suffixed
+  file silently leaves the scope of the rules meant to cover it — which is why
+  `deck_labels_widget.dart` keeps `_widget` although it holds an extension.
+- `check_architecture.sh`'s `check_suffix` pairs each folder with its required
+  suffix: `/domain/entities/` → `_entity.dart`, `/presentation/screens/` →
+  `_screen.dart`, and eight more.
 
-`usecases/` is absent on purpose: the repository contract *is* the use-case
-surface here, and a use-case class per method would be a pass-through. Add one
-when a call orchestrates more than one repository.
+**A note on that second one, because it is the reason this layout is worth having
+rather than just conventional.** Until M4.10 `check_suffix` was written against
+*singular* folder names — `/domain/entity/`, `/presentation/screen/` — which the
+flat layout did not have either. All six calls matched **zero files**. They ran,
+found nothing to look at, and passed. A check that cannot fail reads as coverage
+and is worse than no check. Nesting with the plural names put 23 files under them;
+fault injection confirms a wrongly-suffixed file is now reported.
+
+**MX-VIS-001 keeps everything below `presentation`.** The audit path is derived by
+stripping only that one segment, so a screen at
+`features/deck/presentation/screens/x_screen.dart` needs its companion at
+`test/visual_audit/screens/features/deck/screens/x_screen_visual_audit_test.dart`.
+The `screens/` folder is preserved, not flattened.
+
+**Four folders exist with a `.gitkeep` and nothing else**, and each has a reason
+to be empty rather than absent:
+
+| Folder | Why empty in Deck |
+|---|---|
+| `domain/usecases/` | the repository contract *is* the use-case surface; a class per method would be a pass-through. Add one when a call orchestrates more than one repository. |
+| `domain/failures/` | failure types are shared, in `core/error/failure.dart`. A feature-specific one goes here. |
+| `data/models/` | there are no DTOs — `dio` is not a dependency (AD-05) and Drift is the source of truth, so a DTO would be a second shape for data that already has two. |
+| `presentation/providers/` | every provider in Deck *is* a controller, and the guard's widget scopes exempt controllers by the `_controller` suffix. A provider that is not a controller goes here. |
 
 ## What `core/` and `shared/` already provide — do not re-create
 

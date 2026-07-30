@@ -10,7 +10,7 @@ import 'package:memox/app/fallback/route_not_found_screen.dart';
 import 'package:memox/app/router/app_router.dart';
 import 'package:memox/app/router/route_names.dart';
 import 'package:memox/app/router/route_paths.dart';
-import 'package:memox/features/deck/presentation/root_deck_list_screen.dart';
+import 'package:memox/features/deck/presentation/screens/root_deck_list_screen.dart';
 import 'package:memox/features/review/presentation/review_placeholder_screen.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_content_shell.dart';

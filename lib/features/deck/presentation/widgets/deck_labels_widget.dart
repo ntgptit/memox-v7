@@ -1,11 +1,11 @@
 import 'package:flutter/widgets.dart';
 
-import '../../../core/error/failure.dart';
-import '../../../l10n/l10n_extension.dart';
-import '../domain/deck_entity.dart';
-import '../domain/deck_move_target_model.dart';
-import '../domain/scheduler_type_model.dart';
-import 'deck_submit_state.dart';
+import '../../../../core/error/failure.dart';
+import '../../../../l10n/l10n_extension.dart';
+import '../../domain/entities/deck_entity.dart';
+import '../../domain/models/deck_move_target_model.dart';
+import '../../domain/models/scheduler_type_model.dart';
+import '../states/deck_submit_state.dart';
 
 /// Where a domain value becomes something a person reads.
 ///

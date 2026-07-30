@@ -2,8 +2,8 @@ import 'package:drift/drift.dart' show QueryRow;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/card/domain/card_entity.dart';
-import 'package:memox/features/deck/domain/deck_entity.dart';
-import 'package:memox/features/deck/domain/scheduler_type_model.dart';
+import 'package:memox/features/deck/domain/entities/deck_entity.dart';
+import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 
 import '../../../database/support/test_database.dart';
 import '../../deck/data/support/deck_repository_harness.dart';

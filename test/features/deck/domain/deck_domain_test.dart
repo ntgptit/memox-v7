@@ -4,10 +4,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/card/domain/card_entity.dart';
 import 'package:memox/features/card/domain/card_review_state_entity.dart';
-import 'package:memox/features/deck/domain/deck_content_type_model.dart';
-import 'package:memox/features/deck/domain/deck_deletion_impact_model.dart';
-import 'package:memox/features/deck/domain/deck_entity.dart';
-import 'package:memox/features/deck/domain/scheduler_type_model.dart';
+import 'package:memox/features/deck/domain/models/deck_content_type_model.dart';
+import 'package:memox/features/deck/domain/models/deck_deletion_impact_model.dart';
+import 'package:memox/features/deck/domain/entities/deck_entity.dart';
+import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 
 /// Domain-layer tests for M4.9: entity equality, validation boundaries and
 /// the unknown-enum policy (read tolerantly, never write back).

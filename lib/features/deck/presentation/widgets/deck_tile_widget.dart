@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/app_icon_size.dart';
-import '../../../core/theme/app_spacing.dart';
-import '../../../core/theme/theme_context_extension.dart';
-import '../../../l10n/l10n_extension.dart';
-import '../../../shared/widgets/mx_icon_button.dart';
-import '../../../shared/widgets/mx_list_tile.dart';
-import '../domain/deck_entity.dart';
-import '../domain/root_deck_summary_model.dart';
+import '../../../../core/theme/app_icon_size.dart';
+import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/theme_context_extension.dart';
+import '../../../../l10n/l10n_extension.dart';
+import '../../../../shared/widgets/mx_icon_button.dart';
+import '../../../../shared/widgets/mx_list_tile.dart';
+import '../../domain/entities/deck_entity.dart';
+import '../../domain/models/root_deck_summary_model.dart';
 import 'deck_labels_widget.dart';
 
 /// One row of the root deck list (UC-06 step 2).

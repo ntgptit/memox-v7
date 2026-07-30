@@ -1,7 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'deck_content_type_model.dart';
-import 'deck_entity.dart';
+import '../entities/deck_entity.dart';
 
 part 'deck_move_target_model.freezed.dart';
 

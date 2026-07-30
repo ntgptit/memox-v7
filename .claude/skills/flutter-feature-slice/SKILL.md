@@ -49,18 +49,19 @@ Layer rules: `flutter-architecture`. No Flutter, no Dio, no Drift here.
 
 ```
 features/<feature>/domain/
-├── <name>_entity.dart
-├── <name>_repository.dart      # abstract contract
-├── <name>_model.dart           # read model / value object / enum
-└── <verb>_<noun>_use_case.dart # only when warranted
+├── entities/       <name>_entity.dart
+├── repositories/   <name>_repository.dart          # abstract contract
+├── models/         <name>_model.dart               # read model / value object / enum
+├── usecases/       <verb>_<noun>_use_case.dart     # only when warranted
+└── failures/       <name>_failure.dart             # only when feature-specific
 ```
 
-**Flat, not `entity/` + `repository/` + `usecase/` subfolders.** The role is
-carried by the *suffix*, and `memox.naming.domain_file_role_suffix` enforces it
-while `check_architecture.sh` checks the singular folder names. See
-`assets/feature_blueprint.md` for why a plausible-looking alternative breaks
-three enforcers at once — it is the authority on layout, and this block is a
-summary of it.
+**The folder does not replace the suffix.** `entities/deck_entity.dart`, not
+`entities/deck.dart`: the role is carried by the *file name*, which
+`memox.naming.domain_file_role_suffix` enforces and which several guard scopes
+select on. `check_architecture.sh` additionally pairs each folder with its
+required suffix. See `assets/feature_blueprint.md` — it is the authority on
+layout, and this block is a summary of it.
 
 - Entities are immutable, with value equality, in domain language. Entity state
   is the enum or sealed class from `docs/business-rules.md`, so illegal states
@@ -81,17 +82,16 @@ Details: `flutter-data-layer`.
 
 ```
 features/<feature>/data/
-├── <name>_repository_impl.dart
-├── <name>_mapper.dart          # Row → Entity, AggregateResult → ReadModel
-└── local/
-    └── <name>_dao.dart
+├── repositories/   <name>_repository_impl.dart
+├── mappers/        <name>_mapper.dart              # Row → Entity, AggregateResult → ReadModel
+├── datasources/    <name>_dao.dart
+└── models/         <name>_model.dart               # DTOs — none exist yet
 ```
 
-Flat again, and `local/` is the only subfolder because it is the only data source
-that exists. **There is no `remote/` and no DTO layer**: `dio` is deliberately not
-a dependency (AD-05), Drift is the source of truth (AD-01), and a
-`<name>_model.dart` DTO would be a second shape for data that already has two.
-Add `remote/` with the first real request, not in anticipation of one.
+`models/` is present and empty on purpose: **there is no DTO layer**. `dio` is
+deliberately not a dependency (AD-05), Drift is the source of truth (AD-01), and a
+DTO would be a second shape for data that already has two. It gets files with the
+first real request, not in anticipation of one.
 
 Order: the DAO first, then the mapper, then the repository. The repository is
 where Drift exceptions become `Failure`s — nowhere else. **There is no cache or
@@ -110,18 +110,20 @@ Details: `flutter-state-riverpod` for state, `flutter-design-system` for UI,
 
 ```
 features/<feature>/presentation/
-├── <name>_state.dart
-├── <name>_controller.dart
-├── <name>_screen.dart
-└── <section>_widget.dart
+├── screens/        <name>_screen.dart
+├── controllers/    <name>_controller.dart
+├── states/         <name>_state.dart
+├── widgets/        <section>_widget.dart
+└── providers/      # only when a provider is not a controller
 ```
 
-Flat, for a third reason on top of the suffix rules: MX-VIS-001 derives each
-screen's required audit path by stripping **only** the `presentation` segment, so
-a `screen/` subfolder relocates every companion file. A file holding a provider
-must be named `_controller.dart`, not `_provider.dart` — the guard's
-`widget_ui_files` scope forbids `ref.watch(...RepositoryProvider)` and exempts
-controllers, which is where that read belongs.
+MX-VIS-001 derives each screen's required audit path by stripping **only** the
+`presentation` segment, so the `screens/` folder is preserved in the companion
+path: `test/visual_audit/screens/features/<f>/screens/<name>_visual_audit_test.dart`.
+A file holding a provider must still be named `_controller.dart`, not
+`_provider.dart` — the guard's widget scopes forbid
+`ref.watch(...RepositoryProvider)` and exempt controllers by that suffix, which is
+where that read belongs.
 
 Build state and controller before the screen. Writing the state model first
 forces the state matrix to be real, and the screen then becomes a rendering of

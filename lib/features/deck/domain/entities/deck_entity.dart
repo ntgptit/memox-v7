@@ -1,8 +1,8 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../../../core/error/failure.dart';
-import 'deck_content_type_model.dart';
-import 'scheduler_type_model.dart';
+import '../../../../core/error/failure.dart';
+import '../models/deck_content_type_model.dart';
+import '../models/scheduler_type_model.dart';
 
 part 'deck_entity.freezed.dart';
 

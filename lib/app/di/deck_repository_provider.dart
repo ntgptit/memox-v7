@@ -1,9 +1,9 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/database/app_database_provider.dart';
-import '../../features/deck/data/deck_repository_impl.dart';
-import '../../features/deck/data/local/deck_dao.dart';
-import '../../features/deck/domain/deck_repository.dart';
+import '../../features/deck/data/repositories/deck_repository_impl.dart';
+import '../../features/deck/data/datasources/deck_dao.dart';
+import '../../features/deck/domain/repositories/deck_repository.dart';
 
 part 'deck_repository_provider.g.dart';
 

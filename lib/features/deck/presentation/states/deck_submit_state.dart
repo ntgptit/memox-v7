@@ -1,6 +1,6 @@
-import '../../../core/error/failure.dart';
-import '../../../core/state/submit_state.dart';
-import '../domain/deck_entity.dart';
+import '../../../../core/error/failure.dart';
+import '../../../../core/state/submit_state.dart';
+import '../../domain/entities/deck_entity.dart';
 
 /// Every way a deck form can be wrong, one value per field-and-reason.
 ///

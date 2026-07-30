@@ -3,15 +3,15 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/theme/app_spacing.dart';
-import '../../../l10n/l10n_extension.dart';
-import '../../../shared/widgets/mx_action_sheet.dart';
-import '../domain/deck_content_type_model.dart';
-import '../domain/deck_entity.dart';
+import '../../../../core/theme/app_spacing.dart';
+import '../../../../l10n/l10n_extension.dart';
+import '../../../../shared/widgets/mx_action_sheet.dart';
+import '../../domain/models/deck_content_type_model.dart';
+import '../../domain/entities/deck_entity.dart';
 import 'deck_confirm_widget.dart';
 import 'deck_form_widget.dart';
-import 'deck_submit_state.dart';
-import 'deck_write_controller.dart';
+import '../states/deck_submit_state.dart';
+import '../controllers/deck_write_controller.dart';
 import 'move_deck_sheet_widget.dart';
 
 /// Opens the per-deck action menu and everything it leads to.

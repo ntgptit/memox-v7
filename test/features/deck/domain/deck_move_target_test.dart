@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/features/deck/domain/deck_content_type_model.dart';
-import 'package:memox/features/deck/domain/deck_entity.dart';
-import 'package:memox/features/deck/domain/deck_move_target_model.dart';
-import 'package:memox/features/deck/domain/scheduler_type_model.dart';
+import 'package:memox/features/deck/domain/models/deck_content_type_model.dart';
+import 'package:memox/features/deck/domain/entities/deck_entity.dart';
+import 'package:memox/features/deck/domain/models/deck_move_target_model.dart';
+import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 
 import '../presentation/support/fake_deck_repository.dart';
 
