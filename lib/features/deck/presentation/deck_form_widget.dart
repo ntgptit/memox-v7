@@ -103,7 +103,7 @@ class _DeckFormWidgetState extends State<DeckFormWidget> {
           label: context.l10n.deckNameLabel,
           errorText: nameProblem == null
               ? null
-              : context.deckNameError(nameProblem),
+              : context.deckFormError(nameProblem),
           isEnabled: !state.isSubmitting,
           shouldAutofocus: true,
           // Bounded at the rule's limit rather than one character past it: BR-01
@@ -120,7 +120,7 @@ class _DeckFormWidgetState extends State<DeckFormWidget> {
             selected: _scheduler,
             isEnabled: !state.isSubmitting,
             errorText: state.isSchedulerMissing
-                ? context.l10n.schedulerMissingError
+                ? context.deckFormError(DeckFormProblem.schedulerMissing)
                 : null,
             onChanged: (value) => setState(() => _scheduler = value),
           ),

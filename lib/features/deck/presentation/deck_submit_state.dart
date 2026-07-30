@@ -1,91 +1,93 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
-
 import '../../../core/error/failure.dart';
-import '../../../core/state/submit_outcome.dart';
+import '../../../core/state/submit_state.dart';
 import '../domain/deck_entity.dart';
 
-part 'deck_submit_state.freezed.dart';
+/// Every way a deck form can be wrong, one value per field-and-reason.
+///
+/// A flat enum rather than one nullable field per input: the state that holds
+/// these is [SubmitState], shared with every other feature, and it cannot carry a
+/// field named after Deck's inputs. What it carries is a `Set<DeckFormProblem>`,
+/// which is also what lets a single attempt report a blank name *and* a missing
+/// scheduler — the create-root form can fail both checks at once, and marking
+/// only the first one found would send the user round twice.
+///
+/// The name values mirror `DeckNameProblem` (BR-01), which stays the domain type:
+/// `DeckEntity.nameProblem` is the rule, this is how the form spells it.
+enum DeckFormProblem {
+  nameEmpty,
+  nameTooLong,
+
+  /// The mandatory scheduler choice is still missing (BR-11). Only the
+  /// create-root flow can produce it; nothing else offers the choice.
+  schedulerMissing,
+}
+
+/// The values that belong to the name input.
+///
+/// Named because two places need the same answer — the accessor below and any
+/// future test asserting the grouping — and a second literal set is how the two
+/// drift apart.
+const Set<DeckFormProblem> kDeckNameProblems = <DeckFormProblem>{
+  DeckFormProblem.nameEmpty,
+  DeckFormProblem.nameTooLong,
+};
 
 /// The status of **one** deck mutation.
 ///
-/// Deliberately per-operation. A single `isLoading` on a screen cannot express
-/// "renaming while a delete confirm is open", and the first time two actions
-/// overlap the spinner appears on the wrong one — which is why CLAUDE.md names
-/// the shared flag as a bug rather than a shortcut.
+/// A typedef, not a subclass: the four fields and the three policy getters are
+/// the same for every form in the app and live once, in [SubmitState]. What is
+/// specific to Deck is only *which problems exist*, which is the type argument.
+typedef DeckSubmitState = SubmitState<DeckFormProblem>;
+
+/// Deck's own reading of the problem set.
 ///
-/// Every field is a value or an enum, never a message. The domain says *which*
-/// rule failed; the screen picks the ARB copy. That split is what stops a
-/// developer-facing database error string from reaching a user through a field
-/// label.
-@freezed
-abstract class DeckSubmitState with _$DeckSubmitState {
-  const factory DeckSubmitState({
-    @Default(false) bool isSubmitting,
+/// These exist so a widget asks `state.nameProblem` rather than reaching into the
+/// set with a filter at each call site. The generic state made the storage
+/// shared; this keeps the questions specific.
+extension DeckSubmitProblems on DeckSubmitState {
+  /// Which name rule the last attempt broke, if any.
+  DeckFormProblem? get nameProblem => firstProblemOf(kDeckNameProblems);
 
-    /// Which BR-01 rule the name breaks, if any.
-    DeckNameProblem? nameProblem,
-
-    /// True when the mandatory scheduler choice is still missing (BR-11).
-    /// Only ever set by the create-root flow; nothing else offers the choice.
-    @Default(false) bool isSchedulerMissing,
-
-    /// The failure that ended the last attempt, when it was not a field
-    /// problem. Held as the domain type so the screen chooses the copy.
-    Failure? failure,
-
-    /// Set once the operation has succeeded, so a screen reacts exactly once
-    /// instead of on every rebuild.
-    ///
-    /// Carries *which kind* of success it was: only [SubmitOutcome.savedAndClose]
-    /// closes anything. A form that stays open for the next entry reports
-    /// [SubmitOutcome.savedAndContinue], and the widget clears its own draft —
-    /// see the enum for why a boolean could not express this.
-    SubmitOutcome? outcome,
-  }) = _DeckSubmitState;
-
-  const DeckSubmitState._();
-
-  /// Whether a tap should be accepted at all — the double-submit guard.
-  ///
-  /// A `savedAndContinue` success deliberately leaves this true: the editor is
-  /// still open and the next entry must be submittable without anything having to
-  /// call [reset] first. Only `savedAndClose` latches it shut, and only because
-  /// the form is on its way out.
-  bool get canSubmit => !isSubmitting && outcome != SubmitOutcome.savedAndClose;
-
-  /// True on the transition a widget should close on.
-  bool get shouldClose => outcome == SubmitOutcome.savedAndClose;
-
-  /// True on the transition a widget should clear its draft on.
-  bool get shouldClearDraft => outcome == SubmitOutcome.savedAndContinue;
-
-  bool get hasFieldError => nameProblem != null || isSchedulerMissing;
+  bool get isSchedulerMissing =>
+      problems.contains(DeckFormProblem.schedulerMissing);
 }
+
+/// How the domain's name rule is spelled as a form problem.
+///
+/// One switch, in one place. Exhaustive over [DeckNameProblem], so a third name
+/// rule added to BR-01 fails to compile here rather than silently arriving with
+/// no error text.
+DeckFormProblem? deckNameFormProblem(String name) =>
+    switch (DeckEntity.nameProblem(name)) {
+      DeckNameProblem.empty => DeckFormProblem.nameEmpty,
+      DeckNameProblem.tooLong => DeckFormProblem.nameTooLong,
+      null => null,
+    };
 
 /// Maps a repository failure onto the form.
 ///
-/// A `ValidationFailure` naming the `name` field lands on [nameProblem] so it
-/// renders under the input; anything else lands on [failure] so it renders
-/// where the operation lives. Without the split, "name is required" arrives as
-/// a banner and the field the user must fix is not marked at all.
+/// A `ValidationFailure` naming a field lands in [SubmitState.problems] so it
+/// renders under the input; anything else lands on [SubmitState.failure] so it
+/// renders where the operation lives. Without the split, "name is required"
+/// arrives as a banner and the field the user must fix is not marked at all.
 ///
 /// The repository's own name check runs `DeckEntity.nameProblem` too, so a
-/// validation failure that got past the form can only mean the form and the
-/// rule disagreed — the mapping below re-derives the problem from the input
-/// rather than trusting the failure's non-localized text.
+/// validation failure that got past the form can only mean the form and the rule
+/// disagreed — this re-derives the problem from the input rather than trusting the
+/// failure's non-localized text.
 DeckSubmitState deckSubmitFailure(Failure failure, {String? name}) {
   if (failure is! ValidationFailure) return DeckSubmitState(failure: failure);
 
-  final problem = name == null ? null : DeckEntity.nameProblem(name);
+  final problems = <DeckFormProblem>{
+    if (name != null) ?deckNameFormProblem(name),
+    if (failure.fieldErrors.containsKey('schedulerType'))
+      DeckFormProblem.schedulerMissing,
+  };
 
   return DeckSubmitState(
-    nameProblem: problem,
-    isSchedulerMissing: failure.fieldErrors.containsKey('schedulerType'),
+    problems: problems,
     // Keep the failure when the field mapping found nothing to point at, so a
     // validation error can never end as a silent no-op.
-    failure:
-        problem == null && !failure.fieldErrors.containsKey('schedulerType')
-        ? failure
-        : null,
+    failure: problems.isEmpty ? failure : null,
   );
 }

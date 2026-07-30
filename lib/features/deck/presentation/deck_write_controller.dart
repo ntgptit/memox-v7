@@ -3,7 +3,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../app/di/deck_repository_provider.dart';
 import '../../../core/error/failure.dart';
 import '../../../core/state/submit_outcome.dart';
-import '../domain/deck_entity.dart';
 import '../domain/scheduler_type_model.dart';
 import 'deck_submit_state.dart';
 
@@ -53,11 +52,21 @@ class CreateRootDeckController extends _$CreateRootDeckController {
   }) async {
     if (!state.canSubmit) return;
 
-    final nameProblem = DeckEntity.nameProblem(name);
+    // Both checks run and both are reported. The set is what makes that possible
+    // — a blank name *and* no scheduler chosen is one attempt with two problems,
+    // and marking only the first would send the user round twice.
+    //
+    // The condition tests the two inputs rather than `problems.isNotEmpty`,
+    // which would read better and cost the type promotion: the compiler cannot
+    // see through a set that `schedulerType` is non-null below, and the
+    // alternative is a `!` on the very value BR-11 exists to protect.
+    final nameProblem = deckNameFormProblem(name);
     if (nameProblem != null || schedulerType == null) {
       state = DeckSubmitState(
-        nameProblem: nameProblem,
-        isSchedulerMissing: schedulerType == null,
+        problems: <DeckFormProblem>{
+          ?nameProblem,
+          if (schedulerType == null) DeckFormProblem.schedulerMissing,
+        },
       );
 
       return;
@@ -97,9 +106,9 @@ class CreateSubDeckController extends _$CreateSubDeckController {
   }) async {
     if (!state.canSubmit) return;
 
-    final nameProblem = DeckEntity.nameProblem(name);
+    final nameProblem = deckNameFormProblem(name);
     if (nameProblem != null) {
-      state = DeckSubmitState(nameProblem: nameProblem);
+      state = DeckSubmitState(problems: <DeckFormProblem>{nameProblem});
 
       return;
     }
@@ -133,9 +142,9 @@ class RenameDeckController extends _$RenameDeckController {
   Future<void> submit({required String name}) async {
     if (!state.canSubmit) return;
 
-    final nameProblem = DeckEntity.nameProblem(name);
+    final nameProblem = deckNameFormProblem(name);
     if (nameProblem != null) {
-      state = DeckSubmitState(nameProblem: nameProblem);
+      state = DeckSubmitState(problems: <DeckFormProblem>{nameProblem});
 
       return;
     }

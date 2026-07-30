@@ -5,7 +5,6 @@ import 'package:memox/app/config/env_config_provider.dart';
 import 'package:memox/app/di/deck_repository_provider.dart';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/core/state/submit_outcome.dart';
-import 'package:memox/features/deck/domain/deck_entity.dart';
 import 'package:memox/features/deck/domain/scheduler_type_model.dart';
 import 'package:memox/features/deck/presentation/deck_submit_state.dart';
 import 'package:memox/features/deck/presentation/deck_write_controller.dart';
@@ -236,7 +235,7 @@ void main() {
           );
 
       final state = container.read(createRootDeckControllerProvider);
-      expect(state.nameProblem, DeckNameProblem.empty);
+      expect(state.nameProblem, DeckFormProblem.nameEmpty);
       expect(state.outcome, isNull);
       expect(state.shouldClearDraft, isFalse);
       expect(state.shouldClose, isFalse);
