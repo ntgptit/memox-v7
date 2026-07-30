@@ -334,9 +334,22 @@ self-describing. A transition prints the **type** of each value, never the value
 question and a count is not content.
 
 **SQL — `core/database/query_log_interceptor.dart`.** Statement text, elapsed
-microseconds, row count. Debug builds only, gated on `kDebugMode` rather than
-`EnvConfig` because a compile-time constant lets the tree shaker remove it from
-release output entirely.
+microseconds, row count, and the `BEGIN` / `COMMIT` / `ROLLBACK` around a
+transaction. Debug builds only, gated on `kDebugMode` rather than `EnvConfig`
+because a compile-time constant lets the tree shaker remove it from release output
+entirely.
+
+Nine of the fourteen `QueryInterceptor` hooks are overridden. The three transaction
+boundaries are not optional decoration: statements *inside* a transaction are
+intercepted, so without them a rolled-back write logged its inserts and their row
+ids and then went silent — byte-identical to a successful write. The log did not
+merely omit the rollback, it asserted the opposite. That matters here because
+`createCard` writes a card and its review state as one unit (BR-09) and reset
+writes a generation change as one (BR-11); "did this commit" is the question those
+operations exist to answer. The remaining five hooks (`dialect`,
+`transactionCanBeNested`, `beginExclusive`, `ensureOpen`, `close`) stay at their
+pass-through defaults — no I/O to time, or once per connection where a line is
+noise.
 
 > **Do not set `driftRuntimeOptions.debugPrint = true`.** It is the obvious answer
 > and the wrong one: drift's own logging prints bound variables next to the
