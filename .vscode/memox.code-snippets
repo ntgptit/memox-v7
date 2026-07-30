@@ -9,7 +9,6 @@
     "await, and the double-submit guard. Those are the four things that are easy to",
     "leave out and expensive to notice missing."
   ],
-
   "memox: repository contract (domain)": {
     "prefix": "mxrepo",
     "scope": "dart",
@@ -33,7 +32,6 @@
       "}"
     ]
   },
-
   "memox: repository provider (composition root)": {
     "prefix": "mxrepoprov",
     "scope": "dart",
@@ -56,7 +54,6 @@
       "    ${2:Name}RepositoryImpl(${2:Name}Dao(ref.watch(appDatabaseProvider)));$0"
     ]
   },
-
   "memox: read controller (stream)": {
     "prefix": "mxread",
     "scope": "dart",
@@ -81,7 +78,6 @@
       "    ref.watch(${1:feature}RepositoryProvider).watch${7:Things}();$0"
     ]
   },
-
   "memox: write controller (submit state machine)": {
     "prefix": "mxwrite",
     "scope": "dart",
@@ -128,26 +124,25 @@
       "}$0"
     ]
   },
-
   "memox: screen (composition only)": {
     "prefix": "mxscreen",
     "scope": "dart",
-    "description": "Screen scaffolding: MxContentShell + Consumer + the three AsyncValue cases. Plain widget wrapping Consumer, not ConsumerWidget.",
+    "description": "Screen scaffolding: MxContentShell + Consumer + MxAsyncView. Plain widget wrapping Consumer, not ConsumerWidget.",
     "body": [
       "import 'package:flutter/material.dart';",
       "import 'package:flutter_riverpod/flutter_riverpod.dart';",
       "",
       "import '../../../l10n/l10n_extension.dart';",
+      "import '../../../shared/widgets/mx_async_view.dart';",
       "import '../../../shared/widgets/mx_content_shell.dart';",
       "import '../../../shared/widgets/mx_empty_state.dart';",
       "import '../../../shared/widgets/mx_error_state.dart';",
-      "import '../../../shared/widgets/mx_loading_state.dart';",
       "import '${1:name}_controller.dart';",
       "",
       "/// ${2:What the user does here} (UC-${3:xx}).",
       "///",
-      "/// Composition only: it picks copy and maps the stream's cases to the shared",
-      "/// components. No query, no business rule, nothing computed in `build`.",
+      "/// Composition only: it picks copy and hands each case to a shared component.",
+      "/// No query, no business rule, nothing computed in `build`.",
       "///",
       "/// A plain widget wrapping `Consumer` rather than a `ConsumerWidget`: only the",
       "/// body depends on the provider, and the two-argument `build` signature trips",
@@ -160,38 +155,38 @@
       "    return MxContentShell(",
       "      title: context.l10n.${5:titleKey},",
       "      body: Consumer(",
-      "        builder: (context, ref, child) => ref",
-      "            .watch(${6:things}Provider)",
-      "            .when(",
-      "              loading: () => MxLoadingState(",
-      "                semanticsLabel: context.l10n.${7:loadingKey},",
-      "              ),",
-      "              data: (items) => items.isEmpty",
-      "                  ? MxEmptyState(",
-      "                      icon: Icons.${8:folder_outlined},",
-      "                      title: context.l10n.${9:emptyTitleKey},",
-      "                      message: context.l10n.${10:emptyMessageKey},",
-      "                    )",
-      "                  : ListView.builder(",
-      "                      itemCount: items.length,",
-      "                      itemBuilder: (context, index) => $0,",
-      "                    ),",
-      "              // The failure never reaches the screen: it tells the user nothing",
-      "              // they can act on and can carry private content.",
-      "              error: (error, stackTrace) => MxErrorState(",
-      "                title: context.l10n.${11:errorTitleKey},",
-      "                message: context.l10n.${12:errorMessageKey},",
-      "                retryLabel: context.l10n.retryAction,",
-      "                onRetry: () => ref.invalidate(${6:things}Provider),",
-      "              ),",
-      "            ),",
+      "        builder: (context, ref, child) => MxAsyncView<List<${6:Name}Entity>>(",
+      "          value: ref.watch(${7:things}Provider),",
+      "          loadingLabel: context.l10n.${8:loadingKey},",
+      "          data: (items) => items.isEmpty",
+      "              ? MxEmptyState(",
+      "                  icon: Icons.${9:folder_outlined},",
+      "                  title: context.l10n.${10:emptyTitleKey},",
+      "                  message: context.l10n.${11:emptyMessageKey},",
+      "                )",
+      "              : ListView.builder(",
+      "                  itemCount: items.length,",
+      "                  itemBuilder: (context, index) => $0,",
+      "                ),",
+      "          // The failure never reaches the user: it tells them nothing they can",
+      "          // act on and can carry private content. Map the Failure *type* to",
+      "          // ARB copy, never its message.",
+      "          //",
+      "          // `invalidate`, not `refresh`: nothing here needs the new value as a",
+      "          // return, and the rebuild reads it anyway.",
+      "          error: (error, stackTrace) => MxErrorState(",
+      "            title: context.l10n.${12:errorTitleKey},",
+      "            message: context.l10n.${13:errorMessageKey},",
+      "            retryLabel: context.l10n.retryAction,",
+      "            onRetry: () => ref.invalidate(${7:things}Provider),",
+      "          ),",
+      "        ),",
       "      ),",
       "    );",
       "  }",
       "}"
     ]
   },
-
   "memox: DAO": {
     "prefix": "mxdao",
     "scope": "dart",
@@ -227,7 +222,6 @@
       "}"
     ]
   },
-
   "memox: contract fake for presentation tests": {
     "prefix": "mxfake",
     "scope": "dart",
@@ -282,7 +276,6 @@
       "}"
     ]
   },
-
   "memox: strict visual audit companion": {
     "prefix": "mxaudit",
     "scope": "dart",

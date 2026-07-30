@@ -5,11 +5,11 @@ import 'package:go_router/go_router.dart';
 import '../../../app/router/route_names.dart';
 import '../../../core/error/failure.dart';
 import '../../../l10n/l10n_extension.dart';
+import '../../../shared/widgets/mx_async_view.dart';
 import '../../../shared/widgets/mx_content_shell.dart';
 import '../../../shared/widgets/mx_empty_state.dart';
 import '../../../shared/widgets/mx_error_state.dart';
 import '../../../shared/widgets/mx_icon_button.dart';
-import '../../../shared/widgets/mx_loading_state.dart';
 import '../domain/deck_content_type_model.dart';
 import '../domain/deck_entity.dart';
 import 'deck_actions_widget.dart';
@@ -33,18 +33,17 @@ class DeckDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer(
-      builder: (context, ref, child) => ref
-          .watch(deckDetailProvider(deckId))
-          .when(
-            loading: () => MxContentShell(
-              body: MxLoadingState(
-                semanticsLabel: context.l10n.deckDetailLoadingLabel,
-              ),
-            ),
-            data: (detail) => _DeckDetailBody(detail: detail),
-            error: (error, stackTrace) =>
-                _DeckDetailError(error: error, deckId: deckId),
-          ),
+      builder: (context, ref, child) => MxAsyncView<DeckDetail>(
+        value: ref.watch(deckDetailProvider(deckId)),
+        loadingLabel: context.l10n.deckDetailLoadingLabel,
+        // Untitled shell while loading: the app-bar title is the deck's name and
+        // is not known yet. Without a shell the spinner would have no Scaffold,
+        // and on this pushed route the deck list would show through behind it.
+        loadingFrame: (loading) => MxContentShell(body: loading),
+        data: (detail) => _DeckDetailBody(detail: detail),
+        error: (error, stackTrace) =>
+            _DeckDetailError(error: error, deckId: deckId),
+      ),
     );
   }
 }
