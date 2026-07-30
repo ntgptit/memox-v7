@@ -1,3 +1,4 @@
+import 'package:memox/features/deck/domain/models/deck_name_model.dart';
 import 'dart:async';
 
 import 'package:memox/core/error/failure.dart';
@@ -145,34 +146,41 @@ class FakeDeckRepository implements DeckRepository {
 
   @override
   Future<DeckEntity> createRootDeck({
-    required String name,
+    required DeckName name,
     required SchedulerType schedulerType,
   }) async {
-    createdRootDecks.add((name: name, scheduler: schedulerType));
+    // Recorded as the normalised string, which is what the repository would
+    // persist — so a test asserting `createdRootDecks.single.name` is asserting
+    // that trim happened exactly once, upstream, and reached here already applied.
+    createdRootDecks.add((name: name.value, scheduler: schedulerType));
     final failure = writeFailure;
     if (failure != null) throw failure;
 
-    return fakeRootDeck(id: 'created-root', name: name);
+    return fakeRootDeck(id: 'created-root', name: name.value);
   }
 
   @override
   Future<DeckEntity> createSubDeck({
-    required String name,
+    required DeckName name,
     required String parentDeckId,
   }) async {
-    createdSubDecks.add((name: name, parentDeckId: parentDeckId));
+    createdSubDecks.add((name: name.value, parentDeckId: parentDeckId));
     final failure = writeFailure;
     if (failure != null) throw failure;
 
-    return fakeSubDeck(id: 'created-sub', name: name, parentId: parentDeckId);
+    return fakeSubDeck(
+      id: 'created-sub',
+      name: name.value,
+      parentId: parentDeckId,
+    );
   }
 
   @override
   Future<void> renameDeck({
     required String deckId,
-    required String name,
+    required DeckName name,
   }) async {
-    renames.add((deckId: deckId, name: name));
+    renames.add((deckId: deckId, name: name.value));
     final failure = writeFailure;
     if (failure != null) throw failure;
   }

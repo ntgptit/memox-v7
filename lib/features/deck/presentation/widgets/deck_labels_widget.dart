@@ -4,9 +4,10 @@ import '../../../../core/error/failure.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../domain/entities/deck_entity.dart';
 import '../../domain/failures/deck_conflict_failure.dart';
+import '../../domain/failures/deck_validation_failure.dart';
+import '../../domain/models/deck_name_model.dart';
 import '../../domain/failures/deck_move_failure.dart';
 import '../../domain/models/scheduler_type_model.dart';
-import '../states/deck_submit_state.dart';
 
 /// Where a domain value becomes something a person reads.
 ///
@@ -43,16 +44,16 @@ extension DeckLabels on BuildContext {
 
   /// Why the form refused the last attempt, per field.
   ///
-  /// One accessor for every [DeckFormProblem] rather than one per input: the
+  /// One accessor for every [DeckValidationProblem] rather than one per input: the
   /// problems now live in a single set, so the copy for them belongs in a single
   /// exhaustive switch. Adding a fourth way for a deck form to be wrong fails to
   /// compile here until it has text.
-  String deckFormError(DeckFormProblem problem) => switch (problem) {
-    DeckFormProblem.nameEmpty => l10n.deckNameEmptyError,
-    DeckFormProblem.nameTooLong => l10n.deckNameTooLongError(
-      DeckEntity.maxNameLength,
+  String deckFormError(DeckValidationProblem problem) => switch (problem) {
+    DeckValidationProblem.nameEmpty => l10n.deckNameEmptyError,
+    DeckValidationProblem.nameTooLong => l10n.deckNameTooLongError(
+      DeckName.maxLength,
     ),
-    DeckFormProblem.schedulerMissing => l10n.schedulerMissingError,
+    DeckValidationProblem.schedulerMissing => l10n.schedulerMissingError,
   };
 
   /// Why a move target cannot be chosen (UC-09 step 2).

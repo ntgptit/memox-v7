@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/features/deck/domain/models/deck_name_model.dart';
 import 'package:memox/features/deck/domain/models/root_deck_summary_model.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 
@@ -27,7 +28,7 @@ void main() {
       // The COALESCE branch. Without it an inner join would drop empty decks and
       // a brand-new deck would vanish from the list that just created it.
       await harness.deckRepository.createRootDeck(
-        name: 'Empty',
+        name: DeckName.parseOrThrow('Empty'),
         schedulerType: SchedulerType.eightBox,
       );
 
@@ -77,7 +78,7 @@ void main() {
       'the scheduler comes back on the root, for the row to display',
       () async {
         await harness.deckRepository.createRootDeck(
-          name: 'SM-2 deck',
+          name: DeckName.parseOrThrow('SM-2 deck'),
           schedulerType: SchedulerType.sm2,
         );
 
@@ -167,13 +168,13 @@ void main() {
 
       await pumpEventQueue();
       final first = await harness.deckRepository.createRootDeck(
-        name: 'First',
+        name: DeckName.parseOrThrow('First'),
         schedulerType: SchedulerType.eightBox,
       );
       await pumpEventQueue();
       await harness.deckRepository.renameDeck(
         deckId: first.id,
-        name: 'Renamed',
+        name: DeckName.parseOrThrow('Renamed'),
       );
       await pumpEventQueue();
       await harness.deckRepository.deleteDeck(first.id);

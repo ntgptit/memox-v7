@@ -9,6 +9,8 @@ import '../../domain/models/deck_deletion_impact_model.dart';
 import '../../domain/entities/deck_entity.dart';
 import '../../domain/failures/deck_conflict_failure.dart';
 import '../../domain/failures/deck_move_failure.dart';
+import '../../domain/failures/deck_validation_failure.dart';
+import '../../domain/models/deck_name_model.dart';
 import '../../domain/repositories/deck_repository.dart';
 import '../../domain/models/root_deck_summary_model.dart';
 import '../../domain/models/scheduler_type_model.dart';
@@ -89,10 +91,11 @@ final class DeckRepositoryImpl
 
   @override
   Future<DeckEntity> createRootDeck({
-    required String name,
+    required DeckName name,
     required SchedulerType schedulerType,
   }) => _guard(() async {
-    final validName = DeckEntity.validateName(name);
+    // No name check. BR-01 was applied when the `DeckName` was constructed, and
+    // checking it again here is what made three layers own one rule.
     _requireRealScheduler(schedulerType);
 
     final id = _idGenerator();
@@ -100,7 +103,7 @@ final class DeckRepositoryImpl
     await _dao.insertDeck(
       DecksCompanion.insert(
         id: id,
-        name: validName,
+        name: name.value,
         rootDeckId: id,
         contentType: DeckContentType.deck.dbValue,
         schedulerType: Value<String?>(schedulerType.dbValue),
@@ -116,11 +119,10 @@ final class DeckRepositoryImpl
 
   @override
   Future<DeckEntity> createSubDeck({
-    required String name,
+    required DeckName name,
     required String parentDeckId,
   }) => _guard(
     () => _dao.runInTransaction(() async {
-      final validName = DeckEntity.validateName(name);
       final parent = await _requireDeckRow(parentDeckId);
       final parentType = _knownContentType(parent);
       if (parentType == DeckContentType.card) {
@@ -155,7 +157,7 @@ final class DeckRepositoryImpl
       await _dao.insertDeck(
         DecksCompanion.insert(
           id: id,
-          name: validName,
+          name: name.value,
           parentDeckId: Value<String?>(parent.id),
           rootDeckId: parent.rootDeckId,
           contentType: DeckContentType.unset.dbValue,
@@ -169,14 +171,13 @@ final class DeckRepositoryImpl
   );
 
   @override
-  Future<void> renameDeck({required String deckId, required String name}) =>
+  Future<void> renameDeck({required String deckId, required DeckName name}) =>
       _guard(() async {
-        final validName = DeckEntity.validateName(name);
         await _requireDeckRow(deckId);
         await _dao.updateDeckById(
           deckId,
           DecksCompanion(
-            name: Value<String>(validName),
+            name: Value<String>(name.value),
             updatedAt: Value<DateTime>(_clock()),
           ),
         );
@@ -279,12 +280,13 @@ final class DeckRepositoryImpl
     if (schedulerType != SchedulerType.unknown) return;
 
     // BR-11 — the choice is mandatory and `unknown` is not a choice.
-    throw const ValidationFailure(
-      message: 'Please choose a study mode for the deck.',
-      fieldErrors: <String, String>{
-        'schedulerType': 'A study mode must be chosen.',
-      },
-    );
+    // Reachable only when a caller passes `SchedulerType.unknown`, which no use
+    // case does — the create-root use case refuses a null choice before this.
+    // Kept as a boundary guard, and it reports the same typed problem the use
+    // case would, so the screen has one shape to read.
+    refuseInvalidDeckForm(<DeckValidationProblem>{
+      DeckValidationProblem.schedulerMissing,
+    });
   }
 
   /// Reads a deck's content type, refusing to operate on a value this build

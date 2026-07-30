@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/features/deck/domain/models/deck_name_model.dart';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/deck/domain/models/deck_content_type_model.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
@@ -19,7 +20,7 @@ void main() {
   group('createRootDeck', () {
     test('creates a root with the mandatory scheduler, generation 1', () async {
       final root = await h.deckRepository.createRootDeck(
-        name: '  My deck  ',
+        name: DeckName.parseOrThrow('  My deck  '),
         schedulerType: SchedulerType.sm2,
       );
 
@@ -41,7 +42,7 @@ void main() {
       () async {
         await expectLater(
           h.deckRepository.createRootDeck(
-            name: 'No mode',
+            name: DeckName.parseOrThrow('No mode'),
             schedulerType: SchedulerType.unknown,
           ),
           throwsA(isA<ValidationFailure>()),
@@ -52,7 +53,7 @@ void main() {
 
     test('a root points at itself: root_deck_id = id (BR-56)', () async {
       final root = await h.deckRepository.createRootDeck(
-        name: 'Self',
+        name: DeckName.parseOrThrow('Self'),
         schedulerType: SchedulerType.eightBox,
       );
 
@@ -62,7 +63,7 @@ void main() {
 
     test('a root is born content_type = deck (BR-58)', () async {
       final root = await h.deckRepository.createRootDeck(
-        name: 'Typed',
+        name: DeckName.parseOrThrow('Typed'),
         schedulerType: SchedulerType.eightBox,
       );
 
@@ -70,19 +71,18 @@ void main() {
       expect(await h.contentTypeOf(root.id), 'deck');
     });
 
-    test(
-      'an invalid name is refused before anything is written (BR-01)',
-      () async {
-        await expectLater(
-          h.deckRepository.createRootDeck(
-            name: '   ',
-            schedulerType: SchedulerType.eightBox,
-          ),
-          throwsA(isA<ValidationFailure>()),
-        );
-        expect(await h.countAll('decks'), 0);
-      },
-    );
+    test('an invalid name cannot reach the repository at all (BR-01)', () async {
+      // Not "the repository refuses it" — the repository has no name check any
+      // more. The contract takes a `DeckName`, and an invalid string cannot
+      // become one, so the write is *unreachable* rather than refused. That is
+      // the difference the value object bought: the guarantee moved from a
+      // runtime check in a third layer into the signature.
+      expect(
+        () => DeckName.parseOrThrow('   '),
+        throwsA(isA<ValidationFailure>()),
+      );
+      expect(await h.countAll('decks'), 0);
+    });
   });
 
   group('createSubDeck', () {
@@ -132,7 +132,7 @@ void main() {
 
         await expectLater(
           h.deckRepository.createSubDeck(
-            name: 'Doomed',
+            name: DeckName.parseOrThrow('Doomed'),
             parentDeckId: tree.leaf.id,
           ),
           throwsA(isA<Failure>()),
@@ -159,7 +159,7 @@ void main() {
 
       await expectLater(
         h.deckRepository.createSubDeck(
-          name: 'Nope',
+          name: DeckName.parseOrThrow('Nope'),
           parentDeckId: tree.leaf.id,
         ),
         throwsA(isA<ConflictFailure>()),
@@ -168,7 +168,10 @@ void main() {
 
     test('a missing parent is NotFound, not a database error', () async {
       await expectLater(
-        h.deckRepository.createSubDeck(name: 'Orphan', parentDeckId: 'absent'),
+        h.deckRepository.createSubDeck(
+          name: DeckName.parseOrThrow('Orphan'),
+          parentDeckId: 'absent',
+        ),
         throwsA(isA<NotFoundFailure>()),
       );
     });

@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/features/deck/domain/failures/deck_validation_failure.dart';
 import 'package:memox/app/config/env_config.dart';
 import 'package:memox/app/config/env_config_provider.dart';
 import 'package:memox/app/di/deck_repository_provider.dart';
@@ -235,7 +236,7 @@ void main() {
           );
 
       final state = container.read(createRootDeckControllerProvider);
-      expect(state.nameProblem, DeckFormProblem.nameEmpty);
+      expect(state.nameProblem, DeckValidationProblem.nameEmpty);
       expect(state.outcome, isNull);
       expect(state.shouldClearDraft, isFalse);
       expect(state.shouldClose, isFalse);

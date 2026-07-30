@@ -1,10 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/features/deck/domain/failures/deck_validation_failure.dart';
+import 'package:memox/features/deck/domain/models/deck_name_model.dart';
 import 'package:memox/app/config/env_config.dart';
 import 'package:memox/app/config/env_config_provider.dart';
 import 'package:memox/app/di/deck_repository_provider.dart';
 import 'package:memox/core/error/failure.dart';
-import 'package:memox/features/deck/domain/entities/deck_entity.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 import 'package:memox/features/deck/presentation/states/deck_submit_state.dart';
 import 'package:memox/features/deck/presentation/controllers/deck_write_controller.dart';
@@ -49,7 +50,10 @@ void main() {
       expect(repository.createdRootDecks, hasLength(1));
       // Trimming is the repository's job via `validateName`; the controller
       // passes what was typed so the rule has one owner.
-      expect(repository.createdRootDecks.single.name, '  Japanese  ');
+      // Normalised, not raw: trim happened once, in `DeckName.parse`, and what
+      // reached the repository was already applied. Asserting the raw string here
+      // would be asserting that some layer downstream still has trimming to do.
+      expect(repository.createdRootDecks.single.name, 'Japanese');
       expect(repository.createdRootDecks.single.scheduler, SchedulerType.sm2);
       expect(
         container.read(createRootDeckControllerProvider).shouldClose,
@@ -101,7 +105,7 @@ void main() {
 
       expect(
         container.read(createRootDeckControllerProvider).nameProblem,
-        DeckFormProblem.nameEmpty,
+        DeckValidationProblem.nameEmpty,
       );
       expect(repository.createdRootDecks, isEmpty);
     });
@@ -113,13 +117,13 @@ void main() {
       await container
           .read(createRootDeckControllerProvider.notifier)
           .submit(
-            name: 'a' * (DeckEntity.maxNameLength + 1),
+            name: 'a' * (DeckName.maxLength + 1),
             schedulerType: SchedulerType.sm2,
           );
 
       expect(
         container.read(createRootDeckControllerProvider).nameProblem,
-        DeckFormProblem.nameTooLong,
+        DeckValidationProblem.nameTooLong,
       );
       expect(repository.createdRootDecks, isEmpty);
     });
@@ -132,13 +136,13 @@ void main() {
           .submit(name: '', schedulerType: null);
 
       final state = container.read(createRootDeckControllerProvider);
-      expect(state.nameProblem, DeckFormProblem.nameEmpty);
+      expect(state.nameProblem, DeckValidationProblem.nameEmpty);
       expect(state.isSchedulerMissing, isTrue);
       // Both, in one set. The accessors above are Deck's reading of it; this is
       // what is stored.
-      expect(state.problems, <DeckFormProblem>{
-        DeckFormProblem.nameEmpty,
-        DeckFormProblem.schedulerMissing,
+      expect(state.problems, <DeckValidationProblem>{
+        DeckValidationProblem.nameEmpty,
+        DeckValidationProblem.schedulerMissing,
       });
     });
 
@@ -157,8 +161,8 @@ void main() {
       final state = container.read(createRootDeckControllerProvider);
       expect(state.isSchedulerMissing, isTrue);
       expect(state.nameProblem, isNull);
-      expect(state.problems, <DeckFormProblem>{
-        DeckFormProblem.schedulerMissing,
+      expect(state.problems, <DeckValidationProblem>{
+        DeckValidationProblem.schedulerMissing,
       });
     });
 

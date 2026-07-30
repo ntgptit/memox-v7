@@ -76,8 +76,8 @@ final class CardRepositoryImpl implements CardRepository {
     required String back,
   }) => _guard(
     () => _cardDao.runInTransaction(() async {
-      final validFront = CardEntity.validateSide(front, side: 'front');
-      final validBack = CardEntity.validateSide(back, side: 'back');
+      final validFront = CardEntity.validateSide(front, side: CardSide.front);
+      final validBack = CardEntity.validateSide(back, side: CardSide.back);
       final deck = await _requireDeckRow(deckId);
       if (deck.parentDeckId == null) {
         // BR-58 — no card ever sits directly under a root.
@@ -130,8 +130,8 @@ final class CardRepositoryImpl implements CardRepository {
     required String front,
     required String back,
   }) => _guard(() async {
-    final validFront = CardEntity.validateSide(front, side: 'front');
-    final validBack = CardEntity.validateSide(back, side: 'back');
+    final validFront = CardEntity.validateSide(front, side: CardSide.front);
+    final validBack = CardEntity.validateSide(back, side: CardSide.back);
     await _requireCardRow(cardId);
     // Writes to `cards` only — the review state and history cannot change
     // here because nothing else is touched (BR-10).

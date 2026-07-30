@@ -2,6 +2,7 @@
 library;
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/features/deck/domain/models/deck_name_model.dart';
 import 'package:memox/core/database/app_database.dart';
 import 'package:memox/features/card/data/card_repository_impl.dart';
 import 'package:memox/features/deck/data/repositories/deck_repository_impl.dart';
@@ -56,15 +57,15 @@ void main() {
     try {
       // Real writes through the production connection.
       final root = await repository.createRootDeck(
-        name: 'Web smoke root',
+        name: DeckName.parseOrThrow('Web smoke root'),
         schedulerType: SchedulerType.eightBox,
       );
       final branch = await repository.createSubDeck(
-        name: 'Web smoke branch',
+        name: DeckName.parseOrThrow('Web smoke branch'),
         parentDeckId: root.id,
       );
       final leaf = await repository.createSubDeck(
-        name: 'Web smoke leaf',
+        name: DeckName.parseOrThrow('Web smoke leaf'),
         parentDeckId: branch.id,
       );
       final card = await cardRepository.createCard(

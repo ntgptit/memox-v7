@@ -81,82 +81,56 @@ void main() {
     });
   });
 
-  group('deck name validation (BR-01)', () {
-    test('empty name is refused', () {
-      expect(
-        () => DeckEntity.validateName(''),
-        throwsA(
-          isA<ValidationFailure>().having(
-            (ValidationFailure f) => f.fieldErrors,
-            'fieldErrors',
-            contains('name'),
-          ),
-        ),
-      );
-    });
-
-    test('whitespace-only name is refused', () {
-      expect(
-        () => DeckEntity.validateName('   \t '),
-        throwsA(isA<ValidationFailure>()),
-      );
-    });
-
-    test('exactly 200 characters passes, and is returned trimmed', () {
-      final name = 'a' * DeckEntity.maxNameLength;
-
-      expect(DeckEntity.validateName('  $name  '), name);
-    });
-
-    test('201 characters is refused, never truncated', () {
-      final name = 'a' * (DeckEntity.maxNameLength + 1);
-
-      expect(
-        () => DeckEntity.validateName(name),
-        throwsA(isA<ValidationFailure>()),
-      );
-    });
-  });
+  // Deck name validation (BR-01) lives in `deck_name_test.dart` now, with the
+  // `DeckName` value object that owns the rule. It used to be tested here because
+  // the rule was on the entity — and being on the entity is what let three layers
+  // each call it for one submit.
 
   group('card content validation (BR-07, BR-08)', () {
-    test('empty front is refused, keyed to its own field', () {
+    test('an empty front is refused, with a typed problem for that side', () {
       expect(
-        () => CardEntity.validateSide('', side: 'front'),
+        () => CardEntity.validateSide('', side: CardSide.front),
         throwsA(
           isA<ValidationFailure>().having(
-            (ValidationFailure f) => f.fieldErrors,
-            'fieldErrors',
-            contains('front'),
+            (ValidationFailure f) => f.problems,
+            'problems',
+            <Enum>{CardValidationProblem.frontEmpty},
           ),
         ),
       );
     });
 
-    test('whitespace-only back is refused, keyed to its own field', () {
+    test('a whitespace-only back is refused, keyed to its own side', () {
       expect(
-        () => CardEntity.validateSide(' \n ', side: 'back'),
+        () => CardEntity.validateSide(' \n ', side: CardSide.back),
         throwsA(
           isA<ValidationFailure>().having(
-            (ValidationFailure f) => f.fieldErrors,
-            'fieldErrors',
-            contains('back'),
+            (ValidationFailure f) => f.problems,
+            'problems',
+            <Enum>{CardValidationProblem.backEmpty},
           ),
         ),
       );
     });
 
-    test('exactly 2000 characters passes, and is returned trimmed', () {
+    test('exactly the limit passes, and is returned trimmed', () {
       final text = 'x' * CardEntity.maxSideLength;
 
-      expect(CardEntity.validateSide(' $text ', side: 'front'), text);
+      expect(CardEntity.validateSide(' $text ', side: CardSide.front), text);
     });
 
-    test('2001 characters is refused, never truncated', () {
+    test('one over the limit is refused, never truncated', () {
       final text = 'x' * (CardEntity.maxSideLength + 1);
 
       expect(
-        () => CardEntity.validateSide(text, side: 'back'),
-        throwsA(isA<ValidationFailure>()),
+        () => CardEntity.validateSide(text, side: CardSide.back),
+        throwsA(
+          isA<ValidationFailure>().having(
+            (ValidationFailure f) => f.problems,
+            'problems',
+            <Enum>{CardValidationProblem.backTooLong},
+          ),
+        ),
       );
     });
   });

@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/features/deck/domain/models/deck_name_model.dart';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/deck/domain/entities/deck_entity.dart';
 
@@ -27,7 +28,7 @@ void main() {
 
       await expectLater(
         h.deckRepository.createSubDeck(
-          name: 'Too deep',
+          name: DeckName.parseOrThrow('Too deep'),
           parentDeckId: chain.last.id,
         ),
         throwsA(isA<ConflictFailure>()),
@@ -48,7 +49,7 @@ void main() {
 
         await expectLater(
           h.deckRepository.createSubDeck(
-            name: 'Too deep',
+            name: DeckName.parseOrThrow('Too deep'),
             parentDeckId: chain.last.id,
           ),
           throwsA(isA<ConflictFailure>()),
@@ -228,7 +229,7 @@ void main() {
         // Any depth-guarded write on the corrupt chain must refuse cleanly.
         await expectLater(
           h.deckRepository.createSubDeck(
-            name: 'On a cycle',
+            name: DeckName.parseOrThrow('On a cycle'),
             parentDeckId: tree.leaf.id,
           ),
           throwsA(isA<ConflictFailure>()),

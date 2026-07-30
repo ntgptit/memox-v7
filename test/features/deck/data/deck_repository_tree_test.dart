@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/features/deck/domain/models/deck_name_model.dart';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 
@@ -18,7 +19,7 @@ void main() {
       () async {
         final tree = await h.seedTree();
         final leaf2 = await h.deckRepository.createSubDeck(
-          name: 'Leaf2',
+          name: DeckName.parseOrThrow('Leaf2'),
           parentDeckId: tree.branch.id,
         );
         await h.cardRepository.createCard(
@@ -138,7 +139,7 @@ void main() {
 
     test('is blocked on a root — a root is deck forever (BR-58)', () async {
       final root = await h.deckRepository.createRootDeck(
-        name: 'Root',
+        name: DeckName.parseOrThrow('Root'),
         schedulerType: SchedulerType.eightBox,
       );
 

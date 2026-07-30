@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/features/deck/domain/models/deck_name_model.dart';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/deck/domain/failures/deck_validation_failure.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
@@ -25,26 +26,26 @@ void main() {
     repository = FakeDeckRepository();
   });
 
-  /// The field keys a refusal reported.
+  /// The typed problems a refusal reported.
   ///
   /// Awaited even though the refusal is thrown *before* the use case reaches its
   /// first await — so a non-awaited call would surface it too. Awaiting keeps the
   /// assertion true if validation ever moves behind an await, and
   /// `discarded_futures` is an error here for that class of mistake.
-  Future<Set<String>> fieldsRefusedBy(Future<void> Function() action) async {
+  Future<Set<Enum>> problemsRefusedBy(Future<void> Function() action) async {
     try {
       await action();
     } on ValidationFailure catch (failure) {
-      return failure.fieldErrors.keys.toSet();
+      return failure.problems.toSet();
     }
 
-    return <String>{};
+    return <Enum>{};
   }
 
   group('CreateRootDeckUseCase', () {
     test('a valid form reaches the repository once', () async {
       await CreateRootDeckUseCase(repository)(
-        name: 'Japanese N5',
+        rawName: 'Japanese N5',
         schedulerType: SchedulerType.sm2,
       );
 
@@ -56,13 +57,13 @@ void main() {
       // BR-01. Refusing here rather than after the round trip is the whole point
       // of validating in the use case.
       expect(
-        await fieldsRefusedBy(
+        await problemsRefusedBy(
           () => CreateRootDeckUseCase(repository)(
-            name: '   ',
+            rawName: '   ',
             schedulerType: SchedulerType.sm2,
           ),
         ),
-        <String>{DeckField.name},
+        <Enum>{DeckValidationProblem.nameEmpty},
       );
       expect(repository.createdRootDecks, isEmpty);
     });
@@ -71,39 +72,47 @@ void main() {
       // Nullable on purpose: "not chosen yet" is a real state the form starts in,
       // and a default would be the implicit choice the rule forbids.
       expect(
-        await fieldsRefusedBy(
+        await problemsRefusedBy(
           () => CreateRootDeckUseCase(repository)(
-            name: 'Japanese N5',
+            rawName: 'Japanese N5',
             schedulerType: null,
           ),
         ),
-        <String>{DeckField.schedulerType},
+        <Enum>{DeckValidationProblem.schedulerMissing},
       );
       expect(repository.createdRootDecks, isEmpty);
     });
 
     test('both fields are reported from one attempt', () async {
-      // The reason refusal carries `fieldErrors` and not `Failure.reason`: a
-      // single reason cannot say that two inputs are wrong, and reporting only
-      // the first would send the user round twice.
+      // The reason refusal carries a `Set` and not `Failure.reason`: a single
+      // reason cannot say that two inputs are wrong, and reporting only the first
+      // would send the user round twice.
       expect(
-        await fieldsRefusedBy(
-          () =>
-              CreateRootDeckUseCase(repository)(name: '', schedulerType: null),
+        await problemsRefusedBy(
+          () => CreateRootDeckUseCase(repository)(
+            rawName: '',
+            schedulerType: null,
+          ),
         ),
-        <String>{DeckField.name, DeckField.schedulerType},
+        <Enum>{
+          DeckValidationProblem.nameEmpty,
+          DeckValidationProblem.schedulerMissing,
+        },
       );
     });
 
     test('the refusal message names no user-facing copy', () async {
-      // `message` is a sanitized diagnostic for the log. The screen picks ARB
-      // text from the field keys — see `deckSubmitFailure`.
+      // `message` is a sanitized diagnostic for the log. The screen picks ARB text
+      // from the typed problems — see `deckSubmitFailure`.
       try {
-        await CreateRootDeckUseCase(repository)(name: '', schedulerType: null);
+        await CreateRootDeckUseCase(repository)(
+          rawName: '',
+          schedulerType: null,
+        );
         fail('expected a refusal');
       } on ValidationFailure catch (failure) {
         expect(failure.message, contains('invalid'));
-        expect(failure.message, contains(DeckField.name));
+        expect(failure.message, contains(DeckValidationProblem.nameEmpty.name));
         // No sentence a user should read.
         expect(failure.message, isNot(contains('Please')));
       }
@@ -113,7 +122,7 @@ void main() {
   group('CreateSubDeckUseCase', () {
     test('a valid form reaches the repository', () async {
       await CreateSubDeckUseCase(repository)(
-        name: 'Hiragana',
+        rawName: 'Hiragana',
         parentDeckId: 'parent-1',
       );
 
@@ -125,13 +134,13 @@ void main() {
       // change between this call and the write, so a depth check here would
       // answer a question about a moment that has passed.
       expect(
-        await fieldsRefusedBy(
+        await problemsRefusedBy(
           () => CreateSubDeckUseCase(repository)(
-            name: '',
+            rawName: '',
             parentDeckId: 'parent-1',
           ),
         ),
-        <String>{DeckField.name},
+        <Enum>{DeckValidationProblem.nameEmpty},
       );
       expect(repository.createdSubDecks, isEmpty);
     });
@@ -139,18 +148,20 @@ void main() {
 
   group('RenameDeckUseCase', () {
     test('a valid name reaches the repository', () async {
-      await RenameDeckUseCase(repository)(deckId: 'deck-1', name: 'Renamed');
+      await RenameDeckUseCase(repository)(deckId: 'deck-1', rawName: 'Renamed');
 
       expect(repository.renames, hasLength(1));
     });
 
     test('an over-length name is refused (BR-01)', () async {
       expect(
-        await fieldsRefusedBy(
-          () =>
-              RenameDeckUseCase(repository)(deckId: 'deck-1', name: 'x' * 201),
+        await problemsRefusedBy(
+          () => RenameDeckUseCase(repository)(
+            deckId: 'deck-1',
+            rawName: 'x' * (DeckName.maxLength + 1),
+          ),
         ),
-        <String>{DeckField.name},
+        <Enum>{DeckValidationProblem.nameTooLong},
       );
       expect(repository.renames, isEmpty);
     });

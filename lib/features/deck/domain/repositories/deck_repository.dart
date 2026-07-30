@@ -1,5 +1,6 @@
 import '../models/deck_deletion_impact_model.dart';
 import '../entities/deck_entity.dart';
+import '../models/deck_name_model.dart';
 import '../models/root_deck_summary_model.dart';
 import '../models/scheduler_type_model.dart';
 
@@ -61,8 +62,13 @@ abstract interface class DeckRepository {
   ///
   /// [schedulerType] is mandatory and must be a real scheduler (BR-11) —
   /// there is no implicit default and `unknown` is rejected.
+  ///
+  /// [name] is a [DeckName], not a `String`: BR-01 has already been applied and
+  /// the value is normalised. The signature is what makes "has this been
+  /// validated?" answerable without reading the implementation — and it is what
+  /// stops this layer checking again.
   Future<DeckEntity> createRootDeck({
-    required String name,
+    required DeckName name,
     required SchedulerType schedulerType,
   });
 
@@ -71,12 +77,15 @@ abstract interface class DeckRepository {
   /// in the same atomic step. Refused when the child would sit deeper than
   /// `DeckEntity.maxTreeDepth` (BR-55) — nothing is written in that case.
   Future<DeckEntity> createSubDeck({
-    required String name,
+    required DeckName name,
     required String parentDeckId,
   });
 
-  /// Renames a deck (BR-01). Touches nothing but the name and `updated_at`.
-  Future<void> renameDeck({required String deckId, required String name});
+  /// Renames a deck. Touches nothing but the name and `updated_at`.
+  ///
+  /// BR-01 was applied when the [DeckName] was constructed; this layer does not
+  /// re-check it.
+  Future<void> renameDeck({required String deckId, required DeckName name});
 
   /// What deleting [deckId] would remove — shown before the delete (BR-04).
   Future<DeckDeletionImpact> getDeletionImpact(String deckId);
