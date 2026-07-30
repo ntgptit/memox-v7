@@ -51,6 +51,19 @@ if command -v flutter >/dev/null 2>&1; then
   flutter analyze --no-fatal-infos || FAILED+=("analyze")
 fi
 
+# ------------------------------------------------------- generated code
+# Generated output is gitignored, so nothing else here notices when it is stale,
+# missing or — worse — committed. `--skip-rebuild` because the reproducibility
+# comparison rebuilds from scratch, which belongs in CI rather than in a gate
+# somebody runs before every commit.
+GEN_CHECK="$REPO_ROOT/.claude/skills/flutter-workflow/scripts/check_generated.sh"
+if [[ -f "$GEN_CHECK" ]]; then
+  step "generated code"
+  bash "$GEN_CHECK" --skip-rebuild || FAILED+=("generated code")
+else
+  SKIPPED+=("generated code (script missing at $GEN_CHECK)")
+fi
+
 # ---------------------------------------------- architecture boundaries
 ARCH_CHECK="$REPO_ROOT/.claude/skills/flutter-architecture/scripts/check_architecture.sh"
 if [[ -x "$ARCH_CHECK" ]]; then

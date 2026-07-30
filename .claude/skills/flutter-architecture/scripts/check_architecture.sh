@@ -17,7 +17,17 @@ cd "$REPO_ROOT" || exit 1
 
 LIB="lib"
 if [[ ! -d "$LIB" ]]; then
-  echo "No lib/ directory — nothing to check yet (expected before Phase 2.3)."
+  # A skip before the project exists is honest; a skip after it exists is this
+  # script reporting success for having looked at nothing. `pubspec.yaml` is what
+  # tells the two apart, and CI is where the difference matters: a wrong working
+  # directory would otherwise produce a green guard.
+  if [[ -f pubspec.yaml ]]; then
+    echo "No lib/ directory, but pubspec.yaml exists — the project is created and" >&2
+    echo "this script found nothing to inspect. That is a failure, not a skip." >&2
+    exit 1
+  fi
+  echo "No lib/ directory and no pubspec.yaml — nothing to check yet"
+  echo "(expected before Phase 2.3)."
   exit 0
 fi
 
@@ -229,6 +239,35 @@ while IFS= read -r file; do
   report warn "large file" "$file" \
     "$lines lines — likely more than one responsibility. Split by section or by role."
 done < <(dart_files)
+
+# ---------------------------------------------------------------------------
+# 9. Scope. Every rule above selects its files by path fragment or by grep, so a
+#    folder rename turns the whole script into checks that pass because they
+#    looked at nothing — which reads as coverage. Six of the suffix checks did
+#    exactly that until M4.10, matching zero files while reporting success.
+#
+#    The numbers are printed on every run so a shrinking scope is visible before
+#    it reaches zero, and zero is a hard failure.
+# ---------------------------------------------------------------------------
+printf '%s\n' "------------------------------------------------------------"
+SCANNED_ALL=$(dart_files | wc -l | tr -d ' ')
+SCANNED_FEATURES=$(dart_files | grep -c '/features/' || true)
+SCANNED_DOMAIN=$(dart_files | grep -c '/domain/' || true)
+SCANNED_DATA=$(dart_files | grep -c '/data/' || true)
+SCANNED_PRESENTATION=$(dart_files | grep -c '/presentation/' || true)
+SCANNED_DI=$(dart_files | grep -c '/di/' || true)
+printf 'scanned %s files under %s — features %s (domain %s, data %s, presentation %s, di %s)\n' \
+  "$SCANNED_ALL" "$LIB" "$SCANNED_FEATURES" "$SCANNED_DOMAIN" "$SCANNED_DATA" \
+  "$SCANNED_PRESENTATION" "$SCANNED_DI"
+
+for scope in "all:$SCANNED_ALL" "features:$SCANNED_FEATURES" \
+             "domain:$SCANNED_DOMAIN" "data:$SCANNED_DATA" \
+             "presentation:$SCANNED_PRESENTATION" "di:$SCANNED_DI"; do
+  name="${scope%%:*}"; count="${scope##*:}"
+  [[ "$count" -gt 0 ]] && continue
+  report error "zero scope: $name" "$LIB" \
+    "No file matched, so every rule scoped to it passed without inspecting anything. Either the layer was removed or the path changed."
+done
 
 # ---------------------------------------------------------------------------
 printf '%s\n' "------------------------------------------------------------"

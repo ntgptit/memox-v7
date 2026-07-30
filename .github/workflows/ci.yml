@@ -1,0 +1,149 @@
+name: CI
+
+# Every gate that can run without a device, on every change that can reach main.
+#
+# `pull_request` and `push` to `main` both, and not one or the other. A PR build
+# tests the *merge result*, which is what review is about; a push build tests what
+# is actually on the branch, which is what a direct commit or a merge queue
+# produces. Neither covers the other.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  # So the gates can be run against a branch without opening a PR first.
+  workflow_dispatch:
+
+# A new push supersedes the run it interrupted. Two builds of the same branch
+# tell you the same thing, and the older one is answering a stale question.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # Pinned, matching `.fvmrc`. `stable` would mean the toolchain changes under the
+  # code without a commit saying so, and the analyzer's error set moves between
+  # minors — a green build would stop being reproducible.
+  FLUTTER_VERSION: 3.44.8
+
+jobs:
+  verify:
+    name: format · analyze · guards · test
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: pub get
+        run: flutter pub get
+
+      # Generated code is not committed (see .gitignore), so this is the step that
+      # makes a fresh clone equivalent to a developer's tree. Everything after it
+      # would report hundreds of unrelated analyzer errors if it were skipped.
+      - name: generate
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      # `.gitignore` claims CI "fails if the tree is dirty" after generating. It
+      # cannot: the output is ignored, so the tree is clean whatever happened.
+      # This script is the mechanism that claim needed — no generated file
+      # tracked, every declared part present, and a clean rebuild byte-identical
+      # to the incremental one.
+      - name: generated code is fresh and uncommitted
+        run: bash .claude/skills/flutter-workflow/scripts/check_generated.sh
+
+      - name: dart format
+        run: dart format --output=none --set-exit-if-changed .
+
+      # Errors and warnings are the bar the Definition of Done sets;
+      # analysis_options.yaml decides which lint is which, and several are
+      # promoted to error there.
+      - name: flutter analyze
+        run: flutter analyze --no-fatal-infos
+
+      # Prints how many files it inspected per layer and fails on zero. Six of its
+      # suffix checks once matched no files at all and reported success, which is
+      # why the count is output rather than assumed.
+      - name: architecture boundaries
+        run: bash .claude/skills/flutter-architecture/scripts/check_architecture.sh
+
+      - name: code verification guard
+        run: python code-verification-guard-v2/guard/run.py check --project . --ruleset memox-v7
+
+      # The spec-integrity checks: cross-references between docs/ that no runtime
+      # can catch. Data invariants need a database and are skipped without one.
+      - name: document integrity
+        run: bash .claude/skills/flutter-workflow/scripts/check_docs.sh
+
+      # `--reporter expanded` so the per-test names are in the log. `pipefail`
+      # because `tee` would otherwise report success for a failed run.
+      - name: flutter test
+        run: |
+          set -o pipefail
+          flutter test --reporter expanded | tee test-output.txt
+
+      # A suite that shrinks silently is the test-side version of a guard that
+      # scans nothing: everything stays green and the coverage is gone. A deleted
+      # file, a `main()` that returns early, a `test/` path that stops being
+      # collected — none of those fail anything on their own.
+      #
+      # The floor is a tripwire, not a target. It sits well below the current count
+      # so ordinary work never touches it, and it is raised deliberately.
+      - name: test count floor
+        run: |
+          count="$(grep -oE '\+[0-9]+' test-output.txt | tail -1 | tr -d '+')"
+          echo "tests passed: ${count:-0}"
+          if [ "${count:-0}" -lt 700 ]; then
+            echo "::error::only ${count:-0} tests ran — the suite has shrunk. If that was intended, lower the floor in this workflow in the same commit."
+            exit 1
+          fi
+
+      # Reruns the goldens explicitly. They pass above too, but a golden failure
+      # buried in 850 lines of expanded output is a golden failure nobody reads,
+      # and the artifact below is what makes it reviewable.
+      - name: golden tests
+        run: flutter test --tags golden --reporter compact
+
+      - name: upload golden failures
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-failures
+          path: |
+            test/**/failures/**
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # Web is not a production target, but it is the E2E channel (Flutter Web +
+  # Playwright), so it has to keep compiling. Its own job so it runs beside the
+  # gates above instead of after them — and so a web-only break is legible as
+  # exactly that.
+  web-build:
+    name: web build (E2E channel)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: pub get
+        run: flutter pub get
+
+      - name: generate
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: build web
+        run: flutter build web --release

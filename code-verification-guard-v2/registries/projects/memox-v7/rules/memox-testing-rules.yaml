@@ -54,7 +54,16 @@ rules:
     scopes:
       - test_files
     patterns:
-      - \bDateTime\s*\.\s*now\s*\(
+      # Anchored at line start and required to reach the call without passing a
+      # `//`, so a comment that *names* it is not a violation. A doc comment
+      # explaining why the clock is injected tripped this rule — the same defect
+      # class as a guard that passes because it scanned nothing: what the rule
+      # measures has to be the code, not the prose about the code.
+      #
+      # Line comments only. A `/* */` block or a string literal holding the call
+      # would still match; excluding those correctly means most of a lexer, so
+      # this is the cheap 95% and not a claim of completeness.
+      - ^(?:(?!//)[^\n])*\bDateTime\s*\.\s*now\s*\(
     tags:
       - memox
       - testing
