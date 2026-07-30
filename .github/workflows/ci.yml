@@ -58,6 +58,14 @@ jobs:
           flutter-version-file: .fvmrc
           cache: true
 
+      # The SDK cache restores a Flutter directory without its downloaded artifacts,
+      # so the third CI run failed to load **every** widget test with `Expected SDK
+      # font not found: material_fonts/roboto-regular.ttf`. Nothing in the project
+      # is wrong; the toolchain was incomplete. `--universal` is what fetches the
+      # material fonts a widget test renders with.
+      - name: precache SDK artifacts
+        run: flutter precache --universal
+
       - name: pub get
         run: flutter pub get
 
