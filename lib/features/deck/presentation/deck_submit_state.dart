@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../core/error/failure.dart';
+import '../../../core/state/submit_outcome.dart';
 import '../domain/deck_entity.dart';
 
 part 'deck_submit_state.freezed.dart';
@@ -32,15 +33,31 @@ abstract class DeckSubmitState with _$DeckSubmitState {
     /// problem. Held as the domain type so the screen chooses the copy.
     Failure? failure,
 
-    /// Set once the operation has succeeded, so a screen closes its sheet or
-    /// pops its route exactly once instead of on every rebuild.
-    @Default(false) bool isDone,
+    /// Set once the operation has succeeded, so a screen reacts exactly once
+    /// instead of on every rebuild.
+    ///
+    /// Carries *which kind* of success it was: only [SubmitOutcome.savedAndClose]
+    /// closes anything. A form that stays open for the next entry reports
+    /// [SubmitOutcome.savedAndContinue], and the widget clears its own draft —
+    /// see the enum for why a boolean could not express this.
+    SubmitOutcome? outcome,
   }) = _DeckSubmitState;
 
   const DeckSubmitState._();
 
   /// Whether a tap should be accepted at all — the double-submit guard.
-  bool get canSubmit => !isSubmitting && !isDone;
+  ///
+  /// A `savedAndContinue` success deliberately leaves this true: the editor is
+  /// still open and the next entry must be submittable without anything having to
+  /// call [reset] first. Only `savedAndClose` latches it shut, and only because
+  /// the form is on its way out.
+  bool get canSubmit => !isSubmitting && outcome != SubmitOutcome.savedAndClose;
+
+  /// True on the transition a widget should close on.
+  bool get shouldClose => outcome == SubmitOutcome.savedAndClose;
+
+  /// True on the transition a widget should clear its draft on.
+  bool get shouldClearDraft => outcome == SubmitOutcome.savedAndContinue;
 
   bool get hasFieldError => nameProblem != null || isSchedulerMissing;
 }

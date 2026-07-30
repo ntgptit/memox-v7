@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../app/di/deck_repository_provider.dart';
 import '../../../core/error/failure.dart';
+import '../../../core/state/submit_outcome.dart';
 import '../domain/deck_entity.dart';
 import '../domain/scheduler_type_model.dart';
 import 'deck_submit_state.dart';
@@ -28,9 +29,12 @@ part 'deck_write_controller.g.dart';
 /// * keeps the user's input on failure — none of them clears anything, the
 ///   widget holds the text (UC-02 E4, UC-03).
 ///
-/// None of them navigates or shows a snackbar. They expose [DeckSubmitState
-/// .isDone] and the widget reacts, because a controller that closed a route
-/// would need a handle on the widget tree that it must never hold.
+/// None of them navigates or shows a snackbar. They report a [SubmitOutcome] and
+/// the widget reacts, because a controller that closed a route would need a handle
+/// on the widget tree that it must never hold.
+///
+/// Only the two creators take a [SubmitDisposition]: rename, delete, reset and
+/// move have nothing to add another of, so they always report `savedAndClose`.
 
 /// Creates a root deck (UC-02).
 @riverpod
@@ -45,6 +49,7 @@ class CreateRootDeckController extends _$CreateRootDeckController {
   Future<void> submit({
     required String name,
     required SchedulerType? schedulerType,
+    SubmitDisposition disposition = SubmitDisposition.close,
   }) async {
     if (!state.canSubmit) return;
 
@@ -64,7 +69,7 @@ class CreateRootDeckController extends _$CreateRootDeckController {
           .read(deckRepositoryProvider)
           .createRootDeck(name: name, schedulerType: schedulerType);
       if (!ref.mounted) return;
-      state = const DeckSubmitState(isDone: true);
+      state = DeckSubmitState(outcome: disposition.outcome);
     } on Failure catch (failure) {
       if (!ref.mounted) return;
       state = deckSubmitFailure(failure, name: name);
@@ -86,7 +91,10 @@ class CreateSubDeckController extends _$CreateSubDeckController {
   @override
   DeckSubmitState build(String parentDeckId) => const DeckSubmitState();
 
-  Future<void> submit({required String name}) async {
+  Future<void> submit({
+    required String name,
+    SubmitDisposition disposition = SubmitDisposition.close,
+  }) async {
     if (!state.canSubmit) return;
 
     final nameProblem = DeckEntity.nameProblem(name);
@@ -102,7 +110,7 @@ class CreateSubDeckController extends _$CreateSubDeckController {
           .read(deckRepositoryProvider)
           .createSubDeck(name: name, parentDeckId: parentDeckId);
       if (!ref.mounted) return;
-      state = const DeckSubmitState(isDone: true);
+      state = DeckSubmitState(outcome: disposition.outcome);
     } on Failure catch (failure) {
       if (!ref.mounted) return;
       state = deckSubmitFailure(failure, name: name);
@@ -138,7 +146,7 @@ class RenameDeckController extends _$RenameDeckController {
           .read(deckRepositoryProvider)
           .renameDeck(deckId: deckId, name: name);
       if (!ref.mounted) return;
-      state = const DeckSubmitState(isDone: true);
+      state = const DeckSubmitState(outcome: SubmitOutcome.savedAndClose);
     } on Failure catch (failure) {
       if (!ref.mounted) return;
       state = deckSubmitFailure(failure, name: name);
@@ -161,7 +169,7 @@ class DeleteDeckController extends _$DeleteDeckController {
     try {
       await ref.read(deckRepositoryProvider).deleteDeck(deckId);
       if (!ref.mounted) return;
-      state = const DeckSubmitState(isDone: true);
+      state = const DeckSubmitState(outcome: SubmitOutcome.savedAndClose);
     } on Failure catch (failure) {
       if (!ref.mounted) return;
       state = DeckSubmitState(failure: failure);
@@ -189,7 +197,7 @@ class ResetContentTypeController extends _$ResetContentTypeController {
     try {
       await ref.read(deckRepositoryProvider).resetContentType(deckId);
       if (!ref.mounted) return;
-      state = const DeckSubmitState(isDone: true);
+      state = const DeckSubmitState(outcome: SubmitOutcome.savedAndClose);
     } on Failure catch (failure) {
       if (!ref.mounted) return;
       state = DeckSubmitState(failure: failure);
@@ -219,7 +227,7 @@ class MoveDeckController extends _$MoveDeckController {
           .read(deckRepositoryProvider)
           .moveDeck(deckId: deckId, targetParentDeckId: targetParentDeckId);
       if (!ref.mounted) return;
-      state = const DeckSubmitState(isDone: true);
+      state = const DeckSubmitState(outcome: SubmitOutcome.savedAndClose);
     } on Failure catch (failure) {
       if (!ref.mounted) return;
       state = DeckSubmitState(failure: failure);

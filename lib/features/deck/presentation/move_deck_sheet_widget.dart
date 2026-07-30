@@ -56,12 +56,14 @@ class MoveDeckSheetWidget extends StatelessWidget {
             final submit = ref.watch(moveDeckControllerProvider(deckId));
             // A one-shot side effect driven by a state transition rather than
             // fired from a rebuild: `listen` runs on change, so the sheet closes
-            // once instead of on every rebuild that happens to see `isDone`.
+            // once instead of on every rebuild that happens to see the outcome.
             ref.listen<DeckSubmitState>(moveDeckControllerProvider(deckId), (
               previous,
               next,
             ) {
-              if (next.isDone && !(previous?.isDone ?? false)) onDone();
+              if (next.shouldClose && !(previous?.shouldClose ?? false)) {
+                onDone();
+              }
             });
 
             return Column(

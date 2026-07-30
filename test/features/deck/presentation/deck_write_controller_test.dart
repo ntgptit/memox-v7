@@ -51,7 +51,10 @@ void main() {
       // passes what was typed so the rule has one owner.
       expect(repository.createdRootDecks.single.name, '  Japanese  ');
       expect(repository.createdRootDecks.single.scheduler, SchedulerType.sm2);
-      expect(container.read(createRootDeckControllerProvider).isDone, isTrue);
+      expect(
+        container.read(createRootDeckControllerProvider).shouldClose,
+        isTrue,
+      );
     });
 
     test('both schedulers are accepted', () async {
@@ -84,7 +87,7 @@ void main() {
       final state = container.read(createRootDeckControllerProvider);
       expect(state.isSchedulerMissing, isTrue);
       expect(state.nameProblem, isNull);
-      expect(state.isDone, isFalse);
+      expect(state.shouldClose, isFalse);
       expect(repository.createdRootDecks, isEmpty);
     });
 
@@ -147,7 +150,7 @@ void main() {
 
       final state = container.read(createRootDeckControllerProvider);
       expect(state.failure, isA<DatabaseFailure>());
-      expect(state.isDone, isFalse);
+      expect(state.shouldClose, isFalse);
       expect(state.isSubmitting, isFalse);
     });
 

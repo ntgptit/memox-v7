@@ -6,12 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../l10n/l10n_extension.dart';
 import '../../../shared/widgets/mx_action_sheet.dart';
-import '../../../shared/widgets/mx_confirm_dialog.dart';
 import '../domain/deck_content_type_model.dart';
-import '../domain/deck_deletion_impact_model.dart';
 import '../domain/deck_entity.dart';
-import 'deck_labels_widget.dart';
-import 'deck_detail_controller.dart';
+import 'deck_confirm_widget.dart';
 import 'deck_form_widget.dart';
 import 'deck_submit_state.dart';
 import 'deck_write_controller.dart';
@@ -80,9 +77,9 @@ Future<void> showDeckActions(
     case _DeckAction.move:
       await showDeckMoveSheet(context, deckId: deck.id);
     case _DeckAction.reset:
-      await _confirmResetContentType(context, deck: deck);
+      await showDeckResetContentTypeConfirm(context, deck: deck);
     case _DeckAction.delete:
-      await _confirmDelete(context, deck: deck, onDeleted: onDeleted);
+      await showDeckDeleteConfirm(context, deck: deck, onDeleted: onDeleted);
   }
 }
 
@@ -182,31 +179,6 @@ Future<void> showDeckMoveSheet(
   ),
 );
 
-/// The delete confirmation, with the impact read before it is shown (BR-04).
-Future<void> _confirmDelete(
-  BuildContext context, {
-  required DeckEntity deck,
-  required VoidCallback onDeleted,
-}) => showDialog<void>(
-  context: context,
-  builder: (dialogContext) => _DeleteDeckDialog(
-    deck: deck,
-    onDeleted: onDeleted,
-    onClose: () => Navigator.of(dialogContext).pop(),
-  ),
-);
-
-Future<void> _confirmResetContentType(
-  BuildContext context, {
-  required DeckEntity deck,
-}) => showDialog<void>(
-  context: context,
-  builder: (dialogContext) => _ResetContentTypeDialog(
-    deckId: deck.id,
-    onClose: () => Navigator.of(dialogContext).pop(),
-  ),
-);
-
 /// Wraps a form in a bottom sheet with the keyboard inset applied.
 ///
 /// `isScrollControlled` plus the view insets, because without both the sheet is
@@ -279,118 +251,18 @@ class _FormHostState extends State<_FormHost> {
   @override
   void didUpdateWidget(_FormHost oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // The transition, not the value: reacting to `isDone` alone would fire on
+    // The transition, not the value: reacting to the outcome alone would fire on
     // every rebuild that happens to see it and pop the sheet more than once.
-    if (widget.state.isDone && !oldWidget.state.isDone) widget.onDone();
+    //
+    // And `shouldClose`, not "succeeded": a form that saved and stayed open for
+    // the next entry reports `savedAndContinue`, and closing on that would be the
+    // bug this distinction exists to prevent. Deck has no such form today; the
+    // check is written this way so cloning it into one cannot go wrong silently.
+    if (widget.state.shouldClose && !oldWidget.state.shouldClose) {
+      widget.onDone();
+    }
   }
 
   @override
   Widget build(BuildContext context) => widget.child;
-}
-
-/// Reads the deletion impact, then asks (BR-04).
-///
-/// The read happens inside the dialog so the numbers are as fresh as the moment
-/// the dialog opened, and so a failed read shows as a failed dialog rather than
-/// a confirmation with blanks where the counts should be.
-class _DeleteDeckDialog extends ConsumerStatefulWidget {
-  const _DeleteDeckDialog({
-    required this.deck,
-    required this.onDeleted,
-    required this.onClose,
-  });
-
-  final DeckEntity deck;
-  final VoidCallback onDeleted;
-  final VoidCallback onClose;
-
-  @override
-  ConsumerState<_DeleteDeckDialog> createState() => _DeleteDeckDialogState();
-}
-
-class _DeleteDeckDialogState extends ConsumerState<_DeleteDeckDialog> {
-  late final Future<DeckDeletionImpact> _impact = ref.read(
-    deckDeletionImpactProvider(widget.deck.id).future,
-  );
-
-  @override
-  Widget build(BuildContext context) {
-    final provider = deleteDeckControllerProvider(widget.deck.id);
-    final submit = ref.watch(provider);
-
-    ref.listen<DeckSubmitState>(provider, (previous, next) {
-      if (!next.isDone || (previous?.isDone ?? false)) return;
-      widget.onClose();
-      widget.onDeleted();
-    });
-
-    return FutureBuilder<DeckDeletionImpact>(
-      future: _impact,
-      builder: (context, snapshot) {
-        final impact = snapshot.data;
-        final message = impact == null
-            // Never a confirmation with the numbers missing: until the impact is
-            // known the dialog cannot say what will be lost, and BR-04 makes
-            // that statement the point of the dialog.
-            ? context.l10n.deckDetailLoadingLabel
-            : context.l10n.deckDeleteImpactMessage(
-                impact.descendantDeckCount,
-                impact.cardCount,
-              );
-
-        return MxConfirmDialog(
-          title: context.l10n.deckDeleteConfirmTitle(widget.deck.name),
-          message: submit.failure != null
-              ? context.deckWriteFailure(submit.failure!)
-              : message,
-          confirmLabel: context.l10n.deckDeleteConfirmAction,
-          cancelLabel: context.l10n.commonCancelAction,
-          variant: MxConfirmDialogVariant.destructive,
-          isSubmitting: submit.isSubmitting || impact == null,
-          onConfirm: () => ref.read(provider.notifier).submit(),
-          onCancel: widget.onClose,
-        );
-      },
-    );
-  }
-}
-
-/// Confirms putting an empty sub-deck back to `unset` (BR-68).
-///
-/// A plain widget wrapping a `Consumer`: the dialog's chrome does not depend on
-/// the provider, only its message and its buttons do, and scoping the watch says
-/// so. It also keeps the two-argument `build` signature — which the project guard
-/// misreads as a Riverpod 2 generated ref type — out of this file.
-class _ResetContentTypeDialog extends StatelessWidget {
-  const _ResetContentTypeDialog({required this.deckId, required this.onClose});
-
-  final String deckId;
-  final VoidCallback onClose;
-
-  @override
-  Widget build(BuildContext context) {
-    final provider = resetContentTypeControllerProvider(deckId);
-
-    return Consumer(
-      builder: (context, ref, child) {
-        final submit = ref.watch(provider);
-
-        ref.listen<DeckSubmitState>(provider, (previous, next) {
-          if (next.isDone && !(previous?.isDone ?? false)) onClose();
-        });
-
-        return MxConfirmDialog(
-          title: context.l10n.deckResetContentTypeTitle,
-          message: submit.failure != null
-              ? context.deckWriteFailure(submit.failure!)
-              : context.l10n.deckResetContentTypeMessage,
-          confirmLabel: context.l10n.deckResetContentTypeConfirmAction,
-          cancelLabel: context.l10n.commonCancelAction,
-          isSubmitting: submit.isSubmitting,
-          onConfirm: () => ref.read(provider.notifier).submit(),
-          onCancel: onClose,
-        );
-      },
-    );
-  }
 }
