@@ -161,6 +161,61 @@ void main() {
 
       expect(retried, 1);
     });
+
+    test('half a retry is refused at construction', () {
+      // Both halves or neither. The build drops an unpaired one silently, which
+      // leaves an error the user can read and cannot act on — and no test
+      // anywhere fails, because the widget renders a complete-looking frame.
+      expect(
+        () => MxErrorState(
+          title: 'Something went wrong',
+          message: 'This part could not be displayed.',
+          retryLabel: 'Try again',
+        ),
+        throwsAssertionError,
+      );
+      expect(
+        () => MxErrorState(
+          title: 'Something went wrong',
+          message: 'This part could not be displayed.',
+          onRetry: () {},
+        ),
+        throwsAssertionError,
+      );
+    });
+  });
+
+  group('MxEmptyState', () {
+    test('half an action is refused at construction', () {
+      // Same trap, and the more likely of the two to be written: an empty state
+      // whose whole purpose is the call to action, shipped with the label wired
+      // and the callback forgotten.
+      //
+      // Non-`const` on purpose, and the reason is the better half of the news:
+      // the constructor is `const`, so a `const` call site with only a label does
+      // not reach a runtime assert at all — the analyzer refuses to compile it
+      // (`const_eval_throws_exception`). Writing this case as a `const` made
+      // `flutter analyze` fail rather than the test pass. Real screens build
+      // these as `const`, so most violations are caught before the app is run.
+      // This test covers the runtime path that a non-`const` call site takes.
+      expect(
+        () => MxEmptyState(
+          title: 'No decks yet',
+          actionLabel: 'Create your first deck',
+        ),
+        throwsAssertionError,
+      );
+      expect(
+        () => MxEmptyState(title: 'No decks yet', onAction: () {}),
+        throwsAssertionError,
+      );
+    });
+
+    test('neither half is the valid empty case', () {
+      // Nothing-due is a normal state, not a failure (BR-29), so an empty state
+      // with no action must stay constructible.
+      expect(const MxEmptyState(title: 'Nothing due today'), isNotNull);
+    });
   });
 
   group('small screen and large text', () {

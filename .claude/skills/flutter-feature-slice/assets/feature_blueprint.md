@@ -286,6 +286,81 @@ switch, and `MxAsyncView` for why no shared default error UI exists.
   `_widget.dart` file **inside the feature** — never in `shared/`, which must not
   know a domain type
 
+### Promoting something to `shared/` — the different bar
+
+A bad feature widget costs one screen. A bad shared component costs every screen
+that adopts it, and the cost arrives later, when changing it means touching all of
+them. Five rules, each one measured against the twelve `Mx*` components rather
+than asserted:
+
+**1 · No state coupling, at all.** All twelve are `StatelessWidget` — no
+`ConsumerWidget`, no `WidgetRef`, no provider read anywhere. The single
+`flutter_riverpod` import in `shared/` is `mx_async_view.dart` taking an
+`AsyncValue<T>` as a *type*; it never touches `ref`. A shared component receives
+data through its constructor and reports through callbacks. Check it with:
+
+```bash
+git grep -nE "Consumer|WidgetRef|ref\.(watch|read|listen)" -- lib/shared
+```
+
+**2 · No raw `Color` or `TextStyle` parameter. Ever.** This is the refusal that
+keeps a design system a system, and it is the one most often argued away as
+flexibility. A `Color? backgroundColor` means the third feature paints a button a
+colour the theme never approved, and by then the parameter has four callers and
+cannot be removed. The sanctioned escape hatch is a **closed variant enum** —
+`MxActionButtonVariant`, `MxConfirmDialogVariant`, `MxActionSheetActionVariant` —
+so a new appearance is a decision made once in the theme rather than at a call
+site. `git grep -nE "final (Color|TextStyle)\??" -- lib/shared` returns nothing,
+and it must stay that way.
+
+**3 · Slots where the variation is a widget, not a flag.** `MxListTile` takes
+`Widget? leading` / `Widget? trailing` so one feature can pass a chevron, another a
+switch, another a price. `MxContentShell` takes `List<Widget>? actions`.
+`MxAsyncView` takes three builders. What none of them take is a boolean that
+selects between two layouts — that is the shape a mega-widget grows from.
+
+**4 · Paired optional parameters get an `assert`.** `MxEmptyState` had
+`actionLabel` and `onAction` both optional, and the build read
+`if (actionLabel != null && onAction != null)`. Passing one without the other
+**dropped the button silently**: the screen looked deliberately action-free, no
+exception, no failing test. `MxErrorState` had the same shape with
+`retryLabel`/`onRetry`, which is worse — an error the user can read and cannot act
+on. Both now assert the pair.
+
+Worth knowing about `const` constructors and asserts: at a `const` call site the
+assert is evaluated by the **analyzer**, so a violation is
+`const_eval_throws_exception` at compile time rather than a runtime failure. Since
+screens build these as `const`, most violations never reach a test run. It also
+means the test for the assert must use a non-`const` invocation — a `const` one
+fails `flutter analyze` instead of passing.
+
+**5 · The stress suite, not a gallery screen.**
+`test/shared/widgets/mx_stress_test.dart` renders **every** component at 320x640,
+`TextScaler.linear(2.0)`, with Vietnamese copy long enough to wrap, in light *and*
+dark, and asserts two things: `takeException()` is null, and
+`meetsGuideline(androidTapTargetGuideline)` passes. Before it existed the tap-target
+guideline ran for two of twelve components.
+
+The Vietnamese copy is not decoration. It is one of the two shipped locales, runs
+~25% longer than the English for the same sentence, and its diacritics raise the
+line box — a Column sized against English overflows there and nowhere else.
+
+A `SharedWidgetGallery` **screen** was considered and rejected: it would be
+production code needing an MX-VIS-001 audit companion, it would ship inside the
+app, and nothing would fail when it rotted. The suite runs on every commit and
+names the component that broke. It also carries a coverage assertion — the specimen
+list is diffed against `lib/shared/widgets/`, so a new component cannot join the
+folder without joining the suite. That assertion caught a missing `MxContentShell`
+on its first run.
+
+One asymmetry to keep in mind while reading it: **components pass, and screens are
+where the caller can still get it wrong.** `MxContentShell.isScrollable` defaults
+to `false` and has to — a body that already scrolls (`ListView`) must not be nested
+in another scroll view, which fails outright rather than overflowing. A fixed body
+that forgets to opt in overflows silently, and only at large text scale or on a
+short screen. The Deck screens each carry a `320 x 2.0` case for this reason; a new
+screen should too, and nothing currently forces it.
+
 ## Tests, and the level each belongs at
 
 | What | Where | Against |
