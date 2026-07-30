@@ -1,5 +1,8 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
+import 'package:flutter/foundation.dart';
+
+import 'query_log_interceptor.dart';
 
 /// The only place in `lib/` that opens a database (AD-08).
 ///
@@ -16,9 +19,11 @@ import 'package:drift_flutter/drift_flutter.dart';
 /// back to a no-op database would let an E2E suite pass with no persistence at
 /// all.
 ///
-/// Nothing here logs a path, a query or a row. Card content, notes and learning
-/// history are private (AD-08), and a database log is the easiest place to leak
-/// all three at once.
+/// Nothing here logs a path, an argument or a row. Card content, notes and
+/// learning history are private (AD-08), and a database log is the easiest place
+/// to leak all three at once. In debug builds the statement *text* and its
+/// duration are logged — see [QueryLogInterceptor] for why that line sits where
+/// it does, and why drift's own `debugPrint` option stays off.
 
 /// Name of the on-device database file.
 ///
@@ -43,11 +48,20 @@ const String kDriftWorkerPath = '/drift_worker.js';
 /// opened the database in a browser — a build that compiles is not a build
 /// that persists.
 QueryExecutor openAppDatabaseConnection() {
-  return driftDatabase(
+  final executor = driftDatabase(
     name: kDatabaseName,
     web: DriftWebOptions(
       sqlite3Wasm: Uri.parse(kSqlite3WasmPath),
       driftWorker: Uri.parse(kDriftWorkerPath),
     ),
   );
+
+  // `kDebugMode` rather than `EnvConfig.logLevel`, which is the usual way to
+  // decide this: a compile-time constant lets the tree shaker drop the
+  // interceptor and its log lines out of a release build entirely. For anything
+  // adjacent to private data that is stronger than a runtime flag, because a
+  // runtime flag can be set wrong and still ship.
+  if (!kDebugMode) return executor;
+
+  return executor.interceptWith(QueryLogInterceptor());
 }

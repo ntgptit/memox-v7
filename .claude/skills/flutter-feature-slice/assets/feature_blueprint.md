@@ -53,6 +53,8 @@ when a call orchestrates more than one repository.
 | screen chrome, list row, buttons, inputs, sheets, dialogs, empty/error/loading | `shared/widgets/mx_*` |
 | the three `AsyncValue` cases, with the loading policy stated | `shared/widgets/mx_async_view.dart` — `MxAsyncView<T>` |
 | close-on-success vs stay-open-on-success | `core/state/submit_outcome.dart` — `SubmitDisposition` / `SubmitOutcome` |
+| provider failures and state transitions in the log | `core/state/provider_observer.dart` — installed in `bootstrap` |
+| which SQL ran, and how long it took | `core/database/query_log_interceptor.dart` — debug builds only |
 | localized strings | `lib/l10n/*.arb` + `context.l10n` |
 
 **The rule that makes this checkable:** every import a feature makes to the
@@ -153,6 +155,103 @@ assertion, so it is worth doing once, deliberately — not halfway.
 - pass `now` in as a parameter. A query that reads the SQL clock cannot be tested
   at its own boundary.
 
+### Bound every read whose row count the user controls
+
+Deck got away without this: a user has tens of root decks, and the tree is capped
+at 10 levels (BR-55). **Cards are the first table with no such ceiling**, and
+`cardsByDeck` as it stands today selects the whole deck.
+
+Measured on real in-memory SQLite, one deck of 5,000 cards, debug VM:
+
+| read | time |
+|---|---|
+| whole deck, as `cardsByDeck` is written now | **37.8 ms** + 0.4 ms to map |
+| first page of 50 | **1.6 ms** |
+| page 99 via `LIMIT ... OFFSET` | 2.7 ms |
+| page 99 via keyset | **1.1 ms** |
+
+37.8 ms is more than two 60fps frames, and a `watch()` stream re-runs the whole
+query on **every** write to `cards` — so editing one card re-reads all 5,000.
+Mapping is not the problem (0.4 ms); the query is.
+
+Three rules follow, in the order they matter:
+
+1. **A list query that can grow without bound takes a page size.** Write it that
+   way in the same commit as the query. Retrofitting it later is not a SQL change
+   — it changes the state shape, the controller and the widget.
+2. **Keyset, not `OFFSET`.** `WHERE (created_at, id) > (:afterCreatedAt, :afterId)
+   ORDER BY created_at, id LIMIT :pageSize`. `OFFSET` costs the rows it skips, and
+   worse, it *shifts* when a row is inserted above the window — a user who adds a
+   card mid-scroll sees a duplicate or misses one. The ordering column pair must
+   be unique, which is why `id` is in it.
+3. **Do not build a generic `PaginatedNotifier<T>` for the first list.** Same rule
+   as shared components: one caller is a guess at what varies. The scroll-end
+   listener likewise stays inside the screen until a second list needs it.
+
+`cardsDueForReview` (M5) is the other unbounded read: a session currently loads
+every due card in the tree.
+
+### Local-first, and what sync will and will not change
+
+Sync is deferred (AD-01), and the deferral is a decision with a scope — knowing
+which half is already paid for is what stops each feature inventing a quarter of
+a sync layer:
+
+**Already in place, because it is expensive to retrofit:**
+
+- repository contracts in `domain/`, written from what presentation needs rather
+  than from Drift's shape. This is the whole of "backend-ready": adding a remote
+  source changes `*_repository_impl.dart` and nothing above it.
+- reads are `watch()` streams, so a future sync writing to the table updates every
+  screen with no invalidation call added anywhere
+- **client-generated UUID primary keys**, so a row created offline needs no
+  server round trip to have an identity
+- nullable `owner_id` on `decks`, so rows survive the arrival of accounts (AD-03)
+- `created_at` / `updated_at` maintained on **every** write, from an injected
+  clock. This is the one that cannot be added later: a column added in v2 has no
+  true value for rows written in v1, and last-write-wins has nothing to compare.
+
+**Deliberately absent — do not add per feature:**
+
+- `is_synced` / `is_pending_sync` / `server_id`. There is no writer that could set
+  them to anything but the same constant and no reader that could act on them, so
+  they would be columns whose tests assert a literal. AD-01 is explicit: a write
+  to Drift *is* a successful write, and there is no "sending" state.
+- an outbox table, a queue, a retry policy, a conflict resolution rule. Conflict
+  policy is undecided and is a **product** question (which side wins when the same
+  card was edited on two devices), not one to settle inside a feature's repository.
+- `dio`, and `data/remote/` (AD-05). `EnvConfig.apiBaseUrl` deliberately points at
+  a `.invalid` host so a premature request fails at DNS instead of reaching
+  something real.
+
+`ConflictFailure` already exists, but it means a **local** constraint violation —
+a duplicate primary key mapped from `SqliteException` extended code 11. It is not
+a sync conflict and must not be reused as one.
+
+### Adding a table or a column
+
+The migration foundation is built and needs nothing from a new feature except
+that it be used:
+
+- `AppDatabase.migration` has `onCreate` and, in `beforeOpen`,
+  `PRAGMA foreign_keys = ON`. That pragma is not decoration: SQLite defaults FK
+  enforcement **off per connection**, so without it every `ON DELETE CASCADE` in
+  the schema is a comment and deletes silently leave rows nothing can reach.
+  `migration_test.dart` and `schema_test.dart` both read the pragma back rather
+  than trusting the declaration.
+- **`drift_schemas/drift_schema_v1.json` is committed**, and
+  `SchemaVerifier.startAt(1)` asserts the `.drift` sources still build exactly
+  that. This is the piece that cannot be recovered once the source moves on, and
+  it is what makes the first real migration testable at all.
+- There is **no placeholder `onUpgrade`**, and a test asserts
+  `GeneratedHelper.versions == [1]`. A handler written against a version that does
+  not exist reads like a decision and is a guess.
+
+So, for a feature that changes the schema: bump `schemaVersion`, write the real
+`onUpgrade` step, dump the new snapshot, and add the data-preservation test
+(v1 rows still readable after migrating to v2). Until a v2 exists there is nothing
+to assert — the harness is proven at v1, which is as far as honesty goes.
+
 ## Errors
 
 `Failure` is the only error type that crosses the repository boundary. Every
@@ -215,6 +314,51 @@ Writes record their arguments so a widget test can assert what the form sent.
 Keep files under 400 lines and 500 logical lines — `common.no_large_source_file`
 and `common.max_file_lines`. Split at group boundaries, sharing the preamble, so
 no fixture exists twice.
+
+## Seeing what the app is doing
+
+Three things are wired up already. All three are diagnostics, and all three are
+constrained by the same rule, so it is worth stating once: **AD-08 forbids logging
+card content at any level, and explicitly permits IDs.** A diagnostic that prints
+a value is the most natural thing to write and the easiest privacy leak in the
+codebase, because it is added while debugging and read only after release.
+
+**Provider failures — `core/state/provider_observer.dart`.** Installed in
+`bootstrap`, failures always, state transitions only when
+`EnvConfig.logLevel == LogLevel.debug`. The asymmetry is earned: Riverpod 3 retries
+a failed provider ten times with a backoff reaching 6.4 s, showing `AsyncLoading`
+throughout — so without this, one broken read is thirteen seconds of spinner and
+no exception in the log. `providerDidFail` fires on every attempt, which makes it
+self-describing. A transition prints the **type** of each value, never the value:
+`AsyncData<List<DeckEntity>>(37)`, with a list length because "3 → 0" is the
+question and a count is not content.
+
+**SQL — `core/database/query_log_interceptor.dart`.** Statement text, elapsed
+microseconds, row count. Debug builds only, gated on `kDebugMode` rather than
+`EnvConfig` because a compile-time constant lets the tree shaker remove it from
+release output entirely.
+
+> **Do not set `driftRuntimeOptions.debugPrint = true`.** It is the obvious answer
+> and the wrong one: drift's own logging prints bound variables next to the
+> statement, so the first `INSERT INTO cards` puts a flashcard's front and back
+> into the log. The interceptor never reads `args` at all — a structural omission
+> rather than a rule to remember — and
+> `test/core/database/query_log_interceptor_test.dart` proves it by inserting
+> content that would be unmistakable in the output.
+
+Two caveats, both asserted in tests so nobody rediscovers them the slow way: a
+*failed* statement is not logged (it travels to the repository, which maps it to a
+`Failure`; logging both makes one problem look like two), and drift's own
+`onCreate` / `beforeOpen` statements are invisible because drift runs them
+underneath any interceptor — so `CREATE TABLE` and `PRAGMA foreign_keys = ON` never
+appear. `test/database/migration_test.dart` covers those by reading the schema and
+the pragma back out of SQLite, which is better evidence than a log line.
+
+**Fakes — `test/features/<f>/presentation/support/`.** Already the standard for
+widget and controller tests, described above. There is no Widgetbook or Storybook
+and none is proposed: component rendering is already covered by 26 goldens and 16
+strict visual-audit states, and a third rendering surface would be a third place
+for a component to look right while the app looks wrong.
 
 ## Before you clone — the honest checklist
 
