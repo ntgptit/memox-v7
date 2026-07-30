@@ -124,6 +124,36 @@ outcome and the widget reacts via `ref.listen` or `didUpdateWidget`, on the
 *transition* rather than the value, so a sheet closes once instead of on every
 rebuild.
 
+**The five things a controller must not touch**, verified by grep across every
+controller, repository and domain file in the feature: `BuildContext`, the router
+(`goNamed`/`context.go`/`Navigator`), a dialog (`showDialog`/`showModalBottomSheet`),
+a snackbar (`ScaffoldMessenger`/`SnackBar`), and an `AnimationController`. All five
+return nothing. The only `package:flutter` import in a controller is
+`root_decks_controller.dart` taking `AppLifecycleListener` — not a widget, holds no
+context, and the alternative was a controller keeping a reference into the widget
+tree.
+
+The direction is the point: a controller reports, the widget decides. Success pops,
+failure renders, created navigates — and each of those is a line in a widget, where
+a `BuildContext` legitimately exists.
+
+**On protecting the side effect from re-running**, one honest note. Three of the
+four sites use `ref.listen`, which Riverpod calls only on a change, so the explicit
+`previous?.shouldClose` check there is a second layer. The fourth,
+`_FormHost.didUpdateWidget`, is called on every parent rebuild and needs its guard
+in principle — but fault injection showed that removing it does **not** produce a
+double pop today, because the state after a success is terminal: nothing changes it
+again, so the `Consumer` above it is not rebuilt again. Keep the guard; do not
+believe a comment that says it is load-bearing today.
+
+What is worth testing is the behaviour rather than the line.
+`side_effect_once_test.dart` pumps *through* the close — keyboard insets changing
+on the way out, as they do on a device — and asserts the sheet is gone, the screen
+that opened it is still mounted, and the repository received exactly one write.
+Before it, every test in the feature called `pumpAndSettle` once and checked the
+repository, which a double pop or a sheet that failed to close would not have
+changed.
+
 `autoDispose` (the generator default) for anything per-screen; `keepAlive` only
 for the database and the repositories.
 
