@@ -4,10 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/theme_context_extension.dart';
 import '../../../l10n/l10n_extension.dart';
+import '../../../shared/widgets/mx_async_view.dart';
 import '../../../shared/widgets/mx_empty_state.dart';
 import '../../../shared/widgets/mx_error_state.dart';
 import '../../../shared/widgets/mx_list_tile.dart';
-import '../../../shared/widgets/mx_loading_state.dart';
 import '../domain/deck_move_target_model.dart';
 import 'deck_labels_widget.dart';
 import 'deck_move_targets_controller.dart';
@@ -83,24 +83,21 @@ class MoveDeckSheetWidget extends StatelessWidget {
                 ],
                 const SizedBox(height: AppSpacing.md),
                 Flexible(
-                  child: ref
-                      .watch(deckMoveTargetsProvider(deckId))
-                      .when(
-                        loading: () => MxLoadingState(
-                          semanticsLabel: context.l10n.deckMoveLoadingLabel,
-                        ),
-                        error: (error, stackTrace) => MxErrorState(
-                          title: context.l10n.deckWriteErrorTitle,
-                          message: context.l10n.deckWriteErrorMessage,
-                        ),
-                        data: (targets) => _TargetList(
-                          targets: targets,
-                          canSubmit: submit.canSubmit,
-                          onChoose: (target) => ref
-                              .read(moveDeckControllerProvider(deckId).notifier)
-                              .submit(targetParentDeckId: target.deck.id),
-                        ),
-                      ),
+                  child: MxAsyncView<List<DeckMoveTarget>>(
+                    value: ref.watch(deckMoveTargetsProvider(deckId)),
+                    loadingLabel: context.l10n.deckMoveLoadingLabel,
+                    data: (targets) => _TargetList(
+                      targets: targets,
+                      canSubmit: submit.canSubmit,
+                      onChoose: (target) => ref
+                          .read(moveDeckControllerProvider(deckId).notifier)
+                          .submit(targetParentDeckId: target.deck.id),
+                    ),
+                    error: (error, stackTrace) => MxErrorState(
+                      title: context.l10n.deckWriteErrorTitle,
+                      message: context.l10n.deckWriteErrorMessage,
+                    ),
+                  ),
                 ),
               ],
             );

@@ -51,6 +51,7 @@ when a call orchestrates more than one repository.
 | the open database | `core/database/app_database_provider.dart` |
 | spacing / radius / icon size / colours / text | `core/theme/*` — never a literal |
 | screen chrome, list row, buttons, inputs, sheets, dialogs, empty/error/loading | `shared/widgets/mx_*` |
+| the three `AsyncValue` cases, with the loading policy stated | `shared/widgets/mx_async_view.dart` — `MxAsyncView<T>` |
 | localized strings | `lib/l10n/*.arb` + `context.l10n` |
 
 **The rule that makes this checkable:** every import a feature makes to the
@@ -225,6 +226,109 @@ edit that are not about the new feature's subject?** For Deck → Card the answe
 is zero outside `features/card/`, plus the ARB pair, plus the route table, plus
 one WBS entry. If a clone would have to touch `core/` or `shared/` to make the
 second feature work, that thing belonged there before the clone.
+
+## Practical patterns — the four things feature 1 got asked about
+
+These are the parts that are cheap to get right once and expensive to retrofit.
+Each entry says what `features/deck` actually does, so the answer is checkable
+rather than aspirational.
+
+### Route arguments, and returning from a form
+
+Route args go in as a **family provider parameter**, not through a widget
+constructor that then pushes them into state:
+
+```dart
+@Riverpod(retry: noAutomaticRetry)
+Stream<DeckDetail> deckDetail(Ref ref, String deckId) { ... }
+```
+
+The screen takes the id, the provider takes the id, and the id is read from
+`state.pathParameters[RoutePathParams.deckId]` in exactly one place — the route
+table. Path-parameter names are constants because the two halves (written at the
+call site, read in the route table) live in different files and a typo compiles.
+
+**Nothing returns data through `Navigator.pop`.** A form writes to the database
+and the list re-renders because its `watch()` stream re-emits. `pop` carries only
+a UI choice — which row of an action sheet was tapped, whether a discard was
+confirmed — never a record:
+
+```bash
+git grep -n "Navigator.of(.*).pop(" -- lib
+```
+
+Every hit should be a sheet or dialog dismissal. A record coming back that way is
+a second source of truth racing the stream, and the two disagree the first time a
+write is slow.
+
+### Forms
+
+Simple form: the widget owns a `TextEditingController`, and the controller
+(Riverpod) sees the value only at submit. That is what makes "a failed write keeps
+the input" true without anyone implementing it — the text never left the widget.
+
+Reset happens **on open**, from the tap that shows the form, not from `dispose`.
+Two reasons, both real: Riverpod refuses a provider mutation inside `build`,
+`initState` or `dispose`; and a reset scheduled from `dispose` races the
+controller's own teardown, so an autoDispose provider with no listeners left is
+already gone by the time the callback runs, and touching its `Ref` throws.
+
+A multi-step or cross-field form would move the field values into the notifier
+state, beside the field problems. Deck did not need it — one name and one radio
+group. Do not reach for it before a form has state that must outlive its widget.
+
+### invalidate vs refresh
+
+`ref.invalidate` — drop the state and let the next read rebuild it. This is the
+retry button: nothing needs the new value as a return, and the rebuild reads it
+anyway.
+
+`ref.refresh` — invalidate **and** read immediately, returning the new value. Use
+it only when the caller needs that value in the same statement.
+
+Deck uses `invalidate` everywhere and `refresh` nowhere, which is the expected
+ratio: a `refresh` whose result is discarded is an `invalidate` with extra steps.
+
+### Search, filter and debounce
+
+Not present — deck search is out of MVP scope. When it lands, the debounce belongs
+**in the provider**, not in the `TextField`: the widget reports every keystroke and
+the provider decides how often to ask the database. Debouncing in the widget ties
+the query cadence to one input control, and the second caller — a filter chip, a
+restored search term, a deep link — skips it silently.
+
+### Stream subscriptions
+
+Every stream reaches the UI through `ref.watch` on a stream provider, so Riverpod
+owns the subscription and cancels it on dispose. There is no manual `.listen` and
+no `StreamSubscription` field anywhere in `lib/`:
+
+```bash
+git grep -nE "\.listen\(|StreamSubscription" -- lib | grep -v "ref.listen"
+```
+
+That should stay empty. A notifier holding its own subscription has to cancel it
+in `dispose`, and the leak when it does not is invisible until an unrelated test
+hangs.
+
+## Two things deliberately NOT built
+
+Both are standard advice that does not fit a local-first app. Skipping them is a
+decision, not an omission.
+
+**No shimmer or skeleton loading.** Skeletons exist to mask network latency. These
+reads are local SQLite and finish in single-digit milliseconds, so a skeleton
+would render a fake layout for less than a frame and then swap it — motion that
+says "slow" about something that is not. `MxAsyncView` uses a labelled spinner.
+Revisit when a read crosses a network; `dio` is deliberately absent today (AD-05).
+
+**No optimistic UI and no rollback.** An optimistic update buys the gap between
+"now" and "when the write lands". For a Drift write on the same isolate that gap
+is about a millisecond, after which the `watch()` stream re-emits the real row.
+Paying for it means a parallel copy of the truth, a rollback path, and a window
+where the screen shows something the database never accepted — to hide latency
+that does not exist. Revisit alongside sync (AD-01 defers it), where the window is
+genuine.
 
 ## Known guard false positive
 

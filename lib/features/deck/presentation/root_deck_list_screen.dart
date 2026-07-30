@@ -4,11 +4,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/router/route_names.dart';
 import '../../../l10n/l10n_extension.dart';
+import '../../../shared/widgets/mx_async_view.dart';
 import '../../../shared/widgets/mx_content_shell.dart';
 import '../../../shared/widgets/mx_empty_state.dart';
 import '../../../shared/widgets/mx_error_state.dart';
 import '../../../shared/widgets/mx_icon_button.dart';
-import '../../../shared/widgets/mx_loading_state.dart';
 import '../domain/root_deck_summary_model.dart';
 import 'deck_actions_widget.dart';
 import 'deck_tile_widget.dart';
@@ -39,23 +39,23 @@ class RootDeckListScreen extends StatelessWidget {
         ),
       ],
       body: Consumer(
-        builder: (context, ref, child) => ref
-            .watch(rootDeckSummariesProvider)
-            .when(
-              loading: () => MxLoadingState(
-                semanticsLabel: context.l10n.decksLoadingLabel,
-              ),
-              data: (summaries) => _RootDeckList(summaries: summaries),
-              // The failure itself never reaches the screen. A Drift message
-              // would tell the user nothing they can act on, and can carry a
-              // deck name.
-              error: (error, stackTrace) => MxErrorState(
-                title: context.l10n.decksLoadErrorTitle,
-                message: context.l10n.decksLoadErrorMessage,
-                retryLabel: context.l10n.retryAction,
-                onRetry: () => ref.invalidate(rootDeckSummariesProvider),
-              ),
-            ),
+        builder: (context, ref, child) => MxAsyncView<List<RootDeckSummary>>(
+          value: ref.watch(rootDeckSummariesProvider),
+          loadingLabel: context.l10n.decksLoadingLabel,
+          data: (summaries) => _RootDeckList(summaries: summaries),
+          // The failure itself never reaches the screen. A Drift message would
+          // tell the user nothing they can act on, and can carry a deck name.
+          //
+          // `invalidate`, not `refresh`: the retry wants a read from scratch and
+          // nothing here needs the new value as a return. `refresh` would also
+          // read it immediately, which the rebuild does anyway.
+          error: (error, stackTrace) => MxErrorState(
+            title: context.l10n.decksLoadErrorTitle,
+            message: context.l10n.decksLoadErrorMessage,
+            retryLabel: context.l10n.retryAction,
+            onRetry: () => ref.invalidate(rootDeckSummariesProvider),
+          ),
+        ),
       ),
     );
   }
