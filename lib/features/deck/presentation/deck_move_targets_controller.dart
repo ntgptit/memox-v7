@@ -1,8 +1,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../app/di/deck_repository_provider.dart';
+import '../../../core/state/retry_policy.dart';
 import '../domain/deck_move_target_model.dart';
-import 'root_decks_controller.dart';
 
 part 'deck_move_targets_controller.g.dart';
 

@@ -2,19 +2,11 @@ import 'package:flutter/widgets.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../app/di/deck_repository_provider.dart';
+import '../../../core/state/retry_policy.dart';
+import '../../../core/time/clock_provider.dart';
 import '../domain/root_deck_summary_model.dart';
 
 part 'root_decks_controller.g.dart';
-
-/// The wall clock, as a value the rest of the tree can override.
-///
-/// A function rather than a `DateTime`, because callers need "now at the moment
-/// I ask", not "now when this provider was first built". Tests override it with
-/// a fixed instant; nothing below reads `DateTime.now()` directly, which is what
-/// makes the `due_at = now` boundary testable at all (BR-22).
-@Riverpod(keepAlive: true)
-DateTime Function() clock(Ref ref) =>
-    () => DateTime.now().toUtc();
 
 /// The instant the deck list's due counts are measured against.
 ///
@@ -58,25 +50,10 @@ class DeckListNow extends _$DeckListNow {
 /// fresh boundary, which is the only thing that can change the due count
 /// without the database changing.
 ///
-/// Automatic retry is off for the same reason as the plain list below.
+/// Automatic retry is off — see `noAutomaticRetry`: while Riverpod retries, the
+/// state is `AsyncLoading`, so a failed local read would spin instead of showing
+/// its error state.
 @Riverpod(retry: noAutomaticRetry)
 Stream<List<RootDeckSummary>> rootDeckSummaries(Ref ref) => ref
     .watch(deckRepositoryProvider)
     .watchRootDeckSummaries(now: ref.watch(deckListNowProvider));
-
-/// Turns off Riverpod 3's automatic retry ladder for a local read.
-///
-/// The default is not neutral: `ProviderContainer.defaultRetry` re-runs a failed
-/// provider up to ten times with exponential backoff, and **while it is
-/// retrying the state is `AsyncLoading`, not `AsyncError`**. On these screens
-/// that means a failed read spins for roughly thirteen seconds before the user
-/// is told anything went wrong, and may then flip out from under them.
-///
-/// It is also the wrong remedy: these are local SQLite queries, not flaky
-/// network calls. A database that cannot be read does not start working because
-/// 6.4 seconds passed. The retry that belongs here is the one the user can see
-/// and control — the button on the error state.
-///
-/// Returning `null` means "do not retry". Top-level because an annotation
-/// argument has to be a constant.
-Duration? noAutomaticRetry(int retryCount, Object error) => null;
