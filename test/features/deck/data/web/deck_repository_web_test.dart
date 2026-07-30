@@ -57,15 +57,15 @@ void main() {
     try {
       // Real writes through the production connection.
       final root = await repository.createRootDeck(
-        name: DeckName.parseOrThrow('Web smoke root'),
+        name: DeckName.parse('Web smoke root').name!,
         schedulerType: SchedulerType.eightBox,
       );
       final branch = await repository.createSubDeck(
-        name: DeckName.parseOrThrow('Web smoke branch'),
+        name: DeckName.parse('Web smoke branch').name!,
         parentDeckId: root.id,
       );
       final leaf = await repository.createSubDeck(
-        name: DeckName.parseOrThrow('Web smoke leaf'),
+        name: DeckName.parse('Web smoke leaf').name!,
         parentDeckId: branch.id,
       );
       final card = await cardRepository.createCard(

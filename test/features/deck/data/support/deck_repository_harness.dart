@@ -63,15 +63,15 @@ final class DeckRepositoryHarness {
     String prefix = '',
   }) async {
     final root = await deckRepository.createRootDeck(
-      name: DeckName.parseOrThrow('${prefix}Root'),
+      name: DeckName.parse('${prefix}Root').name!,
       schedulerType: scheduler,
     );
     final branch = await deckRepository.createSubDeck(
-      name: DeckName.parseOrThrow('${prefix}Branch'),
+      name: DeckName.parse('${prefix}Branch').name!,
       parentDeckId: root.id,
     );
     final leaf = await deckRepository.createSubDeck(
-      name: DeckName.parseOrThrow('${prefix}Leaf'),
+      name: DeckName.parse('${prefix}Leaf').name!,
       parentDeckId: branch.id,
     );
 
@@ -87,14 +87,14 @@ final class DeckRepositoryHarness {
   }) async {
     final decks = <DeckEntity>[
       await deckRepository.createRootDeck(
-        name: DeckName.parseOrThrow('${prefix}1'),
+        name: DeckName.parse('${prefix}1').name!,
         schedulerType: SchedulerType.eightBox,
       ),
     ];
     for (var level = 2; level <= totalLevels; level++) {
       decks.add(
         await deckRepository.createSubDeck(
-          name: DeckName.parseOrThrow('$prefix$level'),
+          name: DeckName.parse('$prefix$level').name!,
           parentDeckId: decks.last.id,
         ),
       );

@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/features/deck/domain/failures/deck_validation_failure.dart';
 import 'package:memox/features/deck/domain/models/deck_name_model.dart';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/deck/domain/models/deck_content_type_model.dart';
@@ -20,7 +21,7 @@ void main() {
   group('createRootDeck', () {
     test('creates a root with the mandatory scheduler, generation 1', () async {
       final root = await h.deckRepository.createRootDeck(
-        name: DeckName.parseOrThrow('  My deck  '),
+        name: DeckName.parse('  My deck  ').name!,
         schedulerType: SchedulerType.sm2,
       );
 
@@ -51,7 +52,7 @@ void main() {
         // untouched.
         await expectLater(
           h.deckRepository.createRootDeck(
-            name: DeckName.parseOrThrow('No mode'),
+            name: DeckName.parse('No mode').name!,
             schedulerType: SchedulerType.unknown,
           ),
           throwsA(isA<Failure>()),
@@ -62,7 +63,7 @@ void main() {
 
     test('a root points at itself: root_deck_id = id (BR-56)', () async {
       final root = await h.deckRepository.createRootDeck(
-        name: DeckName.parseOrThrow('Self'),
+        name: DeckName.parse('Self').name!,
         schedulerType: SchedulerType.eightBox,
       );
 
@@ -72,7 +73,7 @@ void main() {
 
     test('a root is born content_type = deck (BR-58)', () async {
       final root = await h.deckRepository.createRootDeck(
-        name: DeckName.parseOrThrow('Typed'),
+        name: DeckName.parse('Typed').name!,
         schedulerType: SchedulerType.eightBox,
       );
 
@@ -86,10 +87,9 @@ void main() {
       // become one, so the write is *unreachable* rather than refused. That is
       // the difference the value object bought: the guarantee moved from a
       // runtime check in a third layer into the signature.
-      expect(
-        () => DeckName.parseOrThrow('   '),
-        throwsA(isA<ValidationFailure>()),
-      );
+      final parsed = DeckName.parse('   ');
+      expect(parsed.name, isNull);
+      expect(parsed.problem, DeckValidationProblem.nameEmpty);
       expect(await h.countAll('decks'), 0);
     });
   });
@@ -141,7 +141,7 @@ void main() {
 
         await expectLater(
           h.deckRepository.createSubDeck(
-            name: DeckName.parseOrThrow('Doomed'),
+            name: DeckName.parse('Doomed').name!,
             parentDeckId: tree.leaf.id,
           ),
           throwsA(isA<Failure>()),
@@ -168,7 +168,7 @@ void main() {
 
       await expectLater(
         h.deckRepository.createSubDeck(
-          name: DeckName.parseOrThrow('Nope'),
+          name: DeckName.parse('Nope').name!,
           parentDeckId: tree.leaf.id,
         ),
         throwsA(isA<ConflictFailure>()),
@@ -178,7 +178,7 @@ void main() {
     test('a missing parent is NotFound, not a database error', () async {
       await expectLater(
         h.deckRepository.createSubDeck(
-          name: DeckName.parseOrThrow('Orphan'),
+          name: DeckName.parse('Orphan').name!,
           parentDeckId: 'absent',
         ),
         throwsA(isA<NotFoundFailure>()),

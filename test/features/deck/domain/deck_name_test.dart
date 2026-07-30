@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/deck/domain/failures/deck_validation_failure.dart';
 import 'package:memox/features/deck/domain/models/deck_name_model.dart';
 
@@ -87,39 +86,6 @@ void main() {
 
     test('different text is not equal', () {
       expect(DeckName.parse('a').name, isNot(DeckName.parse('b').name));
-    });
-  });
-
-  group('parseOrThrow, for a caller with no form', () {
-    test('returns the value when valid', () {
-      expect(DeckName.parseOrThrow('  ok  ').value, 'ok');
-    });
-
-    test('throws a ValidationFailure carrying the typed problem', () {
-      // Typed, so a caller that does have a form can render the right field
-      // without re-running the rule.
-      expect(
-        () => DeckName.parseOrThrow('  '),
-        throwsA(
-          isA<ValidationFailure>().having(
-            (failure) => failure.problems,
-            'problems',
-            <Enum>{DeckValidationProblem.nameEmpty},
-          ),
-        ),
-      );
-    });
-
-    test('the message is a diagnostic, not copy', () {
-      // `Failure.message` is safe to log and must never reach a user. The screen
-      // renders ARB text chosen from `problems`.
-      try {
-        DeckName.parseOrThrow('');
-        fail('expected a refusal');
-      } on ValidationFailure catch (failure) {
-        expect(failure.message, contains('nameEmpty'));
-        expect(failure.message, isNot(contains('Please')));
-      }
     });
   });
 }

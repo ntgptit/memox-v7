@@ -119,21 +119,45 @@ done < <(find lib -name '*.dart' -type f \
   ! -name '*.g.dart' ! -name '*.freezed.dart' ! -name '*.drift.dart' 2>/dev/null | sort)
 
 # ---------------------------------------------------------------------------
-# 3. A full rebuild changes nothing.
+# 3. A clean rebuild reproduces the same output, byte for byte.
 #
-#    build_runner is incremental and caches aggressively. If a clean rebuild
-#    disagrees with the cached one, then what CI verified is not what a developer
-#    is running, and neither of them can be called fresh.
+#    build_runner is incremental and caches aggressively in `.dart_tool/build`.
+#    Re-running `build` reuses that cache and the existing outputs, so it proves
+#    nothing about reproducibility — it can pass while a from-nothing build would
+#    differ or fail. A real check has to remove the cache AND the existing outputs
+#    first, then build from source alone, then compare:
+#
+#      * a path present before but absent after  → a generator silently stopped
+#        emitting a file (a fresh clone would miss it);
+#      * a path absent before but present after  → an output nobody was tracking;
+#      * a path whose bytes changed              → non-deterministic generation.
+#
+#    Destructive, so it is guarded. Generated files are not tracked by git, so a
+#    `git checkout` cannot bring them back — the safety net is instead to
+#    regenerate on the way out if the verifying build did not finish, leaving the
+#    tree usable rather than half-deleted.
 # ---------------------------------------------------------------------------
 REBUILD_CHECKED=0
 if [[ $SKIP_REBUILD -eq 1 ]]; then
-  note "rebuild comparison skipped (--skip-rebuild)"
+  note "clean-rebuild comparison skipped (--skip-rebuild)"
 elif ! command -v dart >/dev/null 2>&1; then
-  note "rebuild comparison skipped — dart not on PATH"
+  note "clean-rebuild comparison skipped — dart not on PATH"
 else
   BEFORE="$(mktemp)"; AFTER="$(mktemp)"
-  trap 'rm -f "$BEFORE" "$AFTER"' EXIT
+  CLEAN_STARTED=0
+  CLEAN_DONE=0
+  restore_tree() {
+    rm -f "$BEFORE" "$AFTER"
+    # If the outputs were removed but the verifying build did not complete
+    # (a failure, a Ctrl-C), regenerate so the working tree is left buildable.
+    if [[ $CLEAN_STARTED -eq 1 && $CLEAN_DONE -ne 1 ]]; then
+      note "restoring generated files after an interrupted clean rebuild…"
+      dart run build_runner build --delete-conflicting-outputs >/dev/null 2>&1 || true
+    fi
+  }
+  trap restore_tree EXIT
 
+  # `hash  path`, sorted by path, so a plain diff classifies every difference.
   hash_generated() { # hash_generated <outfile>
     : > "$1"
     while IFS= read -r file; do
@@ -147,19 +171,55 @@ else
 
   if [[ "$REBUILD_CHECKED" -eq 0 ]]; then
     report "nothing to compare" "lib/, test/" \
-      "No generated files exist, so the rebuild check has no subject. Generate first."
+      "No generated files exist, so the clean-rebuild check has no subject. Generate first."
   else
-    printf 'rebuilding %s generated files from scratch…\n' "$REBUILD_CHECKED"
-    if dart run build_runner build --delete-conflicting-outputs >/dev/null 2>&1 \
-      || dart run build_runner build >/dev/null 2>&1; then
+    printf 'clean rebuild: removing cache and %s generated files, then building from source…\n' \
+      "$REBUILD_CHECKED"
+    CLEAN_STARTED=1
+
+    # a. Drop build_runner's own cache and the outputs it tracks.
+    dart run build_runner clean >/dev/null 2>&1 || true
+
+    # b. Remove every generated file by the exact producer used above — so the
+    #    hand-written drift fixtures under test/drift/generated/ are NOT touched,
+    #    and no dangerous find-and-delete runs over source. `clean` usually did
+    #    this already; this makes "no existing output survives" true regardless.
+    while IFS= read -r file; do
+      [[ -z "$file" ]] && continue
+      rm -f "$file"
+    done < <(generated_files)
+
+    # c. Belt and braces on the cache directory itself, in case `clean` was a
+    #    no-op (older build_runner, or an aborted prior run).
+    rm -rf .dart_tool/build 2>/dev/null || true
+
+    # d. Build from source alone.
+    if dart run build_runner build --delete-conflicting-outputs >/dev/null 2>&1; then
+      CLEAN_DONE=1
       hash_generated "$AFTER"
-      if ! diff -q "$BEFORE" "$AFTER" >/dev/null 2>&1; then
-        report "codegen is not reproducible" "$(diff "$BEFORE" "$AFTER" | head -5 | tr '\n' ' ')" \
-          "A clean rebuild disagreed with the incremental one, so what CI verified is not what runs locally."
+
+      MISSING="$(comm -23 <(cut -d' ' -f3- "$BEFORE" | sort) <(cut -d' ' -f3- "$AFTER" | sort))"
+      EXTRA="$(comm -13 <(cut -d' ' -f3- "$BEFORE" | sort) <(cut -d' ' -f3- "$AFTER" | sort))"
+
+      if [[ -n "$MISSING" ]]; then
+        report "clean rebuild is missing generated files" \
+          "$(echo "$MISSING" | head -5 | tr '\n' ' ')" \
+          "A from-nothing build did not re-emit these, so a fresh clone would not have them either."
+      fi
+      if [[ -n "$EXTRA" ]]; then
+        report "clean rebuild produced unexpected generated files" \
+          "$(echo "$EXTRA" | head -5 | tr '\n' ' ')" \
+          "These outputs were not present before — the generator set is not what the tree recorded."
+      fi
+      if [[ -z "$MISSING" && -z "$EXTRA" ]] && ! diff -q "$BEFORE" "$AFTER" >/dev/null 2>&1; then
+        report "codegen is not reproducible" \
+          "$(diff "$BEFORE" "$AFTER" | grep -E '^[<>]' | head -5 | tr '\n' ' ')" \
+          "A clean rebuild produced different bytes for the same path, so 'fresh' is not verifiable."
       fi
     else
-      report "build_runner failed" "dart run build_runner build" \
-        "Generation must succeed from the current sources; nothing downstream is meaningful until it does."
+      # Leave CLEAN_DONE=0 so the trap regenerates a usable tree on the way out.
+      report "clean build_runner build failed" "dart run build_runner build" \
+        "Generation must succeed from source alone; a build that only works from cache is not reproducible."
     fi
   fi
 fi

@@ -82,7 +82,7 @@ void main() {
   }
 
   Future<DeckEntity> seedRoot(String name) => repository.createRootDeck(
-    name: DeckName.parseOrThrow(name),
+    name: DeckName.parse(name).name!,
     schedulerType: SchedulerType.eightBox,
   );
 
@@ -92,7 +92,7 @@ void main() {
       // the deck and the children came from two snapshots again.
       final root = await seedRoot('Japanese');
       await repository.createSubDeck(
-        name: DeckName.parseOrThrow('Hiragana'),
+        name: DeckName.parse('Hiragana').name!,
         parentDeckId: root.id,
       );
 
@@ -125,7 +125,7 @@ void main() {
       // other was not.
       final root = await seedRoot('Japanese');
       await repository.createSubDeck(
-        name: DeckName.parseOrThrow('Hiragana'),
+        name: DeckName.parse('Hiragana').name!,
         parentDeckId: root.id,
       );
 
@@ -158,7 +158,7 @@ void main() {
       final root = await seedRoot('Japanese');
       for (final String name in <String>['First', 'Second', 'Third']) {
         await repository.createSubDeck(
-          name: DeckName.parseOrThrow(name),
+          name: DeckName.parse(name).name!,
           parentDeckId: root.id,
         );
       }
@@ -179,7 +179,7 @@ void main() {
 
       await repository.renameDeck(
         deckId: root.id,
-        name: DeckName.parseOrThrow('After'),
+        name: DeckName.parse('After').name!,
       );
       await pumpEventQueue();
 
@@ -193,7 +193,7 @@ void main() {
       expect(emissions.last.childDecks, isEmpty);
 
       await repository.createSubDeck(
-        name: DeckName.parseOrThrow('Hiragana'),
+        name: DeckName.parse('Hiragana').name!,
         parentDeckId: root.id,
       );
       await pumpEventQueue();
@@ -206,7 +206,7 @@ void main() {
     test('deleting a child re-emits without it', () async {
       final root = await seedRoot('Japanese');
       final child = await repository.createSubDeck(
-        name: DeckName.parseOrThrow('Hiragana'),
+        name: DeckName.parse('Hiragana').name!,
         parentDeckId: root.id,
       );
       final emissions = watch(root.id);
@@ -225,11 +225,11 @@ void main() {
       // would miss this.
       final root = await seedRoot('Japanese');
       final other = await repository.createSubDeck(
-        name: DeckName.parseOrThrow('Other'),
+        name: DeckName.parse('Other').name!,
         parentDeckId: root.id,
       );
       final moving = await repository.createSubDeck(
-        name: DeckName.parseOrThrow('Moving'),
+        name: DeckName.parse('Moving').name!,
         parentDeckId: root.id,
       );
 
@@ -254,7 +254,7 @@ void main() {
       // from after it would offer an action the repository then refuses.
       final root = await seedRoot('Japanese');
       final branch = await repository.createSubDeck(
-        name: DeckName.parseOrThrow('Branch'),
+        name: DeckName.parse('Branch').name!,
         parentDeckId: root.id,
       );
 
@@ -263,7 +263,7 @@ void main() {
       expect(emissions.last.mayOfferReset, isTrue);
 
       await repository.createSubDeck(
-        name: DeckName.parseOrThrow('Leaf'),
+        name: DeckName.parse('Leaf').name!,
         parentDeckId: branch.id,
       );
       await pumpEventQueue();

@@ -25,9 +25,9 @@ import '../states/deck_submit_state.dart';
 /// storing it: the state a persistence error must not destroy never left the
 /// widget (UC-02 E4).
 ///
-/// It holds no business rule. The name check comes from
-/// `DeckEntity.nameProblem`, evaluated by the controller; this widget renders
-/// whichever problem it is handed.
+/// It holds no business rule. BR-01 is owned by `DeckName.parse`, applied in the
+/// use case; the controller maps the resulting typed `DeckValidationProblem` into
+/// `state`, and this widget renders whichever problem it is handed.
 class DeckFormWidget extends StatefulWidget {
   const DeckFormWidget({
     required this.title,
@@ -46,9 +46,11 @@ class DeckFormWidget extends StatefulWidget {
 
   final DeckSubmitState state;
 
-  /// Called with the trimmed-as-typed name and, for a root deck, the chosen
-  /// mode. [scheduler] is null when the section is not shown or nothing has
-  /// been picked — "not chosen" is a real state and BR-11 forbids defaulting it.
+  /// Called with the raw text the user typed — untrimmed — and, for a root deck,
+  /// the chosen mode. Trim and BR-01 are `DeckName.parse`'s job in the use case,
+  /// not the widget's. [scheduler] is null when the section is not shown or
+  /// nothing has been picked — "not chosen" is a real state and BR-11 forbids
+  /// defaulting it.
   final void Function(String name, SchedulerType? scheduler) onSubmit;
 
   /// Called when the form is genuinely finished with.

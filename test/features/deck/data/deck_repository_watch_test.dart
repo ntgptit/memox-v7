@@ -20,7 +20,7 @@ void main() {
   group('watch()', () {
     test('emits the current value on listen', () async {
       await h.deckRepository.createRootDeck(
-        name: DeckName.parseOrThrow('Existing'),
+        name: DeckName.parse('Existing').name!,
         schedulerType: SchedulerType.eightBox,
       );
 
@@ -47,7 +47,7 @@ void main() {
       expect(emissions.last, isEmpty);
 
       await h.deckRepository.createRootDeck(
-        name: DeckName.parseOrThrow('Fresh'),
+        name: DeckName.parse('Fresh').name!,
         schedulerType: SchedulerType.sm2,
       );
       await pumpEventQueue();
@@ -57,7 +57,7 @@ void main() {
 
     test('re-emits after an update', () async {
       final root = await h.deckRepository.createRootDeck(
-        name: DeckName.parseOrThrow('Before'),
+        name: DeckName.parse('Before').name!,
         schedulerType: SchedulerType.eightBox,
       );
       final emissions = <List<DeckEntity>>[];
@@ -69,7 +69,7 @@ void main() {
 
       await h.deckRepository.renameDeck(
         deckId: root.id,
-        name: DeckName.parseOrThrow('After'),
+        name: DeckName.parse('After').name!,
       );
       await pumpEventQueue();
 
@@ -78,7 +78,7 @@ void main() {
 
     test('re-emits after a delete', () async {
       final root = await h.deckRepository.createRootDeck(
-        name: DeckName.parseOrThrow('Doomed'),
+        name: DeckName.parse('Doomed').name!,
         schedulerType: SchedulerType.eightBox,
       );
       final emissions = <List<DeckEntity>>[];
@@ -166,13 +166,13 @@ void main() {
         clock: () => h.currentInstant,
       );
       await fixedIdRepository.createRootDeck(
-        name: DeckName.parseOrThrow('First'),
+        name: DeckName.parse('First').name!,
         schedulerType: SchedulerType.eightBox,
       );
 
       await expectLater(
         fixedIdRepository.createRootDeck(
-          name: DeckName.parseOrThrow('Second'),
+          name: DeckName.parse('Second').name!,
           schedulerType: SchedulerType.eightBox,
         ),
         throwsA(isA<ConflictFailure>()),
@@ -194,7 +194,7 @@ void main() {
   test('a full repository scenario leaves all 15 invariants clean', () async {
     final treeA = await h.seedTree(prefix: 'A-');
     final grandLeaf = await h.deckRepository.createSubDeck(
-      name: DeckName.parseOrThrow('A-GrandLeaf'),
+      name: DeckName.parse('A-GrandLeaf').name!,
       parentDeckId: treeA.leaf.id,
     );
     await h.cardRepository.createCard(
@@ -215,7 +215,7 @@ void main() {
     );
     await h.deckRepository.renameDeck(
       deckId: treeA.root.id,
-      name: DeckName.parseOrThrow('A-Renamed'),
+      name: DeckName.parse('A-Renamed').name!,
     );
 
     // Same-scheduler move plus a delete, then check every invariant.
