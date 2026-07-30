@@ -63,6 +63,14 @@ CREATE TABLE decks (
     updated_at DATETIME NOT NULL
 );
 
-CREATE INDEX idx_decks_parent ON decks (parent_deck_id);
+-- Both composite, and both in the order the queries actually use. Every deck
+-- read filters on one of these two columns and sorts by `created_at, id`:
+-- `rootDecks` (parent IS NULL), `childDecks` (parent = ?), `decksInTree`
+-- (root = ?). With only the leading column indexed, all three ended in
+-- `USE TEMP B-TREE FOR ORDER BY`.
+--
+-- Each replaces its single-column predecessor rather than joining it — see the
+-- note in `cards.drift` for why keeping both would be a cost with no benefit.
+CREATE INDEX idx_decks_parent_created ON decks (parent_deck_id, created_at, id);
 
-CREATE INDEX idx_decks_root ON decks (root_deck_id);
+CREATE INDEX idx_decks_root_created ON decks (root_deck_id, created_at, id);

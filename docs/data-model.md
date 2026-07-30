@@ -7,8 +7,8 @@
 | **Scope** | Bảng, cột, index, quan hệ, query bất biến. Ngoài phạm vi: SQL runtime (`lib/core/database/`, chưa tồn tại) |
 | **Source of truth for** | Schema · cột và kiểu · index · query bất biến · thứ tự migration |
 | **Depends on** | `document-conventions.md`, `architecture.md`, `business-rules.md` |
-| **Updated by task** | M4.9a |
-| **Last updated** | 2026-07-29 |
+| **Updated by task** | M4.10 (composite index) |
+| **Last updated** | 2026-07-30 |
 
 Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; SQL thật nằm
 ở `lib/core/database/tables/` và **chưa được tạo** — task này chỉ chốt đặc tả.
@@ -118,9 +118,19 @@ deck khác, thay vì một luật riêng phải nhớ.
 Deck con để NULL và tra qua `root_deck_id` (BR-06). Đây là cách khiến "deck con
 không chọn scheduler riêng" bất khả thi về cấu trúc, thay vì chỉ là quy ước.
 
-Index:
-- `idx_decks_parent` trên `(parent_deck_id)` — dựng cây
-- `idx_decks_root` trên `(root_deck_id)` — mọi query gộp theo cây
+Index — composite, và thứ tự cột theo đúng thứ tự query lọc rồi sắp:
+- `idx_decks_parent_created` trên `(parent_deck_id, created_at, id)` — dựng cây
+  (`rootDecks`, `childDecks`)
+- `idx_decks_root_created` trên `(root_deck_id, created_at, id)` — mọi query gộp
+  theo cây (`decksInTree`, `allDecks`, hai subquery của `rootDeckSummaries`)
+
+Mọi query đọc deck đều lọc theo một trong hai cột dẫn đầu rồi `ORDER BY
+created_at, id`. Với index chỉ một cột, cả ba đều kết thúc bằng `USE TEMP B-TREE
+FOR ORDER BY` — SQLite đọc hết row khớp rồi sắp, trước khi áp bất kỳ `LIMIT` nào.
+Đo bằng `EXPLAIN QUERY PLAN`: thêm cột sắp vào index thì temp B-tree biến mất, và
+subquery `total` của `rootDeckSummaries` trở thành **covering** (không chạm bảng).
+Index composite thay thế bản một cột chứ không cộng thêm: cùng cột dẫn đầu thì nó
+trả lời được mọi lookup cũ, giữ cả hai chỉ khiến mỗi insert bảo trì hai B-tree.
 
 ## `cards`
 
@@ -137,7 +147,11 @@ Index:
 dung, nó sống xuyên qua mọi lần reset (BR-41). Reset learning progress không được
 chạm vào bảng này.
 
-Index: `idx_cards_deck` trên `(deck_id)`.
+Index: `idx_cards_deck_created` trên `(deck_id, created_at, id)` — composite,
+theo đúng thứ tự `cardsByDeck` lọc rồi sắp. Đây là điều kiện để phân trang keyset
+(`WHERE deck_id = ? AND (created_at, id) > (?, ?)`) là một range scan thật thay vì
+một lần sắp toàn bộ deck rồi đặt `LIMIT` lên trên: đo trên 5.000 thẻ một deck, một
+trang 50 thẻ đi từ 1193µs xuống 102µs.
 
 ## `card_review_states`
 
