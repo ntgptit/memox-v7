@@ -16,8 +16,8 @@ lib/features/<feature>/
 │   ├── entities/       <name>_entity.dart
 │   ├── repositories/   <name>_repository.dart          (the contract)
 │   ├── models/         <name>_model.dart               (read models, enums)
-│   ├── usecases/       <name>_use_case.dart            (only when warranted)
-│   └── failures/       <name>_failure.dart             (only when feature-specific)
+│   ├── usecases/       <verb>_<noun>_use_case.dart     (one per interaction)
+│   └── failures/       <name>_failure.dart             (reason enums + refusal helpers)
 ├── data/
 │   ├── repositories/   <name>_repository_impl.dart
 │   ├── mappers/        <name>_mapper.dart
@@ -28,7 +28,7 @@ lib/features/<feature>/
     ├── controllers/    <name>_controller.dart
     ├── states/         <name>_state.dart
     ├── widgets/        <name>_widget.dart
-    └── providers/      (only when a provider is not a controller)
+    └── providers/      <name>_provider.dart            (dependency wiring only)
 ```
 
 Plural folder names, which is both the industry convention (Clean Architecture,
@@ -61,15 +61,63 @@ stripping only that one segment, so a screen at
 `test/visual_audit/screens/features/deck/screens/x_screen_visual_audit_test.dart`.
 The `screens/` folder is preserved, not flattened.
 
-**Four folders exist with a `.gitkeep` and nothing else**, and each has a reason
-to be empty rather than absent:
+**One folder is still empty**, and one is empty for a reason worth reading:
 
-| Folder | Why empty in Deck |
+| Folder | State |
 |---|---|
-| `domain/usecases/` | the repository contract *is* the use-case surface; a class per method would be a pass-through. Add one when a call orchestrates more than one repository. |
-| `domain/failures/` | **now populated.** `Failure` is `sealed`, so a feature cannot add a subtype — what goes here is the *reason* enum a failure carries, plus the pure rule that produces it. |
-| `data/models/` | there are no DTOs — `dio` is not a dependency (AD-05) and Drift is the source of truth, so a DTO would be a second shape for data that already has two. |
-| `presentation/providers/` | every provider in Deck *is* a controller, and the guard's widget scopes exempt controllers by the `_controller` suffix. A provider that is not a controller goes here. |
+| `domain/usecases/` | **10 files** — one per interaction. See below. |
+| `domain/failures/` | **3 files** — reason enums plus the refusal helper every write use case shares. |
+| `presentation/providers/` | **1 file** — the use-case wiring. |
+| `data/datasources/` | the DAO. An abstract `LocalDataSource` over a Drift DAO would be an interface with one implementation and no second candidate. |
+| `data/models/` | **empty.** Drift's generated row class *is* the data model, and it lives in `core/database/` because the schema is shared across features. A per-feature DTO would be a second shape for one row, and `dio` is not a dependency (AD-05), so there is no wire format to model either. It gets files with the first real request. |
+
+### The use case layer
+
+Ten use cases, one per interaction, each taking the repository contract and
+exposing `call`. Two things make them more than indirection:
+
+**They hold the validation, and it used to run twice.** `DeckEntity.nameProblem`
+ran in the controller *and* again inside the repository, in two layers, with
+nothing to catch the two disagreeing. It runs in the use case now — the layer that
+owns BR-01 — and both the controller and the repository stopped duplicating it.
+
+**A controller keeps only what is presentation:** the double-submit guard, the
+submitting flag, the `ref.mounted` check after an await, and turning a `Failure`
+into per-field state. It no longer reads a repository at all.
+
+What deliberately did **not** move into a use case: BR-55 depth, BR-62's
+first-child content lock, BR-68's emptiness checks, and UC-09's move rules. Every
+one of those needs the tree *as it stands at the moment of writing* and runs inside
+`runInTransaction`. A use case above the repository would put the check outside the
+transaction, which is a race between the check and the write — so the rule would be
+in a tidier place and wrong. The use case is the entry point; the transaction is
+where a tree-shaped rule belongs.
+
+**Refusal travels as `ValidationFailure.fieldErrors`, not `Failure.reason`.** A
+form can fail on two fields at once — a blank name *and* no scheduler chosen — and
+`reason` holds one value. The keys come from `DeckField`, are identifiers rather
+than copy, and `deckSubmitFailure` maps them to the per-field problems the screen
+renders.
+
+### `presentation/providers/` versus `controllers/`
+
+A controller holds state and exposes commands. A provider here holds nothing and
+exposes one use case. The distinction is enforced, not stylistic: the guard's
+widget scope excludes files by suffix, so `_provider` was added to the allowed
+presentation suffixes *and* to that scope's exclusions at M4.10 — a file whose job
+is dependency wiring reads a repository by definition, and must not have to borrow
+the `_controller` exemption to do it.
+
+`app/di/` still holds the repository provider. That is the composition root: the
+one place `DeckRepositoryImpl` is named, so a test can substitute the
+implementation from outside the feature. A use case has no implementation to choose
+between, so its wiring travels with the feature.
+
+Use-case providers are `autoDispose`, like everything else under
+`features/*/presentation/`. Constructing one is a field assignment, so an exception
+to that rule would buy nothing and cost the rule its teeth —
+`test/app/provider_convention_test.dart` enforces it and caught this while the
+layer was being added.
 
 ## What `core/` and `shared/` already provide — do not re-create
 

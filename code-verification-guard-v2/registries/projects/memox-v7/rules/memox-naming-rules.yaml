@@ -29,15 +29,20 @@ rules:
     enabled: true
     message: >-
       Files under presentation/ must state their role in the suffix — one of
-      _screen, _widget, _controller, _state, _page or _view. Scopes in this
-      ruleset select files by suffix, so a mis-named file escapes the rules meant
-      to cover it.
+      _screen, _widget, _controller, _state, _page, _view or _provider. Scopes in
+      this ruleset select files by suffix, so a mis-named file escapes the rules
+      meant to cover it.
+
+      `_provider` was added at M4.10 with `presentation/providers/`: a provider
+      that only wires a use case into the graph is not a controller and must not
+      borrow the controller exemptions. Anything holding submit state or a
+      command stays `_controller`.
     include:
       - lib/features/*/presentation/**/*.dart
     exclude:
       - '**/*.g.dart'
       - '**/*.freezed.dart'
-    pattern: '^[a-z0-9_]+_(?:screen|widget|controller|state|page|view)\.dart$'
+    pattern: '^[a-z0-9_]+_(?:screen|widget|controller|state|page|view|provider)\.dart$'
     tags:
       - memox
       - naming

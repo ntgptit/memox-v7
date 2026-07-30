@@ -1,8 +1,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../app/di/deck_repository_provider.dart';
 import '../../../../core/state/retry_policy.dart';
 import '../../domain/models/deck_move_target_model.dart';
+import '../providers/deck_use_case_provider.dart';
 
 part 'deck_move_targets_controller.g.dart';
 
@@ -23,12 +23,5 @@ part 'deck_move_targets_controller.g.dart';
 /// decision rather than a move.
 @Riverpod(retry: noAutomaticRetry)
 Stream<List<DeckMoveTarget>> deckMoveTargets(Ref ref, String deckId) {
-  final repository = ref.watch(deckRepositoryProvider);
-
-  return repository.watchAllDecks().asyncMap(
-    (decks) async => buildDeckMoveTargets(
-      source: await repository.getDeckById(deckId),
-      allDecks: decks,
-    ),
-  );
+  return ref.watch(watchDeckMoveTargetsUseCaseProvider)(deckId);
 }

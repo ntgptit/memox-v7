@@ -1,9 +1,9 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../app/di/deck_repository_provider.dart';
 import '../../../../core/state/retry_policy.dart';
 import '../../domain/models/deck_deletion_impact_model.dart';
+import '../providers/deck_use_case_provider.dart';
 import '../../domain/entities/deck_entity.dart';
 
 part 'deck_detail_controller.freezed.dart';
@@ -53,21 +53,17 @@ abstract class DeckDetail with _$DeckDetail {
 /// refuses a delete that has become impossible.
 @Riverpod(retry: noAutomaticRetry)
 Future<DeckDeletionImpact> deckDeletionImpact(Ref ref, String deckId) =>
-    ref.watch(deckRepositoryProvider).getDeletionImpact(deckId);
+    ref.watch(getDeckDeletionImpactUseCaseProvider)(deckId);
 
 @Riverpod(retry: noAutomaticRetry)
 Stream<DeckDetail> deckDetail(Ref ref, String deckId) {
-  final repository = ref.watch(deckRepositoryProvider);
+  final children = ref.watch(watchDeckChildrenUseCaseProvider);
 
   // The children stream is the one that re-emits on every write in this
   // subtree; the deck itself is re-read on each emission so a rename made
   // elsewhere shows up without a second subscription.
-  return repository
-      .watchChildDecks(deckId)
-      .asyncMap(
-        (children) async => DeckDetail(
-          deck: await repository.getDeckById(deckId),
-          childDecks: children,
-        ),
-      );
+  return children(deckId).asyncMap(
+    (childDecks) async =>
+        DeckDetail(deck: await children.deck(deckId), childDecks: childDecks),
+  );
 }
