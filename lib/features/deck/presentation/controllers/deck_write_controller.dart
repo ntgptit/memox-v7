@@ -1,9 +1,9 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../app/di/deck_repository_provider.dart';
 import '../../../../core/error/failure.dart';
 import '../../../../core/state/submit_outcome.dart';
 import '../../domain/models/scheduler_type_model.dart';
+import '../providers/deck_use_case_provider.dart';
 import '../states/deck_submit_state.dart';
 
 part 'deck_write_controller.g.dart';
@@ -52,31 +52,17 @@ class CreateRootDeckController extends _$CreateRootDeckController {
   }) async {
     if (!state.canSubmit) return;
 
-    // Both checks run and both are reported. The set is what makes that possible
-    // — a blank name *and* no scheduler chosen is one attempt with two problems,
-    // and marking only the first would send the user round twice.
-    //
-    // The condition tests the two inputs rather than `problems.isNotEmpty`,
-    // which would read better and cost the type promotion: the compiler cannot
-    // see through a set that `schedulerType` is non-null below, and the
-    // alternative is a `!` on the very value BR-11 exists to protect.
-    final nameProblem = deckNameFormProblem(name);
-    if (nameProblem != null || schedulerType == null) {
-      state = DeckSubmitState(
-        problems: <DeckFormProblem>{
-          ?nameProblem,
-          if (schedulerType == null) DeckFormProblem.schedulerMissing,
-        },
-      );
-
-      return;
-    }
-
+    // No validation here. BR-01 and BR-11 belong to the domain, and the use case
+    // checks them — the controller used to check them too, which meant the same
+    // rule ran in `presentation/` and again in `data/` with nothing to catch the
+    // two disagreeing. An invalid form now arrives as a `ValidationFailure` and
+    // `deckSubmitFailure` turns it into the per-field problems below.
     state = const DeckSubmitState(isSubmitting: true);
     try {
-      await ref
-          .read(deckRepositoryProvider)
-          .createRootDeck(name: name, schedulerType: schedulerType);
+      await ref.read(createRootDeckUseCaseProvider)(
+        name: name,
+        schedulerType: schedulerType,
+      );
       if (!ref.mounted) return;
       state = DeckSubmitState(outcome: disposition.outcome);
     } on Failure catch (failure) {
@@ -106,18 +92,12 @@ class CreateSubDeckController extends _$CreateSubDeckController {
   }) async {
     if (!state.canSubmit) return;
 
-    final nameProblem = deckNameFormProblem(name);
-    if (nameProblem != null) {
-      state = DeckSubmitState(problems: <DeckFormProblem>{nameProblem});
-
-      return;
-    }
-
     state = const DeckSubmitState(isSubmitting: true);
     try {
-      await ref
-          .read(deckRepositoryProvider)
-          .createSubDeck(name: name, parentDeckId: parentDeckId);
+      await ref.read(createSubDeckUseCaseProvider)(
+        name: name,
+        parentDeckId: parentDeckId,
+      );
       if (!ref.mounted) return;
       state = DeckSubmitState(outcome: disposition.outcome);
     } on Failure catch (failure) {
@@ -142,18 +122,9 @@ class RenameDeckController extends _$RenameDeckController {
   Future<void> submit({required String name}) async {
     if (!state.canSubmit) return;
 
-    final nameProblem = deckNameFormProblem(name);
-    if (nameProblem != null) {
-      state = DeckSubmitState(problems: <DeckFormProblem>{nameProblem});
-
-      return;
-    }
-
     state = const DeckSubmitState(isSubmitting: true);
     try {
-      await ref
-          .read(deckRepositoryProvider)
-          .renameDeck(deckId: deckId, name: name);
+      await ref.read(renameDeckUseCaseProvider)(deckId: deckId, name: name);
       if (!ref.mounted) return;
       state = const DeckSubmitState(outcome: SubmitOutcome.savedAndClose);
     } on Failure catch (failure) {
@@ -176,7 +147,7 @@ class DeleteDeckController extends _$DeleteDeckController {
 
     state = const DeckSubmitState(isSubmitting: true);
     try {
-      await ref.read(deckRepositoryProvider).deleteDeck(deckId);
+      await ref.read(deleteDeckUseCaseProvider)(deckId);
       if (!ref.mounted) return;
       state = const DeckSubmitState(outcome: SubmitOutcome.savedAndClose);
     } on Failure catch (failure) {
@@ -204,7 +175,7 @@ class ResetContentTypeController extends _$ResetContentTypeController {
 
     state = const DeckSubmitState(isSubmitting: true);
     try {
-      await ref.read(deckRepositoryProvider).resetContentType(deckId);
+      await ref.read(resetDeckContentTypeUseCaseProvider)(deckId);
       if (!ref.mounted) return;
       state = const DeckSubmitState(outcome: SubmitOutcome.savedAndClose);
     } on Failure catch (failure) {
@@ -232,9 +203,10 @@ class MoveDeckController extends _$MoveDeckController {
 
     state = const DeckSubmitState(isSubmitting: true);
     try {
-      await ref
-          .read(deckRepositoryProvider)
-          .moveDeck(deckId: deckId, targetParentDeckId: targetParentDeckId);
+      await ref.read(moveDeckUseCaseProvider)(
+        deckId: deckId,
+        targetParentDeckId: targetParentDeckId,
+      );
       if (!ref.mounted) return;
       state = const DeckSubmitState(outcome: SubmitOutcome.savedAndClose);
     } on Failure catch (failure) {

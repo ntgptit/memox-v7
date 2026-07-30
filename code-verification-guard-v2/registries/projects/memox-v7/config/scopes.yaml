@@ -188,6 +188,12 @@ scopes:
     exclude:
       - '**/*_controller.dart'
       - '**/*_state.dart'
+      # `presentation/providers/` — added at M4.10 with the use-case layer. A file
+      # whose whole job is dependency wiring reads a repository *by definition*
+      # and hands it to a use case that the widgets then reach through a
+      # controller. Excluding it keeps `widget_no_repository_access` pointed at
+      # the thing it is for: a widget skipping its controller.
+      - '**/*_provider.dart'
       - '**/*.g.dart'
       - '**/*.freezed.dart'
 

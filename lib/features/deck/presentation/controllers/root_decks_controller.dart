@@ -1,10 +1,10 @@
 import 'package:flutter/widgets.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../app/di/deck_repository_provider.dart';
 import '../../../../core/state/retry_policy.dart';
 import '../../../../core/time/clock_provider.dart';
 import '../../domain/models/root_deck_summary_model.dart';
+import '../providers/deck_use_case_provider.dart';
 
 part 'root_decks_controller.g.dart';
 
@@ -54,6 +54,6 @@ class DeckListNow extends _$DeckListNow {
 /// state is `AsyncLoading`, so a failed local read would spin instead of showing
 /// its error state.
 @Riverpod(retry: noAutomaticRetry)
-Stream<List<RootDeckSummary>> rootDeckSummaries(Ref ref) => ref
-    .watch(deckRepositoryProvider)
-    .watchRootDeckSummaries(now: ref.watch(deckListNowProvider));
+Stream<List<RootDeckSummary>> rootDeckSummaries(Ref ref) => ref.watch(
+  watchRootDeckSummariesUseCaseProvider,
+)(now: ref.watch(deckListNowProvider));
