@@ -67,7 +67,7 @@ to be empty rather than absent:
 | Folder | Why empty in Deck |
 |---|---|
 | `domain/usecases/` | the repository contract *is* the use-case surface; a class per method would be a pass-through. Add one when a call orchestrates more than one repository. |
-| `domain/failures/` | failure types are shared, in `core/error/failure.dart`. A feature-specific one goes here. |
+| `domain/failures/` | **now populated.** `Failure` is `sealed`, so a feature cannot add a subtype — what goes here is the *reason* enum a failure carries, plus the pure rule that produces it. |
 | `data/models/` | there are no DTOs — `dio` is not a dependency (AD-05) and Drift is the source of truth, so a DTO would be a second shape for data that already has two. |
 | `presentation/providers/` | every provider in Deck *is* a controller, and the guard's widget scopes exempt controllers by the `_controller` suffix. A provider that is not a controller goes here. |
 
@@ -329,6 +329,79 @@ a sync layer:
 `ConflictFailure` already exists, but it means a **local** constraint violation —
 a duplicate primary key mapped from `SqliteException` extended code 11. It is not
 a sync conflict and must not be reused as one.
+
+### A failure carries *why* as a value, not as a sentence
+
+`Failure.reason` is an `Enum?` on the base type. `Enum` and not a feature type
+because `core/` must not import a feature, and on the base because `Failure` is
+**sealed** — a feature cannot declare its own subtype, so the reason has to travel
+on an existing one.
+
+The alternative was live in Deck until M4.10 and is worth stating as the failure
+mode, because it looks harmless: fifteen different refusals each threw
+`ConflictFailure(message: '<its own English sentence>')`, and the one place that
+maps a failure to copy could only say `ConflictFailure() => deckConflictMessage`.
+**Fifteen distinct reasons arrived at the user as one sentence** — not because
+anyone chose that, but because the reason was encoded in a string the UI is
+forbidden to render.
+
+A feature declares its reasons in `domain/failures/*_failure.dart` (the `_failure`
+suffix is required there, and `check_architecture.sh` checks it), the repository
+throws `ConflictFailure(reason: ...)`, and presentation matches on the reason's
+type:
+
+```dart
+ConflictFailure(reason: final DeckMoveRejection rejection) =>
+    deckMoveRejectionText(rejection),
+ConflictFailure(reason: final DeckConflictReason reason) => deckConflict(reason),
+ConflictFailure() => l10n.deckConflictMessage,   // no reason: a duplicate key
+```
+
+Each helper switches exhaustively over its own enum, so a new reason fails to
+compile until it has copy. `message` keeps a diagnostic for the log — and now
+reads like one (`'Refused: the parent already holds cards.'`) rather than like
+user copy that nothing was allowed to show.
+
+### A rule the UI predicts and the repository enforces belongs in one function
+
+UC-09 was implemented **twice** in Deck: as a pure function behind the move picker,
+and again as eight `ConflictFailure` throws inside `moveDeck`, with no import
+between them. Two spellings of one rule set, free to drift, and only the first had
+tests.
+
+The fix is not to move the rule up out of `data/`. The guards must run **inside**
+`runInTransaction` so a refused write leaves no trace and a concurrent move cannot
+slip between the check and the write — a use case above the repository would put
+that check outside the transaction. That constraint is real and it is why the rules
+were there.
+
+What separates cleanly is the **decision** from the **fact-gathering**, because the
+two callers gather differently:
+
+- the picker has every deck in one query and derives depth in memory;
+- `moveDeck` asks SQLite for each fact separately, inside the transaction.
+
+So the shared function takes *facts*, not a tree:
+
+```dart
+DeckMoveRejection? deckMoveRejection({
+  required DeckEntity source,
+  required DeckEntity target,
+  required bool isTargetInSourceSubtree,
+  required SchedulerType? sourceRootScheduler,
+  ...
+})
+```
+
+Both callers reach it, the order of checks is defined once — so the picker and the
+write path report the same reason for the same situation — and the rule is pure, so
+all eight rejections are tested with no database and no widget. One of the eight
+(`sourceIsRoot`) previously existed only in the repository, where the picker could
+never see it.
+
+`deck_move_rule_test.dart` also asserts that **every enum value is reachable**
+through the function. A value with no rule producing it is a reason that can never
+be shown, which reads as coverage in the ARB file.
 
 ### Adding a table or a column
 

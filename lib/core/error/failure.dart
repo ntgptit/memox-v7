@@ -12,7 +12,7 @@
 /// boundary (M4.9) and `only_throw_errors` rightly refuses anything that is
 /// neither an Error nor an Exception.
 sealed class Failure implements Exception {
-  const Failure({required this.message, this.cause});
+  const Failure({required this.message, this.cause, this.reason});
 
   /// A sanitized diagnostic string. **Not a UI API.**
   ///
@@ -41,21 +41,52 @@ sealed class Failure implements Exception {
 
   /// The original error, for logs only. Never rendered.
   final Object? cause;
+
+  /// *Why*, as a value the UI can switch on.
+  ///
+  /// Typed as `Enum?` rather than a feature type, because `core/` must not import
+  /// a feature (`check_architecture.sh` rule 4) and because `Failure` is
+  /// **sealed** — a feature cannot add its own subtype, so the reason has to
+  /// travel on an existing one.
+  ///
+  /// This exists because the alternative was worse and was live: fifteen
+  /// different conflicts in the Deck repository each threw
+  /// `ConflictFailure(message: '<its own English sentence>')`, and the one place
+  /// that maps a failure to copy could only say
+  /// `ConflictFailure() => l10n.deckConflictMessage`. Fifteen distinct reasons
+  /// arrived at the user as one sentence, because the reason was encoded in a
+  /// string the UI is forbidden to render.
+  ///
+  /// A feature declares its own enum in `domain/failures/` and matches on it:
+  ///
+  /// ```dart
+  /// ConflictFailure(reason: final DeckMoveRejection rejection) =>
+  ///     context.deckMoveRejection(rejection),
+  /// ```
+  ///
+  /// The switch inside that helper is exhaustive over the feature's enum, so a
+  /// new reason fails to compile until it has copy. `null` means the failure has
+  /// no reason worth distinguishing — not that one was forgotten.
+  final Enum? reason;
 }
 
 /// The device could not reach the server, or the request timed out.
 final class NetworkFailure extends Failure {
-  const NetworkFailure({required super.message, super.cause});
+  const NetworkFailure({required super.message, super.cause, super.reason});
 }
 
 /// Credentials are missing or no longer valid.
 final class UnauthorizedFailure extends Failure {
-  const UnauthorizedFailure({required super.message, super.cause});
+  const UnauthorizedFailure({
+    required super.message,
+    super.cause,
+    super.reason,
+  });
 }
 
 /// Authenticated, but not allowed to do this.
 final class ForbiddenFailure extends Failure {
-  const ForbiddenFailure({required super.message, super.cause});
+  const ForbiddenFailure({required super.message, super.cause, super.reason});
 }
 
 /// Input did not satisfy a business or validation rule.
@@ -64,6 +95,7 @@ final class ValidationFailure extends Failure {
     required super.message,
     this.fieldErrors = const <String, String>{},
     super.cause,
+    super.reason,
   });
 
   /// Field name to the message for that field.
@@ -76,25 +108,25 @@ final class ValidationFailure extends Failure {
 
 /// The requested thing does not exist.
 final class NotFoundFailure extends Failure {
-  const NotFoundFailure({required super.message, super.cause});
+  const NotFoundFailure({required super.message, super.cause, super.reason});
 }
 
 /// The operation conflicts with the current state, e.g. a duplicate.
 final class ConflictFailure extends Failure {
-  const ConflictFailure({required super.message, super.cause});
+  const ConflictFailure({required super.message, super.cause, super.reason});
 }
 
 /// Local persistence failed — a Drift or SQLite error, mapped at the boundary.
 final class DatabaseFailure extends Failure {
-  const DatabaseFailure({required super.message, super.cause});
+  const DatabaseFailure({required super.message, super.cause, super.reason});
 }
 
 /// The caller cancelled the operation. Usually not worth showing at all.
 final class CancelledFailure extends Failure {
-  const CancelledFailure({required super.message, super.cause});
+  const CancelledFailure({required super.message, super.cause, super.reason});
 }
 
 /// Nothing more specific applies. Keep [cause] so the log still explains it.
 final class UnknownFailure extends Failure {
-  const UnknownFailure({required super.message, super.cause});
+  const UnknownFailure({required super.message, super.cause, super.reason});
 }
