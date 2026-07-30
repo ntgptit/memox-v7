@@ -154,6 +154,16 @@ Minimum for a feature to be done:
 `assets/feature_checklist.md` is a copy-paste version of all of the above to
 paste into a WBS entry or PR description.
 
+`assets/feature_blueprint.md` is the same ground covered from the other
+direction: what the *existing* `features/deck` slice settled, measured against
+the code rather than described in the abstract. Read it before starting the
+second feature of a kind — it records which folder layouts the guards actually
+accept, what already lives in `core/` and `shared/` so you do not rebuild it,
+the five steps every write controller follows, which test belongs at which level,
+and the one duplication that was left in place along with the three extractions
+that were tried and rejected. It is the answer to "how much of feature 1 can I
+copy", with the parts that must not be copied named.
+
 ## The failure modes this ordering prevents
 
 - **Screen first, then data.** The state model ends up shaped by widget

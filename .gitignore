@@ -142,6 +142,11 @@ coverage/
 !.vscode/launch.json
 !.vscode/extensions.json
 !.vscode/settings.json
+# ...and the shared snippets. They carry the four things easiest to leave out of a
+# hand-written controller — the double-submit guard, the local validation, the
+# `ref.mounted` check after the await, and the retry policy on a local read — so
+# they belong to the project, not to one machine.
+!.vscode/memox.code-snippets
 
 # =============================================================================
 # OS
