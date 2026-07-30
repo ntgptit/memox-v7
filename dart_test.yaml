@@ -1,0 +1,18 @@
+# Test tags, declared so `flutter test --tags` / `--exclude-tags` are checked rather
+# than silently matching nothing. Without this file the runner printed
+# "Tags were used that weren't specified in dart_test.yaml" on every run — a warning
+# that a mistyped tag would hide inside.
+tags:
+  # Compares rendered pixels against a committed PNG.
+  #
+  # **Platform-bound, and that is not a project defect.** Text rasterisation differs
+  # between Windows, Linux and macOS, so a golden generated on one platform fails on
+  # another by 1–3% of pixels. These were generated on Windows, which is where this
+  # project is developed, so CI runs them on `windows-latest` and excludes them from
+  # the Linux job. Running them on Linux would mean either 60 spurious failures or
+  # regenerating every PNG on a platform nobody develops on.
+  golden:
+  # A strict visual audit (MX-VIS-001). Always also `golden`.
+  screen-audit:
+  # Design-review previews: rendered for a human to look at, not asserted against.
+  review:

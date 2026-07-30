@@ -149,10 +149,16 @@ jobs:
 
       # `--reporter expanded` so the per-test names are in the log. `pipefail`
       # because `tee` would otherwise report success for a failed run.
+      # `--exclude-tags golden`: a golden compares rasterised pixels, and text
+      # rasterisation differs between platforms. These PNGs were generated on
+      # Windows, which is where this project is developed, so on Linux they fail by
+      # 1–3% of pixels for reasons that have nothing to do with the change under
+      # test. The `goldens` job below runs them on `windows-latest` instead — on the
+      # platform they came from. See `dart_test.yaml`.
       - name: flutter test
         run: |
           set -o pipefail
-          flutter test --reporter expanded | tee test-output.txt
+          flutter test --exclude-tags golden --reporter expanded | tee test-output.txt
 
       # A suite that shrinks silently is the test-side version of a guard that
       # scans nothing: everything stays green and the coverage is gone. A deleted
@@ -160,23 +166,53 @@ jobs:
       # collected — none of those fail anything on their own.
       #
       # The floor is a tripwire, not a target. It sits well below the current count
-      # so ordinary work never touches it, and it is raised deliberately.
+      # so ordinary work never touches it, and it is raised deliberately. It counts
+      # the non-golden suites only; the golden job has its own floor.
       - name: test count floor
         run: |
           count="$(grep -oE '\+[0-9]+' test-output.txt | tail -1 | tr -d '+')"
           echo "tests passed: ${count:-0}"
-          if [ "${count:-0}" -lt 700 ]; then
+          if [ "${count:-0}" -lt 650 ]; then
             echo "::error::only ${count:-0} tests ran — the suite has shrunk. If that was intended, lower the floor in this workflow in the same commit."
             exit 1
           fi
 
-      # Reruns the goldens explicitly. They pass above too, but a golden failure
-      # buried in 850 lines of expanded output is a golden failure nobody reads,
-      # and the artifact below is what makes it reviewable.
+  # Goldens, on the platform they were generated on.
+  #
+  # Its own job on `windows-latest` because a golden is a comparison of rasterised
+  # pixels and text rasterisation is platform-specific: the same widget differs by
+  # 1–3% of pixels between Windows and Linux. Running these beside the Linux gates
+  # produced 62 failures that were entirely about the runner's font stack.
+  #
+  # The alternative — regenerating every PNG on Linux — was rejected: development
+  # happens on Windows, so it would move the false failures onto every developer's
+  # machine instead of removing them.
+  goldens:
+    name: goldens (windows, where they were generated)
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: .fvmrc
+          cache: true
+          cache-key: 'flutter-goldens-:os:-:channel:-:version:-:arch:'
+
+      - name: pub get
+        run: flutter pub get
+
+      - name: generate
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      # `compact` rather than `expanded`: a golden failure buried in hundreds of
+      # lines is a golden failure nobody reads, and the diff artifact below is what
+      # makes it reviewable.
       - name: golden tests
         run: flutter test --tags golden --reporter compact
 
-      - name: upload golden failures
+      - name: upload golden diffs
         if: failure()
         uses: actions/upload-artifact@v4
         with:
