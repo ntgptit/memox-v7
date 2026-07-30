@@ -1,21 +1,24 @@
 name: CI
 
-# Every gate that can run without a device, on every change that can reach main.
+# The lightweight gate that runs on every change, kept deliberately cheap for the
+# develop phase. It catches the mistakes that would be copied out of Deck into the
+# next feature — a controller reaching the wrong layer, duplicated validation, a
+# guard that scans nothing, stale generated code — without paying for a full test
+# matrix, goldens, or a web build on every commit.
 #
-# `pull_request` and `push` to `main` both, and not one or the other. A PR build
-# tests the *merge result*, which is what review is about; a push build tests what
-# is actually on the branch, which is what a direct commit or a merge queue
-# produces. Neither covers the other.
+# The heavy jobs (full test suite, goldens + count floor, web build, clean-rebuild
+# reproducibility) live in `ci-full.yml` and run on demand — open Actions and press
+# "Run workflow", or before merging a milestone. This split is a develop-phase
+# choice, not a permanent one: the heavy gates are still one click away and must be
+# run before a release.
 on:
   pull_request:
     branches: [main]
   push:
     branches: [main]
-  # So the gates can be run against a branch without opening a PR first.
+  # So the light gate can also be run against any branch without a PR.
   workflow_dispatch:
 
-# A new push supersedes the run it interrupted. Two builds of the same branch
-# tell you the same thing, and the older one is answering a stale question.
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -25,20 +28,13 @@ permissions:
 
 jobs:
   verify:
-    name: format · analyze · guards · test
+    name: format · analyze · guards · deck tests
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
-      # The verification guard is a Python program with real dependencies
-      # (`typer`, `rich`, `pyyaml`). The runner has a Python, but not those — the
-      # first CI run failed with `ModuleNotFoundError: No module named 'typer'`
-      # while the guard ran clean locally, because a developer machine has them
-      # installed once and then forever.
-      #
-      # `requirements.txt` is pinned, so this installs the versions the guard was
-      # written against rather than whatever resolves today.
+      # Python for the verification guard and the doc-integrity checks.
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -48,57 +44,38 @@ jobs:
       - name: install guard dependencies
         run: python -m pip install -r code-verification-guard-v2/requirements.txt
 
-      # `flutter-version-file`, not a hardcoded number: `.fvmrc` is where the pin
-      # lives and two copies of a version drift. `stable` alone would mean the
-      # toolchain changes under the code without a commit saying so, and the
-      # analyzer's error set moves between minors — a green build would stop being
-      # reproducible. This closes the M2.2 debt entry that asked for exactly this.
       - uses: subosito/flutter-action@v2
         with:
           flutter-version-file: .fvmrc
           cache: true
-          # Per-job cache key. The two jobs need different SDK artifacts — this one
-          # needs the material fonts a widget test renders with, the web job needs
-          # the web SDK — and with a shared key whichever finished first saved a
-          # cache the other then restored. That is how run 3 lost its fonts.
           cache-key: 'flutter-verify-:os:-:channel:-:version:-:arch:'
 
       - name: pub get
         run: flutter pub get
 
-      # Generated code is not committed (see .gitignore), so this is the step that
-      # makes a fresh clone equivalent to a developer's tree. Everything after it
-      # would report hundreds of unrelated analyzer errors if it were skipped.
+      # Generated code is gitignored, so this is what makes a fresh clone equal to a
+      # developer's tree; analyze and the tests below would report hundreds of
+      # unrelated errors without it.
       - name: generate
         run: dart run build_runner build --delete-conflicting-outputs
 
-      # `.gitignore` claims CI "fails if the tree is dirty" after generating. It
-      # cannot: the output is ignored, so the tree is clean whatever happened.
-      # This script is the mechanism that claim needed — no generated file
-      # tracked, every declared part present, and a clean rebuild byte-identical
-      # to the incremental one.
-      - name: generated code is fresh and uncommitted
-        run: bash .claude/skills/flutter-workflow/scripts/check_generated.sh
+      # Freshness only (`--skip-rebuild`): nothing generated is committed, every
+      # declared part is present. The absolute clean-rebuild-reproducibility check
+      # is slow and lives in ci-full.yml.
+      - name: generated code freshness
+        run: bash .claude/skills/flutter-workflow/scripts/check_generated.sh --skip-rebuild
 
       - name: dart format
         run: dart format --output=none --set-exit-if-changed .
 
-      # Errors and warnings are the bar the Definition of Done sets;
-      # analysis_options.yaml decides which lint is which, and several are
-      # promoted to error there.
       - name: flutter analyze
         run: flutter analyze --no-fatal-infos
 
-      # Prints how many files it inspected per layer and fails on zero. Six of its
-      # suffix checks once matched no files at all and reported success, which is
-      # why the count is output rather than assumed.
+      # Architecture guards — the cheap ones that stop a boundary or ownership
+      # mistake from being copied out of Deck.
       - name: architecture boundaries
         run: bash .claude/skills/flutter-architecture/scripts/check_architecture.sh
 
-      # Which vendored guard this run enforced, printed so the pinned version is
-      # visible in the CI log rather than inferred. The guard is owned here as a
-      # vendored copy (see code-verification-guard-v2/AGENTS.md), so this is the
-      # single source of truth's version.
       - name: guard version
         run: |
           echo "Guard registry version: $(cat code-verification-guard-v2/VERSION)"
@@ -106,36 +83,12 @@ jobs:
       - name: code verification guard
         run: python code-verification-guard-v2/guard/run.py check --project . --ruleset memox-v7
 
-      # The spec-integrity checks: cross-references between docs/ that no runtime
-      # can catch. Data invariants need a database and are skipped without one.
       - name: document integrity
         run: bash .claude/skills/flutter-workflow/scripts/check_docs.sh
 
-      # `Expected SDK font not found: material_fonts/roboto-regular.ttf` failed
-      # **every** widget test on four runs. Nothing in the project was wrong; the
-      # toolchain was incomplete, and the failure surfaced as ninety unrelated test
-      # errors.
-      #
-      # Immediately before the tests, not near the SDK setup: this is the only step
-      # that needs the fonts, and putting the check next to its consumer means a
-      # missing artifact is reported as a missing artifact rather than as a broken
-      # suite. `--force` because plain `precache --universal` fetched only the iOS
-      # USB artifacts and stopped — the stamp files claimed everything else was
-      # present while the files were not.
-      #
-      # **And then the actual cause, which only Linux could show.** The fonts were
-      # there all along, named `Roboto-Regular.ttf`; `flutter_test` 3.44.8 asks for
-      # `roboto-regular.ttf`. Windows and macOS have case-insensitive filesystems, so
-      # every local run resolved it and every Linux run did not. Four CI failures and
-      # a directory listing to find one letter.
-      #
-      # Lowercase symlinks rather than renames: the CamelCase names are what the SDK
-      # ships and what other tooling may look for, so both spellings now resolve. The
-      # loop is a no-op on a filesystem that does not care.
-      #
-      # The verification after it is the point. If the font is still unreachable, this
-      # prints the directory and fails here — a one-line diagnosis instead of ninety
-      # "Failed to load" errors that read as a broken test suite.
+      # Widget tests below render with the material fonts; the SDK ships them under
+      # a CamelCase name that `flutter_test` asks for in lowercase, and Linux is
+      # case-sensitive. Symlink both spellings, then fail loudly if still unreachable.
       - name: precache and verify the SDK artifacts tests render with
         run: |
           flutter precache --force --universal
@@ -155,132 +108,9 @@ jobs:
           fi
           echo "material fonts reachable at $FONTS/roboto-regular.ttf"
 
-      # `--reporter expanded` so the per-test names are in the log. `pipefail`
-      # because `tee` would otherwise report success for a failed run.
-      # `--exclude-tags golden`: a golden compares rasterised pixels, and text
-      # rasterisation differs between platforms. These PNGs were generated on
-      # Windows, which is where this project is developed, so on Linux they fail by
-      # 1–3% of pixels for reasons that have nothing to do with the change under
-      # test. The `goldens` job below runs them on `windows-latest` instead — on the
-      # platform they came from. See `dart_test.yaml`.
-      - name: flutter test
-        run: |
-          set -o pipefail
-          flutter test --exclude-tags golden --reporter expanded | tee test-output.txt
-
-      # A suite that shrinks silently is the test-side version of a guard that
-      # scans nothing: everything stays green and the coverage is gone. A deleted
-      # file, a `main()` that returns early, a `test/` path that stops being
-      # collected — none of those fail anything on their own.
-      #
-      # The floor is a tripwire, not a target. It sits well below the current count
-      # so ordinary work never touches it, and it is raised deliberately. It counts
-      # the non-golden suites only; the golden job has its own floor.
-      - name: test count floor
-        run: |
-          count="$(grep -oE '\+[0-9]+' test-output.txt | tail -1 | tr -d '+')"
-          echo "tests passed: ${count:-0}"
-          if [ "${count:-0}" -lt 650 ]; then
-            echo "::error::only ${count:-0} tests ran — the suite has shrunk. If that was intended, lower the floor in this workflow in the same commit."
-            exit 1
-          fi
-
-  # Goldens, on the platform they were generated on.
-  #
-  # Its own job on `windows-latest` because a golden is a comparison of rasterised
-  # pixels and text rasterisation is platform-specific: the same widget differs by
-  # 1–3% of pixels between Windows and Linux. Running these beside the Linux gates
-  # produced 62 failures that were entirely about the runner's font stack.
-  #
-  # The alternative — regenerating every PNG on Linux — was rejected: development
-  # happens on Windows, so it would move the false failures onto every developer's
-  # machine instead of removing them.
-  goldens:
-    name: goldens (windows, where they were generated)
-    runs-on: windows-latest
-    timeout-minutes: 25
-    steps:
-      - uses: actions/checkout@v4
-
-      # Python for the count-floor parser below. windows-latest ships a Python,
-      # but pinning it here is what makes the parser step reproducible rather than
-      # dependent on whatever the runner image happens to carry.
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version-file: .fvmrc
-          cache: true
-          cache-key: 'flutter-goldens-:os:-:channel:-:version:-:arch:'
-
-      - name: pub get
-        run: flutter pub get
-
-      - name: generate
-        run: dart run build_runner build --delete-conflicting-outputs
-
-      # `--reporter json`, not `compact`. A golden compares rasterised pixels, so
-      # a real failure still fails this step (`flutter test` exits non-zero and
-      # `pipefail` propagates it) — but the machine-readable stream is what the
-      # count floor below reads. The compact reporter's animation cannot be
-      # counted, and a suite that runs *zero* golden tests exits 0, so without a
-      # count a broken tag or a renamed path would pass this job silently.
-      #
-      # `shell: bash` on windows-latest (Git Bash ships with the runner) so the
-      # pipe, `tee` and `pipefail` behave as they do everywhere else in this file.
-      - name: golden tests
-        shell: bash
-        run: |
-          set -o pipefail
-          flutter test --tags golden --reporter json | tee golden-report.jsonl
-
-      # The tripwire. It counts test-completion events, not files, so a suite that
-      # is discovered but empty, or a tag that stopped matching, trips it. The floor
-      # sits well below the current count (~88) and is raised deliberately; it is
-      # here to catch scope collapse, not to track the exact number.
-      - name: golden count floor
-        shell: bash
-        run: python .claude/skills/flutter-workflow/scripts/count_golden_tests.py golden-report.jsonl 70
-
-      - name: upload golden diffs
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: golden-failures
-          path: |
-            test/**/failures/**
-          if-no-files-found: ignore
-          retention-days: 7
-
-  # Web is not a production target, but it is the E2E channel (Flutter Web +
-  # Playwright), so it has to keep compiling. Its own job so it runs beside the
-  # gates above instead of after them — and so a web-only break is legible as
-  # exactly that.
-  web-build:
-    name: web build (E2E channel)
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version-file: .fvmrc
-          cache: true
-          cache-key: 'flutter-web-:os:-:channel:-:version:-:arch:'
-
-      - name: pub get
-        run: flutter pub get
-
-      - name: generate
-        run: dart run build_runner build --delete-conflicting-outputs
-
-      # `--no-web-resources-cdn` is not optional and is not a preference. Without
-      # it Flutter fetches CanvasKit from `gstatic.com` at **runtime** even though
-      # it is already bundled locally, so in an environment that blocks the CDN the
-      # app silently fails to render with no build error anywhere. Recorded as
-      # technical debt since M2.1a; this is where it gets paid.
-      - name: build web
-        run: flutter build web --release --no-web-resources-cdn
+      # Targeted, not the full suite: the AST/provider convention guards in
+      # test/app, and the Deck domain + data + controller/presentation tests — the
+      # ones that protect the feature being used as a template. `--exclude-tags
+      # golden` because goldens are windows-bound and run in ci-full.
+      - name: provider/AST convention and Deck tests
+        run: flutter test --exclude-tags golden test/app test/features/deck

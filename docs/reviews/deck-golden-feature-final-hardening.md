@@ -7,8 +7,8 @@
 - Guard base commit: same as MemoX base — the guard is **vendored into and owned by MemoX**, so it has no separate history (see §1)
 - Guard final commit: same as MemoX final; vendored version pinned at `code-verification-guard-v2/VERSION` = `0.1.0-memox.1`
 - Branch: `claude/deck-golden-hardening-0ll4zw`
-- PR: _not opened — see "Verification status" below_
-- CI run: _pending — the branch cannot self-trigger CI (see "Verification status")_
+- PR: [#56](https://github.com/ntgptit/memox-v7/pull/56)
+- CI: split into a **light PR gate** (`ci.yml` — format, analyze, architecture/AST/guard checks, Deck domain+data+controller tests, generated-code freshness) that runs on every PR/push, and a **manual heavy pipeline** (`ci-full.yml`, `workflow_dispatch`) for the full suite, goldens + count floor, web build, and clean-rebuild reproducibility. This is a develop-phase choice (requested by the owner): the expensive gates stay one click away and are run before a milestone/release, so architecture, codegen, and Deck-test regressions are still caught continuously.
 
 ### Verification status (read this first)
 
@@ -83,10 +83,15 @@ gate therefore have different levels of assurance:
   before emission → one refresh at the new instant; boundary `== now` → one
   refresh; repository stuck on a past boundary → one refresh then silence across a
   long pump (loop guard); dispose while a crossed-boundary emission is in flight →
-  no read, no mutation, no pending timer. Existing future-boundary/ceiling/
-  dispose/no-duplicate tests still hold (a same-value clock refresh is a Riverpod
-  no-op, so the fixed-boundary fakes do not over-count).
-- Result: **CODE COMPLETE; execution pending CI** (no Dart toolchain here).
+  no read, no mutation, no pending timer.
+- CI-caught test-harness bug (fixed): the first three immediate-refresh tests
+  originally advanced the clock *before* the first `pump()` and relied on
+  `Stream.value` delivery timing, which put the clock read at the wrong instant and
+  took the future-timer path — they failed in CI. Rewritten to feed the first
+  emission by hand through a `StreamController` *after* `setNow`, so the clock sits
+  strictly between the read and its processing. The controller code was correct;
+  only the tests' emission timing was wrong.
+- Result: **CODE COMPLETE; tests fixed after the first CI run; re-run pending.**
 
 ## 3. Documentation alignment
 
@@ -149,7 +154,9 @@ gate therefore have different levels of assurance:
 - Floor: **70** — a tripwire well below the count, commented as such, raised deliberately.
 - Mechanism: the `goldens` job runs `flutter test --tags golden --reporter json |
   tee golden-report.jsonl`, then `count_golden_tests.py golden-report.jsonl 70`
-  counts non-hidden `testDone` events and fails below the floor. It prints
+  counts `testDone` events that are neither hidden nor **skipped** (a Codex review
+  correctly noted that skipped tests report `result: success` and would otherwise
+  pad the count) and fails below the floor. It prints
   `Golden tests discovered: N` / `Minimum required: 70`. A real golden failure
   still fails the test step (`pipefail`); the parser also fails on any non-success result.
 - Zero-test injection: a JSON fixture with only hidden loading entries → parser

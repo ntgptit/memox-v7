@@ -53,11 +53,17 @@ def count_and_check(path: str, floor: int) -> int:
 
     # `testDone` is emitted once per test as it finishes. `hidden` marks the
     # synthetic "loading <suite>" entries the reporter creates per file, which
-    # are not tests — excluding them is what makes this a count of real tests.
+    # are not tests. `skipped` marks a test that was declared but did not run —
+    # `@Skip(...)` or `skip: true` — which reports `result: success` and would
+    # otherwise pad the count: 60 real + 20 skipped would read as 80 and clear a
+    # floor of 70 while only 60 actually ran. Both are excluded so the count is of
+    # tests that genuinely executed.
     done = [
         e
         for e in events
-        if e.get("type") == "testDone" and not e.get("hidden", False)
+        if e.get("type") == "testDone"
+        and not e.get("hidden", False)
+        and not e.get("skipped", False)
     ]
     discovered = len(done)
     failed = [e for e in done if e.get("result") != "success"]
