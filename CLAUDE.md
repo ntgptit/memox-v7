@@ -129,9 +129,41 @@ These are the rules that survive every phase. Everything else is guidance.
 
 **Layering.** `domain/` imports no Flutter, no Dio, no Drift — only Dart and
 other domain code. If a domain file needs `package:flutter`, the abstraction is
-wrong. `data/` implements domain contracts. `presentation/` talks to use cases or
-repository contracts, never to a data source directly. Features never import
-another feature's `data/` or `presentation/` internals.
+wrong. `data/` implements domain contracts. Features never import another
+feature's `data/` or `presentation/` internals.
+
+**The dependency direction is `presentation → domain use case → domain contract ←
+data impl`** (AD-12). A controller calls a use case; it does **not** read a
+repository. Each feature is laid out as:
+
+```
+lib/features/<feature>/
+├── domain/       entities/ · repositories/ · models/ · usecases/ · failures/
+├── data/         repositories/ · mappers/ · datasources/ · models/
+└── presentation/ screens/ · controllers/ · states/ · widgets/ · providers/
+```
+
+Plural folder names, and **the folder does not replace the suffix** —
+`entities/deck_entity.dart`, not `entities/deck.dart`. The guards match on the
+file name, and several of their scopes select files by it, so a mis-suffixed file
+silently leaves the scope of the rules meant to cover it.
+`check_architecture.sh` pairs each folder with the suffix it admits.
+
+**A use case per interaction**, and this overrides the older "only when it holds
+real logic" guidance: uniformity is what makes a new feature a clone rather than a
+judgement call at every operation. Six of Deck's ten hold the input validation
+that used to run twice — once in a controller and again in the repository. The
+four read ones are thin, and that is the accepted cost (AD-12).
+
+**What must NOT move into a use case:** any rule that needs the data *as it stands
+at the moment of writing*. Depth limits, first-child locks, emptiness checks and
+subtree moves run inside `runInTransaction`; hoisting them above the repository
+puts the check outside the transaction, which is a race between the check and the
+write. The rule would be in a tidier place and be wrong.
+
+**`presentation/providers/` is dependency wiring only.** Anything holding state or
+a command is a `_controller`. The distinction decides which guard rules apply, so
+it is not stylistic.
 
 **Control flow.** Guard clauses, early return, fail fast. Avoid `else` — an
 `else` branch usually means a guard clause was skipped. Never swallow errors
@@ -159,9 +191,25 @@ secrets in the repo. No sensitive data in logs, at any level.
 
 ## Naming
 
-Files are `snake_case` with a suffix that states the role: `*_screen.dart`,
-`*_widget.dart`, `*_controller.dart`, `*_state.dart`, `*_repository.dart`,
-`*_repository_impl.dart`, `*_use_case.dart`, `*_model.dart`, `*_entity.dart`.
+Files are `snake_case` with a suffix that states the role. The suffix is
+load-bearing, not decoration: guard scopes select files by it, so the wrong
+suffix removes a file from the rules meant to cover it.
+
+| Layer | Allowed suffixes |
+|---|---|
+| `domain/` | `_entity` · `_repository` · `_use_case` · `_model` · `_failure` · `_scheduler` |
+| `data/` | `_repository_impl` · `_mapper` · `_dao` · `_data_source` · `_model` · `_loader` |
+| `presentation/` | `_screen` · `_controller` · `_state` · `_widget` · `_provider` · `_page` · `_view` |
+
+Two that bite:
+
+- a file holding a provider is `_controller.dart` when it holds state or a
+  command, and `_provider.dart` only when it does dependency wiring;
+- a `presentation/` file with no widget in it still needs one of these suffixes.
+  Deck's `deck_labels_widget.dart` holds a `BuildContext` extension and keeps
+  `_widget` deliberately — renaming it to `_extension.dart` was tried and reverted
+  because it dropped the file out of the widget scope.
+
 Booleans read as predicates: `isX`, `hasX`, `canX`, `shouldX`. Avoid `Utils`,
 `Manager`, `Helper` unless the responsibility is genuinely that and is named
 precisely.

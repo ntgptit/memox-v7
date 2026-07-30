@@ -71,10 +71,14 @@ layout, and this block is a summary of it.
   contract still has one method and the implementation makes three.
 - Business validation belongs here — it is the same regardless of UI, and here
   it can be unit-tested without a widget or a server.
-- **Create a use case only when it holds real logic or has more than one
-  caller.** `Future<List<X>> call() => repo.getAll();` is a file, an
-  indirection and a test for no benefit. Call the repository from the
-  controller.
+- **One use case per interaction** (AD-12). It takes the repository *contract*,
+  never an implementation, and it is where the input validation lives — a
+  controller that validates and a repository that validates the same rule again
+  is the shape this replaced.
+- **A rule that needs the tree as it stands at the moment of writing stays in the
+  repository**, inside `runInTransaction`. Depth limits, content locks, emptiness
+  checks, subtree moves. A use case above the repository would put the check
+  outside the transaction, which is a race between the check and the write.
 
 ## Step 2 — Data
 
