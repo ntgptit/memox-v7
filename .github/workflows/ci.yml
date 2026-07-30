@@ -57,14 +57,22 @@ jobs:
         with:
           flutter-version-file: .fvmrc
           cache: true
+          # Per-job cache key. The two jobs need different SDK artifacts — this one
+          # needs the material fonts a widget test renders with, the web job needs
+          # the web SDK — and with a shared key whichever finished first saved a
+          # cache the other then restored. That is how run 3 lost its fonts.
+          cache-key: flutter-verify-:os:-:channel:-:version:-:arch:
 
-      # The SDK cache restores a Flutter directory without its downloaded artifacts,
-      # so the third CI run failed to load **every** widget test with `Expected SDK
-      # font not found: material_fonts/roboto-regular.ttf`. Nothing in the project
-      # is wrong; the toolchain was incomplete. `--universal` is what fetches the
-      # material fonts a widget test renders with.
+      # `Expected SDK font not found: material_fonts/roboto-regular.ttf` failed
+      # **every** widget test on runs 3 and 4. Nothing in the project was wrong; the
+      # toolchain was incomplete.
+      #
+      # `--force` because plain `precache --universal` fetched only the iOS USB
+      # artifacts and stopped: the stamp files said everything else was present while
+      # the files were not, which is what a partially-restored cache looks like.
+      # `--force` ignores the stamps.
       - name: precache SDK artifacts
-        run: flutter precache --universal
+        run: flutter precache --force --universal
 
       - name: pub get
         run: flutter pub get
@@ -160,6 +168,7 @@ jobs:
         with:
           flutter-version-file: .fvmrc
           cache: true
+          cache-key: flutter-web-:os:-:channel:-:version:-:arch:
 
       - name: pub get
         run: flutter pub get
