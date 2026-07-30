@@ -309,7 +309,46 @@ anywhere. `cause` is for logs only and is never rendered at all.
 
 There is no "fall back to `message`" rule, on purpose: a fallback like that only
 ever fires on the error paths nobody looked at, which is precisely where an
-untranslated diagnostic would surface. See `deck_labels_widget.dart` for the
+untranslated diagnostic would surface.
+
+**The five distinctions, and where each is decided.** `core/error/failure.dart`
+has nine subtypes; five of them carry different meaning to a user, and the split
+happens in two places rather than one:
+
+| Distinction | Decided by |
+|---|---|
+| validation | the repository's own guard, *before* the write — 25 explicit `ConflictFailure`/`NotFoundFailure` throws across Deck and Card |
+| not found | a guard, or a foreign-key violation (the row vanished between the check and the write) |
+| conflict / duplicate | a primary-key or unique violation — the one the user can act on |
+| database | any other SQLite error, plus `NOT NULL` and `CHECK` violations |
+| unexpected | an error with no persistence origin at all |
+
+**Read the result code, not the message.** `mapDatabaseError` classifies a
+constraint violation by `SqliteException.extendedResultCode` — 1555/2067 for
+uniqueness, 787 for a foreign key, 1299/1811 for `NOT NULL`/`CHECK`. Verified
+against a real database. A text match cannot do this job: all three kinds put the
+literal `constraint failed` in their message, so matching the prose lumps together
+the one case the user can act on with the two they cannot. Doing that told the user
+"choose a different name" for a deck that had been deleted, and for a `NOT NULL`
+bug they had no part in.
+
+A text fallback stays for errors arriving without a code, and it classifies by kind
+too — a fallback that is more optimistic than the primary path is a fallback that
+hides the difference it exists to preserve.
+
+`sqlite3` is therefore a **direct** dependency, not a transitive one: the file whose
+stated job is to know what a persistence exception looks like should say so in
+`pubspec.yaml`. Import `package:sqlite3/common.dart`, never `sqlite3.dart` — the
+latter pulls in `dart:ffi` and web is a required build target (AD-04).
+
+**On the read path the distinctions collapse to two, and that is correct.** A read
+can be "the thing is gone" (offer a way back, not a retry that will fail forever) or
+"the read failed" (offer a retry). `deck_detail_screen.dart` tests
+`error is NotFoundFailure` for exactly that. The list screen has one branch because
+a missing list is an empty list, not an error. This becomes a compiler-checked
+switch at M9, when a network read failure will deserve copy of its own — not
+before, because a switch whose every branch returns the same string is machinery
+without a decision inside it. See `deck_labels_widget.dart` for the
 switch, and `MxAsyncView` for why no shared default error UI exists.
 
 ## Presentation

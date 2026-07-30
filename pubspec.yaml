@@ -38,6 +38,10 @@ dependencies:
   riverpod_annotation: any
   go_router: ^17.3.0
   drift: 2.34.0
+  # Direct because core/error/drift_error_mapper.dart reads SqliteException.
+  # resultCode: the exception drift throws for a constraint violation carries the
+  # kind numerically, and the three kinds need different Failures.
+  sqlite3: ^3.5.0
   path_provider: ^2.1.6
   path: ^1.9.1
   freezed_annotation: ^3.1.0
