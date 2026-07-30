@@ -129,8 +129,18 @@ node_modules/
 # =============================================================================
 coverage/
 *.lcov
-# golden test diffs — inspect locally, upload as artifacts from CI
-**/failures/
+# Golden test diffs — inspect locally, upload as artifacts from CI.
+#
+# Scoped to `test/`, and that scope is load-bearing. As a bare `**/failures/` this
+# swallowed `lib/features/deck/domain/failures/` — the whole domain failures layer,
+# three source files, **never committed**. Every local gate passed because the files
+# were on disk; the first CI run failed to compile because a fresh checkout does not
+# have them. That is the defect class this pattern must not repeat: an ignore rule
+# written for build output that also matches a source directory sharing its name.
+#
+# `check_generated.sh` now asserts the converse — every non-generated Dart file under
+# `lib/` is tracked — so the next such rule fails a gate instead of a clone.
+test/**/failures/
 
 # =============================================================================
 # IDE

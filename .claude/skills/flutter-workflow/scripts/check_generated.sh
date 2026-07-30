@@ -63,6 +63,37 @@ done < <(git ls-files 2>/dev/null \
   | grep -v '^test/drift/generated/' | grep -v '^drift_schemas/')
 
 # ---------------------------------------------------------------------------
+# 1b. Every hand-written source file IS tracked.
+#
+#     The converse of check 1, and the one that was missing. An ignore rule written
+#     for build output can also match a source directory that happens to share its
+#     name: `**/failures/`, added for golden-test diffs, silently swallowed
+#     `lib/features/deck/domain/failures/` — three source files, never committed.
+#     Every local gate passed, because the files were on disk. The first CI run
+#     failed to compile, because a fresh checkout is the only place the difference
+#     shows.
+#
+#     `comm` against `git ls-files` rather than `git check-ignore`, so a file that is
+#     absent from the index for *any* reason — ignored, or simply never added — is
+#     reported. `lib/l10n/generated/` is excluded: it is gen-l10n output and is
+#     ignored on purpose.
+# ---------------------------------------------------------------------------
+UNTRACKED=0
+while IFS= read -r file; do
+  [[ -z "$file" ]] && continue
+  UNTRACKED=$((UNTRACKED + 1))
+  report "source file is not in git" "$file" \
+    "A fresh clone does not have this file, so CI compiles something different from what you are running. Look for a .gitignore pattern written for build output that also matches a source path."
+done < <(
+  comm -23 \
+    <(find lib -name '*.dart' -type f \
+        ! -name '*.g.dart' ! -name '*.freezed.dart' ! -name '*.drift.dart' \
+        ! -name '*.mocks.dart' ! -name '*.config.dart' 2>/dev/null \
+      | grep -v '^lib/l10n/generated/' | sort) \
+    <(git ls-files -- 'lib/*.dart' 'lib/**/*.dart' 2>/dev/null | sort)
+)
+
+# ---------------------------------------------------------------------------
 # 2. Every declared part exists.
 #
 #    This is the check that actually detects staleness. A source that declares
@@ -138,8 +169,16 @@ fi
 # them into checks that pass because they looked at nothing.
 # ---------------------------------------------------------------------------
 hr
-printf 'scanned: %s tracked-file candidates, %s declared parts, %s generated files hashed\n' \
-  "$(git ls-files 2>/dev/null | wc -l | tr -d ' ')" "$DECLARED" "$REBUILD_CHECKED"
+SOURCE_COUNT=$(find lib -name '*.dart' -type f \
+  ! -name '*.g.dart' ! -name '*.freezed.dart' ! -name '*.drift.dart' 2>/dev/null \
+  | grep -vc '^lib/l10n/generated/' || true)
+printf 'scanned: %s hand-written sources under lib/, %s declared parts, %s generated files hashed\n' \
+  "$SOURCE_COUNT" "$DECLARED" "$REBUILD_CHECKED"
+
+if [[ "$SOURCE_COUNT" -eq 0 ]]; then
+  report "zero scope" "lib/" \
+    "No hand-written Dart file matched under lib/, so the tracked-source check inspected nothing."
+fi
 
 if [[ "$DECLARED" -eq 0 ]]; then
   report "zero scope" "lib/" \
