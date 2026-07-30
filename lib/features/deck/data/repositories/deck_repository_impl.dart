@@ -6,6 +6,7 @@ import '../../../../core/error/drift_error_mapper.dart';
 import '../../../../core/error/failure.dart';
 import '../../domain/models/deck_content_type_model.dart';
 import '../../domain/models/deck_deletion_impact_model.dart';
+import '../../domain/models/deck_detail_model.dart';
 import '../../domain/entities/deck_entity.dart';
 import '../../domain/failures/deck_conflict_failure.dart';
 import '../../domain/failures/deck_move_failure.dart';
@@ -80,12 +81,8 @@ final class DeckRepositoryImpl
       _guardStream(_dao.watchDecksInTree(rootDeckId)).map(_mapDeckRows);
 
   @override
-  Stream<List<DeckEntity>> watchChildDecks(String parentDeckId) =>
-      _guardStream(_dao.watchChildDecks(parentDeckId)).map(_mapDeckRows);
-
-  @override
-  Future<DeckEntity> getDeckById(String deckId) =>
-      _guard(() async => deckEntityFromRow(await _requireDeckRow(deckId)));
+  Stream<DeckDetail> watchDeckDetail(String deckId) =>
+      _guardStream(_dao.watchDeckDetail(deckId)).map(deckDetailFromRows);
 
   // ---- writes ------------------------------------------------------------
 

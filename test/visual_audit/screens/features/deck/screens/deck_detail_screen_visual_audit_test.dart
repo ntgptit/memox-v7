@@ -12,6 +12,7 @@ import 'package:memox/app/router/app_router.dart';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/deck/domain/models/deck_content_type_model.dart';
 import 'package:memox/features/deck/domain/entities/deck_entity.dart';
+import 'package:memox/features/deck/domain/models/deck_detail_model.dart';
 import 'package:memox/features/deck/presentation/screens/deck_detail_screen.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
@@ -70,8 +71,8 @@ void main() {
     DeckEntity deck, {
     List<DeckEntity> children = const <DeckEntity>[],
   }) => FakeDeckRepository(
-    deckById: (id) async => deck,
-    childDecks: (_) => Stream<List<DeckEntity>>.value(children),
+    deckDetail: (_) =>
+        Stream<DeckDetail>.value(DeckDetail(deck: deck, childDecks: children)),
     allDecks: () => Stream<List<DeckEntity>>.value(<DeckEntity>[deck]),
   );
 

@@ -1,4 +1,5 @@
 import '../models/deck_deletion_impact_model.dart';
+import '../models/deck_detail_model.dart';
 import '../entities/deck_entity.dart';
 import '../models/deck_name_model.dart';
 import '../models/root_deck_summary_model.dart';
@@ -51,11 +52,19 @@ abstract interface class DeckRepository {
   /// A root deck and every descendant, to the allowed depth (BR-55).
   Stream<List<DeckEntity>> watchDeckTree(String rootDeckId);
 
-  /// The direct children of one deck.
-  Stream<List<DeckEntity>> watchChildDecks(String parentDeckId);
-
-  /// One deck, for operations that need its current state.
-  Future<DeckEntity> getDeckById(String deckId);
+  /// One deck together with its direct children (UC-06 step 4, UC-08).
+  ///
+  /// **One method, because the screen needs one snapshot.** The action set is
+  /// computed from the deck's `content_type` and from whether the children are
+  /// empty (BR-68) at the same time, so the two facts must come from the same
+  /// read. This used to be `watchChildDecks` plus `getDeckById`, composed in the
+  /// controller — two statements, two snapshots, and a window a rename or a
+  /// create could land in.
+  ///
+  /// Errors as `NotFoundFailure` when the deck does not exist, which is a
+  /// different thing from a deck with no children and has to stay different: one
+  /// is a dead route, the other is an empty state.
+  Stream<DeckDetail> watchDeckDetail(String deckId);
 
   /// Creates a root deck (UC-02): `parent_deck_id = NULL`, `root_deck_id =
   /// id`, `content_type = deck`, generation 1, `first_review_at = NULL`.

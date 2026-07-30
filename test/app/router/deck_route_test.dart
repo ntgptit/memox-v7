@@ -9,6 +9,7 @@ import 'package:memox/app/router/app_router.dart';
 import 'package:memox/app/router/route_names.dart';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/deck/domain/entities/deck_entity.dart';
+import 'package:memox/features/deck/domain/models/deck_detail_model.dart';
 import 'package:memox/features/deck/presentation/screens/deck_detail_screen.dart';
 import 'package:memox/features/deck/presentation/screens/root_deck_list_screen.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
@@ -71,8 +72,12 @@ void main() {
     /// A repository that can serve one deck, so the nested route has something
     /// to render.
     FakeDeckRepository servingDeck() => FakeDeckRepository(
-      deckById: (id) async => fakeRootDeck(id: id, name: 'Japanese N5'),
-      childDecks: (_) => Stream<List<DeckEntity>>.value(const <DeckEntity>[]),
+      deckDetail: (String id) => Stream<DeckDetail>.value(
+        DeckDetail(
+          deck: fakeRootDeck(id: id, name: 'Japanese N5'),
+          childDecks: const <DeckEntity>[],
+        ),
+      ),
     );
 
     testWidgets('a deep link to /decks/<id> opens that deck', (tester) async {

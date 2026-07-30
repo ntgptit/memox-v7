@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/deck/domain/models/deck_content_type_model.dart';
 import 'package:memox/features/deck/domain/models/deck_deletion_impact_model.dart';
+import 'package:memox/features/deck/domain/models/deck_detail_model.dart';
 import 'package:memox/features/deck/domain/entities/deck_entity.dart';
 import 'package:memox/features/deck/domain/repositories/deck_repository.dart';
 import 'package:memox/features/deck/domain/models/root_deck_summary_model.dart';
@@ -31,8 +32,7 @@ class FakeDeckRepository implements DeckRepository {
     Stream<List<RootDeckSummary>> Function()? summaries,
     Stream<List<DeckEntity>> Function()? rootDecks,
     Stream<List<DeckEntity>> Function()? allDecks,
-    Stream<List<DeckEntity>> Function(String parentDeckId)? childDecks,
-    Future<DeckEntity> Function(String deckId)? deckById,
+    Stream<DeckDetail> Function(String deckId)? deckDetail,
     this.deletionImpact = const DeckDeletionImpact(
       descendantDeckCount: 0,
       cardCount: 0,
@@ -41,8 +41,7 @@ class FakeDeckRepository implements DeckRepository {
   }) : _summaries = summaries ?? _emptySummaries,
        _rootDecks = rootDecks ?? _emptyDecks,
        _allDecks = allDecks ?? _emptyDecks,
-       _childDecks = childDecks ?? ((_) => _emptyDecks()),
-       _deckById = deckById ?? _missingDeck;
+       _deckDetail = deckDetail ?? _missingDeck;
 
   /// Emits [decks] as root summaries with the counts each entry carries.
   factory FakeDeckRepository.withSummaries(List<RootDeckSummary> summaries) =>
@@ -54,14 +53,27 @@ class FakeDeckRepository implements DeckRepository {
   /// still answering.
   factory FakeDeckRepository.pending() => FakeDeckRepository(
     summaries: () => StreamController<List<RootDeckSummary>>().stream,
-    childDecks: (_) => StreamController<List<DeckEntity>>().stream,
+    deckDetail: (_) => StreamController<DeckDetail>().stream,
   );
 
   /// Fails without ever emitting — a read that could not reach the database.
   factory FakeDeckRepository.failing(Object error) => FakeDeckRepository(
     summaries: () => Stream<List<RootDeckSummary>>.error(error),
-    childDecks: (_) => Stream<List<DeckEntity>>.error(error),
-    deckById: (_) => Future<DeckEntity>.error(error),
+    deckDetail: (_) => Stream<DeckDetail>.error(error),
+  );
+
+  /// A deck screen's read, supplied as the pair the real read returns together.
+  ///
+  /// One builder for both facts, because the contract has one method for both.
+  /// The old fake had a `childDecks` stream and a separate `deckById` future, and
+  /// a test could therefore set up a state the database cannot produce — a deck
+  /// whose children belong to a different snapshot. That is no longer expressible.
+  factory FakeDeckRepository.withDetail({
+    required DeckEntity deck,
+    List<DeckEntity> children = const <DeckEntity>[],
+  }) => FakeDeckRepository(
+    deckDetail: (_) =>
+        Stream<DeckDetail>.value(DeckDetail(deck: deck, childDecks: children)),
   );
 
   static Stream<List<RootDeckSummary>> _emptySummaries() =>
@@ -70,16 +82,15 @@ class FakeDeckRepository implements DeckRepository {
   static Stream<List<DeckEntity>> _emptyDecks() =>
       Stream<List<DeckEntity>>.value(const <DeckEntity>[]);
 
-  static Future<DeckEntity> _missingDeck(String deckId) =>
-      Future<DeckEntity>.error(
+  static Stream<DeckDetail> _missingDeck(String deckId) =>
+      Stream<DeckDetail>.error(
         const NotFoundFailure(message: 'That deck no longer exists.'),
       );
 
   final Stream<List<RootDeckSummary>> Function() _summaries;
   final Stream<List<DeckEntity>> Function() _rootDecks;
   final Stream<List<DeckEntity>> Function() _allDecks;
-  final Stream<List<DeckEntity>> Function(String parentDeckId) _childDecks;
-  final Future<DeckEntity> Function(String deckId) _deckById;
+  final Stream<DeckDetail> Function(String deckId) _deckDetail;
 
   DeckDeletionImpact deletionImpact;
 
@@ -92,7 +103,7 @@ class FakeDeckRepository implements DeckRepository {
   /// two writes" are both questions about the number.
   int summariesCallCount = 0;
   int allDecksCallCount = 0;
-  final List<String> childDecksCalls = <String>[];
+  final List<String> deckDetailCalls = <String>[];
   final List<({String name, SchedulerType scheduler})> createdRootDecks =
       <({String name, SchedulerType scheduler})>[];
   final List<({String name, String parentDeckId})> createdSubDecks =
@@ -124,17 +135,14 @@ class FakeDeckRepository implements DeckRepository {
   }
 
   @override
-  Stream<List<DeckEntity>> watchChildDecks(String parentDeckId) {
-    childDecksCalls.add(parentDeckId);
+  Stream<DeckDetail> watchDeckDetail(String deckId) {
+    deckDetailCalls.add(deckId);
 
-    return _childDecks(parentDeckId);
+    return _deckDetail(deckId);
   }
 
   @override
   Stream<List<DeckEntity>> watchDeckTree(String rootDeckId) => _allDecks();
-
-  @override
-  Future<DeckEntity> getDeckById(String deckId) => _deckById(deckId);
 
   @override
   Future<DeckDeletionImpact> getDeletionImpact(String deckId) async {

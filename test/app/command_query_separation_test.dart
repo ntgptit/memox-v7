@@ -60,6 +60,12 @@ void main() {
     // eight methods in one notifier, only smaller — and it was live:
     // `WatchDeckChildrenUseCase` held the children stream *and* a deck read until
     // this check was written.
+    //
+    // **One interaction is not one statement.** That class was later replaced by
+    // `WatchDeckDetailUseCase`, which returns a deck and its children from a
+    // single query — because opening a deck is one thing the user does. What this
+    // rule forbids is a class exposing two *entry points*, not a read that
+    // answers one question with a join.
     final offenders = <String>[];
 
     for (final file in dartFilesUnder('lib/features')) {
@@ -73,8 +79,9 @@ void main() {
       offenders,
       isEmpty,
       reason:
-          'A use case is one interaction. Split it, and compose in the '
-          'controller — that is what a controller is for.\n'
+          'A use case is one interaction. Split it — and if the two halves are '
+          'always needed together, that is a sign they belong in one read, not '
+          'in one class with two methods.\n'
           '${offenders.join('\n')}',
     );
   });

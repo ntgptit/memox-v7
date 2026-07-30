@@ -40,8 +40,13 @@ final class DeckDao {
   Stream<List<Deck>> watchDecksInTree(String rootDeckId) =>
       _db.decksInTree(rootDeckId).watch();
 
-  Stream<List<Deck>> watchChildDecks(String parentDeckId) =>
-      _db.childDecks(parentDeckId).watch();
+  /// One deck and its direct children, one statement (UC-06 step 4, UC-08).
+  ///
+  /// A `LEFT JOIN`, so a childless deck still yields exactly one row — with
+  /// `child` null. Which is why the empty list and "the deck is gone" are
+  /// distinguishable here at all: no rows means no deck.
+  Stream<List<DeckDetailResult>> watchDeckDetail(String deckId) =>
+      _db.deckDetail(deckId).watch();
 
   Future<Deck?> deckById(String deckId) =>
       _db.deckById(deckId).getSingleOrNull();

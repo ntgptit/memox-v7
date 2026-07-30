@@ -106,10 +106,27 @@ SELECT * FROM decks
 WHERE root_deck_id = :rootDeckId
 ORDER BY created_at ASC, id ASC;
 
-childDecks:
-SELECT * FROM decks
-WHERE parent_deck_id = :parentDeckId
-ORDER BY created_at ASC, id ASC;
+-- One deck and its direct children, from ONE statement (UC-06 step 4, UC-08).
+--
+-- **Why one statement and not two.** The screen's action set is computed from
+-- both facts at once: which actions exist comes from the deck's `content_type`,
+-- and whether *reset* is offered comes from the children being empty (BR-68). Two
+-- reads mean two database snapshots, so the screen could render an action matrix
+-- from a deck captured at one instant and a child list captured at another — and
+-- the window is real, because a rename or a create lands between them.
+--
+-- The previous shape watched `childDecks` and then asked `deckById` per emission.
+-- Its comment said both facts "arrive together"; they did not.
+--
+-- `LEFT JOIN`, so a deck with no children still yields exactly one row with a
+-- null child. A deck that does not exist yields none, which is how the repository
+-- tells the difference between "empty" and "gone" without a second query.
+deckDetail:
+SELECT deck.**, child.**
+FROM decks AS deck
+LEFT JOIN decks AS child ON child.parent_deck_id = deck.id
+WHERE deck.id = :deckId
+ORDER BY child.created_at ASC, child.id ASC;
 
 -- An arbitrary deck's subtree — itself plus every descendant.
 subtreeDeckIds:

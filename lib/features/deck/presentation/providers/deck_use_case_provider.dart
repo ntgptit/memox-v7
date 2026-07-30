@@ -4,12 +4,11 @@ import '../../../../app/di/deck_repository_provider.dart';
 import '../../domain/usecases/create_root_deck_use_case.dart';
 import '../../domain/usecases/create_sub_deck_use_case.dart';
 import '../../domain/usecases/delete_deck_use_case.dart';
-import '../../domain/usecases/get_deck_by_id_use_case.dart';
 import '../../domain/usecases/get_deck_deletion_impact_use_case.dart';
 import '../../domain/usecases/move_deck_use_case.dart';
 import '../../domain/usecases/rename_deck_use_case.dart';
 import '../../domain/usecases/reset_deck_content_type_use_case.dart';
-import '../../domain/usecases/watch_deck_children_use_case.dart';
+import '../../domain/usecases/watch_deck_detail_use_case.dart';
 import '../../domain/usecases/watch_deck_move_targets_use_case.dart';
 import '../../domain/usecases/watch_root_deck_summaries_use_case.dart';
 
@@ -70,12 +69,8 @@ WatchRootDeckSummariesUseCase watchRootDeckSummariesUseCase(Ref ref) =>
     WatchRootDeckSummariesUseCase(ref.watch(deckRepositoryProvider));
 
 @riverpod
-WatchDeckChildrenUseCase watchDeckChildrenUseCase(Ref ref) =>
-    WatchDeckChildrenUseCase(ref.watch(deckRepositoryProvider));
-
-@riverpod
-GetDeckByIdUseCase getDeckByIdUseCase(Ref ref) =>
-    GetDeckByIdUseCase(ref.watch(deckRepositoryProvider));
+WatchDeckDetailUseCase watchDeckDetailUseCase(Ref ref) =>
+    WatchDeckDetailUseCase(ref.watch(deckRepositoryProvider));
 
 @riverpod
 GetDeckDeletionImpactUseCase getDeckDeletionImpactUseCase(Ref ref) =>

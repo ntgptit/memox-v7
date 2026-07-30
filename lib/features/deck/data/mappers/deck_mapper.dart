@@ -1,6 +1,8 @@
 import '../../../../core/database/app_database.dart';
+import '../../../../core/error/failure.dart';
 import '../../domain/models/deck_content_type_model.dart';
 import '../../domain/entities/deck_entity.dart';
+import '../../domain/models/deck_detail_model.dart';
 import '../../domain/models/root_deck_summary_model.dart';
 import '../../domain/models/scheduler_type_model.dart';
 
@@ -26,6 +28,34 @@ DeckEntity deckEntityFromRow(Deck row) {
     firstReviewAt: row.firstReviewAt?.toUtc(),
     createdAt: row.createdAt.toUtc(),
     updatedAt: row.updatedAt.toUtc(),
+  );
+}
+
+/// Maps the `deckDetail` result set to the deck-screen read model.
+///
+/// The `LEFT JOIN` gives one row per child, or a single row with a null `child`
+/// when there are none — so the two cases the screen must not confuse are
+/// distinguishable here:
+///
+/// * **no rows at all** — the deck does not exist, which surfaces as
+///   [NotFoundFailure]. The screen renders a way back, not a retry (UC-03 E1).
+/// * **one row, `child` null** — the deck exists and has no children, so reset
+///   may be offered (BR-68).
+///
+/// `rows.first.deck` is the same deck in every row by construction: the join is
+/// keyed on `deck.id = :deckId`.
+DeckDetail deckDetailFromRows(List<DeckDetailResult> rows) {
+  if (rows.isEmpty) {
+    throw const NotFoundFailure(message: 'That deck no longer exists.');
+  }
+
+  return DeckDetail(
+    deck: deckEntityFromRow(rows.first.deck),
+    childDecks: rows
+        .map((DeckDetailResult row) => row.child)
+        .nonNulls
+        .map(deckEntityFromRow)
+        .toList(growable: false),
   );
 }
 
