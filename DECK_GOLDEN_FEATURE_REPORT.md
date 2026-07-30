@@ -278,7 +278,24 @@ layer now references no validation rule at all.**
 | code verification guard | 0 violations, 66 rules | 0 violations, 66 rules |
 | `check_docs.sh` | clean | clean |
 | `flutter build web --release --no-web-resources-cdn` | not run | succeeds |
-| CI | **did not exist** | 2 jobs, 14 + 5 steps |
+| CI | **did not exist** | 3 jobs, **green** — run [30538692605](https://github.com/ntgptit/memox-v7/actions/runs/30538692605) |
+
+The CI split, and why: 756 non-golden tests on Linux, 88 goldens on `windows-latest`
+where the PNGs were generated, and the web build on Linux. A golden compares
+rasterised pixels and text rasterisation is platform-specific, so the same widget
+differs by 1-3% between the two.
+
+Counts reported by the green run, which is what "shows scanned file/test counts"
+means in practice:
+
+```
+scanned: 106 hand-written sources under lib/, 20 declared parts, 20 generated files hashed
+scanned 109 files under lib - features 54 (domain 27, data 10, presentation 16, di 2)
+command/query scan: {usecases: 10, controllers: 8, command controllers: 6,
+                     query controllers: 1, input-state notifiers: 1,
+                     controller and use-case members: 45}
+tests passed: 756
+```
 
 New test files:
 
@@ -375,15 +392,40 @@ The three control rows (20, 33, 35) are the ones that matter most: each is a cas
 previous implementation reported as a violation, which is how a guard ends up
 punishing the comment that explains it.
 
+### Added after CI found what local gates could not
+
+| # | Injection | Result |
+|---|---|---|
+| 38 | `git rm --cached` one of the three `domain/failures/` files | "source file is not in git" - the new rule that would have caught the real defect |
+| 39 | break the tracked-source `find` so it matches nothing | "zero scope" |
+
+Row 38 is the injection that matters most in the whole table, because the defect it
+models was **live on `main`** and every existing gate passed on it.
+
 ---
 
 ## Remaining risks
 
-1. **CI has never executed on GitHub.** Every step was verified locally in the order
-   the workflow runs them, including the web build, but no run exists yet. The first
-   PR is where `subosito/flutter-action@v2` with `flutter-version-file: .fvmrc`, the
-   Ubuntu `python` name, and the golden-artifact glob are proven. Nothing in the
-   workflow is exotic; the risk is a step name or a runner path, not a gate.
+1. ~~**CI has never executed on GitHub.**~~ **Resolved - and it found four defects
+   no local gate could.** It took eight runs to go green, and every one of the four
+   was invisible on a developer machine:
+
+   | # | What CI found | Why local could not |
+   |---|---|---|
+   | 1 | `lib/features/deck/domain/failures/` - three source files - **had never been committed**. `.gitignore` carried `**/failures/`, added for golden diff directories, and it also matched a source directory sharing the name. | Every local gate reads the working tree, where the files exist. A fresh checkout is the only place the difference shows. |
+   | 2 | the verification guard's Python dependencies were not installed | a developer installs them once and then forever |
+   | 3 | the SDK ships `Roboto-Regular.ttf`; `flutter_test` 3.44.8 asks for `roboto-regular.ttf` | Windows and macOS filesystems are case-insensitive, so the mismatch is unobservable |
+   | 4 | 62 goldens differ by 1-3% of pixels between Windows and Linux | the goldens were generated on the platform they were being compared on |
+
+   Defect 1 is the one that mattered: **a fresh clone of `main` did not compile**, and
+   had not for as long as `domain/failures/` has existed. `check_generated.sh` now
+   asserts the converse of the rule it already had - every hand-written Dart file
+   under `lib/` **is** tracked - so this fails a gate rather than a clone.
+
+   Two hypotheses along the way were wrong and are recorded in the workflow comments
+   so they are not retried: that `precache` alone would fix the fonts, and that the
+   jobs sharing an SDK cache was the cause. The first was necessary but insufficient;
+   the second was not the cause at all.
 2. **The `/di/` suffix check is a `warn`, not an `error`** — like all fifteen of its
    siblings in `check_architecture.sh`, so it does not fail the guard. Promoting the
    whole suffix family is a separate change.
@@ -484,12 +526,13 @@ clean rebuild is byte-identical.
 | No validation-ownership contradiction | yes — BR-01 is a type; BR-11 splits "chosen" (use case) from "real" (type); the data layer references no validation rule |
 | No mixed-snapshot `DeckDetail` | yes — one statement, proved by counting statements, not by asserting values |
 | No second query in the move-target emission | yes — proved by repository call counts |
-| CI exists and runs | exists and is complete; **has not yet executed on GitHub** |
+| CI exists and runs | **green on the PR** - [run 30538692605](https://github.com/ntgptit/memox-v7/actions/runs/30538692605), 3 jobs |
 
-The last row is the one qualification, and it is not a blocker: every step was run
-locally in the workflow's order, including the web build. The verdict is READY with
-the standing note that the first PR is what proves the runner, and that a red first
-run is a workflow-syntax problem rather than a gate that does not hold.
+No qualification remains on the verdict: CI is green, and the eight runs it took to
+get there paid for themselves. The most valuable thing on this branch turned out not
+to be any of the nine planned changes - it was the first CI run discovering that a
+fresh clone of `main` did not compile, because an ignore rule written for golden
+diffs had been quietly swallowing a source directory.
 
 **Cloning to Card may proceed.** What makes it safe is not that the tests are green —
 they were green before all of this — but that the four defects a clone would have
