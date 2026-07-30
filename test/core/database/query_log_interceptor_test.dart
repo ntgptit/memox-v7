@@ -28,9 +28,23 @@ void main() {
     return db;
   }
 
-  Future<void> insertDeckAndCard(AppDatabase db) async {
-    final now = DateTime.utc(2026, 7, 30, 12);
+  final DateTime now = DateTime.utc(2026, 7, 30, 12);
 
+  Future<void> insertCard(AppDatabase db, {required String id}) =>
+      db.customInsert(
+        'INSERT INTO cards (id, deck_id, front, back, created_at, updated_at) '
+        'VALUES (?, ?, ?, ?, ?, ?)',
+        variables: <Variable<Object>>[
+          Variable<String>(id),
+          const Variable<String>('d1'),
+          const Variable<String>(front),
+          const Variable<String>(back),
+          Variable<DateTime>(now),
+          Variable<DateTime>(now),
+        ],
+      );
+
+  Future<void> insertDeckAndCard(AppDatabase db) async {
     await db.customInsert(
       'INSERT INTO decks (id, name, parent_deck_id, root_deck_id, '
       'content_type, scheduler_type, scheduler_version, scheduler_generation, '
@@ -47,18 +61,7 @@ void main() {
       ],
     );
 
-    await db.customInsert(
-      'INSERT INTO cards (id, deck_id, front, back, created_at, updated_at) '
-      'VALUES (?, ?, ?, ?, ?, ?)',
-      variables: <Variable<Object>>[
-        const Variable<String>('c1'),
-        const Variable<String>('d1'),
-        const Variable<String>(front),
-        const Variable<String>(back),
-        Variable<DateTime>(now),
-        Variable<DateTime>(now),
-      ],
-    );
+    await insertCard(db, id: 'c1');
   }
 
   setUp(() {
@@ -170,6 +173,67 @@ void main() {
       expect(lines.any((line) => line.contains('CREATE TABLE')), isFalse);
     });
 
+    test('a committed transaction says so', () async {
+      final db = openLoggedDatabase();
+      await insertDeckAndCard(db);
+      lines.clear();
+
+      await db.transaction(() => insertCard(db, id: 'c2'));
+
+      expect(lines.first, 'BEGIN');
+      expect(lines.any((line) => line.contains('INSERT INTO cards')), isTrue);
+      expect(lines.last, contains('COMMIT'));
+      expect(lines.last, contains('committed'));
+    });
+
+    test('a rolled-back transaction says nothing was written', () async {
+      // The bug this pair exists for. Statements inside a transaction *are*
+      // intercepted, so before the boundaries were logged a rollback produced
+      // `INSERT INTO cards (rowid 1)` and stopped — character-for-character what
+      // a successful write produced. The log did not omit the rollback so much as
+      // assert the opposite of it.
+      final db = openLoggedDatabase();
+      await insertDeckAndCard(db);
+      lines.clear();
+
+      await expectLater(
+        db.transaction(() async {
+          await insertCard(db, id: 'c2');
+          await insertCard(db, id: 'c2'); // duplicate key
+        }),
+        throwsA(isA<Exception>()),
+      );
+
+      expect(lines.first, 'BEGIN');
+      expect(lines.last, contains('ROLLBACK'));
+      expect(lines.last, contains('nothing written'));
+      expect(lines.any((line) => line.contains('COMMIT')), isFalse);
+    });
+
+    test('the two outcomes are not confusable', () async {
+      // Stated as its own assertion because "both are logged" is not the
+      // requirement — "they differ" is.
+      final db = openLoggedDatabase();
+      await insertDeckAndCard(db);
+
+      lines.clear();
+      await db.transaction(() => insertCard(db, id: 'c2'));
+      final committed = lines.join('\n');
+
+      lines.clear();
+      await expectLater(
+        db.transaction(() async {
+          await insertCard(db, id: 'c3');
+          await insertCard(db, id: 'c3');
+        }),
+        throwsA(isA<Exception>()),
+      );
+      final rolledBack = lines.join('\n');
+
+      expect(committed, isNot(contains('ROLLBACK')));
+      expect(rolledBack, isNot(contains('COMMIT')));
+    });
+
     test('a failing statement is not logged twice', () async {
       // The failure travels to the repository, which maps it to a `Failure`.
       // Logging it here as well would make one problem look like two.
@@ -177,21 +241,8 @@ void main() {
       await insertDeckAndCard(db);
       lines.clear();
 
-      await expectLater(
-        db.customInsert(
-          'INSERT INTO cards (id, deck_id, front, back, created_at, '
-          'updated_at) VALUES (?, ?, ?, ?, ?, ?)',
-          variables: <Variable<Object>>[
-            const Variable<String>('c1'), // duplicate primary key
-            const Variable<String>('d1'),
-            const Variable<String>(front),
-            const Variable<String>(back),
-            Variable<DateTime>(DateTime.utc(2026, 7, 30, 12)),
-            Variable<DateTime>(DateTime.utc(2026, 7, 30, 12)),
-          ],
-        ),
-        throwsA(isA<Exception>()),
-      );
+      // `c1` already exists, so this violates the primary key.
+      await expectLater(insertCard(db, id: 'c1'), throwsA(isA<Exception>()));
 
       expect(
         lines.where((line) => line.contains('INSERT INTO cards')),

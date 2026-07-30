@@ -26,12 +26,20 @@ const Duration kSlowStatementThreshold = Duration(milliseconds: 10);
 /// because reaching for content while debugging is the natural reflex. So the
 /// flag stays off and this interceptor takes its place.
 ///
-/// **What is logged:** the statement text, the elapsed time, and a row count.
+/// **What is logged:** the statement text, the elapsed time, a row count, and the
+/// `BEGIN` / `COMMIT` / `ROLLBACK` around a transaction.
 /// **What is never logged:** the arguments, the returned rows, and the database
 /// path. `args` is not read anywhere in this file — the omission is structural
 /// rather than a rule someone has to remember, and
 /// `test/core/database/query_log_interceptor_test.dart` proves it with card
 /// content that would be unmistakable in the output.
+///
+/// **Which hooks are overridden, and why the rest are not.** Six statement hooks
+/// plus the three transaction boundaries. The other five — `dialect`,
+/// `transactionCanBeNested`, `beginExclusive`, `ensureOpen`, `close` — are left at
+/// their pass-through defaults: the first two do no I/O so there is no duration to
+/// report, `beginExclusive` has no caller in this codebase, and the last two fire
+/// once per connection where a line would be noise rather than information.
 ///
 /// The statement text is safe because every query in `lib/` comes from a
 /// `.drift` file and reaches SQLite with `?` placeholders (AD-02). A
@@ -99,6 +107,39 @@ final class QueryLogInterceptor extends QueryInterceptor {
     List<Object?> args,
   ) =>
       _timed(statement, () => executor.runCustom(statement, args), (_) => 'ok');
+
+  /// Transaction boundaries.
+  ///
+  /// These three exist because without them the log **lies**. Statements inside a
+  /// transaction are intercepted — drift wraps the transaction executor with the
+  /// same interceptor — so a rolled-back transaction logged its inserts and their
+  /// row ids and then said nothing about being undone. A committed and a
+  /// rolled-back write produced identical output, and the reader's natural
+  /// conclusion from `INSERT INTO cards (rowid 1)` is that a card exists.
+  ///
+  /// That matters here more than in most codebases: `createCard` writes a card
+  /// and its review state as one unit (BR-09), and reset writes a whole
+  /// generation change as one (BR-11). "Did this commit" is the question those
+  /// operations are designed around.
+  ///
+  /// No indentation or grouping of the statements between the boundaries. Drift
+  /// serialises everything through one connection, so log order is execution
+  /// order; a depth counter on a shared interceptor would be a second source of
+  /// truth about nesting, and a wrong one under concurrency.
+  @override
+  TransactionExecutor beginTransaction(QueryExecutor parent) {
+    _sink('BEGIN');
+
+    return parent.beginTransaction();
+  }
+
+  @override
+  Future<void> commitTransaction(TransactionExecutor inner) =>
+      _timed('COMMIT', inner.send, (_) => 'committed');
+
+  @override
+  Future<void> rollbackTransaction(TransactionExecutor inner) =>
+      _timed('ROLLBACK', inner.rollback, (_) => 'rolled back, nothing written');
 
   @override
   Future<void> runBatched(
