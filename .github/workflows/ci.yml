@@ -23,12 +23,6 @@ concurrency:
 permissions:
   contents: read
 
-env:
-  # Pinned, matching `.fvmrc`. `stable` would mean the toolchain changes under the
-  # code without a commit saying so, and the analyzer's error set moves between
-  # minors — a green build would stop being reproducible.
-  FLUTTER_VERSION: 3.44.8
-
 jobs:
   verify:
     name: format · analyze · guards · test
@@ -37,10 +31,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # `flutter-version-file`, not a hardcoded number: `.fvmrc` is where the pin
+      # lives and two copies of a version drift. `stable` alone would mean the
+      # toolchain changes under the code without a commit saying so, and the
+      # analyzer's error set moves between minors — a green build would stop being
+      # reproducible. This closes the M2.2 debt entry that asked for exactly this.
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: stable
+          flutter-version-file: .fvmrc
           cache: true
 
       - name: pub get
@@ -135,8 +133,7 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: stable
+          flutter-version-file: .fvmrc
           cache: true
 
       - name: pub get
@@ -145,5 +142,10 @@ jobs:
       - name: generate
         run: dart run build_runner build --delete-conflicting-outputs
 
+      # `--no-web-resources-cdn` is not optional and is not a preference. Without
+      # it Flutter fetches CanvasKit from `gstatic.com` at **runtime** even though
+      # it is already bundled locally, so in an environment that blocks the CDN the
+      # app silently fails to render with no build error anywhere. Recorded as
+      # technical debt since M2.1a; this is where it gets paid.
       - name: build web
-        run: flutter build web --release
+        run: flutter build web --release --no-web-resources-cdn

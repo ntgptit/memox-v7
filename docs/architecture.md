@@ -7,7 +7,7 @@
 | **Scope** | Quyết định ràng buộc nhiều tài liệu hoặc nhiều layer. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), hình dạng dữ liệu (`data-model.md`) |
 | **Source of truth for** | AD-xx · đánh đổi kiến trúc · phương án đã bị loại · lý do pin toolchain |
 | **Depends on** | `document-conventions.md`, `product.md` |
-| **Updated by task** | M4.10 (AD-12) |
+| **Updated by task** | M4.10b (AD-13) |
 | **Last updated** | 2026-07-30 |
 
 Format theo `document-conventions.md` §6.1. AD xếp theo số; ID vĩnh viễn (§7).
@@ -589,8 +589,10 @@ bảo vệ. Script đã trỏ lại sang tên số nhiều và mở rộng thàn
 ### Tầng use case: cái gì vào, cái gì không
 
 **Vào use case: validation.** Trước AD-12, `DeckEntity.nameProblem` chạy trong
-controller *và* lần nữa trong repository — cùng một BR-01 thực thi ở hai tầng, và
-không gì bắt được nếu hai bên lệch. Giờ chạy một lần, ở tầng sở hữu luật.
+controller *và* lần nữa trong repository. AD-12 chuyển nó vào use case, và **vẫn
+chưa đủ** — xem AD-13: cho một lần submit, BR-01 thực ra chạy **ba** lần, vì screen
+còn tự dẫn lại vấn đề từ chuỗi thô để biết field nào cần tô đỏ. Ba chủ sở hữu,
+được phép lệch nhau, trong khi tài liệu nói là một.
 
 Controller chỉ giữ phần thực sự là presentation: double-submit guard, cờ
 submitting, kiểm `ref.mounted` sau await, và map `Failure` sang state per-field.
@@ -601,10 +603,16 @@ trong `runInTransaction`. Đặt chúng lên use case là đẩy phần kiểm r
 transaction — tạo race giữa lúc kiểm và lúc ghi. Luật sẽ nằm ở chỗ gọn hơn và
 **sai**. Use case là điểm vào; luật hình cây thuộc về nơi có transaction.
 
-**Refusal đi bằng `ValidationFailure.fieldErrors`, không phải `Failure.reason`.**
-Một form có thể sai hai field cùng lúc — tên trống *và* chưa chọn scheduler — mà
-`reason` chỉ giữ một giá trị. Key lấy từ hằng số (`DeckField`), là identifier
-không phải copy; screen map key sang ARB.
+**Refusal đi bằng một `Set` vấn đề có type, không phải `Failure.reason`.** Một
+form có thể sai hai field cùng lúc — tên trống *và* chưa chọn scheduler — mà
+`reason` chỉ giữ một giá trị.
+
+AD-12 chọn `Map<String, String> fieldErrors`. **Cả hai nửa của lựa chọn đó đều
+sai**, và AD-13 sửa: key là chuỗi literal lặp lại (`'name'`, `'schedulerType'`)
+không gì kiểm được, còn value là câu chữ mà UI bị **cấm** render — nên presentation
+bỏ qua value và tự dẫn lại vấn đề từ input thô, đó chính là *lý do* BR-01 có chủ sở
+hữu thứ ba. Nay là `Set<Enum> problems`: identifier có type, và không còn message
+nào để ai đó bị dụ dùng.
 
 **`Failure.reason` là `Enum?` trên base type.** `Enum` vì `core/` không được
 import feature; trên base vì `Failure` là `sealed` nên feature **không thể** tự
@@ -618,9 +626,11 @@ thêm subtype — đó cũng là lý do `domain/failures/` không bao giờ ch�
   vào suffix cho phép của `presentation/` **và** loại khỏi scope
   `widget_ui_files`, vì một file làm wiring thì đọc repository là đúng định nghĩa
   của nó. Thứ gì giữ state hay lệnh là `_controller`.
-- `app/di/` vẫn là composition root — chỗ duy nhất `*RepositoryImpl` được gọi
-  tên, nên test thay được implementation từ ngoài feature. Use case không có
-  implementation nào để chọn, nên wiring của nó đi cùng feature.
+- `app/di/` là composition root — chỗ duy nhất `*RepositoryImpl` được gọi tên.
+  AD-12 đặt **cả khai báo** `deckRepositoryProvider` ở đó, khiến
+  `features/deck/presentation/` phải import `app/`; AD-13 tách hai việc đó ra.
+  Use case không có implementation nào để chọn, nên wiring của nó vẫn đi cùng
+  feature.
 - Provider trong `features/*/presentation/` phải `autoDispose`
   (`test/app/provider_convention_test.dart` cưỡng chế).
 
@@ -638,3 +648,145 @@ Architecture đầy đủ trước khi clone sang feature thứ hai); tạo
 `no_hardcoded_strings_test` quét nó, và một `*_screen.dart` bên trong sẽ đòi
 strict visual audit riêng; Deck kèm README của nó là ví dụ đã compile và đã được
 gate).
+
+## AD-13 · Một interaction là một read; hướng phụ thuộc chỉ đi xuống
+
+| | |
+|---|---|
+| **Status** | accepted |
+| **Affected documents** | `feature_blueprint.md` · `lib/features/deck/README.md` · `flutter-project-setup` skill · `flutter-data-layer/references/networking.md` · `feature_checklist.md` · `wbs.md` |
+
+**Quyết định.** Một interaction của người dùng đọc dữ liệu bằng **một** read
+interaction — một contract method, một statement, một snapshot. Một luật input
+thuộc về **một type**, không phải một tầng. Và `features/` không bao giờ import
+`app/`: composition root thấy feature, không có chiều ngược lại.
+
+**Bối cảnh.** Sau AD-12, Deck được rà lại như thể nó là feature *mới* — đọc code
+thay vì đọc tài liệu về code. Bốn khiếm khuyết còn sống, và cả bốn đều đã pass mọi
+test đang có.
+
+### 1 · BR-01 có một chủ sở hữu, và là một *type*
+
+`DeckEntity.nameProblem` + `validateName` bị xoá. Thay bằng value object
+`DeckName` (`domain/models/deck_name_model.dart`): constructor private, `parse`
+trả về hoặc giá trị hoặc một `DeckValidationProblem` có type. Contract repository
+nhận `DeckName`, nên câu "cái này đã validate chưa?" được trả lời bởi **signature**
+chứ không phải bởi việc đọc implementation.
+
+Chuyển một luật vào một *tầng* chỉ ngăn được trùng lặp bằng **quy ước**; chuyển nó
+vào một *type* ngăn được về mặt cấu trúc. Giới hạn đo **sau** khi trim, và tên quá
+dài bị từ chối chứ không bị cắt — không tồn tại giá trị đã cắt để caller lỡ ghi.
+
+### 2 · Read model của một screen đến từ một statement
+
+Hai screen từng dựng read model từ hai query, và cả hai **trông** đúng vì với
+database im lặng thì hai snapshot cho cùng câu trả lời.
+
+- **Deck screen** watch `childDecks` rồi await `getDeckById` mỗi lần emit, kèm một
+  comment khẳng định hai dữ kiện "arrive together". Không đúng. Action set tính từ
+  `content_type` **và** từ việc children rỗng (BR-68), nên một rename hoặc một
+  create rơi vào giữa hai lần đọc tạo ra màn hình ghép từ hai thời điểm. Nay:
+  `watchDeckDetail` — một `LEFT JOIN`, một contract method, `DeckDetail` nằm ở
+  `domain/models/` vì repository trả về nó. Không có row nào nghĩa là deck đã mất
+  (`NotFoundFailure`); một row với `child` null nghĩa là deck còn và không có con.
+  Hai trạng thái đó phải phân biệt được: một là route chết, một là empty state.
+- **Move picker** đọc mọi deck, rồi hỏi lại deck nguồn — một deck đã có trong danh
+  sách nó vừa nhận, đọc lại từ snapshot **muộn hơn**. Nay nguồn lấy từ cùng lần
+  emit đó; không có nghĩa là nó đã bị xoá ở screen khác, và đó là
+  `NotFoundFailure` có type.
+
+**Cách chứng minh mới là phần quan trọng.** Không assertion nào về *giá trị* phân
+biệt được hai thiết kế, nên `deck_detail_read_test.dart` **đếm câu SQL** qua một
+`QueryInterceptor` thật. Fault injection: dựng lại shape hai-read → đúng hai test
+đếm đó đỏ, chín test hành vi còn lại vẫn xanh. Nguyên tắc: khi một tuyên bố nói về
+*cách* dữ liệu được đọc chứ không phải nó trả về gì, phải **đo**.
+
+### 3 · Due count hết hạn cùng snapshot sinh ra nó
+
+`rootDeckSummaries` trả thêm `nextDueAt` — `MIN(due_at) WHERE due_at > :now`, một
+scalar subquery trong **cùng** statement với các count. Vì mọi count đều tương đối
+với `now` của lần đọc, mỗi count có một thời điểm hết hạn; đọc riêng thì thời điểm
+đó tính từ một trạng thái database khác với các count, và lần refresh sẽ rơi vào
+thời điểm không đúng với cả hai.
+
+Contract đổi tên theo thứ nó trả về: `watchRootDeckList` → `RootDeckListSnapshot
+{ decks, nextDueAt }`.
+
+`> :now` **chặt**, và điều đó có ý nghĩa: một card đến hạn đúng tại `:now` đã được
+tính là due, nên nếu bao gồm nó thì delay bằng 0, guard chống timer delay-0 sẽ từ
+chối arm, và boundary thật sự kế tiếp **không bao giờ** được hẹn. Cùng một lỗi cũ,
+tái sinh bằng một ký tự. Có test cho ký tự đó.
+
+`DeckListNow` giờ có hai trigger: app resume, và một `Timer` một-lần arm theo
+`nextDueAt`. Trước đó chỉ có resume, và comment ghi rằng timer chu kỳ đã được "cân
+nhắc và loại" vì resume bắt được cùng boundary — **không đúng**: người dùng ngồi ở
+danh sách khi một card đến hạn thấy badge nói 3 trong khi session nó mở phát ra 4.
+Thay thế cũng **không** phải timer chu kỳ: là một lần thức được hẹn từ dữ liệu, nên
+screen không có gì sắp đến hạn thì không có timer nào.
+
+`kMaxDueBoundaryDelay = 1 ngày` là **trần**, không phải chu kỳ: trên web `Timer` là
+`setTimeout`, delay là số millisecond 32-bit có dấu, nên boundary quá ~24,8 ngày
+fire ngay và biến một lần hẹn thành busy loop. Web là kênh E2E nên phép tính đó
+phải an toàn ở đó.
+
+**Clock có một chủ sở hữu.** Hai repository impl từng default clock về
+`DateTime.now()` khi không ai truyền. Điều đó khiến "now" là hai thứ: một provider
+cả cây override được, và một static private không gì với tới — và cái khó với tới
+là cái thắng trong production. `clock` nay là `required`, fallback bị xoá,
+`app/di/` truyền `clockProvider` vào. `lib/features/` không còn `DateTime.now()`.
+
+### 4 · `features/` không import `app/`
+
+Hai chiều phụ thuộc sai cùng tồn tại: `presentation/providers/` import
+`app/di/deck_repository_provider.dart`, và hai screen import
+`app/router/route_names.dart`.
+
+- **Repository provider đảo chiều.** Feature khai báo cái nó cần —
+  `features/<feature>/di/<feature>_repository_provider.dart`, kiểu là contract
+  domain, thân hàm **throw**. `app/di/repository_bindings.dart` quyết định cái gì
+  thoả mãn nó, `buildRootWidget` cài đặt bằng một dòng. Giá phải trả: thiếu binding
+  là `StateError` lúc đọc đầu tiên chứ không phải lỗi compile — bị chặn lại bởi hai
+  test, một xác nhận root thật có bind, một xác nhận đọc khi chưa bind thì lỗi kèm
+  message chỉ đúng chỗ cần sửa.
+- **`di/` là một tầng**, không phải thư mục cho tiện. Nó đặt ở đó chứ không ở
+  `presentation/providers/` vì `provider_convention_test.dart` cấm `keepAlive`
+  dưới `features/*/presentation/`, mà một handle repository thì phải `keepAlive`.
+  Luật đó đúng; chỗ đặt ban đầu sai. Phương án `autoDispose` bị loại: nó dựng lại
+  repository mỗi lần điều hướng và chạy lại query đầu tiên của mỗi screen vô ích.
+- **`RouteNames` + `RoutePathParams` chuyển sang `core/navigation/`.** Đảo chiều
+  không phải phương án: một route thuộc về **bảng route**, không thuộc về một
+  screen, nên router không thể lấy tên từ features. Chúng là từ vựng không bên nào
+  sở hữu — đúng lập luận của `clockProvider`. `RoutePaths` **cố ý không** đi theo:
+  một path là hợp đồng URL của app và chỉ bảng route xác nhận nó.
+
+**Cưỡng chế:** `check_architecture.sh` rule 4b + `test/app/architecture_boundary_
+test.dart`. Cả hai fault-inject.
+
+### Hệ quả lên harness — guard đọc *code*, không đọc văn xuôi
+
+Ba guard đã báo sai trên chính phần giải thích của chúng, và cả ba được sửa ở
+**rule** chứ không phải bằng cách viết lại comment cho lọt:
+
+| Guard | Nó khớp cái gì | Sửa |
+|---|---|---|
+| `command_query_separation_test.dart` | đếm method public **theo file**; cấm *chữ* `navigateTo` kể cả trong comment giải thích chính luật đó | parse AST bằng `package:analyzer`: class là object riêng, comment và string literal không phải node |
+| `deck_card_boundary_test.dart` | `contains('part of')` khớp một comment nói file này **không** là part of cái gì | strip comment trước khi match |
+| `memox.testing.no_real_clock_in_test`, `common.no_commented_out_code` | doc comment *nêu tên* `DateTime.now()`; câu văn xuôi gãy dòng `// for this assertion.` | pattern neo ở đầu dòng không vượt qua `//`; mỗi alternative đòi cú pháp thật theo sau keyword |
+
+AST cho phép vẽ một phân biệt mà regex không vẽ được: có **ba** loại notifier, không
+phải hai — command controller (`build` trả `SubmitState`: chỉ `build`/`submit`/
+`reset`), query controller (`build` trả `Stream`/`Future`: chỉ `build`), input-state
+notifier (còn lại: `build` + tối đa một mutator).
+
+**Và luật quan trọng nhất về guard:** một rule không quét gì thì pass, và đọc như
+là có bảo vệ. Mọi guard giờ **in ra số nó đã quét** và coi 0 là lỗi. Việc đó phát
+hiện một lỗ đang sống: khi thiếu `lib/`, `check_architecture.sh` exit **0** với câu
+"nothing to check yet". Trung thực trước khi project tồn tại; là một guard xanh cho
+một working directory sai sau đó.
+
+**Phương án đã bị loại:** viết một regex mới phức tạp hơn thay vì AST (bỏ — mọi
+khiếm khuyết ở trên đều là tính chất của *text*, thêm pattern không đổi được điều
+đó); ADR chứng minh `features/ → app/` là bất khả kháng (bỏ — nó khả thi, chỉ tốn
+một dòng ở composition root); một timer chu kỳ cho due count (bỏ — nó đánh thức
+database theo lịch để đổi một con số không ai đang xem, còn boundary nó bắt thì một
+lần hẹn theo dữ liệu bắt chính xác hơn).

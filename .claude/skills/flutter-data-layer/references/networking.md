@@ -99,7 +99,11 @@ Failure mapDioException(DioException e) {
   return switch (status) {
     400 => ValidationFailure(
         message: _serverMessage(e) ?? 'Invalid request',
-        fieldErrors: _fieldErrors(e),
+        // Typed problems, mapped from the server's field names to this feature's
+        // problem enum. Not the server's strings: those are copy the UI must not
+        // render, and a `Map<String, String>` here is what led memox to re-derive
+        // validation in presentation.
+        problems: _problems(e),
       ),
     401 => const UnauthorizedFailure(message: 'Please sign in again'),
     403 => const ForbiddenFailure(message: 'You do not have access to this'),
@@ -107,7 +111,7 @@ Failure mapDioException(DioException e) {
     409 => const ConflictFailure(message: 'This was changed elsewhere'),
     422 => ValidationFailure(
         message: _serverMessage(e) ?? 'Please check your input',
-        fieldErrors: _fieldErrors(e),
+        problems: _problems(e),
       ),
     >= 500 => const NetworkFailure(message: 'The server is having problems'),
     _ => UnknownFailure(message: 'Something went wrong', cause: e),
