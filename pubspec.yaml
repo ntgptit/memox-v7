@@ -66,6 +66,12 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  # Direct because test/app/command_query_separation_test.dart parses lib/ into a
+  # real AST. It was reachable transitively through build_runner; depending on it
+  # by accident means a build_runner upgrade could remove it, so it is declared.
+  # Version tracked to what `flutter analyze` itself resolves — a parser ahead of
+  # the SDK's would reject syntax the SDK accepts.
+  analyzer: ^12.1.0
   build_runner: ^2.15.1
   freezed: ^3.2.5
   json_serializable: ^6.14.0
