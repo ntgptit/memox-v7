@@ -49,10 +49,18 @@ Layer rules: `flutter-architecture`. No Flutter, no Dio, no Drift here.
 
 ```
 features/<feature>/domain/
-├── entity/      <name>_entity.dart
-├── repository/  <name>_repository.dart      # abstract contract
-└── usecase/     <verb>_<noun>_use_case.dart # only when warranted
+├── <name>_entity.dart
+├── <name>_repository.dart      # abstract contract
+├── <name>_model.dart           # read model / value object / enum
+└── <verb>_<noun>_use_case.dart # only when warranted
 ```
+
+**Flat, not `entity/` + `repository/` + `usecase/` subfolders.** The role is
+carried by the *suffix*, and `memox.naming.domain_file_role_suffix` enforces it
+while `check_architecture.sh` checks the singular folder names. See
+`assets/feature_blueprint.md` for why a plausible-looking alternative breaks
+three enforcers at once — it is the authority on layout, and this block is a
+summary of it.
 
 - Entities are immutable, with value equality, in domain language. Entity state
   is the enum or sealed class from `docs/business-rules.md`, so illegal states
@@ -73,20 +81,27 @@ Details: `flutter-data-layer`.
 
 ```
 features/<feature>/data/
-├── model/       <name>_model.dart          # DTO
-├── remote/      <name>_remote_data_source.dart
-├── local/       <name>_local_data_source.dart, <name>_dao.dart
-└── repository/  <name>_repository_impl.dart
+├── <name>_repository_impl.dart
+├── <name>_mapper.dart          # Row → Entity, AggregateResult → ReadModel
+└── local/
+    └── <name>_dao.dart
 ```
 
-Order matters here: DTOs and data sources first, then the mapper, then the
-repository. The repository is where exceptions become `Failure`s and where the
-cache/sync policy from `docs/architecture.md` is applied — nowhere else.
+Flat again, and `local/` is the only subfolder because it is the only data source
+that exists. **There is no `remote/` and no DTO layer**: `dio` is deliberately not
+a dependency (AD-05), Drift is the source of truth (AD-01), and a
+`<name>_model.dart` DTO would be a second shape for data that already has two.
+Add `remote/` with the first real request, not in anticipation of one.
 
-If the backend is not ready, implement the contract with a fake that returns
-realistic data *including* error and empty cases. A fake that only ever succeeds
-means the error states never get built, which is exactly the gap this step is
-supposed to close.
+Order: the DAO first, then the mapper, then the repository. The repository is
+where Drift exceptions become `Failure`s — nowhere else. **There is no cache or
+sync policy to apply.** Reads come from `watch()` streams straight off the table;
+sync bookkeeping is deliberately deferred (AD-01), so a cache layer here would be
+a guess at a requirement that does not exist.
+
+SQL goes in `.drift` files so `drift_dev` type-checks it at build time (AD-02).
+No business SQL in Dart. Multi-step writes run inside `dao.runInTransaction`, and
+every guard that can refuse runs *before* the first mutation.
 
 ## Step 3 — Presentation
 
@@ -95,11 +110,18 @@ Details: `flutter-state-riverpod` for state, `flutter-design-system` for UI,
 
 ```
 features/<feature>/presentation/
-├── state/       <name>_state.dart
-├── controller/  <name>_controller.dart
-├── screen/      <name>_screen.dart
-└── widget/      <section>_widget.dart
+├── <name>_state.dart
+├── <name>_controller.dart
+├── <name>_screen.dart
+└── <section>_widget.dart
 ```
+
+Flat, for a third reason on top of the suffix rules: MX-VIS-001 derives each
+screen's required audit path by stripping **only** the `presentation` segment, so
+a `screen/` subfolder relocates every companion file. A file holding a provider
+must be named `_controller.dart`, not `_provider.dart` — the guard's
+`widget_ui_files` scope forbids `ref.watch(...RepositoryProvider)` and exempts
+controllers, which is where that read belongs.
 
 Build state and controller before the screen. Writing the state model first
 forces the state matrix to be real, and the screen then becomes a rendering of
@@ -129,14 +151,28 @@ Details: `flutter-testing`.
 Minimum for a feature to be done:
 
 - [ ] Unit tests for domain logic and validation, including the rule violations.
-- [ ] Repository tests with a mocked data source, covering the failure paths and
-      the cache fallback.
+      Pure input/output — no database, no widget.
+- [ ] Repository tests against **real in-memory SQLite**, not a mocked executor.
+      What is in doubt is the SQL: the cascade, the transaction rollback, the NULL
+      semantics of a predicate. A mocked data source would only prove the code
+      calls the API it was written to call, which is the one thing nobody doubts.
+      Use `test/database/support/test_database.dart` and a per-feature harness.
+      There is no cache fallback to cover — see Step 2.
 - [ ] Mapper tests, including a null field and an unknown enum value.
 - [ ] Controller tests: initial state, loading→loaded, loading→error, refresh,
       submit success, submit failure, duplicate submit.
-- [ ] Widget tests for the states that matter — at least loaded, empty, error.
-- [ ] Integration test for the main flow.
+- [ ] Widget tests for the states that matter — at least loaded, empty, error —
+      against a **fake of the domain contract**, not a real database. Driving Drift
+      from a widget test leaves its stream-notification timer pending at teardown
+      and `flutter_test` fails the test for that rather than for the behaviour.
+- [ ] Route tests through the real router: cold start, deep link, back, and the
+      branch state if the route sits in the navigation shell.
+- [ ] A strict visual audit companion per production screen (MX-VIS-001), one
+      call per state, PASS in light and dark.
 - [ ] Golden tests if this feature added a shared component.
+
+`assets/feature_blueprint.md` has the table of which test belongs at which level,
+and the counts the Deck slice ended up with as a size reference.
 
 ## Step 5 — Close it out
 

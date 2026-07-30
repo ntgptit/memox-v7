@@ -1,14 +1,19 @@
 {
-  "//": [
-    "Snippets for the shapes that repeat once per feature in this repo.",
-    "Derived from features/deck — see",
-    ".claude/skills/flutter-feature-slice/assets/feature_blueprint.md.",
-    "",
-    "They are deliberately opinionated: each one already carries the guard-safe",
-    "file suffix, the retry policy on local reads, the ref.mounted check after the",
-    "await, and the double-submit guard. Those are the four things that are easy to",
-    "leave out and expensive to notice missing."
-  ],
+// Snippets for the shapes that repeat once per feature in this repo.
+//
+// Derived from features/deck. The authority on structure is
+// .claude/skills/flutter-feature-slice/assets/feature_blueprint.md — if this file
+// and that one disagree, the blueprint wins and this file is the bug.
+//
+// They are deliberately opinionated. Each one already carries the four things
+// that are easy to leave out of a hand-written controller and expensive to notice
+// missing: the double-submit guard, the local validation before the round trip,
+// the ref.mounted check after the await, and the retry policy on a local read.
+//
+// A `.code-snippets` file is JSONC, so these are real comments. An earlier
+// version put the same prose in a `"//": [...]` entry, which is not a comment —
+// every top-level key must be a snippet object with a prefix and a body, so that
+// entry was a malformed snippet sitting quietly in the list.
   "memox: repository contract (domain)": {
     "prefix": "mxrepo",
     "scope": "dart",

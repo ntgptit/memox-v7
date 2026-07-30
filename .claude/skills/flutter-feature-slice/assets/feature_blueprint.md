@@ -159,9 +159,17 @@ repository method runs inside a guard that rethrows domain failures untouched an
 maps anything else through `mapDatabaseError`. Streams too — `handleError`, or a
 raw `DriftWrappedException` reaches a widget.
 
-The UI maps the failure **type** to ARB copy, never its `message`: that string is
-written for whoever reads a log and can name a table. See
-`deck_labels_widget.dart` for the switch.
+`Failure.message` is a **sanitized diagnostic string, not a UI API.** It is safe
+to print — into a log, a test failure, a debugger — and it is deliberately not
+localized, because `core/` and `domain/` cannot reach the ARB bundle. Production
+UI therefore maps the failure **type** to ARB copy and never renders `message`; a
+screen that did would show English to a Vietnamese user with no test failing
+anywhere. `cause` is for logs only and is never rendered at all.
+
+There is no "fall back to `message`" rule, on purpose: a fallback like that only
+ever fires on the error paths nobody looked at, which is precisely where an
+untranslated diagnostic would surface. See `deck_labels_widget.dart` for the
+switch, and `MxAsyncView` for why no shared default error UI exists.
 
 ## Presentation
 
@@ -221,11 +229,28 @@ flutter test test/l10n/no_hardcoded_strings_test.dart
 .claude/skills/flutter-workflow/scripts/check_docs.sh --db build/invariant_fixture_clean.db
 ```
 
-Then answer the question that matters: **how many files does the clone have to
-edit that are not about the new feature's subject?** For Deck → Card the answer
-is zero outside `features/card/`, plus the ARB pair, plus the route table, plus
-one WBS entry. If a clone would have to touch `core/` or `shared/` to make the
-second feature work, that thing belonged there before the clone.
+### The real footprint of a new feature
+
+"Nothing outside the feature folder" is false, and stating it that way hides
+work. A new feature touches these, and only these:
+
+| Path | Why |
+|---|---|
+| `lib/features/<feature>/` | the slice itself |
+| `lib/app/di/<feature>_repository_provider.dart` | the composition root — `presentation/` may not import `data/`, `domain/` may not import Riverpod, `core/` may not import a feature, so nothing else *can* hold it |
+| `lib/app/router/route_names.dart` · `route_paths.dart` · `app_router.dart` | the route, its name, and its path-parameter constants |
+| `lib/l10n/app_en.arb` · `app_vi.arb` | every user-visible string, both locales, each with a description |
+| `test/features/<feature>/` | domain · data on real SQLite · controller · widget |
+| `test/visual_audit/screens/features/<feature>/` | one strict companion per production screen (MX-VIS-001) |
+| `docs/wbs.md` | one entry, updated in the same commit as the code |
+| `lib/core/database/tables/*.drift` · `queries/*.drift` | **only if** the feature needs a table or query that does not exist. A new query is additive against schema v1; a new *table* is a migration and a separate decision. |
+
+The test that matters is not "did I avoid touching anything" — it is **"did I have
+to touch `core/` or `shared/` to make the second feature work?"** If yes, that
+thing belonged there before the clone, and moving it is part of finishing feature
+one rather than part of starting feature two. Three things failed exactly that
+test and were moved or extracted: `clock_provider`, `retry_policy`, and
+`MxAsyncView`.
 
 ## Practical patterns — the four things feature 1 got asked about
 

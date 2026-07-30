@@ -14,18 +14,29 @@
 sealed class Failure implements Exception {
   const Failure({required this.message, this.cause});
 
-  /// Safe to show to a user as-is.
+  /// A sanitized diagnostic string. **Not a UI API.**
   ///
   /// MUST NOT carry SQL, a stack trace, a URL, a file path or an exception
   /// class name. `test/core/error/failure_test.dart` asserts this, because an
   /// error path is exactly where such a detail leaks: it is written while
   /// debugging and read only after release.
   ///
-  /// Not localized, and deliberately so: `domain/` and `core/` cannot import
-  /// Flutter, so they cannot reach the ARB bundle. This is the safe fallback.
-  /// A screen that renders a failure SHOULD pick its copy from ARB by failure
-  /// type and fall back to this — that wiring belongs to the first screen that
-  /// actually shows an error (M5.4), not to a guess made here.
+  /// **Production UI MUST NOT render it.** It is not localized — `domain/` and
+  /// `core/` cannot import Flutter, so they cannot reach the ARB bundle — and a
+  /// screen that showed it would present English to a Vietnamese user with no
+  /// test failing anywhere. Screens map the failure **type** to ARB copy; see
+  /// `features/deck/presentation/deck_labels_widget.dart` for the switch, and
+  /// `MxAsyncView` for why no shared default exists.
+  ///
+  /// It is sanitized rather than raw because it does reach places a person
+  /// reads: a log line, a test failure message, a `toString()` in a debugger.
+  /// Being safe to *print* is not the same as being fit to *display*.
+  ///
+  /// This settles a contract that was left open when this file was written: the
+  /// doc used to call it a display fallback and defer the ARB wiring to M5.4.
+  /// The wiring arrived earlier, at M4.10, and arrived without a fallback —
+  /// deliberately, because "fall back to the English diagnostic" is a rule that
+  /// only ever fires on the paths nobody looked at.
   final String message;
 
   /// The original error, for logs only. Never rendered.
