@@ -6,7 +6,6 @@ import 'package:memox/app/config/env_config.dart';
 import 'package:memox/app/config/env_config_provider.dart';
 import 'package:memox/app/di/deck_repository_provider.dart';
 import 'package:memox/app/mobile_frame_widget.dart';
-import 'package:memox/features/deck/domain/deck_entity.dart';
 
 import 'features/deck/presentation/support/fake_deck_repository.dart';
 
@@ -19,9 +18,7 @@ void main() {
       ProviderScope(
         overrides: [
           envConfigProvider.overrideWithValue(EnvConfig.development),
-          deckRepositoryProvider.overrideWithValue(
-            FakeDeckRepository.emitting(const <DeckEntity>[]),
-          ),
+          deckRepositoryProvider.overrideWithValue(FakeDeckRepository()),
         ],
         child: const MemoxApp(),
       ),

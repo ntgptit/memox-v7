@@ -11,7 +11,6 @@ import 'package:memox/app/config/env_config.dart';
 import 'package:memox/app/config/env_config_provider.dart';
 import 'package:memox/app/di/deck_repository_provider.dart';
 import 'package:memox/app/error_screen_widget.dart';
-import 'package:memox/features/deck/domain/deck_entity.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 
 import '../features/deck/presentation/support/fake_deck_repository.dart';
@@ -140,9 +139,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            deckRepositoryProvider.overrideWithValue(
-              FakeDeckRepository.emitting(const <DeckEntity>[]),
-            ),
+            deckRepositoryProvider.overrideWithValue(FakeDeckRepository()),
           ],
           child: buildRootWidget(EnvConfig.staging),
         ),

@@ -134,8 +134,11 @@ Future<ScreenAudit> auditScreen(
 
   void walk(RenderObject node, String owner, Rect clip) {
     final id = owners[node] ?? owner;
-    final rect = globalRect(node);
 
+    // The hidden check comes BEFORE the measurement, not after. `globalRect`
+    // reads `RenderBox.size`, which asserts on a box that was never laid out —
+    // and an unlaid-out box is one of the things `isHidden` recognises. Measuring
+    // first meant the walk threw on exactly the nodes it was about to prune.
     if (isHidden(node)) {
       // Nothing below an `Offstage` or a zero-opacity layer reaches the screen,
       // so the whole subtree is pruned. A hidden node is NOT an unresolved one:
@@ -146,6 +149,8 @@ Future<ScreenAudit> auditScreen(
 
       return;
     }
+
+    final rect = globalRect(node);
 
     // Only the part of the node that survives the clip is measured. Handing the
     // full rect to the extractor and then to the raster puts pixels the widget

@@ -11,7 +11,7 @@ import 'package:memox/app/router/app_router.dart';
 import 'package:memox/app/router/route_paths.dart';
 import 'package:memox/app/shell/app_navigation_shell.dart';
 import 'package:memox/core/error/failure.dart';
-import 'package:memox/features/deck/domain/deck_entity.dart';
+import 'package:memox/features/deck/domain/root_deck_summary_model.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
@@ -63,9 +63,9 @@ void main() {
     await tester.pump();
   }
 
-  List<DeckEntity> manyDecks() => <DeckEntity>[
+  List<RootDeckSummary> manySummaries() => <RootDeckSummary>[
     for (var i = 0; i < 30; i++)
-      fakeRootDeck(id: 'deck-$i', name: 'Deck number $i'),
+      fakeSummary(id: 'deck-$i', name: 'Deck number $i'),
   ];
 
   group('the bar survives every state of the deck branch', () {
@@ -78,10 +78,7 @@ void main() {
     });
 
     testWidgets('empty', (tester) async {
-      await pumpShell(
-        tester,
-        FakeDeckRepository.emitting(const <DeckEntity>[]),
-      );
+      await pumpShell(tester, FakeDeckRepository());
 
       expect(find.byType(MxEmptyState), findsOneWidget);
       expect(find.byType(MxNavigationBar), findsOneWidget);
@@ -89,7 +86,10 @@ void main() {
     });
 
     testWidgets('loaded', (tester) async {
-      await pumpShell(tester, FakeDeckRepository.emitting(manyDecks()));
+      await pumpShell(
+        tester,
+        FakeDeckRepository.withSummaries(manySummaries()),
+      );
 
       expect(find.byType(MxListTile), findsWidgets);
       expect(find.byType(MxNavigationBar), findsOneWidget);
@@ -110,7 +110,7 @@ void main() {
     testWidgets('and on the review branch', (tester) async {
       await pumpShell(
         tester,
-        FakeDeckRepository.emitting(const <DeckEntity>[]),
+        FakeDeckRepository(),
         initialLocation: RoutePaths.review,
       );
 
@@ -129,7 +129,10 @@ void main() {
       // stops where the bar starts. Painting the bar over the content instead
       // would still look fine on a short list and hide the last row on a long
       // one — which is why this uses thirty decks, not three.
-      await pumpShell(tester, FakeDeckRepository.emitting(manyDecks()));
+      await pumpShell(
+        tester,
+        FakeDeckRepository.withSummaries(manySummaries()),
+      );
 
       final list = tester.getRect(find.byType(Scrollable).first);
       final bar = tester.getRect(find.byType(MxNavigationBar));
@@ -140,7 +143,10 @@ void main() {
     testWidgets('scrolling to the end leaves the last row fully visible', (
       tester,
     ) async {
-      await pumpShell(tester, FakeDeckRepository.emitting(manyDecks()));
+      await pumpShell(
+        tester,
+        FakeDeckRepository.withSummaries(manySummaries()),
+      );
 
       await tester.fling(
         find.byType(Scrollable).first,
@@ -162,10 +168,7 @@ void main() {
       // Two Scaffolds are involved. If the inner one ever started contributing
       // its own bottom inset, the bar would change height when the branch
       // changed and the whole frame would jump.
-      await pumpShell(
-        tester,
-        FakeDeckRepository.emitting(const <DeckEntity>[]),
-      );
+      await pumpShell(tester, FakeDeckRepository());
       final onDecks = tester.getSize(find.byType(MxNavigationBar));
 
       await tester.tap(
@@ -184,10 +187,7 @@ void main() {
     ) async {
       // Guards against the branch screens each growing their own bar, which is
       // the shape the shell exists to prevent.
-      await pumpShell(
-        tester,
-        FakeDeckRepository.emitting(const <DeckEntity>[]),
-      );
+      await pumpShell(tester, FakeDeckRepository());
 
       expect(find.byType(AppNavigationShell), findsOneWidget);
       expect(find.byType(MxNavigationBar), findsOneWidget);
@@ -200,7 +200,7 @@ void main() {
     testWidgets('no overflow at 320x568', (tester) async {
       await pumpShell(
         tester,
-        FakeDeckRepository.emitting(manyDecks()),
+        FakeDeckRepository.withSummaries(manySummaries()),
         surface: compact,
       );
 
@@ -211,7 +211,7 @@ void main() {
     testWidgets('no overflow at 320x568 with textScaler 2.0', (tester) async {
       await pumpShell(
         tester,
-        FakeDeckRepository.emitting(manyDecks()),
+        FakeDeckRepository.withSummaries(manySummaries()),
         surface: compact,
         textScale: 2,
       );
@@ -228,7 +228,7 @@ void main() {
       // bar is what it runs into.
       await pumpShell(
         tester,
-        FakeDeckRepository.emitting(const <DeckEntity>[]),
+        FakeDeckRepository(),
         surface: compact,
         textScale: 2,
       );
@@ -245,16 +245,19 @@ void main() {
     testWidgets('a later emission still updates the list under the bar', (
       tester,
     ) async {
-      final controller = StreamController<List<DeckEntity>>();
+      final controller = StreamController<List<RootDeckSummary>>();
       addTearDown(controller.close);
 
-      await pumpShell(tester, FakeDeckRepository(() => controller.stream));
+      await pumpShell(
+        tester,
+        FakeDeckRepository(summaries: () => controller.stream),
+      );
 
-      controller.add(const <DeckEntity>[]);
+      controller.add(const <RootDeckSummary>[]);
       await tester.pump();
       expect(find.byType(MxEmptyState), findsOneWidget);
 
-      controller.add(manyDecks());
+      controller.add(manySummaries());
       await tester.pump();
 
       expect(find.byType(MxListTile), findsWidgets);

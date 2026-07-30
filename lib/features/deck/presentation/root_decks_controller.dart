@@ -1,50 +1,82 @@
+import 'package:flutter/widgets.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../app/di/deck_repository_provider.dart';
-import '../domain/deck_entity.dart';
+import '../domain/root_deck_summary_model.dart';
 
 part 'root_decks_controller.g.dart';
 
-/// Every root deck, re-emitted whenever the tree changes (UC-06, A2).
+/// The wall clock, as a value the rest of the tree can override.
 ///
-/// A stream provider rather than a future: `watchRootDecks()` already re-emits
-/// on every write, so a deck created on another screen reaches this list
-/// without anyone asking for a refresh. That is also why the screen has no
-/// pull-to-refresh — there is nothing a manual reload could produce that the
-/// stream has not already delivered.
-///
-/// `autoDispose` (the `@riverpod` default) is deliberate here even though the
-/// repository below is kept alive: the subscription is what costs something,
-/// and it should end when the last screen watching it goes away.
-///
-/// Re-subscribing is `ref.invalidate(rootDecksProvider)`. That disposes this
-/// provider and builds it again, which opens a *new* `watch()` on the DAO —
-/// the reason the error state's retry button genuinely retries rather than
-/// re-rendering the same dead stream.
-///
-/// This file is named `_controller` and not `_provider` on purpose: the guard's
-/// `widget_ui_files` scope forbids `ref.watch(...RepositoryProvider)` and
-/// exempts controllers, because a controller is exactly where that read
-/// belongs. A `*_provider.dart` here would be reported, correctly.
-@Riverpod(retry: noAutomaticRetry)
-Stream<List<DeckEntity>> rootDecks(Ref ref) =>
-    ref.watch(deckRepositoryProvider).watchRootDecks();
+/// A function rather than a `DateTime`, because callers need "now at the moment
+/// I ask", not "now when this provider was first built". Tests override it with
+/// a fixed instant; nothing below reads `DateTime.now()` directly, which is what
+/// makes the `due_at = now` boundary testable at all (BR-22).
+@Riverpod(keepAlive: true)
+DateTime Function() clock(Ref ref) =>
+    () => DateTime.now().toUtc();
 
-/// Turns off Riverpod 3's automatic retry ladder for this read.
+/// The instant the deck list's due counts are measured against.
 ///
-/// The default is not neutral here. `ProviderContainer.defaultRetry` re-runs a
-/// failed provider up to ten times with exponential backoff — and while it is
-/// retrying the state is `AsyncLoading`, not `AsyncError`. On this screen that
-/// means a failed read spins for roughly thirteen seconds before the user is
-/// told anything went wrong, and then the screen may flip back out from under
-/// them mid-sentence when a later attempt succeeds.
+/// Held as state rather than read inline so it changes at moments we choose. A
+/// `DateTime.now()` inside the stream provider would be re-evaluated on every
+/// unrelated rebuild, which makes the count flicker between two truths, and
+/// would never update at all while the screen sat still.
 ///
-/// It is also the wrong shape of remedy: this read is a local SQLite query, not
-/// a flaky network call. A database that cannot be read does not start working
-/// because 6.4 seconds passed. The retry that belongs here is the one the user
-/// can see and control — the button on the error state, which invalidates the
-/// provider and opens a fresh `watch()`.
+/// It refreshes when the app comes back to the foreground. That is the moment
+/// that matters in practice: the phone was in a pocket, hours passed, and cards
+/// became due while nothing was watching. A periodic timer was considered and
+/// rejected — it would wake the database on a schedule to change a number
+/// nobody is looking at, and the boundary it would catch is the same one resume
+/// already catches.
+@riverpod
+class DeckListNow extends _$DeckListNow {
+  @override
+  DateTime build() {
+    // `AppLifecycleListener` rather than a widget observer: the trigger belongs
+    // to the data this provider owns, and reaching it through the widget tree
+    // would mean a controller holding on to a piece of that tree.
+    final listener = AppLifecycleListener(onResume: refresh);
+    ref.onDispose(listener.dispose);
+
+    return ref.read(clockProvider)();
+  }
+
+  /// Re-measures now. Also the hook a pull-to-refresh would use, if the stream
+  /// were not already the source of truth for everything except the clock.
+  void refresh() => state = ref.read(clockProvider)();
+}
+
+/// Every root deck with its aggregate progress (UC-06).
 ///
-/// Returning `null` means "do not retry". It is a top-level function because an
-/// annotation argument has to be a constant.
+/// One repository stream, one SQL statement. The counts are not computed here
+/// and must not be: deriving them per row in Dart is the N+1 UC-06 names, and
+/// it would also make the number disagree with the session query it is supposed
+/// to predict.
+///
+/// Watching [deckListNowProvider] means a resume re-opens the stream with a
+/// fresh boundary, which is the only thing that can change the due count
+/// without the database changing.
+///
+/// Automatic retry is off for the same reason as the plain list below.
+@Riverpod(retry: noAutomaticRetry)
+Stream<List<RootDeckSummary>> rootDeckSummaries(Ref ref) => ref
+    .watch(deckRepositoryProvider)
+    .watchRootDeckSummaries(now: ref.watch(deckListNowProvider));
+
+/// Turns off Riverpod 3's automatic retry ladder for a local read.
+///
+/// The default is not neutral: `ProviderContainer.defaultRetry` re-runs a failed
+/// provider up to ten times with exponential backoff, and **while it is
+/// retrying the state is `AsyncLoading`, not `AsyncError`**. On these screens
+/// that means a failed read spins for roughly thirteen seconds before the user
+/// is told anything went wrong, and may then flip out from under them.
+///
+/// It is also the wrong remedy: these are local SQLite queries, not flaky
+/// network calls. A database that cannot be read does not start working because
+/// 6.4 seconds passed. The retry that belongs here is the one the user can see
+/// and control — the button on the error state.
+///
+/// Returning `null` means "do not retry". Top-level because an annotation
+/// argument has to be a constant.
 Duration? noAutomaticRetry(int retryCount, Object error) => null;

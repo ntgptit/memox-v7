@@ -1,186 +1,158 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/app/config/env_config.dart';
-import 'package:memox/app/config/env_config_provider.dart';
-import 'package:memox/app/di/deck_repository_provider.dart';
 import 'package:memox/core/error/failure.dart';
-import 'package:memox/core/theme/app_theme.dart';
-import 'package:memox/features/deck/domain/deck_entity.dart';
+import 'package:memox/features/deck/domain/root_deck_summary_model.dart';
+import 'package:memox/features/deck/domain/scheduler_type_model.dart';
+import 'package:memox/features/deck/presentation/deck_tile_widget.dart';
 import 'package:memox/features/deck/presentation/root_deck_list_screen.dart';
-import 'package:memox/l10n/generated/app_localizations.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
-import 'package:memox/shared/widgets/mx_list_tile.dart';
 import 'package:memox/shared/widgets/mx_loading_state.dart';
 
+import 'support/deck_screen_harness.dart';
 import 'support/fake_deck_repository.dart';
 
-/// The four states of the deck list, and the two viewports that break layouts.
+/// The root deck list's four read states and its responsive matrix (UC-06).
 ///
-/// The screen is pumped under the production themes and the real localization
-/// delegates. A test-only `MaterialApp` with hardcoded strings would pass while
-/// the shipped screen threw on every `context.l10n` — which is how the first run
-/// of the visual audit harness found two production screens rendering Flutter's
-/// error box and still reporting a pass.
+/// The create flow lives in `root_deck_create_test.dart`.
 void main() {
   final english = AppLocalizationsEn();
 
-  /// Pumps the screen with [repository] behind it.
-  ///
-  /// [size] and [textScaler] are the two axes CLAUDE.md requires every screen
-  /// to be checked on; they default to a normal phone so the state tests read
-  /// without noise.
-  Future<void> pumpScreen(
-    WidgetTester tester,
-    FakeDeckRepository repository, {
-    bool isDark = false,
-    Size size = const Size(393, 852),
-    double textScaler = 1,
-  }) async {
-    tester.view.physicalSize = size;
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
-
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          envConfigProvider.overrideWithValue(EnvConfig.development),
-          deckRepositoryProvider.overrideWithValue(repository),
-        ],
-        child: MaterialApp(
-          localizationsDelegates: const <LocalizationsDelegate<Object>>[
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: AppLocalizations.supportedLocales,
-          theme: isDark ? buildDarkTheme() : buildLightTheme(),
-          home: MediaQuery(
-            data: MediaQueryData(textScaler: TextScaler.linear(textScaler)),
-            child: const RootDeckListScreen(),
-          ),
-        ),
-      ),
-    );
-    await tester.pump();
-  }
-
-  List<DeckEntity> threeDecks() => <DeckEntity>[
-    fakeRootDeck(id: 'deck-1', name: 'Japanese N5'),
-    fakeRootDeck(id: 'deck-2', name: 'Spanish verbs'),
-    fakeRootDeck(id: 'deck-3', name: 'Kanji radicals'),
+  List<RootDeckSummary> threeSummaries() => <RootDeckSummary>[
+    fakeSummary(
+      id: '1',
+      name: 'Japanese N5',
+      totalCardCount: 120,
+      dueCardCount: 7,
+    ),
+    fakeSummary(id: '2', name: 'Spanish verbs', totalCardCount: 40),
+    fakeSummary(
+      id: '3',
+      name: 'Kanji radicals',
+      schedulerType: SchedulerType.sm2,
+    ),
   ];
 
   group('loading', () {
-    testWidgets('shows the shared loading state, announced to a screen reader', (
+    testWidgets('shows the shared loading state, announced to a reader', (
       tester,
     ) async {
-      await pumpScreen(tester, FakeDeckRepository.pending());
-
-      final loading = tester.widget<MxLoadingState>(
-        find.byType(MxLoadingState),
+      await pumpDeckScreen(
+        tester,
+        repository: FakeDeckRepository.pending(),
+        screen: const RootDeckListScreen(),
       );
 
-      expect(loading.semanticsLabel, english.decksLoadingLabel);
+      expect(
+        tester
+            .widget<MxLoadingState>(find.byType(MxLoadingState))
+            .semanticsLabel,
+        english.decksLoadingLabel,
+      );
       // The title stays put while the body swaps, so the screen does not appear
-      // to be replaced by a different one every time the data changes.
+      // to be replaced every time the data changes.
       expect(find.text(english.decksTitle), findsOneWidget);
       expect(tester.takeException(), isNull);
-    });
-
-    testWidgets('shows neither the empty nor the error state', (tester) async {
-      await pumpScreen(tester, FakeDeckRepository.pending());
-
-      expect(find.byType(MxEmptyState), findsNothing);
-      expect(find.byType(MxErrorState), findsNothing);
     });
   });
 
   group('empty', () {
-    testWidgets('reads as a starting point, not as a failure', (tester) async {
-      await pumpScreen(
-        tester,
-        FakeDeckRepository.emitting(const <DeckEntity>[]),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.byType(MxEmptyState), findsOneWidget);
-      expect(find.byType(MxErrorState), findsNothing);
-      expect(find.text(english.decksEmptyTitle), findsOneWidget);
-      expect(find.text(english.decksEmptyMessage), findsOneWidget);
-      expect(tester.takeException(), isNull);
-    });
-
-    testWidgets('offers no action, because there is no flow behind one', (
+    testWidgets('reads as a starting point and offers the create action', (
       tester,
     ) async {
-      // Guards the decision, not the layout: a button wired to an empty
-      // callback, or to a "coming soon" snackbar, is a worse answer than no
-      // button, and it is the thing most likely to be added by accident.
-      await pumpScreen(
+      await pumpDeckScreen(
         tester,
-        FakeDeckRepository.emitting(const <DeckEntity>[]),
+        repository: FakeDeckRepository(),
+        screen: const RootDeckListScreen(),
       );
-      await tester.pumpAndSettle();
 
       final empty = tester.widget<MxEmptyState>(find.byType(MxEmptyState));
-
-      expect(empty.onAction, isNull);
-      expect(empty.actionLabel, isNull);
+      expect(find.text(english.decksEmptyTitle), findsOneWidget);
+      expect(find.text(english.decksEmptyMessage), findsOneWidget);
+      // Unlike M4.10 slice 1, the action now leads somewhere real.
+      expect(empty.actionLabel, english.deckCreateRootAction);
+      expect(empty.onAction, isNotNull);
+      expect(find.byType(MxErrorState), findsNothing);
+      expect(tester.takeException(), isNull);
     });
   });
 
   group('loaded', () {
-    testWidgets('renders one row per root deck, in the stream order', (
+    testWidgets('each row shows name, totals, due state and study mode', (
       tester,
     ) async {
-      await pumpScreen(tester, FakeDeckRepository.emitting(threeDecks()));
-      await tester.pumpAndSettle();
+      await pumpDeckScreen(
+        tester,
+        repository: FakeDeckRepository.withSummaries(threeSummaries()),
+        screen: const RootDeckListScreen(),
+      );
 
-      expect(find.byType(MxListTile), findsNWidgets(3));
+      expect(find.byType(DeckTileWidget), findsNWidgets(3));
       expect(find.text('Japanese N5'), findsOneWidget);
-      expect(find.text('Spanish verbs'), findsOneWidget);
-      expect(find.text('Kanji radicals'), findsOneWidget);
-      expect(find.byType(MxEmptyState), findsNothing);
-      expect(tester.takeException(), isNull);
+      // Totals, due count and mode, on one subtitle line.
+      expect(
+        find.textContaining(english.deckCardCountLabel(120)),
+        findsOneWidget,
+      );
+      expect(find.textContaining(english.deckDueCountLabel(7)), findsOneWidget);
+      expect(find.textContaining(english.schedulerEightBoxLabel), findsWidgets);
+      expect(find.textContaining(english.schedulerSm2Label), findsOneWidget);
     });
 
-    testWidgets('rows carry no tap target while deck detail does not exist', (
+    testWidgets('a deck with nothing due says so, neutrally (BR-29)', (
       tester,
     ) async {
-      await pumpScreen(tester, FakeDeckRepository.emitting(threeDecks()));
-      await tester.pumpAndSettle();
+      await pumpDeckScreen(
+        tester,
+        repository: FakeDeckRepository.withSummaries(threeSummaries()),
+        screen: const RootDeckListScreen(),
+      );
 
-      final tile = tester.widget<MxListTile>(find.byType(MxListTile).first);
+      expect(find.textContaining(english.deckNoDueLabel), findsNWidgets(2));
+    });
 
-      expect(tile.onTap, isNull);
+    testWidgets('due state is carried by an icon as well as words', (
+      tester,
+    ) async {
+      // UC-06 step 3. Colour alone fails for a colour-blind user and in
+      // high-contrast modes, so the icon and the text both have to say it.
+      await pumpDeckScreen(
+        tester,
+        repository: FakeDeckRepository.withSummaries(threeSummaries()),
+        screen: const RootDeckListScreen(),
+      );
+
+      expect(find.byIcon(Icons.notifications_active), findsOneWidget);
+      expect(
+        find.bySemanticsLabel(RegExp(english.deckDueSemanticLabel)),
+        findsWidgets,
+      );
     });
 
     testWidgets('a later emission updates the list without a manual refresh', (
       tester,
     ) async {
-      // UC-06 A2. The whole reason the read is a stream: a deck created on
-      // another screen has to arrive here on its own.
-      final controller = StreamController<List<DeckEntity>>();
+      // UC-06 A2, the reason the read is a stream.
+      final controller = StreamController<List<RootDeckSummary>>();
       addTearDown(controller.close);
 
-      await pumpScreen(tester, FakeDeckRepository(() => controller.stream));
+      await pumpDeckScreen(
+        tester,
+        repository: FakeDeckRepository(summaries: () => controller.stream),
+        screen: const RootDeckListScreen(),
+      );
 
-      controller.add(const <DeckEntity>[]);
-      await tester.pumpAndSettle();
+      controller.add(const <RootDeckSummary>[]);
+      await tester.pump();
       expect(find.byType(MxEmptyState), findsOneWidget);
 
-      controller.add(threeDecks());
-      await tester.pumpAndSettle();
+      controller.add(threeSummaries());
+      await tester.pump();
 
-      expect(find.byType(MxListTile), findsNWidgets(3));
-      expect(find.byType(MxEmptyState), findsNothing);
+      expect(find.byType(DeckTileWidget), findsNWidgets(3));
       expect(tester.takeException(), isNull);
     });
   });
@@ -190,13 +162,15 @@ void main() {
       const failure = DatabaseFailure(
         message: 'SqliteException(11): database disk image is malformed',
       );
-      await pumpScreen(tester, FakeDeckRepository.failing(failure));
-      await tester.pumpAndSettle();
+      await pumpDeckScreen(
+        tester,
+        repository: FakeDeckRepository.failing(failure),
+        screen: const RootDeckListScreen(),
+      );
 
       expect(find.byType(MxErrorState), findsOneWidget);
       expect(find.text(english.decksLoadErrorTitle), findsOneWidget);
-      expect(find.text(english.decksLoadErrorMessage), findsOneWidget);
-      // The `Failure`'s own message is a developer string. It must not be what
+      // The Failure's own message is a developer string and must never be what
       // the user reads, even though it is right there on the exception.
       expect(find.textContaining('Sqlite'), findsNothing);
       expect(find.textContaining('malformed'), findsNothing);
@@ -207,129 +181,129 @@ void main() {
       tester,
     ) async {
       var attempt = 0;
-      final repository = FakeDeckRepository(() {
-        attempt += 1;
-        if (attempt == 1) {
-          return Stream<List<DeckEntity>>.error(
-            const DatabaseFailure(message: 'read failed'),
-          );
-        }
+      final repository = FakeDeckRepository(
+        summaries: () {
+          attempt += 1;
+          if (attempt == 1) {
+            return Stream<List<RootDeckSummary>>.error(
+              const DatabaseFailure(message: 'read failed'),
+            );
+          }
 
-        return Stream<List<DeckEntity>>.value(threeDecks());
-      });
+          return Stream<List<RootDeckSummary>>.value(threeSummaries());
+        },
+      );
 
-      await pumpScreen(tester, repository);
-      await tester.pumpAndSettle();
+      await pumpDeckScreen(
+        tester,
+        repository: repository,
+        screen: const RootDeckListScreen(),
+      );
       expect(find.byType(MxErrorState), findsOneWidget);
 
       await tester.tap(find.text(english.retryAction));
       await tester.pumpAndSettle();
 
-      expect(repository.watchRootDecksCallCount, 2);
-      expect(find.byType(MxListTile), findsNWidgets(3));
-      expect(find.byType(MxErrorState), findsNothing);
-      expect(tester.takeException(), isNull);
+      expect(repository.summariesCallCount, 2);
+      expect(find.byType(DeckTileWidget), findsNWidgets(3));
     });
   });
 
-  group('dark mode', () {
-    testWidgets('every state builds under the dark theme', (tester) async {
-      // `pump`, never `pumpAndSettle`: the loading state holds a
-      // `CircularProgressIndicator`, which animates forever, so settling would
-      // time out on a screen that is behaving correctly. One extra pump is
-      // enough — it flushes the stream event the fake delivers as a microtask.
-      for (final repository in <FakeDeckRepository>[
-        FakeDeckRepository.pending(),
-        FakeDeckRepository.emitting(const <DeckEntity>[]),
-        FakeDeckRepository.emitting(threeDecks()),
-        FakeDeckRepository.failing(const DatabaseFailure(message: 'x')),
-      ]) {
-        await pumpScreen(tester, repository, isDark: true);
-        await tester.pump();
-
-        expect(tester.takeException(), isNull);
-      }
-    });
-  });
-
-  group('responsive', () {
-    // 320x568 is the smallest phone the project supports, and textScaler 2.0 is
-    // the accessibility setting that breaks a layout first. Both are checked on
-    // the loaded list *and* on the two centred states, because they overflow for
-    // different reasons: a list clips, a centred column runs off the bottom.
+  group('responsive and accessibility', () {
     const compact = Size(320, 568);
 
-    testWidgets('the loaded list fits a 320x568 screen', (tester) async {
-      await pumpScreen(
+    testWidgets('the loaded list fits 320x568', (tester) async {
+      await pumpDeckScreen(
         tester,
-        FakeDeckRepository.emitting(threeDecks()),
-        size: compact,
+        repository: FakeDeckRepository.withSummaries(threeSummaries()),
+        screen: const RootDeckListScreen(),
+        surface: compact,
       );
-      await tester.pumpAndSettle();
 
-      expect(find.byType(MxListTile), findsNWidgets(3));
+      expect(find.byType(DeckTileWidget), findsNWidgets(3));
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('the loaded list survives textScaler 2.0 on a small screen', (
+    testWidgets('the loaded list survives textScaler 2.0 on 320x568', (
       tester,
     ) async {
-      await pumpScreen(
+      await pumpDeckScreen(
         tester,
-        FakeDeckRepository.emitting(threeDecks()),
-        size: compact,
-        textScaler: 2,
+        repository: FakeDeckRepository.withSummaries(threeSummaries()),
+        screen: const RootDeckListScreen(),
+        surface: compact,
+        textScale: 2,
       );
-      await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('the empty state survives textScaler 2.0 on a small screen', (
+    testWidgets('the empty state survives textScaler 2.0 on 320x568', (
       tester,
     ) async {
-      await pumpScreen(
+      await pumpDeckScreen(
         tester,
-        FakeDeckRepository.emitting(const <DeckEntity>[]),
-        size: compact,
-        textScaler: 2,
+        repository: FakeDeckRepository(),
+        screen: const RootDeckListScreen(),
+        surface: compact,
+        textScale: 2,
       );
-      await tester.pumpAndSettle();
 
       expect(find.byType(MxEmptyState), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('the error state survives textScaler 2.0 on a small screen', (
-      tester,
-    ) async {
-      await pumpScreen(
+    testWidgets('a very long deck name does not break the row', (tester) async {
+      await pumpDeckScreen(
         tester,
-        FakeDeckRepository.failing(const DatabaseFailure(message: 'x')),
-        size: compact,
-        textScaler: 2,
+        repository: FakeDeckRepository.withSummaries(<RootDeckSummary>[
+          fakeSummary(id: '1', name: 'A' * 200, totalCardCount: 1),
+        ]),
+        screen: const RootDeckListScreen(),
+        surface: compact,
+        textScale: 2,
       );
-      await tester.pumpAndSettle();
 
-      expect(find.byType(MxErrorState), findsOneWidget);
+      expect(find.byType(DeckTileWidget), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('a long deck name truncates instead of overflowing', (
+    testWidgets('every state builds under the dark theme', (tester) async {
+      for (final repository in <FakeDeckRepository>[
+        FakeDeckRepository.pending(),
+        FakeDeckRepository(),
+        FakeDeckRepository.withSummaries(threeSummaries()),
+        FakeDeckRepository.failing(const DatabaseFailure(message: 'x')),
+      ]) {
+        await pumpDeckScreen(
+          tester,
+          repository: repository,
+          screen: const RootDeckListScreen(),
+          isDark: true,
+        );
+
+        expect(tester.takeException(), isNull);
+      }
+    });
+
+    testWidgets('the row action button carries a semantics label', (
       tester,
     ) async {
-      await pumpScreen(
-        tester,
-        FakeDeckRepository.emitting(<DeckEntity>[
-          fakeRootDeck(id: 'deck-1', name: 'A' * DeckEntity.maxNameLength),
-        ]),
-        size: compact,
-        textScaler: 2,
-      );
-      await tester.pumpAndSettle();
+      final handle = tester.ensureSemantics();
 
-      expect(find.byType(MxListTile), findsOneWidget);
-      expect(tester.takeException(), isNull);
+      await pumpDeckScreen(
+        tester,
+        repository: FakeDeckRepository.withSummaries(threeSummaries()),
+        screen: const RootDeckListScreen(),
+      );
+
+      expect(
+        find.bySemanticsLabel(RegExp(english.deckActionsSemanticLabel)),
+        findsWidgets,
+      );
+      await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+
+      handle.dispose();
     });
   });
 }

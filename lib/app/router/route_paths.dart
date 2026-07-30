@@ -14,6 +14,18 @@ abstract final class RoutePaths {
   /// management is what the user opens the app into.
   static const String decks = '/';
 
+  /// One deck's contents, as a **relative** sub-route of [decks].
+  ///
+  /// Relative on purpose: GoRouter appends it to the parent route's path, which
+  /// is what puts `/decks/:deckId` inside the Decks branch. A leading slash here
+  /// would make it a top-level route, and the deck screen would then open with
+  /// no bottom bar and no branch to go back into.
+  ///
+  /// The full location is `/decks/<id>` even though the branch root is `/`; the
+  /// list is the app's home, and a deck is addressable under a named collection
+  /// so the URL says what it points at.
+  static const String deckDetailRelative = 'decks/:deckId';
+
   /// The review branch. A real path rather than a sub-path of `/` so that a
   /// deep link can open the app directly on the Review tab.
   static const String review = '/review';

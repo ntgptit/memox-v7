@@ -1,6 +1,7 @@
 import '../../../core/database/app_database.dart';
 import '../domain/deck_content_type_model.dart';
 import '../domain/deck_entity.dart';
+import '../domain/root_deck_summary_model.dart';
 import '../domain/scheduler_type_model.dart';
 
 /// Maps a `decks` row to the domain entity.
@@ -27,3 +28,15 @@ DeckEntity deckEntityFromRow(Deck row) {
     updatedAt: row.updatedAt.toUtc(),
   );
 }
+
+/// Maps an aggregate row to the root-list read model (UC-06).
+///
+/// The counts stop being SQL here: nothing above this line sees a
+/// `RootDeckSummariesResult`, which is what keeps the aggregate replaceable
+/// without touching presentation (AD-01).
+RootDeckSummary rootDeckSummaryFromRow(RootDeckSummariesResult row) =>
+    RootDeckSummary(
+      deck: deckEntityFromRow(row.d),
+      totalCardCount: row.totalCardCount,
+      dueCardCount: row.dueCardCount,
+    );

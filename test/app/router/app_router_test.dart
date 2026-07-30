@@ -10,7 +10,6 @@ import 'package:memox/app/fallback/route_not_found_screen.dart';
 import 'package:memox/app/router/app_router.dart';
 import 'package:memox/app/router/route_names.dart';
 import 'package:memox/app/router/route_paths.dart';
-import 'package:memox/features/deck/domain/deck_entity.dart';
 import 'package:memox/features/deck/presentation/root_deck_list_screen.dart';
 import 'package:memox/features/review/presentation/review_placeholder_screen.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
@@ -66,7 +65,7 @@ void main() {
         overrides: [
           envConfigProvider.overrideWithValue(EnvConfig.development),
           deckRepositoryProvider.overrideWithValue(
-            repository ?? FakeDeckRepository.emitting(const <DeckEntity>[]),
+            repository ?? FakeDeckRepository(),
           ),
         ],
         child: MemoxApp(router: router),
@@ -151,20 +150,20 @@ void main() {
     ) async {
       // What `indexedStack` buys, measured rather than assumed. The deck screen
       // stays mounted while Review is on top, so its stream subscription
-      // survives — one `watchRootDecks()` for the whole round trip. Replace the
+      // survives — one summary subscription for the whole round trip. Replace the
       // shell with plain top-level routes and this becomes 2, which is the
       // "why did my place in the list disappear" bug in its smallest form.
-      final repository = FakeDeckRepository.emitting(const <DeckEntity>[]);
+      final repository = FakeDeckRepository();
       await pumpApp(tester, repository: repository);
 
-      expect(repository.watchRootDecksCallCount, 1);
+      expect(repository.summariesCallCount, 1);
 
       await tester.tap(tab(english.navigationReviewLabel));
       await tester.pumpAndSettle();
       await tester.tap(tab(english.navigationDecksLabel));
       await tester.pumpAndSettle();
 
-      expect(repository.watchRootDecksCallCount, 1);
+      expect(repository.summariesCallCount, 1);
       expect(find.byType(RootDeckListScreen), findsOneWidget);
     });
 

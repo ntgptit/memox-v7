@@ -3,90 +3,449 @@
 
   "appTitle": "MemoX",
   "@appTitle": {
-    "description": "Application name. Shown as the MaterialApp title and in the Android task switcher. Not translated — it is a product name."
+      "description": "Application name. Shown as the MaterialApp title and in the Android task switcher. Not translated — it is a product name."
   },
 
   "navigationDecksLabel": "Bộ thẻ",
   "@navigationDecksLabel": {
-    "description": "Bottom navigation label for the Decks destination. Kept separate from decksTitle even though the English words match: a tab label is competing for width with another label and may need to be shortened in a language where the screen title cannot be."
+      "description": "Bottom navigation label for the Decks destination. Kept separate from decksTitle even though the English words match: a tab label is competing for width with another label and may need to be shortened in a language where the screen title cannot be."
   },
 
   "navigationReviewLabel": "Ôn tập",
   "@navigationReviewLabel": {
-    "description": "Bottom navigation label for the Review destination, where the user studies due cards."
+      "description": "Bottom navigation label for the Review destination, where the user studies due cards."
   },
 
   "reviewPlaceholderMessage": "MemoX đang khởi động.",
   "@reviewPlaceholderMessage": {
-    "description": "Text on the temporary Review screen shown until the real review session screen lands (M5.4)."
+      "description": "Text on the temporary Review screen shown until the real review session screen lands (M5.4)."
   },
 
   "decksTitle": "Bộ thẻ",
   "@decksTitle": {
-    "description": "App bar title of the home screen, which lists the user's root decks. A deck is a folder of flashcards."
+      "description": "App bar title of the home screen, which lists the user's root decks. A deck is a folder of flashcards."
   },
 
   "decksLoadingLabel": "Đang tải bộ thẻ",
   "@decksLoadingLabel": {
-    "description": "Screen-reader label announced while the deck list is loading. A bare progress spinner announces nothing at all, so the user is told neither that something is happening nor when it stops."
+      "description": "Screen-reader label announced while the deck list is loading. A bare progress spinner announces nothing at all, so the user is told neither that something is happening nor when it stops."
   },
 
   "decksEmptyTitle": "Chưa có bộ thẻ",
   "@decksEmptyTitle": {
-    "description": "Heading of the empty state on the deck list, shown when the user has no root decks. Not an error — an account with no decks is a normal starting point."
+      "description": "Heading of the empty state on the deck list, shown when the user has no root decks. Not an error — an account with no decks is a normal starting point."
   },
 
   "decksEmptyMessage": "Tạo một bộ thẻ để bắt đầu sắp xếp các thẻ ghi nhớ.",
   "@decksEmptyMessage": {
-    "description": "Body of the deck list empty state. Explains what a deck is for; it carries no button because creating a deck is not built yet."
+      "description": "Body of the deck list empty state. Explains what a deck is for; it carries no button because creating a deck is not built yet."
   },
 
   "decksLoadErrorTitle": "Không thể tải bộ thẻ",
   "@decksLoadErrorTitle": {
-    "description": "Heading shown when reading the deck list from the local database fails. Carries no database detail — the user cannot act on it."
+      "description": "Heading shown when reading the deck list from the local database fails. Carries no database detail — the user cannot act on it."
   },
 
   "decksLoadErrorMessage": "Vui lòng thử lại.",
   "@decksLoadErrorMessage": {
-    "description": "Body of the deck list error state. Deliberately free of the exception, the SQL and the file path."
+      "description": "Body of the deck list error state. Deliberately free of the exception, the SQL and the file path."
   },
 
   "retryAction": "Thử lại",
   "@retryAction": {
-    "description": "Button that re-runs a failed read. On the deck list it re-subscribes to the database stream."
+      "description": "Button that re-runs a failed read. On the deck list it re-subscribes to the database stream."
+  },
+
+  "deckCreateRootAction": "Bộ thẻ mới",
+  "@deckCreateRootAction": {
+      "description": "Primary action on the deck list that opens the form for creating a new top-level deck."
+  },
+
+  "deckCardCountLabel": "{count, plural, =0{Chưa có thẻ} other{{count} thẻ}}",
+  "@deckCardCountLabel": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      },
+      "description": "Total number of cards in a deck's whole tree, shown on each row of the deck list."
+  },
+
+  "deckDueCountLabel": "{count, plural, other{{count} thẻ đến hạn}}",
+  "@deckDueCountLabel": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      },
+      "description": "How many cards in a deck are due for review right now. Only shown when the number is above zero."
+  },
+
+  "deckNoDueLabel": "Không có thẻ đến hạn",
+  "@deckNoDueLabel": {
+      "description": "Shown on a deck row when no card is due. Neutral wording on purpose — having nothing due is a normal state, not a problem (BR-29)."
+  },
+
+  "deckDueSemanticLabel": "Có thẻ đến hạn",
+  "@deckDueSemanticLabel": {
+      "description": "Screen-reader label for the icon that marks a deck as having due cards. The icon and the text both carry the state so it never depends on colour alone."
+  },
+
+  "schedulerEightBoxLabel": "Tám hộp",
+  "@schedulerEightBoxLabel": {
+      "description": "Name of the eight-box study mode, shown on deck rows and in the study-mode picker."
+  },
+
+  "schedulerSm2Label": "SM-2",
+  "@schedulerSm2Label": {
+      "description": "Name of the SM-2 study mode. Not translated — it is the published name of the algorithm."
+  },
+
+  "schedulerUnknownLabel": "Chế độ không hỗ trợ",
+  "@schedulerUnknownLabel": {
+      "description": "Shown instead of a study-mode name when the stored value comes from a newer version of the app."
+  },
+
+  "schedulerEightBoxDescription": "Thẻ đi qua tám hộp. Đơn giản, và dễ quay lại sau khi nghỉ dài.",
+  "@schedulerEightBoxDescription": {
+      "description": "One-line explanation of the eight-box mode in the study-mode picker (UC-02 step 3)."
+  },
+
+  "schedulerSm2Description": "Khoảng cách ôn tập tự điều chỉnh theo mức độ bạn nhớ từng thẻ.",
+  "@schedulerSm2Description": {
+      "description": "One-line explanation of the SM-2 mode in the study-mode picker (UC-02 step 3)."
+  },
+
+  "schedulerLockNotice": "Chế độ ôn tập sẽ bị khoá sau lượt ôn đầu tiên.",
+  "@schedulerLockNotice": {
+      "description": "Warning shown in the study-mode picker. Required by UC-02 step 3 so the choice is understood as hard to undo."
+  },
+
+  "schedulerSectionLabel": "Chế độ ôn tập",
+  "@schedulerSectionLabel": {
+      "description": "Heading of the mandatory study-mode section in the create-deck form."
+  },
+
+  "schedulerMissingError": "Hãy chọn một chế độ ôn tập.",
+  "@schedulerMissingError": {
+      "description": "Inline error shown when the deck form is submitted without a study mode. There is deliberately no default (BR-11)."
+  },
+
+  "deckCreateRootTitle": "Bộ thẻ mới",
+  "@deckCreateRootTitle": {
+      "description": "Title of the form for creating a top-level deck."
+  },
+
+  "deckCreateSubDeckTitle": "Bộ thẻ con mới",
+  "@deckCreateSubDeckTitle": {
+      "description": "Title of the form for creating a deck inside another deck."
+  },
+
+  "deckRenameTitle": "Đổi tên bộ thẻ",
+  "@deckRenameTitle": {
+      "description": "Title of the rename form."
+  },
+
+  "deckNameLabel": "Tên bộ thẻ",
+  "@deckNameLabel": {
+      "description": "Label of the deck name input."
+  },
+
+  "deckNameEmptyError": "Hãy nhập tên.",
+  "@deckNameEmptyError": {
+      "description": "Inline error when the deck name is empty or only whitespace (BR-01)."
+  },
+
+  "deckNameTooLongError": "Dùng tối đa {max} ký tự.",
+  "@deckNameTooLongError": {
+      "placeholders": {
+          "max": {
+              "type": "int"
+          }
+      },
+      "description": "Inline error when the deck name exceeds the allowed length (BR-01). The name is never truncated silently."
+  },
+
+  "deckFormSubmitAction": "Tạo",
+  "@deckFormSubmitAction": {
+      "description": "Submit button of the create-deck forms."
+  },
+
+  "deckRenameSubmitAction": "Lưu",
+  "@deckRenameSubmitAction": {
+      "description": "Submit button of the rename form."
+  },
+
+  "commonCancelAction": "Huỷ",
+  "@commonCancelAction": {
+      "description": "Cancel button shared by the deck forms and confirmation dialogs."
+  },
+
+  "deckFormDiscardTitle": "Bỏ bộ thẻ này?",
+  "@deckFormDiscardTitle": {
+      "description": "Title of the confirmation shown when a deck form with typed input is cancelled (UC-02 A1)."
+  },
+
+  "deckFormDiscardMessage": "Nội dung bạn đã nhập sẽ không được lưu.",
+  "@deckFormDiscardMessage": {
+      "description": "Body of the discard confirmation for a partly filled deck form."
+  },
+
+  "deckFormDiscardConfirmAction": "Bỏ",
+  "@deckFormDiscardConfirmAction": {
+      "description": "Destructive confirm button of the discard-form dialog."
+  },
+
+  "deckDetailLoadingLabel": "Đang tải bộ thẻ",
+  "@deckDetailLoadingLabel": {
+      "description": "Screen-reader label announced while a deck's contents are loading."
+  },
+
+  "deckDetailEmptyUnsetTitle": "Chưa có gì trong này",
+  "@deckDetailEmptyUnsetTitle": {
+      "description": "Empty state of a sub-deck that has not yet been fixed to hold cards or decks (content_type unset)."
+  },
+
+  "deckDetailEmptyUnsetMessage": "Thêm một thẻ hoặc một bộ thẻ con. Thứ bạn thêm trước sẽ quyết định bộ thẻ này chứa gì.",
+  "@deckDetailEmptyUnsetMessage": {
+      "description": "Body of the unset-deck empty state. States the consequence because the first child is what locks the deck's content type (BR-62)."
+  },
+
+  "deckDetailEmptyDeckTitle": "Chưa có bộ thẻ con",
+  "@deckDetailEmptyDeckTitle": {
+      "description": "Empty state of a deck that holds decks but has none yet."
+  },
+
+  "deckDetailEmptyDeckMessage": "Thêm bộ thẻ con để sắp xếp bộ thẻ này chi tiết hơn.",
+  "@deckDetailEmptyDeckMessage": {
+      "description": "Body of the deck-type empty state."
+  },
+
+  "deckDetailEmptyCardTitle": "Bộ thẻ này chứa thẻ ghi nhớ",
+  "@deckDetailEmptyCardTitle": {
+      "description": "Empty state of a deck fixed to hold cards. The card list itself is not built yet."
+  },
+
+  "deckDetailEmptyCardMessage": "Quản lý thẻ ghi nhớ sẽ có trong bản cập nhật tiếp theo.",
+  "@deckDetailEmptyCardMessage": {
+      "description": "Body shown in a card-type deck. States plainly that the feature is not in this build rather than showing a control that does nothing."
+  },
+
+  "deckDetailNotFoundTitle": "Không tìm thấy bộ thẻ",
+  "@deckDetailNotFoundTitle": {
+      "description": "Shown when the deck a route points at does not exist — a deep link to a deleted deck, or a deck removed on another screen (UC-03 E1)."
+  },
+
+  "deckDetailNotFoundMessage": "Có thể bộ thẻ đã bị xoá.",
+  "@deckDetailNotFoundMessage": {
+      "description": "Body of the deck-not-found state. Carries no id — the user cannot act on it."
+  },
+
+  "deckDetailLoadErrorTitle": "Không thể tải bộ thẻ này",
+  "@deckDetailLoadErrorTitle": {
+      "description": "Heading shown when reading a deck from the local database fails."
+  },
+
+  "deckBackToDecksAction": "Về danh sách bộ thẻ",
+  "@deckBackToDecksAction": {
+      "description": "Action that returns from a deck screen to the root deck list."
+  },
+
+  "deckCreateSubDeckAction": "Bộ thẻ con mới",
+  "@deckCreateSubDeckAction": {
+      "description": "Action that creates a deck inside the current deck (UC-08)."
+  },
+
+  "deckCreateCardAction": "Thẻ mới",
+  "@deckCreateCardAction": {
+      "description": "Action that would create a card in the current deck. Shown disabled in this build (UC-08, BR-61)."
+  },
+
+  "deckCreateCardUnavailableMessage": "Thêm thẻ ghi nhớ sẽ có trong bản cập nhật tiếp theo.",
+  "@deckCreateCardUnavailableMessage": {
+      "description": "Explanation attached to the disabled New card action. The option stays visible because BR-61 requires an unset deck to show both choices; it is disabled rather than hidden so the user learns the deck can hold cards."
+  },
+
+  "deckActionsSemanticLabel": "Tác vụ bộ thẻ",
+  "@deckActionsSemanticLabel": {
+      "description": "Screen-reader label for the icon button that opens the per-deck action menu."
+  },
+
+  "deckActionsTitle": "Tác vụ bộ thẻ",
+  "@deckActionsTitle": {
+      "description": "Title of the sheet listing what can be done with a deck."
+  },
+
+  "deckRenameAction": "Đổi tên",
+  "@deckRenameAction": {
+      "description": "Action that opens the rename form for a deck."
+  },
+
+  "deckDeleteAction": "Xoá",
+  "@deckDeleteAction": {
+      "description": "Destructive action that opens the delete confirmation for a deck."
+  },
+
+  "deckDeleteConfirmTitle": "Xoá “{name}”?",
+  "@deckDeleteConfirmTitle": {
+      "placeholders": {
+          "name": {
+              "type": "String"
+          }
+      },
+      "description": "Title of the delete confirmation. Names the deck so the user can tell which one they are about to lose (BR-04)."
+  },
+
+  "deckDeleteImpactMessage": "{deckCount, plural, =0{} other{{deckCount} bộ thẻ con và }}{cardCount, plural, =0{không có thẻ nào} other{{cardCount} thẻ}} sẽ bị xoá theo. Không thể hoàn tác.",
+  "@deckDeleteImpactMessage": {
+      "placeholders": {
+          "deckCount": {
+              "type": "int"
+          },
+          "cardCount": {
+              "type": "int"
+          }
+      },
+      "description": "Body of the delete confirmation, stating exactly how many sub-decks and cards go with the deck (BR-04)."
+  },
+
+  "deckDeleteConfirmAction": "Xoá",
+  "@deckDeleteConfirmAction": {
+      "description": "Destructive confirm button of the delete-deck dialog."
+  },
+
+  "deckResetContentTypeAction": "Cho phép lại cả thẻ và bộ thẻ",
+  "@deckResetContentTypeAction": {
+      "description": "Action that puts an empty sub-deck's content type back to unset (BR-68). Worded as what it enables, because 'reset content type' is implementation language."
+  },
+
+  "deckResetContentTypeTitle": "Cho phép lại cả hai loại?",
+  "@deckResetContentTypeTitle": {
+      "description": "Title of the reset-content-type confirmation."
+  },
+
+  "deckResetContentTypeMessage": "Bộ thẻ này sẽ nhận cả thẻ hoặc bộ thẻ con, và thứ bạn thêm trước sẽ quyết định lại.",
+  "@deckResetContentTypeMessage": {
+      "description": "Body of the reset-content-type confirmation, explaining what changes (BR-68, BR-62)."
+  },
+
+  "deckResetContentTypeConfirmAction": "Cho phép cả hai",
+  "@deckResetContentTypeConfirmAction": {
+      "description": "Confirm button of the reset-content-type dialog."
+  },
+
+  "deckMoveAction": "Di chuyển",
+  "@deckMoveAction": {
+      "description": "Action that opens the move picker for a deck (UC-09)."
+  },
+
+  "deckMoveTitle": "Di chuyển tới",
+  "@deckMoveTitle": {
+      "description": "Title of the move picker, listing candidate parent decks."
+  },
+
+  "deckMoveLoadingLabel": "Đang tải bộ thẻ",
+  "@deckMoveLoadingLabel": {
+      "description": "Screen-reader label announced while the move picker loads candidate decks."
+  },
+
+  "deckMoveEmptyTitle": "Không có chỗ để di chuyển",
+  "@deckMoveEmptyTitle": {
+      "description": "Empty state of the move picker when no deck can receive this one."
+  },
+
+  "deckMoveEmptyMessage": "Hiện chưa có bộ thẻ nào có thể chứa bộ thẻ này.",
+  "@deckMoveEmptyMessage": {
+      "description": "Body of the move-picker empty state."
+  },
+
+  "deckMoveRejectItself": "Đây chính là bộ thẻ đang di chuyển",
+  "@deckMoveRejectItself": {
+      "description": "Reason a move target is unavailable: it is the deck being moved (BR-70)."
+  },
+
+  "deckMoveRejectDescendant": "Nằm trong bộ thẻ đang di chuyển",
+  "@deckMoveRejectDescendant": {
+      "description": "Reason a move target is unavailable: it sits inside the deck being moved. This is the cycle guard (BR-69, BR-70)."
+  },
+
+  "deckMoveRejectAlreadyParent": "Vốn đã là bộ thẻ cha",
+  "@deckMoveRejectAlreadyParent": {
+      "description": "Reason a move target is unavailable: the deck is already there, so the move would do nothing."
+  },
+
+  "deckMoveRejectHoldsCards": "Chứa thẻ ghi nhớ, không chứa bộ thẻ",
+  "@deckMoveRejectHoldsCards": {
+      "description": "Reason a move target is unavailable: it is fixed to hold cards (BR-64)."
+  },
+
+  "deckMoveRejectScheduler": "Dùng chế độ ôn tập khác",
+  "@deckMoveRejectScheduler": {
+      "description": "Reason a move target is unavailable: its top-level deck uses another scheduler, and learning progress is never converted silently (BR-73, BR-74)."
+  },
+
+  "deckMoveRejectGeneration": "Thuộc chu kỳ học khác",
+  "@deckMoveRejectGeneration": {
+      "description": "Reason a move target is unavailable: its top-level deck has been reset to a different scheduler generation (BR-74)."
+  },
+
+  "deckMoveRejectTooDeep": "Sẽ lồng quá sâu",
+  "@deckMoveRejectTooDeep": {
+      "description": "Reason a move target is unavailable: the move would push the tree past the maximum depth (BR-55)."
+  },
+
+  "deckWriteErrorTitle": "Không lưu được",
+  "@deckWriteErrorTitle": {
+      "description": "Heading shown when a deck write fails for a reason the user cannot fix inline."
+  },
+
+  "deckWriteErrorMessage": "Vui lòng thử lại.",
+  "@deckWriteErrorMessage": {
+      "description": "Body of the generic deck write failure. Deliberately free of the exception, the SQL and the file path."
+  },
+
+  "deckGoneMessage": "Bộ thẻ đó không còn tồn tại.",
+  "@deckGoneMessage": {
+      "description": "Shown when a write targets a deck that was deleted elsewhere (UC-03 E1). Gentle on purpose: nothing the user did was wrong."
+  },
+
+  "deckConflictMessage": "Hiện không thể làm điều đó với bộ thẻ này.",
+  "@deckConflictMessage": {
+      "description": "Shown when a deck write is refused because the tree changed or a rule forbids it — a non-empty reset, an illegal move, a depth limit (BR-55, BR-64, BR-68, BR-70, BR-74). The specific rule is explained by the control that was used."
   },
 
   "startupErrorTitle": "Không khởi động được MemoX",
   "@startupErrorTitle": {
-    "description": "Heading of the screen shown when bootstrap fails before the app can render. Must not contain technical detail."
+      "description": "Heading of the screen shown when bootstrap fails before the app can render. Must not contain technical detail."
   },
 
   "startupErrorMessage": "Đã có lỗi khi khởi động ứng dụng. Vui lòng đóng và mở lại.",
   "@startupErrorMessage": {
-    "description": "Body of the startup failure screen. Tells the user what to do; deliberately carries no stack trace, URL or error code."
+      "description": "Body of the startup failure screen. Tells the user what to do; deliberately carries no stack trace, URL or error code."
   },
 
   "unexpectedErrorTitle": "Đã có lỗi xảy ra",
   "@unexpectedErrorTitle": {
-    "description": "Heading shown in place of Flutter's red error screen when a widget fails to build."
+      "description": "Heading shown in place of Flutter's red error screen when a widget fails to build."
   },
 
   "unexpectedErrorMessage": "Không hiển thị được phần này của ứng dụng.",
   "@unexpectedErrorMessage": {
-    "description": "Body shown in place of Flutter's red error screen. Deliberately carries no stack trace or widget name."
+      "description": "Body shown in place of Flutter's red error screen. Deliberately carries no stack trace or widget name."
   },
+
   "pageNotFoundTitle": "Không tìm thấy trang",
   "@pageNotFoundTitle": {
-    "description": "Heading of the screen shown when a location matches no route. Carries no URL — the user cannot act on it, and a location can hold private content once deep links exist."
+      "description": "Heading of the screen shown when a location matches no route. Carries no URL — the user cannot act on it, and a location can hold private content once deep links exist."
   },
 
   "pageNotFoundMessage": "Trang bạn yêu cầu không tồn tại.",
   "@pageNotFoundMessage": {
-    "description": "Body of the 404 screen. Deliberately free of the failed path, the router state and any technical detail."
+      "description": "Body of the 404 screen. Deliberately free of the failed path, the router state and any technical detail."
   },
 
   "goHomeAction": "Về trang chính",
   "@goHomeAction": {
-    "description": "Button on the 404 screen that returns to the app's main route."
+      "description": "Button on the 404 screen that returns to the app's main route."
   }
 }
