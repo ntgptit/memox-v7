@@ -41,8 +41,16 @@ class DeckDetailScreen extends StatelessWidget {
         // and on this pushed route the deck list would show through behind it.
         loadingFrame: (loading) => MxContentShell(body: loading),
         data: (detail) => _DeckDetailBody(detail: detail),
-        error: (error, stackTrace) =>
-            _DeckDetailError(error: error, deckId: deckId),
+        // The retry is built here, where `ref` already exists, rather than passed
+        // down as a deck id for the error widget to re-derive. That keeps `ref`
+        // inside the `Consumer` and leaves `_DeckDetailError` a pure renderer —
+        // and it removes the second way this feature used to invalidate a
+        // provider, which was the actual problem: `ProviderScope.containerOf`
+        // here and `ref.invalidate` on the sibling screen, for the same job.
+        error: (error, stackTrace) => _DeckDetailError(
+          error: error,
+          onRetry: () => ref.invalidate(deckDetailProvider(deckId)),
+        ),
       ),
     );
   }
@@ -173,10 +181,12 @@ class _DeckDetailBody extends StatelessWidget {
 /// not an error the user caused — it gets its own gentle state with a way back,
 /// not a retry button that will fail again forever.
 class _DeckDetailError extends StatelessWidget {
-  const _DeckDetailError({required this.error, required this.deckId});
+  const _DeckDetailError({required this.error, required this.onRetry});
 
   final Object error;
-  final String deckId;
+
+  /// Re-reads the deck. Supplied by the caller, which owns the `ref`.
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -193,13 +203,8 @@ class _DeckDetailError extends StatelessWidget {
         retryLabel: isMissing
             ? context.l10n.deckBackToDecksAction
             : context.l10n.retryAction,
-        onRetry: isMissing
-            ? () => context.goNamed(RouteNames.decks)
-            : () => _retry(context),
+        onRetry: isMissing ? () => context.goNamed(RouteNames.decks) : onRetry,
       ),
     );
   }
-
-  void _retry(BuildContext context) =>
-      ProviderScope.containerOf(context).invalidate(deckDetailProvider(deckId));
 }

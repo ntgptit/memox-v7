@@ -64,9 +64,43 @@ extension DeckLabels on BuildContext {
   /// for whoever reads a log, and can name a table or an exception. A
   /// `ValidationFailure` is deliberately absent — those are rendered under the
   /// field that caused them and never reach here.
+  /// A failure, as copy the user can act on.
+  ///
+  /// **Every subtype is listed and there is no `_` branch**, which is the whole
+  /// reason `Failure` is sealed. This switch used to end in `_ =>
+  /// deckWriteErrorMessage`, and that catch-all defeated the type: a new failure
+  /// subtype would have compiled straight into "something went wrong" with
+  /// nothing failing anywhere — exactly what the doc on [Failure] warns about.
+  ///
+  /// Several cases share one message on purpose. Sharing a message is a decision;
+  /// a `_` branch is the absence of one, and the difference only shows up the day
+  /// a subtype is added.
   String deckWriteFailure(Failure failure) => switch (failure) {
+    // Distinct copy, because the user's next action differs.
     NotFoundFailure() => l10n.deckGoneMessage,
     ConflictFailure() => l10n.deckConflictMessage,
-    _ => l10n.deckWriteErrorMessage,
+
+    // Reachable, and there is nothing more useful to say: the write did not
+    // land and retrying is the only move.
+    DatabaseFailure() => l10n.deckWriteErrorMessage,
+    UnknownFailure() => l10n.deckWriteErrorMessage,
+
+    // A cancelled write is usually not worth a message at all, but the state is
+    // rendered whenever `failure != null`, so silence here would be an empty
+    // banner. Revisit if a flow ever cancels deliberately.
+    CancelledFailure() => l10n.deckWriteErrorMessage,
+
+    // Should never arrive: `deckSubmitFailure` peels `ValidationFailure` off into
+    // the per-field problem before the state is built. Listed rather than
+    // grouped so that if that ever changes, this line is where someone looks.
+    ValidationFailure() => l10n.deckWriteErrorMessage,
+
+    // Unreachable today — no network (AD-05) and no auth (AD-03), so nothing can
+    // construct these. They are enumerated instead of swept under a `_` so that
+    // M9 has to come here and decide, rather than inheriting a generic string it
+    // never chose. A session that expired mid-write is not "an error occurred".
+    NetworkFailure() => l10n.deckWriteErrorMessage,
+    UnauthorizedFailure() => l10n.deckWriteErrorMessage,
+    ForbiddenFailure() => l10n.deckWriteErrorMessage,
   };
 }
