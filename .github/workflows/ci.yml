@@ -63,17 +63,6 @@ jobs:
           # cache the other then restored. That is how run 3 lost its fonts.
           cache-key: 'flutter-verify-:os:-:channel:-:version:-:arch:'
 
-      # `Expected SDK font not found: material_fonts/roboto-regular.ttf` failed
-      # **every** widget test on runs 3 and 4. Nothing in the project was wrong; the
-      # toolchain was incomplete.
-      #
-      # `--force` because plain `precache --universal` fetched only the iOS USB
-      # artifacts and stopped: the stamp files said everything else was present while
-      # the files were not, which is what a partially-restored cache looks like.
-      # `--force` ignores the stamps.
-      - name: precache SDK artifacts
-        run: flutter precache --force --universal
-
       - name: pub get
         run: flutter pub get
 
@@ -113,6 +102,35 @@ jobs:
       # can catch. Data invariants need a database and are skipped without one.
       - name: document integrity
         run: bash .claude/skills/flutter-workflow/scripts/check_docs.sh
+
+      # `Expected SDK font not found: material_fonts/roboto-regular.ttf` failed
+      # **every** widget test on four runs. Nothing in the project was wrong; the
+      # toolchain was incomplete, and the failure surfaced as ninety unrelated test
+      # errors.
+      #
+      # Immediately before the tests, not near the SDK setup: this is the only step
+      # that needs the fonts, and putting the check next to its consumer means a
+      # missing artifact is reported as a missing artifact rather than as a broken
+      # suite. `--force` because plain `precache --universal` fetched only the iOS
+      # USB artifacts and stopped — the stamp files claimed everything else was
+      # present while the files were not.
+      #
+      # The verification is the point. If the font is still absent after a
+      # successful precache, this prints the directory and fails here, which is a
+      # one-line diagnosis instead of a log full of "Failed to load".
+      - name: precache and verify the SDK artifacts tests render with
+        run: |
+          flutter precache --force --universal
+          FONT="$FLUTTER_ROOT/bin/cache/artifacts/material_fonts/roboto-regular.ttf"
+          if [ ! -f "$FONT" ]; then
+            echo "::error::material fonts absent after precache — the toolchain is incomplete, not the project"
+            echo "--- bin/cache/artifacts ---"
+            ls -la "$FLUTTER_ROOT/bin/cache/artifacts/" || true
+            echo "--- material_fonts ---"
+            ls -la "$FLUTTER_ROOT/bin/cache/artifacts/material_fonts/" || true
+            exit 1
+          fi
+          echo "material fonts present at $FONT"
 
       # `--reporter expanded` so the per-test names are in the log. `pipefail`
       # because `tee` would otherwise report success for a failed run.
