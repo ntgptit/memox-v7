@@ -8,8 +8,10 @@ import 'package:memox/app/config/env_config.dart';
 import 'package:memox/app/config/env_config_provider.dart';
 import 'package:memox/app/di/deck_repository_provider.dart';
 import 'package:memox/app/router/app_router.dart';
+import 'package:memox/features/deck/presentation/root_decks_controller.dart';
 import 'package:memox/core/error/failure.dart';
-import 'package:memox/features/deck/domain/deck_entity.dart';
+import 'package:memox/features/deck/domain/root_deck_summary_model.dart';
+import 'package:memox/features/deck/domain/scheduler_type_model.dart';
 import 'package:memox/features/deck/presentation/root_deck_list_screen.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
@@ -62,6 +64,9 @@ void main() {
       overrides: [
         envConfigProvider.overrideWithValue(EnvConfig.development),
         deckRepositoryProvider.overrideWithValue(repository),
+        // A fixed clock, so the due counts in the loaded state are the same on
+        // every run — a golden-adjacent check must not depend on the wall clock.
+        clockProvider.overrideWithValue(() => DateTime.utc(2026, 7, 29, 12)),
       ],
       child: Router.withConfig(config: router),
     );
@@ -132,7 +137,7 @@ void main() {
 
   memoxProductionScreenAuditTest(
     'root_deck_list_screen',
-    () => shellWith(FakeDeckRepository.emitting(const <DeckEntity>[])),
+    () => shellWith(FakeDeckRepository()),
     state: 'empty',
     anchors: <AuditAnchor>[
       AuditAnchor.type('deck_screen', RootDeckListScreen),
@@ -150,10 +155,19 @@ void main() {
   memoxProductionScreenAuditTest(
     'root_deck_list_screen',
     () => shellWith(
-      FakeDeckRepository.emitting(<DeckEntity>[
-        fakeRootDeck(id: 'deck-1', name: 'Japanese N5'),
-        fakeRootDeck(id: 'deck-2', name: 'Spanish verbs'),
-        fakeRootDeck(id: 'deck-3', name: 'Kanji radicals'),
+      FakeDeckRepository.withSummaries(<RootDeckSummary>[
+        fakeSummary(
+          id: 'deck-1',
+          name: 'Japanese N5',
+          totalCardCount: 120,
+          dueCardCount: 7,
+        ),
+        fakeSummary(id: 'deck-2', name: 'Spanish verbs', totalCardCount: 40),
+        fakeSummary(
+          id: 'deck-3',
+          name: 'Kanji radicals',
+          schedulerType: SchedulerType.sm2,
+        ),
       ]),
     ),
     state: 'loaded',

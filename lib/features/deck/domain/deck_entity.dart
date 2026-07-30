@@ -48,29 +48,54 @@ abstract class DeckEntity with _$DeckEntity {
 
   bool get isRoot => parentDeckId == null;
 
+  /// What is wrong with a proposed deck name, or `null` when nothing is
+  /// (BR-01).
+  ///
+  /// Exists so a form can say "this is invalid, and here is which rule"
+  /// **without** catching an exception and without restating the 200 anywhere.
+  /// A screen that re-implemented the check would be a second owner of BR-01,
+  /// and the two would disagree the first time the rule moved.
+  ///
+  /// Returns a value, not a message: copy is the screen's job and lives in ARB.
+  static DeckNameProblem? nameProblem(String raw) {
+    final name = raw.trim();
+    if (name.isEmpty) return DeckNameProblem.empty;
+    if (name.length > maxNameLength) return DeckNameProblem.tooLong;
+
+    return null;
+  }
+
   /// Validates and normalises a deck name (BR-01).
   ///
-  /// Returns the trimmed name. Throws [ValidationFailure] when empty after
-  /// trim or longer than [maxNameLength] — never truncates silently. The
-  /// messages are the non-localized fallback; screens pick their copy from ARB
-  /// by field key (see `Failure.message`).
+  /// Returns the trimmed name. Throws [ValidationFailure] when [nameProblem]
+  /// finds anything — never truncates silently. Expressed through
+  /// [nameProblem] so the rule has exactly one implementation; the messages
+  /// here are the non-localized fallback for a caller that reached the
+  /// repository without a form in front of it.
   static String validateName(String raw) {
-    final name = raw.trim();
-    if (name.isEmpty) {
-      throw const ValidationFailure(
-        message: 'Please check the highlighted fields.',
-        fieldErrors: <String, String>{'name': 'Name must not be empty.'},
-      );
-    }
-    if (name.length > maxNameLength) {
-      throw const ValidationFailure(
-        message: 'Please check the highlighted fields.',
-        fieldErrors: <String, String>{
-          'name': 'Name is longer than $maxNameLength characters.',
-        },
-      );
-    }
+    final problem = nameProblem(raw);
+    if (problem == null) return raw.trim();
 
-    return name;
+    throw ValidationFailure(
+      message: 'Please check the highlighted fields.',
+      fieldErrors: <String, String>{'name': problem.debugDescription},
+    );
   }
+}
+
+/// Why a deck name is not acceptable (BR-01).
+enum DeckNameProblem {
+  /// Empty, or nothing but whitespace.
+  empty,
+
+  /// Longer than [DeckEntity.maxNameLength] after trimming.
+  tooLong;
+
+  /// Non-localized text for the `Failure` a non-UI caller receives. Never
+  /// shown to a user — screens map the enum to ARB copy.
+  String get debugDescription => switch (this) {
+    DeckNameProblem.empty => 'Name must not be empty.',
+    DeckNameProblem.tooLong =>
+      'Name is longer than ${DeckEntity.maxNameLength} characters.',
+  };
 }

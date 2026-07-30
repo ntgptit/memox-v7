@@ -6,7 +6,6 @@ import 'package:memox/app/di/deck_repository_provider.dart';
 import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/core/theme/theme_context_extension.dart';
-import 'package:memox/features/deck/domain/deck_entity.dart';
 
 import '../../features/deck/presentation/support/fake_deck_repository.dart';
 import '../../support/color_math.dart';
@@ -235,9 +234,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            deckRepositoryProvider.overrideWithValue(
-              FakeDeckRepository.emitting(const <DeckEntity>[]),
-            ),
+            deckRepositoryProvider.overrideWithValue(FakeDeckRepository()),
           ],
           child: const MemoxApp(),
         ),

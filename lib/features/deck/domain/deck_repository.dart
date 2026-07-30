@@ -1,5 +1,6 @@
 import 'deck_deletion_impact_model.dart';
 import 'deck_entity.dart';
+import 'root_deck_summary_model.dart';
 import 'scheduler_type_model.dart';
 
 /// Contract for deck-tree management (UC-02, UC-03, UC-08, UC-09). Card CRUD
@@ -25,6 +26,26 @@ import 'scheduler_type_model.dart';
 abstract interface class DeckRepository {
   /// All root decks, re-emitted on every change.
   Stream<List<DeckEntity>> watchRootDecks();
+
+  /// Root decks with their aggregate progress — total cards in the tree and
+  /// how many are due (UC-06).
+  ///
+  /// [now] is passed in, never read from a clock inside the query: "due
+  /// exactly at now" is a boundary that has to work, and a query that reads
+  /// the clock itself cannot be tested at it (BR-22). The caller owns when the
+  /// number is recomputed.
+  ///
+  /// One query, not one per deck. The counts reach descendants through
+  /// `root_deck_id` (BR-56), which is what makes a flat aggregate possible
+  /// where a parent walk would need recursion.
+  Stream<List<RootDeckSummary>> watchRootDeckSummaries({required DateTime now});
+
+  /// Every deck in the database, for building a move-target picker (UC-09).
+  ///
+  /// Deliberately unfiltered and unsorted by hierarchy: eligibility is decided
+  /// by `buildDeckMoveTargets`, which is pure and testable, and the picker has
+  /// to show every tree by definition. One stream rather than one per root.
+  Stream<List<DeckEntity>> watchAllDecks();
 
   /// A root deck and every descendant, to the allowed depth (BR-55).
   Stream<List<DeckEntity>> watchDeckTree(String rootDeckId);

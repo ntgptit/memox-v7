@@ -30,6 +30,72 @@ SELECT * FROM decks
 WHERE parent_deck_id IS NULL
 ORDER BY created_at ASC, id ASC;
 
+-- Root decks with their aggregate progress — the whole of UC-06 step 1 in ONE
+-- statement (M4.10).
+--
+-- **Why the two counts are joined subqueries, not correlated ones.** Each
+-- inner SELECT groups the cards table once and the outer query joins the
+-- result, so the work does not repeat per root. A correlated subquery, or the
+-- obvious Dart loop calling `subtreeCardCount` per deck, is the N+1 UC-06
+-- names by name — invisible with three decks and the reason the screen stalls
+-- with three hundred.
+--
+-- Both counts reach descendants through `root_deck_id` (BR-56, BR-57, AD-10),
+-- never by walking parents: a deck at level 3 has the same `root_deck_id` as
+-- the root, which is exactly the property that makes this a flat GROUP BY
+-- instead of a recursive walk.
+--
+-- **The due predicate below is character-for-character the one in
+-- `study.drift`.** BR-22 defines "due" once, and the badge on this list has to
+-- agree with the list a session then hands out; two spellings drift apart the
+-- first time one is edited. `query_test.dart` asserts all three agree on the
+-- same data and the same `:now`.
+--
+-- `:now` is a parameter, never a SQL clock function — a query that reads the
+-- clock itself cannot be tested at the `due_at = now` boundary, and that
+-- boundary has to work.
+--
+-- A root with no cards yields no row from either subquery, hence COALESCE to
+-- 0. That is a count of nothing, not a missing parent, so it has nothing to do
+-- with the banned `COALESCE(parent_deck_id, ...)`.
+rootDeckSummaries:
+SELECT
+    d.**,
+    COALESCE(total.cardCount, 0) AS totalCardCount,
+    COALESCE(due.dueCount, 0) AS dueCardCount
+FROM decks d
+LEFT JOIN (
+    SELECT cd.root_deck_id AS rootDeckId, COUNT(*) AS cardCount
+    FROM cards c
+    INNER JOIN decks cd ON cd.id = c.deck_id
+    GROUP BY cd.root_deck_id
+) total ON total.rootDeckId = d.id
+LEFT JOIN (
+    SELECT cd.root_deck_id AS rootDeckId, COUNT(*) AS dueCount
+    FROM cards c
+    INNER JOIN decks cd ON cd.id = c.deck_id
+    INNER JOIN card_review_states s ON s.card_id = c.id
+    WHERE (s.due_at IS NULL OR s.due_at <= :now)
+    GROUP BY cd.root_deck_id
+) due ON due.rootDeckId = d.id
+WHERE d.parent_deck_id IS NULL
+ORDER BY d.created_at ASC, d.id ASC;
+
+-- Every deck in the database, ordered so a tree can be rebuilt from it.
+--
+-- One statement for the move-target picker (UC-09). The alternative —
+-- `decksInTree` once per root — is N+1 in the number of trees, and the picker
+-- has to show every tree by definition. Depth and ancestry are then derived in
+-- memory from the parent pointers already in these rows; that is arithmetic
+-- over one result set, not a walk that hits the database again.
+--
+-- The repository still re-validates every rule at submit time. What the UI
+-- computes from this is which options to *offer*; what may actually be written
+-- is decided by `moveDeck` (BR-55, BR-64, BR-70, BR-74).
+allDecks:
+SELECT * FROM decks
+ORDER BY root_deck_id ASC, created_at ASC, id ASC;
+
 deckById:
 SELECT * FROM decks WHERE id = :deckId;
 

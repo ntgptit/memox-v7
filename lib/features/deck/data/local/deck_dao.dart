@@ -27,6 +27,14 @@ final class DeckDao {
 
   Stream<List<Deck>> watchRootDecks() => _db.rootDecks().watch();
 
+  /// Root decks with their aggregate card and due counts, one statement
+  /// (UC-06). [now] is a parameter so the due boundary is testable (BR-22).
+  Stream<List<RootDeckSummariesResult>> watchRootDeckSummaries(DateTime now) =>
+      _db.rootDeckSummaries(now).watch();
+
+  /// Every deck, for the move-target picker (UC-09).
+  Stream<List<Deck>> watchAllDecks() => _db.allDecks().watch();
+
   /// One root's whole tree at any allowed depth, via `root_deck_id`
   /// (BR-56, BR-57).
   Stream<List<Deck>> watchDecksInTree(String rootDeckId) =>

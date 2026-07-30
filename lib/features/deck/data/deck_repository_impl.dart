@@ -8,6 +8,7 @@ import '../domain/deck_content_type_model.dart';
 import '../domain/deck_deletion_impact_model.dart';
 import '../domain/deck_entity.dart';
 import '../domain/deck_repository.dart';
+import '../domain/root_deck_summary_model.dart';
 import '../domain/scheduler_type_model.dart';
 import 'deck_mapper.dart';
 import 'local/deck_dao.dart';
@@ -58,6 +59,17 @@ final class DeckRepositoryImpl
   @override
   Stream<List<DeckEntity>> watchRootDecks() =>
       _guardStream(_dao.watchRootDecks()).map(_mapDeckRows);
+
+  @override
+  Stream<List<RootDeckSummary>> watchRootDeckSummaries({
+    required DateTime now,
+  }) => _guardStream(
+    _dao.watchRootDeckSummaries(now),
+  ).map((rows) => rows.map(rootDeckSummaryFromRow).toList(growable: false));
+
+  @override
+  Stream<List<DeckEntity>> watchAllDecks() =>
+      _guardStream(_dao.watchAllDecks()).map(_mapDeckRows);
 
   @override
   Stream<List<DeckEntity>> watchDeckTree(String rootDeckId) =>

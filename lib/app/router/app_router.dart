@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/deck/presentation/deck_detail_screen.dart';
 import '../../features/deck/presentation/root_deck_list_screen.dart';
 import '../../features/review/presentation/review_placeholder_screen.dart';
 import '../fallback/route_not_found_screen.dart';
@@ -53,6 +54,22 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
                 path: RoutePaths.decks,
                 name: RouteNames.decks,
                 builder: (context, state) => const RootDeckListScreen(),
+                routes: <RouteBase>[
+                  // A child route, so a deck screen pushes onto the Decks
+                  // branch: the bottom bar stays, Back returns to the list, and
+                  // switching to Review and back finds the deck still open.
+                  GoRoute(
+                    path: RoutePaths.deckDetailRelative,
+                    name: RouteNames.deckDetail,
+                    builder: (context, state) => DeckDetailScreen(
+                      // Non-null by construction: the path segment is required,
+                      // so a match cannot occur without it. `!` rather than a
+                      // fallback because a fallback would invent a deck id and
+                      // open somebody else's deck.
+                      deckId: state.pathParameters[RoutePathParams.deckId]!,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
