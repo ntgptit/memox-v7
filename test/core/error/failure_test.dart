@@ -108,13 +108,24 @@ void main() {
           error: Exception('UNIQUE constraint failed: decks.id'),
           expected: ConflictFailure,
         ),
+        // A foreign key means the referenced row is gone, not that two values
+        // clash. Every write checks its parent exists first, so this only
+        // arrives when the row was deleted between that check and the write —
+        // and "pick a different name" would be nonsense advice for it.
         (
           error: Exception('FOREIGN KEY constraint failed'),
-          expected: ConflictFailure,
+          expected: NotFoundFailure,
         ),
+        // NOT NULL and CHECK can only be our own defect: every column and every
+        // enum value is written from a typed source. The user cannot act, so
+        // they must not be told to try something different.
         (
           error: Exception('CHECK constraint failed: content_type'),
-          expected: ConflictFailure,
+          expected: DatabaseFailure,
+        ),
+        (
+          error: Exception('NOT NULL constraint failed: cards.front'),
+          expected: DatabaseFailure,
         ),
         (
           error: DriftWrappedException(
