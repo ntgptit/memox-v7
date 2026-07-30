@@ -6,8 +6,9 @@ import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/deck/domain/models/deck_content_type_model.dart';
 import 'package:memox/features/deck/domain/models/deck_deletion_impact_model.dart';
 import 'package:memox/features/deck/domain/entities/deck_entity.dart';
-import 'package:memox/features/deck/domain/models/deck_detail_model.dart';
-import 'package:memox/features/deck/presentation/screens/deck_detail_screen.dart';
+import 'package:memox/features/deck/domain/models/deck_list_snapshot_model.dart';
+import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
+import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 
 import 'support/deck_screen_harness.dart';
@@ -16,7 +17,7 @@ import 'support/fake_deck_repository.dart';
 /// The write flows reached from a deck's action menu: rename, delete with its
 /// impact, reset content type and move (UC-03, UC-09).
 ///
-/// Split from `deck_detail_screen_test.dart`, which keeps the read states and
+/// Split from `deck_list_level_test.dart`, which keeps the read states and
 /// the create-action matrix.
 void main() {
   final english = AppLocalizationsEn();
@@ -24,14 +25,15 @@ void main() {
   /// A repository serving one deck and the children it should show.
   FakeDeckRepository serving(
     DeckEntity deck, {
-    List<DeckEntity> children = const <DeckEntity>[],
+    List<DeckSummary> children = const <DeckSummary>[],
     List<DeckEntity>? allDecks,
     Failure? writeFailure,
   }) => FakeDeckRepository(
     // One builder for the pair, because the contract returns the pair. A deck and
     // a child list from different snapshots is no longer expressible here.
-    deckDetail: (_) =>
-        Stream<DeckDetail>.value(DeckDetail(deck: deck, childDecks: children)),
+    deckList: (_) => Stream<DeckListSnapshot>.value(
+      DeckListSnapshot(parent: deck, decks: children, nextDueAt: null),
+    ),
     allDecks: () =>
         Stream<List<DeckEntity>>.value(allDecks ?? <DeckEntity>[deck]),
     writeFailure: writeFailure,
@@ -47,7 +49,7 @@ void main() {
   }) => pumpDeckScreen(
     tester,
     repository: repository,
-    screen: DeckDetailScreen(deckId: deckId),
+    screen: DeckListScreen(parentDeckId: deckId),
     surface: surface,
     textScale: textScale,
     isDark: isDark,
@@ -110,8 +112,8 @@ void main() {
             parentId: 'root',
             contentType: DeckContentType.deck,
           ),
-          children: <DeckEntity>[
-            fakeSubDeck(id: 'c1', name: 'Child', parentId: 'deck-1'),
+          children: <DeckSummary>[
+            fakeChildSummary(id: 'c1', name: 'Child', parentId: 'deck-1'),
           ],
         ),
       );

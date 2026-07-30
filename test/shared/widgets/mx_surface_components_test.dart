@@ -6,6 +6,9 @@ import 'package:memox/shared/widgets/mx_confirm_dialog.dart';
 import 'package:memox/shared/widgets/mx_list_tile.dart';
 
 /// `MxListTile`, `MxConfirmDialog` and `MxActionSheet`.
+///
+/// `MxCard` moved to `mx_card_test.dart` when this file crossed the 400-line
+/// guard.
 void main() {
   Future<void> pump(
     WidgetTester tester,

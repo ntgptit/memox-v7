@@ -5,7 +5,7 @@ import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_confirm_dialog.dart';
 import '../../domain/models/deck_deletion_impact_model.dart';
 import '../../domain/entities/deck_entity.dart';
-import '../controllers/deck_detail_controller.dart';
+import '../controllers/deck_deletion_impact_controller.dart';
 import 'deck_labels_widget.dart';
 import '../states/deck_submit_state.dart';
 import '../controllers/deck_write_controller.dart';

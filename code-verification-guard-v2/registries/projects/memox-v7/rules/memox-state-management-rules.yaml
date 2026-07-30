@@ -124,7 +124,11 @@ rules:
     scopes:
       - flutter_source
     patterns:
-      - '\b[A-Z][A-Za-z0-9]*Ref\s+ref\b'
+      # `WidgetRef` is excluded: it is a current Riverpod 3 type, not a generated
+      # per-provider subclass, and it is the declared parameter type of every
+      # `Consumer` builder — so matching it made the rule fire on correct code the
+      # first time a builder's `ref` was passed to a helper.
+      - '\b(?!WidgetRef\b)[A-Z][A-Za-z0-9]*Ref\s+ref\b'
     tags:
       - memox
       - state-management

@@ -37,7 +37,7 @@ void main() {
     test('the mirrored path drops the presentation segment', () {
       final pairs = discoverScreenPairs(Directory('lib'));
       final deckList = pairs.firstWhere(
-        (pair) => pair.screenPath.contains('root_deck_list'),
+        (pair) => pair.screenPath.contains('deck_list_screen'),
       );
 
       expect(
@@ -46,9 +46,9 @@ void main() {
         // `screens/` folder the nested layout introduced — is kept, so the
         // companion sits at the mirrored depth rather than being flattened.
         'test/visual_audit/screens/features/deck/screens/'
-        'root_deck_list_screen_visual_audit_test.dart',
+        'deck_list_screen_visual_audit_test.dart',
       );
-      expect(deckList.screenClass, 'RootDeckListScreen');
+      expect(deckList.screenClass, 'DeckListScreen');
     });
   });
 

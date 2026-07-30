@@ -34,6 +34,18 @@ import 'audit_model.dart';
 /// rather than folding it into every caller's number is what makes the arithmetic
 /// checkable by eye.
 ///
+/// [tappableCards] is the number of `MxCard`s built with an `onTap`. Each hosts
+/// an `InkWell`, which contributes an ink layer and a clip painted by a
+/// `CustomPaint` with no painter of its own.
+///
+/// [pills] is the number of `MxPillButton`s. A `ChoiceChip` contributes three
+/// unreadable nodes rather than two: an ink layer, a `CustomPaint`, and
+/// `_RenderChip` itself, which lays out and paints its own shape through a
+/// private render object no extractor claims.
+///
+/// [hasFloatingAction] for the create button. Same two nodes as a tappable card —
+/// it is a `Material` with an `InkWell` and a clip.
+///
 /// A zero count is not passed as `expectedMatches: 0`: an allowance that matches
 /// nothing is an unused allowance, which this harness treats as fatal, so the
 /// entry is omitted instead.
@@ -42,8 +54,17 @@ List<AuditSkipAllowance> deckShellAllowances({
   required String screenItemId,
   bool hasAppBar = true,
   bool hasBackButton = false,
+  int tappableCards = 0,
+  int pills = 0,
+  bool hasFloatingAction = false,
 }) {
   final iconButtons = screenIconButtons + (hasBackButton ? 1 : 0);
+  final floatingActions = hasFloatingAction ? 1 : 0;
+  // Every one of these hosts an InkWell inside its own Material.
+  final inkHosts = iconButtons + tappableCards + pills + floatingActions;
+  // The InkWell's rounded clip, once per host that has one. Icon buttons draw a
+  // `_ShapeBorderPainter` instead, which is counted separately below.
+  final unnamedPainters = tappableCards + pills + floatingActions;
 
   return <AuditSkipAllowance>[
     // One per Navigator: the harness's own MaterialApp, GoRouter's root, and the
@@ -85,16 +106,45 @@ List<AuditSkipAllowance> deckShellAllowances({
       itemId: screenItemId,
       reason: SkipReason.rasterOnly,
       detailContains: '_RenderInkFeatures',
-      // MxContentShell's Scaffold, its AppBar when it has one, and one per icon
-      // button — the back button included.
-      expectedMatches: (hasAppBar ? 2 : 1) + iconButtons,
+      // MxContentShell's Scaffold, its AppBar when it has one, and one per thing
+      // that hosts an InkWell — icon buttons, tappable cards, pills, the
+      // floating action.
+      expectedMatches: (hasAppBar ? 2 : 1) + inkHosts,
       rationale:
           'The branch screen Material layers: its Scaffold and its AppBar from '
-          'MxContentShell, plus one per MxIconButton. Same raster-only reason as '
-          'the shell — a Material paints background, splash and highlight into a '
-          'layer no render object reports. The icon button states are pinned by '
-          'the mx_icon_button_* goldens (M4.8).',
+          'MxContentShell, plus one per InkWell host — MxIconButton, a tappable '
+          'MxCard, an MxPillButton, the floating action. Same raster-only reason '
+          'as the shell: a Material paints background, splash and highlight into '
+          'a layer no render object reports. The icon button states are pinned by '
+          'the mx_icon_button_* goldens (M4.8), the card and pill surfaces by '
+          'app_theme_test.dart.',
     ),
+    if (unnamedPainters > 0)
+      AuditSkipAllowance(
+        itemId: screenItemId,
+        reason: SkipReason.customPainter,
+        detailContains: 'CustomPaint (no painter)',
+        expectedMatches: unnamedPainters,
+        rationale:
+            'The rounded clip an InkWell paints for its ripple, one per tappable '
+            'MxCard, MxPillButton and floating action. It has no painter to '
+            'interrogate because the shape is the ripple boundary rather than a '
+            'drawn stroke — the visible border is the DecoratedBox behind it, '
+            'which the audit does read.',
+      ),
+    if (pills > 0)
+      AuditSkipAllowance(
+        itemId: screenItemId,
+        reason: SkipReason.unknownRenderType,
+        detailContains: '_RenderChip',
+        expectedMatches: pills,
+        rationale:
+            'ChoiceChip lays out and paints through a private _RenderChip, so '
+            'neither its fill nor its border is reachable from the render tree. '
+            'Both come from chipTheme in app_theme.dart and the selected and '
+            'unselected fills are asserted to differ, in both themes, in '
+            'mx_pill_button_test.dart.',
+      ),
     if (iconButtons > 0)
       AuditSkipAllowance(
         itemId: screenItemId,

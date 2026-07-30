@@ -3,11 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/error/failure.dart';
-import 'package:memox/features/deck/domain/models/root_deck_list_snapshot_model.dart';
-import 'package:memox/features/deck/domain/models/root_deck_summary_model.dart';
+import 'package:memox/features/deck/domain/models/deck_list_snapshot_model.dart';
+import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 import 'package:memox/features/deck/presentation/widgets/deck_tile_widget.dart';
-import 'package:memox/features/deck/presentation/screens/root_deck_list_screen.dart';
+import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
@@ -18,11 +18,12 @@ import 'support/fake_deck_repository.dart';
 
 /// The root deck list's four read states and its responsive matrix (UC-06).
 ///
-/// The create flow lives in `root_deck_create_test.dart`.
+/// The create flow lives in `root_deck_create_test.dart`, and the filter and
+/// sort pills in `deck_list_toolbar_test.dart`.
 void main() {
   final english = AppLocalizationsEn();
 
-  List<RootDeckSummary> threeSummaries() => <RootDeckSummary>[
+  List<DeckSummary> threeSummaries() => <DeckSummary>[
     fakeSummary(
       id: '1',
       name: 'Japanese N5',
@@ -44,7 +45,7 @@ void main() {
       await pumpDeckScreen(
         tester,
         repository: FakeDeckRepository.pending(),
-        screen: const RootDeckListScreen(),
+        screen: const DeckListScreen(),
       );
 
       expect(
@@ -67,7 +68,7 @@ void main() {
       await pumpDeckScreen(
         tester,
         repository: FakeDeckRepository(),
-        screen: const RootDeckListScreen(),
+        screen: const DeckListScreen(),
       );
 
       final empty = tester.widget<MxEmptyState>(find.byType(MxEmptyState));
@@ -88,7 +89,7 @@ void main() {
       await pumpDeckScreen(
         tester,
         repository: FakeDeckRepository.withSummaries(threeSummaries()),
-        screen: const RootDeckListScreen(),
+        screen: const DeckListScreen(),
       );
 
       expect(find.byType(DeckTileWidget), findsNWidgets(3));
@@ -109,7 +110,7 @@ void main() {
       await pumpDeckScreen(
         tester,
         repository: FakeDeckRepository.withSummaries(threeSummaries()),
-        screen: const RootDeckListScreen(),
+        screen: const DeckListScreen(),
       );
 
       expect(find.textContaining(english.deckNoDueLabel), findsNWidgets(2));
@@ -123,7 +124,7 @@ void main() {
       await pumpDeckScreen(
         tester,
         repository: FakeDeckRepository.withSummaries(threeSummaries()),
-        screen: const RootDeckListScreen(),
+        screen: const DeckListScreen(),
       );
 
       expect(find.byIcon(Icons.notifications_active), findsOneWidget);
@@ -137,16 +138,16 @@ void main() {
       tester,
     ) async {
       // UC-06 A2, the reason the read is a stream.
-      final controller = StreamController<RootDeckListSnapshot>();
+      final controller = StreamController<DeckListSnapshot>();
       addTearDown(controller.close);
 
       await pumpDeckScreen(
         tester,
-        repository: FakeDeckRepository(summaries: () => controller.stream),
-        screen: const RootDeckListScreen(),
+        repository: FakeDeckRepository(deckList: (_) => controller.stream),
+        screen: const DeckListScreen(),
       );
 
-      controller.add(fakeListSnapshot(const <RootDeckSummary>[]));
+      controller.add(fakeListSnapshot(const <DeckSummary>[]));
       await tester.pump();
       expect(find.byType(MxEmptyState), findsOneWidget);
 
@@ -166,7 +167,7 @@ void main() {
       await pumpDeckScreen(
         tester,
         repository: FakeDeckRepository.failing(failure),
-        screen: const RootDeckListScreen(),
+        screen: const DeckListScreen(),
       );
 
       expect(find.byType(MxErrorState), findsOneWidget);
@@ -183,15 +184,15 @@ void main() {
     ) async {
       var attempt = 0;
       final repository = FakeDeckRepository(
-        summaries: () {
+        deckList: (_) {
           attempt += 1;
           if (attempt == 1) {
-            return Stream<RootDeckListSnapshot>.error(
+            return Stream<DeckListSnapshot>.error(
               const DatabaseFailure(message: 'read failed'),
             );
           }
 
-          return Stream<RootDeckListSnapshot>.value(
+          return Stream<DeckListSnapshot>.value(
             fakeListSnapshot(threeSummaries()),
           );
         },
@@ -200,14 +201,14 @@ void main() {
       await pumpDeckScreen(
         tester,
         repository: repository,
-        screen: const RootDeckListScreen(),
+        screen: const DeckListScreen(),
       );
       expect(find.byType(MxErrorState), findsOneWidget);
 
       await tester.tap(find.text(english.retryAction));
       await tester.pumpAndSettle();
 
-      expect(repository.summariesCallCount, 2);
+      expect(repository.deckListCallCount, 2);
       expect(find.byType(DeckTileWidget), findsNWidgets(3));
     });
   });
@@ -219,7 +220,7 @@ void main() {
       await pumpDeckScreen(
         tester,
         repository: FakeDeckRepository.withSummaries(threeSummaries()),
-        screen: const RootDeckListScreen(),
+        screen: const DeckListScreen(),
         surface: compact,
       );
 
@@ -233,7 +234,7 @@ void main() {
       await pumpDeckScreen(
         tester,
         repository: FakeDeckRepository.withSummaries(threeSummaries()),
-        screen: const RootDeckListScreen(),
+        screen: const DeckListScreen(),
         surface: compact,
         textScale: 2,
       );
@@ -247,7 +248,7 @@ void main() {
       await pumpDeckScreen(
         tester,
         repository: FakeDeckRepository(),
-        screen: const RootDeckListScreen(),
+        screen: const DeckListScreen(),
         surface: compact,
         textScale: 2,
       );
@@ -259,10 +260,10 @@ void main() {
     testWidgets('a very long deck name does not break the row', (tester) async {
       await pumpDeckScreen(
         tester,
-        repository: FakeDeckRepository.withSummaries(<RootDeckSummary>[
+        repository: FakeDeckRepository.withSummaries(<DeckSummary>[
           fakeSummary(id: '1', name: 'A' * 200, totalCardCount: 1),
         ]),
-        screen: const RootDeckListScreen(),
+        screen: const DeckListScreen(),
         surface: compact,
         textScale: 2,
       );
@@ -281,7 +282,7 @@ void main() {
         await pumpDeckScreen(
           tester,
           repository: repository,
-          screen: const RootDeckListScreen(),
+          screen: const DeckListScreen(),
           isDark: true,
         );
 
@@ -297,7 +298,7 @@ void main() {
       await pumpDeckScreen(
         tester,
         repository: FakeDeckRepository.withSummaries(threeSummaries()),
-        screen: const RootDeckListScreen(),
+        screen: const DeckListScreen(),
       );
 
       expect(

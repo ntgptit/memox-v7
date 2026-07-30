@@ -40,13 +40,21 @@ final class DeckDao {
   Stream<List<Deck>> watchDecksInTree(String rootDeckId) =>
       _db.decksInTree(rootDeckId).watch();
 
-  /// One deck and its direct children, one statement (UC-06 step 4, UC-08).
+  /// One deck and its direct children, each child with its whole subtree's
+  /// aggregate — one statement (UC-06 step 4, UC-08).
   ///
-  /// A `LEFT JOIN`, so a childless deck still yields exactly one row — with
-  /// `child` null. Which is why the empty list and "the deck is gone" are
+  /// A `LEFT JOIN`, so a childless deck still yields exactly one row, with
+  /// `child` null. That is why the empty list and "the deck is gone" are
   /// distinguishable here at all: no rows means no deck.
-  Stream<List<DeckDetailResult>> watchDeckDetail(String deckId) =>
-      _db.deckDetail(deckId).watch();
+  ///
+  /// The recursive walk inside it is what a deeper level costs. A root's subtree
+  /// is free — every descendant carries its `root_deck_id` — but nothing
+  /// identifies an intermediate ancestor, so `watchRootDeckSummaries` and this
+  /// are two statements on purpose rather than one generalised one.
+  Stream<List<ChildDeckLevelResult>> watchChildDeckLevel({
+    required String parentDeckId,
+    required DateTime now,
+  }) => _db.childDeckLevel(parentDeckId, now).watch();
 
   Future<Deck?> deckById(String deckId) =>
       _db.deckById(deckId).getSingleOrNull();

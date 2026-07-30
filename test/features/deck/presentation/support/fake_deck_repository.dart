@@ -1,14 +1,13 @@
-import 'package:memox/features/deck/domain/models/deck_name_model.dart';
 import 'dart:async';
 
 import 'package:memox/core/error/failure.dart';
+import 'package:memox/features/deck/domain/entities/deck_entity.dart';
 import 'package:memox/features/deck/domain/models/deck_content_type_model.dart';
 import 'package:memox/features/deck/domain/models/deck_deletion_impact_model.dart';
-import 'package:memox/features/deck/domain/models/deck_detail_model.dart';
-import 'package:memox/features/deck/domain/entities/deck_entity.dart';
+import 'package:memox/features/deck/domain/models/deck_list_snapshot_model.dart';
+import 'package:memox/features/deck/domain/models/deck_name_model.dart';
+import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/domain/repositories/deck_repository.dart';
-import 'package:memox/features/deck/domain/models/root_deck_list_snapshot_model.dart';
-import 'package:memox/features/deck/domain/models/root_deck_summary_model.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 
 /// A [DeckRepository] a presentation test can drive.
@@ -23,6 +22,12 @@ import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 /// only be listened to once, so a stored `Stream.value(...)` would throw on the
 /// second listen — which is exactly what retry and a family provider rebuild do.
 ///
+/// **One read builder for every level.** The fake used to have a `summaries`
+/// stream for the root list and a separate `deckDetail` stream for the inside of
+/// a deck, which let a test set up a root list and a deck screen that disagreed
+/// about the same deck. The contract has one method now, so the fake has one
+/// builder, keyed on the parent id the screen asked for.
+///
 /// Writes record their arguments and return whatever the test asked for. That is
 /// what lets a widget test assert "the form called `createRootDeck` with this
 /// name and this scheduler" without a database, while the *behaviour* of those
@@ -30,79 +35,80 @@ import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 /// `test/features/deck/data/`.
 class FakeDeckRepository implements DeckRepository {
   FakeDeckRepository({
-    Stream<RootDeckListSnapshot> Function()? summaries,
+    Stream<DeckListSnapshot> Function(String? parentDeckId)? deckList,
     Stream<List<DeckEntity>> Function()? rootDecks,
     Stream<List<DeckEntity>> Function()? allDecks,
-    Stream<DeckDetail> Function(String deckId)? deckDetail,
     this.deletionImpact = const DeckDeletionImpact(
       descendantDeckCount: 0,
       cardCount: 0,
     ),
     this.writeFailure,
-  }) : _summaries = summaries ?? _emptySummaries,
+  }) : _deckList = deckList ?? _emptyLevel,
        _rootDecks = rootDecks ?? _emptyDecks,
-       _allDecks = allDecks ?? _emptyDecks,
-       _deckDetail = deckDetail ?? _missingDeck;
+       _allDecks = allDecks ?? _emptyDecks;
 
-  /// Emits [summaries] as the deck list, with no due boundary by default.
+  /// Emits [summaries] as the root level, with no due boundary by default.
   ///
   /// [nextDueAt] is the instant the counts expire. It is part of the same read as
   /// the counts in production, so it is one argument here too — a fake that let a
   /// test set the two independently would be a fake of a contract that does not
   /// exist.
   factory FakeDeckRepository.withSummaries(
-    List<RootDeckSummary> summaries, {
+    List<DeckSummary> summaries, {
     DateTime? nextDueAt,
   }) => FakeDeckRepository(
-    summaries: () => Stream<RootDeckListSnapshot>.value(
-      RootDeckListSnapshot(decks: summaries, nextDueAt: nextDueAt),
+    deckList: (_) => Stream<DeckListSnapshot>.value(
+      DeckListSnapshot(parent: null, decks: summaries, nextDueAt: nextDueAt),
+    ),
+  );
+
+  /// One level inside a deck: the parent, and what it directly contains.
+  ///
+  /// The same value type the root level uses, because it is the same screen —
+  /// the only difference is that `parent` is not null.
+  factory FakeDeckRepository.withLevel({
+    required DeckEntity parent,
+    List<DeckSummary> children = const <DeckSummary>[],
+    DateTime? nextDueAt,
+  }) => FakeDeckRepository(
+    deckList: (_) => Stream<DeckListSnapshot>.value(
+      DeckListSnapshot(parent: parent, decks: children, nextDueAt: nextDueAt),
+    ),
+  );
+
+  /// A level that does not exist — the deck was deleted while it was open.
+  factory FakeDeckRepository.missingDeck() => FakeDeckRepository(
+    deckList: (_) => Stream<DeckListSnapshot>.error(
+      const NotFoundFailure(message: 'That deck no longer exists.'),
     ),
   );
 
   /// Never emits and never closes: the state a real read is in while SQLite is
   /// still answering.
   factory FakeDeckRepository.pending() => FakeDeckRepository(
-    summaries: () => StreamController<RootDeckListSnapshot>().stream,
-    deckDetail: (_) => StreamController<DeckDetail>().stream,
+    deckList: (_) => StreamController<DeckListSnapshot>().stream,
   );
 
   /// Fails without ever emitting — a read that could not reach the database.
   factory FakeDeckRepository.failing(Object error) => FakeDeckRepository(
-    summaries: () => Stream<RootDeckListSnapshot>.error(error),
-    deckDetail: (_) => Stream<DeckDetail>.error(error),
+    deckList: (_) => Stream<DeckListSnapshot>.error(error),
   );
 
-  /// A deck screen's read, supplied as the pair the real read returns together.
-  ///
-  /// One builder for both facts, because the contract has one method for both.
-  /// The old fake had a `childDecks` stream and a separate `deckById` future, and
-  /// a test could therefore set up a state the database cannot produce — a deck
-  /// whose children belong to a different snapshot. That is no longer expressible.
-  factory FakeDeckRepository.withDetail({
-    required DeckEntity deck,
-    List<DeckEntity> children = const <DeckEntity>[],
-  }) => FakeDeckRepository(
-    deckDetail: (_) =>
-        Stream<DeckDetail>.value(DeckDetail(deck: deck, childDecks: children)),
-  );
-
-  static Stream<RootDeckListSnapshot> _emptySummaries() =>
-      Stream<RootDeckListSnapshot>.value(
-        const RootDeckListSnapshot(decks: <RootDeckSummary>[], nextDueAt: null),
+  static Stream<DeckListSnapshot> _emptyLevel(String? parentDeckId) =>
+      Stream<DeckListSnapshot>.value(
+        const DeckListSnapshot(
+          parent: null,
+          decks: <DeckSummary>[],
+          nextDueAt: null,
+        ),
       );
 
   static Stream<List<DeckEntity>> _emptyDecks() =>
       Stream<List<DeckEntity>>.value(const <DeckEntity>[]);
 
-  static Stream<DeckDetail> _missingDeck(String deckId) =>
-      Stream<DeckDetail>.error(
-        const NotFoundFailure(message: 'That deck no longer exists.'),
-      );
-
-  final Stream<RootDeckListSnapshot> Function() _summaries;
+  final Stream<DeckListSnapshot> Function(String? parentDeckId) _deckList;
   final Stream<List<DeckEntity>> Function() _rootDecks;
   final Stream<List<DeckEntity>> Function() _allDecks;
-  final Stream<DeckDetail> Function(String deckId) _deckDetail;
 
   DeckDeletionImpact deletionImpact;
 
@@ -113,7 +119,11 @@ class FakeDeckRepository implements DeckRepository {
 
   /// Counts, not booleans: "did retry re-subscribe" and "did a double tap send
   /// two writes" are both questions about the number.
-  int summariesCallCount = 0;
+  int deckListCallCount = 0;
+
+  /// Every parent id the list read was opened for, in order — `null` for the
+  /// root level.
+  final List<String?> deckListParents = <String?>[];
 
   /// Every `now` the list read was given, in order.
   ///
@@ -122,7 +132,6 @@ class FakeDeckRepository implements DeckRepository {
   /// actually happened at a new instant rather than just re-running.
   final List<DateTime> readInstants = <DateTime>[];
   int allDecksCallCount = 0;
-  final List<String> deckDetailCalls = <String>[];
   final List<({String name, SchedulerType scheduler})> createdRootDecks =
       <({String name, SchedulerType scheduler})>[];
   final List<({String name, String parentDeckId})> createdSubDecks =
@@ -135,11 +144,15 @@ class FakeDeckRepository implements DeckRepository {
       <({String deckId, String target})>[];
 
   @override
-  Stream<RootDeckListSnapshot> watchRootDeckList({required DateTime now}) {
-    summariesCallCount += 1;
+  Stream<DeckListSnapshot> watchDeckList({
+    required String? parentDeckId,
+    required DateTime now,
+  }) {
+    deckListCallCount += 1;
+    deckListParents.add(parentDeckId);
     readInstants.add(now);
 
-    return _summaries();
+    return _deckList(parentDeckId);
   }
 
   @override
@@ -150,13 +163,6 @@ class FakeDeckRepository implements DeckRepository {
     allDecksCallCount += 1;
 
     return _allDecks();
-  }
-
-  @override
-  Stream<DeckDetail> watchDeckDetail(String deckId) {
-    deckDetailCalls.add(deckId);
-
-    return _deckDetail(deckId);
   }
 
   @override
@@ -246,6 +252,7 @@ DeckEntity fakeRootDeck({
   required String name,
   SchedulerType schedulerType = SchedulerType.eightBox,
   int schedulerGeneration = 1,
+  DeckContentType contentType = DeckContentType.deck,
   DateTime? createdAt,
 }) {
   final at = createdAt ?? DateTime.utc(2026);
@@ -255,7 +262,7 @@ DeckEntity fakeRootDeck({
     name: name,
     parentDeckId: null,
     rootDeckId: id,
-    contentType: DeckContentType.deck,
+    contentType: contentType,
     schedulerType: schedulerType,
     schedulerGeneration: schedulerGeneration,
     firstReviewAt: null,
@@ -294,20 +301,58 @@ DeckEntity fakeSubDeck({
 ///
 /// [nextDueAt] defaults to null — nothing scheduled to come due — because that is
 /// what most tests are about. The ones about the due-boundary timer pass it.
-RootDeckListSnapshot fakeListSnapshot(
-  List<RootDeckSummary> summaries, {
+DeckListSnapshot fakeListSnapshot(
+  List<DeckSummary> summaries, {
+  DeckEntity? parent,
   DateTime? nextDueAt,
-}) => RootDeckListSnapshot(decks: summaries, nextDueAt: nextDueAt);
+}) => DeckListSnapshot(parent: parent, decks: summaries, nextDueAt: nextDueAt);
 
-/// A root summary with explicit counts.
-RootDeckSummary fakeSummary({
+/// A root deck's summary with explicit counts.
+DeckSummary fakeSummary({
   required String id,
   required String name,
   int totalCardCount = 0,
   int dueCardCount = 0,
   SchedulerType schedulerType = SchedulerType.eightBox,
-}) => RootDeckSummary(
-  deck: fakeRootDeck(id: id, name: name, schedulerType: schedulerType),
+  DateTime? createdAt,
+}) => DeckSummary(
+  deck: fakeRootDeck(
+    id: id,
+    name: name,
+    schedulerType: schedulerType,
+    createdAt: createdAt,
+  ),
   totalCardCount: totalCardCount,
   dueCardCount: dueCardCount,
+  schedulerType: schedulerType,
+);
+
+/// A sub-deck's summary — the same three facts a root's carries.
+///
+/// The scheduler is passed separately from the entity on purpose: a sub-deck's
+/// own column is null by BR-06, and the value here is the one the query resolved
+/// through `root_deck_id`. A helper that read it off the entity would quietly
+/// make every child summary in the suite say "unknown".
+DeckSummary fakeChildSummary({
+  required String id,
+  required String name,
+  required String parentId,
+  String? rootId,
+  int totalCardCount = 0,
+  int dueCardCount = 0,
+  SchedulerType schedulerType = SchedulerType.eightBox,
+  DeckContentType contentType = DeckContentType.unset,
+  DateTime? createdAt,
+}) => DeckSummary(
+  deck: fakeSubDeck(
+    id: id,
+    name: name,
+    parentId: parentId,
+    rootId: rootId,
+    contentType: contentType,
+    createdAt: createdAt,
+  ),
+  totalCardCount: totalCardCount,
+  dueCardCount: dueCardCount,
+  schedulerType: schedulerType,
 );
