@@ -18,7 +18,13 @@ class MxEmptyState extends StatelessWidget {
     this.onAction,
     this.icon = Icons.check_circle_outline,
     super.key,
-  });
+  }) : assert(
+         (actionLabel == null) == (onAction == null),
+         'An empty state has an action or it does not. With only a label the '
+         'button renders and does nothing; with only a callback it never '
+         'renders at all — and either way the build below drops it silently, so '
+         'the screen looks deliberately action-free and no test fails.',
+       );
 
   /// Already-localized. The screen owns the copy.
   final String title;

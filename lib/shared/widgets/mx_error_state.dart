@@ -19,7 +19,12 @@ class MxErrorState extends StatelessWidget {
     this.retryLabel,
     this.onRetry,
     super.key,
-  });
+  }) : assert(
+         (retryLabel == null) == (onRetry == null),
+         'Retry needs both a label and a callback. Half of the pair is dropped '
+         'silently by the build below, which leaves an error the user can read '
+         'and cannot act on — the worst of the two states this widget has.',
+       );
 
   /// Already-localized, and already free of technical detail.
   final String title;
