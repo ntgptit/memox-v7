@@ -4,11 +4,11 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/state/retry_policy.dart';
 import '../../../../core/time/clock_provider.dart';
-import '../../domain/models/root_deck_list_snapshot_model.dart';
+import '../../domain/models/deck_list_snapshot_model.dart';
 import '../providers/deck_use_case_provider.dart';
 import 'deck_list_now_controller.dart';
 
-part 'root_deck_list_controller.g.dart';
+part 'deck_list_controller.g.dart';
 
 /// The longest a due-boundary timer may wait before it re-measures anyway.
 ///
@@ -20,62 +20,44 @@ part 'root_deck_list_controller.g.dart';
 /// channel, so the arithmetic has to be safe there.
 ///
 /// A day is far inside that limit and far past any real foreground session, so in
-/// practice the ceiling is never what fires. If it ever does, the effect is one
-/// extra query after a day of the screen being continuously open.
+/// practice the ceiling is never what fires.
 const Duration kMaxDueBoundaryDelay = Duration(days: 1);
 
-/// Every root deck with its aggregate progress, and a refresh scheduled for the
-/// moment that progress expires (UC-06).
+/// One level of the deck tree, with a refresh scheduled for the moment its counts
+/// expire (UC-06, UC-08).
 ///
-/// One repository stream, one SQL statement. The counts are not computed here and
-/// must not be: deriving them per row in Dart is the N+1 UC-06 names, and it would
-/// also make the number disagree with the session query it is supposed to predict.
+/// **`family` on the parent id, and that is the whole unification.** The root list
+/// is this notifier with `null`; the inside of a deck is the same notifier with an
+/// id. There were two — `RootDeckList` and `DeckDetail` — and they answered the
+/// same question with different amounts of information, which is why the two
+/// screens looked different. One notifier cannot drift from itself.
+///
+/// The family also means opening a second deck does not disturb the first, which
+/// matters because the shell keeps the branch alive behind a pushed route.
 ///
 /// **The timer, and why it is one timer and not a schedule.** Each emission
-/// carries `nextDueAt` — the earliest instant at which some card becomes due, from
-/// the same statement as the counts. A single one-shot timer is armed for that
-/// instant; when it fires it moves [deckListNowProvider], this notifier rebuilds,
-/// the query runs at the new instant, and the next emission arms the next timer.
-/// So the wake-ups follow the data instead of a fixed interval, there is never
-/// more than one pending, and a screen with nothing scheduled to come due has none
-/// at all.
-///
-/// **The boundary that has already passed.** A snapshot is read at one `now` and
-/// processed a few instants later. If the clock crosses `nextDueAt` in that gap —
-/// `delay <= 0` — a future timer would be armed for a moment already gone, so
-/// instead the notifier refreshes *immediately*: it re-opens the query at the new
-/// `now`, where the card that just came due is finally counted. Without this the
-/// count could sit stale until the next resume or unrelated rebuild.
-///
-/// It still cannot loop. A healthy repository answers the re-opened query
-/// (`due_at > now`) with a *later* boundary or none, so the immediate refresh
-/// fires at most once per real crossing. The one degenerate case — a repository
-/// that keeps re-emitting the *same* past boundary regardless of `now` — is held
-/// by [_immediateRefreshBoundary], which refuses to arm a second refresh for a
-/// boundary it has already chased.
+/// carries `nextDueAt` — the earliest instant at which some card in view becomes
+/// due, from the same statement as the counts. A single one-shot timer is armed
+/// for that instant; when it fires it moves [deckListNowProvider], every level
+/// rebuilds, and the next emission arms the next timer. So the wake-ups follow the
+/// data instead of a fixed interval, there is never more than one pending per
+/// level, and a level with nothing scheduled to come due has none at all.
 ///
 /// The timer is armed in `listenSelf` rather than inside the stream's transform,
 /// because arming it is a side effect and a `map` is not where side effects
 /// belong. It is cancelled by an `onDispose` registered in the same build, which
 /// Riverpod runs both on disposal *and* before a rebuild — that is what keeps a
 /// rebuild from leaving the previous timer pending. Nothing here is global: this
-/// notifier is `autoDispose`, so leaving the screen cancels the timer with it.
-///
-/// **A notifier and not a function provider**, only because `listenSelf` is a
-/// notifier method: a function provider receives a plain `Ref`, which has no way
-/// to observe its own output. It exposes `build` and nothing else — there is no
-/// command here.
+/// notifier is `autoDispose`, so leaving a level cancels its timer with it.
 ///
 /// Automatic retry is off — see `noAutomaticRetry`: while Riverpod retries, the
 /// state is `AsyncLoading`, so a failed local read would spin instead of showing
 /// its error state.
 @Riverpod(retry: noAutomaticRetry)
-class RootDeckList extends _$RootDeckList {
-  /// At most one pending wake-up, ever. Held on the notifier rather than in the
-  /// build closure so cancelling it does not depend on which closure won a race.
-  /// Carries either the future-boundary timer or the one-shot immediate refresh —
-  /// they never coexist, so one field and one [_cancelBoundary] cover both, and
-  /// the `onDispose` that cancels it cancels whichever is armed.
+class DeckList extends _$DeckList {
+  /// At most one pending wake-up per level, ever. Held on the notifier rather
+  /// than in the build closure so cancelling it does not depend on which closure
+  /// won a race.
   Timer? _boundaryTimer;
 
   /// The past-or-equal boundary an immediate refresh has already been armed for,
@@ -87,19 +69,20 @@ class RootDeckList extends _$RootDeckList {
   DateTime? _immediateRefreshBoundary;
 
   @override
-  Stream<RootDeckListSnapshot> build() {
+  Stream<DeckListSnapshot> build(String? parentDeckId) {
     ref.onDispose(_cancelBoundary);
     listenSelf(_armBoundary);
 
-    return ref.watch(watchRootDeckListUseCaseProvider)(
+    return ref.watch(watchDeckListUseCaseProvider)(
+      parentDeckId: parentDeckId,
       now: ref.watch(deckListNowProvider),
     );
   }
 
   /// Re-arms the wake-up from the emission that just landed.
   void _armBoundary(
-    AsyncValue<RootDeckListSnapshot>? _,
-    AsyncValue<RootDeckListSnapshot> next,
+    AsyncValue<DeckListSnapshot>? _,
+    AsyncValue<DeckListSnapshot> next,
   ) {
     // Cancel first, unconditionally. An emission that carries no boundary must
     // also clear the timer armed for the previous one — otherwise deleting the
@@ -131,9 +114,9 @@ class RootDeckList extends _$RootDeckList {
     // counted — instead of dropping the update until the next resume.
     //
     // Guarded so it cannot spin: recorded once per boundary, and refused for a
-    // boundary already chased. A healthy repository advances past `nextDueAt` on
-    // the reopened read, so this fires once; only a repository stuck on the same
-    // past boundary would try again, and that is what the guard stops.
+    // boundary already chased. A healthy repository answers the re-opened query
+    // (`due_at > now`) with a later boundary or none, so this fires at most once
+    // per real crossing.
     if (_immediateRefreshBoundary == nextDueAt) return;
     _immediateRefreshBoundary = nextDueAt;
     _boundaryTimer = Timer(

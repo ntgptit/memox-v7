@@ -11,12 +11,12 @@ import 'package:memox/app/router/app_router.dart';
 import 'package:memox/app/router/route_paths.dart';
 import 'package:memox/app/shell/app_navigation_shell.dart';
 import 'package:memox/core/error/failure.dart';
-import 'package:memox/features/deck/domain/models/root_deck_list_snapshot_model.dart';
-import 'package:memox/features/deck/domain/models/root_deck_summary_model.dart';
+import 'package:memox/features/deck/domain/models/deck_list_snapshot_model.dart';
+import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
-import 'package:memox/shared/widgets/mx_list_tile.dart';
+import 'package:memox/features/deck/presentation/widgets/deck_tile_widget.dart';
 import 'package:memox/shared/widgets/mx_loading_state.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 
@@ -64,7 +64,7 @@ void main() {
     await tester.pump();
   }
 
-  List<RootDeckSummary> manySummaries() => <RootDeckSummary>[
+  List<DeckSummary> manySummaries() => <DeckSummary>[
     for (var i = 0; i < 30; i++)
       fakeSummary(id: 'deck-$i', name: 'Deck number $i'),
   ];
@@ -92,7 +92,7 @@ void main() {
         FakeDeckRepository.withSummaries(manySummaries()),
       );
 
-      expect(find.byType(MxListTile), findsWidgets);
+      expect(find.byType(DeckTileWidget), findsWidgets);
       expect(find.byType(MxNavigationBar), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
@@ -157,9 +157,16 @@ void main() {
       await tester.pumpAndSettle();
 
       final bar = tester.getRect(find.byType(MxNavigationBar));
-      final lastRow = tester.getRect(find.byType(MxListTile).last);
+      final lastRow = tester.getRect(find.byType(DeckTileWidget).last);
 
       expect(lastRow.bottom, lessThanOrEqualTo(bar.top));
+
+      // And clear of the create action, which floats *over* the list rather than
+      // displacing it. The list's own bottom inset is what buys this; the shell
+      // reserves nothing. Without it the last deck is unreachable — visible, and
+      // covered by a button on top of it.
+      final fab = tester.getRect(find.byType(FloatingActionButton));
+      expect(lastRow.bottom, lessThanOrEqualTo(fab.top));
       expect(tester.takeException(), isNull);
     });
 
@@ -246,22 +253,22 @@ void main() {
     testWidgets('a later emission still updates the list under the bar', (
       tester,
     ) async {
-      final controller = StreamController<RootDeckListSnapshot>();
+      final controller = StreamController<DeckListSnapshot>();
       addTearDown(controller.close);
 
       await pumpShell(
         tester,
-        FakeDeckRepository(summaries: () => controller.stream),
+        FakeDeckRepository(deckList: (_) => controller.stream),
       );
 
-      controller.add(fakeListSnapshot(const <RootDeckSummary>[]));
+      controller.add(fakeListSnapshot(const <DeckSummary>[]));
       await tester.pump();
       expect(find.byType(MxEmptyState), findsOneWidget);
 
       controller.add(fakeListSnapshot(manySummaries()));
       await tester.pump();
 
-      expect(find.byType(MxListTile), findsWidgets);
+      expect(find.byType(DeckTileWidget), findsWidgets);
       expect(find.byType(MxNavigationBar), findsOneWidget);
       expect(tester.takeException(), isNull);
     });

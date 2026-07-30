@@ -15,6 +15,7 @@ class MxContentShell extends StatelessWidget {
     this.actions,
     this.padding,
     this.isScrollable = false,
+    this.floatingActionButton,
     super.key,
   });
 
@@ -49,12 +50,26 @@ class MxContentShell extends StatelessWidget {
   /// every earlier size test.
   final bool isScrollable;
 
+  /// The screen's primary create action, if it has one.
+  ///
+  /// Passed to the `Scaffold` rather than stacked into [body] by the caller: the
+  /// Scaffold is what keeps a floating action clear of the system gesture inset
+  /// and of the navigation bar this shell sits inside. A screen positioning its
+  /// own would have to re-derive both, and would get them wrong on the first
+  /// device with a different inset.
+  ///
+  /// **It reserves no space.** A floating action overlaps content by definition,
+  /// so a scrolling [body] still has to end with enough bottom padding for its
+  /// last item to clear the button.
+  final Widget? floatingActionButton;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: title == null
           ? null
           : AppBar(title: Text(title!), actions: actions),
+      floatingActionButton: floatingActionButton,
       body: SafeArea(child: _buildBody(context)),
     );
   }

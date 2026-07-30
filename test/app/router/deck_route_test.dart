@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -7,11 +8,9 @@ import 'package:memox/app/config/env_config_provider.dart';
 import 'package:memox/features/deck/di/deck_repository_provider.dart';
 import 'package:memox/app/router/app_router.dart';
 import 'package:memox/core/navigation/route_names.dart';
-import 'package:memox/core/error/failure.dart';
-import 'package:memox/features/deck/domain/entities/deck_entity.dart';
-import 'package:memox/features/deck/domain/models/deck_detail_model.dart';
-import 'package:memox/features/deck/presentation/screens/deck_detail_screen.dart';
-import 'package:memox/features/deck/presentation/screens/root_deck_list_screen.dart';
+import 'package:memox/features/deck/domain/models/deck_list_snapshot_model.dart';
+import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
+import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 
@@ -68,15 +67,35 @@ void main() {
     return router;
   }
 
+  /// The deck list at a particular level.
+  ///
+  /// `find.byType` no longer separates the two screens — there is only one, and
+  /// the level is an argument. So the route tests ask the question they actually
+  /// mean: which level is on screen.
+  Finder levelFor(String? parentDeckId) => find.byWidgetPredicate(
+    (Widget widget) =>
+        widget is DeckListScreen && widget.parentDeckId == parentDeckId,
+  );
+
   group('the deck detail route', () {
     /// A repository that can serve one deck, so the nested route has something
     /// to render.
+    ///
+    /// The root level and the deck level come from the same builder, told apart
+    /// by the parent id — the same way the real repository tells them apart.
     FakeDeckRepository servingDeck() => FakeDeckRepository(
-      deckDetail: (String id) => Stream<DeckDetail>.value(
-        DeckDetail(
-          deck: fakeRootDeck(id: id, name: 'Japanese N5'),
-          childDecks: const <DeckEntity>[],
-        ),
+      deckList: (String? id) => Stream<DeckListSnapshot>.value(
+        id == null
+            ? const DeckListSnapshot(
+                parent: null,
+                decks: <DeckSummary>[],
+                nextDueAt: null,
+              )
+            : DeckListSnapshot(
+                parent: fakeRootDeck(id: id, name: 'Japanese N5'),
+                decks: const <DeckSummary>[],
+                nextDueAt: null,
+              ),
       ),
     );
 
@@ -87,7 +106,7 @@ void main() {
         repository: servingDeck(),
       );
 
-      expect(find.byType(DeckDetailScreen), findsOneWidget);
+      expect(levelFor('deck-1'), findsOneWidget);
       expect(find.text('Japanese N5'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
@@ -118,7 +137,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byType(DeckDetailScreen), findsOneWidget);
+      expect(levelFor('deck-9'), findsOneWidget);
       expect(
         router.routerDelegate.currentConfiguration.uri.path,
         '/decks/deck-9',
@@ -133,13 +152,13 @@ void main() {
         pathParameters: <String, String>{RoutePathParams.deckId: 'deck-1'},
       );
       await tester.pumpAndSettle();
-      expect(find.byType(DeckDetailScreen), findsOneWidget);
+      expect(levelFor('deck-1'), findsOneWidget);
 
       router.pop();
       await tester.pumpAndSettle();
 
-      expect(find.byType(RootDeckListScreen), findsOneWidget);
-      expect(find.byType(DeckDetailScreen), findsNothing);
+      expect(levelFor(null), findsOneWidget);
+      expect(levelFor('deck-1'), findsNothing);
     });
 
     testWidgets('switching to Review and back keeps the deck open', (
@@ -159,7 +178,7 @@ void main() {
       await tester.tap(tab(english.navigationDecksLabel));
       await tester.pumpAndSettle();
 
-      expect(find.byType(DeckDetailScreen), findsOneWidget);
+      expect(levelFor('deck-1'), findsOneWidget);
     });
 
     testWidgets('a deck that no longer exists shows the not-found state', (
@@ -170,9 +189,7 @@ void main() {
       await pumpApp(
         tester,
         initialLocation: '/decks/gone',
-        repository: FakeDeckRepository.failing(
-          const NotFoundFailure(message: 'That deck no longer exists.'),
-        ),
+        repository: FakeDeckRepository.missingDeck(),
       );
 
       expect(find.text(english.deckDetailNotFoundTitle), findsOneWidget);

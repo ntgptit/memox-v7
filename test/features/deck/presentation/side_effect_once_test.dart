@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/features/deck/domain/models/root_deck_summary_model.dart';
-import 'package:memox/features/deck/presentation/screens/root_deck_list_screen.dart';
+import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
+import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 
 import 'support/deck_screen_harness.dart';
@@ -37,7 +37,7 @@ import 'support/fake_deck_repository.dart';
 void main() {
   final english = AppLocalizationsEn();
 
-  List<RootDeckSummary> oneSummary() => <RootDeckSummary>[
+  List<DeckSummary> oneSummary() => <DeckSummary>[
     fakeSummary(id: '1', name: 'Japanese N5', totalCardCount: 120),
   ];
 
@@ -81,7 +81,7 @@ void main() {
       // The sheet is gone…
       expect(find.byType(TextField), findsNothing);
       // …and the screen it opened over is not. A second pop would have taken it.
-      expect(find.byType(RootDeckListScreen), findsOneWidget);
+      expect(find.byType(DeckListScreen), findsOneWidget);
       // And the write still happened exactly once, which rules out the other
       // way this could pass: the form never submitting at all.
       expect(repository.createdRootDecks, hasLength(1));
@@ -106,7 +106,7 @@ void main() {
       await pumpThroughClose(tester);
 
       expect(find.byType(TextField), findsNothing);
-      expect(find.byType(RootDeckListScreen), findsOneWidget);
+      expect(find.byType(DeckListScreen), findsOneWidget);
       expect(repository.renames, hasLength(1));
     });
   });
@@ -129,7 +129,7 @@ void main() {
       await pumpThroughClose(tester);
 
       expect(repository.deletes, hasLength(1));
-      expect(find.byType(RootDeckListScreen), findsOneWidget);
+      expect(find.byType(DeckListScreen), findsOneWidget);
     });
   });
 }
