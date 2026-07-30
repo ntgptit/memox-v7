@@ -1,10 +1,12 @@
 import '../entities/deck_entity.dart';
 import '../repositories/deck_repository.dart';
 
-/// A deck and its direct children (UC-06 step 4, UC-08).
+/// A deck's direct children (UC-06 step 4, UC-08).
 ///
-/// Two calls rather than one composed stream, because the screen needs them at
-/// different times: the deck to title the shell, the children to fill it.
+/// One interaction, one method. Reading the deck itself is
+/// [GetDeckByIdUseCase] — they were one class until the method count made the
+/// point, and a use case with two queries is the same shape as a notifier with
+/// eight, only smaller.
 class WatchDeckChildrenUseCase {
   const WatchDeckChildrenUseCase(this._repository);
 
@@ -12,6 +14,4 @@ class WatchDeckChildrenUseCase {
 
   Stream<List<DeckEntity>> call(String parentDeckId) =>
       _repository.watchChildDecks(parentDeckId);
-
-  Future<DeckEntity> deck(String deckId) => _repository.getDeckById(deckId);
 }

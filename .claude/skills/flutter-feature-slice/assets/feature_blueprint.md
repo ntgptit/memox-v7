@@ -119,6 +119,42 @@ to that rule would buy nothing and cost the rule its teeth —
 `test/app/provider_convention_test.dart` enforces it and caught this while the
 layer was being added.
 
+### Command and query, with numbers instead of judgement
+
+The failure mode is a `DeckNotifier` that grows `loadDecks`, `createDeck`,
+`deleteDeck`, `selectDeck`, `searchDeck`, `navigateToDeck`, `showError`. Each
+addition is individually reasonable and it never arrives as one commit, so a review
+will not catch it. A method count will.
+
+`test/app/command_query_separation_test.dart` holds four counts:
+
+| Check | Rule |
+|---|---|
+| a use case | exactly **one** public method — one interaction |
+| a command controller | only `build`, `submit`, `reset` |
+| an input-state notifier | one value and at most one mutator |
+| any controller or use case | no `select*`, `search*`, `navigateTo*`, `show{Error,Snack}*` |
+
+A command controller is identified by what its state **is** — `build` returns a
+submit state — rather than by where the file sits. That matters because
+`DeckListNow` is a notifier under `controllers/` that is *not* a command: it holds
+the instant the due counts are measured against. It is bounded by the third check
+rather than exempted from the second, so "the thing that holds the odds and ends"
+cannot become the God Notifier by a different route.
+
+The first check found a live violation on the run that introduced it:
+`WatchDeckChildrenUseCase` held the children stream *and* a deck read. Two queries
+in one class is the same shape as eight methods in one notifier, only smaller. It
+was split into `GetDeckByIdUseCase`, and `deckDetail` composes the two —
+composition is what a controller is for.
+
+**All four were fault-injected, and two were vacuous when written.** One had
+`replaceAll(r'', '/')` where an escaped backslash was intended, so every path became
+garbage and `contains('/controllers/')` was false for every file: the loop body
+never ran and the check passed by looking at nothing. Both bugs were invisible while
+the codebase was clean, which is the whole argument for injecting a failure before
+trusting a green check.
+
 ## What `core/` and `shared/` already provide — do not re-create
 
 | Need | Use |
