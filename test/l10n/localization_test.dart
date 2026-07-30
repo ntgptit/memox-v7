@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/app/app.dart';
 import 'package:memox/app/config/env_config.dart';
 import 'package:memox/app/config/env_config_provider.dart';
-import 'package:memox/app/di/deck_repository_provider.dart';
+import 'package:memox/features/deck/di/deck_repository_provider.dart';
 import 'package:memox/l10n/generated/app_localizations.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/l10n/generated/app_localizations_vi.dart';

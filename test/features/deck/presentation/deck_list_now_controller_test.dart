@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/app/config/env_config.dart';
 import 'package:memox/app/config/env_config_provider.dart';
-import 'package:memox/app/di/deck_repository_provider.dart';
+import 'package:memox/features/deck/di/deck_repository_provider.dart';
 import 'package:memox/core/time/clock_provider.dart';
 import 'package:memox/features/deck/presentation/controllers/deck_list_now_controller.dart';
 

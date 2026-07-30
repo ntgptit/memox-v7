@@ -118,6 +118,27 @@ while IFS= read -r file; do
 done < <(dart_files | grep -E '^lib/(core|shared)/')
 
 # ---------------------------------------------------------------------------
+# 4b. features/ must not depend on app/. The composition root may see a feature;
+#     a feature may not see the shell it happens to be mounted in.
+#
+#     Both halves of this were live. `features/deck/presentation/providers/`
+#     imported `app/di/deck_repository_provider.dart`, so the feature's wiring was
+#     partly outside the feature — cloning it meant editing `app/` too, and
+#     forgetting to would fail inside the *new* feature rather than at the root.
+#     Two screens imported `app/router/route_names.dart` for constants the router
+#     and the screens both speak; those moved to `core/navigation/`, which is what
+#     `core/` is for.
+# ---------------------------------------------------------------------------
+while IFS= read -r file; do
+  [[ -z "$file" ]] && continue
+  while IFS=: read -r lineno line; do
+    [[ -z "$lineno" ]] && continue
+    report error "a feature depends on app/" "$file:$lineno" \
+      "app/ composes features, never the reverse. A provider the feature needs belongs in its own di/, declared as the domain contract and bound at the root; a constant both sides speak belongs in core/."
+  done < <(grep -nE "^\s*import\s+'([^']*/)?(\.\./)*app/" "$file" 2>/dev/null)
+done < <(dart_files | grep '^lib/features/')
+
+# ---------------------------------------------------------------------------
 # 5. Swallowed exceptions. `catch (_) {}` reports a failure as "nothing
 #    happened", which is the hardest defect class to diagnose in the field.
 # ---------------------------------------------------------------------------
@@ -190,6 +211,11 @@ check_suffix '/data/models/'              '_model.dart'
 # guard's widget scope exempts files by that suffix, so the distinction decides
 # which rules apply.
 check_suffix '/presentation/providers/'   '_provider.dart'
+# A feature's dependency seam: one provider per contract the feature needs,
+# declared as the domain type and bound at the composition root. It is not
+# `presentation/` because `provider_convention_test.dart` forbids `keepAlive`
+# there, and a repository handle has to be keepAlive.
+check_suffix '/di/'                       '_provider.dart' '_bindings.dart'
 
 # ---------------------------------------------------------------------------
 # 8. Oversized files. Not a hard failure — a legitimately long generated-ish

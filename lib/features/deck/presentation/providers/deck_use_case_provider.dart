@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../app/di/deck_repository_provider.dart';
+import '../../di/deck_repository_provider.dart';
 import '../../domain/usecases/create_root_deck_use_case.dart';
 import '../../domain/usecases/create_sub_deck_use_case.dart';
 import '../../domain/usecases/delete_deck_use_case.dart';
