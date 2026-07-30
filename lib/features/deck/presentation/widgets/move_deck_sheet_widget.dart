@@ -170,7 +170,7 @@ class _TargetRow extends StatelessWidget {
         title: target.deck.name,
         subtitle: rejection == null
             ? null
-            : context.deckMoveRejection(rejection),
+            : context.deckMoveRejectionText(rejection),
         leading: const Icon(Icons.folder_outlined),
         isEnabled: isEnabled,
         onTap: onTap,

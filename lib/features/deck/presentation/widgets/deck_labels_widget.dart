@@ -3,7 +3,8 @@ import 'package:flutter/widgets.dart';
 import '../../../../core/error/failure.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../domain/entities/deck_entity.dart';
-import '../../domain/models/deck_move_target_model.dart';
+import '../../domain/failures/deck_conflict_failure.dart';
+import '../../domain/failures/deck_move_failure.dart';
 import '../../domain/models/scheduler_type_model.dart';
 import '../states/deck_submit_state.dart';
 
@@ -55,14 +56,42 @@ extension DeckLabels on BuildContext {
   };
 
   /// Why a move target cannot be chosen (UC-09 step 2).
-  String deckMoveRejection(DeckMoveRejection rejection) => switch (rejection) {
-    DeckMoveRejection.itself => l10n.deckMoveRejectItself,
-    DeckMoveRejection.ownDescendant => l10n.deckMoveRejectDescendant,
-    DeckMoveRejection.alreadyParent => l10n.deckMoveRejectAlreadyParent,
-    DeckMoveRejection.holdsCards => l10n.deckMoveRejectHoldsCards,
-    DeckMoveRejection.differentScheduler => l10n.deckMoveRejectScheduler,
-    DeckMoveRejection.differentGeneration => l10n.deckMoveRejectGeneration,
-    DeckMoveRejection.tooDeep => l10n.deckMoveRejectTooDeep,
+  String deckMoveRejectionText(DeckMoveRejection rejection) =>
+      switch (rejection) {
+        // Unreachable from the picker, which is not offered for a root. Present
+        // because the rule has one home and every value here must have text.
+        DeckMoveRejection.sourceIsRoot => l10n.deckMoveRejectRootDeck,
+        DeckMoveRejection.itself => l10n.deckMoveRejectItself,
+        DeckMoveRejection.ownDescendant => l10n.deckMoveRejectDescendant,
+        DeckMoveRejection.alreadyParent => l10n.deckMoveRejectAlreadyParent,
+        DeckMoveRejection.holdsCards => l10n.deckMoveRejectHoldsCards,
+        DeckMoveRejection.differentScheduler => l10n.deckMoveRejectScheduler,
+        DeckMoveRejection.differentGeneration => l10n.deckMoveRejectGeneration,
+        DeckMoveRejection.tooDeep => l10n.deckMoveRejectTooDeep,
+      };
+
+  /// Why a deck write was refused, per reason.
+  ///
+  /// Exhaustive over [DeckConflictReason], so a ninth refusal added in the domain
+  /// fails to compile here until it has copy. That is the whole reason the
+  /// repository throws a reason instead of a sentence: `Failure.message` is a
+  /// sanitized diagnostic the UI must not render, so before this existed all
+  /// eight of these arrived as one line.
+  String deckConflict(DeckConflictReason reason) => switch (reason) {
+    DeckConflictReason.parentHoldsCards => l10n.deckConflictParentHoldsCards,
+    DeckConflictReason.parentAtMaxDepth => l10n.deckConflictParentAtMaxDepth(
+      DeckEntity.maxTreeDepth,
+    ),
+    DeckConflictReason.rootContentTypeFixed =>
+      l10n.deckConflictRootContentTypeFixed,
+    DeckConflictReason.deckStillHasCards => l10n.deckConflictStillHasCards,
+    DeckConflictReason.deckStillHasSubDecks =>
+      l10n.deckConflictStillHasSubDecks,
+    DeckConflictReason.unknownContentType =>
+      l10n.deckConflictUnknownContentType,
+    DeckConflictReason.deckDepthUnknowable => l10n.deckConflictDepthUnknowable,
+    DeckConflictReason.subtreeHeightUnknowable =>
+      l10n.deckConflictHeightUnknowable,
   };
 
   /// A failure, as copy the user can act on.
@@ -82,6 +111,19 @@ extension DeckLabels on BuildContext {
   String deckWriteFailure(Failure failure) => switch (failure) {
     // Distinct copy, because the user's next action differs.
     NotFoundFailure() => l10n.deckGoneMessage,
+
+    // A conflict carries *why* as an enum, and the two enums that can appear
+    // here each have their own exhaustive switch. Matching on the reason's type
+    // is what turned fifteen refusals sharing one sentence into fifteen with
+    // their own — the reason used to be an English string inside `message`,
+    // which the UI is forbidden to render.
+    ConflictFailure(reason: final DeckMoveRejection rejection) =>
+      deckMoveRejectionText(rejection),
+    ConflictFailure(reason: final DeckConflictReason reason) => deckConflict(
+      reason,
+    ),
+    // A conflict with no reason: a duplicate key mapped from SQLite, where the
+    // only true answer is that something already exists.
     ConflictFailure() => l10n.deckConflictMessage,
 
     // Reachable, and there is nothing more useful to say: the write did not

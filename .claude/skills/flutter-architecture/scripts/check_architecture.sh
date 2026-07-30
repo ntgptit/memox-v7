@@ -164,6 +164,7 @@ check_suffix '/domain/entities/'          '_entity.dart'
 check_suffix '/domain/repositories/'      '_repository.dart'
 check_suffix '/domain/usecases/'          '_use_case.dart'
 check_suffix '/domain/models/'            '_model.dart'
+check_suffix '/domain/failures/'          '_failure.dart'
 check_suffix '/data/mappers/'             '_mapper.dart'
 check_suffix '/data/repositories/'        '_repository_impl.dart'
 

@@ -18,59 +18,50 @@ mixin _MoveDeckOperation implements DeckRepository {
     required String targetParentDeckId,
   }) => _guard(
     () => _dao.runInTransaction(() async {
-      // Validation order follows UC-09 step 2 exactly; every check runs
-      // BEFORE the first mutation, so a refused move changes nothing —
-      // no parent pointer, no root pointer, no content type, no timestamp.
+      // The rule set is UC-09 step 2 and it lives in the domain, in
+      // `deckMoveRejection`. This half only gathers the facts it needs — from
+      // SQLite, one at a time, inside the transaction so a refused move changes
+      // nothing: no parent pointer, no root pointer, no content type, no
+      // timestamp.
+      //
+      // Until M4.10 these eight rules were written out here as eight
+      // `ConflictFailure(message: '<sentence>')` throws, with no import of the
+      // domain function that already expressed them. Two spellings of one rule
+      // set, free to drift, and the reasons arrived at the user as one sentence
+      // because a message is not something the UI may render.
       final source = await _requireDeckRow(deckId);
       final target = await _requireDeckRow(targetParentDeckId);
-      if (source.parentDeckId == null) {
-        // Moving a root would put scheduler columns on a non-root (BR-06).
-        // Demoting a root is a new decision, not a move — same reasoning as
-        // UC-09 A2 in the other direction.
-        throw const ConflictFailure(
-          message: 'A top-level deck cannot be moved into another deck.',
-        );
-      }
-      if (target.id == source.id) {
-        throw const ConflictFailure(
-          message: 'A deck cannot be moved into itself.',
-        );
-      }
+      final sourceEntity = deckEntityFromRow(source);
+      final targetEntity = deckEntityFromRow(target);
       final subtreeIds = await _dao.subtreeDeckIds(source.id);
-      if (subtreeIds.contains(target.id)) {
-        // The cycle guard (BR-69, BR-70).
-        throw const ConflictFailure(
-          message: 'A deck cannot be moved into one of its own sub-decks.',
-        );
-      }
       final targetType = _knownContentType(target);
-      if (targetType == DeckContentType.card) {
-        throw const ConflictFailure(
-          message: 'The target deck holds cards, so it cannot hold decks.',
-        );
-      }
-      final sourceRoot = await _requireDeckRow(source.rootDeckId);
-      final targetRoot = await _requireDeckRow(target.rootDeckId);
-      if (sourceRoot.schedulerType != targetRoot.schedulerType) {
-        // Never silently converted (BR-73, BR-74).
-        throw const ConflictFailure(
-          message: 'The target uses a different study mode.',
-        );
-      }
-      if (sourceRoot.schedulerGeneration != targetRoot.schedulerGeneration) {
-        throw const ConflictFailure(
-          message: 'The target is on a different learning cycle.',
-        );
-      }
-      // BR-55 — the deepest resulting level is the target's level plus the
-      // subtree's height (source itself = height 1).
-      final targetDepth = await _requireDeckDepth(target.id);
-      final subtreeHeight = await _requireSubtreeHeight(source.id);
-      if (targetDepth + subtreeHeight > DeckEntity.maxTreeDepth) {
-        throw const ConflictFailure(
-          message:
-              'Moving here would nest decks deeper than the allowed '
-              '${DeckEntity.maxTreeDepth} levels.',
+
+      // Each root read once. The entity mapper is what turns the stored
+      // scheduler string into the enum the rule compares, so the rule never
+      // sees a database value.
+      final sourceRoot = deckEntityFromRow(
+        await _requireDeckRow(source.rootDeckId),
+      );
+      final targetRoot = deckEntityFromRow(
+        await _requireDeckRow(target.rootDeckId),
+      );
+
+      final rejection = deckMoveRejection(
+        source: sourceEntity,
+        target: targetEntity,
+        isTargetInSourceSubtree: subtreeIds.contains(target.id),
+        sourceRootScheduler: sourceRoot.schedulerType,
+        sourceRootGeneration: sourceRoot.schedulerGeneration,
+        targetRootScheduler: targetRoot.schedulerType,
+        targetRootGeneration: targetRoot.schedulerGeneration,
+        targetDepth: await _requireDeckDepth(target.id),
+        sourceSubtreeHeight: await _requireSubtreeHeight(source.id),
+      );
+      if (rejection != null) {
+        throw ConflictFailure(
+          // The message is for the log; the reason is what the screen reads.
+          message: 'The move was refused by UC-09 rule ${rejection.name}.',
+          reason: rejection,
         );
       }
 

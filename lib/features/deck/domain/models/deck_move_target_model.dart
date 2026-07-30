@@ -1,39 +1,9 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import 'deck_content_type_model.dart';
 import '../entities/deck_entity.dart';
+import '../failures/deck_move_failure.dart';
 
 part 'deck_move_target_model.freezed.dart';
-
-/// Why a deck cannot receive a move (UC-09 step 2).
-///
-/// An enum rather than a message, because the copy is the screen's job and the
-/// reason is the domain's. It carries the *first* rule that fails, in the order
-/// UC-09 lists them, so the explanation the user reads is the one the
-/// repository would also produce.
-enum DeckMoveRejection {
-  /// The target is the deck being moved (BR-70).
-  itself,
-
-  /// The target sits inside the deck being moved — the cycle guard (BR-69,
-  /// BR-70).
-  ownDescendant,
-
-  /// The target already holds cards, so it cannot hold decks (BR-64).
-  holdsCards,
-
-  /// The target's root uses a different scheduler (BR-73, BR-74).
-  differentScheduler,
-
-  /// The target's root is on a different learning cycle (BR-74).
-  differentGeneration,
-
-  /// The move would nest deeper than [DeckEntity.maxTreeDepth] (BR-55).
-  tooDeep,
-
-  /// The target is already this deck's parent, so the move is a no-op.
-  alreadyParent,
-}
 
 /// One candidate in the move picker: a deck, how deep it sits, and whether the
 /// move is allowed.
@@ -122,6 +92,11 @@ List<DeckMoveTarget> buildDeckMoveTargets({
   return List<DeckMoveTarget>.unmodifiable(targets);
 }
 
+/// Gathers the facts UC-09 needs from the loaded snapshot, then defers the
+/// decision to [deckMoveRejection].
+///
+/// The split is the point: this half knows how to read a tree held in memory,
+/// and the rule itself lives in one place that `moveDeck` also calls.
 DeckMoveRejection? _rejectionFor({
   required DeckEntity source,
   required DeckEntity? sourceRoot,
@@ -130,34 +105,19 @@ DeckMoveRejection? _rejectionFor({
   required Set<String> subtreeIds,
   required int subtreeHeight,
 }) {
-  // Order matches UC-09 step 2. The first failure is the one reported, so the
-  // reason a user sees is the most specific one that applies.
-  if (target.id == source.id) return DeckMoveRejection.itself;
-  if (subtreeIds.contains(target.id)) return DeckMoveRejection.ownDescendant;
-  if (target.id == source.parentDeckId) return DeckMoveRejection.alreadyParent;
-  if (target.contentType == DeckContentType.card) {
-    return DeckMoveRejection.holdsCards;
-  }
-
   final targetRoot = byId[target.rootDeckId];
-  if (sourceRoot == null || targetRoot == null) {
-    // A root that is not in the list means the snapshot is inconsistent. Refuse
-    // rather than offer a move whose scheduler pairing cannot be checked.
-    return DeckMoveRejection.differentScheduler;
-  }
-  if (sourceRoot.schedulerType != targetRoot.schedulerType) {
-    return DeckMoveRejection.differentScheduler;
-  }
-  if (sourceRoot.schedulerGeneration != targetRoot.schedulerGeneration) {
-    return DeckMoveRejection.differentGeneration;
-  }
 
-  final targetDepth = _depthOf(target, byId);
-  if (targetDepth + subtreeHeight > DeckEntity.maxTreeDepth) {
-    return DeckMoveRejection.tooDeep;
-  }
-
-  return null;
+  return deckMoveRejection(
+    source: source,
+    target: target,
+    isTargetInSourceSubtree: subtreeIds.contains(target.id),
+    sourceRootScheduler: sourceRoot?.schedulerType,
+    sourceRootGeneration: sourceRoot?.schedulerGeneration,
+    targetRootScheduler: targetRoot?.schedulerType,
+    targetRootGeneration: targetRoot?.schedulerGeneration,
+    targetDepth: _depthOf(target, byId),
+    sourceSubtreeHeight: subtreeHeight,
+  );
 }
 
 /// Level with the root as 1. Bounded so corrupt data cannot loop forever: a

@@ -7,6 +7,8 @@ import '../../../../core/error/failure.dart';
 import '../../domain/models/deck_content_type_model.dart';
 import '../../domain/models/deck_deletion_impact_model.dart';
 import '../../domain/entities/deck_entity.dart';
+import '../../domain/failures/deck_conflict_failure.dart';
+import '../../domain/failures/deck_move_failure.dart';
 import '../../domain/repositories/deck_repository.dart';
 import '../../domain/models/root_deck_summary_model.dart';
 import '../../domain/models/scheduler_type_model.dart';
@@ -123,7 +125,8 @@ final class DeckRepositoryImpl
       final parentType = _knownContentType(parent);
       if (parentType == DeckContentType.card) {
         throw const ConflictFailure(
-          message: 'This deck holds cards, so it cannot hold decks.',
+          message: 'Refused: the parent already holds cards.',
+          reason: DeckConflictReason.parentHoldsCards,
         );
       }
       // BR-55 — refused BEFORE the content lock below, so a rejected create
@@ -131,9 +134,8 @@ final class DeckRepositoryImpl
       final parentDepth = await _requireDeckDepth(parent.id);
       if (parentDepth >= DeckEntity.maxTreeDepth) {
         throw const ConflictFailure(
-          message:
-              'This deck already sits at the deepest allowed level '
-              '(${DeckEntity.maxTreeDepth}).',
+          message: 'Refused: the parent is already at the depth limit.',
+          reason: DeckConflictReason.parentAtMaxDepth,
         );
       }
 
@@ -210,17 +212,20 @@ final class DeckRepositoryImpl
       if (deck.parentDeckId == null) {
         // A root is 'deck' forever — that is what makes BR-58 checkable.
         throw const ConflictFailure(
-          message: 'A top-level deck always holds decks.',
+          message: 'Refused: the content type of a root deck is invariant.',
+          reason: DeckConflictReason.rootContentTypeFixed,
         );
       }
       if (await _dao.directCardCount(deckId) > 0) {
         throw const ConflictFailure(
-          message: 'The deck still has cards. Remove them first.',
+          message: 'Refused: the deck still holds cards.',
+          reason: DeckConflictReason.deckStillHasCards,
         );
       }
       if (await _dao.directChildDeckCount(deckId) > 0) {
         throw const ConflictFailure(
-          message: 'The deck still has decks inside it. Remove them first.',
+          message: 'Refused: the deck still holds sub-decks.',
+          reason: DeckConflictReason.deckStillHasSubDecks,
         );
       }
 
@@ -290,7 +295,9 @@ final class DeckRepositoryImpl
     final type = DeckContentType.fromDbValue(deck.contentType);
     if (type == DeckContentType.unknown) {
       throw const ConflictFailure(
-        message: 'This deck was made by a newer version of the app.',
+        message:
+            'Refused: stored content_type is not a value this build knows.',
+        reason: DeckConflictReason.unknownContentType,
       );
     }
 
@@ -311,7 +318,8 @@ final class DeckRepositoryImpl
     );
     if (probe == null || !probe.reachedRoot) {
       throw const ConflictFailure(
-        message: 'This deck sits deeper than the app supports.',
+        message: 'Refused: the deck depth probe did not reach a root.',
+        reason: DeckConflictReason.deckDepthUnknowable,
       );
     }
 
@@ -332,7 +340,8 @@ final class DeckRepositoryImpl
     );
     if (height == null || height >= maxWalk) {
       throw const ConflictFailure(
-        message: 'This deck holds more nested levels than the app supports.',
+        message: 'Refused: the subtree height probe hit its walk bound.',
+        reason: DeckConflictReason.subtreeHeightUnknowable,
       );
     }
 
