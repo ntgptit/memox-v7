@@ -53,6 +53,7 @@ when a call orchestrates more than one repository.
 | screen chrome, list row, buttons, inputs, sheets, dialogs, empty/error/loading | `shared/widgets/mx_*` |
 | the three `AsyncValue` cases, with the loading policy stated | `shared/widgets/mx_async_view.dart` — `MxAsyncView<T>` |
 | close-on-success vs stay-open-on-success | `core/state/submit_outcome.dart` — `SubmitDisposition` / `SubmitOutcome` |
+| one mutation's status, and the success policy | `core/state/submit_state.dart` — `SubmitState<P>`; a feature adds only its problem enum |
 | provider failures and state transitions in the log | `core/state/provider_observer.dart` — installed in `bootstrap` |
 | which SQL ran, and how long it took | `core/database/query_log_interceptor.dart` — debug builds only |
 | localized strings | `lib/l10n/*.arb` + `context.l10n` |
@@ -101,7 +102,8 @@ then has to destructure a failure to find out which field to mark. See
 `deck_submit_state.dart` for the shape:
 
 ```dart
-isSubmitting · <field problems> · Failure? failure · isDone   → canSubmit
+isSubmitting · Set<P> problems · Failure? failure · SubmitOutcome? outcome
+                                              → canSubmit · shouldClose · shouldClearDraft
 ```
 
 Every `submit` follows the same five steps, in this order:
@@ -110,21 +112,60 @@ Every `submit` follows the same five steps, in this order:
 2. validate locally against the domain rule, and return with a field problem set
 3. `state = const XSubmitState(isSubmitting: true);`
 4. `await` the repository; `if (!ref.mounted) return;` **before** touching state
-5. success → `isDone: true`; `on Failure` → map onto field or `failure`
+5. success → `outcome: disposition.outcome`; `on Failure` → map onto a problem or
+   `failure`. A failure sets **no outcome at all**, so neither success transition
+   fires and the input survives.
 
 Never clear the user's input on failure. The widget owns the text, so a failed
 write cannot destroy it — that is the point of keeping the controller out of it.
 
-A controller never holds a `BuildContext` and never navigates. It exposes
-`isDone` and the widget reacts via `ref.listen`, on the *transition* rather than
-the value, so a sheet closes once instead of on every rebuild.
+A controller never holds a `BuildContext` and never navigates. It reports an
+outcome and the widget reacts via `ref.listen` or `didUpdateWidget`, on the
+*transition* rather than the value, so a sheet closes once instead of on every
+rebuild.
 
 `autoDispose` (the generator default) for anything per-screen; `keepAlive` only
 for the database and the repositories.
 
-### The one thing that is duplicated, and the trade-off
+### The state class is shared; the five steps are not
 
-The five steps above appear once per operation — six times in Deck, about eight
+**`core/state/submit_state.dart` holds `SubmitState<P>`** — `isSubmitting`,
+`Set<P> problems`, `Failure? failure`, `SubmitOutcome? outcome`, and the three
+policy getters. A feature supplies only its own problem enum:
+
+```dart
+enum DeckFormProblem { nameEmpty, nameTooLong, schedulerMissing }
+
+typedef DeckSubmitState = SubmitState<DeckFormProblem>;
+
+extension DeckSubmitProblems on DeckSubmitState {
+  DeckFormProblem? get nameProblem => firstProblemOf(kDeckNameProblems);
+  bool get isSchedulerMissing =>
+      problems.contains(DeckFormProblem.schedulerMissing);
+}
+```
+
+The extension is what keeps the questions specific while the storage is shared: a
+widget still asks `state.nameProblem`, so **no widget changed** when this was
+extracted. `firstProblemOf` narrows the set to the values belonging to one input,
+which is the case a plain `problems.isNotEmpty` gets wrong — a form that failed
+only on the scheduler must leave the name field clean.
+
+`problems` is a `Set` because a form can fail in more than one place at once.
+Creating a root deck with a blank name and no scheduler chosen marks both; marking
+whichever check ran first sends the user round twice.
+
+**What the sharing actually buys is the three getters.** They are the success
+policy, and the policy has been wrong once: `canSubmit` was
+`!isSubmitting && !isDone`, which latched shut on any success and would have let an
+*add another* form accept exactly one entry. Copied per feature, that is a policy
+that can differ between two features for no visible reason.
+`test/core/state/submit_state_test.dart` asserts it at the level it is shared —
+including that the equality is by value, because a widget detects the success
+transition by comparing the old state with the new one, and identity equality on
+the `Set` would fire the side effect on every rebuild.
+
+**The five steps stay written out per operation.** Six times in Deck, about eight
 lines each. Three extractions were tried and rejected:
 
 - an extension on the generated base couples app code to riverpod's
@@ -134,11 +175,11 @@ lines each. Three extractions were tried and rejected:
 - a `BaseController` hides the `ref.mounted` check, which is the one line that
   must be visible.
 
-If the count grows past a second feature, generalise the **state class** rather
-than the runner: `SubmitState<P>` with `Set<P> fieldProblems`, and each feature
-supplying its own field enum. That keeps the visible steps and removes the
-duplicated type. It is a real refactor across every call site and every
-assertion, so it is worth doing once, deliberately — not halfway.
+One implementation detail worth copying rather than rediscovering: validate on the
+**inputs**, not on `problems.isNotEmpty`. The latter reads better and costs the
+type promotion — the compiler cannot see through a set that a nullable argument is
+non-null below, and the alternative is a `!` on the very value the rule exists to
+protect.
 
 ## Data layer
 

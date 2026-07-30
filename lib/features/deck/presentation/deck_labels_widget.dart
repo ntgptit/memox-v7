@@ -5,6 +5,7 @@ import '../../../l10n/l10n_extension.dart';
 import '../domain/deck_entity.dart';
 import '../domain/deck_move_target_model.dart';
 import '../domain/scheduler_type_model.dart';
+import 'deck_submit_state.dart';
 
 /// Where a domain value becomes something a person reads.
 ///
@@ -39,12 +40,18 @@ extension DeckLabels on BuildContext {
     SchedulerType.unknown => l10n.schedulerUnknownLabel,
   };
 
-  /// Inline copy for a name that breaks BR-01.
-  String deckNameError(DeckNameProblem problem) => switch (problem) {
-    DeckNameProblem.empty => l10n.deckNameEmptyError,
-    DeckNameProblem.tooLong => l10n.deckNameTooLongError(
+  /// Why the form refused the last attempt, per field.
+  ///
+  /// One accessor for every [DeckFormProblem] rather than one per input: the
+  /// problems now live in a single set, so the copy for them belongs in a single
+  /// exhaustive switch. Adding a fourth way for a deck form to be wrong fails to
+  /// compile here until it has text.
+  String deckFormError(DeckFormProblem problem) => switch (problem) {
+    DeckFormProblem.nameEmpty => l10n.deckNameEmptyError,
+    DeckFormProblem.nameTooLong => l10n.deckNameTooLongError(
       DeckEntity.maxNameLength,
     ),
+    DeckFormProblem.schedulerMissing => l10n.schedulerMissingError,
   };
 
   /// Why a move target cannot be chosen (UC-09 step 2).
@@ -58,13 +65,10 @@ extension DeckLabels on BuildContext {
     DeckMoveRejection.tooDeep => l10n.deckMoveRejectTooDeep,
   };
 
-  /// What to tell the user about a failed write.
+  /// A failure, as copy the user can act on.
   ///
   /// Maps the `Failure` *type*, never its message: `Failure.message` is written
-  /// for whoever reads a log, and can name a table or an exception. A
-  /// `ValidationFailure` is deliberately absent — those are rendered under the
-  /// field that caused them and never reach here.
-  /// A failure, as copy the user can act on.
+  /// for whoever reads a log, and can name a table or an exception.
   ///
   /// **Every subtype is listed and there is no `_` branch**, which is the whole
   /// reason `Failure` is sealed. This switch used to end in `_ =>

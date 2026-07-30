@@ -101,7 +101,7 @@ void main() {
 
       expect(
         container.read(createRootDeckControllerProvider).nameProblem,
-        DeckNameProblem.empty,
+        DeckFormProblem.nameEmpty,
       );
       expect(repository.createdRootDecks, isEmpty);
     });
@@ -119,7 +119,7 @@ void main() {
 
       expect(
         container.read(createRootDeckControllerProvider).nameProblem,
-        DeckNameProblem.tooLong,
+        DeckFormProblem.nameTooLong,
       );
       expect(repository.createdRootDecks, isEmpty);
     });
@@ -132,8 +132,34 @@ void main() {
           .submit(name: '', schedulerType: null);
 
       final state = container.read(createRootDeckControllerProvider);
-      expect(state.nameProblem, DeckNameProblem.empty);
+      expect(state.nameProblem, DeckFormProblem.nameEmpty);
       expect(state.isSchedulerMissing, isTrue);
+      // Both, in one set. The accessors above are Deck's reading of it; this is
+      // what is stored.
+      expect(state.problems, <DeckFormProblem>{
+        DeckFormProblem.nameEmpty,
+        DeckFormProblem.schedulerMissing,
+      });
+    });
+
+    test('a missing scheduler marks no error under the name field', () async {
+      // The grouping the accessors exist for. `nameProblem` filters the set down
+      // to the values that belong to the name input, so a form that failed only
+      // on the scheduler must leave the name input clean — a plain
+      // "are there any problems" check would put a red border under a name the
+      // user typed correctly.
+      final container = containerWith(FakeDeckRepository());
+
+      await container
+          .read(createRootDeckControllerProvider.notifier)
+          .submit(name: 'Japanese', schedulerType: null);
+
+      final state = container.read(createRootDeckControllerProvider);
+      expect(state.isSchedulerMissing, isTrue);
+      expect(state.nameProblem, isNull);
+      expect(state.problems, <DeckFormProblem>{
+        DeckFormProblem.schedulerMissing,
+      });
     });
 
     test('a persistence failure is reported and does not report done', () async {

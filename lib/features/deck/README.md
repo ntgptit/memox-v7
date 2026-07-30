@@ -72,7 +72,13 @@ otherwise retries a failed provider ten times with a backoff reaching 6.4s while
 reporting `AsyncLoading`, so a failed local read spins for ~13 seconds before the
 error state appears. A local SQLite read that failed will fail again.
 
-**Command** — one controller per mutation, each with its own submit state:
+**Command** — one controller per mutation, each with its own submit state.
+
+The state itself is **not** Deck's: `DeckSubmitState` is a typedef onto
+`SubmitState<DeckFormProblem>` in `core/state/`, so the four fields and the three
+policy getters (`canSubmit`, `shouldClose`, `shouldClearDraft`) live once for every
+feature. Deck supplies only its problem enum and two accessors. See
+`deck_submit_state.dart`.
 
 `createRootDeckController` · `createSubDeckController` ·
 `renameDeckController(deckId)` · `deleteDeckController(deckId)` ·
@@ -130,7 +136,10 @@ In `domain/`, expressed so that the illegal case cannot be represented rather
 than merely checked:
 
 - `DeckEntity.nameProblem` returns `DeckNameProblem?` — BR-01's trim and
-  200-character limit, as an enum the UI maps to ARB copy
+  200-character limit, as an enum rather than a message. `deckNameFormProblem`
+  spells it as the form's own `DeckFormProblem` in one switch, and
+  `context.deckFormError` turns that into ARB copy. The domain owns the *rule*;
+  the form owns how it is displayed.
 - `buildDeckMoveTargets` — a pure function returning every candidate with its
   rejection reason (depth, cycle, content type, scheduler mismatch). UC-09's
   whole rule set, testable with no database and no widget.
