@@ -57,13 +57,16 @@ Future<DeckDeletionImpact> deckDeletionImpact(Ref ref, String deckId) =>
 
 @Riverpod(retry: noAutomaticRetry)
 Stream<DeckDetail> deckDetail(Ref ref, String deckId) {
+  // Two use cases, composed here. Composition is the controller's job: the
+  // screen needs a read model, and neither use case should know about the other.
   final children = ref.watch(watchDeckChildrenUseCaseProvider);
+  final deckById = ref.watch(getDeckByIdUseCaseProvider);
 
   // The children stream is the one that re-emits on every write in this
   // subtree; the deck itself is re-read on each emission so a rename made
   // elsewhere shows up without a second subscription.
   return children(deckId).asyncMap(
     (childDecks) async =>
-        DeckDetail(deck: await children.deck(deckId), childDecks: childDecks),
+        DeckDetail(deck: await deckById(deckId), childDecks: childDecks),
   );
 }
