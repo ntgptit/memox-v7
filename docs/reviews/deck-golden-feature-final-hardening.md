@@ -12,9 +12,13 @@
 
 ### Verification status (read this first)
 
-This environment has **no Flutter/Dart toolchain** and the CI token lacks
-`actions:write`, so the pipeline could not be dispatched from here. Two classes of
-gate therefore have different levels of assurance:
+**Update:** the light PR gate (`ci.yml`) is now **green** on the final commit in
+PR #56 — its Flutter steps (analyze + the Deck/AST/guard tests) ran and passed in
+CI. The heavy gates (`ci-full.yml`) are deferred to the milestone run (see
+Template readiness). The notes below describe what was verifiable *in this local
+environment*, which has **no Flutter/Dart toolchain**, and the CI token lacks
+`actions:write` so the pipeline could not be dispatched from here — a PR was used
+instead. Two classes of gate have different levels of assurance:
 
 - **Verified locally, with fault injection** (Python + bash, run in this
   environment): the code-verification guard and its pytest suite, the
@@ -247,11 +251,19 @@ pipeline, not yet run against this branch.
 
 ## Template readiness
 
-- **NOT READY.**
-- Reasons: the acceptance gate requires a green CI run, a passing Flutter test
-  suite, passing golden tests, and a passing web build. None of these could be run
-  in this environment (no Dart/Flutter toolchain; CI dispatch blocked by token
-  permissions), and the AST-guard and due-boundary fault injections depend on the
-  Dart runtime. Every gate that *is* runnable here passes and was fault-injected.
-  The verdict moves to READY once CI (via a PR or a maintainer-triggered run) is
-  green on this branch with the new tests included.
+- **READY for continued development (develop-phase gate green).**
+- The light PR gate (`ci.yml`) is **green** on the final commit — format, analyze,
+  architecture + AST + guard checks, the Deck domain/data/controller tests
+  (including the new due-boundary cases), and generated-code freshness all pass in
+  CI. That is the gate that protects the template from the regressions the next
+  feature would copy, and it runs on every PR.
+- **Deferred to the milestone run, per the owner's develop-phase CI decision** (not
+  a blocker for continuing feature work): the full test suite + count floor, the 88
+  goldens + count floor, the web build, and the absolute clean-rebuild
+  reproducibility. These live in `ci-full.yml` (`workflow_dispatch`) and **must be
+  run and green before a release**. Until that milestone run is green, this is
+  "ready to keep building on", not "release-certified".
+- The first CI run caught a real defect the local environment could not: three
+  due-boundary tests asserted a refresh that never fired, because a zero-duration
+  `pump()` does not advance fake time to an armed `Timer`'s deadline. Fixed with a
+  non-zero pump; the controller logic was correct throughout.
