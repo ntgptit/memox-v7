@@ -677,6 +677,18 @@ Chuyển một luật vào một *tầng* chỉ ngăn được trùng lặp bằ
 vào một *type* ngăn được về mặt cấu trúc. Giới hạn đo **sau** khi trim, và tên quá
 dài bị từ chối chứ không bị cắt — không tồn tại giá trị đã cắt để caller lỡ ghi.
 
+**BR-11 cũng có hai chủ sở hữu, và cái thứ hai sai theo hai cách.**
+`_requireRealScheduler` trong repository ném
+`ValidationFailure(schedulerMissing)` khi nhận `SchedulerType.unknown`. Thứ nhất,
+nó dư: `SchedulerType.unknown` **không có** `dbValue` — write đã bất khả thi chứ
+không chỉ bị từ chối. Thứ hai, nó báo một vấn đề *form* cho một trạng thái người
+dùng không thể gây ra và không thể sửa, nên "hãy chọn một scheduler" sẽ hiện lên để
+trả lời một lỗi lập trình. Đã xoá; luật nằm ở **type**.
+
+Dấu hiệu cấu trúc cho thấy việc xoá là đúng: `deck_repository_impl.dart` sau đó
+không còn dùng `deck_validation_failure.dart`, và analyzer báo import không dùng.
+Tầng data giờ không tham chiếu luật validation nào.
+
 ### 2 · Read model của một screen đến từ một statement
 
 Hai screen từng dựng read model từ hai query, và cả hai **trông** đúng vì với

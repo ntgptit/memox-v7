@@ -257,6 +257,13 @@ than merely checked:
   The limit is measured **after** trimming, and an over-length name is refused
   rather than truncated — there is no truncated value for a caller to persist by
   accident.
+- `SchedulerType` owns BR-11's "and `unknown` is not a choice" half, because
+  `SchedulerType.unknown` has no `dbValue` — the write is *impossible*, not merely
+  refused. There used to be a `_requireRealScheduler` guard in the repository as
+  well, throwing `ValidationFailure(schedulerMissing)`; it was redundant, and it
+  reported a **form** problem for a state no user can cause, so "please choose a
+  scheduler" would have answered a programming error. The use case owns "must be
+  chosen"; the type owns "must be real".
 - `buildDeckMoveTargets` — a pure function returning every candidate with its
   rejection reason (depth, cycle, content type, scheduler mismatch). UC-09's
   whole rule set, testable with no database and no widget.

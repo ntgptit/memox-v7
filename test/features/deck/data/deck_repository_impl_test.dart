@@ -38,14 +38,23 @@ void main() {
     });
 
     test(
-      'refuses the unknown scheduler — the choice is mandatory (BR-11)',
+      'the unknown scheduler cannot be persisted, and writes nothing (BR-11)',
       () async {
+        // Not a `ValidationFailure`. It was one until M4.10b, from a
+        // `_requireRealScheduler` guard in the repository — the *second* owner of
+        // BR-11, reporting a form problem for a state no user can cause. "Please
+        // choose a scheduler" is the wrong thing to show for a programming error.
+        //
+        // The rule is enforced by the type instead: `SchedulerType.unknown` has no
+        // `dbValue`, so the write is impossible rather than merely refused. What
+        // this asserts is the property that matters either way — the table is
+        // untouched.
         await expectLater(
           h.deckRepository.createRootDeck(
             name: DeckName.parseOrThrow('No mode'),
             schedulerType: SchedulerType.unknown,
           ),
-          throwsA(isA<ValidationFailure>()),
+          throwsA(isA<Failure>()),
         );
         expect(await h.countAll('decks'), 0);
       },
