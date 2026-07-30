@@ -115,22 +115,37 @@ jobs:
       # USB artifacts and stopped — the stamp files claimed everything else was
       # present while the files were not.
       #
-      # The verification is the point. If the font is still absent after a
-      # successful precache, this prints the directory and fails here, which is a
-      # one-line diagnosis instead of a log full of "Failed to load".
+      # **And then the actual cause, which only Linux could show.** The fonts were
+      # there all along, named `Roboto-Regular.ttf`; `flutter_test` 3.44.8 asks for
+      # `roboto-regular.ttf`. Windows and macOS have case-insensitive filesystems, so
+      # every local run resolved it and every Linux run did not. Four CI failures and
+      # a directory listing to find one letter.
+      #
+      # Lowercase symlinks rather than renames: the CamelCase names are what the SDK
+      # ships and what other tooling may look for, so both spellings now resolve. The
+      # loop is a no-op on a filesystem that does not care.
+      #
+      # The verification after it is the point. If the font is still unreachable, this
+      # prints the directory and fails here — a one-line diagnosis instead of ninety
+      # "Failed to load" errors that read as a broken test suite.
       - name: precache and verify the SDK artifacts tests render with
         run: |
           flutter precache --force --universal
-          FONT="$FLUTTER_ROOT/bin/cache/artifacts/material_fonts/roboto-regular.ttf"
-          if [ ! -f "$FONT" ]; then
-            echo "::error::material fonts absent after precache — the toolchain is incomplete, not the project"
-            echo "--- bin/cache/artifacts ---"
-            ls -la "$FLUTTER_ROOT/bin/cache/artifacts/" || true
-            echo "--- material_fonts ---"
-            ls -la "$FLUTTER_ROOT/bin/cache/artifacts/material_fonts/" || true
+          FONTS="$FLUTTER_ROOT/bin/cache/artifacts/material_fonts"
+          cd "$FONTS"
+          for file in *; do
+            lower="$(printf '%s' "$file" | tr '[:upper:]' '[:lower:]')"
+            [ "$file" = "$lower" ] && continue
+            [ -e "$lower" ] && continue
+            ln -s "$file" "$lower"
+          done
+          cd - > /dev/null
+          if [ ! -f "$FONTS/roboto-regular.ttf" ]; then
+            echo "::error::material fonts unreachable after precache — the toolchain is incomplete, not the project"
+            ls -la "$FONTS" || true
             exit 1
           fi
-          echo "material fonts present at $FONT"
+          echo "material fonts reachable at $FONTS/roboto-regular.ttf"
 
       # `--reporter expanded` so the per-test names are in the log. `pipefail`
       # because `tee` would otherwise report success for a failed run.
