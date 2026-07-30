@@ -52,6 +52,7 @@ when a call orchestrates more than one repository.
 | spacing / radius / icon size / colours / text | `core/theme/*` — never a literal |
 | screen chrome, list row, buttons, inputs, sheets, dialogs, empty/error/loading | `shared/widgets/mx_*` |
 | the three `AsyncValue` cases, with the loading policy stated | `shared/widgets/mx_async_view.dart` — `MxAsyncView<T>` |
+| close-on-success vs stay-open-on-success | `core/state/submit_outcome.dart` — `SubmitDisposition` / `SubmitOutcome` |
 | localized strings | `lib/l10n/*.arb` + `context.l10n` |
 
 **The rule that makes this checkable:** every import a feature makes to the
@@ -301,6 +302,87 @@ already gone by the time the callback runs, and touching its `Ref` throws.
 A multi-step or cross-field form would move the field values into the notifier
 state, beside the field problems. Deck did not need it — one name and one radio
 group. Do not reach for it before a form has state that must outlive its widget.
+
+#### Success has two kinds, and the difference is not optional
+
+Every Deck form closes when it succeeds, so the draft in the widget's
+`TextEditingController` vanished with the widget and nobody had to clear it. A
+form with *Save and add another* stays open, and cloning Deck's pattern into one
+reproduces three bugs at once:
+
+1. the transition to "done" pops the sheet, closing an editor the user asked to
+   keep open;
+2. if it does not close, the controller still holds the text of the record that
+   was just saved — and `reset()` on the notifier cannot reach widget-local state;
+3. `canSubmit` was `!isSubmitting && !isDone`, so the *next* entry could not be
+   submitted at all until something called `reset()`.
+
+`core/state/submit_outcome.dart` names the distinction so none of the three can
+happen quietly:
+
+```dart
+enum SubmitDisposition { close, addAnother }        // passed in
+enum SubmitOutcome { savedAndClose, savedAndContinue } // reported back
+```
+
+**Only the creators take a disposition.** Rename, delete, reset and move have
+nothing to add another of, so they do not accept one and always report
+`savedAndClose` — the type makes the wrong call impossible rather than merely
+unlikely. `close` is the default, so a form that does not care is unchanged.
+
+The submit state exposes the two questions a widget actually asks, rather than
+making every call site re-derive them from the enum:
+
+```dart
+bool get canSubmit      => !isSubmitting && outcome != SubmitOutcome.savedAndClose;
+bool get shouldClose    => outcome == SubmitOutcome.savedAndClose;
+bool get shouldClearDraft => outcome == SubmitOutcome.savedAndContinue;
+```
+
+Note `canSubmit`: a `savedAndContinue` success deliberately leaves it **true**.
+Only `savedAndClose` latches it shut, and only because the form is on its way out.
+
+**The widget half of the contract.** React to the *transition*, never the value —
+`ref.listen`, or `didUpdateWidget` comparing against the old state. On
+`shouldClearDraft`, in this order:
+
+1. clear the draft controllers the widget owns;
+2. clear the field errors;
+3. return the submit state to idle (`reset()`);
+4. move focus back to the first field.
+
+Clear **only after** the repository confirmed the write. A draft cleared
+optimistically is a record the user typed and lost. A failure — validation or
+persistence — reports **no outcome at all**, so neither `shouldClose` nor
+`shouldClearDraft` fires and the input survives untouched.
+
+Do not move the `TextEditingController` into the notifier to make add-another
+easier. The draft stays widget-local; what the notifier gains is the outcome, not
+the text.
+
+Nothing is handed back through `Navigator.pop` in either case. The list behind
+re-renders because its `watch()` stream re-emitted.
+
+**Test matrix.** `test/features/deck/presentation/submit_disposition_test.dart`
+covers the state machine, and it exists in the Deck feature even though Deck has no
+add-another form — because M4.11's card editor does, and the bugs live in the state
+machine rather than in the widget:
+
+| Case | Expected |
+|---|---|
+| disposition omitted | `savedAndClose`, `shouldClose`, `canSubmit == false` |
+| rename / delete / reset / move | always `savedAndClose` |
+| `addAnother` succeeds | `savedAndContinue`, `shouldClose == false`, `shouldClearDraft` |
+| `addAnother` twice in sequence | both writes land, no `reset()` in between |
+| two concurrent taps, one entry | one write — the double-submit guard still holds |
+| `close` twice | one write; the second is latched out |
+| validation failure | no outcome, draft untouched |
+| persistence failure | no outcome, `canSubmit` true so it can be retried |
+| `reset()` after `addAnother` | back to the idle state |
+
+The widget half — that the controllers are actually cleared and focus actually
+moves — belongs to the first form that has one. Asserting it against a form that
+does not exist would be testing a stand-in rather than the thing.
 
 ### invalidate vs refresh
 

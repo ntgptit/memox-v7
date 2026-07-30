@@ -102,7 +102,7 @@ void main() {
 
       expect(repository.deletes, <String>['deck-1']);
       expect(
-        container.read(deleteDeckControllerProvider('deck-1')).isDone,
+        container.read(deleteDeckControllerProvider('deck-1')).shouldClose,
         isTrue,
       );
     });
@@ -136,7 +136,7 @@ void main() {
       final failed = container.read(deleteDeckControllerProvider('deck-1'));
 
       expect(failed.failure, isNotNull);
-      expect(failed.isDone, isFalse);
+      expect(failed.shouldClose, isFalse);
       // Not submitting and not done, so the confirm button works again.
       expect(failed.canSubmit, isTrue);
     });
@@ -206,7 +206,7 @@ void main() {
 
         final state = container.read(moveDeckControllerProvider('deck-1'));
         expect(state.failure, isA<ConflictFailure>());
-        expect(state.isDone, isFalse);
+        expect(state.shouldClose, isFalse);
       },
     );
 
