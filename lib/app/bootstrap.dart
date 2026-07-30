@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/state/provider_observer.dart';
 import 'app.dart';
 import 'config/env_config.dart';
 import 'config/env_config_provider.dart';
@@ -60,6 +61,15 @@ Widget buildRootWidget(EnvConfig config) => ProviderScope(
   // No explicit type argument: `Override` is internal to riverpod and is not
   // part of flutter_riverpod's public API.
   overrides: [envConfigProvider.overrideWithValue(config)],
+  // Provider failures are always reported: Riverpod 3 retries a failed provider
+  // ten times and shows `AsyncLoading` throughout, so without this a broken read
+  // is thirteen seconds of spinner and no exception anywhere. State transitions
+  // are chatter by comparison, so they follow the configured log level.
+  observers: [
+    MemoxProviderObserver(
+      shouldLogStateChanges: config.logLevel == LogLevel.debug,
+    ),
+  ],
   child: const MemoxApp(),
 );
 
