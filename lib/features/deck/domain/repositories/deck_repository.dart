@@ -2,7 +2,7 @@ import '../models/deck_deletion_impact_model.dart';
 import '../models/deck_detail_model.dart';
 import '../entities/deck_entity.dart';
 import '../models/deck_name_model.dart';
-import '../models/root_deck_summary_model.dart';
+import '../models/root_deck_list_snapshot_model.dart';
 import '../models/scheduler_type_model.dart';
 
 /// Contract for deck-tree management (UC-02, UC-03, UC-08, UC-09). Card CRUD
@@ -29,8 +29,14 @@ abstract interface class DeckRepository {
   /// All root decks, re-emitted on every change.
   Stream<List<DeckEntity>> watchRootDecks();
 
-  /// Root decks with their aggregate progress — total cards in the tree and
-  /// how many are due (UC-06).
+  /// Root decks with their aggregate progress — total cards in the tree, how
+  /// many are due, and the instant that answer expires (UC-06).
+  ///
+  /// The expiry is part of the same read on purpose. Every due count is relative
+  /// to [now], so each one has a moment at which it becomes wrong; the caller
+  /// re-measures then. Two reads would compute the counts and the boundary from
+  /// two database states, and the refresh would land at an instant that was
+  /// correct for neither.
   ///
   /// [now] is passed in, never read from a clock inside the query: "due
   /// exactly at now" is a boundary that has to work, and a query that reads
@@ -40,7 +46,7 @@ abstract interface class DeckRepository {
   /// One query, not one per deck. The counts reach descendants through
   /// `root_deck_id` (BR-56), which is what makes a flat aggregate possible
   /// where a parent walk would need recursion.
-  Stream<List<RootDeckSummary>> watchRootDeckSummaries({required DateTime now});
+  Stream<RootDeckListSnapshot> watchRootDeckList({required DateTime now});
 
   /// Every deck in the database, for building a move-target picker (UC-09).
   ///

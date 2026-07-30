@@ -9,10 +9,11 @@ import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_empty_state.dart';
 import '../../../../shared/widgets/mx_error_state.dart';
 import '../../../../shared/widgets/mx_icon_button.dart';
+import '../../domain/models/root_deck_list_snapshot_model.dart';
 import '../../domain/models/root_deck_summary_model.dart';
 import '../widgets/deck_actions_widget.dart';
 import '../widgets/deck_tile_widget.dart';
-import '../controllers/root_decks_controller.dart';
+import '../controllers/root_deck_list_controller.dart';
 
 /// The app's home: every root deck with its progress (UC-06).
 ///
@@ -39,10 +40,13 @@ class RootDeckListScreen extends StatelessWidget {
         ),
       ],
       body: Consumer(
-        builder: (context, ref, child) => MxAsyncView<List<RootDeckSummary>>(
-          value: ref.watch(rootDeckSummariesProvider),
+        builder: (context, ref, child) => MxAsyncView<RootDeckListSnapshot>(
+          value: ref.watch(rootDeckListProvider),
           loadingLabel: context.l10n.decksLoadingLabel,
-          data: (summaries) => _RootDeckList(summaries: summaries),
+          // `nextDueAt` is not rendered. It travels with the counts because the
+          // controller schedules the next re-measure from it — the screen's job is
+          // to show what the snapshot says, not to know when it expires.
+          data: (snapshot) => _RootDeckList(summaries: snapshot.decks),
           // The failure itself never reaches the screen. A Drift message would
           // tell the user nothing they can act on, and can carry a deck name.
           //
@@ -53,7 +57,7 @@ class RootDeckListScreen extends StatelessWidget {
             title: context.l10n.decksLoadErrorTitle,
             message: context.l10n.decksLoadErrorMessage,
             retryLabel: context.l10n.retryAction,
-            onRetry: () => ref.invalidate(rootDeckSummariesProvider),
+            onRetry: () => ref.invalidate(rootDeckListProvider),
           ),
         ),
       ),

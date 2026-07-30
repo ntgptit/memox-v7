@@ -8,8 +8,28 @@ import 'package:flutter_test/flutter_test.dart';
 ///
 /// Complements the guard: these are cross-file claims ("this contract does
 /// not mention that operation") that a per-file regex rule cannot own.
+///
+/// **Comments are stripped before matching.** These checks look for text in
+/// source, and prose is source too — a doc comment that explains why a file is
+/// *not* `part of` something contained the words `part of` and failed the check
+/// that the file is not a part. That is not a hypothetical; it happened, and it is
+/// the same defect class as a guard that passes because it scanned nothing: what
+/// the check measures has to be the code.
+///
+/// String literals are **not** stripped. Doing that correctly means most of a
+/// lexer, and no check here is plausibly tripped by one — the claim this file
+/// makes is "no comment can fake or break these", not "nothing can".
 void main() {
-  String read(String path) => File(path).readAsStringSync();
+  /// Source with its comments removed: `//` to end of line, `--` to end of line
+  /// for `.drift`, and `/* … */` however many lines it spans.
+  String read(String path) {
+    final source = File(path).readAsStringSync();
+    final lineComment = path.endsWith('.drift') ? r'(?://|--)' : '//';
+
+    return source
+        .replaceAll(RegExp(r'/\*.*?\*/', dotAll: true), '')
+        .replaceAll(RegExp('$lineComment.*'), '');
+  }
 
   const cardOperations = <String>[
     'watchCardsByDeck',

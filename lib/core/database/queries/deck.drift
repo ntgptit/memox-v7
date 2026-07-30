@@ -58,11 +58,31 @@ ORDER BY created_at ASC, id ASC;
 -- A root with no cards yields no row from either subquery, hence COALESCE to
 -- 0. That is a count of nothing, not a missing parent — this file resolves
 -- roots only through `root_deck_id`, per BR-57.
+-- **`nextDueAt` is in this statement and not in a second one.** It is the
+-- earliest instant at which any `dueCardCount` above would change, and the list
+-- screen schedules its next re-measure from it — so the count and the moment it
+-- expires have to describe the same snapshot. Read separately they could not:
+-- the boundary would be computed from a database state the counts were not, and
+-- the screen would refresh at an instant that was right for neither.
+--
+-- `> :now`, strictly, and the same `:now` the counts use. A card due exactly at
+-- `:now` is already counted by the predicate above, so including it here would
+-- schedule a wake for a boundary that has already been crossed — a timer firing
+-- at zero delay, forever.
+--
+-- One scalar subquery, evaluated once per statement, and `idx_review_states_due`
+-- makes it a single index seek rather than a scan. NULL means nothing is
+-- scheduled to become due at all, which is a real state — every card due, or no
+-- cards — and the screen must not set a timer for it.
 rootDeckSummaries:
 SELECT
     d.**,
     COALESCE(total.cardCount, 0) AS totalCardCount,
-    COALESCE(due.dueCount, 0) AS dueCardCount
+    COALESCE(due.dueCount, 0) AS dueCardCount,
+    (
+        SELECT MIN(next.due_at) FROM card_review_states next
+        WHERE next.due_at > :now
+    ) AS nextDueAt
 FROM decks d
 LEFT JOIN (
     SELECT cd.root_deck_id AS rootDeckId, COUNT(*) AS cardCount

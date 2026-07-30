@@ -13,7 +13,7 @@ import '../../domain/failures/deck_move_failure.dart';
 import '../../domain/failures/deck_validation_failure.dart';
 import '../../domain/models/deck_name_model.dart';
 import '../../domain/repositories/deck_repository.dart';
-import '../../domain/models/root_deck_summary_model.dart';
+import '../../domain/models/root_deck_list_snapshot_model.dart';
 import '../../domain/models/scheduler_type_model.dart';
 import '../mappers/deck_mapper.dart';
 import '../datasources/deck_dao.dart';
@@ -42,10 +42,15 @@ final class DeckRepositoryImpl
     implements DeckRepository {
   DeckRepositoryImpl(
     this._dao, {
+    required DateTime Function() clock,
     String Function()? idGenerator,
-    DateTime Function()? clock,
   }) : _idGenerator = idGenerator ?? const Uuid().v4,
-       _clock = clock ?? _utcNow;
+       // The initializing formal the lint asks for would be
+       // `required this._clock`, and Dart forbids a named parameter starting
+       // with an underscore. The field has to stay private — the move operation
+       // is a `part of` this library and reads it.
+       // ignore: prefer_initializing_formals
+       _clock = clock;
 
   @override
   final DeckDao _dao;
@@ -53,11 +58,15 @@ final class DeckRepositoryImpl
   /// Client-generated UUIDs (AD-03); injectable so tests are deterministic.
   final String Function() _idGenerator;
 
-  /// Injectable clock; timestamps are stored in UTC, always.
+  /// The clock, injected — there is no default.
+  ///
+  /// A `?? DateTime.now()` fallback here would make "now" have two owners: this
+  /// private static, and `clockProvider` which the whole tree can override. The
+  /// one that is harder to reach is the one that silently wins in production, so
+  /// it is gone and the composition root passes the provider's clock in.
+  /// Timestamps are stored in UTC, always.
   @override
   final DateTime Function() _clock;
-
-  static DateTime _utcNow() => DateTime.now().toUtc();
 
   // ---- reads -------------------------------------------------------------
 
@@ -66,11 +75,8 @@ final class DeckRepositoryImpl
       _guardStream(_dao.watchRootDecks()).map(_mapDeckRows);
 
   @override
-  Stream<List<RootDeckSummary>> watchRootDeckSummaries({
-    required DateTime now,
-  }) => _guardStream(
-    _dao.watchRootDeckSummaries(now),
-  ).map((rows) => rows.map(rootDeckSummaryFromRow).toList(growable: false));
+  Stream<RootDeckListSnapshot> watchRootDeckList({required DateTime now}) =>
+      _guardStream(_dao.watchRootDeckSummaries(now)).map(rootDeckListFromRows);
 
   @override
   Stream<List<DeckEntity>> watchAllDecks() =>

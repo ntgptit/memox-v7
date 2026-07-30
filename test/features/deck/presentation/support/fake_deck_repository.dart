@@ -7,6 +7,7 @@ import 'package:memox/features/deck/domain/models/deck_deletion_impact_model.dar
 import 'package:memox/features/deck/domain/models/deck_detail_model.dart';
 import 'package:memox/features/deck/domain/entities/deck_entity.dart';
 import 'package:memox/features/deck/domain/repositories/deck_repository.dart';
+import 'package:memox/features/deck/domain/models/root_deck_list_snapshot_model.dart';
 import 'package:memox/features/deck/domain/models/root_deck_summary_model.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 
@@ -29,7 +30,7 @@ import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 /// `test/features/deck/data/`.
 class FakeDeckRepository implements DeckRepository {
   FakeDeckRepository({
-    Stream<List<RootDeckSummary>> Function()? summaries,
+    Stream<RootDeckListSnapshot> Function()? summaries,
     Stream<List<DeckEntity>> Function()? rootDecks,
     Stream<List<DeckEntity>> Function()? allDecks,
     Stream<DeckDetail> Function(String deckId)? deckDetail,
@@ -43,22 +44,31 @@ class FakeDeckRepository implements DeckRepository {
        _allDecks = allDecks ?? _emptyDecks,
        _deckDetail = deckDetail ?? _missingDeck;
 
-  /// Emits [decks] as root summaries with the counts each entry carries.
-  factory FakeDeckRepository.withSummaries(List<RootDeckSummary> summaries) =>
-      FakeDeckRepository(
-        summaries: () => Stream<List<RootDeckSummary>>.value(summaries),
-      );
+  /// Emits [summaries] as the deck list, with no due boundary by default.
+  ///
+  /// [nextDueAt] is the instant the counts expire. It is part of the same read as
+  /// the counts in production, so it is one argument here too — a fake that let a
+  /// test set the two independently would be a fake of a contract that does not
+  /// exist.
+  factory FakeDeckRepository.withSummaries(
+    List<RootDeckSummary> summaries, {
+    DateTime? nextDueAt,
+  }) => FakeDeckRepository(
+    summaries: () => Stream<RootDeckListSnapshot>.value(
+      RootDeckListSnapshot(decks: summaries, nextDueAt: nextDueAt),
+    ),
+  );
 
   /// Never emits and never closes: the state a real read is in while SQLite is
   /// still answering.
   factory FakeDeckRepository.pending() => FakeDeckRepository(
-    summaries: () => StreamController<List<RootDeckSummary>>().stream,
+    summaries: () => StreamController<RootDeckListSnapshot>().stream,
     deckDetail: (_) => StreamController<DeckDetail>().stream,
   );
 
   /// Fails without ever emitting — a read that could not reach the database.
   factory FakeDeckRepository.failing(Object error) => FakeDeckRepository(
-    summaries: () => Stream<List<RootDeckSummary>>.error(error),
+    summaries: () => Stream<RootDeckListSnapshot>.error(error),
     deckDetail: (_) => Stream<DeckDetail>.error(error),
   );
 
@@ -76,8 +86,10 @@ class FakeDeckRepository implements DeckRepository {
         Stream<DeckDetail>.value(DeckDetail(deck: deck, childDecks: children)),
   );
 
-  static Stream<List<RootDeckSummary>> _emptySummaries() =>
-      Stream<List<RootDeckSummary>>.value(const <RootDeckSummary>[]);
+  static Stream<RootDeckListSnapshot> _emptySummaries() =>
+      Stream<RootDeckListSnapshot>.value(
+        const RootDeckListSnapshot(decks: <RootDeckSummary>[], nextDueAt: null),
+      );
 
   static Stream<List<DeckEntity>> _emptyDecks() =>
       Stream<List<DeckEntity>>.value(const <DeckEntity>[]);
@@ -87,7 +99,7 @@ class FakeDeckRepository implements DeckRepository {
         const NotFoundFailure(message: 'That deck no longer exists.'),
       );
 
-  final Stream<List<RootDeckSummary>> Function() _summaries;
+  final Stream<RootDeckListSnapshot> Function() _summaries;
   final Stream<List<DeckEntity>> Function() _rootDecks;
   final Stream<List<DeckEntity>> Function() _allDecks;
   final Stream<DeckDetail> Function(String deckId) _deckDetail;
@@ -102,6 +114,13 @@ class FakeDeckRepository implements DeckRepository {
   /// Counts, not booleans: "did retry re-subscribe" and "did a double tap send
   /// two writes" are both questions about the number.
   int summariesCallCount = 0;
+
+  /// Every `now` the list read was given, in order.
+  ///
+  /// The due boundary is the only reason the same query runs twice with different
+  /// arguments, so this is what a test asserts against to show a re-measure
+  /// actually happened at a new instant rather than just re-running.
+  final List<DateTime> readInstants = <DateTime>[];
   int allDecksCallCount = 0;
   final List<String> deckDetailCalls = <String>[];
   final List<({String name, SchedulerType scheduler})> createdRootDecks =
@@ -116,10 +135,9 @@ class FakeDeckRepository implements DeckRepository {
       <({String deckId, String target})>[];
 
   @override
-  Stream<List<RootDeckSummary>> watchRootDeckSummaries({
-    required DateTime now,
-  }) {
+  Stream<RootDeckListSnapshot> watchRootDeckList({required DateTime now}) {
     summariesCallCount += 1;
+    readInstants.add(now);
 
     return _summaries();
   }
@@ -271,6 +289,15 @@ DeckEntity fakeSubDeck({
     updatedAt: at,
   );
 }
+
+/// The list read's snapshot, for a test that drives the stream directly.
+///
+/// [nextDueAt] defaults to null — nothing scheduled to come due — because that is
+/// what most tests are about. The ones about the due-boundary timer pass it.
+RootDeckListSnapshot fakeListSnapshot(
+  List<RootDeckSummary> summaries, {
+  DateTime? nextDueAt,
+}) => RootDeckListSnapshot(decks: summaries, nextDueAt: nextDueAt);
 
 /// A root summary with explicit counts.
 RootDeckSummary fakeSummary({

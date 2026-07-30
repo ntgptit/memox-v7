@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/database/app_database_provider.dart';
+import '../../core/time/clock_provider.dart';
 import '../../features/deck/data/repositories/deck_repository_impl.dart';
 import '../../features/deck/data/datasources/deck_dao.dart';
 import '../../features/deck/domain/repositories/deck_repository.dart';
@@ -21,6 +22,14 @@ part 'deck_repository_provider.g.dart';
 /// `keepAlive` matches [appDatabaseProvider]: the repository is a thin wrapper
 /// over the DAO and rebuilding it per screen would buy nothing and churn the
 /// Drift streams underneath.
+///
+/// The clock is passed in from [clockProvider] rather than left to the
+/// repository's own default. The default was a `DateTime.now()` inside the
+/// feature, which meant "now" had two owners: one a provider the whole tree can
+/// override, the other a private static nothing could reach. Wiring it here makes
+/// the provider the only source, and lets the repository's own fallback go.
 @Riverpod(keepAlive: true)
-DeckRepository deckRepository(Ref ref) =>
-    DeckRepositoryImpl(DeckDao(ref.watch(appDatabaseProvider)));
+DeckRepository deckRepository(Ref ref) => DeckRepositoryImpl(
+  DeckDao(ref.watch(appDatabaseProvider)),
+  clock: ref.watch(clockProvider),
+);

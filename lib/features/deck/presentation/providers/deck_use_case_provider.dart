@@ -10,7 +10,7 @@ import '../../domain/usecases/rename_deck_use_case.dart';
 import '../../domain/usecases/reset_deck_content_type_use_case.dart';
 import '../../domain/usecases/watch_deck_detail_use_case.dart';
 import '../../domain/usecases/watch_deck_move_targets_use_case.dart';
-import '../../domain/usecases/watch_root_deck_summaries_use_case.dart';
+import '../../domain/usecases/watch_root_deck_list_use_case.dart';
 
 part 'deck_use_case_provider.g.dart';
 
@@ -65,8 +65,8 @@ MoveDeckUseCase moveDeckUseCase(Ref ref) =>
     MoveDeckUseCase(ref.watch(deckRepositoryProvider));
 
 @riverpod
-WatchRootDeckSummariesUseCase watchRootDeckSummariesUseCase(Ref ref) =>
-    WatchRootDeckSummariesUseCase(ref.watch(deckRepositoryProvider));
+WatchRootDeckListUseCase watchRootDeckListUseCase(Ref ref) =>
+    WatchRootDeckListUseCase(ref.watch(deckRepositoryProvider));
 
 @riverpod
 WatchDeckDetailUseCase watchDeckDetailUseCase(Ref ref) =>
