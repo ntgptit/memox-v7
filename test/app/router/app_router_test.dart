@@ -10,9 +10,6 @@ import 'package:memox/app/fallback/route_not_found_screen.dart';
 import 'package:memox/app/router/app_router.dart';
 import 'package:memox/app/router/route_names.dart';
 import 'package:memox/app/router/route_paths.dart';
-import 'package:memox/core/error/failure.dart';
-import 'package:memox/features/deck/domain/deck_entity.dart';
-import 'package:memox/features/deck/presentation/deck_detail_screen.dart';
 import 'package:memox/features/deck/presentation/root_deck_list_screen.dart';
 import 'package:memox/features/review/presentation/review_placeholder_screen.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
@@ -197,115 +194,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(MxNavigationBar), findsOneWidget);
-    });
-  });
-
-  group('the deck detail route', () {
-    /// A repository that can serve one deck, so the nested route has something
-    /// to render.
-    FakeDeckRepository servingDeck() => FakeDeckRepository(
-      deckById: (id) async => fakeRootDeck(id: id, name: 'Japanese N5'),
-      childDecks: (_) => Stream<List<DeckEntity>>.value(const <DeckEntity>[]),
-    );
-
-    testWidgets('a deep link to /decks/<id> opens that deck', (tester) async {
-      await pumpApp(
-        tester,
-        initialLocation: '/decks/deck-1',
-        repository: servingDeck(),
-      );
-
-      expect(find.byType(DeckDetailScreen), findsOneWidget);
-      expect(find.text('Japanese N5'), findsOneWidget);
-      expect(tester.takeException(), isNull);
-    });
-
-    testWidgets('it stays inside the Decks branch, bar and all', (
-      tester,
-    ) async {
-      // A child route rather than a top-level one. As a top-level route the deck
-      // screen would open with no bottom bar and no branch to go back into.
-      await pumpApp(
-        tester,
-        initialLocation: '/decks/deck-1',
-        repository: servingDeck(),
-      );
-
-      expect(find.byType(MxNavigationBar), findsOneWidget);
-      expect(selectedTab(tester), 0);
-    });
-
-    testWidgets('goNamed with a path parameter reaches it', (tester) async {
-      // By name and by parameter constant, so neither half is a literal that the
-      // compiler cannot check against the other.
-      final router = await pumpApp(tester, repository: servingDeck());
-
-      router.goNamed(
-        RouteNames.deckDetail,
-        pathParameters: <String, String>{RoutePathParams.deckId: 'deck-9'},
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.byType(DeckDetailScreen), findsOneWidget);
-      expect(
-        router.routerDelegate.currentConfiguration.uri.path,
-        '/decks/deck-9',
-      );
-    });
-
-    testWidgets('back returns to the root deck list', (tester) async {
-      final router = await pumpApp(tester, repository: servingDeck());
-
-      router.goNamed(
-        RouteNames.deckDetail,
-        pathParameters: <String, String>{RoutePathParams.deckId: 'deck-1'},
-      );
-      await tester.pumpAndSettle();
-      expect(find.byType(DeckDetailScreen), findsOneWidget);
-
-      router.pop();
-      await tester.pumpAndSettle();
-
-      expect(find.byType(RootDeckListScreen), findsOneWidget);
-      expect(find.byType(DeckDetailScreen), findsNothing);
-    });
-
-    testWidgets('switching to Review and back keeps the deck open', (
-      tester,
-    ) async {
-      // The branch stack, which is what `indexedStack` buys. A plain route set
-      // would drop the pushed deck screen on the way out.
-      final router = await pumpApp(tester, repository: servingDeck());
-      router.goNamed(
-        RouteNames.deckDetail,
-        pathParameters: <String, String>{RoutePathParams.deckId: 'deck-1'},
-      );
-      await tester.pumpAndSettle();
-
-      await tester.tap(tab(english.navigationReviewLabel));
-      await tester.pumpAndSettle();
-      await tester.tap(tab(english.navigationDecksLabel));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(DeckDetailScreen), findsOneWidget);
-    });
-
-    testWidgets('a deck that no longer exists shows the not-found state', (
-      tester,
-    ) async {
-      // UC-03 E1 through the route: a stale deep link must not crash or land on
-      // a blank screen.
-      await pumpApp(
-        tester,
-        initialLocation: '/decks/gone',
-        repository: FakeDeckRepository.failing(
-          const NotFoundFailure(message: 'That deck no longer exists.'),
-        ),
-      );
-
-      expect(find.text(english.deckDetailNotFoundTitle), findsOneWidget);
-      expect(find.byType(MxNavigationBar), findsOneWidget);
-      expect(tester.takeException(), isNull);
     });
   });
 

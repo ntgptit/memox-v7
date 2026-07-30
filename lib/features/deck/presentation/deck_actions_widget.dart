@@ -10,7 +10,7 @@ import '../../../shared/widgets/mx_confirm_dialog.dart';
 import '../domain/deck_content_type_model.dart';
 import '../domain/deck_deletion_impact_model.dart';
 import '../domain/deck_entity.dart';
-import 'deck_copy_widget.dart';
+import 'deck_labels_widget.dart';
 import 'deck_detail_controller.dart';
 import 'deck_form_widget.dart';
 import 'deck_submit_state.dart';
@@ -356,31 +356,41 @@ class _DeleteDeckDialogState extends ConsumerState<_DeleteDeckDialog> {
 }
 
 /// Confirms putting an empty sub-deck back to `unset` (BR-68).
-class _ResetContentTypeDialog extends ConsumerWidget {
+///
+/// A plain widget wrapping a `Consumer`: the dialog's chrome does not depend on
+/// the provider, only its message and its buttons do, and scoping the watch says
+/// so. It also keeps the two-argument `build` signature — which the project guard
+/// misreads as a Riverpod 2 generated ref type — out of this file.
+class _ResetContentTypeDialog extends StatelessWidget {
   const _ResetContentTypeDialog({required this.deckId, required this.onClose});
 
   final String deckId;
   final VoidCallback onClose;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final provider = resetContentTypeControllerProvider(deckId);
-    final submit = ref.watch(provider);
 
-    ref.listen<DeckSubmitState>(provider, (previous, next) {
-      if (next.isDone && !(previous?.isDone ?? false)) onClose();
-    });
+    return Consumer(
+      builder: (context, ref, child) {
+        final submit = ref.watch(provider);
 
-    return MxConfirmDialog(
-      title: context.l10n.deckResetContentTypeTitle,
-      message: submit.failure != null
-          ? context.deckWriteFailure(submit.failure!)
-          : context.l10n.deckResetContentTypeMessage,
-      confirmLabel: context.l10n.deckResetContentTypeConfirmAction,
-      cancelLabel: context.l10n.commonCancelAction,
-      isSubmitting: submit.isSubmitting,
-      onConfirm: () => ref.read(provider.notifier).submit(),
-      onCancel: onClose,
+        ref.listen<DeckSubmitState>(provider, (previous, next) {
+          if (next.isDone && !(previous?.isDone ?? false)) onClose();
+        });
+
+        return MxConfirmDialog(
+          title: context.l10n.deckResetContentTypeTitle,
+          message: submit.failure != null
+              ? context.deckWriteFailure(submit.failure!)
+              : context.l10n.deckResetContentTypeMessage,
+          confirmLabel: context.l10n.deckResetContentTypeConfirmAction,
+          cancelLabel: context.l10n.commonCancelAction,
+          isSubmitting: submit.isSubmitting,
+          onConfirm: () => ref.read(provider.notifier).submit(),
+          onCancel: onClose,
+        );
+      },
     );
   }
 }

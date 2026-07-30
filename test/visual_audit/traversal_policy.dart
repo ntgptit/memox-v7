@@ -20,6 +20,17 @@ bool isHidden(RenderObject node) {
   if (node is RenderOffstage && node.offstage) return true;
   if (node is RenderOpacity && node.opacity == 0) return true;
   if (node is RenderAnimatedOpacity && node.opacity.value == 0) return true;
+  // A box with no layout paints nothing, so it belongs in the same bucket as an
+  // offstage one — and it MUST be recognised before anything asks for its rect,
+  // because `RenderBox.size` asserts on an unlaid-out box rather than returning
+  // an empty rect.
+  //
+  // This is reachable as soon as a screen sits on a *pushed* route: the
+  // Navigator keeps the route below it in the tree, and an Overlay can hold a
+  // deferred-layout child that has not been laid out at the moment the walk
+  // runs. A single-route screen never produces one, which is why the ordering
+  // bug this guards survived until the first nested route was audited.
+  if (node is RenderBox && !node.hasSize) return true;
 
   return false;
 }

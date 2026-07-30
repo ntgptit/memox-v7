@@ -8,7 +8,7 @@ import '../../../shared/widgets/mx_icon_button.dart';
 import '../../../shared/widgets/mx_list_tile.dart';
 import '../domain/deck_entity.dart';
 import '../domain/root_deck_summary_model.dart';
-import 'deck_copy_widget.dart';
+import 'deck_labels_widget.dart';
 
 /// One row of the root deck list (UC-06 step 2).
 ///

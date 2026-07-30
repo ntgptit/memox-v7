@@ -8,7 +8,7 @@ import '../../../shared/widgets/mx_confirm_dialog.dart';
 import '../../../shared/widgets/mx_text_field.dart';
 import '../domain/deck_entity.dart';
 import '../domain/scheduler_type_model.dart';
-import 'deck_copy_widget.dart';
+import 'deck_labels_widget.dart';
 import 'deck_submit_state.dart';
 
 /// The one deck form, used for create-root, create-sub-deck and rename.

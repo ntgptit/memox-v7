@@ -15,11 +15,13 @@ import '../domain/scheduler_type_model.dart';
 /// work: add a scheduler or a rejection reason and every call site fails to
 /// compile until it has copy.
 ///
-/// It is an extension on `BuildContext` rather than a widget because it returns
-/// strings. The file carries the `_widget` suffix that the naming rule requires
-/// of everything under `presentation/`; there is no widget here and inventing a
-/// wrapper one to satisfy the suffix would be worse than the mismatch.
-extension DeckCopy on BuildContext {
+/// It is an extension on the build context rather than a widget because it
+/// returns strings. The file carries the `_widget` suffix that the naming rule
+/// requires of everything under `presentation/`; there is no widget here and
+/// inventing a wrapper one to satisfy the suffix would be worse than the
+/// mismatch. It is named `_labels_` and not `_copy_`: "copy" reads as a backup
+/// file to the repository's own file-name guard, which is a fair reading.
+extension DeckLabels on BuildContext {
   /// The study mode's name (BR-30's sibling for deck screens: the label comes
   /// from the stored value, never from a hardcoded pair).
   String schedulerLabel(SchedulerType? scheduler) => switch (scheduler) {

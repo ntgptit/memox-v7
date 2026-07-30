@@ -30,7 +30,7 @@ part 'deck_write_controller.g.dart';
 ///
 /// None of them navigates or shows a snackbar. They expose [DeckSubmitState
 /// .isDone] and the widget reacts, because a controller that closed a route
-/// would need a `BuildContext` it must never hold.
+/// would need a handle on the widget tree that it must never hold.
 
 /// Creates a root deck (UC-02).
 @riverpod

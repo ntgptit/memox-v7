@@ -3,57 +3,57 @@
 
   "appTitle": "MemoX",
   "@appTitle": {
-    "description": "Application name. Shown as the MaterialApp title and in the Android task switcher. Not translated — it is a product name."
+      "description": "Application name. Shown as the MaterialApp title and in the Android task switcher. Not translated — it is a product name."
   },
 
   "navigationDecksLabel": "Bộ thẻ",
   "@navigationDecksLabel": {
-    "description": "Bottom navigation label for the Decks destination. Kept separate from decksTitle even though the English words match: a tab label is competing for width with another label and may need to be shortened in a language where the screen title cannot be."
+      "description": "Bottom navigation label for the Decks destination. Kept separate from decksTitle even though the English words match: a tab label is competing for width with another label and may need to be shortened in a language where the screen title cannot be."
   },
 
   "navigationReviewLabel": "Ôn tập",
   "@navigationReviewLabel": {
-    "description": "Bottom navigation label for the Review destination, where the user studies due cards."
+      "description": "Bottom navigation label for the Review destination, where the user studies due cards."
   },
 
   "reviewPlaceholderMessage": "MemoX đang khởi động.",
   "@reviewPlaceholderMessage": {
-    "description": "Text on the temporary Review screen shown until the real review session screen lands (M5.4)."
+      "description": "Text on the temporary Review screen shown until the real review session screen lands (M5.4)."
   },
 
   "decksTitle": "Bộ thẻ",
   "@decksTitle": {
-    "description": "App bar title of the home screen, which lists the user's root decks. A deck is a folder of flashcards."
+      "description": "App bar title of the home screen, which lists the user's root decks. A deck is a folder of flashcards."
   },
 
   "decksLoadingLabel": "Đang tải bộ thẻ",
   "@decksLoadingLabel": {
-    "description": "Screen-reader label announced while the deck list is loading. A bare progress spinner announces nothing at all, so the user is told neither that something is happening nor when it stops."
+      "description": "Screen-reader label announced while the deck list is loading. A bare progress spinner announces nothing at all, so the user is told neither that something is happening nor when it stops."
   },
 
   "decksEmptyTitle": "Chưa có bộ thẻ",
   "@decksEmptyTitle": {
-    "description": "Heading of the empty state on the deck list, shown when the user has no root decks. Not an error — an account with no decks is a normal starting point."
+      "description": "Heading of the empty state on the deck list, shown when the user has no root decks. Not an error — an account with no decks is a normal starting point."
   },
 
   "decksEmptyMessage": "Tạo một bộ thẻ để bắt đầu sắp xếp các thẻ ghi nhớ.",
   "@decksEmptyMessage": {
-    "description": "Body of the deck list empty state. Explains what a deck is for; it carries no button because creating a deck is not built yet."
+      "description": "Body of the deck list empty state. Explains what a deck is for; it carries no button because creating a deck is not built yet."
   },
 
   "decksLoadErrorTitle": "Không thể tải bộ thẻ",
   "@decksLoadErrorTitle": {
-    "description": "Heading shown when reading the deck list from the local database fails. Carries no database detail — the user cannot act on it."
+      "description": "Heading shown when reading the deck list from the local database fails. Carries no database detail — the user cannot act on it."
   },
 
   "decksLoadErrorMessage": "Vui lòng thử lại.",
   "@decksLoadErrorMessage": {
-    "description": "Body of the deck list error state. Deliberately free of the exception, the SQL and the file path."
+      "description": "Body of the deck list error state. Deliberately free of the exception, the SQL and the file path."
   },
 
   "retryAction": "Thử lại",
   "@retryAction": {
-    "description": "Button that re-runs a failed read. On the deck list it re-subscribes to the database stream."
+      "description": "Button that re-runs a failed read. On the deck list it re-subscribes to the database stream."
   },
 
   "deckCreateRootAction": "Bộ thẻ mới",
@@ -63,22 +63,22 @@
 
   "deckCardCountLabel": "{count, plural, =0{Chưa có thẻ} other{{count} thẻ}}",
   "@deckCardCountLabel": {
-      "description": "Total number of cards in a deck's whole tree, shown on each row of the deck list.",
       "placeholders": {
           "count": {
               "type": "int"
           }
-      }
+      },
+      "description": "Total number of cards in a deck's whole tree, shown on each row of the deck list."
   },
 
   "deckDueCountLabel": "{count, plural, other{{count} thẻ đến hạn}}",
   "@deckDueCountLabel": {
-      "description": "How many cards in a deck are due for review right now. Only shown when the number is above zero.",
       "placeholders": {
           "count": {
               "type": "int"
           }
-      }
+      },
+      "description": "How many cards in a deck are due for review right now. Only shown when the number is above zero."
   },
 
   "deckNoDueLabel": "Không có thẻ đến hạn",
@@ -158,12 +158,12 @@
 
   "deckNameTooLongError": "Dùng tối đa {max} ký tự.",
   "@deckNameTooLongError": {
-      "description": "Inline error when the deck name exceeds the allowed length (BR-01). The name is never truncated silently.",
       "placeholders": {
           "max": {
               "type": "int"
           }
-      }
+      },
+      "description": "Inline error when the deck name exceeds the allowed length (BR-01). The name is never truncated silently."
   },
 
   "deckFormSubmitAction": "Tạo",
@@ -288,17 +288,16 @@
 
   "deckDeleteConfirmTitle": "Xoá “{name}”?",
   "@deckDeleteConfirmTitle": {
-      "description": "Title of the delete confirmation. Names the deck so the user can tell which one they are about to lose (BR-04).",
       "placeholders": {
           "name": {
               "type": "String"
           }
-      }
+      },
+      "description": "Title of the delete confirmation. Names the deck so the user can tell which one they are about to lose (BR-04)."
   },
 
   "deckDeleteImpactMessage": "{deckCount, plural, =0{} other{{deckCount} bộ thẻ con và }}{cardCount, plural, =0{không có thẻ nào} other{{cardCount} thẻ}} sẽ bị xoá theo. Không thể hoàn tác.",
   "@deckDeleteImpactMessage": {
-      "description": "Body of the delete confirmation, stating exactly how many sub-decks and cards go with the deck (BR-04).",
       "placeholders": {
           "deckCount": {
               "type": "int"
@@ -306,7 +305,8 @@
           "cardCount": {
               "type": "int"
           }
-      }
+      },
+      "description": "Body of the delete confirmation, stating exactly how many sub-decks and cards go with the deck (BR-04)."
   },
 
   "deckDeleteConfirmAction": "Xoá",
@@ -413,37 +413,39 @@
   "@deckConflictMessage": {
       "description": "Shown when a deck write is refused because the tree changed or a rule forbids it — a non-empty reset, an illegal move, a depth limit (BR-55, BR-64, BR-68, BR-70, BR-74). The specific rule is explained by the control that was used."
   },
+
   "startupErrorTitle": "Không khởi động được MemoX",
   "@startupErrorTitle": {
-    "description": "Heading of the screen shown when bootstrap fails before the app can render. Must not contain technical detail."
+      "description": "Heading of the screen shown when bootstrap fails before the app can render. Must not contain technical detail."
   },
 
   "startupErrorMessage": "Đã có lỗi khi khởi động ứng dụng. Vui lòng đóng và mở lại.",
   "@startupErrorMessage": {
-    "description": "Body of the startup failure screen. Tells the user what to do; deliberately carries no stack trace, URL or error code."
+      "description": "Body of the startup failure screen. Tells the user what to do; deliberately carries no stack trace, URL or error code."
   },
 
   "unexpectedErrorTitle": "Đã có lỗi xảy ra",
   "@unexpectedErrorTitle": {
-    "description": "Heading shown in place of Flutter's red error screen when a widget fails to build."
+      "description": "Heading shown in place of Flutter's red error screen when a widget fails to build."
   },
 
   "unexpectedErrorMessage": "Không hiển thị được phần này của ứng dụng.",
   "@unexpectedErrorMessage": {
-    "description": "Body shown in place of Flutter's red error screen. Deliberately carries no stack trace or widget name."
+      "description": "Body shown in place of Flutter's red error screen. Deliberately carries no stack trace or widget name."
   },
+
   "pageNotFoundTitle": "Không tìm thấy trang",
   "@pageNotFoundTitle": {
-    "description": "Heading of the screen shown when a location matches no route. Carries no URL — the user cannot act on it, and a location can hold private content once deep links exist."
+      "description": "Heading of the screen shown when a location matches no route. Carries no URL — the user cannot act on it, and a location can hold private content once deep links exist."
   },
 
   "pageNotFoundMessage": "Trang bạn yêu cầu không tồn tại.",
   "@pageNotFoundMessage": {
-    "description": "Body of the 404 screen. Deliberately free of the failed path, the router state and any technical detail."
+      "description": "Body of the 404 screen. Deliberately free of the failed path, the router state and any technical detail."
   },
 
   "goHomeAction": "Về trang chính",
   "@goHomeAction": {
-    "description": "Button on the 404 screen that returns to the app's main route."
+      "description": "Button on the 404 screen that returns to the app's main route."
   }
 }

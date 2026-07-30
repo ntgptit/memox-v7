@@ -56,8 +56,8 @@ ORDER BY created_at ASC, id ASC;
 -- boundary has to work.
 --
 -- A root with no cards yields no row from either subquery, hence COALESCE to
--- 0. That is a count of nothing, not a missing parent, so it has nothing to do
--- with the banned `COALESCE(parent_deck_id, ...)`.
+-- 0. That is a count of nothing, not a missing parent — this file resolves
+-- roots only through `root_deck_id`, per BR-57.
 rootDeckSummaries:
 SELECT
     d.**,

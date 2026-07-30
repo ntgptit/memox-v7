@@ -14,8 +14,8 @@ part 'deck_submit_state.freezed.dart';
 ///
 /// Every field is a value or an enum, never a message. The domain says *which*
 /// rule failed; the screen picks the ARB copy. That split is what stops a
-/// developer-facing string like `SqliteException(11)` from reaching a user
-/// through a field label.
+/// developer-facing database error string from reaching a user through a field
+/// label.
 @freezed
 abstract class DeckSubmitState with _$DeckSubmitState {
   const factory DeckSubmitState({

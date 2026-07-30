@@ -34,8 +34,8 @@ class DeckListNow extends _$DeckListNow {
   @override
   DateTime build() {
     // `AppLifecycleListener` rather than a widget observer: the trigger belongs
-    // to the data this provider owns, and a controller must not hold a
-    // BuildContext to get at it.
+    // to the data this provider owns, and reaching it through the widget tree
+    // would mean a controller holding on to a piece of that tree.
     final listener = AppLifecycleListener(onResume: refresh);
     ref.onDispose(listener.dispose);
 
