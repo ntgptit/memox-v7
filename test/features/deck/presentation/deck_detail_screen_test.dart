@@ -100,6 +100,27 @@ void main() {
       expect(find.textContaining('Sqlite'), findsNothing);
     });
 
+    testWidgets('tapping retry actually re-reads the deck', (tester) async {
+      // The button existing was asserted above; that it *does* something was
+      // not. Worth its own case because the wiring is easy to get subtly wrong:
+      // this screen used to reach the container through
+      // `ProviderScope.containerOf` from inside a `StatelessWidget` that had no
+      // `ref`, while the sibling list screen used `ref.invalidate`. That left two
+      // idioms doing one job, which is the kind of thing a clone copies at
+      // random.
+      final repository = FakeDeckRepository.failing(
+        const DatabaseFailure(message: 'unavailable'),
+      );
+
+      await pumpDetail(tester, repository);
+      final int readsBeforeRetry = repository.childDecksCalls.length;
+
+      await tester.tap(find.text(english.retryAction));
+      await tester.pump();
+
+      expect(repository.childDecksCalls.length, greaterThan(readsBeforeRetry));
+    });
+
     testWidgets('children are listed and the title is the deck name', (
       tester,
     ) async {
