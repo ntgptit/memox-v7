@@ -621,3 +621,133 @@ and `deck_move_picker_test.dart` out of the actions test. Both are real seams.
 - **The strip is not keyboard-scrollable** beyond what focus traversal gives it.
   Web is the E2E channel, not a production target (AD-04), so this is deferred
   rather than dismissed.
+
+---
+
+# Addendum 3 — four review notes, and what measuring them changed
+
+Four findings from review, ordered by the reviewer as *"làm xong 1 và 2 là hết
+cảm giác xấu; 3 và 4 là polish"*. Three held. One did not survive measurement,
+and one of the proposed fixes would have made things worse — both are below with
+the numbers.
+
+## 1. Light mode had no depth — confirmed, but not for the stated reason
+
+The note was "card trắng trên nền gần trắng, không border/shadow". The card **did**
+have a 1px border. What it did not have was a *visible* one:
+
+| | light | dark |
+|---|---|---|
+| card surface vs page | 1.09:1 | 1.17:1 |
+| card border vs card surface | **1.40:1** | **1.82:1** |
+| card border vs page | 1.28:1 | 2.12:1 |
+
+That is the actual defect, and it is exactly the reviewer's second sentence: one
+mechanism, two strengths. Dark read as correct because its border was 30% stronger.
+
+**The suggested value would have made it worse.** `#E5E7EB` measures **1.14:1**
+against the page where the existing `#D7DAE3` already measured 1.28:1 — it is a
+lighter grey, not a darker one.
+
+`borderSubtleLight` is now `#BEC0C3`: **1.82:1** against the card, matching dark to
+two decimal places. It is near-neutral rather than blue-grey because
+`app_palette_test.dart` rejected the first candidate at that luminance
+(`#B9BECD`) for spending more of the light canvas's chroma budget than the page
+itself does — a rule this work discovered rather than one it knew.
+
+Not pushed to the 3.0:1 non-text floor: at that strength (around `#8A92AC`) every
+card, chip and input reads as a ruled table. WCAG 1.4.11 covers graphics
+*required to understand the content*, and the content inside these surfaces is
+legible on its own.
+
+**The symmetry is now a test, not an intention.** `app_theme_test.dart` asserts a
+floor in both modes *and* that the two ratios differ by less than 0.25 — a floor
+alone would let light drift back to a hairline while dark stayed strong, which is
+the exact state this replaced.
+
+One token, so this fixed the card, the filter pills, the text fields, the dialogs
+and the sheets at once. Nineteen goldens moved; the text-field resting state in
+particular went from an invisible outline to a visible one.
+
+## 2. Three-line card, with the scheduler on its own row — agreed
+
+The third line existed for a reason that had expired. It was moved out at M4.12
+because `46 cards · 5 cards due · Eight boxes` wrapped on every card at 390 wide,
+and the fix then was a new row. The fix now is shorter copy:
+`46 cards · 5 due · 8 boxes` fits, so the row is gone.
+
+`deckDueCountLabel` dropped its noun — the clause before it already says "cards" —
+and `schedulerShortLabel` is a second, compact form of the study-mode name rather
+than a truncation at the call site, because the create form's picker has a whole
+row and should still read "Eight boxes".
+
+## 3. "Nothing due" in green — half confirmed
+
+**The emphasis point is right.** `success` at `w600` put the loudest thing on the
+card on the one fact that asks for no action, so a list of finished decks read as
+a list of alerts. It is now the same quiet grey as the counts beside it, and
+colour plus weight are spent only on the state that wants a tap.
+
+**The contrast suspicion is not.** Amber on a white card measures **5.41:1**
+against a 4.5 floor, and the green it replaced measured 5.91:1. Both passed. The
+reason the theme's own contrast test never flagged them is that they were never
+failing — and `test/core/theme/app_theme_test.dart` has been asserting every
+semantic colour against both card and page since M3.5b.
+
+This does not weaken "never colour alone" (UC-06 step 3): the due state is still
+carried by an icon, by words *and* by colour. What changed is that the *absence*
+of that state stopped being decorated.
+
+## 4a. The breadcrumb repeated the title — agreed, and it exposed a bug
+
+The last step was the current deck, on the argument that a path needs somewhere to
+terminate. On this screen it does not: the app-bar title one line above says the
+same word in much larger type, so the step spent a third of the strip repeating it.
+It now shows ancestors only, which also makes every element of the strip
+actionable.
+
+Rendering the change immediately showed something the code review had not:
+`MxBreadcrumb` styled its **last item** as the "you are here" step. That was the
+same thing as "the step with no `onTap`" only while every caller ended its path
+with the current deck. The moment the deck list stopped, its final ancestor was a
+working link drawn as though it were not one. The rule is now derived from
+`onTap`, where it always belonged.
+
+## 4b. Two nav items pinned to the edges — agreed
+
+`NavigationBar` divides its width evenly, so two destinations land at the quarter
+and three-quarter marks with a void between them that reads as a missing tab.
+
+`MxNavigationBar` now caps the destination row at `destinations.length × 120` and
+centres it. Multiplying by the count means **the cap disarms itself**: at four
+destinations the row wants more width than a phone has and the constraint stops
+applying, which is the arrangement Material designed the even split for. A fixed
+maximum would need revisiting every time a tab is added.
+
+It is seamless because `navigationBarTheme.backgroundColor` and
+`scaffoldBackgroundColor` are the same token — the bar paints the page colour, so
+narrowing it leaves no band edge to notice.
+
+A `Row`, not a `Center` or an `Align`: both of those expand to fill, and in the
+Scaffold's `bottomNavigationBar` slot that made the bar claim the whole body — the
+list scrolled underneath it and the destinations stopped hit-testing. Three
+existing shell tests caught that within a minute of writing it.
+
+**Not done: docking the FAB into the bar.** That replaces `NavigationBar` with a
+`BottomAppBar`, losing the M3 indicator and label semantics, and it would move the
+floating action from the screen into the shell — so `features/` would have to hand
+a button to `app/`, which is the dependency direction AD-13 exists to prevent.
+
+## Verification
+
+| | |
+|---|---|
+| `flutter analyze` | clean |
+| `flutter test` | **931 pass** |
+| Visual audits | 97 |
+| Goldens | 19 updated and reviewed, all of them consequences of the border token or the bar width |
+| `check_generated.sh` · `check_architecture.sh` · guard · `check_docs.sh` | all clean |
+| `dod_check.sh` | mechanical gates passed |
+
+`deck_path_test.dart` was split out of `deck_list_level_test.dart` at the
+400-line guard.

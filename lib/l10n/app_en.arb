@@ -57,7 +57,7 @@
     },
     "description": "Total number of cards in a deck's whole tree, shown on each row of the deck list."
   },
-  "deckDueCountLabel": "{count, plural, =1{1 card due} other{{count} cards due}}",
+  "deckDueCountLabel": "{count, plural, other{{count} due}}",
   "@deckDueCountLabel": {
     "placeholders": {
       "count": {
@@ -125,6 +125,14 @@
   "schedulerEightBoxLabel": "Eight boxes",
   "@schedulerEightBoxLabel": {
     "description": "Name of the eight-box study mode, shown on deck rows and in the study-mode picker."
+  },
+  "schedulerEightBoxShortLabel": "8 boxes",
+  "@schedulerEightBoxShortLabel": {
+    "description": "Compact name of the eight-box study mode, for the one-line deck summary where the full name would wrap."
+  },
+  "schedulerUnknownShortLabel": "Unknown mode",
+  "@schedulerUnknownShortLabel": {
+    "description": "Compact form of the unsupported-study-mode label, for the one-line deck summary."
   },
   "schedulerSm2Label": "SM-2",
   "@schedulerSm2Label": {

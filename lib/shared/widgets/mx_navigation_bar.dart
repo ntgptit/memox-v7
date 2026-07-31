@@ -1,5 +1,22 @@
 import 'package:flutter/material.dart';
 
+/// How much width one destination may claim before the row stops growing.
+///
+/// `NavigationBar` divides its width evenly, so with two destinations on a phone
+/// they land at the quarter and three-quarter marks — one hard against each
+/// edge, with a void between them that reads as a missing tab rather than as
+/// space. Capping the row and centring it puts them either side of the middle.
+///
+/// Multiplied by the destination count, so **the cap disarms itself**: at four
+/// destinations the row wants more width than a phone has and the constraint
+/// stops applying, which is the arrangement Material designed the even split for.
+/// A fixed maximum would instead have to be revisited every time a tab is added.
+///
+/// Seamless because `navigationBarTheme.backgroundColor` and
+/// `scaffoldBackgroundColor` are the same token: the bar paints the page colour,
+/// so narrowing it leaves no band edge to notice.
+const double _kWidthPerDestination = 120;
+
 /// The app's bottom navigation bar.
 ///
 /// **Render-only, and deliberately ignorant.** It takes a selected index, a
@@ -19,8 +36,9 @@ import 'package:flutter/material.dart';
 /// the app.
 ///
 /// Height, colours and the indicator come from `navigationBarTheme` in
-/// `app_theme.dart`. Nothing is set here, so a spacing decision cannot differ
-/// between this widget and the theme that is supposed to own it.
+/// `app_theme.dart`. The one thing set here is how wide the destination row is
+/// allowed to grow — see [_kWidthPerDestination] — because `NavigationBarThemeData`
+/// has no property for it and the alternative is every caller solving it again.
 class MxNavigationBar extends StatelessWidget {
   const MxNavigationBar({
     required this.selectedIndex,
@@ -47,15 +65,30 @@ class MxNavigationBar extends StatelessWidget {
       'A navigation bar needs at least two destinations.',
     );
 
-    return NavigationBar(
-      selectedIndex: selectedIndex,
-      onDestinationSelected: onDestinationSelected,
-      destinations: destinations,
-      // Labels always visible, on every destination. The M3 default hides the
-      // unselected ones, which leaves three unlabelled icons and one labelled
-      // — and makes selection readable only as a colour difference, which is
-      // exactly what an accessibility review rejects.
-      labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+    // A `Row`, not an `Align` or a `Center`: both of those expand to fill, and in
+    // the Scaffold's `bottomNavigationBar` slot that made the bar claim the whole
+    // body — the list then scrolled underneath it and the destinations stopped
+    // hit-testing. A `Row` stretches only across, and takes its height from the
+    // bar itself.
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: destinations.length * _kWidthPerDestination,
+          ),
+          child: NavigationBar(
+            selectedIndex: selectedIndex,
+            onDestinationSelected: onDestinationSelected,
+            destinations: destinations,
+            // Labels always visible, on every destination. The M3 default hides
+            // the unselected ones, which leaves three unlabelled icons and one
+            // labelled — and makes selection readable only as a colour
+            // difference, which is exactly what an accessibility review rejects.
+            labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+          ),
+        ),
+      ],
     );
   }
 }

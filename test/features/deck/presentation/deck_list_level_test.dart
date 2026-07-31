@@ -11,7 +11,6 @@ import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
 import 'package:memox/features/deck/presentation/widgets/deck_tile_widget.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
-import 'package:memox/shared/widgets/mx_breadcrumb.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
 
@@ -28,8 +27,9 @@ import 'support/fake_deck_repository.dart';
 /// is the whole claim of the unification: everything below is the level-dependent
 /// behaviour, and it is a short list.
 ///
-/// The create-action matrix lives in `deck_level_create_test.dart`; the write
-/// flows reached from the action menu in `deck_level_actions_test.dart`.
+/// The create-action matrix lives in `deck_level_create_test.dart`, the write
+/// flows in `deck_level_actions_test.dart`, and the breadcrumb in
+/// `deck_path_test.dart`.
 void main() {
   final english = AppLocalizationsEn();
 
@@ -187,7 +187,10 @@ void main() {
       expect(find.text('Hiragana'), findsOneWidget);
       expect(find.textContaining('42'), findsOneWidget);
       expect(find.textContaining('7'), findsOneWidget);
-      expect(find.text(english.schedulerEightBoxLabel), findsOneWidget);
+      expect(
+        find.textContaining(english.schedulerEightBoxShortLabel),
+        findsOneWidget,
+      );
     });
 
     testWidgets('a later emission updates the child list', (tester) async {
@@ -289,109 +292,6 @@ void main() {
 
         expect(tester.takeException(), isNull);
       }
-    });
-  });
-
-  group('the path back up', () {
-    testWidgets('a deck with ancestors shows them, current step last', (
-      tester,
-    ) async {
-      await pumpLevel(
-        tester,
-        serving(
-          fakeSubDeck(id: 'deck-1', name: 'Hiragana', parentId: 'branch'),
-          ancestors: fakePath(<String>['Japanese N5', 'Kana']),
-        ),
-      );
-
-      expect(find.byType(MxBreadcrumb), findsOneWidget);
-      final MxBreadcrumb crumb = tester.widget(find.byType(MxBreadcrumb));
-      expect(crumb.items.map((MxBreadcrumbItem i) => i.label), <String>[
-        'Japanese N5',
-        'Kana',
-        'Hiragana',
-      ]);
-      // The last step is where the user already is, so it goes nowhere.
-      expect(crumb.items.last.onTap, isNull);
-    });
-
-    testWidgets('a root deck shows no breadcrumb at all', (tester) async {
-      // One level in, the only step above is the deck list, which Back and the
-      // Decks tab both already reach in one tap. A crumb there would be a third
-      // control doing the same thing.
-      await pumpLevel(
-        tester,
-        serving(fakeRootDeck(id: 'deck-1', name: 'Japanese N5')),
-      );
-
-      expect(find.byType(MxBreadcrumb), findsNothing);
-    });
-
-    testWidgets('tapping an ancestor navigates to that deck', (tester) async {
-      // Through the real router: the crumb calls `goNamed`, which needs a
-      // GoRouter above it, and the assertion that matters is the location it
-      // lands on rather than that a callback fired.
-      final repository = FakeDeckRepository(
-        deckList: (String? id) => Stream<DeckListSnapshot>.value(
-          DeckListSnapshot(
-            parent: fakeSubDeck(
-              id: id ?? 'deck-1',
-              name: 'Hiragana',
-              parentId: 'branch',
-            ),
-            ancestors: fakePath(<String>['Japanese N5']),
-            decks: const <DeckSummary>[],
-            nextDueAt: null,
-          ),
-        ),
-      );
-      final router = await pumpDeckApp(
-        tester,
-        repository: repository,
-        initialLocation: '/decks/deck-1',
-      );
-
-      await tester.tap(find.text('Japanese N5'));
-      await tester.pumpAndSettle();
-
-      expect(
-        router.routerDelegate.currentConfiguration.uri.path,
-        '/decks/path-0',
-      );
-    });
-
-    testWidgets('it is shown above an empty level too', (tester) async {
-      // Where the level has nothing in it is exactly where "where am I" is
-      // hardest to answer from what is on screen.
-      await pumpLevel(
-        tester,
-        serving(
-          fakeSubDeck(id: 'deck-1', name: 'Empty', parentId: 'branch'),
-          ancestors: fakePath(<String>['Japanese N5', 'Kana']),
-        ),
-      );
-
-      expect(find.byType(MxEmptyState), findsOneWidget);
-      expect(find.byType(MxBreadcrumb), findsOneWidget);
-    });
-
-    testWidgets('a full-depth path fits 320x568 at textScaler 2.0', (
-      tester,
-    ) async {
-      // BR-55 caps the tree at ten, so nine ancestors is the worst real case.
-      await pumpLevel(
-        tester,
-        serving(
-          fakeSubDeck(id: 'deck-1', name: 'Level ten', parentId: 'branch'),
-          ancestors: fakePath(<String>[
-            for (var i = 1; i <= 9; i++) 'Level number $i',
-          ]),
-        ),
-        surface: const Size(320, 568),
-        textScale: 2,
-      );
-
-      expect(tester.takeException(), isNull);
     });
   });
 }
