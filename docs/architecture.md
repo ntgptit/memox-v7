@@ -7,7 +7,7 @@
 | **Scope** | Quyết định ràng buộc nhiều tài liệu hoặc nhiều layer. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), hình dạng dữ liệu (`data-model.md`) |
 | **Source of truth for** | AD-xx · đánh đổi kiến trúc · phương án đã bị loại · lý do pin toolchain |
 | **Depends on** | `document-conventions.md`, `product.md` |
-| **Updated by task** | M4.10l (AD-14) |
+| **Updated by task** | M4.10o (AD-14) |
 | **Last updated** | 2026-07-30 |
 
 Format theo `document-conventions.md` §6.1. AD xếp theo số; ID vĩnh viễn (§7).
@@ -875,7 +875,7 @@ mode đó có hai.
 **5 · Mọi thứ được vẽ phải đến từ theme của app, kể cả khi Flutter có mặc định.**
 Một màu tồn tại như mặc định framework thì **vô hình với mọi phép quét mã nguồn**
 — đó là cách `Colors.black54` làm barrier sau mỗi dialog và sheet sống sót qua
-trọn một cuộc audit màu (M4.10j). Component nào app dùng thì app khai báo theme
+trọn một cuộc audit màu (M4.10m). Component nào app dùng thì app khai báo theme
 cho nó.
 
 ### Đánh đổi đã nhận
@@ -896,9 +896,9 @@ cho nó.
 - **Giữ card trắng thuần** (bỏ ở M4.10i) — nó là lựa chọn hợp lệ, nhưng nó để một
   surface duy nhất nằm ngoài hệ, và sau khi có shadow thì chi phí lightness không
   còn là lý do giữ.
-- **Mở strict visual audit sang overlay** (bỏ ở M4.10j) — auditor duyệt một màn
+- **Mở strict visual audit sang overlay** (bỏ ở M4.10m) — auditor duyệt một màn
   hình ở trạng thái nghỉ, trong khi một nửa render tree của overlay là nội dung
   người dùng đang bị cố ý ngăn không cho đọc. Làm nó xanh cần một danh sách
   allowance khẳng định chữ không đọc được là chấp nhận được.
-- **Thêm tuỳ chọn surface cho `MxListTile`** (bỏ ở M4.10k) — không caller nào cần,
+- **Thêm tuỳ chọn surface cho `MxListTile`** (bỏ ở M4.10n) — không caller nào cần,
   và tấm ảnh mới là thứ sai chứ không phải component.

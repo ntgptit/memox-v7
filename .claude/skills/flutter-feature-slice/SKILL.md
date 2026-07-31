@@ -176,6 +176,14 @@ Minimum for a feature to be done:
 - [ ] A strict visual audit companion per production screen (MX-VIS-001), one
       call per state, PASS in light and dark.
 - [ ] Golden tests if this feature added a shared component.
+- [ ] Every new screen registered in the Widgetbook catalog (`widgetbook/`): a
+      use-case that mounts the screen inside a `ProviderScope` with the domain
+      contract faked, knobs selecting the states worth looking at (empty, a
+      few items, long Vietnamese names, error). A new shared component gets a
+      knob-driven playground there too. This is the human-inspection
+      counterpart of the audits above — the machine checks catch overlap and
+      contrast, the catalog is where a person turns the viewport and theme and
+      *looks*. `widgetbook/README.md` has the how-to.
 
 `assets/feature_blueprint.md` has the table of which test belongs at which level,
 and the counts the Deck slice ended up with as a size reference.

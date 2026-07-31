@@ -59,6 +59,14 @@ Each needs light, dark, enabled, disabled, loading, and error where it applies.
 A button without a loading state means every caller invents its own, and they
 will not match.
 
+A new shared component is not done until it has a knob-driven playground in the
+Widgetbook catalog (`widgetbook/lib/components/`, registered in
+`widgetbook/lib/main.dart`) — the catalog is where every state is inspected
+under both themes, text scales and viewports without hunting through screens,
+and the CI smoke test fails if the tree stops building. New screens go in too,
+mounted with their domain contract faked; `widgetbook/README.md` has the
+how-to.
+
 Two failure modes to avoid, in tension with each other:
 
 - **The god component.** Twenty optional parameters, half mutually exclusive.

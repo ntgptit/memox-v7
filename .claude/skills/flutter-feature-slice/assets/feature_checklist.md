@@ -96,6 +96,8 @@ WBS task: `T<x.y>` · Use cases: `UC-xx` · Business rules: `BR-xx`
 - [ ] Widget: loaded, empty, error
 - [ ] Integration: main flow
 - [ ] Golden: any new shared component, light and dark
+- [ ] Widgetbook: new screen mounted as a use-case with faked contract and
+      state knobs; new shared component as a knob playground (`widgetbook/`)
 - [ ] **Every new guard or architecture test fault-injected**: create the
       violation, watch it fail, revert, watch it pass. Record what was injected
 - [ ] Every guard prints what it scanned and fails on zero — a rule that inspects
