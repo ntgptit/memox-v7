@@ -54,10 +54,13 @@ Tick a line only after the file exists on disk.
 
 ## ui_kits/memox-app/
 
-- [ ] `index.html` · `kitdata.js`
-- [x] `README.md`
-- [x] `DeckLevelScreen.jsx`
-- [ ] `DeckForms.jsx` · `ReviewScreen.jsx` · `ProfileScreen.jsx`
+- [x] `index.html` · `kitdata.js` · `README.md`
+- [x] `DeckLevelScreen.jsx` · `DeckForms.jsx` · `ReviewScreen.jsx` · `ProfileScreen.jsx`
+
+**The kit does not run as imported.** `index.html` loads `../../_ds_bundle.js`,
+which is the one file deliberately left out (see below), so opening it gives a
+blank frame. Everything it *would* render is here to read; making it run means
+fetching that one path.
 
 ## Not imported, and why
 
@@ -66,7 +69,7 @@ Tick a line only after the file exists on disk.
 | `assets/fonts/*.ttf`, `*.txt` | Already in this repo at `assets/fonts/` — the design project copied them **from** here. A second copy is ~1 MB of binary and a second thing to keep in step. `tokens/fonts.css` was re-pointed at `../../assets/fonts/` instead; that edit is the **only** deviation from the source project and is commented in the file itself. |
 | `test/design_preview/goldens/*.png` | Same: these are this repo's own goldens, copied out. `test/design_preview/goldens/` is canonical. |
 | `web/favicon.png`, `web/icons/Icon-192.png` | Flutter's untouched defaults, already in `web/`. |
-| `_ds_bundle.js` | A generated concatenation of the component sources that are imported individually here. Nothing in it is not already in `components/`. |
+| `_ds_bundle.js` | A generated concatenation of the component sources. Left out as a build artifact — but it is what `ui_kits/memox-app/index.html` actually loads, so the kit will not render until someone pulls it: `DesignSync get_file` on `_ds_bundle.js` into `design_system/_ds_bundle.js`. |
 | `uploads/학비_송금_한이찬.jpg` | **Not a design file.** The name reads as a personal tuition-remittance document. It has no relationship to the design system and does not belong in a source repository — flagged rather than copied. |
 
 ## Where the snapshot already disagrees with the code
@@ -77,7 +80,7 @@ snapshot. In every row the repo is right and the snapshot is stale.
 | Snapshot says | Repo does | Note |
 |---|---|---|
 | `MxErrorState.prompt.md`: "Retry is a `secondary` button, never primary" | Retry is **primary** | Changed in M4.10n so `MxErrorState` and `MxEmptyState` — two states one keystroke apart — stop looking like different components. |
-| `tokens/colors.css`: `--color-web-letterbox:#6E7288` | `AppColors.webLetterbox` is `#14162A` | The snapshot's value is a mid grey; the repo's is the seed-tinted near-black the web build actually letterboxes with. |
+| `tokens/colors.css`: `--color-web-letterbox:#6E7288` | `AppColors.webLetterbox` is `#14162A` | Not a straight contradiction — `#6E7288` is the grey `ui_kits/.../index.html` paints *behind its phone frame*, and the token was named after it. The repo's value is the seed-tinted near-black the Flutter web build letterboxes with. Two different surfaces sharing one token name. |
 | `readme.md`: "**Intentional additions** — two" then lists three | — | Its own count is off by one; `MxIcon`, `MxProgressBar` and `MxSearchField` are all additions. |
 | `ui_kits/.../README.md` and `github.md` both name `SettingsScreen.jsx` | The project ships `ProfileScreen.jsx` | The file was renamed and the two prose files were not. |
 
