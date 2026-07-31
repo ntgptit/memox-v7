@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_icon_size.dart';
-import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/theme_context_extension.dart';
+
+/// The focus underline is twice the font's own stroke — the kit's
+/// `--border-focus`, and the same value `mx_text_button.dart` resolves for its
+/// own label. Declared here rather than shared: two widgets is not yet a token,
+/// and `core/theme/` has no home for a stroke width.
+const double _kFocusUnderlineThickness = 2;
 
 /// One step in an [MxBreadcrumb].
 ///
@@ -50,13 +55,17 @@ class MxBreadcrumbItem {
 /// [collapseAfter]'s default of 4: first step, fold, last two.
 ///
 /// It still scrolls horizontally, so nothing can overflow even expanded, and it
-/// scrolls to its deep end on arrival — a path the user has just walked into
-/// should show where they are, not where they started.
+/// **starts at the left and stays there.** It used to jump to its deep end on
+/// arrival, on the argument that a path you have just walked into should show
+/// where you are rather than where you started. The fold is what made that
+/// argument obsolete: above [collapseAfter] steps the strip is already first ·
+/// fold · last two, so the deep end is on screen without scrolling, and the jump
+/// bought nothing while costing the one thing a path is read for — you could no
+/// longer see where it begins.
 ///
 /// A step with no [MxBreadcrumbItem.onTap] renders as quiet text rather than as a
-/// control. That is how a caller marks the step the user is already on — though
-/// the deck list deliberately does not include one, because its app-bar title
-/// already says it.
+/// control. That is how a caller marks the step the user is already on, and the
+/// deck list now ends every path with one.
 ///
 /// Every step is its own tap target at [AppSpacing.minimumTouchTarget], so a deep
 /// path is a row of real controls rather than a line of text with hot spots in it.
@@ -96,7 +105,6 @@ class MxBreadcrumb extends StatefulWidget {
 }
 
 class _MxBreadcrumbState extends State<MxBreadcrumb> {
-  final ScrollController _controller = ScrollController();
   bool _isExpanded = false;
 
   @override
@@ -106,26 +114,6 @@ class _MxBreadcrumbState extends State<MxBreadcrumb> {
     // expansion would leave a two-step path rendering as though it had been
     // unfolded.
     if (oldWidget.items.length != widget.items.length) _isExpanded = false;
-    _scrollToDeepEnd();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollToDeepEnd();
-  }
-
-  void _scrollToDeepEnd() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!_controller.hasClients) return;
-      _controller.jumpTo(_controller.position.maxScrollExtent);
-    });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
   }
 
   @override
@@ -141,7 +129,6 @@ class _MxBreadcrumbState extends State<MxBreadcrumb> {
       explicitChildNodes: true,
       label: widget.semanticLabel,
       child: SingleChildScrollView(
-        controller: _controller,
         scrollDirection: Axis.horizontal,
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -177,11 +164,22 @@ class _MxBreadcrumbState extends State<MxBreadcrumb> {
 }
 
 /// The middle of a long path, as one control that opens it.
-class _MxBreadcrumbFold extends StatelessWidget {
+///
+/// Styled like the steps either side of it rather than like a button: it sits
+/// inside the same strip, and one filled hover box among link hovers is the
+/// inconsistency that made the strip read as a toolbar in the first place.
+class _MxBreadcrumbFold extends StatefulWidget {
   const _MxBreadcrumbFold({required this.hiddenCount, required this.onExpand});
 
   final int hiddenCount;
   final VoidCallback onExpand;
+
+  @override
+  State<_MxBreadcrumbFold> createState() => _MxBreadcrumbFoldState();
+}
+
+class _MxBreadcrumbFoldState extends State<_MxBreadcrumbFold> {
+  bool _isHovered = false;
 
   @override
   Widget build(BuildContext context) {
@@ -190,12 +188,14 @@ class _MxBreadcrumbFold extends StatelessWidget {
       // The count, not the glyph: "…" announced on its own says nothing about
       // what pressing it does.
       label: MaterialLocalizations.of(context).moreButtonTooltip,
-      value: '$hiddenCount',
+      value: '${widget.hiddenCount}',
       child: Material(
         type: MaterialType.transparency,
         child: InkWell(
-          onTap: onExpand,
-          borderRadius: BorderRadius.circular(AppRadius.sm),
+          onTap: widget.onExpand,
+          onHover: (bool value) => setState(() => _isHovered = value),
+          overlayColor: _noOverlay(context),
+          splashFactory: NoSplash.splashFactory,
           child: ConstrainedBox(
             constraints: const BoxConstraints(
               minHeight: AppSpacing.minimumTouchTarget,
@@ -205,7 +205,9 @@ class _MxBreadcrumbFold extends StatelessWidget {
               child: Icon(
                 Icons.more_horiz,
                 size: AppIconSize.sm,
-                color: context.colors.onSurfaceVariant,
+                color: _isHovered
+                    ? context.colors.onSurface
+                    : context.colors.onSurfaceVariant,
               ),
             ),
           ),
@@ -215,16 +217,42 @@ class _MxBreadcrumbFold extends StatelessWidget {
   }
 }
 
-/// One step: a button when there is somewhere to go, text when there is not.
-class _MxBreadcrumbStep extends StatelessWidget {
+/// Suppresses every ink overlay an `InkWell` would paint — hover, focus, press.
+///
+/// A scheme colour at alpha zero rather than the framework's transparent
+/// constant, which the design-token guard rightly reads as a hardcoded colour.
+WidgetStateProperty<Color> _noOverlay(BuildContext context) =>
+    WidgetStatePropertyAll<Color>(context.colors.primary.withAlpha(0));
+
+/// One step: a link when there is somewhere to go, text when there is not.
+///
+/// **A link, not a button — every state lives on the text.** It was an `InkWell`
+/// with a rounded highlight, which drew a filled chip behind the word on hover:
+/// four or five of those in a row read as a toolbar of buttons rather than as a
+/// path, and the boxes appear and vanish under the pointer as it crosses the
+/// strip. `MxTextButton` settled this shape for the project — states on the
+/// label, no surface under it — and a breadcrumb step is the same kind of thing.
+///
+/// Hover and press take the label to the full ink and underline it; focus
+/// underlines at twice the font's stroke. That is the kit's own rule for
+/// `.mx-crumbs__step--link`, minus the background it also painted.
+class _MxBreadcrumbStep extends StatefulWidget {
   const _MxBreadcrumbStep({required this.item, this.icon});
 
   final MxBreadcrumbItem item;
   final IconData? icon;
 
   @override
+  State<_MxBreadcrumbStep> createState() => _MxBreadcrumbStepState();
+}
+
+class _MxBreadcrumbStepState extends State<_MxBreadcrumbStep> {
+  bool _isHovered = false;
+  bool _isFocused = false;
+
+  @override
   Widget build(BuildContext context) {
-    final tap = item.onTap;
+    final tap = widget.item.onTap;
 
     // Quiet when there is nowhere to go — **derived from [MxBreadcrumbItem.onTap],
     // not from the position in the list.** It was keyed on "is this the last
@@ -233,44 +261,48 @@ class _MxBreadcrumbStep extends StatelessWidget {
     // immediate: its final ancestor was a working link drawn as though it were
     // not one. A control's appearance has to follow whether it acts.
     //
-    // **Both states are `onSurfaceVariant`, and weight is what separates them.**
-    // A link used to be `onSurface`, which made the path as loud as the app-bar
-    // title one line above it. A breadcrumb is chrome; the design carries the
-    // whole distinction in weight for that reason, and this now matches.
-    final style = context.texts.labelMedium?.copyWith(
-      color: context.colors.onSurfaceVariant,
-      fontWeight: tap == null ? FontWeight.w400 : FontWeight.w600,
-    );
-
-    final content = Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        if (icon != null) ...<Widget>[
-          Icon(
-            icon,
-            size: AppIconSize.sm,
+    // **Both states rest at `onSurfaceVariant`, and weight is what separates
+    // them.** A link used to be `onSurface`, which made the path as loud as the
+    // app-bar title one line above it. A breadcrumb is chrome; the design
+    // carries the whole distinction in weight for that reason, and this matches.
+    // **No 48 floor on this branch.** `AppSpacing` calls the touch target a
+    // floor rather than a step because it applies to things a finger has to hit,
+    // and this step is a statement. In a mixed strip nothing moves — the row is
+    // as tall as its tallest child and the tappable steps still carry 48 — so
+    // the only strip that shrinks is one made entirely of text. That is the deck
+    // list, whose single `Root` step arrived into a screen the compact scale had
+    // already trimmed to four spare pixels at `textScaler` 2.0.
+    if (tap == null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+        child: Text(
+          widget.item.label,
+          style: context.texts.labelMedium?.copyWith(
             color: context.colors.onSurfaceVariant,
           ),
-          const SizedBox(width: AppSpacing.xs),
-        ],
-        Text(item.label, style: style, maxLines: 1),
-      ],
-    );
-
-    final label = ConstrainedBox(
-      constraints: const BoxConstraints(
-        minHeight: AppSpacing.minimumTouchTarget,
-      ),
-      child: Center(
-        widthFactor: 1,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-          child: content,
+          maxLines: 1,
         ),
-      ),
-    );
+      );
+    }
 
-    if (tap == null) return label;
+    // Quiet at rest, full ink once the pointer is on it — not a blend toward the
+    // ink the way `MxTextButton` does it. That button starts from an accent and
+    // has somewhere to travel; a crumb starts at `onSurfaceVariant`, and the
+    // kit's rule for it goes the whole way to the primary text colour.
+    //
+    // `decorationColor` is set explicitly: left null the engine falls back to a
+    // default that does not track this colour, and the underline visibly
+    // disagrees with the text it belongs to.
+    final ink = _isHovered
+        ? context.colors.onSurface
+        : context.colors.onSurfaceVariant;
+    final style = context.texts.labelMedium?.copyWith(
+      color: ink,
+      fontWeight: FontWeight.w600,
+      decoration: _isHovered || _isFocused ? TextDecoration.underline : null,
+      decorationColor: ink,
+      decorationThickness: _isFocused ? _kFocusUnderlineThickness : null,
+    );
 
     return Semantics(
       button: true,
@@ -278,8 +310,38 @@ class _MxBreadcrumbStep extends StatelessWidget {
         type: MaterialType.transparency,
         child: InkWell(
           onTap: tap,
-          borderRadius: BorderRadius.circular(AppRadius.sm),
-          child: label,
+          onHover: (bool value) => setState(() => _isHovered = value),
+          onFocusChange: (bool value) => setState(() => _isFocused = value),
+          // No hover surface, no focus surface, no ripple — the whole point of
+          // the change. The states are on the text instead.
+          overlayColor: _noOverlay(context),
+          splashFactory: NoSplash.splashFactory,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minHeight: AppSpacing.minimumTouchTarget,
+            ),
+            child: Center(
+              widthFactor: 1,
+              child: Padding(
+                // Horizontal `sm` so the word does not touch the chevrons on
+                // either side; the vertical floor is height rather than padding,
+                // as `AppSpacing` intends for a touch target.
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: AppSpacing.xs,
+                  children: <Widget>[
+                    // The glyph is deliberately outside the underline: a
+                    // decoration that reached it would draw a rule under the
+                    // home icon as well as the word.
+                    if (widget.icon != null)
+                      Icon(widget.icon, size: AppIconSize.sm, color: ink),
+                    Text(widget.item.label, style: style, maxLines: 1),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );

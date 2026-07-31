@@ -11,6 +11,7 @@ import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_breadcrumb.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
+import 'package:memox/shared/widgets/mx_search_field.dart';
 
 import 'support/deck_screen_harness.dart';
 import 'support/fake_deck_repository.dart';
@@ -85,7 +86,7 @@ void main() {
       // — and the result was a strip that answered "where am I" only in the
       // middle of the tree.
       expect(crumb.items.map((MxBreadcrumbItem i) => i.label), <String>[
-        english.decksTitle,
+        english.deckPathRootLabel,
         'Japanese N5',
         'Kana',
         'Hiragana',
@@ -99,9 +100,7 @@ void main() {
       expect(crumb.items.last.onTap, isNull);
     });
 
-    testWidgets('a root deck gets one too — the list, then itself', (
-      tester,
-    ) async {
+    testWidgets('a root deck gets one too — Root, then itself', (tester) async {
       // The case that used to render nothing, and the reason this changed: one
       // level in is where a user first looks for a breadcrumb, and finding none
       // there reads as the component being broken rather than as a decision.
@@ -114,12 +113,58 @@ void main() {
 
       final MxBreadcrumb crumb = tester.widget(find.byType(MxBreadcrumb));
       expect(crumb.items.map((MxBreadcrumbItem i) => i.label), <String>[
-        english.decksTitle,
+        english.deckPathRootLabel,
         'Japanese N5',
       ]);
     });
 
-    testWidgets('the first step goes back to the deck list', (tester) async {
+    testWidgets('the deck list itself shows Root, and it does not act', (
+      tester,
+    ) async {
+      // The top of the tree is a place like any other, so it says so. It is not
+      // a link there: tapping it would navigate to the screen already on screen,
+      // which is the same reason the last step of a deeper path is text.
+      final english = AppLocalizationsEn();
+
+      await pumpDeckScreen(
+        tester,
+        repository: FakeDeckRepository.withSummaries(<DeckSummary>[
+          fakeSummary(id: '1', name: 'Japanese N5'),
+        ]),
+        screen: const DeckListScreen(),
+      );
+
+      final MxBreadcrumb crumb = tester.widget(find.byType(MxBreadcrumb));
+      expect(crumb.items.map((MxBreadcrumbItem i) => i.label), <String>[
+        english.deckPathRootLabel,
+      ]);
+      expect(crumb.items.single.onTap, isNull);
+    });
+
+    testWidgets('it starts at the gutter, not centred in the strip', (
+      tester,
+    ) async {
+      // Geometry, because "it looks left-aligned" is not a property any widget
+      // exposes. The subheader's Column defaulted to centring its children; the
+      // search field is full width so it hid that, and only the breadcrumb —
+      // which is as wide as its own steps — showed a path floating in the middle
+      // of a screen whose every other element starts at the gutter.
+      await pumpDeckScreen(
+        tester,
+        repository: FakeDeckRepository.withSummaries(<DeckSummary>[
+          fakeSummary(id: '1', name: 'Japanese N5'),
+        ]),
+        screen: const DeckListScreen(),
+      );
+
+      expect(
+        tester.getTopLeft(find.byType(MxBreadcrumb)).dx,
+        tester.getTopLeft(find.byType(MxSearchField)).dx,
+        reason: 'the path and the search field share one left edge',
+      );
+    });
+
+    testWidgets('the Root step goes back to the deck list', (tester) async {
       // Through the real router, like the ancestor case below: what the step
       // does is the whole of its behaviour.
       final english = AppLocalizationsEn();
@@ -145,7 +190,7 @@ void main() {
       await tester.tap(
         find.descendant(
           of: find.byType(MxBreadcrumb),
-          matching: find.text(english.decksTitle),
+          matching: find.text(english.deckPathRootLabel),
         ),
       );
       await tester.pumpAndSettle();

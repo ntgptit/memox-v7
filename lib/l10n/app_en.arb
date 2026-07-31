@@ -214,6 +214,10 @@
   "@deckPathSemanticLabel": {
     "description": "Screen-reader label introducing the breadcrumb strip that shows where in the deck tree the user is."
   },
+  "deckPathRootLabel": "Root",
+  "@deckPathRootLabel": {
+    "description": "First step of the breadcrumb: the top of the deck tree, above every root deck. Names the top of the hierarchy rather than the screen — the screen's own title is 'Decks', and a path whose first step repeated it read as a link back to where the reader already was. Not tappable while the user is on that screen."
+  },
   "deckFilterAllLabel": "All decks",
   "@deckFilterAllLabel": {
     "description": "Label of the deck-list filter pill when every deck is shown. Tapping it switches to showing only decks with cards due."

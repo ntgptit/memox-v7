@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_spacing.dart';
@@ -101,6 +102,63 @@ void main() {
     });
   });
 
+  group('a step is a link, not a button', () {
+    /// Puts a mouse pointer on [label] and leaves it there.
+    Future<void> hover(WidgetTester tester, String label) async {
+      final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: Offset.zero);
+      addTearDown(gesture.removePointer);
+      await gesture.moveTo(tester.getCenter(find.text(label)));
+      await tester.pumpAndSettle();
+    }
+
+    TextStyle styleOf(WidgetTester tester, String label) =>
+        tester.widget<Text>(find.text(label)).style!;
+
+    testWidgets('rests quiet, with nothing under it', (tester) async {
+      await pump(tester, path(3));
+
+      final style = styleOf(tester, 'Level 0');
+      expect(style.decoration, isNot(TextDecoration.underline));
+      expect(
+        style.color,
+        buildLightTheme().colorScheme.onSurfaceVariant,
+        reason: 'a path is chrome, not a heading',
+      );
+    });
+
+    testWidgets('hovering moves the label, not a surface behind it', (
+      tester,
+    ) async {
+      // The whole point of the change. An `InkWell` highlight drew a filled
+      // rounded chip behind each word, and four of those in a row read as a
+      // toolbar of buttons rather than as a path. Asserted on the label because
+      // that is where the state now lives — if a surface ever comes back, this
+      // test keeps passing, so `overlayColor` is suppressed in the widget and
+      // the ink layer has nothing to paint.
+      await pump(tester, path(3));
+      await hover(tester, 'Level 0');
+
+      final style = styleOf(tester, 'Level 0');
+      expect(style.decoration, TextDecoration.underline);
+      expect(style.color, buildLightTheme().colorScheme.onSurface);
+      expect(
+        style.decorationColor,
+        style.color,
+        reason: 'the rule must not disagree with the word it belongs to',
+      );
+    });
+
+    testWidgets('the step the user is on never reacts', (tester) async {
+      await pump(tester, path(3));
+      await hover(tester, 'Level 2');
+
+      final style = styleOf(tester, 'Level 2');
+      expect(style.decoration, isNot(TextDecoration.underline));
+      expect(style.color, buildLightTheme().colorScheme.onSurfaceVariant);
+    });
+  });
+
   group('semantics', () {
     testWidgets('an ancestor announces itself as a button', (tester) async {
       // An `InkWell` contributes a tap action and focusability but **not** the
@@ -178,6 +236,21 @@ void main() {
       await pump(tester, path(10), surface: const Size(320, 568), textScale: 2);
 
       expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('opens at its left end, not its deep one', (tester) async {
+      // It used to jump to the deep end on arrival. The fold made that
+      // unnecessary — first · fold · last two already puts the deep end on
+      // screen — and the jump cost the thing a path is read for: where it
+      // begins. Measured on the scroll position, because "it looks left-aligned"
+      // and "it is scrolled to 0" are the same claim only if nobody scrolls it.
+      await pump(tester, path(10), surface: const Size(320, 568));
+
+      expect(
+        tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels,
+        0,
+      );
+      expect(find.text('Level 0'), findsOneWidget);
     });
 
     testWidgets('scrolls rather than truncating', (tester) async {

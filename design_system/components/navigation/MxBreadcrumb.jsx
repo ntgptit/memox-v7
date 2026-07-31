@@ -11,17 +11,21 @@ import { MxIcon } from '../core/MxIcon.jsx';
  * the parent they are about to go back to — while the middle is the part they
  * scrolled past. The fold is reversible; a truncation is not.
  *
+ * It starts at the LEFT and stays there. It used to jump to its deep end on
+ * arrival; the fold made that obsolete, because above `collapseAfter` the strip
+ * is already first · fold · last two — the deep end is on screen without
+ * scrolling, and the jump cost the one thing a path is read for, which is seeing
+ * where it begins.
+ *
  * A step with no onTap renders as quiet text rather than a control that does
  * nothing — derived from the callback, never from position in the list.
+ *
+ * Every state is on the TEXT, never on a surface behind it. A hover that fills a
+ * rounded box behind each word turns a path into a row of buttons, and the boxes
+ * flick on and off as the pointer crosses the strip.
  */
 export function MxBreadcrumb({ items, semanticLabel, rootIcon, collapseAfter = 4 }) {
   const [expanded, setExpanded] = React.useState(false);
-  const strip = React.useRef(null);
-
-  // A path the user just walked into should show its deep end, not its root.
-  React.useEffect(() => {
-    if (strip.current) strip.current.scrollLeft = strip.current.scrollWidth;
-  }, [items.length, expanded]);
 
   if (!items || items.length === 0) return null;
 
@@ -29,7 +33,7 @@ export function MxBreadcrumb({ items, semanticLabel, rootIcon, collapseAfter = 4
   const shown = folded ? [items[0], { fold: true }, ...items.slice(-2)] : items;
 
   return (
-    <div className="mx-crumbs" role="navigation" aria-label={semanticLabel} ref={strip}>
+    <div className="mx-crumbs" role="navigation" aria-label={semanticLabel}>
       {shown.map((item, i) => (
         <React.Fragment key={item.fold ? 'fold' : item.label + i}>
           {i > 0 ? <MxIcon name="chevron_right" filled size="var(--icon-sm)" className="mx-crumbs__sep" /> : null}
@@ -38,7 +42,7 @@ export function MxBreadcrumb({ items, semanticLabel, rootIcon, collapseAfter = 4
           ) : item.onTap ? (
             <button type="button" className="mx-crumbs__step mx-crumbs__step--link" onClick={item.onTap}>
               {i === 0 && rootIcon ? <MxIcon name={rootIcon} filled size="var(--icon-sm)" /> : null}
-              {item.label}
+              <span className="mx-crumbs__label">{item.label}</span>
             </button>
           ) : (
             <span className="mx-crumbs__step mx-crumbs__step--current">{item.label}</span>

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/app_breakpoints.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_text_button.dart';
@@ -64,11 +65,20 @@ class DeckSummarySectionWidget extends ConsumerWidget {
       // cost is the section break below going `xl` to `lg`; the toolbar still
       // reads as controls, not as the first row, because the rows carry their
       // own surfaces. `deck_list_spacing_test.dart` measures the gap above.
-      padding: const EdgeInsets.fromLTRB(
+      //
+      // **The bottom drops one step on a compact screen.** The other half of
+      // the 17 pixels the breadcrumb strip cost the pinned chrome at 320 with
+      // `textScaler` 2.0; the toolbar's own section break gives the first half.
+      // Taken from below rather than above because the gap above is the one
+      // `deck_list_spacing_test.dart` measures, and because moving body pixels
+      // *up* only increases the last row's clearance from the floating action.
+      padding: EdgeInsets.fromLTRB(
         AppSpacing.lg,
         AppSpacing.sm,
         AppSpacing.lg,
-        AppSpacing.lg,
+        AppBreakpoints.isCompact(MediaQuery.sizeOf(context).width)
+            ? AppSpacing.sm
+            : AppSpacing.lg,
       ),
       child: isVisible
           ? DeckLevelSummaryWidget(
