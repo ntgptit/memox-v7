@@ -161,7 +161,7 @@ void main() {
       expect(find.text('Hiragana'), findsOneWidget);
     });
 
-    testWidgets('a child shows the same three facts a root deck does', (
+    testWidgets('a child shows the same four facts a root deck does', (
       tester,
     ) async {
       // The reason the recursive aggregate exists. Before it, a sub-deck row was
@@ -179,17 +179,44 @@ void main() {
               parentId: 'deck-1',
               totalCardCount: 42,
               dueCardCount: 7,
+              learnedCardCount: 21,
             ),
           ],
         ),
       );
 
       expect(find.text('Hiragana'), findsOneWidget);
-      expect(find.textContaining('42'), findsOneWidget);
-      expect(find.textContaining('7'), findsOneWidget);
+      expect(
+        // `textContaining`, because the meta line is a `Text.rich` of spans
+        // and `find.text` only matches a plain `Text`.
+        find.textContaining(english.deckCardCountLabel(42)),
+        findsOneWidget,
+        reason: 'the card count',
+      );
+      expect(
+        find.textContaining(english.deckDueCountLabel(7)),
+        findsOneWidget,
+        reason: 'the due count',
+      );
       expect(
         find.textContaining(english.schedulerEightBoxShortLabel),
         findsOneWidget,
+        reason: 'the resolved scheduler',
+      );
+      // **The fourth fact, added with BR-88.** Asserted by its formatted label
+      // rather than by looking for the digits: `find.textContaining('42')` used
+      // to be enough and stopped being so the moment a second line on the same
+      // card mentioned the same total, which is exactly the ambiguity a bare
+      // substring match hides.
+      expect(
+        find.text(english.deckLearnedProgressLabel(21, 42)),
+        findsOneWidget,
+        reason: 'the learned count',
+      );
+      expect(
+        find.text(english.deckLearnedPercentLabel(50)),
+        findsOneWidget,
+        reason: 'and its percentage',
       );
     });
 

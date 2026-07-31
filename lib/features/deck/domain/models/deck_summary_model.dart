@@ -28,6 +28,19 @@ abstract class DeckSummary with _$DeckSummary {
     /// Of those, how many were due at the `now` used for the read (BR-22).
     required int dueCardCount,
 
+    /// Of those, how many count as learned (BR-88).
+    ///
+    /// **Derived at read time, never stored.** `eight_box` counts a card at box
+    /// 8; `sm2` counts one whose interval has reached 128 days — the same
+    /// distance box 8 schedules, so "learned" means the same span of time under
+    /// either scheduler rather than one convention under each.
+    ///
+    /// It arrives from the same statement as the other two counts, for the same
+    /// AD-13 reason: a screen that shows "20 of 570 learned" beside "12 due"
+    /// must not be able to render one of them from before a write and the other
+    /// from after it.
+    required int learnedCardCount,
+
     /// The scheduler this deck is reviewed with — **resolved**, not raw.
     ///
     /// A sub-deck's own scheduler columns are NULL by rule (BR-06); the review it
@@ -38,6 +51,20 @@ abstract class DeckSummary with _$DeckSummary {
   }) = _DeckSummary;
 
   const DeckSummary._();
+
+  /// How much of this deck is learned, as a fraction from 0 to 1.
+  ///
+  /// Zero for an empty deck rather than a division by zero — a deck with no
+  /// cards is 0% learned, which is both true and what a progress bar needs.
+  double get learnedFraction =>
+      totalCardCount == 0 ? 0 : learnedCardCount / totalCardCount;
+
+  /// Whether every card in this deck is learned, and there is at least one.
+  ///
+  /// A predicate rather than letting each widget compare two integers: the empty
+  /// case reads as "complete" to `>=` and is the opposite of it.
+  bool get isFullyLearned =>
+      totalCardCount > 0 && learnedCardCount == totalCardCount;
 
   /// Whether anything is waiting to be studied.
   ///

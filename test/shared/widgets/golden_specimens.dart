@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/shared/widgets/mx_progress_bar.dart';
 import 'package:memox/shared/widgets/mx_action_sheet.dart';
 import 'package:memox/shared/widgets/mx_confirm_dialog.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
@@ -276,4 +278,39 @@ class _FocusedOnFirstFrameState extends State<FocusedOnFirstFrame> {
 
   @override
   Widget build(BuildContext context) => widget.child;
+}
+
+/// Both sizes and both fills in one frame.
+///
+/// The complete bar is the half worth pinning: it is the only place the fill
+/// leaves its own colour family, and the value label follows it — a change to
+/// either shows up here.
+class ProgressBarSpecimen extends StatelessWidget {
+  const ProgressBarSpecimen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Padding(
+        padding: EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            MxProgressBar(
+              value: 0.62,
+              label: '20 of 32 learned',
+              valueLabel: '62%',
+            ),
+            SizedBox(height: AppSpacing.xl),
+            MxProgressBar(
+              value: 1,
+              label: '88 of 88 learned',
+              valueLabel: '100%',
+              size: MxProgressBarSize.sm,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

@@ -23,6 +23,7 @@ import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 
 import '../../../../../features/deck/presentation/support/fake_deck_repository.dart';
 import '../../../../audit_allowance.dart';
+import '../../../../audit_model.dart';
 import '../../../../deck_audit_allowances.dart';
 import '../../../../memox_audit.dart';
 import '../../../../screen_auditor.dart';
@@ -172,6 +173,26 @@ void main() {
         pills: 2,
         hasFloatingAction: true,
       ),
+      // One progress bar per deck that has cards; two of the three fixtures do.
+      //
+      // `LinearProgressIndicator` paints its track and its fill through
+      // `_LinearProgressIndicatorPainter`, so neither colour exists on a render
+      // object the auditor can read. Both are pinned elsewhere:
+      // `mx_progress_bar_test.dart` asserts the fill is `secondary` below 100%
+      // and `success` at it, and the track is `surfaceMuted` — read off the
+      // widget rather than the raster — and the `mx_progress_bar_*` goldens hold
+      // the rendering.
+      const AuditSkipAllowance(
+        itemId: 'deck_screen',
+        reason: SkipReason.customPainter,
+        detailContains: '_LinearProgressIndicatorPainter',
+        rationale:
+            'LinearProgressIndicator paints its track and fill in a '
+            'CustomPainter, so no render object carries either colour. Both are '
+            'asserted in mx_progress_bar_test.dart and pinned by the '
+            'mx_progress_bar_* goldens.',
+        expectedMatches: 2,
+      ),
     ],
   );
 
@@ -302,6 +323,21 @@ void main() {
         pills: 2,
         breadcrumbSteps: 2,
         hasFloatingAction: true,
+      ),
+      // Three here against the root level's two: every child in this fixture has
+      // cards, where one of the root fixtures does not and so draws no bar.
+      // The count is exact on purpose — an allowance that said "any number" would
+      // stop noticing when a bar appears on a row that should not have one.
+      const AuditSkipAllowance(
+        itemId: 'deck_screen',
+        reason: SkipReason.customPainter,
+        detailContains: '_LinearProgressIndicatorPainter',
+        rationale:
+            'LinearProgressIndicator paints its track and fill in a '
+            'CustomPainter, so no render object carries either colour. Both are '
+            'asserted in mx_progress_bar_test.dart and pinned by the '
+            'mx_progress_bar_* goldens.',
+        expectedMatches: 3,
       ),
     ],
   );

@@ -10,6 +10,8 @@ import 'app_colors.dart';
 @immutable
 final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   const AppSemanticColors({
+    required this.progressTrack,
+    required this.progressFill,
     required this.success,
     required this.warning,
     required this.danger,
@@ -22,7 +24,9 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   });
 
   const AppSemanticColors.light()
-    : success = AppColors.successLight,
+    : progressTrack = AppColors.progressTrackLight,
+      progressFill = AppColors.progressFillLight,
+      success = AppColors.successLight,
       warning = AppColors.warningLight,
       danger = AppColors.dangerLight,
       info = AppColors.infoLight,
@@ -33,7 +37,9 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       secondaryAction = AppColors.secondaryActionLight;
 
   const AppSemanticColors.dark()
-    : success = AppColors.successDark,
+    : progressTrack = AppColors.progressTrackDark,
+      progressFill = AppColors.progressFillDark,
+      success = AppColors.successDark,
       warning = AppColors.warningDark,
       danger = AppColors.dangerDark,
       info = AppColors.infoDark,
@@ -42,6 +48,11 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       borderSubtle = AppColors.borderSubtleDark,
       focusRing = AppColors.focusRingDark,
       secondaryAction = AppColors.secondaryActionDark;
+
+  /// The unfilled part of a progress track, and the filled part below 100%.
+  /// At 100% the fill becomes [success] — see `MxProgressBar`.
+  final Color progressTrack;
+  final Color progressFill;
 
   final Color success;
   final Color warning;
@@ -66,6 +77,8 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
 
   @override
   AppSemanticColors copyWith({
+    Color? progressTrack,
+    Color? progressFill,
     Color? success,
     Color? warning,
     Color? danger,
@@ -77,6 +90,8 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     Color? secondaryAction,
   }) {
     return AppSemanticColors(
+      progressTrack: progressTrack ?? this.progressTrack,
+      progressFill: progressFill ?? this.progressFill,
       success: success ?? this.success,
       warning: warning ?? this.warning,
       danger: danger ?? this.danger,
@@ -100,6 +115,8 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     if (other is! AppSemanticColors) return this;
 
     return AppSemanticColors(
+      progressTrack: Color.lerp(progressTrack, other.progressTrack, t)!,
+      progressFill: Color.lerp(progressFill, other.progressFill, t)!,
       success: Color.lerp(success, other.success, t)!,
       warning: Color.lerp(warning, other.warning, t)!,
       danger: Color.lerp(danger, other.danger, t)!,
