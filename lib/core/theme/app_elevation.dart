@@ -39,11 +39,12 @@ abstract final class AppElevation {
 /// at 0.70, still only 2.04. The surface step already there is ΔL\* 7.70. A dark
 /// shadow is paint nobody can see, and Material 3 drops it for the same reason.
 ///
-/// Light is the opposite, and the alpha was **solved for rather than picked**.
+/// Light is the opposite, and the alpha is **solved for rather than picked**.
 /// Dark separates a card from its page by ΔL\* 7.70 on the surface step alone.
-/// Light's surface step is only 3.46, so the shadow has to make up 4.24 — which
-/// lands at alpha **0.05**, giving 7.62 against dark's 7.70. The first draft used
-/// 0.12 and overshot to 13.28, making light cards float where dark's sit.
+/// Light's step is 2.15 once the card carries a seed tint, so the shadow has to
+/// make up 5.6 — alpha **0.07**, giving 7.75. It has been re-solved twice: 0.12
+/// overshot to 13.28, and 0.05 was right only while the card was pure white and
+/// its step was 3.46.
 ///
 /// **So the modes stay symmetric in the thing that matters.** They are no longer
 /// matched on *border contrast* — light's border is now the lighter of the two —
@@ -59,7 +60,7 @@ List<BoxShadow> shadowsFor(double level, ColorScheme scheme) {
   // it twenty times.
   return <BoxShadow>[
     BoxShadow(
-      color: scheme.shadow.withValues(alpha: 0.04 + 0.01 * level),
+      color: scheme.shadow.withValues(alpha: 0.06 + 0.01 * level),
       blurRadius: level * 3,
       offset: Offset(0, level),
     ),

@@ -3,7 +3,7 @@
   "light": {
     "borderProminence": {
       "semantic.borderSubtle on card (colorScheme.surface)": {
-        "ratio": 1.4996725802551463,
+        "ratio": 1.451959386225585,
         "verdict": "in-band"
       },
       "semantic.borderSubtle on page (scaffoldBackgroundColor)": {
@@ -15,7 +15,7 @@
         "verdict": "in-band"
       },
       "colorScheme.outline on card (colorScheme.surface)": {
-        "ratio": 1.4996725802551463,
+        "ratio": 1.451959386225585,
         "verdict": "in-band"
       },
       "colorScheme.outline on page (scaffoldBackgroundColor)": {
@@ -27,7 +27,7 @@
         "verdict": "in-band"
       },
       "colorScheme.outlineVariant on card (colorScheme.surface)": {
-        "ratio": 1.4996725802551463,
+        "ratio": 1.451959386225585,
         "verdict": "in-band"
       },
       "colorScheme.outlineVariant on page (scaffoldBackgroundColor)": {
@@ -48,11 +48,11 @@
         "isPureNeutral": false
       },
       "surface": {
-        "hex": "#FFFFFF",
-        "hue": null,
-        "saturation": 0.0,
-        "chroma": 0.0,
-        "isPureNeutral": true
+        "hex": "#FBFBFE",
+        "hue": 240.0,
+        "saturation": 0.6000000000000056,
+        "chroma": 0.01176470588235301,
+        "isPureNeutral": false
       }
     },
     "neutralFamilyCoherence": {
@@ -62,9 +62,9 @@
         "chroma": 0.015686274509803866
       },
       "surface": {
-        "hex": "#FFFFFF",
-        "hue": null,
-        "chroma": 0.0
+        "hex": "#FBFBFE",
+        "hue": 240.0,
+        "chroma": 0.01176470588235301
       },
       "surfaceMuted": {
         "hex": "#EAECF1",
@@ -83,8 +83,8 @@
       }
     },
     "depthMechanism": {
-      "surfaceVsPage": 1.090170345007657,
-      "borderVsSurface": 1.4996725802551463,
+      "surfaceVsPage": 1.0554857679329903,
+      "borderVsSurface": 1.451959386225585,
       "borderVsPage": 1.375631420468159,
       "cardElevation": 0.0,
       "boxShadowSitesInLib": 1,

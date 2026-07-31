@@ -198,7 +198,13 @@ Map<String, Object?> buildViolations() {
     }
 
     // ---- V5: translucency applied at the paint site -----------------------
-    if (site.sourceKind == 'opacity-modified-token' && !isDeclaration) {
+    // A shadow is exempt, and not as a courtesy: a shadow *is* a translucent
+    // wash over whatever it falls on, and an opaque one is a block of colour
+    // rather than a shadow. It is the same exemption `overlayColor` gets — some
+    // paint has no ground to be precomputed against.
+    if (site.sourceKind == 'opacity-modified-token' &&
+        site.elementKind != 'shadow' &&
+        !isDeclaration) {
       flag(
         site,
         'V5',

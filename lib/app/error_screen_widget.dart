@@ -2,6 +2,8 @@ import 'dart:ui' show PlatformDispatcher;
 
 import 'package:flutter/widgets.dart';
 
+import '../core/theme/app_colors.dart';
+
 import '../l10n/generated/app_localizations.dart';
 import '../l10n/generated/app_localizations_en.dart';
 
@@ -118,17 +120,23 @@ class _FallbackPalette {
   final Color message;
 }
 
-/// Chosen to match the real theme closely enough that the failure does not also
-/// look like a different app — but declared here, because the theme is exactly
-/// what is unavailable when this renders.
+/// **The real tokens, not copies of them.** These were six literals until
+/// M4.10i, on the reasoning that a file with no `ThemeData` has no token to
+/// reach. That conflated two different things: `Theme.of` needs an element tree,
+/// `AppColors` is a class of compile-time constants and needs nothing at all.
+///
+/// So the error screen now renders the same colours as the rest of the app, and
+/// a palette change reaches it. What it still cannot do is read the *user's*
+/// theme override — hence [_FallbackPalette] and the platform-brightness lookup
+/// rather than a single value.
 const _FallbackPalette _lightFallback = _FallbackPalette(
-  background: Color(0xFFF4F5F8),
-  title: Color(0xFF16182B),
-  message: Color(0xFF565C72),
+  background: AppColors.backgroundLight,
+  title: AppColors.textPrimaryLight,
+  message: AppColors.textSecondaryLight,
 );
 
 const _FallbackPalette _darkFallback = _FallbackPalette(
-  background: Color(0xFF0A082D),
-  title: Color(0xFFEDEEF5),
-  message: Color(0xFFA6ABC2),
+  background: AppColors.backgroundDark,
+  title: AppColors.textPrimaryDark,
+  message: AppColors.textSecondaryDark,
 );

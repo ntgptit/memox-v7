@@ -54,29 +54,38 @@ M4.10h it got one, and the ceiling is met in light because the border no longer
 carries the edge alone.
 
 **Dark keeps its heavier border for a reason that is a number.** A dark shadow at
-four times the alpha light uses moves the page by **0.26 L\***, against a surface
+four times the alpha light uses moves the page by **0.26 L***, against a surface
 step already worth 7.70 — the dark page sits at the bottom of the lightness scale
 and there is no room beneath it. Dark has no second cue to hand the work to, so
 its border keeps it. Material 3 drops dark shadows for the same reason.
 
 **The modes remain symmetric, in the property that matters.** Not border contrast
 — light's border is now the lighter of the two — but total lift of a card off its
-page: **7.62 L\* in light against 7.70 in dark**. The shadow alpha was solved for
+page: **7.62 L* in light against 7.70 in dark**. The shadow alpha was solved for
 that number rather than picked; a first draft used 0.12 and overshot to 13.28,
 which made light cards float where dark's sat. `app_theme_test.dart` now pins the
 lift instead of the border, and `app_elevation_test.dart` pins the measurement
 that says dark should not paint.
 
-**The light-mode background-tint answer, plainly:** the *page* is tinted —
-`#F4F5F8`, hue 225°, 15° from the seed — but the *card* is **pure `#FFFFFF` with
-no hue at all**. So light mode is half-conformant: its canvas carries the seed and
-the surface sitting on that canvas does not. That is the single most consequential
-finding in this audit, and it is the same defect as the 1.09:1 surface step seen
-from the other side: a white card cannot relate to a tinted page.
+**The light-mode background-tint answer, plainly:** both are tinted. The page is
+`#F4F5F8` and the card is `#FBFBFE` — `seed @ 0.02` over white, hue 240.
 
-**Neutral family coherence:** dark is one family — every neutral within 11° of the
-seed. Light is one family plus a hole: 216–240° for everything that has a hue,
-and five tokens with no hue at all.
+**It was the audit's largest finding and it is closed.** The card was pure
+`#FFFFFF` with no hue at all, along with `surfaceBright`,
+`surfaceContainerLowest`, `surfaceElevated` and every dialog and sheet that
+follows them: a tinted canvas with an untinted surface sitting on it, which is
+why light read as a different palette from dark.
+
+Closing it cost lightness, and the cost was paid rather than waived. A tinted
+card is a darker card, so the surface step fell from 3.46 L* to 2.15. Two things
+absorbed that: the shadow's alpha was re-solved from 0.05 to 0.07, and the light
+ladder's minimum step went from 3.0 to 2.0 — the step it gave up is exactly what
+the shadow took on, and the total lift is unchanged at **7.75 L\* against dark's
+7.70**.
+
+**Neutral family coherence:** both are one family now. Every neutral in both
+modes carries a hue and sits within 25° of the seed — pinned by MX-VIS-002 rule
+R9, which was a proposal in this report until it started passing.
 ''';
 
 const String asymmetryNote = '''
