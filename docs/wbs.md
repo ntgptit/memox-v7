@@ -2905,6 +2905,13 @@ chỗ khác.
   `MxBreadcrumb` có playground riêng với knob depth 2–10 và tên tiếng Việt
   dài. Compile error của fake khi model đổi chính là điểm cộng: catalog gãy
   **lúc build** thay vì mục lục mồ côi.
+- **Viewport mặc định là khung điện thoại (chủ dự án yêu cầu):** catalog mở
+  mọi use-case trong frame **Galaxy S23 Ultra** (384×823 logical, dpr 3.75 —
+  tự định nghĩa vì Widgetbook không có preset) thay vì kéo căng canvas trình
+  duyệt; một màn được thẩm ở bề rộng desktop là thẩm trong hình dạng không
+  user nào thấy (AD-04: Android là release target). `Viewports.first` là
+  default của addon nên thứ tự list chính là quyết định; `None` giữ cuối
+  list cho việc soi bảng token rộng.
 
 ### M4.11 · Card management full-stack
 

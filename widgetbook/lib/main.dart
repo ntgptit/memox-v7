@@ -18,6 +18,20 @@ void main() {
   runApp(const MemoxWidgetbook());
 }
 
+/// Galaxy S23 Ultra — the reference device this catalog opens on, per the
+/// project owner: Android is the release target (AD-04), so the default frame
+/// is a phone, not the browser canvas. 1440×3088 physical at 3.75 dpr gives
+/// 384×823 logical; safe areas mirror Widgetbook's other Samsung presets.
+/// Not a stock preset, hence defined here.
+const ViewportData galaxyS23UltraViewport = ViewportData(
+  name: 'Galaxy S23 Ultra',
+  width: 384,
+  height: 823,
+  pixelRatio: 3.75,
+  platform: TargetPlatform.android,
+  safeAreas: EdgeInsets.only(top: 36, bottom: 24),
+);
+
 /// The 320×568 case every memox component is tested against (M4.8b), which no
 /// stock viewport preset covers.
 const ViewportData compactViewport = ViewportData(
@@ -63,11 +77,17 @@ class MemoxWidgetbook extends StatelessWidget {
             GlobalCupertinoLocalizations.delegate,
           ],
         ),
+        // First entry is the addon's default (`viewports.first`), so the
+        // catalog opens every use-case inside the phone frame rather than
+        // stretched across the browser canvas — a screen judged at desktop
+        // width is a screen judged in a shape no user ever sees. `None` stays
+        // available for full-canvas inspection of wide token tables.
         ViewportAddon(<ViewportData>[
-          Viewports.none,
+          galaxyS23UltraViewport,
           compactViewport,
           AndroidViewports.samsungGalaxyS20,
           AndroidViewports.mediumTablet,
+          Viewports.none,
         ]),
         InspectorAddon(),
       ],
