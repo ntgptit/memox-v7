@@ -35,16 +35,23 @@ class MxBreadcrumbItem {
 /// `MxListTile` is a row. Nothing in `shared/widgets/` held "where am I, and how
 /// do I get back up", so this is the missing piece.
 ///
-/// **It scrolls horizontally and therefore cannot overflow.** A path can be ten
-/// deep (BR-55 caps the deck tree there) and a 320-wide screen at `textScaler` 2.0
-/// fits about one and a half names. The alternatives were both worse: wrapping
-/// turns a deep path into five lines of chrome above the content it is meant to
-/// help you scan, and collapsing the middle behind an ellipsis hides exactly the
-/// steps a user goes to a breadcrumb to find. Scrolling hides nothing and costs
-/// nothing when the path is short.
+/// **A deep path folds in the middle, and the fold opens.** A path can be ten deep
+/// (BR-55 caps the deck tree there) and a 320-wide screen at `textScaler` 2.0 fits
+/// about one and a half names. This file used to argue against folding on the
+/// grounds that "collapsing the middle behind an ellipsis hides exactly the steps a
+/// user goes to a breadcrumb to find" — which is true of a *truncation* and false
+/// of this, because the ellipsis is a button that expands in place and never
+/// collapses again. What the old scroll-only strategy actually produced at ten
+/// levels was a strip the user had to scrub sideways to read at all, with the two
+/// ends — the root they came from and the parent they are about to return to —
+/// the least likely to be on screen.
 ///
-/// Left-aligned rather than pinned to the end, because the steps nearest the top
-/// of the hierarchy are the ones a caller cannot reach any other way.
+/// The design system reached the same shape independently and is the source for
+/// [collapseAfter]'s default of 4: first step, fold, last two.
+///
+/// It still scrolls horizontally, so nothing can overflow even expanded, and it
+/// scrolls to its deep end on arrival — a path the user has just walked into
+/// should show where they are, not where they started.
 ///
 /// A step with no [MxBreadcrumbItem.onTap] renders as quiet text rather than as a
 /// control. That is how a caller marks the step the user is already on — though
@@ -53,42 +60,155 @@ class MxBreadcrumbItem {
 ///
 /// Every step is its own tap target at [AppSpacing.minimumTouchTarget], so a deep
 /// path is a row of real controls rather than a line of text with hot spots in it.
-class MxBreadcrumb extends StatelessWidget {
-  const MxBreadcrumb({required this.items, this.semanticLabel, super.key});
+/// The design's own CSS sets 36 here and its usage note says 48; 48 wins, because
+/// 36 would break the touch-target floor the same design declares.
+class MxBreadcrumb extends StatefulWidget {
+  const MxBreadcrumb({
+    required this.items,
+    this.semanticLabel,
+    this.rootIcon,
+    this.collapseAfter = 4,
+    super.key,
+  });
 
   /// Ordered from the top of the hierarchy to the current step.
   ///
-  /// An empty list renders nothing at all — not an empty bar. A path with one
-  /// element says only "you are here", which the title already said, so a caller
-  /// with nothing above the current step should not build this widget.
+  /// An empty list renders nothing at all rather than an empty strip, so a caller
+  /// at the top of a tree does not have to branch.
   final List<MxBreadcrumbItem> items;
 
-  /// Names the strip for assistive technology — "deck path", not the path itself.
-  ///
-  /// Applied with `explicitChildNodes`, so it introduces the group without
-  /// swallowing the steps: a screen reader announces the group and then each step
-  /// as its own button, rather than reading one run-on string.
+  /// Names the strip for assistive tech — "deck path", not the path itself.
   final String? semanticLabel;
+
+  /// Drawn before the first step. The library root is recognisable at a glance
+  /// rather than by reading it.
+  final IconData? rootIcon;
+
+  /// Above this many steps the middle folds into an expandable ellipsis.
+  ///
+  /// The fold keeps the first step and the last two — the two ends are the ones a
+  /// user navigates to, and the middle is the part they scrolled past on the way
+  /// down.
+  final int collapseAfter;
+
+  @override
+  State<MxBreadcrumb> createState() => _MxBreadcrumbState();
+}
+
+class _MxBreadcrumbState extends State<MxBreadcrumb> {
+  final ScrollController _controller = ScrollController();
+  bool _isExpanded = false;
+
+  @override
+  void didUpdateWidget(MxBreadcrumb oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // A new path is a new question about where the user is. Keeping the previous
+    // expansion would leave a two-step path rendering as though it had been
+    // unfolded.
+    if (oldWidget.items.length != widget.items.length) _isExpanded = false;
+    _scrollToDeepEnd();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollToDeepEnd();
+  }
+
+  void _scrollToDeepEnd() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_controller.hasClients) return;
+      _controller.jumpTo(_controller.position.maxScrollExtent);
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final items = widget.items;
     if (items.isEmpty) return const SizedBox.shrink();
+
+    final isFolded = !_isExpanded && items.length > widget.collapseAfter;
+    final hiddenCount = items.length - 3;
 
     return Semantics(
       container: true,
       explicitChildNodes: true,
-      label: semanticLabel,
+      label: widget.semanticLabel,
       child: SingleChildScrollView(
+        controller: _controller,
         scrollDirection: Axis.horizontal,
         child: Row(
           mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            for (final (int index, MxBreadcrumbItem item)
-                in items.indexed) ...<Widget>[
-              if (index > 0) const _MxBreadcrumbSeparator(),
-              _MxBreadcrumbStep(item: item),
-            ],
-          ],
+          children: isFolded
+              ? <Widget>[
+                  _MxBreadcrumbStep(item: items.first, icon: widget.rootIcon),
+                  const _MxBreadcrumbSeparator(),
+                  _MxBreadcrumbFold(
+                    hiddenCount: hiddenCount,
+                    onExpand: () => setState(() => _isExpanded = true),
+                  ),
+                  for (final item in items.sublist(
+                    items.length - 2,
+                  )) ...<Widget>[
+                    const _MxBreadcrumbSeparator(),
+                    _MxBreadcrumbStep(item: item),
+                  ],
+                ]
+              : <Widget>[
+                  for (final (int index, MxBreadcrumbItem item)
+                      in items.indexed) ...<Widget>[
+                    if (index > 0) const _MxBreadcrumbSeparator(),
+                    _MxBreadcrumbStep(
+                      item: item,
+                      icon: index == 0 ? widget.rootIcon : null,
+                    ),
+                  ],
+                ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The middle of a long path, as one control that opens it.
+class _MxBreadcrumbFold extends StatelessWidget {
+  const _MxBreadcrumbFold({required this.hiddenCount, required this.onExpand});
+
+  final int hiddenCount;
+  final VoidCallback onExpand;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      // The count, not the glyph: "…" announced on its own says nothing about
+      // what pressing it does.
+      label: MaterialLocalizations.of(context).moreButtonTooltip,
+      value: '$hiddenCount',
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          onTap: onExpand,
+          borderRadius: BorderRadius.circular(AppRadius.sm),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minHeight: AppSpacing.minimumTouchTarget,
+              minWidth: AppSpacing.minimumTouchTarget,
+            ),
+            child: Center(
+              child: Icon(
+                Icons.more_horiz,
+                size: AppIconSize.sm,
+                color: context.colors.onSurfaceVariant,
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -97,9 +217,10 @@ class MxBreadcrumb extends StatelessWidget {
 
 /// One step: a button when there is somewhere to go, text when there is not.
 class _MxBreadcrumbStep extends StatelessWidget {
-  const _MxBreadcrumbStep({required this.item});
+  const _MxBreadcrumbStep({required this.item, this.icon});
 
   final MxBreadcrumbItem item;
+  final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
@@ -111,11 +232,29 @@ class _MxBreadcrumbStep extends StatelessWidget {
     // the current step. The deck list stopped doing that and the bug was
     // immediate: its final ancestor was a working link drawn as though it were
     // not one. A control's appearance has to follow whether it acts.
-    final style = context.texts.labelLarge?.copyWith(
-      color: tap == null
-          ? context.colors.onSurfaceVariant
-          : context.colors.onSurface,
+    //
+    // **Both states are `onSurfaceVariant`, and weight is what separates them.**
+    // A link used to be `onSurface`, which made the path as loud as the app-bar
+    // title one line above it. A breadcrumb is chrome; the design carries the
+    // whole distinction in weight for that reason, and this now matches.
+    final style = context.texts.labelMedium?.copyWith(
+      color: context.colors.onSurfaceVariant,
       fontWeight: tap == null ? FontWeight.w400 : FontWeight.w600,
+    );
+
+    final content = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        if (icon != null) ...<Widget>[
+          Icon(
+            icon,
+            size: AppIconSize.sm,
+            color: context.colors.onSurfaceVariant,
+          ),
+          const SizedBox(width: AppSpacing.xs),
+        ],
+        Text(item.label, style: style, maxLines: 1),
+      ],
     );
 
     final label = ConstrainedBox(
@@ -126,16 +265,13 @@ class _MxBreadcrumbStep extends StatelessWidget {
         widthFactor: 1,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-          child: Text(item.label, style: style, maxLines: 1),
+          child: content,
         ),
       ),
     );
 
     if (tap == null) return label;
 
-    // `button: true` for the same reason `MxCard` needs it: an `InkWell`
-    // contributes a tap action and focusability but not the button flag, so a
-    // reader would announce the name and never say it can be activated.
     return Semantics(
       button: true,
       child: Material(
@@ -150,11 +286,9 @@ class _MxBreadcrumbStep extends StatelessWidget {
   }
 }
 
-/// The mark between two steps.
-///
-/// Excluded from semantics: a chevron between names is punctuation, and a reader
-/// announcing "chevron right" nine times on a deep path is noise the user has to
-/// sit through. The grouping is carried by [MxBreadcrumb.semanticLabel] instead.
+/// The chevron between two steps. Decorative: the path is announced by the
+/// container's own label, so a separator with a semantic label would read the
+/// word "chevron" between every pair of names.
 class _MxBreadcrumbSeparator extends StatelessWidget {
   const _MxBreadcrumbSeparator();
 

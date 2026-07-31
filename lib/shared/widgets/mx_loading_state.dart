@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_spacing.dart';
-import '../../core/theme/theme_context_extension.dart';
 
 /// The loading state, centred in whatever space it is given.
 ///
@@ -29,10 +28,16 @@ class MxLoadingState extends StatelessWidget {
         // once. The cost is one render object; the alternative is the whole
         // loading screen repainting at 60fps to move one arc.
         child: RepaintBoundary(
-          child: CircularProgressIndicator(
-            semanticsLabel: semanticsLabel,
-            color: context.colors.primary,
-          ),
+          // **No `color:` here on purpose.** It used to pass
+          // `context.colors.primary`, which quietly overrode
+          // `buildProgressIndicatorTheme` — the theme M4.10j introduced *because*
+          // dark `primary` measures 2.81:1 against the surface it spins on,
+          // under the 3.0 floor a graphic needs. The theme therefore reached
+          // every spinner in the app except the one screen whose whole job is to
+          // be a spinner. Letting the theme supply the colour is the fix, and it
+          // is the same rule the repo applies everywhere else: correct it at the
+          // rule, not at the call site.
+          child: CircularProgressIndicator(semanticsLabel: semanticsLabel),
         ),
       ),
     );

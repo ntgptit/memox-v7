@@ -209,9 +209,14 @@ louder than the design intends.
 ### F9 - `MxContentShell` has no `subheader`
 
 The design pins a subheader between the app bar and the scrolling body, and that
-is where the redesign puts the breadcrumb **and** the search field - both stay
-put while the list scrolls. Dart has no such slot, so anything of that kind ends
-up inside the scrolling body instead.
+is where the redesign puts the breadcrumb **and** the search field.
+
+**Corrected while fixing it:** the first draft of this entry said the deck
+screen's breadcrumb scrolled away. It did not - a `Column` above an `Expanded`
+is already pinned. What the missing slot actually cost was ownership: the screen
+re-derived the gutter with a hardcoded `AppSpacing.lg`, so the path lined up with
+the rows at the wide width and not at the compact one, and there was no chrome
+boundary for a scroll hairline to attach to.
 
 ### F10 - No `leading` slot
 
@@ -328,3 +333,55 @@ move to the design (F1-F5 group, F9-F11, F15), **two design self-contradictions*
 Nothing here has been changed yet. This file is the plan; the fixes are the next
 step, and F5 (breadcrumb folding) and F9 (`subheader`) are the two that change
 what a user actually sees.
+
+---
+
+## Round 2 - what was fixed
+
+`flutter analyze` clean, **959 tests pass**, 4 goldens regenerated.
+
+| Finding | Fix | File |
+|---|---|---|
+| **F14** defect | dropped the `color:` argument so the theme supplies it | `mx_loading_state.dart` |
+| **F5** | fold past 4 steps, expandable in place, auto-scroll to the deep end | `mx_breadcrumb.dart` |
+| **F6** | `rootIcon`, wired to `Icons.home_outlined` | `mx_breadcrumb.dart`, `deck_path_widget.dart` |
+| **F7** | `labelLarge` -> `labelMedium` | `mx_breadcrumb.dart` |
+| **F8** | both states `onSurfaceVariant`; weight alone distinguishes them | `mx_breadcrumb.dart` |
+| **F9** | `subheader` slot, and the deck path moved into it | `mx_content_shell.dart`, `deck_list_screen.dart` |
+| **F10** | `leading` slot | `mx_content_shell.dart` |
+| **F4** | hairline derived from scroll position | `mx_content_shell.dart` |
+| **F1** | hover resolves to 6% accent instead of falling through | `app_button_themes.dart` |
+| **F2** | top hairline on the bar | `mx_navigation_bar.dart` |
+| **F11** (part) | FAB shape circle -> `RoundedRectangleBorder(AppRadius.lg)` | `app_theme.dart` |
+
+### Two things the render caught that reading did not
+
+**The nav hairline was broken in the middle.** `DecoratedBox` paints its
+decoration *behind* its child by default, and `NavigationBar` paints its own
+fill, so the first version drew a line at both edges and a gap where the
+destinations sat. `DecorationPosition.foreground` fixes it. Only visible in the
+golden.
+
+**Material elevation renders as a solid black ring in goldens.** F11 and F15
+originally added `elevation` to the FAB and the dialog to carry the design's
+`--shadow-card` / `--shadow-overlay`. The regenerated golden showed a dialog
+inside a heavy black outline, because `flutter_test` disables real shadows and
+draws them as solid shapes.
+
+That turned out to be the smaller reason to back it out. The larger one: **AD-14
+makes depth one mechanism** - `shadowsFor`, a `BoxShadow` that the colour audit
+can read and that is empty in dark by measurement. Material's `elevation` is a
+second, parallel mechanism that is not mode-aware and that no audit rule can
+see. Adding it would trade a measurable rule for an unmeasurable one. The shape
+change landed; the shadow did not.
+
+## Still open
+
+| # | Why |
+|---|---|
+| **F15** dialog / FAB shadow | Needs the `shadowsFor` mechanism, which for a dialog means wrapping its content rather than setting a theme property. Deferred deliberately, reason above. |
+| **F3** nav indicator role | Design's prose and CSS disagree; Dart follows the prose. No change. |
+| **F12** breadcrumb step height | Same - prose says 48, CSS says 36, and 36 breaks the design's own touch-target floor. No change. |
+| **F16** scrim opacity | Design 60% flat vs Dart 48/72. Dart's numbers were measured at M4.10j; taking 60% would undo a measured decision to satisfy an unmeasured one. Flagged, not changed. |
+| **C8 / C17 / D6 / D7** | `MxProgressBar`, `MxSearchField`, the summary panel and subtree search. Blocked on a `learned` definition that no BR provides, and on a query that does not exist. |
+| A7, A13, A14, A16, A18, A19, B10, B12, B13, C5, C7, C10, C12-C15, D1-D5, D8-D15, E1-E12 | Not yet reviewed. |

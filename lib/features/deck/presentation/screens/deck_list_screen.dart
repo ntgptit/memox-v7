@@ -178,15 +178,20 @@ class _DeckLevel extends StatelessWidget {
       // and under the floating button, so it owns its gutters and its bottom
       // inset.
       padding: EdgeInsets.zero,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          // Above every body state, including the empty ones — "where am I" is
-          // most worth answering on a level with nothing in it to recognise.
-          DeckPathWidget(snapshot: snapshot),
-          Expanded(child: _body(context, parent)),
-        ],
-      ),
+      // **The path is the shell's subheader, not the first row of the body.**
+      // It was already pinned — a `Column` above an `Expanded` does not scroll —
+      // so this changes nothing about whether it moves. What it changes is who
+      // owns it: as a subheader it sits inside the app bar's own chrome, takes
+      // the screen gutter from the shell instead of re-deriving it, and lands on
+      // the correct side of the hairline that appears once the list scrolls
+      // under. It is also where the design puts it.
+      //
+      // Above every body state, including the empty ones — "where am I" is most
+      // worth answering on a level with nothing in it to recognise.
+      subheader: DeckPathWidget.hasPath(snapshot)
+          ? DeckPathWidget(snapshot: snapshot)
+          : null,
+      body: _body(context, parent),
     );
   }
 
