@@ -1,0 +1,17 @@
+/* Levels are dp; a shadow is what a level RENDERS as, and it renders only in
+   light. The dark page sits at L* 3.86 — the bottom of the scale — so a shadow
+   there moves it by dL* 0.26 where the surface step already moves it 7.70.
+   Light's alpha was solved for, not picked: 0.06 + 0.01 x level. */
+:root{
+  --elevation-none:0;--elevation-card:1;--elevation-raised:3;--elevation-overlay:8;
+  --shadow-none:none;
+  --shadow-card:0 1px 3px rgb(11 12 24 / 0.07);
+  --shadow-raised:0 3px 9px rgb(11 12 24 / 0.09);
+  --shadow-overlay:0 8px 24px rgb(11 12 24 / 0.14);
+  --border-hairline:1px;
+  --border-input:1.5px;   /* same stroke in every state — only the hue moves */
+  --border-focus:2px;     /* focus ring on icon buttons and outlined buttons */
+}
+[data-theme="dark"]{
+  --shadow-card:none;--shadow-raised:none;--shadow-overlay:none;
+}

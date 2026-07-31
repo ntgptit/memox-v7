@@ -1,0 +1,31 @@
+/* Two families, each doing the job it is good at.
+   Plus Jakarta Sans: display + titles — the app's only visual signature.
+   Inter: body + UI — drawn for screens, unambiguous l/I/1 at 14px on a phone.
+   Sizes are the Material 3 scale, with the two the app deliberately overrides:
+   headline-md (the card prompt) at 30/1.22/-0.5, and body-md leading at 1.45. */
+:root{
+  --font-display:"Plus Jakarta Sans","Inter",system-ui,sans-serif;
+  --font-body:"Inter",system-ui,sans-serif;
+
+  --text-display-lg:57px;--leading-display-lg:64px;
+  --text-display-md:45px;--leading-display-md:52px;
+  --text-display-sm:36px;--leading-display-sm:44px;
+  --text-headline-lg:32px;--leading-headline-lg:40px;
+  /* The review card prompt — the one place the app deliberately gets large */
+  --text-card-prompt:30px;--leading-card-prompt:1.22;--tracking-card-prompt:-0.5px;
+  --text-card-prompt-compact:26px;
+  --text-headline-sm:24px;--leading-headline-sm:32px;
+  --text-title-lg:22px;--leading-title-lg:28px;--text-title-lg-compact:20px;
+  --text-title-md:16px;--leading-title-md:24px;--tracking-title-md:0.15px;
+  --text-title-sm:14px;--leading-title-sm:20px;--tracking-title-sm:0.1px;
+  --text-body-lg:16px;--leading-body-lg:24px;--tracking-body-lg:0.5px;
+  --text-body-md:14px;--leading-body-md:1.45;--tracking-body-md:0.25px;
+  --text-body-sm:12px;--leading-body-sm:16px;--tracking-body-sm:0.4px;
+  --text-label-lg:14px;--leading-label-lg:20px;--tracking-label-lg:0.1px;
+  --text-label-md:12px;--leading-label-md:16px;--tracking-label-md:0.5px;
+  --text-label-sm:11px;--leading-label-sm:16px;--tracking-label-sm:0.5px;
+  /* Section labels above a group of rows: uppercase label-sm, 1.1px tracked */
+  --tracking-section-label:1.1px;
+
+  --weight-regular:400;--weight-medium:500;--weight-semibold:600;--weight-bold:700;
+}

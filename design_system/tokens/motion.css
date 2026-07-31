@@ -1,0 +1,11 @@
+/* Short and few. During a review the user is answering, not watching;
+   animation that draws attention to itself costs recall.
+   fast = button press / ripple · normal = card and surface transitions ·
+   slow = the longest anything in the app is allowed to take. */
+:root{
+  --duration-fast:120ms; /* @kind other */
+  --duration-normal:200ms; /* @kind other */
+  --duration-slow:320ms; /* @kind other */
+  --ease-standard:cubic-bezier(0.2,0,0,1); /* @kind other */
+  --ease-decelerate:cubic-bezier(0,0,0,1); /* @kind other */
+}

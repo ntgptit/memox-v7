@@ -1,0 +1,192 @@
+<!-- @dsCard group="memox app" viewport="480x1010" name="Redesign — memox v2" subtitle="Harmonised indigo, progress-led deck cards, clearer session, a You tab" -->
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>memox — app UI kit</title>
+<link rel="stylesheet" href="../../styles.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons|Material+Icons+Outlined">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<script src="kitdata.js"></script>
+<style>
+html,body{margin:0;height:100%}
+body{background:#6E7288;font-family:var(--font-body);box-sizing:border-box;overflow:hidden}
+#root{height:100%;display:flex;flex-direction:column;align-items:center;gap:12px;padding:16px 0;box-sizing:border-box}
+.stage{flex:1;min-height:0;width:100%;display:flex;align-items:center;justify-content:center}
+.stage__scale{transform:scale(var(--fit,1));transform-origin:center center;transition:transform var(--duration-normal) var(--ease-standard)}
+.frame{width:var(--frame-w);height:var(--frame-h);background:var(--color-background);border-radius:20px;overflow:hidden;position:relative;display:flex;flex-direction:column;box-shadow:0 24px 60px rgb(0 0 0 / .45);transition:width var(--duration-normal) var(--ease-standard),height var(--duration-normal) var(--ease-standard)}
+.frame__app{flex:1;min-height:0;position:relative}
+.kitbar{display:flex;gap:8px;align-items:center;color:#1E2033;font-size:11px;letter-spacing:.4px}
+.kitbars{display:flex;flex-direction:column;gap:8px;align-items:center}
+.kitbar em{font-style:normal;color:#3B3E52;font-family:ui-monospace,monospace}
+.kitbar button{font:inherit;background:transparent;color:#1E2033;border:1px solid #4E5164;border-radius:999px;padding:6px 12px;cursor:pointer}
+.kitbar button[aria-pressed="true"]{background:#1E2033;color:#F1F2F6;border-color:#1E2033}
+a{color:var(--color-primary)}a:hover{color:var(--color-focus-ring)}
+</style></head>
+<body><div id="root"></div>
+<script type="text/babel" src="DeckLevelScreen.jsx"></script>
+<script type="text/babel" src="ReviewScreen.jsx"></script>
+<script type="text/babel" src="ProfileScreen.jsx"></script>
+<script type="text/babel" src="DeckForms.jsx"></script>
+<script type="text/babel" data-presets="react">
+const { MxNavigationBar, MxActionSheet, MxConfirmDialog } = window.MemoxDesignSystem_3a620f;
+
+/**
+ * The two devices the app is actually built and tested against, plus the width
+ * at which the compact scale kicks in. Both are edited HERE, in this file:
+ *
+ *   - change a device's width/height to reframe the kit
+ *   - raise COMPACT_BELOW above a device's width to put that device into the
+ *     compact layout (smaller app-bar title, 12px gutters, 26px card prompt)
+ *
+ * Widths are logical CSS px, not the panel's physical pixels: the S23 Ultra's
+ * 1440x3088 panel is 412x915 dp at its 3.5x density.
+ */
+const DEVICES = {
+  s23: { label: 'S23 Ultra', width: 412, height: 915, note: '412 × 915 dp' },
+  mini: { label: 'iPhone 13 mini', width: 375, height: 812, note: '375 × 812 pt' },
+};
+
+// The system's --breakpoint-compact. Set to 380 to make the mini compact.
+const COMPACT_BELOW = 360;
+
+/**
+ * Scales the frame down to whatever room the browser window actually gives it,
+ * so the kit opens whole on a laptop, a small window or a phone. It only ever
+ * shrinks: on a tall screen the frame stays at its true device size, which is
+ * the point of framing it at all.
+ */
+function useFitScale(width, height) {
+  const stage = React.useRef(null);
+  const [scale, setScale] = React.useState(1);
+  React.useLayoutEffect(() => {
+    function measure() {
+      const box = stage.current;
+      if (!box) return;
+      const pad = 24;
+      setScale(Math.min(1, (box.clientWidth - pad) / width, (box.clientHeight - pad) / height));
+    }
+    measure();
+    const ro = new ResizeObserver(measure);
+    if (stage.current) ro.observe(stage.current);
+    return () => ro.disconnect();
+  }, [width, height]);
+  return [stage, scale];
+}
+
+function App() {
+  const [theme, setTheme] = React.useState('light');
+  const [device, setDevice] = React.useState('s23');
+  const [tab, setTab] = React.useState(0);
+  // The whole of navigation: a path from the root down. The deck list renders
+  // path[last]; every ancestor above it is a breadcrumb step.
+  const [path, setPath] = React.useState([window.MEMOX_TREE]);
+  const [studying, setStudying] = React.useState(null);
+  const [overlay, setOverlay] = React.useState(null);
+
+  React.useEffect(() => { document.documentElement.dataset.theme = theme; }, [theme]);
+
+  const frame = DEVICES[device];
+  const isCompact = frame.width < COMPACT_BELOW;
+  const [stageRef, fit] = useFitScale(frame.width, frame.height);
+
+  const deck = path[path.length - 1];
+  const isRoot = path.length === 1;
+
+  // Studying is a mode, not a tab: it can start from any deck card, and the
+  // Review tab is simply "study whatever is due across the library".
+  function study(target) { setStudying(target); setTab(1); }
+
+  const body = (() => {
+    if (tab === 2) return <window.ProfileScreen onReset={() => setOverlay({ kind: 'reset' })} isCompact={isCompact} />;
+    if (tab === 1) return <window.ReviewScreen deckName={(studying && studying.id !== 'root') ? studying.name : 'Everything due'} onClose={() => { setStudying(null); setTab(0); }} isCompact={isCompact} />;
+    return (
+      <window.DeckLevelScreen
+        path={path}
+        onOpen={(child) => setPath([...path, child])}
+        onUp={() => setPath(path.slice(0, -1))}
+        onJumpTo={(i) => setPath(path.slice(0, i + 1))}
+        onNavigate={(trail) => setPath([window.MEMOX_TREE, ...trail])}
+        onActions={() => setOverlay({ kind: 'actions', name: deck.name })}
+        onRowActions={(row) => setOverlay({ kind: 'actions', name: row.name })}
+        onCreate={() => setOverlay({ kind: 'create', isRoot })}
+        onStudy={study}
+        isCompact={isCompact}
+      />
+    );
+  })();
+
+  return (
+    <React.Fragment>
+      <div className="stage" ref={stageRef}>
+        <div className="stage__scale" style={{ '--fit': fit }}>
+      <div className="frame" data-screen-label={'memox app — ' + frame.label} style={{ '--frame-w': frame.width + 'px', '--frame-h': frame.height + 'px' }}>
+        <div className="frame__app">
+          {body}
+          {overlay && overlay.kind === 'actions' ? (
+            <MxActionSheet
+              title={overlay.name}
+              onDismiss={() => setOverlay(null)}
+              actions={[
+                { label: 'Rename', icon: 'edit', onPress: () => setOverlay(null) },
+                { label: 'Move', icon: 'drive_file_move', onPress: () => setOverlay(null) },
+                { label: 'Reset learning progress', icon: 'restart_alt', onPress: () => {}, isEnabled: false },
+                { label: 'Delete', icon: 'delete_outline', variant: 'destructive', onPress: () => setOverlay({ kind: 'delete', name: overlay.name }) },
+              ]}
+            />
+          ) : null}
+          {overlay && overlay.kind === 'delete' ? (
+            <MxConfirmDialog
+              variant="destructive"
+              title={'Delete “' + overlay.name + '”?'}
+              message="This also deletes 3 sub-decks and 180 cards, along with their review history. This cannot be undone."
+              confirmLabel="Delete" cancelLabel="Cancel"
+              onConfirm={() => setOverlay(null)} onCancel={() => setOverlay(null)}
+            />
+          ) : null}
+          {overlay && overlay.kind === 'reset' ? (
+            <MxConfirmDialog
+              variant="destructive"
+              title="Reset learning progress?"
+              message="Decks, sub-decks and cards are kept. Due dates, boxes and session progress are cleared."
+              confirmLabel="Reset" cancelLabel="Cancel"
+              onConfirm={() => setOverlay(null)} onCancel={() => setOverlay(null)}
+            />
+          ) : null}
+          {overlay && overlay.kind === 'create' ? (
+            <window.DeckFormSheet
+              title={overlay.isRoot ? 'New deck' : 'New sub-deck'}
+              submitLabel="Create"
+              isSchedulerRequired={overlay.isRoot}
+              onSubmit={() => setOverlay(null)}
+              onCancel={() => setOverlay(null)}
+            />
+          ) : null}
+        </div>
+        <MxNavigationBar
+          selectedIndex={tab}
+          onDestinationSelected={(i) => { setTab(i); if (i === 1 && !studying) setStudying(window.MEMOX_TREE); }}
+          destinations={[{ icon: 'folder', label: 'Decks' }, { icon: 'school', label: 'Review' }, { icon: 'insights', label: 'You' }]}
+        />
+      </div>
+        </div>
+      </div>
+      <div className="kitbars">
+        <div className="kitbar">
+          <span>Screen</span>
+          {Object.keys(DEVICES).map((k) => (
+            <button key={k} type="button" aria-pressed={device === k} onClick={() => setDevice(k)}>{DEVICES[k].label}</button>
+          ))}
+          <em>{frame.note}{isCompact ? ' · compact' : ''}</em>
+        </div>
+        <div className="kitbar">
+          <span>Theme</span>
+          <button type="button" aria-pressed={theme === 'light'} onClick={() => setTheme('light')}>Light</button>
+          <button type="button" aria-pressed={theme === 'dark'} onClick={() => setTheme('dark')}>Dark</button>
+        </div>
+      </div>
+    </React.Fragment>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script></body></html>
