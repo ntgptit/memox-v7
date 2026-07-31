@@ -47,8 +47,10 @@ import 'audit_model.dart';
 /// it is a `Material` with an `InkWell` and a clip.
 ///
 /// [breadcrumbSteps] is the number of **tappable** steps in an `MxBreadcrumb` —
-/// its ancestors, not its last step, which is text rather than a control. Each is
-/// again a `Material` with an `InkWell` and a clip, so it counts like a card.
+/// the deck list and every ancestor, but not its last step, which is the deck the
+/// user is in and renders as text rather than as a control. So a deck with no
+/// ancestors still has one: every deck level has a strip now. Each tappable step
+/// is again a `Material` with an `InkWell` and a clip, so it counts like a card.
 ///
 /// A zero count is not passed as `expectedMatches: 0`: an allowance that matches
 /// nothing is an unused allowance, which this harness treats as fatal, so the

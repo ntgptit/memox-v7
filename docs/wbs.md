@@ -3977,6 +3977,50 @@ xem trên một deck đã học xong, và một tap là tới.
 summary tách hẳn sang file riêng — cùng lý do `mx_card_test.dart` từng tách khỏi
 `mx_surface_components_test.dart`.
 
+**Next task: M4.10ae · Breadcrumb đủ đường.**
+
+### M4.10ae · Breadcrumb chạy hết đường, từ danh sách tới deck đang mở
+
+- **Status:** done
+- **Goal:** Breadcrumb hiện ở mọi cấp deck, và liệt kê đủ: danh sách deck, mọi
+  tổ tiên, rồi chính deck đang mở.
+- **Scope:** `deck_path_widget.dart`; `deck_path_test.dart`,
+  `deck_list_level_test.dart`, `deck_route_test.dart`, allowance của visual
+  audit; `ui_kits/memox-app/DeckLevelScreen.jsx` cho khớp.
+- **Out of scope:** thao tác trên bước breadcrumb (menu, kéo-thả) — chưa có yêu
+  cầu.
+- **Dependencies:** M4.10ad
+- **Checklist phases:** 7, 8
+- **Tests required:** 3 case trong `deck_path_test.dart` (đủ đường, root deck
+  cũng có, bước đầu về danh sách).
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `test/visual_audit/deck_audit_harness.dart`
+- **Acceptance criteria:**
+  - [x] Vào một root deck cũng có breadcrumb: `Decks › <tên deck>`.
+  - [x] Bước cuối là deck đang mở, không bấm được; mọi bước khác điều hướng.
+  - [x] 1007 test pass, mọi gate xanh.
+
+**Không có bug — và đó mới là phát hiện.** Chủ dự án báo "breadcrumb không hiện",
+nên bước đầu là truy nguồn: `ancestryJson` được `deck_ancestry_read_test.dart`
+kiểm trên SQLite thật ở cả ba mức (root không có tổ tiên, cấp 3 nêu đúng root,
+mười cấp cho đủ chín). Data layer đúng. Cái sai là **luật hiển thị**: widget cố ý
+im lặng cho tới khi có ít nhất một tổ tiên, tức đúng chỗ người dùng nhìn đầu tiên
+— bên trong một root deck — thì không có gì. Một component bị giấu khỏi vị trí
+phổ biến nhất của nó, từ ngoài nhìn vào không khác gì hỏng.
+
+**Hai lý lẽ cũ đều đúng, và cộng lại thì sai.** Bước đầu trùng nút Back; bước
+cuối trùng app-bar title. Cả hai là lập luận chống *chrome trùng lặp*, đều đứng
+vững khi xét riêng. Cái giá phải trả là chấp nhận: đổi lại, câu trả lời cho "tôi
+đang ở đâu" luôn có mặt và luôn cùng một hình dạng.
+
+Chi phí đã đo được ngay trong test: tên deck giờ xuất hiện hai lần, nên hai test
+`findsOneWidget` đỏ. Cả hai chuyển sang tìm trong `AppBar` — `findsNWidgets(2)`
+thì vẫn xanh kể cả khi title biến mất và breadcrumb mọc thêm một bản.
+
+File audit companion đứng sẵn ở 399/400 dòng nên phần fixture tách sang
+`deck_audit_harness.dart` — **không** tách theo state, vì MX-VIS-001 đòi đúng một
+companion cho mỗi screen.
+
 **Next task: M4.11 · Card management full-stack.**
 
 ### M4.11 · Card management full-stack
