@@ -71,7 +71,7 @@ void main() {
 
       await tester.tap(find.text(english.deckCreateRootAction));
       await tester.pumpAndSettle();
-      await tester.enterText(find.byType(TextField), 'Japanese N5');
+      await tester.enterText(deckFormField, 'Japanese N5');
       await tester.tap(find.text(english.schedulerSm2Label));
       await tester.pumpAndSettle();
       await tester.tap(find.text(english.deckFormSubmitAction));
@@ -79,7 +79,7 @@ void main() {
       await pumpThroughClose(tester);
 
       // The sheet is gone…
-      expect(find.byType(TextField), findsNothing);
+      expect(deckFormField, findsNothing);
       // …and the screen it opened over is not. A second pop would have taken it.
       expect(find.byType(DeckListScreen), findsOneWidget);
       // And the write still happened exactly once, which rules out the other
@@ -100,12 +100,12 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text(english.deckRenameAction));
       await tester.pumpAndSettle();
-      await tester.enterText(find.byType(TextField), 'Renamed');
+      await tester.enterText(deckFormField, 'Renamed');
       await tester.tap(find.text(english.deckRenameSubmitAction));
 
       await pumpThroughClose(tester);
 
-      expect(find.byType(TextField), findsNothing);
+      expect(deckFormField, findsNothing);
       expect(find.byType(DeckListScreen), findsOneWidget);
       expect(repository.renames, hasLength(1));
     });

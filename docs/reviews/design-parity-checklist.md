@@ -113,7 +113,7 @@ Dart widget: props, defaults, states, radius, spacing, semantics.
 | C14 | `MxActionSheet` | `mx_action_sheet.dart` | [x] | **match** — `!isEnabled` is tested first, so disabled beats destructive |
 | C15 | `MxNavigationBar` | `mx_navigation_bar.dart` | [x] | **match** — `selectedIcon` carries the filled twin, labels always shown |
 | C16 | `MxBreadcrumb` | `mx_breadcrumb.dart` | [x] | **drift (F5-F8)** - no fold, no `rootIcon`, label one size up, link colour full-strength |
-| C17 | `MxSearchField` | — | [x] | **reviewed, not built** — the design's contract is clear and nothing blocks it; it is the one substantial piece still outstanding |
+| C17 | `MxSearchField` | `mx_search_field.dart` | [x] | **built M4.10x** |
 | C18 | `MxContentShell` | `mx_content_shell.dart` | [x] | **drift (F9, F10)** - no `subheader`, no `leading`; gutters match exactly |
 
 ---
@@ -128,7 +128,7 @@ Dart widget: props, defaults, states, radius, spacing, semantics.
 | D4 | `DeckLevelScreen.jsx` breadcrumb use | `deck_path_widget.dart` | [x] | **done M4.10q** — fold, root icon, quiet weight |
 | D5 | `DeckLevelScreen.jsx` `LevelEmpty` (three empties) | `deck_list_screen.dart` empty states | [x] | **match** — five empty states, more than the design's three: `card`-typed decks and a failed read are cases the kit has no fixture for |
 | D6 | `DeckLevelScreen.jsx` `LevelSummary` | `deck_level_summary_widget.dart` | [x] | **built M4.10t**, minus the streak chip and Start studying — both need M5 |
-| D7 | `DeckLevelScreen.jsx` `SearchResults` | — | [x] | **reviewed, not built** — needs a recursive name query, a contract method and a use case. Not blocked on a rule, only on the work |
+| D7 | `DeckLevelScreen.jsx` `SearchResults` | `deck_search_results_widget.dart` | [x] | **built M4.10x** — in memory over `watchAllDecks()`, so no new query and no contract change after all. Result rows carry the path but not the counts: those need a per-row subtree aggregate |
 | D8 | `DeckForms.jsx` | `deck_form_widget.dart` | [x] | **match** — one form for create-root, create-sub and rename |
 | D9 | `DeckForms.jsx` `SchedulerChoice` | `deck_form_widget.dart` radio rows | [x] | **match** — radio rows, `SchedulerType?` null until chosen, so nothing is preselected (BR-11) |
 | D10 | `index.html` action sheet wiring | `deck_actions_widget.dart` | [x] | **match** — same four actions, reset disabled rather than hidden |

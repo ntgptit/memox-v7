@@ -55,6 +55,10 @@ class MxContentShell extends StatefulWidget {
   /// field, or both.
   final Widget? subheader;
 
+  /// How tall the subheader is. `AppBar.bottom` needs the number up front, so a
+  /// caller stacking two rows in there — a path and a search field — has to say
+  /// so, and has to scale it with the text: at `textScaler` 2.0 a row that fit
+
   /// Screen padding. `null` resolves to the scale for the current width:
   /// [AppSpacing.lg], or [AppSpacing.md] below [AppBreakpoints.compact].
   final EdgeInsetsGeometry? padding;
@@ -90,9 +94,21 @@ class _MxContentShellState extends State<MxContentShell> {
       appBar: _buildAppBar(context),
       floatingActionButton: widget.floatingActionButton,
       body: SafeArea(
-        child: NotificationListener<ScrollNotification>(
-          onNotification: _onScroll,
-          child: _buildBody(context),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            if (widget.subheader != null)
+              _MxSubheader(
+                gutter: _defaultPadding(context).left,
+                child: widget.subheader!,
+              ),
+            Expanded(
+              child: NotificationListener<ScrollNotification>(
+                onNotification: _onScroll,
+                child: _buildBody(context),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -115,12 +131,6 @@ class _MxContentShellState extends State<MxContentShell> {
               bottom: BorderSide(color: context.semanticColors.borderSubtle),
             )
           : null,
-      bottom: subheader == null
-          ? null
-          : _MxSubheader(
-              gutter: _defaultPadding(context).left,
-              child: subheader,
-            ),
     );
   }
 
@@ -153,32 +163,33 @@ class _MxContentShellState extends State<MxContentShell> {
 ///
 /// Carries the screen's horizontal gutter so its contents line up with the body
 /// below, and pads only its bottom — the app bar already provides the space above.
-class _MxSubheader extends StatelessWidget implements PreferredSizeWidget {
+/// **The top of the body, not `AppBar.bottom`.** It was the latter, which forces
+/// a height to be declared up front — and the height of this strip depends on the
+/// user's text scale, so a declared number is a guess that overflows the moment
+/// the guess is low. Above an `Expanded` body it takes the height it needs and
+/// stays just as pinned: nothing above the `Expanded` scrolls.
+class _MxSubheader extends StatelessWidget {
   const _MxSubheader({required this.gutter, required this.child});
 
   final double gutter;
   final Widget child;
 
-  /// A breadcrumb step is [AppSpacing.minimumTouchTarget] tall and the strip pads
-  /// [AppSpacing.md] below it. `AppBar.bottom` needs its height up front, so this
-  /// is that number.
-  static const double _height = AppSpacing.minimumTouchTarget + AppSpacing.md;
-
-  @override
-  Size get preferredSize => const Size.fromHeight(_height);
-
   @override
   Widget build(BuildContext context) {
     return Padding(
+      // `sm` below the compact breakpoint, `md` above it. At 320 wide with
+      // `textScaler` 2.0 the chrome and this strip together wanted four pixels
+      // more than the screen had; tightening the one gap that is pure spacing
+      // is the same trade `app_compact_scale.dart` already makes with gutters
+      // and button padding, and it is the gap least missed.
       padding: EdgeInsets.only(
         left: gutter,
         right: gutter,
-        bottom: AppSpacing.md,
+        bottom: AppBreakpoints.isCompact(MediaQuery.sizeOf(context).width)
+            ? AppSpacing.xs
+            : AppSpacing.md,
       ),
-      child: SizedBox(
-        height: AppSpacing.minimumTouchTarget,
-        child: Align(alignment: AlignmentDirectional.centerStart, child: child),
-      ),
+      child: Align(alignment: AlignmentDirectional.centerStart, child: child),
     );
   }
 }

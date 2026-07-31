@@ -62,6 +62,11 @@ List<AuditSkipAllowance> deckShellAllowances({
   int pills = 0,
   int breadcrumbSteps = 0,
   bool hasFloatingAction = false,
+
+  /// Whether the level's subheader carries the search field. Every deck level
+  /// does; the parameter exists so a state that renders no shell at all does not
+  /// have to opt out of it silently.
+  bool hasSearchField = true,
 }) {
   final iconButtons = screenIconButtons + (hasBackButton ? 1 : 0);
   final floatingActions = hasFloatingAction ? 1 : 0;
@@ -70,10 +75,43 @@ List<AuditSkipAllowance> deckShellAllowances({
       iconButtons + tappableCards + pills + breadcrumbSteps + floatingActions;
   // The InkWell's rounded clip, once per host that has one. Icon buttons draw a
   // `_ShapeBorderPainter` instead, which is counted separately below.
+  //
+  // The search field adds one of its own: a `TextField` paints its cursor and
+  // selection through an unnamed `CustomPaint`, and it is there whether or not
+  // anything has been typed.
   final unnamedPainters =
-      tappableCards + pills + breadcrumbSteps + floatingActions;
+      tappableCards +
+      pills +
+      breadcrumbSteps +
+      floatingActions +
+      (hasSearchField ? 1 : 0);
 
   return <AuditSkipAllowance>[
+    if (hasSearchField)
+      AuditSkipAllowance(
+        itemId: screenItemId,
+        reason: SkipReason.rasterOnly,
+        detailContains: 'RenderEditable',
+        rationale:
+            'A TextField paints its text, its hint and its cursor into a '
+            'RenderEditable, which reports no colour. The field takes its style '
+            'from the body text theme and its fill from surfaceMuted; the pill '
+            'and both of its states are pinned by the mx_search_field_* '
+            'goldens.',
+        // Three: the text, the hint and the cursor layer are separate paints on
+        // one field.
+        expectedMatches: 3,
+      ),
+    if (hasSearchField)
+      AuditSkipAllowance(
+        itemId: screenItemId,
+        reason: SkipReason.rasterOnly,
+        detailContains: '_RenderDecoration',
+        rationale:
+            "InputDecorator's own render object. Every border on this field is "
+            'InputBorder.none — the pill around it is the decoration — so there '
+            'is nothing here to read a colour from.',
+      ),
     // One per Navigator: the harness's own MaterialApp, GoRouter's root, and the
     // branch.
     const AuditSkipAllowance(

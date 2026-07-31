@@ -20,19 +20,16 @@ import '../widgets/deck_actions_widget.dart';
 import '../widgets/deck_level_error_widget.dart';
 import '../widgets/deck_level_summary_widget.dart';
 import '../widgets/deck_list_toolbar_widget.dart';
-import '../widgets/deck_path_widget.dart';
+import '../widgets/deck_level_body_widget.dart';
+import '../widgets/deck_subheader_widget.dart';
 import '../widgets/deck_tile_widget.dart';
 
-/// Material's own FAB diameter. Named because the inset below is derived from it
-/// and a bare 56 in that sum would be a number nobody could check.
-const double _kFabDiameter = 56;
-
-/// Space under the last card so the floating action never covers it.
+/// Material's own FAB diameter, and the space under the last card so the
+/// floating action never covers it.
 ///
-/// The button is [_kFabDiameter] and sits [AppSpacing.lg] from the bottom edge;
-/// the [AppSpacing.xl] on top of that is the gap between it and the card it would
-/// otherwise touch. `MxContentShell` deliberately reserves nothing — a floating
-/// action overlaps content by definition — so the list is what has to make room.
+/// `MxContentShell` deliberately reserves nothing — a floating action overlaps
+/// content by definition — so the list is what has to make room.
+const double _kFabDiameter = 56;
 const double _kListBottomInset = _kFabDiameter + AppSpacing.lg + AppSpacing.xl;
 
 /// The toolbar's two commands, bound to a `ref`.
@@ -189,10 +186,11 @@ class _DeckLevel extends StatelessWidget {
       //
       // Above every body state, including the empty ones — "where am I" is most
       // worth answering on a level with nothing in it to recognise.
-      subheader: DeckPathWidget.hasPath(snapshot)
-          ? DeckPathWidget(snapshot: snapshot)
-          : null,
-      body: _body(context, parent),
+      subheader: DeckSubheaderWidget(snapshot: snapshot),
+      body: DeckLevelBodyWidget(
+        snapshot: snapshot,
+        buildLevel: () => _body(context, parent),
+      ),
     );
   }
 

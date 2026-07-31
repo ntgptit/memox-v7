@@ -16,6 +16,7 @@ import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
+import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
 import 'package:memox/features/deck/presentation/widgets/deck_tile_widget.dart';
 import 'package:memox/shared/widgets/mx_loading_state.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
@@ -155,8 +156,19 @@ void main() {
       // the test failed on 4 pixels of content it had simply not scrolled to.
       // A distance that has to be large enough is a distance that silently
       // stops being large enough.
+      // **The list's scrollable, named.** `find.byType(Scrollable).first` used to
+      // be unambiguous; the search field in the subheader brought its own — an
+      // `EditableText` contains one — and it comes first in the tree, so jumping
+      // it scrolled the text cursor and left the list where it was.
       final position = tester
-          .state<ScrollableState>(find.byType(Scrollable).first)
+          .state<ScrollableState>(
+            find
+                .descendant(
+                  of: find.byType(DeckListScreen),
+                  matching: find.byType(Scrollable),
+                )
+                .last,
+          )
           .position;
       position.jumpTo(position.maxScrollExtent);
       await tester.pumpAndSettle();

@@ -13,6 +13,7 @@ import 'package:memox/shared/widgets/mx_loading_state.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
 import 'package:memox/shared/widgets/mx_progress_bar.dart';
+import 'package:memox/shared/widgets/mx_search_field.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
 
 /// The specimen set for the stress suite: every shared component, built with
@@ -93,6 +94,17 @@ List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
       icon: Icons.delete_outline,
       semanticLabel: kLongLabel,
       onPressed: _noop,
+    ),
+    isInteractive: true,
+  ),
+  MxStressSpecimen(
+    // A long hint is the case that breaks a search bar: the placeholder has to
+    // ellipsize inside the pill rather than push the clear button off the end.
+    name: 'MxSearchField',
+    build: () => const MxSearchField(
+      value: '',
+      onChanged: _ignoreText,
+      hintText: kLongLabel,
     ),
     isInteractive: true,
   ),
@@ -302,3 +314,5 @@ List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
 /// A `const` builder, so the specimen itself can be `const`.
 Widget _buildLoadingState() =>
     const MxLoadingState(semanticsLabel: 'Đang tải danh sách bộ thẻ');
+
+void _ignoreText(String _) {}

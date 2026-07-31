@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:memox/core/theme/app_spacing.dart';
 import 'package:memox/shared/widgets/mx_progress_bar.dart';
+import 'package:memox/shared/widgets/mx_search_field.dart';
 import 'package:memox/shared/widgets/mx_action_sheet.dart';
 import 'package:memox/shared/widgets/mx_confirm_dialog.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
@@ -313,4 +314,42 @@ class ProgressBarSpecimen extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Empty and in use, one above the other.
+///
+/// The second is the half worth pinning: the count and the clear button only
+/// exist once something has been typed, and they are what the pill has to make
+/// room for without pushing the text out of it.
+class SearchFieldSpecimen extends StatelessWidget {
+  const SearchFieldSpecimen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Padding(
+        padding: EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            MxSearchField(
+              value: '',
+              onChanged: _ignore,
+              hintText: 'Search your whole library',
+            ),
+            SizedBox(height: AppSpacing.xl),
+            MxSearchField(
+              value: 'nouns',
+              onChanged: _ignore,
+              hintText: 'Search in Academic Word List',
+              resultCount: 7,
+              clearSemanticLabel: 'Clear search',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static void _ignore(String _) {}
 }
