@@ -1,0 +1,160 @@
+<!-- @dsCard group="Brand" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wordmark</title>
+<link rel="stylesheet" href="../components/mx.css">
+<style>
+  body { margin: 0; padding: clamp(12px, 4vw, 24px); }
+  .card { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; max-width: 1000px; margin: 0 auto; }
+  .card__intro p { color: var(--mx-color-on-surface-variant); max-width: 70ch; margin: 8px 0 0; }
+  .card__intro p + p { margin-top: 10px; }
+  .panel {
+    background: var(--mx-color-surface);
+    color: var(--mx-color-on-surface);
+    border: 1px solid var(--mx-color-border-subtle);
+    border-radius: var(--mx-radius-lg);
+    padding: 20px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    align-content: start;
+  }
+  .panel__name { color: var(--mx-color-on-surface-variant); text-transform: uppercase; letter-spacing: 0.08em; }
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 16px; }
+  .swatches { display: grid; gap: 10px; }
+  .swatch { display: grid; grid-template-columns: 56px 1fr auto; gap: 14px; align-items: center; }
+  .swatch__chip { height: 44px; border-radius: var(--mx-radius-sm); border: 1px solid var(--mx-color-border-subtle); }
+  .swatch__name { display: grid; gap: 2px; min-width: 0; }
+  .swatch__role { color: var(--mx-color-on-surface-variant); }
+  .swatch__meta { color: var(--mx-color-on-surface-variant); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+  .note { color: var(--mx-color-on-surface-variant); max-width: 70ch; }
+  .rules { display: grid; gap: 8px; margin: 0; padding-left: 20px; color: var(--mx-color-on-surface-variant); }
+  .rules li { max-width: 68ch; }
+  code { font-family: var(--mx-font-mono); font-size: 0.92em; overflow-wrap: anywhere; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var(--mx-color-border-subtle); }
+  th { color: var(--mx-color-on-surface-variant); font-weight: var(--mx-weight-semibold); }
+  td.num { font-variant-numeric: tabular-nums; }
+
+  .wordmark {
+    font-family: var(--mx-font-display);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    color: var(--mx-color-on-surface);
+  }
+  .wordmark em { font-style: normal; color: var(--mx-color-primary); }
+  .clearspace {
+    display: inline-grid; place-items: center;
+    padding: 0.5em;
+    outline: 1px dashed var(--mx-color-focus-ring);
+    outline-offset: 0;
+  }
+  .monogram {
+    display: grid; place-items: center;
+    width: 88px; height: 88px;
+    border-radius: 22px;
+    background: var(--mx-color-primary);
+    color: var(--mx-color-on-primary);
+    font-family: var(--mx-font-display);
+    font-weight: 700;
+    font-size: 34px;
+    line-height: 1;
+    white-space: nowrap;
+    letter-spacing: -0.03em;
+  }
+  .dont { display: grid; gap: 8px; justify-items: start; }
+  .dont__label { color: var(--mx-color-danger); }
+</style>
+</head>
+<body class="mx-app">
+<div class="card">
+  <div class="card__intro">
+    <h1 class="mx-type-headline-small">Wordmark</h1>
+    <p class="mx-type-body-medium">
+      <strong>MemoX</strong>, set in Plus Jakarta Sans Bold at −0.02em tracking, with the final
+      <em>X</em> in <code>primary</code>. That is the whole mark: the app has one visual signature
+      and it is the display face, so the wordmark is the face used well rather than a drawing
+      placed beside it.
+    </p>
+    <p class="mx-type-body-medium">
+      The coloured X is the only place brand colour is used decoratively. Everywhere else
+      <code>primary</code> means "this is the action", and a logo is not an action — which is
+      precisely why the mark is allowed to borrow it once and nothing else is.
+    </p>
+  </div>
+  <div class="cols">
+    <div class="panel">
+      <div class="panel__name mx-type-label-small">The wordmark</div>
+      <div style="display:grid;gap:24px;justify-items:start;padding-block:8px">
+        <div class="wordmark" style="font-size:56px">Memo<em>X</em></div>
+        <div class="wordmark" style="font-size:28px">Memo<em>X</em></div>
+        <div class="wordmark" style="font-size:18px">Memo<em>X</em></div>
+      </div>
+      <p class="note mx-type-body-medium">
+        18px is the floor. Below it the tracking closes up and the coloured X stops reading as a
+        deliberate part of the word.
+      </p>
+    </div>
+
+    <div class="panel">
+      <div class="panel__name mx-type-label-small">Clear space and the monogram</div>
+      <div style="display:flex;gap:28px;align-items:center;flex-wrap:wrap;padding-block:8px">
+        <span class="clearspace"><span class="wordmark" style="font-size:32px">Memo<em>X</em></span></span>
+        <div class="monogram">M<span style="color:var(--mx-color-inverse-primary)">x</span></div>
+      </div>
+      <p class="note mx-type-body-medium">
+        Clear space is half the cap height on every side — the dashed box above. It is expressed
+        as a ratio rather than a pixel value so it holds at every size the mark is used at.
+      </p>
+      <p class="note mx-type-body-medium">
+        The monogram is for spaces the wordmark does not fit: an app icon, an avatar, a favicon.
+        The tile is <code>primary</code> at <code>lg</code> radius plus a little, and the second
+        letter takes <code>inverse-primary</code> so the two are distinguishable at 32px where the
+        lowercase x would otherwise disappear into the M.
+      </p>
+    </div>
+  </div>
+
+  <div class="cols">
+    <div class="panel" data-mx-theme="light">
+      <div class="panel__name mx-type-label-small">On light</div>
+      <div style="display:grid;gap:16px">
+        <div style="background:var(--mx-color-background);border-radius:var(--mx-radius-md);padding:20px"><span class="wordmark" style="font-size:32px">Memo<em>X</em></span></div>
+        <div style="background:var(--mx-color-primary);border-radius:var(--mx-radius-md);padding:20px"><span class="wordmark" style="font-size:32px;color:var(--mx-color-on-primary)">Memo<em style="color:var(--mx-color-inverse-primary)">X</em></span></div>
+      </div>
+    </div>
+    <div class="panel" data-mx-theme="dark">
+      <div class="panel__name mx-type-label-small">On dark</div>
+      <div style="display:grid;gap:16px">
+        <div style="background:var(--mx-color-background);border-radius:var(--mx-radius-md);padding:20px"><span class="wordmark" style="font-size:32px">Memo<em>X</em></span></div>
+        <div style="background:var(--mx-color-surface-elevated);border-radius:var(--mx-radius-md);padding:20px"><span class="wordmark" style="font-size:32px">Memo<em style="color:var(--mx-color-focus-ring)">X</em></span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel__name mx-type-label-small">Do not</div>
+    <ul class="rules mx-type-body-medium">
+      <li><strong>Re-space it.</strong> The tracking is part of the mark. "M e m o X" is a
+        different logo.</li>
+      <li><strong>Colour the X anything but <code>primary</code></strong> — or, on a
+        <code>primary</code> fill, <code>inverse-primary</code>. On the app's own elevated
+        surfaces <code>focus-ring</code> is the one permitted substitution, because
+        <code>primary</code> against <code>surface-elevated</code> in dark does not clear a
+        graphic's 3:1 floor.</li>
+      <li><strong>Set it in anything but Plus Jakarta Sans Bold.</strong> Not the body face, not a
+        fallback, not a synthesised bold.</li>
+      <li><strong>Put it in a box it does not need.</strong> The wordmark sits on the page; the
+        monogram is the version that comes with a container.</li>
+      <li><strong>Use it as a heading.</strong> The app name in running text is
+        <code>title-large</code> like any other title — the mark is for chrome that identifies the
+        app, not for a screen that mentions it.</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

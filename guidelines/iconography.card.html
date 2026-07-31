@@ -1,0 +1,146 @@
+<!-- @dsCard group="Foundations" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Iconography</title>
+<link rel="stylesheet" href="../components/mx.css">
+<style>
+  body { margin: 0; padding: clamp(12px, 4vw, 24px); }
+  .card { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; max-width: 1000px; margin: 0 auto; }
+  .card__intro p { color: var(--mx-color-on-surface-variant); max-width: 70ch; margin: 8px 0 0; }
+  .card__intro p + p { margin-top: 10px; }
+  .panel {
+    background: var(--mx-color-surface);
+    color: var(--mx-color-on-surface);
+    border: 1px solid var(--mx-color-border-subtle);
+    border-radius: var(--mx-radius-lg);
+    padding: 20px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    align-content: start;
+  }
+  .panel__name { color: var(--mx-color-on-surface-variant); text-transform: uppercase; letter-spacing: 0.08em; }
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 16px; }
+  .swatches { display: grid; gap: 10px; }
+  .swatch { display: grid; grid-template-columns: 56px 1fr auto; gap: 14px; align-items: center; }
+  .swatch__chip { height: 44px; border-radius: var(--mx-radius-sm); border: 1px solid var(--mx-color-border-subtle); }
+  .swatch__name { display: grid; gap: 2px; min-width: 0; }
+  .swatch__role { color: var(--mx-color-on-surface-variant); }
+  .swatch__meta { color: var(--mx-color-on-surface-variant); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+  .note { color: var(--mx-color-on-surface-variant); max-width: 70ch; }
+  .rules { display: grid; gap: 8px; margin: 0; padding-left: 20px; color: var(--mx-color-on-surface-variant); }
+  .rules li { max-width: 68ch; }
+  code { font-family: var(--mx-font-mono); font-size: 0.92em; overflow-wrap: anywhere; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var(--mx-color-border-subtle); }
+  th { color: var(--mx-color-on-surface-variant); font-weight: var(--mx-weight-semibold); }
+  td.num { font-variant-numeric: tabular-nums; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(112px, 100%), 1fr)); gap: 8px; }
+  .cell {
+    display: grid; justify-items: center; gap: 8px; padding: 14px 6px;
+    border: 1px solid var(--mx-color-border-subtle); border-radius: var(--mx-radius-md);
+    color: var(--mx-color-on-surface);
+  }
+  .cell span { color: var(--mx-color-on-surface-variant); text-align: center; word-break: break-word; }
+  .sizes { display: flex; align-items: flex-end; gap: 28px; }
+  .sizes > div { display: grid; justify-items: center; gap: 8px; color: var(--mx-color-on-surface-variant); }
+  .measure { position: relative; display: grid; place-items: center; border: 1px dashed var(--mx-color-focus-ring); border-radius: 4px; }
+</style>
+</head>
+<body class="mx-app">
+<div class="card">
+  <div class="card__intro">
+    <h1 class="mx-type-headline-small">Iconography</h1>
+    <p class="mx-type-body-medium">
+      28 glyphs, and the set is <strong>closed</strong>. <code>MxIcon</code> takes a
+      name from this list and nothing else — no <code>src</code>, no children, no inline SVG at a
+      call site. The moment a caller can supply a shape, two screens draw two different bins and
+      no reviewer can tell an intentional variant from a paste. An unknown name renders nothing
+      and warns, so a typo fails where it is written.
+    </p>
+    <p class="mx-type-body-medium">
+      Drawn on a 24 grid with round caps and joins, and every glyph inherits
+      <code>currentColor</code>: an icon inside a control is the control's colour, which is what
+      stops a glyph and its label drifting apart when someone restyles one of them.
+    </p>
+  </div>
+  <div class="panel">
+    <div class="panel__name mx-type-label-small">The set</div>
+    <div class="grid">
+      <div class="cell"><svg class="mx-icon mx-icon--md " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4.5 12.4 5 5 10-10.8"/></svg><span class="mx-type-body-small"><code>check</code></span></div>
+      <div class="cell"><svg class="mx-icon mx-icon--md " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.3 2.7 2.7 5.6-5.7"/></svg><span class="mx-type-body-small"><code>check-circle</code></span></div>
+      <div class="cell"><svg class="mx-icon mx-icon--md " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.4v5.4"/><path d="M12 16.3v.4"/></svg><span class="mx-type-body-small"><code>alert-circle</code></span></div>
+      <div class="cell"><svg class="mx-icon mx-icon--md " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.8 2.8 20h18.4z"/><path d="M12 9.6v4.2"/><path d="M12 16.9v.4"/></svg><span class="mx-type-body-small"><code>alert-triangle</code></span></div>
+      <div class="cell"><svg class="mx-icon mx-icon--md " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11.2v5.4"/><path d="M12 7.4v.4"/></svg><span class="mx-type-body-small"><code>info</code></span></div>
+      <div class="cell"><svg class="mx-icon mx-icon--md " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9.5 5.5 7 6.5-7 6.5"/></svg><span class="mx-type-body-small"><code>chevron-right</code></span></div>
+      <div class="cell"><svg class="mx-icon mx-icon--md " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14.5 5.5-7 6.5 7 6.5"/></svg><span class="mx-type-body-small"><code>chevron-left</code></span></div>
+      <div class="cell"><svg class="mx-icon mx-icon--md " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5.5 9.5 6.5 7 6.5-7"/></svg><span class="mx-type-body-small"><code>chevron-down</code></span></div>
+      <div class="cell"><svg class="mx-icon mx-icon--md " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12H4.4"/><path d="m10.4 6-6 6 6 6"/></svg><span class="mx-type-body-small"><code>arrow-left</code></span></div>
+      <div class="cell"><svg class="mx-icon mx-icon--md " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15.6"/><path d="m13.6 6 6 6-6 6"/></svg><span class="mx-type-body-small"><code>arrow-right</code></span></div>
+      <div class="cell"><svg class="mx-icon mx-icon--md " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m15.8 15.8 4.4 4.4"/></svg><span class="mx-type-body-small"><code>search</code></span></div>
+      <div class="cell"><svg class="mx-icon mx-icon--md " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6.2 6.2 11.6 11.6"/><path d="m17.8 6.2-11.6 11.6"/></svg><span class="mx-type-body-small"><code>close</code></span></div>
+      <div class="cell"><svg class="mx-icon mx-icon--md " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span class="mx-type-body-small"><code>plus</code></span></div>
+      <div class="cell"><svg class="mx-icon mx-icon--md " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/></svg><span class="mx-type-body-small"><code>minus</code></span></div>
+      <div class="cell"><svg class="mx-icon mx-icon--md " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg><span class="mx-type-body-small"><code>menu</code></span></div>
+      <div class="cell"><svg class="mx-icon mx-icon--md " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="5.2" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="18.8" r="1.5" fill="currentColor" stroke="none"/></svg><span class="mx-type-body-small"><code>more-vertical</code></span></div>
+      <div class="cell"><svg class="mx-icon mx-icon--md " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 19.5h4L18.4 9.6l-4-4L4.5 15.5z"/><path d="m14.4 5.6 4 4"/></svg><span class="mx-type-body-small"><code>edit</code></span></div>
+      <div class="cell"><svg class="mx-icon mx-icon--md " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 7h15"/><path d="M9.5 7V4.8h5V7"/><path d="M6.6 7v12.2h10.8V7"/><path d="M10.4 10.6v5.6"/><path d="M13.6 10.6v5.6"/></svg><span class="mx-type-body-small"><code>trash</code></span></div>
+      <div class="cell"><svg class="mx-icon mx-icon--md " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19.5 12a7.5 7.5 0 1 1-2.4-5.5"/><path d="M19.6 4.6v4.3h-4.3"/></svg><span class="mx-type-body-small"><code>refresh</code></span></div>
+      <div class="cell"><svg class="mx-icon mx-icon--md " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 13.4 6.2 5h11.6l2.7 8.4v5.6H3.5z"/><path d="M3.5 13.4h4.3l1.2 2.5h6l1.2-2.5h4.3"/></svg><span class="mx-type-body-small"><code>inbox</code></span></div>
+      <div class="cell"><svg class="mx-icon mx-icon--md " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.6 5.5h5.6l2 2.6h9.2v10.4H3.6z"/></svg><span class="mx-type-body-small"><code>folder</code></span></div>
+      <div class="cell"><svg class="mx-icon mx-icon--md " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 4 8.4 4.4L12 12.8 3.6 8.4z"/><path d="m4.6 12.4 7.4 3.9 7.4-3.9"/></svg><span class="mx-type-body-small"><code>layers</code></span></div>
+      <div class="cell"><svg class="mx-icon mx-icon--md " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.6"/><path d="M12 6.8v5.5l3.4 2"/></svg><span class="mx-type-body-small"><code>clock</code></span></div>
+      <div class="cell"><svg class="mx-icon mx-icon--md " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.6" y="5.6" width="16.8" height="14.8" rx="2.6"/><path d="M3.6 10.2h16.8"/><path d="M8.2 3.6v4"/><path d="M15.8 3.6v4"/></svg><span class="mx-type-body-small"><code>calendar</code></span></div>
+      <div class="cell"><svg class="mx-icon mx-icon--md " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 4 2.5 5.3 5.8.8-4.2 4 1 5.9L12 17.2 6.9 20l1-5.9-4.2-4 5.8-.8z"/></svg><span class="mx-type-body-small"><code>star</code></span></div>
+      <div class="cell"><svg class="mx-icon mx-icon--md " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.6h16l-6.3 7.1v5.9l-3.4 1.8v-7.7z"/></svg><span class="mx-type-body-small"><code>filter</code></span></div>
+      <div class="cell"><svg class="mx-icon mx-icon--md " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.4 4.8v14.4"/><path d="m3.4 15.6 3 3.6 3-3.6"/><path d="M12.8 7h7.8"/><path d="M12.8 12h5.8"/><path d="M12.8 17h3.8"/></svg><span class="mx-type-body-small"><code>sort</code></span></div>
+      <div class="cell"><svg class="mx-icon mx-icon--md " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8.4h9.6"/><path d="M18.4 8.4H20"/><circle cx="16" cy="8.4" r="2.4"/><path d="M4 15.6h4.4"/><path d="M13.2 15.6H20"/><circle cx="10.8" cy="15.6" r="2.4"/></svg><span class="mx-type-body-small"><code>settings</code></span></div>
+    </div>
+  </div>
+
+  <div class="cols">
+    <div class="panel">
+      <div class="panel__name mx-type-label-small">Three sizes, three stroke weights</div>
+      <div class="sizes">
+        <div><div class="measure" style="width:16px;height:16px"><svg class="mx-icon mx-icon--sm " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m15.8 15.8 4.4 4.4"/></svg></div><span class="mx-type-body-small">sm · 16<br>stroke 1.75</span></div>
+        <div><div class="measure" style="width:24px;height:24px"><svg class="mx-icon mx-icon--md " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m15.8 15.8 4.4 4.4"/></svg></div><span class="mx-type-body-small">md · 24<br>stroke 1.5</span></div>
+        <div><div class="measure" style="width:40px;height:40px"><svg class="mx-icon mx-icon--lg " viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m15.8 15.8 4.4 4.4"/></svg></div><span class="mx-type-body-small">lg · 40<br>stroke 1.25</span></div>
+      </div>
+      <p class="note mx-type-body-medium">
+        The weight is set per step rather than left to scale with the box. A 1.5 stroke on a 24
+        grid is 2.5 device px once the box grows to 40, which turns the illustrative icon in an
+        empty state into the heaviest mark on the screen; the same stroke shrunk to 16 is 1.0 and
+        starts to break up. The set reads as one weight at all three sizes rather than one
+        <em>number</em> at all three sizes.
+      </p>
+    </div>
+
+    <div class="panel">
+      <div class="panel__name mx-type-label-small">Where each size goes</div>
+      <table class="mx-type-body-medium">
+        <thead><tr><th>Size</th><th>Used by</th></tr></thead>
+        <tbody>
+          <tr><td><code>sm</code> 16</td><td>Inline with body text — a button's leading glyph, a pill's, a breadcrumb separator.</td></tr>
+          <tr><td><code>md</code> 24</td><td>Actions and list affordances — icon buttons, list rows, sheet rows, navigation destinations.</td></tr>
+          <tr><td><code>lg</code> 40</td><td>The illustrative icon in an empty or error state. Nothing else.</td></tr>
+        </tbody>
+      </table>
+      <ul class="rules mx-type-body-medium">
+        <li><strong>Decorative by default.</strong> An icon beside its own label is
+          <code>aria-hidden</code>; the text is what is announced. A glyph that repeated the
+          label would be read twice.</li>
+        <li><strong>Named only when it is the content</strong> — and even then the name says what
+          the state means, not what the shape is.</li>
+        <li><strong>An icon-only control's label belongs on the control</strong>, not on the
+          glyph. <code>MxIconButton</code> requires one.</li>
+        <li><strong>No colour prop.</strong> Everything inherits.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</body>
+</html>

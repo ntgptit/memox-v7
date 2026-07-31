@@ -1,0 +1,129 @@
+<!-- @dsCard group="Colors" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Semantic — dark</title>
+<link rel="stylesheet" href="../components/mx.css">
+<style>
+  body { margin: 0; padding: clamp(12px, 4vw, 24px); }
+  .card { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; max-width: 1000px; margin: 0 auto; }
+  .card__intro p { color: var(--mx-color-on-surface-variant); max-width: 70ch; margin: 8px 0 0; }
+  .card__intro p + p { margin-top: 10px; }
+  .panel {
+    background: var(--mx-color-surface);
+    color: var(--mx-color-on-surface);
+    border: 1px solid var(--mx-color-border-subtle);
+    border-radius: var(--mx-radius-lg);
+    padding: 20px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    align-content: start;
+  }
+  .panel__name { color: var(--mx-color-on-surface-variant); text-transform: uppercase; letter-spacing: 0.08em; }
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 16px; }
+  .swatches { display: grid; gap: 10px; }
+  .swatch { display: grid; grid-template-columns: 56px 1fr auto; gap: 14px; align-items: center; }
+  .swatch__chip { height: 44px; border-radius: var(--mx-radius-sm); border: 1px solid var(--mx-color-border-subtle); }
+  .swatch__name { display: grid; gap: 2px; min-width: 0; }
+  .swatch__role { color: var(--mx-color-on-surface-variant); }
+  .swatch__meta { color: var(--mx-color-on-surface-variant); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+  .note { color: var(--mx-color-on-surface-variant); max-width: 70ch; }
+  .rules { display: grid; gap: 8px; margin: 0; padding-left: 20px; color: var(--mx-color-on-surface-variant); }
+  .rules li { max-width: 68ch; }
+  code { font-family: var(--mx-font-mono); font-size: 0.92em; overflow-wrap: anywhere; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var(--mx-color-border-subtle); }
+  th { color: var(--mx-color-on-surface-variant); font-weight: var(--mx-weight-semibold); }
+  td.num { font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body class="mx-app">
+<div class="card">
+  <div class="card__intro">
+    <h1 class="mx-type-headline-small">Semantic — dark</h1>
+    <p class="mx-type-body-medium">
+      Four meanings <code>ColorScheme</code> has no slot for, carried as a theme extension rather
+      than as globals — a global <code>successColor</code> is correct in exactly one brightness,
+      and wrong in the other on every screen at once.
+    </p>
+    <p class="mx-type-body-medium">
+      On a chroma budget, and deliberately <strong>not equal</strong>: <code>danger</code> is the
+      alarm and carries the most saturation, <code>info</code> is only an indicator and carries
+      the least. None reaches full saturation — four hues all shouting is how a study tool starts
+      looking like a game.
+    </p>
+  </div>
+  <div class="panel" data-mx-theme="dark">
+    <div class="panel__name mx-type-label-small">Dark</div>
+    <div class="swatches">
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#68BB9C"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-success</code></span>
+          <span class="swatch__role mx-type-body-small">Answer remembered, session completed, saved.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#68BB9C<br>7.23:1 on surface</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#D2AC76"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-warning</code></span>
+          <span class="swatch__role mx-type-body-small">Card due soon, streak at risk — informative, not alarming.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#D2AC76<br>7.81:1 on surface</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#E88794"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-danger</code></span>
+          <span class="swatch__role mx-type-body-small">Answer forgotten, destructive action, reset. Also <code>error</code>.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#E88794<br>6.56:1 on surface</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#8FAEC6"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-info</code></span>
+          <span class="swatch__role mx-type-body-small">Status that genuinely carries information: streak, counters, "3 of 20".</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#8FAEC6<br>7.13:1 on surface</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:16px;padding-top:4px"><div style="display:flex;align-items:center;gap:8px">
+          <span style="width:10px;height:10px;border-radius:999px;background:#68BB9C"></span>
+          <span class="mx-type-body-medium" style="color:#68BB9C">Remembered</span>
+        </div><div style="display:flex;align-items:center;gap:8px">
+          <span style="width:10px;height:10px;border-radius:999px;background:#D2AC76"></span>
+          <span class="mx-type-body-medium" style="color:#D2AC76">Due in 2 days</span>
+        </div><div style="display:flex;align-items:center;gap:8px">
+          <span style="width:10px;height:10px;border-radius:999px;background:#E88794"></span>
+          <span class="mx-type-body-medium" style="color:#E88794">Forgotten</span>
+        </div><div style="display:flex;align-items:center;gap:8px">
+          <span style="width:10px;height:10px;border-radius:999px;background:#8FAEC6"></span>
+          <span class="mx-type-body-medium" style="color:#8FAEC6">3 of 20</span>
+        </div></div>
+  </div>
+
+  <div class="panel" data-mx-theme="dark">
+    <div class="panel__name mx-type-label-small">Rules</div>
+    <ul class="rules mx-type-body-medium">
+      <li><strong>Never colour alone.</strong> A red outline with no message tells a colour-blind
+        user that something is different and not what. Every semantic colour in this app arrives
+        with a word or a glyph beside it.</li>
+      <li><strong><code>danger</code> is also <code>error</code>.</strong> The Material role is
+        mapped onto this token so the two cannot diverge, and the
+        <code>error</code>/<code>onError</code> pair is contrast-checked against each other.</li>
+      <li><strong>Empty is not error.</strong> "You have finished everything due today" is good
+        news; rendering it in <code>danger</code> tells the user something is broken when nothing
+        is. <code>MxEmptyState</code> and <code>MxErrorState</code> are separate components for
+        this reason alone.</li>
+      <li><code>info</code> is for status that carries information, not for decoration. Plain
+        metadata is <code>text-secondary</code>.</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

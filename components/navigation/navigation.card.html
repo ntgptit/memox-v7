@@ -1,0 +1,217 @@
+<!-- @dsCard group="Components" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Navigation components</title>
+<link rel="stylesheet" href="../mx.css">
+<style>
+  body { margin: 0; padding: clamp(12px, 4vw, 24px); }
+  .card { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; max-width: 1100px; margin: 0 auto; }
+  .card__intro p { color: var(--mx-color-on-surface-variant); max-width: 68ch; margin: 6px 0 0; }
+  .panes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(330px, 100%), 1fr)); gap: 16px; }
+  .pane {
+    background: var(--mx-color-web-letterbox);
+    border-radius: var(--mx-radius-lg);
+    padding: 16px;
+    display: grid;
+    gap: 12px;
+    justify-items: center;
+  }
+  .pane__label { color: #a6abc2; text-transform: uppercase; letter-spacing: 0.08em; }
+  /* The phone frame the web build letterboxes to. */
+  .frame {
+    width: 100%;
+    max-width: var(--mx-frame-max-width);
+    height: 560px;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid var(--mx-color-border-subtle);
+  }
+  .frame .mx-shell { height: 100%; }
+  .parts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 16px; }
+  .part { padding: 20px; display: grid; gap: 12px; align-content: start; }
+  .part__name { color: var(--mx-color-on-surface-variant); }
+  .stack { display: grid; gap: 12px; }
+</style>
+</head>
+<body class="mx-app">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 4 8.4 4.4L12 12.8 3.6 8.4z"/><path d="m4.6 12.4 7.4 3.9 7.4-3.9"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><path d="M12 6.8v5.5l3.4 2"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 8.4h9.6"/><path d="M18.4 8.4H20"/><circle cx="16" cy="8.4" r="2.4"/><path d="M4 15.6h4.4"/><path d="M13.2 15.6H20"/><circle cx="10.8" cy="15.6" r="2.4"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m15.8 15.8 4.4 4.4"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="m6.2 6.2 11.6 11.6"/><path d="m17.8 6.2-11.6 11.6"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></symbol>
+  <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9.5 5.5 7 6.5-7 6.5"/></symbol>
+  <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="M20 12H4.4"/><path d="m10.4 6-6 6 6 6"/></symbol>
+  <symbol id="i-more-vertical" viewBox="0 0 24 24"><circle cx="12" cy="5.2" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="18.8" r="1.5" fill="currentColor" stroke="none"/></symbol>
+</defs></svg>
+
+<div class="card">
+  <div class="card__intro">
+    <h1 class="mx-type-headline-small">Navigation</h1>
+    <p class="mx-type-body-medium">
+      Four components that answer four different questions, which is why they are four and not
+      one with a mode. <strong>Where am I in the app</strong> — the bottom bar, siblings at a
+      fixed level. <strong>Where am I in the tree, and how do I get back up</strong> — the
+      breadcrumb, an arbitrary number of levels. <strong>What is this screen</strong> — the
+      shell, which owns the gutter and the app bar so no screen picks its own.
+      <strong>Which of these</strong> — the search field. None of them knows the router; they
+      take an index and a callback and never navigate.
+    </p>
+  </div>
+
+  <div class="panes">
+    <section class="pane">
+      <div class="pane__label mx-type-label-small">Light</div>
+      <div class="frame" data-mx-theme="light">
+        <div class="mx-shell">
+          <header class="mx-shell__app-bar">
+            <button type="button" class="mx-icon-button" title="Back" aria-label="Back"><svg class="mx-icon mx-icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-arrow-left"/></svg></button>
+            <h1 class="mx-shell__title mx-type-title-large">Phrasal verbs</h1>
+            <div class="mx-shell__actions">
+              <button type="button" class="mx-icon-button" title="Deck actions" aria-label="Deck actions"><svg class="mx-icon mx-icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-more-vertical"/></svg></button>
+            </div>
+          </header>
+          <main class="mx-shell__body mx-shell__body--scrollable">
+            <div class="stack">
+              <nav class="mx-breadcrumb" aria-label="Deck path">
+                <button type="button" class="mx-breadcrumb__step">All decks</button>
+                <svg class="mx-icon mx-icon--sm mx-breadcrumb__separator" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-chevron-right"/></svg>
+                <button type="button" class="mx-breadcrumb__step">English</button>
+                <svg class="mx-icon mx-icon--sm mx-breadcrumb__separator" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-chevron-right"/></svg>
+                <span class="mx-breadcrumb__step mx-breadcrumb__step--current" aria-current="page">Phrasal verbs</span>
+              </nav>
+
+              <div class="mx-search">
+                <svg class="mx-icon mx-icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-search"/></svg>
+                <input class="mx-search__input" type="search" value="give" aria-label="Search cards">
+                <button type="button" class="mx-search__clear" aria-label="Clear search"><svg class="mx-icon mx-icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-close"/></svg></button>
+              </div>
+
+              <div class="mx-card mx-card--elevation-card">
+                <div class="stack" style="gap:4px">
+                  <span class="mx-type-title-medium">give up</span>
+                  <span class="mx-type-body-medium" style="color:var(--mx-color-on-surface-variant)">to stop trying</span>
+                </div>
+              </div>
+              <div class="mx-card mx-card--elevation-card">
+                <div class="stack" style="gap:4px">
+                  <span class="mx-type-title-medium">give in</span>
+                  <span class="mx-type-body-medium" style="color:var(--mx-color-on-surface-variant)">to finally agree</span>
+                </div>
+              </div>
+            </div>
+          </main>
+          <button type="button" class="mx-shell__fab" aria-label="Add card"><svg class="mx-icon mx-icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-plus"/></svg></button>
+          <nav class="mx-nav-bar" aria-label="Main">
+            <div class="mx-nav-bar__row" style="--mx-nav-destination-count:3">
+              <button type="button" class="mx-nav-bar__destination mx-nav-bar__destination--selected" aria-current="page">
+                <span class="mx-nav-bar__indicator"><svg class="mx-icon mx-icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-layers"/></svg></span>
+                <span class="mx-nav-bar__label mx-type-label-small">Decks</span>
+              </button>
+              <button type="button" class="mx-nav-bar__destination">
+                <span class="mx-nav-bar__indicator"><svg class="mx-icon mx-icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-clock"/></svg></span>
+                <span class="mx-nav-bar__label mx-type-label-small">Review</span>
+              </button>
+              <button type="button" class="mx-nav-bar__destination">
+                <span class="mx-nav-bar__indicator"><svg class="mx-icon mx-icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-settings"/></svg></span>
+                <span class="mx-nav-bar__label mx-type-label-small">Settings</span>
+              </button>
+            </div>
+          </nav>
+        </div>
+      </div>
+    </section>
+
+    <section class="pane">
+      <div class="pane__label mx-type-label-small">Dark</div>
+      <div class="frame" data-mx-theme="dark">
+        <div class="mx-shell">
+          <header class="mx-shell__app-bar">
+            <button type="button" class="mx-icon-button" title="Back" aria-label="Back"><svg class="mx-icon mx-icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-arrow-left"/></svg></button>
+            <h1 class="mx-shell__title mx-type-title-large">Phrasal verbs</h1>
+            <div class="mx-shell__actions">
+              <button type="button" class="mx-icon-button" title="Deck actions" aria-label="Deck actions"><svg class="mx-icon mx-icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-more-vertical"/></svg></button>
+            </div>
+          </header>
+          <main class="mx-shell__body mx-shell__body--scrollable">
+            <div class="stack">
+              <nav class="mx-breadcrumb" aria-label="Deck path">
+                <button type="button" class="mx-breadcrumb__step">All decks</button>
+                <svg class="mx-icon mx-icon--sm mx-breadcrumb__separator" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-chevron-right"/></svg>
+                <button type="button" class="mx-breadcrumb__step">English</button>
+                <svg class="mx-icon mx-icon--sm mx-breadcrumb__separator" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-chevron-right"/></svg>
+                <span class="mx-breadcrumb__step mx-breadcrumb__step--current" aria-current="page">Phrasal verbs</span>
+              </nav>
+
+              <div class="mx-search">
+                <svg class="mx-icon mx-icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-search"/></svg>
+                <input class="mx-search__input" type="search" value="give" aria-label="Search cards">
+                <button type="button" class="mx-search__clear" aria-label="Clear search"><svg class="mx-icon mx-icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-close"/></svg></button>
+              </div>
+
+              <div class="mx-card mx-card--elevation-card">
+                <div class="stack" style="gap:4px">
+                  <span class="mx-type-title-medium">give up</span>
+                  <span class="mx-type-body-medium" style="color:var(--mx-color-on-surface-variant)">to stop trying</span>
+                </div>
+              </div>
+              <div class="mx-card mx-card--elevation-card">
+                <div class="stack" style="gap:4px">
+                  <span class="mx-type-title-medium">give in</span>
+                  <span class="mx-type-body-medium" style="color:var(--mx-color-on-surface-variant)">to finally agree</span>
+                </div>
+              </div>
+            </div>
+          </main>
+          <button type="button" class="mx-shell__fab" aria-label="Add card"><svg class="mx-icon mx-icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-plus"/></svg></button>
+          <nav class="mx-nav-bar" aria-label="Main">
+            <div class="mx-nav-bar__row" style="--mx-nav-destination-count:3">
+              <button type="button" class="mx-nav-bar__destination mx-nav-bar__destination--selected" aria-current="page">
+                <span class="mx-nav-bar__indicator"><svg class="mx-icon mx-icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-layers"/></svg></span>
+                <span class="mx-nav-bar__label mx-type-label-small">Decks</span>
+              </button>
+              <button type="button" class="mx-nav-bar__destination">
+                <span class="mx-nav-bar__indicator"><svg class="mx-icon mx-icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-clock"/></svg></span>
+                <span class="mx-nav-bar__label mx-type-label-small">Review</span>
+              </button>
+              <button type="button" class="mx-nav-bar__destination">
+                <span class="mx-nav-bar__indicator"><svg class="mx-icon mx-icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-settings"/></svg></span>
+                <span class="mx-nav-bar__label mx-type-label-small">Settings</span>
+              </button>
+            </div>
+          </nav>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="parts">
+    <div class="mx-card mx-card--elevation-none part">
+      <div class="part__name mx-type-label-medium">Why 120px per destination</div>
+      <p class="mx-type-body-medium" style="color:var(--mx-color-on-surface-variant)">
+        An even split puts two destinations at the quarter and three-quarter marks, one hard
+        against each edge, with a void between them that reads as a missing tab. Capping the
+        row per destination centres them — and at four the row wants more width than a phone
+        has, so the cap disarms itself and Material's even split takes over. A fixed maximum
+        would have to be revisited every time a tab is added.
+      </p>
+    </div>
+    <div class="mx-card mx-card--elevation-none part">
+      <div class="part__name mx-type-label-medium">Why the breadcrumb scrolls</div>
+      <p class="mx-type-body-medium" style="color:var(--mx-color-on-surface-variant)">
+        A path can be ten deep and a 320-wide screen at a 2× text scale fits about one and a
+        half names. Wrapping turns a deep path into five lines of chrome above the content it
+        exists to help you scan; collapsing the middle behind an ellipsis hides exactly the
+        steps a user goes to a breadcrumb to find. Scrolling hides nothing and costs nothing
+        when the path is short.
+      </p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

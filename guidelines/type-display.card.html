@@ -1,0 +1,97 @@
+<!-- @dsCard group="Type" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Display</title>
+<link rel="stylesheet" href="../components/mx.css">
+<style>
+  body { margin: 0; padding: clamp(12px, 4vw, 24px); }
+  .card { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; max-width: 1000px; margin: 0 auto; }
+  .card__intro p { color: var(--mx-color-on-surface-variant); max-width: 70ch; margin: 8px 0 0; }
+  .card__intro p + p { margin-top: 10px; }
+  .panel {
+    background: var(--mx-color-surface);
+    color: var(--mx-color-on-surface);
+    border: 1px solid var(--mx-color-border-subtle);
+    border-radius: var(--mx-radius-lg);
+    padding: 20px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    align-content: start;
+  }
+  .panel__name { color: var(--mx-color-on-surface-variant); text-transform: uppercase; letter-spacing: 0.08em; }
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 16px; }
+  .swatches { display: grid; gap: 10px; }
+  .swatch { display: grid; grid-template-columns: 56px 1fr auto; gap: 14px; align-items: center; }
+  .swatch__chip { height: 44px; border-radius: var(--mx-radius-sm); border: 1px solid var(--mx-color-border-subtle); }
+  .swatch__name { display: grid; gap: 2px; min-width: 0; }
+  .swatch__role { color: var(--mx-color-on-surface-variant); }
+  .swatch__meta { color: var(--mx-color-on-surface-variant); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+  .note { color: var(--mx-color-on-surface-variant); max-width: 70ch; }
+  .rules { display: grid; gap: 8px; margin: 0; padding-left: 20px; color: var(--mx-color-on-surface-variant); }
+  .rules li { max-width: 68ch; }
+  code { font-family: var(--mx-font-mono); font-size: 0.92em; overflow-wrap: anywhere; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var(--mx-color-border-subtle); }
+  th { color: var(--mx-color-on-surface-variant); font-weight: var(--mx-weight-semibold); }
+  td.num { font-variant-numeric: tabular-nums; }
+
+  /* A 57px specimen is wider than a 320 screen and cannot be made narrower without
+     lying about the size. It breaks mid-word instead, which is visibly a wrap rather
+     than a smaller face. */
+  .specimen { display: grid; gap: 4px; padding-block: 14px; border-bottom: 1px solid var(--mx-color-border-subtle); overflow-wrap: anywhere; }
+  .specimen:last-child { border-bottom: 0; }
+  .specimen__meta { color: var(--mx-color-on-surface-variant); font-variant-numeric: tabular-nums; }
+  .specimen__why { color: var(--mx-color-on-surface-variant); max-width: 66ch; margin: 4px 0 0; }
+</style>
+</head>
+<body class="mx-app">
+<div class="card">
+  <div class="card__intro">
+    <h1 class="mx-type-headline-small">Display</h1>
+    <p class="mx-type-body-medium">
+      Plus Jakarta Sans: geometric with humanist stroke endings, so a single vocabulary word set
+      large reads as designed rather than as default system text. This is the app's only visual
+      signature, and it is spent on exactly one thing — the review card prompt. Everything else
+      on this card exists so that a screen which genuinely needs a larger step has one to take
+      rather than a number to invent.
+    </p>
+    <p class="mx-type-body-medium">
+      A variable font, and the weight moves the <code>wght</code> axis rather than asking the
+      renderer to fake one. A face declared at 400 and asked for 700 is synthesised — the
+      outline is smeared rather than redrawn, and at display sizes that is visible.
+    </p>
+  </div>
+  <div class="panel">
+    <div class="specimen">
+      <div class="mx-type-display-large">Remembered</div>
+      <div class="specimen__meta mx-type-body-small">
+        <code>.mx-type-display-large</code> &nbsp;·&nbsp; Plus Jakarta Sans &nbsp;·&nbsp; 57px / 1.12 / 700 / -0.25 tracking
+      </div>
+    </div>
+    <div class="specimen">
+      <div class="mx-type-display-medium">Remembered</div>
+      <div class="specimen__meta mx-type-body-small">
+        <code>.mx-type-display-medium</code> &nbsp;·&nbsp; Plus Jakarta Sans &nbsp;·&nbsp; 45px / 1.16 / 700 / 0 tracking
+      </div>
+    </div>
+    <div class="specimen">
+      <div class="mx-type-display-small">Remembered</div>
+      <div class="specimen__meta mx-type-body-small">
+        <code>.mx-type-display-small</code> &nbsp;·&nbsp; Plus Jakarta Sans &nbsp;·&nbsp; 36px / 1.22 / 600 / 0 tracking
+      </div>
+    </div>
+    <div class="specimen">
+      <div class="mx-type-headline-large">Your decks</div>
+      <div class="specimen__meta mx-type-body-small">
+        <code>.mx-type-headline-large</code> &nbsp;·&nbsp; Plus Jakarta Sans &nbsp;·&nbsp; 32px / 1.25 / 600 / 0 tracking
+      </div>
+      <p class="specimen__why mx-type-body-small">The largest step any chrome is allowed. Above this is content, not interface.</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!-- @dsCard group="Spacing" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scale</title>
+<link rel="stylesheet" href="../components/mx.css">
+<style>
+  body { margin: 0; padding: clamp(12px, 4vw, 24px); }
+  .card { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; max-width: 1000px; margin: 0 auto; }
+  .card__intro p { color: var(--mx-color-on-surface-variant); max-width: 70ch; margin: 8px 0 0; }
+  .card__intro p + p { margin-top: 10px; }
+  .panel {
+    background: var(--mx-color-surface);
+    color: var(--mx-color-on-surface);
+    border: 1px solid var(--mx-color-border-subtle);
+    border-radius: var(--mx-radius-lg);
+    padding: 20px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    align-content: start;
+  }
+  .panel__name { color: var(--mx-color-on-surface-variant); text-transform: uppercase; letter-spacing: 0.08em; }
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 16px; }
+  .swatches { display: grid; gap: 10px; }
+  .swatch { display: grid; grid-template-columns: 56px 1fr auto; gap: 14px; align-items: center; }
+  .swatch__chip { height: 44px; border-radius: var(--mx-radius-sm); border: 1px solid var(--mx-color-border-subtle); }
+  .swatch__name { display: grid; gap: 2px; min-width: 0; }
+  .swatch__role { color: var(--mx-color-on-surface-variant); }
+  .swatch__meta { color: var(--mx-color-on-surface-variant); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+  .note { color: var(--mx-color-on-surface-variant); max-width: 70ch; }
+  .rules { display: grid; gap: 8px; margin: 0; padding-left: 20px; color: var(--mx-color-on-surface-variant); }
+  .rules li { max-width: 68ch; }
+  code { font-family: var(--mx-font-mono); font-size: 0.92em; overflow-wrap: anywhere; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var(--mx-color-border-subtle); }
+  th { color: var(--mx-color-on-surface-variant); font-weight: var(--mx-weight-semibold); }
+  td.num { font-variant-numeric: tabular-nums; }
+
+  /* `minmax(0, 1fr)`, not `1fr`: a track sized `1fr` still takes its MINIMUM from
+     the item, so a bar declared 192px wide floors the column at 192 and `max-width:
+     100%` never gets a chance to apply. */
+  .step { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 16px; align-items: center; }
+  .step__bar { height: 24px; max-width: 100%; background: var(--mx-color-primary); border-radius: var(--mx-radius-sm); }
+  .step__name { display: grid; gap: 2px; }
+  .step__role { color: var(--mx-color-on-surface-variant); }
+  .annot { position: relative; }
+  .tick { background: color-mix(in srgb, var(--mx-color-focus-ring) 22%, transparent); border-radius: 3px; }
+  .target { display: grid; place-items: center; border: 1px dashed var(--mx-color-focus-ring); border-radius: var(--mx-radius-sm); }
+</style>
+</head>
+<body class="mx-app">
+<div class="card">
+  <div class="card__intro">
+    <h1 class="mx-type-headline-small">Scale</h1>
+    <p class="mx-type-body-medium">
+      Six steps, deliberately. A scale wide enough to express "a bit more" invites per-screen
+      drift, and the drift is what makes an interface feel unfinished long before anyone can
+      point at a specific screen.
+    </p>
+    <p class="mx-type-body-medium">
+      Every gap, pad and inset in the app comes from here. The list is exported as an array so a
+      test can assert the scale did not quietly grow a step — which is the only thing that stops
+      a seventh appearing the first time 20 looks better than 16 on one screen.
+    </p>
+  </div>
+  <div class="panel">
+    <div class="panel__name mx-type-label-small">The six steps (bars drawn at 6×)</div>
+    <div style="display:grid;gap:12px">
+      <div class="step">
+        <div class="step__name">
+          <span class="mx-type-label-large"><code>--mx-space-xs</code></span>
+          <span class="step__role mx-type-body-small">4px</span>
+        </div>
+        <div class="step__bar" style="width:24px"></div>
+      </div>
+      <div class="step">
+        <div></div>
+        <div class="step__role mx-type-body-small" style="margin-top:-8px">Between an icon and its label.</div>
+      </div>
+      <div class="step">
+        <div class="step__name">
+          <span class="mx-type-label-large"><code>--mx-space-sm</code></span>
+          <span class="step__role mx-type-body-small">8px</span>
+        </div>
+        <div class="step__bar" style="width:48px"></div>
+      </div>
+      <div class="step">
+        <div></div>
+        <div class="step__role mx-type-body-small" style="margin-top:-8px">Between tightly related items in a row.</div>
+      </div>
+      <div class="step">
+        <div class="step__name">
+          <span class="mx-type-label-large"><code>--mx-space-md</code></span>
+          <span class="step__role mx-type-body-small">12px</span>
+        </div>
+        <div class="step__bar" style="width:72px"></div>
+      </div>
+      <div class="step">
+        <div></div>
+        <div class="step__role mx-type-body-small" style="margin-top:-8px">Inside a compact control.</div>
+      </div>
+      <div class="step">
+        <div class="step__name">
+          <span class="mx-type-label-large"><code>--mx-space-lg</code></span>
+          <span class="step__role mx-type-body-small">16px</span>
+        </div>
+        <div class="step__bar" style="width:96px"></div>
+      </div>
+      <div class="step">
+        <div></div>
+        <div class="step__role mx-type-body-small" style="margin-top:-8px">Standard screen padding and the gap between list items.</div>
+      </div>
+      <div class="step">
+        <div class="step__name">
+          <span class="mx-type-label-large"><code>--mx-space-xl</code></span>
+          <span class="step__role mx-type-body-small">24px</span>
+        </div>
+        <div class="step__bar" style="width:144px"></div>
+      </div>
+      <div class="step">
+        <div></div>
+        <div class="step__role mx-type-body-small" style="margin-top:-8px">Between sections of a screen.</div>
+      </div>
+      <div class="step">
+        <div class="step__name">
+          <span class="mx-type-label-large"><code>--mx-space-xxl</code></span>
+          <span class="step__role mx-type-body-small">32px</span>
+        </div>
+        <div class="step__bar" style="width:192px"></div>
+      </div>
+      <div class="step">
+        <div></div>
+        <div class="step__role mx-type-body-small" style="margin-top:-8px">Around a lone focal element — an empty state, a single card in a session.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel__name mx-type-label-small">Rules</div>
+    <ul class="rules mx-type-body-medium">
+      <li><strong>No value outside the scale.</strong> Not 10, not 20, not "just this once".</li>
+      <li><strong>The touch target is not on it.</strong> 48 is a floor, not a step — see
+        <em>Targets</em>.</li>
+      <li>Steps are not a ratio series. They are the six distances the app actually needs, which
+        is why <code>md</code> is 12 and not 16 × 0.75.</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!-- @dsCard group="Colors" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brand</title>
+<link rel="stylesheet" href="../components/mx.css">
+<style>
+  body { margin: 0; padding: clamp(12px, 4vw, 24px); }
+  .card { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; max-width: 1000px; margin: 0 auto; }
+  .card__intro p { color: var(--mx-color-on-surface-variant); max-width: 70ch; margin: 8px 0 0; }
+  .card__intro p + p { margin-top: 10px; }
+  .panel {
+    background: var(--mx-color-surface);
+    color: var(--mx-color-on-surface);
+    border: 1px solid var(--mx-color-border-subtle);
+    border-radius: var(--mx-radius-lg);
+    padding: 20px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    align-content: start;
+  }
+  .panel__name { color: var(--mx-color-on-surface-variant); text-transform: uppercase; letter-spacing: 0.08em; }
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 16px; }
+  .swatches { display: grid; gap: 10px; }
+  .swatch { display: grid; grid-template-columns: 56px 1fr auto; gap: 14px; align-items: center; }
+  .swatch__chip { height: 44px; border-radius: var(--mx-radius-sm); border: 1px solid var(--mx-color-border-subtle); }
+  .swatch__name { display: grid; gap: 2px; min-width: 0; }
+  .swatch__role { color: var(--mx-color-on-surface-variant); }
+  .swatch__meta { color: var(--mx-color-on-surface-variant); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+  .note { color: var(--mx-color-on-surface-variant); max-width: 70ch; }
+  .rules { display: grid; gap: 8px; margin: 0; padding-left: 20px; color: var(--mx-color-on-surface-variant); }
+  .rules li { max-width: 68ch; }
+  code { font-family: var(--mx-font-mono); font-size: 0.92em; overflow-wrap: anywhere; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var(--mx-color-border-subtle); }
+  th { color: var(--mx-color-on-surface-variant); font-weight: var(--mx-weight-semibold); }
+  td.num { font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body class="mx-app">
+<div class="card">
+  <div class="card__intro">
+    <h1 class="mx-type-headline-small">Brand</h1>
+    <p class="mx-type-body-medium">
+      One accent, on hue 240 in both brightnesses, so the brand is the same object in light and
+      dark. The dark value is held at luminance 0.13 — bright enough to read as the brand against
+      the navy page, far enough below the card's headline text that the CTA never becomes the
+      brightest thing on screen. That relationship is asserted rather than assumed:
+      <code>primary</code> against the page must score lower than <code>onSurface</code> against
+      the page. It does — 3.29:1 against
+      16.72:1.
+    </p>
+  </div>
+  <div class="cols">
+  <div class="panel" data-mx-theme="light">
+    <div class="panel__name mx-type-label-small">Light</div>
+    <div class="swatches">
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#4646B4"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-primary</code></span>
+          <span class="swatch__role mx-type-body-small">The single accent. Fills the primary action in both modes.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#4646B4<br>7.51:1 vs on-primary</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#FFFFFF;border-color:#4646B4"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-on-primary</code></span>
+          <span class="swatch__role mx-type-body-small">The label on a filled action.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#FFFFFF</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#4141C0"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-focus-ring</code></span>
+          <span class="swatch__role mx-type-body-small">A focused input's border, a caret, a spinner.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#4141C0<br>7.41:1 on surface</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#454B5E"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-secondary-action</code></span>
+          <span class="swatch__role mx-type-body-small">An outlined action's label. Deliberately neutral.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#454B5E</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#A9A9E0"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-inverse-primary</code></span>
+          <span class="swatch__role mx-type-body-small">The brand on an inverted surface.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#A9A9E0</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#D2D2DD"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-border-subtle</code></span>
+          <span class="swatch__role mx-type-body-small">Hairline: rows, card edges, an input at rest.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#D2D2DD<br>1.45:1 on surface</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;padding-top:4px">
+      <button type="button" class="mx-button mx-button--primary"><span class="mx-button__content"><span class="mx-button__label">Primary</span></span></button>
+      <button type="button" class="mx-button mx-button--secondary"><span class="mx-button__content"><span class="mx-button__label">Secondary</span></span></button>
+    </div>
+  </div>
+  <div class="panel" data-mx-theme="dark">
+    <div class="panel__name mx-type-label-small">Dark</div>
+    <div class="swatches">
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#5656C9"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-primary</code></span>
+          <span class="swatch__role mx-type-body-small">The single accent. Fills the primary action in both modes.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#5656C9<br>5.88:1 vs on-primary</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#FFFFFF;border-color:#5656C9"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-on-primary</code></span>
+          <span class="swatch__role mx-type-body-small">The label on a filled action.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#FFFFFF</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#8A8AE0"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-focus-ring</code></span>
+          <span class="swatch__role mx-type-body-small">A focused input's border, a caret, a spinner.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#8A8AE0<br>5.36:1 on surface</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#C3C6D2"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-secondary-action</code></span>
+          <span class="swatch__role mx-type-body-small">An outlined action's label. Deliberately neutral.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#C3C6D2</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#3A3A9B"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-inverse-primary</code></span>
+          <span class="swatch__role mx-type-body-small">The brand on an inverted surface.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#3A3A9B</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#414762"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-border-subtle</code></span>
+          <span class="swatch__role mx-type-body-small">Hairline: rows, card edges, an input at rest.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#414762<br>1.82:1 on surface</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;padding-top:4px">
+      <button type="button" class="mx-button mx-button--primary"><span class="mx-button__content"><span class="mx-button__label">Primary</span></span></button>
+      <button type="button" class="mx-button mx-button--secondary"><span class="mx-button__content"><span class="mx-button__label">Secondary</span></span></button>
+    </div>
+  </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel__name mx-type-label-small">Why the secondary action has no hue</div>
+    <p class="note mx-type-body-medium">
+      <code>secondary-action</code> is under 20% saturation, and it is a separate token from
+      <code>primary</code> rather than a lighter version of it. A secondary action sits next to
+      the review verdicts, and anything with a hue there competes with the two colours carrying
+      the user's actual decision. Keeping the tokens separate also stops the pairing that once
+      shipped a label at 3.09:1 — one colour cannot be both a fill and a label on a dark surface.
+    </p>
+    <p class="note mx-type-body-medium">
+      <code>focus-ring</code> is the same hue as <code>primary</code> at the intensity meant to
+      pull attention, which is why it does double duty as the spinner and progress colour.
+      Material's default there is <code>primary</code>, and dark <code>primary</code> measures
+      2.81:1 against the surface it spins on — under the 3.0 floor a
+      graphic needs. <code>focus-ring</code> measures 5.36:1 dark
+      and 7.41:1 light.
+    </p>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,37 @@
+/* Layout — breakpoints from `app_breakpoints.dart`, icon sizes from
+ * `app_icon_size.dart`, and the gutter `MxContentShell` resolves.
+ *
+ * Mobile-first, matching AD-04: Android is the release target and the web build
+ * is framed to a phone. There is no desktop breakpoint because nothing in the
+ * MVP has a desktop layout to switch to — adding one now would be a branch no
+ * code takes.
+ */
+
+:root {
+  /* Below this, treat the screen as cramped: the 320x568 case every component is
+   * tested against. */
+  --mx-breakpoint-compact: 360px;
+  /* Tablet and the framed web surface at its widest. Documented upper edge of the
+   * phone range; nothing branches on it. */
+  --mx-breakpoint-medium: 600px;
+
+  /* Icon sizes. Three steps covers everything the app draws. A fourth would be a
+   * guess. */
+  --mx-icon-sm: 16px; /* Inline with body text. */
+  --mx-icon-md: 24px; /* Default for actions and list affordances. */
+  --mx-icon-lg: 40px; /* Illustrative icon in an empty or error state. */
+
+  /* Screen padding. 16 a side costs 10% of a 320-wide screen and 8% of a
+   * 393-wide one — the same number and a different amount of the screen, which is
+   * what makes a narrow phone feel padded rather than laid out. */
+  --mx-gutter: var(--mx-space-lg);
+
+  /* The phone frame the web build letterboxes to. */
+  --mx-frame-max-width: 430px;
+}
+
+@media (max-width: 359px) {
+  :root {
+    --mx-gutter: var(--mx-space-md);
+  }
+}

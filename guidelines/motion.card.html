@@ -1,0 +1,165 @@
+<!-- @dsCard group="Foundations" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Motion</title>
+<link rel="stylesheet" href="../components/mx.css">
+<style>
+  body { margin: 0; padding: clamp(12px, 4vw, 24px); }
+  .card { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; max-width: 1000px; margin: 0 auto; }
+  .card__intro p { color: var(--mx-color-on-surface-variant); max-width: 70ch; margin: 8px 0 0; }
+  .card__intro p + p { margin-top: 10px; }
+  .panel {
+    background: var(--mx-color-surface);
+    color: var(--mx-color-on-surface);
+    border: 1px solid var(--mx-color-border-subtle);
+    border-radius: var(--mx-radius-lg);
+    padding: 20px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    align-content: start;
+  }
+  .panel__name { color: var(--mx-color-on-surface-variant); text-transform: uppercase; letter-spacing: 0.08em; }
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 16px; }
+  .swatches { display: grid; gap: 10px; }
+  .swatch { display: grid; grid-template-columns: 56px 1fr auto; gap: 14px; align-items: center; }
+  .swatch__chip { height: 44px; border-radius: var(--mx-radius-sm); border: 1px solid var(--mx-color-border-subtle); }
+  .swatch__name { display: grid; gap: 2px; min-width: 0; }
+  .swatch__role { color: var(--mx-color-on-surface-variant); }
+  .swatch__meta { color: var(--mx-color-on-surface-variant); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+  .note { color: var(--mx-color-on-surface-variant); max-width: 70ch; }
+  .rules { display: grid; gap: 8px; margin: 0; padding-left: 20px; color: var(--mx-color-on-surface-variant); }
+  .rules li { max-width: 68ch; }
+  code { font-family: var(--mx-font-mono); font-size: 0.92em; overflow-wrap: anywhere; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var(--mx-color-border-subtle); }
+  th { color: var(--mx-color-on-surface-variant); font-weight: var(--mx-weight-semibold); }
+  td.num { font-variant-numeric: tabular-nums; }
+
+  .track {
+    position: relative; height: 40px; border-radius: var(--mx-radius-sm);
+    background: var(--mx-color-surface-muted); overflow: hidden;
+  }
+  .dot {
+    position: absolute; top: 8px; left: 0; width: 24px; height: 24px;
+    border-radius: 999px; background: var(--mx-color-focus-ring);
+    animation-name: travel; animation-iteration-count: infinite; animation-direction: alternate;
+  }
+  @keyframes travel { from { left: 8px } to { left: calc(100% - 32px) } }
+  .curve { background: var(--mx-color-surface-muted); border-radius: var(--mx-radius-md); padding: 12px; }
+  .curve svg { display: block; width: 100%; height: auto; }
+  .curve path { fill: none; stroke: var(--mx-color-focus-ring); stroke-width: 3; }
+  .curve line { stroke: var(--mx-color-border-subtle); stroke-width: 1.5; }
+</style>
+</head>
+<body class="mx-app">
+<div class="card">
+  <div class="card__intro">
+    <h1 class="mx-type-headline-small">Motion</h1>
+    <p class="mx-type-body-medium">
+      Short and few. During a review session the user is answering, not watching; animation that
+      draws attention to itself costs recall. Three durations, and 320ms is the ceiling — there is
+      nothing in this app worth a third of a second of somebody's attention.
+    </p>
+    <p class="mx-type-body-medium">
+      Motion is also never the only carrier of a state. A spinner says "working", and so does the
+      label beside it; a progress bar moves, and the "7 of 20" beside it says the same thing in
+      words.
+    </p>
+  </div>
+  <div class="panel">
+    <div class="panel__name mx-type-label-small">Durations</div>
+    <div style="display:grid;gap:18px">
+      <div style="display:grid;gap:6px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <span class="mx-type-label-large"><code>--mx-duration-fast</code></span>
+          <span class="mx-type-body-small" style="color:var(--mx-color-on-surface-variant);font-variant-numeric:tabular-nums">120ms</span>
+        </div>
+        <div class="track"><div class="dot" style="animation-duration:120ms;animation-timing-function:var(--mx-ease-standard)"></div></div>
+        <span class="mx-type-body-small" style="color:var(--mx-color-on-surface-variant)">State changes that must not feel like a jump — a press, a hover, a colour shift on focus.</span>
+      </div>
+      <div style="display:grid;gap:6px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <span class="mx-type-label-large"><code>--mx-duration-normal</code></span>
+          <span class="mx-type-body-small" style="color:var(--mx-color-on-surface-variant);font-variant-numeric:tabular-nums">200ms</span>
+        </div>
+        <div class="track"><div class="dot" style="animation-duration:200ms;animation-timing-function:var(--mx-ease-standard)"></div></div>
+        <span class="mx-type-body-small" style="color:var(--mx-color-on-surface-variant)">Card and surface transitions. A progress bar filling. A dialog arriving.</span>
+      </div>
+      <div style="display:grid;gap:6px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <span class="mx-type-label-large"><code>--mx-duration-slow</code></span>
+          <span class="mx-type-body-small" style="color:var(--mx-color-on-surface-variant);font-variant-numeric:tabular-nums">320ms</span>
+        </div>
+        <div class="track"><div class="dot" style="animation-duration:320ms;animation-timing-function:var(--mx-ease-standard)"></div></div>
+        <span class="mx-type-body-small" style="color:var(--mx-color-on-surface-variant)">The longest anything in the app is allowed to take.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel__name mx-type-label-small">Easing</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px">
+      <div style="display:grid;gap:8px">
+        <div class="curve">
+          <svg viewBox="-4 -4 108 108" role="img" aria-label="standard easing curve">
+            <line x1="0" y1="100" x2="100" y2="100"/>
+            <line x1="0" y1="100" x2="0" y2="0"/>
+            <path d="M0,100 C42,100 58,0 100,0"/>
+          </svg>
+        </div>
+        <span class="mx-type-label-large"><code>--mx-ease-standard</code></span>
+        <span class="mx-type-body-small" style="color:var(--mx-color-on-surface-variant)">Anything that starts and ends on screen. The default.</span>
+      </div>
+      <div style="display:grid;gap:8px">
+        <div class="curve">
+          <svg viewBox="-4 -4 108 108" role="img" aria-label="decelerate easing curve">
+            <line x1="0" y1="100" x2="100" y2="100"/>
+            <line x1="0" y1="100" x2="0" y2="0"/>
+            <path d="M0,100 C0,100 58,0 100,0"/>
+          </svg>
+        </div>
+        <span class="mx-type-label-large"><code>--mx-ease-decelerate</code></span>
+        <span class="mx-type-body-small" style="color:var(--mx-color-on-surface-variant)">Something arriving — a sheet, a dialog, a row appearing.</span>
+      </div>
+      <div style="display:grid;gap:8px">
+        <div class="curve">
+          <svg viewBox="-4 -4 108 108" role="img" aria-label="accelerate easing curve">
+            <line x1="0" y1="100" x2="100" y2="100"/>
+            <line x1="0" y1="100" x2="0" y2="0"/>
+            <path d="M0,100 C42,100 100,0 100,0"/>
+          </svg>
+        </div>
+        <span class="mx-type-label-large"><code>--mx-ease-accelerate</code></span>
+        <span class="mx-type-body-small" style="color:var(--mx-color-on-surface-variant)">Something leaving. Eases in, then goes.</span>
+      </div>
+    </div>
+    <p class="note mx-type-body-medium">
+      These name the curve the platform was already using rather than introducing a new one:
+      Flutter's implicit animations default to <code>Curves.easeInOut</code>, and the app never
+      overrode it. Stating them is what stops a component reaching for the browser default
+      <code>ease</code>, which is faster out of the gate and makes a 120ms press look like a
+      flicker.
+    </p>
+  </div>
+
+  <div class="panel">
+    <div class="panel__name mx-type-label-small">Reduced motion</div>
+    <ul class="rules mx-type-body-medium">
+      <li><strong>Durations collapse to 1ms, not 0.</strong> A zero-length transition never fires
+        <code>transitionend</code>, and a component that sequences off that event stops sequencing
+        for exactly the users who asked for less motion.</li>
+      <li><strong>The spinner slows; it does not stop.</strong> A stopped spinner is a lie about
+        whether the app is doing anything, and it is the only signal the user has.</li>
+      <li><strong>An indeterminate progress bar pulses in place.</strong> A bar that stops moving
+        says "finished", which is the one thing it must not say.</li>
+      <li>Everything else simply arrives at its end state. Nothing in the app depends on the
+        journey.</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

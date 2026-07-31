@@ -1,0 +1,16 @@
+/* Corner radii — the web mirror of `lib/core/theme/app_radius.dart`.
+ *
+ * Restrained on purpose: this is a study tool for adults at work, and heavily
+ * rounded surfaces read as playful rather than focused.
+ */
+
+:root {
+  /* Chips, badges, small indicators. */
+  --mx-radius-sm: 8px;
+  /* Buttons and inputs. */
+  --mx-radius-md: 12px;
+  /* Cards and sheets — the review card itself. */
+  --mx-radius-lg: 16px;
+  /* Fully rounded, for pill-shaped controls. */
+  --mx-radius-pill: 999px;
+}

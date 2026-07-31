@@ -1,0 +1,1141 @@
+/* mx.css — every component's appearance, in one place.
+ *
+ * The web mirror of `lib/core/theme/`: `app_theme.dart` and the three files split
+ * out of it when it crossed the 400-line guard. What lives here is what lives
+ * there — a component named `Mx*` reads classes, never raw values, for the same
+ * reason a widget reads `Theme.of(context)`. A component allowed to invent a
+ * colour is a design system that cannot be enforced, and the first screen to do
+ * it looks correct in isolation and wrong beside the others.
+ *
+ * Imported rather than expected: a page links this file alone and gets the tokens
+ * with it, so there is no order for a caller to get wrong.
+ */
+
+@import url("../tokens/fonts.css");
+@import url("../tokens/colors.css");
+@import url("../tokens/spacing.css");
+@import url("../tokens/radius.css");
+@import url("../tokens/elevation.css");
+@import url("../tokens/motion.css");
+@import url("../tokens/layout.css");
+@import url("../tokens/typography.css");
+
+/* ============================================================ foundations */
+
+/* The page. Applied by a host page rather than by `html`, so this stylesheet can
+ * be dropped into a document that already owns its background. */
+.mx-app {
+  background: var(--mx-color-background);
+  color: var(--mx-color-on-surface);
+  font-family: var(--mx-font-body);
+  font-optical-sizing: auto;
+}
+
+/* Padding is inside the declared size, on every component root.
+ *
+ * Stated per component rather than as a universal selector: these classes can be
+ * dropped into a page that already has its own box model, and a `*` rule would
+ * reach past the design system into markup it does not own. The bug this fixes was
+ * real — `.mx-loading` is `width: 100%` with `xl` padding, so it was 48px wider
+ * than its container and pushed a 320-wide screen sideways. */
+.mx-app,
+.mx-button,
+.mx-icon-button,
+.mx-card,
+.mx-list-tile,
+.mx-pill,
+.mx-pill__shape,
+.mx-progress-bar,
+.mx-progress-bar__track,
+.mx-field,
+.mx-field__input,
+.mx-search,
+.mx-loading,
+.mx-state,
+.mx-dialog,
+.mx-sheet,
+.mx-shell,
+.mx-shell__app-bar,
+.mx-shell__body,
+.mx-nav-bar,
+.mx-nav-bar__destination,
+.mx-breadcrumb,
+.mx-breadcrumb__step {
+  box-sizing: border-box;
+}
+
+/* Names the control for assistive technology and nothing else. Used wherever a
+ * label must exist and must not be drawn — a spinner, an icon-only button that
+ * also carries a tooltip. */
+.mx-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Keyboard focus draws a RING, not just a tint.
+ *
+ * Measured off the goldens, Material's default focus tint alone is 1.15:1 against
+ * the surface behind it in both modes. WCAG 1.4.11 asks 3:1 of a focus indicator,
+ * so on its own that tint marks the focused control for people who can already
+ * see where they are and for nobody else. `:focus-visible`, not `:focus`, so a
+ * mouse press does not leave a ring behind. */
+.mx-focus-ring:focus-visible {
+  outline: 2px solid var(--mx-color-primary);
+  outline-offset: 2px;
+}
+
+/* Scroll thumbs, everywhere the system draws one. */
+.mx-app *::-webkit-scrollbar { width: 8px; height: 8px; }
+.mx-app *::-webkit-scrollbar-thumb {
+  background: var(--mx-color-scrollbar-thumb);
+  border-radius: var(--mx-radius-sm);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+.mx-app * { scrollbar-color: var(--mx-color-scrollbar-thumb) transparent; scrollbar-width: thin; }
+
+.mx-app ::selection {
+  background: var(--mx-color-selection);
+}
+
+/* ================================================================== MxIcon */
+
+.mx-icon {
+  display: inline-block;
+  flex: none;
+  width: var(--mx-icon-md);
+  height: var(--mx-icon-md);
+  /* Strokes inherit the text colour, so an icon inside a coloured control needs
+   * no colour of its own — which is what stops a glyph and its label drifting. */
+  color: inherit;
+  vertical-align: middle;
+}
+
+/* Stroke weight is set per step, not left to scale with the box.
+ *
+ * A 1.5 stroke on a 24 grid is 2.5 device px once the box grows to 40, which
+ * turns the illustrative icon in an empty state into the heaviest mark on the
+ * screen; the same stroke shrunk to 16 is 1.0 and starts to break up. Each step
+ * carries the weight it is drawn at, so the set reads as one weight at all three
+ * sizes rather than one NUMBER at all three sizes. */
+.mx-icon--sm { width: var(--mx-icon-sm); height: var(--mx-icon-sm); stroke-width: 1.75; }
+.mx-icon--md { width: var(--mx-icon-md); height: var(--mx-icon-md); stroke-width: 1.5; }
+.mx-icon--lg { width: var(--mx-icon-lg); height: var(--mx-icon-lg); stroke-width: 1.25; }
+
+/* ========================================================= MxActionButton */
+
+.mx-button {
+  /* 48 high before padding: the minimum touch target, enforced here rather than
+   * per component so no button in the app can be built below it. */
+  min-height: var(--mx-touch-target);
+  min-width: 64px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--mx-space-sm);
+  padding: var(--mx-space-md) var(--mx-space-xl);
+  border: 1px solid transparent;
+  border-radius: var(--mx-radius-md);
+  font-family: var(--mx-font-body);
+  font-size: var(--mx-type-label-large-size);
+  line-height: var(--mx-type-label-large-line);
+  font-weight: var(--mx-type-label-large-weight);
+  letter-spacing: var(--mx-type-label-large-tracking);
+  cursor: pointer;
+  position: relative;
+  text-align: center;
+  transition:
+    background-color var(--mx-duration-fast) var(--mx-ease-standard),
+    border-color var(--mx-duration-fast) var(--mx-ease-standard),
+    color var(--mx-duration-fast) var(--mx-ease-standard);
+}
+
+/* Two lines before ellipsis. One line ellipsizes "Endgültig löschen" down to
+ * "End…" at a 3× text scale, which on a destructive dialog leaves the user
+ * approving an action they can no longer read. */
+.mx-button__label {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.mx-button__icon {
+  width: var(--mx-icon-sm);
+  height: var(--mx-icon-sm);
+}
+
+.mx-button--primary {
+  background: var(--mx-color-primary);
+  color: var(--mx-color-on-primary);
+}
+.mx-button--primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--mx-color-on-surface) 6%, var(--mx-color-primary));
+}
+.mx-button--primary:active:not(:disabled) {
+  background: color-mix(in srgb, var(--mx-color-on-surface) 12%, var(--mx-color-primary));
+}
+
+/* `error` / `on-error`, not the danger token read directly: the scheme pair is
+ * already contrast-checked against each other, and `error` is mapped onto
+ * `danger` so the two cannot diverge. */
+.mx-button--destructive {
+  background: var(--mx-color-error);
+  color: var(--mx-color-on-error);
+}
+.mx-button--destructive:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--mx-color-on-surface) 6%, var(--mx-color-error));
+}
+.mx-button--destructive:active:not(:disabled) {
+  background: color-mix(in srgb, var(--mx-color-on-surface) 12%, var(--mx-color-error));
+}
+
+.mx-button--secondary {
+  background: transparent;
+  color: var(--mx-color-secondary-action);
+  border-color: var(--mx-color-border-subtle);
+}
+.mx-button--secondary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--mx-color-primary) 8%, transparent);
+}
+.mx-button--secondary:active:not(:disabled) {
+  background: color-mix(in srgb, var(--mx-color-primary) 12%, transparent);
+}
+.mx-button--secondary:focus-visible {
+  border-color: var(--mx-color-primary);
+  border-width: 2px;
+  /* The extra pixel comes out of the padding, so the label does not shift when
+   * the border thickens. */
+  padding: calc(var(--mx-space-md) - 1px) calc(var(--mx-space-xl) - 1px);
+}
+
+/* Disabled is solid, not translucent — MX-VIS-002 rule R7. Material's idiom is
+ * `onSurface` at 12% alpha composited against whatever happens to be behind the
+ * button at paint time, so one token renders as three values and none of them was
+ * chosen. */
+.mx-button:disabled {
+  cursor: not-allowed;
+  color: var(--mx-color-disabled-content);
+}
+.mx-button--primary:disabled,
+.mx-button--destructive:disabled {
+  background: var(--mx-color-disabled-surface);
+}
+.mx-button--secondary:disabled {
+  border-color: var(--mx-color-disabled-surface);
+  background: transparent;
+}
+
+/* Loading keeps the button's width.
+ *
+ * The label stays laid out and merely invisible: replacing the child with a
+ * spinner would resize the button, which moves everything beside it exactly when
+ * the user is waiting to see what happened. */
+.mx-button--loading .mx-button__content {
+  visibility: hidden;
+}
+.mx-button__spinner {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.mx-button__content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--mx-space-sm);
+  min-width: 0;
+}
+
+/* Compact: buttons keep their height and lose horizontal padding.
+ *
+ * The opposite of what "make the button smaller" would do, and the only version
+ * that helps. Measured: four review actions in a row at 320 give each button
+ * 68px. At 24 a side the padding takes 48 of that and leaves 20 for the label, so
+ * "Again" renders as "Ag". At 12 a side the label gets 44. */
+@media (max-width: 359px) {
+  .mx-button { padding: var(--mx-space-md); }
+  .mx-button--secondary:focus-visible { padding: calc(var(--mx-space-md) - 1px); }
+}
+
+/* =========================================================== MxIconButton */
+
+.mx-icon-button {
+  width: var(--mx-touch-target);
+  height: var(--mx-touch-target);
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: var(--mx-radius-md);
+  background: transparent;
+  color: var(--mx-color-on-surface-variant);
+  cursor: pointer;
+  transition: background-color var(--mx-duration-fast) var(--mx-ease-standard);
+}
+.mx-icon-button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--mx-color-on-surface) 8%, transparent);
+}
+.mx-icon-button:active:not(:disabled) {
+  background: color-mix(in srgb, var(--mx-color-on-surface) 12%, transparent);
+}
+.mx-icon-button:focus-visible {
+  outline: none;
+  border-color: var(--mx-color-primary);
+}
+.mx-icon-button:disabled {
+  color: var(--mx-color-disabled-content);
+  cursor: not-allowed;
+}
+
+/* ================================================================== MxCard */
+
+.mx-card {
+  background: var(--mx-color-surface);
+  border: 1px solid var(--mx-color-border-subtle);
+  border-radius: var(--mx-radius-lg);
+  padding: var(--mx-space-lg);
+  box-shadow: var(--mx-shadow-card);
+  /* A card is a block, so it fills the width it is given rather than shrinking to
+   * its content — which is what a caller laying out a list expects. */
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: inherit;
+  color: inherit;
+  font: inherit;
+}
+
+/* A card INSIDE another surface. A shadow stacked on a shadow reads as a
+ * rendering fault rather than as depth. */
+.mx-card--elevation-none { box-shadow: var(--mx-shadow-none); }
+.mx-card--elevation-card { box-shadow: var(--mx-shadow-card); }
+.mx-card--elevation-raised { box-shadow: var(--mx-shadow-raised); }
+.mx-card--elevation-overlay { box-shadow: var(--mx-shadow-overlay); }
+
+/* Makes the whole surface one target rather than requiring a nested button. The
+ * card looks identical with and without it — only the states are added. */
+.mx-card--interactive {
+  cursor: pointer;
+  transition:
+    background-color var(--mx-duration-fast) var(--mx-ease-standard),
+    box-shadow var(--mx-duration-normal) var(--mx-ease-standard);
+}
+.mx-card--interactive:hover {
+  background: color-mix(in srgb, var(--mx-color-on-surface) 4%, var(--mx-color-surface));
+}
+.mx-card--interactive:active {
+  background: color-mix(in srgb, var(--mx-color-on-surface) 8%, var(--mx-color-surface));
+}
+
+/* ============================================================== MxListTile */
+
+.mx-list-tile {
+  display: flex;
+  align-items: center;
+  gap: var(--mx-space-lg);
+  width: 100%;
+  box-sizing: border-box;
+  min-height: var(--mx-touch-target);
+  padding: var(--mx-space-sm) var(--mx-space-lg);
+  border: 0;
+  border-radius: var(--mx-radius-md);
+  background: transparent;
+  color: var(--mx-color-on-surface);
+  text-align: start;
+  font: inherit;
+  transition: background-color var(--mx-duration-fast) var(--mx-ease-standard);
+}
+
+.mx-list-tile--interactive { cursor: pointer; }
+.mx-list-tile--interactive:hover {
+  background: color-mix(in srgb, var(--mx-color-on-surface) 6%, transparent);
+}
+.mx-list-tile--interactive:active {
+  background: color-mix(in srgb, var(--mx-color-on-surface) 10%, transparent);
+}
+
+.mx-list-tile--selected {
+  background: var(--mx-color-surface-muted);
+  color: var(--mx-color-primary);
+}
+
+/* `false` greys the row and removes it from the focus order. Distinct from a null
+ * handler: one says "not now", the other says "never". */
+.mx-list-tile--disabled {
+  color: var(--mx-color-disabled-content);
+  cursor: not-allowed;
+}
+
+.mx-list-tile__leading,
+.mx-list-tile__trailing {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  /* Not the label's colour. The glyph carrying the same weight as the words next
+   * to it leaves the eye two things to land on. */
+  color: var(--mx-color-on-surface-variant);
+}
+.mx-list-tile--selected .mx-list-tile__leading,
+.mx-list-tile--selected .mx-list-tile__trailing { color: inherit; }
+.mx-list-tile--disabled .mx-list-tile__leading,
+.mx-list-tile--disabled .mx-list-tile__trailing { color: inherit; }
+
+.mx-list-tile__text {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Two lines then ellipsis rather than unbounded growth: at a 2× text scale an
+ * unbounded subtitle pushes the trailing action off a 320-wide screen, and the
+ * row silently loses its only control. */
+.mx-list-tile__title,
+.mx-list-tile__subtitle {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+.mx-list-tile__subtitle { color: var(--mx-color-on-surface-variant); }
+.mx-list-tile--disabled .mx-list-tile__subtitle { color: inherit; }
+
+@media (max-width: 359px) {
+  /* Horizontal only. The vertical rhythm is what keeps a row tappable. */
+  .mx-list-tile { padding-inline: var(--mx-space-md); }
+}
+
+/* ============================================================ MxPillButton */
+
+.mx-pill {
+  /* Padded to the touch target rather than shrink-wrapped: the pill's own box is
+   * 32 high and the guideline minimum is 48. The padding is on the outside so the
+   * visible shape stays the size it was drawn. */
+  display: inline-flex;
+  align-items: center;
+  padding-block: var(--mx-space-sm);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+.mx-pill__shape {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mx-space-sm);
+  min-height: 32px;
+  padding: var(--mx-space-sm) var(--mx-space-md);
+  box-sizing: border-box;
+  background: var(--mx-color-surface);
+  border: 1px solid var(--mx-color-border-subtle);
+  /* A stadium, not a radius: the shape is the affordance. */
+  border-radius: var(--mx-radius-pill);
+  color: var(--mx-color-on-surface-variant);
+  font-family: var(--mx-font-body);
+  font-size: var(--mx-type-label-large-size);
+  line-height: var(--mx-type-label-large-line);
+  font-weight: var(--mx-type-label-large-weight);
+  letter-spacing: var(--mx-type-label-large-tracking);
+  transition:
+    background-color var(--mx-duration-fast) var(--mx-ease-standard),
+    color var(--mx-duration-fast) var(--mx-ease-standard);
+}
+
+/* Selected borrows the navigation bar's indicator pair, so "this one is active"
+ * looks the same whether it is a tab or a filter. No checkmark: the group is
+ * always visible in full, so the selected pill is legible by contrast alone and a
+ * tick would shift the label sideways on every change. */
+.mx-pill--selected .mx-pill__shape {
+  background: var(--mx-color-secondary-container);
+  color: var(--mx-color-on-secondary-container);
+}
+
+.mx-pill:hover:not(:disabled) .mx-pill__shape {
+  background: color-mix(in srgb, var(--mx-color-on-surface) 6%, var(--mx-color-surface));
+}
+.mx-pill--selected:hover:not(:disabled) .mx-pill__shape {
+  background: color-mix(in srgb, var(--mx-color-on-surface) 6%, var(--mx-color-secondary-container));
+}
+.mx-pill:focus-visible { outline: none; }
+.mx-pill:focus-visible .mx-pill__shape {
+  outline: 2px solid var(--mx-color-primary);
+  outline-offset: 2px;
+}
+.mx-pill:disabled { cursor: not-allowed; }
+.mx-pill:disabled .mx-pill__shape {
+  color: var(--mx-color-disabled-content);
+  border-color: var(--mx-color-disabled-surface);
+  background: transparent;
+}
+
+.mx-pill__icon { width: var(--mx-icon-sm); height: var(--mx-icon-sm); }
+
+/* =========================================================== MxProgressBar */
+
+.mx-progress-bar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mx-space-sm);
+  width: 100%;
+}
+
+.mx-progress-bar__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--mx-space-sm);
+  color: var(--mx-color-on-surface-variant);
+}
+
+.mx-progress-bar__track {
+  position: relative;
+  height: 6px;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--mx-radius-pill);
+  background: var(--mx-color-surface-container-highest);
+}
+
+/* `focus-ring`, not `primary`.
+ *
+ * Material's default for a progress indicator is `colorScheme.primary`, and
+ * measured against the surface it spins on dark `primary` scores 2.81:1 — under
+ * the 3.0 floor a graphic needs. That value was never chosen for this job: it is
+ * held at a luminance that keeps a filled button from becoming the brightest
+ * thing on a navy page, which is the opposite of what an indicator wants.
+ * `focus-ring` is the same hue at the intensity meant to pull attention —
+ * 5.36:1 in dark, 7.41:1 in light. */
+.mx-progress-bar__indicator {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--mx-color-focus-ring);
+  transition: width var(--mx-duration-normal) var(--mx-ease-standard);
+}
+
+.mx-progress-bar--indeterminate .mx-progress-bar__indicator {
+  position: absolute;
+  inset-block: 0;
+  width: 40%;
+  transition: none;
+  animation: mx-progress-slide 1.4s var(--mx-ease-standard) infinite;
+}
+
+@keyframes mx-progress-slide {
+  from { inset-inline-start: -40%; }
+  to { inset-inline-start: 100%; }
+}
+
+/* Determinate stays still under a reduced-motion setting; indeterminate cannot —
+ * a bar that never moves says "finished". It pulses in place instead, which
+ * carries "still working" without travel. */
+@media (prefers-reduced-motion: reduce) {
+  .mx-progress-bar--indeterminate .mx-progress-bar__indicator {
+    animation: mx-progress-pulse 1.6s ease-in-out infinite;
+    inset-inline-start: 0;
+    width: 100%;
+  }
+  @keyframes mx-progress-pulse {
+    0%, 100% { opacity: 0.35; }
+    50% { opacity: 1; }
+  }
+}
+
+/* ============================================================= MxTextField */
+
+.mx-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mx-space-xs);
+  width: 100%;
+  font-family: var(--mx-font-body);
+}
+
+.mx-field__shell {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Outlined, not filled. A fill makes the field a block that competes with the
+ * cards around it; a stroke alone lets the page show through, so the field reads
+ * as an opening rather than an object — and it then sits correctly on whatever
+ * surface it lands on, page or card, with no per-screen override. */
+.mx-field__input {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: var(--mx-touch-target);
+  padding: var(--mx-space-md) var(--mx-space-lg);
+  background: transparent;
+  color: var(--mx-color-on-surface);
+  border: 0;
+  border-radius: var(--mx-radius-md);
+  font-family: inherit;
+  font-size: var(--mx-type-body-large-size);
+  line-height: var(--mx-type-body-large-line);
+  letter-spacing: var(--mx-type-body-large-tracking);
+  resize: vertical;
+  caret-color: var(--mx-color-focus-ring);
+}
+.mx-field__input:focus { outline: none; }
+
+/* The hint appears with the floating label, not before it. Two pieces of grey
+ * text in the same box is one too many. */
+.mx-field__input:not(:focus)::placeholder { color: transparent; }
+.mx-field__input:focus::placeholder { color: var(--mx-color-on-surface-variant); }
+
+/* The outline is a real `fieldset`, so the floating label can cut a notch in it
+ * rather than being drawn over a line it has to hide. */
+.mx-field__outline {
+  position: absolute;
+  inset: -6px 0 0;
+  margin: 0;
+  padding-inline: calc(var(--mx-space-md) - 4px);
+  pointer-events: none;
+  border: 1.5px solid var(--mx-color-border-subtle);
+  border-radius: var(--mx-radius-md);
+  /* Same geometry and the same 1.5 stroke in every state — only the colour
+   * carries the meaning. Material's default goes 1px -> 2px on focus, which makes
+   * the field jump and nudges anything laid out beside it. */
+  transition: border-color var(--mx-duration-fast) var(--mx-ease-standard);
+}
+
+.mx-field__legend {
+  padding: 0;
+  /* Collapsed until the label floats: the notch opens as the label arrives. */
+  max-width: 0.01px;
+  height: 11px;
+  visibility: hidden;
+  font-size: var(--mx-type-body-small-size);
+  transition: max-width var(--mx-duration-fast) var(--mx-ease-standard);
+}
+.mx-field__legend > span { padding-inline: var(--mx-space-xs); }
+
+.mx-field__label {
+  position: absolute;
+  inset-inline-start: var(--mx-space-lg);
+  top: 50%;
+  transform: translateY(-50%);
+  transform-origin: inline-start center;
+  pointer-events: none;
+  color: var(--mx-color-on-surface-variant);
+  font-size: var(--mx-type-body-large-size);
+  line-height: 1;
+  transition:
+    transform var(--mx-duration-fast) var(--mx-ease-standard),
+    font-size var(--mx-duration-fast) var(--mx-ease-standard),
+    color var(--mx-duration-fast) var(--mx-ease-standard);
+  max-width: calc(100% - 2 * var(--mx-space-lg));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mx-field__shell:focus-within .mx-field__label,
+.mx-field--floating .mx-field__label {
+  top: 0;
+  transform: translateY(-50%) scale(1);
+  font-size: var(--mx-type-body-small-size);
+  inset-inline-start: calc(var(--mx-space-lg) - var(--mx-space-xs));
+  padding-inline: var(--mx-space-xs);
+}
+
+.mx-field__shell:focus-within .mx-field__legend,
+.mx-field--floating .mx-field__legend {
+  max-width: 100%;
+}
+
+/* Focus shifts HUE, never stroke width. */
+.mx-field__shell:focus-within .mx-field__outline {
+  border-color: var(--mx-color-focus-ring);
+}
+.mx-field__shell:focus-within .mx-field__label {
+  color: var(--mx-color-focus-ring);
+}
+
+/* The error state is carried by real error text, never by colour alone — a red
+ * outline with no message tells a colour-blind user that something is different
+ * and not what. The class exists to paint it; the message is what says it. */
+.mx-field--error .mx-field__outline,
+.mx-field--error .mx-field__shell:focus-within .mx-field__outline {
+  border-color: var(--mx-color-danger);
+}
+.mx-field--error .mx-field__label,
+.mx-field--error .mx-field__shell:focus-within .mx-field__label {
+  color: var(--mx-color-danger);
+}
+
+/* Solid, not `border-subtle` at 50% — MX-VIS-002 rule R7. A translucent border
+ * composites against the field's fill in one place and the page in another, so
+ * the same disabled state read as two different greys. */
+.mx-field--disabled .mx-field__outline {
+  border-color: var(--mx-color-disabled-surface);
+}
+.mx-field--disabled .mx-field__input,
+.mx-field--disabled .mx-field__label {
+  color: var(--mx-color-disabled-content);
+  cursor: not-allowed;
+}
+
+.mx-field__footer {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--mx-space-md);
+  padding-inline: var(--mx-space-lg);
+  color: var(--mx-color-on-surface-variant);
+}
+.mx-field__message--error { color: var(--mx-color-danger); }
+.mx-field__counter {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ========================================================== MxSearchField */
+
+.mx-search {
+  display: flex;
+  align-items: center;
+  gap: var(--mx-space-sm);
+  width: 100%;
+  box-sizing: border-box;
+  min-height: var(--mx-touch-target);
+  padding-inline: var(--mx-space-lg);
+  background: transparent;
+  border: 1.5px solid var(--mx-color-border-subtle);
+  border-radius: var(--mx-radius-md);
+  color: var(--mx-color-on-surface-variant);
+  transition: border-color var(--mx-duration-fast) var(--mx-ease-standard);
+}
+.mx-search:focus-within { border-color: var(--mx-color-focus-ring); }
+
+.mx-search__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  padding-block: var(--mx-space-md);
+  color: var(--mx-color-on-surface);
+  font-family: var(--mx-font-body);
+  font-size: var(--mx-type-body-large-size);
+  line-height: var(--mx-type-body-large-line);
+  letter-spacing: var(--mx-type-body-large-tracking);
+  caret-color: var(--mx-color-focus-ring);
+}
+.mx-search__input:focus { outline: none; }
+.mx-search__input::placeholder { color: var(--mx-color-on-surface-variant); }
+/* The browser's own clear affordance, removed: it appears on one engine, sits at
+ * a size no guideline covers, and would stand beside the one this component
+ * draws. */
+.mx-search__input::-webkit-search-cancel-button { display: none; }
+
+/* Smaller than the 48 floor, and deliberately: it sits INSIDE a 48-high row, so
+ * the row is the target the thumb aims at and this is the last few pixels of it.
+ * A 48-square button here would make the field 64 high. */
+.mx-search__clear {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: var(--mx-radius-pill);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.mx-search__clear:hover {
+  background: color-mix(in srgb, var(--mx-color-on-surface) 8%, transparent);
+}
+
+.mx-search--disabled {
+  border-color: var(--mx-color-disabled-surface);
+  color: var(--mx-color-disabled-content);
+}
+
+/* ========================================================= MxLoadingState */
+
+.mx-loading {
+  display: grid;
+  place-items: center;
+  padding: var(--mx-space-xl);
+  width: 100%;
+}
+
+.mx-spinner {
+  width: var(--mx-icon-lg);
+  height: var(--mx-icon-lg);
+  animation: mx-spin 1.2s linear infinite;
+  color: var(--mx-color-focus-ring);
+}
+.mx-spinner--sm { width: var(--mx-icon-sm); height: var(--mx-icon-sm); }
+
+.mx-spinner__arc {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linecap: round;
+  /* A three-quarter arc rather than a full ring: a closed circle rotating is
+   * indistinguishable from one standing still. The circle is r=9, so the
+   * circumference is 56.5 — the dash and the gap have to add up to that, and a
+   * first dash longer than it silently closes the ring back up. */
+  stroke-dasharray: 40.7 15.8;
+}
+
+/* Explicitly no track behind the arc. Material draws a faint one in newer
+ * versions; on a card that reads as a second ring nobody asked for. */
+
+@keyframes mx-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Slower, not stopped. A stopped spinner is a lie about whether the app is
+   * doing anything, and it is the only signal the user has. */
+  .mx-spinner { animation-duration: 3s; }
+}
+
+/* ============================================ MxEmptyState / MxErrorState */
+
+.mx-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0;
+  padding: var(--mx-space-xl);
+  overflow-y: auto;
+  /* Around a lone focal element. The scroll is what keeps a translated message at
+   * a 3× text scale from clipping instead of erroring. */
+  max-height: 100%;
+}
+
+.mx-state__icon { color: var(--mx-color-primary); }
+/* Distinct from the empty state on purpose: "you have finished everything due
+ * today" is good news, and rendering it in error styling tells the user something
+ * is broken when nothing is (BR-29). */
+.mx-state--error .mx-state__icon { color: var(--mx-color-danger); }
+
+.mx-state__title { margin-top: var(--mx-space-lg); }
+.mx-state__message {
+  margin-top: var(--mx-space-sm);
+  color: var(--mx-color-on-surface-variant);
+  max-width: 40ch;
+}
+.mx-state__action { margin-top: var(--mx-space-xl); }
+
+/* ======================================================== MxConfirmDialog */
+
+.mx-scrim {
+  position: fixed;
+  inset: 0;
+  background: var(--mx-color-modal-barrier);
+  display: grid;
+  z-index: 100;
+}
+
+.mx-dialog {
+  place-self: center;
+  margin: var(--mx-space-xl);
+  width: min(420px, calc(100% - 2 * var(--mx-space-xl)));
+  box-sizing: border-box;
+  max-height: calc(100% - 2 * var(--mx-space-xl));
+  display: flex;
+  flex-direction: column;
+  background: var(--mx-color-surface);
+  border: 1px solid var(--mx-color-border-subtle);
+  border-radius: var(--mx-radius-lg);
+  box-shadow: var(--mx-shadow-overlay);
+  padding: var(--mx-space-xl);
+  gap: var(--mx-space-md);
+}
+
+.mx-dialog__title { color: var(--mx-color-on-surface); }
+
+/* Scrollable because the alternative is silent truncation, not an error. At a 3×
+ * text scale on a 320-wide screen a translated message clips mid-word inside the
+ * content box: no exception, no overflow stripe, nothing a passing test would
+ * notice — and the user confirms a delete having read half the sentence. */
+.mx-dialog__content {
+  color: var(--mx-color-on-surface-variant);
+  overflow-y: auto;
+  flex: 0 1 auto;
+}
+
+/* Wraps to a stack when the two actions no longer fit side by side, which is what
+ * happens on a 320-wide screen at a 2× text scale. */
+.mx-dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--mx-space-sm);
+  margin-top: var(--mx-space-sm);
+}
+.mx-dialog__actions > .mx-button { flex: 1 1 auto; }
+
+/* =========================================================== MxActionSheet */
+
+.mx-sheet-scrim {
+  align-items: end;
+  justify-items: stretch;
+}
+
+.mx-sheet {
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+  background: var(--mx-color-surface);
+  border-start-start-radius: var(--mx-radius-lg);
+  border-start-end-radius: var(--mx-radius-lg);
+  box-shadow: var(--mx-shadow-overlay);
+  padding-block: var(--mx-space-sm);
+  /* A sheet is anchored to the bottom of the screen, which is exactly where the
+   * home indicator and the keyboard are. */
+  padding-bottom: max(var(--mx-space-sm), env(safe-area-inset-bottom));
+}
+
+.mx-sheet__handle {
+  width: 32px;
+  height: 4px;
+  border-radius: var(--mx-radius-pill);
+  background: var(--mx-color-border-subtle);
+  margin: var(--mx-space-sm) auto var(--mx-space-md);
+}
+
+.mx-sheet__title {
+  padding: var(--mx-space-md) var(--mx-space-lg) var(--mx-space-sm);
+  color: var(--mx-color-on-surface-variant);
+}
+
+.mx-sheet__action { border-radius: 0; }
+
+/* Disabled wins over destructive: a greyed row that is still red reads as
+ * available and dangerous, which is the worst of both. */
+.mx-sheet__action--destructive { color: var(--mx-color-danger); }
+.mx-sheet__action--destructive .mx-list-tile__leading { color: inherit; }
+.mx-sheet__action--destructive.mx-list-tile--disabled { color: var(--mx-color-disabled-content); }
+
+/* ========================================================= MxContentShell */
+
+/* A three-row grid — app bar, body, navigation bar — rather than a flex column
+ * with an absolutely-positioned floating action.
+ *
+ * The floating action goes in the BODY row, end-aligned, so it sits above the
+ * navigation bar by construction. Positioned against the shell instead it lands
+ * on top of the last destination, and the fix is then a hardcoded bar height that
+ * is wrong the first time a label wraps. */
+.mx-shell {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  grid-template-columns: 1fr;
+  min-height: 100%;
+  background: var(--mx-color-background);
+  color: var(--mx-color-on-surface);
+}
+
+/* The bar sits on the page colour, like the navigation bar below it, so the
+ * chrome reads as one frame rather than three surfaces stacked on the content.
+ * No tint on scroll: during a review the header must stay still, because a colour
+ * shift behind the card reads as the card itself changing. */
+.mx-shell__app-bar {
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--mx-space-sm);
+  min-height: 56px;
+  padding-inline: var(--mx-space-xs) var(--mx-space-sm);
+  background: var(--mx-color-background);
+  color: var(--mx-color-on-surface);
+}
+
+.mx-shell__title {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-inline-start: var(--mx-space-md);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mx-shell__actions {
+  display: flex;
+  align-items: center;
+  flex: none;
+}
+
+.mx-shell__body {
+  grid-row: 2;
+  grid-column: 1;
+  min-height: 0;
+  padding: var(--mx-gutter);
+  box-sizing: border-box;
+}
+
+/* Opt-in, and it has to be: a body that already scrolls must not be nested inside
+ * another scroll view, and a fixed body such as a form must scroll or it overflows
+ * the moment the screen gets shorter. */
+.mx-shell__body--scrollable { overflow-y: auto; }
+
+/* Reserves no space. A floating action overlaps content by definition, so a
+ * scrolling body still has to end with enough bottom padding for its last item to
+ * clear the button. */
+.mx-shell__fab {
+  grid-row: 2;
+  grid-column: 1;
+  justify-self: end;
+  align-self: end;
+  margin: var(--mx-space-lg);
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: var(--mx-radius-pill);
+  /* `primary` rather than M3's `primaryContainer`: this is the one control that
+   * starts a flow, and it sits over scrolling content where a low-contrast fill
+   * would disappear against a card passing underneath. Unshadowed like everything
+   * else — the colour is the separation. */
+  background: var(--mx-color-primary);
+  color: var(--mx-color-on-primary);
+  cursor: pointer;
+}
+.mx-shell__fab:hover {
+  background: color-mix(in srgb, var(--mx-color-on-surface) 8%, var(--mx-color-primary));
+}
+
+/* ========================================================= MxNavigationBar */
+
+.mx-nav-bar {
+  grid-row: 3;
+  display: flex;
+  justify-content: center;
+  background: var(--mx-color-background);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* A fixed maximum would have to be revisited every time a tab is added; per
+ * destination the cap disarms itself — at four destinations the row wants more
+ * width than a phone has and the constraint stops applying, which is the
+ * arrangement the even split was designed for. */
+.mx-nav-bar__row {
+  display: flex;
+  width: 100%;
+  --mx-nav-width-per-destination: 120px;
+  max-width: calc(var(--mx-nav-destination-count, 2) * var(--mx-nav-width-per-destination));
+}
+
+.mx-nav-bar__destination {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--mx-space-xs);
+  padding-block: var(--mx-space-md);
+  border: 0;
+  background: transparent;
+  color: var(--mx-color-on-surface-variant);
+  cursor: pointer;
+  font: inherit;
+}
+
+.mx-nav-bar__indicator {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 32px;
+  border-radius: var(--mx-radius-pill);
+  transition: background-color var(--mx-duration-normal) var(--mx-ease-standard);
+}
+.mx-nav-bar__destination--selected { color: var(--mx-color-on-secondary-container); }
+.mx-nav-bar__destination--selected .mx-nav-bar__indicator {
+  background: var(--mx-color-secondary-container);
+}
+
+/* Labels always visible, on every destination. The M3 default hides the
+ * unselected ones, which leaves three unlabelled icons and one labelled — and
+ * makes selection readable only as a colour difference, which is exactly what an
+ * accessibility review rejects. */
+.mx-nav-bar__label {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ============================================================ MxBreadcrumb */
+
+/* Scrolls horizontally and therefore cannot overflow. A path can be ten deep
+ * (BR-55 caps the deck tree there) and a 320-wide screen at a 2× text scale fits
+ * about one and a half names. Wrapping turns a deep path into five lines of
+ * chrome above the content it is meant to help you scan; collapsing the middle
+ * behind an ellipsis hides exactly the steps a user goes to a breadcrumb to find.
+ * Scrolling hides nothing and costs nothing when the path is short. */
+.mx-breadcrumb {
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  /* Left-aligned rather than pinned to the end: the steps nearest the top of the
+   * hierarchy are the ones a caller cannot reach any other way. */
+  justify-content: flex-start;
+  scrollbar-width: none;
+}
+.mx-breadcrumb::-webkit-scrollbar { display: none; }
+
+/* Every step is its own tap target, so a deep path is a row of real controls
+ * rather than a line of text with hot spots in it. */
+.mx-breadcrumb__step {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--mx-touch-target);
+  padding-inline: var(--mx-space-sm);
+  border: 0;
+  border-radius: var(--mx-radius-sm);
+  background: transparent;
+  white-space: nowrap;
+  color: var(--mx-color-on-surface);
+  font-family: var(--mx-font-body);
+  font-size: var(--mx-type-label-large-size);
+  font-weight: var(--mx-weight-semibold);
+  letter-spacing: var(--mx-type-label-large-tracking);
+  cursor: pointer;
+}
+.mx-breadcrumb__step:hover {
+  background: color-mix(in srgb, var(--mx-color-on-surface) 6%, transparent);
+}
+
+/* The step the user is already on. Not "disabled": there is nowhere to go, so it
+ * is rendered as text rather than as a control that does nothing. */
+.mx-breadcrumb__step--current {
+  color: var(--mx-color-on-surface-variant);
+  font-weight: var(--mx-weight-regular);
+  cursor: default;
+}
+.mx-breadcrumb__step--current:hover { background: transparent; }
+
+/* Punctuation. A reader announcing "chevron right" nine times on a deep path is
+ * noise the user has to sit through, so it is hidden from the accessibility tree
+ * and the grouping is carried by the strip's own label instead. */
+.mx-breadcrumb__separator {
+  flex: none;
+  color: var(--mx-color-on-surface-variant);
+}

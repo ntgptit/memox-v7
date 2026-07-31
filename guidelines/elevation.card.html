@@ -1,0 +1,147 @@
+<!-- @dsCard group="Foundations" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Elevation</title>
+<link rel="stylesheet" href="../components/mx.css">
+<style>
+  body { margin: 0; padding: clamp(12px, 4vw, 24px); }
+  .card { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; max-width: 1000px; margin: 0 auto; }
+  .card__intro p { color: var(--mx-color-on-surface-variant); max-width: 70ch; margin: 8px 0 0; }
+  .card__intro p + p { margin-top: 10px; }
+  .panel {
+    background: var(--mx-color-surface);
+    color: var(--mx-color-on-surface);
+    border: 1px solid var(--mx-color-border-subtle);
+    border-radius: var(--mx-radius-lg);
+    padding: 20px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    align-content: start;
+  }
+  .panel__name { color: var(--mx-color-on-surface-variant); text-transform: uppercase; letter-spacing: 0.08em; }
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 16px; }
+  .swatches { display: grid; gap: 10px; }
+  .swatch { display: grid; grid-template-columns: 56px 1fr auto; gap: 14px; align-items: center; }
+  .swatch__chip { height: 44px; border-radius: var(--mx-radius-sm); border: 1px solid var(--mx-color-border-subtle); }
+  .swatch__name { display: grid; gap: 2px; min-width: 0; }
+  .swatch__role { color: var(--mx-color-on-surface-variant); }
+  .swatch__meta { color: var(--mx-color-on-surface-variant); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+  .note { color: var(--mx-color-on-surface-variant); max-width: 70ch; }
+  .rules { display: grid; gap: 8px; margin: 0; padding-left: 20px; color: var(--mx-color-on-surface-variant); }
+  .rules li { max-width: 68ch; }
+  code { font-family: var(--mx-font-mono); font-size: 0.92em; overflow-wrap: anywhere; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var(--mx-color-border-subtle); }
+  th { color: var(--mx-color-on-surface-variant); font-weight: var(--mx-weight-semibold); }
+  td.num { font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body class="mx-app">
+<div class="card">
+  <div class="card__intro">
+    <h1 class="mx-type-headline-small">Elevation</h1>
+    <p class="mx-type-body-medium">
+      Four levels, and they are <strong>dp, not shadows</strong>. A shadow is what a level renders
+      as, and it renders differently in each mode — keeping the scale separate from the paint is
+      what lets dark opt out of shadows without opting out of the scale.
+    </p>
+    <p class="mx-type-body-medium">
+      This token was asked for by the checklist and never built, and its absence was read as a
+      rule for two milestones: two doc comments said the surface ladder worked "without a shadow
+      being asked to carry the hierarchy", and both were cited as a ban. It never was one. The
+      ladder <em>can</em> carry the hierarchy; that is not the same as a rule against shadows.
+    </p>
+  </div>
+  <div class="cols">
+  <div class="panel" data-mx-theme="light" style="background:var(--mx-color-background)">
+    <div class="panel__name mx-type-label-small">Light</div>
+    <div style="display:grid;gap:16px">
+      <div class="mx-card mx-card--elevation-none" style="display:grid;gap:4px">
+        <span class="mx-type-label-large"><code>--mx-shadow-none</code></span>
+        <span class="mx-type-body-small" style="color:var(--mx-color-on-surface-variant)">0 dp · Flush with the surface behind it. The default for everything.</span>
+      </div>
+      <div class="mx-card mx-card--elevation-card" style="display:grid;gap:4px">
+        <span class="mx-type-label-large"><code>--mx-shadow-card</code></span>
+        <span class="mx-type-body-small" style="color:var(--mx-color-on-surface-variant)">1 dp · A card in a list. The lowest step that reads as a step at all.</span>
+      </div>
+      <div class="mx-card mx-card--elevation-raised" style="display:grid;gap:4px">
+        <span class="mx-type-label-large"><code>--mx-shadow-raised</code></span>
+        <span class="mx-type-body-small" style="color:var(--mx-color-on-surface-variant)">3 dp · Deliberately lifted above its neighbours — selected, dragged.</span>
+      </div>
+      <div class="mx-card mx-card--elevation-overlay" style="display:grid;gap:4px">
+        <span class="mx-type-label-large"><code>--mx-shadow-overlay</code></span>
+        <span class="mx-type-body-small" style="color:var(--mx-color-on-surface-variant)">8 dp · A sheet or dialog over the whole screen.</span>
+      </div>
+    </div>
+  </div>
+  <div class="panel" data-mx-theme="dark" style="background:var(--mx-color-background)">
+    <div class="panel__name mx-type-label-small">Dark</div>
+    <div style="display:grid;gap:16px">
+      <div class="mx-card mx-card--elevation-none" style="display:grid;gap:4px">
+        <span class="mx-type-label-large"><code>--mx-shadow-none</code></span>
+        <span class="mx-type-body-small" style="color:var(--mx-color-on-surface-variant)">0 dp · Flush with the surface behind it. The default for everything.</span>
+      </div>
+      <div class="mx-card mx-card--elevation-card" style="display:grid;gap:4px">
+        <span class="mx-type-label-large"><code>--mx-shadow-card</code></span>
+        <span class="mx-type-body-small" style="color:var(--mx-color-on-surface-variant)">1 dp · A card in a list. The lowest step that reads as a step at all.</span>
+      </div>
+      <div class="mx-card mx-card--elevation-raised" style="display:grid;gap:4px">
+        <span class="mx-type-label-large"><code>--mx-shadow-raised</code></span>
+        <span class="mx-type-body-small" style="color:var(--mx-color-on-surface-variant)">3 dp · Deliberately lifted above its neighbours — selected, dragged.</span>
+      </div>
+      <div class="mx-card mx-card--elevation-overlay" style="display:grid;gap:4px">
+        <span class="mx-type-label-large"><code>--mx-shadow-overlay</code></span>
+        <span class="mx-type-body-small" style="color:var(--mx-color-on-surface-variant)">8 dp · A sheet or dialog over the whole screen.</span>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel__name mx-type-label-small">The formula</div>
+    <table class="mx-type-body-medium">
+      <thead><tr><th>Level</th><th class="num">dp</th><th class="num">alpha</th><th class="num">blur</th><th class="num">offset-y</th></tr></thead>
+      <tbody>
+        <tr><td><code>none</code></td><td class="num">0</td><td class="num">—</td><td class="num">—</td><td class="num">—</td></tr>
+        <tr><td><code>card</code></td><td class="num">1</td><td class="num">0.07</td><td class="num">3px</td><td class="num">1px</td></tr>
+        <tr><td><code>raised</code></td><td class="num">3</td><td class="num">0.09</td><td class="num">9px</td><td class="num">3px</td></tr>
+        <tr><td><code>overlay</code></td><td class="num">8</td><td class="num">0.14</td><td class="num">24px</td><td class="num">8px</td></tr>
+      </tbody>
+    </table>
+    <p class="note mx-type-body-medium">
+      alpha = 0.06 + 0.01 × level, blur = 3 × level, offset-y = level. One shadow per level, not
+      Material's two: the second is an ambient wash that costs a full-size blur per surface and,
+      at level 1, moves the result by under half an L* step — measurable, not visible, and a list
+      of twenty cards pays for it twenty times.
+    </p>
+  </div>
+
+  <div class="panel">
+    <div class="panel__name mx-type-label-small">Why dark paints nothing</div>
+    <p class="note mx-type-body-medium">
+      Measured, not assumed. The dark page sits at L* 3.9 — the bottom of the
+      scale — so there is no room below it for a shadow to occupy. At alpha 0.10 a dark shadow
+      moves the page by <strong>ΔL* 0.26</strong>; at 0.70, still only 2.04. The surface step
+      already there is ΔL* 7.70. A dark shadow is
+      paint nobody can see, and Material 3 drops it for the same reason.
+    </p>
+    <p class="note mx-type-body-medium">
+      Light is the opposite, and the alpha is <strong>solved for rather than picked</strong>.
+      Light's surface step is only 2.15 once the
+      card carries a seed tint, so the shadow has to make up the remaining ~5.6 — alpha 0.07,
+      giving 7.75 in total. It has been re-solved twice: 0.12 overshot to 13.28, and 0.05 was
+      right only while the card was pure white.
+    </p>
+    <p class="note mx-type-body-medium">
+      So the modes stay symmetric in the thing that matters. They are no longer matched on border
+      contrast — light's border is now the lighter of the two — but on <strong>how far a card is
+      lifted off the page in total</strong>, which is what a reader actually perceives.
+    </p>
+  </div>
+</div>
+</body>
+</html>

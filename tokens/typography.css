@@ -1,0 +1,250 @@
+/* Type scale — the web mirror of `lib/core/theme/app_typography.dart` applied
+ * over Material 3's 2021 english-like text theme.
+ *
+ * Flutter's `TextTheme` is fifteen named roles; the Dart file replaces the family
+ * and weight on every one and overrides size and leading on two. Both halves are
+ * reproduced here — the roles a Material component would have supplied are as
+ * much a part of the system as the overrides, and a web mirror that shipped only
+ * the overrides would leave thirteen roles to be reinvented per page.
+ *
+ * Sizes are px, not rem. Flutter's logical pixels do not scale with a root font
+ * size, and a mirror that silently did would drift from the app on the first user
+ * who changes their browser default. Accessibility scaling is handled the way the
+ * app handles it — see `--mx-type-scale` below — rather than by making every
+ * number relative to a setting the design has no view of.
+ *
+ * Roles are exposed twice: as `--mx-type-<role>-*` custom properties, for a
+ * component that needs one axis of a style, and as a `.mx-type-<role>` class that
+ * sets all five at once. Nothing else may declare a `font-size`.
+ */
+
+:root {
+  /* Multiplies every role. The counterpart of `MediaQuery.textScaler`: a page can
+   * set it from a user preference and the whole scale moves together, keeping the
+   * ratios the scale was drawn with. Left at 1 by default — the design system
+   * does not decide a user's text size. */
+  --mx-type-scale: 1;
+
+  /* --- Display: Plus Jakarta Sans -------------------------------------- */
+  --mx-type-display-large-size: calc(57px * var(--mx-type-scale));
+  --mx-type-display-large-line: 1.12;
+  --mx-type-display-large-weight: var(--mx-weight-bold);
+  --mx-type-display-large-tracking: -0.25px;
+
+  --mx-type-display-medium-size: calc(45px * var(--mx-type-scale));
+  --mx-type-display-medium-line: 1.16;
+  --mx-type-display-medium-weight: var(--mx-weight-bold);
+  --mx-type-display-medium-tracking: 0;
+
+  --mx-type-display-small-size: calc(36px * var(--mx-type-scale));
+  --mx-type-display-small-line: 1.22;
+  --mx-type-display-small-weight: var(--mx-weight-semibold);
+  --mx-type-display-small-tracking: 0;
+
+  --mx-type-headline-large-size: calc(32px * var(--mx-type-scale));
+  --mx-type-headline-large-line: 1.25;
+  --mx-type-headline-large-weight: var(--mx-weight-semibold);
+  --mx-type-headline-large-tracking: 0;
+
+  /* THE CARD PROMPT. The front of a review card — the one place the app
+   * deliberately gets large, because that text is the task.
+   *
+   * 30px, not Material's 28, and leading tightened from 1.29 to 1.22: a long-ish
+   * prompt otherwise wraps in a way that pushes the answer below the fold inside
+   * the phone frame, which is the one thing the review screen must not do. */
+  --mx-type-headline-medium-size: calc(30px * var(--mx-type-scale));
+  --mx-type-headline-medium-line: 1.22;
+  --mx-type-headline-medium-weight: var(--mx-weight-semibold);
+  --mx-type-headline-medium-tracking: -0.5px;
+
+  --mx-type-headline-small-size: calc(24px * var(--mx-type-scale));
+  --mx-type-headline-small-line: 1.33;
+  --mx-type-headline-small-weight: var(--mx-weight-semibold);
+  --mx-type-headline-small-tracking: 0;
+
+  /* The app-bar title. */
+  --mx-type-title-large-size: calc(22px * var(--mx-type-scale));
+  --mx-type-title-large-line: 1.27;
+  --mx-type-title-large-weight: var(--mx-weight-semibold);
+  --mx-type-title-large-tracking: 0;
+
+  /* --- UI and body: Inter ---------------------------------------------- */
+  --mx-type-title-medium-size: calc(16px * var(--mx-type-scale));
+  --mx-type-title-medium-line: 1.5;
+  --mx-type-title-medium-weight: var(--mx-weight-semibold);
+  --mx-type-title-medium-tracking: 0.15px;
+
+  --mx-type-title-small-size: calc(14px * var(--mx-type-scale));
+  --mx-type-title-small-line: 1.43;
+  --mx-type-title-small-weight: var(--mx-weight-semibold);
+  --mx-type-title-small-tracking: 0.1px;
+
+  --mx-type-body-large-size: calc(16px * var(--mx-type-scale));
+  --mx-type-body-large-line: 1.5;
+  --mx-type-body-large-weight: var(--mx-weight-regular);
+  --mx-type-body-large-tracking: 0.5px;
+
+  /* 1.45 keeps a two-line empty-state message readable without looking airy.
+   * Material's 1.43 is close enough that the difference is only visible in the
+   * one place it was chosen for, which is why it is an override and not a change
+   * to the scale. */
+  --mx-type-body-medium-size: calc(14px * var(--mx-type-scale));
+  --mx-type-body-medium-line: 1.45;
+  --mx-type-body-medium-weight: var(--mx-weight-regular);
+  --mx-type-body-medium-tracking: 0.25px;
+
+  --mx-type-body-small-size: calc(12px * var(--mx-type-scale));
+  --mx-type-body-small-line: 1.33;
+  --mx-type-body-small-weight: var(--mx-weight-regular);
+  --mx-type-body-small-tracking: 0.4px;
+
+  /* Button labels and breadcrumb steps. */
+  --mx-type-label-large-size: calc(14px * var(--mx-type-scale));
+  --mx-type-label-large-line: 1.43;
+  --mx-type-label-large-weight: var(--mx-weight-semibold);
+  --mx-type-label-large-tracking: 0.1px;
+
+  --mx-type-label-medium-size: calc(12px * var(--mx-type-scale));
+  --mx-type-label-medium-line: 1.33;
+  --mx-type-label-medium-weight: var(--mx-weight-medium);
+  --mx-type-label-medium-tracking: 0.5px;
+
+  /* Navigation bar labels. */
+  --mx-type-label-small-size: calc(11px * var(--mx-type-scale));
+  --mx-type-label-small-line: 1.45;
+  --mx-type-label-small-weight: var(--mx-weight-medium);
+  --mx-type-label-small-tracking: 0.5px;
+}
+
+/* Compact.
+ *
+ * Body and label text is deliberately untouched. Scaling readable text down by
+ * device width would silently undo the user's own accessibility setting, and it
+ * undoes it hardest for the people most likely to need it — a large-text setting
+ * is at least as common on a small cheap phone as on a big one. What shrinks is
+ * the type the *app* chose to make oversized.
+ *
+ * Two roles, matching `applyCompactScale`: the app-bar title, because at 22 a
+ * real deck name truncates to "Academic Word ..." on a 320-wide screen and the
+ * name is the one thing that screen is about; and the card prompt, because 30
+ * forces a two-word prompt onto three lines. */
+@media (max-width: 359px) {
+  :root {
+    --mx-type-title-large-size: calc(20px * var(--mx-type-scale));
+    --mx-type-headline-medium-size: calc(26px * var(--mx-type-scale));
+  }
+}
+
+.mx-type-display-large,
+.mx-type-display-medium,
+.mx-type-display-small,
+.mx-type-headline-large,
+.mx-type-headline-medium,
+.mx-type-headline-small,
+.mx-type-title-large {
+  font-family: var(--mx-font-display);
+  margin: 0;
+}
+
+.mx-type-title-medium,
+.mx-type-title-small,
+.mx-type-body-large,
+.mx-type-body-medium,
+.mx-type-body-small,
+.mx-type-label-large,
+.mx-type-label-medium,
+.mx-type-label-small {
+  font-family: var(--mx-font-body);
+  margin: 0;
+}
+
+.mx-type-display-large {
+  font-size: var(--mx-type-display-large-size);
+  line-height: var(--mx-type-display-large-line);
+  font-weight: var(--mx-type-display-large-weight);
+  letter-spacing: var(--mx-type-display-large-tracking);
+}
+.mx-type-display-medium {
+  font-size: var(--mx-type-display-medium-size);
+  line-height: var(--mx-type-display-medium-line);
+  font-weight: var(--mx-type-display-medium-weight);
+  letter-spacing: var(--mx-type-display-medium-tracking);
+}
+.mx-type-display-small {
+  font-size: var(--mx-type-display-small-size);
+  line-height: var(--mx-type-display-small-line);
+  font-weight: var(--mx-type-display-small-weight);
+  letter-spacing: var(--mx-type-display-small-tracking);
+}
+.mx-type-headline-large {
+  font-size: var(--mx-type-headline-large-size);
+  line-height: var(--mx-type-headline-large-line);
+  font-weight: var(--mx-type-headline-large-weight);
+  letter-spacing: var(--mx-type-headline-large-tracking);
+}
+.mx-type-headline-medium {
+  font-size: var(--mx-type-headline-medium-size);
+  line-height: var(--mx-type-headline-medium-line);
+  font-weight: var(--mx-type-headline-medium-weight);
+  letter-spacing: var(--mx-type-headline-medium-tracking);
+}
+.mx-type-headline-small {
+  font-size: var(--mx-type-headline-small-size);
+  line-height: var(--mx-type-headline-small-line);
+  font-weight: var(--mx-type-headline-small-weight);
+  letter-spacing: var(--mx-type-headline-small-tracking);
+}
+.mx-type-title-large {
+  font-size: var(--mx-type-title-large-size);
+  line-height: var(--mx-type-title-large-line);
+  font-weight: var(--mx-type-title-large-weight);
+  letter-spacing: var(--mx-type-title-large-tracking);
+}
+.mx-type-title-medium {
+  font-size: var(--mx-type-title-medium-size);
+  line-height: var(--mx-type-title-medium-line);
+  font-weight: var(--mx-type-title-medium-weight);
+  letter-spacing: var(--mx-type-title-medium-tracking);
+}
+.mx-type-title-small {
+  font-size: var(--mx-type-title-small-size);
+  line-height: var(--mx-type-title-small-line);
+  font-weight: var(--mx-type-title-small-weight);
+  letter-spacing: var(--mx-type-title-small-tracking);
+}
+.mx-type-body-large {
+  font-size: var(--mx-type-body-large-size);
+  line-height: var(--mx-type-body-large-line);
+  font-weight: var(--mx-type-body-large-weight);
+  letter-spacing: var(--mx-type-body-large-tracking);
+}
+.mx-type-body-medium {
+  font-size: var(--mx-type-body-medium-size);
+  line-height: var(--mx-type-body-medium-line);
+  font-weight: var(--mx-type-body-medium-weight);
+  letter-spacing: var(--mx-type-body-medium-tracking);
+}
+.mx-type-body-small {
+  font-size: var(--mx-type-body-small-size);
+  line-height: var(--mx-type-body-small-line);
+  font-weight: var(--mx-type-body-small-weight);
+  letter-spacing: var(--mx-type-body-small-tracking);
+}
+.mx-type-label-large {
+  font-size: var(--mx-type-label-large-size);
+  line-height: var(--mx-type-label-large-line);
+  font-weight: var(--mx-type-label-large-weight);
+  letter-spacing: var(--mx-type-label-large-tracking);
+}
+.mx-type-label-medium {
+  font-size: var(--mx-type-label-medium-size);
+  line-height: var(--mx-type-label-medium-line);
+  font-weight: var(--mx-type-label-medium-weight);
+  letter-spacing: var(--mx-type-label-medium-tracking);
+}
+.mx-type-label-small {
+  font-size: var(--mx-type-label-small-size);
+  line-height: var(--mx-type-label-small-line);
+  font-weight: var(--mx-type-label-small-weight);
+  letter-spacing: var(--mx-type-label-small-tracking);
+}

@@ -1,0 +1,179 @@
+/* Colour tokens — A2 Quizlet Navy Indigo.
+ *
+ * The web mirror of `lib/core/theme/app_colors.dart`. Every name says what the
+ * colour *means*, never what it looks like: `danger` survives a redesign that
+ * turns it amber, `red` becomes a lie the moment someone changes it.
+ *
+ * The page is the only place saturated navy is allowed. `background` (dark) sits
+ * at 70% saturation, which is what gives dark mode its identity. Every surface
+ * above it drops to 20–30% while climbing in lightness, so the navy reads as the
+ * room the content sits in rather than as a tint on the content itself.
+ *
+ * Both modes live in one declaration via `light-dark()`. The alternative — a
+ * `:root` block, a `prefers-color-scheme` block and a `[data-mx-theme]` block —
+ * states every value three times, and the copy that drifts is always the one
+ * nobody opens. Mode is switched by `color-scheme`, and nothing else.
+ */
+
+:root {
+  color-scheme: light dark;
+
+  /* --- Surface ladder ---------------------------------------------------
+   * Four tiers. Dark climbs L* 3.9 -> 11.6 -> 19.0 -> 26.3 so a card reads as a
+   * card and an inset tile as an inset on the strength of the ladder alone.
+   * Light inverts it — the card is the brightest thing and the rest sit below —
+   * which is the same ordering of PROMINENCE, built the only way white allows.
+   */
+
+  /* The page. The one component allowed a strong navy saturation. */
+  --mx-color-background: light-dark(#f4f5f8, #0a082d);
+
+  /* Card and sheet — the flashcard surface.
+   * Not pure white: `#FFFFFF` carries no hue at all, so the one surface the whole
+   * app is built on would have no relation to the seed while every other neutral
+   * did. `#FBFBFE` is seed @ 0.02 over white — hue 240, chroma 0.012. */
+  --mx-color-surface: light-dark(#fbfbfe, #1b1d32);
+
+  /* Inset tile, chip, icon container. */
+  --mx-color-surface-muted: light-dark(#eaecf1, #292d42);
+
+  /* Top of the ladder: a raised or selected surface. */
+  --mx-color-surface-elevated: light-dark(#fcfcfe, #383d55);
+
+  /* --- Text and lines ---------------------------------------------------
+   * Neither end is pure. `#EDEEF5` rather than white, `#16182B` rather than
+   * black: a pure value buzzes against a tinted ground, and carrying a trace of
+   * the surface hue makes text sit *in* the interface rather than on top of it.
+   */
+  --mx-color-text-primary: light-dark(#16182b, #edeef5);
+  --mx-color-text-secondary: light-dark(#565c72, #a6abc2);
+
+  /* Hairline between rows, around cards, and an input at rest.
+   * The two modes are deliberately NOT matched on contrast. Light has a shadow,
+   * so its border stands down to 1.45:1; dark has none — at the bottom of the
+   * lightness scale a shadow moves the page by ΔL* 0.26 — so its border keeps
+   * carrying the edge at 1.82:1. What stays symmetric is the total step a card's
+   * edge produces: ΔL* 8.04 light against 7.70 dark. */
+  --mx-color-border-subtle: light-dark(#d2d2dd, #414762);
+
+  /* Input border while focused. Focus shifts *hue*, never stroke width. */
+  --mx-color-focus-ring: light-dark(#4141c0, #8a8ae0);
+
+  /* --- Brand and actions ------------------------------------------------ */
+
+  /* The single accent, on hue 240 in both brightnesses. The dark value is held at
+   * luminance 0.13 — bright enough to read as the brand against the navy page,
+   * far enough below the card's headline that the CTA is never the brightest
+   * thing on screen. */
+  --mx-color-primary: light-dark(#4646b4, #5656c9);
+  --mx-color-on-primary: light-dark(#ffffff, #ffffff);
+
+  /* Label of a secondary (outlined) action — "End session", "Cancel".
+   * Deliberately neutral (saturation under 20%) rather than the brand colour: a
+   * secondary action sits next to the review verdicts, and a hue there competes
+   * with the two colours carrying the user's actual decision. */
+  --mx-color-secondary-action: light-dark(#454b5e, #c3c6d2);
+
+  /* --- Semantic ---------------------------------------------------------
+   * On a chroma budget, and deliberately not equal: `danger` is the alarm and
+   * carries the most saturation, `info` is only an indicator and carries the
+   * least. Four hues all shouting is how a study tool starts looking like a game.
+   */
+
+  /* Answer remembered, session completed, saved. */
+  --mx-color-success: light-dark(#1e7156, #68bb9c);
+  /* Card due soon, streak at risk — informative, not alarming. */
+  --mx-color-warning: light-dark(#856520, #d2ac76);
+  /* Answer forgotten, destructive action, reset. */
+  --mx-color-danger: light-dark(#b02233, #e88794);
+  /* Status that genuinely carries information: streak, counters, "3 of 20".
+   * Not a decorative accent — plain metadata uses `text-secondary`. */
+  --mx-color-info: light-dark(#456480, #8faec6);
+
+  /* --- Material roles ---------------------------------------------------
+   * Declared, not generated. An audit of `ColorScheme.fromSeed` found it had
+   * produced a neutral-grey container ladder, a PINK tertiary and a second red
+   * for `error` — none of it visible until the app grew a dialog, a sheet, a
+   * navigation bar and a chip. Declaring every role is what stops that.
+   */
+  --mx-color-primary-container: light-dark(#dcdcf2, #2b2b6e);
+  --mx-color-on-primary-container: light-dark(#1b1b5c, #d8d8f0);
+  --mx-color-secondary: light-dark(#4e5468, #b4b9cc);
+  --mx-color-on-secondary: light-dark(#ffffff, #1e2033);
+  --mx-color-secondary-container: light-dark(#e4e6ec, #333852);
+  --mx-color-on-secondary-container: light-dark(#2c3141, #d9dce7);
+  --mx-color-tertiary: light-dark(#45647f, #a2bad0);
+  --mx-color-on-tertiary: light-dark(#ffffff, #17232e);
+  --mx-color-tertiary-container: light-dark(#e1e9f0, #33465a);
+  --mx-color-on-tertiary-container: light-dark(#22394b, #d5e0ea);
+
+  /* `error` IS `danger`, not a second red system. */
+  --mx-color-error: var(--mx-color-danger);
+  --mx-color-on-error: light-dark(#ffffff, #2c1319);
+  --mx-color-error-container: light-dark(#f8dde1, #5e2831);
+  --mx-color-on-error-container: light-dark(#641421, #f5d3d8);
+
+  --mx-color-surface-container-lowest: light-dark(#fcfcfe, #07061f);
+  --mx-color-surface-container-low: light-dark(#fafafc, #12142b);
+  --mx-color-surface-container: light-dark(#f1f2f6, #1f2237);
+  --mx-color-surface-container-high: light-dark(#eaecf1, #292d42);
+  --mx-color-surface-container-highest: light-dark(#e3e5ec, #333852);
+  --mx-color-surface-dim: light-dark(#dee0e7, #08061f);
+  --mx-color-surface-bright: light-dark(#fcfcfe, #383d55);
+
+  --mx-color-inverse-surface: light-dark(#2a2c3e, #e7e8f0);
+  --mx-color-on-inverse-surface: light-dark(#f1f2f6, #23253a);
+  --mx-color-inverse-primary: light-dark(#a9a9e0, #3a3a9b);
+
+  /* The colour a drop shadow and a modal scrim are drawn from. Both modes derive
+   * from the seed: dark was pure black while light was already seed-tinted, an
+   * asymmetry nobody could see until surfaces started painting shadows. */
+  --mx-color-shadow: light-dark(#0b0c18, #04040b);
+  --mx-color-scrim: light-dark(#0b0c18, #04040b);
+
+  /* The letterbox around the phone-sized frame on the web build. Outside the app
+   * surface entirely, and darker than any real surface on purpose: it has to
+   * read as "not the app" rather than as another panel. */
+  --mx-color-web-letterbox: #14162a;
+
+  /* --- Roles mapped onto the tokens above -------------------------------
+   * `ColorScheme` names, so a component can be read against Material's own
+   * vocabulary without any component owning the mapping.
+   */
+  --mx-color-on-surface: var(--mx-color-text-primary);
+  --mx-color-on-surface-variant: var(--mx-color-text-secondary);
+  --mx-color-outline: var(--mx-color-border-subtle);
+  --mx-color-outline-variant: var(--mx-color-border-subtle);
+
+  /* --- Derived ----------------------------------------------------------
+   * Computed by the browser rather than hand-pasted. MX-VIS-002 rule R7 asks for
+   * solid colours where Material would composite a translucent one: the same
+   * token painted over a card, a sheet and a dialog otherwise renders as three
+   * values, and nobody chose any of them. `color-mix` fixes the ground here.
+   */
+
+  /* A disabled control's fill and border. */
+  --mx-color-disabled-surface: color-mix(in srgb, var(--mx-color-on-surface) 12%, var(--mx-color-surface));
+  /* A disabled control's label. */
+  --mx-color-disabled-content: color-mix(in srgb, var(--mx-color-on-surface) 38%, transparent);
+
+  /* How much of the page a modal hides. Translucent on purpose, and exempt from
+   * R7 for the same reason a shadow is: a barrier's whole job is to let the page
+   * show through dimmed, so there is no ground to blend against. Dark goes deeper
+   * because a 54% black over a `#0A082D` page barely registers. */
+  --mx-color-modal-barrier: light-dark(rgb(11 12 24 / 0.48), rgb(4 4 11 / 0.72));
+
+  /* Text selection. Material's default is light enough that selected text on a
+   * tinted card is hard to see IS selected. */
+  --mx-color-selection: color-mix(in srgb, var(--mx-color-primary) 24%, transparent);
+
+  /* The scroll thumb. Long lists are the app's main surface, so it is on screen
+   * often; left to the browser it is a neutral grey with no seed in it. */
+  --mx-color-scrollbar-thumb: color-mix(in srgb, var(--mx-color-on-surface-variant) 40%, transparent);
+}
+
+/* Explicit overrides. `color-scheme` is the switch — setting it is what moves
+ * every `light-dark()` above, plus the browser's own form controls, scrollbars
+ * and caret, which a class-based theme would leave behind. */
+[data-mx-theme="light"] { color-scheme: light; }
+[data-mx-theme="dark"] { color-scheme: dark; }

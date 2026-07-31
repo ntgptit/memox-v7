@@ -1,0 +1,38 @@
+/* Motion — the web mirror of `lib/core/theme/app_durations.dart`.
+ *
+ * Short and few. During a review session the user is answering, not watching;
+ * animation that draws attention to itself costs recall.
+ */
+
+:root {
+  /* State changes that must not feel like a jump — button press, ripple. */
+  --mx-duration-fast: 120ms;
+  /* Card and surface transitions. */
+  --mx-duration-normal: 200ms;
+  /* The longest anything is allowed to take. */
+  --mx-duration-slow: 320ms;
+
+  /* Easing has no Dart counterpart: Flutter's implicit animations default to
+   * `Curves.easeInOut` and the app never overrode it, so these name the curve the
+   * platform was already using rather than introducing a new one. Stated here so
+   * a component cannot reach for the browser default `ease`, which is faster out
+   * of the gate and makes a 120ms press look like a flicker. */
+  --mx-ease-standard: cubic-bezier(0.42, 0, 0.58, 1);
+  /* Entering: fast to start, settles. For something arriving on screen. */
+  --mx-ease-decelerate: cubic-bezier(0, 0, 0.58, 1);
+  /* Leaving: eases in, then goes. For something being dismissed. */
+  --mx-ease-accelerate: cubic-bezier(0.42, 0, 1, 1);
+}
+
+/* Honour the OS setting rather than each component remembering to.
+ *
+ * Durations collapse to 1ms instead of 0: a zero-length transition never fires
+ * `transitionend`, and a component that sequences off that event stops sequencing
+ * for exactly the users who asked for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --mx-duration-fast: 1ms;
+    --mx-duration-normal: 1ms;
+    --mx-duration-slow: 1ms;
+  }
+}

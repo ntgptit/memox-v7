@@ -1,0 +1,31 @@
+/* Spacing scale — the web mirror of `lib/core/theme/app_spacing.dart`.
+ *
+ * Every gap, pad and inset comes from here. Six steps, deliberately: a scale wide
+ * enough to express "a bit more" invites per-screen drift, and the drift is what
+ * makes an interface feel unfinished long before anyone can point at a screen.
+ */
+
+:root {
+  /* Between an icon and its label. */
+  --mx-space-xs: 4px;
+  /* Between tightly related items in a row. */
+  --mx-space-sm: 8px;
+  /* Inside a compact control. */
+  --mx-space-md: 12px;
+  /* Standard screen padding and the gap between list items. */
+  --mx-space-lg: 16px;
+  /* Between sections of a screen. */
+  --mx-space-xl: 24px;
+  /* Around a lone focal element — an empty state, a single card in a session. */
+  --mx-space-xxl: 32px;
+
+  /* Smallest side of anything a finger has to hit.
+   *
+   * Not a step on the scale — a floor. A control below this is reachable on a
+   * desk and missed on a bus, and the miss looks like the app ignoring the tap
+   * rather than the user hitting beside it.
+   *
+   * Note the unit mismatch that is not one: 48 CSS px is the same physical size
+   * as 48dp, because a CSS px is defined against the same 96dpi reference. */
+  --mx-touch-target: 48px;
+}

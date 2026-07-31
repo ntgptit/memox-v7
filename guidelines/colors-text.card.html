@@ -1,0 +1,194 @@
+<!-- @dsCard group="Colors" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Text</title>
+<link rel="stylesheet" href="../components/mx.css">
+<style>
+  body { margin: 0; padding: clamp(12px, 4vw, 24px); }
+  .card { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; max-width: 1000px; margin: 0 auto; }
+  .card__intro p { color: var(--mx-color-on-surface-variant); max-width: 70ch; margin: 8px 0 0; }
+  .card__intro p + p { margin-top: 10px; }
+  .panel {
+    background: var(--mx-color-surface);
+    color: var(--mx-color-on-surface);
+    border: 1px solid var(--mx-color-border-subtle);
+    border-radius: var(--mx-radius-lg);
+    padding: 20px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    align-content: start;
+  }
+  .panel__name { color: var(--mx-color-on-surface-variant); text-transform: uppercase; letter-spacing: 0.08em; }
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 16px; }
+  .swatches { display: grid; gap: 10px; }
+  .swatch { display: grid; grid-template-columns: 56px 1fr auto; gap: 14px; align-items: center; }
+  .swatch__chip { height: 44px; border-radius: var(--mx-radius-sm); border: 1px solid var(--mx-color-border-subtle); }
+  .swatch__name { display: grid; gap: 2px; min-width: 0; }
+  .swatch__role { color: var(--mx-color-on-surface-variant); }
+  .swatch__meta { color: var(--mx-color-on-surface-variant); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+  .note { color: var(--mx-color-on-surface-variant); max-width: 70ch; }
+  .rules { display: grid; gap: 8px; margin: 0; padding-left: 20px; color: var(--mx-color-on-surface-variant); }
+  .rules li { max-width: 68ch; }
+  code { font-family: var(--mx-font-mono); font-size: 0.92em; overflow-wrap: anywhere; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var(--mx-color-border-subtle); }
+  th { color: var(--mx-color-on-surface-variant); font-weight: var(--mx-weight-semibold); }
+  td.num { font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body class="mx-app">
+<div class="card">
+  <div class="card__intro">
+    <h1 class="mx-type-headline-small">Text</h1>
+    <p class="mx-type-body-medium">
+      Neither end is pure. <code>#EDEEF5</code> rather than white,
+      <code>#16182B</code> rather than black: a pure value buzzes against a tinted
+      ground, and carrying a trace of the surface hue makes text sit <em>in</em> the interface
+      rather than on top of it.
+    </p>
+    <p class="mx-type-body-medium">
+      Two weights of text, not three. <code>text-primary</code> is what the user is reading;
+      <code>text-secondary</code> is everything that supports it. A third tier is how a screen
+      ends up with a hierarchy nobody can see.
+    </p>
+  </div>
+  <div class="cols">
+  <div class="panel" data-mx-theme="light">
+    <div class="panel__name mx-type-label-small">Light</div>
+    <div class="swatches">
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#16182B"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-text-primary</code></span>
+          <span class="swatch__role mx-type-body-small">Headings and body. Mapped onto <code>onSurface</code>.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#16182B<br>16.95:1 on surface</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#565C72"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-text-secondary</code></span>
+          <span class="swatch__role mx-type-body-small">Subtitles, metadata, helper text. Mapped onto <code>onSurfaceVariant</code>.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#565C72<br>6.41:1 on surface</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#454B5E"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-secondary-action</code></span>
+          <span class="swatch__role mx-type-body-small">The label of an outlined button.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#454B5E<br>7.96:1 on page</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#F1F2F6;border-color:#2A2C3E"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-on-inverse-surface</code></span>
+          <span class="swatch__role mx-type-body-small">Snackbar and tooltip text.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#F1F2F6<br>12.28:1 on inverse</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#A4A5AE"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-disabled-content</code></span>
+          <span class="swatch__role mx-type-body-small"><code>on-surface</code> at 38%. Computed by the browser, never pasted.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#A4A5AE over surface</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#E0E0E5"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-disabled-surface</code></span>
+          <span class="swatch__role mx-type-body-small"><code>on-surface</code> at 12% — a disabled fill or border.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#E0E0E5 over surface</div>
+      </div>
+    </div>
+    <div style="display:grid;gap:6px;padding-top:4px">
+      <span class="mx-type-title-medium">A title in text-primary</span>
+      <span class="mx-type-body-medium" style="color:var(--mx-color-on-surface-variant)">A subtitle in text-secondary — 42 cards, 7 due today</span>
+      <span class="mx-type-body-small" style="color:var(--mx-color-disabled-content)">A disabled row's label</span>
+    </div>
+  </div>
+  <div class="panel" data-mx-theme="dark">
+    <div class="panel__name mx-type-label-small">Dark</div>
+    <div class="swatches">
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#EDEEF5"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-text-primary</code></span>
+          <span class="swatch__role mx-type-body-small">Headings and body. Mapped onto <code>onSurface</code>.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#EDEEF5<br>14.31:1 on surface</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#A6ABC2"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-text-secondary</code></span>
+          <span class="swatch__role mx-type-body-small">Subtitles, metadata, helper text. Mapped onto <code>onSurfaceVariant</code>.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#A6ABC2<br>7.27:1 on surface</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#C3C6D2"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-secondary-action</code></span>
+          <span class="swatch__role mx-type-body-small">The label of an outlined button.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#C3C6D2<br>11.36:1 on page</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#23253A;border-color:#E7E8F0"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-on-inverse-surface</code></span>
+          <span class="swatch__role mx-type-body-small">Snackbar and tooltip text.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#23253A<br>12.31:1 on inverse</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#6B6C7C"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-disabled-content</code></span>
+          <span class="swatch__role mx-type-body-small"><code>on-surface</code> at 38%. Computed by the browser, never pasted.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#6B6C7C over surface</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#343649"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-disabled-surface</code></span>
+          <span class="swatch__role mx-type-body-small"><code>on-surface</code> at 12% — a disabled fill or border.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#343649 over surface</div>
+      </div>
+    </div>
+    <div style="display:grid;gap:6px;padding-top:4px">
+      <span class="mx-type-title-medium">A title in text-primary</span>
+      <span class="mx-type-body-medium" style="color:var(--mx-color-on-surface-variant)">A subtitle in text-secondary — 42 cards, 7 due today</span>
+      <span class="mx-type-body-small" style="color:var(--mx-color-disabled-content)">A disabled row's label</span>
+    </div>
+  </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel__name mx-type-label-small">Rules</div>
+    <ul class="rules mx-type-body-medium">
+      <li>Body text clears 4.5:1 against the surface it sits on, in both modes. Every figure on
+        this card is computed from the token, not asserted.</li>
+      <li><strong>Metadata that carries information is not <code>info</code>.</strong> A streak,
+        a counter, "3 of 20" — those are <code>info</code>. Plain metadata is
+        <code>text-secondary</code>. Colouring everything quiet blue is how a study tool starts
+        looking like a dashboard.</li>
+      <li>A disabled label is <code>on-surface</code> at 38%, computed with
+        <code>color-mix</code> rather than pasted as a hex, so it stays right when the surface
+        under it changes.</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

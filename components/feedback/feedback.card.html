@@ -1,0 +1,221 @@
+<!-- @dsCard group="Components" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Feedback components</title>
+<link rel="stylesheet" href="../mx.css">
+<style>
+  body { margin: 0; padding: clamp(12px, 4vw, 24px); }
+  .card { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; max-width: 1100px; margin: 0 auto; }
+  .card__intro p { color: var(--mx-color-on-surface-variant); max-width: 68ch; margin: 6px 0 0; }
+  .panes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 16px; }
+  .pane {
+    background: var(--mx-color-background);
+    color: var(--mx-color-on-surface);
+    border: 1px solid var(--mx-color-border-subtle);
+    border-radius: var(--mx-radius-lg);
+    padding: 20px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 22px;
+    align-content: start;
+  }
+  .pane__label { color: var(--mx-color-on-surface-variant); text-transform: uppercase; letter-spacing: 0.08em; }
+  .group { display: grid; gap: 10px; }
+  .group__name { color: var(--mx-color-on-surface-variant); }
+  /* The real scrim is fixed to the viewport. Contained here so a modal can be
+     previewed beside everything else rather than over it. */
+  .demo-modal { position: relative; min-height: 300px; border-radius: var(--mx-radius-lg); overflow: hidden; }
+  .demo-modal .mx-scrim { position: absolute; }
+  .demo-modal .mx-dialog { margin: var(--mx-space-md); width: auto; max-height: none; }
+  .surface { background: var(--mx-color-surface); border: 1px solid var(--mx-color-border-subtle); border-radius: var(--mx-radius-lg); }
+</style>
+</head>
+<body class="mx-app">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12.3 2.7 2.7 5.6-5.7"/></symbol>
+  <symbol id="i-alert-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.4v5.4"/><path d="M12 16.3v.4"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4.5 19.5h4L18.4 9.6l-4-4L4.5 15.5z"/><path d="m14.4 5.6 4 4"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4.5 7h15"/><path d="M9.5 7V4.8h5V7"/><path d="M6.6 7v12.2h10.8V7"/><path d="M10.4 10.6v5.6"/><path d="M13.6 10.6v5.6"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 4 2.5 5.3 5.8.8-4.2 4 1 5.9L12 17.2 6.9 20l1-5.9-4.2-4 5.8-.8z"/></symbol>
+</defs></svg>
+
+<div class="card">
+  <div class="card__intro">
+    <h1 class="mx-type-headline-small">Feedback</h1>
+    <p class="mx-type-body-medium">
+      The four things a screen can be doing instead of showing content — loading, empty,
+      failed, or asking — plus the two modals. Empty and error are separate components on
+      purpose: "you have finished everything due today" is good news, and rendering it in
+      error styling tells the user something is broken when nothing is. Every string here
+      arrives already localized; none of these components reads a catalogue, and none of them
+      decides how a failure reads.
+    </p>
+  </div>
+
+  <div class="panes">
+    <section class="pane" data-mx-theme="light">
+      <div class="pane__label mx-type-label-small">Light</div>
+
+      <div class="group">
+        <div class="group__name mx-type-label-medium">MxLoadingState</div>
+        <div class="surface"><div class="mx-loading" role="status" aria-live="polite">
+          <svg class="mx-spinner" viewBox="0 0 24 24" aria-hidden="true"><circle class="mx-spinner__arc" cx="12" cy="12" r="9"/></svg>
+          <span class="mx-visually-hidden">Loading your decks</span>
+        </div></div>
+      </div>
+
+      <div class="group">
+        <div class="group__name mx-type-label-medium">MxEmptyState — nothing wrong</div>
+        <div class="surface"><div class="mx-state">
+          <svg class="mx-icon mx-icon--lg mx-state__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-check-circle"/></svg>
+          <h2 class="mx-state__title mx-type-title-medium">No cards due today</h2>
+          <p class="mx-state__message mx-type-body-medium">Come back tomorrow, or add a deck to study ahead.</p>
+          <div class="mx-state__action"><button type="button" class="mx-button mx-button--primary"><span class="mx-button__content"><span class="mx-button__label">Add a deck</span></span></button></div>
+        </div></div>
+      </div>
+
+      <div class="group">
+        <div class="group__name mx-type-label-medium">MxErrorState — something failed</div>
+        <div class="surface"><div class="mx-state mx-state--error" role="alert">
+          <svg class="mx-icon mx-icon--lg mx-state__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-alert-circle"/></svg>
+          <h2 class="mx-state__title mx-type-title-medium">Couldn't load your decks</h2>
+          <p class="mx-state__message mx-type-body-medium">Your cards are safe on this device. Try again in a moment.</p>
+          <div class="mx-state__action"><button type="button" class="mx-button mx-button--primary"><span class="mx-button__content"><span class="mx-button__label">Try again</span></span></button></div>
+        </div></div>
+      </div>
+
+      <div class="group">
+        <div class="group__name mx-type-label-medium">MxConfirmDialog — destructive</div>
+        <div class="demo-modal surface">
+          <div class="mx-scrim">
+            <div class="mx-dialog" role="alertdialog" aria-modal="true" aria-labelledby="l-dt" aria-describedby="l-dm">
+              <h2 id="l-dt" class="mx-dialog__title mx-type-title-medium">Delete "Phrasal verbs"?</h2>
+              <div id="l-dm" class="mx-dialog__content mx-type-body-medium">This takes 4 sub-decks and 11 cards with it. It cannot be undone.</div>
+              <div class="mx-dialog__actions">
+                <button type="button" class="mx-button mx-button--secondary"><span class="mx-button__content"><span class="mx-button__label">Keep it</span></span></button>
+                <button type="button" class="mx-button mx-button--destructive"><span class="mx-button__content"><span class="mx-button__label">Delete deck</span></span></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group__name mx-type-label-medium">MxActionSheet — normal / destructive / unavailable</div>
+        <div class="demo-modal surface">
+          <div class="mx-scrim mx-sheet-scrim">
+            <div class="mx-sheet" role="menu" aria-labelledby="l-st">
+              <div class="mx-sheet__handle" aria-hidden="true"></div>
+              <div id="l-st" class="mx-sheet__title mx-type-title-small">Phrasal verbs</div>
+              <button type="button" role="menuitem" class="mx-list-tile mx-list-tile--interactive mx-sheet__action">
+                <span class="mx-list-tile__leading"><svg class="mx-icon mx-icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-edit"/></svg></span>
+                <span class="mx-list-tile__text"><span class="mx-list-tile__title mx-type-body-large">Rename deck</span></span>
+              </button>
+              <div role="menuitem" class="mx-list-tile mx-list-tile--disabled mx-sheet__action" aria-disabled="true">
+                <span class="mx-list-tile__leading"><svg class="mx-icon mx-icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-star"/></svg></span>
+                <span class="mx-list-tile__text"><span class="mx-list-tile__title mx-type-body-large">Star deck</span></span>
+              </div>
+              <button type="button" role="menuitem" class="mx-list-tile mx-list-tile--interactive mx-sheet__action mx-sheet__action--destructive">
+                <span class="mx-list-tile__leading"><svg class="mx-icon mx-icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-trash"/></svg></span>
+                <span class="mx-list-tile__text"><span class="mx-list-tile__title mx-type-body-large">Delete deck</span></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="pane" data-mx-theme="dark">
+      <div class="pane__label mx-type-label-small">Dark</div>
+
+      <div class="group">
+        <div class="group__name mx-type-label-medium">MxLoadingState</div>
+        <div class="surface"><div class="mx-loading" role="status" aria-live="polite">
+          <svg class="mx-spinner" viewBox="0 0 24 24" aria-hidden="true"><circle class="mx-spinner__arc" cx="12" cy="12" r="9"/></svg>
+          <span class="mx-visually-hidden">Loading your decks</span>
+        </div></div>
+      </div>
+
+      <div class="group">
+        <div class="group__name mx-type-label-medium">MxEmptyState — nothing wrong</div>
+        <div class="surface"><div class="mx-state">
+          <svg class="mx-icon mx-icon--lg mx-state__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-check-circle"/></svg>
+          <h2 class="mx-state__title mx-type-title-medium">No cards due today</h2>
+          <p class="mx-state__message mx-type-body-medium">Come back tomorrow, or add a deck to study ahead.</p>
+          <div class="mx-state__action"><button type="button" class="mx-button mx-button--primary"><span class="mx-button__content"><span class="mx-button__label">Add a deck</span></span></button></div>
+        </div></div>
+      </div>
+
+      <div class="group">
+        <div class="group__name mx-type-label-medium">MxErrorState — something failed</div>
+        <div class="surface"><div class="mx-state mx-state--error" role="alert">
+          <svg class="mx-icon mx-icon--lg mx-state__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-alert-circle"/></svg>
+          <h2 class="mx-state__title mx-type-title-medium">Couldn't load your decks</h2>
+          <p class="mx-state__message mx-type-body-medium">Your cards are safe on this device. Try again in a moment.</p>
+          <div class="mx-state__action"><button type="button" class="mx-button mx-button--primary"><span class="mx-button__content"><span class="mx-button__label">Try again</span></span></button></div>
+        </div></div>
+      </div>
+
+      <div class="group">
+        <div class="group__name mx-type-label-medium">MxConfirmDialog — destructive</div>
+        <div class="demo-modal surface">
+          <div class="mx-scrim">
+            <div class="mx-dialog" role="alertdialog" aria-modal="true" aria-labelledby="d-dt" aria-describedby="d-dm">
+              <h2 id="d-dt" class="mx-dialog__title mx-type-title-medium">Delete "Phrasal verbs"?</h2>
+              <div id="d-dm" class="mx-dialog__content mx-type-body-medium">This takes 4 sub-decks and 11 cards with it. It cannot be undone.</div>
+              <div class="mx-dialog__actions">
+                <button type="button" class="mx-button mx-button--secondary"><span class="mx-button__content"><span class="mx-button__label">Keep it</span></span></button>
+                <button type="button" class="mx-button mx-button--destructive"><span class="mx-button__content"><span class="mx-button__label">Delete deck</span></span></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group__name mx-type-label-medium">MxActionSheet — normal / destructive / unavailable</div>
+        <div class="demo-modal surface">
+          <div class="mx-scrim mx-sheet-scrim">
+            <div class="mx-sheet" role="menu" aria-labelledby="d-st">
+              <div class="mx-sheet__handle" aria-hidden="true"></div>
+              <div id="d-st" class="mx-sheet__title mx-type-title-small">Phrasal verbs</div>
+              <button type="button" role="menuitem" class="mx-list-tile mx-list-tile--interactive mx-sheet__action">
+                <span class="mx-list-tile__leading"><svg class="mx-icon mx-icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-edit"/></svg></span>
+                <span class="mx-list-tile__text"><span class="mx-list-tile__title mx-type-body-large">Rename deck</span></span>
+              </button>
+              <div role="menuitem" class="mx-list-tile mx-list-tile--disabled mx-sheet__action" aria-disabled="true">
+                <span class="mx-list-tile__leading"><svg class="mx-icon mx-icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-star"/></svg></span>
+                <span class="mx-list-tile__text"><span class="mx-list-tile__title mx-type-body-large">Star deck</span></span>
+              </div>
+              <button type="button" role="menuitem" class="mx-list-tile mx-list-tile--interactive mx-sheet__action mx-sheet__action--destructive">
+                <span class="mx-list-tile__leading"><svg class="mx-icon mx-icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-trash"/></svg></span>
+                <span class="mx-list-tile__text"><span class="mx-list-tile__title mx-type-body-large">Delete deck</span></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="mx-card mx-card--elevation-none">
+    <h2 class="mx-type-title-medium">MxAsyncView — the policy, not the branch</h2>
+    <p class="mx-type-body-medium" style="color:var(--mx-color-on-surface-variant);margin-top:8px">
+      It renders one of the three states above, and what it centralises is the answer to
+      "does a refresh show a spinner". <strong>First load</strong>: spinner — there is nothing
+      to keep showing, so a screen never presents stale data as fresh. <strong>Refresh</strong>:
+      the previous value stays, because replacing a populated list with a spinner on every
+      resume is motion in place of information. <strong>Reload</strong>: spinner, because a
+      dependency changing means the previous value answers a question nobody is asking any
+      more. <strong>Failure</strong>: the caller's own copy — there is deliberately no default,
+      since a generic "something went wrong" is how every screen ends up with the same
+      unhelpful sentence.
+    </p>
+  </div>
+</div>
+</body>
+</html>

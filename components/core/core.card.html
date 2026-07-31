@@ -1,0 +1,282 @@
+<!-- @dsCard group="Components" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Core components</title>
+<link rel="stylesheet" href="../mx.css">
+<style>
+  body { margin: 0; padding: clamp(12px, 4vw, 24px); }
+  .card { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; max-width: 1100px; margin: 0 auto; }
+  .card__intro { display: grid; gap: 6px; }
+  .card__intro p { color: var(--mx-color-on-surface-variant); max-width: 68ch; }
+  .panes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 16px; }
+  .pane {
+    background: var(--mx-color-background);
+    color: var(--mx-color-on-surface);
+    border: 1px solid var(--mx-color-border-subtle);
+    border-radius: var(--mx-radius-lg);
+    padding: 20px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+    align-content: start;
+  }
+  .pane__label {
+    color: var(--mx-color-on-surface-variant);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .group { display: grid; gap: 10px; }
+  .group__name { color: var(--mx-color-on-surface-variant); }
+  .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .stack { display: grid; gap: 10px; }
+  .icons { display: flex; flex-wrap: wrap; gap: 14px; color: var(--mx-color-on-surface-variant); }
+</style>
+</head>
+<body class="mx-app">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4.5 7h15"/><path d="M9.5 7V4.8h5V7"/><path d="M6.6 7v12.2h10.8V7"/><path d="M10.4 10.6v5.6"/><path d="M13.6 10.6v5.6"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 4 8.4 4.4L12 12.8 3.6 8.4z"/><path d="m4.6 12.4 7.4 3.9 7.4-3.9"/></symbol>
+  <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9.5 5.5 7 6.5-7 6.5"/></symbol>
+  <symbol id="i-more-vertical" viewBox="0 0 24 24"><circle cx="12" cy="5.2" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="18.8" r="1.5" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 5.6h16l-6.3 7.1v5.9l-3.4 1.8v-7.7z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m4.5 12.4 5 5 10-10.8"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><path d="M12 6.8v5.5l3.4 2"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 4 2.5 5.3 5.8.8-4.2 4 1 5.9L12 17.2 6.9 20l1-5.9-4.2-4 5.8-.8z"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m15.8 15.8 4.4 4.4"/></symbol>
+</defs></svg>
+
+<div class="card">
+  <div class="card__intro">
+    <h1 class="mx-type-headline-small">Core components</h1>
+    <p class="mx-type-body-medium">
+      The eight components every screen is built from. Each takes an intent — a variant, a
+      selected flag, an elevation step — and never a colour: appearance belongs to the system,
+      so a screen cannot invent a shade that looks correct in isolation and wrong beside the
+      others. Both modes are shown together because every decision here was made against the
+      pair, not against one of them.
+    </p>
+  </div>
+
+  <div class="panes">
+    <!-- ================================================= LIGHT -->
+    <section class="pane" data-mx-theme="light">
+      <div class="pane__label mx-type-label-small">Light</div>
+
+      <div class="group">
+        <div class="group__name mx-type-label-medium">MxActionButton — primary / secondary / destructive</div>
+        <div class="row">
+          <button type="button" class="mx-button mx-button--primary mx-focus-ring"><span class="mx-button__content"><span class="mx-button__label">Start review</span></span></button>
+          <button type="button" class="mx-button mx-button--secondary mx-focus-ring"><span class="mx-button__content"><span class="mx-button__label">Not now</span></span></button>
+        </div>
+        <div class="row">
+          <button type="button" class="mx-button mx-button--destructive mx-focus-ring"><span class="mx-button__content"><svg class="mx-icon mx-icon--sm mx-button__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-trash"/></svg><span class="mx-button__label">Delete deck</span></span></button>
+          <button type="button" class="mx-button mx-button--primary" disabled><span class="mx-button__content"><span class="mx-button__label">Disabled</span></span></button>
+        </div>
+        <div class="row">
+          <button type="button" class="mx-button mx-button--primary mx-button--loading" disabled aria-busy="true" aria-label="Saving">
+            <span class="mx-button__content"><span class="mx-button__label">Saving</span></span>
+            <span class="mx-button__spinner"><svg class="mx-spinner mx-spinner--sm" viewBox="0 0 24 24" aria-hidden="true"><circle class="mx-spinner__arc" cx="12" cy="12" r="9"/></svg></span>
+          </button>
+          <button type="button" class="mx-icon-button" title="More actions" aria-label="More actions"><svg class="mx-icon mx-icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-more-vertical"/></svg></button>
+          <button type="button" class="mx-icon-button" title="Add card" aria-label="Add card"><svg class="mx-icon mx-icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-plus"/></svg></button>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group__name mx-type-label-medium">MxCard — elevation card / none</div>
+        <div class="mx-card mx-card--elevation-card">
+          <div class="stack">
+            <span class="mx-type-title-medium">Academic Word List</span>
+            <span class="mx-type-body-medium" style="color:var(--mx-color-on-surface-variant)">42 cards · 7 due today</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group__name mx-type-label-medium">MxListTile — default / selected / disabled</div>
+        <div class="stack">
+          <button type="button" class="mx-list-tile mx-list-tile--interactive mx-focus-ring">
+            <span class="mx-list-tile__leading"><svg class="mx-icon mx-icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-layers"/></svg></span>
+            <span class="mx-list-tile__text"><span class="mx-list-tile__title mx-type-body-large">Phrasal verbs</span><span class="mx-list-tile__subtitle mx-type-body-medium">18 cards</span></span>
+            <span class="mx-list-tile__trailing"><svg class="mx-icon mx-icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-chevron-right"/></svg></span>
+          </button>
+          <button type="button" class="mx-list-tile mx-list-tile--interactive mx-list-tile--selected" aria-current="true">
+            <span class="mx-list-tile__leading"><svg class="mx-icon mx-icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-star"/></svg></span>
+            <span class="mx-list-tile__text"><span class="mx-list-tile__title mx-type-body-large">Starred</span></span>
+          </button>
+          <div class="mx-list-tile mx-list-tile--disabled" aria-disabled="true">
+            <span class="mx-list-tile__leading"><svg class="mx-icon mx-icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-clock"/></svg></span>
+            <span class="mx-list-tile__text"><span class="mx-list-tile__title mx-type-body-large">Scheduled import</span><span class="mx-list-tile__subtitle mx-type-body-medium">Not available yet</span></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group__name mx-type-label-medium">MxPillButton — one of N</div>
+        <div class="row">
+          <button type="button" class="mx-pill mx-pill--selected" aria-pressed="true"><span class="mx-pill__shape"><span>Due</span></span></button>
+          <button type="button" class="mx-pill" aria-pressed="false"><span class="mx-pill__shape"><span>All</span></span></button>
+          <button type="button" class="mx-pill" aria-pressed="false"><span class="mx-pill__shape"><svg class="mx-icon mx-icon--sm mx-pill__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-filter"/></svg><span>Filtered</span></span></button>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group__name mx-type-label-medium">MxProgressBar — determinate / indeterminate</div>
+        <div class="stack">
+          <div class="mx-progress-bar">
+            <div class="mx-progress-bar__header"><span class="mx-type-label-large">This session</span><span class="mx-type-label-medium">7 of 20</span></div>
+            <div class="mx-progress-bar__track" role="progressbar" aria-label="Session progress" aria-valuenow="35" aria-valuemin="0" aria-valuemax="100"><div class="mx-progress-bar__indicator" style="width:35%"></div></div>
+          </div>
+          <div class="mx-progress-bar mx-progress-bar--indeterminate">
+            <div class="mx-progress-bar__track" role="progressbar" aria-label="Importing"><div class="mx-progress-bar__indicator"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group__name mx-type-label-medium">MxTextField — filled / error</div>
+        <div class="stack">
+          <div class="mx-field mx-field--floating">
+            <div class="mx-field__shell">
+              <input id="l-deck" class="mx-field__input" value="Academic Word List" placeholder=" ">
+              <label class="mx-field__label mx-type-body-large" for="l-deck">Deck name</label>
+              <fieldset class="mx-field__outline" aria-hidden="true"><legend class="mx-field__legend"><span>Deck name</span></legend></fieldset>
+            </div>
+            <div class="mx-field__footer mx-type-body-small"><span>Shown on the deck list</span><span class="mx-field__counter">18/200</span></div>
+          </div>
+          <div class="mx-field mx-field--floating mx-field--error">
+            <div class="mx-field__shell">
+              <input id="l-front" class="mx-field__input" value="" placeholder=" " aria-invalid="true">
+              <label class="mx-field__label mx-type-body-large" for="l-front">Front</label>
+              <fieldset class="mx-field__outline" aria-hidden="true"><legend class="mx-field__legend"><span>Front</span></legend></fieldset>
+            </div>
+            <div class="mx-field__footer mx-type-body-small"><span class="mx-field__message--error">A card needs a front</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group__name mx-type-label-medium">MxIcon — sm 16 / md 24 / lg 40</div>
+        <div class="icons">
+          <svg class="mx-icon mx-icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-check"/></svg>
+          <svg class="mx-icon mx-icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-search"/></svg>
+          <svg class="mx-icon mx-icon--lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-layers"/></svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================= DARK -->
+    <section class="pane" data-mx-theme="dark">
+      <div class="pane__label mx-type-label-small">Dark</div>
+
+      <div class="group">
+        <div class="group__name mx-type-label-medium">MxActionButton — primary / secondary / destructive</div>
+        <div class="row">
+          <button type="button" class="mx-button mx-button--primary mx-focus-ring"><span class="mx-button__content"><span class="mx-button__label">Start review</span></span></button>
+          <button type="button" class="mx-button mx-button--secondary mx-focus-ring"><span class="mx-button__content"><span class="mx-button__label">Not now</span></span></button>
+        </div>
+        <div class="row">
+          <button type="button" class="mx-button mx-button--destructive mx-focus-ring"><span class="mx-button__content"><svg class="mx-icon mx-icon--sm mx-button__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-trash"/></svg><span class="mx-button__label">Delete deck</span></span></button>
+          <button type="button" class="mx-button mx-button--primary" disabled><span class="mx-button__content"><span class="mx-button__label">Disabled</span></span></button>
+        </div>
+        <div class="row">
+          <button type="button" class="mx-button mx-button--primary mx-button--loading" disabled aria-busy="true" aria-label="Saving">
+            <span class="mx-button__content"><span class="mx-button__label">Saving</span></span>
+            <span class="mx-button__spinner"><svg class="mx-spinner mx-spinner--sm" viewBox="0 0 24 24" aria-hidden="true"><circle class="mx-spinner__arc" cx="12" cy="12" r="9"/></svg></span>
+          </button>
+          <button type="button" class="mx-icon-button" title="More actions" aria-label="More actions"><svg class="mx-icon mx-icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-more-vertical"/></svg></button>
+          <button type="button" class="mx-icon-button" title="Add card" aria-label="Add card"><svg class="mx-icon mx-icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-plus"/></svg></button>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group__name mx-type-label-medium">MxCard — no shadow, by measurement</div>
+        <div class="mx-card mx-card--elevation-card">
+          <div class="stack">
+            <span class="mx-type-title-medium">Academic Word List</span>
+            <span class="mx-type-body-medium" style="color:var(--mx-color-on-surface-variant)">42 cards · 7 due today</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group__name mx-type-label-medium">MxListTile — default / selected / disabled</div>
+        <div class="stack">
+          <button type="button" class="mx-list-tile mx-list-tile--interactive mx-focus-ring">
+            <span class="mx-list-tile__leading"><svg class="mx-icon mx-icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-layers"/></svg></span>
+            <span class="mx-list-tile__text"><span class="mx-list-tile__title mx-type-body-large">Phrasal verbs</span><span class="mx-list-tile__subtitle mx-type-body-medium">18 cards</span></span>
+            <span class="mx-list-tile__trailing"><svg class="mx-icon mx-icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-chevron-right"/></svg></span>
+          </button>
+          <button type="button" class="mx-list-tile mx-list-tile--interactive mx-list-tile--selected" aria-current="true">
+            <span class="mx-list-tile__leading"><svg class="mx-icon mx-icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-star"/></svg></span>
+            <span class="mx-list-tile__text"><span class="mx-list-tile__title mx-type-body-large">Starred</span></span>
+          </button>
+          <div class="mx-list-tile mx-list-tile--disabled" aria-disabled="true">
+            <span class="mx-list-tile__leading"><svg class="mx-icon mx-icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-clock"/></svg></span>
+            <span class="mx-list-tile__text"><span class="mx-list-tile__title mx-type-body-large">Scheduled import</span><span class="mx-list-tile__subtitle mx-type-body-medium">Not available yet</span></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group__name mx-type-label-medium">MxPillButton — one of N</div>
+        <div class="row">
+          <button type="button" class="mx-pill mx-pill--selected" aria-pressed="true"><span class="mx-pill__shape"><span>Due</span></span></button>
+          <button type="button" class="mx-pill" aria-pressed="false"><span class="mx-pill__shape"><span>All</span></span></button>
+          <button type="button" class="mx-pill" aria-pressed="false"><span class="mx-pill__shape"><svg class="mx-icon mx-icon--sm mx-pill__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-filter"/></svg><span>Filtered</span></span></button>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group__name mx-type-label-medium">MxProgressBar — determinate / indeterminate</div>
+        <div class="stack">
+          <div class="mx-progress-bar">
+            <div class="mx-progress-bar__header"><span class="mx-type-label-large">This session</span><span class="mx-type-label-medium">7 of 20</span></div>
+            <div class="mx-progress-bar__track" role="progressbar" aria-label="Session progress" aria-valuenow="35" aria-valuemin="0" aria-valuemax="100"><div class="mx-progress-bar__indicator" style="width:35%"></div></div>
+          </div>
+          <div class="mx-progress-bar mx-progress-bar--indeterminate">
+            <div class="mx-progress-bar__track" role="progressbar" aria-label="Importing"><div class="mx-progress-bar__indicator"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group__name mx-type-label-medium">MxTextField — filled / error</div>
+        <div class="stack">
+          <div class="mx-field mx-field--floating">
+            <div class="mx-field__shell">
+              <input id="d-deck" class="mx-field__input" value="Academic Word List" placeholder=" ">
+              <label class="mx-field__label mx-type-body-large" for="d-deck">Deck name</label>
+              <fieldset class="mx-field__outline" aria-hidden="true"><legend class="mx-field__legend"><span>Deck name</span></legend></fieldset>
+            </div>
+            <div class="mx-field__footer mx-type-body-small"><span>Shown on the deck list</span><span class="mx-field__counter">18/200</span></div>
+          </div>
+          <div class="mx-field mx-field--floating mx-field--error">
+            <div class="mx-field__shell">
+              <input id="d-front" class="mx-field__input" value="" placeholder=" " aria-invalid="true">
+              <label class="mx-field__label mx-type-body-large" for="d-front">Front</label>
+              <fieldset class="mx-field__outline" aria-hidden="true"><legend class="mx-field__legend"><span>Front</span></legend></fieldset>
+            </div>
+            <div class="mx-field__footer mx-type-body-small"><span class="mx-field__message--error">A card needs a front</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group__name mx-type-label-medium">MxIcon — sm 16 / md 24 / lg 40</div>
+        <div class="icons">
+          <svg class="mx-icon mx-icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-check"/></svg>
+          <svg class="mx-icon mx-icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-search"/></svg>
+          <svg class="mx-icon mx-icon--lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-layers"/></svg>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+</body>
+</html>

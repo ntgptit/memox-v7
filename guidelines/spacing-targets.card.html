@@ -1,0 +1,113 @@
+<!-- @dsCard group="Spacing" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Targets</title>
+<link rel="stylesheet" href="../components/mx.css">
+<style>
+  body { margin: 0; padding: clamp(12px, 4vw, 24px); }
+  .card { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; max-width: 1000px; margin: 0 auto; }
+  .card__intro p { color: var(--mx-color-on-surface-variant); max-width: 70ch; margin: 8px 0 0; }
+  .card__intro p + p { margin-top: 10px; }
+  .panel {
+    background: var(--mx-color-surface);
+    color: var(--mx-color-on-surface);
+    border: 1px solid var(--mx-color-border-subtle);
+    border-radius: var(--mx-radius-lg);
+    padding: 20px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    align-content: start;
+  }
+  .panel__name { color: var(--mx-color-on-surface-variant); text-transform: uppercase; letter-spacing: 0.08em; }
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 16px; }
+  .swatches { display: grid; gap: 10px; }
+  .swatch { display: grid; grid-template-columns: 56px 1fr auto; gap: 14px; align-items: center; }
+  .swatch__chip { height: 44px; border-radius: var(--mx-radius-sm); border: 1px solid var(--mx-color-border-subtle); }
+  .swatch__name { display: grid; gap: 2px; min-width: 0; }
+  .swatch__role { color: var(--mx-color-on-surface-variant); }
+  .swatch__meta { color: var(--mx-color-on-surface-variant); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+  .note { color: var(--mx-color-on-surface-variant); max-width: 70ch; }
+  .rules { display: grid; gap: 8px; margin: 0; padding-left: 20px; color: var(--mx-color-on-surface-variant); }
+  .rules li { max-width: 68ch; }
+  code { font-family: var(--mx-font-mono); font-size: 0.92em; overflow-wrap: anywhere; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var(--mx-color-border-subtle); }
+  th { color: var(--mx-color-on-surface-variant); font-weight: var(--mx-weight-semibold); }
+  td.num { font-variant-numeric: tabular-nums; }
+
+  /* `minmax(0, 1fr)`, not `1fr`: a track sized `1fr` still takes its MINIMUM from
+     the item, so a bar declared 192px wide floors the column at 192 and `max-width:
+     100%` never gets a chance to apply. */
+  .step { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 16px; align-items: center; }
+  .step__bar { height: 24px; max-width: 100%; background: var(--mx-color-primary); border-radius: var(--mx-radius-sm); }
+  .step__name { display: grid; gap: 2px; }
+  .step__role { color: var(--mx-color-on-surface-variant); }
+  .annot { position: relative; }
+  .tick { background: color-mix(in srgb, var(--mx-color-focus-ring) 22%, transparent); border-radius: 3px; }
+  .target { display: grid; place-items: center; border: 1px dashed var(--mx-color-focus-ring); border-radius: var(--mx-radius-sm); }
+</style>
+</head>
+<body class="mx-app">
+<div class="card">
+  <div class="card__intro">
+    <h1 class="mx-type-headline-small">Targets</h1>
+    <p class="mx-type-body-medium">
+      48 is the smallest side of anything a finger has to hit, and it is not part of the spacing
+      scale — it is a floor, not a step. A control below it is reachable on a desk and missed on
+      a bus, and the miss looks like the app ignoring the tap rather than the user hitting beside
+      it.
+    </p>
+    <p class="mx-type-body-medium">
+      It lives in the stylesheet and never in a prop, so there is nothing for a screen to pass.
+      Material's <code>VisualDensity.compact</code> would have been the shorter route to a
+      tighter layout, and it subtracts 8 from every button — taking the icon button to 40×40,
+      under the floor a thumb needs and under the floor the button was measured against.
+    </p>
+  </div>
+  <div class="panel">
+    <div class="panel__name mx-type-label-small">Every control, at its target</div>
+    <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center">
+      <div class="target" style="width:48px;height:48px">
+        <button type="button" class="mx-icon-button" aria-label="Add"><svg class="mx-icon mx-icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg></button>
+      </div>
+      <div class="target" style="height:48px;padding-inline:0">
+        <button type="button" class="mx-button mx-button--primary"><span class="mx-button__content"><span class="mx-button__label">Start review</span></span></button>
+      </div>
+      <div class="target" style="height:48px">
+        <button type="button" class="mx-pill mx-pill--selected" aria-pressed="true"><span class="mx-pill__shape"><span>Due</span></span></button>
+      </div>
+      <div class="target" style="height:48px">
+        <button type="button" class="mx-breadcrumb__step">All decks</button>
+      </div>
+    </div>
+    <p class="note mx-type-body-medium">
+      The dashed outline is 48. Note what is <em>not</em> 48: the pill's visible shape is 32, and
+      the padding that brings it to the floor sits outside it — so the control stays the size it
+      was drawn while the target clears the floor. Same for a breadcrumb step, which is text with
+      48 of height around it rather than a box drawn at 48.
+    </p>
+  </div>
+
+  <div class="panel">
+    <div class="panel__name mx-type-label-small">The one deliberate exception</div>
+    <div style="max-width:min(360px, 100%)">
+      <div class="mx-search">
+        <svg class="mx-icon mx-icon--md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m15.8 15.8 4.4 4.4"/></svg>
+        <input class="mx-search__input" type="search" value="give" aria-label="Search cards">
+        <button type="button" class="mx-search__clear" aria-label="Clear search"><svg class="mx-icon mx-icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6.2 6.2 11.6 11.6"/><path d="m17.8 6.2-11.6 11.6"/></svg></button>
+      </div>
+    </div>
+    <p class="note mx-type-body-medium">
+      <code>MxSearchField</code>'s clear button is 32. It sits <em>inside</em> a 48-high row, so
+      the row is what the thumb aims at and this is the last few pixels of it — a 48-square button
+      there would make the field 64 high. An exception that is written down and reasoned is a
+      decision; an exception that is discovered later is a bug.
+    </p>
+  </div>
+</div>
+</body>
+</html>

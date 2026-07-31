@@ -1,0 +1,182 @@
+<!-- @dsCard group="Colors" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Surfaces — light</title>
+<link rel="stylesheet" href="../components/mx.css">
+<style>
+  body { margin: 0; padding: clamp(12px, 4vw, 24px); }
+  .card { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; max-width: 1000px; margin: 0 auto; }
+  .card__intro p { color: var(--mx-color-on-surface-variant); max-width: 70ch; margin: 8px 0 0; }
+  .card__intro p + p { margin-top: 10px; }
+  .panel {
+    background: var(--mx-color-surface);
+    color: var(--mx-color-on-surface);
+    border: 1px solid var(--mx-color-border-subtle);
+    border-radius: var(--mx-radius-lg);
+    padding: 20px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    align-content: start;
+  }
+  .panel__name { color: var(--mx-color-on-surface-variant); text-transform: uppercase; letter-spacing: 0.08em; }
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 16px; }
+  .swatches { display: grid; gap: 10px; }
+  .swatch { display: grid; grid-template-columns: 56px 1fr auto; gap: 14px; align-items: center; }
+  .swatch__chip { height: 44px; border-radius: var(--mx-radius-sm); border: 1px solid var(--mx-color-border-subtle); }
+  .swatch__name { display: grid; gap: 2px; min-width: 0; }
+  .swatch__role { color: var(--mx-color-on-surface-variant); }
+  .swatch__meta { color: var(--mx-color-on-surface-variant); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+  .note { color: var(--mx-color-on-surface-variant); max-width: 70ch; }
+  .rules { display: grid; gap: 8px; margin: 0; padding-left: 20px; color: var(--mx-color-on-surface-variant); }
+  .rules li { max-width: 68ch; }
+  code { font-family: var(--mx-font-mono); font-size: 0.92em; overflow-wrap: anywhere; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var(--mx-color-border-subtle); }
+  th { color: var(--mx-color-on-surface-variant); font-weight: var(--mx-weight-semibold); }
+  td.num { font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body class="mx-app">
+<div class="card">
+  <div class="card__intro">
+    <h1 class="mx-type-headline-small">Surfaces — light</h1>
+    <p class="mx-type-body-medium">
+      Four tiers, and the page is the only one allowed a strong navy saturation. Every surface
+      above it drops to 20–30% saturation while climbing in lightness, so the navy reads as the
+      room the content sits in rather than as a tint applied to the content itself. A palette
+      where card, tile and input are all as navy as the page has no hierarchy left to spend —
+      everything is equally coloured, so nothing is emphasised.
+    </p>
+  </div>
+  <div class="panel" data-mx-theme="light">
+    <div class="panel__name mx-type-label-small">The four-tier ladder</div>
+    <div class="swatches">
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#F4F5F8"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-background</code></span>
+          <span class="swatch__role mx-type-body-small">The page. The one component allowed a strong navy saturation.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#F4F5F8<br>L* 96.5</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#FBFBFE"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-surface</code></span>
+          <span class="swatch__role mx-type-body-small">Card and sheet — the flashcard surface.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#FBFBFE<br>L* 98.7 &nbsp;·&nbsp; ΔL* +2.15</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#EAECF1"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-surface-muted</code></span>
+          <span class="swatch__role mx-type-body-small">Inset tile, chip, icon container.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#EAECF1<br>L* 93.4 &nbsp;·&nbsp; ΔL* -5.32</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#FCFCFE"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-surface-elevated</code></span>
+          <span class="swatch__role mx-type-body-small">Top of the ladder: a raised or selected surface.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#FCFCFE<br>L* 99.0 &nbsp;·&nbsp; ΔL* +5.64</div>
+      </div>
+    </div>
+      <p class="note mx-type-body-medium">
+        Light inverts the ordering: the card is the brightest thing and the rest sit below it.
+        That is the same ordering of <strong>prominence</strong> as dark, built the only way
+        white allows — and it is why the ladder's steps are small here and the shadow does the
+        rest of the work.
+      </p>
+  </div>
+
+  <div class="panel" data-mx-theme="light">
+    <div class="panel__name mx-type-label-small">Material's container roles — declared, not generated</div>
+    <div class="swatches">
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#FCFCFE"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-surface-container-lowest</code></span>
+          <span class="swatch__role mx-type-body-small">Below the page.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#FCFCFE<br>L* 99.0</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#FAFAFC"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-surface-container-low</code></span>
+          <span class="swatch__role mx-type-body-small">A quiet inset.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#FAFAFC<br>L* 98.3</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#F1F2F6"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-surface-container</code></span>
+          <span class="swatch__role mx-type-body-small">Material's default container.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#F1F2F6<br>L* 95.5</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#EAECF1"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-surface-container-high</code></span>
+          <span class="swatch__role mx-type-body-small">Same value as <code>surface-muted</code>.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#EAECF1<br>L* 93.4</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#E3E5EC"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-surface-container-highest</code></span>
+          <span class="swatch__role mx-type-body-small">A progress track, a filled well.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#E3E5EC<br>L* 91.0</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#DEE0E7"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-surface-dim</code></span>
+          <span class="swatch__role mx-type-body-small">The dimmest surface Material will ask for.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#DEE0E7<br>L* 89.2</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch__chip" style="background:#FCFCFE"></div>
+        <div class="swatch__name">
+          <span class="mx-type-label-large"><code>--mx-color-surface-bright</code></span>
+          <span class="swatch__role mx-type-body-small">The brightest.</span>
+        </div>
+        <div class="swatch__meta mx-type-body-small">#FCFCFE<br>L* 99.0</div>
+      </div>
+    </div>
+    <p class="note mx-type-body-medium">
+      Every role is declared. <code>ColorScheme.fromSeed</code> had been generating a
+      neutral-grey container ladder with no relation to the navy canvas, and none of it was
+      visible until the app grew a dialog, a sheet, a navigation bar and a chip — by which point
+      it would have been expensive to discover.
+    </p>
+      <p class="note mx-type-body-medium">
+        The card is not pure white, and has not been since M4.10i. <code>#FFFFFF</code> carries
+        no hue at all, so the one surface the whole app is built on had no relation to the seed
+        while every other neutral did — the audit's largest finding, and the reason light mode
+        read as a different palette from dark. <code>#FBFBFE</code> is seed @ 0.02 over
+        white: hue 240, chroma 0.012.
+      </p>
+      <p class="note mx-type-body-medium">
+        It costs lightness. A tinted card is a darker card, so the surface step drops from
+        3.46 L* to 2.15. That was the argument for
+        leaving it alone while the step was the only depth cue light had. It is not any more:
+        the shadow's alpha was re-solved to 0.07 and the total lift is 7.75 L* against dark's
+        7.70.
+      </p>
+  </div>
+</div>
+</body>
+</html>

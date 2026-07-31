@@ -1,0 +1,69 @@
+/* Font faces — the web mirror of the `fonts:` block in `pubspec.yaml`.
+ *
+ * Two families, each doing the job it is good at:
+ *
+ *  - Plus Jakarta Sans for display and titles. Geometric with humanist stroke
+ *    endings, so a single vocabulary word set large reads as designed rather than
+ *    as default system text. This is the app's only visual signature.
+ *  - Inter for body and UI. Drawn for screens — tall x-height, open apertures,
+ *    unambiguous l/I/1 — which is what a definition read at 14px on a phone
+ *    actually needs.
+ *
+ * Both are bundled from `assets/fonts/` rather than fetched from a CDN, for the
+ * same reason the app does not use `google_fonts`: a study tool must render
+ * identically offline, and a webfont request is a first-paint dependency on a
+ * host nobody in this project controls.
+ *
+ * Both are VARIABLE. The single file covers the whole weight range, so a
+ * `font-weight` anywhere between the bounds below is real interpolation and not a
+ * browser-synthesised fake. Inter also carries an optical-size axis (opsz 14–32),
+ * which `font-optical-sizing: auto` drives from the rendered size — the card
+ * prompt at 30px gets the display cut of the face without a second file.
+ */
+
+@font-face {
+  font-family: "Inter";
+  src: url("../assets/fonts/Inter-Variable.ttf") format("truetype-variations");
+  /* The fvar range, stated. A face declared `font-weight: 400` and then asked for
+   * 600 is synthesised — the browser smears the outline rather than moving the
+   * axis, and the result is a heavier, muddier letterform at every UI weight. */
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("../assets/fonts/PlusJakartaSans-Variable.ttf") format("truetype-variations");
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: block;
+}
+
+:root {
+  /* Display and titles. */
+  --mx-font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  /* Body and UI, and the fallback for anything that builds its own style. */
+  --mx-font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+  /* Nothing in the app renders code. Named so that a card, a token dump or a
+   * spec table has one answer instead of each picking its own stack. */
+  --mx-font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, monospace;
+
+  /* The weights the type scale actually uses. Everything else is a guess. */
+  --mx-weight-regular: 400;
+  --mx-weight-medium: 500;
+  --mx-weight-semibold: 600;
+  --mx-weight-bold: 700;
+}
+
+/* `font-display: block` rather than `swap`. A swap re-lays out every line the
+ * moment the face arrives, and on the review screen that moves the prompt the
+ * user is mid-way through reading. Both files are local, so the block period is
+ * a disk read. */
+
+html {
+  font-family: var(--mx-font-body);
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}

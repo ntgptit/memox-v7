@@ -1,0 +1,130 @@
+<!-- @dsCard group="Colors" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Containers</title>
+<link rel="stylesheet" href="../components/mx.css">
+<style>
+  body { margin: 0; padding: clamp(12px, 4vw, 24px); }
+  .card { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; max-width: 1000px; margin: 0 auto; }
+  .card__intro p { color: var(--mx-color-on-surface-variant); max-width: 70ch; margin: 8px 0 0; }
+  .card__intro p + p { margin-top: 10px; }
+  .panel {
+    background: var(--mx-color-surface);
+    color: var(--mx-color-on-surface);
+    border: 1px solid var(--mx-color-border-subtle);
+    border-radius: var(--mx-radius-lg);
+    padding: 20px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    align-content: start;
+  }
+  .panel__name { color: var(--mx-color-on-surface-variant); text-transform: uppercase; letter-spacing: 0.08em; }
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 16px; }
+  .swatches { display: grid; gap: 10px; }
+  .swatch { display: grid; grid-template-columns: 56px 1fr auto; gap: 14px; align-items: center; }
+  .swatch__chip { height: 44px; border-radius: var(--mx-radius-sm); border: 1px solid var(--mx-color-border-subtle); }
+  .swatch__name { display: grid; gap: 2px; min-width: 0; }
+  .swatch__role { color: var(--mx-color-on-surface-variant); }
+  .swatch__meta { color: var(--mx-color-on-surface-variant); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+  .note { color: var(--mx-color-on-surface-variant); max-width: 70ch; }
+  .rules { display: grid; gap: 8px; margin: 0; padding-left: 20px; color: var(--mx-color-on-surface-variant); }
+  .rules li { max-width: 68ch; }
+  code { font-family: var(--mx-font-mono); font-size: 0.92em; overflow-wrap: anywhere; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var(--mx-color-border-subtle); }
+  th { color: var(--mx-color-on-surface-variant); font-weight: var(--mx-weight-semibold); }
+  td.num { font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body class="mx-app">
+<div class="card">
+  <div class="card__intro">
+    <h1 class="mx-type-headline-small">Containers</h1>
+    <p class="mx-type-body-medium">
+      A container is a surface that carries a hue without carrying an action. Each comes with the
+      colour that goes on it, and the pair is checked against itself — a container used with any
+      other foreground is a contrast failure waiting for the one screen nobody re-checked.
+    </p>
+    <p class="mx-type-body-medium">
+      These were the roles the audit found had gone wrong quietly. <code>fromSeed</code> had
+      produced a <strong>pink</strong> tertiary and an <code>error</code> red competing with
+      <code>danger</code>, in hue families the app never uses. None had surfaced only because the
+      MVP had no dialog, sheet, navigation bar, menu or chip yet — leaving them generated meant
+      those screens would render as a different app.
+    </p>
+  </div>
+  <div class="cols">
+  <div class="panel" data-mx-theme="light">
+    <div class="panel__name mx-type-label-small">Light</div>
+    <div style="display:grid;gap:10px">
+      <div style="background:#DCDCF2;color:#1B1B5C;border-radius:var(--mx-radius-md);padding:14px 16px;display:grid;gap:4px">
+        <span class="mx-type-label-large"><code>primary-container</code></span>
+        <span class="mx-type-body-small">A quiet brand-tinted panel.</span>
+        <span class="mx-type-body-small" style="font-variant-numeric:tabular-nums;opacity:.85">#DCDCF2 on #1B1B5C &nbsp;·&nbsp; 11.46:1</span>
+      </div>
+      <div style="background:#E4E6EC;color:#2C3141;border-radius:var(--mx-radius-md);padding:14px 16px;display:grid;gap:4px">
+        <span class="mx-type-label-large"><code>secondary-container</code></span>
+        <span class="mx-type-body-small">The navigation bar's indicator, and a selected pill. Shared on purpose: "this one is active" looks the same whether it is a tab or a filter.</span>
+        <span class="mx-type-body-small" style="font-variant-numeric:tabular-nums;opacity:.85">#E4E6EC on #2C3141 &nbsp;·&nbsp; 10.37:1</span>
+      </div>
+      <div style="background:#E1E9F0;color:#22394B;border-radius:var(--mx-radius-md);padding:14px 16px;display:grid;gap:4px">
+        <span class="mx-type-label-large"><code>tertiary-container</code></span>
+        <span class="mx-type-body-small">A third accent, for a panel that is neither.</span>
+        <span class="mx-type-body-small" style="font-variant-numeric:tabular-nums;opacity:.85">#E1E9F0 on #22394B &nbsp;·&nbsp; 9.75:1</span>
+      </div>
+      <div style="background:#F8DDE1;color:#641421;border-radius:var(--mx-radius-md);padding:14px 16px;display:grid;gap:4px">
+        <span class="mx-type-label-large"><code>error-container</code></span>
+        <span class="mx-type-body-small">A failure that is stated rather than shouted.</span>
+        <span class="mx-type-body-small" style="font-variant-numeric:tabular-nums;opacity:.85">#F8DDE1 on #641421 &nbsp;·&nbsp; 9.87:1</span>
+      </div>
+    </div>
+  </div>
+  <div class="panel" data-mx-theme="dark">
+    <div class="panel__name mx-type-label-small">Dark</div>
+    <div style="display:grid;gap:10px">
+      <div style="background:#2B2B6E;color:#D8D8F0;border-radius:var(--mx-radius-md);padding:14px 16px;display:grid;gap:4px">
+        <span class="mx-type-label-large"><code>primary-container</code></span>
+        <span class="mx-type-body-small">A quiet brand-tinted panel.</span>
+        <span class="mx-type-body-small" style="font-variant-numeric:tabular-nums;opacity:.85">#2B2B6E on #D8D8F0 &nbsp;·&nbsp; 8.96:1</span>
+      </div>
+      <div style="background:#333852;color:#D9DCE7;border-radius:var(--mx-radius-md);padding:14px 16px;display:grid;gap:4px">
+        <span class="mx-type-label-large"><code>secondary-container</code></span>
+        <span class="mx-type-body-small">The navigation bar's indicator, and a selected pill. Shared on purpose: "this one is active" looks the same whether it is a tab or a filter.</span>
+        <span class="mx-type-body-small" style="font-variant-numeric:tabular-nums;opacity:.85">#333852 on #D9DCE7 &nbsp;·&nbsp; 8.39:1</span>
+      </div>
+      <div style="background:#33465A;color:#D5E0EA;border-radius:var(--mx-radius-md);padding:14px 16px;display:grid;gap:4px">
+        <span class="mx-type-label-large"><code>tertiary-container</code></span>
+        <span class="mx-type-body-small">A third accent, for a panel that is neither.</span>
+        <span class="mx-type-body-small" style="font-variant-numeric:tabular-nums;opacity:.85">#33465A on #D5E0EA &nbsp;·&nbsp; 7.24:1</span>
+      </div>
+      <div style="background:#5E2831;color:#F5D3D8;border-radius:var(--mx-radius-md);padding:14px 16px;display:grid;gap:4px">
+        <span class="mx-type-label-large"><code>error-container</code></span>
+        <span class="mx-type-body-small">A failure that is stated rather than shouted.</span>
+        <span class="mx-type-body-small" style="font-variant-numeric:tabular-nums;opacity:.85">#5E2831 on #F5D3D8 &nbsp;·&nbsp; 8.33:1</span>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel__name mx-type-label-small">Rules</div>
+    <ul class="rules mx-type-body-medium">
+      <li><strong>Never split a pair.</strong> <code>on-primary-container</code> goes on
+        <code>primary-container</code> and nowhere else.</li>
+      <li><strong>A container is not an action.</strong> A filled button is
+        <code>primary</code> / <code>on-primary</code>. A container that looks pressable is a
+        control the user will press.</li>
+      <li><strong><code>error</code> is <code>danger</code>.</strong> One red, not two systems
+        that drift apart the first time one of them is adjusted.</li>
+      <li>The <code>*Fixed</code> family is brightness-independent by definition, so both themes
+        take the same light-container values. Nothing reads them today — which is exactly the
+        argument that left a pink tertiary undetected until someone went looking.</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

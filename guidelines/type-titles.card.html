@@ -1,0 +1,87 @@
+<!-- @dsCard group="Type" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Titles</title>
+<link rel="stylesheet" href="../components/mx.css">
+<style>
+  body { margin: 0; padding: clamp(12px, 4vw, 24px); }
+  .card { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; max-width: 1000px; margin: 0 auto; }
+  .card__intro p { color: var(--mx-color-on-surface-variant); max-width: 70ch; margin: 8px 0 0; }
+  .card__intro p + p { margin-top: 10px; }
+  .panel {
+    background: var(--mx-color-surface);
+    color: var(--mx-color-on-surface);
+    border: 1px solid var(--mx-color-border-subtle);
+    border-radius: var(--mx-radius-lg);
+    padding: 20px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    align-content: start;
+  }
+  .panel__name { color: var(--mx-color-on-surface-variant); text-transform: uppercase; letter-spacing: 0.08em; }
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 16px; }
+  .swatches { display: grid; gap: 10px; }
+  .swatch { display: grid; grid-template-columns: 56px 1fr auto; gap: 14px; align-items: center; }
+  .swatch__chip { height: 44px; border-radius: var(--mx-radius-sm); border: 1px solid var(--mx-color-border-subtle); }
+  .swatch__name { display: grid; gap: 2px; min-width: 0; }
+  .swatch__role { color: var(--mx-color-on-surface-variant); }
+  .swatch__meta { color: var(--mx-color-on-surface-variant); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+  .note { color: var(--mx-color-on-surface-variant); max-width: 70ch; }
+  .rules { display: grid; gap: 8px; margin: 0; padding-left: 20px; color: var(--mx-color-on-surface-variant); }
+  .rules li { max-width: 68ch; }
+  code { font-family: var(--mx-font-mono); font-size: 0.92em; overflow-wrap: anywhere; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var(--mx-color-border-subtle); }
+  th { color: var(--mx-color-on-surface-variant); font-weight: var(--mx-weight-semibold); }
+  td.num { font-variant-numeric: tabular-nums; }
+
+  /* A 57px specimen is wider than a 320 screen and cannot be made narrower without
+     lying about the size. It breaks mid-word instead, which is visibly a wrap rather
+     than a smaller face. */
+  .specimen { display: grid; gap: 4px; padding-block: 14px; border-bottom: 1px solid var(--mx-color-border-subtle); overflow-wrap: anywhere; }
+  .specimen:last-child { border-bottom: 0; }
+  .specimen__meta { color: var(--mx-color-on-surface-variant); font-variant-numeric: tabular-nums; }
+  .specimen__why { color: var(--mx-color-on-surface-variant); max-width: 66ch; margin: 4px 0 0; }
+</style>
+</head>
+<body class="mx-app">
+<div class="card">
+  <div class="card__intro">
+    <h1 class="mx-type-headline-small">Titles</h1>
+    <p class="mx-type-body-medium">
+      Titles straddle the two families, and the seam is deliberate.
+      <code>title-large</code> is the app-bar title and the last size drawn in Plus Jakarta Sans;
+      <code>title-medium</code> and <code>title-small</code> are Inter, because at 16 and 14 the
+      display face stops being a signature and starts being a slightly odd UI font.
+    </p>
+  </div>
+  <div class="panel">
+    <div class="specimen">
+      <div class="mx-type-title-large">Academic Word List</div>
+      <div class="specimen__meta mx-type-body-small">
+        <code>.mx-type-title-large</code> &nbsp;·&nbsp; Plus Jakarta Sans &nbsp;·&nbsp; 22px / 1.27 / 600 / 0 tracking
+      </div>
+      <p class="specimen__why mx-type-body-small">The app-bar title. Drops to 20 below 360, because at 22 a real deck name truncates to "Academic Word …" on a 320-wide screen — and the name is the one thing that screen is about.</p>
+    </div>
+    <div class="specimen">
+      <div class="mx-type-title-medium">42 cards · 7 due today</div>
+      <div class="specimen__meta mx-type-body-small">
+        <code>.mx-type-title-medium</code> &nbsp;·&nbsp; Inter &nbsp;·&nbsp; 16px / 1.5 / 600 / 0.15 tracking
+      </div>
+      <p class="specimen__why mx-type-body-small">A card heading, a dialog title, an empty state's headline.</p>
+    </div>
+    <div class="specimen">
+      <div class="mx-type-title-small">Phrasal verbs</div>
+      <div class="specimen__meta mx-type-body-small">
+        <code>.mx-type-title-small</code> &nbsp;·&nbsp; Inter &nbsp;·&nbsp; 14px / 1.43 / 600 / 0.1 tracking
+      </div>
+      <p class="specimen__why mx-type-body-small">A section label, an action sheet's title. Names the object, not the menu.</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>
