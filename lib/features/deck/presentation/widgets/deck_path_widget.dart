@@ -19,13 +19,16 @@ import '../../domain/models/deck_path_segment_model.dart';
 /// are reachable by nothing else short of tapping Back repeatedly, and that is
 /// the gap a breadcrumb closes.
 ///
-/// The current deck is the last step and is not tappable. It repeats the app-bar
-/// title on purpose: a path that stopped at the parent would read as a link to
-/// somewhere else rather than as the trail that ends here.
+/// **It shows ancestors only.** The current deck was the last step until
+/// M4.10e, on the argument that a path needs somewhere to terminate. On this
+/// screen it does not: the app-bar title one line above says exactly the same
+/// word, so the trailing step spent a third of the strip's width repeating the
+/// largest text on screen. Dropping it also makes every element of the strip
+/// actionable, which is a better answer to "what is this control for".
 ///
 /// Navigation goes by route name and path-parameter constant, like every other
-/// jump in this file — a literal `/decks/$id` would work today and break silently
-/// the first time the route moves.
+/// jump in this feature — a literal `/decks/$id` would work today and break
+/// silently the first time the route moves.
 class DeckPathWidget extends StatelessWidget {
   const DeckPathWidget({required this.snapshot, super.key});
 
@@ -62,7 +65,6 @@ class DeckPathWidget extends StatelessWidget {
                 },
               ),
             ),
-          MxBreadcrumbItem(label: parent.name),
         ],
       ),
     );

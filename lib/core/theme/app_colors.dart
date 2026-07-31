@@ -66,7 +66,30 @@ abstract final class AppColors {
   static const Color textSecondaryDark = Color(0xFFA6ABC2);
 
   /// Hairline between rows, around cards, and an input at rest.
-  static const Color borderSubtleLight = Color(0xFFD7DAE3);
+  ///
+  /// **This is the whole of the app's depth model.** Cards are unshadowed by
+  /// choice, and a surface sits only one step from the page it lies on — 1.09:1
+  /// in light, 1.17:1 in dark — so the boundary is the border or it is nothing.
+  ///
+  /// The light value was `#D7DAE3` until M4.10e and was measurably too weak for
+  /// that job: 1.40:1 against the card it outlined and 1.28:1 against the page,
+  /// where dark's border already stood at 1.82:1 and 2.12:1. The two modes were
+  /// using one mechanism at two strengths, which is why light read as flat while
+  /// dark read as correct. `#BEC0C3` puts light at **1.82:1** against the card,
+  /// matching dark to two decimal places — the modes now agree by measurement
+  /// rather than merely sharing a token name.
+  ///
+  /// It is a near-neutral grey where the old value was blue-grey. The first
+  /// candidate at this luminance was `#B9BECD`, and `app_palette_test.dart`
+  /// rejected it: a light surface has a chroma budget, and that value spends more
+  /// of it than the page itself does. The tint rule is real, not a preference.
+  ///
+  /// Not pushed to the 3.0:1 non-text floor: at that strength (around `#8A92AC`)
+  /// every card, chip and input reads as a ruled table. WCAG 1.4.11 covers
+  /// graphics *required to understand the content*, and the content inside these
+  /// surfaces is legible on its own — the border is a boundary aid, and it is
+  /// pinned by `app_theme_test.dart` rather than left to whoever edits this next.
+  static const Color borderSubtleLight = Color(0xFFBEC0C3);
   static const Color borderSubtleDark = Color(0xFF414762);
 
   /// Input border while focused. Focus shifts *hue*, never stroke width —

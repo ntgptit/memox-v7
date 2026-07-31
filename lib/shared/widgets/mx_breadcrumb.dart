@@ -43,9 +43,13 @@ class MxBreadcrumbItem {
 /// steps a user goes to a breadcrumb to find. Scrolling hides nothing and costs
 /// nothing when the path is short.
 ///
-/// Left-aligned rather than pinned to the end, because the ancestors are the part
-/// worth seeing: where you *are* is already the screen's title, and the last step
-/// here repeats it only so the path has somewhere to terminate.
+/// Left-aligned rather than pinned to the end, because the steps nearest the top
+/// of the hierarchy are the ones a caller cannot reach any other way.
+///
+/// A step with no [MxBreadcrumbItem.onTap] renders as quiet text rather than as a
+/// control. That is how a caller marks the step the user is already on — though
+/// the deck list deliberately does not include one, because its app-bar title
+/// already says it.
 ///
 /// Every step is its own tap target at [AppSpacing.minimumTouchTarget], so a deep
 /// path is a row of real controls rather than a line of text with hot spots in it.
@@ -82,10 +86,7 @@ class MxBreadcrumb extends StatelessWidget {
             for (final (int index, MxBreadcrumbItem item)
                 in items.indexed) ...<Widget>[
               if (index > 0) const _MxBreadcrumbSeparator(),
-              _MxBreadcrumbStep(
-                item: item,
-                isCurrent: index == items.length - 1,
-              ),
+              _MxBreadcrumbStep(item: item),
             ],
           ],
         ),
@@ -96,21 +97,25 @@ class MxBreadcrumb extends StatelessWidget {
 
 /// One step: a button when there is somewhere to go, text when there is not.
 class _MxBreadcrumbStep extends StatelessWidget {
-  const _MxBreadcrumbStep({required this.item, required this.isCurrent});
+  const _MxBreadcrumbStep({required this.item});
 
   final MxBreadcrumbItem item;
-  final bool isCurrent;
 
   @override
   Widget build(BuildContext context) {
-    // The current step is the quiet one. It is where you already are, so drawing
-    // it at full strength would make the least actionable thing on the strip the
-    // loudest — and the ancestors are what the control is for.
+    final tap = item.onTap;
+
+    // Quiet when there is nowhere to go — **derived from [MxBreadcrumbItem.onTap],
+    // not from the position in the list.** It was keyed on "is this the last
+    // one", which was the same thing only while every caller ended its path with
+    // the current step. The deck list stopped doing that and the bug was
+    // immediate: its final ancestor was a working link drawn as though it were
+    // not one. A control's appearance has to follow whether it acts.
     final style = context.texts.labelLarge?.copyWith(
-      color: isCurrent
+      color: tap == null
           ? context.colors.onSurfaceVariant
           : context.colors.onSurface,
-      fontWeight: isCurrent ? FontWeight.w400 : FontWeight.w600,
+      fontWeight: tap == null ? FontWeight.w400 : FontWeight.w600,
     );
 
     final label = ConstrainedBox(
@@ -126,7 +131,6 @@ class _MxBreadcrumbStep extends StatelessWidget {
       ),
     );
 
-    final tap = item.onTap;
     if (tap == null) return label;
 
     // `button: true` for the same reason `MxCard` needs it: an `InkWell`

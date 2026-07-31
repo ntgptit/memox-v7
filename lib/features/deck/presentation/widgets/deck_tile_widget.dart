@@ -85,26 +85,6 @@ class DeckTileWidget extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 _DeckMetaLine(summary: summary),
-                const SizedBox(height: AppSpacing.xs),
-                // The scheduler on its own line, quietest of the three. It was on
-                // the line above and wrapped there on *every* card at 390 wide —
-                // so each card was two or three lines tall depending on the
-                // deck's name, and the list had no consistent rhythm. It is also
-                // the least scannable of the three facts: it changes once, at
-                // creation, and never again.
-                Text(
-                  // `summary.schedulerType`, not `summary.deck.schedulerType`.
-                  // Only a root carries the column (BR-06), so the entity's own
-                  // field is null on every deck below the first level — the
-                  // query resolves it through `root_deck_id` and the summary
-                  // carries the answer.
-                  context.schedulerLabel(summary.schedulerType),
-                  style: context.texts.labelSmall?.copyWith(
-                    color: context.colors.onSurfaceVariant,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
               ],
             ),
           ),
@@ -178,9 +158,22 @@ class DeckIconArea extends StatelessWidget {
 /// of chips would either overflow or push the trailing action off the card, which
 /// is the failure M4.8b already paid for once.
 ///
-/// The scheduler used to be a third clause here and now has its own line. Two
-/// facts fit the width; three did not, so every card wrapped and no two cards
-/// were the same height.
+/// **The scheduler came back into this line at M4.10e, and the card went from
+/// three lines to two.** It was moved out at M4.12 because
+/// `46 cards · 5 cards due · Eight boxes` wrapped on every card at 390 wide. The
+/// fix then was a third line; the fix now is shorter copy — `46 cards · 5 due ·
+/// 8 boxes` fits, so the line that was added to solve a wrap is gone and the card
+/// has one title and one summary instead of three competing rows.
+///
+/// **Only the due state carries colour, and only when it is due.** "Nothing due"
+/// was `success` green at `w600`, which put the loudest thing on the card on the
+/// one fact that asks for no action — a list of finished decks read as a list of
+/// alerts. It is now the same quiet grey as the counts beside it. Colour and
+/// weight are spent on the state that wants a tap, and nowhere else.
+///
+/// This does not weaken the "never colour alone" rule (UC-06 step 3): the due
+/// state is still carried by an icon, by words *and* by colour. What changed is
+/// that the *absence* of that state stopped being decorated.
 class _DeckMetaLine extends StatelessWidget {
   const _DeckMetaLine({required this.summary});
 
@@ -204,12 +197,20 @@ class _DeckMetaLine extends StatelessWidget {
             text: summary.hasDueCards
                 ? context.l10n.deckDueCountLabel(summary.dueCardCount)
                 : context.l10n.deckNoDueLabel,
-            style: quiet?.copyWith(
-              color: summary.hasDueCards
-                  ? context.semanticColors.warning
-                  : context.semanticColors.success,
-              fontWeight: FontWeight.w600,
-            ),
+            style: summary.hasDueCards
+                ? quiet?.copyWith(
+                    color: context.semanticColors.warning,
+                    fontWeight: FontWeight.w600,
+                  )
+                : null,
+          ),
+          const TextSpan(text: ' · '),
+          TextSpan(
+            // `summary.schedulerType`, not `summary.deck.schedulerType`. Only a
+            // root carries the column (BR-06), so the entity's own field is null
+            // on every deck below the first level — the query resolves it through
+            // `root_deck_id` and the summary carries the answer.
+            text: context.schedulerShortLabel(summary.schedulerType),
           ),
         ],
       ),

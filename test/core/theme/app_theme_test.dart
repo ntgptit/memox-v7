@@ -123,6 +123,46 @@ void main() {
         }
       }
     });
+
+    test('the card boundary is visible, and equally so in both modes', () {
+      // **The whole of this app's depth model.** Cards are unshadowed by choice
+      // and a surface sits about 1.1:1 from the page it lies on, so the border
+      // is the boundary or there is none.
+      //
+      // Two assertions, and the second is the one that matters. A floor alone
+      // would let light drift back to a hairline while dark stayed strong, which
+      // is exactly the state this replaced: one mechanism at two strengths, so
+      // light read as flat while dark read as correct. Pinning the *ratio
+      // between the modes* is what makes "symmetric" a fact rather than an
+      // intention.
+      final ratios = <String, double>{
+        for (final entry in themes.entries)
+          entry.key: contrast(
+            entry.value.extension<AppSemanticColors>()!.borderSubtle,
+            entry.value.colorScheme.surface,
+          ),
+      };
+
+      for (final entry in ratios.entries) {
+        expect(
+          entry.value,
+          greaterThanOrEqualTo(1.7),
+          reason:
+              '${entry.key}: a card border below this is a hairline nobody can '
+              'find on a surface that is already the same colour as the page',
+        );
+      }
+
+      expect(
+        (ratios['light']! - ratios['dark']!).abs(),
+        lessThan(0.25),
+        reason:
+            'the two modes must separate a card from its page by the same '
+            'amount, not merely share a token name — light was 1.40 against '
+            "dark's 1.82 before M4.10e, and that gap is what made light look "
+            'flat. Measured: $ratios',
+      );
+    });
   });
 
   group('input focus', () {
