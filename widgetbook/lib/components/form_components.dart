@@ -118,9 +118,11 @@ WidgetbookComponent cardComponent() {
                 'radius lg.',
             maxLines: 3,
           );
+          final isTappable = context.knobs.boolean(label: 'tappable');
 
           return CatalogCenterPage(
             child: MxCard(
+              onTap: isTappable ? _noop : null,
               child: Text(content, style: context.texts.bodyMedium),
             ),
           );

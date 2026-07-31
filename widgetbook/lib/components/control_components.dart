@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_icon_button.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
+import 'package:memox/shared/widgets/mx_pill_button.dart';
 import 'package:widgetbook/widgetbook.dart';
 
 import '../support/catalog_page.dart';
@@ -69,6 +70,46 @@ WidgetbookComponent iconButtonComponent() {
               icon: Icons.edit_outlined,
               semanticLabel: semanticLabel,
               onPressed: isEnabled ? _noop : null,
+            ),
+          );
+        },
+      ),
+    ],
+  );
+}
+
+WidgetbookComponent pillButtonComponent() {
+  return WidgetbookComponent(
+    name: 'MxPillButton',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'Playground',
+        builder: (BuildContext context) {
+          final label = context.knobs.string(
+            label: 'label',
+            initialValue: 'Due',
+          );
+          final isSelected = context.knobs.boolean(
+            label: 'isSelected',
+            initialValue: true,
+          );
+          final isEnabled = context.knobs.boolean(
+            label: 'enabled',
+            initialValue: true,
+          );
+          final hasIcon = context.knobs.boolean(label: 'with icon');
+          final semanticLabel = context.knobs.stringOrNull(
+            label: 'semanticLabel',
+            description: 'For abbreviations — what the label cannot say',
+          );
+
+          return CatalogCenterPage(
+            child: MxPillButton(
+              label: label,
+              isSelected: isSelected,
+              onPressed: isEnabled ? _noop : null,
+              icon: hasIcon ? Icons.schedule : null,
+              semanticLabel: semanticLabel,
             ),
           );
         },

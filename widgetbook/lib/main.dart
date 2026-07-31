@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:memox/core/theme/app_theme.dart';
+import 'package:memox/l10n/generated/app_localizations.dart';
 import 'package:widgetbook/widgetbook.dart';
 
 import 'components/control_components.dart';
 import 'components/feedback_components.dart';
 import 'components/form_components.dart';
 import 'components/overlay_components.dart';
+import 'screens/deck_list_screen_use_case.dart';
 import 'support/catalog_page.dart';
 import 'tokens/color_sections.dart';
 import 'tokens/scale_sections.dart';
@@ -47,6 +50,19 @@ class MemoxWidgetbook extends StatelessWidget {
           ],
         ),
         TextScaleAddon(),
+        // Screens read ARB copy through `context.l10n`; without the delegates
+        // the first mounted screen throws. Components take pre-localized
+        // strings and ignore this addon, which is correct — they are below
+        // the layer that owns copy.
+        LocalizationAddon(
+          locales: AppLocalizations.supportedLocales,
+          localizationsDelegates: const <LocalizationsDelegate<Object>>[
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+        ),
         ViewportAddon(<ViewportData>[
           Viewports.none,
           compactViewport,
@@ -56,6 +72,10 @@ class MemoxWidgetbook extends StatelessWidget {
         InspectorAddon(),
       ],
       directories: <WidgetbookNode>[
+        WidgetbookCategory(
+          name: 'Screens',
+          children: <WidgetbookNode>[deckListScreenComponent()],
+        ),
         WidgetbookCategory(
           name: 'Design tokens',
           children: <WidgetbookNode>[
@@ -84,6 +104,7 @@ class MemoxWidgetbook extends StatelessWidget {
           children: <WidgetbookNode>[
             actionButtonComponent(),
             iconButtonComponent(),
+            pillButtonComponent(),
             navigationBarComponent(),
             textFieldComponent(),
             cardComponent(),

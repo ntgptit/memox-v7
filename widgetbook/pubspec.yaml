@@ -20,6 +20,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   memox:
     path: ../
@@ -29,6 +31,12 @@ dependencies:
   # justify a second build_runner surface, and the manual tree keeps the whole
   # catalog readable in one place.
   widgetbook: ^3.17.0
+
+  # Pinned to the same majors as the app (see the app pubspec for why those
+  # majors are load-bearing): the screen use-cases mount real screens, which
+  # read providers and navigate.
+  flutter_riverpod: ^3.3.2
+  go_router: ^17.3.0
 
 dev_dependencies:
   flutter_test:
