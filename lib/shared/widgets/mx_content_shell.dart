@@ -33,6 +33,7 @@ class MxContentShell extends StatefulWidget {
     this.leading,
     this.actions,
     this.subheader,
+    this.subheaderHeight,
     this.padding,
     this.isScrollable = false,
     this.floatingActionButton,
@@ -54,6 +55,12 @@ class MxContentShell extends StatefulWidget {
   /// Pinned between the app bar and the scrolling body — a breadcrumb, a search
   /// field, or both.
   final Widget? subheader;
+
+  /// How tall the subheader is. `AppBar.bottom` needs the number up front, so a
+  /// caller stacking two rows in there — a path and a search field — has to say
+  /// so, and has to scale it with the text: at `textScaler` 2.0 a row that fit
+  /// in 48 needs 96.
+  final double? subheaderHeight;
 
   /// Screen padding. `null` resolves to the scale for the current width:
   /// [AppSpacing.lg], or [AppSpacing.md] below [AppBreakpoints.compact].
@@ -119,6 +126,7 @@ class _MxContentShellState extends State<MxContentShell> {
           ? null
           : _MxSubheader(
               gutter: _defaultPadding(context).left,
+              height: widget.subheaderHeight,
               child: subheader,
             ),
     );
@@ -154,10 +162,11 @@ class _MxContentShellState extends State<MxContentShell> {
 /// Carries the screen's horizontal gutter so its contents line up with the body
 /// below, and pads only its bottom — the app bar already provides the space above.
 class _MxSubheader extends StatelessWidget implements PreferredSizeWidget {
-  const _MxSubheader({required this.gutter, required this.child});
+  const _MxSubheader({required this.gutter, required this.child, this.height});
 
   final double gutter;
   final Widget child;
+  final double? height;
 
   /// A breadcrumb step is [AppSpacing.minimumTouchTarget] tall and the strip pads
   /// [AppSpacing.md] below it. `AppBar.bottom` needs its height up front, so this
@@ -165,7 +174,7 @@ class _MxSubheader extends StatelessWidget implements PreferredSizeWidget {
   static const double _height = AppSpacing.minimumTouchTarget + AppSpacing.md;
 
   @override
-  Size get preferredSize => const Size.fromHeight(_height);
+  Size get preferredSize => Size.fromHeight(height ?? _height);
 
   @override
   Widget build(BuildContext context) {
@@ -175,10 +184,7 @@ class _MxSubheader extends StatelessWidget implements PreferredSizeWidget {
         right: gutter,
         bottom: AppSpacing.md,
       ),
-      child: SizedBox(
-        height: AppSpacing.minimumTouchTarget,
-        child: Align(alignment: AlignmentDirectional.centerStart, child: child),
-      ),
+      child: Align(alignment: AlignmentDirectional.centerStart, child: child),
     );
   }
 }

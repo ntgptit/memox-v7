@@ -1,14 +1,14 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 118,
-  "totalSites": 281,
+  "scannedFiles": 123,
+  "totalSites": 290,
   "byElementKind": {
     "other": 234,
-    "background": 11,
-    "text": 18,
+    "background": 13,
+    "text": 21,
     "shadow": 1,
-    "border": 9,
-    "icon": 8
+    "border": 10,
+    "icon": 11
   },
   "bySourceKind": {
     "shared-constant": 135,
@@ -16,7 +16,7 @@
     "opacity-modified-token": 9,
     "hardcoded-literal": 89,
     "Colors-material": 4,
-    "theme-token": 41
+    "theme-token": 50
   },
   "sites": [
     {
@@ -2748,6 +2748,72 @@
       "resolved_value_dark": "#A6ABC2"
     },
     {
+      "file": "lib/features/deck/presentation/widgets/deck_search_results_widget.dart",
+      "line": 58,
+      "widget_context": "DeckSearchResultsWidget",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A6ABC2"
+    },
+    {
+      "file": "lib/features/deck/presentation/widgets/deck_search_results_widget.dart",
+      "line": 91,
+      "widget_context": "_DeckSearchRow",
+      "element_kind": "background",
+      "source_kind": "theme-token",
+      "expression": "context.colors.surface",
+      "token": "colorScheme.surface",
+      "resolved_value_light": "#FBFBFE",
+      "resolved_value_dark": "#1B1D32"
+    },
+    {
+      "file": "lib/features/deck/presentation/widgets/deck_search_results_widget.dart",
+      "line": 93,
+      "widget_context": "_DeckSearchRow",
+      "element_kind": "border",
+      "source_kind": "theme-token",
+      "expression": "context.semanticColors.borderSubtle",
+      "token": "semantic.borderSubtle",
+      "resolved_value_light": "#D2D2DD",
+      "resolved_value_dark": "#414762"
+    },
+    {
+      "file": "lib/features/deck/presentation/widgets/deck_search_results_widget.dart",
+      "line": 106,
+      "widget_context": "_DeckSearchRow",
+      "element_kind": "icon",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A6ABC2"
+    },
+    {
+      "file": "lib/features/deck/presentation/widgets/deck_search_results_widget.dart",
+      "line": 120,
+      "widget_context": "_DeckSearchRow",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A6ABC2"
+    },
+    {
+      "file": "lib/features/deck/presentation/widgets/deck_search_results_widget.dart",
+      "line": 139,
+      "widget_context": "_DeckSearchRow",
+      "element_kind": "icon",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A6ABC2"
+    },
+    {
       "file": "lib/features/deck/presentation/widgets/deck_tile_widget.dart",
       "line": 155,
       "widget_context": "_DeckOpenRegion",
@@ -3013,7 +3079,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_content_shell.dart",
-      "line": 115,
+      "line": 122,
       "widget_context": "_MxContentShellState",
       "element_kind": "border",
       "source_kind": "theme-token",
@@ -3109,6 +3175,39 @@
       "token": "colorScheme.onSurface",
       "resolved_value_light": "#16182B",
       "resolved_value_dark": "#EDEEF5"
+    },
+    {
+      "file": "lib/shared/widgets/mx_search_field.dart",
+      "line": 72,
+      "widget_context": "_MxSearchFieldState",
+      "element_kind": "background",
+      "source_kind": "theme-token",
+      "expression": "context.semanticColors.surfaceMuted",
+      "token": "semantic.surfaceMuted",
+      "resolved_value_light": "#EAECF1",
+      "resolved_value_dark": "#292D42"
+    },
+    {
+      "file": "lib/shared/widgets/mx_search_field.dart",
+      "line": 82,
+      "widget_context": "_MxSearchFieldState",
+      "element_kind": "icon",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A6ABC2"
+    },
+    {
+      "file": "lib/shared/widgets/mx_search_field.dart",
+      "line": 111,
+      "widget_context": "_MxSearchFieldState",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A6ABC2"
     }
   ]
 }

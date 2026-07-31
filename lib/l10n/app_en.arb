@@ -134,6 +134,57 @@
     },
     "description": "Leads a deck row's meta line when the deck has children. Direct children only -- it counts what opening the row will show."
   },
+  "deckSearchHintRoot": "Search your whole library",
+  "@deckSearchHintRoot": {
+    "description": "Placeholder at the root level. Names the scope, not the action -- the user needs to know how wide the search reaches."
+  },
+  "deckSearchHintInDeck": "Search in {name}",
+  "@deckSearchHintInDeck": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    },
+    "description": "The same placeholder inside a deck, naming that deck as the scope."
+  },
+  "deckSearchClearLabel": "Clear search",
+  "@deckSearchClearLabel": {
+    "description": "The button that empties the search field."
+  },
+  "deckSearchMatchCountLabel": "{count, plural, =1{1 match in {scope}} other{{count} matches in {scope}}}",
+  "@deckSearchMatchCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "scope": {
+        "type": "String"
+      }
+    },
+    "description": "Heads the result list. Names the scope again because a count without one is a number about nothing."
+  },
+  "deckSearchScopeLibrary": "your library",
+  "@deckSearchScopeLibrary": {
+    "description": "The scope word for a root-level search, used inside the count and the empty state."
+  },
+  "deckSearchEmptyTitle": "No decks match “{query}”",
+  "@deckSearchEmptyTitle": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    },
+    "description": "Curly quotes around the user's own words, as everywhere else a user's text appears in a sentence."
+  },
+  "deckSearchEmptyMessage": "Nothing in {scope} has that in its name.",
+  "@deckSearchEmptyMessage": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    },
+    "description": "Says what was searched, so the user can tell an empty result from a search that looked in the wrong place."
+  },
   "deckDueNowLabel": "{count, plural, other{{count} due now}}",
   "@deckDueNowLabel": {
     "placeholders": {

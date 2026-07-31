@@ -8,6 +8,7 @@ import '../../domain/usecases/get_deck_deletion_impact_use_case.dart';
 import '../../domain/usecases/move_deck_use_case.dart';
 import '../../domain/usecases/rename_deck_use_case.dart';
 import '../../domain/usecases/reset_deck_content_type_use_case.dart';
+import '../../domain/usecases/search_decks_use_case.dart';
 import '../../domain/usecases/watch_deck_move_targets_use_case.dart';
 import '../../domain/usecases/watch_deck_list_use_case.dart';
 
@@ -74,3 +75,8 @@ GetDeckDeletionImpactUseCase getDeckDeletionImpactUseCase(Ref ref) =>
 @riverpod
 WatchDeckMoveTargetsUseCase watchDeckMoveTargetsUseCase(Ref ref) =>
     WatchDeckMoveTargetsUseCase(ref.watch(deckRepositoryProvider));
+
+/// Finding a deck by name, anywhere below where the user is standing.
+@riverpod
+SearchDecksUseCase searchDecksUseCase(Ref ref) =>
+    SearchDecksUseCase(ref.watch(deckRepositoryProvider));
