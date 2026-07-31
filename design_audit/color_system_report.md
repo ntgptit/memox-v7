@@ -19,24 +19,25 @@ guess.
 | | |
 |---|---|
 | Files scanned (`lib/`, hand-written) | 112 |
-| Colour sites found | 160 |
-| Violations | 17 |
+| Colour sites found | 244 |
+| Violations | 15 |
 
 **By element kind**
 
 | kind | sites |
 |---|---|
-| other | 145 |
-| background | 5 |
+| other | 231 |
 | text | 3 |
-| border | 7 |
+| border | 6 |
+| background | 4 |
 
 **By source kind**
 
 | kind | sites |
 |---|---|
-| hardcoded-literal | 2 |
-| opacity-modified-token | 8 |
+| hardcoded-literal | 87 |
+| blend-source | 2 |
+| opacity-modified-token | 5 |
 | shared-constant | 120 |
 | Colors-material | 3 |
 | theme-token | 27 |
@@ -45,58 +46,52 @@ guess.
 
 | code | count | meaning |
 |---|---|---|
-| V1 | 7 | neutral not derived from the seed |
+| V1 | 5 | neutral not derived from the seed |
 | V2 | 0 | role component using a colour outside its role |
-| V3 | 1 | literal duplicating an existing token |
+| V3 | 7 | literal duplicating an existing token |
 | V4 | 0 | hand-picked role variant instead of a generated one |
-| V5 | 4 | translucency applied at the paint site |
-| V6 | 5 | defined for one brightness, different mechanism in the other |
+| V5 | 1 | translucency applied at the paint site |
+| V6 | 2 | defined for one brightness, different mechanism in the other |
 
 ## 2. Violations
 
 | code | sev | file:line | context | current (light) | current (dark) | proposed target |
 |---|---|---|---|---|---|---|
-| V6 | 🟡 | `lib/app/error_screen_widget.dart:57` | const Color(0xFFFAF7FF) | `#FAF7FF` | `#FAF7FF` | a const pair chosen by PlatformDispatcher.platformBrightness |
+| V3 | 🟢 | `lib/app/error_screen_widget.dart:125` | Color(0xFFF4F5F8) | `#F4F5F8` | `#F4F5F8` | no token within ΔE-ish range — needs a new one |
+| V3 | 🟢 | `lib/app/error_screen_widget.dart:126` | Color(0xFF16182B) | `#16182B` | `#16182B` | colorScheme.onSurface |
+| V3 | 🟢 | `lib/app/error_screen_widget.dart:127` | Color(0xFF565C72) | `#565C72` | `#565C72` | colorScheme.onSurfaceVariant |
+| V3 | 🟢 | `lib/app/error_screen_widget.dart:131` | Color(0xFF0A082D) | `#0A082D` | `#0A082D` | no token within ΔE-ish range — needs a new one |
+| V3 | 🟢 | `lib/app/error_screen_widget.dart:132` | Color(0xFFEDEEF5) | `#EDEEF5` | `#EDEEF5` | no token within ΔE-ish range — needs a new one |
+| V3 | 🟢 | `lib/app/error_screen_widget.dart:133` | Color(0xFFA6ABC2) | `#A6ABC2` | `#A6ABC2` | no token within ΔE-ish range — needs a new one |
 | V3 | 🟡 | `lib/app/mobile_frame_widget.dart:54` | const Color(0xFF1E1E1E) | `#1E1E1E` | `#1E1E1E` | no token within ΔE-ish range — needs a new one |
 | V5 | 🟢 | `lib/shared/widgets/mx_action_sheet.dart:125` | context.colors.onSurface.withValues(alpha: _disabledOpacity) | `#16182B @ alpha unresolvable` | `#EDEEF5 @ alpha unresolvable` | a precomputed blendOver(...) constant |
-| V5 | 🟢 | `lib/core/theme/app_button_themes.dart:51` | scheme.onSurface.withValues(alpha: 0.12) | `#16182B @ alpha 0.12` | `#EDEEF5 @ alpha 0.12` | a precomputed blendOver(...) constant |
-| V5 | 🟢 | `lib/core/theme/app_button_themes.dart:85` | scheme.onSurface.withValues(alpha: 0.12) | `#16182B @ alpha 0.12` | `#EDEEF5 @ alpha 0.12` | a precomputed blendOver(...) constant |
-| V5 | 🟢 | `lib/core/theme/app_theme.dart:297` | semantic.borderSubtle.withValues(alpha: 0.5) | `#BEC0C3 @ alpha 0.5` | `#414762 @ alpha 0.5` | a precomputed blendOver(...) constant |
 | V1 | 🔴 | `lib/core/theme/app_colors.dart` | colorScheme.surface (light) | `#FFFFFF` | `#1B1D32` | blendOver(seed, base, small alpha) - see migration_map.md |
 | V6 | 🔴 | `lib/core/theme/app_colors.dart` | colorScheme.surface (mechanism differs by mode) | `#FFFFFF` | `#1B1D32` | derive both from the seed, or neither |
-| V1 | 🔴 | `lib/core/theme/app_colors.dart` | colorScheme.shadow (dark) | `#0B0C18` | `#000000` | blendOver(seed, base, small alpha) - see migration_map.md |
-| V6 | 🔴 | `lib/core/theme/app_colors.dart` | colorScheme.shadow (mechanism differs by mode) | `#0B0C18` | `#000000` | derive both from the seed, or neither |
-| V1 | 🔴 | `lib/core/theme/app_colors.dart` | colorScheme.scrim (dark) | `#0B0C18` | `#000000` | blendOver(seed, base, small alpha) - see migration_map.md |
-| V6 | 🔴 | `lib/core/theme/app_colors.dart` | colorScheme.scrim (mechanism differs by mode) | `#0B0C18` | `#000000` | derive both from the seed, or neither |
 | V1 | 🔴 | `lib/core/theme/app_colors.dart` | semantic.surfaceElevated (light) | `#FFFFFF` | `#383D55` | blendOver(seed, base, small alpha) - see migration_map.md |
 | V6 | 🔴 | `lib/core/theme/app_colors.dart` | semantic.surfaceElevated (mechanism differs by mode) | `#FFFFFF` | `#383D55` | derive both from the seed, or neither |
 | V1 | 🟢 | `lib/core/theme/app_colors.dart` | colorScheme.outline (light) is 24 degrees from the seed hue | `#BEC0C3` | `#414762` | regenerate from the seed at the same lightness |
 | V1 | 🟢 | `lib/core/theme/app_colors.dart` | colorScheme.outlineVariant (light) is 24 degrees from the seed hue | `#BEC0C3` | `#414762` | regenerate from the seed at the same lightness |
 | V1 | 🟢 | `lib/core/theme/app_colors.dart` | semantic.borderSubtle (light) is 24 degrees from the seed hue | `#BEC0C3` | `#414762` | regenerate from the seed at the same lightness |
 
-- **V6** `const Color(0xFFFAF7FF)` — This file imports flutter/widgets.dart only, so no ThemeData is in scope and the value cannot follow the mode. It renders the same in light and dark by construction.
+- **V3** `Color(0xFFF4F5F8)` — Mirrors no token within ΔE-ish range — needs a new one because this file has no ThemeData in scope. It follows the mode by reading PlatformDispatcher, so it is a copy that cannot drift silently — but it is still a copy, and changing the token will not change it.
+
+- **V3** `Color(0xFF16182B)` — Mirrors colorScheme.onSurface because this file has no ThemeData in scope. It follows the mode by reading PlatformDispatcher, so it is a copy that cannot drift silently — but it is still a copy, and changing the token will not change it.
+
+- **V3** `Color(0xFF565C72)` — Mirrors colorScheme.onSurfaceVariant because this file has no ThemeData in scope. It follows the mode by reading PlatformDispatcher, so it is a copy that cannot drift silently — but it is still a copy, and changing the token will not change it.
+
+- **V3** `Color(0xFF0A082D)` — Mirrors no token within ΔE-ish range — needs a new one because this file has no ThemeData in scope. It follows the mode by reading PlatformDispatcher, so it is a copy that cannot drift silently — but it is still a copy, and changing the token will not change it.
+
+- **V3** `Color(0xFFEDEEF5)` — Mirrors no token within ΔE-ish range — needs a new one because this file has no ThemeData in scope. It follows the mode by reading PlatformDispatcher, so it is a copy that cannot drift silently — but it is still a copy, and changing the token will not change it.
+
+- **V3** `Color(0xFFA6ABC2)` — Mirrors no token within ΔE-ish range — needs a new one because this file has no ThemeData in scope. It follows the mode by reading PlatformDispatcher, so it is a copy that cannot drift silently — but it is still a copy, and changing the token will not change it.
 
 - **V3** `const Color(0xFF1E1E1E)` — A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #1E1E1E.
 
 - **V5** `context.colors.onSurface.withValues(alpha: _disabledOpacity)` — A translucent colour composites against whatever is behind it at paint time, so one token renders as two values.
 
-- **V5** `scheme.onSurface.withValues(alpha: 0.12)` — Translucency in a theme slot rather than a precomputed solid. The model asks for Color.alphaBlend(...) resolved at build time.
-
-- **V5** `scheme.onSurface.withValues(alpha: 0.12)` — Translucency in a theme slot rather than a precomputed solid. The model asks for Color.alphaBlend(...) resolved at build time.
-
-- **V5** `semantic.borderSubtle.withValues(alpha: 0.5)` — Translucency in a theme slot rather than a precomputed solid. The model asks for Color.alphaBlend(...) resolved at build time.
-
 - **V1** `colorScheme.surface (light)` — A pure neutral: no hue at all, so it carries no trace of the seed and cannot move with it.
 
 - **V6** `colorScheme.surface (mechanism differs by mode)` — One mode derives this neutral from a hue and the other does not, so the two modes cannot drift together.
-
-- **V1** `colorScheme.shadow (dark)` — A pure neutral: no hue at all, so it carries no trace of the seed and cannot move with it.
-
-- **V6** `colorScheme.shadow (mechanism differs by mode)` — One mode derives this neutral from a hue and the other does not, so the two modes cannot drift together.
-
-- **V1** `colorScheme.scrim (dark)` — A pure neutral: no hue at all, so it carries no trace of the seed and cannot move with it.
-
-- **V6** `colorScheme.scrim (mechanism differs by mode)` — One mode derives this neutral from a hue and the other does not, so the two modes cannot drift together.
 
 - **V1** `semantic.surfaceElevated (light)` — A pure neutral: no hue at all, so it carries no trace of the seed and cannot move with it.
 
@@ -202,10 +197,7 @@ be kept in step by editing one value.
 
 | token / site | light | dark |
 |---|---|---|
-| const Color(0xFFFAF7FF) | `#FAF7FF` | `#FAF7FF` |
 | colorScheme.surface (mechanism differs by mode) | `#FFFFFF` | `#1B1D32` |
-| colorScheme.shadow (mechanism differs by mode) | `#0B0C18` | `#000000` |
-| colorScheme.scrim (mechanism differs by mode) | `#0B0C18` | `#000000` |
 | semantic.surfaceElevated (mechanism differs by mode) | `#FFFFFF` | `#383D55` |
 
 ## 5. Role families (V2 / V4 evidence)

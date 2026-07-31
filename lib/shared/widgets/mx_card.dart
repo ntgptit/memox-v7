@@ -4,12 +4,19 @@ import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/theme_context_extension.dart';
 
-/// The app's one raised surface: a bordered, unshadowed panel.
+/// The app's one raised surface: a bordered panel.
 ///
-/// Flat by design. During a review the card content is the task, and elevation
-/// shadows in a stack of surfaces add depth cues that compete with it. The page
-/// already sits a step below the card — see `scaffoldBackgroundColor` in
-/// `app_theme.dart` — so a card reads as a card without a shadow saying so.
+/// **Flat today, not flat by rule.** This doc used to say "flat by design" and
+/// argue it from the review screen, which does not exist yet; two later
+/// milestones then cited that sentence as a constraint. It never was one — there
+/// is no AD, no BR and no test behind it, and `docs/checklist.md` actually asks
+/// for an Elevation token that was never built.
+///
+/// The project owner has since said the app needs real elevation to separate
+/// elements. Until that lands the card is bordered and unshadowed, and the
+/// border is doing the whole job at 1.82:1 — heavier than it should have to be.
+/// When a shadow arrives, this is where it goes and the border should come
+/// down.
 ///
 /// [onTap] makes the whole surface one target rather than requiring a nested
 /// button. That is a generic capability, not a feature one: any card that stands

@@ -86,8 +86,10 @@
       "surfaceVsPage": 1.090170345007657,
       "borderVsSurface": 1.8233423041653078,
       "borderVsPage": 1.6725297220889834,
+      "cardElevation": 0.0,
+      "boxShadowSitesInLib": 0,
       "usesShadow": false,
-      "shadowNote": "cardTheme.elevation is 0 and MxCard paints no BoxShadow; depth is border-only in both modes by design."
+      "shadowNote": "Flat today. Not a rule: no AD, BR or test requires it, and docs/checklist.md asks for an Elevation token that does not exist. The project owner has said elevation is wanted."
     }
   },
   "dark": {
@@ -176,8 +178,10 @@
       "surfaceVsPage": 1.1684655220210152,
       "borderVsSurface": 1.8152128981088882,
       "borderVsPage": 2.121013686568082,
+      "cardElevation": 0.0,
+      "boxShadowSitesInLib": 0,
       "usesShadow": false,
-      "shadowNote": "cardTheme.elevation is 0 and MxCard paints no BoxShadow; depth is border-only in both modes by design."
+      "shadowNote": "Flat today. Not a rule: no AD, BR or test requires it, and docs/checklist.md asks for an Elevation token that does not exist. The project owner has said elevation is wanted."
     }
   }
 }

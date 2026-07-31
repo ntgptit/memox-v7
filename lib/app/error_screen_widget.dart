@@ -1,3 +1,5 @@
+import 'dart:ui' show PlatformDispatcher;
+
 import 'package:flutter/widgets.dart';
 
 import '../l10n/generated/app_localizations.dart';
@@ -51,10 +53,24 @@ class ErrorScreenWidget extends StatelessWidget {
       AppErrorKind.render => l10n.unexpectedErrorMessage,
     };
 
+    // **Answers to the platform brightness, per MX-VIS-002 rule R8.** This
+    // screen holds literals because it has no `Theme` to read — that much is
+    // forced. What is not forced is being stuck in one mode: a dark-mode user
+    // whose app has just failed got a full-screen white flash, which is the
+    // worst possible moment for one.
+    //
+    // `PlatformDispatcher` rather than `MediaQuery.platformBrightnessOf`: this
+    // widget can stand in for one that failed *above* `MaterialApp`, where no
+    // inherited widget is guaranteed. The dispatcher is the one source that
+    // survives having no element tree above it.
+    final isDark =
+        PlatformDispatcher.instance.platformBrightness == Brightness.dark;
+    final palette = isDark ? _darkFallback : _lightFallback;
+
     return Directionality(
       textDirection: TextDirection.ltr,
       child: ColoredBox(
-        color: const Color(0xFFFAF7FF),
+        color: palette.background,
         child: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -64,8 +80,8 @@ class ErrorScreenWidget extends StatelessWidget {
                 Text(
                   title,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Color(0xFF1C1B1F),
+                  style: TextStyle(
+                    color: palette.title,
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
                   ),
@@ -74,10 +90,7 @@ class ErrorScreenWidget extends StatelessWidget {
                 Text(
                   message,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Color(0xFF49454F),
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: palette.message, fontSize: 14),
                 ),
               ],
             ),
@@ -87,3 +100,35 @@ class ErrorScreenWidget extends StatelessWidget {
     );
   }
 }
+
+/// The three colours this screen needs, for one brightness.
+///
+/// A tiny value type rather than three parallel constants: the trio has to move
+/// together, and three separate `isDark ? a : b` expressions is how a background
+/// gets swapped and a text colour does not.
+class _FallbackPalette {
+  const _FallbackPalette({
+    required this.background,
+    required this.title,
+    required this.message,
+  });
+
+  final Color background;
+  final Color title;
+  final Color message;
+}
+
+/// Chosen to match the real theme closely enough that the failure does not also
+/// look like a different app — but declared here, because the theme is exactly
+/// what is unavailable when this renders.
+const _FallbackPalette _lightFallback = _FallbackPalette(
+  background: Color(0xFFF4F5F8),
+  title: Color(0xFF16182B),
+  message: Color(0xFF565C72),
+);
+
+const _FallbackPalette _darkFallback = _FallbackPalette(
+  background: Color(0xFF0A082D),
+  title: Color(0xFFEDEEF5),
+  message: Color(0xFFA6ABC2),
+);

@@ -242,7 +242,11 @@ class _ColorVisitor extends RecursiveAstVisitor<void> {
       final target = node.target;
       _record(
         node,
-        'opacity-modified-token',
+        // A translucent value fed to `Color.alphaBlend` is not translucency at
+        // the paint site — it is the canonical derivation the model asks for,
+        // and the result is a solid colour. Classifying the two the same way
+        // made the rule flag its own fix.
+        _isBlendSource(node) ? 'blend-source' : 'opacity-modified-token',
         target == null ? null : _tokenPathOf(target),
       );
     }
@@ -252,8 +256,36 @@ class _ColorVisitor extends RecursiveAstVisitor<void> {
         _record(node, 'hardcoded-literal', null);
       }
     }
+    // **`Color(0x...)` with no `const` or `new` in front of it.** This parse is
+    // unresolved, so the analyzer cannot know `Color` is a class: without a
+    // keyword the expression is indistinguishable from a function call and
+    // arrives here rather than at `visitInstanceCreationExpression`.
+    //
+    // The first version of this scanner only handled the keyword form, and the
+    // audit it produced therefore under-reported — two literals inside a `const`
+    // outer expression were invisible, because Dart lets the inner `const` be
+    // implied. Found by a fault injection that refused to go red.
+    if (name == 'Color' && node.target == null) {
+      _record(node, 'hardcoded-literal', null);
+    }
     super.visitMethodInvocation(node);
   }
+}
+
+/// Whether [node] is the translucent argument of a `Color.alphaBlend(...)`.
+///
+/// Walks up rather than matching text, so a blend spread over several lines by
+/// the formatter reads the same as one written inline.
+bool _isBlendSource(AstNode node) {
+  for (AstNode? cursor = node.parent; cursor != null; cursor = cursor.parent) {
+    final AstNode current = cursor;
+    if (current is! MethodInvocation) continue;
+    if (current.methodName.name != 'alphaBlend') continue;
+    final target = current.target;
+    if (target is SimpleIdentifier && target.name == 'Color') return true;
+  }
+
+  return false;
 }
 
 /// `context.colors.primary` → `colorScheme.primary`, and the same for the
@@ -305,4 +337,39 @@ List<ColorSite> scanLib() {
   });
 
   return sites;
+}
+
+/// Whether [relativePath] names [identifier] in **code**, not in prose.
+///
+/// Parsed rather than searched, because this project has shipped the other
+/// version: three guards once matched the word they forbade inside the comment
+/// explaining why it was forbidden, and one rule here passed its own fault
+/// injection because the identifier it looked for survived in a doc comment
+/// after the code using it was deleted.
+bool referencesIdentifier(String relativePath, String identifier) {
+  final matches = libDartFiles().where(
+    (File file) => file.path.replaceAll(r'\', '/').endsWith(relativePath),
+  );
+  if (matches.isEmpty) return false;
+
+  final visitor = _IdentifierVisitor(identifier);
+  parseString(
+    content: matches.first.readAsStringSync(),
+    throwIfDiagnostics: false,
+  ).unit.accept(visitor);
+
+  return visitor.found;
+}
+
+class _IdentifierVisitor extends RecursiveAstVisitor<void> {
+  _IdentifierVisitor(this.wanted);
+
+  final String wanted;
+  bool found = false;
+
+  @override
+  void visitSimpleIdentifier(SimpleIdentifier node) {
+    if (node.name == wanted) found = true;
+    super.visitSimpleIdentifier(node);
+  }
 }
