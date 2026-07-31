@@ -163,9 +163,9 @@ void main() {
     anchors: plainAnchors,
     allowances: <AuditSkipAllowance>[
       ...deckShellAllowances(
-        // One action per row, three decks. The app bar's add action became the
-        // floating one at M4.12.
-        screenIconButtons: 3,
+        // One action per row for three decks, plus the summary panel's close
+        // button. The app bar's add action became the floating one at M4.12.
+        screenIconButtons: 4,
         screenItemId: 'deck_screen',
         // Every row is a tappable card now rather than a ListTile.
         tappableCards: 3,
@@ -319,7 +319,8 @@ void main() {
       // Two breadcrumb steps: the chain is two deep and its last step — the deck
       // the user is in — is text rather than a control, so it hosts no ink.
       ...deckShellAllowances(
-        screenIconButtons: 4,
+        // Four as before, plus the summary panel's close button.
+        screenIconButtons: 5,
         screenItemId: 'deck_screen',
         hasBackButton: true,
         tappableCards: 3,

@@ -36,3 +36,28 @@ class DeckListSortChoice extends _$DeckListSortChoice {
 
   void select(DeckListSort sort) => state = sort;
 }
+
+/// Whether the level summary panel is showing.
+///
+/// The third input-state notifier beside filter and sort, and the same kind of
+/// value: something the UI owns that a view is parameterized by, reading nothing
+/// and writing nothing.
+///
+/// **Not keyed by level, deliberately.** The reason the design gives for making
+/// the panel dismissible is a mood rather than a place — on a day spent
+/// reorganising decks it is in the way of the list it sits on top of — and a
+/// user who dismisses it at the root and finds it back two taps later has not
+/// been listened to. Filter and sort are global for the same reason.
+///
+/// Defaults to showing: the panel is the most useful thing on the screen on the
+/// day you opened the app to study, which is most days.
+///
+/// One mutator, so a caller says which state it wants rather than toggling —
+/// the close button and the link that brings it back both know their answer.
+@riverpod
+class DeckSummaryVisibility extends _$DeckSummaryVisibility {
+  @override
+  bool build() => true;
+
+  void setVisible({required bool isVisible}) => state = isVisible;
+}

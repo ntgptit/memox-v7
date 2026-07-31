@@ -6,6 +6,7 @@ import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/deck/domain/models/deck_list_snapshot_model.dart';
 import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
+import 'package:memox/features/deck/presentation/widgets/deck_level_summary_widget.dart';
 import 'package:memox/features/deck/presentation/widgets/deck_tile_widget.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
@@ -79,6 +80,40 @@ void main() {
       expect(empty.onAction, isNotNull);
       expect(find.byType(MxErrorState), findsNothing);
       expect(tester.takeException(), isNull);
+    });
+  });
+
+  group('the summary panel', () {
+    testWidgets('hides on request and comes back from the line that replaces it', (
+      tester,
+    ) async {
+      // **Something is always here.** A panel that vanished without trace would
+      // leave the user no way back to it and no reason to believe it had been
+      // there; the link is what makes dismissing it a preference rather than a
+      // loss, so the test walks the whole round trip rather than stopping at
+      // "it disappeared".
+      await pumpDeckScreen(
+        tester,
+        repository: FakeDeckRepository.withSummaries(threeSummaries()),
+        screen: const DeckListScreen(),
+      );
+
+      expect(find.byType(DeckLevelSummaryWidget), findsOneWidget);
+      expect(find.text(english.deckSummaryShowAction), findsNothing);
+
+      await tester.tap(
+        find.bySemanticsLabel(english.deckSummaryHideLabel).first,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(DeckLevelSummaryWidget), findsNothing);
+      expect(find.text(english.deckSummaryShowAction), findsOneWidget);
+
+      await tester.tap(find.text(english.deckSummaryShowAction));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(DeckLevelSummaryWidget), findsOneWidget);
+      expect(find.text(english.deckSummaryShowAction), findsNothing);
     });
   });
 
@@ -238,13 +273,14 @@ void main() {
         surface: compact,
       );
 
-      // **Two of three, and that is the list working.** The summary panel added
-      // at M4.10t takes the top of a 568-tall screen, so the third card is
-      // below the fold — built lazily, reachable by scrolling. Asserting three
-      // here would be asserting that nothing above the list is allowed to have
-      // height, which is a rule nobody chose. What matters at this size is that
-      // nothing overflows and the rest is scrollable.
-      expect(find.byType(DeckTileWidget), findsNWidgets(2));
+      // **One of three, and that is the list working.** The summary panel takes
+      // the top of a 568-tall screen and the search field takes another band, so
+      // the rest is below the fold — built lazily, reachable by scrolling.
+      // Asserting a particular number here would be asserting that nothing above
+      // the list is allowed to have height, which is a rule nobody chose. What
+      // matters at this size is that nothing overflows and the rest is
+      // reachable, and both are asserted below.
+      expect(find.byType(DeckTileWidget), findsWidgets);
       expect(tester.takeException(), isNull);
 
       final position = tester

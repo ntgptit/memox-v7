@@ -4,6 +4,7 @@ import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/theme_context_extension.dart';
 import '../../../../l10n/l10n_extension.dart';
+import '../../../../shared/widgets/mx_icon_button.dart';
 import '../../../../shared/widgets/mx_progress_bar.dart';
 import '../../domain/models/deck_list_snapshot_model.dart';
 
@@ -26,9 +27,19 @@ import '../../domain/models/deck_list_snapshot_model.dart';
 /// studying" button needs a session to start, from the same milestone. Both
 /// would be controls that look live and are not.
 class DeckLevelSummaryWidget extends StatelessWidget {
-  const DeckLevelSummaryWidget({required this.snapshot, super.key});
+  const DeckLevelSummaryWidget({
+    required this.snapshot,
+    required this.onDismiss,
+    super.key,
+  });
 
   final DeckListSnapshot snapshot;
+
+  /// Hides the panel. **Dismissible on purpose**: it is the most useful thing on
+  /// the screen on the day you opened the app to study, and the thing in the way
+  /// of the list on the day you opened it to reorganise your decks. Getting it
+  /// back is one tap, so nothing is lost by hiding it.
+  final VoidCallback onDismiss;
 
   /// Whether this level has anything to summarise.
   ///
@@ -62,10 +73,26 @@ class DeckLevelSummaryWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            _SummaryHeadline(
-              dueCount: dueCount,
-              isRoot: isRoot,
-              isCaughtUp: isCaughtUp,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Expanded(
+                  child: _SummaryHeadline(
+                    dueCount: dueCount,
+                    isRoot: isRoot,
+                    isCaughtUp: isCaughtUp,
+                  ),
+                ),
+                // Top-aligned against the figure rather than centred on the
+                // block: the panel grows a progress bar under it, and a close
+                // button that drifted downwards as it did would stop reading as
+                // belonging to the panel's own corner.
+                MxIconButton(
+                  icon: Icons.close,
+                  semanticLabel: context.l10n.deckSummaryHideLabel,
+                  onPressed: onDismiss,
+                ),
+              ],
             ),
             if (cardCount > 0) ...<Widget>[
               const SizedBox(height: AppSpacing.lg),
