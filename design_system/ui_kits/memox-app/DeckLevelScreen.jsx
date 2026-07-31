@@ -48,7 +48,15 @@ function DeckLevelScreen({ path, onOpen, onUp, onJumpTo, onNavigate, onActions, 
             <MxBreadcrumb
               semanticLabel="Deck path"
               rootIcon="home"
-              items={ancestors.map((a, i) => ({ label: a.name, onTap: () => onJumpTo(i) }))}
+              // The whole path, ending in the deck you are standing in. That last
+              // step carries no onTap — it is where you already are, so it reads
+              // as text — and it repeats the app-bar title on purpose: a strip
+              // that stopped at the parent left the reader working out whether
+              // the title was part of the path or something else.
+              items={[
+                ...ancestors.map((a, i) => ({ label: a.name, onTap: () => onJumpTo(i) })),
+                { label: deck.name },
+              ]}
             />
           )}
           <MxSearchField

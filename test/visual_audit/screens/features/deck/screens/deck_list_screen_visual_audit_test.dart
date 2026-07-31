@@ -1,23 +1,12 @@
 @Tags(<String>['golden', 'screen-audit'])
 library;
 
-import 'package:flutter/widgets.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/app/config/env_config.dart';
-import 'package:memox/app/config/env_config_provider.dart';
-import 'package:memox/app/router/app_router.dart';
 import 'package:memox/core/error/failure.dart';
-import 'package:memox/core/time/clock_provider.dart';
-import 'package:memox/features/deck/di/deck_repository_provider.dart';
-import 'package:memox/features/deck/domain/entities/deck_entity.dart';
 import 'package:memox/features/deck/domain/models/deck_content_type_model.dart';
-import 'package:memox/features/deck/domain/models/deck_list_snapshot_model.dart';
-import 'package:memox/features/deck/domain/models/deck_path_segment_model.dart';
 import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
-import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 
@@ -25,6 +14,7 @@ import '../../../../../features/deck/presentation/support/fake_deck_repository.d
 import '../../../../audit_allowance.dart';
 import '../../../../audit_model.dart';
 import '../../../../deck_audit_allowances.dart';
+import '../../../../deck_audit_harness.dart';
 import '../../../../memox_audit.dart';
 import '../../../../screen_auditor.dart';
 
@@ -54,79 +44,17 @@ import '../../../../screen_auditor.dart';
 /// The allowance counts differ per state because the number of icon buttons on
 /// screen differs, and every count is exact: `expectedMatches` fails when the
 /// number moves at all, in either direction.
+///
+/// The fixture — router, fake repository, anchors — is in
+/// `deck_audit_harness.dart`, so what is left here is the list of states.
 void main() {
-  /// The production route table at [location], with the database faked out.
-  ///
-  /// The router is per-call because `GoRouter` carries navigation history and the
-  /// harness builds one screen per theme; sharing one would let the light run
-  /// decide where the dark run starts.
-  Widget shellWith(FakeDeckRepository repository, {String? location}) {
-    // No `initialLocation` for the root level: the default is already the deck
-    // branch, and stating it trips `avoid_redundant_argument_values`, a lint this
-    // project promotes to error.
-    final router = location == null
-        ? createAppRouter()
-        : createAppRouter(initialLocation: location);
-    addTearDown(router.dispose);
-
-    return ProviderScope(
-      overrides: [
-        envConfigProvider.overrideWithValue(EnvConfig.development),
-        deckRepositoryProvider.overrideWithValue(repository),
-        // A fixed clock, so the due counts in the loaded states are identical on
-        // every run.
-        clockProvider.overrideWithValue(() => DateTime.utc(2026, 7, 29, 12)),
-      ],
-      child: Router.withConfig(config: router),
-    );
-  }
-
-  Widget levelWith(FakeDeckRepository repository) =>
-      shellWith(repository, location: '/decks/deck-1');
-
-  /// Lets the pushed route finish laying out before the walk starts.
-  ///
-  /// A level inside a deck is a *child* route, so mounting it puts two routes in
-  /// the branch Navigator and starts a page transition. The audit walks the
-  /// render tree, and a route still mid-insertion has boxes that have not been
-  /// laid out — walking one throws rather than reporting a colour. Settling first
-  /// is not hiding anything: the audit is about the screen at rest.
-  Future<void> settle(WidgetTester tester) => tester.pumpAndSettle();
-
-  /// A repository serving one deck and the children it should show.
-  FakeDeckRepository serving(
-    DeckEntity deck, {
-    List<DeckSummary> children = const <DeckSummary>[],
-    List<DeckPathSegment> ancestors = const <DeckPathSegment>[],
-  }) => FakeDeckRepository(
-    deckList: (_) => Stream<DeckListSnapshot>.value(
-      DeckListSnapshot(
-        ancestors: ancestors,
-        parent: deck,
-        decks: children,
-        nextDueAt: null,
-      ),
-    ),
-    allDecks: () => Stream<List<DeckEntity>>.value(<DeckEntity>[deck]),
-  );
-
-  final anchorsWithEmpty = <AuditAnchor>[
-    AuditAnchor.type('deck_screen', DeckListScreen),
-    AuditAnchor.type('empty_state', MxEmptyState),
-    AuditAnchor.type('navigation_bar', MxNavigationBar),
-  ];
-  final plainAnchors = <AuditAnchor>[
-    AuditAnchor.type('deck_screen', DeckListScreen),
-    AuditAnchor.type('navigation_bar', MxNavigationBar),
-  ];
-
   // ---- the root level ------------------------------------------------------
 
   memoxProductionScreenAuditTest(
     'deck_list_screen',
-    () => shellWith(FakeDeckRepository()),
+    () => deckShellWith(FakeDeckRepository()),
     state: 'root_empty',
-    anchors: anchorsWithEmpty,
+    anchors: deckAnchorsWithEmpty,
     allowances: <AuditSkipAllowance>[
       ...deckShellAllowances(
         // No app-bar icon button: create moved to the floating action at M4.12,
@@ -143,7 +71,7 @@ void main() {
 
   memoxProductionScreenAuditTest(
     'deck_list_screen',
-    () => shellWith(
+    () => deckShellWith(
       FakeDeckRepository.withSummaries(<DeckSummary>[
         fakeSummary(
           id: 'deck-1',
@@ -160,7 +88,7 @@ void main() {
       ]),
     ),
     state: 'root_loaded',
-    anchors: plainAnchors,
+    anchors: deckPlainAnchors,
     allowances: <AuditSkipAllowance>[
       ...deckShellAllowances(
         // One action per row for three decks, plus the summary panel's close
@@ -200,7 +128,7 @@ void main() {
 
   memoxProductionScreenAuditTest(
     'deck_list_screen',
-    () => shellWith(
+    () => deckShellWith(
       FakeDeckRepository.failing(const DatabaseFailure(message: 'read failed')),
     ),
     state: 'root_error',
@@ -230,19 +158,25 @@ void main() {
   // carries the notice row as well as the empty state's button.
   memoxProductionScreenAuditTest(
     'deck_list_screen',
-    () => levelWith(
-      serving(fakeSubDeck(id: 'deck-1', name: 'Unset deck', parentId: 'root')),
+    () => deckLevelWith(
+      servingDeckLevel(
+        fakeSubDeck(id: 'deck-1', name: 'Unset deck', parentId: 'root'),
+      ),
     ),
     state: 'level_unset',
-    drive: settle,
-    anchors: anchorsWithEmpty,
+    drive: settleDeckScreen,
+    anchors: deckAnchorsWithEmpty,
     allowances: <AuditSkipAllowance>[
       // One declared icon button — the action menu — plus the back button the
       // AppBar adds on a pushed route. Create-sub-deck is the floating action.
+      // One breadcrumb step: this deck has no ancestors, so the strip is the
+      // deck list and then the deck itself, and only the first of those is a
+      // control.
       ...deckShellAllowances(
         screenIconButtons: 1,
         screenItemId: 'deck_screen',
         hasBackButton: true,
+        breadcrumbSteps: 1,
         hasFloatingAction: true,
       ),
       ...mxActionButtonAllowances('empty_state'),
@@ -253,8 +187,8 @@ void main() {
   // notice.
   memoxProductionScreenAuditTest(
     'deck_list_screen',
-    () => levelWith(
-      serving(
+    () => deckLevelWith(
+      servingDeckLevel(
         fakeSubDeck(
           id: 'deck-1',
           name: 'Empty deck folder',
@@ -264,13 +198,14 @@ void main() {
       ),
     ),
     state: 'level_empty_deck',
-    drive: settle,
-    anchors: anchorsWithEmpty,
+    drive: settleDeckScreen,
+    anchors: deckAnchorsWithEmpty,
     allowances: <AuditSkipAllowance>[
       ...deckShellAllowances(
         screenIconButtons: 1,
         screenItemId: 'deck_screen',
         hasBackButton: true,
+        breadcrumbSteps: 1,
         hasFloatingAction: true,
       ),
       ...mxActionButtonAllowances('empty_state'),
@@ -282,8 +217,8 @@ void main() {
   // `root_loaded`'s shape, the two levels have drifted apart again.
   memoxProductionScreenAuditTest(
     'deck_list_screen',
-    () => levelWith(
-      serving(
+    () => deckLevelWith(
+      servingDeckLevel(
         fakeSubDeck(id: 'deck-1', name: 'Kana', parentId: 'branch'),
         ancestors: fakePath(<String>['Japanese N5', 'Writing systems']),
         children: <DeckSummary>[
@@ -311,13 +246,14 @@ void main() {
       ),
     ),
     state: 'level_loaded',
-    drive: settle,
-    anchors: plainAnchors,
+    drive: settleDeckScreen,
+    anchors: deckPlainAnchors,
     allowances: <AuditSkipAllowance>[
       // The action menu and one per child row — plus the AppBar's back button.
       // Three children, so four declared; create-sub-deck is the floating action.
-      // Two breadcrumb steps: the chain is two deep and its last step — the deck
-      // the user is in — is text rather than a control, so it hosts no ink.
+      // Three breadcrumb steps: the deck list, then the two ancestors. The
+      // strip's last step — the deck the user is in — is text rather than a
+      // control, so it hosts no ink.
       ...deckShellAllowances(
         // Four as before, plus the summary panel's close button.
         screenIconButtons: 5,
@@ -325,7 +261,7 @@ void main() {
         hasBackButton: true,
         tappableCards: 3,
         pills: 2,
-        breadcrumbSteps: 2,
+        breadcrumbSteps: 3,
         hasFloatingAction: true,
       ),
       // Three cards, all with cards, plus the level summary's own bar.
@@ -350,8 +286,8 @@ void main() {
   // offering a control that does nothing. One icon button — the action menu.
   memoxProductionScreenAuditTest(
     'deck_list_screen',
-    () => levelWith(
-      serving(
+    () => deckLevelWith(
+      servingDeckLevel(
         fakeSubDeck(
           id: 'deck-1',
           name: 'Verbs',
@@ -361,13 +297,16 @@ void main() {
       ),
     ),
     state: 'level_card_handoff',
-    drive: settle,
-    anchors: anchorsWithEmpty,
+    drive: settleDeckScreen,
+    anchors: deckAnchorsWithEmpty,
     allowances: <AuditSkipAllowance>[
       ...deckShellAllowances(
         screenIconButtons: 1,
         screenItemId: 'deck_screen',
         hasBackButton: true,
+        // The deck list step. This deck has no ancestors, and its own step is
+        // text rather than a control.
+        breadcrumbSteps: 1,
       ),
     ],
   );
@@ -376,9 +315,9 @@ void main() {
   // there is no deck to act on — so zero icon buttons.
   memoxProductionScreenAuditTest(
     'deck_list_screen',
-    () => levelWith(FakeDeckRepository.missingDeck()),
+    () => deckLevelWith(FakeDeckRepository.missingDeck()),
     state: 'level_not_found',
-    drive: settle,
+    drive: settleDeckScreen,
     anchors: <AuditAnchor>[
       AuditAnchor.type('deck_screen', DeckListScreen),
       AuditAnchor.type('error_state', MxErrorState),

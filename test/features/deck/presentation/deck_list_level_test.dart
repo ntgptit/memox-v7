@@ -156,7 +156,18 @@ void main() {
 
       await pumpLevel(tester, serving(deck, children: children));
 
-      expect(find.text('Japanese N5'), findsOneWidget);
+      // **In the app bar specifically.** The name is on screen twice now — the
+      // title, and the breadcrumb's own last step — so a bare `findsOneWidget`
+      // would fail for a reason that has nothing to do with the title, and a
+      // `findsNWidgets(2)` would pass if the title vanished and the crumb grew a
+      // second copy.
+      expect(
+        find.descendant(
+          of: find.byType(AppBar),
+          matching: find.text('Japanese N5'),
+        ),
+        findsOneWidget,
+      );
       expect(find.byType(DeckTileWidget), findsNWidgets(2));
       expect(find.text('Hiragana'), findsOneWidget);
     });

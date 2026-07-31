@@ -1,4 +1,5 @@
-import 'package:flutter/widgets.dart';
+// `material`, not `widgets`: the title assertion below reaches for `AppBar`.
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -110,7 +111,16 @@ void main() {
       );
 
       expect(levelFor('deck-1'), findsOneWidget);
-      expect(find.text('Japanese N5'), findsOneWidget);
+      // In the app bar: the deck's name is also the breadcrumb's last step now,
+      // and what this test is about is that the deep link landed on the deck —
+      // which the title is the evidence for.
+      expect(
+        find.descendant(
+          of: find.byType(AppBar),
+          matching: find.text('Japanese N5'),
+        ),
+        findsOneWidget,
+      );
       expect(tester.takeException(), isNull);
     });
 

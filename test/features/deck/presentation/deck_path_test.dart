@@ -8,6 +8,7 @@ import 'package:memox/features/deck/domain/models/deck_list_snapshot_model.dart'
 import 'package:memox/features/deck/domain/models/deck_path_segment_model.dart';
 import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
+import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_breadcrumb.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 
@@ -64,9 +65,11 @@ void main() {
   );
 
   group('the path back up', () {
-    testWidgets('a deck with ancestors shows them, and only them', (
+    testWidgets('it runs from the deck list down to the deck you are in', (
       tester,
     ) async {
+      final english = AppLocalizationsEn();
+
       await pumpLevel(
         tester,
         serving(
@@ -77,31 +80,77 @@ void main() {
 
       expect(find.byType(MxBreadcrumb), findsOneWidget);
       final MxBreadcrumb crumb = tester.widget(find.byType(MxBreadcrumb));
-      // The deck the user is *in* is deliberately absent: the app-bar title one
-      // line above already says it, and a trailing copy spent a third of the
-      // strip repeating the largest text on screen.
+      // The whole path, literally. Both ends used to be dropped as duplicate
+      // chrome — the list is what Back reaches, the deck is what the title says
+      // — and the result was a strip that answered "where am I" only in the
+      // middle of the tree.
       expect(crumb.items.map((MxBreadcrumbItem i) => i.label), <String>[
+        english.decksTitle,
         'Japanese N5',
         'Kana',
+        'Hiragana',
       ]);
-      expect(find.text('Hiragana'), findsOneWidget, reason: 'the title only');
-      // Every step goes somewhere, which is the point of dropping the last one.
+      // Every step but the last goes somewhere; the last is where you already
+      // are, so it renders as text rather than as a control that does nothing.
       expect(
-        crumb.items.every((MxBreadcrumbItem i) => i.onTap != null),
+        crumb.items.take(3).every((MxBreadcrumbItem i) => i.onTap != null),
         isTrue,
       );
+      expect(crumb.items.last.onTap, isNull);
     });
 
-    testWidgets('a root deck shows no breadcrumb at all', (tester) async {
-      // One level in, the only step above is the deck list, which Back and the
-      // Decks tab both already reach in one tap. A crumb there would be a third
-      // control doing the same thing.
+    testWidgets('a root deck gets one too — the list, then itself', (
+      tester,
+    ) async {
+      // The case that used to render nothing, and the reason this changed: one
+      // level in is where a user first looks for a breadcrumb, and finding none
+      // there reads as the component being broken rather than as a decision.
+      final english = AppLocalizationsEn();
+
       await pumpLevel(
         tester,
         serving(fakeRootDeck(id: 'deck-1', name: 'Japanese N5')),
       );
 
-      expect(find.byType(MxBreadcrumb), findsNothing);
+      final MxBreadcrumb crumb = tester.widget(find.byType(MxBreadcrumb));
+      expect(crumb.items.map((MxBreadcrumbItem i) => i.label), <String>[
+        english.decksTitle,
+        'Japanese N5',
+      ]);
+    });
+
+    testWidgets('the first step goes back to the deck list', (tester) async {
+      // Through the real router, like the ancestor case below: what the step
+      // does is the whole of its behaviour.
+      final english = AppLocalizationsEn();
+      final repository = FakeDeckRepository(
+        deckList: (String? id) => Stream<DeckListSnapshot>.value(
+          DeckListSnapshot(
+            parent: fakeRootDeck(id: id ?? 'deck-1', name: 'Japanese N5'),
+            ancestors: const <DeckPathSegment>[],
+            decks: const <DeckSummary>[],
+            nextDueAt: null,
+          ),
+        ),
+      );
+      final router = await pumpDeckApp(
+        tester,
+        repository: repository,
+        initialLocation: '/decks/deck-1',
+      );
+
+      // Scoped to the strip: the bottom navigation carries its own "Decks"
+      // label, and a bare text finder would be ambiguous about which control
+      // this test is exercising.
+      await tester.tap(
+        find.descendant(
+          of: find.byType(MxBreadcrumb),
+          matching: find.text(english.decksTitle),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(router.routerDelegate.currentConfiguration.uri.path, '/');
     });
 
     testWidgets('tapping an ancestor navigates to that deck', (tester) async {
