@@ -20,6 +20,8 @@ import 'package:memox/shared/widgets/mx_text_field.dart';
 import 'golden_specimens.dart';
 import 'golden_surfaces.dart';
 
+import '../../support/golden_density.dart';
+
 /// Golden tests for every shared component, light and dark.
 ///
 /// Uses `matchesGoldenFile` from `flutter_test` — no golden_toolkit and no
@@ -51,8 +53,8 @@ void main() {
     required bool isDark,
     Size at = surface,
   }) async {
-    tester.view.physicalSize = at;
-    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = goldenSurfaceFor(at);
+    tester.view.devicePixelRatio = kGoldenDevicePixelRatio;
     addTearDown(tester.view.reset);
 
     await tester.pumpWidget(
