@@ -63,19 +63,6 @@ in the empty cells, not in re-picking what exists.
 
 | target token | site | current (light) | current (dark) |
 |---|---|---|---|
-| no token within ΔE-ish range — needs a new one | `lib/app/error_screen_widget.dart:125` — Color(0xFFF4F5F8) | `#F4F5F8` | `#F4F5F8` |
-| no token within ΔE-ish range — needs a new one | `lib/app/error_screen_widget.dart:131` — Color(0xFF0A082D) | `#0A082D` | `#0A082D` |
-| no token within ΔE-ish range — needs a new one | `lib/app/error_screen_widget.dart:132` — Color(0xFFEDEEF5) | `#EDEEF5` | `#EDEEF5` |
-| no token within ΔE-ish range — needs a new one | `lib/app/error_screen_widget.dart:133` — Color(0xFFA6ABC2) | `#A6ABC2` | `#A6ABC2` |
-| no token within ΔE-ish range — needs a new one | `lib/app/mobile_frame_widget.dart:54` — const Color(0xFF1E1E1E) | `#1E1E1E` | `#1E1E1E` |
-| colorScheme.onSurface | `lib/app/error_screen_widget.dart:126` — Color(0xFF16182B) | `#16182B` | `#16182B` |
-| colorScheme.onSurfaceVariant | `lib/app/error_screen_widget.dart:127` — Color(0xFF565C72) | `#565C72` | `#565C72` |
-| a precomputed blendOver(...) constant | `lib/core/theme/app_elevation.dart:62` — scheme.shadow.withValues(alpha: 0.04 + 0.01 * level) | `#0B0C18 @ alpha 0.04` | `#04040B @ alpha 0.04` |
-| a precomputed blendOver(...) constant | `lib/shared/widgets/mx_action_sheet.dart:125` — context.colors.onSurface.withValues(alpha: _disabledOpacity) | `#16182B @ alpha unresolvable` | `#EDEEF5 @ alpha unresolvable` |
-| blendOver(seed, base, small alpha) - see migration_map.md | `lib/core/theme/app_colors.dart` — colorScheme.surface (light) | `#FFFFFF` | `#1B1D32` |
-| blendOver(seed, base, small alpha) - see migration_map.md | `lib/core/theme/app_colors.dart` — semantic.surfaceElevated (light) | `#FFFFFF` | `#383D55` |
-| derive both from the seed, or neither | `lib/core/theme/app_colors.dart` — colorScheme.surface (mechanism differs by mode) | `#FFFFFF` | `#1B1D32` |
-| derive both from the seed, or neither | `lib/core/theme/app_colors.dart` — semantic.surfaceElevated (mechanism differs by mode) | `#FFFFFF` | `#383D55` |
 
 ## 3. Fill order: ColorScheme vs ThemeExtension
 

@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../core/theme/app_colors.dart';
+
 /// Logical size the web build is constrained to.
 ///
 /// Roughly a Pixel 7/8 in logical pixels. Web is the E2E and visual-regression
@@ -51,7 +53,7 @@ class MobileFrameWidget extends StatelessWidget {
           // Backdrop outside the app surface. Visible only on the web dev
           // channel, so it is deliberately not a design token — it is not part
           // of the product UI.
-          color: const Color(0xFF1E1E1E),
+          color: AppColors.webLetterbox,
           child: Center(
             child: SizedBox(
               width: kMobileFrameSize.width,

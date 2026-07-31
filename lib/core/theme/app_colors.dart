@@ -50,7 +50,19 @@ abstract final class AppColors {
   static const Color backgroundDark = Color(0xFF0A082D);
 
   /// Card and sheet — the flashcard surface.
-  static const Color surfaceLight = Color(0xFFFFFFFF);
+  ///
+  /// **Not pure white, since M4.10i.** `#FFFFFF` carries no hue at all, so the
+  /// one surface the whole app is built on had no relation to the seed while
+  /// every other neutral did — the audit's largest finding, and the reason light
+  /// mode read as a different palette from dark. `#FBFBFE` is `seed @ 0.02` over
+  /// white: hue 240, chroma 0.012, nowhere near the light canvas's tint budget.
+  ///
+  /// It costs lightness. A tinted card is a *darker* card, so the surface step
+  /// drops from 3.46 L\* to 2.15 — which was the argument for leaving it alone
+  /// while the step was the only depth cue light had. It is not any more: the
+  /// shadow's alpha was re-solved to 0.07 and the total lift is 7.75 L\* against
+  /// dark's 7.70.
+  static const Color surfaceLight = Color(0xFFFBFBFE);
   static const Color surfaceDark = Color(0xFF1B1D32);
 
   /// Inset tile, chip, icon container.
@@ -58,7 +70,11 @@ abstract final class AppColors {
   static const Color surfaceMutedDark = Color(0xFF292D42);
 
   /// Top of the ladder: a raised or selected surface.
-  static const Color surfaceElevatedLight = Color(0xFFFFFFFF);
+  ///
+  /// `seed @ 0.015` over white — one step lighter than [surfaceLight] and still
+  /// carrying the hue. Both were `#FFFFFF` before M4.10i, which made the top two
+  /// rungs of the light ladder the same rung.
+  static const Color surfaceElevatedLight = Color(0xFFFCFCFE);
   static const Color surfaceElevatedDark = Color(0xFF383D55);
 
   // --- Text and lines ------------------------------------------------------
@@ -180,7 +196,7 @@ abstract final class AppColors {
   static const Color errorContainerDark = Color(0xFF5E2831);
   static const Color onErrorContainerLight = Color(0xFF641421);
   static const Color onErrorContainerDark = Color(0xFFF5D3D8);
-  static const Color surfaceContainerLowestLight = Color(0xFFFFFFFF);
+  static const Color surfaceContainerLowestLight = Color(0xFFFCFCFE);
   static const Color surfaceContainerLowestDark = Color(0xFF07061F);
   static const Color surfaceContainerLowLight = Color(0xFFFAFAFC);
   static const Color surfaceContainerLowDark = Color(0xFF12142B);
@@ -192,7 +208,7 @@ abstract final class AppColors {
   static const Color surfaceContainerHighestDark = Color(0xFF333852);
   static const Color surfaceDimLight = Color(0xFFDEE0E7);
   static const Color surfaceDimDark = Color(0xFF08061F);
-  static const Color surfaceBrightLight = Color(0xFFFFFFFF);
+  static const Color surfaceBrightLight = Color(0xFFFCFCFE);
   static const Color surfaceBrightDark = Color(0xFF383D55);
   static const Color inverseSurfaceLight = Color(0xFF2A2C3E);
   static const Color inverseSurfaceDark = Color(0xFFE7E8F0);
@@ -213,6 +229,14 @@ abstract final class AppColors {
   /// `#04040B` is `seed @ 0.06` over black, which keeps hue 240 at a luminance
   /// low enough to read as a shadow rather than as a navy smear. Pinned by
   /// MX-VIS-002 rule R6.
+  /// The letterbox around the phone-sized frame on the web build.
+  ///
+  /// Outside the app surface entirely — Android never shows it (AD-04) — but it
+  /// is still a colour, and a colour in a widget is a colour the theme cannot
+  /// change. Darker than any real surface on purpose: it has to read as "not the
+  /// app" rather than as another panel.
+  static const Color webLetterbox = Color(0xFF14162A);
+
   static const Color shadowLight = Color(0xFF0B0C18);
   static const Color shadowDark = Color(0xFF04040B);
   static const Color scrimLight = Color(0xFF0B0C18);

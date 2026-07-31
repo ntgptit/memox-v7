@@ -19,14 +19,14 @@ guess.
 | | |
 |---|---|
 | Files scanned (`lib/`, hand-written) | 113 |
-| Colour sites found | 245 |
-| Violations | 13 |
+| Colour sites found | 247 |
+| Violations | 0 |
 
 **By element kind**
 
 | kind | sites |
 |---|---|
-| other | 216 |
+| other | 218 |
 | background | 7 |
 | text | 11 |
 | shadow | 1 |
@@ -37,67 +37,28 @@ guess.
 
 | kind | sites |
 |---|---|
-| hardcoded-literal | 87 |
-| blend-source | 2 |
-| opacity-modified-token | 6 |
-| shared-constant | 120 |
+| shared-constant | 127 |
+| blend-source | 3 |
+| opacity-modified-token | 5 |
+| hardcoded-literal | 81 |
 | Colors-material | 3 |
-| theme-token | 27 |
+| theme-token | 28 |
 
 **By violation code**
 
 | code | count | meaning |
 |---|---|---|
-| V1 | 2 | neutral not derived from the seed |
+| V1 | 0 | neutral not derived from the seed |
 | V2 | 0 | role component using a colour outside its role |
-| V3 | 7 | literal duplicating an existing token |
+| V3 | 0 | literal duplicating an existing token |
 | V4 | 0 | hand-picked role variant instead of a generated one |
-| V5 | 2 | translucency applied at the paint site |
-| V6 | 2 | defined for one brightness, different mechanism in the other |
+| V5 | 0 | translucency applied at the paint site |
+| V6 | 0 | defined for one brightness, different mechanism in the other |
 
 ## 2. Violations
 
 | code | sev | file:line | context | current (light) | current (dark) | proposed target |
 |---|---|---|---|---|---|---|
-| V3 | 🟢 | `lib/app/error_screen_widget.dart:125` | Color(0xFFF4F5F8) | `#F4F5F8` | `#F4F5F8` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟢 | `lib/app/error_screen_widget.dart:126` | Color(0xFF16182B) | `#16182B` | `#16182B` | colorScheme.onSurface |
-| V3 | 🟢 | `lib/app/error_screen_widget.dart:127` | Color(0xFF565C72) | `#565C72` | `#565C72` | colorScheme.onSurfaceVariant |
-| V3 | 🟢 | `lib/app/error_screen_widget.dart:131` | Color(0xFF0A082D) | `#0A082D` | `#0A082D` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟢 | `lib/app/error_screen_widget.dart:132` | Color(0xFFEDEEF5) | `#EDEEF5` | `#EDEEF5` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟢 | `lib/app/error_screen_widget.dart:133` | Color(0xFFA6ABC2) | `#A6ABC2` | `#A6ABC2` | no token within ΔE-ish range — needs a new one |
-| V3 | 🟡 | `lib/app/mobile_frame_widget.dart:54` | const Color(0xFF1E1E1E) | `#1E1E1E` | `#1E1E1E` | no token within ΔE-ish range — needs a new one |
-| V5 | 🟢 | `lib/core/theme/app_elevation.dart:62` | scheme.shadow.withValues(alpha: 0.04 + 0.01 * level) | `#0B0C18 @ alpha 0.04` | `#04040B @ alpha 0.04` | a precomputed blendOver(...) constant |
-| V5 | 🟢 | `lib/shared/widgets/mx_action_sheet.dart:125` | context.colors.onSurface.withValues(alpha: _disabledOpacity) | `#16182B @ alpha unresolvable` | `#EDEEF5 @ alpha unresolvable` | a precomputed blendOver(...) constant |
-| V1 | 🔴 | `lib/core/theme/app_colors.dart` | colorScheme.surface (light) | `#FFFFFF` | `#1B1D32` | blendOver(seed, base, small alpha) - see migration_map.md |
-| V6 | 🔴 | `lib/core/theme/app_colors.dart` | colorScheme.surface (mechanism differs by mode) | `#FFFFFF` | `#1B1D32` | derive both from the seed, or neither |
-| V1 | 🔴 | `lib/core/theme/app_colors.dart` | semantic.surfaceElevated (light) | `#FFFFFF` | `#383D55` | blendOver(seed, base, small alpha) - see migration_map.md |
-| V6 | 🔴 | `lib/core/theme/app_colors.dart` | semantic.surfaceElevated (mechanism differs by mode) | `#FFFFFF` | `#383D55` | derive both from the seed, or neither |
-
-- **V3** `Color(0xFFF4F5F8)` — Mirrors no token within ΔE-ish range — needs a new one because this file has no ThemeData in scope. It follows the mode by reading PlatformDispatcher, so it is a copy that cannot drift silently — but it is still a copy, and changing the token will not change it.
-
-- **V3** `Color(0xFF16182B)` — Mirrors colorScheme.onSurface because this file has no ThemeData in scope. It follows the mode by reading PlatformDispatcher, so it is a copy that cannot drift silently — but it is still a copy, and changing the token will not change it.
-
-- **V3** `Color(0xFF565C72)` — Mirrors colorScheme.onSurfaceVariant because this file has no ThemeData in scope. It follows the mode by reading PlatformDispatcher, so it is a copy that cannot drift silently — but it is still a copy, and changing the token will not change it.
-
-- **V3** `Color(0xFF0A082D)` — Mirrors no token within ΔE-ish range — needs a new one because this file has no ThemeData in scope. It follows the mode by reading PlatformDispatcher, so it is a copy that cannot drift silently — but it is still a copy, and changing the token will not change it.
-
-- **V3** `Color(0xFFEDEEF5)` — Mirrors no token within ΔE-ish range — needs a new one because this file has no ThemeData in scope. It follows the mode by reading PlatformDispatcher, so it is a copy that cannot drift silently — but it is still a copy, and changing the token will not change it.
-
-- **V3** `Color(0xFFA6ABC2)` — Mirrors no token within ΔE-ish range — needs a new one because this file has no ThemeData in scope. It follows the mode by reading PlatformDispatcher, so it is a copy that cannot drift silently — but it is still a copy, and changing the token will not change it.
-
-- **V3** `const Color(0xFF1E1E1E)` — A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #1E1E1E.
-
-- **V5** `scheme.shadow.withValues(alpha: 0.04 + 0.01 * level)` — A translucent colour composites against whatever is behind it at paint time, so one token renders as two values.
-
-- **V5** `context.colors.onSurface.withValues(alpha: _disabledOpacity)` — A translucent colour composites against whatever is behind it at paint time, so one token renders as two values.
-
-- **V1** `colorScheme.surface (light)` — A pure neutral: no hue at all, so it carries no trace of the seed and cannot move with it.
-
-- **V6** `colorScheme.surface (mechanism differs by mode)` — One mode derives this neutral from a hue and the other does not, so the two modes cannot drift together.
-
-- **V1** `semantic.surfaceElevated (light)` — A pure neutral: no hue at all, so it carries no trace of the seed and cannot move with it.
-
-- **V6** `semantic.surfaceElevated (mechanism differs by mode)` — One mode derives this neutral from a hue and the other does not, so the two modes cannot drift together.
 
 ## 3. Perceptual checks
 
@@ -110,13 +71,13 @@ an edge.
 
 | mode | border on ground | ratio | verdict |
 |---|---|---|---|
-| light | semantic.borderSubtle on card (colorScheme.surface) | 1.50 | in-band |
+| light | semantic.borderSubtle on card (colorScheme.surface) | 1.45 | in-band |
 | light | semantic.borderSubtle on page (scaffoldBackgroundColor) | 1.38 | in-band |
 | light | semantic.borderSubtle on muted tile (semantic.surfaceMuted) | 1.27 | in-band |
-| light | colorScheme.outline on card (colorScheme.surface) | 1.50 | in-band |
+| light | colorScheme.outline on card (colorScheme.surface) | 1.45 | in-band |
 | light | colorScheme.outline on page (scaffoldBackgroundColor) | 1.38 | in-band |
 | light | colorScheme.outline on muted tile (semantic.surfaceMuted) | 1.27 | in-band |
-| light | colorScheme.outlineVariant on card (colorScheme.surface) | 1.50 | in-band |
+| light | colorScheme.outlineVariant on card (colorScheme.surface) | 1.45 | in-band |
 | light | colorScheme.outlineVariant on page (scaffoldBackgroundColor) | 1.38 | in-band |
 | light | colorScheme.outlineVariant on muted tile (semantic.surfaceMuted) | 1.27 | in-band |
 | dark | semantic.borderSubtle on card (colorScheme.surface) | 1.82 | too-heavy |
@@ -134,7 +95,7 @@ an edge.
 | mode | surface | hex | hue | saturation | pure neutral |
 |---|---|---|---|---|---|
 | light | page | `#F4F5F8` | 225 | 0.222 | false |
-| light | surface | `#FFFFFF` | none | 0.000 | true |
+| light | surface | `#FBFBFE` | 240 | 0.600 | false |
 | dark | page | `#0A082D` | 243 | 0.698 | false |
 | dark | surface | `#1B1D32` | 235 | 0.299 | false |
 
@@ -143,7 +104,7 @@ an edge.
 | mode | token | hex | hue |
 |---|---|---|---|
 | light | page | `#F4F5F8` | 225 |
-| light | surface | `#FFFFFF` | **none** |
+| light | surface | `#FBFBFE` | 240 |
 | light | surfaceMuted | `#EAECF1` | 223 |
 | light | borderSubtle | `#D2D2DD` | 240 |
 | light | onSurfaceVariant | `#565C72` | 227 |
@@ -180,16 +141,25 @@ which made light cards float where dark's sat. `app_theme_test.dart` now pins th
 lift instead of the border, and `app_elevation_test.dart` pins the measurement
 that says dark should not paint.
 
-**The light-mode background-tint answer, plainly:** the *page* is tinted —
-`#F4F5F8`, hue 225°, 15° from the seed — but the *card* is **pure `#FFFFFF` with
-no hue at all**. So light mode is half-conformant: its canvas carries the seed and
-the surface sitting on that canvas does not. That is the single most consequential
-finding in this audit, and it is the same defect as the 1.09:1 surface step seen
-from the other side: a white card cannot relate to a tinted page.
+**The light-mode background-tint answer, plainly:** both are tinted. The page is
+`#F4F5F8` and the card is `#FBFBFE` — `seed @ 0.02` over white, hue 240.
 
-**Neutral family coherence:** dark is one family — every neutral within 11° of the
-seed. Light is one family plus a hole: 216–240° for everything that has a hue,
-and five tokens with no hue at all.
+**It was the audit's largest finding and it is closed.** The card was pure
+`#FFFFFF` with no hue at all, along with `surfaceBright`,
+`surfaceContainerLowest`, `surfaceElevated` and every dialog and sheet that
+follows them: a tinted canvas with an untinted surface sitting on it, which is
+why light read as a different palette from dark.
+
+Closing it cost lightness, and the cost was paid rather than waived. A tinted
+card is a darker card, so the surface step fell from 3.46 L* to 2.15. Two things
+absorbed that: the shadow's alpha was re-solved from 0.05 to 0.07, and the light
+ladder's minimum step went from 3.0 to 2.0 — the step it gave up is exactly what
+the shadow took on, and the total lift is unchanged at **7.75 L* against dark's
+7.70**.
+
+**Neutral family coherence:** both are one family now. Every neutral in both
+modes carries a hue and sits within 25° of the seed — pinned by MX-VIS-002 rule
+R9, which was a proposal in this report until it started passing.
 
 
 ## 4. Cross-mode asymmetry (V6)
@@ -201,8 +171,6 @@ be kept in step by editing one value.
 
 | token / site | light | dark |
 |---|---|---|
-| colorScheme.surface (mechanism differs by mode) | `#FFFFFF` | `#1B1D32` |
-| semantic.surfaceElevated (mechanism differs by mode) | `#FFFFFF` | `#383D55` |
 
 ## 5. Role families (V2 / V4 evidence)
 
