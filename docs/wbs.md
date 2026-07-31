@@ -2788,6 +2788,22 @@ nhau thì trên màn hình không nhìn ra được.
   nothing due / no decks yet / read fails); `MxPillButton` playground; knob
   `tappable` cho `MxCard` (API mới của #57); `LocalizationAddon` en + vi vì
   màn thật đọc ARB qua `context.l10n`.
+- **Out of scope:** use-case cho các form/sheet của Deck (mở được từ màn đã
+  mount, không cần entry riêng); mô phỏng stream re-emit; Widgetbook Cloud.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `widgetbook/lib/screens/deck_list_screen_use_case.dart` (fake
+  `DeckRepository` + router mini + 6 scenario), `MxPillButton` playground trong
+  `component_control_sections... (control_components.dart)`, knob `tappable`
+  trong `form_components.dart`, `LocalizationAddon` trong `main.dart`.
+- **Acceptance criteria:**
+  - [x] `DeckListScreen` render trong catalog bằng contract fake — không mở
+        database, không import `data/` của feature.
+  - [x] Sáu scenario chuyển được bằng knob; drill-down bằng tap row hoạt động
+        trong khung catalog và quay lại được bằng Back của router mini.
+  - [x] Scheduler của hàng con resolve qua root (BR-06) — không còn
+        "Eight boxes" trong cây `sm2`.
+  - [x] Root gates xanh sau merge #57: 804 test, guard, architecture, analyze;
+        catalog analyze/test/web build xanh.
 - **Cách mount, và hai quyết định trong đó:**
   - **Use-case mang một `GoRouter` mini riêng** (route `decks` + `deckDetail`,
     giữ trong `State` để knob rebuild không reset stack) — nên tap một row
