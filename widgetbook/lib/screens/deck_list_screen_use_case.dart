@@ -9,6 +9,7 @@ import 'package:memox/features/deck/domain/models/deck_content_type_model.dart';
 import 'package:memox/features/deck/domain/models/deck_deletion_impact_model.dart';
 import 'package:memox/features/deck/domain/models/deck_list_snapshot_model.dart';
 import 'package:memox/features/deck/domain/models/deck_name_model.dart';
+import 'package:memox/features/deck/domain/models/deck_path_segment_model.dart';
 import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 import 'package:memox/features/deck/domain/repositories/deck_repository.dart';
@@ -138,7 +139,12 @@ class _CatalogDeckRepository implements DeckRepository {
 
     if (parentDeckId == null) {
       return Stream<DeckListSnapshot>.value(
-        DeckListSnapshot(parent: null, decks: _roots(), nextDueAt: null),
+        DeckListSnapshot(
+          parent: null,
+          decks: _roots(),
+          ancestors: const <DeckPathSegment>[],
+          nextDueAt: null,
+        ),
       );
     }
 
@@ -148,9 +154,26 @@ class _CatalogDeckRepository implements DeckRepository {
       DeckListSnapshot(
         parent: parent,
         decks: _childrenOf(parent),
+        ancestors: _ancestorsOf(parentDeckId),
         nextDueAt: null,
       ),
     );
+  }
+
+  /// Root first, excluding the deck being looked inside — the same contract as
+  /// the real read. Recovered from the synthetic id chain: `r2-c3-c1` has
+  /// ancestors `r2` and `r2-c3`.
+  List<DeckPathSegment> _ancestorsOf(String parentDeckId) {
+    final segments = parentDeckId.split('-');
+    final ancestors = <DeckPathSegment>[];
+    var prefix = '';
+    for (final segment in segments.take(segments.length - 1)) {
+      prefix = prefix.isEmpty ? segment : '$prefix-$segment';
+      final deck = _deckById(prefix);
+      ancestors.add(DeckPathSegment(id: deck.id, name: deck.name));
+    }
+
+    return ancestors;
   }
 
   List<DeckSummary> _roots() {

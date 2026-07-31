@@ -46,6 +46,10 @@ import 'audit_model.dart';
 /// [hasFloatingAction] for the create button. Same two nodes as a tappable card —
 /// it is a `Material` with an `InkWell` and a clip.
 ///
+/// [breadcrumbSteps] is the number of **tappable** steps in an `MxBreadcrumb` —
+/// its ancestors, not its last step, which is text rather than a control. Each is
+/// again a `Material` with an `InkWell` and a clip, so it counts like a card.
+///
 /// A zero count is not passed as `expectedMatches: 0`: an allowance that matches
 /// nothing is an unused allowance, which this harness treats as fatal, so the
 /// entry is omitted instead.
@@ -56,15 +60,18 @@ List<AuditSkipAllowance> deckShellAllowances({
   bool hasBackButton = false,
   int tappableCards = 0,
   int pills = 0,
+  int breadcrumbSteps = 0,
   bool hasFloatingAction = false,
 }) {
   final iconButtons = screenIconButtons + (hasBackButton ? 1 : 0);
   final floatingActions = hasFloatingAction ? 1 : 0;
   // Every one of these hosts an InkWell inside its own Material.
-  final inkHosts = iconButtons + tappableCards + pills + floatingActions;
+  final inkHosts =
+      iconButtons + tappableCards + pills + breadcrumbSteps + floatingActions;
   // The InkWell's rounded clip, once per host that has one. Icon buttons draw a
   // `_ShapeBorderPainter` instead, which is counted separately below.
-  final unnamedPainters = tappableCards + pills + floatingActions;
+  final unnamedPainters =
+      tappableCards + pills + breadcrumbSteps + floatingActions;
 
   return <AuditSkipAllowance>[
     // One per Navigator: the harness's own MaterialApp, GoRouter's root, and the
@@ -113,7 +120,8 @@ List<AuditSkipAllowance> deckShellAllowances({
       rationale:
           'The branch screen Material layers: its Scaffold and its AppBar from '
           'MxContentShell, plus one per InkWell host — MxIconButton, a tappable '
-          'MxCard, an MxPillButton, the floating action. Same raster-only reason '
+          'MxCard, an MxPillButton, a breadcrumb step, the floating action. Same '
+          'raster-only reason '
           'as the shell: a Material paints background, splash and highlight into '
           'a layer no render object reports. The icon button states are pinned by '
           'the mx_icon_button_* goldens (M4.8), the card and pill surfaces by '

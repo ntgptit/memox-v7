@@ -13,6 +13,7 @@ import 'package:memox/features/deck/di/deck_repository_provider.dart';
 import 'package:memox/features/deck/domain/entities/deck_entity.dart';
 import 'package:memox/features/deck/domain/models/deck_content_type_model.dart';
 import 'package:memox/features/deck/domain/models/deck_list_snapshot_model.dart';
+import 'package:memox/features/deck/domain/models/deck_path_segment_model.dart';
 import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
@@ -95,9 +96,15 @@ void main() {
   FakeDeckRepository serving(
     DeckEntity deck, {
     List<DeckSummary> children = const <DeckSummary>[],
+    List<DeckPathSegment> ancestors = const <DeckPathSegment>[],
   }) => FakeDeckRepository(
     deckList: (_) => Stream<DeckListSnapshot>.value(
-      DeckListSnapshot(parent: deck, decks: children, nextDueAt: null),
+      DeckListSnapshot(
+        ancestors: ancestors,
+        parent: deck,
+        decks: children,
+        nextDueAt: null,
+      ),
     ),
     allDecks: () => Stream<List<DeckEntity>>.value(<DeckEntity>[deck]),
   );
@@ -253,7 +260,8 @@ void main() {
     'deck_list_screen',
     () => levelWith(
       serving(
-        fakeRootDeck(id: 'deck-1', name: 'Japanese N5'),
+        fakeSubDeck(id: 'deck-1', name: 'Kana', parentId: 'branch'),
+        ancestors: fakePath(<String>['Japanese N5', 'Writing systems']),
         children: <DeckSummary>[
           fakeChildSummary(
             id: 'c1',
@@ -284,12 +292,15 @@ void main() {
     allowances: <AuditSkipAllowance>[
       // The action menu and one per child row — plus the AppBar's back button.
       // Three children, so four declared; create-sub-deck is the floating action.
+      // Two breadcrumb steps: the chain is two deep and its last step — the deck
+      // the user is in — is text rather than a control, so it hosts no ink.
       ...deckShellAllowances(
         screenIconButtons: 4,
         screenItemId: 'deck_screen',
         hasBackButton: true,
         tappableCards: 3,
         pills: 2,
+        breadcrumbSteps: 2,
         hasFloatingAction: true,
       ),
     ],

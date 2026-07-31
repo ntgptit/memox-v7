@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import '../../../../core/database/app_database.dart';
 import '../../../../core/error/failure.dart';
 import '../../domain/entities/deck_entity.dart';
 import '../../domain/models/deck_content_type_model.dart';
 import '../../domain/models/deck_list_snapshot_model.dart';
+import '../../domain/models/deck_path_segment_model.dart';
 import '../../domain/models/deck_summary_model.dart';
 import '../../domain/models/scheduler_type_model.dart';
 
@@ -53,6 +56,8 @@ DeckEntity deckEntityFromRow(Deck row) {
 DeckListSnapshot rootLevelFromRows(List<RootDeckSummariesResult> rows) =>
     DeckListSnapshot(
       parent: null,
+      // The root level is the top: there is nothing above it to name.
+      ancestors: const <DeckPathSegment>[],
       decks: <DeckSummary>[
         for (final RootDeckSummariesResult row in rows)
           DeckSummary(
@@ -91,6 +96,7 @@ DeckListSnapshot childLevelFromRows(List<ChildDeckLevelResult> rows) {
 
   return DeckListSnapshot(
     parent: deckEntityFromRow(rows.first.parent),
+    ancestors: deckPathFromJson(rows.first.ancestryJson),
     decks: <DeckSummary>[
       for (final ChildDeckLevelResult row in rows)
         if (row.child case final Deck child)
@@ -105,4 +111,57 @@ DeckListSnapshot childLevelFromRows(List<ChildDeckLevelResult> rows) {
     ],
     nextDueAt: rows.first.nextDueAt?.toUtc(),
   );
+}
+
+/// The ancestor chain, decoded from the one JSON column `childDeckLevel` returns.
+///
+/// **This is the only untyped column in the deck reads, and it stops here.** The
+/// query's own comment explains why the alternatives (a join that multiplies rows,
+/// or a compound select drift silently mis-compiles) are worse. What matters at
+/// this boundary is that the string never escapes it: everything above the
+/// repository receives `List<DeckPathSegment>` or nothing.
+///
+/// **Total, not throwing.** A breadcrumb is chrome. If this column is ever
+/// malformed — a schema change, a SQLite build without JSON1, a corrupt row — the
+/// right outcome is a screen with no breadcrumb, not a deck the user can no longer
+/// open. The counts, the rows and the title in the same read are unaffected by
+/// whatever went wrong here, so failing the whole level would throw away nine
+/// correct facts to punish one.
+///
+/// Sorted by `distance` **descending** — the furthest ancestor is the root, and
+/// the path reads downwards from it. The sort is done here rather than in SQL
+/// because SQLite does not promise the order an aggregate consumes its input, so
+/// the column's order is not a guarantee to lean on.
+List<DeckPathSegment> deckPathFromJson(String encoded) {
+  final Object? decoded = _tryDecode(encoded);
+  if (decoded is! List) return const <DeckPathSegment>[];
+
+  final entries = <({int distance, DeckPathSegment segment})>[];
+  for (final Object? element in decoded) {
+    if (element is! Map<String, Object?>) continue;
+    final Object? id = element['id'];
+    final Object? name = element['name'];
+    final Object? distance = element['distance'];
+    if (id is! String || name is! String || distance is! int) continue;
+
+    entries.add((
+      distance: distance,
+      segment: DeckPathSegment(id: id, name: name),
+    ));
+  }
+
+  entries.sort((a, b) => b.distance.compareTo(a.distance));
+
+  return <DeckPathSegment>[for (final entry in entries) entry.segment];
+}
+
+/// `jsonDecode` throws on malformed input, and this is the one place that is a
+/// recoverable state rather than a bug — see [deckPathFromJson]. Caught narrowly:
+/// a `FormatException` is the documented failure, and anything else is not.
+Object? _tryDecode(String encoded) {
+  try {
+    return jsonDecode(encoded);
+  } on FormatException {
+    return null;
+  }
 }

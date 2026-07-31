@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
+import 'package:memox/shared/widgets/mx_breadcrumb.dart';
 import 'package:memox/shared/widgets/mx_icon_button.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
@@ -110,6 +111,51 @@ WidgetbookComponent pillButtonComponent() {
               onPressed: isEnabled ? _noop : null,
               icon: hasIcon ? Icons.schedule : null,
               semanticLabel: semanticLabel,
+            ),
+          );
+        },
+      ),
+    ],
+  );
+}
+
+WidgetbookComponent breadcrumbComponent() {
+  return WidgetbookComponent(
+    name: 'MxBreadcrumb',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'Playground',
+        builder: (BuildContext context) {
+          final depth = context.knobs.int.slider(
+            label: 'depth',
+            initialValue: 3,
+            min: 2,
+            max: 10,
+          );
+          final hasLongNames = context.knobs.boolean(
+            label: 'long Vietnamese names',
+          );
+
+          final names = hasLongNames
+              ? <String>[
+                  'Bộ từ vựng học thuật chuyên sâu',
+                  'Chương 1 · Giao tiếp công sở và thư tín',
+                  'Bài 3 · Thành ngữ thường gặp',
+                ]
+              : <String>['Decks', 'Unit 1', 'Grammar'];
+
+          return CatalogCenterPage(
+            child: MxBreadcrumb(
+              items: <MxBreadcrumbItem>[
+                for (var i = 0; i < depth; i++)
+                  MxBreadcrumbItem(
+                    label:
+                        '${names[i % names.length]}'
+                        '${i >= names.length ? ' ${i + 1}' : ''}',
+                    // The last step is where the user already is: no tap.
+                    onTap: i == depth - 1 ? null : _noop,
+                  ),
+              ],
             ),
           );
         },
