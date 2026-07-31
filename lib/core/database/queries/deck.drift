@@ -126,28 +126,6 @@ SELECT * FROM decks
 WHERE root_deck_id = :rootDeckId
 ORDER BY created_at ASC, id ASC;
 
--- One deck and its direct children, from ONE statement (UC-06 step 4, UC-08).
---
--- **Why one statement and not two.** The screen's action set is computed from
--- both facts at once: which actions exist comes from the deck's `content_type`,
--- and whether *reset* is offered comes from the children being empty (BR-68). Two
--- reads mean two database snapshots, so the screen could render an action matrix
--- from a deck captured at one instant and a child list captured at another — and
--- the window is real, because a rename or a create lands between them.
---
--- The previous shape watched `childDecks` and then asked `deckById` per emission.
--- Its comment said both facts "arrive together"; they did not.
---
--- `LEFT JOIN`, so a deck with no children still yields exactly one row with a
--- null child. A deck that does not exist yields none, which is how the repository
--- tells the difference between "empty" and "gone" without a second query.
-deckDetail:
-SELECT deck.**, child.**
-FROM decks AS deck
-LEFT JOIN decks AS child ON child.parent_deck_id = deck.id
-WHERE deck.id = :deckId
-ORDER BY child.created_at ASC, child.id ASC;
-
 -- One deck and its direct children, each child carrying the aggregate of its
 -- WHOLE subtree — the same three facts `rootDeckSummaries` gives a root.
 --
@@ -173,13 +151,50 @@ ORDER BY child.created_at ASC, child.id ASC;
 --
 -- The `nextDueAt` scalar is character-for-character the one in
 -- `rootDeckSummaries`, and for the same reason: it is when these counts expire.
+--
+-- **`ancestryJson` — the path back up, in this same statement.** The breadcrumb
+-- has to agree with the title. Renaming an ancestor while a descendant is open
+-- must move both or neither, and a second query is a second snapshot (AD-13).
+--
+-- It is a **JSON scalar, and that is a deliberate hole** in this file's rule that
+-- every column is type-checked at build time. Two typed shapes were tried first
+-- and both are worse. Joining `ancestry` onto the child rows multiplies the
+-- result set by the depth — 100 children at level 5 becomes 400 rows where 100
+-- would do, and M4.10 measured that what costs on the UI thread is rows crossing
+-- the isolate boundary, not SQL time. A `UNION ALL` returning ancestors as extra
+-- rows would be free and fully typed, but drift does NOT expand `table.**` inside
+-- a compound select: it emits the literal `parent.**` into the SQL string with no
+-- error, so the query cannot run. Both were verified against drift 2.34 before
+-- this shape was chosen.
+--
+-- So one scalar, repeated per row exactly like `nextDueAt`, decoded in the mapper.
+-- Nothing above the repository ever sees a string.
+--
+-- `distance` is carried inside each object rather than relied on as row order.
+-- SQLite does not promise the order an aggregate consumes its input, so the chain
+-- is sorted in Dart, where the guarantee is real.
+--
+-- The walk stops at the root because `parent_deck_id IS NOT NULL` guards the
+-- recursive step, and UNION rather than UNION ALL terminates on corrupt cyclic
+-- data. The current deck is deliberately NOT in the chain — it is `parent.**`
+-- above, and putting it in both places would let one read disagree with itself.
 childDeckLevel:
-WITH RECURSIVE branch (branch_id, deck_id) AS (
+WITH RECURSIVE
+branch (branch_id, deck_id) AS (
     SELECT id, id FROM decks WHERE parent_deck_id = :parentId
     UNION
     SELECT b.branch_id, d.id
     FROM decks d
     INNER JOIN branch b ON d.parent_deck_id = b.deck_id
+),
+ancestry (deck_id, distance) AS (
+    SELECT parent_deck_id, 1 FROM decks
+    WHERE id = :parentId AND parent_deck_id IS NOT NULL
+    UNION
+    SELECT d.parent_deck_id, a.distance + 1
+    FROM decks d
+    INNER JOIN ancestry a ON d.id = a.deck_id
+    WHERE d.parent_deck_id IS NOT NULL
 )
 SELECT
     parent.**,
@@ -190,7 +205,14 @@ SELECT
     (
         SELECT MIN(next.due_at) FROM card_review_states next
         WHERE next.due_at > :now
-    ) AS nextDueAt
+    ) AS nextDueAt,
+    (
+        SELECT json_group_array(
+            json_object('id', a.deck_id, 'name', d.name, 'distance', a.distance)
+        )
+        FROM ancestry a
+        INNER JOIN decks d ON d.id = a.deck_id
+    ) AS ancestryJson
 FROM decks AS parent
 LEFT JOIN decks AS child ON child.parent_deck_id = parent.id
 LEFT JOIN decks AS root ON root.id = child.root_deck_id

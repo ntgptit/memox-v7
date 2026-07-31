@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:memox/app/app.dart';
 import 'package:memox/app/config/env_config.dart';
 import 'package:memox/app/config/env_config_provider.dart';
@@ -36,7 +37,7 @@ import '../../../../database/support/test_database.dart';
 final DateTime deckTestNow = testNow;
 
 /// Pumps the whole app — real router, real shell — with [repository] behind it.
-Future<void> pumpDeckApp(
+Future<GoRouter> pumpDeckApp(
   WidgetTester tester, {
   required DeckRepository repository,
   String? initialLocation,
@@ -71,6 +72,11 @@ Future<void> pumpDeckApp(
   );
   await tester.pump();
   await tester.pump();
+
+  // Returned so a test can assert *where* a tap landed rather than only that a
+  // callback fired. The breadcrumb is the case that needs it: what it navigates
+  // to is the whole of its behaviour.
+  return router;
 }
 
 /// Pumps one screen on its own, without the router.

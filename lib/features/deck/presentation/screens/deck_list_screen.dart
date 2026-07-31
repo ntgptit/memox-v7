@@ -19,6 +19,7 @@ import '../states/deck_list_view_state.dart';
 import '../widgets/deck_actions_widget.dart';
 import '../widgets/deck_level_error_widget.dart';
 import '../widgets/deck_list_toolbar_widget.dart';
+import '../widgets/deck_path_widget.dart';
 import '../widgets/deck_tile_widget.dart';
 
 /// Material's own FAB diameter. Named because the inset below is derived from it
@@ -177,7 +178,15 @@ class _DeckLevel extends StatelessWidget {
       // and under the floating button, so it owns its gutters and its bottom
       // inset.
       padding: EdgeInsets.zero,
-      body: _body(context, parent),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          // Above every body state, including the empty ones — "where am I" is
+          // most worth answering on a level with nothing in it to recognise.
+          DeckPathWidget(snapshot: snapshot),
+          Expanded(child: _body(context, parent)),
+        ],
+      ),
     );
   }
 

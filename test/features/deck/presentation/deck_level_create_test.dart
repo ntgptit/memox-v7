@@ -6,6 +6,7 @@ import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/deck/domain/entities/deck_entity.dart';
 import 'package:memox/features/deck/domain/models/deck_content_type_model.dart';
 import 'package:memox/features/deck/domain/models/deck_list_snapshot_model.dart';
+import 'package:memox/features/deck/domain/models/deck_path_segment_model.dart';
 import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
@@ -31,7 +32,12 @@ void main() {
     Failure? writeFailure,
   }) => FakeDeckRepository(
     deckList: (_) => Stream<DeckListSnapshot>.value(
-      DeckListSnapshot(parent: deck, decks: children, nextDueAt: null),
+      DeckListSnapshot(
+        ancestors: const <DeckPathSegment>[],
+        parent: deck,
+        decks: children,
+        nextDueAt: null,
+      ),
     ),
     allDecks: () =>
         Stream<List<DeckEntity>>.value(allDecks ?? <DeckEntity>[deck]),

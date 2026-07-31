@@ -178,6 +178,28 @@ void main() {
       expect(level.decks, hasLength(3));
       expect(reads(), hasLength(1), reason: 'statements seen: ${reads()}');
     });
+
+    test('the path back up is in that same statement too', () async {
+      // The breadcrumb must not cost a second read. A second query would also be
+      // a second snapshot, so a rename could land on the title and not on the
+      // path — which is the whole reason `ancestryJson` is a scalar in this
+      // statement rather than a query of its own.
+      final root = await seedRoot('Japanese');
+      final branch = await repository.createSubDeck(
+        name: DeckName.parse('Branch').name!,
+        parentDeckId: root.id,
+      );
+      final leaf = await repository.createSubDeck(
+        name: DeckName.parse('Leaf').name!,
+        parentDeckId: branch.id,
+      );
+
+      lines.clear();
+      final level = await levelOf(leaf.id).first;
+
+      expect(level.ancestors, hasLength(2));
+      expect(reads(), hasLength(1), reason: 'statements seen: ${reads()}');
+    });
   });
 
   group('what the stream emits', () {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_action_sheet.dart';
+import 'package:memox/shared/widgets/mx_breadcrumb.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
 import 'package:memox/shared/widgets/mx_confirm_dialog.dart';
 import 'package:memox/shared/widgets/mx_content_shell.dart';
@@ -113,6 +114,23 @@ List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
       icon: Icons.filter_list,
       isSelected: true,
       onPressed: _noop,
+    ),
+    isInteractive: true,
+  ),
+  MxStressSpecimen(
+    // Ten steps, which is the deepest path BR-55 allows, with long labels. The
+    // strip scrolls, so the stress here is not overflow but the tap target: each
+    // step still has to clear the minimum once the row is that long.
+    name: 'MxBreadcrumb',
+    build: () => MxBreadcrumb(
+      semanticLabel: 'Deck path',
+      items: <MxBreadcrumbItem>[
+        for (var i = 0; i < 10; i++)
+          MxBreadcrumbItem(
+            label: '$kLongLabel $i',
+            onTap: i == 9 ? null : _noop,
+          ),
+      ],
     ),
     isInteractive: true,
   ),

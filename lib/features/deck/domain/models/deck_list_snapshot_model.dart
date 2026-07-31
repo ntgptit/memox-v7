@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../entities/deck_entity.dart';
+import 'deck_path_segment_model.dart';
 import 'deck_summary_model.dart';
 
 part 'deck_list_snapshot_model.freezed.dart';
@@ -33,6 +34,18 @@ abstract class DeckListSnapshot with _$DeckListSnapshot {
 
     /// What is directly inside [parent] — or every root deck when it is null.
     required List<DeckSummary> decks,
+
+    /// The path from the root down to, but not including, [parent] — root first.
+    ///
+    /// Empty at the root level, and empty again one level in: a root deck's own
+    /// ancestry is nothing. The first non-empty case is level 3, which is also
+    /// the first level where "where am I" stops being answerable from the title
+    /// alone.
+    ///
+    /// From the same statement as everything else (AD-13). Read separately, a
+    /// rename could land on the title and not on the breadcrumb, and the screen
+    /// would show one deck under two names.
+    required List<DeckPathSegment> ancestors,
 
     /// The earliest instant strictly after the read's `now` at which some card
     /// becomes due, or null when no card is scheduled to.
