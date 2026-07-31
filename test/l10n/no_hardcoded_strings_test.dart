@@ -23,19 +23,8 @@ void main() {
     for (final entity in Directory('lib').listSync(recursive: true)) {
       if (entity is! File) continue;
       if (!entity.path.endsWith('.dart')) continue;
-      final posix = entity.path.replaceAll(r'\', '/');
       // Generated bindings legitimately contain every translated string.
-      if (posix.contains('lib/l10n/generated/')) {
-        continue;
-      }
-      // The dev channel (M4.10c). The design-system showcase is debug-only
-      // tooling behind `includeDevRoutes` — a release build cannot reach it —
-      // and its copy names tokens and `Mx*` components, identifiers a
-      // translator cannot act on. Localizing it would spend en+vi keys on
-      // strings no user ever sees; the exemption is this one directory, not
-      // the shell, so the 404 screen and everything else in `lib/app/` stays
-      // covered.
-      if (posix.contains('lib/app/dev/')) {
+      if (entity.path.replaceAll(r'\', '/').contains('lib/l10n/generated/')) {
         continue;
       }
 

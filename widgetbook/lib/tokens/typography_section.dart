@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_spacing.dart';
-import '../../core/theme/theme_context_extension.dart';
-import 'showcase_section_widget.dart';
+import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/core/theme/theme_context_extension.dart';
+import '../support/showcase_section.dart';
 
 /// The typography section: every `TextTheme` role, rendered in itself, with
 /// the resolved family, size, weight and line height spelled out beneath it.

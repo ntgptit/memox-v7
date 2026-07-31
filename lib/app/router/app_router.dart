@@ -1,11 +1,9 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/deck/presentation/screens/deck_detail_screen.dart';
 import '../../features/deck/presentation/screens/root_deck_list_screen.dart';
 import '../../features/review/presentation/review_placeholder_screen.dart';
-import '../dev/design_system_showcase_screen.dart';
 import '../fallback/route_not_found_screen.dart';
 import '../shell/app_navigation_shell.dart';
 import '../../core/navigation/route_names.dart';
@@ -40,18 +38,7 @@ final GoRouter appRouter = createAppRouter();
 /// scroll position while the other is on screen. A plain set of top-level
 /// routes would rebuild the destination from scratch on every tab switch, which
 /// is the "why did my place in the list disappear" bug.
-///
-/// [includeDevRoutes] gates the design-system showcase. It defaults to
-/// `kDebugMode` rather than reading `EnvConfig`, because the router is built
-/// before any provider scope exists — and the gate's job is binary anyway: a
-/// dev tool must be absent from a release binary, which is precisely the line
-/// `kDebugMode` draws at compile time. The parameter exists so a test can pin
-/// both sides of the gate instead of inheriting whichever mode the test runner
-/// is in.
-GoRouter createAppRouter({
-  String initialLocation = RoutePaths.decks,
-  bool includeDevRoutes = kDebugMode,
-}) {
+GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
   return GoRouter(
     initialLocation: initialLocation,
     redirect: appRedirect,
@@ -97,13 +84,6 @@ GoRouter createAppRouter({
           ),
         ],
       ),
-      // Top-level rather than a branch: the showcase is an inspection surface,
-      // not a destination the bottom bar should offer.
-      if (includeDevRoutes)
-        GoRoute(
-          path: RoutePaths.devDesignSystem,
-          builder: (context, state) => const DesignSystemShowcaseScreen(),
-        ),
     ],
   );
 }

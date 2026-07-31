@@ -53,6 +53,15 @@ jobs:
       - name: pub get
         run: flutter pub get
 
+      # The Widgetbook catalog is a nested package (widgetbook/). The root
+      # `flutter analyze` run creates an analysis context for it too, so its
+      # dependencies must be resolved here or every import in the catalog
+      # reports uri_does_not_exist — 100+ errors that have nothing to do with
+      # the change under review.
+      - name: pub get (widgetbook catalog)
+        run: flutter pub get
+        working-directory: widgetbook
+
       # Generated code is gitignored, so this is what makes a fresh clone equal to a
       # developer's tree; analyze and the tests below would report hundreds of
       # unrelated errors without it.
@@ -114,3 +123,10 @@ jobs:
       # golden` because goldens are windows-bound and run in ci-full.
       - name: provider/AST convention and Deck tests
         run: flutter test --exclude-tags golden test/app test/features/deck
+
+      # One smoke test: every registered use-case must construct and the shell
+      # must build. A catalog nobody runs in CI is a catalog that rots the
+      # first week nobody opens it.
+      - name: widgetbook catalog smoke test
+        run: flutter test
+        working-directory: widgetbook

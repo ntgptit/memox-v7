@@ -1,0 +1,52 @@
+# The component catalog — a separate app, deliberately.
+#
+# Widgetbook lives in its own package so the catalog's dependencies never enter
+# the product's dependency tree: `dependency_pinning_test` and the M2.2 rule
+# that every runtime dependency carries a written justification keep applying
+# to the app's pubspec untouched. This package depends ON memox (path) and
+# renders its real tokens and shared widgets; nothing in memox knows this
+# package exists.
+#
+# Run it:
+#   cd widgetbook && flutter pub get && flutter run -d chrome
+name: memox_widgetbook
+description: Widgetbook catalog for memox design tokens and shared components.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  memox:
+    path: ../
+
+  # The catalog shell: navigation tree, knobs, theme/text-scale/viewport
+  # addons. Composed manually (no widgetbook_generator): 13 components do not
+  # justify a second build_runner surface, and the manual tree keeps the whole
+  # catalog readable in one place.
+  widgetbook: ^3.17.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  # The same two faces the app bundles, copied here because a font declared in
+  # a dependency's pubspec is registered under a `packages/<pkg>/` prefixed
+  # family — memox's theme asks for plain `Inter` / `PlusJakartaSans`, so the
+  # catalog must register them under the plain names itself. The OFL licences
+  # sit beside them, same as in the app.
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Variable.ttf
+    - family: PlusJakartaSans
+      fonts:
+        - asset: assets/fonts/PlusJakartaSans-Variable.ttf

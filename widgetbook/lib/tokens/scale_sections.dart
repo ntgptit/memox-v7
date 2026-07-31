@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_breakpoints.dart';
-import '../../core/theme/app_durations.dart';
-import '../../core/theme/app_icon_size.dart';
-import '../../core/theme/app_radius.dart';
-import '../../core/theme/app_spacing.dart';
-import '../../core/theme/theme_context_extension.dart';
-import 'showcase_section_widget.dart';
+import 'package:memox/core/theme/app_breakpoints.dart';
+import 'package:memox/core/theme/app_durations.dart';
+import 'package:memox/core/theme/app_icon_size.dart';
+import 'package:memox/core/theme/app_radius.dart';
+import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/core/theme/theme_context_extension.dart';
+import '../support/showcase_section.dart';
 
 /// The scale-token sections of the token gallery: spacing, radius, icon
 /// sizes, durations and breakpoints — the tokens with no theme indirection,

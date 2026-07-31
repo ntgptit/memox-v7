@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:memox/core/theme/app_radius.dart';
+import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/core/theme/theme_context_extension.dart';
 
-import '../../core/theme/app_radius.dart';
-import '../../core/theme/app_spacing.dart';
-import '../../core/theme/theme_context_extension.dart';
-import 'showcase_section_widget.dart';
+import '../support/showcase_section.dart';
 
-/// The two colour sections of the token gallery: the `ColorScheme` roles the
-/// theme declares, and the `AppSemanticColors` extension beside them.
+/// The two colour sections: the `ColorScheme` roles the theme declares, and
+/// the `AppSemanticColors` extension beside them.
 ///
 /// Read from the live theme, never from `AppColors`, so a swatch shows the
-/// colour a product widget would actually resolve.
+/// colour a product widget would actually resolve — which is also what makes
+/// the theme addon flip every swatch.
 class TokenColorSectionsWidget extends StatelessWidget {
   const TokenColorSectionsWidget({super.key});
 
@@ -100,7 +101,7 @@ class _ColorGrid extends StatelessWidget {
   }
 }
 
-/// Width of one colour swatch card, sized so a 320-wide screen fits two.
+/// Width of one colour swatch card, sized so a 320-wide viewport fits two.
 const double _swatchWidth = 132;
 
 /// Height of the colour block inside a swatch.
