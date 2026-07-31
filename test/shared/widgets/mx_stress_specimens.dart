@@ -10,6 +10,7 @@ import 'package:memox/shared/widgets/mx_icon_button.dart';
 import 'package:memox/shared/widgets/mx_list_tile.dart';
 import 'package:memox/shared/widgets/mx_loading_state.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
+import 'package:memox/shared/widgets/mx_pill_button.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
 
 /// The specimen set for the stress suite: every shared component, built with
@@ -96,6 +97,24 @@ List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
   MxStressSpecimen(
     name: 'MxCard',
     build: () => const MxCard(child: Text(kLongMessage)),
+  ),
+  MxStressSpecimen(
+    name: 'MxCard (tappable)',
+    build: () => const MxCard(onTap: _noop, child: Text(kLongMessage)),
+    isInteractive: true,
+  ),
+  MxStressSpecimen(
+    // A pill's label is short by design, so the stress here is the *selected*
+    // pair plus an icon: that is the widest it gets, and the tap target still has
+    // to reach the minimum once the chip is padded.
+    name: 'MxPillButton',
+    build: () => const MxPillButton(
+      label: kLongLabel,
+      icon: Icons.filter_list,
+      isSelected: true,
+      onPressed: _noop,
+    ),
+    isInteractive: true,
   ),
   MxStressSpecimen(
     name: 'MxListTile',

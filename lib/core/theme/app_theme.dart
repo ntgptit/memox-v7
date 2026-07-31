@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'app_button_themes.dart';
 import 'app_colors.dart';
+import 'app_icon_size.dart';
 import 'app_radius.dart';
 import 'app_semantic_colors.dart';
 import 'app_spacing.dart';
@@ -11,8 +13,13 @@ import 'app_typography.dart';
 /// Only components something actually renders are themed: AppBar, Card,
 /// FilledButton, OutlinedButton, TextField and SnackBar from UC-05, plus
 /// IconButton, ListTile, Dialog and BottomSheet added in M4.8 when the Mx
-/// shared components gave them callers. Theming a Chip now would still be a
-/// decision made without a screen to check it against.
+/// shared components gave them callers.
+///
+/// Chip and FloatingActionButton joined them in M4.12: the deck list's filter and
+/// sort pills render a `ChoiceChip` through `MxPillButton`, and its create action
+/// renders a FAB. Until then both would have been decisions made without a screen
+/// to check them against — which is the rule this list follows, not an oversight
+/// that was finally corrected.
 ThemeData buildLightTheme() => _buildTheme(
   ColorScheme.fromSeed(seedColor: AppColors.seed).copyWith(
     // Every role is declared. `fromSeed` had been generating a neutral-grey
@@ -205,51 +212,63 @@ ThemeData _buildTheme(
       ),
     ),
 
-    // Both button themes declare disabled, pressed and focused explicitly.
-    // Material supplies defaults, but they are derived from the scheme and
-    // drift once the scheme changes; naming them keeps the states stable.
-    filledButtonTheme: FilledButtonThemeData(
-      style: _buttonStyle(scheme).copyWith(
-        backgroundColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.disabled)) {
-            return scheme.onSurface.withValues(alpha: 0.12);
-          }
-          if (states.contains(WidgetState.pressed)) {
-            return Color.lerp(actionFill, scheme.onSurface, 0.12);
-          }
-
-          return actionFill;
-        }),
-        foregroundColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.disabled)) {
-            return scheme.onSurface.withValues(alpha: 0.38);
-          }
-
-          return actionLabel;
-        }),
+    // Pills — `MxPillButton`. Selected borrows the navigation bar's indicator
+    // pair, so "this one is active" looks the same whether it is a tab or a
+    // filter; unselected is a card sitting on the page, which is the same
+    // surface-over-background step every other panel uses.
+    //
+    // No checkmark: the pill group is always visible in full, so the selected
+    // one is legible by contrast alone and the tick would shift the label
+    // sideways on every change.
+    chipTheme: ChipThemeData(
+      backgroundColor: scheme.surface,
+      selectedColor: scheme.secondaryContainer,
+      showCheckmark: false,
+      side: BorderSide(color: semantic.borderSubtle),
+      shape: const StadiumBorder(),
+      labelStyle: base.textTheme.labelLarge?.copyWith(
+        color: scheme.onSurfaceVariant,
+      ),
+      secondaryLabelStyle: base.textTheme.labelLarge?.copyWith(
+        color: scheme.onSecondaryContainer,
+      ),
+      iconTheme: IconThemeData(
+        size: AppIconSize.sm,
+        color: scheme.onSurfaceVariant,
+      ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
       ),
     ),
 
-    outlinedButtonTheme: OutlinedButtonThemeData(
-      style: _buttonStyle(scheme).copyWith(
-        foregroundColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.disabled)) {
-            return scheme.onSurface.withValues(alpha: 0.38);
-          }
+    // The create action. `primary` rather than the M3 default
+    // `primaryContainer`: this is the one control on the deck list that starts a
+    // flow, and it sits over scrolling content where a low-contrast fill would
+    // disappear against a card passing underneath.
+    //
+    // Unshadowed like everything else here — the colour is the separation. See
+    // `MxCard` for the same decision on panels.
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      backgroundColor: scheme.primary,
+      foregroundColor: scheme.onPrimary,
+      elevation: 0,
+      focusElevation: 0,
+      hoverElevation: 0,
+      highlightElevation: 0,
+      shape: const CircleBorder(),
+    ),
 
-          return outlineLabel;
-        }),
-        side: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.disabled)) {
-            return BorderSide(color: scheme.onSurface.withValues(alpha: 0.12));
-          }
-          if (states.contains(WidgetState.focused)) {
-            return BorderSide(color: scheme.primary, width: 2);
-          }
+    filledButtonTheme: buildFilledButtonTheme(
+      scheme,
+      actionFill: actionFill,
+      actionLabel: actionLabel,
+    ),
 
-          return BorderSide(color: semantic.borderSubtle);
-        }),
-      ),
+    outlinedButtonTheme: buildOutlinedButtonTheme(
+      scheme,
+      semantic,
+      outlineLabel: outlineLabel,
     ),
 
     // Focus changes the border's COLOUR, not its weight. Material's default
@@ -369,26 +388,4 @@ ThemeData _buildTheme(
 OutlineInputBorder _inputBorder(Color color) => OutlineInputBorder(
   borderRadius: BorderRadius.circular(AppRadius.md),
   borderSide: BorderSide(color: color, width: 1.5),
-);
-
-ButtonStyle _buttonStyle(ColorScheme scheme) => ButtonStyle(
-  // 48 high before padding: the minimum touch target, enforced here rather
-  // than per component so no button can be built below it.
-  minimumSize: const WidgetStatePropertyAll<Size>(Size(64, 48)),
-  padding: const WidgetStatePropertyAll<EdgeInsets>(
-    EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.md),
-  ),
-  shape: WidgetStatePropertyAll<OutlinedBorder>(
-    RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
-  ),
-  overlayColor: WidgetStateProperty.resolveWith((states) {
-    if (states.contains(WidgetState.pressed)) {
-      return scheme.primary.withValues(alpha: 0.12);
-    }
-    if (states.contains(WidgetState.focused)) {
-      return scheme.primary.withValues(alpha: 0.10);
-    }
-
-    return null;
-  }),
 );

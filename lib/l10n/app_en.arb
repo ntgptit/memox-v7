@@ -74,6 +74,50 @@
   "@deckDueSemanticLabel": {
     "description": "Screen-reader label for the icon that marks a deck as having due cards. The icon and the text both carry the state so it never depends on colour alone."
   },
+  "deckFilterAllLabel": "All decks",
+  "@deckFilterAllLabel": {
+    "description": "Label of the deck-list filter pill when every deck is shown. Tapping it switches to showing only decks with cards due."
+  },
+  "deckFilterDueLabel": "Due only",
+  "@deckFilterDueLabel": {
+    "description": "Label of the deck-list filter pill when only decks with cards due are shown. Tapping it switches back to showing every deck."
+  },
+  "deckFilterAllSemanticLabel": "Showing all decks. Activate to show only decks with cards due.",
+  "@deckFilterAllSemanticLabel": {
+    "description": "Screen-reader label for the filter pill in its all-decks state. Says both what is on screen and what activating it does, because the pill is a toggle rather than a menu."
+  },
+  "deckFilterDueSemanticLabel": "Showing only decks with cards due. Activate to show all decks.",
+  "@deckFilterDueSemanticLabel": {
+    "description": "Screen-reader label for the filter pill in its due-only state."
+  },
+  "deckSortRecentLabel": "Recent",
+  "@deckSortRecentLabel": {
+    "description": "Label of the deck-list sort pill when decks are ordered newest first."
+  },
+  "deckSortNameLabel": "A-Z",
+  "@deckSortNameLabel": {
+    "description": "Label of the deck-list sort pill when decks are ordered by name. An abbreviation on purpose - the pill is narrow - with the full wording in the screen-reader label."
+  },
+  "deckSortRecentSemanticLabel": "Sorted by newest first. Activate to sort by name.",
+  "@deckSortRecentSemanticLabel": {
+    "description": "Screen-reader label for the sort pill in its recent state."
+  },
+  "deckSortNameSemanticLabel": "Sorted by name. Activate to sort by newest first.",
+  "@deckSortNameSemanticLabel": {
+    "description": "Screen-reader label for the sort pill in its by-name state."
+  },
+  "decksNoDueTitle": "Nothing due right now",
+  "@decksNoDueTitle": {
+    "description": "Title of the empty state shown when the due-only filter matches no deck. Not an error: having nothing due is a normal, good state (BR-29)."
+  },
+  "decksNoDueMessage": "Every deck is up to date. Switch the filter to see all your decks.",
+  "@decksNoDueMessage": {
+    "description": "Message of the empty state shown when the due-only filter matches no deck. Points at the control that got the user here."
+  },
+  "decksShowAllAction": "Show all decks",
+  "@decksShowAllAction": {
+    "description": "Button on the no-cards-due empty state. Clears the due-only filter."
+  },
   "schedulerEightBoxLabel": "Eight boxes",
   "@schedulerEightBoxLabel": {
     "description": "Name of the eight-box study mode, shown on deck rows and in the study-mode picker."

@@ -10,7 +10,7 @@ import 'package:memox/app/fallback/route_not_found_screen.dart';
 import 'package:memox/app/router/app_router.dart';
 import 'package:memox/core/navigation/route_names.dart';
 import 'package:memox/app/router/route_paths.dart';
-import 'package:memox/features/deck/presentation/screens/root_deck_list_screen.dart';
+import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
 import 'package:memox/features/review/presentation/review_placeholder_screen.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_content_shell.dart';
@@ -82,7 +82,7 @@ void main() {
     ) async {
       await pumpApp(tester);
 
-      expect(find.byType(RootDeckListScreen), findsOneWidget);
+      expect(find.byType(DeckListScreen), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
@@ -103,7 +103,7 @@ void main() {
     testWidgets('cold start selects Decks, not Review', (tester) async {
       await pumpApp(tester);
 
-      expect(find.byType(RootDeckListScreen), findsOneWidget);
+      expect(find.byType(DeckListScreen), findsOneWidget);
       expect(selectedTab(tester), 0);
     });
 
@@ -128,7 +128,7 @@ void main() {
       await tester.tap(tab(english.navigationDecksLabel));
       await tester.pumpAndSettle();
 
-      expect(find.byType(RootDeckListScreen), findsOneWidget);
+      expect(find.byType(DeckListScreen), findsOneWidget);
       expect(selectedTab(tester), 0);
     });
 
@@ -141,7 +141,7 @@ void main() {
       await pumpApp(tester, initialLocation: RoutePaths.review);
 
       expect(find.byType(ReviewPlaceholderScreen), findsOneWidget);
-      expect(find.byType(RootDeckListScreen), findsNothing);
+      expect(find.byType(DeckListScreen), findsNothing);
       expect(selectedTab(tester), 1);
     });
 
@@ -156,15 +156,15 @@ void main() {
       final repository = FakeDeckRepository();
       await pumpApp(tester, repository: repository);
 
-      expect(repository.summariesCallCount, 1);
+      expect(repository.deckListCallCount, 1);
 
       await tester.tap(tab(english.navigationReviewLabel));
       await tester.pumpAndSettle();
       await tester.tap(tab(english.navigationDecksLabel));
       await tester.pumpAndSettle();
 
-      expect(repository.summariesCallCount, 1);
-      expect(find.byType(RootDeckListScreen), findsOneWidget);
+      expect(repository.deckListCallCount, 1);
+      expect(find.byType(DeckListScreen), findsOneWidget);
     });
 
     testWidgets('re-selecting the current tab stays on its initial location', (
@@ -181,7 +181,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(router.routerDelegate.currentConfiguration.uri.path, '/');
-      expect(find.byType(RootDeckListScreen), findsOneWidget);
+      expect(find.byType(DeckListScreen), findsOneWidget);
       expect(selectedTab(tester), 0);
       expect(tester.takeException(), isNull);
     });
@@ -206,7 +206,7 @@ void main() {
       router.goNamed(RouteNames.decks);
       await tester.pumpAndSettle();
 
-      expect(find.byType(RootDeckListScreen), findsOneWidget);
+      expect(find.byType(DeckListScreen), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
@@ -251,7 +251,7 @@ void main() {
       await pumpApp(tester, initialLocation: missing);
 
       expect(find.byType(RouteNotFoundScreen), findsOneWidget);
-      expect(find.byType(RootDeckListScreen), findsNothing);
+      expect(find.byType(DeckListScreen), findsNothing);
       expect(tester.takeException(), isNull);
     });
 
@@ -271,7 +271,7 @@ void main() {
       await tester.tap(find.text(english.goHomeAction));
       await tester.pumpAndSettle();
 
-      expect(find.byType(RootDeckListScreen), findsOneWidget);
+      expect(find.byType(DeckListScreen), findsOneWidget);
       expect(find.byType(RouteNotFoundScreen), findsNothing);
     });
 

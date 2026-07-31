@@ -1,4 +1,6 @@
-import 'package:drift/drift.dart';
+// `isNull` collides with drift's SQL builder of the same name; the matcher is
+// what this file means every time.
+import 'package:drift/drift.dart' hide isNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/database/app_database.dart';
@@ -7,13 +9,15 @@ import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/deck/data/datasources/deck_dao.dart';
 import 'package:memox/features/deck/data/repositories/deck_repository_impl.dart';
 import 'package:memox/features/deck/domain/entities/deck_entity.dart';
-import 'package:memox/features/deck/domain/models/deck_detail_model.dart';
+import 'package:memox/features/deck/domain/models/deck_list_snapshot_model.dart';
 import 'package:memox/features/deck/domain/models/deck_name_model.dart';
+import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 
 import '../../../database/support/test_database.dart';
 
-/// `watchDeckDetail` — one read interaction for the deck screen (UC-06 step 4).
+/// `watchDeckList` with a parent — one read interaction for a level inside a
+/// deck (UC-06 step 4).
 ///
 /// **What this file exists to prove, and why a behaviour test could not.** The
 /// screen used to get its deck and its children from two statements: the
@@ -26,6 +30,12 @@ import '../../../database/support/test_database.dart';
 /// A test that only reads the emitted values cannot tell the two designs apart.
 /// So this one counts statements, through a real `QueryInterceptor` on real
 /// SQLite: the claim "one read" is measured, not asserted in prose.
+///
+/// The claim got *larger* when the two deck screens became one. A child row now
+/// carries its whole subtree's card total and due count, computed by a recursive
+/// CTE — three more aggregates that a naive implementation would have fetched
+/// per row, turning one statement into one-plus-N. The count below is what stops
+/// that.
 void main() {
   late List<String> lines;
   late AppDatabase db;
@@ -52,6 +62,10 @@ void main() {
   ///
   /// Reads only: an `UPDATE` goes through `runUpdate` and never carries the word,
   /// so a rename driven below appears in the log without inflating this count.
+  ///
+  /// One entry per *statement*, not per `SELECT` keyword — the interceptor logs a
+  /// statement as one line, so the recursive CTE's inner selects do not each
+  /// count.
   List<String> reads() =>
       lines.where((String line) => line.contains('SELECT')).toList();
 
@@ -70,16 +84,20 @@ void main() {
     updates: <TableInfo<Table, dynamic>>{db.decks},
   );
 
+  Stream<DeckListSnapshot> levelOf(String deckId) =>
+      repository.watchDeckList(parentDeckId: deckId, now: testNow);
+
   /// Subscribes and returns the list every emission lands in.
-  List<DeckDetail> watch(String deckId) {
-    final emissions = <DeckDetail>[];
-    final subscription = repository
-        .watchDeckDetail(deckId)
-        .listen(emissions.add);
+  List<DeckListSnapshot> watch(String deckId) {
+    final emissions = <DeckListSnapshot>[];
+    final subscription = levelOf(deckId).listen(emissions.add);
     addTearDown(subscription.cancel);
 
     return emissions;
   }
+
+  List<String> namesOf(DeckListSnapshot snapshot) =>
+      snapshot.decks.map((DeckSummary summary) => summary.deck.name).toList();
 
   Future<DeckEntity> seedRoot(String name) => repository.createRootDeck(
     name: DeckName.parse(name).name!,
@@ -107,7 +125,7 @@ void main() {
       await pumpEventQueue();
 
       expect(emissions, hasLength(2));
-      expect(emissions.last.deck.name, 'Japanese N5');
+      expect(emissions.last.parent?.name, 'Japanese N5');
       expect(
         reads(),
         hasLength(1),
@@ -130,14 +148,35 @@ void main() {
       );
 
       lines.clear();
-      final detail = await repository.watchDeckDetail(root.id).first;
+      final level = await levelOf(root.id).first;
 
-      expect(detail.deck.name, 'Japanese');
-      expect(detail.childDecks.map((DeckEntity d) => d.name), <String>[
-        'Hiragana',
-      ]);
+      expect(level.parent?.name, 'Japanese');
+      expect(namesOf(level), <String>['Hiragana']);
       expect(reads(), hasLength(1));
-      expect(reads().single, contains('FROM decks AS deck'));
+      expect(reads().single, contains('FROM decks AS parent'));
+    });
+
+    test('the subtree aggregates are in that same statement', () async {
+      // The 1+N guard. Three children, each with a subtree of its own, and still
+      // one statement: the counts come from the recursive CTE, not from a query
+      // per row.
+      final root = await seedRoot('Japanese');
+      for (final String name in <String>['A', 'B', 'C']) {
+        final branch = await repository.createSubDeck(
+          name: DeckName.parse(name).name!,
+          parentDeckId: root.id,
+        );
+        await repository.createSubDeck(
+          name: DeckName.parse('$name-leaf').name!,
+          parentDeckId: branch.id,
+        );
+      }
+
+      lines.clear();
+      final level = await levelOf(root.id).first;
+
+      expect(level.decks, hasLength(3));
+      expect(reads(), hasLength(1), reason: 'statements seen: ${reads()}');
     });
   });
 
@@ -148,10 +187,10 @@ void main() {
       // "gone" apart.
       final root = await seedRoot('Empty');
 
-      final detail = await repository.watchDeckDetail(root.id).first;
+      final level = await levelOf(root.id).first;
 
-      expect(detail.deck.id, root.id);
-      expect(detail.childDecks, isEmpty);
+      expect(level.parent?.id, root.id);
+      expect(level.decks, isEmpty);
     });
 
     test('children are ordered by creation, oldest first', () async {
@@ -163,13 +202,33 @@ void main() {
         );
       }
 
-      final detail = await repository.watchDeckDetail(root.id).first;
+      final level = await levelOf(root.id).first;
 
-      expect(detail.childDecks.map((DeckEntity d) => d.name), <String>[
-        'First',
-        'Second',
-        'Third',
-      ]);
+      expect(namesOf(level), <String>['First', 'Second', 'Third']);
+    });
+
+    test('a child carries the scheduler resolved from its root (BR-06)', () async {
+      // A sub-deck's own `scheduler_type` column is NULL by rule, so a summary
+      // built from the entity alone would say "unknown" on every row below the
+      // first level. The query resolves it through `root_deck_id`; this is that
+      // resolution, end to end.
+      final root = await repository.createRootDeck(
+        name: DeckName.parse('Japanese').name!,
+        schedulerType: SchedulerType.sm2,
+      );
+      final branch = await repository.createSubDeck(
+        name: DeckName.parse('Branch').name!,
+        parentDeckId: root.id,
+      );
+      await repository.createSubDeck(
+        name: DeckName.parse('Leaf').name!,
+        parentDeckId: branch.id,
+      );
+
+      final level = await levelOf(branch.id).first;
+
+      expect(level.decks.single.deck.schedulerType, isNull);
+      expect(level.decks.single.schedulerType, SchedulerType.sm2);
     });
 
     test('renaming the deck re-emits with the new name', () async {
@@ -183,14 +242,14 @@ void main() {
       );
       await pumpEventQueue();
 
-      expect(emissions.last.deck.name, 'After');
+      expect(emissions.last.parent?.name, 'After');
     });
 
     test('adding a child re-emits with it listed', () async {
       final root = await seedRoot('Japanese');
       final emissions = watch(root.id);
       await pumpEventQueue();
-      expect(emissions.last.childDecks, isEmpty);
+      expect(emissions.last.decks, isEmpty);
 
       await repository.createSubDeck(
         name: DeckName.parse('Hiragana').name!,
@@ -198,9 +257,7 @@ void main() {
       );
       await pumpEventQueue();
 
-      expect(emissions.last.childDecks.map((DeckEntity d) => d.name), <String>[
-        'Hiragana',
-      ]);
+      expect(namesOf(emissions.last), <String>['Hiragana']);
     });
 
     test('deleting a child re-emits without it', () async {
@@ -211,12 +268,12 @@ void main() {
       );
       final emissions = watch(root.id);
       await pumpEventQueue();
-      expect(emissions.last.childDecks, hasLength(1));
+      expect(emissions.last.decks, hasLength(1));
 
       await repository.deleteDeck(child.id);
       await pumpEventQueue();
 
-      expect(emissions.last.childDecks, isEmpty);
+      expect(emissions.last.decks, isEmpty);
     });
 
     test('moving a child away re-emits without it', () async {
@@ -235,7 +292,7 @@ void main() {
 
       final emissions = watch(root.id);
       await pumpEventQueue();
-      expect(emissions.last.childDecks, hasLength(2));
+      expect(emissions.last.decks, hasLength(2));
 
       await repository.moveDeck(
         deckId: moving.id,
@@ -243,9 +300,7 @@ void main() {
       );
       await pumpEventQueue();
 
-      expect(emissions.last.childDecks.map((DeckEntity d) => d.name), <String>[
-        'Other',
-      ]);
+      expect(namesOf(emissions.last), <String>['Other']);
     });
 
     test('mayOfferReset follows the children in the same emission', () async {
@@ -274,10 +329,7 @@ void main() {
 
   group('not found', () {
     test('a deck that never existed errors as NotFoundFailure', () async {
-      await expectLater(
-        repository.watchDeckDetail('nope').first,
-        throwsA(isA<NotFoundFailure>()),
-      );
+      await expectLater(levelOf('nope').first, throwsA(isA<NotFoundFailure>()));
     });
 
     test(
@@ -286,11 +338,11 @@ void main() {
         // UC-03 E1. "No rows" must not be mistaken for "a deck with no children" —
         // the screen renders a way back for one and an empty state for the other.
         final root = await seedRoot('Doomed');
-        final emissions = <DeckDetail>[];
+        final emissions = <DeckListSnapshot>[];
         final errors = <Object>[];
-        final subscription = repository
-            .watchDeckDetail(root.id)
-            .listen(emissions.add, onError: errors.add);
+        final subscription = levelOf(
+          root.id,
+        ).listen(emissions.add, onError: errors.add);
         addTearDown(subscription.cancel);
         await pumpEventQueue();
         expect(emissions, hasLength(1));

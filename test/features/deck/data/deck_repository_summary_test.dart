@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/deck/domain/models/deck_name_model.dart';
-import 'package:memox/features/deck/domain/models/root_deck_summary_model.dart';
+import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 
 import '../../../database/support/test_database.dart';
@@ -20,8 +20,11 @@ void main() {
   /// touches the wall clock, so `due_at == now` is constructible.
   final now = testNow;
 
-  Future<List<RootDeckSummary>> readSummaries() async =>
-      (await harness.deckRepository.watchRootDeckList(now: now).first).decks;
+  Future<List<DeckSummary>> readSummaries() async =>
+      (await harness.deckRepository
+              .watchDeckList(parentDeckId: null, now: now)
+              .first)
+          .decks;
 
   group('counting', () {
     test('a root with no cards still appears, with zeroes', () async {
@@ -66,7 +69,7 @@ void main() {
       await insertCard(harness.db, id: 'c3', deckId: second.leaf.id);
 
       final summaries = await readSummaries();
-      final byId = <String, RootDeckSummary>{
+      final byId = <String, DeckSummary>{
         for (final summary in summaries) summary.deck.id: summary,
       };
 
@@ -149,7 +152,10 @@ void main() {
       await seedDueCases();
 
       final later = await harness.deckRepository
-          .watchRootDeckList(now: now.add(const Duration(hours: 1)))
+          .watchDeckList(
+            parentDeckId: null,
+            now: now.add(const Duration(hours: 1)),
+          )
           .first;
 
       expect(later.decks.single.dueCardCount, 4);
@@ -165,7 +171,7 @@ void main() {
       await seedDueCases();
 
       final snapshot = await harness.deckRepository
-          .watchRootDeckList(now: now)
+          .watchDeckList(parentDeckId: null, now: now)
           .first;
 
       expect(snapshot.nextDueAt, now.add(const Duration(minutes: 1)));
@@ -175,7 +181,10 @@ void main() {
       await seedDueCases();
 
       final snapshot = await harness.deckRepository
-          .watchRootDeckList(now: now.add(const Duration(hours: 1)))
+          .watchDeckList(
+            parentDeckId: null,
+            now: now.add(const Duration(hours: 1)),
+          )
           .first;
 
       // Nothing left to wait for. The controller must arm no timer here, and a
@@ -191,7 +200,7 @@ void main() {
       );
 
       final snapshot = await harness.deckRepository
-          .watchRootDeckList(now: now)
+          .watchDeckList(parentDeckId: null, now: now)
           .first;
 
       expect(snapshot.decks, hasLength(1));
@@ -203,7 +212,7 @@ void main() {
       // row to read the scalar off, and `null` is the truth rather than a value
       // that went missing.
       final snapshot = await harness.deckRepository
-          .watchRootDeckList(now: now)
+          .watchDeckList(parentDeckId: null, now: now)
           .first;
 
       expect(snapshot.decks, isEmpty);
@@ -230,7 +239,7 @@ void main() {
       );
 
       final snapshot = await harness.deckRepository
-          .watchRootDeckList(now: now)
+          .watchDeckList(parentDeckId: null, now: now)
           .first;
 
       expect(snapshot.nextDueAt, now.add(const Duration(minutes: 7)));
@@ -242,11 +251,11 @@ void main() {
       // the timer would be waking the screen for nothing.
       await seedDueCases();
       final before = await harness.deckRepository
-          .watchRootDeckList(now: now)
+          .watchDeckList(parentDeckId: null, now: now)
           .first;
 
       final after = await harness.deckRepository
-          .watchRootDeckList(now: before.nextDueAt!)
+          .watchDeckList(parentDeckId: null, now: before.nextDueAt!)
           .first;
 
       expect(before.decks.single.dueCardCount, 3);
@@ -258,9 +267,9 @@ void main() {
     test('re-emits after a create, a rename, a move and a delete', () async {
       // What makes the list update without a manual refresh (UC-06 A2). Each
       // write touches `decks`, and Drift invalidates the aggregate on that.
-      final emissions = <List<RootDeckSummary>>[];
+      final emissions = <List<DeckSummary>>[];
       final subscription = harness.deckRepository
-          .watchRootDeckList(now: now)
+          .watchDeckList(parentDeckId: null, now: now)
           .listen((snapshot) => emissions.add(snapshot.decks));
       addTearDown(subscription.cancel);
 
@@ -296,9 +305,9 @@ void main() {
       // stream would look broken while the app is fine. Using the real write
       // path is also what this test is actually about.
       final tree = await harness.seedTree();
-      final emissions = <List<RootDeckSummary>>[];
+      final emissions = <List<DeckSummary>>[];
       final subscription = harness.deckRepository
-          .watchRootDeckList(now: now)
+          .watchDeckList(parentDeckId: null, now: now)
           .listen((snapshot) => emissions.add(snapshot.decks));
       addTearDown(subscription.cancel);
 

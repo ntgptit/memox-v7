@@ -148,6 +148,69 @@ LEFT JOIN decks AS child ON child.parent_deck_id = deck.id
 WHERE deck.id = :deckId
 ORDER BY child.created_at ASC, child.id ASC;
 
+-- One deck and its direct children, each child carrying the aggregate of its
+-- WHOLE subtree — the same three facts `rootDeckSummaries` gives a root.
+--
+-- **Why this exists at all.** Opening a deck used to show a plainer list than the
+-- one the user came from: names only, no counts, no state. Two screens for one
+-- idea, and the difference was not a design decision — it was the shape of the
+-- data leaking upward, because `deckDetail` returned bare rows.
+--
+-- **Why it needs recursion where `rootDeckSummaries` does not.** A root's subtree
+-- is free: every descendant already carries its `root_deck_id`, so the aggregate
+-- is a flat GROUP BY. No column identifies an *intermediate* ancestor, so the
+-- subtree of a deck at level 3 has to be walked. `branch` does that once for the
+-- whole level: it maps every descendant to which direct child of :parentId it
+-- belongs under, and the two aggregates then group on that.
+--
+-- UNION, not UNION ALL, for the same reason as every other walk in this file: a
+-- cyclic tree from corrupt data terminates with the complete reachable set
+-- instead of hanging. BR-55 caps real depth at 10, so the walk is short.
+--
+-- **The scheduler comes from the root** (BR-06): a sub-deck's own columns are
+-- NULL by rule, and the review it is part of uses the root's. Reading it here
+-- rather than leaving the caller to look it up keeps the level one statement.
+--
+-- The `nextDueAt` scalar is character-for-character the one in
+-- `rootDeckSummaries`, and for the same reason: it is when these counts expire.
+childDeckLevel:
+WITH RECURSIVE branch (branch_id, deck_id) AS (
+    SELECT id, id FROM decks WHERE parent_deck_id = :parentId
+    UNION
+    SELECT b.branch_id, d.id
+    FROM decks d
+    INNER JOIN branch b ON d.parent_deck_id = b.deck_id
+)
+SELECT
+    parent.**,
+    child.**,
+    root.scheduler_type AS inheritedSchedulerType,
+    COALESCE(total.cardCount, 0) AS totalCardCount,
+    COALESCE(due.dueCount, 0) AS dueCardCount,
+    (
+        SELECT MIN(next.due_at) FROM card_review_states next
+        WHERE next.due_at > :now
+    ) AS nextDueAt
+FROM decks AS parent
+LEFT JOIN decks AS child ON child.parent_deck_id = parent.id
+LEFT JOIN decks AS root ON root.id = child.root_deck_id
+LEFT JOIN (
+    SELECT b.branch_id AS branchId, COUNT(*) AS cardCount
+    FROM branch b
+    INNER JOIN cards c ON c.deck_id = b.deck_id
+    GROUP BY b.branch_id
+) total ON total.branchId = child.id
+LEFT JOIN (
+    SELECT b.branch_id AS branchId, COUNT(*) AS dueCount
+    FROM branch b
+    INNER JOIN cards c ON c.deck_id = b.deck_id
+    INNER JOIN card_review_states s ON s.card_id = c.id
+    WHERE (s.due_at IS NULL OR s.due_at <= :now)
+    GROUP BY b.branch_id
+) due ON due.branchId = child.id
+WHERE parent.id = :parentId
+ORDER BY child.created_at ASC, child.id ASC;
+
 -- An arbitrary deck's subtree — itself plus every descendant.
 subtreeDeckIds:
 WITH RECURSIVE subtree (id) AS (

@@ -6,10 +6,10 @@ import 'package:memox/app/config/env_config.dart';
 import 'package:memox/app/config/env_config_provider.dart';
 import 'package:memox/core/time/clock_provider.dart';
 import 'package:memox/features/deck/di/deck_repository_provider.dart';
-import 'package:memox/features/deck/domain/models/root_deck_list_snapshot_model.dart';
-import 'package:memox/features/deck/domain/models/root_deck_summary_model.dart';
+import 'package:memox/features/deck/domain/models/deck_list_snapshot_model.dart';
+import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/presentation/controllers/deck_list_now_controller.dart';
-import 'package:memox/features/deck/presentation/controllers/root_deck_list_controller.dart';
+import 'package:memox/features/deck/presentation/controllers/deck_list_controller.dart';
 
 import 'support/fake_deck_repository.dart';
 
@@ -48,8 +48,8 @@ void main() {
         ],
       );
       addTearDown(container.dispose);
-      container.listen<AsyncValue<RootDeckListSnapshot>>(
-        rootDeckListProvider,
+      container.listen<AsyncValue<DeckListSnapshot>>(
+        deckListProvider(null),
         (_, _) {},
       );
 
@@ -59,8 +59,8 @@ void main() {
     /// A repository whose snapshot always claims the same next boundary.
     FakeDeckRepository servingBoundary(DateTime? nextDueAt) =>
         FakeDeckRepository(
-          summaries: () => Stream<RootDeckListSnapshot>.value(
-            fakeListSnapshot(<RootDeckSummary>[
+          deckList: (_) => Stream<DeckListSnapshot>.value(
+            fakeListSnapshot(<DeckSummary>[
               fakeSummary(id: '1', name: 'Japanese', totalCardCount: 4),
             ], nextDueAt: nextDueAt),
           ),
@@ -75,16 +75,16 @@ void main() {
       final repository = servingBoundary(boundary);
       final fixture = driven(repository, start: fixedNow);
       await tester.pump();
-      expect(repository.summariesCallCount, 1);
+      expect(repository.deckListCallCount, 1);
 
       // Not yet. A timer that fired early would re-read for nothing.
       await tester.pump(const Duration(minutes: 29));
-      expect(repository.summariesCallCount, 1);
+      expect(repository.deckListCallCount, 1);
 
       fixture.setNow(boundary.add(const Duration(seconds: 1)));
       await tester.pump(const Duration(minutes: 2));
 
-      expect(repository.summariesCallCount, 2);
+      expect(repository.deckListCallCount, 2);
       expect(
         repository.readInstants.last,
         boundary.add(const Duration(seconds: 1)),
@@ -101,7 +101,7 @@ void main() {
 
       await tester.pump(const Duration(days: 2));
 
-      expect(repository.summariesCallCount, 1);
+      expect(repository.deckListCallCount, 1);
       // `flutter_test` fails a test that leaves a Timer pending, so reaching the
       // end of this one is itself the assertion that none was armed.
     });
@@ -117,12 +117,12 @@ void main() {
       );
       final fixture = driven(repository, start: fixedNow);
       await tester.pump();
-      expect(repository.summariesCallCount, 1);
+      expect(repository.deckListCallCount, 1);
 
       fixture.setNow(fixedNow.add(kMaxDueBoundaryDelay));
       await tester.pump(kMaxDueBoundaryDelay + const Duration(seconds: 1));
 
-      expect(repository.summariesCallCount, 2);
+      expect(repository.deckListCallCount, 2);
       expect(repository.readInstants.last, fixedNow.add(kMaxDueBoundaryDelay));
 
       // Disposed here rather than in a tear-down, because this is the one case
@@ -144,7 +144,7 @@ void main() {
       await tester.pump(const Duration(hours: 2));
 
       expect(
-        repository.summariesCallCount,
+        repository.deckListCallCount,
         1,
         reason:
             'a timer surviving disposal would read through a torn-down '
@@ -167,19 +167,19 @@ void main() {
     ({FakeDeckRepository repository, void Function(DateTime?) emit}) fed({
       DateTime? reReadBoundary,
     }) {
-      final controller = StreamController<RootDeckListSnapshot>();
+      final controller = StreamController<DeckListSnapshot>();
       addTearDown(controller.close);
-      RootDeckListSnapshot snapshot(DateTime? nextDueAt) =>
-          fakeListSnapshot(<RootDeckSummary>[
+      DeckListSnapshot snapshot(DateTime? nextDueAt) =>
+          fakeListSnapshot(<DeckSummary>[
             fakeSummary(id: '1', name: 'Japanese', totalCardCount: 4),
           ], nextDueAt: nextDueAt);
       var opened = 0;
       final repository = FakeDeckRepository(
-        summaries: () {
+        deckList: (_) {
           opened += 1;
           return opened == 1
               ? controller.stream
-              : Stream<RootDeckListSnapshot>.value(snapshot(reReadBoundary));
+              : Stream<DeckListSnapshot>.value(snapshot(reReadBoundary));
         },
       );
 
@@ -199,7 +199,7 @@ void main() {
         final DateTime boundary = fixedNow.add(const Duration(milliseconds: 5));
         final f = fed();
         final fixture = driven(f.repository, start: fixedNow);
-        expect(f.repository.summariesCallCount, 1);
+        expect(f.repository.deckListCallCount, 1);
         expect(f.repository.readInstants.single, fixedNow);
 
         // The clock crosses the boundary, then the snapshot read at `fixedNow`
@@ -213,7 +213,7 @@ void main() {
         await tester.pump(const Duration(milliseconds: 1));
 
         expect(
-          f.repository.summariesCallCount,
+          f.repository.deckListCallCount,
           2,
           reason: 'the crossed boundary must trigger exactly one refresh',
         );
@@ -233,14 +233,14 @@ void main() {
       final DateTime boundary = fixedNow.add(const Duration(minutes: 5));
       final f = fed();
       final fixture = driven(f.repository, start: fixedNow);
-      expect(f.repository.summariesCallCount, 1);
+      expect(f.repository.deckListCallCount, 1);
 
       fixture.setNow(boundary);
       f.emit(boundary);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 1));
 
-      expect(f.repository.summariesCallCount, 2);
+      expect(f.repository.deckListCallCount, 2);
       expect(f.repository.readInstants.last, boundary);
     });
 
@@ -254,7 +254,7 @@ void main() {
         final DateTime boundary = fixedNow.add(const Duration(milliseconds: 5));
         final f = fed(reReadBoundary: boundary);
         final fixture = driven(f.repository, start: fixedNow);
-        expect(f.repository.summariesCallCount, 1);
+        expect(f.repository.deckListCallCount, 1);
 
         fixture.setNow(fixedNow.add(const Duration(milliseconds: 10)));
         f.emit(boundary);
@@ -266,13 +266,13 @@ void main() {
 
         // One immediate refresh — the second read — and then silence, even
         // though the re-read still reports the same past boundary.
-        expect(f.repository.summariesCallCount, 2);
+        expect(f.repository.deckListCallCount, 2);
 
         // Pump far past any schedule. The count must not climb: the guard has to
         // refuse a second refresh for a boundary it already chased.
         await tester.pump(const Duration(minutes: 5));
         expect(
-          f.repository.summariesCallCount,
+          f.repository.deckListCallCount,
           2,
           reason: 'the loop guard must stop a stuck boundary re-refreshing',
         );
@@ -288,7 +288,7 @@ void main() {
       final DateTime boundary = fixedNow.add(const Duration(milliseconds: 5));
       final f = fed();
       final fixture = driven(f.repository, start: fixedNow);
-      expect(f.repository.summariesCallCount, 1);
+      expect(f.repository.deckListCallCount, 1);
 
       fixture.setNow(fixedNow.add(const Duration(milliseconds: 10)));
       f.emit(boundary);
@@ -298,7 +298,7 @@ void main() {
       await tester.pump(const Duration(minutes: 1));
 
       expect(
-        f.repository.summariesCallCount,
+        f.repository.deckListCallCount,
         1,
         reason: 'a disposed provider must not re-read from a late emission',
       );
@@ -319,13 +319,13 @@ void main() {
         fixture.container.read(deckListNowProvider.notifier).refresh();
         await tester.pump();
       }
-      final int readsBeforeBoundary = repository.summariesCallCount;
+      final int readsBeforeBoundary = repository.deckListCallCount;
 
       fixture.setNow(boundary.add(const Duration(seconds: 1)));
       await tester.pump(const Duration(minutes: 11));
 
       expect(
-        repository.summariesCallCount,
+        repository.deckListCallCount,
         readsBeforeBoundary + 1,
         reason: 'exactly one wake-up fired, however many times it was re-armed',
       );

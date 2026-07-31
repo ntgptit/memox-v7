@@ -6,13 +6,12 @@ import '../../../../core/error/drift_error_mapper.dart';
 import '../../../../core/error/failure.dart';
 import '../../domain/models/deck_content_type_model.dart';
 import '../../domain/models/deck_deletion_impact_model.dart';
-import '../../domain/models/deck_detail_model.dart';
 import '../../domain/entities/deck_entity.dart';
 import '../../domain/failures/deck_conflict_failure.dart';
 import '../../domain/failures/deck_move_failure.dart';
 import '../../domain/models/deck_name_model.dart';
 import '../../domain/repositories/deck_repository.dart';
-import '../../domain/models/root_deck_list_snapshot_model.dart';
+import '../../domain/models/deck_list_snapshot_model.dart';
 import '../../domain/models/scheduler_type_model.dart';
 import '../mappers/deck_mapper.dart';
 import '../datasources/deck_dao.dart';
@@ -74,8 +73,25 @@ final class DeckRepositoryImpl
       _guardStream(_dao.watchRootDecks()).map(_mapDeckRows);
 
   @override
-  Stream<RootDeckListSnapshot> watchRootDeckList({required DateTime now}) =>
-      _guardStream(_dao.watchRootDeckSummaries(now)).map(rootDeckListFromRows);
+  Stream<DeckListSnapshot> watchDeckList({
+    required String? parentDeckId,
+    required DateTime now,
+  }) {
+    // Two statements, one per shape of the question, and never both for one
+    // screen state. A root's subtree is reachable through `root_deck_id` in a flat
+    // GROUP BY (BR-56); a deeper level has no such column and has to be walked.
+    // Generalising them into one query would mean paying for the walk at the root,
+    // where the aggregate is already covering-index fast.
+    if (parentDeckId == null) {
+      return _guardStream(
+        _dao.watchRootDeckSummaries(now),
+      ).map(rootLevelFromRows);
+    }
+
+    return _guardStream(
+      _dao.watchChildDeckLevel(parentDeckId: parentDeckId, now: now),
+    ).map(childLevelFromRows);
+  }
 
   @override
   Stream<List<DeckEntity>> watchAllDecks() =>
@@ -84,12 +100,6 @@ final class DeckRepositoryImpl
   @override
   Stream<List<DeckEntity>> watchDeckTree(String rootDeckId) =>
       _guardStream(_dao.watchDecksInTree(rootDeckId)).map(_mapDeckRows);
-
-  @override
-  Stream<DeckDetail> watchDeckDetail(String deckId) =>
-      _guardStream(_dao.watchDeckDetail(deckId)).map(deckDetailFromRows);
-
-  // ---- writes ------------------------------------------------------------
 
   @override
   Future<DeckEntity> createRootDeck({

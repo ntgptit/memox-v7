@@ -1,8 +1,7 @@
 import '../models/deck_deletion_impact_model.dart';
-import '../models/deck_detail_model.dart';
 import '../entities/deck_entity.dart';
 import '../models/deck_name_model.dart';
-import '../models/root_deck_list_snapshot_model.dart';
+import '../models/deck_list_snapshot_model.dart';
 import '../models/scheduler_type_model.dart';
 
 /// Contract for deck-tree management (UC-02, UC-03, UC-08, UC-09). Card CRUD
@@ -29,24 +28,34 @@ abstract interface class DeckRepository {
   /// All root decks, re-emitted on every change.
   Stream<List<DeckEntity>> watchRootDecks();
 
-  /// Root decks with their aggregate progress — total cards in the tree, how
-  /// many are due, and the instant that answer expires (UC-06).
+  /// One level of the deck tree, re-emitted on every change (UC-06, UC-08).
   ///
-  /// The expiry is part of the same read on purpose. Every due count is relative
-  /// to [now], so each one has a moment at which it becomes wrong; the caller
-  /// re-measures then. Two reads would compute the counts and the boundary from
-  /// two database states, and the refresh would land at an instant that was
-  /// correct for neither.
+  /// [parentDeckId] null asks for the root level: every root deck, and no parent.
+  /// Any other id asks for what is inside that deck, and the snapshot carries the
+  /// deck itself so the screen can title itself and build its action set from the
+  /// same instant the list came from.
   ///
-  /// [now] is passed in, never read from a clock inside the query: "due
-  /// exactly at now" is a boundary that has to work, and a query that reads
-  /// the clock itself cannot be tested at it (BR-22). The caller owns when the
-  /// number is recomputed.
+  /// **One method, because it is one screen.** The root list and the inside of a
+  /// deck were `watchRootDeckList` and `watchDeckDetail`, and the second returned
+  /// bare rows where the first returned aggregates — so opening a deck showed a
+  /// plainer list than the one the user came from. That difference was two reads
+  /// showing through, not a decision anyone made.
   ///
-  /// One query, not one per deck. The counts reach descendants through
-  /// `root_deck_id` (BR-56), which is what makes a flat aggregate possible
-  /// where a parent walk would need recursion.
-  Stream<RootDeckListSnapshot> watchRootDeckList({required DateTime now});
+  /// Every level costs **one statement**. Which statement differs — a root's
+  /// subtree is free through `root_deck_id` (BR-56) while a deeper one has to be
+  /// walked — but no screen state is ever built from two.
+  ///
+  /// [now] is passed in, never read from a clock inside the query: "due exactly at
+  /// now" is a boundary that has to work, and a query that reads the clock itself
+  /// cannot be tested at it (BR-22). The caller owns when the number is recomputed.
+  ///
+  /// Errors as `NotFoundFailure` when [parentDeckId] names a deck that does not
+  /// exist. That is a different thing from a level with no children and has to
+  /// stay different: one is a dead route, the other is an empty state.
+  Stream<DeckListSnapshot> watchDeckList({
+    required String? parentDeckId,
+    required DateTime now,
+  });
 
   /// Every deck in the database, for building a move-target picker (UC-09).
   ///
@@ -57,20 +66,6 @@ abstract interface class DeckRepository {
 
   /// A root deck and every descendant, to the allowed depth (BR-55).
   Stream<List<DeckEntity>> watchDeckTree(String rootDeckId);
-
-  /// One deck together with its direct children (UC-06 step 4, UC-08).
-  ///
-  /// **One method, because the screen needs one snapshot.** The action set is
-  /// computed from the deck's `content_type` and from whether the children are
-  /// empty (BR-68) at the same time, so the two facts must come from the same
-  /// read. This used to be `watchChildDecks` plus `getDeckById`, composed in the
-  /// controller — two statements, two snapshots, and a window a rename or a
-  /// create could land in.
-  ///
-  /// Errors as `NotFoundFailure` when the deck does not exist, which is a
-  /// different thing from a deck with no children and has to stay different: one
-  /// is a dead route, the other is an empty state.
-  Stream<DeckDetail> watchDeckDetail(String deckId);
 
   /// Creates a root deck (UC-02): `parent_deck_id = NULL`, `root_deck_id =
   /// id`, `content_type = deck`, generation 1, `first_review_at = NULL`.
