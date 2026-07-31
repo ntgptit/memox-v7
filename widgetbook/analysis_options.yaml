@@ -1,0 +1,19 @@
+# The catalog package borrows the app's lint posture but not its promotions:
+# `flutter_lints` recommended set, analyzer strictness on. The root
+# analysis_options.yaml governs the app package only — this file is what makes
+# the nested package's analysis context self-contained.
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  language:
+    strict-casts: true
+    strict-inference: true
+    strict-raw-types: true
+
+linter:
+  rules:
+    - prefer_const_constructors
+    - prefer_const_declarations
+    - prefer_final_locals
+    - always_declare_return_types
+    - avoid_redundant_argument_values

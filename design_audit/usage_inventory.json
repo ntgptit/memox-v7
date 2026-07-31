@@ -2576,8 +2576,8 @@
       "line": 126,
       "widget_context": "_SheetRow",
       "element_kind": "other",
-      "source_kind": "blend-source",
-      "expression": "context.colors.onSurface.withValues(alpha: _disabledOpacity)",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurface",
       "token": "colorScheme.onSurface",
       "resolved_value_light": "#16182B",
       "resolved_value_dark": "#EDEEF5"
@@ -2587,8 +2587,8 @@
       "line": 126,
       "widget_context": "_SheetRow",
       "element_kind": "other",
-      "source_kind": "theme-token",
-      "expression": "context.colors.onSurface",
+      "source_kind": "blend-source",
+      "expression": "context.colors.onSurface.withValues(alpha: _disabledOpacity)",
       "token": "colorScheme.onSurface",
       "resolved_value_light": "#16182B",
       "resolved_value_dark": "#EDEEF5"
