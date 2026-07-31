@@ -1,15 +1,23 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_elevation.dart';
 import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/theme_context_extension.dart';
 
-/// The app's one raised surface: a bordered, unshadowed panel.
+/// The app's one raised surface: a bordered panel that carries elevation.
 ///
-/// Flat by design. During a review the card content is the task, and elevation
-/// shadows in a stack of surfaces add depth cues that compete with it. The page
-/// already sits a step below the card — see `scaffoldBackgroundColor` in
-/// `app_theme.dart` — so a card reads as a card without a shadow saying so.
+/// **It was flat, and that was never a rule.** Two doc comments said the surface
+/// ladder worked without a shadow, and two milestones read that as a ban — no AD,
+/// no BR, no test behind it, while `docs/checklist.md` asked for an Elevation
+/// token nobody built. The project owner has since said the app needs real
+/// elevation to separate elements, so it has one.
+///
+/// **The shadow appears in light and not in dark, by measurement.** The dark page
+/// sits at the bottom of the lightness scale, so a shadow there moves it by
+/// ΔL\* 0.26 where the surface step already moves it 7.70 — see [shadowsFor].
+/// Dark keeps its ladder and its border; light gains a shadow and gives some
+/// border back.
 ///
 /// [onTap] makes the whole surface one target rather than requiring a nested
 /// button. That is a generic capability, not a feature one: any card that stands
@@ -17,18 +25,24 @@ import '../../core/theme/theme_context_extension.dart';
 /// call site is how two call sites end up with different splash radii.
 ///
 /// The ripple is clipped to the same [AppRadius.lg] the border uses, and the card
-/// keeps its exact unshadowed look when [onTap] is null — the `Material` layer is
-/// transparent and exists only to host the ink.
+/// looks identical when [onTap] is null — the `Material` layer is transparent and
+/// exists only to host the ink.
 class MxCard extends StatelessWidget {
   const MxCard({
     required this.child,
     this.padding = const EdgeInsets.all(AppSpacing.lg),
+    this.elevation = AppElevation.card,
     this.onTap,
     super.key,
   });
 
   final Widget child;
   final EdgeInsetsGeometry padding;
+
+  /// How far this card sits above the page. [AppElevation.none] returns it to a
+  /// flat bordered panel, which is what a card *inside* another surface wants —
+  /// a shadow stacked on a shadow reads as a rendering fault rather than depth.
+  final double elevation;
 
   /// Makes the whole card a target. Null leaves it a plain surface.
   ///
@@ -47,6 +61,7 @@ class MxCard extends StatelessWidget {
         color: context.colors.surface,
         borderRadius: BorderRadius.circular(AppRadius.lg),
         border: Border.all(color: context.semanticColors.borderSubtle),
+        boxShadow: shadowsFor(elevation, context.colors),
       ),
       child: Padding(padding: padding, child: child),
     );

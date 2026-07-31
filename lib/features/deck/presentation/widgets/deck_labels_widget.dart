@@ -36,6 +36,23 @@ extension DeckLabels on BuildContext {
     null => l10n.schedulerUnknownLabel,
   };
 
+  /// The study mode's name, short enough to sit in a one-line summary.
+  ///
+  /// A second form rather than a shortening of the first: the picker in the
+  /// create form has a whole row for the name and should say "Eight boxes", while
+  /// a deck row has to fit it after two counts. Truncating the long one at the
+  /// call site would put a layout decision inside a string.
+  ///
+  /// `SM-2` is already as short as it gets and is not translated — it is the
+  /// published name of the algorithm — so it has one form and both getters return
+  /// it.
+  String schedulerShortLabel(SchedulerType? scheduler) => switch (scheduler) {
+    SchedulerType.eightBox => l10n.schedulerEightBoxShortLabel,
+    SchedulerType.sm2 => l10n.schedulerSm2Label,
+    SchedulerType.unknown => l10n.schedulerUnknownShortLabel,
+    null => l10n.schedulerUnknownShortLabel,
+  };
+
   String schedulerDescription(SchedulerType scheduler) => switch (scheduler) {
     SchedulerType.eightBox => l10n.schedulerEightBoxDescription,
     SchedulerType.sm2 => l10n.schedulerSm2Description,

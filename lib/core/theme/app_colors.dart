@@ -35,16 +35,34 @@ abstract final class AppColors {
   // --- Surface ladder ------------------------------------------------------
   //
   // Four tiers. Dark climbs L* 3.9 -> 11.6 -> 19.0 -> 26.3 so a card reads as a
-  // card and an inset tile as an inset without a shadow being asked to carry
-  // the hierarchy. Light inverts it — the card is white and the rest sit below
-  // — which is the same ordering of PROMINENCE, built the only way white allows.
+  // card and an inset tile as an inset on the strength of the ladder alone.
+  // Light inverts it — the card is white and the rest sit below — which is the
+  // same ordering of PROMINENCE, built the only way white allows.
+  //
+  // **That the ladder can carry the hierarchy is not the same as a rule against
+  // shadows**, and this comment was read as one for two milestones. The project
+  // owner has since said the app needs real elevation to separate elements; see
+  // `shadowLight`/`shadowDark` and MX-VIS-002 rule R6. Nothing here forbids a
+  // shadow — it only explains why the ladder was built to work without one.
 
   /// Page background. The one component allowed a strong navy saturation.
   static const Color backgroundLight = Color(0xFFF4F5F8);
   static const Color backgroundDark = Color(0xFF0A082D);
 
   /// Card and sheet — the flashcard surface.
-  static const Color surfaceLight = Color(0xFFFFFFFF);
+  ///
+  /// **Not pure white, since M4.10i.** `#FFFFFF` carries no hue at all, so the
+  /// one surface the whole app is built on had no relation to the seed while
+  /// every other neutral did — the audit's largest finding, and the reason light
+  /// mode read as a different palette from dark. `#FBFBFE` is `seed @ 0.02` over
+  /// white: hue 240, chroma 0.012, nowhere near the light canvas's tint budget.
+  ///
+  /// It costs lightness. A tinted card is a *darker* card, so the surface step
+  /// drops from 3.46 L\* to 2.15 — which was the argument for leaving it alone
+  /// while the step was the only depth cue light had. It is not any more: the
+  /// shadow's alpha was re-solved to 0.07 and the total lift is 7.75 L\* against
+  /// dark's 7.70.
+  static const Color surfaceLight = Color(0xFFFBFBFE);
   static const Color surfaceDark = Color(0xFF1B1D32);
 
   /// Inset tile, chip, icon container.
@@ -52,7 +70,11 @@ abstract final class AppColors {
   static const Color surfaceMutedDark = Color(0xFF292D42);
 
   /// Top of the ladder: a raised or selected surface.
-  static const Color surfaceElevatedLight = Color(0xFFFFFFFF);
+  ///
+  /// `seed @ 0.015` over white — one step lighter than [surfaceLight] and still
+  /// carrying the hue. Both were `#FFFFFF` before M4.10i, which made the top two
+  /// rungs of the light ladder the same rung.
+  static const Color surfaceElevatedLight = Color(0xFFFCFCFE);
   static const Color surfaceElevatedDark = Color(0xFF383D55);
 
   // --- Text and lines ------------------------------------------------------
@@ -66,7 +88,26 @@ abstract final class AppColors {
   static const Color textSecondaryDark = Color(0xFFA6ABC2);
 
   /// Hairline between rows, around cards, and an input at rest.
-  static const Color borderSubtleLight = Color(0xFFD7DAE3);
+  ///
+  /// **The two modes are no longer matched on this number, and that is the
+  /// point.** Until M4.10h both stood at 1.82:1 against the card, because the
+  /// border was the only depth cue either had. Light now has a shadow
+  /// (`AppElevation`), so its border can stand down to 1.50:1; dark has no
+  /// shadow — measured, not chosen: at the bottom of the lightness scale a
+  /// shadow moves the page by ΔL* 0.26 — so its border keeps carrying the edge
+  /// at 1.82:1.
+  ///
+  /// Matching the borders was the right rule when the border was everything, and
+  /// it is the wrong rule now: it would force light to draw a frame it no longer
+  /// needs. What `app_theme_test.dart` pins instead is the **step a card's edge
+  /// produces** — ΔL* 8.04 in light against 7.70 in dark — which is the thing a
+  /// reader actually perceives, and which stays symmetric while the mechanisms
+  /// differ.
+  ///
+  /// Both values are hue 240 and inside the light canvas's chroma budget. The
+  /// history is worth keeping: `#D7DAE3` (1.40:1) was too weak when it was the
+  /// only cue, `#BEC0C3` (1.82:1) was right then and too heavy now.
+  static const Color borderSubtleLight = Color(0xFFD2D2DD);
   static const Color borderSubtleDark = Color(0xFF414762);
 
   /// Input border while focused. Focus shifts *hue*, never stroke width —
@@ -155,7 +196,7 @@ abstract final class AppColors {
   static const Color errorContainerDark = Color(0xFF5E2831);
   static const Color onErrorContainerLight = Color(0xFF641421);
   static const Color onErrorContainerDark = Color(0xFFF5D3D8);
-  static const Color surfaceContainerLowestLight = Color(0xFFFFFFFF);
+  static const Color surfaceContainerLowestLight = Color(0xFFFCFCFE);
   static const Color surfaceContainerLowestDark = Color(0xFF07061F);
   static const Color surfaceContainerLowLight = Color(0xFFFAFAFC);
   static const Color surfaceContainerLowDark = Color(0xFF12142B);
@@ -167,7 +208,7 @@ abstract final class AppColors {
   static const Color surfaceContainerHighestDark = Color(0xFF333852);
   static const Color surfaceDimLight = Color(0xFFDEE0E7);
   static const Color surfaceDimDark = Color(0xFF08061F);
-  static const Color surfaceBrightLight = Color(0xFFFFFFFF);
+  static const Color surfaceBrightLight = Color(0xFFFCFCFE);
   static const Color surfaceBrightDark = Color(0xFF383D55);
   static const Color inverseSurfaceLight = Color(0xFF2A2C3E);
   static const Color inverseSurfaceDark = Color(0xFFE7E8F0);
@@ -175,8 +216,29 @@ abstract final class AppColors {
   static const Color onInverseSurfaceDark = Color(0xFF23253A);
   static const Color inversePrimaryLight = Color(0xFFA9A9E0);
   static const Color inversePrimaryDark = Color(0xFF3A3A9B);
+
+  /// The colour a drop shadow and a modal scrim are drawn from.
+  ///
+  /// **Both modes derive from the seed, and that stopped being cosmetic at
+  /// M4.10g.** Dark was pure `#000000` while light was already `#0B0C18` (hue
+  /// 235) — an asymmetry nobody could see, because nothing in the app painted a
+  /// shadow. The project owner's decision that surfaces *should* carry elevation
+  /// makes it visible on the first switch: light would drop a seed-tinted shadow
+  /// and dark a flat black one, from one token name.
+  ///
+  /// `#04040B` is `seed @ 0.06` over black, which keeps hue 240 at a luminance
+  /// low enough to read as a shadow rather than as a navy smear. Pinned by
+  /// MX-VIS-002 rule R6.
+  /// The letterbox around the phone-sized frame on the web build.
+  ///
+  /// Outside the app surface entirely — Android never shows it (AD-04) — but it
+  /// is still a colour, and a colour in a widget is a colour the theme cannot
+  /// change. Darker than any real surface on purpose: it has to read as "not the
+  /// app" rather than as another panel.
+  static const Color webLetterbox = Color(0xFF14162A);
+
   static const Color shadowLight = Color(0xFF0B0C18);
-  static const Color shadowDark = Color(0xFF000000);
+  static const Color shadowDark = Color(0xFF04040B);
   static const Color scrimLight = Color(0xFF0B0C18);
-  static const Color scrimDark = Color(0xFF000000);
+  static const Color scrimDark = Color(0xFF04040B);
 }

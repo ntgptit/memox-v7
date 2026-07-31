@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/app/app.dart';
 import 'package:memox/features/deck/di/deck_repository_provider.dart';
 import 'package:memox/core/theme/app_semantic_colors.dart';
+import 'package:memox/core/theme/app_elevation.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/core/theme/theme_context_extension.dart';
 
@@ -122,6 +123,67 @@ void main() {
           }
         }
       }
+    });
+
+    test('a card edge produces the same step in both modes', () {
+      // **This replaced a rule that had become wrong.** Until M4.10h it asserted
+      // that the *border contrast* matched across modes, which was right while
+      // the border was the only depth cue either mode had. Light now has a
+      // shadow and dark does not — measured, not chosen: at the bottom of the
+      // lightness scale a dark shadow moves the page by ΔL* 0.26 where the
+      // surface step already moves it 7.70 — so matching the borders would force
+      // light to keep drawing a frame it no longer needs.
+      //
+      // What has to stay symmetric is what a reader perceives: how big a step
+      // the edge of a card makes against the page it lies on. Each mode is
+      // allowed to build that step out of whatever it has.
+      // **How far a card is lifted off the page, in total.** Not the border
+      // contrast: a border is a one-pixel line, and the first version of this
+      // measurement took whichever cue was furthest from the page, which meant
+      // dark's border always won and reported 26.8 L* for a card that moves 7.7.
+      //
+      // The surface step plus whatever the shadow darkens around it — the two
+      // things that actually make a card sit on something.
+      double liftOf(ThemeData theme) {
+        final page = theme.scaffoldBackgroundColor;
+        final surfaceStep =
+            (lightnessStar(theme.colorScheme.surface) - lightnessStar(page))
+                .abs();
+
+        var shadowStep = 0.0;
+        for (final shadow in shadowsFor(AppElevation.card, theme.colorScheme)) {
+          final under = Color.alphaBlend(shadow.color, page);
+          final depth = (lightnessStar(page) - lightnessStar(under)).abs();
+          if (depth > shadowStep) shadowStep = depth;
+        }
+
+        return surfaceStep + shadowStep;
+      }
+
+      final steps = <String, double>{
+        for (final entry in themes.entries) entry.key: liftOf(entry.value),
+      };
+
+      for (final entry in steps.entries) {
+        expect(
+          entry.value,
+          greaterThanOrEqualTo(6.0),
+          reason:
+              '${entry.key}: a card edge moves the page by only '
+              '${entry.value.toStringAsFixed(2)} L*. Below this a card does not '
+              'read as sitting on anything. Measured: $steps',
+        );
+      }
+
+      expect(
+        (steps['light']! - steps['dark']!).abs(),
+        lessThan(2.0),
+        reason:
+            'the two modes must lift a card off the page by the same amount, '
+            'however each builds it. Light was 1.40 against a border-matched '
+            "dark's 1.82 before M4.10e, and 8.04 against 7.70 after elevation "
+            'landed. Measured: $steps',
+      );
     });
   });
 

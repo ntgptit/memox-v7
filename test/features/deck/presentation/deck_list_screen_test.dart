@@ -100,7 +100,10 @@ void main() {
         findsOneWidget,
       );
       expect(find.textContaining(english.deckDueCountLabel(7)), findsOneWidget);
-      expect(find.textContaining(english.schedulerEightBoxLabel), findsWidgets);
+      expect(
+        find.textContaining(english.schedulerEightBoxShortLabel),
+        findsWidgets,
+      );
       expect(find.textContaining(english.schedulerSm2Label), findsOneWidget);
     });
 

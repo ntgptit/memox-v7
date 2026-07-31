@@ -24,7 +24,20 @@ void main() {
       // 3 L* is roughly where a step across a large flat field stops being
       // visible. Asserting the ORDER and the STEP, not the values, so a future
       // palette can move all four without this test dictating the colours.
-      const minimumStep = 3.0;
+      //
+      // **Light asks for less, since M4.10i, and for a reason rather than a
+      // concession.** This number was set at M3.5b when neither mode had a
+      // shadow and the ladder was the entire hierarchy. Light has one now, and
+      // its card also carries a seed tint that costs 1.31 L* of lightness — a
+      // tint the audit's largest finding required. Holding light to a ladder
+      // built for a mode with no other cue would mean choosing between a card
+      // that relates to the seed and a card that sits on the page.
+      //
+      // What stops this being a quiet loosening: the *total* lift of a card off
+      // its page is asserted separately in `app_theme_test.dart` and has not
+      // moved — 7.75 L* in light against 7.70 in dark. The ladder gave some up
+      // and the shadow took it on.
+      const minimumStep = <String, double>{'dark': 3.0, 'light': 2.0};
       final ladders = <String, List<(String, Color)>>{
         'dark': <(String, Color)>[
           ('page', dark.scaffoldBackgroundColor),
@@ -50,7 +63,7 @@ void main() {
 
           expect(
             step,
-            greaterThanOrEqualTo(minimumStep),
+            greaterThanOrEqualTo(minimumStep[ladder.key]!),
             reason:
                 '${ladder.key}: ${tiers[i - 1].$1} -> ${tiers[i].$1} is flat',
           );
