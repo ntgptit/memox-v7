@@ -35,6 +35,12 @@ without re-checking.
       unhandled empty state is the single most common gap here.
 - [ ] Icon-only controls have semantic labels; touch targets are at least 48dp.
 - [ ] No user-visible string outside the ARB files.
+- [ ] Registered in the Widgetbook catalog (`widgetbook/`): a new shared
+      component gets a knob-driven playground; a new screen gets a use-case
+      mounting it with its domain contract faked, states reachable via knobs.
+      The catalog is where a human inspects the UI under both themes, text
+      scales and viewports without hunting through the app — a screen missing
+      from it is invisible to that review.
 
 ## Paperwork
 - [ ] `docs/wbs.md` updated in this commit.

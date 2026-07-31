@@ -251,7 +251,9 @@ No task is done until: scope matches the WBS entry, acceptance criteria pass,
 `dart format` clean, `flutter analyze` clean (zero errors *and* warnings),
 related tests pass, UI uses tokens and was checked in light + dark + small
 screen + large text scale, loading/empty/error/success all covered, basic
-accessibility checked, docs and WBS updated, CI green.
+accessibility checked, every new screen and new shared component registered in
+the Widgetbook catalog (`widgetbook/` — see its README), docs and WBS updated,
+CI green.
 
 Run `.claude/skills/flutter-workflow/scripts/dod_check.sh` for the mechanical
 half of that list. The judgement half is still yours.
