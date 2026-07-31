@@ -105,6 +105,62 @@ void main() {
       handle.dispose();
     });
 
+    testWidgets('its ink layer sits above the surface paint', (tester) async {
+      // Paint order, asserted structurally because it cannot be seen any other
+      // way in a widget test. `_RenderInkFeatures` draws splashes and the hover
+      // highlight and *then* draws its child, so an `InkWell` wrapped around the
+      // `DecoratedBox` puts every state underneath an opaque surface colour — a
+      // tappable card with no feedback at all. The ink has to be inside the
+      // decoration, with only the padding and the content below it.
+      await pump(
+        tester,
+        MxCard(onTap: () {}, child: const Text('Academic Word List')),
+      );
+
+      final inCard = find.descendant(
+        of: find.byType(MxCard),
+        matching: find.byType(DecoratedBox),
+      );
+      expect(
+        find.descendant(of: inCard, matching: find.byType(InkWell)),
+        findsOneWidget,
+        reason: 'the ink is painted over the surface, not under it',
+      );
+      expect(
+        find.descendant(of: find.byType(InkWell), matching: inCard),
+        findsNothing,
+        reason: 'no opaque surface may sit between the ink and the eye',
+      );
+    });
+
+    testWidgets('a control inside a tappable card keeps its own tap', (
+      tester,
+    ) async {
+      // The reason the whole card can be the target at all. A deck card carries
+      // an overflow menu, and a card that swallowed it would force the caller to
+      // make a *region* of itself tappable instead — which leaves the rest of the
+      // card looking tappable and inert. The nested button wins the gesture arena
+      // over the card's ink; nothing else is needed to keep them apart.
+      var cardTaps = 0;
+      var buttonTaps = 0;
+      await pump(
+        tester,
+        MxCard(
+          onTap: () => cardTaps += 1,
+          child: TextButton(
+            onPressed: () => buttonTaps += 1,
+            child: const Text('Actions'),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Actions'));
+      await tester.pump();
+
+      expect(buttonTaps, 1);
+      expect(cardTaps, 0, reason: 'the card must not fire as well');
+    });
+
     testWidgets('its contents are what name it', (tester) async {
       // There is no `semanticLabel` parameter, deliberately: the card's children
       // already say what it is, and an override would replace them rather than

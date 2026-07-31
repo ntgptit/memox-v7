@@ -63,6 +63,7 @@ in the empty cells, not in re-picking what exists.
 
 | target token | site | current (light) | current (dark) |
 |---|---|---|---|
+| a precomputed blendOver(...) constant | `lib/shared/widgets/mx_text_button.dart:93` — context.colors.onSurface.withValues(alpha: _kDisabledLabelAlpha) | `#16182B @ alpha unresolvable` | `#EDEDF6 @ alpha unresolvable` |
 
 ## 3. Fill order: ColorScheme vs ThemeExtension
 

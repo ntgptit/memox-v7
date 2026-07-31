@@ -24,9 +24,21 @@ import '../../core/theme/theme_context_extension.dart';
 /// for a thing the user can open wants it, and building the ink by hand at each
 /// call site is how two call sites end up with different splash radii.
 ///
-/// The ripple is clipped to the same [AppRadius.lg] the border uses, and the card
-/// looks identical when [onTap] is null — the `Material` layer is transparent and
-/// exists only to host the ink.
+/// **A tappable card may still hold its own controls.** The ink covers the whole
+/// card and a nested button wins the gesture arena over it, so a card with a
+/// trailing menu does not have to make a *region* of itself the target — which is
+/// the arrangement that leaves the rest of the card looking tappable and inert.
+/// The web kit had to be taught the same thing the hard way: a `<button>` cannot
+/// contain a control, so `MxCard` there lays its target under the content rather
+/// than becoming one.
+///
+/// **The ink layer sits inside the decoration, not around it.** An `InkWell`
+/// paints its splash and its hover highlight *before* it paints its child, so a
+/// card that wrapped the whole `DecoratedBox` in one drew every state underneath
+/// an opaque surface colour — a tappable card with no visible feedback at all.
+/// The `Material` is transparent and hosts only the ink; the ripple is clipped to
+/// the same [AppRadius.lg] the border uses, and the card looks identical when
+/// [onTap] is null.
 class MxCard extends StatelessWidget {
   const MxCard({
     required this.child,
@@ -56,18 +68,18 @@ class MxCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final surface = DecoratedBox(
-      decoration: BoxDecoration(
-        color: context.colors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: context.semanticColors.borderSubtle),
-        boxShadow: shadowsFor(elevation, context.colors),
-      ),
-      child: Padding(padding: padding, child: child),
+    final decoration = BoxDecoration(
+      color: context.colors.surface,
+      borderRadius: BorderRadius.circular(AppRadius.lg),
+      border: Border.all(color: context.semanticColors.borderSubtle),
+      boxShadow: shadowsFor(elevation, context.colors),
     );
+    final content = Padding(padding: padding, child: child);
 
     final tap = onTap;
-    if (tap == null) return surface;
+    if (tap == null) {
+      return DecoratedBox(decoration: decoration, child: content);
+    }
 
     // `button: true` and nothing else. An `InkWell` contributes a tap action and
     // focusability but **not** the button flag — a screen reader would read the
@@ -75,17 +87,20 @@ class MxCard extends StatelessWidget {
     // labelling is the whole point: adding a `label` here would replace the
     // children's text instead of naming the control, which is the mistake the
     // first version of this made.
-    return Semantics(
-      button: true,
-      child: Material(
-        // Transparency rather than a colour: the `DecoratedBox` above already
-        // paints the surface, and a second opaque layer would double the border
-        // radius' antialiasing seam.
-        type: MaterialType.transparency,
-        child: InkWell(
-          onTap: tap,
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          child: surface,
+    return DecoratedBox(
+      decoration: decoration,
+      child: Semantics(
+        button: true,
+        child: Material(
+          // Transparency rather than a colour: the `DecoratedBox` around it
+          // already paints the surface, and a second opaque layer would double
+          // the border radius' antialiasing seam.
+          type: MaterialType.transparency,
+          child: InkWell(
+            onTap: tap,
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            child: content,
+          ),
         ),
       ),
     );

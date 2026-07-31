@@ -3889,6 +3889,50 @@ sai chứ không phải nút. Sàn chạm 48 vẫn giữ, nhưng chuyển sang `
 thay vì padding; `AppSpacing` gọi nó là *floor* chứ không phải *step* đúng cho
 tình huống này.
 
+**Next task: M4.10ac · Cả card là một target.**
+
+### M4.10ac · Cả card là một target, ở cả hai kit
+
+- **Status:** done
+- **Goal:** Bấm chỗ nào trên deck card cũng mở deck; hover/press phủ toàn card.
+  Sửa ở tầng component, không phải ở deck card.
+- **Scope:** `design_system/components/core/MxCard.{jsx,d.ts,prompt.md}`,
+  `design_system/components/mx.css`, `ui_kits/memox-app/DeckLevelScreen.jsx`,
+  `_adherence.oxlintrc.json`; `lib/shared/widgets/mx_card.dart`,
+  `lib/features/deck/presentation/widgets/deck_tile_widget.dart`; 2 file test.
+- **Out of scope:** nút *Study* phía Flutter — chưa có session để mở (M4.11).
+- **Dependencies:** M4.10ab
+- **Checklist phases:** 7
+- **Tests required:** `deck_tile_target_test.dart` (geometry qua router thật),
+  2 test mới trong `mx_card_test.dart`.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `test/features/deck/presentation/deck_tile_target_test.dart`
+- **Acceptance criteria:**
+  - [x] Bấm dải dưới cùng của card mở đúng deck; bấm ⋮ thì không.
+  - [x] `MxCard` có `onClick`/`onTap` vẫn chứa được control bên trong.
+  - [x] 998 test pass, analyze sạch, architecture check sạch.
+
+**Bug nằm ở component, không ở deck card.** Kit bọc riêng phần đầu vào
+`<button className="mx-deck__open">` vì `MxCard` khi có `onClick` render chính
+card thành `<button>` — mà một `<button>` không được chứa control. Ai cần card
+vừa bấm được vừa có control thì **buộc** phải tự bọc một phần, tức lặp lại đúng
+lỗi này. `MxCard` giờ giữ card là `<div>` và đặt một `button.mx-card__action`
+`inset:0` **dưới** nội dung; nội dung `pointer-events:none`, control nào cần thì
+nhận lại bằng `mx-card__control`. Overlay không có chữ nên `actionLabel` là bắt
+buộc trên thực tế — nếu không, card announce ra là một button không tên.
+
+**Flutter có đúng lỗi song song, ở một tầng khác.** `InkWell` vẽ splash và hover
+highlight **trước** khi vẽ child, nên `MxCard` bọc `InkWell` quanh cả
+`DecoratedBox` là vẽ mọi trạng thái xuống *dưới* một nền đục: card bấm được mà
+không có phản hồi nào. Chưa ai gặp vì chưa call site nào truyền `onTap` — nâng
+tap của deck card lên `MxCard` là thứ làm nó lộ ra. Ink giờ nằm **trong**
+decoration, chỉ còn padding và nội dung ở dưới nó.
+
+Nested interactive là chỗ hai nền tảng khác nhau thật: HTML cấm, Flutter thì nút
+lồng bên trong thắng gesture arena của card. Cùng một kết quả, hai lý do —
+`deck_tile_target_test.dart` pin cả hai chiều, và đã kiểm tiêm lỗi: bỏ
+`onTap: onTap` thì test đỏ.
+
 **Next task: M4.11 · Card management full-stack.**
 
 ### M4.11 · Card management full-stack

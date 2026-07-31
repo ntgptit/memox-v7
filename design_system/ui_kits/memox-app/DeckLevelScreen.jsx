@@ -1,4 +1,4 @@
-const { MxContentShell, MxIconButton, MxIcon, MxBreadcrumb, MxPillButton, MxEmptyState, MxProgressBar, MxActionButton, MxSearchField, MxTextButton } = window.MemoxDesignSystem_3a620f;
+const { MxContentShell, MxIconButton, MxIcon, MxCard, MxBreadcrumb, MxPillButton, MxEmptyState, MxProgressBar, MxActionButton, MxSearchField, MxTextButton } = window.MemoxDesignSystem_3a620f;
 
 /**
  * The deck list — ONE screen, used at every depth of the tree. The root is not a
@@ -192,11 +192,16 @@ function LevelEmpty({ dueOnly, isRoot, onShowAll, onCreate }) {
 }
 
 /**
- * The redesigned deck card. Three regions, and each is a separate target so that
- * nothing has to guess which of a deck's verbs the user meant:
- *   open  — the name and its summary
+ * The redesigned deck card. The whole card opens the deck; two controls sit on
+ * top of it and mean something else:
+ *   open  — the card, all of it
  *   study — an explicit pill, present only when there is something to study
  *   menu  — everything else
+ *
+ * **It does not wrap its own header in a button.** It did, and the result was a
+ * card whose hover lit up only the top band while the progress bar and the foot
+ * looked tappable and were not. `MxCard onClick` puts the target under the whole
+ * card, which is why that arrangement is possible at all — see its prompt note.
  */
 function DeckCard({ summary, onOpen, onActions, onStudy }) {
   const due = summary.due > 0;
@@ -205,8 +210,8 @@ function DeckCard({ summary, onOpen, onActions, onStudy }) {
   const complete = summary.cards > 0 && summary.learned === summary.cards;
 
   return (
-    <article className="mx-deck">
-      <button type="button" className="mx-deck__open" onClick={onOpen}>
+    <MxCard elevation="none" padding="0" onClick={onOpen} actionLabel={'Open ' + summary.name}>
+      <div className="mx-deck__open">
         <span className="mx-deck__well" style={complete ? { background: 'var(--color-surface-muted)', color: 'var(--color-success)' } : undefined}>
           <MxIcon name={complete ? 'check_circle' : (nested ? 'folder' : 'style')} filled={complete} />
         </span>
@@ -217,7 +222,7 @@ function DeckCard({ summary, onOpen, onActions, onStudy }) {
           </span>
         </span>
         {nested ? <MxIcon name="chevron_right" filled size="var(--icon-sm)" color="var(--color-text-secondary)" style={{ marginTop: 4 }} /> : null}
-      </button>
+      </div>
 
       {summary.cards ? (
         <div style={{ padding: '0 var(--space-lg) var(--space-md)' }}>
@@ -232,13 +237,15 @@ function DeckCard({ summary, onOpen, onActions, onStudy }) {
             : <span style={{ fontSize: 'var(--text-label-sm)', letterSpacing: 'var(--tracking-label-sm)', color: 'var(--color-text-secondary)' }}>{summary.cards ? 'Nothing due' : 'No cards yet'}</span>}
         </span>
         {due ? (
-          <button type="button" className="mx-deck__study" onClick={onStudy} aria-label={'Study ' + summary.due + ' cards in ' + summary.name} title="Study now">
+          <button type="button" className="mx-deck__study mx-card__control" onClick={onStudy} aria-label={'Study ' + summary.due + ' cards in ' + summary.name} title="Study now">
             <MxIcon name="play_arrow" filled size={16} />Study
           </button>
         ) : null}
-        <MxIconButton icon="more_vert" filled semanticLabel={'Actions for ' + summary.name} onClick={() => onActions(summary)} />
+        <span className="mx-deck__menu mx-card__control">
+          <MxIconButton icon="more_vert" filled semanticLabel={'Actions for ' + summary.name} onClick={() => onActions(summary)} />
+        </span>
       </div>
-    </article>
+    </MxCard>
   );
 }
 
