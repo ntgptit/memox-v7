@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../l10n/l10n_extension.dart';
+import '../../../../shared/widgets/mx_text_button.dart';
 import '../../domain/models/deck_list_snapshot_model.dart';
 import '../controllers/deck_list_view_controller.dart';
 import 'deck_level_summary_widget.dart';
@@ -41,23 +42,35 @@ class DeckSummarySectionWidget extends ConsumerWidget {
     final isVisible = ref.watch(deckSummaryVisibilityProvider);
 
     return Padding(
+      // **`sm` above, redistributed from below — the total is fixed.** The
+      // shell's strip pads only `xs` under the search field (a 320×2.0
+      // overflow trade — see `_MxSubheader`), and with a top of zero here the
+      // whole separation between the search pill and this card was 4px: two
+      // same-width, same-radius surfaces reading as one glued blob. Taking the
+      // `sm` out of the bottom instead of adding it keeps every body pixel
+      // below this section where it was, so the last row's clearance from the
+      // floating action — 7px, per the shell's own audit — is untouched. The
+      // cost is the section break below going `xl` to `lg`; the toolbar still
+      // reads as controls, not as the first row, because the rows carry their
+      // own surfaces. `deck_list_spacing_test.dart` measures the gap above.
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
-        0,
+        AppSpacing.sm,
         AppSpacing.lg,
-        AppSpacing.xl,
+        AppSpacing.lg,
       ),
       child: isVisible
           ? DeckLevelSummaryWidget(
               snapshot: snapshot,
               onDismiss: _setSummaryVisible(ref, isVisible: false),
             )
-          : Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: TextButton(
-                onPressed: _setSummaryVisible(ref, isVisible: true),
-                child: Text(context.l10n.deckSummaryShowAction),
-              ),
+          // No `Align` around it: `MxTextButton` starts its own label and takes
+          // no padding, so the link lands on the same vertical line as the
+          // cards below it. The `Align` existed to undo a centring that the
+          // bare `TextButton`'s 64px minimum width imposed.
+          : MxTextButton(
+              label: context.l10n.deckSummaryShowAction,
+              onPressed: _setSummaryVisible(ref, isVisible: true),
             ),
     );
   }

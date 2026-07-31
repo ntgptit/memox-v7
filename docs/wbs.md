@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M4.10aa |
+| **Updated by task** | M4.10ab |
 | **Last updated** | 2026-08-01 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -3847,6 +3847,47 @@ khoảng 2 L\* mỗi bậc: thang thực tế thành 3.9 → 10.2 → 16.9 → 2
 **Chưa đóng, cố ý.** `--color-progress-track` (`#2E3247`) và
 `--color-on-secondary-container` (`#D9DCE7`) vẫn ở họ slate cũ. Không gate nào
 phủ chúng và chủ dự án không liệt kê; ghi ra đây để lần sau không phải đo lại.
+
+**Next task: M4.10ab · Khoảng hở subheader và nút text dùng chung.**
+
+### M4.10ab · Khoảng hở subheader và nút text dùng chung
+
+- **Status:** done
+- **Goal:** Ô search thôi dính app bar; *Show today's summary* thành component
+  dùng chung, không padding.
+- **Scope:** `mx_content_shell.dart` (`_MxSubheader`), `mx_text_button.dart`
+  (mới), `deck_summary_section_widget.dart`, Widgetbook, 2 golden mới, 1 stress
+  specimen.
+- **Out of scope:** khoảng hở ở màn compact — không còn pixel nào để chia lại.
+- **Dependencies:** M4.10aa
+- **Checklist phases:** 7
+- **Tests required:** golden `text_button` light/dark, stress specimen, strict
+  visual audit toàn bộ.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/shared/widgets/mx_text_button.dart`
+- **Acceptance criteria:**
+  - [x] Subheader có khoảng hở phía trên, **tổng chiều cao không đổi**.
+  - [x] `MxTextButton` không padding ngang, vẫn giữ sàn chạm 48.
+  - [x] Đăng ký Widgetbook, có golden và stress specimen; 992 test pass.
+
+**Cộng thêm khoảng hở thì hỏng, chia lại thì không — và đó là phát hiện đáng
+ghi.** Thêm thẳng `md` phía trên đẩy toàn bộ body xuống 12px, và trên deck list
+điều đó nhét icon trailing của card cuối xuống dưới floating action: 24px
+`textSecondary` trên `primary`, visual audit đo **1,13:1** và fail. Khoảng hở
+giữa icon đó và FAB chỉ có **7px** — nghĩa là mọi mức cộng thêm lớn hơn `xs` đều
+va. Giải pháp là chia lại 12px sẵn có thành `sm` trên / `xs` dưới: pill có không
+khí, body không dịch một pixel nào.
+
+`_kListBottomInset` không cứu được chỗ này, và lý do đáng nhớ: nó chừa chỗ ở
+**cuối** vùng cuộn, còn hàng đang nằm dưới FAB ở trạng thái nghỉ thì không liên
+quan gì tới padding cuối danh sách.
+
+**Nút text không padding phải là component, không phải một `TextButton` chỉnh
+tại chỗ.** `TextButton` của Material thụt label 12px, nên một link đặt ở gutter
+màn hình lệch 12px so với tiêu đề và card phía trên — mắt đọc ra là phần tử căn
+sai chứ không phải nút. Sàn chạm 48 vẫn giữ, nhưng chuyển sang `minimumSize`
+thay vì padding; `AppSpacing` gọi nó là *floor* chứ không phải *step* đúng cho
+tình huống này.
 
 **Next task: M4.11 · Card management full-stack.**
 

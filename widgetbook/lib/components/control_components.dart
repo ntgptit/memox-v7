@@ -4,6 +4,7 @@ import 'package:memox/shared/widgets/mx_breadcrumb.dart';
 import 'package:memox/shared/widgets/mx_icon_button.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
+import 'package:memox/shared/widgets/mx_text_button.dart';
 import 'package:widgetbook/widgetbook.dart';
 
 import '../support/catalog_page.dart';
@@ -111,6 +112,40 @@ WidgetbookComponent pillButtonComponent() {
               onPressed: isEnabled ? _noop : null,
               icon: hasIcon ? Icons.schedule : null,
               semanticLabel: semanticLabel,
+            ),
+          );
+        },
+      ),
+    ],
+  );
+}
+
+WidgetbookComponent textButtonComponent() {
+  return WidgetbookComponent(
+    name: 'MxTextButton',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'Playground',
+        builder: (BuildContext context) {
+          final label = context.knobs.string(
+            label: 'label',
+            initialValue: "Show today's summary",
+          );
+          final isEnabled = context.knobs.boolean(
+            label: 'enabled',
+            initialValue: true,
+          );
+
+          // Start-aligned rather than centred: the whole point of this button is
+          // that its label sits flush with the column it belongs to, and a
+          // centred specimen is the one layout that cannot show that.
+          return CatalogCenterPage(
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: MxTextButton(
+                label: label,
+                onPressed: isEnabled ? _noop : null,
+              ),
             ),
           );
         },

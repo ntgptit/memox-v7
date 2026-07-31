@@ -1,0 +1,60 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
+import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
+import 'package:memox/features/deck/presentation/widgets/deck_level_summary_widget.dart';
+import 'package:memox/shared/widgets/mx_search_field.dart';
+
+import 'support/deck_screen_harness.dart';
+import 'support/fake_deck_repository.dart';
+
+/// The gap between the search strip and the first body surface, measured.
+///
+/// This defect cannot be caught any other way. Every value involved is a
+/// legitimate token — the shell's strip pads `xs` below itself for a reason
+/// (the 320×2.0 overflow trade in `mx_content_shell.dart`), and the summary
+/// section's own padding is tokens too — so the literal-hunting guard sees
+/// nothing. The bug lives in the *sum*: two files each own half of one gap,
+/// each half defensible alone, and the halves added up to 4px between two
+/// same-width, same-radius surfaces, which read as a single glued blob.
+/// Only geometry after layout can see a sum, hence `getRect`.
+void main() {
+  // Both sides of the breakpoint: the strip pads itself differently in each
+  // (`mx_content_shell.dart`), and the glue was reported on a compact device.
+  const surfaces = <String, Size>{
+    'compact': Size(393, 852),
+    'regular': Size(700, 900),
+  };
+
+  for (final entry in surfaces.entries) {
+    testWidgets(
+      'search field and summary card are visibly separate — ${entry.key}',
+      (tester) async {
+        await pumpDeckScreen(
+          tester,
+          repository: FakeDeckRepository.withSummaries(<DeckSummary>[
+            fakeSummary(id: '1', name: 'Korean'),
+          ]),
+          screen: const DeckListScreen(),
+          surface: entry.value,
+        );
+
+        final searchBottom = tester.getRect(find.byType(MxSearchField)).bottom;
+        final summaryTop = tester
+            .getRect(find.byType(DeckLevelSummaryWidget))
+            .top;
+
+        // `sm` is the floor for two elements that are merely *related*; these
+        // two are different sections. Anything under it reads as one shape.
+        expect(
+          summaryTop - searchBottom,
+          greaterThanOrEqualTo(AppSpacing.sm),
+          reason:
+              'the search pill and the summary card must not read as one '
+              'glued surface',
+        );
+      },
+    );
+  }
+}

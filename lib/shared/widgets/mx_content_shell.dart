@@ -162,7 +162,7 @@ class _MxContentShellState extends State<MxContentShell> {
 /// The pinned strip under the bar.
 ///
 /// Carries the screen's horizontal gutter so its contents line up with the body
-/// below, and pads only its bottom — the app bar already provides the space above.
+/// below.
 /// **The top of the body, not `AppBar.bottom`.** It was the latter, which forces
 /// a height to be declared up front — and the height of this strip depends on the
 /// user's text scale, so a declared number is a guess that overflows the moment
@@ -176,18 +176,40 @@ class _MxSubheader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isCompact = AppBreakpoints.isCompact(
+      MediaQuery.sizeOf(context).width,
+    );
+
     return Padding(
-      // `sm` below the compact breakpoint, `md` above it. At 320 wide with
-      // `textScaler` 2.0 the chrome and this strip together wanted four pixels
-      // more than the screen had; tightening the one gap that is pure spacing
-      // is the same trade `app_compact_scale.dart` already makes with gutters
-      // and button padding, and it is the gap least missed.
+      // **The strip's total height is fixed; what changed is where its space
+      // sits.** Top used to be zero, on the reasoning that the app bar already
+      // provides the gap above. It provides some — a 56pt bar leaves roughly 17
+      // under its title — but that is the bar centring its own title, not a gap
+      // anyone chose between two elements, and the search pill read as stuck to
+      // the chrome. Splitting the regular-width gap `sm` above / `xs` below
+      // gives the pill air without moving the body a single pixel.
+      //
+      // **Keeping the total fixed is the constraint, not an aesthetic.** Adding
+      // the space instead of moving it pushes every body pixel down with it, and
+      // on the deck list that puts the last card's trailing icon under the
+      // floating action — 24px of `textSecondary` on `primary`, which the visual
+      // audit fails at 1.13:1. The clearance there is 7px, so any real addition
+      // above `xs` collides. See `deck_list_screen.dart`'s `_kListBottomInset`:
+      // it reserves room at the *end* of the scroll, which does nothing for a
+      // row sitting under the action at rest.
+      //
+      // More space above than below is also the right grouping. The strip
+      // belongs to the content it filters, not to the bar it hangs under.
+      //
+      // Compact keeps all of it below. At 320 with `textScaler` 2.0 the chrome
+      // and this strip together wanted four pixels more than the screen had —
+      // the same trade `app_compact_scale.dart` makes with gutters and button
+      // padding — and there is nothing left there to redistribute.
       padding: EdgeInsets.only(
         left: gutter,
         right: gutter,
-        bottom: AppBreakpoints.isCompact(MediaQuery.sizeOf(context).width)
-            ? AppSpacing.xs
-            : AppSpacing.md,
+        top: isCompact ? 0 : AppSpacing.sm,
+        bottom: AppSpacing.xs,
       ),
       child: Align(alignment: AlignmentDirectional.centerStart, child: child),
     );

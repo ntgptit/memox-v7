@@ -200,7 +200,14 @@ button.mx-tile:focus-visible{outline:none;box-shadow:inset 0 0 0 var(--border-fo
 .mx-shell__bar--divided{border-bottom-color:var(--color-border-subtle)}
 .mx-shell__title{flex:1;min-width:0;font-family:var(--font-display);font-size:var(--text-title-lg);line-height:1.2;letter-spacing:-0.2px;font-weight:var(--weight-semibold);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mx-shell__body{flex:1;min-height:0;overflow:hidden;box-sizing:border-box}
-.mx-shell__sub{flex:none;box-sizing:border-box;display:flex;flex-direction:column;gap:var(--space-sm);padding:0 var(--space-lg) var(--space-md);background:var(--color-background);z-index:1}
+/* The strip's total height is 12px of padding either way; what changed is where
+   it sits. Top was 0, which left the search pill reading as stuck to the bar —
+   the only gap above it was the bar centring its own title. `sm` above / `xs`
+   below gives it air and puts the strip with the content it filters rather than
+   with the chrome it hangs under. Keeping the total fixed is a constraint, not a
+   preference: in the Flutter app adding height here pushes every body pixel down
+   and slides the last deck card's trailing icon under the floating action. */
+.mx-shell__sub{flex:none;box-sizing:border-box;display:flex;flex-direction:column;gap:var(--space-sm);padding:var(--space-sm) var(--space-lg) var(--space-xs);background:var(--color-background);z-index:1}
 .mx-shell__body--scroll{overflow-y:auto}
 .mx-shell__fab{position:absolute;right:var(--space-lg);bottom:var(--space-lg);width:56px;height:56px;border-radius:var(--radius-lg);border:0;background:var(--color-primary);color:var(--color-on-primary);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--shadow-card)}
 .mx-shell__fab:active{background:color-mix(in srgb,var(--color-primary) 88%,var(--color-text-primary))}

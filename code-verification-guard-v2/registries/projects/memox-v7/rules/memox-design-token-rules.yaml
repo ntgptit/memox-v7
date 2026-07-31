@@ -64,7 +64,10 @@ rules:
       - ui_surfaces
     patterns:
       - '\bEdgeInsets\s*\.\s*(?:all|symmetric|only|fromLTRB)\s*\([^)]*\b\d'
+      - '\bEdgeInsetsDirectional\s*\.\s*(?:all|symmetric|only|fromSTEB)\s*\([^)]*\b\d'
       - '\bSizedBox\s*\(\s*(?:width|height)\s*:\s*\d'
+      - '\bGap\s*\(\s*\d'
+      - '\b(?:spacing|runSpacing)\s*:\s*\d'
     tags:
       - memox
       - design-token

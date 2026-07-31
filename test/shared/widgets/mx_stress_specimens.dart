@@ -14,6 +14,7 @@ import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
 import 'package:memox/shared/widgets/mx_progress_bar.dart';
 import 'package:memox/shared/widgets/mx_search_field.dart';
+import 'package:memox/shared/widgets/mx_text_button.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
 
 /// The specimen set for the stress suite: every shared component, built with
@@ -136,6 +137,15 @@ List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
       isSelected: true,
       onPressed: _noop,
     ),
+    isInteractive: true,
+  ),
+  MxStressSpecimen(
+    // The interesting stress is the tap target, not the width. This button
+    // draws no padding at all, so nothing but `minimumSize` is holding it to
+    // 48 — and a long label that wraps to its two-line ceiling is where a
+    // height floor is most likely to be quietly overridden by the content.
+    name: 'MxTextButton',
+    build: () => const MxTextButton(label: kLongLabel, onPressed: _noop),
     isInteractive: true,
   ),
   MxStressSpecimen(
