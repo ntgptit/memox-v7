@@ -1,0 +1,186 @@
+{
+  "generatedBy": "test/design_audit/audit_test.dart",
+  "note": "hasBorderToken and hasFocusToken record what the target model asks for, not what a role needs today. A false is a gap in the model, not necessarily a defect on screen.",
+  "roles": {
+    "light": {
+      "primary": {
+        "members": {
+          "fill": {
+            "hex": "#4646B4",
+            "hue": 240.0
+          },
+          "onFill": {
+            "hex": "#FFFFFF",
+            "hue": null
+          },
+          "container": {
+            "hex": "#DCDCF2",
+            "hue": 240.0
+          },
+          "onContainer": {
+            "hex": "#1B1B5C",
+            "hue": 240.0
+          }
+        },
+        "hueSpreadExcludingOnColors": 0.0,
+        "hasContainerPair": true,
+        "hasBorderToken": false,
+        "hasFocusToken": true
+      },
+      "error/danger": {
+        "members": {
+          "fill": {
+            "hex": "#B02233",
+            "hue": 352.8169014084507
+          },
+          "onFill": {
+            "hex": "#FFFFFF",
+            "hue": null
+          },
+          "container": {
+            "hex": "#F8DDE1",
+            "hue": 351.11111111111114
+          },
+          "onContainer": {
+            "hex": "#641421",
+            "hue": 350.25
+          },
+          "semanticDanger": {
+            "hex": "#B02233",
+            "hue": 352.8169014084507
+          }
+        },
+        "hueSpreadExcludingOnColors": 1.7057902973395471,
+        "hasContainerPair": true,
+        "hasBorderToken": false,
+        "hasFocusToken": false
+      },
+      "success": {
+        "members": {
+          "fill": {
+            "hex": "#1E7156",
+            "hue": 160.4819277108434
+          }
+        },
+        "hueSpreadExcludingOnColors": 0.0,
+        "hasContainerPair": false,
+        "hasBorderToken": false,
+        "hasFocusToken": false
+      },
+      "warning": {
+        "members": {
+          "fill": {
+            "hex": "#856520",
+            "hue": 40.99009900990099
+          }
+        },
+        "hueSpreadExcludingOnColors": 0.0,
+        "hasContainerPair": false,
+        "hasBorderToken": false,
+        "hasFocusToken": false
+      },
+      "info": {
+        "members": {
+          "fill": {
+            "hex": "#456480",
+            "hue": 208.47457627118644
+          }
+        },
+        "hueSpreadExcludingOnColors": 0.0,
+        "hasContainerPair": false,
+        "hasBorderToken": false,
+        "hasFocusToken": false
+      }
+    },
+    "dark": {
+      "primary": {
+        "members": {
+          "fill": {
+            "hex": "#5656C9",
+            "hue": 240.0
+          },
+          "onFill": {
+            "hex": "#FFFFFF",
+            "hue": null
+          },
+          "container": {
+            "hex": "#2B2B6E",
+            "hue": 240.0
+          },
+          "onContainer": {
+            "hex": "#D8D8F0",
+            "hue": 240.0
+          }
+        },
+        "hueSpreadExcludingOnColors": 0.0,
+        "hasContainerPair": true,
+        "hasBorderToken": false,
+        "hasFocusToken": true
+      },
+      "error/danger": {
+        "members": {
+          "fill": {
+            "hex": "#E88794",
+            "hue": 351.9587628865979
+          },
+          "onFill": {
+            "hex": "#2C1319",
+            "hue": 345.59999999999997
+          },
+          "container": {
+            "hex": "#5E2831",
+            "hue": 350.0
+          },
+          "onContainer": {
+            "hex": "#F5D3D8",
+            "hue": 351.17647058823525
+          },
+          "semanticDanger": {
+            "hex": "#E88794",
+            "hue": 351.9587628865979
+          }
+        },
+        "hueSpreadExcludingOnColors": 1.958762886597924,
+        "hasContainerPair": true,
+        "hasBorderToken": false,
+        "hasFocusToken": false
+      },
+      "success": {
+        "members": {
+          "fill": {
+            "hex": "#68BB9C",
+            "hue": 157.59036144578315
+          }
+        },
+        "hueSpreadExcludingOnColors": 0.0,
+        "hasContainerPair": false,
+        "hasBorderToken": false,
+        "hasFocusToken": false
+      },
+      "warning": {
+        "members": {
+          "fill": {
+            "hex": "#D2AC76",
+            "hue": 35.217391304347835
+          }
+        },
+        "hueSpreadExcludingOnColors": 0.0,
+        "hasContainerPair": false,
+        "hasBorderToken": false,
+        "hasFocusToken": false
+      },
+      "info": {
+        "members": {
+          "fill": {
+            "hex": "#8FAEC6",
+            "hue": 206.1818181818182
+          }
+        },
+        "hueSpreadExcludingOnColors": 0.0,
+        "hasContainerPair": false,
+        "hasBorderToken": false,
+        "hasFocusToken": false
+      }
+    }
+  }
+}
