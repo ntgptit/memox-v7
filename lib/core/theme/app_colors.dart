@@ -198,6 +198,30 @@ abstract final class AppColors {
   static const Color progressFillLight = Color(0xFF6E6ECE);
   static const Color progressFillDark = Color(0xFF8A8AE0);
 
+  // --- Due chip -----------------------------------------------------------
+  //
+  // The filled pill on a deck card that says how many cards are waiting. The
+  // container is `design_system/tokens/colors.css`'s `--color-streak-container`
+  // unchanged; the design reuses one warm family for everything time-pressured,
+  // and the due chip is the first thing here to draw it.
+  //
+  // **The foreground is not the design's.** `.mx-deck__due` paints its label in
+  // `--color-streak` (`#C2731B`), which measures **3.12:1** on its own container
+  // at 11px semibold — under the 4.5 small text needs. Dark is fine at 6.65,
+  // which is presumably why it went unnoticed. Every other container in this
+  // palette has an `on*Container` partner and this family had none, so one is
+  // derived here: same hue to within 1.2 degrees, 6.38:1 on the container.
+  //
+  // `--color-streak` itself is deliberately absent. It belongs to a streak
+  // display that does not exist, and a colour with no caller is a colour nobody
+  // is checking.
+  static const Color streakContainerLight = Color(0xFFFBEBD7);
+  static const Color streakContainerDark = Color(0xFF3A2E1C);
+  static const Color onStreakContainerLight = Color(0xFF7A4A10);
+
+  /// Dark needs no correction: the design's own `#E0B064` reads 6.65:1 here.
+  static const Color onStreakContainerDark = Color(0xFFE0B064);
+
   /// Status that genuinely carries information: streak, counters, "3 of 20".
   /// Not a decorative accent — plain metadata uses `textSecondary`.
   static const Color infoLight = Color(0xFF3F6E97);

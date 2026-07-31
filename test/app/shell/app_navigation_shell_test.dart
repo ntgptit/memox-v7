@@ -149,11 +149,16 @@ void main() {
         FakeDeckRepository.withSummaries(manySummaries()),
       );
 
-      await tester.fling(
-        find.byType(Scrollable).first,
-        const Offset(0, -3000),
-        1000,
-      );
+      // **Jump to the measured end, not a fling of a guessed distance.** This
+      // was `fling(-3000)`, which reached the bottom only while the list was
+      // short enough; the taller cards of M4.10s put the last row past it and
+      // the test failed on 4 pixels of content it had simply not scrolled to.
+      // A distance that has to be large enough is a distance that silently
+      // stops being large enough.
+      final position = tester
+          .state<ScrollableState>(find.byType(Scrollable).first)
+          .position;
+      position.jumpTo(position.maxScrollExtent);
       await tester.pumpAndSettle();
 
       final bar = tester.getRect(find.byType(MxNavigationBar));
