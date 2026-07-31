@@ -91,6 +91,14 @@
   "@deckFullyLearnedSemanticLabel": {
     "description": "Announced on the glyph of a deck whose every card is learned (BR-88). The only state this glyph carries in words as well as in colour."
   },
+  "deckSummaryHideLabel": "Hide summary",
+  "@deckSummaryHideLabel": {
+    "description": "The close button on the level summary panel. Says what it does, not what the glyph is."
+  },
+  "deckSummaryShowAction": "Show today's summary",
+  "@deckSummaryShowAction": {
+    "description": "Brings the panel back after it has been dismissed. Named so it is obvious what returns."
+  },
   "deckSummaryCaughtUpFigure": "All",
   "@deckSummaryCaughtUpFigure": {
     "description": "Replaces the due figure when nothing is waiting. A zero in a large display face reads as a failure; the word does not."

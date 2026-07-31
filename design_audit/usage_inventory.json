@@ -1,6 +1,6 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 125,
+  "scannedFiles": 126,
   "totalSites": 290,
   "byElementKind": {
     "other": 234,
@@ -2694,7 +2694,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/deck_level_summary_widget.dart",
-      "line": 55,
+      "line": 66,
       "widget_context": "DeckLevelSummaryWidget",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -2705,7 +2705,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/deck_level_summary_widget.dart",
-      "line": 57,
+      "line": 68,
       "widget_context": "DeckLevelSummaryWidget",
       "element_kind": "border",
       "source_kind": "theme-token",
@@ -2716,7 +2716,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/deck_level_summary_widget.dart",
-      "line": 126,
+      "line": 153,
       "widget_context": "_SummaryHeadline",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -2727,7 +2727,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/deck_level_summary_widget.dart",
-      "line": 135,
+      "line": 162,
       "widget_context": "_SummaryHeadline",
       "element_kind": "text",
       "source_kind": "theme-token",

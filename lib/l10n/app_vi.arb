@@ -91,6 +91,14 @@
   "@deckFullyLearnedSemanticLabel": {
     "description": "Đọc lên ở glyph của deck mà mọi thẻ đều đã thuộc (BR-88)."
   },
+  "deckSummaryHideLabel": "Ẩn tổng kết",
+  "@deckSummaryHideLabel": {
+    "description": "Nút đóng trên panel tổng kết. Nói việc nó làm, không nói hình cái glyph."
+  },
+  "deckSummaryShowAction": "Hiện tổng kết hôm nay",
+  "@deckSummaryShowAction": {
+    "description": "Đưa panel trở lại sau khi đã ẩn."
+  },
   "deckSummaryCaughtUpFigure": "Xong",
   "@deckSummaryCaughtUpFigure": {
     "description": "Thay cho số khi không còn thẻ nào đến hạn. Số 0 ở cỡ chữ lớn đọc như một thất bại."

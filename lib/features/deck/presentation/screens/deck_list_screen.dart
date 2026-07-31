@@ -18,7 +18,7 @@ import '../controllers/deck_list_view_controller.dart';
 import '../states/deck_list_view_state.dart';
 import '../widgets/deck_actions_widget.dart';
 import '../widgets/deck_level_error_widget.dart';
-import '../widgets/deck_level_summary_widget.dart';
+import '../widgets/deck_summary_section_widget.dart';
 import '../widgets/deck_list_toolbar_widget.dart';
 import '../widgets/deck_level_body_widget.dart';
 import '../widgets/deck_subheader_widget.dart';
@@ -215,18 +215,9 @@ class _DeckLevel extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        // What this level amounts to, above the list of what is in it. Left out
-        // when the level is empty: an empty state says more than "0 due" would.
-        if (DeckLevelSummaryWidget.hasContent(snapshot))
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.lg,
-              0,
-              AppSpacing.lg,
-              AppSpacing.xl,
-            ),
-            child: DeckLevelSummaryWidget(snapshot: snapshot),
-          ),
+        // What this level amounts to, above the list of what is in it — or the
+        // line that brings it back once dismissed.
+        DeckSummarySectionWidget(snapshot: snapshot),
         Padding(
           // `xl` below, not `lg`: this is the gap between two *sections* — the
           // controls and the thing they control — and a section break that used
