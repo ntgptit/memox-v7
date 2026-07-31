@@ -7,7 +7,7 @@
 | **Scope** | Quyết định ràng buộc nhiều tài liệu hoặc nhiều layer. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), hình dạng dữ liệu (`data-model.md`) |
 | **Source of truth for** | AD-xx · đánh đổi kiến trúc · phương án đã bị loại · lý do pin toolchain |
 | **Depends on** | `document-conventions.md`, `product.md` |
-| **Updated by task** | M4.10o (AD-14) |
+| **Updated by task** | M4.10p (AD-14) |
 | **Last updated** | 2026-07-30 |
 
 Format theo `document-conventions.md` §6.1. AD xếp theo số; ID vĩnh viễn (§7).
@@ -877,6 +877,38 @@ Một màu tồn tại như mặc định framework thì **vô hình với mọi
 — đó là cách `Colors.black54` làm barrier sau mỗi dialog và sheet sống sót qua
 trọn một cuộc audit màu (M4.10m). Component nào app dùng thì app khai báo theme
 cho nó.
+
+### Nguồn của giá trị token đã đổi (M4.10p)
+
+Khi AD này được viết, `lib/core/theme/` là nơi duy nhất định nghĩa một token.
+**Nay không còn.** Chủ dự án đưa một design system dựng ở claude.ai/design về
+`design_system/` và quyết định: **`design_system/tokens/*.css` là chuẩn cho
+*giá trị* token**. Dart lệch thì Dart sửa theo, không phải ngược lại.
+
+Đổi *nguồn*, không đổi *luật*. Năm quyết định ở trên vẫn nguyên: seed vẫn là gốc
+của mọi trung tính, chiều sâu vẫn là mục tiêu đo được, mọi thứ được vẽ vẫn phải
+đến từ theme. Cái đổi là ai chọn con số điền vào.
+
+Hai giới hạn, cả hai đều rút ra từ lần áp đầu tiên chứ không phải phòng xa:
+
+- **Giá trị của design không tự nhất quán với văn xuôi của chính nó.**
+  `design_system/readme.md` viết "danger carries the most saturation"; hex của nó
+  làm `warning` to nhất ở light (0.801 so với 0.634). Khi hai nửa của design cãi
+  nhau, giá trị thắng — vì giá trị là thứ được cho quyền — nhưng mâu thuẫn đó là
+  của design, không phải của repo, và `app_palette_test.dart` ghi lại toàn bộ
+  phép đo thay vì lặng lẽ nới luật.
+- **Một giá trị đúng vẫn có thể bị dùng sai.** Lấy `--color-success` xong, một
+  nhãn 14px tụt xuống **4.30:1** trên `secondaryContainer`. Strict visual audit
+  bắt được, và lời giải cũng nằm trong design: `VerdictAction` của nó giữ nền
+  trung tính "vì một lớp tint cùng hue với nhãn ăn mất tương phản đúng lúc nhãn
+  quan trọng nhất". **Theo một token là theo cả cách design dùng nó, không chỉ
+  mã hex.**
+
+Ba token CSS chưa mang về, và lý do giống nhau: chưa có gì vẽ chúng.
+`--color-progress-*` thuộc về `MxProgressBar`, `--color-streak*` thuộc về màn
+streak — cả hai chưa tồn tại, và `--color-streak` còn là **hue thứ năm** (cam),
+nằm ngoài một accent và bốn semantic mà chính readme của design cho phép. Chúng
+về cùng component cần chúng, không về trước.
 
 ### Đánh đổi đã nhận
 

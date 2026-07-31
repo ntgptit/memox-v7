@@ -143,27 +143,45 @@ abstract final class AppColors {
 
   // --- Semantic ------------------------------------------------------------
   //
-  // On a chroma budget, and deliberately not equal: `danger` is the alarm and
-  // carries the most saturation, `info` is only an indicator and carries the
-  // least. None reaches full saturation — four hues all shouting is how a study
-  // tool starts looking like a game.
+  // On a chroma budget, `info` the quietest of the four. None reaches full
+  // saturation — four hues all shouting is how a study tool starts looking like
+  // a game.
+  //
+  // **These eight values come from `design_system/tokens/colors.css` and the
+  // design system is authoritative for them** (project owner's decision, M4.10p).
+  // They are louder than the values they replaced — in HSL saturation, light
+  // rises 0.299…0.676 → 0.411…0.801 and dark 0.325…0.678 → 0.490…0.814.
+  //
+  // Two consequences, both measured rather than assumed:
+  //
+  // - Every one still clears 3.0:1 on both its card and its page, so
+  //   `app_theme_test.dart` holds. The tightest is `warningLight` at 4.33:1 on
+  //   the page, down from 4.97:1 — still above the 3.0 floor a graphic needs,
+  //   and below the 4.5:1 a body-text colour would need. It is not used as body
+  //   text anywhere; if it ever is, that is the number to re-check.
+  // - `danger` is no longer the loudest in light: `warning` 0.801 and `success`
+  //   0.766 both out-saturate it at 0.634. That contradicts the design system's
+  //   own readme ("danger carries the most saturation"), so the contradiction is
+  //   inside the design project, not between it and this repo. The values won
+  //   because values are what was made authoritative; `app_palette_test.dart`
+  //   records the whole measurement.
 
   /// Answer remembered, session completed, saved.
-  static const Color successLight = Color(0xFF1E7156);
-  static const Color successDark = Color(0xFF68BB9C);
+  static const Color successLight = Color(0xFF10795C);
+  static const Color successDark = Color(0xFF4FC79B);
 
   /// Card due soon, streak at risk — informative, not alarming.
-  static const Color warningLight = Color(0xFF856520);
-  static const Color warningDark = Color(0xFFD2AC76);
+  static const Color warningLight = Color(0xFF9A6A11);
+  static const Color warningDark = Color(0xFFE0B064);
 
   /// Answer forgotten, destructive action, reset.
-  static const Color dangerLight = Color(0xFFB02233);
-  static const Color dangerDark = Color(0xFFE88794);
+  static const Color dangerLight = Color(0xFFC02B3A);
+  static const Color dangerDark = Color(0xFFF2808F);
 
   /// Status that genuinely carries information: streak, counters, "3 of 20".
   /// Not a decorative accent — plain metadata uses `textSecondary`.
-  static const Color infoLight = Color(0xFF456480);
-  static const Color infoDark = Color(0xFF8FAEC6);
+  static const Color infoLight = Color(0xFF3F6E97);
+  static const Color infoDark = Color(0xFF8DB4D8);
 
   // --- Material roles ------------------------------------------------------
   //
@@ -173,7 +191,9 @@ abstract final class AppColors {
   static const Color primaryContainerLight = Color(0xFFDCDCF2);
   static const Color primaryContainerDark = Color(0xFF2B2B6E);
   static const Color onPrimaryContainerLight = Color(0xFF1B1B5C);
-  static const Color onPrimaryContainerDark = Color(0xFFD8D8F0);
+  // `#D7D5FF` from the design system, replacing `#D8D8F0`. It reads the same on
+  // the container (8.87:1 against 8.96:1) and carries more of the seed's hue.
+  static const Color onPrimaryContainerDark = Color(0xFFD7D5FF);
   static const Color secondaryLight = Color(0xFF4E5468);
   static const Color secondaryDark = Color(0xFFB4B9CC);
   static const Color onSecondaryLight = Color(0xFFFFFFFF);
@@ -183,7 +203,10 @@ abstract final class AppColors {
   static const Color onSecondaryContainerLight = Color(0xFF2C3141);
   static const Color onSecondaryContainerDark = Color(0xFFD9DCE7);
   static const Color tertiaryLight = Color(0xFF45647F);
-  static const Color tertiaryDark = Color(0xFFA2BAD0);
+  // `#8DB4D8` from the design system, replacing `#A2BAD0` — and it is the same
+  // value as `infoDark`, which is deliberate there: the tertiary role and the
+  // `info` semantic are the one blue the palette has.
+  static const Color tertiaryDark = Color(0xFF8DB4D8);
   static const Color onTertiaryLight = Color(0xFFFFFFFF);
   static const Color onTertiaryDark = Color(0xFF17232E);
   static const Color tertiaryContainerLight = Color(0xFFE1E9F0);
@@ -233,9 +256,15 @@ abstract final class AppColors {
   ///
   /// Outside the app surface entirely — Android never shows it (AD-04) — but it
   /// is still a colour, and a colour in a widget is a colour the theme cannot
-  /// change. Darker than any real surface on purpose: it has to read as "not the
-  /// app" rather than as another panel.
-  static const Color webLetterbox = Color(0xFF14162A);
+  /// change. It has to read as "not the app" rather than as another panel.
+  ///
+  /// `#6E7288` from `design_system/tokens/colors.css`, replacing `#14162A`. The
+  /// design system reaches the same goal from the opposite direction: its own
+  /// `ui_kits/memox-app/index.html` paints exactly this grey behind the phone
+  /// frame, so the surround is *lighter* than every app surface in dark mode
+  /// instead of darker than every one in light. Either reads as "not the app";
+  /// this one is the design's.
+  static const Color webLetterbox = Color(0xFF6E7288);
 
   static const Color shadowLight = Color(0xFF0B0C18);
   static const Color shadowDark = Color(0xFF04040B);
