@@ -280,27 +280,27 @@
       "carriesNoHue": false
     },
     "colorScheme.outline": {
-      "hex": "#BEC0C3",
+      "hex": "#D2D2DD",
       "opaque": true,
-      "hue": 216.0,
-      "saturation": 0.039999999999999855,
-      "chroma": 0.019607843137254832,
-      "lightnessStar": 77.63025940380804,
+      "hue": 240.0,
+      "saturation": 0.13924050632911414,
+      "chroma": 0.04313725490196085,
+      "lightnessStar": 84.49161091168108,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 24.0,
-      "hueDistanceFromDarkSurfaceFamily": 27.243243243243256,
+      "hueDistanceFromDeclaredSeed": 0.0,
+      "hueDistanceFromDarkSurfaceFamily": 3.2432432432432563,
       "carriesNoHue": false
     },
     "colorScheme.outlineVariant": {
-      "hex": "#BEC0C3",
+      "hex": "#D2D2DD",
       "opaque": true,
-      "hue": 216.0,
-      "saturation": 0.039999999999999855,
-      "chroma": 0.019607843137254832,
-      "lightnessStar": 77.63025940380804,
+      "hue": 240.0,
+      "saturation": 0.13924050632911414,
+      "chroma": 0.04313725490196085,
+      "lightnessStar": 84.49161091168108,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 24.0,
-      "hueDistanceFromDarkSurfaceFamily": 27.243243243243256,
+      "hueDistanceFromDeclaredSeed": 0.0,
+      "hueDistanceFromDarkSurfaceFamily": 3.2432432432432563,
       "carriesNoHue": false
     },
     "colorScheme.inverseSurface": {
@@ -436,15 +436,15 @@
       "carriesNoHue": true
     },
     "semantic.borderSubtle": {
-      "hex": "#BEC0C3",
+      "hex": "#D2D2DD",
       "opaque": true,
-      "hue": 216.0,
-      "saturation": 0.039999999999999855,
-      "chroma": 0.019607843137254832,
-      "lightnessStar": 77.63025940380804,
+      "hue": 240.0,
+      "saturation": 0.13924050632911414,
+      "chroma": 0.04313725490196085,
+      "lightnessStar": 84.49161091168108,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 24.0,
-      "hueDistanceFromDarkSurfaceFamily": 27.243243243243256,
+      "hueDistanceFromDeclaredSeed": 0.0,
+      "hueDistanceFromDarkSurfaceFamily": 3.2432432432432563,
       "carriesNoHue": false
     },
     "semantic.focusRing": {
@@ -466,15 +466,15 @@
       "classifiedAs": "role-or-on-color"
     },
     "inputDecorationTheme.enabledBorder": {
-      "hex": "#BEC0C3",
+      "hex": "#D2D2DD",
       "opaque": true,
-      "hue": 216.0,
-      "saturation": 0.039999999999999855,
-      "chroma": 0.019607843137254832,
-      "lightnessStar": 77.63025940380804,
+      "hue": 240.0,
+      "saturation": 0.13924050632911414,
+      "chroma": 0.04313725490196085,
+      "lightnessStar": 84.49161091168108,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 24.0,
-      "hueDistanceFromDarkSurfaceFamily": 27.243243243243256,
+      "hueDistanceFromDeclaredSeed": 0.0,
+      "hueDistanceFromDarkSurfaceFamily": 3.2432432432432563,
       "carriesNoHue": false
     },
     "inputDecorationTheme.focusedBorder": {
@@ -487,15 +487,15 @@
       "classifiedAs": "role-or-on-color"
     },
     "inputDecorationTheme.disabledBorder": {
-      "hex": "#DFE0E1",
+      "hex": "#E9E9EE",
       "opaque": true,
-      "hue": 216.0,
-      "saturation": 0.039999999999999855,
-      "chroma": 0.009803921568627416,
-      "lightnessStar": 88.963985755701,
+      "hue": 240.0,
+      "saturation": 0.13924050632911425,
+      "chroma": 0.021568627450980427,
+      "lightnessStar": 92.31284162441067,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 24.0,
-      "hueDistanceFromDarkSurfaceFamily": 27.243243243243256,
+      "hueDistanceFromDeclaredSeed": 0.0,
+      "hueDistanceFromDarkSurfaceFamily": 3.2432432432432563,
       "carriesNoHue": false
     },
     "cardTheme.color": {
@@ -511,15 +511,15 @@
       "carriesNoHue": true
     },
     "dividerTheme.color": {
-      "hex": "#BEC0C3",
+      "hex": "#D2D2DD",
       "opaque": true,
-      "hue": 216.0,
-      "saturation": 0.039999999999999855,
-      "chroma": 0.019607843137254832,
-      "lightnessStar": 77.63025940380804,
+      "hue": 240.0,
+      "saturation": 0.13924050632911414,
+      "chroma": 0.04313725490196085,
+      "lightnessStar": 84.49161091168108,
       "classifiedAs": "neutral",
-      "hueDistanceFromDeclaredSeed": 24.0,
-      "hueDistanceFromDarkSurfaceFamily": 27.243243243243256,
+      "hueDistanceFromDeclaredSeed": 0.0,
+      "hueDistanceFromDarkSurfaceFamily": 3.2432432432432563,
       "carriesNoHue": false
     },
     "navigationBarTheme.backgroundColor": {

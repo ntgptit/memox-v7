@@ -18,18 +18,20 @@ guess.
 
 | | |
 |---|---|
-| Files scanned (`lib/`, hand-written) | 112 |
-| Colour sites found | 244 |
-| Violations | 15 |
+| Files scanned (`lib/`, hand-written) | 113 |
+| Colour sites found | 245 |
+| Violations | 13 |
 
 **By element kind**
 
 | kind | sites |
 |---|---|
-| other | 231 |
-| text | 3 |
+| other | 216 |
+| background | 7 |
+| text | 11 |
+| shadow | 1 |
 | border | 6 |
-| background | 4 |
+| icon | 4 |
 
 **By source kind**
 
@@ -37,7 +39,7 @@ guess.
 |---|---|
 | hardcoded-literal | 87 |
 | blend-source | 2 |
-| opacity-modified-token | 5 |
+| opacity-modified-token | 6 |
 | shared-constant | 120 |
 | Colors-material | 3 |
 | theme-token | 27 |
@@ -46,11 +48,11 @@ guess.
 
 | code | count | meaning |
 |---|---|---|
-| V1 | 5 | neutral not derived from the seed |
+| V1 | 2 | neutral not derived from the seed |
 | V2 | 0 | role component using a colour outside its role |
 | V3 | 7 | literal duplicating an existing token |
 | V4 | 0 | hand-picked role variant instead of a generated one |
-| V5 | 1 | translucency applied at the paint site |
+| V5 | 2 | translucency applied at the paint site |
 | V6 | 2 | defined for one brightness, different mechanism in the other |
 
 ## 2. Violations
@@ -64,14 +66,12 @@ guess.
 | V3 | 🟢 | `lib/app/error_screen_widget.dart:132` | Color(0xFFEDEEF5) | `#EDEEF5` | `#EDEEF5` | no token within ΔE-ish range — needs a new one |
 | V3 | 🟢 | `lib/app/error_screen_widget.dart:133` | Color(0xFFA6ABC2) | `#A6ABC2` | `#A6ABC2` | no token within ΔE-ish range — needs a new one |
 | V3 | 🟡 | `lib/app/mobile_frame_widget.dart:54` | const Color(0xFF1E1E1E) | `#1E1E1E` | `#1E1E1E` | no token within ΔE-ish range — needs a new one |
+| V5 | 🟢 | `lib/core/theme/app_elevation.dart:62` | scheme.shadow.withValues(alpha: 0.04 + 0.01 * level) | `#0B0C18 @ alpha 0.04` | `#04040B @ alpha 0.04` | a precomputed blendOver(...) constant |
 | V5 | 🟢 | `lib/shared/widgets/mx_action_sheet.dart:125` | context.colors.onSurface.withValues(alpha: _disabledOpacity) | `#16182B @ alpha unresolvable` | `#EDEEF5 @ alpha unresolvable` | a precomputed blendOver(...) constant |
 | V1 | 🔴 | `lib/core/theme/app_colors.dart` | colorScheme.surface (light) | `#FFFFFF` | `#1B1D32` | blendOver(seed, base, small alpha) - see migration_map.md |
 | V6 | 🔴 | `lib/core/theme/app_colors.dart` | colorScheme.surface (mechanism differs by mode) | `#FFFFFF` | `#1B1D32` | derive both from the seed, or neither |
 | V1 | 🔴 | `lib/core/theme/app_colors.dart` | semantic.surfaceElevated (light) | `#FFFFFF` | `#383D55` | blendOver(seed, base, small alpha) - see migration_map.md |
 | V6 | 🔴 | `lib/core/theme/app_colors.dart` | semantic.surfaceElevated (mechanism differs by mode) | `#FFFFFF` | `#383D55` | derive both from the seed, or neither |
-| V1 | 🟢 | `lib/core/theme/app_colors.dart` | colorScheme.outline (light) is 24 degrees from the seed hue | `#BEC0C3` | `#414762` | regenerate from the seed at the same lightness |
-| V1 | 🟢 | `lib/core/theme/app_colors.dart` | colorScheme.outlineVariant (light) is 24 degrees from the seed hue | `#BEC0C3` | `#414762` | regenerate from the seed at the same lightness |
-| V1 | 🟢 | `lib/core/theme/app_colors.dart` | semantic.borderSubtle (light) is 24 degrees from the seed hue | `#BEC0C3` | `#414762` | regenerate from the seed at the same lightness |
 
 - **V3** `Color(0xFFF4F5F8)` — Mirrors no token within ΔE-ish range — needs a new one because this file has no ThemeData in scope. It follows the mode by reading PlatformDispatcher, so it is a copy that cannot drift silently — but it is still a copy, and changing the token will not change it.
 
@@ -87,6 +87,8 @@ guess.
 
 - **V3** `const Color(0xFF1E1E1E)` — A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #1E1E1E.
 
+- **V5** `scheme.shadow.withValues(alpha: 0.04 + 0.01 * level)` — A translucent colour composites against whatever is behind it at paint time, so one token renders as two values.
+
 - **V5** `context.colors.onSurface.withValues(alpha: _disabledOpacity)` — A translucent colour composites against whatever is behind it at paint time, so one token renders as two values.
 
 - **V1** `colorScheme.surface (light)` — A pure neutral: no hue at all, so it carries no trace of the seed and cannot move with it.
@@ -96,12 +98,6 @@ guess.
 - **V1** `semantic.surfaceElevated (light)` — A pure neutral: no hue at all, so it carries no trace of the seed and cannot move with it.
 
 - **V6** `semantic.surfaceElevated (mechanism differs by mode)` — One mode derives this neutral from a hue and the other does not, so the two modes cannot drift together.
-
-- **V1** `colorScheme.outline (light) is 24 degrees from the seed hue` — It carries a hue, but not the seed. A neutral family spread this wide reads as two greys rather than one.
-
-- **V1** `colorScheme.outlineVariant (light) is 24 degrees from the seed hue` — It carries a hue, but not the seed. A neutral family spread this wide reads as two greys rather than one.
-
-- **V1** `semantic.borderSubtle (light) is 24 degrees from the seed hue` — It carries a hue, but not the seed. A neutral family spread this wide reads as two greys rather than one.
 
 ## 3. Perceptual checks
 
@@ -114,15 +110,15 @@ an edge.
 
 | mode | border on ground | ratio | verdict |
 |---|---|---|---|
-| light | semantic.borderSubtle on card (colorScheme.surface) | 1.82 | too-heavy |
-| light | semantic.borderSubtle on page (scaffoldBackgroundColor) | 1.67 | too-heavy |
-| light | semantic.borderSubtle on muted tile (semantic.surfaceMuted) | 1.54 | in-band |
-| light | colorScheme.outline on card (colorScheme.surface) | 1.82 | too-heavy |
-| light | colorScheme.outline on page (scaffoldBackgroundColor) | 1.67 | too-heavy |
-| light | colorScheme.outline on muted tile (semantic.surfaceMuted) | 1.54 | in-band |
-| light | colorScheme.outlineVariant on card (colorScheme.surface) | 1.82 | too-heavy |
-| light | colorScheme.outlineVariant on page (scaffoldBackgroundColor) | 1.67 | too-heavy |
-| light | colorScheme.outlineVariant on muted tile (semantic.surfaceMuted) | 1.54 | in-band |
+| light | semantic.borderSubtle on card (colorScheme.surface) | 1.50 | in-band |
+| light | semantic.borderSubtle on page (scaffoldBackgroundColor) | 1.38 | in-band |
+| light | semantic.borderSubtle on muted tile (semantic.surfaceMuted) | 1.27 | in-band |
+| light | colorScheme.outline on card (colorScheme.surface) | 1.50 | in-band |
+| light | colorScheme.outline on page (scaffoldBackgroundColor) | 1.38 | in-band |
+| light | colorScheme.outline on muted tile (semantic.surfaceMuted) | 1.27 | in-band |
+| light | colorScheme.outlineVariant on card (colorScheme.surface) | 1.50 | in-band |
+| light | colorScheme.outlineVariant on page (scaffoldBackgroundColor) | 1.38 | in-band |
+| light | colorScheme.outlineVariant on muted tile (semantic.surfaceMuted) | 1.27 | in-band |
 | dark | semantic.borderSubtle on card (colorScheme.surface) | 1.82 | too-heavy |
 | dark | semantic.borderSubtle on page (scaffoldBackgroundColor) | 2.12 | too-heavy |
 | dark | semantic.borderSubtle on muted tile (semantic.surfaceMuted) | 1.49 | in-band |
@@ -149,7 +145,7 @@ an edge.
 | light | page | `#F4F5F8` | 225 |
 | light | surface | `#FFFFFF` | **none** |
 | light | surfaceMuted | `#EAECF1` | 223 |
-| light | borderSubtle | `#BEC0C3` | 216 |
+| light | borderSubtle | `#D2D2DD` | 240 |
 | light | onSurfaceVariant | `#565C72` | 227 |
 | dark | page | `#0A082D` | 243 |
 | dark | surface | `#1B1D32` | 235 |
@@ -158,23 +154,31 @@ an edge.
 | dark | onSurfaceVariant | `#A6ABC2` | 229 |
 
 **The light-mode border-prominence answer, plainly:** `borderSubtle` is
-**1.82:1** against the card and **1.67:1** against the page. Both are above the
-brief's 1.6 ceiling, so by that band the border is too heavy in light.
+**1.50:1** against the card and **1.38:1** against the page — inside the brief's
+band. Dark is **1.82:1** and **2.12:1**, above the ceiling, and stays there
+deliberately.
 
-**And the same measurement says dark is too.** Dark scores 1.82:1 and 2.12:1 —
-higher than light on the page. The ceiling is not catching a light-mode
-regression; it is disagreeing with this app's depth model in both modes, and it
-would have flagged dark before any recent change was made.
+**This section has been through three positions and only the last one is
+measured.** It first reported both modes above the ceiling and rejected the
+ceiling, on the grounds that the app was flat *by decision* and the border was
+therefore the only cue it had. The flatness was never a decision — no AD, no BR,
+no test — and the project owner has since said the app needs real elevation. At
+M4.10h it got one, and the ceiling is met in light because the border no longer
+carries the edge alone.
 
-That disagreement is real and is the audit's job to surface rather than resolve.
-This app's cards are **unshadowed by decision** (`cardTheme.elevation` is 0, no
-`BoxShadow` anywhere in `lib/`), and its surfaces sit 1.09:1 (light) and 1.17:1
-(dark) from the page they lie on. When the surface step is that small and there
-is no shadow, the border is not one of several depth cues — it is the only one,
-and a value inside a 1.6 ceiling is invisible at that job. The band assumes a
-model with more than one cue. Adopting the ceiling therefore means adopting a
-shadow or a bigger surface step first; changing the border alone would trade a
-frame for no boundary at all.
+**Dark keeps its heavier border for a reason that is a number.** A dark shadow at
+four times the alpha light uses moves the page by **0.26 L***, against a surface
+step already worth 7.70 — the dark page sits at the bottom of the lightness scale
+and there is no room beneath it. Dark has no second cue to hand the work to, so
+its border keeps it. Material 3 drops dark shadows for the same reason.
+
+**The modes remain symmetric, in the property that matters.** Not border contrast
+— light's border is now the lighter of the two — but total lift of a card off its
+page: **7.62 L* in light against 7.70 in dark**. The shadow alpha was solved for
+that number rather than picked; a first draft used 0.12 and overshot to 13.28,
+which made light cards float where dark's sat. `app_theme_test.dart` now pins the
+lift instead of the border, and `app_elevation_test.dart` pins the measurement
+that says dark should not paint.
 
 **The light-mode background-tint answer, plainly:** the *page* is tinted —
 `#F4F5F8`, hue 225°, 15° from the seed — but the *card* is **pure `#FFFFFF` with

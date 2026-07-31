@@ -92,27 +92,22 @@ String _elementKindFor(AstNode node) {
   // no access to the subtype's members.
   for (AstNode? cursor = node; cursor != null; cursor = cursor.parent) {
     final AstNode current = cursor;
-    if (current is InstanceCreationExpression) {
-      final type = current.constructorName.type.name.lexeme;
-      if (type == 'BorderSide' ||
-          type == 'Border' ||
-          type == 'OutlineInputBorder' ||
-          type == 'UnderlineInputBorder' ||
-          type == 'TableBorder' ||
-          type == 'Divider' ||
-          type == 'VerticalDivider') {
-        return 'border';
-      }
-      if (type == 'BoxShadow') return 'shadow';
-      if (type == 'Icon') return 'icon';
-      if (type == 'TextStyle' || type == 'Text') return 'text';
-      if (type == 'BoxDecoration' ||
-          type == 'DecoratedBox' ||
-          type == 'Container' ||
-          type == 'ColoredBox' ||
-          type == 'Material') {
-        return 'background';
-      }
+    // **Both shapes, because an unresolved parse cannot tell them apart.**
+    // `const BoxShadow(...)` is an InstanceCreationExpression; the same call
+    // with the `const` implied by an outer const is a MethodInvocation with a
+    // capitalised name and no target. Handling only the first is what made
+    // `shadowSiteCount()` report zero on a file that paints shadows.
+    final String? constructed = switch (current) {
+      InstanceCreationExpression() => current.constructorName.type.name.lexeme,
+      MethodInvocation(target: null, methodName: final SimpleIdentifier name)
+          when name.name.isNotEmpty &&
+              name.name[0] == name.name[0].toUpperCase() =>
+        name.name,
+      _ => null,
+    };
+    if (constructed != null) {
+      final kind = _kindOfConstructor(constructed);
+      if (kind != null) return kind;
     }
     if (current is MethodInvocation) {
       final name = current.methodName.name;
@@ -162,6 +157,26 @@ String _elementKindFor(AstNode node) {
 
   return 'other';
 }
+
+/// What element a constructor of [type] paints, or null when it says nothing.
+String? _kindOfConstructor(String type) => switch (type) {
+  'BorderSide' ||
+  'Border' ||
+  'OutlineInputBorder' ||
+  'UnderlineInputBorder' ||
+  'TableBorder' ||
+  'Divider' ||
+  'VerticalDivider' => 'border',
+  'BoxShadow' => 'shadow',
+  'Icon' => 'icon',
+  'TextStyle' || 'Text' => 'text',
+  'BoxDecoration' ||
+  'DecoratedBox' ||
+  'Container' ||
+  'ColoredBox' ||
+  'Material' => 'background',
+  _ => null,
+};
 
 /// The enclosing class name, or `<top-level>`.
 String _contextFor(AstNode node) {

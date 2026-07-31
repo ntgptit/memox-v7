@@ -41,23 +41,31 @@ an edge.
 
 const String perceptualVerdict = '''
 **The light-mode border-prominence answer, plainly:** `borderSubtle` is
-**1.82:1** against the card and **1.67:1** against the page. Both are above the
-brief's 1.6 ceiling, so by that band the border is too heavy in light.
+**1.50:1** against the card and **1.38:1** against the page — inside the brief's
+band. Dark is **1.82:1** and **2.12:1**, above the ceiling, and stays there
+deliberately.
 
-**And the same measurement says dark is too.** Dark scores 1.82:1 and 2.12:1 —
-higher than light on the page. The ceiling is not catching a light-mode
-regression; it is disagreeing with this app's depth model in both modes, and it
-would have flagged dark before any recent change was made.
+**This section has been through three positions and only the last one is
+measured.** It first reported both modes above the ceiling and rejected the
+ceiling, on the grounds that the app was flat *by decision* and the border was
+therefore the only cue it had. The flatness was never a decision — no AD, no BR,
+no test — and the project owner has since said the app needs real elevation. At
+M4.10h it got one, and the ceiling is met in light because the border no longer
+carries the edge alone.
 
-That disagreement is real and is the audit's job to surface rather than resolve.
-This app's cards are **unshadowed by decision** (`cardTheme.elevation` is 0, no
-`BoxShadow` anywhere in `lib/`), and its surfaces sit 1.09:1 (light) and 1.17:1
-(dark) from the page they lie on. When the surface step is that small and there
-is no shadow, the border is not one of several depth cues — it is the only one,
-and a value inside a 1.6 ceiling is invisible at that job. The band assumes a
-model with more than one cue. Adopting the ceiling therefore means adopting a
-shadow or a bigger surface step first; changing the border alone would trade a
-frame for no boundary at all.
+**Dark keeps its heavier border for a reason that is a number.** A dark shadow at
+four times the alpha light uses moves the page by **0.26 L\***, against a surface
+step already worth 7.70 — the dark page sits at the bottom of the lightness scale
+and there is no room beneath it. Dark has no second cue to hand the work to, so
+its border keeps it. Material 3 drops dark shadows for the same reason.
+
+**The modes remain symmetric, in the property that matters.** Not border contrast
+— light's border is now the lighter of the two — but total lift of a card off its
+page: **7.62 L\* in light against 7.70 in dark**. The shadow alpha was solved for
+that number rather than picked; a first draft used 0.12 and overshot to 13.28,
+which made light cards float where dark's sat. `app_theme_test.dart` now pins the
+lift instead of the border, and `app_elevation_test.dart` pins the measurement
+that says dark should not paint.
 
 **The light-mode background-tint answer, plainly:** the *page* is tinted —
 `#F4F5F8`, hue 225°, 15° from the seed — but the *card* is **pure `#FFFFFF` with

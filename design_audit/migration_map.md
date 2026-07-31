@@ -70,14 +70,12 @@ in the empty cells, not in re-picking what exists.
 | no token within ΔE-ish range — needs a new one | `lib/app/mobile_frame_widget.dart:54` — const Color(0xFF1E1E1E) | `#1E1E1E` | `#1E1E1E` |
 | colorScheme.onSurface | `lib/app/error_screen_widget.dart:126` — Color(0xFF16182B) | `#16182B` | `#16182B` |
 | colorScheme.onSurfaceVariant | `lib/app/error_screen_widget.dart:127` — Color(0xFF565C72) | `#565C72` | `#565C72` |
+| a precomputed blendOver(...) constant | `lib/core/theme/app_elevation.dart:62` — scheme.shadow.withValues(alpha: 0.04 + 0.01 * level) | `#0B0C18 @ alpha 0.04` | `#04040B @ alpha 0.04` |
 | a precomputed blendOver(...) constant | `lib/shared/widgets/mx_action_sheet.dart:125` — context.colors.onSurface.withValues(alpha: _disabledOpacity) | `#16182B @ alpha unresolvable` | `#EDEEF5 @ alpha unresolvable` |
 | blendOver(seed, base, small alpha) - see migration_map.md | `lib/core/theme/app_colors.dart` — colorScheme.surface (light) | `#FFFFFF` | `#1B1D32` |
 | blendOver(seed, base, small alpha) - see migration_map.md | `lib/core/theme/app_colors.dart` — semantic.surfaceElevated (light) | `#FFFFFF` | `#383D55` |
 | derive both from the seed, or neither | `lib/core/theme/app_colors.dart` — colorScheme.surface (mechanism differs by mode) | `#FFFFFF` | `#1B1D32` |
 | derive both from the seed, or neither | `lib/core/theme/app_colors.dart` — semantic.surfaceElevated (mechanism differs by mode) | `#FFFFFF` | `#383D55` |
-| regenerate from the seed at the same lightness | `lib/core/theme/app_colors.dart` — colorScheme.outline (light) is 24 degrees from the seed hue | `#BEC0C3` | `#414762` |
-| regenerate from the seed at the same lightness | `lib/core/theme/app_colors.dart` — colorScheme.outlineVariant (light) is 24 degrees from the seed hue | `#BEC0C3` | `#414762` |
-| regenerate from the seed at the same lightness | `lib/core/theme/app_colors.dart` — semantic.borderSubtle (light) is 24 degrees from the seed hue | `#BEC0C3` | `#414762` |
 
 ## 3. Fill order: ColorScheme vs ThemeExtension
 
