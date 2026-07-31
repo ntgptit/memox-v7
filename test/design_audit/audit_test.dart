@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'audit_report.dart';
+import 'audit_role_steps.dart';
 import 'audit_scan_steps.dart';
 import 'audit_theme_steps.dart';
 import 'color_usage_scan.dart';

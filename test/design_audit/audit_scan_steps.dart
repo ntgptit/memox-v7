@@ -114,7 +114,13 @@ Map<String, Object?> buildViolations() {
     // token" or "there is no token to use".
     if (site.sourceKind == 'hardcoded-literal' &&
         !isDeclaration &&
-        !_reachesTheme(site.file)) {
+        !_reachesTheme(site.file) &&
+        // ...and does not answer to the platform brightness by hand. A file
+        // with no theme can still read `PlatformDispatcher` and pick between a
+        // light and a dark constant, which is what MX-VIS-002 rule R8 asks for.
+        // Without this clause the audit would keep reporting the fix as the
+        // defect.
+        !referencesIdentifier(site.file, 'platformBrightness')) {
       flag(
         site,
         'V6',
@@ -145,12 +151,27 @@ Map<String, Object?> buildViolations() {
         }
       }
 
+      // A literal in a file that cannot read the theme but *does* answer to
+      // the platform brightness is a **mirror**, not a duplicate of convenience:
+      // it restates a token because no other mechanism reaches it, and it moves
+      // with the mode. Real V3 — same value, token available — is a different
+      // problem and a different severity.
+      final isUnavoidableMirror =
+          !_reachesTheme(site.file) &&
+          referencesIdentifier(site.file, 'platformBrightness');
+
       flag(
         site,
         'V3',
-        '🟡',
-        'A colour literal outside the palette file. It renders the same value '
-            'in both modes, so it is also a latent V6: ${resolved.light}.',
+        isUnavoidableMirror ? '🟢' : '🟡',
+        isUnavoidableMirror
+            ? 'Mirrors $nearest because this file has no ThemeData in scope. It '
+                  'follows the mode by reading PlatformDispatcher, so it is a '
+                  'copy that cannot drift silently — but it is still a copy, and '
+                  'changing the token will not change it.'
+            : 'A colour literal outside the palette file. It renders the same '
+                  'value in both modes, so it is also a latent V6: '
+                  '${resolved.light}.',
         nearest,
       );
       continue;

@@ -35,9 +35,15 @@ abstract final class AppColors {
   // --- Surface ladder ------------------------------------------------------
   //
   // Four tiers. Dark climbs L* 3.9 -> 11.6 -> 19.0 -> 26.3 so a card reads as a
-  // card and an inset tile as an inset without a shadow being asked to carry
-  // the hierarchy. Light inverts it — the card is white and the rest sit below
-  // — which is the same ordering of PROMINENCE, built the only way white allows.
+  // card and an inset tile as an inset on the strength of the ladder alone.
+  // Light inverts it — the card is white and the rest sit below — which is the
+  // same ordering of PROMINENCE, built the only way white allows.
+  //
+  // **That the ladder can carry the hierarchy is not the same as a rule against
+  // shadows**, and this comment was read as one for two milestones. The project
+  // owner has since said the app needs real elevation to separate elements; see
+  // `shadowLight`/`shadowDark` and MX-VIS-002 rule R6. Nothing here forbids a
+  // shadow — it only explains why the ladder was built to work without one.
 
   /// Page background. The one component allowed a strong navy saturation.
   static const Color backgroundLight = Color(0xFFF4F5F8);
@@ -67,9 +73,15 @@ abstract final class AppColors {
 
   /// Hairline between rows, around cards, and an input at rest.
   ///
-  /// **This is the whole of the app's depth model.** Cards are unshadowed by
-  /// choice, and a surface sits only one step from the page it lies on — 1.09:1
-  /// in light, 1.17:1 in dark — so the boundary is the border or it is nothing.
+  /// **This carries the whole depth model today**, and only because nothing yet
+  /// paints a shadow: a surface sits one step from the page it lies on — 1.09:1
+  /// in light, 1.17:1 in dark — so the border is currently the only boundary.
+  ///
+  /// "Currently" is the load-bearing word. That the app is flat was never a
+  /// decision written anywhere — no AD, no BR, no test — and the project owner
+  /// has since said elevation *is* wanted. Once a shadow exists this token stops
+  /// being the only cue and the values below should be re-measured downward:
+  /// 1.82:1 is a border doing two jobs.
   ///
   /// The light value was `#D7DAE3` until M4.10e and was measurably too weak for
   /// that job: 1.40:1 against the card it outlined and 1.28:1 against the page,
@@ -198,8 +210,21 @@ abstract final class AppColors {
   static const Color onInverseSurfaceDark = Color(0xFF23253A);
   static const Color inversePrimaryLight = Color(0xFFA9A9E0);
   static const Color inversePrimaryDark = Color(0xFF3A3A9B);
+
+  /// The colour a drop shadow and a modal scrim are drawn from.
+  ///
+  /// **Both modes derive from the seed, and that stopped being cosmetic at
+  /// M4.10g.** Dark was pure `#000000` while light was already `#0B0C18` (hue
+  /// 235) — an asymmetry nobody could see, because nothing in the app painted a
+  /// shadow. The project owner's decision that surfaces *should* carry elevation
+  /// makes it visible on the first switch: light would drop a seed-tinted shadow
+  /// and dark a flat black one, from one token name.
+  ///
+  /// `#04040B` is `seed @ 0.06` over black, which keeps hue 240 at a luminance
+  /// low enough to read as a shadow rather than as a navy smear. Pinned by
+  /// MX-VIS-002 rule R6.
   static const Color shadowLight = Color(0xFF0B0C18);
-  static const Color shadowDark = Color(0xFF000000);
+  static const Color shadowDark = Color(0xFF04040B);
   static const Color scrimLight = Color(0xFF0B0C18);
-  static const Color scrimDark = Color(0xFF000000);
+  static const Color scrimDark = Color(0xFF04040B);
 }

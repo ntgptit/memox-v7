@@ -293,8 +293,15 @@ ThemeData _buildTheme(
       focusedBorder: _inputBorder(semantic.focusRing),
       errorBorder: _inputBorder(semantic.danger),
       focusedErrorBorder: _inputBorder(semantic.danger),
+      // Solid, not `borderSubtle` at 50% — see MX-VIS-002 rule R7. A
+      // translucent border on an input composites against the field's fill in
+      // one place and the page in another, so the same disabled state read as
+      // two different greys.
       disabledBorder: _inputBorder(
-        semantic.borderSubtle.withValues(alpha: 0.5),
+        Color.alphaBlend(
+          semantic.borderSubtle.withValues(alpha: 0.5),
+          scheme.surface,
+        ),
       ),
       hintStyle: base.textTheme.bodyMedium?.copyWith(
         color: scheme.onSurfaceVariant,

@@ -231,6 +231,100 @@ void main() {
     }
   });
 
+  test('R6 — the shadow tokens are built the same way in both modes', () {
+    // **Promoted from a report finding to a rule by a product decision.** While
+    // nothing painted a shadow this was latent: light's `shadow` carried the seed
+    // (`#0B0C18`, hue 235) and dark's was pure `#000000`, and neither was drawn.
+    // The app is now to have real elevation, so the asymmetry becomes visible the
+    // moment it is switched on — one mode dropping a seed-tinted shadow and the
+    // other a flat black one.
+    for (final token in <String, (Color, Color)>{
+      'colorScheme.shadow': (light.colorScheme.shadow, dark.colorScheme.shadow),
+      'colorScheme.scrim': (light.colorScheme.scrim, dark.colorScheme.scrim),
+    }.entries) {
+      final (lightValue, darkValue) = token.value;
+
+      for (final mode in <String, Color>{
+        'light': lightValue,
+        'dark': darkValue,
+      }.entries) {
+        expect(
+          hueOf(mode.value),
+          isNotNull,
+          reason:
+              '${token.key} in ${mode.key} is ${hex(mode.value)} — a pure '
+              'neutral with no hue. A shadow that carries no trace of the seed '
+              'cannot move with it, and the other mode already does.',
+        );
+      }
+    }
+  });
+
+  test('R7 — a fill or a border is a solid colour, never a translucent one', () {
+    // A translucent `BorderSide` or fill composites against whatever is behind
+    // it at paint time, so one token renders as two values — over a card and
+    // over a sheet — and neither is the one anybody chose. The model asks for
+    // `Color.alphaBlend(...)` resolved at build time.
+    //
+    // **Scoped to fill and border on purpose.** `overlayColor` must be
+    // translucent: a ripple that is opaque hides the label it washes over.
+    // Foreground and label colours are left out too — alpha on disabled text is
+    // the Material idiom and the ground under a label is always its own surface,
+    // so nothing is unresolved there.
+    final offenders = scanLib()
+        .where((ColorSite site) => site.sourceKind == 'opacity-modified-token')
+        .where(
+          (ColorSite site) =>
+              site.elementKind == 'border' || site.elementKind == 'background',
+        )
+        .map((ColorSite site) => '${site.file}:${site.line} ${site.expression}')
+        .toList();
+
+    expect(
+      offenders,
+      isEmpty,
+      reason:
+          'Precompute these with Color.alphaBlend over the surface they sit '
+          'on.\n${offenders.join('\n')}',
+    );
+  });
+
+  test('R8 — a screen that cannot read the theme still answers to the mode', () {
+    // The other half of V6. A file importing only `flutter/widgets.dart` has no
+    // `Theme.of` to call, so R2 lets it hold literals — but "no theme" is not
+    // "no dark mode". `ErrorScreenWidget` stands in for a widget that failed,
+    // including above `MaterialApp`, and a fixed light palette there means a
+    // dark-mode user gets a white flash at the worst possible moment.
+    //
+    // `PlatformDispatcher.platformBrightness` is the mechanism that survives
+    // having no inherited widgets at all, so that is what this looks for.
+    final offenders = <String>[];
+
+    for (final site in scanLib()) {
+      if (site.sourceKind != 'hardcoded-literal') continue;
+      if (declarationFiles.contains(site.file)) continue;
+      if (_reachesTheme(site.file)) continue;
+
+      // Parsed, not searched. The first version of this used
+      // `source.contains('platformBrightness')` and **passed its own fault
+      // injection**: deleting the code left the word behind in the comment
+      // explaining it, so the rule matched its own prose.
+      if (referencesIdentifier(site.file, 'platformBrightness')) continue;
+
+      offenders.add(
+        '${site.file}:${site.line} ${site.expression} — mode-locked',
+      );
+    }
+
+    expect(
+      offenders,
+      isEmpty,
+      reason:
+          'Read PlatformDispatcher.platformBrightness and pick between a const '
+          'light and a const dark value.\n${offenders.join('\n')}',
+    );
+  });
+
   test('the scan the rules above depend on actually looked at something', () {
     // Every rule here is an `isEmpty` or a loop. A scanner returning nothing
     // passes all five and reads as conformance, which is the failure this
