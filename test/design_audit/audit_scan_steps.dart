@@ -100,6 +100,8 @@ Map<String, Object?> buildViolations() {
     'lib/core/theme/app_theme.dart',
     'lib/core/theme/app_semantic_colors.dart',
     'lib/core/theme/app_button_themes.dart',
+    'lib/core/theme/app_elevation.dart',
+    'lib/core/theme/app_overlay_themes.dart',
   };
 
   for (final site in sites) {
@@ -198,12 +200,14 @@ Map<String, Object?> buildViolations() {
     }
 
     // ---- V5: translucency applied at the paint site -----------------------
-    // A shadow is exempt, and not as a courtesy: a shadow *is* a translucent
-    // wash over whatever it falls on, and an opaque one is a block of colour
-    // rather than a shadow. It is the same exemption `overlayColor` gets — some
-    // paint has no ground to be precomputed against.
+    // Shadows and scrims are exempt, and not as a courtesy: both *are*
+    // translucent washes over whatever is behind them, and an opaque one is a
+    // block of colour rather than a shadow or a barrier. Same exemption
+    // `overlayColor` gets — some paint has no ground to be precomputed against,
+    // because the ground is whatever screen is underneath.
     if (site.sourceKind == 'opacity-modified-token' &&
         site.elementKind != 'shadow' &&
+        site.elementKind != 'scrim' &&
         !isDeclaration) {
       flag(
         site,

@@ -7,7 +7,7 @@
 | **Scope** | Quyết định ràng buộc nhiều tài liệu hoặc nhiều layer. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), hình dạng dữ liệu (`data-model.md`) |
 | **Source of truth for** | AD-xx · đánh đổi kiến trúc · phương án đã bị loại · lý do pin toolchain |
 | **Depends on** | `document-conventions.md`, `product.md` |
-| **Updated by task** | M4.10b (AD-13) |
+| **Updated by task** | M4.10o (AD-14) |
 | **Last updated** | 2026-07-30 |
 
 Format theo `document-conventions.md` §6.1. AD xếp theo số; ID vĩnh viễn (§7).
@@ -802,3 +802,103 @@ khiếm khuyết ở trên đều là tính chất của *text*, thêm pattern k
 một dòng ở composition root); một timer chu kỳ cho due count (bỏ — nó đánh thức
 database theo lịch để đổi một con số không ai đang xem, còn boundary nó bắt thì một
 lần hẹn theo dữ liệu bắt chính xác hơn).
+
+## AD-14 · Hệ màu và chiều sâu: seed, role, và cue theo mode
+
+| | |
+|---|---|
+| **Status** | accepted |
+| **Affected documents** | `docs/checklist.md` (7.1 design tokens) · `wbs.md` · `design_audit/color_system_report.md` |
+| **Decision** | Mọi màu trung tính suy từ một seed; mỗi role là một hue qua một bộ sinh; chiều sâu là **một mục tiêu đo được**, không phải một cơ chế cố định — mỗi mode được dựng nó bằng thứ mode đó có. |
+
+### Vì sao có quyết định này
+
+Hệ màu của app từng đúng ở hầu hết các chỗ mà không ai viết ra tại sao. Hậu quả
+đo được ở M4.10f: light mode có nền mang seed nhưng **card là trắng thuần không
+hue**, sáu token nữa cũng vậy, và shadow mang seed ở light còn dark là đen tuyệt
+đối. Không cái nào là quyết định — chúng là chỗ trống chưa ai lấp.
+
+Tệ hơn: **hai đoạn comment bị đọc thành luật**. `app_colors.dart` viết rằng thang
+surface hoạt động "without a shadow being asked to carry the hierarchy", và
+`mx_card.dart` viết "flat by design". Hai milestone sau đó trích chúng như một
+ràng buộc — kể cả để bác bỏ một ceiling của bản brief audit — trong khi không có
+AD, không BR, không test nào đứng sau, và `docs/checklist.md` thì vẫn đang yêu cầu
+một Elevation token chưa ai làm. Chủ dự án cuối cùng phải nói thẳng rằng app **cần**
+độ nổi. AD này tồn tại để lần sau không phải suy ra luật từ văn xuôi.
+
+### Quyết định
+
+**1 · Seed là nguồn của mọi trung tính.** `AppColors.seed` (hue 240). Mọi
+neutral — surface, page, border, muted text, shadow, scrim — phải mang một trace
+của nó. Công thức chuẩn tắc là
+`Color.alphaBlend(seed.withValues(alpha: a), base)`, **precompute thành hằng số**,
+không phải một màu trong suốt đặt vào slot vẽ.
+
+Một trung tính không có hue không phải "trung tính hơn": nó là một trung tính
+**không thể đi theo seed khi seed đổi**. MX-VIS-002 rule R9 chặn.
+
+**2 · Mỗi role là một hue qua một bộ sinh.** `primary`, `secondary`, `tertiary`,
+`error`/`danger`, `success`, `warning`, `info`. Fill và container của cùng một
+role phải nằm trong 5° của nhau (rule R3). Không chọn tay một biến thể sáng hơn
+cho một badge.
+
+Lỗ đã biết: `success`, `warning`, `info` mới có fill. Container / border / focus
+sẽ derive khi có caller thật, không derive trước.
+
+**3 · Border lấy hue từ chủ của thứ nó bọc.** Container trung tính (card, input
+nghỉ, divider, list tile, sheet) → từ seed. Component thuộc role (outline button
+nguy hiểm, input lỗi, trạng thái focus) → từ hue của role đó.
+
+**4 · Chiều sâu là mục tiêu đo được, không phải cơ chế cố định.**
+
+Đây là phần đắt nhất và là phần dễ bị viết sai thành luật nhất. **Cái phải giữ
+bằng nhau giữa hai mode là tổng độ nổi của một card khỏi trang nó nằm trên** —
+hiện 7.75 L\* ở light và 7.70 ở dark. Mỗi mode tự do dựng con số đó bằng thứ nó có:
+
+| | bậc surface | shadow | border |
+|---|---|---|---|
+| light | 2.15 L\* | +5.6 L\* (alpha 0.07) | 1.50:1 |
+| dark | 7.70 L\* | **không có** | 1.82:1 |
+
+Dark không vẽ shadow vì **đo được**, không phải vì thẩm mỹ: trang dark nằm ở đáy
+thang lightness (L\* 3.86), nên một shadow ở alpha 0.20 chỉ dịch được 0.26 L\*.
+Material 3 bỏ shadow ở dark vì cùng lý do. `app_elevation_test.dart` **dẫn lại**
+phép đo đó chứ không trích nó, nên nếu palette đổi tới mức shadow dark trở nên
+thấy được thì test đỏ và quyết định được xem lại.
+
+**Hệ quả: hai luật cũ đã bị thay, và cả hai từng đúng.** "Border phải khớp giữa
+hai mode" đúng khi border là cue duy nhất; sai ngay khi light có shadow. "Mỗi bậc
+ladder ≥ 3 L\*" đúng khi ladder là toàn bộ hierarchy; light nay là 2.0 vì shadow
+gánh phần chênh. Một luật viết cho một mode chỉ có một cue thì hết hiệu lực khi
+mode đó có hai.
+
+**5 · Mọi thứ được vẽ phải đến từ theme của app, kể cả khi Flutter có mặc định.**
+Một màu tồn tại như mặc định framework thì **vô hình với mọi phép quét mã nguồn**
+— đó là cách `Colors.black54` làm barrier sau mỗi dialog và sheet sống sót qua
+trọn một cuộc audit màu (M4.10m). Component nào app dùng thì app khai báo theme
+cho nó.
+
+### Đánh đổi đã nhận
+
+- **Tint làm card tối đi.** Bậc surface light tụt 3.46 → 2.15 L\*. Trả bằng shadow
+  và bằng việc nới ngưỡng ladder, không phải bằng cách bỏ tint.
+- **Precompute buộc phải chọn một nền.** `disabledSurfaceTint` blend trên
+  `surface`, nên đúng ở form sheet và dialog, hơi sáng ở nút đặt thẳng trên page.
+  Chính khoảng cách đó là lý do translucency tại điểm vẽ bị cấm.
+- **Shadow và scrim được miễn trừ khỏi luật precompute**, vì nền của chúng theo
+  định nghĩa là bất cứ thứ gì phía sau.
+
+### Phương án đã bị loại
+
+- **Nhận ceiling 1.6:1 cho border khi chưa có cue thứ hai** (bỏ ở M4.10f, nhận ở
+  M4.10h) — hạ border trước khi có shadow là đổi một cái khung quá đậm lấy không
+  có ranh giới nào.
+- **Giữ card trắng thuần** (bỏ ở M4.10i) — nó là lựa chọn hợp lệ, nhưng nó để một
+  surface duy nhất nằm ngoài hệ, và sau khi có shadow thì chi phí lightness không
+  còn là lý do giữ.
+- **Mở strict visual audit sang overlay** (bỏ ở M4.10m) — auditor duyệt một màn
+  hình ở trạng thái nghỉ, trong khi một nửa render tree của overlay là nội dung
+  người dùng đang bị cố ý ngăn không cho đọc. Làm nó xanh cần một danh sách
+  allowance khẳng định chữ không đọc được là chấp nhận được.
+- **Thêm tuỳ chọn surface cho `MxListTile`** (bỏ ở M4.10n) — không caller nào cần,
+  và tấm ảnh mới là thứ sai chứ không phải component.

@@ -64,7 +64,12 @@ class MxErrorState extends StatelessWidget {
               MxActionButton(
                 label: retryLabel!,
                 onPressed: onRetry,
-                variant: MxActionButtonVariant.secondary,
+                // Primary, not secondary. An error state has exactly one
+                // thing to do and nothing to weigh it against — an outlined
+                // button there is a quiet control on an otherwise empty screen,
+                // which reads as optional. `MxEmptyState`'s action has been
+                // primary all along; these two were inconsistent rather than
+                // deliberately different.
               ),
             ],
           ],

@@ -18,6 +18,7 @@ import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
 
 import 'golden_specimens.dart';
+import 'golden_surfaces.dart';
 
 /// Golden tests for every shared component, light and dark.
 ///
@@ -214,30 +215,36 @@ void main() {
       ),
     ),
     'mx_list_tile_selected': const Scaffold(
-      body: MxListTile(
-        title: 'Academic Word List',
-        subtitle: '20 of 570 learned',
-        leading: Icon(Icons.style_outlined),
-        isSelected: true,
-        onTap: noop,
+      body: OnSheetSurface(
+        child: MxListTile(
+          title: 'Academic Word List',
+          subtitle: '20 of 570 learned',
+          leading: Icon(Icons.style_outlined),
+          isSelected: true,
+          onTap: noop,
+        ),
       ),
     ),
     'mx_list_tile_disabled': const Scaffold(
-      body: MxListTile(
-        title: 'Academic Word List',
-        subtitle: 'Not available yet',
-        leading: Icon(Icons.style_outlined),
-        trailing: Icon(Icons.chevron_right),
-        isEnabled: false,
-        onTap: noop,
+      body: OnSheetSurface(
+        child: MxListTile(
+          title: 'Academic Word List',
+          subtitle: 'Not available yet',
+          leading: Icon(Icons.style_outlined),
+          trailing: Icon(Icons.chevron_right),
+          isEnabled: false,
+          onTap: noop,
+        ),
       ),
     ),
     'mx_list_tile': const Scaffold(
-      body: MxListTile(
-        title: 'Academic Word List',
-        subtitle: '20 of 570 learned',
-        leading: Icon(Icons.style_outlined),
-        trailing: Icon(Icons.chevron_right),
+      body: OnSheetSurface(
+        child: MxListTile(
+          title: 'Academic Word List',
+          subtitle: '20 of 570 learned',
+          leading: Icon(Icons.style_outlined),
+          trailing: Icon(Icons.chevron_right),
+        ),
       ),
     ),
     // A benign action on purpose. Reusing "Delete this deck?" here would make

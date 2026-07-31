@@ -54,14 +54,14 @@ M4.10h it got one, and the ceiling is met in light because the border no longer
 carries the edge alone.
 
 **Dark keeps its heavier border for a reason that is a number.** A dark shadow at
-four times the alpha light uses moves the page by **0.26 L***, against a surface
+four times the alpha light uses moves the page by **0.26 L****, against a surface
 step already worth 7.70 — the dark page sits at the bottom of the lightness scale
 and there is no room beneath it. Dark has no second cue to hand the work to, so
 its border keeps it. Material 3 drops dark shadows for the same reason.
 
 **The modes remain symmetric, in the property that matters.** Not border contrast
 — light's border is now the lighter of the two — but total lift of a card off its
-page: **7.62 L* in light against 7.70 in dark**. The shadow alpha was solved for
+page: **7.62 L** in light against 7.70 in dark**. The shadow alpha was solved for
 that number rather than picked; a first draft used 0.12 and overshot to 13.28,
 which made light cards float where dark's sat. `app_theme_test.dart` now pins the
 lift instead of the border, and `app_elevation_test.dart` pins the measurement
@@ -72,15 +72,15 @@ that says dark should not paint.
 
 **It was the audit's largest finding and it is closed.** The card was pure
 `#FFFFFF` with no hue at all, along with `surfaceBright`,
-`surfaceContainerLowest`, `surfaceElevated` and every dialog and sheet that
+`surfaceContainerL*owest`, `surfaceElevated` and every dialog and sheet that
 follows them: a tinted canvas with an untinted surface sitting on it, which is
 why light read as a different palette from dark.
 
 Closing it cost lightness, and the cost was paid rather than waived. A tinted
-card is a darker card, so the surface step fell from 3.46 L* to 2.15. Two things
+card is a darker card, so the surface step fell from 3.46 L** to 2.15. Two things
 absorbed that: the shadow's alpha was re-solved from 0.05 to 0.07, and the light
 ladder's minimum step went from 3.0 to 2.0 — the step it gave up is exactly what
-the shadow took on, and the total lift is unchanged at **7.75 L\* against dark's
+the shadow took on, and the total lift is unchanged at **7.75 L** against dark's
 7.70**.
 
 **Neutral family coherence:** both are one family now. Every neutral in both
@@ -160,7 +160,7 @@ section 4.
 | `surfaceDim` | `#DEE0E7` | keep (hue 227) | `#08061F` | keep | Already in family. |
 | `borderSubtle` | `#BEC0C3` (hue 216) | `#BFBFCB` = the same lightness at hue 240 | `#414762` | keep | Contrast against the card is **1.82 before and 1.82 after**, so the M4.10e depth decision survives untouched. Chroma 0.047, inside the 0.06 budget. |
 | `borderDefault` | — | `#A8A8B8` | — | `#5A6180` | New. Nothing needs a second border weight today; listed because the model names it. |
-| `shadowTint` | `#0B0C18` (hue 235) | keep | `#000000` (no hue) | `#04040B` = seed @ 0.06 over black | **Closes a V6.** Light's shadow already carries the seed; dark's does not. |
+| `shadowTint` | `#0B0C18` (hue 235) | keep | `#000000` (no hue) | `#04040B` = seed @ 0.06 over black | **Closes a V6.** L*ight's shadow already carries the seed; dark's does not. |
 | `textMuted` | `#565C72` | keep | `#A6ABC2` | keep | Already in family, 11-13 degrees off seed. |
 
 **The cost of the `surface` proposal, stated rather than buried.** Tinting the
@@ -226,8 +226,8 @@ surface. A diff means the site was compositing over something else, which is the
 bug this batch exists to remove.
 
 **Batch 4 — `surface` gets a seed trace (V1, 🔴). Contested.**
-Light `surface` `#FFFFFF` → `#FCFCFE`, and with it `surfaceBright`,
-`surfaceContainerLowest`, `surfaceElevated`, `cardTheme.color`,
+L*ight `surface` `#FFFFFF` → `#FCFCFE`, and with it `surfaceBright`,
+`surfaceContainerL*owest`, `surfaceElevated`, `cardTheme.color`,
 `dialogTheme.backgroundColor`, `bottomSheetTheme.backgroundColor`.
 *Goldens:* nearly every light golden — 12+ files.
 *Contested because* a pure-white card is a legitimate design position, and this
@@ -235,7 +235,7 @@ change is visible on every screen. It closes the audit's single largest finding
 and it is a decision, not a correction.
 
 **Batch 5 - `borderSubtle` hue (V1, 🟢).**
-Light `#BEC0C3` -> `#BFBFCB`. Hue 216 -> 240, contrast against the card
+L*ight `#BEC0C3` -> `#BFBFCB`. Hue 216 -> 240, contrast against the card
 **1.82 before and after**, chroma 0.047 against a 0.06 budget.
 
 *Goldens:* every light golden with a card, input or chip - around 12 files, all

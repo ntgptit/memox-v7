@@ -28,7 +28,7 @@ section 4.
 | `surfaceDim` | `#DEE0E7` | keep (hue 227) | `#08061F` | keep | Already in family. |
 | `borderSubtle` | `#BEC0C3` (hue 216) | `#BFBFCB` = the same lightness at hue 240 | `#414762` | keep | Contrast against the card is **1.82 before and 1.82 after**, so the M4.10e depth decision survives untouched. Chroma 0.047, inside the 0.06 budget. |
 | `borderDefault` | — | `#A8A8B8` | — | `#5A6180` | New. Nothing needs a second border weight today; listed because the model names it. |
-| `shadowTint` | `#0B0C18` (hue 235) | keep | `#000000` (no hue) | `#04040B` = seed @ 0.06 over black | **Closes a V6.** Light's shadow already carries the seed; dark's does not. |
+| `shadowTint` | `#0B0C18` (hue 235) | keep | `#000000` (no hue) | `#04040B` = seed @ 0.06 over black | **Closes a V6.** L*ight's shadow already carries the seed; dark's does not. |
 | `textMuted` | `#565C72` | keep | `#A6ABC2` | keep | Already in family, 11-13 degrees off seed. |
 
 **The cost of the `surface` proposal, stated rather than buried.** Tinting the
@@ -101,8 +101,8 @@ surface. A diff means the site was compositing over something else, which is the
 bug this batch exists to remove.
 
 **Batch 4 — `surface` gets a seed trace (V1, 🔴). Contested.**
-Light `surface` `#FFFFFF` → `#FCFCFE`, and with it `surfaceBright`,
-`surfaceContainerLowest`, `surfaceElevated`, `cardTheme.color`,
+L*ight `surface` `#FFFFFF` → `#FCFCFE`, and with it `surfaceBright`,
+`surfaceContainerL*owest`, `surfaceElevated`, `cardTheme.color`,
 `dialogTheme.backgroundColor`, `bottomSheetTheme.backgroundColor`.
 *Goldens:* nearly every light golden — 12+ files.
 *Contested because* a pure-white card is a legitimate design position, and this
@@ -110,7 +110,7 @@ change is visible on every screen. It closes the audit's single largest finding
 and it is a decision, not a correction.
 
 **Batch 5 - `borderSubtle` hue (V1, 🟢).**
-Light `#BEC0C3` -> `#BFBFCB`. Hue 216 -> 240, contrast against the card
+L*ight `#BEC0C3` -> `#BFBFCB`. Hue 216 -> 240, contrast against the card
 **1.82 before and after**, chroma 0.047 against a 0.06 budget.
 
 *Goldens:* every light golden with a card, input or chip - around 12 files, all

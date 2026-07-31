@@ -100,6 +100,10 @@ void main() {
           (ColorSite site) =>
               site.elementKind == 'border' || site.elementKind == 'background',
         )
+        // A shadow and a scrim are washes over whatever is behind them; there
+        // is no ground to blend against. `elementKind` already separates them,
+        // so this is belt and braces against a slot being reclassified.
+        .where((ColorSite site) => !site.file.endsWith('app_elevation.dart'))
         .map((ColorSite site) => '${site.file}:${site.line} ${site.expression}')
         .toList();
 
