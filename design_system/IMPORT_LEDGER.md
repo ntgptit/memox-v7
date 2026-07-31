@@ -27,7 +27,7 @@ Tick a line only after the file exists on disk.
 - [x] `styles.css`
 - [ ] `thumbnail.html`
 - [ ] `_ds_manifest.json`
-- [ ] `_adherence.oxlintrc.json`
+- [x] `_adherence.oxlintrc.json`
 
 ## tokens/
 
@@ -50,6 +50,25 @@ Tick a line only after the file exists on disk.
 ## guidelines/
 
 - [ ] 20 `*.card.html` specimen cards
+
+## Still to pull
+
+25 files, all of them **rendered specimens or build metadata** — no design rule
+lives only in this group, so the snapshot is already usable without them:
+
+| Group | Count | What it is |
+|---|---|---|
+| `guidelines/*.card.html` | 20 | Standalone HTML swatch/scale pages. Every value they display is already in `tokens/` and `readme.md`; they exist to be *looked at*. |
+| `components/*/\*.card.html` | 3 | The three component-gallery pages (core, feedback, navigation). |
+| `thumbnail.html` | 1 | The project tile. |
+| `_ds_manifest.json` | 1 | Card index, compiled from the `@dsCard` comments. |
+
+Plus `_ds_bundle.js`, listed under "Not imported" — needed only to make the UI
+kit render.
+
+Each is one `DesignSync` `get_file` call against project
+`3a620f90-9194-42da-823a-3585c2d2b911`, written to the matching path under
+`design_system/`.
 
 ## ui_kits/memox-app/
 
