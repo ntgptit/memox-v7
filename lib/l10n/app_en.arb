@@ -87,6 +87,23 @@
     },
     "description": "The figure at the right-hand end of a deck's progress bar. Whole percent -- a decimal on a 4px bar is precision nobody can act on."
   },
+  "deckFullyLearnedSemanticLabel": "Fully learned",
+  "@deckFullyLearnedSemanticLabel": {
+    "description": "Announced on the glyph of a deck whose every card is learned (BR-88). The only state this glyph carries in words as well as in colour."
+  },
+  "deckDueNowLabel": "{count, plural, other{{count} due now}}",
+  "@deckDueNowLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "The filled chip on a deck card. \"now\" because it sits beside a Nothing due state and the difference is about this moment, not about the deck."
+  },
+  "deckNoCardsLabel": "No cards yet",
+  "@deckNoCardsLabel": {
+    "description": "Shown on a deck card that holds no cards at all -- distinct from Nothing due, which means there are cards and none is waiting."
+  },
   "deckNoDueLabel": "Nothing due",
   "@deckNoDueLabel": {
     "description": "Shown on a deck row when no card is due. Neutral wording on purpose — having nothing due is a normal state, not a problem (BR-29)."
@@ -94,10 +111,6 @@
   "deckPathSemanticLabel": "Deck path",
   "@deckPathSemanticLabel": {
     "description": "Screen-reader label introducing the breadcrumb strip that shows where in the deck tree the user is."
-  },
-  "deckDueSemanticLabel": "Has cards due",
-  "@deckDueSemanticLabel": {
-    "description": "Screen-reader label for the icon that marks a deck as having due cards. The icon and the text both carry the state so it never depends on colour alone."
   },
   "deckFilterAllLabel": "All decks",
   "@deckFilterAllLabel": {

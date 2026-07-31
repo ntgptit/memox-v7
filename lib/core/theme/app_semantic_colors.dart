@@ -10,6 +10,8 @@ import 'app_colors.dart';
 @immutable
 final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   const AppSemanticColors({
+    required this.streakContainer,
+    required this.onStreakContainer,
     required this.progressTrack,
     required this.progressFill,
     required this.success,
@@ -24,7 +26,9 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   });
 
   const AppSemanticColors.light()
-    : progressTrack = AppColors.progressTrackLight,
+    : streakContainer = AppColors.streakContainerLight,
+      onStreakContainer = AppColors.onStreakContainerLight,
+      progressTrack = AppColors.progressTrackLight,
       progressFill = AppColors.progressFillLight,
       success = AppColors.successLight,
       warning = AppColors.warningLight,
@@ -37,7 +41,9 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       secondaryAction = AppColors.secondaryActionLight;
 
   const AppSemanticColors.dark()
-    : progressTrack = AppColors.progressTrackDark,
+    : streakContainer = AppColors.streakContainerDark,
+      onStreakContainer = AppColors.onStreakContainerDark,
+      progressTrack = AppColors.progressTrackDark,
       progressFill = AppColors.progressFillDark,
       success = AppColors.successDark,
       warning = AppColors.warningDark,
@@ -51,6 +57,11 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
 
   /// The unfilled part of a progress track, and the filled part below 100%.
   /// At 100% the fill becomes [success] — see `MxProgressBar`.
+  /// The due chip's fill and its label. See `AppColors.streakContainerLight`
+  /// for why the label is not the design's own value.
+  final Color streakContainer;
+  final Color onStreakContainer;
+
   final Color progressTrack;
   final Color progressFill;
 
@@ -77,6 +88,8 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
 
   @override
   AppSemanticColors copyWith({
+    Color? streakContainer,
+    Color? onStreakContainer,
     Color? progressTrack,
     Color? progressFill,
     Color? success,
@@ -90,6 +103,8 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     Color? secondaryAction,
   }) {
     return AppSemanticColors(
+      streakContainer: streakContainer ?? this.streakContainer,
+      onStreakContainer: onStreakContainer ?? this.onStreakContainer,
       progressTrack: progressTrack ?? this.progressTrack,
       progressFill: progressFill ?? this.progressFill,
       success: success ?? this.success,
@@ -115,6 +130,12 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     if (other is! AppSemanticColors) return this;
 
     return AppSemanticColors(
+      streakContainer: Color.lerp(streakContainer, other.streakContainer, t)!,
+      onStreakContainer: Color.lerp(
+        onStreakContainer,
+        other.onStreakContainer,
+        t,
+      )!,
       progressTrack: Color.lerp(progressTrack, other.progressTrack, t)!,
       progressFill: Color.lerp(progressFill, other.progressFill, t)!,
       success: Color.lerp(success, other.success, t)!,

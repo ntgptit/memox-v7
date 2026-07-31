@@ -94,12 +94,14 @@ void main() {
 
       expect(find.byType(DeckTileWidget), findsNWidgets(3));
       expect(find.text('Japanese N5'), findsOneWidget);
-      // Totals, due count and mode, on one subtitle line.
+      // **Totals and mode on the subtitle line; the due count is no longer on
+      // it.** M4.10s moved it to a chip in the card's foot, so asserting it here
+      // would be asserting the old layout.
       expect(
         find.textContaining(english.deckCardCountLabel(120)),
         findsOneWidget,
       );
-      expect(find.textContaining(english.deckDueCountLabel(7)), findsOneWidget);
+      expect(find.textContaining(english.deckDueNowLabel(7)), findsOneWidget);
       expect(
         find.textContaining(english.schedulerEightBoxShortLabel),
         findsWidgets,
@@ -116,7 +118,12 @@ void main() {
         screen: const DeckListScreen(),
       );
 
-      expect(find.textContaining(english.deckNoDueLabel), findsNWidgets(2));
+      // **Two states, not one.** One fixture has cards and none of them due;
+      // the other has no cards at all. Both used to read "Nothing due", which
+      // told a user who had just created a deck that they were up to date with
+      // it. M4.10s split them, and asserting both is what keeps them split.
+      expect(find.textContaining(english.deckNoDueLabel), findsOneWidget);
+      expect(find.textContaining(english.deckNoCardsLabel), findsOneWidget);
     });
 
     testWidgets('due state is carried by an icon as well as words', (
@@ -130,11 +137,15 @@ void main() {
         screen: const DeckListScreen(),
       );
 
-      expect(find.byIcon(Icons.notifications_active), findsOneWidget);
-      expect(
-        find.bySemanticsLabel(RegExp(english.deckDueSemanticLabel)),
-        findsWidgets,
-      );
+      // `schedule` on a filled chip, not `notifications_active` on the well.
+      // The well now says what the deck is made of; what is waiting says so in
+      // the foot, where it can be a pill rather than a tint on a glyph.
+      expect(find.byIcon(Icons.schedule), findsOneWidget);
+      // **The words are the chip's own text now, not a semantic label on a
+      // glyph.** The glyph used to be the only carrier, so it needed a label
+      // nobody could see; the chip says "7 due now" in words a sighted user
+      // reads and a screen reader announces from the same string.
+      expect(find.textContaining(english.deckDueNowLabel(7)), findsOneWidget);
     });
 
     testWidgets('a later emission updates the list without a manual refresh', (

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_icon_size.dart';
+import '../../../../core/theme/app_elevation.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/theme_context_extension.dart';
@@ -8,7 +9,9 @@ import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_card.dart';
 import '../../../../shared/widgets/mx_icon_button.dart';
 import '../../../../shared/widgets/mx_progress_bar.dart';
+import '../../domain/models/deck_content_type_model.dart';
 import '../../domain/models/deck_summary_model.dart';
+import 'deck_due_state_widget.dart';
 import 'deck_labels_widget.dart';
 
 /// One deck in a deck list, at any level (UC-06 step 2).
@@ -49,64 +52,177 @@ class DeckTileWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // **Flat, and padded by its regions rather than as a whole.** The design's
+    // `.mx-deck` carries a hairline and no shadow -- two competing depths in one
+    // scrolling column is what makes a list read as busy, and the card no longer
+    // needs a shadow to separate from the page now that it has three bands of
+    // its own. The padding moves inside so the open region's ink covers the
+    // whole of what it opens, edge to edge.
     return MxCard(
-      onTap: onTap,
-      child: Row(
-        // Top, not centre. Once the name wraps — a long deck title, or any title
-        // at `textScaler` 2.0 — a centred glyph floats halfway down the card with
-        // nothing beside it, and the row stops reading left-to-right. Anchoring
-        // both edges to the first line keeps the icon next to the name it labels.
-        crossAxisAlignment: CrossAxisAlignment.start,
+      elevation: AppElevation.none,
+      padding: EdgeInsets.zero,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          DeckIconArea(
-            icon: summary.hasDueCards
-                ? Icons.notifications_active
-                : Icons.folder_outlined,
-            // Semantics only on the state-carrying icon: the folder is
-            // decoration, and announcing "folder" on every row is noise a
-            // screen-reader user has to sit through.
-            semanticLabel: summary.hasDueCards
-                ? context.l10n.deckDueSemanticLabel
-                : null,
-            tint: summary.hasDueCards
-                ? context.semanticColors.warning
-                : context.colors.onPrimaryContainer,
-          ),
-          const SizedBox(width: AppSpacing.lg),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Text(
-                  summary.deck.name,
-                  style: context.texts.titleMedium,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+          _DeckOpenRegion(summary: summary, onTap: onTap),
+          if (summary.totalCardCount > 0)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                0,
+                AppSpacing.lg,
+                AppSpacing.md,
+              ),
+              child: MxProgressBar(
+                size: MxProgressBarSize.sm,
+                value: summary.learnedFraction,
+                label: context.l10n.deckLearnedProgressLabel(
+                  summary.learnedCardCount,
+                  summary.totalCardCount,
                 ),
-                const SizedBox(height: AppSpacing.xs),
-                _DeckMetaLine(summary: summary),
-                // Only when there is something to be a fraction of. A deck with
-                // no cards would draw an empty track under every row of a fresh
-                // library, which says "0% learned" where the truth is "nothing
-                // to learn yet" — and the meta line already says that.
-                if (summary.totalCardCount > 0) ...<Widget>[
-                  const SizedBox(height: AppSpacing.sm),
-                  MxProgressBar(
-                    size: MxProgressBarSize.sm,
-                    value: summary.learnedFraction,
-                    label: context.l10n.deckLearnedProgressLabel(
-                      summary.learnedCardCount,
-                      summary.totalCardCount,
-                    ),
-                    valueLabel: context.l10n.deckLearnedPercentLabel(
-                      (summary.learnedFraction * 100).round(),
+                valueLabel: context.l10n.deckLearnedPercentLabel(
+                  (summary.learnedFraction * 100).round(),
+                ),
+              ),
+            ),
+          _DeckFootRegion(summary: summary, onActions: onActions),
+        ],
+      ),
+    );
+  }
+}
+
+/// The part of the card that opens the deck: the well, the name, the counts.
+///
+/// **Its own target, not the whole card.** The card used to be one button with
+/// the overflow menu nested inside it, which works but makes the menu a hole in
+/// the middle of a large target and gives the ripple no relationship to what it
+/// opens. Splitting it is the design's arrangement and it is also what leaves
+/// room for a study action here later, when there is a session to start.
+class _DeckOpenRegion extends StatelessWidget {
+  const _DeckOpenRegion({required this.summary, required this.onTap});
+
+  final DeckSummary summary;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    // A deck fixed to cards holds no sub-decks (BR-63), so it is the one row
+    // that opens onto something other than a list -- and the one that gets the
+    // card glyph rather than the folder. A completed deck outranks both: at
+    // 100% learned, what the row is *made of* matters less than that it is done.
+    final isComplete = summary.isFullyLearned;
+    final holdsCards = summary.deck.contentType == DeckContentType.card;
+
+    return Semantics(
+      button: true,
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          onTap: onTap,
+          // Only the top corners: the region is the top band of the card, and a
+          // ripple rounded on all four would leave two notches mid-card.
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(AppRadius.lg),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.lg,
+              AppSpacing.lg,
+              AppSpacing.md,
+            ),
+            child: Row(
+              // Top, not centre. Once the name wraps -- a long deck title, or
+              // any title at `textScaler` 2.0 -- a centred glyph floats halfway
+              // down the card with nothing beside it, and the row stops reading
+              // left to right.
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                DeckIconArea(
+                  icon: isComplete
+                      ? Icons.check_circle
+                      : holdsCards
+                      ? Icons.style_outlined
+                      : Icons.folder_outlined,
+                  // Semantics only on the state-carrying glyph. Folder and card
+                  // are decoration -- the meta line under them says the same
+                  // thing in words -- and announcing "folder" on every row is
+                  // noise a screen-reader user has to sit through.
+                  semanticLabel: isComplete
+                      ? context.l10n.deckFullyLearnedSemanticLabel
+                      : null,
+                  tint: isComplete
+                      ? context.semanticColors.success
+                      : context.colors.onPrimaryContainer,
+                  // A finished deck steps off the brand container onto the
+                  // neutral one. The design does the same, and the reason shows
+                  // in a list: every well is indigo, so a green tick inside an
+                  // indigo square still reads as "one of the indigo ones" until
+                  // you look at it. On the muted surface it reads as done from
+                  // across the column.
+                  wellColor: isComplete
+                      ? context.semanticColors.surfaceMuted
+                      : null,
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Text(
+                        summary.deck.name,
+                        style: context.texts.titleMedium,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      _DeckMetaLine(summary: summary),
+                    ],
+                  ),
+                ),
+                // Only where it opens onto another level. On a deck fixed to
+                // cards it would promise a list that BR-63 says cannot exist.
+                if (!holdsCards) ...<Widget>[
+                  const SizedBox(width: AppSpacing.sm),
+                  ExcludeSemantics(
+                    child: Icon(
+                      Icons.chevron_right,
+                      size: AppIconSize.sm,
+                      color: context.colors.onSurfaceVariant,
                     ),
                   ),
                 ],
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The bottom band: what is waiting, and the row's menu.
+class _DeckFootRegion extends StatelessWidget {
+  const _DeckFootRegion({required this.summary, required this.onActions});
+
+  final DeckSummary summary;
+  final VoidCallback onActions;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        0,
+        AppSpacing.sm,
+        AppSpacing.sm,
+      ),
+      child: Row(
+        children: <Widget>[
+          Expanded(child: DeckDueStateWidget(summary: summary)),
           MxIconButton(
             icon: Icons.more_vert,
             semanticLabel: context.l10n.deckActionsSemanticLabel,
@@ -141,6 +257,7 @@ class DeckIconArea extends StatelessWidget {
     required this.icon,
     required this.tint,
     this.semanticLabel,
+    this.wellColor,
     super.key,
   });
 
@@ -148,11 +265,15 @@ class DeckIconArea extends StatelessWidget {
   final Color tint;
   final String? semanticLabel;
 
+  /// Null keeps the brand container. Pass one only to say the row is in a state
+  /// the brand colour would talk over.
+  final Color? wellColor;
+
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: context.colors.primaryContainer,
+        color: wellColor ?? context.colors.primaryContainer,
         borderRadius: BorderRadius.circular(AppRadius.md),
       ),
       child: SizedBox.square(
@@ -211,18 +332,10 @@ class _DeckMetaLine extends StatelessWidget {
           TextSpan(
             text: context.l10n.deckCardCountLabel(summary.totalCardCount),
           ),
-          const TextSpan(text: ' · '),
-          TextSpan(
-            text: summary.hasDueCards
-                ? context.l10n.deckDueCountLabel(summary.dueCardCount)
-                : context.l10n.deckNoDueLabel,
-            style: summary.hasDueCards
-                ? quiet?.copyWith(
-                    color: context.semanticColors.warning,
-                    fontWeight: FontWeight.w600,
-                  )
-                : null,
-          ),
+          // **The due count left this line at M4.10s.** It now has its own chip
+          // in the card's foot, where it can be a filled pill rather than a
+          // coloured run of text inside a quiet sentence. Keeping it here as
+          // well would state the same fact twice on one card.
           const TextSpan(text: ' · '),
           TextSpan(
             // `summary.schedulerType`, not `summary.deck.schedulerType`. Only a

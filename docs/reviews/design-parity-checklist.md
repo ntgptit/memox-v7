@@ -123,7 +123,7 @@ Dart widget: props, defaults, states, radius, spacing, semantics.
 | # | Design source | Flutter target | Status | Verdict |
 |---|---|---|---|---|
 | D1 | `DeckLevelScreen.jsx` shell + subheader | `deck_list_screen.dart` | [ ] | |
-| D2 | `DeckLevelScreen.jsx` `DeckCard` | `deck_tile_widget.dart` | [ ] | progress bar landed M4.10r; the study pill and the three-target split are still open |
+| D2 | `DeckLevelScreen.jsx` `DeckCard` | `deck_tile_widget.dart` | [x] | **rebuilt M4.10s** — flat card, open region, due chip, three foot states. Study pill deliberately absent: no session to start until M5 |
 | D3 | `DeckLevelScreen.jsx` filter/sort row | `deck_list_toolbar_widget.dart` | [ ] | |
 | D4 | `DeckLevelScreen.jsx` breadcrumb use | `deck_path_widget.dart` | [ ] | |
 | D5 | `DeckLevelScreen.jsx` `LevelEmpty` (three empties) | `deck_list_screen.dart` empty states | [ ] | |
