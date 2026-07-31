@@ -70,6 +70,7 @@ class DeckSummarySectionWidget extends ConsumerWidget {
           // bare `TextButton`'s 64px minimum width imposed.
           : MxTextButton(
               label: context.l10n.deckSummaryShowAction,
+              trailingIcon: Icons.expand_more,
               onPressed: _setSummaryVisible(ref, isVisible: true),
             ),
     );

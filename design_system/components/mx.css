@@ -102,9 +102,25 @@ button.mx-card:focus-visible{outline:none;box-shadow:0 0 0 var(--border-focus) v
 .mx-today__close{position:absolute;top:var(--space-sm);right:var(--space-sm);width:32px;height:32px;display:flex;align-items:center;justify-content:center;border:0;border-radius:50%;background:none;color:var(--color-text-secondary);cursor:pointer}
 .mx-today__close:hover{background:color-mix(in srgb,var(--color-text-secondary) 10%,transparent)}
 .mx-today__close:focus-visible{outline:none;box-shadow:0 0 0 var(--border-focus) var(--color-primary)}
-.mx-textlink{border:0;background:none;padding:var(--space-xs) var(--space-sm);margin:0 calc(var(--space-sm) * -1);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:var(--text-label-md);letter-spacing:var(--tracking-label-md);font-weight:var(--weight-semibold);color:var(--color-primary);cursor:pointer}
-.mx-textlink:hover{background:color-mix(in srgb,var(--color-primary) 8%,transparent)}
-.mx-textlink:focus-visible{outline:none;box-shadow:0 0 0 var(--border-focus) var(--color-primary)}
+/* --- MxTextButton ------------------------------------------------------
+   No padding, no radius, no hover surface: a text button with a background is
+   an outlined button with the border turned off. The 48 target is min-height
+   alone, so the label sits flush with the gutter, and every state lives on the
+   text. The underline rides .mx-textbtn__label, never the button — decoration
+   on the button inherits into icon spans and underlines the glyph's ligature.
+   Colour is the accent: --color-primary measures 3.33:1 on dark at label size
+   and fails AA; the accent (#8A8AE0 dark) measures 6.26:1. */
+.mx-textbtn{display:inline-flex;align-items:center;gap:var(--space-xs);border:0;background:none;padding:0;min-height:var(--touch-target-min);font-family:var(--font-body);font-size:var(--text-label-md);letter-spacing:var(--tracking-label-md);font-weight:var(--weight-semibold);color:var(--color-primary-accent);cursor:pointer;transition:color var(--duration-fast) var(--ease-standard)}
+.mx-textbtn:hover{color:color-mix(in srgb,var(--color-primary-accent) 85%,var(--color-text-primary))}
+.mx-textbtn:hover .mx-textbtn__label{text-decoration:underline;text-underline-offset:3px}
+.mx-textbtn:active{color:color-mix(in srgb,var(--color-primary-accent) 72%,var(--color-text-primary))}
+.mx-textbtn:focus-visible{outline:none}
+.mx-textbtn:focus-visible .mx-textbtn__label{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
+.mx-textbtn--destructive{color:var(--color-danger)}
+.mx-textbtn--destructive:hover{color:color-mix(in srgb,var(--color-danger) 85%,var(--color-text-primary))}
+.mx-textbtn--destructive:active{color:color-mix(in srgb,var(--color-danger) 72%,var(--color-text-primary))}
+.mx-textbtn:disabled{color:var(--color-on-disabled);cursor:not-allowed}
+.mx-textbtn:disabled .mx-textbtn__label{text-decoration:none}
 .mx-streak{display:inline-flex;align-items:center;gap:var(--space-xs);padding:var(--space-xs) var(--space-sm);border-radius:var(--radius-pill);background:var(--color-streak-container);color:var(--color-streak);font-size:var(--text-label-md);line-height:var(--leading-label-md);letter-spacing:var(--tracking-label-md);font-weight:var(--weight-semibold);white-space:nowrap}
 .mx-stats{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-md)}
 .mx-stat{box-sizing:border-box;background:var(--color-surface);border:var(--border-hairline) solid var(--color-border-subtle);border-radius:var(--radius-lg);padding:var(--space-lg)}

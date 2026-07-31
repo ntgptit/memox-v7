@@ -1,4 +1,4 @@
-const { MxContentShell, MxIconButton, MxIcon, MxBreadcrumb, MxPillButton, MxEmptyState, MxProgressBar, MxActionButton, MxSearchField } = window.MemoxDesignSystem_3a620f;
+const { MxContentShell, MxIconButton, MxIcon, MxBreadcrumb, MxPillButton, MxEmptyState, MxProgressBar, MxActionButton, MxSearchField, MxTextButton } = window.MemoxDesignSystem_3a620f;
 
 /**
  * The deck list — ONE screen, used at every depth of the tree. The root is not a
@@ -75,7 +75,7 @@ function DeckLevelScreen({ path, onOpen, onUp, onJumpTo, onNavigate, onActions, 
 
             {summaryOpen ? null : (
               <div style={{ marginBottom: 'var(--space-md)' }}>
-                <button type="button" className="mx-textlink" onClick={() => setSummaryOpen(true)}>Show today’s summary</button>
+                <MxTextButton label="Show today’s summary" trailingIcon="expand_more" onClick={() => setSummaryOpen(true)} />
               </div>
             )}
 

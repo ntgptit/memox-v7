@@ -159,6 +159,17 @@ abstract final class AppColors {
   static const Color onPrimaryLight = Color(0xFFFFFFFF);
   static const Color onPrimaryDark = Color(0xFFFFFFFF);
 
+  /// The brand hue as a LABEL rather than as a fill.
+  ///
+  /// `primaryDark` is deliberately held below the card's headline text so a
+  /// filled CTA never outshines it — which also means it measures 3.33:1 as
+  /// bare text on the dark page and fails AA at label size. Text that carries
+  /// the brand (a text button, a link) uses this instead: the light value is
+  /// the fill colour, which passes on light surfaces; the dark value is the
+  /// brighter indigo the focus ring already uses, 6.26:1 on the page.
+  static const Color primaryAccentLight = Color(0xFF4646B4);
+  static const Color primaryAccentDark = Color(0xFF8A8AE0);
+
   /// Label of a secondary (outlined) action — *End session*, *Cancel*.
   ///
   /// Deliberately neutral (saturation under 20%) rather than the brand colour.

@@ -10,6 +10,7 @@ import 'app_colors.dart';
 @immutable
 final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   const AppSemanticColors({
+    required this.primaryAccent,
     required this.streakContainer,
     required this.onStreakContainer,
     required this.progressTrack,
@@ -26,7 +27,8 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   });
 
   const AppSemanticColors.light()
-    : streakContainer = AppColors.streakContainerLight,
+    : primaryAccent = AppColors.primaryAccentLight,
+      streakContainer = AppColors.streakContainerLight,
       onStreakContainer = AppColors.onStreakContainerLight,
       progressTrack = AppColors.progressTrackLight,
       progressFill = AppColors.progressFillLight,
@@ -41,7 +43,8 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       secondaryAction = AppColors.secondaryActionLight;
 
   const AppSemanticColors.dark()
-    : streakContainer = AppColors.streakContainerDark,
+    : primaryAccent = AppColors.primaryAccentDark,
+      streakContainer = AppColors.streakContainerDark,
       onStreakContainer = AppColors.onStreakContainerDark,
       progressTrack = AppColors.progressTrackDark,
       progressFill = AppColors.progressFillDark,
@@ -54,6 +57,11 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       borderSubtle = AppColors.borderSubtleDark,
       focusRing = AppColors.focusRingDark,
       secondaryAction = AppColors.secondaryActionDark;
+
+  /// The brand hue as text — a text button, a link. `ColorScheme.primary` is a
+  /// fill colour, held dark enough on dark surfaces that it fails AA as a bare
+  /// label; this is the variant that passes. See `AppColors.primaryAccentDark`.
+  final Color primaryAccent;
 
   /// The unfilled part of a progress track, and the filled part below 100%.
   /// At 100% the fill becomes [success] — see `MxProgressBar`.
@@ -88,6 +96,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
 
   @override
   AppSemanticColors copyWith({
+    Color? primaryAccent,
     Color? streakContainer,
     Color? onStreakContainer,
     Color? progressTrack,
@@ -103,6 +112,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     Color? secondaryAction,
   }) {
     return AppSemanticColors(
+      primaryAccent: primaryAccent ?? this.primaryAccent,
       streakContainer: streakContainer ?? this.streakContainer,
       onStreakContainer: onStreakContainer ?? this.onStreakContainer,
       progressTrack: progressTrack ?? this.progressTrack,
@@ -130,6 +140,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     if (other is! AppSemanticColors) return this;
 
     return AppSemanticColors(
+      primaryAccent: Color.lerp(primaryAccent, other.primaryAccent, t)!,
       streakContainer: Color.lerp(streakContainer, other.streakContainer, t)!,
       onStreakContainer: Color.lerp(
         onStreakContainer,
