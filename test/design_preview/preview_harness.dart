@@ -6,6 +6,8 @@ import 'package:memox/core/theme/app_spacing.dart';
 import 'package:memox/core/theme/app_typography.dart';
 import 'package:memox/core/theme/app_theme.dart';
 
+import '../support/golden_density.dart';
+
 /// Design exploration: composition studies under the **production** theme.
 ///
 /// **These are look-alikes, not the app.** `_ReviewScreen`, `_DeckListScreen`
@@ -34,8 +36,10 @@ Future<void> pumpPreview(
   required Widget child,
   required String goldenName,
 }) async {
-  tester.view.physicalSize = const Size(420, 1040);
-  tester.view.devicePixelRatio = 1;
+  // Logical 420x1040, rasterised at [kGoldenDevicePixelRatio]. The layout is
+  // unchanged — logical size is physical / dpr — and only the raster got finer.
+  tester.view.physicalSize = goldenSurfaceFor(const Size(420, 1040));
+  tester.view.devicePixelRatio = kGoldenDevicePixelRatio;
   addTearDown(tester.view.reset);
 
   await tester.pumpWidget(
