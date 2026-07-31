@@ -29,4 +29,14 @@ abstract final class RoutePaths {
   /// The review branch. A real path rather than a sub-path of `/` so that a
   /// deep link can open the app directly on the Review tab.
   static const String review = '/review';
+
+  /// The design-system showcase, registered only when the route table is
+  /// built with dev routes enabled (debug builds — see `createAppRouter`).
+  /// In a release build the path falls through to the 404 screen.
+  ///
+  /// Its real caller is the developer typing the URL on the web dev channel,
+  /// which is exactly why it has a path and no `RouteNames` entry: no code
+  /// navigates here, so giving features a name for it would put a dev tool
+  /// into the product's navigation vocabulary.
+  static const String devDesignSystem = '/dev/design-system';
 }
