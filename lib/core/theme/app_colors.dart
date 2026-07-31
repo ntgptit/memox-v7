@@ -73,35 +73,25 @@ abstract final class AppColors {
 
   /// Hairline between rows, around cards, and an input at rest.
   ///
-  /// **This carries the whole depth model today**, and only because nothing yet
-  /// paints a shadow: a surface sits one step from the page it lies on — 1.09:1
-  /// in light, 1.17:1 in dark — so the border is currently the only boundary.
+  /// **The two modes are no longer matched on this number, and that is the
+  /// point.** Until M4.10h both stood at 1.82:1 against the card, because the
+  /// border was the only depth cue either had. Light now has a shadow
+  /// (`AppElevation`), so its border can stand down to 1.50:1; dark has no
+  /// shadow — measured, not chosen: at the bottom of the lightness scale a
+  /// shadow moves the page by ΔL* 0.26 — so its border keeps carrying the edge
+  /// at 1.82:1.
   ///
-  /// "Currently" is the load-bearing word. That the app is flat was never a
-  /// decision written anywhere — no AD, no BR, no test — and the project owner
-  /// has since said elevation *is* wanted. Once a shadow exists this token stops
-  /// being the only cue and the values below should be re-measured downward:
-  /// 1.82:1 is a border doing two jobs.
+  /// Matching the borders was the right rule when the border was everything, and
+  /// it is the wrong rule now: it would force light to draw a frame it no longer
+  /// needs. What `app_theme_test.dart` pins instead is the **step a card's edge
+  /// produces** — ΔL* 8.04 in light against 7.70 in dark — which is the thing a
+  /// reader actually perceives, and which stays symmetric while the mechanisms
+  /// differ.
   ///
-  /// The light value was `#D7DAE3` until M4.10e and was measurably too weak for
-  /// that job: 1.40:1 against the card it outlined and 1.28:1 against the page,
-  /// where dark's border already stood at 1.82:1 and 2.12:1. The two modes were
-  /// using one mechanism at two strengths, which is why light read as flat while
-  /// dark read as correct. `#BEC0C3` puts light at **1.82:1** against the card,
-  /// matching dark to two decimal places — the modes now agree by measurement
-  /// rather than merely sharing a token name.
-  ///
-  /// It is a near-neutral grey where the old value was blue-grey. The first
-  /// candidate at this luminance was `#B9BECD`, and `app_palette_test.dart`
-  /// rejected it: a light surface has a chroma budget, and that value spends more
-  /// of it than the page itself does. The tint rule is real, not a preference.
-  ///
-  /// Not pushed to the 3.0:1 non-text floor: at that strength (around `#8A92AC`)
-  /// every card, chip and input reads as a ruled table. WCAG 1.4.11 covers
-  /// graphics *required to understand the content*, and the content inside these
-  /// surfaces is legible on its own — the border is a boundary aid, and it is
-  /// pinned by `app_theme_test.dart` rather than left to whoever edits this next.
-  static const Color borderSubtleLight = Color(0xFFBEC0C3);
+  /// Both values are hue 240 and inside the light canvas's chroma budget. The
+  /// history is worth keeping: `#D7DAE3` (1.40:1) was too weak when it was the
+  /// only cue, `#BEC0C3` (1.82:1) was right then and too heavy now.
+  static const Color borderSubtleLight = Color(0xFFD2D2DD);
   static const Color borderSubtleDark = Color(0xFF414762);
 
   /// Input border while focused. Focus shifts *hue*, never stroke width —

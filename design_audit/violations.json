@@ -1,13 +1,13 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
   "seedUsedForHueChecks": "#4646B4",
-  "totalViolations": 15,
+  "totalViolations": 13,
   "byCode": {
-    "V1": 5,
+    "V1": 2,
     "V2": 0,
     "V3": 7,
     "V4": 0,
-    "V5": 1,
+    "V5": 2,
     "V6": 2
   },
   "violations": [
@@ -101,13 +101,27 @@
       "file": "lib/app/mobile_frame_widget.dart",
       "line": 54,
       "widget_context": "MobileFrameWidget",
-      "element_kind": "other",
+      "element_kind": "background",
       "source_kind": "hardcoded-literal",
       "expression": "const Color(0xFF1E1E1E)",
       "resolved_value_light": "#1E1E1E",
       "resolved_value_dark": "#1E1E1E",
       "why": "A colour literal outside the palette file. It renders the same value in both modes, so it is also a latent V6: #1E1E1E.",
       "proposed_target_token": "no token within ΔE-ish range — needs a new one"
+    },
+    {
+      "code": "V5",
+      "severity": "🟢",
+      "file": "lib/core/theme/app_elevation.dart",
+      "line": 62,
+      "widget_context": "<top-level>",
+      "element_kind": "shadow",
+      "source_kind": "opacity-modified-token",
+      "expression": "scheme.shadow.withValues(alpha: 0.04 + 0.01 * level)",
+      "resolved_value_light": "#0B0C18 @ alpha 0.04",
+      "resolved_value_dark": "#04040B @ alpha 0.04",
+      "why": "A translucent colour composites against whatever is behind it at paint time, so one token renders as two values.",
+      "proposed_target_token": "a precomputed blendOver(...) constant"
     },
     {
       "code": "V5",
@@ -178,48 +192,6 @@
       "resolved_value_dark": "#383D55",
       "why": "One mode derives this neutral from a hue and the other does not, so the two modes cannot drift together.",
       "proposed_target_token": "derive both from the seed, or neither"
-    },
-    {
-      "code": "V1",
-      "severity": "🟢",
-      "file": "lib/core/theme/app_colors.dart",
-      "line": 0,
-      "widget_context": "AppColors",
-      "element_kind": "token",
-      "source_kind": "shared-constant",
-      "expression": "colorScheme.outline (light) is 24 degrees from the seed hue",
-      "resolved_value_light": "#BEC0C3",
-      "resolved_value_dark": "#414762",
-      "why": "It carries a hue, but not the seed. A neutral family spread this wide reads as two greys rather than one.",
-      "proposed_target_token": "regenerate from the seed at the same lightness"
-    },
-    {
-      "code": "V1",
-      "severity": "🟢",
-      "file": "lib/core/theme/app_colors.dart",
-      "line": 0,
-      "widget_context": "AppColors",
-      "element_kind": "token",
-      "source_kind": "shared-constant",
-      "expression": "colorScheme.outlineVariant (light) is 24 degrees from the seed hue",
-      "resolved_value_light": "#BEC0C3",
-      "resolved_value_dark": "#414762",
-      "why": "It carries a hue, but not the seed. A neutral family spread this wide reads as two greys rather than one.",
-      "proposed_target_token": "regenerate from the seed at the same lightness"
-    },
-    {
-      "code": "V1",
-      "severity": "🟢",
-      "file": "lib/core/theme/app_colors.dart",
-      "line": 0,
-      "widget_context": "AppColors",
-      "element_kind": "token",
-      "source_kind": "shared-constant",
-      "expression": "semantic.borderSubtle (light) is 24 degrees from the seed hue",
-      "resolved_value_light": "#BEC0C3",
-      "resolved_value_dark": "#414762",
-      "why": "It carries a hue, but not the seed. A neutral family spread this wide reads as two greys rather than one.",
-      "proposed_target_token": "regenerate from the seed at the same lightness"
     }
   ]
 }

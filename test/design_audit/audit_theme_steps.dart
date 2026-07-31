@@ -309,9 +309,11 @@ Map<String, Object?> buildPerceptualChecks() {
         'usesShadow':
             (theme.cardTheme.elevation ?? 0) > 0 || shadowSiteCount() > 0,
         'shadowNote':
-            'Flat today. Not a rule: no AD, BR or test requires it, and '
-            'docs/checklist.md asks for an Elevation token that does not '
-            'exist. The project owner has said elevation is wanted.',
+            'MxCard paints its own BoxShadow from AppElevation rather than '
+            'going through Material elevation, so cardTheme.elevation stays 0 '
+            'and the shadow site count is what says whether the app is flat. '
+            'Light only: a dark shadow moves the page by dL* 0.26 against a '
+            'surface step of 7.70, so dark keeps its ladder instead.',
       },
     };
   }
@@ -319,11 +321,14 @@ Map<String, Object?> buildPerceptualChecks() {
   return out;
 }
 
-/// How many places in `lib/` paint a `BoxShadow`.
+/// How many colour sites in `lib/` are painted as a shadow.
 ///
 /// Counted from the source rather than assumed, so "the app is flat" is a
-/// reading and not a belief. Zero today.
-int shadowSiteCount() => scanLib()
-    .where((ColorSite site) => site.elementKind == 'shadow')
-    .where((ColorSite site) => site.expression.contains('BoxShadow'))
-    .length;
+/// reading and not a belief — and it stopped being true at M4.10h.
+///
+/// It counts the *colour* fed to a shadow, not the `BoxShadow` node: the first
+/// version also required the expression to contain `BoxShadow`, which excluded
+/// every real case, because the colour is written as
+/// `scheme.shadow.withValues(...)` and the type name is on the line above it.
+int shadowSiteCount() =>
+    scanLib().where((ColorSite site) => site.elementKind == 'shadow').length;
