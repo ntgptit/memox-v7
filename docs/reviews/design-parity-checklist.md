@@ -100,7 +100,7 @@ Dart widget: props, defaults, states, radius, spacing, semantics.
 | C1 | `MxActionButton` | `mx_action_button.dart` | [x] | **match** - `isBlock`/`isCompact`/`isDisabled` are expressed idiomatically (caller width, global compact scale, null callback) |
 | C2 | `MxIconButton` | `mx_icon_button.dart` | [x] | **match** - radius 12, 48 square, `onSurfaceVariant`; `filled` is expressed by which `IconData` the caller passes |
 | C3 | `MxPillButton` | `mx_pill_button.dart` | [x] | **match** - props one-for-one, 48 target via `MaterialTapTargetSize.padded` |
-| C4 | `MxCard` | `mx_card.dart` | [x] | **match** - radius 16, hairline, `--shadow-card` default, `--space-lg` padding |
+| C4 | `MxCard` | `mx_card.dart` | [x] | **match** - radius 16, hairline, `--shadow-card` default, `--space-lg` padding. **M4.10ac:** a clickable card no longer *becomes* a button on either side, so it may hold controls — web lays the target under the content (`.mx-card__action` / `.mx-card__control`, `actionLabel`), Flutter lets the nested button win the arena. Same guarantee, two mechanisms, because HTML forbids what Flutter merely arbitrates |
 | C5 | `MxTextField` | `mx_text_field.dart` | [x] | **match** — unfilled, 1.5 stroke, hue-only focus, error shows a message and not colour alone. `onSurface` is web-only: Flutter's outline gaps for the label, so there is no backing to match |
 | C6 | `MxListTile` | `mx_list_tile.dart` | [x] | **match** - radius 12, selected fill `surfaceMuted` + primary title, 2-line clamp both sides |
 | C7 | `MxIcon` | — (Flutter uses `Icons.*`) | [x] | n/a — Flutter reaches `Icons.*` directly; the wrapper exists because the web has no bundled set |
@@ -123,7 +123,7 @@ Dart widget: props, defaults, states, radius, spacing, semantics.
 | # | Design source | Flutter target | Status | Verdict |
 |---|---|---|---|---|
 | D1 | `DeckLevelScreen.jsx` shell + subheader | `deck_list_screen.dart` | [x] | **done M4.10q** — `subheader` holds the path |
-| D2 | `DeckLevelScreen.jsx` `DeckCard` | `deck_tile_widget.dart` | [x] | **rebuilt M4.10s** — flat card, open region, due chip, three foot states. Study pill deliberately absent: no session to start until M5 |
+| D2 | `DeckLevelScreen.jsx` `DeckCard` | `deck_tile_widget.dart` | [x] | **rebuilt M4.10s** — flat card, open region, due chip, three foot states. Study pill deliberately absent: no session to start until M5. **M4.10ac:** the whole card is the target on both sides; `.mx-deck__*` and `_DeckOpenRegion` are layout only |
 | D3 | `DeckLevelScreen.jsx` filter/sort row | `deck_list_toolbar_widget.dart` | [x] | **gap → fixed** — the design heads the list "Your decks"/"Sub-decks" beside the pills; there was nothing saying what the pills filtered |
 | D4 | `DeckLevelScreen.jsx` breadcrumb use | `deck_path_widget.dart` | [x] | **done M4.10q** — fold, root icon, quiet weight |
 | D5 | `DeckLevelScreen.jsx` `LevelEmpty` (three empties) | `deck_list_screen.dart` empty states | [x] | **match** — five empty states, more than the design's three: `card`-typed decks and a failed read are cases the kit has no fixture for |

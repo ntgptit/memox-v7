@@ -1,4 +1,4 @@
-const { MxContentShell, MxCard, MxIcon, MxProgressBar } = window.MemoxDesignSystem_3a620f;
+const { MxContentShell, MxCard, MxIcon, MxProgressBar, MxTextButton } = window.MemoxDesignSystem_3a620f;
 
 /**
  * The third tab the redesign adds. Not an account screen — the app is
@@ -53,9 +53,17 @@ function ProfileScreen({ onReset, isCompact }) {
       <div style={{ height: 'var(--space-xl)' }} />
       <p className="mx-section-label">Data</p>
       <MxCard padding="var(--space-xs) 0">
-        <ValueRow title="Export decks" value="" />
+        {/* Actions, not settings — a verb gets a text button, not a ValueRow
+            whose chevron promises a detail screen that does not exist. The
+            row supplies only the horizontal gutter; the button's own 48
+            min-height is the row height. */}
+        <ActionRow>
+          <MxTextButton label="Export decks" icon="download" onClick={() => {}} />
+        </ActionRow>
         <RowDivider />
-        <DestructiveRow title="Reset learning progress" onClick={onReset} />
+        <ActionRow>
+          <MxTextButton label="Reset learning progress" icon="restart_alt" isDestructive onClick={onReset} />
+        </ActionRow>
       </MxCard>
       <div style={{ height: 'var(--space-xl)' }} />
     </MxContentShell>
@@ -101,18 +109,14 @@ function ValueRow({ title, value }) {
   );
 }
 
-/** danger as a LABEL, not as a fill: a red block reads as an error being reported. */
-function DestructiveRow({ title, onClick }) {
-  return (
-    <button type="button" onClick={onClick} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)', width: '100%', boxSizing: 'border-box', padding: 'var(--space-md) var(--space-lg)', minHeight: 48, background: 'none', border: 0, cursor: 'pointer', textAlign: 'left', font: 'inherit' }}>
-      <MxIcon name="restart_alt" filled size={20} color="var(--color-danger)" />
-      <span style={{ fontSize: 'var(--text-body-lg)', color: 'var(--color-danger)' }}>{title}</span>
-    </button>
-  );
+/** The horizontal gutter for a row that holds an MxTextButton; the button's
+    own 48 min-height is the row height, so the row adds none of its own. */
+function ActionRow({ children }) {
+  return <div style={{ padding: '0 var(--space-lg)' }}>{children}</div>;
 }
 
 function RowDivider() {
   return <div style={{ height: 1, background: 'var(--color-border-subtle)', marginLeft: 'var(--space-lg)' }} />;
 }
 
-Object.assign(window, { ProfileScreen, Stat, SwitchRow, ValueRow, DestructiveRow, RowDivider });
+Object.assign(window, { ProfileScreen, Stat, SwitchRow, ValueRow, ActionRow, RowDivider });

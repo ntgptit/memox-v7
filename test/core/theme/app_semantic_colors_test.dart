@@ -14,6 +14,7 @@ void main() {
       final changed = base.copyWith(danger: const Color(0xFF123456));
 
       expect(changed.danger, const Color(0xFF123456));
+      expect(changed.primaryAccent, base.primaryAccent);
       expect(changed.success, base.success);
       expect(changed.warning, base.warning);
       expect(changed.info, base.info);
@@ -32,6 +33,10 @@ void main() {
       // A field left out of lerp snaps during a theme change, and the snap is
       // visible only on the one screen that uses it. Comparing every field to
       // Color.lerp catches the omission wherever it is.
+      expect(
+        mid.primaryAccent,
+        Color.lerp(light.primaryAccent, dark.primaryAccent, 0.5),
+      );
       expect(mid.success, Color.lerp(light.success, dark.success, 0.5));
       expect(mid.warning, Color.lerp(light.warning, dark.warning, 0.5));
       expect(mid.danger, Color.lerp(light.danger, dark.danger, 0.5));

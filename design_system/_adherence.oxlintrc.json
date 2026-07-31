@@ -69,8 +69,8 @@
         "message": "<MxBreadcrumbItem> doesn't accept that prop. Declared props: label, onTap."
       },
       {
-        "selector": "JSXOpeningElement[name.name='MxCard'] > JSXAttribute > JSXIdentifier[name!=/^(?:children|elevation|onClick|padding|className|style|key|ref|className|style|children)$/]",
-        "message": "<MxCard> doesn't accept that prop. Declared props: children, elevation, onClick, padding, className, style."
+        "selector": "JSXOpeningElement[name.name='MxCard'] > JSXAttribute > JSXIdentifier[name!=/^(?:children|elevation|onClick|actionLabel|padding|className|style|key|ref|className|style|children)$/]",
+        "message": "<MxCard> doesn't accept that prop. Declared props: children, elevation, onClick, actionLabel, padding, className, style."
       },
       {
         "selector": "JSXOpeningElement[name.name='MxCard'] > JSXAttribute[name.name='elevation'] > Literal[value!=/^(?:none|flat|card|raised|overlay)$/]",

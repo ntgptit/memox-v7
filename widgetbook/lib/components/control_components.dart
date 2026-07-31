@@ -135,6 +135,12 @@ WidgetbookComponent textButtonComponent() {
             label: 'enabled',
             initialValue: true,
           );
+          final hasLeadingIcon = context.knobs.boolean(label: 'leading icon');
+          final hasTrailingIcon = context.knobs.boolean(
+            label: 'trailing icon',
+            initialValue: true,
+          );
+          final isDestructive = context.knobs.boolean(label: 'destructive');
 
           // Start-aligned rather than centred: the whole point of this button is
           // that its label sits flush with the column it belongs to, and a
@@ -144,6 +150,9 @@ WidgetbookComponent textButtonComponent() {
               alignment: AlignmentDirectional.centerStart,
               child: MxTextButton(
                 label: label,
+                icon: hasLeadingIcon ? Icons.restart_alt : null,
+                trailingIcon: hasTrailingIcon ? Icons.expand_more : null,
+                isDestructive: isDestructive,
                 onPressed: isEnabled ? _noop : null,
               ),
             ),

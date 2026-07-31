@@ -110,7 +110,11 @@ void main() {
         padding: EdgeInsets.all(16),
         child: Align(
           alignment: AlignmentDirectional.topStart,
-          child: MxTextButton(label: "Show today's summary", onPressed: noop),
+          child: MxTextButton(
+            label: "Show today's summary",
+            trailingIcon: Icons.expand_more,
+            onPressed: noop,
+          ),
         ),
       ),
     ),
@@ -119,7 +123,27 @@ void main() {
         padding: EdgeInsets.all(16),
         child: Align(
           alignment: AlignmentDirectional.topStart,
-          child: MxTextButton(label: "Show today's summary", onPressed: null),
+          child: MxTextButton(
+            label: "Show today's summary",
+            trailingIcon: Icons.expand_more,
+            onPressed: null,
+          ),
+        ),
+      ),
+    ),
+    // Danger as a LABEL, not as a fill — the icon and the text carry it, and
+    // the golden is what pins that the glyph is not underlined with the label.
+    'text_button_destructive': const Scaffold(
+      body: Padding(
+        padding: EdgeInsets.all(16),
+        child: Align(
+          alignment: AlignmentDirectional.topStart,
+          child: MxTextButton(
+            label: 'Reset learning progress',
+            icon: Icons.restart_alt,
+            isDestructive: true,
+            onPressed: noop,
+          ),
         ),
       ),
     ),

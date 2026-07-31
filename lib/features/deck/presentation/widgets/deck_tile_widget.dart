@@ -50,20 +50,26 @@ class DeckTileWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // **Flat, and padded by its regions rather than as a whole.** The design's
-    // `.mx-deck` carries a hairline and no shadow -- two competing depths in one
+    // **Flat, and padded by its bands rather than as a whole.** The design's
+    // deck card carries a hairline and no shadow -- two competing depths in one
     // scrolling column is what makes a list read as busy, and the card no longer
     // needs a shadow to separate from the page now that it has three bands of
-    // its own. The padding moves inside so the open region's ink covers the
-    // whole of what it opens, edge to edge.
+    // its own. The padding moves inside so the card's ink covers the whole of
+    // what it opens, edge to edge.
+    //
+    // **The whole card opens the deck.** Only the top band used to, and the two
+    // bands under it -- the progress bar, the due chip -- then looked tappable
+    // and were not. `MxCard` takes the tap; the overflow menu is a nested button
+    // and wins the gesture arena over it, so it stays its own action.
     return MxCard(
       elevation: AppElevation.none,
       padding: EdgeInsets.zero,
+      onTap: onTap,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          _DeckOpenRegion(summary: summary, onTap: onTap),
+          _DeckOpenRegion(summary: summary),
           if (summary.totalCardCount > 0)
             Padding(
               padding: const EdgeInsets.fromLTRB(
@@ -91,18 +97,17 @@ class DeckTileWidget extends StatelessWidget {
   }
 }
 
-/// The part of the card that opens the deck: the well, the name, the counts.
+/// The card's top band: the well, the name, the counts.
 ///
-/// **Its own target, not the whole card.** The card used to be one button with
-/// the overflow menu nested inside it, which works but makes the menu a hole in
-/// the middle of a large target and gives the ripple no relationship to what it
-/// opens. Splitting it is the design's arrangement and it is also what leaves
-/// room for a study action here later, when there is a session to start.
+/// **Layout only — the tap belongs to the card.** This was its own `InkWell` for
+/// one release, which made the hover and the ripple cover the top third of a card
+/// whose other two bands opened the same deck and showed nothing. Naming it after
+/// the verb is kept deliberately: it is the band the design calls `.mx-deck__open`
+/// and it is where a study action goes when there is a session to start.
 class _DeckOpenRegion extends StatelessWidget {
-  const _DeckOpenRegion({required this.summary, required this.onTap});
+  const _DeckOpenRegion({required this.summary});
 
   final DeckSummary summary;
-  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -113,90 +118,72 @@ class _DeckOpenRegion extends StatelessWidget {
     final isComplete = summary.isFullyLearned;
     final holdsCards = summary.deck.contentType == DeckContentType.card;
 
-    return Semantics(
-      button: true,
-      child: Material(
-        type: MaterialType.transparency,
-        child: InkWell(
-          onTap: onTap,
-          // Only the top corners: the region is the top band of the card, and a
-          // ripple rounded on all four would leave two notches mid-card.
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(AppRadius.lg),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.md,
+      ),
+      child: Row(
+        // Top, not centre. Once the name wraps -- a long deck title, or any
+        // title at `textScaler` 2.0 -- a centred glyph floats halfway down the
+        // card with nothing beside it, and the row stops reading left to right.
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          DeckIconArea(
+            icon: isComplete
+                ? Icons.check_circle
+                : holdsCards
+                ? Icons.style_outlined
+                : Icons.folder_outlined,
+            // Semantics only on the state-carrying glyph. Folder and card are
+            // decoration -- the meta line under them says the same thing in
+            // words -- and announcing "folder" on every row is noise a
+            // screen-reader user has to sit through.
+            semanticLabel: isComplete
+                ? context.l10n.deckFullyLearnedSemanticLabel
+                : null,
+            tint: isComplete
+                ? context.semanticColors.success
+                : context.colors.onPrimaryContainer,
+            // A finished deck steps off the brand container onto the neutral
+            // one. The design does the same, and the reason shows in a list:
+            // every well is indigo, so a green tick inside an indigo square
+            // still reads as "one of the indigo ones" until you look at it. On
+            // the muted surface it reads as done from across the column.
+            wellColor: isComplete ? context.semanticColors.surfaceMuted : null,
           ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.lg,
-              AppSpacing.lg,
-              AppSpacing.lg,
-              AppSpacing.md,
-            ),
-            child: Row(
-              // Top, not centre. Once the name wraps -- a long deck title, or
-              // any title at `textScaler` 2.0 -- a centred glyph floats halfway
-              // down the card with nothing beside it, and the row stops reading
-              // left to right.
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                DeckIconArea(
-                  icon: isComplete
-                      ? Icons.check_circle
-                      : holdsCards
-                      ? Icons.style_outlined
-                      : Icons.folder_outlined,
-                  // Semantics only on the state-carrying glyph. Folder and card
-                  // are decoration -- the meta line under them says the same
-                  // thing in words -- and announcing "folder" on every row is
-                  // noise a screen-reader user has to sit through.
-                  semanticLabel: isComplete
-                      ? context.l10n.deckFullyLearnedSemanticLabel
-                      : null,
-                  tint: isComplete
-                      ? context.semanticColors.success
-                      : context.colors.onPrimaryContainer,
-                  // A finished deck steps off the brand container onto the
-                  // neutral one. The design does the same, and the reason shows
-                  // in a list: every well is indigo, so a green tick inside an
-                  // indigo square still reads as "one of the indigo ones" until
-                  // you look at it. On the muted surface it reads as done from
-                  // across the column.
-                  wellColor: isComplete
-                      ? context.semanticColors.surfaceMuted
-                      : null,
+                Text(
+                  summary.deck.name,
+                  style: context.texts.titleMedium,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Text(
-                        summary.deck.name,
-                        style: context.texts.titleMedium,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                      _DeckMetaLine(summary: summary),
-                    ],
-                  ),
-                ),
-                // Only where it opens onto another level. On a deck fixed to
-                // cards it would promise a list that BR-63 says cannot exist.
-                if (!holdsCards) ...<Widget>[
-                  const SizedBox(width: AppSpacing.sm),
-                  ExcludeSemantics(
-                    child: Icon(
-                      Icons.chevron_right,
-                      size: AppIconSize.sm,
-                      color: context.colors.onSurfaceVariant,
-                    ),
-                  ),
-                ],
+                const SizedBox(height: AppSpacing.xs),
+                _DeckMetaLine(summary: summary),
               ],
             ),
           ),
-        ),
+          // Only where it opens onto another level. On a deck fixed to cards it
+          // would promise a list that BR-63 says cannot exist.
+          if (!holdsCards) ...<Widget>[
+            const SizedBox(width: AppSpacing.sm),
+            ExcludeSemantics(
+              child: Icon(
+                Icons.chevron_right,
+                size: AppIconSize.sm,
+                color: context.colors.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
