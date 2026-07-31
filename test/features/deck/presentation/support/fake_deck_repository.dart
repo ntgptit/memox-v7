@@ -345,6 +345,7 @@ DeckSummary fakeSummary({
   int totalCardCount = 0,
   int dueCardCount = 0,
   int learnedCardCount = 0,
+  int subDeckCount = 0,
   SchedulerType schedulerType = SchedulerType.eightBox,
   DateTime? createdAt,
 }) => DeckSummary(
@@ -357,6 +358,7 @@ DeckSummary fakeSummary({
   totalCardCount: totalCardCount,
   dueCardCount: dueCardCount,
   learnedCardCount: learnedCardCount,
+  subDeckCount: subDeckCount,
   schedulerType: schedulerType,
 );
 
@@ -374,6 +376,7 @@ DeckSummary fakeChildSummary({
   int totalCardCount = 0,
   int dueCardCount = 0,
   int learnedCardCount = 0,
+  int subDeckCount = 0,
   SchedulerType schedulerType = SchedulerType.eightBox,
   DeckContentType contentType = DeckContentType.unset,
   DateTime? createdAt,
@@ -389,5 +392,6 @@ DeckSummary fakeChildSummary({
   totalCardCount: totalCardCount,
   dueCardCount: dueCardCount,
   learnedCardCount: learnedCardCount,
+  subDeckCount: subDeckCount,
   schedulerType: schedulerType,
 );

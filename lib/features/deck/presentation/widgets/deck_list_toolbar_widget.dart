@@ -47,21 +47,35 @@ class DeckListToolbarWidget extends StatelessWidget {
 
     // Wrap, not Row: at `textScaler` 2.0 on a 320-wide screen the two pills do
     // not fit side by side, and a Row would overflow rather than stack.
+    // **Label left, pills hard right.** The design gives the heading `flex: 1`
+    // so the two controls sit at the end of the row rather than trailing the
+    // words. A `Row` with an `Expanded` heading is that, and the heading
+    // ellipsizes rather than clipping when the row runs out — the right thing
+    // to give up first, since the pills are the controls and the heading only
+    // names what they act on.
+    // **Heading left, pills hard right — and it has to survive 320 at
+    // textScaler 2.0.** The design gives the heading `flex: 1` so the controls
+    // sit at the end of the row. A `Row` with an `Expanded` heading is exactly
+    // that, and it overflowed at the compact size: the heading ellipsizes, but
+    // the two pills together are already wider than the screen once the text
+    // doubles.
+    //
+    // A `Wrap` holding the heading and a second `Wrap` of the pills is both. On
+    // one line `spaceBetween` pushes the pills to the end; when they no longer
+    // fit, the group drops to its own line, and if the two cannot share even
+    // that, the inner `Wrap` breaks them apart as well.
+    //
+    // The heading itself: without it the two pills float above the cards with
+    // nothing saying what they filter, and "Your decks" against "Sub-decks" is
+    // the one place besides the app-bar title where the screen says which level
+    // the user is on.
     return Wrap(
-      spacing: AppSpacing.sm,
       runSpacing: AppSpacing.sm,
       crossAxisAlignment: WrapCrossAlignment.center,
+      alignment: WrapAlignment.spaceBetween,
       children: <Widget>[
-        // **The list gets a heading, and it names the scope.** Without it the
-        // two pills float above the cards with nothing saying what they filter,
-        // and "Your decks" against "Sub-decks" is the one place the screen says
-        // out loud which level the user is on besides the app-bar title.
-        //
-        // Inside the `Wrap` rather than in a `Row` above it: at `textScaler` 2.0
-        // on a 320 screen the label and both pills cannot share a line, and a
-        // `Row` would clip rather than wrap.
         Padding(
-          padding: const EdgeInsets.only(right: AppSpacing.sm),
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
           child: Text(
             (isRootLevel
                     ? context.l10n.decksSectionLabelRoot
@@ -73,32 +87,39 @@ class DeckListToolbarWidget extends StatelessWidget {
             ),
           ),
         ),
-        MxPillButton(
-          label: isDueOnly
-              ? context.l10n.deckFilterDueLabel
-              : context.l10n.deckFilterAllLabel,
-          icon: Icons.filter_list,
-          isSelected: isDueOnly,
-          semanticLabel: isDueOnly
-              ? context.l10n.deckFilterDueSemanticLabel
-              : context.l10n.deckFilterAllSemanticLabel,
-          onPressed: () => onFilterChanged(
-            isDueOnly ? DeckListFilter.all : DeckListFilter.due,
-          ),
-        ),
-        MxPillButton(
-          label: isByName
-              ? context.l10n.deckSortNameLabel
-              : context.l10n.deckSortRecentLabel,
-          icon: Icons.swap_vert,
-          isSelected: isByName,
-          // `A–Z` is two letters to a screen reader. The expansion is what gets
-          // announced; the abbreviation is what gets read.
-          semanticLabel: isByName
-              ? context.l10n.deckSortNameSemanticLabel
-              : context.l10n.deckSortRecentSemanticLabel,
-          onPressed: () =>
-              onSortChanged(isByName ? DeckListSort.recent : DeckListSort.name),
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
+          children: <Widget>[
+            MxPillButton(
+              label: isDueOnly
+                  ? context.l10n.deckFilterDueLabel
+                  : context.l10n.deckFilterAllLabel,
+              icon: Icons.filter_list,
+              isSelected: isDueOnly,
+              semanticLabel: isDueOnly
+                  ? context.l10n.deckFilterDueSemanticLabel
+                  : context.l10n.deckFilterAllSemanticLabel,
+              onPressed: () => onFilterChanged(
+                isDueOnly ? DeckListFilter.all : DeckListFilter.due,
+              ),
+            ),
+            MxPillButton(
+              label: isByName
+                  ? context.l10n.deckSortNameLabel
+                  : context.l10n.deckSortRecentLabel,
+              icon: Icons.swap_vert,
+              isSelected: isByName,
+              // `A-Z` is two letters to a screen reader. The expansion is what
+              // gets announced; the abbreviation is what gets read.
+              semanticLabel: isByName
+                  ? context.l10n.deckSortNameSemanticLabel
+                  : context.l10n.deckSortRecentSemanticLabel,
+              onPressed: () => onSortChanged(
+                isByName ? DeckListSort.recent : DeckListSort.name,
+              ),
+            ),
+          ],
         ),
       ],
     );

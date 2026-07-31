@@ -80,6 +80,7 @@ SELECT
     COALESCE(total.cardCount, 0) AS totalCardCount,
     COALESCE(due.dueCount, 0) AS dueCardCount,
     COALESCE(learned.learnedCount, 0) AS learnedCardCount,
+    COALESCE(sub.subCount, 0) AS subDeckCount,
     (
         SELECT MIN(next.due_at) FROM card_review_states next
         WHERE next.due_at > :now
@@ -111,6 +112,14 @@ LEFT JOIN (
        OR (s.scheduler_type = 'sm2' AND s.interval_days >= 128)
     GROUP BY cd.root_deck_id
 ) learned ON learned.rootDeckId = d.id
+-- Direct children only, not the subtree: the row says "3 sub-decks", and a
+-- reader counts what they will see after tapping it.
+LEFT JOIN (
+    SELECT parent_deck_id AS parentId, COUNT(*) AS subCount
+    FROM decks
+    WHERE parent_deck_id IS NOT NULL
+    GROUP BY parent_deck_id
+) sub ON sub.parentId = d.id
 WHERE d.parent_deck_id IS NULL
 ORDER BY d.created_at ASC, d.id ASC;
 
@@ -216,6 +225,7 @@ SELECT
     COALESCE(total.cardCount, 0) AS totalCardCount,
     COALESCE(due.dueCount, 0) AS dueCardCount,
     COALESCE(learned.learnedCount, 0) AS learnedCardCount,
+    COALESCE(sub.subCount, 0) AS subDeckCount,
     (
         SELECT MIN(next.due_at) FROM card_review_states next
         WHERE next.due_at > :now
@@ -256,6 +266,13 @@ LEFT JOIN (
        OR (s.scheduler_type = 'sm2' AND s.interval_days >= 128)
     GROUP BY b.branch_id
 ) learned ON learned.branchId = child.id
+-- Direct children of each child, same reason as the root query.
+LEFT JOIN (
+    SELECT parent_deck_id AS parentId, COUNT(*) AS subCount
+    FROM decks
+    WHERE parent_deck_id IS NOT NULL
+    GROUP BY parent_deck_id
+) sub ON sub.parentId = child.id
 WHERE parent.id = :parentId
 ORDER BY child.created_at ASC, child.id ASC;
 
