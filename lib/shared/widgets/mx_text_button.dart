@@ -166,10 +166,15 @@ class _StateStyledLabel extends StatelessWidget {
 
         // `copyWith` on the style the button resolved, so colour and typography
         // stay the button's business and only the decoration is added here.
+        // `decorationColor` is set explicitly to the label's own colour: left
+        // null, the engine falls back to a default that does not track the
+        // state-blended foreground, and the underline visibly disagrees with
+        // the text it belongs to.
         final base = DefaultTextStyle.of(context).style;
         final style = isFocused || isHovered
             ? base.copyWith(
                 decoration: TextDecoration.underline,
+                decorationColor: base.color,
                 decorationThickness: isFocused
                     ? _kFocusUnderlineThickness
                     : null,

@@ -67,7 +67,14 @@ and the CI smoke test fails if the tree stops building. New screens go in too,
 mounted with their domain contract faked; `widgetbook/README.md` has the
 how-to.
 
-Two failure modes to avoid, in tension with each other:
+**A component that can be tapped is a surface with a target composed into it, not
+a control that happens to look like a surface.** A surface that *is* the control
+can hold no other control, so the first caller needing one wraps a region of the
+content instead — and every region left over then looks tappable and is not. This
+is the shape both kits got wrong independently; the contract and the Flutter ink
+paint-order trap behind it are in `references/components.md`.
+
+Two further failure modes to avoid, in tension with each other:
 
 - **The god component.** Twenty optional parameters, half mutually exclusive.
   When a component needs a flag that changes its layout structure, that is a

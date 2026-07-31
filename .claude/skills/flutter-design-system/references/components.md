@@ -32,6 +32,47 @@ a variant.
 
 **Do not take a `BuildContext`.** It already has one.
 
+## A surface that is a target
+
+A card, a tile or a row the user can tap is **a surface with a target composed
+into it** — not a control that happens to look like a surface. Three parts, in
+this order:
+
+1. the surface paints its own background, border and elevation;
+2. the target covers **all** of it — the ink layer in Flutter, an absolutely
+   positioned `<button>` under the content on the web;
+3. any control the surface carries sits above the target and keeps its own tap.
+
+A contract, not a preference, because the alternative does not compose. A surface
+that *is* the control can hold no other control, so the first caller needing one
+wraps a **region** of the content instead — and every region left over then looks
+tappable and is not. It reads as a layout decision while you are making it. The
+rationalization it ships with, verbatim from this repo before the fix: *"its own
+target, not the whole card … the card used to be one button with the overflow
+menu nested inside it, which works but makes the menu a hole in the middle of a
+large target."* Both halves of that sentence are true; the conclusion is still
+wrong, because a nested button wins the gesture arena and there was no hole.
+
+**Flutter: the ink goes inside the decoration.**
+
+`InkWell` paints its splash and its hover highlight *before* it paints its child,
+so an ink layer wrapped **around** an opaque `DecoratedBox` draws every state
+underneath the surface colour — a tappable card with no feedback at all. Nothing
+fails, no golden moves, and it survives until someone happens to press one.
+
+```dart
+// no — the surface colour is painted over the splash
+Material(child: InkWell(onTap: t, child: DecoratedBox(decoration: d, child: body)))
+
+// yes — splash over the surface, under the content
+DecoratedBox(decoration: d, child: Material(child: InkWell(onTap: t, child: body)))
+```
+
+`mx_card.dart` is the worked example, `deck_tile_widget.dart` the caller, and
+`deck_tile_target_test.dart` pins it by geometry — which is the only way to see
+it, since the widget tree is identical either way and only the reacting pixels
+differ.
+
 ## The base set
 
 | Component | Must handle | Notes |
@@ -42,7 +83,7 @@ a variant.
 | `AppIconButton` | semantic label **required** | unlabelled icon buttons are unusable with a screen reader |
 | `AppTextField` | label, error, helper, obscure, keyboard type | error text tied to the field for a11y |
 | `AppSearchField` | debounce, clear button | debounce belongs here, not in every caller |
-| `AppCard` | tap target, elevation from tokens | |
+| `AppCard` | tap target, elevation from tokens | tappable = surface + target composed in, never a card that *is* a button |
 | `AppListItem` | leading/trailing, 2-line, tap | |
 | `AppEmptyState` | icon, title, message, optional action | most-skipped state — build it early |
 | `AppErrorState` | message, retry callback | takes a message string, never a `Failure` |
@@ -62,6 +103,9 @@ Before a component is done:
 - [ ] No hardcoded colour, text style, spacing, radius or duration.
 - [ ] Light and dark both correct.
 - [ ] Enabled, disabled, pressed, focused all styled.
+- [ ] If tappable: the target covers the **whole** surface, its feedback is
+      visible over the surface colour, and any control it carries still fires on
+      its own. Checked by pressing a corner, not by reading the tree.
 - [ ] Loading state if it can trigger async work.
 - [ ] Semantic label on anything without visible text.
 - [ ] Touch target ≥ 48×48.
