@@ -10,6 +10,12 @@ import '../../domain/models/deck_path_segment_model.dart';
 
 /// Where this level sits in the tree.
 ///
+/// **Present at every level, including the deck list itself**, where it is the
+/// single step `Root` with nothing to tap. A strip that appeared only once you
+/// were inside something made the reader learn it twice — first that it exists,
+/// then where. One shape, always in the same place, is cheaper to read than a
+/// band of chrome that comes and goes.
+///
 /// **The whole path, from inside any deck.** It used to start at level 3 and
 /// list ancestors only, and both restrictions were argued for here: one level in,
 /// the only step above is the deck list, which Back and the Decks tab already
@@ -38,21 +44,10 @@ class DeckPathWidget extends StatelessWidget {
 
   final DeckListSnapshot snapshot;
 
-  /// Whether this snapshot has a path worth drawing.
-  ///
-  /// Exposed because the caller mounts this in `MxContentShell.subheader`, and a
-  /// subheader reserves its height whether or not its child paints anything. A
-  /// widget that shrinks to nothing inside a slot that has already claimed its
-  /// height leaves a band of empty chrome at the root level, where there is no
-  /// path to show.
-  /// Any deck level has one — at minimum the list and the deck itself. Only the
-  /// deck list, where [DeckListSnapshot.parent] is null, has nothing to draw.
-  static bool hasPath(DeckListSnapshot snapshot) => snapshot.parent != null;
-
   @override
   Widget build(BuildContext context) {
     final DeckEntity? parent = snapshot.parent;
-    if (parent == null) return const SizedBox.shrink();
+    final bool isAtRoot = parent == null;
 
     // **No padding of its own any more.** The gutter and the space below it come
     // from `MxContentShell`'s subheader slot, which takes them from the same
@@ -61,17 +56,17 @@ class DeckPathWidget extends StatelessWidget {
     // the wide one.
     return MxBreadcrumb(
       semanticLabel: context.l10n.deckPathSemanticLabel,
-      // The library root, recognisable without reading it. Outlined, because
-      // this step is a place to go rather than the place you are — the design's
-      // own rule for which twin of a glyph to use.
+      // The top of the tree, recognisable without reading it.
       rootIcon: Icons.home_outlined,
       items: <MxBreadcrumbItem>[
-        // The list itself. `decksTitle` rather than a string of its own: this
-        // step goes to that screen and should say what that screen is called,
-        // and a second copy would be one rename away from disagreeing with it.
+        // **"Root", not the screen's own title.** It names the top of the tree
+        // rather than the screen that lists it: a first step reading "Decks"
+        // while the app bar above also read "Decks" looked like a link back to
+        // where the reader already was. And on that screen it is exactly that,
+        // so it carries no `onTap` there — the same rule the last step follows.
         MxBreadcrumbItem(
-          label: context.l10n.decksTitle,
-          onTap: () => context.goNamed(RouteNames.decks),
+          label: context.l10n.deckPathRootLabel,
+          onTap: isAtRoot ? null : () => context.goNamed(RouteNames.decks),
         ),
         for (final DeckPathSegment segment in snapshot.ancestors)
           MxBreadcrumbItem(
@@ -83,8 +78,9 @@ class DeckPathWidget extends StatelessWidget {
               },
             ),
           ),
-        // No `onTap`: this is where the user already is.
-        MxBreadcrumbItem(label: parent.name),
+        // No `onTap`: this is where the user already is. Absent at the root,
+        // where the first step is already that statement.
+        if (parent != null) MxBreadcrumbItem(label: parent.name),
       ],
     );
   }

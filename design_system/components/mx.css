@@ -188,11 +188,21 @@ button.mx-tile:focus-visible{outline:none;box-shadow:inset 0 0 0 var(--border-fo
 .mx-crumbs::-webkit-scrollbar{display:none}
 .mx-crumbs__sep{color:var(--color-text-secondary);font-size:var(--icon-sm);flex:none}
 .mx-crumbs__step{display:inline-flex;align-items:center;gap:var(--space-xs);flex:none;min-height:36px;padding:0 var(--space-sm);border:0;background:none;white-space:nowrap;font-family:var(--font-body);font-size:var(--text-label-md);line-height:var(--leading-label-md);letter-spacing:var(--tracking-label-md);border-radius:var(--radius-sm)}
-.mx-crumbs__step--link{color:var(--color-text-secondary);font-weight:var(--weight-semibold);cursor:pointer;transition:background-color var(--duration-fast) var(--ease-standard),color var(--duration-fast) var(--ease-standard)}
-.mx-crumbs__step--link:hover{background:color-mix(in srgb,var(--color-text-secondary) 8%,transparent);color:var(--color-text-primary)}
-.mx-crumbs__step--link:focus-visible{outline:none;box-shadow:inset 0 0 0 var(--border-focus) var(--color-primary)}
-.mx-crumbs__step--fold{color:var(--color-text-secondary);font-weight:var(--weight-bold);cursor:pointer;letter-spacing:1px}
-.mx-crumbs__step--fold:hover{background:color-mix(in srgb,var(--color-text-secondary) 8%,transparent);color:var(--color-text-primary)}
+/* A link, not a button: every state is on the text, nothing is painted behind
+   it. The 8% wash this used to carry drew a filled chip under each word, and
+   four of those in a row read as a toolbar rather than as a path — they also
+   flick on and off as the pointer crosses the strip. Same rule MxTextButton
+   settled: an underline and a colour, on the label. */
+.mx-crumbs__step--link{color:var(--color-text-secondary);font-weight:var(--weight-semibold);cursor:pointer;transition:color var(--duration-fast) var(--ease-standard)}
+/* The underline rides .mx-crumbs__label, never the step — a decoration on the
+   button inherits into the root glyph, which is the underlined `expand_more`
+   MxTextButton already paid for once. */
+.mx-crumbs__step--link:hover{color:var(--color-text-primary)}
+.mx-crumbs__step--link:hover .mx-crumbs__label{text-decoration:underline;text-decoration-color:currentColor;text-underline-offset:3px}
+.mx-crumbs__step--link:focus-visible{outline:none;color:var(--color-text-primary)}
+.mx-crumbs__step--link:focus-visible .mx-crumbs__label{text-decoration:underline;text-decoration-color:currentColor;text-decoration-thickness:2px;text-underline-offset:3px}
+.mx-crumbs__step--fold{color:var(--color-text-secondary);font-weight:var(--weight-bold);cursor:pointer;letter-spacing:1px;transition:color var(--duration-fast) var(--ease-standard)}
+.mx-crumbs__step--fold:hover{color:var(--color-text-primary)}
 .mx-crumbs__step--current{color:var(--color-text-secondary);font-weight:var(--weight-regular)}
 
 /* --- MxSearchField ------------------------------------------------------ */

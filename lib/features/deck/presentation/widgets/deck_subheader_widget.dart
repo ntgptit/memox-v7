@@ -24,8 +24,8 @@ ValueChanged<String> _updateQuery(WidgetRef ref, String? parentDeckId) =>
 /// The path, and the search field under it.
 ///
 /// Both are chrome and both stay put while the list scrolls, which is what the
-/// shell's subheader slot is for. The path is absent at the root — there is no
-/// path to show — but the field never is: search is the one control that is as
+/// shell's subheader slot is for. Neither is ever absent: the path is drawn at
+/// every level including the deck list, and search is the one control that is as
 /// useful with three decks as with three hundred.
 class DeckSubheaderWidget extends ConsumerWidget {
   const DeckSubheaderWidget({required this.snapshot, super.key});
@@ -41,9 +41,17 @@ class DeckSubheaderWidget extends ConsumerWidget {
 
     return Column(
       mainAxisSize: MainAxisSize.min,
+      // **`start`, and it is load-bearing.** The default is `center`, and the
+      // search field is full width so it hid that: only the breadcrumb, which is
+      // as wide as its own steps, showed the effect — a path floating in the
+      // middle of the strip with the list left-aligned under it. The gutter is
+      // the line every other element on the screen starts from, so the path
+      // starts there too.
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        if (DeckPathWidget.hasPath(snapshot))
-          DeckPathWidget(snapshot: snapshot),
+        // Unconditional: every level has a path now, the deck list included,
+        // where it is the single `Root` step.
+        DeckPathWidget(snapshot: snapshot),
         MxSearchField(
           value: query,
           onChanged: _updateQuery(ref, parentId),

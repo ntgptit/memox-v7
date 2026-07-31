@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/navigation/route_names.dart';
+import '../../../../core/theme/app_breakpoints.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
@@ -223,11 +224,20 @@ class _DeckLevel extends StatelessWidget {
           // controls and the thing they control — and a section break that used
           // the same number as the gap between two cards would make the toolbar
           // read as the first row of the list.
-          padding: const EdgeInsets.fromLTRB(
+          //
+          //
+          // **`md` on a compact screen: a trade, not a preference.** This
+          // toolbar and the summary panel are pinned above the list, so at 320
+          // with `textScaler` 2.0 they wanted 17 pixels more than were left once
+          // the breadcrumb strip joined the chrome. Both breaks give some, so
+          // neither collapses. See M4.10af in `docs/wbs.md` for the cause.
+          padding: EdgeInsets.fromLTRB(
             AppSpacing.lg,
             0,
             AppSpacing.lg,
-            AppSpacing.xl,
+            AppBreakpoints.isCompact(MediaQuery.sizeOf(context).width)
+                ? AppSpacing.md
+                : AppSpacing.xl,
           ),
           child: DeckListToolbarWidget(
             isRootLevel: parent == null,

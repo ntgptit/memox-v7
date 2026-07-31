@@ -4021,6 +4021,57 @@ File audit companion đứng sẵn ở 399/400 dòng nên phần fixture tách s
 `deck_audit_harness.dart` — **không** tách theo state, vì MX-VIS-001 đòi đúng một
 companion cho mỗi screen.
 
+**Next task: M4.10af · Breadcrumb: Root, căn trái, và là link.**
+
+### M4.10af · Breadcrumb: bước Root, căn trái, và là link chứ không phải button
+
+- **Status:** done
+- **Goal:** Ba chỉnh sửa chủ dự án yêu cầu sau khi dùng thử M4.10ae.
+- **Scope:** `mx_breadcrumb.dart`, `deck_path_widget.dart`,
+  `deck_subheader_widget.dart`, `deck_list_screen.dart`,
+  `deck_summary_section_widget.dart`, ARB en+vi; `MxBreadcrumb.jsx`, `mx.css`,
+  `DeckLevelScreen.jsx`.
+- **Out of scope:** đổi mô hình cuộn của màn deck list — xem mục nợ kỹ thuật bên
+  dưới.
+- **Dependencies:** M4.10ae
+- **Checklist phases:** 7
+- **Tests required:** 3 case hover/rest trong `mx_breadcrumb_test.dart`, 1 case
+  căn trái đo bằng geometry, 1 case màn danh sách chỉ có bước `Root` không bấm
+  được, 1 case strip mở ở đầu trái.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** không có file mới
+- **Acceptance criteria:**
+  - [x] Màn danh sách deck: `🏠 Root`, không bấm được.
+  - [x] Trong root deck: `🏠 Root › Japanese N5`. Sâu 3 cấp: đủ bốn bước.
+  - [x] Strip bắt đầu ở gutter, cùng mép trái với ô search.
+  - [x] Hover không còn ô nền — chỉ đổi màu chữ và gạch chân.
+  - [x] 1013 test pass, mọi gate xanh.
+
+**Ba lỗi, và cả ba đều là thứ chỉ người dùng thật mới thấy.** "Root" chứ không
+phải `decksTitle`: bước đầu tên là "Decks" nằm dưới app bar cũng tên "Decks"
+đọc ra như một link về đúng chỗ đang đứng. Căn trái: `Column` của
+`DeckSubheaderWidget` mặc định `CrossAxisAlignment.center`, và ô search rộng hết
+chiều ngang nên che mất điều đó — chỉ breadcrumb, rộng đúng bằng các bước của
+nó, mới lộ ra. Hover: `InkWell` vẽ một ô bo góc sau mỗi chữ, bốn ô cạnh nhau đọc
+ra như một hàng nút chứ không phải một đường dẫn.
+
+**Cái giá của việc thêm strip vào màn danh sách đã đo được: tràn 33px** ở
+320×568 với `textScaler` 2.0. Trả bằng ba khoản, không khoản nào là "thu nhỏ cho
+vừa":
+
+1. Bước không bấm được bỏ sàn chạm 48 (−16px). `AppSpacing` gọi 48 là *floor*
+   cho thứ ngón tay phải chạm; một bước không hành động là một câu khẳng định.
+   Strip hỗn hợp không đổi chiều cao vì các bước bấm được vẫn giữ 48.
+2. Khoảng hở section dưới toolbar `xl` → `md` ở compact.
+3. Khoảng hở dưới panel tổng kết `lg` → `sm` ở compact.
+
+**Nợ kỹ thuật phát hiện ở đây, chưa trả:** panel tổng kết và toolbar được ghim
+phía trên danh sách, nên chiều cao của chúng trừ vào màn hình chứ không trừ vào
+vùng cuộn. Ở text scale lớn trên máy hẹp, chúng không vừa — và mọi lần thêm chrome
+sau này lại phải đi cạo pixel một lần nữa. Cách sửa đúng là cho chúng cuộn cùng
+danh sách (`CustomScrollView` + sliver), là đổi mô hình cuộn của màn hình chứ
+không phải đổi spacing, nên tách ra làm riêng.
+
 **Next task: M4.11 · Card management full-stack.**
 
 ### M4.11 · Card management full-stack

@@ -44,21 +44,28 @@ function DeckLevelScreen({ path, onOpen, onUp, onJumpTo, onNavigate, onActions, 
       actions={isRoot ? null : <MxIconButton icon="more_vert" filled semanticLabel="Deck actions" onClick={onActions} />}
       subheader={
         <React.Fragment>
-          {isRoot ? null : (
-            <MxBreadcrumb
-              semanticLabel="Deck path"
-              rootIcon="home"
-              // The whole path, ending in the deck you are standing in. That last
-              // step carries no onTap — it is where you already are, so it reads
-              // as text — and it repeats the app-bar title on purpose: a strip
-              // that stopped at the parent left the reader working out whether
-              // the title was part of the path or something else.
-              items={[
-                ...ancestors.map((a, i) => ({ label: a.name, onTap: () => onJumpTo(i) })),
-                { label: deck.name },
-              ]}
-            />
-          )}
+          {/* Every level, the library included — where it is the single Root
+              step, and not a link, because tapping it would go to the screen you
+              are already on. The strip is what answers "where am I", and a
+              control that is absent at the top of the tree is a control the
+              reader concludes is broken. */}
+          <MxBreadcrumb
+            semanticLabel="Deck path"
+            rootIcon="home"
+            // "Root" names the top of the TREE, not the screen that lists it: a
+            // first step reading "Decks" under an app bar also reading "Decks"
+            // looked like a link back to where the reader already was.
+            //
+            // The last step is the deck you are standing in and carries no onTap
+            // — it is where you already are, so it reads as text. It repeats the
+            // app-bar title on purpose: a strip that stopped at the parent left
+            // the reader working out whether the title was part of the path.
+            items={[
+              { label: 'Root', onTap: isRoot ? undefined : () => onJumpTo(0) },
+              ...ancestors.slice(1).map((a, i) => ({ label: a.name, onTap: () => onJumpTo(i + 1) })),
+              ...(isRoot ? [] : [{ label: deck.name }]),
+            ]}
+          />
           <MxSearchField
             value={query}
             onChange={setQuery}
