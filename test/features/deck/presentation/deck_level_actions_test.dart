@@ -136,7 +136,7 @@ void main() {
       await openActions(tester);
       await tester.tap(find.text(english.deckRenameAction));
       await tester.pumpAndSettle();
-      await tester.enterText(find.byType(TextField), 'New name');
+      await tester.enterText(deckFormField, 'New name');
       await tester.tap(find.text(english.deckRenameSubmitAction));
       await tester.pumpAndSettle();
 
@@ -152,7 +152,7 @@ void main() {
       await openActions(tester);
       await tester.tap(find.text(english.deckRenameAction));
       await tester.pumpAndSettle();
-      await tester.enterText(find.byType(TextField), '   ');
+      await tester.enterText(deckFormField, '   ');
       await tester.tap(find.text(english.deckRenameSubmitAction));
       await tester.pumpAndSettle();
 

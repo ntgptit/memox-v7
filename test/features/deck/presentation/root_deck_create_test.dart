@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
@@ -35,7 +34,7 @@ void main() {
 
       await tester.tap(find.text(english.deckCreateRootAction));
       await tester.pumpAndSettle();
-      await tester.enterText(find.byType(TextField), 'Japanese N5');
+      await tester.enterText(deckFormField, 'Japanese N5');
       await tester.tap(find.text(english.schedulerSm2Label));
       await tester.pumpAndSettle();
       await tester.tap(find.text(english.deckFormSubmitAction));
@@ -57,7 +56,7 @@ void main() {
 
       await tester.tap(find.text(english.deckCreateRootAction));
       await tester.pumpAndSettle();
-      await tester.enterText(find.byType(TextField), 'Japanese N5');
+      await tester.enterText(deckFormField, 'Japanese N5');
       await tester.tap(find.text(english.deckFormSubmitAction));
       await tester.pumpAndSettle();
 
@@ -94,7 +93,7 @@ void main() {
 
       await tester.tap(find.text(english.deckCreateRootAction));
       await tester.pumpAndSettle();
-      await tester.enterText(find.byType(TextField), 'Japanese N5');
+      await tester.enterText(deckFormField, 'Japanese N5');
       await tester.tap(find.text(english.schedulerSm2Label));
       await tester.pumpAndSettle();
       await tester.tap(find.text(english.deckFormSubmitAction));
@@ -127,7 +126,7 @@ void main() {
 
       await tester.tap(find.text(english.deckCreateRootAction));
       await tester.pumpAndSettle();
-      await tester.enterText(find.byType(TextField), 'Half typed');
+      await tester.enterText(deckFormField, 'Half typed');
       await tester.tap(find.text(english.commonCancelAction).first);
       await tester.pumpAndSettle();
 

@@ -294,6 +294,7 @@ void main() {
       ),
     ),
     'mx_progress_bar': const ProgressBarSpecimen(),
+    'mx_search_field': const SearchFieldSpecimen(),
   };
 
   for (final entry in cases.entries) {

@@ -1,6 +1,6 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 123,
+  "scannedFiles": 125,
   "totalSites": 290,
   "byElementKind": {
     "other": 234,
@@ -3079,7 +3079,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_content_shell.dart",
-      "line": 122,
+      "line": 131,
       "widget_context": "_MxContentShellState",
       "element_kind": "border",
       "source_kind": "theme-token",
@@ -3189,7 +3189,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_search_field.dart",
-      "line": 82,
+      "line": 94,
       "widget_context": "_MxSearchFieldState",
       "element_kind": "icon",
       "source_kind": "theme-token",
@@ -3200,7 +3200,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_search_field.dart",
-      "line": 111,
+      "line": 136,
       "widget_context": "_MxSearchFieldState",
       "element_kind": "text",
       "source_kind": "theme-token",

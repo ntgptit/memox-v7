@@ -74,61 +74,88 @@ class _MxSearchFieldState extends State<MxSearchField> {
       ),
       child: Padding(
         padding: const EdgeInsets.only(left: AppSpacing.md),
-        child: Row(
-          children: <Widget>[
-            Icon(
-              Icons.search,
-              size: AppIconSize.sm,
-              color: context.colors.onSurfaceVariant,
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: TextField(
-                controller: _controller,
-                onChanged: widget.onChanged,
-                textInputAction: TextInputAction.search,
-                style: context.texts.bodyMedium,
-                decoration: InputDecoration(
-                  hintText: widget.hintText,
-                  // The pill *is* the decoration. Left to the theme this would
-                  // draw the form field's 1.5px outline inside it.
-                  border: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  isDense: true,
-                  contentPadding: EdgeInsets.zero,
-                ),
+        // **48, not the design's 44.** `.mx-search` is 44 tall; the same design
+        // declares 48 as a floor nothing a finger has to hit may go below, and
+        // `mx_stress_test.dart`'s tap-target guideline enforces it. Without this
+        // the field measured 20 — a `TextField` takes its height from its text,
+        // and `isDense` with no padding leaves nothing else.
+        child: SizedBox(
+          height: AppSpacing.minimumTouchTarget,
+          child: Row(
+            // Stretch, so the field's own box is the full 48 rather than the
+            // height of one line of text. The tap-target guideline reads the
+            // semantics node, and a `ConstrainedBox` around the row left that
+            // node 20 tall inside a 48 pill.
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Icon(
+                Icons.search,
+                size: AppIconSize.sm,
+                color: context.colors.onSurfaceVariant,
               ),
-            ),
-            // The count and the clear button appear together, and only once
-            // something has been typed — an empty field with a clear button on
-            // it offers to undo nothing.
-            if (hasQuery) ...<Widget>[
-              if (count != null) ...<Widget>[
-                Text(
-                  '$count',
-                  style: context.texts.labelMedium?.copyWith(
-                    color: context.colors.onSurfaceVariant,
-                    fontWeight: FontWeight.w600,
-                    fontFeatures: const <FontFeature>[
-                      FontFeature.tabularFigures(),
-                    ],
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: TextField(
+                  controller: _controller,
+                  onChanged: widget.onChanged,
+                  textInputAction: TextInputAction.search,
+                  style: context.texts.bodyMedium,
+                  // **`expands` with a null `maxLines`, not just a stretched
+                  // box.** Stretching the row gave the field its 48 and left the
+                  // text drawn at the top of it, because a `TextField` sized
+                  // taller than its content anchors to the top unless it is told
+                  // to fill. The golden is what showed that: the glyphs sat on
+                  // the ceiling of the pill while the icons beside them were
+                  // centred.
+                  expands: true,
+                  maxLines: null,
+                  textAlignVertical: TextAlignVertical.center,
+                  decoration: InputDecoration(
+                    hintText: widget.hintText,
+                    // The pill *is* the decoration. Left to the theme this would
+                    // draw the form field's 1.5px outline inside it.
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.zero,
                   ),
                 ),
-                const SizedBox(width: AppSpacing.xs),
-              ],
-              IconButton(
-                onPressed: () => widget.onChanged(''),
-                tooltip: widget.clearSemanticLabel,
-                icon: Icon(
-                  Icons.close,
-                  size: AppIconSize.sm,
-                  semanticLabel: widget.clearSemanticLabel,
-                ),
               ),
-            ] else
-              const SizedBox(width: AppSpacing.md),
-          ],
+              // The count and the clear button appear together, and only once
+              // something has been typed — an empty field with a clear button on
+              // it offers to undo nothing.
+              if (hasQuery) ...<Widget>[
+                if (count != null) ...<Widget>[
+                  // Centred explicitly: the row stretches so the field can fill
+                  // it, and a bare `Text` in a stretched row draws at the top.
+                  Center(
+                    child: Text(
+                      '$count',
+                      style: context.texts.labelMedium?.copyWith(
+                        color: context.colors.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                        fontFeatures: const <FontFeature>[
+                          FontFeature.tabularFigures(),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                ],
+                IconButton(
+                  onPressed: () => widget.onChanged(''),
+                  tooltip: widget.clearSemanticLabel,
+                  icon: Icon(
+                    Icons.close,
+                    size: AppIconSize.sm,
+                    semanticLabel: widget.clearSemanticLabel,
+                  ),
+                ),
+              ] else
+                const SizedBox(width: AppSpacing.md),
+            ],
+          ),
         ),
       ),
     );

@@ -20,23 +20,16 @@ import '../widgets/deck_actions_widget.dart';
 import '../widgets/deck_level_error_widget.dart';
 import '../widgets/deck_level_summary_widget.dart';
 import '../widgets/deck_list_toolbar_widget.dart';
-import '../controllers/deck_search_controller.dart';
-import '../widgets/deck_path_widget.dart';
-import '../widgets/deck_search_results_widget.dart';
-import '../../../../shared/widgets/mx_search_field.dart';
-import '../../domain/models/deck_search_result_model.dart';
+import '../widgets/deck_level_body_widget.dart';
+import '../widgets/deck_subheader_widget.dart';
 import '../widgets/deck_tile_widget.dart';
 
-/// Material's own FAB diameter. Named because the inset below is derived from it
-/// and a bare 56 in that sum would be a number nobody could check.
-const double _kFabDiameter = 56;
-
-/// Space under the last card so the floating action never covers it.
+/// Material's own FAB diameter, and the space under the last card so the
+/// floating action never covers it.
 ///
-/// The button is [_kFabDiameter] and sits [AppSpacing.lg] from the bottom edge;
-/// the [AppSpacing.xl] on top of that is the gap between it and the card it would
-/// otherwise touch. `MxContentShell` deliberately reserves nothing — a floating
-/// action overlaps content by definition — so the list is what has to make room.
+/// `MxContentShell` deliberately reserves nothing — a floating action overlaps
+/// content by definition — so the list is what has to make room.
+const double _kFabDiameter = 56;
 const double _kListBottomInset = _kFabDiameter + AppSpacing.lg + AppSpacing.xl;
 
 /// The toolbar's two commands, bound to a `ref`.
@@ -193,60 +186,10 @@ class _DeckLevel extends StatelessWidget {
       //
       // Above every body state, including the empty ones — "where am I" is most
       // worth answering on a level with nothing in it to recognise.
-      subheader: _Subheader(snapshot: snapshot),
-      // Declared, not guessed: one row when the level has no path, two when it
-      // does, and both scale with the user's text — at `textScaler` 2.0 a row
-      // that fits in 48 needs 96, and `AppBar.bottom` has to be told up front.
-      subheaderHeight: _subheaderHeight(context, snapshot),
-      // Search replaces the level rather than filtering it in place: the
-      // results come from the whole subtree, so leaving the toolbar and the
-      // summary above them would be chrome describing a list that is no longer
-      // on screen.
-      body: Consumer(
-        builder: (context, ref, _) {
-          final parentId = parent?.id;
-          final query = ref.watch(deckSearchQueryProvider(parentId));
-          if (query.trim().isEmpty) return _body(context, parent);
-
-          return MxAsyncView<List<DeckSearchResult>>(
-            value: ref.watch(deckSearchResultsProvider(parentId)),
-            loadingLabel: context.l10n.decksLoadingLabel,
-            data: (results) => SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg,
-                0,
-                AppSpacing.lg,
-                _kListBottomInset,
-              ),
-              child: DeckSearchResultsWidget(
-                results: results,
-                query: query.trim(),
-                scopeName: parent?.name ?? context.l10n.deckSearchScopeLibrary,
-                onOpen: (result) {
-                  ref
-                      .read(deckSearchQueryProvider(parentId).notifier)
-                      .update('');
-                  context.goNamed(
-                    RouteNames.deckDetail,
-                    pathParameters: <String, String>{
-                      RoutePathParams.deckId: result.deck.id,
-                    },
-                  );
-                },
-                onClear: () => ref
-                    .read(deckSearchQueryProvider(parentId).notifier)
-                    .update(''),
-              ),
-            ),
-            error: (error, stackTrace) => DeckLevelErrorWidget(
-              error: error,
-              title: parent?.name,
-              isRootLevel: parent == null,
-              onRetry: () =>
-                  ref.invalidate(deckSearchResultsProvider(parentId)),
-            ),
-          );
-        },
+      subheader: DeckSubheaderWidget(snapshot: snapshot),
+      body: DeckLevelBodyWidget(
+        snapshot: snapshot,
+        buildLevel: () => _body(context, parent),
       ),
     );
   }
@@ -452,53 +395,4 @@ class _DeckList extends StatelessWidget {
       },
     );
   }
-}
-
-/// The path, and the search field under it.
-///
-/// Both are chrome and both stay put while the list scrolls, which is what the
-/// shell's subheader slot is for. The path is absent at the root — there is no
-/// path to show — but the field never is: search is the one control that is as
-/// useful with three decks as with three hundred.
-class _Subheader extends ConsumerWidget {
-  const _Subheader({required this.snapshot});
-
-  final DeckListSnapshot snapshot;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final parent = snapshot.parent;
-    final parentId = parent?.id;
-    final query = ref.watch(deckSearchQueryProvider(parentId));
-    final results = ref.watch(deckSearchResultsProvider(parentId));
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        if (DeckPathWidget.hasPath(snapshot))
-          DeckPathWidget(snapshot: snapshot),
-        MxSearchField(
-          value: query,
-          onChanged: (value) => ref
-              .read(deckSearchQueryProvider(parentId).notifier)
-              .update(value),
-          hintText: parent == null
-              ? context.l10n.deckSearchHintRoot
-              : context.l10n.deckSearchHintInDeck(parent.name),
-          clearSemanticLabel: context.l10n.deckSearchClearLabel,
-          // Only once a search is running and has actually resolved: a count
-          // that flickered to 0 while the stream was loading would read as "no
-          // matches" for a frame.
-          resultCount: query.trim().isEmpty ? null : results.value?.length,
-        ),
-      ],
-    );
-  }
-}
-
-/// How tall the pinned strip has to be for this level.
-double _subheaderHeight(BuildContext context, DeckListSnapshot snapshot) {
-  final rows = DeckPathWidget.hasPath(snapshot) ? 2 : 1;
-  final scaler = MediaQuery.textScalerOf(context);
-  return scaler.scale(AppSpacing.minimumTouchTarget) * rows + AppSpacing.md;
 }

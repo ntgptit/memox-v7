@@ -216,6 +216,7 @@ void main() {
         // level's title is a constant, so it survives a failed read.
         screenIconButtons: 0,
         screenItemId: 'deck_screen',
+        hasSearchField: false, // error widget, not the level shell
       ),
       // The Retry button, the only control this state adds.
       ...mxActionButtonAllowances('error_state'),
@@ -389,6 +390,7 @@ void main() {
         screenIconButtons: 0,
         screenItemId: 'deck_screen',
         hasAppBar: false,
+        hasSearchField: false, // error widget, not the level shell
       ),
       ...mxActionButtonAllowances('error_state'),
     ],

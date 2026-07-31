@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:memox/shared/widgets/mx_text_field.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -121,3 +122,16 @@ Future<void> pumpDeckScreen(
   await tester.pump();
   await tester.pump();
 }
+
+/// The text field of the deck **form** — create or rename.
+///
+/// **Named rather than reached for by type.** Every deck level now carries a
+/// search field as well, so `find.byType(TextField)` resolves to two and every
+/// `.single` behind it throws "Bad state: Too many elements". Which of the two a
+/// test means is exactly the thing worth saying out loud: these tests are about
+/// the form, and a finder that says so keeps working the next time the screen
+/// grows another input.
+Finder get deckFormField => find.descendant(
+  of: find.byType(MxTextField),
+  matching: find.byType(TextField),
+);

@@ -154,7 +154,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text(english.schedulerSectionLabel), findsNothing);
 
-      await tester.enterText(find.byType(TextField), 'Hiragana');
+      await tester.enterText(deckFormField, 'Hiragana');
       await tester.tap(find.text(english.deckFormSubmitAction));
       await tester.pumpAndSettle();
 
@@ -173,7 +173,7 @@ void main() {
 
       await tester.tap(find.text(english.deckCreateSubDeckAction));
       await tester.pumpAndSettle();
-      await tester.enterText(find.byType(TextField), 'Deeper');
+      await tester.enterText(deckFormField, 'Deeper');
       await tester.tap(find.text(english.deckFormSubmitAction));
       await tester.pumpAndSettle();
 

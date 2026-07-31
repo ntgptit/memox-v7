@@ -63,7 +63,19 @@ void main() {
       // The failure this guards against is a silently empty screen: an
       // unresolved locale renders nothing rather than announcing itself.
       expect(find.text(en.decksEmptyTitle), findsOneWidget);
-      expect(find.text(''), findsNothing);
+      // Excluding editable text: an empty search field is legitimately empty,
+      // and the failure this guards against is a *label* that resolved to
+      // nothing. Without the exclusion the guard fires on the one widget on the
+      // screen that is supposed to start blank.
+      expect(
+        find.descendant(
+          of: find.byType(MaterialApp),
+          matching: find.byWidgetPredicate(
+            (widget) => widget is Text && widget.data == '',
+          ),
+        ),
+        findsNothing,
+      );
       expect(tester.takeException(), isNull);
     });
 
