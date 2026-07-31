@@ -1,13 +1,13 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 117,
-  "totalSites": 276,
+  "scannedFiles": 118,
+  "totalSites": 280,
   "byElementKind": {
     "other": 234,
-    "background": 10,
-    "text": 15,
+    "background": 11,
+    "text": 17,
     "shadow": 1,
-    "border": 8,
+    "border": 9,
     "icon": 8
   },
   "bySourceKind": {
@@ -16,7 +16,7 @@
     "opacity-modified-token": 9,
     "hardcoded-literal": 89,
     "Colors-material": 4,
-    "theme-token": 36
+    "theme-token": 40
   },
   "sites": [
     {
@@ -2691,6 +2691,50 @@
       "token": "semantic.danger",
       "resolved_value_light": "#C02B3A",
       "resolved_value_dark": "#F2808F"
+    },
+    {
+      "file": "lib/features/deck/presentation/widgets/deck_level_summary_widget.dart",
+      "line": 55,
+      "widget_context": "DeckLevelSummaryWidget",
+      "element_kind": "background",
+      "source_kind": "theme-token",
+      "expression": "context.colors.surface",
+      "token": "colorScheme.surface",
+      "resolved_value_light": "#FBFBFE",
+      "resolved_value_dark": "#1B1D32"
+    },
+    {
+      "file": "lib/features/deck/presentation/widgets/deck_level_summary_widget.dart",
+      "line": 57,
+      "widget_context": "DeckLevelSummaryWidget",
+      "element_kind": "border",
+      "source_kind": "theme-token",
+      "expression": "context.semanticColors.borderSubtle",
+      "token": "semantic.borderSubtle",
+      "resolved_value_light": "#D2D2DD",
+      "resolved_value_dark": "#414762"
+    },
+    {
+      "file": "lib/features/deck/presentation/widgets/deck_level_summary_widget.dart",
+      "line": 126,
+      "widget_context": "_SummaryHeadline",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.semanticColors.success",
+      "token": "semantic.success",
+      "resolved_value_light": "#10795C",
+      "resolved_value_dark": "#4FC79B"
+    },
+    {
+      "file": "lib/features/deck/presentation/widgets/deck_level_summary_widget.dart",
+      "line": 135,
+      "widget_context": "_SummaryHeadline",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A6ABC2"
     },
     {
       "file": "lib/features/deck/presentation/widgets/deck_tile_widget.dart",

@@ -208,14 +208,18 @@ void main() {
       // to be enough and stopped being so the moment a second line on the same
       // card mentioned the same total, which is exactly the ambiguity a bare
       // substring match hides.
+      // **Two of each, and that is correct.** The card carries its own bar and
+      // the level summary above it carries the level's — and with one child in
+      // this fixture the two totals are the same numbers. Asserting one would
+      // be asserting that the summary does not exist.
       expect(
         find.text(english.deckLearnedProgressLabel(21, 42)),
-        findsOneWidget,
-        reason: 'the learned count',
+        findsNWidgets(2),
+        reason: 'the learned count, on the card and in the level summary',
       );
       expect(
         find.text(english.deckLearnedPercentLabel(50)),
-        findsOneWidget,
+        findsNWidgets(2),
         reason: 'and its percentage',
       );
     });

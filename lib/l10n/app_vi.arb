@@ -91,6 +91,32 @@
   "@deckFullyLearnedSemanticLabel": {
     "description": "Đọc lên ở glyph của deck mà mọi thẻ đều đã thuộc (BR-88)."
   },
+  "deckSummaryCaughtUpFigure": "Xong",
+  "@deckSummaryCaughtUpFigure": {
+    "description": "Thay cho số khi không còn thẻ nào đến hạn. Số 0 ở cỡ chữ lớn đọc như một thất bại."
+  },
+  "deckSummaryCaughtUp": "đã ôn hết — hôm nay không còn thẻ nào ở đây",
+  "@deckSummaryCaughtUp": {
+    "description": "Nằm dưới chữ Xong, nối tiếp thành một câu."
+  },
+  "deckSummaryDueAcrossLibrary": "{count, plural, other{thẻ đến hạn trong thư viện hôm nay}}",
+  "@deckSummaryDueAcrossLibrary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Nằm dưới con số ở cấp gốc. Con số chính là nó nên câu không lặp lại."
+  },
+  "deckSummaryDueInDeck": "{count, plural, other{thẻ đến hạn trong deck này hôm nay}}",
+  "@deckSummaryDueInDeck": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Cùng câu đó khi ở trong một deck."
+  },
   "deckDueNowLabel": "{count, plural, other{{count} thẻ đến hạn}}",
   "@deckDueNowLabel": {
     "placeholders": {

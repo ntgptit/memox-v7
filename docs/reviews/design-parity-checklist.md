@@ -127,7 +127,7 @@ Dart widget: props, defaults, states, radius, spacing, semantics.
 | D3 | `DeckLevelScreen.jsx` filter/sort row | `deck_list_toolbar_widget.dart` | [ ] | |
 | D4 | `DeckLevelScreen.jsx` breadcrumb use | `deck_path_widget.dart` | [ ] | |
 | D5 | `DeckLevelScreen.jsx` `LevelEmpty` (three empties) | `deck_list_screen.dart` empty states | [ ] | |
-| D6 | `DeckLevelScreen.jsx` `LevelSummary` | — | [ ] | **blocked** — `learned` + streak |
+| D6 | `DeckLevelScreen.jsx` `LevelSummary` | `deck_level_summary_widget.dart` | [x] | **built M4.10t**, minus the streak chip and Start studying — both need M5 |
 | D7 | `DeckLevelScreen.jsx` `SearchResults` | — | [ ] | **blocked** — needs a subtree query |
 | D8 | `DeckForms.jsx` | `deck_form_widget.dart` | [ ] | |
 | D9 | `DeckForms.jsx` `SchedulerChoice` | `deck_form_widget.dart` radio rows | [ ] | |
