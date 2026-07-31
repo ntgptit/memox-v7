@@ -65,6 +65,7 @@ DeckListSnapshot rootLevelFromRows(List<RootDeckSummariesResult> rows) =>
             totalCardCount: row.totalCardCount,
             dueCardCount: row.dueCardCount,
             learnedCardCount: row.learnedCardCount,
+            subDeckCount: row.subDeckCount,
             schedulerType: SchedulerType.fromDbValue(row.d.schedulerType ?? ''),
           ),
       ],
@@ -106,6 +107,7 @@ DeckListSnapshot childLevelFromRows(List<ChildDeckLevelResult> rows) {
             totalCardCount: row.totalCardCount,
             dueCardCount: row.dueCardCount,
             learnedCardCount: row.learnedCardCount,
+            subDeckCount: row.subDeckCount,
             schedulerType: SchedulerType.fromDbValue(
               row.inheritedSchedulerType ?? '',
             ),

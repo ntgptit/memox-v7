@@ -19,20 +19,18 @@ import 'deck_labels_widget.dart';
 /// There used to be a second tile for sub-decks, showing only a name — because
 /// the detail screen's query did not load counts for them. The recursive
 /// aggregate landed and the reason evaporated: a sub-deck now carries the same
-/// three facts a root does, so it gets the same row. Deleting the second tile is
-/// the point of the unification, not a tidy-up after it.
+/// facts a root does, so it gets the same row.
 ///
 /// A feature widget, not a shared one: it knows [DeckSummary], and a shared
 /// tile that knew a domain type would drag the deck domain into every widget test
 /// in the project. It is built **on** `MxCard`, so the surface colour, the corner
 /// radius, the border and the ripple still come from one place.
 ///
-/// **It stopped being an `MxListTile` at M4.12.** A `ListTile` puts the leading
-/// glyph, the title and the trailing control on one baseline at a fixed height,
-/// which reads as a row in a table — every deck the same weight, nothing to scan
-/// for. The card gives the name its own line at title weight, the counts a
-/// quieter line under it, and the state its own colour, so a list of twenty decks
-/// can be read by shape instead of by reading each row.
+/// **It stopped being an `MxListTile` at M4.12.** A `ListTile` puts everything on
+/// one baseline at a fixed height, which reads as a row in a table — every deck
+/// the same weight, nothing to scan for. The card gives the name its own line,
+/// the counts a quieter one under it, and the state its own colour, so a list of
+/// twenty decks can be read by shape rather than by reading each row.
 ///
 /// The due state is carried by an icon, by words **and** by colour, never by
 /// colour alone (UC-06 step 3). "Nothing due" is `success` rather than neutral:
@@ -329,6 +327,14 @@ class _DeckMetaLine extends StatelessWidget {
       TextSpan(
         style: quiet,
         children: <InlineSpan>[
+          // Only when there are any. A row that reads "0 sub-decks · 12 cards"
+          // spends its first fact saying nothing happened.
+          if (summary.subDeckCount > 0) ...<InlineSpan>[
+            TextSpan(
+              text: context.l10n.deckSubDeckCountLabel(summary.subDeckCount),
+            ),
+            const TextSpan(text: ' · '),
+          ],
           TextSpan(
             text: context.l10n.deckCardCountLabel(summary.totalCardCount),
           ),

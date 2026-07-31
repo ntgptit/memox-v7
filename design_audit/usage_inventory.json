@@ -2738,7 +2738,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/deck_list_toolbar_widget.dart",
-      "line": 71,
+      "line": 85,
       "widget_context": "DeckListToolbarWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -2749,7 +2749,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/deck_tile_widget.dart",
-      "line": 157,
+      "line": 156,
       "widget_context": "_DeckOpenRegion",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -2760,7 +2760,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/deck_tile_widget.dart",
-      "line": 158,
+      "line": 157,
       "widget_context": "_DeckOpenRegion",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -2771,7 +2771,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/deck_tile_widget.dart",
-      "line": 166,
+      "line": 165,
       "widget_context": "_DeckOpenRegion",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -2782,7 +2782,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/deck_tile_widget.dart",
-      "line": 194,
+      "line": 193,
       "widget_context": "_DeckOpenRegion",
       "element_kind": "icon",
       "source_kind": "theme-token",
@@ -2793,7 +2793,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/deck_tile_widget.dart",
-      "line": 276,
+      "line": 275,
       "widget_context": "DeckIconArea",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -2804,7 +2804,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/deck_tile_widget.dart",
-      "line": 325,
+      "line": 324,
       "widget_context": "_DeckMetaLine",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -2815,7 +2815,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/deck_tile_widget.dart",
-      "line": 379,
+      "line": 386,
       "widget_context": "DeckNoticeWidget",
       "element_kind": "icon",
       "source_kind": "theme-token",
@@ -2826,7 +2826,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/deck_tile_widget.dart",
-      "line": 386,
+      "line": 393,
       "widget_context": "DeckNoticeWidget",
       "element_kind": "text",
       "source_kind": "theme-token",

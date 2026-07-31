@@ -356,6 +356,7 @@ class _CatalogDeckRepository implements DeckRepository {
     required int total,
     required int due,
     int? learned,
+    int subDecks = 0,
     SchedulerType? scheduler,
   }) {
     return DeckSummary(
@@ -367,6 +368,7 @@ class _CatalogDeckRepository implements DeckRepository {
       // bars are all complete shows only the success colour. A caller that cares
       // about either end passes it.
       learnedCardCount: learned ?? (total * 2) ~/ 3,
+      subDeckCount: subDecks,
       schedulerType: scheduler ?? deck.schedulerType ?? SchedulerType.eightBox,
     );
   }

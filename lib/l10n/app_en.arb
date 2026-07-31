@@ -125,6 +125,15 @@
   "@decksSectionLabelChild": {
     "description": "The same heading inside a deck, where what follows is that deck's children rather than the library."
   },
+  "deckSubDeckCountLabel": "{count, plural, =1{1 sub-deck} other{{count} sub-decks}}",
+  "@deckSubDeckCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Leads a deck row's meta line when the deck has children. Direct children only -- it counts what opening the row will show."
+  },
   "deckDueNowLabel": "{count, plural, other{{count} due now}}",
   "@deckDueNowLabel": {
     "placeholders": {

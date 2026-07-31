@@ -41,6 +41,14 @@ abstract class DeckSummary with _$DeckSummary {
     /// from after it.
     required int learnedCardCount,
 
+    /// How many decks sit **directly** inside this one.
+    ///
+    /// Direct children, not the subtree, because the row says "3 sub-decks" and
+    /// a reader counts what they will see after tapping it. The card counts
+    /// above are the opposite — those are the whole subtree, because a card
+    /// buried three levels down is still a card this deck is responsible for.
+    required int subDeckCount,
+
     /// The scheduler this deck is reviewed with — **resolved**, not raw.
     ///
     /// A sub-deck's own scheduler columns are NULL by rule (BR-06); the review it

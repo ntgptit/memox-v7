@@ -125,6 +125,15 @@
   "@decksSectionLabelChild": {
     "description": "Cùng tiêu đề đó khi đang ở trong một deck."
   },
+  "deckSubDeckCountLabel": "{count, plural, other{{count} deck con}}",
+  "@deckSubDeckCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Mở đầu dòng meta của một deck khi nó có deck con. Chỉ đếm con trực tiếp — đúng thứ sẽ thấy khi mở."
+  },
   "deckDueNowLabel": "{count, plural, other{{count} thẻ đến hạn}}",
   "@deckDueNowLabel": {
     "placeholders": {
