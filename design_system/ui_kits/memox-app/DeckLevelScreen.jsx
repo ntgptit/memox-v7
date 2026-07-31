@@ -13,7 +13,11 @@ function DeckLevelScreen({ path, onOpen, onUp, onJumpTo, onNavigate, onActions, 
   const [dueOnly, setDueOnly] = React.useState(false);
   const [byName, setByName] = React.useState(true);
   const [query, setQuery] = React.useState('');
-  const [summaryOpen, setSummaryOpen] = React.useState(true);
+  // 'auto' follows the level's due count; 'shown' and 'hidden' are the user
+  // overriding it, and neither returns to 'auto' — both are saying "from now on".
+  // It defaulted to open, which meant every level with nothing due opened a panel
+  // whose only content was that nothing was due, and then asked to be dismissed.
+  const [summaryChoice, setSummaryChoice] = React.useState('auto');
 
   const deck = path[path.length - 1];
   const ancestors = path.slice(0, -1);
@@ -31,6 +35,7 @@ function DeckLevelScreen({ path, onOpen, onUp, onJumpTo, onNavigate, onActions, 
   rows = [...rows].sort((a, b) => (byName ? a.name.localeCompare(b.name) : b.due - a.due));
 
   const totalDue = all.reduce((n, r) => n + r.due, 0);
+  const summaryOpen = summaryChoice === 'auto' ? totalDue > 0 : summaryChoice === 'shown';
 
   return (
     <MxContentShell
@@ -64,7 +69,7 @@ function DeckLevelScreen({ path, onOpen, onUp, onJumpTo, onNavigate, onActions, 
         ) : (
           <React.Fragment>
             {summaryOpen
-              ? <LevelSummary deck={deck} isRoot={isRoot} totalDue={totalDue} onStudy={onStudy} onDismiss={() => setSummaryOpen(false)} />
+              ? <LevelSummary deck={deck} isRoot={isRoot} totalDue={totalDue} onStudy={onStudy} onDismiss={() => setSummaryChoice('hidden')} />
               : null}
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', margin: (summaryOpen ? 'var(--space-xl)' : '0') + ' 0 var(--space-md)' }}>
@@ -75,7 +80,7 @@ function DeckLevelScreen({ path, onOpen, onUp, onJumpTo, onNavigate, onActions, 
 
             {summaryOpen ? null : (
               <div style={{ marginBottom: 'var(--space-md)' }}>
-                <MxTextButton label="Show today’s summary" trailingIcon="expand_more" onClick={() => setSummaryOpen(true)} />
+                <MxTextButton label="Show today’s summary" trailingIcon="expand_more" onClick={() => setSummaryChoice('shown')} />
               </div>
             )}
 

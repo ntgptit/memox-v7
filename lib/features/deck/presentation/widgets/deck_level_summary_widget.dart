@@ -7,6 +7,8 @@ import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_icon_button.dart';
 import '../../../../shared/widgets/mx_progress_bar.dart';
 import '../../domain/models/deck_list_snapshot_model.dart';
+import '../../domain/models/deck_summary_model.dart';
+import '../states/deck_list_view_state.dart';
 
 /// What this level amounts to, above the list of what is in it.
 ///
@@ -48,6 +50,19 @@ class DeckLevelSummaryWidget extends StatelessWidget {
   /// more than "0 cards due" would.
   static bool hasContent(DeckListSnapshot snapshot) =>
       snapshot.decks.isNotEmpty;
+
+  /// Whether anything on this level is waiting to be studied.
+  ///
+  /// What [DeckSummaryVisibility.auto] follows. Exposed here rather than computed
+  /// by the caller so that the number deciding whether the panel appears and the
+  /// number the panel prints are the same fold over the same snapshot — a panel
+  /// that appeared because of one count and then displayed another would be worse
+  /// than one that never appeared.
+  ///
+  /// `any` rather than summing: the question is whether the sum is non-zero, and
+  /// a card count cannot be negative, so the first due deck answers it.
+  static bool hasDue(DeckListSnapshot snapshot) =>
+      snapshot.decks.any((DeckSummary summary) => summary.dueCardCount > 0);
 
   @override
   Widget build(BuildContext context) {

@@ -28,6 +28,31 @@ enum DeckListSort {
   name,
 }
 
+/// Whether the level summary panel is on screen.
+///
+/// **Three states, not a boolean, because "the user has not said" is not the same
+/// as "hide it".** The panel used to default to showing, on the argument that it
+/// is the most useful thing on the screen on the day you opened the app to study.
+/// That is true of the day there is something to study. On every other day it
+/// opened to announce that nothing was waiting and then had to be dismissed by
+/// hand — a panel asking for an action in order to say no action is needed.
+///
+/// [auto] is the answer: the panel follows the level's due count until the user
+/// says otherwise, and once they do, their choice sticks and stops following it.
+enum DeckSummaryVisibility {
+  /// Follow the level: shown where something is due, absent where nothing is.
+  auto,
+
+  /// The user opened it. Stays open on a level with nothing due — asking for the
+  /// panel is asking for the progress bar inside it, which is worth seeing on a
+  /// deck that is finished.
+  shown,
+
+  /// The user dismissed it. Stays closed even where something is due; the link
+  /// that brings it back is always there.
+  hidden,
+}
+
 /// Applies the current view choices to one snapshot's decks.
 ///
 /// Pure, and deliberately not a method on the controller: it is the whole of what

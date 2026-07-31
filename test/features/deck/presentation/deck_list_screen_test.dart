@@ -6,7 +6,6 @@ import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/deck/domain/models/deck_list_snapshot_model.dart';
 import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
-import 'package:memox/features/deck/presentation/widgets/deck_level_summary_widget.dart';
 import 'package:memox/features/deck/presentation/widgets/deck_tile_widget.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
@@ -19,8 +18,9 @@ import 'support/fake_deck_repository.dart';
 
 /// The root deck list's four read states and its responsive matrix (UC-06).
 ///
-/// The create flow lives in `root_deck_create_test.dart`, and the filter and
-/// sort pills in `deck_list_toolbar_test.dart`.
+/// The create flow lives in `root_deck_create_test.dart`, the filter and sort
+/// pills in `deck_list_toolbar_test.dart`, and the summary panel's visibility in
+/// `deck_list_summary_test.dart`.
 void main() {
   final english = AppLocalizationsEn();
 
@@ -80,40 +80,6 @@ void main() {
       expect(empty.onAction, isNotNull);
       expect(find.byType(MxErrorState), findsNothing);
       expect(tester.takeException(), isNull);
-    });
-  });
-
-  group('the summary panel', () {
-    testWidgets('hides on request and comes back from the line that replaces it', (
-      tester,
-    ) async {
-      // **Something is always here.** A panel that vanished without trace would
-      // leave the user no way back to it and no reason to believe it had been
-      // there; the link is what makes dismissing it a preference rather than a
-      // loss, so the test walks the whole round trip rather than stopping at
-      // "it disappeared".
-      await pumpDeckScreen(
-        tester,
-        repository: FakeDeckRepository.withSummaries(threeSummaries()),
-        screen: const DeckListScreen(),
-      );
-
-      expect(find.byType(DeckLevelSummaryWidget), findsOneWidget);
-      expect(find.text(english.deckSummaryShowAction), findsNothing);
-
-      await tester.tap(
-        find.bySemanticsLabel(english.deckSummaryHideLabel).first,
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.byType(DeckLevelSummaryWidget), findsNothing);
-      expect(find.text(english.deckSummaryShowAction), findsOneWidget);
-
-      await tester.tap(find.text(english.deckSummaryShowAction));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(DeckLevelSummaryWidget), findsOneWidget);
-      expect(find.text(english.deckSummaryShowAction), findsNothing);
     });
   });
 
