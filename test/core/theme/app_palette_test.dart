@@ -240,10 +240,31 @@ void main() {
   });
 
   group('semantic chroma budget', () {
-    test('danger carries the most and info the least', () {
+    test('info stays the quietest, and nothing is fully saturated', () {
       // Not equal on purpose. Four hues all at full saturation is how a study
       // tool starts looking like a game.
-      const ceiling = 0.70;
+      //
+      // **This replaced a rule that the palette outgrew at M4.10p.** Until then
+      // it also asserted `danger` was the loudest, and with the old values it
+      // was — light 0.676 against warning's 0.612. Adopting the design system's
+      // semantic colours inverted that: light is now warning 0.801, success
+      // 0.766, danger 0.634.
+      //
+      // The interesting part is where the disagreement lives. The design
+      // system's own readme says "danger carries the most saturation, info the
+      // least", so its prose and its hex values contradict each other; this repo
+      // is not the party that disagrees. Values are what the project owner made
+      // authoritative, so the values won, and the half of the rule they did not
+      // break is kept rather than the whole rule being deleted:
+      //
+      //   - `info` is still the quietest in both modes, and the design agrees.
+      //   - Nothing approaches full saturation. The ceiling is 0.85 rather than
+      //     the old 0.70 because dark `danger` now measures 0.814 — high enough
+      //     that the old number would only be re-raised on the next palette
+      //     change, and low enough to still catch a raw `#FF0000`.
+      //   - The four are still spread, so "deliberately unequal" keeps a test.
+      const ceiling = 0.85;
+      const minimumSpread = 1.5;
 
       for (final entry in <String, AppSemanticColors>{
         'light': lightSemantic,
@@ -258,20 +279,24 @@ void main() {
         };
         final values = budget.values.toList();
 
-        expect(
-          budget['danger'],
-          values.reduce((a, b) => a > b ? a : b),
-          reason: '${entry.key}: danger is not the loudest',
-        );
+        final loudest = values.reduce((a, b) => a > b ? a : b);
+        final quietest = values.reduce((a, b) => a < b ? a : b);
+
         expect(
           budget['info'],
-          values.reduce((a, b) => a < b ? a : b),
+          quietest,
           reason: '${entry.key}: info is not the quietest',
         );
         expect(
-          values.reduce((a, b) => a > b ? a : b),
+          loudest,
           lessThanOrEqualTo(ceiling),
           reason: '${entry.key}: a semantic colour is over budget',
+        );
+        expect(
+          loudest / quietest,
+          greaterThanOrEqualTo(minimumSpread),
+          reason:
+              '${entry.key}: the four semantics are too close to be a budget',
         );
       }
     });

@@ -1,11 +1,28 @@
 # Import ledger — claude.ai/design → `design_system/`
 
-> **This directory is a snapshot, not a source of truth.** `lib/core/theme/`
-> remains the only place a memox token is defined; the CSS here was *generated
-> from* it and will drift the moment the Dart changes. Read it to see what the
-> redesign proposes; never treat a value here as authoritative, and never edit a
-> Dart token to match a CSS one. Nothing in `design_system/` is compiled,
-> analyzed or tested by any repo gate.
+> **`tokens/*.css` is authoritative for token VALUES. Everything else here is a
+> snapshot.** That reverses what this file said when it was written, and the
+> reversal was the project owner's call (M4.10p): where a token's value in
+> `lib/core/theme/` disagreed with the value here, the Dart was changed to match.
+> So a hex in `tokens/` is the design, and a hex in `AppColors` is that design
+> compiled into Dart — edit the CSS first, then bring the Dart to it.
+>
+> Two limits on that, both learned by measuring rather than assumed:
+>
+> - **The CSS values are not self-consistent with the CSS prose.** `readme.md`
+>   says "danger carries the most saturation"; the hex values make `warning` the
+>   loudest in light. Where the two halves of the design disagree, the values
+>   win, because values are what was made authoritative — but the disagreement is
+>   the design's, not this repo's, and it is worth fixing upstream.
+> - **A value can be right and still be applied wrongly.** Adopting
+>   `--color-success` dropped a 14px label to 4.30:1 on one ground. The repo's
+>   own audit caught it and the fix came from the design too — its `VerdictAction`
+>   keeps the fill neutral for exactly this reason. Following a token means
+>   following what the design does with it, not just its hex.
+>
+> Everything that is not a token value — the components, the UI kit, the
+> guideline prose — is still a snapshot generated from this repo and will drift.
+> Nothing in `design_system/` is compiled, analyzed or tested by any repo gate.
 >
 > `readme.md`, `SKILL.md` and the `.prompt.md` files are written as instructions
 > to an agent. They are the design project's own prose, kept verbatim as part of
@@ -92,13 +109,15 @@ fetching that one path.
 
 ## Where the snapshot already disagrees with the code
 
-Recorded because a snapshot that silently contradicts `lib/` is worse than no
-snapshot. In every row the repo is right and the snapshot is stale.
+Written before the authority reversed, so read the verdict column, not the
+framing: **the two colour rows were resolved in the design's favour at
+M4.10p** and no longer disagree. The other two are prose, not values, and the
+repo is still right about them.
 
 | Snapshot says | Repo does | Note |
 |---|---|---|
-| `MxErrorState.prompt.md`: "Retry is a `secondary` button, never primary" | Retry is **primary** | Changed in M4.10n so `MxErrorState` and `MxEmptyState` — two states one keystroke apart — stop looking like different components. |
-| `tokens/colors.css`: `--color-web-letterbox:#6E7288` | `AppColors.webLetterbox` is `#14162A` | Not a straight contradiction — `#6E7288` is the grey `ui_kits/.../index.html` paints *behind its phone frame*, and the token was named after it. The repo's value is the seed-tinted near-black the Flutter web build letterboxes with. Two different surfaces sharing one token name. |
+| `MxErrorState.prompt.md`: "Retry is a `secondary` button, never primary" | Retry is **primary** — *still open; M4.10p covered tokens only, not component behaviour* | Changed in M4.10n so `MxErrorState` and `MxEmptyState` — two states one keystroke apart — stop looking like different components. |
+| ~~`tokens/colors.css`: `--color-web-letterbox:#6E7288`~~ **resolved M4.10p — Dart now `#6E7288`** | `AppColors.webLetterbox` was `#14162A` | Not a straight contradiction — `#6E7288` is the grey `ui_kits/.../index.html` paints *behind its phone frame*, and the token was named after it. The repo's value is the seed-tinted near-black the Flutter web build letterboxes with. Two different surfaces sharing one token name. |
 | `readme.md`: "**Intentional additions** — two" then lists three | — | Its own count is off by one; `MxIcon`, `MxProgressBar` and `MxSearchField` are all additions. |
 | `ui_kits/.../README.md` and `github.md` both name `SettingsScreen.jsx` | The project ships `ProfileScreen.jsx` | The file was renamed and the two prose files were not. |
 
@@ -119,3 +138,38 @@ three facts the app cannot currently produce:
 So `MxProgressBar` and the redesigned deck card are blocked on a business rule,
 not on UI work. `MxSearchField` is not: filtering the level already in memory
 needs no new read, and searching the whole subtree needs one query.
+
+## Token parity, measured at M4.10p
+
+Every numeric token matched already — spacing (4·8·12·16·24·32 plus the 48 floor),
+radius (8·12·16·999), icon sizes (16·24·40), durations (120·200·320), breakpoints
+(360·600) and the elevation scale (0·1·3·8) are identical on both sides.
+
+Colour was where the two had drifted. Of 40 mapped colour tokens, **11 differed**
+and all 11 were taken from the CSS:
+
+| Token | was (Dart) | now (CSS) |
+|---|---|---|
+| `success` light / dark | `#1E7156` / `#68BB9C` | `#10795C` / `#4FC79B` |
+| `warning` light / dark | `#856520` / `#D2AC76` | `#9A6A11` / `#E0B064` |
+| `danger` light / dark | `#B02233` / `#E88794` | `#C02B3A` / `#F2808F` |
+| `info` light / dark | `#456480` / `#8FAEC6` | `#3F6E97` / `#8DB4D8` |
+| `onPrimaryContainer` dark | `#D8D8F0` | `#D7D5FF` |
+| `tertiary` dark | `#A2BAD0` | `#8DB4D8` |
+| `webLetterbox` | `#14162A` | `#6E7288` |
+
+Three CSS tokens have **no Dart counterpart and were deliberately not added**:
+
+- `--color-progress-track` / `-fill` / `-complete` and `--color-streak` /
+  `-container` — these belong to `MxProgressBar` and the streak display, neither
+  of which exists. `--color-streak` is also a fifth hue (orange, outside the one
+  accent and four semantics the design's own readme allows), so adding it before
+  something draws it would put an unexplained colour in the palette. They land
+  with the components that need them.
+- `--color-primary-accent` — already expressible: it is `primary` in light and
+  `focusRing` in dark, and both already hold exactly those hex values.
+- `--color-disabled-surface` — the Dart derives it
+  (`onSurface @ 12% over surface`) rather than hardcoding it, and the derived
+  result is `#E0E0E5` / `#343649` against the CSS's `#E3E3E6` / `#33344A`. Within
+  three units on each channel; deriving is what keeps it correct when the surface
+  moves, so the derivation stays.

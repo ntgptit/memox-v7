@@ -124,12 +124,12 @@
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.error": {
-      "hex": "#B02233",
+      "hex": "#C02B3A",
       "opaque": true,
-      "hue": 352.8169014084507,
-      "saturation": 0.6761904761904762,
-      "chroma": 0.5568627450980392,
-      "lightnessStar": 38.92117247148544,
+      "hue": 353.9597315436242,
+      "saturation": 0.6340425531914893,
+      "chroma": 0.584313725490196,
+      "lightnessStar": 43.122230669429825,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.onError": {
@@ -376,39 +376,39 @@
       "carriesNoHue": false
     },
     "semantic.success": {
-      "hex": "#1E7156",
+      "hex": "#10795C",
       "opaque": true,
-      "hue": 160.4819277108434,
-      "saturation": 0.5804195804195803,
-      "chroma": 0.3254901960784313,
-      "lightnessStar": 42.39656905970063,
+      "hue": 163.42857142857144,
+      "saturation": 0.7664233576642335,
+      "chroma": 0.4117647058823529,
+      "lightnessStar": 45.02222206391582,
       "classifiedAs": "role-or-on-color"
     },
     "semantic.warning": {
-      "hex": "#856520",
+      "hex": "#9A6A11",
       "opaque": true,
-      "hue": 40.99009900990099,
-      "saturation": 0.6121212121212122,
-      "chroma": 0.39607843137254906,
-      "lightnessStar": 44.79865382336012,
+      "hue": 38.978102189781026,
+      "saturation": 0.8011695906432749,
+      "chroma": 0.5372549019607843,
+      "lightnessStar": 48.534254460157285,
       "classifiedAs": "role-or-on-color"
     },
     "semantic.danger": {
-      "hex": "#B02233",
+      "hex": "#C02B3A",
       "opaque": true,
-      "hue": 352.8169014084507,
-      "saturation": 0.6761904761904762,
-      "chroma": 0.5568627450980392,
-      "lightnessStar": 38.92117247148544,
+      "hue": 353.9597315436242,
+      "saturation": 0.6340425531914893,
+      "chroma": 0.584313725490196,
+      "lightnessStar": 43.122230669429825,
       "classifiedAs": "role-or-on-color"
     },
     "semantic.info": {
-      "hex": "#456480",
+      "hex": "#3F6E97",
       "opaque": true,
-      "hue": 208.47457627118644,
-      "saturation": 0.2994923857868021,
-      "chroma": 0.23137254901960785,
-      "lightnessStar": 41.11751414449484,
+      "hue": 207.95454545454544,
+      "saturation": 0.411214953271028,
+      "chroma": 0.34509803921568627,
+      "lightnessStar": 44.86164292293543,
       "classifiedAs": "role-or-on-color"
     },
     "semantic.surfaceMuted": {
@@ -609,12 +609,12 @@
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.onPrimaryContainer": {
-      "hex": "#D8D8F0",
+      "hex": "#D7D5FF",
       "opaque": true,
-      "hue": 240.0,
-      "saturation": 0.44444444444444414,
-      "chroma": 0.09411764705882353,
-      "lightnessStar": 86.99781269072702,
+      "hue": 242.85714285714283,
+      "saturation": 1.0000000000000007,
+      "chroma": 0.16470588235294115,
+      "lightnessStar": 86.63044935542257,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.secondary": {
@@ -654,12 +654,12 @@
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.tertiary": {
-      "hex": "#A2BAD0",
+      "hex": "#8DB4D8",
       "opaque": true,
-      "hue": 208.69565217391306,
-      "saturation": 0.32857142857142857,
-      "chroma": 0.18039215686274512,
-      "lightnessStar": 74.41516581460449,
+      "hue": 208.8,
+      "saturation": 0.4901960784313724,
+      "chroma": 0.2941176470588235,
+      "lightnessStar": 71.7331823296374,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.onTertiary": {
@@ -690,12 +690,12 @@
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.error": {
-      "hex": "#E88794",
+      "hex": "#F2808F",
       "opaque": true,
-      "hue": 351.9587628865979,
-      "saturation": 0.6783216783216783,
-      "chroma": 0.3803921568627451,
-      "lightnessStar": 66.9923683573113,
+      "hue": 352.10526315789474,
+      "saturation": 0.8142857142857142,
+      "chroma": 0.44705882352941173,
+      "lightnessStar": 66.74756961865232,
       "classifiedAs": "role-or-on-color"
     },
     "colorScheme.onError": {
@@ -942,39 +942,39 @@
       "carriesNoHue": false
     },
     "semantic.success": {
-      "hex": "#68BB9C",
+      "hex": "#4FC79B",
       "opaque": true,
-      "hue": 157.59036144578315,
-      "saturation": 0.37899543378995426,
-      "chroma": 0.3254901960784313,
-      "lightnessStar": 70.094577024094,
+      "hue": 158.0,
+      "saturation": 0.5172413793103449,
+      "chroma": 0.47058823529411764,
+      "lightnessStar": 72.80995267457173,
       "classifiedAs": "role-or-on-color"
     },
     "semantic.warning": {
-      "hex": "#D2AC76",
+      "hex": "#E0B064",
       "opaque": true,
-      "hue": 35.217391304347835,
-      "saturation": 0.5054945054945054,
-      "chroma": 0.36078431372549014,
-      "lightnessStar": 72.5711830324821,
+      "hue": 36.774193548387096,
+      "saturation": 0.6666666666666666,
+      "chroma": 0.48627450980392156,
+      "lightnessStar": 74.71003022035062,
       "classifiedAs": "role-or-on-color"
     },
     "semantic.danger": {
-      "hex": "#E88794",
+      "hex": "#F2808F",
       "opaque": true,
-      "hue": 351.9587628865979,
-      "saturation": 0.6783216783216783,
-      "chroma": 0.3803921568627451,
-      "lightnessStar": 66.9923683573113,
+      "hue": 352.10526315789474,
+      "saturation": 0.8142857142857142,
+      "chroma": 0.44705882352941173,
+      "lightnessStar": 66.74756961865232,
       "classifiedAs": "role-or-on-color"
     },
     "semantic.info": {
-      "hex": "#8FAEC6",
+      "hex": "#8DB4D8",
       "opaque": true,
-      "hue": 206.1818181818182,
-      "saturation": 0.32544378698224863,
-      "chroma": 0.21568627450980393,
-      "lightnessStar": 69.60390575883414,
+      "hue": 208.8,
+      "saturation": 0.4901960784313724,
+      "chroma": 0.2941176470588235,
+      "lightnessStar": 71.7331823296374,
       "classifiedAs": "role-or-on-color"
     },
     "semantic.surfaceMuted": {
