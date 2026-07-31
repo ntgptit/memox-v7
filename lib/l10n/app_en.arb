@@ -117,6 +117,14 @@
     },
     "description": "The same sentence inside a deck, where the scope is that deck rather than the whole library."
   },
+  "decksSectionLabelRoot": "Your decks",
+  "@decksSectionLabelRoot": {
+    "description": "Heads the list at the root level, beside the filter and sort pills. Uppercased by the widget, not here."
+  },
+  "decksSectionLabelChild": "Sub-decks",
+  "@decksSectionLabelChild": {
+    "description": "The same heading inside a deck, where what follows is that deck's children rather than the library."
+  },
   "deckDueNowLabel": "{count, plural, other{{count} due now}}",
   "@deckDueNowLabel": {
     "placeholders": {

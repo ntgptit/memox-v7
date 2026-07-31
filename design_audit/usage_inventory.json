@@ -1,11 +1,11 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
   "scannedFiles": 118,
-  "totalSites": 280,
+  "totalSites": 281,
   "byElementKind": {
     "other": 234,
     "background": 11,
-    "text": 17,
+    "text": 18,
     "shadow": 1,
     "border": 9,
     "icon": 8
@@ -16,7 +16,7 @@
     "opacity-modified-token": 9,
     "hardcoded-literal": 89,
     "Colors-material": 4,
-    "theme-token": 40
+    "theme-token": 41
   },
   "sites": [
     {
@@ -2729,6 +2729,17 @@
       "file": "lib/features/deck/presentation/widgets/deck_level_summary_widget.dart",
       "line": 135,
       "widget_context": "_SummaryHeadline",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A6ABC2"
+    },
+    {
+      "file": "lib/features/deck/presentation/widgets/deck_list_toolbar_widget.dart",
+      "line": 71,
+      "widget_context": "DeckListToolbarWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",

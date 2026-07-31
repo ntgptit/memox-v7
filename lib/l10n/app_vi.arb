@@ -117,6 +117,14 @@
     },
     "description": "Cùng câu đó khi ở trong một deck."
   },
+  "decksSectionLabelRoot": "Deck của bạn",
+  "@decksSectionLabelRoot": {
+    "description": "Tiêu đề của danh sách ở cấp gốc, cạnh hai pill lọc và sắp xếp. Widget tự viết hoa."
+  },
+  "decksSectionLabelChild": "Deck con",
+  "@decksSectionLabelChild": {
+    "description": "Cùng tiêu đề đó khi đang ở trong một deck."
+  },
   "deckDueNowLabel": "{count, plural, other{{count} thẻ đến hạn}}",
   "@deckDueNowLabel": {
     "placeholders": {
