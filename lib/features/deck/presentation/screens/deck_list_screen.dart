@@ -241,6 +241,7 @@ class _DeckLevel extends StatelessWidget {
             AppSpacing.xl,
           ),
           child: DeckListToolbarWidget(
+            isRootLevel: parent == null,
             filter: filter,
             sort: sort,
             onFilterChanged: onFilterChanged,

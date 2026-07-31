@@ -92,7 +92,7 @@ class MxProgressBar extends StatelessWidget {
                 // count that moved is the feedback, and a bar that snaps has
                 // already finished moving by the time the user looks at it.
                 duration: AppDurations.slow,
-                curve: Curves.decelerate,
+                curve: AppDurations.decelerate,
                 tween: Tween<double>(end: fraction),
                 builder: (context, animated, child) => LinearProgressIndicator(
                   value: animated,

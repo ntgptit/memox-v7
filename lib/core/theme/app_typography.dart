@@ -35,6 +35,12 @@ abstract final class AppTypography {
   /// answer below the fold — the one thing the review screen must not do.
   static const double compactCardPromptSize = 26;
 
+  /// Extra tracking on the uppercase label above a group of rows.
+  ///
+  /// Uppercase set at 11px closes up; the design tracks it 1.1px for that, and
+  /// it is the one place in the app where a text style is adjusted per use.
+  static const double sectionLabelTracking = 1.1;
+
   /// Pairs a [FontWeight] with the matching variable-axis setting.
   static List<FontVariation> _wght(FontWeight weight) => <FontVariation>[
     FontVariation('wght', weight.value.toDouble()),

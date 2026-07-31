@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_typography.dart';
+import '../../../../core/theme/theme_context_extension.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_pill_button.dart';
 import '../states/deck_list_view_state.dart';
@@ -26,6 +28,7 @@ class DeckListToolbarWidget extends StatelessWidget {
     required this.sort,
     required this.onFilterChanged,
     required this.onSortChanged,
+    required this.isRootLevel,
     super.key,
   });
 
@@ -33,6 +36,9 @@ class DeckListToolbarWidget extends StatelessWidget {
   final DeckListSort sort;
   final ValueChanged<DeckListFilter> onFilterChanged;
   final ValueChanged<DeckListSort> onSortChanged;
+
+  /// Which heading the list gets — the library's, or this deck's children's.
+  final bool isRootLevel;
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +50,29 @@ class DeckListToolbarWidget extends StatelessWidget {
     return Wrap(
       spacing: AppSpacing.sm,
       runSpacing: AppSpacing.sm,
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: <Widget>[
+        // **The list gets a heading, and it names the scope.** Without it the
+        // two pills float above the cards with nothing saying what they filter,
+        // and "Your decks" against "Sub-decks" is the one place the screen says
+        // out loud which level the user is on besides the app-bar title.
+        //
+        // Inside the `Wrap` rather than in a `Row` above it: at `textScaler` 2.0
+        // on a 320 screen the label and both pills cannot share a line, and a
+        // `Row` would clip rather than wrap.
+        Padding(
+          padding: const EdgeInsets.only(right: AppSpacing.sm),
+          child: Text(
+            (isRootLevel
+                    ? context.l10n.decksSectionLabelRoot
+                    : context.l10n.decksSectionLabelChild)
+                .toUpperCase(),
+            style: context.texts.labelSmall?.copyWith(
+              color: context.colors.onSurfaceVariant,
+              letterSpacing: AppTypography.sectionLabelTracking,
+            ),
+          ),
+        ),
         MxPillButton(
           label: isDueOnly
               ? context.l10n.deckFilterDueLabel

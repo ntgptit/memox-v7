@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_radius.dart';
 import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/core/theme/app_typography.dart';
 import 'package:memox/core/theme/app_theme.dart';
 
 /// Design exploration: composition studies under the **production** theme.
@@ -144,7 +145,7 @@ class SectionLabel extends StatelessWidget {
       text.toUpperCase(),
       style: Theme.of(context).textTheme.labelSmall?.copyWith(
         color: Theme.of(context).colorScheme.onSurfaceVariant,
-        letterSpacing: 1.1,
+        letterSpacing: AppTypography.sectionLabelTracking,
       ),
     ),
   );
