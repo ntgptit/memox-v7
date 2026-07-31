@@ -49,15 +49,22 @@ class DeckListSortChoice extends _$DeckListSortChoice {
 /// user who dismisses it at the root and finds it back two taps later has not
 /// been listened to. Filter and sort are global for the same reason.
 ///
-/// Defaults to showing: the panel is the most useful thing on the screen on the
-/// day you opened the app to study, which is most days.
+/// Defaults to [DeckSummaryVisibility.auto] rather than to showing. The old
+/// default put the panel on screen on every level including the ones with
+/// nothing due, where it existed only to be dismissed. `auto` is still a global
+/// choice — what it follows is local, which is the point: the same preference
+/// produces a panel on the level that has work waiting and none on the level
+/// that does not.
 ///
 /// One mutator, so a caller says which state it wants rather than toggling —
-/// the close button and the link that brings it back both know their answer.
+/// the close button and the link that brings it back both know their answer, and
+/// both are saying "from now on", which is why neither can return to `auto`.
 @riverpod
-class DeckSummaryVisibility extends _$DeckSummaryVisibility {
+class DeckSummaryVisibilityChoice extends _$DeckSummaryVisibilityChoice {
   @override
-  bool build() => true;
+  DeckSummaryVisibility build() => DeckSummaryVisibility.auto;
 
-  void setVisible({required bool isVisible}) => state = isVisible;
+  void setVisible({required bool isVisible}) => state = isVisible
+      ? DeckSummaryVisibility.shown
+      : DeckSummaryVisibility.hidden;
 }

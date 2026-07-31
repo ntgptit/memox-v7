@@ -33,8 +33,12 @@ void main() {
       (tester) async {
         await pumpDeckScreen(
           tester,
+          // **The due count is load-bearing here.** The summary panel follows
+          // the level's due count unless the user has said otherwise, so a
+          // fixture with nothing due renders the one-line link instead of the
+          // card and there is no card to measure the gap to.
           repository: FakeDeckRepository.withSummaries(<DeckSummary>[
-            fakeSummary(id: '1', name: 'Korean'),
+            fakeSummary(id: '1', name: 'Korean', dueCardCount: 3),
           ]),
           screen: const DeckListScreen(),
           surface: entry.value,

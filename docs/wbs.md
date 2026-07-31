@@ -3933,6 +3933,50 @@ lồng bên trong thắng gesture arena của card. Cùng một kết quả, hai
 `deck_tile_target_test.dart` pin cả hai chiều, và đã kiểm tiêm lỗi: bỏ
 `onTap: onTap` thì test đỏ.
 
+**Next task: M4.10ad · Panel tổng kết theo due.**
+
+### M4.10ad · Panel tổng kết chỉ tự mở khi có due
+
+- **Status:** done
+- **Goal:** Panel tổng kết thôi tự mở ở level không có gì tới hạn. Lựa chọn của
+  người dùng vẫn thắng, theo cả hai chiều.
+- **Scope:** `deck_list_view_state.dart` (enum mới),
+  `deck_list_view_controller.dart` (đổi tên notifier + codegen),
+  `deck_level_summary_widget.dart` (`hasDue`), `deck_summary_section_widget.dart`;
+  `ui_kits/memox-app/DeckLevelScreen.jsx` cho khớp.
+- **Out of scope:** ghi nhớ lựa chọn qua các lần mở app — vẫn là state trong bộ
+  nhớ, như filter và sort.
+- **Dependencies:** M4.10ac
+- **Checklist phases:** 7, 9
+- **Tests required:** `deck_list_summary_test.dart` (mới, 5 case).
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `test/features/deck/presentation/deck_list_summary_test.dart`
+- **Acceptance criteria:**
+  - [x] Level có due → panel tự mở. Không có due → chỉ còn dòng link.
+  - [x] Người dùng bấm mở thì panel ở lại kể cả khi không có due; bấm đóng thì
+        đóng kể cả khi có due.
+  - [x] 1006 test pass, mọi gate xanh.
+
+**Boolean không diễn đạt được "người dùng chưa nói gì".** `build() => true` làm
+panel mở ở mọi level, kể cả level mà toàn bộ nội dung của nó là "không có gì tới
+hạn" — một panel đòi một thao tác để nói rằng không cần thao tác nào. Ba trạng
+thái `auto` / `shown` / `hidden` mới tách được "chưa chọn" khỏi "chọn ẩn", và đó
+đúng là chỗ CLAUDE.md nói: trạng thái hữu hạn là enum, không phải một đống bool.
+
+**`auto` giải ở widget, không giải trong notifier.** Notifier giữ một *sở thích*
+và không biết level nào cả; sở thích đó có ra panel hay không phụ thuộc snapshot
+mà widget đang cầm. Đẩy snapshot vào notifier để giải trong đó là bắt một lựa
+chọn global mang dữ liệu của một level — và mang nhầm level ngay khi có hai
+level cùng sống trong lúc chuyển route.
+
+**Dòng link vẫn ở lại khi không có due.** Cái phiền là phải *đóng* một thứ để
+tới được danh sách, không phải bản thân panel; thanh tiến độ bên trong vẫn đáng
+xem trên một deck đã học xong, và một tap là tới.
+
+`deck_list_screen_test.dart` vượt 400 dòng khi thêm các case này, nên nhóm
+summary tách hẳn sang file riêng — cùng lý do `mx_card_test.dart` từng tách khỏi
+`mx_surface_components_test.dart`.
+
 **Next task: M4.11 · Card management full-stack.**
 
 ### M4.11 · Card management full-stack

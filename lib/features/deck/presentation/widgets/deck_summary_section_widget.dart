@@ -6,6 +6,7 @@ import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_text_button.dart';
 import '../../domain/models/deck_list_snapshot_model.dart';
 import '../controllers/deck_list_view_controller.dart';
+import '../states/deck_list_view_state.dart';
 import 'deck_level_summary_widget.dart';
 
 /// Setting the panel's visibility, bound to a `ref`.
@@ -18,7 +19,7 @@ import 'deck_level_summary_widget.dart';
 /// from a missed subscription.
 VoidCallback _setSummaryVisible(WidgetRef ref, {required bool isVisible}) =>
     () => ref
-        .read(deckSummaryVisibilityProvider.notifier)
+        .read(deckSummaryVisibilityChoiceProvider.notifier)
         .setVisible(isVisible: isVisible);
 
 /// The level summary, or the one line that brings it back.
@@ -39,7 +40,17 @@ class DeckSummarySectionWidget extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
-    final isVisible = ref.watch(deckSummaryVisibilityProvider);
+    // **`auto` is resolved here, not in the notifier.** The notifier holds a
+    // preference and knows nothing about any level; whether that preference puts
+    // a panel on screen depends on the snapshot this widget was handed. Pushing
+    // the snapshot into the notifier to resolve it there would make a global
+    // choice carry one level's data, and the wrong level's the moment two are
+    // alive during a route transition.
+    final isVisible = switch (ref.watch(deckSummaryVisibilityChoiceProvider)) {
+      DeckSummaryVisibility.shown => true,
+      DeckSummaryVisibility.hidden => false,
+      DeckSummaryVisibility.auto => DeckLevelSummaryWidget.hasDue(snapshot),
+    };
 
     return Padding(
       // **`sm` above, redistributed from below — the total is fixed.** The

@@ -2738,7 +2738,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/deck_level_summary_widget.dart",
-      "line": 66,
+      "line": 81,
       "widget_context": "DeckLevelSummaryWidget",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -2749,7 +2749,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/deck_level_summary_widget.dart",
-      "line": 68,
+      "line": 83,
       "widget_context": "DeckLevelSummaryWidget",
       "element_kind": "border",
       "source_kind": "theme-token",
@@ -2760,7 +2760,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/deck_level_summary_widget.dart",
-      "line": 153,
+      "line": 168,
       "widget_context": "_SummaryHeadline",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -2771,7 +2771,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/deck_level_summary_widget.dart",
-      "line": 162,
+      "line": 177,
       "widget_context": "_SummaryHeadline",
       "element_kind": "text",
       "source_kind": "theme-token",
