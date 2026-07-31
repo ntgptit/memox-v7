@@ -499,3 +499,125 @@ assertions with the read states.
 
 Rendered at both levels, light and dark, 393×852: the two screens are identical
 apart from the title, the back arrow and the parent's action menu.
+
+---
+
+# Addendum 2 — `MxBreadcrumb`, and the path back up
+
+Requested once the screen became recursive: *"vì là màn hình đệ quy nên hãy phát
+triển breadcrumb làm share widget để dễ dàng điều hướng"*.
+
+## Where it appears, and where it deliberately does not
+
+| Level | Breadcrumb |
+|---|---|
+| Root list | none — nothing above it |
+| Inside a root deck | none |
+| Level 3 and below | `Japanese N5 › Writing systems › Kana` |
+
+**One level in it is suppressed on purpose.** The only step above a root deck is
+the deck list, which the Back arrow *and* the Decks tab already reach in one tap.
+A crumb there would be a third control doing the same job — the duplicate chrome
+this design has refused elsewhere. From level 3 the intermediate decks are
+reachable by nothing short of tapping Back repeatedly, and that is the gap a
+breadcrumb closes.
+
+The last step is the current deck and is **not** tappable. It repeats the app-bar
+title on purpose: a path that stopped at the parent would read as a link to
+somewhere else rather than as the trail that ends here.
+
+## The shared widget
+
+`MxBreadcrumb` takes `List<MxBreadcrumbItem>` — a label and an optional `onTap`.
+No domain type, no Riverpod, no ARB lookup. `DeckPathWidget` is the feature-local
+adapter that turns a `DeckListSnapshot` into those items.
+
+**It ships with one caller, and that is a departure from the rule this project
+set itself** ("a new shared widget needs ≥2 real callers"). It was asked for as a
+shared widget explicitly, and the named second caller is the card list in M4.11,
+which sits under the same tree and needs the same path. Recording the deviation
+rather than pretending the rule was met.
+
+Why it is not one of the existing components: `MxNavigationBar` switches between
+siblings at a fixed top level, `MxPillButton` is one-of-N over the same content (a
+set, not a sequence, with a selected state where a path has a last element), and
+`MxListTile` is a row. Nothing held "where am I, and how do I get back up".
+
+**It scrolls horizontally, so it cannot overflow.** Wrapping turns a ten-deep path
+at `textScaler` 2.0 into five lines of chrome above the content it is meant to
+help you scan; collapsing the middle behind an ellipsis hides exactly the steps a
+user opens a breadcrumb to find. Scrolling hides nothing and costs nothing when
+the path is short. Rendered at 320×568 / scale 2.0 with nine ancestors: the strip
+clips mid-word at the right edge, the rest of the screen is unaffected, and the
+clipped word is its own affordance.
+
+## Getting the chain out of the database
+
+The chain has to agree with the title — renaming an ancestor while a descendant is
+open must move both or neither — so it comes from the level's **own statement**
+(AD-13), not from a second query. Three shapes were tried:
+
+1. **Join `ancestry` onto the child rows.** Fully typed, and wrong: it multiplies
+   the result set by the depth. 100 children at level 5 becomes 400 rows where 100
+   would do, and M4.10 measured that what costs on the UI thread is rows crossing
+   the isolate boundary, not SQL time.
+2. **`UNION ALL` returning ancestors as extra rows.** Free *and* typed — except
+   drift does not expand `table.**` inside a compound select. It emits the literal
+   `parent.**` into the SQL string, generates a result class with only the
+   discriminator column, and reports **no error**. Verified against drift 2.34.
+3. **One JSON scalar**, repeated per row exactly like `nextDueAt`. Chosen.
+
+So `ancestryJson` is a deliberate hole in this file's rule that every column is
+type-checked at build time, and it is sealed at the mapper: `deckPathFromJson`
+is the only thing that sees a string, and everything above the repository
+receives `List<DeckPathSegment>`.
+
+The decode is **total**. A breadcrumb is chrome, so malformed input yields a
+screen with no breadcrumb rather than a deck the user can no longer open — the
+counts, the rows and the title in the same read are unaffected by whatever went
+wrong. `deck_mapper_test.dart` pins that: bad JSON, valid JSON of the wrong
+shape, and a partially damaged array where the intact entries survive.
+
+`distance` travels inside each object rather than being inferred from array
+order, because SQLite does not promise the order an aggregate consumes its input.
+The sort happens in Dart, where the guarantee is real — and a test feeds the array
+backwards to prove it.
+
+## A drift footgun worth recording
+
+The first version of the query silently failed to compile with
+`Expected a sql statement here` pointing at the *next* query's label. The cause
+was a **semicolon inside a `--` comment**: drift splits `.drift` files on `;`
+before stripping comments, so one sentence ending in a semicolon truncated the
+statement above it. It is reported as a warning, not an error, so the build
+succeeds and the generated method simply does not exist.
+
+## Verification
+
+| | |
+|---|---|
+| `flutter analyze` | clean |
+| `flutter test` | **930 pass** (from 892) |
+| Visual audits | 97 — the loaded level now carries a two-step path, so the breadcrumb's colours are measured rather than assumed |
+| `check_generated.sh` · `check_architecture.sh` · guard · `check_docs.sh` | all clean |
+| `dod_check.sh` | mechanical gates passed |
+
+New tests: `mx_breadcrumb_test.dart` (14 — the last step is not a control, deep
+paths do not overflow, every step announces itself, separators do not),
+`deck_ancestry_read_test.dart` (9, against real SQLite — depth 1 to 10, sibling
+branches excluded, rename and move rewrite the chain, JSON punctuation survives),
+plus the chain's statement count, six mapper cases and five screen cases.
+
+Two files were split at the 400-line guard: `DeckPathWidget` out of the screen,
+and `deck_move_picker_test.dart` out of the actions test. Both are real seams.
+
+## Standing limitations
+
+- **One caller.** See above.
+- **No scroll affordance.** A deep path clips at the right edge with no fade or
+  arrow. A gradient would be the usual fix and there is no token for one; adding a
+  hardcoded shader to satisfy an edge case is the trade this design has refused
+  elsewhere.
+- **The strip is not keyboard-scrollable** beyond what focus traversal gives it.
+  Web is the E2E channel, not a production target (AD-04), so this is deferred
+  rather than dismissed.

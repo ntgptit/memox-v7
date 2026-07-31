@@ -205,4 +205,61 @@ void main() {
       expect(storable, isNot(contains('unknown')));
     });
   });
+
+  group('the ancestor chain', () {
+    // The one untyped column in the deck reads. Its whole contract is here,
+    // because a JSON string is exactly the shape the compiler cannot check.
+    test('is ordered root first, whatever order the rows arrive in', () {
+      // SQLite does not promise the order an aggregate consumes its input, so
+      // the distance is what orders the chain — not the array. Fed backwards on
+      // purpose.
+      final path = deckPathFromJson(
+        '[{"id":"b","name":"Branch","distance":1},'
+        '{"id":"a","name":"Root","distance":2}]',
+      );
+
+      expect(path.map((s) => s.name), <String>['Root', 'Branch']);
+    });
+
+    test('an empty chain is a deck one level down, not a failure', () {
+      // A root deck opened from the list: its ancestry is genuinely nothing.
+      expect(deckPathFromJson('[]'), isEmpty);
+    });
+
+    test('malformed JSON yields no path rather than killing the level', () {
+      // A breadcrumb is chrome. The counts, the rows and the title in the same
+      // read are unaffected by whatever went wrong here, so failing the whole
+      // level would throw away nine correct facts to punish one.
+      expect(deckPathFromJson('not json at all'), isEmpty);
+      expect(deckPathFromJson(''), isEmpty);
+    });
+
+    test('a valid JSON value of the wrong shape yields no path', () {
+      expect(deckPathFromJson('{"id":"a"}'), isEmpty);
+      expect(deckPathFromJson('null'), isEmpty);
+      expect(deckPathFromJson('42'), isEmpty);
+    });
+
+    test('an unusable entry is dropped and the rest survive', () {
+      // Partial damage should cost the damaged step, not the path. A missing
+      // name is the realistic case: a column renamed under an old build.
+      final path = deckPathFromJson(
+        '[{"id":"a","name":"Root","distance":2},'
+        '{"id":"b","distance":1},'
+        '{"id":"c","name":"Leaf","distance":0}]',
+      );
+
+      expect(path.map((s) => s.id), <String>['a', 'c']);
+    });
+
+    test('a name is carried verbatim, delimiters and all', () {
+      // The reason this column is JSON rather than two group_concat strings:
+      // BR-01 lets a deck be called anything, so no separator is safe.
+      final path = deckPathFromJson(
+        '[{"id":"a","name":"N5, N4 | \\"quoted\\"","distance":1}]',
+      );
+
+      expect(path.single.name, 'N5, N4 | "quoted"');
+    });
+  });
 }

@@ -70,6 +70,10 @@
   "@deckNoDueLabel": {
     "description": "Shown on a deck row when no card is due. Neutral wording on purpose — having nothing due is a normal state, not a problem (BR-29)."
   },
+  "deckPathSemanticLabel": "Deck path",
+  "@deckPathSemanticLabel": {
+    "description": "Screen-reader label introducing the breadcrumb strip that shows where in the deck tree the user is."
+  },
   "deckDueSemanticLabel": "Has cards due",
   "@deckDueSemanticLabel": {
     "description": "Screen-reader label for the icon that marks a deck as having due cards. The icon and the text both carry the state so it never depends on colour alone."

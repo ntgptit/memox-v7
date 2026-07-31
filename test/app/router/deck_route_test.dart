@@ -9,6 +9,7 @@ import 'package:memox/features/deck/di/deck_repository_provider.dart';
 import 'package:memox/app/router/app_router.dart';
 import 'package:memox/core/navigation/route_names.dart';
 import 'package:memox/features/deck/domain/models/deck_list_snapshot_model.dart';
+import 'package:memox/features/deck/domain/models/deck_path_segment_model.dart';
 import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
@@ -87,11 +88,13 @@ void main() {
       deckList: (String? id) => Stream<DeckListSnapshot>.value(
         id == null
             ? const DeckListSnapshot(
+                ancestors: <DeckPathSegment>[],
                 parent: null,
                 decks: <DeckSummary>[],
                 nextDueAt: null,
               )
             : DeckListSnapshot(
+                ancestors: const <DeckPathSegment>[],
                 parent: fakeRootDeck(id: id, name: 'Japanese N5'),
                 decks: const <DeckSummary>[],
                 nextDueAt: null,

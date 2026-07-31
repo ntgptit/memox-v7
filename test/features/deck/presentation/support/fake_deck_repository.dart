@@ -6,6 +6,7 @@ import 'package:memox/features/deck/domain/models/deck_content_type_model.dart';
 import 'package:memox/features/deck/domain/models/deck_deletion_impact_model.dart';
 import 'package:memox/features/deck/domain/models/deck_list_snapshot_model.dart';
 import 'package:memox/features/deck/domain/models/deck_name_model.dart';
+import 'package:memox/features/deck/domain/models/deck_path_segment_model.dart';
 import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/domain/repositories/deck_repository.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
@@ -58,7 +59,12 @@ class FakeDeckRepository implements DeckRepository {
     DateTime? nextDueAt,
   }) => FakeDeckRepository(
     deckList: (_) => Stream<DeckListSnapshot>.value(
-      DeckListSnapshot(parent: null, decks: summaries, nextDueAt: nextDueAt),
+      DeckListSnapshot(
+        parent: null,
+        ancestors: const <DeckPathSegment>[],
+        decks: summaries,
+        nextDueAt: nextDueAt,
+      ),
     ),
   );
 
@@ -69,10 +75,16 @@ class FakeDeckRepository implements DeckRepository {
   factory FakeDeckRepository.withLevel({
     required DeckEntity parent,
     List<DeckSummary> children = const <DeckSummary>[],
+    List<DeckPathSegment> ancestors = const <DeckPathSegment>[],
     DateTime? nextDueAt,
   }) => FakeDeckRepository(
     deckList: (_) => Stream<DeckListSnapshot>.value(
-      DeckListSnapshot(parent: parent, decks: children, nextDueAt: nextDueAt),
+      DeckListSnapshot(
+        parent: parent,
+        ancestors: ancestors,
+        decks: children,
+        nextDueAt: nextDueAt,
+      ),
     ),
   );
 
@@ -98,6 +110,7 @@ class FakeDeckRepository implements DeckRepository {
       Stream<DeckListSnapshot>.value(
         const DeckListSnapshot(
           parent: null,
+          ancestors: <DeckPathSegment>[],
           decks: <DeckSummary>[],
           nextDueAt: null,
         ),
@@ -304,8 +317,26 @@ DeckEntity fakeSubDeck({
 DeckListSnapshot fakeListSnapshot(
   List<DeckSummary> summaries, {
   DeckEntity? parent,
+  List<DeckPathSegment> ancestors = const <DeckPathSegment>[],
   DateTime? nextDueAt,
-}) => DeckListSnapshot(parent: parent, decks: summaries, nextDueAt: nextDueAt);
+}) => DeckListSnapshot(
+  parent: parent,
+  ancestors: ancestors,
+  decks: summaries,
+  nextDueAt: nextDueAt,
+);
+
+/// An ancestor chain from names alone, ordered root first.
+///
+/// The ids are positional — `path-0` is the root — because nothing in the
+/// breadcrumb cares what they are beyond being distinct and navigable, and a test
+/// that had to invent nine uuids to assert a path would bury the one thing it is
+/// checking. Positional rather than derived from the name, so a name with a space
+/// in it does not turn into a percent-encoded route in the assertion.
+List<DeckPathSegment> fakePath(List<String> names) => <DeckPathSegment>[
+  for (final (int index, String name) in names.indexed)
+    DeckPathSegment(id: 'path-$index', name: name),
+];
 
 /// A root deck's summary with explicit counts.
 DeckSummary fakeSummary({
