@@ -7,8 +7,8 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M4.10z |
-| **Last updated** | 2026-07-31 |
+| **Updated by task** | M4.10aa |
+| **Last updated** | 2026-08-01 |
 
 Single source of truth for project progress. Update it in the same commit as the
 work it describes. A task is `done` only when it meets the Definition of Done in
@@ -3778,6 +3778,9 @@ lật cái đang có.
   - [x] Focus đổi nền và viền, không đổi kích thước, có test canh.
   - [x] 985 test pass, audit xanh.
 
+**Follow-up:** một nudge dọc 2px qua `TextAlignVertical` đã đóng phần mép dưới
+khó chịu còn lại, và golden của `mx_search_field` đã được regen để khớp.
+
 **Phép đo đầu tiên của em sai, và đó là bài học đáng ghi.** Em báo "căn giữa
 trong sai số nửa pixel" dựa trên `matchesGoldenFile` — nhưng golden chụp **cả
 màn**, không phải riêng pill, nên mọi cửa sổ quét pixel của em rơi vào nền trang.
@@ -3797,6 +3800,53 @@ audit chặn — đúng, vì "alpha bằng 0" chính là cách một màu vô ch
 đúng màu nền cũng vô hình y hệt mà lại là token. `strokeAlignOutside` giữ nét
 viền ngoài layout: viền nằm trong hộp sẽ đẩy pill lên 50 trong khi tap target
 cần 48, và ở 320 với `textScaler` 2.0 chrome không dư nổi hai pixel.
+
+**Next task: M4.10aa · Thang bề mặt dark về đúng hue của page.**
+
+### M4.10aa · Thang bề mặt dark về đúng hue của page
+
+- **Status:** done
+- **Goal:** Card dark thôi trông như tờ giấy xám nổi trên nền app tím.
+- **Scope:** `design_system/tokens/colors.css` (khối dark), `app_colors.dart`,
+  `design_system/readme.md`, `IMPORT_LEDGER.md`, 32 golden dark.
+- **Out of scope:** light mode — không đụng một giá trị nào. `--color-progress-track`
+  và `--color-on-secondary-container`: xem *Chưa đóng* bên dưới.
+- **Dependencies:** M4.10z
+- **Checklist phases:** 7
+- **Tests required:** `app_palette_test.dart`, `app_theme_test.dart`,
+  `color_system_rules_test.dart`, golden dark, strict visual audit.
+- **Editable documents:** `docs/wbs.md`, `design_system/readme.md`,
+  `design_system/IMPORT_LEDGER.md`
+- **Output:** `design_system/tokens/colors.css`, `lib/core/theme/app_colors.dart`
+- **Acceptance criteria:**
+  - [x] Mọi bề mặt dark nằm ở OKLCH hue ~285, chroma 0.06–0.074.
+  - [x] Thang L\* vẫn tăng đều và card vẫn cách page ≥ 6.0 L\* (đo 6.32).
+  - [x] R3/R8/R9 xanh; 985 test pass; analyze sạch.
+
+**Nguyên nhân chủ dự án chỉ ra, và nó đúng ở hai tầng cùng lúc.** Card `#1B1D32`
+lệch hue so với page `#0A082D` (235 với 243), **và** chỉ mang hơn nửa chroma của
+page (0.040 với 0.072). Nhìn riêng từng màu thì không gọi tên được khác biệt nào;
+xếp chồng lên nhau thì một bề mặt xỉn hơn, ngả xanh lá hơn nằm trên nền tím bão
+hoà đọc thành *tờ giấy dán lên app* chứ không phải một mặt phẳng cùng phòng.
+
+**Giữ bậc sáng là ý định, không phải kết quả.** Kéo về hue mới trong sRGB tốn
+khoảng 2 L\* mỗi bậc: thang thực tế thành 3.9 → 10.2 → 16.9 → 24.0 thay vì
+3.9 → 11.6 → 19.0 → 26.3. Mọi assertion vẫn xanh, chỗ sát nhất là card cách page
+6.32 L\* trên sàn 6.0.
+
+**Hai thứ đi kèm không nằm trong danh sách ban đầu.**
+
+- `--color-secondary` (`#B4B9CC` → `#B8B7D0`). R3 buộc fill và container của một
+  role cách nhau tối đa 5°; đưa container sang họ page mà để fill ở slate cũ mở
+  ra 18°, và test đỏ ngay. Đây là kiểu lỗi mà chỉ đổi container mới lộ ra.
+- Comment trong `app_colors.dart` khẳng định border dark giữ 1.82:1 — nay là
+  1.69:1, vì cả border lẫn card đều tăng chroma và border thì đọc so với card.
+  Con số bị pin trong test là *tổng độ nâng của card khỏi page*, không phải
+  border, nên gate không đỏ; nhưng một comment sai thì phiên sau tin.
+
+**Chưa đóng, cố ý.** `--color-progress-track` (`#2E3247`) và
+`--color-on-secondary-container` (`#D9DCE7`) vẫn ở họ slate cũ. Không gate nào
+phủ chúng và chủ dự án không liệt kê; ghi ra đây để lần sau không phải đo lại.
 
 **Next task: M4.11 · Card management full-stack.**
 

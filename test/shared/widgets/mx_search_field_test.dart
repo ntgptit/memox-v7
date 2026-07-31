@@ -102,11 +102,10 @@ void main() {
   });
 
   group('layout', () {
-    testWidgets('the glyph and the text share a centre line', (tester) async {
-      // The bug this replaced: the field asked `InputDecoration` for a minimum
-      // height, which grew the box and left the text against its ceiling while
-      // the glyph beside it sat centred. Reported as "icon and hint on
-      // different lines", and it was.
+    testWidgets('the glyph and the text share a bottom edge', (tester) async {
+      // The bug this replaces: the field's vertical slack made the hint sit a
+      // touch lower than the search icon, which reads as the two being on
+      // different lines.
       await pump(tester);
       await tester.pumpAndSettle();
 
@@ -114,7 +113,7 @@ void main() {
       final text = tester.getRect(find.byType(EditableText));
 
       expect(
-        (text.center.dy - icon.center.dy).abs(),
+        (text.bottom - icon.bottom).abs(),
         lessThan(1),
         reason: 'the two are on one line, within a pixel',
       );

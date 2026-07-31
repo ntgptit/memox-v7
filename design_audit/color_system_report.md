@@ -80,15 +80,15 @@ an edge.
 | light | colorScheme.outlineVariant on card (colorScheme.surface) | 1.45 | in-band |
 | light | colorScheme.outlineVariant on page (scaffoldBackgroundColor) | 1.38 | in-band |
 | light | colorScheme.outlineVariant on muted tile (semantic.surfaceMuted) | 1.27 | in-band |
-| dark | semantic.borderSubtle on card (colorScheme.surface) | 1.82 | too-heavy |
-| dark | semantic.borderSubtle on page (scaffoldBackgroundColor) | 2.12 | too-heavy |
-| dark | semantic.borderSubtle on muted tile (semantic.surfaceMuted) | 1.49 | in-band |
-| dark | colorScheme.outline on card (colorScheme.surface) | 1.82 | too-heavy |
-| dark | colorScheme.outline on page (scaffoldBackgroundColor) | 2.12 | too-heavy |
-| dark | colorScheme.outline on muted tile (semantic.surfaceMuted) | 1.49 | in-band |
-| dark | colorScheme.outlineVariant on card (colorScheme.surface) | 1.82 | too-heavy |
-| dark | colorScheme.outlineVariant on page (scaffoldBackgroundColor) | 2.12 | too-heavy |
-| dark | colorScheme.outlineVariant on muted tile (semantic.surfaceMuted) | 1.49 | in-band |
+| dark | semantic.borderSubtle on card (colorScheme.surface) | 1.69 | too-heavy |
+| dark | semantic.borderSubtle on page (scaffoldBackgroundColor) | 1.92 | too-heavy |
+| dark | semantic.borderSubtle on muted tile (semantic.surfaceMuted) | 1.43 | in-band |
+| dark | colorScheme.outline on card (colorScheme.surface) | 1.69 | too-heavy |
+| dark | colorScheme.outline on page (scaffoldBackgroundColor) | 1.92 | too-heavy |
+| dark | colorScheme.outline on muted tile (semantic.surfaceMuted) | 1.43 | in-band |
+| dark | colorScheme.outlineVariant on card (colorScheme.surface) | 1.69 | too-heavy |
+| dark | colorScheme.outlineVariant on page (scaffoldBackgroundColor) | 1.92 | too-heavy |
+| dark | colorScheme.outlineVariant on muted tile (semantic.surfaceMuted) | 1.43 | in-band |
 
 ### Background tint
 
@@ -97,7 +97,7 @@ an edge.
 | light | page | `#F4F5F8` | 225 | 0.222 | false |
 | light | surface | `#FBFBFE` | 240 | 0.600 | false |
 | dark | page | `#0A082D` | 243 | 0.698 | false |
-| dark | surface | `#1B1D32` | 235 | 0.299 | false |
+| dark | surface | `#1A1838` | 244 | 0.400 | false |
 
 ### Neutral family coherence
 
@@ -109,10 +109,10 @@ an edge.
 | light | borderSubtle | `#D2D2DD` | 240 |
 | light | onSurfaceVariant | `#565C72` | 227 |
 | dark | page | `#0A082D` | 243 |
-| dark | surface | `#1B1D32` | 235 |
-| dark | surfaceMuted | `#292D42` | 230 |
-| dark | borderSubtle | `#414762` | 229 |
-| dark | onSurfaceVariant | `#A6ABC2` | 229 |
+| dark | surface | `#1A1838` | 244 |
+| dark | surfaceMuted | `#28254B` | 245 |
+| dark | borderSubtle | `#403D67` | 244 |
+| dark | onSurfaceVariant | `#A8A7C4` | 242 |
 
 **The light-mode border-prominence answer, plainly:** `borderSubtle` is
 **1.50:1** against the card and **1.38:1** against the page — inside the brief's

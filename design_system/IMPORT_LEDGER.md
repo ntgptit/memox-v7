@@ -170,6 +170,12 @@ Three CSS tokens have **no Dart counterpart and were deliberately not added**:
   `focusRing` in dark, and both already hold exactly those hex values.
 - `--color-disabled-surface` — the Dart derives it
   (`onSurface @ 12% over surface`) rather than hardcoding it, and the derived
-  result is `#E0E0E5` / `#343649` against the CSS's `#E3E3E6` / `#33344A`. Within
-  three units on each channel; deriving is what keeps it correct when the surface
+  result is `#E0E0E5` / `#33324F` against the CSS's `#E3E3E6` / `#312E4E`. Within
+  four units on each channel; deriving is what keeps it correct when the surface
   moves, so the derivation stays.
+
+  **The dark surface then moved, which is the argument made concrete.** When the
+  ladder went from slate to the page's hue the derived value followed on its own,
+  and the only thing needing a hand was this note. Had the Dart hardcoded
+  `#33344A`, dark would now be drawing a disabled control in the old family on a
+  card in the new one.

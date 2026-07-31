@@ -51,7 +51,8 @@ If you have access, read those files directly — `app_colors.dart` and `app_ele
 A study tool for adults at work. Restrained, dense, quiet. Exactly one accent (indigo, hue 240), four semantic colours on a strict chroma budget, and a page that is the only place saturation is allowed to be loud.
 
 ### Colour
-- **Surface ladder, four tiers.** Dark climbs L\* 3.9 → 11.6 → 19.0 → 26.3 (`#0A082D` page → `#1B1D32` card → `#292D42` inset → `#383D55` raised). Light inverts the ordering: the card is the brightest thing (`#FBFBFE`) on a slightly darker page (`#F4F5F8`). The ladder is spaced in L\*, not contrast ratio — at the bottom of the scale WCAG's constant compresses every real step into "1.1-something".
+- **Surface ladder, four tiers.** Dark climbs L\* 3.9 → 10.2 → 16.9 → 24.0 (`#0A082D` page → `#1A1838` card → `#28254B` inset → `#37345F` raised). Light inverts the ordering: the card is the brightest thing (`#FBFBFE`) on a slightly darker page (`#F4F5F8`). The ladder is spaced in L\*, not contrast ratio — at the bottom of the scale WCAG's constant compresses every real step into "1.1-something".
+- **The dark ladder is the page's own colour, lightened.** It used to be a separate slate — the card was hue 235 to the page's 243 and carried half its chroma — and the two families stacked on each other made the card read as grey paper laid on a violet app. Every dark surface now sits at OKLCH hue ~285, chroma 0.06–0.074. That is also why the dark `secondary` and the dark due-chip ground moved: a role whose fill and container disagree by 18° of hue, or a warm olive ground on a violet page, is the same mistake one level down.
 - **The card is not pure white.** `#FBFBFE` is the seed at 2% over white: the surface the whole app is built on carries the same hue as every other neutral.
 - **One accent, both modes.** `#4646B4` light, `#5656C9` dark. The dark value is deliberately held below the card's headline text, so the CTA is never the brightest thing on screen.
 - **Secondary actions are neutral, not brand.** `#454B5E` / `#C3C6D2` — a secondary action sits next to the review verdicts, and a hue there competes with the user's actual decision.
@@ -84,7 +85,7 @@ Three durations: **120ms** (press, ripple), **200ms** (card and surface transiti
 - **Hover** (web/desktop only): 8% neutral wash on rows, 6% indigo on outlined controls, 4% on cards.
 - **Press:** a 12% indigo overlay; a filled button darkens by lerping 12% toward `onSurface`. Nothing scales, nothing shrinks.
 - **Focus:** a 2px indigo ring. On an input, focus shifts the border's **hue** and never its width — Material's 1px→2px jump nudges everything laid out beside it.
-- **Disabled:** a **precomputed solid** (`#E3E3E6` light, `#33344A` dark), never a translucent token — a 12% alpha composites against whatever happens to be behind the control, so one token renders as three colours nobody chose.
+- **Disabled:** a **precomputed solid** (`#E3E3E6` light, `#312E4E` dark), never a translucent token — a 12% alpha composites against whatever happens to be behind the control, so one token renders as three colours nobody chose.
 - **Selected:** the navigation indicator pair (`secondary-container`), used identically for a tab, a filter pill and a chosen verdict.
 - **Loading:** a spinner, never a skeleton. Local reads finish in single-digit milliseconds; motion that says "slow" about something that is not is worse than a moment of nothing.
 

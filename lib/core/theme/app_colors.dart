@@ -8,18 +8,37 @@ import 'package:flutter/material.dart';
 ///
 /// **The page is the only place saturated navy is allowed.** [backgroundDark]
 /// sits at 70% saturation, which is what gives dark mode its identity. Every
-/// surface above it drops to 20–30% while climbing in lightness, so the navy
+/// surface above it drops to 26–40% while climbing in lightness, so the navy
 /// reads as the room the content sits in rather than as a tint applied to the
 /// content itself. A palette where card, tile and input are all as navy as the
 /// page has no hierarchy left to spend — everything is equally coloured, so
 /// nothing is emphasised.
+///
+/// That band was 20–30% until M4.10aa. Joining the page's colour family is
+/// exactly what raised it, and it is the one number the change spends: the card
+/// now sits at 40% against a ceiling of 42% (`app_palette_test.dart` allows a
+/// surface 60% of the page's saturation). There is no room left above the card,
+/// so a future surface that wants more saturation has to take lightness instead.
 ///
 /// **Why the ladder is measured in L\*, not in contrast ratio.** A deep navy
 /// page is at luminance 0.004, and down there WCAG's `+0.05` constant compresses
 /// every real step into "1.1-something": the card is 3× the page's luminance and
 /// still scores 1.17:1. L\* is the perceptual scale and stays honest at the
 /// bottom, so `test/core/theme/app_theme_test.dart` asserts the ladder in L\*.
-/// The three dark steps are ~7.4 L\* each.
+/// The three dark steps are ~6.3, 6.7 and 7.1 L\*.
+///
+/// **The dark ladder joined the page's colour family at M4.10aa.** It failed to
+/// be in it in two ways at once: `#1B1D32` was hue 235 against the page's 243 —
+/// a green-leaning slate under a violet — and it carried barely half the page's
+/// chroma (0.040 against 0.072). A duller, greener surface stacked on a
+/// saturated violet page reads as grey paper laid on the app rather than as
+/// part of the same room, and neither difference is large enough to be named
+/// when you look at either colour alone. Every surface now sits at OKLCH hue
+/// ~285, chroma 0.06–0.074.
+///
+/// Reaching that inside sRGB cost the rungs ~2 L\* apiece. Every ladder
+/// assertion still holds; the tightest is the card's 6.3 L\* off the page,
+/// against a 6.0 floor.
 ///
 /// **Why every role is declared.** `ColorScheme.fromSeed` generates ~30 roles,
 /// and an audit found it had produced a neutral-grey `surfaceContainer` ladder, a
@@ -34,7 +53,7 @@ abstract final class AppColors {
 
   // --- Surface ladder ------------------------------------------------------
   //
-  // Four tiers. Dark climbs L* 3.9 -> 11.6 -> 19.0 -> 26.3 so a card reads as a
+  // Four tiers. Dark climbs L* 3.9 -> 10.2 -> 16.9 -> 24.0 so a card reads as a
   // card and an inset tile as an inset on the strength of the ladder alone.
   // Light inverts it — the card is white and the rest sit below — which is the
   // same ordering of PROMINENCE, built the only way white allows.
@@ -60,14 +79,14 @@ abstract final class AppColors {
   /// It costs lightness. A tinted card is a *darker* card, so the surface step
   /// drops from 3.46 L\* to 2.15 — which was the argument for leaving it alone
   /// while the step was the only depth cue light had. It is not any more: the
-  /// shadow's alpha was re-solved to 0.07 and the total lift is 7.75 L\* against
-  /// dark's 7.70.
+  /// shadow's alpha was re-solved to 0.07 and the total lift is 8.04 L\* against
+  /// dark's 6.58.
   static const Color surfaceLight = Color(0xFFFBFBFE);
-  static const Color surfaceDark = Color(0xFF1B1D32);
+  static const Color surfaceDark = Color(0xFF1A1838);
 
   /// Inset tile, chip, icon container.
   static const Color surfaceMutedLight = Color(0xFFEAECF1);
-  static const Color surfaceMutedDark = Color(0xFF292D42);
+  static const Color surfaceMutedDark = Color(0xFF28254B);
 
   /// Top of the ladder: a raised or selected surface.
   ///
@@ -75,17 +94,19 @@ abstract final class AppColors {
   /// carrying the hue. Both were `#FFFFFF` before M4.10i, which made the top two
   /// rungs of the light ladder the same rung.
   static const Color surfaceElevatedLight = Color(0xFFFCFCFE);
-  static const Color surfaceElevatedDark = Color(0xFF383D55);
+  static const Color surfaceElevatedDark = Color(0xFF37345F);
 
   // --- Text and lines ------------------------------------------------------
   //
-  // Neither end is pure. `#EDEEF5` rather than white, `#16182B` rather than
+  // Neither end is pure. `#EDEDF6` rather than white, `#16182B` rather than
   // black: a pure value buzzes against a tinted ground, and carrying a trace of
   // the surface hue makes text sit *in* the interface rather than on top of it.
+  // Which is why both dark values moved with the ladder — a trace of the *old*
+  // surface hue is a trace of a hue no surface carries any more.
   static const Color textPrimaryLight = Color(0xFF16182B);
-  static const Color textPrimaryDark = Color(0xFFEDEEF5);
+  static const Color textPrimaryDark = Color(0xFFEDEDF6);
   static const Color textSecondaryLight = Color(0xFF565C72);
-  static const Color textSecondaryDark = Color(0xFFA6ABC2);
+  static const Color textSecondaryDark = Color(0xFFA8A7C4);
 
   /// Hairline between rows, around cards, and an input at rest.
   ///
@@ -94,13 +115,21 @@ abstract final class AppColors {
   /// border was the only depth cue either had. Light now has a shadow
   /// (`AppElevation`), so its border can stand down to 1.50:1; dark has no
   /// shadow — measured, not chosen: at the bottom of the lightness scale a
-  /// shadow moves the page by ΔL* 0.26 — so its border keeps carrying the edge
-  /// at 1.82:1.
+  /// shadow moves the page by ΔL* 0.26 — so its border keeps carrying the edge,
+  /// at 1.69:1 since the ladder moved onto the page's hue (1.82:1 before).
+  ///
+  /// **That drop is a consequence, not a decision.** Both the border and the
+  /// card it is drawn on gained chroma at their new hue, and a border reads
+  /// against its card: 1.69 is what holding the border's L* step at the new
+  /// saturation produces. It stays well above the 1.40 that was measured as too
+  /// weak, and what the tests actually pin — the total lift of a card off its
+  /// page — is unaffected, because the border was deliberately taken out of that
+  /// measurement at M4.10h.
   ///
   /// Matching the borders was the right rule when the border was everything, and
   /// it is the wrong rule now: it would force light to draw a frame it no longer
   /// needs. What `app_theme_test.dart` pins instead is the **step a card's edge
-  /// produces** — ΔL* 8.04 in light against 7.70 in dark — which is the thing a
+  /// produces** — ΔL* 8.04 in light against 6.58 in dark — which is the thing a
   /// reader actually perceives, and which stays symmetric while the mechanisms
   /// differ.
   ///
@@ -108,7 +137,7 @@ abstract final class AppColors {
   /// history is worth keeping: `#D7DAE3` (1.40:1) was too weak when it was the
   /// only cue, `#BEC0C3` (1.82:1) was right then and too heavy now.
   static const Color borderSubtleLight = Color(0xFFD2D2DD);
-  static const Color borderSubtleDark = Color(0xFF414762);
+  static const Color borderSubtleDark = Color(0xFF403D67);
 
   /// Input border while focused. Focus shifts *hue*, never stroke width —
   /// Material's default doubles the stroke, which reads as the field shouting.
@@ -205,6 +234,14 @@ abstract final class AppColors {
   // unchanged; the design reuses one warm family for everything time-pressured,
   // and the due chip is the first thing here to draw it.
   //
+  // **Dark's container left that warm family at M4.10aa, and only dark's.** It
+  // was `#3A2E1C`, an olive-brown at hue 77 — the one hue that cannot sit on a
+  // violet page without looking soiled, because the surround tints it toward
+  // grey and the chip reads as a stain rather than as a warm accent. It is now
+  // a surface at the same L* (19.8 -> 20.2), and the *label* keeps the warm
+  // colour, which is where the warmth was doing the work. Light's ground is
+  // cream on a near-white page and has no such problem, so it is untouched.
+  //
   // **The foreground is not the design's.** `.mx-deck__due` paints its label in
   // `--color-streak` (`#C2731B`), which measures **3.12:1** on its own container
   // at 11px semibold — under the 4.5 small text needs. Dark is fine at 6.65,
@@ -216,10 +253,12 @@ abstract final class AppColors {
   // display that does not exist, and a colour with no caller is a colour nobody
   // is checking.
   static const Color streakContainerLight = Color(0xFFFBEBD7);
-  static const Color streakContainerDark = Color(0xFF3A2E1C);
+  static const Color streakContainerDark = Color(0xFF342C4B);
   static const Color onStreakContainerLight = Color(0xFF7A4A10);
 
-  /// Dark needs no correction: the design's own `#E0B064` reads 6.65:1 here.
+  /// Dark needs no correction: the design's own `#E0B064` reads 6.57:1 here —
+  /// 6.65 before the container moved onto the surface family, which is close
+  /// enough that the move cost the label nothing.
   static const Color onStreakContainerDark = Color(0xFFE0B064);
 
   /// Status that genuinely carries information: streak, counters, "3 of 20".
@@ -239,11 +278,17 @@ abstract final class AppColors {
   // the container (8.87:1 against 8.96:1) and carries more of the seed's hue.
   static const Color onPrimaryContainerDark = Color(0xFFD7D5FF);
   static const Color secondaryLight = Color(0xFF4E5468);
-  static const Color secondaryDark = Color(0xFFB4B9CC);
+
+  /// Moved with [secondaryContainerDark] at M4.10aa, and forced rather than
+  /// chosen: `color_system_rules_test.dart` R3 holds a role's fill and its
+  /// container within 5 degrees of hue, and taking the container to the page
+  /// family while the fill stayed on the old slate opened 18. Same L* (75.2),
+  /// now 3.5 degrees off its container.
+  static const Color secondaryDark = Color(0xFFB8B7D0);
   static const Color onSecondaryLight = Color(0xFFFFFFFF);
   static const Color onSecondaryDark = Color(0xFF1E2033);
   static const Color secondaryContainerLight = Color(0xFFE4E6EC);
-  static const Color secondaryContainerDark = Color(0xFF333852);
+  static const Color secondaryContainerDark = Color(0xFF332F58);
   static const Color onSecondaryContainerLight = Color(0xFF2C3141);
   static const Color onSecondaryContainerDark = Color(0xFFD9DCE7);
   static const Color tertiaryLight = Color(0xFF45647F);
@@ -264,19 +309,24 @@ abstract final class AppColors {
   static const Color onErrorContainerLight = Color(0xFF641421);
   static const Color onErrorContainerDark = Color(0xFFF5D3D8);
   static const Color surfaceContainerLowestLight = Color(0xFFFCFCFE);
-  static const Color surfaceContainerLowestDark = Color(0xFF07061F);
+  // The dark half of this ladder moved with the four main tiers at M4.10aa —
+  // `surfaceContainerHigh`, `Highest` and `Bright` are the same values as
+  // `surfaceMuted`, `secondaryContainer` and `surfaceElevated`, and leaving them
+  // on the old slate would have split one ladder into two hue families at
+  // exactly the rungs a Dialog and a Menu draw from.
+  static const Color surfaceContainerLowestDark = Color(0xFF0A0326);
   static const Color surfaceContainerLowLight = Color(0xFFFAFAFC);
-  static const Color surfaceContainerLowDark = Color(0xFF12142B);
+  static const Color surfaceContainerLowDark = Color(0xFF151134);
   static const Color surfaceContainerLight = Color(0xFFF1F2F6);
-  static const Color surfaceContainerDark = Color(0xFF1F2237);
+  static const Color surfaceContainerDark = Color(0xFF221E44);
   static const Color surfaceContainerHighLight = Color(0xFFEAECF1);
-  static const Color surfaceContainerHighDark = Color(0xFF292D42);
+  static const Color surfaceContainerHighDark = Color(0xFF28254B);
   static const Color surfaceContainerHighestLight = Color(0xFFE3E5EC);
-  static const Color surfaceContainerHighestDark = Color(0xFF333852);
+  static const Color surfaceContainerHighestDark = Color(0xFF332F58);
   static const Color surfaceDimLight = Color(0xFFDEE0E7);
-  static const Color surfaceDimDark = Color(0xFF08061F);
+  static const Color surfaceDimDark = Color(0xFF0B0327);
   static const Color surfaceBrightLight = Color(0xFFFCFCFE);
-  static const Color surfaceBrightDark = Color(0xFF383D55);
+  static const Color surfaceBrightDark = Color(0xFF37345F);
   static const Color inverseSurfaceLight = Color(0xFF2A2C3E);
   static const Color inverseSurfaceDark = Color(0xFFE7E8F0);
   static const Color onInverseSurfaceLight = Color(0xFFF1F2F6);

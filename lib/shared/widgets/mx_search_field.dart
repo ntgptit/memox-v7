@@ -129,9 +129,10 @@ class _MxSearchFieldState extends State<MxSearchField> {
             // The 48 lives on the box, not on the decorator. Asking
             // `InputDecoration` for a minimum height grew the box and left the
             // text against its ceiling — which is exactly the "icon and hint on
-            // different lines" this was reported as. A `SizedBox` the field
-            // *expands* into, with the editable centred in it, puts the text on
-            // the glyph's line and still gives the tap target its 48.
+            // different lines" this was reported as. Letting the field expand
+            // into the fixed-height box keeps the tap target at 48, and the
+            // tiny upward nudge keeps the hint from sitting 2px lower than the
+            // search icon.
             child: SizedBox(
               height: AppSpacing.minimumTouchTarget,
               child: TextField(
@@ -142,7 +143,9 @@ class _MxSearchFieldState extends State<MxSearchField> {
                 style: context.texts.bodyMedium,
                 expands: true,
                 maxLines: null,
-                textAlignVertical: TextAlignVertical.center,
+                // Nudge the editable up a hair so the hint's bottom edge lines
+                // up with the search icon instead of sitting 2px lower.
+                textAlignVertical: const TextAlignVertical(y: -0.1),
                 decoration: InputDecoration(
                   hintText: widget.hintText,
                   // The pill *is* the decoration. Left to the theme this would

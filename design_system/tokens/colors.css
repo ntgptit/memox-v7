@@ -16,8 +16,19 @@
   --mx-indigo-light:#4646B4;--mx-indigo-deep-light:#4141C0;--mx-indigo-container-light:#DCDCF2;
   --mx-success-light:#10795C;--mx-warning-light:#9A6A11;--mx-danger-light:#C02B3A;--mx-info-light:#3F6E97;
   /* --- base literals: dark -------------------------------------------- */
-  --mx-page-dark:#0A082D;--mx-card-dark:#1B1D32;--mx-inset-dark:#292D42;--mx-raised-dark:#383D55;
-  --mx-ink-dark:#EDEEF5;--mx-ink-quiet-dark:#A6ABC2;--mx-line-dark:#414762;
+  /* The dark surface ladder now sits in the page's colour family. It did not
+     before, and it failed in two ways at once: the card #1B1D32 was hue 235 to
+     the page's 243 — a green-leaning slate against a violet — and it carried
+     little more than half the page's chroma (0.040 against 0.072 in OKLCH).
+     A duller, greener surface stacked on a saturated violet page reads as grey
+     paper laid on the app rather than as part of the same room. Every surface
+     is now OKLCH hue ~285 at chroma 0.06-0.074.
+
+     The rungs are the ones that were already there — L* 3.9 -> 11.6 -> 19.0 ->
+     26.3 — give or take the ~2 L* apiece it costs to reach the new hue inside
+     sRGB; measured, the ladder lands at 3.9 -> 10.2 -> 16.9 -> 24.0. */
+  --mx-page-dark:#0A082D;--mx-card-dark:#1A1838;--mx-inset-dark:#28254B;--mx-raised-dark:#37345F;
+  --mx-ink-dark:#EDEDF6;--mx-ink-quiet-dark:#A8A7C4;--mx-line-dark:#403D67;
   --mx-indigo-dark:#5656C9;--mx-indigo-bright-dark:#8A8AE0;--mx-indigo-container-dark:#2B2B6E;
   --mx-success-dark:#4FC79B;--mx-warning-dark:#E0B064;--mx-danger-dark:#F2808F;--mx-info-dark:#8DB4D8;
 
@@ -105,9 +116,13 @@
   --color-primary-accent:var(--mx-indigo-bright-dark);
   --color-primary-container:var(--mx-indigo-container-dark);
   --color-on-primary-container:#D7D5FF;
-  --color-secondary:#B4B9CC;
+  /* Moved with its container. A role has to read as one hue: leaving the fill
+     on the old slate while the container joined the page family put 18 degrees
+     between them, which is visible the moment the two are drawn side by side.
+     Same L* (75.2), hue now 3.5 degrees off the container. */
+  --color-secondary:#B8B7D0;
   --color-on-secondary:#1E2033;
-  --color-secondary-container:#333852;
+  --color-secondary-container:#332F58;
   --color-on-secondary-container:#D9DCE7;
   --color-tertiary:#8DB4D8;
   --color-on-tertiary:#17232E;
@@ -126,19 +141,24 @@
   --color-progress-fill:#8A8AE0;
   --color-progress-complete:var(--mx-success-dark);
   --color-streak:#E0B064;
-  --color-streak-container:#3A2E1C;
-  --color-surface-container-lowest:#07061F;
-  --color-surface-container-low:#12142B;
-  --color-surface-container:#1F2237;
-  --color-surface-container-high:#292D42;
-  --color-surface-container-highest:#333852;
-  --color-surface-dim:#08061F;
-  --color-surface-bright:#383D55;
+  /* The container is no longer the warm olive #3A2E1C. A brown-olive fill is
+     the one hue that cannot sit on a violet page without looking muddy — the
+     page tints it toward grey and the chip reads as dirt rather than as a
+     warm accent. The label keeps its warm --color-streak; only the ground
+     joins the surface family, at the same L*. */
+  --color-streak-container:#342C4B;
+  --color-surface-container-lowest:#0A0326;
+  --color-surface-container-low:#151134;
+  --color-surface-container:#221E44;
+  --color-surface-container-high:#28254B;
+  --color-surface-container-highest:#332F58;
+  --color-surface-dim:#0B0327;
+  --color-surface-bright:#37345F;
   --color-inverse-surface:#E7E8F0;
   --color-on-inverse-surface:#23253A;
   --color-inverse-primary:#3A3A9B;
   --color-shadow:#04040B;
   --color-scrim:#04040B;
-  --color-disabled-surface:#33344A;
+  --color-disabled-surface:#312E4E;
   --color-on-disabled:rgb(237 238 245 / 0.38);
 }
