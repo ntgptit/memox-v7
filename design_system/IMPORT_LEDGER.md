@@ -44,9 +44,8 @@ Tick a line only after the file exists on disk.
 
 - [x] `mx.css`
 - [x] **every `.d.ts` and `.prompt.md`** — all 18 components across the three folders
-- [ ] `core/` — 8 `.jsx` + `core.card.html`
-- [ ] `feedback/` — 6 `.jsx` + `feedback.card.html`
-- [ ] `navigation/` — 4 `.jsx` + `navigation.card.html`
+- [x] **every `.jsx`** — all 18 component implementations
+- [ ] `core.card.html` · `feedback.card.html` · `navigation.card.html`
 
 ## guidelines/
 
