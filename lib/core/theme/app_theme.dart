@@ -230,6 +230,14 @@ ThemeData _buildTheme(
     //
     // Unshadowed like everything else here — the colour is the separation. See
     // `MxCard` for the same decision on panels.
+    // **A rounded square, not a circle.** `CircleBorder` was Material 2's shape;
+    // M3's is a 16dp rounded square, and it is what the design draws. A circle
+    // beside a 16-radius card reads as a control from a different system.
+    //
+    // **Shape only, and the missing shadow is deliberate.** AD-14 makes depth one
+    // mechanism — `shadowsFor` — and Material's `elevation` is a second one that
+    // is not mode-aware and that no audit rule can see. See F11 and F15 in
+    // `docs/reviews/design-parity-checklist.md`.
     floatingActionButtonTheme: FloatingActionButtonThemeData(
       backgroundColor: scheme.primary,
       foregroundColor: scheme.onPrimary,
@@ -237,7 +245,9 @@ ThemeData _buildTheme(
       focusElevation: 0,
       hoverElevation: 0,
       highlightElevation: 0,
-      shape: const CircleBorder(),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+      ),
     ),
 
     filledButtonTheme: buildFilledButtonTheme(
@@ -341,6 +351,8 @@ ThemeData _buildTheme(
       barrierColor: modalBarrierColor(scheme),
       backgroundColor: scheme.surface,
       surfaceTintColor: Colors.transparent,
+      // Zero, for the same reason as the FAB above: a second depth mechanism
+      // AD-14 does not admit. See F15.
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.lg),

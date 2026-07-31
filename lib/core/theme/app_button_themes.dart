@@ -56,6 +56,16 @@ ButtonStyle buildSharedButtonStyle(ColorScheme scheme) => ButtonStyle(
     if (states.contains(WidgetState.focused)) {
       return scheme.primary.withValues(alpha: 0.10);
     }
+    // **Hover used to fall through to `null`**, which handed it to Material's
+    // default — a wash of the *foreground* colour, so a filled button hovered
+    // toward white and an outlined one toward its own label. 6% of the accent is
+    // the design's number and it points the same way in both. Web and desktop
+    // only, and Android is the release target (AD-04) — but the web build is the
+    // E2E channel, so it shows up in exactly the place this project takes
+    // screenshots.
+    if (states.contains(WidgetState.hovered)) {
+      return scheme.primary.withValues(alpha: 0.06);
+    }
 
     return null;
   }),

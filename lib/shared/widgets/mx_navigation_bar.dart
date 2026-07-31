@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/theme_context_extension.dart';
+
 /// How much width one destination may claim before the row stops growing.
 ///
 /// `NavigationBar` divides its width evenly, so with two destinations on a phone
@@ -65,30 +67,52 @@ class MxNavigationBar extends StatelessWidget {
       'A navigation bar needs at least two destinations.',
     );
 
+    // **The hairline lives here, not in the theme**, because
+    // `NavigationBarThemeData` has no border slot. It is needed *because* of the
+    // choices above it: the bar paints the page colour and carries no elevation,
+    // so without a line the chrome and the content share an edge with nothing on
+    // it, and a list scrolled to the bottom runs straight into the tabs. The
+    // design draws the same 1px `--color-border-subtle` for the same reason.
+    //
+    // Full width even though the destinations are capped at 120dp each — the
+    // edge being marked is the screen's, not the row's.
+    //
     // A `Row`, not an `Align` or a `Center`: both of those expand to fill, and in
     // the Scaffold's `bottomNavigationBar` slot that made the bar claim the whole
     // body — the list then scrolled underneath it and the destinations stopped
     // hit-testing. A `Row` stretches only across, and takes its height from the
     // bar itself.
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: destinations.length * _kWidthPerDestination,
-          ),
-          child: NavigationBar(
-            selectedIndex: selectedIndex,
-            onDestinationSelected: onDestinationSelected,
-            destinations: destinations,
-            // Labels always visible, on every destination. The M3 default hides
-            // the unselected ones, which leaves three unlabelled icons and one
-            // labelled — and makes selection readable only as a colour
-            // difference, which is exactly what an accessibility review rejects.
-            labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-          ),
+    // `foreground`, not the default `background`: `NavigationBar` paints its own
+    // fill, so a border drawn behind it survives only either side of the
+    // destination row. The first render of this showed exactly that — a line at
+    // both edges and a gap in the middle where the bar sat on top of it.
+    return DecoratedBox(
+      position: DecorationPosition.foreground,
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(color: context.semanticColors.borderSubtle),
         ),
-      ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: destinations.length * _kWidthPerDestination,
+            ),
+            child: NavigationBar(
+              selectedIndex: selectedIndex,
+              onDestinationSelected: onDestinationSelected,
+              destinations: destinations,
+              // Labels always visible, on every destination. The M3 default hides
+              // the unselected ones, which leaves three unlabelled icons and one
+              // labelled — and makes selection readable only as a colour
+              // difference, which is exactly what an accessibility review rejects.
+              labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

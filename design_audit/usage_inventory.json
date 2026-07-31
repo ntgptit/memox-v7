@@ -1,22 +1,22 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
   "scannedFiles": 115,
-  "totalSites": 252,
+  "totalSites": 255,
   "byElementKind": {
-    "other": 222,
+    "other": 221,
     "background": 7,
     "text": 11,
     "shadow": 1,
-    "border": 6,
-    "icon": 5
+    "border": 8,
+    "icon": 7
   },
   "bySourceKind": {
     "shared-constant": 127,
     "blend-source": 3,
-    "opacity-modified-token": 8,
+    "opacity-modified-token": 9,
     "hardcoded-literal": 81,
     "Colors-material": 4,
-    "theme-token": 29
+    "theme-token": 31
   },
   "sites": [
     {
@@ -131,7 +131,18 @@
     },
     {
       "file": "lib/core/theme/app_button_themes.dart",
-      "line": 83,
+      "line": 67,
+      "widget_context": "<top-level>",
+      "element_kind": "other",
+      "source_kind": "opacity-modified-token",
+      "expression": "scheme.primary.withValues(alpha: 0.06)",
+      "token": "colorScheme.primary",
+      "resolved_value_light": "#4646B4 @ alpha 0.06",
+      "resolved_value_dark": "#5656C9 @ alpha 0.06"
+    },
+    {
+      "file": "lib/core/theme/app_button_themes.dart",
+      "line": 93,
       "widget_context": "<top-level>",
       "element_kind": "text",
       "source_kind": "opacity-modified-token",
@@ -142,7 +153,7 @@
     },
     {
       "file": "lib/core/theme/app_button_themes.dart",
-      "line": 100,
+      "line": 110,
       "widget_context": "<top-level>",
       "element_kind": "text",
       "source_kind": "opacity-modified-token",
@@ -2430,7 +2441,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 283,
+      "line": 293,
       "widget_context": "<top-level>",
       "element_kind": "border",
       "source_kind": "blend-source",
@@ -2441,7 +2452,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 343,
+      "line": 353,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -2452,7 +2463,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 360,
+      "line": 372,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -2683,7 +2694,18 @@
     },
     {
       "file": "lib/shared/widgets/mx_breadcrumb.dart",
-      "line": 116,
+      "line": 208,
+      "widget_context": "_MxBreadcrumbFold",
+      "element_kind": "icon",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A6ABC2"
+    },
+    {
+      "file": "lib/shared/widgets/mx_breadcrumb.dart",
+      "line": 241,
       "widget_context": "_MxBreadcrumbStep",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -2694,18 +2716,18 @@
     },
     {
       "file": "lib/shared/widgets/mx_breadcrumb.dart",
-      "line": 117,
+      "line": 252,
       "widget_context": "_MxBreadcrumbStep",
-      "element_kind": "other",
+      "element_kind": "icon",
       "source_kind": "theme-token",
-      "expression": "context.colors.onSurface",
-      "token": "colorScheme.onSurface",
-      "resolved_value_light": "#16182B",
-      "resolved_value_dark": "#EDEEF5"
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A6ABC2"
     },
     {
       "file": "lib/shared/widgets/mx_breadcrumb.dart",
-      "line": 167,
+      "line": 301,
       "widget_context": "_MxBreadcrumbSeparator",
       "element_kind": "icon",
       "source_kind": "theme-token",
@@ -2729,6 +2751,17 @@
       "file": "lib/shared/widgets/mx_card.dart",
       "line": 63,
       "widget_context": "MxCard",
+      "element_kind": "border",
+      "source_kind": "theme-token",
+      "expression": "context.semanticColors.borderSubtle",
+      "token": "semantic.borderSubtle",
+      "resolved_value_light": "#D2D2DD",
+      "resolved_value_dark": "#414762"
+    },
+    {
+      "file": "lib/shared/widgets/mx_content_shell.dart",
+      "line": 115,
+      "widget_context": "_MxContentShellState",
       "element_kind": "border",
       "source_kind": "theme-token",
       "expression": "context.semanticColors.borderSubtle",
@@ -2781,15 +2814,15 @@
       "resolved_value_dark": "#A6ABC2"
     },
     {
-      "file": "lib/shared/widgets/mx_loading_state.dart",
-      "line": 34,
-      "widget_context": "MxLoadingState",
-      "element_kind": "other",
+      "file": "lib/shared/widgets/mx_navigation_bar.dart",
+      "line": 93,
+      "widget_context": "MxNavigationBar",
+      "element_kind": "border",
       "source_kind": "theme-token",
-      "expression": "context.colors.primary",
-      "token": "colorScheme.primary",
-      "resolved_value_light": "#4646B4",
-      "resolved_value_dark": "#5656C9"
+      "expression": "context.semanticColors.borderSubtle",
+      "token": "semantic.borderSubtle",
+      "resolved_value_light": "#D2D2DD",
+      "resolved_value_dark": "#414762"
     }
   ]
 }
