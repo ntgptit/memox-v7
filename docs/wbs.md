@@ -2678,6 +2678,15 @@ xảy ra ngay khi screen đầu của feature mount.
 - **Dependencies:** M4.10c (nội dung demo), M4.8, M3.4, M3.5
 - **Tests required:** smoke test catalog build không throw (chạy cả local lẫn CI)
 - **Checklist phases:** 7.3, 7.5
+- **Bổ sung sau khi đóng task (chủ dự án yêu cầu):** đăng ký Widgetbook thành
+  **điều kiện Definition of Done** cho mọi screen/shared component mới — screen
+  mount trong `ProviderScope` fake contract, state chọn bằng knobs; component
+  là knob playground. Ghi ở `CLAUDE.md`, `definition-of-done.md`,
+  `flutter-feature-slice` (Step 4 + checklist), `flutter-design-system`, và
+  `widgetbook/README.md` (mẫu mount screen). Lý do: catalog cô lập không thấy
+  lỗi composition — screen use-case với dữ liệu điều khiển được là chỗ mắt
+  người soi được chúng. Hai màn Deck hiện có chưa backfill; M4.11 trở đi áp
+  dụng bắt buộc.
 
 ### M4.11 · Card management full-stack
 
