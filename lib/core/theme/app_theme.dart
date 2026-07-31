@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'app_button_themes.dart';
+import 'app_chip_theme.dart';
+import 'app_overlay_themes.dart';
 import 'app_colors.dart';
-import 'app_icon_size.dart';
 import 'app_radius.dart';
 import 'app_semantic_colors.dart';
 import 'app_spacing.dart';
@@ -220,27 +221,7 @@ ThemeData _buildTheme(
     // No checkmark: the pill group is always visible in full, so the selected
     // one is legible by contrast alone and the tick would shift the label
     // sideways on every change.
-    chipTheme: ChipThemeData(
-      backgroundColor: scheme.surface,
-      selectedColor: scheme.secondaryContainer,
-      showCheckmark: false,
-      side: BorderSide(color: semantic.borderSubtle),
-      shape: const StadiumBorder(),
-      labelStyle: base.textTheme.labelLarge?.copyWith(
-        color: scheme.onSurfaceVariant,
-      ),
-      secondaryLabelStyle: base.textTheme.labelLarge?.copyWith(
-        color: scheme.onSecondaryContainer,
-      ),
-      iconTheme: IconThemeData(
-        size: AppIconSize.sm,
-        color: scheme.onSurfaceVariant,
-      ),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
-      ),
-    ),
+    chipTheme: buildChipTheme(scheme, semantic, base.textTheme),
 
     // The create action. `primary` rather than the M3 default
     // `primaryContainer`: this is the one control on the deck list that starts a
@@ -335,6 +316,12 @@ ThemeData _buildTheme(
           ),
     ),
 
+    progressIndicatorTheme: buildProgressIndicatorTheme(scheme, semantic),
+    tooltipTheme: buildTooltipTheme(scheme, base.textTheme),
+    textSelectionTheme: buildTextSelectionTheme(scheme, semantic),
+    dividerTheme: buildDividerTheme(semantic),
+    scrollbarTheme: buildScrollbarTheme(scheme),
+
     listTileTheme: ListTileThemeData(
       contentPadding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.lg,
@@ -351,6 +338,7 @@ ThemeData _buildTheme(
     ),
 
     dialogTheme: DialogThemeData(
+      barrierColor: modalBarrierColor(scheme),
       backgroundColor: scheme.surface,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
@@ -367,6 +355,7 @@ ThemeData _buildTheme(
     ),
 
     bottomSheetTheme: BottomSheetThemeData(
+      modalBarrierColor: modalBarrierColor(scheme),
       backgroundColor: scheme.surface,
       surfaceTintColor: Colors.transparent,
       elevation: 0,

@@ -139,7 +139,6 @@ String _elementKindFor(AstNode node) {
         'indicatorColor',
         'surfaceTintColor',
         'scaffoldBackgroundColor',
-        'barrierColor',
       };
       const textSlots = <String>{
         'labelStyle',
@@ -151,6 +150,12 @@ String _elementKindFor(AstNode node) {
       if (backgroundSlots.contains(label)) return 'background';
       if (textSlots.contains(label)) return 'text';
       if (label == 'shadowColor' || label == 'boxShadow') return 'shadow';
+      // A scrim, not a background. Its ground is whichever screen happens to be
+      // behind the modal, so it has no fixed value to be precomputed to — the
+      // same argument that exempts a shadow from rule R7.
+      if (label == 'barrierColor' || label == 'modalBarrierColor') {
+        return 'scrim';
+      }
       if (label == 'iconColor' || label == 'iconTheme') return 'icon';
     }
   }
