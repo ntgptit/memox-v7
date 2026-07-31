@@ -148,4 +148,5 @@ Each has a `.jsx`, a `.d.ts` props contract and a `.prompt.md` usage note beside
 
 - Link `styles.css`, add the Material Icons stylesheet, load `_ds_bundle.js`, then `const { MxCard } = window.<Namespace>`.
 - Dark mode is `document.documentElement.dataset.theme = 'dark'` — one scope re-points every semantic token.
+- **A component that can be tapped is never itself a `<button>`.** A button may not contain a control, so a component that becomes one can hold none — and the first caller that needs a trailing menu wraps *part* of the content in its own button instead, which leaves every other part looking tappable and inert. `MxCard` composes `button.mx-card__action` under `.mx-card__content` and hands pointer events back with `.mx-card__control`; its `.prompt.md` has the pattern. **`MxListTile` still renders as a `<button>`** and needs the same treatment the first time a caller gives it an interactive `trailing` — a switch, an icon button — rather than a chevron.
 - Never introduce a colour, radius, duration or spacing value that is not a token. Upstream this is enforced by a design-token guard in CI; here it is the same rule, unenforced.

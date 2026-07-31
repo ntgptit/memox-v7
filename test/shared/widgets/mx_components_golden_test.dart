@@ -131,6 +131,25 @@ void main() {
         ),
       ),
     ),
+    // Focus is the state that draws the 2px underline, and the golden is what
+    // pins two things at once: the underline is painted in the label's own
+    // colour — left to the engine default it visibly disagrees with the text —
+    // and the expand_more glyph beside it stays clean.
+    'text_button_focused': const Scaffold(
+      body: Padding(
+        padding: EdgeInsets.all(16),
+        child: Align(
+          alignment: AlignmentDirectional.topStart,
+          child: FocusedOnFirstFrame(
+            child: MxTextButton(
+              label: "Show today's summary",
+              trailingIcon: Icons.expand_more,
+              onPressed: noop,
+            ),
+          ),
+        ),
+      ),
+    ),
     // Danger as a LABEL, not as a fill — the icon and the text carry it, and
     // the golden is what pins that the glyph is not underlined with the label.
     'text_button_destructive': const Scaffold(
