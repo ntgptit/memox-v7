@@ -1,14 +1,14 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
   "scannedFiles": 126,
-  "totalSites": 290,
+  "totalSites": 287,
   "byElementKind": {
     "other": 234,
-    "background": 13,
-    "text": 21,
+    "background": 12,
+    "text": 20,
     "shadow": 1,
     "border": 10,
-    "icon": 11
+    "icon": 10
   },
   "bySourceKind": {
     "shared-constant": 135,
@@ -16,7 +16,7 @@
     "opacity-modified-token": 9,
     "hardcoded-literal": 89,
     "Colors-material": 4,
-    "theme-token": 50
+    "theme-token": 47
   },
   "sites": [
     {
@@ -3175,39 +3175,6 @@
       "token": "colorScheme.onSurface",
       "resolved_value_light": "#16182B",
       "resolved_value_dark": "#EDEEF5"
-    },
-    {
-      "file": "lib/shared/widgets/mx_search_field.dart",
-      "line": 72,
-      "widget_context": "_MxSearchFieldState",
-      "element_kind": "background",
-      "source_kind": "theme-token",
-      "expression": "context.semanticColors.surfaceMuted",
-      "token": "semantic.surfaceMuted",
-      "resolved_value_light": "#EAECF1",
-      "resolved_value_dark": "#292D42"
-    },
-    {
-      "file": "lib/shared/widgets/mx_search_field.dart",
-      "line": 94,
-      "widget_context": "_MxSearchFieldState",
-      "element_kind": "icon",
-      "source_kind": "theme-token",
-      "expression": "context.colors.onSurfaceVariant",
-      "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#565C72",
-      "resolved_value_dark": "#A6ABC2"
-    },
-    {
-      "file": "lib/shared/widgets/mx_search_field.dart",
-      "line": 136,
-      "widget_context": "_MxSearchFieldState",
-      "element_kind": "text",
-      "source_kind": "theme-token",
-      "expression": "context.colors.onSurfaceVariant",
-      "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#565C72",
-      "resolved_value_dark": "#A6ABC2"
     }
   ]
 }
