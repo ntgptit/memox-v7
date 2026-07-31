@@ -1,0 +1,183 @@
+{
+  "generatedBy": "test/design_audit/audit_test.dart",
+  "light": {
+    "borderProminence": {
+      "semantic.borderSubtle on card (colorScheme.surface)": {
+        "ratio": 1.8233423041653078,
+        "verdict": "too-heavy"
+      },
+      "semantic.borderSubtle on page (scaffoldBackgroundColor)": {
+        "ratio": 1.6725297220889834,
+        "verdict": "too-heavy"
+      },
+      "semantic.borderSubtle on muted tile (semantic.surfaceMuted)": {
+        "ratio": 1.5426205953192298,
+        "verdict": "in-band"
+      },
+      "colorScheme.outline on card (colorScheme.surface)": {
+        "ratio": 1.8233423041653078,
+        "verdict": "too-heavy"
+      },
+      "colorScheme.outline on page (scaffoldBackgroundColor)": {
+        "ratio": 1.6725297220889834,
+        "verdict": "too-heavy"
+      },
+      "colorScheme.outline on muted tile (semantic.surfaceMuted)": {
+        "ratio": 1.5426205953192298,
+        "verdict": "in-band"
+      },
+      "colorScheme.outlineVariant on card (colorScheme.surface)": {
+        "ratio": 1.8233423041653078,
+        "verdict": "too-heavy"
+      },
+      "colorScheme.outlineVariant on page (scaffoldBackgroundColor)": {
+        "ratio": 1.6725297220889834,
+        "verdict": "too-heavy"
+      },
+      "colorScheme.outlineVariant on muted tile (semantic.surfaceMuted)": {
+        "ratio": 1.5426205953192298,
+        "verdict": "in-band"
+      }
+    },
+    "backgroundTint": {
+      "page": {
+        "hex": "#F4F5F8",
+        "hue": 225.0,
+        "saturation": 0.22222222222222152,
+        "chroma": 0.015686274509803866,
+        "isPureNeutral": false
+      },
+      "surface": {
+        "hex": "#FFFFFF",
+        "hue": null,
+        "saturation": 0.0,
+        "chroma": 0.0,
+        "isPureNeutral": true
+      }
+    },
+    "neutralFamilyCoherence": {
+      "page": {
+        "hex": "#F4F5F8",
+        "hue": 225.0,
+        "chroma": 0.015686274509803866
+      },
+      "surface": {
+        "hex": "#FFFFFF",
+        "hue": null,
+        "chroma": 0.0
+      },
+      "surfaceMuted": {
+        "hex": "#EAECF1",
+        "hue": 222.8571428571427,
+        "chroma": 0.027450980392156876
+      },
+      "borderSubtle": {
+        "hex": "#BEC0C3",
+        "hue": 216.0,
+        "chroma": 0.019607843137254832
+      },
+      "onSurfaceVariant": {
+        "hex": "#565C72",
+        "hue": 227.14285714285717,
+        "chroma": 0.10980392156862745
+      }
+    },
+    "depthMechanism": {
+      "surfaceVsPage": 1.090170345007657,
+      "borderVsSurface": 1.8233423041653078,
+      "borderVsPage": 1.6725297220889834,
+      "usesShadow": false,
+      "shadowNote": "cardTheme.elevation is 0 and MxCard paints no BoxShadow; depth is border-only in both modes by design."
+    }
+  },
+  "dark": {
+    "borderProminence": {
+      "semantic.borderSubtle on card (colorScheme.surface)": {
+        "ratio": 1.8152128981088882,
+        "verdict": "too-heavy"
+      },
+      "semantic.borderSubtle on page (scaffoldBackgroundColor)": {
+        "ratio": 2.121013686568082,
+        "verdict": "too-heavy"
+      },
+      "semantic.borderSubtle on muted tile (semantic.surfaceMuted)": {
+        "ratio": 1.4870608231251252,
+        "verdict": "in-band"
+      },
+      "colorScheme.outline on card (colorScheme.surface)": {
+        "ratio": 1.8152128981088882,
+        "verdict": "too-heavy"
+      },
+      "colorScheme.outline on page (scaffoldBackgroundColor)": {
+        "ratio": 2.121013686568082,
+        "verdict": "too-heavy"
+      },
+      "colorScheme.outline on muted tile (semantic.surfaceMuted)": {
+        "ratio": 1.4870608231251252,
+        "verdict": "in-band"
+      },
+      "colorScheme.outlineVariant on card (colorScheme.surface)": {
+        "ratio": 1.8152128981088882,
+        "verdict": "too-heavy"
+      },
+      "colorScheme.outlineVariant on page (scaffoldBackgroundColor)": {
+        "ratio": 2.121013686568082,
+        "verdict": "too-heavy"
+      },
+      "colorScheme.outlineVariant on muted tile (semantic.surfaceMuted)": {
+        "ratio": 1.4870608231251252,
+        "verdict": "in-band"
+      }
+    },
+    "backgroundTint": {
+      "page": {
+        "hex": "#0A082D",
+        "hue": 243.24324324324326,
+        "saturation": 0.6981132075471698,
+        "chroma": 0.1450980392156863,
+        "isPureNeutral": false
+      },
+      "surface": {
+        "hex": "#1B1D32",
+        "hue": 234.7826086956522,
+        "saturation": 0.29870129870129863,
+        "chroma": 0.09019607843137255,
+        "isPureNeutral": false
+      }
+    },
+    "neutralFamilyCoherence": {
+      "page": {
+        "hex": "#0A082D",
+        "hue": 243.24324324324326,
+        "chroma": 0.1450980392156863
+      },
+      "surface": {
+        "hex": "#1B1D32",
+        "hue": 234.7826086956522,
+        "chroma": 0.09019607843137255
+      },
+      "surfaceMuted": {
+        "hex": "#292D42",
+        "hue": 230.39999999999998,
+        "chroma": 0.09803921568627452
+      },
+      "borderSubtle": {
+        "hex": "#414762",
+        "hue": 229.09090909090907,
+        "chroma": 0.1294117647058824
+      },
+      "onSurfaceVariant": {
+        "hex": "#A6ABC2",
+        "hue": 229.28571428571433,
+        "chroma": 0.1098039215686274
+      }
+    },
+    "depthMechanism": {
+      "surfaceVsPage": 1.1684655220210152,
+      "borderVsSurface": 1.8152128981088882,
+      "borderVsPage": 2.121013686568082,
+      "usesShadow": false,
+      "shadowNote": "cardTheme.elevation is 0 and MxCard paints no BoxShadow; depth is border-only in both modes by design."
+    }
+  }
+}
