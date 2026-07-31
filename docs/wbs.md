@@ -2911,7 +2911,12 @@ chỗ khác.
   duyệt; một màn được thẩm ở bề rộng desktop là thẩm trong hình dạng không
   user nào thấy (AD-04: Android là release target). `Viewports.first` là
   default của addon nên thứ tự list chính là quyết định; `None` giữ cuối
-  list cho việc soi bảng token rộng.
+  list cho việc soi bảng token rộng. **Màn nhỏ đại diện bằng máy thật (chủ dự
+  án yêu cầu):** thêm preset iPhone 13 Mini (375×812) và iPhone SE (375×667 —
+  trùng logical size iPhone 8); Compact 320 đổi nhãn thành "M4.8b floor" —
+  nó là cận dưới dự án test, không phải điện thoại nhỏ tiêu biểu, và một
+  catalog mà lựa chọn màn nhỏ duy nhất là 320 sẽ biến mọi lần kiểm màn nhỏ
+  thành kiểm ca cực đoan.
 
 ### M4.11 · Card management full-stack
 

@@ -32,10 +32,11 @@ const ViewportData galaxyS23UltraViewport = ViewportData(
   safeAreas: EdgeInsets.only(top: 36, bottom: 24),
 );
 
-/// The 320×568 case every memox component is tested against (M4.8b), which no
-/// stock viewport preset covers.
+/// The 320×568 case every memox component is tested against (M4.8b). Kept as
+/// the hard lower bound, not as the representative small phone — real small
+/// phones are the iPhone 13 Mini / SE presets beside it in the addon list.
 const ViewportData compactViewport = ViewportData(
-  name: 'Compact 320',
+  name: 'Compact 320 (M4.8b floor)',
   width: 320,
   height: 568,
   pixelRatio: 2,
@@ -82,8 +83,15 @@ class MemoxWidgetbook extends StatelessWidget {
         // stretched across the browser canvas — a screen judged at desktop
         // width is a screen judged in a shape no user ever sees. `None` stays
         // available for full-canvas inspection of wide token tables.
+        // Small screens are represented by real devices — iPhone 13 Mini
+        // (375×812) and iPhone SE (375×667, the iPhone 8's logical size) —
+        // because a catalog whose only small option is the synthetic 320
+        // floor makes every small-screen check an extreme-case check. The
+        // 320 floor stays, as the bound M4.8b actually tests against.
         ViewportAddon(<ViewportData>[
           galaxyS23UltraViewport,
+          IosViewports.iPhone13Mini,
+          IosViewports.iPhoneSE,
           compactViewport,
           AndroidViewports.samsungGalaxyS20,
           AndroidViewports.mediumTablet,
