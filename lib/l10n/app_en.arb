@@ -91,6 +91,32 @@
   "@deckFullyLearnedSemanticLabel": {
     "description": "Announced on the glyph of a deck whose every card is learned (BR-88). The only state this glyph carries in words as well as in colour."
   },
+  "deckSummaryCaughtUpFigure": "All",
+  "@deckSummaryCaughtUpFigure": {
+    "description": "Replaces the due figure when nothing is waiting. A zero in a large display face reads as a failure; the word does not."
+  },
+  "deckSummaryCaughtUp": "caught up — nothing due here today",
+  "@deckSummaryCaughtUp": {
+    "description": "Sits under the All figure. Lower case because it continues the figure above it as one sentence."
+  },
+  "deckSummaryDueAcrossLibrary": "{count, plural, other{cards due across your library today}}",
+  "@deckSummaryDueAcrossLibrary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Sits under the due figure at the root level. The count is the figure itself, so the sentence does not repeat it."
+  },
+  "deckSummaryDueInDeck": "{count, plural, other{cards due in this deck today}}",
+  "@deckSummaryDueInDeck": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "The same sentence inside a deck, where the scope is that deck rather than the whole library."
+  },
   "deckDueNowLabel": "{count, plural, other{{count} due now}}",
   "@deckDueNowLabel": {
     "placeholders": {

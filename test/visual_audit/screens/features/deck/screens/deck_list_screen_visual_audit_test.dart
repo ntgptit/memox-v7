@@ -191,7 +191,9 @@ void main() {
             'CustomPainter, so no render object carries either colour. Both are '
             'asserted in mx_progress_bar_test.dart and pinned by the '
             'mx_progress_bar_* goldens.',
-        expectedMatches: 2,
+        // Two of the three fixtures have cards, plus the level summary's own
+        // bar above them.
+        expectedMatches: 3,
       ),
     ],
   );
@@ -324,8 +326,7 @@ void main() {
         breadcrumbSteps: 2,
         hasFloatingAction: true,
       ),
-      // Three here against the root level's two: every child in this fixture has
-      // cards, where one of the root fixtures does not and so draws no bar.
+      // Three cards, all with cards, plus the level summary's own bar.
       // The count is exact on purpose — an allowance that said "any number" would
       // stop noticing when a bar appears on a row that should not have one.
       const AuditSkipAllowance(
@@ -337,7 +338,7 @@ void main() {
             'CustomPainter, so no render object carries either colour. Both are '
             'asserted in mx_progress_bar_test.dart and pinned by the '
             'mx_progress_bar_* goldens.',
-        expectedMatches: 3,
+        expectedMatches: 4,
       ),
     ],
   );
