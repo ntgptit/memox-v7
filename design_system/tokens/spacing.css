@@ -1,0 +1,14 @@
+/* Six steps, deliberately. A scale wide enough to express "a bit more" invites
+   per-screen drift, and the drift is what makes an interface feel unfinished
+   long before anyone can point at a specific screen. */
+:root{
+  --space-xs:4px;   /* icon to its label */
+  --space-sm:8px;   /* tightly related items in a row */
+  --space-md:12px;  /* inside a compact control */
+  --space-lg:16px;  /* screen padding, gap between list items */
+  --space-xl:24px;  /* between sections of a screen */
+  --space-xxl:32px; /* around a lone focal element */
+  /* A floor, not a step: smallest side of anything a finger has to hit. */
+  --touch-target-min:48px;
+  --icon-sm:16px;--icon-md:24px;--icon-lg:40px;
+}

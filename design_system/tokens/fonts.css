@@ -1,0 +1,12 @@
+/* Both families are bundled with the app (pubspec.yaml), never fetched at runtime:
+   a study tool must render identically offline. Both are VARIABLE fonts — weight
+   moves the wght axis, so any weight 100-900 is real, not synthesised. */
+
+/* IMPORT DEVIATION — the only edit made to any file in this snapshot.
+   Upstream these urls read "../assets/fonts/…", pointing at the design
+   project's own copy of the two TTFs. That copy was taken FROM this repo, so
+   the paths here point back at the originals in ../../assets/fonts/ instead of
+   carrying ~1 MB of duplicated binaries that would then have to be kept in step.
+   Nothing else in design_system/ differs from the source project. */
+@font-face{font-family:"Plus Jakarta Sans";src:url("../../assets/fonts/PlusJakartaSans-Variable.ttf") format("truetype-variations");font-weight:200 800;font-style:normal;font-display:swap}
+@font-face{font-family:"Inter";src:url("../../assets/fonts/Inter-Variable.ttf") format("truetype-variations");font-weight:100 900;font-style:normal;font-display:swap}

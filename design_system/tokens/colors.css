@@ -1,0 +1,144 @@
+/* memox colour system — the app's own palette, unchanged.
+   Every value here is lifted from lib/core/theme/app_colors.dart. The redesign
+   changed layout and hierarchy, not hue: this file is the app's existing colour
+   language, and anything built on it should still look like memox.
+
+   The one addition is a progress family, because the redesign puts a bar on
+   every deck and a bar drawn in --color-primary sits beside a button drawn in
+   --color-primary with nothing to tell them apart. It is a tint of the same
+   indigo, not a new hue.
+
+   Light is the default scope; dark re-points the same semantic names. */
+:root{
+  /* --- base literals: light ------------------------------------------- */
+  --mx-page-light:#F4F5F8;--mx-card-light:#FBFBFE;--mx-inset-light:#EAECF1;--mx-raised-light:#FCFCFE;
+  --mx-ink-light:#16182B;--mx-ink-quiet-light:#565C72;--mx-line-light:#D2D2DD;
+  --mx-indigo-light:#4646B4;--mx-indigo-deep-light:#4141C0;--mx-indigo-container-light:#DCDCF2;
+  --mx-success-light:#10795C;--mx-warning-light:#9A6A11;--mx-danger-light:#C02B3A;--mx-info-light:#3F6E97;
+  /* --- base literals: dark -------------------------------------------- */
+  --mx-page-dark:#0A082D;--mx-card-dark:#1B1D32;--mx-inset-dark:#292D42;--mx-raised-dark:#383D55;
+  --mx-ink-dark:#EDEEF5;--mx-ink-quiet-dark:#A6ABC2;--mx-line-dark:#414762;
+  --mx-indigo-dark:#5656C9;--mx-indigo-bright-dark:#8A8AE0;--mx-indigo-container-dark:#2B2B6E;
+  --mx-success-dark:#4FC79B;--mx-warning-dark:#E0B064;--mx-danger-dark:#F2808F;--mx-info-dark:#8DB4D8;
+
+  /* --- semantic: surface ladder --------------------------------------- */
+  --color-background:var(--mx-page-light);
+  --color-surface:var(--mx-card-light);
+  --color-surface-muted:var(--mx-inset-light);
+  --color-surface-elevated:var(--mx-raised-light);
+
+  /* --- semantic: text and lines --------------------------------------- */
+  --color-text-primary:var(--mx-ink-light);
+  --color-text-secondary:var(--mx-ink-quiet-light);
+  --color-border-subtle:var(--mx-line-light);
+  --color-focus-ring:var(--mx-indigo-deep-light);
+
+  /* --- semantic: brand and actions ------------------------------------ */
+  --color-seed:#4646B4;
+  --color-primary:var(--mx-indigo-light);
+  --color-on-primary:#FFFFFF;
+  /* The accent as TEXT or an ICON, which is a different problem from the accent
+     as a fill: on dark, the colour that carries white text is too dark to read
+     as a label on the page. */
+  --color-primary-accent:var(--mx-indigo-light);
+  --color-primary-container:var(--mx-indigo-container-light);
+  --color-on-primary-container:#1B1B5C;
+  --color-secondary:#4E5468;
+  --color-on-secondary:#FFFFFF;
+  --color-secondary-container:#E4E6EC;
+  --color-on-secondary-container:#2C3141;
+  --color-tertiary:#45647F;
+  --color-on-tertiary:#FFFFFF;
+  --color-tertiary-container:#E1E9F0;
+  --color-on-tertiary-container:#22394B;
+  --color-secondary-action:#454B5E;
+
+  /* --- semantic: meaning ---------------------------------------------- */
+  --color-success:var(--mx-success-light);
+  --color-warning:var(--mx-warning-light);
+  --color-danger:var(--mx-danger-light);
+  --color-info:var(--mx-info-light);
+  --color-error:var(--mx-danger-light);
+  --color-on-error:#FFFFFF;
+  --color-error-container:#F8DDE1;
+  --color-on-error-container:#641421;
+
+  /* --- semantic: progress and reward ----------------------------------- */
+  /* Its own family, not the accent. A bar drawn in --color-primary sits beside a
+     button drawn in --color-primary and the eye cannot tell which one it can press. */
+  --color-progress-track:#DFE0E9;
+  --color-progress-fill:#6E6ECE;
+  --color-progress-complete:var(--mx-success-light);
+  --color-streak:#C2731B;
+  --color-streak-container:#FBEBD7;
+
+  /* --- semantic: Material surface container ladder --------------------- */
+  --color-surface-container-lowest:#FCFCFE;
+  --color-surface-container-low:#FAFAFC;
+  --color-surface-container:#F1F2F6;
+  --color-surface-container-high:#EAECF1;
+  --color-surface-container-highest:#E3E5EC;
+  --color-surface-dim:#DEE0E7;
+  --color-surface-bright:#FCFCFE;
+  --color-inverse-surface:#2A2C3E;
+  --color-on-inverse-surface:#F1F2F6;
+  --color-inverse-primary:#A9A9E0;
+
+  /* --- semantic: shadow, scrim, chrome --------------------------------- */
+  --color-shadow:#0B0C18;
+  --color-scrim:#0B0C18;
+  --color-web-letterbox:#6E7288;
+  --color-disabled-surface:#E3E3E6;
+  --color-on-disabled:rgb(22 24 43 / 0.38);
+}
+[data-theme="dark"]{
+  --color-background:var(--mx-page-dark);
+  --color-surface:var(--mx-card-dark);
+  --color-surface-muted:var(--mx-inset-dark);
+  --color-surface-elevated:var(--mx-raised-dark);
+  --color-text-primary:var(--mx-ink-dark);
+  --color-text-secondary:var(--mx-ink-quiet-dark);
+  --color-border-subtle:var(--mx-line-dark);
+  --color-focus-ring:var(--mx-indigo-bright-dark);
+  --color-primary:var(--mx-indigo-dark);
+  --color-on-primary:#FFFFFF;
+  --color-primary-accent:var(--mx-indigo-bright-dark);
+  --color-primary-container:var(--mx-indigo-container-dark);
+  --color-on-primary-container:#D7D5FF;
+  --color-secondary:#B4B9CC;
+  --color-on-secondary:#1E2033;
+  --color-secondary-container:#333852;
+  --color-on-secondary-container:#D9DCE7;
+  --color-tertiary:#8DB4D8;
+  --color-on-tertiary:#17232E;
+  --color-tertiary-container:#33465A;
+  --color-on-tertiary-container:#D5E0EA;
+  --color-secondary-action:#C3C6D2;
+  --color-success:var(--mx-success-dark);
+  --color-warning:var(--mx-warning-dark);
+  --color-danger:var(--mx-danger-dark);
+  --color-info:var(--mx-info-dark);
+  --color-error:var(--mx-danger-dark);
+  --color-on-error:#2C1319;
+  --color-error-container:#5E2831;
+  --color-on-error-container:#F5D3D8;
+  --color-progress-track:#2E3247;
+  --color-progress-fill:#8A8AE0;
+  --color-progress-complete:var(--mx-success-dark);
+  --color-streak:#E0B064;
+  --color-streak-container:#3A2E1C;
+  --color-surface-container-lowest:#07061F;
+  --color-surface-container-low:#12142B;
+  --color-surface-container:#1F2237;
+  --color-surface-container-high:#292D42;
+  --color-surface-container-highest:#333852;
+  --color-surface-dim:#08061F;
+  --color-surface-bright:#383D55;
+  --color-inverse-surface:#E7E8F0;
+  --color-on-inverse-surface:#23253A;
+  --color-inverse-primary:#3A3A9B;
+  --color-shadow:#04040B;
+  --color-scrim:#04040B;
+  --color-disabled-surface:#33344A;
+  --color-on-disabled:rgb(237 238 245 / 0.38);
+}

@@ -1,0 +1,8 @@
+/* Mobile-first. Android is the release target and the web build is framed to a
+   phone; there is no desktop breakpoint because nothing has a desktop layout. */
+:root{
+  --breakpoint-compact:360px; /* below this: the 320x568 case every component is tested against */
+  --breakpoint-medium:600px;  /* documented upper edge of the phone range; nothing branches on it */
+  --frame-width:420px;--frame-height:1040px; /* the preview/phone frame */
+  --nav-width-per-destination:120px;
+}
