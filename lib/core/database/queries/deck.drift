@@ -79,6 +79,7 @@ SELECT
     d.**,
     COALESCE(total.cardCount, 0) AS totalCardCount,
     COALESCE(due.dueCount, 0) AS dueCardCount,
+    COALESCE(learned.learnedCount, 0) AS learnedCardCount,
     (
         SELECT MIN(next.due_at) FROM card_review_states next
         WHERE next.due_at > :now
@@ -98,6 +99,18 @@ LEFT JOIN (
     WHERE (s.due_at IS NULL OR s.due_at <= :now)
     GROUP BY cd.root_deck_id
 ) due ON due.rootDeckId = d.id
+-- BR-88. `card_review_states` carries `scheduler_type` denormalised, so the
+-- predicate needs no join back to decks -- and the denormalisation is what makes
+-- the two branches checkable in one pass instead of two queries.
+LEFT JOIN (
+    SELECT cd.root_deck_id AS rootDeckId, COUNT(*) AS learnedCount
+    FROM cards c
+    INNER JOIN decks cd ON cd.id = c.deck_id
+    INNER JOIN card_review_states s ON s.card_id = c.id
+    WHERE (s.scheduler_type = 'eight_box' AND s.current_box = 8)
+       OR (s.scheduler_type = 'sm2' AND s.interval_days >= 128)
+    GROUP BY cd.root_deck_id
+) learned ON learned.rootDeckId = d.id
 WHERE d.parent_deck_id IS NULL
 ORDER BY d.created_at ASC, d.id ASC;
 
@@ -202,6 +215,7 @@ SELECT
     root.scheduler_type AS inheritedSchedulerType,
     COALESCE(total.cardCount, 0) AS totalCardCount,
     COALESCE(due.dueCount, 0) AS dueCardCount,
+    COALESCE(learned.learnedCount, 0) AS learnedCardCount,
     (
         SELECT MIN(next.due_at) FROM card_review_states next
         WHERE next.due_at > :now
@@ -230,6 +244,18 @@ LEFT JOIN (
     WHERE (s.due_at IS NULL OR s.due_at <= :now)
     GROUP BY b.branch_id
 ) due ON due.branchId = child.id
+-- BR-88, per branch. Same predicate as the root query above; it is repeated
+-- rather than factored into a view because drift generates from the statement
+-- text and a view would put the rule somewhere neither query names.
+LEFT JOIN (
+    SELECT b.branch_id AS branchId, COUNT(*) AS learnedCount
+    FROM branch b
+    INNER JOIN cards c ON c.deck_id = b.deck_id
+    INNER JOIN card_review_states s ON s.card_id = c.id
+    WHERE (s.scheduler_type = 'eight_box' AND s.current_box = 8)
+       OR (s.scheduler_type = 'sm2' AND s.interval_days >= 128)
+    GROUP BY b.branch_id
+) learned ON learned.branchId = child.id
 WHERE parent.id = :parentId
 ORDER BY child.created_at ASC, child.id ASC;
 

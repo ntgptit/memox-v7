@@ -12,6 +12,7 @@ import 'package:memox/shared/widgets/mx_list_tile.dart';
 import 'package:memox/shared/widgets/mx_loading_state.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
+import 'package:memox/shared/widgets/mx_progress_bar.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
 
 /// The specimen set for the stress suite: every shared component, built with
@@ -94,6 +95,14 @@ List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
       onPressed: _noop,
     ),
     isInteractive: true,
+  ),
+  MxStressSpecimen(
+    // A long label beside a long figure is the case that breaks a progress
+    // header: the label has to ellipsize and the figure must not, or the
+    // percentage is what falls off the end of the row.
+    name: 'MxProgressBar',
+    build: () =>
+        const MxProgressBar(value: 0.62, label: kLongLabel, valueLabel: '62%'),
   ),
   MxStressSpecimen(
     name: 'MxCard',

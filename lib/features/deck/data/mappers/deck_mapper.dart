@@ -64,6 +64,7 @@ DeckListSnapshot rootLevelFromRows(List<RootDeckSummariesResult> rows) =>
             deck: deckEntityFromRow(row.d),
             totalCardCount: row.totalCardCount,
             dueCardCount: row.dueCardCount,
+            learnedCardCount: row.learnedCardCount,
             schedulerType: SchedulerType.fromDbValue(row.d.schedulerType ?? ''),
           ),
       ],
@@ -104,6 +105,7 @@ DeckListSnapshot childLevelFromRows(List<ChildDeckLevelResult> rows) {
             deck: deckEntityFromRow(child),
             totalCardCount: row.totalCardCount,
             dueCardCount: row.dueCardCount,
+            learnedCardCount: row.learnedCardCount,
             schedulerType: SchedulerType.fromDbValue(
               row.inheritedSchedulerType ?? '',
             ),

@@ -7,6 +7,7 @@ import '../../../../core/theme/theme_context_extension.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_card.dart';
 import '../../../../shared/widgets/mx_icon_button.dart';
+import '../../../../shared/widgets/mx_progress_bar.dart';
 import '../../domain/models/deck_summary_model.dart';
 import 'deck_labels_widget.dart';
 
@@ -85,6 +86,24 @@ class DeckTileWidget extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 _DeckMetaLine(summary: summary),
+                // Only when there is something to be a fraction of. A deck with
+                // no cards would draw an empty track under every row of a fresh
+                // library, which says "0% learned" where the truth is "nothing
+                // to learn yet" — and the meta line already says that.
+                if (summary.totalCardCount > 0) ...<Widget>[
+                  const SizedBox(height: AppSpacing.sm),
+                  MxProgressBar(
+                    size: MxProgressBarSize.sm,
+                    value: summary.learnedFraction,
+                    label: context.l10n.deckLearnedProgressLabel(
+                      summary.learnedCardCount,
+                      summary.totalCardCount,
+                    ),
+                    valueLabel: context.l10n.deckLearnedPercentLabel(
+                      (summary.learnedFraction * 100).round(),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

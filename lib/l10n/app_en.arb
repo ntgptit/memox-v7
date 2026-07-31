@@ -66,6 +66,27 @@
     },
     "description": "How many cards in a deck are due for review right now. Only shown when the number is above zero."
   },
+  "deckLearnedProgressLabel": "{learned} of {total} learned",
+  "@deckLearnedProgressLabel": {
+    "placeholders": {
+      "learned": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    },
+    "description": "Label above a deck's progress bar. \"Learned\" is BR-88: box 8 under eight_box, an interval of 128 days or more under sm2."
+  },
+  "deckLearnedPercentLabel": "{percent}%",
+  "@deckLearnedPercentLabel": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    },
+    "description": "The figure at the right-hand end of a deck's progress bar. Whole percent -- a decimal on a 4px bar is precision nobody can act on."
+  },
   "deckNoDueLabel": "Nothing due",
   "@deckNoDueLabel": {
     "description": "Shown on a deck row when no card is due. Neutral wording on purpose — having nothing due is a normal state, not a problem (BR-29)."

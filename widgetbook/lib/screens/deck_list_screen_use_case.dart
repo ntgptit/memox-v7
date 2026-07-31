@@ -355,12 +355,18 @@ class _CatalogDeckRepository implements DeckRepository {
     DeckEntity deck, {
     required int total,
     required int due,
+    int? learned,
     SchedulerType? scheduler,
   }) {
     return DeckSummary(
       deck: deck,
       totalCardCount: total,
       dueCardCount: due,
+      // Two thirds by default rather than zero or full: a catalog whose bars are
+      // all empty shows the component's least interesting state, and one whose
+      // bars are all complete shows only the success colour. A caller that cares
+      // about either end passes it.
+      learnedCardCount: learned ?? (total * 2) ~/ 3,
       schedulerType: scheduler ?? deck.schedulerType ?? SchedulerType.eightBox,
     );
   }

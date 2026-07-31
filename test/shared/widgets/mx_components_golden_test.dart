@@ -291,6 +291,7 @@ void main() {
         onRetry: noop,
       ),
     ),
+    'mx_progress_bar': const ProgressBarSpecimen(),
   };
 
   for (final entry in cases.entries) {

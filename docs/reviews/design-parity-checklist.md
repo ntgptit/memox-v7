@@ -22,7 +22,7 @@ at the bottom, so their absence here is deliberate rather than an oversight.
 |---|---|---|---|---|---|
 | A1 | `colors.css` (light scope) | `app_colors.dart` | every `--color-*` hex | [x] | **drift → resolved M4.10p.** 11 of 40 taken from CSS |
 | A2 | `colors.css` (`[data-theme=dark]`) | `app_colors.dart` | every dark override | [x] | same, resolved |
-| A3 | `colors.css` progress + streak families | — | 5 tokens with no Dart counterpart | [x] | **blocked** — no caller; `--color-streak` is a fifth hue |
+| A3 | `colors.css` progress + streak families | `app_semantic_colors.dart` | 5 tokens with no Dart counterpart | [x] | **progress resolved M4.10r** — `MxProgressBar` is the caller. Streak still blocked: no feature, and a fifth hue |
 | A4 | `typography.css` sizes + leading | `app_typography.dart` | 15 M3 styles, measured off the built `TextTheme` | [x] | **match** (see §A-detail) |
 | A5 | `typography.css` tracking | same | `--tracking-*` | [x] | **match** |
 | A6 | `typography.css` weights | same | which style gets which `--weight-*` | [x] | **match** — 400/500/600/700 land on the same styles |
@@ -104,7 +104,7 @@ Dart widget: props, defaults, states, radius, spacing, semantics.
 | C5 | `MxTextField` | `mx_text_field.dart` | [ ] | |
 | C6 | `MxListTile` | `mx_list_tile.dart` | [x] | **match** - radius 12, selected fill `surfaceMuted` + primary title, 2-line clamp both sides |
 | C7 | `MxIcon` | — (Flutter uses `Icons.*`) | [ ] | design-gap expected |
-| C8 | `MxProgressBar` | — | [ ] | **blocked** — no `learned` BR |
+| C8 | `MxProgressBar` | `mx_progress_bar.dart` | [x] | **built M4.10r** — BR-88 unblocked it |
 | C9 | `MxEmptyState` | `mx_empty_state.dart` | [x] | **match** - 40px primary glyph, 24 padding, 16/8 rhythm, `check_circle_outline` default |
 | C10 | `MxErrorState` | `mx_error_state.dart` | [ ] | **known drift** — retry primary vs `secondary` |
 | C11 | `MxLoadingState` | `mx_loading_state.dart` | [x] | **drift (F14)** - passes `primary` explicitly, defeating the theme that exists to avoid it |
@@ -123,7 +123,7 @@ Dart widget: props, defaults, states, radius, spacing, semantics.
 | # | Design source | Flutter target | Status | Verdict |
 |---|---|---|---|---|
 | D1 | `DeckLevelScreen.jsx` shell + subheader | `deck_list_screen.dart` | [ ] | |
-| D2 | `DeckLevelScreen.jsx` `DeckCard` | `deck_tile_widget.dart` | [ ] | |
+| D2 | `DeckLevelScreen.jsx` `DeckCard` | `deck_tile_widget.dart` | [ ] | progress bar landed M4.10r; the study pill and the three-target split are still open |
 | D3 | `DeckLevelScreen.jsx` filter/sort row | `deck_list_toolbar_widget.dart` | [ ] | |
 | D4 | `DeckLevelScreen.jsx` breadcrumb use | `deck_path_widget.dart` | [ ] | |
 | D5 | `DeckLevelScreen.jsx` `LevelEmpty` (three empties) | `deck_list_screen.dart` empty states | [ ] | |

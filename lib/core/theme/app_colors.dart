@@ -178,6 +178,26 @@ abstract final class AppColors {
   static const Color dangerLight = Color(0xFFC02B3A);
   static const Color dangerDark = Color(0xFFF2808F);
 
+  // --- Progress -----------------------------------------------------------
+  //
+  // **Its own family, and not the accent.** A bar drawn in `primary` sits beside
+  // a button drawn in `primary` and nothing tells the eye which of the two it
+  // can press. These are a lighter tint of the same indigo — related to the
+  // brand, not competing with its call to action. Values from
+  // `design_system/tokens/colors.css`; they arrived with `MxProgressBar`, the
+  // first thing that draws them.
+  //
+  // There is no `progressComplete`: the design points it at `success`, and a
+  // second name for one colour is a second thing to keep in step.
+
+  /// The unfilled part of a progress track.
+  static const Color progressTrackLight = Color(0xFFDFE0E9);
+  static const Color progressTrackDark = Color(0xFF2E3247);
+
+  /// The filled part, below 100%.
+  static const Color progressFillLight = Color(0xFF6E6ECE);
+  static const Color progressFillDark = Color(0xFF8A8AE0);
+
   /// Status that genuinely carries information: streak, counters, "3 of 20".
   /// Not a decorative accent — plain metadata uses `textSecondary`.
   static const Color infoLight = Color(0xFF3F6E97);
