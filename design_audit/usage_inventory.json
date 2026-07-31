@@ -1,14 +1,14 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
   "scannedFiles": 115,
-  "totalSites": 251,
+  "totalSites": 252,
   "byElementKind": {
     "other": 222,
     "background": 7,
     "text": 11,
     "shadow": 1,
     "border": 6,
-    "icon": 4
+    "icon": 5
   },
   "bySourceKind": {
     "shared-constant": 127,
@@ -16,7 +16,7 @@
     "opacity-modified-token": 8,
     "hardcoded-literal": 81,
     "Colors-material": 4,
-    "theme-token": 28
+    "theme-token": 29
   },
   "sites": [
     {
@@ -2669,6 +2669,17 @@
       "token": "colorScheme.onSurface",
       "resolved_value_light": "#16182B",
       "resolved_value_dark": "#EDEEF5"
+    },
+    {
+      "file": "lib/shared/widgets/mx_action_sheet.dart",
+      "line": 151,
+      "widget_context": "_SheetRow",
+      "element_kind": "icon",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A6ABC2"
     },
     {
       "file": "lib/shared/widgets/mx_breadcrumb.dart",

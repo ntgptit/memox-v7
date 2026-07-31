@@ -135,7 +135,21 @@ class _SheetRow extends StatelessWidget {
       onTap: action.isEnabled ? action.onPressed : null,
       leading: action.icon == null
           ? null
-          : Icon(action.icon, size: AppIconSize.md, color: color),
+          // **Not `color`.** The label and the glyph were both `onSurface`, so a
+          // row's icon carried the same weight as the words next to it and the
+          // eye had two things to land on. `listTileTheme.iconColor` is
+          // `onSurfaceVariant` for exactly this reason; passing `color` here
+          // overrode the theme's own answer with a copy of the label's.
+          //
+          // Destructive keeps the full colour: there the glyph is part of the
+          // warning, and quieting it would leave red text beside a neutral bin.
+          : Icon(
+              action.icon,
+              size: AppIconSize.md,
+              color: isDestructive || !action.isEnabled
+                  ? color
+                  : context.colors.onSurfaceVariant,
+            ),
       title: Text(
         action.label,
         style: context.texts.bodyLarge?.copyWith(color: color),
