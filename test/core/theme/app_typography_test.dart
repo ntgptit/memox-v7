@@ -1,0 +1,212 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/app_theme.dart';
+import 'package:memox/core/theme/app_typography.dart';
+
+/// The type scale, pinned against `design_system/tokens/typography.css`.
+///
+/// **This test exists because the scale was an accident.** Until now
+/// `app_typography.dart` set family and weight and left every size to Material
+/// 3's defaults. Those defaults happen to equal the design's tokens, so the app
+/// and the kit agreed — by coincidence, not by declaration. An SDK bump moves
+/// Material's scale, and nothing in the project would have failed: not analyze,
+/// not a widget test, and not a golden, because a golden compares the app to
+/// itself rather than to the design.
+///
+/// So the numbers below are copied from the CSS by hand, deliberately. A test
+/// that read them from the same source the code reads would only prove the code
+/// is self-consistent; what is worth proving is that it matches a document
+/// nobody can change from inside Dart.
+///
+/// `height` is Flutter's multiplier and the CSS states a leading, so each
+/// expectation writes the division out. Where the design states a ratio rather
+/// than a leading — the card prompt's 1.22, body-md's 1.45 — the ratio is used
+/// directly.
+void main() {
+  final TextTheme texts = buildLightTheme().textTheme;
+
+  /// One rung: the CSS token, then what Flutter must resolve.
+  void expectStep(
+    String token,
+    TextStyle? style, {
+    required double size,
+    required double height,
+    required double tracking,
+    required String family,
+  }) {
+    expect(style, isNotNull, reason: '$token has no style at all');
+    expect(style!.fontSize, size, reason: '$token size');
+    expect(style.height, closeTo(height, 0.0001), reason: '$token leading');
+    expect(style.letterSpacing, tracking, reason: '$token tracking');
+    expect(style.fontFamily, family, reason: '$token family');
+  }
+
+  const String display = AppTypography.displayFamily;
+  const String body = AppTypography.bodyFamily;
+
+  group('the display face carries the scale above title', () {
+    test('display-lg / md / sm', () {
+      expectStep(
+        'display-lg',
+        texts.displayLarge,
+        size: 57,
+        height: 64 / 57,
+        tracking: 0,
+        family: display,
+      );
+      expectStep(
+        'display-md',
+        texts.displayMedium,
+        size: 45,
+        height: 52 / 45,
+        tracking: 0,
+        family: display,
+      );
+      expectStep(
+        'display-sm',
+        texts.displaySmall,
+        size: 36,
+        height: 44 / 36,
+        tracking: 0,
+        family: display,
+      );
+    });
+
+    test('headline-lg / the card prompt / headline-sm', () {
+      expectStep(
+        'headline-lg',
+        texts.headlineLarge,
+        size: 32,
+        height: 40 / 32,
+        tracking: 0,
+        family: display,
+      );
+      // The one deliberately large style, and the only rung whose size the app
+      // chose rather than inherited: 30/1.22/-0.5.
+      expectStep(
+        'card-prompt',
+        texts.headlineMedium,
+        size: AppTypography.cardPromptSize,
+        height: 1.22,
+        tracking: -0.5,
+        family: display,
+      );
+      expectStep(
+        'headline-sm',
+        texts.headlineSmall,
+        size: 24,
+        height: 32 / 24,
+        tracking: 0,
+        family: display,
+      );
+    });
+
+    test('title-lg is the app-bar title', () {
+      expectStep(
+        'title-lg',
+        texts.titleLarge,
+        size: 22,
+        height: 28 / 22,
+        tracking: 0,
+        family: display,
+      );
+    });
+  });
+
+  group('the body face carries title-md down', () {
+    test('title-md / title-sm', () {
+      expectStep(
+        'title-md',
+        texts.titleMedium,
+        size: 16,
+        height: 24 / 16,
+        tracking: 0.15,
+        family: body,
+      );
+      expectStep(
+        'title-sm',
+        texts.titleSmall,
+        size: 14,
+        height: 20 / 14,
+        tracking: 0.1,
+        family: body,
+      );
+    });
+
+    test('body-lg / md / sm', () {
+      expectStep(
+        'body-lg',
+        texts.bodyLarge,
+        size: 16,
+        height: 24 / 16,
+        tracking: 0.5,
+        family: body,
+      );
+      // A ratio rather than a leading: 1.45 keeps a two-line empty-state
+      // message readable without looking airy.
+      expectStep(
+        'body-md',
+        texts.bodyMedium,
+        size: 14,
+        height: 1.45,
+        tracking: 0.25,
+        family: body,
+      );
+      expectStep(
+        'body-sm',
+        texts.bodySmall,
+        size: 12,
+        height: 16 / 12,
+        tracking: 0.4,
+        family: body,
+      );
+    });
+
+    test('label-lg / md / sm', () {
+      expectStep(
+        'label-lg',
+        texts.labelLarge,
+        size: 14,
+        height: 20 / 14,
+        tracking: 0.1,
+        family: body,
+      );
+      expectStep(
+        'label-md',
+        texts.labelMedium,
+        size: 12,
+        height: 16 / 12,
+        tracking: 0.5,
+        family: body,
+      );
+      expectStep(
+        'label-sm',
+        texts.labelSmall,
+        size: 11,
+        height: 16 / 11,
+        tracking: 0.5,
+        family: body,
+      );
+    });
+  });
+
+  test('dark resolves the same scale as light', () {
+    // Colour differs by theme; size never does. A scale that drifted between
+    // modes would make every golden pair disagree for a reason nobody could see.
+    final TextTheme dark = buildDarkTheme().textTheme;
+
+    for (final (String name, TextStyle? a, TextStyle? b)
+        in <(String, TextStyle?, TextStyle?)>[
+          ('displayLarge', texts.displayLarge, dark.displayLarge),
+          ('headlineMedium', texts.headlineMedium, dark.headlineMedium),
+          ('titleLarge', texts.titleLarge, dark.titleLarge),
+          ('titleMedium', texts.titleMedium, dark.titleMedium),
+          ('bodyMedium', texts.bodyMedium, dark.bodyMedium),
+          ('labelMedium', texts.labelMedium, dark.labelMedium),
+        ]) {
+      expect(b?.fontSize, a?.fontSize, reason: '$name size');
+      expect(b?.height, a?.height, reason: '$name leading');
+      expect(b?.letterSpacing, a?.letterSpacing, reason: '$name tracking');
+    }
+  });
+}
