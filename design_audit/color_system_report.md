@@ -18,31 +18,31 @@ guess.
 
 | | |
 |---|---|
-| Files scanned (`lib/`, hand-written) | 130 |
-| Colour sites found | 302 |
-| Violations | 1 |
+| Files scanned (`lib/`, hand-written) | 134 |
+| Colour sites found | 305 |
+| Violations | 0 |
 
 **By element kind**
 
 | kind | sites |
 |---|---|
-| other | 250 |
-| background | 9 |
-| text | 23 |
+| other | 258 |
+| background | 7 |
 | shadow | 1 |
 | border | 10 |
+| text | 20 |
 | icon | 9 |
 
 **By source kind**
 
 | kind | sites |
 |---|---|
-| shared-constant | 137 |
-| blend-source | 3 |
-| opacity-modified-token | 10 |
-| hardcoded-literal | 91 |
+| shared-constant | 141 |
+| hardcoded-literal | 95 |
+| opacity-modified-token | 7 |
 | Colors-material | 4 |
-| theme-token | 57 |
+| blend-source | 2 |
+| theme-token | 56 |
 
 **By violation code**
 
@@ -52,16 +52,13 @@ guess.
 | V2 | 0 | role component using a colour outside its role |
 | V3 | 0 | literal duplicating an existing token |
 | V4 | 0 | hand-picked role variant instead of a generated one |
-| V5 | 1 | translucency applied at the paint site |
+| V5 | 0 | translucency applied at the paint site |
 | V6 | 0 | defined for one brightness, different mechanism in the other |
 
 ## 2. Violations
 
 | code | sev | file:line | context | current (light) | current (dark) | proposed target |
 |---|---|---|---|---|---|---|
-| V5 | 🟢 | `lib/shared/widgets/mx_text_button.dart:93` | context.colors.onSurface.withValues(alpha: _kDisabledLabelAlpha) | `#16182B @ alpha unresolvable` | `#EDEDF6 @ alpha unresolvable` | a precomputed blendOver(...) constant |
-
-- **V5** `context.colors.onSurface.withValues(alpha: _kDisabledLabelAlpha)` — A translucent colour composites against whatever is behind it at paint time, so one token renders as two values.
 
 ## 3. Perceptual checks
 

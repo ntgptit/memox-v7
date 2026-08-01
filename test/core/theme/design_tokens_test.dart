@@ -3,10 +3,12 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_breakpoints.dart';
 import 'package:memox/core/theme/app_colors.dart';
+import 'package:memox/core/theme/app_delays.dart';
 import 'package:memox/core/theme/app_durations.dart';
 import 'package:memox/core/theme/app_icon_size.dart';
 import 'package:memox/core/theme/app_radius.dart';
 import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/core/theme/app_stroke.dart';
 
 void main() {
   group('AppSpacing', () {
@@ -67,6 +69,43 @@ void main() {
     });
   });
 
+  group('AppStroke', () {
+    test('carries the three canonical widths', () {
+      // Named against the values rather than against each other: a stroke scale
+      // that only has to be *increasing* passes with 1 / 1.6 / 3, which is three
+      // numbers nobody chose.
+      expect(AppStroke.hairline, 1);
+      expect(AppStroke.input, 1.5);
+      expect(AppStroke.focus, 2);
+    });
+
+    test('matches design_system/tokens/elevation.css', () {
+      // The kit is where these values are decided, and a Dart constant that
+      // silently drifts from it is exactly the divergence this project keeps
+      // finding by eye. Parsed rather than transcribed, so the two cannot part
+      // company without this failing.
+      final css = File('design_system/tokens/elevation.css').readAsStringSync();
+
+      double declared(String token) {
+        final match = RegExp('--border-$token:\\s*([0-9.]+)px').firstMatch(css);
+        expect(match, isNotNull, reason: '--border-$token is not in the kit');
+
+        return double.parse(match!.group(1)!);
+      }
+
+      expect(AppStroke.hairline, declared('hairline'));
+      expect(AppStroke.input, declared('input'));
+      expect(AppStroke.focus, declared('focus'));
+    });
+  });
+
+  test('a tooltip delay is not a motion duration', () {
+    // The reason `AppDelays` exists as its own file. `AppDurations.slow` is
+    // documented as the ceiling on motion, so parking a 500ms interaction delay
+    // there would say the app may animate for half a second.
+    expect(AppDelays.tooltipWait, greaterThan(AppDurations.slow));
+  });
+
   test('colour tokens are named for meaning, not appearance', () {
     // `red` becomes a lie the moment the palette changes, and nobody renames a
     // constant used in forty files.
@@ -107,6 +146,10 @@ void main() {
       'app_breakpoints',
       'app_colors',
       'app_typography',
+      'app_stroke',
+      'app_delays',
+      'app_interaction_states',
+      'app_motion_policy',
     ]) {
       final source = File('lib/core/theme/$path.dart').readAsStringSync();
 

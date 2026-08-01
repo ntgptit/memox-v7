@@ -24,6 +24,8 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     required this.borderSubtle,
     required this.focusRing,
     required this.secondaryAction,
+    required this.disabledSurface,
+    required this.onDisabled,
   });
 
   const AppSemanticColors.light()
@@ -40,7 +42,9 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       surfaceElevated = AppColors.surfaceElevatedLight,
       borderSubtle = AppColors.borderSubtleLight,
       focusRing = AppColors.focusRingLight,
-      secondaryAction = AppColors.secondaryActionLight;
+      secondaryAction = AppColors.secondaryActionLight,
+      disabledSurface = AppColors.disabledSurfaceLight,
+      onDisabled = AppColors.onDisabledLight;
 
   const AppSemanticColors.dark()
     : primaryAccent = AppColors.primaryAccentDark,
@@ -56,7 +60,9 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       surfaceElevated = AppColors.surfaceElevatedDark,
       borderSubtle = AppColors.borderSubtleDark,
       focusRing = AppColors.focusRingDark,
-      secondaryAction = AppColors.secondaryActionDark;
+      secondaryAction = AppColors.secondaryActionDark,
+      disabledSurface = AppColors.disabledSurfaceDark,
+      onDisabled = AppColors.onDisabledDark;
 
   /// The brand hue as text — a text button, a link. `ColorScheme.primary` is a
   /// fill colour, held dark enough on dark surfaces that it fails AA as a bare
@@ -94,6 +100,15 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   /// Label of a secondary (outlined) action.
   final Color secondaryAction;
 
+  /// The fill and the border of a disabled control — a solid, so the same
+  /// disabled button is the same colour on a page, on a card and in a dialog.
+  /// See `AppColors.disabledSurfaceLight`.
+  final Color disabledSurface;
+
+  /// A disabled label or glyph. Translucent, because it has three possible
+  /// grounds where [disabledSurface] has one.
+  final Color onDisabled;
+
   @override
   AppSemanticColors copyWith({
     Color? primaryAccent,
@@ -110,6 +125,8 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     Color? borderSubtle,
     Color? focusRing,
     Color? secondaryAction,
+    Color? disabledSurface,
+    Color? onDisabled,
   }) {
     return AppSemanticColors(
       primaryAccent: primaryAccent ?? this.primaryAccent,
@@ -126,6 +143,8 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       borderSubtle: borderSubtle ?? this.borderSubtle,
       focusRing: focusRing ?? this.focusRing,
       secondaryAction: secondaryAction ?? this.secondaryAction,
+      disabledSurface: disabledSurface ?? this.disabledSurface,
+      onDisabled: onDisabled ?? this.onDisabled,
     );
   }
 
@@ -158,6 +177,8 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       borderSubtle: Color.lerp(borderSubtle, other.borderSubtle, t)!,
       focusRing: Color.lerp(focusRing, other.focusRing, t)!,
       secondaryAction: Color.lerp(secondaryAction, other.secondaryAction, t)!,
+      disabledSurface: Color.lerp(disabledSurface, other.disabledSurface, t)!,
+      onDisabled: Color.lerp(onDisabled, other.onDisabled, t)!,
     );
   }
 }

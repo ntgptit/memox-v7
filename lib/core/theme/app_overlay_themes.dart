@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import 'app_delays.dart';
 import 'app_radius.dart';
 import 'app_semantic_colors.dart';
 import 'app_spacing.dart';
+import 'app_stroke.dart';
 
 /// The themes for everything Flutter draws that the app had never named.
 ///
@@ -67,19 +69,23 @@ ProgressIndicatorThemeData buildProgressIndicatorTheme(
 /// `inverseSurface` and `onInverseSurface` rather than a hand-made dark box:
 /// they are the M3 roles for exactly this, they already carry the seed, and they
 /// invert with the mode so the tooltip stays legible in both.
-TooltipThemeData buildTooltipTheme(ColorScheme scheme, TextTheme texts) =>
-    TooltipThemeData(
-      decoration: BoxDecoration(
-        color: scheme.inverseSurface,
-        borderRadius: BorderRadius.circular(AppRadius.sm),
-      ),
-      textStyle: texts.labelMedium?.copyWith(color: scheme.onInverseSurface),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
-      ),
-      waitDuration: const Duration(milliseconds: 500),
-    );
+TooltipThemeData buildTooltipTheme(
+  ColorScheme scheme,
+  TextTheme texts,
+) => TooltipThemeData(
+  decoration: BoxDecoration(
+    color: scheme.inverseSurface,
+    borderRadius: BorderRadius.circular(AppRadius.sm),
+  ),
+  textStyle: texts.labelMedium?.copyWith(color: scheme.onInverseSurface),
+  padding: const EdgeInsets.symmetric(
+    horizontal: AppSpacing.md,
+    vertical: AppSpacing.sm,
+  ),
+  // An interaction delay, not a motion duration — see `AppDelays` for why
+  // it is not `AppDurations.slow`, and why reduced motion does not touch it.
+  waitDuration: AppDelays.tooltipWait,
+);
 
 /// Caret, selection and the drag handles in a text field.
 ///
@@ -100,8 +106,15 @@ TextSelectionThemeData buildTextSelectionTheme(
 /// The same token a card's border uses, because they are the same idea at
 /// different scales — a divider that disagreed with a card outline would make
 /// one list look like two.
+///
+/// `space` equals `thickness`, so a divider occupies exactly the line it draws
+/// and adds no padding of its own — Material's default reserves 16.
 DividerThemeData buildDividerTheme(AppSemanticColors semantic) =>
-    DividerThemeData(color: semantic.borderSubtle, thickness: 1, space: 1);
+    DividerThemeData(
+      color: semantic.borderSubtle,
+      thickness: AppStroke.hairline,
+      space: AppStroke.hairline,
+    );
 
 /// The scroll thumb.
 ///

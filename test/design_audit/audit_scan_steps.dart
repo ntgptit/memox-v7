@@ -102,6 +102,13 @@ Map<String, Object?> buildViolations() {
     'lib/core/theme/app_button_themes.dart',
     'lib/core/theme/app_elevation.dart',
     'lib/core/theme/app_overlay_themes.dart',
+    // The state layers. Translucent by definition — an overlay's job is to
+    // composite over whatever surface the control happens to sit on, so there
+    // is no fixed ground to precompute against. Exactly the exemption a shadow
+    // and a scrim already have, and the V5 rule below names `overlayColor` as
+    // the case it means. The three sites here used to live in
+    // `app_button_themes.dart`, which is on this list for the same reason.
+    'lib/core/theme/app_interaction_states.dart',
   };
 
   for (final site in sites) {

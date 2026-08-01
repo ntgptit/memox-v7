@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_button_themes.dart';
 import '../../core/theme/app_icon_size.dart';
 import '../../core/theme/app_spacing.dart';
+import '../../core/theme/theme_context_extension.dart';
 
 /// How much weight a button carries on its screen.
 ///
@@ -83,12 +85,22 @@ class MxActionButton extends StatelessWidget {
       // `error` / `onError`, not a token read directly: the scheme pair is
       // already contrast-checked against each other in `app_theme_test.dart`,
       // and A2 maps `error` onto the `danger` token so the two cannot diverge.
+      //
+      // **`buildFilledStyle`, not `FilledButton.styleFrom`.** `styleFrom` builds
+      // a flat `WidgetStatePropertyAll`, and a non-null property on the widget
+      // shadows the theme's for every state at once — so the destructive button
+      // did not darken on press and stayed fully red when disabled while its
+      // label faded to 38%. A control that looks armed and is inert is worse
+      // than one that looks disabled. The same builder the primary variant
+      // resolves through, with the error pair substituted for the accent.
       MxActionButtonVariant.destructive => FilledButton(
         onPressed: effectiveOnPressed,
         autofocus: shouldAutofocus,
-        style: FilledButton.styleFrom(
-          backgroundColor: Theme.of(context).colorScheme.error,
-          foregroundColor: Theme.of(context).colorScheme.onError,
+        style: buildFilledStyle(
+          context.colors,
+          context.semanticColors,
+          fill: context.colors.error,
+          label: context.colors.onError,
         ),
         child: child,
       ),

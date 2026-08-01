@@ -7,8 +7,8 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M4.10ab |
-| **Last updated** | 2026-08-01 |
+| **Updated by task** | M4.10an |
+| **Last updated** | 2026-08-02 |
 
 Single source of truth for project progress. Update it in the same commit as the
 work it describes. A task is `done` only when it meets the Definition of Done in
@@ -4365,6 +4365,106 @@ Phân công enforcement ghi trong AD-15 và nhắc ở cả ba nơi: AD giữ da
 canonical, boundary test giữ hình dạng đầy đủ + anti-vacuous mức app, guard là
 lưới thứ hai; `check_architecture.sh` cố ý đứng ngoài — nó sở hữu suffix, và
 một luật hai bản trong hai script là hai bản sẽ trôi khỏi nhau.
+
+**Next task: M4.10an · Nền tảng chung cho interaction state, stroke và motion.**
+
+### M4.10an · Interaction state, stroke token và reduced motion về tầng common
+
+- **Status:** done
+- **Goal:** Mọi trạng thái tương tác quan trọng (hover · pressed · focus ·
+  disabled · selected) được **khai báo** ở tầng common thay vì rơi về default
+  của Material, ba bề rộng nét có token semantic, và animation hữu hạn tôn trọng
+  reduced motion của hệ điều hành.
+- **Scope:** bốn file token/policy mới dưới `lib/core/theme/` (`app_stroke.dart`,
+  `app_interaction_states.dart`, `app_delays.dart`, `app_motion_policy.dart`);
+  hai field mới trên `AppSemanticColors` (`disabledSurface`, `onDisabled`);
+  `app_theme.dart`, `app_button_themes.dart`, `app_overlay_themes.dart`,
+  `app_chip_theme.dart`; `MxCard`, `MxListTile`, `MxActionButton`,
+  `MxTextButton`, `MxProgressBar`, `MxSearchField`; `test/support/ink_probe.dart`
+  và test ở 8 file; `design_audit/` sinh lại; `test/design_audit/`
+  `audit_scan_steps.dart` thêm file theme mới vào `declarationSites`.
+- **Out of scope:** `MxSnackbar` / feedback coordinator; responsive
+  tablet/desktop; settings theme-mode / locale / text-scale; routing, Riverpod,
+  domain, repository, Drift; component shared mới; `lib/features/**` (hai chỗ
+  `Border.all` ở deck vẫn dùng width mặc định — không có literal để thay).
+- **Dependencies:** M4.10am
+- **Checklist phases:** 7, 12, 13
+- **Tests required:** stroke token so với `design_system/tokens/elevation.css`;
+  contract state ở tầng theme; chuột và bàn phím **thật** trên `MxCard` và
+  `MxListTile` ở cả light lẫn dark; reduced motion trên `MxProgressBar` và
+  `MxSearchField` với cả hai giá trị của cờ.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/core/theme/app_stroke.dart` ·
+  `lib/core/theme/app_interaction_states.dart` ·
+  `lib/core/theme/app_motion_policy.dart` · `lib/core/theme/app_delays.dart` ·
+  `test/support/ink_probe.dart` · `test/shared/widgets/mx_list_tile_test.dart`
+- **Acceptance criteria:**
+  - [x] `AppStroke.hairline/input/focus` khớp `--border-hairline/input/focus`,
+        kiểm bằng cách **parse CSS** chứ không chép tay.
+  - [x] Không còn state quan trọng nào của button / card / list item rơi về
+        default Material; ngoại lệ có chủ ý là `MxTextButton` và breadcrumb
+        (link-like, state nằm trên chữ).
+  - [x] Focus trên card và row là **ring 2px**, không phải chỉ đổi màu; đo được
+        là không có layout shift ở hover / pressed / focus.
+  - [x] `MxProgressBar` và `MxSearchField` trả `Duration.zero` khi
+        `disableAnimations`; giá trị cuối, màu, semantics và callback không đổi.
+  - [x] 1063 test pass; `flutter analyze` 0 issue; guard xanh; 4 golden đổi có
+        chủ đích, đã render và kiểm bằng mắt ở cả hai chế độ.
+
+**Ba lỗi thật mà việc "khai báo state" phơi ra, và không lỗi nào nhìn thấy được
+trong source trước đó.** (1) `MxActionButton.destructive` truyền
+`FilledButton.styleFrom(backgroundColor: error)` — `styleFrom` dựng một
+`WidgetStatePropertyAll` phẳng, và property non-null của widget **che property
+của theme cho mọi state**: nút destructive không tối đi khi nhấn, và khi disabled
+vẫn đỏ nguyên dưới một nhãn 38%. (2) `FilledButton` primary phủ overlay 6%
+`primary` lên nền `primary` — hover **vô hình**; kit quy định `.mx-btn--primary`
+hover là lerp 6% về phía ink, tức một phép trộn chứ không phải một lớp phủ. (3)
+`MxCard` và `MxListTile` không khai bất kỳ màu tương tác nào, nên hover / focus /
+splash đến từ `ThemeData.hoverColor` — một wash đen hardcoded, không mang seed,
+giống hệt nhau ở light và dark. Cả ba vô hình với `design_audit/` vì nó quét
+source, còn default của framework không tồn tại trong source.
+
+**`AppDelays` tách khỏi `AppDurations`, và đó là một ranh giới chứ không phải sở
+thích.** `tooltipWait` 500ms là độ trễ tương tác, không phải thời lượng chuyển
+động; đặt nó vào `AppDurations.slow` sẽ phá chính hợp đồng của file đó — `slow`
+được mô tả là **trần** của motion. Cùng lý do, reduced motion không đụng tới nó:
+tooltip xuất hiện ngay khi con trỏ chạm sẽ bật lên ở mọi lần lướt qua toolbar.
+Spinner indeterminate cũng giữ nguyên: chuyển động của nó *là* thông tin.
+
+**Ba mâu thuẫn design/code phát hiện được, xử lý theo thứ tự nguồn.**
+- `design_system/tokens/colors.css` khai `--color-disabled-surface:#E3E3E6` /
+  `#312E4E`; phép trộn mà code chạy cho ra `#E0E0E5` / `#33324F`, lệch ~3/255.
+  Kit là bản **chép lại** từ một comment cũ trong `app_button_themes.dart`, nên
+  giữ giá trị code đang render và ghi nhận ở đây. Token mới nằm trong
+  `AppColors` — luật MX-VIS-002 R2 giữ mọi colour literal ở đó, và bản nháp đầu
+  đặt chúng cạnh alpha trong `app_interaction_states.dart` đã bị
+  `color_source_rules_test.dart` bắt — còn test buộc nó bằng đúng phép trộn.
+- `mx.css` tự mâu thuẫn với chính nó: comment đầu file nói press là overlay 12%
+  ở mọi nơi, còn rule `.mx-card__action:active` ngay dưới đó nói 10%. Rule thắng
+  comment — cùng thứ tự ưu tiên mà `document-conventions.md` §9 đặt ra.
+- `readme.md` nói hover trên row là "8% neutral"; `mx.css` `button.mx-tile:hover`
+  nói 7%. `mx.css` là nguồn cho hành vi component, nên 7% thắng.
+- **Chưa xử lý, cần người quyết:** `.mx-iconbtn:focus-visible` dùng
+  `--color-primary`, mà `primary` ở dark đo được **2.81:1** trên surface — dưới
+  ngưỡng 3:1 của WCAG 1.4.11 cho focus indicator. Token `--color-focus-ring` tồn
+  tại và đạt 5.36:1 dark / 7.41:1 light, `mx.css` đã dùng nó cho nav và nút
+  Study. Đổi màu ring là **thay đổi pixel dựa trên một mâu thuẫn chưa có nguồn
+  canonical**, nên task này chỉ token hoá bề rộng và giữ nguyên màu.
+
+**`design_audit/` xuống 0 violation** (từ 1): V5 duy nhất còn lại là
+`onSurface.withValues(alpha: 0.38)` trong `MxTextButton`, nay đọc
+`semantic.onDisabled`. `app_interaction_states.dart` được thêm vào
+`declarationSites` của audit vì state layer **về bản chất** là trong suốt — nền
+của nó là bề mặt mà control tình cờ ngồi lên — đúng miễn trừ mà shadow và scrim
+đã có, và chính rule V5 nêu `overlayColor` là trường hợp nó muốn nói tới.
+
+**Test dùng sự kiện thật, và cái đó buộc phải viết một probe.** Đọc
+`inkWell.overlayColor.resolve({hovered})` chỉ chứng minh một property đã được
+gán — nó pass y hệt khi con trỏ không bao giờ tới control. `test/support/`
+`ink_probe.dart` lái chuột thật rồi đọc lệnh vẽ trên `_RenderInkFeatures`; nó
+quét **mọi** lớp ink (`MxCard` tự dựng Material của nó, `MxListTile` vẽ vào lớp
+của `Scaffold`) và so màu theo ARGB đóng gói, vì `InkHighlight` animate alpha
+bằng số nguyên nên token khai `alpha: 0.04` chạm canvas ở `10/255`.
 
 **Next task: M4.11 · Card management full-stack.**
 

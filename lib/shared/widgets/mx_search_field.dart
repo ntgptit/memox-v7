@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_durations.dart';
 import '../../core/theme/app_icon_size.dart';
+import '../../core/theme/app_motion_policy.dart';
 import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
@@ -89,7 +90,11 @@ class _MxSearchFieldState extends State<MxSearchField> {
     final count = widget.resultCount;
 
     return AnimatedContainer(
-      duration: AppDurations.fast,
+      // The crossfade between the resting well and the focused surface is
+      // decoration on a state change — the state itself is carried by the fill
+      // and the border colour, both of which are already correct in the first
+      // frame. Reduced motion drops the fade and keeps the state.
+      duration: AppMotionPolicy.durationOf(context, AppDurations.fast),
       curve: AppDurations.standard,
       decoration: BoxDecoration(
         color: _hasFocus ? colors.surface : semantic.surfaceMuted,

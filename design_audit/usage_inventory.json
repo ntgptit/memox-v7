@@ -1,22 +1,22 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 130,
-  "totalSites": 302,
+  "scannedFiles": 134,
+  "totalSites": 305,
   "byElementKind": {
-    "other": 250,
-    "background": 9,
-    "text": 23,
+    "other": 258,
+    "background": 7,
     "shadow": 1,
     "border": 10,
+    "text": 20,
     "icon": 9
   },
   "bySourceKind": {
-    "shared-constant": 137,
-    "blend-source": 3,
-    "opacity-modified-token": 10,
-    "hardcoded-literal": 91,
+    "shared-constant": 141,
+    "hardcoded-literal": 95,
+    "opacity-modified-token": 7,
     "Colors-material": 4,
-    "theme-token": 57
+    "blend-source": 2,
+    "theme-token": 56
   },
   "sites": [
     {
@@ -95,72 +95,6 @@
       "token": "AppColors.webLetterbox",
       "resolved_value_light": "unresolvable: no light counterpart in theme",
       "resolved_value_dark": "unresolvable: no dark counterpart in theme"
-    },
-    {
-      "file": "lib/core/theme/app_button_themes.dart",
-      "line": 38,
-      "widget_context": "<top-level>",
-      "element_kind": "other",
-      "source_kind": "blend-source",
-      "expression": "scheme.onSurface.withValues(alpha: 0.12)",
-      "token": "colorScheme.onSurface",
-      "resolved_value_light": "#16182B",
-      "resolved_value_dark": "#EDEDF6"
-    },
-    {
-      "file": "lib/core/theme/app_button_themes.dart",
-      "line": 54,
-      "widget_context": "<top-level>",
-      "element_kind": "other",
-      "source_kind": "opacity-modified-token",
-      "expression": "scheme.primary.withValues(alpha: 0.12)",
-      "token": "colorScheme.primary",
-      "resolved_value_light": "#4646B4 @ alpha 0.12",
-      "resolved_value_dark": "#5656C9 @ alpha 0.12"
-    },
-    {
-      "file": "lib/core/theme/app_button_themes.dart",
-      "line": 57,
-      "widget_context": "<top-level>",
-      "element_kind": "other",
-      "source_kind": "opacity-modified-token",
-      "expression": "scheme.primary.withValues(alpha: 0.10)",
-      "token": "colorScheme.primary",
-      "resolved_value_light": "#4646B4 @ alpha 0.10",
-      "resolved_value_dark": "#5656C9 @ alpha 0.10"
-    },
-    {
-      "file": "lib/core/theme/app_button_themes.dart",
-      "line": 67,
-      "widget_context": "<top-level>",
-      "element_kind": "other",
-      "source_kind": "opacity-modified-token",
-      "expression": "scheme.primary.withValues(alpha: 0.06)",
-      "token": "colorScheme.primary",
-      "resolved_value_light": "#4646B4 @ alpha 0.06",
-      "resolved_value_dark": "#5656C9 @ alpha 0.06"
-    },
-    {
-      "file": "lib/core/theme/app_button_themes.dart",
-      "line": 93,
-      "widget_context": "<top-level>",
-      "element_kind": "text",
-      "source_kind": "opacity-modified-token",
-      "expression": "scheme.onSurface.withValues(alpha: 0.38)",
-      "token": "colorScheme.onSurface",
-      "resolved_value_light": "#16182B @ alpha 0.38",
-      "resolved_value_dark": "#EDEDF6 @ alpha 0.38"
-    },
-    {
-      "file": "lib/core/theme/app_button_themes.dart",
-      "line": 110,
-      "widget_context": "<top-level>",
-      "element_kind": "text",
-      "source_kind": "opacity-modified-token",
-      "expression": "scheme.onSurface.withValues(alpha: 0.38)",
-      "token": "colorScheme.onSurface",
-      "resolved_value_light": "#16182B @ alpha 0.38",
-      "resolved_value_dark": "#EDEDF6 @ alpha 0.38"
     },
     {
       "file": "lib/core/theme/app_colors.dart",
@@ -344,6 +278,50 @@
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
+      "expression": "Color(0xFFE0E0E5)",
+      "token": null,
+      "resolved_value_light": "#E0E0E5",
+      "resolved_value_dark": "#E0E0E5"
+    },
+    {
+      "file": "lib/core/theme/app_colors.dart",
+      "line": 158,
+      "widget_context": "AppColors",
+      "element_kind": "other",
+      "source_kind": "hardcoded-literal",
+      "expression": "Color(0xFF33324F)",
+      "token": null,
+      "resolved_value_light": "#33324F",
+      "resolved_value_dark": "#33324F"
+    },
+    {
+      "file": "lib/core/theme/app_colors.dart",
+      "line": 164,
+      "widget_context": "AppColors",
+      "element_kind": "other",
+      "source_kind": "hardcoded-literal",
+      "expression": "Color(0x6116182B)",
+      "token": null,
+      "resolved_value_light": "#6116182B",
+      "resolved_value_dark": "#6116182B"
+    },
+    {
+      "file": "lib/core/theme/app_colors.dart",
+      "line": 165,
+      "widget_context": "AppColors",
+      "element_kind": "other",
+      "source_kind": "hardcoded-literal",
+      "expression": "Color(0x61EDEDF6)",
+      "token": null,
+      "resolved_value_light": "#61EDEDF6",
+      "resolved_value_dark": "#61EDEDF6"
+    },
+    {
+      "file": "lib/core/theme/app_colors.dart",
+      "line": 177,
+      "widget_context": "AppColors",
+      "element_kind": "other",
+      "source_kind": "hardcoded-literal",
       "expression": "Color(0xFF4646B4)",
       "token": null,
       "resolved_value_light": "#4646B4",
@@ -351,7 +329,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 158,
+      "line": 178,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -362,7 +340,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 159,
+      "line": 179,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -373,7 +351,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 160,
+      "line": 180,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -384,7 +362,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 170,
+      "line": 190,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -395,7 +373,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 171,
+      "line": 191,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -406,7 +384,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 181,
+      "line": 201,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -417,7 +395,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 182,
+      "line": 202,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -428,7 +406,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 210,
+      "line": 230,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -439,7 +417,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 211,
+      "line": 231,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -450,7 +428,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 214,
+      "line": 234,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -461,7 +439,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 215,
+      "line": 235,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -472,7 +450,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 218,
+      "line": 238,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -483,7 +461,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 219,
+      "line": 239,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -494,7 +472,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 234,
+      "line": 254,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -505,7 +483,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 235,
+      "line": 255,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -516,7 +494,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 238,
+      "line": 258,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -527,7 +505,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 239,
+      "line": 259,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -538,7 +516,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 266,
+      "line": 286,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -549,7 +527,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 267,
+      "line": 287,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -560,7 +538,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 268,
+      "line": 288,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -571,7 +549,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 273,
+      "line": 293,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -582,7 +560,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 277,
+      "line": 297,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -593,7 +571,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 278,
+      "line": 298,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -604,7 +582,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 285,
+      "line": 305,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -615,7 +593,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 286,
+      "line": 306,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -626,7 +604,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 287,
+      "line": 307,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -637,7 +615,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 290,
+      "line": 310,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -648,7 +626,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 291,
+      "line": 311,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -659,7 +637,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 298,
+      "line": 318,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -670,7 +648,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 299,
+      "line": 319,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -681,7 +659,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 300,
+      "line": 320,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -692,7 +670,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 301,
+      "line": 321,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -703,7 +681,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 302,
+      "line": 322,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -714,7 +692,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 303,
+      "line": 323,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -725,7 +703,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 304,
+      "line": 324,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -736,7 +714,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 305,
+      "line": 325,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -747,7 +725,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 309,
+      "line": 329,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -758,7 +736,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 310,
+      "line": 330,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -769,7 +747,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 311,
+      "line": 331,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -780,7 +758,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 312,
+      "line": 332,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -791,7 +769,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 313,
+      "line": 333,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -802,7 +780,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 314,
+      "line": 334,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -813,7 +791,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 315,
+      "line": 335,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -824,7 +802,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 316,
+      "line": 336,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -835,7 +813,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 317,
+      "line": 337,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -846,7 +824,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 318,
+      "line": 338,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -857,7 +835,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 319,
+      "line": 339,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -868,7 +846,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 320,
+      "line": 340,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -879,7 +857,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 321,
+      "line": 341,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -890,7 +868,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 322,
+      "line": 342,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -901,7 +879,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 328,
+      "line": 348,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -912,7 +890,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 329,
+      "line": 349,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -923,7 +901,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 330,
+      "line": 350,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -934,7 +912,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 331,
+      "line": 351,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -945,7 +923,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 332,
+      "line": 352,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -956,7 +934,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 333,
+      "line": 353,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -967,7 +945,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 334,
+      "line": 354,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -978,7 +956,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 335,
+      "line": 355,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -989,7 +967,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 336,
+      "line": 356,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -1000,7 +978,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 337,
+      "line": 357,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -1011,7 +989,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 338,
+      "line": 358,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -1022,7 +1000,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 339,
+      "line": 359,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -1033,7 +1011,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 340,
+      "line": 360,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -1044,7 +1022,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 341,
+      "line": 361,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -1055,7 +1033,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 342,
+      "line": 362,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -1066,7 +1044,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 343,
+      "line": 363,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -1077,7 +1055,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 344,
+      "line": 364,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -1088,7 +1066,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 345,
+      "line": 365,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -1099,7 +1077,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 346,
+      "line": 366,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -1110,7 +1088,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 372,
+      "line": 392,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -1121,7 +1099,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 374,
+      "line": 394,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -1132,7 +1110,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 375,
+      "line": 395,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -1143,7 +1121,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 376,
+      "line": 396,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -1154,7 +1132,7 @@
     },
     {
       "file": "lib/core/theme/app_colors.dart",
-      "line": 377,
+      "line": 397,
       "widget_context": "AppColors",
       "element_kind": "other",
       "source_kind": "hardcoded-literal",
@@ -1175,8 +1153,41 @@
       "resolved_value_dark": "#04040B @ alpha 0.06"
     },
     {
+      "file": "lib/core/theme/app_interaction_states.dart",
+      "line": 144,
+      "widget_context": "AppInteractionStates",
+      "element_kind": "other",
+      "source_kind": "opacity-modified-token",
+      "expression": "scheme.primary.withValues(alpha: pressedAlpha)",
+      "token": "colorScheme.primary",
+      "resolved_value_light": "#4646B4 @ alpha unresolvable",
+      "resolved_value_dark": "#5656C9 @ alpha unresolvable"
+    },
+    {
+      "file": "lib/core/theme/app_interaction_states.dart",
+      "line": 147,
+      "widget_context": "AppInteractionStates",
+      "element_kind": "other",
+      "source_kind": "opacity-modified-token",
+      "expression": "scheme.primary.withValues(alpha: AppStateOpacity.focus)",
+      "token": "colorScheme.primary",
+      "resolved_value_light": "#4646B4 @ alpha unresolvable",
+      "resolved_value_dark": "#5656C9 @ alpha unresolvable"
+    },
+    {
+      "file": "lib/core/theme/app_interaction_states.dart",
+      "line": 150,
+      "widget_context": "AppInteractionStates",
+      "element_kind": "other",
+      "source_kind": "opacity-modified-token",
+      "expression": "hoverColor.withValues(alpha: hoverAlpha)",
+      "token": null,
+      "resolved_value_light": "unresolvable: value depends on runtime state",
+      "resolved_value_dark": "unresolvable: value depends on runtime state"
+    },
+    {
       "file": "lib/core/theme/app_overlay_themes.dart",
-      "line": 35,
+      "line": 37,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
@@ -1187,7 +1198,7 @@
     },
     {
       "file": "lib/core/theme/app_overlay_themes.dart",
-      "line": 60,
+      "line": 62,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "Colors-material",
@@ -1198,7 +1209,7 @@
     },
     {
       "file": "lib/core/theme/app_overlay_themes.dart",
-      "line": 94,
+      "line": 100,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
@@ -1209,7 +1220,7 @@
     },
     {
       "file": "lib/core/theme/app_overlay_themes.dart",
-      "line": 113,
+      "line": 126,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
@@ -1220,7 +1231,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 30,
+      "line": 32,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1231,7 +1242,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 31,
+      "line": 33,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1242,7 +1253,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 32,
+      "line": 34,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1253,7 +1264,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 33,
+      "line": 35,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1264,7 +1275,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 34,
+      "line": 36,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1275,7 +1286,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 35,
+      "line": 37,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1286,7 +1297,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 36,
+      "line": 38,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1297,7 +1308,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 37,
+      "line": 39,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1308,7 +1319,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 38,
+      "line": 40,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1319,7 +1330,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 39,
+      "line": 41,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1330,7 +1341,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 40,
+      "line": 42,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1341,7 +1352,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 41,
+      "line": 43,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1352,7 +1363,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 42,
+      "line": 44,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1363,7 +1374,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 43,
+      "line": 45,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1375,6 +1386,28 @@
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
       "line": 46,
+      "widget_context": "AppSemanticColors",
+      "element_kind": "other",
+      "source_kind": "shared-constant",
+      "expression": "AppColors.disabledSurfaceLight",
+      "token": "AppColors.disabledSurfaceLight",
+      "resolved_value_light": "unresolvable: no light counterpart in theme",
+      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
+    },
+    {
+      "file": "lib/core/theme/app_semantic_colors.dart",
+      "line": 47,
+      "widget_context": "AppSemanticColors",
+      "element_kind": "other",
+      "source_kind": "shared-constant",
+      "expression": "AppColors.onDisabledLight",
+      "token": "AppColors.onDisabledLight",
+      "resolved_value_light": "unresolvable: no light counterpart in theme",
+      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
+    },
+    {
+      "file": "lib/core/theme/app_semantic_colors.dart",
+      "line": 50,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1385,7 +1418,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 47,
+      "line": 51,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1396,7 +1429,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 48,
+      "line": 52,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1407,7 +1440,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 49,
+      "line": 53,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1418,7 +1451,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 50,
+      "line": 54,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1429,7 +1462,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 51,
+      "line": 55,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1440,7 +1473,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 52,
+      "line": 56,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1451,7 +1484,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 53,
+      "line": 57,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1462,7 +1495,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 54,
+      "line": 58,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1473,7 +1506,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 55,
+      "line": 59,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1484,7 +1517,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 56,
+      "line": 60,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1495,7 +1528,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 57,
+      "line": 61,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1506,7 +1539,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 58,
+      "line": 62,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1517,7 +1550,7 @@
     },
     {
       "file": "lib/core/theme/app_semantic_colors.dart",
-      "line": 59,
+      "line": 63,
       "widget_context": "AppSemanticColors",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1527,8 +1560,30 @@
       "resolved_value_dark": "#C3C6D2"
     },
     {
+      "file": "lib/core/theme/app_semantic_colors.dart",
+      "line": 64,
+      "widget_context": "AppSemanticColors",
+      "element_kind": "other",
+      "source_kind": "shared-constant",
+      "expression": "AppColors.disabledSurfaceDark",
+      "token": "AppColors.disabledSurfaceDark",
+      "resolved_value_light": "unresolvable: no light counterpart in theme",
+      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
+    },
+    {
+      "file": "lib/core/theme/app_semantic_colors.dart",
+      "line": 65,
+      "widget_context": "AppSemanticColors",
+      "element_kind": "other",
+      "source_kind": "shared-constant",
+      "expression": "AppColors.onDisabledDark",
+      "token": "AppColors.onDisabledDark",
+      "resolved_value_light": "unresolvable: no light counterpart in theme",
+      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
+    },
+    {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 25,
+      "line": 27,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1539,7 +1594,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 30,
+      "line": 32,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1550,7 +1605,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 31,
+      "line": 33,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1561,7 +1616,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 32,
+      "line": 34,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1572,7 +1627,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 33,
+      "line": 35,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1583,7 +1638,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 34,
+      "line": 36,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1594,7 +1649,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 35,
+      "line": 37,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1605,7 +1660,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 36,
+      "line": 38,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1616,7 +1671,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 37,
+      "line": 39,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1627,7 +1682,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 38,
+      "line": 40,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1638,7 +1693,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 39,
+      "line": 41,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1649,7 +1704,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 40,
+      "line": 42,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1660,7 +1715,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 41,
+      "line": 43,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1671,7 +1726,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 43,
+      "line": 45,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1682,7 +1737,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 44,
+      "line": 46,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1693,7 +1748,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 45,
+      "line": 47,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1704,7 +1759,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 46,
+      "line": 48,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1715,7 +1770,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 47,
+      "line": 49,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1726,7 +1781,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 48,
+      "line": 50,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1737,7 +1792,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 49,
+      "line": 51,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1748,7 +1803,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 50,
+      "line": 52,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1759,7 +1814,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 51,
+      "line": 53,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1770,7 +1825,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 52,
+      "line": 54,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1781,7 +1836,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 53,
+      "line": 55,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1792,7 +1847,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 54,
+      "line": 56,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1803,7 +1858,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 55,
+      "line": 57,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1814,7 +1869,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 56,
+      "line": 58,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1825,29 +1880,29 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 57,
-      "widget_context": "<top-level>",
-      "element_kind": "border",
-      "source_kind": "shared-constant",
-      "expression": "AppColors.borderSubtleLight",
-      "token": "AppColors.borderSubtleLight",
-      "resolved_value_light": "#D2D2DD",
-      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
-    },
-    {
-      "file": "lib/core/theme/app_theme.dart",
-      "line": 58,
-      "widget_context": "<top-level>",
-      "element_kind": "border",
-      "source_kind": "shared-constant",
-      "expression": "AppColors.borderSubtleLight",
-      "token": "AppColors.borderSubtleLight",
-      "resolved_value_light": "#D2D2DD",
-      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
-    },
-    {
-      "file": "lib/core/theme/app_theme.dart",
       "line": 59,
+      "widget_context": "<top-level>",
+      "element_kind": "border",
+      "source_kind": "shared-constant",
+      "expression": "AppColors.borderSubtleLight",
+      "token": "AppColors.borderSubtleLight",
+      "resolved_value_light": "#D2D2DD",
+      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
+    },
+    {
+      "file": "lib/core/theme/app_theme.dart",
+      "line": 60,
+      "widget_context": "<top-level>",
+      "element_kind": "border",
+      "source_kind": "shared-constant",
+      "expression": "AppColors.borderSubtleLight",
+      "token": "AppColors.borderSubtleLight",
+      "resolved_value_light": "#D2D2DD",
+      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
+    },
+    {
+      "file": "lib/core/theme/app_theme.dart",
+      "line": 61,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1858,7 +1913,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 60,
+      "line": 62,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1869,7 +1924,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 61,
+      "line": 63,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1880,7 +1935,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 62,
+      "line": 64,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1891,29 +1946,29 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 68,
-      "widget_context": "<top-level>",
-      "element_kind": "other",
-      "source_kind": "shared-constant",
-      "expression": "AppColors.primaryContainerLight",
-      "token": "AppColors.primaryContainerLight",
-      "resolved_value_light": "#DCDCF2",
-      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
-    },
-    {
-      "file": "lib/core/theme/app_theme.dart",
-      "line": 69,
-      "widget_context": "<top-level>",
-      "element_kind": "other",
-      "source_kind": "shared-constant",
-      "expression": "AppColors.primaryContainerLight",
-      "token": "AppColors.primaryContainerLight",
-      "resolved_value_light": "#DCDCF2",
-      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
-    },
-    {
-      "file": "lib/core/theme/app_theme.dart",
       "line": 70,
+      "widget_context": "<top-level>",
+      "element_kind": "other",
+      "source_kind": "shared-constant",
+      "expression": "AppColors.primaryContainerLight",
+      "token": "AppColors.primaryContainerLight",
+      "resolved_value_light": "#DCDCF2",
+      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
+    },
+    {
+      "file": "lib/core/theme/app_theme.dart",
+      "line": 71,
+      "widget_context": "<top-level>",
+      "element_kind": "other",
+      "source_kind": "shared-constant",
+      "expression": "AppColors.primaryContainerLight",
+      "token": "AppColors.primaryContainerLight",
+      "resolved_value_light": "#DCDCF2",
+      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
+    },
+    {
+      "file": "lib/core/theme/app_theme.dart",
+      "line": 72,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1924,7 +1979,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 71,
+      "line": 73,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1935,29 +1990,29 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 72,
-      "widget_context": "<top-level>",
-      "element_kind": "other",
-      "source_kind": "shared-constant",
-      "expression": "AppColors.secondaryContainerLight",
-      "token": "AppColors.secondaryContainerLight",
-      "resolved_value_light": "#E4E6EC",
-      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
-    },
-    {
-      "file": "lib/core/theme/app_theme.dart",
-      "line": 73,
-      "widget_context": "<top-level>",
-      "element_kind": "other",
-      "source_kind": "shared-constant",
-      "expression": "AppColors.secondaryContainerLight",
-      "token": "AppColors.secondaryContainerLight",
-      "resolved_value_light": "#E4E6EC",
-      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
-    },
-    {
-      "file": "lib/core/theme/app_theme.dart",
       "line": 74,
+      "widget_context": "<top-level>",
+      "element_kind": "other",
+      "source_kind": "shared-constant",
+      "expression": "AppColors.secondaryContainerLight",
+      "token": "AppColors.secondaryContainerLight",
+      "resolved_value_light": "#E4E6EC",
+      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
+    },
+    {
+      "file": "lib/core/theme/app_theme.dart",
+      "line": 75,
+      "widget_context": "<top-level>",
+      "element_kind": "other",
+      "source_kind": "shared-constant",
+      "expression": "AppColors.secondaryContainerLight",
+      "token": "AppColors.secondaryContainerLight",
+      "resolved_value_light": "#E4E6EC",
+      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
+    },
+    {
+      "file": "lib/core/theme/app_theme.dart",
+      "line": 76,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1968,7 +2023,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 75,
+      "line": 77,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -1979,29 +2034,29 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 76,
-      "widget_context": "<top-level>",
-      "element_kind": "other",
-      "source_kind": "shared-constant",
-      "expression": "AppColors.tertiaryContainerLight",
-      "token": "AppColors.tertiaryContainerLight",
-      "resolved_value_light": "unresolvable: no light counterpart in theme",
-      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
-    },
-    {
-      "file": "lib/core/theme/app_theme.dart",
-      "line": 77,
-      "widget_context": "<top-level>",
-      "element_kind": "other",
-      "source_kind": "shared-constant",
-      "expression": "AppColors.tertiaryContainerLight",
-      "token": "AppColors.tertiaryContainerLight",
-      "resolved_value_light": "unresolvable: no light counterpart in theme",
-      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
-    },
-    {
-      "file": "lib/core/theme/app_theme.dart",
       "line": 78,
+      "widget_context": "<top-level>",
+      "element_kind": "other",
+      "source_kind": "shared-constant",
+      "expression": "AppColors.tertiaryContainerLight",
+      "token": "AppColors.tertiaryContainerLight",
+      "resolved_value_light": "unresolvable: no light counterpart in theme",
+      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
+    },
+    {
+      "file": "lib/core/theme/app_theme.dart",
+      "line": 79,
+      "widget_context": "<top-level>",
+      "element_kind": "other",
+      "source_kind": "shared-constant",
+      "expression": "AppColors.tertiaryContainerLight",
+      "token": "AppColors.tertiaryContainerLight",
+      "resolved_value_light": "unresolvable: no light counterpart in theme",
+      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
+    },
+    {
+      "file": "lib/core/theme/app_theme.dart",
+      "line": 80,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2012,7 +2067,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 79,
+      "line": 81,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2023,7 +2078,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 80,
+      "line": 82,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2034,7 +2089,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 81,
+      "line": 83,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2045,7 +2100,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 84,
+      "line": 86,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2056,7 +2111,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 85,
+      "line": 87,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2067,7 +2122,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 86,
+      "line": 88,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2078,7 +2133,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 87,
+      "line": 89,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2089,7 +2144,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 92,
+      "line": 94,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2100,7 +2155,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 95,
+      "line": 97,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2111,7 +2166,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 96,
+      "line": 98,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2122,7 +2177,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 97,
+      "line": 99,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2133,7 +2188,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 98,
+      "line": 100,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2144,7 +2199,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 99,
+      "line": 101,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2155,7 +2210,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 100,
+      "line": 102,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2166,7 +2221,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 101,
+      "line": 103,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2177,7 +2232,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 102,
+      "line": 104,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2188,7 +2243,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 103,
+      "line": 105,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2199,7 +2254,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 104,
+      "line": 106,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2210,7 +2265,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 105,
+      "line": 107,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2221,7 +2276,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 106,
+      "line": 108,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2232,7 +2287,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 107,
+      "line": 109,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2243,7 +2298,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 108,
+      "line": 110,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2254,7 +2309,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 109,
+      "line": 111,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2265,7 +2320,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 110,
+      "line": 112,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2276,7 +2331,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 111,
+      "line": 113,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2287,7 +2342,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 112,
+      "line": 114,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2298,7 +2353,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 113,
+      "line": 115,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2309,7 +2364,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 114,
+      "line": 116,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2320,7 +2375,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 115,
+      "line": 117,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2331,7 +2386,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 116,
+      "line": 118,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2342,7 +2397,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 117,
+      "line": 119,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2353,7 +2408,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 118,
+      "line": 120,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2364,7 +2419,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 119,
+      "line": 121,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2375,7 +2430,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 120,
+      "line": 122,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2386,29 +2441,29 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 121,
-      "widget_context": "<top-level>",
-      "element_kind": "border",
-      "source_kind": "shared-constant",
-      "expression": "AppColors.borderSubtleDark",
-      "token": "AppColors.borderSubtleDark",
-      "resolved_value_light": "unresolvable: no light counterpart in theme",
-      "resolved_value_dark": "#403D67"
-    },
-    {
-      "file": "lib/core/theme/app_theme.dart",
-      "line": 122,
-      "widget_context": "<top-level>",
-      "element_kind": "border",
-      "source_kind": "shared-constant",
-      "expression": "AppColors.borderSubtleDark",
-      "token": "AppColors.borderSubtleDark",
-      "resolved_value_light": "unresolvable: no light counterpart in theme",
-      "resolved_value_dark": "#403D67"
-    },
-    {
-      "file": "lib/core/theme/app_theme.dart",
       "line": 123,
+      "widget_context": "<top-level>",
+      "element_kind": "border",
+      "source_kind": "shared-constant",
+      "expression": "AppColors.borderSubtleDark",
+      "token": "AppColors.borderSubtleDark",
+      "resolved_value_light": "unresolvable: no light counterpart in theme",
+      "resolved_value_dark": "#403D67"
+    },
+    {
+      "file": "lib/core/theme/app_theme.dart",
+      "line": 124,
+      "widget_context": "<top-level>",
+      "element_kind": "border",
+      "source_kind": "shared-constant",
+      "expression": "AppColors.borderSubtleDark",
+      "token": "AppColors.borderSubtleDark",
+      "resolved_value_light": "unresolvable: no light counterpart in theme",
+      "resolved_value_dark": "#403D67"
+    },
+    {
+      "file": "lib/core/theme/app_theme.dart",
+      "line": 125,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2419,7 +2474,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 124,
+      "line": 126,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2430,7 +2485,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 125,
+      "line": 127,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2441,7 +2496,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 128,
+      "line": 130,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2452,29 +2507,29 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 134,
-      "widget_context": "<top-level>",
-      "element_kind": "other",
-      "source_kind": "shared-constant",
-      "expression": "AppColors.primaryContainerLight",
-      "token": "AppColors.primaryContainerLight",
-      "resolved_value_light": "#DCDCF2",
-      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
-    },
-    {
-      "file": "lib/core/theme/app_theme.dart",
-      "line": 135,
-      "widget_context": "<top-level>",
-      "element_kind": "other",
-      "source_kind": "shared-constant",
-      "expression": "AppColors.primaryContainerLight",
-      "token": "AppColors.primaryContainerLight",
-      "resolved_value_light": "#DCDCF2",
-      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
-    },
-    {
-      "file": "lib/core/theme/app_theme.dart",
       "line": 136,
+      "widget_context": "<top-level>",
+      "element_kind": "other",
+      "source_kind": "shared-constant",
+      "expression": "AppColors.primaryContainerLight",
+      "token": "AppColors.primaryContainerLight",
+      "resolved_value_light": "#DCDCF2",
+      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
+    },
+    {
+      "file": "lib/core/theme/app_theme.dart",
+      "line": 137,
+      "widget_context": "<top-level>",
+      "element_kind": "other",
+      "source_kind": "shared-constant",
+      "expression": "AppColors.primaryContainerLight",
+      "token": "AppColors.primaryContainerLight",
+      "resolved_value_light": "#DCDCF2",
+      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
+    },
+    {
+      "file": "lib/core/theme/app_theme.dart",
+      "line": 138,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2485,7 +2540,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 137,
+      "line": 139,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2496,29 +2551,29 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 138,
-      "widget_context": "<top-level>",
-      "element_kind": "other",
-      "source_kind": "shared-constant",
-      "expression": "AppColors.secondaryContainerLight",
-      "token": "AppColors.secondaryContainerLight",
-      "resolved_value_light": "#E4E6EC",
-      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
-    },
-    {
-      "file": "lib/core/theme/app_theme.dart",
-      "line": 139,
-      "widget_context": "<top-level>",
-      "element_kind": "other",
-      "source_kind": "shared-constant",
-      "expression": "AppColors.secondaryContainerLight",
-      "token": "AppColors.secondaryContainerLight",
-      "resolved_value_light": "#E4E6EC",
-      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
-    },
-    {
-      "file": "lib/core/theme/app_theme.dart",
       "line": 140,
+      "widget_context": "<top-level>",
+      "element_kind": "other",
+      "source_kind": "shared-constant",
+      "expression": "AppColors.secondaryContainerLight",
+      "token": "AppColors.secondaryContainerLight",
+      "resolved_value_light": "#E4E6EC",
+      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
+    },
+    {
+      "file": "lib/core/theme/app_theme.dart",
+      "line": 141,
+      "widget_context": "<top-level>",
+      "element_kind": "other",
+      "source_kind": "shared-constant",
+      "expression": "AppColors.secondaryContainerLight",
+      "token": "AppColors.secondaryContainerLight",
+      "resolved_value_light": "#E4E6EC",
+      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
+    },
+    {
+      "file": "lib/core/theme/app_theme.dart",
+      "line": 142,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2529,7 +2584,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 141,
+      "line": 143,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2540,29 +2595,29 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 142,
-      "widget_context": "<top-level>",
-      "element_kind": "other",
-      "source_kind": "shared-constant",
-      "expression": "AppColors.tertiaryContainerLight",
-      "token": "AppColors.tertiaryContainerLight",
-      "resolved_value_light": "unresolvable: no light counterpart in theme",
-      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
-    },
-    {
-      "file": "lib/core/theme/app_theme.dart",
-      "line": 143,
-      "widget_context": "<top-level>",
-      "element_kind": "other",
-      "source_kind": "shared-constant",
-      "expression": "AppColors.tertiaryContainerLight",
-      "token": "AppColors.tertiaryContainerLight",
-      "resolved_value_light": "unresolvable: no light counterpart in theme",
-      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
-    },
-    {
-      "file": "lib/core/theme/app_theme.dart",
       "line": 144,
+      "widget_context": "<top-level>",
+      "element_kind": "other",
+      "source_kind": "shared-constant",
+      "expression": "AppColors.tertiaryContainerLight",
+      "token": "AppColors.tertiaryContainerLight",
+      "resolved_value_light": "unresolvable: no light counterpart in theme",
+      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
+    },
+    {
+      "file": "lib/core/theme/app_theme.dart",
+      "line": 145,
+      "widget_context": "<top-level>",
+      "element_kind": "other",
+      "source_kind": "shared-constant",
+      "expression": "AppColors.tertiaryContainerLight",
+      "token": "AppColors.tertiaryContainerLight",
+      "resolved_value_light": "unresolvable: no light counterpart in theme",
+      "resolved_value_dark": "unresolvable: no dark counterpart in theme"
+    },
+    {
+      "file": "lib/core/theme/app_theme.dart",
+      "line": 146,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2573,7 +2628,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 145,
+      "line": 147,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2584,7 +2639,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 146,
+      "line": 148,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2595,7 +2650,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 147,
+      "line": 149,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2606,7 +2661,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 150,
+      "line": 152,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2617,7 +2672,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 155,
+      "line": 157,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2628,7 +2683,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 156,
+      "line": 158,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2639,7 +2694,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 157,
+      "line": 159,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "shared-constant",
@@ -2650,7 +2705,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 201,
+      "line": 203,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -2661,7 +2716,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 293,
+      "line": 291,
       "widget_context": "<top-level>",
       "element_kind": "border",
       "source_kind": "blend-source",
@@ -2672,7 +2727,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 353,
+      "line": 355,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -2683,7 +2738,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 372,
+      "line": 374,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -2980,22 +3035,22 @@
     },
     {
       "file": "lib/shared/widgets/mx_action_button.dart",
-      "line": 90,
+      "line": 102,
       "widget_context": "MxActionButton",
-      "element_kind": "background",
+      "element_kind": "other",
       "source_kind": "theme-token",
-      "expression": "Theme.of(context).colorScheme.error",
+      "expression": "context.colors.error",
       "token": "colorScheme.error",
       "resolved_value_light": "#C02B3A",
       "resolved_value_dark": "#F2808F"
     },
     {
       "file": "lib/shared/widgets/mx_action_button.dart",
-      "line": 91,
+      "line": 103,
       "widget_context": "MxActionButton",
-      "element_kind": "text",
+      "element_kind": "other",
       "source_kind": "theme-token",
-      "expression": "Theme.of(context).colorScheme.onError",
+      "expression": "context.colors.onError",
       "token": "colorScheme.onError",
       "resolved_value_light": "#FFFFFF",
       "resolved_value_dark": "#2C1319"
@@ -3156,19 +3211,8 @@
     },
     {
       "file": "lib/shared/widgets/mx_card.dart",
-      "line": 72,
-      "widget_context": "MxCard",
-      "element_kind": "background",
-      "source_kind": "theme-token",
-      "expression": "context.colors.surface",
-      "token": "colorScheme.surface",
-      "resolved_value_light": "#FBFBFE",
-      "resolved_value_dark": "#1A1838"
-    },
-    {
-      "file": "lib/shared/widgets/mx_card.dart",
-      "line": 74,
-      "widget_context": "MxCard",
+      "line": 102,
+      "widget_context": "_MxCardState",
       "element_kind": "border",
       "source_kind": "theme-token",
       "expression": "context.semanticColors.borderSubtle",
@@ -3244,7 +3288,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_progress_bar.dart",
-      "line": 163,
+      "line": 173,
       "widget_context": "_MxProgressHeader",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3255,7 +3299,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_progress_bar.dart",
-      "line": 173,
+      "line": 183,
       "widget_context": "_MxProgressHeader",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3266,7 +3310,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_progress_bar.dart",
-      "line": 174,
+      "line": 184,
       "widget_context": "_MxProgressHeader",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3277,29 +3321,18 @@
     },
     {
       "file": "lib/shared/widgets/mx_text_button.dart",
-      "line": 93,
-      "widget_context": "_MxTextButtonState",
-      "element_kind": "other",
-      "source_kind": "opacity-modified-token",
-      "expression": "context.colors.onSurface.withValues(alpha: _kDisabledLabelAlpha)",
-      "token": "colorScheme.onSurface",
-      "resolved_value_light": "#16182B @ alpha unresolvable",
-      "resolved_value_dark": "#EDEDF6 @ alpha unresolvable"
-    },
-    {
-      "file": "lib/shared/widgets/mx_text_button.dart",
-      "line": 93,
+      "line": 92,
       "widget_context": "_MxTextButtonState",
       "element_kind": "other",
       "source_kind": "theme-token",
-      "expression": "context.colors.onSurface",
-      "token": "colorScheme.onSurface",
-      "resolved_value_light": "#16182B",
-      "resolved_value_dark": "#EDEDF6"
+      "expression": "context.semanticColors.onDisabled",
+      "token": "semantic.onDisabled",
+      "resolved_value_light": "unresolvable: semantic.onDisabled not in the dumped theme",
+      "resolved_value_dark": "unresolvable: semantic.onDisabled not in the dumped theme"
     },
     {
       "file": "lib/shared/widgets/mx_text_button.dart",
-      "line": 97,
+      "line": 96,
       "widget_context": "_MxTextButtonState",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3310,7 +3343,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_text_button.dart",
-      "line": 98,
+      "line": 97,
       "widget_context": "_MxTextButtonState",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3321,7 +3354,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_text_button.dart",
-      "line": 99,
+      "line": 98,
       "widget_context": "_MxTextButtonState",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3332,7 +3365,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_text_button.dart",
-      "line": 129,
+      "line": 128,
       "widget_context": "_MxTextButtonState",
       "element_kind": "other",
       "source_kind": "theme-token",
