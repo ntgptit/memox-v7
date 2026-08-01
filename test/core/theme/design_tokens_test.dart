@@ -3,9 +3,9 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_breakpoints.dart';
 import 'package:memox/core/theme/app_colors.dart';
-import 'package:memox/core/theme/app_delays.dart';
 import 'package:memox/core/theme/app_durations.dart';
 import 'package:memox/core/theme/app_icon_size.dart';
+import 'package:memox/core/theme/app_overlay_themes.dart';
 import 'package:memox/core/theme/app_radius.dart';
 import 'package:memox/core/theme/app_spacing.dart';
 import 'package:memox/core/theme/app_stroke.dart';
@@ -100,10 +100,11 @@ void main() {
   });
 
   test('a tooltip delay is not a motion duration', () {
-    // The reason `AppDelays` exists as its own file. `AppDurations.slow` is
-    // documented as the ceiling on motion, so parking a 500ms interaction delay
-    // there would say the app may animate for half a second.
-    expect(AppDelays.tooltipWait, greaterThan(AppDurations.slow));
+    // Why `kTooltipWaitDuration` lives beside the tooltip theme instead of
+    // becoming a fourth rung on this scale: `AppDurations.slow` is documented as
+    // the ceiling on motion, so parking a 500ms interaction delay there would
+    // say the app may animate for half a second.
+    expect(kTooltipWaitDuration, greaterThan(AppDurations.slow));
   });
 
   test('colour tokens are named for meaning, not appearance', () {
@@ -147,7 +148,6 @@ void main() {
       'app_colors',
       'app_typography',
       'app_stroke',
-      'app_delays',
       'app_interaction_states',
       'app_motion_policy',
     ]) {

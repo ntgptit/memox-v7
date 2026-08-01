@@ -18,6 +18,21 @@ import 'app_spacing.dart';
 /// the scheme changes; naming them is what keeps the states stable. The values
 /// come from [AppStateOpacity], which transcribes them from the kit's `mx.css`.
 
+/// A disabled control's fill and border, resolved to a solid colour over the
+/// ground that state actually has.
+///
+/// Most disabled controls sit on the page or on a card, and for those the answer
+/// is already precomputed: `AppSemanticColors.disabledSurface`. This exists for
+/// the one that does not — a *selected* pill that goes disabled sits on
+/// `secondaryContainer`, so blending the same 12% over `surface` there would
+/// erase the selection rather than dim it. The tint is the constant; the ground
+/// is per state.
+Color disabledSurfaceTint(ColorScheme scheme, {Color? over}) =>
+    Color.alphaBlend(
+      scheme.onSurface.withValues(alpha: AppStateOpacity.disabledSurfaceBlend),
+      over ?? scheme.surface,
+    );
+
 /// Geometry shared by every button.
 ///
 /// 48 high before padding: the minimum touch target, enforced here rather than

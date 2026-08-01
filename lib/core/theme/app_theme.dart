@@ -175,11 +175,16 @@ ThemeData _buildTheme(
     fontFamily: AppTypography.bodyFamily,
   );
 
+  // **Built once, then handed to every slot below.** Component themes took
+  // Material's own scale off `base` until M4.12 — a pill label at weight 500
+  // where `labelLarge` says 600. See `component_theme_typography_test.dart`.
+  final texts = AppTypography.buildTextTheme(base.textTheme);
+
   return base.copyWith(
     // The page sits a step below the card, so a card reads as a card without
     // needing a shadow to say so.
     scaffoldBackgroundColor: background,
-    textTheme: AppTypography.buildTextTheme(base.textTheme),
+    textTheme: texts,
     extensions: <ThemeExtension<Object?>>[semantic],
 
     appBarTheme: AppBarTheme(
@@ -223,7 +228,7 @@ ThemeData _buildTheme(
     // No checkmark: the pill group is always visible in full, so the selected
     // one is legible by contrast alone and the tick would shift the label
     // sideways on every change.
-    chipTheme: buildChipTheme(scheme, semantic, base.textTheme),
+    chipTheme: buildChipTheme(scheme, semantic, texts),
 
     // The create action. `primary` rather than the M3 default
     // `primaryContainer`: this is the one control on the deck list that starts a
@@ -292,14 +297,12 @@ ThemeData _buildTheme(
           scheme.surface,
         ),
       ),
-      hintStyle: base.textTheme.bodyMedium?.copyWith(
-        color: scheme.onSurfaceVariant,
-      ),
+      hintStyle: texts.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
     ),
 
     // Four component themes added in M4.8, one per shared component that
-    // actually renders through them. Nothing speculative: a theme for a
-    // component nobody builds is a decision made without a screen to check it.
+    // renders through them — a theme for one nobody builds is a decision made
+    // without a screen to check it against.
     iconButtonTheme: IconButtonThemeData(
       style:
           IconButton.styleFrom(
@@ -307,16 +310,15 @@ ThemeData _buildTheme(
             // screen can pass a smaller one — there is no parameter to pass.
             minimumSize: const Size.square(AppSpacing.minimumTouchTarget),
             foregroundColor: scheme.onSurfaceVariant,
-            // Named rather than left to `defaultStyleOf`, two layers away where
-            // no audit of this file can see it.
+            // Named, not left to `defaultStyleOf` where no audit can see it.
             disabledForegroundColor: semantic.onDisabled,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppRadius.md),
             ),
           ).copyWith(
             // Hover, press and focus declared. Left null they came from
-            // Material, which is neither the kit's values nor the ones every
-            // other control in this app resolves.
+            // Material, which is neither the kit nor what every other control
+            // in this app resolves.
             overlayColor: AppInteractionStates.iconOverlay(scheme),
             // Focus draws a ring, not just the tint: measured off the goldens
             // that tint alone is 1.15:1 against the surface behind it in both
@@ -329,7 +331,7 @@ ThemeData _buildTheme(
     ),
 
     progressIndicatorTheme: buildProgressIndicatorTheme(scheme, semantic),
-    tooltipTheme: buildTooltipTheme(scheme, base.textTheme),
+    tooltipTheme: buildTooltipTheme(scheme, texts),
     textSelectionTheme: buildTextSelectionTheme(scheme, semantic),
     dividerTheme: buildDividerTheme(semantic),
     scrollbarTheme: buildScrollbarTheme(scheme),
@@ -360,10 +362,8 @@ ThemeData _buildTheme(
         borderRadius: BorderRadius.circular(AppRadius.lg),
         side: BorderSide(color: semantic.borderSubtle),
       ),
-      titleTextStyle: base.textTheme.titleMedium?.copyWith(
-        color: scheme.onSurface,
-      ),
-      contentTextStyle: base.textTheme.bodyMedium?.copyWith(
+      titleTextStyle: texts.titleMedium?.copyWith(color: scheme.onSurface),
+      contentTextStyle: texts.bodyMedium?.copyWith(
         color: scheme.onSurfaceVariant,
       ),
     ),
@@ -382,7 +382,7 @@ ThemeData _buildTheme(
 
     snackBarTheme: SnackBarThemeData(
       backgroundColor: scheme.inverseSurface,
-      contentTextStyle: base.textTheme.bodyMedium?.copyWith(
+      contentTextStyle: texts.bodyMedium?.copyWith(
         color: scheme.onInverseSurface,
       ),
       behavior: SnackBarBehavior.floating,

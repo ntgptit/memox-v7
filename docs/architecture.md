@@ -7,8 +7,8 @@
 | **Scope** | Quyết định ràng buộc nhiều tài liệu hoặc nhiều layer. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), hình dạng dữ liệu (`data-model.md`) |
 | **Source of truth for** | AD-xx · đánh đổi kiến trúc · phương án đã bị loại · lý do pin toolchain |
 | **Depends on** | `document-conventions.md`, `product.md` |
-| **Updated by task** | M4.10p (AD-14) |
-| **Last updated** | 2026-07-30 |
+| **Updated by task** | M4.10ao (AD-05) |
+| **Last updated** | 2026-08-02 |
 
 Format theo `document-conventions.md` §6.1. AD xếp theo số; ID vĩnh viễn (§7).
 
@@ -878,6 +878,14 @@ Một màu tồn tại như mặc định framework thì **vô hình với mọi
 trọn một cuộc audit màu (M4.10m). Component nào app dùng thì app khai báo theme
 cho nó.
 
+**Và khai báo component là chưa đủ — phải khai báo đủ *state*.** `ChipThemeData`
+có `backgroundColor` và `selectedColor` nên nhìn qua tưởng đã xong; Material vẫn
+trả lời cho disabled, hover, focus và press. Câu trả lời của nó cho disabled là
+`onSurface` ở **alpha** 12% — đúng thứ R7 cấm — và cho disabled-selected là
+nguyên vẹn `secondaryContainer`, tức một pill không bấm được trông y hệt pill
+bấm được (M4.10ao). Slot state-aware (`color`, `WidgetStateBorderSide`,
+`WidgetStateColor` trong `labelStyle`) là nơi quyền sở hữu thật sự nằm.
+
 ### Nguồn của giá trị token đã đổi (M4.10p)
 
 Khi AD này được viết, `lib/core/theme/` là nơi duy nhất định nghĩa một token.
@@ -904,11 +912,20 @@ Hai giới hạn, cả hai đều rút ra từ lần áp đầu tiên chứ khô
   quan trọng nhất". **Theo một token là theo cả cách design dùng nó, không chỉ
   mã hex.**
 
-Ba token CSS chưa mang về, và lý do giống nhau: chưa có gì vẽ chúng.
-`--color-progress-*` thuộc về `MxProgressBar`, `--color-streak*` thuộc về màn
-streak — cả hai chưa tồn tại, và `--color-streak` còn là **hue thứ năm** (cam),
-nằm ngoài một accent và bốn semantic mà chính readme của design cho phép. Chúng
-về cùng component cần chúng, không về trước.
+Nguyên tắc mang token về: **token đi cùng component cần nó, không đi trước.**
+`--color-progress-*` và `--color-streak-container` đã về ở M4.12 cùng
+`MxProgressBar` và due chip, và nay có counterpart trong `AppSemanticColors`.
+
+Còn đúng **một** token cố ý chưa mang về: `--color-streak`. Nó là nhãn của màn
+streak — màn đó chưa tồn tại — và nó còn là **hue thứ năm** (cam), nằm ngoài một
+accent và bốn semantic mà chính readme của design cho phép. Due chip cần một
+foreground nên `onStreakContainerLight` được dẫn xuất riêng: `--color-streak`
+đo **3.12:1** trên container của chính nó ở 11px semibold, dưới ngưỡng 4.5 của
+chữ nhỏ.
+
+Danh sách này không còn được duy trì bằng tay. `css_token_parity_test.dart` bắt
+mọi `--color-*` mà Dart chưa có lập trường — mang về, hoặc ghi lý do — nên một
+token thêm vào kit sẽ làm đỏ test thay vì trôi qua im lặng.
 
 ### Đánh đổi đã nhận
 

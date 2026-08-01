@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_delays.dart';
 import 'package:memox/core/theme/app_interaction_states.dart';
+import 'package:memox/core/theme/app_overlay_themes.dart';
 import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_stroke.dart';
 import 'package:memox/core/theme/app_theme.dart';
@@ -211,7 +211,7 @@ void main() {
 
     test('the tooltip delay is the named one', () {
       for (final entry in themes.entries) {
-        expect(entry.value.tooltipTheme.waitDuration, AppDelays.tooltipWait);
+        expect(entry.value.tooltipTheme.waitDuration, kTooltipWaitDuration);
       }
     });
   });

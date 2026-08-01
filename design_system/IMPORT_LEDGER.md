@@ -158,16 +158,26 @@ and all 11 were taken from the CSS:
 | `tertiary` dark | `#A2BAD0` | `#8DB4D8` |
 | `webLetterbox` | `#14162A` | `#6E7288` |
 
-Three CSS tokens have **no Dart counterpart and were deliberately not added**:
+CSS tokens with **no direct Dart constant**, and why:
 
-- `--color-progress-track` / `-fill` / `-complete` and `--color-streak` /
-  `-container` — these belong to `MxProgressBar` and the streak display, neither
-  of which exists. `--color-streak` is also a fifth hue (orange, outside the one
-  accent and four semantics the design's own readme allows), so adding it before
-  something draws it would put an unexplained colour in the palette. They land
-  with the components that need them.
+- `--color-progress-track` / `-fill` and `--color-streak-container` **have since
+  landed** (M4.12), with `MxProgressBar` and the due chip — which is the rule
+  working as intended: a token arrives with the component that draws it.
+  `--color-progress-complete` is `success` under a second name.
+- `--color-streak` — still absent, and now the only one. It is the streak
+  display's label and that screen does not exist; it is also a fifth hue
+  (orange, outside the one accent and four semantics the design's own readme
+  allows). The due chip needed a foreground, so `onStreakContainer` is derived
+  instead — `--color-streak` measures 3.12:1 on its own container at 11px
+  semibold, under the 4.5 small text needs.
 - `--color-primary-accent` — already expressible: it is `primary` in light and
   `focusRing` in dark, and both already hold exactly those hex values.
+
+**This list is now checked rather than remembered.**
+`test/design_audit/css_token_parity_test.dart` parses these files and fails on
+any `--color-*` the app has taken no position on, so a token added here cannot
+sit unnoticed — which is exactly how the three entries above went stale between
+M4.10p and M4.12.
 - `--color-disabled-surface` — the Dart derives it
   (`onSurface @ 12% over surface`) rather than hardcoding it, and the derived
   result is `#E0E0E5` / `#33324F` against the CSS's `#E3E3E6` / `#312E4E`. Within

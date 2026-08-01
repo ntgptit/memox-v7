@@ -75,6 +75,41 @@ rules:
     fix:
       hint: Use AppSpacing.* instead of a bare number.
 
+  - id: memox.design_token.no_raw_duration
+    type: regex
+    severity: warning
+    enabled: true
+    message: >-
+      No anonymous `Duration` literal in product UI. Use an `AppDurations` token
+      — the 120/200/320 scale — or, when the value is not motion, declare a named
+      `const Duration` beside the thing that reads it and say what it is for.
+    scopes:
+      - ui_surfaces
+    # **This replaces `flutter.no_hardcoded_duration`, which is disabled in
+    # overrides.yaml.** That rule was turned off for two good reasons and left no
+    # successor: it fired inside `lib/core/theme` where the scale is DEFINED, and
+    # on domain date arithmetic like `Duration(days: 1)`. Both are fixed by
+    # scope and by shape rather than by switching it back on —
+    # `ui_surfaces` excludes `lib/core/theme` and `lib/app`, and the lookahead
+    # below exempts a *named* const declaration, which is how the two legitimate
+    # non-motion durations in this repo are already written
+    # (`kSlowStatementThreshold`, `kMaxDueBoundaryDelay`).
+    #
+    # What is left is the case the tooltip theme actually shipped: a bare
+    # `Duration(milliseconds: 500)` inline in a theme slot, which reads as
+    # deliberate and is invisible to review.
+    patterns:
+      - >-
+        ^(?!\s*(?:static\s+)?const\s+Duration\s).*\bDuration\s*\(\s*(?:days|hours|minutes|seconds|milliseconds|microseconds)\s*:\s*\d
+    tags:
+      - memox
+      - design-token
+      - ui
+    fix:
+      hint: >-
+        Use AppDurations.fast/normal/slow, or name it as a const with a comment
+        explaining why it is not on the motion scale.
+
   - id: memox.design_token.no_raw_border_radius
     type: regex
     severity: warning

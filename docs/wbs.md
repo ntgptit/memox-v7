@@ -4366,6 +4366,75 @@ canonical, boundary test giữ hình dạng đầy đủ + anti-vacuous mức ap
 lưới thứ hai; `check_architecture.sh` cố ý đứng ngoài — nó sở hữu suffix, và
 một luật hai bản trong hai script là hai bản sẽ trôi khỏi nhau.
 
+**Next task: M4.10ao · Component theme lấy đúng typography, chip sở hữu đủ state.**
+
+### M4.10ao · Theme lấy đúng token, và bốn lỗ hổng enforcement được bịt
+
+- **Status:** done
+- **Goal:** Đóng năm phát hiện của vòng review theme: component theme dùng
+  `AppTypography`, `ChipThemeData` sở hữu mọi interaction state, parity CSS↔Dart
+  được tự động hoá, duration có guard thay cho rule đã tắt, và hai hệ audit
+  thôi đưa ra hai kết luận trái nhau.
+- **Scope:** `app_theme.dart` (build `texts` một lần, truyền vào 6 slot);
+  `app_chip_theme.dart` (viết lại quanh `ChipThemeData.color`);
+  `app_button_themes.dart` (`disabledSurfaceTint` nhận ground, đặt tên 5 alpha);
+  `app_overlay_themes.dart` (`kTooltipWaitDuration`);
+  rule `memox.design_token.no_raw_duration`; predicate dùng chung
+  `isTranslucentFillViolation`; `docs/architecture.md` + `IMPORT_LEDGER.md`
+  (progress/streak đã có counterpart Dart).
+- **Out of scope:** `chipTheme.iconTheme` vẫn là `onSurfaceVariant` ở mọi state
+  — `IconThemeData` trong `ChipThemeData` không resolve theo state được, và
+  icon của pill là trang trí; nếu muốn nó theo label thì phải đổi cách
+  `MxPillButton` dựng avatar, là quyết định riêng.
+- **Dependencies:** M4.10am
+- **Checklist phases:** 7, 12
+- **Tests required:** 5 file test mới; fault injection cho cả ba guard mới
+  (typography, duration, parity).
+- **Editable documents:** `docs/wbs.md`, `docs/architecture.md`,
+  `design_system/IMPORT_LEDGER.md`
+- **Output:** `test/design_audit/css_tokens.dart`,
+  `test/design_audit/color_rule_scope.dart`
+- **Acceptance criteria:**
+  - [x] 6 component theme resolve đúng rung của app; test tiêm lỗi bắt được cả
+        ở mức hành vi lẫn mức source.
+  - [x] Mọi tổ hợp state của chip resolve ra màu **đục**; disabled-selected
+        khác cả selected lẫn disabled; widget test đọc `Ink` để chứng minh
+        Material thật sự dùng theme.
+  - [x] Parity test parse CSS bắt được ba lớp lỗi: đổi giá trị, đổi màu, và
+        **thêm** token mới.
+  - [x] `no_raw_duration` bắt literal ẩn danh, tha named const — đã tiêm cả hai
+        chiều.
+  - [x] `violations.json` từ 1 xuống 0; V5 và R7 dùng chung một predicate.
+  - [x] 1107 test pass, `flutter analyze` 0 issue, guard 68 rule xanh.
+
+**Ba trong năm phát hiện có chung một hình dạng: luật đúng, nhưng không ai
+kiểm.** `ThemeData.textTheme` được build đúng và có test riêng — chỉ là component
+theme lấy `base.textTheme`, nên `labelLarge` của pill chạy weight 500 trong khi
+`Theme.of(context).textTheme.labelLarge` nói 600. Hai họ font trùng nhau, nên nó
+sống sót qua review. CSS được tuyên bố là nguồn chuẩn ở AD-05, nhưng test chép
+tay số nên sửa CSS xong mọi gate vẫn xanh. `flutter.no_hardcoded_duration` bị tắt
+có lý do, và không ai viết rule thay thế.
+
+**Chip là hình dạng còn lại: framework default vô hình với source scan** — đúng
+loại AD-05 rule 5 gọi tên. Khai báo `backgroundColor`/`selectedColor` mà không
+khai `color` để Material trả lời cho phần còn lại, và câu trả lời của nó là
+`onSurface` ở **alpha** 12% cho disabled (đúng thứ R7 tồn tại để cấm) cùng
+nguyên vẹn `secondaryContainer` cho disabled-selected — một pill không bấm được
+trông y hệt pill bấm được. Không dòng nào trong `lib/` nói hai điều đó.
+
+**Hai hệ audit cãi nhau thì báo cáo mất tác dụng, chứ không phải màu sai.** V5
+đánh dấu mọi `opacity-modified-token` ngoài shadow/scrim; R7 cố ý tha alpha cho
+label. Cùng một nhãn disabled vừa hợp lệ với gate vừa là violation trong report
+— và "sửa" nó theo report sẽ làm gate đỏ. Một violation không hành động được là
+cách một báo cáo ngừng được đọc. Nay cả hai đi qua `isTranslucentFillViolation`.
+
+**Một lệch parity thật lộ ra và cố ý không sửa:** `--color-disabled-surface` của
+kit là `#E3E3E6`/`#312E4E`, còn Dart dẫn xuất ra `#E0E0E5`/`#33324F`. Ledger đã
+ghi lý do giữ dẫn xuất — nó tự đi theo khi surface ladder đổi — nên test khoá
+bằng **dung sai 4 đơn vị** thay vì đẳng thức: đủ rộng cho khoảng chép tay, quá
+hẹp cho một token bị trỏ lại. Comment trong `app_button_themes.dart` ghi
+`#E3E3E6` là số đo cũ, đã sửa theo số đo lại.
+
 **Next task: M4.10an · Nền tảng chung cho interaction state, stroke và motion.**
 
 ### M4.10an · Interaction state, stroke token và reduced motion về tầng common
@@ -4375,11 +4444,11 @@ một luật hai bản trong hai script là hai bản sẽ trôi khỏi nhau.
   disabled · selected) được **khai báo** ở tầng common thay vì rơi về default
   của Material, ba bề rộng nét có token semantic, và animation hữu hạn tôn trọng
   reduced motion của hệ điều hành.
-- **Scope:** bốn file token/policy mới dưới `lib/core/theme/` (`app_stroke.dart`,
-  `app_interaction_states.dart`, `app_delays.dart`, `app_motion_policy.dart`);
+- **Scope:** ba file token/policy mới dưới `lib/core/theme/` (`app_stroke.dart`,
+  `app_interaction_states.dart`, `app_motion_policy.dart`);
   hai field mới trên `AppSemanticColors` (`disabledSurface`, `onDisabled`);
   `app_theme.dart`, `app_button_themes.dart`, `app_overlay_themes.dart`,
-  `app_chip_theme.dart`; `MxCard`, `MxListTile`, `MxActionButton`,
+  `app_chip_theme.dart` (gộp với M4.10ao); `MxCard`, `MxListTile`, `MxActionButton`,
   `MxTextButton`, `MxProgressBar`, `MxSearchField`; `test/support/ink_probe.dart`
   và test ở 8 file; `design_audit/` sinh lại; `test/design_audit/`
   `audit_scan_steps.dart` thêm file theme mới vào `declarationSites`.
@@ -4396,7 +4465,7 @@ một luật hai bản trong hai script là hai bản sẽ trôi khỏi nhau.
 - **Editable documents:** `docs/wbs.md`
 - **Output:** `lib/core/theme/app_stroke.dart` ·
   `lib/core/theme/app_interaction_states.dart` ·
-  `lib/core/theme/app_motion_policy.dart` · `lib/core/theme/app_delays.dart` ·
+  `lib/core/theme/app_motion_policy.dart` ·
   `test/support/ink_probe.dart` · `test/shared/widgets/mx_list_tile_test.dart`
 - **Acceptance criteria:**
   - [x] `AppStroke.hairline/input/focus` khớp `--border-hairline/input/focus`,
@@ -4424,12 +4493,23 @@ splash đến từ `ThemeData.hoverColor` — một wash đen hardcoded, không 
 giống hệt nhau ở light và dark. Cả ba vô hình với `design_audit/` vì nó quét
 source, còn default của framework không tồn tại trong source.
 
-**`AppDelays` tách khỏi `AppDurations`, và đó là một ranh giới chứ không phải sở
-thích.** `tooltipWait` 500ms là độ trễ tương tác, không phải thời lượng chuyển
-động; đặt nó vào `AppDurations.slow` sẽ phá chính hợp đồng của file đó — `slow`
-được mô tả là **trần** của motion. Cùng lý do, reduced motion không đụng tới nó:
-tooltip xuất hiện ngay khi con trỏ chạm sẽ bật lên ở mọi lần lướt qua toolbar.
-Spinner indeterminate cũng giữ nguyên: chuyển động của nó *là* thông tin.
+**Độ trễ tooltip tách khỏi `AppDurations`, và task này nhường tên cho M4.10ao.**
+500ms là độ trễ tương tác, không phải thời lượng chuyển động; đặt nó vào
+`AppDurations.slow` sẽ phá chính hợp đồng của file đó — `slow` được mô tả là
+**trần** của motion. Bản nháp ở đây đặt tên nó là `AppDelays.tooltipWait` trong
+file riêng; M4.10ao merge trước với `kTooltipWaitDuration` đứng cạnh theme duy
+nhất đọc nó, và **hai tên cho một giá trị chính là thứ task này tồn tại để
+chống**, nên bản đã merge thắng. Reduced motion cố ý không đụng tới nó: tooltip
+bật ngay khi con trỏ chạm sẽ nháy ở mọi lần lướt qua một toolbar icon. Spinner
+indeterminate cũng giữ nguyên: chuyển động của nó *là* thông tin.
+
+**Bảng alpha gộp làm một.** M4.10ao đặt `kPressedOverlayAlpha` /
+`kFocusedOverlayAlpha` / `kHoveredOverlayAlpha` / `kDisabledTintAlpha` /
+`kDisabledForegroundAlpha` trong `app_button_themes.dart`; `AppStateOpacity` là
+tập cha của chúng — nó còn giữ bốn trọng số hover riêng cho row / icon / control
+/ card kèm selector `mx.css` của từng cái. Sau merge chỉ còn một bảng, và
+`app_chip_theme.dart` (bản đầy đủ của M4.10ao) đọc từ đó, cùng
+`AppInteractionStates.focusRing` mà nút và card đã dùng.
 
 **Ba mâu thuẫn design/code phát hiện được, xử lý theo thứ tự nguồn.**
 - `design_system/tokens/colors.css` khai `--color-disabled-surface:#E3E3E6` /
