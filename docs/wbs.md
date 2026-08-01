@@ -4280,6 +4280,39 @@ outlined để cột card không ồn — cân nhắc rồi, chủ dự án ch�
 **đáy** card thay vì giữa; ⋮ nằm với danh tính deck thay vì ở dải chân. Kit đã
 được cập nhật theo cả ba.
 
+**Next task: M4.10al · Ô search cân giữa breadcrumb và panel.**
+
+### M4.10al · Ô search cân lại giữa breadcrumb và hero panel
+
+- **Status:** done
+- **Goal:** Khoảng mắt thấy từ chữ breadcrumb xuống ô search ≈ từ ô search
+  xuống panel, với breadcrumb và panel đứng yên — chỉ ô search trượt.
+- **Scope:** `deck_subheader_widget.dart`, `deck_summary_section_widget.dart`;
+  `mx.css` (`.mx-today`).
+- **Out of scope:** mọi khoảng cách khác — đã đo và đạt từ các vòng trước.
+- **Dependencies:** M4.10ak
+- **Checklist phases:** 7
+- **Tests required:** toàn bộ suite; đo geometry xác nhận span bất biến.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** không có file mới
+- **Acceptance criteria:**
+  - [x] Chữ breadcrumb → search: 36 → 24. Search → panel: 16 → 28.
+  - [x] Panel top và breadcrumb không đổi vị trí (span 84 giữ nguyên, đo được).
+  - [x] Kit khớp (`.mx-shell__sub` gap sm vốn có; `.mx-today` md → xl).
+  - [x] 1022 test pass, mọi gate xanh.
+
+**Giá trị và chính comment của nó cãi nhau.** `spacing: AppSpacing.lg +
+AppSpacing.xs` (= 20) lọt vào ở squash của #86, trong khi comment ngay trên nó
+vẫn lập luận cho `sm` — và kit chưa bao giờ rời 8. Cộng với 16px không khí vô
+hình dưới chữ (strip 48 cho sàn chạm, chữ 16), khoảng mắt thấy phía trên ô
+search thành 36 so với 16 phía dưới: ô search đọc ra như bị tách khỏi chrome
+của nó và dính vào nội dung cuộn bên dưới — ngược đúng luật proximity, vì
+subheader là chrome ghim còn panel trượt dưới nó.
+
+**Chia đôi tuyệt đối là bất khả trên lưới 4px.** Quỹ đệm 36 cố định, nửa là 18
+— không phải bội của 4. Gần nhất: 24/28 theo mắt, và 4px lệch đặt về phía
+proximity muốn — search nhích về breadcrumb, không phải về panel.
+
 **Next task: M4.11 · Card management full-stack.**
 
 ### M4.11 · Card management full-stack

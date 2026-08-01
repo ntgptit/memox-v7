@@ -53,14 +53,14 @@ class DeckSummarySectionWidget extends ConsumerWidget {
     };
 
     return Padding(
-      // **`md` above, and it costs nothing now.** With the shell's `xs` under
-      // the search field this makes the separation 16 — two same-width,
-      // same-radius surfaces need it, and at 12 they still read as one shape
-      // with a seam. It was `sm` because every pixel added here pushed the whole
-      // body down, and the last row then sat under the floating action with 7px
-      // of clearance. Neither constraint exists: the action left the screen and
-      // the body is one scroll view, so there is no height budget to borrow
-      // against. `deck_list_spacing_test.dart` measures this gap.
+      // **`xl` above: with the shell's `xs` under the search field the
+      // separation is 28.** The other half of evening out the field's two
+      // sides — 24 of visible space above it, 28 below, where it used to be 36
+      // against 16. The pixels the field gave back by moving up toward the
+      // breadcrumb land here, so the strip and this panel have not moved at
+      // all; only the field slid. There is no height budget to spend against —
+      // the body is one scroll view and nothing floats — and
+      // `deck_list_spacing_test.dart` measures this gap.
       //
       // **The bottom drops one step on a compact screen.** The other half of
       // the 17 pixels the breadcrumb strip cost the pinned chrome at 320 with
@@ -70,7 +70,7 @@ class DeckSummarySectionWidget extends ConsumerWidget {
       // *up* only increases the last row's clearance from the floating action.
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
-        AppSpacing.md,
+        AppSpacing.xl,
         AppSpacing.lg,
         AppSpacing.lg,
       ),
