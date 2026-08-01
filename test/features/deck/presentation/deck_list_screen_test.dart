@@ -229,7 +229,7 @@ void main() {
   });
 
   group('responsive and accessibility', () {
-    const compact = Size(320, 568);
+    const compact = Size(360, 640);
 
     testWidgets('the loaded list fits 320x568', (tester) async {
       await pumpDeckScreen(

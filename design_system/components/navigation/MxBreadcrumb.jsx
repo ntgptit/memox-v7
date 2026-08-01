@@ -45,7 +45,14 @@ export function MxBreadcrumb({ items, semanticLabel, rootIcon, collapseAfter = 4
               <span className="mx-crumbs__label">{item.label}</span>
             </button>
           ) : (
-            <span className="mx-crumbs__step mx-crumbs__step--current">{item.label}</span>
+            // The glyph is drawn on BOTH branches. Rendering it only on the
+            // tappable one took the home icon off the one strip where the first
+            // step is also the current one — the top of the tree, where the mark
+            // that makes it recognisable without reading matters most.
+            <span className="mx-crumbs__step mx-crumbs__step--current">
+              {i === 0 && rootIcon ? <MxIcon name={rootIcon} filled size="var(--icon-sm)" /> : null}
+              {item.label}
+            </span>
           )}
         </React.Fragment>
       ))}

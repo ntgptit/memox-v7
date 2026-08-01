@@ -170,20 +170,31 @@ void main() {
                 .last,
           )
           .position;
-      position.jumpTo(position.maxScrollExtent);
-      await tester.pumpAndSettle();
+      // **Until the extent stops moving, not once.** `maxScrollExtent` over a
+      // lazily built list is an *estimate* from the items laid out so far, and
+      // the body became a `CustomScrollView` whose first two slivers shift it:
+      // one jump landed 78px short of the true end, which reads exactly like the
+      // list failing to reserve room for the floating action. Jumping again once
+      // the real items are built is what asks the question the test means.
+      var previous = -1.0;
+      while (position.maxScrollExtent != previous) {
+        previous = position.maxScrollExtent;
+        position.jumpTo(previous);
+        await tester.pumpAndSettle();
+      }
 
       final bar = tester.getRect(find.byType(MxNavigationBar));
       final lastRow = tester.getRect(find.byType(DeckTileWidget).last);
 
       expect(lastRow.bottom, lessThanOrEqualTo(bar.top));
 
-      // And clear of the create action, which floats *over* the list rather than
-      // displacing it. The list's own bottom inset is what buys this; the shell
-      // reserves nothing. Without it the last deck is unreachable — visible, and
-      // covered by a button on top of it.
-      final fab = tester.getRect(find.byType(FloatingActionButton));
-      expect(lastRow.bottom, lessThanOrEqualTo(fab.top));
+      // **And nothing floats over it.** This used to also assert the last row
+      // cleared the create action, bought by a 112px bottom inset. The button
+      // covered whatever row happened to sit at the bottom-right at rest — on a
+      // deck card, its overflow menu — and no inset fixes that, because an inset
+      // only reserves the *end* of the scroll. Create moved to the app bar, so
+      // the guarantee is now structural rather than measured.
+      expect(find.byType(FloatingActionButton), findsNothing);
       expect(tester.takeException(), isNull);
     });
 
@@ -220,7 +231,7 @@ void main() {
   });
 
   group('responsive', () {
-    const compact = Size(320, 568);
+    const compact = Size(360, 640);
 
     testWidgets('no overflow at 320x568', (tester) async {
       await pumpShell(

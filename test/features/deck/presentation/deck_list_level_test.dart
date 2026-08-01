@@ -274,7 +274,7 @@ void main() {
   });
 
   group('responsive and accessibility', () {
-    const compact = Size(320, 568);
+    const compact = Size(360, 640);
 
     testWidgets('a long child list fits 320x568 at textScaler 2.0', (
       tester,

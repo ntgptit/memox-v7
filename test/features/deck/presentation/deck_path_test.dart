@@ -157,10 +157,36 @@ void main() {
         screen: const DeckListScreen(),
       );
 
+      // **The first painted thing, not the strip's box.** Asserting the widget
+      // origin passed while every step still carried `sm` of leading padding,
+      // so the box sat on the gutter and the word sat 8px inside it — which is
+      // what a reader sees and what was reported.
       expect(
-        tester.getTopLeft(find.byType(MxBreadcrumb)).dx,
+        tester.getTopLeft(find.byIcon(Icons.home_outlined)).dx,
         tester.getTopLeft(find.byType(MxSearchField)).dx,
         reason: 'the path and the search field share one left edge',
+      );
+    });
+
+    testWidgets('the root step keeps its home glyph', (tester) async {
+      // It lost it for a release: the glyph was drawn on the tappable branch
+      // only, and the deck list's `Root` step is the one step in the app that is
+      // first and non-tappable at once — so the mark that makes the top of the
+      // tree recognisable without reading was missing exactly there.
+      await pumpDeckScreen(
+        tester,
+        repository: FakeDeckRepository.withSummaries(<DeckSummary>[
+          fakeSummary(id: '1', name: 'Japanese N5'),
+        ]),
+        screen: const DeckListScreen(),
+      );
+
+      expect(
+        find.descendant(
+          of: find.byType(MxBreadcrumb),
+          matching: find.byIcon(Icons.home_outlined),
+        ),
+        findsOneWidget,
       );
     });
 
@@ -258,7 +284,7 @@ void main() {
             for (var i = 1; i <= 9; i++) 'Level number $i',
           ]),
         ),
-        surface: const Size(320, 568),
+        surface: const Size(360, 640),
         textScale: 2,
       );
 

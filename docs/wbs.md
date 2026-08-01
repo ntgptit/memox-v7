@@ -4072,6 +4072,47 @@ sau này lại phải đi cạo pixel một lần nữa. Cách sửa đúng là 
 danh sách (`CustomScrollView` + sliver), là đổi mô hình cuộn của màn hình chứ
 không phải đổi spacing, nên tách ra làm riêng.
 
+**Next task: M4.10ag · Bỏ FAB, nâng đáy màn hình.**
+
+### M4.10ag · Bỏ floating action, và nâng đáy màn hình lên 360×640
+
+- **Status:** done
+- **Goal:** Chấm dứt hai lớp lỗi đã ngốn cả một phiên: chrome không vừa màn hình
+  bé, và nút nổi đè lên control của hàng danh sách.
+- **Scope:** `deck_list_screen.dart` (create lên app bar, bỏ FAB, bỏ inset 112),
+  `app_breakpoints.dart` (tài liệu), 4 file test màn hình đổi surface,
+  `app_navigation_shell_test.dart`, allowance của visual audit;
+  `ui_kits/memox-app/DeckLevelScreen.jsx` cho khớp.
+- **Out of scope:** mật độ card và thang chữ — chủ dự án dừng hướng đó.
+- **Dependencies:** M4.10af
+- **Checklist phases:** 7
+- **Tests required:** toàn bộ suite; visual audit `level_loaded` phải xanh trở
+  lại mà không cần allowance nào.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** không có file mới
+- **Acceptance criteria:**
+  - [x] Không còn `FloatingActionButton` trên màn deck; create nằm ở app bar.
+  - [x] Visual audit hết `contrast.text 1.13:1` mà không nới gate.
+  - [x] Test màn hình chạy ở 360×640, `textScaler` 2.0 vẫn giữ.
+  - [x] 1014 test pass, mọi gate xanh.
+
+**320×568 chưa bao giờ là thứ thiết kế hứa.** `design_system/readme.md:71` ghi
+"one real breakpoint at 360px", nhưng 19 chỗ trong 12 file test chạy ở 320 —
+thấp hơn đáy đã tuyên bố 40px. Đó là cỗ máy sinh ra chuỗi đánh đổi khoảng hở:
+mỗi lần chrome to lên một chút lại phải cạo một section break để mua lại vài
+pixel trên một kích thước không thiết bị nào báo cáo. Test màn hình giờ chạy ở
+360×640. **Tầng compact dưới 360 giữ nguyên và vẫn được test ở mức component** —
+một component xuống dưới đáy mà vẫn dùng được thì rẻ; một màn hình dựng cho kích
+thước không ai ship mới là thứ đắt.
+
+**Nút nổi thì không có cách nào "né đúng".** `_kListBottomInset` 112px chỉ chừa
+chỗ ở **cuối** vùng cuộn; ở trạng thái nghỉ, hàng nào rơi vào góc dưới phải thì
+bị che, và trên deck card đó là nút ⋮. Đo được: FAB `y 700→756`, ⋮ của hàng hai
+`y 692→716`. Trước đây pass là do may — comment cũ trong repo tự ghi khoảng hở
+chỉ còn 7px. Bỏ hẳn phần tử nổi biến bảo đảm từ "đo được hôm nay" thành "cấu
+trúc". Giá phải trả, chấp nhận và ghi lại: hành động chính rời khỏi tầm ngón cái
+lên đầu màn hình. Inset cuối danh sách từ 112 xuống `lg`.
+
 **Next task: M4.11 · Card management full-stack.**
 
 ### M4.11 · Card management full-stack

@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/navigation/route_names.dart';
-import '../../../../core/theme/app_breakpoints.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
@@ -25,13 +24,9 @@ import '../widgets/deck_level_body_widget.dart';
 import '../widgets/deck_subheader_widget.dart';
 import '../widgets/deck_tile_widget.dart';
 
-/// Material's own FAB diameter, and the space under the last card so the
-/// floating action never covers it.
-///
-/// `MxContentShell` deliberately reserves nothing — a floating action overlaps
-/// content by definition — so the list is what has to make room.
-const double _kFabDiameter = 56;
-const double _kListBottomInset = _kFabDiameter + AppSpacing.lg + AppSpacing.xl;
+/// Space under the last card. It was 112 while a floating action hovered over
+/// the list; nothing hovers now, so the last row needs only what the first has.
+const double _kListBottomInset = AppSpacing.lg;
 
 /// The toolbar's two commands, bound to a `ref`.
 ///
@@ -137,6 +132,26 @@ class _DeckLevel extends StatelessWidget {
       // The level names itself: the app at the root, the deck below it.
       title: parent?.name ?? context.l10n.decksTitle,
       actions: <Widget>[
+        // **Create is an app-bar action, not a floating one.** A button hovering
+        // over the bottom-right of a scrolling list covers whatever row is
+        // there, and on a deck card that is its overflow menu — an inset only
+        // reserves the END of the scroll, never the resting frame. Nothing
+        // floats now. The cost is accepted: the primary action left the thumb's
+        // reach. See M4.10ag in `docs/wbs.md`.
+        //
+        // It disappears where the action does: a `card` deck holds no sub-decks
+        // (BR-63), and a button that appears only when it applies is honest
+        // where a permanently disabled one is not.
+        if (_mayCreate(parent))
+          MxIconButton(
+            // The same glyph at every level. It was `add` at the root and
+            // `create_new_folder` inside a deck, which made one action look like
+            // two — and the thing being created is a deck in both cases.
+            icon: Icons.add,
+            semanticLabel: _createLabel(context, parent),
+            tooltip: _createLabel(context, parent),
+            onPressed: () => _startCreate(context, parent),
+          ),
         // Only when there is a deck to act on. The root level is not a deck, so
         // there is nothing to rename, move or delete from up here — the rows have
         // their own menus for that.
@@ -154,28 +169,8 @@ class _DeckLevel extends StatelessWidget {
             ),
           ),
       ],
-      // Create is a floating action at every level, and it is the same button
-      // starting the level-appropriate flow. It disappears where the action does:
-      // a `card` deck holds no sub-decks (BR-63), and a button that appears only
-      // when it applies is honest where a permanently disabled one is not.
-      floatingActionButton: _mayCreate(parent)
-          ? FloatingActionButton(
-              onPressed: () => _startCreate(context, parent),
-              tooltip: _createLabel(context, parent),
-              // The same glyph at every level. It was `add` at the root and
-              // `create_new_folder` inside a deck, which made one action look
-              // like two — and the thing being created is a deck in both cases.
-              // What differs is only which parent it lands under, and the
-              // tooltip and the semantic label already say that.
-              child: Icon(
-                Icons.add,
-                semanticLabel: _createLabel(context, parent),
-              ),
-            )
-          : null,
-      // The shell's own padding is dropped: the list scrolls under the toolbar
-      // and under the floating button, so it owns its gutters and its bottom
-      // inset.
+      // The shell's own padding is dropped: the body is one scroll view and
+      // owns its gutters.
       padding: EdgeInsets.zero,
       // **The path is the shell's subheader, not the first row of the body.**
       // It was already pinned — a `Column` above an `Expanded` does not scroll —
@@ -213,49 +208,46 @@ class _DeckLevel extends StatelessWidget {
     // which is exactly the dead control this design refused to copy.
     if (snapshot.decks.isEmpty) return _emptyLevel(context, parent);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
+    // **One scroll view, not a pinned block above a scrolling one.** The summary
+    // panel and the toolbar used to sit outside the list, so their height came
+    // out of the *screen* rather than the scroll — and stopped fitting the
+    // moment the breadcrumb strip joined the chrome above them. They scroll now:
+    // nothing here has a height budget, so growing the chrome cannot overflow.
+    return CustomScrollView(
+      slivers: <Widget>[
         // What this level amounts to, above the list of what is in it — or the
         // line that brings it back once dismissed.
-        DeckSummarySectionWidget(snapshot: snapshot),
-        Padding(
-          // `xl` below, not `lg`: this is the gap between two *sections* — the
-          // controls and the thing they control — and a section break that used
-          // the same number as the gap between two cards would make the toolbar
-          // read as the first row of the list.
-          //
-          //
-          // **`md` on a compact screen: a trade, not a preference.** This
-          // toolbar and the summary panel are pinned above the list, so at 320
-          // with `textScaler` 2.0 they wanted 17 pixels more than were left once
-          // the breadcrumb strip joined the chrome. Both breaks give some, so
-          // neither collapses. See M4.10af in `docs/wbs.md` for the cause.
-          padding: EdgeInsets.fromLTRB(
-            AppSpacing.lg,
-            0,
-            AppSpacing.lg,
-            AppBreakpoints.isCompact(MediaQuery.sizeOf(context).width)
-                ? AppSpacing.md
-                : AppSpacing.xl,
-          ),
-          child: DeckListToolbarWidget(
-            isRootLevel: parent == null,
-            filter: filter,
-            sort: sort,
-            onFilterChanged: onFilterChanged,
-            onSortChanged: onSortChanged,
-          ),
-        ),
-        Expanded(
-          child: _DeckList(
-            summaries: applyDeckListView(
-              snapshot.decks,
+        SliverToBoxAdapter(child: DeckSummarySectionWidget(snapshot: snapshot)),
+        SliverToBoxAdapter(
+          child: Padding(
+            // `xl` below, not `lg`: this is the gap between two *sections* — the
+            // controls and the thing they control — and a section break that
+            // used the same number as the gap between two cards would make the
+            // toolbar read as the first row of the list. It is `xl` at every
+            // width again: the compact trade existed only to buy screen height,
+            // and there is no longer any to buy.
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              0,
+              AppSpacing.lg,
+              AppSpacing.xl,
+            ),
+            child: DeckListToolbarWidget(
+              isRootLevel: parent == null,
               filter: filter,
               sort: sort,
+              onFilterChanged: onFilterChanged,
+              onSortChanged: onSortChanged,
             ),
-            onClearFilter: () => onFilterChanged(DeckListFilter.all),
           ),
+        ),
+        _DeckListSliver(
+          summaries: applyDeckListView(
+            snapshot.decks,
+            filter: filter,
+            sort: sort,
+          ),
+          onClearFilter: () => onFilterChanged(DeckListFilter.all),
         ),
       ],
     );
@@ -338,8 +330,8 @@ class _DeckLevel extends StatelessWidget {
 /// filter matched none of them. The "nothing here at all" cases never reach this
 /// widget — `_DeckLevel` answers them before the toolbar is even built, because
 /// they need different words and different actions.
-class _DeckList extends StatelessWidget {
-  const _DeckList({required this.summaries, required this.onClearFilter});
+class _DeckListSliver extends StatelessWidget {
+  const _DeckListSliver({required this.summaries, required this.onClearFilter});
 
   final List<DeckSummary> summaries;
   final VoidCallback onClearFilter;
@@ -347,53 +339,60 @@ class _DeckList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (summaries.isEmpty) {
-      return MxEmptyState(
-        // `MxEmptyState`'s default check-mark, left unset on purpose: nothing due
-        // means the reviews are finished, which is the one state in this feature
-        // where that icon tells the truth.
-        title: context.l10n.decksNoDueTitle,
-        message: context.l10n.decksNoDueMessage,
-        actionLabel: context.l10n.decksShowAllAction,
-        onAction: onClearFilter,
+      // `hasScrollBody: false` so the state is sized to its content and centred
+      // in what is left, rather than stretched down a viewport it does not fill.
+      return SliverFillRemaining(
+        hasScrollBody: false,
+        child: MxEmptyState(
+          // `MxEmptyState`'s default check-mark, left unset on purpose: nothing
+          // due means the reviews are finished, which is the one state in this
+          // feature where that icon tells the truth.
+          title: context.l10n.decksNoDueTitle,
+          message: context.l10n.decksNoDueMessage,
+          actionLabel: context.l10n.decksShowAllAction,
+          onAction: onClearFilter,
+        ),
       );
     }
 
-    return ListView.separated(
+    return SliverPadding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
         0,
         AppSpacing.lg,
         _kListBottomInset,
       ),
-      itemCount: summaries.length,
-      separatorBuilder: (context, index) =>
-          const SizedBox(height: AppSpacing.md),
-      itemBuilder: (context, index) {
-        final summary = summaries[index];
+      sliver: SliverList.separated(
+        itemCount: summaries.length,
+        separatorBuilder: (context, index) =>
+            const SizedBox(height: AppSpacing.md),
+        itemBuilder: (context, index) {
+          final summary = summaries[index];
 
-        return DeckTileWidget(
-          summary: summary,
-          // By name, with the id as a path parameter. The literal path would work
-          // today and break silently the first time the route moves.
-          onTap: () => context.goNamed(
-            RouteNames.deckDetail,
-            pathParameters: <String, String>{
-              RoutePathParams.deckId: summary.deck.id,
-            },
-          ),
-          onActions: () => showDeckActions(
-            context,
-            deck: summary.deck,
-            // Whether a deck may be reset is a question about its own children,
-            // answered on its own level where they are known. Offering it from
-            // the level above would mean guessing.
-            mayOfferReset: false,
-            // Deleting from a list leaves the user on that list; there is nowhere
-            // to navigate back from.
-            onDeleted: () {},
-          ),
-        );
-      },
+          return DeckTileWidget(
+            summary: summary,
+            // By name, with the id as a path parameter. The literal path would
+            // work today and break silently the first time the route moves.
+            onTap: () => context.goNamed(
+              RouteNames.deckDetail,
+              pathParameters: <String, String>{
+                RoutePathParams.deckId: summary.deck.id,
+              },
+            ),
+            onActions: () => showDeckActions(
+              context,
+              deck: summary.deck,
+              // Whether a deck may be reset is a question about its own
+              // children, answered on its own level where they are known.
+              // Offering it from the level above would mean guessing.
+              mayOfferReset: false,
+              // Deleting from a list leaves the user on that list; there is
+              // nowhere to navigate back from.
+              onDeleted: () {},
+            ),
+          );
+        },
+      ),
     );
   }
 }
