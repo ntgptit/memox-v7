@@ -127,4 +127,16 @@ abstract final class CssTokens {
   /// catches a token *added* to the CSS rather than one changed.
   static Set<String> names(String file, {String scope = ':root'}) =>
       read(file, scope: scope).keys.toSet();
+
+  /// Every `.css` file in the token directory.
+  ///
+  /// The completeness checks enumerate tokens inside a list of files they are
+  /// given, so a whole *file* added to the kit would be invisible to them —
+  /// clean output, nothing read. This is what turns that into a failure.
+  static Set<String> tokenFileNames() => Directory('design_system/tokens')
+      .listSync()
+      .whereType<File>()
+      .map((file) => file.uri.pathSegments.last)
+      .where((name) => name.endsWith('.css'))
+      .toSet();
 }

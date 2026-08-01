@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_breakpoints.dart';
+import 'package:memox/core/theme/app_compact_scale.dart';
 import 'package:memox/core/theme/app_durations.dart';
 import 'package:memox/core/theme/app_elevation.dart';
 import 'package:memox/core/theme/app_icon_size.dart';
@@ -8,6 +9,7 @@ import 'package:memox/core/theme/app_radius.dart';
 import 'package:memox/core/theme/app_spacing.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/core/theme/app_typography.dart';
+import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 
 import 'css_tokens.dart';
 
@@ -23,6 +25,7 @@ import 'css_tokens.dart';
 /// `css_token_parity_test.dart`.
 void main() {
   final ThemeData light = buildLightTheme();
+  final ThemeData dark = buildDarkTheme();
 
   group('the scales match the kit', () {
     test('spacing', () {
@@ -187,10 +190,27 @@ void main() {
       expectRung('label-sm', texts.labelSmall, trackingToken: 'label-sm');
     });
 
+    test('the two faces are the kit\'s two', () {
+      // The kit writes a CSS font stack and Flutter names one bundled family,
+      // so the comparison is against the head of the stack with its spaces
+      // removed — `"Plus Jakarta Sans", …` against `PlusJakartaSans`.
+      String head(String token) => CssTokens.require(
+        'typography.css',
+        token,
+      ).split(',').first.replaceAll('"', '').replaceAll(' ', '');
+
+      expect(head('--font-display'), AppTypography.displayFamily);
+      expect(head('--font-body'), AppTypography.bodyFamily);
+    });
+
     test('weights are the kit\'s four', () {
       final texts = light.textTheme;
       final weights = <String, FontWeight?>{
         'regular': texts.bodyMedium?.fontWeight,
+        // `--weight-medium` had no assertion until M4.10ap, which made it the
+        // one rung of the weight scale that could move without anything
+        // noticing. It is what the two smallest labels are set in.
+        'medium': texts.labelMedium?.fontWeight,
         'semibold': texts.labelLarge?.fontWeight,
         'bold': texts.displayLarge?.fontWeight,
       };
@@ -204,7 +224,7 @@ void main() {
       }
     });
 
-    test('the compact prompt and the section-label tracking', () {
+    test('the compact rungs and the section-label tracking', () {
       expect(
         CssTokens.number('typography.css', '--text-card-prompt-compact'),
         AppTypography.compactCardPromptSize,
@@ -213,8 +233,94 @@ void main() {
         CssTokens.number('typography.css', '--tracking-section-label'),
         AppTypography.sectionLabelTracking,
       );
+      // Read off the compact theme rather than a constant: `app_compact_scale.dart`
+      // sets the app-bar title inline, so a constant to compare against does not
+      // exist and asserting one would only prove the test agrees with itself.
+      expect(
+        applyCompactScale(light).textTheme.titleLarge?.fontSize,
+        CssTokens.number('typography.css', '--text-title-lg-compact'),
+      );
     });
   });
+
+  group('what the kit states as a value, the app computes', () {
+    test('a shadow at each level is the kit\'s shadow', () {
+      // `shadowsFor` derives offset, blur and alpha from the level — the alpha
+      // was solved for, not picked — where the kit has to write three literals.
+      // So this is the one place the *formula* is checked against the values,
+      // and it is why the elevation tokens can be in parity at all.
+      for (final (String token, double level) in <(String, double)>[
+        ('--shadow-card', AppElevation.card),
+        ('--shadow-raised', AppElevation.raised),
+        ('--shadow-overlay', AppElevation.overlay),
+      ]) {
+        final declared = _shadow('elevation.css', token);
+        final shadows = shadowsFor(level, light.colorScheme);
+
+        expect(shadows, hasLength(1), reason: '$token: expected one shadow');
+        expect(shadows.single.offset.dy, declared.dy, reason: '$token offset');
+        expect(shadows.single.blurRadius, declared.blur, reason: '$token blur');
+        expect(
+          shadows.single.color.a,
+          closeTo(declared.alpha, 0.005),
+          reason: '$token alpha',
+        );
+      }
+    });
+
+    test('dark drops every shadow, as the kit does', () {
+      // `[data-theme="dark"]` re-points all three to `none`. The Dart side says
+      // the same thing by returning an empty list, and the two agreeing is what
+      // makes "no shadow in dark" a shared decision rather than a coincidence.
+      for (final token in <String>[
+        '--shadow-card',
+        '--shadow-raised',
+        '--shadow-overlay',
+      ]) {
+        expect(
+          CssTokens.require(
+            'elevation.css',
+            token,
+            scope: '[data-theme="dark"]',
+          ),
+          'none',
+          reason: '$token still paints in dark',
+        );
+      }
+
+      for (final level in AppElevation.scale) {
+        expect(
+          shadowsFor(level, dark.colorScheme),
+          isEmpty,
+          reason: 'level $level paints a shadow in dark',
+        );
+      }
+    });
+
+    test('the navigation bar caps at the kit\'s width per destination', () {
+      expect(
+        widthPerNavigationDestination,
+        CssTokens.number('layout.css', '--nav-width-per-destination'),
+      );
+    });
+  });
+}
+
+/// `0 1px 3px rgb(r g b / a)` — the parts Flutter needs.
+({double dy, double blur, double alpha}) _shadow(String file, String token) {
+  final raw = CssTokens.require(file, token);
+  final match = RegExp(
+    r'^0\s+(\d+)px\s+(\d+)px\s+rgb\([^/]+/\s*([\d.]+)\s*\)$',
+  ).firstMatch(raw);
+  if (match == null) {
+    throw StateError('$token is "$raw", which is not a single offset shadow');
+  }
+
+  return (
+    dy: double.parse(match.group(1)!),
+    blur: double.parse(match.group(2)!),
+    alpha: double.parse(match.group(3)!),
+  );
 }
 
 void _expectSameCurve(String token, Curve dart) {

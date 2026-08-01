@@ -58,6 +58,30 @@ const double kDisabledTintAlpha = 0.12;
 /// about fills and borders, whose ground is whatever happens to be behind them.
 const double kDisabledForegroundAlpha = 0.38;
 
+/// The border a control draws while it holds keyboard focus.
+///
+/// **One function, because three components had three copies and all three were
+/// wrong in dark.** The chip, the outlined button and the icon button each wrote
+/// `BorderSide(color: scheme.primary, width: 2)`. Measured, `primaryDark` is
+/// **2.90:1** on `surface` and **2.11:1** on `secondaryContainer` — under the
+/// 3:1 WCAG 1.4.11 asks of a focus indicator, and under it on the two grounds a
+/// focused control actually sits on. The icon button's own comment invoked that
+/// 3:1 while painting a colour that missed it.
+///
+/// `focusRing` is the token for this and was already carrying it for the text
+/// field's border and the spinner: 5.51:1 and 4.02:1 on those same two dark
+/// grounds, 7.41 and 6.14 in light. `primary` is held at a luminance that keeps
+/// a filled button from becoming the brightest thing on a navy page, which is
+/// the opposite of what a focus ring wants — the same argument that moved the
+/// progress indicator off it in M4.10m.
+///
+/// Pinned per ground by `focus_ring_contrast_test.dart`.
+BorderSide focusRingSide(AppSemanticColors semantic) =>
+    BorderSide(color: semantic.focusRing, width: kFocusRingWidth);
+
+/// `--border-focus` in `design_system/tokens/elevation.css`.
+const double kFocusRingWidth = 2;
+
 /// How much of the accent a control takes on while it is pressed, focused or
 /// hovered.
 ///
@@ -150,7 +174,7 @@ OutlinedButtonThemeData buildOutlinedButtonTheme(
         return BorderSide(color: disabledSurfaceTint(scheme));
       }
       if (states.contains(WidgetState.focused)) {
-        return BorderSide(color: scheme.primary, width: 2);
+        return focusRingSide(semantic);
       }
 
       return BorderSide(color: semantic.borderSubtle);

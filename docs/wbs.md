@@ -4435,6 +4435,63 @@ bằng **dung sai 4 đơn vị** thay vì đẳng thức: đủ rộng cho kho�
 hẹp cho một token bị trỏ lại. Comment trong `app_button_themes.dart` ghi
 `#E3E3E6` là số đo cũ, đã sửa theo số đo lại.
 
+**Next task: M4.10ap · Focus ring đạt ngưỡng, và hai lỗ hổng enforcement còn lại.**
+
+### M4.10ap · Focus ring lên semantic token, guard duration và scale parity khép kín
+
+- **Status:** done
+- **Goal:** Đóng ba phát hiện của vòng review M4.10ao: focus ring không đạt
+  3:1 ở dark, guard duration không phủ nơi regression thật sự xảy ra, và scale
+  parity không có completeness.
+- **Scope:** `focusRingSide()` + `kFocusRingWidth` trong `app_button_themes.dart`
+  và ba nơi gọi (chip, outlined button, icon button); scope
+  `ui_and_theme_surfaces` + regex bỏ qua dòng comment cho `no_raw_duration`;
+  `widthPerNavigationDestination` đổi từ private thành public; completeness cho
+  6 file token còn lại; `CssTokens.tokenFileNames()`.
+- **Out of scope:** giá trị `primaryDark` — nó được giữ ở luminance đó có lý do
+  (một filled button không được là thứ sáng nhất trên trang navy); vấn đề là
+  dùng nó làm focus ring, không phải bản thân nó.
+- **Dependencies:** M4.10ao
+- **Checklist phases:** 7, 12, 13
+- **Tests required:** `focus_ring_contrast_test.dart` (8 test, 4 nền × 2 mode);
+  `css_scale_coverage_test.dart`; fault injection cho cả ba.
+- **Editable documents:** `docs/wbs.md`, `docs/architecture.md`
+- **Output:** `test/core/theme/focus_ring_contrast_test.dart`,
+  `test/design_audit/css_scale_coverage_test.dart`
+- **Acceptance criteria:**
+  - [x] Ba component vẽ focus ring đều đi qua `focusRingSide`; đo được ≥3:1
+        trên **cả bốn** nền ở cả hai mode.
+  - [x] `no_raw_duration` bắt được đúng regression tooltip khi tiêm lại vào
+        `app_overlay_themes.dart`; named const vẫn được tha.
+  - [x] Completeness bắt token scale mới; anti-vacuous bắt cả **file** token mới.
+  - [x] 1121 test pass, `flutter analyze` 0 issue, guard 68 rule xanh.
+
+**Test cũ khẳng định đúng cái giá trị đang sai.** `mx_pill_button_theme_test.dart`
+pin `focused?.color == colorScheme.primary` — nó pass, và nó pin một màu đo được
+**2.11:1** trên chính `secondaryContainer` mà pill selected dùng làm nền. Một
+test viết bằng cách đọc giá trị hiện có sẽ đồng ý với bug. Nay nó pin qua
+`focusRingSide`, còn con số thì `focus_ring_contrast_test.dart` đo.
+
+**Đo trên nền thật, không trên một nền danh nghĩa.** `primaryDark` đạt 3.29:1
+trên `background` — nếu chỉ kiểm nền trang thì đã pass. Nó hỏng ở `surface`
+(2.90) và hỏng nặng nhất ở `secondaryContainer` (2.11), tức đúng hai nền mà một
+control được focus thực sự nằm lên. Comment của `iconButtonTheme` viện dẫn ngưỡng
+3:1 trong khi vẽ một màu không đạt nó.
+
+**Guard scoped sai thì không bắt được chính ca nó được viết ra để chặn.**
+`ui_surfaces` cố ý loại `lib/core/theme/**` — đúng cho màu và radius, vì ở đó
+literal *chính là* token. Duration không như vậy: `AppDurations` khai báo ba rung
+của nó dưới dạng **named const**, và mọi duration hợp lệ khác trong repo cũng
+thế, nên thư mục theme không cần miễn trừ nào — trong khi nó lại là nơi
+`Duration(milliseconds: 500)` từng nằm ẩn danh. Scope mới `ui_and_theme_surfaces`
+đưa theme vào, lookahead giữ domain ở ngoài.
+
+**Rule bắt chính tài liệu của nó.** Sau khi mở scope, `no_raw_duration` đỏ ở
+`app_overlay_themes.dart:75` — dòng doc comment giải thích *không được viết*
+`Duration(milliseconds: 500)`. Repo đã gặp đúng lỗi này một lần (R8 khớp chữ
+`platformBrightness` còn sót trong comment giải thích nó). Lookahead nay bỏ qua
+dòng bắt đầu bằng `//` hoặc `*`.
+
 **Next task: M4.11 · Card management full-stack.**
 
 ### M4.11 · Card management full-stack

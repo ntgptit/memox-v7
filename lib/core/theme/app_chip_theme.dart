@@ -104,12 +104,13 @@ ChipThemeData buildChipTheme(
     if (states.contains(WidgetState.disabled)) {
       return BorderSide(color: disabledSurfaceTint(scheme));
     }
-    // The same 2px ring `iconButtonTheme` and the outlined button draw. A pill
-    // is reachable by keyboard on the web build, which is the E2E channel, and
-    // Material's own focus cue for a chip is a fill tint this theme now owns —
-    // so without a ring the focused pill and the hovered one look alike.
+    // The same ring `iconButtonTheme` and the outlined button draw, through the
+    // one function so the three cannot drift. A pill is reachable by keyboard on
+    // the web build, which is the E2E channel, and Material's own focus cue for
+    // a chip is a fill tint this theme now owns — so without a ring the focused
+    // pill and the hovered one look alike.
     if (states.contains(WidgetState.focused)) {
-      return BorderSide(color: scheme.primary, width: 2);
+      return focusRingSide(semantic);
     }
 
     return BorderSide(color: semantic.borderSubtle);

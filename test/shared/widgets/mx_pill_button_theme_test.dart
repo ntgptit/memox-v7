@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/app_button_themes.dart';
+import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
 
@@ -181,6 +183,12 @@ void main() {
     test('focus draws a ring rather than only a tint', () {
       // WCAG 1.4.11 asks 3:1 of a focus indicator. A fill tint alone does not
       // reach it — the same measurement that put a ring on `MxIconButton`.
+      //
+      // **The ring's colour is asserted through `focusRingSide`, not spelled
+      // out.** This test first pinned `colorScheme.primary`, which is what the
+      // chip drew — and `primary` misses that same 3:1 in dark, on this very
+      // component's selected fill (2.11:1). A test naming the value it found
+      // agrees with the bug. `focus_ring_contrast_test.dart` measures it.
       for (final isDark in <bool>[false, true]) {
         final theme = isDark ? buildDarkTheme() : buildLightTheme();
         final side = theme.chipTheme.side;
@@ -193,7 +201,10 @@ void main() {
           <WidgetState>{},
         );
 
-        expect(focused?.color, theme.colorScheme.primary);
+        expect(
+          focused?.color,
+          focusRingSide(theme.extension<AppSemanticColors>()!).color,
+        );
         expect(focused?.width, greaterThan(resting?.width ?? 0));
       }
     });

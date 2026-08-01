@@ -317,14 +317,13 @@ ThemeData _buildTheme(
               borderRadius: BorderRadius.circular(AppRadius.md),
             ),
           ).copyWith(
-            // Keyboard focus draws a ring, not just the default tint. Measured
-            // off the goldens, that tint alone is 1.15:1 against the surface
-            // behind it in both modes — WCAG 1.4.11 asks 3:1 of a focus
-            // indicator, so on its own it marks the focused control for people
-            // who can already see where they are and for nobody else.
+            // Keyboard focus draws a ring, not just the default tint: measured
+            // off the goldens that tint alone is 1.15:1 in both modes, where
+            // WCAG 1.4.11 asks 3:1 of a focus indicator. The ring itself was
+            // `primary` and missed the same 3:1 in dark — see `focusRingSide`.
             side: WidgetStateProperty.resolveWith((states) {
               if (!states.contains(WidgetState.focused)) return null;
-              return BorderSide(color: scheme.primary, width: 2);
+              return focusRingSide(semantic);
             }),
           ),
     ),

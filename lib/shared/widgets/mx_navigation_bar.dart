@@ -17,7 +17,11 @@ import '../../core/theme/theme_context_extension.dart';
 /// Seamless because `navigationBarTheme.backgroundColor` and
 /// `scaffoldBackgroundColor` are the same token: the bar paints the page colour,
 /// so narrowing it leaves no band edge to notice.
-const double _kWidthPerDestination = 120;
+///
+/// This is `--nav-width-per-destination` in `design_system/tokens/layout.css`,
+/// and it is public for that reason: a private copy is a token the CSS/Dart
+/// parity check cannot see, which is how it sat outside parity until M4.10ap.
+const double widthPerNavigationDestination = 120;
 
 /// The app's bottom navigation bar.
 ///
@@ -39,7 +43,7 @@ const double _kWidthPerDestination = 120;
 ///
 /// Height, colours and the indicator come from `navigationBarTheme` in
 /// `app_theme.dart`. The one thing set here is how wide the destination row is
-/// allowed to grow — see [_kWidthPerDestination] — because `NavigationBarThemeData`
+/// allowed to grow — see [widthPerNavigationDestination] — because `NavigationBarThemeData`
 /// has no property for it and the alternative is every caller solving it again.
 class MxNavigationBar extends StatelessWidget {
   const MxNavigationBar({
@@ -98,7 +102,7 @@ class MxNavigationBar extends StatelessWidget {
         children: <Widget>[
           ConstrainedBox(
             constraints: BoxConstraints(
-              maxWidth: destinations.length * _kWidthPerDestination,
+              maxWidth: destinations.length * widthPerNavigationDestination,
             ),
             child: NavigationBar(
               selectedIndex: selectedIndex,
