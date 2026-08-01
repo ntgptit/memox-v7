@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_breakpoints.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_text_button.dart';
@@ -54,17 +53,14 @@ class DeckSummarySectionWidget extends ConsumerWidget {
     };
 
     return Padding(
-      // **`sm` above, redistributed from below — the total is fixed.** The
-      // shell's strip pads only `xs` under the search field (a 320×2.0
-      // overflow trade — see `_MxSubheader`), and with a top of zero here the
-      // whole separation between the search pill and this card was 4px: two
-      // same-width, same-radius surfaces reading as one glued blob. Taking the
-      // `sm` out of the bottom instead of adding it keeps every body pixel
-      // below this section where it was, so the last row's clearance from the
-      // floating action — 7px, per the shell's own audit — is untouched. The
-      // cost is the section break below going `xl` to `lg`; the toolbar still
-      // reads as controls, not as the first row, because the rows carry their
-      // own surfaces. `deck_list_spacing_test.dart` measures the gap above.
+      // **`md` above, and it costs nothing now.** With the shell's `xs` under
+      // the search field this makes the separation 16 — two same-width,
+      // same-radius surfaces need it, and at 12 they still read as one shape
+      // with a seam. It was `sm` because every pixel added here pushed the whole
+      // body down, and the last row then sat under the floating action with 7px
+      // of clearance. Neither constraint exists: the action left the screen and
+      // the body is one scroll view, so there is no height budget to borrow
+      // against. `deck_list_spacing_test.dart` measures this gap.
       //
       // **The bottom drops one step on a compact screen.** The other half of
       // the 17 pixels the breadcrumb strip cost the pinned chrome at 320 with
@@ -72,13 +68,11 @@ class DeckSummarySectionWidget extends ConsumerWidget {
       // Taken from below rather than above because the gap above is the one
       // `deck_list_spacing_test.dart` measures, and because moving body pixels
       // *up* only increases the last row's clearance from the floating action.
-      padding: EdgeInsets.fromLTRB(
+      padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
-        AppSpacing.sm,
+        AppSpacing.md,
         AppSpacing.lg,
-        AppBreakpoints.isCompact(MediaQuery.sizeOf(context).width)
-            ? AppSpacing.sm
-            : AppSpacing.lg,
+        AppSpacing.lg,
       ),
       child: isVisible
           ? DeckLevelSummaryWidget(
