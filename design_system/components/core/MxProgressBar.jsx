@@ -9,12 +9,12 @@ import React from 'react';
  * competes with the button next to it, and turns green at 100% — the one place
  * the interface is allowed to congratulate anybody.
  */
-export function MxProgressBar({ value, label, valueLabel, size = 'md', tone = 'progress' }) {
+export function MxProgressBar({ value, label, valueLabel, size = 'md', shape = 'pill', tone = 'progress' }) {
   const pct = Math.max(0, Math.min(1, value));
   const complete = pct >= 1;
   const fill = tone === 'streak' ? 'var(--color-streak)' : (complete ? 'var(--color-progress-complete)' : 'var(--color-progress-fill)');
   return (
-    <div className={`mx-progress mx-progress--${size}`} role="progressbar" aria-valuenow={Math.round(pct * 100)} aria-valuemin={0} aria-valuemax={100} aria-label={label}>
+    <div className={`mx-progress mx-progress--${size} mx-progress--${shape}`} role="progressbar" aria-valuenow={Math.round(pct * 100)} aria-valuemin={0} aria-valuemax={100} aria-label={label}>
       {(label || valueLabel) ? (
         <div className="mx-progress__head">
           <span>{label}</span>

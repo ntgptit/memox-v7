@@ -121,12 +121,16 @@
         "message": "<MxPillButton> doesn't accept that prop. Declared props: label, isSelected, onClick, icon, semanticLabel."
       },
       {
-        "selector": "JSXOpeningElement[name.name='MxProgressBar'] > JSXAttribute > JSXIdentifier[name!=/^(?:value|label|valueLabel|size|tone|key|ref|className|style|children)$/]",
-        "message": "<MxProgressBar> doesn't accept that prop. Declared props: value, label, valueLabel, size, tone."
+        "selector": "JSXOpeningElement[name.name='MxProgressBar'] > JSXAttribute > JSXIdentifier[name!=/^(?:value|label|valueLabel|size|shape|tone|key|ref|className|style|children)$/]",
+        "message": "<MxProgressBar> doesn't accept that prop. Declared props: value, label, valueLabel, size, shape, tone."
       },
       {
         "selector": "JSXOpeningElement[name.name='MxProgressBar'] > JSXAttribute[name.name='size'] > Literal[value!=/^(?:sm|md)$/]",
         "message": "<MxProgressBar> size must be one of 'sm' | 'md'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='MxProgressBar'] > JSXAttribute[name.name='shape'] > Literal[value!=/^(?:pill|flush)$/]",
+        "message": "<MxProgressBar> shape must be one of 'pill' | 'flush'."
       },
       {
         "selector": "JSXOpeningElement[name.name='MxProgressBar'] > JSXAttribute[name.name='tone'] > Literal[value!=/^(?:progress|streak)$/]",

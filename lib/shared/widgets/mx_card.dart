@@ -74,7 +74,18 @@ class MxCard extends StatelessWidget {
       border: Border.all(color: context.semanticColors.borderSubtle),
       boxShadow: shadowsFor(elevation, context.colors),
     );
-    final content = Padding(padding: padding, child: child);
+    // **The card clips what it holds.** Anything a caller seats on an edge — the
+    // deck card puts a progress track on its base — is otherwise cut by its own
+    // box rather than by the card's corner: a `ClipRRect` around a 4px-tall bar
+    // clamps a 16px radius down to 4, so the bar keeps its full width where the
+    // card's surface has already curved inward, and the colour runs past the
+    // corner. Clipping here is the only place that knows the real geometry.
+    // `antiAlias`, not `hardEdge`: a 16px curve stepped by whole pixels is
+    // visible against a hairline border.
+    final content = ClipRRect(
+      borderRadius: BorderRadius.circular(AppRadius.lg),
+      child: Padding(padding: padding, child: child),
+    );
 
     final tap = onTap;
     if (tap == null) {
