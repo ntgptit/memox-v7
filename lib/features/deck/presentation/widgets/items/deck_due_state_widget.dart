@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_icon_size.dart';
-import '../../../../core/theme/app_radius.dart';
-import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/theme_context_extension.dart';
-import '../../../../l10n/l10n_extension.dart';
-import '../../domain/models/deck_summary_model.dart';
+import '../../../../../core/theme/app_icon_size.dart';
+import '../../../../../core/theme/app_radius.dart';
+import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/theme_context_extension.dart';
+import '../../../../../l10n/l10n_extension.dart';
+import '../../../domain/models/deck_summary_model.dart';
 
 /// A filled chip when something is waiting; quiet text when nothing is.
 ///

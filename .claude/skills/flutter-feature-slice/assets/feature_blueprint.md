@@ -27,7 +27,11 @@ lib/features/<feature>/
     ├── screens/        <name>_screen.dart
     ├── controllers/    <name>_controller.dart
     ├── states/         <name>_state.dart
-    ├── widgets/        <name>_widget.dart
+    ├── widgets/                                        (bucketed — AD-15)
+    │   ├── sections/   <name>_widget.dart              (bands the screen composes)
+    │   ├── items/      <name>_widget.dart              (the repeated row and its parts)
+    │   ├── overlays/   <name>_widget.dart              (sheets, dialogs, forms + their showX)
+    │   └── support/    <name>_widget.dart              (ARB mapping, render-only extensions)
     └── providers/      <name>_provider.dart            (dependency wiring only)
 ```
 
@@ -43,6 +47,27 @@ at the folder:
   name, and other guard scopes select files by that same suffix. A mis-suffixed
   file silently leaves the scope of the rules meant to cover it — which is why
   `deck_labels_widget.dart` keeps `_widget` although it holds an extension.
+
+**`widgets/` is bucketed, and the bucket list is not the feature's to choose.**
+Every widget sits in exactly one of `sections/`, `items/`, `overlays/` or
+`support/`, one level deep — the placement test is four questions asked in
+order, stopping at the first yes:
+
+1. opens *over* the screen (`showModalBottomSheet`/`showDialog`)? → `overlays/`
+2. the repeated row of a list, or a part only that row uses? → `items/`
+3. composed directly into the screen's body or chrome? → `sections/`
+4. serves more than one bucket above? → `support/`
+
+Nothing sits directly in `widgets/`, buckets never nest, and an empty bucket is
+not scaffolded — create it with its first real file. Deck is the worked
+example: its tile and the tile's chip/pill/glyph are `items/`, its subheader,
+toolbar, summary and body switcher are `sections/`, its action sheet, forms,
+confirm dialogs and move picker are `overlays/`, and the ARB-mapping extension
+`deck_labels_widget.dart` is `support/` because four files across three buckets
+call it. AD-15 in `docs/architecture.md` is the contract;
+`architecture_boundary_test.dart` and the guard rule
+`memox.architecture.widgets_grouped_into_buckets` enforce it, so a cloned
+feature that invents a folder fails the suite instead of setting a precedent.
 - `check_architecture.sh`'s `check_suffix` pairs each folder with its required
   suffix: `/domain/entities/` → `_entity.dart`, `/presentation/screens/` →
   `_screen.dart`, and eight more.

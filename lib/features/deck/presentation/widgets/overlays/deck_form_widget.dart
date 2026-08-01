@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/theme_context_extension.dart';
-import '../../../../l10n/l10n_extension.dart';
-import '../../../../shared/widgets/mx_action_button.dart';
-import '../../../../shared/widgets/mx_confirm_dialog.dart';
-import '../../../../shared/widgets/mx_text_field.dart';
-import '../../domain/models/scheduler_type_model.dart';
-import 'deck_labels_widget.dart';
-import '../../domain/failures/deck_validation_failure.dart';
-import '../../domain/models/deck_name_model.dart';
-import '../states/deck_submit_state.dart';
+import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/theme_context_extension.dart';
+import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_action_button.dart';
+import '../../../../../shared/widgets/mx_confirm_dialog.dart';
+import '../../../../../shared/widgets/mx_text_field.dart';
+import '../../../domain/models/scheduler_type_model.dart';
+import '../support/deck_labels_widget.dart';
+import '../../../domain/failures/deck_validation_failure.dart';
+import '../../../domain/models/deck_name_model.dart';
+import '../../states/deck_submit_state.dart';
 
 /// The one deck form, used for create-root, create-sub-deck and rename.
 ///

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/navigation/route_names.dart';
-import '../../../../l10n/l10n_extension.dart';
-import '../../../../shared/widgets/mx_breadcrumb.dart';
-import '../../domain/entities/deck_entity.dart';
-import '../../domain/models/deck_list_snapshot_model.dart';
-import '../../domain/models/deck_path_segment_model.dart';
+import '../../../../../core/navigation/route_names.dart';
+import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_breadcrumb.dart';
+import '../../../domain/entities/deck_entity.dart';
+import '../../../domain/models/deck_list_snapshot_model.dart';
+import '../../../domain/models/deck_path_segment_model.dart';
 
 /// Where this level sits in the tree.
 ///

@@ -1,13 +1,13 @@
 import 'package:flutter/widgets.dart';
 
-import '../../../../core/error/failure.dart';
-import '../../../../l10n/l10n_extension.dart';
-import '../../domain/entities/deck_entity.dart';
-import '../../domain/failures/deck_conflict_failure.dart';
-import '../../domain/failures/deck_validation_failure.dart';
-import '../../domain/models/deck_name_model.dart';
-import '../../domain/failures/deck_move_failure.dart';
-import '../../domain/models/scheduler_type_model.dart';
+import '../../../../../core/error/failure.dart';
+import '../../../../../l10n/l10n_extension.dart';
+import '../../../domain/entities/deck_entity.dart';
+import '../../../domain/failures/deck_conflict_failure.dart';
+import '../../../domain/failures/deck_validation_failure.dart';
+import '../../../domain/models/deck_name_model.dart';
+import '../../../domain/failures/deck_move_failure.dart';
+import '../../../domain/models/scheduler_type_model.dart';
 
 /// Where a domain value becomes something a person reads.
 ///

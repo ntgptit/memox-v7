@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_icon_size.dart';
-import '../../../../core/theme/app_radius.dart';
-import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/theme_context_extension.dart';
-import '../../../../l10n/l10n_extension.dart';
-import '../../../../shared/widgets/mx_empty_state.dart';
-import '../../domain/models/deck_content_type_model.dart';
-import '../../domain/models/deck_search_result_model.dart';
+import '../../../../../core/theme/app_icon_size.dart';
+import '../../../../../core/theme/app_radius.dart';
+import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/theme_context_extension.dart';
+import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_empty_state.dart';
+import '../../../domain/models/deck_content_type_model.dart';
+import '../../../domain/models/deck_search_result_model.dart';
 
 /// What a search found, or the fact that it found nothing.
 ///

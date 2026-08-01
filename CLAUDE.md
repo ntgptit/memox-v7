@@ -142,7 +142,18 @@ lib/features/<feature>/
 ├── data/         repositories/ · mappers/ · datasources/ · models/
 ├── di/           one provider per contract the feature needs
 └── presentation/ screens/ · controllers/ · states/ · widgets/ · providers/
+                  widgets/ holds exactly four buckets, one level deep:
+                  sections/ · items/ · overlays/ · support/   (AD-15)
 ```
+
+**`widgets/` is bucketed, and the bucket list is fixed.** A widget sits in
+`sections/` (a band the screen composes), `items/` (the repeated row and its
+parts), `overlays/` (sheets, dialogs, forms and their `showX` functions) or
+`support/` (presentation mapping used across buckets) — never directly in
+`widgets/`, never deeper, never in a fifth name. AD-15 owns the contract and
+the placement questions; `architecture_boundary_test.dart` and the guard's
+`widgets_grouped_into_buckets` rule both enforce it, so an invented folder
+fails the suite rather than becoming a precedent.
 
 **`features/` never imports `app/`** (AD-13). The composition root sees a feature;
 the reverse makes a feature depend on the shell it happens to be mounted in, and

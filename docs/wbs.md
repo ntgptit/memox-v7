@@ -4313,6 +4313,59 @@ subheader là chrome ghim còn panel trượt dưới nó.
 — không phải bội của 4. Gần nhất: 24/28 theo mắt, và 4px lệch đặt về phía
 proximity muốn — search nhích về breadcrumb, không phải về panel.
 
+**Next task: M4.10am · Bucket hoá presentation/widgets.**
+
+### M4.10am · `presentation/widgets` chia bốn bucket, enforce ở ba nơi
+
+- **Status:** done
+- **Goal:** 18 widget phẳng của deck vào bốn bucket cố định
+  (`sections/` · `items/` · `overlays/` · `support/`), và biến cách xếp này
+  thành contract toàn app mà feature sau clone được nguyên vẹn.
+- **Scope:** 18 `git mv` + 26 file sửa import (screens, widgets, tests);
+  AD-15 trong `docs/architecture.md`; `CLAUDE.md`; hai skill
+  (`flutter-architecture`, blueprint của `flutter-feature-slice`);
+  `lib/features/deck/README.md`; `design_system/github.md`;
+  `lib/core/error/failure.dart` (comment path đã stale từ trước);
+  test bucket trong `architecture_boundary_test.dart`; rule
+  `memox.architecture.widgets_grouped_into_buckets` + matcher `file_path` mới
+  trong guard engine.
+- **Out of scope:** cây test (nhóm theo behavior, không mirror bucket);
+  WBS/report lịch sử (giữ nguyên path cũ như hồ sơ); `controllers/` (7 file,
+  phẳng vẫn đọc được — cùng luật có thể áp sau nếu cần, là quyết định riêng).
+- **Dependencies:** M4.10al
+- **Checklist phases:** 4, 5
+- **Tests required:** toàn bộ suite; test bucket mới kiểm tiêm lỗi đủ ba hình
+  dạng sai (file ở gốc, bucket lạ, nesting sâu); guard cũng kiểm tiêm lỗi đủ ba.
+- **Editable documents:** `docs/wbs.md`, `docs/architecture.md`, `CLAUDE.md`
+- **Output:**
+  `code-verification-guard-v2/code_verification_guard/matchers/file_path_matcher.py`
+- **Acceptance criteria:**
+  - [x] 18 file đúng bucket theo contract AD-15, import tính lại bằng script,
+        `flutter analyze` 0 issue, không đổi class/hành vi/public API nào.
+  - [x] Ba hình dạng sai đều bị bắt ở cả harness lẫn guard (đã tiêm lỗi, đã đỏ,
+        đã gỡ, đã xanh lại).
+  - [x] 1022 test pass, mọi gate xanh.
+
+**Guard tự bắt bản nháp đầu của chính luật này, và đó là phát hiện đáng ghi.**
+Cách hiển nhiên để enforce bucket bằng rule `file_name` là include/exclude đẽo
+gọt + pattern never-match — nhưng trạng thái khoẻ mạnh của rule đó là *target
+set rỗng*, và runner có sẵn diagnostic `guard.config.rule_without_targets` coi
+đúng hình dạng đó là rule chết. Trả lời đúng không phải là tắt diagnostic mà là
+thêm matcher `file_path` vào engine (enum + matcher + registry, theo đúng
+plugin-style có sẵn): pattern khớp trên đường-dẫn-tương-đối-repo, target set
+khoẻ mạnh là toàn bộ file widget, và **một** rule phủ cả ba hình dạng sai thay
+vì hai rule never-match.
+
+**Import không thay chuỗi mù mà tính lại:** script resolve từng import tương
+đối theo thư mục cũ của file, rồi re-relativize theo thư mục mới — vì file bị
+move đổi cả độ sâu (`../../../../core/` thành `../../../../../core/`) lẫn quan
+hệ với hàng xóm (labels từ sibling thành `../support/`).
+
+Phân công enforcement ghi trong AD-15 và nhắc ở cả ba nơi: AD giữ danh sách
+canonical, boundary test giữ hình dạng đầy đủ + anti-vacuous mức app, guard là
+lưới thứ hai; `check_architecture.sh` cố ý đứng ngoài — nó sở hữu suffix, và
+một luật hai bản trong hai script là hai bản sẽ trôi khỏi nhau.
+
 **Next task: M4.11 · Card management full-stack.**
 
 ### M4.11 · Card management full-stack
