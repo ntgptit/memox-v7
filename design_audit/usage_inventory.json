@@ -1,6 +1,6 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 134,
+  "scannedFiles": 135,
   "totalSites": 306,
   "byElementKind": {
     "other": 259,
@@ -1184,6 +1184,17 @@
       "token": "colorScheme.shadow",
       "resolved_value_light": "#0B0C18 @ alpha 0.06",
       "resolved_value_dark": "#04040B @ alpha 0.06"
+    },
+    {
+      "file": "lib/core/theme/app_input_theme.dart",
+      "line": 43,
+      "widget_context": "<top-level>",
+      "element_kind": "border",
+      "source_kind": "blend-source",
+      "expression": "semantic.borderSubtle.withValues(alpha: 0.5)",
+      "token": "semantic.borderSubtle",
+      "resolved_value_light": "#D2D2DD",
+      "resolved_value_dark": "#403D67"
     },
     {
       "file": "lib/core/theme/app_interaction_states.dart",
@@ -2793,18 +2804,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 316,
-      "widget_context": "<top-level>",
-      "element_kind": "border",
-      "source_kind": "blend-source",
-      "expression": "semantic.borderSubtle.withValues(alpha: 0.5)",
-      "token": "semantic.borderSubtle",
-      "resolved_value_light": "#D2D2DD",
-      "resolved_value_dark": "#403D67"
-    },
-    {
-      "file": "lib/core/theme/app_theme.dart",
-      "line": 378,
+      "line": 349,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -2815,7 +2815,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 395,
+      "line": 366,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
