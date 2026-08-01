@@ -69,45 +69,30 @@ class DeckTileWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          _DeckOpenRegion(summary: summary),
-          if (summary.totalCardCount > 0)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg,
-                0,
-                AppSpacing.lg,
-                AppSpacing.md,
-              ),
-              child: MxProgressBar(
-                size: MxProgressBarSize.sm,
-                value: summary.learnedFraction,
-                label: context.l10n.deckLearnedProgressLabel(
-                  summary.learnedCardCount,
-                  summary.totalCardCount,
-                ),
-                valueLabel: context.l10n.deckLearnedPercentLabel(
-                  (summary.learnedFraction * 100).round(),
-                ),
-              ),
-            ),
-          _DeckFootRegion(summary: summary, onActions: onActions),
+          _DeckHeadRegion(summary: summary, onActions: onActions),
+          _DeckStateRegion(summary: summary),
         ],
       ),
     );
   }
 }
 
-/// The card's top band: the well, the name, the counts.
+/// The card's first band: the well, the name, the counts, and the row's menu.
 ///
 /// **Layout only — the tap belongs to the card.** This was its own `InkWell` for
 /// one release, which made the hover and the ripple cover the top third of a card
-/// whose other two bands opened the same deck and showed nothing. Naming it after
-/// the verb is kept deliberately: it is the band the design calls `.mx-deck__open`
-/// and it is where a study action goes when there is a session to start.
-class _DeckOpenRegion extends StatelessWidget {
-  const _DeckOpenRegion({required this.summary});
+/// whose other bands opened the same deck and showed nothing.
+///
+/// **The menu moved up here from a band of its own.** A 48-tall row holding one
+/// icon button cost the card 48 pixels to say nothing; this band is already at
+/// least that tall because the button sets its floor, so the row came for free.
+/// That is most of what took the card from 168 to about 110 — on a 393x852 screen
+/// the difference is 2.3 visible decks against 3.5.
+class _DeckHeadRegion extends StatelessWidget {
+  const _DeckHeadRegion({required this.summary, required this.onActions});
 
   final DeckSummary summary;
+  final VoidCallback onActions;
 
   @override
   Widget build(BuildContext context) {
@@ -119,11 +104,14 @@ class _DeckOpenRegion extends StatelessWidget {
     final holdsCards = summary.deck.contentType == DeckContentType.card;
 
     return Padding(
+      // `sm` on the right: the overflow button carries its own 48 of width and
+      // its glyph is inset inside that, so the full gutter here would push the
+      // dots visibly past the text above them.
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
         AppSpacing.lg,
-        AppSpacing.lg,
-        AppSpacing.md,
+        AppSpacing.sm,
+        0,
       ),
       child: Row(
         // Top, not centre. Once the name wraps -- a long deck title, or any
@@ -175,44 +163,89 @@ class _DeckOpenRegion extends StatelessWidget {
           // would promise a list that BR-63 says cannot exist.
           if (!holdsCards) ...<Widget>[
             const SizedBox(width: AppSpacing.sm),
-            ExcludeSemantics(
-              child: Icon(
-                Icons.chevron_right,
-                size: AppIconSize.sm,
-                color: context.colors.onSurfaceVariant,
+            // Boxed to the button's height beside it. Left bare, the glyph sat
+            // on the row's top edge while the menu's dots — centred inside their
+            // own 48 — sat lower, and two trailing marks half a line apart read
+            // as a mistake rather than as two controls.
+            SizedBox(
+              height: AppSpacing.minimumTouchTarget,
+              child: ExcludeSemantics(
+                child: Icon(
+                  Icons.chevron_right,
+                  size: AppIconSize.sm,
+                  color: context.colors.onSurfaceVariant,
+                ),
               ),
             ),
           ],
+          MxIconButton(
+            icon: Icons.more_vert,
+            semanticLabel: context.l10n.deckActionsSemanticLabel,
+            onPressed: onActions,
+          ),
         ],
       ),
     );
   }
 }
 
-/// The bottom band: what is waiting, and the row's menu.
-class _DeckFootRegion extends StatelessWidget {
-  const _DeckFootRegion({required this.summary, required this.onActions});
+/// The card's second band: how far through it is, and what is waiting.
+///
+/// **A bare bar and the chip, on one row.** The bar used to carry its own header
+/// — `20 of 46 learned` on the left, `43%` on the right — above the track, and
+/// the due chip had a third row under that. The header says in words what the
+/// track says in length, so it was 24 pixels of restatement on every card in the
+/// list; a screen reader still gets it, from the `Semantics` below rather than
+/// from painted text.
+class _DeckStateRegion extends StatelessWidget {
+  const _DeckStateRegion({required this.summary});
 
   final DeckSummary summary;
-  final VoidCallback onActions;
 
   @override
   Widget build(BuildContext context) {
+    const padding = EdgeInsets.fromLTRB(
+      AppSpacing.lg,
+      0,
+      AppSpacing.lg,
+      AppSpacing.md,
+    );
+
+    // A deck with no cards has no progress to draw, and `No cards yet` is the
+    // whole of what this band has to say. Rendering an empty track beside it
+    // would draw a measurement of nothing.
+    if (summary.totalCardCount == 0) {
+      return Padding(
+        padding: padding,
+        child: DeckDueStateWidget(summary: summary),
+      );
+    }
+
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        0,
-        AppSpacing.sm,
-        AppSpacing.sm,
-      ),
+      padding: padding,
       child: Row(
         children: <Widget>[
-          Expanded(child: DeckDueStateWidget(summary: summary)),
-          MxIconButton(
-            icon: Icons.more_vert,
-            semanticLabel: context.l10n.deckActionsSemanticLabel,
-            onPressed: onActions,
+          Expanded(
+            // **The label lives in `Semantics`, not on screen.** `MxProgressBar`
+            // paints its header whenever it is given one, so the caller supplies
+            // the announcement itself — the one place in this feature where a
+            // widget does its own a11y rather than passing a string down.
+            child: Semantics(
+              label: context.l10n.deckLearnedProgressLabel(
+                summary.learnedCardCount,
+                summary.totalCardCount,
+              ),
+              value: context.l10n.deckLearnedPercentLabel(
+                (summary.learnedFraction * 100).round(),
+              ),
+              child: MxProgressBar(
+                size: MxProgressBarSize.sm,
+                value: summary.learnedFraction,
+              ),
+            ),
           ),
+          const SizedBox(width: AppSpacing.md),
+          DeckDueStateWidget(summary: summary),
         ],
       ),
     );
@@ -341,47 +374,6 @@ class _DeckMetaLine extends StatelessWidget {
       ),
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
-    );
-  }
-}
-
-/// A short banner explaining why an action is not available in this build.
-///
-/// Used for the card handoff to M4.11. It is a statement, not a control: an
-/// enabled-looking button that does nothing is worse than no button, and hiding
-/// the fact entirely would leave an `unset` deck looking as though it could only
-/// ever hold decks — which contradicts BR-61.
-class DeckNoticeWidget extends StatelessWidget {
-  const DeckNoticeWidget({required this.message, super.key});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.sm,
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Icon(
-            Icons.info_outline,
-            size: AppIconSize.sm,
-            color: context.semanticColors.info,
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text(
-              message,
-              style: context.texts.bodySmall?.copyWith(
-                color: context.colors.onSurfaceVariant,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

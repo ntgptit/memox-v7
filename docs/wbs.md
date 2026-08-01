@@ -4147,6 +4147,46 @@ tức **1.42857**. Lệch 0.02px, đủ đổi khử răng cưa của gạch ch�
 focus. Khai báo theo kit là đúng hơn, và golden bắt được — đúng việc nó sinh ra
 để làm.
 
+**Next task: M4.10ai · Deck card hai dải.**
+
+### M4.10ai · Deck card ba dải xuống hai: 168px → 100px
+
+- **Status:** done
+- **Goal:** Thấy được nhiều deck hơn trong một màn, không đụng cỡ chữ.
+- **Scope:** `deck_tile_widget.dart`; `deck_list_level_test.dart`.
+- **Out of scope:** thang chữ (đã khai báo ở M4.10ah, giá trị không đổi).
+- **Dependencies:** M4.10ah
+- **Checklist phases:** 7
+- **Tests required:** toàn bộ suite, gồm visual audit và golden.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** không có file mới
+- **Acceptance criteria:**
+  - [x] Card 100px thay vì 168px; màn 393×852 hiện ~3,5 card thay vì 2,3.
+  - [x] Trạng thái due vẫn mang icon + chữ + màu (UC-06 step 3).
+  - [x] Tiến độ vẫn được screen reader đọc dù không còn vẽ chữ.
+  - [x] 1021 test pass, mọi gate xanh.
+
+**Chữ chỉ chiếm 24 trong 168px — nên không đụng tới nó.** Đo trước khi sửa:
+16 padding + 48 dải well/tên + 20 dòng meta + 12 + 20 thanh tiến độ + 12 + 48
+dải chân + 8. Hai ô vuông 48 và ba dải xếp chồng là toàn bộ câu chuyện; hạ tên
+deck 16→14 chỉ tiết kiệm ~4px, tức 3% của vấn đề.
+
+**Hai khoản cắt, cả hai đều là chỗ nói thừa:**
+
+1. **Dải chân biến mất.** Nó cao 48px để chứa đúng một icon button. Dải đầu vốn
+   đã cao ít nhất 48 vì chính nút đó đặt sàn, nên chuyển ⋮ lên đấy là miễn phí.
+2. **Header của thanh tiến độ biến mất.** `21 of 42 learned` viết bằng chữ ngay
+   trên một cái track dài đúng bằng tỉ lệ đó là một sự thật nói hai lần, tốn 24px
+   trên mỗi hàng. Chữ chuyển vào `Semantics` — screen reader vẫn nghe đủ, và
+   `deck_list_level_test.dart` kiểm chính nhãn gộp của card chứ không kiểm một
+   node riêng, vì `MxCard` announce cả card là một button.
+
+Thanh tiến độ và chip due giờ chung một hàng: bar giãn, chip nằm phải.
+
+**Một lỗi do chính thay đổi này sinh ra, đã sửa:** chevron căn theo đỉnh hàng
+trong khi ⋮ nằm giữa ô 48 của nó, nên hai dấu ở đuôi hàng lệch nhau nửa dòng —
+đọc ra như lỗi chứ không như hai control. Chevron giờ đóng hộp cùng chiều cao.
+
 **Next task: M4.11 · Card management full-stack.**
 
 ### M4.11 · Card management full-stack
