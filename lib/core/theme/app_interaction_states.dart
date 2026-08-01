@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'app_semantic_colors.dart';
 import 'app_stroke.dart';
 
 /// The state-layer alphas, and the one place they are written down.
@@ -124,12 +125,33 @@ abstract final class AppInteractionStates {
   /// The focus-visible ring every control draws, at the one stroke and the one
   /// colour.
   ///
-  /// `primary`, as `mx.css` has it on `.mx-btn`, `.mx-iconbtn` and
-  /// `.mx-card__action`. Not `semanticColors.focusRing` — that token is the
-  /// *input* border's focused hue, and the two are deliberately different values
-  /// in this palette.
-  static BorderSide focusRing(ColorScheme scheme) =>
-      BorderSide(color: scheme.primary, width: AppStroke.focus);
+  /// **`focusRing`, not `primary`, and this reverses an earlier reading of the
+  /// kit.** `mx.css` does draw most of its rings in `--color-primary`, which is
+  /// why this started there — but the kit is not consistent with itself
+  /// (`.mx-deck__study:focus-visible` uses `--color-focus-ring` on a *button*,
+  /// so the token is not the input border's private hue), and consistency is
+  /// not what settles it. The measurement is:
+  ///
+  /// | ground | `primary` dark | `focusRing` dark |
+  /// |---|---|---|
+  /// | `background` | 3.29:1 | 6.26:1 |
+  /// | `surface` | **2.90:1** | 5.51:1 |
+  /// | `secondaryContainer` | **2.11:1** | 4.02:1 |
+  ///
+  /// WCAG 1.4.11 asks 3:1 of a focus indicator, and `primary` misses it on the
+  /// two grounds a focused control actually sits on — a card, and a selected
+  /// pill's own fill. `primaryDark` is held at a luminance that keeps a filled
+  /// button from becoming the brightest thing on a navy page, which is the
+  /// opposite of what a ring wants; the same argument moved the progress
+  /// indicator off it in M4.10m.
+  ///
+  /// Following the kit means following how it uses a token, not only its hex —
+  /// and `docs/architecture.md` already records the precedent for deviating when
+  /// a kit value lands in a contrast failure (`--color-success` on a 14px label).
+  ///
+  /// Pinned per ground, in both modes, by `focus_ring_contrast_test.dart`.
+  static BorderSide focusRing(AppSemanticColors semantic) =>
+      BorderSide(color: semantic.focusRing, width: AppStroke.focus);
 
   /// Ordered pressed → focused → hovered, and the order is load-bearing: a
   /// control being pressed is also hovered, and reading hover first would make

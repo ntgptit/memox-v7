@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_interaction_states.dart';
+import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_stroke.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
@@ -307,9 +308,16 @@ void main() {
           AppStroke.focus,
           reason: '$label: focus is invisible on a card',
         );
+        // Read through the helper rather than naming a role. Pinning
+        // `colorScheme.primary` here is what let the ring ship at 2.90:1 on a
+        // card in dark — a test written from the value it found agrees with the
+        // bug. `focus_ring_contrast_test.dart` measures it per ground.
+        final theme = isDark ? buildDarkTheme() : buildLightTheme();
         expect(
           borderOf(tester).color,
-          (isDark ? buildDarkTheme() : buildLightTheme()).colorScheme.primary,
+          AppInteractionStates.focusRing(
+            theme.extension<AppSemanticColors>()!,
+          ).color,
         );
         expect(
           tester.getRect(find.byType(MxCard)),

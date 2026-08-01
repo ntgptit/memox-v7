@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/app_interaction_states.dart';
+import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
 
@@ -193,7 +195,12 @@ void main() {
           <WidgetState>{},
         );
 
-        expect(focused?.color, theme.colorScheme.primary);
+        expect(
+          focused?.color,
+          AppInteractionStates.focusRing(
+            theme.extension<AppSemanticColors>()!,
+          ).color,
+        );
         expect(focused?.width, greaterThan(resting?.width ?? 0));
       }
     });

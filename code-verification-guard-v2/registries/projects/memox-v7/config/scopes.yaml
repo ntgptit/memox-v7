@@ -208,6 +208,26 @@ scopes:
       - '**/*.g.dart'
       - '**/*.freezed.dart'
 
+  # Product UI *plus* the theme, for the rules where "where tokens are defined"
+  # is not an exemption but the very place the regression happens.
+  #
+  # `ui_surfaces` excludes `lib/core/theme/**` because a raw colour or radius
+  # there IS the token — linting it would be flagging the definition as the
+  # crime. A duration is not like that. `AppDurations` declares its three rungs
+  # as *named* constants, and so does every legitimate non-motion duration in
+  # the repo, so the theme directory has nothing that needs the exemption — and
+  # it is exactly where `Duration(milliseconds: 500)` sat anonymously inside
+  # `tooltipTheme` until M4.10ao. A rule scoped to `ui_surfaces` alone could not
+  # catch the case it was written for.
+  ui_and_theme_surfaces:
+    include:
+      - lib/features/*/presentation/**/*.dart
+      - lib/shared/**/*.dart
+      - lib/core/theme/**/*.dart
+    exclude:
+      - '**/*.g.dart'
+      - '**/*.freezed.dart'
+
   # Riverpod-owned files: controllers, notifiers and generated-provider sources.
   provider_files:
     include:

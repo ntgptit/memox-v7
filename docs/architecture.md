@@ -7,7 +7,7 @@
 | **Scope** | Quyết định ràng buộc nhiều tài liệu hoặc nhiều layer. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), hình dạng dữ liệu (`data-model.md`) |
 | **Source of truth for** | AD-xx · đánh đổi kiến trúc · phương án đã bị loại · lý do pin toolchain |
 | **Depends on** | `document-conventions.md`, `product.md` |
-| **Updated by task** | M4.10ao (AD-05) |
+| **Updated by task** | M4.10ap (AD-05) |
 | **Last updated** | 2026-08-02 |
 
 Format theo `document-conventions.md` §6.1. AD xếp theo số; ID vĩnh viễn (§7).
@@ -877,6 +877,16 @@ Một màu tồn tại như mặc định framework thì **vô hình với mọi
 — đó là cách `Colors.black54` làm barrier sau mỗi dialog và sheet sống sót qua
 trọn một cuộc audit màu (M4.10m). Component nào app dùng thì app khai báo theme
 cho nó.
+
+**Một token đúng vẫn có thể sai ở vai trò khác.** `primary` là fill của nút, và
+`primaryDark` được giữ ở luminance thấp để một filled button không thành thứ sáng
+nhất trên trang navy. Dùng chính nó làm **focus ring** thì đo được 2.90:1 trên
+`surface` và 2.11:1 trên `secondaryContainer` — dưới ngưỡng 3:1 mà WCAG 1.4.11
+đòi ở một chỉ báo đồ hoạ (M4.10ap). `focusRing` là token cho vai trò đó, và đây
+là cùng một lập luận đã đưa progress indicator rời khỏi `primary` ở M4.10m.
+**Đo trên nền thật, không trên một nền danh nghĩa:** `primaryDark` đạt 3.29:1
+trên `background`, nên một phép kiểm chỉ dùng nền trang sẽ pass và bỏ sót cả hai
+nền mà control được focus thực sự nằm lên.
 
 **Và khai báo component là chưa đủ — phải khai báo đủ *state*.** `ChipThemeData`
 có `backgroundColor` và `selectedColor` nên nhìn qua tưởng đã xong; Material vẫn

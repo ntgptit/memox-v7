@@ -1176,7 +1176,7 @@
     },
     {
       "file": "lib/core/theme/app_interaction_states.dart",
-      "line": 144,
+      "line": 166,
       "widget_context": "AppInteractionStates",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
@@ -1187,7 +1187,7 @@
     },
     {
       "file": "lib/core/theme/app_interaction_states.dart",
-      "line": 147,
+      "line": 169,
       "widget_context": "AppInteractionStates",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
@@ -1198,7 +1198,7 @@
     },
     {
       "file": "lib/core/theme/app_interaction_states.dart",
-      "line": 150,
+      "line": 172,
       "widget_context": "AppInteractionStates",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
@@ -3233,7 +3233,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_card.dart",
-      "line": 102,
+      "line": 104,
       "widget_context": "_MxCardState",
       "element_kind": "border",
       "source_kind": "theme-token",
@@ -3299,7 +3299,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_navigation_bar.dart",
-      "line": 93,
+      "line": 97,
       "widget_context": "MxNavigationBar",
       "element_kind": "border",
       "source_kind": "theme-token",

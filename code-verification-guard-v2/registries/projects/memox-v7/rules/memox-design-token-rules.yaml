@@ -83,24 +83,37 @@ rules:
       No anonymous `Duration` literal in product UI. Use an `AppDurations` token
       — the 120/200/320 scale — or, when the value is not motion, declare a named
       `const Duration` beside the thing that reads it and say what it is for.
-    scopes:
-      - ui_surfaces
-    # **This replaces `flutter.no_hardcoded_duration`, which is disabled in
-    # overrides.yaml.** That rule was turned off for two good reasons and left no
-    # successor: it fired inside `lib/core/theme` where the scale is DEFINED, and
-    # on domain date arithmetic like `Duration(days: 1)`. Both are fixed by
-    # scope and by shape rather than by switching it back on —
-    # `ui_surfaces` excludes `lib/core/theme` and `lib/app`, and the lookahead
-    # below exempts a *named* const declaration, which is how the two legitimate
-    # non-motion durations in this repo are already written
-    # (`kSlowStatementThreshold`, `kMaxDueBoundaryDelay`).
+    # **`ui_and_theme_surfaces`, not `ui_surfaces`, and that is the whole point
+    # of the rule.** The case this was written for — a bare
+    # `Duration(milliseconds: 500)` inline in `tooltipTheme` — lives in
+    # `lib/core/theme`, which `ui_surfaces` deliberately excludes. Scoped there
+    # the rule would have passed the very regression its message describes.
     #
-    # What is left is the case the tooltip theme actually shipped: a bare
-    # `Duration(milliseconds: 500)` inline in a theme slot, which reads as
-    # deliberate and is invisible to review.
+    # **This replaces `flutter.no_hardcoded_duration`, disabled in
+    # overrides.yaml.** That rule was turned off for two good reasons and left no
+    # successor: it fired on `AppDurations`' own declarations, and on domain date
+    # arithmetic like `Duration(days: 1)`. Neither needs a scope exemption —
+    # both are *named* constants, and the lookahead below exempts those by shape.
+    # So the theme comes back into scope and domain code stays out of it, which
+    # is the split the original rule could not express.
+    scopes:
+      - ui_and_theme_surfaces
+    # Two exemptions, both in the lookahead so they are structural rather than a
+    # list of blessed files:
+    #
+    #   `//` and `*` — a comment line. **This rule flagged its own
+    #     documentation:** the doc comment on `kTooltipWaitDuration` says what it
+    #     must not be, and quotes `Duration(milliseconds: 500)` to say it. The
+    #     repo has been here before — `R8` once matched the word
+    #     `platformBrightness` left behind in the comment explaining it — and a
+    #     rule that fails on the prose describing it is a rule people switch off.
+    #   `const Duration` — a *named* declaration. `AppDurations`' three rungs,
+    #     `kTooltipWaitDuration`, `kSlowStatementThreshold` and
+    #     `kMaxDueBoundaryDelay` are all written this way, which is the shape the
+    #     message asks for.
     patterns:
       - >-
-        ^(?!\s*(?:static\s+)?const\s+Duration\s).*\bDuration\s*\(\s*(?:days|hours|minutes|seconds|milliseconds|microseconds)\s*:\s*\d
+        ^(?!\s*(?://|\*|(?:static\s+)?const\s+Duration\s)).*\bDuration\s*\(\s*(?:days|hours|minutes|seconds|milliseconds|microseconds)\s*:\s*\d
     tags:
       - memox
       - design-token
