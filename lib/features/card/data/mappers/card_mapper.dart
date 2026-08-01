@@ -1,5 +1,5 @@
-import '../../../core/database/app_database.dart';
-import '../domain/card_entity.dart';
+import '../../../../core/database/app_database.dart';
+import '../../domain/entities/card_entity.dart';
 
 /// Maps a `cards` row to the domain entity. Content only — no schedule field
 /// exists on either side of this mapping (BR-10).

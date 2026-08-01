@@ -2,18 +2,18 @@
 library;
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/features/review/presentation/review_placeholder_screen.dart';
+import 'package:memox/features/review/presentation/screens/review_placeholder_screen.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_content_shell.dart';
 
-import '../../../memox_audit.dart';
-import '../../../audit_allowance.dart';
-import '../../../audit_model.dart';
-import '../../../screen_auditor.dart';
+import '../../../../memox_audit.dart';
+import '../../../../audit_allowance.dart';
+import '../../../../audit_model.dart';
+import '../../../../screen_auditor.dart';
 
 /// Strict visual audit for `ReviewPlaceholderScreen`.
 ///
-/// Companion of `lib/features/review/presentation/review_placeholder_screen.dart`,
+/// Companion of `lib/features/review/presentation/screens/review_placeholder_screen.dart`,
 /// at the mirrored path. `MX-VIS-001` checks that this file exists, imports that
 /// screen, and calls the strict helper — a file that merely sits at the right
 /// path proves nothing.

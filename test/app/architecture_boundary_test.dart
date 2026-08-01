@@ -178,6 +178,84 @@ void main() {
     );
   });
 
+  test('domain/, data/ and presentation/ hold only their buckets', () {
+    // AD-12, and the same shape as the widget rule above — for the same reason.
+    //
+    // **What this catches is a feature the other rules cannot see at all.**
+    // `check_architecture.sh` selects files by path fragment: `/domain/entities/`,
+    // `/data/datasources/`. A feature that never made those folders matches zero
+    // of them, so every suffix rule passes without inspecting anything, and the
+    // app-wide scope counters at the bottom of that script stay non-zero because
+    // one correctly-laid-out feature satisfies them alone. The feature is not
+    // compliant; it is invisible. That is the defect class the script's own
+    // comment describes at its `check_suffix` block — six checks matching zero
+    // files, reading as coverage — reintroduced through a different door.
+    //
+    // Bucket lists come from AD-12 and the folder table in `CLAUDE.md`. A fifth
+    // name is an AD change, not a new folder.
+    const buckets = <String, Set<String>>{
+      'domain': <String>{
+        'entities',
+        'repositories',
+        'models',
+        'usecases',
+        'failures',
+      },
+      'data': <String>{'repositories', 'mappers', 'datasources', 'models'},
+      'presentation': <String>{
+        'screens',
+        'controllers',
+        'states',
+        'widgets',
+        'providers',
+      },
+    };
+    // `presentation/widgets/` is the one bucket that legally nests one level
+    // further, because AD-15 divides it again. The depth inside it belongs to
+    // the widget-bucket test above — checking it here too would report the same
+    // file twice with two different explanations.
+    const nestsFurther = <String>{'widgets'};
+    final offenders = <String>[];
+
+    for (final File file in dartFilesUnder('lib/features')) {
+      final path = relative(file);
+      for (final MapEntry<String, Set<String>> layer in buckets.entries) {
+        final match = RegExp('/${layer.key}/(.*)').firstMatch(path);
+        if (match == null) continue;
+
+        final below = match.group(1)!.split('/');
+        if (below.length == 1) {
+          offenders.add(
+            '$path — directly under ${layer.key}/, pick a bucket '
+            '(${layer.value.join(', ')})',
+          );
+          continue;
+        }
+        if (!layer.value.contains(below.first)) {
+          offenders.add(
+            '$path — "${below.first}" is not a ${layer.key}/ bucket '
+            '(${layer.value.join(', ')})',
+          );
+          continue;
+        }
+        if (below.length > 2 && !nestsFurther.contains(below.first)) {
+          offenders.add('$path — nested deeper than one bucket level');
+        }
+      }
+    }
+
+    expect(
+      offenders,
+      isEmpty,
+      reason:
+          'A feature lays domain/ and data/ out the same way or the next '
+          'feature cannot be read by anyone who learned the last one — and, '
+          'worse, the suffix rules select files by these exact paths, so an '
+          'unbucketed file is not checked by anything at all.\n'
+          '${offenders.join('\n')}',
+    );
+  });
+
   test('the checks above actually looked at files', () {
     // The failure mode these guards are most likely to develop: a path that stops
     // matching, after which the rule passes because it inspected nothing. Six
@@ -202,5 +280,24 @@ void main() {
       isNotEmpty,
       reason: 'the bucket rule needs widget files to have any effect',
     );
+    // The layer-bucket rule reports nothing when it matches nothing, which is
+    // exactly how a feature laid out flat stayed invisible to every suffix rule
+    // until M4.10ar. Prove each layer was seen — in more than one feature, so
+    // one correctly-shaped feature cannot cover for the rest.
+    for (final String layer in <String>['domain', 'data']) {
+      final features = dartFilesUnder('lib/features')
+          .map(relative)
+          .where((String path) => path.contains('/$layer/'))
+          .map((String path) => path.split('/')[2])
+          .toSet();
+      expect(
+        features.length,
+        greaterThan(1),
+        reason:
+            'the $layer/ bucket rule saw ${features.length} feature(s); it '
+            'needs to be exercised by more than one or it degrades into a '
+            'check on Deck alone',
+      );
+    }
   });
 }

@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/deck/presentation/screens/deck_list_screen.dart';
-import '../../features/review/presentation/review_placeholder_screen.dart';
+import '../../features/review/presentation/screens/review_placeholder_screen.dart';
 import '../fallback/route_not_found_screen.dart';
 import '../shell/app_navigation_shell.dart';
 import '../../core/navigation/route_names.dart';

@@ -1,4 +1,4 @@
-import 'card_entity.dart';
+import '../entities/card_entity.dart';
 
 /// Contract for card management inside a deck (UC-04, UC-08).
 ///

@@ -42,8 +42,8 @@ String _posix(String path) => path.replaceAll(r'\', '/');
 
 /// Every production screen file, with the companion path it requires.
 ///
-/// `lib/features/review/presentation/review_placeholder_screen.dart`
-/// →  `test/visual_audit/screens/features/review/
+/// `lib/features/review/presentation/screens/review_placeholder_screen.dart`
+/// →  `test/visual_audit/screens/features/review/screens/
 ///     review_placeholder_screen_visual_audit_test.dart`
 List<ScreenAuditPair> discoverScreenPairs(Directory libRoot) {
   final pairs = <ScreenAuditPair>[];

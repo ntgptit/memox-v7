@@ -1,16 +1,16 @@
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../../core/database/app_database.dart';
-import '../../../core/error/drift_error_mapper.dart';
-import '../../../core/error/failure.dart';
-import '../../deck/domain/models/deck_content_type_model.dart';
-import '../../deck/domain/models/scheduler_type_model.dart';
-import '../domain/card_entity.dart';
-import '../domain/card_repository.dart';
-import 'card_mapper.dart';
-import 'local/card_dao.dart';
-import 'local/card_deck_context_dao.dart';
+import '../../../../core/database/app_database.dart';
+import '../../../../core/error/drift_error_mapper.dart';
+import '../../../../core/error/failure.dart';
+import '../../../deck/domain/models/deck_content_type_model.dart';
+import '../../../deck/domain/models/scheduler_type_model.dart';
+import '../../domain/entities/card_entity.dart';
+import '../../domain/repositories/card_repository.dart';
+import '../mappers/card_mapper.dart';
+import '../datasources/card_dao.dart';
+import '../datasources/card_deck_context_dao.dart';
 
 /// Review-state initialisation per scheduler (BR-09 table).
 const int _eightBoxInitialBox = 1;

@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../../../core/error/failure.dart';
+import '../../../../core/error/failure.dart';
 
 part 'card_entity.freezed.dart';
 

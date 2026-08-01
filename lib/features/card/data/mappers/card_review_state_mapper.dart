@@ -1,6 +1,6 @@
-import '../../../core/database/app_database.dart';
-import '../domain/card_review_state_entity.dart';
-import '../../deck/domain/models/scheduler_type_model.dart';
+import '../../../../core/database/app_database.dart';
+import '../../domain/entities/card_review_state_entity.dart';
+import '../../../deck/domain/models/scheduler_type_model.dart';
 
 /// Maps a `card_review_states` row to the domain entity.
 ///
