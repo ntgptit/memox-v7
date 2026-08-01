@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'audit_color_math.dart';
 import 'audit_theme_steps.dart';
+import 'color_rule_scope.dart';
 import 'color_usage_scan.dart';
 import 'token_resolver.dart';
 
@@ -200,15 +201,14 @@ Map<String, Object?> buildViolations() {
     }
 
     // ---- V5: translucency applied at the paint site -----------------------
-    // Shadows and scrims are exempt, and not as a courtesy: both *are*
-    // translucent washes over whatever is behind them, and an opaque one is a
-    // block of colour rather than a shadow or a barrier. Same exemption
-    // `overlayColor` gets — some paint has no ground to be precomputed against,
-    // because the ground is whatever screen is underneath.
-    if (site.sourceKind == 'opacity-modified-token' &&
-        site.elementKind != 'shadow' &&
-        site.elementKind != 'scrim' &&
-        !isDeclaration) {
+    // **Scoped by `isTranslucentFillViolation`, which is also what rule R7
+    // asks.** This used to flag every `opacity-modified-token` outside `shadow`
+    // and `scrim`, so a disabled label's `onSurface @ 0.38` — the Material
+    // idiom, stated on purpose as `--color-on-disabled` — was a V5 here and
+    // conforming over in `color_source_rules_test.dart`. Two audits, two
+    // verdicts, and a report that always carried one violation nobody could
+    // act on without breaking the other.
+    if (!isDeclaration && isTranslucentFillViolation(site)) {
       flag(
         site,
         'V5',
@@ -225,11 +225,8 @@ Map<String, Object?> buildViolations() {
   // Declared separately because the loop above exempts declaration sites for
   // V3, and blanket-exempting them would hide the real ones.
   for (final site in sites) {
-    if (site.sourceKind != 'opacity-modified-token') continue;
     if (!declarationSites.contains(site.file)) continue;
-    if (site.elementKind != 'border' && site.elementKind != 'background') {
-      continue;
-    }
+    if (!isTranslucentFillViolation(site)) continue;
     flag(
       site,
       'V5',

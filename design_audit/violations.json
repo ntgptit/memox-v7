@@ -1,29 +1,14 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
   "seedUsedForHueChecks": "#4646B4",
-  "totalViolations": 1,
+  "totalViolations": 0,
   "byCode": {
     "V1": 0,
     "V2": 0,
     "V3": 0,
     "V4": 0,
-    "V5": 1,
+    "V5": 0,
     "V6": 0
   },
-  "violations": [
-    {
-      "code": "V5",
-      "severity": "🟢",
-      "file": "lib/shared/widgets/mx_text_button.dart",
-      "line": 93,
-      "widget_context": "_MxTextButtonState",
-      "element_kind": "other",
-      "source_kind": "opacity-modified-token",
-      "expression": "context.colors.onSurface.withValues(alpha: _kDisabledLabelAlpha)",
-      "resolved_value_light": "#16182B @ alpha unresolvable",
-      "resolved_value_dark": "#EDEDF6 @ alpha unresolvable",
-      "why": "A translucent colour composites against whatever is behind it at paint time, so one token renders as two values.",
-      "proposed_target_token": "a precomputed blendOver(...) constant"
-    }
-  ]
+  "violations": []
 }
