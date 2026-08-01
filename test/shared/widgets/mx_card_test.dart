@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/app_interaction_states.dart';
+import 'package:memox/core/theme/app_semantic_colors.dart';
+import 'package:memox/core/theme/app_stroke.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
+
+import '../../support/ink_probe.dart';
 
 /// `MxCard` — the app's one raised surface, and the tap it grew in M4.12.
 ///
@@ -48,6 +54,29 @@ void main() {
 
   const long =
       'A deck name long enough that it has to wrap or be cut off, twice over';
+
+  /// The card's own border, which is where its focus indicator lives — the ring
+  /// replaces the hairline rather than being added beside it, so reading this
+  /// one value answers both "is the ring drawn" and "did the geometry move".
+  BorderSide borderOf(WidgetTester tester) {
+    final decorated = tester.widget<DecoratedBox>(
+      find
+          .descendant(
+            of: find.byType(MxCard),
+            matching: find.byType(DecoratedBox),
+          )
+          .first,
+    );
+
+    return ((decorated.decoration as BoxDecoration).border! as Border).top;
+  }
+
+  /// Tab, from a real keyboard. Focus that is only ever set programmatically
+  /// proves the indicator renders and not that anybody can reach it.
+  Future<void> tabTo(WidgetTester tester) async {
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+  }
 
   group('MxCard', () {
     testWidgets('is a plain surface without onTap', (tester) async {
@@ -161,6 +190,27 @@ void main() {
       expect(cardTaps, 0, reason: 'the card must not fire as well');
     });
 
+    testWidgets('a card with no onTap never becomes interactive', (
+      tester,
+    ) async {
+      // The other half of the default. A plain panel must not enter the focus
+      // order, and it must not paint a state layer when a pointer crosses it —
+      // a surface that lights up under the mouse and does nothing when clicked
+      // is worse than one that never reacts.
+      await pump(tester, const MxCard(child: Text('Academic Word List')));
+      final atRest = borderOf(tester);
+
+      await hover(tester, find.byType(MxCard));
+      await tabTo(tester);
+
+      expect(find.byType(InkWell), findsNothing);
+      expect(
+        borderOf(tester),
+        atRest,
+        reason: 'a plain panel took a focus ring, or a hover state',
+      );
+    });
+
     testWidgets('its contents are what name it', (tester) async {
       // There is no `semanticLabel` parameter, deliberately: the card's children
       // already say what it is, and an override would replace them rather than
@@ -174,6 +224,129 @@ void main() {
 
       expect(find.bySemanticsLabel('Academic Word List'), findsOneWidget);
       handle.dispose();
+    });
+  });
+
+  group('MxCard interaction states', () {
+    for (final mode in <(String, bool)>[('light', false), ('dark', true)]) {
+      final label = mode.$1;
+      final isDark = mode.$2;
+
+      testWidgets('$label · hover paints the card wash, exit clears it', (
+        tester,
+      ) async {
+        // A real mouse, and both directions. Before this the card declared no
+        // interaction colours at all, so hover came from `ThemeData.hoverColor`
+        // — a hardcoded black wash with no seed in it and the same value in
+        // both modes.
+        await pump(
+          tester,
+          MxCard(onTap: () {}, child: const Text(long)),
+          isDark: isDark,
+        );
+        final theme = isDark ? buildDarkTheme() : buildLightTheme();
+        final wash = AppInteractionStates.cardOverlay(
+          theme.colorScheme,
+        ).resolve(const <WidgetState>{WidgetState.hovered})!;
+
+        final gesture = await hover(tester, find.byType(MxCard));
+        expectInkColor(tester, wash, reason: '$label: hover paints nothing');
+
+        // Below the card, not to the origin: the card is flush with the top of
+        // the body, so (0, 0) is still inside it and the "pointer left" half of
+        // this test would never run.
+        await gesture.moveTo(
+          tester.getBottomRight(find.byType(MxCard)) + const Offset(0, 40),
+        );
+        await tester.pumpAndSettle();
+
+        expectNoInkColor(
+          tester,
+          wash,
+          reason: '$label: the card kept its hover after the pointer left',
+        );
+      });
+
+      testWidgets('$label · pressing changes no geometry', (tester) async {
+        // The design's own rule: "nothing scales, nothing shrinks". A press
+        // that resizes the card moves every card under it in the list.
+        await pump(
+          tester,
+          MxCard(onTap: () {}, child: const Text(long)),
+          isDark: isDark,
+        );
+        final atRest = tester.getRect(find.byType(MxCard));
+        final borderAtRest = borderOf(tester);
+
+        final press = await tester.startGesture(
+          tester.getCenter(find.byType(MxCard)),
+        );
+        await tester.pump(const Duration(milliseconds: 100));
+
+        expect(tester.getRect(find.byType(MxCard)), atRest);
+        expect(borderOf(tester), borderAtRest);
+
+        await press.up();
+        await tester.pumpAndSettle();
+      });
+
+      testWidgets('$label · keyboard focus draws the ring, and costs nothing', (
+        tester,
+      ) async {
+        await pump(
+          tester,
+          MxCard(onTap: () {}, child: const Text(long)),
+          isDark: isDark,
+        );
+        final atRest = tester.getRect(find.byType(MxCard));
+        expect(borderOf(tester).width, AppStroke.hairline);
+
+        await tabTo(tester);
+
+        expect(
+          borderOf(tester).width,
+          AppStroke.focus,
+          reason: '$label: focus is invisible on a card',
+        );
+        // Read through the helper rather than naming a role. Pinning
+        // `colorScheme.primary` here is what let the ring ship at 2.90:1 on a
+        // card in dark — a test written from the value it found agrees with the
+        // bug. `focus_ring_contrast_test.dart` measures it per ground.
+        final theme = isDark ? buildDarkTheme() : buildLightTheme();
+        expect(
+          borderOf(tester).color,
+          AppInteractionStates.focusRing(
+            theme.extension<AppSemanticColors>()!,
+          ).color,
+        );
+        expect(
+          tester.getRect(find.byType(MxCard)),
+          atRest,
+          reason: '$label: the ring pushed the card around',
+        );
+      });
+    }
+
+    testWidgets('the keyboard activates it, not just the pointer', (
+      tester,
+    ) async {
+      // An `InkWell` maps Enter and Space onto its own tap, and that is the
+      // only path a keyboard user has to a card. Asserting it here means the
+      // card cannot lose it to a future wrapper that eats key events.
+      var taps = 0;
+      await pump(
+        tester,
+        MxCard(onTap: () => taps += 1, child: const Text(long)),
+      );
+
+      await tabTo(tester);
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pumpAndSettle();
+      expect(taps, 1);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.space);
+      await tester.pumpAndSettle();
+      expect(taps, 2);
     });
   });
 }

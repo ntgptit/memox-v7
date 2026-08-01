@@ -1,158 +1,119 @@
 import 'package:flutter/material.dart';
 
+import 'app_interaction_states.dart';
 import 'app_radius.dart';
 import 'app_semantic_colors.dart';
 import 'app_spacing.dart';
 
-/// The filled and outlined button themes, and the geometry both share.
+/// The filled, outlined and destructive button styles, and the geometry all
+/// three share.
 ///
 /// Split out of `app_theme.dart` when that file crossed the 400-line guard. They
 /// are the natural seam: everything here is one component family, it is the
-/// longest block in the theme because both buttons declare every interaction
+/// longest block in the theme because every button declares every interaction
 /// state by hand, and nothing else in the theme reads it.
 ///
-/// **Both declare disabled, pressed and focused explicitly.** Material supplies
-/// defaults, but they are derived from the scheme and drift the moment the scheme
-/// changes; naming them is what keeps the states stable.
+/// **They declare disabled, pressed, hovered and focused explicitly.** Material
+/// supplies defaults, but they are derived from the scheme and drift the moment
+/// the scheme changes; naming them is what keeps the states stable. The values
+/// come from [AppStateOpacity], which transcribes them from the kit's `mx.css`.
 
-/// A disabled control's fill and border, resolved to a solid colour.
+/// A disabled control's fill and border, resolved to a solid colour over the
+/// ground that state actually has.
 ///
-/// **Precomputed rather than translucent, per MX-VIS-002 rule R7.** Material's
-/// idiom is `onSurface` at 12% alpha, and as a `BorderSide` or a fill that
-/// composites against whatever happens to be behind the button at paint time —
-/// a card, a sheet, a dialog — so one token renders as three values and none of
-/// them was chosen. Blending over [scheme.surface] here fixes the ground.
-///
-/// **Blended over `surface`, and that is a choice with a cost.** Precomputing
-/// forces one ground where translucency had none, so the value is now right in
-/// the place these states actually occur — a disabled submit inside a form sheet,
-/// a disabled action inside a dialog — and slightly light where a disabled button
-/// sits straight on the page. Measured, light: `#E0E0E5` over the card against
-/// `#D9DADF` over the page. (The kit's `--color-disabled-surface` reads `#E3E3E6`,
-/// four units away; `IMPORT_LEDGER.md` records why the derivation wins.)
-///
-/// That gap is the finding, not a side effect of fixing it. One token was
-/// rendering as two colours depending on what happened to be behind it, and
-/// nobody had chosen either. Four goldens moved when this landed, which is how
-/// the gap became visible at all.
-///
-/// [over] names the ground when it is not the page's `surface`. A selected pill
-/// that goes disabled sits on `secondaryContainer`, not on `surface`, so
-/// blending the same 12% over `surface` there would erase the selection rather
-/// than dim it. The tint is the constant; the ground is per state.
+/// Most disabled controls sit on the page or on a card, and for those the answer
+/// is already precomputed: `AppSemanticColors.disabledSurface`. This exists for
+/// the one that does not — a *selected* pill that goes disabled sits on
+/// `secondaryContainer`, so blending the same 12% over `surface` there would
+/// erase the selection rather than dim it. The tint is the constant; the ground
+/// is per state.
 Color disabledSurfaceTint(ColorScheme scheme, {Color? over}) =>
     Color.alphaBlend(
-      scheme.onSurface.withValues(alpha: kDisabledTintAlpha),
+      scheme.onSurface.withValues(alpha: AppStateOpacity.disabledSurfaceBlend),
       over ?? scheme.surface,
     );
 
-/// Material's disabled-surface alpha, named because three component themes now
-/// blend with it and a fourth copying the literal is how they drift apart.
-const double kDisabledTintAlpha = 0.12;
-
-/// Material's disabled-foreground alpha — `--color-on-disabled` in
-/// `design_system/tokens/colors.css`, which states it at 0.38 in both modes.
-///
-/// **Alpha here is correct and is not a rule R7 violation.** A label's ground is
-/// always the surface it is printed on, so nothing is left unresolved; R7 is
-/// about fills and borders, whose ground is whatever happens to be behind them.
-const double kDisabledForegroundAlpha = 0.38;
-
-/// The border a control draws while it holds keyboard focus.
-///
-/// **One function, because three components had three copies and all three were
-/// wrong in dark.** The chip, the outlined button and the icon button each wrote
-/// `BorderSide(color: scheme.primary, width: 2)`. Measured, `primaryDark` is
-/// **2.90:1** on `surface` and **2.11:1** on `secondaryContainer` — under the
-/// 3:1 WCAG 1.4.11 asks of a focus indicator, and under it on the two grounds a
-/// focused control actually sits on. The icon button's own comment invoked that
-/// 3:1 while painting a colour that missed it.
-///
-/// `focusRing` is the token for this and was already carrying it for the text
-/// field's border and the spinner: 5.51:1 and 4.02:1 on those same two dark
-/// grounds, 7.41 and 6.14 in light. `primary` is held at a luminance that keeps
-/// a filled button from becoming the brightest thing on a navy page, which is
-/// the opposite of what a focus ring wants — the same argument that moved the
-/// progress indicator off it in M4.10m.
-///
-/// Pinned per ground by `focus_ring_contrast_test.dart`.
-BorderSide focusRingSide(AppSemanticColors semantic) =>
-    BorderSide(color: semantic.focusRing, width: kFocusRingWidth);
-
-/// `--border-focus` in `design_system/tokens/elevation.css`.
-const double kFocusRingWidth = 2;
-
-/// How much of the accent a control takes on while it is pressed, focused or
-/// hovered.
-///
-/// Named because the pill reuses them. A `ChipThemeData` cannot express feedback
-/// as an overlay — declaring its state-aware `color` makes Material set the
-/// InkWell's `hoverColor` to transparent — so the pill blends these into its
-/// fill instead. Same three numbers either way, so a pill and a button answer a
-/// pointer by the same amount.
-const double kPressedOverlayAlpha = 0.12;
-const double kFocusedOverlayAlpha = 0.10;
-const double kHoveredOverlayAlpha = 0.06;
-
-/// Geometry shared by both buttons.
+/// Geometry shared by every button.
 ///
 /// 48 high before padding: the minimum touch target, enforced here rather than
 /// per component so no button in the app can be built below it.
 ButtonStyle buildSharedButtonStyle(ColorScheme scheme) => ButtonStyle(
-  minimumSize: const WidgetStatePropertyAll<Size>(Size(64, 48)),
+  minimumSize: const WidgetStatePropertyAll<Size>(
+    Size(64, AppSpacing.minimumTouchTarget),
+  ),
   padding: const WidgetStatePropertyAll<EdgeInsets>(
     EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.md),
   ),
   shape: WidgetStatePropertyAll<OutlinedBorder>(
     RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
   ),
-  overlayColor: WidgetStateProperty.resolveWith((states) {
-    if (states.contains(WidgetState.pressed)) {
-      return scheme.primary.withValues(alpha: kPressedOverlayAlpha);
-    }
-    if (states.contains(WidgetState.focused)) {
-      return scheme.primary.withValues(alpha: kFocusedOverlayAlpha);
-    }
-    // **Hover used to fall through to `null`**, which handed it to Material's
-    // default — a wash of the *foreground* colour, so a filled button hovered
-    // toward white and an outlined one toward its own label. 6% of the accent is
-    // the design's number and it points the same way in both. Web and desktop
-    // only, and Android is the release target (AD-04) — but the web build is the
-    // E2E channel, so it shows up in exactly the place this project takes
-    // screenshots.
-    if (states.contains(WidgetState.hovered)) {
-      return scheme.primary.withValues(alpha: kHoveredOverlayAlpha);
-    }
-
-    return null;
-  }),
+  // **Hover used to fall through to `null`**, which handed it to Material's
+  // default — a wash of the *foreground* colour, so a filled button hovered
+  // toward white and an outlined one toward its own label. Web and desktop only,
+  // and Android is the release target (AD-04) — but the web build is the E2E
+  // channel, so it shows up in exactly the place this project takes screenshots.
+  overlayColor: AppInteractionStates.controlOverlay(scheme),
 );
 
-/// The primary action: `MxActionButton`'s `primary` and `destructive` variants.
+/// The primary action: `MxActionButton`'s `primary` variant.
 FilledButtonThemeData buildFilledButtonTheme(
-  ColorScheme scheme, {
+  ColorScheme scheme,
+  AppSemanticColors semantic, {
   required Color actionFill,
   required Color actionLabel,
 }) => FilledButtonThemeData(
-  style: buildSharedButtonStyle(scheme).copyWith(
-    backgroundColor: WidgetStateProperty.resolveWith((states) {
-      if (states.contains(WidgetState.disabled)) {
-        return disabledSurfaceTint(scheme);
-      }
-      if (states.contains(WidgetState.pressed)) {
-        return Color.lerp(actionFill, scheme.onSurface, kPressedOverlayAlpha);
-      }
-
-      return actionFill;
-    }),
-    foregroundColor: WidgetStateProperty.resolveWith((states) {
-      if (states.contains(WidgetState.disabled)) {
-        return scheme.onSurface.withValues(alpha: kDisabledForegroundAlpha);
-      }
-
-      return actionLabel;
-    }),
+  style: buildFilledStyle(
+    scheme,
+    semantic,
+    fill: actionFill,
+    label: actionLabel,
   ),
+);
+
+/// A filled button's colours, for any fill.
+///
+/// Public so `MxActionButton`'s destructive variant can be the same button with
+/// a different pair rather than a second implementation. It used to reach for
+/// `FilledButton.styleFrom(backgroundColor: error)`, and that is a flat
+/// `WidgetStatePropertyAll` which **shadows the theme's property entirely** —
+/// so a destructive button did not darken on press and, worse, stayed fully red
+/// when disabled while its label went to 38%. A button that looks armed and is
+/// inert is the failure this whole file exists to prevent.
+ButtonStyle buildFilledStyle(
+  ColorScheme scheme,
+  AppSemanticColors semantic, {
+  required Color fill,
+  required Color label,
+}) => buildSharedButtonStyle(scheme).copyWith(
+  backgroundColor: WidgetStateProperty.resolveWith((states) {
+    if (states.contains(WidgetState.disabled)) return semantic.disabledSurface;
+    if (states.contains(WidgetState.pressed)) {
+      return Color.lerp(
+        fill,
+        scheme.onSurface,
+        AppStateOpacity.filledPressedBlend,
+      );
+    }
+    // **A blend, where every other control gets an overlay.** The shared
+    // `overlayColor` washes 6% of `primary`, and 6% of the accent painted on
+    // the accent is the accent — the primary button had no visible hover at
+    // all. `.mx-btn--primary:hover` mixes toward the ink instead, and only a
+    // colour that is not already the fill can show up on it.
+    if (states.contains(WidgetState.hovered)) {
+      return Color.lerp(
+        fill,
+        scheme.onSurface,
+        AppStateOpacity.filledHoverBlend,
+      );
+    }
+
+    return fill;
+  }),
+  foregroundColor: WidgetStateProperty.resolveWith((states) {
+    if (states.contains(WidgetState.disabled)) return semantic.onDisabled;
+
+    return label;
+  }),
 );
 
 /// The secondary action: `MxActionButton`'s `secondary` variant.
@@ -163,18 +124,20 @@ OutlinedButtonThemeData buildOutlinedButtonTheme(
 }) => OutlinedButtonThemeData(
   style: buildSharedButtonStyle(scheme).copyWith(
     foregroundColor: WidgetStateProperty.resolveWith((states) {
-      if (states.contains(WidgetState.disabled)) {
-        return scheme.onSurface.withValues(alpha: kDisabledForegroundAlpha);
-      }
+      if (states.contains(WidgetState.disabled)) return semantic.onDisabled;
 
       return outlineLabel;
     }),
     side: WidgetStateProperty.resolveWith((states) {
       if (states.contains(WidgetState.disabled)) {
-        return BorderSide(color: disabledSurfaceTint(scheme));
+        return BorderSide(color: semantic.disabledSurface);
       }
+      // The ring, at the one stroke every focus indicator in the app uses. It
+      // replaces the hairline rather than sitting outside it, so focus costs no
+      // layout — an `OutlinedBorder`'s side is painted on the shape, not added
+      // to the box.
       if (states.contains(WidgetState.focused)) {
-        return focusRingSide(semantic);
+        return AppInteractionStates.focusRing(semantic);
       }
 
       return BorderSide(color: semantic.borderSubtle);

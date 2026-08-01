@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_button_themes.dart';
+import 'package:memox/core/theme/app_interaction_states.dart';
 import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_theme.dart';
 
@@ -52,7 +52,7 @@ void main() {
       };
 
       test('clears 3:1 on every ground it can land on', () {
-        final ring = focusRingSide(semantic).color;
+        final ring = AppInteractionStates.focusRing(semantic).color;
 
         for (final entry in grounds.entries) {
           expect(
@@ -69,7 +69,7 @@ void main() {
 
       test('is the reason the ring is not `primary`', () {
         // Kept as an assertion rather than a comment: it is the whole
-        // justification for `focusRingSide` existing, and if the palette ever
+        // justification for the token choice in `AppInteractionStates.focusRing`, and if the palette ever
         // moves `primary` up to where it would pass, this test says so instead
         // of quietly leaving a helper nobody can explain.
         //
@@ -81,7 +81,7 @@ void main() {
           lessThan(graphicFloor),
           reason:
               'primary now clears 3:1 on secondaryContainer in dark. If that '
-              'is deliberate, focusRingSide can be reconsidered — but it must '
+              'is deliberate, AppInteractionStates.focusRing can be reconsidered — but it must '
               'be reconsidered, not silently bypassed.',
         );
       });
@@ -89,8 +89,8 @@ void main() {
       test('the three components that draw one all draw the same one', () {
         // The structural half. Equal colours today prove nothing about
         // tomorrow if each component computes its own, so this asserts they
-        // resolve to the value `focusRingSide` returns.
-        final expected = focusRingSide(semantic);
+        // resolve to the value `AppInteractionStates.focusRing` returns.
+        final expected = AppInteractionStates.focusRing(semantic);
 
         final chip = (theme.chipTheme.side! as WidgetStateBorderSide).resolve(
           <WidgetState>{WidgetState.focused},
@@ -125,7 +125,7 @@ void main() {
       test('the ring is distinguishable from the resting border', () {
         // A ring that clears 3:1 against the page can still be invisible as a
         // *change* if it lands on the same colour the control already had.
-        final ring = focusRingSide(semantic).color;
+        final ring = AppInteractionStates.focusRing(semantic).color;
 
         expect(
           ring,

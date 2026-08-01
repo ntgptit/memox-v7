@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'app_button_themes.dart';
 import 'app_icon_size.dart';
+import 'app_interaction_states.dart';
 import 'app_semantic_colors.dart';
 import 'app_spacing.dart';
 
@@ -57,13 +58,13 @@ Color _fillFor(ColorScheme scheme, Set<WidgetState> states) {
     return disabledSurfaceTint(scheme, over: resting);
   }
   if (states.contains(WidgetState.pressed)) {
-    return _tint(resting, scheme.primary, kPressedOverlayAlpha);
+    return _tint(resting, scheme.primary, AppStateOpacity.pressed);
   }
   if (states.contains(WidgetState.focused)) {
-    return _tint(resting, scheme.primary, kFocusedOverlayAlpha);
+    return _tint(resting, scheme.primary, AppStateOpacity.focus);
   }
   if (states.contains(WidgetState.hovered)) {
-    return _tint(resting, scheme.primary, kHoveredOverlayAlpha);
+    return _tint(resting, scheme.primary, AppStateOpacity.hoverControl);
   }
 
   return resting;
@@ -79,9 +80,13 @@ Color _tint(Color ground, Color tint, double alpha) =>
 /// widget's own label style when selected, and it is merged *over* this one — so a
 /// plain `Color` there would win for the selected pill and take the disabled and
 /// pressed states with it. One state machine, in the slot Material resolves.
-Color _labelColorFor(ColorScheme scheme, Set<WidgetState> states) {
+Color _labelColorFor(
+  ColorScheme scheme,
+  AppSemanticColors semantic,
+  Set<WidgetState> states,
+) {
   if (states.contains(WidgetState.disabled)) {
-    return scheme.onSurface.withValues(alpha: kDisabledForegroundAlpha);
+    return semantic.onDisabled;
   }
   if (states.contains(WidgetState.selected)) {
     return scheme.onSecondaryContainer;
@@ -104,13 +109,13 @@ ChipThemeData buildChipTheme(
     if (states.contains(WidgetState.disabled)) {
       return BorderSide(color: disabledSurfaceTint(scheme));
     }
-    // The same ring `iconButtonTheme` and the outlined button draw, through the
-    // one function so the three cannot drift. A pill is reachable by keyboard on
-    // the web build, which is the E2E channel, and Material's own focus cue for
-    // a chip is a fill tint this theme now owns — so without a ring the focused
-    // pill and the hovered one look alike.
+    // The same ring `iconButtonTheme` and the outlined button draw, from the
+    // one definition. A pill is reachable by keyboard on the web build, which is
+    // the E2E channel, and Material's own focus cue for a chip is a fill tint
+    // this theme now owns — so without a ring the focused pill and the hovered
+    // one look alike.
     if (states.contains(WidgetState.focused)) {
-      return focusRingSide(semantic);
+      return AppInteractionStates.focusRing(semantic);
     }
 
     return BorderSide(color: semantic.borderSubtle);
@@ -118,7 +123,7 @@ ChipThemeData buildChipTheme(
   shape: const StadiumBorder(),
   labelStyle: texts.labelLarge?.copyWith(
     color: WidgetStateColor.resolveWith(
-      (states) => _labelColorFor(scheme, states),
+      (states) => _labelColorFor(scheme, semantic, states),
     ),
   ),
   iconTheme: IconThemeData(

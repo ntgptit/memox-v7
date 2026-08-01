@@ -2,19 +2,18 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_icon_size.dart';
 import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_stroke.dart';
 import '../../core/theme/theme_context_extension.dart';
 
 /// How far the label's colour moves toward the ink on hover, and further on
 /// press. Mirrors the kit's `color-mix(… 85%/72%, var(--color-text-primary))`.
+///
+/// Local rather than in `AppStateOpacity`: those are *state-layer* alphas —
+/// a wash painted over a control — and these are blends of the label's own
+/// colour. `.mx-textbtn` is the one control in the kit with no surface to wash,
+/// so its numbers are its own and are not shared with anything.
 const double _kHoverBlend = 0.15;
 const double _kPressedBlend = 0.28;
-
-/// The focus underline is twice the font's own stroke — the kit's 2px.
-const double _kFocusUnderlineThickness = 2;
-
-/// Material's disabled-label opacity, the same value every button theme in
-/// `app_button_themes.dart` resolves for its disabled foreground.
-const double _kDisabledLabelAlpha = 0.38;
 
 /// A low-emphasis action drawn as a bare label.
 ///
@@ -90,7 +89,7 @@ class _MxTextButtonState extends State<MxTextButton> {
 
   Color _foreground(Set<WidgetState> states) {
     if (states.contains(WidgetState.disabled)) {
-      return context.colors.onSurface.withValues(alpha: _kDisabledLabelAlpha);
+      return context.semanticColors.onDisabled;
     }
 
     final accent = widget.isDestructive
@@ -175,9 +174,10 @@ class _StateStyledLabel extends StatelessWidget {
             ? base.copyWith(
                 decoration: TextDecoration.underline,
                 decorationColor: base.color,
-                decorationThickness: isFocused
-                    ? _kFocusUnderlineThickness
-                    : null,
+                // The same stroke every other focus indicator in the app draws
+                // — a text button has no border to thicken, so the underline
+                // carries it.
+                decorationThickness: isFocused ? AppStroke.focus : null,
               )
             : base;
 

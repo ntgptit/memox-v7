@@ -17,11 +17,25 @@ import 'package:memox/shared/widgets/mx_progress_bar.dart';
 void main() {
   final light = buildLightTheme();
 
-  Future<void> pumpApp(WidgetTester tester, Widget bar) => tester.pumpWidget(
+  Future<void> pumpApp(
+    WidgetTester tester,
+    Widget bar, {
+    bool disableAnimations = false,
+  }) => tester.pumpWidget(
     MaterialApp(
       theme: light,
-      home: Scaffold(
-        body: Padding(padding: const EdgeInsets.all(16), child: bar),
+      home: Builder(
+        // `copyWith` on the real data, never a fresh `MediaQueryData`:
+        // constructing one zeroes `size` and `padding`, so the widget is told
+        // the screen is 0x0 while the view says otherwise.
+        builder: (context) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(disableAnimations: disableAnimations),
+          child: Scaffold(
+            body: Padding(padding: const EdgeInsets.all(16), child: bar),
+          ),
+        ),
       ),
     ),
   );
@@ -92,6 +106,55 @@ void main() {
         lessThan(1),
         reason: 'a bar that snaps has finished moving before anyone looks',
       );
+    });
+  });
+
+  group('reduced motion', () {
+    testWidgets('the sweep is gone, and the value that arrives is the same', (
+      tester,
+    ) async {
+      // The sweep is decoration on a value change, not the value itself. With
+      // the platform flag on, the bar has to land on the new figure in the
+      // frame it changes — not sweep faster, and not skip the figure.
+      await pumpApp(
+        tester,
+        const MxProgressBar(value: 0),
+        disableAnimations: true,
+      );
+      await tester.pumpAndSettle();
+
+      await pumpApp(
+        tester,
+        const MxProgressBar(value: 1),
+        disableAnimations: true,
+      );
+      await tester.pump();
+
+      expect(
+        indicatorOf(tester).value,
+        1,
+        reason: 'the bar was still animating with animations disabled',
+      );
+    });
+
+    testWidgets('the colour and the announced label do not change with it', (
+      tester,
+    ) async {
+      // The accessibility contract removes movement, never information. A
+      // reduced-motion build that also dropped the success colour or the
+      // announcement would be answering a different request.
+      final handle = tester.ensureSemantics();
+
+      await pumpApp(
+        tester,
+        const MxProgressBar(value: 1, label: '20 of 20 learned'),
+        disableAnimations: true,
+      );
+      await tester.pump();
+
+      expect(indicatorOf(tester).color, semantic.success);
+      expect(find.bySemanticsLabel('20 of 20 learned'), findsOneWidget);
+      handle.dispose();
     });
   });
 

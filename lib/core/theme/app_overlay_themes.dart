@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'app_radius.dart';
 import 'app_semantic_colors.dart';
 import 'app_spacing.dart';
+import 'app_stroke.dart';
 
 /// The themes for everything Flutter draws that the app had never named.
 ///
@@ -118,8 +119,14 @@ TextSelectionThemeData buildTextSelectionTheme(
 /// The same token a card's border uses, because they are the same idea at
 /// different scales — a divider that disagreed with a card outline would make
 /// one list look like two.
+/// `space` equals `thickness`, so a divider occupies exactly the line it draws
+/// and adds no padding of its own — Material's default reserves 16.
 DividerThemeData buildDividerTheme(AppSemanticColors semantic) =>
-    DividerThemeData(color: semantic.borderSubtle, thickness: 1, space: 1);
+    DividerThemeData(
+      color: semantic.borderSubtle,
+      thickness: AppStroke.hairline,
+      space: AppStroke.hairline,
+    );
 
 /// The scroll thumb.
 ///

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_elevation.dart';
+import '../../core/theme/app_interaction_states.dart';
 import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/theme_context_extension.dart';
@@ -39,7 +40,17 @@ import '../../core/theme/theme_context_extension.dart';
 /// The `Material` is transparent and hosts only the ink; the ripple is clipped to
 /// the same [AppRadius.lg] the border uses, and the card looks identical when
 /// [onTap] is null.
-class MxCard extends StatelessWidget {
+///
+/// **Every interaction state is declared, and until this task none of them was.**
+/// A bare `InkWell` takes `ThemeData.hoverColor`, `focusColor` and `splashColor`
+/// — hardcoded black-and-white washes with no seed in them and no difference
+/// between light and dark. `AppInteractionStates.cardOverlay` replaces all three
+/// with the kit's `.mx-card__action` values, and keyboard focus additionally
+/// thickens the card's own border to [AppStroke.focus] in the accent. That is the
+/// same inset ring `.mx-card__action:focus-visible` draws, and it costs no
+/// layout: a `DecoratedBox` never insets its child for a border, so the card is
+/// the same size focused as it is at rest.
+class MxCard extends StatefulWidget {
   const MxCard({
     required this.child,
     this.padding = const EdgeInsets.all(AppSpacing.lg),
@@ -67,12 +78,35 @@ class MxCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   @override
+  State<MxCard> createState() => _MxCardState();
+}
+
+class _MxCardState extends State<MxCard> {
+  /// Only ever true on a tappable card: an `InkWell` is the one thing here that
+  /// can take focus, and it is built only when [MxCard.onTap] is non-null.
+  bool _isFocused = false;
+
+  void _onFocusChanged(bool isFocused) {
+    if (isFocused == _isFocused) return;
+    setState(() => _isFocused = isFocused);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final scheme = context.colors;
+    // The focus ring replaces the hairline rather than sitting outside it. Both
+    // are painted on the border box, so the swap moves nothing beside the card
+    // and nothing inside it.
+    final border = _isFocused
+        ? Border.fromBorderSide(
+            AppInteractionStates.focusRing(context.semanticColors),
+          )
+        : Border.all(color: context.semanticColors.borderSubtle);
     final decoration = BoxDecoration(
-      color: context.colors.surface,
+      color: scheme.surface,
       borderRadius: BorderRadius.circular(AppRadius.lg),
-      border: Border.all(color: context.semanticColors.borderSubtle),
-      boxShadow: shadowsFor(elevation, context.colors),
+      border: border,
+      boxShadow: shadowsFor(widget.elevation, scheme),
     );
     // **The card clips what it holds.** Anything a caller seats on an edge — the
     // deck card puts a progress track on its base — is otherwise cut by its own
@@ -84,10 +118,10 @@ class MxCard extends StatelessWidget {
     // visible against a hairline border.
     final content = ClipRRect(
       borderRadius: BorderRadius.circular(AppRadius.lg),
-      child: Padding(padding: padding, child: child),
+      child: Padding(padding: widget.padding, child: widget.child),
     );
 
-    final tap = onTap;
+    final tap = widget.onTap;
     if (tap == null) {
       return DecoratedBox(decoration: decoration, child: content);
     }
@@ -109,6 +143,11 @@ class MxCard extends StatelessWidget {
           type: MaterialType.transparency,
           child: InkWell(
             onTap: tap,
+            onFocusChange: _onFocusChanged,
+            // One property for hover, press and focus, so the three cannot be
+            // set from three different places. It also clips to the card's own
+            // corner, because `borderRadius` below governs the whole ink layer.
+            overlayColor: AppInteractionStates.cardOverlay(scheme),
             borderRadius: BorderRadius.circular(AppRadius.lg),
             child: content,
           ),

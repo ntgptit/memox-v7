@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 
 import 'app_button_themes.dart';
 import 'app_chip_theme.dart';
+import 'app_interaction_states.dart';
 import 'app_overlay_themes.dart';
 import 'app_colors.dart';
 import 'app_radius.dart';
 import 'app_semantic_colors.dart';
 import 'app_spacing.dart';
+import 'app_stroke.dart';
 import 'app_typography.dart';
 
 /// Material 3 themes for the app.
@@ -233,8 +235,6 @@ ThemeData _buildTheme(
     // flow, and it sits over scrolling content where a low-contrast fill would
     // disappear against a card passing underneath.
     //
-    // Unshadowed like everything else here — the colour is the separation. See
-    // `MxCard` for the same decision on panels.
     // **A rounded square, not a circle.** `CircleBorder` was Material 2's shape;
     // M3's is a 16dp rounded square, and it is what the design draws. A circle
     // beside a 16-radius card reads as a control from a different system.
@@ -242,7 +242,8 @@ ThemeData _buildTheme(
     // **Shape only, and the missing shadow is deliberate.** AD-14 makes depth one
     // mechanism — `shadowsFor` — and Material's `elevation` is a second one that
     // is not mode-aware and that no audit rule can see. See F11 and F15 in
-    // `docs/reviews/design-parity-checklist.md`.
+    // `docs/reviews/design-parity-checklist.md`, and `MxCard` for the same
+    // decision on panels.
     floatingActionButtonTheme: FloatingActionButtonThemeData(
       backgroundColor: scheme.primary,
       foregroundColor: scheme.onPrimary,
@@ -257,6 +258,7 @@ ThemeData _buildTheme(
 
     filledButtonTheme: buildFilledButtonTheme(
       scheme,
+      semantic,
       actionFill: actionFill,
       actionLabel: actionLabel,
     ),
@@ -269,16 +271,14 @@ ThemeData _buildTheme(
 
     // Focus changes the border's COLOUR, not its weight. Material's default
     // goes 1px -> 2px on focus, which makes the field jump and nudges anything
-    // laid out beside it; keeping the stroke at 1.5 in every state and moving
-    // the hue to `focusRing` is the difference between a field answering and a
-    // field shouting.
+    // laid out beside it; keeping the stroke at `AppStroke.input` in every state
+    // and moving the hue to `focusRing` is the difference between a field
+    // answering and a field shouting.
     inputDecorationTheme: InputDecorationTheme(
       // Outlined, not filled. A fill makes the field a block that competes with
-      // the cards around it; the reference defines the field with a stroke
-      // alone and lets the page show through, so the field reads as an opening
-      // rather than an object. `filled: false` means it sits correctly on
-      // whatever surface it lands on — page or card — with no per-screen
-      // override.
+      // the cards around it; the reference defines the field with a stroke alone
+      // and lets the page show through, so the field reads as an opening rather
+      // than an object, and sits correctly on page or card with no override.
       filled: false,
       contentPadding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.lg,
@@ -289,10 +289,8 @@ ThemeData _buildTheme(
       focusedBorder: _inputBorder(semantic.focusRing),
       errorBorder: _inputBorder(semantic.danger),
       focusedErrorBorder: _inputBorder(semantic.danger),
-      // Solid, not `borderSubtle` at 50% — see MX-VIS-002 rule R7. A
-      // translucent border on an input composites against the field's fill in
-      // one place and the page in another, so the same disabled state read as
-      // two different greys.
+      // Solid, per MX-VIS-002 rule R7. Blended here rather than read from
+      // `disabledSurface`: this is the *hairline* faded, that is the *ink*.
       disabledBorder: _inputBorder(
         Color.alphaBlend(
           semantic.borderSubtle.withValues(alpha: 0.5),
@@ -303,9 +301,8 @@ ThemeData _buildTheme(
     ),
 
     // Four component themes added in M4.8, one per shared component that
-    // actually renders through them. Nothing speculative: a theme for a
-    // component nobody builds is a decision made without a screen to check it
-    // against, and it still needs revisiting when one exists.
+    // renders through them — a theme for one nobody builds is a decision made
+    // without a screen to check it against.
     iconButtonTheme: IconButtonThemeData(
       style:
           IconButton.styleFrom(
@@ -313,17 +310,22 @@ ThemeData _buildTheme(
             // screen can pass a smaller one — there is no parameter to pass.
             minimumSize: const Size.square(AppSpacing.minimumTouchTarget),
             foregroundColor: scheme.onSurfaceVariant,
+            // Named, not left to `defaultStyleOf` where no audit can see it.
+            disabledForegroundColor: semantic.onDisabled,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppRadius.md),
             ),
           ).copyWith(
-            // Keyboard focus draws a ring, not just the default tint: measured
-            // off the goldens that tint alone is 1.15:1 in both modes, where
-            // WCAG 1.4.11 asks 3:1 of a focus indicator. The ring itself was
-            // `primary` and missed the same 3:1 in dark — see `focusRingSide`.
+            // Hover, press and focus declared. Left null they came from
+            // Material, which is neither the kit nor what every other control
+            // in this app resolves.
+            overlayColor: AppInteractionStates.iconOverlay(scheme),
+            // Focus draws a ring, not just the tint: measured off the goldens
+            // that tint alone is 1.15:1 against the surface behind it in both
+            // modes, where WCAG 1.4.11 asks 3:1 of a focus indicator.
             side: WidgetStateProperty.resolveWith((states) {
               if (!states.contains(WidgetState.focused)) return null;
-              return focusRingSide(semantic);
+              return AppInteractionStates.focusRing(semantic);
             }),
           ),
     ),
@@ -391,9 +393,8 @@ ThemeData _buildTheme(
   );
 }
 
-/// Same geometry and the same 1.5 stroke in every state — only the colour
-/// carries the meaning.
+/// Same geometry and the same stroke in every state — only the colour speaks.
 OutlineInputBorder _inputBorder(Color color) => OutlineInputBorder(
   borderRadius: BorderRadius.circular(AppRadius.md),
-  borderSide: BorderSide(color: color, width: 1.5),
+  borderSide: BorderSide(color: color, width: AppStroke.input),
 );
