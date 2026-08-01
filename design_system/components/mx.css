@@ -46,7 +46,12 @@
 .mx-pill:disabled .mx-pill__body{color:var(--color-on-disabled);border-color:var(--color-disabled-surface)}
 
 /* --- MxCard ----------------------------------------------------------- */
-.mx-card{box-sizing:border-box;background:var(--color-surface);border:var(--border-hairline) solid var(--color-border-subtle);border-radius:var(--radius-lg);box-shadow:var(--shadow-card);text-align:left;display:block;width:100%}
+/* `overflow:hidden` so the CARD clips what it holds. A child seated on an edge —
+   the deck card's progress track — is otherwise cut by its own box: a radius set
+   on a 6px-tall bar is clamped to 6, so the bar keeps its full width where the
+   card's surface has already curved inward and the colour runs past the corner.
+   Only the card knows the real geometry. */
+.mx-card{box-sizing:border-box;background:var(--color-surface);border:var(--border-hairline) solid var(--color-border-subtle);border-radius:var(--radius-lg);box-shadow:var(--shadow-card);text-align:left;display:block;width:100%;overflow:hidden}
 .mx-card--none,.mx-card--flat{box-shadow:var(--shadow-none)}
 .mx-card--raised{box-shadow:var(--shadow-raised)}
 .mx-card--overlay{box-shadow:var(--shadow-overlay)}
@@ -85,7 +90,15 @@
 .mx-deck__well{width:44px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-md);background:var(--color-primary-container);color:var(--color-on-primary-container)}
 .mx-deck__name{display:block;font-size:var(--text-title-md);line-height:var(--leading-title-md);letter-spacing:var(--tracking-title-md);font-weight:var(--weight-semibold)}
 .mx-deck__meta{display:block;font-size:var(--text-body-sm);line-height:var(--leading-body-sm);color:var(--color-text-secondary);margin-top:2px}
-.mx-deck__foot{display:flex;align-items:center;gap:var(--space-sm);padding:0 var(--space-sm) var(--space-sm) var(--space-lg)}
+/* `sm` below, against `lg` above the card's first row — and that is what makes
+   them look equal. The row is the 48 touch-target floor while the Study pill
+   paints 32, so it already sits 8 clear of the row's bottom edge; `lg` here put
+   24 of visible space under it against 16 over the well at the top. */
+.mx-deck__foot{display:flex;align-items:center;gap:var(--space-sm);min-height:var(--touch-target-min);padding:0 var(--space-lg) var(--space-sm) var(--space-lg)}
+/* Stands in for Study where there is nothing to study — a fact, not a disabled
+   control. */
+.mx-deck__figure{font-size:var(--text-label-md);line-height:var(--leading-label-md);letter-spacing:var(--tracking-label-md);font-weight:var(--weight-semibold);color:var(--color-text-secondary);flex:none}
+.mx-deck__figure--complete{color:var(--color-success)}
 .mx-deck__bar{flex:1;min-width:0;padding-right:var(--space-sm)}
 /* A wrapper, only because the control it holds takes no className of its own —
    it exists to carry `.mx-card__control` and must not change the row's layout. */
@@ -95,9 +108,14 @@
    on a card that already carries a name, a meta line, a bar and a due chip that
    height is the thing making the row feel crowded. Outlined, so the word is not
    repeated down the column and the card stays calm. */
-.mx-deck__study{height:32px;padding:0 var(--space-md);flex:none;display:flex;align-items:center;justify-content:center;gap:var(--space-xs);border:1.5px solid var(--color-primary);border-radius:var(--radius-pill);background:transparent;color:var(--color-primary);font-family:var(--font-body);font-size:var(--text-label-md);line-height:1;letter-spacing:var(--tracking-label-md);font-weight:var(--weight-semibold);cursor:pointer;transition:background-color var(--duration-fast) var(--ease-standard)}
-.mx-deck__study:hover{background:color-mix(in srgb,var(--color-primary) 10%,transparent)}
-.mx-deck__study:active{background:color-mix(in srgb,var(--color-primary) 18%,transparent)}
+/* **Filled, against this file's own earlier argument.** It was outlined so the
+   word was not repeated down the column and the card stayed calm — true, and
+   weighed: the project owner chose emphasis, because Study is the card's primary
+   action and an outlined pill lost to the filled due chip beside it. Recorded in
+   docs/reviews/design-parity-checklist.md as a deliberate divergence. */
+.mx-deck__study{height:32px;padding:0 var(--space-md);flex:none;display:flex;align-items:center;justify-content:center;gap:var(--space-xs);border:0;border-radius:var(--radius-pill);background:var(--color-primary);color:var(--color-on-primary);font-family:var(--font-body);font-size:var(--text-label-md);line-height:1;letter-spacing:var(--tracking-label-md);font-weight:var(--weight-semibold);cursor:pointer;transition:background-color var(--duration-fast) var(--ease-standard)}
+.mx-deck__study:hover{background:color-mix(in srgb,var(--color-primary) 88%,var(--color-text-primary))}
+.mx-deck__study:active{background:color-mix(in srgb,var(--color-primary) 78%,var(--color-text-primary))}
 .mx-deck__study:focus-visible{outline:none;box-shadow:0 0 0 var(--border-focus) var(--color-focus-ring)}
 
 /* --- redesign: the hero panel ------------------------------------------
@@ -282,7 +300,16 @@ button.mx-tile:focus-visible{outline:none;box-shadow:inset 0 0 0 var(--border-fo
 .mx-progress__head{display:flex;justify-content:space-between;align-items:baseline;gap:var(--space-sm);margin-bottom:var(--space-xs);font-size:var(--text-label-md);line-height:var(--leading-label-md);letter-spacing:var(--tracking-label-md);color:var(--color-text-secondary)}
 .mx-progress__value{font-weight:var(--weight-semibold);color:var(--color-text-primary);font-variant-numeric:tabular-nums}
 .mx-progress__track{width:100%;background:var(--color-progress-track);border-radius:var(--radius-pill);overflow:hidden}
-.mx-progress--sm .mx-progress__track{height:4px}
+/* A bar used as an EDGE rather than as a component on a surface: square ends,
+   so the container's own corner is the only rounding. A pill end seated in a
+   16px card corner reads as a lozenge tucked into it, not as the card's base. */
+.mx-progress--pill .mx-progress__track{border-radius:var(--radius-pill)}
+.mx-progress--flush .mx-progress__track{border-radius:0}
+/* 6, not 4. At 4 the track read as a hairline rather than a measure, and on the
+   deck card — where it is the card's base inside a 16px corner — it also sat
+   further into the curve: the horizontal inset at the top edge of a 4px bar is
+   5.4px against 3.5 at 6, so the thicker bar reaches CLOSER to the corners. */
+.mx-progress--sm .mx-progress__track{height:6px}
 .mx-progress--md .mx-progress__track{height:8px}
 .mx-progress__fill{height:100%;border-radius:var(--radius-pill);transition:width var(--duration-slow) var(--ease-decelerate),background-color var(--duration-normal) var(--ease-standard)}
 

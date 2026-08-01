@@ -98,6 +98,8 @@ void main() {
         tappableCards: 3,
         // Filter and sort.
         pills: 2,
+        // One deck in this fixture has cards due, so one Study action.
+        filledButtons: 1,
       ),
       // One progress bar per deck that has cards; two of the three fixtures do.
       //
@@ -256,6 +258,8 @@ void main() {
         hasBackButton: true,
         tappableCards: 3,
         pills: 2,
+        // Two of the three children have cards due.
+        filledButtons: 2,
         breadcrumbSteps: 3,
       ),
       // Three cards, all with cards, plus the level summary's own bar.

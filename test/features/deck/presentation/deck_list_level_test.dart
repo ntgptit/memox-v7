@@ -172,6 +172,46 @@ void main() {
       expect(find.text('Hiragana'), findsOneWidget);
     });
 
+    testWidgets('Study appears only where something is due, and answers', (
+      tester,
+    ) async {
+      // **The button is real before the feature is.** There is no review session
+      // until M5, so it says so rather than swallowing the tap — the project
+      // refuses enabled-looking controls that go nowhere, and a reply is what
+      // separates this from one. The layout under review is then the real one.
+      await pumpLevel(
+        tester,
+        serving(
+          fakeRootDeck(id: 'deck-1', name: 'Japanese'),
+          children: <DeckSummary>[
+            fakeChildSummary(
+              id: 'c1',
+              name: 'Due',
+              parentId: 'deck-1',
+              totalCardCount: 40,
+              dueCardCount: 5,
+            ),
+            fakeChildSummary(
+              id: 'c2',
+              name: 'Caught up',
+              parentId: 'deck-1',
+              totalCardCount: 40,
+              learnedCardCount: 40,
+            ),
+          ],
+        ),
+      );
+
+      // One deck has cards due; the other offers the figure in its place.
+      expect(find.text(english.deckStudyAction), findsOneWidget);
+      expect(find.text(english.deckLearnedPercentLabel(100)), findsOneWidget);
+
+      await tester.tap(find.text(english.deckStudyAction));
+      await tester.pumpAndSettle();
+
+      expect(find.text(english.deckStudyComingSoonMessage), findsOneWidget);
+    });
+
     testWidgets('a child shows the same four facts a root deck does', (
       tester,
     ) async {

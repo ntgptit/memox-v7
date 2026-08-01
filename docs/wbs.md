@@ -4187,6 +4187,99 @@ Thanh tiến độ và chip due giờ chung một hàng: bar giãn, chip nằm p
 trong khi ⋮ nằm giữa ô 48 của nó, nên hai dấu ở đuôi hàng lệch nhau nửa dòng —
 đọc ra như lỗi chứ không như hai control. Chevron giờ đóng hộp cùng chiều cao.
 
+**Next task: M4.10aj · Deck card chừa chỗ cho Study.**
+
+### M4.10aj · Deck card ba dải chia lại việc, và chừa sẵn chỗ cho Study
+
+- **Status:** done
+- **Goal:** Card thấp hơn bản gốc nhưng vẫn có chỗ cho nút Study về sau, không
+  phải dựng lại lần nữa.
+- **Scope:** `deck_tile_widget.dart`; `design-parity-checklist.md`.
+- **Out of scope:** bản thân nút Study — cần session, thuộc M5.
+- **Dependencies:** M4.10ai
+- **Checklist phases:** 7
+- **Tests required:** toàn bộ suite, gồm visual audit và golden.
+- **Editable documents:** `docs/wbs.md`, `docs/reviews/design-parity-checklist.md`
+- **Output:** không có file mới
+- **Acceptance criteria:**
+  - [x] Card 120px hôm nay, 128px khi Study về — vẫn thấp hơn bản gốc 168.
+  - [x] Dải chân là một hàng thật, Study chỉ việc điền vào.
+  - [x] 1021 test pass, mọi gate xanh.
+
+**Cắt hẳn dải chân là đóng cửa cho verb thứ hai.** M4.10ai gộp thanh tiến độ và
+chip due vào một hàng, xuống 100px — và chủ dự án chỉ ra hai điều tôi bỏ sót:
+card như vậy **chật**, và kit có **ba** thứ ở dải chân (chip due, nút Study, ⋮)
+nên Study sẽ không có chỗ về.
+
+**Chia lại việc thay vì xoá dải.** ⋮ lên dải 1, ở cùng chỗ với danh tính của
+deck. Dải chân còn đúng hai *verb*: cái đang chờ, và việc để làm với nó. Nhờ đó
+dải chân cao **32** (chiều cao pill) thay vì **48** (chiều cao icon button) —
+đây là chỗ khác kit, cố ý, đã ghi vào parity checklist.
+
+**Bỏ mũi tên `›`.** Nó nói "chỗ này mở ra một cấp nữa", mà cả card giờ đã nói
+điều đó bằng cách chính nó là target; đứng cạnh một control thật thì nó đọc ra
+như control thứ hai không làm gì. Cái row được làm bằng gì vẫn còn: glyph trong
+well, và số sub-deck trên dòng meta.
+
+**Luật cần chốt trước M5:** kit chỉ vẽ pill Study khi `due > 0`. Mời học một deck
+đã xong hôm nay là mời làm một việc không có nội dung — nhưng đó là luật nghiệp
+vụ, chưa chốt.
+
+**Next task: M4.10ak · Deck card chốt hình, hai kit.**
+
+### M4.10ak · Deck card: nút Study, thanh nền, và cân lại padding — cả hai kit
+
+- **Status:** done
+- **Goal:** Chốt hình dạng deck card sau một vòng review giao diện, và đưa **cả**
+  Flutter lẫn design kit về cùng một trạng thái.
+- **Scope:** `deck_tile_widget.dart`, `deck_study_button_widget.dart` (mới),
+  `deck_icon_area_widget.dart` (tách ra), `deck_due_state_widget.dart`,
+  `mx_card.dart`, `mx_progress_bar.dart`, ARB en+vi, `deck_list_level_test.dart`,
+  allowance của visual audit; `MxProgressBar.{jsx,d.ts,prompt.md}`, `mx.css`,
+  `DeckLevelScreen.jsx`, `_adherence.oxlintrc.json`.
+- **Out of scope:** nối nút Study vào phiên học — issue #89, thuộc M5.
+- **Dependencies:** M4.10aj
+- **Checklist phases:** 7
+- **Tests required:** case Study trong `deck_list_level_test.dart`; toàn bộ suite.
+- **Editable documents:** `docs/wbs.md`, `docs/reviews/design-parity-checklist.md`
+- **Output:** `lib/features/deck/presentation/widgets/deck_study_button_widget.dart`
+- **Acceptance criteria:**
+  - [x] Card 134px, **đều** ở cả ba trạng thái due.
+  - [x] Study filled, chỉ khi `due > 0`; không có due thì `%` đứng chỗ đó.
+  - [x] Padding trên/dưới cân 16/16 tính từ mặt sơn.
+  - [x] Thanh nền 6px, vuông đầu, bị **card** cắt chứ không tự cắt.
+  - [x] Kit khớp từng điểm; 1022 test pass, mọi gate xanh.
+
+**Cắt sai đối tượng, không phải thiếu clip.** Thanh tiến độ ở đáy card "lòi ra
+ngoài" vì `ClipRRect` bọc **chính thanh**: bán kính 16 bị co xuống bằng chiều cao
+thanh (luật `RRect`), nên nó bo góc *của thanh* trong khi mặt card ở dải cuối đã
+cong vào ~5px. Chỗ duy nhất biết hình học thật là card, nên `MxCard` tự cắt nội
+dung — `overflow:hidden` bên kit. Hai đầu pill là lớp lỗi thứ hai nằm trên nó:
+`MxProgressBarShape.flush`.
+
+**Track 6px làm góc *khít hơn*, không hụt hơn.** Thụt ngang tại mép trên thanh là
+`r − √(r² − (r−h)²)`: với r=16, h=4 → 5,4px; h=6 → 3,5px.
+
+**Padding "đúng" ở cả hai đầu mà mắt vẫn thấy lệch.** Trên đo từ mép hộp, dưới đo
+từ mặt sơn: pill vẽ 32 trong hộp 48 (sàn chạm), nên đã trống 8 trước khi cộng
+padding. `lg` dưới → `sm`: 8 + 8 = 16, khớp trên.
+
+**Nút Study có mặt trước cả tính năng.** Chưa có phiên học (M5), nên nó trả lời
+bằng snackbar thay vì nuốt cú chạm — repo từ chối control bật sáng mà không đi
+đâu, và một lời đáp là thứ tách nó khỏi loại đó. Nhờ vậy bố cục đem review là bố
+cục thật. Guard đòi TODO có mã ticket nên mở issue **#89** thay vì bịa mã.
+
+**Ba lỗi tự tạo trong lượt này, tự bắt:** (1) label nút lấy `labelMedium` nguyên
+khối nên kèm màu chữ mặc định — chữ đen trên nền brand, visual audit đo 2,33:1;
+đặt `onPrimary` tường minh. (2) hằng số chừa chỗ cho card chưa có thẻ là literal
+`4`, track lên 6 thì nhịp lệch 2px — giờ đọc `MxProgressBarSize.sm.trackHeight`.
+(3) assertion a11y đầu tiên pass rỗng vì `MxCard` gộp semantics thành một node.
+
+**Phân kỳ có chủ ý với kit, đã ghi vào parity:** Study filled (kit lập luận
+outlined để cột card không ồn — cân nhắc rồi, chủ dự án chọn nhấn mạnh); thanh ở
+**đáy** card thay vì giữa; ⋮ nằm với danh tính deck thay vì ở dải chân. Kit đã
+được cập nhật theo cả ba.
+
 **Next task: M4.11 · Card management full-stack.**
 
 ### M4.11 · Card management full-stack

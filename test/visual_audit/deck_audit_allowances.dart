@@ -43,6 +43,12 @@ import 'audit_model.dart';
 /// `_RenderChip` itself, which lays out and paints its own shape through a
 /// private render object no extractor claims.
 ///
+/// [filledButtons] is the number of `FilledButton`s *inside the screen item* —
+/// the deck card's Study action. Each is an ink host and draws its own rounded
+/// `_ShapeBorderPainter`, the same pair an icon button contributes; it is a
+/// separate parameter because calling a labelled action an icon button in an
+/// allowance is how a count stops describing the screen.
+///
 /// [hasFloatingAction] for the create button. Same two nodes as a tappable card —
 /// it is a `Material` with an `InkWell` and a clip.
 ///
@@ -62,6 +68,7 @@ List<AuditSkipAllowance> deckShellAllowances({
   bool hasBackButton = false,
   int tappableCards = 0,
   int pills = 0,
+  int filledButtons = 0,
   int breadcrumbSteps = 0,
   bool hasFloatingAction = false,
 
@@ -74,7 +81,12 @@ List<AuditSkipAllowance> deckShellAllowances({
   final floatingActions = hasFloatingAction ? 1 : 0;
   // Every one of these hosts an InkWell inside its own Material.
   final inkHosts =
-      iconButtons + tappableCards + pills + breadcrumbSteps + floatingActions;
+      iconButtons +
+      tappableCards +
+      pills +
+      filledButtons +
+      breadcrumbSteps +
+      floatingActions;
   // The InkWell's rounded clip, once per host that has one. Icon buttons draw a
   // `_ShapeBorderPainter` instead, which is counted separately below.
   //
@@ -193,14 +205,16 @@ List<AuditSkipAllowance> deckShellAllowances({
             'unselected fills are asserted to differ, in both themes, in '
             'mx_pill_button_test.dart.',
       ),
-    if (iconButtons > 0)
+    if (iconButtons + filledButtons > 0)
       AuditSkipAllowance(
         itemId: screenItemId,
         reason: SkipReason.customPainter,
         detailContains: '_ShapeBorderPainter',
-        expectedMatches: iconButtons,
+        expectedMatches: iconButtons + filledButtons,
         rationale:
-            'One per MxIconButton: an IconButton draws its shape with a '
+            'One per MxIconButton, and one per FilledButton: the deck card Study '
+            'action draws its pill through the same painter. An '
+            'IconButton draws its shape with a '
             "CustomPainter, so the outline exists in no render object — the "
             "audit's own SkipReason doc names this case for OutlinedButton and it "
             'is the same painter. The buttons are transparent-shaped and their '

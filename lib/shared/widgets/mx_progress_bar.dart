@@ -12,7 +12,12 @@ import '../../core/theme/theme_context_extension.dart';
 /// *is* the content, as a review session's own progress will be. A third would
 /// be a guess, which is the same argument that keeps the icon scale at three.
 enum MxProgressBarSize {
-  sm(4),
+  /// **6, not 4.** At 4 the track read as a hairline rather than a measure, and
+  /// on the deck card — where it is the card's base, seated inside a 16 corner —
+  /// it also sat further into the curve: the horizontal inset at the top edge of
+  /// a 4px bar is 5.4px against 3.5 at 6, so the thicker bar reaches *closer* to
+  /// the corners rather than further from them.
+  sm(6),
   md(8);
 
   const MxProgressBarSize(this.trackHeight);
@@ -38,12 +43,23 @@ enum MxProgressBarSize {
 /// cards is a real case — `DeckSummary.learnedFraction` returns 0 for exactly
 /// that — and a bar drawn past its own track is a rendering bug shipped to a user
 /// instead of a number caught in a test.
+/// Whether the track's ends are rounded.
+///
+/// **A shape, not a size.** [MxProgressBarShape.pill] is the bar as a component
+/// on a surface — its ends are its own. [MxProgressBarShape.flush] is the bar
+/// used as an *edge*: the deck card seats one on its base, where a pill end adds
+/// a second rounding inside the card's own corner and the track reads as a
+/// lozenge tucked into it rather than as the card's foundation. The caller
+/// supplying the clip is the caller that owns the shape.
+enum MxProgressBarShape { pill, flush }
+
 class MxProgressBar extends StatelessWidget {
   const MxProgressBar({
     required this.value,
     this.label,
     this.valueLabel,
     this.size = MxProgressBarSize.md,
+    this.shape = MxProgressBarShape.pill,
     super.key,
   });
 
@@ -60,6 +76,10 @@ class MxProgressBar extends StatelessWidget {
   final String? valueLabel;
 
   final MxProgressBarSize size;
+
+  /// [MxProgressBarShape.flush] for a bar that forms an edge rather than sitting
+  /// on a surface — the clipping is then the caller's to do.
+  final MxProgressBarShape shape;
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +105,9 @@ class MxProgressBar extends StatelessWidget {
               const SizedBox(height: AppSpacing.xs),
             ],
             ClipRRect(
-              borderRadius: BorderRadius.circular(AppRadius.pill),
+              borderRadius: BorderRadius.circular(
+                shape == MxProgressBarShape.pill ? AppRadius.pill : 0,
+              ),
               child: TweenAnimationBuilder<double>(
                 // The bar animates to its new value rather than jumping. `slow`
                 // is the app's ceiling and this is the one thing it is for: a

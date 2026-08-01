@@ -251,15 +251,14 @@ function DeckCard({ summary, onOpen, onActions, onStudy }) {
             {nested ? nested + ' sub-decks · ' : ''}{summary.cards} cards · {summary.scheduler}
           </span>
         </span>
-        {nested ? <MxIcon name="chevron_right" filled size="var(--icon-sm)" color="var(--color-text-secondary)" style={{ marginTop: 4 }} /> : null}
+        <span className="mx-deck__menu mx-card__control">
+          <MxIconButton icon="more_vert" filled semanticLabel={'Actions for ' + summary.name} onClick={() => onActions(summary)} />
+        </span>
       </div>
 
-      {summary.cards ? (
-        <div style={{ padding: '0 var(--space-lg) var(--space-md)' }}>
-          <MxProgressBar value={learned} label={summary.learned + ' of ' + summary.cards + ' learned'} valueLabel={Math.round(learned * 100) + '%'} size="sm" />
-        </div>
-      ) : null}
-
+      {/* The verbs, and only the verbs. The menu sits with the deck's identity
+          above; this row carries what a user DOES with the deck, so it is a
+          32px pill row rather than a 48px icon-button row. */}
       <div className="mx-deck__foot">
         <span className="mx-deck__bar">
           {due
@@ -271,10 +270,22 @@ function DeckCard({ summary, onOpen, onActions, onStudy }) {
             <MxIcon name="play_arrow" filled size={16} />Study
           </button>
         ) : null}
-        <span className="mx-deck__menu mx-card__control">
-          <MxIconButton icon="more_vert" filled semanticLabel={'Actions for ' + summary.name} onClick={() => onActions(summary)} />
-        </span>
+        {/* The slot Study leaves empty is filled by a fact, never by a disabled
+            button: "nothing due" is good news (BR-29), and a greyed control
+            says you cannot do the thing when there is nothing to do. */}
+        {!due && summary.cards ? (
+          <span className={'mx-deck__figure' + (complete ? ' mx-deck__figure--complete' : '')}>{Math.round(learned * 100)}%</span>
+        ) : null}
       </div>
+
+      {/* The track is the card's BASE, not a rule across its middle. In the
+          middle it cut the card in two; on the edge it is what the card stands
+          on. `--flush` squares its ends so the card's own corner is the only
+          rounding — a pill end inside a 16px corner reads as a lozenge tucked
+          into it. */}
+      {summary.cards ? (
+        <MxProgressBar value={learned} size="sm" shape="flush" />
+      ) : null}
     </MxCard>
   );
 }

@@ -411,6 +411,14 @@
   "@deckCreateCardUnavailableMessage": {
     "description": "Explanation attached to the disabled New card action. The option stays visible because BR-61 requires an unset deck to show both choices; it is disabled rather than hidden so the user learns the deck can hold cards."
   },
+  "deckStudyAction": "Study",
+  "@deckStudyAction": {
+    "description": "Label of the button on a deck card that starts a review session for the cards due in that deck. Shown only when at least one card is due — a deck that is finished for today has nothing to start."
+  },
+  "deckStudyComingSoonMessage": "Study sessions are still being built.",
+  "@deckStudyComingSoonMessage": {
+    "description": "Snackbar shown when the Study button is pressed before review sessions exist (M5). The button is present so the card layout is the real one; the message is what keeps it honest rather than dead."
+  },
   "deckActionsSemanticLabel": "Deck actions",
   "@deckActionsSemanticLabel": {
     "description": "Screen-reader label for the icon button that opens the per-deck action menu."
