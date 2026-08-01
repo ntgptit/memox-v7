@@ -5,8 +5,8 @@ import 'app_radius.dart';
 import 'app_semantic_colors.dart';
 import 'app_spacing.dart';
 
-/// The filled, outlined and destructive button styles, and the geometry all
-/// three share.
+/// The filled, outlined, text-link and destructive button styles, and the
+/// geometry the filled and outlined pair share.
 ///
 /// Split out of `app_theme.dart` when that file crossed the 400-line guard. They
 /// are the natural seam: everything here is one component family, it is the
@@ -115,6 +115,92 @@ ButtonStyle buildFilledStyle(
     return label;
   }),
 );
+
+/// A text link's label colour, resolved per state.
+///
+/// Public for the same reason as [buildFilledStyle]: `MxTextButton`'s
+/// destructive variant is the same link with `danger` as its accent, not a
+/// second implementation. Every state is a blend of the accent toward the ink
+/// — `.mx-textbtn` is the one control in the kit with no surface to wash, so
+/// its states are carried by the text itself. Focus adds no colour: the
+/// label's underline is the focus indicator, and it is drawn by `MxTextButton`
+/// where the decoration cannot inherit into icon glyphs.
+WidgetStateProperty<Color> textLinkForeground(
+  ColorScheme scheme,
+  AppSemanticColors semantic, {
+  required Color accent,
+}) => WidgetStateProperty.resolveWith((states) {
+  if (states.contains(WidgetState.disabled)) return semantic.onDisabled;
+  if (states.contains(WidgetState.pressed)) {
+    return Color.lerp(
+      accent,
+      scheme.onSurface,
+      AppStateOpacity.textPressedBlend,
+    )!;
+  }
+  if (states.contains(WidgetState.hovered)) {
+    return Color.lerp(
+      accent,
+      scheme.onSurface,
+      AppStateOpacity.textHoverBlend,
+    )!;
+  }
+
+  return accent;
+});
+
+/// The low-emphasis action: `MxTextButton`, a bare label in the flow of the
+/// content.
+///
+/// **No padding, no radius and no hover surface — that is the entire point.**
+/// Material's `TextButton` insets its label by 12 and paints a tinted overlay
+/// on hover, and a text button with a background is an outlined button with
+/// the border turned off. Zero padding keeps the label on the same vertical
+/// line as everything else in the column; the overlay is suppressed, and every
+/// state lives on the text through [textLinkForeground].
+///
+/// **The 48 floor is kept as height, not as padding.** `AppSpacing` calls the
+/// touch target a floor rather than a step for exactly this case: the label
+/// may sit flush, but the thing a finger has to hit may not shrink to the
+/// height of a line of text. The width floor is zero rather than Material's
+/// 64 — a link that pads itself out re-introduces the misalignment on the
+/// trailing side, and `tapTargetSize: padded` gives the finger its horizontal
+/// 48 without drawing it.
+///
+/// **Colour is the accent, not the fill.** `ColorScheme.primary` is held dark
+/// enough on dark surfaces that it measures 3.33:1 as bare text and fails AA
+/// at label size; `AppSemanticColors.primaryAccent` is the variant that reads
+/// as a label.
+///
+/// This is the design system's definition of a text button, so anything that
+/// builds a `TextButton` inherits the link shape — a future `SnackBarAction`
+/// included. A caller that genuinely needs Material's padded button declares
+/// its own style; none exists today.
+TextButtonThemeData buildTextButtonTheme(
+  ColorScheme scheme,
+  AppSemanticColors semantic,
+) {
+  final foreground = textLinkForeground(
+    scheme,
+    semantic,
+    accent: semantic.primaryAccent,
+  );
+
+  return TextButtonThemeData(
+    style: ButtonStyle(
+      padding: const WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.zero),
+      minimumSize: const WidgetStatePropertyAll<Size>(
+        Size(0, AppSpacing.minimumTouchTarget),
+      ),
+      alignment: AlignmentDirectional.centerStart,
+      // No hover surface and no ripple — the states live on the text.
+      overlayColor: const WidgetStatePropertyAll<Color>(Colors.transparent),
+      splashFactory: NoSplash.splashFactory,
+      foregroundColor: foreground,
+      iconColor: foreground,
+    ),
+  );
+}
 
 /// The secondary action: `MxActionButton`'s `secondary` variant.
 OutlinedButtonThemeData buildOutlinedButtonTheme(

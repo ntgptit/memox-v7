@@ -66,6 +66,17 @@ abstract final class AppStateOpacity {
   /// The same, on press — `.mx-btn--primary:active`, 88%.
   static const double filledPressedBlend = 0.12;
 
+  /// How far a text link's label moves toward the ink on hover —
+  /// `.mx-textbtn:hover`, `color-mix(… 85%, var(--color-text-primary))`.
+  ///
+  /// A blend of the label's own colour, like [filledHoverBlend]: `.mx-textbtn`
+  /// is the one control in the kit with no surface to wash, so its states are
+  /// carried by the text itself rather than by an overlay painted over it.
+  static const double textHoverBlend = 0.15;
+
+  /// The same, on press — `.mx-textbtn:active`, 72%.
+  static const double textPressedBlend = 0.28;
+
   /// A disabled label or glyph — `--color-on-disabled`, 38% of the primary text
   /// colour. Translucent by design: a disabled label sits on the page, on a
   /// card and on a disabled fill, so there is no one ground to precompute over.

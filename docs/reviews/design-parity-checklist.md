@@ -86,7 +86,9 @@ prompt and body-md's 1.45 — are identical on both sides.
 | B10 | `readme.md` "States" | `app_theme.dart` overlays | hover 8/6/4, press 12, focus 2px ring | [x] | **match** since M4.10q — hover 6%, press 12%, focus ring 2px |
 | B11 | `readme.md` "Layout rules" | `app_theme.dart` appBar + `MxContentShell` | no elevation, no scroll tint, page-colour bar | [x] | **drift (F4, F11)** - page colour and zero elevation match; no scroll hairline, and the FAB shape differs |
 | B12 | — | `app_overlay_themes.dart` tooltip, selection, divider, scrollbar | design has no counterpart | [x] | **design-gap, as expected** — tooltip, text selection, divider and scrollbar have no CSS counterpart; the design leaves them to the browser as Flutter left them to Material until M4.10j |
-| B13 | `index.html` `COMPACT_BELOW` behaviour | `app_compact_scale.dart` | title 22→20, prompt 30→26, button padding | [x] | **match** — title 22→20, card prompt 30→26, button padding 24→12, same 360 breakpoint |
+| B13 | `index.html` `COMPACT_BELOW` behaviour | `app_compact_scale.dart` | title 22→20, prompt 30→26, button padding | [x] | **match** — title 22→20, card prompt 30→26, button padding 24→12, same 360 breakpoint. The compact pass deliberately skips the text button: a zero-padding link has nothing to give back |
+| B14 | `mx.css` `.mx-textbtn` (+ `--destructive`) | `buildTextButtonTheme()` in `app_button_themes.dart` | zero padding, 48 floor as height, 15%/28% hover/press label blends, underline on hover/focus | [x] | **match** since M4.10ap — the values always matched but lived inline in `MxTextButton`; the slot owns them now, the blends are `AppStateOpacity.textHoverBlend`/`textPressedBlend`, and the underline stays on the label because a decoration on the shared style reaches the icon glyphs |
+| B15 | — | `app_radio_theme.dart` | design has no counterpart | [x] | **design-gap, as B12** — no kit mock renders a scheduler picker, so the radio takes the app's own conventions: `primaryAccent` mark (a glyph, and `primary` misses 3:1 on the dark card), secondary-ink resting ring, the shared control overlay |
 
 ---
 
@@ -156,6 +158,7 @@ Dart widget: props, defaults, states, radius, spacing, semantics.
 | E10 | Middle dot separates facts on one line | ARB files | [x] | **match** — the middle dot separates facts on the deck meta line |
 | E11 | No emoji anywhere | ARB files, code | [x] | **match** — no character above U+2100 in either ARB |
 | E12 | Error copy belongs to the screen, not the component | `MxErrorState` callers | [x] | **match** — `MxErrorState` maps no failure type; every caller passes its own sentence |
+| E13 | States are instant flat washes (readme §States) | every pressed control on Android | [x] | **deliberate divergence, recorded** — Android keeps Material's ink ripple; the wash colours are the kit's (`ThemeData.splashColor` is primary at 12% since M4.10ap), only the animation differs. See divergence #5 |
 
 ---
 
@@ -388,17 +391,18 @@ change landed; the shadow did not.
 
 ---
 
-## Complete — all 77 rows
+## Complete — all 80 rows
 
-Every row now carries a verdict. Final tally:
+Every row now carries a verdict. Final tally (B14, B15 and E13 joined in
+M4.10ap's theme-slot audit — see Round 3 below):
 
 | Outcome | Count |
 |---|---|
-| **match** — nothing to do | 47 |
+| **match** — nothing to do | 48 |
 | **fixed** — Dart moved to the design | 14 |
-| **n/a / design-gap** — no counterpart is needed on one side | 8 |
+| **n/a / design-gap** — no counterpart is needed on one side | 9 |
 | **blocked on M5** — streak, Start studying, the review and settings screens | 4 |
-| **deliberate divergence, recorded** | 4 |
+| **deliberate divergence, recorded** | 5 |
 
 ### Fixed in this last pass
 
@@ -413,7 +417,7 @@ Every row now carries a verdict. Final tally:
   than a `Row` above it, because at `textScaler` 2.0 on a 320 screen the label
   and both pills cannot share a line and a `Row` would clip instead of wrapping.
 
-### The four deliberate divergences, all measured
+### The five deliberate divergences, all measured
 
 | # | The design says | This repo does | Why the repo wins |
 |---|---|---|---|
@@ -421,6 +425,7 @@ Every row now carries a verdict. Final tally:
 | F3 | `mx.css` paints the nav indicator `primary-container` | `secondaryContainer` | The design's own readme says `secondary-container` "used identically for a tab, a filter pill and a chosen verdict". Its CSS and its prose disagree. |
 | F12 | `.mx-crumbs__step` is 36px tall | 48 | The design's own usage note says 48, and 36 breaks the touch-target floor its own spacing token declares. |
 | F16 | a 60% scrim in both modes | 48% light / 72% dark | M4.10j measured it: a mid scrim over a `#0A082D` page barely registers. |
+| E13 | states snap to a flat wash, no animation | Android animates the press as an ink ripple, in the kit's colours | Platform-native touch feedback on the release target (decided M4.10ap). The kit is a web artifact with no press-animation vocabulary; the wash colours themselves are transcribed, and parity screenshots are static so no render can see the difference. `MxTextButton` and `MxBreadcrumb` keep their local `NoSplash` — text links carry states on the text itself. |
 
 Plus the two contradictions resolved in the design's favour with a correction
 attached — `danger`'s saturation (M4.10p) and the due chip's foreground
@@ -441,3 +446,34 @@ token a component reaches for, and measurement wins over both.
 | "Start studying" (D6 part) | No session to start until M5. |
 | `ReviewScreen` (D13), `SettingsScreen` (D14) | Neither is a built screen; both exist here only as preview harnesses. |
 | `MxSearchField` (C17), subtree search (D7) | **Not blocked** — needs a recursive name query, a contract method, a use case and the results UI. The one substantial piece of the design still unbuilt. |
+
+---
+
+## Round 3 — the theme-slot audit (M4.10ap)
+
+An audit of `ThemeData` against what the app actually renders, in both
+directions: slots a live renderer was missing, and slots that outlived their
+renderer. Three rows joined the tables above (B14, B15, E13); the rest of what
+it changed has no row of its own:
+
+- **`floatingActionButtonTheme` is gone.** M4.10ag removed the FAB itself; the
+  theme outlived its renderer and kept the F11 shape argument alive for a
+  control that no longer exists. The kit still draws `.mx-shell__fab` — that
+  cleanup is the kit's, recorded here so it is not mistaken for a Flutter gap.
+- **`cardTheme` stays, re-labelled.** Still no `Card` in the app; the slot is
+  now documented as the safety net that keeps a bare or third-party `Card` on
+  the app's surface, radius and hairline. `MxCard` remains canonical.
+- **Geometry pinned for the E2E channel.** `visualDensity: standard` and
+  `materialTapTargetSize: padded`. Flutter's platform defaults hand a desktop
+  browser `compact` density and `shrinkWrap` targets, so Playwright was
+  measuring geometry Android never renders. No CSS counterpart — the kit has
+  no density concept — so no row.
+- **The framework fall-through is seeded.** `hoverColor` / `focusColor` /
+  `highlightColor` / `splashColor` now carry the kit's washes, so a control
+  nobody themes degrades to the house states instead of Material's unseeded
+  black-and-white pair. `iconTheme` is declared at `onSurfaceVariant` /
+  `AppIconSize.md` for the same reason.
+- **`MxActionSheet`'s private `0.38`** — a re-derivation of
+  `--color-on-disabled` — now reads the token (`semanticColors.onDisabled`).
+  The 0.4-per-mille alpha difference between the literal and the token moved
+  the two action-sheet goldens by one channel step; regenerated deliberately.

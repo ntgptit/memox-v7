@@ -1,19 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_button_themes.dart';
 import '../../core/theme/app_icon_size.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_stroke.dart';
 import '../../core/theme/theme_context_extension.dart';
-
-/// How far the label's colour moves toward the ink on hover, and further on
-/// press. Mirrors the kit's `color-mix(… 85%/72%, var(--color-text-primary))`.
-///
-/// Local rather than in `AppStateOpacity`: those are *state-layer* alphas —
-/// a wash painted over a control — and these are blends of the label's own
-/// colour. `.mx-textbtn` is the one control in the kit with no surface to wash,
-/// so its numbers are its own and are not shared with anything.
-const double _kHoverBlend = 0.15;
-const double _kPressedBlend = 0.28;
 
 /// A low-emphasis action drawn as a bare label.
 ///
@@ -21,32 +12,22 @@ const double _kPressedBlend = 0.28;
 /// action that belongs in the flow of the content rather than beside it —
 /// *Show today's summary* is the first, and the one it was built for.
 ///
-/// **It carries no padding, no radius and no hover surface, and that is the
-/// entire reason it exists as a widget.** Material's `TextButton` insets its
-/// label by 12 and paints a tinted overlay on hover — and a text button with a
-/// background is an outlined button with the border turned off. Zero padding
-/// puts the label on the same vertical line as everything else in the column;
-/// the overlay is suppressed, and every state lives on the text itself: hover
-/// blends the colour toward the ink and underlines, focus underlines at twice
-/// the font's stroke, press blends further. (The kit also offsets the
-/// underline 3px from the baseline; `TextStyle` has no underline offset, and
-/// the font's own position is the accepted divergence.)
+/// **The link's geometry and colours live in the theme.** `buildTextButtonTheme`
+/// owns the zero padding, the 48 height floor, the suppressed overlay and the
+/// state-blended foreground — see `app_button_themes.dart` for why each is what
+/// it is. What this widget adds is the two things a `ButtonStyle` cannot carry:
 ///
 /// **The underline rides the label, never the button.** A decoration on the
 /// button's shared style inherits into the icon glyphs — the kit had exactly
 /// that bug, an underlined `expand_more` — so the label alone carries it,
-/// through `.copyWith` on the style the button already resolved.
+/// through `.copyWith` on the style the button already resolved: hover
+/// underlines, focus underlines at twice the font's stroke. (The kit also
+/// offsets the underline 3px from the baseline; `TextStyle` has no underline
+/// offset, and the font's own position is the accepted divergence.)
 ///
-/// **The 48 floor is kept as height, not as padding.** `AppSpacing` calls the
-/// touch target a floor rather than a step for exactly this case: the label
-/// may sit flush, but the thing a finger has to hit may not shrink to the
-/// height of a line of text.
-///
-/// **Colour is the accent, not the fill.** `ColorScheme.primary` is held dark
-/// enough on dark surfaces that it measures 3.33:1 as bare text and fails AA
-/// at label size; `semanticColors.primaryAccent` (dark `#8A8AE0`, 6.26:1) is
-/// the variant that reads as a label. Destructive actions carry
-/// `semanticColors.danger` — danger as a LABEL, not as a fill.
+/// **Destructive is the same link with `danger` as its accent** —
+/// [textLinkForeground] with a different pair, danger as a LABEL, not as a
+/// fill.
 class MxTextButton extends StatefulWidget {
   const MxTextButton({
     required this.label,
@@ -87,23 +68,18 @@ class _MxTextButtonState extends State<MxTextButton> {
     super.dispose();
   }
 
-  Color _foreground(Set<WidgetState> states) {
-    if (states.contains(WidgetState.disabled)) {
-      return context.semanticColors.onDisabled;
-    }
+  /// The theme's resolver with `danger` as its accent — the same link, a
+  /// different pair. Null otherwise, so `textButtonTheme` applies untouched.
+  ButtonStyle? _destructiveStyle(BuildContext context) {
+    if (!widget.isDestructive) return null;
 
-    final accent = widget.isDestructive
-        ? context.semanticColors.danger
-        : context.semanticColors.primaryAccent;
-    final ink = context.colors.onSurface;
+    final foreground = textLinkForeground(
+      context.colors,
+      context.semanticColors,
+      accent: context.semanticColors.danger,
+    );
 
-    if (states.contains(WidgetState.pressed)) {
-      return Color.lerp(accent, ink, _kPressedBlend)!;
-    }
-    if (states.contains(WidgetState.hovered)) {
-      return Color.lerp(accent, ink, _kHoverBlend)!;
-    }
-    return accent;
+    return ButtonStyle(foregroundColor: foreground, iconColor: foreground);
   }
 
   @override
@@ -111,26 +87,7 @@ class _MxTextButtonState extends State<MxTextButton> {
     return TextButton(
       statesController: _states,
       onPressed: widget.onPressed,
-      style: ButtonStyle(
-        padding: const WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.zero),
-        // The width floor is zero rather than Material's 64: a link that pads
-        // itself out to a minimum width re-introduces the misalignment on the
-        // trailing side. `tapTargetSize` stays at the theme's `padded`, which
-        // gives the finger its horizontal 48 without drawing it.
-        minimumSize: const WidgetStatePropertyAll<Size>(
-          Size(0, AppSpacing.minimumTouchTarget),
-        ),
-        alignment: AlignmentDirectional.centerStart,
-        // No hover surface and no ripple — the states live on the text. A
-        // scheme colour at alpha zero rather than the framework's transparent
-        // constant, which the token guard rightly reads as hardcoded.
-        overlayColor: WidgetStatePropertyAll<Color>(
-          context.colors.primary.withAlpha(0),
-        ),
-        splashFactory: NoSplash.splashFactory,
-        foregroundColor: WidgetStateProperty.resolveWith(_foreground),
-        iconColor: WidgetStateProperty.resolveWith(_foreground),
-      ),
+      style: _destructiveStyle(context),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         spacing: AppSpacing.xs,

@@ -54,9 +54,10 @@ ThemeData applyCompactScale(ThemeData base) {
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: base.outlinedButtonTheme.style?.copyWith(padding: _compactPadding),
     ),
-    textButtonTheme: TextButtonThemeData(
-      style: base.textButtonTheme.style?.copyWith(padding: _compactPadding),
-    ),
+    // No `textButtonTheme` clause. The app's text button is a zero-padding
+    // link (`buildTextButtonTheme`) — there is no horizontal padding to give
+    // back, and handing it the buttons' compact padding would indent the one
+    // control whose whole point is sitting flush with the column.
   );
 }
 
