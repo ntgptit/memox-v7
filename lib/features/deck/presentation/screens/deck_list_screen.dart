@@ -25,8 +25,7 @@ import '../widgets/deck_subheader_widget.dart';
 import '../widgets/deck_notice_widget.dart';
 import '../widgets/deck_tile_widget.dart';
 
-/// Space under the last card. It was 112 while a floating action hovered over
-/// the list; nothing hovers now, so the last row needs only what the first has.
+/// Space under the last card. It was 112 while a floating action hovered.
 const double _kListBottomInset = AppSpacing.lg;
 
 /// The toolbar's two commands, bound to a `ref`.
@@ -365,8 +364,10 @@ class _DeckListSliver extends StatelessWidget {
       ),
       sliver: SliverList.separated(
         itemCount: summaries.length,
+        // `lg`: the track on each card's base makes that boundary loud, so 12
+        // after it read as part of the card rather than as the space between.
         separatorBuilder: (context, index) =>
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.lg),
         itemBuilder: (context, index) {
           final summary = summaries[index];
 

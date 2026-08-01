@@ -102,7 +102,10 @@ class MxProgressBar extends StatelessWidget {
                 valueLabel: valueLabel,
                 isComplete: isComplete,
               ),
-              const SizedBox(height: AppSpacing.xs),
+              // `sm`, not `xs`. At 4 the figure sat on the track and the two
+              // read as one object; the header is a caption *for* the bar, and
+              // a caption needs enough room to be read as one.
+              const SizedBox(height: AppSpacing.sm),
             ],
             ClipRRect(
               borderRadius: BorderRadius.circular(
