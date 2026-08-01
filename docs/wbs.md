@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M4.10aq |
+| **Updated by task** | M4.10ar |
 | **Last updated** | 2026-08-02 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -4690,6 +4690,86 @@ ghi `(M4.10ap)` vì nó được viết trước khi #97 land và giành mất I
 số lại chỉ kịp vào nội dung, không vào subject. `git log --grep M4.10aq` vì thế
 không tìm ra nó — dòng này là chỗ để tìm. Không rewrite lịch sử của `main` cho
 một dòng subject.
+
+**Next task: M4.10ar · Chuẩn bị nền trước khi clone sang Card.**
+
+### M4.10ar · Card lên chuẩn golden feature, và guard nhìn thấy được nó
+
+- **Status:** done
+- **Goal:** Trước khi M4.11 dựng presentation cho Card, đóng bốn lớp defect mà
+  Deck đã mắc và đã sửa nhưng Card vẫn còn — vì domain/data của Card viết ở
+  M4.9, **trước** đợt hardening M4.10b — để feature thứ hai không nhân bản
+  chúng và trở thành tiền lệ cho feature thứ ba.
+- **Scope:** ba commit.
+  1. **Layout + guard.** `architecture_boundary_test` giữ `domain/`, `data/`,
+     `presentation/` đúng bucket như AD-15 đã giữ `presentation/widgets/`;
+     Card và Review chuyển vào bucket (`data/local/` không phải tên AD-12),
+     màn Review vào `presentation/screens/` kèm companion visual audit.
+  2. **Hardening.** `CardText` value object (constructor private), contract
+     nhận `CardText`, xoá validate trùng ở data layer, `domain/failures/` ba
+     file với enum reason, bốn use case, `di/` + binding + bootstrap.
+  3. **README + vệ sinh.** Sửa ~12 câu đã trôi trong README của Deck, gỡ
+     `.gitkeep` thừa, đồng bộ `_kListBottomInset` bị sót.
+- **Out of scope:** presentation của Card (đó là M4.11); phân trang keyset —
+  xem quyết định bên dưới; gỡ `watchRootDecks`/`watchDeckTree` chết.
+- **Dependencies:** M4.10aq
+- **Checklist phases:** 4, 5, 14
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/features/card/{domain/{models,failures,usecases},di}/`,
+  `test/features/card/domain/`, `test/features/card/data/support/`
+- **Acceptance criteria:**
+  - [x] Rule bucket viết **trước**, chạy cho đỏ, báo đúng 10 file thuộc hai
+        feature; fault injection xác nhận bắt cả hai dạng lỗi.
+  - [x] Contract nhận `CardText`; `card_repository_impl` không còn tham chiếu
+        luật nào; sáu `ConflictFailure` và hai `NotFoundFailure` mang reason.
+  - [x] `cardRepositoryProvider` đi qua composition root — contract **thứ hai**
+        từng làm vậy.
+  - [x] 1189 test pass, analyze 0 issue, guard xanh, DoD mechanical xanh.
+
+**Lỗ hổng guard là phát hiện đáng giá nhất, và nó rộng hơn dự đoán.**
+`check_suffix` chọn file theo path fragment `/domain/entities/`,
+`/data/datasources/`. Card khớp **không rule nào** — nên mọi rule đó pass mà
+không soi file Card nào, còn bộ đếm scope cuối script vẫn khác 0 vì một mình
+Deck thoả. Card không hề *tuân thủ*; nó **vô hình**. Đúng lớp defect mà comment
+của chính script mô tả (sáu check match 0 file, đọc như là có phủ), quay lại
+bằng cửa khác. Rule mới bắt được 10 file thuộc **hai** feature — Review cũng
+vô hình y hệt.
+
+**Hai lỗi của chính Deck bị phát hiện khi soi để clone, và đã sửa ở cả hai.**
+(1) Use case validating khai trả `Future` nhưng `refuse*Form` ném **đồng bộ**,
+nên refusal thoát ra *trước khi* future tồn tại và `catchError` không thấy —
+trong khi mọi failure khác đều đến qua future. Một controller viết theo
+`.catchError` sẽ crash với card sai và bắt được lỗi database, tức đúng ngược
+lại. Nay ba use case của Deck và hai của Card đều `async`, có test khoá lại và
+fault injection xác nhận. (2) `_kListBottomInset` bị sót ở nhánh search.
+
+**Hai chỗ cố ý KHÔNG clone từ Deck.** `parseCardSides` là một helper thay cho
+khối parse/refuse/`StateError('unreachable')` sáu dòng mà Deck chép nguyên vào
+từng use case validating — với Card có hai mặt và hai lệnh ghi thì đó sẽ là bốn
+bản sao. Và bảng liệt kê tên class trong README đổi thành trỏ tới thư mục: mọi
+cái tên trong đó đều đã sai, vì một bản sao chép tay của thứ compiler đã giữ
+thì bản chép tay là bản nói dối.
+
+**Phân trang keyset: cố ý chưa làm, và đây là lý do.** `docs/wbs.md` đo được
+5.000 card đọc trọn 37,8ms so với một trang 50 là 1,6ms, index
+`idx_cards_deck_created` đã dựng sẵn cho đúng mệnh đề keyset, và
+`feature_blueprint.md` cảnh báo retrofit sau sẽ đổi cả state shape, controller
+lẫn widget. Nhưng **acceptance criteria của M4.11 đang tự mâu thuẫn**: nó không
+có tiêu chí phân trang nào, lại có tiêu chí "card list tự cập nhật qua stream"
+— mà một trang keyset không thể là `watch()` cả bảng. Cửa sổ lớn dần bằng
+`LIMIT` thì không phải `OFFSET` nhưng đọc lại từ đầu mỗi lần, nên tới trang 99
+nó thoái hoá về đúng 37,8ms mà phép đo muốn tránh. Chọn hình dạng nào là quyết
+định **gắn với UI** (cửa sổ lớn theo cái gì, ai giữ cursor), và đoán mò ở tầng
+contract rồi phải đổi lần hai là đắt hơn chờ. **M4.11 MUST chốt hình dạng đó ở
+bước thiết kế, trước dòng code đầu tiên, và sửa lại tiêu chí "tự cập nhật qua
+stream" cho khớp.**
+
+**Còn nợ, ghi lại để không quên:** `watchRootDecks` và `watchDeckTree` không có
+caller nào trong `lib/` nhưng vẫn nằm trên contract, kéo theo 5 tầng mỗi cái
+cộng 2 query `.drift` và hai bản fake. Gỡ chúng cần trỏ lại 4 test reactivity
+sang `watchAllDecks` và quyết định số phận test `watchDeckTree covers every
+depth` — một quyết định về độ phủ test, nên tách thành thay đổi riêng thay vì
+kèm vào đây.
 
 **Next task: M4.11 · Card management full-stack.**
 
