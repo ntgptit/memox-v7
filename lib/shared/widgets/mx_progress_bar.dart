@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_durations.dart';
+import '../../core/theme/app_motion_policy.dart';
 import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/theme_context_extension.dart';
@@ -116,7 +117,16 @@ class MxProgressBar extends StatelessWidget {
                 // is the app's ceiling and this is the one thing it is for: a
                 // count that moved is the feedback, and a bar that snaps has
                 // already finished moving by the time the user looks at it.
-                duration: AppDurations.slow,
+                //
+                // **Unless the user asked it not to.** The sweep is decoration
+                // on a value change, not the value itself, so reduced motion
+                // collapses it to zero and the bar lands on the new figure in
+                // the same frame. Nothing about the reading changes: the final
+                // value, the colour and the announced label are identical.
+                duration: AppMotionPolicy.durationOf(
+                  context,
+                  AppDurations.slow,
+                ),
                 curve: AppDurations.decelerate,
                 tween: Tween<double>(end: fraction),
                 builder: (context, animated, child) => LinearProgressIndicator(

@@ -144,6 +144,26 @@ abstract final class AppColors {
   static const Color focusRingLight = Color(0xFF4141C0);
   static const Color focusRingDark = Color(0xFF8A8AE0);
 
+  /// The fill and the border of a disabled control — a solid, per MX-VIS-002
+  /// rule R7. Material's idiom is the ink at 12% alpha, which composites
+  /// against whatever is behind the control at paint time — a card, a sheet, a
+  /// dialog — so one token renders as three colours and none of them was
+  /// chosen. Flattened over the surface once, here, where the ground is fixed;
+  /// `app_semantic_colors_test.dart` pins each back to that blend.
+  ///
+  /// The kit's `--color-disabled-surface` reads `#E3E3E6` / `#312E4E`, ~3/255
+  /// away: a stale transcription of this file rather than a decision of its
+  /// own. Recorded in `docs/wbs.md` under M4.10an.
+  static const Color disabledSurfaceLight = Color(0xFFE0E0E5);
+  static const Color disabledSurfaceDark = Color(0xFF33324F);
+
+  /// A disabled label or glyph — the kit's `--color-on-disabled`, which is the
+  /// ink at 38%. Translucent where the fill above is solid, and for a reason: a
+  /// disabled fill has one ground, a disabled label has three — the page, a
+  /// card, and the disabled fill itself.
+  static const Color onDisabledLight = Color(0x6116182B);
+  static const Color onDisabledDark = Color(0x61EDEDF6);
+
   // --- Brand and actions ---------------------------------------------------
 
   /// The single accent, on hue 240 in both brightnesses.

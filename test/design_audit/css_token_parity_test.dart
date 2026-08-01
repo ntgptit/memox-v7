@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_button_themes.dart';
 import 'package:memox/core/theme/app_colors.dart';
+import 'package:memox/core/theme/app_interaction_states.dart';
 import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_theme.dart';
 
@@ -208,7 +209,7 @@ void main() {
     test('the disabled foreground alpha is the kit\'s 0.38', () {
       // Stated as `rgb(R G B / 0.38)` rather than a hex, so it is read as a pair:
       // the ink it tints, and how much of it survives. Both halves matter —
-      // `kDisabledForegroundAlpha` is what three component themes multiply by.
+      // `AppStateOpacity.disabledContent` is what the disabled ink is made of.
       for (final (String scope, Color ink) in <(String, Color)>[
         (':root', AppColors.textPrimaryLight),
         ('[data-theme="dark"]', AppColors.textPrimaryDark),
@@ -241,9 +242,9 @@ void main() {
           );
         }
 
-        // No tolerance here. The alpha is what three component themes multiply
-        // by, so a drift of 0.01 is a decision, not a rounding.
-        expect(double.parse(match.group(4)!), kDisabledForegroundAlpha);
+        // No tolerance here. The alpha is what `AppColors.onDisabled*` is
+        // built from, so a drift of 0.01 is a decision, not a rounding.
+        expect(double.parse(match.group(4)!), AppStateOpacity.disabledContent);
       }
     });
 

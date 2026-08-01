@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
@@ -110,6 +111,50 @@ void main() {
       expect(size.height, greaterThanOrEqualTo(48));
       expect(size.width, greaterThanOrEqualTo(48));
     });
+
+    for (final mode in <(String, bool)>[('light', false), ('dark', true)]) {
+      testWidgets('${mode.$1} · destructive resolves every state, not one', (
+        tester,
+      ) async {
+        // The variant used to pass `FilledButton.styleFrom(backgroundColor:
+        // error)`, and `styleFrom` builds a flat `WidgetStatePropertyAll`. A
+        // non-null property on the widget shadows the theme's for *every*
+        // state, so pressing did not darken the button and disabling it left a
+        // fully red fill under a 38% label — a control that looks armed and is
+        // inert.
+        await tester.pumpWidget(
+          host(
+            Scaffold(
+              body: MxActionButton(
+                label: 'Delete deck',
+                variant: MxActionButtonVariant.destructive,
+                onPressed: () {},
+              ),
+            ),
+            isDark: mode.$2,
+          ),
+        );
+
+        final theme = mode.$2 ? buildDarkTheme() : buildLightTheme();
+        final semantic = theme.extension<AppSemanticColors>()!;
+        final fill = tester
+            .widget<FilledButton>(find.byType(FilledButton))
+            .style!
+            .backgroundColor!;
+
+        expect(fill.resolve(const <WidgetState>{}), theme.colorScheme.error);
+        expect(
+          fill.resolve(const <WidgetState>{WidgetState.pressed}),
+          isNot(theme.colorScheme.error),
+          reason: '${mode.$1}: a destructive press does not darken',
+        );
+        expect(
+          fill.resolve(const <WidgetState>{WidgetState.disabled}),
+          semantic.disabledSurface,
+          reason: '${mode.$1}: a disabled destructive button is still red',
+        );
+      });
+    }
   });
 
   group('MxLoadingState', () {

@@ -3,12 +3,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/shared/widgets/mx_action_sheet.dart';
 import 'package:memox/shared/widgets/mx_confirm_dialog.dart';
-import 'package:memox/shared/widgets/mx_list_tile.dart';
 
-/// `MxListTile`, `MxConfirmDialog` and `MxActionSheet`.
+/// `MxConfirmDialog` and `MxActionSheet`.
 ///
-/// `MxCard` moved to `mx_card_test.dart` when this file crossed the 400-line
-/// guard.
+/// `MxCard` moved to `mx_card_test.dart`, and `MxListTile` to
+/// `mx_list_tile_test.dart`, each time this file crossed the 400-line guard.
 void main() {
   Future<void> pump(
     WidgetTester tester,
@@ -46,76 +45,6 @@ void main() {
     }
     await tester.pump();
   }
-
-  const long =
-      'A deck name long enough that it has to wrap or be cut off, twice over';
-
-  group('MxListTile', () {
-    testWidgets('renders every slot it was given', (tester) async {
-      await pump(
-        tester,
-        const MxListTile(
-          title: 'Academic Word List',
-          subtitle: '20 of 570 learned',
-          leading: Icon(Icons.style_outlined),
-          trailing: Icon(Icons.chevron_right),
-        ),
-      );
-
-      expect(find.text('Academic Word List'), findsOneWidget);
-      expect(find.text('20 of 570 learned'), findsOneWidget);
-      expect(find.byIcon(Icons.style_outlined), findsOneWidget);
-      expect(find.byIcon(Icons.chevron_right), findsOneWidget);
-    });
-
-    testWidgets('tap fires once', (tester) async {
-      var taps = 0;
-
-      await pump(tester, MxListTile(title: 'Deck', onTap: () => taps++));
-      await tester.tap(find.byType(ListTile));
-      await tester.pumpAndSettle();
-
-      expect(taps, 1);
-    });
-
-    testWidgets('disabled fires nothing', (tester) async {
-      var taps = 0;
-
-      await pump(
-        tester,
-        MxListTile(title: 'Deck', isEnabled: false, onTap: () => taps++),
-      );
-      await tester.tap(find.byType(ListTile));
-      await tester.pumpAndSettle();
-
-      expect(taps, 0);
-    });
-
-    testWidgets('selected is carried through to the tile', (tester) async {
-      await pump(tester, const MxListTile(title: 'Deck', isSelected: true));
-
-      expect(tester.widget<ListTile>(find.byType(ListTile)).selected, isTrue);
-    });
-
-    testWidgets('a long title truncates rather than overflowing', (
-      tester,
-    ) async {
-      // Unbounded growth pushes the trailing action off a narrow screen, and the
-      // row silently loses its only control.
-      await pump(
-        tester,
-        const MxListTile(
-          title: long,
-          subtitle: long,
-          trailing: Icon(Icons.chevron_right),
-        ),
-        surface: const Size(320, 568),
-        textScale: 2,
-      );
-
-      expect(tester.takeException(), isNull);
-    });
-  });
 
   group('MxConfirmDialog', () {
     MxConfirmDialog build({

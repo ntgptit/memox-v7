@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_confirm_dialog.dart';
 import 'package:memox/shared/widgets/mx_icon_button.dart';
+
+import '../../support/ink_probe.dart';
 
 /// What a screen reader and a keyboard actually get.
 ///
@@ -113,6 +116,38 @@ void main() {
       expect(node.label, 'Delete deck');
       expect(node.tooltip, 'Delete deck');
       handle.dispose();
+    });
+
+    testWidgets('keeps its 48x48 through the interaction states', (
+      tester,
+    ) async {
+      // The state layers landed on this button in the same change that gave it
+      // an overlay and a ring, and a ring that grew the box would take the
+      // touch target with it. Measured hovered and focused as well as at rest,
+      // because a target that only holds at rest is not a target.
+      await pump(
+        tester,
+        MxIconButton(
+          icon: Icons.delete_outline,
+          semanticLabel: 'Delete deck',
+          onPressed: () {},
+        ),
+      );
+      final atRest = tester.getSize(find.byType(IconButton));
+      expect(atRest.width, greaterThanOrEqualTo(48));
+      expect(atRest.height, greaterThanOrEqualTo(48));
+
+      await hover(tester, find.byType(IconButton));
+      expect(tester.getSize(find.byType(IconButton)), atRest);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.getSize(find.byType(IconButton)),
+        atRest,
+        reason: 'the focus ring changed the touch target',
+      );
     });
   });
 

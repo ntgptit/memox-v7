@@ -13,16 +13,28 @@ void main() {
     WidgetTester tester, {
     String value = '',
     int? resultCount,
+    bool disableAnimations = false,
+    ValueChanged<String>? onChanged,
   }) => tester.pumpWidget(
     MaterialApp(
       theme: light,
-      home: Scaffold(
-        body: MxSearchField(
-          value: value,
-          onChanged: (_) {},
-          hintText: 'Search your whole library',
-          resultCount: resultCount,
-          clearSemanticLabel: 'Clear search',
+      home: Builder(
+        // `copyWith` on the real data, never a fresh `MediaQueryData`:
+        // constructing one zeroes `size` and `padding`, so the widget is told
+        // the screen is 0x0 while the view says otherwise.
+        builder: (context) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(disableAnimations: disableAnimations),
+          child: Scaffold(
+            body: MxSearchField(
+              value: value,
+              onChanged: onChanged ?? (_) {},
+              hintText: 'Search your whole library',
+              resultCount: resultCount,
+              clearSemanticLabel: 'Clear search',
+            ),
+          ),
         ),
       ),
     ),
@@ -32,6 +44,23 @@ void main() {
       tester
               .widget<AnimatedContainer>(find.byType(AnimatedContainer))
               .decoration!
+          as BoxDecoration;
+
+  /// The decoration the pill is *painting*, as opposed to the one it is heading
+  /// for. `AnimatedContainer`'s own `decoration` is the target and changes in
+  /// the frame the state does, so reading it would call every transition
+  /// instant — including the one this test is trying to prove is not.
+  BoxDecoration paintedDecorationOf(WidgetTester tester) =>
+      tester
+              .widget<DecoratedBox>(
+                find
+                    .descendant(
+                      of: find.byType(AnimatedContainer),
+                      matching: find.byType(DecoratedBox),
+                    )
+                    .first,
+              )
+              .decoration
           as BoxDecoration;
 
   group('focus', () {
@@ -67,6 +96,69 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(tester.getSize(find.byType(MxSearchField)), atRest);
+    });
+  });
+
+  group('reduced motion', () {
+    testWidgets('the focus crossfade runs when animation is allowed', (
+      tester,
+    ) async {
+      // The control case, and it is what makes the next test mean anything: if
+      // the pill were instant either way, a broken policy would still pass.
+      await pump(tester);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
+
+      expect(
+        paintedDecorationOf(tester).color,
+        isNot(light.colorScheme.surface),
+        reason: 'the pill arrived before the transition had run',
+      );
+    });
+
+    testWidgets('the focus state arrives in one frame when it is not', (
+      tester,
+    ) async {
+      await pump(tester, disableAnimations: true);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
+
+      expect(paintedDecorationOf(tester).color, light.colorScheme.surface);
+      expect(
+        paintedDecorationOf(tester).border!.top.color,
+        semantic.focusRing,
+        reason: 'the border did not reach its focused hue',
+      );
+    });
+
+    testWidgets('the size, the semantics and the callback are untouched', (
+      tester,
+    ) async {
+      // Reduced motion removes movement, never behaviour. A policy that also
+      // dropped the clear button's callback would be answering a different
+      // request from the one the platform flag makes.
+      final typed = <String>[];
+      await pump(
+        tester,
+        value: 'nouns',
+        disableAnimations: true,
+        onChanged: typed.add,
+      );
+      await tester.pumpAndSettle();
+      final atRest = tester.getSize(find.byType(MxSearchField));
+
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
+      expect(tester.getSize(find.byType(MxSearchField)), atRest);
+
+      await tester.tap(find.byTooltip('Clear search'));
+      await tester.pump();
+
+      expect(typed, <String>['']);
     });
   });
 
