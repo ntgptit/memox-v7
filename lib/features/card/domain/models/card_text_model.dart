@@ -1,0 +1,97 @@
+import '../failures/card_validation_failure.dart';
+
+/// One side of a card that has been through BR-07 and BR-08.
+///
+/// **The point of the type is that it cannot be constructed from invalid text.**
+/// The repository contract takes a `CardText`, not a `String`, so "did anyone
+/// validate this?" is answered by the signature rather than by reading three
+/// layers to find out.
+///
+/// This is `DeckName` applied to the second feature, and the history is the
+/// argument for it: before `DeckName`, BR-01 ran in three places for one submit
+/// — the use case checked it, the repository called `validateName` again, and
+/// the screen re-derived the problem to decide which field to mark. The card
+/// repository was still doing the middle one of those three
+/// (`CardEntity.validateSide`, called inside the write transaction) when this
+/// type replaced it.
+///
+/// **Trim happens here and nowhere else.** [parse] is the only entry point, it
+/// normalises once, and [value] is the normalised result — so no layer can trim
+/// what another layer already trimmed, and none of them needs to know whether
+/// someone else did.
+final class CardText {
+  const CardText._(this.value);
+
+  /// The trimmed text. Safe to persist as-is.
+  final String value;
+
+  /// BR-08's limit, measured after trimming.
+  static const int maxLength = kCardSideMaxLength;
+
+  /// Parses [raw] for [side], reporting the rule it broke instead of throwing.
+  ///
+  /// Returns exactly one of the two: a [CardText] or a
+  /// [CardValidationProblem]. Reporting rather than throwing is what lets the
+  /// caller parse **both** sides and refuse once with both problems — a card
+  /// with two blank fields is the ordinary state of an empty form, and throwing
+  /// on the first would make the user submit twice to find the second.
+  ///
+  /// [side] only decides which problem value comes back; the rules are the same
+  /// for front and back.
+  static ({CardText? text, CardValidationProblem? problem}) parse(
+    String raw, {
+    required CardSide side,
+  }) {
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) {
+      return (text: null, problem: side.emptyProblem);
+    }
+    if (trimmed.length > maxLength) {
+      return (text: null, problem: side.tooLongProblem);
+    }
+
+    return (text: CardText._(trimmed), problem: null);
+  }
+
+  @override
+  bool operator ==(Object other) => other is CardText && other.value == value;
+
+  @override
+  int get hashCode => value.hashCode;
+
+  @override
+  String toString() => value;
+}
+
+/// Parses both sides of a card form and refuses once, with everything wrong.
+///
+/// **One place, deliberately.** Deck's equivalent — parse, refuse, then a
+/// three-line `StateError('unreachable: …')` to convince the compiler the value
+/// is non-null — is copy-pasted verbatim into each of its three validating use
+/// cases, and a fourth would get a fourth copy. Card has two sides and two
+/// write operations, so the same shape would have been four copies of a
+/// six-line block. It lives here instead, and the use cases are one line each.
+///
+/// Both sides are parsed before either is refused: a form with two blank fields
+/// reports both, so the user does not fix one and resubmit to discover the
+/// other. That is what `ValidationFailure.problems` being a `Set` is for.
+({CardText front, CardText back}) parseCardSides({
+  required String rawFront,
+  required String rawBack,
+}) {
+  final parsedFront = CardText.parse(rawFront, side: CardSide.front);
+  final parsedBack = CardText.parse(rawBack, side: CardSide.back);
+
+  refuseInvalidCardForm(<CardValidationProblem>{
+    ?parsedFront.problem,
+    ?parsedBack.problem,
+  });
+
+  final front = parsedFront.text;
+  final back = parsedBack.text;
+  if (front == null || back == null) {
+    throw StateError('unreachable: refuseInvalidCardForm would have thrown');
+  }
+
+  return (front: front, back: back);
+}

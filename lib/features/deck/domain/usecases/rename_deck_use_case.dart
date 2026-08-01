@@ -12,7 +12,7 @@ class RenameDeckUseCase {
 
   final DeckRepository _repository;
 
-  Future<void> call({required String deckId, required String rawName}) {
+  Future<void> call({required String deckId, required String rawName}) async {
     final parsed = DeckName.parse(rawName);
     refuseInvalidDeckForm(<DeckValidationProblem>{?parsed.problem});
     final name = parsed.name;

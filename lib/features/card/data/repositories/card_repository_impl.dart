@@ -7,6 +7,9 @@ import '../../../../core/error/failure.dart';
 import '../../../deck/domain/models/deck_content_type_model.dart';
 import '../../../deck/domain/models/scheduler_type_model.dart';
 import '../../domain/entities/card_entity.dart';
+import '../../domain/failures/card_conflict_failure.dart';
+import '../../domain/failures/card_not_found_failure.dart';
+import '../../domain/models/card_text_model.dart';
 import '../../domain/repositories/card_repository.dart';
 import '../mappers/card_mapper.dart';
 import '../datasources/card_dao.dart';
@@ -80,23 +83,27 @@ final class CardRepositoryImpl implements CardRepository {
   @override
   Future<CardEntity> createCard({
     required String deckId,
-    required String front,
-    required String back,
+    required CardText front,
+    required CardText back,
   }) => _guard(
     () => _cardDao.runInTransaction(() async {
-      final validFront = CardEntity.validateSide(front, side: CardSide.front);
-      final validBack = CardEntity.validateSide(back, side: CardSide.back);
+      // No validation here. BR-07 and BR-08 were applied by `CardText.parse`
+      // above the contract, and re-running them inside the transaction is what
+      // gave one rule two owners — the arrangement `DeckName` ended on the deck
+      // side and this now matches.
       final deck = await _requireDeckRow(deckId);
       if (deck.parentDeckId == null) {
         // BR-58 — no card ever sits directly under a root.
         throw const ConflictFailure(
           message: 'A top-level deck holds decks, not cards.',
+          reason: CardConflictReason.parentIsRoot,
         );
       }
       final deckType = _knownContentType(deck);
       if (deckType == DeckContentType.deck) {
         throw const ConflictFailure(
           message: 'This deck holds decks, so it cannot hold cards.',
+          reason: CardConflictReason.deckHoldsDecks,
         );
       }
 
@@ -118,8 +125,8 @@ final class CardRepositoryImpl implements CardRepository {
         CardsCompanion.insert(
           id: id,
           deckId: deck.id,
-          front: validFront,
-          back: validBack,
+          front: front.value,
+          back: back.value,
           createdAt: now,
           updatedAt: now,
         ),
@@ -135,19 +142,17 @@ final class CardRepositoryImpl implements CardRepository {
   @override
   Future<CardEntity> updateCard({
     required String cardId,
-    required String front,
-    required String back,
+    required CardText front,
+    required CardText back,
   }) => _guard(() async {
-    final validFront = CardEntity.validateSide(front, side: CardSide.front);
-    final validBack = CardEntity.validateSide(back, side: CardSide.back);
     await _requireCardRow(cardId);
     // Writes to `cards` only — the review state and history cannot change
     // here because nothing else is touched (BR-10).
     await _cardDao.updateCardById(
       cardId,
       CardsCompanion(
-        front: Value<String>(validFront),
-        back: Value<String>(validBack),
+        front: Value<String>(front.value),
+        back: Value<String>(back.value),
         updatedAt: Value<DateTime>(_clock()),
       ),
     );
@@ -183,7 +188,10 @@ final class CardRepositoryImpl implements CardRepository {
   Future<Deck> _requireDeckRow(String deckId) async {
     final row = await _deckContextDao.deckById(deckId);
     if (row == null) {
-      throw const NotFoundFailure(message: 'That deck no longer exists.');
+      throw const NotFoundFailure(
+        message: 'That deck no longer exists.',
+        reason: CardNotFoundReason.deckGone,
+      );
     }
 
     return row;
@@ -192,7 +200,10 @@ final class CardRepositoryImpl implements CardRepository {
   Future<Card> _requireCardRow(String cardId) async {
     final row = await _cardDao.cardById(cardId);
     if (row == null) {
-      throw const NotFoundFailure(message: 'That card no longer exists.');
+      throw const NotFoundFailure(
+        message: 'That card no longer exists.',
+        reason: CardNotFoundReason.cardGone,
+      );
     }
 
     return row;
@@ -206,6 +217,7 @@ final class CardRepositoryImpl implements CardRepository {
     if (type == DeckContentType.unknown) {
       throw const ConflictFailure(
         message: 'This deck was made by a newer version of the app.',
+        reason: CardConflictReason.unknownContentType,
       );
     }
 
@@ -225,6 +237,7 @@ final class CardRepositoryImpl implements CardRepository {
       // only honest response to corrupt data.
       throw const ConflictFailure(
         message: 'This deck has no study mode configured.',
+        reason: CardConflictReason.rootSchedulerMissing,
       );
     }
 
@@ -232,6 +245,7 @@ final class CardRepositoryImpl implements CardRepository {
     if (type == SchedulerType.unknown) {
       throw const ConflictFailure(
         message: 'This deck uses a study mode this app version does not know.',
+        reason: CardConflictReason.unknownScheduler,
       );
     }
 
@@ -262,6 +276,7 @@ final class CardRepositoryImpl implements CardRepository {
       // Unreachable: _resolveRootScheduler already refused it.
       SchedulerType.unknown => throw const ConflictFailure(
         message: 'This deck uses a study mode this app version does not know.',
+        reason: CardConflictReason.unknownScheduler,
       ),
     };
   }

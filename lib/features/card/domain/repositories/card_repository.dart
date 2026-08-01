@@ -1,4 +1,5 @@
 import '../entities/card_entity.dart';
+import '../models/card_text_model.dart';
 
 /// Contract for card management inside a deck (UC-04, UC-08).
 ///
@@ -23,18 +24,21 @@ abstract interface class CardRepository {
   /// The state carries the root's scheduler, version and current generation,
   /// `due_at = NULL`, and the scheduler's initial values; a deck still
   /// `unset` becomes `card` in the same atomic step.
+  ///
+  /// [front] and [back] are [CardText], not `String`: BR-07 and BR-08 have been
+  /// applied before the call, and the signature is what says so.
   Future<CardEntity> createCard({
     required String deckId,
-    required String front,
-    required String back,
+    required CardText front,
+    required CardText back,
   });
 
   /// Updates card content only (BR-10) — the review state and history are
   /// untouched, structurally, because this writes only to `cards`.
   Future<CardEntity> updateCard({
     required String cardId,
-    required String front,
-    required String back,
+    required CardText front,
+    required CardText back,
   });
 
   /// Deletes a card; its review state and history cascade. The deck's

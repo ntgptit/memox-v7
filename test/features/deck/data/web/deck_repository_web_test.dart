@@ -2,6 +2,7 @@
 library;
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/features/card/domain/failures/card_validation_failure.dart';
 import 'package:memox/features/deck/domain/models/deck_name_model.dart';
 import 'package:memox/core/database/app_database.dart';
 import 'package:memox/features/card/data/repositories/card_repository_impl.dart';
@@ -9,6 +10,8 @@ import 'package:memox/features/deck/data/repositories/deck_repository_impl.dart'
 import 'package:memox/features/deck/data/datasources/deck_dao.dart';
 import 'package:memox/features/deck/domain/entities/deck_entity.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
+
+import '../../../card/data/support/card_text_fixture.dart';
 
 /// The web runtime proof M4.2 left open: the production web connection —
 /// `sqlite3.wasm` plus the drift worker, opened by `AppDatabase.open()` —
@@ -70,8 +73,8 @@ void main() {
       );
       final card = await cardRepository.createCard(
         deckId: leaf.id,
-        front: 'web front',
-        back: 'web back',
+        front: cardText('web front'),
+        back: cardText('web back', side: CardSide.back),
       );
 
       // Typed named query, executed for real.

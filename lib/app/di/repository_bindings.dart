@@ -2,6 +2,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/database/app_database_provider.dart';
 import '../../core/time/clock_provider.dart';
+import '../../features/card/data/repositories/card_repository_impl.dart';
+import '../../features/card/domain/repositories/card_repository.dart';
 import '../../features/deck/data/datasources/deck_dao.dart';
 import '../../features/deck/data/repositories/deck_repository_impl.dart';
 import '../../features/deck/domain/repositories/deck_repository.dart';
@@ -31,5 +33,19 @@ DeckRepository deckRepositoryBinding(Ref ref) => DeckRepositoryImpl(
   DeckDao(ref.watch(appDatabaseProvider)),
   // From `clockProvider` rather than a default inside the repository, so "now"
   // has one owner the whole tree can override.
+  clock: ref.watch(clockProvider),
+);
+
+/// **The database itself, not a DAO — and the difference is the point of this
+/// file.** `CardRepositoryImpl` builds both of its adapters internally so that
+/// the BR-62 content lock and the card insert cannot end up in two
+/// transactions; an API taking two ready-made DAOs would let this root hand it
+/// instances from two databases, and the lock would then sit outside the
+/// transaction that rolls the card back. The binding absorbs that difference,
+/// which is what a composition root is for: the two contracts look the same to
+/// the features that declare them, and only this file knows they are wired
+/// differently.
+CardRepository cardRepositoryBinding(Ref ref) => CardRepositoryImpl(
+  ref.watch(appDatabaseProvider),
   clock: ref.watch(clockProvider),
 );

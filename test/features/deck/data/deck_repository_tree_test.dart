@@ -1,8 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/features/card/domain/failures/card_validation_failure.dart';
 import 'package:memox/features/deck/domain/models/deck_name_model.dart';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 
+import '../../card/data/support/card_text_fixture.dart';
 import '../../../database/support/test_database.dart';
 import 'support/deck_repository_harness.dart';
 
@@ -24,18 +26,18 @@ void main() {
         );
         await h.cardRepository.createCard(
           deckId: tree.leaf.id,
-          front: 'a',
-          back: 'a',
+          front: cardText('a'),
+          back: cardText('a', side: CardSide.back),
         );
         await h.cardRepository.createCard(
           deckId: leaf2.id,
-          front: 'b',
-          back: 'b',
+          front: cardText('b'),
+          back: cardText('b', side: CardSide.back),
         );
         await h.cardRepository.createCard(
           deckId: leaf2.id,
-          front: 'c',
-          back: 'c',
+          front: cardText('c'),
+          back: cardText('c', side: CardSide.back),
         );
 
         final rootImpact = await h.deckRepository.getDeletionImpact(
@@ -60,8 +62,8 @@ void main() {
       final tree = await h.seedTree();
       await h.cardRepository.createCard(
         deckId: tree.leaf.id,
-        front: 'f',
-        back: 'b',
+        front: cardText('f'),
+        back: cardText('b', side: CardSide.back),
       );
       await insertSession(
         h.db,
@@ -82,8 +84,8 @@ void main() {
       final tree = await h.seedTree();
       await h.cardRepository.createCard(
         deckId: tree.leaf.id,
-        front: 'f',
-        back: 'b',
+        front: cardText('f'),
+        back: cardText('b', side: CardSide.back),
       );
 
       await h.deckRepository.deleteDeck(tree.branch.id);
@@ -100,8 +102,8 @@ void main() {
       final tree = await h.seedTree();
       final card = await h.cardRepository.createCard(
         deckId: tree.leaf.id,
-        front: 'f',
-        back: 'b',
+        front: cardText('f'),
+        back: cardText('b', side: CardSide.back),
       );
       await h.cardRepository.deleteCard(card.id);
       // BR-67: still 'card' after the delete...
@@ -116,8 +118,8 @@ void main() {
       final tree = await h.seedTree();
       await h.cardRepository.createCard(
         deckId: tree.leaf.id,
-        front: 'f',
-        back: 'b',
+        front: cardText('f'),
+        back: cardText('b', side: CardSide.back),
       );
 
       await expectLater(
