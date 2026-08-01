@@ -18,15 +18,22 @@ It owns the **deck tree** and nothing else. Card content belongs to
 
 ## 2 · Public entry points
 
-| Kind | Name |
+| Kind | Where to read it |
 |---|---|
 | Routes | `RouteNames.decks` (`/`), `RouteNames.deckDetail` (`decks/:deckId`) |
-| Screens | `RootDeckListScreen`, `DeckDetailScreen` |
+| Screen | `DeckListScreen(parentDeckId?)` — **one** screen, recursive. M4.10c merged the root list and the detail view once the only difference left was which data they were given |
 | Contract | `DeckRepository` (`domain/repositories/deck_repository.dart`) |
 | Entity | `DeckEntity` |
 | Value object | `DeckName` — the only way to construct a valid deck name (BR-01) |
-| Read models | `RootDeckListSnapshot`, `RootDeckSummary`, `DeckDetail`, `DeckMoveTarget`, `DeckDeletionImpact` |
-| Enums | `SchedulerType`, `DeckContentType`, `DeckValidationProblem`, `DeckConflictReason`, `DeckMoveRejection` |
+| Read models | the files in `domain/models/` |
+| Enums | the files in `domain/models/` and `domain/failures/` |
+
+**The last two rows point at folders rather than listing names, and that is a
+correction.** They used to be lists, and every one of the names in them was
+wrong by the time anyone read it — a read model renamed in M4.10c, a type that
+was folded into another and deleted. A list of identifiers in prose is a second
+copy of something the compiler already maintains, and the copy is the one that
+lies. What belongs here is why a thing exists, not that it exists.
 
 Everything else in this folder is internal. Another feature that needs deck data
 takes `DeckRepository` from `di/deck_repository_provider.dart` — never a DAO, a
@@ -50,8 +57,12 @@ write lands in SQLite, the stream re-emits, every screen watching it rebuilds.
 Ten use cases in `domain/usecases/`, one per interaction (AD-12). Each takes the
 repository **contract**, never an implementation.
 
-The six write use cases hold the input validation, and that is why they are not
-indirection. BR-01 used to run **three** times for one submit: the controller
+Three of the six write use cases hold input validation, and that is why they are
+not indirection. (The other three — delete, reset and move — validate nothing:
+their rules need the tree as it stands at write time and stay in the repository.
+So the split is *five that do something and five that forward*, not the
+read/write line it is tempting to draw.) BR-01 used to run **three** times for
+one submit: the controller
 called `DeckEntity.nameProblem`, the repository called `DeckEntity.validateName`
 again, and the screen re-derived the problem from the raw text to decide which
 field to mark. Three owners, free to disagree, while the documentation said there
@@ -59,8 +70,10 @@ was one. There is now a `DeckName` value object that cannot hold an invalid valu
 the repository contract asks for one, and the answer to "has this been validated?"
 is the signature.
 
-The four read use cases are thin, which is the accepted cost of a uniform layer.
-Two of them are gone rather than thin: `WatchDeckChildrenUseCase` and
+Two of the four read use cases are thin, which is the accepted cost of a uniform
+layer; the other two do real work — the move-target read raises its own
+`NotFoundFailure`, and `SearchDecksUseCase` scopes and builds trails in memory.
+Two more are gone rather than thin: `WatchDeckChildrenUseCase` and
 `GetDeckByIdUseCase` were composed in a controller to build one screen's read
 model, and that composition was two database snapshots — see §3.1.
 
@@ -73,16 +86,16 @@ correct because a quiet database gives two snapshots the same answer.
   emission, with a comment claiming the two facts "arrive together". They did not.
   The action set is computed from `content_type` *and* from the children being
   empty (BR-68), so a rename or a create landing between the reads produced a
-  screen assembled from two instants. There is now one `deckDetail` statement, one
-  contract method, and `DeckDetail` lives in `domain/models/` because the
-  repository returns it.
+  screen assembled from two instants. There is now one statement behind
+  `watchDeckList`, one contract method, and the snapshot it returns lives in
+  `domain/models/` because the repository returns it.
 - **The move picker** read every deck, then asked for the source deck again — a
   deck that was already in the list it had just been handed, re-read from a later
   snapshot. The source now comes from the same emission; absent means it was
   deleted elsewhere, which is a typed `NotFoundFailure`.
 
-`test/features/deck/data/deck_detail_read_test.dart` counts SQL statements through
-a real `QueryInterceptor`, because no assertion about the *values* can tell the two
+The read tests under `test/features/deck/data/` count SQL statements through a
+real `QueryInterceptor`, because no assertion about the *values* can tell the two
 designs apart. That is the shape to copy: when a claim is about how something is
 read rather than what it returns, measure it.
 
@@ -148,15 +161,15 @@ writes is the thing this split exists to prevent.
   `features/*/presentation/`, and a repository handle has to be `keepAlive`. That
   rule is right; the placement was wrong.
 
-**Query** — `autoDispose` (the default), one per question, read-only:
-
-- `rootDeckListProvider` — the list screen: every root deck with its aggregate
-  counts **and** `nextDueAt`, the instant those counts expire. A `StreamNotifier`
-  rather than a function provider, because arming the due-boundary timer needs
-  `listenSelf`, which is a notifier method.
-- `deckDetailProvider(deckId)` — one deck plus its children, from one statement
-- `deckMoveTargetsProvider(deckId)` — legal move destinations (UC-09)
-- `deckDeletionImpactProvider(deckId)` — what a delete would take with it
+**Query** — `autoDispose` (the default), one per question, read-only. They live in
+`presentation/controllers/`; the one worth knowing about before you read them is
+`deckListProvider(parentDeckId)`, which serves **both** levels of the recursive
+screen: the decks at that level with their aggregate counts **and** `nextDueAt`,
+the instant those counts expire. It is a `StreamNotifier` rather than a function
+provider because arming the due-boundary timer needs `listenSelf`, which is a
+notifier method. The others — move targets, deletion impact, search results —
+are function providers, and the difference is exactly that: a notifier only when
+something must happen *to* the stream.
 
 Every stream query carries `@Riverpod(retry: noAutomaticRetry)`. Riverpod 3
 otherwise retries a failed provider ten times with a backoff reaching 6.4s while
@@ -185,7 +198,10 @@ notifier would need one `isSubmitting` and one `failure` for six operations, so 
 failed rename would light up the delete button's error — and the file would grow
 a method per use case forever.
 
-**Input state** — `autoDispose`, one entry:
+**Input state** — `autoDispose`. Five of them now: the due-count clock below, and
+the list's filter, sort, summary-visibility and search-query choices. Each is a
+notifier holding **one** value with **one** mutator, which is what keeps it out
+of the command category; `command_query_separation_test.dart` counts that.
 
 - `deckListNowProvider` — a `DateTime`, the instant the due counts are measured
   against. Neither a query nor a mutation: a value the UI owns that a query is
@@ -193,7 +209,7 @@ a method per use case forever.
 
   - **app resume**, via `AppLifecycleListener` — the phone was in a pocket and
     hours passed while nothing was watching;
-  - **a due boundary being crossed with the screen open** — `RootDeckList` arms a
+  - **a due boundary being crossed with the screen open** — `DeckList` arms a
     single one-shot `Timer` for `nextDueAt`, which comes from the same statement as
     the counts. When it fires the clock moves, the query re-runs, and the next
     emission arms the next timer.
@@ -205,25 +221,37 @@ a method per use case forever.
   a periodic timer either — it is one wake scheduled from the data, so a screen
   with nothing due has no timer at all.
 
-No search or filter state exists yet. When one arrives it is widget state or its
-own small provider, never a field on a command controller.
+Search and filter arrived as exactly that shape — their own small providers,
+never a field on a command controller. A filter kept on a submit controller
+would be cleared by a failed submit, and the list would silently change what it
+was showing because a rename went wrong.
 
 ### The two properties that make this classification worth keeping
 
 **Nothing mixes roles, and it is structural rather than disciplined.** A query is a
 top-level function returning `Stream`/`Future` — it has no `state` setter, so it
 *cannot* mutate. A command is a `Notifier` holding only its submit state — it reads
-no query. Verified: the six write controllers reference exactly one provider between
-them, `deckRepositoryProvider`.
+no query. Verified: the six write controllers read **use-case providers only**,
+one each, and `deckRepositoryProvider` appears nowhere under `presentation/`
+except in `providers/deck_use_case_provider.dart`, which is dependency wiring and
+nothing else.
+
+That sentence used to say the opposite — that the write controllers referenced
+`deckRepositoryProvider` between them. It was true when it was written and the
+use-case layer superseded it; left standing, it described an AD-12 violation as
+though it were the design, in the one file the next feature is told to read
+first. Worth naming rather than quietly fixing: **a stale doc does not degrade
+into vagueness, it degrades into confident wrongness**, and this section is the
+one a cloner copies structure from.
 
 **Every dependency edge runs from a shorter-lived provider to a longer-lived one.**
 
 ```
-appDatabase ← deckRepository ← { 4 queries, 6 commands }      (keepAlive ← autoDispose)
-clock       ← deckListNow    ← rootDeckList                   (the one autoDispose ← autoDispose edge, one-way)
+appDatabase ← deckRepository ← use-case providers ← { queries, commands }
+clock       ← deckListNow    ← deckList                (the one autoDispose ← autoDispose edge, one-way)
 ```
 
-`rootDeckList` also *writes* to `deckListNow` when its timer fires — through
+`deckList` also *writes* to `deckListNow` when its timer fires — through
 `ref.read(...notifier).refresh()`, from a timer callback rather than from `build`.
 That is not an edge back up the graph: it is an imperative nudge, and the
 dependency direction is unchanged.
@@ -321,13 +349,24 @@ Read `feature_blueprint.md` first — it has the folder-layout rules the three
 enforcers actually accept, the footprint table of what a new feature touches
 outside its own folder, and the extractions that were tried and rejected.
 
-Two things people get wrong on the first clone:
+What people get wrong on the first clone:
 
+- **`domain/` and `data/` are bucketed too, not just `presentation/widgets/`.**
+  `domain/` is `entities/` · `repositories/` · `models/` · `usecases/` ·
+  `failures/`; `data/` is `repositories/` · `mappers/` · `datasources/` ·
+  `models/`. Nothing sits directly in `domain/` or `data/`, and an invented name
+  like `data/local/` is not a bucket. This is enforced now, and it was added
+  *because* it had already gone wrong: Card and Review were laid out flat, and
+  the suffix rules in `check_architecture.sh` select files by these exact path
+  fragments — so both features matched **zero** rules and passed every check by
+  being invisible to it, while the app-wide scope counters stayed green because
+  Deck alone satisfied them.
 - **The folder does not replace the suffix.** `domain/entities/deck_entity.dart`,
   not `domain/entities/deck.dart`. The role is carried by the file name, which
   `memox.naming.domain_file_role_suffix` enforces and which
   `check_architecture.sh` pairs with the folder it sits in.
-- **`data/models/` is the one empty folder, and the reason is not laziness.**
+- **`data/models/` is the only folder kept empty, and the reason is not
+  laziness.**
   Drift's generated row class *is* the data model and lives in `core/database/`
   because the schema is shared; a per-feature DTO would be a second shape for one
   row, and with no `dio` (AD-05) there is no wire format to model either.

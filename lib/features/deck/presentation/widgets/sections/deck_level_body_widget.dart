@@ -12,8 +12,15 @@ import '../../controllers/deck_search_controller.dart';
 import 'deck_level_error_widget.dart';
 import 'deck_search_results_widget.dart';
 
-/// Space under the last row so the floating action never covers it.
-const double _kListBottomInset = 56 + AppSpacing.lg + AppSpacing.xl;
+/// Space under the last result. The same value the list beside it uses — see
+/// `deck_list_screen.dart`.
+///
+/// It was `56 + lg + xl` here, to clear a floating action. M4.10ag deleted the
+/// floating action and corrected the list's copy of this constant to `lg`; this
+/// one was missed, so a search left 112px of empty space under its last row
+/// while the list below it left 24. Two constants of the same name in one
+/// feature is how that survived being read.
+const double _kListBottomInset = AppSpacing.lg;
 
 /// Either the level, or what a search of it found.
 ///
