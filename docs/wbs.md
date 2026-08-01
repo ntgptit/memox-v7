@@ -4366,6 +4366,75 @@ canonical, boundary test giữ hình dạng đầy đủ + anti-vacuous mức ap
 lưới thứ hai; `check_architecture.sh` cố ý đứng ngoài — nó sở hữu suffix, và
 một luật hai bản trong hai script là hai bản sẽ trôi khỏi nhau.
 
+**Next task: M4.10ao · Component theme lấy đúng typography, chip sở hữu đủ state.**
+
+### M4.10ao · Theme lấy đúng token, và bốn lỗ hổng enforcement được bịt
+
+- **Status:** done
+- **Goal:** Đóng năm phát hiện của vòng review theme: component theme dùng
+  `AppTypography`, `ChipThemeData` sở hữu mọi interaction state, parity CSS↔Dart
+  được tự động hoá, duration có guard thay cho rule đã tắt, và hai hệ audit
+  thôi đưa ra hai kết luận trái nhau.
+- **Scope:** `app_theme.dart` (build `texts` một lần, truyền vào 6 slot);
+  `app_chip_theme.dart` (viết lại quanh `ChipThemeData.color`);
+  `app_button_themes.dart` (`disabledSurfaceTint` nhận ground, đặt tên 5 alpha);
+  `app_overlay_themes.dart` (`kTooltipWaitDuration`);
+  rule `memox.design_token.no_raw_duration`; predicate dùng chung
+  `isTranslucentFillViolation`; `docs/architecture.md` + `IMPORT_LEDGER.md`
+  (progress/streak đã có counterpart Dart).
+- **Out of scope:** `chipTheme.iconTheme` vẫn là `onSurfaceVariant` ở mọi state
+  — `IconThemeData` trong `ChipThemeData` không resolve theo state được, và
+  icon của pill là trang trí; nếu muốn nó theo label thì phải đổi cách
+  `MxPillButton` dựng avatar, là quyết định riêng.
+- **Dependencies:** M4.10am
+- **Checklist phases:** 7, 12
+- **Tests required:** 5 file test mới; fault injection cho cả ba guard mới
+  (typography, duration, parity).
+- **Editable documents:** `docs/wbs.md`, `docs/architecture.md`,
+  `design_system/IMPORT_LEDGER.md`
+- **Output:** `test/design_audit/css_tokens.dart`,
+  `test/design_audit/color_rule_scope.dart`
+- **Acceptance criteria:**
+  - [x] 6 component theme resolve đúng rung của app; test tiêm lỗi bắt được cả
+        ở mức hành vi lẫn mức source.
+  - [x] Mọi tổ hợp state của chip resolve ra màu **đục**; disabled-selected
+        khác cả selected lẫn disabled; widget test đọc `Ink` để chứng minh
+        Material thật sự dùng theme.
+  - [x] Parity test parse CSS bắt được ba lớp lỗi: đổi giá trị, đổi màu, và
+        **thêm** token mới.
+  - [x] `no_raw_duration` bắt literal ẩn danh, tha named const — đã tiêm cả hai
+        chiều.
+  - [x] `violations.json` từ 1 xuống 0; V5 và R7 dùng chung một predicate.
+  - [x] 1107 test pass, `flutter analyze` 0 issue, guard 68 rule xanh.
+
+**Ba trong năm phát hiện có chung một hình dạng: luật đúng, nhưng không ai
+kiểm.** `ThemeData.textTheme` được build đúng và có test riêng — chỉ là component
+theme lấy `base.textTheme`, nên `labelLarge` của pill chạy weight 500 trong khi
+`Theme.of(context).textTheme.labelLarge` nói 600. Hai họ font trùng nhau, nên nó
+sống sót qua review. CSS được tuyên bố là nguồn chuẩn ở AD-05, nhưng test chép
+tay số nên sửa CSS xong mọi gate vẫn xanh. `flutter.no_hardcoded_duration` bị tắt
+có lý do, và không ai viết rule thay thế.
+
+**Chip là hình dạng còn lại: framework default vô hình với source scan** — đúng
+loại AD-05 rule 5 gọi tên. Khai báo `backgroundColor`/`selectedColor` mà không
+khai `color` để Material trả lời cho phần còn lại, và câu trả lời của nó là
+`onSurface` ở **alpha** 12% cho disabled (đúng thứ R7 tồn tại để cấm) cùng
+nguyên vẹn `secondaryContainer` cho disabled-selected — một pill không bấm được
+trông y hệt pill bấm được. Không dòng nào trong `lib/` nói hai điều đó.
+
+**Hai hệ audit cãi nhau thì báo cáo mất tác dụng, chứ không phải màu sai.** V5
+đánh dấu mọi `opacity-modified-token` ngoài shadow/scrim; R7 cố ý tha alpha cho
+label. Cùng một nhãn disabled vừa hợp lệ với gate vừa là violation trong report
+— và "sửa" nó theo report sẽ làm gate đỏ. Một violation không hành động được là
+cách một báo cáo ngừng được đọc. Nay cả hai đi qua `isTranslucentFillViolation`.
+
+**Một lệch parity thật lộ ra và cố ý không sửa:** `--color-disabled-surface` của
+kit là `#E3E3E6`/`#312E4E`, còn Dart dẫn xuất ra `#E0E0E5`/`#33324F`. Ledger đã
+ghi lý do giữ dẫn xuất — nó tự đi theo khi surface ladder đổi — nên test khoá
+bằng **dung sai 4 đơn vị** thay vì đẳng thức: đủ rộng cho khoảng chép tay, quá
+hẹp cho một token bị trỏ lại. Comment trong `app_button_themes.dart` ghi
+`#E3E3E6` là số đo cũ, đã sửa theo số đo lại.
+
 **Next task: M4.11 · Card management full-stack.**
 
 ### M4.11 · Card management full-stack

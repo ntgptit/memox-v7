@@ -173,11 +173,16 @@ ThemeData _buildTheme(
     fontFamily: AppTypography.bodyFamily,
   );
 
+  // **Built once, then handed to every slot below.** Component themes took
+  // Material's own scale off `base` until M4.12 — a pill label at weight 500
+  // where `labelLarge` says 600. See `component_theme_typography_test.dart`.
+  final texts = AppTypography.buildTextTheme(base.textTheme);
+
   return base.copyWith(
     // The page sits a step below the card, so a card reads as a card without
     // needing a shadow to say so.
     scaffoldBackgroundColor: background,
-    textTheme: AppTypography.buildTextTheme(base.textTheme),
+    textTheme: texts,
     extensions: <ThemeExtension<Object?>>[semantic],
 
     appBarTheme: AppBarTheme(
@@ -221,7 +226,7 @@ ThemeData _buildTheme(
     // No checkmark: the pill group is always visible in full, so the selected
     // one is legible by contrast alone and the tick would shift the label
     // sideways on every change.
-    chipTheme: buildChipTheme(scheme, semantic, base.textTheme),
+    chipTheme: buildChipTheme(scheme, semantic, texts),
 
     // The create action. `primary` rather than the M3 default
     // `primaryContainer`: this is the one control on the deck list that starts a
@@ -294,9 +299,7 @@ ThemeData _buildTheme(
           scheme.surface,
         ),
       ),
-      hintStyle: base.textTheme.bodyMedium?.copyWith(
-        color: scheme.onSurfaceVariant,
-      ),
+      hintStyle: texts.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
     ),
 
     // Four component themes added in M4.8, one per shared component that
@@ -327,7 +330,7 @@ ThemeData _buildTheme(
     ),
 
     progressIndicatorTheme: buildProgressIndicatorTheme(scheme, semantic),
-    tooltipTheme: buildTooltipTheme(scheme, base.textTheme),
+    tooltipTheme: buildTooltipTheme(scheme, texts),
     textSelectionTheme: buildTextSelectionTheme(scheme, semantic),
     dividerTheme: buildDividerTheme(semantic),
     scrollbarTheme: buildScrollbarTheme(scheme),
@@ -358,10 +361,8 @@ ThemeData _buildTheme(
         borderRadius: BorderRadius.circular(AppRadius.lg),
         side: BorderSide(color: semantic.borderSubtle),
       ),
-      titleTextStyle: base.textTheme.titleMedium?.copyWith(
-        color: scheme.onSurface,
-      ),
-      contentTextStyle: base.textTheme.bodyMedium?.copyWith(
+      titleTextStyle: texts.titleMedium?.copyWith(color: scheme.onSurface),
+      contentTextStyle: texts.bodyMedium?.copyWith(
         color: scheme.onSurfaceVariant,
       ),
     ),
@@ -380,7 +381,7 @@ ThemeData _buildTheme(
 
     snackBarTheme: SnackBarThemeData(
       backgroundColor: scheme.inverseSurface,
-      contentTextStyle: base.textTheme.bodyMedium?.copyWith(
+      contentTextStyle: texts.bodyMedium?.copyWith(
         color: scheme.onInverseSurface,
       ),
       behavior: SnackBarBehavior.floating,

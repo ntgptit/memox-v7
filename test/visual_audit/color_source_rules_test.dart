@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
+import '../design_audit/color_rule_scope.dart';
 import '../design_audit/color_usage_scan.dart';
 
 /// **MX-VIS-002, source half** — what `lib/` is allowed to write.
@@ -89,21 +90,13 @@ void main() {
     // over a sheet — and neither is the one anybody chose. The model asks for
     // `Color.alphaBlend(...)` resolved at build time.
     //
-    // **Scoped to fill and border on purpose.** `overlayColor` must be
-    // translucent: a ripple that is opaque hides the label it washes over.
-    // Foreground and label colours are left out too — alpha on disabled text is
-    // the Material idiom and the ground under a label is always its own surface,
-    // so nothing is unresolved there.
+    // **Scoped to fill and border on purpose**, and that scope now lives in
+    // `isTranslucentFillViolation` rather than in this expression, because the
+    // audit generator asked the same question and answered it differently. See
+    // that function for the whole argument, and
+    // `color_system_agreement_test.dart` for what stops them parting again.
     final offenders = scanLib()
-        .where((ColorSite site) => site.sourceKind == 'opacity-modified-token')
-        .where(
-          (ColorSite site) =>
-              site.elementKind == 'border' || site.elementKind == 'background',
-        )
-        // A shadow and a scrim are washes over whatever is behind them; there
-        // is no ground to blend against. `elementKind` already separates them,
-        // so this is belt and braces against a slot being reclassified.
-        .where((ColorSite site) => !site.file.endsWith('app_elevation.dart'))
+        .where(isTranslucentFillViolation)
         .map((ColorSite site) => '${site.file}:${site.line} ${site.expression}')
         .toList();
 

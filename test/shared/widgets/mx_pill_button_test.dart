@@ -15,11 +15,10 @@ void main() {
     WidgetTester tester,
     Widget pill, {
     double textScale = 1,
-    bool isDark = false,
   }) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: isDark ? buildDarkTheme() : buildLightTheme(),
+        theme: buildLightTheme(),
         home: Scaffold(
           body: MediaQuery(
             data: MediaQueryData(textScaler: TextScaler.linear(textScale)),
@@ -191,43 +190,6 @@ void main() {
 
       expect(find.text('Due only'), findsOneWidget);
       expect(find.byIcon(Icons.filter_list), findsOneWidget);
-    });
-  });
-
-  group('theming', () {
-    testWidgets('selected and unselected differ in both themes', (
-      tester,
-    ) async {
-      // The pill carries "which one is active" by fill alone, so the two fills
-      // have to actually differ — in dark as well as light, where a scheme that
-      // collapsed them would be invisible rather than merely subtle.
-      for (final isDark in <bool>[false, true]) {
-        await pump(
-          tester,
-          MxPillButton(label: 'A-Z', isSelected: false, onPressed: () {}),
-          isDark: isDark,
-        );
-        final unselected = tester.widget<ChoiceChip>(find.byType(ChoiceChip));
-
-        await pump(
-          tester,
-          MxPillButton(label: 'A-Z', isSelected: true, onPressed: () {}),
-          isDark: isDark,
-        );
-        final selected = tester.widget<ChoiceChip>(find.byType(ChoiceChip));
-
-        expect(unselected.selected, isFalse);
-        expect(selected.selected, isTrue);
-
-        final theme = isDark ? buildDarkTheme() : buildLightTheme();
-        expect(
-          theme.chipTheme.selectedColor,
-          isNot(theme.chipTheme.backgroundColor),
-          reason:
-              'the two states are indistinguishable in '
-              '${isDark ? 'dark' : 'light'}',
-        );
-      }
     });
   });
 }

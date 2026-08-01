@@ -1,9 +1,9 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
   "scannedFiles": 130,
-  "totalSites": 302,
+  "totalSites": 304,
   "byElementKind": {
-    "other": 250,
+    "other": 252,
     "background": 9,
     "text": 23,
     "shadow": 1,
@@ -12,8 +12,8 @@
   },
   "bySourceKind": {
     "shared-constant": 137,
-    "blend-source": 3,
-    "opacity-modified-token": 10,
+    "blend-source": 4,
+    "opacity-modified-token": 11,
     "hardcoded-literal": 91,
     "Colors-material": 4,
     "theme-token": 57
@@ -98,69 +98,91 @@
     },
     {
       "file": "lib/core/theme/app_button_themes.dart",
-      "line": 38,
+      "line": 45,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "blend-source",
-      "expression": "scheme.onSurface.withValues(alpha: 0.12)",
+      "expression": "scheme.onSurface.withValues(alpha: kDisabledTintAlpha)",
       "token": "colorScheme.onSurface",
       "resolved_value_light": "#16182B",
       "resolved_value_dark": "#EDEDF6"
     },
     {
       "file": "lib/core/theme/app_button_themes.dart",
-      "line": 54,
+      "line": 87,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
-      "expression": "scheme.primary.withValues(alpha: 0.12)",
+      "expression": "scheme.primary.withValues(alpha: kPressedOverlayAlpha)",
       "token": "colorScheme.primary",
-      "resolved_value_light": "#4646B4 @ alpha 0.12",
-      "resolved_value_dark": "#5656C9 @ alpha 0.12"
+      "resolved_value_light": "#4646B4 @ alpha unresolvable",
+      "resolved_value_dark": "#5656C9 @ alpha unresolvable"
     },
     {
       "file": "lib/core/theme/app_button_themes.dart",
-      "line": 57,
+      "line": 90,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
-      "expression": "scheme.primary.withValues(alpha: 0.10)",
+      "expression": "scheme.primary.withValues(alpha: kFocusedOverlayAlpha)",
       "token": "colorScheme.primary",
-      "resolved_value_light": "#4646B4 @ alpha 0.10",
-      "resolved_value_dark": "#5656C9 @ alpha 0.10"
+      "resolved_value_light": "#4646B4 @ alpha unresolvable",
+      "resolved_value_dark": "#5656C9 @ alpha unresolvable"
     },
     {
       "file": "lib/core/theme/app_button_themes.dart",
-      "line": 67,
+      "line": 100,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
-      "expression": "scheme.primary.withValues(alpha: 0.06)",
+      "expression": "scheme.primary.withValues(alpha: kHoveredOverlayAlpha)",
       "token": "colorScheme.primary",
-      "resolved_value_light": "#4646B4 @ alpha 0.06",
-      "resolved_value_dark": "#5656C9 @ alpha 0.06"
+      "resolved_value_light": "#4646B4 @ alpha unresolvable",
+      "resolved_value_dark": "#5656C9 @ alpha unresolvable"
     },
     {
       "file": "lib/core/theme/app_button_themes.dart",
-      "line": 93,
+      "line": 126,
       "widget_context": "<top-level>",
       "element_kind": "text",
       "source_kind": "opacity-modified-token",
-      "expression": "scheme.onSurface.withValues(alpha: 0.38)",
+      "expression": "scheme.onSurface.withValues(alpha: kDisabledForegroundAlpha)",
       "token": "colorScheme.onSurface",
-      "resolved_value_light": "#16182B @ alpha 0.38",
-      "resolved_value_dark": "#EDEDF6 @ alpha 0.38"
+      "resolved_value_light": "#16182B @ alpha unresolvable",
+      "resolved_value_dark": "#EDEDF6 @ alpha unresolvable"
     },
     {
       "file": "lib/core/theme/app_button_themes.dart",
-      "line": 110,
+      "line": 143,
       "widget_context": "<top-level>",
       "element_kind": "text",
       "source_kind": "opacity-modified-token",
-      "expression": "scheme.onSurface.withValues(alpha: 0.38)",
+      "expression": "scheme.onSurface.withValues(alpha: kDisabledForegroundAlpha)",
       "token": "colorScheme.onSurface",
-      "resolved_value_light": "#16182B @ alpha 0.38",
-      "resolved_value_dark": "#EDEDF6 @ alpha 0.38"
+      "resolved_value_light": "#16182B @ alpha unresolvable",
+      "resolved_value_dark": "#EDEDF6 @ alpha unresolvable"
+    },
+    {
+      "file": "lib/core/theme/app_chip_theme.dart",
+      "line": 73,
+      "widget_context": "<top-level>",
+      "element_kind": "other",
+      "source_kind": "blend-source",
+      "expression": "tint.withValues(alpha: alpha)",
+      "token": null,
+      "resolved_value_light": "unresolvable: value depends on runtime state",
+      "resolved_value_dark": "unresolvable: value depends on runtime state"
+    },
+    {
+      "file": "lib/core/theme/app_chip_theme.dart",
+      "line": 84,
+      "widget_context": "<top-level>",
+      "element_kind": "other",
+      "source_kind": "opacity-modified-token",
+      "expression": "scheme.onSurface.withValues(alpha: kDisabledForegroundAlpha)",
+      "token": "colorScheme.onSurface",
+      "resolved_value_light": "#16182B @ alpha unresolvable",
+      "resolved_value_dark": "#EDEDF6 @ alpha unresolvable"
     },
     {
       "file": "lib/core/theme/app_colors.dart",
@@ -1198,7 +1220,7 @@
     },
     {
       "file": "lib/core/theme/app_overlay_themes.dart",
-      "line": 94,
+      "line": 112,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
@@ -1209,7 +1231,7 @@
     },
     {
       "file": "lib/core/theme/app_overlay_themes.dart",
-      "line": 113,
+      "line": 131,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "opacity-modified-token",
@@ -2650,7 +2672,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 201,
+      "line": 206,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -2661,7 +2683,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 293,
+      "line": 298,
       "widget_context": "<top-level>",
       "element_kind": "border",
       "source_kind": "blend-source",
@@ -2672,7 +2694,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 353,
+      "line": 356,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
@@ -2683,7 +2705,7 @@
     },
     {
       "file": "lib/core/theme/app_theme.dart",
-      "line": 372,
+      "line": 373,
       "widget_context": "<top-level>",
       "element_kind": "background",
       "source_kind": "Colors-material",
