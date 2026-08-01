@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:memox/app/app.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/l10n/generated/app_localizations.dart';
 import 'package:widgetbook/widgetbook.dart';
@@ -98,6 +99,16 @@ class MemoxWidgetbook extends StatelessWidget {
           Viewports.none,
         ]),
         InspectorAddon(),
+        // Last on purpose — the addon list nests first→outermost, so this one
+        // sits inside both the theme addon's `Theme` and the viewport addon's
+        // simulated `MediaQuery`. That is what lets the 320 viewport exercise
+        // the same compact clauses the app applies at runtime; without it the
+        // catalog rendered the roomy theme at every width, and a compact
+        // regression could not be caught here.
+        BuilderAddon(
+          name: 'Compact scale',
+          builder: (context, child) => CompactScaleWidget(child: child),
+        ),
       ],
       directories: <WidgetbookNode>[
         WidgetbookCategory(

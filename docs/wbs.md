@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M4.10an |
+| **Updated by task** | M4.10aq |
 | **Last updated** | 2026-08-02 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -4612,6 +4612,78 @@ thế, nên thư mục theme không cần miễn trừ nào — trong khi nó l�
 `Duration(milliseconds: 500)`. Repo đã gặp đúng lỗi này một lần (R8 khớp chữ
 `platformBrightness` còn sót trong comment giải thích nó). Lookahead nay bỏ qua
 dòng bắt đầu bằng `//` hoặc `*`.
+
+**Next task: M4.10aq · Audit slot ThemeData theo chuẩn hiện đại.**
+
+### M4.10aq · ThemeData slot audit — bịt slot thiếu, dọn slot mồ côi
+
+- **Status:** done
+- **Goal:** Mọi slot component theme có renderer đang chạy đều được khai báo,
+  slot sống lâu hơn renderer của nó bị gỡ, và các knob toàn cục quyết định
+  geometry được pin thay vì rơi về default theo platform.
+- **Scope:** `textButtonTheme` (`buildTextButtonTheme` + `textLinkForeground`
+  trong `app_button_themes.dart`, hấp thụ style inline của `MxTextButton`);
+  `app_radio_theme.dart` mới (`RadioListTile` của deck form vốn render hoàn
+  toàn theo default Material); `iconTheme`; `visualDensity: standard` +
+  `materialTapTargetSize: padded`; bốn wash fall-through
+  (`hoverColor`/`focusColor`/`highlightColor`/`splashColor`) mang alpha của
+  `AppStateOpacity`; hai blend `textHoverBlend`/`textPressedBlend` về
+  `AppStateOpacity`; gỡ `floatingActionButtonTheme` (FAB đã bỏ ở M4.10ag) và
+  `useMaterial3` (default từ 3.16); gỡ clause compact của textButton (link
+  zero-padding không có padding để thu); `MxNavigationBar` thôi khai
+  `labelBehavior` lần hai; `MxActionSheet` đọc `onDisabled` thay hằng 0.38
+  riêng; widgetbook thêm `BuilderAddon` bọc `CompactScaleWidget` để viewport
+  320 của catalog chạy đúng compact scale.
+- **Out of scope:** slot không có renderer và không nằm trong lộ trình
+  (elevated/segmented/switch/checkbox/slider/tab/menu/search/badge/banner/
+  datePicker/timePicker/dataTable…); ThemeExtension per-component; đổi
+  `listTileTheme.selectedColor`; panel geometry trùng lặp ở 3 widget deck
+  (việc tầng component, không phải tầng theme); `.mx-shell__fab` phía kit.
+- **Dependencies:** M4.10ap
+- **Checklist phases:** 7, 12, 13
+- **Tests required:** state resolution của text link và radio ở cả hai mode;
+  sàn tương phản cho nhãn link (4.5:1) và mark radio (3:1); compact scale
+  **không** đụng `textButtonTheme`; `labelBehavior` đo hành vi hiệu dụng.
+- **Editable documents:** `docs/wbs.md`, `docs/reviews/design-parity-checklist.md`
+- **Output:** `lib/core/theme/app_radio_theme.dart` ·
+  `lib/core/theme/app_input_theme.dart` (input family tách khỏi
+  `app_theme.dart` khi file chạm guard 400 dòng — cùng seam với button/chip/
+  overlay)
+- **Acceptance criteria:**
+  - [x] `textButtonTheme` giữ nguyên từng giá trị `MxTextButton` từng render —
+        golden của nó **zero-diff**, đó là bằng chứng migration trung thực.
+  - [x] Radio khai đủ selected / resting / disabled / hover / press / focus ở
+        cả hai mode; mark selected là `primaryAccent` vì `primary` đo 2.90:1
+        trên card dark, dưới ngưỡng 3:1 của WCAG 1.4.11.
+  - [x] Widget test đo hành vi hiệu dụng (`widget ?? theme`) thay vì thuộc
+        tính widget, nên một quyết định chỉ còn một chỗ khai.
+  - [x] Toàn bộ test pass; analyze 0 issue; 2 golden action-sheet đổi có chủ ý
+        (hằng 0.38 → token `0x61`, lệch 1 nấc kênh màu); parity checklist thêm
+        B14/B15/E13 và Round 3.
+
+**Điều tra trước khi làm** (chuẩn ngoài: `ThemeData` stable có 48 slot; flex
+color scheme theme 40 — nhưng đó là package tổng quát): app đã khai 24 slot,
+đủ Tier 1 trừ đúng `textButtonTheme`. Kết luận giữ nguyên luật của repo —
+*chỉ theme cái gì đang render* — thay vì chạy theo con số 40; hai lỗ hổng
+thật là slot có renderer mà không khai (textButton, radio), và một slot khai
+mà không còn renderer (FAB). `cardTheme` giữ lại có chủ ý làm lưới an toàn
+cho `Card` trần/3rd-party, đổi doc thay vì xoá.
+
+**Hai knob geometry là bug parity E2E thật:** default theo platform cho trình
+duyệt desktop `compact` density và `shrinkWrap` tap target, nghĩa là Playwright
+đo một geometry mà Android không bao giờ render. Pin `standard`/`padded` là
+khai báo giá trị Android đang dùng, không phải đổi hành vi release.
+
+**Một quyết định cần người dùng và đã hỏi:** giữ ripple M3 trên Android thay
+vì `NoSplash` toàn cục theo kit — ghi thành divergence #5 (E13) với
+counter-argument của kit giữ nguyên trong checklist; `splashColor` giờ mang
+màu wash của kit nên ripple loang đúng alpha 12% của `primary`.
+
+**Cùng lập luận với M4.10ap, ở một control khác.** Task trước chuyển focus
+ring khỏi `primary` vì nó đo 2.90:1 trên `surface` ở dark; mark của radio là
+đúng loại đối tượng đó — một glyph trên nền trần, không phải một mảng fill —
+nên nó nhận `primaryAccent` chứ không phải `primary`, và con số hỏng là cùng
+một con số.
 
 **Next task: M4.11 · Card management full-stack.**
 

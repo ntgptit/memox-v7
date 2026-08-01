@@ -101,6 +101,57 @@ void main() {
       }
     });
 
+    test('the text link is readable at rest on page AND on card', () {
+      // The link's label is bare text with no fill behind it, so it must clear
+      // the body-text bar rather than the 3:1 UI bar. This is the reason the
+      // accent token exists: `primary` measures 3.33:1 as bare text on the
+      // dark page. Read from the theme slot, not from the token, so the test
+      // holds whichever colour the slot is ever rewired to.
+      for (final entry in themes.entries) {
+        final label = entry.value.textButtonTheme.style!.foregroundColor!
+            .resolve(const <WidgetState>{})!;
+
+        for (final ground in <(String, Color)>[
+          ('card', entry.value.colorScheme.surface),
+          ('page', entry.value.scaffoldBackgroundColor),
+        ]) {
+          expect(
+            contrast(label, ground.$2),
+            greaterThanOrEqualTo(4.5),
+            reason: '${entry.key}: text link on ${ground.$1}',
+          );
+        }
+      }
+    });
+
+    test('the radio mark is visible in both of its states', () {
+      // WCAG 1.4.11 asks 3:1 of a UI component's visual information. Both
+      // states matter: an invisible resting ring makes the unchosen options
+      // look like plain rows, and the picker stops reading as a choice.
+      for (final entry in themes.entries) {
+        final fill = entry.value.radioTheme.fillColor!;
+
+        for (final state in <(String, Color)>[
+          (
+            'selected',
+            fill.resolve(const <WidgetState>{WidgetState.selected})!,
+          ),
+          ('resting', fill.resolve(const <WidgetState>{})!),
+        ]) {
+          for (final ground in <(String, Color)>[
+            ('card', entry.value.colorScheme.surface),
+            ('page', entry.value.scaffoldBackgroundColor),
+          ]) {
+            expect(
+              contrast(state.$2, ground.$2),
+              greaterThanOrEqualTo(3.0),
+              reason: '${entry.key}: ${state.$1} radio on ${ground.$1}',
+            );
+          }
+        }
+      }
+    });
+
     test('semantic colours stay legible on card and page', () {
       for (final entry in themes.entries) {
         final semantic = entry.value.extension<AppSemanticColors>()!;

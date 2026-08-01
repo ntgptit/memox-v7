@@ -92,12 +92,18 @@ void main() {
       tester,
     ) async {
       // The M3 default hides unselected labels, which leaves selection readable
-      // as a colour difference and one floating word.
+      // as a colour difference and one floating word. The decision lives in
+      // `navigationBarTheme` — one spelling — so the widget passes nothing and
+      // the *effective* behaviour is what must hold, resolved the same way
+      // `NavigationBar` resolves it.
       await pumpBar(tester);
 
       final bar = tester.widget<NavigationBar>(find.byType(NavigationBar));
+      final context = tester.element(find.byType(NavigationBar));
+      final effective =
+          bar.labelBehavior ?? NavigationBarTheme.of(context).labelBehavior;
 
-      expect(bar.labelBehavior, NavigationDestinationLabelBehavior.alwaysShow);
+      expect(effective, NavigationDestinationLabelBehavior.alwaysShow);
     });
   });
 

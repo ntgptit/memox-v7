@@ -122,10 +122,7 @@ class _SheetRow extends StatelessWidget {
     // Disabled wins over destructive: a greyed row that is still red reads as
     // available and dangerous, which is the worst of both.
     final color = !action.isEnabled
-        ? Color.alphaBlend(
-            context.colors.onSurface.withValues(alpha: _disabledOpacity),
-            context.colors.surface,
-          )
+        ? context.semanticColors.onDisabled
         : isDestructive
         ? context.semanticColors.danger
         : context.colors.onSurface;
@@ -159,6 +156,3 @@ class _SheetRow extends StatelessWidget {
     );
   }
 }
-
-/// Material's own disabled opacity for content on a surface.
-const double _disabledOpacity = 0.38;

@@ -104,15 +104,13 @@ class MxNavigationBar extends StatelessWidget {
             constraints: BoxConstraints(
               maxWidth: destinations.length * widthPerNavigationDestination,
             ),
+            // `labelBehavior` deliberately not set here: `navigationBarTheme`
+            // owns it, and a second spelling of the same decision is how the
+            // two drift apart.
             child: NavigationBar(
               selectedIndex: selectedIndex,
               onDestinationSelected: onDestinationSelected,
               destinations: destinations,
-              // Labels always visible, on every destination. The M3 default hides
-              // the unselected ones, which leaves three unlabelled icons and one
-              // labelled — and makes selection readable only as a colour
-              // difference, which is exactly what an accessibility review rejects.
-              labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
             ),
           ),
         ],

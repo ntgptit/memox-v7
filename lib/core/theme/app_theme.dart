@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 
 import 'app_button_themes.dart';
 import 'app_chip_theme.dart';
+import 'app_icon_size.dart';
+import 'app_input_theme.dart';
 import 'app_interaction_states.dart';
 import 'app_overlay_themes.dart';
 import 'app_colors.dart';
+import 'app_radio_theme.dart';
 import 'app_radius.dart';
 import 'app_semantic_colors.dart';
 import 'app_spacing.dart';
-import 'app_stroke.dart';
 import 'app_typography.dart';
 
 /// Material 3 themes for the app.
@@ -18,11 +20,13 @@ import 'app_typography.dart';
 /// IconButton, ListTile, Dialog and BottomSheet added in M4.8 when the Mx
 /// shared components gave them callers.
 ///
-/// Chip and FloatingActionButton joined them in M4.12: the deck list's filter and
-/// sort pills render a `ChoiceChip` through `MxPillButton`, and its create action
-/// renders a FAB. Until then both would have been decisions made without a screen
-/// to check them against — which is the rule this list follows, not an oversight
-/// that was finally corrected.
+/// Chip joined in M4.12 — the deck list's filter and sort pills render a
+/// `ChoiceChip` through `MxPillButton`. The FloatingActionButton theme left
+/// with the FAB itself when M4.10ag moved the create action into the app bar;
+/// TextButton and Radio joined when `MxTextButton` and the deck form's
+/// scheduler picker gave them callers. A theme for a component nobody renders
+/// is a decision made without a screen to check it against — which is the rule
+/// this list follows, in both directions.
 ThemeData buildLightTheme() => _buildTheme(
   ColorScheme.fromSeed(seedColor: AppColors.seed).copyWith(
     // Every role is declared. `fromSeed` had been generating a neutral-grey
@@ -169,7 +173,14 @@ ThemeData _buildTheme(
 }) {
   final base = ThemeData(
     colorScheme: scheme,
-    useMaterial3: true,
+    // Pinned, not platform-adaptive. Android is the release target, but the
+    // web build is the E2E channel (AD-04) — and Flutter's platform defaults
+    // hand a desktop browser `compact` density and `shrinkWrap` tap targets,
+    // so every Playwright measurement would be taken on geometry Android never
+    // renders. `standard` and `padded` are Android's own values, declared so
+    // the two channels cannot drift apart.
+    visualDensity: VisualDensity.standard,
+    materialTapTargetSize: MaterialTapTargetSize.padded,
     // Anything that builds its own TextStyle without going through the text
     // theme still lands on the body face rather than the platform default.
     fontFamily: AppTypography.bodyFamily,
@@ -186,6 +197,30 @@ ThemeData _buildTheme(
     scaffoldBackgroundColor: background,
     textTheme: texts,
     extensions: <ThemeExtension<Object?>>[semantic],
+
+    // The framework fall-through, seeded. Anything not themed below — a bare
+    // `InkWell`, a third-party widget — resolves its washes from these four,
+    // and Material's own values are hardcoded black-and-white with no seed in
+    // them, identical in light and dark (see `AppStateOpacity`'s file
+    // comment). The hues and alphas are the ones `AppInteractionStates`
+    // resolves, so an untended control degrades to the house washes rather
+    // than to a foreign system. Translucent deliberately: these paint over
+    // grounds this file cannot know, which is R7's overlay exemption.
+    hoverColor: scheme.onSurfaceVariant.withValues(
+      alpha: AppStateOpacity.hoverRow,
+    ),
+    focusColor: scheme.primary.withValues(alpha: AppStateOpacity.focus),
+    highlightColor: scheme.primary.withValues(alpha: AppStateOpacity.pressed),
+    splashColor: scheme.primary.withValues(alpha: AppStateOpacity.pressed),
+
+    // A bare `Icon` outside every themed component. Material's fallback is a
+    // hardcoded black87/white pair, not even `onSurface`; declaring the
+    // secondary ink at the standard glyph size means an icon nobody styled
+    // degrades on-brand — the same colour every quiet glyph in the app wears.
+    iconTheme: IconThemeData(
+      color: scheme.onSurfaceVariant,
+      size: AppIconSize.md,
+    ),
 
     appBarTheme: AppBarTheme(
       backgroundColor: background,
@@ -207,9 +242,18 @@ ThemeData _buildTheme(
       indicatorColor: scheme.secondaryContainer,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
+      // Labels always visible, on every destination. The M3 default hides the
+      // unselected ones, which leaves unlabelled icons whose selection is
+      // readable only as a colour difference — exactly what an accessibility
+      // review rejects.
       labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
     ),
 
+    // The safety net for a bare or third-party `Card` — no app widget renders
+    // one. `MxCard` is the canonical card and paints itself, because its
+    // focus-ring border swap and `shadowsFor` depth have no `CardThemeData`
+    // slot; this keeps an untended `Card` on the same surface, radius and
+    // hairline instead of Material's elevated default.
     cardTheme: CardThemeData(
       color: scheme.surface,
       elevation: 0,
@@ -230,32 +274,6 @@ ThemeData _buildTheme(
     // sideways on every change.
     chipTheme: buildChipTheme(scheme, semantic, texts),
 
-    // The create action. `primary` rather than the M3 default
-    // `primaryContainer`: this is the one control on the deck list that starts a
-    // flow, and it sits over scrolling content where a low-contrast fill would
-    // disappear against a card passing underneath.
-    //
-    // **A rounded square, not a circle.** `CircleBorder` was Material 2's shape;
-    // M3's is a 16dp rounded square, and it is what the design draws. A circle
-    // beside a 16-radius card reads as a control from a different system.
-    //
-    // **Shape only, and the missing shadow is deliberate.** AD-14 makes depth one
-    // mechanism — `shadowsFor` — and Material's `elevation` is a second one that
-    // is not mode-aware and that no audit rule can see. See F11 and F15 in
-    // `docs/reviews/design-parity-checklist.md`, and `MxCard` for the same
-    // decision on panels.
-    floatingActionButtonTheme: FloatingActionButtonThemeData(
-      backgroundColor: scheme.primary,
-      foregroundColor: scheme.onPrimary,
-      elevation: 0,
-      focusElevation: 0,
-      hoverElevation: 0,
-      highlightElevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-      ),
-    ),
-
     filledButtonTheme: buildFilledButtonTheme(
       scheme,
       semantic,
@@ -269,36 +287,9 @@ ThemeData _buildTheme(
       outlineLabel: outlineLabel,
     ),
 
-    // Focus changes the border's COLOUR, not its weight. Material's default
-    // goes 1px -> 2px on focus, which makes the field jump and nudges anything
-    // laid out beside it; keeping the stroke at `AppStroke.input` in every state
-    // and moving the hue to `focusRing` is the difference between a field
-    // answering and a field shouting.
-    inputDecorationTheme: InputDecorationTheme(
-      // Outlined, not filled. A fill makes the field a block that competes with
-      // the cards around it; the reference defines the field with a stroke alone
-      // and lets the page show through, so the field reads as an opening rather
-      // than an object, and sits correctly on page or card with no override.
-      filled: false,
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.md,
-      ),
-      border: _inputBorder(semantic.borderSubtle),
-      enabledBorder: _inputBorder(semantic.borderSubtle),
-      focusedBorder: _inputBorder(semantic.focusRing),
-      errorBorder: _inputBorder(semantic.danger),
-      focusedErrorBorder: _inputBorder(semantic.danger),
-      // Solid, per MX-VIS-002 rule R7. Blended here rather than read from
-      // `disabledSurface`: this is the *hairline* faded, that is the *ink*.
-      disabledBorder: _inputBorder(
-        Color.alphaBlend(
-          semantic.borderSubtle.withValues(alpha: 0.5),
-          scheme.surface,
-        ),
-      ),
-      hintStyle: texts.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
-    ),
+    textButtonTheme: buildTextButtonTheme(scheme, semantic),
+
+    inputDecorationTheme: buildInputDecorationTheme(scheme, semantic, texts),
 
     // Four component themes added in M4.8, one per shared component that
     // renders through them — a theme for one nobody builds is a decision made
@@ -335,6 +326,7 @@ ThemeData _buildTheme(
     textSelectionTheme: buildTextSelectionTheme(scheme, semantic),
     dividerTheme: buildDividerTheme(semantic),
     scrollbarTheme: buildScrollbarTheme(scheme),
+    radioTheme: buildRadioTheme(scheme, semantic),
 
     listTileTheme: ListTileThemeData(
       contentPadding: const EdgeInsets.symmetric(
@@ -392,9 +384,3 @@ ThemeData _buildTheme(
     ),
   );
 }
-
-/// Same geometry and the same stroke in every state — only the colour speaks.
-OutlineInputBorder _inputBorder(Color color) => OutlineInputBorder(
-  borderRadius: BorderRadius.circular(AppRadius.md),
-  borderSide: BorderSide(color: color, width: AppStroke.input),
-);

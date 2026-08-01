@@ -188,6 +188,21 @@ void main() {
   });
 
   group('what the compact scale must never change', () {
+    testWidgets('the text link keeps its zero padding', (tester) async {
+      // The link has no horizontal padding to give back, and handing it the
+      // buttons' compact padding would indent the one control whose whole
+      // point is sitting flush with the column.
+      final compact = await themeAt(tester, small);
+      final roomy = await themeAt(tester, normal);
+
+      for (final theme in <ThemeData>[compact, roomy]) {
+        expect(
+          theme.textButtonTheme.style!.padding!.resolve(const <WidgetState>{}),
+          EdgeInsets.zero,
+        );
+      }
+    });
+
     testWidgets('readable text keeps its size', (tester) async {
       // The line this whole feature is drawn along. Scaling body and label text
       // by device width silently undoes `MediaQuery.textScaler` — the user's own

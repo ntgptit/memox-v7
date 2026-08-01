@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/app_button_themes.dart';
 import 'package:memox/core/theme/app_interaction_states.dart';
 import 'package:memox/core/theme/app_overlay_themes.dart';
 import 'package:memox/core/theme/app_semantic_colors.dart';
+import 'package:memox/core/theme/app_spacing.dart';
 import 'package:memox/core/theme/app_stroke.dart';
 import 'package:memox/core/theme/app_theme.dart';
 
@@ -132,6 +134,142 @@ void main() {
         expect(
           entry.value.iconButtonTheme.style!.foregroundColor!.resolve(disabled),
           semantic.onDisabled,
+        );
+      }
+    });
+  });
+
+  group('the text button', () {
+    test('hover and press blend the label toward the ink', () {
+      for (final entry in themes.entries) {
+        final semantic = entry.value.extension<AppSemanticColors>()!;
+        final foreground = entry.value.textButtonTheme.style!.foregroundColor!;
+        final rest = foreground.resolve(resting);
+
+        expect(rest, semantic.primaryAccent, reason: entry.key);
+        expect(
+          foreground.resolve(hovered),
+          isNot(rest),
+          reason: '${entry.key}: hover is invisible on the label',
+        );
+        expect(
+          foreground.resolve(pressed),
+          isNot(rest),
+          reason: '${entry.key}: press does not deepen',
+        );
+        expect(
+          foreground.resolve(pressed),
+          isNot(foreground.resolve(hovered)),
+          reason: '${entry.key}: press and hover are the same colour',
+        );
+        expect(
+          foreground.resolve(disabled),
+          semantic.onDisabled,
+          reason: entry.key,
+        );
+      }
+    });
+
+    test('the icon rides the label through every state', () {
+      // A glyph that keeps the resting colour while the label blends makes the
+      // two halves of one control disagree about what state it is in.
+      for (final entry in themes.entries) {
+        final style = entry.value.textButtonTheme.style!;
+
+        for (final states in <Set<WidgetState>>[
+          resting,
+          hovered,
+          pressed,
+          disabled,
+        ]) {
+          expect(
+            style.iconColor!.resolve(states),
+            style.foregroundColor!.resolve(states),
+            reason: entry.key,
+          );
+        }
+      }
+    });
+
+    test('the link paints no overlay and keeps the floor as height', () {
+      for (final entry in themes.entries) {
+        final style = entry.value.textButtonTheme.style!;
+
+        expect(
+          style.overlayColor!.resolve(hovered),
+          Colors.transparent,
+          reason:
+              '${entry.key}: the states live on the text, not on a wash '
+              'painted behind it',
+        );
+        expect(style.padding!.resolve(resting), EdgeInsets.zero);
+        expect(
+          style.minimumSize!.resolve(resting),
+          const Size(0, AppSpacing.minimumTouchTarget),
+          reason: '${entry.key}: flush width, floor height',
+        );
+      }
+    });
+
+    test('destructive is the same resolver with danger as its accent', () {
+      for (final entry in themes.entries) {
+        final semantic = entry.value.extension<AppSemanticColors>()!;
+        final foreground = textLinkForeground(
+          entry.value.colorScheme,
+          semantic,
+          accent: semantic.danger,
+        );
+
+        expect(foreground.resolve(resting), semantic.danger, reason: entry.key);
+        expect(
+          foreground.resolve(disabled),
+          semantic.onDisabled,
+          reason: '${entry.key}: disabled wins over destructive',
+        );
+      }
+    });
+  });
+
+  group('the radio', () {
+    const selected = <WidgetState>{WidgetState.selected};
+
+    test('selected, resting and disabled each declare their fill', () {
+      for (final entry in themes.entries) {
+        final semantic = entry.value.extension<AppSemanticColors>()!;
+        final fill = entry.value.radioTheme.fillColor!;
+
+        expect(
+          fill.resolve(selected),
+          semantic.primaryAccent,
+          reason:
+              '${entry.key}: the mark is a glyph, so selected takes the '
+              'accent — primary is a fill colour and misses 3:1 on the dark '
+              'card',
+        );
+        expect(
+          fill.resolve(resting),
+          entry.value.colorScheme.onSurfaceVariant,
+          reason: '${entry.key}: the resting ring is the quiet-glyph ink',
+        );
+        expect(
+          fill.resolve(disabled),
+          semantic.onDisabled,
+          reason: '${entry.key}: disabled is the shared content token',
+        );
+      }
+    });
+
+    test('hover, press and focus resolve rather than falling through', () {
+      for (final entry in themes.entries) {
+        final overlay = entry.value.radioTheme.overlayColor!;
+
+        expect(overlay.resolve(hovered), isNotNull, reason: entry.key);
+        expect(overlay.resolve(pressed), isNotNull, reason: entry.key);
+        expect(overlay.resolve(focused), isNotNull, reason: entry.key);
+        expect(
+          overlay.resolve(resting),
+          isNull,
+          reason: '${entry.key}: a resting control must paint no state layer',
         );
       }
     });
