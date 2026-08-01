@@ -3244,7 +3244,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_progress_bar.dart",
-      "line": 160,
+      "line": 163,
       "widget_context": "_MxProgressHeader",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3255,7 +3255,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_progress_bar.dart",
-      "line": 170,
+      "line": 173,
       "widget_context": "_MxProgressHeader",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3266,7 +3266,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_progress_bar.dart",
-      "line": 171,
+      "line": 174,
       "widget_context": "_MxProgressHeader",
       "element_kind": "text",
       "source_kind": "theme-token",

@@ -109,7 +109,10 @@ function DeckLevelScreen({ path, onOpen, onUp, onJumpTo, onNavigate, onActions, 
               </div>
             )}
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+            {/* `lg`, not `md`: the track seated on each card's base makes the
+                bottom boundary loud, so a 12px gap after it reads as part of
+                the card rather than the space between two. */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
               {rows.length === 0
                 ? <LevelEmpty dueOnly={dueOnly} isRoot={isRoot} onShowAll={() => setDueOnly(false)} onCreate={onCreate} />
                 : rows.map((r) => <DeckCard key={r.id} summary={r} onOpen={() => onOpen(r)} onActions={onRowActions} onStudy={() => onStudy(r)} />)}
