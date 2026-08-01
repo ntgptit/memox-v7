@@ -123,7 +123,10 @@
    coloured block underneath it gives the eye two places to land. */
 
 /* --- redesign: the summary block and stat tiles ------------------------ */
-.mx-today{position:relative;display:flex;flex-direction:column;gap:var(--space-lg);box-sizing:border-box;background:var(--color-surface);border:var(--border-hairline) solid var(--color-border-subtle);border-radius:var(--radius-lg);padding:var(--space-lg)}
+/* `md` above: with the shell's `xs` under the search field the separation comes
+   to 16, which two same-width, same-radius surfaces need — at 12 they read as
+   one shape with a seam. */
+.mx-today{position:relative;display:flex;flex-direction:column;gap:var(--space-lg);box-sizing:border-box;background:var(--color-surface);border:var(--border-hairline) solid var(--color-border-subtle);border-radius:var(--radius-lg);padding:var(--space-lg);margin-top:var(--space-md)}
 .mx-today__row{display:flex;align-items:flex-start;gap:var(--space-md)}
 .mx-today__figure{display:block;font-family:var(--font-display);font-size:34px;line-height:1.05;font-weight:var(--weight-bold);letter-spacing:-1px;font-variant-numeric:tabular-nums}
 .mx-today__sub{display:block;font-size:var(--text-body-sm);line-height:var(--leading-body-sm);color:var(--color-text-secondary);margin-top:var(--space-sm)}
