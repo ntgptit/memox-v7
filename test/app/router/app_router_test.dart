@@ -11,7 +11,7 @@ import 'package:memox/app/router/app_router.dart';
 import 'package:memox/core/navigation/route_names.dart';
 import 'package:memox/app/router/route_paths.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
-import 'package:memox/features/review/presentation/review_placeholder_screen.dart';
+import 'package:memox/features/review/presentation/screens/review_placeholder_screen.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_content_shell.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';

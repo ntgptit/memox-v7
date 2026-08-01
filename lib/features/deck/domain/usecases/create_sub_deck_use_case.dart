@@ -18,7 +18,7 @@ class CreateSubDeckUseCase {
   Future<DeckEntity> call({
     required String rawName,
     required String parentDeckId,
-  }) {
+  }) async {
     final parsed = DeckName.parse(rawName);
     refuseInvalidDeckForm(<DeckValidationProblem>{?parsed.problem});
     final name = parsed.name;

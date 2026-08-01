@@ -53,7 +53,9 @@ void main() {
   });
 
   test('CardRepository owns exactly the card operations', () {
-    final contract = read('lib/features/card/domain/card_repository.dart');
+    final contract = read(
+      'lib/features/card/domain/repositories/card_repository.dart',
+    );
 
     for (final operation in cardOperations) {
       expect(contract, contains('$operation('));
@@ -89,7 +91,9 @@ void main() {
           'card operations live in features/card, '
           'not in a part of DeckRepositoryImpl',
     );
-    final cardImpl = read('lib/features/card/data/card_repository_impl.dart');
+    final cardImpl = read(
+      'lib/features/card/data/repositories/card_repository_impl.dart',
+    );
     expect(cardImpl, isNot(contains('part of')));
     expect(
       cardImpl,
@@ -115,7 +119,7 @@ void main() {
       );
     }
 
-    final cardDao = read('lib/features/card/data/local/card_dao.dart');
+    final cardDao = read('lib/features/card/data/datasources/card_dao.dart');
     for (final member in <String>[
       'insertCard(',
       'updateCardById(',

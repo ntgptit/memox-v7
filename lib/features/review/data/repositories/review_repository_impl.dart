@@ -1,4 +1,4 @@
-import '../domain/review_repository.dart';
+import '../../domain/repositories/review_repository.dart';
 
 /// Drift-backed implementation of [ReviewRepository].
 ///

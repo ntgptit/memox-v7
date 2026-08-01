@@ -1,9 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/error/failure.dart';
-import 'package:memox/features/card/domain/card_entity.dart';
-import 'package:memox/features/card/domain/card_review_state_entity.dart';
+import 'package:memox/features/card/domain/entities/card_entity.dart';
+import 'package:memox/features/card/domain/entities/card_review_state_entity.dart';
 import 'package:memox/features/deck/domain/models/deck_content_type_model.dart';
 import 'package:memox/features/deck/domain/models/deck_deletion_impact_model.dart';
 import 'package:memox/features/deck/domain/entities/deck_entity.dart';
@@ -86,55 +85,10 @@ void main() {
   // the rule was on the entity — and being on the entity is what let three layers
   // each call it for one submit.
 
-  group('card content validation (BR-07, BR-08)', () {
-    test('an empty front is refused, with a typed problem for that side', () {
-      expect(
-        () => CardEntity.validateSide('', side: CardSide.front),
-        throwsA(
-          isA<ValidationFailure>().having(
-            (ValidationFailure f) => f.problems,
-            'problems',
-            <Enum>{CardValidationProblem.frontEmpty},
-          ),
-        ),
-      );
-    });
-
-    test('a whitespace-only back is refused, keyed to its own side', () {
-      expect(
-        () => CardEntity.validateSide(' \n ', side: CardSide.back),
-        throwsA(
-          isA<ValidationFailure>().having(
-            (ValidationFailure f) => f.problems,
-            'problems',
-            <Enum>{CardValidationProblem.backEmpty},
-          ),
-        ),
-      );
-    });
-
-    test('exactly the limit passes, and is returned trimmed', () {
-      final text = 'x' * CardEntity.maxSideLength;
-
-      expect(CardEntity.validateSide(' $text ', side: CardSide.front), text);
-    });
-
-    test('one over the limit is refused, never truncated', () {
-      final text = 'x' * (CardEntity.maxSideLength + 1);
-
-      expect(
-        () => CardEntity.validateSide(text, side: CardSide.back),
-        throwsA(
-          isA<ValidationFailure>().having(
-            (ValidationFailure f) => f.problems,
-            'problems',
-            <Enum>{CardValidationProblem.backTooLong},
-          ),
-        ),
-      );
-    });
-  });
-
+  // Card content validation (BR-07, BR-08) moved to
+  // `test/features/card/domain/card_text_test.dart` with the `CardText` value
+  // object that owns the rule — the same move, for the same reason, as the
+  // deck-name note above.
   group('enum round-trips', () {
     test('every real value maps both ways', () {
       expect(SchedulerType.fromDbValue('eight_box'), SchedulerType.eightBox);

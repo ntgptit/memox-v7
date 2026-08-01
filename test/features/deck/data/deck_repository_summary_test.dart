@@ -1,8 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/features/card/domain/failures/card_validation_failure.dart';
 import 'package:memox/features/deck/domain/models/deck_name_model.dart';
 import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 
+import '../../card/data/support/card_text_fixture.dart';
 import '../../../database/support/test_database.dart';
 import 'support/deck_repository_harness.dart';
 
@@ -314,8 +316,8 @@ void main() {
       await pumpEventQueue();
       await harness.cardRepository.createCard(
         deckId: tree.leaf.id,
-        front: 'front',
-        back: 'back',
+        front: cardText('front'),
+        back: cardText('back', side: CardSide.back),
       );
       await pumpEventQueue();
 

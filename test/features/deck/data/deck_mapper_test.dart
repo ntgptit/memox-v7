@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/database/app_database.dart';
-import 'package:memox/features/card/data/card_mapper.dart';
-import 'package:memox/features/card/data/card_review_state_mapper.dart';
+import 'package:memox/features/card/data/mappers/card_mapper.dart';
+import 'package:memox/features/card/data/mappers/card_review_state_mapper.dart';
 import 'package:memox/features/deck/data/mappers/deck_mapper.dart';
 import 'package:memox/features/deck/domain/models/deck_content_type_model.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';

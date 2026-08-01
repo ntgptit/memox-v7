@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../l10n/l10n_extension.dart';
-import '../../../shared/widgets/mx_content_shell.dart';
-import '../../../shared/widgets/mx_empty_state.dart';
+import '../../../../l10n/l10n_extension.dart';
+import '../../../../shared/widgets/mx_content_shell.dart';
+import '../../../../shared/widgets/mx_empty_state.dart';
 
 /// The review feature's entry surface until the real session screen exists.
 ///

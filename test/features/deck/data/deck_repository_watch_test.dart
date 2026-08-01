@@ -1,12 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/features/card/domain/failures/card_validation_failure.dart';
 import 'package:memox/features/deck/domain/models/deck_name_model.dart';
 import 'package:memox/core/error/failure.dart';
-import 'package:memox/features/card/domain/card_entity.dart';
+import 'package:memox/features/card/domain/entities/card_entity.dart';
 import 'package:memox/features/deck/data/repositories/deck_repository_impl.dart';
 import 'package:memox/features/deck/data/datasources/deck_dao.dart';
 import 'package:memox/features/deck/domain/entities/deck_entity.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 
+import '../../card/data/support/card_text_fixture.dart';
 import '../../../database/invariant_queries.dart';
 import '../../../database/support/test_database.dart';
 import 'support/deck_repository_harness.dart';
@@ -107,8 +109,8 @@ void main() {
 
       final card = await h.cardRepository.createCard(
         deckId: tree.leaf.id,
-        front: 'f',
-        back: 'b',
+        front: cardText('f'),
+        back: cardText('b', side: CardSide.back),
       );
       await pumpEventQueue();
       expect(emissions.last.single.front, 'f');
@@ -147,8 +149,8 @@ void main() {
       try {
         await h.cardRepository.createCard(
           deckId: tree.leaf.id,
-          front: 'f',
-          back: 'b',
+          front: cardText('f'),
+          back: cardText('b', side: CardSide.back),
         );
       } on Object catch (error) {
         caught = error;
@@ -201,19 +203,19 @@ void main() {
     );
     await h.cardRepository.createCard(
       deckId: grandLeaf.id,
-      front: 'a',
-      back: 'a',
+      front: cardText('a'),
+      back: cardText('a', side: CardSide.back),
     );
     final treeB = await h.seedTree(prefix: 'B-', scheduler: SchedulerType.sm2);
     final cardB = await h.cardRepository.createCard(
       deckId: treeB.leaf.id,
-      front: 'b',
-      back: 'b',
+      front: cardText('b'),
+      back: cardText('b', side: CardSide.back),
     );
     await h.cardRepository.updateCard(
       cardId: cardB.id,
-      front: 'b2',
-      back: 'b2',
+      front: cardText('b2'),
+      back: cardText('b2', side: CardSide.back),
     );
     await h.deckRepository.renameDeck(
       deckId: treeA.root.id,

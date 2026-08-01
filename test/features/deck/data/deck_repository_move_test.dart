@@ -1,7 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/features/card/domain/failures/card_validation_failure.dart';
 import 'package:memox/features/deck/domain/models/deck_name_model.dart';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
+
+import '../../card/data/support/card_text_fixture.dart';
 
 import 'support/deck_repository_harness.dart';
 
@@ -22,8 +25,8 @@ void main() {
       );
       await h.cardRepository.createCard(
         deckId: grandLeaf.id,
-        front: 'f',
-        back: 'b',
+        front: cardText('f'),
+        back: cardText('b', side: CardSide.back),
       );
       final treeB = await h.seedTree(prefix: 'B-');
 
@@ -105,8 +108,8 @@ void main() {
     final treeB = await h.seedTree(prefix: 'B-');
     await h.cardRepository.createCard(
       deckId: treeB.leaf.id,
-      front: 'f',
-      back: 'b',
+      front: cardText('f'),
+      back: cardText('b', side: CardSide.back),
     );
 
     await expectLater(

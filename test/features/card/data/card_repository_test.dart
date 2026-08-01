@@ -1,10 +1,12 @@
 import 'package:drift/drift.dart' show QueryRow;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/features/card/domain/failures/card_validation_failure.dart';
 import 'package:memox/core/error/failure.dart';
-import 'package:memox/features/card/domain/card_entity.dart';
+import 'package:memox/features/card/domain/entities/card_entity.dart';
 import 'package:memox/features/deck/domain/entities/deck_entity.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 
+import 'support/card_text_fixture.dart';
 import '../../../database/support/test_database.dart';
 import '../../deck/data/support/deck_repository_harness.dart';
 
@@ -19,8 +21,8 @@ void main() {
       final tree = await h.seedTree();
       final card = await h.cardRepository.createCard(
         deckId: tree.leaf.id,
-        front: ' front ',
-        back: ' back ',
+        front: cardText(' front '),
+        back: cardText(' back ', side: CardSide.back),
       );
 
       expect(card.front, 'front');
@@ -38,8 +40,8 @@ void main() {
         final tree = await h.seedTree();
         final card = await h.cardRepository.createCard(
           deckId: tree.leaf.id,
-          front: 'f',
-          back: 'b',
+          front: cardText('f'),
+          back: cardText('b', side: CardSide.back),
         );
 
         final state = (await h.rawStates(card.id)).single;
@@ -60,8 +62,8 @@ void main() {
       final tree = await h.seedTree(scheduler: SchedulerType.sm2);
       final card = await h.cardRepository.createCard(
         deckId: tree.leaf.id,
-        front: 'f',
-        back: 'b',
+        front: cardText('f'),
+        back: cardText('b', side: CardSide.back),
       );
 
       final state = (await h.rawStates(card.id)).single;
@@ -90,8 +92,8 @@ void main() {
         await expectLater(
           h.cardRepository.createCard(
             deckId: tree.leaf.id,
-            front: 'f',
-            back: 'b',
+            front: cardText('f'),
+            back: cardText('b', side: CardSide.back),
           ),
           throwsA(isA<Failure>()),
         );
@@ -110,8 +112,8 @@ void main() {
       await expectLater(
         h.cardRepository.createCard(
           deckId: tree.root.id,
-          front: 'f',
-          back: 'b',
+          front: cardText('f'),
+          back: cardText('b', side: CardSide.back),
         ),
         throwsA(isA<ConflictFailure>()),
       );
@@ -124,8 +126,8 @@ void main() {
       await expectLater(
         h.cardRepository.createCard(
           deckId: tree.branch.id,
-          front: 'f',
-          back: 'b',
+          front: cardText('f'),
+          back: cardText('b', side: CardSide.back),
         ),
         throwsA(isA<ConflictFailure>()),
       );
@@ -137,8 +139,8 @@ void main() {
       final tree = await h.seedTree();
       final card = await h.cardRepository.createCard(
         deckId: tree.leaf.id,
-        front: 'front v1',
-        back: 'back v1',
+        front: cardText('front v1'),
+        back: cardText('back v1', side: CardSide.back),
       );
 
       return (leaf: tree.leaf, card: card);
@@ -153,8 +155,8 @@ void main() {
         h.currentInstant = testNow.add(const Duration(minutes: 5));
         final updated = await h.cardRepository.updateCard(
           cardId: seeded.card.id,
-          front: 'front v2',
-          back: 'back v2',
+          front: cardText('front v2'),
+          back: cardText('back v2', side: CardSide.back),
         );
 
         expect(updated.front, 'front v2');
@@ -185,8 +187,8 @@ void main() {
 
       await h.cardRepository.updateCard(
         cardId: seeded.card.id,
-        front: 'new front',
-        back: 'new back',
+        front: cardText('new front'),
+        back: cardText('new back', side: CardSide.back),
       );
 
       final after =
@@ -228,21 +230,12 @@ void main() {
       },
     );
 
-    test('validation failure leaves the card untouched (BR-07)', () async {
-      final seeded = await seedCard();
-
-      await expectLater(
-        h.cardRepository.updateCard(
-          cardId: seeded.card.id,
-          front: '  ',
-          back: 'b',
-        ),
-        throwsA(isA<ValidationFailure>()),
-      );
-      expect(
-        (await h.rawCard(seeded.card.id))!.read<String>('front'),
-        'front v1',
-      );
-    });
+    // "A refused write leaves the card untouched (BR-07)" used to be asserted
+    // here, by handing the repository a blank side and checking the row after.
+    // It cannot be written that way any more, and that is the improvement: the
+    // contract takes `CardText`, so there is no blank side to hand it. The rule
+    // runs above this layer and the guarantee is now structural rather than
+    // observed — `card_use_cases_test.dart` proves the repository is never
+    // reached, and `card_text_test.dart` owns the rule itself.
   });
 }

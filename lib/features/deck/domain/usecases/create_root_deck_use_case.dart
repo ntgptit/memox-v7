@@ -21,7 +21,13 @@ class CreateRootDeckUseCase {
   Future<DeckEntity> call({
     required String rawName,
     required SchedulerType? schedulerType,
-  }) {
+    // `async`, and it is load-bearing: `refuseInvalidDeckForm` throws
+    // synchronously, so without it a refusal escapes before the future exists
+    // and `call(...).catchError(...)` cannot see it. Every other failure from
+    // this layer arrives through the future, and one that does not is the
+    // asymmetry a controller gets wrong exactly once. The three validating use
+    // cases here all carry it.
+  }) async {
     // Both fields are evaluated before anything is reported, so one attempt
     // reports both problems. Reporting only the first would send the user round
     // twice.

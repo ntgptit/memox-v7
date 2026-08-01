@@ -1,7 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/features/card/domain/failures/card_validation_failure.dart';
 import 'package:memox/features/deck/domain/models/deck_name_model.dart';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/deck/domain/entities/deck_entity.dart';
+
+import '../../card/data/support/card_text_fixture.dart';
 
 import 'support/deck_repository_harness.dart';
 
@@ -169,8 +172,8 @@ void main() {
       final chain = await h.seedChain(DeckEntity.maxTreeDepth);
       await h.cardRepository.createCard(
         deckId: chain.last.id,
-        front: 'f',
-        back: 'b',
+        front: cardText('f'),
+        back: cardText('b', side: CardSide.back),
       );
 
       final impact = await h.deckRepository.getDeletionImpact(chain.first.id);
