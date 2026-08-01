@@ -16,14 +16,14 @@ import '../../domain/models/deck_summary_model.dart';
 import '../controllers/deck_list_controller.dart';
 import '../controllers/deck_list_view_controller.dart';
 import '../states/deck_list_view_state.dart';
-import '../widgets/deck_actions_widget.dart';
-import '../widgets/deck_level_error_widget.dart';
-import '../widgets/deck_summary_section_widget.dart';
-import '../widgets/deck_list_toolbar_widget.dart';
-import '../widgets/deck_level_body_widget.dart';
-import '../widgets/deck_subheader_widget.dart';
-import '../widgets/deck_notice_widget.dart';
-import '../widgets/deck_tile_widget.dart';
+import '../widgets/overlays/deck_actions_widget.dart';
+import '../widgets/sections/deck_level_error_widget.dart';
+import '../widgets/sections/deck_summary_section_widget.dart';
+import '../widgets/sections/deck_list_toolbar_widget.dart';
+import '../widgets/sections/deck_level_body_widget.dart';
+import '../widgets/sections/deck_subheader_widget.dart';
+import '../widgets/sections/deck_notice_widget.dart';
+import '../widgets/items/deck_tile_widget.dart';
 
 /// Space under the last card. It was 112 while a floating action hovered.
 const double _kListBottomInset = AppSpacing.lg;

@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/theme_context_extension.dart';
-import '../../../../l10n/l10n_extension.dart';
-import '../../../../shared/widgets/mx_async_view.dart';
-import '../../../../shared/widgets/mx_empty_state.dart';
-import '../../../../shared/widgets/mx_error_state.dart';
-import '../../../../shared/widgets/mx_list_tile.dart';
-import '../../domain/models/deck_move_target_model.dart';
-import 'deck_labels_widget.dart';
-import '../controllers/deck_move_targets_controller.dart';
-import '../states/deck_submit_state.dart';
-import '../controllers/deck_write_controller.dart';
+import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/theme_context_extension.dart';
+import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_async_view.dart';
+import '../../../../../shared/widgets/mx_empty_state.dart';
+import '../../../../../shared/widgets/mx_error_state.dart';
+import '../../../../../shared/widgets/mx_list_tile.dart';
+import '../../../domain/models/deck_move_target_model.dart';
+import '../support/deck_labels_widget.dart';
+import '../../controllers/deck_move_targets_controller.dart';
+import '../../states/deck_submit_state.dart';
+import '../../controllers/deck_write_controller.dart';
 
 /// The move-target picker (UC-09).
 ///

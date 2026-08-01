@@ -25,7 +25,7 @@ sealed class Failure implements Exception {
   /// `core/` cannot import Flutter, so they cannot reach the ARB bundle — and a
   /// screen that showed it would present English to a Vietnamese user with no
   /// test failing anywhere. Screens map the failure **type** to ARB copy; see
-  /// `features/deck/presentation/deck_labels_widget.dart` for the switch, and
+  /// `features/deck/presentation/widgets/support/deck_labels_widget.dart` for the switch, and
   /// `MxAsyncView` for why no shared default exists.
   ///
   /// It is sanitized rather than raw because it does reach places a person

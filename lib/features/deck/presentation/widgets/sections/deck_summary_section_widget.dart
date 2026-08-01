@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_spacing.dart';
-import '../../../../l10n/l10n_extension.dart';
-import '../../../../shared/widgets/mx_text_button.dart';
-import '../../domain/models/deck_list_snapshot_model.dart';
-import '../controllers/deck_list_view_controller.dart';
-import '../states/deck_list_view_state.dart';
+import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_text_button.dart';
+import '../../../domain/models/deck_list_snapshot_model.dart';
+import '../../controllers/deck_list_view_controller.dart';
+import '../../states/deck_list_view_state.dart';
 import 'deck_level_summary_widget.dart';
 
 /// Setting the panel's visibility, bound to a `ref`.

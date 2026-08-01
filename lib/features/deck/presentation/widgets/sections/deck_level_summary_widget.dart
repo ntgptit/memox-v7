@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_radius.dart';
-import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/theme_context_extension.dart';
-import '../../../../l10n/l10n_extension.dart';
-import '../../../../shared/widgets/mx_icon_button.dart';
-import '../../../../shared/widgets/mx_progress_bar.dart';
-import '../../domain/models/deck_list_snapshot_model.dart';
-import '../../domain/models/deck_summary_model.dart';
-import '../states/deck_list_view_state.dart';
+import '../../../../../core/theme/app_radius.dart';
+import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/theme_context_extension.dart';
+import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_icon_button.dart';
+import '../../../../../shared/widgets/mx_progress_bar.dart';
+import '../../../domain/models/deck_list_snapshot_model.dart';
+import '../../../domain/models/deck_summary_model.dart';
+import '../../states/deck_list_view_state.dart';
 
 /// What this level amounts to, above the list of what is in it.
 ///

@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/navigation/route_names.dart';
-import '../../../../core/theme/app_spacing.dart';
-import '../../../../l10n/l10n_extension.dart';
-import '../../../../shared/widgets/mx_async_view.dart';
-import '../../domain/models/deck_list_snapshot_model.dart';
-import '../../domain/models/deck_search_result_model.dart';
-import '../controllers/deck_search_controller.dart';
+import '../../../../../core/navigation/route_names.dart';
+import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_async_view.dart';
+import '../../../domain/models/deck_list_snapshot_model.dart';
+import '../../../domain/models/deck_search_result_model.dart';
+import '../../controllers/deck_search_controller.dart';
 import 'deck_level_error_widget.dart';
 import 'deck_search_results_widget.dart';
 

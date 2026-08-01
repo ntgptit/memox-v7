@@ -9,7 +9,7 @@ import 'package:memox/features/deck/domain/models/deck_list_snapshot_model.dart'
 import 'package:memox/features/deck/domain/models/deck_path_segment_model.dart';
 import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
-import 'package:memox/features/deck/presentation/widgets/deck_tile_widget.dart';
+import 'package:memox/features/deck/presentation/widgets/items/deck_tile_widget.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';

@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_elevation.dart';
-import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/theme_context_extension.dart';
-import '../../../../l10n/l10n_extension.dart';
-import '../../../../shared/widgets/mx_card.dart';
-import '../../../../shared/widgets/mx_icon_button.dart';
-import '../../../../shared/widgets/mx_progress_bar.dart';
-import '../../domain/models/deck_content_type_model.dart';
-import '../../domain/models/deck_summary_model.dart';
+import '../../../../../core/theme/app_elevation.dart';
+import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/theme_context_extension.dart';
+import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_card.dart';
+import '../../../../../shared/widgets/mx_icon_button.dart';
+import '../../../../../shared/widgets/mx_progress_bar.dart';
+import '../../../domain/models/deck_content_type_model.dart';
+import '../../../domain/models/deck_summary_model.dart';
 import 'deck_due_state_widget.dart';
 import 'deck_icon_area_widget.dart';
 import 'deck_study_button_widget.dart';
-import 'deck_labels_widget.dart';
+import '../support/deck_labels_widget.dart';
 
 /// One deck in a deck list, at any level (UC-06 step 2).
 ///

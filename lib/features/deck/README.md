@@ -341,3 +341,12 @@ Two things people get wrong on the first clone:
   putting a controller in `providers/` would change which rules apply to it.
 - **Promote to `shared/` on the second caller, not the first.** One caller is a
   guess at what varies; the second one shows you.
+- **`presentation/widgets/` is bucketed — `sections/` · `items/` · `overlays/` ·
+  `support/`, one level deep, nothing at the root (AD-15).** Placing a widget is
+  four questions asked in order, stopping at the first yes: opens over the
+  screen? → `overlays/`. The repeated row or a part only it uses? → `items/`.
+  Composed directly into body/chrome? → `sections/`. Serves more than one
+  bucket? → `support/`. The bucket list is app-wide and fixed — a fifth name is
+  an AD-15 change, and both `architecture_boundary_test.dart` and the guard
+  fail on an invented folder. When cloning, create a bucket with its first real
+  file; never scaffold empty ones.

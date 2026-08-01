@@ -126,6 +126,58 @@ void main() {
     );
   });
 
+  test('presentation/widgets holds only the four buckets, one level deep', () {
+    // AD-15. A feature's widgets sit in exactly one of four buckets —
+    // sections/, items/, overlays/, support/ — and nowhere else: not directly
+    // under widgets/, not in a bucket someone invents, not nested deeper. The
+    // point of fixing the list is that every feature answers "where does this
+    // widget live" the same way, so a cloned feature inherits a map instead of
+    // a habit.
+    //
+    // This test owns the full shape; the guard's two `file_name` rules are the
+    // second net and deliberately cover less (fnmatch cannot see nesting depth
+    // inside a valid bucket). Change the bucket list in AD-15 first, then here,
+    // then in `memox-architecture-rules.yaml` — three sites, named there.
+    const allowedBuckets = <String>{'sections', 'items', 'overlays', 'support'};
+    final offenders = <String>[];
+
+    for (final File file in dartFilesUnder('lib/features')) {
+      final path = relative(file);
+      final match = RegExp(r'/presentation/widgets/(.*)$').firstMatch(path);
+      if (match == null) continue;
+
+      final below = match.group(1)!.split('/');
+      // [file.dart] — sitting directly in widgets/, where nothing may.
+      if (below.length == 1) {
+        offenders.add('$path — directly under widgets/, pick a bucket');
+        continue;
+      }
+      // [bucket, file.dart] — the only legal shape, and only the four names.
+      if (!allowedBuckets.contains(below.first)) {
+        offenders.add(
+          '$path — "${below.first}" is not a bucket '
+          '(${allowedBuckets.join(', ')})',
+        );
+        continue;
+      }
+      if (below.length > 2) {
+        offenders.add('$path — nested deeper than one bucket level');
+      }
+    }
+
+    expect(
+      offenders,
+      isEmpty,
+      reason:
+          "A feature's widgets sit in exactly one of four buckets, one level "
+          'deep: sections/ (bands the screen composes), items/ (the repeated '
+          'row and its parts), overlays/ (sheets, dialogs, forms), support/ '
+          '(presentation mapping used across buckets). AD-15 is the contract; '
+          'a fifth bucket is an AD change, not a new folder.\n'
+          '${offenders.join('\n')}',
+    );
+  });
+
   test('the checks above actually looked at files', () {
     // The failure mode these guards are most likely to develop: a path that stops
     // matching, after which the rule passes because it inspected nothing. Six
@@ -138,6 +190,17 @@ void main() {
       ).where((File f) => relative(f).contains('/di/')),
       isNotEmpty,
       reason: 'the di/ rule needs a di/ folder to have any effect',
+    );
+    // App-level, not per-feature: a feature with no widgets yet must not fail
+    // the bucket rule, but the suite has to prove the rule saw at least one
+    // bucketed file somewhere — otherwise a renamed widgets/ folder would turn
+    // the whole check into a pass that inspected nothing.
+    expect(
+      dartFilesUnder(
+        'lib/features',
+      ).where((File f) => relative(f).contains('/presentation/widgets/')),
+      isNotEmpty,
+      reason: 'the bucket rule needs widget files to have any effect',
     );
   });
 }

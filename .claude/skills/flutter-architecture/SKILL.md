@@ -35,8 +35,25 @@ lib/
 │       ├── data/           # repositories/, mappers/, datasources/, models/
 │       ├── domain/         # entities/, repositories/, models/, usecases/, failures/
 │       └── presentation/   # screens/, controllers/, states/, widgets/, providers/
+│           └── widgets/    # exactly four buckets, one level deep (AD-15):
+│                           #   sections/ items/ overlays/ support/
 └── main.dart
 ```
+
+**Placing a widget** is four questions asked in order, stopping at the first
+yes — the full contract, the rationale and the rejected alternatives are AD-15
+in `docs/architecture.md`:
+
+1. Does it open *over* the screen (`showModalBottomSheet`/`showDialog`)? → `overlays/`
+2. Is it the repeated row of a list, or a part only that row uses? → `items/`
+3. Does the screen compose it directly into its body or chrome? → `sections/`
+4. Does it serve more than one bucket above (ARB mapping, render-only extension)? → `support/`
+
+Nothing sits directly in `widgets/`, buckets never nest, a bucket is created
+only when it has real content, and the bucket list is app-wide: a fifth name is
+an AD-15 change, not a new folder. `architecture_boundary_test.dart` owns the
+full shape; the guard rule `memox.architecture.widgets_grouped_into_buckets` is
+the second net.
 
 `core/` is infrastructure with no knowledge of any feature. The moment
 `core/network/` mentions a specific endpoint, or `core/database/` imports a

@@ -934,3 +934,103 @@ về cùng component cần chúng, không về trước.
   allowance khẳng định chữ không đọc được là chấp nhận được.
 - **Thêm tuỳ chọn surface cho `MxListTile`** (bỏ ở M4.10n) — không caller nào cần,
   và tấm ảnh mới là thứ sai chứ không phải component.
+
+
+## AD-15 · `presentation/widgets` chia bốn bucket cố định, sâu đúng một tầng
+
+| | |
+|---|---|
+| **Status** | accepted |
+| **Affected documents** | `CLAUDE.md` · `.claude/skills/flutter-architecture/SKILL.md` · `.claude/skills/flutter-feature-slice/assets/feature_blueprint.md` · `lib/features/deck/README.md` |
+| **Decision** | Mọi file trong `presentation/widgets/` của một feature nằm trong **đúng một** trong bốn bucket — `sections/`, `items/`, `overlays/`, `support/` — và sâu **đúng một tầng**. Danh sách bucket là bất biến của toàn app: thêm hay đổi tên bucket là sửa AD này trước, không phải tạo folder. |
+
+### Vì sao có quyết định này
+
+`deck/presentation/widgets/` đạt 18 file phẳng ở M4.10ak, và cái giá không phải
+là đếm file: section của màn hình, item lặp trong danh sách, luồng modal và
+mapping hiển thị **trộn vào nhau**, trong khi mọi tên file đều mở đầu bằng
+`deck_` nên prefix không còn nói được file nào chịu trách nhiệm gì. Deck là
+slice mẫu — feature sau **clone từ nó** — nên cây phẳng này sắp được nhân bản:
+mỗi feature sẽ tự phát minh cách xếp riêng khi nó lớn lên, và toàn app mất chung
+một bản đồ.
+
+Phương án tự nhiên nhất — group theo màn hình hay theo flow — diễn đạt domain
+tốt, nhưng taxonomy của nó **khác nhau giữa các feature**: deck có "level",
+card có "editor", review có "session". Bốn bucket cố định đổi một chút sức diễn
+đạt lấy một thứ đáng hơn: câu hỏi "widget này sống ở đâu" có **cùng một câu trả
+lời** ở mọi feature.
+
+Và một quy ước chỉ nằm trong tài liệu sẽ lệch — đó là bài học đã trả tiền ở
+M4.10 (sáu suffix check từng match **zero file** mà vẫn pass). Vì vậy AD này
+chỉ tồn tại cùng enforcement bằng máy, ghi ở mục Enforcement bên dưới.
+
+### Quyết định
+
+| Bucket | Trách nhiệm | Được chứa | Không được chứa |
+|---|---|---|---|
+| `sections/` | Các vùng màn hình compose trực tiếp vào body/chrome | subheader, toolbar, summary, body switcher, search results, error/notice mà screen tự đặt | dialog, sheet, phần chỉ item dùng |
+| `items/` | Item lặp trong danh sách và các mảnh **chỉ** item đó dùng | tile/card/row, glyph well, chip trạng thái, action pill của item | section màn hình, luồng modal |
+| `overlays/` | Luồng UI phủ lên màn hình | form, dialog, action sheet, bottom sheet, **và hàm `showX` mở chúng** | list body, item thường |
+| `support/` | Hỗ trợ presentation dùng xuyên ≥ 2 bucket | mapping enum/failure sang ARB, extension render-only | business rule, provider, helper dùng toàn app |
+
+Câu hỏi đặt chỗ, mỗi bucket một câu, trả lời theo thứ tự và dừng ở câu "có"
+đầu tiên:
+
+1. Nó **phủ lên** màn hình (mở bằng `showModalBottomSheet`/`showDialog`)? → `overlays/`
+2. Nó là **hàng lặp lại** trong danh sách, hoặc mảnh chỉ hàng đó dùng? → `items/`
+3. Màn hình **compose nó trực tiếp** vào body hay chrome? → `sections/`
+4. Nó phục vụ **nhiều hơn một** bucket ở trên? → `support/`
+
+Quy ước đi kèm, mỗi dòng là một luật:
+
+- Sâu đúng một tầng: `presentation/widgets/<bucket>/<file>_widget.dart`. Không
+  file Dart nào nằm trực tiếp trong `widgets/`, không nesting sâu hơn bucket.
+- Bucket chỉ tạo khi có nội dung thật — không scaffold folder rỗng.
+- Không barrel `index.dart`/file export: import site phải nêu đích danh file,
+  vì guard chọn scope theo đường dẫn import được viết ra.
+- Folder **không** thay suffix (`items/deck_tile_widget.dart`, không phải
+  `items/deck_tile.dart`) — các guard chọn file theo suffix, sai suffix là file
+  rời khỏi luật một cách im lặng.
+- Widget chỉ được promote sang `lib/shared/` khi có caller thật từ feature thứ
+  hai — bucket không đổi luật này, nó ghi ở blueprint từ trước.
+
+Hai chi tiết đã cân nhắc chứ không phải bỏ sót:
+
+- **`support` là danh từ khối, không phải số ít sai luật.** Quy ước "plural
+  folder names" áp cho folder đếm được; tiền lệ cùng loại là
+  `design_system/components/feedback`. Đổi thành `supports/` đúng ngữ pháp máy
+  nhưng sai ngữ pháp người.
+- **`test/features/deck/presentation/support/`** (harness của test) trùng chữ
+  với bucket `support/` là **trùng hợp** — hai quy ước không liên quan, và
+  bucket không áp cho cây test: test nhóm theo behavior, không mirror widget.
+
+### Enforcement — ba nơi giữ luật, đổi theo đúng thứ tự này
+
+1. **AD này** — danh sách bucket canonical. Đổi ở đây trước.
+2. **`test/app/architecture_boundary_test.dart`** — chủ sở hữu hình dạng đầy đủ:
+   đúng bốn tên, không file ở gốc `widgets/`, không nesting sâu hơn một tầng,
+   kèm bằng chứng anti-vacuous **mức app** (suite phải thấy ≥ 1 file bucket ở
+   đâu đó; feature chưa có widget không bị fail oan).
+3. **Guard `memox.architecture.widgets_grouped_into_buckets`**
+   (`memox-architecture-rules.yaml`) — lưới thứ hai, chạy trong `dod_check` và
+   CI. Dùng matcher `file_path` (thêm ở M4.10am): pattern khớp trên đường dẫn
+   tương-đối-repo, target set khoẻ mạnh là toàn bộ file widget. Bản nháp đầu
+   dùng `file_name` với pattern never-match trên include/exclude đẽo gọt — bị
+   chính guard bắt bằng `guard.config.rule_without_targets`, vì trạng thái
+   khoẻ mạnh của nó là target set rỗng. Giữ lại chi tiết này để không ai thử
+   lại cách đó.
+
+`check_architecture.sh` **không** giữ luật bucket — nó sở hữu suffix, và chỉ
+suffix. Một luật hai bản trong hai script là hai bản sẽ trôi khỏi nhau.
+
+### Phương án bị loại
+
+- **Group theo màn hình / theo flow** — diễn đạt domain tốt hơn nhưng taxonomy
+  khác nhau giữa các feature; mất chính thứ AD này mua: một bản đồ chung.
+- **Bucket thứ năm `feedback/`** cho error/notice — đã đề xuất và rút: cả hai
+  đều được screen compose trực tiếp nên qua câu hỏi 3 của `sections/`, và bốn
+  bucket rẻ hơn năm ở đúng chỗ đắt nhất — số nhánh của câu hỏi đặt chỗ.
+- **Mirror bucket sang cây test** — đảo hơn 30 file test để thu về zero thông
+  tin; test nhóm theo behavior từ trước và giữ nguyên.
+- **Barrel export** — che import site khỏi guard và biến mọi đổi tên thành
+  breaking change hai chỗ.

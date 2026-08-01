@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
-import 'package:memox/features/deck/presentation/widgets/deck_level_summary_widget.dart';
+import 'package:memox/features/deck/presentation/widgets/sections/deck_level_summary_widget.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 
 import 'support/deck_screen_harness.dart';

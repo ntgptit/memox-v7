@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_spacing.dart';
-import '../../../../l10n/l10n_extension.dart';
-import '../../../../shared/widgets/mx_search_field.dart';
-import '../../domain/models/deck_list_snapshot_model.dart';
-import '../controllers/deck_search_controller.dart';
+import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_search_field.dart';
+import '../../../domain/models/deck_list_snapshot_model.dart';
+import '../../controllers/deck_search_controller.dart';
 import 'deck_path_widget.dart';
 
 /// Typing into the search field of one level, bound to a `ref`.

@@ -159,3 +159,39 @@ rules:
       - memox
       - architecture
       - dependencies
+
+
+  # AD-15: a feature's presentation/widgets is grouped into exactly four fixed
+  # buckets, one level deep — widgets/<bucket>/<file>.dart and nothing else.
+  # This is the guard's half of the enforcement; the boundary test
+  # (test/app/architecture_boundary_test.dart) owns the same shape with richer
+  # per-shape messages and the app-level proof that the rule saw files. Change
+  # the bucket list in AD-15 first, then in that test, then here.
+  #
+  # `file_path`, not `file_name`: the rule is about where a file sits, and the
+  # healthy state must keep a non-empty target set or the runner's own
+  # rule_without_targets diagnostic fires — a never-matching file_name pattern
+  # over a carved include/exclude was tried first and tripped exactly that.
+  # The pattern deliberately ends in `[^/]+\.dart` rather than requiring the
+  # `_widget` suffix: memox.naming.presentation_file_role_suffix already owns
+  # suffixes, and one finding per defect beats two rules reporting one mistake.
+  - id: memox.architecture.widgets_grouped_into_buckets
+    type: file_path
+    severity: error
+    enabled: true
+    message: >-
+      A feature's widgets sit in exactly one of four buckets, one level deep —
+      sections/ (bands the screen composes), items/ (the repeated row and its
+      parts), overlays/ (sheets, dialogs, forms and their open functions),
+      support/ (presentation mapping used across buckets). Nothing sits
+      directly under widgets/, buckets never nest, and a fifth bucket is an
+      AD-15 change, not a new folder.
+    include:
+      - lib/features/*/presentation/widgets/**/*.dart
+    exclude:
+      - '**/*.g.dart'
+      - '**/*.freezed.dart'
+    pattern: '^lib/features/[^/]+/presentation/widgets/(?:sections|items|overlays|support)/[^/]+\.dart$'
+    tags:
+      - memox
+      - architecture

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/error/failure.dart';
-import '../../../../core/navigation/route_names.dart';
-import '../../../../l10n/l10n_extension.dart';
-import '../../../../shared/widgets/mx_content_shell.dart';
-import '../../../../shared/widgets/mx_error_state.dart';
+import '../../../../../core/error/failure.dart';
+import '../../../../../core/navigation/route_names.dart';
+import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_content_shell.dart';
+import '../../../../../shared/widgets/mx_error_state.dart';
 
 /// Not-found and read failures on a deck level, told apart (UC-03 E1).
 ///
