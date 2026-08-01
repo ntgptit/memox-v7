@@ -223,7 +223,7 @@ OutlinedButtonThemeData buildOutlinedButtonTheme(
       // layout — an `OutlinedBorder`'s side is painted on the shape, not added
       // to the box.
       if (states.contains(WidgetState.focused)) {
-        return AppInteractionStates.focusRing(scheme);
+        return AppInteractionStates.focusRing(semantic);
       }
 
       return BorderSide(color: semantic.borderSubtle);

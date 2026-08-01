@@ -115,7 +115,7 @@ ChipThemeData buildChipTheme(
     // this theme now owns — so without a ring the focused pill and the hovered
     // one look alike.
     if (states.contains(WidgetState.focused)) {
-      return AppInteractionStates.focusRing(scheme);
+      return AppInteractionStates.focusRing(semantic);
     }
 
     return BorderSide(color: semantic.borderSubtle);

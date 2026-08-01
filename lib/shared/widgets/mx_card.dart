@@ -98,7 +98,9 @@ class _MxCardState extends State<MxCard> {
     // are painted on the border box, so the swap moves nothing beside the card
     // and nothing inside it.
     final border = _isFocused
-        ? Border.fromBorderSide(AppInteractionStates.focusRing(scheme))
+        ? Border.fromBorderSide(
+            AppInteractionStates.focusRing(context.semanticColors),
+          )
         : Border.all(color: context.semanticColors.borderSubtle);
     final decoration = BoxDecoration(
       color: scheme.surface,

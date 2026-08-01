@@ -87,7 +87,7 @@ prompt and body-md's 1.45 — are identical on both sides.
 | B11 | `readme.md` "Layout rules" | `app_theme.dart` appBar + `MxContentShell` | no elevation, no scroll tint, page-colour bar | [x] | **drift (F4, F11)** - page colour and zero elevation match; no scroll hairline, and the FAB shape differs |
 | B12 | — | `app_overlay_themes.dart` tooltip, selection, divider, scrollbar | design has no counterpart | [x] | **design-gap, as expected** — tooltip, text selection, divider and scrollbar have no CSS counterpart; the design leaves them to the browser as Flutter left them to Material until M4.10j |
 | B13 | `index.html` `COMPACT_BELOW` behaviour | `app_compact_scale.dart` | title 22→20, prompt 30→26, button padding | [x] | **match** — title 22→20, card prompt 30→26, button padding 24→12, same 360 breakpoint. The compact pass deliberately skips the text button: a zero-padding link has nothing to give back |
-| B14 | `mx.css` `.mx-textbtn` (+ `--destructive`) | `buildTextButtonTheme()` in `app_button_themes.dart` | zero padding, 48 floor as height, 15%/28% hover/press label blends, underline on hover/focus | [x] | **match** since M4.10ap — the values always matched but lived inline in `MxTextButton`; the slot owns them now, the blends are `AppStateOpacity.textHoverBlend`/`textPressedBlend`, and the underline stays on the label because a decoration on the shared style reaches the icon glyphs |
+| B14 | `mx.css` `.mx-textbtn` (+ `--destructive`) | `buildTextButtonTheme()` in `app_button_themes.dart` | zero padding, 48 floor as height, 15%/28% hover/press label blends, underline on hover/focus | [x] | **match** since M4.10aq — the values always matched but lived inline in `MxTextButton`; the slot owns them now, the blends are `AppStateOpacity.textHoverBlend`/`textPressedBlend`, and the underline stays on the label because a decoration on the shared style reaches the icon glyphs |
 | B15 | — | `app_radio_theme.dart` | design has no counterpart | [x] | **design-gap, as B12** — no kit mock renders a scheduler picker, so the radio takes the app's own conventions: `primaryAccent` mark (a glyph, and `primary` misses 3:1 on the dark card), secondary-ink resting ring, the shared control overlay |
 
 ---
@@ -158,7 +158,7 @@ Dart widget: props, defaults, states, radius, spacing, semantics.
 | E10 | Middle dot separates facts on one line | ARB files | [x] | **match** — the middle dot separates facts on the deck meta line |
 | E11 | No emoji anywhere | ARB files, code | [x] | **match** — no character above U+2100 in either ARB |
 | E12 | Error copy belongs to the screen, not the component | `MxErrorState` callers | [x] | **match** — `MxErrorState` maps no failure type; every caller passes its own sentence |
-| E13 | States are instant flat washes (readme §States) | every pressed control on Android | [x] | **deliberate divergence, recorded** — Android keeps Material's ink ripple; the wash colours are the kit's (`ThemeData.splashColor` is primary at 12% since M4.10ap), only the animation differs. See divergence #5 |
+| E13 | States are instant flat washes (readme §States) | every pressed control on Android | [x] | **deliberate divergence, recorded** — Android keeps Material's ink ripple; the wash colours are the kit's (`ThemeData.splashColor` is primary at 12% since M4.10aq), only the animation differs. See divergence #5 |
 
 ---
 
@@ -394,7 +394,7 @@ change landed; the shadow did not.
 ## Complete — all 80 rows
 
 Every row now carries a verdict. Final tally (B14, B15 and E13 joined in
-M4.10ap's theme-slot audit — see Round 3 below):
+M4.10aq's theme-slot audit — see Round 3 below):
 
 | Outcome | Count |
 |---|---|
@@ -425,7 +425,7 @@ M4.10ap's theme-slot audit — see Round 3 below):
 | F3 | `mx.css` paints the nav indicator `primary-container` | `secondaryContainer` | The design's own readme says `secondary-container` "used identically for a tab, a filter pill and a chosen verdict". Its CSS and its prose disagree. |
 | F12 | `.mx-crumbs__step` is 36px tall | 48 | The design's own usage note says 48, and 36 breaks the touch-target floor its own spacing token declares. |
 | F16 | a 60% scrim in both modes | 48% light / 72% dark | M4.10j measured it: a mid scrim over a `#0A082D` page barely registers. |
-| E13 | states snap to a flat wash, no animation | Android animates the press as an ink ripple, in the kit's colours | Platform-native touch feedback on the release target (decided M4.10ap). The kit is a web artifact with no press-animation vocabulary; the wash colours themselves are transcribed, and parity screenshots are static so no render can see the difference. `MxTextButton` and `MxBreadcrumb` keep their local `NoSplash` — text links carry states on the text itself. |
+| E13 | states snap to a flat wash, no animation | Android animates the press as an ink ripple, in the kit's colours | Platform-native touch feedback on the release target (decided M4.10aq). The kit is a web artifact with no press-animation vocabulary; the wash colours themselves are transcribed, and parity screenshots are static so no render can see the difference. `MxTextButton` and `MxBreadcrumb` keep their local `NoSplash` — text links carry states on the text itself. |
 
 Plus the two contradictions resolved in the design's favour with a correction
 attached — `danger`'s saturation (M4.10p) and the due chip's foreground
@@ -449,7 +449,7 @@ token a component reaches for, and measurement wins over both.
 
 ---
 
-## Round 3 — the theme-slot audit (M4.10ap)
+## Round 3 — the theme-slot audit (M4.10aq)
 
 An audit of `ThemeData` against what the app actually renders, in both
 directions: slots a live renderer was missing, and slots that outlived their

@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M4.10ap |
+| **Updated by task** | M4.10aq |
 | **Last updated** | 2026-08-02 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -4546,9 +4546,76 @@ quét **mọi** lớp ink (`MxCard` tự dựng Material của nó, `MxListTile`
 của `Scaffold`) và so màu theo ARGB đóng gói, vì `InkHighlight` animate alpha
 bằng số nguyên nên token khai `alpha: 0.04` chạm canvas ở `10/255`.
 
-**Next task: M4.10ap · Audit slot ThemeData theo chuẩn hiện đại.**
+**Next task: M4.10ap · Focus ring đạt ngưỡng, và hai lỗ hổng enforcement còn lại.**
 
-### M4.10ap · ThemeData slot audit — bịt slot thiếu, dọn slot mồ côi
+### M4.10ap · Focus ring lên semantic token, guard duration và scale parity khép kín
+
+- **Status:** done
+- **Goal:** Đóng ba phát hiện của vòng review M4.10ao: focus ring không đạt
+  3:1 ở dark, guard duration không phủ nơi regression thật sự xảy ra, và scale
+  parity không có completeness.
+- **Scope:** `focusRingSide()` + `kFocusRingWidth` trong `app_button_themes.dart`
+  và ba nơi gọi (chip, outlined button, icon button); scope
+  `ui_and_theme_surfaces` + regex bỏ qua dòng comment cho `no_raw_duration`;
+  `widthPerNavigationDestination` đổi từ private thành public; completeness cho
+  6 file token còn lại; `CssTokens.tokenFileNames()`.
+- **Out of scope:** giá trị `primaryDark` — nó được giữ ở luminance đó có lý do
+  (một filled button không được là thứ sáng nhất trên trang navy); vấn đề là
+  dùng nó làm focus ring, không phải bản thân nó.
+- **Dependencies:** M4.10ao
+- **Checklist phases:** 7, 12, 13
+- **Tests required:** `focus_ring_contrast_test.dart` (8 test, 4 nền × 2 mode);
+  `css_scale_coverage_test.dart`; fault injection cho cả ba.
+- **Editable documents:** `docs/wbs.md`, `docs/architecture.md`
+- **Output:** `test/core/theme/focus_ring_contrast_test.dart`,
+  `test/design_audit/css_scale_coverage_test.dart`
+- **Acceptance criteria:**
+  - [x] Ba component vẽ focus ring đều đi qua `focusRingSide`; đo được ≥3:1
+        trên **cả bốn** nền ở cả hai mode.
+  - [x] `no_raw_duration` bắt được đúng regression tooltip khi tiêm lại vào
+        `app_overlay_themes.dart`; named const vẫn được tha.
+  - [x] Completeness bắt token scale mới; anti-vacuous bắt cả **file** token mới.
+  - [x] 1121 test pass, `flutter analyze` 0 issue, guard 68 rule xanh.
+
+**Đảo một quyết định vừa land ở M4.10an, và đây là lý do.** M4.10an gom focus
+ring về `AppInteractionStates.focusRing` — đúng về cấu trúc, và task này giữ
+nguyên helper đó. Nhưng nó chọn `primary` với lập luận "`semanticColors.focusRing`
+là hue của viền *input*". Hai điểm bác lập luận đó: kit không nhất quán với chính
+nó (`.mx-deck__study:focus-visible` dùng `--color-focus-ring` trên một **button**,
+nên token đó không phải của riêng input), và quan trọng hơn — số đo. `primary`
+trượt 3:1 ở dark trên đúng hai nền mà control được focus nằm lên. AD-05 đã có
+tiền lệ cho đúng tình huống này: theo kit là theo *cách* nó dùng token, và khi
+một giá trị của kit rơi vào lỗi tương phản thì app lệch đi và ghi lại lý do.
+
+**Test cũ khẳng định đúng cái giá trị đang sai.** `mx_pill_button_theme_test.dart`
+pin `focused?.color == colorScheme.primary` — nó pass, và nó pin một màu đo được
+**2.11:1** trên chính `secondaryContainer` mà pill selected dùng làm nền. Một
+test viết bằng cách đọc giá trị hiện có sẽ đồng ý với bug. Nay nó pin qua
+`focusRingSide`, còn con số thì `focus_ring_contrast_test.dart` đo.
+
+**Đo trên nền thật, không trên một nền danh nghĩa.** `primaryDark` đạt 3.29:1
+trên `background` — nếu chỉ kiểm nền trang thì đã pass. Nó hỏng ở `surface`
+(2.90) và hỏng nặng nhất ở `secondaryContainer` (2.11), tức đúng hai nền mà một
+control được focus thực sự nằm lên. Comment của `iconButtonTheme` viện dẫn ngưỡng
+3:1 trong khi vẽ một màu không đạt nó.
+
+**Guard scoped sai thì không bắt được chính ca nó được viết ra để chặn.**
+`ui_surfaces` cố ý loại `lib/core/theme/**` — đúng cho màu và radius, vì ở đó
+literal *chính là* token. Duration không như vậy: `AppDurations` khai báo ba rung
+của nó dưới dạng **named const**, và mọi duration hợp lệ khác trong repo cũng
+thế, nên thư mục theme không cần miễn trừ nào — trong khi nó lại là nơi
+`Duration(milliseconds: 500)` từng nằm ẩn danh. Scope mới `ui_and_theme_surfaces`
+đưa theme vào, lookahead giữ domain ở ngoài.
+
+**Rule bắt chính tài liệu của nó.** Sau khi mở scope, `no_raw_duration` đỏ ở
+`app_overlay_themes.dart:75` — dòng doc comment giải thích *không được viết*
+`Duration(milliseconds: 500)`. Repo đã gặp đúng lỗi này một lần (R8 khớp chữ
+`platformBrightness` còn sót trong comment giải thích nó). Lookahead nay bỏ qua
+dòng bắt đầu bằng `//` hoặc `*`.
+
+**Next task: M4.10aq · Audit slot ThemeData theo chuẩn hiện đại.**
+
+### M4.10aq · ThemeData slot audit — bịt slot thiếu, dọn slot mồ côi
 
 - **Status:** done
 - **Goal:** Mọi slot component theme có renderer đang chạy đều được khai báo,
@@ -4572,8 +4639,11 @@ bằng số nguyên nên token khai `alpha: 0.04` chạm canvas ở `10/255`.
   datePicker/timePicker/dataTable…); ThemeExtension per-component; đổi
   `listTileTheme.selectedColor`; panel geometry trùng lặp ở 3 widget deck
   (việc tầng component, không phải tầng theme); `.mx-shell__fab` phía kit.
-- **Dependencies:** M4.10an
+- **Dependencies:** M4.10ap
 - **Checklist phases:** 7, 12, 13
+- **Tests required:** state resolution của text link và radio ở cả hai mode;
+  sàn tương phản cho nhãn link (4.5:1) và mark radio (3:1); compact scale
+  **không** đụng `textButtonTheme`; `labelBehavior` đo hành vi hiệu dụng.
 - **Editable documents:** `docs/wbs.md`, `docs/reviews/design-parity-checklist.md`
 - **Output:** `lib/core/theme/app_radio_theme.dart` ·
   `lib/core/theme/app_input_theme.dart` (input family tách khỏi
@@ -4587,7 +4657,7 @@ bằng số nguyên nên token khai `alpha: 0.04` chạm canvas ở `10/255`.
         trên card dark, dưới ngưỡng 3:1 của WCAG 1.4.11.
   - [x] Widget test đo hành vi hiệu dụng (`widget ?? theme`) thay vì thuộc
         tính widget, nên một quyết định chỉ còn một chỗ khai.
-  - [x] 1157 test pass; analyze 0 issue; 2 golden action-sheet đổi có chủ ý
+  - [x] Toàn bộ test pass; analyze 0 issue; 2 golden action-sheet đổi có chủ ý
         (hằng 0.38 → token `0x61`, lệch 1 nấc kênh màu); parity checklist thêm
         B14/B15/E13 và Round 3.
 
@@ -4608,6 +4678,12 @@ khai báo giá trị Android đang dùng, không phải đổi hành vi release.
 vì `NoSplash` toàn cục theo kit — ghi thành divergence #5 (E13) với
 counter-argument của kit giữ nguyên trong checklist; `splashColor` giờ mang
 màu wash của kit nên ripple loang đúng alpha 12% của `primary`.
+
+**Cùng lập luận với M4.10ap, ở một control khác.** Task trước chuyển focus
+ring khỏi `primary` vì nó đo 2.90:1 trên `surface` ở dark; mark của radio là
+đúng loại đối tượng đó — một glyph trên nền trần, không phải một mảng fill —
+nên nó nhận `primaryAccent` chứ không phải `primary`, và con số hỏng là cùng
+một con số.
 
 **Next task: M4.11 · Card management full-stack.**
 

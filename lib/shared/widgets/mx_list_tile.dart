@@ -97,7 +97,7 @@ class _MxListTileState extends State<MxListTile> {
         borderRadius: BorderRadius.circular(AppRadius.md),
         border: _isFocused
             ? Border.fromBorderSide(
-                AppInteractionStates.focusRing(context.colors),
+                AppInteractionStates.focusRing(context.semanticColors),
               )
             : null,
       ),

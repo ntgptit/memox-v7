@@ -316,7 +316,7 @@ ThemeData _buildTheme(
             // modes, where WCAG 1.4.11 asks 3:1 of a focus indicator.
             side: WidgetStateProperty.resolveWith((states) {
               if (!states.contains(WidgetState.focused)) return null;
-              return AppInteractionStates.focusRing(scheme);
+              return AppInteractionStates.focusRing(semantic);
             }),
           ),
     ),
