@@ -22,6 +22,7 @@ import '../widgets/deck_summary_section_widget.dart';
 import '../widgets/deck_list_toolbar_widget.dart';
 import '../widgets/deck_level_body_widget.dart';
 import '../widgets/deck_subheader_widget.dart';
+import '../widgets/deck_notice_widget.dart';
 import '../widgets/deck_tile_widget.dart';
 
 /// Space under the last card. It was 112 while a floating action hovered over

@@ -219,20 +219,29 @@ void main() {
       // to be enough and stopped being so the moment a second line on the same
       // card mentioned the same total, which is exactly the ambiguity a bare
       // substring match hides.
-      // **Two of each, and that is correct.** The card carries its own bar and
-      // the level summary above it carries the level's — and with one child in
-      // this fixture the two totals are the same numbers. Asserting one would
-      // be asserting that the summary does not exist.
+      //
+      // **Painted once, announced twice.** The level summary above the list
+      // still writes the figure out; the card stopped, because a header saying
+      // `21 of 42 learned` above a track of the same length is the same fact
+      // twice and it cost 24px on every row. The card's copy moved into
+      // `Semantics`, so a screen reader still hears both — which is what the
+      // second expectation checks.
       expect(
         find.text(english.deckLearnedProgressLabel(21, 42)),
-        findsNWidgets(2),
-        reason: 'the learned count, on the card and in the level summary',
+        findsOneWidget,
+        reason: 'painted once, by the level summary',
       );
+      // On the card's own node, not as a separate one: `MxCard` announces the
+      // whole card as one button, so everything inside it merges into that
+      // label. That was already true of the header when it was painted — what
+      // changed is only that the words are no longer also drawn.
+      final handle = tester.ensureSemantics();
       expect(
-        find.text(english.deckLearnedPercentLabel(50)),
-        findsNWidgets(2),
-        reason: 'and its percentage',
+        tester.getSemantics(find.byType(DeckTileWidget)).label,
+        contains(english.deckLearnedProgressLabel(21, 42)),
+        reason: 'the card announces what it stopped painting',
       );
+      handle.dispose();
     });
 
     testWidgets('a later emission updates the child list', (tester) async {
