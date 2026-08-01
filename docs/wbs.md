@@ -4685,6 +4685,12 @@ ring khỏi `primary` vì nó đo 2.90:1 trên `surface` ở dark; mark của ra
 nên nó nhận `primaryAccent` chứ không phải `primary`, và con số hỏng là cùng
 một con số.
 
+**Commit của task này mang sai ID trên subject.** Squash commit `139733b` (#98)
+ghi `(M4.10ap)` vì nó được viết trước khi #97 land và giành mất ID đó; việc đánh
+số lại chỉ kịp vào nội dung, không vào subject. `git log --grep M4.10aq` vì thế
+không tìm ra nó — dòng này là chỗ để tìm. Không rewrite lịch sử của `main` cho
+một dòng subject.
+
 **Next task: M4.11 · Card management full-stack.**
 
 ### M4.11 · Card management full-stack
