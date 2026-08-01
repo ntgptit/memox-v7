@@ -49,13 +49,18 @@ class DeckSubheaderWidget extends ConsumerWidget {
       // the line every other element on the screen starts from, so the path
       // starts there too.
       crossAxisAlignment: CrossAxisAlignment.start,
-      // **The two rows were touching.** The path's box ended at the exact pixel
-      // the search pill began, so a strip that is quiet grey text read as the
-      // pill's own label rather than as a separate control. `sm` is the smallest
-      // step that separates two things that *are* related — they are both this
-      // level's chrome — and it is what the compact budget could still afford
-      // after the breadcrumb's own arrival; see M4.10af.
-      spacing: AppSpacing.lg + AppSpacing.xs,
+      // **`sm`, and the number the eye meets is 24.** The strip above is 48
+      // tall for its touch floor while its text is 16, so 16px of invisible
+      // target space already sits under the words; what a reader sees is that
+      // plus this gap. It shipped one release as `lg + xs` — 20, put there by a
+      // squash while this very comment still argued for `sm`, and the kit's
+      // `.mx-shell__sub` stayed at 8 — which pushed the visible gap to 36
+      // against 16 on the panel side: the search field read as stranded from
+      // the chrome it belongs to and glued to the content that scrolls under
+      // it. 8 here and 28 below the field is as close to even as the 4px grid
+      // allows (the exact split, 18, is not on it), with the odd 4 spent on the
+      // side proximity wants: search groups with the breadcrumb, not the panel.
+      spacing: AppSpacing.sm,
       children: <Widget>[
         // Unconditional: every level has a path now, the deck list included,
         // where it is the single `Root` step.
