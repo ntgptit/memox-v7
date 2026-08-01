@@ -46,50 +46,158 @@ abstract final class AppTypography {
     FontVariation('wght', weight.value.toDouble()),
   ];
 
-  static TextStyle _display(TextStyle? base, FontWeight weight) =>
-      (base ?? const TextStyle()).copyWith(
-        fontFamily: displayFamily,
-        fontWeight: weight,
-        fontVariations: _wght(weight),
-      );
+  /// One rung of the scale, in the display face.
+  ///
+  /// **[size], [height] and [tracking] are stated, never inherited.** Every
+  /// value here also exists in `design_system/tokens/typography.css`, which is
+  /// authoritative for token values since M4.10p — and until now this file
+  /// declared none of them. The two agreed because Material 3's own defaults
+  /// happen to equal the design's, which is a coincidence with a maintenance
+  /// bill: an SDK bump would have moved the whole app's type scale with no line
+  /// of code changing and no test noticing. `app_typography_test.dart` is what
+  /// notices now.
+  ///
+  /// [height] is the multiplier Flutter wants; the call sites write it as
+  /// `leading / size` so the leading the design states stays readable.
+  static TextStyle _display(
+    TextStyle? base,
+    FontWeight weight, {
+    required double size,
+    required double height,
+    double tracking = 0,
+  }) => (base ?? const TextStyle()).copyWith(
+    fontFamily: displayFamily,
+    fontWeight: weight,
+    fontVariations: _wght(weight),
+    fontSize: size,
+    height: height,
+    letterSpacing: tracking,
+  );
 
-  static TextStyle _body(TextStyle? base, FontWeight weight) =>
-      (base ?? const TextStyle()).copyWith(
-        fontFamily: bodyFamily,
-        fontWeight: weight,
-        fontVariations: _wght(weight),
-      );
+  /// One rung of the scale, in the body face. See [_display].
+  static TextStyle _body(
+    TextStyle? base,
+    FontWeight weight, {
+    required double size,
+    required double height,
+    double tracking = 0,
+  }) => (base ?? const TextStyle()).copyWith(
+    fontFamily: bodyFamily,
+    fontWeight: weight,
+    fontVariations: _wght(weight),
+    fontSize: size,
+    height: height,
+    letterSpacing: tracking,
+  );
 
   static TextTheme buildTextTheme(TextTheme base) {
     return base.copyWith(
       // --- Display: Plus Jakarta Sans ---
-      displayLarge: _display(base.displayLarge, FontWeight.w700),
-      displayMedium: _display(base.displayMedium, FontWeight.w700),
-      displaySmall: _display(base.displaySmall, FontWeight.w600),
-      headlineLarge: _display(base.headlineLarge, FontWeight.w600),
+      displayLarge: _display(
+        base.displayLarge,
+        FontWeight.w700,
+        size: 57,
+        height: 64 / 57,
+      ),
+      displayMedium: _display(
+        base.displayMedium,
+        FontWeight.w700,
+        size: 45,
+        height: 52 / 45,
+      ),
+      displaySmall: _display(
+        base.displaySmall,
+        FontWeight.w600,
+        size: 36,
+        height: 44 / 36,
+      ),
+      headlineLarge: _display(
+        base.headlineLarge,
+        FontWeight.w600,
+        size: 32,
+        height: 40 / 32,
+      ),
       // The card prompt. Tighter leading than Material's default: a long-ish
       // prompt otherwise wraps in a way that pushes the answer below the fold
       // inside the phone frame.
       headlineMedium: _display(
         base.headlineMedium,
         FontWeight.w600,
-      ).copyWith(fontSize: cardPromptSize, height: 1.22, letterSpacing: -0.5),
-      headlineSmall: _display(base.headlineSmall, FontWeight.w600),
-      titleLarge: _display(base.titleLarge, FontWeight.w600),
+        size: cardPromptSize,
+        height: 1.22,
+        tracking: -0.5,
+      ),
+      headlineSmall: _display(
+        base.headlineSmall,
+        FontWeight.w600,
+        size: 24,
+        height: 32 / 24,
+      ),
+      titleLarge: _display(
+        base.titleLarge,
+        FontWeight.w600,
+        size: 22,
+        height: 28 / 22,
+      ),
 
       // --- UI and body: Inter ---
-      titleMedium: _body(base.titleMedium, FontWeight.w600),
-      titleSmall: _body(base.titleSmall, FontWeight.w600),
-      bodyLarge: _body(base.bodyLarge, FontWeight.w400),
+      titleMedium: _body(
+        base.titleMedium,
+        FontWeight.w600,
+        size: 16,
+        height: 24 / 16,
+        tracking: 0.15,
+      ),
+      titleSmall: _body(
+        base.titleSmall,
+        FontWeight.w600,
+        size: 14,
+        height: 20 / 14,
+        tracking: 0.1,
+      ),
+      bodyLarge: _body(
+        base.bodyLarge,
+        FontWeight.w400,
+        size: 16,
+        height: 24 / 16,
+        tracking: 0.5,
+      ),
       // 1.45 keeps a two-line empty-state message readable without looking airy.
       bodyMedium: _body(
         base.bodyMedium,
         FontWeight.w400,
-      ).copyWith(height: 1.45),
-      bodySmall: _body(base.bodySmall, FontWeight.w400),
-      labelLarge: _body(base.labelLarge, FontWeight.w600),
-      labelMedium: _body(base.labelMedium, FontWeight.w500),
-      labelSmall: _body(base.labelSmall, FontWeight.w500),
+        size: 14,
+        height: 1.45,
+        tracking: 0.25,
+      ),
+      bodySmall: _body(
+        base.bodySmall,
+        FontWeight.w400,
+        size: 12,
+        height: 16 / 12,
+        tracking: 0.4,
+      ),
+      labelLarge: _body(
+        base.labelLarge,
+        FontWeight.w600,
+        size: 14,
+        height: 20 / 14,
+        tracking: 0.1,
+      ),
+      labelMedium: _body(
+        base.labelMedium,
+        FontWeight.w500,
+        size: 12,
+        height: 16 / 12,
+        tracking: 0.5,
+      ),
+      labelSmall: _body(
+        base.labelSmall,
+        FontWeight.w500,
+        size: 11,
+        height: 16 / 11,
+        tracking: 0.5,
+      ),
     );
   }
 }

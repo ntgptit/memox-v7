@@ -4113,6 +4113,40 @@ chỉ còn 7px. Bỏ hẳn phần tử nổi biến bảo đảm từ "đo đư�
 trúc". Giá phải trả, chấp nhận và ghi lại: hành động chính rời khỏi tầm ngón cái
 lên đầu màn hình. Inset cuối danh sách từ 112 xuống `lg`.
 
+**Next task: M4.10ah · Thang chữ thôi là tai nạn.**
+
+### M4.10ah · Khai báo thang chữ tường minh, và pin nó vào design kit
+
+- **Status:** done
+- **Goal:** Thang chữ của app thôi phụ thuộc mặc định Material 3.
+- **Scope:** `app_typography.dart`, `app_typography_test.dart` (mới), 2 golden.
+- **Out of scope:** đổi cỡ chữ — đây là khai báo, không phải thiết kế lại.
+- **Dependencies:** M4.10ag
+- **Checklist phases:** 7
+- **Tests required:** `app_typography_test.dart`, kiểm tiêm lỗi.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `test/core/theme/app_typography_test.dart`
+- **Acceptance criteria:**
+  - [x] Mọi rung của thang khai báo `fontSize`, `height`, `letterSpacing`.
+  - [x] Test đối chiếu tay với `tokens/typography.css`; tiêm lỗi 16→15 thì đỏ.
+  - [x] 1021 test pass, mọi gate xanh.
+
+**App và kit trùng nhau do may, không do khai báo.** `app_typography.dart` chỉ
+đặt font family và weight; mọi cỡ chữ là mặc định Material 3, và chúng tình cờ
+đúng bằng token của kit. Nâng SDK là cả thang chữ đổi mà **không gì trong dự án
+đỏ**: không analyze, không widget test, và không cả golden — vì golden so app với
+chính nó chứ không so với thiết kế.
+
+**Test chép tay từ CSS, có chủ ý.** Một test đọc token từ cùng nguồn mà code đọc
+chỉ chứng minh code tự nhất quán. Thứ đáng chứng minh là code khớp với một tài
+liệu không ai sửa được từ trong Dart.
+
+**Hai golden đổi 0.05%, và đó là bằng chứng chứ không phải phiền toái.** Material
+làm tròn `height` của `label-lg` thành **1.43**; kit ghi leading 20px trên cỡ 14,
+tức **1.42857**. Lệch 0.02px, đủ đổi khử răng cưa của gạch chân ở trạng thái
+focus. Khai báo theo kit là đúng hơn, và golden bắt được — đúng việc nó sinh ra
+để làm.
+
 **Next task: M4.11 · Card management full-stack.**
 
 ### M4.11 · Card management full-stack
