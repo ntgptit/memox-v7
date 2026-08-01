@@ -188,6 +188,11 @@ button.mx-tile:focus-visible{outline:none;box-shadow:inset 0 0 0 var(--border-fo
 .mx-crumbs::-webkit-scrollbar{display:none}
 .mx-crumbs__sep{color:var(--color-text-secondary);font-size:var(--icon-sm);flex:none}
 .mx-crumbs__step{display:inline-flex;align-items:center;gap:var(--space-xs);flex:none;min-height:36px;padding:0 var(--space-sm);border:0;background:none;white-space:nowrap;font-family:var(--font-body);font-size:var(--text-label-md);line-height:var(--leading-label-md);letter-spacing:var(--tracking-label-md);border-radius:var(--radius-sm)}
+/* The padding keeps a word off the chevrons beside it, and the first step has
+   nothing on its left. Symmetric on every step put the strip's first glyph 8px
+   inside the search field and the list under it — the box sat on the gutter and
+   the word did not, which is what a reader sees. */
+.mx-crumbs__step:first-child{padding-left:0}
 /* A link, not a button: every state is on the text, nothing is painted behind
    it. The 8% wash this used to carry drew a filled chip under each word, and
    four of those in a row read as a toolbar rather than as a path — they also

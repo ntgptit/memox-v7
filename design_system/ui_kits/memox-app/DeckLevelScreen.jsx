@@ -41,7 +41,18 @@ function DeckLevelScreen({ path, onOpen, onUp, onJumpTo, onNavigate, onActions, 
     <MxContentShell
       title={deck.name}
       leading={isRoot ? null : <MxIconButton icon="arrow_back" filled semanticLabel="Back" onClick={onUp} />}
-      actions={isRoot ? null : <MxIconButton icon="more_vert" filled semanticLabel="Deck actions" onClick={onActions} />}
+      actions={
+        // **Create is an app-bar action, not a floating one.** A button that
+        // hovers over the bottom-right of a scrolling list covers whatever row
+        // is there, and on a deck card that is its overflow menu. No inset fixes
+        // it: an inset reserves the END of the scroll, not the resting frame.
+        // Nothing floats now, so nothing can be covered — at the cost of the
+        // primary action leaving the thumb's reach.
+        <React.Fragment>
+          {searching ? null : <MxIconButton icon="add" filled semanticLabel={isRoot ? 'Create deck' : 'Create sub-deck'} onClick={onCreate} />}
+          {isRoot ? null : <MxIconButton icon="more_vert" filled semanticLabel="Deck actions" onClick={onActions} />}
+        </React.Fragment>
+      }
       subheader={
         <React.Fragment>
           {/* Every level, the library included — where it is the single Root
@@ -76,7 +87,6 @@ function DeckLevelScreen({ path, onOpen, onUp, onJumpTo, onNavigate, onActions, 
       }
       isScrollable
       isCompact={isCompact}
-      fab={searching ? undefined : { label: isRoot ? 'Create deck' : 'Create sub-deck', onPress: onCreate }}
     >
       <div style={{ paddingBottom: 96 }}>
         {searching ? (

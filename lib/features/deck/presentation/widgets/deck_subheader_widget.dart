@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/app_spacing.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_search_field.dart';
 import '../../domain/models/deck_list_snapshot_model.dart';
@@ -48,6 +49,13 @@ class DeckSubheaderWidget extends ConsumerWidget {
       // the line every other element on the screen starts from, so the path
       // starts there too.
       crossAxisAlignment: CrossAxisAlignment.start,
+      // **The two rows were touching.** The path's box ended at the exact pixel
+      // the search pill began, so a strip that is quiet grey text read as the
+      // pill's own label rather than as a separate control. `sm` is the smallest
+      // step that separates two things that *are* related — they are both this
+      // level's chrome — and it is what the compact budget could still afford
+      // after the breadcrumb's own arrival; see M4.10af.
+      spacing: AppSpacing.lg + AppSpacing.xs,
       children: <Widget>[
         // Unconditional: every level has a path now, the deck list included,
         // where it is the single `Root` step.

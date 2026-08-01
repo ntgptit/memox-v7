@@ -57,13 +57,12 @@ void main() {
     anchors: deckAnchorsWithEmpty,
     allowances: <AuditSkipAllowance>[
       ...deckShellAllowances(
-        // No app-bar icon button: create moved to the floating action at M4.12,
-        // and the root level has no deck of its own to act on. The empty state's
-        // own button belongs to the `empty_state` item below, and there is no
-        // toolbar — with no decks there is nothing to filter or sort.
-        screenIconButtons: 0,
+        // One: create, which came back to the app bar when the floating action
+        // was dropped. The root level has no deck of its own to act on, the
+        // empty state's own button belongs to the `empty_state` item below, and
+        // there is no toolbar — with no decks there is nothing to filter.
+        screenIconButtons: 1,
         screenItemId: 'deck_screen',
-        hasFloatingAction: true,
       ),
       ...mxActionButtonAllowances('empty_state'),
     ],
@@ -92,14 +91,13 @@ void main() {
     allowances: <AuditSkipAllowance>[
       ...deckShellAllowances(
         // One action per row for three decks, plus the summary panel's close
-        // button. The app bar's add action became the floating one at M4.12.
-        screenIconButtons: 4,
+        // button, plus the app bar's create action.
+        screenIconButtons: 5,
         screenItemId: 'deck_screen',
         // Every row is a tappable card now rather than a ListTile.
         tappableCards: 3,
         // Filter and sort.
         pills: 2,
-        hasFloatingAction: true,
       ),
       // One progress bar per deck that has cards; two of the three fixtures do.
       //
@@ -167,17 +165,15 @@ void main() {
     drive: settleDeckScreen,
     anchors: deckAnchorsWithEmpty,
     allowances: <AuditSkipAllowance>[
-      // One declared icon button — the action menu — plus the back button the
-      // AppBar adds on a pushed route. Create-sub-deck is the floating action.
-      // One breadcrumb step: this deck has no ancestors, so the strip is the
-      // deck list and then the deck itself, and only the first of those is a
-      // control.
+      // Two declared icon buttons — create and the action menu — plus the back
+      // button the AppBar adds on a pushed route. One breadcrumb step: this deck
+      // has no ancestors, so the strip is the deck list and then the deck
+      // itself, and only the first of those is a control.
       ...deckShellAllowances(
-        screenIconButtons: 1,
+        screenIconButtons: 2,
         screenItemId: 'deck_screen',
         hasBackButton: true,
         breadcrumbSteps: 1,
-        hasFloatingAction: true,
       ),
       ...mxActionButtonAllowances('empty_state'),
     ],
@@ -202,11 +198,10 @@ void main() {
     anchors: deckAnchorsWithEmpty,
     allowances: <AuditSkipAllowance>[
       ...deckShellAllowances(
-        screenIconButtons: 1,
+        screenIconButtons: 2,
         screenItemId: 'deck_screen',
         hasBackButton: true,
         breadcrumbSteps: 1,
-        hasFloatingAction: true,
       ),
       ...mxActionButtonAllowances('empty_state'),
     ],
@@ -250,19 +245,18 @@ void main() {
     anchors: deckPlainAnchors,
     allowances: <AuditSkipAllowance>[
       // The action menu and one per child row — plus the AppBar's back button.
-      // Three children, so four declared; create-sub-deck is the floating action.
+      // Three children, so four declared, plus create and the deck action menu.
       // Three breadcrumb steps: the deck list, then the two ancestors. The
       // strip's last step — the deck the user is in — is text rather than a
       // control, so it hosts no ink.
       ...deckShellAllowances(
         // Four as before, plus the summary panel's close button.
-        screenIconButtons: 5,
+        screenIconButtons: 6,
         screenItemId: 'deck_screen',
         hasBackButton: true,
         tappableCards: 3,
         pills: 2,
         breadcrumbSteps: 3,
-        hasFloatingAction: true,
       ),
       // Three cards, all with cards, plus the level summary's own bar.
       // The count is exact on purpose — an allowance that said "any number" would

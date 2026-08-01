@@ -26,9 +26,9 @@ guess.
 
 | kind | sites |
 |---|---|
-| other | 249 |
+| other | 250 |
 | background | 9 |
-| text | 21 |
+| text | 20 |
 | shadow | 1 |
 | border | 10 |
 | icon | 10 |

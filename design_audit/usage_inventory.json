@@ -3,9 +3,9 @@
   "scannedFiles": 127,
   "totalSites": 300,
   "byElementKind": {
-    "other": 249,
+    "other": 250,
     "background": 9,
-    "text": 21,
+    "text": 20,
     "shadow": 1,
     "border": 10,
     "icon": 10
@@ -3057,7 +3057,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_breadcrumb.dart",
-      "line": 209,
+      "line": 212,
       "widget_context": "_MxBreadcrumbFoldState",
       "element_kind": "icon",
       "source_kind": "theme-token",
@@ -3068,7 +3068,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_breadcrumb.dart",
-      "line": 210,
+      "line": 213,
       "widget_context": "_MxBreadcrumbFoldState",
       "element_kind": "icon",
       "source_kind": "theme-token",
@@ -3079,7 +3079,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_breadcrumb.dart",
-      "line": 225,
+      "line": 228,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3090,9 +3090,9 @@
     },
     {
       "file": "lib/shared/widgets/mx_breadcrumb.dart",
-      "line": 281,
+      "line": 302,
       "widget_context": "_MxBreadcrumbStepState",
-      "element_kind": "text",
+      "element_kind": "other",
       "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",
       "token": "colorScheme.onSurfaceVariant",
@@ -3101,7 +3101,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_breadcrumb.dart",
-      "line": 297,
+      "line": 330,
       "widget_context": "_MxBreadcrumbStepState",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3112,7 +3112,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_breadcrumb.dart",
-      "line": 298,
+      "line": 331,
       "widget_context": "_MxBreadcrumbStepState",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3123,7 +3123,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_breadcrumb.dart",
-      "line": 363,
+      "line": 395,
       "widget_context": "_MxBreadcrumbSeparator",
       "element_kind": "icon",
       "source_kind": "theme-token",
