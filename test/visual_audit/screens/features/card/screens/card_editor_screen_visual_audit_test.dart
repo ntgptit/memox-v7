@@ -30,6 +30,8 @@ void main() {
     // toolbar anchor; edit does not, so that allowance is create's alone.
     allowances: const <AuditSkipAllowance>[
       ..._sharedAllowances,
+      _inkLayersCreate,
+      _shapesCreate,
       _selectionAnchorAllowance,
     ],
   );
@@ -39,9 +41,19 @@ void main() {
     _editorInEditMode,
     state: 'edit',
     anchors: <AuditAnchor>[AuditAnchor.type('shell', MxContentShell)],
-    allowances: _sharedAllowances,
+    // The flag toggle loads its value after the card resolves; a second settle
+    // lets it become enabled so the audit reads its token colour, not the
+    // disabled-state blend.
+    drive: _settleFlagToggle,
+    allowances: const <AuditSkipAllowance>[
+      ..._sharedAllowances,
+      _inkLayersEdit,
+      _shapesEdit,
+    ],
   );
 }
+
+Future<void> _settleFlagToggle(WidgetTester tester) => tester.pumpAndSettle();
 
 /// The editor opened on an existing card (UC-04 A1): the two fields prefilled,
 /// the BR-10 progress note, the save-changes button, and the danger zone.
@@ -71,10 +83,57 @@ const AuditSkipAllowance _selectionAnchorAllowance = AuditSkipAllowance(
       'only positions its child and paints nothing.',
 );
 
-/// Shared by both modes: create and edit paint the same render tree — two
-/// `MxTextField`s, a close `IconButton` and two `MxActionButton`s inside the
-/// shell — so the same allowances resolve both. The only difference is the text
-/// prefilled into the fields, which is raster-only either way.
+/// The Material ink and shape layers, whose count is the one thing that differs
+/// between the two modes: create shows a close `IconButton` and two
+/// `MxActionButton`s; edit adds a flag `IconButton` in the app bar, so it has one
+/// more ink layer and one more shape painter. Split out of the shared list so the
+/// count is exact per mode rather than fudged to fit both.
+const AuditSkipAllowance _inkLayersCreate = AuditSkipAllowance(
+  itemId: 'shell',
+  reason: SkipReason.rasterOnly,
+  detailContains: '_RenderInkFeatures',
+  expectedMatches: 5,
+  rationale:
+      'The Material ink layers of the Scaffold, the AppBar, the close '
+      'IconButton and the two action buttons. Splash and highlight paint into '
+      'these layers; the overlay colours are asserted in app_theme_test.dart.',
+);
+
+const AuditSkipAllowance _inkLayersEdit = AuditSkipAllowance(
+  itemId: 'shell',
+  reason: SkipReason.rasterOnly,
+  detailContains: '_RenderInkFeatures',
+  expectedMatches: 6,
+  rationale:
+      'The five of create plus the app-bar flag IconButton (BR-92). Overlay '
+      'colours are asserted in app_theme_test.dart.',
+);
+
+const AuditSkipAllowance _shapesCreate = AuditSkipAllowance(
+  itemId: 'shell',
+  reason: SkipReason.customPainter,
+  detailContains: '_ShapeBorderPainter',
+  expectedMatches: 3,
+  rationale:
+      'The two action buttons and the close IconButton draw their rounded '
+      'shapes through ShapeBorder painters; the shapes come from the button and '
+      'icon-button themes and are pinned by the mx_components goldens.',
+);
+
+const AuditSkipAllowance _shapesEdit = AuditSkipAllowance(
+  itemId: 'shell',
+  reason: SkipReason.customPainter,
+  detailContains: '_ShapeBorderPainter',
+  expectedMatches: 4,
+  rationale:
+      'The three of create plus the app-bar flag IconButton (BR-92); the shapes '
+      'come from the icon-button theme and are pinned by the mx_components '
+      'goldens.',
+);
+
+/// Shared by both modes: the fields, the route backdrop, the field decoration.
+/// The ink/shape counts and the selection anchor vary per mode and are composed
+/// in at the call site.
 const List<AuditSkipAllowance> _sharedAllowances = <AuditSkipAllowance>[
   AuditSkipAllowance(
     itemId: 'screen',
@@ -83,28 +142,6 @@ const List<AuditSkipAllowance> _sharedAllowances = <AuditSkipAllowance>[
     rationale:
         'The route backdrop MaterialApp paints around an opaque page; the '
         'surface value is asserted in app_theme_test.dart.',
-  ),
-  AuditSkipAllowance(
-    itemId: 'shell',
-    reason: SkipReason.rasterOnly,
-    detailContains: '_RenderInkFeatures',
-    expectedMatches: 5,
-    rationale:
-        'The Material ink layers of the Scaffold, the AppBar, the close '
-        'IconButton and the two action buttons. Splash and highlight paint '
-        'into these layers; the overlay colours are asserted in '
-        'app_theme_test.dart.',
-  ),
-  AuditSkipAllowance(
-    itemId: 'shell',
-    reason: SkipReason.customPainter,
-    detailContains: '_ShapeBorderPainter',
-    expectedMatches: 3,
-    rationale:
-        'The two action buttons and the close IconButton draw their rounded '
-        'shapes through ShapeBorder painters; the shapes come from the '
-        'button and icon-button themes and are pinned by the mx_components '
-        'goldens.',
   ),
   // The two text fields. Each RenderEditable and its two custom-paint
   // layers (caret, selection) are raster-only; the field's border and

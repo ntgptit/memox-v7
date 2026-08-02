@@ -88,6 +88,24 @@ void main() {
     expect(find.text('Save changes'), findsNothing);
   });
 
+  testWidgets('the flag toggle writes the flag and flips its icon', (
+    tester,
+  ) async {
+    final repository = FakeCardRepository();
+    addTearDown(repository.dispose);
+    repository.cardToGet = repository.card('card-1');
+
+    await pump(tester, repository);
+
+    expect(find.byIcon(Icons.outlined_flag), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.outlined_flag));
+    await tester.pump();
+
+    expect(repository.flagWrites.single, (id: 'card-1', isFlagged: true));
+    expect(find.byIcon(Icons.flag), findsOneWidget);
+  });
+
   testWidgets('the danger zone confirms, then deletes the card', (
     tester,
   ) async {

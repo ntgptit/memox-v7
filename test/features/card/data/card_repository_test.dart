@@ -237,5 +237,27 @@ void main() {
     // runs above this layer and the guarantee is now structural rather than
     // observed — `card_use_cases_test.dart` proves the repository is never
     // reached, and `card_text_test.dart` owns the rule itself.
+
+    test('setCardFlag writes only the flag (BR-92)', () async {
+      final seeded = await seedCard();
+
+      await h.cardRepository.setCardFlag(
+        cardId: seeded.card.id,
+        isFlagged: true,
+      );
+
+      final row = await h.rawCard(seeded.card.id);
+      expect(row!.read<int>('is_flagged'), 1);
+      // The content the toggle must not touch.
+      expect(row.read<String>('front'), seeded.card.front);
+      expect(row.read<String>('back'), seeded.card.back);
+    });
+
+    test('setCardFlag on a missing card is a NotFoundFailure', () async {
+      await expectLater(
+        h.cardRepository.setCardFlag(cardId: 'ghost', isFlagged: true),
+        throwsA(isA<NotFoundFailure>()),
+      );
+    });
   });
 }

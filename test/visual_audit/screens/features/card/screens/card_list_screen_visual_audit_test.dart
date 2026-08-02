@@ -25,9 +25,16 @@ import '../../../../../features/card/presentation/support/fake_card_repository.d
 /// exact count, so a control added to the row surfaces as a miscount rather than
 /// vanishing into a blanket permission.
 void main() {
+  // One flagged row and one plain one, so the audit measures the flag indicator
+  // (BR-92) as well as the two-line face.
   FakeCardRepository loaded() => FakeCardRepository.loaded(
     <dynamic>[
-      FakeCardRepository().card('c1', front: 'ephemeral', back: 'short-lived'),
+      FakeCardRepository().card(
+        'c1',
+        front: 'ephemeral',
+        back: 'short-lived',
+        isFlagged: true,
+      ),
       FakeCardRepository().card('c2', front: 'ubiquitous', back: 'everywhere'),
     ].cast(),
     total: 214,

@@ -4948,8 +4948,14 @@ cột NULL của scheduler kia.
   `CardEdit`/`CardDelete` controller, editor rẽ hai nhánh (title, prefill, ghi chú
   BR-10, không có save-and-add ở edit), overlay xác nhận xóa dùng `MxConfirmDialog`
   destructive, route `:cardId/edit` (tên `cardEditorEdit`), strict visual audit
-  thêm state `edit`. Còn: tag chip, cờ pill, panel tiến độ, optional details,
-  breadcrumb + tên deck, auto-forward khi vào deck card-type.
+  thêm state `edit`;
+  lát 3 (cờ end-to-end, BR-92) **done** — `setCardFlag` use case + repo (ghi đúng
+  một cột `is_flagged`, `NotFoundFailure` nếu thiếu card), `CardFlag` controller
+  optimistic + revert khi ghi lỗi, toggle cờ ở app bar editor (filled/outline),
+  icon cờ trên hàng card dùng `onSurface` — không `primary`, vì accent đo 3,29:1
+  trên nền tối, dưới 4,5:1 cho glyph. Còn: tag chip, panel tiến độ + Due/New/state
+  trên hàng, optional details, breadcrumb + tên deck, auto-forward khi vào deck
+  card-type.
 - **Goal:** Người dùng quản lý card hoàn chỉnh trong deck loại `card`, từ UI
   xuống transaction Drift.
 - **Scope:** card list; empty state; tạo card; tạo card **đầu tiên** trong deck

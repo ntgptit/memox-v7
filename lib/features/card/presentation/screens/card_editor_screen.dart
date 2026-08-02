@@ -12,6 +12,7 @@ import '../../domain/entities/card_entity.dart';
 import '../../domain/failures/card_validation_failure.dart';
 import '../controllers/card_create_controller.dart';
 import '../controllers/card_editor_load_controller.dart';
+import '../controllers/card_flag_controller.dart';
 import '../controllers/card_write_controller.dart';
 import '../states/card_submit_state.dart';
 import '../widgets/overlays/card_confirm_widget.dart';
@@ -174,6 +175,7 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
     return _shell(
       context,
       title: context.l10n.cardEditorEditTitle,
+      actions: <Widget>[_flagToggle(cardId)],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
@@ -282,12 +284,31 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
     BuildContext context, {
     required String title,
     required Widget body,
+    List<Widget>? actions,
   }) => MxContentShell(
     title: title,
     leading: _closeButton(context),
+    actions: actions,
     isScrollable: true,
     body: body,
   );
+
+  /// The flag toggle, filled when the card is flagged (BR-92). Disabled until
+  /// the flag has loaded, so a tap can never write against an unknown value.
+  Widget _flagToggle(String cardId) {
+    final flagged = ref.watch(cardFlagProvider(cardId));
+    final isFlagged = flagged.value ?? false;
+
+    return IconButton(
+      icon: Icon(isFlagged ? Icons.flag : Icons.outlined_flag),
+      onPressed: flagged.isLoading
+          ? null
+          : () => ref.read(cardFlagProvider(cardId).notifier).toggle(),
+      tooltip: isFlagged
+          ? context.l10n.cardEditorUnflagAction
+          : context.l10n.cardEditorFlagAction,
+    );
+  }
 
   Widget _closeButton(BuildContext context) => IconButton(
     icon: const Icon(Icons.close),

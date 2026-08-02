@@ -78,6 +78,27 @@ void main() {
     expect(find.text('Showing 2 of 214'), findsOneWidget);
   });
 
+  testWidgets(
+    'a flagged card shows the flag indicator, an unflagged one does not',
+    (tester) async {
+      final repository = FakeCardRepository();
+      addTearDown(repository.dispose);
+      await pump(tester, repository);
+
+      repository.emitCards(
+        <dynamic>[
+          repository.card('c1', front: 'marked', isFlagged: true),
+          repository.card('c2', front: 'plain'),
+        ].cast(),
+      );
+      repository.emitCount(2);
+      await tester.pump();
+
+      // One flag icon, for the one flagged card.
+      expect(find.byIcon(Icons.flag), findsOneWidget);
+    },
+  );
+
   testWidgets('the tail offers load-more while rows remain', (tester) async {
     final repository = FakeCardRepository();
     addTearDown(repository.dispose);

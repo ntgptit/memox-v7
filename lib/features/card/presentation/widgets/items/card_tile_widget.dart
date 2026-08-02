@@ -17,6 +17,10 @@ import '../../../domain/entities/card_entity.dart';
 /// user's own text at different weights, which a list tile's title/subtitle pair
 /// would flatten. Tapping opens the editor — wired by the caller, so the tile
 /// stays ignorant of the router (AD-13).
+/// The flag indicator's size — the front line's title height, so the mark reads
+/// as part of that line rather than as chrome hung off the row.
+const double _flagIconSize = 18;
+
 class CardTileWidget extends StatelessWidget {
   const CardTileWidget({required this.card, required this.onTap, super.key});
 
@@ -39,25 +43,48 @@ class CardTileWidget extends StatelessWidget {
             horizontal: AppSpacing.lg,
             vertical: AppSpacing.md,
           ),
-          child: Column(
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Text(
-                card.front,
-                style: context.texts.titleSmall,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                card.back,
-                style: context.texts.bodySmall?.copyWith(
-                  color: context.colors.onSurfaceVariant,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Text(
+                      card.front,
+                      style: context.texts.titleSmall,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      card.back,
+                      style: context.texts.bodySmall?.copyWith(
+                        color: context.colors.onSurfaceVariant,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
+              // The flag indicator, read-only here — the editor owns the toggle
+              // (BR-92). Present only when set, so an unflagged row carries no
+              // decoration and the flagged ones stand out in a vertical scan.
+              if (card.isFlagged) ...<Widget>[
+                const SizedBox(width: AppSpacing.sm),
+                Icon(
+                  Icons.flag,
+                  size: _flagIconSize,
+                  // `onSurface`, not `primary`: the accent measures 3.29:1 as a
+                  // glyph on the dark surface — below the 4.5:1 the icon needs as
+                  // painted text. The flag reads by its shape and position; the
+                  // colour only has to stay legible (BR-92).
+                  color: context.colors.onSurface,
+                  semanticLabel: context.l10n.cardTileFlaggedSemantics,
+                ),
+              ],
             ],
           ),
         ),
