@@ -51,7 +51,10 @@ class _CardTagSectionWidgetState extends ConsumerState<CardTagSectionWidget> {
     final tags = ref.watch(cardTagsProvider(cardId)).value ?? <TagEntity>[];
     final entry = ref.watch(cardTagEntryProvider(cardId));
 
-    ref.listen<CardTagState>(cardTagEntryProvider(cardId), (previous, next) {
+    ref.listen<CardTagSubmitState>(cardTagEntryProvider(cardId), (
+      previous,
+      next,
+    ) {
       if (next.shouldClearDraft && !(previous?.shouldClearDraft ?? false)) {
         _input.clear();
         ref.read(cardTagEntryProvider(cardId).notifier).reset();
@@ -89,8 +92,8 @@ class _CardTagSectionWidgetState extends ConsumerState<CardTagSectionWidget> {
                 Chip(
                   label: Text(tag.name),
                   onDeleted: () => ref
-                      .read(cardTagEntryProvider(cardId).notifier)
-                      .remove(tag.id),
+                      .read(cardTagRemoveProvider(cardId).notifier)
+                      .submit(tag.id),
                   deleteButtonTooltipMessage: context.l10n
                       .cardEditorTagRemoveSemantics(tag.name),
                 ),
@@ -107,7 +110,7 @@ class _CardTagSectionWidgetState extends ConsumerState<CardTagSectionWidget> {
           errorText: _error(entry.problem),
           isEnabled: !entry.isSubmitting,
           onSubmitted: (value) =>
-              ref.read(cardTagEntryProvider(cardId).notifier).add(value),
+              ref.read(cardTagEntryProvider(cardId).notifier).submit(value),
         ),
       ],
     );

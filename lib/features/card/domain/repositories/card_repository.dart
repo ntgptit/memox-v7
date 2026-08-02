@@ -106,6 +106,10 @@ abstract interface class CardRepository {
   /// desync the mark from what the row shows.
   Future<void> setCardFlag({required String cardId, required bool isFlagged});
 
+  /// One card's flag as a stream (BR-92), so the editor's toggle shows the
+  /// current mark and reflects its own write without re-reading the card.
+  Stream<bool> watchCardFlag(String cardId);
+
   /// One card's tags, re-emitted on every change (BR-93).
   ///
   /// A stream, not a one-shot: the editor's chip strip must reflect an add or a

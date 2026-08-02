@@ -297,16 +297,20 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
   );
 
   /// The flag toggle, filled when the card is flagged (BR-92). Disabled until
-  /// the flag has loaded, so a tap can never write against an unknown value.
+  /// the flag has loaded, so a tap can never write against an unknown value. The
+  /// icon reads the [cardFlag] stream; the tap is a [SetCardFlag] command, and
+  /// the stream re-emits the written value.
   Widget _flagToggle(String cardId) {
-    final flagged = ref.watch(cardFlagProvider(cardId));
-    final isFlagged = flagged.value ?? false;
+    final flag = ref.watch(cardFlagProvider(cardId));
+    final isFlagged = flag.value ?? false;
 
     return IconButton(
       icon: Icon(isFlagged ? Icons.flag : Icons.outlined_flag),
-      onPressed: flagged.isLoading
+      onPressed: flag.isLoading
           ? null
-          : () => ref.read(cardFlagProvider(cardId).notifier).toggle(),
+          : () => ref
+                .read(setCardFlagProvider(cardId).notifier)
+                .submit(isFlagged: !isFlagged),
       tooltip: isFlagged
           ? context.l10n.cardEditorUnflagAction
           : context.l10n.cardEditorFlagAction,

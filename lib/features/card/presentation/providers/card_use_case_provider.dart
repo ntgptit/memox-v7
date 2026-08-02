@@ -5,6 +5,7 @@ import '../../domain/usecases/create_card_use_case.dart';
 import '../../domain/usecases/delete_card_use_case.dart';
 import '../../domain/usecases/get_card_use_case.dart';
 import '../../domain/usecases/set_card_flag_use_case.dart';
+import '../../domain/usecases/watch_card_flag_use_case.dart';
 import '../../domain/usecases/add_card_tag_use_case.dart';
 import '../../domain/usecases/remove_card_tag_use_case.dart';
 import '../../domain/usecases/watch_card_tags_use_case.dart';
@@ -66,3 +67,7 @@ RemoveCardTagUseCase removeCardTagUseCase(Ref ref) =>
 @riverpod
 WatchCardListItemsUseCase watchCardListItemsUseCase(Ref ref) =>
     WatchCardListItemsUseCase(ref.watch(cardRepositoryProvider));
+
+@riverpod
+WatchCardFlagUseCase watchCardFlagUseCase(Ref ref) =>
+    WatchCardFlagUseCase(ref.watch(cardRepositoryProvider));

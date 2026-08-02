@@ -222,6 +222,16 @@ final class FakeCardRepository implements CardRepository {
   /// When set, the next `setCardFlag` throws it — the optimistic-revert path.
   Failure? nextFlagFailure;
 
+  final StreamController<bool> _flag = StreamController<bool>.broadcast();
+  bool? _currentFlag;
+
+  @override
+  Stream<bool> watchCardFlag(String cardId) async* {
+    // The current mark first (from the seeded card, if any), then every change.
+    yield _currentFlag ?? cardToGet?.isFlagged ?? false;
+    yield* _flag.stream;
+  }
+
   @override
   Future<void> setCardFlag({
     required String cardId,
@@ -230,6 +240,8 @@ final class FakeCardRepository implements CardRepository {
     final failure = nextFlagFailure;
     if (failure != null) throw failure;
     flagWrites.add((id: cardId, isFlagged: isFlagged));
+    _currentFlag = isFlagged;
+    _flag.add(isFlagged);
   }
 
   // ---- tags --------------------------------------------------------------
@@ -280,5 +292,6 @@ final class FakeCardRepository implements CardRepository {
     unawaited(_items.close());
     unawaited(_count.close());
     unawaited(_tags.close());
+    unawaited(_flag.close());
   }
 }

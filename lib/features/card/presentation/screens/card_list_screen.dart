@@ -12,6 +12,7 @@ import '../../../../shared/widgets/mx_empty_state.dart';
 import '../../../../shared/widgets/mx_text_button.dart';
 import '../../domain/models/card_list_item_model.dart';
 import '../controllers/card_list_controller.dart';
+import '../controllers/card_list_now_controller.dart';
 import '../controllers/card_list_window_controller.dart';
 import '../widgets/items/card_tile_widget.dart';
 
@@ -106,6 +107,9 @@ class _Loaded extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final hasMore = items.length < total;
+    // One "now" for the whole list, from the composition root — every badge is
+    // measured against the same instant, and the tile never reads the clock.
+    final now = ref.watch(cardListNowProvider);
 
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(
@@ -134,7 +138,11 @@ class _Loaded extends ConsumerWidget {
         }
         if (index <= items.length) {
           final item = items[index - 1];
-          return CardTileWidget(item: item, onTap: () => onOpen(item));
+          return CardTileWidget(
+            item: item,
+            now: now,
+            onTap: () => onOpen(item),
+          );
         }
 
         return _Tail(
