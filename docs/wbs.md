@@ -4894,8 +4894,13 @@ hai mới cho biết cái gì thay đổi".
   — thứ tự danh sách cố định mới-trước, không có control đổi thứ tự; search thẻ
   là S1, chưa tới lượt.
 - **Wireframe:** [`docs/wireframes/m4-11-card-management.md`](wireframes/m4-11-card-management.md)
-  — bố cục chín màn, ba quyết định UI đã chốt (D1–D3), bảy câu còn mở (Q1, Q3–Q7).
-  **Q6 và Q7 chặn code**: `windowSize` và hành vi cửa sổ khi quay lại màn.
+  — bố cục chín màn, năm quyết định UI đã chốt (D1–D5), chín câu còn mở
+  (Q1, Q3–Q11). §4 tách trạng thái đích (màn tham chiếu của chủ dự án) khỏi lát
+  cắt M4.11, kèm bảng phân tầng từng khối.
+  **Chặn code:** Q6/Q7 (`windowSize`, hành vi cửa sổ khi quay lại màn) và
+  **Q8** — nhãn trạng thái thẻ cần một BR, vì `card_review_states` không có cột
+  trạng thái và ngưỡng quy chiếu khác nhau giữa `eight_box` và `sm2`.
+  Q9 (tag), Q10 (cờ) và Q11 (panel tiến độ) cần schema hoặc thuộc M5.x.
 - **Editable documents:** `docs/wbs.md`, `docs/wireframes/m4-11-card-management.md`
 - **Output:** `lib/features/card/`, `lib/l10n/`, `test/features/card/`,
   `test/visual_audit/screens/features/card/`

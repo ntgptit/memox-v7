@@ -25,6 +25,8 @@ Nó cũng không phải design reference để đo pixel. Acceptance criteria c�
 | Ngày | Task | Ai | Thay đổi |
 |---|---|---|---|
 | 2026-08-02 | M4.11 | — | Bản đầu. Chốt D1–D3 qua trao đổi; mở Q1–Q5. |
+| 2026-08-02 | M4.11 | — | Thêm ràng buộc kế thừa C1–C3 từ M4.10ar; thêm W1b (cửa sổ, load-more); Q2 đóng nhờ C1. |
+| 2026-08-02 | M4.11 | — | Nhận màn hình tham chiếu của chủ dự án. W1 tách thành trạng thái đích (§4.1), phân tầng khối (§4.2) và lát cắt M4.11 (§4.3). Chốt D4–D5; mở Q8–Q11. |
 
 ---
 
@@ -35,6 +37,8 @@ Nó cũng không phải design reference để đo pixel. Acceptance criteria c�
 | D1 | Card editor là **full-screen route**, không phải bottom sheet | Hai ô tới 2000 ký tự (BR-08) cộng luồng thêm liên tiếp (UC-04 A4) không vừa sheet ở 320×568 với `textScaler` 2.0. Lệch khỏi tiền lệ deck form (`showDeckRenameForm`) một cách có chủ đích. | 2026-08-02 |
 | D2 | Hàng card hiện **front + back + chip trạng thái ôn tập** | Quét được cả cặp mà không phải mở từng card. Chip đọc từ `card_review_states` mà BR-09 đã tạo sẵn lúc tạo card, nên không cần dữ liệu mới. | 2026-08-02 |
 | D3 | **Không** có search/filter/sort trên màn card | `wbs.md` M4.11 đặt thẳng chúng vào out-of-scope: thứ tự cố định, không control đổi thứ tự, search thẻ là S1. Deck list có search là quyết định riêng của M4.10; chép sang đây là nới scope. | 2026-08-02 |
+| D4 | FAB là **extended** (`+ New card`), không phải icon tròn | Từ ảnh tham chiếu. Màn này chỉ có một hành động chính và nó cần được gọi tên — một dấu `+` trần trên màn đầy thẻ không nói nó tạo *thẻ* hay tạo *deck con*. Cùng lý do `MxActionButton` không có variant chỉ-icon. | 2026-08-02 |
+| D5 | Hàng card là **bốn phần**: dot trạng thái · front · back · nhãn trạng thái, cộng badge hạn bên phải | Từ ảnh tham chiếu. Thay chip đơn của bản đầu. Ba tín hiệu trạng thái trả lời ba câu khác nhau — xem bảng ở §4.3 — và gộp lại thành một chip là mất hai trong ba. | 2026-08-02 |
 
 **D2 có một ranh giới phải giữ.** M4.11 **đọc** state row để vẽ chip; nó không
 tính lịch. `due_at` tiến lên là việc của M5.1. Nếu chip bắt đầu cần biết box số
@@ -69,54 +73,144 @@ Shell tái dùng: `MxContentShell` · `MxBreadcrumb` · `MxCard` · `MxActionShe
 
 ---
 
-## 4. W1 · Card list — loaded
+## 4. W1 · Card list
+
+### 4.1. Trạng thái đích
+
+Bản dưới là màn hình tham chiếu chủ dự án đưa (ảnh chụp, 2026-08-02). Nó vẽ ra
+màn deck detail **đầy đủ** — tức đích đến, không phải phạm vi M4.11.
 
 ```
 ┌──────────────────────────────────────────────┐
-│  ←   Academic Word List                  ⋮   │  AppBar
+│  ←   TOPIK II — Vocab                🔍   ⋮  │  ⚑ search: S1
 ├──────────────────────────────────────────────┤
-│  Library › English › Academic Word List      │  MxBreadcrumb
+│  Library › Korean › TOPIK II › TOPIK II — V… │  MxBreadcrumb, 4 cấp
 │                                              │
-│  SHOWING 50 OF 214                           │  section label · C3
+│  ┌────────────────────────────────────────┐  │ ╮
+│  │   ╭────╮   DECK PROGRESS               │  │ │
+│  │   │62% │   106 of 142 cards mastered   │  │ │
+│  │   ╰────╯   ● 23 due · 6 new            │  │ │
+│  │                                        │  │ │ ⚑ M5.x
+│  │  ▓▓▒▒▒▒▒████████░░░░░░░░░░░░░░░░░░░░░  │  │ │
+│  │  ● New 4   ● Learning 8  ● Reviewing 24│  │ │
+│  │  ● Mastered 106                        │  │ │
+│  │  ┌──────────────────────────────────┐  │  │ │
+│  │  │      ▷  Start study · 23 due     │  │  │ │ ⚑ M5.1
+│  │  └──────────────────────────────────┘  │  │ │
+│  └────────────────────────────────────────┘  │ ╯
+│                                              │
+│  ⟨All 142⟩ ⟨Due now 23⟩ ⟨New 4⟩ ⟨⚑ Flagged 2⟩│  ⚑ filter: out-of-scope
+│                                              │
+│  7 CARDS                       ⇅ Due first ⌄ │  ⚑ sort: out-of-scope
 │                                              │
 │  ┌────────────────────────────────────────┐  │
-│  │ ephemeral                          ⋮   │  │  front · title-sm
-│  │ lasting a very short time              │  │  back  · body-sm, 1 dòng
-│  │ ◷ Due now                              │  │  chip trạng thái
+│  │ ●  연구자                        ⟨now⟩ │  │  dot · front · due badge
+│  │    researcher / nhà nghiên cứu         │  │  back
+│  │    NEW    ⟨noun⟩ ⟨people⟩              │  │  state · ⚑ tag: bảng "sau"
 │  └────────────────────────────────────────┘  │
-│                                              │  ← AppSpacing.md giữa các card
 │  ┌────────────────────────────────────────┐  │
-│  │ ubiquitous                         ⋮   │  │
-│  │ present, appearing, or found every…    │  │  ellipsis khi tràn
-│  │ ○ New                                  │  │
+│  │ ●  공부하다                    ⟨in 4d⟩ │  │
+│  │    to study                            │  │
+│  │    MASTERED   ⟨verb⟩                   │  │
+│  └────────────────────────────────────────┘  │
+│  ┌────────────────────────────────────────┐  │
+│  │ ●  도서관                           ⚑  │  │  ⚑ flag: chưa có cột
+│  │    library, reading room       ⟨10m⟩   │  │
+│  │    LEARNING   ⟨noun⟩ ⟨places⟩          │  │
 │  └────────────────────────────────────────┘  │
 │                                              │
-│  ┌────────────────────────────────────────┐  │
-│  │ pragmatic                          ⋮   │  │
-│  │ dealing with things sensibly and re…   │  │
-│  │ ✓ Learned                              │  │
-│  └────────────────────────────────────────┘  │
-│                                              │
-│                                    ┌──────┐  │
-│                                    │  +   │  │  FAB → /cards/new
-│                                    └──────┘  │
+│                     ┌────────────────────┐   │
+│                     │  +   New card      │   │  extended FAB
+│                     └────────────────────┘   │
 └──────────────────────────────────────────────┘
 ```
 
-Chạm vào hàng mở editor chế độ sửa. `⋮` mở action sheet (W7).
+### 4.2. Khối nào thuộc đâu
 
-| Chip | Điều kiện | Token |
+Đối chiếu từng khối với `data-model.md` và scope M4.11. Ba nhóm, và chúng bị
+chặn bởi ba thứ khác nhau — nên gộp chúng thành "để sau" là mất thông tin.
+
+| Khối | Dữ liệu có chưa | Thuộc đâu |
 |---|---|---|
-| `○ New` | chưa có review nào | `textSecondary` |
-| `◷ Due now` | `due_at <= now`, đọc qua `clockProvider` | `semantic.warning` |
-| `✓ Learned` | `due_at > now` | `semantic.success` |
+| Back · title · `⋮` · breadcrumb | có | **M4.11** |
+| `7 CARDS` / dòng đếm | có (C3) | **M4.11** |
+| Hàng: dot · front · back · state · due badge | có | **M4.11** |
+| Extended FAB `+ New card` | — | **M4.11** — xem D4 |
+| Nút `🔍` search | — | **Chặn bởi scope.** `wbs.md` M4.11: search thẻ là S1 |
+| Pill `All / Due now / New` | có | **Chặn bởi scope.** M4.11 out-of-scope: không control lọc |
+| Sort `⇅ Due first` | có | **Chặn bởi scope**, và mâu thuẫn C1 (thứ tự cố định) |
+| Panel Deck progress + vòng 62% | một phần | **M5.x** — xem Q11 |
+| `▷ Start study` | có | **M5.1** — review nằm ngoài M4.11 |
+| Pill `⚑ Flagged` · icon ⚑ trên hàng | **không có cột** | **Cần schema mới** — Q10 |
+| Chip tag `⟨noun⟩ ⟨people⟩` | **bảng `tags` là "sau"** | **Cần schema mới** — Q9 |
+| Chữ `NEW / LEARNING / MASTERED / REVIEWING` | **bốn tên này không tồn tại** | **Cần một BR** — Q8 |
 
-Không widget nào trong `lib/features/` được đọc đồng hồ tường trực tiếp — giờ
-đến từ `clockProvider` ở composition root, theo `CLAUDE.md`.
+Hai điều cần nói thẳng, vì chúng dễ bị bỏ qua khi nhìn ảnh:
+
+**`card_review_states` không có cột trạng thái.** Nó có `current_box` 1..8 cho
+`eight_box`, và `ease_factor` / `interval_days` / `repetitions` cho `sm2`. Bốn
+nhãn trong ảnh là một *phép quy chiếu* từ những cột đó, và ngưỡng quy chiếu là
+quyết định sản phẩm — box mấy thì gọi là Mastered? — nên nó phải là một BR chứ
+không phải một hằng số ai đó chọn lúc viết widget. Xem Q8.
+
+**Hai scheduler quy chiếu khác nhau.** Cùng một nhãn `MASTERED` phải suy từ
+`current_box = 8` ở deck này và từ `interval_days` ở deck kia. Một hàm quy chiếu
+duy nhất cho cả hai là sai theo AD-06 — mỗi scheduler có state riêng.
+
+### 4.3. Lát cắt M4.11
+
+Cùng bố cục, bỏ những khối chưa tới lượt. Đây là thứ được build ở task này.
+
+```
+┌──────────────────────────────────────────────┐
+│  ←   TOPIK II — Vocab                     ⋮  │
+├──────────────────────────────────────────────┤
+│  Library › Korean › TOPIK II › TOPIK II — V… │
+│                                              │
+│  SHOWING 50 OF 214                           │  C3
+│                                              │
+│  ┌────────────────────────────────────────┐  │
+│  │ ●  연구자                        ⟨now⟩ │  │
+│  │    researcher / nhà nghiên cứu         │  │
+│  │    NEW                                 │  │
+│  └────────────────────────────────────────┘  │
+│  ┌────────────────────────────────────────┐  │
+│  │ ●  공부하다                    ⟨in 4d⟩ │  │
+│  │    to study                            │  │
+│  │    BOX 8                               │  │  ← tên thật, chưa quy chiếu
+│  └────────────────────────────────────────┘  │
+│  ┌────────────────────────────────────────┐  │
+│  │ ●  도서관                       ⟨10m⟩  │  │
+│  │    library, reading room               │  │
+│  │    BOX 3                               │  │
+│  └────────────────────────────────────────┘  │
+│                                              │
+│                     ┌────────────────────┐   │
+│                     │  +   New card      │   │
+│                     └────────────────────┘   │
+└──────────────────────────────────────────────┘
+```
+
+Chạm vào hàng mở editor chế độ sửa. `⋮` trên hàng bị bỏ so với bản trước: ảnh
+tham chiếu không có nó, và badge bên phải đã chiếm chỗ đó. Hành động của một
+card đi qua long-press → action sheet (W7).
+
+**Ba phần của trạng thái, và chúng trả lời ba câu khác nhau:**
+
+| Phần | Nguồn | Trả lời |
+|---|---|---|
+| Dot màu (trái) | cùng nguồn với nhãn | Quét dọc cả cột thấy ngay phân bố |
+| Nhãn chữ (dưới) | `current_box` \| `interval_days` | Thẻ này đang ở đâu |
+| Badge `⟨…⟩` (phải) | `due_at` − now | Bao giờ tới lượt nó |
+
+Badge là thời gian tương đối: `now` khi `due_at` NULL hoặc đã qua, `10m` / `in
+4d` khi còn. Giờ đến từ `clockProvider` ở composition root — không widget nào
+trong `lib/features/` đọc đồng hồ tường, theo `CLAUDE.md`.
 
 **Dòng đếm nói cửa sổ, không nói deck.** `SHOWING 50 OF 214` là cách C2 và C3
-hiện ra: 50 là cửa sổ đang mở, 214 là tổng thật từ query riêng. Viết `214 CARDS`
-sẽ nói dối về thứ người dùng cuộn được, và viết `50 CARDS` sẽ nói dối về deck.
+hiện ra: 50 là cửa sổ đang mở, 214 là tổng thật từ query riêng. Ảnh tham chiếu
+viết `7 CARDS` vì deck đó nhỏ hơn cửa sổ — ở deck lớn thì `214 CARDS` sẽ nói dối
+về thứ người dùng cuộn được, và `50 CARDS` nói dối về deck.
 
 ---
 
@@ -324,7 +418,7 @@ không" là lý do người ta không dám sửa lỗi chính tả trong card. P
 
 ```
         ┌──────────────────────────────┐
-        │  Card actions                │   MxActionSheet ( ⋮ )
+        │  Card actions                │   MxActionSheet (long-press)
         │                              │
         │  ✎  Edit                     │
         │  🗑  Delete                   │   destructive
@@ -345,6 +439,12 @@ không" là lý do người ta không dám sửa lỗi chính tả trong card. P
 
 Câu xác nhận nói rõ history cũng mất — hậu quả người dùng không đoán được từ chữ
 "xoá card". `Cancel` được autofocus, theo tiền lệ `mx_confirm_dialog` hiện có.
+
+**Vào bằng long-press, không phải `⋮` trên hàng.** Bản đầu vẽ `⋮` ở góc phải mỗi
+hàng; ảnh tham chiếu không có nó, và chỗ đó đã là badge hạn. Đổi lại thì hai thứ
+tranh nhau một góc. Cái giá phải trả là long-press không có affordance nhìn thấy
+được — đó là lý do `⋮` tồn tại ở deck list — nên nếu Q10 mang cờ ⚑ vào góc phải
+thì câu hỏi này phải mở lại.
 
 **Xoá card cuối cùng** đưa list về W2 (`No cards yet`), **không** về W3:
 `content_type` giữ nguyên `card` theo BR-67. Deck không hỏi lại câu đã trả lời.
@@ -427,6 +527,10 @@ thêm dòng vào [Lịch sửa](#1-lịch-sửa).
 | Q5 | Copy tiếng Việt cho toàn bộ chuỗi ở trên | ARB `vi` | — |
 | Q6 | `windowSize` là bao nhiêu, và bước load-more có bằng nó không. Wireframe vẽ 50/50 làm chỗ đặt số, không phải để chốt | W1b, `card.drift` `LIMIT :limit` | — |
 | Q7 | Cửa sổ có reset về `windowSize` khi rời màn rồi quay lại không, hay giữ nguyên độ mở | Controller state ở M4.11 | — |
+| Q8 | **Nhãn trạng thái thẻ cần một BR.** `card_review_states` không có cột trạng thái; `NEW / LEARNING / REVIEWING / MASTERED` trong ảnh là phép quy chiếu từ `current_box` (eight_box) và `interval_days` (sm2), và ngưỡng là quyết định sản phẩm. Cần **hai** hàm quy chiếu, một cho mỗi scheduler (AD-06). M4.11 tạm hiện tên thật (`NEW`, `BOX 3`) để không phát minh ngưỡng | Nhãn ở W1 §4.3; `business-rules.md` cần BR mới | — |
+| Q9 | Chip tag (`noun`, `people`) — `data-model.md` xếp bảng `tags` vào nhóm "sau" | Hàng card ở §4.1 | — |
+| Q10 | Cờ ⚑ trên thẻ — không có cột nào cho nó, và nó kéo theo một pill lọc | Hàng card và pill ở §4.1 | — |
+| Q11 | Panel Deck progress: vòng %, thanh phân đoạn 4 trạng thái, `106 of 142 mastered`. Phụ thuộc Q8, và "mastered" là khái niệm sản phẩm chưa được định nghĩa ở đâu | Đầu màn ở §4.1; M5.x | — |
 
 ---
 
@@ -449,6 +553,8 @@ không thành thứ không ai nhớ.
 | UC-08 — card đầu tiên khoá `content_type` | W3 |
 | M4.11 scope — `windowSize`, load-more, dòng "đang hiện N / M" | W1, W1b |
 | M4.11 scope — hành vi cuộn khi có dòng mới | W1b |
+| Màn tham chiếu của chủ dự án — trạng thái đích | W1 §4.1 |
+| Màn tham chiếu — khối nào chặn bởi scope, khối nào chặn bởi schema | W1 §4.2 |
 
 Một dòng của scope M4.11 **chưa có wireframe và cố ý vậy**: "auto-load". W1b chốt
 là load-more tường minh (C2), nên nếu auto-load nghĩa là tự mở rộng khi cuộn tới
