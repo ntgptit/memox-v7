@@ -4961,9 +4961,16 @@ cột NULL của scheduler kia.
   trước repo) / `Remove` / `Watch`; `CardTagEntry` controller + `cardTags`
   stream; section tag trong editor edit mode (chip xóa được + field thêm +
   counter `n / 10`). Audit editor tách field-count theo mode (edit có 3 field).
-  Còn: panel tiến độ + Due/New/state trên hàng, optional details, breadcrumb +
-  tên deck, auto-forward khi vào deck card-type. Ghi chú: tag ở create mode
-  (pending → link khi save) hoãn — card chưa có id để link.
+  lát 5 (hàng card đầy đủ: state, D5) **done** — read gộp `cardListItemsByDeck`
+  (`c.**, s.**`, INNER JOIN total nhờ BR-09) → projection `CardListItemModel`
+  (state suy bằng `cardStateOf`), use case + đổi `CardList` sang projection; tile
+  vẽ chấm trạng thái (màu map vào token semantic có sẵn info/warning/primaryAccent/
+  success — chấm là non-text nên 3:1 đủ, không thêm token mới nên 2 kit khỏi phân
+  kỳ) + front + back + nhãn trạng thái (`onSurfaceVariant`). Audit list đo cả chấm
+  lẫn nhãn. Còn: badge hạn (thời gian tương đối), tag chip trên hàng, filter pills
+  All/Due/New/Flagged, panel tiến độ, optional details, breadcrumb + tên deck,
+  auto-forward. Ghi chú: tag ở create mode (pending → link khi save) hoãn — card
+  chưa có id để link.
 - **Goal:** Người dùng quản lý card hoàn chỉnh trong deck loại `card`, từ UI
   xuống transaction Drift.
 - **Scope:** card list; empty state; tạo card; tạo card **đầu tiên** trong deck

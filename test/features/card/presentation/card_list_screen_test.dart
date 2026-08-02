@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/card/di/card_repository_provider.dart';
+import 'package:memox/features/card/domain/models/card_state_model.dart';
 import 'package:memox/features/card/presentation/controllers/card_list_window_controller.dart';
 import 'package:memox/features/card/presentation/screens/card_list_screen.dart';
 import 'package:memox/l10n/generated/app_localizations.dart';
@@ -48,7 +49,7 @@ void main() {
     addTearDown(repository.dispose);
     await pump(tester, repository);
 
-    repository.emitCards(<dynamic>[].cast());
+    repository.emitItems(<dynamic>[].cast());
     repository.emitCount(0);
     await tester.pump();
 
@@ -63,10 +64,10 @@ void main() {
     addTearDown(repository.dispose);
     await pump(tester, repository);
 
-    repository.emitCards(
+    repository.emitItems(
       <dynamic>[
-        repository.card('c1', front: 'ephemeral'),
-        repository.card('c2', front: 'ubiquitous'),
+        repository.listItem('c1', front: 'ephemeral'),
+        repository.listItem('c2', front: 'ubiquitous'),
       ].cast(),
     );
     repository.emitCount(214);
@@ -85,10 +86,10 @@ void main() {
       addTearDown(repository.dispose);
       await pump(tester, repository);
 
-      repository.emitCards(
+      repository.emitItems(
         <dynamic>[
-          repository.card('c1', front: 'marked', isFlagged: true),
-          repository.card('c2', front: 'plain'),
+          repository.listItem('c1', front: 'marked', isFlagged: true),
+          repository.listItem('c2', front: 'plain'),
         ].cast(),
       );
       repository.emitCount(2);
@@ -99,12 +100,32 @@ void main() {
     },
   );
 
+  testWidgets('each row shows its state label (D5, BR-90/91/88)', (
+    tester,
+  ) async {
+    final repository = FakeCardRepository();
+    addTearDown(repository.dispose);
+    await pump(tester, repository);
+
+    repository.emitItems(
+      <dynamic>[
+        repository.listItem('c1', front: 'fresh'),
+        repository.listItem('c2', front: 'done', state: CardState.mastered),
+      ].cast(),
+    );
+    repository.emitCount(2);
+    await tester.pump();
+
+    expect(find.text('New'), findsOneWidget);
+    expect(find.text('Mastered'), findsOneWidget);
+  });
+
   testWidgets('the tail offers load-more while rows remain', (tester) async {
     final repository = FakeCardRepository();
     addTearDown(repository.dispose);
     await pump(tester, repository);
 
-    repository.emitCards(<dynamic>[repository.card('c1')].cast());
+    repository.emitItems(<dynamic>[repository.listItem('c1')].cast());
     repository.emitCount(120);
     await tester.pump();
 
@@ -118,7 +139,7 @@ void main() {
     addTearDown(repository.dispose);
     await pump(tester, repository);
 
-    repository.emitCards(<dynamic>[repository.card('c1')].cast());
+    repository.emitItems(<dynamic>[repository.listItem('c1')].cast());
     repository.emitCount(1);
     await tester.pump();
 
@@ -133,7 +154,7 @@ void main() {
     addTearDown(repository.dispose);
     await pump(tester, repository);
 
-    repository.emitCards(<dynamic>[repository.card('c1')].cast());
+    repository.emitItems(<dynamic>[repository.listItem('c1')].cast());
     repository.emitCount(120);
     await tester.pump();
 

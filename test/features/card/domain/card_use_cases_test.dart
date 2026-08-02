@@ -4,6 +4,7 @@ import 'package:memox/features/card/domain/entities/card_entity.dart';
 import 'package:memox/features/card/domain/entities/tag_entity.dart';
 import 'package:memox/features/card/domain/failures/card_validation_failure.dart';
 import 'package:memox/features/card/domain/failures/tag_validation_failure.dart';
+import 'package:memox/features/card/domain/models/card_list_item_model.dart';
 import 'package:memox/features/card/domain/models/card_text_model.dart';
 import 'package:memox/features/card/domain/models/tag_name_model.dart';
 import 'package:memox/features/card/domain/repositories/card_repository.dart';
@@ -334,6 +335,17 @@ final class _CountingCardRepository implements CardRepository {
     watchLimits.add(limit);
 
     return const Stream<List<CardEntity>>.empty();
+  }
+
+  @override
+  Stream<List<CardListItemModel>> watchCardListItems(
+    String deckId, {
+    required int limit,
+  }) {
+    watchCalls.add(deckId);
+    watchLimits.add(limit);
+
+    return const Stream<List<CardListItemModel>>.empty();
   }
 
   @override

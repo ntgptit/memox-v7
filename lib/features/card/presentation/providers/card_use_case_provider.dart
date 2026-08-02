@@ -11,6 +11,7 @@ import '../../domain/usecases/watch_card_tags_use_case.dart';
 import '../../domain/usecases/update_card_use_case.dart';
 import '../../domain/usecases/watch_card_count_use_case.dart';
 import '../../domain/usecases/watch_cards_by_deck_use_case.dart';
+import '../../domain/usecases/watch_card_list_items_use_case.dart';
 
 part 'card_use_case_provider.g.dart';
 
@@ -61,3 +62,7 @@ AddCardTagUseCase addCardTagUseCase(Ref ref) =>
 @riverpod
 RemoveCardTagUseCase removeCardTagUseCase(Ref ref) =>
     RemoveCardTagUseCase(ref.watch(cardRepositoryProvider));
+
+@riverpod
+WatchCardListItemsUseCase watchCardListItemsUseCase(Ref ref) =>
+    WatchCardListItemsUseCase(ref.watch(cardRepositoryProvider));

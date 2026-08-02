@@ -10,7 +10,7 @@ import '../../../../shared/widgets/mx_async_view.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_empty_state.dart';
 import '../../../../shared/widgets/mx_text_button.dart';
-import '../../domain/entities/card_entity.dart';
+import '../../domain/models/card_list_item_model.dart';
 import '../controllers/card_list_controller.dart';
 import '../controllers/card_list_window_controller.dart';
 import '../widgets/items/card_tile_widget.dart';
@@ -71,7 +71,7 @@ class CardListScreen extends ConsumerWidget {
         icon: const Icon(Icons.add),
         label: Text(context.l10n.cardListNewFab),
       ),
-      body: MxAsyncView<List<CardEntity>>(
+      body: MxAsyncView<List<CardListItemModel>>(
         value: cards,
         loadingLabel: context.l10n.cardListLoadingLabel,
         error: (_, _) => _Error(message: context.l10n.cardListError),
@@ -79,11 +79,11 @@ class CardListScreen extends ConsumerWidget {
             ? _Empty(onAdd: () => _openEditor(context))
             : _Loaded(
                 deckId: deckId,
-                cards: list,
+                items: list,
                 // The count trails the window by at most a frame (C3); until its
                 // first value arrives the window length is the honest floor.
                 total: count.value ?? list.length,
-                onOpen: (card) => _openEditor(context, cardId: card.id),
+                onOpen: (item) => _openEditor(context, cardId: item.card.id),
               ),
       ),
     );
@@ -93,19 +93,19 @@ class CardListScreen extends ConsumerWidget {
 class _Loaded extends ConsumerWidget {
   const _Loaded({
     required this.deckId,
-    required this.cards,
+    required this.items,
     required this.total,
     required this.onOpen,
   });
 
   final String deckId;
-  final List<CardEntity> cards;
+  final List<CardListItemModel> items;
   final int total;
-  final void Function(CardEntity card) onOpen;
+  final void Function(CardListItemModel item) onOpen;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hasMore = cards.length < total;
+    final hasMore = items.length < total;
 
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(
@@ -116,7 +116,7 @@ class _Loaded extends ConsumerWidget {
       ),
       // One extra row: the "showing N of M" label at the top, then the cards,
       // then the tail. The header is index 0; the tail is the last index.
-      itemCount: cards.length + 2,
+      itemCount: items.length + 2,
       separatorBuilder: (_, index) =>
           SizedBox(height: index == 0 ? 0 : AppSpacing.md),
       itemBuilder: (context, index) {
@@ -124,7 +124,7 @@ class _Loaded extends ConsumerWidget {
           return Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.sm),
             child: Text(
-              context.l10n.cardListShowing(cards.length, total),
+              context.l10n.cardListShowing(items.length, total),
               style: context.texts.labelSmall?.copyWith(
                 color: context.colors.onSurfaceVariant,
                 letterSpacing: 1.1,
@@ -132,14 +132,14 @@ class _Loaded extends ConsumerWidget {
             ),
           );
         }
-        if (index <= cards.length) {
-          final card = cards[index - 1];
-          return CardTileWidget(card: card, onTap: () => onOpen(card));
+        if (index <= items.length) {
+          final item = items[index - 1];
+          return CardTileWidget(item: item, onTap: () => onOpen(item));
         }
 
         return _Tail(
           deckId: deckId,
-          shown: cards.length,
+          shown: items.length,
           total: total,
           hasMore: hasMore,
         );

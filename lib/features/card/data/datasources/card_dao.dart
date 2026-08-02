@@ -27,6 +27,13 @@ final class CardDao {
   Stream<List<Card>> watchCardsByDeck(String deckId, {required int limit}) =>
       _db.cardsByDeck(deckId, limit).watch();
 
+  /// The same window, joined to each card's review state (see `card.drift`).
+  /// Each result carries a nested `Card` and `CardReviewState`.
+  Stream<List<CardListItemsByDeckResult>> watchCardListItemsByDeck(
+    String deckId, {
+    required int limit,
+  }) => _db.cardListItemsByDeck(deckId, limit).watch();
+
   /// The deck's whole card count, for the "showing N of M" line.
   Stream<int> watchCardCountByDeck(String deckId) =>
       _db.cardCountByDeck(deckId).watchSingle();

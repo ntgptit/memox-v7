@@ -11,9 +11,11 @@ import '../../domain/entities/tag_entity.dart';
 import '../../domain/failures/card_conflict_failure.dart';
 import '../../domain/failures/card_not_found_failure.dart';
 import '../../domain/failures/tag_validation_failure.dart';
+import '../../domain/models/card_list_item_model.dart';
 import '../../domain/models/card_text_model.dart';
 import '../../domain/models/tag_name_model.dart';
 import '../../domain/repositories/card_repository.dart';
+import '../mappers/card_list_item_mapper.dart';
 import '../mappers/card_mapper.dart';
 import '../mappers/tag_mapper.dart';
 import '../datasources/card_dao.dart';
@@ -94,6 +96,24 @@ final class CardRepositoryImpl implements CardRepository {
         .map(
           (List<Card> rows) =>
               rows.map(cardEntityFromRow).toList(growable: false),
+        );
+  }
+
+  @override
+  Stream<List<CardListItemModel>> watchCardListItems(
+    String deckId, {
+    required int limit,
+  }) {
+    if (limit < 1) {
+      throw ArgumentError.value(limit, 'limit', 'must be at least 1');
+    }
+
+    return _cardDao
+        .watchCardListItemsByDeck(deckId, limit: limit)
+        .handleError(_rethrowMapped)
+        .map(
+          (List<CardListItemsByDeckResult> rows) =>
+              rows.map(cardListItemFromRow).toList(growable: false),
         );
   }
 
