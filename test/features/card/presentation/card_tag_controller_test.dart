@@ -26,7 +26,9 @@ void main() {
     addTearDown(repository.dispose);
     final container = containerWith(repository);
 
-    await container.read(cardTagEntryProvider('card-1').notifier).add('noun');
+    await container
+        .read(cardTagEntryProvider('card-1').notifier)
+        .submit('noun');
 
     expect(repository.tagAdds.single, (id: 'card-1', name: 'noun'));
     expect(
@@ -41,7 +43,7 @@ void main() {
     addTearDown(repository.dispose);
     final container = containerWith(repository);
 
-    await container.read(cardTagEntryProvider('card-1').notifier).add('   ');
+    await container.read(cardTagEntryProvider('card-1').notifier).submit('   ');
 
     expect(
       container.read(cardTagEntryProvider('card-1')).problem,
@@ -61,7 +63,7 @@ void main() {
 
     await container
         .read(cardTagEntryProvider('card-1').notifier)
-        .add('eleventh');
+        .submit('eleventh');
 
     expect(
       container.read(cardTagEntryProvider('card-1')).problem,
@@ -75,8 +77,8 @@ void main() {
     final container = containerWith(repository);
 
     await container
-        .read(cardTagEntryProvider('card-1').notifier)
-        .remove('tag-1');
+        .read(cardTagRemoveProvider('card-1').notifier)
+        .submit('tag-1');
 
     expect(repository.tagRemoves.single, (id: 'card-1', tagId: 'tag-1'));
   });

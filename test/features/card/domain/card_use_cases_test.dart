@@ -305,6 +305,9 @@ final class _CountingCardRepository implements CardRepository {
     required bool isFlagged,
   }) async => flagCalls.add((id: cardId, isFlagged: isFlagged));
 
+  @override
+  Stream<bool> watchCardFlag(String cardId) => const Stream<bool>.empty();
+
   final List<({String id, String name})> tagAddCalls =
       <({String id, String name})>[];
   final List<({String id, String tagId})> tagRemoveCalls =

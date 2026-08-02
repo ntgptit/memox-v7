@@ -269,6 +269,10 @@ final class CardRepositoryImpl implements CardRepository {
   });
 
   @override
+  Stream<bool> watchCardFlag(String cardId) =>
+      _cardDao.watchCardFlag(cardId).handleError(_rethrowMapped);
+
+  @override
   Future<void> setCardFlag({required String cardId, required bool isFlagged}) =>
       _guard(() async {
         await _requireCardRow(cardId);

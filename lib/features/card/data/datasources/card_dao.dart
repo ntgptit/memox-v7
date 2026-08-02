@@ -79,6 +79,13 @@ final class CardDao {
       (_db.update(_db.cards)..where((Cards card) => card.id.equals(cardId)))
           .write(CardsCompanion(isFlagged: Value(isFlagged ? 1 : 0)));
 
+  /// One card's flag as a stream, so the editor's toggle reflects a write
+  /// without re-reading the whole card. Re-emits on every change to the row.
+  Stream<bool> watchCardFlag(String cardId) => _db
+      .cardById(cardId)
+      .watchSingleOrNull()
+      .map((Card? row) => row?.isFlagged == 1);
+
   // ---- state counts -------------------------------------------------------
 
   /// The four numbers behind the deck progress panel.

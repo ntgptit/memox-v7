@@ -7,11 +7,11 @@ import '../../domain/failures/tag_validation_failure.dart';
 /// A typedef over the shared [SubmitState], exactly like `CardSubmitState`: the
 /// four fields and the policy getters live once in core, and what is the tag
 /// entry's own is only which problems exist — [TagValidationProblem].
-typedef CardTagState = SubmitState<TagValidationProblem>;
+typedef CardTagSubmitState = SubmitState<TagValidationProblem>;
 
 /// The tag field's reading of the problem set. All three problems belong to the
 /// one input, so there is a single accessor rather than a per-field split.
-extension CardTagProblems on CardTagState {
+extension CardTagProblems on CardTagSubmitState {
   TagValidationProblem? get problem =>
       firstProblemOf(TagValidationProblem.values.toSet());
 }
@@ -22,12 +22,14 @@ extension CardTagProblems on CardTagState {
 /// `cardSubmitFailure` documents. `AddCardTagUseCase` and the repository put the
 /// typed problems in the failure; this only routes a field problem under the
 /// input and anything else to the operation.
-CardTagState cardTagFailure(Failure failure) {
-  if (failure is! ValidationFailure) return CardTagState(failure: failure);
+CardTagSubmitState cardTagFailure(Failure failure) {
+  if (failure is! ValidationFailure) {
+    return CardTagSubmitState(failure: failure);
+  }
 
   final problems = failure.problems.whereType<TagValidationProblem>().toSet();
 
-  return CardTagState(
+  return CardTagSubmitState(
     problems: problems,
     failure: problems.isEmpty ? failure : null,
   );

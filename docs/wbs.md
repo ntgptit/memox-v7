@@ -4967,10 +4967,20 @@ cột NULL của scheduler kia.
   vẽ chấm trạng thái (màu map vào token semantic có sẵn info/warning/primaryAccent/
   success — chấm là non-text nên 3:1 đủ, không thêm token mới nên 2 kit khỏi phân
   kỳ) + front + back + nhãn trạng thái (`onSurfaceVariant`). Audit list đo cả chấm
-  lẫn nhãn. Còn: badge hạn (thời gian tương đối), tag chip trên hàng, filter pills
-  All/Due/New/Flagged, panel tiến độ, optional details, breadcrumb + tên deck,
-  auto-forward. Ghi chú: tag ở create mode (pending → link khi save) hoãn — card
-  chưa có id để link.
+  lẫn nhãn;
+  lát 6 (badge hạn + fix CQS, D5) **done** — model thuần `dueBadgeOf(dueAt, now)`
+  → sealed `CardDueBadge` (now/phút/giờ/ngày, coarse), `CardListNow` (now từ
+  clockProvider, refresh khi resume — mirror `DeckListNow`, không widget đọc đồng
+  hồ), badge ở góc phải hàng (cột flag + badge). **Đồng thời sửa vi phạm CQS/
+  provider mà `test/app` bắt (slice 3/4 lọt vì trước chỉ chạy test/features):**
+  `cardTags`/`cardFlag` thành query-stream `noAutomaticRetry` build-only; tách
+  `CardFlag` (Future+toggle, vi phạm query) thành `cardFlag` stream + `SetCardFlag`
+  command (`watchCardFlag` mới ở repo/DAO); tách `CardTagEntry.add/remove` thành
+  `CardTagEntry.submit` + `CardTagRemove.submit`; đổi typedef `CardTagState` →
+  `CardTagSubmitState` để test phân loại đúng command controller. Còn: tag chip
+  trên hàng, filter pills All/Due/New/Flagged, panel tiến độ, optional details,
+  breadcrumb + tên deck, auto-forward. Ghi chú: tag ở create mode hoãn — card chưa
+  có id để link.
 - **Goal:** Người dùng quản lý card hoàn chỉnh trong deck loại `card`, từ UI
   xuống transaction Drift.
 - **Scope:** card list; empty state; tạo card; tạo card **đầu tiên** trong deck

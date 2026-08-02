@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../domain/models/card_due_badge_model.dart';
 import '../../../domain/models/card_list_item_model.dart';
+import '../support/card_due_badge_widget.dart';
 import '../support/card_state_widget.dart';
 
 /// One card in the management list: a state dot, front over back with a state
@@ -26,15 +28,25 @@ const double _flagIconSize = 18;
 const double _stateDotSize = 10;
 
 class CardTileWidget extends StatelessWidget {
-  const CardTileWidget({required this.item, required this.onTap, super.key});
+  const CardTileWidget({
+    required this.item,
+    required this.now,
+    required this.onTap,
+    super.key,
+  });
 
   final CardListItemModel item;
+
+  /// The instant the due badge is measured against, from `cardListNowProvider`
+  /// at the composition root — the tile never reads the wall clock (CLAUDE.md).
+  final DateTime now;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final card = item.card;
     final stateLabel = context.cardStateLabel(item.state);
+    final dueLabel = context.dueBadgeLabel(dueBadgeOf(item.dueAt, now));
 
     return Semantics(
       button: true,
@@ -99,22 +111,38 @@ class CardTileWidget extends StatelessWidget {
                   ],
                 ),
               ),
-              // The flag indicator, read-only here — the editor owns the toggle
-              // (BR-92). Present only when set, so an unflagged row carries no
-              // decoration and the flagged ones stand out in a vertical scan.
-              if (card.isFlagged) ...<Widget>[
-                const SizedBox(width: AppSpacing.sm),
-                Icon(
-                  Icons.flag,
-                  size: _flagIconSize,
-                  // `onSurface`, not `primary`: the accent measures 3.29:1 as a
-                  // glyph on the dark surface — below the 4.5:1 the icon needs as
-                  // painted text. The flag reads by its shape and position; the
-                  // colour only has to stay legible (BR-92).
-                  color: context.colors.onSurface,
-                  semanticLabel: context.l10n.cardTileFlaggedSemantics,
-                ),
-              ],
+              const SizedBox(width: AppSpacing.sm),
+              // The trailing stack: the flag (when set) over the due badge, both
+              // right-aligned so the eye finds "when" and "marked" in one column.
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  // Read-only here — the editor owns the toggle (BR-92). Present
+                  // only when set, so unflagged rows carry no decoration.
+                  if (card.isFlagged)
+                    Icon(
+                      Icons.flag,
+                      size: _flagIconSize,
+                      // `onSurface`, not `primary`: the accent measures 3.29:1 as
+                      // a glyph on the dark surface — below the 4.5:1 an icon
+                      // needs as painted text. The flag reads by shape; the
+                      // colour only has to stay legible (BR-92).
+                      color: context.colors.onSurface,
+                      semanticLabel: context.l10n.cardTileFlaggedSemantics,
+                    ),
+                  if (card.isFlagged) const SizedBox(height: AppSpacing.xs),
+                  Semantics(
+                    label: context.l10n.cardDueBadgeSemantics(dueLabel),
+                    child: Text(
+                      dueLabel,
+                      style: context.texts.labelSmall?.copyWith(
+                        color: context.colors.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
         ),

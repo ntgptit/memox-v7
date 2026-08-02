@@ -697,6 +697,28 @@
     "placeholders": { "label": { "type": "String" } },
     "description": "Screen-reader label for the state dot, naming the state it stands for (D5)."
   },
+  "cardDueNow": "now",
+  "@cardDueNow": { "description": "Due badge when a card is due now — due_at null or past (D5, BR-22)." },
+  "cardDueInMinutes": "{minutes}m",
+  "@cardDueInMinutes": {
+    "placeholders": { "minutes": { "type": "int" } },
+    "description": "Due badge, compact minutes until due (D5)."
+  },
+  "cardDueInHours": "{hours}h",
+  "@cardDueInHours": {
+    "placeholders": { "hours": { "type": "int" } },
+    "description": "Due badge, compact hours until due (D5)."
+  },
+  "cardDueInDays": "{days}d",
+  "@cardDueInDays": {
+    "placeholders": { "days": { "type": "int" } },
+    "description": "Due badge, compact days until due (D5)."
+  },
+  "cardDueBadgeSemantics": "Due {when}",
+  "@cardDueBadgeSemantics": {
+    "placeholders": { "when": { "type": "String" } },
+    "description": "Screen-reader label for the due badge, wrapping the compact form (D5)."
+  },
   "cardEditorTagsLabel": "Tags",
   "@cardEditorTagsLabel": { "description": "Heading of the tag section in the card editor (BR-93)." },
   "cardEditorTagAddHint": "Add tag",

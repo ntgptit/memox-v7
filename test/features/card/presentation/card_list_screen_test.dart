@@ -120,6 +120,19 @@ void main() {
     expect(find.text('Mastered'), findsOneWidget);
   });
 
+  testWidgets('a card due now shows the now badge (BR-22)', (tester) async {
+    // The seeded rows carry no due date, so every one is due now.
+    final repository = FakeCardRepository();
+    addTearDown(repository.dispose);
+    await pump(tester, repository);
+
+    repository.emitItems(<dynamic>[repository.listItem('c1')].cast());
+    repository.emitCount(1);
+    await tester.pump();
+
+    expect(find.text('now'), findsOneWidget);
+  });
+
   testWidgets('the tail offers load-more while rows remain', (tester) async {
     final repository = FakeCardRepository();
     addTearDown(repository.dispose);
