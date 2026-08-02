@@ -1,0 +1,60 @@
+import '../tables/tags.drift';
+import '../tables/cards.drift';
+
+-- Typed queries for tags and the card flag (M4.10at).
+--
+-- Separate from `card.drift` because they are a different table family: these
+-- touch `tags` and `card_tags`, and nothing here reads a review state.
+
+-- Does this name already exist for this owner (BR-93)?
+--
+-- Matched on `name_folded`, never on `name`. The folded column is the one the
+-- unique index is built on, and it is the only comparison that treats `Động từ`
+-- and `động từ` as one tag — SQLite's own NOCASE folds ASCII and would let both
+-- in.
+--
+-- `owner_id IS :ownerId` rather than `=`: the local profile's owner is NULL
+-- (AD-03), and `NULL = NULL` is NULL in SQL, so `=` would never match a row
+-- that has not been claimed by an account yet.
+tagByFoldedName:
+SELECT * FROM tags
+WHERE owner_id IS :ownerId AND name_folded = :nameFolded;
+
+-- Every tag, for the picker. Ordered by the displayed spelling so the list
+-- reads the way it looks, not the way it is compared.
+allTags:
+SELECT * FROM tags WHERE owner_id IS :ownerId ORDER BY name ASC, id ASC;
+
+-- The chips on one card.
+tagsForCard:
+SELECT t.* FROM card_tags AS ct
+INNER JOIN tags AS t ON t.id = ct.tag_id
+WHERE ct.card_id = :cardId
+ORDER BY t.name ASC, t.id ASC;
+
+-- The chips for a *window* of cards, in one statement.
+--
+-- **The reason this exists rather than calling `tagsForCard` per row.** The list
+-- draws up to a window of cards and `watch()` re-runs on every change; asking
+-- per row makes that 50 queries where it can be 1. The classic N+1, and it would
+-- have been invisible until a deck got large.
+tagsForCards:
+SELECT ct.card_id AS cardId, t.* FROM card_tags AS ct
+INNER JOIN tags AS t ON t.id = ct.tag_id
+WHERE ct.card_id IN :cardIds
+ORDER BY t.name ASC, t.id ASC;
+
+-- How many tags a card already carries, for BR-94's limit of ten.
+tagCountForCard:
+SELECT COUNT(*) FROM card_tags WHERE card_id = :cardId;
+
+-- Tags nothing points at any more.
+--
+-- Deleting a card cascades its links away but leaves the tag itself, which is
+-- correct — a tag is not owned by one card. This is what a later cleanup would
+-- read; nothing calls it yet, and it is here because the question "what happened
+-- to the tag" is asked the moment someone sees the cascade.
+orphanedTags:
+SELECT * FROM tags
+WHERE id NOT IN (SELECT tag_id FROM card_tags)
+ORDER BY created_at ASC, id ASC;

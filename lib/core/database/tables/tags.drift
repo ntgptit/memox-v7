@@ -32,7 +32,19 @@ CREATE TABLE tags (
 );
 
 -- Uniqueness is per owner, so two profiles may each have their own `noun`.
-CREATE UNIQUE INDEX idx_tags_owner_folded ON tags (owner_id, name_folded);
+--
+-- **`COALESCE(owner_id, '')`, not `owner_id`, and a test found out why.** In
+-- SQLite a UNIQUE index treats every NULL as distinct from every other NULL, so
+-- `(NULL, 'noun')` and `(NULL, 'noun')` are two different keys and both insert.
+-- MVP has no auth, which means `owner_id` is NULL on *every* row (AD-03) — so
+-- the plain two-column index enforced nothing at all, on the only rows that
+-- exist. It looked correct in the schema and in the query plan.
+--
+-- Folding NULL to `''` gives the local profile one key like any other owner.
+-- `card_tag_dao_test.dart` inserts `Động từ` twice and requires the second to
+-- fail; that is what caught it.
+CREATE UNIQUE INDEX idx_tags_owner_folded
+    ON tags (COALESCE(owner_id, ''), name_folded);
 
 -- Many-to-many. No surrogate key: the pair *is* the identity.
 CREATE TABLE card_tags (

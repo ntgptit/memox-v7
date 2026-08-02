@@ -49,3 +49,59 @@ SELECT * FROM cards WHERE id = :cardId;
 
 reviewStateByCard:
 SELECT * FROM card_review_states WHERE card_id = :cardId;
+
+-- The same window as `cardsByDeck`, narrowed to flagged cards (BR-92).
+--
+-- **A separate statement rather than a mode parameter on the one above.** A
+-- single query with `(:mode = 'all' OR (:mode = 'flagged' AND is_flagged = 1))`
+-- reads as less duplication and costs the index: SQLite cannot use
+-- `(deck_id, created_at, id)` to stop early through an OR chain, so the filtered
+-- list would sort the whole deck and put a lid on it — undoing the 1193us → 102us
+-- the composite index was measured to buy.
+flaggedCardsByDeck:
+SELECT * FROM cards
+WHERE deck_id = :deckId AND is_flagged = 1
+ORDER BY created_at DESC, id DESC
+LIMIT :limit;
+
+-- The number on the flag filter pill.
+flaggedCountByDeck:
+SELECT COUNT(*) FROM cards WHERE deck_id = :deckId AND is_flagged = 1;
+
+-- The four numbers behind the deck progress panel (BR-89…BR-91, BR-88).
+--
+-- **Every threshold arrives as a parameter, and that is the point.** BR-16 keeps
+-- the box ladder and the SM-2 factors in the scheduler, so a literal here would
+-- make changing the algorithm a migration. Passing them in leaves Dart —
+-- `card_state_model.dart` — as the one place the numbers are written, and this
+-- query as arithmetic that knows nothing about which scheduler it is counting.
+--
+-- The count has to be SQL rather than Dart: the panel describes the whole deck
+-- while the list holds a window, so projecting in Dart would mean reading every
+-- review state to produce four integers.
+--
+-- `review_count = 0` is tested first and separately, mirroring `cardStateOf`:
+-- `eight_box` seeds `current_box = 1` at creation (BR-09), so a card that has
+-- never been reviewed would otherwise be counted as beginning.
+cardStateCountsByDeck:
+SELECT
+  COUNT(*) AS total,
+  SUM(CASE WHEN s.review_count = 0 THEN 1 ELSE 0 END) AS newCount,
+  SUM(CASE WHEN s.review_count > 0 AND (
+        (s.scheduler_type = 'eight_box' AND s.current_box < :reviewingBox)
+     OR (s.scheduler_type = 'sm2' AND s.interval_days < :reviewingDays)
+  ) THEN 1 ELSE 0 END) AS beginningCount,
+  SUM(CASE WHEN s.review_count > 0 AND (
+        (s.scheduler_type = 'eight_box'
+           AND s.current_box >= :reviewingBox AND s.current_box < :masteredBox)
+     OR (s.scheduler_type = 'sm2'
+           AND s.interval_days >= :reviewingDays
+           AND s.interval_days < :masteredDays)
+  ) THEN 1 ELSE 0 END) AS reviewingCount,
+  SUM(CASE WHEN s.review_count > 0 AND (
+        (s.scheduler_type = 'eight_box' AND s.current_box >= :masteredBox)
+     OR (s.scheduler_type = 'sm2' AND s.interval_days >= :masteredDays)
+  ) THEN 1 ELSE 0 END) AS masteredCount
+FROM cards AS c
+INNER JOIN card_review_states AS s ON s.card_id = c.id
+WHERE c.deck_id = :deckId;
