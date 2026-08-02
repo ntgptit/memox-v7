@@ -1,15 +1,30 @@
 #!/usr/bin/env bash
 # Mechanical half of the Definition of Done.
-# Runs format check, analyzer, architecture boundaries and tests.
-# Exits non-zero if any gate fails, so it is safe to wire into CI or a hook.
+# Runs format, analyzer, generated-code freshness, the architecture and docs
+# guards, the code-verification guard, and tests.
 #
-# Usage: .claude/skills/flutter-workflow/scripts/dod_check.sh [--fix]
-#   --fix  apply `dart format` instead of only reporting drift
+# Usage: .claude/skills/flutter-workflow/scripts/dod_check.sh [--fast] [--fix]
+#   --fast  the tight-loop mode: run only the Deck + app test subset (what CI's
+#           light gate runs), skipping goldens. ~20s instead of ~50s. It does
+#           NOT run test/core, test/shared, or another feature's tests — run the
+#           full gate (no --fast) before you commit, and always before a merge.
+#   --fix   apply `dart format` instead of only reporting drift
+#
+# The two slow bash guards this used to shell into (architecture, docs) are now
+# one-process Python and cost ~1s each; the time here is `flutter analyze` and
+# `flutter test`.
 
 set -uo pipefail
 
 FIX=0
-[[ "${1:-}" == "--fix" ]] && FIX=1
+FAST=0
+for arg in "$@"; do
+  case "$arg" in
+    --fix) FIX=1 ;;
+    --fast) FAST=1 ;;
+    *) echo "unknown argument: $arg" >&2; exit 2 ;;
+  esac
+done
 
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 cd "$REPO_ROOT" || exit 1
@@ -66,11 +81,23 @@ fi
 
 # ---------------------------------------------- architecture boundaries
 ARCH_CHECK="$REPO_ROOT/.claude/skills/flutter-architecture/scripts/check_architecture.sh"
-if [[ -x "$ARCH_CHECK" ]]; then
+if [[ -f "$ARCH_CHECK" ]]; then
   step "architecture boundaries"
-  "$ARCH_CHECK" || FAILED+=("architecture")
+  bash "$ARCH_CHECK" || FAILED+=("architecture")
 else
-  SKIPPED+=("architecture (script not executable at $ARCH_CHECK)")
+  SKIPPED+=("architecture (script missing at $ARCH_CHECK)")
+fi
+
+# ---------------------------------------------------- document integrity
+# Cheap now that it is one Python process (~1s), so it belongs in the local
+# gate rather than only in CI — a dangling BR reference or a stale WBS
+# dependency is caught before the commit, not on the PR.
+DOCS_CHECK="$REPO_ROOT/.claude/skills/flutter-workflow/scripts/check_docs.sh"
+if [[ -f "$DOCS_CHECK" ]]; then
+  step "document integrity"
+  bash "$DOCS_CHECK" --quiet || FAILED+=("docs")
+else
+  SKIPPED+=("docs (script missing at $DOCS_CHECK)")
 fi
 
 # ------------------------------------------------ code verification guard
@@ -100,8 +127,14 @@ fi
 # ------------------------------------------------------------------ test
 if command -v flutter >/dev/null 2>&1; then
   if [[ -d test ]]; then
-    step "flutter test"
-    flutter test || FAILED+=("test")
+    if [[ $FAST -eq 1 ]]; then
+      step "flutter test (--fast: Deck + app subset, no goldens)"
+      flutter test --exclude-tags golden test/app test/features/deck \
+        || FAILED+=("test")
+    else
+      step "flutter test (full suite)"
+      flutter test || FAILED+=("test")
+    fi
   else
     SKIPPED+=("test (no test/ directory yet)")
   fi
@@ -112,6 +145,13 @@ hr
 if [[ ${#SKIPPED[@]} -gt 0 ]]; then
   echo "skipped:"
   printf '  - %s\n' "${SKIPPED[@]}"
+fi
+
+if [[ $FAST -eq 1 ]]; then
+  echo
+  echo "⚡ --fast ran the Deck + app subset only. It did NOT run test/core,"
+  echo "   test/shared, test/features/<other>, the visual audits, or goldens."
+  echo "   Run without --fast before you commit."
 fi
 
 if [[ ${#FAILED[@]} -eq 0 ]]; then
