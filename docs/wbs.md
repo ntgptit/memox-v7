@@ -4953,9 +4953,17 @@ cột NULL của scheduler kia.
   một cột `is_flagged`, `NotFoundFailure` nếu thiếu card), `CardFlag` controller
   optimistic + revert khi ghi lỗi, toggle cờ ở app bar editor (filled/outline),
   icon cờ trên hàng card dùng `onSurface` — không `primary`, vì accent đo 3,29:1
-  trên nền tối, dưới 4,5:1 cho glyph. Còn: tag chip, panel tiến độ + Due/New/state
-  trên hàng, optional details, breadcrumb + tên deck, auto-forward khi vào deck
-  card-type.
+  trên nền tối, dưới 4,5:1 cho glyph;
+  lát 4 (tag end-to-end, BR-93/BR-94) **done** — `TagEntity` + mapper,
+  `addCardTag` (find-or-create theo `name_folded`, link idempotent
+  `insertOrIgnore`, cap 10 tag trong transaction), `removeCardTag`,
+  `watchCardTags` stream; use case `AddCardTagUseCase` (parse TagName, refuse
+  trước repo) / `Remove` / `Watch`; `CardTagEntry` controller + `cardTags`
+  stream; section tag trong editor edit mode (chip xóa được + field thêm +
+  counter `n / 10`). Audit editor tách field-count theo mode (edit có 3 field).
+  Còn: panel tiến độ + Due/New/state trên hàng, optional details, breadcrumb +
+  tên deck, auto-forward khi vào deck card-type. Ghi chú: tag ở create mode
+  (pending → link khi save) hoãn — card chưa có id để link.
 - **Goal:** Người dùng quản lý card hoàn chỉnh trong deck loại `card`, từ UI
   xuống transaction Drift.
 - **Scope:** card list; empty state; tạo card; tạo card **đầu tiên** trong deck

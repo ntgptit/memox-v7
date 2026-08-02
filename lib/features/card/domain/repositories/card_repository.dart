@@ -1,5 +1,8 @@
 import '../entities/card_entity.dart';
+import '../entities/tag_entity.dart';
+import '../failures/tag_validation_failure.dart';
 import '../models/card_text_model.dart';
+import '../models/tag_name_model.dart';
 
 /// Contract for card management inside a deck (UC-04, UC-08).
 ///
@@ -88,4 +91,29 @@ abstract interface class CardRepository {
   /// — setting the value it already holds is a no-op, so a double tap cannot
   /// desync the mark from what the row shows.
   Future<void> setCardFlag({required String cardId, required bool isFlagged});
+
+  /// One card's tags, re-emitted on every change (BR-93).
+  ///
+  /// A stream, not a one-shot: the editor's chip strip must reflect an add or a
+  /// remove without a reload, and the same watch drives the row's chips.
+  Stream<List<TagEntity>> watchCardTags(String cardId);
+
+  /// Attaches a tag to a card, creating the tag if no one owns its name yet
+  /// (BR-93, BR-94).
+  ///
+  /// [name] is a [TagName], so BR-93's trim and length are already applied — the
+  /// signature says so. Case-insensitive reuse is deliberate: adding `noun` when
+  /// `Noun` exists attaches the existing tag rather than minting a duplicate, so
+  /// a later filter by `noun` finds both cards.
+  ///
+  /// **The ten-tag cap (BR-94) is checked inside the write**, not above it: the
+  /// count and the link have to be one atomic step, or two adds racing each other
+  /// both pass an eleventh tag. Over the cap surfaces as a `ValidationFailure`
+  /// carrying [TagValidationProblem.tooManyTags]. Adding a tag the card already
+  /// has is a no-op.
+  Future<void> addCardTag({required String cardId, required TagName name});
+
+  /// Detaches a tag from a card (BR-93). The tag row itself stays — another card
+  /// may still carry it, and an orphaned tag harms nothing.
+  Future<void> removeCardTag({required String cardId, required String tagId});
 }

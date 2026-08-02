@@ -1,12 +1,17 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/card/domain/entities/card_entity.dart';
+import 'package:memox/features/card/domain/entities/tag_entity.dart';
 import 'package:memox/features/card/domain/failures/card_validation_failure.dart';
+import 'package:memox/features/card/domain/failures/tag_validation_failure.dart';
 import 'package:memox/features/card/domain/models/card_text_model.dart';
+import 'package:memox/features/card/domain/models/tag_name_model.dart';
 import 'package:memox/features/card/domain/repositories/card_repository.dart';
+import 'package:memox/features/card/domain/usecases/add_card_tag_use_case.dart';
 import 'package:memox/features/card/domain/usecases/create_card_use_case.dart';
 import 'package:memox/features/card/domain/usecases/delete_card_use_case.dart';
 import 'package:memox/features/card/domain/usecases/get_card_use_case.dart';
+import 'package:memox/features/card/domain/usecases/remove_card_tag_use_case.dart';
 import 'package:memox/features/card/domain/usecases/set_card_flag_use_case.dart';
 import 'package:memox/features/card/domain/usecases/update_card_use_case.dart';
 import 'package:memox/features/card/domain/usecases/watch_card_count_use_case.dart';
@@ -162,6 +167,37 @@ void main() {
       },
     );
 
+    test('add-tag trims and reaches the repository', () async {
+      await AddCardTagUseCase(
+        repository,
+      ).call(cardId: 'card-1', rawName: '  noun  ');
+
+      expect(repository.tagAddCalls.single, (id: 'card-1', name: 'noun'));
+    });
+
+    test('a blank tag never reaches the repository (BR-93)', () async {
+      await expectLater(
+        AddCardTagUseCase(repository).call(cardId: 'card-1', rawName: '   '),
+        throwsA(
+          isA<ValidationFailure>().having(
+            (ValidationFailure f) => f.problems,
+            'problems',
+            <Enum>{TagValidationProblem.nameEmpty},
+          ),
+        ),
+      );
+
+      expect(repository.tagAddCalls, isEmpty);
+    });
+
+    test('remove-tag forwards the ids', () async {
+      await RemoveCardTagUseCase(
+        repository,
+      ).call(cardId: 'card-1', tagId: 'tag-1');
+
+      expect(repository.tagRemoveCalls.single, (id: 'card-1', tagId: 'tag-1'));
+    });
+
     test('watch forwards the deck id and the window, unchanged', () async {
       // The use case must not have an opinion about the window: a default here
       // would be a second answer to "how far has the reader scrolled", and the
@@ -267,6 +303,27 @@ final class _CountingCardRepository implements CardRepository {
     required String cardId,
     required bool isFlagged,
   }) async => flagCalls.add((id: cardId, isFlagged: isFlagged));
+
+  final List<({String id, String name})> tagAddCalls =
+      <({String id, String name})>[];
+  final List<({String id, String tagId})> tagRemoveCalls =
+      <({String id, String tagId})>[];
+
+  @override
+  Stream<List<TagEntity>> watchCardTags(String cardId) =>
+      const Stream<List<TagEntity>>.empty();
+
+  @override
+  Future<void> addCardTag({
+    required String cardId,
+    required TagName name,
+  }) async => tagAddCalls.add((id: cardId, name: name.value));
+
+  @override
+  Future<void> removeCardTag({
+    required String cardId,
+    required String tagId,
+  }) async => tagRemoveCalls.add((id: cardId, tagId: tagId));
 
   @override
   Stream<List<CardEntity>> watchCardsByDeck(

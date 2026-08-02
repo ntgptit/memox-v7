@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/card/domain/entities/card_entity.dart';
+import 'package:memox/features/card/domain/entities/tag_entity.dart';
 import 'package:memox/features/card/domain/models/card_text_model.dart';
+import 'package:memox/features/card/domain/models/tag_name_model.dart';
 import 'package:memox/features/card/domain/repositories/card_repository.dart';
 
 /// A `CardRepository` a presentation test drives by hand.
@@ -168,8 +170,52 @@ final class FakeCardRepository implements CardRepository {
     flagWrites.add((id: cardId, isFlagged: isFlagged));
   }
 
+  // ---- tags --------------------------------------------------------------
+
+  final StreamController<List<TagEntity>> _tags =
+      StreamController<List<TagEntity>>.broadcast();
+
+  /// Recorded add-tag calls: (cardId, rawName). The use case has already parsed,
+  /// so this holds the display value.
+  final List<({String id, String name})> tagAdds =
+      <({String id, String name})>[];
+
+  /// Recorded remove-tag calls: (cardId, tagId).
+  final List<({String id, String tagId})> tagRemoves =
+      <({String id, String tagId})>[];
+
+  /// When set, the next `addCardTag` throws it — e.g. the BR-94 tooManyTags path.
+  Failure? nextTagFailure;
+
+  void emitTags(List<TagEntity> tags) => _tags.add(tags);
+
+  TagEntity tag(String id, {required String name}) =>
+      TagEntity(id: id, name: name);
+
+  @override
+  Stream<List<TagEntity>> watchCardTags(String cardId) => _tags.stream;
+
+  @override
+  Future<void> addCardTag({
+    required String cardId,
+    required TagName name,
+  }) async {
+    final failure = nextTagFailure;
+    if (failure != null) throw failure;
+    tagAdds.add((id: cardId, name: name.value));
+  }
+
+  @override
+  Future<void> removeCardTag({
+    required String cardId,
+    required String tagId,
+  }) async {
+    tagRemoves.add((id: cardId, tagId: tagId));
+  }
+
   void dispose() {
     unawaited(_cards.close());
     unawaited(_count.close());
+    unawaited(_tags.close());
   }
 }

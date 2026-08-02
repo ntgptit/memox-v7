@@ -1,0 +1,115 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_text_field.dart';
+import '../../../domain/entities/tag_entity.dart';
+import '../../../domain/failures/tag_validation_failure.dart';
+import '../../../domain/models/tag_name_model.dart';
+import '../../controllers/card_tag_controller.dart';
+import '../../states/card_tag_state.dart';
+
+/// The editor's tag strip: the card's tags as removable chips, and a field that
+/// adds one (UC-04 W5, BR-93, BR-94).
+///
+/// Edit-mode only — a tag links to a card, and a card that is not saved yet has
+/// no id to link to. The chips read `cardTagsProvider`, so an add or a remove
+/// shows without a reload; the field drives `CardTagEntry`, which reports the
+/// same `savedAndContinue` a save-and-add form does, so the field clears and
+/// stays open for the next tag.
+class CardTagSectionWidget extends ConsumerStatefulWidget {
+  const CardTagSectionWidget({required this.cardId, super.key});
+
+  final String cardId;
+
+  @override
+  ConsumerState<CardTagSectionWidget> createState() =>
+      _CardTagSectionWidgetState();
+}
+
+class _CardTagSectionWidgetState extends ConsumerState<CardTagSectionWidget> {
+  final TextEditingController _input = TextEditingController();
+
+  @override
+  void dispose() {
+    _input.dispose();
+    super.dispose();
+  }
+
+  String? _error(TagValidationProblem? problem) => switch (problem) {
+    TagValidationProblem.nameEmpty => context.l10n.cardTagEmptyError,
+    TagValidationProblem.nameTooLong => context.l10n.cardTagTooLongError,
+    TagValidationProblem.tooManyTags => context.l10n.cardTagTooManyError,
+    // `nameTaken` is never raised on the add path — reuse is silent (BR-93).
+    _ => null,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final cardId = widget.cardId;
+    final tags = ref.watch(cardTagsProvider(cardId)).value ?? <TagEntity>[];
+    final entry = ref.watch(cardTagEntryProvider(cardId));
+
+    ref.listen<CardTagState>(cardTagEntryProvider(cardId), (previous, next) {
+      if (next.shouldClearDraft && !(previous?.shouldClearDraft ?? false)) {
+        _input.clear();
+        ref.read(cardTagEntryProvider(cardId).notifier).reset();
+      }
+    });
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        Row(
+          children: <Widget>[
+            Text(
+              context.l10n.cardEditorTagsLabel,
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
+            const Spacer(),
+            // The counter appears only once a tag exists: at zero it is a limit
+            // nobody is near, and showing 0 / 10 is noise (W5).
+            if (tags.isNotEmpty)
+              Text(
+                context.l10n.cardEditorTagCount(tags.length, kMaxTagsPerCard),
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+          ],
+        ),
+        if (tags.isNotEmpty) ...<Widget>[
+          const SizedBox(height: AppSpacing.sm),
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.xs,
+            children: <Widget>[
+              for (final tag in tags)
+                Chip(
+                  label: Text(tag.name),
+                  onDeleted: () => ref
+                      .read(cardTagEntryProvider(cardId).notifier)
+                      .remove(tag.id),
+                  deleteButtonTooltipMessage: context.l10n
+                      .cardEditorTagRemoveSemantics(tag.name),
+                ),
+            ],
+          ),
+        ],
+        const SizedBox(height: AppSpacing.sm),
+        MxTextField(
+          controller: _input,
+          label: context.l10n.cardEditorTagAddHint,
+          hintText: context.l10n.cardEditorTagAddHint,
+          maxLength: TagName.maxLength,
+          textInputAction: TextInputAction.done,
+          errorText: _error(entry.problem),
+          isEnabled: !entry.isSubmitting,
+          onSubmitted: (value) =>
+              ref.read(cardTagEntryProvider(cardId).notifier).add(value),
+        ),
+      ],
+    );
+  }
+}

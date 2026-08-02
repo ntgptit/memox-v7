@@ -1,4 +1,5 @@
-import 'package:drift/drift.dart' show Value, BooleanExpressionOperators;
+import 'package:drift/drift.dart'
+    show Value, BooleanExpressionOperators, InsertMode;
 import '../../../../core/database/app_database.dart';
 
 /// Data access for the Card side of the vertical.
@@ -114,9 +115,15 @@ final class CardDao {
 
   Future<void> insertTag(TagsCompanion tag) => _db.into(_db.tags).insert(tag);
 
+  /// Links a tag to a card, idempotently. `insertOrIgnore` because the pair is
+  /// the primary key (BR-94's table): adding a tag a card already carries is a
+  /// no-op, not a constraint error the repository would have to map back.
   Future<void> linkTag(String cardId, String tagId) => _db
       .into(_db.cardTags)
-      .insert(CardTagsCompanion.insert(cardId: cardId, tagId: tagId));
+      .insert(
+        CardTagsCompanion.insert(cardId: cardId, tagId: tagId),
+        mode: InsertMode.insertOrIgnore,
+      );
 
   Future<int> unlinkTag(String cardId, String tagId) =>
       (_db.delete(_db.cardTags)..where(

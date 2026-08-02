@@ -684,6 +684,26 @@
   "@cardEditorUnflagAction": { "description": "Tooltip of the editor's flag toggle when the card is flagged (BR-92)." },
   "cardTileFlaggedSemantics": "Đã gắn cờ",
   "@cardTileFlaggedSemantics": { "description": "Screen-reader label for the flag indicator on a card row (BR-92)." },
+  "cardEditorTagsLabel": "Thẻ nhãn",
+  "@cardEditorTagsLabel": { "description": "Heading of the tag section in the card editor (BR-93)." },
+  "cardEditorTagAddHint": "Thêm nhãn",
+  "@cardEditorTagAddHint": { "description": "Placeholder of the add-tag input (W5)." },
+  "cardEditorTagCount": "{count} / {max}",
+  "@cardEditorTagCount": {
+    "placeholders": { "count": { "type": "int" }, "max": { "type": "int" } },
+    "description": "Tag counter shown once a card has at least one tag (BR-94, W5)."
+  },
+  "cardEditorTagRemoveSemantics": "Xóa nhãn {name}",
+  "@cardEditorTagRemoveSemantics": {
+    "placeholders": { "name": { "type": "String" } },
+    "description": "Screen-reader label for a tag chip's delete affordance (BR-93)."
+  },
+  "cardTagEmptyError": "Nhãn không được để trống",
+  "@cardTagEmptyError": { "description": "Inline error when the tag name is blank after trimming (BR-93)." },
+  "cardTagTooLongError": "Nhãn đã đạt giới hạn ký tự",
+  "@cardTagTooLongError": { "description": "Inline error when the tag name reaches its length limit (BR-93)." },
+  "cardTagTooManyError": "Một thẻ chứa tối đa 10 nhãn",
+  "@cardTagTooManyError": { "description": "Inline error when the card already has the maximum tags (BR-94)." },
   "cardEditorDangerZone": "Vùng nguy hiểm",
   "@cardEditorDangerZone": { "description": "Heading above the delete action (UC-04 A5)." },
   "cardEditorDelete": "Xóa thẻ",

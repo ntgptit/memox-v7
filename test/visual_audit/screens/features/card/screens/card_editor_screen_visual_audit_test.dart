@@ -29,7 +29,9 @@ void main() {
     // Create autofocuses the front field, which mounts the text-selection
     // toolbar anchor; edit does not, so that allowance is create's alone.
     allowances: const <AuditSkipAllowance>[
-      ..._sharedAllowances,
+      _coloredBox,
+      ..._fieldsCreate,
+      _layoutBuilder,
       _inkLayersCreate,
       _shapesCreate,
       _selectionAnchorAllowance,
@@ -46,7 +48,9 @@ void main() {
     // disabled-state blend.
     drive: _settleFlagToggle,
     allowances: const <AuditSkipAllowance>[
-      ..._sharedAllowances,
+      _coloredBox,
+      ..._fieldsEdit,
+      _layoutBuilder,
       _inkLayersEdit,
       _shapesEdit,
     ],
@@ -131,48 +135,54 @@ const AuditSkipAllowance _shapesEdit = AuditSkipAllowance(
       'goldens.',
 );
 
-/// Shared by both modes: the fields, the route backdrop, the field decoration.
-/// The ink/shape counts and the selection anchor vary per mode and are composed
-/// in at the call site.
-const List<AuditSkipAllowance> _sharedAllowances = <AuditSkipAllowance>[
-  AuditSkipAllowance(
-    itemId: 'screen',
-    reason: SkipReason.rasterOnly,
-    detailContains: '_RenderColoredBox',
-    rationale:
-        'The route backdrop MaterialApp paints around an opaque page; the '
-        'surface value is asserted in app_theme_test.dart.',
-  ),
-  // The two text fields. Each RenderEditable and its two custom-paint
-  // layers (caret, selection) are raster-only; the field's border and
-  // decoration paint no colour on a render object. Typed text and caret are
-  // covered when a focused/error field audit lands in a later slice.
+/// The route backdrop and the field LayoutBuilder — constant across modes, so
+/// they carry no count.
+const AuditSkipAllowance _coloredBox = AuditSkipAllowance(
+  itemId: 'screen',
+  reason: SkipReason.rasterOnly,
+  detailContains: '_RenderColoredBox',
+  rationale:
+      'The route backdrop MaterialApp paints around an opaque page; the surface '
+      'value is asserted in app_theme_test.dart.',
+);
+
+const AuditSkipAllowance _layoutBuilder = AuditSkipAllowance(
+  itemId: 'shell',
+  reason: SkipReason.unknownRenderType,
+  detailContains: '_RenderLayoutBuilder',
+  rationale:
+      'A LayoutBuilder inside each field decoration sizes its child and paints '
+      'no colour.',
+);
+
+/// The per-field raster nodes, counted per mode: create has two fields (front,
+/// back); edit adds the tag-entry field, so its counts are one higher. Each
+/// `MxTextField` contributes one decoration, one editable region, two editable
+/// custom-paint layers (caret, selection) and one painter-less clip — none of
+/// which carries a colour on a render object.
+const List<AuditSkipAllowance> _fieldsCreate = <AuditSkipAllowance>[
   AuditSkipAllowance(
     itemId: 'shell',
     reason: SkipReason.rasterOnly,
     detailContains: '_RenderDecoration',
     expectedMatches: 2,
     rationale:
-        'InputDecorator lays out each field; its border is painted by a '
-        'CustomPainter and its colours are asserted in app_theme_test.dart.',
+        'InputDecorator lays out each field; its border is a CustomPainter and '
+        'its colours are asserted in app_theme_test.dart.',
   ),
   AuditSkipAllowance(
     itemId: 'shell',
     reason: SkipReason.rasterOnly,
     detailContains: 'RenderEditable paints',
     expectedMatches: 2,
-    rationale:
-        'The editable region of each field. Typed text and caret are '
-        'raster-only, covered by a focused/error field audit in M5.',
+    rationale: 'The editable region of each field; typed text is raster-only.',
   ),
   AuditSkipAllowance(
     itemId: 'shell',
     reason: SkipReason.rasterOnly,
     detailContains: '_RenderEditableCustomPaint',
     expectedMatches: 4,
-    rationale:
-        'The caret and selection painters behind the two fields, both '
-        'raster-only and covered by the same M5 field-state audit.',
+    rationale: 'The caret and selection painters behind each field.',
   ),
   AuditSkipAllowance(
     itemId: 'shell',
@@ -182,12 +192,38 @@ const List<AuditSkipAllowance> _sharedAllowances = <AuditSkipAllowance>[
     rationale:
         'Each field clips through a CustomPaint with no painter of its own.',
   ),
+];
+
+const List<AuditSkipAllowance> _fieldsEdit = <AuditSkipAllowance>[
   AuditSkipAllowance(
     itemId: 'shell',
-    reason: SkipReason.unknownRenderType,
-    detailContains: '_RenderLayoutBuilder',
+    reason: SkipReason.rasterOnly,
+    detailContains: '_RenderDecoration',
+    expectedMatches: 3,
     rationale:
-        'A LayoutBuilder inside the field decoration sizes its child and '
-        'paints no colour.',
+        'Front, back and the tag-entry field (BR-93); each border is a '
+        'CustomPainter with its colours asserted in app_theme_test.dart.',
+  ),
+  AuditSkipAllowance(
+    itemId: 'shell',
+    reason: SkipReason.rasterOnly,
+    detailContains: 'RenderEditable paints',
+    expectedMatches: 3,
+    rationale: 'The editable region of the three fields; text is raster-only.',
+  ),
+  AuditSkipAllowance(
+    itemId: 'shell',
+    reason: SkipReason.rasterOnly,
+    detailContains: '_RenderEditableCustomPaint',
+    expectedMatches: 6,
+    rationale: 'The caret and selection painters behind the three fields.',
+  ),
+  AuditSkipAllowance(
+    itemId: 'shell',
+    reason: SkipReason.customPainter,
+    detailContains: 'no painter',
+    expectedMatches: 3,
+    rationale:
+        'Each of the three fields clips through a painter-less CustomPaint.',
   ),
 ];
