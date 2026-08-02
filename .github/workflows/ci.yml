@@ -48,7 +48,25 @@ jobs:
         with:
           flutter-version-file: .fvmrc
           cache: true
-          cache-key: 'flutter-verify-:os:-:channel:-:version:-:arch:'
+          # One SDK + pub cache shared by every ubuntu job across both
+          # workflows — they resolve the same lockfile, so four separate caches
+          # (flutter-verify-, -full-, -web-) were three redundant downloads.
+          cache-key: 'flutter-:os:-:channel:-:version:-:arch:'
+
+      # build_runner's own incremental cache. Without it every run regenerates
+      # from cold — drift_dev + riverpod_generator + freezed from scratch, ~30s.
+      # Keyed on the lockfile (which changes when a generator version does) plus
+      # the sha, so the newest run restores the most recent graph and build_runner
+      # rebuilds only what a source edit touched. The reproducibility gate in
+      # ci-full still builds cold, so a subtly-stale incremental output cannot
+      # pass unnoticed.
+      - name: cache build_runner
+        uses: actions/cache@v4
+        with:
+          path: .dart_tool/build
+          key: build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}-${{ github.sha }}
+          restore-keys: |
+            build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}-
 
       - name: pub get
         run: flutter pub get
