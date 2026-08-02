@@ -45,8 +45,12 @@ jobs:
         with:
           flutter-version-file: .fvmrc
           cache: true
-          cache-key: 'flutter-full-:os:-:channel:-:version:-:arch:'
+          cache-key: 'flutter-:os:-:channel:-:version:-:arch:'
 
+      # No build_runner cache in this job on purpose: its whole reason to exist
+      # is the from-cold reproducibility check below, and restoring a warm graph
+      # would undercut it. The other jobs (goldens, web) cache it; this one must
+      # not.
       - name: pub get
         run: flutter pub get
 
@@ -112,7 +116,15 @@ jobs:
         with:
           flutter-version-file: .fvmrc
           cache: true
-          cache-key: 'flutter-goldens-:os:-:channel:-:version:-:arch:'
+          cache-key: 'flutter-:os:-:channel:-:version:-:arch:'
+
+      - name: cache build_runner
+        uses: actions/cache@v4
+        with:
+          path: .dart_tool/build
+          key: build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}-${{ github.sha }}
+          restore-keys: |
+            build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}-
 
       - name: pub get
         run: flutter pub get
@@ -154,7 +166,15 @@ jobs:
         with:
           flutter-version-file: .fvmrc
           cache: true
-          cache-key: 'flutter-web-:os:-:channel:-:version:-:arch:'
+          cache-key: 'flutter-:os:-:channel:-:version:-:arch:'
+
+      - name: cache build_runner
+        uses: actions/cache@v4
+        with:
+          path: .dart_tool/build
+          key: build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}-${{ github.sha }}
+          restore-keys: |
+            build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}-
 
       - name: pub get
         run: flutter pub get
