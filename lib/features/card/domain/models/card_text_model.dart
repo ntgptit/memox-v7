@@ -68,6 +68,103 @@ final class CardText {
   String toString() => value;
 }
 
+/// An optional detail — example, hint or pronunciation — that has been through
+/// BR-95.
+///
+/// Like [CardText], it cannot be built from invalid text; unlike it, empty is
+/// **valid** and means "no value", so [parse] returns `(null, null)` for a blank
+/// field. The repository takes a `CardDetailText?`, where null clears the column.
+final class CardDetailText {
+  const CardDetailText._(this.value);
+
+  /// The trimmed text — never empty (an empty field parses to null instead).
+  final String value;
+
+  /// Parses [raw] for [field]. Three outcomes, distinguished by which of the
+  /// pair is set: `(value, null)` a detail, `(null, null)` an empty field that
+  /// folds to null, `(null, problem)` too long (BR-95).
+  static ({CardDetailText? text, CardValidationProblem? problem}) parse(
+    String raw, {
+    required CardDetailField field,
+  }) {
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) return (text: null, problem: null);
+    if (trimmed.length > kCardDetailMaxLength) {
+      return (text: null, problem: field.tooLongProblem);
+    }
+
+    return (text: CardDetailText._(trimmed), problem: null);
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is CardDetailText && other.value == value;
+
+  @override
+  int get hashCode => value.hashCode;
+
+  @override
+  String toString() => value;
+}
+
+/// One parsed card form: the two required sides plus the three optional details
+/// (BR-07, BR-08, BR-95).
+typedef ParsedCardForm = ({
+  CardText front,
+  CardText back,
+  CardDetailText? example,
+  CardDetailText? hint,
+  CardDetailText? pronunciation,
+});
+
+/// Parses a whole card form and refuses once, with everything wrong.
+///
+/// Supersedes [parseCardSides] for the write use cases: the details join the
+/// sides so a form with a blank front *and* an over-long hint reports both in
+/// one refusal, rather than the user fixing the front and resubmitting to find
+/// the hint. The details default to empty, so a caller that has none passes none.
+ParsedCardForm parseCardForm({
+  required String rawFront,
+  required String rawBack,
+  String rawExample = '',
+  String rawHint = '',
+  String rawPronunciation = '',
+}) {
+  final parsedFront = CardText.parse(rawFront, side: CardSide.front);
+  final parsedBack = CardText.parse(rawBack, side: CardSide.back);
+  final parsedExample = CardDetailText.parse(
+    rawExample,
+    field: CardDetailField.example,
+  );
+  final parsedHint = CardDetailText.parse(rawHint, field: CardDetailField.hint);
+  final parsedPronunciation = CardDetailText.parse(
+    rawPronunciation,
+    field: CardDetailField.pronunciation,
+  );
+
+  refuseInvalidCardForm(<CardValidationProblem>{
+    ?parsedFront.problem,
+    ?parsedBack.problem,
+    ?parsedExample.problem,
+    ?parsedHint.problem,
+    ?parsedPronunciation.problem,
+  });
+
+  final front = parsedFront.text;
+  final back = parsedBack.text;
+  if (front == null || back == null) {
+    throw StateError('unreachable: refuseInvalidCardForm would have thrown');
+  }
+
+  return (
+    front: front,
+    back: back,
+    example: parsedExample.text,
+    hint: parsedHint.text,
+    pronunciation: parsedPronunciation.text,
+  );
+}
+
 /// Parses both sides of a card form and refuses once, with everything wrong.
 ///
 /// **One place, deliberately.** Deck's equivalent — parse, refuse, then a

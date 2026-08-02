@@ -30,21 +30,16 @@ const int _sm2InitialRepetitions = 0;
 /// Drift-backed [CardRepository].
 ///
 /// Uses both Card-owned adapters deliberately: `createCard` has a cross-entity
-/// invariant — validate the target deck, lock an `unset` deck to `card`
-/// (BR-62), resolve the scheduler from the root (BR-09) — and one drift
-/// transaction covers the whole write **because both adapters wrap the same
-/// open [AppDatabase]**. That
-/// sameness is structural, not conventional: the constructor takes the one
-/// database and builds both adapters from it itself. An API accepting two
-/// ready-made adapters would let a composition root hand it instances from two
-/// databases, and the BR-62 content lock would then sit outside the
-/// transaction that rolls the card back — a bug no test with a correctly
-/// wired harness can see.
+/// invariant — validate the target deck, lock an `unset` deck to `card` (BR-62),
+/// resolve the scheduler from the root (BR-09) — and one drift transaction
+/// covers the whole write **because both adapters wrap the same open
+/// [AppDatabase]**, which the constructor guarantees by building both from the
+/// one database it is handed. Accepting two ready-made adapters would let a root
+/// pass instances from two databases, putting the BR-62 lock outside the
+/// transaction that rolls the card back.
 ///
 /// Same boundary rule as `DeckRepositoryImpl`: below this class, rows,
-/// companions and Drift exceptions; above it, entities and [Failure]. The
-/// guard helpers are intentionally this class's own — each repository owns
-/// its boundary rather than sharing one through a hidden coupling.
+/// companions and Drift exceptions; above it, entities and [Failure].
 final class CardRepositoryImpl implements CardRepository {
   CardRepositoryImpl(
     AppDatabase database, {
@@ -53,28 +48,23 @@ final class CardRepositoryImpl implements CardRepository {
   }) : _cardDao = CardDao(database),
        _deckContextDao = CardDeckContextDao(database),
        _idGenerator = idGenerator ?? const Uuid().v4,
-       // The initializing formal the lint asks for would be
-       // `required this._clock`, and Dart forbids a named parameter starting
-       // with an underscore.
+       // Dart forbids a named parameter starting with `_`, so the initializing
+       // formal the lint asks for is impossible here.
        // ignore: prefer_initializing_formals
        _clock = clock;
 
   final CardDao _cardDao;
 
-  /// For the deck side of the createCard invariant only — deck mutations
-  /// beyond the BR-62 content lock belong to `DeckRepositoryImpl`.
+  /// For the deck side of the createCard invariant only (BR-62 lock).
   final CardDeckContextDao _deckContextDao;
 
   /// Client-generated UUIDs (AD-03); injectable so tests are deterministic.
   final String Function() _idGenerator;
 
-  /// The clock, injected — there is no default.
-  ///
-  /// A `?? DateTime.now()` fallback here would make "now" have two owners: this
-  /// private static, and `clockProvider` which the whole tree can override. The
-  /// one that is harder to reach is the one that silently wins in production, so
-  /// it is gone and the composition root passes the provider's clock in.
-  /// Timestamps are stored in UTC, always.
+  /// The clock, injected — there is no default. A `?? DateTime.now()` fallback
+  /// would make "now" have two owners, and the unreachable one (this static)
+  /// silently wins in production. The composition root passes `clockProvider`'s
+  /// clock in; timestamps are stored in UTC, always.
   final DateTime Function() _clock;
 
   @override
@@ -130,6 +120,9 @@ final class CardRepositoryImpl implements CardRepository {
     required String deckId,
     required CardText front,
     required CardText back,
+    CardDetailText? example,
+    CardDetailText? hint,
+    CardDetailText? pronunciation,
   }) => _guard(
     () => _cardDao.runInTransaction(() async {
       // No validation here. BR-07 and BR-08 were applied by `CardText.parse`
@@ -172,6 +165,9 @@ final class CardRepositoryImpl implements CardRepository {
           deckId: deck.id,
           front: front.value,
           back: back.value,
+          example: Value<String?>(example?.value),
+          hint: Value<String?>(hint?.value),
+          pronunciation: Value<String?>(pronunciation?.value),
           createdAt: now,
           updatedAt: now,
         ),
@@ -189,15 +185,23 @@ final class CardRepositoryImpl implements CardRepository {
     required String cardId,
     required CardText front,
     required CardText back,
+    CardDetailText? example,
+    CardDetailText? hint,
+    CardDetailText? pronunciation,
   }) => _guard(() async {
     await _requireCardRow(cardId);
     // Writes to `cards` only — the review state and history cannot change
-    // here because nothing else is touched (BR-10).
+    // here because nothing else is touched (BR-10). The details are always
+    // written (BR-95): a null value clears the column, so removing a detail is
+    // a real edit rather than a value left behind.
     await _cardDao.updateCardById(
       cardId,
       CardsCompanion(
         front: Value<String>(front.value),
         back: Value<String>(back.value),
+        example: Value<String?>(example?.value),
+        hint: Value<String?>(hint?.value),
+        pronunciation: Value<String?>(pronunciation?.value),
         updatedAt: Value<DateTime>(_clock()),
       ),
     );

@@ -1,13 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/error/failure.dart';
-import 'package:memox/features/card/domain/entities/card_entity.dart';
-import 'package:memox/features/card/domain/entities/tag_entity.dart';
 import 'package:memox/features/card/domain/failures/card_validation_failure.dart';
 import 'package:memox/features/card/domain/failures/tag_validation_failure.dart';
-import 'package:memox/features/card/domain/models/card_list_item_model.dart';
-import 'package:memox/features/card/domain/models/card_text_model.dart';
-import 'package:memox/features/card/domain/models/tag_name_model.dart';
-import 'package:memox/features/card/domain/repositories/card_repository.dart';
+import 'support/counting_card_repository.dart';
 import 'package:memox/features/card/domain/usecases/add_card_tag_use_case.dart';
 import 'package:memox/features/card/domain/usecases/create_card_use_case.dart';
 import 'package:memox/features/card/domain/usecases/delete_card_use_case.dart';
@@ -28,9 +23,9 @@ import 'package:memox/features/card/domain/usecases/watch_cards_by_deck_use_case
 /// visible — an `expect` on the row could not tell "refused before the write"
 /// apart from "written and rolled back".
 void main() {
-  late _CountingCardRepository repository;
+  late CountingCardRepository repository;
 
-  setUp(() => repository = _CountingCardRepository());
+  setUp(() => repository = CountingCardRepository());
 
   group('creating', () {
     test('a valid card reaches the repository once, already trimmed', () async {
@@ -74,11 +69,59 @@ void main() {
           .catchError((Object error) {
             caught = error;
 
-            return _unreachableCard();
+            return unreachableCard();
           });
 
       expect(caught, isA<ValidationFailure>());
     });
+
+    test(
+      'a valid example is trimmed and reaches the repository (BR-95)',
+      () async {
+        await CreateCardUseCase(repository).call(
+          deckId: 'd',
+          rawFront: 'f',
+          rawBack: 'b',
+          rawExample: '  a sentence  ',
+        );
+
+        expect(repository.lastExample?.value, 'a sentence');
+      },
+    );
+
+    test(
+      'a blank example folds to null, not an empty detail (BR-95)',
+      () async {
+        await CreateCardUseCase(
+          repository,
+        ).call(deckId: 'd', rawFront: 'f', rawBack: 'b', rawExample: '   ');
+
+        expect(repository.createCalls, 1);
+        expect(repository.lastExample, isNull);
+      },
+    );
+
+    test(
+      'an over-long detail is refused with everything wrong (BR-95)',
+      () async {
+        await expectLater(
+          CreateCardUseCase(
+            repository,
+          ).call(deckId: 'd', rawFront: '', rawBack: 'b', rawHint: 'x' * 241),
+          throwsA(
+            isA<ValidationFailure>().having(
+              (ValidationFailure f) => f.problems,
+              'problems',
+              <Enum>{
+                CardValidationProblem.frontEmpty,
+                CardValidationProblem.hintTooLong,
+              },
+            ),
+          ),
+        );
+        expect(repository.createCalls, 0);
+      },
+    );
 
     test('both sides wrong are reported together', () async {
       await expectLater(
@@ -216,145 +259,4 @@ void main() {
       expect(repository.countCalls, <String>['deck-1']);
     });
   });
-}
-
-/// `catchError` must return the future's type; this value is never read,
-/// because the test asserts on what was caught rather than on what came back.
-CardEntity _unreachableCard() => CardEntity(
-  id: 'never-read',
-  deckId: 'never-read',
-  front: '',
-  back: '',
-  isFlagged: false,
-  example: null,
-  hint: null,
-  pronunciation: null,
-  createdAt: DateTime.utc(2026),
-  updatedAt: DateTime.utc(2026),
-);
-
-/// Counts what it was asked to do. Nothing else — these tests are about
-/// whether the repository is reached, not about what it would return.
-final class _CountingCardRepository implements CardRepository {
-  int createCalls = 0;
-  int updateCalls = 0;
-  final List<String> deleteCalls = <String>[];
-  final List<String> watchCalls = <String>[];
-  final List<int> watchLimits = <int>[];
-  final List<String> countCalls = <String>[];
-  CardText? lastFront;
-  CardText? lastBack;
-
-  CardEntity _card() => CardEntity(
-    id: 'card-1',
-    deckId: 'deck-1',
-    front: lastFront?.value ?? '',
-    back: lastBack?.value ?? '',
-    isFlagged: false,
-    example: null,
-    hint: null,
-    pronunciation: null,
-    createdAt: DateTime.utc(2026),
-    updatedAt: DateTime.utc(2026),
-  );
-
-  @override
-  Future<CardEntity> createCard({
-    required String deckId,
-    required CardText front,
-    required CardText back,
-  }) async {
-    createCalls += 1;
-    lastFront = front;
-    lastBack = back;
-
-    return _card();
-  }
-
-  @override
-  Future<CardEntity> updateCard({
-    required String cardId,
-    required CardText front,
-    required CardText back,
-  }) async {
-    updateCalls += 1;
-    lastFront = front;
-    lastBack = back;
-
-    return _card();
-  }
-
-  int getCalls = 0;
-
-  @override
-  Future<CardEntity> getCard(String cardId) async {
-    getCalls += 1;
-
-    return _card();
-  }
-
-  @override
-  Future<void> deleteCard(String cardId) async => deleteCalls.add(cardId);
-
-  final List<({String id, bool isFlagged})> flagCalls =
-      <({String id, bool isFlagged})>[];
-
-  @override
-  Future<void> setCardFlag({
-    required String cardId,
-    required bool isFlagged,
-  }) async => flagCalls.add((id: cardId, isFlagged: isFlagged));
-
-  @override
-  Stream<bool> watchCardFlag(String cardId) => const Stream<bool>.empty();
-
-  final List<({String id, String name})> tagAddCalls =
-      <({String id, String name})>[];
-  final List<({String id, String tagId})> tagRemoveCalls =
-      <({String id, String tagId})>[];
-
-  @override
-  Stream<List<TagEntity>> watchCardTags(String cardId) =>
-      const Stream<List<TagEntity>>.empty();
-
-  @override
-  Future<void> addCardTag({
-    required String cardId,
-    required TagName name,
-  }) async => tagAddCalls.add((id: cardId, name: name.value));
-
-  @override
-  Future<void> removeCardTag({
-    required String cardId,
-    required String tagId,
-  }) async => tagRemoveCalls.add((id: cardId, tagId: tagId));
-
-  @override
-  Stream<List<CardEntity>> watchCardsByDeck(
-    String deckId, {
-    required int limit,
-  }) {
-    watchCalls.add(deckId);
-    watchLimits.add(limit);
-
-    return const Stream<List<CardEntity>>.empty();
-  }
-
-  @override
-  Stream<List<CardListItemModel>> watchCardListItems(
-    String deckId, {
-    required int limit,
-  }) {
-    watchCalls.add(deckId);
-    watchLimits.add(limit);
-
-    return const Stream<List<CardListItemModel>>.empty();
-  }
-
-  @override
-  Stream<int> watchCardCountByDeck(String deckId) {
-    countCalls.add(deckId);
-
-    return const Stream<int>.empty();
-  }
 }

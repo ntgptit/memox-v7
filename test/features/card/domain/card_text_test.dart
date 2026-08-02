@@ -145,18 +145,26 @@ void main() {
   });
 
   group('the problem sets stay in step with the enum', () {
-    test('every problem belongs to exactly one side', () {
-      // A fifth problem added without extending a set would leave a screen
-      // unable to decide which input to mark.
+    test('every problem belongs to exactly one field set', () {
+      // A new problem added without extending a set would leave a screen unable
+      // to decide which input to mark. The five sets partition the enum: the two
+      // sides and the three optional details (BR-95).
+      const fieldSets = <Set<CardValidationProblem>>[
+        kCardFrontProblems,
+        kCardBackProblems,
+        kCardExampleProblems,
+        kCardHintProblems,
+        kCardPronunciationProblems,
+      ];
+
       for (final CardValidationProblem problem
           in CardValidationProblem.values) {
-        final inFront = kCardFrontProblems.contains(problem);
-        final inBack = kCardBackProblems.contains(problem);
+        final owners = fieldSets.where((set) => set.contains(problem)).length;
 
         expect(
-          inFront ^ inBack,
-          isTrue,
-          reason: '${problem.name} is in neither side set, or in both',
+          owners,
+          1,
+          reason: '${problem.name} is in no field set, or in more than one',
         );
       }
     });
@@ -169,6 +177,18 @@ void main() {
 
         expect(owned, contains(side.emptyProblem));
         expect(owned, contains(side.tooLongProblem));
+      }
+    });
+
+    test('each detail field produces its own too-long problem (BR-95)', () {
+      const owners = <CardDetailField, Set<CardValidationProblem>>{
+        CardDetailField.example: kCardExampleProblems,
+        CardDetailField.hint: kCardHintProblems,
+        CardDetailField.pronunciation: kCardPronunciationProblems,
+      };
+
+      for (final CardDetailField field in CardDetailField.values) {
+        expect(owners[field], contains(field.tooLongProblem));
       }
     });
   });

@@ -15,6 +15,14 @@ extension CardSubmitProblems on CardSubmitState {
   CardValidationProblem? get frontProblem => firstProblemOf(kCardFrontProblems);
 
   CardValidationProblem? get backProblem => firstProblemOf(kCardBackProblems);
+
+  CardValidationProblem? get exampleProblem =>
+      firstProblemOf(kCardExampleProblems);
+
+  CardValidationProblem? get hintProblem => firstProblemOf(kCardHintProblems);
+
+  CardValidationProblem? get pronunciationProblem =>
+      firstProblemOf(kCardPronunciationProblems);
 }
 
 /// Maps a repository or use-case failure onto the form.

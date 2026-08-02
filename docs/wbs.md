@@ -4980,7 +4980,15 @@ cột NULL của scheduler kia.
   `CardTagSubmitState` để test phân loại đúng command controller. Còn: tag chip
   trên hàng, filter pills All/Due/New/Flagged, panel tiến độ, optional details,
   breadcrumb + tên deck, auto-forward. Ghi chú: tag ở create mode hoãn — card chưa
-  có id để link.
+  có id để link;
+  lát 7 (optional detail fields, BR-95) **done** — value object `CardDetailText`
+  (empty→null, ≤240) + enum `CardDetailField` + 3 problem `tooLong` +
+  `parseCardForm` gộp 2 mặt và 3 detail, refuse một lần; create/update use case +
+  repo + DAO ghi 3 cột (null = clear); section "Add details" mặc định collapse
+  (W4), tự mở khi card đã có detail (W5), 3 field example/hint/pronunciation, nhãn
+  và icon dùng `primaryAccent` (không `primary` — accent-as-text mới đạt 4.5:1 ở
+  nền tối). Audit editor không đổi (InkWell dùng chung Material ink). Còn: tag
+  chip trên hàng, filter pills, panel tiến độ, breadcrumb + tên deck, auto-forward.
 - **Goal:** Người dùng quản lý card hoàn chỉnh trong deck loại `card`, từ UI
   xuống transaction Drift.
 - **Scope:** card list; empty state; tạo card; tạo card **đầu tiên** trong deck

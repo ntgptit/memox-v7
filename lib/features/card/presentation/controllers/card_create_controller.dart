@@ -35,6 +35,9 @@ class CardCreate extends _$CardCreate {
   Future<void> submit({
     required String rawFront,
     required String rawBack,
+    String rawExample = '',
+    String rawHint = '',
+    String rawPronunciation = '',
     SubmitDisposition disposition = SubmitDisposition.close,
   }) async {
     if (!state.canSubmit) return;
@@ -45,6 +48,9 @@ class CardCreate extends _$CardCreate {
         deckId: deckId,
         rawFront: rawFront,
         rawBack: rawBack,
+        rawExample: rawExample,
+        rawHint: rawHint,
+        rawPronunciation: rawPronunciation,
       );
       if (!ref.mounted) return;
       state = CardSubmitState(outcome: disposition.outcome);

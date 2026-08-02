@@ -106,6 +106,48 @@ void main() {
     expect(find.byIcon(Icons.flag), findsOneWidget);
   });
 
+  testWidgets('editing a card with a detail opens the details expanded', (
+    tester,
+  ) async {
+    final repository = FakeCardRepository();
+    addTearDown(repository.dispose);
+    repository.cardToGet = repository
+        .card('card-1')
+        .copyWith(example: 'a seeded example');
+
+    await pump(tester, repository);
+
+    // The detail is visible without tapping the toggle.
+    expect(find.text('a seeded example'), findsOneWidget);
+  });
+
+  testWidgets('expanding details and saving carries the example through', (
+    tester,
+  ) async {
+    final repository = FakeCardRepository();
+    addTearDown(repository.dispose);
+    repository.cardToGet = repository.card('card-1');
+
+    await pump(tester, repository);
+
+    // Collapsed by default: the toggle is present, the field is not.
+    expect(find.text('Add details'), findsOneWidget);
+    await tester.ensureVisible(find.text('Add details'));
+    await tester.tap(find.text('Add details'));
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.widgetWithText(TextField, 'Example'));
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Example'),
+      'a new example',
+    );
+    await tester.ensureVisible(find.text('Save changes'));
+    await tester.tap(find.text('Save changes'));
+    await tester.pump();
+
+    expect(repository.updates.single.example, 'a new example');
+  });
+
   testWidgets('the tag section renders the card tags as chips', (tester) async {
     final repository = FakeCardRepository();
     addTearDown(repository.dispose);
@@ -153,6 +195,7 @@ void main() {
 
     await pump(tester, repository);
 
+    await tester.ensureVisible(find.text('Delete card'));
     await tester.tap(find.text('Delete card'));
     await tester.pumpAndSettle();
 

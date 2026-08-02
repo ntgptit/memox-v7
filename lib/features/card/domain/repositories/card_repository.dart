@@ -71,11 +71,16 @@ abstract interface class CardRepository {
   /// `unset` becomes `card` in the same atomic step.
   ///
   /// [front] and [back] are [CardText], not `String`: BR-07 and BR-08 have been
-  /// applied before the call, and the signature is what says so.
+  /// applied before the call, and the signature is what says so. The three
+  /// details are [CardDetailText] and optional (BR-95) — null means the column
+  /// is left empty.
   Future<CardEntity> createCard({
     required String deckId,
     required CardText front,
     required CardText back,
+    CardDetailText? example,
+    CardDetailText? hint,
+    CardDetailText? pronunciation,
   });
 
   /// One card by id, for the editor to prefill.
@@ -87,11 +92,16 @@ abstract interface class CardRepository {
   Future<CardEntity> getCard(String cardId);
 
   /// Updates card content only (BR-10) — the review state and history are
-  /// untouched, structurally, because this writes only to `cards`.
+  /// untouched, structurally, because this writes only to `cards`. The three
+  /// details are rewritten too (BR-95); a null clears the column, so editing a
+  /// detail to empty removes it.
   Future<CardEntity> updateCard({
     required String cardId,
     required CardText front,
     required CardText back,
+    CardDetailText? example,
+    CardDetailText? hint,
+    CardDetailText? pronunciation,
   });
 
   /// Deletes a card; its review state and history cascade. The deck's
