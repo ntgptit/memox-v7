@@ -33,6 +33,14 @@ abstract final class RouteNames {
   /// The review surface. Branch 1 of the shell; still a placeholder until the
   /// real session screen lands in M5.4.
   static const String review = 'review';
+
+  /// The card list of a card-type deck. A child of [deckDetail], so it stays in
+  /// the Decks branch and the bottom bar remains visible (UC-04).
+  static const String cardList = 'cardList';
+
+  /// The card editor — create when it carries no card id, edit when it does. A
+  /// child of [cardList] (M4.11).
+  static const String cardEditor = 'cardEditor';
 }
 
 /// Names of the path parameters routes carry.
@@ -43,4 +51,8 @@ abstract final class RouteNames {
 /// half compiles, and surfaces as a null id at runtime.
 abstract final class RoutePathParams {
   static const String deckId = 'deckId';
+
+  /// The card being edited. Absent on the create route, present on edit —
+  /// which is how one editor screen serves both.
+  static const String cardId = 'cardId';
 }

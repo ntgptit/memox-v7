@@ -715,8 +715,8 @@ thêm dòng vào [Lịch sửa](#1-lịch-sửa).
 | Q3 | `⋮` trên AppBar của card list làm gì. Có thể mượn lại `showDeckActions` của deck | W1 AppBar | — |
 | Q4 | Design reference JSX (`CardScreen.jsx`, `CardEditor.jsx`) trong `design_system/ui_kits/memox-app/` — dựng trước hay sau code Flutter | Acceptance criteria "pixel difference dưới 3%" không đo được khi chưa có bản tham chiếu | — |
 | Q5 | Copy tiếng Việt cho toàn bộ chuỗi ở trên | ARB `vi` | — |
-| Q6 | `windowSize` là bao nhiêu, và bước load-more có bằng nó không. Wireframe vẽ 50/50 làm chỗ đặt số, không phải để chốt | W1b, `card.drift` `LIMIT :limit` | — |
-| Q7 | Cửa sổ có reset về `windowSize` khi rời màn rồi quay lại không, hay giữ nguyên độ mở | Controller state ở M4.11 | — |
+| Q6 | ~~`windowSize`~~ | — | **Chốt ở lát 1**: `kCardWindowSize = 50`, bước load-more cũng 50 |
+| Q7 | ~~Cửa sổ reset khi quay lại màn~~ | — | **Chốt ở lát 1**: `CardListWindow` là `autoDispose` → reset về `windowSize` mỗi lần vào |
 | Q12 | Nhãn ô ghi ngôn ngữ (`FRONT · KOREAN`). Deck chưa có cột ngôn ngữ, nên hoặc thêm cột, hoặc bỏ nửa sau của nhãn | Nhãn ô ở W4 | — |
 | Q13 | `Save` trên app bar và `Save card` ở đáy là hai lối cho một hành động. Giữ cả hai theo ảnh, hay bỏ cái trên | W4 app bar | — |
 | Q8 | ~~Nhãn trạng thái thẻ cần một BR~~ | — | **Đã chốt ở M4.10at**: BR-89…BR-91, bốn nhãn `new / beginning / reviewing / mastered`, `mastered` đọc lại BR-88 |

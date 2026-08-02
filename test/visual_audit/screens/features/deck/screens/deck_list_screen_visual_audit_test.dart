@@ -306,6 +306,8 @@ void main() {
         // text rather than a control.
         breadcrumbSteps: 1,
       ),
+      // The "Open cards" action that hands off to the card list (M4.11).
+      ...mxActionButtonAllowances('empty_state'),
     ],
   );
 
