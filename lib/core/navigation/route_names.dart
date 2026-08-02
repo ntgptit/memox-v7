@@ -38,9 +38,14 @@ abstract final class RouteNames {
   /// the Decks branch and the bottom bar remains visible (UC-04).
   static const String cardList = 'cardList';
 
-  /// The card editor — create when it carries no card id, edit when it does. A
-  /// child of [cardList] (M4.11).
+  /// The card editor in create mode — carries no card id. A child of
+  /// [cardList] (M4.11).
   static const String cardEditor = 'cardEditor';
+
+  /// The card editor in edit mode — carries a `cardId`. A separate name because
+  /// GoRouter requires each route name to be unique, and create and edit are two
+  /// routes (`new` and `:cardId/edit`) under the same parent (M4.11).
+  static const String cardEditorEdit = 'cardEditorEdit';
 }
 
 /// Names of the path parameters routes carry.

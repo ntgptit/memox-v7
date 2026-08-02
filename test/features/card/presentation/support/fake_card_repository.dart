@@ -104,15 +104,48 @@ final class FakeCardRepository implements CardRepository {
     return card('created', front: front.value, back: back.value);
   }
 
+  /// The card the editor loads in edit mode; set by a test opening the editor.
+  CardEntity? cardToGet;
+
+  /// Recorded update calls: (cardId, front, back).
+  final List<({String id, String front, String back})> updates =
+      <({String id, String front, String back})>[];
+
+  /// Recorded deletes.
+  final List<String> deletes = <String>[];
+
+  /// When set, the next `getCard` throws it — the edit prefill's failure path.
+  Failure? nextGetFailure;
+
+  @override
+  Future<CardEntity> getCard(String cardId) async {
+    final failure = nextGetFailure;
+    if (failure != null) throw failure;
+    final seeded = cardToGet;
+    if (seeded != null) return seeded;
+
+    return card(cardId);
+  }
+
   @override
   Future<CardEntity> updateCard({
     required String cardId,
     required CardText front,
     required CardText back,
-  }) async => card(cardId, front: front.value, back: back.value);
+  }) async {
+    updates.add((id: cardId, front: front.value, back: back.value));
+    final failure = nextCreateFailure;
+    if (failure != null) throw failure;
+
+    return card(cardId, front: front.value, back: back.value);
+  }
 
   @override
-  Future<void> deleteCard(String cardId) async {}
+  Future<void> deleteCard(String cardId) async {
+    deletes.add(cardId);
+    final failure = nextCreateFailure;
+    if (failure != null) throw failure;
+  }
 
   void dispose() {
     unawaited(_cards.close());

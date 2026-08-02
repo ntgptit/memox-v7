@@ -61,6 +61,14 @@ abstract interface class CardRepository {
     required CardText back,
   });
 
+  /// One card by id, for the editor to prefill.
+  ///
+  /// A one-shot read, not a stream: the editor takes a snapshot when it opens
+  /// and the user edits that. A card deleted from another screen while the form
+  /// is open surfaces as a `NotFoundFailure` on save, which is where it matters —
+  /// re-fetching live would only let the form's text fight an incoming change.
+  Future<CardEntity> getCard(String cardId);
+
   /// Updates card content only (BR-10) — the review state and history are
   /// untouched, structurally, because this writes only to `cards`.
   Future<CardEntity> updateCard({

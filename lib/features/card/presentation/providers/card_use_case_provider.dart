@@ -2,6 +2,9 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../di/card_repository_provider.dart';
 import '../../domain/usecases/create_card_use_case.dart';
+import '../../domain/usecases/delete_card_use_case.dart';
+import '../../domain/usecases/get_card_use_case.dart';
+import '../../domain/usecases/update_card_use_case.dart';
 import '../../domain/usecases/watch_card_count_use_case.dart';
 import '../../domain/usecases/watch_cards_by_deck_use_case.dart';
 
@@ -14,10 +17,7 @@ part 'card_use_case_provider.g.dart';
 /// widget scopes exempt `_controller` from the ban on reading a repository
 /// directly, so a wiring file must not borrow that exemption.
 ///
-/// The two list reads and the one write the create editor needs. `update` and
-/// `delete` land with the edit and delete slices that call them — a provider for
-/// a use case nobody reads yet is a decision made without a screen to check it
-/// against.
+/// The list reads and the card writes the editor and the list drive.
 @riverpod
 WatchCardsByDeckUseCase watchCardsByDeckUseCase(Ref ref) =>
     WatchCardsByDeckUseCase(ref.watch(cardRepositoryProvider));
@@ -29,3 +29,15 @@ WatchCardCountUseCase watchCardCountUseCase(Ref ref) =>
 @riverpod
 CreateCardUseCase createCardUseCase(Ref ref) =>
     CreateCardUseCase(ref.watch(cardRepositoryProvider));
+
+@riverpod
+GetCardUseCase getCardUseCase(Ref ref) =>
+    GetCardUseCase(ref.watch(cardRepositoryProvider));
+
+@riverpod
+UpdateCardUseCase updateCardUseCase(Ref ref) =>
+    UpdateCardUseCase(ref.watch(cardRepositoryProvider));
+
+@riverpod
+DeleteCardUseCase deleteCardUseCase(Ref ref) =>
+    DeleteCardUseCase(ref.watch(cardRepositoryProvider));
