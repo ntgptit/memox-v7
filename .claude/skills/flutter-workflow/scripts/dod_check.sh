@@ -10,9 +10,31 @@
 #           full gate (no --fast) before you commit, and always before a merge.
 #   --fix   apply `dart format` instead of only reporting drift
 #
-# The two slow bash guards this used to shell into (architecture, docs) are now
-# one-process Python and cost ~1s each; the time here is `flutter analyze` and
-# `flutter test`.
+# ---------------------------------------------------------------------------
+# Where the time goes, measured rather than assumed (2026-08-02, this machine):
+#
+#   flutter test    43s        dart format          3s
+#   flutter analyze 10s        guard (python)       2s
+#                              3 doc/arch guards    2s
+#
+# **This file is not the bottleneck and rewriting it in another language does
+# not help.** It has no per-file loop and no fork storm — the thing that made
+# `check_architecture.sh` take two minutes before it became Python. It starts
+# seven subprocesses and prints a summary; the cost is inside those seven.
+#
+# Two things in here *were* worth fixing, and both are scheduling rather than
+# language:
+#
+#   1. It shelled into `bash check_*.sh`, and each of those wrappers only
+#      `exec`s a `.py`. On Windows git-bash that fork measured **286ms**, three
+#      times over — nearly a second spent starting shells that immediately
+#      replace themselves. The `.py` is called directly now; the `.sh` wrappers
+#      stay for everyone else who calls them by name.
+#   2. Every gate ran in series although only one pair has an ordering
+#      constraint. They run concurrently now, with each step's output buffered
+#      and replayed in a fixed order — parallel execution, serial reading, so a
+#      failure is still findable.
+# ---------------------------------------------------------------------------
 
 set -uo pipefail
 
@@ -47,98 +69,120 @@ if [[ ! -f pubspec.yaml ]]; then
   exit 0
 fi
 
-# ---------------------------------------------------------------- format
-if command -v dart >/dev/null 2>&1; then
-  step "dart format"
-  if [[ $FIX -eq 1 ]]; then
-    dart format . && echo "formatted"
-  else
-    dart format --output=none --set-exit-if-changed . \
-      || FAILED+=("format — run with --fix, or 'dart format .'")
-  fi
+# `python3` as well as `python`. Only `python` was tried once, so on a machine
+# where the interpreter is named `python3` — most Linux distributions, and the
+# CI runner — the project's main guard was *skipped* and this script still
+# printed success. A skip that reads as a pass is the same defect as a rule that
+# scans nothing.
+PY=""
+for candidate in python python3; do
+  command -v "$candidate" >/dev/null 2>&1 && { PY="$candidate"; break; }
+done
+
+# ------------------------------------------------------------ the schedule
+# name | label | command. Order here is the order results are printed, which is
+# deliberately not the order they finish.
+NAMES=()
+LABELS=()
+CMDS=()
+
+plan() { NAMES+=("$1"); LABELS+=("$2"); CMDS+=("$3"); }
+
+# `--fix` writes files, so it cannot share a window with the analyzer or the
+# tests reading them. It runs alone, first, before anything is scheduled.
+if [[ $FIX -eq 1 ]] && command -v dart >/dev/null 2>&1; then
+  step "dart format --fix"
+  dart format . && echo "formatted"
+elif command -v dart >/dev/null 2>&1; then
+  plan format "dart format" \
+    "dart format --output=none --set-exit-if-changed ."
 fi
 
-# --------------------------------------------------------------- analyze
 if command -v flutter >/dev/null 2>&1; then
-  step "flutter analyze"
   # --fatal-infos would be stricter than the checklist requires; errors and
   # warnings are the bar, and analysis_options.yaml decides which is which.
-  flutter analyze --no-fatal-infos || FAILED+=("analyze")
+  plan analyze "flutter analyze" "flutter analyze --no-fatal-infos"
 fi
 
-# ------------------------------------------------------- generated code
 # Generated output is gitignored, so nothing else here notices when it is stale,
 # missing or — worse — committed. `--skip-rebuild` because the reproducibility
 # comparison rebuilds from scratch, which belongs in CI rather than in a gate
 # somebody runs before every commit.
-GEN_CHECK="$REPO_ROOT/.claude/skills/flutter-workflow/scripts/check_generated.sh"
-if [[ -f "$GEN_CHECK" ]]; then
-  step "generated code"
-  bash "$GEN_CHECK" --skip-rebuild || FAILED+=("generated code")
+GEN_PY="$REPO_ROOT/.claude/skills/flutter-workflow/scripts/check_generated.py"
+if [[ -n "$PY" && -f "$GEN_PY" ]]; then
+  plan generated "generated code" "$PY '$GEN_PY' --skip-rebuild"
 else
-  SKIPPED+=("generated code (script missing at $GEN_CHECK)")
+  SKIPPED+=("generated code (no python, or missing at $GEN_PY)")
 fi
 
-# ---------------------------------------------- architecture boundaries
-ARCH_CHECK="$REPO_ROOT/.claude/skills/flutter-architecture/scripts/check_architecture.sh"
-if [[ -f "$ARCH_CHECK" ]]; then
-  step "architecture boundaries"
-  bash "$ARCH_CHECK" || FAILED+=("architecture")
+ARCH_PY="$REPO_ROOT/.claude/skills/flutter-architecture/scripts/check_architecture.py"
+if [[ -n "$PY" && -f "$ARCH_PY" ]]; then
+  plan architecture "architecture boundaries" "$PY '$ARCH_PY'"
 else
-  SKIPPED+=("architecture (script missing at $ARCH_CHECK)")
+  SKIPPED+=("architecture (no python, or missing at $ARCH_PY)")
 fi
 
-# ---------------------------------------------------- document integrity
-# Cheap now that it is one Python process (~1s), so it belongs in the local
-# gate rather than only in CI — a dangling BR reference or a stale WBS
-# dependency is caught before the commit, not on the PR.
-DOCS_CHECK="$REPO_ROOT/.claude/skills/flutter-workflow/scripts/check_docs.sh"
-if [[ -f "$DOCS_CHECK" ]]; then
-  step "document integrity"
-  bash "$DOCS_CHECK" --quiet || FAILED+=("docs")
+# Cheap now that it is one Python process, so it belongs in the local gate
+# rather than only in CI — a dangling BR reference or a stale WBS dependency is
+# caught before the commit, not on the PR.
+DOCS_PY="$REPO_ROOT/.claude/skills/flutter-workflow/scripts/check_docs.py"
+if [[ -n "$PY" && -f "$DOCS_PY" ]]; then
+  plan docs "document integrity" "$PY '$DOCS_PY' --quiet"
 else
-  SKIPPED+=("docs (script missing at $DOCS_CHECK)")
+  SKIPPED+=("docs (no python, or missing at $DOCS_PY)")
 fi
 
-# ------------------------------------------------ code verification guard
 # The project's main guard. Owns every check flutter analyze cannot express —
 # layer boundaries, Riverpod usage, design tokens, memox data invariants —
 # including the rules riverpod_lint covered before it was descoped.
 GUARD_RUNNER="$REPO_ROOT/code-verification-guard-v2/guard/run.py"
-# `python3` as well as `python`. Only `python` was tried, so on a machine where the
-# interpreter is named `python3` — most Linux distributions, and the CI runner — the
-# project's main guard was *skipped* and this script still printed success. A skip
-# that reads as a pass is the same defect as a rule that scans nothing.
-GUARD_PY=""
-for candidate in python python3; do
-  command -v "$candidate" >/dev/null 2>&1 && { GUARD_PY="$candidate"; break; }
-done
-
 if [[ ! -f "$GUARD_RUNNER" ]]; then
   SKIPPED+=("guard (not vendored at $GUARD_RUNNER)")
-elif [[ -z "$GUARD_PY" ]]; then
+elif [[ -z "$PY" ]]; then
   SKIPPED+=("guard (neither python nor python3 on PATH)")
 else
-  step "code verification guard (memox-v7)"
-  "$GUARD_PY" "$GUARD_RUNNER" check --project "$REPO_ROOT" --ruleset memox-v7 \
-    || FAILED+=("guard — see the rule ids above")
+  plan guard "code verification guard (memox-v7)" \
+    "$PY '$GUARD_RUNNER' check --project '$REPO_ROOT' --ruleset memox-v7"
 fi
 
-# ------------------------------------------------------------------ test
 if command -v flutter >/dev/null 2>&1; then
-  if [[ -d test ]]; then
-    if [[ $FAST -eq 1 ]]; then
-      step "flutter test (--fast: Deck + app subset, no goldens)"
-      flutter test --exclude-tags golden test/app test/features/deck \
-        || FAILED+=("test")
-    else
-      step "flutter test (full suite)"
-      flutter test || FAILED+=("test")
-    fi
-  else
+  if [[ ! -d test ]]; then
     SKIPPED+=("test (no test/ directory yet)")
+  elif [[ $FAST -eq 1 ]]; then
+    plan test "flutter test (--fast: Deck + app subset, no goldens)" \
+      "flutter test --exclude-tags golden test/app test/features/deck"
+  else
+    plan test "flutter test (full suite)" "flutter test"
   fi
 fi
+
+# ------------------------------------------------------------- run them all
+# Output is captured per step rather than streamed. Interleaved output from
+# seven concurrent processes is unreadable exactly when it matters — when
+# something failed and you are looking for which line said so.
+WORK="$(mktemp -d 2>/dev/null || echo "${TMPDIR:-/tmp}/dod_$$")"
+mkdir -p "$WORK"
+trap 'rm -rf "$WORK"' EXIT
+
+for i in "${!NAMES[@]}"; do
+  {
+    eval "${CMDS[$i]}" >"$WORK/${NAMES[$i]}.log" 2>&1
+    printf '%s' "$?" >"$WORK/${NAMES[$i]}.rc"
+  } &
+done
+wait
+
+for i in "${!NAMES[@]}"; do
+  step "${LABELS[$i]}"
+  cat "$WORK/${NAMES[$i]}.log"
+  if [[ "$(cat "$WORK/${NAMES[$i]}.rc" 2>/dev/null || echo 1)" != "0" ]]; then
+    case "${NAMES[$i]}" in
+      format) FAILED+=("format — run with --fix, or 'dart format .'") ;;
+      guard)  FAILED+=("guard — see the rule ids above") ;;
+      *)      FAILED+=("${NAMES[$i]}") ;;
+    esac
+  fi
+done
 
 # --------------------------------------------------------------- summary
 hr
