@@ -7,10 +7,42 @@ import '../tables/cards.drift';
 -- deletion confirm — stay in deck.drift with the deck boundary that calls
 -- them.
 
+-- The management list for one deck: newest first, bounded by a caller-supplied
+-- window.
+--
+-- **`DESC`, and the direction is load-bearing.** Cards were ordered oldest-first
+-- until M4.11, which put a just-created card at the *far end* of the deck — the
+-- opposite of what UC-04 A4 (add several in a row) needs to show. It also made
+-- the window expensive exactly where it is used most: with the newest rows last,
+-- seeing them means holding the whole deck open, and `watch()` re-reads that
+-- window on every insert. Newest-first keeps the add-many flow at one page.
+--
+-- This order is a **management** view and decides nothing about study: the
+-- review queue is `cardsDueForReview` in study.drift, ordered by BR-23.
+--
+-- `created_at`, never `updated_at` — editing an old card would otherwise move it
+-- to the top and take the reader's place in the list with it.
+--
+-- **`LIMIT` with no `OFFSET`, and no cursor.** The window grows (50, 100, 150…)
+-- and is re-read whole, so an insert above it cannot duplicate or drop a row the
+-- way a shifting offset window does. A keyset cursor buys nothing until
+-- something seeks deep without reading what is before it — no MVP flow does, as
+-- there is still no card search (S1, deferred). What the composite index
+-- `(deck_id, created_at, id)` buys *is* realised here: it supplies the order, so
+-- `LIMIT` stops early instead of sorting the deck and putting a lid on it.
 cardsByDeck:
 SELECT * FROM cards
 WHERE deck_id = :deckId
-ORDER BY created_at ASC, id ASC;
+ORDER BY created_at DESC, id DESC
+LIMIT :limit;
+
+-- How many cards the deck holds, for "showing 50 of 3,240".
+--
+-- A separate statement on purpose. `COUNT(*) OVER ()` beside the rows above
+-- would make SQLite materialise every matching row to compute it, which is
+-- precisely the early stop the `LIMIT` and the index exist to buy.
+cardCountByDeck:
+SELECT COUNT(*) FROM cards WHERE deck_id = :deckId;
 
 cardById:
 SELECT * FROM cards WHERE id = :cardId;

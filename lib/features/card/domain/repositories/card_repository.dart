@@ -17,8 +17,36 @@ import '../models/card_text_model.dart';
 /// the card operation's implementation; it does not make card CRUD a deck
 /// responsibility.
 abstract interface class CardRepository {
-  /// The cards of one deck, re-emitted on every change (AD-01).
-  Stream<List<CardEntity>> watchCardsByDeck(String deckId);
+  /// One deck's cards, newest first, capped at [limit] — re-emitted on every
+  /// change (AD-01).
+  ///
+  /// **[limit] is a window, not a page number.** The caller asks for the first
+  /// N and asks again for a larger N as the reader scrolls; there is no cursor
+  /// and no offset, so the window is always re-read whole and an insert above
+  /// it can neither duplicate a row nor drop one. How the window grows is the
+  /// screen's business — this layer has no concept of a page.
+  ///
+  /// Newest first because a just-created card must be visible without scrolling
+  /// (UC-04 A4). This is a management order and decides nothing about study:
+  /// the review queue is ordered by BR-23 through its own query.
+  Stream<List<CardEntity>> watchCardsByDeck(
+    String deckId, {
+    required int limit,
+  });
+
+  /// How many cards the deck holds, whatever the window is showing.
+  ///
+  /// **A second read rather than a field on the one above**, because the count
+  /// has to come from its own statement: a window function computing it beside
+  /// the rows would make SQLite materialise the whole deck and cancel the early
+  /// stop the `LIMIT` exists for.
+  ///
+  /// AD-13 asks for one read where two facts jointly decide something — the
+  /// deck screen's action set was computed from two snapshots and rendered the
+  /// wrong buttons. These two decide nothing together: the count is a label
+  /// beside the list, so a frame where it trails the rows by one is a stale
+  /// label, not a wrong control.
+  Stream<int> watchCardCountByDeck(String deckId);
 
   /// Creates a card and exactly one review state atomically — BR-09, BR-62.
   /// The state carries the root's scheduler, version and current generation,

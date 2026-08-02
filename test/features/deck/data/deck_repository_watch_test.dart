@@ -101,7 +101,7 @@ void main() {
       final tree = await h.seedTree();
       final emissions = <List<CardEntity>>[];
       final subscription = h.cardRepository
-          .watchCardsByDeck(tree.leaf.id)
+          .watchCardsByDeck(tree.leaf.id, limit: 50)
           .listen(emissions.add);
       addTearDown(subscription.cancel);
       await pumpEventQueue();
