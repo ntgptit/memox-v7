@@ -72,13 +72,30 @@ final class CardRepositoryImpl implements CardRepository {
   final DateTime Function() _clock;
 
   @override
-  Stream<List<CardEntity>> watchCardsByDeck(String deckId) => _cardDao
-      .watchCardsByDeck(deckId)
-      .handleError(_rethrowMapped)
-      .map(
-        (List<Card> rows) =>
-            rows.map(cardEntityFromRow).toList(growable: false),
-      );
+  Stream<List<CardEntity>> watchCardsByDeck(
+    String deckId, {
+    required int limit,
+  }) {
+    // A window has to be a window. Zero would render an empty deck that has
+    // cards, and a negative one is SQLite's "no limit" — the unbounded read
+    // this parameter exists to prevent, arriving through the parameter meant
+    // to stop it.
+    if (limit < 1) {
+      throw ArgumentError.value(limit, 'limit', 'must be at least 1');
+    }
+
+    return _cardDao
+        .watchCardsByDeck(deckId, limit: limit)
+        .handleError(_rethrowMapped)
+        .map(
+          (List<Card> rows) =>
+              rows.map(cardEntityFromRow).toList(growable: false),
+        );
+  }
+
+  @override
+  Stream<int> watchCardCountByDeck(String deckId) =>
+      _cardDao.watchCardCountByDeck(deckId).handleError(_rethrowMapped);
 
   @override
   Future<CardEntity> createCard({

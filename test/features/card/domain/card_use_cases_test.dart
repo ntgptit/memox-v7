@@ -7,6 +7,7 @@ import 'package:memox/features/card/domain/repositories/card_repository.dart';
 import 'package:memox/features/card/domain/usecases/create_card_use_case.dart';
 import 'package:memox/features/card/domain/usecases/delete_card_use_case.dart';
 import 'package:memox/features/card/domain/usecases/update_card_use_case.dart';
+import 'package:memox/features/card/domain/usecases/watch_card_count_use_case.dart';
 import 'package:memox/features/card/domain/usecases/watch_cards_by_deck_use_case.dart';
 
 /// The card use cases: what they refuse, and what they never reach.
@@ -142,10 +143,21 @@ void main() {
       expect(repository.deleteCalls, <String>['card-1']);
     });
 
-    test('watch forwards the deck id', () async {
-      WatchCardsByDeckUseCase(repository).call('deck-1');
+    test('watch forwards the deck id and the window, unchanged', () async {
+      // The use case must not have an opinion about the window: a default here
+      // would be a second answer to "how far has the reader scrolled", and the
+      // screen's would be the one nothing can see.
+      WatchCardsByDeckUseCase(repository).call('deck-1', limit: 50);
+      WatchCardsByDeckUseCase(repository).call('deck-1', limit: 100);
 
-      expect(repository.watchCalls, <String>['deck-1']);
+      expect(repository.watchCalls, <String>['deck-1', 'deck-1']);
+      expect(repository.watchLimits, <int>[50, 100]);
+    });
+
+    test('the count is its own read', () async {
+      WatchCardCountUseCase(repository).call('deck-1');
+
+      expect(repository.countCalls, <String>['deck-1']);
     });
   });
 }
@@ -168,6 +180,8 @@ final class _CountingCardRepository implements CardRepository {
   int updateCalls = 0;
   final List<String> deleteCalls = <String>[];
   final List<String> watchCalls = <String>[];
+  final List<int> watchLimits = <int>[];
+  final List<String> countCalls = <String>[];
   CardText? lastFront;
   CardText? lastBack;
 
@@ -210,9 +224,20 @@ final class _CountingCardRepository implements CardRepository {
   Future<void> deleteCard(String cardId) async => deleteCalls.add(cardId);
 
   @override
-  Stream<List<CardEntity>> watchCardsByDeck(String deckId) {
+  Stream<List<CardEntity>> watchCardsByDeck(
+    String deckId, {
+    required int limit,
+  }) {
     watchCalls.add(deckId);
+    watchLimits.add(limit);
 
     return const Stream<List<CardEntity>>.empty();
+  }
+
+  @override
+  Stream<int> watchCardCountByDeck(String deckId) {
+    countCalls.add(deckId);
+
+    return const Stream<int>.empty();
   }
 }

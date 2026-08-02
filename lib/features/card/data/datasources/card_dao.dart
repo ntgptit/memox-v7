@@ -21,8 +21,13 @@ final class CardDao {
 
   // ---- reads -------------------------------------------------------------
 
-  Stream<List<Card>> watchCardsByDeck(String deckId) =>
-      _db.cardsByDeck(deckId).watch();
+  /// Newest first, capped at [limit] — see `card.drift` for why both.
+  Stream<List<Card>> watchCardsByDeck(String deckId, {required int limit}) =>
+      _db.cardsByDeck(deckId, limit).watch();
+
+  /// The deck's whole card count, for the "showing N of M" line.
+  Stream<int> watchCardCountByDeck(String deckId) =>
+      _db.cardCountByDeck(deckId).watchSingle();
 
   Future<Card?> cardById(String cardId) =>
       _db.cardById(cardId).getSingleOrNull();
