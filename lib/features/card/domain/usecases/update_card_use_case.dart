@@ -21,13 +21,25 @@ class UpdateCardUseCase {
     required String cardId,
     required String rawFront,
     required String rawBack,
+    String rawExample = '',
+    String rawHint = '',
+    String rawPronunciation = '',
   }) async {
-    final sides = parseCardSides(rawFront: rawFront, rawBack: rawBack);
+    final form = parseCardForm(
+      rawFront: rawFront,
+      rawBack: rawBack,
+      rawExample: rawExample,
+      rawHint: rawHint,
+      rawPronunciation: rawPronunciation,
+    );
 
     return _repository.updateCard(
       cardId: cardId,
-      front: sides.front,
-      back: sides.back,
+      front: form.front,
+      back: form.back,
+      example: form.example,
+      hint: form.hint,
+      pronunciation: form.pronunciation,
     );
   }
 }

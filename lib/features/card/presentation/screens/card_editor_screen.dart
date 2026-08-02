@@ -16,6 +16,7 @@ import '../controllers/card_flag_controller.dart';
 import '../controllers/card_write_controller.dart';
 import '../states/card_submit_state.dart';
 import '../widgets/overlays/card_confirm_widget.dart';
+import '../widgets/sections/card_details_section_widget.dart';
 import '../widgets/sections/card_tag_section_widget.dart';
 
 /// The card editor — create and edit (UC-04 W4, A1).
@@ -44,11 +45,18 @@ class CardEditorScreen extends ConsumerStatefulWidget {
 class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
   final TextEditingController _front = TextEditingController();
   final TextEditingController _back = TextEditingController();
+  final TextEditingController _example = TextEditingController();
+  final TextEditingController _hint = TextEditingController();
+  final TextEditingController _pronunciation = TextEditingController();
   final FocusNode _frontFocus = FocusNode();
 
   /// Edit mode fills the fields once, when the card first arrives — re-filling
   /// on every rebuild would overwrite what the user is typing.
   bool _prefilled = false;
+
+  /// The optional-detail fields start collapsed (W4); a card that already has a
+  /// detail opens them expanded (W5).
+  bool _detailsExpanded = false;
 
   bool get _isEditing => widget.cardId != null;
 
@@ -56,9 +64,25 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
   void dispose() {
     _front.dispose();
     _back.dispose();
+    _example.dispose();
+    _hint.dispose();
+    _pronunciation.dispose();
     _frontFocus.dispose();
     super.dispose();
   }
+
+  Widget _detailsSection(CardSubmitState state, {required bool busy}) =>
+      CardDetailsSectionWidget(
+        isExpanded: _detailsExpanded,
+        onToggle: () => setState(() => _detailsExpanded = !_detailsExpanded),
+        exampleController: _example,
+        hintController: _hint,
+        pronunciationController: _pronunciation,
+        isBusy: busy,
+        exampleProblem: state.exampleProblem,
+        hintProblem: state.hintProblem,
+        pronunciationProblem: state.pronunciationProblem,
+      );
 
   @override
   Widget build(BuildContext context) =>
@@ -81,6 +105,9 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
       if (next.shouldClearDraft && !(previous?.shouldClearDraft ?? false)) {
         _front.clear();
         _back.clear();
+        _example.clear();
+        _hint.clear();
+        _pronunciation.clear();
         _frontFocus.requestFocus();
         controller.reset();
       }
@@ -96,15 +123,12 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           ..._fields(state, busy: busy, autofocus: true),
+          const SizedBox(height: AppSpacing.md),
+          _detailsSection(state, busy: busy),
           const SizedBox(height: AppSpacing.xl),
           MxActionButton(
             label: context.l10n.cardEditorSave,
-            onPressed: busy
-                ? null
-                : () => controller.submit(
-                    rawFront: _front.text,
-                    rawBack: _back.text,
-                  ),
+            onPressed: busy ? null : () => _submitCreate(controller),
             isLoading: busy,
           ),
           const SizedBox(height: AppSpacing.md),
@@ -113,9 +137,8 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
             variant: MxActionButtonVariant.secondary,
             onPressed: busy
                 ? null
-                : () => controller.submit(
-                    rawFront: _front.text,
-                    rawBack: _back.text,
+                : () => _submitCreate(
+                    controller,
                     disposition: SubmitDisposition.addAnother,
                   ),
           ),
@@ -123,6 +146,18 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
       ),
     );
   }
+
+  void _submitCreate(
+    CardCreate controller, {
+    SubmitDisposition disposition = SubmitDisposition.close,
+  }) => controller.submit(
+    rawFront: _front.text,
+    rawBack: _back.text,
+    rawExample: _example.text,
+    rawHint: _hint.text,
+    rawPronunciation: _pronunciation.text,
+    disposition: disposition,
+  );
 
   // ---- edit --------------------------------------------------------------
 
@@ -158,6 +193,15 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
     if (!_prefilled) {
       _front.text = card.front;
       _back.text = card.back;
+      _example.text = card.example ?? '';
+      _hint.text = card.hint ?? '';
+      _pronunciation.text = card.pronunciation ?? '';
+      // Open the details already if this card has any — so an existing detail is
+      // visible without hunting for the toggle (W5).
+      _detailsExpanded =
+          card.example != null ||
+          card.hint != null ||
+          card.pronunciation != null;
       _prefilled = true;
     }
 
@@ -188,6 +232,8 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
+          const SizedBox(height: AppSpacing.md),
+          _detailsSection(state, busy: busy),
           const SizedBox(height: AppSpacing.xl),
           MxActionButton(
             label: context.l10n.cardEditorSaveChanges,
@@ -196,6 +242,9 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
                 : () => controller.submit(
                     rawFront: _front.text,
                     rawBack: _back.text,
+                    rawExample: _example.text,
+                    rawHint: _hint.text,
+                    rawPronunciation: _pronunciation.text,
                   ),
             isLoading: busy,
           ),

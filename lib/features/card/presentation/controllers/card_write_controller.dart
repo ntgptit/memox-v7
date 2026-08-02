@@ -33,6 +33,9 @@ class CardEdit extends _$CardEdit {
   Future<void> submit({
     required String rawFront,
     required String rawBack,
+    String rawExample = '',
+    String rawHint = '',
+    String rawPronunciation = '',
   }) async {
     if (!state.canSubmit) return;
 
@@ -42,6 +45,9 @@ class CardEdit extends _$CardEdit {
         cardId: cardId,
         rawFront: rawFront,
         rawBack: rawBack,
+        rawExample: rawExample,
+        rawHint: rawHint,
+        rawPronunciation: rawPronunciation,
       );
       if (!ref.mounted) return;
       state = const CardSubmitState(outcome: SubmitOutcome.savedAndClose);

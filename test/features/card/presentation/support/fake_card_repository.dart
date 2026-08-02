@@ -47,10 +47,10 @@ final class FakeCardRepository implements CardRepository {
   /// load-more grew the window.
   final List<int> requestedLimits = <int>[];
 
-  /// Recorded create calls: (front, back). A double-submit guard is proven by
-  /// this staying length 1.
-  final List<({String front, String back})> creates =
-      <({String front, String back})>[];
+  /// Recorded create calls: (front, back, example). A double-submit guard is
+  /// proven by this staying length 1.
+  final List<({String front, String back, String? example})> creates =
+      <({String front, String back, String? example})>[];
 
   /// When set, the next `createCard` throws it instead of returning.
   Failure? nextCreateFailure;
@@ -163,8 +163,15 @@ final class FakeCardRepository implements CardRepository {
     required String deckId,
     required CardText front,
     required CardText back,
+    CardDetailText? example,
+    CardDetailText? hint,
+    CardDetailText? pronunciation,
   }) async {
-    creates.add((front: front.value, back: back.value));
+    creates.add((
+      front: front.value,
+      back: back.value,
+      example: example?.value,
+    ));
     if (createGate != null) await createGate!.future;
     final failure = nextCreateFailure;
     if (failure != null) throw failure;
@@ -175,9 +182,9 @@ final class FakeCardRepository implements CardRepository {
   /// The card the editor loads in edit mode; set by a test opening the editor.
   CardEntity? cardToGet;
 
-  /// Recorded update calls: (cardId, front, back).
-  final List<({String id, String front, String back})> updates =
-      <({String id, String front, String back})>[];
+  /// Recorded update calls: (cardId, front, back, example).
+  final List<({String id, String front, String back, String? example})>
+  updates = <({String id, String front, String back, String? example})>[];
 
   /// Recorded deletes.
   final List<String> deletes = <String>[];
@@ -200,8 +207,16 @@ final class FakeCardRepository implements CardRepository {
     required String cardId,
     required CardText front,
     required CardText back,
+    CardDetailText? example,
+    CardDetailText? hint,
+    CardDetailText? pronunciation,
   }) async {
-    updates.add((id: cardId, front: front.value, back: back.value));
+    updates.add((
+      id: cardId,
+      front: front.value,
+      back: back.value,
+      example: example?.value,
+    ));
     final failure = nextCreateFailure;
     if (failure != null) throw failure;
 

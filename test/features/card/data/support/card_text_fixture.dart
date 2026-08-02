@@ -25,3 +25,23 @@ CardText cardText(String raw, {CardSide side = CardSide.front}) {
 
   return text;
 }
+
+/// A [CardDetailText] from a literal, for a data-layer test that wants a valid
+/// optional detail. Goes through the real [CardDetailText.parse] for the same
+/// reason [cardText] does.
+CardDetailText cardDetail(
+  String raw, {
+  CardDetailField field = CardDetailField.example,
+}) {
+  final parsed = CardDetailText.parse(raw, field: field);
+  final text = parsed.text;
+  if (text == null) {
+    throw ArgumentError.value(
+      raw,
+      'raw',
+      'is not a valid card detail (${parsed.problem?.name})',
+    );
+  }
+
+  return text;
+}

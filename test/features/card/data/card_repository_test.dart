@@ -262,6 +262,48 @@ void main() {
     });
   });
 
+  group('optional details (BR-95)', () {
+    test('createCard persists the three details', () async {
+      final tree = await h.seedTree();
+
+      final card = await h.cardRepository.createCard(
+        deckId: tree.leaf.id,
+        front: cardText('f'),
+        back: cardText('b', side: CardSide.back),
+        example: cardDetail('a sentence'),
+        hint: cardDetail('a mnemonic'),
+        pronunciation: cardDetail('/saʊnd/'),
+      );
+
+      expect(card.example, 'a sentence');
+      expect(card.hint, 'a mnemonic');
+      expect(card.pronunciation, '/saʊnd/');
+    });
+
+    test('updateCard with null details clears them (BR-95)', () async {
+      final tree = await h.seedTree();
+      final card = await h.cardRepository.createCard(
+        deckId: tree.leaf.id,
+        front: cardText('f'),
+        back: cardText('b', side: CardSide.back),
+        example: cardDetail('was here'),
+      );
+      expect(card.example, 'was here');
+
+      final updated = await h.cardRepository.updateCard(
+        cardId: card.id,
+        front: cardText('f2'),
+        back: cardText('b2', side: CardSide.back),
+      );
+
+      expect(
+        updated.example,
+        isNull,
+        reason: 'a null detail clears the column',
+      );
+    });
+  });
+
   group('watchCardListItems (D5)', () {
     test(
       'joins each card to its review state; a new card reads isNew',

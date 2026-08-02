@@ -61,6 +61,32 @@ enum CardValidationProblem {
 
   /// Back is longer than [kCardBackMaxLength] after trimming (BR-08).
   backTooLong,
+
+  /// The example detail is longer than [kCardDetailMaxLength] (BR-95). There is
+  /// no `exampleEmpty`: the three details are optional, so empty is valid and
+  /// folds to null.
+  exampleTooLong,
+
+  /// The hint detail is longer than [kCardDetailMaxLength] (BR-95).
+  hintTooLong,
+
+  /// The pronunciation detail is longer than [kCardDetailMaxLength] (BR-95).
+  pronunciationTooLong,
+}
+
+/// The three optional detail fields (BR-95). Unlike [CardSide] they have no
+/// empty problem — empty is valid and folds to null — only a shared length cap.
+enum CardDetailField {
+  example,
+  hint,
+  pronunciation;
+
+  /// The problem this field reports when it exceeds [kCardDetailMaxLength].
+  CardValidationProblem get tooLongProblem => switch (this) {
+    CardDetailField.example => CardValidationProblem.exampleTooLong,
+    CardDetailField.hint => CardValidationProblem.hintTooLong,
+    CardDetailField.pronunciation => CardValidationProblem.pronunciationTooLong,
+  };
 }
 
 /// The values that belong to the front input.
@@ -77,6 +103,19 @@ const Set<CardValidationProblem> kCardBackProblems = <CardValidationProblem>{
   CardValidationProblem.backEmpty,
   CardValidationProblem.backTooLong,
 };
+
+/// The one problem each detail input can carry (BR-95).
+const Set<CardValidationProblem> kCardExampleProblems = <CardValidationProblem>{
+  CardValidationProblem.exampleTooLong,
+};
+const Set<CardValidationProblem> kCardHintProblems = <CardValidationProblem>{
+  CardValidationProblem.hintTooLong,
+};
+const Set<CardValidationProblem> kCardPronunciationProblems =
+    <CardValidationProblem>{CardValidationProblem.pronunciationTooLong};
+
+/// BR-95's limit for every optional detail, measured after trimming.
+const int kCardDetailMaxLength = 240;
 
 /// BR-08's limit for the front, measured after trimming.
 ///
