@@ -26,6 +26,17 @@ abstract final class RoutePaths {
   /// so the URL says what it points at.
   static const String deckDetailRelative = 'decks/:deckId';
 
+  /// A card-type deck's card list, **relative** to [deckDetailRelative] so the
+  /// full location is `/decks/<id>/cards` and it nests inside the deck route —
+  /// the bottom bar stays and Back returns to the deck tree.
+  static const String cardListRelative = 'cards';
+
+  /// The card editor, **relative** to [cardListRelative]: create at
+  /// `/decks/<id>/cards/new`, edit at `/decks/<id>/cards/<cardId>/edit`. Two
+  /// patterns, one screen, told apart by whether a card id is present.
+  static const String cardCreateRelative = 'new';
+  static const String cardEditRelative = ':cardId/edit';
+
   /// The review branch. A real path rather than a sub-path of `/` so that a
   /// deep link can open the app directly on the Review tab.
   static const String review = '/review';

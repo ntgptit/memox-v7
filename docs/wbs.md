@@ -4880,9 +4880,9 @@ hai mới cho biết cái gì thay đổi".
 
 ### M4.10at · `tags`, `card_tags`, `is_flagged` và bốn trạng thái thẻ
 
-- **Status:** in progress — schema, migration, domain primitive và DAO/named
-  query **done**; còn nợ chứng minh reset không đụng `is_flagged`/`card_tags`
-  (cần đường reset của repository, thuộc M5.x)
+- **Status:** done — schema, migration, domain primitive, DAO/named query đủ.
+  Bảo chứng reset không đụng `is_flagged`/`card_tags` chuyển sang M5.x cùng
+  đường reset của repository (chưa có caller); cascade `card_tags` đã kiểm.
 - **Goal:** Đưa schema và luật mà màn card cần lên trước, để M4.11 dựng hàng thẻ
   **một lần** theo hình dạng cuối thay vì dựng rồi sửa.
 - **Scope:** migration v2 (`tags`, `card_tags`, `cards.is_flagged` và ba trường
@@ -4943,7 +4943,9 @@ cột NULL của scheduler kia.
 
 ### M4.11 · Card management full-stack
 
-- **Status:** todo
+- **Status:** in progress — lát 1 (card list + create editor tối giản) **done**.
+  Còn: edit-mode, delete/danger-zone, tag chip, cờ pill, panel tiến độ, optional
+  details, breadcrumb + tên deck, auto-forward khi vào deck card-type.
 - **Goal:** Người dùng quản lý card hoàn chỉnh trong deck loại `card`, từ UI
   xuống transaction Drift.
 - **Scope:** card list; empty state; tạo card; tạo card **đầu tiên** trong deck

@@ -130,7 +130,9 @@ void main() {
       );
 
       expect(find.text(english.deckDetailEmptyCardTitle), findsOneWidget);
-      expect(find.text(english.deckDetailEmptyCardMessage), findsOneWidget);
+      // The card-type deck now offers a way into its cards (M4.11); what it
+      // still must not offer is deck creation (BR-63).
+      expect(find.text(english.deckDetailOpenCardsAction), findsOneWidget);
       expect(find.text(english.deckCreateSubDeckAction), findsNothing);
       expect(
         find.bySemanticsLabel(RegExp(english.deckCreateSubDeckAction)),

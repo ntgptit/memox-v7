@@ -612,5 +612,83 @@
   },
   "@deckConflictHeightUnknowable": {
     "description": "Lý do một thao tác ghi bộ thẻ bị từ chối (UC-09, BR-55, BR-58, BR-68)."
+  },
+  "cardListTitle": "Thẻ ghi nhớ",
+  "@cardListTitle": {
+    "description": "App-bar title of the card list, shown for a card-type deck (UC-04)."
+  },
+  "cardListShowing": "Đang hiện {shown} trong {total}",
+  "@cardListShowing": {
+    "placeholders": { "shown": { "type": "int" }, "total": { "type": "int" } },
+    "description": "Section label above the card list."
+  },
+  "cardListEmptyTitle": "Chưa có thẻ nào",
+  "@cardListEmptyTitle": {
+    "description": "Empty state of a card-type deck with no cards (UC-04 A3)."
+  },
+  "cardListEmptyMessage": "Thêm thẻ đầu tiên để bắt đầu ôn tập bộ thẻ này.",
+  "@cardListEmptyMessage": {
+    "description": "Body of the card-list empty state."
+  },
+  "cardListEmptyAction": "Thêm thẻ",
+  "@cardListEmptyAction": {
+    "description": "Button in the card-list empty state."
+  },
+  "cardListLoadMore": "Tải thêm {count}",
+  "@cardListLoadMore": {
+    "placeholders": { "count": { "type": "int" } },
+    "description": "Button that grows the window (W1b)."
+  },
+  "cardListAllShown": "{count, plural, =1{Đã hiện thẻ duy nhất} other{Đã hiện tất cả {count} thẻ}}",
+  "@cardListAllShown": {
+    "placeholders": { "count": { "type": "int" } },
+    "description": "Tail line when the window covers the whole deck (W1b)."
+  },
+  "cardListLoadingLabel": "Đang tải thẻ",
+  "@cardListLoadingLabel": {
+    "description": "Announced to a screen reader while the card list loads."
+  },
+  "cardListError": "Không tải được các thẻ này. Kéo để thử lại.",
+  "@cardListError": {
+    "description": "Shown when the card list read fails."
+  },
+  "cardListNewFab": "Thẻ mới",
+  "@cardListNewFab": {
+    "description": "Extended floating action button on the card list (D4)."
+  },
+  "cardEditorCreateTitle": "Thẻ mới",
+  "@cardEditorCreateTitle": { "description": "App-bar title of the card editor in create mode." },
+  "cardEditorClose": "Đóng",
+  "@cardEditorClose": { "description": "Tooltip of the editor's close button." },
+  "cardEditorSave": "Lưu thẻ",
+  "@cardEditorSave": { "description": "Primary save button." },
+  "cardEditorSaveAndAdd": "Lưu và thêm thẻ nữa",
+  "@cardEditorSaveAndAdd": { "description": "Second save path (UC-04 A4)." },
+  "cardEditorSaveFailed": "Không lưu được thẻ này. Nội dung vẫn được giữ — hãy thử lại.",
+  "@cardEditorSaveFailed": { "description": "Shown when a card write fails (UC-04 E3)." },
+  "cardFrontLabel": "Mặt trước",
+  "@cardFrontLabel": { "description": "Label of the front input." },
+  "cardFrontHint": "Từ bạn muốn nhớ",
+  "@cardFrontHint": { "description": "Placeholder of the front input." },
+  "cardBackLabel": "Mặt sau",
+  "@cardBackLabel": { "description": "Label of the back input." },
+  "cardBackHint": "Tiếng Anh, tiếng Việt, hoặc cả hai",
+  "@cardBackHint": { "description": "Placeholder of the back input." },
+  "cardFrontEmptyError": "Mặt trước không được để trống",
+  "@cardFrontEmptyError": { "description": "Inline error (BR-07)." },
+  "cardFrontTooLongError": "Mặt trước đã đạt giới hạn ký tự",
+  "@cardFrontTooLongError": { "description": "Inline error (BR-08)." },
+  "cardBackEmptyError": "Mặt sau không được để trống",
+  "@cardBackEmptyError": { "description": "Inline error (BR-07)." },
+  "cardBackTooLongError": "Mặt sau đã đạt giới hạn ký tự",
+  "@cardBackTooLongError": { "description": "Inline error (BR-08)." },
+  "deckDetailOpenCardsMessage": "Bộ thẻ này chứa các thẻ ghi nhớ.",
+  "@deckDetailOpenCardsMessage": { "description": "Body shown on a card-type deck (UC-04)." },
+  "deckDetailOpenCardsAction": "Mở thẻ",
+  "@deckDetailOpenCardsAction": { "description": "Button that opens the card list." },
+  "cardTileSemantics": "{front}. {back}",
+  "@cardTileSemantics": {
+    "placeholders": { "front": { "type": "String" }, "back": { "type": "String" } },
+    "description": "Screen-reader label for a card row (UC-04 W1)."
   }
 }

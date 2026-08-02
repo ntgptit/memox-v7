@@ -612,5 +612,83 @@
   "deckConflictHeightUnknowable": "This deck holds more nested levels than the app supports.",
   "@deckConflictHeightUnknowable": {
     "description": "Why a deck write was refused (UC-09, BR-55, BR-58, BR-68)."
+  },
+  "cardListTitle": "Flashcards",
+  "@cardListTitle": {
+    "description": "App-bar title of the card list, shown for a card-type deck (UC-04)."
+  },
+  "cardListShowing": "Showing {shown} of {total}",
+  "@cardListShowing": {
+    "placeholders": { "shown": { "type": "int" }, "total": { "type": "int" } },
+    "description": "Section label above the card list: how many of the deck's cards the current window holds (C2/C3). `shown` is the window, `total` is the whole deck."
+  },
+  "cardListEmptyTitle": "No cards yet",
+  "@cardListEmptyTitle": {
+    "description": "Empty state of a card-type deck with no cards (UC-04 A3)."
+  },
+  "cardListEmptyMessage": "Add your first card to start studying this deck.",
+  "@cardListEmptyMessage": {
+    "description": "Body of the card-list empty state."
+  },
+  "cardListEmptyAction": "Add card",
+  "@cardListEmptyAction": {
+    "description": "Button in the card-list empty state that starts the editor."
+  },
+  "cardListLoadMore": "Load {count} more",
+  "@cardListLoadMore": {
+    "placeholders": { "count": { "type": "int" } },
+    "description": "Button at the tail of the card list that grows the window (W1b). `count` is the window step."
+  },
+  "cardListAllShown": "{count, plural, =1{The one card is shown} other{All {count} cards shown}}",
+  "@cardListAllShown": {
+    "placeholders": { "count": { "type": "int" } },
+    "description": "Tail line when the window covers the whole deck, so there is no load-more button (W1b)."
+  },
+  "cardListLoadingLabel": "Loading cards",
+  "@cardListLoadingLabel": {
+    "description": "Announced to a screen reader while the card list loads."
+  },
+  "cardListError": "These cards couldn't be loaded. Pull to try again.",
+  "@cardListError": {
+    "description": "Shown when the card list read fails (UC-04, E3-adjacent)."
+  },
+  "cardListNewFab": "New card",
+  "@cardListNewFab": {
+    "description": "Extended floating action button on the card list that opens the editor (D4)."
+  },
+  "cardEditorCreateTitle": "New flashcard",
+  "@cardEditorCreateTitle": { "description": "App-bar title of the card editor in create mode (UC-04 W4)." },
+  "cardEditorClose": "Close",
+  "@cardEditorClose": { "description": "Tooltip of the editor's close button." },
+  "cardEditorSave": "Save card",
+  "@cardEditorSave": { "description": "Primary save button in the card editor." },
+  "cardEditorSaveAndAdd": "Save and add another",
+  "@cardEditorSaveAndAdd": { "description": "Second save path that keeps the form open for the next card (UC-04 A4)." },
+  "cardEditorSaveFailed": "This card couldn't be saved. Your text is kept — try again.",
+  "@cardEditorSaveFailed": { "description": "Shown when a card write fails; the form keeps its content (UC-04 E3)." },
+  "cardFrontLabel": "Front",
+  "@cardFrontLabel": { "description": "Label of the front input in the card editor." },
+  "cardFrontHint": "The term you want to remember",
+  "@cardFrontHint": { "description": "Placeholder of the front input (W4)." },
+  "cardBackLabel": "Back",
+  "@cardBackLabel": { "description": "Label of the back input in the card editor." },
+  "cardBackHint": "English, Vietnamese, or both",
+  "@cardBackHint": { "description": "Placeholder of the back input (W4)." },
+  "cardFrontEmptyError": "Front can't be empty",
+  "@cardFrontEmptyError": { "description": "Inline error when the front is blank after trimming (BR-07, UC-04 E1)." },
+  "cardFrontTooLongError": "Front is at the character limit",
+  "@cardFrontTooLongError": { "description": "Inline error when the front reaches its length limit (BR-08, UC-04 E2)." },
+  "cardBackEmptyError": "Back can't be empty",
+  "@cardBackEmptyError": { "description": "Inline error when the back is blank after trimming (BR-07, UC-04 E1)." },
+  "cardBackTooLongError": "Back is at the character limit",
+  "@cardBackTooLongError": { "description": "Inline error when the back reaches its length limit (BR-08, UC-04 E2)." },
+  "deckDetailOpenCardsMessage": "This deck holds flashcards.",
+  "@deckDetailOpenCardsMessage": { "description": "Body shown on a card-type deck, above the button that opens the card list (UC-04)." },
+  "deckDetailOpenCardsAction": "Open cards",
+  "@deckDetailOpenCardsAction": { "description": "Button on a card-type deck that opens the card list." },
+  "cardTileSemantics": "{front}. {back}",
+  "@cardTileSemantics": {
+    "placeholders": { "front": { "type": "String" }, "back": { "type": "String" } },
+    "description": "Screen-reader label for a card row: front then back as one announcement (UC-04 W1)."
   }
 }

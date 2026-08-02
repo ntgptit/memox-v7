@@ -1,6 +1,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/card/presentation/screens/card_editor_screen.dart';
+import '../../features/card/presentation/screens/card_list_screen.dart';
 import '../../features/deck/presentation/screens/deck_list_screen.dart';
 import '../../features/review/presentation/screens/review_placeholder_screen.dart';
 import '../fallback/route_not_found_screen.dart';
@@ -71,6 +73,33 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
                       parentDeckId:
                           state.pathParameters[RoutePathParams.deckId],
                     ),
+                    routes: <RouteBase>[
+                      // The card list of a card-type deck, nested so its URL is
+                      // `/decks/<id>/cards` and it stays inside the Decks branch.
+                      // A deck screen sends the user here (BR-63); the card
+                      // feature owns the screen and the deck feature never
+                      // imports it (AD-13).
+                      GoRoute(
+                        path: RoutePaths.cardListRelative,
+                        name: RouteNames.cardList,
+                        builder: (context, state) => CardListScreen(
+                          deckId: state.pathParameters[RoutePathParams.deckId]!,
+                        ),
+                        routes: <RouteBase>[
+                          // The editor. One name, two patterns: `new` for create
+                          // and `:cardId/edit` for edit. This slice registers
+                          // create; edit joins when its screen lands.
+                          GoRoute(
+                            path: RoutePaths.cardCreateRelative,
+                            name: RouteNames.cardEditor,
+                            builder: (context, state) => CardEditorScreen(
+                              deckId:
+                                  state.pathParameters[RoutePathParams.deckId]!,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ],
               ),

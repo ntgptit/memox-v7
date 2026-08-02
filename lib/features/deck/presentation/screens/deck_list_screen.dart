@@ -24,6 +24,7 @@ import '../widgets/sections/deck_level_body_widget.dart';
 import '../widgets/sections/deck_subheader_widget.dart';
 import '../widgets/sections/deck_notice_widget.dart';
 import '../widgets/items/deck_tile_widget.dart';
+import '../widgets/sections/deck_card_handoff_widget.dart';
 
 /// Space under the last card. It was 112 while a floating action hovered.
 const double _kListBottomInset = AppSpacing.lg;
@@ -191,16 +192,9 @@ class _DeckLevel extends StatelessWidget {
   }
 
   Widget _body(BuildContext context, DeckEntity? parent) {
-    // A `card` deck shows no deck list at all — not an empty one (BR-63). The
-    // card list itself belongs to M4.11; until then this states plainly that the
-    // feature is not in the build rather than offering a control that does
-    // nothing.
+    // A `card` deck hands off to its card screen (AD-13, BR-63).
     if (parent != null && parent.contentType == DeckContentType.card) {
-      return MxEmptyState(
-        icon: Icons.style_outlined,
-        title: context.l10n.deckDetailEmptyCardTitle,
-        message: context.l10n.deckDetailEmptyCardMessage,
-      );
+      return DeckCardHandoffWidget(deckId: parent.id);
     }
 
     // Nothing here at all. The toolbar is not built for this state on purpose: a
