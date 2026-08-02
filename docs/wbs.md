@@ -4750,6 +4750,41 @@ bản sao. Và bảng liệt kê tên class trong README đổi thành trỏ t�
 cái tên trong đó đều đã sai, vì một bản sao chép tay của thứ compiler đã giữ
 thì bản chép tay là bản nói dối.
 
+**Cập nhật sau review thiết kế — hình dạng đã chốt và tầng data đã làm.** Đoạn
+dưới là lập luận lúc dừng lại; sau khi soi UC-04 thì lộ ra một dữ kiện đổi hẳn
+kết luận: **thứ tự cũ-trước đặt thẻ vừa tạo ở cuối deck**, tức đúng luồng chính
+UC-04 A4 rơi vào trường hợp tệ nhất, và muốn thấy thẻ mới thì cửa sổ buộc phải
+mở gần hết deck — mà `watch()` đọc lại cả cửa sổ đó sau **mỗi** lần thêm.
+
+Chốt: `created_at DESC, id DESC` + `LIMIT :limit` **không cursor, không
+`OFFSET`**. Một stream, cửa sổ lớn dần, đọc lại nguyên vẹn — nên insert phía
+trên không thể làm trùng hay mất dòng như cửa sổ có offset. Tổng số card là
+**query riêng**: `COUNT(*) OVER ()` cạnh các dòng sẽ buộc SQLite duyệt hết tập
+kết quả và huỷ đúng khoản lợi mà `LIMIT` mua được.
+
+**Phân biệt bị hiểu sai lúc đầu, đã sửa:** phép đo 1193µs → 102µs là index xoá
+`USE TEMP B-TREE FOR ORDER BY` — và **cửa sổ `LIMIT` hưởng trọn khoản đó**.
+Mệnh đề cursor chỉ cần khi có thứ nhảy sâu mà không đọc phần phía trước; không
+luồng MVP nào làm vậy vì chưa có search thẻ (S1). Nên keyset là tối ưu cho một
+access path chưa tồn tại.
+
+Đo lại trên SQLite thật (`card_list_window_test.dart`), deck 800 thẻ: cửa sổ
+50/200/800 = **1,75 / 4,29 / 16,87 ms** — chi phí theo cửa sổ chứ không theo
+deck. `EXPLAIN QUERY PLAN` xác nhận dạng `DESC` vẫn dùng
+`idx_cards_deck_created` và **không** sinh temp B-tree; điều này được assert
+chứ không giả định, vì quét ngược index chỉ miễn phí khi mọi cột sắp cùng chiều.
+
+**Điều kiện xem xét lại keyset** (ghi ra để lần sau không phải tranh luận từ
+đầu): người dùng thường xuyên vượt 500 thẻ hiển thị · p95 của load-more vượt
+ngân sách · search cần kết quả vô hạn · có deep link hoặc jump tới một thẻ · có
+đồng bộ nhiều nguồn làm danh sách đổi liên tục.
+
+**Còn nợ ở M4.11:** nửa presentation của phép đo — end-to-end từ DB invalidate
+tới UI ổn định, **trên thiết bị Android mục tiêu**, ở 50/500/3.000 dòng. Số ở
+trên là debug VM trên máy dev, không phải số của thiết bị.
+
+<details><summary>Lập luận lúc dừng lại (giữ nguyên để đối chiếu)</summary>
+
 **Phân trang keyset: cố ý chưa làm, và đây là lý do.** `docs/wbs.md` đo được
 5.000 card đọc trọn 37,8ms so với một trang 50 là 1,6ms, index
 `idx_cards_deck_created` đã dựng sẵn cho đúng mệnh đề keyset, và
@@ -4763,6 +4798,8 @@ nó thoái hoá về đúng 37,8ms mà phép đo muốn tránh. Chọn hình d�
 contract rồi phải đổi lần hai là đắt hơn chờ. **M4.11 MUST chốt hình dạng đó ở
 bước thiết kế, trước dòng code đầu tiên, và sửa lại tiêu chí "tự cập nhật qua
 stream" cho khớp.**
+
+</details>
 
 **Còn nợ, ghi lại để không quên:** `watchRootDecks` và `watchDeckTree` không có
 caller nào trong `lib/` nhưng vẫn nằm trên contract, kéo theo 5 tầng mỗi cái
@@ -4781,8 +4818,13 @@ kèm vào đây.
 - **Scope:** card list; empty state; tạo card; tạo card **đầu tiên** trong deck
   `unset`; editor front/back; sửa; xoá; luồng *add another*; validation; Riverpod
   state/controller; route; ARB en/vi; `CardTile`/`CardEditor` đặt trong feature.
+  Cộng thêm phía presentation của cửa sổ danh sách: `windowSize`, auto-load,
+  load-more tường minh, dòng "đang hiện N / M", và hành vi cuộn khi có dòng mới.
 - **Out of scope:** review scheduler (M5.1); review history UI; import/export;
-  media; rich text.
+  media; rich text. **Keyset cursor** — xem điều kiện kích hoạt ở M4.10ar; cửa
+  sổ `LIMIT` không cursor là hình dạng đã chốt cho MVP. **Sort/filter toolbar**
+  — thứ tự danh sách cố định mới-trước, không có control đổi thứ tự; search thẻ
+  là S1, chưa tới lượt.
 - **Editable documents:** `docs/wbs.md`
 - **Output:** `lib/features/card/`, `lib/l10n/`, `test/features/card/`,
   `test/visual_audit/screens/features/card/`
@@ -4798,12 +4840,47 @@ kèm vào đây.
   - [ ] *Add another* giữ editor mở và xoá form sau khi lưu.
   - [ ] Lỗi persistence **giữ lại** nội dung form.
   - [ ] Double-submit không tạo hai card.
-  - [ ] Card list tự cập nhật qua stream.
+  - [ ] Danh sách dùng **một** reactive stream ứng với giới hạn hiện tại; insert,
+        update và delete phản ánh lên danh sách mà **không** tạo dòng trùng hoặc
+        mất dòng. (Thay cho tiêu chí "card list tự cập nhật qua stream" cũ, vốn
+        mâu thuẫn với phân trang khi chưa nói rõ hình dạng cửa sổ.)
+  - [ ] Danh sách sắp `created_at DESC, id DESC`; thẻ mới tạo ở đầu danh sách.
+        **Thứ tự này là thứ tự quản lý, không quyết định thứ tự học hay review**
+        (BR-23 sở hữu thứ tự hàng đợi ôn qua query riêng). Dùng `created_at`,
+        **không** `updated_at`: sửa một thẻ cũ mà nó nhảy lên đầu sẽ cướp chỗ
+        đang đọc của người dùng.
+  - [ ] Tải ban đầu tối đa **50** card; gần đáy thì cửa sổ tăng thêm 50.
+  - [ ] Auto-load dừng sau **500** card; quá mốc đó người dùng tải thêm bằng
+        hành động tường minh. Đây là **soft cap** — không được khoá hẳn, vì dữ
+        liệu tồn tại mà không quản lý được thì tệ hơn một danh sách chậm.
+  - [ ] Màn hình hiển thị đúng **số đang hiện / tổng số**, và tổng số lấy bằng
+        query riêng — **không** dùng window count (`COUNT(*) OVER ()`) trong
+        query có `LIMIT`, vì nó buộc SQLite duyệt hết tập kết quả và huỷ đúng
+        khoản lợi mà `LIMIT` cùng index mua được.
+  - [ ] Query danh sách **không** dùng `OFFSET`, và query `DESC` dùng index,
+        không sinh temporary B-tree. (Đã khoá sẵn ở tầng data:
+        `test/features/card/data/card_list_window_test.dart`.)
+  - [ ] Sau chuỗi *add another*, quay lại danh sách **thấy ngay thẻ mới mà không
+        phải cuộn**; đánh dấu ngắn thẻ vừa tạo hoặc trạng thái "đã thêm".
+  - [ ] **Không tự cuộn khi người dùng đang thao tác sâu trong danh sách.** Dòng
+        mới xuất hiện phía trên không được giật vị trí đang đọc; nếu sau này có
+        write từ nguồn khác thì dùng chip kiểu "Có 3 thẻ mới" thay vì cuộn.
+  - [ ] Đo end-to-end **trên thiết bị Android mục tiêu**, không chỉ benchmark
+        database: từ lúc DB invalidate tới lúc UI ổn định, ở 50 / 500 / 3.000
+        dòng. Ghi số vào WBS. (Nửa SQL đã đo ở M4.10ar: deck 800 thẻ, cửa sổ
+        50/200/800 = 1,75 / 4,29 / 16,87 ms — chi phí theo cửa sổ, không theo
+        deck.)
   - [ ] Toàn bộ copy từ ARB; không raw style hay token.
   - [ ] 320×568 và `textScaler` 2.0 không overflow.
   - [ ] Mọi production screen có strict visual audit **PASS** ở light và dark.
-  - [ ] Screen có design reference đạt pixel difference **dưới 3%**.
-- **Dependencies:** M4.10
+  - [ ] ~~Screen có design reference đạt pixel difference **dưới 3%**.~~
+        **Không áp dụng được:** kit không có màn card list. `design_system/`
+        chỉ ship `DeckLevelScreen`, `ReviewScreen`, `SettingsScreen`,
+        `DeckForms`, và `ui_kits/memox-app/README.md` nói thẳng "a card editor
+        and a card list … there is no screen to copy, so there is none here".
+        Thay bằng: dựng màn theo token và component sẵn có, rồi **bổ sung màn
+        đó vào kit trong cùng PR** theo luật both-kits-must-match.
+- **Dependencies:** M4.10, M4.10ar
 - **Tests required:** domain, repository transaction và rollback, controller,
   form validation, widget, visual audit strict, route
 - **Checklist phases:** 9.2, 9.3, 14.4, 15.1, 15.2, 15.3, 15.4
