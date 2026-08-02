@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart' show Value, BooleanExpressionOperators;
 import '../../../../core/database/app_database.dart';
 
 /// Data access for the Card side of the vertical.
@@ -51,4 +52,76 @@ final class CardDao {
 
   Future<void> insertReviewState(CardReviewStatesCompanion state) =>
       _db.into(_db.cardReviewStates).insert(state);
+
+  // ---- flag ---------------------------------------------------------------
+
+  /// Only flagged cards, same window and order as [watchCardsByDeck].
+  Stream<List<Card>> watchFlaggedCardsByDeck(
+    String deckId, {
+    required int limit,
+  }) => _db.flaggedCardsByDeck(deckId, limit).watch();
+
+  Stream<int> watchFlaggedCountByDeck(String deckId) =>
+      _db.flaggedCountByDeck(deckId).watchSingle();
+
+  /// Writes only the flag. A `CardsCompanion` covering the whole row would let a
+  /// caller change `front` while meaning to toggle a mark — and BR-92 is about
+  /// the flag being content the *user* owns, not something an edit path moves.
+  Future<int> setCardFlag(String cardId, {required bool isFlagged}) =>
+      (_db.update(_db.cards)..where((Cards card) => card.id.equals(cardId)))
+          .write(CardsCompanion(isFlagged: Value(isFlagged ? 1 : 0)));
+
+  // ---- state counts -------------------------------------------------------
+
+  /// The four numbers behind the deck progress panel.
+  ///
+  /// Thresholds are passed in rather than written into the SQL — see
+  /// `card.drift`, and `card_state_model.dart` for where they live.
+  Stream<CardStateCountsByDeckResult> watchCardStateCounts(
+    String deckId, {
+    required int reviewingBox,
+    required int masteredBox,
+    required int reviewingDays,
+    required int masteredDays,
+  }) => _db
+      .cardStateCountsByDeck(
+        reviewingBox,
+        reviewingDays,
+        masteredBox,
+        masteredDays,
+        deckId,
+      )
+      .watchSingle();
+
+  // ---- tags ---------------------------------------------------------------
+
+  Stream<List<Tag>> watchAllTags({String? ownerId}) =>
+      _db.allTags(ownerId).watch();
+
+  Stream<List<Tag>> watchTagsForCard(String cardId) =>
+      _db.tagsForCard(cardId).watch();
+
+  /// Tags for a whole window of cards in one statement — see `tag.drift` for
+  /// why this exists rather than a call per row.
+  Stream<List<TagsForCardsResult>> watchTagsForCards(List<String> cardIds) =>
+      _db.tagsForCards(cardIds).watch();
+
+  Future<Tag?> tagByFoldedName(String nameFolded, {String? ownerId}) =>
+      _db.tagByFoldedName(ownerId, nameFolded).getSingleOrNull();
+
+  Future<int> tagCountForCard(String cardId) =>
+      _db.tagCountForCard(cardId).getSingle();
+
+  Future<void> insertTag(TagsCompanion tag) => _db.into(_db.tags).insert(tag);
+
+  Future<void> linkTag(String cardId, String tagId) => _db
+      .into(_db.cardTags)
+      .insert(CardTagsCompanion.insert(cardId: cardId, tagId: tagId));
+
+  Future<int> unlinkTag(String cardId, String tagId) =>
+      (_db.delete(_db.cardTags)..where(
+            (CardTags link) =>
+                link.cardId.equals(cardId) & link.tagId.equals(tagId),
+          ))
+          .go();
 }

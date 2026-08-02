@@ -19,6 +19,7 @@ part 'app_database.g.dart';
     'queries/study.drift',
     'queries/deck.drift',
     'queries/card.drift',
+    'queries/tag.drift',
   },
 )
 class AppDatabase extends _$AppDatabase {

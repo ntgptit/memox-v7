@@ -4880,8 +4880,9 @@ hai mới cho biết cái gì thay đổi".
 
 ### M4.10at · `tags`, `card_tags`, `is_flagged` và bốn trạng thái thẻ
 
-- **Status:** in progress — schema, migration và domain primitive **done**;
-  DAO/named query cho tag, cờ và bộ đếm theo trạng thái **chưa**
+- **Status:** in progress — schema, migration, domain primitive và DAO/named
+  query **done**; còn nợ chứng minh reset không đụng `is_flagged`/`card_tags`
+  (cần đường reset của repository, thuộc M5.x)
 - **Goal:** Đưa schema và luật mà màn card cần lên trước, để M4.11 dựng hàng thẻ
   **một lần** theo hình dạng cuối thay vì dựng rồi sửa.
 - **Scope:** migration v2 (`tags`, `card_tags`, `cards.is_flagged` và ba trường
@@ -4912,7 +4913,9 @@ hai mới cho biết cái gì thay đổi".
   - [x] `mastered` đọc lại BR-88 — không share code được giữa `.drift` và Dart,
         nên `card_state_test.dart` **parse `deck.drift`** và so ngưỡng, cùng
         cách các test parity CSS làm. Đã tiêm lỗi.
-  - [ ] Reset learning progress không đụng `is_flagged` và `card_tags`.
+  - [ ] Reset learning progress không đụng `is_flagged` và `card_tags`. Chưa
+        kiểm được ở đây: đường reset sống trong repository của Deck và chưa có
+        caller nào; cascade hai chiều của `card_tags` thì đã kiểm.
   - [ ] Mặt trước 240 ký tự bị từ chối, mặt sau thì không — hai giới hạn thật
         sự khác nhau, không phải một hằng dùng chung.
   - [ ] Ba trường phụ trim rồi quy chuỗi rỗng về NULL, không lưu chuỗi rỗng.
@@ -4922,6 +4925,13 @@ mà chủ dự án đưa vẽ tag, cờ và một panel tiến độ bốn trạ
 có schema. Nếu M4.11 làm cả hai nửa thì migration và UI nằm chung một PR, và
 hàng thẻ phải dựng hai lần: một lần cho `front`/`back`, một lần nữa khi tag và cờ
 tới. Tách ra thì M4.11 chỉ còn là UI trên một hình dạng dữ liệu đã cố định.
+
+**Một lỗi schema mà chỉ test ở tầng DB mới thấy.** `UNIQUE (owner_id,
+name_folded)` đọc như đúng, và enforce **không gì cả**: SQLite coi mọi NULL là
+khác nhau trong unique index, còn MVP chưa có auth nên `owner_id` NULL ở *mọi*
+dòng. `TagName` fold đúng, index tồn tại, và hai tag `Động từ` vẫn vào được cả
+hai. Sửa bằng `COALESCE(owner_id, '')`. Test value object không thể bắt được
+điều này — nó đúng ở tầng của nó.
 
 **Quy chiếu trạng thái đặt cạnh scheduler, không đặt ở widget.** BR-89…BR-91 là
 luật nghiệp vụ; một `switch` trong `CardTile` đọc `current_box` sẽ là bản sao thứ

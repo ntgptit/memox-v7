@@ -178,9 +178,18 @@ void main() {
     // "mastered" is enforced by the database, and `rootDeckSummaries` counts it,
     // so `current_box = 8` and `interval_days >= 128` are allowed to appear.
     // Nothing else is.
+    // **Comments are stripped first, and that is not a detail.** The first
+    // version of this scanned the raw file and failed on a comment that
+    // *explains* the seed value — it matched the prose describing the rule,
+    // not any SQL. This project has shipped that mistake twice: `R8` once
+    // matched `platformBrightness` left in the comment describing it, and
+    // the duration guard flagged its own documentation.
     final sql = <String>[
       for (final name in <String>['deck.drift', 'card.drift', 'study.drift'])
-        File('lib/core/database/queries/$name').readAsStringSync(),
+        File('lib/core/database/queries/$name').readAsStringSync().replaceAll(
+          RegExp(r'^\s*--.*$', multiLine: true),
+          '',
+        ),
     ].join('\n');
 
     final boxes = RegExp(

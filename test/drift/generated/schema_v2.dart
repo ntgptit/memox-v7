@@ -4,6 +4,80 @@
 //
 import 'package:drift/drift.dart';
 
+class Tags extends Table with TableInfo {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  Tags(this.attachedDatabase, [this._alias]);
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL PRIMARY KEY',
+  );
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  late final GeneratedColumn<String> nameFolded = GeneratedColumn<String>(
+    'name_folded',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
+    'owner_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: 'NULL',
+  );
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    nameFolded,
+    ownerId,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'tags';
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Never map(Map<String, dynamic> data, {String? tablePrefix}) {
+    throw UnsupportedError('TableInfo.map in schema verification code');
+  }
+
+  @override
+  Tags createAlias(String alias) {
+    return Tags(attachedDatabase, alias);
+  }
+
+  @override
+  bool get dontWriteConstraints => true;
+}
+
 class Decks extends Table with TableInfo {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -286,6 +360,52 @@ class Cards extends Table with TableInfo {
     return Cards(attachedDatabase, alias);
   }
 
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class CardTags extends Table with TableInfo {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  CardTags(this.attachedDatabase, [this._alias]);
+  late final GeneratedColumn<String> cardId = GeneratedColumn<String>(
+    'card_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL REFERENCES cards(id)ON DELETE CASCADE',
+  );
+  late final GeneratedColumn<String> tagId = GeneratedColumn<String>(
+    'tag_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL REFERENCES tags(id)ON DELETE CASCADE',
+  );
+  @override
+  List<GeneratedColumn> get $columns => [cardId, tagId];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'card_tags';
+  @override
+  Set<GeneratedColumn> get $primaryKey => {cardId, tagId};
+  @override
+  Never map(Map<String, dynamic> data, {String? tablePrefix}) {
+    throw UnsupportedError('TableInfo.map in schema verification code');
+  }
+
+  @override
+  CardTags createAlias(String alias) {
+    return CardTags(attachedDatabase, alias);
+  }
+
+  @override
+  List<String> get customConstraints => const ['PRIMARY KEY(card_id, tag_id)'];
   @override
   bool get dontWriteConstraints => true;
 }
@@ -702,130 +822,12 @@ class ReviewHistory extends Table with TableInfo {
   bool get dontWriteConstraints => true;
 }
 
-class Tags extends Table with TableInfo {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  Tags(this.attachedDatabase, [this._alias]);
-  late final GeneratedColumn<String> id = GeneratedColumn<String>(
-    'id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL PRIMARY KEY',
-  );
-  late final GeneratedColumn<String> name = GeneratedColumn<String>(
-    'name',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL',
-  );
-  late final GeneratedColumn<String> nameFolded = GeneratedColumn<String>(
-    'name_folded',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL',
-  );
-  late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
-    'owner_id',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    $customConstraints: 'NULL',
-  );
-  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
-    'created_at',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL',
-  );
-  @override
-  List<GeneratedColumn> get $columns => [
-    id,
-    name,
-    nameFolded,
-    ownerId,
-    createdAt,
-  ];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'tags';
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  Never map(Map<String, dynamic> data, {String? tablePrefix}) {
-    throw UnsupportedError('TableInfo.map in schema verification code');
-  }
-
-  @override
-  Tags createAlias(String alias) {
-    return Tags(attachedDatabase, alias);
-  }
-
-  @override
-  bool get dontWriteConstraints => true;
-}
-
-class CardTags extends Table with TableInfo {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  CardTags(this.attachedDatabase, [this._alias]);
-  late final GeneratedColumn<String> cardId = GeneratedColumn<String>(
-    'card_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL REFERENCES cards(id)ON DELETE CASCADE',
-  );
-  late final GeneratedColumn<String> tagId = GeneratedColumn<String>(
-    'tag_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL REFERENCES tags(id)ON DELETE CASCADE',
-  );
-  @override
-  List<GeneratedColumn> get $columns => [cardId, tagId];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'card_tags';
-  @override
-  Set<GeneratedColumn> get $primaryKey => {cardId, tagId};
-  @override
-  Never map(Map<String, dynamic> data, {String? tablePrefix}) {
-    throw UnsupportedError('TableInfo.map in schema verification code');
-  }
-
-  @override
-  CardTags createAlias(String alias) {
-    return CardTags(attachedDatabase, alias);
-  }
-
-  @override
-  List<String> get customConstraints => const ['PRIMARY KEY(card_id, tag_id)'];
-  @override
-  bool get dontWriteConstraints => true;
-}
-
 class DatabaseAtV2 extends GeneratedDatabase {
   DatabaseAtV2(QueryExecutor e) : super(e);
+  late final Tags tags = Tags(this);
   late final Decks decks = Decks(this);
   late final Cards cards = Cards(this);
+  late final CardTags cardTags = CardTags(this);
   late final CardReviewStates cardReviewStates = CardReviewStates(this);
   late final StudySessions studySessions = StudySessions(this);
   late final ReviewHistory reviewHistory = ReviewHistory(this);
@@ -837,12 +839,10 @@ class DatabaseAtV2 extends GeneratedDatabase {
     'idx_history_session',
     'CREATE INDEX idx_history_session ON review_history (session_id)',
   );
-  late final Tags tags = Tags(this);
   late final Index idxTagsOwnerFolded = Index(
     'idx_tags_owner_folded',
-    'CREATE UNIQUE INDEX idx_tags_owner_folded ON tags (owner_id, name_folded)',
+    'CREATE UNIQUE INDEX idx_tags_owner_folded ON tags (COALESCE(owner_id, \'\'), name_folded)',
   );
-  late final CardTags cardTags = CardTags(this);
   late final Index idxCardTagsTag = Index(
     'idx_card_tags_tag',
     'CREATE INDEX idx_card_tags_tag ON card_tags (tag_id, card_id)',
@@ -868,16 +868,16 @@ class DatabaseAtV2 extends GeneratedDatabase {
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
+    tags,
     decks,
     cards,
+    cardTags,
     cardReviewStates,
     studySessions,
     reviewHistory,
     idxHistoryCard,
     idxHistorySession,
-    tags,
     idxTagsOwnerFolded,
-    cardTags,
     idxCardTagsTag,
     idxCardsDeckCreated,
     idxReviewStatesDue,
@@ -892,6 +892,20 @@ class DatabaseAtV2 extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('cards', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'cards',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('card_tags', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'tags',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('card_tags', kind: UpdateKind.delete)],
     ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(
@@ -913,20 +927,6 @@ class DatabaseAtV2 extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('review_history', kind: UpdateKind.delete)],
-    ),
-    WritePropagation(
-      on: TableUpdateQuery.onTableName(
-        'cards',
-        limitUpdateKind: UpdateKind.delete,
-      ),
-      result: [TableUpdate('card_tags', kind: UpdateKind.delete)],
-    ),
-    WritePropagation(
-      on: TableUpdateQuery.onTableName(
-        'tags',
-        limitUpdateKind: UpdateKind.delete,
-      ),
-      result: [TableUpdate('card_tags', kind: UpdateKind.delete)],
     ),
   ]);
   @override
