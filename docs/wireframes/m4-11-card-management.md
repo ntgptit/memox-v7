@@ -27,6 +27,7 @@ Nó cũng không phải design reference để đo pixel. Acceptance criteria c�
 | 2026-08-02 | M4.11 | — | Bản đầu. Chốt D1–D3 qua trao đổi; mở Q1–Q5. |
 | 2026-08-02 | M4.11 | — | Thêm ràng buộc kế thừa C1–C3 từ M4.10ar; thêm W1b (cửa sổ, load-more); Q2 đóng nhờ C1. |
 | 2026-08-02 | M4.11 | — | Nhận màn hình tham chiếu của chủ dự án. W1 tách thành trạng thái đích (§4.1), phân tầng khối (§4.2) và lát cắt M4.11 (§4.3). Chốt D4–D5; mở Q8–Q11. |
+| 2026-08-02 | M4.10at | — | Nhận màn tham chiếu thứ hai (editor). W4–W6b vẽ lại theo nó. BR-08 siết 2000 → 60/240; BR-95 thêm ba trường phụ. Chốt D6–D9; mở Q12–Q13. |
 | 2026-08-02 | M4.10at | — | Chủ dự án chốt đưa tag, cờ và panel tiến độ vào MVP, chèn M4.10at trước M4.11. Q8–Q11 đóng bằng BR-89…BR-94 và schema v2. D3 sửa: lọc vào scope, sort vẫn ngoài. Nhãn `LEARNING` → `BEGINNING`. |
 
 ---
@@ -39,6 +40,10 @@ Nó cũng không phải design reference để đo pixel. Acceptance criteria c�
 | D2 | Hàng card hiện **front + back + chip trạng thái ôn tập** | Quét được cả cặp mà không phải mở từng card. Chip đọc từ `card_review_states` mà BR-09 đã tạo sẵn lúc tạo card, nên không cần dữ liệu mới. | 2026-08-02 |
 | D3 | **Không** search, **không** sort. Pill **lọc** thì có | Sort đổi `ORDER BY` và mâu thuẫn C1 mà M4.10ar chốt; search thẻ là S1. Lọc chỉ thêm `WHERE` nên không đụng thứ tự hay cửa sổ — xem §4.3. Sửa lại D3 bản đầu, vốn gộp cả ba thành một. | 2026-08-02 |
 | D4 | FAB là **extended** (`+ New card`), không phải icon tròn | Từ ảnh tham chiếu. Màn này chỉ có một hành động chính và nó cần được gọi tên — một dấu `+` trần trên màn đầy thẻ không nói nó tạo *thẻ* hay tạo *deck con*. Cùng lý do `MxActionButton` không có variant chỉ-icon. | 2026-08-02 |
+| D6 | Editor có **thanh hành động ghim đáy**, và `Save & add another` sống ở đó | Ảnh tham chiếu có `Cancel` + `Save card` ở đáy nhưng **không** có add-another, trong khi UC-04 A4 (frozen) đòi giữ form mở. `Cancel` bỏ đi vì `✕` ở app bar đã làm đúng việc đó; chỗ trống thành add-another. | 2026-08-02 |
+| D7 | Ba trường phụ nằm trong một **disclosure đóng mặc định** | BR-95 cho cả ba là tuỳ chọn. Mở sẵn biến form hai ô thành form năm ô cho việc thường gặp nhất. | 2026-08-02 |
+| D8 | Deck hiện **read-only**, không phải picker | Đổi deck đích nghĩa là thẻ có thể sang root khác scheduler hoặc khác generation — đúng thứ BR-73/BR-74 đang chặn. Deck là ngữ cảnh màn đang mở. | 2026-08-02 |
+| D9 | **Không** có nút micro nhập giọng nói | Ảnh tham chiếu có. Nó cần plugin, quyền hệ điều hành và một luồng lỗi riêng; không nằm trong scope M4.11 và gần với media, vốn đã hoãn. | 2026-08-02 |
 | D5 | Hàng card là **bốn phần**: dot trạng thái · front · back · nhãn trạng thái, cộng badge hạn bên phải | Từ ảnh tham chiếu. Thay chip đơn của bản đầu. Ba tín hiệu trạng thái trả lời ba câu khác nhau — xem bảng ở §4.3 — và gộp lại thành một chip là mất hai trong ba. | 2026-08-02 |
 
 **D2 có một ranh giới phải giữ, và nó dịch chỗ ở M4.10at.** M4.11 **đọc**
@@ -350,106 +355,170 @@ không có gì bị khoá.
 
 ## 8. W4 · Editor — chế độ tạo
 
+Theo màn tham chiếu thứ hai chủ dự án đưa (ảnh chụp, 2026-08-02).
+
 ```
 ┌──────────────────────────────────────────────┐
-│  ✕                New card            Save   │
+│  ✕   New flashcard                    Save   │  Save: filled, app bar
 ├──────────────────────────────────────────────┤
+│  Library › Korean › TOPIK II — Vocab ›       │
+│  New card                                    │  bậc cuối đậm
 │                                              │
-│  FRONT                                       │
+│  ▤ TOPIK II — Vocab           ● REQUIRED     │  deck: read-only, xem D8
+│                                              │
+│  FRONT · KOREAN   Required           0 / 60  │  BR-07 · BR-08
 │  ┌────────────────────────────────────────┐  │
-│  │ ephemeral                              │  │  MxTextField
-│  │                                        │  │  multiline, min 3 dòng
+│  │ The term you want to remember          │  │  placeholder
 │  │                                        │  │
 │  └────────────────────────────────────────┘  │
-│                                     9 / 2000 │
 │                                              │
-│  BACK                                        │
+│  BACK · MEANING   Required          0 / 240  │
 │  ┌────────────────────────────────────────┐  │
-│  │ lasting a very short time              │  │
-│  │                                        │  │
-│  │                                        │  │
-│  └────────────────────────────────────────┘  │
-│                                    26 / 2000 │
-│                                              │
-│  ┌────────────────────────────────────────┐  │
-│  │        Save and add another            │  │  MxActionButton secondary
+│  │ English, Vietnamese, or both — comma-  │  │
+│  │ separated reads cleanest.              │  │
 │  └────────────────────────────────────────┘  │
 │                                              │
+│  ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐    │
+│    ✦ Add details   example · hint · pron ⌄   │  disclosure, đóng mặc định
+│  └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘    │
+│                                              │
+│  ⌷ TAGS · optional                           │
+│  ┌ ─ ─ ─ ─ ─ ─ ┐                             │
+│    +  Add tag                                │  BR-93, tối đa 10
+│  └ ─ ─ ─ ─ ─ ─ ┘                             │
+│                                              │
+├──────────────────────────────────────────────┤
+│  ┌──────────────┐  ┌──────────────────────┐  │
+│  │ Save & add   │  │   ✓  Save card       │  │  thanh ghim đáy
+│  └──────────────┘  └──────────────────────┘  │
+│  Front and back are required to save.        │  body-sm, onSurfaceVariant
 └──────────────────────────────────────────────┘
 ```
 
-| Hành động | Kết quả |
-|---|---|
-| `Save` (app bar) | Lưu, pop về list |
-| `Save and add another` | Lưu, **giữ màn**, xoá trống hai ô, focus về Front, snackbar `Card added` |
+**Nhãn ô nói cả vai trò lẫn nội dung.** `FRONT · KOREAN` và `BACK · MEANING` —
+nửa trái là vai trò trong thẻ, nửa phải là thứ người dùng thực sự gõ. Ngôn ngữ
+lấy từ deck; deck chưa khai ngôn ngữ thì chỉ còn `FRONT` / `BACK`, không để lại
+dấu `·` treo lơ lửng. Xem Q12.
 
-Hai lối lưu là cách UC-04 A4 được thể hiện. Đếm ký tự hiện thường trực chứ không
-chỉ khi gần ngưỡng: 2000 là giới hạn người dùng cần biết *trước* khi viết dài.
+**Đếm ký tự thường trực, và hai ô có hai số** — 60 với 240 (BR-08). Chúng khác
+nhau nên hiện cả hai là cần thiết: thấy `0 / 60` ở trên và `0 / 240` ở dưới thì
+hiểu ngay mặt trước là một từ chứ không phải một câu, không cần hướng dẫn nào.
+
+**Placeholder dạy cách dùng, không lặp lại nhãn.** `The term you want to
+remember` nói *cái gì* thuộc về đây; `comma-separated reads cleanest` nói *viết
+thế nào*. Một placeholder ghi "Front" là ô nhắc lại nhãn của chính nó.
+
+**Add details đóng mặc định.** Ba trường của BR-95 đều tuỳ chọn, và mở sẵn cả ba
+biến form hai ô thành form năm ô cho đúng việc thường gặp nhất — thêm một từ.
+Viền đứt và dấu `⌄` nói rằng còn thứ bên dưới.
 
 ---
 
-## 9. W5 · Editor — lỗi validation
+## 9. W5 · Editor — Add details mở, tag đã nhập
+
+```
+│  ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐    │
+│    ✦ Add details                         ⌃   │
+│                                              │
+│    EXAMPLE                        0 / 240    │
+│    ┌────────────────────────────────────┐    │
+│    │ 그는 유명한 연구자입니다.          │    │
+│    └────────────────────────────────────┘    │
+│                                              │
+│    HINT                           0 / 240    │
+│    ┌────────────────────────────────────┐    │
+│    │ 연구 + 자 (người làm)              │    │
+│    └────────────────────────────────────┘    │
+│                                              │
+│    PRONUNCIATION                  0 / 240    │
+│    ┌────────────────────────────────────┐    │
+│    │ yeon-gu-ja                         │    │
+│    └────────────────────────────────────┘    │
+│  └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘    │
+│                                              │
+│  ⌷ TAGS · optional                   2 / 10  │
+│  ⟨noun ✕⟩  ⟨people ✕⟩                        │
+│  ┌ ─ ─ ─ ─ ─ ─ ┐                             │
+│    +  Add tag                                │
+│  └ ─ ─ ─ ─ ─ ─ ┘                             │
+```
+
+Ba ô phụ dùng chung giới hạn 240 (BR-95), nên chúng trông giống nhau và không ai
+phải nhớ ô nào rộng hơn ô nào.
+
+**Bộ đếm tag `2 / 10` chỉ hiện khi đã có tag.** Ở mức 0 nó là một giới hạn chưa
+ai chạm tới, và hiện ngay từ đầu biến một trường tuỳ chọn thành thứ trông như có
+hạn ngạch phải dùng hết.
+
+---
+
+## 10. W6 · Editor — lỗi validation
 
 ```
 ┌──────────────────────────────────────────────┐
-│  ✕                New card            Save   │
+│  ✕   New flashcard                    Save   │
 ├──────────────────────────────────────────────┤
-│                                              │
-│  FRONT                                       │
-│  ┌────────────────────────────────────────┐  │
-│  │                                        │  │  border → semantic.danger
+│  FRONT · KOREAN   Required           0 / 60  │
+│  ┌────────────────────────────────────────┐  │  viền → semantic.danger
 │  └────────────────────────────────────────┘  │
 │  ⚠ Front can't be empty                      │  UC-04 E1
-│                                     0 / 2000 │
 │                                              │
-│  BACK                                        │
+│  BACK · MEANING   Required        240 / 240  │  ← đếm chuyển danger
 │  ┌────────────────────────────────────────┐  │
 │  │ Lorem ipsum dolor sit amet, consecte…  │  │
 │  └────────────────────────────────────────┘  │
-│  ⚠ Back is at the 2000 character limit       │  UC-04 E2
-│                                  2000 / 2000 │  ← counter chuyển danger
+│  ⚠ Back is at the 240 character limit        │  UC-04 E2
 │                                              │
+├──────────────────────────────────────────────┤
+│  ┌──────────────┐  ┌──────────────────────┐  │
+│  │ Save & add   │  │   ✓  Save card       │  │  cả hai disabled
+│  └──────────────┘  └──────────────────────┘  │
+│  Front and back are required to save.        │
 └──────────────────────────────────────────────┘
 ```
 
-- **E1** kích hoạt khi submit, không phải khi gõ. Báo "trống" lúc ô còn chưa được
-  chạm là la mắng người dùng vì chưa làm gì. Chuỗi toàn khoảng trắng rơi vào E1
-  vì BR-07 xét sau khi trim.
+- **E1** kích hoạt khi submit, không phải khi gõ: báo "trống" lúc ô còn chưa
+  được chạm là la mắng người dùng vì chưa làm gì. Chuỗi toàn khoảng trắng rơi
+  vào E1 vì BR-07 xét sau khi trim.
 - **E2** chặn nhập thêm ở đúng ngưỡng (`maxLength`), và câu lỗi nói *đang ở giới
   hạn* chứ không phải *đã vượt* — vượt là điều không xảy ra được.
+- Câu dưới thanh hành động là **hướng dẫn thường trực**, không phải lỗi: nó có
+  mặt cả khi form hợp lệ, nên nó không tranh chỗ với hai câu ⚠ ở trên.
 
 ---
 
-## 10. W6 · Editor — chế độ sửa
+## 11. W6b · Editor — chế độ sửa
 
 ```
 ┌──────────────────────────────────────────────┐
-│  ✕                Edit card           Save   │
+│  ✕   Edit flashcard                   Save   │
 ├──────────────────────────────────────────────┤
-│  FRONT                                       │
-│  ┌────────────────────────────────────────┐  │
-│  │ ephemeral                              │  │
-│  └────────────────────────────────────────┘  │
-│                                     9 / 2000 │
-│  BACK                                        │
-│  ┌────────────────────────────────────────┐  │
-│  │ lasting a very short time              │  │
-│  └────────────────────────────────────────┘  │
-│                                    26 / 2000 │
+│  Library › Korean › TOPIK II — Vocab › 연구자│
 │                                              │
-│  Editing content doesn't reset this card's   │  ← BR-10, nói ra
+│  FRONT · KOREAN   Required           3 / 60  │
+│  ┌────────────────────────────────────────┐  │
+│  │ 연구자                                 │  │
+│  └────────────────────────────────────────┘  │
+│  …                                           │
+│                                              │
+│  Editing content doesn't reset this card's   │  BR-10
 │  learning progress.                          │
 │                                              │
+├──────────────────────────────────────────────┤
+│              ┌──────────────────────┐        │
+│              │   ✓  Save changes    │        │  một nút, không "add"
+│              └──────────────────────┘        │
 └──────────────────────────────────────────────┘
 ```
 
-Khác chế độ tạo ở ba chỗ: title, **không có** "Save and add another", và một dòng
-giải thích BR-10. Dòng đó không phải trang trí — nỗi sợ "sửa chữ có mất tiến độ
-không" là lý do người ta không dám sửa lỗi chính tả trong card. Phủ UC-04 A1.
+Khác chế độ tạo ở bốn chỗ: title, breadcrumb kết bằng tên thẻ thay vì
+`New card`, **không có** `Save & add`, và một dòng giải thích BR-10. Dòng đó
+không phải trang trí — nỗi sợ "sửa chữ có mất tiến độ không" là lý do người ta
+không dám sửa lỗi chính tả trong thẻ. Phủ UC-04 A1.
 
 ---
 
-## 11. W7 · Xoá card
+## 12. W7 · Xoá card
 
 ```
         ┌──────────────────────────────┐
@@ -487,7 +556,7 @@ Phủ UC-04 A2.
 
 ---
 
-## 12. W8 · Loading, submitting, error
+## 13. W8 · Loading, submitting, error
 
 ```
    LOADING                SUBMITTING             ERROR
@@ -517,7 +586,7 @@ Ba acceptance criteria của M4.11 nằm ở đây:
 
 ---
 
-## 13. W9 · 320×568, `textScaler` 2.0
+## 14. W9 · 320×568, `textScaler` 2.0
 
 ```
 ┌────────────────────────────────┐
@@ -548,7 +617,7 @@ hoặc bị cắt hoặc đẩy title mất. Hai nút xếp dọc chứ không c
 
 ---
 
-## 14. Việc còn mở
+## 15. Việc còn mở
 
 Mỗi mục dưới đây chặn một phần code cụ thể. Chốt bằng cách điền cột **Chốt** và
 thêm dòng vào [Lịch sửa](#1-lịch-sửa).
@@ -562,6 +631,8 @@ thêm dòng vào [Lịch sửa](#1-lịch-sửa).
 | Q5 | Copy tiếng Việt cho toàn bộ chuỗi ở trên | ARB `vi` | — |
 | Q6 | `windowSize` là bao nhiêu, và bước load-more có bằng nó không. Wireframe vẽ 50/50 làm chỗ đặt số, không phải để chốt | W1b, `card.drift` `LIMIT :limit` | — |
 | Q7 | Cửa sổ có reset về `windowSize` khi rời màn rồi quay lại không, hay giữ nguyên độ mở | Controller state ở M4.11 | — |
+| Q12 | Nhãn ô ghi ngôn ngữ (`FRONT · KOREAN`). Deck chưa có cột ngôn ngữ, nên hoặc thêm cột, hoặc bỏ nửa sau của nhãn | Nhãn ô ở W4 | — |
+| Q13 | `Save` trên app bar và `Save card` ở đáy là hai lối cho một hành động. Giữ cả hai theo ảnh, hay bỏ cái trên | W4 app bar | — |
 | Q8 | ~~Nhãn trạng thái thẻ cần một BR~~ | — | **Đã chốt ở M4.10at**: BR-89…BR-91, bốn nhãn `new / beginning / reviewing / mastered`, `mastered` đọc lại BR-88 |
 | Q9 | ~~Chip tag~~ | — | **Đã chốt ở M4.10at**: bảng `tags` + `card_tags`, BR-93/BR-94 |
 | Q10 | ~~Cờ ⚑~~ | — | **Đã chốt ở M4.10at**: cột `cards.is_flagged`, BR-92 |
@@ -569,7 +640,7 @@ thêm dòng vào [Lịch sửa](#1-lịch-sửa).
 
 ---
 
-## 15. Bản đồ phủ
+## 16. Bản đồ phủ
 
 Kiểm chéo wireframe với UC-04 và UC-08, để chỗ thiếu lộ ra thành ô trống chứ
 không thành thứ không ai nhớ.
@@ -577,12 +648,14 @@ không thành thứ không ai nhớ.
 | UC / flow | Wireframe |
 |---|---|
 | UC-04 main flow | W1, W4 |
-| UC-04 A1 — sửa card | W6 |
+| BR-95 — ba trường phụ | W5 |
+| BR-93 — tối đa 10 tag | W4, W5 |
+| UC-04 A1 — sửa card | W6b |
 | UC-04 A2 — xoá card | W7 |
 | UC-04 A3 — deck rỗng | W2 |
 | UC-04 A4 — thêm liên tiếp | W4 |
-| UC-04 E1 — mặt trước/sau rỗng | W5 |
-| UC-04 E2 — vượt 2000 ký tự | W5 |
+| UC-04 E1 — mặt trước/sau rỗng | W6 |
+| UC-04 E2 — vượt giới hạn ký tự | W6 |
 | UC-04 E3 — ghi thất bại | W8 |
 | UC-04 UI states | W1 (loaded), W2 (empty), W8 (loading · submitting · error) |
 | UC-08 — card đầu tiên khoá `content_type` | W3 |

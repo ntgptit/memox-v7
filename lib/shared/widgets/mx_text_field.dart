@@ -10,10 +10,11 @@ import 'package:flutter/material.dart';
 ///
 /// **It knows nothing about the rules it enforces.** [maxLength] is a number the
 /// caller supplies and [errorText] is a string the caller has already localized
-/// and already decided to show. BR-01's 200 characters and BR-07/BR-08's 2000
+/// and already decided to show. BR-01's 200 characters and BR-08's 60 and 240
 /// live with the feature that owns them — a shared widget carrying a business
 /// limit is a business rule nobody can find, and it is wrong the moment a second
-/// screen has a different limit.
+/// screen has a different limit. BR-08 became two numbers at M4.10at, which is
+/// that last sentence happening.
 ///
 /// It also does not trim. Trimming here would silently change what the caller
 /// validated, so the value it reports and the value it was given stay the same

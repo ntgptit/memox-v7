@@ -25,8 +25,12 @@ final class CardText {
   /// The trimmed text. Safe to persist as-is.
   final String value;
 
-  /// BR-08's limit, measured after trimming.
-  static const int maxLength = kCardSideMaxLength;
+  /// BR-08's limit for [side], measured after trimming.
+  ///
+  /// **Per side, not one number.** This was a single `maxLength` constant while
+  /// BR-08 gave both sides 2000; at M4.10at it became 60 and 240, and a shared
+  /// constant would have quietly handed the front the back's allowance.
+  static int maxLengthOf(CardSide side) => side.maxLength;
 
   /// Parses [raw] for [side], reporting the rule it broke instead of throwing.
   ///
@@ -36,8 +40,9 @@ final class CardText {
   /// with two blank fields is the ordinary state of an empty form, and throwing
   /// on the first would make the user submit twice to find the second.
   ///
-  /// [side] only decides which problem value comes back; the rules are the same
-  /// for front and back.
+  /// [side] decides both which problem value comes back **and** which limit
+  /// applies — BR-08 gives the front 60 characters and the back 240. It used to
+  /// only pick the problem, back when the two shared one number.
   static ({CardText? text, CardValidationProblem? problem}) parse(
     String raw, {
     required CardSide side,
@@ -46,7 +51,7 @@ final class CardText {
     if (trimmed.isEmpty) {
       return (text: null, problem: side.emptyProblem);
     }
-    if (trimmed.length > maxLength) {
+    if (trimmed.length > side.maxLength) {
       return (text: null, problem: side.tooLongProblem);
     }
 

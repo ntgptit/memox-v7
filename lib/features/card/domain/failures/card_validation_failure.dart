@@ -5,9 +5,14 @@ import '../../../../core/error/failure.dart';
 
 /// Which side of a card a rule is about.
 ///
-/// Carried as a value rather than duplicated as two parallel code paths: front
-/// and back obey the same two rules, and the only thing that differs is which
-/// input a screen must mark.
+/// Carried as a value rather than duplicated as two parallel code paths. The
+/// two sides obey the same *rules* — non-empty after trimming, and a maximum
+/// length — but **not the same numbers**: BR-08 gives the front 60 characters
+/// and the back 240, because a front is a term and a back is its meaning.
+///
+/// That is why the limit lives on the enum. A single `maxLength` constant read
+/// by both sides was correct while the number was shared, and became a silent
+/// way to give the front the back's allowance the moment it stopped being.
 enum CardSide {
   front,
   back;
@@ -18,11 +23,16 @@ enum CardSide {
     CardSide.back => CardValidationProblem.backEmpty,
   };
 
-  /// The problem this side reports when it exceeds [kCardSideMaxLength]
-  /// (BR-08).
+  /// The problem this side reports when it exceeds [maxLength] (BR-08).
   CardValidationProblem get tooLongProblem => switch (this) {
     CardSide.front => CardValidationProblem.frontTooLong,
     CardSide.back => CardValidationProblem.backTooLong,
+  };
+
+  /// How many characters this side allows after trimming (BR-08).
+  int get maxLength => switch (this) {
+    CardSide.front => kCardFrontMaxLength,
+    CardSide.back => kCardBackMaxLength,
   };
 }
 
@@ -42,14 +52,14 @@ enum CardValidationProblem {
   /// Front is empty, or nothing but whitespace, after trimming (BR-07).
   frontEmpty,
 
-  /// Front is longer than [kCardSideMaxLength] after trimming (BR-08). Never
+  /// Front is longer than [kCardFrontMaxLength] after trimming (BR-08). Never
   /// truncated silently.
   frontTooLong,
 
   /// Back is empty, or nothing but whitespace, after trimming (BR-07).
   backEmpty,
 
-  /// Back is longer than [kCardSideMaxLength] after trimming (BR-08).
+  /// Back is longer than [kCardBackMaxLength] after trimming (BR-08).
   backTooLong,
 }
 
@@ -68,8 +78,21 @@ const Set<CardValidationProblem> kCardBackProblems = <CardValidationProblem>{
   CardValidationProblem.backTooLong,
 };
 
-/// BR-08's limit, measured after trimming. Lives beside the rule that uses it.
-const int kCardSideMaxLength = 2000;
+/// BR-08's limit for the front, measured after trimming.
+///
+/// **60, not 2000, since M4.10at.** The old number was a paste guard — it
+/// stopped someone dropping a whole page in, and said nothing about what a card
+/// is. A front is the term being learned, and 60 characters is the width the
+/// list row and the review card are drawn for; past that the prompt wraps to
+/// three lines on a phone and the answer goes below the fold.
+const int kCardFrontMaxLength = 60;
+
+/// BR-08's limit for the back, measured after trimming.
+///
+/// Four times the front, because a meaning carries more than a term — a gloss
+/// in two languages, comma-separated, is the shape the design writes into the
+/// placeholder.
+const int kCardBackMaxLength = 240;
 
 /// Refuses when [problems] has anything in it.
 ///
