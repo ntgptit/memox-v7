@@ -36,6 +36,27 @@ WHERE deck_id = :deckId
 ORDER BY created_at DESC, id DESC
 LIMIT :limit;
 
+-- The management list, joined to each card's review state so the row can show
+-- its state dot and label without a second read per card (D5, BR-89…BR-91).
+--
+-- **`INNER JOIN`, and it is safe because BR-09 makes it total:** every card is
+-- born with exactly one review state in the same transaction, so no card can be
+-- missing its state row. The join therefore drops nothing, and reads the state
+-- for the whole window in one statement rather than N.
+--
+-- **`c.**, s.**` — two nested rows, not a flattened select.** drift maps each
+-- star to its own row class (`Card`, `CardReviewState`), which the repository
+-- hands to the existing two mappers; a flat select would need a hand-written
+-- result class that duplicates both. Same order and window as `cardsByDeck`, so
+-- C1 and C2 hold identically.
+cardListItemsByDeck:
+SELECT c.**, s.**
+FROM cards c
+INNER JOIN card_review_states s ON s.card_id = c.id
+WHERE c.deck_id = :deckId
+ORDER BY c.created_at DESC, c.id DESC
+LIMIT :limit;
+
 -- How many cards the deck holds, for "showing 50 of 3,240".
 --
 -- A separate statement on purpose. `COUNT(*) OVER ()` beside the rows above

@@ -2,6 +2,7 @@
 library;
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/features/card/domain/models/card_state_model.dart';
 import 'package:memox/features/card/presentation/screens/card_list_screen.dart';
 import 'package:memox/shared/widgets/mx_content_shell.dart';
 
@@ -25,17 +26,22 @@ import '../../../../../features/card/presentation/support/fake_card_repository.d
 /// exact count, so a control added to the row surfaces as a miscount rather than
 /// vanishing into a blanket permission.
 void main() {
-  // One flagged row and one plain one, so the audit measures the flag indicator
-  // (BR-92) as well as the two-line face.
+  // Two rows in different states, one flagged, so the audit measures the state
+  // dots and label (D5) and the flag indicator (BR-92) as well as the face.
   FakeCardRepository loaded() => FakeCardRepository.loaded(
     <dynamic>[
-      FakeCardRepository().card(
+      FakeCardRepository().listItem(
         'c1',
         front: 'ephemeral',
         back: 'short-lived',
         isFlagged: true,
       ),
-      FakeCardRepository().card('c2', front: 'ubiquitous', back: 'everywhere'),
+      FakeCardRepository().listItem(
+        'c2',
+        front: 'ubiquitous',
+        back: 'everywhere',
+        state: CardState.mastered,
+      ),
     ].cast(),
     total: 214,
   );

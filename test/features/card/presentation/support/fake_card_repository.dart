@@ -2,9 +2,13 @@ import 'dart:async';
 
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/card/domain/entities/card_entity.dart';
+import 'package:memox/features/card/domain/entities/card_review_state_entity.dart';
 import 'package:memox/features/card/domain/entities/tag_entity.dart';
+import 'package:memox/features/card/domain/models/card_list_item_model.dart';
+import 'package:memox/features/card/domain/models/card_state_model.dart';
 import 'package:memox/features/card/domain/models/card_text_model.dart';
 import 'package:memox/features/card/domain/models/tag_name_model.dart';
+import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 import 'package:memox/features/card/domain/repositories/card_repository.dart';
 
 /// A `CardRepository` a presentation test drives by hand.
@@ -19,19 +23,24 @@ final class FakeCardRepository implements CardRepository {
 
   /// A repository whose list and count are already loaded, for a visual audit
   /// that needs the loaded frame without pumping a stream event.
-  factory FakeCardRepository.loaded(List<CardEntity> cards, {int? total}) {
+  factory FakeCardRepository.loaded(
+    List<CardListItemModel> items, {
+    int? total,
+  }) {
     final repository = FakeCardRepository();
-    repository._seededCards = cards;
-    repository._seededCount = total ?? cards.length;
+    repository._seededItems = items;
+    repository._seededCount = total ?? items.length;
 
     return repository;
   }
 
-  List<CardEntity>? _seededCards;
+  List<CardListItemModel>? _seededItems;
   int? _seededCount;
 
   final StreamController<List<CardEntity>> _cards =
       StreamController<List<CardEntity>>.broadcast();
+  final StreamController<List<CardListItemModel>> _items =
+      StreamController<List<CardListItemModel>>.broadcast();
   final StreamController<int> _count = StreamController<int>.broadcast();
 
   /// Every `watchCardsByDeck` limit asked for, in order — so a test can prove a
@@ -52,9 +61,14 @@ final class FakeCardRepository implements CardRepository {
 
   void emitCards(List<CardEntity> cards) => _cards.add(cards);
 
+  /// Pushes a list frame into the management-list stream (the read the list
+  /// screen actually subscribes to).
+  void emitItems(List<CardListItemModel> items) => _items.add(items);
+
   void emitCount(int count) => _count.add(count);
 
-  void emitError(Object error) => _cards.addError(error);
+  /// Errors the management-list stream — the list screen's error path.
+  void emitError(Object error) => _items.addError(error);
 
   CardEntity card(
     String id, {
@@ -74,18 +88,66 @@ final class FakeCardRepository implements CardRepository {
     updatedAt: DateTime.utc(2026),
   );
 
+  /// A list item in a chosen display [state], built by handing `cardStateOf` a
+  /// review state that resolves to it (BR-90/BR-91/BR-88).
+  CardListItemModel listItem(
+    String id, {
+    String front = 'front',
+    String back = 'back',
+    bool isFlagged = false,
+    CardState state = CardState.isNew,
+  }) => CardListItemModel(
+    card: card(id, front: front, back: back, isFlagged: isFlagged),
+    reviewState: _reviewStateFor(id, state),
+  );
+
+  CardReviewStateEntity _reviewStateFor(String cardId, CardState state) {
+    // eight_box only — enough to place the card in each display band. `isNew`
+    // is review_count 0; the rest pick a box on BR-91's ladder.
+    final (int reviewCount, int box) = switch (state) {
+      CardState.isNew => (0, 1),
+      CardState.beginning => (3, 2),
+      CardState.reviewing => (6, 5),
+      CardState.mastered => (12, kMasteredBox),
+    };
+
+    return CardReviewStateEntity(
+      cardId: cardId,
+      schedulerType: SchedulerType.eightBox,
+      schedulerVersion: 1,
+      schedulerGeneration: 1,
+      dueAt: null,
+      lastReviewedAt: null,
+      reviewCount: reviewCount,
+      lapseCount: 0,
+      currentBox: box,
+      easeFactor: null,
+      intervalDays: null,
+      repetitions: null,
+    );
+  }
+
   @override
   Stream<List<CardEntity>> watchCardsByDeck(
     String deckId, {
     required int limit,
   }) {
     requestedLimits.add(limit);
-    final seeded = _seededCards;
+    return _cards.stream;
+  }
+
+  @override
+  Stream<List<CardListItemModel>> watchCardListItems(
+    String deckId, {
+    required int limit,
+  }) {
+    requestedLimits.add(limit);
+    final seeded = _seededItems;
     if (seeded != null) {
-      return Stream<List<CardEntity>>.value(seeded);
+      return Stream<List<CardListItemModel>>.value(seeded);
     }
 
-    return _cards.stream;
+    return _items.stream;
   }
 
   @override
@@ -215,6 +277,7 @@ final class FakeCardRepository implements CardRepository {
 
   void dispose() {
     unawaited(_cards.close());
+    unawaited(_items.close());
     unawaited(_count.close());
     unawaited(_tags.close());
   }

@@ -1,6 +1,7 @@
 import '../entities/card_entity.dart';
 import '../entities/tag_entity.dart';
 import '../failures/tag_validation_failure.dart';
+import '../models/card_list_item_model.dart';
 import '../models/card_text_model.dart';
 import '../models/tag_name_model.dart';
 
@@ -33,6 +34,19 @@ abstract interface class CardRepository {
   /// (UC-04 A4). This is a management order and decides nothing about study:
   /// the review queue is ordered by BR-23 through its own query.
   Stream<List<CardEntity>> watchCardsByDeck(
+    String deckId, {
+    required int limit,
+  });
+
+  /// The same window as [watchCardsByDeck], each card joined to its review state
+  /// so a row can show its state dot and label (D5, BR-89…BR-91).
+  ///
+  /// A richer read than [watchCardsByDeck], not a replacement: the editor prefill
+  /// and the create flow want a bare [CardEntity], while the list wants the pair.
+  /// Both are one statement — this one joins, because the row needs the card and
+  /// its state in the same frame (AD-13), and the join is total by BR-09 (every
+  /// card is born with exactly one state).
+  Stream<List<CardListItemModel>> watchCardListItems(
     String deckId, {
     required int limit,
   });

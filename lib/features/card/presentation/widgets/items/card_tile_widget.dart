@@ -3,37 +3,43 @@ import 'package:flutter/material.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
-import '../../../domain/entities/card_entity.dart';
+import '../../../domain/models/card_list_item_model.dart';
+import '../support/card_state_widget.dart';
 
-/// One card in the management list — front over back.
+/// One card in the management list: a state dot, front over back with a state
+/// label, and — when set — a flag (D5, W1 §4.3).
 ///
-/// **Front and back, and not yet the state chip or the due badge.** Those read
-/// the card's review state, which is a second read this list slice does not make
-/// yet; the tile is built to grow a trailing column and a status line without
-/// moving the two lines that are here, so the next slice adds rather than
-/// reshapes. The wireframe's four-part row (W1 §4.3) is the target.
+/// **The state dot leads the row and the label sits under the back line**, so a
+/// vertical scan reads the column of dots for the deck's distribution while the
+/// word names each card's state for anyone who cannot rely on colour. The due
+/// badge on the right is the next slice; the row is built to grow it into the
+/// trailing slot without moving what is here.
 ///
-/// `MxCard` with [onTap] rather than an `MxListTile`: a card is two lines of the
+/// `InkWell` with [onTap] rather than an `MxListTile`: a card is two lines of the
 /// user's own text at different weights, which a list tile's title/subtitle pair
 /// would flatten. Tapping opens the editor — wired by the caller, so the tile
 /// stays ignorant of the router (AD-13).
-/// The flag indicator's size — the front line's title height, so the mark reads
-/// as part of that line rather than as chrome hung off the row.
 const double _flagIconSize = 18;
 
-class CardTileWidget extends StatelessWidget {
-  const CardTileWidget({required this.card, required this.onTap, super.key});
+/// The state dot's diameter — small, because colour and position carry it, not
+/// size.
+const double _stateDotSize = 10;
 
-  final CardEntity card;
+class CardTileWidget extends StatelessWidget {
+  const CardTileWidget({required this.item, required this.onTap, super.key});
+
+  final CardListItemModel item;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
+    final card = item.card;
+    final stateLabel = context.cardStateLabel(item.state);
+
     return Semantics(
       button: true,
-      // Front then back, joined for the reader so the pair is announced as one
-      // card rather than two unrelated lines. Through the ARB so the join — the
-      // pause between the two — is a translator's decision, not a `. ` literal.
+      // Front, back and state, joined for the reader so the row is announced as
+      // one card. Through the ARB so the joins are a translator's decision.
       label: context.l10n.cardTileSemantics(card.front, card.back),
       child: InkWell(
         onTap: onTap,
@@ -46,6 +52,23 @@ class CardTileWidget extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
+              // The dot sits on the front line's baseline band, not the top, so
+              // it reads as belonging to the card rather than floating above it.
+              Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.xs),
+                child: Semantics(
+                  label: context.l10n.cardStateDotSemantics(stateLabel),
+                  child: Container(
+                    width: _stateDotSize,
+                    height: _stateDotSize,
+                    decoration: BoxDecoration(
+                      color: context.cardStateColor(item.state),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -65,6 +88,13 @@ class CardTileWidget extends StatelessWidget {
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      stateLabel,
+                      style: context.texts.labelSmall?.copyWith(
+                        color: context.colors.onSurfaceVariant,
+                      ),
                     ),
                   ],
                 ),

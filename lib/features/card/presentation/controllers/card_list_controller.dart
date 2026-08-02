@@ -1,7 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/state/retry_policy.dart';
-import '../../domain/entities/card_entity.dart';
+import '../../domain/models/card_list_item_model.dart';
 import '../providers/card_use_case_provider.dart';
 import 'card_list_window_controller.dart';
 
@@ -23,10 +23,10 @@ part 'card_list_controller.g.dart';
 @Riverpod(retry: noAutomaticRetry)
 class CardList extends _$CardList {
   @override
-  Stream<List<CardEntity>> build(String deckId) {
+  Stream<List<CardListItemModel>> build(String deckId) {
     final limit = ref.watch(cardListWindowProvider(deckId));
 
-    return ref.watch(watchCardsByDeckUseCaseProvider)(deckId, limit: limit);
+    return ref.watch(watchCardListItemsUseCaseProvider)(deckId, limit: limit);
   }
 }
 
