@@ -123,11 +123,26 @@ void main() {
           .map((specimen) => specimen.name.split(' ').first)
           .toSet();
 
-      // `MxAsyncView` is excluded: it renders whichever of three builders the
-      // `AsyncValue` selects and has no layout of its own. Its three branches are
-      // covered by `mx_async_view_test.dart`, and its content is whatever the
-      // caller passed — which is one of the components above.
-      expect(files.difference(covered), <String>{'MxAsyncView'});
+      // Three exclusions, and each is excluded for the same reason: it has no
+      // layout of its own, so a stress specimen would be measuring whatever the
+      // caller passed rather than the component.
+      //
+      // * `MxAsyncView` renders whichever of three builders the `AsyncValue`
+      //   selects; its branches are covered by `mx_async_view_test.dart`.
+      // * `MxFormSheet` is a `showModalBottomSheet` configuration plus a host
+      //   that returns its child untouched. What it *does* own — the keyboard
+      //   inset, and closing on the `shouldClose` transition rather than on the
+      //   value — is behaviour a static specimen cannot show, so it is covered
+      //   by `mx_form_sheet_test.dart` instead.
+      // * `MxFailureLabelsWidget` contains no widget at all: it is the
+      //   `Failure` → copy mapping, and `_widget` stays in the file name for
+      //   the same reason `deck_labels_widget.dart` keeps it — the suffix is
+      //   what puts the file in scope for the rules meant to cover it.
+      expect(files.difference(covered), <String>{
+        'MxAsyncView',
+        'MxFailureLabelsWidget',
+        'MxFormSheet',
+      });
     });
   });
 }

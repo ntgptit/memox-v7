@@ -528,6 +528,10 @@
   "@deckWriteErrorTitle": {
     "description": "Heading shown when a deck write fails for a reason the user cannot fix inline."
   },
+  "writeErrorMessage": "Please try again.",
+  "@writeErrorMessage": {
+    "description": "Body of the generic write failure, for any feature. Deliberately free of the exception, the SQL and the file path."
+  },
   "deckWriteErrorMessage": "Please try again.",
   "@deckWriteErrorMessage": {
     "description": "Body of the generic deck write failure. Deliberately free of the exception, the SQL and the file path."
