@@ -4876,6 +4876,50 @@ nó sẽ đang trưng bày *form của caller*, không phải component. Khi car
 tồn tại thì có form thật để trưng, và đó là lúc thêm — cùng lập luận "caller thứ
 hai mới cho biết cái gì thay đổi".
 
+**Next task: M4.10at · Schema v2 và phép quy chiếu trạng thái thẻ.**
+
+### M4.10at · `tags`, `card_tags`, `is_flagged` và bốn trạng thái thẻ
+
+- **Status:** todo
+- **Goal:** Đưa schema và luật mà màn card cần lên trước, để M4.11 dựng hàng thẻ
+  **một lần** theo hình dạng cuối thay vì dựng rồi sửa.
+- **Scope:** migration v2 (`tags`, `card_tags`, `cards.is_flagged`); DAO và
+  named query cho tag, cờ và bộ đếm theo trạng thái; phép quy chiếu bốn trạng
+  thái (BR-89…BR-91) đặt cạnh scheduler tương ứng, **hai** hàm chứ không một;
+  value object `TagName` với private constructor (BR-93); bất biến mới cho
+  `card_tags`; migration test từ v1.
+- **Out of scope:** mọi UI. Màn card, chip tag, pill lọc và panel tiến độ đều
+  thuộc M4.11 — task này chỉ mở đường. `card_media` vẫn để sau.
+- **Dependencies:** M4.10as
+- **Checklist phases:** 11.1, 11.2, 15.1
+- **Tests required:** migration v1→v2 giữ nguyên dữ liệu; `is_flagged` mặc định
+  0 cho thẻ cũ; unique tag không phân biệt hoa thường **có dấu tiếng Việt**;
+  cascade hai chiều của `card_tags`; quy chiếu trạng thái ở biên box 3/4 và 7/8,
+  và ở biên `interval_days` 7/8 và 127/128; reset giữ nguyên cờ và tag (BR-41).
+- **Editable documents:** `docs/wbs.md`, `docs/data-model.md`,
+  `docs/business-rules.md`
+- **Output:** `lib/core/database/tables/`, `lib/core/database/queries/`,
+  `lib/features/card/domain/`
+- **Acceptance criteria:**
+  - [ ] Migration v1→v2 chạy trên DB v1 thật, không mất dòng nào.
+  - [ ] `TagName` chặn rỗng-sau-trim và quá 50 ký tự ở **kiểu**, không ở caller.
+  - [ ] `Động từ` và `động từ` va nhau ở unique — tức fold không phải `NOCASE`.
+  - [ ] Bốn trạng thái suy ra đúng ở cả hai scheduler, kiểm ở từng biên.
+  - [ ] `mastered` đọc lại BR-88 chứ không định nghĩa lần hai.
+  - [ ] Reset learning progress không đụng `is_flagged` và `card_tags`.
+
+**Vì sao task này chen vào trước M4.11 thay vì gộp vào nó.** Màn hình tham chiếu
+mà chủ dự án đưa vẽ tag, cờ và một panel tiến độ bốn trạng thái — không cái nào
+có schema. Nếu M4.11 làm cả hai nửa thì migration và UI nằm chung một PR, và
+hàng thẻ phải dựng hai lần: một lần cho `front`/`back`, một lần nữa khi tag và cờ
+tới. Tách ra thì M4.11 chỉ còn là UI trên một hình dạng dữ liệu đã cố định.
+
+**Quy chiếu trạng thái đặt cạnh scheduler, không đặt ở widget.** BR-89…BR-91 là
+luật nghiệp vụ; một `switch` trong `CardTile` đọc `current_box` sẽ là bản sao thứ
+hai của chúng, và bản sao đó không có test nào của scheduler chạm tới. Hai hàm
+riêng vì AD-06 cho hai scheduler state khác nhau — một hàm chung buộc phải đọc
+cột NULL của scheduler kia.
+
 **Next task: M4.11 · Card management full-stack.**
 
 ### M4.11 · Card management full-stack
@@ -4888,19 +4932,20 @@ hai mới cho biết cái gì thay đổi".
   state/controller; route; ARB en/vi; `CardTile`/`CardEditor` đặt trong feature.
   Cộng thêm phía presentation của cửa sổ danh sách: `windowSize`, auto-load,
   load-more tường minh, dòng "đang hiện N / M", và hành vi cuộn khi có dòng mới.
-- **Out of scope:** review scheduler (M5.1); review history UI; import/export;
-  media; rich text. **Keyset cursor** — xem điều kiện kích hoạt ở M4.10ar; cửa
-  sổ `LIMIT` không cursor là hình dạng đã chốt cho MVP. **Sort/filter toolbar**
-  — thứ tự danh sách cố định mới-trước, không có control đổi thứ tự; search thẻ
-  là S1, chưa tới lượt.
+  **Cộng phần UI mà M4.10at mở đường:** nhãn bốn trạng thái trên hàng thẻ, chip
+  tag, cờ ⚑ và pill lọc theo cờ, panel tiến độ deck (vòng %, thanh phân đoạn,
+  "N of M mastered"), và form gán tag trong editor.
+- **Out of scope:** review scheduler và nút **Start study** (M5.1); review
+  history UI; import/export; media; rich text. **Keyset cursor** — xem điều kiện
+  kích hoạt ở M4.10ar; cửa sổ `LIMIT` không cursor là hình dạng đã chốt cho MVP.
+  **Sort control và search thẻ** — thứ tự danh sách cố định mới-trước; search là
+  S1. Pill lọc theo cờ và theo trạng thái thì **trong** scope: chúng lọc, không
+  đổi thứ tự.
 - **Wireframe:** [`docs/wireframes/m4-11-card-management.md`](wireframes/m4-11-card-management.md)
-  — bố cục chín màn, năm quyết định UI đã chốt (D1–D5), chín câu còn mở
-  (Q1, Q3–Q11). §4 tách trạng thái đích (màn tham chiếu của chủ dự án) khỏi lát
-  cắt M4.11, kèm bảng phân tầng từng khối.
-  **Chặn code:** Q6/Q7 (`windowSize`, hành vi cửa sổ khi quay lại màn) và
-  **Q8** — nhãn trạng thái thẻ cần một BR, vì `card_review_states` không có cột
-  trạng thái và ngưỡng quy chiếu khác nhau giữa `eight_box` và `sm2`.
-  Q9 (tag), Q10 (cờ) và Q11 (panel tiến độ) cần schema hoặc thuộc M5.x.
+  — bố cục chín màn, năm quyết định UI đã chốt (D1–D5). §4 tách trạng thái đích
+  (màn tham chiếu của chủ dự án) khỏi lát cắt M4.11, kèm bảng phân tầng từng
+  khối. Q8–Q11 đã đóng ở M4.10at; còn mở Q1, Q3–Q7, trong đó **Q6/Q7 chặn code**
+  (`windowSize`, hành vi cửa sổ khi quay lại màn).
 - **Editable documents:** `docs/wbs.md`, `docs/wireframes/m4-11-card-management.md`
 - **Output:** `lib/features/card/`, `lib/l10n/`, `test/features/card/`,
   `test/visual_audit/screens/features/card/`
@@ -4956,7 +5001,7 @@ hai mới cho biết cái gì thay đổi".
         and a card list … there is no screen to copy, so there is none here".
         Thay bằng: dựng màn theo token và component sẵn có, rồi **bổ sung màn
         đó vào kit trong cùng PR** theo luật both-kits-must-match.
-- **Dependencies:** M4.10, M4.10ar, M4.10as
+- **Dependencies:** M4.10, M4.10ar, M4.10as, M4.10at
 - **Tests required:** domain, repository transaction và rollback, controller,
   form validation, widget, visual audit strict, route
 - **Checklist phases:** 9.2, 9.3, 14.4, 15.1, 15.2, 15.3, 15.4

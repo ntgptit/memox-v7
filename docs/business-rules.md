@@ -7,8 +7,8 @@
 | **Scope** | Luật nghiệp vụ, validation rule, state machine, edge case của phạm vi MVP. Ngoài phạm vi: quyết định kiến trúc (`architecture.md`), hình dạng dữ liệu (`data-model.md`), luồng người dùng (`use-cases.md`) |
 | **Source of truth for** | BR-xx · validation rule · entity state machine · edge case |
 | **Depends on** | `document-conventions.md`, `product.md`, `architecture.md` |
-| **Updated by task** | M4.10r |
-| **Last updated** | 2026-07-29 |
+| **Updated by task** | M4.10at (BR-89…BR-94) |
+| **Last updated** | 2026-08-02 |
 
 Format tuân theo `document-conventions.md` §6.2. Từ khoá MUST / SHOULD / MAY
 theo §3. Prose **không** chứa từ khoá là giải thích, không phải rule (§9).
@@ -27,7 +27,7 @@ khi ai đó đọc và làm theo.
 
 Rule bị thay thế MUST đánh `superseded by BR-yy` ở cột Status và giữ nguyên ID.
 
-Trạng thái hiện tại: **BR-01…BR-87**, không trùng, không thiếu.
+Trạng thái hiện tại: **BR-01…BR-94**, không trùng, không thiếu.
 
 ---
 
@@ -344,6 +344,49 @@ BR-47 quan trọng vì nửa vời ở đây nghĩa là một cây deck có card
 generation, hoặc scheduler mới với card state theo luật cũ. Cả hai là dữ liệu
 hỏng không tự phục hồi, tệ hơn nhiều so với reset thất bại sạch sẽ.
 
+## Trạng thái hiển thị của thẻ
+
+BR-88 đã định nghĩa nửa trên của thang này — "đã thuộc" — cho cả hai scheduler.
+Ba rule dưới đây chia phần còn lại, và **không** phát biểu lại BR-88.
+
+| ID | Status | Rule | Enforced by | Related |
+|---|---|---|---|---|
+| BR-89 | active | Trạng thái hiển thị của một thẻ MUST là một trong bốn: `new`, `beginning`, `reviewing`, `mastered`. Nó MUST được suy ra khi đọc và MUST NOT là cột trong DB. | domain | BR-88, UC-04 |
+| BR-90 | active | Thẻ chưa có lượt `scheduled` nào (`review_count = 0`) MUST là `new`, ở cả hai scheduler. | domain | BR-89, BR-20 |
+| BR-91 | active | Với thẻ đã review và chưa "đã thuộc": interval hiện tại dưới 8 ngày MUST là `beginning`, từ 8 ngày trở lên MUST là `reviewing`. Với `eight_box` đó là box 1–3 và box 4–7; với `sm2` là `interval_days` < 8 và 8…127. | domain | BR-89, BR-16, BR-88 |
+
+**Mốc 8 ngày không phải số mới.** Nó là interval của box 4 trong BR-16, và thang
+đó là luỹ thừa của hai — 1, 2, 4, **8**, 16, 32, 64, 128 — nên box 1–3 là toàn bộ
+phần dưới một tuần và box 4 là bước đầu tiên ra khỏi nhịp ôn ngắn. Dùng lại đúng
+mốc đó cho `sm2` khiến `beginning` nghĩa là **cùng một khoảng cách thời gian** ở
+cả hai scheduler, là chính lập luận BR-88 dùng khi chọn 128 thay vì 21.
+
+Chọn một ngưỡng riêng cho `sm2` — 7 ngày, hay 30 — sẽ khiến hai deck cùng nhịp
+ôn hiện hai nhãn khác nhau, và không có gì trong dữ liệu giải thích được vì sao.
+
+**Bốn trạng thái là nhãn hiển thị, không phải state machine.** Không có chuyển
+tiếp nào được định nghĩa giữa chúng và không có gì lưu chúng lại; chúng là một
+phép đọc `card_review_states` tại thời điểm vẽ. Thẻ đi lùi từ `reviewing` về
+`beginning` sau một lần quên là chuyện bình thường, không phải vi phạm.
+
+## Cờ và tag
+
+| ID | Status | Rule | Enforced by | Related |
+|---|---|---|---|---|
+| BR-92 | active | Cờ đánh dấu thẻ MUST là nội dung: sửa thẻ và reset learning progress MUST NOT đụng tới nó; xoá thẻ MUST xoá nó theo cascade. | db + repository | BR-10, BR-41 |
+| BR-93 | active | Tag MUST là nội dung, quan hệ nhiều-nhiều với thẻ. Tên tag MUST không rỗng sau trim, MUST tối đa 50 ký tự, và MUST là duy nhất không phân biệt hoa thường. | domain + db | BR-41, UC-04 |
+| BR-94 | active | Một thẻ MUST mang tối đa 10 tag. | domain | BR-93 |
+
+BR-92 và BR-93 nói cùng một điều mà BR-41 đã nói cho reset, nhưng ở chiều khác:
+BR-41 nói reset giữ chúng lại, hai rule này nói *vì sao* — chúng thuộc nội dung,
+cùng phía với `front`/`back`, chứ không thuộc lịch. Đó cũng là lý do cờ nằm trên
+`cards` chứ không trên `card_review_states`.
+
+BR-94 là một giới hạn của **giao diện** được nâng thành rule, và nó thừa nhận
+điều đó: hàng thẻ vẽ tag thành một dãy chip, và một dãy không giới hạn sẽ tràn ở
+320 với `textScaler` 2.0. Mười là con số đủ rộng để không ai gặp phải trong thực
+tế và đủ hẹp để hàng thẻ có chiều cao đoán được.
+
 ## Dữ liệu riêng tư
 
 | ID | Status | Rule | Enforced by | Related |
@@ -369,6 +412,10 @@ hỏng không tự phục hồi, tệ hơn nhiều so với reset thất bại s
 | Card.front | không rỗng sau trim | "Mặt trước không được để trống" | domain |
 | Card.back | không rỗng sau trim | "Mặt sau không được để trống" | domain |
 | Card.front/back | ≤ 2000 ký tự | "Nội dung tối đa 2000 ký tự" | domain |
+| Tag.name | không rỗng sau trim (BR-93) | "Tên tag không được để trống" | domain |
+| Tag.name | ≤ 50 ký tự (BR-93) | "Tên tag tối đa 50 ký tự" | domain |
+| Tag.name | không trùng, không phân biệt hoa thường (BR-93) | "Tag này đã tồn tại" | domain + db |
+| Card.tags | ≤ 10 tag mỗi thẻ (BR-94) | "Mỗi thẻ tối đa 10 tag" | domain |
 
 Toàn bộ enforce ở domain vì chưa có server. Khi có backend, server validate lại —
 client validation là trải nghiệm, không phải bảo mật.

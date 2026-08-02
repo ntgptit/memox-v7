@@ -7,8 +7,8 @@
 | **Scope** | Bảng, cột, index, quan hệ, query bất biến. Ngoài phạm vi: SQL runtime (`lib/core/database/`, chưa tồn tại) |
 | **Source of truth for** | Schema · cột và kiểu · index · query bất biến · thứ tự migration |
 | **Depends on** | `document-conventions.md`, `architecture.md`, `business-rules.md` |
-| **Updated by task** | M4.10 (composite index) |
-| **Last updated** | 2026-07-30 |
+| **Updated by task** | M4.10at (tags, card_tags, is_flagged) |
+| **Last updated** | 2026-08-02 |
 
 Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; SQL thật nằm
 ở `lib/core/database/tables/` và **chưa được tạo** — task này chỉ chốt đặc tả.
@@ -140,6 +140,7 @@ trả lời được mọi lookup cũ, giữ cả hai chỉ khiến mỗi insert
 | `deck_id` | TEXT NOT NULL | → `decks(id)` ON DELETE CASCADE. Chỉ deck có `content_type = 'card'` (BR-63) |
 | `front` | TEXT NOT NULL | BR-07, BR-08 |
 | `back` | TEXT NOT NULL | BR-07, BR-08 |
+| `is_flagged` | INTEGER NOT NULL DEFAULT 0 | 0 \| 1. Cờ người dùng đánh dấu (BR-92) |
 | `created_at` | DATETIME NOT NULL | UTC |
 | `updated_at` | DATETIME NOT NULL | UTC |
 
@@ -147,11 +148,54 @@ trả lời được mọi lookup cũ, giữ cả hai chỉ khiến mỗi insert
 dung, nó sống xuyên qua mọi lần reset (BR-41). Reset learning progress không được
 chạm vào bảng này.
 
+`is_flagged` nằm ở đây chứ không ở `card_review_states` và đó là cùng một lập
+luận: cờ là thứ người dùng đặt lên *nội dung* — "quay lại thẻ này" — nên nó phải
+sống sót qua reset. Đặt nó cạnh `current_box` sẽ khiến reset xoá nó cùng lịch
+(BR-92).
+
 Index: `idx_cards_deck_created` trên `(deck_id, created_at, id)` — composite,
 theo đúng thứ tự `cardsByDeck` lọc rồi sắp. Đây là điều kiện để phân trang keyset
 (`WHERE deck_id = ? AND (created_at, id) > (?, ?)`) là một range scan thật thay vì
 một lần sắp toàn bộ deck rồi đặt `LIMIT` lên trên: đo trên 5.000 thẻ một deck, một
 trang 50 thẻ đi từ 1193µs xuống 102µs.
+
+## `tags`
+
+Nhãn phân loại nội dung do người dùng đặt — `noun`, `people`, `verb`. Nội dung,
+không phải lịch: reset giữ nguyên (BR-41, BR-93).
+
+| Cột | Kiểu | Ghi chú |
+|---|---|---|
+| `id` | TEXT PK | UUID sinh phía client (AD-03) |
+| `name` | TEXT NOT NULL | BR-93. Lưu nguyên dạng người dùng gõ |
+| `name_folded` | TEXT NOT NULL | `lower(trim(name))`. Cột để **cưỡng chế** unique |
+| `owner_id` | TEXT NULL | NULL = local profile (AD-03) |
+| `created_at` | DATETIME NOT NULL | UTC |
+
+Index: `UNIQUE (owner_id, name_folded)`.
+
+**`name_folded` là một cột thật, không phải một expression index**, vì BR-93 đòi
+unique không phân biệt hoa thường và SQLite chỉ có `NOCASE` cho ASCII — một tag
+tiếng Việt `Động từ` và `động từ` sẽ lọt qua `COLLATE NOCASE`. Ghi cột đã fold
+lúc insert thì phép so sánh là byte-với-byte và đúng cho mọi bảng chữ.
+
+Tag **không** thuộc về một deck. Cùng một `noun` dùng lại ở mọi deck; buộc nó
+theo deck sẽ sinh ra bản sao mỗi lần người dùng tạo deck mới, và lúc lọc thì
+chúng là các tag khác nhau.
+
+## `card_tags`
+
+| Cột | Kiểu | Ghi chú |
+|---|---|---|
+| `card_id` | TEXT NOT NULL | → `cards(id)` ON DELETE CASCADE |
+| `tag_id` | TEXT NOT NULL | → `tags(id)` ON DELETE CASCADE |
+
+PK là `(card_id, tag_id)`. Index thứ hai `idx_card_tags_tag` trên `(tag_id,
+card_id)` cho chiều ngược lại — "mọi thẻ mang tag này" là câu mà bộ lọc hỏi, và
+PK không phục vụ được nó.
+
+Cả hai FK đều `CASCADE`: xoá thẻ thì liên kết mất theo (BR-92 nói cùng điều đó
+cho cờ), xoá tag thì nó biến khỏi mọi thẻ. Không có bản ghi mồ côi nào cần dọn.
 
 ## `card_review_states`
 
@@ -434,19 +478,27 @@ state, review history và study session đều biến mất (BR-03).
 
 ## Chưa mô hình hoá
 
-Media và tag được nhắc trong quy tắc reset (BR-41: reset giữ nguyên chúng) nhưng
-**chưa thuộc MVP** và chưa có bảng. Khi thêm, chúng gắn với `cards` và không mang
-`scheduler_generation` — chúng là nội dung, và quy tắc "reset không chạm nội dung"
+Media được nhắc trong quy tắc reset (BR-41: reset giữ nguyên nó) nhưng **chưa
+thuộc MVP** và chưa có bảng. Khi thêm, nó gắn với `cards` và không mang
+`scheduler_generation` — nó là nội dung, và quy tắc "reset không chạm nội dung"
 áp dụng nguyên vẹn.
+
+Tag từng nằm ở mục này. Nó rời khỏi đây ở M4.10at, khi màn card cần hiển thị tag
+và cờ — xem `docs/wireframes/m4-11-card-management.md`.
 
 ## Thứ tự migration dự kiến
 
 | Version | Nội dung |
 |---|---|
-| 1 | Toàn bộ schema trên |
-| _sau_ | Bảng `tags`, `card_media` |
+| 1 | Toàn bộ schema trên, trừ những gì v2 thêm |
+| 2 | Bảng `tags`, `card_tags`; cột `cards.is_flagged` (M4.10at) |
+| _sau_ | Bảng `card_media` |
 | _sau_ | Cột sync (`is_pending_sync`, `version`) khi có backend (AD-03) |
 | _sau_ | `deck_templates` thành bảng runtime nếu tải template từ server |
+
+v2 là **thêm bảng và thêm một cột có DEFAULT** — không đụng dòng nào đang có, và
+`is_flagged DEFAULT 0` nghĩa là mọi thẻ cũ mở lên đúng trạng thái "chưa đánh
+dấu". Đó là kết quả có chủ đích của việc tách bảng ngay từ v1, không phải may.
 
 Tất cả đều là thêm cột hoặc thêm bảng — không đụng dữ liệu đang có. Đó là kết quả
 có chủ đích của việc tách bảng, đặt `scheduler_generation` và `root_deck_id` ngay
