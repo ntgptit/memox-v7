@@ -27,29 +27,49 @@ void main() {
     });
 
     test('exactly the limit passes, and the value is trimmed', () {
-      final text = 'x' * kCardSideMaxLength;
-      final parsed = CardText.parse(' $text ', side: CardSide.front);
+      for (final side in CardSide.values) {
+        final text = 'x' * side.maxLength;
+        final parsed = CardText.parse(' $text ', side: side);
 
-      expect(parsed.problem, isNull);
-      expect(parsed.text?.value, text);
+        expect(parsed.problem, isNull, reason: '${side.name} at its limit');
+        expect(parsed.text?.value, text);
+      }
+    });
+
+    test('the two sides do not share a limit', () {
+      // The regression this pins: `maxLength` was one constant for both sides
+      // until M4.10at. A front of 240 characters passing would mean the front is
+      // reading the back's allowance.
+      expect(CardSide.front.maxLength, lessThan(CardSide.back.maxLength));
+
+      final overFront = 'x' * (CardSide.front.maxLength + 1);
+      expect(
+        CardText.parse(overFront, side: CardSide.front).problem,
+        CardValidationProblem.frontTooLong,
+      );
+      expect(
+        CardText.parse(overFront, side: CardSide.back).problem,
+        isNull,
+        reason: 'the back is longer, so the same text is fine there',
+      );
     });
 
     test('one over the limit is refused, never truncated', () {
       final parsed = CardText.parse(
-        'x' * (kCardSideMaxLength + 1),
+        'x' * (CardSide.back.maxLength + 1),
         side: CardSide.back,
       );
 
       expect(parsed.text, isNull);
       expect(parsed.problem, CardValidationProblem.backTooLong);
       // The point of reporting rather than truncating: a card silently cut to
-      // 2000 characters is content the user believes they saved.
+      // the limit is content the user believes they saved.
     });
 
     test('the limit is measured after trimming, not before', () {
-      final padded = ' ${'x' * kCardSideMaxLength} ';
+      final padded = ' ${'x' * CardSide.front.maxLength} ';
 
-      expect(padded.length, greaterThan(kCardSideMaxLength));
+      expect(padded.length, greaterThan(CardSide.front.maxLength));
       expect(CardText.parse(padded, side: CardSide.front).problem, isNull);
     });
 
@@ -87,7 +107,7 @@ void main() {
       expect(
         () => parseCardSides(
           rawFront: '',
-          rawBack: 'x' * (kCardSideMaxLength + 1),
+          rawBack: 'x' * (CardSide.back.maxLength + 1),
         ),
         throwsA(
           isA<ValidationFailure>().having(

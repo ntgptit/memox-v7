@@ -4883,7 +4883,9 @@ hai mới cho biết cái gì thay đổi".
 - **Status:** todo
 - **Goal:** Đưa schema và luật mà màn card cần lên trước, để M4.11 dựng hàng thẻ
   **một lần** theo hình dạng cuối thay vì dựng rồi sửa.
-- **Scope:** migration v2 (`tags`, `card_tags`, `cards.is_flagged`); DAO và
+- **Scope:** migration v2 (`tags`, `card_tags`, `cards.is_flagged` và ba trường
+  phụ `example` / `hint` / `pronunciation`); **BR-08 siết 2000 → 60/240**, kéo
+  theo `CardSide.maxLength` thay cho một hằng dùng chung; DAO và
   named query cho tag, cờ và bộ đếm theo trạng thái; phép quy chiếu bốn trạng
   thái (BR-89…BR-91) đặt cạnh scheduler tương ứng, **hai** hàm chứ không một;
   value object `TagName` với private constructor (BR-93); bất biến mới cho
@@ -4907,6 +4909,9 @@ hai mới cho biết cái gì thay đổi".
   - [ ] Bốn trạng thái suy ra đúng ở cả hai scheduler, kiểm ở từng biên.
   - [ ] `mastered` đọc lại BR-88 chứ không định nghĩa lần hai.
   - [ ] Reset learning progress không đụng `is_flagged` và `card_tags`.
+  - [ ] Mặt trước 240 ký tự bị từ chối, mặt sau thì không — hai giới hạn thật
+        sự khác nhau, không phải một hằng dùng chung.
+  - [ ] Ba trường phụ trim rồi quy chuỗi rỗng về NULL, không lưu chuỗi rỗng.
 
 **Vì sao task này chen vào trước M4.11 thay vì gộp vào nó.** Màn hình tham chiếu
 mà chủ dự án đưa vẽ tag, cờ và một panel tiến độ bốn trạng thái — không cái nào

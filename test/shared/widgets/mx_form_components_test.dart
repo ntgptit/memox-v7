@@ -159,7 +159,7 @@ void main() {
     testWidgets('the caller supplies the limit; the field knows no rule', (
       tester,
     ) async {
-      // BR-01's 200 and BR-07/BR-08's 2000 live with the feature. The field is
+      // BR-01's 200 and BR-08's 60/240 live with the feature. The field is
       // handed a number.
       final controller = TextEditingController();
       addTearDown(controller.dispose);

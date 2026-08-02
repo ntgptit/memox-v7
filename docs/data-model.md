@@ -7,7 +7,7 @@
 | **Scope** | Bảng, cột, index, quan hệ, query bất biến. Ngoài phạm vi: SQL runtime (`lib/core/database/`, chưa tồn tại) |
 | **Source of truth for** | Schema · cột và kiểu · index · query bất biến · thứ tự migration |
 | **Depends on** | `document-conventions.md`, `architecture.md`, `business-rules.md` |
-| **Updated by task** | M4.10at (tags, card_tags, is_flagged) |
+| **Updated by task** | M4.10at (tags, card_tags, is_flagged, ba trường phụ) |
 | **Last updated** | 2026-08-02 |
 
 Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; SQL thật nằm
@@ -141,12 +141,20 @@ trả lời được mọi lookup cũ, giữ cả hai chỉ khiến mỗi insert
 | `front` | TEXT NOT NULL | BR-07, BR-08 |
 | `back` | TEXT NOT NULL | BR-07, BR-08 |
 | `is_flagged` | INTEGER NOT NULL DEFAULT 0 | 0 \| 1. Cờ người dùng đánh dấu (BR-92) |
+| `example` | TEXT NULL | Tuỳ chọn (BR-95) |
+| `hint` | TEXT NULL | Tuỳ chọn (BR-95) |
+| `pronunciation` | TEXT NULL | Tuỳ chọn (BR-95) |
 | `created_at` | DATETIME NOT NULL | UTC |
 | `updated_at` | DATETIME NOT NULL | UTC |
 
 **Không có cột SRS nào ở đây**, và không có `scheduler_generation` — card là nội
 dung, nó sống xuyên qua mọi lần reset (BR-41). Reset learning progress không được
 chạm vào bảng này.
+
+Ba trường phụ để **NULL, không phải chuỗi rỗng**. NULL nghĩa là người dùng chưa
+điền; chuỗi rỗng nghĩa là họ điền rồi xoá — và không màn nào phân biệt được hai
+thứ đó, nên cho phép cả hai chỉ tạo ra hai cách biểu diễn một trạng thái. Lớp
+domain trim rồi quy chuỗi rỗng về NULL trước khi ghi, cùng chỗ `CardText` trim.
 
 `is_flagged` nằm ở đây chứ không ở `card_review_states` và đó là cùng một lập
 luận: cờ là thứ người dùng đặt lên *nội dung* — "quay lại thẻ này" — nên nó phải
@@ -491,14 +499,21 @@ và cờ — xem `docs/wireframes/m4-11-card-management.md`.
 | Version | Nội dung |
 |---|---|
 | 1 | Toàn bộ schema trên, trừ những gì v2 thêm |
-| 2 | Bảng `tags`, `card_tags`; cột `cards.is_flagged` (M4.10at) |
+| 2 | Bảng `tags`, `card_tags`; cột `cards.is_flagged`, `example`, `hint`, `pronunciation` (M4.10at) |
 | _sau_ | Bảng `card_media` |
 | _sau_ | Cột sync (`is_pending_sync`, `version`) khi có backend (AD-03) |
 | _sau_ | `deck_templates` thành bảng runtime nếu tải template từ server |
 
-v2 là **thêm bảng và thêm một cột có DEFAULT** — không đụng dòng nào đang có, và
-`is_flagged DEFAULT 0` nghĩa là mọi thẻ cũ mở lên đúng trạng thái "chưa đánh
-dấu". Đó là kết quả có chủ đích của việc tách bảng ngay từ v1, không phải may.
+v2 là **thêm bảng và thêm cột** — không đụng dòng nào đang có. `is_flagged
+DEFAULT 0` nghĩa là mọi thẻ cũ mở lên đúng trạng thái "chưa đánh dấu", và ba
+trường phụ nullable nên thẻ cũ không cần giá trị nào. Đó là kết quả có chủ đích
+của việc tách bảng ngay từ v1, không phải may.
+
+**BR-08 siết từ 2000 xuống 60/240 ở cùng task, và migration không đụng tới nó.**
+Không thẻ nào trong dữ liệu hiện tại vượt giới hạn mới — chưa có UI tạo thẻ, nên
+chưa có thẻ người dùng nào tồn tại. Nếu điều đó đổi trước khi v2 chạy thì siết
+giới hạn cần một bước dọn dữ liệu, và nó phải là quyết định tường minh chứ không
+phải một `CHECK` làm hỏng lần mở app kế tiếp.
 
 Tất cả đều là thêm cột hoặc thêm bảng — không đụng dữ liệu đang có. Đó là kết quả
 có chủ đích của việc tách bảng, đặt `scheduler_generation` và `root_deck_id` ngay

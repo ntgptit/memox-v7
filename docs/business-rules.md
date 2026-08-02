@@ -7,7 +7,7 @@
 | **Scope** | Luật nghiệp vụ, validation rule, state machine, edge case của phạm vi MVP. Ngoài phạm vi: quyết định kiến trúc (`architecture.md`), hình dạng dữ liệu (`data-model.md`), luồng người dùng (`use-cases.md`) |
 | **Source of truth for** | BR-xx · validation rule · entity state machine · edge case |
 | **Depends on** | `document-conventions.md`, `product.md`, `architecture.md` |
-| **Updated by task** | M4.10at (BR-89…BR-94) |
+| **Updated by task** | M4.10at (BR-08 sửa số, BR-89…BR-95) |
 | **Last updated** | 2026-08-02 |
 
 Format tuân theo `document-conventions.md` §6.2. Từ khoá MUST / SHOULD / MAY
@@ -27,7 +27,7 @@ khi ai đó đọc và làm theo.
 
 Rule bị thay thế MUST đánh `superseded by BR-yy` ở cột Status và giữ nguyên ID.
 
-Trạng thái hiện tại: **BR-01…BR-94**, không trùng, không thiếu.
+Trạng thái hiện tại: **BR-01…BR-95**, không trùng, không thiếu.
 
 ---
 
@@ -84,12 +84,34 @@ BR-02 đã chốt: người dùng có thể muốn hai deck "Unit 5" cho hai gi�
 | ID | Status | Rule | Enforced by | Related |
 |---|---|---|---|---|
 | BR-07 | active | Card MUST có mặt trước và mặt sau, đều không rỗng sau khi trim. | domain | UC-04 |
-| BR-08 | active | Mặt trước và mặt sau MUST tối đa 2000 ký tự. | domain | UC-04 |
+| BR-08 | active | Mặt trước MUST tối đa **60** ký tự và mặt sau MUST tối đa **240** ký tự, đo sau khi trim. | domain | UC-04 |
+| BR-95 | active | Thẻ MAY có ba trường phụ, đều tuỳ chọn: ví dụ, gợi ý và phiên âm. Mỗi trường MUST tối đa 240 ký tự sau khi trim. | domain | UC-04, BR-08 |
 | BR-09 | active | Tạo card MUST đồng thời tạo review state theo scheduler của root deck, với `scheduler_generation` hiện tại của root và `due_at = NULL`. | repository | UC-04, UC-08 |
 | BR-10 | active | Sửa nội dung card MUST NOT đụng đến review state hay review history. | repository | UC-04 |
 
 Card chỉ tồn tại trong deck có `content_type = card` (BR-63), và không bao giờ
 trong root deck (BR-58).
+
+**BR-08 đổi số ở M4.10at: 2000 cho cả hai → 60 và 240.** Rule giữ nguyên ID chứ
+không đánh `superseded`, vì cơ chế supersede của §7 dành cho lúc *danh tính* một
+rule đổi khiến tham chiếu cũ trỏ sai chỗ. Ở đây ý nghĩa không đổi — "hai mặt có
+giới hạn độ dài" — nên 21 chỗ đang trích BR-08 vẫn trích đúng thứ chúng định
+trích. Cái đổi là con số, và nó được ghi ở đây thay vì im lặng.
+
+2000 là **hàng rào chống dán**, không phải một quyết định về thẻ: nó chặn ai đó
+thả nguyên một trang vào ô và không nói gì về thẻ nên dài bao nhiêu. 60 là bề
+rộng mà hàng danh sách và mặt trước thẻ ôn được vẽ cho; quá đó thì prompt xuống
+ba dòng trên điện thoại và câu trả lời rơi khỏi tầm nhìn. 240 gấp bốn vì một
+nghĩa chứa nhiều hơn một từ — hai ngôn ngữ, ngăn bằng dấu phẩy.
+
+**Hai mặt nay có hai số, nên giới hạn thuộc về `CardSide`** chứ không phải một
+hằng số dùng chung. Một hằng chung là đúng khi số giống nhau và trở thành cách
+âm thầm cho mặt trước mượn hạn mức của mặt sau ngay khi chúng khác nhau;
+`card_text_test.dart` ghim đúng điều đó.
+
+BR-95 để cả ba trường phụ ở 240 thay vì ba con số riêng. Chúng là văn bản hỗ
+trợ cùng bậc với mặt sau, và ba ngưỡng khác nhau cho ba ô trông giống nhau là
+thứ phải giải thích mà không mua được gì.
 
 Giá trị khởi tạo của review state theo scheduler:
 
@@ -411,7 +433,9 @@ tế và đủ hẹp để hàng thẻ có chiều cao đoán được.
 | Deck.move | cấp đích + chiều cao subtree nguồn ≤ 10 (BR-55) | "Di chuyển vào đây sẽ vượt độ sâu tối đa (10 cấp)" | repository |
 | Card.front | không rỗng sau trim | "Mặt trước không được để trống" | domain |
 | Card.back | không rỗng sau trim | "Mặt sau không được để trống" | domain |
-| Card.front/back | ≤ 2000 ký tự | "Nội dung tối đa 2000 ký tự" | domain |
+| Card.front | ≤ 60 ký tự (BR-08) | "Mặt trước tối đa 60 ký tự" | domain |
+| Card.back | ≤ 240 ký tự (BR-08) | "Mặt sau tối đa 240 ký tự" | domain |
+| Card.example / hint / pronunciation | ≤ 240 ký tự (BR-95) | "Tối đa 240 ký tự" | domain |
 | Tag.name | không rỗng sau trim (BR-93) | "Tên tag không được để trống" | domain |
 | Tag.name | ≤ 50 ký tự (BR-93) | "Tên tag tối đa 50 ký tự" | domain |
 | Tag.name | không trùng, không phân biệt hoa thường (BR-93) | "Tag này đã tồn tại" | domain + db |
