@@ -4893,7 +4893,10 @@ hai mới cho biết cái gì thay đổi".
   sổ `LIMIT` không cursor là hình dạng đã chốt cho MVP. **Sort/filter toolbar**
   — thứ tự danh sách cố định mới-trước, không có control đổi thứ tự; search thẻ
   là S1, chưa tới lượt.
-- **Editable documents:** `docs/wbs.md`
+- **Wireframe:** [`docs/wireframes/m4-11-card-management.md`](wireframes/m4-11-card-management.md)
+  — bố cục chín màn, ba quyết định UI đã chốt (D1–D3), bảy câu còn mở (Q1, Q3–Q7).
+  **Q6 và Q7 chặn code**: `windowSize` và hành vi cửa sổ khi quay lại màn.
+- **Editable documents:** `docs/wbs.md`, `docs/wireframes/m4-11-card-management.md`
 - **Output:** `lib/features/card/`, `lib/l10n/`, `test/features/card/`,
   `test/visual_audit/screens/features/card/`
 - **Acceptance criteria:**

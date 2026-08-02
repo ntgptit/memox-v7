@@ -7,8 +7,8 @@
 | **Scope** | Toàn bộ `docs/`. Ngoài phạm vi: nội dung của từng tài liệu |
 | **Source of truth for** | Danh mục tài liệu · trạng thái từng tài liệu · tài liệu chưa viết và phase sở hữu |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M4.9a |
-| **Last updated** | 2026-07-29 |
+| **Updated by task** | M4.11 |
+| **Last updated** | 2026-08-02 |
 
 Format và thứ tự đọc: [`document-conventions.md`](document-conventions.md).
 
@@ -28,6 +28,22 @@ Format và thứ tự đọc: [`document-conventions.md`](document-conventions.m
 "Frozen for MVP" nghĩa là đặc tả đã chốt và code được viết theo nó. Đổi một tài
 liệu frozen là một quyết định có chủ đích, phải kèm cập nhật mọi tài liệu tham
 chiếu tới nó trong cùng commit — không phải một chỉnh sửa tiện tay.
+
+### Tài liệu theo task
+
+Hai thư mục con giữ tài liệu gắn với **một** task chứ không phải với sản phẩm.
+Chúng nằm ngoài bảng trên vì vòng đời khác: một report đóng lại khi task đóng,
+còn `use-cases.md` thì không.
+
+| Thư mục | Chứa gì | Vòng đời |
+|---|---|---|
+| [`wireframes/`](wireframes/) | Bố cục và hành vi UI chốt **trước** khi viết code một task | `draft` → `active` khi code land |
+| [`reviews/`](reviews/) | Report và checklist của một vòng review đã chạy | Đóng băng sau khi task đóng |
+
+Cả hai MUST tham chiếu BR/AD/UC bằng ID và MUST NOT phát biểu lại luật — cùng
+quy tắc canonical location ở `document-conventions.md` §5. `check_docs.py` chỉ
+quét `docs/*.md` cấp một, nên header bảy dòng ở đây là kỷ luật tự giác, không
+phải thứ được cưỡng chế.
 
 **ID là vĩnh viễn.** BR, AD và UC không bao giờ được đánh số lại; rule mới append
 vào số tiếp theo. Lần renumber trước đã làm hỏng tham chiếu ngầm mà không có gì
