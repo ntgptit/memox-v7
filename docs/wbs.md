@@ -4880,7 +4880,8 @@ hai mới cho biết cái gì thay đổi".
 
 ### M4.10at · `tags`, `card_tags`, `is_flagged` và bốn trạng thái thẻ
 
-- **Status:** todo
+- **Status:** in progress — schema, migration và domain primitive **done**;
+  DAO/named query cho tag, cờ và bộ đếm theo trạng thái **chưa**
 - **Goal:** Đưa schema và luật mà màn card cần lên trước, để M4.11 dựng hàng thẻ
   **một lần** theo hình dạng cuối thay vì dựng rồi sửa.
 - **Scope:** migration v2 (`tags`, `card_tags`, `cards.is_flagged` và ba trường
@@ -4903,11 +4904,14 @@ hai mới cho biết cái gì thay đổi".
 - **Output:** `lib/core/database/tables/`, `lib/core/database/queries/`,
   `lib/features/card/domain/`
 - **Acceptance criteria:**
-  - [ ] Migration v1→v2 chạy trên DB v1 thật, không mất dòng nào.
-  - [ ] `TagName` chặn rỗng-sau-trim và quá 50 ký tự ở **kiểu**, không ở caller.
-  - [ ] `Động từ` và `động từ` va nhau ở unique — tức fold không phải `NOCASE`.
-  - [ ] Bốn trạng thái suy ra đúng ở cả hai scheduler, kiểm ở từng biên.
-  - [ ] `mastered` đọc lại BR-88 chứ không định nghĩa lần hai.
+  - [x] Migration v1→v2 chạy trên DB v1 thật, không mất dòng nào.
+  - [x] `TagName` chặn rỗng-sau-trim và quá 50 ký tự ở **kiểu**, không ở caller.
+  - [x] `Động từ` và `động từ` va nhau ở fold — tức không phải `NOCASE`. Ở mức
+        value object; ràng buộc UNIQUE trên DB kiểm khi DAO có.
+  - [x] Bốn trạng thái suy ra đúng ở cả hai scheduler, kiểm ở từng biên.
+  - [x] `mastered` đọc lại BR-88 — không share code được giữa `.drift` và Dart,
+        nên `card_state_test.dart` **parse `deck.drift`** và so ngưỡng, cùng
+        cách các test parity CSS làm. Đã tiêm lỗi.
   - [ ] Reset learning progress không đụng `is_flagged` và `card_tags`.
   - [ ] Mặt trước 240 ký tự bị từ chối, mặt sau thì không — hai giới hạn thật
         sự khác nhau, không phải một hằng dùng chung.

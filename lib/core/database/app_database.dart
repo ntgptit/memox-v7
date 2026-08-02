@@ -14,6 +14,7 @@ part 'app_database.g.dart';
   include: <String>{
     'tables/decks.drift',
     'tables/cards.drift',
+    'tables/tags.drift',
     'tables/study.drift',
     'queries/study.drift',
     'queries/deck.drift',
@@ -28,7 +29,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.open() : super(openAppDatabaseConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -36,11 +37,33 @@ class AppDatabase extends _$AppDatabase {
       await m.createAll();
     },
 
-    // Deliberately absent: no `onUpgrade`. There is exactly one schema version,
-    // and a handler written against a version that does not exist yet would be
-    // a guess that looks like a decision. `drift_schemas/drift_schema_v1.json`
-    // is committed so that the first real migration has a baseline to test
-    // against — that snapshot, not a placeholder, is what makes v2 safe.
+    // v1 → v2 (M4.10at): the card screen needs tags, a flag and three optional
+    // fields, so `cards` gains four columns and two tables arrive.
+    //
+    // **Every step is additive and none rewrites a row.** The four columns are
+    // nullable or defaulted, so a v1 card upgrades without a value being
+    // invented for it: `is_flagged` reads 0 — "not marked", which is true of
+    // every card that predates the flag — and the three optional fields read
+    // NULL, which is the "never filled" this schema deliberately keeps distinct
+    // from empty string.
+    //
+    // That the first migration is this cheap is what committing
+    // `drift_schema_v1.json` at M4.4 bought. The snapshot is what the migration
+    // test upgrades *from*; without it, "v1 still opens" would be a claim
+    // nobody could run.
+    onUpgrade: (Migrator m, int from, int to) async {
+      if (from < 2) {
+        await m.addColumn(cards, cards.isFlagged);
+        await m.addColumn(cards, cards.example);
+        await m.addColumn(cards, cards.hint);
+        await m.addColumn(cards, cards.pronunciation);
+        await m.createTable(tags);
+        await m.createTable(cardTags);
+        await m.createIndex(idxTagsOwnerFolded);
+        await m.createIndex(idxCardTagsTag);
+      }
+    },
+
     beforeOpen: (OpeningDetails details) async {
       // Without this, `ON DELETE CASCADE` is a comment. SQLite defaults foreign
       // key enforcement OFF per connection, so every deletion would leave
