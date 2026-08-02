@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M4.10ar |
+| **Updated by task** | M4.10as |
 | **Last updated** | 2026-08-02 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -4808,6 +4808,74 @@ sang `watchAllDecks` và quyết định số phận test `watchDeckTree covers 
 depth` — một quyết định về độ phủ test, nên tách thành thay đổi riêng thay vì
 kèm vào đây.
 
+**Next task: M4.10as · Promote cái Card chắc chắn cần, ở caller thứ hai.**
+
+### M4.10as · Form sheet và bảng copy lỗi lên `shared/`
+
+- **Status:** done
+- **Goal:** Những thứ Deck đang giữ private mà Card chắc chắn cần được promote
+  **trước** khi Card tự viết lại — đúng luật của repo: promote ở caller thứ hai,
+  không phải caller thứ nhất. Caller thứ hai vừa tới.
+- **Scope:** `lib/shared/widgets/mx_form_sheet.dart` (`showMxFormSheet` +
+  `MxFormHost<P extends Enum>`, tách khỏi `deck_actions_widget.dart`);
+  `lib/shared/widgets/mx_failure_labels_widget.dart` (`mxWriteFailure` giữ
+  switch exhaustive không `_`, nhận hai callback cho `NotFoundFailure` và
+  `ConflictFailure`); key ARB chung `writeErrorMessage` (en + vi); Deck nối vào
+  cả hai; `mx_form_sheet_test.dart` 5 test; `mx_stress_test.dart` mở rộng danh
+  sách miễn trừ kèm lý do từng mục.
+- **Out of scope:** promote `MxIconWell`, `MxNotice`, `_DueStateBox` — Card
+  **có thể** cần nhưng chưa chắc, và một caller vẫn là một phỏng đoán. Chờ màn
+  card list có hình dạng rồi quyết. Entry widgetbook cho form sheet: hoãn có lý
+  do, xem dưới.
+- **Dependencies:** M4.10ar
+- **Checklist phases:** 7, 14
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/shared/widgets/mx_form_sheet.dart` ·
+  `lib/shared/widgets/mx_failure_labels_widget.dart` ·
+  `test/shared/widgets/mx_form_sheet_test.dart`
+- **Acceptance criteria:**
+  - [x] Deck hành vi không đổi; 1204 test pass, analyze 0 issue, hai guard xanh.
+  - [x] Fault injection: bỏ view inset → test bàn phím đỏ; đổi `shouldClose`
+        thành `outcome != null` → hai test host đỏ.
+  - [x] `mxWriteFailure` giữ switch exhaustive không nhánh `_`; hai loại failure
+        mang nghĩa của feature là **required callback**, nên một feature không
+        thể để chúng rơi vào câu chữ chung do quên.
+
+**Bẫy bàn phím là lý do chính, và nó đã dính một lần.** Doc comment của
+`_showFormSheet` ghi rõ: thiếu `isScrollControlled` **cộng** view inset thì
+sheet bị chặn ở nửa màn và bàn phím che nút submit — một form không submit được
+nếu không tắt bàn phím trước. Card editor có hai ô tối đa 2000 ký tự, tức đúng
+ca tệ nhất. Để Card tự cấu hình `showModalBottomSheet` lần nữa là mở lại đường
+cho lỗi đó.
+
+**`MxFormHost` được viết sẵn cho Card từ trước.** Nó đóng theo *transition*
+`shouldClose` chứ không theo "đã thành công", và comment gốc nói thẳng: Deck
+không có form add-another nào, viết thế này để lúc clone sang một form như vậy
+thì không sai âm thầm. Card editor **chính là** cái clone đó. Generic hoá theo
+`SubmitState<P extends Enum>` vì host ghim vào enum của Deck là host Card không
+dùng được — đúng hình dạng mà việc promote này gỡ bỏ.
+
+**Bảng copy lỗi: 7/12 nhánh đổ về đúng một câu, và câu đó không có gì thuộc về
+deck** — `deckWriteErrorMessage` nghĩa đen là "Please try again.". Phần thật sự
+của feature chỉ có 4 nhánh: *cái gì* không còn (NotFound) và *vì sao* bị từ chối
+(ba dạng Conflict). Giá trị lớn nhất của bản gốc là switch exhaustive không
+`_` — một `Failure` subtype mới không compile được cho tới khi có người quyết —
+và giữ nó ở **một** chỗ nghĩa là Card thừa hưởng luôn thay vì tự dẫn lại; mà
+tự dẫn lại chính là cách một trong hai bản mọc ra nhánh `_`.
+
+**Một điều test tự phát hiện về chính nó.** Bản đầu giả lập bàn phím bằng widget
+`MediaQuery` bọc quanh nút mở sheet, và đo được inset **0**. Sheet là một route:
+nội dung của nó dựng dưới Navigator nên đọc `MediaQuery` của app, không bao giờ
+thấy cái bọc quanh nút. Phải set ở `tester.view.viewInsets`. Một test giả lập
+sai kiểu đó sẽ báo đỏ và trông y hệt như lỗi của sheet.
+
+**Widgetbook: hoãn có lý do.** Cả hai thứ không có layout riêng —
+`MxFailureLabelsWidget` không chứa widget nào, `MxFormSheet` là một cấu hình
+`showModalBottomSheet` cộng một host trả nguyên child. Một use-case catalog cho
+nó sẽ đang trưng bày *form của caller*, không phải component. Khi card editor
+tồn tại thì có form thật để trưng, và đó là lúc thêm — cùng lập luận "caller thứ
+hai mới cho biết cái gì thay đổi".
+
 **Next task: M4.11 · Card management full-stack.**
 
 ### M4.11 · Card management full-stack
@@ -4880,7 +4948,7 @@ kèm vào đây.
         and a card list … there is no screen to copy, so there is none here".
         Thay bằng: dựng màn theo token và component sẵn có, rồi **bổ sung màn
         đó vào kit trong cùng PR** theo luật both-kits-must-match.
-- **Dependencies:** M4.10, M4.10ar
+- **Dependencies:** M4.10, M4.10ar, M4.10as
 - **Tests required:** domain, repository transaction và rollback, controller,
   form validation, widget, visual audit strict, route
 - **Checklist phases:** 9.2, 9.3, 14.4, 15.1, 15.2, 15.3, 15.4

@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../../../../core/error/failure.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_failure_labels_widget.dart';
 import '../../../domain/entities/deck_entity.dart';
 import '../../../domain/failures/deck_conflict_failure.dart';
 import '../../../domain/failures/deck_validation_failure.dart';
@@ -114,57 +115,30 @@ extension DeckLabels on BuildContext {
 
   /// A failure, as copy the user can act on.
   ///
-  /// Maps the `Failure` *type*, never its message: `Failure.message` is written
-  /// for whoever reads a log, and can name a table or an exception.
+  /// **What is Deck's here is exactly what carries deck meaning**: which thing
+  /// is gone, and why a refusal happened. The rest — a database error, a
+  /// cancelled write, the failures M9 will make reachable — is not a deck
+  /// question, and `mxWriteFailure` owns it along with the exhaustive,
+  /// no-default switch that forces a new `Failure` subtype to be decided about
+  /// rather than swept into "something went wrong".
   ///
-  /// **Every subtype is listed and there is no `_` branch**, which is the whole
-  /// reason `Failure` is sealed. This switch used to end in `_ =>
-  /// deckWriteErrorMessage`, and that catch-all defeated the type: a new failure
-  /// subtype would have compiled straight into "something went wrong" with
-  /// nothing failing anywhere — exactly what the doc on [Failure] warns about.
-  ///
-  /// Several cases share one message on purpose. Sharing a message is a decision;
-  /// a `_` branch is the absence of one, and the difference only shows up the day
-  /// a subtype is added.
-  String deckWriteFailure(Failure failure) => switch (failure) {
+  /// The two callbacks are required, so a feature cannot let its own two fall
+  /// through to the generic line by omission.
+  String deckWriteFailure(Failure failure) => mxWriteFailure(
+    failure,
     // Distinct copy, because the user's next action differs.
-    NotFoundFailure() => l10n.deckGoneMessage,
-
+    onNotFound: (_) => l10n.deckGoneMessage,
     // A conflict carries *why* as an enum, and the two enums that can appear
     // here each have their own exhaustive switch. Matching on the reason's type
     // is what turned fifteen refusals sharing one sentence into fifteen with
     // their own — the reason used to be an English string inside `message`,
     // which the UI is forbidden to render.
-    ConflictFailure(reason: final DeckMoveRejection rejection) =>
-      deckMoveRejectionText(rejection),
-    ConflictFailure(reason: final DeckConflictReason reason) => deckConflict(
-      reason,
-    ),
-    // A conflict with no reason: a duplicate key mapped from SQLite, where the
-    // only true answer is that something already exists.
-    ConflictFailure() => l10n.deckConflictMessage,
-
-    // Reachable, and there is nothing more useful to say: the write did not
-    // land and retrying is the only move.
-    DatabaseFailure() => l10n.deckWriteErrorMessage,
-    UnknownFailure() => l10n.deckWriteErrorMessage,
-
-    // A cancelled write is usually not worth a message at all, but the state is
-    // rendered whenever `failure != null`, so silence here would be an empty
-    // banner. Revisit if a flow ever cancels deliberately.
-    CancelledFailure() => l10n.deckWriteErrorMessage,
-
-    // Should never arrive: `deckSubmitFailure` peels `ValidationFailure` off into
-    // the per-field problem before the state is built. Listed rather than
-    // grouped so that if that ever changes, this line is where someone looks.
-    ValidationFailure() => l10n.deckWriteErrorMessage,
-
-    // Unreachable today — no network (AD-05) and no auth (AD-03), so nothing can
-    // construct these. They are enumerated instead of swept under a `_` so that
-    // M9 has to come here and decide, rather than inheriting a generic string it
-    // never chose. A session that expired mid-write is not "an error occurred".
-    NetworkFailure() => l10n.deckWriteErrorMessage,
-    UnauthorizedFailure() => l10n.deckWriteErrorMessage,
-    ForbiddenFailure() => l10n.deckWriteErrorMessage,
-  };
+    onConflict: (conflict) => switch (conflict.reason) {
+      final DeckMoveRejection rejection => deckMoveRejectionText(rejection),
+      final DeckConflictReason reason => deckConflict(reason),
+      // A conflict with no reason: a duplicate key mapped from SQLite, where
+      // the only true answer is that something already exists.
+      _ => l10n.deckConflictMessage,
+    },
+  );
 }
