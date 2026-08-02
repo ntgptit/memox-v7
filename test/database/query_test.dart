@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/database/app_database.dart';
 
@@ -158,11 +160,51 @@ void main() {
     expect(due.map((row) => row.c.id), isNot(contains('a-stateless')));
   });
 
-  test('no scheduler interval appears in the SQL', () async {
-    // BR-16: the eight-box day table and the SM-2 factors belong to the
-    // scheduler. A number here would make changing the algorithm a migration.
+  test('the schema version is 2', () async {
     final db = openTestDatabase();
 
-    expect(db.schemaVersion, 1);
+    expect(db.schemaVersion, 2);
+  });
+
+  test('the only scheduler numbers in SQL are BR-88s two thresholds', () {
+    // **This test used to assert `schemaVersion == 1` under this name.** It
+    // passed, and it measured nothing about the SQL — the name promised BR-16
+    // and the body checked a version number. Renaming it would have hidden that;
+    // implementing it is what the name was worth.
+    //
+    // BR-16 keeps the eight-box day ladder and the SM-2 factors in the
+    // scheduler, so a number here would make changing the algorithm a
+    // migration. Two exceptions are deliberate and written down: BR-88 says
+    // "mastered" is enforced by the database, and `rootDeckSummaries` counts it,
+    // so `current_box = 8` and `interval_days >= 128` are allowed to appear.
+    // Nothing else is.
+    final sql = <String>[
+      for (final name in <String>['deck.drift', 'card.drift', 'study.drift'])
+        File('lib/core/database/queries/$name').readAsStringSync(),
+    ].join('\n');
+
+    final boxes = RegExp(
+      r'current_box\s*[=<>]+\s*(\d+)',
+    ).allMatches(sql).map((m) => m.group(1)!).toSet();
+    final intervals = RegExp(
+      r'interval_days\s*[=<>]+\s*(\d+)',
+    ).allMatches(sql).map((m) => m.group(1)!).toSet();
+    final easeFactors = RegExp(
+      r'ease_factor\s*[=<>]+\s*([\d.]+)',
+    ).allMatches(sql).map((m) => m.group(1)!).toSet();
+
+    expect(boxes, <String>{
+      '8',
+    }, reason: 'a box number other than BR-88s mastered box is in the SQL');
+    expect(
+      intervals,
+      <String>{'128'},
+      reason: 'an interval other than BR-88s mastered threshold is in the SQL',
+    );
+    expect(
+      easeFactors,
+      isEmpty,
+      reason: 'SM-2 factors belong to the scheduler, not to a query (BR-16)',
+    );
   });
 }

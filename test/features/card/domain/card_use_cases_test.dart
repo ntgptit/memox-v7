@@ -169,6 +169,10 @@ CardEntity _unreachableCard() => CardEntity(
   deckId: 'never-read',
   front: '',
   back: '',
+  isFlagged: false,
+  example: null,
+  hint: null,
+  pronunciation: null,
   createdAt: DateTime.utc(2026),
   updatedAt: DateTime.utc(2026),
 );
@@ -190,6 +194,10 @@ final class _CountingCardRepository implements CardRepository {
     deckId: 'deck-1',
     front: lastFront?.value ?? '',
     back: lastBack?.value ?? '',
+    isFlagged: false,
+    example: null,
+    hint: null,
+    pronunciation: null,
     createdAt: DateTime.utc(2026),
     updatedAt: DateTime.utc(2026),
   );

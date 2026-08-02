@@ -8,6 +8,13 @@ CardEntity cardEntityFromRow(Card row) => CardEntity(
   deckId: row.deckId,
   front: row.front,
   back: row.back,
+  // SQLite has no boolean; the column is INTEGER with a CHECK for 0 or 1, so
+  // the widening happens here at the data/domain boundary rather than leaving
+  // an int to be truthiness-tested somewhere in presentation.
+  isFlagged: row.isFlagged == 1,
+  example: row.example,
+  hint: row.hint,
+  pronunciation: row.pronunciation,
   createdAt: row.createdAt.toUtc(),
   updatedAt: row.updatedAt.toUtc(),
 );

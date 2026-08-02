@@ -40,7 +40,7 @@ void main() {
     expect(rows.single['foreign_keys'], 1);
   });
 
-  test('exactly the five tables data-model.md specifies', () async {
+  test('exactly the seven tables data-model.md specifies', () async {
     final db = openTestDatabase();
     final rows = await pragma(
       db,
@@ -50,10 +50,12 @@ void main() {
 
     expect(rows.map((row) => row['name']), <String>[
       'card_review_states',
+      'card_tags',
       'cards',
       'decks',
       'review_history',
       'study_sessions',
+      'tags',
     ]);
   });
 
@@ -81,9 +83,15 @@ void main() {
         'deck_id',
         'front',
         'back',
+        'is_flagged',
+        'example',
+        'hint',
+        'pronunciation',
         'created_at',
         'updated_at',
       ],
+      'tags': <String>['id', 'name', 'name_folded', 'owner_id', 'created_at'],
+      'card_tags': <String>['card_id', 'tag_id'],
       'card_review_states': <String>[
         'card_id',
         'scheduler_type',
@@ -233,12 +241,14 @@ void main() {
     );
 
     expect(rows.map((row) => row['name']), <String>[
+      'idx_card_tags_tag',
       'idx_cards_deck_created',
       'idx_decks_parent_created',
       'idx_decks_root_created',
       'idx_history_card',
       'idx_history_session',
       'idx_review_states_due',
+      'idx_tags_owner_folded',
     ]);
   });
 

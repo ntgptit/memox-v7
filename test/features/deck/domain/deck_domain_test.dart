@@ -48,6 +48,10 @@ void main() {
         deckId: 'deck-1',
         front: 'f',
         back: 'b',
+        isFlagged: false,
+        example: null,
+        hint: null,
+        pronunciation: null,
         createdAt: createdAt,
         updatedAt: createdAt,
       );

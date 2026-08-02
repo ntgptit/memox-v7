@@ -14,6 +14,19 @@ CREATE TABLE cards (
 
     front TEXT NOT NULL,
     back TEXT NOT NULL,
+
+    -- The user's own mark on the content (BR-92). It lives here rather than in
+    -- card_review_states for the same reason `front` does: reset drops and
+    -- recreates the schedule, and a flag has to survive that.
+    is_flagged INTEGER NOT NULL DEFAULT 0 CHECK (is_flagged IN (0, 1)),
+
+    -- Optional supporting text (BR-95). NULL, never empty string: nothing in
+    -- the UI tells "never filled" from "filled then cleared", so allowing both
+    -- would be two spellings of one state. The domain folds '' to NULL.
+    example TEXT NULL,
+    hint TEXT NULL,
+    pronunciation TEXT NULL,
+
     created_at DATETIME NOT NULL,
     updated_at DATETIME NOT NULL
 );

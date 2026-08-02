@@ -1,0 +1,48 @@
+import 'cards.drift';
+
+-- User-authored labels on card content — `noun`, `people`, `TOPIK II`.
+--
+-- Content, not schedule: reset keeps them (BR-41, BR-93), the same side of the
+-- line as `front` and `is_flagged`.
+--
+-- Tags do **not** belong to a deck. One `noun` is reused across every deck;
+-- scoping them per deck would mint a duplicate each time a deck is created, and
+-- at filter time those duplicates are different tags.
+CREATE TABLE tags (
+    id TEXT NOT NULL PRIMARY KEY,
+
+    -- Stored as the user typed it. This is what a chip renders.
+    name TEXT NOT NULL,
+
+    -- `lower(trim(name))`, written by the domain. This column — not `name` — is
+    -- what the unique index enforces on.
+    --
+    -- **A real column rather than `COLLATE NOCASE`, and that is not a
+    -- preference.** SQLite's NOCASE folds ASCII only, so Vietnamese `Động từ`
+    -- and `động từ` compare as different and both get in. Folding once at write
+    -- time makes the comparison byte-for-byte and correct for every alphabet
+    -- (BR-93).
+    name_folded TEXT NOT NULL,
+
+    -- NULL = the local profile (AD-03). Present from day one so the table does
+    -- not need a migration when auth lands.
+    owner_id TEXT NULL,
+
+    created_at DATETIME NOT NULL
+);
+
+-- Uniqueness is per owner, so two profiles may each have their own `noun`.
+CREATE UNIQUE INDEX idx_tags_owner_folded ON tags (owner_id, name_folded);
+
+-- Many-to-many. No surrogate key: the pair *is* the identity.
+CREATE TABLE card_tags (
+    card_id TEXT NOT NULL REFERENCES cards (id) ON DELETE CASCADE,
+    tag_id TEXT NOT NULL REFERENCES tags (id) ON DELETE CASCADE,
+
+    PRIMARY KEY (card_id, tag_id)
+);
+
+-- The reverse direction. The primary key serves "which tags does this card
+-- have"; a filter asks "which cards carry this tag", and that is a different
+-- leading column.
+CREATE INDEX idx_card_tags_tag ON card_tags (tag_id, card_id);

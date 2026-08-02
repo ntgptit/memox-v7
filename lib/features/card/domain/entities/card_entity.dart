@@ -18,6 +18,19 @@ abstract class CardEntity with _$CardEntity {
     required String deckId,
     required String front,
     required String back,
+
+    /// The user's own mark on this card (BR-92). Content, not schedule — reset
+    /// leaves it alone, which is why it sits here beside [front] rather than on
+    /// the review-state entity.
+    required bool isFlagged,
+
+    /// Optional supporting text (BR-95). `null` means never filled; the domain
+    /// folds an empty string to `null` on the way in, so the two are never both
+    /// used to mean the same thing.
+    required String? example,
+    required String? hint,
+    required String? pronunciation,
+
     required DateTime createdAt,
     required DateTime updatedAt,
   }) = _CardEntity;

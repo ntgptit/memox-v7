@@ -106,6 +106,7 @@ void main() {
           deckId: 'leaf',
           front: 'front text',
           back: 'back text',
+          isFlagged: 0,
           createdAt: localInstant,
           updatedAt: localInstant,
         ),
