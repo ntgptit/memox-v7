@@ -98,6 +98,10 @@ final class CardRepositoryImpl implements CardRepository {
       _cardDao.watchCardCountByDeck(deckId).handleError(_rethrowMapped);
 
   @override
+  Future<CardEntity> getCard(String cardId) =>
+      _guard(() async => cardEntityFromRow(await _requireCardRow(cardId)));
+
+  @override
   Future<CardEntity> createCard({
     required String deckId,
     required CardText front,

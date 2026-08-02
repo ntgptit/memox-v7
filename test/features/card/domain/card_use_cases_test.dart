@@ -6,6 +6,7 @@ import 'package:memox/features/card/domain/models/card_text_model.dart';
 import 'package:memox/features/card/domain/repositories/card_repository.dart';
 import 'package:memox/features/card/domain/usecases/create_card_use_case.dart';
 import 'package:memox/features/card/domain/usecases/delete_card_use_case.dart';
+import 'package:memox/features/card/domain/usecases/get_card_use_case.dart';
 import 'package:memox/features/card/domain/usecases/update_card_use_case.dart';
 import 'package:memox/features/card/domain/usecases/watch_card_count_use_case.dart';
 import 'package:memox/features/card/domain/usecases/watch_cards_by_deck_use_case.dart';
@@ -143,6 +144,12 @@ void main() {
       expect(repository.deleteCalls, <String>['card-1']);
     });
 
+    test('get forwards the id for the editor prefill', () async {
+      await GetCardUseCase(repository).call('card-1');
+
+      expect(repository.getCalls, 1);
+    });
+
     test('watch forwards the deck id and the window, unchanged', () async {
       // The use case must not have an opinion about the window: a default here
       // would be a second answer to "how far has the reader scrolled", and the
@@ -224,6 +231,15 @@ final class _CountingCardRepository implements CardRepository {
     updateCalls += 1;
     lastFront = front;
     lastBack = back;
+
+    return _card();
+  }
+
+  int getCalls = 0;
+
+  @override
+  Future<CardEntity> getCard(String cardId) async {
+    getCalls += 1;
 
     return _card();
   }

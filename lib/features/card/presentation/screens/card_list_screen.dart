@@ -41,9 +41,22 @@ class CardListScreen extends ConsumerWidget {
   final String deckId;
 
   void _openEditor(BuildContext context, {String? cardId}) {
-    final params = <String, String>{RoutePathParams.deckId: deckId};
-    if (cardId != null) params[RoutePathParams.cardId] = cardId;
-    context.goNamed(RouteNames.cardEditor, pathParameters: params);
+    // Create and edit are two named routes; the card id picks which, and rides
+    // in the path only for edit.
+    if (cardId == null) {
+      context.goNamed(
+        RouteNames.cardEditor,
+        pathParameters: <String, String>{RoutePathParams.deckId: deckId},
+      );
+      return;
+    }
+    context.goNamed(
+      RouteNames.cardEditorEdit,
+      pathParameters: <String, String>{
+        RoutePathParams.deckId: deckId,
+        RoutePathParams.cardId: cardId,
+      },
+    );
   }
 
   @override

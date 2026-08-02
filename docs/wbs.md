@@ -4943,9 +4943,13 @@ cột NULL của scheduler kia.
 
 ### M4.11 · Card management full-stack
 
-- **Status:** in progress — lát 1 (card list + create editor tối giản) **done**.
-  Còn: edit-mode, delete/danger-zone, tag chip, cờ pill, panel tiến độ, optional
-  details, breadcrumb + tên deck, auto-forward khi vào deck card-type.
+- **Status:** in progress — lát 1 (card list + create editor tối giản) **done**;
+  lát 2 (edit-mode + delete/danger-zone) **done** — `getCard` một-phát để prefill,
+  `CardEdit`/`CardDelete` controller, editor rẽ hai nhánh (title, prefill, ghi chú
+  BR-10, không có save-and-add ở edit), overlay xác nhận xóa dùng `MxConfirmDialog`
+  destructive, route `:cardId/edit` (tên `cardEditorEdit`), strict visual audit
+  thêm state `edit`. Còn: tag chip, cờ pill, panel tiến độ, optional details,
+  breadcrumb + tên deck, auto-forward khi vào deck card-type.
 - **Goal:** Người dùng quản lý card hoàn chỉnh trong deck loại `card`, từ UI
   xuống transaction Drift.
 - **Scope:** card list; empty state; tạo card; tạo card **đầu tiên** trong deck

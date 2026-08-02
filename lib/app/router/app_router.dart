@@ -86,15 +86,26 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
                           deckId: state.pathParameters[RoutePathParams.deckId]!,
                         ),
                         routes: <RouteBase>[
-                          // The editor. One name, two patterns: `new` for create
-                          // and `:cardId/edit` for edit. This slice registers
-                          // create; edit joins when its screen lands.
+                          // The editor, two routes onto one screen: `new`
+                          // creates, `:cardId/edit` edits. Separate names
+                          // because GoRouter requires each to be unique; the
+                          // screen branches on whether `cardId` is present.
                           GoRoute(
                             path: RoutePaths.cardCreateRelative,
                             name: RouteNames.cardEditor,
                             builder: (context, state) => CardEditorScreen(
                               deckId:
                                   state.pathParameters[RoutePathParams.deckId]!,
+                            ),
+                          ),
+                          GoRoute(
+                            path: RoutePaths.cardEditRelative,
+                            name: RouteNames.cardEditorEdit,
+                            builder: (context, state) => CardEditorScreen(
+                              deckId:
+                                  state.pathParameters[RoutePathParams.deckId]!,
+                              cardId:
+                                  state.pathParameters[RoutePathParams.cardId],
                             ),
                           ),
                         ],
