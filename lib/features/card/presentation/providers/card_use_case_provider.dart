@@ -4,6 +4,7 @@ import '../../di/card_repository_provider.dart';
 import '../../domain/usecases/create_card_use_case.dart';
 import '../../domain/usecases/delete_card_use_case.dart';
 import '../../domain/usecases/get_card_use_case.dart';
+import '../../domain/usecases/set_card_flag_use_case.dart';
 import '../../domain/usecases/update_card_use_case.dart';
 import '../../domain/usecases/watch_card_count_use_case.dart';
 import '../../domain/usecases/watch_cards_by_deck_use_case.dart';
@@ -41,3 +42,7 @@ UpdateCardUseCase updateCardUseCase(Ref ref) =>
 @riverpod
 DeleteCardUseCase deleteCardUseCase(Ref ref) =>
     DeleteCardUseCase(ref.watch(cardRepositoryProvider));
+
+@riverpod
+SetCardFlagUseCase setCardFlagUseCase(Ref ref) =>
+    SetCardFlagUseCase(ref.watch(cardRepositoryProvider));

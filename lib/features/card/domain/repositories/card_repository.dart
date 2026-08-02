@@ -80,4 +80,12 @@ abstract interface class CardRepository {
   /// Deletes a card; its review state and history cascade. The deck's
   /// `content_type` stays as it is, even for the last card (BR-67).
   Future<void> deleteCard(String cardId);
+
+  /// Sets the user's flag on a card (BR-92).
+  ///
+  /// Writes only `is_flagged`, never the schedule or the rest of the content:
+  /// the flag is a mark the user owns, and toggling it is not an edit. Idempotent
+  /// — setting the value it already holds is a no-op, so a double tap cannot
+  /// desync the mark from what the row shows.
+  Future<void> setCardFlag({required String cardId, required bool isFlagged});
 }

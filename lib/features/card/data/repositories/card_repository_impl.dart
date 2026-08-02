@@ -189,6 +189,15 @@ final class CardRepositoryImpl implements CardRepository {
     await _cardDao.deleteCardById(cardId);
   });
 
+  @override
+  Future<void> setCardFlag({required String cardId, required bool isFlagged}) =>
+      _guard(() async {
+        await _requireCardRow(cardId);
+        // Only `is_flagged` moves (BR-92); the DAO's companion covers that one
+        // column, so no edit path can ride along on a flag toggle.
+        await _cardDao.setCardFlag(cardId, isFlagged: isFlagged);
+      });
+
   // ---- helpers -----------------------------------------------------------
 
   Future<T> _guard<T>(Future<T> Function() action) async {

@@ -54,19 +54,23 @@ final class FakeCardRepository implements CardRepository {
 
   void emitError(Object error) => _cards.addError(error);
 
-  CardEntity card(String id, {String front = 'front', String back = 'back'}) =>
-      CardEntity(
-        id: id,
-        deckId: 'deck-1',
-        front: front,
-        back: back,
-        isFlagged: false,
-        example: null,
-        hint: null,
-        pronunciation: null,
-        createdAt: DateTime.utc(2026),
-        updatedAt: DateTime.utc(2026),
-      );
+  CardEntity card(
+    String id, {
+    String front = 'front',
+    String back = 'back',
+    bool isFlagged = false,
+  }) => CardEntity(
+    id: id,
+    deckId: 'deck-1',
+    front: front,
+    back: back,
+    isFlagged: isFlagged,
+    example: null,
+    hint: null,
+    pronunciation: null,
+    createdAt: DateTime.utc(2026),
+    updatedAt: DateTime.utc(2026),
+  );
 
   @override
   Stream<List<CardEntity>> watchCardsByDeck(
@@ -145,6 +149,23 @@ final class FakeCardRepository implements CardRepository {
     deletes.add(cardId);
     final failure = nextCreateFailure;
     if (failure != null) throw failure;
+  }
+
+  /// Recorded flag writes: (cardId, isFlagged).
+  final List<({String id, bool isFlagged})> flagWrites =
+      <({String id, bool isFlagged})>[];
+
+  /// When set, the next `setCardFlag` throws it — the optimistic-revert path.
+  Failure? nextFlagFailure;
+
+  @override
+  Future<void> setCardFlag({
+    required String cardId,
+    required bool isFlagged,
+  }) async {
+    final failure = nextFlagFailure;
+    if (failure != null) throw failure;
+    flagWrites.add((id: cardId, isFlagged: isFlagged));
   }
 
   void dispose() {

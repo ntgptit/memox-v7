@@ -7,6 +7,7 @@ import 'package:memox/features/card/domain/repositories/card_repository.dart';
 import 'package:memox/features/card/domain/usecases/create_card_use_case.dart';
 import 'package:memox/features/card/domain/usecases/delete_card_use_case.dart';
 import 'package:memox/features/card/domain/usecases/get_card_use_case.dart';
+import 'package:memox/features/card/domain/usecases/set_card_flag_use_case.dart';
 import 'package:memox/features/card/domain/usecases/update_card_use_case.dart';
 import 'package:memox/features/card/domain/usecases/watch_card_count_use_case.dart';
 import 'package:memox/features/card/domain/usecases/watch_cards_by_deck_use_case.dart';
@@ -150,6 +151,17 @@ void main() {
       expect(repository.getCalls, 1);
     });
 
+    test(
+      'set-flag forwards the id and the value, validating nothing',
+      () async {
+        await SetCardFlagUseCase(
+          repository,
+        ).call(cardId: 'card-1', isFlagged: true);
+
+        expect(repository.flagCalls.single, (id: 'card-1', isFlagged: true));
+      },
+    );
+
     test('watch forwards the deck id and the window, unchanged', () async {
       // The use case must not have an opinion about the window: a default here
       // would be a second answer to "how far has the reader scrolled", and the
@@ -246,6 +258,15 @@ final class _CountingCardRepository implements CardRepository {
 
   @override
   Future<void> deleteCard(String cardId) async => deleteCalls.add(cardId);
+
+  final List<({String id, bool isFlagged})> flagCalls =
+      <({String id, bool isFlagged})>[];
+
+  @override
+  Future<void> setCardFlag({
+    required String cardId,
+    required bool isFlagged,
+  }) async => flagCalls.add((id: cardId, isFlagged: isFlagged));
 
   @override
   Stream<List<CardEntity>> watchCardsByDeck(
