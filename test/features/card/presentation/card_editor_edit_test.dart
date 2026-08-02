@@ -106,6 +106,44 @@ void main() {
     expect(find.byIcon(Icons.flag), findsOneWidget);
   });
 
+  testWidgets('the tag section renders the card tags as chips', (tester) async {
+    final repository = FakeCardRepository();
+    addTearDown(repository.dispose);
+    repository.cardToGet = repository.card('card-1');
+
+    await pump(tester, repository);
+
+    repository.emitTags(
+      <dynamic>[
+        repository.tag('t1', name: 'noun'),
+        repository.tag('t2', name: 'people'),
+      ].cast(),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.widgetWithText(Chip, 'noun'), findsOneWidget);
+    expect(find.widgetWithText(Chip, 'people'), findsOneWidget);
+    // The counter appears once tags exist.
+    expect(find.text('2 / 10'), findsOneWidget);
+  });
+
+  testWidgets('submitting the tag field adds the tag', (tester) async {
+    final repository = FakeCardRepository();
+    addTearDown(repository.dispose);
+    repository.cardToGet = repository.card('card-1');
+
+    await pump(tester, repository);
+
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Add tag').first,
+      'verb',
+    );
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+
+    expect(repository.tagAdds.single, (id: 'card-1', name: 'verb'));
+  });
+
   testWidgets('the danger zone confirms, then deletes the card', (
     tester,
   ) async {

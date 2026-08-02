@@ -684,6 +684,26 @@
   "@cardEditorUnflagAction": { "description": "Tooltip of the editor's flag toggle when the card is flagged (BR-92)." },
   "cardTileFlaggedSemantics": "Flagged",
   "@cardTileFlaggedSemantics": { "description": "Screen-reader label for the flag indicator on a card row (BR-92)." },
+  "cardEditorTagsLabel": "Tags",
+  "@cardEditorTagsLabel": { "description": "Heading of the tag section in the card editor (BR-93)." },
+  "cardEditorTagAddHint": "Add tag",
+  "@cardEditorTagAddHint": { "description": "Placeholder of the add-tag input (W5)." },
+  "cardEditorTagCount": "{count} / {max}",
+  "@cardEditorTagCount": {
+    "placeholders": { "count": { "type": "int" }, "max": { "type": "int" } },
+    "description": "Tag counter shown once a card has at least one tag (BR-94, W5)."
+  },
+  "cardEditorTagRemoveSemantics": "Remove tag {name}",
+  "@cardEditorTagRemoveSemantics": {
+    "placeholders": { "name": { "type": "String" } },
+    "description": "Screen-reader label for a tag chip's delete affordance (BR-93)."
+  },
+  "cardTagEmptyError": "Tag can't be empty",
+  "@cardTagEmptyError": { "description": "Inline error when the tag name is blank after trimming (BR-93)." },
+  "cardTagTooLongError": "Tag is at the character limit",
+  "@cardTagTooLongError": { "description": "Inline error when the tag name reaches its length limit (BR-93)." },
+  "cardTagTooManyError": "A card can hold up to 10 tags",
+  "@cardTagTooManyError": { "description": "Inline error when the card already has the maximum tags (BR-94)." },
   "cardEditorDangerZone": "Danger zone",
   "@cardEditorDangerZone": { "description": "Heading above the delete action in the card editor (UC-04 A5)." },
   "cardEditorDelete": "Delete card",

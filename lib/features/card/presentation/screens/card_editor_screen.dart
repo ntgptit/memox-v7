@@ -16,6 +16,7 @@ import '../controllers/card_flag_controller.dart';
 import '../controllers/card_write_controller.dart';
 import '../states/card_submit_state.dart';
 import '../widgets/overlays/card_confirm_widget.dart';
+import '../widgets/sections/card_tag_section_widget.dart';
 
 /// The card editor — create and edit (UC-04 W4, A1).
 ///
@@ -198,6 +199,8 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
                   ),
             isLoading: busy,
           ),
+          const SizedBox(height: AppSpacing.xl),
+          CardTagSectionWidget(cardId: cardId),
           const SizedBox(height: AppSpacing.xxl),
           _dangerZone(context, cardId, disabled: busy),
         ],

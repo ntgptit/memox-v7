@@ -7,11 +7,15 @@ import '../../../../core/error/failure.dart';
 import '../../../deck/domain/models/deck_content_type_model.dart';
 import '../../../deck/domain/models/scheduler_type_model.dart';
 import '../../domain/entities/card_entity.dart';
+import '../../domain/entities/tag_entity.dart';
 import '../../domain/failures/card_conflict_failure.dart';
 import '../../domain/failures/card_not_found_failure.dart';
+import '../../domain/failures/tag_validation_failure.dart';
 import '../../domain/models/card_text_model.dart';
+import '../../domain/models/tag_name_model.dart';
 import '../../domain/repositories/card_repository.dart';
 import '../mappers/card_mapper.dart';
+import '../mappers/tag_mapper.dart';
 import '../datasources/card_dao.dart';
 import '../datasources/card_deck_context_dao.dart';
 
@@ -187,6 +191,61 @@ final class CardRepositoryImpl implements CardRepository {
     // The review state and history cascade; the deck's content_type is
     // deliberately left alone, even for the last card (BR-67).
     await _cardDao.deleteCardById(cardId);
+  });
+
+  @override
+  Stream<List<TagEntity>> watchCardTags(String cardId) => _cardDao
+      .watchTagsForCard(cardId)
+      .handleError(_rethrowMapped)
+      .map(
+        (List<Tag> rows) => rows.map(tagEntityFromRow).toList(growable: false),
+      );
+
+  @override
+  Future<void> addCardTag({
+    required String cardId,
+    required TagName name,
+  }) => _guard(
+    () => _cardDao.runInTransaction(() async {
+      await _requireCardRow(cardId);
+      // BR-94, and it lives inside the transaction on purpose: the count and the
+      // link must be atomic, or two adds racing each other both pass an eleventh
+      // tag past a check that each read as "9 so far".
+      final existing = await _cardDao.tagCountForCard(cardId);
+      if (existing >= kMaxTagsPerCard) {
+        refuseInvalidTag(<TagValidationProblem>{
+          TagValidationProblem.tooManyTags,
+        });
+      }
+
+      // Reuse the tag that already owns this folded name (BR-93); mint one only
+      // when nobody does. `owner_id` stays NULL — the local profile (AD-03).
+      final owned = await _cardDao.tagByFoldedName(name.folded);
+      final tagId = owned?.id ?? _idGenerator();
+      if (owned == null) {
+        await _cardDao.insertTag(
+          TagsCompanion.insert(
+            id: tagId,
+            name: name.value,
+            nameFolded: name.folded,
+            createdAt: _clock(),
+          ),
+        );
+      }
+
+      // Idempotent — the DAO ignores a pair the card already carries.
+      await _cardDao.linkTag(cardId, tagId);
+    }),
+  );
+
+  @override
+  Future<void> removeCardTag({
+    required String cardId,
+    required String tagId,
+  }) => _guard(() async {
+    // No existence check: unlinking a pair that is not there removes nothing and
+    // is the same end state, so a double tap is harmless (BR-93).
+    await _cardDao.unlinkTag(cardId, tagId);
   });
 
   @override
