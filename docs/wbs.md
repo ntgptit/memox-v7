@@ -4987,8 +4987,14 @@ cột NULL của scheduler kia.
   repo + DAO ghi 3 cột (null = clear); section "Add details" mặc định collapse
   (W4), tự mở khi card đã có detail (W5), 3 field example/hint/pronunciation, nhãn
   và icon dùng `primaryAccent` (không `primary` — accent-as-text mới đạt 4.5:1 ở
-  nền tối). Audit editor không đổi (InkWell dùng chung Material ink). Còn: tag
-  chip trên hàng, filter pills, panel tiến độ, breadcrumb + tên deck, auto-forward.
+  nền tối). Audit editor không đổi (InkWell dùng chung Material ink);
+  lát 8 (tag chip trên hàng, BR-93) **done** — `cardListItemsByDeck` thêm subquery
+  `GROUP_CONCAT(t.name, char(31))` (live theo `card_tags`), `CardListItemModel`
+  mang `tagNames`, mapper tách theo unit-separator; tile vẽ chip viền
+  (`borderSubtle`, text `onSurfaceVariant`) trên dòng state (Wrap để tràn dòng ở
+  màn hẹp); tách `build()` tile thành `_StateDot`/`_CardFace`/`_TrailingBadges`
+  cho qua guard max_build_lines. Còn: filter pills, panel tiến độ, breadcrumb +
+  tên deck, auto-forward.
 - **Goal:** Người dùng quản lý card hoàn chỉnh trong deck loại `card`, từ UI
   xuống transaction Drift.
 - **Scope:** card list; empty state; tạo card; tạo card **đầu tiên** trong deck

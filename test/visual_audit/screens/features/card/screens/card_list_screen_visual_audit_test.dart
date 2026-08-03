@@ -35,6 +35,7 @@ void main() {
         front: 'ephemeral',
         back: 'short-lived',
         isFlagged: true,
+        tagNames: <String>['noun', 'people'],
       ),
       FakeCardRepository().listItem(
         'c2',

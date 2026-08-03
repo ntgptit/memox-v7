@@ -2,6 +2,7 @@ import 'package:drift/drift.dart' show QueryRow;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/card/domain/failures/card_validation_failure.dart';
 import 'package:memox/features/card/domain/models/card_state_model.dart';
+import 'package:memox/features/card/domain/models/tag_name_model.dart';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/card/domain/entities/card_entity.dart';
 import 'package:memox/features/deck/domain/entities/deck_entity.dart';
@@ -333,6 +334,31 @@ void main() {
         () => h.cardRepository.watchCardListItems(tree.leaf.id, limit: 0),
         throwsArgumentError,
       );
+    });
+
+    test('the row carries its tag names (BR-93)', () async {
+      final tree = await h.seedTree();
+      final card = await h.cardRepository.createCard(
+        deckId: tree.leaf.id,
+        front: cardText('f'),
+        back: cardText('b', side: CardSide.back),
+      );
+      await h.cardRepository.addCardTag(
+        cardId: card.id,
+        name: TagName.parse('noun').name!,
+      );
+      await h.cardRepository.addCardTag(
+        cardId: card.id,
+        name: TagName.parse('people').name!,
+      );
+
+      final item =
+          (await h.cardRepository
+                  .watchCardListItems(tree.leaf.id, limit: 50)
+                  .first)
+              .single;
+
+      expect(item.tagNames, containsAll(<String>['noun', 'people']));
     });
   });
 }
