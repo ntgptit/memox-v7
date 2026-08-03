@@ -203,6 +203,52 @@ void main() {
       expect(repository.deletes, <String>['deck-1']);
     });
 
+    testWidgets('deleting a sub-deck lands on its parent, not the root', (
+      tester,
+    ) async {
+      // Where the deck was is where its siblings are, and that is what the user
+      // was browsing. Landing at the root reads as though more than the one
+      // deck had gone — which is how this was reported.
+      final repository = serving(
+        fakeSubDeck(id: 'child', name: 'Hiragana', parentId: 'parent'),
+      );
+      final router = await pumpDeckApp(
+        tester,
+        repository: repository,
+        initialLocation: '/decks/child',
+      );
+
+      await openActions(tester);
+      await tester.tap(find.text(english.deckDeleteAction));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(english.deckDeleteConfirmAction));
+      await tester.pumpAndSettle();
+
+      expect(
+        router.routerDelegate.currentConfiguration.uri.path,
+        '/decks/parent',
+      );
+    });
+
+    testWidgets('deleting a root deck lands on the root list', (tester) async {
+      // A root has no level above it, so the list is the honest destination —
+      // `RoutePaths.decks` is '/', the shell's first branch.
+      final repository = serving(fakeRootDeck(id: 'deck-1', name: 'Japanese'));
+      final router = await pumpDeckApp(
+        tester,
+        repository: repository,
+        initialLocation: '/decks/deck-1',
+      );
+
+      await openActions(tester);
+      await tester.tap(find.text(english.deckDeleteAction));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(english.deckDeleteConfirmAction));
+      await tester.pumpAndSettle();
+
+      expect(router.routerDelegate.currentConfiguration.uri.path, '/');
+    });
+
     testWidgets('cancelling the delete does nothing (UC-03 A4)', (
       tester,
     ) async {
