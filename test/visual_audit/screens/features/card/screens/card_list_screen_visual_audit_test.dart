@@ -134,10 +134,33 @@ void main() {
         itemId: 'shell',
         reason: SkipReason.customPainter,
         detailContains: 'no painter',
-        expectedMatches: 6,
+        expectedMatches: 7,
         rationale:
-            'A clip with no painter: the four filter chips and the two MxCard '
-            'card rows each clip through a CustomPaint with no painter of its own.',
+            'A clip with no painter: the four filter chips, the two MxCard card '
+            'rows and the search pill each clip through a CustomPaint with no '
+            'painter of its own.',
+      ),
+      // The search field (S1) — the same two allowances the deck list's field
+      // carries, for the same reasons; see `deck_audit_allowances.dart`.
+      AuditSkipAllowance(
+        itemId: 'shell',
+        reason: SkipReason.rasterOnly,
+        detailContains: 'RenderEditable',
+        expectedMatches: 3,
+        rationale:
+            'A TextField paints its text, its hint and its cursor into a '
+            'RenderEditable, which reports no colour. The field takes its style '
+            'from the body text theme and its fill from surfaceMuted; both '
+            'states are pinned by the mx_search_field_* goldens.',
+      ),
+      AuditSkipAllowance(
+        itemId: 'shell',
+        reason: SkipReason.rasterOnly,
+        detailContains: '_RenderDecoration',
+        rationale:
+            "InputDecorator's own render object. Every border on this field is "
+            'InputBorder.none — the pill around it is the decoration — so there '
+            'is nothing here to read a colour from.',
       ),
       // The progress ring (D5, BR-88).
       AuditSkipAllowance(

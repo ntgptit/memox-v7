@@ -2,6 +2,7 @@ import 'package:drift/drift.dart' show Variable;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/database/app_database.dart';
 import 'package:memox/features/card/data/datasources/card_dao.dart';
+import 'package:memox/features/card/domain/models/card_list_filter_model.dart';
 import 'package:memox/features/card/domain/models/card_state_model.dart';
 import 'package:memox/features/card/domain/models/tag_name_model.dart';
 
@@ -188,6 +189,10 @@ void main() {
 
       await insertCard(db, id: 'c1', deckId: 'leaf');
       await insertCard(db, id: 'c2', deckId: 'leaf');
+      // The count joins the review state, which BR-09 says is born with the
+      // card — the fixture has to honour that invariant to be read at all.
+      await insertReviewState(db, cardId: 'c1');
+      await insertReviewState(db, cardId: 'c2');
       await dao.setCardFlag('c2', isFlagged: true);
 
       final flagged = await dao
@@ -195,7 +200,12 @@ void main() {
           .first;
 
       expect(flagged.map((card) => card.id), <String>['c2']);
-      expect(await dao.watchFlaggedCountByDeck('leaf').first, 1);
+      expect(
+        await dao
+            .watchCardCount(deckId: 'leaf', filter: CardListFilter.flagged)
+            .first,
+        1,
+      );
     });
 
     test('setting the flag touches nothing else on the row', () async {
@@ -220,11 +230,17 @@ void main() {
       final dao = CardDao(db);
       await insertCard(db, id: 'c1', deckId: 'leaf');
 
+      await insertReviewState(db, cardId: 'c1');
       await dao.setCardFlag('c1', isFlagged: true);
       await dao.setCardFlag('c1', isFlagged: false);
 
       expect((await dao.cardById('c1'))!.isFlagged, 0);
-      expect(await dao.watchFlaggedCountByDeck('leaf').first, 0);
+      expect(
+        await dao
+            .watchCardCount(deckId: 'leaf', filter: CardListFilter.flagged)
+            .first,
+        0,
+      );
     });
   });
 

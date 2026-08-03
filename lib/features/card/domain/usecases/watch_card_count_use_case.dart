@@ -15,6 +15,12 @@ class WatchCardCountUseCase {
   Stream<int> call(
     String deckId, {
     CardListFilter filter = CardListFilter.all,
+    String? searchTerm,
     DateTime? now,
-  }) => _repository.watchFilteredCardCount(deckId, filter: filter, now: now);
+  }) => _repository.watchFilteredCardCount(
+    deckId,
+    filter: filter,
+    searchTerm: searchTerm,
+    now: now,
+  );
 }

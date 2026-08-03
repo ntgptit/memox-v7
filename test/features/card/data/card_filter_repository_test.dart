@@ -204,4 +204,44 @@ void main() {
       expect(items.map((i) => i.card.id), <String>[a, b]);
     },
   );
+
+  test(
+    'search matches front or back, and narrows the count with it (S1)',
+    () async {
+      final tree = await h.seedTree();
+      final hit = await seedCardIn(tree.leaf.id, 'ephemeral');
+      await seedCardIn(tree.leaf.id, 'unrelated');
+
+      final items = await h.cardRepository
+          .watchCardListItems(tree.leaf.id, limit: 50, searchTerm: 'phemer')
+          .first;
+
+      expect(items.map((i) => i.card.id), <String>[hit]);
+      // The count runs the same predicate, so the pill and the list agree.
+      expect(
+        await h.cardRepository
+            .watchFilteredCardCount(tree.leaf.id, searchTerm: 'phemer')
+            .first,
+        1,
+      );
+    },
+  );
+
+  test('a search term composes with a filter (S1 x D3)', () async {
+    final tree = await h.seedTree();
+    final both = await seedCardIn(tree.leaf.id, 'flagged match');
+    await seedCardIn(tree.leaf.id, 'unflagged match');
+    await h.cardRepository.setCardFlag(cardId: both, isFlagged: true);
+
+    final items = await h.cardRepository
+        .watchCardListItems(
+          tree.leaf.id,
+          limit: 50,
+          filter: CardListFilter.flagged,
+          searchTerm: 'match',
+        )
+        .first;
+
+    expect(items.map((i) => i.card.id), <String>[both]);
+  });
 }

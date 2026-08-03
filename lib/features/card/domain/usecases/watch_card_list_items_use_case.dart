@@ -19,6 +19,7 @@ class WatchCardListItemsUseCase {
     required int limit,
     CardListFilter filter = CardListFilter.all,
     CardListSort sort = CardListSort.newest,
+    String? searchTerm,
     DateTime? now,
   }) => _repository.watchCardListItems(
     deckId,

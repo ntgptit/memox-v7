@@ -1,7 +1,9 @@
 import 'package:drift/drift.dart'
-    show Value, BooleanExpressionOperators, InsertMode, OrderBy, OrderingTerm;
+    show Value, BooleanExpressionOperators, InsertMode;
 import '../../../../core/database/app_database.dart';
+import '../../domain/models/card_list_filter_model.dart';
 import '../../domain/models/card_list_sort_model.dart';
+import '../mappers/card_list_query_mapper.dart';
 
 /// Data access for the Card side of the vertical.
 ///
@@ -13,33 +15,8 @@ import '../../domain/models/card_list_sort_model.dart';
 /// This class speaks Drift rows and companions. They stop here: the
 /// repository maps them to domain entities and never lets one across (AD-01).
 /// One management-list row as it leaves the DAO: the card, its review state and
-/// its concatenated tag names. A record so all four filter queries — each with
-/// its own drift result class — share one type the repository maps once.
+/// its concatenated tag names. A record, so the repository maps one type.
 typedef CardListItemRow = (Card, CardReviewState, String? tagNames);
-
-/// The `$order` term each list query takes, built from the real columns.
-///
-/// One function for all four filtered reads: drift's generated order typedefs
-/// are structurally the same `OrderBy Function(Cards, CardReviewStates)`, so the
-/// sort lives here once rather than per query. `id` breaks every tie, so a window
-/// re-read cannot shuffle two rows that share a timestamp.
-OrderBy cardListOrder(
-  CardListSort sort,
-  Cards c,
-  CardReviewStates s,
-) => switch (sort) {
-  CardListSort.newest => OrderBy(<OrderingTerm>[
-    OrderingTerm.desc(c.createdAt),
-    OrderingTerm.desc(c.id),
-  ]),
-  // NULL `due_at` is a new card — due now — and SQLite sorts NULLs first
-  // ascending, so "soonest first" needs no COALESCE to put them at the front.
-  CardListSort.dueFirst => OrderBy(<OrderingTerm>[
-    OrderingTerm.asc(s.dueAt),
-    OrderingTerm.desc(c.createdAt),
-    OrderingTerm.desc(c.id),
-  ]),
-};
 
 final class CardDao {
   CardDao(this._db);
@@ -57,77 +34,51 @@ final class CardDao {
   Stream<List<Card>> watchCardsByDeck(String deckId, {required int limit}) =>
       _db.cardsByDeck(deckId, limit).watch();
 
-  /// The window joined to each card's review state and tags (see `card.drift`).
-  ///
-  /// **Every filter yields the same record type** — `(Card, CardReviewState,
-  /// String? tagNames)` — even though drift generates a distinct result class per
-  /// query, so the repository maps all four through one path without a per-filter
-  /// branch. The tuple carries Drift rows, not domain entities: they still stop
-  /// at the repository (AD-01).
-  Stream<List<CardListItemRow>> watchCardListItemsByDeck(
-    String deckId, {
+  /// The management list: one statement, with the filter, the search term and
+  /// the sort composed into its `$predicate` and `$order` (see
+  /// `card_list_query_mapper.dart` for why this is one query and not four).
+  Stream<List<CardListItemRow>> watchCardListItems({
+    required String deckId,
     required int limit,
+    required CardListFilter filter,
     required CardListSort sort,
+    String? searchTerm,
+    DateTime? now,
   }) => _db
-      .cardListItemsByDeck(deckId, (c, s) => cardListOrder(sort, c, s), limit)
-      .watch()
-      .map((rows) => rows.map((r) => (r.c, r.s, r.tagNames)).toList());
-
-  /// The same read, filtered to cards due now (BR-22).
-  Stream<List<CardListItemRow>> watchCardListItemsDueByDeck(
-    String deckId, {
-    required DateTime now,
-    required int limit,
-    required CardListSort sort,
-  }) => _db
-      .cardListItemsDueByDeck(
-        deckId,
-        now,
+      .cardListItems(
+        (c, s) => cardListPredicate(
+          c: c,
+          s: s,
+          deckId: deckId,
+          filter: filter,
+          searchTerm: searchTerm,
+          now: now,
+        ),
         (c, s) => cardListOrder(sort, c, s),
         limit,
       )
       .watch()
       .map((rows) => rows.map((r) => (r.c, r.s, r.tagNames)).toList());
 
-  /// The same read, filtered to new cards — no scheduled review yet (BR-90).
-  Stream<List<CardListItemRow>> watchCardListItemsNewByDeck(
-    String deckId, {
-    required int limit,
-    required CardListSort sort,
+  /// How many cards the same predicate matches, without the window — so a pill
+  /// and the list it opens can never disagree.
+  Stream<int> watchCardCount({
+    required String deckId,
+    required CardListFilter filter,
+    String? searchTerm,
+    DateTime? now,
   }) => _db
-      .cardListItemsNewByDeck(
-        deckId,
-        (c, s) => cardListOrder(sort, c, s),
-        limit,
+      .cardCount(
+        (c, s) => cardListPredicate(
+          c: c,
+          s: s,
+          deckId: deckId,
+          filter: filter,
+          searchTerm: searchTerm,
+          now: now,
+        ),
       )
-      .watch()
-      .map((rows) => rows.map((r) => (r.c, r.s, r.tagNames)).toList());
-
-  /// The same read, filtered to flagged cards (BR-92).
-  Stream<List<CardListItemRow>> watchCardListItemsFlaggedByDeck(
-    String deckId, {
-    required int limit,
-    required CardListSort sort,
-  }) => _db
-      .cardListItemsFlaggedByDeck(
-        deckId,
-        (c, s) => cardListOrder(sort, c, s),
-        limit,
-      )
-      .watch()
-      .map((rows) => rows.map((r) => (r.c, r.s, r.tagNames)).toList());
-
-  /// The deck's whole card count, for the "showing N of M" line.
-  Stream<int> watchCardCountByDeck(String deckId) =>
-      _db.cardCountByDeck(deckId).watchSingle();
-
-  /// The Due-now pill count (BR-22).
-  Stream<int> watchDueCountByDeck(String deckId, {required DateTime now}) =>
-      _db.dueCountByDeck(deckId, now).watchSingle();
-
-  /// The New pill count (BR-90).
-  Stream<int> watchNewCountByDeck(String deckId) =>
-      _db.newCountByDeck(deckId).watchSingle();
+      .watchSingle();
 
   Future<Card?> cardById(String cardId) =>
       _db.cardById(cardId).getSingleOrNull();
@@ -159,9 +110,6 @@ final class CardDao {
     String deckId, {
     required int limit,
   }) => _db.flaggedCardsByDeck(deckId, limit).watch();
-
-  Stream<int> watchFlaggedCountByDeck(String deckId) =>
-      _db.flaggedCountByDeck(deckId).watchSingle();
 
   /// Writes only the flag. A `CardsCompanion` covering the whole row would let a
   /// caller change `front` while meaning to toggle a mark — and BR-92 is about

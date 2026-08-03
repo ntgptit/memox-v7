@@ -55,6 +55,7 @@ abstract interface class CardRepository {
     required int limit,
     CardListFilter filter = CardListFilter.all,
     CardListSort sort = CardListSort.newest,
+    String? searchTerm,
     DateTime? now,
   });
 
@@ -63,6 +64,7 @@ abstract interface class CardRepository {
   Stream<int> watchFilteredCardCount(
     String deckId, {
     CardListFilter filter = CardListFilter.all,
+    String? searchTerm,
     DateTime? now,
   });
 
