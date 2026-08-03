@@ -17,12 +17,12 @@ import '../controllers/deck_list_controller.dart';
 import '../controllers/deck_list_view_controller.dart';
 import '../states/deck_list_view_state.dart';
 import '../widgets/overlays/deck_actions_widget.dart';
+import '../widgets/overlays/deck_create_child_widget.dart';
 import '../widgets/sections/deck_level_error_widget.dart';
 import '../widgets/sections/deck_summary_section_widget.dart';
 import '../widgets/sections/deck_list_toolbar_widget.dart';
 import '../widgets/sections/deck_level_body_widget.dart';
 import '../widgets/sections/deck_subheader_widget.dart';
-import '../widgets/sections/deck_notice_widget.dart';
 import '../widgets/items/deck_tile_widget.dart';
 import '../widgets/sections/deck_card_handoff_widget.dart';
 
@@ -270,27 +270,22 @@ class _DeckLevel extends StatelessWidget {
 
     final isUnset = parent.contentType == DeckContentType.unset;
 
-    return Column(
-      children: <Widget>[
-        Expanded(
-          child: MxEmptyState(
-            icon: Icons.folder_outlined,
-            title: isUnset
-                ? context.l10n.deckDetailEmptyUnsetTitle
-                : context.l10n.deckDetailEmptyDeckTitle,
-            message: isUnset
-                ? context.l10n.deckDetailEmptyUnsetMessage
-                : context.l10n.deckDetailEmptyDeckMessage,
-            actionLabel: context.l10n.deckCreateSubDeckAction,
-            onAction: () =>
-                showCreateSubDeckForm(context, parentDeckId: parent.id),
-          ),
-        ),
-        if (isUnset)
-          DeckNoticeWidget(
-            message: context.l10n.deckCreateCardUnavailableMessage,
-          ),
-      ],
+    // **An empty `unset` deck offers both kinds (BR-61).** It used to offer only
+    // a sub-deck beside a notice saying cards were unavailable — which left the
+    // deck unable to ever hold one, because the card screen opens only after
+    // `content_type` is already `card` and only a card can set it (BR-62).
+    return MxEmptyState(
+      icon: Icons.folder_outlined,
+      title: isUnset
+          ? context.l10n.deckDetailEmptyUnsetTitle
+          : context.l10n.deckDetailEmptyDeckTitle,
+      message: isUnset
+          ? context.l10n.deckDetailEmptyUnsetMessage
+          : context.l10n.deckDetailEmptyDeckMessage,
+      actionLabel: isUnset
+          ? context.l10n.deckCreateChildAction
+          : context.l10n.deckCreateSubDeckAction,
+      onAction: () => showCreateChildForm(context, parent: parent),
     );
   }
 
@@ -314,7 +309,9 @@ class _DeckLevel extends StatelessWidget {
   static Future<void> _startCreate(BuildContext context, DeckEntity? parent) {
     if (parent == null) return showCreateRootDeckForm(context);
 
-    return showCreateSubDeckForm(context, parentDeckId: parent.id);
+    // An `unset` deck is asked which kind of child (BR-61); a settled one goes
+    // straight to the matching form (BR-66).
+    return showCreateChildForm(context, parent: parent);
   }
 }
 
