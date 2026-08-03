@@ -62,18 +62,17 @@ void main() {
             'renders Colors.transparent at rest and ColorScheme.surface only '
             'mid-transition; the surface value is asserted in app_theme_test.dart.',
       ),
-      // The shell: Scaffold, AppBar and the extended FAB.
+      // The shell: Scaffold, AppBar, the extended FAB and the four filter chips.
       AuditSkipAllowance(
         itemId: 'shell',
         reason: SkipReason.rasterOnly,
         detailContains: '_RenderInkFeatures',
-        expectedMatches: 4,
+        expectedMatches: 8,
         rationale:
             'The Material ink layers of the Scaffold, the AppBar, the '
-            'FloatingActionButton and one tappable card row that hosts an '
-            'InkWell. Splash and highlight paint into these layers, so no render '
-            'object carries them; the overlay colours are asserted in '
-            'app_theme_test.dart.',
+            'FloatingActionButton, one tappable card row and the four filter '
+            'chips. Splash and highlight paint into these layers; the overlay '
+            'colours are asserted in app_theme_test.dart.',
       ),
       AuditSkipAllowance(
         itemId: 'shell',
@@ -84,13 +83,35 @@ void main() {
             'ShapeBorder painter; the shape is set in floatingActionButtonTheme '
             'and pinned by the mx_components goldens.',
       ),
+      // The four filter chips (D3). Their fill, border and label come from
+      // ChipThemeData and are pinned by the mx_components chip goldens; the
+      // _RenderChip render object lays them out and paints no colour of its own.
+      AuditSkipAllowance(
+        itemId: 'shell',
+        reason: SkipReason.unknownRenderType,
+        detailContains: '_RenderChip',
+        expectedMatches: 4,
+        rationale:
+            'The four FilterChip render objects; their colours come from '
+            'ChipThemeData, pinned by the mx_components chip goldens.',
+      ),
+      AuditSkipAllowance(
+        itemId: 'shell',
+        reason: SkipReason.rasterNotFlat,
+        detailContains: 'covers only 0%',
+        rationale:
+            'An unselected chip declares a surface tint that its transparent '
+            'rest state does not fill; the chip colours are pinned by the '
+            'mx_components goldens.',
+      ),
       AuditSkipAllowance(
         itemId: 'shell',
         reason: SkipReason.customPainter,
         detailContains: 'no painter',
+        expectedMatches: 5,
         rationale:
-            'A clip with no painter: an InkWell paints its clip through a '
-            'CustomPaint with no painter of its own.',
+            'A clip with no painter: the tappable card row and the four filter '
+            'chips each clip through a CustomPaint with no painter of its own.',
       ),
       AuditSkipAllowance(
         itemId: 'shell',

@@ -1,6 +1,7 @@
 import '../entities/card_entity.dart';
 import '../entities/tag_entity.dart';
 import '../failures/tag_validation_failure.dart';
+import '../models/card_list_filter_model.dart';
 import '../models/card_list_item_model.dart';
 import '../models/card_text_model.dart';
 import '../models/tag_name_model.dart';
@@ -39,16 +40,26 @@ abstract interface class CardRepository {
   });
 
   /// The same window as [watchCardsByDeck], each card joined to its review state
-  /// so a row can show its state dot and label (D5, BR-89…BR-91).
+  /// and tags so a row can show its state dot, label and chips (D5, BR-89…BR-91,
+  /// BR-93), narrowed by [filter] (D3).
   ///
-  /// A richer read than [watchCardsByDeck], not a replacement: the editor prefill
-  /// and the create flow want a bare [CardEntity], while the list wants the pair.
-  /// Both are one statement — this one joins, because the row needs the card and
-  /// its state in the same frame (AD-13), and the join is total by BR-09 (every
-  /// card is born with exactly one state).
+  /// [filter] adds one indexed `WHERE` and nothing else — the order and the
+  /// window contract hold across all four (C1, C2). [now] is only read by
+  /// [CardListFilter.dueNow]; the caller passes the composition-root clock so no
+  /// widget touches the wall clock.
   Stream<List<CardListItemModel>> watchCardListItems(
     String deckId, {
     required int limit,
+    CardListFilter filter = CardListFilter.all,
+    DateTime? now,
+  });
+
+  /// How many cards a [filter] would show — the "showing N of M" denominator and
+  /// the pill counts (D3). Its own statement per filter, like the reads.
+  Stream<int> watchFilteredCardCount(
+    String deckId, {
+    CardListFilter filter = CardListFilter.all,
+    DateTime? now,
   });
 
   /// How many cards the deck holds, whatever the window is showing.

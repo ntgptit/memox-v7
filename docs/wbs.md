@@ -4993,8 +4993,17 @@ cột NULL của scheduler kia.
   mang `tagNames`, mapper tách theo unit-separator; tile vẽ chip viền
   (`borderSubtle`, text `onSurfaceVariant`) trên dòng state (Wrap để tràn dòng ở
   màn hẹp); tách `build()` tile thành `_StateDot`/`_CardFace`/`_TrailingBadges`
-  cho qua guard max_build_lines. Còn: filter pills, panel tiến độ, breadcrumb +
-  tên deck, auto-forward.
+  cho qua guard max_build_lines;
+  lát 9 (filter pills All/Due/New/Flagged, D3) **done** — 3 query list lọc
+  (due/new/flagged) + due/new count trong `card.drift`; enum `CardListFilter`;
+  repo dispatch qua record `CardListItemRow` chung (mọi filter một map); tách
+  phần đọc-danh-sách ra `CardListReadDataSource` để impl < 400 dòng;
+  `CardListFilterSelection` (reset window bằng `ref.invalidate`, không thêm
+  mutator vào window để giữ CQS) + 4 count provider; `CardFilterBarWidget`
+  (FilterChip, count trên từng pill) ở subheader, ẩn khi deck rỗng; empty-theo-
+  filter (`_NoMatch`). Audit list thêm allowance cho `_RenderChip`/ink 8/no-
+  painter 5/rasterNotFlat chip. Còn: panel tiến độ, breadcrumb + tên deck,
+  auto-forward.
 - **Goal:** Người dùng quản lý card hoàn chỉnh trong deck loại `card`, từ UI
   xuống transaction Drift.
 - **Scope:** card list; empty state; tạo card; tạo card **đầu tiên** trong deck

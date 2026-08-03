@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/card/di/card_repository_provider.dart';
+import 'package:memox/features/card/domain/models/card_list_filter_model.dart';
 import 'package:memox/features/card/domain/models/card_state_model.dart';
 import 'package:memox/features/card/presentation/controllers/card_list_window_controller.dart';
 import 'package:memox/features/card/presentation/screens/card_list_screen.dart';
@@ -118,6 +119,28 @@ void main() {
 
     expect(find.text('New'), findsOneWidget);
     expect(find.text('Mastered'), findsOneWidget);
+  });
+
+  testWidgets('selecting a pill re-reads the list with that filter (D3)', (
+    tester,
+  ) async {
+    final repository = FakeCardRepository();
+    addTearDown(repository.dispose);
+    repository.filterCounts[CardListFilter.isNew] = 4;
+    await pump(tester, repository);
+
+    repository.emitItems(<dynamic>[repository.listItem('c1')].cast());
+    repository.emitCount(10);
+    await tester.pumpAndSettle();
+
+    // The pill carries its count.
+    expect(find.widgetWithText(FilterChip, 'New 4'), findsOneWidget);
+    await tester.tap(find.widgetWithText(FilterChip, 'New 4'));
+    // A plain pump, not settle: switching filter re-subscribes the list, which
+    // spins until the fake re-emits, and pumpAndSettle would wait on the spinner.
+    await tester.pump();
+
+    expect(repository.requestedFilters, contains(CardListFilter.isNew));
   });
 
   testWidgets('a row shows its tag names as chips (BR-93)', (tester) async {

@@ -622,6 +622,10 @@
     "placeholders": { "shown": { "type": "int" }, "total": { "type": "int" } },
     "description": "Section label above the card list."
   },
+  "cardListNoMatchTitle": "Không có thẻ nào khớp",
+  "@cardListNoMatchTitle": { "description": "Shown when a filter matches no cards but the deck is not empty (D3)." },
+  "cardListNoMatchMessage": "Thử bộ lọc khác, hoặc thêm thẻ.",
+  "@cardListNoMatchMessage": { "description": "Body of the filtered-empty state (D3)." },
   "cardListEmptyTitle": "Chưa có thẻ nào",
   "@cardListEmptyTitle": {
     "description": "Empty state of a card-type deck with no cards (UC-04 A3)."
@@ -651,6 +655,26 @@
   "cardListError": "Không tải được các thẻ này. Kéo để thử lại.",
   "@cardListError": {
     "description": "Shown when the card list read fails."
+  },
+  "cardFilterAll": "Tất cả {count}",
+  "@cardFilterAll": {
+    "placeholders": { "count": { "type": "int" } },
+    "description": "The All filter pill with its count (D3)."
+  },
+  "cardFilterDueNow": "Đến hạn {count}",
+  "@cardFilterDueNow": {
+    "placeholders": { "count": { "type": "int" } },
+    "description": "The Due-now filter pill with its count (D3, BR-22)."
+  },
+  "cardFilterNew": "Mới {count}",
+  "@cardFilterNew": {
+    "placeholders": { "count": { "type": "int" } },
+    "description": "The New filter pill with its count (D3, BR-90)."
+  },
+  "cardFilterFlagged": "⚑ Đã gắn cờ {count}",
+  "@cardFilterFlagged": {
+    "placeholders": { "count": { "type": "int" } },
+    "description": "The Flagged filter pill with its count (D3, BR-92)."
   },
   "cardListNewFab": "Thẻ mới",
   "@cardListNewFab": {

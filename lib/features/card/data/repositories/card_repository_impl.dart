@@ -11,11 +11,12 @@ import '../../domain/entities/tag_entity.dart';
 import '../../domain/failures/card_conflict_failure.dart';
 import '../../domain/failures/card_not_found_failure.dart';
 import '../../domain/failures/tag_validation_failure.dart';
+import '../../domain/models/card_list_filter_model.dart';
 import '../../domain/models/card_list_item_model.dart';
 import '../../domain/models/card_text_model.dart';
 import '../../domain/models/tag_name_model.dart';
 import '../../domain/repositories/card_repository.dart';
-import '../mappers/card_list_item_mapper.dart';
+import '../datasources/card_list_read_data_source.dart';
 import '../mappers/card_mapper.dart';
 import '../mappers/tag_mapper.dart';
 import '../datasources/card_dao.dart';
@@ -46,6 +47,7 @@ final class CardRepositoryImpl implements CardRepository {
     required DateTime Function() clock,
     String Function()? idGenerator,
   }) : _cardDao = CardDao(database),
+       _reads = CardListReadDataSource(CardDao(database)),
        _deckContextDao = CardDeckContextDao(database),
        _idGenerator = idGenerator ?? const Uuid().v4,
        // Dart forbids a named parameter starting with `_`, so the initializing
@@ -54,6 +56,10 @@ final class CardRepositoryImpl implements CardRepository {
        _clock = clock;
 
   final CardDao _cardDao;
+
+  /// The list-read surface (windowed rows, filter counts), split out to keep
+  /// each file inside the size guard.
+  final CardListReadDataSource _reads;
 
   /// For the deck side of the createCard invariant only (BR-62 lock).
   final CardDeckContextDao _deckContextDao;
@@ -67,49 +73,33 @@ final class CardRepositoryImpl implements CardRepository {
   /// clock in; timestamps are stored in UTC, always.
   final DateTime Function() _clock;
 
+  // ---- reads: delegated to CardListReads (the list surface) --------------
+
   @override
   Stream<List<CardEntity>> watchCardsByDeck(
     String deckId, {
     required int limit,
-  }) {
-    // A window has to be a window. Zero would render an empty deck that has
-    // cards, and a negative one is SQLite's "no limit" — the unbounded read
-    // this parameter exists to prevent, arriving through the parameter meant
-    // to stop it.
-    if (limit < 1) {
-      throw ArgumentError.value(limit, 'limit', 'must be at least 1');
-    }
-
-    return _cardDao
-        .watchCardsByDeck(deckId, limit: limit)
-        .handleError(_rethrowMapped)
-        .map(
-          (List<Card> rows) =>
-              rows.map(cardEntityFromRow).toList(growable: false),
-        );
-  }
+  }) => _reads.watchCardsByDeck(deckId, limit: limit);
 
   @override
   Stream<List<CardListItemModel>> watchCardListItems(
     String deckId, {
     required int limit,
-  }) {
-    if (limit < 1) {
-      throw ArgumentError.value(limit, 'limit', 'must be at least 1');
-    }
+    CardListFilter filter = CardListFilter.all,
+    DateTime? now,
+  }) =>
+      _reads.watchCardListItems(deckId, limit: limit, filter: filter, now: now);
 
-    return _cardDao
-        .watchCardListItemsByDeck(deckId, limit: limit)
-        .handleError(_rethrowMapped)
-        .map(
-          (List<CardListItemsByDeckResult> rows) =>
-              rows.map(cardListItemFromRow).toList(growable: false),
-        );
-  }
+  @override
+  Stream<int> watchFilteredCardCount(
+    String deckId, {
+    CardListFilter filter = CardListFilter.all,
+    DateTime? now,
+  }) => _reads.watchFilteredCardCount(deckId, filter: filter, now: now);
 
   @override
   Stream<int> watchCardCountByDeck(String deckId) =>
-      _cardDao.watchCardCountByDeck(deckId).handleError(_rethrowMapped);
+      _reads.watchCardCountByDeck(deckId);
 
   @override
   Future<CardEntity> getCard(String cardId) =>

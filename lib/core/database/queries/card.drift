@@ -73,6 +73,50 @@ WHERE c.deck_id = :deckId
 ORDER BY c.created_at DESC, c.id DESC
 LIMIT :limit;
 
+-- Filtered variants of `cardListItemsByDeck` (D3 filter pills: Due now, New,
+-- Flagged). **Separate statements, not a mode parameter**, for the index reason
+-- `flaggedCardsByDeck` already gives: each adds one predicate on an indexed
+-- column and the composite `(deck_id, created_at, id)` still stops early, where
+-- an `OR (:mode = …)` chain would sort the whole deck. The SELECT list — the two
+-- nested rows and the tag `GROUP_CONCAT` — is identical to the unfiltered read;
+-- only the `WHERE` differs.
+--
+-- "Due" is `due_at IS NULL OR due_at <= :now`, character-for-character the BR-22
+-- predicate in `study.drift`; "new" is `review_count = 0`, the BR-90 test
+-- `cardStateOf` runs first.
+cardListItemsDueByDeck:
+SELECT
+  c.**, s.**,
+  (SELECT GROUP_CONCAT(t.name, char(31)) FROM card_tags ct
+     INNER JOIN tags t ON t.id = ct.tag_id WHERE ct.card_id = c.id) AS tag_names
+FROM cards c
+INNER JOIN card_review_states s ON s.card_id = c.id
+WHERE c.deck_id = :deckId AND (s.due_at IS NULL OR s.due_at <= :now)
+ORDER BY c.created_at DESC, c.id DESC
+LIMIT :limit;
+
+cardListItemsNewByDeck:
+SELECT
+  c.**, s.**,
+  (SELECT GROUP_CONCAT(t.name, char(31)) FROM card_tags ct
+     INNER JOIN tags t ON t.id = ct.tag_id WHERE ct.card_id = c.id) AS tag_names
+FROM cards c
+INNER JOIN card_review_states s ON s.card_id = c.id
+WHERE c.deck_id = :deckId AND s.review_count = 0
+ORDER BY c.created_at DESC, c.id DESC
+LIMIT :limit;
+
+cardListItemsFlaggedByDeck:
+SELECT
+  c.**, s.**,
+  (SELECT GROUP_CONCAT(t.name, char(31)) FROM card_tags ct
+     INNER JOIN tags t ON t.id = ct.tag_id WHERE ct.card_id = c.id) AS tag_names
+FROM cards c
+INNER JOIN card_review_states s ON s.card_id = c.id
+WHERE c.deck_id = :deckId AND c.is_flagged = 1
+ORDER BY c.created_at DESC, c.id DESC
+LIMIT :limit;
+
 -- How many cards the deck holds, for "showing 50 of 3,240".
 --
 -- A separate statement on purpose. `COUNT(*) OVER ()` beside the rows above
@@ -80,6 +124,19 @@ LIMIT :limit;
 -- precisely the early stop the `LIMIT` and the index exist to buy.
 cardCountByDeck:
 SELECT COUNT(*) FROM cards WHERE deck_id = :deckId;
+
+-- The Due-now and New pill counts. The mirror of `flaggedCountByDeck`: the same
+-- predicate as the filtered list, without the window, so the pill can say how
+-- many the filter would show.
+dueCountByDeck:
+SELECT COUNT(*) FROM cards c
+INNER JOIN card_review_states s ON s.card_id = c.id
+WHERE c.deck_id = :deckId AND (s.due_at IS NULL OR s.due_at <= :now);
+
+newCountByDeck:
+SELECT COUNT(*) FROM cards c
+INNER JOIN card_review_states s ON s.card_id = c.id
+WHERE c.deck_id = :deckId AND s.review_count = 0;
 
 cardById:
 SELECT * FROM cards WHERE id = :cardId;

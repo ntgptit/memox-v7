@@ -11,6 +11,11 @@ import '../../../../core/database/app_database.dart';
 ///
 /// This class speaks Drift rows and companions. They stop here: the
 /// repository maps them to domain entities and never lets one across (AD-01).
+/// One management-list row as it leaves the DAO: the card, its review state and
+/// its concatenated tag names. A record so all four filter queries — each with
+/// its own drift result class — share one type the repository maps once.
+typedef CardListItemRow = (Card, CardReviewState, String? tagNames);
+
 final class CardDao {
   CardDao(this._db);
 
@@ -27,16 +32,60 @@ final class CardDao {
   Stream<List<Card>> watchCardsByDeck(String deckId, {required int limit}) =>
       _db.cardsByDeck(deckId, limit).watch();
 
-  /// The same window, joined to each card's review state (see `card.drift`).
-  /// Each result carries a nested `Card` and `CardReviewState`.
-  Stream<List<CardListItemsByDeckResult>> watchCardListItemsByDeck(
+  /// The window joined to each card's review state and tags (see `card.drift`).
+  ///
+  /// **Every filter yields the same record type** — `(Card, CardReviewState,
+  /// String? tagNames)` — even though drift generates a distinct result class per
+  /// query, so the repository maps all four through one path without a per-filter
+  /// branch. The tuple carries Drift rows, not domain entities: they still stop
+  /// at the repository (AD-01).
+  Stream<List<CardListItemRow>> watchCardListItemsByDeck(
     String deckId, {
     required int limit,
-  }) => _db.cardListItemsByDeck(deckId, limit).watch();
+  }) => _db
+      .cardListItemsByDeck(deckId, limit)
+      .watch()
+      .map((rows) => rows.map((r) => (r.c, r.s, r.tagNames)).toList());
+
+  /// The same read, filtered to cards due now (BR-22).
+  Stream<List<CardListItemRow>> watchCardListItemsDueByDeck(
+    String deckId, {
+    required DateTime now,
+    required int limit,
+  }) => _db
+      .cardListItemsDueByDeck(deckId, now, limit)
+      .watch()
+      .map((rows) => rows.map((r) => (r.c, r.s, r.tagNames)).toList());
+
+  /// The same read, filtered to new cards — no scheduled review yet (BR-90).
+  Stream<List<CardListItemRow>> watchCardListItemsNewByDeck(
+    String deckId, {
+    required int limit,
+  }) => _db
+      .cardListItemsNewByDeck(deckId, limit)
+      .watch()
+      .map((rows) => rows.map((r) => (r.c, r.s, r.tagNames)).toList());
+
+  /// The same read, filtered to flagged cards (BR-92).
+  Stream<List<CardListItemRow>> watchCardListItemsFlaggedByDeck(
+    String deckId, {
+    required int limit,
+  }) => _db
+      .cardListItemsFlaggedByDeck(deckId, limit)
+      .watch()
+      .map((rows) => rows.map((r) => (r.c, r.s, r.tagNames)).toList());
 
   /// The deck's whole card count, for the "showing N of M" line.
   Stream<int> watchCardCountByDeck(String deckId) =>
       _db.cardCountByDeck(deckId).watchSingle();
+
+  /// The Due-now pill count (BR-22).
+  Stream<int> watchDueCountByDeck(String deckId, {required DateTime now}) =>
+      _db.dueCountByDeck(deckId, now).watchSingle();
+
+  /// The New pill count (BR-90).
+  Stream<int> watchNewCountByDeck(String deckId) =>
+      _db.newCountByDeck(deckId).watchSingle();
 
   Future<Card?> cardById(String cardId) =>
       _db.cardById(cardId).getSingleOrNull();
