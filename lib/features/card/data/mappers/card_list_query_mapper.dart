@@ -39,27 +39,32 @@ Expression<bool> isNewPredicate(CardReviewStates s) => s.reviewCount.equals(0);
 /// BR-92: the user's own mark.
 Expression<bool> isFlaggedPredicate(Cards c) => c.isFlagged.equals(1);
 
-/// Front or back contains [term], case-insensitively (ASCII, SQLite's `LIKE`).
+/// Front or back contains [term], matched **literally** and case-insensitively
+/// (ASCII, which is what SQLite's own case folding covers).
 ///
-/// `LIKE` with wrapping wildcards, which SQLite answers by scanning — no index
-/// serves a leading `%`. That is acceptable here and only here: the deck
-/// predicate has already narrowed the scan to one deck's cards, so the scan is
-/// bounded by what the screen was already reading.
+/// **`instr`, not `LIKE`, and that is what makes `%` an ordinary character.**
+/// `LIKE` reads `%` and `_` in its pattern as wildcards, so a user searching
+/// `100%` was really searching "100 followed by anything" and a lone `%` matched
+/// the whole deck. Suppressing that needs a `LIKE … ESCAPE '\'` clause, which
+/// drift's typed `like()` does not emit — and `CustomExpression` cannot bind a
+/// variable, so writing the clause by hand would mean interpolating the user's
+/// text into SQL. `instr(haystack, needle) > 0` has no pattern language at all:
+/// every character is itself, and the term stays a bound variable.
 ///
-/// **`%` and `_` typed by the user act as wildcards, not literals** — the search
-/// is therefore over-permissive, never unbounded. `100%` becomes the pattern
-/// `%100%%`, which still demands the literal `100`; the extra wildcard only
-/// widens what may follow it, so the card reading `100% sure` is found and an
-/// unrelated card is not. What a lone `%` does is match every card, and `a%b`
-/// matches `axxxb` as well as `a%b`.
+/// `lower()` on both sides because `instr` is case-sensitive where `LIKE` is
+/// not; the search should not become stricter than it was.
 ///
-/// Fixing it needs a `LIKE … ESCAPE '\'` clause, and drift's typed `like()`
-/// emits no `ESCAPE` — pre-escaping alone does nothing, because SQLite has no
-/// default escape character. Getting it right means hand-writing this comparison
-/// as raw SQL against aliased columns, a worse trade than the wart for a local
-/// vocabulary search. `card_filter_repository_test.dart` pins both behaviours.
+/// Still a scan — no index serves "contains" — and still acceptable for the same
+/// reason as before: the deck predicate has already narrowed it to one deck.
 Expression<bool> searchPredicate(Cards c, String term) =>
-    c.front.like('%$term%') | c.back.like('%$term%');
+    _contains(c.front, term) | _contains(c.back, term);
+
+/// `instr(lower(column), lower(?)) > 0`.
+Expression<bool> _contains(GeneratedColumn<String> column, String term) =>
+    FunctionCallExpression<int>('instr', <Expression<Object>>[
+      column.lower(),
+      Variable<String>(term.toLowerCase()),
+    ]).isBiggerThanValue(0);
 
 /// The whole `WHERE` for one list read: always the deck, plus the active filter,
 /// plus the search term when there is one.
