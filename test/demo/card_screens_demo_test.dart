@@ -5,6 +5,7 @@ import 'package:flutter/material.dart' show Brightness, Widget;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/card/di/card_repository_provider.dart';
+import 'package:memox/features/card/domain/models/card_list_filter_model.dart';
 import 'package:memox/features/card/domain/models/card_list_item_model.dart';
 import 'package:memox/features/card/domain/models/card_state_distribution_model.dart';
 import 'package:memox/features/card/domain/models/card_state_model.dart';
@@ -63,10 +64,16 @@ const CardStateDistributionModel _demoDistribution = CardStateDistributionModel(
   mastered: 44,
 );
 
-FakeCardRepository _demoList(List<CardListItemModel> items) =>
-    FakeCardRepository.loaded(items, total: 142)
-      ..deckContextToShow = _demoContext
-      ..distributionToShow = _demoDistribution;
+FakeCardRepository _demoList(
+  List<CardListItemModel> items,
+) => FakeCardRepository.loaded(items, total: 142)
+  ..deckContextToShow = _demoContext
+  ..distributionToShow = _demoDistribution
+  // Something waiting, so the panel's Start-study action and the pill counts
+  // render the state a learner actually opens this screen in.
+  ..filterCounts[CardListFilter.dueNow] = 23
+  ..filterCounts[CardListFilter.isNew] = 38
+  ..filterCounts[CardListFilter.flagged] = 2;
 
 ProviderScope _scope(FakeCardRepository repo, Widget home, Brightness mode) =>
     ProviderScope(

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/theme/app_elevation.dart';
+import '../../../../../core/theme/app_icon_size.dart';
+import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -52,7 +54,67 @@ class CardProgressPanelWidget extends ConsumerWidget {
           _DistributionBar(distribution: distribution),
           const SizedBox(height: AppSpacing.sm),
           _Legend(distribution: distribution),
+          _StudyAction(deckId: deckId),
         ],
+      ),
+    );
+  }
+}
+
+/// The panel's primary action: begin a review over what is due.
+///
+/// **Only when something is due**, the rule the deck card already follows: a
+/// deck with nothing waiting has no verb to offer, and a disabled Study button
+/// says "you cannot" where the truth is "there is nothing to". It is the one
+/// filled `primary` control on this screen, because it is the one thing a
+/// learner comes here to do.
+///
+/// The session itself is M5; until then the tap says so, exactly as
+/// `deck_study_button_widget.dart` does — one place to change when the review
+/// screen lands.
+class _StudyAction extends ConsumerWidget {
+  const _StudyAction({required this.deckId});
+
+  final String deckId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final due = ref.watch(cardDueCountProvider(deckId)).value ?? 0;
+    if (due == 0) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.lg),
+      child: FilledButton(
+        onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.deckStudyComingSoonMessage)),
+        ),
+        style: ButtonStyle(
+          minimumSize: const WidgetStatePropertyAll<Size>(
+            Size.fromHeight(AppSpacing.minimumTouchTarget),
+          ),
+          shape: WidgetStatePropertyAll<OutlinedBorder>(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppRadius.pill),
+            ),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          spacing: AppSpacing.xs,
+          children: <Widget>[
+            const Icon(Icons.play_arrow, size: AppIconSize.sm),
+            Text(
+              context.l10n.cardProgressStudyAction(due),
+              // `onPrimary` stated, not inherited: a style taken from the text
+              // theme carries the body colour and would land dark ink on the
+              // brand fill — the 2.33:1 the deck button already paid for once.
+              style: context.texts.labelMedium?.copyWith(
+                color: context.colors.onPrimary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
