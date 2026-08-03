@@ -154,6 +154,8 @@ void main() {
       'c3',
       front: 'meticulous',
       back: 'showing great attention to detail / rất tỉ mỉ, cẩn thận',
+      // Flagged, so the review render shows the app-bar flag in its active amber.
+      isFlagged: true,
     );
 
     await pumpReview(

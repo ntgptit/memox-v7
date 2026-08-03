@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/state/submit_outcome.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/theme_context_extension.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_action_button.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
@@ -349,12 +350,19 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
   /// the flag has loaded, so a tap can never write against an unknown value. The
   /// icon reads the [cardFlag] stream; the tap is a [SetCardFlag] command, and
   /// the stream re-emits the written value.
+  ///
+  /// Flagged turns the glyph `warning` amber as well as filling it, so the active
+  /// state reads by colour and not shape alone — the one place a colour is worth
+  /// it, because this is the control that owns the mark. (The list row keeps its
+  /// neutral flag: a passive glyph among many rows takes the max-contrast tone,
+  /// where a coloured one cannot clear 4.5:1 on both themes.)
   Widget _flagToggle(String cardId) {
     final flag = ref.watch(cardFlagProvider(cardId));
     final isFlagged = flag.value ?? false;
 
     return IconButton(
       icon: Icon(isFlagged ? Icons.flag : Icons.outlined_flag),
+      color: isFlagged ? context.semanticColors.warning : null,
       onPressed: flag.isLoading
           ? null
           : () => ref
