@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../core/theme/app_elevation.dart';
+import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
-import '../../../../../shared/widgets/mx_card.dart';
 import '../../../domain/models/card_state_distribution_model.dart';
 import '../../../domain/models/card_state_model.dart';
+import '../../controllers/card_list_filter_controller.dart';
 import '../../controllers/card_progress_controller.dart';
 import '../support/card_state_widget.dart';
 
@@ -29,12 +29,18 @@ class CardProgressPanelWidget extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
-    // A flat bordered card (no shadow — it sits inside the scrolling list, where
-    // a shadow stacked on the page reads as a rendering fault, MxCard's own rule).
-    // It gives the progress block one clear region rather than four elements
-    // floating on the page.
-    return MxCard(
-      elevation: AppElevation.none,
+    // **A tinted panel, not another white card.** Every row below is an MxCard on
+    // the page colour; a panel built the same way read as the first row of the
+    // list rather than as the deck's summary. `primaryContainer` gives the block
+    // its own ground — `onPrimaryContainer` on it measures 11.46:1 light and
+    // 8.87:1 dark, and the legend dots keep their state hues, which clear the 3:1
+    // a non-text mark needs (3.50 at the tightest).
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: context.colors.primaryContainer,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
@@ -42,7 +48,9 @@ class CardProgressPanelWidget extends ConsumerWidget {
             children: <Widget>[
               _ProgressRing(fraction: distribution.masteredFraction),
               const SizedBox(width: AppSpacing.lg),
-              Expanded(child: _Headline(distribution: distribution)),
+              Expanded(
+                child: _Headline(deckId: deckId, distribution: distribution),
+              ),
             ],
           ),
           const SizedBox(height: AppSpacing.md),
@@ -84,7 +92,9 @@ class _ProgressRing extends StatelessWidget {
           ),
           Text(
             context.l10n.cardProgressPercent((fraction * 100).round()),
-            style: context.texts.labelMedium,
+            style: context.texts.labelMedium?.copyWith(
+              color: context.colors.onPrimaryContainer,
+            ),
           ),
         ],
       ),
@@ -92,14 +102,21 @@ class _ProgressRing extends StatelessWidget {
   }
 }
 
-/// The title and the mastered/total line.
-class _Headline extends StatelessWidget {
-  const _Headline({required this.distribution});
+/// The title, the mastered/total line, and what is waiting right now.
+class _Headline extends ConsumerWidget {
+  const _Headline({required this.deckId, required this.distribution});
 
+  final String deckId;
   final CardStateDistributionModel distribution;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final onPanel = context.colors.onPrimaryContainer;
+    // The two counts the pills already read, said once more where the summary is
+    // — "how far along" above, "what is waiting" below it. Null until each lands.
+    final due = ref.watch(cardDueCountProvider(deckId)).value;
+    final fresh = ref.watch(cardNewCountProvider(deckId)).value;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -107,7 +124,7 @@ class _Headline extends StatelessWidget {
         Text(
           context.l10n.cardProgressTitle.toUpperCase(),
           style: context.texts.labelSmall?.copyWith(
-            color: context.colors.onSurfaceVariant,
+            color: onPanel,
             letterSpacing: 1.1,
           ),
         ),
@@ -117,8 +134,15 @@ class _Headline extends StatelessWidget {
             distribution.mastered,
             distribution.total,
           ),
-          style: context.texts.titleSmall,
+          style: context.texts.titleSmall?.copyWith(color: onPanel),
         ),
+        if (due != null && fresh != null) ...<Widget>[
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            context.l10n.cardProgressDueNew(due, fresh),
+            style: context.texts.labelSmall?.copyWith(color: onPanel),
+          ),
+        ],
       ],
     );
   }
@@ -203,11 +227,11 @@ class _LegendItem extends StatelessWidget {
             context.cardStateLabel(state),
             count,
           ),
-          // labelMedium on onSurface, not labelSmall on onSurfaceVariant: four
-          // short counts that a reader scans need to clear the row of ordinary
-          // body text, and the muted variant at the smaller size sat under it.
+          // labelMedium on the panel's own ink: four short counts a reader scans
+          // need to clear ordinary body text, and `onPrimaryContainer` measures
+          // 11.46:1 light / 8.87:1 dark on the tinted ground.
           style: context.texts.labelMedium?.copyWith(
-            color: context.colors.onSurface,
+            color: context.colors.onPrimaryContainer,
           ),
         ),
       ],

@@ -668,6 +668,11 @@
     "placeholders": { "mastered": { "type": "int" }, "total": { "type": "int" } },
     "description": "The mastered/total line beside the ring (BR-88)."
   },
+  "cardProgressDueNew": "{due} due · {fresh} new",
+  "@cardProgressDueNew": {
+    "placeholders": { "due": { "type": "int" }, "fresh": { "type": "int" } },
+    "description": "The what-to-do-now line under the mastered count: how many cards are due and how many are still new (D5, BR-22, BR-90)."
+  },
   "cardProgressLegendItem": "{label} {count}",
   "@cardProgressLegendItem": {
     "placeholders": { "label": { "type": "String" }, "count": { "type": "int" } },
