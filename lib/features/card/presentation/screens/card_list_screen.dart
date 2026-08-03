@@ -18,6 +18,7 @@ import '../controllers/card_list_now_controller.dart';
 import '../controllers/card_list_window_controller.dart';
 import '../widgets/items/card_tile_widget.dart';
 import '../widgets/sections/card_filter_bar_widget.dart';
+import '../widgets/sections/card_progress_panel_widget.dart';
 
 /// Grows the read window by one step (W1b).
 ///
@@ -126,6 +127,11 @@ class _Loaded extends ConsumerWidget {
     // measured against the same instant, and the tile never reads the clock.
     final now = ref.watch(cardListNowProvider);
 
+    // Two header rows scroll above the cards: the progress panel (D5) and the
+    // "showing N of M" line. The filter pills pin in the subheader instead, so
+    // they stay reachable while the panel scrolls away.
+    const headerCount = 2;
+
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
@@ -133,13 +139,14 @@ class _Loaded extends ConsumerWidget {
         AppSpacing.lg,
         AppSpacing.xxl,
       ),
-      // One extra row: the "showing N of M" label at the top, then the cards,
-      // then the tail. The header is index 0; the tail is the last index.
-      itemCount: items.length + 2,
+      itemCount: items.length + headerCount + 1,
       separatorBuilder: (_, index) =>
-          SizedBox(height: index == 0 ? 0 : AppSpacing.md),
+          SizedBox(height: index == 0 ? AppSpacing.md : AppSpacing.md),
       itemBuilder: (context, index) {
         if (index == 0) {
+          return CardProgressPanelWidget(deckId: deckId);
+        }
+        if (index == 1) {
           return Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.sm),
             child: Text(
@@ -151,8 +158,9 @@ class _Loaded extends ConsumerWidget {
             ),
           );
         }
-        if (index <= items.length) {
-          final item = items[index - 1];
+        final cardIndex = index - headerCount;
+        if (cardIndex < items.length) {
+          final item = items[cardIndex];
           return CardTileWidget(
             item: item,
             now: now,

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/card/di/card_repository_provider.dart';
 import 'package:memox/features/card/domain/models/card_list_filter_model.dart';
+import 'package:memox/features/card/domain/models/card_state_distribution_model.dart';
 import 'package:memox/features/card/domain/models/card_state_model.dart';
 import 'package:memox/features/card/presentation/controllers/card_list_window_controller.dart';
 import 'package:memox/features/card/presentation/screens/card_list_screen.dart';
@@ -119,6 +120,30 @@ void main() {
 
     expect(find.text('New'), findsOneWidget);
     expect(find.text('Mastered'), findsOneWidget);
+  });
+
+  testWidgets('the progress panel shows the mastered percentage (D5)', (
+    tester,
+  ) async {
+    final repository = FakeCardRepository();
+    addTearDown(repository.dispose);
+    repository.distributionToShow = const CardStateDistributionModel(
+      total: 100,
+      isNew: 10,
+      beginning: 8,
+      reviewing: 20,
+      mastered: 62,
+    );
+    await pump(tester, repository);
+
+    repository.emitItems(<dynamic>[repository.listItem('c1')].cast());
+    repository.emitCount(100);
+    await tester.pumpAndSettle();
+
+    expect(find.text('62%'), findsOneWidget);
+    expect(find.text('62 of 100 mastered'), findsOneWidget);
+    // The legend names each band with its count.
+    expect(find.text('Reviewing 20'), findsOneWidget);
   });
 
   testWidgets('selecting a pill re-reads the list with that filter (D3)', (

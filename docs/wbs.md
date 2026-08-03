@@ -5002,8 +5002,17 @@ cột NULL của scheduler kia.
   mutator vào window để giữ CQS) + 4 count provider; `CardFilterBarWidget`
   (FilterChip, count trên từng pill) ở subheader, ẩn khi deck rỗng; empty-theo-
   filter (`_NoMatch`). Audit list thêm allowance cho `_RenderChip`/ink 8/no-
-  painter 5/rasterNotFlat chip. Còn: panel tiến độ, breadcrumb + tên deck,
-  auto-forward.
+  painter 5/rasterNotFlat chip;
+  lát 10 (panel tiến độ deck, D5) **done** — `CardStateDistributionModel`
+  (total + 4 band, `masteredFraction`) đọc từ `cardStateCountsByDeck` có sẵn
+  (map trong `CardListReadDataSource`, `?? 0` cho SUM nullable);
+  `watchCardStateDistribution` use case + `cardProgress` stream provider;
+  `CardProgressPanelWidget` (vòng mastered `success`/track `progressTrack`, thanh
+  phân bố bốn màu `info`/`warning`/`primaryAccent`/`success` khớp
+  `card_state_widget.dart`, legend) là header index 0 của list, tự ẩn khi total 0;
+  audit list thêm `drive: pumpAndSettle` (stream phân bố tới sau list một frame) +
+  allowance customPainter cho `_CircularProgressIndicatorPainter`. Còn: breadcrumb
+  + tên deck, auto-forward.
 - **Goal:** Người dùng quản lý card hoàn chỉnh trong deck loại `card`, từ UI
   xuống transaction Drift.
 - **Scope:** card list; empty state; tạo card; tạo card **đầu tiên** trong deck

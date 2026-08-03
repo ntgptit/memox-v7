@@ -3,6 +3,7 @@ import '../entities/tag_entity.dart';
 import '../failures/tag_validation_failure.dart';
 import '../models/card_list_filter_model.dart';
 import '../models/card_list_item_model.dart';
+import '../models/card_state_distribution_model.dart';
 import '../models/card_text_model.dart';
 import '../models/tag_name_model.dart';
 
@@ -61,6 +62,10 @@ abstract interface class CardRepository {
     CardListFilter filter = CardListFilter.all,
     DateTime? now,
   });
+
+  /// The deck's four-state distribution, for the progress panel (D5, BR-88…91).
+  /// One aggregate over every card, not a count of the window.
+  Stream<CardStateDistributionModel> watchCardStateDistribution(String deckId);
 
   /// How many cards the deck holds, whatever the window is showing.
   ///

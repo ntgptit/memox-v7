@@ -13,6 +13,7 @@ import '../../domain/failures/card_not_found_failure.dart';
 import '../../domain/failures/tag_validation_failure.dart';
 import '../../domain/models/card_list_filter_model.dart';
 import '../../domain/models/card_list_item_model.dart';
+import '../../domain/models/card_state_distribution_model.dart';
 import '../../domain/models/card_text_model.dart';
 import '../../domain/models/tag_name_model.dart';
 import '../../domain/repositories/card_repository.dart';
@@ -100,6 +101,11 @@ final class CardRepositoryImpl implements CardRepository {
   @override
   Stream<int> watchCardCountByDeck(String deckId) =>
       _reads.watchCardCountByDeck(deckId);
+
+  @override
+  Stream<CardStateDistributionModel> watchCardStateDistribution(
+    String deckId,
+  ) => _reads.watchCardStateDistribution(deckId);
 
   @override
   Future<CardEntity> getCard(String cardId) =>

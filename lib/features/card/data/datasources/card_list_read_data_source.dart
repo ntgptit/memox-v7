@@ -4,6 +4,8 @@ import '../../../../core/error/failure.dart';
 import '../../domain/entities/card_entity.dart';
 import '../../domain/models/card_list_filter_model.dart';
 import '../../domain/models/card_list_item_model.dart';
+import '../../domain/models/card_state_distribution_model.dart';
+import '../../domain/models/card_state_model.dart';
 import 'card_dao.dart';
 import '../mappers/card_list_item_mapper.dart';
 import '../mappers/card_mapper.dart';
@@ -77,6 +79,29 @@ final class CardListReadDataSource {
 
   Stream<int> watchCardCountByDeck(String deckId) =>
       _dao.watchCardCountByDeck(deckId).handleError(_rethrowMapped);
+
+  Stream<CardStateDistributionModel> watchCardStateDistribution(
+    String deckId,
+  ) => _dao
+      .watchCardStateCounts(
+        deckId,
+        // The four thresholds live in card_state_model.dart, not the SQL, so
+        // changing the ladder is a Dart edit, not a migration (see card.drift).
+        reviewingBox: kReviewingBox,
+        masteredBox: kMasteredBox,
+        reviewingDays: kReviewingIntervalDays,
+        masteredDays: kMasteredIntervalDays,
+      )
+      .handleError(_rethrowMapped)
+      .map(
+        (r) => CardStateDistributionModel(
+          total: r.total,
+          isNew: r.newCount ?? 0,
+          beginning: r.beginningCount ?? 0,
+          reviewing: r.reviewingCount ?? 0,
+          mastered: r.masteredCount ?? 0,
+        ),
+      );
 
   Stream<int> watchFilteredCardCount(
     String deckId, {

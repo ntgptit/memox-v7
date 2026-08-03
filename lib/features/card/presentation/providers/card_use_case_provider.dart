@@ -13,6 +13,7 @@ import '../../domain/usecases/update_card_use_case.dart';
 import '../../domain/usecases/watch_card_count_use_case.dart';
 import '../../domain/usecases/watch_cards_by_deck_use_case.dart';
 import '../../domain/usecases/watch_card_list_items_use_case.dart';
+import '../../domain/usecases/watch_card_state_distribution_use_case.dart';
 
 part 'card_use_case_provider.g.dart';
 
@@ -71,3 +72,7 @@ WatchCardListItemsUseCase watchCardListItemsUseCase(Ref ref) =>
 @riverpod
 WatchCardFlagUseCase watchCardFlagUseCase(Ref ref) =>
     WatchCardFlagUseCase(ref.watch(cardRepositoryProvider));
+
+@riverpod
+WatchCardStateDistributionUseCase watchCardStateDistributionUseCase(Ref ref) =>
+    WatchCardStateDistributionUseCase(ref.watch(cardRepositoryProvider));

@@ -2,6 +2,7 @@
 library;
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/features/card/domain/models/card_state_distribution_model.dart';
 import 'package:memox/features/card/domain/models/card_state_model.dart';
 import 'package:memox/features/card/presentation/screens/card_list_screen.dart';
 import 'package:memox/shared/widgets/mx_content_shell.dart';
@@ -12,6 +13,8 @@ import '../../../../card_audit_harness.dart';
 import '../../../../memox_audit.dart';
 import '../../../../screen_auditor.dart';
 import '../../../../../features/card/presentation/support/fake_card_repository.dart';
+
+Future<void> _settle(WidgetTester tester) => tester.pumpAndSettle();
 
 /// Strict visual audit for `CardListScreen` (UC-04 W1).
 ///
@@ -26,31 +29,46 @@ import '../../../../../features/card/presentation/support/fake_card_repository.d
 /// exact count, so a control added to the row surfaces as a miscount rather than
 /// vanishing into a blanket permission.
 void main() {
-  // Two rows in different states, one flagged, so the audit measures the state
-  // dots and label (D5) and the flag indicator (BR-92) as well as the face.
-  FakeCardRepository loaded() => FakeCardRepository.loaded(
-    <dynamic>[
-      FakeCardRepository().listItem(
-        'c1',
-        front: 'ephemeral',
-        back: 'short-lived',
-        isFlagged: true,
-        tagNames: <String>['noun', 'people'],
-      ),
-      FakeCardRepository().listItem(
-        'c2',
-        front: 'ubiquitous',
-        back: 'everywhere',
-        state: CardState.mastered,
-      ),
-    ].cast(),
-    total: 214,
-  );
+  // Two rows in different states, one flagged and tagged, plus a progress
+  // distribution — so the audit measures the panel (ring, bar, legend), the
+  // state dots and label (D5), the tag chips (BR-93) and the flag (BR-92).
+  FakeCardRepository loaded() {
+    final repository = FakeCardRepository.loaded(
+      <dynamic>[
+        FakeCardRepository().listItem(
+          'c1',
+          front: 'ephemeral',
+          back: 'short-lived',
+          isFlagged: true,
+          tagNames: <String>['noun', 'people'],
+        ),
+        FakeCardRepository().listItem(
+          'c2',
+          front: 'ubiquitous',
+          back: 'everywhere',
+          state: CardState.mastered,
+        ),
+      ].cast(),
+      total: 214,
+    );
+    repository.distributionToShow = const CardStateDistributionModel(
+      total: 214,
+      isNew: 40,
+      beginning: 34,
+      reviewing: 34,
+      mastered: 106,
+    );
+
+    return repository;
+  }
 
   memoxProductionScreenAuditTest(
     'card_list_screen',
     () => cardScreenWith(loaded(), const CardListScreen(deckId: 'deck-1')),
     anchors: <AuditAnchor>[AuditAnchor.type('shell', MxContentShell)],
+    // The distribution stream lands a frame after the list, so give the panel a
+    // second settle before capture — otherwise it is still SizedBox.shrink.
+    drive: _settle,
     allowances: const <AuditSkipAllowance>[
       // The MaterialApp's own surfaces, above the screen.
       AuditSkipAllowance(
@@ -120,6 +138,16 @@ void main() {
         rationale:
             'The extended FAB lays out its label and icon in an OverflowBox, '
             'whose render object only sizes its child and paints no colour.',
+      ),
+      // The progress ring (D5, BR-88).
+      AuditSkipAllowance(
+        itemId: 'shell',
+        reason: SkipReason.customPainter,
+        detailContains: '_CircularProgressIndicatorPainter',
+        rationale:
+            'The mastered ring draws its arc through the CircularProgressIndicator '
+            'painter; the arc is semantic.success and the track semantic.'
+            'progressTrack, both asserted in app_theme_test.dart.',
       ),
     ],
   );
