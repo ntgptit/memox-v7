@@ -244,4 +244,31 @@ void main() {
 
     expect(items.map((i) => i.card.id), <String>[both]);
   });
+
+  test('a term containing % still requires its literal part (S1)', () async {
+    final tree = await h.seedTree();
+    final literal = await seedCardIn(tree.leaf.id, '100% sure');
+    await seedCardIn(tree.leaf.id, 'anything at all');
+
+    final items = await h.cardRepository
+        .watchCardListItems(tree.leaf.id, limit: 50, searchTerm: '100%')
+        .first;
+
+    // `%100%%` still demands the literal "100"; the trailing wildcards only widen
+    // what may follow it. So this is over-permissive, not unbounded.
+    expect(items.map((i) => i.card.id), <String>[literal]);
+  });
+
+  test('a bare % is the term that does match everything (S1)', () async {
+    final tree = await h.seedTree();
+    final a = await seedCardIn(tree.leaf.id, 'alpha');
+    final b = await seedCardIn(tree.leaf.id, 'beta');
+
+    final items = await h.cardRepository
+        .watchCardListItems(tree.leaf.id, limit: 50, searchTerm: '%')
+        .first;
+
+    // This is the real edge of the unescaped LIKE: a lone wildcard matches all.
+    expect(items.map((i) => i.card.id).toSet(), <String>{a, b});
+  });
 }
