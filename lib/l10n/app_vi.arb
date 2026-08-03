@@ -698,9 +698,9 @@
     "placeholders": { "count": { "type": "int" } },
     "description": "The Flagged filter pill with its count (D3, BR-92)."
   },
-  "cardListNewFab": "Thẻ mới",
-  "@cardListNewFab": {
-    "description": "Extended floating action button on the card list (D4)."
+  "cardListNewAction": "Thẻ mới",
+  "@cardListNewAction": {
+    "description": "App-bar action on the card list that opens the editor (D4)."
   },
   "cardEditorCreateTitle": "Thẻ mới",
   "@cardEditorCreateTitle": { "description": "App-bar title of the card editor in create mode." },
