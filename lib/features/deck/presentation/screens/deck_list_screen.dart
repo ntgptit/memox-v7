@@ -17,6 +17,7 @@ import '../controllers/deck_list_controller.dart';
 import '../controllers/deck_list_view_controller.dart';
 import '../states/deck_list_view_state.dart';
 import '../widgets/overlays/deck_actions_widget.dart';
+import '../widgets/overlays/deck_confirm_widget.dart';
 import '../widgets/overlays/deck_create_child_widget.dart';
 import '../widgets/sections/deck_level_error_widget.dart';
 import '../widgets/sections/deck_summary_section_widget.dart';
@@ -165,8 +166,12 @@ class _DeckLevel extends StatelessWidget {
               deck: parent,
               mayOfferReset: snapshot.mayOfferReset,
               // The deck being viewed is gone, so staying here would show a
-              // not-found state the user did not ask for.
-              onDeleted: () => context.goNamed(RouteNames.decks),
+              // not-found state the user did not ask for. Going **up one
+              // level** — not to the root — is where the deck was: the user
+              // was inside it, and its siblings are what they were browsing.
+              // Landing at the root instead reads as though more than the one
+              // deck had gone.
+              onDeleted: () => leaveDeletedDeck(context, parent),
             ),
           ),
       ],

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../../../core/navigation/route_names.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../l10n/l10n_extension.dart';
@@ -148,4 +151,26 @@ class _ResetContentTypeDialog extends StatelessWidget {
       },
     );
   }
+}
+
+/// Leaves a deck that has just been deleted, for the level that held it.
+///
+/// **Up one level, not back to the root.** A deleted deck's siblings are what
+/// the user was browsing, so that is where they belong; being dropped at the
+/// root reads as though more than the one deck had gone. A deleted *root* deck
+/// has no level above it, so the root list is the honest destination there.
+///
+/// `goNamed`, not `pop`: the deck was reached by a deep link as often as by a
+/// tap, and popping a stack that may have one entry leaves nowhere to land.
+void leaveDeletedDeck(BuildContext context, DeckEntity deleted) {
+  final parentId = deleted.parentDeckId;
+  if (parentId == null) {
+    context.goNamed(RouteNames.decks);
+    return;
+  }
+
+  context.goNamed(
+    RouteNames.deckDetail,
+    pathParameters: <String, String>{RoutePathParams.deckId: parentId},
+  );
 }
