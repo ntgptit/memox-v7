@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/state/retry_policy.dart';
 import '../../domain/models/card_list_filter_model.dart';
+import '../../domain/models/card_list_sort_model.dart';
 import '../providers/card_use_case_provider.dart';
 import 'card_list_now_controller.dart';
 import 'card_list_window_controller.dart';
@@ -26,6 +27,25 @@ class CardListFilterSelection extends _$CardListFilterSelection {
     // Invalidate rather than a `reset()` on the window: the window stays a value
     // with one mutator (`grow`), and re-creating its autoDispose notifier starts
     // it at `kCardWindowSize`.
+    ref.invalidate(cardListWindowProvider(deckId));
+  }
+}
+
+/// Which order the card list is in (D3).
+///
+/// Its own notifier beside [CardListFilterSelection], and it resets the window
+/// the same way: the list is a growing window, not pages, so re-ordering under a
+/// reader who has grown it to 150 rows re-reads 150 rows in a new order and
+/// leaves them nowhere they recognise. Starting at the first window is both the
+/// cheaper read and the honest position.
+@riverpod
+class CardListSortSelection extends _$CardListSortSelection {
+  @override
+  CardListSort build(String deckId) => CardListSort.newest;
+
+  void select(CardListSort sort) {
+    if (sort == state) return;
+    state = sort;
     ref.invalidate(cardListWindowProvider(deckId));
   }
 }

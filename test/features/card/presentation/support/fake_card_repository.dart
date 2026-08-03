@@ -6,6 +6,7 @@ import 'package:memox/features/card/domain/entities/card_review_state_entity.dar
 import 'package:memox/features/card/domain/entities/tag_entity.dart';
 import 'package:memox/features/card/domain/models/card_list_filter_model.dart';
 import 'package:memox/features/card/domain/models/card_list_item_model.dart';
+import 'package:memox/features/card/domain/models/card_list_sort_model.dart';
 import 'package:memox/features/card/domain/models/card_state_distribution_model.dart';
 import 'package:memox/features/card/domain/models/card_state_model.dart';
 import 'package:memox/features/card/domain/models/deck_context_model.dart';
@@ -148,15 +149,21 @@ final class FakeCardRepository implements CardRepository {
   /// Per-filter pill counts a test can set; all-filter uses the count stream.
   final Map<CardListFilter, int> filterCounts = <CardListFilter, int>{};
 
+  /// Every sort the list read was asked for, in order — so a test can prove the
+  /// sort control changed the query.
+  final List<CardListSort> requestedSorts = <CardListSort>[];
+
   @override
   Stream<List<CardListItemModel>> watchCardListItems(
     String deckId, {
     required int limit,
     CardListFilter filter = CardListFilter.all,
+    CardListSort sort = CardListSort.newest,
     DateTime? now,
   }) {
     requestedLimits.add(limit);
     requestedFilters.add(filter);
+    requestedSorts.add(sort);
     final seeded = _seededItems;
     if (seeded != null) {
       return Stream<List<CardListItemModel>>.value(seeded);

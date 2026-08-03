@@ -2,6 +2,7 @@ import 'package:memox/features/card/domain/entities/card_entity.dart';
 import 'package:memox/features/card/domain/entities/tag_entity.dart';
 import 'package:memox/features/card/domain/models/card_list_filter_model.dart';
 import 'package:memox/features/card/domain/models/card_list_item_model.dart';
+import 'package:memox/features/card/domain/models/card_list_sort_model.dart';
 import 'package:memox/features/card/domain/models/card_state_distribution_model.dart';
 import 'package:memox/features/card/domain/models/card_text_model.dart';
 import 'package:memox/features/card/domain/models/deck_context_model.dart';
@@ -128,6 +129,7 @@ final class CountingCardRepository implements CardRepository {
     String deckId, {
     required int limit,
     CardListFilter filter = CardListFilter.all,
+    CardListSort sort = CardListSort.newest,
     DateTime? now,
   }) {
     watchCalls.add(deckId);

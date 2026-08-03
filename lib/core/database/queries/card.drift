@@ -70,7 +70,7 @@ SELECT
 FROM cards c
 INNER JOIN card_review_states s ON s.card_id = c.id
 WHERE c.deck_id = :deckId
-ORDER BY c.created_at DESC, c.id DESC
+ORDER BY $order
 LIMIT :limit;
 
 -- Filtered variants of `cardListItemsByDeck` (D3 filter pills: Due now, New,
@@ -92,7 +92,7 @@ SELECT
 FROM cards c
 INNER JOIN card_review_states s ON s.card_id = c.id
 WHERE c.deck_id = :deckId AND (s.due_at IS NULL OR s.due_at <= :now)
-ORDER BY c.created_at DESC, c.id DESC
+ORDER BY $order
 LIMIT :limit;
 
 cardListItemsNewByDeck:
@@ -103,7 +103,7 @@ SELECT
 FROM cards c
 INNER JOIN card_review_states s ON s.card_id = c.id
 WHERE c.deck_id = :deckId AND s.review_count = 0
-ORDER BY c.created_at DESC, c.id DESC
+ORDER BY $order
 LIMIT :limit;
 
 cardListItemsFlaggedByDeck:
@@ -114,7 +114,7 @@ SELECT
 FROM cards c
 INNER JOIN card_review_states s ON s.card_id = c.id
 WHERE c.deck_id = :deckId AND c.is_flagged = 1
-ORDER BY c.created_at DESC, c.id DESC
+ORDER BY $order
 LIMIT :limit;
 
 -- How many cards the deck holds, for "showing 50 of 3,240".

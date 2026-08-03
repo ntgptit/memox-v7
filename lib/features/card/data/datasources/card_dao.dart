@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart'
-    show Value, BooleanExpressionOperators, InsertMode;
+    show Value, BooleanExpressionOperators, InsertMode, OrderBy, OrderingTerm;
 import '../../../../core/database/app_database.dart';
+import '../../domain/models/card_list_sort_model.dart';
 
 /// Data access for the Card side of the vertical.
 ///
@@ -15,6 +16,30 @@ import '../../../../core/database/app_database.dart';
 /// its concatenated tag names. A record so all four filter queries — each with
 /// its own drift result class — share one type the repository maps once.
 typedef CardListItemRow = (Card, CardReviewState, String? tagNames);
+
+/// The `$order` term each list query takes, built from the real columns.
+///
+/// One function for all four filtered reads: drift's generated order typedefs
+/// are structurally the same `OrderBy Function(Cards, CardReviewStates)`, so the
+/// sort lives here once rather than per query. `id` breaks every tie, so a window
+/// re-read cannot shuffle two rows that share a timestamp.
+OrderBy cardListOrder(
+  CardListSort sort,
+  Cards c,
+  CardReviewStates s,
+) => switch (sort) {
+  CardListSort.newest => OrderBy(<OrderingTerm>[
+    OrderingTerm.desc(c.createdAt),
+    OrderingTerm.desc(c.id),
+  ]),
+  // NULL `due_at` is a new card — due now — and SQLite sorts NULLs first
+  // ascending, so "soonest first" needs no COALESCE to put them at the front.
+  CardListSort.dueFirst => OrderBy(<OrderingTerm>[
+    OrderingTerm.asc(s.dueAt),
+    OrderingTerm.desc(c.createdAt),
+    OrderingTerm.desc(c.id),
+  ]),
+};
 
 final class CardDao {
   CardDao(this._db);
@@ -42,8 +67,9 @@ final class CardDao {
   Stream<List<CardListItemRow>> watchCardListItemsByDeck(
     String deckId, {
     required int limit,
+    required CardListSort sort,
   }) => _db
-      .cardListItemsByDeck(deckId, limit)
+      .cardListItemsByDeck(deckId, (c, s) => cardListOrder(sort, c, s), limit)
       .watch()
       .map((rows) => rows.map((r) => (r.c, r.s, r.tagNames)).toList());
 
@@ -52,8 +78,14 @@ final class CardDao {
     String deckId, {
     required DateTime now,
     required int limit,
+    required CardListSort sort,
   }) => _db
-      .cardListItemsDueByDeck(deckId, now, limit)
+      .cardListItemsDueByDeck(
+        deckId,
+        now,
+        (c, s) => cardListOrder(sort, c, s),
+        limit,
+      )
       .watch()
       .map((rows) => rows.map((r) => (r.c, r.s, r.tagNames)).toList());
 
@@ -61,8 +93,13 @@ final class CardDao {
   Stream<List<CardListItemRow>> watchCardListItemsNewByDeck(
     String deckId, {
     required int limit,
+    required CardListSort sort,
   }) => _db
-      .cardListItemsNewByDeck(deckId, limit)
+      .cardListItemsNewByDeck(
+        deckId,
+        (c, s) => cardListOrder(sort, c, s),
+        limit,
+      )
       .watch()
       .map((rows) => rows.map((r) => (r.c, r.s, r.tagNames)).toList());
 
@@ -70,8 +107,13 @@ final class CardDao {
   Stream<List<CardListItemRow>> watchCardListItemsFlaggedByDeck(
     String deckId, {
     required int limit,
+    required CardListSort sort,
   }) => _db
-      .cardListItemsFlaggedByDeck(deckId, limit)
+      .cardListItemsFlaggedByDeck(
+        deckId,
+        (c, s) => cardListOrder(sort, c, s),
+        limit,
+      )
       .watch()
       .map((rows) => rows.map((r) => (r.c, r.s, r.tagNames)).toList());
 

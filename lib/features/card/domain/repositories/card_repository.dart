@@ -3,6 +3,7 @@ import '../entities/tag_entity.dart';
 import '../failures/tag_validation_failure.dart';
 import '../models/card_list_filter_model.dart';
 import '../models/card_list_item_model.dart';
+import '../models/card_list_sort_model.dart';
 import '../models/card_state_distribution_model.dart';
 import '../models/card_text_model.dart';
 import '../models/deck_context_model.dart';
@@ -53,6 +54,7 @@ abstract interface class CardRepository {
     String deckId, {
     required int limit,
     CardListFilter filter = CardListFilter.all,
+    CardListSort sort = CardListSort.newest,
     DateTime? now,
   });
 
