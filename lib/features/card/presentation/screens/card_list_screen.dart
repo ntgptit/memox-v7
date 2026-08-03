@@ -23,6 +23,7 @@ import '../widgets/items/card_tile_widget.dart';
 import '../widgets/sections/card_breadcrumb_widget.dart';
 import '../widgets/sections/card_filter_bar_widget.dart';
 import '../widgets/sections/card_progress_panel_widget.dart';
+import '../widgets/support/card_sort_control_widget.dart';
 
 /// Grows the read window by one step (W1b).
 ///
@@ -198,12 +199,19 @@ class _Loaded extends ConsumerWidget {
         if (index == 1) {
           return Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-            child: Text(
-              context.l10n.cardListShowing(items.length, total),
-              style: context.texts.labelSmall?.copyWith(
-                color: context.colors.onSurfaceVariant,
-                letterSpacing: 1.1,
-              ),
+            child: Row(
+              children: <Widget>[
+                Expanded(
+                  child: Text(
+                    context.l10n.cardListShowing(items.length, total),
+                    style: context.texts.labelSmall?.copyWith(
+                      color: context.colors.onSurfaceVariant,
+                      letterSpacing: 1.1,
+                    ),
+                  ),
+                ),
+                CardSortControlWidget(deckId: deckId),
+              ],
             ),
           );
         }

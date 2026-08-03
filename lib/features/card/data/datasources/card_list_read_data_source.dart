@@ -4,6 +4,7 @@ import '../../../../core/error/failure.dart';
 import '../../domain/entities/card_entity.dart';
 import '../../domain/models/card_list_filter_model.dart';
 import '../../domain/models/card_list_item_model.dart';
+import '../../domain/models/card_list_sort_model.dart';
 import '../../domain/models/card_state_distribution_model.dart';
 import '../../domain/models/card_state_model.dart';
 import 'card_dao.dart';
@@ -42,6 +43,7 @@ final class CardListReadDataSource {
     String deckId, {
     required int limit,
     CardListFilter filter = CardListFilter.all,
+    CardListSort sort = CardListSort.newest,
     DateTime? now,
   }) {
     _requireWindow(limit);
@@ -50,19 +52,26 @@ final class CardListReadDataSource {
     // than defaulting the clock. Every branch yields the same `CardListItemRow`,
     // so one map covers them all.
     final rows = switch (filter) {
-      CardListFilter.all => _dao.watchCardListItemsByDeck(deckId, limit: limit),
+      CardListFilter.all => _dao.watchCardListItemsByDeck(
+        deckId,
+        limit: limit,
+        sort: sort,
+      ),
       CardListFilter.dueNow => _dao.watchCardListItemsDueByDeck(
         deckId,
         now: _requireNow(now),
         limit: limit,
+        sort: sort,
       ),
       CardListFilter.isNew => _dao.watchCardListItemsNewByDeck(
         deckId,
         limit: limit,
+        sort: sort,
       ),
       CardListFilter.flagged => _dao.watchCardListItemsFlaggedByDeck(
         deckId,
         limit: limit,
+        sort: sort,
       ),
     };
 

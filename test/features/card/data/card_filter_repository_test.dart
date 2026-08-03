@@ -1,10 +1,18 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/card/domain/failures/card_validation_failure.dart';
 import 'package:memox/features/card/domain/models/card_list_filter_model.dart';
+import 'package:memox/features/card/domain/models/card_list_sort_model.dart';
 
 import 'support/card_text_fixture.dart';
 import '../../../database/support/test_database.dart';
 import '../../deck/data/support/deck_repository_harness.dart';
+
+/// Drift stores DateTime as unix **seconds**, not ISO text
+/// (`store_date_time_values_as_text: false`), so a raw UPDATE has to write the
+/// same shape the mapper reads back. The due-filter tests above got away with an
+/// ISO string only because the row they wrote it to was the one the filter
+/// excluded — a sort returns every row, so it has to be right.
+int _epoch(DateTime at) => at.millisecondsSinceEpoch ~/ 1000;
 
 /// The list filters on a real SQLite database (D3): each narrows the read and
 /// its count to the cards its predicate matches, and nothing else.
@@ -131,4 +139,69 @@ void main() {
     expect(dist.mastered, 1);
     expect(dist.masteredFraction, 0.5);
   });
+
+  test('due-first orders by due_at, NULL (a new card) at the front', () async {
+    final tree = await h.seedTree();
+    final later = await seedCardIn(tree.leaf.id, 'later');
+    final sooner = await seedCardIn(tree.leaf.id, 'sooner');
+    final untouched = await seedCardIn(tree.leaf.id, 'never reviewed');
+    await h.db.customStatement(
+      'UPDATE card_review_states SET due_at = ? WHERE card_id = ?',
+      <Object?>[_epoch(now.add(const Duration(days: 9))), later],
+    );
+    await h.db.customStatement(
+      'UPDATE card_review_states SET due_at = ? WHERE card_id = ?',
+      <Object?>[_epoch(now.add(const Duration(days: 2))), sooner],
+    );
+
+    final items = await h.cardRepository
+        .watchCardListItems(
+          tree.leaf.id,
+          limit: 50,
+          sort: CardListSort.dueFirst,
+        )
+        .first;
+
+    // NULL first (due now), then soonest, then furthest out.
+    expect(items.map((i) => i.card.id), <String>[untouched, sooner, later]);
+  });
+
+  test('the default sort is still newest-first (UC-04 A4)', () async {
+    final tree = await h.seedTree();
+    final first = await seedCardIn(tree.leaf.id, 'older');
+    final second = await seedCardIn(tree.leaf.id, 'newer');
+
+    final items = await h.cardRepository
+        .watchCardListItems(tree.leaf.id, limit: 50)
+        .first;
+
+    expect(items.map((i) => i.card.id), <String>[second, first]);
+  });
+
+  test(
+    'a sort applies under a filter too (D3 — the two are orthogonal)',
+    () async {
+      final tree = await h.seedTree();
+      final a = await seedCardIn(tree.leaf.id, 'flag a');
+      final b = await seedCardIn(tree.leaf.id, 'flag b');
+      await h.cardRepository.setCardFlag(cardId: a, isFlagged: true);
+      await h.cardRepository.setCardFlag(cardId: b, isFlagged: true);
+      await h.db.customStatement(
+        'UPDATE card_review_states SET due_at = ? WHERE card_id = ?',
+        <Object?>[_epoch(now.add(const Duration(days: 5))), b],
+      );
+
+      final items = await h.cardRepository
+          .watchCardListItems(
+            tree.leaf.id,
+            limit: 50,
+            filter: CardListFilter.flagged,
+            sort: CardListSort.dueFirst,
+          )
+          .first;
+
+      // Both flagged; `a` still has a NULL due date so it leads.
+      expect(items.map((i) => i.card.id), <String>[a, b]);
+    },
+  );
 }

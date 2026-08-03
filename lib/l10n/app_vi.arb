@@ -668,6 +668,12 @@
     "placeholders": { "mastered": { "type": "int" }, "total": { "type": "int" } },
     "description": "The mastered/total line beside the ring (BR-88)."
   },
+  "cardSortLabel": "Sắp xếp",
+  "@cardSortLabel": { "description": "Semantic label of the card list's sort control (D3)." },
+  "cardSortNewest": "Mới nhất",
+  "@cardSortNewest": { "description": "Sort option: newest cards first — the default (UC-04 A4)." },
+  "cardSortDueFirst": "Đến hạn trước",
+  "@cardSortDueFirst": { "description": "Sort option: cards due soonest first (BR-22)." },
   "cardProgressStudyAction": "Bắt đầu học · {due} đến hạn",
   "@cardProgressStudyAction": {
     "placeholders": { "due": { "type": "int" } },

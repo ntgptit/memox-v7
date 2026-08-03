@@ -28,6 +28,7 @@ class CardList extends _$CardList {
   @override
   Stream<List<CardListItemModel>> build(String deckId) {
     final filter = ref.watch(cardListFilterSelectionProvider(deckId));
+    final sort = ref.watch(cardListSortSelectionProvider(deckId));
     final limit = ref.watch(cardListWindowProvider(deckId));
     // `now` only matters to the Due-now filter, so only that filter watches it —
     // the others must not re-subscribe every time the clock ticks.
@@ -39,6 +40,7 @@ class CardList extends _$CardList {
       deckId,
       limit: limit,
       filter: filter,
+      sort: sort,
       now: now,
     );
   }

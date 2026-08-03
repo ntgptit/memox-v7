@@ -13,6 +13,7 @@ import '../../domain/failures/card_not_found_failure.dart';
 import '../../domain/failures/tag_validation_failure.dart';
 import '../../domain/models/card_list_filter_model.dart';
 import '../../domain/models/card_list_item_model.dart';
+import '../../domain/models/card_list_sort_model.dart';
 import '../../domain/models/card_state_distribution_model.dart';
 import '../../domain/models/card_text_model.dart';
 import '../../domain/models/deck_context_model.dart';
@@ -36,11 +37,11 @@ const int _sm2InitialRepetitions = 0;
 /// Builds all its adapters from the one [AppDatabase] it is handed, so
 /// `createCard`'s cross-entity invariant — validate the deck, lock an `unset`
 /// deck to `card` (BR-62), resolve the scheduler from the root (BR-09) — runs in
-/// one transaction. Accepting ready-made adapters would let a root pass instances
-/// from two databases, putting the BR-62 lock outside the rollback.
+/// one transaction. Ready-made adapters would let a root pass two databases,
+/// putting the BR-62 lock outside the rollback.
 ///
-/// Same boundary rule as `DeckRepositoryImpl`: below this class, rows,
-/// companions and Drift exceptions; above it, entities and [Failure].
+/// Same boundary as `DeckRepositoryImpl`: below, rows and Drift exceptions;
+/// above, entities and [Failure].
 final class CardRepositoryImpl implements CardRepository {
   CardRepositoryImpl(
     AppDatabase database, {
@@ -57,11 +58,10 @@ final class CardRepositoryImpl implements CardRepository {
 
   final CardDao _cardDao;
 
-  /// The list-read surface (windowed rows, filter counts), split out for size.
+  /// The list reads (windowed rows, filter counts), split out for size.
   final CardListReadDataSource _reads;
 
-  /// The deck-context read surface (header name + breadcrumb, holds-cards), split
-  /// out for the same reason.
+  /// The deck-context reads (header name + breadcrumb, holds-cards).
   final DeckContextReadDataSource _deckContextReads;
 
   /// For the deck side of the createCard invariant only (BR-62 lock).
@@ -70,9 +70,8 @@ final class CardRepositoryImpl implements CardRepository {
   /// Client-generated UUIDs (AD-03); injectable so tests are deterministic.
   final String Function() _idGenerator;
 
-  /// The clock, injected — no default. A `?? DateTime.now()` fallback would give
-  /// "now" two owners, and the unreachable static wins in production. The
-  /// composition root passes `clockProvider`'s clock; timestamps are UTC always.
+  /// Injected — no default. A `?? DateTime.now()` fallback gives "now" two
+  /// owners and the unreachable static wins in production. UTC always.
   final DateTime Function() _clock;
 
   @override
@@ -86,9 +85,15 @@ final class CardRepositoryImpl implements CardRepository {
     String deckId, {
     required int limit,
     CardListFilter filter = CardListFilter.all,
+    CardListSort sort = CardListSort.newest,
     DateTime? now,
-  }) =>
-      _reads.watchCardListItems(deckId, limit: limit, filter: filter, now: now);
+  }) => _reads.watchCardListItems(
+    deckId,
+    limit: limit,
+    filter: filter,
+    sort: sort,
+    now: now,
+  );
 
   @override
   Stream<int> watchFilteredCardCount(
@@ -128,9 +133,8 @@ final class CardRepositoryImpl implements CardRepository {
     CardDetailText? pronunciation,
   }) => _guard(
     () => _cardDao.runInTransaction(() async {
-      // No validation here: BR-07/BR-08 were applied by `CardText.parse` above
-      // the contract, and re-running them inside the transaction gave one rule
-      // two owners — this matches where `DeckName` ended up.
+      // No validation here: BR-07/BR-08 ran in `CardText.parse` above the
+      // contract; re-running them here gave one rule two owners.
       final deck = await _requireDeckRow(deckId);
       if (deck.parentDeckId == null) {
         // BR-58 — no card ever sits directly under a root.
@@ -174,8 +178,7 @@ final class CardRepositoryImpl implements CardRepository {
           updatedAt: now,
         ),
       );
-      // Exactly one review state, born with the card (BR-09). due_at stays NULL
-      // — a new card is due immediately; counters default to 0.
+      // Exactly one review state, born with the card (BR-09); due_at NULL.
       await _cardDao.insertReviewState(_initialReviewState(id, scheduler));
 
       return cardEntityFromRow(await _requireCardRow(id));
@@ -192,9 +195,8 @@ final class CardRepositoryImpl implements CardRepository {
     CardDetailText? pronunciation,
   }) => _guard(() async {
     await _requireCardRow(cardId);
-    // Writes to `cards` only — nothing else is touched, so the review state and
-    // history cannot change (BR-10). Details are always written (BR-95): a null
-    // clears the column, so removing a detail is a real edit.
+    // `cards` only, so BR-10 holds structurally. Details always written
+    // (BR-95): a null clears the column.
     await _cardDao.updateCardById(
       cardId,
       CardsCompanion(
@@ -233,9 +235,8 @@ final class CardRepositoryImpl implements CardRepository {
   }) => _guard(
     () => _cardDao.runInTransaction(() async {
       await _requireCardRow(cardId);
-      // BR-94, and it lives inside the transaction on purpose: the count and the
-      // link must be atomic, or two adds racing each other both pass an eleventh
-      // tag past a check that each read as "9 so far".
+      // BR-94 inside the transaction: the count and the link must be atomic, or
+      // two racing adds both pass an eleventh tag past a "9 so far" check.
       final existing = await _cardDao.tagCountForCard(cardId);
       if (existing >= kMaxTagsPerCard) {
         refuseInvalidTag(<TagValidationProblem>{

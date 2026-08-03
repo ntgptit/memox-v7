@@ -1,5 +1,6 @@
 import '../models/card_list_filter_model.dart';
 import '../models/card_list_item_model.dart';
+import '../models/card_list_sort_model.dart';
 import '../repositories/card_repository.dart';
 
 /// One deck's cards with their state and tags, for the management list, narrowed
@@ -17,6 +18,7 @@ class WatchCardListItemsUseCase {
     String deckId, {
     required int limit,
     CardListFilter filter = CardListFilter.all,
+    CardListSort sort = CardListSort.newest,
     DateTime? now,
   }) => _repository.watchCardListItems(
     deckId,
