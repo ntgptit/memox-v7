@@ -15,10 +15,19 @@ import 'card_state_model.dart';
 /// projection of `current_box` / `interval_days` (BR-89), and `cardStateOf` owns
 /// the two per-scheduler functions that compute it.
 class CardListItemModel {
-  const CardListItemModel({required this.card, required this.reviewState});
+  const CardListItemModel({
+    required this.card,
+    required this.reviewState,
+    this.tagNames = const <String>[],
+  });
 
   final CardEntity card;
   final CardReviewStateEntity reviewState;
+
+  /// The card's tag names, for the row's chip strip (BR-93). Names only — the
+  /// row does not act on a tag, so it needs no id; the editor owns tag edits and
+  /// reads full `TagEntity`s through its own stream.
+  final List<String> tagNames;
 
   /// The four-way display state (BR-90/BR-91/BR-88).
   CardState get state => cardStateOf(reviewState);

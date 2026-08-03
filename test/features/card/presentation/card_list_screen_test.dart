@@ -120,6 +120,27 @@ void main() {
     expect(find.text('Mastered'), findsOneWidget);
   });
 
+  testWidgets('a row shows its tag names as chips (BR-93)', (tester) async {
+    final repository = FakeCardRepository();
+    addTearDown(repository.dispose);
+    await pump(tester, repository);
+
+    repository.emitItems(
+      <dynamic>[
+        repository.listItem(
+          'c1',
+          front: 'tagged',
+          tagNames: <String>['noun', 'people'],
+        ),
+      ].cast(),
+    );
+    repository.emitCount(1);
+    await tester.pump();
+
+    expect(find.text('noun'), findsOneWidget);
+    expect(find.text('people'), findsOneWidget);
+  });
+
   testWidgets('a card due now shows the now badge (BR-22)', (tester) async {
     // The seeded rows carry no due date, so every one is due now.
     final repository = FakeCardRepository();

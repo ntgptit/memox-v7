@@ -96,9 +96,11 @@ final class FakeCardRepository implements CardRepository {
     String back = 'back',
     bool isFlagged = false,
     CardState state = CardState.isNew,
+    List<String> tagNames = const <String>[],
   }) => CardListItemModel(
     card: card(id, front: front, back: back, isFlagged: isFlagged),
     reviewState: _reviewStateFor(id, state),
+    tagNames: tagNames,
   );
 
   CardReviewStateEntity _reviewStateFor(String cardId, CardState state) {
