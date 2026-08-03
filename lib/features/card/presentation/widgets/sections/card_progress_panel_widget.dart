@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../core/theme/app_radius.dart';
+import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_card.dart';
 import '../../../domain/models/card_state_distribution_model.dart';
 import '../../../domain/models/card_state_model.dart';
 import '../../controllers/card_list_filter_controller.dart';
@@ -29,18 +30,12 @@ class CardProgressPanelWidget extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
-    // **A tinted panel, not another white card.** Every row below is an MxCard on
-    // the page colour; a panel built the same way read as the first row of the
-    // list rather than as the deck's summary. `primaryContainer` gives the block
-    // its own ground — `onPrimaryContainer` on it measures 11.46:1 light and
-    // 8.87:1 dark, and the legend dots keep their state hues, which clear the 3:1
-    // a non-text mark needs (3.50 at the tightest).
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: context.colors.primaryContainer,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-      ),
+    // A flat bordered card, the same surface every row below it uses (MxCard, no
+    // shadow inside a scrolling list). The tinted ground was tried and reverted:
+    // a block of colour at the top of the list outweighed the cards under it,
+    // which are what the screen is actually about.
+    return MxCard(
+      elevation: AppElevation.none,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
@@ -92,9 +87,7 @@ class _ProgressRing extends StatelessWidget {
           ),
           Text(
             context.l10n.cardProgressPercent((fraction * 100).round()),
-            style: context.texts.labelMedium?.copyWith(
-              color: context.colors.onPrimaryContainer,
-            ),
+            style: context.texts.labelMedium,
           ),
         ],
       ),
@@ -111,7 +104,7 @@ class _Headline extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final onPanel = context.colors.onPrimaryContainer;
+    final quiet = context.colors.onSurfaceVariant;
     // The two counts the pills already read, said once more where the summary is
     // — "how far along" above, "what is waiting" below it. Null until each lands.
     final due = ref.watch(cardDueCountProvider(deckId)).value;
@@ -124,7 +117,7 @@ class _Headline extends ConsumerWidget {
         Text(
           context.l10n.cardProgressTitle.toUpperCase(),
           style: context.texts.labelSmall?.copyWith(
-            color: onPanel,
+            color: quiet,
             letterSpacing: 1.1,
           ),
         ),
@@ -134,13 +127,13 @@ class _Headline extends ConsumerWidget {
             distribution.mastered,
             distribution.total,
           ),
-          style: context.texts.titleSmall?.copyWith(color: onPanel),
+          style: context.texts.titleSmall,
         ),
         if (due != null && fresh != null) ...<Widget>[
           const SizedBox(height: AppSpacing.xs),
           Text(
             context.l10n.cardProgressDueNew(due, fresh),
-            style: context.texts.labelSmall?.copyWith(color: onPanel),
+            style: context.texts.labelSmall?.copyWith(color: quiet),
           ),
         ],
       ],
@@ -227,11 +220,10 @@ class _LegendItem extends StatelessWidget {
             context.cardStateLabel(state),
             count,
           ),
-          // labelMedium on the panel's own ink: four short counts a reader scans
-          // need to clear ordinary body text, and `onPrimaryContainer` measures
-          // 11.46:1 light / 8.87:1 dark on the tinted ground.
+          // labelMedium on onSurface: four short counts a reader scans need to
+          // clear ordinary body text, and the muted variant sat under it.
           style: context.texts.labelMedium?.copyWith(
-            color: context.colors.onPrimaryContainer,
+            color: context.colors.onSurface,
           ),
         ),
       ],
