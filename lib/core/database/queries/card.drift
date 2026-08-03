@@ -199,3 +199,44 @@ SELECT
 FROM cards AS c
 INNER JOIN card_review_states AS s ON s.card_id = c.id
 WHERE c.deck_id = :deckId;
+
+-- The card list header: the deck's own name and the path of ancestors above it,
+-- in one statement so the title and the breadcrumb agree in the same frame (W1,
+-- AD-13). A rename of an ancestor moves both or neither.
+--
+-- **`ancestryJson` is a JSON scalar, the same deliberate hole `childDeckLevel`
+-- opens and for the same reason.** Joining the ancestry chain onto the row would
+-- multiply a single deck's read by its depth; a typed compound select cannot use
+-- `table.**`. So the chain is one scalar, decoded in the mapper, and `distance`
+-- rides inside each object because SQLite does not promise aggregate input order
+-- — the mapper sorts root-first where the guarantee is real.
+--
+-- The current deck is deliberately NOT in the chain: it is `deckName` here, and
+-- putting it in both would let the title and the last crumb disagree. The walk
+-- stops at the root (`parent_deck_id IS NOT NULL` guards the step) and UNION, not
+-- UNION ALL, terminates on corrupt cyclic data — BR-55 caps real depth at 10.
+--
+-- `contentType` rides along so `readDeckHoldsCards` need not run a second read
+-- for the router's auto-forward; nothing above the repository sees the string.
+deckContextById:
+WITH RECURSIVE ancestry (deck_id, distance) AS (
+    SELECT parent_deck_id, 1 FROM decks
+    WHERE id = :deckId AND parent_deck_id IS NOT NULL
+    UNION
+    SELECT d.parent_deck_id, a.distance + 1
+    FROM decks d
+    INNER JOIN ancestry a ON d.id = a.deck_id
+    WHERE d.parent_deck_id IS NOT NULL
+)
+SELECT
+    self.name AS deckName,
+    self.content_type AS contentType,
+    (
+        SELECT json_group_array(
+            json_object('id', a.deck_id, 'name', d.name, 'distance', a.distance)
+        )
+        FROM ancestry a
+        INNER JOIN decks d ON d.id = a.deck_id
+    ) AS ancestryJson
+FROM decks self
+WHERE self.id = :deckId;

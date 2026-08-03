@@ -6,6 +6,7 @@ import 'package:memox/features/card/di/card_repository_provider.dart';
 import 'package:memox/features/card/domain/models/card_list_filter_model.dart';
 import 'package:memox/features/card/domain/models/card_state_distribution_model.dart';
 import 'package:memox/features/card/domain/models/card_state_model.dart';
+import 'package:memox/features/card/domain/models/deck_context_model.dart';
 import 'package:memox/features/card/presentation/controllers/card_list_window_controller.dart';
 import 'package:memox/features/card/presentation/screens/card_list_screen.dart';
 import 'package:memox/l10n/generated/app_localizations.dart';
@@ -120,6 +121,30 @@ void main() {
 
     expect(find.text('New'), findsOneWidget);
     expect(find.text('Mastered'), findsOneWidget);
+  });
+
+  testWidgets('the header shows the deck name and its breadcrumb (W1)', (
+    tester,
+  ) async {
+    final repository = FakeCardRepository();
+    addTearDown(repository.dispose);
+    repository.deckContextToShow = const DeckContextModel(
+      deckName: 'Phrasal verbs',
+      ancestors: <DeckBreadcrumbSegment>[
+        DeckBreadcrumbSegment(id: 'english', name: 'English'),
+      ],
+    );
+    await pump(tester, repository);
+
+    repository.emitItems(<dynamic>[repository.listItem('c1')].cast());
+    repository.emitCount(1);
+    await tester.pumpAndSettle();
+
+    // The app-bar title is the deck's name, not the generic label.
+    expect(find.widgetWithText(AppBar, 'Phrasal verbs'), findsOneWidget);
+    // The breadcrumb names the ancestor and the root step above it.
+    expect(find.text('English'), findsOneWidget);
+    expect(find.text('Root'), findsOneWidget);
   });
 
   testWidgets('the progress panel shows the mastered percentage (D5)', (

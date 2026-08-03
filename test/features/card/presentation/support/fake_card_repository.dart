@@ -8,6 +8,7 @@ import 'package:memox/features/card/domain/models/card_list_filter_model.dart';
 import 'package:memox/features/card/domain/models/card_list_item_model.dart';
 import 'package:memox/features/card/domain/models/card_state_distribution_model.dart';
 import 'package:memox/features/card/domain/models/card_state_model.dart';
+import 'package:memox/features/card/domain/models/deck_context_model.dart';
 import 'package:memox/features/card/domain/models/card_text_model.dart';
 import 'package:memox/features/card/domain/models/tag_name_model.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
@@ -195,6 +196,24 @@ final class FakeCardRepository implements CardRepository {
 
     return Stream<CardStateDistributionModel>.value(seeded);
   }
+
+  /// The deck context the header shows; null emits nothing so the title falls
+  /// back to the generic label.
+  DeckContextModel? deckContextToShow;
+
+  /// What the router's auto-forward reads; a test sets it to prove the redirect.
+  bool holdsCards = false;
+
+  @override
+  Stream<DeckContextModel> watchDeckContext(String deckId) {
+    final seeded = deckContextToShow;
+    if (seeded == null) return const Stream<DeckContextModel>.empty();
+
+    return Stream<DeckContextModel>.value(seeded);
+  }
+
+  @override
+  Future<bool> readDeckHoldsCards(String deckId) async => holdsCards;
 
   @override
   Future<CardEntity> createCard({
