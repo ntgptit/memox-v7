@@ -15,9 +15,11 @@ import '../../domain/models/card_list_filter_model.dart';
 import '../../domain/models/card_list_item_model.dart';
 import '../../domain/models/card_state_distribution_model.dart';
 import '../../domain/models/card_text_model.dart';
+import '../../domain/models/deck_context_model.dart';
 import '../../domain/models/tag_name_model.dart';
 import '../../domain/repositories/card_repository.dart';
 import '../datasources/card_list_read_data_source.dart';
+import '../datasources/deck_context_read_data_source.dart';
 import '../mappers/card_mapper.dart';
 import '../mappers/tag_mapper.dart';
 import '../datasources/card_dao.dart';
@@ -31,14 +33,11 @@ const int _sm2InitialRepetitions = 0;
 
 /// Drift-backed [CardRepository].
 ///
-/// Uses both Card-owned adapters deliberately: `createCard` has a cross-entity
-/// invariant — validate the target deck, lock an `unset` deck to `card` (BR-62),
-/// resolve the scheduler from the root (BR-09) — and one drift transaction
-/// covers the whole write **because both adapters wrap the same open
-/// [AppDatabase]**, which the constructor guarantees by building both from the
-/// one database it is handed. Accepting two ready-made adapters would let a root
-/// pass instances from two databases, putting the BR-62 lock outside the
-/// transaction that rolls the card back.
+/// Builds all its adapters from the one [AppDatabase] it is handed, so
+/// `createCard`'s cross-entity invariant — validate the deck, lock an `unset`
+/// deck to `card` (BR-62), resolve the scheduler from the root (BR-09) — runs in
+/// one transaction. Accepting ready-made adapters would let a root pass instances
+/// from two databases, putting the BR-62 lock outside the rollback.
 ///
 /// Same boundary rule as `DeckRepositoryImpl`: below this class, rows,
 /// companions and Drift exceptions; above it, entities and [Failure].
@@ -49,18 +48,21 @@ final class CardRepositoryImpl implements CardRepository {
     String Function()? idGenerator,
   }) : _cardDao = CardDao(database),
        _reads = CardListReadDataSource(CardDao(database)),
+       _deckContextReads = DeckContextReadDataSource(database),
        _deckContextDao = CardDeckContextDao(database),
        _idGenerator = idGenerator ?? const Uuid().v4,
-       // Dart forbids a named parameter starting with `_`, so the initializing
-       // formal the lint asks for is impossible here.
+       // A named parameter can't start with `_`, so the formal is impossible.
        // ignore: prefer_initializing_formals
        _clock = clock;
 
   final CardDao _cardDao;
 
-  /// The list-read surface (windowed rows, filter counts), split out to keep
-  /// each file inside the size guard.
+  /// The list-read surface (windowed rows, filter counts), split out for size.
   final CardListReadDataSource _reads;
+
+  /// The deck-context read surface (header name + breadcrumb, holds-cards), split
+  /// out for the same reason.
+  final DeckContextReadDataSource _deckContextReads;
 
   /// For the deck side of the createCard invariant only (BR-62 lock).
   final CardDeckContextDao _deckContextDao;
@@ -68,13 +70,10 @@ final class CardRepositoryImpl implements CardRepository {
   /// Client-generated UUIDs (AD-03); injectable so tests are deterministic.
   final String Function() _idGenerator;
 
-  /// The clock, injected — there is no default. A `?? DateTime.now()` fallback
-  /// would make "now" have two owners, and the unreachable one (this static)
-  /// silently wins in production. The composition root passes `clockProvider`'s
-  /// clock in; timestamps are stored in UTC, always.
+  /// The clock, injected — no default. A `?? DateTime.now()` fallback would give
+  /// "now" two owners, and the unreachable static wins in production. The
+  /// composition root passes `clockProvider`'s clock; timestamps are UTC always.
   final DateTime Function() _clock;
-
-  // ---- reads: delegated to CardListReads (the list surface) --------------
 
   @override
   Stream<List<CardEntity>> watchCardsByDeck(
@@ -108,6 +107,14 @@ final class CardRepositoryImpl implements CardRepository {
   ) => _reads.watchCardStateDistribution(deckId);
 
   @override
+  Stream<DeckContextModel> watchDeckContext(String deckId) =>
+      _deckContextReads.watchDeckContext(deckId);
+
+  @override
+  Future<bool> readDeckHoldsCards(String deckId) =>
+      _deckContextReads.readDeckHoldsCards(deckId);
+
+  @override
   Future<CardEntity> getCard(String cardId) =>
       _guard(() async => cardEntityFromRow(await _requireCardRow(cardId)));
 
@@ -121,10 +128,9 @@ final class CardRepositoryImpl implements CardRepository {
     CardDetailText? pronunciation,
   }) => _guard(
     () => _cardDao.runInTransaction(() async {
-      // No validation here. BR-07 and BR-08 were applied by `CardText.parse`
-      // above the contract, and re-running them inside the transaction is what
-      // gave one rule two owners — the arrangement `DeckName` ended on the deck
-      // side and this now matches.
+      // No validation here: BR-07/BR-08 were applied by `CardText.parse` above
+      // the contract, and re-running them inside the transaction gave one rule
+      // two owners — this matches where `DeckName` ended up.
       final deck = await _requireDeckRow(deckId);
       if (deck.parentDeckId == null) {
         // BR-58 — no card ever sits directly under a root.
@@ -168,8 +174,8 @@ final class CardRepositoryImpl implements CardRepository {
           updatedAt: now,
         ),
       );
-      // Exactly one review state, born with the card (BR-09). due_at stays
-      // NULL — a new card is due immediately. Counters default to 0.
+      // Exactly one review state, born with the card (BR-09). due_at stays NULL
+      // — a new card is due immediately; counters default to 0.
       await _cardDao.insertReviewState(_initialReviewState(id, scheduler));
 
       return cardEntityFromRow(await _requireCardRow(id));
@@ -186,10 +192,9 @@ final class CardRepositoryImpl implements CardRepository {
     CardDetailText? pronunciation,
   }) => _guard(() async {
     await _requireCardRow(cardId);
-    // Writes to `cards` only — the review state and history cannot change
-    // here because nothing else is touched (BR-10). The details are always
-    // written (BR-95): a null value clears the column, so removing a detail is
-    // a real edit rather than a value left behind.
+    // Writes to `cards` only — nothing else is touched, so the review state and
+    // history cannot change (BR-10). Details are always written (BR-95): a null
+    // clears the column, so removing a detail is a real edit.
     await _cardDao.updateCardById(
       cardId,
       CardsCompanion(
@@ -208,8 +213,8 @@ final class CardRepositoryImpl implements CardRepository {
   @override
   Future<void> deleteCard(String cardId) => _guard(() async {
     await _requireCardRow(cardId);
-    // The review state and history cascade; the deck's content_type is
-    // deliberately left alone, even for the last card (BR-67).
+    // Review state and history cascade; content_type is left alone, even for the
+    // last card (BR-67).
     await _cardDao.deleteCardById(cardId);
   });
 
@@ -263,8 +268,8 @@ final class CardRepositoryImpl implements CardRepository {
     required String cardId,
     required String tagId,
   }) => _guard(() async {
-    // No existence check: unlinking a pair that is not there removes nothing and
-    // is the same end state, so a double tap is harmless (BR-93).
+    // No existence check: unlinking an absent pair is the same end state, so a
+    // double tap is harmless (BR-93).
     await _cardDao.unlinkTag(cardId, tagId);
   });
 
@@ -273,15 +278,14 @@ final class CardRepositoryImpl implements CardRepository {
       _cardDao.watchCardFlag(cardId).handleError(_rethrowMapped);
 
   @override
-  Future<void> setCardFlag({required String cardId, required bool isFlagged}) =>
-      _guard(() async {
-        await _requireCardRow(cardId);
-        // Only `is_flagged` moves (BR-92); the DAO's companion covers that one
-        // column, so no edit path can ride along on a flag toggle.
-        await _cardDao.setCardFlag(cardId, isFlagged: isFlagged);
-      });
-
-  // ---- helpers -----------------------------------------------------------
+  Future<void> setCardFlag({
+    required String cardId,
+    required bool isFlagged,
+  }) => _guard(() async {
+    await _requireCardRow(cardId);
+    // Only `is_flagged` moves (BR-92); the companion covers that one column.
+    await _cardDao.setCardFlag(cardId, isFlagged: isFlagged);
+  });
 
   Future<T> _guard<T>(Future<T> Function() action) async {
     try {
@@ -322,9 +326,8 @@ final class CardRepositoryImpl implements CardRepository {
     return row;
   }
 
-  /// Reads a deck's content type, refusing to operate on a value this build
-  /// does not understand — altering such a deck could contradict rules a
-  /// newer schema attached to it.
+  /// A deck's content type, refusing a value this build does not understand —
+  /// altering such a deck could contradict rules a newer schema attached.
   DeckContentType _knownContentType(Deck deck) {
     final type = DeckContentType.fromDbValue(deck.contentType);
     if (type == DeckContentType.unknown) {
@@ -346,8 +349,8 @@ final class CardRepositoryImpl implements CardRepository {
     final version = root.schedulerVersion;
     final generation = root.schedulerGeneration;
     if (typeValue == null || version == null || generation == null) {
-      // A root without a scheduler violates invariant Q11; refusing is the
-      // only honest response to corrupt data.
+      // A root without a scheduler violates Q11; refusing is the only honest
+      // response to corrupt data.
       throw const ConflictFailure(
         message: 'This deck has no study mode configured.',
         reason: CardConflictReason.rootSchedulerMissing,

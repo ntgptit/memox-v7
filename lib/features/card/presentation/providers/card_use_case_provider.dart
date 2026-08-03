@@ -14,6 +14,8 @@ import '../../domain/usecases/watch_card_count_use_case.dart';
 import '../../domain/usecases/watch_cards_by_deck_use_case.dart';
 import '../../domain/usecases/watch_card_list_items_use_case.dart';
 import '../../domain/usecases/watch_card_state_distribution_use_case.dart';
+import '../../domain/usecases/watch_deck_context_use_case.dart';
+import '../../domain/usecases/read_deck_holds_cards_use_case.dart';
 
 part 'card_use_case_provider.g.dart';
 
@@ -76,3 +78,11 @@ WatchCardFlagUseCase watchCardFlagUseCase(Ref ref) =>
 @riverpod
 WatchCardStateDistributionUseCase watchCardStateDistributionUseCase(Ref ref) =>
     WatchCardStateDistributionUseCase(ref.watch(cardRepositoryProvider));
+
+@riverpod
+WatchDeckContextUseCase watchDeckContextUseCase(Ref ref) =>
+    WatchDeckContextUseCase(ref.watch(cardRepositoryProvider));
+
+@riverpod
+ReadDeckHoldsCardsUseCase readDeckHoldsCardsUseCase(Ref ref) =>
+    ReadDeckHoldsCardsUseCase(ref.watch(cardRepositoryProvider));

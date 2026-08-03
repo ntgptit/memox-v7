@@ -5,6 +5,7 @@ import '../models/card_list_filter_model.dart';
 import '../models/card_list_item_model.dart';
 import '../models/card_state_distribution_model.dart';
 import '../models/card_text_model.dart';
+import '../models/deck_context_model.dart';
 import '../models/tag_name_model.dart';
 
 /// Contract for card management inside a deck (UC-04, UC-08).
@@ -66,6 +67,24 @@ abstract interface class CardRepository {
   /// The deck's four-state distribution, for the progress panel (D5, BR-88…91).
   /// One aggregate over every card, not a count of the window.
   Stream<CardStateDistributionModel> watchCardStateDistribution(String deckId);
+
+  /// The card list's header: the deck's own name and the path of ancestors above
+  /// it (W1), re-emitted so a rename lands on the title and the breadcrumb in one
+  /// frame (AD-13).
+  ///
+  /// A card-side read of deck rows, not a call into the deck feature — the same
+  /// seam `createCard` already uses. The returned [DeckContextModel] carries no
+  /// Drift type; the ancestry is decoded from a JSON scalar at the boundary.
+  Stream<DeckContextModel> watchDeckContext(String deckId);
+
+  /// Whether the deck holds cards (BR-63) — the one fact the router's auto-forward
+  /// redirect needs, read once rather than watched.
+  ///
+  /// A lean one-shot: it reads the deck's `content_type`, not the ancestry the
+  /// header needs, because a redirect that runs before every deck opens must not
+  /// pay for a breadcrumb it will not show. Returns `false` for a missing deck —
+  /// there is nothing to forward into.
+  Future<bool> readDeckHoldsCards(String deckId);
 
   /// How many cards the deck holds, whatever the window is showing.
   ///

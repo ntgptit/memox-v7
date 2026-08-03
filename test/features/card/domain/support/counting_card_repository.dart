@@ -4,6 +4,7 @@ import 'package:memox/features/card/domain/models/card_list_filter_model.dart';
 import 'package:memox/features/card/domain/models/card_list_item_model.dart';
 import 'package:memox/features/card/domain/models/card_state_distribution_model.dart';
 import 'package:memox/features/card/domain/models/card_text_model.dart';
+import 'package:memox/features/card/domain/models/deck_context_model.dart';
 import 'package:memox/features/card/domain/models/tag_name_model.dart';
 import 'package:memox/features/card/domain/repositories/card_repository.dart';
 
@@ -157,6 +158,13 @@ final class CountingCardRepository implements CardRepository {
   Stream<CardStateDistributionModel> watchCardStateDistribution(
     String deckId,
   ) => const Stream<CardStateDistributionModel>.empty();
+
+  @override
+  Stream<DeckContextModel> watchDeckContext(String deckId) =>
+      const Stream<DeckContextModel>.empty();
+
+  @override
+  Future<bool> readDeckHoldsCards(String deckId) async => false;
 }
 
 /// A never-read card for `catchError` returns whose type must be `CardEntity`.

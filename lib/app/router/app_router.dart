@@ -1,6 +1,8 @@
 import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/card/presentation/providers/card_use_case_provider.dart';
 import '../../features/card/presentation/screens/card_editor_screen.dart';
 import '../../features/card/presentation/screens/card_list_screen.dart';
 import '../../features/deck/presentation/screens/deck_list_screen.dart';
@@ -65,6 +67,9 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
                   GoRoute(
                     path: RoutePaths.deckDetailRelative,
                     name: RouteNames.deckDetail,
+                    // A card-type deck holds no sub-decks, so its detail level
+                    // forwards straight into its card list (BR-63, W1).
+                    redirect: _cardDeckRedirect,
                     // `pathParameters` is a non-nullable map in go_router and
                     // the segment is required by the pattern, so a match cannot
                     // occur without it. No fallback: inventing a deck id would
@@ -144,4 +149,51 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
 /// reaches a log file nobody thought of as private.
 String? appRedirect(BuildContext context, GoRouterState state) {
   return null;
+}
+
+/// Forwards a `card`-type deck's detail route into its card list (BR-63, W1).
+///
+/// A card deck holds no sub-decks, so its detail level has nothing of its own to
+/// show — the card list belongs to the card screen the card feature owns (AD-13).
+/// Rather than land on an empty deck screen and make the user tap through, the
+/// route resolves the deck's content type once and redirects.
+///
+/// **Async, and read through the card feature's own use case.** go_router awaits
+/// a `Future`-returning redirect; the deck's content type is a database read, so
+/// this asks `ReadDeckHoldsCardsUseCase` — the same card-side seam the header uses
+/// — via the root [ProviderScope] container the running app is wrapped in.
+///
+/// **It fires only when landing *on* the deck.** [GoRouterState.topRoute] being
+/// anything deeper — the card list itself, the editor — means we are already past
+/// the deck, so returning null there is what stops the redirect chasing its own
+/// target into a loop. The forward target is built from the same relative segment
+/// the card route is mounted under, so moving the route moves this with it.
+Future<String?> _cardDeckRedirect(
+  BuildContext context,
+  GoRouterState state,
+) async {
+  if (state.topRoute?.name != RouteNames.deckDetail) return null;
+  final deckId = state.pathParameters[RoutePathParams.deckId];
+  if (deckId == null) return null;
+
+  final container = ProviderScope.containerOf(context);
+  final holdsCards = await _deckHoldsCards(container, deckId);
+  if (!holdsCards) return null;
+
+  return '${state.matchedLocation}/${RoutePaths.cardListRelative}';
+}
+
+/// The content-type read, guarded so a failure never blocks navigation.
+///
+/// If the read throws — a database error, or a test that has not wired the card
+/// repository — the honest outcome is to stay on the deck's own screen, which
+/// renders its own error, not a stuck navigation. So a failure resolves to "does
+/// not hold cards": no forward. `on Object` because any thrown type must be
+/// absorbed here; nothing about a redirect is worth crashing the app for.
+Future<bool> _deckHoldsCards(ProviderContainer container, String deckId) async {
+  try {
+    return await container.read(readDeckHoldsCardsUseCaseProvider)(deckId);
+  } on Object {
+    return false;
+  }
 }

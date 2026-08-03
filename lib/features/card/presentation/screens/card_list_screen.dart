@@ -12,11 +12,14 @@ import '../../../../shared/widgets/mx_empty_state.dart';
 import '../../../../shared/widgets/mx_text_button.dart';
 import '../../domain/models/card_list_filter_model.dart';
 import '../../domain/models/card_list_item_model.dart';
+import '../../domain/models/deck_context_model.dart';
 import '../controllers/card_list_controller.dart';
 import '../controllers/card_list_filter_controller.dart';
 import '../controllers/card_list_now_controller.dart';
 import '../controllers/card_list_window_controller.dart';
+import '../controllers/deck_context_controller.dart';
 import '../widgets/items/card_tile_widget.dart';
+import '../widgets/sections/card_breadcrumb_widget.dart';
 import '../widgets/sections/card_filter_bar_widget.dart';
 import '../widgets/sections/card_progress_panel_widget.dart';
 
@@ -32,14 +35,17 @@ void _growWindow(WidgetRef ref, String deckId) =>
 /// The card list for a card-type deck (UC-04, W1).
 ///
 /// **Reached by redirect, not built by the deck screen.** A `card` deck's detail
-/// route redirects here (see `app_router.dart`), so the card feature owns its own
-/// screen and the deck feature never imports it (AD-13). It still sits inside the
-/// Decks branch, so the bottom bar stays and Back returns to the deck tree.
+/// route redirects here (`_cardDeckRedirect` in `app_router.dart`), so the card
+/// feature owns its own screen and the deck feature never imports it (AD-13). It
+/// still sits inside the Decks branch, so the bottom bar stays and Back returns
+/// to the deck tree.
 ///
-/// It draws the filtered list (D3), the count, the window's load-more tail, and
-/// the four-part card rows. The breadcrumb, the deck-name title and the progress
-/// panel arrive with a later slice — all read deck context this screen does not
-/// yet fetch, so they travel together rather than one at a time.
+/// It draws the deck-name title and its ancestor breadcrumb (W1), the progress
+/// panel (D5), the filtered list and its counts (D3), the window's load-more tail
+/// and the four-part card rows. The title and breadcrumb come from one card-side
+/// read of deck context — `watchDeckContext`, the same seam `createCard` uses —
+/// so a rename lands on both in the same frame and the deck feature's Dart is
+/// never imported (AD-13).
 class CardListScreen extends ConsumerWidget {
   const CardListScreen({required this.deckId, super.key});
 
@@ -72,10 +78,13 @@ class CardListScreen extends ConsumerWidget {
     // The pills appear only once the deck has cards — an empty deck shows the
     // add-first state, not a bar of zeroes (W2/W3).
     final deckTotal = ref.watch(cardAllCountProvider(deckId)).value ?? 0;
+    // The deck's name and breadcrumb (W1). Null until the read lands or if the
+    // deck has vanished — the title then falls back to the generic label.
+    final deckContext = ref.watch(deckContextProvider(deckId)).value;
 
     return MxContentShell(
-      title: context.l10n.cardListTitle,
-      subheader: deckTotal > 0 ? CardFilterBarWidget(deckId: deckId) : null,
+      title: deckContext?.deckName ?? context.l10n.cardListTitle,
+      subheader: _subheader(deckId, deckContext, deckTotal),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openEditor(context),
         icon: const Icon(Icons.add),
@@ -96,6 +105,34 @@ class CardListScreen extends ConsumerWidget {
                 onOpen: (item) => _openEditor(context, cardId: item.card.id),
               ),
       ),
+    );
+  }
+
+  // The pinned strip: the breadcrumb (W1) above the filter pills (D3). The
+  // breadcrumb is drawn as soon as the deck context lands, even on an empty deck
+  // — "where am I" is most worth answering on a level with nothing to recognise,
+  // the same rule the deck screen follows. The pills wait for the deck to hold
+  // cards. When neither is ready there is no strip at all.
+  Widget? _subheader(
+    String deckId,
+    DeckContextModel? deckContext,
+    int deckTotal,
+  ) {
+    final crumb = deckContext == null
+        ? null
+        : CardBreadcrumbWidget(deckContext: deckContext);
+    final pills = deckTotal > 0 ? CardFilterBarWidget(deckId: deckId) : null;
+    if (crumb == null && pills == null) return null;
+    if (pills == null) return crumb;
+    if (crumb == null) return pills;
+
+    return Column(
+      // Stretch, not start: both strips scroll horizontally, so they take the
+      // gutter-bounded width and scroll within it rather than sizing to content.
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      spacing: AppSpacing.sm,
+      children: <Widget>[crumb, pills],
     );
   }
 

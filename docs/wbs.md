@@ -5011,8 +5011,22 @@ cột NULL của scheduler kia.
   phân bố bốn màu `info`/`warning`/`primaryAccent`/`success` khớp
   `card_state_widget.dart`, legend) là header index 0 của list, tự ẩn khi total 0;
   audit list thêm `drive: pumpAndSettle` (stream phân bố tới sau list một frame) +
-  allowance customPainter cho `_CircularProgressIndicatorPainter`. Còn: breadcrumb
-  + tên deck, auto-forward.
+  allowance customPainter cho `_CircularProgressIndicatorPainter`;
+  lát 11 (breadcrumb + tên deck + auto-forward, W1) **done** — query card-side
+  `deckContextById` (tên + content_type + ancestryJson, một snapshot) trong
+  `card.drift`; `DeckContextModel`/`DeckBreadcrumbSegment` (card-side, không import
+  deck presentation — AD-13), mapper decode JSON root-first mirror `deckPathFromJson`;
+  `DeckContextReadDataSource` (watch header + `readDeckHoldsCards` một lần, tách
+  khỏi impl để giữ <400 dòng); contract `CardRepository` thêm `watchDeckContext` +
+  `readDeckHoldsCards`; use case + `deckContext` stream provider; title màn = tên
+  deck (fallback `cardListTitle`), subheader = `CardBreadcrumbWidget` (dùng
+  `MxBreadcrumb` shared) trên filter pills. Auto-forward: `_cardDeckRedirect` trong
+  `app_router.dart` — async route redirect đọc `readDeckHoldsCardsUseCase` qua
+  `ProviderScope.containerOf`, chỉ chạy khi `topRoute == deckDetail` (tránh loop),
+  lỗi thì không forward (deck screen tự xử lý); `DeckCardHandoffWidget` giờ là
+  fallback. Test: data read (tên + ancestry root-first, rename live, holdsCards),
+  widget (title + breadcrumb), router (forward card-deck / ở lại deck-deck).
+  **M4.11 xong cả 11 lát; còn: recursive review toàn tính năng card.**
 - **Goal:** Người dùng quản lý card hoàn chỉnh trong deck loại `card`, từ UI
   xuống transaction Drift.
 - **Scope:** card list; empty state; tạo card; tạo card **đầu tiên** trong deck
