@@ -3,21 +3,28 @@ import '../../domain/models/card_list_item_model.dart';
 import 'card_mapper.dart';
 import 'card_review_state_mapper.dart';
 
-/// Maps a joined `cardListItemsByDeck` row to the list projection.
+/// Maps the parts of a joined list row to the projection.
 ///
-/// Reuses the two existing row mappers — the nested `Card` and `CardReviewState`
-/// go through the same `cardEntityFromRow` and `cardReviewStateEntityFromRow` a
-/// single-table read uses, so the join adds no second way to build an entity.
-/// The delimiter `cardListItemsByDeck` folds tag names with — ASCII unit
-/// separator, which a trimmed printable `TagName` can never contain.
+/// **Takes the parts, not a specific result class**, because the four filter
+/// variants (`cardListItemsByDeck` and the Due/New/Flagged ones) each generate
+/// their own drift result class, all with the same `.c`, `.s` and `.tagNames`
+/// fields. One parts-mapper serves all four; the DAO pulls the three fields off
+/// whichever result it read.
+///
+/// Reuses the two existing row mappers, so the join adds no second way to build
+/// an entity. The delimiter is the ASCII unit separator (`char(31)` in the
+/// query), which a trimmed printable `TagName` can never contain.
 const String _tagSeparator = '\u{1F}';
 
-CardListItemModel cardListItemFromRow(CardListItemsByDeckResult row) =>
-    CardListItemModel(
-      card: cardEntityFromRow(row.c),
-      reviewState: cardReviewStateEntityFromRow(row.s),
-      tagNames: _splitTagNames(row.tagNames),
-    );
+CardListItemModel cardListItemFromParts(
+  Card card,
+  CardReviewState reviewState,
+  String? tagNames,
+) => CardListItemModel(
+  card: cardEntityFromRow(card),
+  reviewState: cardReviewStateEntityFromRow(reviewState),
+  tagNames: _splitTagNames(tagNames),
+);
 
 List<String> _splitTagNames(String? concatenated) {
   if (concatenated == null || concatenated.isEmpty) return const <String>[];

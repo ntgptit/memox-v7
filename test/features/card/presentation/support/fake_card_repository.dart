@@ -4,6 +4,7 @@ import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/card/domain/entities/card_entity.dart';
 import 'package:memox/features/card/domain/entities/card_review_state_entity.dart';
 import 'package:memox/features/card/domain/entities/tag_entity.dart';
+import 'package:memox/features/card/domain/models/card_list_filter_model.dart';
 import 'package:memox/features/card/domain/models/card_list_item_model.dart';
 import 'package:memox/features/card/domain/models/card_state_model.dart';
 import 'package:memox/features/card/domain/models/card_text_model.dart';
@@ -138,18 +139,39 @@ final class FakeCardRepository implements CardRepository {
     return _cards.stream;
   }
 
+  /// Every filter the list read was asked for, in order — so a test can prove a
+  /// pill selection changed the query.
+  final List<CardListFilter> requestedFilters = <CardListFilter>[];
+
+  /// Per-filter pill counts a test can set; all-filter uses the count stream.
+  final Map<CardListFilter, int> filterCounts = <CardListFilter, int>{};
+
   @override
   Stream<List<CardListItemModel>> watchCardListItems(
     String deckId, {
     required int limit,
+    CardListFilter filter = CardListFilter.all,
+    DateTime? now,
   }) {
     requestedLimits.add(limit);
+    requestedFilters.add(filter);
     final seeded = _seededItems;
     if (seeded != null) {
       return Stream<List<CardListItemModel>>.value(seeded);
     }
 
     return _items.stream;
+  }
+
+  @override
+  Stream<int> watchFilteredCardCount(
+    String deckId, {
+    CardListFilter filter = CardListFilter.all,
+    DateTime? now,
+  }) {
+    if (filter == CardListFilter.all) return watchCardCountByDeck(deckId);
+
+    return Stream<int>.value(filterCounts[filter] ?? 0);
   }
 
   @override

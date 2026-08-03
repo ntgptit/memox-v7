@@ -10,11 +10,14 @@ import '../../../../shared/widgets/mx_async_view.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_empty_state.dart';
 import '../../../../shared/widgets/mx_text_button.dart';
+import '../../domain/models/card_list_filter_model.dart';
 import '../../domain/models/card_list_item_model.dart';
 import '../controllers/card_list_controller.dart';
+import '../controllers/card_list_filter_controller.dart';
 import '../controllers/card_list_now_controller.dart';
 import '../controllers/card_list_window_controller.dart';
 import '../widgets/items/card_tile_widget.dart';
+import '../widgets/sections/card_filter_bar_widget.dart';
 
 /// Grows the read window by one step (W1b).
 ///
@@ -32,10 +35,10 @@ void _growWindow(WidgetRef ref, String deckId) =>
 /// screen and the deck feature never imports it (AD-13). It still sits inside the
 /// Decks branch, so the bottom bar stays and Back returns to the deck tree.
 ///
-/// This slice draws the list, the count, and the window's load-more tail. The
-/// breadcrumb, the deck-name title and the progress panel arrive with the next
-/// slice — all three read deck context, which this screen does not yet fetch, so
-/// they travel together rather than one at a time.
+/// It draws the filtered list (D3), the count, the window's load-more tail, and
+/// the four-part card rows. The breadcrumb, the deck-name title and the progress
+/// panel arrive with a later slice — all read deck context this screen does not
+/// yet fetch, so they travel together rather than one at a time.
 class CardListScreen extends ConsumerWidget {
   const CardListScreen({required this.deckId, super.key});
 
@@ -64,9 +67,14 @@ class CardListScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cards = ref.watch(cardListProvider(deckId));
     final count = ref.watch(cardCountProvider(deckId));
+    final filter = ref.watch(cardListFilterSelectionProvider(deckId));
+    // The pills appear only once the deck has cards — an empty deck shows the
+    // add-first state, not a bar of zeroes (W2/W3).
+    final deckTotal = ref.watch(cardAllCountProvider(deckId)).value ?? 0;
 
     return MxContentShell(
       title: context.l10n.cardListTitle,
+      subheader: deckTotal > 0 ? CardFilterBarWidget(deckId: deckId) : null,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openEditor(context),
         icon: const Icon(Icons.add),
@@ -77,7 +85,7 @@ class CardListScreen extends ConsumerWidget {
         loadingLabel: context.l10n.cardListLoadingLabel,
         error: (_, _) => _Error(message: context.l10n.cardListError),
         data: (list) => list.isEmpty
-            ? _Empty(onAdd: () => _openEditor(context))
+            ? _empty(context, filter)
             : _Loaded(
                 deckId: deckId,
                 items: list,
@@ -89,6 +97,13 @@ class CardListScreen extends ConsumerWidget {
       ),
     );
   }
+
+  // An empty result means "add your first card" only when no filter is on;
+  // otherwise it means the filter matched nothing (D3).
+  Widget _empty(BuildContext context, CardListFilter filter) =>
+      filter == CardListFilter.all
+      ? _Empty(onAdd: () => _openEditor(context))
+      : const _NoMatch();
 }
 
 class _Loaded extends ConsumerWidget {
@@ -215,6 +230,20 @@ class _Empty extends StatelessWidget {
       message: context.l10n.cardListEmptyMessage,
       actionLabel: context.l10n.cardListEmptyAction,
       onAction: onAdd,
+    );
+  }
+}
+
+/// The filtered-empty state: the deck has cards, this filter matched none (D3).
+class _NoMatch extends StatelessWidget {
+  const _NoMatch();
+
+  @override
+  Widget build(BuildContext context) {
+    return MxEmptyState(
+      icon: Icons.filter_list_off,
+      title: context.l10n.cardListNoMatchTitle,
+      message: context.l10n.cardListNoMatchMessage,
     );
   }
 }

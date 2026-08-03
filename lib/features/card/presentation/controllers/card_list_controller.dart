@@ -1,8 +1,11 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/state/retry_policy.dart';
+import '../../domain/models/card_list_filter_model.dart';
 import '../../domain/models/card_list_item_model.dart';
 import '../providers/card_use_case_provider.dart';
+import 'card_list_filter_controller.dart';
+import 'card_list_now_controller.dart';
 import 'card_list_window_controller.dart';
 
 part 'card_list_controller.g.dart';
@@ -24,9 +27,20 @@ part 'card_list_controller.g.dart';
 class CardList extends _$CardList {
   @override
   Stream<List<CardListItemModel>> build(String deckId) {
+    final filter = ref.watch(cardListFilterSelectionProvider(deckId));
     final limit = ref.watch(cardListWindowProvider(deckId));
+    // `now` only matters to the Due-now filter, so only that filter watches it —
+    // the others must not re-subscribe every time the clock ticks.
+    final now = filter == CardListFilter.dueNow
+        ? ref.watch(cardListNowProvider)
+        : null;
 
-    return ref.watch(watchCardListItemsUseCaseProvider)(deckId, limit: limit);
+    return ref.watch(watchCardListItemsUseCaseProvider)(
+      deckId,
+      limit: limit,
+      filter: filter,
+      now: now,
+    );
   }
 }
 
@@ -39,6 +53,18 @@ class CardList extends _$CardList {
 @Riverpod(retry: noAutomaticRetry)
 class CardCount extends _$CardCount {
   @override
-  Stream<int> build(String deckId) =>
-      ref.watch(watchCardCountUseCaseProvider)(deckId);
+  Stream<int> build(String deckId) {
+    // The denominator of "showing N of M" is the *active* filter's total (§4.3),
+    // so it follows the filter — the pills each read their own fixed count.
+    final filter = ref.watch(cardListFilterSelectionProvider(deckId));
+    final now = filter == CardListFilter.dueNow
+        ? ref.watch(cardListNowProvider)
+        : null;
+
+    return ref.watch(watchCardCountUseCaseProvider)(
+      deckId,
+      filter: filter,
+      now: now,
+    );
+  }
 }
