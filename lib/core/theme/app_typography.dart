@@ -26,6 +26,18 @@ abstract final class AppTypography {
   static const String displayFamily = 'PlusJakartaSans';
   static const String bodyFamily = 'Inter';
 
+  /// The CJK fallback face, behind both primary families on every text style.
+  ///
+  /// Inter and Plus Jakarta Sans are Latin-only, so a card whose content is
+  /// Korean (or Japanese/Chinese) would render as tofu boxes on any platform
+  /// whose system font happens not to cover the script — the web build most of
+  /// all. Naming this as `fontFamilyFallback` on each style means Flutter reaches
+  /// for it only for the glyphs the primary lacks, so Latin UI text is untouched
+  /// and the fallback carries the vocabulary. It is a variable font with a `wght`
+  /// axis, so the same [_wght] setting drives its weight too.
+  static const String cjkFallbackFamily = 'NotoSansKR';
+  static const List<String> _cjkFallback = <String>[cjkFallbackFamily];
+
   /// The front of a review card — the one place the app deliberately gets
   /// large, because that text is the task.
   static const double cardPromptSize = 30;
@@ -67,6 +79,7 @@ abstract final class AppTypography {
     double tracking = 0,
   }) => (base ?? const TextStyle()).copyWith(
     fontFamily: displayFamily,
+    fontFamilyFallback: _cjkFallback,
     fontWeight: weight,
     fontVariations: _wght(weight),
     fontSize: size,
@@ -83,6 +96,7 @@ abstract final class AppTypography {
     double tracking = 0,
   }) => (base ?? const TextStyle()).copyWith(
     fontFamily: bodyFamily,
+    fontFamilyFallback: _cjkFallback,
     fontWeight: weight,
     fontVariations: _wght(weight),
     fontSize: size,

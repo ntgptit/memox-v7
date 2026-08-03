@@ -23,6 +23,13 @@ import '../support/review_render.dart';
 /// golden job and excludes it on Linux. Run with:
 ///   flutter test --update-goldens --tags golden test/demo/card_screens_demo_test.dart
 /// PNGs land in test/demo/goldens/.
+///
+/// **Latin sample content on purpose.** `flutter_test`'s golden renderer does not
+/// exercise the CJK `fontFamilyFallback` the app wires (see
+/// `AppTypography.cjkFallbackFamily`), so seeding Korean here would render tofu
+/// boxes in the PNG even though a device shows the script. The fallback wiring is
+/// proven instead by `test/core/theme/cjk_fallback_test.dart`; these renders use
+/// English vocabulary so the layout is faithful.
 CardListItemModel demoItem(
   String id,
   String front,
@@ -40,10 +47,10 @@ CardListItemModel demoItem(
 // The deck the card list belongs to (W1): its name titles the screen and its
 // ancestors draw the breadcrumb.
 const DeckContextModel _demoContext = DeckContextModel(
-  deckName: 'Korean · TOPIK I',
+  deckName: 'English · IELTS',
   ancestors: <DeckBreadcrumbSegment>[
     DeckBreadcrumbSegment(id: 'lang', name: 'Languages'),
-    DeckBreadcrumbSegment(id: 'kr', name: 'Korean'),
+    DeckBreadcrumbSegment(id: 'en', name: 'English'),
   ],
 );
 
@@ -70,25 +77,35 @@ ProviderScope _scope(FakeCardRepository repo, Widget home, Brightness mode) =>
 void main() {
   testWidgets('card list — full row (state, flag, due badge)', (tester) async {
     final repo = _demoList(<CardListItemModel>[
-      demoItem('c1', '연구자', 'researcher / nhà nghiên cứu', CardState.isNew),
-      demoItem('c2', '공부하다', 'to study / học', CardState.mastered),
+      demoItem('c1', 'ephemeral', 'short-lived / phù du', CardState.isNew),
+      demoItem('c2', 'ubiquitous', 'everywhere / khắp nơi', CardState.mastered),
       demoItem(
         'c3',
-        '도서관',
-        'library / thư viện',
+        'meticulous',
+        'very careful / tỉ mỉ',
         CardState.beginning,
         flag: true,
       ),
-      demoItem('c4', '어렵다', 'to be difficult / khó', CardState.reviewing),
-      demoItem('c5', '경험', 'experience / kinh nghiệm', CardState.isNew),
+      demoItem(
+        'c4',
+        'resilient',
+        'quick to recover / kiên cường',
+        CardState.reviewing,
+      ),
+      demoItem('c5', 'candid', 'frank, honest / thẳng thắn', CardState.isNew),
       demoItem(
         'c6',
-        '준비하다',
-        'to prepare / chuẩn bị',
+        'pragmatic',
+        'practical / thực dụng',
         CardState.beginning,
         flag: true,
       ),
-      demoItem('c7', '환경', 'environment / môi trường', CardState.mastered),
+      demoItem(
+        'c7',
+        'eloquent',
+        'fluent, persuasive / hùng biện',
+        CardState.mastered,
+      ),
     ]);
     addTearDown(repo.dispose);
 
@@ -105,15 +122,15 @@ void main() {
 
   testWidgets('card list — dark', (tester) async {
     final repo = _demoList(<CardListItemModel>[
-      demoItem('c1', '연구자', 'researcher / nhà nghiên cứu', CardState.isNew),
+      demoItem('c1', 'ephemeral', 'short-lived / phù du', CardState.isNew),
       demoItem(
         'c3',
-        '도서관',
-        'library / thư viện',
+        'meticulous',
+        'very careful / tỉ mỉ',
         CardState.beginning,
         flag: true,
       ),
-      demoItem('c2', '공부하다', 'to study / học', CardState.mastered),
+      demoItem('c2', 'ubiquitous', 'everywhere / khắp nơi', CardState.mastered),
     ]);
     addTearDown(repo.dispose);
 
@@ -135,8 +152,8 @@ void main() {
     addTearDown(repo.dispose);
     repo.cardToGet = repo.card(
       'c3',
-      front: '도서관',
-      back: 'library, reading room / thư viện',
+      front: 'meticulous',
+      back: 'showing great attention to detail / rất tỉ mỉ, cẩn thận',
     );
 
     await pumpReview(

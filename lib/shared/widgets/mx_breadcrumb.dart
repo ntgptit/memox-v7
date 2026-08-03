@@ -90,7 +90,8 @@ class MxBreadcrumb extends StatefulWidget {
   ///
   /// The fold keeps the first step and the last two — the two ends are the ones a
   /// user navigates to, and the middle is the part they scrolled past on the way
-  /// down.
+  /// down. A tighter screen passes a lower value: the card list uses 3, the deck
+  /// list keeps the default and shows every ancestor on purpose.
   final int collapseAfter;
 
   @override

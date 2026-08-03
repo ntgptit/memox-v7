@@ -177,8 +177,23 @@ class _Loaded extends ConsumerWidget {
         AppSpacing.xxl,
       ),
       itemCount: items.length + headerCount + 1,
-      separatorBuilder: (_, index) =>
-          SizedBox(height: index == 0 ? AppSpacing.md : AppSpacing.md),
+      // A hairline only between two card rows, so the list reads as separated
+      // rows rather than one dense block; a plain gap wraps the panel, the
+      // "showing" line and the load-more tail, which are not rows to divide.
+      separatorBuilder: (context, index) {
+        const firstCard = headerCount;
+        final lastCard = headerCount + items.length - 1;
+        final betweenCards = index >= firstCard && index < lastCard;
+        if (!betweenCards) return const SizedBox(height: AppSpacing.md);
+
+        return Divider(
+          height: AppSpacing.md,
+          thickness: 1,
+          indent: AppSpacing.lg,
+          endIndent: AppSpacing.lg,
+          color: context.semanticColors.borderSubtle,
+        );
+      },
       itemBuilder: (context, index) {
         if (index == 0) {
           return CardProgressPanelWidget(deckId: deckId);

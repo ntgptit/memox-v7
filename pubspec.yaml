@@ -123,6 +123,11 @@ flutter:
     - family: PlusJakartaSans
       fonts:
         - asset: assets/fonts/PlusJakartaSans-Variable.ttf
+    # CJK fallback behind both Latin faces (see AppTypography.cjkFallbackFamily),
+    # so Korean/CJK card content renders on every platform, web included.
+    - family: NotoSansKR
+      fonts:
+        - asset: assets/fonts/NotoSansKR-Variable.ttf
 
   # To add assets to your application, add an assets section, like this:
   # assets:
