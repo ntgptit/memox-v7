@@ -46,13 +46,18 @@ Expression<bool> isFlaggedPredicate(Cards c) => c.isFlagged.equals(1);
 /// predicate has already narrowed the scan to one deck's cards, so the scan is
 /// bounded by what the screen was already reading.
 ///
-/// **`%` and `_` typed by the user act as wildcards, not literals.** Escaping
-/// them requires a `LIKE … ESCAPE '\'` clause, and drift's typed `like()` emits
-/// no `ESCAPE` — pre-escaping alone does nothing, because SQLite has no default
-/// escape character. Getting it right means hand-writing this comparison as raw
-/// SQL against aliased columns, which is a worse trade than the wart for a local
-/// vocabulary search: searching `100%` matches every card in the deck rather
-/// than the one that reads `100%`.
+/// **`%` and `_` typed by the user act as wildcards, not literals** — the search
+/// is therefore over-permissive, never unbounded. `100%` becomes the pattern
+/// `%100%%`, which still demands the literal `100`; the extra wildcard only
+/// widens what may follow it, so the card reading `100% sure` is found and an
+/// unrelated card is not. What a lone `%` does is match every card, and `a%b`
+/// matches `axxxb` as well as `a%b`.
+///
+/// Fixing it needs a `LIKE … ESCAPE '\'` clause, and drift's typed `like()`
+/// emits no `ESCAPE` — pre-escaping alone does nothing, because SQLite has no
+/// default escape character. Getting it right means hand-writing this comparison
+/// as raw SQL against aliased columns, a worse trade than the wart for a local
+/// vocabulary search. `card_filter_repository_test.dart` pins both behaviours.
 Expression<bool> searchPredicate(Cards c, String term) =>
     c.front.like('%$term%') | c.back.like('%$term%');
 
