@@ -119,8 +119,9 @@ void main() {
     repository.emitCount(2);
     await tester.pump();
 
-    expect(find.text('New'), findsOneWidget);
-    expect(find.text('Mastered'), findsOneWidget);
+    // Uppercased on the row, like the reference and the deck list's labels.
+    expect(find.text('NEW'), findsOneWidget);
+    expect(find.text('MASTERED'), findsOneWidget);
   });
 
   testWidgets('the header shows the deck name and its breadcrumb (W1)', (
