@@ -79,13 +79,13 @@ CardState cardStateOf(CardReviewStateEntity state) {
 CardState _eightBoxState(int? box) {
   if (box == null) return CardState.isNew;
   if (box >= kMasteredBox) return CardState.mastered;
-  if (box >= _reviewingBox) return CardState.reviewing;
+  if (box >= kReviewingBox) return CardState.reviewing;
 
   return CardState.beginning;
 }
 
 /// Box 4 — the first rung whose interval reaches [kReviewingIntervalDays].
-const int _reviewingBox = 4;
+const int kReviewingBox = 4;
 
 /// interval < 8 → beginning · 8–127 → reviewing · ≥ 128 → mastered.
 CardState _sm2State(int? intervalDays) {

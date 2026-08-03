@@ -111,4 +111,24 @@ void main() {
       throwsArgumentError,
     );
   });
+
+  test('the state distribution counts every card by band (D5)', () async {
+    final tree = await h.seedTree();
+    await seedCardIn(tree.leaf.id, 'fresh'); // new (review_count 0)
+    final mastered = await seedCardIn(tree.leaf.id, 'known');
+    await h.db.customStatement(
+      'UPDATE card_review_states SET review_count = 20, current_box = 8 '
+      'WHERE card_id = ?',
+      <Object?>[mastered],
+    );
+
+    final dist = await h.cardRepository
+        .watchCardStateDistribution(tree.leaf.id)
+        .first;
+
+    expect(dist.total, 2);
+    expect(dist.isNew, 1);
+    expect(dist.mastered, 1);
+    expect(dist.masteredFraction, 0.5);
+  });
 }

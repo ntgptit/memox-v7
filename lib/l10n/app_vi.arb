@@ -656,6 +656,28 @@
   "@cardListError": {
     "description": "Shown when the card list read fails."
   },
+  "cardProgressTitle": "Tiến độ deck",
+  "@cardProgressTitle": { "description": "Heading of the deck progress panel (D5)." },
+  "cardProgressPercent": "{percent}%",
+  "@cardProgressPercent": {
+    "placeholders": { "percent": { "type": "int" } },
+    "description": "The mastered percentage inside the progress ring (BR-88)."
+  },
+  "cardProgressMastered": "đã thuộc {mastered}/{total}",
+  "@cardProgressMastered": {
+    "placeholders": { "mastered": { "type": "int" }, "total": { "type": "int" } },
+    "description": "The mastered/total line beside the ring (BR-88)."
+  },
+  "cardProgressLegendItem": "{label} {count}",
+  "@cardProgressLegendItem": {
+    "placeholders": { "label": { "type": "String" }, "count": { "type": "int" } },
+    "description": "One state in the distribution legend: its name and count (D5)."
+  },
+  "cardProgressDistributionSemantics": "Phân bố: {newCount} mới, {beginning} bắt đầu, {reviewing} đang ôn, {mastered} đã thuộc",
+  "@cardProgressDistributionSemantics": {
+    "placeholders": { "newCount": { "type": "int" }, "beginning": { "type": "int" }, "reviewing": { "type": "int" }, "mastered": { "type": "int" } },
+    "description": "Screen-reader summary of the distribution bar (D5)."
+  },
   "cardFilterAll": "Tất cả {count}",
   "@cardFilterAll": {
     "placeholders": { "count": { "type": "int" } },

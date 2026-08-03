@@ -6,6 +6,7 @@ import 'package:memox/features/card/domain/entities/card_review_state_entity.dar
 import 'package:memox/features/card/domain/entities/tag_entity.dart';
 import 'package:memox/features/card/domain/models/card_list_filter_model.dart';
 import 'package:memox/features/card/domain/models/card_list_item_model.dart';
+import 'package:memox/features/card/domain/models/card_state_distribution_model.dart';
 import 'package:memox/features/card/domain/models/card_state_model.dart';
 import 'package:memox/features/card/domain/models/card_text_model.dart';
 import 'package:memox/features/card/domain/models/tag_name_model.dart';
@@ -180,6 +181,19 @@ final class FakeCardRepository implements CardRepository {
     if (seeded != null) return Stream<int>.value(seeded);
 
     return _count.stream;
+  }
+
+  /// The deck distribution the progress panel shows; null renders no panel.
+  CardStateDistributionModel? distributionToShow;
+
+  @override
+  Stream<CardStateDistributionModel> watchCardStateDistribution(String deckId) {
+    final seeded = distributionToShow;
+    if (seeded == null) {
+      return const Stream<CardStateDistributionModel>.empty();
+    }
+
+    return Stream<CardStateDistributionModel>.value(seeded);
   }
 
   @override
