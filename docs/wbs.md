@@ -4943,7 +4943,7 @@ cột NULL của scheduler kia.
 
 ### M4.11 · Card management full-stack
 
-- **Status:** in progress — lát 1 (card list + create editor tối giản) **done**;
+- **Status:** **done** (11/11 lát + recursive review) — lát 1 (card list + create editor tối giản) **done**;
   lát 2 (edit-mode + delete/danger-zone) **done** — `getCard` một-phát để prefill,
   `CardEdit`/`CardDelete` controller, editor rẽ hai nhánh (title, prefill, ghi chú
   BR-10, không có save-and-add ở edit), overlay xác nhận xóa dùng `MxConfirmDialog`
@@ -5026,7 +5026,23 @@ cột NULL của scheduler kia.
   lỗi thì không forward (deck screen tự xử lý); `DeckCardHandoffWidget` giờ là
   fallback. Test: data read (tên + ancestry root-first, rename live, holdsCards),
   widget (title + breadcrumb), router (forward card-deck / ở lại deck-deck).
-  **M4.11 xong cả 11 lát; còn: recursive review toàn tính năng card.**
+  **Recursive review toàn tính năng (11 lát, 69 file) done — sạch, không sửa
+  code.** Đã soát mọi layer + `card.drift` + redirect: layering (domain không
+  Flutter/Drift), AD-12 (use case mỗi interaction; controller gọi use case),
+  AD-13 (card không import deck data/presentation; không `DateTime.now()` trong
+  feature — chỉ `clockProvider`; redirect đọc use case card-side qua
+  `ProviderScope.containerOf`), AD-15 (widgets bốn bucket), CQS (mọi command
+  controller build/submit/reset + `ref.mounted`, giữ input khi lỗi), error →
+  `Failure` ở biên repo (không rò Drift/SQL lên UI), band `cardStateOf` khớp SQL
+  `cardStateCountsByDeck`, redirect có loop-guard (`topRoute`) + guard lỗi. Hai
+  quan sát nhỏ **không chặn, không cần sửa**: (1) hàng `review_count > 0` mà
+  scheduler `unknown` / `current_box` NULL được `cardStateOf` gán `isNew` nhưng
+  SQL panel không đếm vào band nào (chỉ `total`) → chỉ xảy ra với dữ liệu
+  hỏng/schema mới hơn; (2) audit list chưa set `deckContextToShow` nên không đo
+  breadcrumb — `MxBreadcrumb` đã có golden riêng + widget test phủ logic card, nên
+  chỉ là fidelity gap. Các method DAO chưa có caller production (`watchAllTags`,
+  `watchTagsForCards`, `watchFlaggedCardsByDeck`, `reviewStateByCard`) là surface
+  có chủ đích cho M5, đã có DAO test — không phải dead code. **M4.11 DONE.**
 - **Goal:** Người dùng quản lý card hoàn chỉnh trong deck loại `card`, từ UI
   xuống transaction Drift.
 - **Scope:** card list; empty state; tạo card; tạo card **đầu tiên** trong deck
