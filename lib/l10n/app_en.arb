@@ -403,13 +403,13 @@
   "@deckCreateSubDeckAction": {
     "description": "Action that creates a deck inside the current deck (UC-08)."
   },
+  "deckCreateChildAction": "Add to this deck",
+  "@deckCreateChildAction": { "description": "Action on an unset deck's empty state; it asks which kind of child to create (BR-61)." },
+  "deckCreateChildTitle": "What are you adding?",
+  "@deckCreateChildTitle": { "description": "Title of the sheet that offers the two choices an unset deck still has (BR-61, BR-62)." },
   "deckCreateCardAction": "New card",
   "@deckCreateCardAction": {
     "description": "Action that would create a card in the current deck. Shown disabled in this build (UC-08, BR-61)."
-  },
-  "deckCreateCardUnavailableMessage": "Adding cards arrives in the next update.",
-  "@deckCreateCardUnavailableMessage": {
-    "description": "Explanation attached to the disabled New card action. The option stays visible because BR-61 requires an unset deck to show both choices; it is disabled rather than hidden so the user learns the deck can hold cards."
   },
   "deckStudyAction": "Study",
   "@deckStudyAction": {

@@ -72,26 +72,34 @@ void main() {
         findsWidgets,
       );
       // No card affordance at all on a root: BR-58 makes a root hold decks only,
-      // and BR-59 says the Create button therefore has one option.
-      expect(find.text(english.deckCreateCardUnavailableMessage), findsNothing);
+      // and BR-59 says the Create button therefore has one option — so neither
+      // the chooser nor a card action appears.
+      expect(find.text(english.deckCreateChildAction), findsNothing);
+      expect(find.text(english.deckCreateCardAction), findsNothing);
     });
 
-    testWidgets('an unset sub-deck shows both choices (BR-61)', (tester) async {
-      // The card one is disabled with the reason rather than hidden. Hiding it
-      // would teach the user this deck can only hold decks, which is not true
-      // until they add one.
-      await pumpLevel(
-        tester,
-        serving(fakeSubDeck(id: 'deck-1', name: 'Unset', parentId: 'root')),
-      );
+    testWidgets(
+      'an unset sub-deck offers both kinds, neither disabled (BR-61)',
+      (tester) async {
+        // Both are real, enabled actions: BR-62 lets the first child of either
+        // kind settle the deck's content_type, and `createCard` applies that in
+        // the same transaction. Offering only a sub-deck left an unset deck with
+        // no way to ever hold a card — the card screen opens only once the type
+        // is already `card`, and only a card can set it.
+        await pumpLevel(
+          tester,
+          serving(fakeSubDeck(id: 'deck-1', name: 'Unset', parentId: 'root')),
+        );
 
-      expect(find.text(english.deckDetailEmptyUnsetTitle), findsOneWidget);
-      expect(find.text(english.deckCreateSubDeckAction), findsOneWidget);
-      expect(
-        find.text(english.deckCreateCardUnavailableMessage),
-        findsOneWidget,
-      );
-    });
+        expect(find.text(english.deckDetailEmptyUnsetTitle), findsOneWidget);
+
+        await tester.tap(find.text(english.deckCreateChildAction));
+        await tester.pumpAndSettle();
+
+        expect(find.text(english.deckCreateSubDeckAction), findsOneWidget);
+        expect(find.text(english.deckCreateCardAction), findsOneWidget);
+      },
+    );
 
     testWidgets('a deck-type sub-deck offers only Create deck (BR-66)', (
       tester,
@@ -109,7 +117,11 @@ void main() {
       );
 
       expect(find.text(english.deckDetailEmptyDeckTitle), findsOneWidget);
-      expect(find.text(english.deckCreateCardUnavailableMessage), findsNothing);
+      // BR-66: the type is settled, so Create names the one action it still
+      // has — no chooser, and no card option anywhere on the level.
+      expect(find.text(english.deckCreateSubDeckAction), findsOneWidget);
+      expect(find.text(english.deckCreateChildAction), findsNothing);
+      expect(find.text(english.deckCreateCardAction), findsNothing);
     });
 
     testWidgets('a card-type deck offers no deck creation at all (BR-63)', (
@@ -142,6 +154,15 @@ void main() {
   });
 
   group('create a sub-deck (UC-08)', () {
+    /// On an `unset` deck the Create action asks which kind first (BR-61), so
+    /// reaching the sub-deck form is two taps rather than one.
+    Future<void> openSubDeckForm(WidgetTester tester) async {
+      await tester.tap(find.text(english.deckCreateChildAction));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(english.deckCreateSubDeckAction));
+      await tester.pumpAndSettle();
+    }
+
     testWidgets('sends the name under this deck, with no scheduler section', (
       tester,
     ) async {
@@ -152,8 +173,7 @@ void main() {
       );
       await pumpLevel(tester, repository);
 
-      await tester.tap(find.text(english.deckCreateSubDeckAction));
-      await tester.pumpAndSettle();
+      await openSubDeckForm(tester);
       expect(find.text(english.schedulerSectionLabel), findsNothing);
 
       await tester.enterText(deckFormField, 'Hiragana');
@@ -173,8 +193,7 @@ void main() {
       );
       await pumpLevel(tester, repository);
 
-      await tester.tap(find.text(english.deckCreateSubDeckAction));
-      await tester.pumpAndSettle();
+      await openSubDeckForm(tester);
       await tester.enterText(deckFormField, 'Deeper');
       await tester.tap(find.text(english.deckFormSubmitAction));
       await tester.pumpAndSettle();

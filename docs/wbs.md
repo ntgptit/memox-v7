@@ -5043,6 +5043,19 @@ cột NULL của scheduler kia.
   chỉ là fidelity gap. Các method DAO chưa có caller production (`watchAllTags`,
   `watchTagsForCards`, `watchFlaggedCardsByDeck`, `reviewStateByCard`) là surface
   có chủ đích cho M5, đã có DAO test — không phải dead code. **M4.11 DONE.**
+- **Hậu M4.11 — sửa lỗ hổng BR-61 (chủ dự án phát hiện).** UI đang chặn việc tạo
+  card ở deck `unset`: empty state chỉ có nút tạo sub-deck kèm notice
+  "card chưa khả dụng", và nút `+` trên app bar đi thẳng vào form sub-deck. Hệ quả
+  là **deck `unset` không bao giờ trở thành deck card được** — màn card chỉ mở khi
+  `content_type` đã là `card`, mà chỉ card đầu tiên mới đặt được giá trị đó
+  (BR-62). Tài liệu **vốn đã đúng**: BR-61 ghi "bấm Create trong sub-deck `unset`
+  MUST hiển thị hai lựa chọn"; code mới là chỗ lệch. Đã thêm
+  `deck_create_child_widget.dart`: deck `unset` → sheet hai lựa chọn (deck con /
+  card, **không disable cái nào**), deck đã chốt type → vào thẳng form tương ứng
+  (BR-66). Điều hướng sang editor bằng route name nên deck vẫn không import
+  presentation của card (AD-13). Bỏ `deckCreateCardUnavailableMessage`. Test
+  `an unset sub-deck offers both kinds` viết lại theo BR-61 thật (trước đó nó
+  đang ghim chính hành vi sai).
 - **Goal:** Người dùng quản lý card hoàn chỉnh trong deck loại `card`, từ UI
   xuống transaction Drift.
 - **Scope:** card list; empty state; tạo card; tạo card **đầu tiên** trong deck
