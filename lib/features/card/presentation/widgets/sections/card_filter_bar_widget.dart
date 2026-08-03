@@ -36,6 +36,10 @@ class CardFilterBarWidget extends ConsumerWidget {
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
+      // Trailing gutter inside the scroll: without it the last pill (Flagged)
+      // ends flush against the viewport edge, so scrolled to the end it looks
+      // clipped rather than finished.
+      padding: const EdgeInsets.only(right: AppSpacing.lg),
       child: Row(
         children: <Widget>[
           _pill(

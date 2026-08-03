@@ -34,6 +34,11 @@ class CardBreadcrumbWidget extends StatelessWidget {
       // Shared copy with the deck path: this walks the same tree.
       semanticLabel: context.l10n.deckPathSemanticLabel,
       rootIcon: Icons.home_outlined,
+      // Fold a step sooner than the deck list. This screen is always at phone
+      // width and stacks the path over the filter pills, so a four-level chain
+      // folds to `Root · … · parent · here` rather than filling the strip; the
+      // ellipsis still expands. The deck list keeps the full path on purpose.
+      collapseAfter: 3,
       items: <MxBreadcrumbItem>[
         // The top of the tree; always tappable here, because the card list is
         // never the root (a root holds decks, not cards — BR-58).

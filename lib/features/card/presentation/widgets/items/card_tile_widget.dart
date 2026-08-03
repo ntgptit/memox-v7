@@ -113,8 +113,11 @@ class _CardFace extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Text(
+          // titleMedium, not titleSmall: the front is the word the row is about
+          // — the term being learned — so it carries the most visual weight, and
+          // the back and the state line step down from it (D5 hierarchy).
           card.front,
-          style: context.texts.titleSmall,
+          style: context.texts.titleMedium,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
@@ -150,8 +153,13 @@ class _CardFace extends StatelessWidget {
   }
 }
 
-/// The right column: the flag (when set) over the due badge, both right-aligned
-/// so the eye finds "marked" and "when" in one place.
+/// The trailing cluster: the flag (when set) and the due badge on **one line**,
+/// right-aligned and top-aligned with the front word.
+///
+/// It was a vertical stack, which left the flag hanging a line above the due
+/// badge — "marked" and "when" reading as two disconnected marks rather than one
+/// trailing group. On one row they sit together at the row's top-right corner,
+/// which is the "in one place" the stack was reaching for.
 class _TrailingBadges extends StatelessWidget {
   const _TrailingBadges({required this.item, required this.now});
 
@@ -162,8 +170,7 @@ class _TrailingBadges extends StatelessWidget {
   Widget build(BuildContext context) {
     final dueLabel = context.dueBadgeLabel(dueBadgeOf(item.dueAt, now));
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
+    return Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         // Read-only here — the editor owns the toggle (BR-92). Present only when
@@ -178,7 +185,7 @@ class _TrailingBadges extends StatelessWidget {
             color: context.colors.onSurface,
             semanticLabel: context.l10n.cardTileFlaggedSemantics,
           ),
-          const SizedBox(height: AppSpacing.xs),
+          const SizedBox(width: AppSpacing.xs),
         ],
         Semantics(
           label: context.l10n.cardDueBadgeSemantics(dueLabel),

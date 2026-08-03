@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_card.dart';
 import '../../../domain/models/card_state_distribution_model.dart';
 import '../../../domain/models/card_state_model.dart';
 import '../../controllers/card_progress_controller.dart';
@@ -27,21 +29,28 @@ class CardProgressPanelWidget extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        Row(
-          children: <Widget>[
-            _ProgressRing(fraction: distribution.masteredFraction),
-            const SizedBox(width: AppSpacing.lg),
-            Expanded(child: _Headline(distribution: distribution)),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.md),
-        _DistributionBar(distribution: distribution),
-        const SizedBox(height: AppSpacing.sm),
-        _Legend(distribution: distribution),
-      ],
+    // A flat bordered card (no shadow — it sits inside the scrolling list, where
+    // a shadow stacked on the page reads as a rendering fault, MxCard's own rule).
+    // It gives the progress block one clear region rather than four elements
+    // floating on the page.
+    return MxCard(
+      elevation: AppElevation.none,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              _ProgressRing(fraction: distribution.masteredFraction),
+              const SizedBox(width: AppSpacing.lg),
+              Expanded(child: _Headline(distribution: distribution)),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          _DistributionBar(distribution: distribution),
+          const SizedBox(height: AppSpacing.sm),
+          _Legend(distribution: distribution),
+        ],
+      ),
     );
   }
 }
@@ -194,8 +203,11 @@ class _LegendItem extends StatelessWidget {
             context.cardStateLabel(state),
             count,
           ),
-          style: context.texts.labelSmall?.copyWith(
-            color: context.colors.onSurfaceVariant,
+          // labelMedium on onSurface, not labelSmall on onSurfaceVariant: four
+          // short counts that a reader scans need to clear the row of ordinary
+          // body text, and the muted variant at the smaller size sat under it.
+          style: context.texts.labelMedium?.copyWith(
+            color: context.colors.onSurface,
           ),
         ),
       ],
