@@ -137,7 +137,9 @@ abstract final class AppColors {
   /// history is worth keeping: `#D7DAE3` (1.40:1) was too weak when it was the
   /// only cue, `#BEC0C3` (1.82:1) was right then and too heavy now.
   static const Color borderSubtleLight = Color(0xFFD2D2DD);
-  static const Color borderSubtleDark = Color(0xFF403D67);
+  // Lifted from 0xFF403D67 so a fill-less hairline (a divider on the dark page)
+  // reads on OLED. Same hue and saturation (0.41), lightness only.
+  static const Color borderSubtleDark = Color(0xFF4C487A);
 
   /// Input border while focused. Focus shifts *hue*, never stroke width —
   /// Material's default doubles the stroke, which reads as the field shouting.
