@@ -130,6 +130,7 @@ final class CountingCardRepository implements CardRepository {
     required int limit,
     CardListFilter filter = CardListFilter.all,
     CardListSort sort = CardListSort.newest,
+    String? searchTerm,
     DateTime? now,
   }) {
     watchCalls.add(deckId);
@@ -142,6 +143,7 @@ final class CountingCardRepository implements CardRepository {
   Stream<int> watchFilteredCardCount(
     String deckId, {
     CardListFilter filter = CardListFilter.all,
+    String? searchTerm,
     DateTime? now,
   }) {
     countCalls.add(deckId);

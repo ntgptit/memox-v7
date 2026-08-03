@@ -44,38 +44,20 @@ final class CardListReadDataSource {
     required int limit,
     CardListFilter filter = CardListFilter.all,
     CardListSort sort = CardListSort.newest,
+    String? searchTerm,
     DateTime? now,
   }) {
     _requireWindow(limit);
 
-    // `dueNow` is the only filter that needs `now`, so it insists on it rather
-    // than defaulting the clock. Every branch yields the same `CardListItemRow`,
-    // so one map covers them all.
-    final rows = switch (filter) {
-      CardListFilter.all => _dao.watchCardListItemsByDeck(
-        deckId,
-        limit: limit,
-        sort: sort,
-      ),
-      CardListFilter.dueNow => _dao.watchCardListItemsDueByDeck(
-        deckId,
-        now: _requireNow(now),
-        limit: limit,
-        sort: sort,
-      ),
-      CardListFilter.isNew => _dao.watchCardListItemsNewByDeck(
-        deckId,
-        limit: limit,
-        sort: sort,
-      ),
-      CardListFilter.flagged => _dao.watchCardListItemsFlaggedByDeck(
-        deckId,
-        limit: limit,
-        sort: sort,
-      ),
-    };
-
-    return rows
+    return _dao
+        .watchCardListItems(
+          deckId: deckId,
+          limit: limit,
+          filter: filter,
+          sort: sort,
+          searchTerm: searchTerm,
+          now: now,
+        )
         .handleError(_rethrowMapped)
         .map(
           (List<CardListItemRow> list) => list
@@ -86,8 +68,24 @@ final class CardListReadDataSource {
         );
   }
 
+  /// The count for the same predicate the list read uses — one definition of
+  /// "due", of "new", of a search term, shared by the pill and the list.
+  Stream<int> watchFilteredCardCount(
+    String deckId, {
+    CardListFilter filter = CardListFilter.all,
+    String? searchTerm,
+    DateTime? now,
+  }) => _dao
+      .watchCardCount(
+        deckId: deckId,
+        filter: filter,
+        searchTerm: searchTerm,
+        now: now,
+      )
+      .handleError(_rethrowMapped);
+
   Stream<int> watchCardCountByDeck(String deckId) =>
-      _dao.watchCardCountByDeck(deckId).handleError(_rethrowMapped);
+      watchFilteredCardCount(deckId);
 
   Stream<CardStateDistributionModel> watchCardStateDistribution(
     String deckId,
@@ -112,22 +110,6 @@ final class CardListReadDataSource {
         ),
       );
 
-  Stream<int> watchFilteredCardCount(
-    String deckId, {
-    CardListFilter filter = CardListFilter.all,
-    DateTime? now,
-  }) => switch (filter) {
-    CardListFilter.all => watchCardCountByDeck(deckId),
-    CardListFilter.dueNow =>
-      _dao
-          .watchDueCountByDeck(deckId, now: _requireNow(now))
-          .handleError(_rethrowMapped),
-    CardListFilter.isNew =>
-      _dao.watchNewCountByDeck(deckId).handleError(_rethrowMapped),
-    CardListFilter.flagged =>
-      _dao.watchFlaggedCountByDeck(deckId).handleError(_rethrowMapped),
-  };
-
   void _requireWindow(int limit) {
     // A window has to be a window. Zero renders an empty deck that has cards;
     // a negative one is SQLite's "no limit", the unbounded read this parameter
@@ -135,12 +117,6 @@ final class CardListReadDataSource {
     if (limit < 1) {
       throw ArgumentError.value(limit, 'limit', 'must be at least 1');
     }
-  }
-
-  DateTime _requireNow(DateTime? now) {
-    if (now == null) throw ArgumentError.notNull('now');
-
-    return now;
   }
 
   Never _rethrowMapped(Object error) {

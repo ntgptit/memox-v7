@@ -159,6 +159,7 @@ final class FakeCardRepository implements CardRepository {
     required int limit,
     CardListFilter filter = CardListFilter.all,
     CardListSort sort = CardListSort.newest,
+    String? searchTerm,
     DateTime? now,
   }) {
     requestedLimits.add(limit);
@@ -176,6 +177,7 @@ final class FakeCardRepository implements CardRepository {
   Stream<int> watchFilteredCardCount(
     String deckId, {
     CardListFilter filter = CardListFilter.all,
+    String? searchTerm,
     DateTime? now,
   }) {
     if (filter == CardListFilter.all) return watchCardCountByDeck(deckId);

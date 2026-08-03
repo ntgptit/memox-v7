@@ -10,6 +10,7 @@ import '../../../../shared/widgets/mx_async_view.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_empty_state.dart';
 import '../../../../shared/widgets/mx_icon_button.dart';
+import '../../../../shared/widgets/mx_search_field.dart';
 import '../../../../shared/widgets/mx_text_button.dart';
 import '../../domain/models/card_list_filter_model.dart';
 import '../../domain/models/card_list_item_model.dart';
@@ -33,6 +34,10 @@ import '../widgets/support/card_sort_control_widget.dart';
 /// `deck_list_toolbar_widget.dart` uses for its filter and sort.
 void _growWindow(WidgetRef ref, String deckId) =>
     ref.read(cardListWindowProvider(deckId).notifier).grow();
+
+/// Types into the search field (S1). A free function for the same reason.
+void _updateSearch(WidgetRef ref, String deckId, String query) =>
+    ref.read(cardListSearchQueryProvider(deckId).notifier).update(query);
 
 /// The card list for a card-type deck (UC-04, W1).
 ///
@@ -86,7 +91,7 @@ class CardListScreen extends ConsumerWidget {
 
     return MxContentShell(
       title: deckContext?.deckName ?? context.l10n.cardListTitle,
-      subheader: _subheader(deckId, deckContext, deckTotal),
+      subheader: _subheader(ref, context, deckContext, deckTotal),
       // The add action lives on the app bar, not a floating button — the same
       // place the deck list puts its create action, so "the primary action" sits
       // in one spot across the app. A FAB would also carry Material's default
@@ -105,7 +110,11 @@ class CardListScreen extends ConsumerWidget {
         loadingLabel: context.l10n.cardListLoadingLabel,
         error: (_, _) => _Error(message: context.l10n.cardListError),
         data: (list) => list.isEmpty
-            ? _empty(context, filter)
+            ? _empty(
+                context,
+                filter,
+                ref.watch(cardListSearchQueryProvider(deckId)),
+              )
             : _Loaded(
                 deckId: deckId,
                 items: list,
@@ -124,34 +133,48 @@ class CardListScreen extends ConsumerWidget {
   // the same rule the deck screen follows. The pills wait for the deck to hold
   // cards. When neither is ready there is no strip at all.
   Widget? _subheader(
-    String deckId,
+    WidgetRef ref,
+    BuildContext context,
     DeckContextModel? deckContext,
     int deckTotal,
   ) {
-    final crumb = deckContext == null
-        ? null
-        : CardBreadcrumbWidget(deckContext: deckContext);
-    final pills = deckTotal > 0 ? CardFilterBarWidget(deckId: deckId) : null;
-    if (crumb == null && pills == null) return null;
-    if (pills == null) return crumb;
-    if (crumb == null) return pills;
+    final strips = <Widget>[
+      if (deckContext != null) CardBreadcrumbWidget(deckContext: deckContext),
+      // Search and the pills both narrow the list, so they arrive together once
+      // the deck has anything to narrow.
+      if (deckTotal > 0) ...<Widget>[
+        MxSearchField(
+          value: ref.watch(cardListSearchQueryProvider(deckId)),
+          onChanged: (query) => _updateSearch(ref, deckId, query),
+          hintText: context.l10n.cardSearchHint,
+          clearSemanticLabel: context.l10n.cardSearchClearLabel,
+        ),
+        CardFilterBarWidget(deckId: deckId),
+      ],
+    ];
+    if (strips.isEmpty) return null;
+    if (strips.length == 1) return strips.first;
 
     return Column(
-      // Stretch, not start: both strips scroll horizontally, so they take the
+      // Stretch, not start: the strips scroll horizontally, so they take the
       // gutter-bounded width and scroll within it rather than sizing to content.
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       spacing: AppSpacing.sm,
-      children: <Widget>[crumb, pills],
+      children: strips,
     );
   }
 
   // An empty result means "add your first card" only when no filter is on;
   // otherwise it means the filter matched nothing (D3).
-  Widget _empty(BuildContext context, CardListFilter filter) =>
-      filter == CardListFilter.all
-      ? _Empty(onAdd: () => _openEditor(context))
-      : const _NoMatch();
+  Widget _empty(BuildContext context, CardListFilter filter, String search) {
+    // A search that matched nothing names the term; a filter that matched
+    // nothing says so; only a genuinely empty deck offers "add your first card".
+    if (search.trim().isNotEmpty) return _NoSearchMatch(query: search.trim());
+    if (filter != CardListFilter.all) return const _NoMatch();
+
+    return _Empty(onAdd: () => _openEditor(context));
+  }
 }
 
 class _Loaded extends ConsumerWidget {
@@ -295,6 +318,22 @@ class _Empty extends StatelessWidget {
       message: context.l10n.cardListEmptyMessage,
       actionLabel: context.l10n.cardListEmptyAction,
       onAction: onAdd,
+    );
+  }
+}
+
+/// The searched-empty state: the deck has cards, the term matched none (S1).
+class _NoSearchMatch extends StatelessWidget {
+  const _NoSearchMatch({required this.query});
+
+  final String query;
+
+  @override
+  Widget build(BuildContext context) {
+    return MxEmptyState(
+      icon: Icons.search_off,
+      title: context.l10n.cardSearchEmptyTitle(query),
+      message: context.l10n.cardSearchEmptyMessage,
     );
   }
 }

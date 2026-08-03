@@ -86,12 +86,14 @@ final class CardRepositoryImpl implements CardRepository {
     required int limit,
     CardListFilter filter = CardListFilter.all,
     CardListSort sort = CardListSort.newest,
+    String? searchTerm,
     DateTime? now,
   }) => _reads.watchCardListItems(
     deckId,
     limit: limit,
     filter: filter,
     sort: sort,
+    searchTerm: searchTerm,
     now: now,
   );
 
@@ -99,8 +101,14 @@ final class CardRepositoryImpl implements CardRepository {
   Stream<int> watchFilteredCardCount(
     String deckId, {
     CardListFilter filter = CardListFilter.all,
+    String? searchTerm,
     DateTime? now,
-  }) => _reads.watchFilteredCardCount(deckId, filter: filter, now: now);
+  }) => _reads.watchFilteredCardCount(
+    deckId,
+    filter: filter,
+    searchTerm: searchTerm,
+    now: now,
+  );
 
   @override
   Stream<int> watchCardCountByDeck(String deckId) =>
@@ -215,8 +223,7 @@ final class CardRepositoryImpl implements CardRepository {
   @override
   Future<void> deleteCard(String cardId) => _guard(() async {
     await _requireCardRow(cardId);
-    // Review state and history cascade; content_type is left alone, even for the
-    // last card (BR-67).
+    // State and history cascade; content_type is left alone (BR-67).
     await _cardDao.deleteCardById(cardId);
   });
 
@@ -244,8 +251,7 @@ final class CardRepositoryImpl implements CardRepository {
         });
       }
 
-      // Reuse the tag that already owns this folded name (BR-93); mint one only
-      // when nobody does. `owner_id` stays NULL — the local profile (AD-03).
+      // Reuse the tag owning this folded name (BR-93); mint one only if none.
       final owned = await _cardDao.tagByFoldedName(name.folded);
       final tagId = owned?.id ?? _idGenerator();
       if (owned == null) {
@@ -265,14 +271,11 @@ final class CardRepositoryImpl implements CardRepository {
   );
 
   @override
-  Future<void> removeCardTag({
-    required String cardId,
-    required String tagId,
-  }) => _guard(() async {
-    // No existence check: unlinking an absent pair is the same end state, so a
-    // double tap is harmless (BR-93).
-    await _cardDao.unlinkTag(cardId, tagId);
-  });
+  Future<void> removeCardTag({required String cardId, required String tagId}) =>
+      _guard(() async {
+        // No existence check: unlinking an absent pair is the same end state.
+        await _cardDao.unlinkTag(cardId, tagId);
+      });
 
   @override
   Stream<bool> watchCardFlag(String cardId) =>
@@ -327,8 +330,7 @@ final class CardRepositoryImpl implements CardRepository {
     return row;
   }
 
-  /// A deck's content type, refusing a value this build does not understand —
-  /// altering such a deck could contradict rules a newer schema attached.
+  /// A deck's content type, refusing a value this build does not know.
   DeckContentType _knownContentType(Deck deck) {
     final type = DeckContentType.fromDbValue(deck.contentType);
     if (type == DeckContentType.unknown) {
@@ -341,8 +343,7 @@ final class CardRepositoryImpl implements CardRepository {
     return type;
   }
 
-  /// The root's scheduler columns, resolved through `root_deck_id` (BR-57)
-  /// for the review state a new card must carry (BR-09).
+  /// The root's scheduler, via `root_deck_id` (BR-57), for BR-09's state.
   Future<({SchedulerType type, int version, int generation})>
   _resolveRootScheduler(String rootDeckId) async {
     final root = await _requireDeckRow(rootDeckId);
@@ -350,8 +351,7 @@ final class CardRepositoryImpl implements CardRepository {
     final version = root.schedulerVersion;
     final generation = root.schedulerGeneration;
     if (typeValue == null || version == null || generation == null) {
-      // A root without a scheduler violates Q11; refusing is the only honest
-      // response to corrupt data.
+      // A root without a scheduler violates Q11 — refuse rather than guess.
       throw const ConflictFailure(
         message: 'This deck has no study mode configured.',
         reason: CardConflictReason.rootSchedulerMissing,

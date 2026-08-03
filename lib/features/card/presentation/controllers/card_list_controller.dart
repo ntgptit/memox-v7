@@ -29,6 +29,7 @@ class CardList extends _$CardList {
   Stream<List<CardListItemModel>> build(String deckId) {
     final filter = ref.watch(cardListFilterSelectionProvider(deckId));
     final sort = ref.watch(cardListSortSelectionProvider(deckId));
+    final search = ref.watch(cardListSearchQueryProvider(deckId));
     final limit = ref.watch(cardListWindowProvider(deckId));
     // `now` only matters to the Due-now filter, so only that filter watches it —
     // the others must not re-subscribe every time the clock ticks.
@@ -41,6 +42,7 @@ class CardList extends _$CardList {
       limit: limit,
       filter: filter,
       sort: sort,
+      searchTerm: search,
       now: now,
     );
   }
@@ -59,6 +61,7 @@ class CardCount extends _$CardCount {
     // The denominator of "showing N of M" is the *active* filter's total (§4.3),
     // so it follows the filter — the pills each read their own fixed count.
     final filter = ref.watch(cardListFilterSelectionProvider(deckId));
+    final search = ref.watch(cardListSearchQueryProvider(deckId));
     final now = filter == CardListFilter.dueNow
         ? ref.watch(cardListNowProvider)
         : null;
@@ -66,6 +69,7 @@ class CardCount extends _$CardCount {
     return ref.watch(watchCardCountUseCaseProvider)(
       deckId,
       filter: filter,
+      searchTerm: search,
       now: now,
     );
   }

@@ -31,6 +31,23 @@ class CardListFilterSelection extends _$CardListFilterSelection {
   }
 }
 
+/// What the user has typed into the card list's search field (S1).
+///
+/// An input-state notifier beside the filter and the sort, and it resets the
+/// window for the same reason they do: a window grown over the whole deck is
+/// meaningless over the handful of cards a term matches.
+@riverpod
+class CardListSearchQuery extends _$CardListSearchQuery {
+  @override
+  String build(String deckId) => '';
+
+  void update(String query) {
+    if (query == state) return;
+    state = query;
+    ref.invalidate(cardListWindowProvider(deckId));
+  }
+}
+
 /// Which order the card list is in (D3).
 ///
 /// Its own notifier beside [CardListFilterSelection], and it resets the window
