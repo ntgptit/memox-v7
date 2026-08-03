@@ -668,6 +668,11 @@
     "placeholders": { "mastered": { "type": "int" }, "total": { "type": "int" } },
     "description": "The mastered/total line beside the ring (BR-88)."
   },
+  "cardProgressStudyAction": "Bắt đầu học · {due} đến hạn",
+  "@cardProgressStudyAction": {
+    "placeholders": { "due": { "type": "int" } },
+    "description": "The primary action on the deck progress panel (D5, UC-07)."
+  },
   "cardProgressDueNew": "{due} đến hạn · {fresh} mới",
   "@cardProgressDueNew": {
     "placeholders": { "due": { "type": "int" }, "fresh": { "type": "int" } },

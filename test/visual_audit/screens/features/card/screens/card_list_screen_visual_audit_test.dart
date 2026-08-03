@@ -2,6 +2,7 @@
 library;
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/features/card/domain/models/card_list_filter_model.dart';
 import 'package:memox/features/card/domain/models/card_state_distribution_model.dart';
 import 'package:memox/features/card/domain/models/card_state_model.dart';
 import 'package:memox/features/card/presentation/screens/card_list_screen.dart';
@@ -58,6 +59,10 @@ void main() {
       reviewing: 34,
       mastered: 106,
     );
+    // Something due, so the panel's Start-study action renders and its
+    // `onPrimary` label is measured on the brand fill — the pairing that failed
+    // at 2.33:1 on the deck card before it was stated explicitly.
+    repository.filterCounts[CardListFilter.dueNow] = 23;
 
     return repository;
   }
@@ -86,22 +91,23 @@ void main() {
         itemId: 'shell',
         reason: SkipReason.rasterOnly,
         detailContains: '_RenderInkFeatures',
-        expectedMatches: 10,
+        expectedMatches: 11,
         rationale:
             'The Material ink layers of the Scaffold, the AppBar, the app-bar '
-            'add IconButton, the two MxCard card rows and the four filter chips. '
-            'Splash and highlight paint into these layers; the overlay colours '
-            'are asserted in app_theme_test.dart.',
+            'add IconButton, the panel Start-study button, the two MxCard card '
+            'rows and the four filter chips. Splash and highlight paint into '
+            'these layers; the overlay colours are asserted in app_theme_test.dart.',
       ),
       AuditSkipAllowance(
         itemId: 'shell',
         reason: SkipReason.customPainter,
         detailContains: '_ShapeBorderPainter',
-        expectedMatches: 2,
+        expectedMatches: 3,
         rationale:
-            'The app-bar add IconButton draws its rounded state-layer shape '
-            'through a ShapeBorder painter; the shape comes from '
-            'iconButtonTheme and is pinned by the mx_components goldens.',
+            'The app-bar add IconButton and the panel Start-study pill draw '
+            'their rounded shapes through a ShapeBorder painter; both shapes '
+            'come from the component themes and are pinned by the mx_components '
+            'goldens.',
       ),
       // The four filter chips (D3). Their fill, border and label come from
       // ChipThemeData and are pinned by the mx_components chip goldens; the
