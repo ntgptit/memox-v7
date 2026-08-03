@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_elevation.dart';
+import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_card.dart';
 import '../../../domain/models/card_due_badge_model.dart';
 import '../../../domain/models/card_list_item_model.dart';
 import '../support/card_due_badge_widget.dart';
@@ -11,10 +14,17 @@ import '../support/card_state_widget.dart';
 /// One card in the management list: a state dot, front over back with a state
 /// label and tag chips, and — when set — a flag over a due badge (D5, W1 §4.3).
 ///
-/// The build stays short by composing three parts — [_StateDot], [_CardFace],
-/// [_TrailingBadges] — each of which owns one column of the row. Tapping opens
-/// the editor, wired by the caller so the tile stays ignorant of the router
-/// (AD-13).
+/// **Built on `MxCard`, like the deck row.** Each card is its own bordered
+/// surface with a gap to the next, not a flat row split by a hairline — the same
+/// shape `deck_tile_widget.dart` uses, so the two lists read alike. The whole card
+/// is the tap target (`MxCard` owns the ink); the build stays short by composing
+/// [_StateDot], [_CardFace] and [_TrailingBadges], one per column.
+///
+/// **Colour follows the deck's rule, not the row's mock.** The dot carries the
+/// state colour (a non-text mark clears the 3:1 bar); the label stays neutral
+/// (`onSurfaceVariant` clears 4.5:1 as text where the state hues do not on both
+/// themes). Tags and the due badge are quiet filled pills — the deck's chip
+/// language — rather than the colour-per-state the reference draws.
 const double _flagIconSize = 18;
 
 /// The state dot's diameter — small, because colour and position carry it, not
@@ -38,34 +48,18 @@ class CardTileWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final card = item.card;
-
-    return Semantics(
-      button: true,
-      // Front and back, joined for the reader so the row is announced as one
-      // card. Through the ARB so the join is a translator's decision.
-      label: context.l10n.cardTileSemantics(card.front, card.back),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppSpacing.md),
-        child: Padding(
-          // `lg` vertical, not `md`: a taller row reads less cramped and gives
-          // the whole tile a larger touch target on a phone (W1 §4.3).
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.lg,
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              _StateDot(item: item),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(child: _CardFace(item: item)),
-              const SizedBox(width: AppSpacing.sm),
-              _TrailingBadges(item: item, now: now),
-            ],
-          ),
-        ),
+    return MxCard(
+      elevation: AppElevation.none,
+      onTap: onTap,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          _StateDot(item: item),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(child: _CardFace(item: item)),
+          const SizedBox(width: AppSpacing.sm),
+          _TrailingBadges(item: item, now: now),
+        ],
       ),
     );
   }
@@ -127,8 +121,7 @@ class _CardFace extends StatelessWidget {
         Text(
           // `onSurface`, a step darker than the state line below it: the meaning
           // is what the learner reads, so it takes the stronger of the two muted
-          // tones and the state label keeps the lighter one — the two stop
-          // competing for the same weight.
+          // tones and the state label keeps the lighter one.
           card.back,
           style: context.texts.bodySmall?.copyWith(
             color: context.colors.onSurface,
@@ -136,7 +129,7 @@ class _CardFace extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        const SizedBox(height: AppSpacing.xs),
+        const SizedBox(height: AppSpacing.sm),
         // The state label and the tag chips share the third line: a Wrap so a
         // card with many tags flows onto a second row at a narrow width rather
         // than overflowing (BR-94 caps it at ten).
@@ -146,9 +139,10 @@ class _CardFace extends StatelessWidget {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: <Widget>[
             Text(
-              context.cardStateLabel(item.state),
+              context.cardStateLabel(item.state).toUpperCase(),
               style: context.texts.labelSmall?.copyWith(
                 color: context.colors.onSurfaceVariant,
+                letterSpacing: 0.6,
               ),
             ),
             for (final tag in item.tagNames) _TagChip(name: tag),
@@ -161,11 +155,6 @@ class _CardFace extends StatelessWidget {
 
 /// The trailing cluster: the flag (when set) and the due badge on **one line**,
 /// right-aligned and top-aligned with the front word.
-///
-/// It was a vertical stack, which left the flag hanging a line above the due
-/// badge — "marked" and "when" reading as two disconnected marks rather than one
-/// trailing group. On one row they sit together at the row's top-right corner,
-/// which is the "in one place" the stack was reaching for.
 class _TrailingBadges extends StatelessWidget {
   const _TrailingBadges({required this.item, required this.now});
 
@@ -191,30 +180,52 @@ class _TrailingBadges extends StatelessWidget {
             color: context.colors.onSurface,
             semanticLabel: context.l10n.cardTileFlaggedSemantics,
           ),
-          // A fixed 8 between the flag and the due label — at `xs` they read as
-          // one smudged mark; `sm` lets each be its own.
           const SizedBox(width: AppSpacing.sm),
         ],
-        Semantics(
-          label: context.l10n.cardDueBadgeSemantics(dueLabel),
-          child: Text(
-            dueLabel,
-            style: context.texts.labelSmall?.copyWith(
-              color: context.colors.onSurfaceVariant,
-            ),
+        _DueBadge(label: dueLabel),
+      ],
+    );
+  }
+}
+
+/// The due label as a quiet filled pill — the deck list's due-chip language: a
+/// `streakContainer` ground with a neutral label, so "when" reads as one mark
+/// rather than a loose word floating at the card's edge.
+class _DueBadge extends StatelessWidget {
+  const _DueBadge({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: context.l10n.cardDueBadgeSemantics(label),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: AppSpacing.xs,
+        ),
+        decoration: BoxDecoration(
+          color: context.semanticColors.streakContainer,
+          borderRadius: BorderRadius.circular(AppRadius.pill),
+        ),
+        child: Text(
+          label,
+          style: context.texts.labelSmall?.copyWith(
+            color: context.colors.onSurfaceVariant,
           ),
         ),
-      ],
+      ),
     );
   }
 }
 
 /// A read-only tag pill on the row (BR-93).
 ///
-/// A hairline border rather than a fill: the label is `onSurfaceVariant` on the
-/// card surface, which clears 4.5:1 as text, and a filled chip would put it on a
-/// second ground to re-check. The border is non-text — 3:1 is enough — so
-/// `borderSubtle` carries the pill shape without a contrast risk.
+/// A filled `surfaceMuted` pill, the deck list's quiet-container language, rather
+/// than the old hairline outline: the label is `onSurfaceVariant` on the muted
+/// ground, which clears 4.5:1, and the fill lets a tag read as a chip at a glance
+/// without a border competing with the card's own.
 class _TagChip extends StatelessWidget {
   const _TagChip({required this.name});
 
@@ -228,8 +239,8 @@ class _TagChip extends StatelessWidget {
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        border: Border.all(color: context.semanticColors.borderSubtle),
-        borderRadius: BorderRadius.circular(AppSpacing.sm),
+        color: context.semanticColors.surfaceMuted,
+        borderRadius: BorderRadius.circular(AppRadius.pill),
       ),
       child: Text(
         name,

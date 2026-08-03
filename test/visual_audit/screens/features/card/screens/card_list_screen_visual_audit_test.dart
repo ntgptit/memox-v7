@@ -86,10 +86,10 @@ void main() {
         itemId: 'shell',
         reason: SkipReason.rasterOnly,
         detailContains: '_RenderInkFeatures',
-        expectedMatches: 8,
+        expectedMatches: 10,
         rationale:
             'The Material ink layers of the Scaffold, the AppBar, the app-bar '
-            'add IconButton, one tappable card row and the four filter chips. '
+            'add IconButton, the two MxCard card rows and the four filter chips. '
             'Splash and highlight paint into these layers; the overlay colours '
             'are asserted in app_theme_test.dart.',
       ),
@@ -128,10 +128,10 @@ void main() {
         itemId: 'shell',
         reason: SkipReason.customPainter,
         detailContains: 'no painter',
-        expectedMatches: 4,
+        expectedMatches: 6,
         rationale:
-            'A clip with no painter: the four filter chips each clip through a '
-            'CustomPaint with no painter of its own.',
+            'A clip with no painter: the four filter chips and the two MxCard '
+            'card rows each clip through a CustomPaint with no painter of its own.',
       ),
       // The progress ring (D5, BR-88).
       AuditSkipAllowance(

@@ -186,23 +186,11 @@ class _Loaded extends ConsumerWidget {
         AppSpacing.xxl,
       ),
       itemCount: items.length + headerCount + 1,
-      // A hairline only between two card rows, so the list reads as separated
-      // rows rather than one dense block; a plain gap wraps the panel, the
-      // "showing" line and the load-more tail, which are not rows to divide.
-      separatorBuilder: (context, index) {
-        const firstCard = headerCount;
-        final lastCard = headerCount + items.length - 1;
-        final betweenCards = index >= firstCard && index < lastCard;
-        if (!betweenCards) return const SizedBox(height: AppSpacing.md);
-
-        return Divider(
-          height: AppSpacing.md,
-          thickness: 1,
-          indent: AppSpacing.lg,
-          endIndent: AppSpacing.lg,
-          color: context.semanticColors.borderSubtle,
-        );
-      },
+      // A plain gap between everything: each card row is now its own bordered
+      // surface (MxCard, like the deck list), so the separation is the space
+      // between cards, not a hairline drawn through one dense block.
+      separatorBuilder: (context, index) =>
+          const SizedBox(height: AppSpacing.md),
       itemBuilder: (context, index) {
         if (index == 0) {
           return CardProgressPanelWidget(deckId: deckId);
