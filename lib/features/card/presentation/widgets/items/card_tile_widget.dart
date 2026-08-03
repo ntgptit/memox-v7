@@ -49,9 +49,11 @@ class CardTileWidget extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(AppSpacing.md),
         child: Padding(
+          // `lg` vertical, not `md`: a taller row reads less cramped and gives
+          // the whole tile a larger touch target on a phone (W1 §4.3).
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.lg,
-            vertical: AppSpacing.md,
+            vertical: AppSpacing.lg,
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -123,9 +125,13 @@ class _CardFace extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
+          // `onSurface`, a step darker than the state line below it: the meaning
+          // is what the learner reads, so it takes the stronger of the two muted
+          // tones and the state label keeps the lighter one — the two stop
+          // competing for the same weight.
           card.back,
           style: context.texts.bodySmall?.copyWith(
-            color: context.colors.onSurfaceVariant,
+            color: context.colors.onSurface,
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
@@ -185,7 +191,9 @@ class _TrailingBadges extends StatelessWidget {
             color: context.colors.onSurface,
             semanticLabel: context.l10n.cardTileFlaggedSemantics,
           ),
-          const SizedBox(width: AppSpacing.xs),
+          // A fixed 8 between the flag and the due label — at `xs` they read as
+          // one smudged mark; `sm` lets each be its own.
+          const SizedBox(width: AppSpacing.sm),
         ],
         Semantics(
           label: context.l10n.cardDueBadgeSemantics(dueLabel),
