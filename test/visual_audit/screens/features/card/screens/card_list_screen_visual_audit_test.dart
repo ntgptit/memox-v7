@@ -80,26 +80,28 @@ void main() {
             'renders Colors.transparent at rest and ColorScheme.surface only '
             'mid-transition; the surface value is asserted in app_theme_test.dart.',
       ),
-      // The shell: Scaffold, AppBar, the extended FAB and the four filter chips.
+      // The shell: Scaffold, AppBar, the app-bar add action and the four filter
+      // chips.
       AuditSkipAllowance(
         itemId: 'shell',
         reason: SkipReason.rasterOnly,
         detailContains: '_RenderInkFeatures',
         expectedMatches: 8,
         rationale:
-            'The Material ink layers of the Scaffold, the AppBar, the '
-            'FloatingActionButton, one tappable card row and the four filter '
-            'chips. Splash and highlight paint into these layers; the overlay '
-            'colours are asserted in app_theme_test.dart.',
+            'The Material ink layers of the Scaffold, the AppBar, the app-bar '
+            'add IconButton, one tappable card row and the four filter chips. '
+            'Splash and highlight paint into these layers; the overlay colours '
+            'are asserted in app_theme_test.dart.',
       ),
       AuditSkipAllowance(
         itemId: 'shell',
         reason: SkipReason.customPainter,
         detailContains: '_ShapeBorderPainter',
+        expectedMatches: 2,
         rationale:
-            'The FloatingActionButton draws its rounded shape through a '
-            'ShapeBorder painter; the shape is set in floatingActionButtonTheme '
-            'and pinned by the mx_components goldens.',
+            'The app-bar add IconButton draws its rounded state-layer shape '
+            'through a ShapeBorder painter; the shape comes from '
+            'iconButtonTheme and is pinned by the mx_components goldens.',
       ),
       // The four filter chips (D3). Their fill, border and label come from
       // ChipThemeData and are pinned by the mx_components chip goldens; the
@@ -126,18 +128,10 @@ void main() {
         itemId: 'shell',
         reason: SkipReason.customPainter,
         detailContains: 'no painter',
-        expectedMatches: 5,
+        expectedMatches: 4,
         rationale:
-            'A clip with no painter: the tappable card row and the four filter '
-            'chips each clip through a CustomPaint with no painter of its own.',
-      ),
-      AuditSkipAllowance(
-        itemId: 'shell',
-        reason: SkipReason.unknownRenderType,
-        detailContains: '_RenderChildOverflowBox',
-        rationale:
-            'The extended FAB lays out its label and icon in an OverflowBox, '
-            'whose render object only sizes its child and paints no colour.',
+            'A clip with no painter: the four filter chips each clip through a '
+            'CustomPaint with no painter of its own.',
       ),
       // The progress ring (D5, BR-88).
       AuditSkipAllowance(

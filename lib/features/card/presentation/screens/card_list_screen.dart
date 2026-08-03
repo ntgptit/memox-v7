@@ -9,6 +9,7 @@ import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_empty_state.dart';
+import '../../../../shared/widgets/mx_icon_button.dart';
 import '../../../../shared/widgets/mx_text_button.dart';
 import '../../domain/models/card_list_filter_model.dart';
 import '../../domain/models/card_list_item_model.dart';
@@ -85,11 +86,19 @@ class CardListScreen extends ConsumerWidget {
     return MxContentShell(
       title: deckContext?.deckName ?? context.l10n.cardListTitle,
       subheader: _subheader(deckId, deckContext, deckTotal),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _openEditor(context),
-        icon: const Icon(Icons.add),
-        label: Text(context.l10n.cardListNewFab),
-      ),
+      // The add action lives on the app bar, not a floating button — the same
+      // place the deck list puts its create action, so "the primary action" sits
+      // in one spot across the app. A FAB would also carry Material's default
+      // `primaryContainer`, a second emphasis tone for the same "add" the deck
+      // screen renders in `primary`; one app-bar icon keeps that consistent.
+      actions: <Widget>[
+        MxIconButton(
+          icon: Icons.add,
+          semanticLabel: context.l10n.cardListNewAction,
+          tooltip: context.l10n.cardListNewAction,
+          onPressed: () => _openEditor(context),
+        ),
+      ],
       body: MxAsyncView<List<CardListItemModel>>(
         value: cards,
         loadingLabel: context.l10n.cardListLoadingLabel,
@@ -281,9 +290,9 @@ class _Empty extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The FAB stays visible here even though this CTA does the same thing: the
-    // wireframe (W2) hides the FAB on the empty state, a refinement that waits
-    // for a golden able to tell the two apart.
+    // The empty state carries its own "add first card" CTA; the app-bar add
+    // action stays too, so there is one consistent place to add whatever the
+    // body shows — the same pairing the deck list's empty level uses.
     return MxEmptyState(
       icon: Icons.style_outlined,
       title: context.l10n.cardListEmptyTitle,
