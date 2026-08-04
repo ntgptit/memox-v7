@@ -33,7 +33,8 @@ later decision depends on it being true.
 | Design tokens, theming, shared components, responsive, localization, a11y | `flutter-design-system` | 7, 12, 13 |
 | Routes, guards, deep links, nested shells, back behaviour | `flutter-navigation` | 8 |
 | Providers, controllers, UI state modelling, side effects | `flutter-state-riverpod` | 9 |
-| Dio, API contracts, Drift schema, migrations, cache, sync, secure storage | `flutter-data-layer` | 10, 11 |
+| Dio, API contracts, repository shape, DTO/entity split, cache, sync, secure storage | `flutter-data-layer` | 10, 11 |
+| Anything under `lib/core/database/` or a `data/` folder — `.drift` schema and queries, indexes, migrations, DAOs, transactions, stream invalidation — and reviewing a database PR | `flutter-drift` | 11 |
 | Building one feature end to end | `flutter-feature-slice` | 14 |
 | Any kind of test | `flutter-testing` | 15 |
 | Security, performance, logging, analytics, CI/CD, release, post-release | `flutter-ship` | 16–22 |

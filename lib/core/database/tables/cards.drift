@@ -15,6 +15,26 @@ CREATE TABLE cards (
     front TEXT NOT NULL,
     back TEXT NOT NULL,
 
+    -- `trim(front)` and `trim(back)` case-folded by Dart, written by the domain
+    -- — the same shape `tags.name_folded` uses, and for the same reason
+    -- (BR-93's comment there states it).
+    --
+    -- **Search compares these, never `lower(front)`.** SQLite's `lower()` folds
+    -- ASCII only, so it leaves `Ô` and `Đ` alone. The search term was already
+    -- folded in Dart with full Unicode, which made the two sides of the
+    -- comparison disagree: a card stored as `CÔNG NGHỆ` could not be found by
+    -- typing `công nghệ`, while a lowercase card could. Folding both sides in
+    -- Dart makes the comparison byte-for-byte and correct for every alphabet.
+    --
+    -- Case only — no diacritic stripping. `công` does not match `cong`, exactly
+    -- as `Động từ` and `Dong tu` stay two different tags. Diacritic-insensitive
+    -- search is a product decision (S1), not a side effect of a bug fix.
+    --
+    -- `DEFAULT ''` because SQLite requires one to add a NOT NULL column; every
+    -- write goes through the repository, which always supplies the real value.
+    front_folded TEXT NOT NULL DEFAULT '',
+    back_folded TEXT NOT NULL DEFAULT '',
+
     -- The user's own mark on the content (BR-92). It lives here rather than in
     -- card_review_states for the same reason `front` does: reset drops and
     -- recreates the schedule, and a flag has to survive that.

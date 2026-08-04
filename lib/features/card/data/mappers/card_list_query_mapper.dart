@@ -27,6 +27,7 @@ import 'package:drift/drift.dart';
 import '../../../../core/database/app_database.dart';
 import '../../domain/models/card_list_filter_model.dart';
 import '../../domain/models/card_list_sort_model.dart';
+import '../../domain/models/card_text_model.dart';
 
 /// BR-22: a card is due when it has no scheduled date yet, or that date has
 /// passed. The same predicate the review queue uses in `study.drift`.
@@ -40,7 +41,7 @@ Expression<bool> isNewPredicate(CardReviewStates s) => s.reviewCount.equals(0);
 Expression<bool> isFlaggedPredicate(Cards c) => c.isFlagged.equals(1);
 
 /// Front or back contains [term], matched **literally** and case-insensitively
-/// (ASCII, which is what SQLite's own case folding covers).
+/// for every alphabet.
 ///
 /// **`instr`, not `LIKE`, and that is what makes `%` an ordinary character.**
 /// `LIKE` reads `%` and `_` in its pattern as wildcards, so a user searching
@@ -51,19 +52,25 @@ Expression<bool> isFlaggedPredicate(Cards c) => c.isFlagged.equals(1);
 /// text into SQL. `instr(haystack, needle) > 0` has no pattern language at all:
 /// every character is itself, and the term stays a bound variable.
 ///
-/// `lower()` on both sides because `instr` is case-sensitive where `LIKE` is
-/// not; the search should not become stricter than it was.
+/// **Both sides are folded in Dart, and no `lower()` appears in the SQL.** This
+/// used to compare `instr(lower(front), :term)` with the term lowered by Dart —
+/// two different folding rules on the two sides of one comparison. SQLite's
+/// `lower()` covers ASCII only, so a card stored as `CÔNG NGHỆ` folded to
+/// `cÔng nghệ` while the term `công nghệ` folded to itself, and the card could
+/// not be found. The stored columns now carry the Dart-folded text
+/// (`CardText.folded`) and the term goes through the same [CardText.fold], so
+/// the two can no longer disagree.
 ///
 /// Still a scan — no index serves "contains" — and still acceptable for the same
 /// reason as before: the deck predicate has already narrowed it to one deck.
-Expression<bool> searchPredicate(Cards c, String term) =>
-    _contains(c.front, term) | _contains(c.back, term);
+Expression<bool> searchPredicate(Cards c, String foldedTerm) =>
+    _contains(c.frontFolded, foldedTerm) | _contains(c.backFolded, foldedTerm);
 
-/// `instr(lower(column), lower(?)) > 0`.
-Expression<bool> _contains(GeneratedColumn<String> column, String term) =>
+/// `instr(folded_column, ?) > 0`, with the needle already folded.
+Expression<bool> _contains(GeneratedColumn<String> column, String foldedTerm) =>
     FunctionCallExpression<int>('instr', <Expression<Object>>[
-      column.lower(),
-      Variable<String>(term.toLowerCase()),
+      column,
+      Variable<String>(foldedTerm),
     ]).isBiggerThanValue(0);
 
 /// The whole `WHERE` for one list read: always the deck, plus the active filter,
@@ -89,7 +96,9 @@ Expression<bool> cardListPredicate({
     CardListFilter.flagged => predicate & isFlaggedPredicate(c),
   };
 
-  final term = searchTerm?.trim() ?? '';
+  // Folded through the same function the stored columns went through, so the
+  // needle and the haystack cannot be folded by two different rules.
+  final term = CardText.fold(searchTerm ?? '');
   if (term.isEmpty) return predicate;
 
   return predicate & searchPredicate(c, term);

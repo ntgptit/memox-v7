@@ -7,8 +7,8 @@
 | **Scope** | Bảng, cột, index, quan hệ, query bất biến. Ngoài phạm vi: SQL runtime (`lib/core/database/`, chưa tồn tại) |
 | **Source of truth for** | Schema · cột và kiểu · index · query bất biến · thứ tự migration |
 | **Depends on** | `document-conventions.md`, `architecture.md`, `business-rules.md` |
-| **Updated by task** | M4.10at (tags, card_tags, is_flagged, ba trường phụ) |
-| **Last updated** | 2026-08-02 |
+| **Updated by task** | Sửa fold search (cột `front_folded`/`back_folded`, schema v3) |
+| **Last updated** | 2026-08-04 |
 
 Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; SQL thật nằm
 ở `lib/core/database/tables/` và **chưa được tạo** — task này chỉ chốt đặc tả.
@@ -140,12 +140,30 @@ trả lời được mọi lookup cũ, giữ cả hai chỉ khiến mỗi insert
 | `deck_id` | TEXT NOT NULL | → `decks(id)` ON DELETE CASCADE. Chỉ deck có `content_type = 'card'` (BR-63) |
 | `front` | TEXT NOT NULL | BR-07, BR-08 |
 | `back` | TEXT NOT NULL | BR-07, BR-08 |
+| `front_folded` | TEXT NOT NULL DEFAULT '' | `front` đã trim + hạ hoa bằng Dart. Search so trên cột này |
+| `back_folded` | TEXT NOT NULL DEFAULT '' | Như trên, cho `back` |
 | `is_flagged` | INTEGER NOT NULL DEFAULT 0 | 0 \| 1. Cờ người dùng đánh dấu (BR-92) |
 | `example` | TEXT NULL | Tuỳ chọn (BR-95) |
 | `hint` | TEXT NULL | Tuỳ chọn (BR-95) |
 | `pronunciation` | TEXT NULL | Tuỳ chọn (BR-95) |
 | `created_at` | DATETIME NOT NULL | UTC |
 | `updated_at` | DATETIME NOT NULL | UTC |
+
+**Hai cột `_folded` tồn tại vì `lower()` của SQLite chỉ hạ hoa ASCII.** Nó không
+đụng tới `Ô`, `Ê`, `Đ`. Search từng so `instr(lower(front), :term)` với `:term`
+đã được Dart hạ hoa theo Unicode — hai vế fold bằng hai luật khác nhau, nên thẻ
+lưu `CÔNG NGHỆ` không tìm ra được bằng `công nghệ`, trong khi thẻ viết thường thì
+tìm được. Fold cả hai vế trong Dart biến phép so thành byte-for-byte và đúng cho
+mọi bảng chữ cái. Đây đúng là lập luận `tags.name_folded` đã dùng ở v2 (BR-93),
+áp cho hai mặt thẻ.
+
+Chỉ hạ hoa, **không** bỏ dấu: `công` vẫn không khớp `cong`. Tìm kiếm không dấu là
+quyết định sản phẩm (S1), không phải hệ quả phụ của một bản vá.
+
+`DEFAULT ''` vì SQLite bắt buộc có default khi thêm cột NOT NULL. Mọi lượt ghi
+đều đi qua repository và luôn ghi giá trị thật; migration v3 backfill toàn bộ
+dòng cũ **bằng Dart**, vì `SET front_folded = lower(front)` sẽ ghi đúng những giá
+trị hỏng mà cột này sinh ra để thay thế.
 
 **Không có cột SRS nào ở đây**, và không có `scheduler_generation` — card là nội
 dung, nó sống xuyên qua mọi lần reset (BR-41). Reset learning progress không được
@@ -500,6 +518,7 @@ và cờ — xem `docs/wireframes/m4-11-card-management.md`.
 |---|---|
 | 1 | Toàn bộ schema trên, trừ những gì v2 thêm |
 | 2 | Bảng `tags`, `card_tags`; cột `cards.is_flagged`, `example`, `hint`, `pronunciation` (M4.10at) |
+| 3 | Cột `cards.front_folded`, `back_folded` + backfill bằng Dart — sửa search không khớp chữ hoa non-ASCII |
 | _sau_ | Bảng `card_media` |
 | _sau_ | Cột sync (`is_pending_sync`, `version`) khi có backend (AD-03) |
 | _sau_ | `deck_templates` thành bảng runtime nếu tải template từ server |

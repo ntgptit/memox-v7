@@ -37,7 +37,7 @@ Load only the skill you need; they are written to stand alone.
 | 10.1 | Dio configuration | `flutter-data-layer` |
 | 10.2 | API contract | `flutter-data-layer` |
 | 10.3 | Network resilience | `flutter-data-layer` |
-| 11.1 | Drift database | `flutter-data-layer` |
+| 11.1 | Drift database | `flutter-drift` |
 | 11.2 | Cache strategy | `flutter-data-layer` |
 | 11.3 | Secure storage | `flutter-data-layer` |
 | 12 | Localization | `flutter-design-system` |

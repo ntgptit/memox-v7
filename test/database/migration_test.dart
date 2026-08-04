@@ -1,4 +1,4 @@
-import 'package:drift/drift.dart' show Variable;
+import 'package:drift/drift.dart' show QueryRow, Variable;
 import 'package:drift/native.dart';
 import 'package:drift_dev/api/migrations_native.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -67,8 +67,8 @@ void main() {
     }
   });
 
-  test('v1 and v2 are the versions that exist', () {
-    expect(GeneratedHelper.versions, <int>[1, 2]);
+  test('v1, v2 and v3 are the versions that exist', () {
+    expect(GeneratedHelper.versions, <int>[1, 2, 3]);
   });
 
   group('v1 → v2', () {
@@ -182,6 +182,107 @@ void main() {
 
       expect(links, isEmpty, reason: 'the link outlived the card');
       expect(tags, hasLength(1), reason: 'the tag itself is not the card');
+    });
+  });
+
+  group('v2 → v3 · folded search columns', () {
+    /// A v2 database holding two cards — one uppercase Vietnamese, one plain
+    /// ASCII — then upgraded to v3.
+    ///
+    /// Raw SQL again, for the reason the v1 seeder gives: the claim is that rows
+    /// written by the *old* schema get correct folded values, and only a row
+    /// that owes nothing to today's code can test that.
+    Future<AppDatabase> upgradedFromSeededV2() async {
+      final verifier = SchemaVerifier(GeneratedHelper());
+      final schema = await verifier.schemaAt(2);
+
+      schema.rawDatabase.execute(
+        'INSERT INTO decks (id, name, root_deck_id, content_type, '
+        'created_at, updated_at) '
+        "VALUES ('d1', 'Korean', 'd1', 'card', 0, 0)",
+      );
+      schema.rawDatabase.execute(
+        'INSERT INTO cards (id, deck_id, front, back, created_at, updated_at) '
+        "VALUES ('c1', 'd1', 'CÔNG NGHỆ', 'TECHNOLOGY', 0, 0)",
+      );
+      schema.rawDatabase.execute(
+        'INSERT INTO cards (id, deck_id, front, back, created_at, updated_at) '
+        "VALUES ('c2', 'd1', 'Ephemeral', 'short-lived', 0, 0)",
+      );
+
+      final db = AppDatabase(schema.newConnection());
+      addTearDown(db.close);
+      await verifier.migrateAndValidate(db, 3);
+
+      return db;
+    }
+
+    Future<QueryRow> foldedRow(AppDatabase db, String id) => db
+        .customSelect(
+          'SELECT front, back, front_folded, back_folded FROM cards '
+          'WHERE id = ?',
+          variables: <Variable<Object>>[Variable<String>(id)],
+        )
+        .getSingle();
+
+    test('the backfill folds non-ASCII text, which lower() would not', () async {
+      // The whole point of the column pair. `UPDATE … SET front_folded =
+      // lower(front)` would have written 'cÔng nghệ' here and looked like it
+      // worked.
+      final row = await foldedRow(await upgradedFromSeededV2(), 'c1');
+
+      expect(row.data['front_folded'], 'công nghệ');
+      expect(row.data['back_folded'], 'technology');
+    });
+
+    test('the displayed text is untouched by the backfill', () async {
+      final row = await foldedRow(await upgradedFromSeededV2(), 'c1');
+
+      expect(row.data['front'], 'CÔNG NGHỆ');
+      expect(row.data['back'], 'TECHNOLOGY');
+    });
+
+    test('ASCII rows fold too, and are not left on the default', () async {
+      final row = await foldedRow(await upgradedFromSeededV2(), 'c2');
+
+      expect(row.data['front_folded'], 'ephemeral');
+    });
+
+    test('no card is left holding the empty default', () async {
+      final db = await upgradedFromSeededV2();
+
+      final unfolded = await db
+          .customSelect(
+            "SELECT id FROM cards WHERE front <> '' AND front_folded = ''",
+          )
+          .get();
+
+      expect(unfolded, isEmpty, reason: 'the backfill skipped a row');
+    });
+
+    test('a v1 database reaches v3 in one launch', () async {
+      // The skipped-version path: a user who has not opened the app since v1
+      // runs both steps back to back, and the v3 backfill has to cope with the
+      // rows v2 created rather than with a fresh table.
+      final verifier = SchemaVerifier(GeneratedHelper());
+      final schema = await verifier.schemaAt(1);
+
+      schema.rawDatabase.execute(
+        'INSERT INTO decks (id, name, root_deck_id, content_type, '
+        'created_at, updated_at) '
+        "VALUES ('d1', 'Korean', 'd1', 'card', 0, 0)",
+      );
+      schema.rawDatabase.execute(
+        'INSERT INTO cards (id, deck_id, front, back, created_at, updated_at) '
+        "VALUES ('c1', 'd1', 'ĐỘNG TỪ', 'verb', 0, 0)",
+      );
+
+      final db = AppDatabase(schema.newConnection());
+      addTearDown(db.close);
+      await verifier.migrateAndValidate(db, 3);
+
+      final row = await foldedRow(db, 'c1');
+      expect(row.data['front_folded'], 'động từ');
     });
   });
 }
