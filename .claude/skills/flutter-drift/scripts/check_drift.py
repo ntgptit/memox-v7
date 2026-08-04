@@ -68,10 +68,26 @@ def rel(path: Path) -> str:
     return str(path.relative_to(REPO))
 
 
+# Generated output. Scanning it reports drift's own code back at the author, who
+# cannot change it and does not commit it — `app_database.g.dart` alone carries
+# nine `customSelect`-without-`readsFrom` hits and three interpolated statements,
+# all of them drift's chosen shape for a named query. Left in, the guard exits 1
+# on every clone that has run build_runner, which is every clone that compiles.
+GENERATED_SUFFIXES = (".g.dart", ".freezed.dart", ".drift.dart")
+
+
+def is_generated(path: Path) -> bool:
+    return path.name.endswith(GENERATED_SUFFIXES)
+
+
 def dart_files(*globs: str) -> list[Path]:
     out: list[Path] = []
     for pattern in globs:
-        out.extend(p for p in LIB.glob(pattern) if p.suffix == ".dart")
+        out.extend(
+            p
+            for p in LIB.glob(pattern)
+            if p.suffix == ".dart" and not is_generated(p)
+        )
     return sorted(set(out))
 
 

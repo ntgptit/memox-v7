@@ -6,7 +6,7 @@ import 'package:memox/core/database/app_database.dart';
 
 import '../drift/generated/schema.dart';
 
-/// The v1 → v2 migration, and the snapshots that make it testable.
+/// The upgrade path, and the snapshots that make it testable.
 ///
 /// v1 was dumped at M4.4 with no migration to write yet, on the argument that
 /// the expensive mistake is writing the first migration with no snapshot of the
@@ -14,14 +14,14 @@ import '../drift/generated/schema.dart';
 /// below starts from `drift_schemas/drift_schema_v1.json`, which could not have
 /// been regenerated once the `.drift` files moved on.
 void main() {
-  test('the schema version is 2', () {
+  test('the schema version is 3', () {
     final db = AppDatabase(NativeDatabase.memory());
     addTearDown(db.close);
 
-    expect(db.schemaVersion, 2);
+    expect(db.schemaVersion, 3);
   });
 
-  test('onCreate builds the whole of v2 from an empty database', () async {
+  test('onCreate builds the whole of v3 from an empty database', () async {
     final db = AppDatabase(NativeDatabase.memory());
     addTearDown(db.close);
 
@@ -71,12 +71,21 @@ void main() {
     expect(GeneratedHelper.versions, <int>[1, 2, 3]);
   });
 
-  group('v1 → v2', () {
-    /// A v1 database holding one deck and one card, then upgraded to v2.
+  group('what v2 added, seen from a v1 database', () {
+    /// A v1 database holding one deck and one card, then upgraded to the latest
+    /// schema.
     ///
     /// Seeded through raw SQL rather than the generated v1 classes: the point
     /// is that rows written by the *old* schema survive, and raw SQL is the
     /// only way to write a row that owes nothing to today's code.
+    ///
+    /// **The target is `db.schemaVersion`, not a literal 2.** `onUpgrade`
+    /// branches on `from` alone, which is the right shape — in production `to`
+    /// is always the newest version, so a `to >= n` guard would add a branch no
+    /// device ever takes. The consequence is that a v1 database cannot be
+    /// stopped at v2: it runs every step. Naming the latest version here also
+    /// keeps these tests from breaking on the day a v4 arrives; what they assert
+    /// is that a v1 row survives the whole path, not that it survives one step.
     Future<AppDatabase> upgradedFromSeededV1() async {
       final verifier = SchemaVerifier(GeneratedHelper());
       final schema = await verifier.schemaAt(1);
@@ -93,7 +102,7 @@ void main() {
 
       final db = AppDatabase(schema.newConnection());
       addTearDown(db.close);
-      await verifier.migrateAndValidate(db, 2);
+      await verifier.migrateAndValidate(db, db.schemaVersion);
 
       return db;
     }
@@ -225,15 +234,18 @@ void main() {
         )
         .getSingle();
 
-    test('the backfill folds non-ASCII text, which lower() would not', () async {
-      // The whole point of the column pair. `UPDATE … SET front_folded =
-      // lower(front)` would have written 'cÔng nghệ' here and looked like it
-      // worked.
-      final row = await foldedRow(await upgradedFromSeededV2(), 'c1');
+    test(
+      'the backfill folds non-ASCII text, which lower() would not',
+      () async {
+        // The whole point of the column pair. `UPDATE … SET front_folded =
+        // lower(front)` would have written 'cÔng nghệ' here and looked like it
+        // worked.
+        final row = await foldedRow(await upgradedFromSeededV2(), 'c1');
 
-      expect(row.data['front_folded'], 'công nghệ');
-      expect(row.data['back_folded'], 'technology');
-    });
+        expect(row.data['front_folded'], 'công nghệ');
+        expect(row.data['back_folded'], 'technology');
+      },
+    );
 
     test('the displayed text is untouched by the backfill', () async {
       final row = await foldedRow(await upgradedFromSeededV2(), 'c1');

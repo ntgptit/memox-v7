@@ -292,10 +292,20 @@ void main() {
     expect(find.textContaining("couldn't be loaded"), findsOneWidget);
     expect(find.text('Retry'), findsOneWidget);
 
+    // Measured as a delta, not as a total. The screen already subscribes to the
+    // deck total twice — once for the showing line, once for the All pill — so
+    // an absolute count asserts how many reads the screen happens to have rather
+    // than what retry did, and breaks on the next read that gets added.
+    final countSubscriptionsBefore = repository.cardCountWatchCount;
+
     await tester.tap(find.text('Retry'));
     await tester.pump();
 
     expect(repository.requestedLimits, <int>[kCardWindowSize, kCardWindowSize]);
-    expect(repository.cardCountWatchCount, 2);
+    expect(
+      repository.cardCountWatchCount,
+      countSubscriptionsBefore + 1,
+      reason: 'retry re-subscribed the total beside the list',
+    );
   });
 }

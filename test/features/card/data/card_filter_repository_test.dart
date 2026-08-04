@@ -291,17 +291,20 @@ void main() {
   // sides of the comparison disagreed. Lowercase content passed, which is why
   // this survived casual testing in an app whose content is Vietnamese and
   // Korean.
-  test('an uppercase non-ASCII card is found by its lowercase form (S1)', () async {
-    final tree = await h.seedTree();
-    final hit = await seedCardIn(tree.leaf.id, 'CÔNG NGHỆ');
-    await seedCardIn(tree.leaf.id, 'unrelated');
+  test(
+    'an uppercase non-ASCII card is found by its lowercase form (S1)',
+    () async {
+      final tree = await h.seedTree();
+      final hit = await seedCardIn(tree.leaf.id, 'CÔNG NGHỆ');
+      await seedCardIn(tree.leaf.id, 'unrelated');
 
-    final items = await h.cardRepository
-        .watchCardListItems(tree.leaf.id, limit: 50, searchTerm: 'công nghệ')
-        .first;
+      final items = await h.cardRepository
+          .watchCardListItems(tree.leaf.id, limit: 50, searchTerm: 'công nghệ')
+          .first;
 
-    expect(items.map((i) => i.card.id), <String>[hit]);
-  });
+      expect(items.map((i) => i.card.id), <String>[hit]);
+    },
+  );
 
   test('and the reverse: lowercase content, uppercase term (S1)', () async {
     final tree = await h.seedTree();

@@ -83,6 +83,8 @@ void main() {
         'deck_id',
         'front',
         'back',
+        'front_folded',
+        'back_folded',
         'is_flagged',
         'example',
         'hint',
