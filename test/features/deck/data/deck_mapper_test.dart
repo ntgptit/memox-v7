@@ -104,8 +104,12 @@ void main() {
         Card(
           id: 'card-1',
           deckId: 'leaf',
-          front: 'front text',
-          back: 'back text',
+          front: 'Front Text',
+          back: 'Back Text',
+          // Folded columns exist from schema v3 and hold the search form. The
+          // mapper must read the original columns, not these.
+          frontFolded: 'front text',
+          backFolded: 'back text',
           isFlagged: 0,
           createdAt: localInstant,
           updatedAt: localInstant,
@@ -114,8 +118,8 @@ void main() {
 
       expect(entity.id, 'card-1');
       expect(entity.deckId, 'leaf');
-      expect(entity.front, 'front text');
-      expect(entity.back, 'back text');
+      expect(entity.front, 'Front Text');
+      expect(entity.back, 'Back Text');
       expect(entity.createdAt.isUtc, isTrue);
       expect(entity.updatedAt, utcInstant);
     });

@@ -95,40 +95,40 @@
   "dark": {
     "borderProminence": {
       "semantic.borderSubtle on card (colorScheme.surface)": {
-        "ratio": 1.6898450878324982,
+        "ratio": 2.0421476825767875,
         "verdict": "too-heavy"
       },
       "semantic.borderSubtle on page (scaffoldBackgroundColor)": {
-        "ratio": 1.9173553933862924,
+        "ratio": 2.317089833543392,
         "verdict": "too-heavy"
       },
       "semantic.borderSubtle on muted tile (semantic.surfaceMuted)": {
-        "ratio": 1.4290563678327735,
-        "verdict": "in-band"
+        "ratio": 1.7269891606363466,
+        "verdict": "too-heavy"
       },
       "colorScheme.outline on card (colorScheme.surface)": {
-        "ratio": 1.6898450878324982,
+        "ratio": 2.0421476825767875,
         "verdict": "too-heavy"
       },
       "colorScheme.outline on page (scaffoldBackgroundColor)": {
-        "ratio": 1.9173553933862924,
+        "ratio": 2.317089833543392,
         "verdict": "too-heavy"
       },
       "colorScheme.outline on muted tile (semantic.surfaceMuted)": {
-        "ratio": 1.4290563678327735,
-        "verdict": "in-band"
+        "ratio": 1.7269891606363466,
+        "verdict": "too-heavy"
       },
       "colorScheme.outlineVariant on card (colorScheme.surface)": {
-        "ratio": 1.6898450878324982,
+        "ratio": 2.0421476825767875,
         "verdict": "too-heavy"
       },
       "colorScheme.outlineVariant on page (scaffoldBackgroundColor)": {
-        "ratio": 1.9173553933862924,
+        "ratio": 2.317089833543392,
         "verdict": "too-heavy"
       },
       "colorScheme.outlineVariant on muted tile (semantic.surfaceMuted)": {
-        "ratio": 1.4290563678327735,
-        "verdict": "in-band"
+        "ratio": 1.7269891606363466,
+        "verdict": "too-heavy"
       }
     },
     "backgroundTint": {
@@ -164,9 +164,9 @@
         "chroma": 0.14901960784313725
       },
       "borderSubtle": {
-        "hex": "#403D67",
-        "hue": 244.28571428571428,
-        "chroma": 0.16470588235294117
+        "hex": "#4C487A",
+        "hue": 244.8,
+        "chroma": 0.19607843137254904
       },
       "onSurfaceVariant": {
         "hex": "#A8A7C4",
@@ -176,8 +176,8 @@
     },
     "depthMechanism": {
       "surfaceVsPage": 1.1346338236516185,
-      "borderVsSurface": 1.6898450878324982,
-      "borderVsPage": 1.9173553933862924,
+      "borderVsSurface": 2.0421476825767875,
+      "borderVsPage": 2.317089833543392,
       "cardElevation": 0.0,
       "boxShadowSitesInLib": 1,
       "usesShadow": true,
