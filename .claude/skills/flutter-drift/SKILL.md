@@ -194,6 +194,7 @@ Load only what the task needs.
 | `references/schema-conventions.md` | Adding or changing a table, column, constraint, enum or timestamp |
 | `references/query-conventions.md` | Writing or reviewing a `.drift` query, designing an index, or paginating |
 | `references/dynamic-sql.md` | The query's shape varies — optional filters, user-chosen sort, search, or anything tempted toward `customSelect` |
+| `references/dynamic-sql-semantics.md` | DYN-01…DYN-10: nullable-filter ambiguity, time ranges, Unicode folding and collation, query budgets, cursor validity, mandatory scope, canonicalisation, write concurrency |
 | `references/migrations.md` | Any change that bumps `schemaVersion`, or a failing migration test |
 | `references/riverpod-drift.md` | Wiring providers, transactions, batches, or debugging a stream that will not re-emit |
 | `references/testing-database.md` | Writing or reviewing any test that touches the database |

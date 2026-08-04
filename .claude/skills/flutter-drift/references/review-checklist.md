@@ -50,6 +50,18 @@ production and not in the diff.
 - A write that takes a map of fields, or a `Companion` covering the whole row
   when the operation changes one column.
 - `CustomExpression` holding anything but a constant fragment.
+- A mandatory scope — soft-delete, owner, workspace, access control — exposed as
+  an optional criteria field (DYN-08).
+- A nullable filter parameter that means both "no filter" and "IS NULL"
+  (DYN-01).
+- `BETWEEN` over a timestamp range instead of half-open `>= from AND < to`
+  (DYN-03).
+- `COLLATE NOCASE` or SQL `lower()` used as if it folded non-ASCII text
+  (DYN-05).
+- A cursor that does not carry the sort and filter it was issued for (DYN-07).
+- An unbounded `IN` list, page size or expression depth (DYN-06).
+- A blind `UPDATE … WHERE id = ?` where concurrent writes are possible, or an
+  upsert whose conflict target is a runtime parameter (DYN-10).
 
 **Migration**
 

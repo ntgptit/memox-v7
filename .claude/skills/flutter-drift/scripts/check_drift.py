@@ -49,6 +49,13 @@ CUSTOM_EXPRESSION = re.compile(r"\bCustomExpression\s*[<(]")
 STRINGLY_SORT = re.compile(
     r"\b(?:String|String\?)\s+(sortColumn|sortBy|orderBy|sortDirection|orderColumn|sortField)\b",
 )
+WALL_CLOCK = re.compile(r"\bDateTime\.now\s*\(")
+ASCII_FOLD = re.compile(r"\.lower\s*\(\s*\)|\blower\s*\(", re.IGNORECASE)
+NOCASE = re.compile(r"COLLATE\s+NOCASE", re.IGNORECASE)
+DATE_BETWEEN = re.compile(
+    r"\bBETWEEN\s+:(\w*(?:from|start|begin|after)\w*)\s+AND\s+:(\w+)",
+    re.IGNORECASE,
+)
 
 findings: list[tuple[str, str, str]] = []  # (severity, location, message)
 
@@ -245,6 +252,58 @@ def check_sort_is_not_stringly_typed() -> None:
             )
 
 
+def check_no_wall_clock_in_data_layer() -> None:
+    """DYN-09a: a query builder must be deterministic.
+
+    Two predicates each calling `now()` are measured against two instants
+    milliseconds apart, which is invisible until it puts a row on the wrong side
+    of a due boundary. The clock is read once, at the use case, and passed down.
+    """
+    for path in dart_files("core/database/**/*.dart", "features/*/data/**/*.dart"):
+        text = strip_dart_comments(path.read_text(encoding="utf-8"))
+        for match in WALL_CLOCK.finditer(text):
+            line = text[: match.start()].count("\n") + 1
+            report(
+                "ERROR",
+                f"{rel(path)}:{line}",
+                "DateTime.now() in the data layer: take the instant from "
+                "clockProvider at the use case and pass it in",
+            )
+
+
+def check_ascii_folding() -> None:
+    """DYN-05: SQLite folds ASCII only.
+
+    `lower()` and `COLLATE NOCASE` leave every non-ASCII letter alone, so a
+    Vietnamese or Korean app that relies on them is case-insensitive for half its
+    content. `tags.drift` already documents this and folds at write time into
+    `name_folded`; anything comparing with SQL-side folding should be held to the
+    same standard.
+    """
+    for path in sorted(LIB.rglob("*.drift")):
+        text = strip_sql_comments(path.read_text(encoding="utf-8"))
+        for match in NOCASE.finditer(text):
+            line = text[: match.start()].count("\n") + 1
+            report(
+                "NOTE",
+                f"{rel(path)}:{line}",
+                "COLLATE NOCASE folds ASCII only — fold at write time into a "
+                "column instead, as tags.name_folded does (DYN-05)",
+            )
+
+    for path in dart_files("features/*/data/**/*.dart", "core/database/**/*.dart"):
+        text = strip_dart_comments(path.read_text(encoding="utf-8"))
+        for match in ASCII_FOLD.finditer(text):
+            line = text[: match.start()].count("\n") + 1
+            report(
+                "NOTE",
+                f"{rel(path)}:{line}",
+                "SQL-side lower() folds ASCII only; if the other side of the "
+                "comparison is folded in Dart the two disagree on non-ASCII "
+                "text (DYN-05)",
+            )
+
+
 # -------------------------------------------------------------------- queries
 
 
@@ -292,6 +351,19 @@ def check_queries() -> None:
                         f"`{name}` orders without an id tie-breaker: rows sharing "
                         "the sort value can swap between reads",
                     )
+
+            # DYN-03: BETWEEN is inclusive at both ends, so a day range written
+            # this way needs an end-of-day value whose precision depends on the
+            # storage mode — the boundary row is kept on one platform and
+            # dropped on another.
+            if (between := DATE_BETWEEN.search(flat)) is not None:
+                report(
+                    "NOTE",
+                    location,
+                    f"`{name}` uses BETWEEN over what looks like a time range "
+                    f"(:{between.group(1)}): prefer half-open "
+                    ">= :from AND < :to (DYN-03)",
+                )
 
             if " JOIN " in upper and SELECT_STAR.search(flat):
                 report(
@@ -373,6 +445,8 @@ def main() -> int:
         check_no_interpolated_sql,
         check_custom_expression,
         check_sort_is_not_stringly_typed,
+        check_no_wall_clock_in_data_layer,
+        check_ascii_folding,
         check_queries,
         check_schema_snapshots,
         check_datetime_contract,

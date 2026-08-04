@@ -255,6 +255,17 @@ using later columns as equality constraints once a range condition is hit.
 
 Good dynamic SQL supports the combinations someone chose. Not every combination.
 
+## Then read the semantics rules
+
+Everything above makes a dynamic query *safe and type-checked*. It does not stop
+it from being **wrong**: a nullable filter that means two things, a `BETWEEN` that
+drops the last millisecond of a day, a case-insensitive search that is only
+case-insensitive for ASCII, a cursor reused across a different sort, or a
+mandatory scope somebody forgot to pass.
+
+`dynamic-sql-semantics.md` holds those as DYN-01…DYN-10, with the failure each one
+prevents. Read it before shipping a query whose shape a user can change.
+
 ## Review checklist
 
 - [ ] Criteria are immutable, with explicit defaults, carrying no Drift types.
