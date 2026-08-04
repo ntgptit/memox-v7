@@ -92,6 +92,13 @@ Query conventions, the naming vocabulary (`get` / `find` / `list` / `watch` /
 to design an index from a query rather than from a column list are in
 `references/query-conventions.md`.
 
+If the query's **shape** varies — an optional filter, a sort the user picks, a
+window — read `references/dynamic-sql.md` before writing it. The rule it exists
+to enforce is that dynamic SQL is structure composed through a type-safe API,
+never SQL text concatenated at runtime; the moment a column name or a clause is
+interpolated into a string, compile-time checking, stream dependencies and
+injection safety are all gone at once.
+
 The order matters: **index after query, never before**. Every index is paid for
 on every insert into that table, forever. An index whose query nobody can name is
 a permanent cost for a speculative benefit — and this project's own composite
@@ -181,6 +188,7 @@ Load only what the task needs.
 | `references/project-baseline.md` | Before proposing any structural change, or when a generic Drift recommendation seems to conflict with this repo |
 | `references/schema-conventions.md` | Adding or changing a table, column, constraint, enum or timestamp |
 | `references/query-conventions.md` | Writing or reviewing a `.drift` query, designing an index, or paginating |
+| `references/dynamic-sql.md` | The query's shape varies — optional filters, user-chosen sort, search, or anything tempted toward `customSelect` |
 | `references/migrations.md` | Any change that bumps `schemaVersion`, or a failing migration test |
 | `references/riverpod-drift.md` | Wiring providers, transactions, batches, or debugging a stream that will not re-emit |
 | `references/review-checklist.md` | Reviewing a database PR, or self-checking before commit |

@@ -35,6 +35,21 @@ CUSTOM_WRITE = re.compile(r"\bcustom(Update|Insert|Statement)\s*\(")
 SELECT_STAR = re.compile(r"\bSELECT\s+\*", re.IGNORECASE)
 SCHEMA_VERSION = re.compile(r"int\s+get\s+schemaVersion\s*=>\s*(\d+)")
 
+# A Dart string literal, single or triple quoted, captured so its body can be
+# inspected for interpolated SQL.
+DART_STRING = re.compile(
+    r"""(?P<quote>'''|\"\"\"|'|")(?P<body>(?:\\.|(?!(?P=quote)).)*)(?P=quote)""",
+    re.DOTALL,
+)
+SQL_VERB = re.compile(
+    r"\b(SELECT\s+\w|INSERT\s+INTO|UPDATE\s+\w+\s+SET|DELETE\s+FROM|ORDER\s+BY|WHERE\s+\w)",
+)
+INTERPOLATION = re.compile(r"\$\{?\w")
+CUSTOM_EXPRESSION = re.compile(r"\bCustomExpression\s*[<(]")
+STRINGLY_SORT = re.compile(
+    r"\b(?:String|String\?)\s+(sortColumn|sortBy|orderBy|sortDirection|orderColumn|sortField)\b",
+)
+
 findings: list[tuple[str, str, str]] = []  # (severity, location, message)
 
 
@@ -51,6 +66,17 @@ def dart_files(*globs: str) -> list[Path]:
     for pattern in globs:
         out.extend(p for p in LIB.glob(pattern) if p.suffix == ".dart")
     return sorted(set(out))
+
+
+def strip_dart_comments(text: str) -> str:
+    """Drop comments so prose about SQL is not mistaken for SQL.
+
+    Every file in this repo explains its query in a doc comment, and several
+    quote the SQL they are arguing about. Scanning those would make the honest
+    files the noisy ones.
+    """
+    text = re.sub(r"/\*.*?\*/", "", text, flags=re.DOTALL)
+    return re.sub(r"^\s*//.*$", "", text, flags=re.MULTILINE)
 
 
 def strip_sql_comments(sql: str) -> str:
@@ -159,6 +185,64 @@ def check_custom_sql_declares_dependencies() -> None:
                     "raw write without `updates:` — confirm no stream depends on "
                     "the tables it changes",
                 )
+
+
+# --------------------------------------------------------------- dynamic SQL
+
+
+def check_no_interpolated_sql() -> None:
+    """SQL built by interpolation loses everything at once.
+
+    Compile-time checking, drift's stream dependencies and injection safety all
+    come from SQL that drift parsed. A column name or a clause spliced into a
+    string has none of them — and a value spliced in is an injection whether or
+    not today's caller happens to pass a UUID.
+    """
+    for path in dart_files("**/*.dart"):
+        text = strip_dart_comments(path.read_text(encoding="utf-8"))
+        for match in DART_STRING.finditer(text):
+            body = match.group("body")
+            if not SQL_VERB.search(body) or not INTERPOLATION.search(body):
+                continue
+            line = text[: match.start()].count("\n") + 1
+            report(
+                "ERROR",
+                f"{rel(path)}:{line}",
+                "SQL built by interpolation: bind values as variables and take "
+                "structure from an enum or a $predicate template",
+            )
+
+
+def check_custom_expression() -> None:
+    for path in dart_files("**/*.dart"):
+        text = strip_dart_comments(path.read_text(encoding="utf-8"))
+        for match in CUSTOM_EXPRESSION.finditer(text):
+            line = text[: match.start()].count("\n") + 1
+            window = text[match.start() : match.start() + 300]
+            severity = "ERROR" if INTERPOLATION.search(window) else "NOTE"
+            detail = (
+                "CustomExpression built by interpolation — unparsed SQL carrying "
+                "runtime input"
+                if severity == "ERROR"
+                else "CustomExpression bypasses drift's type checking; confirm the "
+                "fragment is a constant and that drift genuinely cannot express it"
+            )
+            report(severity, f"{rel(path)}:{line}", detail)
+
+
+def check_sort_is_not_stringly_typed() -> None:
+    """A sort that arrives as a String is a column name the UI can choose."""
+    for path in dart_files("**/*.dart"):
+        text = strip_dart_comments(path.read_text(encoding="utf-8"))
+        for match in STRINGLY_SORT.finditer(text):
+            line = text[: match.start()].count("\n") + 1
+            report(
+                "NOTE",
+                f"{rel(path)}:{line}",
+                f"`{match.group(1)}` is a String: sorting should come from an enum "
+                "with an exhaustive switch, so an unsupported order cannot be "
+                "expressed",
+            )
 
 
 # -------------------------------------------------------------------- queries
@@ -286,6 +370,9 @@ def main() -> int:
         check_single_opener,
         check_transactions_stay_in_data,
         check_custom_sql_declares_dependencies,
+        check_no_interpolated_sql,
+        check_custom_expression,
+        check_sort_is_not_stringly_typed,
         check_queries,
         check_schema_snapshots,
         check_datetime_contract,

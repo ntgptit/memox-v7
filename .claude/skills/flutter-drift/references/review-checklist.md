@@ -35,6 +35,22 @@ production and not in the diff.
 - A `catch` that swallows a database exception and returns an empty list — the
   screen then shows "no cards" for what is actually a failure.
 
+**Dynamic SQL** (the full set, with reasoning, is in `dynamic-sql.md`)
+
+- SQL assembled by string interpolation — a column name, a direction or a clause
+  spliced into a query at runtime.
+- A column name or sort direction arriving from the UI as a `String` instead of
+  an enum.
+- A catch-all predicate chain — `(:x IS NULL OR col = :x)` repeated per filter.
+- A sort branch with no tie-breaker, or a cursor that does not carry every
+  ordering column.
+- A filter over a collection with no stated meaning for empty.
+- A query whose *result shape* varies by flag (`includeDeck`,
+  `includeStatistics`) — that is two read models sharing one name.
+- A write that takes a map of fields, or a `Companion` covering the whole row
+  when the operation changes one column.
+- `CustomExpression` holding anything but a constant fragment.
+
 **Migration**
 
 - `.drift` changed and `schemaVersion` not bumped.
