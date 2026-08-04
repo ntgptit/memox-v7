@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/error/failure.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_failure_labels_widget.dart';
 import '../../../../../shared/widgets/mx_text_field.dart';
 import '../../../domain/entities/tag_entity.dart';
 import '../../../domain/failures/tag_validation_failure.dart';
@@ -45,11 +47,26 @@ class _CardTagSectionWidgetState extends ConsumerState<CardTagSectionWidget> {
     _ => null,
   };
 
+  Widget _writeFailure(Failure failure) => Semantics(
+    liveRegion: true,
+    child: Text(
+      context.mxWriteFailure(
+        failure,
+        onNotFound: (_) => context.l10n.writeErrorMessage,
+        onConflict: (_) => context.l10n.writeErrorMessage,
+      ),
+      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+        color: Theme.of(context).colorScheme.error,
+      ),
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     final cardId = widget.cardId;
     final tags = ref.watch(cardTagsProvider(cardId)).value ?? <TagEntity>[];
     final entry = ref.watch(cardTagEntryProvider(cardId));
+    final remove = ref.watch(cardTagRemoveProvider(cardId));
 
     ref.listen<CardTagSubmitState>(cardTagEntryProvider(cardId), (
       previous,
@@ -112,6 +129,14 @@ class _CardTagSectionWidgetState extends ConsumerState<CardTagSectionWidget> {
           onSubmitted: (value) =>
               ref.read(cardTagEntryProvider(cardId).notifier).submit(value),
         ),
+        if (entry.failure != null) ...<Widget>[
+          const SizedBox(height: AppSpacing.sm),
+          _writeFailure(entry.failure!),
+        ],
+        if (remove.failure != null) ...<Widget>[
+          const SizedBox(height: AppSpacing.sm),
+          _writeFailure(remove.failure!),
+        ],
       ],
     );
   }

@@ -652,7 +652,7 @@
   "@cardListLoadingLabel": {
     "description": "Announced to a screen reader while the card list loads."
   },
-  "cardListError": "Không tải được các thẻ này. Kéo để thử lại.",
+  "cardListError": "Không tải được các thẻ này.",
   "@cardListError": {
     "description": "Shown when the card list read fails."
   },

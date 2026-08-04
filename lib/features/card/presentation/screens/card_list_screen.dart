@@ -9,6 +9,7 @@ import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_empty_state.dart';
+import '../../../../shared/widgets/mx_error_state.dart';
 import '../../../../shared/widgets/mx_icon_button.dart';
 import '../../../../shared/widgets/mx_search_field.dart';
 import '../../../../shared/widgets/mx_text_button.dart';
@@ -38,6 +39,15 @@ void _growWindow(WidgetRef ref, String deckId) =>
 /// Types into the search field (S1). A free function for the same reason.
 void _updateSearch(WidgetRef ref, String deckId, String query) =>
     ref.read(cardListSearchQueryProvider(deckId).notifier).update(query);
+
+/// Re-subscribes both reads that render the card-list frame.
+///
+/// The list and total are separate statements, so retrying only the failed list
+/// could leave the next frame paired with a stale count.
+void _retryCardList(WidgetRef ref, String deckId) {
+  ref.invalidate(cardListProvider(deckId));
+  ref.invalidate(cardCountProvider(deckId));
+}
 
 /// The card list for a card-type deck (UC-04, W1).
 ///
@@ -108,7 +118,12 @@ class CardListScreen extends ConsumerWidget {
       body: MxAsyncView<List<CardListItemModel>>(
         value: cards,
         loadingLabel: context.l10n.cardListLoadingLabel,
-        error: (_, _) => _Error(message: context.l10n.cardListError),
+        error: (_, _) => MxErrorState(
+          title: context.l10n.unexpectedErrorTitle,
+          message: context.l10n.cardListError,
+          retryLabel: context.l10n.retryAction,
+          onRetry: () => _retryCardList(ref, deckId),
+        ),
         data: (list) => list.isEmpty
             ? _empty(
                 context,
@@ -348,28 +363,6 @@ class _NoMatch extends StatelessWidget {
       icon: Icons.filter_list_off,
       title: context.l10n.cardListNoMatchTitle,
       message: context.l10n.cardListNoMatchMessage,
-    );
-  }
-}
-
-class _Error extends StatelessWidget {
-  const _Error({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Text(
-          message,
-          textAlign: TextAlign.center,
-          style: context.texts.bodyMedium?.copyWith(
-            color: context.colors.onSurfaceVariant,
-          ),
-        ),
-      ),
     );
   }
 }
