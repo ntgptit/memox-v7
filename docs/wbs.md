@@ -5142,6 +5142,8 @@ cột NULL của scheduler kia.
 - **Status:** **done** — bốn lệnh bàn giao đã chạy trên máy có toolchain
   (Flutter 3.44.8). Snapshot v3 đã commit, `flutter analyze` sạch,
   `flutter test` 1367/1367 pass, `check_drift.sh` 0 error.
+- **Goal:** Search card MUST fold Unicode nhất quán giữa dữ liệu đã lưu và từ
+  khoá, đồng thời migration v3 MUST backfill đúng dữ liệu cũ.
 - **Vấn đề.** `searchPredicate` so `instr(lower(front), :term)` với `:term` đã
   được Dart hạ hoa. `lower()` của SQLite chỉ fold ASCII, `String.toLowerCase()`
   của Dart fold theo Unicode — hai vế của **một** phép so dùng hai luật khác
@@ -5164,6 +5166,9 @@ cột NULL của scheduler kia.
   `card_text_model.dart`, `card_list_query_mapper.dart`,
   `card_repository_impl.dart`, `test/features/card/data/card_filter_repository_test.dart`,
   `test/database/migration_test.dart`, `docs/data-model.md`.
+- **Editable documents:** `docs/wbs.md`, `docs/data-model.md`.
+- **Output:** Schema v3, Unicode-folded search columns/query, migration/backfill,
+  schema snapshot và regression tests liên quan.
 - **Bàn giao — đã chạy, kết quả bên dưới:**
   ```bash
   dart run build_runner build --delete-conflicting-outputs
@@ -5181,6 +5186,8 @@ cột NULL của scheduler kia.
   - [x] v1 → v3 trong một lần mở app cũng cho kết quả như vậy.
   - [x] Snapshot v3 đã commit; `check_drift.sh` sạch.
 - **Dependencies:** M4.11
+- **Tests required:** Card search repository tests, migration/schema/query tests,
+  analyzer và Drift guard.
 - **Checklist phases:** 11.1, 15.1
 
 **Bốn thứ đỏ mà lệnh thứ tư mới lộ ra.** Code fold là đúng và không phải sửa
