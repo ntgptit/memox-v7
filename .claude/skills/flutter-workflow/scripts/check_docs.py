@@ -78,11 +78,16 @@ def _lines(path: str) -> tuple[str, ...]:
 
 
 def _docs_md() -> list[str]:
-    """Repo-relative `docs/*.md`, the form `ls docs/*.md` produced — so a
-    reported location reads `docs/wbs.md:5`, not an absolute path."""
-    return sorted(
-        p.relative_to(_REPO).as_posix() for p in (_REPO / "docs").glob("*.md")
-    )
+    """Contract documents checked by this repository.
+
+    Core specifications live directly under ``docs/``. IT scenarios are the
+    one intentionally nested contract: their catalog and agent execution guide
+    must receive the same header/reference checks rather than becoming an
+    unguarded island of prose.
+    """
+    paths = set((_REPO / "docs").glob("*.md"))
+    paths.update((_REPO / "docs" / "it-scenarios").glob("*.md"))
+    return sorted(p.relative_to(_REPO).as_posix() for p in paths)
 
 
 BR_FILE = "docs/business-rules.md"
@@ -462,6 +467,157 @@ def _check_document_contract() -> None:
     _check_section_br()
     _check_uc_sections()
     _check_ad_sections()
+    _check_it_scenario_contract()
+
+
+_IT_DIR = "docs/it-scenarios"
+_IT_CATALOG = f"{_IT_DIR}/scenario-catalog.md"
+_IT_GUIDE = f"{_IT_DIR}/00-agent-execution-guide.md"
+_IT_HEAD_RE = re.compile(r"^## (IT-[A-Z]+-[0-9]{3}) — .+$")
+_IT_CATALOG_RE = re.compile(r"^\| (IT-[A-Z]+-[0-9]{3}) \|")
+_IT_READINESS = {"READY", "FIXTURE-BLOCKED", "KNOWN-GAP"}
+_IT_PROFILES = {
+    "UI",
+    "UI-RESTART",
+    "UI-DEVICE",
+    "DEV-LINK",
+    "UI-FIXTURE",
+    "UI-LARGE",
+}
+_IT_CLEANUPS = {"CLEAN-RESET", "CLEAN-DELETE-CREATED", "CLEAN-PRESERVE", "CLEAN-NONE"}
+
+
+def _check_it_scenario_contract() -> None:
+    """Keep the agent catalog complete and every scenario executable in shape."""
+    if not (_REPO / _IT_CATALOG).is_file() or not (_REPO / _IT_GUIDE).is_file():
+        _fail(
+            "IT scenario agent contract is incomplete",
+            f"expected both {_IT_GUIDE} and {_IT_CATALOG}",
+        )
+        return
+
+    scenario_docs = sorted(
+        p.relative_to(_REPO).as_posix()
+        for p in (_REPO / _IT_DIR).glob("[0-9][0-9]-*.md")
+    )
+    headings: dict[str, tuple[str, int]] = {}
+    ordered: list[tuple[str, str, int, int]] = []
+    before = _problems
+
+    for path in scenario_docs:
+        lines = _lines(path)
+        starts: list[tuple[str, int]] = []
+        for index, line in enumerate(lines):
+            match = _IT_HEAD_RE.match(line)
+            if not match:
+                continue
+            scenario_id = match.group(1)
+            if scenario_id in headings:
+                previous = headings[scenario_id]
+                _fail(
+                    "duplicate IT scenario ID",
+                    f"{scenario_id}: {previous[0]}:{previous[1]} and {path}:{index + 1}",
+                )
+            headings[scenario_id] = (path, index + 1)
+            starts.append((scenario_id, index))
+
+        for position, (scenario_id, start) in enumerate(starts):
+            end = starts[position + 1][1] if position + 1 < len(starts) else len(lines)
+            ordered.append((scenario_id, path, start, end))
+
+    for scenario_id, path, start, end in ordered:
+        block = _lines(path)[start:end]
+        required = {
+            "priority": any(re.match(r"^- \*\*Ưu tiên:\*\* P[012]$", line) for line in block),
+            "precondition": any(line.startswith("- **Tiền điều kiện:**") for line in block),
+            "step table": any(
+                line == "| Bước | Thao tác người dùng | Kết quả mong đợi |" for line in block
+            ),
+        }
+        for label, present in required.items():
+            if not present:
+                _fail(
+                    "IT scenario missing agent-required field",
+                    f"{path}:{start + 1}: {scenario_id} missing {label}",
+                )
+
+    catalog: dict[str, tuple[str, int]] = {}
+    catalog_rows: dict[str, list[str]] = {}
+    for line_number, line in enumerate(_lines(_IT_CATALOG), start=1):
+        match = _IT_CATALOG_RE.match(line)
+        if not match:
+            continue
+        scenario_id = match.group(1)
+        cells = [cell.strip().strip("`") for cell in line.strip().strip("|").split("|")]
+        if scenario_id in catalog:
+            previous = catalog[scenario_id]
+            _fail(
+                "duplicate IT catalog ID",
+                f"{scenario_id}: {_IT_CATALOG}:{previous[1]} and line {line_number}",
+            )
+        catalog[scenario_id] = (_IT_CATALOG, line_number)
+        catalog_rows[scenario_id] = cells
+
+    missing = sorted(set(headings) - set(catalog))
+    extra = sorted(set(catalog) - set(headings))
+    if missing:
+        _fail("IT scenarios missing from catalog", ", ".join(missing))
+    if extra:
+        _fail("IT catalog points at missing scenarios", ", ".join(extra))
+
+    setup_ids = set()
+    for line in _lines(_IT_GUIDE):
+        if not line.startswith("### "):
+            continue
+        setup_ids.update(re.findall(r"\bSETUP-[A-Z0-9-]+", line))
+        setup_ids.update(re.findall(r"\bS-(?:PROGRESS|DUE|LARGE)\b", line))
+
+    for scenario_id, cells in catalog_rows.items():
+        if len(cells) != 7:
+            _fail(
+                "IT catalog row has wrong column count",
+                f"{_IT_CATALOG}:{catalog[scenario_id][1]}: {scenario_id} has {len(cells)}, expected 7",
+            )
+            continue
+        _id, file_name, readiness, profile, setup, cleanup, trace = cells
+        scenario_path = f"{_IT_DIR}/{file_name}"
+        if not (_REPO / scenario_path).is_file():
+            _fail("IT catalog file does not exist", f"{scenario_id}: {scenario_path}")
+        elif scenario_id in headings and scenario_path != headings[scenario_id][0]:
+            _fail(
+                "IT catalog points at the wrong scenario file",
+                f"{scenario_id}: catalog={scenario_path}, actual={headings[scenario_id][0]}",
+            )
+        if readiness not in _IT_READINESS:
+            _fail("invalid IT readiness", f"{scenario_id}: {readiness}")
+        if profile not in _IT_PROFILES:
+            _fail("invalid IT execution profile", f"{scenario_id}: {profile}")
+        setup_base = setup.split(":", 1)[0]
+        if setup_base not in setup_ids:
+            _fail("undefined IT setup", f"{scenario_id}: {setup}")
+        if cleanup not in _IT_CLEANUPS:
+            _fail("invalid IT cleanup", f"{scenario_id}: {cleanup}")
+        if not trace or trace == "—":
+            _fail("IT scenario has no traceability", scenario_id)
+
+    link_re = re.compile(r"\[[^]]+\]\(([^)#]+\.md)(?:#[^)]+)?\)")
+    for path in _docs_md():
+        if not path.startswith(f"{_IT_DIR}/"):
+            continue
+        parent = (_REPO / path).parent
+        for line_number, line in enumerate(_lines(path), start=1):
+            for target in link_re.findall(line):
+                if not (parent / target).resolve().is_file():
+                    _fail(
+                        "broken IT scenario Markdown link",
+                        f"{path}:{line_number}: {target}",
+                    )
+
+    if _problems == before:
+        _ok(
+            f"all {len(headings)} IT scenarios have unique IDs, required fields, "
+            "and valid agent catalog rows"
+        )
 
 
 _BR_ROW_RE = re.compile(r"^\| BR-[0-9]+ \|")
