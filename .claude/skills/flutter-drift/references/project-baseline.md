@@ -126,6 +126,38 @@ Knowing the negatives prevents half of the bad suggestions:
   with three lifetimes; a "just one column" that puts a due date on `cards` breaks
   reset (BR-41) and BR-10 at once.
 
+## What "backend-ready" already means here
+
+The sync engine is deferred, but four things are already shaped for it, and each
+one would be expensive to retrofit:
+
+- **IDs are client-generated**, so rows created offline can be referenced
+  immediately and never need renumbering.
+- **`owner_id` is nullable on user tables**, so auth backfills rather than
+  migrates.
+- **Enum codes are stable text**, so the database, the DTO and the domain share
+  one vocabulary.
+- **The migration path is tested from v1**, which is what makes adding sync
+  bookkeeping columns later a routine change rather than a gamble.
+
+What is deliberately *not* here: `is_pending_sync`, `version`, tombstones, a
+mutation queue. When they arrive, three decisions come with them and should be
+made once, in `docs/architecture.md`, not per feature:
+
+- **Sync state is an enum, not a boolean.** `pending_create`, `pending_update`,
+  `pending_delete`, `synced`, `conflict`, `failed` — an `is_synced` boolean
+  cannot express a delete waiting to be pushed, and that is the case that loses
+  data.
+- **Queued mutations need an idempotency key**, or a retry after an ambiguous
+  failure creates the row twice.
+- **Concurrency needs a version or revision per row.** A device clock is not a
+  source of truth, so last-write-wins keyed on local `updated_at` is not a
+  policy.
+
+Conflict-resolution policy itself belongs to the repository/sync layer and is
+documented in `flutter-data-layer/references/persistence.md`; the database's part
+is only to make those states representable.
+
 ## Invariants are executable here
 
 `test/database/invariants_test.dart` runs the project's data invariants against a

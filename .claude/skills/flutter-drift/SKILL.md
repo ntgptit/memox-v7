@@ -119,22 +119,26 @@ because the tests run the new code.
 
 ### Step 4 — wire it up without leaking Drift
 
-DAO → data source → repository responsibilities, plus transaction and batch
-rules, are in `references/riverpod-drift.md` together with the provider lifetime
-matrix (what is keep-alive, what is autoDispose, and why the database must never
-be a `family`).
+Who is allowed to do what — `AppDatabase`, DAO, data source, repository — and
+which types may cross each boundary is in `references/layering.md`.
+
+Provider lifetimes (what is keep-alive, what is autoDispose, why the database
+must never be a `family`), stream invalidation, transactions and batches are in
+`references/riverpod-drift.md`.
+
+Code generation, what may and may not be logged, and backup/export constraints
+are in `references/operations.md`.
 
 ### Step 5 — test what the database actually guarantees
 
-Migration tests, constraint tests, stream-invalidation tests and repository
-tests are in `flutter-testing`; the Drift-specific cases — what to test with
-`NativeDatabase.memory()`, what needs the real file, which invariants belong in
-`test/database/invariants_test.dart` — are in `references/migrations.md` and
-`references/review-checklist.md`.
+`references/testing-database.md` holds the matrix: constraints, converters,
+ordering and tie-breakers, query plans, transaction rollback, stream
+invalidation, and the both-ways pattern the invariant tests use.
 
-A test that inserts a row and reads it back proves almost nothing. The tests that
-earn their keep assert the things SQLite enforces *for* you: a constraint
-rejects, a cascade deletes, a transaction rolls back whole, a stream re-emits.
+A test that inserts a row and reads it back proves almost nothing — it re-asserts
+that SQLite works. The tests that earn their keep assert the things you are
+relying on: a constraint rejects, a cascade deletes, a transaction rolls back
+whole, a stream re-emits, a plan uses the index.
 
 ## Review path
 
@@ -186,11 +190,14 @@ Load only what the task needs.
 | File | Read it when |
 |---|---|
 | `references/project-baseline.md` | Before proposing any structural change, or when a generic Drift recommendation seems to conflict with this repo |
+| `references/layering.md` | Deciding where code goes — `AppDatabase` vs DAO vs data source vs repository — or reviewing a type that crossed a boundary |
 | `references/schema-conventions.md` | Adding or changing a table, column, constraint, enum or timestamp |
 | `references/query-conventions.md` | Writing or reviewing a `.drift` query, designing an index, or paginating |
 | `references/dynamic-sql.md` | The query's shape varies — optional filters, user-chosen sort, search, or anything tempted toward `customSelect` |
 | `references/migrations.md` | Any change that bumps `schemaVersion`, or a failing migration test |
 | `references/riverpod-drift.md` | Wiring providers, transactions, batches, or debugging a stream that will not re-emit |
+| `references/testing-database.md` | Writing or reviewing any test that touches the database |
+| `references/operations.md` | Code generation and CI gates, what may be logged, backup/export/import |
 | `references/review-checklist.md` | Reviewing a database PR, or self-checking before commit |
 
 ## Related skills
