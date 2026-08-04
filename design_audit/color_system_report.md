@@ -18,20 +18,20 @@ guess.
 
 | | |
 |---|---|
-| Files scanned (`lib/`, hand-written) | 160 |
-| Colour sites found | 311 |
+| Files scanned (`lib/`, hand-written) | 203 |
+| Colour sites found | 329 |
 | Violations | 0 |
 
 **By element kind**
 
 | kind | sites |
 |---|---|
-| other | 259 |
-| background | 7 |
+| other | 263 |
+| background | 10 |
 | shadow | 1 |
 | border | 10 |
-| text | 25 |
-| icon | 9 |
+| text | 34 |
+| icon | 11 |
 
 **By source kind**
 
@@ -42,7 +42,7 @@ guess.
 | Colors-material | 5 |
 | hardcoded-literal | 95 |
 | opacity-modified-token | 11 |
-| theme-token | 56 |
+| theme-token | 74 |
 
 **By violation code**
 
@@ -80,15 +80,15 @@ an edge.
 | light | colorScheme.outlineVariant on card (colorScheme.surface) | 1.45 | in-band |
 | light | colorScheme.outlineVariant on page (scaffoldBackgroundColor) | 1.38 | in-band |
 | light | colorScheme.outlineVariant on muted tile (semantic.surfaceMuted) | 1.27 | in-band |
-| dark | semantic.borderSubtle on card (colorScheme.surface) | 1.69 | too-heavy |
-| dark | semantic.borderSubtle on page (scaffoldBackgroundColor) | 1.92 | too-heavy |
-| dark | semantic.borderSubtle on muted tile (semantic.surfaceMuted) | 1.43 | in-band |
-| dark | colorScheme.outline on card (colorScheme.surface) | 1.69 | too-heavy |
-| dark | colorScheme.outline on page (scaffoldBackgroundColor) | 1.92 | too-heavy |
-| dark | colorScheme.outline on muted tile (semantic.surfaceMuted) | 1.43 | in-band |
-| dark | colorScheme.outlineVariant on card (colorScheme.surface) | 1.69 | too-heavy |
-| dark | colorScheme.outlineVariant on page (scaffoldBackgroundColor) | 1.92 | too-heavy |
-| dark | colorScheme.outlineVariant on muted tile (semantic.surfaceMuted) | 1.43 | in-band |
+| dark | semantic.borderSubtle on card (colorScheme.surface) | 2.04 | too-heavy |
+| dark | semantic.borderSubtle on page (scaffoldBackgroundColor) | 2.32 | too-heavy |
+| dark | semantic.borderSubtle on muted tile (semantic.surfaceMuted) | 1.73 | too-heavy |
+| dark | colorScheme.outline on card (colorScheme.surface) | 2.04 | too-heavy |
+| dark | colorScheme.outline on page (scaffoldBackgroundColor) | 2.32 | too-heavy |
+| dark | colorScheme.outline on muted tile (semantic.surfaceMuted) | 1.73 | too-heavy |
+| dark | colorScheme.outlineVariant on card (colorScheme.surface) | 2.04 | too-heavy |
+| dark | colorScheme.outlineVariant on page (scaffoldBackgroundColor) | 2.32 | too-heavy |
+| dark | colorScheme.outlineVariant on muted tile (semantic.surfaceMuted) | 1.73 | too-heavy |
 
 ### Background tint
 
@@ -111,7 +111,7 @@ an edge.
 | dark | page | `#0A082D` | 243 |
 | dark | surface | `#1A1838` | 244 |
 | dark | surfaceMuted | `#28254B` | 245 |
-| dark | borderSubtle | `#403D67` | 244 |
+| dark | borderSubtle | `#4C487A` | 245 |
 | dark | onSurfaceVariant | `#A8A7C4` | 242 |
 
 **The light-mode border-prominence answer, plainly:** `borderSubtle` is
