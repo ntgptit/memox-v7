@@ -13,7 +13,13 @@ it, DTOs, Dio and Drift. Nothing from below crosses up — that single rule is
 what keeps the UI testable and the domain framework-free.
 
 Read `references/networking.md` for the Dio client and interceptor setup, and
-`references/persistence.md` for Drift schema, migrations, cache and sync.
+`references/persistence.md` for cache and sync policy.
+
+**For anything below the repository — `.drift` schema and queries, indexes,
+migrations, DAOs, transactions, Drift stream invalidation, or reviewing a
+database PR — load `flutter-drift` instead.** That skill owns the database in
+depth and knows what this project has already settled; this one owns the
+repository contract above it.
 
 ## Source of truth — already decided for this project
 
