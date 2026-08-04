@@ -179,6 +179,11 @@ final class CardRepositoryImpl implements CardRepository {
           deckId: deck.id,
           front: front.value,
           back: back.value,
+          // Written together with the text they fold, never derived later: a
+          // row whose folded column disagrees with its text is invisible to
+          // search while looking perfectly correct in the list.
+          frontFolded: Value<String>(front.folded),
+          backFolded: Value<String>(back.folded),
           example: Value<String?>(example?.value),
           hint: Value<String?>(hint?.value),
           pronunciation: Value<String?>(pronunciation?.value),
@@ -210,6 +215,8 @@ final class CardRepositoryImpl implements CardRepository {
       CardsCompanion(
         front: Value<String>(front.value),
         back: Value<String>(back.value),
+        frontFolded: Value<String>(front.folded),
+        backFolded: Value<String>(back.folded),
         example: Value<String?>(example?.value),
         hint: Value<String?>(hint?.value),
         pronunciation: Value<String?>(pronunciation?.value),

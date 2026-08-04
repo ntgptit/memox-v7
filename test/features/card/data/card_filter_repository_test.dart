@@ -284,4 +284,58 @@ void main() {
 
     expect(items.map((i) => i.card.id), <String>[hit]);
   });
+
+  // The case that was broken until the folded columns landed. It is the
+  // *stored* text being uppercase that breaks it, not the term: SQLite's
+  // `lower()` left `Ô` alone while Dart's `toLowerCase()` folded it, so the two
+  // sides of the comparison disagreed. Lowercase content passed, which is why
+  // this survived casual testing in an app whose content is Vietnamese and
+  // Korean.
+  test('an uppercase non-ASCII card is found by its lowercase form (S1)', () async {
+    final tree = await h.seedTree();
+    final hit = await seedCardIn(tree.leaf.id, 'CÔNG NGHỆ');
+    await seedCardIn(tree.leaf.id, 'unrelated');
+
+    final items = await h.cardRepository
+        .watchCardListItems(tree.leaf.id, limit: 50, searchTerm: 'công nghệ')
+        .first;
+
+    expect(items.map((i) => i.card.id), <String>[hit]);
+  });
+
+  test('and the reverse: lowercase content, uppercase term (S1)', () async {
+    final tree = await h.seedTree();
+    final hit = await seedCardIn(tree.leaf.id, 'động từ');
+
+    final items = await h.cardRepository
+        .watchCardListItems(tree.leaf.id, limit: 50, searchTerm: 'ĐỘNG')
+        .first;
+
+    expect(items.map((i) => i.card.id), <String>[hit]);
+  });
+
+  // Case folding only — the same line `TagName` draws (BR-93). Making this
+  // match is a product decision about diacritic-insensitive search (S1), not
+  // something a folding fix should smuggle in.
+  test('folding is case only, not diacritics (S1)', () async {
+    final tree = await h.seedTree();
+    await seedCardIn(tree.leaf.id, 'công nghệ');
+
+    final items = await h.cardRepository
+        .watchCardListItems(tree.leaf.id, limit: 50, searchTerm: 'cong nghe')
+        .first;
+
+    expect(items, isEmpty);
+  });
+
+  test('the count agrees with the list on a folded match (S1)', () async {
+    final tree = await h.seedTree();
+    await seedCardIn(tree.leaf.id, 'CÔNG NGHỆ');
+
+    final count = await h.cardRepository
+        .watchFilteredCardCount(tree.leaf.id, searchTerm: 'công')
+        .first;
+
+    expect(count, 1);
+  });
 }

@@ -30,7 +30,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.open() : super(openAppDatabaseConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -63,6 +63,20 @@ class AppDatabase extends _$AppDatabase {
         await m.createIndex(idxTagsOwnerFolded);
         await m.createIndex(idxCardTagsTag);
       }
+
+      // v2 → v3: the two folded search columns, and the backfill that gives
+      // existing cards a value for them.
+      //
+      // **The backfill runs in Dart, and it has to.** The whole reason these
+      // columns exist is that SQLite's `lower()` folds ASCII only, so
+      // `UPDATE cards SET front_folded = lower(front)` would write exactly the
+      // broken values the columns were added to replace — and it would look
+      // like it worked.
+      if (from < 3) {
+        await m.addColumn(cards, cards.frontFolded);
+        await m.addColumn(cards, cards.backFolded);
+        await _backfillFoldedSides();
+      }
     },
 
     beforeOpen: (OpeningDetails details) async {
@@ -73,4 +87,41 @@ class AppDatabase extends _$AppDatabase {
       await customStatement('PRAGMA foreign_keys = ON');
     },
   );
+
+  /// Fills `front_folded` / `back_folded` for every card that predates them.
+  ///
+  /// **Raw SQL, not the generated query API.** The generated symbols always
+  /// describe the *latest* schema, so a step that used them would break the day
+  /// a v4 adds another column to `cards` — the migration would then be reading a
+  /// column that does not exist yet at this point in the upgrade. The two
+  /// statements below name only what v3 has.
+  ///
+  /// A loop rather than a batch: this runs once per device, inside the
+  /// migration's transaction, and `customStatement` is the API that is certain
+  /// to be there. Folding is `CardText.fold`'s rule — trim, then Dart's
+  /// Unicode-aware `toLowerCase()` — restated here rather than imported, because
+  /// `core/` must not depend on a feature (AD-13). The pair is pinned by
+  /// `migration_test.dart`, which upgrades a v2 card holding `CÔNG NGHỆ` and
+  /// requires the folded column to read `công nghệ`.
+  Future<void> _backfillFoldedSides() async {
+    final rows = await customSelect(
+      'SELECT id, front, back FROM cards',
+      readsFrom: <TableInfo<Table, Object?>>{cards},
+    ).get();
+
+    for (final row in rows) {
+      await customUpdate(
+        'UPDATE cards SET front_folded = ?, back_folded = ? WHERE id = ?',
+        variables: <Variable<Object>>[
+          Variable<String>(row.read<String>('front').trim().toLowerCase()),
+          Variable<String>(row.read<String>('back').trim().toLowerCase()),
+          Variable<String>(row.read<String>('id')),
+        ],
+        // Stated even though nothing is listening mid-upgrade: `customUpdate`
+        // is how a raw write tells drift which streams it invalidates, and a
+        // write that does not say is the habit that breaks a live screen later.
+        updates: <TableInfo<Table, Object?>>{cards},
+      );
+    }
+  }
 }

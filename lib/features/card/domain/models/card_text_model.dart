@@ -20,10 +20,25 @@ import '../failures/card_validation_failure.dart';
 /// what another layer already trimmed, and none of them needs to know whether
 /// someone else did.
 final class CardText {
-  const CardText._(this.value);
+  const CardText._(this.value, this.folded);
 
   /// The trimmed text. Safe to persist as-is.
   final String value;
+
+  /// [value] case-folded for comparison — what `cards.front_folded` and
+  /// `cards.back_folded` store, and what search matches against.
+  ///
+  /// **Folded here rather than in SQL, and that is the whole point.** SQLite's
+  /// `lower()` and `COLLATE NOCASE` fold ASCII only, so they leave `Ô`, `Ê` and
+  /// `Đ` untouched. Dart's `toLowerCase()` is Unicode-aware, so folding both the
+  /// stored text and the search term in Dart makes the comparison byte-for-byte
+  /// and correct for Vietnamese as well as English. `TagName.folded` reached the
+  /// same conclusion first (BR-93); this is that decision applied to the two
+  /// sides a card is searched by.
+  ///
+  /// Case only. `công` still does not match `cong` — diacritic-insensitive
+  /// search is a separate product decision (S1).
+  final String folded;
 
   /// BR-08's limit for [side], measured after trimming.
   ///
@@ -55,8 +70,15 @@ final class CardText {
       return (text: null, problem: side.tooLongProblem);
     }
 
-    return (text: CardText._(trimmed), problem: null);
+    return (text: CardText._(trimmed, trimmed.toLowerCase()), problem: null);
   }
+
+  /// Folds a search term the same way a stored side is folded.
+  ///
+  /// Exists so the two sides of the comparison cannot drift apart: a query that
+  /// folds its term by hand is one `toLowerCase()` away from being asymmetric
+  /// again, which is the bug this column pair was added to fix.
+  static String fold(String raw) => raw.trim().toLowerCase();
 
   @override
   bool operator ==(Object other) => other is CardText && other.value == value;

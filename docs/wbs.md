@@ -5137,6 +5137,54 @@ cột NULL của scheduler kia.
   form validation, widget, visual audit strict, route
 - **Checklist phases:** 9.2, 9.3, 14.4, 15.1, 15.2, 15.3, 15.4
 
+### M4.11a · Fold Unicode cho search thẻ (schema v3)
+
+- **Status:** **in review** — code xong, **chưa verify được trong môi trường
+  hiện tại** (không có Dart/Flutter toolchain). Xem *Bàn giao* bên dưới.
+- **Vấn đề.** `searchPredicate` so `instr(lower(front), :term)` với `:term` đã
+  được Dart hạ hoa. `lower()` của SQLite chỉ fold ASCII, `String.toLowerCase()`
+  của Dart fold theo Unicode — hai vế của **một** phép so dùng hai luật khác
+  nhau. Hệ quả: thẻ lưu `CÔNG NGHỆ` không tìm ra bằng `công nghệ`. Tiếng Hàn
+  không ảnh hưởng (không có hoa/thường), thẻ viết thường cũng không — nên lỗi
+  sống sót qua test thủ công trong đúng một app mà nội dung là tiếng Việt và
+  tiếng Hàn. `tags.drift` đã ghi rõ chính xác cái bẫy này từ v2 (BR-93) và giải
+  bằng `name_folded`; hai mặt thẻ thì chưa được hưởng.
+- **Cách sửa.** Cột `cards.front_folded` / `back_folded`, fold trong Dart
+  (`CardText.folded`, `CardText.fold` cho từ khoá), search so trên hai cột đó và
+  **không còn `lower()` nào ở phía SQL**. Chỉ hạ hoa, không bỏ dấu — `công` vẫn
+  không khớp `cong`; tìm không dấu là quyết định sản phẩm (S1), không phải hệ
+  quả phụ của một bản vá.
+- **Migration v3.** `addColumn` ×2 rồi backfill **bằng Dart**: `SET front_folded
+  = lower(front)` sẽ ghi đúng những giá trị hỏng mà cột này sinh ra để thay thế.
+  Backfill dùng raw SQL chứ không dùng generated query — API sinh ra luôn mô tả
+  schema mới nhất, nên một bước migration dùng nó sẽ vỡ vào ngày v4 thêm cột cho
+  `cards`.
+- **Scope:** `lib/core/database/tables/cards.drift`, `app_database.dart`,
+  `card_text_model.dart`, `card_list_query_mapper.dart`,
+  `card_repository_impl.dart`, `test/features/card/data/card_filter_repository_test.dart`,
+  `test/database/migration_test.dart`, `docs/data-model.md`.
+- **Bàn giao — bốn lệnh phải chạy trên máy có toolchain trước khi merge:**
+  ```bash
+  dart run build_runner build --delete-conflicting-outputs
+  dart run drift_dev schema dump lib/core/database/app_database.dart drift_schemas/
+  dart run drift_dev schema generate drift_schemas/ test/drift/generated/
+  flutter analyze && flutter test test/database/ test/features/card/
+  ```
+  `drift_schemas/drift_schema_v3.json` và `test/drift/generated/schema_v3.dart`
+  **chưa tồn tại**, nên `migration_test.dart` chưa compile được —
+  `check_drift.sh` báo đúng lỗi đó và sẽ tự im khi snapshot được commit.
+- **Acceptance criteria:**
+  - [ ] Thẻ `CÔNG NGHỆ` tìm được bằng `công nghệ`, và ngược lại.
+  - [ ] `công` **không** khớp `cong` (fold chỉ hạ hoa).
+  - [ ] Count và list khớp nhau trên cùng một từ khoá đã fold.
+  - [ ] `%` và `100%` vẫn khớp theo nghĩa đen (không regress `instr`).
+  - [ ] v2 → v3 backfill đúng cho cả dòng non-ASCII lẫn ASCII; không dòng nào
+        còn giữ default `''`.
+  - [ ] v1 → v3 trong một lần mở app cũng cho kết quả như vậy.
+  - [ ] Snapshot v3 đã commit; `check_drift.sh` sạch.
+- **Dependencies:** M4.11
+- **Checklist phases:** 11.1, 15.1
+
 ### M4.12 · Deck/Card demo hardening, fixture và E2E
 
 - **Status:** todo

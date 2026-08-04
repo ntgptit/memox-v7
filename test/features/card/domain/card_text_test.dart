@@ -192,4 +192,34 @@ void main() {
       }
     });
   });
+
+  group('folding', () {
+    /// Parsed through the only entry point, so these read the same folded value
+    /// the repository writes.
+    CardText parsed(String raw) =>
+        CardText.parse(raw, side: CardSide.front).text!;
+
+    test('folds non-ASCII, which SQLite lower() would leave alone', () {
+      final text = parsed('CÔNG NGHỆ');
+
+      expect(text.value, 'CÔNG NGHỆ', reason: 'display text is untouched');
+      expect(text.folded, 'công nghệ');
+    });
+
+    test('folds the way ĐỘNG needs, not the way ASCII rules would', () {
+      expect(parsed('ĐỘNG TỪ').folded, 'động từ');
+    });
+
+    test('a search term folds through the same rule as a stored side', () {
+      // The two sides of the comparison must not be foldable by two different
+      // rules — that asymmetry is what made the column pair necessary.
+      expect(CardText.fold('  CÔNG NGHỆ  '), parsed('CÔNG NGHỆ').folded);
+    });
+
+    test('folding is case only — diacritics survive it', () {
+      // `công` must not match `cong`. Diacritic-insensitive search is a product
+      // decision (S1), not something folding decides on its own.
+      expect(parsed('công').folded, isNot('cong'));
+    });
+  });
 }
