@@ -11,6 +11,7 @@ import 'package:memox/features/card/presentation/controllers/card_list_window_co
 import 'package:memox/features/card/presentation/screens/card_list_screen.dart';
 import 'package:memox/l10n/generated/app_localizations.dart';
 import 'package:memox/core/theme/app_theme.dart';
+import 'package:memox/shared/widgets/mx_error_state.dart';
 
 import 'support/fake_card_repository.dart';
 
@@ -276,7 +277,7 @@ void main() {
     ]);
   });
 
-  testWidgets('a read failure shows the error copy, not a spinner', (
+  testWidgets('a read failure offers a retry that re-subscribes both reads', (
     tester,
   ) async {
     final repository = FakeCardRepository();
@@ -287,6 +288,14 @@ void main() {
     await tester.pump();
 
     expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(find.byType(MxErrorState), findsOneWidget);
     expect(find.textContaining("couldn't be loaded"), findsOneWidget);
+    expect(find.text('Retry'), findsOneWidget);
+
+    await tester.tap(find.text('Retry'));
+    await tester.pump();
+
+    expect(repository.requestedLimits, <int>[kCardWindowSize, kCardWindowSize]);
+    expect(repository.cardCountWatchCount, 2);
   });
 }

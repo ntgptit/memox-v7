@@ -106,6 +106,23 @@ void main() {
     expect(find.byIcon(Icons.flag), findsOneWidget);
   });
 
+  testWidgets('a failed flag write is visible and leaves the icon unchanged', (
+    tester,
+  ) async {
+    final repository = FakeCardRepository();
+    addTearDown(repository.dispose);
+    repository.cardToGet = repository.card('card-1');
+    repository.nextFlagFailure = const DatabaseFailure(message: 'write failed');
+
+    await pump(tester, repository);
+    await tester.tap(find.byIcon(Icons.outlined_flag));
+    await tester.pump();
+
+    expect(repository.flagWrites, isEmpty);
+    expect(find.byIcon(Icons.outlined_flag), findsOneWidget);
+    expect(find.text('Please try again.'), findsOneWidget);
+  });
+
   testWidgets('editing a card with a detail opens the details expanded', (
     tester,
   ) async {
@@ -184,6 +201,52 @@ void main() {
     await tester.pump();
 
     expect(repository.tagAdds.single, (id: 'card-1', name: 'verb'));
+  });
+
+  testWidgets('a failed tag add is visible below the tag field', (
+    tester,
+  ) async {
+    final repository = FakeCardRepository();
+    addTearDown(repository.dispose);
+    repository.cardToGet = repository.card('card-1');
+    repository.nextTagFailure = const DatabaseFailure(message: 'write failed');
+
+    await pump(tester, repository);
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Add tag').first,
+      'verb',
+    );
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+
+    expect(repository.tagAdds, isEmpty);
+    expect(find.text('Please try again.'), findsOneWidget);
+  });
+
+  testWidgets('a failed tag removal is visible below the tag section', (
+    tester,
+  ) async {
+    final repository = FakeCardRepository();
+    addTearDown(repository.dispose);
+    repository.cardToGet = repository.card('card-1');
+    repository.nextRemoveTagFailure = const DatabaseFailure(
+      message: 'write failed',
+    );
+
+    await pump(tester, repository);
+    repository.emitTags(<dynamic>[repository.tag('t1', name: 'noun')].cast());
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.descendant(
+        of: find.widgetWithText(Chip, 'noun'),
+        matching: find.byIcon(Icons.cancel),
+      ),
+    );
+    await tester.pump();
+
+    expect(repository.tagRemoves, isEmpty);
+    expect(find.widgetWithText(Chip, 'noun'), findsOneWidget);
+    expect(find.text('Please try again.'), findsOneWidget);
   });
 
   testWidgets('the danger zone confirms, then deletes the card', (

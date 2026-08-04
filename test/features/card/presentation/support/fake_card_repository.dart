@@ -51,6 +51,9 @@ final class FakeCardRepository implements CardRepository {
   /// load-more grew the window.
   final List<int> requestedLimits = <int>[];
 
+  /// Number of subscriptions to the total-count stream.
+  int cardCountWatchCount = 0;
+
   /// Recorded create calls: (front, back, example). A double-submit guard is
   /// proven by this staying length 1.
   final List<({String front, String back, String? example})> creates =
@@ -187,6 +190,7 @@ final class FakeCardRepository implements CardRepository {
 
   @override
   Stream<int> watchCardCountByDeck(String deckId) {
+    cardCountWatchCount++;
     final seeded = _seededCount;
     if (seeded != null) return Stream<int>.value(seeded);
 
@@ -342,6 +346,9 @@ final class FakeCardRepository implements CardRepository {
   /// When set, the next `addCardTag` throws it — e.g. the BR-94 tooManyTags path.
   Failure? nextTagFailure;
 
+  /// When set, the next `removeCardTag` throws it.
+  Failure? nextRemoveTagFailure;
+
   void emitTags(List<TagEntity> tags) => _tags.add(tags);
 
   TagEntity tag(String id, {required String name}) =>
@@ -365,6 +372,8 @@ final class FakeCardRepository implements CardRepository {
     required String cardId,
     required String tagId,
   }) async {
+    final failure = nextRemoveTagFailure;
+    if (failure != null) throw failure;
     tagRemoves.add((id: cardId, tagId: tagId));
   }
 

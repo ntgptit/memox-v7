@@ -652,7 +652,7 @@
   "@cardListLoadingLabel": {
     "description": "Announced to a screen reader while the card list loads."
   },
-  "cardListError": "These cards couldn't be loaded. Pull to try again.",
+  "cardListError": "These cards couldn't be loaded.",
   "@cardListError": {
     "description": "Shown when the card list read fails (UC-04, E3-adjacent)."
   },

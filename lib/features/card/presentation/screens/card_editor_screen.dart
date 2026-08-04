@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/error/failure.dart';
 import '../../../../core/state/submit_outcome.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/theme_context_extension.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_action_button.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_empty_state.dart';
+import '../../../../shared/widgets/mx_failure_labels_widget.dart';
 import '../../../../shared/widgets/mx_text_field.dart';
 import '../../domain/entities/card_entity.dart';
 import '../../domain/failures/card_validation_failure.dart';
@@ -18,6 +19,7 @@ import '../controllers/card_write_controller.dart';
 import '../states/card_submit_state.dart';
 import '../widgets/overlays/card_confirm_widget.dart';
 import '../widgets/sections/card_details_section_widget.dart';
+import '../widgets/sections/card_flag_toggle_widget.dart';
 import '../widgets/sections/card_tag_section_widget.dart';
 
 /// The card editor — create and edit (UC-04 W4, A1).
@@ -208,6 +210,7 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
 
     final provider = cardEditProvider(cardId);
     final state = ref.watch(provider);
+    final flagState = ref.watch(setCardFlagProvider(cardId));
     final controller = ref.read(provider.notifier);
 
     ref.listen<CardSubmitState>(provider, (previous, next) {
@@ -221,7 +224,19 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
     return _shell(
       context,
       title: context.l10n.cardEditorEditTitle,
-      actions: <Widget>[_flagToggle(cardId)],
+      actions: <Widget>[
+        CardFlagToggleWidget(
+          cardId: cardId,
+          onToggle: flagState.isSubmitting
+              ? null
+              : (isFlagged) => ref
+                    .read(setCardFlagProvider(cardId).notifier)
+                    .submit(isFlagged: !isFlagged),
+        ),
+      ],
+      subheader: flagState.failure == null
+          ? null
+          : _writeFailure(flagState.failure!),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
@@ -338,41 +353,29 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
     required String title,
     required Widget body,
     List<Widget>? actions,
+    Widget? subheader,
   }) => MxContentShell(
     title: title,
     leading: _closeButton(context),
     actions: actions,
+    subheader: subheader,
     isScrollable: true,
     body: body,
   );
 
-  /// The flag toggle, filled when the card is flagged (BR-92). Disabled until
-  /// the flag has loaded, so a tap can never write against an unknown value. The
-  /// icon reads the [cardFlag] stream; the tap is a [SetCardFlag] command, and
-  /// the stream re-emits the written value.
-  ///
-  /// Flagged turns the glyph `warning` amber as well as filling it, so the active
-  /// state reads by colour and not shape alone — the one place a colour is worth
-  /// it, because this is the control that owns the mark. (The list row keeps its
-  /// neutral flag: a passive glyph among many rows takes the max-contrast tone,
-  /// where a coloured one cannot clear 4.5:1 on both themes.)
-  Widget _flagToggle(String cardId) {
-    final flag = ref.watch(cardFlagProvider(cardId));
-    final isFlagged = flag.value ?? false;
-
-    return IconButton(
-      icon: Icon(isFlagged ? Icons.flag : Icons.outlined_flag),
-      color: isFlagged ? context.semanticColors.warning : null,
-      onPressed: flag.isLoading
-          ? null
-          : () => ref
-                .read(setCardFlagProvider(cardId).notifier)
-                .submit(isFlagged: !isFlagged),
-      tooltip: isFlagged
-          ? context.l10n.cardEditorUnflagAction
-          : context.l10n.cardEditorFlagAction,
-    );
-  }
+  Widget _writeFailure(Failure failure) => Semantics(
+    liveRegion: true,
+    child: Text(
+      context.mxWriteFailure(
+        failure,
+        onNotFound: (_) => context.l10n.writeErrorMessage,
+        onConflict: (_) => context.l10n.writeErrorMessage,
+      ),
+      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+        color: Theme.of(context).colorScheme.error,
+      ),
+    ),
+  );
 
   Widget _closeButton(BuildContext context) => IconButton(
     icon: const Icon(Icons.close),
