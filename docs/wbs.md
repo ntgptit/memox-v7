@@ -5324,6 +5324,23 @@ và đóng nốt là câu hỏi về chữ ("Due now" → "Due"), không phải 
 hạ token thêm nữa để mua 20px đó — token dùng chung với mọi pill khác trong app,
 và chúng không phải bên đang thiếu chỗ.
 
+**Phần chữ ấy đã chốt ngay sau đó, trong cùng task này.** Chủ dự án duyệt rút
+nhãn, `"Due now
+{count}"` → `"Due {count}"` trong `app_en.arb`; bản `vi` vốn đã là `"Đến hạn
+{count}"` nên không đổi. Pill hẹp 38px, hàng còn **361.8** so với 374 — deck có
+số đếm một chữ số hiện đủ bốn pill ở màn 390 mà không cần cuộn.
+
+**Nhưng không phải mọi cỡ, và không có mức padding nào đóng được nốt.** Đo tiếp:
+360 vẫn tràn 17.8; deck ba chữ số (`All 142`) dài 416.5 ở màn 390. Nhãn nở theo
+dữ liệu, nên hàng pill **là** hàng cuộn ngang theo thiết kế — trailing gutter
+trong `CardFilterBarWidget` tồn tại đúng cho việc đó. Ghi lại đây để phiên sau
+không đọc "đã fit" thành "đã fit mọi lúc" rồi lại đi hạ token.
+
+Một hệ quả cần biết: `robot.tapTextContaining('Due now')` trong
+`it_fixture_scenarios_test.dart` thành `'Due 2'` chứ không phải `'Due'` — panel
+ngay trên dải pill mang chuỗi "2 due · 1 new", nên tiền tố trần chỉ cách một cú
+tap là chạm vào văn xuôi.
+
 ### M4.12 · Deck/Card demo hardening, fixture và E2E
 
 - **Status:** todo

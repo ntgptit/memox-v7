@@ -722,10 +722,10 @@
     "placeholders": { "count": { "type": "int" } },
     "description": "The All filter pill with its count (D3)."
   },
-  "cardFilterDueNow": "Due now {count}",
+  "cardFilterDueNow": "Due {count}",
   "@cardFilterDueNow": {
     "placeholders": { "count": { "type": "int" } },
-    "description": "The Due-now filter pill with its count (D3, BR-22)."
+    "description": "The Due filter pill with its count (D3, BR-22). 'Due', not 'Due now': the pill sits beside three others in a row that has to be scrolled to reach the last one, and 'now' cost 38px while adding nothing — the whole pill row already describes the deck as it stands. The count is BR-22's queue, so a never-reviewed card is inside it and this pill and New overlap by design; the panel above is where each card is counted once."
   },
   "cardFilterNew": "New {count}",
   "@cardFilterNew": {

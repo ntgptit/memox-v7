@@ -137,15 +137,18 @@ ChipThemeData buildChipTheme(
   // Vertical stays `sm`: that is what makes the pill 36 tall, the height M3
   // draws and the one `MaterialTapTargetSize.padded` grows to 48 for a finger.
   //
-  // **It narrows the card list's filter row without making it fit, and the
-  // measurement is here so nobody re-derives it.** Those four pills — All, Due
-  // now, New, ⚑ Flagged, each carrying a count — ran to 426.4 against the 374 a
-  // 390-wide screen leaves inside the gutter, and run to 394.4 now: 52 of the
-  // last pill hidden, down to 20. The row still has to be scrolled to reach
-  // Flagged. Closing the rest is a copy question ("Due now" → "Due"), not a
-  // padding one, and it is not settled — do not shave this token further to buy
-  // those 20 pixels, because the token is shared with every other pill in the
-  // app and they are not the ones that are short of room.
+  // **The measurement is here so nobody re-derives it.** The card list's four
+  // pills — All, Due, New, ⚑ Flagged, each carrying a count — ran to 426.4
+  // against the 374 a 390-wide screen leaves inside the gutter. This token took
+  // them to 394.4 and dropping "now" from the Due label took them to 361.8, so
+  // a deck with single-digit counts now shows all four without scrolling.
+  //
+  // **It is not fixed at every size, and no further padding will fix it.** At
+  // 360 the row overflows by 17.8, and on a deck with three-digit counts it
+  // runs to 416.5 at 390 — the labels grow with the data, so the row is
+  // horizontally scrollable by design and the trailing gutter below exists for
+  // that. Do not shave this token again to buy those pixels: it is shared with
+  // every other pill in the app, and they are not the ones short of room.
   //
   // `.mx-pill__body` in `design_system/components/mx.css` carries the same two
   // numbers and changed with this — a pill that is one size in the app and
