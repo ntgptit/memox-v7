@@ -94,6 +94,7 @@ class MxTextField extends StatelessWidget {
       minLines: minLines,
       maxLines: maxLines,
       maxLength: maxLength,
+      buildCounter: _buildCounter,
       onChanged: onChanged,
       onSubmitted: onSubmitted,
       decoration: InputDecoration(
@@ -104,4 +105,39 @@ class MxTextField extends StatelessWidget {
       ),
     );
   }
+
+  /// The counter speaks only when the limit is near.
+  ///
+  /// A `0/240` under an empty field is noise about a rule the user is nowhere
+  /// close to breaking; from [_counterVisibleFraction] of the limit it becomes
+  /// the warning it exists to be. Hidden, it still keeps its line
+  /// (`maintainSize`), so its arrival never reflows the field below —
+  /// state-change layout stability is the same rule the error slot follows.
+  Widget? _buildCounter(
+    BuildContext context, {
+    required int currentLength,
+    required int? maxLength,
+    required bool isFocused,
+  }) {
+    if (maxLength == null) return null;
+    final isNearLimit = currentLength >= maxLength * _counterVisibleFraction;
+
+    return Visibility(
+      visible: isNearLimit,
+      maintainSize: true,
+      maintainAnimation: true,
+      maintainState: true,
+      child: Text(
+        '$currentLength/$maxLength',
+        // The same pairing the framework's default counter paints, said
+        // explicitly because a custom `buildCounter` starts from nothing.
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+      ),
+    );
+  }
 }
+
+/// From what fraction of [MxTextField.maxLength] the counter becomes visible.
+const double _counterVisibleFraction = 0.8;
