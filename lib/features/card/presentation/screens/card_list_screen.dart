@@ -102,6 +102,16 @@ class CardListScreen extends ConsumerWidget {
     return MxContentShell(
       title: deckContext?.deckName ?? context.l10n.cardListTitle,
       subheader: _subheader(ref, context, deckContext, deckTotal),
+      // **The shell's own padding is dropped, exactly as the deck list drops
+      // it.** Every branch below owns its gutters — the loaded list through its
+      // `ListView` padding, the empty and error states through `MxEmptyState` /
+      // `MxErrorState`'s own `xl` — so leaving the shell's `lg` on as well
+      // padded each of them twice: the progress panel and the card rows sat at
+      // 32 from the screen edge while the search field and the filter pills
+      // above them, which take the gutter from the shell's default rather than
+      // from this value, sat at 16. Two gutters on one screen, and neither
+      // matched the deck list's 16 next door.
+      padding: EdgeInsets.zero,
       // The add action lives on the app bar, not a floating button — the same
       // place the deck list puts its create action, so "the primary action" sits
       // in one spot across the app. A FAB would also carry Material's default
@@ -218,9 +228,14 @@ class _Loaded extends ConsumerWidget {
     const headerCount = 2;
 
     return ListView.separated(
+      // `xl` on top, not `md`: with the shell no longer padding this scroll view
+      // the only space above the panel would be the subheader's `xs`, and the
+      // panel would sit tighter under the pills than it did before the double
+      // gutter was removed. `xl` under the strip's `xs` is the 28 the deck
+      // list's first section already stands at.
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
-        AppSpacing.md,
+        AppSpacing.xl,
         AppSpacing.lg,
         AppSpacing.xxl,
       ),

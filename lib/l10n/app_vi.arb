@@ -682,15 +682,30 @@
   "@cardSortNewest": { "description": "Sort option: newest cards first — the default (UC-04 A4)." },
   "cardSortDueFirst": "Đến hạn trước",
   "@cardSortDueFirst": { "description": "Sort option: cards due soonest first (BR-22)." },
-  "cardProgressStudyAction": "Bắt đầu học · {due} đến hạn",
+  "cardProgressStudyAction": "{count, plural, other{Bắt đầu học · {count} thẻ}}",
   "@cardProgressStudyAction": {
-    "placeholders": { "due": { "type": "int" } },
-    "description": "The primary action on the deck progress panel (D5, UC-07)."
+    "placeholders": { "count": { "type": "int" } },
+    "description": "The primary action on the deck progress panel when the queue holds at least one card seen before (D5, UC-07). `count` is the whole BR-22 queue."
+  },
+  "cardProgressLearnAction": "{count, plural, other{Học {count} thẻ mới}}",
+  "@cardProgressLearnAction": {
+    "placeholders": { "count": { "type": "int" } },
+    "description": "The same action when every card in the queue has never been reviewed (D5, BR-90)."
   },
   "cardProgressDueNew": "{due} đến hạn · {fresh} mới",
   "@cardProgressDueNew": {
     "placeholders": { "due": { "type": "int" }, "fresh": { "type": "int" } },
-    "description": "The due/new line under the mastered count (D5, BR-22, BR-90)."
+    "description": "The due/new line under the mastered count, when both kinds are waiting (D5, BR-22, BR-90)."
+  },
+  "cardProgressDueOnly": "{due} đến hạn",
+  "@cardProgressDueOnly": {
+    "placeholders": { "due": { "type": "int" } },
+    "description": "The what-to-do-now line when nothing is still new (D5, BR-22)."
+  },
+  "cardProgressNewOnly": "{fresh} mới",
+  "@cardProgressNewOnly": {
+    "placeholders": { "fresh": { "type": "int" } },
+    "description": "The what-to-do-now line when nothing has come back around yet (D5, BR-90)."
   },
   "cardProgressLegendItem": "{label} {count}",
   "@cardProgressLegendItem": {

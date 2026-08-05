@@ -71,7 +71,16 @@ FakeCardRepository _demoList(
   ..distributionToShow = _demoDistribution
   // Something waiting, so the panel's Start-study action and the pill counts
   // render the state a learner actually opens this screen in.
-  ..filterCounts[CardListFilter.dueNow] = 23
+  //
+  // **Due-now has to cover New.** BR-22's queue is `due_at IS NULL OR
+  // due_at <= now` and BR-09 creates every card with `due_at = NULL`, so the
+  // never-reviewed cards are *inside* the due-now count and no real deck can
+  // report fewer due than new. This fixture said 23 due against 38 new, which
+  // is unreachable — and the panel, which now subtracts one from the other to
+  // avoid counting a new card twice, rendered the demo as though every one of
+  // the 23 were new. 61 is 38 new plus 23 that have come back around, which is
+  // the mixed state worth showing.
+  ..filterCounts[CardListFilter.dueNow] = 61
   ..filterCounts[CardListFilter.isNew] = 38
   ..filterCounts[CardListFilter.flagged] = 2;
 

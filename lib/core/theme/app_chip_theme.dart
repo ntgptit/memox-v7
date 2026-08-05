@@ -130,8 +130,28 @@ ChipThemeData buildChipTheme(
     size: AppIconSize.sm,
     color: scheme.onSurfaceVariant,
   ),
+  // **`sm` across, not `md`.** Material's own M3 chip padding is 8, and `md`
+  // put 21 of chrome on each side of a label as short as "All 1" — 42 of a
+  // 69.5-wide pill, so more of the control was padding than word. `sm` brings
+  // that to 17 a side and the pill to 61.5, which is where M3 draws it.
+  // Vertical stays `sm`: that is what makes the pill 36 tall, the height M3
+  // draws and the one `MaterialTapTargetSize.padded` grows to 48 for a finger.
+  //
+  // **It narrows the card list's filter row without making it fit, and the
+  // measurement is here so nobody re-derives it.** Those four pills — All, Due
+  // now, New, ⚑ Flagged, each carrying a count — ran to 426.4 against the 374 a
+  // 390-wide screen leaves inside the gutter, and run to 394.4 now: 52 of the
+  // last pill hidden, down to 20. The row still has to be scrolled to reach
+  // Flagged. Closing the rest is a copy question ("Due now" → "Due"), not a
+  // padding one, and it is not settled — do not shave this token further to buy
+  // those 20 pixels, because the token is shared with every other pill in the
+  // app and they are not the ones that are short of room.
+  //
+  // `.mx-pill__body` in `design_system/components/mx.css` carries the same two
+  // numbers and changed with this — a pill that is one size in the app and
+  // another in the kit is the drift the parity checklist exists to catch.
   padding: const EdgeInsets.symmetric(
-    horizontal: AppSpacing.md,
+    horizontal: AppSpacing.sm,
     vertical: AppSpacing.sm,
   ),
 );

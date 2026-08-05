@@ -5264,6 +5264,66 @@ việc retry đã làm chứ không đo màn hình đang có bao nhiêu read.
   repository stream-invalidation test 2 chiều, widget boundary test
 - **Checklist phases:** 15.4
 
+### M4.11c · Card list: gutter đôi, chữ "due" cho thẻ chưa học, và pill quá rộng
+
+- **Status:** **done** — 1372/1372 test pass, `flutter analyze` sạch,
+  `dart format` sạch, guard `memox-v7` 0 violation.
+- **Goal:** Ba lỗi UI trên `CardListScreen` mà chủ dự án chỉ ra từ ảnh chụp,
+  mỗi lỗi MUST được đo trước khi sửa và đo lại sau khi sửa.
+- **Scope:** `card_list_screen.dart`, `card_progress_panel_widget.dart`,
+  `app_chip_theme.dart`, `mx.css` (`.mx-pill__body`), `app_en.arb`/`app_vi.arb`,
+  fixture `test/demo/card_screens_demo_test.dart`, 3 golden.
+- **Out of scope:** predicate của BR-22 và của pill "Due now" — chỉ đổi chữ;
+  `CardFilterBarWidget` vẫn dựng `FilterChip` thô thay vì `MxPillButton`.
+- **Dependencies:** M4.11
+- **Checklist phases:** 7, 12
+- **Tests required:** toàn bộ suite; đo geometry trước/sau bằng widget test
+  tạm; golden `card_list_light`/`card_list_dark`/`card_editor_edit` sinh lại.
+- **Editable documents:** `docs/wbs.md`,
+  `docs/reviews/design-parity-checklist.md`
+- **Output:** không có file mới
+- **Acceptance criteria:**
+  - [x] Gutter thân màn 32 → 16, bằng đúng ô search phía trên và bằng deck list.
+  - [x] Panel không còn đếm một thẻ hai lần; nút không gọi "due" thẻ chưa học.
+  - [x] Pill hẹp lại 8px mỗi bên ở **cả hai** kit, hàng filter 426.4 → 394.4.
+  - [x] 1372 test pass, mọi gate xanh.
+
+**Gutter đôi: `MxContentShell` bọc padding, rồi `ListView` bọc lần nữa.** Màn
+này không truyền `padding`, nên shell áp `EdgeInsets.all(lg)` quanh body — trong
+khi `ListView` bên trong đã có `fromLTRB(lg, md, lg, xxl)` của riêng nó. Đo ở
+390×844: ô search và dải pill ở L=16 (chúng lấy gutter từ **default** của shell
+chứ không từ tham số), còn panel tiến độ và mọi card row ở L=32. Deck list không
+dính vì nó truyền `padding: EdgeInsets.zero` với đúng lý do đó, nên hai màn cạnh
+nhau lệch nhau 16px. Sửa giống deck list: shell nhả padding, mỗi nhánh tự giữ
+gutter — `ListView` đã có, `MxEmptyState`/`MxErrorState` đã có `xl` của chúng.
+Top của `ListView` lên `xl` để bù phần shell nhả ra.
+
+**"1 due · 1 new" là một thẻ đếm hai lần.** BR-22 định nghĩa hàng đợi phiên học
+là `due_at IS NULL OR due_at <= now`, nên thẻ vừa tạo nằm trong đó; bảng trạng
+thái ở `business-rules.md` lại gọi đúng thẻ ấy là `new`, không phải `due`. Hai
+từ vựng, một chữ "due" — và màn hình in cả hai cạnh nhau. Deck một thẻ mới đọc
+ra "1 due · 1 new" rồi mời "Start study · 1 due", tức là bảo người dùng có thẻ
+đến hạn quay lại trong khi chưa thẻ nào được giới thiệu.
+
+Predicate không đổi — nó đúng, và là hợp đồng của hàng đợi. Chỉ chữ đổi: nút đọc
+kích thước hàng đợi ("Start study · N cards") khi trong đó có thẻ từng học, và
+đọc "Learn N new cards" khi toàn thẻ mới; dòng meta lấy hiệu hai số nên mỗi thẻ
+chỉ đếm một lần. `new ⊆ hàng đợi` là bảo đảm được: BR-09 tạo review state với
+`due_at = NULL`, BR-77 mới điền nó ở lượt `scheduled` đầu tiên.
+
+Fixture demo từng khai 23 due / 38 new — bất khả trong dữ liệu thật, và phép trừ
+làm lộ ra ngay: golden vẽ "Learn 23 new cards". Đã sửa thành 61 = 38 mới + 23
+quay lại.
+
+**Pill: 42px chrome quanh nhãn 27.5px.** `md` ngang cho "All 1" một viên rộng
+69.5 mà chỉ 27.5 là chữ. Bốn pill của card list dài 426.4 so với 374 mà màn 390
+chừa trong gutter, nên "Flagged" nằm ngoài màn ở **mọi** kích thước hỗ trợ.
+Hạ xuống `sm` — đúng mức M3 mặc định — ở cả `app_chip_theme.dart` lẫn
+`.mx-pill__body`: 17px mỗi bên, hàng còn 394.4. **Vẫn phải cuộn**: còn thừa 20px,
+và đóng nốt là câu hỏi về chữ ("Due now" → "Due"), không phải về padding. Không
+hạ token thêm nữa để mua 20px đó — token dùng chung với mọi pill khác trong app,
+và chúng không phải bên đang thiếu chỗ.
+
 ### M4.12 · Deck/Card demo hardening, fixture và E2E
 
 - **Status:** todo
