@@ -1,13 +1,13 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 203,
-  "totalSites": 329,
+  "scannedFiles": 204,
+  "totalSites": 330,
   "byElementKind": {
     "other": 263,
     "background": 10,
     "shadow": 1,
     "border": 10,
-    "text": 34,
+    "text": 35,
     "icon": 11
   },
   "bySourceKind": {
@@ -16,7 +16,7 @@
     "Colors-material": 5,
     "hardcoded-literal": 95,
     "opacity-modified-token": 11,
-    "theme-token": 74
+    "theme-token": 75
   },
   "sites": [
     {
@@ -109,7 +109,7 @@
     },
     {
       "file": "lib/core/theme/app_button_themes.dart",
-      "line": 197,
+      "line": 221,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "Colors-material",
@@ -2870,7 +2870,7 @@
     },
     {
       "file": "lib/features/card/presentation/screens/card_list_screen.dart",
-      "line": 246,
+      "line": 261,
       "widget_context": "_Loaded",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -2881,7 +2881,7 @@
     },
     {
       "file": "lib/features/card/presentation/screens/card_list_screen.dart",
-      "line": 301,
+      "line": 316,
       "widget_context": "_Tail",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -2892,7 +2892,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/items/card_tile_widget.dart",
-      "line": 127,
+      "line": 133,
       "widget_context": "_CardFace",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -2903,7 +2903,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/items/card_tile_widget.dart",
-      "line": 188,
+      "line": 194,
       "widget_context": "_TrailingBadges",
       "element_kind": "icon",
       "source_kind": "theme-token",
@@ -2914,7 +2914,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/items/card_tile_widget.dart",
-      "line": 220,
+      "line": 226,
       "widget_context": "_DueBadge",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -2925,7 +2925,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/items/card_tile_widget.dart",
-      "line": 226,
+      "line": 232,
       "widget_context": "_DueBadge",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -2936,7 +2936,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/items/card_tile_widget.dart",
-      "line": 253,
+      "line": 259,
       "widget_context": "_TagChip",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -2947,7 +2947,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/items/card_tile_widget.dart",
-      "line": 259,
+      "line": 265,
       "widget_context": "_TagChip",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -2980,7 +2980,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 112,
+      "line": 133,
       "widget_context": "_StudyAction",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -2991,7 +2991,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 147,
+      "line": 168,
       "widget_context": "_ProgressRing",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3002,7 +3002,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 148,
+      "line": 169,
       "widget_context": "_ProgressRing",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -3013,7 +3013,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 169,
+      "line": 213,
       "widget_context": "_Headline",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3024,7 +3024,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 288,
+      "line": 335,
       "widget_context": "_LegendItem",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3101,14 +3101,14 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/items/deck_study_button_widget.dart",
-      "line": 73,
+      "line": 84,
       "widget_context": "DeckStudyButtonWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
-      "expression": "context.colors.onPrimary",
-      "token": "colorScheme.onPrimary",
-      "resolved_value_light": "#FFFFFF",
-      "resolved_value_dark": "#FFFFFF"
+      "expression": "context.colors.onSecondaryContainer",
+      "token": "colorScheme.onSecondaryContainer",
+      "resolved_value_light": "#2C3141",
+      "resolved_value_dark": "#D9DCE7"
     },
     {
       "file": "lib/features/deck/presentation/widgets/items/deck_tile_widget.dart",
@@ -3637,6 +3637,17 @@
       "token": "semantic.danger",
       "resolved_value_light": "#C02B3A",
       "resolved_value_dark": "#F2808F"
+    },
+    {
+      "file": "lib/shared/widgets/mx_text_field.dart",
+      "line": 135,
+      "widget_context": "MxTextField",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "Theme.of(context).colorScheme.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
     }
   ]
 }

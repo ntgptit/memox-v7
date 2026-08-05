@@ -682,15 +682,30 @@
   "@cardSortNewest": { "description": "Sort option: newest cards first — the default (UC-04 A4)." },
   "cardSortDueFirst": "Due first",
   "@cardSortDueFirst": { "description": "Sort option: cards due soonest first (BR-22)." },
-  "cardProgressStudyAction": "Start study · {due} due",
+  "cardProgressStudyAction": "{count, plural, =1{Start study · 1 card} other{Start study · {count} cards}}",
   "@cardProgressStudyAction": {
-    "placeholders": { "due": { "type": "int" } },
-    "description": "The primary action on the deck progress panel: begin a review session over the cards that are due (D5, UC-07)."
+    "placeholders": { "count": { "type": "int" } },
+    "description": "The primary action on the deck progress panel when the queue holds at least one card the learner has seen before (D5, UC-07). `count` is the whole BR-22 queue, new cards included — it says how many cards the session will hand over, so it must not be spelled 'due': BR-22's queue and the `new`/`due`/`scheduled` state table in business-rules.md are two different vocabularies, and a card that has never been reviewed belongs to both the queue and `new`."
+  },
+  "cardProgressLearnAction": "{count, plural, =1{Learn 1 new card} other{Learn {count} new cards}}",
+  "@cardProgressLearnAction": {
+    "placeholders": { "count": { "type": "int" } },
+    "description": "The same action when every card in the queue is one the learner has never seen (D5, BR-90). 'Start study · 1 due' on a deck holding one untouched card told the learner a card had come back around when in fact none had been introduced yet."
   },
   "cardProgressDueNew": "{due} due · {fresh} new",
   "@cardProgressDueNew": {
     "placeholders": { "due": { "type": "int" }, "fresh": { "type": "int" } },
-    "description": "The what-to-do-now line under the mastered count: how many cards are due and how many are still new (D5, BR-22, BR-90)."
+    "description": "The what-to-do-now line under the mastered count, when both kinds are waiting. `due` here is the state-table sense — reviewed before and ripe again — never the BR-22 queue, which would count every new card twice on this one line (D5, BR-22, BR-90)."
+  },
+  "cardProgressDueOnly": "{due} due",
+  "@cardProgressDueOnly": {
+    "placeholders": { "due": { "type": "int" } },
+    "description": "The what-to-do-now line when nothing in the deck is still new. A whole sentence rather than a fragment of cardProgressDueNew — the separator and the order differ per language (D5, BR-22)."
+  },
+  "cardProgressNewOnly": "{fresh} new",
+  "@cardProgressNewOnly": {
+    "placeholders": { "fresh": { "type": "int" } },
+    "description": "The what-to-do-now line when nothing has come back around yet, which is every deck on the day it is filled (D5, BR-90)."
   },
   "cardProgressLegendItem": "{label} {count}",
   "@cardProgressLegendItem": {
