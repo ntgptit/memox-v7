@@ -216,17 +216,47 @@ void main() {
     expect(find.text('people'), findsOneWidget);
   });
 
-  testWidgets('a card due now shows the now badge (BR-22)', (tester) async {
-    // The seeded rows carry no due date, so every one is due now.
+  testWidgets('a card whose due date has passed shows the now badge', (
+    tester,
+  ) async {
     final repository = FakeCardRepository();
     addTearDown(repository.dispose);
     await pump(tester, repository);
 
-    repository.emitItems(<dynamic>[repository.listItem('c1')].cast());
+    repository.emitItems(
+      <dynamic>[
+        repository.listItem(
+          'c1',
+          state: CardState.beginning,
+          // Well behind any clock the screen could read — the row is comparing
+          // against the composition root's `now`, not a value this test owns.
+          dueAt: DateTime.utc(2020),
+        ),
+      ].cast(),
+    );
     repository.emitCount(1);
     await tester.pump();
 
     expect(find.text('now'), findsOneWidget);
+  });
+
+  testWidgets('a card that has never been scheduled shows no due badge', (
+    tester,
+  ) async {
+    final repository = FakeCardRepository();
+    addTearDown(repository.dispose);
+    await pump(tester, repository);
+
+    // No `dueAt`: BR-22 would hand this card to a session, but nothing has
+    // scheduled it, so "when is it next due" has no answer to draw. The row says
+    // `NEW` instead — and used to say `now` beside that, which read as a card
+    // the learner had never opened having come back around.
+    repository.emitItems(<dynamic>[repository.listItem('c1')].cast());
+    repository.emitCount(1);
+    await tester.pump();
+
+    expect(find.text('now'), findsNothing);
+    expect(find.text('NEW'), findsOneWidget);
   });
 
   testWidgets('the tail offers load-more while rows remain', (tester) async {

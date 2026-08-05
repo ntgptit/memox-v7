@@ -57,7 +57,8 @@ class CardTileWidget extends StatelessWidget {
           _StateDot(item: item),
           const SizedBox(width: AppSpacing.md),
           Expanded(child: _CardFace(item: item)),
-          const SizedBox(width: AppSpacing.sm),
+          // No gap here — `_TrailingBadges` owns it, because it can render
+          // nothing at all.
           _TrailingBadges(item: item, now: now),
         ],
       ),
@@ -169,6 +170,12 @@ class _CardFace extends StatelessWidget {
 
 /// The trailing cluster: the flag (when set) and the due badge on **one line**,
 /// right-aligned and top-aligned with the front word.
+///
+/// **Either mark can be absent, so the cluster carries its own leading gap.** A
+/// never-scheduled card draws no badge and an unflagged one draws no flag, which
+/// leaves rows with nothing to show here at all; a gap owned by the parent `Row`
+/// would then sit against the card's edge holding space for nothing, and narrow
+/// the front word by 8 for no reason.
 class _TrailingBadges extends StatelessWidget {
   const _TrailingBadges({required this.item, required this.now});
 
@@ -177,27 +184,33 @@ class _TrailingBadges extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Null for a card that has never been scheduled — the row's `NEW` label
+    // already says so, and the badge used to say `now` beside it.
     final dueLabel = context.dueBadgeLabel(dueBadgeOf(item.dueAt, now));
+    // Read-only here — the editor owns the toggle (BR-92). Present only when
+    // set, so unflagged rows carry no decoration.
+    final marks = <Widget>[
+      if (item.card.isFlagged)
+        Icon(
+          Icons.flag,
+          size: _flagIconSize,
+          // `onSurface`, not `primary`: the accent measures 3.29:1 as a glyph
+          // on the dark surface — below the 4.5:1 an icon needs as painted
+          // text. The flag reads by shape; the colour only stays legible.
+          color: context.colors.onSurface,
+          semanticLabel: context.l10n.cardTileFlaggedSemantics,
+        ),
+      if (dueLabel != null) _DueBadge(label: dueLabel),
+    ];
+    if (marks.isEmpty) return const SizedBox.shrink();
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        // Read-only here — the editor owns the toggle (BR-92). Present only when
-        // set, so unflagged rows carry no decoration.
-        if (item.card.isFlagged) ...<Widget>[
-          Icon(
-            Icons.flag,
-            size: _flagIconSize,
-            // `onSurface`, not `primary`: the accent measures 3.29:1 as a glyph
-            // on the dark surface — below the 4.5:1 an icon needs as painted
-            // text. The flag reads by shape; the colour only stays legible.
-            color: context.colors.onSurface,
-            semanticLabel: context.l10n.cardTileFlaggedSemantics,
-          ),
-          const SizedBox(width: AppSpacing.sm),
-        ],
-        _DueBadge(label: dueLabel),
-      ],
+    return Padding(
+      padding: const EdgeInsets.only(left: AppSpacing.sm),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        spacing: AppSpacing.sm,
+        children: marks,
+      ),
     );
   }
 }

@@ -5398,7 +5398,55 @@ mở, một thẻ quay lại, một thẻ hẹn sau, một thẻ đã thuộc �
 **Còn lại, chưa làm:** badge `now` trên hàng thẻ vẫn dùng BR-22
 (`dueBadgeOf(null, now)` → `CardDueNow`), nên một thẻ chưa học vẫn hiện `now`
 ngay cạnh nhãn `NEW`. Cùng loại va chạm từ vựng, ở cấp hàng thay vì cấp pill;
-tách ra vì nó là quyết định về badge, không phải về bộ lọc.
+tách ra vì nó là quyết định về badge, không phải về bộ lọc. **Đã đóng ở
+M4.11e.**
+
+### M4.11e · Badge `now` thôi nói thay cho thẻ chưa có lịch
+
+- **Status:** **done** — 1374/1374 test pass, `flutter analyze` sạch,
+  `dart format` sạch, guard `memox-v7` 0 violation, `check_generated` sạch.
+- **Goal:** Hàng thẻ MUST KHÔNG trả lời "khi nào đến hạn" bằng `now` cho thẻ
+  chưa từng được lên lịch.
+- **Scope:** `card_due_badge_model.dart`, `card_due_badge_widget.dart`,
+  `card_tile_widget.dart`, `fake_card_repository.dart`, 3 test + 2 fixture,
+  2 golden.
+- **Out of scope:** BR-22; pill và panel (đã xong ở M4.11c/d); badge của deck.
+- **Dependencies:** M4.11d
+- **Checklist phases:** 7, 13
+- **Tests required:** unit cho `dueBadgeOf`; widget test cho cả hai nhánh
+  (có badge / không badge); toàn bộ suite; 2 golden sinh lại.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** không có file mới
+- **Acceptance criteria:**
+  - [x] `dueBadgeOf(null, now)` trả `CardNotScheduled`, không phải `CardDueNow`.
+  - [x] Hàng thẻ chưa lên lịch không vẽ badge; hàng quá hạn vẫn vẽ `now`.
+  - [x] Cụm trailing rỗng không để lại khoảng trống mồ côi.
+  - [x] 1374 test pass, mọi gate xanh.
+
+**Nốt cuối của cùng một va chạm.** M4.11c sửa panel, M4.11d sửa pill, và cả hai
+lần lý do đều là: BR-22 nói về *hàng đợi phiên học*, còn bảng trạng thái nói về
+*thẻ này đang ở đâu*. Badge là chỗ thứ ba đọc BR-22 rồi in ra như thể nó trả lời
+câu hỏi thứ hai — `due_at == null` cho ra `CardDueNow`, nên thẻ vừa tạo hiện
+`now` ngay cạnh nhãn `NEW`.
+
+**Thêm case `CardNotScheduled`, và không vẽ gì.** Không đặt một chữ khác (kiểu
+"chưa lên lịch") vì hàng đã trả lời rồi: thẻ không có `due_at` đúng là thẻ chưa
+từng ôn, và nhãn state ngay dưới từ khoá đã ghi `NEW`. Một dấu thứ hai nói lại
+cùng một điều bằng chữ khác chính là thứ nhiễu mà badge sinh ra để cắt bớt.
+`dueBadgeLabel` do đó trả `String?`, và `null` là nhánh "không có badge" — kiểu
+trả về ép mọi call site phải xử lý, thay vì trông cậy vào việc nhớ.
+
+**Cụm trailing tự mang gap của nó.** Cả flag lẫn badge đều có thể vắng, nên hàng
+có thể không còn gì bên phải; `SizedBox(width: sm)` do `Row` cha giữ sẽ đứng đó
+ôm chỗ cho hư không và bóp mặt trước 8px. Gap chuyển vào trong, và cụm rỗng trả
+`SizedBox.shrink()`.
+
+**Fixture phải mang `due_at` thật từ đây.** `FakeCardRepository.listItem` trước
+đây luôn tạo `due_at = null`, nên sau thay đổi này mọi hàng trong demo và trong
+visual audit sẽ mất badge — độ phủ biến mất mà không test nào đỏ. `listItem`
+nhận thêm `dueAt`, demo cấp ngày cho mọi thẻ đã qua `isNew` (đúng BR-77), và
+audit giữ một hàng mỗi loại. Ngày dùng là `DateTime.utc(2020)`: một golden mà
+nội dung phụ thuộc ngày sinh ra nó là golden hỏng vào hôm sau.
 
 ### M4.12 · Deck/Card demo hardening, fixture và E2E
 

@@ -2892,7 +2892,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/items/card_tile_widget.dart",
-      "line": 133,
+      "line": 134,
       "widget_context": "_CardFace",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -2903,7 +2903,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/items/card_tile_widget.dart",
-      "line": 194,
+      "line": 200,
       "widget_context": "_TrailingBadges",
       "element_kind": "icon",
       "source_kind": "theme-token",
@@ -2914,7 +2914,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/items/card_tile_widget.dart",
-      "line": 226,
+      "line": 239,
       "widget_context": "_DueBadge",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -2925,7 +2925,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/items/card_tile_widget.dart",
-      "line": 232,
+      "line": 245,
       "widget_context": "_DueBadge",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -2936,7 +2936,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/items/card_tile_widget.dart",
-      "line": 259,
+      "line": 272,
       "widget_context": "_TagChip",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -2947,7 +2947,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/items/card_tile_widget.dart",
-      "line": 265,
+      "line": 278,
       "widget_context": "_TagChip",
       "element_kind": "text",
       "source_kind": "theme-token",

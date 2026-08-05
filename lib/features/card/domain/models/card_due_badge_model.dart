@@ -10,7 +10,22 @@ sealed class CardDueBadge {
   const CardDueBadge();
 }
 
-/// Due now — `due_at` is null (a new card, BR-22) or already in the past.
+/// No date to show — `due_at` is null, so the card has never been scheduled.
+///
+/// **Its own case, not [CardDueNow].** BR-22 puts an unscheduled card in the
+/// session queue, and this classification used to follow that: `due_at == null`
+/// answered "now". On a row that already carries a `NEW` label the badge then
+/// said `now` beside it — a card the learner has never opened, announced as
+/// having come back around. The queue's membership is a fact about the session,
+/// not about when this card is next due, and the honest answer to "when" here is
+/// that there is no date yet.
+///
+/// The row draws nothing for this case; see `card_due_badge_widget.dart`.
+class CardNotScheduled extends CardDueBadge {
+  const CardNotScheduled();
+}
+
+/// Due now — `due_at` is set and already in the past.
 class CardDueNow extends CardDueBadge {
   const CardDueNow();
 }
@@ -39,12 +54,13 @@ class CardDueInDays extends CardDueBadge {
 const int _minutesPerHour = 60;
 const int _hoursPerDay = 24;
 
-/// Buckets [dueAt] against [now]. Null or past → [CardDueNow]; otherwise the
-/// coarsest unit that is at least one — minutes under an hour, hours under a day,
-/// days beyond. Coarse on purpose: the badge is a glanceable "when", not a
-/// countdown, so a card due in 90 minutes reads "1h", not "90m".
+/// Buckets [dueAt] against [now]. Null → [CardNotScheduled], past → [CardDueNow];
+/// otherwise the coarsest unit that is at least one — minutes under an hour,
+/// hours under a day, days beyond. Coarse on purpose: the badge is a glanceable
+/// "when", not a countdown, so a card due in 90 minutes reads "1h", not "90m".
 CardDueBadge dueBadgeOf(DateTime? dueAt, DateTime now) {
-  if (dueAt == null || !dueAt.isAfter(now)) return const CardDueNow();
+  if (dueAt == null) return const CardNotScheduled();
+  if (!dueAt.isAfter(now)) return const CardDueNow();
 
   final remaining = dueAt.difference(now);
   final minutes = remaining.inMinutes;

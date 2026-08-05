@@ -48,6 +48,10 @@ void main() {
           front: 'ubiquitous',
           back: 'everywhere',
           state: CardState.mastered,
+          // Scheduled and overdue, so the row draws its due badge and the audit
+          // measures that pill's fill and label. A never-scheduled card renders
+          // none, and c1 above is exactly that — one row of each.
+          dueAt: DateTime.utc(2020),
         ),
       ].cast(),
       total: 214,
