@@ -371,7 +371,11 @@ class _DeckListSliver extends StatelessWidget {
             summary: summary,
             // By name, with the id as a path parameter. The literal path would
             // work today and break silently the first time the route moves.
-            onTap: () => context.goNamed(
+            //
+            // `push`, not `go`: `go` replaces the one `/decks/:deckId` entry,
+            // so Back from level 5 landed on the root list. The breadcrumb
+            // keeps `go` — a jump *should* replace the stack (IT-NAV-003/004).
+            onTap: () => context.pushNamed(
               RouteNames.deckDetail,
               pathParameters: <String, String>{
                 RoutePathParams.deckId: summary.deck.id,

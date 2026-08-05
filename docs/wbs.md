@@ -5224,6 +5224,28 @@ pill *All* (thêm ở #121) — nên tổng đã là 2 trước khi bấm Retry.
 đúng: retry chỉ cần lấy lại list và tổng của nó. Phép đo mới là delta, nên nó đo
 việc retry đã làm chứ không đo màn hình đang có bao nhiêu read.
 
+### M4.11b · Thực thi 60 IT scenario trên thiết bị thật
+
+- **Status:** **done** — 60/60 PASS trên emulator Android (AVD `memox_it`,
+  flavor development), host regression 1370/1370, analyze/format sạch,
+  `check_drift.sh --diff` 0 error. Catalog: 60 READY, 0 FIXTURE-BLOCKED,
+  0 KNOWN-GAP (IT-TREE-014 đóng bằng journey app-bar reset có sẵn).
+- **Goal:** Mọi scenario trong `docs/it-scenarios/` MUST chạy qua UI như người
+  dùng thật; defect tìm thấy MUST sửa tận root cause kèm regression test đúng
+  boundary; KHÔNG hạ expected result để test pass.
+- **Giao được:** harness/robot/fixtures (`integration_test/support/`) với seam
+  `buildRootWidget(database, now)`, clock T0 tick-per-write, watchdog; 8 file
+  `it_*_test.dart`; fixtures S-DUE/S-PROGRESS/S-LARGE qua repository thật.
+- **Defect sản phẩm:** (1) back-sau-redirect không re-run — ghi nhận, hướng A
+  `pushNamed` ở deck list; (2) use case nuốt `sort`/`searchTerm` — sửa +
+  `watch_card_list_items_use_case_test.dart`; (3) drift 2.34 bỏ `card_tags`/
+  `tags` khỏi `readsFrom` của `cardListItems` (subquery-only) — DAO merge
+  `tableUpdates`, pin bằng `card_list_tag_invalidation_test.dart` 2 chiều.
+  20 defect harness/automation đã sửa trong suite (IME connection chết sau
+  `done`, frozen-clock tie-breaker UUID, finder đo sai bề mặt…).
+- **Dependencies:** M4.11a, docs/it-scenarios (#144)
+- **Checklist phases:** 15.4
+
 ### M4.12 · Deck/Card demo hardening, fixture và E2E
 
 - **Status:** todo

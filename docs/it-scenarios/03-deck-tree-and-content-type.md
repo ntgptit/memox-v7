@@ -116,8 +116,8 @@
 
 | Bước | Thao tác người dùng | Kết quả mong đợi |
 |---|---|---|
-| 1 | Chọn Di chuyển trên `Vocabulary` | `Vocabulary` và `Academic words`/`Level 1` không phải đích hợp lệ |
-| 2 | Quan sát target bị từ chối và thử kích hoạt qua bề mặt UI | Target không kích hoạt move và lý do từ chối vẫn quan sát được; agent không gọi callback trực tiếp |
+| 1 | Chọn Di chuyển trên `Vocabulary` | `Vocabulary` và `Academic words`/`Level 1` không xuất hiện như đích có thể chọn |
+| 2 | Quan sát sheet | Sheet **ẩn** đích không hợp lệ thay vì liệt kê kèm lý do; khi mọi ứng viên đều bị loại nó nói thẳng `Nowhere to move this` — cycle bất khả thi và người dùng được giải thích |
 | 3 | Đóng sheet | Cây giữ nguyên, không có cycle |
 
 ## IT-TREE-011 — Không cho di chuyển deck vào deck chứa card

@@ -45,14 +45,13 @@ Write into `docs/`. Templates are in `assets/`.
 
 | File | Contains | Template |
 |---|---|---|
-| `docs/product.md` | Problem, users, core value, platforms, online/offline, auth, sensitive data | `assets/product_template.md` |
-| `docs/mvp.md` | Feature list classified must/should/nice/out, with completion conditions | `assets/product_template.md` |
+| `docs/product.md` | Problem, users, core value, platforms, online/offline, auth, sensitive data — **and the MVP scope** (must/should/nice/out with completion conditions; the repo decided against a separate `mvp.md`, see `docs/README.md`) | `assets/product_template.md` |
 | `docs/use-cases.md` | One entry per use case, full flows | `assets/use_case_template.md` |
 | `docs/business-rules.md` | Rules, validation rules, entity states, edge cases | `assets/business_rules_template.md` |
 | `docs/wbs.md` | Milestones → features → tasks, the live progress ledger | `assets/wbs_template.md` |
 | `docs/architecture.md` | Layering decisions and deviations, written as they are made | — |
 | `docs/data-model.md` | Entities, relationships, Drift schema intent | — |
-| `docs/api-spec.md` | Endpoints, request/response shapes, error format, pagination | — |
+| `docs/api-spec.md` | Endpoints, request/response shapes, error format, pagination — not until the backend exists (AD-05) | — |
 | `docs/design-system.md` | Owned by `flutter-design-system` | — |
 | `docs/testing-strategy.md` | Owned by `flutter-testing` | — |
 | `docs/release-checklist.md` | Owned by `flutter-ship` | — |

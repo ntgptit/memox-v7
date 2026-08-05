@@ -156,6 +156,10 @@ final class FakeCardRepository implements CardRepository {
   /// sort control changed the query.
   final List<CardListSort> requestedSorts = <CardListSort>[];
 
+  /// Every search term the list read was asked for — the parameter a use case
+  /// once accepted and silently dropped, which is why it is recorded here.
+  final List<String?> requestedSearchTerms = <String?>[];
+
   @override
   Stream<List<CardListItemModel>> watchCardListItems(
     String deckId, {
@@ -168,6 +172,7 @@ final class FakeCardRepository implements CardRepository {
     requestedLimits.add(limit);
     requestedFilters.add(filter);
     requestedSorts.add(sort);
+    requestedSearchTerms.add(searchTerm);
     final seeded = _seededItems;
     if (seeded != null) {
       return Stream<List<CardListItemModel>>.value(seeded);

@@ -89,16 +89,20 @@ one, nobody notices until reviews arrive.
 
 The pipeline gates, in order (details in `references/ci.md`):
 
-1. `dart format --output=none --set-exit-if-changed .`
-2. `flutter analyze`
-3. `python code-verification-guard-v2/guard/run.py check --project . --ruleset memox-v7 --profile ci` —
+1. `dart run build_runner build --delete-conflicting-outputs`, then fail if
+   the tree is dirty — **codegen first**: generated code is not committed, so
+   analyze and test cannot even run before this step (the real ci.yml orders
+   it this way).
+2. `dart format --output=none --set-exit-if-changed .`
+3. `flutter analyze` (the live workflow passes `--no-fatal-infos`).
+4. `python code-verification-guard-v2/guard/run.py check --project . --ruleset memox-v7` —
    **separate step**. This is the project's main guard and owns the checks
    `flutter analyze` cannot express, including the Riverpod rules that
-   `riverpod_lint` used to cover (descoped — see `docs/wbs.md`).
-4. `dart run build_runner build --delete-conflicting-outputs`, then fail if the
-   tree is dirty — this is what catches stale committed generated code.
+   `riverpod_lint` used to cover (descoped — see `docs/wbs.md`). (No
+   `--profile ci`: local and CI runs are identical by design.)
 5. `.claude/skills/flutter-architecture/scripts/check_architecture.sh`
-6. `flutter test` including goldens.
+6. `flutter test` — per-PR ci.yml runs the golden-excluded subset; the full
+   suite including goldens runs in `ci-full.yml`.
 7. Build Android; build iOS if the runner supports it; build web if in scope.
 
 Nothing merges on a red pipeline.

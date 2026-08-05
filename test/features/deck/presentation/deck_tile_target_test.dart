@@ -39,7 +39,8 @@ void main() {
     testWidgets('its bottom band opens the deck, not only its top one', (
       tester,
     ) async {
-      final router = await pumpDeckApp(tester, repository: serving());
+      final repository = serving();
+      await pumpDeckApp(tester, repository: repository);
 
       final card = tester.getRect(find.byType(DeckTileWidget));
       // Bottom-left: the due chip's end of the foot row, as far from the old
@@ -47,9 +48,17 @@ void main() {
       await tester.tapAt(Offset(card.left + 8, card.bottom - 8));
       await tester.pumpAndSettle();
 
+      // The deck's own level was opened, proven by the read it caused.
+      //
+      // Not the router's uri: opening a deck is a `push` on a
+      // `StatefulShellRoute`, and `currentConfiguration` keeps reporting `/`
+      // through it — which would make this assertion, and the one below,
+      // indifferent to whether the deck opened at all. The parent id the level
+      // read asks for cannot be faked by a screen that never changed.
       expect(
-        router.routerDelegate.currentConfiguration.uri.path,
-        '/decks/deck-1',
+        repository.deckListParents,
+        contains('deck-1'),
+        reason: 'the tap did not open deck-1',
       );
     });
 
@@ -57,7 +66,8 @@ void main() {
       // The other half of the fix: a card that takes the whole tap must not
       // swallow the controls sitting on it. A nested button wins the gesture
       // arena over the card's ink, and this is what says so.
-      final router = await pumpDeckApp(tester, repository: serving());
+      final repository = serving();
+      await pumpDeckApp(tester, repository: repository);
 
       await tester.tap(
         find.bySemanticsLabel(RegExp(english.deckActionsSemanticLabel)).last,
@@ -66,8 +76,8 @@ void main() {
 
       expect(find.text(english.deckRenameAction), findsOneWidget);
       expect(
-        router.routerDelegate.currentConfiguration.uri.path,
-        '/',
+        repository.deckListParents,
+        isNot(contains('deck-1')),
         reason: 'opening the row menu must not also open the deck',
       );
     });
