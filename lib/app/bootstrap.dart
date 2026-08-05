@@ -11,11 +11,13 @@ import '../core/state/provider_observer.dart';
 import '../core/time/clock_provider.dart';
 import '../features/card/di/card_repository_provider.dart';
 import '../features/deck/di/deck_repository_provider.dart';
+import '../features/deck/di/deck_template_provider.dart';
 import 'di/repository_bindings.dart';
 import 'app.dart';
 import 'config/env_config.dart';
 import 'config/env_config_provider.dart';
 import 'error_screen_widget.dart';
+import 'startup/fixture_seeder_widget.dart';
 
 /// Restores the error handlers that were installed before
 /// [installErrorHandlers] replaced them.
@@ -85,6 +87,7 @@ Widget buildRootWidget(
     // `*Impl`; these are the lines that do.
     deckRepositoryProvider.overrideWith(deckRepositoryBinding),
     cardRepositoryProvider.overrideWith(cardRepositoryBinding),
+    deckTemplateRepositoryProvider.overrideWith(deckTemplateRepositoryBinding),
     if (database != null) appDatabaseProvider.overrideWithValue(database),
     if (now != null) clockProvider.overrideWithValue(now),
   ],
@@ -97,7 +100,10 @@ Widget buildRootWidget(
       shouldLogStateChanges: config.logLevel == LogLevel.debug,
     ),
   ],
-  child: const MemoxApp(),
+  // The fixture seed sits inside the scope so it reads the bindings above,
+  // and wraps rather than replaces the app so the first frame is the deck
+  // list rather than a spinner waiting on assets.
+  child: const FixtureSeederWidget(child: MemoxApp()),
 );
 
 /// Installs the three error boundaries and returns a callback that puts the

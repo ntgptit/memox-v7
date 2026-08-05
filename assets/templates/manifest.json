@@ -1,0 +1,9 @@
+{
+  "manifest_version": 1,
+  "content_source": "memox-fixture",
+  "content_notice": "DEVELOPMENT AND TEST FIXTURE. The decks listed here are written by this project to exercise the deck tree, the two schedulers and the card list. They are NOT production study content and MUST NOT be presented as such (BR-87). Production starter content needs a source with clear licensing, which is an M8 concern.",
+  "templates": [
+    "eight_box_starter.json",
+    "sm2_starter.json"
+  ]
+}
