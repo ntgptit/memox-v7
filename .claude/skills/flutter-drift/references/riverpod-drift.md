@@ -72,9 +72,35 @@ table.
 The reliable way to avoid the whole class of bug is to keep reusable SQL in
 `.drift`, where Drift resolves dependencies itself.
 
+**…with one proven exception.** drift 2.34's analyzer omits tables that a
+`.drift` query reads *only through a subquery* when the query also uses nested
+star columns (`c.**`) and Dart placeholders (`$predicate`/`$order`). This is
+not theory: `cardListItems` reads `card_tags`/`tags` inside its `tag_names`
+subquery, and the generated `readsFrom` lists only `cards` and
+`card_review_states` — moving the join into `FROM` as a derived table changed
+nothing, while `orphanedTags` (a plain query with a `WHERE` subquery) gets its
+tables counted fine. The symptom is the silent kind: the list emitted once and
+never re-emitted on a tag write, so the row kept a stale chip until something
+else touched `cards`.
+
+So, whenever a `.drift` query reads a table only via subquery:
+
+1. **Check the generated `readsFrom`** in `app_database.g.dart` after building.
+2. If a table is missing, **complete the dependency set in the DAO** — merge
+   the generated watch with `db.tableUpdates(TableUpdateQuery.onAllTables([...]))`
+   over the missing tables, re-running `query.get()` on each update
+   (`CardDao.watchCardListItems` is the template). The DAO is the right layer:
+   it owns Drift specifics, and the repository contract stays untouched.
+   Do *not* restructure the SQL to appease the analyzer if that costs the
+   query plan (the correlated form keeps the index's early stop).
+3. **Pin it with a both-ways repository-level test** — write to the subquery's
+   table, expect a re-emit; remove, expect another
+   (`test/features/card/data/card_list_tag_invalidation_test.dart`).
+
 Worth testing explicitly, because the failure is silent: insert → expect the
 stream emits; update → expect it emits; delete → expect it emits. For a joined
-query, write to **both** sides and assert both re-emit.
+query, write to **both** sides and assert both re-emit — and for a query with a
+subquery, write to the subquery's tables too.
 
 ## Transactions
 

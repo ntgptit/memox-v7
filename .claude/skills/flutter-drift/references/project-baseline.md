@@ -21,8 +21,8 @@ lib/features/<feature>/data/
 ├── mappers/                     row → entity, one file per shape
 └── repositories/                <feature>_repository_impl.dart
 
-drift_schemas/                   drift_schema_v1.json · drift_schema_v2.json
-test/drift/generated/            schema.dart · schema_v1.dart · schema_v2.dart (verifier)
+drift_schemas/                   drift_schema_v1.json … drift_schema_vN.json (one per released schemaVersion; v3 at the time of writing)
+test/drift/generated/            schema.dart · schema_v1.dart … schema_vN.dart (verifier)
 test/database/                   migration_test.dart · invariants_test.dart
 ```
 

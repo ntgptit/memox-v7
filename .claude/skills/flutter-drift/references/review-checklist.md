@@ -91,7 +91,11 @@ Ask these; they are where the real defects hide.
 2. **Which query does this index serve?** If nobody can name it, it is cost with
    no benefit.
 3. **Does the stream re-emit for every write that should change this screen?**
-   Including writes made by another feature.
+   Including writes made by another feature — and including tables the query
+   reads *only through a subquery*: drift 2.34 can drop those from the
+   generated `readsFrom` (see the exception in `riverpod-drift.md`). If the
+   query has a subquery, open `app_database.g.dart` and read the actual
+   `readsFrom` set; do not take the comment's word for it.
 4. **Is this one atomic write or several?** If several statements must all land or
    none, is that actually a transaction?
 5. **What does the UI show when this read fails?** `noAutomaticRetry` providers

@@ -26,9 +26,10 @@ out to be open becomes rework, and the rework is always larger than the check.
       with no new visual design.
 - [ ] **State matrix decided** — which of initial / loading / loaded / empty /
       error / refreshing / submitting occur, and what each shows.
-- [ ] **API contract known** — endpoints, shapes, error format, pagination in
-      `docs/api-spec.md`. If the backend does not exist yet, agree the contract
-      and build against a fake implementing the same interface.
+- [ ] **API contract known** — N/A while AD-05 holds (no remote API in MVP;
+      `docs/api-spec.md` deliberately does not exist yet). When the backend
+      lands: endpoints, shapes, error format, pagination there first, and build
+      against a fake implementing the same interface.
 - [ ] **Data model known** — entities, tables, whether a migration is needed.
 - [ ] **Acceptance criteria written** in the WBS entry, checkable by someone
       else.
@@ -79,6 +80,13 @@ layout, and this block is a summary of it.
   repository**, inside `runInTransaction`. Depth limits, content locks, emptiness
   checks, subtree moves. A use case above the repository would put the check
   outside the transaction, which is a race between the check and the write.
+- **A pass-through use case with optional parameters must forward every one of
+  them, and gets a test proving it.** Optional params have defaults, so a
+  dropped `sort:` or `searchTerm:` compiles clean and analyzes clean — the
+  card list shipped exactly this ("Showing 3 of 1", inert sort control) and
+  only end-to-end runs caught it. The lock is cheap: a fake repository that
+  records every parameter it receives, one assert per param
+  (`watch_card_list_items_use_case_test.dart` is the template).
 
 ## Step 2 — Data
 

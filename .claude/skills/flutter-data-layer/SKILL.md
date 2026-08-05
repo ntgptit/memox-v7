@@ -1,6 +1,6 @@
 ---
 name: flutter-data-layer
-description: Networking and persistence for this Flutter app — the shared Dio client with auth/logging/error/token-refresh/request-ID interceptors, DTO-to-entity mapping, pagination and error-response contracts, offline and retry behaviour, Drift schema design with indexes and migrations, cache strategy with TTL and a declared source of truth, conflict resolution and sync, and secure storage of tokens. Use this skill when calling an API, adding or changing a repository implementation, designing database tables or writing a Drift migration, deciding what to cache or how to sync, handling offline state, or storing anything sensitive. Covers checklist phases 10 and 11.
+description: Networking and persistence for this Flutter app. Today only the persistence half is live — dio is deliberately not a dependency (AD-05), so the networking guidance here is reference for the backend phase, not current work. Covers the future shared Dio client with auth/logging/error/token-refresh/request-ID interceptors, DTO-to-entity mapping, pagination and error-response contracts, offline and retry behaviour, Drift schema design with indexes and migrations, cache strategy with TTL and a declared source of truth, conflict resolution and sync, and secure storage of tokens. Use this skill when calling an API, adding or changing a repository implementation, designing database tables or writing a Drift migration, deciding what to cache or how to sync, handling offline state, or storing anything sensitive. Covers checklist phases 10 and 11.
 ---
 
 # Data layer: networking and persistence
@@ -86,9 +86,9 @@ exercises.
 
 ## DTO and entity are different types
 
-`*_model.dart` in `data/model/` is the wire shape: nullable where the server is
+`*_model.dart` in `data/models/` is the wire shape: nullable where the server is
 nullable, named as the server names things, `json_serializable` annotations.
-`*_entity.dart` in `domain/entity/` is the shape the app reasons about:
+`*_entity.dart` in `domain/entities/` is the shape the app reasons about:
 non-nullable where the app requires a value, named in domain language.
 
 The mapper between them is where you handle the server's inconsistencies — a
@@ -118,15 +118,21 @@ widget.
 
 ## Checks before the data layer is done
 
+Now (local-first, AD-05 in force):
+
 - [ ] Source of truth declared in `docs/architecture.md` and followed everywhere.
-- [ ] No `DioException` or Drift exception escapes a repository.
+- [ ] No Drift exception escapes a repository.
 - [ ] Exception→failure mapping in one place, with tests.
-- [ ] DTOs never reach presentation.
+- [ ] Generated row types never reach presentation.
 - [ ] Sensitive fields redacted in logs; verbose logging off in production.
-- [ ] Timeouts set for connect, receive and send.
-- [ ] Token refresh handles concurrent 401s without a refresh storm.
 - [ ] Mutations are not blindly retried; duplicate submits are prevented.
-- [ ] Requests cancelled when their screen goes away.
 - [ ] Indexes exist for the queries actually run.
 - [ ] Migration tested from every released schema version.
+
+When the backend lands (deferred with AD-05):
+
+- [ ] No `DioException` escapes a repository; DTOs never reach presentation.
+- [ ] Timeouts set for connect, receive and send.
+- [ ] Token refresh handles concurrent 401s without a refresh storm.
+- [ ] Requests cancelled when their screen goes away.
 - [ ] Tokens in secure storage, cleared on logout.

@@ -18,12 +18,14 @@ Prefer `@riverpod` codegen — it produces the right provider type, correct
 
 ```dart
 @riverpod
-Future<List<Deck>> decks(Ref ref) async =>
-    ref.watch(deckRepositoryProvider).getAll();
+Stream<List<DeckListItem>> deckList(Ref ref, String? parentId) =>
+    ref.watch(watchDeckListUseCaseProvider)(parentId);   // AD-12: through the
+                                                         // use case, never the
+                                                         // repository directly
 
 @riverpod
-Future<Deck> deck(Ref ref, String deckId) async =>
-    ref.watch(deckRepositoryProvider).findById(deckId);   // family, generated
+Stream<DeckDetail> deck(Ref ref, String deckId) =>
+    ref.watch(watchDeckDetailUseCaseProvider)(deckId);   // family, generated
 
 @Riverpod(keepAlive: true)
 DeckRepository deckRepository(Ref ref) =>
@@ -31,8 +33,8 @@ DeckRepository deckRepository(Ref ref) =>
 ```
 
 `autoDispose` is the default under codegen and is usually right. `keepAlive` is
-for things that are genuinely app-scoped — repositories, the Dio client, the
-database, config. Screen data is not app-scoped; keeping it alive is how a user
+for things that are genuinely app-scoped — repositories, the database, config
+(and, when networking lands per AD-05, the HTTP client). Screen data is not app-scoped; keeping it alive is how a user
 sees another account's data after switching.
 
 One provider, one responsibility, in the feature that owns it. A single
@@ -162,6 +164,10 @@ one-shot events should be consumed, or they fire again on the next unrelated
 state change.
 
 ## Cancellation
+
+> **Deferred until networking lands (AD-05)** — the repo has no dio and no
+> remote requests today; local Drift streams cancel themselves when the
+> subscription is disposed. Reference for that phase:
 
 Long requests from a screen the user has left should stop. Tie the Dio
 `CancelToken` to the provider lifecycle:

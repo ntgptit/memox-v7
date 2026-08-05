@@ -36,7 +36,7 @@ fabricate command output.
   makes checkout-and-run work and makes diffs noisy; not committing them means
   CI must run `build_runner` before analyze. Not committing is the better default
   here because CI already runs codegen as a freshness check (Phase 19.1).
-- Conventional Commits, scoped by feature: `feat(auth):`, `fix(sync):`.
+- Conventional Commits, scoped by feature: `feat(deck):`, `fix(card):`.
 - Branch naming: `feat/<slice>`, `fix/<issue>`, `chore/<thing>`.
 - PR and issue templates in `.github/`.
 - Branch protection on the default branch; no direct pushes.

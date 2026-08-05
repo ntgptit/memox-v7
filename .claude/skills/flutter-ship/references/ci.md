@@ -2,7 +2,17 @@
 
 ## GitHub Actions
 
-`.github/workflows/ci.yml`:
+> **The block below is a reference template, not the live workflow.** The real
+> pipeline is a *pair*: `.github/workflows/ci.yml` (per-PR: codegen +
+> freshness, doc-integrity via `check_docs.sh`, guard-version check, format,
+> `flutter analyze --no-fatal-infos`, guard **without** `--profile ci`,
+> subset test run `--exclude-tags golden` plus targeted suites, widgetbook
+> smoke test, a font-symlink workaround) and `.github/workflows/ci-full.yml`
+> (the full suite including goldens, Windows-bound). When they disagree with
+> this template, **the workflow files win** — update this file when the
+> pipeline changes rather than the other way round.
+
+Reference template:
 
 ```yaml
 name: CI

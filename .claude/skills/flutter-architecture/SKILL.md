@@ -73,8 +73,10 @@ presentation ──► domain ◄── data
   domain entity means a UI concept leaked into the model.
 - **data** implements the repository contracts declared in domain, and depends
   on domain. Never the reverse.
-- **presentation** talks to use cases, or to repository contracts directly when
-  there is no use case. Never to a data source, never to Drift, never to Dio.
+- **presentation** talks to use cases (AD-12). The only sanctioned exception is
+  a feature that has no `usecases/` folder at all (see the carve-out below) —
+  never "this one read felt too small for a use case" inside a feature that has
+  them. Never to a data source, never to Drift, never to Dio.
 - **features are islands.** A feature may not import another feature's `data/`
   or `presentation/`. If two features need the same thing, it moves to `shared/`
   or `core/`, or one feature exposes a domain-level contract the other depends
