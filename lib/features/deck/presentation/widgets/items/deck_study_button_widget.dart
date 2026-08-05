@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_button_themes.dart';
 import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
@@ -22,11 +23,15 @@ const double _kPillHeight = 32;
 /// its label and the rule that it appears only when something is due are already
 /// what M5 needs; only `onPressed` changes.
 ///
-/// **Filled, against the design kit's outlined pill.** The kit argues a column
-/// of filled buttons stops the card being calm, which is true and was weighed:
-/// the project owner chose emphasis, because Study is the card's primary action
-/// and an outlined pill beside a filled due-chip lost to it. Recorded in
-/// `docs/reviews/design-parity-checklist.md` as a deliberate divergence.
+/// **Tonal, revised from filled (owner decision, 2026-08-05).** The history has
+/// three steps, each recorded in `docs/reviews/design-parity-checklist.md`:
+/// the kit argued *outlined* (a column of filled buttons stops the card being
+/// calm), the owner first chose *filled* (Study is the card's primary action
+/// and an outlined pill lost to the due chip beside it) — and the measured UI
+/// review then showed the cost: with several decks due at once, a column of
+/// `primary` fills sprays the screen's accent across every row. Tonal
+/// (`secondaryContainer`) keeps the emphasis that beat outlined while leaving
+/// `primary` to screen-level actions; the owner approved the revision.
 ///
 /// **32 is what it paints; 48 is what a finger gets.** `AppSpacing` calls the
 /// touch target a floor, and `MxBreadcrumb` already settled the same conflict
@@ -44,18 +49,24 @@ class DeckStudyButtonWidget extends StatelessWidget {
       onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.l10n.deckStudyComingSoonMessage)),
       ),
-      style: ButtonStyle(
-        minimumSize: const WidgetStatePropertyAll<Size>(Size(0, _kPillHeight)),
-        padding: const WidgetStatePropertyAll<EdgeInsets>(
-          EdgeInsets.symmetric(horizontal: AppSpacing.md),
-        ),
-        shape: WidgetStatePropertyAll<OutlinedBorder>(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppRadius.pill),
+      // The tonal pair comes from the theme's builder (one slot in ThemeData
+      // belongs to the brand fill — see `buildFilledTonalStyle`); only the
+      // pill's geometry is stated here.
+      style: buildFilledTonalStyle(context.colors, context.semanticColors)
+          .copyWith(
+            minimumSize: const WidgetStatePropertyAll<Size>(
+              Size(0, _kPillHeight),
+            ),
+            padding: const WidgetStatePropertyAll<EdgeInsets>(
+              EdgeInsets.symmetric(horizontal: AppSpacing.md),
+            ),
+            shape: WidgetStatePropertyAll<OutlinedBorder>(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppRadius.pill),
+              ),
+            ),
+            tapTargetSize: MaterialTapTargetSize.padded,
           ),
-        ),
-        tapTargetSize: MaterialTapTargetSize.padded,
-      ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         spacing: AppSpacing.xs,
@@ -63,14 +74,14 @@ class DeckStudyButtonWidget extends StatelessWidget {
           const Icon(Icons.play_arrow, size: AppIconSize.sm),
           Text(
             context.l10n.deckStudyAction,
-            // **`onPrimary` stated, not inherited.** `context.texts.labelMedium`
+            // **`onSecondaryContainer` stated, not inherited.** `context.texts.labelMedium`
             // carries the theme's body colour, and passing it whole overrode the
             // foreground `FilledButton` had already resolved — dark ink on the
-            // brand fill, which the visual audit measured at 2.33:1 against a
-            // 4.5 floor. A style taken from the text theme has to say its colour
+            // tinted fill — the same override class the visual audit once
+            // measured at 2.33:1 on the brand fill. A style taken from the text theme has to say its colour
             // when it lands on a coloured surface.
             style: context.texts.labelMedium?.copyWith(
-              color: context.colors.onPrimary,
+              color: context.colors.onSecondaryContainer,
               fontWeight: FontWeight.w600,
             ),
           ),
