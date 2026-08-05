@@ -5,8 +5,6 @@ import 'package:drift/drift.dart'
         Value,
         BooleanExpressionOperators,
         InsertMode,
-        Table,
-        TableInfo,
         TableUpdate,
         TableUpdateQuery;
 import '../../../../core/database/app_database.dart';
@@ -84,10 +82,7 @@ final class CardDao {
             .listen(listener.add, onError: listener.addError),
         _db
             .tableUpdates(
-              TableUpdateQuery.onAllTables(<TableInfo<Table, dynamic>>[
-                _db.cardTags,
-                _db.tags,
-              ]),
+              TableUpdateQuery.onAllTables([_db.cardTags, _db.tags]),
             )
             .listen(
               (Set<TableUpdate> _) => query

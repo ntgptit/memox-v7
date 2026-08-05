@@ -377,8 +377,11 @@ final class ItRobot {
   /// X == Y keys the barrier to the invariant itself — and if the product ever
   /// genuinely diverges, the timeout lets the caller's assertion say so.
   Future<void> waitCardListSteady() async {
-    final deadline = DateTime.now().add(const Duration(seconds: 6));
-    while (DateTime.now().isBefore(deadline)) {
+    // Wall time, not the harness clock, deliberately: this bounds how long
+    // the *driver* waits for the device, which the frozen test clock cannot
+    // measure. Stopwatch keeps the guard's DateTime.now ban intact.
+    final stopwatch = Stopwatch()..start();
+    while (stopwatch.elapsed < const Duration(seconds: 6)) {
       await _tester.pump(const Duration(milliseconds: 150));
       final showing = _tester
           .widgetList<Text>(find.textContaining('Showing '))
