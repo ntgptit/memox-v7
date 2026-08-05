@@ -6,8 +6,13 @@ import 'package:memox/features/card/domain/models/card_due_badge_model.dart';
 void main() {
   final now = DateTime.utc(2026, 1, 1, 12);
 
-  test('null due is due now (a new card, BR-22)', () {
-    expect(dueBadgeOf(null, now), isA<CardDueNow>());
+  test('a null due has no date to show, and is not "now"', () {
+    // BR-22 would put this card in a session, but that is a fact about the
+    // queue, not about when the card is next due. Answering "now" here put the
+    // word beside the row's own `NEW` label and told the learner a card they
+    // had never opened had come back around.
+    expect(dueBadgeOf(null, now), isA<CardNotScheduled>());
+    expect(dueBadgeOf(null, now), isNot(isA<CardDueNow>()));
   });
 
   test('a past due is due now', () {

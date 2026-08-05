@@ -97,6 +97,9 @@ final class FakeCardRepository implements CardRepository {
 
   /// A list item in a chosen display [state], built by handing `cardStateOf` a
   /// review state that resolves to it (BR-90/BR-91/BR-88).
+  /// [dueAt] left null is a card that has never been scheduled, which is what
+  /// the row draws no due badge for. A test that wants the badge has to say
+  /// when — passing a date is the only way to get one.
   CardListItemModel listItem(
     String id, {
     String front = 'front',
@@ -104,13 +107,18 @@ final class FakeCardRepository implements CardRepository {
     bool isFlagged = false,
     CardState state = CardState.isNew,
     List<String> tagNames = const <String>[],
+    DateTime? dueAt,
   }) => CardListItemModel(
     card: card(id, front: front, back: back, isFlagged: isFlagged),
-    reviewState: _reviewStateFor(id, state),
+    reviewState: _reviewStateFor(id, state, dueAt),
     tagNames: tagNames,
   );
 
-  CardReviewStateEntity _reviewStateFor(String cardId, CardState state) {
+  CardReviewStateEntity _reviewStateFor(
+    String cardId,
+    CardState state,
+    DateTime? dueAt,
+  ) {
     // eight_box only — enough to place the card in each display band. `isNew`
     // is review_count 0; the rest pick a box on BR-91's ladder.
     final (int reviewCount, int box) = switch (state) {
@@ -125,7 +133,7 @@ final class FakeCardRepository implements CardRepository {
       schedulerType: SchedulerType.eightBox,
       schedulerVersion: 1,
       schedulerGeneration: 1,
-      dueAt: null,
+      dueAt: dueAt,
       lastReviewedAt: null,
       reviewCount: reviewCount,
       lapseCount: 0,

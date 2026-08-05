@@ -31,6 +31,11 @@ import '../support/review_render.dart';
 /// boxes in the PNG even though a device shows the script. The fallback wiring is
 /// proven instead by `test/core/theme/cjk_fallback_test.dart`; these renders use
 /// English vocabulary so the layout is faithful.
+/// **A card past `isNew` gets a due date, because a real one has.** BR-77 fills
+/// `due_at` on the first `scheduled` review, so only a never-reviewed card has
+/// none — and the row draws no due badge for those. Leaving every fixture row at
+/// `due_at = null` would render a demo with no badge anywhere and quietly drop
+/// the mark from review.
 CardListItemModel demoItem(
   String id,
   String front,
@@ -43,7 +48,13 @@ CardListItemModel demoItem(
   back: back,
   state: state,
   isFlagged: flag,
+  dueAt: state == CardState.isNew ? null : _demoDueAt,
 );
+
+/// Comfortably behind any clock the render could read, so the badge is `now`
+/// rather than a countdown that changes with the calendar — a golden whose
+/// content depends on the day it was generated is a golden that fails tomorrow.
+final DateTime _demoDueAt = DateTime.utc(2020);
 
 // The deck the card list belongs to (W1): its name titles the screen and its
 // ancestors draw the breadcrumb.
