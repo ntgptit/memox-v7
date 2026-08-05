@@ -5,7 +5,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/database/app_database.dart';
+import '../core/database/app_database_provider.dart';
 import '../core/state/provider_observer.dart';
+import '../core/time/clock_provider.dart';
 import '../features/card/di/card_repository_provider.dart';
 import '../features/deck/di/deck_repository_provider.dart';
 import 'di/repository_bindings.dart';
@@ -60,9 +63,21 @@ Future<void> bootstrap(EnvConfig config) async {
 /// `runZonedGuarded` and `runApp`. `flutter_test` owns its own zone and its own
 /// binding; calling `runApp` inside a fresh zone from a test hangs instead of
 /// failing, which costs minutes per run to discover.
-Widget buildRootWidget(EnvConfig config) => ProviderScope(
-  // No explicit type argument: `Override` is internal to riverpod and is not
-  // part of flutter_riverpod's public API.
+///
+/// [database] and [now] substitute the two things an end-to-end run must
+/// control, and they are named types rather than a list of overrides because
+/// riverpod's `Override` is not part of the public API.
+///
+/// They belong *here* rather than in an outer `ProviderScope`, which looks
+/// equivalent and is not: a provider nobody overrides — `deckList`, say — is
+/// hosted by the outermost container, so it resolves `deckRepositoryProvider`
+/// there, where the bindings below have not been installed, and the screen
+/// renders "a provider that is in error state" instead of its data.
+Widget buildRootWidget(
+  EnvConfig config, {
+  AppDatabase? database,
+  DateTime Function()? now,
+}) => ProviderScope(
   overrides: [
     envConfigProvider.overrideWithValue(config),
     // The composition root binding a contract to an implementation. Each
@@ -70,6 +85,8 @@ Widget buildRootWidget(EnvConfig config) => ProviderScope(
     // `*Impl`; these are the lines that do.
     deckRepositoryProvider.overrideWith(deckRepositoryBinding),
     cardRepositoryProvider.overrideWith(cardRepositoryBinding),
+    if (database != null) appDatabaseProvider.overrideWithValue(database),
+    if (now != null) clockProvider.overrideWithValue(now),
   ],
   // Provider failures are always reported: Riverpod 3 retries a failed provider
   // ten times and shows `AsyncLoading` throughout, so without this a broken read

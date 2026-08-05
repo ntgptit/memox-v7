@@ -56,16 +56,16 @@ bước gốc. Ý nghĩa status/profile/setup/cleanup nằm trong
 | IT-TREE-011 | `03-deck-tree-and-content-type.md` | READY | UI | SETUP-MOVE-TREE | CLEAN-RESET | UC-09 E2, BR-64 |
 | IT-TREE-012 | `03-deck-tree-and-content-type.md` | READY | UI | SETUP-CROSS-SCHEDULER-MOVE | CLEAN-RESET | UC-09 E3, BR-73, BR-74 |
 | IT-TREE-013 | `03-deck-tree-and-content-type.md` | READY | UI | SETUP-DEEP-10 | CLEAN-RESET | UC-08 E4, UC-09 E5, BR-55 |
-| IT-TREE-014 | `03-deck-tree-and-content-type.md` | KNOWN-GAP | UI | SETUP-CARD-EMPTY-TYPED | CLEAN-RESET | UC-03 A3, BR-67, BR-68 |
+| IT-TREE-014 | `03-deck-tree-and-content-type.md` | READY | UI | SETUP-CARD-EMPTY-TYPED | CLEAN-RESET | UC-03 A3, BR-67, BR-68 |
 
 ## Deck discovery và progress
 
 | ID | File | Readiness | Profile | Setup | Cleanup | Trace |
 |---|---|---|---|---|---|---|
-| IT-DISC-001 | `04-deck-discovery-and-progress.md` | FIXTURE-BLOCKED | UI-FIXTURE | S-DUE | CLEAN-RESET | UC-06, BR-22 |
-| IT-DISC-002 | `04-deck-discovery-and-progress.md` | FIXTURE-BLOCKED | UI-FIXTURE | S-DUE | CLEAN-RESET | UC-06 A1, BR-29 |
-| IT-DISC-003 | `04-deck-discovery-and-progress.md` | FIXTURE-BLOCKED | UI-FIXTURE | S-DUE | CLEAN-RESET | UC-06, BR-22 |
-| IT-DISC-004 | `04-deck-discovery-and-progress.md` | FIXTURE-BLOCKED | UI-FIXTURE | S-DUE | CLEAN-RESET | UC-06, BR-29 |
+| IT-DISC-001 | `04-deck-discovery-and-progress.md` | READY | UI-FIXTURE | S-DUE | CLEAN-RESET | UC-06, BR-22 |
+| IT-DISC-002 | `04-deck-discovery-and-progress.md` | READY | UI-FIXTURE | S-DUE | CLEAN-RESET | UC-06 A1, BR-29 |
+| IT-DISC-003 | `04-deck-discovery-and-progress.md` | READY | UI-FIXTURE | S-DUE | CLEAN-RESET | UC-06, BR-22 |
+| IT-DISC-004 | `04-deck-discovery-and-progress.md` | READY | UI-FIXTURE | S-DUE | CLEAN-RESET | UC-06, BR-29 |
 | IT-DISC-005 | `04-deck-discovery-and-progress.md` | READY | UI | SETUP-ROOT-TRIO | CLEAN-RESET | UC-06 |
 | IT-DISC-006 | `04-deck-discovery-and-progress.md` | READY | UI | SETUP-SEARCH-TREES | CLEAN-RESET | UC-06 A3, BR-56, BR-57 |
 | IT-DISC-007 | `04-deck-discovery-and-progress.md` | READY | UI | SETUP-D-EB | CLEAN-RESET | UC-06 |
@@ -83,7 +83,7 @@ bước gốc. Ý nghĩa status/profile/setup/cleanup nằm trong
 | IT-CARD-006 | `05-card-lifecycle.md` | READY | UI | SETUP-CARD-EMPTY-TYPED | CLEAN-RESET | BR-95 |
 | IT-CARD-007 | `05-card-lifecycle.md` | READY | UI | SETUP-CARD-EMPTY-TYPED | CLEAN-RESET | UC-04 A4 |
 | IT-CARD-008 | `05-card-lifecycle.md` | READY | UI-RESTART | SETUP-CARD-BASIC | CLEAN-RESET | UC-04 A1, BR-10 |
-| IT-CARD-009 | `05-card-lifecycle.md` | FIXTURE-BLOCKED | UI-FIXTURE | S-PROGRESS | CLEAN-RESET | UC-04 A1, BR-10, BR-92 |
+| IT-CARD-009 | `05-card-lifecycle.md` | READY | UI-FIXTURE | S-PROGRESS | CLEAN-RESET | UC-04 A1, BR-10, BR-92 |
 | IT-CARD-010 | `05-card-lifecycle.md` | READY | UI-RESTART | SETUP-CARD-BASIC | CLEAN-RESET | UC-04 A2 |
 | IT-CARD-011 | `05-card-lifecycle.md` | READY | UI | SETUP-CARD-SINGLE | CLEAN-RESET | UC-04 A2, BR-67 |
 
@@ -93,16 +93,16 @@ bước gốc. Ý nghĩa status/profile/setup/cleanup nằm trong
 |---|---|---|---|---|---|---|
 | IT-ORG-001 | `06-card-discovery-and-organization.md` | READY | UI | SETUP-CARD-BASIC | CLEAN-RESET | UC-04, S1 |
 | IT-ORG-002 | `06-card-discovery-and-organization.md` | READY | UI | SETUP-CARD-BASIC | CLEAN-RESET | UC-04, S1 |
-| IT-ORG-003 | `06-card-discovery-and-organization.md` | FIXTURE-BLOCKED | UI-FIXTURE | S-DUE | CLEAN-RESET | UC-04, BR-22 |
+| IT-ORG-003 | `06-card-discovery-and-organization.md` | READY | UI-FIXTURE | S-DUE | CLEAN-RESET | UC-04, BR-22 |
 | IT-ORG-004 | `06-card-discovery-and-organization.md` | READY | UI-RESTART | SETUP-CARD-PLAIN | CLEAN-RESET | BR-92 |
-| IT-ORG-005 | `06-card-discovery-and-organization.md` | FIXTURE-BLOCKED | UI-FIXTURE | S-DUE | CLEAN-RESET | BR-22, BR-90, BR-92 |
+| IT-ORG-005 | `06-card-discovery-and-organization.md` | READY | UI-FIXTURE | S-DUE | CLEAN-RESET | BR-22, BR-90, BR-92 |
 | IT-ORG-006 | `06-card-discovery-and-organization.md` | READY | UI | SETUP-TREE-CARD | CLEAN-RESET | BR-92 |
 | IT-ORG-007 | `06-card-discovery-and-organization.md` | READY | UI | SETUP-CARD-PLAIN | CLEAN-RESET | BR-93 |
 | IT-ORG-008 | `06-card-discovery-and-organization.md` | READY | UI-RESTART | SETUP-CARD-TAGS | CLEAN-RESET | BR-93 |
 | IT-ORG-009 | `06-card-discovery-and-organization.md` | READY | UI | SETUP-CARD-SINGLE | CLEAN-RESET | BR-93, BR-94 |
-| IT-ORG-010 | `06-card-discovery-and-organization.md` | FIXTURE-BLOCKED | UI-FIXTURE | S-PROGRESS | CLEAN-RESET | BR-89, BR-90, BR-91 |
+| IT-ORG-010 | `06-card-discovery-and-organization.md` | READY | UI-FIXTURE | S-PROGRESS | CLEAN-RESET | BR-89, BR-90, BR-91 |
 | IT-ORG-011 | `06-card-discovery-and-organization.md` | READY | UI | SETUP-TREE-CARD | CLEAN-RESET | UC-04, UC-06 |
-| IT-ORG-012 | `06-card-discovery-and-organization.md` | FIXTURE-BLOCKED | UI-LARGE | S-LARGE | CLEAN-RESET | M4.11 W1b |
+| IT-ORG-012 | `06-card-discovery-and-organization.md` | READY | UI-LARGE | S-LARGE | CLEAN-RESET | M4.11 W1b |
 
 ## Catalog invariants
 

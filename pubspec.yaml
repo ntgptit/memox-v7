@@ -73,6 +73,14 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+  # Drives the IT scenario suite in `integration_test/` on a real device, which
+  # is the only place persistence, restart and the Android back button behave
+  # like they do for a user. `flutter_test` alone cannot make those claims: it
+  # renders into a fake binding with no app-private directory and no process to
+  # restart.
+  integration_test:
+    sdk: flutter
+
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your

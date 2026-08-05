@@ -214,10 +214,17 @@ Chạy `SETUP-TREE-CARD` và không tạo thêm card. `D-LEAF` có đúng `C-001
 2. Tạo ba root theo thứ tự `beta`, `Alpha`, `gamma`, cùng scheduler Eight Box.
 3. Dừng tại root list.
 
-## 6. Fixture contract chưa được triển khai
+## 6. Fixture contract
 
-Các fixture dưới đây là đặc tả đầu ra cho M4.12. Chúng chưa có asset/loader nên
-catalog phải giữ `FIXTURE-BLOCKED`.
+| | |
+|---|---|
+| **Artifact path** | `integration_test/support/it_fixtures.dart` |
+| **Version** | `v1` |
+| **Cách nạp** | `ItFixtures.loadDueLibrary(harness)` / `ItFixtures.loadLargeDeck(harness)` — gọi trước `launchApp`, clock đã pin `T0` |
+| **Reset** | Mỗi loader tự wipe trước khi seed, nên nạp hai lần cho đúng một kết quả |
+| **Đường ghi** | Deck/card qua đúng repository contract với clock tiêm theo từng thẻ; riêng review state ghi trực tiếp bảng `card_review_states`, vì writer sản phẩm duy nhất của state ngoài-initial là scheduler (M5, chưa tồn tại). Khi M5 có, nâng cấp trung thực là thay bước ghi đó bằng review thật. |
+
+Đặc tả dữ liệu giữ nguyên bên dưới; loader ở trên là hiện thực của nó.
 
 ### S-PROGRESS và S-DUE
 
@@ -255,7 +262,6 @@ hai ngày, không flagged và không có tag. Vì vậy:
 - Tại level `Due library`: `Mixed due` có 2 due; `No due group` có 0 due.
 - Tại level `No due group`: bộ lọc Due không khớp child nào.
 
-Fixture implementation MUST khai báo artifact path, version và cách load ở đây.
 Không được thêm cột/trạng thái nghiệp vụ mới chỉ để phục vụ fixture.
 
 ### S-LARGE

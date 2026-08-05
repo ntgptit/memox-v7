@@ -95,8 +95,8 @@ Mỗi scenario SHOULD chạy độc lập. Nếu chạy nối chuỗi, tester MU
 ### 4.3. Dữ liệu seed dành riêng cho trạng thái học
 
 Các mã `S-PROGRESS`, `S-DUE` và `S-LARGE` có contract xác định tại
-[`00-agent-execution-guide.md`](00-agent-execution-guide.md). Hiện chưa có
-fixture loader của M4.12 nên scenario dùng các mã này là `FIXTURE-BLOCKED`.
+[`00-agent-execution-guide.md`](00-agent-execution-guide.md), và loader hiện
+thực chúng nằm ở `integration_test/support/it_fixtures.dart` (v1).
 
 Agent MUST NOT tự tạo SQL hoặc sửa database để vượt blocker. Seed MUST dùng nội
 dung giả, không dùng dữ liệu cá nhân thật.
