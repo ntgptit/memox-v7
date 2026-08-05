@@ -69,15 +69,22 @@ class CardListSortSelection extends _$CardListSortSelection {
 
 /// The four pill counts (D3). Each is its own statement — the mirror of the four
 /// filtered reads — so a pill can say how many its filter would show. Only the
-/// Due-now count reads `now`, from the composition-root clock.
+/// Due count reads `now`, from the composition-root clock.
 @Riverpod(retry: noAutomaticRetry)
 Stream<int> cardAllCount(Ref ref, String deckId) =>
     ref.watch(watchCardCountUseCaseProvider)(deckId);
 
+/// How many cards are due **and have been reviewed before** — the state table's
+/// `due`, not BR-22's queue.
+///
+/// The two differ by exactly the new cards, and the difference is why this is
+/// not the number the Start-study button shows: a session takes the queue, so
+/// the button adds this to [cardNewCount]. Reading this one as "how many the
+/// session will hand over" is the mistake the split exists to prevent.
 @Riverpod(retry: noAutomaticRetry)
 Stream<int> cardDueCount(Ref ref, String deckId) => ref.watch(
   watchCardCountUseCaseProvider,
-)(deckId, filter: CardListFilter.dueNow, now: ref.watch(cardListNowProvider));
+)(deckId, filter: CardListFilter.due, now: ref.watch(cardListNowProvider));
 
 @Riverpod(retry: noAutomaticRetry)
 Stream<int> cardNewCount(Ref ref, String deckId) => ref.watch(

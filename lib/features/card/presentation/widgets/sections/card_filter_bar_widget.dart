@@ -51,8 +51,8 @@ class CardFilterBarWidget extends ConsumerWidget {
           const SizedBox(width: AppSpacing.sm),
           _pill(
             ref,
-            context.l10n.cardFilterDueNow(due ?? 0),
-            CardListFilter.dueNow,
+            context.l10n.cardFilterDue(due ?? 0),
+            CardListFilter.due,
             active,
           ),
           const SizedBox(width: AppSpacing.sm),

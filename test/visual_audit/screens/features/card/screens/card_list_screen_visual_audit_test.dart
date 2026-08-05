@@ -62,7 +62,7 @@ void main() {
     // Something due, so the panel's Start-study action renders and its
     // `onPrimary` label is measured on the brand fill — the pairing that failed
     // at 2.33:1 on the deck card before it was stated explicitly.
-    repository.filterCounts[CardListFilter.dueNow] = 23;
+    repository.filterCounts[CardListFilter.due] = 23;
 
     return repository;
   }

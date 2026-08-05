@@ -722,10 +722,10 @@
     "placeholders": { "count": { "type": "int" } },
     "description": "The All filter pill with its count (D3)."
   },
-  "cardFilterDueNow": "Đến hạn {count}",
-  "@cardFilterDueNow": {
+  "cardFilterDue": "Đến hạn {count}",
+  "@cardFilterDue": {
     "placeholders": { "count": { "type": "int" } },
-    "description": "The Due filter pill with its count (D3, BR-22). Already the short form — English dropped 'now' to match."
+    "description": "The Due filter pill with its count (D3): BR-22's queue minus the never-reviewed cards, so it never overlaps New."
   },
   "cardFilterNew": "Mới {count}",
   "@cardFilterNew": {

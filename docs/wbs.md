@@ -5337,9 +5337,68 @@ trong `CardFilterBarWidget` tồn tại đúng cho việc đó. Ghi lại đây 
 không đọc "đã fit" thành "đã fit mọi lúc" rồi lại đi hạ token.
 
 Một hệ quả cần biết: `robot.tapTextContaining('Due now')` trong
-`it_fixture_scenarios_test.dart` thành `'Due 2'` chứ không phải `'Due'` — panel
-ngay trên dải pill mang chuỗi "2 due · 1 new", nên tiền tố trần chỉ cách một cú
+`it_fixture_scenarios_test.dart` thành `'Due 1'` chứ không phải `'Due'` — panel
+ngay trên dải pill mang chuỗi "1 due · 1 new", nên tiền tố trần chỉ cách một cú
 tap là chạm vào văn xuôi.
+
+### M4.11d · Pill Due tách hẳn khỏi New — đổi predicate, không đổi BR-22
+
+- **Status:** **done** — 1373/1373 test pass, `flutter analyze` sạch,
+  `dart format` sạch, guard `memox-v7` 0 violation, `check_generated` sạch.
+- **Goal:** Hai pill `Due` và `New` MUST KHÔNG bao giờ cùng mô tả một thẻ, và
+  tổng của chúng MUST bằng đúng hàng đợi BR-22.
+- **Scope:** `card_list_query_mapper.dart`, `card_list_filter_model.dart`,
+  `card_list_filter_controller.dart`, `card_list_controller.dart`,
+  `card_repository.dart` (doc), `card_progress_panel_widget.dart`,
+  `card_filter_bar_widget.dart`, ARB en/vi, 3 test + 1 IT + 2 fixture.
+- **Out of scope:** BR-22 và mọi read của nó (`study.drift`, `deck.drift`);
+  badge `now` trên từng hàng thẻ.
+- **Dependencies:** M4.11c
+- **Checklist phases:** 7, 11, 12
+- **Tests required:** repository test trên SQLite thật cho predicate mới **và**
+  cho tính phân hoạch; IT-ORG-005; toàn bộ suite; 2 golden sinh lại.
+- **Editable documents:** `docs/wbs.md`,
+  `docs/reviews/design-parity-checklist.md`
+- **Output:** không có file mới
+- **Acceptance criteria:**
+  - [x] `Due ∩ New = ∅` và `Due + New = hàng đợi BR-22`, chứng minh bằng test
+        trên database thật (`due and new partition the session queue`).
+  - [x] `studyQueuePredicate` (BR-22) không đổi hành vi; `study.drift` và
+        `deck.drift` không bị đụng.
+  - [x] Nút Start study vẫn in kích thước hàng đợi (`Due + New`).
+  - [x] 1373 test pass, mọi gate xanh.
+
+**M4.11c mới sửa chỗ hiển thị, chưa sửa chỗ định nghĩa.** Panel đã đếm mỗi thẻ
+một lần bằng cách **trừ** `New` khỏi hàng đợi ngay tại widget, nhưng pill `Due`
+vẫn là hàng đợi trần — nên deck một thẻ mới vẫn hiện `Due 1` cạnh `New 1`. Trừ ở
+tầng trình bày thì chỉ panel được hưởng; đưa phép trừ xuống query thì pill được
+luôn, và không còn chỗ nào phải nhớ trừ.
+
+**`duePredicate = studyQueuePredicate & NOT isNewPredicate`.** Phủ định chính
+`isNewPredicate` chứ không viết `due_at IS NOT NULL AND due_at <= now`. Hai cách
+cho cùng kết quả **hôm nay**, vì BR-09 tạo `due_at = NULL` và BR-77 chỉ điền nó ở
+lượt `scheduled` đầu tiên nên `review_count = 0` kéo theo `due_at IS NULL`. Nhưng
+cách thứ hai chỉ đúng chừng nào giả định đó còn đúng; cách thứ nhất **không thể**
+rời khỏi định nghĩa của `New` — `New` là gì thì `Due` là phần còn lại của hàng
+đợi. Đó là thứ cho phép panel **cộng** hai số lại thành kích thước phiên học mà
+không phải là một xấp xỉ.
+
+**BR-22 không đổi, và không được đổi.** `studyQueuePredicate` (đổi tên từ
+`dueNowPredicate` cho khỏi nhầm) vẫn là `due_at IS NULL OR due_at <= now`, và
+phiên học vẫn lấy cả thẻ mới — `study.drift`, `deck.drift` không bị chạm. Cái đổi
+là **bộ lọc UI**, thứ `use-cases.md` chưa bao giờ đặc tả (không có mục filter
+nào trong đó), nên đây là quyết định trình bày, không phải sửa luật.
+
+Hệ quả trên fixture: demo trả `due = 23 / new = 38` — chính là cặp số nó đã khai
+trước M4.11c, và nút vẫn in 61 vì giờ 61 là tổng chứ không phải một trong hai.
+IT-ORG-005 đổi từ `Due 2` sang `Due 1`: bốn thẻ của "Mixed due" gồm một thẻ chưa
+mở, một thẻ quay lại, một thẻ hẹn sau, một thẻ đã thuộc — hàng đợi có hai, nhưng
+`Due` chỉ nhận thẻ quay lại.
+
+**Còn lại, chưa làm:** badge `now` trên hàng thẻ vẫn dùng BR-22
+(`dueBadgeOf(null, now)` → `CardDueNow`), nên một thẻ chưa học vẫn hiện `now`
+ngay cạnh nhãn `NEW`. Cùng loại va chạm từ vựng, ở cấp hàng thay vì cấp pill;
+tách ra vì nó là quyết định về badge, không phải về bộ lọc.
 
 ### M4.12 · Deck/Card demo hardening, fixture và E2E
 
