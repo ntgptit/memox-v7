@@ -108,14 +108,16 @@
    on a card that already carries a name, a meta line, a bar and a due chip that
    height is the thing making the row feel crowded. Outlined, so the word is not
    repeated down the column and the card stays calm. */
-/* **Filled, against this file's own earlier argument.** It was outlined so the
-   word was not repeated down the column and the card stayed calm — true, and
-   weighed: the project owner chose emphasis, because Study is the card's primary
-   action and an outlined pill lost to the filled due chip beside it. Recorded in
-   docs/reviews/design-parity-checklist.md as a deliberate divergence. */
-.mx-deck__study{height:32px;padding:0 var(--space-md);flex:none;display:flex;align-items:center;justify-content:center;gap:var(--space-xs);border:0;border-radius:var(--radius-pill);background:var(--color-primary);color:var(--color-on-primary);font-family:var(--font-body);font-size:var(--text-label-md);line-height:1;letter-spacing:var(--tracking-label-md);font-weight:var(--weight-semibold);cursor:pointer;transition:background-color var(--duration-fast) var(--ease-standard)}
-.mx-deck__study:hover{background:color-mix(in srgb,var(--color-primary) 88%,var(--color-text-primary))}
-.mx-deck__study:active{background:color-mix(in srgb,var(--color-primary) 78%,var(--color-text-primary))}
+/* **Tonal, revised from filled (owner, 2026-08-05).** Three steps, all in
+   docs/reviews/design-parity-checklist.md: outlined lost to the due chip,
+   filled won for emphasis — and then a measured review showed a column of
+   due decks spraying the primary accent down the screen. Tonal keeps the
+   emphasis that beat outlined and leaves primary to screen-level actions;
+   the pair is the selected pill's, so tinted surface = secondary emphasis
+   stays one fact. */
+.mx-deck__study{height:32px;padding:0 var(--space-md);flex:none;display:flex;align-items:center;justify-content:center;gap:var(--space-xs);border:0;border-radius:var(--radius-pill);background:var(--color-secondary-container);color:var(--color-on-secondary-container);font-family:var(--font-body);font-size:var(--text-label-md);line-height:1;letter-spacing:var(--tracking-label-md);font-weight:var(--weight-semibold);cursor:pointer;transition:background-color var(--duration-fast) var(--ease-standard)}
+.mx-deck__study:hover{background:color-mix(in srgb,var(--color-secondary-container) 88%,var(--color-text-primary))}
+.mx-deck__study:active{background:color-mix(in srgb,var(--color-secondary-container) 78%,var(--color-text-primary))}
 .mx-deck__study:focus-visible{outline:none;box-shadow:0 0 0 var(--border-focus) var(--color-focus-ring)}
 
 /* --- redesign: the hero panel ------------------------------------------

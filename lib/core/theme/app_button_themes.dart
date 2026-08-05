@@ -70,6 +70,30 @@ FilledButtonThemeData buildFilledButtonTheme(
   ),
 );
 
+/// The tonal action: emphasis above outlined, below the brand fill.
+///
+/// `secondaryContainer`/`onSecondaryContainer` — the same pair the selected
+/// pill already owns, so "tinted surface = secondary emphasis" stays one fact.
+/// Exists for actions that repeat down a list (the deck row's Study pill):
+/// a column of `primary` fills sprays the accent, a column of outlines loses
+/// to the due chip beside it, and tonal is the middle the owner picked
+/// (2026-08-05, recorded in `docs/reviews/design-parity-checklist.md`).
+/// A `ButtonStyle`, not a `FilledButtonThemeData`: `ThemeData` has one slot
+/// for both `FilledButton` variants, and this app's `filledButtonTheme`
+/// already claims it for the brand fill — a second theme entry would either
+/// collide or silently restyle every primary button. Callers apply it as
+/// `FilledButton(style: buildFilledTonalStyle(...))`, optionally `copyWith`
+/// geometry of their own.
+ButtonStyle buildFilledTonalStyle(
+  ColorScheme scheme,
+  AppSemanticColors semantic,
+) => buildFilledStyle(
+  scheme,
+  semantic,
+  fill: scheme.secondaryContainer,
+  label: scheme.onSecondaryContainer,
+);
+
 /// A filled button's colours, for any fill.
 ///
 /// Public so `MxActionButton`'s destructive variant can be the same button with
