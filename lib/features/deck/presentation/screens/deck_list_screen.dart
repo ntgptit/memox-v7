@@ -371,7 +371,14 @@ class _DeckListSliver extends StatelessWidget {
             summary: summary,
             // By name, with the id as a path parameter. The literal path would
             // work today and break silently the first time the route moves.
-            onTap: () => context.goNamed(
+            //
+            // **`push`, not `go`.** Opening a child is one step down the tree,
+            // and `go` replaces the single `/decks/:deckId` entry rather than
+            // stacking on it — so Back from level 5 landed on the root list,
+            // discarding four levels the user had walked. Breadcrumb keeps
+            // `go` on purpose: tapping an ancestor is a jump, and replacing the
+            // stack is exactly what a jump should do (IT-NAV-003, IT-NAV-004).
+            onTap: () => context.pushNamed(
               RouteNames.deckDetail,
               pathParameters: <String, String>{
                 RoutePathParams.deckId: summary.deck.id,
