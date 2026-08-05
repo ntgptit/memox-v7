@@ -108,10 +108,16 @@ rules:
     scopes:
       - dart_source
       - drift_sql_files
+    # `[^;]*`, never `(?:[^;]|\n)*`. A negated class already matches newlines,
+    # so that alternation was ambiguous: every newline gave the engine two ways
+    # to consume it, and the *passing* case — the column absent, which is every
+    # run — backtracked through 2^n splits before failing. One 5 KB
+    # `cards.drift` cost 57s per pattern and 178s for this rule alone, 99% of
+    # the whole guard. Same matches, 0.000s.
     patterns:
-      - 'CREATE\s+TABLE\s+cards\b(?:[^;]|\n)*\bscheduler_generation\b'
-      - 'CREATE\s+TABLE\s+cards\b(?:[^;]|\n)*\bdue_at\b'
-      - 'CREATE\s+TABLE\s+cards\b(?:[^;]|\n)*\bease_factor\b'
+      - 'CREATE\s+TABLE\s+cards\b[^;]*\bscheduler_generation\b'
+      - 'CREATE\s+TABLE\s+cards\b[^;]*\bdue_at\b'
+      - 'CREATE\s+TABLE\s+cards\b[^;]*\bease_factor\b'
     mode: file
     tags:
       - memox
