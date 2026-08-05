@@ -98,8 +98,10 @@ The pipeline gates, in order (details in `references/ci.md`):
 4. `python code-verification-guard-v2/guard/run.py check --project . --ruleset memox-v7` —
    **separate step**. This is the project's main guard and owns the checks
    `flutter analyze` cannot express, including the Riverpod rules that
-   `riverpod_lint` used to cover (descoped — see `docs/wbs.md`). (No
-   `--profile ci`: local and CI runs are identical by design.)
+   `riverpod_lint` used to cover (descoped — see `docs/wbs.md`). (No explicit `--profile` flag —
+   but the guard resolves the `ci` profile from the CI environment, and that
+   profile sets `warning_as_error: true`: a run that "passes with warnings"
+   locally exits 1 on CI. Fix warnings, do not merge past them.)
 5. `.claude/skills/flutter-architecture/scripts/check_architecture.sh`
 6. `flutter test` — per-PR ci.yml runs the golden-excluded subset; the full
    suite including goldens runs in `ci-full.yml`.

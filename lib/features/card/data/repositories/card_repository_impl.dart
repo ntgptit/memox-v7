@@ -22,15 +22,10 @@ import '../../domain/repositories/card_repository.dart';
 import '../datasources/card_list_read_data_source.dart';
 import '../datasources/deck_context_read_data_source.dart';
 import '../mappers/card_mapper.dart';
+import '../mappers/card_review_state_seed_mapper.dart';
 import '../mappers/tag_mapper.dart';
 import '../datasources/card_dao.dart';
 import '../datasources/card_deck_context_dao.dart';
-
-/// Review-state initialisation per scheduler (BR-09 table).
-const int _eightBoxInitialBox = 1;
-const double _sm2InitialEaseFactor = 2.5;
-const int _sm2InitialIntervalDays = 0;
-const int _sm2InitialRepetitions = 0;
 
 /// Drift-backed [CardRepository].
 ///
@@ -192,7 +187,9 @@ final class CardRepositoryImpl implements CardRepository {
         ),
       );
       // Exactly one review state, born with the card (BR-09); due_at NULL.
-      await _cardDao.insertReviewState(_initialReviewState(id, scheduler));
+      await _cardDao.insertReviewState(
+        initialReviewStateFromScheduler(id, scheduler),
+      );
 
       return cardEntityFromRow(await _requireCardRow(id));
     }),
@@ -374,34 +371,5 @@ final class CardRepositoryImpl implements CardRepository {
     }
 
     return (type: type, version: version, generation: generation);
-  }
-
-  CardReviewStatesCompanion _initialReviewState(
-    String cardId,
-    ({SchedulerType type, int version, int generation}) scheduler,
-  ) {
-    final base = CardReviewStatesCompanion.insert(
-      cardId: cardId,
-      schedulerType: scheduler.type.dbValue,
-      schedulerVersion: scheduler.version,
-      schedulerGeneration: scheduler.generation,
-    );
-
-    return switch (scheduler.type) {
-      // BR-09 initialisation table: each scheduler fills only its own columns.
-      SchedulerType.eightBox => base.copyWith(
-        currentBox: const Value<int?>(_eightBoxInitialBox),
-      ),
-      SchedulerType.sm2 => base.copyWith(
-        easeFactor: const Value<double?>(_sm2InitialEaseFactor),
-        intervalDays: const Value<int?>(_sm2InitialIntervalDays),
-        repetitions: const Value<int?>(_sm2InitialRepetitions),
-      ),
-      // Unreachable: _resolveRootScheduler already refused it.
-      SchedulerType.unknown => throw const ConflictFailure(
-        message: 'This deck uses a study mode this app version does not know.',
-        reason: CardConflictReason.unknownScheduler,
-      ),
-    };
   }
 }
