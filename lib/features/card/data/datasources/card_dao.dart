@@ -1,5 +1,14 @@
+import 'dart:async';
+
 import 'package:drift/drift.dart'
-    show Value, BooleanExpressionOperators, InsertMode;
+    show
+        Value,
+        BooleanExpressionOperators,
+        InsertMode,
+        Table,
+        TableInfo,
+        TableUpdate,
+        TableUpdateQuery;
 import '../../../../core/database/app_database.dart';
 import '../../domain/models/card_list_filter_model.dart';
 import '../../domain/models/card_list_sort_model.dart';
@@ -44,21 +53,57 @@ final class CardDao {
     required CardListSort sort,
     String? searchTerm,
     DateTime? now,
-  }) => _db
-      .cardListItems(
-        (c, s) => cardListPredicate(
-          c: c,
-          s: s,
-          deckId: deckId,
-          filter: filter,
-          searchTerm: searchTerm,
-          now: now,
-        ),
-        (c, s) => cardListOrder(sort, c, s),
-        limit,
-      )
-      .watch()
-      .map((rows) => rows.map((r) => (r.c, r.s, r.tagNames)).toList());
+  }) {
+    final query = _db.cardListItems(
+      (c, s) => cardListPredicate(
+        c: c,
+        s: s,
+        deckId: deckId,
+        filter: filter,
+        searchTerm: searchTerm,
+        now: now,
+      ),
+      (c, s) => cardListOrder(sort, c, s),
+      limit,
+    );
+    List<CardListItemRow> toRows(List<CardListItemsResult> raw) =>
+        raw.map((r) => (r.c, r.s, r.tagNames)).toList();
+
+    // drift 2.34's analyzer drops `card_tags`/`tags` from this query's
+    // generated `readsFrom` — they are read only inside the tag_names
+    // subquery — so the plain watch never re-emits when a tag is added or
+    // removed (IT-ORG-007/008). This merge completes the dependency set by
+    // hand: the base watch covers `cards`/`card_review_states`, and a write
+    // to either tag table triggers a re-read of the same query.
+    // `card_list_tag_invalidation_test.dart` pins the behaviour.
+    return Stream<List<CardListItemRow>>.multi((listener) {
+      final subscriptions = <StreamSubscription<Object?>>[
+        query
+            .watch()
+            .map(toRows)
+            .listen(listener.add, onError: listener.addError),
+        _db
+            .tableUpdates(
+              TableUpdateQuery.onAllTables(<TableInfo<Table, dynamic>>[
+                _db.cardTags,
+                _db.tags,
+              ]),
+            )
+            .listen(
+              (Set<TableUpdate> _) => query
+                  .get()
+                  .then((raw) => listener.add(toRows(raw)))
+                  .catchError(listener.addError),
+              onError: listener.addError,
+            ),
+      ];
+      listener.onCancel = () async {
+        for (final subscription in subscriptions) {
+          await subscription.cancel();
+        }
+      };
+    });
+  }
 
   /// How many cards the same predicate matches, without the window — so a pill
   /// and the list it opens can never disagree.

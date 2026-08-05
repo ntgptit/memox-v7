@@ -25,6 +25,15 @@ class WatchCardListItemsUseCase {
     deckId,
     limit: limit,
     filter: filter,
+    sort: sort,
+    // Both of these were accepted here and then dropped on the floor — the
+    // parameters are optional with defaults, so the call compiled and every
+    // search typed into the card list filtered the count but never the rows
+    // ("Showing 3 of 1"), and the sort control changed nothing. The repository
+    // tests could not see it (they call the repository directly) and neither
+    // could the widget tests (they fake the repository); only driving the real
+    // app end-to-end put both layers in one line of sight.
+    searchTerm: searchTerm,
     now: now,
   );
 }

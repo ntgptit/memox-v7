@@ -52,11 +52,19 @@ LIMIT :limit;
 --
 -- **The tag names ride along as a `GROUP_CONCAT`, not a second read (D5).** A
 -- correlated subquery over `card_tags`/`tags` folds each card's tags into one
--- unit-separated string, so the row draws its chips without a call per card, and
--- because the subquery reads those two tables drift re-emits the whole list when
--- a tag is added or removed. `char(31)` (the ASCII unit separator) is the
--- delimiter — it cannot occur inside a `TagName`, which is trimmed printable
--- text, so the split back apart is unambiguous. NULL for a card with no tags.
+-- unit-separated string, so the row draws its chips without a call per card.
+-- `char(31)` (the ASCII unit separator) is the delimiter — it cannot occur
+-- inside a `TagName`, which is trimmed printable text, so the split back apart
+-- is unambiguous. NULL for a card with no tags.
+--
+-- **The subquery's tables do NOT reach the generated stream dependencies.**
+-- drift 2.34's analyzer omits `card_tags`/`tags` from this query's `readsFrom`
+-- (moving the join into `FROM` as a derived table changed nothing), so on its
+-- own the watch emits once and goes silent when a tag is added or removed —
+-- the row keeps showing stale chips until something else touches `cards`
+-- (found by IT-ORG-007/008). `CardDao.watchCardListItems` completes the
+-- dependency set with `tableUpdates` over the two missing tables;
+-- `card_list_tag_invalidation_test.dart` pins the repaired behaviour.
 cardListItems:
 SELECT
   c.**,
