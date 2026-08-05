@@ -40,10 +40,11 @@
    17 a side and matches Material's own M3 chip padding. Vertical stays `sm`:
    that is the 36px height M3 draws, under the 48px .mx-pill tap target above.
    It narrows the card list's filter row from 426.4 to 394.4 against the 374 a
-   390-wide screen leaves inside the gutter, so the last pill is still reached
-   by scrolling — closing the remaining 20px is a copy question, not a padding
-   one. `buildChipTheme` in lib/core/theme/app_chip_theme.dart carries the same
-   two numbers and changed with this. */
+   390-wide screen leaves inside the gutter; dropping "now" from the Due label
+   took it to 361.8, so single-digit counts fit without scrolling. Three-digit
+   counts (416.5) and 360-wide screens still scroll — the labels grow with the
+   data, which is what the row scrolls for. `buildChipTheme` in
+   lib/core/theme/app_chip_theme.dart carries the same two numbers. */
 .mx-pill{display:inline-flex;flex:none;align-items:center;justify-content:center;min-height:var(--touch-target-min);background:none;border:0;padding:0;cursor:pointer}
 .mx-pill__body{display:inline-flex;align-items:center;gap:var(--space-xs);white-space:nowrap;padding:var(--space-sm) var(--space-sm);border-radius:var(--radius-pill);border:var(--border-hairline) solid var(--color-border-subtle);background:var(--color-surface);color:var(--color-text-secondary);font-size:var(--text-label-lg);line-height:var(--leading-label-lg);letter-spacing:var(--tracking-label-lg);font-weight:var(--weight-semibold);transition:background-color var(--duration-fast) var(--ease-standard)}
 .mx-pill__body .mx-icon{font-size:var(--icon-sm)}

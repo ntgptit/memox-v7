@@ -15,7 +15,7 @@ import '../../controllers/card_list_filter_controller.dart';
 void _selectFilter(WidgetRef ref, String deckId, CardListFilter filter) =>
     ref.read(cardListFilterSelectionProvider(deckId).notifier).select(filter);
 
-/// The filter pills over the card list (D3): All, Due now, New, ⚑ Flagged.
+/// The filter pills over the card list (D3): All, Due, New, ⚑ Flagged.
 ///
 /// A filter narrows the `WHERE`, never the order, so selecting one is a pure read
 /// change — the controller swaps the filter and resets the window. Each pill

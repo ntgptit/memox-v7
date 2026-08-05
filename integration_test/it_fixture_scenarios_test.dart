@@ -198,8 +198,8 @@ void main() {
     await robot.openDeck('Due library');
     await robot.openDeck('Mixed due');
 
-    // Step 1: All 4 · Due now 2 · New 1 · Flagged 1, as numbers, not vibes.
-    for (final pill in <String>['All 4', 'Due now 2', 'New 1', 'Flagged 1']) {
+    // Step 1: All 4 · Due 2 · New 1 · Flagged 1, as numbers, not vibes.
+    for (final pill in <String>['All 4', 'Due 2', 'New 1', 'Flagged 1']) {
       expect(
         find.textContaining(pill),
         findsWidgets,
@@ -208,7 +208,10 @@ void main() {
     }
 
     // Step 2: Due keeps exactly the two due-now cards.
-    await robot.tapTextContaining('Due now');
+    //
+    // `Due 2` rather than `Due`: the panel above the pills carries "2 due · 1
+    // new", and a bare prefix would be one tap away from landing on prose.
+    await robot.tapTextContaining('Due 2');
     await robot.waitCardListSteady();
     expect(find.text('new-visible'), findsWidgets);
     expect(find.text('beginning-visible'), findsWidgets);

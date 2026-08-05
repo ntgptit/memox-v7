@@ -725,7 +725,7 @@
   "cardFilterDueNow": "Đến hạn {count}",
   "@cardFilterDueNow": {
     "placeholders": { "count": { "type": "int" } },
-    "description": "The Due-now filter pill with its count (D3, BR-22)."
+    "description": "The Due filter pill with its count (D3, BR-22). Already the short form — English dropped 'now' to match."
   },
   "cardFilterNew": "Mới {count}",
   "@cardFilterNew": {
