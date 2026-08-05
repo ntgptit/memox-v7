@@ -122,8 +122,14 @@ class _CardFace extends StatelessWidget {
           // `onSurface`, a step darker than the state line below it: the meaning
           // is what the learner reads, so it takes the stronger of the two muted
           // tones and the state label keeps the lighter one.
+          //
+          // bodyMedium, not bodySmall: the back is the second most-read text on
+          // the row — the answer being recalled — and at 12 it sat at caption
+          // size, two roles below the 16 front. 14 keeps one full step of
+          // hierarchy under the front while staying readable when scanning
+          // long diacritic-heavy Vietnamese lists.
           card.back,
-          style: context.texts.bodySmall?.copyWith(
+          style: context.texts.bodyMedium?.copyWith(
             color: context.colors.onSurface,
           ),
           maxLines: 1,
