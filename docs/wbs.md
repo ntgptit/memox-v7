@@ -5243,7 +5243,25 @@ việc retry đã làm chứ không đo màn hình đang có bao nhiêu read.
   `tableUpdates`, pin bằng `card_list_tag_invalidation_test.dart` 2 chiều.
   20 defect harness/automation đã sửa trong suite (IME connection chết sau
   `done`, frozen-clock tie-breaker UUID, finder đo sai bề mặt…).
-- **Dependencies:** M4.11a, docs/it-scenarios (#144)
+- **Scope:** `integration_test/**` (harness, robot, fixtures, 8 file
+  scenario), fix sản phẩm tối thiểu trong `lib/features/card/**` và
+  `lib/features/deck/presentation/screens/deck_list_screen.dart`, seam
+  `lib/app/bootstrap.dart`; KHÔNG đổi business rule, KHÔNG đổi schema.
+- **Editable documents:** `docs/it-scenarios/**` (catalog, execution guide,
+  agent notes), `docs/wbs.md`.
+- **Output:** suite 60 scenario chạy được lặp lại trên emulator; 3 regression
+  test host mới; catalog 60 READY; báo cáo defect per-ID.
+- **Acceptance criteria:**
+  - [x] 60/60 scenario PASS qua UI thật, không hạ expected result nào.
+  - [x] Mọi defect sản phẩm có root cause + regression test đúng boundary
+        (use case seam, repository stream, widget).
+  - [x] Host regression không giảm: `flutter test` 1370/1370.
+  - [x] `flutter analyze` / `dart format` / `check_drift.sh --diff` sạch.
+  - [x] Catalog 60 READY / 0 FIXTURE-BLOCKED / 0 KNOWN-GAP, khớp 1:1 với
+        `integration_test/it_*_test.dart`.
+- **Dependencies:** M4.11a
+- **Tests required:** integration (60 scenario), use-case seam test,
+  repository stream-invalidation test 2 chiều, widget boundary test
 - **Checklist phases:** 15.4
 
 ### M4.12 · Deck/Card demo hardening, fixture và E2E
