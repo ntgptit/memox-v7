@@ -5448,9 +5448,77 @@ nhận thêm `dueAt`, demo cấp ngày cho mọi thẻ đã qua `isNew` (đúng 
 audit giữ một hàng mỗi loại. Ngày dùng là `DateTime.utc(2020)`: một golden mà
 nội dung phụ thuộc ngày sinh ra nó là golden hỏng vào hôm sau.
 
+### M4.12a · Starter template, loader và seed idempotent
+
+- **Status:** **done** — 1398/1398 test pass, `flutter analyze` sạch,
+  `dart format` sạch, guard `memox-v7` 0 violation, `check_generated` và
+  `check_docs` sạch.
+- **Goal:** Lát nền của M4.12: app **tự có dữ liệu** ở bản development mà không
+  ai phải sửa database bằng tay, và nạp lại **không** nhân bản (BR-37).
+- **Scope:** `assets/templates/` (manifest + 2 template), `DeckTemplate` domain
+  model, `DeckTemplateDataSource`, `DeckTemplateRepository` + impl + DAO + seed
+  mapper, `InstallDeckTemplatesUseCase`, DI + binding, `FixtureSeederWidget`,
+  `test/helpers/seed.dart`, 20 test mới.
+- **Out of scope:** Playwright/Web E2E, state matrix, design parity — vẫn nằm ở
+  M4.12 và **chưa làm**; xem "Còn lại" bên dưới.
+- **Dependencies:** M4.11, M4.4
+- **Checklist phases:** 11.1, 14.4
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `assets/templates/` (3 file), `deck_template_model.dart`,
+  `deck_template_repository.dart`, `install_deck_templates_use_case.dart`,
+  `datasources/deck_template_data_source.dart`, `datasources/deck_template_dao.dart`,
+  `mappers/deck_template_seed_mapper.dart`,
+  `repositories/deck_template_repository_impl.dart`,
+  `di/deck_template_provider.dart`, `app/startup/fixture_seeder_widget.dart`,
+  `test/helpers/seed.dart`
+- **Tests required:** repository integration trên SQLite thật (copy, idempotent,
+  rollback, cả hai scheduler), toàn bộ 15 bất biến sau seed, loader trên asset
+  thật + 5 asset hỏng, seed helper end-to-end, seeder widget theo flavor
+- **Acceptance criteria:**
+  - [x] Fixture: một root `eight_box`, một root `sm2`, cây **ba cấp**, leaf chứa
+        card; `manifest.json` ghi rõ là fixture development/test (BR-87).
+  - [x] Nạp **hai lần** không nhân bản (BR-37), chứng minh trên SQLite thật.
+  - [x] Đủ **15** bất biến pass sau seed (và sau seed hai lần).
+  - [x] Copy nằm trong **một** transaction; copy hỏng không để lại gì (BR-39).
+  - [x] Seed chạy qua **chính** repository và loader thật, không INSERT tay.
+
+**Copy-on-use là AD-07, seed-at-startup là fixture — hai chuyện khác nhau.**
+AD-07 cấm chèn thẳng nội dung starter vào dữ liệu người dùng lúc khởi động, vì
+đó là ghi mà không hỏi. Lập luận ấy đúng với **nội dung starter thật**. Thứ đang
+ship không phải vậy: BR-87 khai báo nó là fixture cho development và test, và
+M4.12 cần app demo được mà không ai sửa database. Nên seed chỉ chạy ở flavor
+`development`; `staging` và `production` khởi động rỗng và sẽ nhận màn thư viện
+starter mà AD-07 thực sự mô tả. `fixture_seeder_widget_test.dart` ghim cả ba
+flavor.
+
+**Idempotency check nằm *trong* transaction.** Kiểm tra trước rồi ghi sau để lại
+một khe: hai lần khởi động, hoặc một test chạy song song, cùng đọc "chưa có" rồi
+cùng ghi. Trong transaction thì cái thứ hai nhìn thấy root của cái thứ nhất.
+
+**Node khai `children` **hoặc** `cards`, không cả hai.** Loader từ chối node khai cả hai, nên `installTemplate` không cần một dòng
+kiểm tra content-type nào — cây mà app từ chối thì không bao giờ tồn tại dưới
+dạng `DeckTemplate`. `content_type` được quyết bởi nội dung node: leaf có card
+là `card`, leaf rỗng giữ `unset` — đúng trạng thái một deck rỗng người dùng vừa
+tạo (BR-62).
+
+**Loader nằm ở `datasources/`, không phải thẳng trong `data/`.** WBS gốc ghi
+`lib/features/deck/data/template_loader.dart`; `architecture_boundary_test.dart`
+từ chối — file thẳng dưới `data/` không nằm trong bucket nào, và các rule suffix
+chọn file **theo đúng đường dẫn đó**, nên một file không bucket là file không
+được rule nào kiểm. Đổi thành `datasources/deck_template_data_source.dart`.
+
+**Seed mapper là bản sao thứ hai của BR-09, có chủ ý.** Bản gốc ở
+`features/card/data/`, mà feature này không được import. Lựa chọn còn lại là đẩy
+BR-09 vào `core/`, biến bảng khởi tạo review state thành hạ tầng chung không
+feature nào sở hữu. Hai mapper ngắn có test ghim từng cột là giá rẻ hơn.
+
 ### M4.12 · Deck/Card demo hardening, fixture và E2E
 
-- **Status:** todo
+- **Status:** in progress — **M4.12a done** (fixture, loader, seed idempotent).
+  **Còn lại:** Playwright/Flutter Web E2E ở mobile viewport, state matrix,
+  design parity <3%, báo cáo demo flow kèm bằng chứng từng bước. Ba mục đó chưa
+  bắt đầu; hạ tầng Playwright chưa tồn tại trong repo (`node` và Chrome có sẵn
+  trên máy, nên không có blocker kỹ thuật — chỉ là chưa làm).
 - **Goal:** Đưa app tới trạng thái **demo được** bằng luồng Deck/Card hoàn chỉnh,
   trước khi bắt đầu Review.
 - **Scope:** fixture cho development/test; seed helper dùng **chính** repository

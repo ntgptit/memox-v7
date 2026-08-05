@@ -1,0 +1,45 @@
+{
+  "template_id": "fixture.eight_box.everyday_english",
+  "version": 1,
+  "locale": "en",
+  "title": "Everyday English",
+  "content_source": "memox-fixture",
+  "default_scheduler_type": "eight_box",
+  "children": [
+    {
+      "name": "Around the house",
+      "children": [
+        {
+          "name": "Kitchen",
+          "cards": [
+            { "front": "kettle", "back": "ấm đun nước", "example": "The kettle is boiling." },
+            { "front": "cupboard", "back": "tủ bát đĩa" },
+            { "front": "sink", "back": "bồn rửa" },
+            { "front": "tray", "back": "cái khay" }
+          ]
+        },
+        {
+          "name": "Living room",
+          "cards": [
+            { "front": "curtain", "back": "rèm cửa" },
+            { "front": "shelf", "back": "kệ, giá sách" },
+            { "front": "cushion", "back": "gối tựa" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Getting around",
+      "children": [
+        {
+          "name": "On the street",
+          "cards": [
+            { "front": "pavement", "back": "vỉa hè", "example": "Wait on the pavement." },
+            { "front": "crossing", "back": "chỗ sang đường" },
+            { "front": "roundabout", "back": "vòng xuyến" }
+          ]
+        }
+      ]
+    }
+  ]
+}

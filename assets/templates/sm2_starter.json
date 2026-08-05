@@ -1,0 +1,45 @@
+{
+  "template_id": "fixture.sm2.korean_basics",
+  "version": 1,
+  "locale": "ko",
+  "title": "Korean Basics",
+  "content_source": "memox-fixture",
+  "default_scheduler_type": "sm2",
+  "children": [
+    {
+      "name": "Hangul",
+      "children": [
+        {
+          "name": "Vowels",
+          "cards": [
+            { "front": "아", "back": "a" },
+            { "front": "어", "back": "eo" },
+            { "front": "오", "back": "o" },
+            { "front": "우", "back": "u" }
+          ]
+        },
+        {
+          "name": "Consonants",
+          "cards": [
+            { "front": "ㄱ", "back": "g / k" },
+            { "front": "ㄴ", "back": "n" },
+            { "front": "ㄷ", "back": "d / t" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "First words",
+      "children": [
+        {
+          "name": "Greetings",
+          "cards": [
+            { "front": "안녕하세요", "back": "xin chào", "example": "안녕하세요, 반갑습니다." },
+            { "front": "감사합니다", "back": "cảm ơn" },
+            { "front": "죄송합니다", "back": "xin lỗi" }
+          ]
+        }
+      ]
+    }
+  ]
+}

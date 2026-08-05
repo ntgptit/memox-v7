@@ -5,8 +5,11 @@ import '../../core/time/clock_provider.dart';
 import '../../features/card/data/repositories/card_repository_impl.dart';
 import '../../features/card/domain/repositories/card_repository.dart';
 import '../../features/deck/data/datasources/deck_dao.dart';
+import '../../features/deck/data/datasources/deck_template_dao.dart';
 import '../../features/deck/data/repositories/deck_repository_impl.dart';
+import '../../features/deck/data/repositories/deck_template_repository_impl.dart';
 import '../../features/deck/domain/repositories/deck_repository.dart';
+import '../../features/deck/domain/repositories/deck_template_repository.dart';
 
 /// Where each repository contract is bound to its implementation.
 ///
@@ -49,3 +52,13 @@ CardRepository cardRepositoryBinding(Ref ref) => CardRepositoryImpl(
   ref.watch(appDatabaseProvider),
   clock: ref.watch(clockProvider),
 );
+
+/// The template-copy path (AD-07). Its own DAO, for the reason stated on
+/// `DeckTemplateDao`: it writes decks, cards and review states in one
+/// transaction, which is a different job from the reads a deck list rebuild
+/// runs constantly.
+DeckTemplateRepository deckTemplateRepositoryBinding(Ref ref) =>
+    DeckTemplateRepositoryImpl(
+      DeckTemplateDao(ref.watch(appDatabaseProvider)),
+      clock: ref.watch(clockProvider),
+    );
