@@ -198,8 +198,16 @@ void main() {
     await robot.openDeck('Due library');
     await robot.openDeck('Mixed due');
 
-    // Step 1: All 4 · Due 2 · New 1 · Flagged 1, as numbers, not vibes.
-    for (final pill in <String>['All 4', 'Due 2', 'New 1', 'Flagged 1']) {
+    // Step 1: All 4 · Due 1 · New 1 · Flagged 1, as numbers, not vibes.
+    //
+    // **Due is 1, not 2, and that is the point of the pill.** All four cards
+    // sit in one deck: one never opened, one that has come back around, one
+    // scheduled ahead, one finished. BR-22's session queue holds the first two
+    // — but `CardListFilter.due` subtracts New from that queue, so Due counts
+    // only the card that has actually returned. While Due was the bare queue
+    // this line read `Due 2 · New 1` for three distinct cards, and `new-visible`
+    // answered to both pills.
+    for (final pill in <String>['All 4', 'Due 1', 'New 1', 'Flagged 1']) {
       expect(
         find.textContaining(pill),
         findsWidgets,
@@ -207,13 +215,18 @@ void main() {
       );
     }
 
-    // Step 2: Due keeps exactly the two due-now cards.
+    // Step 2: Due keeps the returning card and nothing else — including not the
+    // new one, which is the pill's whole job.
     //
-    // `Due 2` rather than `Due`: the panel above the pills carries "2 due · 1
+    // `Due 1` rather than `Due`: the panel above the pills carries "1 due · 1
     // new", and a bare prefix would be one tap away from landing on prose.
-    await robot.tapTextContaining('Due 2');
+    await robot.tapTextContaining('Due 1');
     await robot.waitCardListSteady();
-    expect(find.text('new-visible'), findsWidgets);
+    expect(
+      find.text('new-visible'),
+      findsNothing,
+      reason: 'Due let a never-reviewed card through; ${robot.visibleText}',
+    );
     expect(find.text('beginning-visible'), findsWidgets);
     expect(find.text('reviewing-visible'), findsNothing);
     expect(find.text('mastered-visible'), findsNothing);

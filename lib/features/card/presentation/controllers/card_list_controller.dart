@@ -31,9 +31,9 @@ class CardList extends _$CardList {
     final sort = ref.watch(cardListSortSelectionProvider(deckId));
     final search = ref.watch(cardListSearchQueryProvider(deckId));
     final limit = ref.watch(cardListWindowProvider(deckId));
-    // `now` only matters to the Due-now filter, so only that filter watches it —
+    // `now` only matters to the Due filter, so only that filter watches it —
     // the others must not re-subscribe every time the clock ticks.
-    final now = filter == CardListFilter.dueNow
+    final now = filter == CardListFilter.due
         ? ref.watch(cardListNowProvider)
         : null;
 
@@ -62,7 +62,7 @@ class CardCount extends _$CardCount {
     // so it follows the filter — the pills each read their own fixed count.
     final filter = ref.watch(cardListFilterSelectionProvider(deckId));
     final search = ref.watch(cardListSearchQueryProvider(deckId));
-    final now = filter == CardListFilter.dueNow
+    final now = filter == CardListFilter.due
         ? ref.watch(cardListNowProvider)
         : null;
 

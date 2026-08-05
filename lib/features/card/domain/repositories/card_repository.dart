@@ -48,7 +48,7 @@ abstract interface class CardRepository {
   ///
   /// [filter] adds one indexed `WHERE` and nothing else — the order and the
   /// window contract hold across all four (C1, C2). [now] is only read by
-  /// [CardListFilter.dueNow]; the caller passes the composition-root clock so no
+  /// [CardListFilter.due]; the caller passes the composition-root clock so no
   /// widget touches the wall clock.
   Stream<List<CardListItemModel>> watchCardListItems(
     String deckId, {

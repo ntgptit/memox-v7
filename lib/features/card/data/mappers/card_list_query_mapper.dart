@@ -29,13 +29,37 @@ import '../../domain/models/card_list_filter_model.dart';
 import '../../domain/models/card_list_sort_model.dart';
 import '../../domain/models/card_text_model.dart';
 
-/// BR-22: a card is due when it has no scheduled date yet, or that date has
-/// passed. The same predicate the review queue uses in `study.drift`.
-Expression<bool> dueNowPredicate(CardReviewStates s, DateTime now) =>
+/// BR-22: what a session would hand over — no scheduled date yet, or that date
+/// has passed. The same set `study.drift` reads, named here so the Due pill can
+/// be defined by subtracting from it rather than by restating it.
+Expression<bool> studyQueuePredicate(CardReviewStates s, DateTime now) =>
     s.dueAt.isNull() | s.dueAt.isSmallerOrEqualValue(now);
 
 /// BR-90: never reviewed.
 Expression<bool> isNewPredicate(CardReviewStates s) => s.reviewCount.equals(0);
+
+/// The Due pill's set: in the study queue, and **not** new.
+///
+/// **BR-22's queue and the `new`/`due`/`scheduled` state table are two different
+/// vocabularies, and the pills speak the state table's.** A card created a
+/// minute ago has `due_at = NULL` (BR-09), so BR-22 puts it in the queue — but
+/// the state table calls it `new`, and while the pill was the bare queue a deck
+/// holding one untouched card reported `Due 1` and `New 1` for that same card.
+/// Two pills, two counts, one card, and no way to tell from the row of pills
+/// that the deck held one thing rather than two.
+///
+/// **Subtracted structurally, not by a second date test.** Writing this as
+/// `due_at IS NOT NULL AND due_at <= now` would also read as disjoint from New,
+/// but only while `review_count = 0` implies `due_at IS NULL` — true today by
+/// BR-09 and BR-77, and true only as long as nothing schedules a card it has
+/// not reviewed. Negating the New predicate itself cannot come apart from it:
+/// whatever New means, Due is the rest of the queue. So `Due + New` is exactly
+/// the queue, which is what lets the progress panel add them.
+///
+/// The queue keeps its own predicate above, untouched — the session still takes
+/// new cards, and BR-22 has not changed.
+Expression<bool> duePredicate(CardReviewStates s, DateTime now) =>
+    studyQueuePredicate(s, now) & isNewPredicate(s).not();
 
 /// BR-92: the user's own mark.
 Expression<bool> isFlaggedPredicate(Cards c) => c.isFlagged.equals(1);
@@ -76,7 +100,7 @@ Expression<bool> _contains(GeneratedColumn<String> column, String foldedTerm) =>
 /// The whole `WHERE` for one list read: always the deck, plus the active filter,
 /// plus the search term when there is one.
 ///
-/// [now] is required only by [CardListFilter.dueNow] — the caller passes the
+/// [now] is required only by [CardListFilter.due] — the caller passes the
 /// composition-root clock, and passing none for that filter is a programming
 /// error the read surfaces rather than silently answering with the wrong "now".
 Expression<bool> cardListPredicate({
@@ -91,7 +115,7 @@ Expression<bool> cardListPredicate({
 
   predicate = switch (filter) {
     CardListFilter.all => predicate,
-    CardListFilter.dueNow => predicate & dueNowPredicate(s, _requireNow(now)),
+    CardListFilter.due => predicate & duePredicate(s, _requireNow(now)),
     CardListFilter.isNew => predicate & isNewPredicate(s),
     CardListFilter.flagged => predicate & isFlaggedPredicate(c),
   };

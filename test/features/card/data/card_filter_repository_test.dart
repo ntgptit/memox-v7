@@ -75,46 +75,92 @@ void main() {
     expect(items.map((i) => i.card.id), <String>[fresh]);
   });
 
-  test('the due-now filter shows cards due now, by BR-22', () async {
-    final tree = await h.seedTree();
-    final dueNull = await seedCardIn(tree.leaf.id, 'due null');
-    final future = await seedCardIn(tree.leaf.id, 'later');
-    // A future due date drops out of the due set; NULL stays (a new card).
-    await h.db.customStatement(
-      'UPDATE card_review_states SET due_at = ? WHERE card_id = ?',
-      <Object?>[now.add(const Duration(days: 5)).toIso8601String(), future],
-    );
+  test(
+    'the due filter shows cards that have come back around, not new ones',
+    () async {
+      final tree = await h.seedTree();
+      // Never opened: `due_at IS NULL`, so BR-22's session queue holds it — but
+      // the Due pill must not, or it counts the same card as the New pill.
+      await seedCardIn(tree.leaf.id, 'due null');
+      final returning = await seedCardIn(tree.leaf.id, 'seen and ripe');
+      final future = await seedCardIn(tree.leaf.id, 'later');
+      await h.db.customStatement(
+        'UPDATE card_review_states SET review_count = 4, due_at = ? '
+        'WHERE card_id = ?',
+        <Object?>[_epoch(now.subtract(const Duration(days: 1))), returning],
+      );
+      // Reviewed, but not ripe yet — the third state the table names, and the one
+      // neither pill may claim.
+      await h.db.customStatement(
+        'UPDATE card_review_states SET review_count = 4, due_at = ? '
+        'WHERE card_id = ?',
+        <Object?>[_epoch(now.add(const Duration(days: 5))), future],
+      );
 
-    final items = await h.cardRepository
-        .watchCardListItems(
-          tree.leaf.id,
-          limit: 50,
-          filter: CardListFilter.dueNow,
-          now: now,
-        )
-        .first;
-
-    expect(items.map((i) => i.card.id), <String>[dueNull]);
-    expect(
-      await h.cardRepository
-          .watchFilteredCardCount(
+      final items = await h.cardRepository
+          .watchCardListItems(
             tree.leaf.id,
-            filter: CardListFilter.dueNow,
+            limit: 50,
+            filter: CardListFilter.due,
             now: now,
           )
-          .first,
-      1,
+          .first;
+
+      expect(items.map((i) => i.card.id), <String>[returning]);
+      expect(
+        await h.cardRepository
+            .watchFilteredCardCount(
+              tree.leaf.id,
+              filter: CardListFilter.due,
+              now: now,
+            )
+            .first,
+        1,
+      );
+    },
+  );
+
+  test('due and new partition the session queue', () async {
+    final tree = await h.seedTree();
+    await seedCardIn(tree.leaf.id, 'untouched');
+    final returning = await seedCardIn(tree.leaf.id, 'seen and ripe');
+    final future = await seedCardIn(tree.leaf.id, 'later');
+    await h.db.customStatement(
+      'UPDATE card_review_states SET review_count = 4, due_at = ? '
+      'WHERE card_id = ?',
+      <Object?>[_epoch(now.subtract(const Duration(days: 1))), returning],
     );
+    await h.db.customStatement(
+      'UPDATE card_review_states SET review_count = 4, due_at = ? '
+      'WHERE card_id = ?',
+      <Object?>[_epoch(now.add(const Duration(days: 5))), future],
+    );
+
+    Future<int> countOf(CardListFilter filter) => h.cardRepository
+        .watchFilteredCardCount(tree.leaf.id, filter: filter, now: now)
+        .first;
+
+    final due = await countOf(CardListFilter.due);
+    final fresh = await countOf(CardListFilter.isNew);
+
+    // Neither pill claims the same card, and together they are exactly what
+    // BR-22 would hand a session: the untouched one and the returning one. That
+    // sum is what the progress panel's Start-study button prints, so if this
+    // ever stops holding the button starts lying about the session size.
+    expect(due, 1);
+    expect(fresh, 1);
+    expect(due + fresh, 2);
+    expect(await countOf(CardListFilter.all), 3);
   });
 
-  test('due-now insists on a clock', () async {
+  test('the due filter insists on a clock', () async {
     final tree = await h.seedTree();
 
     expect(
       () => h.cardRepository.watchCardListItems(
         tree.leaf.id,
         limit: 50,
-        filter: CardListFilter.dueNow,
+        filter: CardListFilter.due,
       ),
       throwsArgumentError,
     );

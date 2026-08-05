@@ -78,10 +78,14 @@ class CardProgressPanelWidget extends ConsumerWidget {
 /// and the state table in `business-rules.md` calls that same card `new`, not
 /// `due`. The button used to read the queue and print it as "N due", which on a
 /// deck holding one untouched card said a review had come back around when
-/// nothing had been introduced yet, and the line above it then counted that one
-/// card twice ("1 due · 1 new"). The queue is what the session hands over, so
-/// the count stays the queue; only the verb branches on whether any of it has
-/// been reviewed before.
+/// nothing had been introduced yet.
+///
+/// **The queue is now added back rather than read directly.** `Due` and `New`
+/// are two disjoint pills — `CardListFilter.due` subtracts New from the queue —
+/// so the number a session would hand over is their sum, and it is assembled
+/// here because that is where it is needed. The button says what will happen:
+/// the whole queue when some of it has been reviewed before, and "learn" when
+/// none of it has.
 class _StudyAction extends ConsumerWidget {
   const _StudyAction({required this.deckId});
 
@@ -89,17 +93,18 @@ class _StudyAction extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final queued = ref.watch(cardDueCountProvider(deckId)).value ?? 0;
+    // Disjoint by construction, so this addition is the queue and not an
+    // approximation of it — see `duePredicate` in `card_list_query_mapper.dart`.
+    final due = ref.watch(cardDueCountProvider(deckId)).value ?? 0;
+    final fresh = ref.watch(cardNewCountProvider(deckId)).value ?? 0;
+    final queued = due + fresh;
     if (queued == 0) return const SizedBox.shrink();
 
-    // `new` is a subset of the queue — BR-09 creates a review state with
-    // `due_at = NULL` and BR-77 fills it on the first `scheduled` review, so
-    // `review_count = 0` implies `due_at IS NULL`. Anything left over is a card
-    // that has been through a session and come back around.
-    final fresh = ref.watch(cardNewCountProvider(deckId)).value ?? 0;
-    // Zero until the count lands, which reads as "some of this has been seen"
-    // and gives the neutral label — the honest one to show while unsure.
-    final hasReturningCards = queued > fresh;
+    // Both counts are zero until their streams land, so the button renders
+    // nothing at all rather than guessing at a verb — the panel around it is
+    // already on screen by then, and a label that flips once the second count
+    // arrives is worse than one that appears a frame late.
+    final hasReturningCards = due > 0;
 
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.lg),
@@ -187,22 +192,23 @@ class _Headline extends ConsumerWidget {
 
   /// "What is waiting", with each card counted once.
   ///
-  /// [queued] is BR-22's queue and [fresh] is BR-90's never-reviewed set, which
-  /// sits inside it — so the number this line may call *due* is the difference,
-  /// the state table's `due`: reviewed before, ripe again. Printing the queue
-  /// beside `fresh` is what made one untouched card read as "1 due · 1 new".
+  /// [due] and [fresh] are the two pill counts, and they no longer overlap —
+  /// `CardListFilter.due` is BR-22's queue minus BR-90's never-reviewed set — so
+  /// this line prints them as they arrive. It used to subtract one from the
+  /// other, because `due` was the whole queue and one untouched card read as
+  /// "1 due · 1 new"; the subtraction moved into the query, where the pills get
+  /// it too.
   ///
   /// Three complete sentences rather than one assembled from parts: the
   /// separator, the order and the pluralisation of "due" and "new" all differ
   /// per language, so a `+ ' · ' +` here is untranslatable. Null when neither
   /// number has anything to report — the deck is finished for now, and a line
   /// of zeroes is noise.
-  String? _waitingLine(BuildContext context, int queued, int fresh) {
-    final returning = queued - fresh;
-    if (returning > 0 && fresh > 0) {
-      return context.l10n.cardProgressDueNew(returning, fresh);
+  String? _waitingLine(BuildContext context, int due, int fresh) {
+    if (due > 0 && fresh > 0) {
+      return context.l10n.cardProgressDueNew(due, fresh);
     }
-    if (returning > 0) return context.l10n.cardProgressDueOnly(returning);
+    if (due > 0) return context.l10n.cardProgressDueOnly(due);
     if (fresh > 0) return context.l10n.cardProgressNewOnly(fresh);
 
     return null;
@@ -213,11 +219,11 @@ class _Headline extends ConsumerWidget {
     final quiet = context.colors.onSurfaceVariant;
     // The two counts the pills already read, said once more where the summary is
     // — "how far along" above, "what is waiting" below it. Null until each lands.
-    final queued = ref.watch(cardDueCountProvider(deckId)).value;
+    final due = ref.watch(cardDueCountProvider(deckId)).value;
     final fresh = ref.watch(cardNewCountProvider(deckId)).value;
-    final waiting = queued == null || fresh == null
+    final waiting = due == null || fresh == null
         ? null
-        : _waitingLine(context, queued, fresh);
+        : _waitingLine(context, due, fresh);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

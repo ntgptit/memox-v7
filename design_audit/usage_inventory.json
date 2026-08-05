@@ -2980,7 +2980,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 133,
+      "line": 138,
       "widget_context": "_StudyAction",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -2991,7 +2991,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 168,
+      "line": 173,
       "widget_context": "_ProgressRing",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3002,7 +3002,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 169,
+      "line": 174,
       "widget_context": "_ProgressRing",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -3013,7 +3013,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 213,
+      "line": 219,
       "widget_context": "_Headline",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3024,7 +3024,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 335,
+      "line": 341,
       "widget_context": "_LegendItem",
       "element_kind": "text",
       "source_kind": "theme-token",
