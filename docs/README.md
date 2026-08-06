@@ -22,6 +22,7 @@ Format và thứ tự đọc: [`document-conventions.md`](document-conventions.m
 | [`product.md`](product.md) | Problem, users, platform/data/auth decisions, **and MVP scope** | **frozen for MVP** |
 | [`architecture.md`](architecture.md) | Architecture decisions AD-01…11 with reasoning | active |
 | [`use-cases.md`](use-cases.md) | UC-01…09 cho must-have MVP | **frozen for MVP** |
+| [`master-flow.md`](master-flow.md) | Đồ thị nối UC-01…09 thành hành trình, tách theo đối tượng deck / card / review | active |
 | [`business-rules.md`](business-rules.md) | BR-01…95: cây deck, hai scheduler, review_kind, session lifecycle, reset/generation, starter template, trạng thái thẻ, cờ và tag | **frozen for MVP** |
 | [`data-model.md`](data-model.md) | Schema + 15 câu query bất biến: decks (cây nhiều cấp), cards, card_review_states, review_history, study_sessions, templates | **frozen for MVP** |
 

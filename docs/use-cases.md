@@ -7,8 +7,8 @@
 | **Scope** | Must-have của MVP. Ngoài phạm vi: should/nice-to-have, và mọi thứ ở mục "Điều đã cố ý không đặc tả" |
 | **Source of truth for** | UC-xx · main/alternative/error flow · UI state matrix của từng màn |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md` |
-| **Updated by task** | M4.9a |
-| **Last updated** | 2026-07-29 |
+| **Updated by task** | M99.1 |
+| **Last updated** | 2026-08-07 |
 
 Chỉ đặc tả must-have. Should-have và nice-to-have viết khi tới lượt — đặc tả
 trước những thứ có thể bị cắt là lãng phí.
@@ -18,6 +18,12 @@ hình sẽ đổi; luồng thì không.
 
 **ID use case là định danh vĩnh viễn**, cùng chính sách với BR (xem
 `business-rules.md`). UC mới append; không đánh số lại. Hiện tại: UC-01…UC-09.
+
+**Các UC nối vào nhau thế nào thì xem [`master-flow.md`](master-flow.md).** Tài
+liệu này đặc tả từng UC riêng lẻ và cố ý không vẽ đồ thị giữa chúng — mỗi UC mô
+tả mình và im lặng về những UC bên cạnh, nên câu "xong bước này thì đi đâu" không
+có chỗ nào ở đây trả lời. Cạnh của đồ thị đó là thứ `master-flow.md` sở hữu; nó
+tham chiếu ngược về đây bằng ID và không phát biểu lại luồng nào.
 
 ---
 
