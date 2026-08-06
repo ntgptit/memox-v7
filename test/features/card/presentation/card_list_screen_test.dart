@@ -195,10 +195,17 @@ void main() {
     repository.emitCount(10);
     await tester.pumpAndSettle();
 
-    // The pill carries its count. `MxPillButton` rather than `FilterChip`: the
-    // filter row went through the shared pill so the flag could be an icon.
-    expect(find.widgetWithText(MxPillButton, 'New 4'), findsOneWidget);
-    await tester.tap(find.widgetWithText(MxPillButton, 'New 4'));
+    // The visible label carries no count — the row stopped fitting once every
+    // pill took an icon, so the number moved to the semantic label. That it is
+    // still announced is asserted just below.
+    expect(find.widgetWithText(MxPillButton, 'New'), findsOneWidget);
+    expect(
+      tester
+          .widget<MxPillButton>(find.widgetWithText(MxPillButton, 'New'))
+          .semanticLabel,
+      'New, 4 cards',
+    );
+    await tester.tap(find.widgetWithText(MxPillButton, 'New'));
     // A plain pump, not settle: switching filter re-subscribes the list, which
     // spins until the fake re-emits, and pumpAndSettle would wait on the spinner.
     await tester.pump();

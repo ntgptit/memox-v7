@@ -717,24 +717,25 @@
     "placeholders": { "newCount": { "type": "int" }, "beginning": { "type": "int" }, "reviewing": { "type": "int" }, "mastered": { "type": "int" } },
     "description": "Screen-reader summary of the distribution bar (D5)."
   },
-  "cardFilterAll": "Tất cả {count}",
+  "cardFilterAll": "Tất cả",
   "@cardFilterAll": {
-    "placeholders": { "count": { "type": "int" } },
     "description": "The All filter pill with its count (D3)."
   },
-  "cardFilterDue": "Đến hạn {count}",
+  "cardFilterDue": "Đến hạn",
   "@cardFilterDue": {
-    "placeholders": { "count": { "type": "int" } },
     "description": "The Due filter pill with its count (D3): BR-22's queue minus the never-reviewed cards, so it never overlaps New."
   },
-  "cardFilterNew": "Mới {count}",
+  "cardFilterNew": "Mới",
   "@cardFilterNew": {
-    "placeholders": { "count": { "type": "int" } },
     "description": "The New filter pill with its count (D3, BR-90)."
   },
-  "cardFilterFlagged": "Đã gắn cờ {count}",
+  "cardFilterSemantics": "{label}, {count} thẻ",
+  "@cardFilterSemantics": {
+    "placeholders": { "label": { "type": "String" }, "count": { "type": "int" } },
+    "description": "What a screen reader announces for a filter pill (D3)."
+  },
+  "cardFilterFlagged": "Đã gắn cờ",
   "@cardFilterFlagged": {
-    "placeholders": { "count": { "type": "int" } },
     "description": "The Flagged filter pill with its count (D3, BR-92)."
   },
   "cardListNewAction": "Thẻ mới",

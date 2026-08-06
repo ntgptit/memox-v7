@@ -717,24 +717,25 @@
     "placeholders": { "newCount": { "type": "int" }, "beginning": { "type": "int" }, "reviewing": { "type": "int" }, "mastered": { "type": "int" } },
     "description": "Screen-reader summary of the distribution bar (D5)."
   },
-  "cardFilterAll": "All {count}",
+  "cardFilterAll": "All",
   "@cardFilterAll": {
-    "placeholders": { "count": { "type": "int" } },
-    "description": "The All filter pill with its count (D3)."
+    "description": "The All filter pill (D3). No count in the label: with an icon on every pill the row no longer fits 390, and the counts for All, Due and New are repeated in the progress panel immediately below. The count still reaches a screen reader through cardFilterSemantics."
   },
-  "cardFilterDue": "Due {count}",
+  "cardFilterDue": "Due",
   "@cardFilterDue": {
-    "placeholders": { "count": { "type": "int" } },
     "description": "The Due filter pill with its count (D3). Cards that have come back around: BR-22's study queue minus the never-reviewed ones, so this pill and New never describe the same card and their counts add up to what a session would hand over. 'Due', not 'Due now' — the pill sits in a row that has to be scrolled to reach the last one, and 'now' cost 38px while adding nothing."
   },
-  "cardFilterNew": "New {count}",
+  "cardFilterNew": "New",
   "@cardFilterNew": {
-    "placeholders": { "count": { "type": "int" } },
     "description": "The New filter pill with its count (D3, BR-90)."
   },
-  "cardFilterFlagged": "Flagged {count}",
+  "cardFilterSemantics": "{label}, {count} cards",
+  "@cardFilterSemantics": {
+    "placeholders": { "label": { "type": "String" }, "count": { "type": "int" } },
+    "description": "What a screen reader announces for a filter pill (D3). The visible label dropped its count so the row would fit; a reader has no such constraint, and losing the number for Flagged would lose it entirely — the progress panel repeats All, Due and New, but nothing repeats Flagged."
+  },
+  "cardFilterFlagged": "Flagged",
   "@cardFilterFlagged": {
-    "placeholders": { "count": { "type": "int" } },
     "description": "The Flagged filter pill with its count (D3, BR-92). No glyph in the string: the flag is an `Icons.flag` the pill draws. It used to open with `⚑` U+2691, which no bundled font carries — the goldens rendered a tofu box, and a device with a wider system font would draw a flag, so the mark was correct or not depending on where you looked."
   },
   "cardListNewAction": "New card",
