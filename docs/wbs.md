@@ -5837,6 +5837,45 @@ cách mép màn rồi.
 object nào đi qua mà không có lý do; `LayoutBuilder` không vẽ gì cả — nó báo
 constraint và dựng con, và cái con đó được audit riêng.
 
+### M4.11m · Sàn bề rộng cho pill, để khoảng trống rơi vào pill chứ không vào khe
+
+- **Status:** **done** — 1400/1400 test pass, `flutter analyze` sạch,
+  `dart format` sạch, guard `memox-v7` 0 violation.
+- **Goal:** Bốn pill MUST đọc ra như một control, không phải bốn thứ rời rạc.
+- **Scope:** `card_filter_bar_widget.dart` (một hằng + `ConstrainedBox`),
+  2 golden.
+- **Out of scope:** nhãn, icon, predicate, hành vi.
+- **Dependencies:** M4.11l
+- **Checklist phases:** 7
+- **Editable documents:** `docs/wbs.md`
+- **Output:** không có file mới
+- **Tests required:** đo bề rộng và khe ở `en`/`vi`, strip 358 và 328,
+  `textScaler` 2.0; toàn bộ suite; 2 golden sinh lại
+- **Acceptance criteria:**
+  - [x] Khe giữa pill từ ~19 xuống **11.4**, và là 8 khi hàng cuộn.
+  - [x] Hàng vẫn vừa strip ở `en`, vẫn cuộn ở `vi` và ở text scale lớn.
+  - [x] Không pill nào bị cắt ở 390.
+
+**Trải đều xong thì khoảng trống rơi vào khe, không vào pill.** M4.11l làm hàng
+trải hết bề rộng, nhưng `spaceBetween` đem 56px thừa chia vào ba khe — 19 mỗi
+khe, gần bằng bề rộng một pill. Bốn thứ thuộc cùng một control đứng xa nhau như
+thế đọc ra là bốn control. Cho pill hẹp một cái sàn chung thì tiêu đúng chỗ
+trống ấy vào chính các control, và khe về gần giá trị nghỉ 8.
+
+**Strip rộng 358, không phải 374 — và tôi đã đặt sai lần đầu.** Subheader gutter
+**cả hai bên**, nên `390 − 2 × 16`. Lần đầu tôi tính theo 374, chọn sàn 84, và
+hàng vượt 14px; nó không làm test nào đỏ — nó chỉ hiện ra là pill cuối bị cắt
+trong render. Đó là lý do phải xem ảnh chứ không chỉ đọc số: `SingleChildScrollView`
+không bao giờ báo overflow, nó cuộn.
+
+Với 358: Flagged cần 96, còn lại chia `(358 − 96 − 24) / 3 = 79.4`, nên 76 là bội
+số 4 lớn nhất còn vừa. Đo được: `en` 76/76/76/95.7 khe 11.4 vừa khít; `vi`
+83.9/97.1/76/108.2 khe 8 và cuộn; `textScaler` 2.0 khe 8 và cuộn.
+
+**Sàn, không phải bề rộng cố định.** Locale dài hơn hay text scale lớn đẩy pill
+vượt sàn, hàng vượt strip, và nó cuộn — đúng thứ `ConstrainedBox` quanh row ở
+M4.11l đã chuẩn bị sẵn.
+
 ### M4.12a · Starter template, loader và seed idempotent
 
 - **Status:** **done** — 1398/1398 test pass, `flutter analyze` sạch,
