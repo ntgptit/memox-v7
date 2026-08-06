@@ -21,6 +21,12 @@ import 'package:memox/core/theme/app_typography.dart';
 ///
 /// So this file asks the question the other one cannot: of the styles the
 /// component themes *declare*, is each one the app's?
+///
+/// **The pill's weight later became 500 again, and the difference is the point.**
+/// Then it was 500 because nobody had said anything and Material answered; now it
+/// is 500 because `app_chip_theme.dart` declares it, carries the measurement, and
+/// moves the `wght` axis with it. A value and a decision that happen to agree are
+/// still not the same thing — [expectRungReweighted] is what tells them apart.
 void main() {
   /// A style that came from [AppTypography] and one that did not are told apart
   /// by `fontVariations`. Material sets a `fontWeight` and stops there; this app
@@ -61,6 +67,45 @@ void main() {
     );
   }
 
+  /// Everything the rung decides, except the weight the component re-declares.
+  ///
+  /// The pill is the app's one rung-level exception, so this is deliberately not
+  /// a general escape hatch: size, leading and tracking must still be the rung's,
+  /// because the pill is `label-lg` *set lighter*, not a private style.
+  ///
+  /// **The `wght` assertion is the load-bearing one.** Both faces are variable
+  /// fonts, and the renderer consults the axis instead of [TextStyle.fontWeight]
+  /// once it is present — so a re-weight that moves only `fontWeight` reports the
+  /// new value here and paints the old one on the device. Asserting the weight
+  /// alone would pass on exactly the bug worth catching.
+  void expectRungReweighted(
+    String slot,
+    TextStyle? style,
+    TextStyle? rung,
+    FontWeight weight,
+  ) {
+    expectAppStyle(slot, style);
+    expect(style!.fontSize, rung?.fontSize, reason: '$slot size');
+    expect(style.height, rung?.height, reason: '$slot leading');
+    expect(style.letterSpacing, rung?.letterSpacing, reason: '$slot tracking');
+    expect(style.fontWeight, weight, reason: '$slot weight');
+    expect(
+      style.fontVariations,
+      <FontVariation>[FontVariation('wght', weight.value.toDouble())],
+      reason:
+          '$slot says $weight and its variable-font axis says otherwise, so it '
+          'reports one weight and paints another',
+    );
+    expect(
+      style.fontWeight,
+      isNot(rung?.fontWeight),
+      reason:
+          '$slot no longer differs from the rung. If the rung moved to meet it, '
+          'the exception is now silent and should be deleted rather than kept '
+          'as a second spelling of the same value.',
+    );
+  }
+
   for (final (String mode, ThemeData Function() build)
       in <(String, ThemeData Function())>[
         ('light', buildLightTheme),
@@ -70,21 +115,17 @@ void main() {
       final ThemeData theme = build();
       final TextTheme texts = theme.textTheme;
 
-      test(
-        'the pill label is label-lg at the app weight, not Material 500',
-        () {
-          expectSameRung(
-            'chipTheme.labelStyle',
-            theme.chipTheme.labelStyle,
-            texts.labelLarge,
-          );
-          expect(
-            theme.chipTheme.labelStyle?.fontWeight,
-            FontWeight.w600,
-            reason: 'the pill is back on Material 3 label-lg',
-          );
-        },
-      );
+      test('the pill label is label-lg, declared one weight lighter', () {
+        // 500 is Material's chip weight and `--weight-medium` in the kit. The
+        // rung stays 600 for the button it was raised for; only the chip parts
+        // from it, and `app_chip_theme.dart` holds the measurement that says why.
+        expectRungReweighted(
+          'chipTheme.labelStyle',
+          theme.chipTheme.labelStyle,
+          texts.labelLarge,
+          FontWeight.w500,
+        );
+      });
 
       test('an input hint is body-md, leading included', () {
         expectSameRung(

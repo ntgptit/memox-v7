@@ -14,6 +14,7 @@ import 'package:memox/shared/widgets/mx_list_tile.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 import 'package:memox/shared/widgets/mx_text_button.dart';
 
+import 'golden_hosts.dart';
 import 'golden_pump.dart';
 import 'golden_specimens.dart';
 import 'golden_surfaces.dart';
@@ -324,6 +325,7 @@ void main() {
     ),
     'mx_progress_bar': const ProgressBarSpecimen(),
     'mx_search_field': const SearchFieldSpecimen(),
+    'mx_pill_group': const PillGroupSpecimen(),
   };
 
   for (final entry in cases.entries) {

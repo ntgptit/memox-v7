@@ -46,7 +46,18 @@
    data, which is what the row scrolls for. `buildChipTheme` in
    lib/core/theme/app_chip_theme.dart carries the same two numbers. */
 .mx-pill{display:inline-flex;flex:none;align-items:center;justify-content:center;min-height:var(--touch-target-min);background:none;border:0;padding:0;cursor:pointer}
-.mx-pill__body{display:inline-flex;align-items:center;gap:var(--space-xs);white-space:nowrap;padding:var(--space-sm) var(--space-sm);border-radius:var(--radius-pill);border:var(--border-hairline) solid var(--color-border-subtle);background:var(--color-surface);color:var(--color-text-secondary);font-size:var(--text-label-lg);line-height:var(--leading-label-lg);letter-spacing:var(--tracking-label-lg);font-weight:var(--weight-semibold);transition:background-color var(--duration-fast) var(--ease-standard)}
+/* `--weight-medium`, not `--weight-semibold`. Semibold is the BUTTON's weight:
+   this kit sets label-lg at 600 where Material 3 sets it at 500, for a label
+   reversed out of a solid fill. A pill has no fill to be reversed out of — it
+   sits on the page behind a 1.50:1 hairline — and it took the raise only by
+   sharing the rung. Measured on a device render at 360dp: pill labels covered
+   0.340 and 0.364 of their glyph box against the search hint's 0.271 at an
+   identical 27px ascender, so two toggles outranked every heading on the screen
+   and sat just under the deck name (0.409). 500 is Material's own chip weight.
+   Size, leading and tracking stay label-lg — the label was never the wrong
+   size. `buildChipTheme` in lib/core/theme/app_chip_theme.dart carries the same
+   decision. */
+.mx-pill__body{display:inline-flex;align-items:center;gap:var(--space-xs);white-space:nowrap;padding:var(--space-sm) var(--space-sm);border-radius:var(--radius-pill);border:var(--border-hairline) solid var(--color-border-subtle);background:var(--color-surface);color:var(--color-text-secondary);font-size:var(--text-label-lg);line-height:var(--leading-label-lg);letter-spacing:var(--tracking-label-lg);font-weight:var(--weight-medium);transition:background-color var(--duration-fast) var(--ease-standard)}
 .mx-pill__body .mx-icon{font-size:var(--icon-sm)}
 .mx-pill[aria-pressed="true"] .mx-pill__body{background:var(--color-secondary-container);color:var(--color-on-secondary-container)}
 .mx-pill:hover .mx-pill__body{background:color-mix(in srgb,var(--color-primary) 6%,var(--color-surface))}
