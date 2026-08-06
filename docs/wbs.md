@@ -5876,6 +5876,44 @@ số 4 lớn nhất còn vừa. Đo được: `en` 76/76/76/95.7 khe 11.4 vừa 
 vượt sàn, hàng vượt strip, và nó cuộn — đúng thứ `ConstrainedBox` quanh row ở
 M4.11l đã chuẩn bị sẵn.
 
+### M4.11n · Khe giữa pill về đúng 8, và lớp layout thêm ở M4.11l bị gỡ
+
+- **Status:** **done** — 1400/1400 test pass, `flutter analyze` sạch,
+  `dart format` sạch, guard `memox-v7` 0 violation.
+- **Goal:** Khoảng cách cuối-pill-này tới đầu-pill-kia MUST là 8, giá trị khe
+  của cả app.
+- **Scope:** `card_filter_bar_widget.dart`, gỡ một allowance trong
+  `card_list_screen_visual_audit_test.dart`, 2 golden.
+- **Out of scope:** nhãn, icon, sàn bề rộng, predicate.
+- **Dependencies:** M4.11m
+- **Checklist phases:** 7
+- **Editable documents:** `docs/wbs.md`
+- **Output:** không có file mới
+- **Tests required:** đo khe ở `en`/`vi` và `textScaler` 2.0; toàn bộ suite;
+  strict visual audit; 2 golden sinh lại
+- **Acceptance criteria:**
+  - [x] Khe = **8.0** ở mọi trường hợp đo.
+  - [x] Không pill nào bị cắt ở 390 (`en`).
+  - [x] `LayoutBuilder` và `ConstrainedBox` của M4.11l bị gỡ, allowance audit
+        tương ứng cũng vậy.
+
+**M4.11l và M4.11m giải quyết đúng vấn đề bằng công cụ sai.** Cả hai làm hàng
+trải rộng bằng cách đẩy phần dư vào `spaceBetween`, tức vào **khe** — mà khe
+rộng chính là thứ làm bốn control của một nhóm đọc ra thành bốn nhóm. M4.11m thu
+khe từ 19 xuống 11.4 bằng sàn bề rộng, nhưng vẫn còn 3.4 rắc vào mỗi khe.
+
+Bỏ `spaceBetween` thì khe về đúng **8**, giá trị khe của cả app, ở mọi trường
+hợp đo: `en` (hàng 347.7 trên strip 358), `vi` (389.3, cuộn), `textScaler` 2.0
+(435.2, cuộn). Phần dư còn lại là **10.3 trên 358 — dưới 3% strip**, nằm ở mép
+phải nơi không có gì khác, và không đọc ra như "thiếu một pill thứ năm" theo
+cách 72px ban đầu đã đọc.
+
+**Gỡ luôn `LayoutBuilder` và `ConstrainedBox`.** Chúng được thêm ở M4.11l chỉ để
+tạo khoảng thừa cho `spaceBetween` phân phối; không còn `spaceBetween` thì
+chúng không làm gì cả. Allowance `_RenderLayoutBuilder` trong strict visual audit
+đi theo — audit không còn thấy render object đó nữa, và một allowance cho thứ
+không tồn tại là thứ audit báo là `unused`.
+
 ### M4.12a · Starter template, loader và seed idempotent
 
 - **Status:** **done** — 1398/1398 test pass, `flutter analyze` sạch,
