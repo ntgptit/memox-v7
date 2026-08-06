@@ -23,6 +23,33 @@ import 'startup/fixture_seeder_widget.dart';
 /// [installErrorHandlers] replaced them.
 typedef RestoreErrorHandlers = void Function();
 
+/// Whether this build exists to be driven by the Playwright suite.
+///
+/// Set by `--dart-define=MEMOX_E2E=true`, which only `e2e/` passes. It is a
+/// compile-time constant, so a normal build has the branch below removed
+/// entirely rather than carrying a runtime check.
+const bool isE2EBuild = bool.fromEnvironment('MEMOX_E2E');
+
+/// Holds the semantics tree open for the whole run.
+///
+/// **Playwright can only see what semantics publishes.** Flutter Web paints to
+/// a canvas; the DOM the driver reads is the semantics tree, and the engine
+/// normally builds it only after the user activates the hidden "Enable
+/// accessibility" placeholder. Worse for a test, the engine switches back to
+/// raw pointer handling once it sees ordinary pointer events — so a suite that
+/// enables semantics by clicking that placeholder watches the tree disappear the
+/// moment it taps anything, which reads as "the deck was never created" when the
+/// deck is plainly on screen.
+///
+/// `ensureSemantics` takes a handle that keeps the tree alive; the handle is
+/// deliberately never released, because the run ends when the page closes.
+///
+/// **Compiled out of every real build.** Semantics has a real cost — a second
+/// tree, rebuilt on every frame — and no user benefits from it being on when no
+/// assistive technology asked. `isE2EBuild` is a `const`, so this call does not
+/// exist in the shipped binary.
+void keepSemanticsOn(WidgetsBinding binding) => binding.ensureSemantics();
+
 /// Single owner of application startup.
 ///
 /// The entrypoints pick a config and call this; they hold no initialisation
@@ -39,8 +66,9 @@ Future<void> bootstrap(EnvConfig config) async {
   // `PlatformDispatcher.onError` does not always see. Both are installed
   // because each misses what the other catches.
   runZonedGuarded<void>(() {
-    WidgetsFlutterBinding.ensureInitialized();
+    final binding = WidgetsFlutterBinding.ensureInitialized();
     installErrorHandlers(logLevel: config.logLevel);
+    if (isE2EBuild) keepSemanticsOn(binding);
 
     try {
       runApp(buildRootWidget(config));

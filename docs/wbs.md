@@ -5512,13 +5512,70 @@ chọn file **theo đúng đường dẫn đó**, nên một file không bucket 
 BR-09 vào `core/`, biến bảng khởi tạo review state thành hạ tầng chung không
 feature nào sở hữu. Hai mapper ngắn có test ghim từng cột là giá rẻ hơn.
 
+### M4.12b · Playwright E2E trên Flutter Web ở mobile viewport
+
+- **Status:** **done** — 3/3 spec pass (~26s), `flutter analyze` sạch,
+  `dart format` sạch, 1398/1398 test Dart, guard `memox-v7` 0 violation.
+- **Goal:** Luồng E2E bắt buộc của M4.12 MUST chạy qua **UI thật** trên Flutter
+  Web ở viewport điện thoại, kể cả persistence sau khi mở lại app.
+- **Scope:** `e2e/` (package.json, playwright.config.ts, specs, support,
+  README), `--dart-define=MEMOX_E2E` + `keepSemanticsOn` trong `bootstrap.dart`,
+  job CI `web build + Playwright E2E`.
+- **Out of scope:** review session (M5); so ảnh — golden và strict visual audit
+  đã sở hữu phần "trông thế nào".
+- **Dependencies:** M4.12a
+- **Checklist phases:** 15.5
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `e2e/` (7 file), `lib/app/bootstrap.dart` (+2 khai báo),
+  `.github/workflows/ci-full.yml`
+- **Tests required:** demo flow đầy đủ, content-type lock + reset (BR-68), cả
+  hai scheduler
+- **Acceptance criteria:**
+  - [x] Viewport 390×844, click trực tiếp trên UI (không gọi API sau lưng).
+  - [x] Luồng bắt buộc: cold start rỗng → root deck + chọn scheduler → branch →
+        leaf → *Create card* → tạo card → sửa card → quay lại cây → **reload** →
+        dữ liệu còn → xoá card → xoá deck.
+  - [x] `content_type = deck`, `content_type = card`, reset khi rỗng (BR-68).
+  - [x] Cả `eight_box` lẫn `sm2`.
+  - [x] Cây ba cấp.
+  - [x] CI chạy build web + E2E, upload report khi đỏ.
+
+**Semantics là DOM duy nhất Playwright đọc được, và mẹo thông thường không sống
+sót.** Flutter Web vẽ lên canvas; driver chỉ thấy semantics tree. Cách phổ biến
+là click `<flt-semantics-placeholder>` để bật — và nó **hỏng ở đây**: engine
+chuyển về xử lý pointer thô ngay khi thấy pointer event thường, nên tree biến
+mất đúng lúc suite tap thứ đầu tiên, và mọi assertion sau đó đọc ra "deck chưa
+bao giờ được tạo" trong khi deck sờ sờ trên màn hình. Bản build E2E vì thế gọi
+`ensureSemantics()` lúc khởi động, sau `isE2EBuild` — một `const` từ
+`--dart-define=MEMOX_E2E=true`, nên bản ship không mang lời gọi đó.
+
+**Hệ quả đáng ghi: reach của E2E và accessibility là **một** việc.** Control nào
+screen reader không gọi tên được thì suite này cũng không chạm tới. Một control
+mất `semanticLabel` làm hỏng cả hai cùng lúc — đó là lý do suite này là bài kiểm
+tra accessibility rẻ nhất repo có.
+
+**Nhãn tới DOM theo hai đường khác nhau.** Button thường mang nhãn ở text; thứ
+gì được gán `Semantics` label thì mang ở `aria-label` và **textContent rỗng** —
+radio chọn scheduler, và mọi deck row (gộp tên + dòng meta + trạng thái đến hạn
+vào một label). Helper khớp cả hai; khớp mỗi text thì tìm thấy empty state và bỏ
+sót mọi hàng app thực sự vẽ. Tap dùng `[flt-tappable]` chứ không
+`[role="button"]`: engine đóng dấu thuộc tính đó lên mọi node có tap action, còn
+radio và card row không phải button.
+
+**Build E2E dùng `main_staging.dart`, không phải entrypoint mặc định.** Mặc định
+là config development, tức seed fixture lúc khởi động (M4.12a) — mà luồng bắt
+buộc bắt đầu từ "cold start rỗng", nên database đã có deck làm assertion đầu
+tiên trở nên vô nghĩa.
+
 ### M4.12 · Deck/Card demo hardening, fixture và E2E
 
-- **Status:** in progress — **M4.12a done** (fixture, loader, seed idempotent).
-  **Còn lại:** Playwright/Flutter Web E2E ở mobile viewport, state matrix,
-  design parity <3%, báo cáo demo flow kèm bằng chứng từng bước. Ba mục đó chưa
-  bắt đầu; hạ tầng Playwright chưa tồn tại trong repo (`node` và Chrome có sẵn
-  trên máy, nên không có blocker kỹ thuật — chỉ là chưa làm).
+- **Status:** in progress — **M4.12a done** (fixture, loader, seed idempotent),
+  **M4.12b done** (Playwright E2E). **Còn lại:** design parity <3% cho screen có
+  baseline, và báo cáo demo flow kèm bằng chứng từng bước. State matrix coi như
+  đã phủ bởi widget test hiện có (deck list: loading/empty/loaded/error/dark/
+  textScale 2.0/320×568; card list: loading/empty/loaded/error/no-match; card
+  editor: submitting, save-failed, load-failed) — nếu muốn nó là một gate riêng
+  thay vì một tính chất của bộ test thì cần một task ghi rõ hình dạng gate đó.
 - **Goal:** Đưa app tới trạng thái **demo được** bằng luồng Deck/Card hoàn chỉnh,
   trước khi bắt đầu Review.
 - **Scope:** fixture cho development/test; seed helper dùng **chính** repository
