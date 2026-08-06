@@ -122,6 +122,10 @@ build/symbols/
 .playwright/
 playwright-report/
 test-results/
+# Step-by-step evidence for one E2E run. A committed screenshot is a golden,
+# and goldens live in test/ where a diff gate watches them; these are
+# per-run artefacts that CI uploads.
+e2e/report/
 node_modules/
 
 # =============================================================================

@@ -232,3 +232,18 @@ jobs:
             e2e/test-results/
           if-no-files-found: ignore
           retention-days: 7
+
+      # Always, unlike the report above. That one is a debugging aid and is only
+      # interesting when something broke; this is the demo-flow evidence M4.12
+      # requires — a numbered walk through the flow with the screen at each step
+      # — and it is worth having precisely on the runs that passed. `always()`
+      # rather than `success()` so a later step failing does not throw away
+      # evidence the flow itself produced.
+      - name: upload demo flow evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: demo-flow-evidence
+          path: e2e/report/
+          if-no-files-found: ignore
+          retention-days: 30

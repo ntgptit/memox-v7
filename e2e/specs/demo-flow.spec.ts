@@ -1,4 +1,5 @@
-import { test, expect } from '@playwright/test';
+import { execFileSync } from 'node:child_process';
+import { test } from '@playwright/test';
 import {
   openApp,
   reopenApp,
@@ -6,8 +7,8 @@ import {
   typeInto,
   expectVisible,
   expectGone,
-  text,
 } from './support/app';
+import { step, writeEvidenceReport } from './support/evidence';
 
 /**
  * The demo flow M4.12 requires, driven through the real UI on Flutter Web.
@@ -20,88 +21,152 @@ import {
  * Runs against the **staging** entrypoint, so the database starts empty: the
  * flow begins at "cold start with nothing in it", and the development flavor's
  * fixture seed would make that first assertion meaningless.
+ *
+ * **Each step is also recorded.** M4.12 asks for a demo-flow report with
+ * step-by-step evidence; `step()` captures the screen after each one and
+ * `writeEvidenceReport` writes `e2e/report/demo-flow.md` at the end. The
+ * assertions are the test — the capture only records what was there when they
+ * passed.
  */
 test.describe('the deck and card flow', () => {
   test('a cold start ends with a three-level tree, a card, and both removed again', async ({
     page,
-  }) => {
+  }, testInfo) => {
     await openApp(page);
 
-    // ---- cold start, nothing in it -------------------------------------
-    await expectVisible(page, 'No decks yet');
+    await step(page, 'Cold start', 'The app opens on an empty database', async () => {
+      await expectVisible(page, 'No decks yet');
+    });
 
-    // ---- create a root deck, choosing a scheduler (BR-11) --------------
-    await tap(page, 'New deck');
-    await typeInto(page, 'Deck name', 'Korean');
-    // The scheduler is mandatory and has no default — a root deck cannot exist
-    // without one, so this tap is part of creating it rather than a preference.
-    await tap(page, 'Eight boxes');
-    await tap(page, 'Create');
+    await step(
+      page,
+      'Create a root deck with a scheduler',
+      'BR-11 — a root deck cannot exist without a study mode',
+      async () => {
+        await tap(page, 'New deck');
+        await typeInto(page, 'Deck name', 'Korean');
+        // The scheduler is mandatory and has no default, so this tap is part of
+        // creating the deck rather than a preference.
+        await tap(page, 'Eight boxes');
+        await tap(page, 'Create');
+        await expectVisible(page, 'Korean');
+        await expectGone(page, 'No decks yet');
+      },
+    );
 
-    await expectVisible(page, 'Korean');
-    await expectGone(page, 'No decks yet');
+    await step(
+      page,
+      'Add a second level',
+      'BR-58 — a root holds sub-decks only, so it offers nothing to choose',
+      async () => {
+        await tap(page, 'Korean');
+        await tap(page, 'New sub-deck');
+        await typeInto(page, 'Deck name', 'Vocabulary');
+        await tap(page, 'Create');
+        await expectVisible(page, 'Vocabulary');
+      },
+    );
 
-    // ---- second level -------------------------------------------------
-    await tap(page, 'Korean');
-    // No "what are you adding?" step here: a root deck holds sub-decks only
-    // (BR-58), so the only thing it can offer is the one it offers.
-    await tap(page, 'New sub-deck');
-    await typeInto(page, 'Deck name', 'Vocabulary');
-    await tap(page, 'Create');
-    await expectVisible(page, 'Vocabulary');
+    await step(
+      page,
+      'Add a third level',
+      'BR-55, BR-62 — an `unset` deck asks which kind of child it takes',
+      async () => {
+        await tap(page, 'Vocabulary');
+        await tap(page, 'Add to this deck');
+        await tap(page, 'New sub-deck');
+        await typeInto(page, 'Deck name', 'Food');
+        await tap(page, 'Create');
+        await expectVisible(page, 'Food');
+      },
+    );
 
-    // ---- third level, and it holds cards (BR-55, BR-62) ----------------
-    // `Vocabulary` is `unset` — it has not been committed to sub-decks or cards
-    // yet, so this is where the app asks.
-    await tap(page, 'Vocabulary');
-    await tap(page, 'Add to this deck');
-    await tap(page, 'New sub-deck');
-    await typeInto(page, 'Deck name', 'Food');
-    await tap(page, 'Create');
-    await expectVisible(page, 'Food');
+    await step(
+      page,
+      'Create a card',
+      'UC-04 — the first card locks its deck to `card`',
+      async () => {
+        await tap(page, 'Food');
+        await tap(page, 'Add to this deck');
+        await tap(page, 'New card');
+        await typeInto(page, 'Front', 'kimchi');
+        await typeInto(page, 'Back', 'kim chi');
+        await tap(page, 'Save card');
+        await expectVisible(page, 'kimchi');
+      },
+    );
 
-    // ---- a card -------------------------------------------------------
-    await tap(page, 'Food');
-    await tap(page, 'Add to this deck');
-    await tap(page, 'New card');
-    await typeInto(page, 'Front', 'kimchi');
-    await typeInto(page, 'Back', 'kim chi');
-    await tap(page, 'Save card');
+    await step(
+      page,
+      'Edit the card',
+      'BR-10 — editing content leaves the review state alone',
+      async () => {
+        await tap(page, 'kimchi');
+        await typeInto(page, 'Front', 'kimchi jjigae');
+        await tap(page, 'Save changes');
+        await expectVisible(page, 'kimchi jjigae');
+      },
+    );
 
-    await expectVisible(page, 'kimchi');
+    await step(
+      page,
+      'Close and re-open the app',
+      'Persistence — a reload is a genuine restart; the database is IndexedDB',
+      async () => {
+        await reopenApp(page);
+        await expectVisible(page, 'kimchi jjigae');
+      },
+    );
 
-    // ---- edit it ------------------------------------------------------
-    await tap(page, 'kimchi');
-    await typeInto(page, 'Front', 'kimchi jjigae');
-    await tap(page, 'Save changes');
-    await expectVisible(page, 'kimchi jjigae');
+    await step(
+      page,
+      'Delete the card',
+      'BR-67 — the deck keeps its content type when its last card goes',
+      async () => {
+        await tap(page, 'kimchi jjigae');
+        await tap(page, 'Delete');
+        await tap(page, 'Delete');
+        await expectVisible(page, 'No cards yet');
+      },
+    );
 
-    // ---- close and re-open: the data is still there --------------------
-    // A reload is a genuine restart for this build — drift keeps the database
-    // in IndexedDB, so nothing about the page survives except what was written.
-    await reopenApp(page);
-    await expectVisible(page, 'kimchi jjigae');
+    await step(
+      page,
+      'Return to the root by the breadcrumb',
+      "UC-06 — the app's own path control, not browser history",
+      async () => {
+        await tap(page, 'Root');
+        await expectVisible(page, 'Korean');
+      },
+    );
 
-    // ---- delete the card ----------------------------------------------
-    await tap(page, 'kimchi jjigae');
-    await tap(page, 'Delete');
-    await tap(page, 'Delete');
-    await expectVisible(page, 'No cards yet');
+    await step(
+      page,
+      'Delete the deck',
+      'BR-04 — the confirm names what goes with it before agreeing is possible',
+      async () => {
+        await tap(page, 'Deck actions');
+        await tap(page, 'Delete');
+        await tap(page, 'Delete');
+        await expectVisible(page, 'No decks yet');
+      },
+    );
 
-    // ---- back to the root, by the breadcrumb ---------------------------
-    // The breadcrumb rather than browser history: the app's own path control is
-    // what a user has, and `goBack` walks a stack GoRouter also writes to, so
-    // the number of steps is an implementation detail this should not encode.
-    await tap(page, 'Root');
-    await expectVisible(page, 'Korean');
-
-    // ---- delete the deck ------------------------------------------------
-    await tap(page, 'Deck actions');
-    await tap(page, 'Delete');
-    // The confirm names what goes with it (BR-04) before it is possible to
-    // agree, which is why there are two taps and not one.
-    await tap(page, 'Delete');
-
-    await expectVisible(page, 'No decks yet');
+    const viewport = page.viewportSize();
+    writeEvidenceReport({
+      // `git` rather than an env var: the report has to name the build it
+      // describes, and CI's SHA variable is absent on a developer machine —
+      // where this report is most often read.
+      // `execFileSync` with an argument array: no shell, so nothing here can
+      // be interpreted as one.
+      commit: execFileSync('git', ['rev-parse', '--short', 'HEAD'])
+        .toString()
+        .trim(),
+      viewport: viewport ? `${viewport.width}x${viewport.height}` : 'unknown',
+    });
+    testInfo.annotations.push({
+      type: 'evidence',
+      description: 'e2e/report/demo-flow.md',
+    });
   });
 });

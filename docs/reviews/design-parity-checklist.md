@@ -7,9 +7,33 @@ how tokens are used, corner radii, states, layout. It exists so the review is
 design side appears exactly once below, paired with what it maps to in `lib/`.
 
 **Status key.** `[x]` reviewed 1:1, verdict recorded · `[ ]` not yet reviewed.
-A verdict is one of **match** (nothing to do), **drift** (Dart moves to the
-design), **design-gap** (the design is missing something the app needs),
-**blocked** (needs a decision or a BR before it can move).
+
+**A verdict opens with exactly one of six words, in bold**, and prose after it:
+
+| Verdict | Means | Counts against the gate? |
+|---|---|---|
+| **match** | nothing to do | no |
+| **resolved** | there was a difference; Dart has moved to the design | no |
+| **divergence** | the two differ on purpose, measured, and the reason is in the divergence table below | no |
+| **design-gap** | the design is missing something the app needs | no |
+| **blocked** | needs a decision, a BR, or a feature that does not exist yet | no |
+| **drift** | a real difference, still open | **yes** |
+| **n/a** | there is nothing on one side to compare | no |
+
+The vocabulary is closed because it is **executable**:
+`test/design_audit/design_parity_gate_test.dart` parses every row and fails when
+open **drift** exceeds 3% of the reviewed rows, when a row is unreviewed, or when
+a verdict opens with a word not on this list. That is the shape M4.12's "design
+parity below 3%" takes here — see the note under the gate table for why it is not
+a pixel comparison.
+
+**What the gate cannot see.** It reads this file, so it is only as current as the
+review that wrote it. It caught nothing when nine rows sat at **drift** for three
+milestones after the code had already moved; a re-verification in M4.12d found
+seven of the nine closed and two closed by widgets written since. The gate stops a
+*known* difference being forgotten. It does not stop *this file* going stale — only
+re-reading `lib/` against `design_system/` does that, and the row's prose says
+which file to open.
 
 **Scope note.** `design_system/` files that carry no rule are excluded and listed
 at the bottom, so their absence here is deliberate rather than an oversight.
@@ -20,9 +44,9 @@ at the bottom, so their absence here is deliberate rather than an oversight.
 
 | # | Design source | Flutter target | Compare | Status | Verdict |
 |---|---|---|---|---|---|
-| A1 | `colors.css` (light scope) | `app_colors.dart` | every `--color-*` hex | [x] | **drift → resolved M4.10p.** 11 of 40 taken from CSS |
-| A2 | `colors.css` (`[data-theme=dark]`) | `app_colors.dart` | every dark override | [x] | same, resolved |
-| A3 | `colors.css` progress + streak families | `app_semantic_colors.dart` | 5 tokens with no Dart counterpart | [x] | **progress resolved M4.10r** — `MxProgressBar` is the caller. Streak still blocked: no feature, and a fifth hue |
+| A1 | `colors.css` (light scope) | `app_colors.dart` | every `--color-*` hex | [x] | **resolved** — M4.10p: 11 of 40 taken from CSS |
+| A2 | `colors.css` (`[data-theme=dark]`) | `app_colors.dart` | every dark override | [x] | **resolved** — same as A1 |
+| A3 | `colors.css` progress + streak families | `app_semantic_colors.dart` | 5 tokens with no Dart counterpart | [x] | **blocked** — the progress family resolved M4.10r — `MxProgressBar` is the caller. Streak still blocked: no feature, and a fifth hue |
 | A4 | `typography.css` sizes + leading | `app_typography.dart` | 15 M3 styles, measured off the built `TextTheme` | [x] | **match** (see §A-detail) |
 | A5 | `typography.css` tracking | same | `--tracking-*` | [x] | **match** |
 | A6 | `typography.css` weights | same | which style gets which `--weight-*` | [x] | **match** — 400/500/600/700 land on the same styles |
@@ -35,10 +59,10 @@ at the bottom, so their absence here is deliberate rather than an oversight.
 | A13 | `elevation.css` shadows | `shadowsFor()` | the three shadow recipes, and dark = none | [x] | **match** — `shadowsFor` *derives* all three: alpha `0.06+0.01*level`, blur `3*level`, offset `(0,level)` reproduce the CSS exactly at 1/3/8 |
 | A14 | `elevation.css` borders | `app_theme.dart`, `mx_text_field.dart` | hairline 1 / input 1.5 / focus 2 | [x] | **match** — hairline 1, input 1.5, focus ring 2 |
 | A15 | `motion.css` | `app_durations.dart` | 120 / 200 / 320 | [x] | **match** |
-| A16 | `motion.css` easing | — | `--ease-standard`, `--ease-decelerate` | [x] | **drift → fixed** — Dart had no curve token and `Curves.decelerate` is `(0,0,0.2,1)`, not the design's `(0,0,0,1)` |
+| A16 | `motion.css` easing | — | `--ease-standard`, `--ease-decelerate` | [x] | **resolved** — Dart had no curve token and `Curves.decelerate` is `(0,0,0.2,1)`, not the design's `(0,0,0,1)` |
 | A17 | `layout.css` breakpoints | `app_breakpoints.dart` | 360 / 600 | [x] | **match** |
 | A18 | `layout.css` `--nav-width-per-destination` | `mx_navigation_bar.dart` | 120 | [x] | **match** — 120 |
-| A19 | `layout.css` `--frame-*` | `web/` letterbox | preview frame only | [x] | n/a — the preview frame has no Flutter counterpart and needs none |
+| A19 | `layout.css` `--frame-*` | `web/` letterbox | preview frame only | [x] | **n/a** — the preview frame has no Flutter counterpart and needs none |
 
 ### A-detail · typography, measured
 
@@ -75,20 +99,20 @@ prompt and body-md's 1.45 — are identical on both sides.
 | # | Design source | Flutter target | Compare | Status | Verdict |
 |---|---|---|---|---|---|
 | B1 | `mx.css` `.mx-btn--primary/--secondary/--destructive` | `app_button_themes.dart` | fill, label colour, border, radius, min height | [x] | **match** - 12/24 padding, radius 12, 64x48 floor, 12% press lerp, all identical |
-| B2 | `mx.css` `:hover` / `:active` on buttons | `app_button_themes.dart` overlays | 4% / 6% / 10% / 12% state layers | [x] | **drift (F1)** - press 12% matches; **hover is unspecified in Dart** and falls back to Material |
+| B2 | `mx.css` `:hover` / `:active` on buttons | `app_button_themes.dart` overlays | 4% / 6% / 10% / 12% state layers | [x] | **resolved** (F1) — hover was unspecified and fell through to Material's wash of the *foreground* colour, so a filled button had no visible hover at all. Every button theme now declares disabled, pressed, hovered and focused explicitly, and hover blends toward the ink as `.mx-btn--primary:hover` does |
 | B3 | `mx.css` `:disabled` | `disabledSurfaceTint()` | precomputed solid vs alpha | [x] | **match** - fill + 38% label + transparent secondary all agree |
 | B4 | `mx.css` `.mx-pill` | `app_chip_theme.dart` | fill, selected pair, border, 48 target | [x] | **match** - every property and no checkmark. Padding was 8/16 in both; **both moved to 8/8 together (2026-08-06)** - 16 across put 21px of chrome each side of a label as short as "All 1", 42 of a 69.5px pill, and the card list's four filter pills ran to 426.4 against the 374 a 390-wide screen leaves. 8 across is Material's own M3 chip padding, 17 a side, row 394.4 - and dropping "now" from the Due label took it to 361.8, so single-digit counts fit at 390 without scrolling. Three-digit counts (416.5) and 360-wide screens still scroll, which is what the row scrolls for. **Label weight moved 600 → 500 on both sides together (2026-08-06, M4.11e)** - semibold is the *button's* weight, raised from Material's 500 for a label reversed out of a solid fill, and the pill took it only by sharing the `label-lg` rung. Measured on a device render at 360dp: the pill labels covered 0.340 and 0.364 of their glyph box against the search hint's 0.271 at an identical 27px ascender, putting two toggles above every heading on the screen and just under the deck name (0.409). 500 is Material's own chip weight and `--weight-medium` here, so this rejoins a spec rather than inventing a value. **Sizing standardised on both sides together (2026-08-06)**: container 32 (M3's chip height, painted 34 with the two hairlines), touch target 48, icon 16, corner radius kept `--radius-pill` after rounding to `--radius-sm` was rendered and rejected by the owner, padding 12 across, and `labelPadding` **zeroed** - Material's default 8-both-sides landed entirely on the trailing edge of a chip with an avatar, which is why the toolbar pills measured 11 left against 17 right. With it gone, 12 means 12 and a no-icon chip is 13/13 including its hairline. The card list's four filter pills came out 8 NARROWER each, so that row now measures 354 against 374 visible at 390 - it fits with three-digit counts, where it needed scrolling before. **`MxPillButton` alone drops one rung to `label-md` with a 4px icon gap**, mirrored by `.mx-pill__body`: those two sit in a deck list beside the Study button on every row, and that button is `label-md` with a 4px gap. The filter pills keep `label-lg` from the theme - Only the metrics are taken from the rung; the colour stays the theme's `WidgetStateColor`, because copying a rung whole replaces it with a flat colour and takes the disabled and selected states with it. **The card list's filter row moved onto `MxPillButton` too (2026-08-06)**, so every pill in the app is now one component: it was the last place building a chip by hand, which is why its Flagged label had to open with `⚑` U+2691 — a character no bundled font carries, so both shipped goldens rendered a tofu box while a device with a wider system font might draw a flag. It is `Icons.flag` now, the same glyph the card row beside it uses |
 | B5 | `mx.css` `.mx-field*` | `app_theme.dart` `inputDecorationTheme` | 1.5px stroke, radius, focus = hue not width, error | [x] | **match** - unfilled, 12/16 padding, hue-only focus |
-| B6 | `mx.css` `.mx-nav` | `app_theme.dart` `navigationBarTheme` | page-colour fill, hairline, indicator pair | [x] | **drift (F2, F3)** - page fill and elevation 0 match; **no top hairline**, and the indicator role is disputed |
-| B7 | `mx.css` `.mx-scrim` (60%) | `modalBarrierColor()` | barrier opacity per mode | [x] | **drift (F16)** - design 60% flat, Dart 48% light / 72% dark |
-| B8 | `mx.css` `.mx-dialog` / `.mx-sheet` | `app_theme.dart` dialog + sheet themes | radius, surface, shadow | [x] | **drift (F15)** - sheet matches entirely; the dialog is missing `--shadow-overlay` |
-| B9 | `mx.css` `.mx-spinner` | `buildProgressIndicatorTheme()` | colour source | [x] | **drift (F14)** - and the Dart widget overrides its own theme |
+| B6 | `mx.css` `.mx-nav` | `app_theme.dart` `navigationBarTheme`, `mx_navigation_bar.dart` | page-colour fill, hairline, indicator pair | [x] | **divergence** — page fill and elevation 0 match. **F2 resolved:** the top hairline is drawn, in `MxNavigationBar` rather than the theme because `NavigationBarThemeData` has no border slot, and as a *foreground* decoration because `NavigationBar` paints its own fill over a background one. **F3 stands, deliberately** — see divergence #2 |
+| B7 | `mx.css` `.mx-scrim` (60%) | `modalBarrierColor()` | barrier opacity per mode | [x] | **divergence** (F16) — design 60% flat, Dart 48% light / 72% dark, measured. See divergence #4 |
+| B8 | `mx.css` `.mx-dialog` / `.mx-sheet` | `app_theme.dart` dialog + sheet themes | radius, surface, shadow | [x] | **drift** (F15) — sheet matches entirely; radius, surface and the hairline match on the dialog too, but `.mx-dialog` carries `--shadow-overlay` and `dialogTheme` is `elevation: 0`. **The comment in `app_theme.dart` cites AD-14 to justify the zero, and AD-14 §4 says the opposite**: depth is a measured target each mode builds from what it has, and light builds it with a shadow. Dark is correct as it stands — `shadowsFor` is none there. Open: a dialog on a light page, which is where the shadow would show. Costed as an M4.12 follow-up rather than taken here, because it moves every dialog golden and those want a render review first |
+| B9 | `mx.css` `.mx-spinner` | `buildProgressIndicatorTheme()` | colour source | [x] | **resolved** (F14) — the slot is declared at `focusRing` rather than left to Material's `primary`, which measured **2.81:1** on the dark surface it spins on, under the 3.0 a graphic needs; `focusRing` is the same hue at 5.36:1 dark / 7.41:1 light. The track is explicitly transparent so no second ring appears |
 | B10 | `readme.md` "States" | `app_theme.dart` overlays | hover 8/6/4, press 12, focus 2px ring | [x] | **match** since M4.10q — hover 6%, press 12%, focus ring 2px |
-| B11 | `readme.md` "Layout rules" | `app_theme.dart` appBar + `MxContentShell` | no elevation, no scroll tint, page-colour bar | [x] | **drift (F4, F11)** - page colour and zero elevation match; no scroll hairline, and the FAB shape differs |
-| B12 | — | `app_overlay_themes.dart` tooltip, selection, divider, scrollbar | design has no counterpart | [x] | **design-gap, as expected** — tooltip, text selection, divider and scrollbar have no CSS counterpart; the design leaves them to the browser as Flutter left them to Material until M4.10j |
+| B11 | `readme.md` "Layout rules" | `app_theme.dart` appBar + `MxContentShell` | no elevation, no scroll tint, page-colour bar | [x] | **resolved** (F4, F11) — page colour and zero elevation match. **F4:** the scroll hairline is drawn, derived from scroll position in `MxContentShell` (`_hasScrolled`, a 2px threshold so a resting screen cannot flicker) and set as the `AppBar.shape` bottom border — below the whole chrome block, subheader included, exactly as `.mx-shell__bar--divided` swaps its `border-bottom` colour. It is a 1px line, not `scrolledUnderElevation`, which stays off so the header never shifts colour under a review card. **F11 is obsolete:** M4.10ag removed the FAB, and M4.10aq removed the theme that outlived it |
+| B12 | — | `app_overlay_themes.dart` tooltip, selection, divider, scrollbar | design has no counterpart | [x] | **design-gap** — as expected: — tooltip, text selection, divider and scrollbar have no CSS counterpart; the design leaves them to the browser as Flutter left them to Material until M4.10j |
 | B13 | `index.html` `COMPACT_BELOW` behaviour | `app_compact_scale.dart` | title 22→20, prompt 30→26, button padding | [x] | **match** — title 22→20, card prompt 30→26, button padding 24→12, same 360 breakpoint. The compact pass deliberately skips the text button: a zero-padding link has nothing to give back |
 | B14 | `mx.css` `.mx-textbtn` (+ `--destructive`) | `buildTextButtonTheme()` in `app_button_themes.dart` | zero padding, 48 floor as height, 15%/28% hover/press label blends, underline on hover/focus | [x] | **match** since M4.10aq — the values always matched but lived inline in `MxTextButton`; the slot owns them now, the blends are `AppStateOpacity.textHoverBlend`/`textPressedBlend`, and the underline stays on the label because a decoration on the shared style reaches the icon glyphs |
-| B15 | — | `app_radio_theme.dart` | design has no counterpart | [x] | **design-gap, as B12** — no kit mock renders a scheduler picker, so the radio takes the app's own conventions: `primaryAccent` mark (a glyph, and `primary` misses 3:1 on the dark card), secondary-ink resting ring, the shared control overlay |
+| B15 | — | `app_radio_theme.dart` | design has no counterpart | [x] | **design-gap** — as B12: — no kit mock renders a scheduler picker, so the radio takes the app's own conventions: `primaryAccent` mark (a glyph, and `primary` misses 3:1 on the dark card), secondary-ink resting ring, the shared control overlay |
 
 ---
 
@@ -105,18 +129,18 @@ Dart widget: props, defaults, states, radius, spacing, semantics.
 | C4 | `MxCard` | `mx_card.dart` | [x] | **match** - radius 16, hairline, `--shadow-card` default, `--space-lg` padding. **M4.10ak:** both clip their content (`overflow:hidden` / `ClipRRect`), so a child seated on an edge is cut by the card's real corner rather than by its own box. **M4.10ac:** a clickable card no longer *becomes* a button on either side, so it may hold controls — web lays the target under the content (`.mx-card__action` / `.mx-card__control`, `actionLabel`), Flutter lets the nested button win the arena. Same guarantee, two mechanisms, because HTML forbids what Flutter merely arbitrates |
 | C5 | `MxTextField` | `mx_text_field.dart` | [x] | **match** — unfilled, 1.5 stroke, hue-only focus, error shows a message and not colour alone. `onSurface` is web-only: Flutter's outline gaps for the label, so there is no backing to match |
 | C6 | `MxListTile` | `mx_list_tile.dart` | [x] | **match** - radius 12, selected fill `surfaceMuted` + primary title, 2-line clamp both sides |
-| C7 | `MxIcon` | — (Flutter uses `Icons.*`) | [x] | n/a — Flutter reaches `Icons.*` directly; the wrapper exists because the web has no bundled set |
-| C8 | `MxProgressBar` | `mx_progress_bar.dart` | [x] | **built M4.10r** — BR-88 unblocked it. **M4.10ak:** `sm` track 4 → 6 on both sides, and both gain a `pill`/`flush` shape. `flush` is for a bar used as an *edge*: the container clips it, because a radius set on the bar is clamped to the bar's own height and rounds the wrong shape |
+| C7 | `MxIcon` | — (Flutter uses `Icons.*`) | [x] | **n/a** — Flutter reaches `Icons.*` directly; the wrapper exists because the web has no bundled set |
+| C8 | `MxProgressBar` | `mx_progress_bar.dart` | [x] | **resolved** — built M4.10r, BR-88 unblocked it. **M4.10ak:** `sm` track 4 → 6 on both sides, and both gain a `pill`/`flush` shape. `flush` is for a bar used as an *edge*: the container clips it, because a radius set on the bar is clamped to the bar's own height and rounds the wrong shape |
 | C9 | `MxEmptyState` | `mx_empty_state.dart` | [x] | **match** - 40px primary glyph, 24 padding, 16/8 rhythm, `check_circle_outline` default |
-| C10 | `MxErrorState` | `mx_error_state.dart` | [x] | **deliberate divergence, repo wins** — retry is primary. The design's note is prose, and M4.10n changed it so `MxErrorState` and `MxEmptyState` stop looking like two components |
-| C11 | `MxLoadingState` | `mx_loading_state.dart` | [x] | **drift (F14)** - passes `primary` explicitly, defeating the theme that exists to avoid it |
+| C10 | `MxErrorState` | `mx_error_state.dart` | [x] | **divergence** — repo wins: retry is primary. The design's note is prose, and M4.10n changed it so `MxErrorState` and `MxEmptyState` stop looking like two components |
+| C11 | `MxLoadingState` | `mx_loading_state.dart` | [x] | **resolved** (F14) — the explicit `color:` is gone, so the widget takes `progressIndicatorTheme` like every other spinner instead of overriding the slot that exists to keep it off `primary`. See B9 |
 | C12 | `MxAsyncView` | `mx_async_view.dart` | [x] | **match** — `error` is required, so no screen can inherit a generic failure sentence |
 | C13 | `MxConfirmDialog` | `mx_confirm_dialog.dart` | [x] | **match** — `shouldAutofocus: _isDestructive` puts initial focus on Cancel |
 | C14 | `MxActionSheet` | `mx_action_sheet.dart` | [x] | **match** — `!isEnabled` is tested first, so disabled beats destructive |
 | C15 | `MxNavigationBar` | `mx_navigation_bar.dart` | [x] | **match** — `selectedIcon` carries the filled twin, labels always shown |
-| C16 | `MxBreadcrumb` | `mx_breadcrumb.dart` | [x] | **drift (F5-F8)** - no fold, no `rootIcon`, label one size up, link colour full-strength |
-| C17 | `MxSearchField` | `mx_search_field.dart` | [x] | **built M4.10x** |
-| C18 | `MxContentShell` | `mx_content_shell.dart` | [x] | **drift (F9, F10)** - no `subheader`, no `leading`; gutters match exactly |
+| C16 | `MxBreadcrumb` | `mx_breadcrumb.dart` | [x] | **resolved** (F5–F8) — all four closed at M4.10q. **F5:** the middle folds above `collapseAfter` (default 4: first step, fold, last two) and the fold opens. **F6:** `rootIcon` exists and lands on the first step. **F7:** the label is `labelMedium`, the `--text-label-md` `.mx-crumbs__step` sets. **F8:** a link rests at `onSurfaceVariant` and travels to `onSurface` on hover, mirroring `text-secondary` → `text-primary`; weight separates link from current, so the path no longer competes with the app-bar title. F12 (36 vs 48 tall) stands as divergence #3 |
+| C17 | `MxSearchField` | `mx_search_field.dart` | [x] | **resolved** — built M4.10x |
+| C18 | `MxContentShell` | `mx_content_shell.dart` | [x] | **resolved** (F9, F10) — gutters always matched; both slots exist now. **F9:** `subheader` is pinned between the bar and the scrolling body, and sits above the `Expanded` rather than in `AppBar.bottom` because that slot demands a height up front and this strip's height follows the user's text scale. **F10:** `leading` is a slot, so a screen chooses its own back affordance and `AppBar` keeps its automatic one when the slot is null |
 
 ---
 
@@ -124,21 +148,21 @@ Dart widget: props, defaults, states, radius, spacing, semantics.
 
 | # | Design source | Flutter target | Status | Verdict |
 |---|---|---|---|---|
-| D1 | `DeckLevelScreen.jsx` shell + subheader | `deck_list_screen.dart` | [x] | **done M4.10q** — `subheader` holds the path |
-| D2 | `DeckLevelScreen.jsx` `DeckCard` | `deck_tile_widget.dart` | [x] | **rebuilt M4.10s** — flat card, due chip, three foot states. Study pill deliberately absent: no session to start until M5. **M4.10ac:** the whole card is the target on both sides. **M4.10ak — deliberate divergences, app wins, kit updated to follow:** the Study pill was *filled* where the kit argued for outlined — the kit's reason (a column of filled buttons stops the card being calm) was weighed and the project owner chose emphasis; **revised 2026-08-05, owner-approved: the pill is now *tonal* (`secondaryContainer`) on both sides** — the measured UI review showed several due decks spraying the primary accent down the column, and tonal keeps the emphasis that beat outlined while leaving `primary` to screen-level actions; the progress track is the card's *base* rather than a rule across its middle; the row menu sits with the deck's identity in the head band rather than in the kit's foot, so the foot carries only the two verbs (due state, and Study when it lands) and is 32 tall rather than 48. The chevron is dropped: it said "this opens onto another level", which the whole card now says by being the target, and beside a real control it read as a second one that did nothing |
-| D3 | `DeckLevelScreen.jsx` filter/sort row | `deck_list_toolbar_widget.dart` | [x] | **gap → fixed** — the design heads the list "Your decks"/"Sub-decks" beside the pills; there was nothing saying what the pills filtered |
-| D4 | `DeckLevelScreen.jsx` breadcrumb use | `deck_path_widget.dart` | [x] | **done M4.10q** — fold, root icon, quiet weight. **M4.10ae:** the strip now runs the whole way on both sides — the deck list, every ancestor, then the deck you are in as a non-tappable last step. The kit already carried the list as its first step; what it gained is the last one |
+| D1 | `DeckLevelScreen.jsx` shell + subheader | `deck_list_screen.dart` | [x] | **resolved** — M4.10q: `subheader` holds the path |
+| D2 | `DeckLevelScreen.jsx` `DeckCard` | `deck_tile_widget.dart` | [x] | **resolved** — rebuilt M4.10s: — flat card, due chip, three foot states. Study pill deliberately absent: no session to start until M5. **M4.10ac:** the whole card is the target on both sides. **M4.10ak — deliberate divergences, app wins, kit updated to follow:** the Study pill was *filled* where the kit argued for outlined — the kit's reason (a column of filled buttons stops the card being calm) was weighed and the project owner chose emphasis; **revised 2026-08-05, owner-approved: the pill is now *tonal* (`secondaryContainer`) on both sides** — the measured UI review showed several due decks spraying the primary accent down the column, and tonal keeps the emphasis that beat outlined while leaving `primary` to screen-level actions; the progress track is the card's *base* rather than a rule across its middle; the row menu sits with the deck's identity in the head band rather than in the kit's foot, so the foot carries only the two verbs (due state, and Study when it lands) and is 32 tall rather than 48. The chevron is dropped: it said "this opens onto another level", which the whole card now says by being the target, and beside a real control it read as a second one that did nothing |
+| D3 | `DeckLevelScreen.jsx` filter/sort row | `deck_list_toolbar_widget.dart` | [x] | **resolved** — the design heads the list "Your decks"/"Sub-decks" beside the pills; there was nothing saying what the pills filtered |
+| D4 | `DeckLevelScreen.jsx` breadcrumb use | `deck_path_widget.dart` | [x] | **resolved** — M4.10q: fold, root icon, quiet weight. **M4.10ae:** the strip now runs the whole way on both sides — the deck list, every ancestor, then the deck you are in as a non-tappable last step. The kit already carried the list as its first step; what it gained is the last one |
 | D5 | `DeckLevelScreen.jsx` `LevelEmpty` (three empties) | `deck_list_screen.dart` empty states | [x] | **match** — five empty states, more than the design's three: `card`-typed decks and a failed read are cases the kit has no fixture for |
-| D6 | `DeckLevelScreen.jsx` `LevelSummary` | `deck_level_summary_widget.dart` | [x] | **built M4.10t**, dismiss added M4.10y. **M4.10ad:** it no longer auto-opens on a level with nothing due — `auto` / `shown` / `hidden` on both sides, the kit's `summaryChoice` mirroring `DeckSummaryVisibility`. Only the streak chip and Start studying remain, and both need M5 |
-| D7 | `DeckLevelScreen.jsx` `SearchResults` | `deck_search_results_widget.dart` | [x] | **built M4.10x** — in memory over `watchAllDecks()`, so no new query and no contract change after all. Result rows carry the path but not the counts: those need a per-row subtree aggregate |
+| D6 | `DeckLevelScreen.jsx` `LevelSummary` | `deck_level_summary_widget.dart` | [x] | **resolved** — built M4.10t, dismiss added M4.10y. **M4.10ad:** it no longer auto-opens on a level with nothing due — `auto` / `shown` / `hidden` on both sides, the kit's `summaryChoice` mirroring `DeckSummaryVisibility`. Only the streak chip and Start studying remain, and both need M5 |
+| D7 | `DeckLevelScreen.jsx` `SearchResults` | `deck_search_results_widget.dart` | [x] | **resolved** — built M4.10x, in memory over `watchAllDecks()`, so no new query and no contract change after all. Result rows carry the path but not the counts: those need a per-row subtree aggregate |
 | D8 | `DeckForms.jsx` | `deck_form_widget.dart` | [x] | **match** — one form for create-root, create-sub and rename |
 | D9 | `DeckForms.jsx` `SchedulerChoice` | `deck_form_widget.dart` radio rows | [x] | **match** — radio rows, `SchedulerType?` null until chosen, so nothing is preselected (BR-11) |
 | D10 | `index.html` action sheet wiring | `deck_actions_widget.dart` | [x] | **match** — same four actions, reset disabled rather than hidden |
 | D11 | `index.html` destructive confirm | `deck_confirm_widget.dart` | [x] | **match** — destructive confirm names the counts |
 | D12 | `index.html` `MxNavigationBar` mount | `app_navigation_shell.dart` | [x] | **match** — two destinations; the kit's third is its "You" tab, which is M5 territory |
-| D13 | `ReviewScreen.jsx` | `review_screen_preview_test.dart` harness | [x] | **partly done M4.10p** — `VerdictAction` ground fixed. The rest is a preview harness, not a screen: the review slice is M5 |
-| D14 | `ProfileScreen.jsx` | `settings_preview_test.dart` harness | [x] | **preview harness only** — settings is not a built screen, so there is nothing to bring to the design yet |
-| D15 | — | `deck_labels_widget.dart`, `deck_level_error_widget.dart`, `move_deck_sheet_widget.dart` | [x] | no design counterpart, and none needed — deck labels, level error and the move sheet are this app's own |
+| D13 | `ReviewScreen.jsx` | `review_screen_preview_test.dart` harness | [x] | **blocked** — `VerdictAction` ground fixed M4.10p. The rest is a preview harness, not a screen: the review slice is M5 |
+| D14 | `ProfileScreen.jsx` | `settings_preview_test.dart` harness | [x] | **blocked** — preview harness only: settings is not a built screen, so there is nothing to bring to the design yet |
+| D15 | — | `deck_labels_widget.dart`, `deck_level_error_widget.dart`, `move_deck_sheet_widget.dart` | [x] | **n/a** — no design counterpart, and none needed — deck labels, level error and the move sheet are this app's own |
 
 ---
 
@@ -158,7 +182,7 @@ Dart widget: props, defaults, states, radius, spacing, semantics.
 | E10 | Middle dot separates facts on one line | ARB files | [x] | **match** — the middle dot separates facts on the deck meta line |
 | E11 | No emoji anywhere | ARB files, code | [x] | **match** — no character above U+2100 in either ARB |
 | E12 | Error copy belongs to the screen, not the component | `MxErrorState` callers | [x] | **match** — `MxErrorState` maps no failure type; every caller passes its own sentence |
-| E13 | States are instant flat washes (readme §States) | every pressed control on Android | [x] | **deliberate divergence, recorded** — Android keeps Material's ink ripple; the wash colours are the kit's (`ThemeData.splashColor` is primary at 12% since M4.10aq), only the animation differs. See divergence #5 |
+| E13 | States are instant flat washes (readme §States) | every pressed control on Android | [x] | **divergence** — recorded: Android keeps Material's ink ripple; the wash colours are the kit's (`ThemeData.splashColor` is primary at 12% since M4.10aq), only the animation differs. See divergence #5 |
 
 ---
 
@@ -380,6 +404,10 @@ change landed; the shadow did not.
 
 ## Still open
 
+**Superseded by Round 4.** This table is where Round 2 stood; six of its rows
+have closed since. It is kept because the reasons are still the reasons — read
+the tally at the foot of the file for what is actually open.
+
 | # | Why |
 |---|---|
 | **F15** dialog / FAB shadow | Needs the `shadowsFor` mechanism, which for a dialog means wrapping its content rather than setting a theme property. Deferred deliberately, reason above. |
@@ -477,3 +505,78 @@ it changed has no row of its own:
   `--color-on-disabled` — now reads the token (`semanticColors.onDisabled`).
   The 0.4-per-mille alpha difference between the literal and the token moved
   the two action-sheet goldens by one channel step; regenerated deliberately.
+
+---
+
+## Round 4 — re-verification, and the gate (M4.12d)
+
+M4.12 asks for "design parity below 3% on screens with a baseline". Rounds 1–3
+did the comparison; this round made the result **executable**, and in doing so
+found that the file had stopped being true.
+
+### Nine rows said drift; seven had been fixed and nobody moved the label
+
+The nine were re-checked against `lib/` one at a time, not re-reasoned from the
+prose:
+
+| Row | Said | Actually |
+|---|---|---|
+| B2 (F1) | hover unspecified | every button theme declares hover, blending toward the ink |
+| B6 (F2) | no top hairline on the nav | drawn in `MxNavigationBar` as a *foreground* border |
+| B9 · C11 (F14) | spinner takes `primary` | slot declares `focusRing`; the widget's override is gone |
+| B11 (F4) | no scroll hairline | derived from scroll position, set as the `AppBar.shape` bottom |
+| B11 (F11) | FAB shape differs | the FAB went at M4.10ag, its theme at M4.10aq |
+| C16 (F5–F8) | no fold, no `rootIcon`, wrong size, wrong colour | all four closed at M4.10q |
+| C18 (F9, F10) | no `subheader`, no `leading` | both are slots, and `subheader` is what pins the deck path |
+
+Two were never drift in the first place — **F3** and **F16** are measured
+divergences and already sat in the divergence table, contradicting their own
+rows. One is real: **F15**, the dialog's missing `--shadow-overlay` in light
+mode. Its comment in `app_theme.dart` cites AD-14 to justify `elevation: 0`, and
+AD-14 §4 says the opposite — depth is a measured target each mode builds from
+what it has, and light builds it with a shadow. Left open deliberately rather
+than fixed in passing: it moves every dialog golden, and goldens get a render
+review first.
+
+**The lesson is about the gate, not about the rows.** A checklist whose labels
+are maintained by hand drifts from the code exactly the way the code was supposed
+to drift from the design. Three milestones of parity work went into rows that
+still read "drift", and nothing failed.
+
+### The tally, and what the gate reads
+
+`test/design_audit/design_parity_gate_test.dart` parses the tables in sections
+A–E and fails when open **drift** exceeds 3% of the reviewed rows, when a row is
+unreviewed, or when a verdict opens with a word outside the closed set.
+
+| Verdict | Count |
+|---|---|
+| **match** | 50 |
+| **resolved** | 17 |
+| **divergence** | 4 |
+| **blocked** | 3 |
+| **n/a** | 3 |
+| **design-gap** | 2 |
+| **drift** — open | **1** |
+| **Total rows** | **80** |
+
+**1 of 80 = 1.25%**, against the 3% gate. Three open rows would fail it.
+
+The four **divergence** rows are C10, B6 (F3), B7 (F16) and E13. The divergence
+table names five, because F12 — the breadcrumb's 36px step — belongs to C16,
+whose other four findings are resolved; a row carries the strongest verdict its
+findings still justify.
+
+### Why 3% is not a pixel difference here
+
+`docs/checklist.md` 15.x says pixel difference, and M4.10 and M4.11 each recorded
+that it could not be applied — scope mismatch between the two sides, then no card
+list in the kit at all. Beyond both: the design renders in Chrome from CSS and the
+app renders through Skia, so antialiasing, font hinting and the kit's CDN icon
+glyphs put a floor under the difference that parity work cannot move. A number
+that cannot reach its threshold however correct the app is, is not a gate — it is
+a permanent red light, and a permanent red light gets muted.
+
+The share of open drift is the same threshold on a quantity that is about the
+design instead of about two rasterisers. It is also the quantity a reader of this
+file can act on: each unit is a row, and the row says which file to open.
