@@ -7,6 +7,11 @@ import '../../../../../shared/widgets/mx_pill_button.dart';
 import '../../../domain/models/card_list_filter_model.dart';
 import '../../controllers/card_list_filter_controller.dart';
 
+/// The narrowest a filter pill may be, so four of unequal width read as one
+/// control rather than four scattered ones. A multiple of 4, like every other
+/// size in the app.
+const double _minPillWidth = 76;
+
 /// Selects a filter (D3).
 ///
 /// A free function, not a closure in `build()`: `ref.read` inside a build reads
@@ -143,18 +148,37 @@ class CardFilterBarWidget extends ConsumerWidget {
     CardListFilter active, {
     required IconData icon,
     int? count,
-  }) => MxPillButton(
-    label: label,
-    icon: icon,
-    isSelected: filter == active,
-    onPressed: () => _selectFilter(ref, deckId, filter),
-    // **The count left the label, not the pill.** The row stopped fitting once
-    // every pill carried an icon, and the visible number was the cheapest thing
-    // to give up: the progress panel directly below repeats All, Due and New.
-    // Nothing repeats Flagged, and a reader has none of the width problem that
-    // caused this — so the number is still announced, on every pill.
-    semanticLabel: count == null
-        ? null
-        : context.l10n.cardFilterSemantics(label, count),
+  }) => ConstrainedBox(
+    // **A floor per pill, so the space goes into the pills rather than between
+    // them.** With four pills of 62 to 96 on a 358-wide strip, `spaceBetween`
+    // had 56 to hand out and put 19 into each of the three gaps — pills that
+    // belong to one control ended up nearly as far apart as they were wide.
+    // Growing the narrow ones to a shared floor spends the same space on the
+    // controls themselves and leaves the gaps near their 8 resting value.
+    //
+    // **The strip is 358 at a 390 screen, not 374.** The subheader gutters both
+    // sides, so it is `390 - 2 * 16`. Sizing this against 374 was tried and put
+    // the row 14 over, which shows up as the last pill clipped rather than as
+    // anything failing. Flagged wants 96 of that, so the other three may have
+    // `(358 - 96 - 24) / 3 = 79.4` — and 76 is the multiple of 4 below it.
+    //
+    // A floor, never a fixed width. A longer locale or a large text scale takes
+    // a pill past it, the row exceeds the strip, and it scrolls — which is what
+    // the `ConstrainedBox` around the row already allows for.
+    constraints: const BoxConstraints(minWidth: _minPillWidth),
+    child: MxPillButton(
+      label: label,
+      icon: icon,
+      isSelected: filter == active,
+      onPressed: () => _selectFilter(ref, deckId, filter),
+      // **The count left the label, not the pill.** The row stopped fitting once
+      // every pill carried an icon, and the visible number was the cheapest thing
+      // to give up: the progress panel directly below repeats All, Due and New.
+      // Nothing repeats Flagged, and a reader has none of the width problem that
+      // caused this — so the number is still announced, on every pill.
+      semanticLabel: count == null
+          ? null
+          : context.l10n.cardFilterSemantics(label, count),
+    ),
   );
 }
