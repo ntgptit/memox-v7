@@ -7,8 +7,8 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M4.11h |
-| **Last updated** | 2026-08-06 |
+| **Updated by task** | M99.1 |
+| **Last updated** | 2026-08-07 |
 
 Single source of truth for project progress. Update it in the same commit as the
 work it describes. A task is `done` only when it meets the Definition of Done in
@@ -33,6 +33,7 @@ AD / UC (xem `business-rules.md`).
 | M7 · CI/CD (Phase 19) | todo | Bắt đầu được ngay sau M2. Job Android + Web, chưa có iOS (AD-04) |
 | M8 · Release Android (Phase 16–18, 20–22) | todo | |
 | M9 · Backend Spring Boot + auth + sync (Phase 10) | todo | Sau khi M8 ổn định |
+| M99 · Adhoc | — | Task chủ dự án giao trực tiếp, ngoài chuỗi phụ thuộc. M99.1 **done** — `master-flow.md` |
 
 ---
 
@@ -6454,6 +6455,72 @@ CRUD deck/card **đã xong ở M4**, không lặp lại ở đây.
 - **Tests required:** đây **là** task test — integration test luồng chính
 - **Checklist phases:** 15.5
 
+---
+
+## M99 · Adhoc
+
+Task do chủ dự án giao trực tiếp, không thuộc chuỗi phụ thuộc M0…M9. Đánh số từ
+99 để chúng không bao giờ tranh ID với một milestone thật, và để đọc bảng tiến độ
+không nhầm chúng là một phase.
+
+### M99.1 · Master flow — đồ thị nối các UC
+
+- **Status:** **done** — `check_docs` sạch, cả 4 sơ đồ mermaid render được bằng
+  `@mermaid-js/mermaid-cli`.
+- **Goal:** Trả lời được câu "xong bước này thì người dùng đi đâu" — thứ mà đọc
+  từng UC riêng lẻ không trả lời được.
+- **Scope:** `docs/master-flow.md` (mới); một đoạn trỏ sang nó trong
+  `use-cases.md`; một dòng trong bảng "What exists" của `docs/README.md`.
+- **Out of scope:** nội dung của từng UC; mọi luật nghiệp vụ; tách nhỏ
+  `use-cases.md` theo đối tượng — xem ghi chú cuối task.
+- **Dependencies:** none
+- **Checklist phases:** 0.3
+- **Tests required:** none — document only. Thay vào đó: `check_docs.sh` phải
+  xanh, và **mọi khối mermaid MUST render được** chứ không chỉ nhìn đúng.
+- **Editable documents:** `docs/master-flow.md`, `docs/use-cases.md`,
+  `docs/README.md`, `docs/wbs.md`
+- **Output:** `docs/master-flow.md`
+- **Acceptance criteria:**
+  - [x] Một sơ đồ toàn app, cộng ba sơ đồ theo đối tượng: deck, card, review.
+  - [x] Mọi đỉnh trỏ về UC hoặc BR bằng ID; không phát biểu lại luật nào.
+  - [x] `Source of truth for` không đụng file nào khác — `check_docs` xác nhận.
+  - [x] Cả 4 khối mermaid parse và render ra SVG.
+  - [x] `use-cases.md` trỏ sang tài liệu mới.
+
+**`use-cases.md` đang `frozen for MVP`, và task này sửa nó có phép.** Chủ dự án
+chỉ định: tạo file riêng, còn `use-cases.md` thì trỏ sang. Phần sửa giới hạn đúng
+một đoạn văn cộng hai dòng header — không UC nào bị đụng.
+
+**Vì sao là file riêng chứ không phải một mục trong `use-cases.md`.**
+`document-conventions.md` §5 nói luồng người dùng có canonical location là
+`use-cases.md`, nên thoạt nhìn mục "Master flow" phải nằm trong đó. Nhưng thứ tài
+liệu mới sở hữu **không phải luồng** — nó là *các cạnh giữa các luồng*, thứ
+`use-cases.md` chưa bao giờ khai là của mình: mỗi UC ở đó tự mô tả mình và im
+lặng về những UC bên cạnh. Hai `Source of truth for` vì thế không giao nhau, và
+`check_docs` kiểm được điều đó.
+
+**Tách theo đối tượng, không theo hành động** — quyết định của chủ dự án. Mục 3–5
+chia theo *deck* / *card* / *review*; không có mục riêng cho "tạo deck". Một tài
+liệu cho mỗi hành động sẽ nhân số file theo số nút bấm và phần lớn chỉ chứa một
+sơ đồ ba đỉnh.
+
+**Mermaid được kiểm bằng cách render, không bằng cách đọc.** `check_docs.sh`
+không biết gì về mermaid, nên một sơ đồ sai cú pháp sẽ merge sạch và chỉ hỏng khi
+có người mở file trên GitHub. Cả 4 khối được trích ra và đưa qua
+`@mermaid-js/mermaid-cli`; 31 / 57 / 27 / 47 node vẽ ra đúng.
+
+**Ba chỗ tài liệu lệch code, phát hiện trong lúc dựng sơ đồ và chỉ *ghi lại*.**
+Chúng nằm ở `use-cases.md`, ngoài phạm vi sửa của task này: UC-04 không nhắc cờ
+và tag dù BR-93/BR-95 khai `Related: UC-04`; UC-06 không nhắc tìm kiếm dù
+`search_decks_use_case.dart` đã có và màn danh sách có ô tìm kiếm; và UC-01 mô tả
+một màn thư viện starter chưa tồn tại — phần đã xây là seed tự động lúc khởi động
+(`app/startup/fixture_seeder_widget.dart`), khác ở chỗ ai chọn `scheduler_type`.
+
+**Việc còn lại, chưa làm:** chủ dự án muốn tách nhỏ `use-cases.md` theo đúng
+nguyên tắc trên (deck / card / review). Đó là một refactor rộng — nó chạm mọi
+tham chiếu UC trong `docs/`, `lib/` và `test/`, **và** `check_docs.py` hiện chỉ
+quét `docs/*.md` cấp một, nên đưa UC xuống thư mục con sẽ làm guard ngừng kiểm mà
+vẫn xanh. Tách ra thành task riêng để phần đó có chỗ cho việc sửa guard.
 
 ---
 
