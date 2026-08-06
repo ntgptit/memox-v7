@@ -6620,11 +6620,10 @@ và tag dù BR-93/BR-95 khai `Related: UC-04`; UC-06 không nhắc tìm kiếm d
 một màn thư viện starter chưa tồn tại — phần đã xây là seed tự động lúc khởi động
 (`app/startup/fixture_seeder_widget.dart`), khác ở chỗ ai chọn `scheduler_type`.
 
-**Việc còn lại, chưa làm:** chủ dự án muốn tách nhỏ `use-cases.md` theo đúng
-nguyên tắc trên (deck / card / review). Đó là một refactor rộng — nó chạm mọi
-tham chiếu UC trong `docs/`, `lib/` và `test/`, **và** `check_docs.py` hiện chỉ
-quét `docs/*.md` cấp một, nên đưa UC xuống thư mục con sẽ làm guard ngừng kiểm mà
-vẫn xanh. Tách ra thành task riêng để phần đó có chỗ cho việc sửa guard.
+**Việc tách `use-cases.md` đã được cân nhắc và hoãn.** Chủ dự án chốt ngay sau
+task này: dự án chưa đủ lớn để một file 560 dòng thành vấn đề. Lý do và điều kiện
+mở lại nằm ở bảng "Deferred and descoped" — gồm cả việc `check_docs.py` phải được
+sửa **trước**, vì nó chỉ quét `docs/*.md` cấp một.
 
 ---
 
@@ -6654,6 +6653,7 @@ của M2.
 | `custom_lint` + `riverpod_lint` | descoped khỏi MVP | Không có phiên bản `custom_lint` nào tương thích `analyzer >=10`, trong khi `json_serializable`, `freezed` và `drift_dev` đều đòi mức đó. Cài được chỉ bằng cách hạ toàn bộ stack generator một thế hệ, kể cả `uuid` về `^3.0.6` — đi ngược AD-03. Chủ dự án quyết định không cần; nếu cần sẽ làm guard bên ngoài | Khi `custom_lint` hỗ trợ `analyzer >=10`, **hoặc** khi một guard ngoài được viết. Xem mục bên dưới về việc mất gì |
 | Flutter toolchain verification | **đã xong** | Từng hoãn vì `flutter` chưa có trong môi trường cloud | Đã kiểm chứng ở M2.1 trên máy local: `flutter doctor -v` → `No issues found!` |
 | Đưa deck con lên thành root deck | descoped khỏi MVP | Cần quyết định scheduler mới; là tính năng riêng chứ không phải phép di chuyển | Sau MVP (UC-09 A2) |
+| Tách `use-cases.md` theo đối tượng (deck / card / review) | hoãn | Chủ dự án quyết định ở M99.1: dự án chưa đủ lớn để một file 560 dòng thành vấn đề, và refactor bây giờ là chi phí không đổi lấy gì. `master-flow.md` đã lấy đi phần việc gấp nhất — trả lời "xong bước này thì đi đâu" — nên phần còn lại chỉ là kích thước file | Khi `use-cases.md` đủ lớn để tìm một UC trong đó thành việc mất thời gian. **Task đó MUST bao gồm việc sửa `check_docs.py` trước:** nó chỉ quét `docs/*.md` cấp một, nên đưa UC xuống thư mục con sẽ làm guard ngừng kiểm chín UC — không header, không "đủ chín mục", không "ID resolve" — mà vẫn báo xanh. Giữ ở cấp một (`use-cases-deck.md`) tránh được điều đó nhưng đánh đổi bằng tên file dài |
 | Media | descoped khỏi MVP | Kéo theo lưu trữ file và đồng bộ file | Sau MVP; quy tắc reset và lưu trữ đã đặt sẵn (BR-41, AD-08) |
 | ~~Tag~~ | **đã vào MVP** | Màn card cần hiển thị và lọc theo tag; bảng `tags` + `card_tags` không kéo theo lưu trữ file như media | Đã làm ở M4.10at (BR-93, BR-94) |
 | Dải metadata trên card editor — `78% recall` và link `History` | hoãn khỏi M4.11 | Hai nửa của nó chặn bởi hai thứ khác nhau. **`% recall`** cần một BR định nghĩa "nhớ được" cho từng scheduler — `remembered` với `eight_box`, còn `sm2` phải chốt `hard\|good\|easy` có tính là nhớ không — tức cùng hình dạng BR-89…BR-91. **Link `History`** mở một màn review history, thứ M4.11 đặt thẳng vào out-of-scope | Cùng M5.x, khi review history có màn của nó. `review_history.action` đã lưu sẵn đủ dữ liệu (BR-77), nên đây là câu hỏi định nghĩa và UI, không phải câu hỏi schema |
