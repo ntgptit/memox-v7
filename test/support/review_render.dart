@@ -25,8 +25,21 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/l10n/generated/app_localizations.dart';
 
-/// The default review surface: a phone in logical pixels, `devicePixelRatio` 1
-/// so the PNG reads 1:1. Matches the frame the app imposes on web (AD-04).
+import 'golden_density.dart';
+
+/// The default review surface, in **logical** pixels: the frame the app imposes
+/// on web (AD-04).
+///
+/// Rasterised at [kGoldenDevicePixelRatio], so the PNG is three times this on
+/// each side. It read 1:1 until then, which was the wrong half of the trade for
+/// the one suite whose entire purpose is a human looking at it: M4.10w moved the
+/// strict goldens and the design previews to 3 precisely because reviewing an
+/// undersampled render is guesswork about whether an edge is wrong or just
+/// short of pixels — and these renders were left behind, so the images most
+/// meant to be read were the softest in the repo.
+///
+/// Nothing about layout changes: logical size is `physicalSize / dpr`, so every
+/// widget lays out at exactly the same numbers and no rect assertion moves.
 const Size kReviewSurface = Size(393, 852);
 
 /// The production-themed, localized `MaterialApp` a review render pumps.
@@ -68,13 +81,17 @@ class ReviewApp extends StatelessWidget {
 /// `debugDisableShadows` back before the framework's end-of-test paint-vars
 /// assertion runs. (The flag has to be off during the *paint*, so it cannot be
 /// restored in a `tearDown` — that fires too late and trips the assertion.)
+///
+/// [surface] is **logical**, and `goldenSurfaceFor` turns it into the physical
+/// one the density needs. Passing a physical size here would shrink the screen
+/// to a third of itself rather than sharpen it.
 Future<void> pumpReview(
   WidgetTester tester,
   Widget root, {
   Size surface = kReviewSurface,
 }) async {
-  tester.view.physicalSize = surface;
-  tester.view.devicePixelRatio = 1;
+  tester.view.physicalSize = goldenSurfaceFor(surface);
+  tester.view.devicePixelRatio = kGoldenDevicePixelRatio;
   addTearDown(tester.view.reset);
 
   debugDisableShadows = false;
@@ -83,11 +100,26 @@ Future<void> pumpReview(
   await tester.pumpAndSettle();
 }
 
-/// Captures the review golden at [path] for [finder], then restores
-/// `debugDisableShadows` to the value the framework's paint-vars assertion
-/// expects. Call this instead of a bare `expectLater(..., matchesGoldenFile)`
-/// after [pumpReview].
-Future<void> matchesReviewGolden(Finder finder, String path) async {
-  await expectLater(finder, matchesGoldenFile(path));
+/// Captures the whole frame to [path], then restores `debugDisableShadows` to
+/// the value the framework's paint-vars assertion expects. Call this instead of
+/// a bare `expectLater(..., matchesGoldenFile)` after [pumpReview].
+///
+/// **The finder is fixed at the root, and that is what makes the density real.**
+/// `captureImage` walks up to the nearest repaint boundary and rasterises that
+/// layer in its own coordinate space, so a finder pointing at a screen inside the
+/// app yields *logical* pixels — 393x852 no matter what `devicePixelRatio` says —
+/// while the root reaches the `RenderView`, whose bounds are physical. Only
+/// capturing at the root gets 1179x2556.
+///
+/// It crops, too, and silently. `find.byType(DeckListScreen)` returned a frame
+/// 80 short of the surface because the navigation bar sits beside the screen
+/// rather than inside it — so the one piece of chrome a reviewer most needs to
+/// judge was missing from the picture meant for judging it.
+///
+/// Both failures come from letting the caller choose, and neither announces
+/// itself: the PNG looks right until someone measures it. So there is no choice
+/// to make.
+Future<void> matchesReviewGolden(String path) async {
+  await expectLater(find.byType(ReviewApp), matchesGoldenFile(path));
   debugDisableShadows = true;
 }
