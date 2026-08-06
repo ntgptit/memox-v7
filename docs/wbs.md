@@ -5797,8 +5797,7 @@ là lựa chọn hiển nhiên và sai: nó vẽ chữ NEW, ngay cạnh chữ Ne
 
 ### M4.11l · Dải pill filter trải hết bề rộng khi vừa, cuộn khi không
 
-- **Status:** **done** — 1400/1400 test pass, `flutter analyze` sạch,
-  `dart format` sạch, guard `memox-v7` 0 violation.
+- **Status:** done, **reverted ở M4.11o**.
 - **Goal:** Bốn pill MUST trải đều hết bề rộng strip khi chúng vừa, và MUST vẫn
   cuộn được khi không vừa.
 - **Scope:** `card_filter_bar_widget.dart`, một allowance trong
@@ -5839,8 +5838,7 @@ constraint và dựng con, và cái con đó được audit riêng.
 
 ### M4.11m · Sàn bề rộng cho pill, để khoảng trống rơi vào pill chứ không vào khe
 
-- **Status:** **done** — 1400/1400 test pass, `flutter analyze` sạch,
-  `dart format` sạch, guard `memox-v7` 0 violation.
+- **Status:** done, **reverted ở M4.11o**.
 - **Goal:** Bốn pill MUST đọc ra như một control, không phải bốn thứ rời rạc.
 - **Scope:** `card_filter_bar_widget.dart` (một hằng + `ConstrainedBox`),
   2 golden.
@@ -5878,8 +5876,7 @@ M4.11l đã chuẩn bị sẵn.
 
 ### M4.11n · Khe giữa pill về đúng 8, và lớp layout thêm ở M4.11l bị gỡ
 
-- **Status:** **done** — 1400/1400 test pass, `flutter analyze` sạch,
-  `dart format` sạch, guard `memox-v7` 0 violation.
+- **Status:** done, **reverted ở M4.11o**.
 - **Goal:** Khoảng cách cuối-pill-này tới đầu-pill-kia MUST là 8, giá trị khe
   của cả app.
 - **Scope:** `card_filter_bar_widget.dart`, gỡ một allowance trong
@@ -5913,6 +5910,47 @@ tạo khoảng thừa cho `spaceBetween` phân phối; không còn `spaceBetween
 chúng không làm gì cả. Allowance `_RenderLayoutBuilder` trong strict visual audit
 đi theo — audit không còn thấy render object đó nữa, và một allowance cho thứ
 không tồn tại là thứ audit báo là `unused`.
+
+### M4.11o · Trả dải pill filter về căn trái, và bỏ ba vòng layout trước đó
+
+- **Status:** **done** — 1400/1400 test pass, `flutter analyze` sạch,
+  `dart format` sạch, guard `memox-v7` 0 violation.
+- **Goal:** Dải pill quay lại đúng trạng thái sau M4.11k: căn trái, khe 8, bốn
+  icon.
+- **Scope:** `card_filter_bar_widget.dart` khôi phục nguyên văn từ M4.11k;
+  2 golden.
+- **Out of scope:** icon, nhãn, semantics, sàn bề rộng — tất cả bị gỡ cùng lúc.
+- **Dependencies:** M4.11n
+- **Checklist phases:** 7
+- **Editable documents:** `docs/wbs.md`
+- **Output:** không có file mới
+- **Tests required:** toàn bộ suite; 2 golden sinh lại
+- **Acceptance criteria:**
+  - [x] Widget giống hệt bản M4.11k (`git checkout` từ chính commit đó).
+  - [x] Không còn `LayoutBuilder`, `ConstrainedBox`, sàn bề rộng hay
+        `spaceBetween`.
+
+**Ba vòng liên tiếp không hội tụ, và đó là dữ liệu chứ không phải thất bại.**
+M4.11l trải rộng, M4.11m thêm sàn để thu khe, M4.11n bỏ `spaceBetween` để khe về
+8 — mỗi vòng sửa đúng thứ vòng trước làm hỏng, vì cả ba đều xoay quanh việc phân
+phối cùng một khoảng dư. Vòng thứ tư định cho bốn pill bằng nhau đúng bằng nhãn
+rộng nhất, và số đo cho thấy giá của nó: 407 (`en`) / 457 (`vi`) trên strip 358,
+tức luôn phải cuộn.
+
+Chủ dự án dừng ở đó và chọn quay về trạng thái đơn giản nhất còn lại: căn trái,
+khe 8, bốn icon. Đó là lựa chọn đúng — mọi phương án còn lại đều đổi một khuyết
+điểm nhìn thấy được lấy một khuyết điểm nhìn thấy được khác, và cái đơn giản
+nhất là cái ít phải giải thích nhất.
+
+**Cái được giữ lại là phần có thật.** M4.11j (bốn pill về `MxPillButton`, cờ
+thôi là tofu) và M4.11k (bốn icon, số đếm sang semantics) đứng nguyên: chúng sửa
+lỗi hiển thị và lỗi accessibility, không phải sắp xếp khoảng trắng.
+
+**Ghi lại số đo để không ai đi lại vòng này.** Bốn pill bằng nhau **và** vừa
+strip 358 đòi mỗi pill ≤ 83.5, tức nhãn ≤ 37.5px ở 12sp sau khi trừ 46 chrome
+(padding, hairline, icon, gap) — khoảng năm đến sáu ký tự. `Flagged` cần bảy,
+`Đến hạn` còn hơn. Muốn cân bằng bề rộng thì phải rút nhãn hoặc bỏ icon trước,
+không phải chỉnh layout.
 
 ### M4.12a · Starter template, loader và seed idempotent
 
