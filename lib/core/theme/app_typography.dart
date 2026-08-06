@@ -58,6 +58,22 @@ abstract final class AppTypography {
     FontVariation('wght', weight.value.toDouble()),
   ];
 
+  /// The same rung of the scale, set in a different weight.
+  ///
+  /// **`copyWith(fontWeight:)` alone is a silent no-op here.** Both faces are
+  /// variable fonts and every rung carries a `wght` axis, which the renderer
+  /// consults *instead of* [TextStyle.fontWeight] once it is present — so a
+  /// style re-weighted by `fontWeight` alone reports the new weight to every
+  /// test and paints the old one on the device. That is the same class of bug
+  /// `component_theme_typography_test.dart` was opened for, arriving from the
+  /// opposite direction.
+  ///
+  /// Deliberately not a general "restyle" helper: size, leading and tracking
+  /// belong to the rung, and a component that needs different ones needs a
+  /// different rung rather than a local edit.
+  static TextStyle withWeight(TextStyle style, FontWeight weight) =>
+      style.copyWith(fontWeight: weight, fontVariations: _wght(weight));
+
   /// One rung of the scale, in the display face.
   ///
   /// **[size], [height] and [tracking] are stated, never inherited.** Every

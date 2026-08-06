@@ -5,6 +5,7 @@ import 'app_icon_size.dart';
 import 'app_interaction_states.dart';
 import 'app_semantic_colors.dart';
 import 'app_spacing.dart';
+import 'app_typography.dart';
 
 /// The chip theme — `MxPillButton`'s entire appearance.
 ///
@@ -95,6 +96,46 @@ Color _labelColorFor(
   return scheme.onSurfaceVariant;
 }
 
+/// The weight a chip label is set in — the one property where the chip parts
+/// from `label-lg`, and the only rung-level exception in the app.
+///
+/// **A chip is not a button, and `label-lg` is the button's weight.** This app
+/// sets `label-lg` at 600 where Material 3 sets it at 500, deliberately and for
+/// `FilledButton`: a label reversed out of a solid fill needs the extra stroke.
+/// `ChipThemeData` reads the same rung, so the pill inherited a raise that was
+/// argued for a surface it does not have — it sits on the page behind a hairline
+/// at 1.50:1, with no fill carrying it.
+///
+/// **Measured on a device render, not judged from the code.** At the same 14px
+/// as the search field's hint the pill labels covered 0.340 and 0.364 of their
+/// glyph box against the hint's 0.271 — 26-34% more ink at an identical
+/// ascender height of 27px. That put two toggles at ranks 2 and 3 in the
+/// screen's ink hierarchy, under the deck name (0.409) and over the section
+/// heading they belong to, `Show today's summary`, and the search field.
+///
+/// 500 is Material's own chip weight, and `--weight-medium` in the kit, so this
+/// rejoins a spec rather than inventing a value. Size, leading and tracking stay
+/// `label-lg`: the label was never the wrong *size*.
+const FontWeight _chipLabelWeight = FontWeight.w500;
+
+/// `label-lg` re-weighted, with the state-aware colour Material resolves.
+TextStyle? _labelStyle(
+  TextTheme texts,
+  ColorScheme scheme,
+  AppSemanticColors semantic,
+) {
+  final rung = texts.labelLarge;
+  if (rung == null) {
+    return null;
+  }
+
+  return AppTypography.withWeight(rung, _chipLabelWeight).copyWith(
+    color: WidgetStateColor.resolveWith(
+      (states) => _labelColorFor(scheme, semantic, states),
+    ),
+  );
+}
+
 ChipThemeData buildChipTheme(
   ColorScheme scheme,
   AppSemanticColors semantic,
@@ -121,11 +162,7 @@ ChipThemeData buildChipTheme(
     return BorderSide(color: semantic.borderSubtle);
   }),
   shape: const StadiumBorder(),
-  labelStyle: texts.labelLarge?.copyWith(
-    color: WidgetStateColor.resolveWith(
-      (states) => _labelColorFor(scheme, semantic, states),
-    ),
-  ),
+  labelStyle: _labelStyle(texts, scheme, semantic),
   iconTheme: IconThemeData(
     size: AppIconSize.sm,
     color: scheme.onSurfaceVariant,

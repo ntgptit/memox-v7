@@ -1,11 +1,9 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/shared/widgets/mx_confirm_dialog.dart';
+import 'package:memox/shared/widgets/mx_pill_button.dart';
 import 'package:memox/shared/widgets/mx_progress_bar.dart';
 import 'package:memox/shared/widgets/mx_search_field.dart';
-import 'package:memox/shared/widgets/mx_action_sheet.dart';
-import 'package:memox/shared/widgets/mx_confirm_dialog.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
 
 /// Specimen widgets for the golden suite.
@@ -13,6 +11,10 @@ import 'package:memox/shared/widgets/mx_text_field.dart';
 /// They live here rather than beside the cases because a specimen is a test
 /// fixture, not a test: none of them asserts anything, and keeping them in
 /// the same file pushed it past the size the guard allows.
+///
+/// A specimen is what gets photographed. The stands it sometimes has to sit on
+/// — focus, an open route, a highlight strategy — moved to `golden_hosts.dart`
+/// when the pill specimen took this file past that guard a second time.
 void noop() {}
 
 /// Swallows a destination index.
@@ -40,32 +42,6 @@ const List<NavigationDestination> navigationDestinations =
         label: 'Review',
       ),
     ];
-
-/// Takes focus on its first frame, so the golden captures the focused border
-/// rather than the resting one.
-class AutoFocusedField extends StatefulWidget {
-  const AutoFocusedField({super.key});
-
-  @override
-  State<AutoFocusedField> createState() => _AutoFocusedFieldState();
-}
-
-class _AutoFocusedFieldState extends State<AutoFocusedField> {
-  final FocusNode _node = FocusNode();
-
-  @override
-  void dispose() {
-    _node.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => TextField(
-    focusNode: _node,
-    autofocus: true,
-    decoration: const InputDecoration(hintText: 'Search'),
-  );
-}
 
 /// One line per text role, so a missing family or a stuck weight axis is
 /// visible rather than inferred.
@@ -190,97 +166,6 @@ class ConfirmDialogSpecimen extends StatelessWidget {
   );
 }
 
-/// Opens a real modal bottom sheet on the first frame and leaves it open.
-///
-/// `pumpAndSettle` runs the open animation to completion before the frame is
-/// captured, so the curve is finished rather than sampled mid-flight.
-class HostedModalSheet extends StatefulWidget {
-  const HostedModalSheet({super.key});
-
-  @override
-  State<HostedModalSheet> createState() => _HostedModalSheetState();
-}
-
-class _HostedModalSheetState extends State<HostedModalSheet> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      unawaited(
-        showModalBottomSheet<void>(
-          context: context,
-          builder: (_) => const MxActionSheet(
-            title: 'Add to this deck',
-            actions: <MxActionSheetAction>[
-              MxActionSheetAction(
-                label: 'Create card',
-                icon: Icons.note_add_outlined,
-                onPressed: noop,
-              ),
-              MxActionSheetAction(
-                label: 'Move',
-                icon: Icons.drive_file_move_outlined,
-                isEnabled: false,
-                onPressed: noop,
-              ),
-              MxActionSheetAction(
-                label: 'Delete',
-                icon: Icons.delete_outline,
-                variant: MxActionSheetActionVariant.destructive,
-                onPressed: noop,
-              ),
-            ],
-          ),
-        ),
-      );
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) => const Scaffold(body: SizedBox.expand());
-}
-
-/// Moves focus onto its child on the first frame, with the keyboard highlight
-/// strategy forced on.
-///
-/// Without the strategy Flutter suppresses the focus ring -- the widget is
-/// focused and the golden shows nothing, which would pin the absence of the
-/// indicator instead of its appearance.
-class FocusedOnFirstFrame extends StatefulWidget {
-  const FocusedOnFirstFrame({required this.child, super.key});
-
-  final Widget child;
-
-  @override
-  State<FocusedOnFirstFrame> createState() => _FocusedOnFirstFrameState();
-}
-
-class _FocusedOnFirstFrameState extends State<FocusedOnFirstFrame> {
-  late final FocusHighlightStrategy _previous;
-
-  @override
-  void initState() {
-    super.initState();
-    _previous = FocusManager.instance.highlightStrategy;
-    FocusManager.instance.highlightStrategy =
-        FocusHighlightStrategy.alwaysTraditional;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      FocusScope.of(context).nextFocus();
-    });
-  }
-
-  @override
-  void dispose() {
-    FocusManager.instance.highlightStrategy = _previous;
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => widget.child;
-}
-
 /// Both sizes and both fills in one frame.
 ///
 /// The complete bar is the half worth pinning: it is the only place the fill
@@ -314,6 +199,62 @@ class ProgressBarSpecimen extends StatelessWidget {
       ),
     );
   }
+}
+
+/// The pill group, over the hint it sits beside on the deck list.
+///
+/// **The reference line is the specimen, not decoration.** `MxPillButton` had no
+/// golden at all until the weight it borrowed from the button was measured off a
+/// device render — and a golden holding only pills would have recorded 600 as
+/// correct, because a weight has nothing to be wrong against on its own. Both
+/// rungs here are 14px, so the picture answers one question: does the control
+/// out-shout the text it belongs to?
+///
+/// Selected and unselected together, because the label colour swaps with the
+/// fill and only one of the two states would otherwise be pinned.
+class PillGroupSpecimen extends StatelessWidget {
+  const PillGroupSpecimen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              'Search your whole library',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            const Wrap(
+              spacing: AppSpacing.sm,
+              children: <Widget>[
+                MxPillButton(
+                  label: 'All decks',
+                  icon: Icons.filter_list,
+                  isSelected: false,
+                  onPressed: _noop,
+                ),
+                MxPillButton(
+                  label: 'Due only',
+                  icon: Icons.filter_list,
+                  isSelected: true,
+                  onPressed: _noop,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static void _noop() {}
 }
 
 /// Empty and in use, one above the other.
