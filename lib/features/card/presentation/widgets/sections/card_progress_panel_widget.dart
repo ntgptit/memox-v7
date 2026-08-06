@@ -108,7 +108,11 @@ class _StudyAction extends ConsumerWidget {
     final hasReturningCards = due > 0;
 
     return Padding(
-      padding: const EdgeInsets.only(top: AppSpacing.lg),
+      // `xl`, not `lg`: this is the break between reading the deck and acting on
+      // it, and at 16 the button sat as close to the last legend row as the two
+      // legend rows sit to each other. A section break should not measure the
+      // same as the gap inside a section.
+      padding: const EdgeInsets.only(top: AppSpacing.xl),
       child: FilledButton(
         onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(context.l10n.deckStudyComingSoonMessage)),
@@ -147,8 +151,19 @@ class _StudyAction extends ConsumerWidget {
   }
 }
 
-const double _ringSize = 52;
-const double _ringStroke = 5;
+/// **64, up from 52 — and the drawn ring was never 52 anyway.** The box was that
+/// size, but `CircularProgressIndicator` inside a `Stack` takes its own
+/// intrinsic size and centres, so it painted at Material's default **36** with
+/// 16 of dead space around it. That is why the ring read as small and the
+/// percentage looked lost inside a panel this wide: the number was never the one
+/// in the source.
+///
+/// `Positioned.fill` below makes the arc actually take the box, so 64 is 64.
+const double _ringSize = 64;
+
+/// Scaled with the ring so the arc keeps its weight rather than thinning out as
+/// the circle grows.
+const double _ringStroke = 6;
 const double _barHeight = 8;
 const double _legendDotSize = 8;
 
@@ -166,13 +181,18 @@ class _ProgressRing extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: <Widget>[
-          CircularProgressIndicator(
-            value: fraction,
-            strokeWidth: _ringStroke,
-            // The arc is non-text — 3:1 is enough — so `success` carries the
-            // "mastered" meaning; the track is the muted surface behind it.
-            color: context.semanticColors.success,
-            backgroundColor: context.semanticColors.progressTrack,
+          // `Positioned.fill`, not a bare child: an indicator in a `Stack` sizes
+          // itself and centres, so without this the arc ignores the box it was
+          // given.
+          Positioned.fill(
+            child: CircularProgressIndicator(
+              value: fraction,
+              strokeWidth: _ringStroke,
+              // The arc is non-text — 3:1 is enough — so `success` carries the
+              // "mastered" meaning; the track is the muted surface behind it.
+              color: context.semanticColors.success,
+              backgroundColor: context.semanticColors.progressTrack,
+            ),
           ),
           Text(
             context.l10n.cardProgressPercent((fraction * 100).round()),
