@@ -5,6 +5,7 @@ import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_card.dart';
@@ -231,9 +232,19 @@ class _Headline extends ConsumerWidget {
       children: <Widget>[
         Text(
           context.l10n.cardProgressTitle.toUpperCase(),
-          style: context.texts.labelSmall?.copyWith(
-            color: quiet,
-            letterSpacing: 1.1,
+          // **`label-md` on `onSurface`, not `label-sm` on the muted colour.**
+          // It is the panel's heading and it was set smaller *and* fainter than
+          // the line it introduces — 11px at `onSurfaceVariant` above 14px at
+          // `onSurface` — so it read as a caption under the ring rather than as
+          // the title of the block. Same rung as `YOUR DECKS` on the deck list
+          // now, and the same colour as the count it heads.
+          //
+          // It stays uppercase with the section tracking, which is what keeps it
+          // a heading rather than a competing statistic: it is 12 against the
+          // count's 14, and it carries no number of its own.
+          style: context.texts.labelMedium?.copyWith(
+            color: context.colors.onSurface,
+            letterSpacing: AppTypography.sectionLabelTracking,
           ),
         ),
         const SizedBox(height: AppSpacing.xs),
@@ -299,12 +310,34 @@ class _Legend extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: AppSpacing.md,
-      runSpacing: AppSpacing.xs,
+    // **Two fixed columns, not a `Wrap`.** The four items need 372 across and
+    // the panel gives them 326, so a `Wrap` put three on one line and left
+    // `Mastered` alone on the next — a ragged break that reads as a mistake
+    // rather than as a layout. Two by two is the same information in two even
+    // rows, and the columns line up because each cell takes half the width
+    // instead of its own.
+    //
+    // Down the rows in `CardState` order, so it still reads New → Beginning →
+    // Reviewing → Mastered left to right, top to bottom.
+    const states = CardState.values;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      spacing: AppSpacing.xs,
       children: <Widget>[
-        for (final state in CardState.values)
-          _LegendItem(state: state, count: distribution.countOf(state)),
+        for (var row = 0; row < states.length; row += 2)
+          Row(
+            spacing: AppSpacing.md,
+            children: <Widget>[
+              for (var column = 0; column < 2; column++)
+                Expanded(
+                  child: _LegendItem(
+                    state: states[row + column],
+                    count: distribution.countOf(states[row + column]),
+                  ),
+                ),
+            ],
+          ),
       ],
     );
   }

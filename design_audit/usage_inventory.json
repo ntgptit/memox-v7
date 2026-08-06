@@ -1,13 +1,13 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
   "scannedFiles": 213,
-  "totalSites": 330,
+  "totalSites": 331,
   "byElementKind": {
     "other": 263,
     "background": 10,
     "shadow": 1,
     "border": 10,
-    "text": 35,
+    "text": 36,
     "icon": 11
   },
   "bySourceKind": {
@@ -16,7 +16,7 @@
     "Colors-material": 5,
     "hardcoded-literal": 95,
     "opacity-modified-token": 11,
-    "theme-token": 75
+    "theme-token": 76
   },
   "sites": [
     {
@@ -2980,7 +2980,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 138,
+      "line": 139,
       "widget_context": "_StudyAction",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -2991,7 +2991,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 173,
+      "line": 174,
       "widget_context": "_ProgressRing",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3002,7 +3002,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 174,
+      "line": 175,
       "widget_context": "_ProgressRing",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -3013,7 +3013,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 219,
+      "line": 220,
       "widget_context": "_Headline",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3024,7 +3024,18 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 341,
+      "line": 246,
+      "widget_context": "_Headline",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurface",
+      "token": "colorScheme.onSurface",
+      "resolved_value_light": "#16182B",
+      "resolved_value_dark": "#EDEDF6"
+    },
+    {
+      "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
+      "line": 374,
       "widget_context": "_LegendItem",
       "element_kind": "text",
       "source_kind": "theme-token",

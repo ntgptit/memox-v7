@@ -5952,6 +5952,41 @@ strip 358 đòi mỗi pill ≤ 83.5, tức nhãn ≤ 37.5px ở 12sp sau khi tr�
 `Đến hạn` còn hơn. Muốn cân bằng bề rộng thì phải rút nhãn hoặc bỏ icon trước,
 không phải chỉnh layout.
 
+### M4.11p · Tiêu đề panel tiến độ thôi mờ hơn nội dung, và legend hết gãy dòng
+
+- **Status:** **done** — 1400/1400 test pass, `flutter analyze` sạch,
+  `dart format` sạch, guard `memox-v7` 0 violation.
+- **Goal:** `DECK PROGRESS` MUST đọc ra là tiêu đề của khối, và bốn nhãn trạng
+  thái MUST KHÔNG gãy dòng lẻ.
+- **Scope:** `card_progress_panel_widget.dart` (`_Legend` và style tiêu đề),
+  2 golden.
+- **Out of scope:** ring, thanh phân bố, nút Start study, các con số.
+- **Dependencies:** M4.11o
+- **Checklist phases:** 7
+- **Editable documents:** `docs/wbs.md`
+- **Output:** không có file mới
+- **Tests required:** đo cỡ chữ tiêu đề và vị trí từng mục legend; toàn bộ
+  suite; 2 golden sinh lại
+- **Acceptance criteria:**
+  - [x] Tiêu đề `label-md` trên `onSurface`, cùng rung với `YOUR DECKS`.
+  - [x] Bốn mục legend nằm 2×2, thẳng cột, không mục nào đứng một mình.
+
+**Tiêu đề nhỏ hơn *và* nhạt hơn thứ nó giới thiệu.** Đo được: `DECK PROGRESS`
+11px `w500` trên `onSurfaceVariant`, ngay trên `44 of 142 mastered` 14px `w600`
+trên `onSurface`. Một tiêu đề thua nội dung ở cả hai chiều thì đọc ra là chú
+thích dưới cái ring, không phải tên của khối. Nâng lên `label-md` trên
+`onSurface` — cùng rung với `YOUR DECKS` ở màn deck, và cùng màu với dòng nó
+đứng đầu. Vẫn viết hoa và giữ section tracking, đó là thứ giữ nó ở vai trò tiêu
+đề: 12 so với 14 của con số, và bản thân nó không mang số nào.
+
+**`Wrap` gãy 3 + 1, và đó là gãy chứ không phải xuống dòng.** Bốn mục cần 371.9
+theo chiều ngang, panel cho 326 — nên `Mastered 44` đứng một mình ở dòng hai
+(top 124 so với 104 của ba mục kia). Đổi sang hai hàng, mỗi hàng hai
+`Expanded`: cùng lượng thông tin trong hai dòng đều nhau, và **cột thẳng hàng**
+vì mỗi ô lấy nửa bề rộng thay vì lấy theo nội dung. Thứ tự vẫn là thứ tự
+`CardState`, đọc trái sang phải rồi xuống dòng: New → Beginning → Reviewing →
+Mastered.
+
 ### M4.12a · Starter template, loader và seed idempotent
 
 - **Status:** **done** — 1398/1398 test pass, `flutter analyze` sạch,
