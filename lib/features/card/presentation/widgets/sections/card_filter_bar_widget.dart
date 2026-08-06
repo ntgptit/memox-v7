@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_pill_button.dart';
 import '../../../domain/models/card_list_filter_model.dart';
 import '../../controllers/card_list_filter_controller.dart';
 
@@ -68,20 +69,39 @@ class CardFilterBarWidget extends ConsumerWidget {
             context.l10n.cardFilterFlagged(flagged ?? 0),
             CardListFilter.flagged,
             active,
+            // **A glyph, not a character.** The label used to open with `⚑`
+            // (U+2691) and no font in the bundle carries it — Inter,
+            // PlusJakartaSans and NotoSansKR all miss it — so the shipped
+            // goldens render a tofu box in both themes. A device with a wider
+            // system font might draw a flag, which makes it worse: the mark was
+            // correct or not depending on where you looked. The card row beside
+            // it already uses `Icons.flag`; this is the same flag.
+            icon: Icons.flag,
           ),
         ],
       ),
     );
   }
 
+  /// **`MxPillButton`, not a bare `FilterChip`.** This row was the one place in
+  /// the app building a chip by hand, which cost it three things at once: the
+  /// flag had to be a character because there was nowhere to put an icon, the
+  /// label sat a rung above every other pill in the app, and the shared
+  /// component's own fixes — the zeroed `labelPadding`, the composed icon gap —
+  /// arrived everywhere except here.
+  ///
+  /// The control is also more accurate: these four are one-of-four, which is a
+  /// `ChoiceChip`'s semantics, not a `FilterChip`'s independent on/off.
   Widget _pill(
     WidgetRef ref,
     String label,
     CardListFilter filter,
-    CardListFilter active,
-  ) => FilterChip(
-    label: Text(label),
-    selected: filter == active,
-    onSelected: (_) => _selectFilter(ref, deckId, filter),
+    CardListFilter active, {
+    IconData? icon,
+  }) => MxPillButton(
+    label: label,
+    icon: icon,
+    isSelected: filter == active,
+    onPressed: () => _selectFilter(ref, deckId, filter),
   );
 }

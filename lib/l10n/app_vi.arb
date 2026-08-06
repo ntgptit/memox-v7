@@ -732,7 +732,7 @@
     "placeholders": { "count": { "type": "int" } },
     "description": "The New filter pill with its count (D3, BR-90)."
   },
-  "cardFilterFlagged": "⚑ Đã gắn cờ {count}",
+  "cardFilterFlagged": "Đã gắn cờ {count}",
   "@cardFilterFlagged": {
     "placeholders": { "count": { "type": "int" } },
     "description": "The Flagged filter pill with its count (D3, BR-92)."

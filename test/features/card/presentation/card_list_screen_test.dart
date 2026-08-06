@@ -9,7 +9,9 @@ import 'package:memox/features/card/domain/models/card_state_model.dart';
 import 'package:memox/features/card/domain/models/deck_context_model.dart';
 import 'package:memox/features/card/presentation/controllers/card_list_window_controller.dart';
 import 'package:memox/features/card/presentation/screens/card_list_screen.dart';
+import 'package:memox/features/card/presentation/widgets/items/card_tile_widget.dart';
 import 'package:memox/l10n/generated/app_localizations.dart';
+import 'package:memox/shared/widgets/mx_pill_button.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
 
@@ -99,8 +101,16 @@ void main() {
       repository.emitCount(2);
       await tester.pump();
 
-      // One flag icon, for the one flagged card.
-      expect(find.byIcon(Icons.flag), findsOneWidget);
+      // One flag icon **among the rows** — the Flagged filter pill above them
+      // carries the same glyph now, so an unscoped finder counts two and the
+      // assertion stops being about the row at all.
+      expect(
+        find.descendant(
+          of: find.byType(CardTileWidget),
+          matching: find.byIcon(Icons.flag),
+        ),
+        findsOneWidget,
+      );
     },
   );
 
@@ -185,9 +195,10 @@ void main() {
     repository.emitCount(10);
     await tester.pumpAndSettle();
 
-    // The pill carries its count.
-    expect(find.widgetWithText(FilterChip, 'New 4'), findsOneWidget);
-    await tester.tap(find.widgetWithText(FilterChip, 'New 4'));
+    // The pill carries its count. `MxPillButton` rather than `FilterChip`: the
+    // filter row went through the shared pill so the flag could be an icon.
+    expect(find.widgetWithText(MxPillButton, 'New 4'), findsOneWidget);
+    await tester.tap(find.widgetWithText(MxPillButton, 'New 4'));
     // A plain pump, not settle: switching filter re-subscribes the list, which
     // spins until the fake re-emits, and pumpAndSettle would wait on the spinner.
     await tester.pump();
