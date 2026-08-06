@@ -139,10 +139,7 @@ void main() {
       _scope(repo, const CardListScreen(deckId: 'demo'), Brightness.light),
     );
 
-    await matchesReviewGolden(
-      find.byType(CardListScreen),
-      'goldens/card_list_light.png',
-    );
+    await matchesReviewGolden('goldens/card_list_light.png');
   });
 
   testWidgets('card list — dark', (tester) async {
@@ -164,10 +161,7 @@ void main() {
       _scope(repo, const CardListScreen(deckId: 'demo'), Brightness.dark),
     );
 
-    await matchesReviewGolden(
-      find.byType(CardListScreen),
-      'goldens/card_list_dark.png',
-    );
+    await matchesReviewGolden('goldens/card_list_dark.png');
   });
 
   testWidgets('card editor — edit mode (tags, flag, danger zone)', (
@@ -199,9 +193,6 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await matchesReviewGolden(
-      find.byType(CardEditorScreen),
-      'goldens/card_editor_edit.png',
-    );
+    await matchesReviewGolden('goldens/card_editor_edit.png');
   });
 }
