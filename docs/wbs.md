@@ -5749,6 +5749,52 @@ giờ đếm được hai — pill Flagged và hàng card — nên nó được 
 `CardTileWidget`, tức nói đúng điều nó muốn nói. Cái còn lại đổi `FilterChip`
 thành `MxPillButton`.
 
+### M4.11k · Bốn pill filter đều có icon, và số đếm rời nhãn sang semantics
+
+- **Status:** **done** — 1400/1400 test pass, `flutter analyze` sạch,
+  `dart format` sạch, guard `memox-v7` 0 violation.
+- **Goal:** Cả bốn pill filter MUST mang icon, và hàng MUST vừa màn ở cả 390
+  lẫn 360.
+- **Scope:** `card_filter_bar_widget.dart`, 4 nhãn + 1 chuỗi semantics trong
+  ARB (en + vi), 1 assertion, 2 golden.
+- **Out of scope:** predicate, thứ tự, hành vi bộ lọc.
+- **Dependencies:** M4.11j
+- **Checklist phases:** 7, 12, 13
+- **Editable documents:** `docs/wbs.md`
+- **Output:** không có file mới
+- **Tests required:** đo bề rộng hàng ở 390/360 với đếm 1 và 3 chữ số; toàn bộ
+  suite; 2 golden sinh lại sau khi chủ dự án chọn phương án
+- **Acceptance criteria:**
+  - [x] Bốn pill đều có icon, lấy từ từ vựng icon sẵn có của app.
+  - [x] Hàng vừa ở **cả** 390 và 360, và không đổi theo độ dài số đếm.
+  - [x] Số đếm vẫn được screen reader đọc trên **mọi** pill.
+
+**Thêm icon và giữ số đếm là hai thứ không cùng vừa màn — đo mới thấy.** Mỗi
+icon tốn 20 (16 icon + gap 4), ba icon mới là +60. Số đo ở 390 (374 khả kiến):
+
+| phương án | hàng dài | 390 | 360 |
+|---|---|---|---|
+| icon cả 4 + giữ số | 418.0 | tràn 44 | tràn 74 |
+| **icon cả 4 + bỏ số** | **341.6** | **vừa** | **vừa** |
+| chỉ Flagged có icon | 354.0 | vừa | tràn |
+
+Chủ dự án chọn phương án giữa. Nó không chỉ vừa — nó **không còn phụ thuộc số
+đếm**: nhãn cố định nên deck 3 chữ số hay 1 chữ số đều 341.6, trong khi hai
+phương án kia co giãn theo dữ liệu và chỉ vừa cho một khoảng.
+
+**Số đếm rời *nhãn*, không rời *pill*.** Panel tiến độ ngay dưới đã nhắc lại
+All, Due và New (`44 of 142 mastered`, `23 due · 38 new`), nên bỏ số khỏi ba
+pill đó không mất gì. **Flagged thì không được nhắc ở đâu khác** — và một screen
+reader không có ràng buộc bề rộng nào cả. Nên số vẫn được đọc, trên cả bốn pill,
+qua `semanticLabel` với chuỗi `cardFilterSemantics`.
+
+**Icon lấy từ từ vựng sẵn có, không phát minh mới.** `Icons.schedule` là glyph
+mà `deck_due_state_widget.dart` đã dùng cho "khi nào"; `Icons.style_outlined` là
+glyph empty state của card list dùng cho "thẻ"; `Icons.flag` là cờ hàng card
+dùng. Riêng New chưa có tiền lệ: chọn `Icons.circle_outlined` — vòng tròn rỗng
+là hình của "chưa bắt đầu" bên cạnh chấm đặc mà mỗi hàng mang. `Icons.fiber_new`
+là lựa chọn hiển nhiên và sai: nó vẽ chữ NEW, ngay cạnh chữ New.
+
 ### M4.12a · Starter template, loader và seed idempotent
 
 - **Status:** **done** — 1398/1398 test pass, `flutter analyze` sạch,

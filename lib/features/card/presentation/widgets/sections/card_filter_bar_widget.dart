@@ -44,31 +44,50 @@ class CardFilterBarWidget extends ConsumerWidget {
       child: Row(
         children: <Widget>[
           _pill(
+            context,
             ref,
-            context.l10n.cardFilterAll(all ?? 0),
+            context.l10n.cardFilterAll,
             CardListFilter.all,
             active,
+            count: all,
+            // The same glyph the deck's empty state uses for "cards".
+            icon: Icons.style_outlined,
           ),
           const SizedBox(width: AppSpacing.sm),
           _pill(
+            context,
             ref,
-            context.l10n.cardFilterDue(due ?? 0),
+            context.l10n.cardFilterDue,
             CardListFilter.due,
             active,
+            count: due,
+            // The deck row's due state already means "when" with this clock
+            // (`deck_due_state_widget.dart`); a second glyph for the same idea
+            // would be a second vocabulary to learn.
+            icon: Icons.schedule,
           ),
           const SizedBox(width: AppSpacing.sm),
           _pill(
+            context,
             ref,
-            context.l10n.cardFilterNew(fresh ?? 0),
+            context.l10n.cardFilterNew,
             CardListFilter.isNew,
             active,
+            count: fresh,
+            // An open circle, because that is what "not started" looks like
+            // beside the filled state dot each row carries. `fiber_new` was the
+            // obvious pick and is wrong: it draws the word NEW, directly beside
+            // the word New.
+            icon: Icons.circle_outlined,
           ),
           const SizedBox(width: AppSpacing.sm),
           _pill(
+            context,
             ref,
-            context.l10n.cardFilterFlagged(flagged ?? 0),
+            context.l10n.cardFilterFlagged,
             CardListFilter.flagged,
             active,
+            count: flagged,
             // **A glyph, not a character.** The label used to open with `⚑`
             // (U+2691) and no font in the bundle carries it — Inter,
             // PlusJakartaSans and NotoSansKR all miss it — so the shipped
@@ -93,15 +112,25 @@ class CardFilterBarWidget extends ConsumerWidget {
   /// The control is also more accurate: these four are one-of-four, which is a
   /// `ChoiceChip`'s semantics, not a `FilterChip`'s independent on/off.
   Widget _pill(
+    BuildContext context,
     WidgetRef ref,
     String label,
     CardListFilter filter,
     CardListFilter active, {
-    IconData? icon,
+    required IconData icon,
+    int? count,
   }) => MxPillButton(
     label: label,
     icon: icon,
     isSelected: filter == active,
     onPressed: () => _selectFilter(ref, deckId, filter),
+    // **The count left the label, not the pill.** The row stopped fitting once
+    // every pill carried an icon, and the visible number was the cheapest thing
+    // to give up: the progress panel directly below repeats All, Due and New.
+    // Nothing repeats Flagged, and a reader has none of the width problem that
+    // caused this — so the number is still announced, on every pill.
+    semanticLabel: count == null
+        ? null
+        : context.l10n.cardFilterSemantics(label, count),
   );
 }
