@@ -10,14 +10,24 @@ import '../support/golden_density.dart';
 
 /// Design exploration: composition studies under the **production** theme.
 ///
-/// **These are look-alikes, not the app.** `_ReviewScreen`, `_DeckListScreen`
-/// and `_SettingsScreen` are private replicas built to argue about colour before
-/// the real screens existed. Auditing a replica proves only that the replica is
-/// correct — the production screens are audited from
+/// **These are look-alikes, not the app.** `_ReviewScreen` and `_SettingsScreen`
+/// are private replicas built to argue about colour before the real screens
+/// existed. Auditing a replica proves only that the replica is correct — the
+/// production screens are audited from
 /// `test/visual_audit/screens/audited_screens.dart`, and the coverage gate there
 /// is what makes sure none is forgotten. The folder is named `design_preview`
 /// rather than `review` so the two are not mistaken for each other, which they
 /// were.
+///
+/// **A replica lives only until its screen does.** `_DeckListScreen` was here
+/// until M4.11h. `DeckListScreen` shipped, and the replica went on showing a
+/// "Library" title, a full-width `Study 15 cards due today` button and a text
+/// due badge — none of which the real screen has had for months. By then it was
+/// not a stale picture of the deck list; it was a picture of a different screen,
+/// and the two goldens under it made that read as coverage. What is left here is
+/// what still has no production screen to be a replica *of*: Review and Settings
+/// arrive with M5. When one of them ships, its replica leaves the same way, and
+/// `test/demo/` renders the real thing instead.
 ///
 /// Not a design-system component and not shipped: nothing here is imported by
 /// `lib/`. It exists because the questions that decide a palette cannot be
