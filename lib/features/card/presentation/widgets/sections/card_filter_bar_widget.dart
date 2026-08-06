@@ -35,69 +35,93 @@ class CardFilterBarWidget extends ConsumerWidget {
     final fresh = ref.watch(cardNewCountProvider(deckId)).value;
     final flagged = ref.watch(cardFlaggedCountProvider(deckId)).value;
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      // Trailing gutter inside the scroll: without it the last pill (Flagged)
-      // ends flush against the viewport edge, so scrolled to the end it looks
-      // clipped rather than finished.
-      padding: const EdgeInsets.only(right: AppSpacing.lg),
-      child: Row(
-        children: <Widget>[
-          _pill(
-            context,
-            ref,
-            context.l10n.cardFilterAll,
-            CardListFilter.all,
-            active,
-            count: all,
-            // The same glyph the deck's empty state uses for "cards".
-            icon: Icons.style_outlined,
+    // **Spread across the width when the four fit, scrolled when they do not.**
+    // A plain `Row` inside a horizontal scroll takes its intrinsic width, so the
+    // pills bunched at the left and left a gap at the right that read as a
+    // missing fifth pill. `spaceBetween` alone cannot fix that — inside a scroll
+    // view the row has unbounded width, so there is no free space to distribute.
+    //
+    // Giving the row a `minWidth` of the viewport is what creates it: when the
+    // pills are narrower than the strip the row stretches to fill it and the
+    // gaps open evenly; when they are wider — a long locale, a large text scale
+    // — the row keeps its intrinsic width and scrolls, exactly as before.
+    //
+    // **No trailing gutter any more.** It existed so the last pill would not sit
+    // flush against the viewport edge when scrolled to the end. It also stopped
+    // the row reaching the right-hand gutter when everything fits, which is the
+    // whole point here; the subheader's own gutter already keeps the pill off
+    // the screen edge.
+    return LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minWidth: constraints.maxWidth),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            // **Both, and they do different jobs.** `spacing` is the floor —
+            // when the pills are wider than the strip and the row scrolls,
+            // `spaceBetween` has no free space to hand out and the pills would
+            // otherwise touch. `spaceBetween` then distributes whatever is left
+            // over on a screen where they do fit. The `SizedBox` separators this
+            // replaces could not do the second job: alignment would have spaced
+            // the gaps as children too, so the pills and the spacers would have
+            // drifted apart from each other.
+            spacing: AppSpacing.sm,
+            children: <Widget>[
+              _pill(
+                context,
+                ref,
+                context.l10n.cardFilterAll,
+                CardListFilter.all,
+                active,
+                count: all,
+                // The same glyph the deck's empty state uses for "cards".
+                icon: Icons.style_outlined,
+              ),
+              _pill(
+                context,
+                ref,
+                context.l10n.cardFilterDue,
+                CardListFilter.due,
+                active,
+                count: due,
+                // The deck row's due state already means "when" with this clock
+                // (`deck_due_state_widget.dart`); a second glyph for the same idea
+                // would be a second vocabulary to learn.
+                icon: Icons.schedule,
+              ),
+              _pill(
+                context,
+                ref,
+                context.l10n.cardFilterNew,
+                CardListFilter.isNew,
+                active,
+                count: fresh,
+                // An open circle, because that is what "not started" looks like
+                // beside the filled state dot each row carries. `fiber_new` was the
+                // obvious pick and is wrong: it draws the word NEW, directly beside
+                // the word New.
+                icon: Icons.circle_outlined,
+              ),
+              _pill(
+                context,
+                ref,
+                context.l10n.cardFilterFlagged,
+                CardListFilter.flagged,
+                active,
+                count: flagged,
+                // **A glyph, not a character.** The label used to open with `⚑`
+                // (U+2691) and no font in the bundle carries it — Inter,
+                // PlusJakartaSans and NotoSansKR all miss it — so the shipped
+                // goldens render a tofu box in both themes. A device with a wider
+                // system font might draw a flag, which makes it worse: the mark was
+                // correct or not depending on where you looked. The card row beside
+                // it already uses `Icons.flag`; this is the same flag.
+                icon: Icons.flag,
+              ),
+            ],
           ),
-          const SizedBox(width: AppSpacing.sm),
-          _pill(
-            context,
-            ref,
-            context.l10n.cardFilterDue,
-            CardListFilter.due,
-            active,
-            count: due,
-            // The deck row's due state already means "when" with this clock
-            // (`deck_due_state_widget.dart`); a second glyph for the same idea
-            // would be a second vocabulary to learn.
-            icon: Icons.schedule,
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          _pill(
-            context,
-            ref,
-            context.l10n.cardFilterNew,
-            CardListFilter.isNew,
-            active,
-            count: fresh,
-            // An open circle, because that is what "not started" looks like
-            // beside the filled state dot each row carries. `fiber_new` was the
-            // obvious pick and is wrong: it draws the word NEW, directly beside
-            // the word New.
-            icon: Icons.circle_outlined,
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          _pill(
-            context,
-            ref,
-            context.l10n.cardFilterFlagged,
-            CardListFilter.flagged,
-            active,
-            count: flagged,
-            // **A glyph, not a character.** The label used to open with `⚑`
-            // (U+2691) and no font in the bundle carries it — Inter,
-            // PlusJakartaSans and NotoSansKR all miss it — so the shipped
-            // goldens render a tofu box in both themes. A device with a wider
-            // system font might draw a flag, which makes it worse: the mark was
-            // correct or not depending on where you looked. The card row beside
-            // it already uses `Icons.flag`; this is the same flag.
-            icon: Icons.flag,
-          ),
-        ],
+        ),
       ),
     );
   }

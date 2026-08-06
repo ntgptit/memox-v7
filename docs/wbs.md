@@ -5795,6 +5795,48 @@ dùng. Riêng New chưa có tiền lệ: chọn `Icons.circle_outlined` — vòn
 là hình của "chưa bắt đầu" bên cạnh chấm đặc mà mỗi hàng mang. `Icons.fiber_new`
 là lựa chọn hiển nhiên và sai: nó vẽ chữ NEW, ngay cạnh chữ New.
 
+### M4.11l · Dải pill filter trải hết bề rộng khi vừa, cuộn khi không
+
+- **Status:** **done** — 1400/1400 test pass, `flutter analyze` sạch,
+  `dart format` sạch, guard `memox-v7` 0 violation.
+- **Goal:** Bốn pill MUST trải đều hết bề rộng strip khi chúng vừa, và MUST vẫn
+  cuộn được khi không vừa.
+- **Scope:** `card_filter_bar_widget.dart`, một allowance trong
+  `card_list_screen_visual_audit_test.dart`, 2 golden.
+- **Out of scope:** nhãn, icon, predicate, hành vi.
+- **Dependencies:** M4.11k
+- **Checklist phases:** 7
+- **Editable documents:** `docs/wbs.md`
+- **Output:** không có file mới
+- **Tests required:** toàn bộ suite; strict visual audit; 2 golden sinh lại
+- **Acceptance criteria:**
+  - [x] Bốn pill trải đều, pill cuối chạm gutter phải.
+  - [x] Vẫn cuộn khi nội dung rộng hơn strip.
+  - [x] Không overflow ở 320×568 @ textScaler 2.0.
+
+**`spaceBetween` một mình không làm được, và lý do đáng ghi.** Bên trong một
+`SingleChildScrollView` ngang, `Row` có bề rộng **không giới hạn** — nên không
+có khoảng thừa nào để phân phối, và alignment không có tác dụng gì. Thứ tạo ra
+khoảng thừa là `ConstrainedBox(minWidth: viewport)`: khi bốn pill hẹp hơn strip,
+row giãn ra đúng bằng strip và các khe mở đều; khi chúng rộng hơn — locale dài,
+text scale lớn — row giữ bề rộng nội dung và cuộn y như cũ.
+
+**`spacing` và `spaceBetween` cùng lúc, mỗi cái một việc.** `spacing` là **sàn**:
+khi row cuộn thì `spaceBetween` không còn gì để chia, và không có sàn thì các
+pill dính vào nhau. `spaceBetween` chia phần dư trên màn mà chúng vừa. Ba
+`SizedBox` ngăn cách trước đây không làm được việc thứ hai: alignment sẽ coi
+chính các spacer là children và giãn cách cả chúng, nên pill và spacer trôi xa
+nhau.
+
+**Trailing gutter bị bỏ, và nó vốn đang chống lại chính mục tiêu này.** Nó tồn
+tại để pill cuối không dính sát mép viewport khi cuộn tới cuối — nhưng nó cũng
+chặn row chạm tới gutter phải khi mọi thứ vừa. Gutter của subheader đã giữ pill
+cách mép màn rồi.
+
+**Audit đòi giải thích `_RenderLayoutBuilder`.** MX-VIS-001 không cho một render
+object nào đi qua mà không có lý do; `LayoutBuilder` không vẽ gì cả — nó báo
+constraint và dựng con, và cái con đó được audit riêng.
+
 ### M4.12a · Starter template, loader và seed idempotent
 
 - **Status:** **done** — 1398/1398 test pass, `flutter analyze` sạch,
