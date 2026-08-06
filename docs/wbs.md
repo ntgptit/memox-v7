@@ -6031,6 +6031,51 @@ panel cao khoảng 300 thì mắt bỏ qua, và nó nói đúng thứ legend nga
 bằng chữ. Nếu vòng chuyển sang multi-segment bốn màu thì thanh này nên bỏ, chứ
 không nên có ba lần cùng một thông tin.
 
+### M4.11r · Sub-text panel lên một rung, và phần phân bố tách file
+
+- **Status:** **done** — 1400/1400 test pass, `flutter analyze` sạch,
+  `dart format` sạch, guard `memox-v7` 0 violation.
+- **Goal:** Dòng `23 due · 38 new` MUST dễ đọc hơn mà MUST KHÔNG đánh mất thứ
+  bậc của nó dưới dòng headline.
+- **Scope:** `card_progress_panel_widget.dart`, file mới
+  `card_state_distribution_widget.dart`, 2 golden.
+- **Out of scope:** thứ tự legend, kích thước vòng, khoảng cách CTA — đã xong ở
+  M4.11p/q.
+- **Dependencies:** M4.11q
+- **Checklist phases:** 7, 13
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `card_state_distribution_widget.dart`
+- **Tests required:** đo contrast WCAG hai theme; toàn bộ suite; 2 golden
+- **Acceptance criteria:**
+  - [x] Sub-text lên `label-md`, **màu giữ nguyên**.
+  - [x] File panel dưới ngưỡng 400 dòng của guard.
+
+**Đề xuất "đậm màu lên cho đạt WCAG" đo ra là không có cơ sở.**
+`onSurfaceVariant` trên `surface` cho **6.41:1** ở light và **7.30:1** ở dark,
+so với ngưỡng AA body là 4.5:1 — light còn sát ngưỡng AAA (7:1) và dark thì
+vượt. Đổi sang `onSurface` sẽ đưa nó lên 16.95:1, tức ngang bằng dòng headline
+ngay trên, và đánh đổi một thứ bậc **có thật** lấy một mức tuân thủ **đã đạt**.
+
+Thứ thực sự nhỏ là cỡ chữ: 11px mang hai con số. Lên `label-md` (12) thì panel
+giờ đặt mọi thứ ở `label-md` trừ đúng một dòng headline — heading, sub-text và
+legend cùng một rung, headline một mình ở trên.
+
+**Guard bắt file vượt 400 dòng, và seam để tách nằm sẵn ở đó.** Thanh phân bố và
+legend là **một phát biểu** — thanh cho thấy tỉ lệ, legend gọi tên màu, và không
+cái nào có nghĩa nếu thiếu cái kia. Panel thì gồm ba ý riêng: một vòng, một phân
+bố, một hành động. Tách theo đúng đường đó: 411 → 294 + 150.
+
+**Hai mục còn lại trong yêu cầu không cần code.** Thứ tự legend đã đúng từ
+M4.11p (đo lại: hàng 1 New | Beginning, hàng 2 Reviewing | Mastered), và khoảng
+cách CTA đã lên `xl` = 24 ở M4.11q, đúng mức "+8" được đề nghị.
+
+**Donut multi-segment vẫn để ngỏ, có điều kiện.**
+`CircularProgressIndicator` nhận đúng một `value` — không có contract nào để
+truyền bốn đoạn vào, nên theo chính nguyên tắc "không làm vỡ component chung"
+thì nó phải là một `CustomPainter` mới chứ không phải một tham số mới. Khi làm,
+thanh phân bố nên bỏ: ba lần phát biểu cùng một phân bố trên một panel là hai
+lần thừa.
+
 ### M4.12a · Starter template, loader và seed idempotent
 
 - **Status:** **done** — 1398/1398 test pass, `flutter analyze` sạch,

@@ -10,10 +10,9 @@ import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../domain/models/card_state_distribution_model.dart';
-import '../../../domain/models/card_state_model.dart';
 import '../../controllers/card_list_filter_controller.dart';
 import '../../controllers/card_progress_controller.dart';
-import '../support/card_state_widget.dart';
+import 'card_state_distribution_widget.dart';
 
 /// The deck progress panel (D5): a mastered ring, the mastered/total line, and
 /// the four-state distribution as a bar and a legend (BR-88…BR-91).
@@ -52,9 +51,7 @@ class CardProgressPanelWidget extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          _DistributionBar(distribution: distribution),
-          const SizedBox(height: AppSpacing.sm),
-          _Legend(distribution: distribution),
+          CardStateDistributionWidget(distribution: distribution),
           _StudyAction(deckId: deckId),
         ],
       ),
@@ -164,8 +161,6 @@ const double _ringSize = 64;
 /// Scaled with the ring so the arc keeps its weight rather than thinning out as
 /// the circle grows.
 const double _ringStroke = 6;
-const double _barHeight = 8;
-const double _legendDotSize = 8;
 
 /// The mastered ring with its percentage (BR-88).
 class _ProgressRing extends StatelessWidget {
@@ -279,121 +274,20 @@ class _Headline extends ConsumerWidget {
           const SizedBox(height: AppSpacing.xs),
           Text(
             waiting,
-            style: context.texts.labelSmall?.copyWith(color: quiet),
+            // **`label-md`, not `label-sm` — and the colour deliberately does
+            // not move.** The line reads faint, and the obvious fix is to darken
+            // it; measured, `onSurfaceVariant` on `surface` is 6.41:1 in light
+            // and 7.30:1 in dark, against WCAG's 4.5:1 for body text. It is not
+            // a contrast problem, so darkening it would trade a real hierarchy
+            // — this sits under the headline, not level with it — for a
+            // compliance gain that does not exist.
+            //
+            // What was actually small is the type: 11px carrying two counts.
+            // 12 is the same rung as the heading above and the legend below, so
+            // the panel now sets everything except its one headline at label-md.
+            style: context.texts.labelMedium?.copyWith(color: quiet),
           ),
         ],
-      ],
-    );
-  }
-}
-
-/// The distribution as one bar of coloured segments, sized by count (D5).
-class _DistributionBar extends StatelessWidget {
-  const _DistributionBar({required this.distribution});
-
-  final CardStateDistributionModel distribution;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      label: context.l10n.cardProgressDistributionSemantics(
-        distribution.isNew,
-        distribution.beginning,
-        distribution.reviewing,
-        distribution.mastered,
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppSpacing.xs),
-        child: SizedBox(
-          height: _barHeight,
-          child: Row(
-            children: <Widget>[
-              for (final state in CardState.values)
-                if (distribution.countOf(state) > 0)
-                  Expanded(
-                    flex: distribution.countOf(state),
-                    child: ColoredBox(color: context.cardStateColor(state)),
-                  ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// The legend: each state's dot, name and count (BR-89…BR-91).
-class _Legend extends StatelessWidget {
-  const _Legend({required this.distribution});
-
-  final CardStateDistributionModel distribution;
-
-  @override
-  Widget build(BuildContext context) {
-    // **Two fixed columns, not a `Wrap`.** The four items need 372 across and
-    // the panel gives them 326, so a `Wrap` put three on one line and left
-    // `Mastered` alone on the next — a ragged break that reads as a mistake
-    // rather than as a layout. Two by two is the same information in two even
-    // rows, and the columns line up because each cell takes half the width
-    // instead of its own.
-    //
-    // Down the rows in `CardState` order, so it still reads New → Beginning →
-    // Reviewing → Mastered left to right, top to bottom.
-    const states = CardState.values;
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      spacing: AppSpacing.xs,
-      children: <Widget>[
-        for (var row = 0; row < states.length; row += 2)
-          Row(
-            spacing: AppSpacing.md,
-            children: <Widget>[
-              for (var column = 0; column < 2; column++)
-                Expanded(
-                  child: _LegendItem(
-                    state: states[row + column],
-                    count: distribution.countOf(states[row + column]),
-                  ),
-                ),
-            ],
-          ),
-      ],
-    );
-  }
-}
-
-class _LegendItem extends StatelessWidget {
-  const _LegendItem({required this.state, required this.count});
-
-  final CardState state;
-  final int count;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Container(
-          width: _legendDotSize,
-          height: _legendDotSize,
-          decoration: BoxDecoration(
-            color: context.cardStateColor(state),
-            shape: BoxShape.circle,
-          ),
-        ),
-        const SizedBox(width: AppSpacing.xs),
-        Text(
-          context.l10n.cardProgressLegendItem(
-            context.cardStateLabel(state),
-            count,
-          ),
-          // labelMedium on onSurface: four short counts a reader scans need to
-          // clear ordinary body text, and the muted variant sat under it.
-          style: context.texts.labelMedium?.copyWith(
-            color: context.colors.onSurface,
-          ),
-        ),
       ],
     );
   }
