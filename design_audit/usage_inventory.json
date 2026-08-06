@@ -1,6 +1,6 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 213,
+  "scannedFiles": 214,
   "totalSites": 331,
   "byElementKind": {
     "other": 263,
@@ -2980,7 +2980,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 143,
+      "line": 140,
       "widget_context": "_StudyAction",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -2991,7 +2991,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 193,
+      "line": 188,
       "widget_context": "_ProgressRing",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3002,7 +3002,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 194,
+      "line": 189,
       "widget_context": "_ProgressRing",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -3013,7 +3013,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 240,
+      "line": 235,
       "widget_context": "_Headline",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3024,7 +3024,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 266,
+      "line": 261,
       "widget_context": "_Headline",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3034,8 +3034,8 @@
       "resolved_value_dark": "#EDEDF6"
     },
     {
-      "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 394,
+      "file": "lib/features/card/presentation/widgets/sections/card_state_distribution_widget.dart",
+      "line": 144,
       "widget_context": "_LegendItem",
       "element_kind": "text",
       "source_kind": "theme-token",
