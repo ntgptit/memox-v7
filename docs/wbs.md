@@ -5706,6 +5706,49 @@ breadcrumb đều không nói. Cùng rung 12 là đủ; chip vẫn nổi hơn nh
 mới là thứ bậc đúng giữa một nhãn và một control. Màu **không** đổi sang
 `onSurface`: làm vậy nó sẽ ngang hàng với tên deck ngay dưới.
 
+### M4.11j · Pill filter của card list về chung một component, và `⚑` thôi là tofu
+
+- **Status:** **done** — 1400/1400 test pass, `flutter analyze` sạch,
+  `dart format` sạch, guard `memox-v7` 0 violation.
+- **Goal:** Mọi pill trong app MUST là một component; nhãn MUST KHÔNG dựa vào
+  ký tự mà font trong bundle không có.
+- **Scope:** `card_filter_bar_widget.dart`, `cardFilterFlagged` (en + vi),
+  2 assertion trong `card_list_screen_test.dart`, 2 golden.
+- **Out of scope:** predicate, thứ tự, hành vi của bộ lọc.
+- **Dependencies:** M4.11i
+- **Checklist phases:** 7, 12, 13
+- **Editable documents:** `docs/wbs.md`,
+  `docs/reviews/design-parity-checklist.md`
+- **Output:** không có file mới
+- **Tests required:** toàn bộ suite; 2 golden sinh lại sau khi chủ dự án xem
+  render
+- **Acceptance criteria:**
+  - [x] Bốn pill dùng `MxPillButton`, không còn `FilterChip` dựng tay.
+  - [x] Cờ là `Icons.flag`, không còn ký tự trong chuỗi ARB.
+  - [x] Bốn pill vẫn vừa màn 390 với đếm ba chữ số.
+
+**`⚑` U+2691 là tofu trong chính golden của dự án.** Không font nào trong bundle
+mang nó — Inter, PlusJakartaSans, NotoSansKR đều thiếu — nên cả hai golden vẽ ra
+một ô vuông có mã hex. Điều làm nó tệ hơn một lỗi hiển thị đơn thuần: máy có font
+hệ thống rộng hơn **có thể** vẽ ra hình cờ, nên dấu này đúng hay sai tuỳ chỗ
+người ta nhìn. Ngay hàng card bên dưới đã dùng `Icons.flag` và render sạch ở cả
+hai theme.
+
+**Nguyên nhân gốc là chỗ này bypass shared component.** `CardFilterBarWidget` là
+nơi duy nhất trong app còn dựng chip bằng tay, và cái giá trả cùng lúc ba thứ:
+cờ phải là ký tự vì không có chỗ đặt icon, nhãn đứng cao hơn mọi pill khác một
+rung, và các sửa chữa của `MxPillButton` — `labelPadding` bị zero, gap icon dựng
+trong label — đến được mọi nơi trừ đây. Chuyển sang `MxPillButton` đóng cả ba
+bằng một thay đổi.
+
+Ngữ nghĩa cũng đúng hơn: bốn pill này là chọn-một-trong-bốn, tức `ChoiceChip`,
+không phải `FilterChip` với các công tắc bật/tắt độc lập.
+
+**Hai assertion phải đổi, và cả hai đổi vì lý do tốt.** `find.byIcon(Icons.flag)`
+giờ đếm được hai — pill Flagged và hàng card — nên nó được thu vào trong
+`CardTileWidget`, tức nói đúng điều nó muốn nói. Cái còn lại đổi `FilterChip`
+thành `MxPillButton`.
+
 ### M4.12a · Starter template, loader và seed idempotent
 
 - **Status:** **done** — 1398/1398 test pass, `flutter analyze` sạch,

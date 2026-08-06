@@ -732,10 +732,10 @@
     "placeholders": { "count": { "type": "int" } },
     "description": "The New filter pill with its count (D3, BR-90)."
   },
-  "cardFilterFlagged": "⚑ Flagged {count}",
+  "cardFilterFlagged": "Flagged {count}",
   "@cardFilterFlagged": {
     "placeholders": { "count": { "type": "int" } },
-    "description": "The Flagged filter pill with its count (D3, BR-92)."
+    "description": "The Flagged filter pill with its count (D3, BR-92). No glyph in the string: the flag is an `Icons.flag` the pill draws. It used to open with `⚑` U+2691, which no bundled font carries — the goldens rendered a tofu box, and a device with a wider system font would draw a flag, so the mark was correct or not depending on where you looked."
   },
   "cardListNewAction": "New card",
   "@cardListNewAction": {
