@@ -5987,6 +5987,50 @@ vì mỗi ô lấy nửa bề rộng thay vì lấy theo nội dung. Thứ tự 
 `CardState`, đọc trái sang phải rồi xuống dòng: New → Beginning → Reviewing →
 Mastered.
 
+### M4.11q · Vòng tiến độ vẽ đúng cỡ nó được cho, và CTA có khoảng thở
+
+- **Status:** **done** — 1400/1400 test pass, `flutter analyze` sạch,
+  `dart format` sạch, guard `memox-v7` 0 violation.
+- **Goal:** Vòng tiến độ MUST chiếm đúng hộp nó được cấp, và nút hành động MUST
+  tách khỏi khối thông tin bằng một khoảng cách cấp section.
+- **Scope:** `card_progress_panel_widget.dart` (`_ProgressRing`, padding của
+  `_StudyAction`), 2 golden.
+- **Out of scope:** thứ tự legend (đã đúng, xem bên dưới); thanh phân bố.
+- **Dependencies:** M4.11p
+- **Checklist phases:** 7
+- **Editable documents:** `docs/wbs.md`
+- **Output:** không có file mới
+- **Tests required:** đo đường kính vòng và khoảng cách CTA; toàn bộ suite;
+  2 golden sinh lại
+- **Acceptance criteria:**
+  - [x] Vòng vẽ **64**, đúng bằng hộp của nó.
+  - [x] Khoảng cách legend → CTA từ 16 lên **24**.
+
+**Vòng chưa bao giờ vẽ ở 52.** `_ringSize` ghi 52 và hộp đúng 52, nhưng
+`CircularProgressIndicator` đặt trần trong `Stack` tự lấy kích thước nội tại và
+căn giữa — nên nó vẽ ở **36**, để lại 16 khoảng chết quanh mình. Đó là lý do
+vòng đọc ra nhỏ và con số phần trăm lọt thỏm: con số trong source không phải con
+số trên màn hình. `Positioned.fill` làm cung chiếm đúng hộp, và 64 giờ là 64 —
+tăng 78% so với thứ thực sự đang hiển thị.
+
+Stroke lên 6 theo: giữ nguyên 5 thì cung mảnh đi khi đường tròn to ra.
+
+**Khoảng cách legend → CTA lên `xl`.** Ở 16 nó bằng đúng khoảng cách giữa hai
+hàng legend, tức một section break đo bằng khoảng cách bên trong section. 24
+tách phần "đọc thông tin" khỏi phần "hành động".
+
+**Thứ tự legend đã đúng, không sửa.** Đo được: `New` (28, 104), `Beginning`
+(197, 104), `Reviewing` (28, 124), `Mastered` (197, 124) — tức hàng 1 là
+New | Beginning, hàng 2 là Reviewing | Mastered, đúng luồng tiến trình đọc trái
+sang phải rồi xuống dòng. Cùng một lưới đọc theo cột sẽ ra New → Reviewing, và
+đó là cách nhìn chứ không phải cách nó được xếp.
+
+**Quan sát để ngỏ: thanh phân bố gần như vô hình.** Nó có thật — đo được
+326×8 với bốn đoạn đúng tỉ lệ (87.2 / 71.2 / 66.6 / 101.0) — nhưng 8px trên một
+panel cao khoảng 300 thì mắt bỏ qua, và nó nói đúng thứ legend ngay dưới đã nói
+bằng chữ. Nếu vòng chuyển sang multi-segment bốn màu thì thanh này nên bỏ, chứ
+không nên có ba lần cùng một thông tin.
+
 ### M4.12a · Starter template, loader và seed idempotent
 
 - **Status:** **done** — 1398/1398 test pass, `flutter analyze` sạch,
