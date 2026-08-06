@@ -128,16 +128,6 @@ void main() {
       ),
       AuditSkipAllowance(
         itemId: 'shell',
-        reason: SkipReason.unknownRenderType,
-        detailContains: '_RenderLayoutBuilder',
-        rationale:
-            'The filter row measures its viewport so the pills can spread to '
-            'the full width when they fit and scroll when they do not. A '
-            'LayoutBuilder paints nothing at all — it reports constraints and '
-            'builds a child, which is audited on its own.',
-      ),
-      AuditSkipAllowance(
-        itemId: 'shell',
         reason: SkipReason.rasterNotFlat,
         detailContains: 'covers only 0%',
         rationale:
