@@ -1,0 +1,13 @@
+{
+  "name": "memox-e2e",
+  "private": true,
+  "description": "Playwright end-to-end suite for the Flutter Web build (AD-04: web is the E2E channel, not a production target).",
+  "scripts": {
+    "build": "flutter build web --release --no-web-resources-cdn -t lib/main_staging.dart",
+    "test": "playwright test",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.50.0"
+  }
+}

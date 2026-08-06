@@ -156,7 +156,7 @@ jobs:
           retention-days: 7
 
   web-build:
-    name: web build (E2E channel)
+    name: web build + Playwright E2E
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -185,5 +185,50 @@ jobs:
       # `--no-web-resources-cdn`: without it Flutter fetches CanvasKit from gstatic
       # at runtime even though it is bundled, so a CDN-blocked environment renders
       # nothing with no build error.
+      #
+      # Two things this build is NOT the default one:
+      #
+      # * `-t lib/main_staging.dart` — the default entrypoint is the development
+      #   config, which seeds the fixture decks at startup. The E2E flow begins
+      #   at "cold start with an empty database", and a seeded one makes its
+      #   first assertion meaningless.
+      # * `--dart-define=MEMOX_E2E=true` — holds the semantics tree open, which
+      #   is the only DOM Playwright can read from a canvas-rendered app. It is a
+      #   compile-time constant, so no shipped build carries it.
       - name: build web
-        run: flutter build web --release --no-web-resources-cdn
+        run: flutter build web --release --no-web-resources-cdn -t lib/main_staging.dart --dart-define=MEMOX_E2E=true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: e2e/package-lock.json
+
+      - name: install e2e dependencies
+        working-directory: e2e
+        run: npm ci
+
+      # Chromium rather than the machine's Chrome: the runner has no Chrome, and
+      # this is the engine the app ships to.
+      - name: install browser
+        working-directory: e2e
+        run: npx playwright install --with-deps chromium
+
+      - name: e2e
+        working-directory: e2e
+        env:
+          # Overrides `channel: 'chrome'` from the config, which is right on a
+          # developer machine and wrong here.
+          PLAYWRIGHT_BROWSER_CHANNEL: chromium
+        run: npx playwright test
+
+      - name: upload e2e report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            e2e/playwright-report/
+            e2e/test-results/
+          if-no-files-found: ignore
+          retention-days: 7
