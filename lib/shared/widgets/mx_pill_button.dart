@@ -23,6 +23,12 @@ import '../../core/theme/app_spacing.dart';
 /// The tap target is padded to [AppSpacing.minimumTouchTarget]. A chip's natural
 /// height is below it, and a control that is easy to see and hard to hit is worse
 /// than one that is neither.
+///
+/// **Almost nothing about its size is decided here.** Height, corner radius,
+/// horizontal padding, label style and every interaction state come from
+/// `chipTheme`, so this pill and the card list's filter pills cannot drift. The
+/// one exception is the gap between an icon and its label, which the theme
+/// cannot state without putting the same space on a chip that has no icon.
 class MxPillButton extends StatelessWidget {
   const MxPillButton({
     required this.label,
@@ -52,6 +58,19 @@ class MxPillButton extends StatelessWidget {
   /// abbreviation — `A–Z` reads as two letters, not as "sort by name".
   final String? semanticLabel;
 
+  /// The theme's chip label with `label-md`'s size, leading and tracking.
+  TextStyle? _labelStyle(BuildContext context) {
+    final themed = ChipTheme.of(context).labelStyle;
+    final rung = Theme.of(context).textTheme.labelMedium;
+    if (themed == null || rung == null) return themed;
+
+    return themed.copyWith(
+      fontSize: rung.fontSize,
+      height: rung.height,
+      letterSpacing: rung.letterSpacing,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final pressed = onPressed;
@@ -62,13 +81,75 @@ class MxPillButton extends StatelessWidget {
       // the chip's tap action along with its label, and without it the reader
       // announces the abbreviation *and* the expansion. Relabelling the child
       // leaves Material's own button and selected flags exactly where they were.
-      label: Text(label, semanticsLabel: semanticLabel),
+      // **The icon rides in the label, not in `avatar`.** Material reserves a
+      // fixed leading box for an avatar and centres the glyph in it, so a 16px
+      // icon came out 3 further from the edge than the 12 the theme asks for and
+      // 10 from its label rather than 8 — numbers that belong to `RawChip`'s
+      // internals, not to this design. Composed here, the gap is the gap.
+      //
+      // Nothing is lost by the move: the icon is decorative, the label is what a
+      // screen reader announces, and `semanticsLabel` still rides the `Text`.
+      label: _Content(icon: icon, label: label, semanticLabel: semanticLabel),
+      // **One rung below the chip theme, on purpose.** `chipTheme` sets
+      // `label-lg` (14), which is right for the card list's filter pills — they
+      // carry counts a reader scans. These two sit in a deck list beside the
+      // Study button on every row, and that button is `label-md` (12); two
+      // controls of the same height in one list reading at two sizes is what
+      // makes a toolbar look assembled rather than designed.
+      //
+      // Only the metrics come from the rung. The colour stays the theme's
+      // `WidgetStateColor` — copying the rung whole would replace it with a flat
+      // colour and take the disabled and selected states with it, the same trap
+      // `app_chip_theme.dart` documents for `secondaryLabelStyle`.
+      labelStyle: _labelStyle(context),
       selected: isSelected,
       onSelected: pressed == null ? null : (_) => pressed(),
-      avatar: icon == null ? null : Icon(icon, size: AppIconSize.sm),
-      // Padded rather than shrinkWrap: `ChoiceChip` is 32 high by default and the
-      // guideline minimum is 48.
+      // Padded rather than shrinkWrap: the pill paints at [_height] and the
+      // guideline minimum for a finger is 48, so the target is grown around a
+      // shape that stays the size the design asks for.
       materialTapTargetSize: MaterialTapTargetSize.padded,
+    );
+  }
+}
+
+/// The pill's contents: an optional leading glyph, then the word.
+///
+/// A widget rather than a `Row` inline in [MxPillButton.build] so the icon-gap
+/// decision has somewhere to be written down.
+class _Content extends StatelessWidget {
+  const _Content({
+    required this.icon,
+    required this.label,
+    required this.semanticLabel,
+  });
+
+  final IconData? icon;
+  final String label;
+  final String? semanticLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Text(label, semanticsLabel: semanticLabel);
+    if (icon == null) return text;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      // The one gap `chipTheme` cannot state: it would land on chips with no
+      // icon too, and the card list's filter pills are exactly those. `xs`
+      // rather than `sm` so the glyph sits as close to its word as the deck
+      // row's Study button holds its own.
+      spacing: AppSpacing.xs,
+      children: <Widget>[
+        // Size from the icon scale, colour from `chipTheme.iconTheme`, which
+        // still resolves here — an `IconTheme` wraps the chip's whole label.
+        Icon(icon, size: AppIconSize.sm),
+        // **`Flexible`, and `mx_stress_test.dart` is why.** A bare `Text` in a
+        // `Row` takes its full intrinsic width and refuses to give any back, so
+        // at 320px with `textScaler` 2.0 the pill overflowed by 171. Material's
+        // own `avatar` slot handled this for us; composing the row took the
+        // responsibility with it.
+        Flexible(child: text),
+      ],
     );
   }
 }
