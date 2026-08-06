@@ -81,7 +81,13 @@ class DeckListToolbarWidget extends StatelessWidget {
                     ? context.l10n.decksSectionLabelRoot
                     : context.l10n.decksSectionLabelChild)
                 .toUpperCase(),
-            style: context.texts.labelSmall?.copyWith(
+            // **`label-md`, not `label-sm`.** The heading and the two pills read
+            // as one row, and the pills carry a container while the heading is
+            // bare text — so at 11 against their 12 the heading looked like a
+            // caption for controls rather than the title of the list they filter.
+            // Same rung now; the pills still lead on weight of surface, which is
+            // the right order for a label and a control.
+            style: context.texts.labelMedium?.copyWith(
               color: context.colors.onSurfaceVariant,
               letterSpacing: AppTypography.sectionLabelTracking,
             ),

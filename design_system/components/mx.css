@@ -35,16 +35,28 @@
 .mx-iconbtn:disabled{color:var(--color-on-disabled);cursor:not-allowed;background:transparent}
 
 /* --- MxPillButton (ChoiceChip) ---------------------------------------- */
-/* `sm` across, not `md`. `md` put 21px of chrome each side of a label as short
-   as "All 1" — 42 of a 69.5px pill, more padding than word. `sm` brings that to
-   17 a side and matches Material's own M3 chip padding. Vertical stays `sm`:
-   that is the 36px height M3 draws, under the 48px .mx-pill tap target above.
-   It narrows the card list's filter row from 426.4 to 394.4 against the 374 a
-   390-wide screen leaves inside the gutter; dropping "now" from the Due label
-   took it to 361.8, so single-digit counts fit without scrolling. Three-digit
-   counts (416.5) and 360-wide screens still scroll — the labels grow with the
-   data, which is what the row scrolls for. `buildChipTheme` in
-   lib/core/theme/app_chip_theme.dart carries the same two numbers. */
+/* **Geometry lives on the component, not on the chip theme.** The Flutter side
+   sets these four numbers on `MxPillButton` rather than in `ChipThemeData`,
+   because that theme is shared with the card list's four filter pills — a
+   scrolling row that already does not fit at 390 and would grow by four times
+   whatever a toolbar toggle gains. Colour, border, shape and states stay shared.
+
+   32 tall / 12px label / 16px icon / 12px each side / 4px icon-to-label — M3's
+   chip metrics, on this project's multiple-of-4 scale, and the same height as the
+   deck row's Study button so two controls in one list agree. It was 36 tall with
+   an asymmetric 11-left / 17-right, because the default label padding added 8 to
+   the trailing edge only; that padding is zeroed now, so 12 means 12.
+
+   `label-md`, not `label-lg`, and the gap `--space-xs`: these two sit beside the
+   Study button on every deck row and that button is label-md with a 4px gap. The
+   card list's filter pills keep label-lg from the chip theme — they carry counts
+   a reader scans, and they are not next to anything.
+
+   Radius stays `--radius-pill`. Rounding to `--radius-sm` was tried and the
+   owner kept the pill.
+
+   `min-height`, not `height`: at large text scales the label's line box passes
+   20px and a fixed height clips it. 32 is the resting size, not a ceiling. */
 .mx-pill{display:inline-flex;flex:none;align-items:center;justify-content:center;min-height:var(--touch-target-min);background:none;border:0;padding:0;cursor:pointer}
 /* `--weight-medium`, not `--weight-semibold`. Semibold is the BUTTON's weight:
    this kit sets label-lg at 600 where Material 3 sets it at 500, for a label
@@ -57,7 +69,7 @@
    Size, leading and tracking stay label-lg — the label was never the wrong
    size. `buildChipTheme` in lib/core/theme/app_chip_theme.dart carries the same
    decision. */
-.mx-pill__body{display:inline-flex;align-items:center;gap:var(--space-xs);white-space:nowrap;padding:var(--space-sm) var(--space-sm);border-radius:var(--radius-pill);border:var(--border-hairline) solid var(--color-border-subtle);background:var(--color-surface);color:var(--color-text-secondary);font-size:var(--text-label-lg);line-height:var(--leading-label-lg);letter-spacing:var(--tracking-label-lg);font-weight:var(--weight-medium);transition:background-color var(--duration-fast) var(--ease-standard)}
+.mx-pill__body{display:inline-flex;box-sizing:border-box;min-height:32px;align-items:center;gap:var(--space-xs);white-space:nowrap;padding:0 var(--space-md);border-radius:var(--radius-pill);border:var(--border-hairline) solid var(--color-border-subtle);background:var(--color-surface);color:var(--color-text-secondary);font-size:var(--text-label-md);line-height:var(--leading-label-md);letter-spacing:var(--tracking-label-md);font-weight:var(--weight-medium);transition:background-color var(--duration-fast) var(--ease-standard)}
 .mx-pill__body .mx-icon{font-size:var(--icon-sm)}
 .mx-pill[aria-pressed="true"] .mx-pill__body{background:var(--color-secondary-container);color:var(--color-on-secondary-container)}
 .mx-pill:hover .mx-pill__body{background:color-mix(in srgb,var(--color-primary) 6%,var(--color-surface))}

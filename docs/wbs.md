@@ -5583,6 +5583,81 @@ một gốc là để caller tự chọn, và cả hai đều không tự khai b
 Trên đĩa: 7 ảnh từ ~40 KB lên 107–175 KB. Layout không đổi một pixel logic nào —
 `logical = physical / dpr` — nên không assertion rect nào bị chạm.
 
+### M4.11h · Chip về chuẩn M3 trên thang bội-4, và heading thôi thua chip
+
+- **Status:** **done** — 1404/1404 test pass, `flutter analyze` sạch,
+  `dart format` sạch, guard `memox-v7` 0 violation.
+- **Goal:** Hai chip `All decks` / `Recent` MUST cân đối với `YOUR DECKS` bên
+  cạnh và với nút Study bên dưới, và việc chuẩn hoá MUST KHÔNG làm chip nào
+  khác tràn.
+- **Scope:** `app_chip_theme.dart`, `mx_pill_button.dart`,
+  `deck_list_toolbar_widget.dart` (một dòng rung chữ), `.mx-pill__body` trong
+  `mx.css`, 9 golden.
+- **Out of scope:** nhãn/màu/icon/hành vi của chip; bố cục quanh nó.
+- **Dependencies:** M4.11g
+- **Checklist phases:** 7
+- **Editable documents:** `docs/wbs.md`,
+  `docs/reviews/design-parity-checklist.md`
+- **Output:** không có file mới
+- **Tests required:** đo geometry trước/sau; `mx_stress_test` ở 320×568
+  `textScaler` 2.0; toàn bộ suite; 9 golden sinh lại sau khi chủ dự án duyệt ảnh
+- **Acceptance criteria:**
+  - [x] Container 32 · touch target 48 · icon 16 · padding ngang 12 · gap
+        icon–nhãn 4 · gap giữa chip 8, đo trên render thật.
+  - [x] Hai bên chip cân nhau (13/13 kể cả hairline), không còn 11/17.
+  - [x] Không chip dùng chung nào tràn; card list filter row **hẹp lại**.
+  - [x] 320×568 @ 2.0 không overflow.
+  - [x] Bo góc giữ nguyên pill; ảnh render được duyệt trước khi chốt golden.
+
+**`labelPadding` mặc định là thứ gây lệch, không phải padding.** Material xếp
+chip là `padding.left │ avatar │ labelPadding.left │ label │ labelPadding.right │
+padding.right`, và mặc định `labelPadding` là 8 **cả hai bên**. Với chip có
+avatar, 8 đó rơi trọn vào mép phải: đo được 11 trái / 17 phải. Zero nó ở theme
+là sửa gốc — sau đó `padding` là thứ duy nhất giữa mép và nội dung, nên 12 nghĩa
+là 12, và chip không icon ra 13/13 (12 + hairline).
+
+**Icon phải rời slot `avatar`.** Material giữ một hộp leading cố định rồi căn
+glyph vào giữa, nên icon 16 vẫn cách mép 15 và cách nhãn 10 — những con số thuộc
+nội bộ `RawChip`. Dựng icon trong `label` thì gap là gap. Cái giá phải trả lộ ra
+ngay: `Text` trần trong `Row` không chịu co, và `mx_stress_test` bắt được
+`RenderFlex overflowed by 171 pixels` ở 320 @ 2.0 — slot `avatar` vốn lo việc đó
+hộ. `Flexible` đóng lại.
+
+**Material có sàn 34px cho chip.** Hạ `_containerHeight` xuống 26 để thử thì
+không gì nhúc nhích. Nên padding dọc vẫn viết theo M3 `(32−20)/2` chứ không viết
+dưới sàn: dưới sàn thì theme nói một đằng render một nẻo, và người đầu tiên nâng
+cỡ nhãn sẽ thấy chip lớn lên từ một con số không ai ghi.
+
+**Chuẩn hoá làm hàng filter card list HẸP lại, không rộng ra.** Đây là điều
+ngược trực giác và là lý do phải đo thay vì suy: padding ngang +4 mỗi bên, nhưng
+bỏ `labelPadding` −16 mỗi chip, nên mỗi chip hẹp đi 8. Hàng bốn pill từ 416.5
+xuống **354** so với 374 khả kiến ở 390 — giờ vừa màn cả khi đếm ba chữ số, việc
+mà M4.11c/d còn phải chấp nhận cuộn.
+
+**Bo góc: thử `AppRadius.sm` rồi trả về pill.** Radius token tên là "chips,
+badges, small indicators" và chưa chip nào dùng, nên đổi là hợp lý trên giấy;
+render ra thì chủ dự án giữ pill. Lý do đứng vững cạnh số đo: ở 32 chip cao đúng
+bằng nút Study trên mỗi hàng deck, mà nút đó bo tròn hết cạnh — hai control cùng
+cỡ trong một danh sách không nên khác hình.
+
+**`MxPillButton` hạ một rung, các chip khác thì không.** `chipTheme` giữ
+`label-lg` (14) cho pill filter của card list — chúng mang số đếm để đọc lướt và
+không đứng cạnh gì. Hai pill toolbar xuống `label-md` (12) với gap 4, vì chúng
+nằm cùng danh sách với nút Study vốn là `label-md` gap 4. Chỉ lấy **metrics** từ
+rung; màu giữ `WidgetStateColor` của theme — chép nguyên rung sẽ thay bằng màu
+phẳng và kéo theo cả trạng thái disabled/selected, đúng cái bẫy
+`app_chip_theme.dart` đã ghi cho `secondaryLabelStyle`.
+
+**`YOUR DECKS` lên `label-md`, và cân nhắc xoá đã bị bác bằng ảnh.** Heading
+11sp bare text đứng cạnh chip 12sp **có nền và viền** đọc ra như chú thích cho
+control chứ không phải tiêu đề của danh sách mà control đó lọc. Hai phương án
+được render và so: bỏ hẳn heading để lại nửa trái trống với hai chip dạt về
+phải, và mất luôn thông tin — ở cấp con heading đọc `SUB-DECKS`, thứ duy nhất
+trên màn nói danh sách bên dưới là deck con chứ không phải card, mà tên deck và
+breadcrumb đều không nói. Cùng rung 12 là đủ; chip vẫn nổi hơn nhờ khối, và đó
+mới là thứ bậc đúng giữa một nhãn và một control. Màu **không** đổi sang
+`onSurface`: làm vậy nó sẽ ngang hàng với tên deck ngay dưới.
+
 ### M4.12a · Starter template, loader và seed idempotent
 
 - **Status:** **done** — 1398/1398 test pass, `flutter analyze` sạch,

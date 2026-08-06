@@ -161,37 +161,57 @@ ChipThemeData buildChipTheme(
 
     return BorderSide(color: semantic.borderSubtle);
   }),
+  // **Stadium, kept.** `AppRadius.sm` is named "chips, badges, small indicators"
+  // and going to it was tried — the owner looked at the render and kept the
+  // pill. The reason holds up beside the numbers: at 32 tall the chip is now the
+  // same height as the deck row's Study button, which is also fully rounded, and
+  // two controls that size alike in one list should not shape differently.
   shape: const StadiumBorder(),
   labelStyle: _labelStyle(texts, scheme, semantic),
   iconTheme: IconThemeData(
     size: AppIconSize.sm,
     color: scheme.onSurfaceVariant,
   ),
-  // **`sm` across, not `md`.** Material's own M3 chip padding is 8, and `md`
-  // put 21 of chrome on each side of a label as short as "All 1" — 42 of a
-  // 69.5-wide pill, so more of the control was padding than word. `sm` brings
-  // that to 17 a side and the pill to 61.5, which is where M3 draws it.
-  // Vertical stays `sm`: that is what makes the pill 36 tall, the height M3
-  // draws and the one `MaterialTapTargetSize.padded` grows to 48 for a finger.
+  // **`labelPadding` zeroed, and that is the fix for the skew rather than a
+  // tightening.** Material lays a chip out as
+  // `padding.left | avatar | labelPadding.left | label | labelPadding.right |
+  // padding.right`, and its default `labelPadding` is 8 on BOTH sides. With an
+  // avatar that put 8 of unasked-for space on the trailing edge only: the
+  // toolbar pills measured 11 left of the icon against 17 right of the label,
+  // which reads as a control shunted left rather than one with even sides.
+  // Zeroing it makes `padding` the only thing between the edge and the content,
+  // so 12 means 12. A chip that wants space between an icon and its label asks
+  // for it explicitly — see `MxPillButton`.
+  labelPadding: EdgeInsets.zero,
+  // 12 across is M3's own chip padding once `labelPadding` is not double-counting
+  // it. Vertical is derived, not chosen: the app's `label-lg` line box is 20, so
+  // `(32 - 20) / 2` is what makes the content box 32 — the height M3 draws a chip
+  // at, and a multiple of 4 like every other size here. The two hairlines sit
+  // outside it, so a ruler laid on the painted shape reads 34.
   //
-  // **The measurement is here so nobody re-derives it.** The card list's four
-  // pills — All, Due, New, ⚑ Flagged, each carrying a count — ran to 426.4
-  // against the 374 a 390-wide screen leaves inside the gutter. This token took
-  // them to 394.4 and dropping "now" from the Due label took them to 361.8, so
-  // a deck with single-digit counts now shows all four without scrolling.
+  // **Stated even though Material would arrive at 32 anyway.** `RawChip` clamps
+  // its height to a 34-painted floor, which was measured by dropping this value
+  // to a deliberate 3 and watching nothing move. Leaving the padding under that
+  // floor would make the theme say one thing and the render do another, and the
+  // first person to raise the label size would find the chip growing from a
+  // number nobody wrote down.
   //
-  // **It is not fixed at every size, and no further padding will fix it.** At
-  // 360 the row overflows by 17.8, and on a deck with three-digit counts it
-  // runs to 416.5 at 390 — the labels grow with the data, so the row is
-  // horizontally scrollable by design and the trailing gutter below exists for
-  // that. Do not shave this token again to buy those pixels: it is shared with
-  // every other pill in the app, and they are not the ones short of room.
-  //
-  // `.mx-pill__body` in `design_system/components/mx.css` carries the same two
-  // numbers and changed with this — a pill that is one size in the app and
-  // another in the kit is the drift the parity checklist exists to catch.
+  // **Padding rather than a fixed height.** At `textScaler` 2.0 the line box
+  // passes 40; a pinned height would clip it, and the 320x568 screen tests run at
+  // exactly that scale. 32 is the resting height, not a ceiling.
   padding: const EdgeInsets.symmetric(
-    horizontal: AppSpacing.sm,
-    vertical: AppSpacing.sm,
+    horizontal: AppSpacing.md,
+    vertical: _verticalPadding,
   ),
 );
+
+/// The chip's content box — M3's chip height, and what a design spec means by
+/// "32dp tall". The two hairlines sit outside it, so the painted shape measures
+/// 34; the tap target is [AppSpacing.minimumTouchTarget] and is grown around
+/// both, never instead of them.
+const double _containerHeight = 32;
+
+/// The `label-lg` line box the vertical padding is derived from.
+const double _labelLineHeight = 20;
+
+const double _verticalPadding = (_containerHeight - _labelLineHeight) / 2;
