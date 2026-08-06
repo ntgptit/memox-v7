@@ -6,7 +6,7 @@ Open `index.html`.
 
 | File | Surface | Built from |
 |---|---|---|
-| `DeckLevelScreen.jsx` | **The deck list — one recursive screen used at every depth.** Root, sub-deck and leaf are the same component with a different path; breadcrumb, back arrow and the create label are the only things that vary | `deck_list_screen.dart`, `deck_tile_widget.dart`, `deck_list_toolbar_widget.dart`, `deck_path_widget.dart`, `test/design_preview/deck_list_preview_test.dart` |
+| `DeckLevelScreen.jsx` | **The deck list — one recursive screen used at every depth.** Root, sub-deck and leaf are the same component with a different path; breadcrumb, back arrow and the create label are the only things that vary | `deck_list_screen.dart`, `deck_tile_widget.dart`, `deck_list_toolbar_widget.dart`, `deck_path_widget.dart`, `test/demo/deck_screens_demo_test.dart` |
 | `ReviewScreen.jsx` | The review session — flashcard, two verdicts, end session, offline notice | `test/design_preview/review_screen_preview_test.dart`, `preview_harness.dart` |
 | `SettingsScreen.jsx` | Grouped rows, switches, one destructive row | `test/design_preview/settings_preview_test.dart` |
 | `DeckForms.jsx` | Create / rename sheet with the mandatory study-mode choice | `deck_form_widget.dart` |
