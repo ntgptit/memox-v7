@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M5.2 (use case) |
+| **Updated by task** | M5.3 (controller) |
 | **Last updated** | 2026-08-07 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -7544,7 +7544,7 @@ không có ai để đua. Đưa phép tính vào trong transaction sẽ đặt c
 
 ### M5.3 · Controller và state của phiên
 
-- **Status:** todo
+- **Status:** **done** — analyze sạch, 1551 test xanh, guard sạch
 - **Goal:** State immutable, tách dữ liệu khỏi trạng thái tác vụ; controller là
   lớp mỏng gọi use case, không giữ luật.
 - **Scope:** `StudySessionState` (freezed), `StudySessionController`
@@ -7554,14 +7554,41 @@ không có ai để đua. Đưa phép tính vào trong transaction sẽ đặt c
 - **Output:** `lib/features/study/presentation/states/`,
   `lib/features/study/presentation/controllers/`
 - **Acceptance criteria:**
-  - [ ] State immutable, có value equality; **không** có một `isLoading` chung.
-  - [ ] Controller không giữ `BuildContext` — `command_query_separation_test` xanh.
-  - [ ] Bấm hai lần liên tiếp cùng một action chỉ ghi **một** lượt (BR-126, BR-25).
-  - [ ] Ghi lượt sau khi controller bị dispose không throw (`ref.mounted`).
-  - [ ] Controller **không** tự quyết thứ tự thẻ hay thẻ nào quay lại — nó đọc
+  - [x] State immutable, có value equality; **không** có một `isLoading` chung.
+  - [x] Controller không giữ `BuildContext` — `command_query_separation_test` xanh.
+  - [x] Bấm hai lần liên tiếp cùng một action chỉ ghi **một** lượt (BR-126, BR-25).
+  - [x] Ghi lượt sau khi controller bị dispose không throw (`ref.mounted`).
+  - [x] Controller **không** tự quyết thứ tự thẻ hay thẻ nào quay lại — nó đọc
         thẻ kế tiếp từ use case; test khẳng định bằng cách đếm lời gọi.
-  - [ ] Test chuyển trạng thái: initial → loading → loaded; loading → error;
+  - [x] Test chuyển trạng thái: initial → loading → loaded; loading → error;
         submitting thành công; submitting thất bại.
+**Không có cờ nào tên `isLoading`.** Guard cấm đúng cái tên đó, và nó đúng: state
+này có **ba** cờ tác vụ — `isOpening`, `isAdvancing`, `isSubmitting`. Một cờ chung
+không nói được "thẻ vẫn trên màn hình và câu trả lời đang được ghi", là trạng thái
+màn hình ở lâu nhất, và cũng không tách được "mở phiên" với "lấy thẻ kế" — hai cái
+đó cần hai loại chrome khác nhau.
+
+**Phải mở rộng taxonomy controller — đây là chỗ tự quyết.**
+`command_query_separation_test` biết ba loại notifier: command (state có
+`SubmitState`), query (`build` trả Stream/Future), và input-state (còn lại, tối đa
+một mutator). `StudySessionController` rơi vào loại thứ ba và có ba mutator, nên test
+đỏ.
+
+Không gấp được ba thành một: `answer` thất bại **phải** để thẻ lại trên màn hình,
+còn `start` thất bại **phải** không để gì, và một mutator không mang được cả hai
+nghĩa. Tách làm ba notifier còn tệ hơn: chúng dùng chung một phiên, nên tách là đặt
+một giá trị sau ba chủ sở hữu.
+
+Nên thêm loại thứ tư vào chính test đó: **session controller**, nhận diện bằng state
+kết thúc `SessionState`, cho đúng `build/start/answer/leave` — có giới hạn chứ
+không miễn trừ. Đây là sửa **test**, không phải sửa tài liệu frozen, và lý do nằm
+ngay trong file. Nếu chủ dự án thấy không ổn thì phương án thay thế là tách
+`leave` sang controller riêng và đưa `start` vào `build`.
+
+**`nextItem` thành `nextTurn`.** Màn hình cần hàng đợi **và** nội dung thẻ cùng lúc;
+hai lượt đọc có thể nằm hai bên một phép ghi, và đó là cách một màn hình hiện mặt
+trước của thẻ này kèm đồng hồ của thẻ khác (AD-13).
+
 - **Dependencies:** M5.2, M3.3
 - **Tests required:** controller test cho toàn bộ chuyển trạng thái, chạy bằng
   `ProviderContainer`, không cần widget

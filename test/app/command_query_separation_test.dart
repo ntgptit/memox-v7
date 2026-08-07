@@ -139,7 +139,8 @@ void main() {
     );
   });
 
-  test('an input-state notifier holds one value and one mutator', () {
+  test('an input-state notifier holds one value and one mutator, and a '
+      'session controller holds exactly its three', () {
     // The remaining kind: `DeckListNow` holds the instant the due counts are
     // measured against, with `refresh` to re-read the clock. It is neither a query
     // of the data layer nor a command against it — it is a value the UI owns that
@@ -148,8 +149,10 @@ void main() {
     // Not exempted, bounded: `build` plus at most one mutator. That is what stops
     // "the thing that holds the odds and ends" from becoming the God Notifier by a
     // different route.
+    const sessionAllowed = <String>{'build', 'start', 'answer', 'leave'};
     final controllers = classesUnder('/controllers/');
     var inputCount = 0;
+    var sessionCount = 0;
     final offenders = <String>[];
 
     for (final entry in controllers) {
@@ -160,6 +163,31 @@ void main() {
           returnType.startsWith('Future<')) {
         continue;
       }
+      // A session controller is the fourth kind, and it is bounded rather than
+      // exempt. A study session is a machine with a life: it opens, it takes
+      // answers, and it closes — and the three cannot collapse into one
+      // `submit`, because each has its own failure and its own task flag.
+      //
+      // Folding them into an input-state notifier was tried and is wrong for the
+      // reason this test exists: `answer` failing must leave the card on screen,
+      // while `start` failing must leave nothing on screen, and one mutator
+      // cannot mean both. Splitting them across three notifiers is worse — they
+      // share the session, so the split would put one value behind three
+      // owners.
+      if (returnType.endsWith('SessionState')) {
+        sessionCount += 1;
+        final extra = publicMethods(
+          entry.type,
+        ).where((String name) => !sessionAllowed.contains(name)).toSet();
+        if (extra.isEmpty) continue;
+        offenders.add(
+          '${entry.path}: ${entry.type.namePart.typeName.lexeme} — '
+          '${extra.join(', ')}',
+        );
+
+        continue;
+      }
+
       inputCount += 1;
       final methods = publicMethods(entry.type);
       if (methods.length <= 2) continue;
@@ -169,6 +197,7 @@ void main() {
     }
 
     scanned['input-state notifiers'] = inputCount;
+    scanned['session controllers'] = sessionCount;
     expect(
       offenders,
       isEmpty,

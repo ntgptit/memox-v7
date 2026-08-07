@@ -124,6 +124,9 @@ final class StudyDao {
     return rows.map((row) => row.read<String>('cardId')).toList();
   }
 
+  Future<Card?> cardById(String id) =>
+      (_db.select(_db.cards)..where((c) => c.id.equals(id))).getSingleOrNull();
+
   Future<AppSetting> appSettings() => _db.appSettingsRow().getSingle();
 
   // ---- writes ------------------------------------------------------------

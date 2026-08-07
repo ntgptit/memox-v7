@@ -68,7 +68,7 @@ mixin _StudyQueueOperations {
     ];
   }
 
-  Future<StudyQueueItemEntity?> nextItem(String sessionId) async {
+  Future<StudyTurnModel?> nextTurn(String sessionId) async {
     final session = await _dao.sessionById(sessionId);
     if (session == null) return null;
 
@@ -77,8 +77,19 @@ mixin _StudyQueueOperations {
       mode: session.currentMode,
       cursor: session.cursor,
     );
+    if (row == null) return null;
 
-    return row == null ? null : studyQueueItemEntityFromRow(row);
+    // The card content comes from the same call, not a second one: the screen
+    // needs both together, and two reads can straddle a write (AD-13).
+    final card = await _dao.cardById(row.cardId);
+    if (card == null) {
+      throw const NotFoundFailure(message: 'Queued card no longer exists');
+    }
+
+    return StudyTurnModel(
+      item: studyQueueItemEntityFromRow(row),
+      card: studyCardModelFromRow(card),
+    );
   }
 
   Future<bool> isStageExhausted(String sessionId) async {

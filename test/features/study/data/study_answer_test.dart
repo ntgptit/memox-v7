@@ -40,7 +40,7 @@ void main() {
 
     test('the first turn is scheduled and the next is relearning', () async {
       final sessionId = await openSelfAssessReview();
-      final card = (await h.repository.nextItem(sessionId))!.cardId;
+      final card = (await h.repository.nextTurn(sessionId))!.cardId;
 
       await h.repository.submitAnswer(
         sessionId: sessionId,
@@ -72,7 +72,7 @@ void main() {
 
     test('a relearning turn moves the stamp and nothing else (BR-78)', () async {
       final sessionId = await openSelfAssessReview();
-      final card = (await h.repository.nextItem(sessionId))!.cardId;
+      final card = (await h.repository.nextTurn(sessionId))!.cardId;
       final due = StudyHarness.now.add(const Duration(days: 4));
 
       await h.repository.submitAnswer(
@@ -120,7 +120,7 @@ void main() {
           newCardOrder: NewCardOrder.created,
           now: StudyHarness.now,
         );
-        final card = (await h.repository.nextItem(session.id))!.cardId;
+        final card = (await h.repository.nextTurn(session.id))!.cardId;
 
         await h.repository.submitAnswer(
           sessionId: session.id,
@@ -149,7 +149,7 @@ void main() {
       'a stale generation invalidates the session and writes nothing',
       () async {
         final sessionId = await openSelfAssessReview();
-        final card = (await h.repository.nextItem(sessionId))!.cardId;
+        final card = (await h.repository.nextTurn(sessionId))!.cardId;
 
         // A Reset, from the session's point of view (BR-40, BR-84).
         await h.db.customStatement(

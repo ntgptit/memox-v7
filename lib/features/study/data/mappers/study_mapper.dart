@@ -5,6 +5,7 @@ import '../../domain/models/study_mode.dart';
 import '../../domain/models/study_queue_item_status_model.dart';
 import '../../domain/models/study_session_kind_model.dart';
 import '../../domain/models/study_session_status_model.dart';
+import '../../domain/models/study_turn_model.dart';
 
 /// Drift rows in, domain entities out. Nothing Drift-shaped crosses this file
 /// (AD-01).
@@ -47,4 +48,14 @@ StudyQueueItemEntity studyQueueItemEntityFromRow(
   // Stored as INTEGER, because SQLite has no boolean. Converting here rather
   // than letting `0`/`1` reach the domain is the point of the mapper.
   isRevealed: row.isRevealed != 0,
+);
+
+StudyCardModel studyCardModelFromRow(Card row) => StudyCardModel(
+  id: row.id,
+  front: row.front,
+  back: row.back,
+  example: row.example,
+  hint: row.hint,
+  pronunciation: row.pronunciation,
+  backFolded: row.backFolded,
 );
