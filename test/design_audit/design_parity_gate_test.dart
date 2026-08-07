@@ -66,7 +66,9 @@ void main() {
   /// Anchored on the status box rather than on column position, because the
   /// tables have five columns in some sections and six in others, and a verdict
   /// may itself contain a pipe inside inline code.
-  final RegExp rowPattern = RegExp(r'^\| ([A-Z]\d+) \|.* \[([x ])\] \| (.*?) \|?$');
+  final RegExp rowPattern = RegExp(
+    r'^\| ([A-Z]\d+) \|.* \[([x ])\] \| (.*?) \|?$',
+  );
   final RegExp idPattern = RegExp(r'^\| ([A-Z]\d+) \|');
   final RegExp verdictPattern = RegExp(r'^\*\*(.+?)\*\*');
 
@@ -136,8 +138,7 @@ void main() {
       expect(
         label,
         isNotNull,
-        reason:
-            '${row.id} does not open with a bold verdict:\n${row.verdict}',
+        reason: '${row.id} does not open with a bold verdict:\n${row.verdict}',
       );
       expect(
         verdicts,
@@ -152,7 +153,9 @@ void main() {
 
   test('open drift stays under 3% of the reviewed rows', () {
     final open = rows
-        .where((row) => verdictPattern.firstMatch(row.verdict)?.group(1) == 'drift')
+        .where(
+          (row) => verdictPattern.firstMatch(row.verdict)?.group(1) == 'drift',
+        )
         .toList();
     final ratio = open.length / rows.length;
 

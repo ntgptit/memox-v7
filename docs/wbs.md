@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M5.0b (chốt nghiệp vụ Study) |
+| **Updated by task** | M99.2 |
 | **Last updated** | 2026-08-07 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -33,7 +33,7 @@ AD / UC (xem `business-rules.md`).
 | M7 · CI/CD (Phase 19) | todo | Bắt đầu được ngay sau M2. Job Android + Web, chưa có iOS (AD-04) |
 | M8 · Release Android (Phase 16–18, 20–22) | todo | |
 | M9 · Backend Spring Boot + auth + sync (Phase 10) | todo | Sau khi M8 ổn định |
-| M99 · Adhoc | — | Task chủ dự án giao trực tiếp, ngoài chuỗi phụ thuộc. M99.1 **done** — `master-flow.md` |
+| M99 · Adhoc | — | Task chủ dự án giao trực tiếp, ngoài chuỗi phụ thuộc. M99.1 **done** — `master-flow.md`. M99.2 **done** — Deck và Card thành bản tham chiếu (AD-17) |
 
 ---
 
@@ -6736,6 +6736,73 @@ mở lại nằm ở bảng "Deferred and descoped" — gồm cả việc `check
 sửa **trước**, vì nó chỉ quét `docs/*.md` cấp một.
 
 ---
+
+### M99.2 · Deck và Card thành bản tham chiếu — tham khảo cách làm, không sao chép
+
+- **Status:** **done** — `check_docs` sạch, `flutter analyze` sạch, guard 0
+  violation, toàn bộ suite pass.
+- **Goal:** Một agent đi qua cửa vào chính thức MUST gặp được hai bản tham chiếu,
+  và MUST hiểu là lấy **phương pháp** chứ không phải bê nghiệp vụ.
+- **Scope:** `CLAUDE.md`; `flutter-workflow/SKILL.md`; `feature_blueprint.md`;
+  `docs/architecture.md` (AD-17); `lib/features/card/README.md` (mới);
+  `lib/features/deck/README.md` (§8 và hai câu đóng khung).
+- **Out of scope:** đưa Card vào Widgetbook (nợ DoD, ghi ở `card/README.md` §6);
+  chuyển `DECK_GOLDEN_FEATURE_REPORT.md` vào `docs/reviews/`; sửa UC-04 cho khớp
+  cờ và tag — `use-cases.md` đang frozen.
+- **Dependencies:** M4.11 (Card đóng)
+- **Checklist phases:** 4, 14
+- **Tests required:** none — document only. Gate: `check_docs` xanh và toàn bộ
+  suite không đỏ vì hai README nằm trong `lib/`.
+- **Editable documents:** `CLAUDE.md`, `docs/architecture.md`, `docs/wbs.md`,
+  `.claude/skills/flutter-workflow/SKILL.md`,
+  `.claude/skills/flutter-feature-slice/assets/feature_blueprint.md`,
+  `lib/features/deck/README.md`, `lib/features/card/README.md`
+- **Output:** `lib/features/card/README.md`, AD-17
+- **Acceptance criteria:**
+  - [x] `CLAUDE.md` và `flutter-workflow/SKILL.md` đều trỏ tới hai bản tham chiếu.
+  - [x] `feature_blueprint.md` có mục nói cái gì **không** chuyển được.
+  - [x] Từ vựng `clone` trong blueprint về **0**.
+  - [x] AD-17 chốt ranh giới thừa kế tầng / không thừa kế hình dạng dữ liệu.
+  - [x] `card/README.md` là ca đối chứng có số đo, không phải catalogue thứ hai.
+
+**Chỗ hở là đường dẫn, không phải nội dung.** `feature_blueprint.md` đã có 1182
+dòng viết rất kỹ, và trong đó chỉ **9 lần** dẫn Deck làm ví dụ — tức nó vốn đã là
+phương pháp chứ không phải kể chuyện một feature. Nhưng `CLAUDE.md` chỉ định
+`flutter-workflow` làm điểm bắt đầu, mà file đó **không nhắc Deck lẫn blueprint
+lần nào**, nên agent chỉ gặp blueprint nếu tình cờ rơi đúng vào
+`flutter-feature-slice` trước. Sửa bằng hai đoạn ở đúng hai file đó.
+
+**Blueprint tự hứa ba việc và chỉ làm hai.** Mở đầu viết *"what to copy, what to
+rename, and what must not be copied"*; vế thứ ba không có một dòng nào trong toàn
+bộ file. Tìm `deck-specific`, `your feature may not`, `does not apply` đều không
+ra gì. Mục "What does not transfer" trả nợ đó bằng một bảng tám dòng: cái gì
+thuộc Deck, cái gì thuộc Card, và vì sao mỗi cái không phải của feature sau.
+
+**Từ vựng kéo ngược lại ý định.** Đo được trước khi sửa: 23 từ mang nghĩa sao chép
+(`copy` 13 · `clone` 4 · `scaffold` 4 · `template` 2) chọi lại **một** lần
+`reference implementation`. Một tài liệu có nội dung là phương pháp nhưng động từ
+là "copy" thì mời gọi đúng cái sao chép 1:1 mà nó muốn ngăn. `clone` nay về 0;
+`copy` còn lại toàn bộ mang nghĩa "ARB copy" — chữ hiển thị — và giữ nguyên là
+đúng.
+
+**Card là ca đối chứng, và đó mới là lý do cần bản thứ hai.** Một bản tham chiếu
+duy nhất không phân biệt được "đây là luật" với "đây là cách feature đó tình cờ
+được viết". Đếm từ code: `domain/repositories` 2→1, `entities` 2→6, `usecases`
+11→15, `mappers` 2→7, `widgets/items` 4→1, `overlays` 5→1, `support` 1→3, và
+`card.drift` có 4 placeholder động trong khi `deck.drift` có 0. Ba dòng bucket là
+hữu ích nhất: chúng chứng minh theo **ba hướng khác nhau** rằng một bucket mỏng
+không phải là feature làm dở.
+
+**Đã cân nhắc và loại: cưỡng chế bằng guard.** Một rule kiểu "feature mới không
+được có cột `parent_*_id`" sai cả hai chiều — chặn oan feature thật sự cần cây, và
+lọt feature sao chép nhầm theo cách khác. Ranh giới này là phán đoán thiết kế; đưa
+cho regex là đổi một luật đúng lấy một luật kiểm được. Ghi trong AD-17.
+
+**Ba việc còn nợ, cố ý không làm trong task này:** Card chưa có trong Widgetbook
+(vi phạm DoD, ghi ở `card/README.md` §6); `DECK_GOLDEN_FEATURE_REPORT.md` vẫn nằm
+ở gốc repo không ai trỏ tới; và UC-04 vẫn không nhắc cờ với tag dù BR-93/BR-95
+khai `Related: UC-04` — sửa nó là mở một tài liệu frozen.
+
 
 ## Blocker
 

@@ -7,7 +7,7 @@
 | **Scope** | Quyết định ràng buộc nhiều tài liệu hoặc nhiều layer. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), hình dạng dữ liệu (`data-model.md`) |
 | **Source of truth for** | AD-xx · đánh đổi kiến trúc · phương án đã bị loại · lý do pin toolchain |
 | **Depends on** | `document-conventions.md`, `product.md` |
-| **Updated by task** | M5.0b (chốt nghiệp vụ Study) |
+| **Updated by task** | M99.2 (AD-17) |
 | **Last updated** | 2026-08-07 |
 
 Format theo `document-conventions.md` §6.1. AD xếp theo số; ID vĩnh viễn (§7).
@@ -1101,3 +1101,74 @@ cùng hình dạng rủi ro, nên đi cùng đường.
   giờ thiết bị trực tiếp.
 - Test của scheduler không cần biết ngày là gì.
 - Đổi mốc cắt sau này — nếu có ai muốn 04:00 thay vì 00:00 — là sửa một chỗ.
+
+---
+
+## AD-17 · Deck và Card là bản tham chiếu: thừa kế tầng, không thừa kế hình dạng dữ liệu
+
+| | |
+|---|---|
+| **Status** | accepted |
+| **Affected documents** | `CLAUDE.md` · `.claude/skills/flutter-workflow/SKILL.md` · `.claude/skills/flutter-feature-slice/assets/feature_blueprint.md` · `lib/features/deck/README.md` · `lib/features/card/README.md` |
+| **Decision** | `features/deck` và `features/card` là hai bản tham chiếu của dự án. Feature mới MUST lấy từ chúng **phương pháp** — cách chia tầng, chỗ cưỡng chế một luật, thứ một use case được phép biết, cách một failure mang theo lý do, test nào nằm ở tầng nào. Feature mới MUST NOT thừa kế **nghiệp vụ** của chúng: cây deck, `content_type`, scheduler-trên-root, cờ và tag của card đều tồn tại vì hai feature đó cần, và một feature không cần mà vẫn mọc ra chúng là đã sao chép nhầm nửa. |
+
+### Vì sao có quyết định này
+
+Ba cơ chế đã cưỡng chế **hình dạng** rất chắc: `architecture_boundary_test.dart`
+kiểm bucket và hướng import bằng AST, `check_architecture.py` ghép mỗi thư mục
+với suffix nó nhận, và guard `memox-v7` phủ phần còn lại. Cái chưa có cơ chế nào
+là **ranh giới giữa phương pháp và nghiệp vụ** — và đó lại đúng là chỗ một agent
+sai mà mọi gate vẫn xanh: một feature mọc thêm cây nhiều cấp không vi phạm luật
+nào cả.
+
+Trước AD này, nguồn duy nhất nói ra điều đó là `feature_blueprint.md`, và nó hở
+hai đường. **Cửa vào không dẫn tới nó:** `CLAUDE.md` chỉ định `flutter-workflow`
+làm điểm bắt đầu, mà file đó không nhắc Deck lẫn blueprint lần nào — agent chỉ
+gặp blueprint nếu tình cờ rơi đúng vào `flutter-feature-slice` trước.
+**Và chính nó tự hứa rồi không trả:** mở đầu viết *"what to copy, what to rename,
+and what must not be copied"*, nhưng trong 1182 dòng không có một dòng nào nói
+cái gì không được mang sang. Đo được: 23 từ mang nghĩa sao chép (`copy`, `clone`,
+`scaffold`, `template`) chọi lại **một** lần `reference implementation`.
+
+### Hai bản, không phải một
+
+Một bản tham chiếu duy nhất **không phân biệt được** "đây là luật" với "đây là
+cách feature đó tình cờ được viết". Chỉ khi có bản thứ hai làm khác mà vẫn đúng
+thì mới biết chỗ nào là bắt buộc. Vài chỗ Deck và Card khác nhau, và mỗi chỗ đều
+đúng: Card không có cây và không có `content_type`; câu lệnh list của Card ghép
+filter, search và sort động trong khi của Deck thì không; Card cần bốn chip lọc,
+Deck cần hai.
+
+`lib/features/card/README.md` giữ danh sách đó — nó là ca đối chứng, không phải
+bản catalogue tính năng thứ hai.
+
+### Phép thử
+
+Với mỗi thứ định mang sang, hỏi: **"bỏ nó đi thì feature của tôi sai, hay chỉ là
+bớt giống Deck?"** Chỉ vế đầu là lý do giữ. Vế sau là cách một codebase có được
+một cái cây không ai cần và một `content_type` không ai đặt.
+
+Phép thử ngược đã có sẵn trong blueprint và không đổi: nếu để feature mới chạy
+được mà phải sửa `core/` hoặc `shared/`, thì thứ đó lẽ ra đã phải ở đó từ trước —
+chuyển nó đi là **hoàn tất feature cũ**, không phải bắt đầu feature mới.
+
+### Hệ quả
+
+- `CLAUDE.md` và `flutter-workflow/SKILL.md` MUST trỏ tới hai bản tham chiếu.
+  Trước M99.2 cả hai đều không.
+- `feature_blueprint.md` MUST có mục nói cái gì **không** chuyển được, và MUST
+  KHÔNG dùng từ vựng sao chép cho thứ nó muốn người đọc tham khảo.
+- Feature thứ ba làm xong MUST được cân nhắc: nó xác nhận phương pháp, hay nó
+  phơi ra một chỗ mà hai bản hiện tại đang đồng ý chỉ vì cùng một tác giả.
+
+### Phương án đã loại
+
+**Cưỡng chế bằng guard.** Đã cân nhắc một rule kiểu "feature mới không được có
+cột `parent_*_id`". Loại vì nó sai cả hai chiều: một feature *thật sự* cần cây
+sẽ bị chặn oan, còn một feature sao chép nhầm theo cách khác thì lọt. Ranh giới
+này là phán đoán thiết kế; đưa nó cho regex là đổi một luật đúng lấy một luật
+kiểm được.
+
+**Sinh feature bằng script scaffold.** Loại vì nó tối ưu đúng cái phần rẻ nhất —
+tạo thư mục — và tự động hoá đúng cái sai mà AD này tồn tại để chặn: một cây thư
+mục sinh sẵn mời gọi việc điền vào cho đủ, kể cả những chỗ feature đó không cần.
