@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M5.0o (recursive review lượt hai) |
+| **Updated by task** | M5.0p (recursive review lượt ba) |
 | **Last updated** | 2026-08-07 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -7127,6 +7127,56 @@ hai đã bị BR-90 và BR-142 thay. Chúng **đúng với schema v4** và chỉ
 có `learned_at`, nhưng không tài liệu nào nói vậy: người viết M5 sẽ hoặc tưởng tài
 liệu sai, hoặc sửa code trước khi có cột để sửa. `data-model.md` giờ có bảng liệt
 kê năm chỗ đó cạnh khối "chưa tồn tại ở schema nào".
+
+### M5.0p · Recursive review lượt ba — thi hành thử thay vì đọc
+
+- **Status:** done — bốn lỗ, một trong đó là bug chết người. Hội tụ ở 0 trên cả
+  ba góc của lượt một, hai và ba.
+- **Goal:** Lấy tình huống cụ thể, chạy qua từng luật, và coi chỗ nào luật không
+  đủ để quyết định là chỗ hở.
+- **Scope:** `business-rules.md` (sửa BR-103, BR-122, BR-144; thêm **BR-154**),
+  `use-cases.md` (UC-05 bước 1, 4, 10).
+- **Out of scope:** không đổi quyết định nghiệp vụ nào ngoài ba câu hỏi đã hỏi.
+- **Editable documents:** `docs/business-rules.md`, `docs/use-cases.md`,
+  `docs/wbs.md`
+- **Output:** BR-154; ba luật sửa
+- **Acceptance criteria:**
+  - [x] Thẻ không có `example` **hoàn tất được** chuỗi học mới (BR-144).
+  - [x] `guess` chạy được ngay ở phiên học mới đầu tiên của một deck (BR-122).
+  - [x] Còn phiên dở mà muốn đổi loại phiên thì có đường đi (BR-103).
+  - [x] Màn chọn mode ôn tập hiện số thẻ **của từng mode** (BR-154).
+  - [x] Bảng thi hành mode × điều kiện không còn ô nào không quyết định được.
+  - [x] Vòng cuối của cả ba góc trả về **0**.
+- **Dependencies:** M5.0o
+- **Tests required:** `check_docs.py`, `verify_invariants.py`, guard `memox-v7`
+- **Checklist phases:** 14.1
+
+**Bug chết người: thẻ không có `example` mắc kẹt vĩnh viễn.** BR-144 nói hoàn tất
+khi thẻ *"đi hết stage cuối"*; BR-114 nói thẻ thiếu dữ liệu bị **bỏ qua** ở stage
+đó; `fill` là stage cuối của `eight_box` và cần `example`. Ghép ba câu lại: thẻ
+không có `example` không bao giờ đi hết `fill`, nên `learned_at` không bao giờ
+được đặt, nên nó ở lại tập Học mới **mãi mãi** và bị học lại mỗi phiên. `example`
+là trường tuỳ chọn (BR-95), nên đây là đa số thẻ, không phải ca hiếm.
+
+Ba luật đều đúng khi đọc riêng. Chỉ khi **thi hành** một thẻ cụ thể qua chuỗi thì
+hệ quả mới hiện ra — và đó là thứ hai lượt review trước không thể tìm, vì cả hai
+đều đọc luật chứ không chạy chúng.
+
+**`guess` không bao giờ chạy ở phiên học mới đầu tiên.** BR-122 lấy distractor từ
+thẻ `learned_at IS NOT NULL`; trên deck mới chưa thẻ nào như vậy, nên pool rỗng và
+stage bị bỏ qua. Thẻ của chính phiên hiện tại giờ cũng vào pool — chúng đã qua
+`browse` nên người học vừa nhìn thấy cả hai mặt, tức chúng là nhiễu thật.
+
+**Con số ở màn chọn mode nói dối ba trên bốn mode.** Popup đầu hiện "Ôn tập (20
+từ)"; chọn `fill` thì chỉ ôn được số thẻ có `example` — có thể là 2. BR-154 bắt
+mỗi mode hiện số của riêng nó.
+
+**Bảng thi hành là công cụ, không phải một lần đọc.** Dựng ma trận mode × điều
+kiện — deck 1/3/5/20 thẻ, có/không `example`, pool đầy/rỗng — rồi hỏi từng ô
+"stage nào chạy, thẻ hoàn tất sau stage nào". Ô nào không trả lời được bằng một
+luật là một lỗ. Ba lượt review dùng ba góc khác nhau và mỗi góc bắt một loại lỗi:
+mâu thuẫn giữa các luật, luật mất kết nối, và luật đúng nhưng ghép lại thành hành
+vi sai.
 
 ### M5.0 · Study-specific domain và data completion
 
