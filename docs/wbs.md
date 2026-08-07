@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M5.0l (schema v4: đổi tên) |
+| **Updated by task** | M5.0m (hai loại phiên học) |
 | **Last updated** | 2026-08-07 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -6955,6 +6955,72 @@ trường hợp.
 `migrateAndValidate(db, 3)` ở hai chỗ, trong khi chính file đó có một comment dặn
 "target là `db.schemaVersion`, không phải literal". Bump lên v4 làm cả hai đỏ ngay.
 Đã đổi sang `db.schemaVersion`, nên v5 sẽ không lặp lại.
+
+### M5.0m · Hai loại phiên: học mới và ôn tập
+
+- **Status:** done — tài liệu và fixture guard. Viết lại phần lớn nghiệp vụ Study
+  đã chốt ở M5.0b…M5.0j.
+- **Goal:** App tạo môi trường học theo năng lực người dùng, không chạy đua số
+  lượng thẻ — và chỉ lần học đầu tiên mới đi qua cả chuỗi stage.
+- **Scope:** `business-rules.md` (sửa BR-13, BR-23, BR-24, BR-29, BR-75, BR-90,
+  BR-109, BR-110, BR-139, BR-141; thêm **BR-142…BR-149**), `data-model.md`
+  (`card_study_states.learned_at`, `study_sessions.session_kind`, `kind` thêm
+  `learning`, `decks.study_config`, bảng **`app_settings`**, invariant **24–27**),
+  `use-cases.md` (UC-05 luồng chính viết lại), `product.md`, `master-flow.md`,
+  `verify_invariants.py`.
+- **Out of scope:** UI của hai popup; migration v5 — đến cùng M5.0/M5.1.
+- **Editable documents:** `docs/business-rules.md`, `docs/data-model.md`,
+  `docs/use-cases.md`, `docs/product.md`, `docs/master-flow.md`, `docs/wbs.md`
+- **Output:** BR-142…BR-149; `app_settings`; invariant 24–27
+- **Acceptance criteria:**
+  - [x] Hai loại phiên tách hẳn, không trộn thẻ (BR-142).
+  - [x] Phiên ôn tập lấy **toàn bộ** thẻ đến hạn, tối đa `card_limit`; không lấp
+        thêm thẻ mới cho đủ số (BR-23, BR-24).
+  - [x] `card_limit` là trần **mỗi lần lấy**, không phải hạn mức ngày (BR-24).
+  - [x] Chuỗi stage chỉ cho học mới; ôn tập chọn một mode chấm điểm, `browse`
+        không phải lựa chọn (BR-109, BR-146).
+  - [x] Không có thẻ đến hạn ⇒ **không mở được** phiên ôn tập (BR-145).
+  - [x] Chuỗi học mới không đổi lịch; hoàn tất là một **sự kiện** đặt `learned_at`
+        và khởi tạo lịch ở mức thấp nhất (BR-144).
+  - [x] Tùy chọn học hai tầng: mặc định `app_settings`, ghi đè trên root deck
+        (BR-147, BR-148).
+  - [x] `verify_invariants.py` **27/27**, bốn query mới đều fire trên đúng vi
+        phạm của nó.
+- **Dependencies:** M5.0l
+- **Tests required:** `check_docs.py`, `verify_invariants.py`, guard `memox-v7`
+- **Checklist phases:** 14.1
+
+**Yêu cầu của chủ dự án, nguyên văn hai ý.** Một: có 8 thẻ đến hạn thì học 8, lấy
+thêm 12 thẻ mới cho đủ 20 là chạy đua số lượng chứ không phải học. Hai: chỉ lần
+đầu mới cần cả năm cách hỏi; từ lần sau là ôn tập và người học chọn cách ôn.
+
+**BR-144 làm một vấn đề biến mất thay vì phải xử lý nó.** Câu hỏi ban đầu là "phiên
+học mới bỏ dở giữa chừng thì sao" — thẻ đã bị đặt lịch nhưng chưa học xong, và
+lần học mới sau sẽ đặt lại lịch lần hai. Gỡ chuyện đó cần hoàn tác
+`card_study_states` từ `previous_*`, giảm `lapse_count`, xoá lượt — tức sửa BR-86,
+thứ tồn tại để đảm bảo không lượt nào bị mất.
+
+Không đặt lịch cho tới khi xong chuỗi thì **không có gì để hoàn tác**: thẻ bỏ dở
+chưa có `learned_at`, chưa có `due_at`, nên nó nằm lại trong tập học mới và học
+lại từ `browse`. Các lượt đã ghi vẫn ở nguyên dưới `kind = 'learning'` — chúng là
+lịch sử thật về việc người học đã gặp thẻ đó.
+
+**Hoàn tất học mới là sự kiện, không phải lượt đánh giá** — và đó là lý do nó
+không cần một `action` tổng kết. Bốn stage chấm điểm đều lặp round tới khi sạch
+(BR-119), nên mọi thẻ đều kết thúc chuỗi bằng một lần đúng: một action suy từ đó
+sẽ luôn là "nhớ được" và không phân biệt được thẻ nào. Thẻ vừa học lần đầu vì thế
+bắt đầu ở mức thấp nhất và gặp lại ngay ngày học kế.
+
+**BR-90 phải đổi định nghĩa, không chỉ đổi câu chữ.** "Thẻ mới" đang là
+`answer_count = 0`. Chuỗi học mới không sinh lượt `scheduled` nào, nên thẻ học xong
+vẫn có `answer_count = 0` và sẽ hiển thị là mới. Định nghĩa đúng bây giờ là
+`learned_at IS NULL` — và nó cũng là định nghĩa mà BR-142 dùng để chia hai tập.
+
+**Bốn invariant mới giữ hai trạng thái không tách rời nhau.** Thẻ có `learned_at`
+phải có lịch; thẻ chưa có `learned_at` không được mang lượt `scheduled`;
+`kind = 'learning'` không được xuất hiện ngoài phiên học mới; tùy chọn học không
+được nằm trên deck con. Cả bốn đã được chứng minh fire trên vi phạm của chính
+chúng trước khi commit.
 
 ### M5.0 · Study-specific domain và data completion
 

@@ -7,7 +7,7 @@
 | **Scope** | Vấn đề, người dùng, quyết định nền tảng, phạm vi MVP, luồng nghiệp vụ chính. Ngoài phạm vi: cách triển khai |
 | **Source of truth for** | Phạm vi MVP · phân loại must/should/nice/out · quyết định platform, data posture, auth, dữ liệu nhạy cảm |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M5.0d (chuỗi stage; browse/self_assess) |
+| **Updated by task** | M5.0m (hai loại phiên học) |
 | **Last updated** | 2026-08-07 |
 
 ## Problem
@@ -98,7 +98,19 @@ phải chi tiết kỹ thuật:
 | **Thuật toán SRS** | `eight_box` · `sm2` — quyết định **khi nào** thẻ quay lại | chọn một lần lúc tạo root deck, khoá sau lượt học đầu (BR-13) |
 | **StudyMode** | `browse` · `self_assess` · `match` · `guess` · `recall` · `fill` — quyết định **cách** thẻ được hỏi | không ai chọn: một phiên chạy chuỗi stage cố định của thuật toán (BR-109, BR-110) |
 
-**Một phiên là một chuỗi stage**, không phải một mode người dùng chọn (BR-109):
+**Hai loại phiên, tách hẳn** (BR-142):
+
+| | Học mới | Ôn tập |
+|---|---|---|
+| Thẻ | chưa học xong lần đầu | đã học xong **và** đến hạn |
+| Cách hỏi | chuỗi stage cố định | một mode người dùng chọn |
+| Đổi lịch | không, cho tới khi xong chuỗi | có, mỗi thẻ một lượt |
+
+**Chỉ lần học đầu tiên mới đi qua cả chuỗi.** Từ lần thứ hai, thẻ vào ôn tập và
+người học chọn cách ôn. Đó là quyết định về **áp lực**: bắt đi lại năm cách hỏi cho
+một thẻ đã quen là bắt làm bài tập, không phải ôn tập.
+
+**Chuỗi của phiên học mới** (BR-109, BR-110):
 
 | Thuật toán | Chuỗi stage |
 |---|---|

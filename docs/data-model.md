@@ -7,7 +7,7 @@
 | **Scope** | Bảng, cột, index, quan hệ, query bất biến. Ngoài phạm vi: SQL runtime (`lib/core/database/`, chưa tồn tại) |
 | **Source of truth for** | Schema · cột và kiểu · index · query bất biến · thứ tự migration |
 | **Depends on** | `document-conventions.md`, `architecture.md`, `business-rules.md` |
-| **Updated by task** | M5.0l (schema v4: đổi tên) |
+| **Updated by task** | M5.0m (hai loại phiên học) |
 | **Last updated** | 2026-08-07 |
 
 Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; SQL thật nằm ở
@@ -40,6 +40,8 @@ Ba nguyên tắc chi phối cách chia bảng:
 ## Tổng quan
 
 ```
+app_settings (một dòng — mặc định tùy chọn học)
+
 deck_templates (asset JSON ở MVP)
         │ sao chép một lần, không liên kết ghi ngược
         ▼
@@ -68,7 +70,8 @@ deck_templates (asset JSON ở MVP)
 | `owner_id` | TEXT NULL | NULL = local profile (AD-03) |
 | `scheduler_type` | TEXT NULL | `'eight_box'` \| `'sm2'`. **NOT NULL trên root, NULL trên deck con** |
 | `scheduler_version` | INTEGER NULL | cùng quy tắc NULL |
-| `scheduler_config` | TEXT NULL | JSON tham số ghi đè. Cùng quy tắc NULL |
+| `scheduler_config` | TEXT NULL | JSON tham số ghi đè của thuật toán. Cùng quy tắc NULL |
+| `study_config` | TEXT NULL | JSON tùy chọn học ghi đè mặc định toàn app (BR-147). NULL = theo mặc định. Chỉ trên root |
 | `scheduler_generation` | INTEGER NULL | bắt đầu từ 1, +1 mỗi lần reset (BR-40). Chỉ trên root |
 | `first_answered_at` | DATETIME NULL | NULL = chưa có lượt `scheduled` ở generation hiện tại → scheduler mở khoá |
 | `source_template_id` | TEXT NULL | NULL = deck tự tạo (BR-34) |
@@ -245,7 +248,8 @@ Một dòng cho mỗi card, tạo cùng lúc với card (BR-09). Xoá và tạo 
 | `scheduler_type` | TEXT NOT NULL | phải bằng scheduler của root deck |
 | `scheduler_version` | INTEGER NOT NULL | |
 | `scheduler_generation` | INTEGER NOT NULL | phải bằng generation hiện tại của root (BR-49) |
-| `due_at` | DATETIME NULL | chung cho mọi scheduler. NULL = đến hạn ngay. UTC |
+| `learned_at` | DATETIME NULL | NULL = chưa xong chuỗi học mới (BR-144). Đặt một lần, không bao giờ về NULL trừ khi Reset |
+| `due_at` | DATETIME NULL | NULL = chưa có lịch, tức chưa học xong lần đầu. UTC |
 | `last_answered_at` | DATETIME NULL | cập nhật ở cả `scheduled` lẫn `relearning` (BR-20) |
 | `answer_count` | INTEGER NOT NULL DEFAULT 0 | chỉ đếm `scheduled` (BR-20) |
 | `lapse_count` | INTEGER NOT NULL DEFAULT 0 | BR-20 |
@@ -276,7 +280,7 @@ xoá (cascade).
 | `session_id` | TEXT NOT NULL | → `study_sessions(id)` |
 | `scheduler_type` | TEXT NOT NULL | scheduler tại thời điểm đánh giá |
 | `scheduler_generation` | INTEGER NOT NULL | generation tại thời điểm đánh giá |
-| `kind` | TEXT NOT NULL | `'scheduled'` \| `'relearning'` (BR-75, BR-76) |
+| `kind` | TEXT NOT NULL | `'learning'` \| `'scheduled'` \| `'relearning'` (BR-75, BR-76, BR-143) |
 | `mode` | TEXT NOT NULL | StudyMode của lượt (BR-108, BR-98). `browse` không bao giờ xuất hiện ở đây (BR-111) |
 | `outcome_reason` | TEXT NULL | `timeout` khi hết giờ ở `recall` (BR-131); NULL khi người dùng tự trả lời |
 | `comparison_version` | INTEGER NULL | chỉ `fill`: phiên bản chính sách so khớp đã dùng (BR-135) |
@@ -313,7 +317,8 @@ bảng đầu tiên cần nhìn khi bàn về kích thước DB.
 | `deck_id` | TEXT NOT NULL | → `decks(id)` ON DELETE CASCADE. Deck được ôn (thường là root hoặc một nhánh) |
 | `root_deck_id` | TEXT NOT NULL | root của cây tại thời điểm mở phiên |
 | `scheduler_generation` | INTEGER NOT NULL | generation lúc mở phiên (BR-45) |
-| `current_mode` | TEXT NOT NULL | stage đang chạy: `browse` \| `self_assess` \| `match` \| `guess` \| `recall` \| `fill` (BR-108, BR-98) |
+| `session_kind` | TEXT NOT NULL | `learning` \| `reviewing` (BR-142) |
+| `current_mode` | TEXT NOT NULL | stage đang chạy: `browse` \| `self_assess` \| `match` \| `guess` \| `recall` \| `fill` (BR-108, BR-98). Phiên `reviewing` chỉ có một giá trị suốt phiên |
 | `status` | TEXT NOT NULL | `in_progress` \| `completed` \| `abandoned` \| `invalidated` \| `failed` (BR-79) |
 | `end_reason` | TEXT NULL | `user_exit` \| `scheduler_reset` \| `stale_generation` \| `persistence_error` \| `interrupted` (BR-80). NULL khi `in_progress` hoặc `completed` |
 | `cursor` | INTEGER NOT NULL DEFAULT 0 | số lượt đã phục vụ trong phiên; nền của BR-26 |
@@ -400,6 +405,26 @@ BR-23, lượt quay lại BR-26, trần BR-104 — và một cấu trúc mang lu
 Cái được kèm theo: phiên sống sót qua việc app bị hệ điều hành thu hồi (BR-103),
 và hàng đợi của phiên đã đóng trở thành dữ liệu thật — "phiên đó gồm những thẻ
 nào, bỏ dở bao nhiêu" — thứ hiện không tồn tại ở bất kỳ đâu.
+
+## `app_settings`
+
+Một dòng, cho local profile. Mặc định toàn app của tùy chọn học (BR-147).
+
+| Cột | Kiểu | Ghi chú |
+|---|---|---|
+| `id` | INTEGER PK | luôn `1`; `CHECK (id = 1)` giữ bảng ở đúng một dòng |
+| `card_limit` | INTEGER NOT NULL DEFAULT 20 | trần thẻ **mỗi phiên**, không phải mỗi ngày (BR-24) |
+| `new_card_order` | TEXT NOT NULL DEFAULT 'created' | `created` \| `random` (BR-148) |
+| `updated_at` | DATETIME NOT NULL | UTC |
+
+**Một bảng một dòng thay vì key-value.** Key-value đọc linh hoạt hơn nhưng mọi
+giá trị thành `TEXT` và mọi lần đọc thành một phép ép kiểu không ai kiểm; một
+dòng có cột thật thì `drift_dev` type-check ngay lúc build, và thêm một tùy chọn
+là một migration — đúng mức nghiêm túc cần có cho thứ đổi hành vi học.
+
+**Ghi đè nằm ở `decks.study_config`, không ở đây.** Deck root MAY mang JSON ghi
+đè; deck con MUST NOT (BR-147), cùng quy tắc cột scheduler đã theo từ BR-06. Giá
+trị hiệu lực = giá trị của root nếu có, ngược lại giá trị bảng này.
 
 ## `deck_templates`
 
@@ -561,6 +586,26 @@ WHERE s.status = 'completed'
 SELECT session_id FROM study_queue_items
 WHERE available_at < 0 OR answers_in_session < 0 OR round < 1
    OR (mode = 'self_assess' AND answers_in_session > 4);
+
+-- 24. Thẻ đã xong học mới nhưng không có lịch (BR-144, BR-149)
+SELECT card_id FROM card_study_states
+WHERE learned_at IS NOT NULL AND due_at IS NULL;
+
+-- 25. Thẻ chưa xong học mới mà đã có lượt `scheduled` (BR-144, BR-149)
+--     Chuỗi học mới ghi `learning`/`relearning` và không đổi lịch; một lượt
+--     `scheduled` ở đây nghĩa là lịch đã bị đặt giữa chừng.
+SELECT a.id FROM study_answers a
+JOIN card_study_states s ON s.card_id = a.card_id
+WHERE a.kind = 'scheduled' AND s.learned_at IS NULL;
+
+-- 26. `kind = 'learning'` nằm ngoài phiên học mới (BR-143)
+SELECT a.id FROM study_answers a
+JOIN study_sessions ss ON ss.id = a.session_id
+WHERE a.kind = 'learning' AND ss.session_kind <> 'learning';
+
+-- 27. Tùy chọn học nằm trên deck con (BR-147)
+SELECT id FROM decks
+WHERE parent_deck_id IS NOT NULL AND study_config IS NOT NULL;
 
 -- 23. Cột đặc thù `fill` xuất hiện ở stage khác (BR-135, BR-136)
 SELECT id FROM study_answers

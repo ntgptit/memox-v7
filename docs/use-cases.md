@@ -7,7 +7,7 @@
 | **Scope** | Must-have của MVP. Ngoài phạm vi: should/nice-to-have, và mọi thứ ở mục "Điều đã cố ý không đặc tả" |
 | **Source of truth for** | UC-xx · main/alternative/error flow · UI state matrix của từng màn |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md` |
-| **Updated by task** | M5.0i (card_limit thuộc phiên) |
+| **Updated by task** | M5.0m (hai loại phiên học) |
 | **Last updated** | 2026-08-07 |
 
 Chỉ đặc tả must-have. Should-have và nice-to-have viết khi tới lượt — đặc tả
@@ -239,44 +239,49 @@ state.
 
 **Actor:** Người dùng
 **Trigger:** Người dùng bấm Study trên một deck. Đây là **cách duy nhất** một phiên được tạo — badge, danh sách và thông báo số đến hạn không tạo phiên (BR-101)
-**Preconditions:** Deck tồn tại và có ít nhất một card thoả BR-22
+**Preconditions:** Deck tồn tại và có ít nhất một thẻ thuộc một trong hai tập của BR-142
 
 Đây là luồng chạy hằng ngày và là vertical slice đầu tiên nên xây.
 
+**Hai loại phiên, không phải một.** *Học mới* đưa thẻ chưa biết qua chuỗi stage và
+kết thúc bằng việc khởi tạo lịch; *ôn tập* đưa thẻ đến hạn qua **một** cách hỏi
+do người dùng chọn và cập nhật lịch. Chúng không bao giờ trộn thẻ (BR-142).
+
 **Main flow:**
-1. Hệ thống lấy card đến hạn trong cả cây theo BR-22, BR-23, tối đa `card_limit` thẻ riêng
-   biệt — mặc định 20 (BR-24, BR-139). **Không có card nào thì dừng ở đây** — xem E1; phiên **chưa**
-   được tạo.
-2. Người dùng bấm Study. Hệ thống đọc `stageSequence` của thuật toán thuộc root
-   deck — `eight_box` → `browse`, `match`, `guess`, `recall`, `fill`; `sm2` →
-   `browse`, `self_assess` (BR-110) — rồi tạo `study_session` với
-   `status = 'in_progress'`, `end_reason = NULL`, `current_mode` = stage đầu,
-   `root_deck_id` và `scheduler_generation` hiện tại của root (BR-45, BR-79,
-   BR-98), **cùng một hàng đợi cho mỗi stage** ghi vào `study_queue_items`, tất
-   cả trong một transaction (BR-102, BR-113). Người dùng **không chọn** stage
-   (BR-109).
-3. Stage `browse` chạy trước: mỗi thẻ hiện mặt trước và mặt sau **cùng lúc**,
-   không có bước lật, không có action nào được ghi (BR-111, BR-112). Đi hết hàng
-   đợi của `browse` thì sang stage kế.
-4. Stage chấm điểm hiện thẻ theo cách của mode đó. Với `self_assess`, hệ thống
-   hiện mặt trước rồi chờ người dùng lật (BR-112); nút đánh giá render từ
-   `supportedActions` — 2 nút với `eight_box`, 4 với `sm2` (BR-30).
-5. `self_assess` lấy action trực tiếp từ người dùng; bốn mode còn lại chấm ra kết
-   quả nhị phân rồi ánh xạ theo BR-107 (BR-106).
-6. Người dùng chọn một action.
-7. Hệ thống **so `session.scheduler_generation` với generation hiện tại của root**
-   (BR-46). Lệch thì đi E4.
-8. Hệ thống xác định `kind`: lượt **đầu tiên** của card này trong phiên là
-   `scheduled`; các lượt sau là `relearning` (BR-77, BR-78). Giá trị này được
-   **ghi tường minh**, không suy ra từ trạng thái trước/sau (BR-76).
-9. Nếu `scheduled`: tính trạng thái mới bằng scheduler (BR-15/BR-16 hoặc
-   BR-18/BR-19), cập nhật study state, `answer_count`, `lapse_count`.
-   Nếu `relearning`: **không** đổi box/ease/interval/due_at; chỉ cập nhật
-   `last_answered_at` (BR-78).
-10. Hệ thống ghi một dòng `study_answers` kèm `kind` (BR-21) — ngay lập
-    tức (BR-25).
-11. Nếu đây là lượt `scheduled` đầu tiên của root ở generation này, hệ thống đặt
-    `first_answered_at` → scheduler bị khoá từ đây (BR-13).
+1. Người dùng bấm Study. Hệ thống đếm hai tập, **không trộn** (BR-142):
+   **học mới** = thẻ `learned_at IS NULL`; **ôn tập** = thẻ `learned_at IS NOT
+   NULL AND due_at <= now`. Cả hai hiện kèm số lượng.
+2. Tập ôn tập rỗng ⇒ lối đó không mở được, kèm thời điểm thẻ gần nhất đến hạn
+   (BR-29, BR-145). Không có thao tác nào ôn sớm hơn hạn.
+3. **Chọn Học mới** — hệ thống lấy tối đa `card_limit` thẻ chưa học, theo
+   `new_card_order` của tùy chọn hiệu lực (BR-147, BR-148), rồi tạo
+   `study_session` với `session_kind = 'learning'` và chuỗi stage của thuật toán
+   (BR-109, BR-110). Người dùng **không chọn** stage.
+4. **Chọn Ôn tập** — hệ thống hiện các mode chấm điểm của thuật toán: `eight_box`
+   → `match`, `guess`, `recall`, `fill`; `sm2` → `self_assess` (BR-146). `browse`
+   không có mặt. Chỉ còn một mode thì vào thẳng, không hiện màn chọn. Sau khi
+   chọn, hệ thống lấy **toàn bộ** thẻ đến hạn theo `due_at` tăng dần, tối đa
+   `card_limit` (BR-23, BR-24), và tạo phiên với `session_kind = 'reviewing'`.
+5. Cả hai loại phiên ghi `card_limit` đã dùng vào phiên (BR-139) và dựng hàng đợi
+   trong cùng transaction (BR-102, BR-113).
+6. Người dùng trả lời một thẻ. Hệ thống **so `session.scheduler_generation` với
+   generation hiện tại của root** (BR-46); lệch thì đi E4.
+7. Hệ thống xác định `kind` và ghi tường minh (BR-76):
+   - phiên `learning` ⇒ `learning`, hoặc `relearning` nếu là lượt lặp trong round;
+     **không đổi lịch** (BR-141, BR-143, BR-144);
+   - phiên `reviewing` ⇒ `scheduled` ở lượt đầu của thẻ, `relearning` ở các lượt
+     lặp (BR-141).
+8. Lượt `scheduled` tính trạng thái mới bằng thuật toán (BR-15/BR-16 hoặc
+   BR-18/BR-19) và cập nhật study state, `answer_count`, `lapse_count`. Lượt
+   `learning` và `relearning` chỉ cập nhật `last_answered_at`.
+9. Hệ thống ghi một dòng `study_answers` kèm `kind` (BR-21) — ngay lập tức
+   (BR-25).
+10. **Chỉ ở phiên `learning`:** thẻ đi hết stage cuối ⇒ hệ thống đặt `learned_at`
+    và khởi tạo lịch ở mức thấp nhất — `eight_box` box 1, `sm2` interval 1 — với
+    `due_at` là đầu ngày học kế tiếp (BR-144, BR-105). Đây là **một sự kiện,
+    không phải một lượt đánh giá**, nên không có `action` nào được ghi.
+11. Nếu đây là thẻ **đầu tiên hoàn tất chuỗi học mới** của root ở generation này,
+    hệ thống đặt `first_answered_at` → thuật toán bị khoá từ đây (BR-13).
 12. Nếu action khác `forgotten`/`again`, card rời hàng đợi (BR-28).
 13. Hết hàng đợi: session → `completed`, `end_reason = NULL`, `ended_at` được đặt
     (BR-81). Hiện tổng kết.
