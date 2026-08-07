@@ -1,6 +1,8 @@
 # features/deck
 
-The first complete vertical slice, and the one the next feature is cloned from.
+The first complete vertical slice, and one of the two the next feature takes its
+method from — `features/card` is the other, and where the two differ is the
+answer to what was method and what was Deck (AD-17).
 
 This file answers the questions a new feature has to answer about itself. It is
 **not** the place for architecture rules — those live in
@@ -242,7 +244,7 @@ use-case layer superseded it; left standing, it described an AD-12 violation as
 though it were the design, in the one file the next feature is told to read
 first. Worth naming rather than quietly fixing: **a stale doc does not degrade
 into vagueness, it degrades into confident wrongness**, and this section is the
-one a cloner copies structure from.
+one a new feature reads its structure from.
 
 **Every dependency edge runs from a shorter-lived provider to a longer-lived one.**
 
@@ -343,13 +345,20 @@ The fake implements the **domain contract** and supplies reads as *builders*,
 because a single-subscription stream can only be listened to once and a retry
 listens twice.
 
-## 8 · Cloning this for a new feature
+## 8 · Taking this as a reference for a new feature
+
+**Take the method, not the shape** (AD-17). The tree, `content_type` and
+scheduler-on-root below are this feature's business; a feature that does not need
+them and grows them anyway has read the wrong half. `lib/features/card/README.md`
+is the control case — it was built to these same rules and came out shaped
+differently in almost every countable way.
 
 Read `feature_blueprint.md` first — it has the folder-layout rules the three
-enforcers actually accept, the footprint table of what a new feature touches
-outside its own folder, and the extractions that were tried and rejected.
+enforcers actually accept, the section on what does *not* transfer, the footprint
+table of what a new feature touches outside its own folder, and the extractions
+that were tried and rejected.
 
-What people get wrong on the first clone:
+What people get wrong first:
 
 - **`domain/` and `data/` are bucketed too, not just `presentation/widgets/`.**
   `domain/` is `entities/` · `repositories/` · `models/` · `usecases/` ·
