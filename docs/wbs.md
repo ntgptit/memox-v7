@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M5.0i (card_limit thuộc phiên) |
+| **Updated by task** | M5.0j (lượt đổi lịch trong chuỗi stage) |
 | **Last updated** | 2026-08-07 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -6816,6 +6816,38 @@ hai vế lại là cách một stage bị bỏ qua vì lý do sai.
 stage chấm điểm ghi `kind` là gì. BR-77 nói lượt đầu của thẻ trong phiên là
 `scheduled`, nhưng nó được viết khi một phiên chỉ có một cách hỏi; giờ một thẻ có
 thể có bốn lượt trong một phiên, và đó là ca BR-77 chưa từng phải xử lý.
+
+### M5.0j · Lượt nào đổi lịch trong chuỗi stage — và vì sao cơ chế round đã trả lời
+
+- **Status:** done — chỉ tài liệu. Đóng mục cuối cùng của nghiệp vụ Study.
+- **Goal:** Phát biểu tường minh cách BR-77 áp vào một phiên nhiều stage, thay vì
+  để người đọc sau tự suy.
+- **Scope:** `business-rules.md` (**BR-141**; đóng danh sách chưa chốt).
+- **Out of scope:** không đổi hành vi nào — BR-141 nói rõ thứ đã đúng sẵn.
+- **Editable documents:** `docs/business-rules.md`, `docs/wbs.md`
+- **Output:** BR-141
+- **Acceptance criteria:**
+  - [x] Lượt đầu tiên của thẻ trong phiên là `scheduled`; mọi lượt sau —
+        retry round cùng stage hay stage kế — là `relearning`.
+  - [x] Danh sách "chưa chốt" của nghiệp vụ Study **rỗng**.
+  - [x] `check_docs.py` xanh.
+- **Dependencies:** M5.0i
+- **Tests required:** `check_docs.py`, guard `memox-v7`
+- **Checklist phases:** 14.1
+
+**Câu hỏi tưởng còn mở hoá ra đã được cơ chế round trả lời.** BR-119 bắt mỗi stage
+lặp cho tới khi một round không còn thẻ sai, nên **lượt cuối của mọi stage luôn là
+một lần đúng**. Nó không nói gì về trí nhớ — chỉ nói vòng lặp đã kết thúc. Thứ duy
+nhất mang tín hiệu là **lần thử đầu tiên**, khi chưa stage nào nhắc bài.
+
+Nên hai phương án còn lại đều sai theo cách đo được: lấy kết quả cuối chuỗi cho
+mọi thẻ đều "nhớ được" và SRS mất sạch tín hiệu; cho mỗi stage đổi lịch một lần
+thì một thẻ vừa quên ở Match vẫn leo bốn box trong một buổi, và `answer_count`
+đếm 4 cho một lần học.
+
+BR-77 vì thế đúng sẵn dù nó được viết khi một phiên chỉ có một cách hỏi. BR-141
+không đổi hành vi — nó ghi lại lập luận, để lần sau không ai phải suy lại từ đầu
+rồi rút ra một kết luận khác.
 
 ### M5.0 · Study-specific domain và data completion
 
