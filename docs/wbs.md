@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M5.0 (nửa data) |
+| **Updated by task** | M5.1 (StudyScheduler) |
 | **Last updated** | 2026-08-07 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -7408,7 +7408,7 @@ gộp chúng làm phiên kết thúc sớm đúng ba thẻ.
 
 ### M5.1 · `StudyScheduler` — chuỗi stage và hai implementation
 
-- **Status:** todo
+- **Status:** **done** — analyze sạch, 1521 test xanh, guard sạch
 - **Goal:** Thuật toán SRS là hàm thuần khiết, và nó là nơi **duy nhất** biết
   stage nào chạy theo thứ tự nào.
 - **Scope:** `domain/scheduler/study_scheduler.dart` với `supportedActions`,
@@ -7417,21 +7417,41 @@ gộp chúng làm phiên kết thúc sớm đúng ba thẻ.
   xạ kết quả nhị phân → action của BR-107.
 - **Out of scope:** dùng scheduler trong controller (M5.3) hay ghi DB (M5.0).
 - **Editable documents:** `docs/wbs.md`
-- **Output:** `lib/features/study/domain/scheduler/`
+- **Output:** `lib/features/study/domain/models/` (`study_scheduler.dart`, `eight_box_scheduler.dart`, `sm2_scheduler.dart`, `study_day_model.dart`, `study_schedule_model.dart`)
 - **Acceptance criteria:**
-  - [ ] `next()` không gọi `DateTime.now()`; `now` là tham số (AD-06).
-  - [ ] `eight_box`: `stageSequence` = `[browse, match, guess, recall, fill]`,
+  - [x] `next()` không gọi `DateTime.now()`; `now` là tham số (AD-06).
+  - [x] `eight_box`: `stageSequence` = `[browse, match, guess, recall, fill]`,
         `reviewModes` = `[match, guess, recall, fill]`,
         `supportedActions` = `[forgotten, remembered]` (BR-110, BR-146, BR-30).
-  - [ ] `sm2`: `stageSequence` = `[browse, self_assess]`,
+  - [x] `sm2`: `stageSequence` = `[browse, self_assess]`,
         `reviewModes` = `[self_assess]`,
         `supportedActions` = `[again, hard, good, easy]`.
-  - [ ] `browse` không nằm trong `reviewModes` của bất kỳ thuật toán nào (BR-146).
-  - [ ] Ma trận 8 box × 2 action của `eight_box` đều có test và khớp BR-15, BR-16.
-  - [ ] Card box 8 trả lời `remembered` vẫn ở box 8, hạn +128 ngày (BR-16).
-  - [ ] `sm2`: `ease_factor` không xuống dưới 1.3 kể cả sau 50 lượt `again` (BR-19).
-  - [ ] `sm2`: `repetitions` 0 → interval 1; 1 → 6; ≥2 → `round(interval * ef)` (BR-18).
-  - [ ] `domain/scheduler/` không import Flutter hay Drift.
+  - [x] `browse` không nằm trong `reviewModes` của bất kỳ thuật toán nào (BR-146).
+  - [x] Ma trận 8 box × 2 action của `eight_box` đều có test và khớp BR-15, BR-16.
+  - [x] Card box 8 trả lời `remembered` vẫn ở box 8, hạn +128 ngày (BR-16).
+  - [x] `sm2`: `ease_factor` không xuống dưới 1.3 kể cả sau 50 lượt `again` (BR-19).
+  - [x] `sm2`: `repetitions` 0 → interval 1; 1 → 6; ≥2 → `round(interval * ef)` (BR-18).
+  - [x] Không import Flutter hay Drift ở bất kỳ file scheduler nào.
+**`domain/` chỉ có năm bucket, không có `scheduler/`.** Bản kế hoạch ghi output là
+`domain/scheduler/`; `architecture_boundary_test` từ chối ngay, và nó đúng — CLAUDE.md
+liệt kê đúng `entities/ · repositories/ · models/ · usecases/ · failures/`. File giữ
+suffix `_scheduler` (bảng naming cho phép) và nằm trong `models/`. Chỗ sai là WBS,
+không phải test.
+
+**BR-18 nhân interval với ease factor **cũ**, không phải cái vừa cập nhật.** Hai luật
+tách rời: BR-18 tính interval từ `ease_factor` đang lưu trên thẻ, BR-19 cập nhật
+`ease_factor`. Đây là cách đọc sát chữ nhất, và có test riêng tách hai hướng bằng
+action `hard` — `good` không đổi hệ số nên không phân biệt được. Nếu chủ dự án muốn
+hướng ngược lại thì đó là một dòng đổi chỗ và một test đổi số.
+
+**`binaryAction` trả null cho `sm2` thay vì bịa một ánh xạ.** BR-107 chỉ nói cho
+`eight_box`, và `sm2` không có stage chấm điểm nào (BR-146). Cho nó trả
+`again`/`good` là tự đặt ra nghiệp vụ; trả null làm lỗi của caller hiện ra thay vì chấm
+sai âm thầm.
+
+**Hai action của thuật toán kia bị **từ chối**, không bỏ qua.** Một dòng history từ
+deck đã đổi thuật toán trước khi khoá có thể mang action lạ; chấm đại nó tệ hơn dừng.
+
 - **Dependencies:** M5.0
 - **Tests required:** unit test toàn ma trận `eight_box`; unit test công thức
   `sm2` gồm biên sàn ease factor; test `stageSequence`, `reviewModes`,
