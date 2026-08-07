@@ -42,6 +42,19 @@ later decision depends on it being true.
 When a task spans several rows — which most real tasks do — `flutter-feature-slice`
 is usually the right entry point; it pulls in the others in the right order.
 
+**Before building a feature, read the two that already went the whole way.** Deck
+and Card are the worked examples:
+`flutter-feature-slice/assets/feature_blueprint.md` records what they settled,
+`lib/features/deck/README.md` and `lib/features/card/README.md` record each
+slice. Take the **method** from them — layering, where a rule is enforced, what a
+use case may know, which test sits at which level — and not the business. Neither
+feature's data shape is a template (AD-17); a third feature that grows a tree or
+a `content_type` because Deck has one has copied the wrong half.
+
+This routing line exists because it was missing: until M99.2 the front door named
+no reference implementation at all, so an agent found the blueprint only by
+landing on `flutter-feature-slice` first.
+
 ## Phase order is a dependency graph, not a suggestion
 
 The recommended order is:

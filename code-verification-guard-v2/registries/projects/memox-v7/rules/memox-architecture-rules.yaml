@@ -202,7 +202,7 @@ rules:
     enabled: true
     message: >-
       StudyMode is dispatched in exactly one exhaustive switch, in the resolver
-      (AD-17). A second branch on StudyMode in domain/ or data/ is where a
+      (AD-18). A second branch on StudyMode in domain/ or data/ is where a
       mode's policy leaks out of its handler and back into the shared flow —
       the thing the handler exists to prevent. A handler already knows which
       mode it is and never needs to ask.

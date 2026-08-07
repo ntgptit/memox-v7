@@ -117,6 +117,22 @@ The `.claude/skills/` directory holds one skill per area of the checklist. Start
 with **flutter-workflow** when you do not know which phase you are in — it routes
 to the right skill and refuses to let phases run out of order.
 
+**Deck and Card are the two worked examples. Read them before building a third
+feature** — `.claude/skills/flutter-feature-slice/assets/feature_blueprint.md`
+first, then `lib/features/deck/README.md` and `lib/features/card/README.md`.
+
+What transfers is the **method**: how a slice is layered, where a rule is
+enforced, what a use case is allowed to know, how a failure carries its reason,
+which test sits at which level. What does **not** transfer is either feature's
+business — the deck tree, `content_type`, scheduler-on-root, the card's flag and
+tags all exist because those features needed them, and a feature that does not
+need them and grows them anyway has copied the wrong half (AD-17).
+
+Two examples rather than one on purpose: a single reference cannot tell "this is
+the method" apart from "this is how that feature happened to be built". Where
+Deck and Card differ, the difference is the answer — `card/README.md` records
+what Card did differently and why it was still right.
+
 Phases run in dependency order, not checklist order: business requirements →
 use cases → WBS → foundation → architecture boundaries → theme/tokens → minimal
 shared components → router → data foundation → features as vertical slices →

@@ -419,7 +419,7 @@ tế và đủ hẹp để hàng thẻ có chiều cao đoán được.
 | BR-98 | active | Mode MUST được lưu tường minh trên `study_sessions` và trên mỗi dòng `study_answers`. MUST NOT suy luận từ hình dạng dữ liệu của lượt. | db | BR-76, AD-11 |
 | BR-99 | active | Một mode MUST khả dụng chỉ khi thoả **cả hai**: nằm trong `supportedModes` của thuật toán, **và** scope hiện tại đủ dữ liệu tối thiểu của mode đó. | domain | BR-97, UC-05 |
 | BR-100 | active | Mode bị chặn vì thuật toán MUST được trình bày là không khả dụng cho deck này, và MUST NOT gợi ý Reset learning progress như cách mở khoá. | UI | BR-13, BR-41 |
-| BR-106 | active | Mọi mode MUST sinh ra một `action` thuộc `supportedActions` của thuật toán. `review` MUST lấy action **trực tiếp từ người dùng**; bốn mode còn lại MUST chấm ra kết quả nhị phân rồi ánh xạ theo BR-107. | domain | BR-15, BR-30, AD-17 |
+| BR-106 | active | Mọi mode MUST sinh ra một `action` thuộc `supportedActions` của thuật toán. `review` MUST lấy action **trực tiếp từ người dùng**; bốn mode còn lại MUST chấm ra kết quả nhị phân rồi ánh xạ theo BR-107. | domain | BR-15, BR-30, AD-18 |
 | BR-107 | active | Với `eight_box`, kết quả nhị phân MUST ánh xạ: sai → `forgotten`, đúng → `remembered`. Hết giờ ở `recall` MUST tính là sai. | domain | BR-15, BR-96 |
 
 **Vì sao tập mode thuộc thuật toán chứ không thuộc deck.** Bốn mode ngoài
@@ -445,7 +445,7 @@ nó vẫn sinh ra `forgotten`/`remembered`, và nếu đọc thành "không sinh
 
 Khác biệt thật giữa năm mode vì thế nằm gọn ở **nguồn** của action, không phải ở
 việc có hay không có action — và đó cũng chính là toàn bộ phần mỗi handler phải
-tự viết (AD-17). `review` không còn là ngoại lệ của luồng chung; nó là mode mà
+tự viết (AD-18). `review` không còn là ngoại lệ của luồng chung; nó là mode mà
 `evaluate` trả về đúng cái người dùng vừa bấm.
 
 **Chưa chốt, và cố ý để trống:** ngưỡng tối thiểu cụ thể của `match` và `recall`;

@@ -1,12 +1,56 @@
-# Feature blueprint — derived from `features/deck` (M4.9…M4.10)
+# Feature blueprint — derived from `features/deck` and `features/card`
 
-The Deck feature is the reference implementation. This file records **what to copy,
-what to rename, and what must not be copied**, measured against the code as it
-stands rather than as an ideal.
+Deck and Card are the two worked examples. This file records **the method they
+settled** — how a slice is layered, where a rule is enforced, what a use case may
+know, which test sits at which level — measured against the code as it stands
+rather than as an ideal.
 
-It is not a folder template to scaffold blindly. The repo's guards select files by
-*suffix*, and MX-VIS-001 derives an audit path from a screen's location, so the
-layout below is load-bearing — a plausible-looking alternative breaks a gate.
+**It is a reference, not a source to copy from.** The distinction is the whole
+point and it has a section of its own below: what transfers is the *shape of the
+reasoning*, not the *shape of the data*. A third feature that grows a tree because
+Deck has one, or a flag because Card has one, has taken the wrong half.
+
+It is also not a folder template to scaffold blindly. The repo's guards select
+files by *suffix*, and MX-VIS-001 derives an audit path from a screen's location,
+so the layout below is load-bearing — a plausible-looking alternative breaks a
+gate.
+
+## What does not transfer
+
+This section pays a debt: the opening of this file promised "what must not be
+copied" from the day it was written and never delivered a single instance, so for
+a year the only guidance available was a document whose verbs were all `copy`.
+
+Everything below exists in Deck or Card **because that feature's business asked
+for it**. None of it is part of the method, and a new feature that acquires one
+of them without its own reason has been scaffolded, not designed.
+
+| Belongs to | What it is | Why it is not yours |
+|---|---|---|
+| Deck | The recursive tree, 10 levels, `parent_deck_id` / `root_deck_id` | A feature whose objects do not *contain* other objects of the same kind has no tree. Most do not. |
+| Deck | `content_type` and the `unset` → `card`/`deck` lock | This models "a container settles what kind of thing it holds on first use". It is a rule with an ID (BR-60…BR-68), not a pattern. |
+| Deck | Scheduler on the root, generation, the lock after first review | Study's business. It reaches Deck only because a deck is what gets studied. |
+| Deck | `DeckMoveRejection` and its eight reasons | The *idea* — a refusal carries its reason as a value — transfers and is in "A failure carries *why* as a value". The eight reasons do not. |
+| Card | The flag, tags, and the three optional detail fields | Card content. A tag table is not a layer. |
+| Card | Four card states derived at read time (BR-89…BR-91) | Derived-not-stored is a method question answered per feature by AD-11; *these four states* answer Card's. |
+| Card | The list statement that composes filter + search + sort dynamically | Right for a list the user filters four ways. Deck's list does not do this and is not worse for it. |
+| Both | The literal folder contents — nine `usecases/` files, four widget buckets *populated* | The buckets are fixed (AD-15); which of them your feature fills is decided by what it renders. An empty bucket is not a gap. |
+
+**The test to apply instead of copying.** For each thing you are about to bring
+across, ask: *"if I delete this, does my feature stop being correct, or does it
+stop resembling Deck?"* Only the first is a reason to keep it. The second is how
+a codebase acquires a tree nobody needed and a `content_type` nobody sets.
+
+The inverse test is in "The real footprint of a new feature": if making your
+feature work forces you to touch `core/` or `shared/`, that thing belonged there
+before you started, and moving it is finishing the previous feature rather than
+starting yours.
+
+**Where Deck and Card disagree, the disagreement is the answer.** Two references
+exist so the method can be told apart from one feature's habits — a single
+example cannot distinguish "this is the rule" from "this is how that one was
+built". `lib/features/card/README.md` records what Card did differently and why
+each difference was still correct.
 
 ## The layout
 
@@ -66,8 +110,8 @@ confirm dialogs and move picker are `overlays/`, and the ARB-mapping extension
 `deck_labels_widget.dart` is `support/` because four files across three buckets
 call it. AD-15 in `docs/architecture.md` is the contract;
 `architecture_boundary_test.dart` and the guard rule
-`memox.architecture.widgets_grouped_into_buckets` enforce it, so a cloned
-feature that invents a folder fails the suite instead of setting a precedent.
+`memox.architecture.widgets_grouped_into_buckets` enforce it, so a new feature
+that invents a folder fails the suite instead of setting a precedent.
 - `check_architecture.sh`'s `check_suffix` pairs each folder with its required
   suffix: `/domain/entities/` → `_entity.dart`, `/presentation/screens/` →
   `_screen.dart`, and eight more.
@@ -112,8 +156,9 @@ The rule now lives in a **value object**. `DeckName` has a private constructor a
 a `parse` that returns either the value or a typed problem, so an invalid deck name
 cannot be constructed at all; the repository contract asks for a `DeckName`, and
 "has this been validated?" is answered by the signature rather than by reading the
-implementation. That is the shape to copy: moving a rule into one layer stops it
-being duplicated by *convention*, and moving it into a type stops it structurally.
+implementation. **That reasoning is what transfers** — the rule is Deck's, the
+move is not: putting a rule in one layer stops it being duplicated by
+*convention*, and putting it in a type stops it structurally.
 
 Only the use case calls `parse`. Presentation reads the typed problems back off the
 failure — `deckSubmitFailure` takes the `Failure` and nothing else, so re-deriving
@@ -243,7 +288,7 @@ git grep -nE "import '[^']*features/[a-z_]+/(data|presentation)/" -- lib/feature
 ```
 
 Anything a second feature would need from the first belongs in `core/` **before**
-the clone, not after. Both entries in the table's first two rows were originally
+the second feature starts, not after. Both entries in the table's first two rows were originally
 inside `features/deck/presentation/` and were moved for exactly this reason.
 
 ## Domain purity
@@ -931,7 +976,7 @@ and none is proposed: component rendering is already covered by 26 goldens and 1
 strict visual-audit states, and a third rendering surface would be a third place
 for a component to look right while the app looks wrong.
 
-## Before you clone — the honest checklist
+## Before you start — the honest checklist
 
 ```bash
 # nothing reaches into another feature
@@ -965,8 +1010,8 @@ work. A new feature touches these, and only these:
 
 The test that matters is not "did I avoid touching anything" — it is **"did I have
 to touch `core/` or `shared/` to make the second feature work?"** If yes, that
-thing belonged there before the clone, and moving it is part of finishing feature
-one rather than part of starting feature two. Three things failed exactly that
+thing belonged there before the second feature started, and moving it is part of
+finishing feature one rather than part of starting feature two. Three things failed exactly that
 test and were moved or extracted: `clock_provider`, `retry_policy`, and
 `MxAsyncView`.
 
