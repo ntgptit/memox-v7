@@ -7,7 +7,7 @@
 | **Scope** | Bảng, cột, index, quan hệ, query bất biến. Ngoài phạm vi: SQL runtime (`lib/core/database/`, chưa tồn tại) |
 | **Source of truth for** | Schema · cột và kiểu · index · query bất biến · thứ tự migration |
 | **Depends on** | `document-conventions.md`, `architecture.md`, `business-rules.md` |
-| **Updated by task** | M5.0o (recursive review lượt hai) |
+| **Updated by task** | M5.0q (recursive review lượt bốn) |
 | **Last updated** | 2026-08-07 |
 
 Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; SQL thật nằm ở
@@ -17,6 +17,29 @@ Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; S
 "vòng review UI/UX", "code review" — đó là *rà soát*, không phải *ôn tập*. Đợt đổi
 tên cố tình không đụng tới chúng, nên gặp chữ `review` ở đâu đó không có nghĩa là
 sót.
+
+**Mỗi cột của Study tồn tại vì một luật, và đây là ánh xạ.** `business-rules.md`
+nói **hành vi** chứ không chỉ định cột — đúng phân công của hai tài liệu — nên không
+tra ngược được từ cột về luật nếu không có bảng này. Người viết M5 cần chiều đó.
+
+| Cột | Tồn tại vì |
+|---|---|
+| `card_study_states.learned_at` | BR-144 (đặt), BR-142 (chia hai tập), BR-90 (định nghĩa `new`), BR-152 (Reset xoá) |
+| `study_sessions.session_kind` | BR-142 |
+| `study_sessions.card_limit` | BR-24, BR-139 |
+| `study_sessions.cursor` | BR-26 — nền của "sau ít nhất 3 thẻ khác" |
+| `study_queue_items.mode` | BR-113 |
+| `study_queue_items.round` | BR-115, BR-117 |
+| `study_queue_items.position` | BR-23, BR-117 |
+| `study_queue_items.available_at` | BR-26 |
+| `study_queue_items.answers_in_session` | BR-77 (lượt đầu), BR-104 (trần 3) |
+| `study_queue_items.remaining_ms` · `is_revealed` | BR-133 |
+| `study_answers.mode` | BR-98 |
+| `study_answers.outcome_reason` | BR-131 |
+| `study_answers.comparison_version` | BR-135 |
+| `study_answers.used_hint` | BR-136 |
+| `decks.study_config` | BR-147 |
+| `app_settings.card_limit` · `new_card_order` | BR-147, BR-148 |
 
 **Năm chỗ trong `lib/` đang implement định nghĩa đã bị thay.** Chúng **đúng với
 schema v4** và sẽ đổi cùng migration mang `learned_at`; liệt kê ở đây để không ai
