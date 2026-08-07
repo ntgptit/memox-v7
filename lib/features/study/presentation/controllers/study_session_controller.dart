@@ -96,6 +96,21 @@ class StudySessionController extends _$StudySessionController {
 
     final repository = ref.read(studyRepositoryProvider);
     try {
+      // `browse` produces no action, so there is nothing to submit — it is
+      // shown and moved past (BR-111, BR-28). The schema cannot even hold
+      // `browse` as an answer mode, so this is a branch rather than a value.
+      if (session.currentMode == StudyMode.browse) {
+        await repository.markBrowsed(
+          sessionId: session.id,
+          cardId: turn.cardId,
+        );
+
+        if (!ref.mounted) return;
+        state = state.copyWith(isSubmitting: false);
+
+        return _pullTurn();
+      }
+
       await SubmitStudyAnswerUseCase(repository).call(
         session: session,
         cardId: turn.cardId,

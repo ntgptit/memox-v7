@@ -29,7 +29,7 @@ final class GuessQuestion {
 }
 
 /// Pick the meaning out of five.
-final class GuessModeHandler implements StudyModeHandler {
+final class GuessModeHandler extends StudyModeHandler {
   const GuessModeHandler();
 
   @override

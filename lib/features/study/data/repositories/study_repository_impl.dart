@@ -157,7 +157,7 @@ final class StudyRepositoryImpl
         throw const NotFoundFailure(message: 'Deck not found');
       }
 
-      final cardIds = await _cardsFor(
+      final cards = await _cardsFor(
         rootDeckId: deck.rootDeckId,
         kind: kind,
         cardLimit: cardLimit,
@@ -169,7 +169,7 @@ final class StudyRepositoryImpl
       // empty one. A session row written and then abandoned would still count as
       // a session in the history, and studying ahead is a rule rather than a
       // missing feature.
-      if (cardIds.isEmpty) {
+      if (cards.isEmpty) {
         throw ConflictFailure(
           message: 'Nothing to study',
           reason: kind == StudySessionKind.reviewing
@@ -198,7 +198,7 @@ final class StudyRepositoryImpl
       // the first, which is the opposite of what five stages are for.
       for (final mode in stageSequence) {
         await _dao.insertQueueItems(
-          _roundOne(sessionId: sessionId, mode: mode, cardIds: cardIds),
+          _roundOne(sessionId: sessionId, mode: mode, cards: cards),
         );
       }
 

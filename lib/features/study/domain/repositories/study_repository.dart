@@ -129,6 +129,14 @@ abstract interface class StudyRepository {
     int? nextIntervalDays,
   });
 
+  /// Moves past a card in a stage that grades nothing (BR-111, BR-28).
+  ///
+  /// **`browse` is the only mode that needs this, and it needs it because it
+  /// produces no action at all.** It writes no `study_answers` row — the column
+  /// enumeration in the schema cannot even hold `browse` — so without a way to
+  /// say "shown, move on" its queue never empties and the session cannot end.
+  Future<void> markBrowsed({required String sessionId, required String cardId});
+
   /// Marks a card as having finished the learning chain (BR-144).
   ///
   /// **Completion is an event, not an answer.** It sets `learned_at`, seeds the

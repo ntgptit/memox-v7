@@ -25,7 +25,7 @@ mixin _StudyQueueOperations {
   Future<StudySession> _invalidateIfStale(String sessionId);
 
   /// The card set for a session — one set, never both (BR-142).
-  Future<List<String>> _cardsFor({
+  Future<List<StudyCardModel>> _cardsFor({
     required String rootDeckId,
     required StudySessionKind kind,
     required int cardLimit,
@@ -34,7 +34,8 @@ mixin _StudyQueueOperations {
   }) async {
     if (kind == StudySessionKind.reviewing) {
       final due = await _dao.dueCards(rootDeckId, now, cardLimit);
-      return due.map((row) => row.c.id).toList();
+
+      return due.map((row) => studyCardModelFromRow(row.c)).toList();
     }
 
     // `random` is applied here rather than in SQL: `RANDOM()` cannot be seeded,
@@ -42,26 +43,39 @@ mixin _StudyQueueOperations {
     // then shuffling would be fairer, but it also reads the whole deck to throw
     // most of it away — and BR-148 asks for an order, not for a sample.
     final fresh = await _dao.newCards(rootDeckId, cardLimit);
-    final ids = fresh.map((row) => row.c.id).toList();
-    if (newCardOrder == NewCardOrder.random) ids.shuffle(_random);
+    final cards = fresh.map((row) => studyCardModelFromRow(row.c)).toList();
+    if (newCardOrder == NewCardOrder.random) cards.shuffle(_random);
 
-    return ids;
+    return cards;
   }
 
-  /// Round 1 of a stage: every card, in an order of this stage's own (BR-117).
+  /// Round 1 of a stage: every card the stage can use, in an order of its own.
+  ///
+  /// **A card the mode cannot use gets no row at all** (BR-114). That is the
+  /// difference between "skipped" and "stuck": with no row here, it has nothing
+  /// left pending in this stage, so it finishes the learning chain alongside the
+  /// others (BR-144). `fill` is the mode this matters for — `example` is
+  /// optional, and an earlier reading would have frozen every card without one.
+  ///
+  /// Two independent shuffles per stage keep BR-117 true: sharing one order
+  /// across stages would make the second stage a re-run of the first.
   List<StudyQueueItemsCompanion> _roundOne({
     required String sessionId,
     required StudyMode mode,
-    required List<String> cardIds,
+    required List<StudyCardModel> cards,
   }) {
-    final shuffled = <String>[...cardIds]..shuffle(_random);
+    final handler = studyModeHandler(mode);
+    final usable = <StudyCardModel>[
+      for (final card in cards)
+        if (handler?.canTake(card) ?? false) card,
+    ]..shuffle(_random);
 
     return <StudyQueueItemsCompanion>[
-      for (final (index, cardId) in shuffled.indexed)
+      for (final (index, card) in usable.indexed)
         StudyQueueItemsCompanion.insert(
           sessionId: sessionId,
           mode: mode.dbValue,
-          cardId: cardId,
+          cardId: card.id,
           position: index,
           status: 'pending',
         ),
@@ -229,6 +243,37 @@ mixin _StudyQueueOperations {
       );
     });
   }
+
+  Future<void> markBrowsed({
+    required String sessionId,
+    required String cardId,
+  }) => _dao.runInTransaction(() async {
+    final session = await _invalidateIfStale(sessionId);
+
+    final round = await _dao.currentRound(
+      sessionId: sessionId,
+      mode: StudyMode.browse.dbValue,
+    );
+    if (round == null) return;
+
+    await _dao.updateQueueItem(
+      sessionId: sessionId,
+      mode: StudyMode.browse.dbValue,
+      round: round,
+      cardId: cardId,
+      values: const StudyQueueItemsCompanion(
+        status: Value<String>('completed'),
+      ),
+    );
+
+    // The cursor still moves. It counts turns served, and a browsed card was
+    // served — BR-26's comeback gap is measured in cards seen, not in cards
+    // graded.
+    await _dao.updateSession(
+      sessionId,
+      StudySessionsCompanion(cursor: Value<int>(session.cursor + 1)),
+    );
+  });
 
   /// What the answer does to the queue — the half of the rules that differ by
   /// mode.

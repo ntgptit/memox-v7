@@ -44,7 +44,7 @@ final class MatchBoard {
 }
 
 /// Pair the term with its meaning.
-final class MatchModeHandler implements StudyModeHandler {
+final class MatchModeHandler extends StudyModeHandler {
   const MatchModeHandler();
 
   @override

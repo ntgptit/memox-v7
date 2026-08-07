@@ -3,6 +3,7 @@ import 'guess_mode.dart';
 import 'match_mode.dart';
 import 'recall_mode.dart';
 import 'study_entry_summary_model.dart';
+import 'study_turn_model.dart';
 
 /// One of the six ways a card can be put in front of the user (BR-108).
 ///
@@ -96,7 +97,10 @@ enum StudyMode {
 ///
 /// A handler never calls another handler; moving between stages is the shared
 /// flow's decision.
-abstract interface class StudyModeHandler {
+abstract class StudyModeHandler {
+  /// Handlers are stateless values, so every one of them is a `const`.
+  const StudyModeHandler();
+
   /// How many of the session's due cards this mode can actually take (BR-154).
   ///
   /// Zero means offered but unable to build content — disabled on the chooser
@@ -105,6 +109,18 @@ abstract interface class StudyModeHandler {
   /// because it is the one thing that differs per mode and nothing else about
   /// counting rows does.
   int capacityFrom(StudyEntrySummaryModel summary);
+
+  /// Whether this mode can put [card] in front of somebody at all (BR-114).
+  ///
+  /// **A card the mode cannot use is skipped, not dropped.** It stays in the
+  /// deck, it still appears in every other stage, and — crucially — it has no
+  /// row in this one to sit `pending` forever. That is what lets it finish the
+  /// learning chain with the rest: completion asks "nothing pending anywhere",
+  /// and a stage it never joined has nothing to answer for (BR-144).
+  ///
+  /// Defaulting to true is right for every mode but one: only `fill` needs a
+  /// field the card may not have.
+  bool canTake(StudyCardModel card) => true;
 }
 
 /// Every mode that needs nothing built: it takes whatever is due.
@@ -116,7 +132,7 @@ abstract interface class StudyModeHandler {
 ///
 /// `recall` has the same capacity and its own handler, because the clock is a
 /// rule even though the card set is not.
-final class PlainModeHandler implements StudyModeHandler {
+final class PlainModeHandler extends StudyModeHandler {
   const PlainModeHandler();
 
   @override
