@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M5.4a (lối vào, chọn mode, browse, self_assess) |
+| **Updated by task** | M5.4b (match, guess) |
 | **Last updated** | 2026-08-07 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -7654,18 +7654,44 @@ Cần một lượt điều tra riêng, không gộp vào M5.
 
 #### M5.4b · `match` và `guess`
 
-- **Status:** todo
+- **Status:** **done** — analyze sạch, 1475 test xanh (trừ golden Windows), guard sạch
 - **Scope:** bàn ghép cặp của `match`, câu hỏi năm lựa chọn của `guess`.
 - **Acceptance criteria:**
-  - [ ] `match` dưới hai cặp thì bỏ qua (phiên học) hoặc vô hiệu hoá (phiên ôn)
+  - [x] `match` dưới hai cặp thì bỏ qua (phiên học) hoặc vô hiệu hoá (phiên ôn)
         — không bao giờ render bàn một cặp (BR-153).
-  - [ ] Chọn nhầm vế sau **không** đánh dấu thẻ sở hữu vế đó là sai (BR-118).
-  - [ ] `guess` render đúng **năm** lựa chọn, đáp án đúng xuất hiện đúng một lần
+  - [x] Chọn nhầm vế sau **không** đánh dấu thẻ sở hữu vế đó là sai (BR-118).
+  - [x] `guess` render đúng **năm** lựa chọn, đáp án đúng xuất hiện đúng một lần
         (BR-121); hai thẻ cùng `back_folded` không cùng xuất hiện (BR-123).
-  - [ ] Chọn được ghi bằng định danh, không bằng chuỗi hiển thị (BR-125).
-  - [ ] Chạm lặp trên một question chỉ sinh một lượt (BR-126).
-  - [ ] Thứ tự thẻ và thứ tự lựa chọn là hai hoán vị độc lập, ổn định khi Resume
+  - [x] Chọn được ghi bằng định danh, không bằng chuỗi hiển thị (BR-125).
+  - [x] Chạm lặp trên một question chỉ sinh một lượt (BR-126).
+  - [x] Thứ tự thẻ và thứ tự lựa chọn là hai hoán vị độc lập, ổn định khi Resume
         (BR-127).
+**Mốc này dựng luôn hệ handler của AD-18, và trả nợ M5.4a.** `capacityFrom`
+chuyển từ switch trong widget chọn mode sang từng handler: `fill` đếm thẻ có ví dụ,
+`guess` đòi năm nghĩa khác nhau, `match` đòi hai cặp. Mỗi luật nằm trong file sở
+hữu nó, và chỉ còn **một** switch trên `StudyMode`.
+
+**Hai rule của guard mâu thuẫn nhau — đây là chỗ tự quyết.** Rule dispatch loại trừ
+`study_mode_resolver.dart` khỏi phạm vi cấm switch, nhưng rule naming bắt file
+`domain/` phải kết thúc bằng `_entity/_repository/_use_case/_scheduler/_mode/_failure/_model`
+— `_resolver` không nằm trong đó. Không file nào tên `study_mode_resolver.dart`
+thoả được cả hai. File `*_mode.dart` thì thoả, nên resolver ở `study_mode.dart` —
+cạnh chính enum nó phân giải, vốn là chỗ đọc hợp lý nhất. **Phần exclude nhắc tên
+`study_mode_resolver.dart` giờ là code chết**, nên dọn ở một lượt riêng.
+
+**`match` ghi lượt cho thẻ của **vế được chọn trước**** (BR-118). Chọn nhầm nghĩa
+của thẻ b đánh dấu **a** sai; thẻ b chưa bao giờ được hỏi, chấm nó là phạt một thẻ vì
+nó có mặt trên bàn. Chạm vào nghĩa khi chưa chọn vế nào thì **không** sinh lượt —
+đoán xem nó "định ghép với ai" là ghi một câu trả lời người dùng chưa đưa.
+
+**`guess` chỉ nhận lựa chọn đầu tiên** (BR-126), và cờ đó reset khi đổi term —
+không reset thì mọi question sau câu đầu không trả lời được.
+
+**BR-120 chưa có test.** Tiêu chí nói mức `almost` của `match` vào tập không đạt
+nhưng không vào `study_answers.action`. Widget hiện chỉ sinh đúng/sai nhị phân,
+chưa có mức phản hồi thứ ba nào — nên không có gì để kiểm. Khi nào thêm `almost`
+thì thêm test cùng lúc; ghi ở đây để không ai tưởng đã phủ.
+
 - **Tests required:** widget test cho từng criteria; test khẳng định `almost` của
   `match` vào tập không đạt nhưng **không** vào `study_answers.action` (BR-120)
 

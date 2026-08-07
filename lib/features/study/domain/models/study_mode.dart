@@ -1,3 +1,8 @@
+import 'fill_mode.dart';
+import 'guess_mode.dart';
+import 'match_mode.dart';
+import 'study_entry_summary_model.dart';
+
 /// One of the six ways a card can be put in front of the user (BR-108).
 ///
 /// **The set of modes belongs to the SRS algorithm, not to the deck and not to
@@ -80,3 +85,58 @@ enum StudyMode {
     return unknown;
   }
 }
+
+/// What one mode knows that the shared flow does not (AD-18).
+///
+/// **Strategy, not Template Method.** The ten steps of a turn are the use case's
+/// — seven of them are writes that have to share a transaction — so a base class
+/// holding `process()` would have to hold a repository, and `domain/` would grow
+/// I/O. What is left for a mode is what only it can answer, and that is this.
+///
+/// A handler never calls another handler; moving between stages is the shared
+/// flow's decision.
+abstract interface class StudyModeHandler {
+  /// How many of the session's due cards this mode can actually take (BR-154).
+  ///
+  /// Zero means offered but unable to build content — disabled on the chooser
+  /// **with its reason**, never hidden (BR-99). This is the rule that used to
+  /// sit in the repository and then in the chooser widget; it belongs here,
+  /// because it is the one thing that differs per mode and nothing else about
+  /// counting rows does.
+  int capacityFrom(StudyEntrySummaryModel summary);
+}
+
+/// Every mode that needs nothing built: it takes whatever is due.
+///
+/// `browse`, `self_assess` and `recall` all show one card and ask about it, so
+/// there is no content to assemble and no threshold to clear. Giving them a
+/// shared handler rather than three identical ones is what keeps the difference
+/// between modes readable — the file that has something in it is the file with a
+/// rule.
+final class PlainModeHandler implements StudyModeHandler {
+  const PlainModeHandler();
+
+  @override
+  int capacityFrom(StudyEntrySummaryModel summary) => summary.dueCount;
+}
+
+/// The single exhaustive dispatch on [StudyMode] (AD-18).
+///
+/// **It lives beside the enum on purpose.** The guard names
+/// `study_mode_resolver.dart` as the one file allowed to branch here, but the
+/// naming rule forbids a `_resolver` suffix under `domain/` — the two rules
+/// cannot both be satisfied by that filename. A `*_mode.dart` file satisfies
+/// both, and the map from a value to its behaviour reads best next to the value.
+///
+/// Missing a branch is a compile error, which is the check a runtime registry
+/// cannot make. [StudyMode.unknown] has none by construction: a mode this build
+/// does not recognise cannot be run, only read.
+StudyModeHandler? studyModeHandler(StudyMode mode) => switch (mode) {
+  StudyMode.browse => const PlainModeHandler(),
+  StudyMode.selfAssess => const PlainModeHandler(),
+  StudyMode.recall => const PlainModeHandler(),
+  StudyMode.match => const MatchModeHandler(),
+  StudyMode.guess => const GuessModeHandler(),
+  StudyMode.fill => const FillModeHandler(),
+  StudyMode.unknown => null,
+};

@@ -32,19 +32,14 @@ class StudyModeChooserWidget extends StatelessWidget {
   final StudyEntrySummaryModel summary;
   final ValueChanged<StudyMode> onModeSelected;
 
-  /// How many cards [mode] can take.
+  /// How many cards [mode] can take, asked of the mode itself (AD-18).
   ///
-  /// The per-mode rules live here rather than in the repository, which reports
-  /// facts (AD-18). `fill` counts only cards with an example; `guess` needs five
-  /// distinct meanings before it can build a single question; `match` needs two
-  /// pairs before the answer stops being obvious.
+  /// This was a `switch` here until the handlers existed, which is a second
+  /// dispatch on `StudyMode` and exactly what the guard rule forbids. Asking the
+  /// handler puts each rule in the file that owns it: `fill` counts examples,
+  /// `guess` needs five distinct meanings, `match` needs two pairs.
   int _capacity(StudyMode mode) =>
-      <StudyMode, int>{
-        StudyMode.fill: summary.fillableCount,
-        StudyMode.guess: summary.distinctMeanings >= 5 ? summary.dueCount : 0,
-        StudyMode.match: summary.dueCount >= 2 ? summary.dueCount : 0,
-      }[mode] ??
-      summary.dueCount;
+      studyModeHandler(mode)?.capacityFrom(summary) ?? 0;
 
   @override
   Widget build(BuildContext context) => Padding(
