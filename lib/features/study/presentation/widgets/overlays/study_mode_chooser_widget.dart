@@ -1,0 +1,78 @@
+import 'package:flutter/material.dart';
+
+import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/theme_context_extension.dart';
+import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_list_tile.dart';
+import '../../../domain/models/study_entry_summary_model.dart';
+import '../../../domain/models/study_mode.dart';
+import '../support/study_labels_widget.dart';
+
+/// Picks the one mode a review session will run in (BR-146).
+///
+/// **A mode that cannot run is disabled with its reason, never hidden** (BR-99).
+/// A control that vanishes reads as a bug; a control that says "needs cards with
+/// an example" tells the user what to do about it.
+///
+/// **Each mode shows its own count** (BR-154). `fill` only accepts cards
+/// carrying an `example`, and that field is optional — so a twenty-card review
+/// can be three cards long in that one mode, and a single number against four
+/// modes would be lying about three of them.
+class StudyModeChooserWidget extends StatelessWidget {
+  const StudyModeChooserWidget({
+    required this.modes,
+    required this.summary,
+    required this.onModeSelected,
+    super.key,
+  });
+
+  /// What the deck's algorithm offers (BR-146). `browse` is never in here.
+  final List<StudyMode> modes;
+
+  final StudyEntrySummaryModel summary;
+  final ValueChanged<StudyMode> onModeSelected;
+
+  /// How many cards [mode] can take.
+  ///
+  /// The per-mode rules live here rather than in the repository, which reports
+  /// facts (AD-18). `fill` counts only cards with an example; `guess` needs five
+  /// distinct meanings before it can build a single question; `match` needs two
+  /// pairs before the answer stops being obvious.
+  int _capacity(StudyMode mode) =>
+      <StudyMode, int>{
+        StudyMode.fill: summary.fillableCount,
+        StudyMode.guess: summary.distinctMeanings >= 5 ? summary.dueCount : 0,
+        StudyMode.match: summary.dueCount >= 2 ? summary.dueCount : 0,
+      }[mode] ??
+      summary.dueCount;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.all(AppSpacing.lg),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        Text(
+          context.l10n.studyChooseModeTitle,
+          style: context.texts.titleMedium,
+        ),
+        const SizedBox(height: AppSpacing.md),
+        for (final mode in modes) _tile(context, mode),
+      ],
+    ),
+  );
+
+  Widget _tile(BuildContext context, StudyMode mode) {
+    final count = _capacity(mode);
+    final isAvailable = count > 0;
+
+    return MxListTile(
+      title: context.studyMode(mode),
+      subtitle: isAvailable
+          ? context.l10n.studyModeCardCount(count)
+          : context.studyModeUnavailable(mode),
+      onTap: isAvailable ? () => onModeSelected(mode) : null,
+    );
+  }
+}

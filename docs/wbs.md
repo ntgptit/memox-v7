@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M5.3 (controller) |
+| **Updated by task** | M5.4a (lối vào, chọn mode, browse, self_assess) |
 | **Last updated** | 2026-08-07 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -7618,17 +7618,37 @@ trước của thẻ này kèm đồng hồ của thẻ khác (AD-13).
 
 #### M5.4a · Lối vào, màn chọn mode, `browse` và `self_assess`
 
-- **Status:** todo
+- **Status:** **done** — analyze sạch, 1455 test xanh (trừ golden Windows), guard sạch
 - **Scope:** badge hai số của BR-150, màn chọn mode với số thẻ **mỗi mode**
   (BR-154), `browse` (hai mặt cùng lúc, không có bước lật — BR-112) và
   `self_assess` (lật rồi mới hiện action — BR-112).
 - **Acceptance criteria:**
-  - [ ] Deck `eight_box` hiện **4** lựa chọn ôn tập; deck `sm2` vào thẳng
+  - [x] Deck `eight_box` hiện **4** lựa chọn ôn tập; deck `sm2` vào thẳng
         `self_assess` không hiện màn chọn (BR-146).
-  - [ ] Mode không đủ dữ liệu bị vô hiệu hoá **kèm lý do**, không bị ẩn (BR-99).
-  - [ ] Không có đường nào mở phiên ôn khi tập đến hạn rỗng (BR-29, BR-145).
-  - [ ] `browse` không có nút action nào (BR-111).
-  - [ ] Bốn trạng thái loading, empty, error, loaded đều có widget test.
+  - [x] Mode không đủ dữ liệu bị vô hiệu hoá **kèm lý do**, không bị ẩn (BR-99).
+  - [x] Không có đường nào mở phiên ôn khi tập đến hạn rỗng (BR-29, BR-145).
+  - [x] `browse` không có nút action nào (BR-111).
+  - [x] Bốn trạng thái loading, empty, error, loaded đều có widget test.
+**`browse` và `self_assess` dùng chung một widget.** Chúng khác nhau đúng một điểm
+(BR-112): `browse` hiện hai mặt cùng lúc và không có action nào, `self_assess` hiện
+mặt trước rồi mới lật. Tách làm hai widget là hai bản sao layout và một khác biệt
+thật — hai bản sao ấy sẽ trôi khỏi nhau ngay lần đổi typography đầu tiên.
+
+**Số thẻ mỗi mode tính ở chọn-mode, không ở repository.** M5.0 đã bỏ switch trên
+`StudyMode` khỏi `data/` theo AD-18; chính sách "mode này nhận được bao nhiêu thẻ"
+giờ nằm ở widget chọn mode, đọc từ dữ kiện repository báo về. **Đây là chỗ tạm:**
+khi handler của AD-18 ra đời ở M5.4b/c, phần này nên chuyển sang handler.
+
+**Ba file phải đổi tên theo guard.** File trong `presentation/` phải kết thúc bằng
+một suffix trong bảng naming, nên `*_section.dart` và `*_sheet.dart` thành
+`*_widget.dart`. `showsBackImmediately` cũng đổi thành `shouldShowBackImmediately`
+vì biến bool phải đọc như một vị từ.
+
+**Một lỗi có sẵn, không phải của mốc này:** golden `deck_screens_demo_test` lệch
+0.06% trên máy này, và lệch **cả trên `main` sạch**. Chúng là golden bound theo
+Windows, chạy ở CI job riêng; số test báo ở trên là chạy với `--exclude-tags golden`.
+Cần một lượt điều tra riêng, không gộp vào M5.
+
 - **Tests required:** widget test 4 trạng thái × 2 thuật toán; test màn chọn khi
   một mode bị vô hiệu hoá; test deck `sm2` bỏ qua màn chọn
 
