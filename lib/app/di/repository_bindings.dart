@@ -10,6 +10,9 @@ import '../../features/deck/data/repositories/deck_repository_impl.dart';
 import '../../features/deck/data/repositories/deck_template_repository_impl.dart';
 import '../../features/deck/domain/repositories/deck_repository.dart';
 import '../../features/deck/domain/repositories/deck_template_repository.dart';
+import '../../features/study/data/datasources/study_dao.dart';
+import '../../features/study/data/repositories/study_repository_impl.dart';
+import '../../features/study/domain/repositories/study_repository.dart';
 
 /// Where each repository contract is bound to its implementation.
 ///
@@ -62,3 +65,14 @@ DeckTemplateRepository deckTemplateRepositoryBinding(Ref ref) =>
       DeckTemplateDao(ref.watch(appDatabaseProvider)),
       clock: ref.watch(clockProvider),
     );
+
+/// Study needs no clock: every one of its operations takes `now` as an argument,
+/// because a session's whole behaviour turns on which instant it is measured
+/// against and a repository that read the clock itself could not be tested at
+/// the `due_at == now` boundary (AD-06).
+///
+/// It does take a random source, which is deliberately not injected here: the
+/// default is a real one, and only a test replaces it. A seeded shuffle in
+/// production would make every session lay its cards out in the same order.
+StudyRepository studyRepositoryBinding(Ref ref) =>
+    StudyRepositoryImpl(StudyDao(ref.watch(appDatabaseProvider)));

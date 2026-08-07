@@ -12,7 +12,9 @@ import '../../domain/failures/study_refusal_failure.dart';
 import '../../domain/models/new_card_order_model.dart';
 import '../../domain/models/study_action_model.dart';
 import '../../domain/models/study_answer_kind_model.dart';
+import '../../domain/models/study_deck_context_model.dart';
 import '../../domain/models/study_entry_summary_model.dart';
+import '../../domain/models/study_schedule_model.dart';
 import '../../domain/models/study_mode.dart';
 import '../../domain/models/study_options_model.dart';
 import '../../domain/models/study_outcome_reason_model.dart';
@@ -81,6 +83,44 @@ final class StudyRepositoryImpl
           distinctMeanings: row.distinctMeanings,
         ),
       );
+
+  @override
+  Future<StudyDeckContextModel> deckContext(String deckId) async {
+    final deck = await _dao.deckById(deckId);
+    if (deck == null) {
+      throw const NotFoundFailure(message: 'Deck not found');
+    }
+
+    // The algorithm lives on the root, and a branch resolves through
+    // `root_deck_id` rather than by walking parents (BR-06, BR-57).
+    final root = deck.rootDeckId == deck.id
+        ? deck
+        : await _dao.deckById(deck.rootDeckId) ?? deck;
+
+    return StudyDeckContextModel(
+      deckId: deck.id,
+      rootDeckId: deck.rootDeckId,
+      schedulerType: SchedulerType.fromDbValue(root.schedulerType ?? ''),
+      schedulerGeneration: root.schedulerGeneration ?? 1,
+    );
+  }
+
+  @override
+  Future<StudyScheduleModel?> scheduleOf(String cardId) async {
+    final state = await _dao.studyStateOf(cardId);
+    if (state == null) return null;
+
+    return StudyScheduleModel(
+      box: state.currentBox,
+      easeFactor: state.easeFactor,
+      intervalDays: state.intervalDays,
+      repetitions: state.repetitions,
+    );
+  }
+
+  @override
+  Future<List<String>> cardsFinishedInSession(String sessionId) =>
+      _dao.cardsWithNothingPending(sessionId);
 
   @override
   Future<StudyOptionsModel> effectiveOptions(String rootDeckId) async {
