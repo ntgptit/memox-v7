@@ -7,7 +7,7 @@
 | **Scope** | Luật nghiệp vụ, validation rule, state machine, edge case của phạm vi MVP. Ngoài phạm vi: quyết định kiến trúc (`architecture.md`), hình dạng dữ liệu (`data-model.md`), luồng người dùng (`use-cases.md`) |
 | **Source of truth for** | BR-xx · validation rule · entity state machine · edge case |
 | **Depends on** | `document-conventions.md`, `product.md`, `architecture.md` |
-| **Updated by task** | M5.0e (round cho stage chấm điểm) |
+| **Updated by task** | M5.0f (luật stage guess) |
 | **Last updated** | 2026-08-07 |
 
 Format tuân theo `document-conventions.md` §6.2. Từ khoá MUST / SHOULD / MAY
@@ -27,7 +27,7 @@ khi ai đó đọc và làm theo.
 
 Rule bị thay thế MUST đánh `superseded by BR-yy` ở cột Status và giữ nguyên ID.
 
-Trạng thái hiện tại: **BR-01…BR-120**, không trùng, không thiếu.
+Trạng thái hiện tại: **BR-01…BR-127**, không trùng, không thiếu.
 
 ---
 
@@ -454,10 +454,15 @@ tự viết (AD-18). `review` không còn là ngoại lệ của luồng chung; 
 `evaluate` trả về đúng cái người dùng vừa bấm.
 
 **Chưa chốt, và cố ý để trống:** ngưỡng tối thiểu cụ thể của `match` và `recall`;
-`guess` so "khác nghĩa" bằng đâu (`back_folded` có sẵn nhưng khác chuỗi ≠ khác
-nghĩa); `fill` đếm eligibility theo số thẻ có `example` khác rỗng (BR-95), nên con
-số của nó khác mọi mode còn lại; và một lượt của bốn mode mới ghi `kind` là gì.
+`fill` đếm eligibility theo số thẻ có `example` khác rỗng (BR-95), nên con số của
+nó khác mọi mode còn lại; và một lượt của bốn stage chấm điểm ghi `kind` là gì.
 Không đoán ở đây — mỗi câu trả lời khác nhau cho ra một thiết kế khác nhau.
+
+Hai mục từng nằm trong danh sách này đã đóng: `guess` so "khác nghĩa" bằng
+`back_folded` (BR-123), và ngưỡng của chính `guess` là **năm nghĩa khác nhau
+trong tập thẻ của phiên** (BR-121, BR-124). Ngưỡng đó khác `match` và `recall` ở
+một điểm đáng chú ý: nó là điều kiện của **cả stage**, không phải của từng thẻ,
+vì một question mượn bốn thẻ khác để dựng.
 
 ---
 
@@ -468,6 +473,13 @@ Không đoán ở đây — mỗi câu trả lời khác nhau cho ra một thi�
 | BR-101 | active | Một `study_session` MUST chỉ được tạo bởi hành động Study tường minh của người dùng. Hiển thị số đến hạn — badge, danh sách, thông báo — MUST NOT tạo session. | domain | UC-05, BR-29 |
 | BR-102 | active | Hàng đợi MUST được lưu trong database và MUST bất biến trong suốt phiên: thay đổi deck sau khi phiên mở MUST NOT đổi hàng đợi đang chạy. | db | UC-05, BR-24, BR-113 |
 | BR-113 | active | Mỗi stage MUST có hàng đợi riêng trên **cùng tập thẻ** của phiên, với thứ tự xoáo độc lập. Hai stage MUST NOT dùng chung một sequence khi phiên có từ hai thẻ trở lên. | db | BR-102, BR-109 |
+| BR-121 | active | Mỗi question của `guess` MUST có **đúng năm** lựa chọn: một đáp án đúng xuất hiện đúng một lần, và bốn distractor. MUST NOT render số lượng khác. | domain + UI | BR-99, BR-122 |
+| BR-122 | active | Distractor MUST lấy từ **toàn bộ tập thẻ của phiên**, không giới hạn ở thẻ của round hiện tại — thẻ đã đạt ở round trước vẫn làm nguồn distractor. Mỗi distractor MUST tham chiếu một thẻ khác thẻ đang hỏi. | domain | BR-115, BR-121 |
+| BR-123 | active | "Hai nghĩa khác nhau" MUST đo bằng `back_folded` (schema v3), không bằng chuỗi hiển thị. Hai thẻ cùng `back_folded` MUST NOT cùng xuất hiện trong một option set. | domain | BR-121, BR-122 |
+| BR-124 | active | Phân biệt hai ca: tập thẻ của phiên **không đủ năm nghĩa khác nhau** thì stage `guess` MUST bị bỏ qua theo BR-99, không phải lỗi. Đủ năm nhưng một question vẫn không dựng được thì MUST chặn: không render, không ghi lượt, không bỏ qua thẻ, không tiến checkpoint. | domain | BR-99, BR-114, BR-121 |
+| BR-125 | active | Đánh giá lựa chọn MUST so bằng định danh, MUST NOT so bằng chuỗi hiển thị. | domain | BR-121 |
+| BR-126 | active | Mỗi question MUST chỉ nhận **lựa chọn đầu tiên** và sinh tối đa một lượt. Chạm lặp MUST NOT sinh lượt thứ hai. | domain | BR-25, BR-121 |
+| BR-127 | active | Thứ tự thẻ trong round và thứ tự năm lựa chọn MUST là hai hoán vị độc lập: đổi cái này MUST NOT đổi cái kia. Cả hai MUST ổn định khi Resume. | db + domain | BR-117 |
 | BR-115 | active | Bốn stage chấm điểm (`match`, `guess`, `recall`, `fill`) MUST chạy theo **round**: round 1 gồm toàn bộ thẻ đủ dữ liệu của stage; mỗi round sau chỉ gồm thẻ không đạt ở round vừa xong. | repository | BR-26, BR-116 |
 | BR-116 | active | Một thẻ từng có kết quả sai trong một round MUST thuộc tập không đạt của round đó, **kể cả khi sau đó nó được làm đúng** để rời bàn. Tập này MUST được khử trùng theo thẻ. | repository | BR-20, BR-115 |
 | BR-117 | active | Mỗi round MUST có thứ tự xoáo riêng. Hai round liền nhau, và round 1 với stage trước đó, MUST NOT dùng chung một sequence khi còn từ hai thẻ trở lên. | db | BR-113 |
@@ -490,6 +502,23 @@ BR-105 sửa một chỗ trôi mà không ai thấy: `now + N*24h` đẩy mốc 
 theo giờ người dùng bấm. Học lúc 23:00 thì hôm sau 22:00 thẻ **chưa** tới hạn, và
 mỗi phiên lại đẩy thêm — giờ học trôi dần về khuya cho tới khi người dùng hụt cả
 một ngày. Neo vào đầu ngày lịch làm "đến hạn hôm nay" đúng nghĩa là hôm nay.
+
+**BR-122 tách hai khái niệm dễ bị gộp.** *Hàng đợi* là những thẻ đang được hỏi ở
+round này; *tập thẻ của phiên* là nguồn lấy distractor. Chúng khác nhau, và gộp
+lại thì retry round còn một thẻ sẽ không đủ năm lựa chọn — đúng ca mà BR-115 tạo ra
+thường xuyên nhất. Thẻ đã đạt rời hàng đợi nhưng **không** rời tập nguồn.
+
+**BR-123 dùng lại `back_folded` thay vì định nghĩa một phép chuẩn hoá thứ hai.**
+Cột đó có từ schema v3 (M4.11a) để search so trên nó: đã trim, hạ hoa và fold
+Unicode. Một phép normalize riêng cho `guess` sẽ trôi khỏi phép kia ngay lần đầu
+có ai sửa một trong hai, và không ai biết để sửa cả hai.
+
+**BR-124 là chỗ đặc tả gốc và BR-114 nói ngược nhau, và cả hai đều đúng — cho hai
+ca khác nhau.** Deck chỉ có ba thẻ thì `guess` **không bao giờ** dựng được question,
+và hiện lỗi mỗi phiên là đổ cho người dùng một thứ họ không sửa được bằng thao
+tác nào trong phiên; bỏ qua stage là đúng. Nhưng khi tập đủ năm mà một question
+vẫn không dựng được thì đó là bất thường thật, và chặn lại mới đúng — render bốn
+lựa chọn sẽ âm thầm đổi xác suất đoán đúng từ 20% lên 25%.
 
 **Một thẻ đi qua nhiều stage chấm điểm, và BR-77 đã trả lời sẵn lượt nào đổi lịch.**
 Lượt đầu tiên của một thẻ trong một phiên là `scheduled` và đổi lịch; mọi lượt sau là
