@@ -744,6 +744,8 @@ và cờ — xem `docs/wireframes/m4-11-card-management.md`.
 | 1 | Toàn bộ schema trên, trừ những gì v2 thêm |
 | 2 | Bảng `tags`, `card_tags`; cột `cards.is_flagged`, `example`, `hint`, `pronunciation` (M4.10at) |
 | 3 | Cột `cards.front_folded`, `back_folded` + backfill bằng Dart — sửa search không khớp chữ hoa non-ASCII |
+| 4 | Đổi tên `card_review_states`→`card_study_states`, `review_history`→`study_answers` và sáu cột (M5.0l). Không thêm, không xoá, không đụng dòng nào |
+| 5 | Toàn bộ schema Study sau brainstorm: `learned_at`, `session_kind`, `current_mode`, `cursor`, `card_limit`, `mode`, `outcome_reason`, `comparison_version`, `used_hint`, `study_config`; bảng `study_queue_items`, `app_settings`; giá trị `learning` cho `kind` và `interrupted` cho `end_reason` (M5.0s) |
 | _sau_ | Bảng `card_media` |
 | _sau_ | Cột sync (`is_pending_sync`, `version`) khi có backend (AD-03) |
 | _sau_ | `deck_templates` thành bảng runtime nếu tải template từ server |
