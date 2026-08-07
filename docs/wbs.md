@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M5.1 (StudyScheduler) |
+| **Updated by task** | M5.1a (BR-18 ease factor order) |
 | **Last updated** | 2026-08-07 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -7438,11 +7438,10 @@ liệt kê đúng `entities/ · repositories/ · models/ · usecases/ · failure
 suffix `_scheduler` (bảng naming cho phép) và nằm trong `models/`. Chỗ sai là WBS,
 không phải test.
 
-**BR-18 nhân interval với ease factor **cũ**, không phải cái vừa cập nhật.** Hai luật
-tách rời: BR-18 tính interval từ `ease_factor` đang lưu trên thẻ, BR-19 cập nhật
-`ease_factor`. Đây là cách đọc sát chữ nhất, và có test riêng tách hai hướng bằng
-action `hard` — `good` không đổi hệ số nên không phân biệt được. Nếu chủ dự án muốn
-hướng ngược lại thì đó là một dòng đổi chỗ và một test đổi số.
+**BR-18 nhân interval với ease factor **mới** — chủ dự án chốt ở M5.1a.** Bản đầu
+triển khai theo cách đọc sát chữ (hệ số cũ), vì tài liệu không nói thứ tự. Thứ tự
+giờ nằm thẳng trong BR-18 thay vì trong commit message, vì đây đúng loại mơ hồ mà
+người đọc kế tiếp sẽ tự suy lại và suy khác.
 
 **`binaryAction` trả null cho `sm2` thay vì bịa một ánh xạ.** BR-107 chỉ nói cho
 `eight_box`, và `sm2` không có stage chấm điểm nào (BR-146). Cho nó trả
@@ -7456,6 +7455,33 @@ deck đã đổi thuật toán trước khi khoá có thể mang action lạ; ch
 - **Tests required:** unit test toàn ma trận `eight_box`; unit test công thức
   `sm2` gồm biên sàn ease factor; test `stageSequence`, `reviewModes`,
   `supportedActions` của cả hai
+- **Checklist phases:** 14.2, 15.1
+
+### M5.1a · BR-18 nhân với ease factor mới
+
+- **Status:** **done** — analyze sạch, 1521 test xanh, guard sạch
+- **Goal:** Gỡ một mơ hồ của BR-18 trước khi nó kịp neo vào integration test.
+- **Scope:** `business-rules.md` (BR-18), `sm2_scheduler.dart`, `sm2_scheduler_test.dart`
+- **Out of scope:** BR-19 — công thức hệ số không đổi, chỉ thứ tự đổi.
+- **Editable documents:** `docs/business-rules.md`, `docs/wbs.md`
+- **Output:** BR-18 nói rõ thứ tự; scheduler nhân với hệ số sau cập nhật
+- **Acceptance criteria:**
+  - [x] BR-18 nêu thứ tự tường minh, kèm con số phân biệt hai cách đọc.
+  - [x] `hard` từ interval 10, ef 2.5 → **24 ngày**, không phải 25.
+  - [x] `good` vẫn cho kết quả cũ — nó không đổi hệ số nên không phân biệt được.
+  - [x] Sàn 1.3 vẫn giữ sau 50 lượt `again`.
+
+**Sửa tài liệu chứ không chỉ sửa code.** BR-18 không sai — nó **im lặng** về thứ tự,
+và pseudocode đặt phép nhân trước khi nhắc tới BR-19 nên cách đọc sát chữ cho ra hệ
+số cũ. Để nguyên thì người đọc kế tiếp suy lại và suy khác — và không test nào bắt
+được, vì cả hai cách đọc đều cho cùng kết quả với `good`, là action phổ biến nhất.
+
+**Đây là lý do sửa ngay thay vì sau M5.6.** Chỉ một test hiện neo vào con số này. Sau
+khi integration test và fixture demo chạy qua vài chu kỳ `sm2`, con số ấy nằm trong
+dữ liệu kỳ vọng của nhiều chỗ và đổi hướng thành một đợt sửa rải rác.
+
+- **Dependencies:** M5.1
+- **Tests required:** `sm2_scheduler_test.dart` — ca `hard` tách hai cách đọc
 - **Checklist phases:** 14.2, 15.1
 
 ### M5.2 · Use case: mở phiên, ghi lượt, hoàn tất, đóng phiên

@@ -73,24 +73,25 @@ final class Sm2Scheduler implements StudyScheduler {
     final repetitions = schedule.repetitions ?? 0;
     final intervalDays = schedule.intervalDays ?? kFirstIntervalDays;
 
-    // **The interval is computed from the ease factor the card arrived with,
-    // and the ease factor is updated separately** (BR-18 then BR-19). The
-    // documents state them as two rules, and BR-18's `ease_factor` is the
-    // card's stored value — the one it had going into this turn. Folding the
-    // new factor in first would make every interval a little longer than the
-    // rule as written, and the drift compounds over a card's life.
+    // **BR-19 runs first, and the interval multiplies by the factor it
+    // produced** — the order is part of BR-18, not an implementation detail.
+    // The two readings differ only for actions that move the factor: `good`
+    // leaves it alone, while `hard` takes 2.5 to 2.36, so a card sitting at ten
+    // days gets 24 rather than 25.
+    final nextEaseFactor = _nextEaseFactor(easeFactor, quality);
+
     final (int nextInterval, int nextRepetitions) = quality < kFailingQuality
         ? (kFirstIntervalDays, 0)
         : switch (repetitions) {
             0 => (kFirstIntervalDays, 1),
             1 => (kSecondIntervalDays, 2),
-            _ => ((intervalDays * easeFactor).round(), repetitions + 1),
+            _ => ((intervalDays * nextEaseFactor).round(), repetitions + 1),
           };
 
     return StudyScheduleUpdateModel(
       intervalDays: nextInterval,
       schedule: StudyScheduleModel(
-        easeFactor: _nextEaseFactor(easeFactor, quality),
+        easeFactor: nextEaseFactor,
         intervalDays: nextInterval,
         repetitions: nextRepetitions,
       ),
