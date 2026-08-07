@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../models/study_mode_model.dart';
+import '../models/study_mode.dart';
 import '../models/study_queue_item_status_model.dart';
 
 part 'study_queue_item_entity.freezed.dart';

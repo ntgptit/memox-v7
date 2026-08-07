@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M5.0 (nửa domain) |
+| **Updated by task** | M5.0 (nửa data) |
 | **Last updated** | 2026-08-07 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -7329,7 +7329,7 @@ vừa — seam có thật: phần đó dựng giá trị, không trả lời l�
 
 ### M5.0 · Study domain và data — gồm cả hàng đợi
 
-- **Status:** in progress — nửa **domain** xong (enum, entity, failure, contract, test); nửa **data** (DAO, mapper, engine hàng đợi) là PR kế
+- **Status:** **done** — analyze sạch, 1458 test xanh, guard sạch, invariants 28/28
 - **Goal:** Dựng phần domain và data mà **chỉ Study** cần, trên schema v5.
 - **Scope:** entity `StudySessionEntity`, `StudyAnswerEntity`,
   `StudyQueueItemEntity`, `CardStudyStateEntity`; enum `StudyMode` (sáu giá trị,
@@ -7344,19 +7344,44 @@ vừa — seam có thật: phần đó dựng giá trị, không trả lời l�
 - **Editable documents:** `docs/wbs.md`
 - **Output:** `lib/features/study/domain/`, `lib/features/study/data/`
 - **Acceptance criteria:**
-  - [ ] `domain/` là Dart thuần — không Flutter, không Drift.
-  - [ ] Repository contract không nhận hay trả kiểu sinh bởi Drift (AD-01).
-  - [ ] Ghi một lượt = cập nhật queue item + insert `study_answers` (+ cập nhật
+  - [x] `domain/` là Dart thuần — không Flutter, không Drift.
+  - [x] Repository contract không nhận hay trả kiểu sinh bởi Drift (AD-01).
+  - [x] Ghi một lượt = cập nhật queue item + insert `study_answers` (+ cập nhật
         `card_study_states` nếu là `scheduled`) trong **một** transaction (BR-86).
-  - [ ] Hoàn tất chuỗi học mới đặt `learned_at` **và** `due_at` cùng lúc, trong
+  - [x] Hoàn tất chuỗi học mới đặt `learned_at` **và** `due_at` cùng lúc, trong
         một transaction, và **không** ghi lượt `scheduled` nào (BR-144, BR-149).
-  - [ ] `forgotten` ở `self_assess` đặt `available_at = cursor + 3`; khi hàng đợi
+  - [x] `forgotten` ở `self_assess` đặt `available_at = cursor + 3`; khi hàng đợi
         còn dưới 3 thẻ khác, thẻ vẫn quay lại ở cuối — test cả hai nhánh (BR-26).
-  - [ ] Round kế tiếp chỉ gồm thẻ **từng sai** trong round vừa xong, kể cả thẻ sau
+  - [x] Round kế tiếp chỉ gồm thẻ **từng sai** trong round vừa xong, kể cả thẻ sau
         đó làm đúng để rời bàn (BR-116) — test khẳng định đúng ca này.
-  - [ ] Round mới có hoán vị `position` khác round trước khi còn ≥2 thẻ (BR-117).
-  - [ ] Không exception persistence thô nào thoát khỏi repository.
-  - [ ] Bất biến 12 và 16…28 vẫn pass sau toàn bộ bộ test.
+  - [x] Round mới có hoán vị `position` khác round trước khi còn ≥2 thẻ (BR-117).
+  - [x] Không exception persistence thô nào thoát khỏi repository.
+  - [x] Bất biến 12 và 16…28 vẫn pass sau toàn bộ bộ test.
+**BR-116 không cần thêm cột.** Luật nói thẻ *từng sai* trong một round thuộc tập
+trượt, kể cả khi sau đó làm đúng để rời bàn — và schema v5 không có cờ "đã sai".
+Cách tránh thêm cột: **ghi thẻ vào round kế ngay lúc sai**, trong cùng transaction.
+Tư cách thành viên của round sau *chính là* bản ghi, và một câu trả lời đúng sau đó
+không xoá được nó. `position` lấy ngẫu nhiên chứ không theo thứ tự sai, nên round sau
+vẫn có hoán vị riêng (BR-117).
+
+**Một lỗi thật do test bắt: BR-84 đòi hai việc không thể cùng một transaction.** Phiên
+generation cũ phải bị đánh dấu `invalidated` **và** lượt không được ghi. Để chứng
+trong cùng transaction thì việc đánh dấu bị rollback cùng với lượt bị từ chối, và
+phiên nằm lại ở `in_progress` — vẫn mời ghi tiếp những lượt không bao giờ được
+chấp nhận. Phép kiểm generation vì thế chạy **trước** transaction và commit riêng;
+transaction đọc lại phiên và chỉ từ chối.
+
+**Guard bắt một vi phạm kiến trúc đúng.** `_modeCapacity` switch trên `StudyMode`
+trong `data/` — AD-18 nói chính sách của một mode thuộc handler của nó. Bỏ hẳn:
+`watchStudyEntry` trả **dữ kiện** (`dueCount`, `fillableCount`, `distinctMeanings`),
+còn việc quy ra số mỗi mode để cho resolver ở M5.1.
+
+**Một lỗi cũ lộ ra khi sửa:** `deck.drift` vẫn đếm badge bằng vị từ BR-22, tức thẻ
+chưa học cũng bị tính là đến hạn — đúng lỗi PR #152 đã sửa cho danh sách thẻ, còn sót
+ở badge deck. Sửa luôn, vì để lại là hai định nghĩa "đến hạn" cùng chạy. Seeder
+`insertReviewState` cũng tự nó vi phạm invariant 28 — đặt `due_at` mà không đặt
+`learned_at`; giờ nó suy ra cặp, nên mọi fixture nằm đúng phía của BR-149.
+
 **Chia làm hai PR.** Contract phải có trước để use case của M5.2 có cái để viết
 dựa vào, còn implementation đi kèm bộ test riêng của nó; gộp làm một PR thì phần
 review đáng chú ý nhất — các phép ghi trong transaction — nằm lẫn giữa vài trăm dòng

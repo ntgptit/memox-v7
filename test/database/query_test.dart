@@ -32,8 +32,10 @@ void main() {
       contentType: 'card',
     );
 
-    // Never reviewed: due_at NULL means due now (BR-22). The predicate has to
-    // test for NULL, not only for a timestamp.
+    // Never learned: no `learned_at`, so no schedule either (BR-149). Under
+    // BR-22 this card was "due now"; since BR-142 it belongs to the *other*
+    // set — the one a learning session takes — and the review queries must not
+    // see it at all.
     await insertCard(db, id: 'a-null', deckId: 'leaf-a');
     await insertReviewState(db, cardId: 'a-null');
 
@@ -79,10 +81,12 @@ void main() {
     final due = await db.cardsDueForStudy('root-a', testNow).get();
 
     expect(due.map((row) => row.c.id).toSet(), <String>{
-      'a-null',
       'a-exact',
       'a-overdue',
     });
+    // The card that has never been learned is New, not Due. The two sets are
+    // disjoint by shape now, not by one predicate subtracting the other.
+    expect(due.map((row) => row.c.id), isNot(contains('a-null')));
     // Reaches a card three levels down through root_deck_id, and never crosses
     // into the other tree.
     expect(due.map((row) => row.c.id), isNot(contains('b-overdue')));
@@ -98,7 +102,7 @@ void main() {
         row.rootDeckId: row.dueCount,
     };
 
-    expect(counts, <String, int>{'root-a': 3, 'root-b': 1});
+    expect(counts, <String, int>{'root-a': 2, 'root-b': 1});
   });
 
   test('the count and the list agree, for every root', () async {
@@ -134,12 +138,8 @@ void main() {
         .cardsDueForStudy('root-a', testNow.add(const Duration(days: 2)))
         .get();
 
-    expect(earlier.map((row) => row.c.id).toSet(), <String>{
-      'a-null',
-      'a-overdue',
-    });
+    expect(earlier.map((row) => row.c.id).toSet(), <String>{'a-overdue'});
     expect(later.map((row) => row.c.id).toSet(), <String>{
-      'a-null',
       'a-exact',
       'a-overdue',
       'a-future',

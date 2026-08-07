@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../models/study_mode_model.dart';
+import '../models/study_mode.dart';
 import '../models/study_session_kind_model.dart';
 import '../models/study_session_status_model.dart';
 

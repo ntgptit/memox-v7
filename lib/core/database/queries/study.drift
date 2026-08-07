@@ -1,47 +1,185 @@
 import '../tables/decks.drift';
 import '../tables/cards.drift';
+import '../tables/study.drift';
 
 -- Business queries for a study session.
 --
--- **One definition of "due", used by both.** BR-22 says a session takes cards
--- where `due_at IS NULL OR due_at <= now`, and the count shown before a session
--- has to agree with the list the session then hands out. Two spellings of the
--- same predicate drift apart the first time one of them is edited, and the
--- symptom is a badge that says 12 while the session offers 11 — which reads as
--- a scheduler bug and is not one. `query_test.dart` asserts the two agree on
--- the same data and the same `now`.
+-- **Two card sets, never mixed** (BR-142). `learning` takes cards that have not
+-- finished the chain; `reviewing` takes cards that finished it and have come
+-- due. The old single "study queue" of BR-22 is gone, and with it the padding
+-- that filled a session to twenty cards with material the user never asked to
+-- learn.
+--
+-- **One definition per set, used by the count and by the list.** The number
+-- shown before a session has to agree with what the session then hands out; two
+-- spellings of the same predicate drift apart the first time one is edited, and
+-- the symptom is a badge saying 12 while the session offers 11 — which reads as
+-- a scheduler bug and is not one.
 --
 -- **`:now` is a parameter, never the SQL clock function.** A query that reads
--- the clock itself cannot be tested at a boundary, and "due exactly at now" is
--- a boundary that has to work.
+-- the clock itself cannot be tested at a boundary, and "due exactly at now" is a
+-- boundary that has to work.
 --
 -- **No scheduler interval appears here.** The eight-box day table and the SM-2
 -- factors belong to the scheduler (BR-16); SQL only asks whether the stored
--- due_at has arrived.
-
--- Cards due in one root deck's whole tree, descendants included.
+-- `due_at` has arrived.
 --
--- Joins through `root_deck_id` rather than walking parents (BR-57, AD-10).
--- Coalescing the parent column with the id would mean "my parent, or me if I
--- have none", which returns the level-2 deck for anything at level 3 — right
--- for a one-level tree, which is what makes it dangerous.
+-- All three tree reads join through `root_deck_id` rather than walking parents
+-- (BR-57, AD-10). Coalescing the parent column with the id means "my parent, or
+-- me if I have none", which returns the level-2 deck for anything at level 3 —
+-- right for a one-level tree, which is what makes it dangerous.
+
+-- Cards that have not finished the learning chain, for a `learning` session.
+--
+-- Ordered by creation, which is `new_card_order = created` (BR-148). The
+-- `random` ordering is applied by the repository after this read: `RANDOM()` in
+-- SQL cannot be seeded, so a shuffle done here could not be tested.
+newCardsInTree:
+SELECT c.**
+FROM cards c
+INNER JOIN decks d ON d.id = c.deck_id
+INNER JOIN card_study_states s ON s.card_id = c.id
+WHERE d.root_deck_id = :rootDeckId
+  AND s.learned_at IS NULL
+ORDER BY c.created_at ASC, c.id ASC
+LIMIT :limit;
+
+-- Cards that finished the chain and have come due, for a `reviewing` session.
+--
+-- `due_at` ascending is BR-23. No `IS NULL` branch: since v5 a card without a
+-- schedule is one that has not been learned, and it belongs to the other set.
+dueCardsInTree:
+SELECT c.**
+FROM cards c
+INNER JOIN decks d ON d.id = c.deck_id
+INNER JOIN card_study_states s ON s.card_id = c.id
+WHERE d.root_deck_id = :rootDeckId
+  AND s.learned_at IS NOT NULL
+  AND s.due_at <= :now
+ORDER BY s.due_at ASC, c.id ASC
+LIMIT :limit;
+
+-- Everything the study entry point needs, in one statement (AD-13).
+--
+-- The badge needs two numbers (BR-150) and the mode chooser needs one per mode
+-- (BR-154). Read separately they are separate snapshots, and the screen can then
+-- draw a badge from before a write beside a chooser from after it.
+--
+-- `fillable` is the count `fill` can actually take: that mode needs an
+-- `example`, and it is optional, so a twenty-card review can be three cards long
+-- in that mode. `distinctMeanings` is what `guess` needs five of (BR-121,
+-- BR-123) — counted on `back_folded`, because two cards that merely *display*
+-- differently are still the same meaning and must not share an option set.
+studyEntryCounts:
+SELECT
+  SUM(CASE WHEN s.learned_at IS NULL THEN 1 ELSE 0 END) AS newCount,
+  SUM(CASE WHEN s.learned_at IS NOT NULL AND s.due_at <= :now
+           THEN 1 ELSE 0 END) AS dueCount,
+  SUM(CASE WHEN s.learned_at IS NOT NULL AND s.due_at <= :now
+                AND c.example IS NOT NULL AND TRIM(c.example) <> ''
+           THEN 1 ELSE 0 END) AS fillableCount,
+  COUNT(DISTINCT CASE WHEN s.learned_at IS NOT NULL AND s.due_at <= :now
+                      THEN c.back_folded END) AS distinctMeanings
+FROM cards c
+INNER JOIN decks d ON d.id = c.deck_id
+INNER JOIN card_study_states s ON s.card_id = c.id
+WHERE d.root_deck_id = :rootDeckId;
+
+-- The next card to serve (BR-23, BR-26).
+--
+-- `round ASC` before `position ASC` is what moves a round-based stage forward
+-- without anything having to notice a round ended: once every row of round N is
+-- `completed`, the lowest pending round *is* N+1.
+--
+-- `available_at <= :cursor` is BR-26's comeback. A forgotten card is pushed to
+-- `cursor + 3` and nothing else moves; the blunt alternative — rewriting
+-- `position` and shifting every row after it — turns one wrong answer into a
+-- burst of updates and loses the original order.
+--
+-- An empty result with rows still `pending` means every remaining card is
+-- waiting out that gap, which is not the same as the stage being finished. That
+-- is why `pendingInStage` exists separately.
+nextQueueItem:
+SELECT *
+FROM study_queue_items
+WHERE session_id = :sessionId
+  AND mode = :mode
+  AND status = 'pending'
+  AND available_at <= :cursor
+ORDER BY round ASC, position ASC, card_id ASC
+LIMIT 1;
+
+-- How many rows of this stage are still pending, at any round.
+pendingInStage:
+SELECT COUNT(*) AS pendingCount
+FROM study_queue_items
+WHERE session_id = :sessionId AND mode = :mode AND status = 'pending';
+
+-- The lowest pending round of a stage — the round currently being served.
+currentRoundOf:
+SELECT MIN(round) AS round
+FROM study_queue_items
+WHERE session_id = :sessionId AND mode = :mode AND status = 'pending';
+
+-- One queue row.
+queueItemAt:
+SELECT *
+FROM study_queue_items
+WHERE session_id = :sessionId
+  AND mode = :mode
+  AND round = :round
+  AND card_id = :cardId;
+
+-- The distinct cards a session holds, from its first stage's first round.
+--
+-- Every stage runs over the same card set (BR-113), so this is the set BR-24's
+-- ceiling was applied to — and the set invariant 18 counts.
+sessionCardIds:
+SELECT DISTINCT card_id AS cardId
+FROM study_queue_items
+WHERE session_id = :sessionId;
+
+-- Sessions left open by an earlier study day (BR-103).
+staleOpenSessions:
+SELECT *
+FROM study_sessions
+WHERE status = 'in_progress' AND started_at < :dayStart;
+
+-- The session currently open for a deck, if any.
+openSessionForDeck:
+SELECT *
+FROM study_sessions
+WHERE deck_id = :deckId AND status = 'in_progress'
+ORDER BY started_at DESC
+LIMIT 1;
+
+-- The app-wide study defaults (BR-147). Always exactly one row.
+appSettingsRow:
+SELECT * FROM app_settings WHERE id = 1;
+
+-- The review set of one tree, and the same set counted per tree.
+--
+-- **The predicate below is character-for-character `dueCardsInTree`'s**, minus
+-- the limit. The count shown before a session has to agree with the list the
+-- session then hands out; two spellings drift apart the first time one is
+-- edited, and the symptom is a badge saying 12 while the session offers 11 —
+-- which reads as a scheduler bug and is not one. `query_test.dart` asserts the
+-- two agree on the same data and the same `now`.
 cardsDueForStudy:
 SELECT c.**
 FROM cards c
 INNER JOIN decks d ON d.id = c.deck_id
 INNER JOIN card_study_states s ON s.card_id = c.id
 WHERE d.root_deck_id = :rootDeckId
-  AND (s.due_at IS NULL OR s.due_at <= :now)
-ORDER BY s.due_at IS NOT NULL, s.due_at ASC, c.id ASC;
+  AND s.learned_at IS NOT NULL
+  AND s.due_at <= :now
+ORDER BY s.due_at ASC, c.id ASC;
 
--- How many cards are due, per root deck.
---
--- The predicate below is character-for-character the one above.
 dueCountPerRootDeck:
 SELECT d.root_deck_id AS rootDeckId, COUNT(*) AS dueCount
 FROM cards c
 INNER JOIN decks d ON d.id = c.deck_id
 INNER JOIN card_study_states s ON s.card_id = c.id
-WHERE (s.due_at IS NULL OR s.due_at <= :now)
+WHERE s.learned_at IS NOT NULL AND s.due_at <= :now
 GROUP BY d.root_deck_id
 ORDER BY d.root_deck_id ASC;

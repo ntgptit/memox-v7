@@ -3,7 +3,7 @@ import '../entities/study_session_entity.dart';
 import '../models/new_card_order_model.dart';
 import '../models/study_action_model.dart';
 import '../models/study_entry_summary_model.dart';
-import '../models/study_mode_model.dart';
+import '../models/study_mode.dart';
 import '../models/study_options_model.dart';
 import '../models/study_outcome_reason_model.dart';
 import '../models/study_session_kind_model.dart';
@@ -27,14 +27,14 @@ import '../models/study_session_status_model.dart';
 /// alternative — the repository asking a scheduler — would put algorithm
 /// knowledge in the data layer and make a new algorithm a change in two places.
 abstract interface class StudyRepository {
-  /// Both card counts and the per-mode counts, from one statement (AD-13).
+  /// The counts the entry point needs, from one statement (AD-13).
   ///
-  /// [modes] is what the deck's algorithm offers for review (BR-146); the result
-  /// carries a count for each. Watching rather than reading once: the badge has
-  /// to fall to zero the moment the last card is answered.
+  /// Facts only — how many cards a given mode can take is that mode's policy and
+  /// belongs to its handler (AD-18), not to the layer that counted the rows.
+  /// Watching rather than reading once: the badge has to fall to zero the moment
+  /// the last card is answered.
   Stream<StudyEntrySummaryModel> watchStudyEntry(
     String deckId, {
-    required List<StudyMode> modes,
     required DateTime now,
   });
 
