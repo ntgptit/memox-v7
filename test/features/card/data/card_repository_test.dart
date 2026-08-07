@@ -31,7 +31,7 @@ void main() {
       expect(card.back, 'back');
       final states = await h.rawStates(card.id);
       expect(states, hasLength(1));
-      expect(await h.countAll('card_review_states'), 1);
+      expect(await h.countAll('card_study_states'), 1);
       // The first card locked the deck (BR-62).
       expect(await h.contentTypeOf(tree.leaf.id), 'card');
     });
@@ -55,7 +55,7 @@ void main() {
         expect(state.readNullable<double>('ease_factor'), isNull);
         expect(state.readNullable<int>('interval_days'), isNull);
         expect(state.readNullable<int>('repetitions'), isNull);
-        expect(state.read<int>('review_count'), 0);
+        expect(state.read<int>('answer_count'), 0);
         expect(state.read<int>('lapse_count'), 0);
       },
     );
@@ -87,7 +87,7 @@ void main() {
         // both happened inside the transaction.
         await h.db.customStatement(
           'CREATE TRIGGER fail_state_insert '
-          'BEFORE INSERT ON card_review_states '
+          'BEFORE INSERT ON card_study_states '
           "BEGIN SELECT RAISE(ABORT, 'injected state failure'); END",
         );
 
@@ -103,7 +103,7 @@ void main() {
         // No card without a study state can exist (BR-09) — and the deck's
         // content_type went back to unset with it.
         expect(await h.countAll('cards'), 0);
-        expect(await h.countAll('card_review_states'), 0);
+        expect(await h.countAll('card_study_states'), 0);
         expect(await h.contentTypeOf(tree.leaf.id), 'unset');
       },
     );
@@ -183,7 +183,7 @@ void main() {
         sessionId: 'session-1',
       );
       final before =
-          (await h.db.customSelect('SELECT * FROM review_history').get())
+          (await h.db.customSelect('SELECT * FROM study_answers').get())
               .map((QueryRow r) => r.data)
               .toList();
 
@@ -194,7 +194,7 @@ void main() {
       );
 
       final after =
-          (await h.db.customSelect('SELECT * FROM review_history').get())
+          (await h.db.customSelect('SELECT * FROM study_answers').get())
               .map((QueryRow r) => r.data)
               .toList();
       expect(after, before);
@@ -218,8 +218,8 @@ void main() {
       await h.cardRepository.deleteCard(seeded.card.id);
 
       expect(await h.rawCard(seeded.card.id), isNull);
-      expect(await h.countAll('card_review_states'), 0);
-      expect(await h.countAll('review_history'), 0);
+      expect(await h.countAll('card_study_states'), 0);
+      expect(await h.countAll('study_answers'), 0);
     });
 
     test(
@@ -322,7 +322,7 @@ void main() {
 
         expect(items, hasLength(1));
         expect(items.single.card.front, 'fresh');
-        // Born with review_count 0 (BR-09), so it projects to isNew (BR-90).
+        // Born with answer_count 0 (BR-09), so it projects to isNew (BR-90).
         expect(items.single.state, CardState.isNew);
       },
     );

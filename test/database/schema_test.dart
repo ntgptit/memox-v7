@@ -49,11 +49,11 @@ void main() {
     );
 
     expect(rows.map((row) => row['name']), <String>[
-      'card_review_states',
+      'card_study_states',
       'card_tags',
       'cards',
       'decks',
-      'review_history',
+      'study_answers',
       'study_sessions',
       'tags',
     ]);
@@ -72,7 +72,7 @@ void main() {
         'scheduler_version',
         'scheduler_config',
         'scheduler_generation',
-        'first_review_at',
+        'first_answered_at',
         'source_template_id',
         'source_template_version',
         'created_at',
@@ -94,29 +94,29 @@ void main() {
       ],
       'tags': <String>['id', 'name', 'name_folded', 'owner_id', 'created_at'],
       'card_tags': <String>['card_id', 'tag_id'],
-      'card_review_states': <String>[
+      'card_study_states': <String>[
         'card_id',
         'scheduler_type',
         'scheduler_version',
         'scheduler_generation',
         'due_at',
-        'last_reviewed_at',
-        'review_count',
+        'last_answered_at',
+        'answer_count',
         'lapse_count',
         'current_box',
         'ease_factor',
         'interval_days',
         'repetitions',
       ],
-      'review_history': <String>[
+      'study_answers': <String>[
         'id',
         'card_id',
         'session_id',
         'scheduler_type',
         'scheduler_generation',
-        'review_kind',
+        'kind',
         'action',
-        'reviewed_at',
+        'answered_at',
         'next_due_at',
         'previous_box',
         'next_box',
@@ -181,9 +181,9 @@ void main() {
       expect(notNull['parent_deck_id'], 0);
     });
 
-    test('card_review_states is keyed 1-1 by card_id', () async {
+    test('card_study_states is keyed 1-1 by card_id', () async {
       final db = openTestDatabase();
-      final rows = await pragma(db, 'PRAGMA table_info(card_review_states)');
+      final rows = await pragma(db, 'PRAGMA table_info(card_study_states)');
       final primary = rows.where((row) => row['pk'] != 0).toList();
 
       expect(primary, hasLength(1));
@@ -212,10 +212,10 @@ void main() {
     expect(await keysOf('cards'), <String>{
       'deck_id->decks.id ON DELETE CASCADE',
     });
-    expect(await keysOf('card_review_states'), <String>{
+    expect(await keysOf('card_study_states'), <String>{
       'card_id->cards.id ON DELETE CASCADE',
     });
-    expect(await keysOf('review_history'), <String>{
+    expect(await keysOf('study_answers'), <String>{
       'card_id->cards.id ON DELETE CASCADE',
       'session_id->study_sessions.id ON DELETE NO ACTION',
     });
@@ -243,13 +243,13 @@ void main() {
     );
 
     expect(rows.map((row) => row['name']), <String>[
+      'idx_card_study_states_due',
       'idx_card_tags_tag',
       'idx_cards_deck_created',
       'idx_decks_parent_created',
       'idx_decks_root_created',
-      'idx_history_card',
-      'idx_history_session',
-      'idx_review_states_due',
+      'idx_study_answers_card',
+      'idx_study_answers_session',
       'idx_tags_owner_folded',
     ]);
   });

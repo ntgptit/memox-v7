@@ -6,7 +6,7 @@
 /// the 23 that are due (§4.3).
 ///
 /// [all] is the resting state. The other three each map to one indexed predicate
-/// — `is_flagged` (BR-92), `review_count = 0` (BR-90), or the due test — which is
+/// — `is_flagged` (BR-92), `answer_count = 0` (BR-90), or the due test — which is
 /// why each has its own query rather than an `OR (:mode = …)` chain.
 ///
 /// **[due] and [isNew] never describe the same card.** [due] is BR-22's study

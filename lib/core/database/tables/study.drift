@@ -45,7 +45,7 @@ CREATE TABLE study_sessions (
 
 -- Append-only. Never updated, never deleted — not even by a reset (BR-43).
 -- Only a cascade from a deleted card removes a row.
-CREATE TABLE review_history (
+CREATE TABLE study_answers (
     id TEXT NOT NULL PRIMARY KEY,
     card_id TEXT NOT NULL REFERENCES cards (id) ON DELETE CASCADE,
     session_id TEXT NOT NULL REFERENCES study_sessions (id),
@@ -60,20 +60,20 @@ CREATE TABLE review_history (
     -- (BR-76, AD-11). The inference is wrong in a case that is not rare: a
     -- `scheduled` review answered `remembered` on a box-8 card also has
     -- previous_box == next_box == 8.
-    review_kind TEXT NOT NULL CHECK (review_kind IN ('scheduled', 'relearning')),
+    kind TEXT NOT NULL CHECK (kind IN ('scheduled', 'relearning')),
 
     -- eight_box uses forgotten/remembered, sm2 uses again/hard/good/easy.
     --
     -- Quoted because ACTION is a keyword to drift's SQL parser, which drops the
     -- column WITHOUT an error when it is written bare: the build succeeded, the
-    -- generated code compiled, and `review_history` simply had no `action`.
+    -- generated code compiled, and `study_answers` simply had no `action`.
     -- Only reading the columns back out of SQLite caught it — asserting against
     -- this file would have agreed with itself.
     "action" TEXT NOT NULL CHECK (
         "action" IN ('forgotten', 'remembered', 'again', 'hard', 'good', 'easy')
     ),
 
-    reviewed_at DATETIME NOT NULL,
+    answered_at DATETIME NOT NULL,
     next_due_at DATETIME NULL,
 
     previous_box INTEGER NULL,
@@ -84,6 +84,6 @@ CREATE TABLE review_history (
     next_interval_days INTEGER NULL
 );
 
-CREATE INDEX idx_history_card ON review_history (card_id, reviewed_at);
+CREATE INDEX idx_study_answers_card ON study_answers (card_id, answered_at);
 
-CREATE INDEX idx_history_session ON review_history (session_id);
+CREATE INDEX idx_study_answers_session ON study_answers (session_id);

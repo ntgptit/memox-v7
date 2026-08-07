@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M5.0k (đổi tên trong lib/) |
+| **Updated by task** | M5.0l (schema v4: đổi tên) |
 | **Last updated** | 2026-08-07 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -6897,6 +6897,64 @@ cho `ReviewScreen.jsx` **của design kit** — tên riêng của kit, cùng lo�
 **Còn nợ, và là toàn bộ nội dung của M5.0l:** tên bảng và cột, cộng `reviewCount`,
 `firstReviewAt`, `lastReviewedAt` — chúng là tên field Dart do Drift sinh từ cột,
 nên chỉ đổi được cùng migration.
+
+### M5.0l · Schema v4: đổi tên bảng, cột và index
+
+- **Status:** done — migration thuần đổi tên. Không thêm, không xoá, không ghi
+  lại dòng nào.
+- **Goal:** Đóng nốt khoảng lệch tên giữa tài liệu và database, để `data-model.md`
+  thôi phải mang khối tra cứu cũ ↔ mới.
+- **Scope:** `.drift` (2 bảng, 5 cột, 3 index), migration v3 → v4 trong
+  `app_database.dart`, `schemaVersion` 3 → 4, `drift_schema_v4.json`,
+  `test/drift/generated/schema_v4.dart`, định danh Drift trong code tay, raw SQL
+  trong test, và `docs/data-model.md`.
+- **Out of scope:** `study_queue_items` và các cột của nghiệp vụ Study — chúng
+  đến ở migration sau, cùng M5.0/M5.1.
+- **Editable documents:** `docs/data-model.md`, `docs/wbs.md`
+- **Output:** schema v4; `migration_v4_test.dart`
+- **Acceptance criteria:**
+  - [x] `card_review_states` → `card_study_states`; `review_history` →
+        `study_answers`.
+  - [x] `review_count` → `answer_count`; `last_reviewed_at` → `last_answered_at`;
+        `review_kind` → `kind`; `reviewed_at` → `answered_at`;
+        `first_review_at` → `first_answered_at`.
+  - [x] Ba index đổi tên; `idx_history_*` → `idx_study_answers_*`.
+  - [x] Migration giữ nguyên **giá trị** của mọi dòng, giữ `kind`, giữ
+        `first_answered_at`, và giữ cả foreign key — bốn test riêng cho bốn điều
+        đó.
+  - [x] `flutter test` **1408 pass**; analyze, format, guard, architecture,
+        check_generated, check_docs xanh.
+  - [x] Khối tra cứu cũ ↔ mới trong `data-model.md` đã **xoá**.
+- **Dependencies:** M5.0k
+- **Tests required:** `migration_v4_test.dart`, `migration_test.dart`,
+  `schema_test.dart`, toàn bộ suite
+- **Checklist phases:** 11.1, 14.1
+
+**Một phép thay chuỗi đã phá chính migration, và `analyze` không thấy gì.** Đợt
+đổi raw SQL trong test quét cả `app_database.dart`, biến
+`ALTER TABLE card_review_states RENAME TO card_study_states` thành
+`RENAME card_study_states TO card_study_states` — câu lệnh đọc gọn gàng, biên dịch
+sạch, và là một no-op sẽ nổ trên database v3 thật vì bảng đích chưa tồn tại.
+`flutter analyze` không nhìn được vào trong một chuỗi; nhóm test v3 → v4 là thứ
+bắt được. Doc comment của `_renameForV4` giờ nói thẳng rằng mọi tên **cũ** trong
+đó là load-bearing và không được "sửa cho nhất quán".
+
+**`ALTER TABLE … RENAME` chứ không create-copy-drop.** SQLite đổi tên cột từ
+3.25, và với `legacy_alter_table` tắt nó cũng viết lại foreign key và định nghĩa
+index trỏ tới bảng vừa đổi. Cách chép bảng sẽ dời từng dòng cho một thay đổi
+không đụng dữ liệu, và cần `PRAGMA foreign_keys = OFF` bao quanh — đúng cái pragma
+database này từ chối tắt. Test cuối trong nhóm v4 kiểm chính điều đó: xoá một thẻ
+và đòi dòng `study_answers` biến mất theo.
+
+**Test rename phải seed dữ liệu, không thì nó không kiểm gì.** `migrateAndValidate`
+so sánh **hình dạng** schema, nên nó pass trên database rỗng và pass luôn nếu
+migration đã drop rồi tạo lại hai bảng. Đọc giá trị ra sau đó là thứ phân biệt hai
+trường hợp.
+
+**Một literal đã chờ sẵn để hỏng.** `migration_test.dart` gọi
+`migrateAndValidate(db, 3)` ở hai chỗ, trong khi chính file đó có một comment dặn
+"target là `db.schemaVersion`, không phải literal". Bump lên v4 làm cả hai đỏ ngay.
+Đã đổi sang `db.schemaVersion`, nên v5 sẽ không lặp lại.
 
 ### M5.0 · Study-specific domain và data completion
 

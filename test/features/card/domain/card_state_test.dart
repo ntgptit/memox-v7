@@ -12,15 +12,15 @@ import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 /// on an off-by-one at box 4 and at box 8, which are the only two places the
 /// arithmetic can be wrong.
 void main() {
-  CardStudyStateEntity eightBox({required int box, int reviewCount = 1}) =>
+  CardStudyStateEntity eightBox({required int box, int answerCount = 1}) =>
       CardStudyStateEntity(
         cardId: 'c1',
         schedulerType: SchedulerType.eightBox,
         schedulerVersion: 1,
         schedulerGeneration: 1,
         dueAt: null,
-        lastReviewedAt: null,
-        reviewCount: reviewCount,
+        lastAnsweredAt: null,
+        answerCount: answerCount,
         lapseCount: 0,
         currentBox: box,
         easeFactor: null,
@@ -28,15 +28,15 @@ void main() {
         repetitions: null,
       );
 
-  CardStudyStateEntity sm2({required int? days, int reviewCount = 1}) =>
+  CardStudyStateEntity sm2({required int? days, int answerCount = 1}) =>
       CardStudyStateEntity(
         cardId: 'c1',
         schedulerType: SchedulerType.sm2,
         schedulerVersion: 1,
         schedulerGeneration: 1,
         dueAt: null,
-        lastReviewedAt: null,
-        reviewCount: reviewCount,
+        lastAnsweredAt: null,
+        answerCount: answerCount,
         lapseCount: 0,
         currentBox: null,
         easeFactor: 2.5,
@@ -51,8 +51,8 @@ void main() {
         // `eight_box` seeds `current_box = 1` at creation (BR-09), so a
         // projection that read the box first would call every untouched card
         // `beginning` and the state would never be reachable.
-        expect(cardStateOf(eightBox(box: 1, reviewCount: 0)), CardState.isNew);
-        expect(cardStateOf(sm2(days: 0, reviewCount: 0)), CardState.isNew);
+        expect(cardStateOf(eightBox(box: 1, answerCount: 0)), CardState.isNew);
+        expect(cardStateOf(sm2(days: 0, answerCount: 0)), CardState.isNew);
       },
     );
 
@@ -140,8 +140,8 @@ void main() {
         schedulerVersion: 99,
         schedulerGeneration: 1,
         dueAt: null,
-        lastReviewedAt: null,
-        reviewCount: 5,
+        lastAnsweredAt: null,
+        answerCount: 5,
         lapseCount: 0,
         currentBox: null,
         easeFactor: null,

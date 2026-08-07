@@ -184,7 +184,7 @@ void main() {
     'Q9',
     'card state disagrees with its root scheduler (BR-48, BR-49)',
     breakIt: (db) => db.customStatement(
-      'UPDATE card_review_states SET scheduler_generation = 99 '
+      'UPDATE card_study_states SET scheduler_generation = 99 '
       "WHERE card_id = 'card-1'",
     ),
     expectOffenders: <String>['card-1'],
@@ -236,7 +236,7 @@ void main() {
       id: 'history-bad',
       cardId: 'card-1',
       sessionId: 'session-1',
-      reviewKind: 'relearning',
+      kind: 'relearning',
       previousBox: 3,
       nextBox: 5,
     ),

@@ -32,11 +32,11 @@ import '../../domain/models/card_text_model.dart';
 /// BR-22: what a session would hand over — no scheduled date yet, or that date
 /// has passed. The same set `study.drift` reads, named here so the Due pill can
 /// be defined by subtracting from it rather than by restating it.
-Expression<bool> studyQueuePredicate(CardReviewStates s, DateTime now) =>
+Expression<bool> studyQueuePredicate(CardStudyStates s, DateTime now) =>
     s.dueAt.isNull() | s.dueAt.isSmallerOrEqualValue(now);
 
 /// BR-90: never reviewed.
-Expression<bool> isNewPredicate(CardReviewStates s) => s.reviewCount.equals(0);
+Expression<bool> isNewPredicate(CardStudyStates s) => s.answerCount.equals(0);
 
 /// The Due pill's set: in the study queue, and **not** new.
 ///
@@ -50,7 +50,7 @@ Expression<bool> isNewPredicate(CardReviewStates s) => s.reviewCount.equals(0);
 ///
 /// **Subtracted structurally, not by a second date test.** Writing this as
 /// `due_at IS NOT NULL AND due_at <= now` would also read as disjoint from New,
-/// but only while `review_count = 0` implies `due_at IS NULL` — true today by
+/// but only while `answer_count = 0` implies `due_at IS NULL` — true today by
 /// BR-09 and BR-77, and true only as long as nothing schedules a card it has
 /// not reviewed. Negating the New predicate itself cannot come apart from it:
 /// whatever New means, Due is the rest of the queue. So `Due + New` is exactly
@@ -58,7 +58,7 @@ Expression<bool> isNewPredicate(CardReviewStates s) => s.reviewCount.equals(0);
 ///
 /// The queue keeps its own predicate above, untouched — the session still takes
 /// new cards, and BR-22 has not changed.
-Expression<bool> duePredicate(CardReviewStates s, DateTime now) =>
+Expression<bool> duePredicate(CardStudyStates s, DateTime now) =>
     studyQueuePredicate(s, now) & isNewPredicate(s).not();
 
 /// BR-92: the user's own mark.
@@ -105,7 +105,7 @@ Expression<bool> _contains(GeneratedColumn<String> column, String foldedTerm) =>
 /// error the read surfaces rather than silently answering with the wrong "now".
 Expression<bool> cardListPredicate({
   required Cards c,
-  required CardReviewStates s,
+  required CardStudyStates s,
   required String deckId,
   required CardListFilter filter,
   String? searchTerm,
@@ -141,7 +141,7 @@ DateTime _requireNow(DateTime? now) {
 OrderBy cardListOrder(
   CardListSort sort,
   Cards c,
-  CardReviewStates s,
+  CardStudyStates s,
 ) => switch (sort) {
   CardListSort.newest => OrderBy(<OrderingTerm>[
     OrderingTerm.desc(c.createdAt),

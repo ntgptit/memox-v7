@@ -14,13 +14,13 @@ const int _sm2InitialRepetitions = 0;
 /// The study state a card is born with (BR-09), per scheduler.
 ///
 /// A mapper, not repository logic: it turns the root's scheduler meta into the
-/// one `CardReviewStatesCompanion` the create transaction inserts, and each
+/// one `CardStudyStatesCompanion` the create transaction inserts, and each
 /// scheduler fills only its own columns.
-CardReviewStatesCompanion initialReviewStateFromScheduler(
+CardStudyStatesCompanion initialReviewStateFromScheduler(
   String cardId,
   ({SchedulerType type, int version, int generation}) scheduler,
 ) {
-  final base = CardReviewStatesCompanion.insert(
+  final base = CardStudyStatesCompanion.insert(
     cardId: cardId,
     schedulerType: scheduler.type.dbValue,
     schedulerVersion: scheduler.version,

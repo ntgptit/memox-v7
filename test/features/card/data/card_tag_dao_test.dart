@@ -37,17 +37,17 @@ void main() {
     AppDatabase db, {
     required String cardId,
     required String schedulerType,
-    required int reviewCount,
+    required int answerCount,
     int? currentBox,
     int? intervalDays,
   }) => db.customInsert(
-    'INSERT INTO card_review_states (card_id, scheduler_type, '
-    'scheduler_version, scheduler_generation, review_count, lapse_count, '
+    'INSERT INTO card_study_states (card_id, scheduler_type, '
+    'scheduler_version, scheduler_generation, answer_count, lapse_count, '
     'current_box, interval_days) VALUES (?, ?, 1, 1, ?, 0, ?, ?)',
     variables: <Variable<Object>>[
       Variable<String>(cardId),
       Variable<String>(schedulerType),
-      Variable<int>(reviewCount),
+      Variable<int>(answerCount),
       if (currentBox == null)
         const Variable<int>(null)
       else
@@ -263,7 +263,7 @@ void main() {
         db,
         cardId: 'n',
         schedulerType: 'eight_box',
-        reviewCount: 0,
+        answerCount: 0,
         currentBox: 1,
       );
       for (final entry in <String, int>{'b': 3, 'r': 4, 'm': 8}.entries) {
@@ -272,7 +272,7 @@ void main() {
           db,
           cardId: entry.key,
           schedulerType: 'eight_box',
-          reviewCount: 1,
+          answerCount: 1,
           currentBox: entry.value,
         );
       }
@@ -294,7 +294,7 @@ void main() {
         db,
         cardId: 'n',
         schedulerType: 'sm2',
-        reviewCount: 0,
+        answerCount: 0,
         intervalDays: 0,
       );
       for (final entry in <String, int>{'b': 7, 'r': 8, 'm': 128}.entries) {
@@ -303,7 +303,7 @@ void main() {
           db,
           cardId: entry.key,
           schedulerType: 'sm2',
-          reviewCount: 1,
+          answerCount: 1,
           intervalDays: entry.value,
         );
       }
@@ -327,7 +327,7 @@ void main() {
         db,
         cardId: 'c1',
         schedulerType: 'eight_box',
-        reviewCount: 0,
+        answerCount: 0,
         currentBox: 1,
       );
 
@@ -350,7 +350,7 @@ void main() {
           db,
           cardId: 'b$box',
           schedulerType: 'eight_box',
-          reviewCount: 1,
+          answerCount: 1,
           currentBox: box,
         );
       }

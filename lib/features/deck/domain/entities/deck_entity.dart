@@ -28,7 +28,7 @@ abstract class DeckEntity with _$DeckEntity {
     required int? schedulerGeneration,
 
     /// Null while the scheduler is still unlocked (BR-12, BR-13). Root only.
-    required DateTime? firstReviewAt,
+    required DateTime? firstAnsweredAt,
     required DateTime createdAt,
     required DateTime updatedAt,
   }) = _DeckEntity;

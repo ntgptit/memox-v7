@@ -24,7 +24,7 @@ const int _initialSchedulerGeneration = 1;
 /// first one's root.
 ///
 /// **It writes cards without going through `CardRepositoryImpl`.** That is not a
-/// boundary being crossed — `cards` and `card_review_states` are core schema,
+/// boundary being crossed — `cards` and `card_study_states` are core schema,
 /// not the card feature's private data — and it is required: the copy has to be
 /// atomic, and two repositories cannot share one transaction. What it must not
 /// do is re-derive card rules, so the row shapes come from

@@ -30,7 +30,7 @@ void main() {
     contentType: contentType,
     schedulerType: schedulerType,
     schedulerGeneration: schedulerGeneration,
-    firstReviewAt: null,
+    firstAnsweredAt: null,
     createdAt: DateTime.utc(2026, 7, 30),
     updatedAt: DateTime.utc(2026, 7, 30),
   );

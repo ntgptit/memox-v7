@@ -18,7 +18,7 @@ const String _tagSeparator = '\u{1F}';
 
 CardListItemModel cardListItemFromParts(
   Card card,
-  CardReviewState studyState,
+  CardStudyState studyState,
   String? tagNames,
 ) => CardListItemModel(
   card: cardEntityFromRow(card),

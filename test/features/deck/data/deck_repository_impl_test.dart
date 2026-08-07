@@ -30,14 +30,14 @@ void main() {
       expect(root.name, 'My deck');
       expect(root.schedulerType, SchedulerType.sm2);
       expect(root.schedulerGeneration, 1);
-      expect(root.firstReviewAt, isNull);
+      expect(root.firstAnsweredAt, isNull);
       expect(root.createdAt, testNow);
 
       final row = (await h.rawDeck(root.id))!;
       expect(row.readNullable<String>('parent_deck_id'), isNull);
       expect(row.read<String>('scheduler_type'), 'sm2');
       expect(row.read<int>('scheduler_version'), 1);
-      expect(row.readNullable<DateTime>('first_review_at'), isNull);
+      expect(row.readNullable<DateTime>('first_answered_at'), isNull);
     });
 
     test(

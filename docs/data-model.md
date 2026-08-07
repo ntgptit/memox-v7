@@ -7,45 +7,22 @@
 | **Scope** | Bảng, cột, index, quan hệ, query bất biến. Ngoài phạm vi: SQL runtime (`lib/core/database/`, chưa tồn tại) |
 | **Source of truth for** | Schema · cột và kiểu · index · query bất biến · thứ tự migration |
 | **Depends on** | `document-conventions.md`, `architecture.md`, `business-rules.md` |
-| **Updated by task** | M5.0i (card_limit thuộc phiên) |
+| **Updated by task** | M5.0l (schema v4: đổi tên) |
 | **Last updated** | 2026-08-07 |
 
-Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; SQL thật nằm
-ở `lib/core/database/tables/` và **chưa được tạo** — task này chỉ chốt đặc tả.
-
-> **Tên trong tài liệu này là tên đích; database đang ở schema v3 với tên cũ.**
-> Đợt đổi tên `Review` → `Study` (M5.0a) đã chạy trên toàn bộ `docs/`, nhưng chưa
-> chạm `lib/`, `.drift` hay migration — đó là task riêng của M5. Cho tới lúc đó,
-> đọc tên dưới đây theo bảng này:
->
-> | Tài liệu (tên đích) | Database hiện tại (v3) |
-> |---|---|
-> | `study_answers` | `review_history` |
-> | `card_study_states` | `card_review_states` |
-> | `study_answers.kind` | `review_history.review_kind` |
-> | `answer_count` | `review_count` |
-> | `answered_at` · `last_answered_at` | `reviewed_at` · `last_reviewed_at` |
-> | `decks.first_answered_at` | `decks.first_review_at` |
-> | `idx_card_study_states_due` | `idx_review_states_due` |
-> | `StudyAnswerKind` · `StudyAction` · `StudyScheduler` | `ReviewKind` · `ReviewAction` · `ReviewScheduler` |
-> | `CardStudyStateEntity` · `StudyAnswerEntity` | `CardReviewStateEntity` · `ReviewHistoryEntity` |
-> | `features/study/` · `RouteNames.study` | `features/review/` · `RouteNames.review` |
->
-> **Chưa tồn tại ở bất kỳ schema nào** — đến cùng đợt migration của M5:
-> bảng `study_queue_items` (cột `mode`, `round`, `remaining_ms`, `is_revealed`);
-> `study_sessions.current_mode`, `study_sessions.cursor`, `study_sessions.card_limit`; `study_answers.mode` và
-> `study_answers.outcome_reason`, `comparison_version`, `used_hint`; giá trị
-> `interrupted` của `end_reason`; và hai
-> StudyMode mới `browse` / `self_assess`.
->
-> Ghi ra đây vì bài học của M4.12d: một tài liệu nói khác code mà không nói rõ nó
-> đang nói khác thì không phải tài liệu, nó là một cái bẫy. Khi migration xong,
-> xoá cả khối này.
+Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; SQL thật nằm ở
+`lib/core/database/tables/`, hiện ở **schema v4**.
 
 **`review` vẫn còn nghĩa thứ hai trong repo, và nó không đổi.** Ở `docs/reviews/`,
 "vòng review UI/UX", "code review" — đó là *rà soát*, không phải *ôn tập*. Đợt đổi
 tên cố tình không đụng tới chúng, nên gặp chữ `review` ở đâu đó không có nghĩa là
 sót.
+
+**Chưa tồn tại ở schema nào** — đến cùng đợt migration tiếp theo của M5: bảng
+`study_queue_items`; `study_sessions.current_mode`, `cursor`, `card_limit`;
+`study_answers.mode`, `outcome_reason`, `comparison_version`, `used_hint`; giá trị
+`interrupted` của `end_reason`; và hai StudyMode `browse` / `self_assess`.
+Mọi tên còn lại trong tài liệu này **đã là tên thật trong database** kể từ schema v4.
 
 Ba nguyên tắc chi phối cách chia bảng:
 
@@ -322,7 +299,7 @@ Giữ history qua các lần reset là lý do bảng này mang `scheduler_type` 
 `scheduler_generation` thay vì tra ngược lên deck: deck chỉ biết generation
 **hiện tại**, còn dòng history phải nói được nó thuộc chu kỳ nào theo luật nào.
 
-Index: `idx_history_card` trên `(card_id, answered_at)`; `idx_history_session`
+Index: `idx_study_answers_card` trên `(card_id, answered_at)`; `idx_study_answers_session`
 trên `(session_id)`.
 
 Bảng này lớn nhanh nhất — mỗi lượt đánh giá một dòng, reset không dọn bớt. Đây là

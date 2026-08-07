@@ -68,7 +68,7 @@ abstract interface class DeckRepository {
   Stream<List<DeckEntity>> watchDeckTree(String rootDeckId);
 
   /// Creates a root deck (UC-02): `parent_deck_id = NULL`, `root_deck_id =
-  /// id`, `content_type = deck`, generation 1, `first_review_at = NULL`.
+  /// id`, `content_type = deck`, generation 1, `first_answered_at = NULL`.
   ///
   /// [schedulerType] is mandatory and must be a real scheduler (BR-11) —
   /// there is no implicit default and `unknown` is rejected.

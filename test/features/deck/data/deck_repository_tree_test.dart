@@ -76,7 +76,7 @@ void main() {
 
       expect(await h.countAll('decks'), 0);
       expect(await h.countAll('cards'), 0);
-      expect(await h.countAll('card_review_states'), 0);
+      expect(await h.countAll('card_study_states'), 0);
       expect(await h.countAll('study_sessions'), 0);
     });
 

@@ -36,7 +36,7 @@ CREATE TABLE cards (
     back_folded TEXT NOT NULL DEFAULT '',
 
     -- The user's own mark on the content (BR-92). It lives here rather than in
-    -- card_review_states for the same reason `front` does: reset drops and
+    -- card_study_states for the same reason `front` does: reset drops and
     -- recreates the schedule, and a flag has to survive that.
     is_flagged INTEGER NOT NULL DEFAULT 0 CHECK (is_flagged IN (0, 1)),
 
@@ -75,7 +75,7 @@ CREATE INDEX idx_cards_deck_created ON cards (deck_id, created_at, id);
 --
 -- No SRS column appears in `cards` and no `scheduler_generation` appears here
 -- by accident: content survives every reset, the schedule does not.
-CREATE TABLE card_review_states (
+CREATE TABLE card_study_states (
     -- Primary key because the relationship is 1–1.
     card_id TEXT NOT NULL PRIMARY KEY REFERENCES cards (id) ON DELETE CASCADE,
 
@@ -91,10 +91,10 @@ CREATE TABLE card_review_states (
     due_at DATETIME NULL,
 
     -- Updated by `scheduled` and by `relearning` alike (BR-20).
-    last_reviewed_at DATETIME NULL,
+    last_answered_at DATETIME NULL,
 
     -- Counts `scheduled` reviews only (BR-20).
-    review_count INTEGER NOT NULL DEFAULT 0,
+    answer_count INTEGER NOT NULL DEFAULT 0,
     lapse_count INTEGER NOT NULL DEFAULT 0,
 
     -- Per-scheduler columns, NULL when they do not apply. A JSON blob would be
@@ -106,4 +106,4 @@ CREATE TABLE card_review_states (
     repetitions INTEGER NULL
 );
 
-CREATE INDEX idx_review_states_due ON card_review_states (due_at);
+CREATE INDEX idx_card_study_states_due ON card_study_states (due_at);

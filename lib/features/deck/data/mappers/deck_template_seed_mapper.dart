@@ -49,11 +49,11 @@ CardsCompanion templateCardCompanion(
 /// `default_scheduler_type` this build does not know, and the caller may only
 /// override it with a real one. The branch throws rather than writing a row no
 /// scheduler owns.
-CardReviewStatesCompanion templateReviewStateCompanion(
+CardStudyStatesCompanion templateReviewStateCompanion(
   String cardId, {
   required ({SchedulerType type, int version, int generation}) scheduler,
 }) {
-  final base = CardReviewStatesCompanion.insert(
+  final base = CardStudyStatesCompanion.insert(
     cardId: cardId,
     schedulerType: scheduler.type.dbValue,
     schedulerVersion: scheduler.version,

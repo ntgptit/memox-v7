@@ -22,8 +22,8 @@ abstract class CardStudyStateEntity with _$CardStudyStateEntity {
 
     /// Null means due immediately (BR-22). A new card starts null (BR-09).
     required DateTime? dueAt,
-    required DateTime? lastReviewedAt,
-    required int reviewCount,
+    required DateTime? lastAnsweredAt,
+    required int answerCount,
     required int lapseCount,
     required int? currentBox,
     required double? easeFactor,
