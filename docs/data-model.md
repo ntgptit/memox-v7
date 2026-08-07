@@ -7,11 +7,41 @@
 | **Scope** | Bảng, cột, index, quan hệ, query bất biến. Ngoài phạm vi: SQL runtime (`lib/core/database/`, chưa tồn tại) |
 | **Source of truth for** | Schema · cột và kiểu · index · query bất biến · thứ tự migration |
 | **Depends on** | `document-conventions.md`, `architecture.md`, `business-rules.md` |
-| **Updated by task** | Sửa fold search (cột `front_folded`/`back_folded`, schema v3) |
-| **Last updated** | 2026-08-04 |
+| **Updated by task** | M5.0a (đổi tên Review → Study; khối trạng thái triển khai) |
+| **Last updated** | 2026-08-07 |
 
 Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; SQL thật nằm
-ở `lib/core/database/tables/` và **chưa được tạo** — task này chỉ chốt đặc tả.
+ở `lib/core/database/tables/`.
+
+> **Tên trong tài liệu này là tên đích, database đang ở schema v3 với tên cũ.**
+> Đợt đổi tên `Review` → `Study` đã chạy trên toàn bộ `docs/`, nhưng chưa chạm
+> vào `lib/`, `.drift` hay migration — đó là hai task riêng của M5. Cho tới khi
+> chúng xong, mọi tên dưới đây đọc theo bảng này:
+>
+> | Tài liệu (tên đích) | Database hiện tại (v3) |
+> |---|---|
+> | `study_answers` | `review_history` |
+> | `card_study_states` | `card_review_states` |
+> | `study_answers.kind` | `review_history.review_kind` |
+> | `answer_count` | `review_count` |
+> | `answered_at` · `last_answered_at` | `reviewed_at` · `last_reviewed_at` |
+> | `decks.first_answered_at` | `decks.first_review_at` |
+> | `idx_card_study_states_due` | `idx_review_states_due` |
+> | `StudyAnswerKind` · `StudyAction` · `StudyScheduler` | `ReviewKind` · `ReviewAction` · `ReviewScheduler` |
+> | `CardStudyStateEntity` · `StudyAnswerEntity` | `CardReviewStateEntity` · `ReviewHistoryEntity` |
+> | `features/study/` · `RouteNames.study` | `features/review/` · `RouteNames.review` |
+>
+> Hai bảng chưa tồn tại ở bất kỳ phiên bản nào: `study_queue_items`, và cột
+> `study_sessions.cursor`. Chúng đến cùng schema v5.
+>
+> Ghi ra đây vì bài học của M4.12d: một tài liệu nói khác code mà không ai nói
+> rõ nó đang nói khác thì không phải tài liệu, nó là một cái bẫy. Khi migration
+> xong, xoá cả khối này.
+
+**`review` vẫn còn nghĩa thứ hai trong repo, và nó không đổi.** Ở `docs/reviews/`,
+"vòng review UI/UX", "code review" — đó là *rà soát*, không phải *ôn tập*. Đợt đổi
+tên cố tình không đụng tới chúng, nên thấy chữ `review` ở đâu đó không có nghĩa là
+sót.
 
 Ba nguyên tắc chi phối cách chia bảng:
 
@@ -20,7 +50,7 @@ Ba nguyên tắc chi phối cách chia bảng:
    thêm, không bao giờ sửa.
 2. **`scheduler_generation` có mặt ở mọi nơi trạng thái học tồn tại**, để "thuộc
    chu kỳ nào" là dữ kiện trong dữ liệu chứ không phải quy ước ngầm (AD-09).
-3. **Trạng thái được lưu tường minh, không suy luận** — `review_kind`,
+3. **Trạng thái được lưu tường minh, không suy luận** — `kind`,
    `session.status`, `end_reason`, `content_type`, `root_deck_id` đều là cột thật
    (AD-10, AD-11).
 
@@ -36,10 +66,10 @@ deck_templates (asset JSON ở MVP)
        │  ▲  │ root_deck_id    (mọi descendant trỏ thẳng về root)
        │  └──┘
        │
-       ├──► cards ──┬──► card_review_states   (1–1, mang generation)
-       │            └──► review_history       (1–n, append-only, mang generation)
+       ├──► cards ──┬──► card_study_states   (1–1, mang generation)
+       │            └──► study_answers       (1–n, append-only, mang generation)
        │
-       └──► study_sessions ──► review_history
+       └──► study_sessions ──► study_answers
 ```
 
 ---
@@ -58,7 +88,7 @@ deck_templates (asset JSON ở MVP)
 | `scheduler_version` | INTEGER NULL | cùng quy tắc NULL |
 | `scheduler_config` | TEXT NULL | JSON tham số ghi đè. Cùng quy tắc NULL |
 | `scheduler_generation` | INTEGER NULL | bắt đầu từ 1, +1 mỗi lần reset (BR-40). Chỉ trên root |
-| `first_review_at` | DATETIME NULL | NULL = chưa có lượt `scheduled` ở generation hiện tại → scheduler mở khoá |
+| `first_answered_at` | DATETIME NULL | NULL = chưa có lượt `scheduled` ở generation hiện tại → scheduler mở khoá |
 | `source_template_id` | TEXT NULL | NULL = deck tự tạo (BR-34) |
 | `source_template_version` | INTEGER NULL | version tại thời điểm sao chép |
 | `created_at` | DATETIME NOT NULL | UTC |
@@ -174,7 +204,7 @@ Ba trường phụ để **NULL, không phải chuỗi rỗng**. NULL nghĩa là
 thứ đó, nên cho phép cả hai chỉ tạo ra hai cách biểu diễn một trạng thái. Lớp
 domain trim rồi quy chuỗi rỗng về NULL trước khi ghi, cùng chỗ `CardText` trim.
 
-`is_flagged` nằm ở đây chứ không ở `card_review_states` và đó là cùng một lập
+`is_flagged` nằm ở đây chứ không ở `card_study_states` và đó là cùng một lập
 luận: cờ là thứ người dùng đặt lên *nội dung* — "quay lại thẻ này" — nên nó phải
 sống sót qua reset. Đặt nó cạnh `current_box` sẽ khiến reset xoá nó cùng lịch
 (BR-92).
@@ -223,7 +253,7 @@ PK không phục vụ được nó.
 Cả hai FK đều `CASCADE`: xoá thẻ thì liên kết mất theo (BR-92 nói cùng điều đó
 cho cờ), xoá tag thì nó biến khỏi mọi thẻ. Không có bản ghi mồ côi nào cần dọn.
 
-## `card_review_states`
+## `card_study_states`
 
 Một dòng cho mỗi card, tạo cùng lúc với card (BR-09). Xoá và tạo lại khi reset.
 
@@ -234,8 +264,8 @@ Một dòng cho mỗi card, tạo cùng lúc với card (BR-09). Xoá và tạo 
 | `scheduler_version` | INTEGER NOT NULL | |
 | `scheduler_generation` | INTEGER NOT NULL | phải bằng generation hiện tại của root (BR-49) |
 | `due_at` | DATETIME NULL | chung cho mọi scheduler. NULL = đến hạn ngay. UTC |
-| `last_reviewed_at` | DATETIME NULL | cập nhật ở cả `scheduled` lẫn `relearning` (BR-20) |
-| `review_count` | INTEGER NOT NULL DEFAULT 0 | chỉ đếm `scheduled` (BR-20) |
+| `last_answered_at` | DATETIME NULL | cập nhật ở cả `scheduled` lẫn `relearning` (BR-20) |
+| `answer_count` | INTEGER NOT NULL DEFAULT 0 | chỉ đếm `scheduled` (BR-20) |
 | `lapse_count` | INTEGER NOT NULL DEFAULT 0 | BR-20 |
 | `current_box` | INTEGER NULL | **chỉ `eight_box`**: 1..8 |
 | `ease_factor` | REAL NULL | **chỉ `sm2`**: mặc định 2.5, sàn 1.3 |
@@ -250,9 +280,9 @@ Cột riêng của từng scheduler để NULL khi không thuộc scheduler đan
 án gói vào JSON linh hoạt hơn nhưng mất type-safety và không query được — mâu
 thuẫn trực tiếp với lý do chọn AD-02.
 
-Index: `idx_review_states_due` trên `(due_at)` — query nóng nhất của app.
+Index: `idx_card_study_states_due` trên `(due_at)` — query nóng nhất của app.
 
-## `review_history`
+## `study_answers`
 
 Append-only. Không sửa, không xoá — kể cả khi reset (BR-43). Chỉ mất khi card bị
 xoá (cascade).
@@ -264,9 +294,9 @@ xoá (cascade).
 | `session_id` | TEXT NOT NULL | → `study_sessions(id)` |
 | `scheduler_type` | TEXT NOT NULL | scheduler tại thời điểm đánh giá |
 | `scheduler_generation` | INTEGER NOT NULL | generation tại thời điểm đánh giá |
-| `review_kind` | TEXT NOT NULL | `'scheduled'` \| `'relearning'` (BR-75, BR-76) |
+| `kind` | TEXT NOT NULL | `'scheduled'` \| `'relearning'` (BR-75, BR-76) |
 | `action` | TEXT NOT NULL | `forgotten`/`remembered` hoặc `again`/`hard`/`good`/`easy` |
-| `reviewed_at` | DATETIME NOT NULL | UTC |
+| `answered_at` | DATETIME NOT NULL | UTC |
 | `next_due_at` | DATETIME NULL | hạn sau khi đánh giá |
 | `previous_box` | INTEGER NULL | chỉ `eight_box` |
 | `next_box` | INTEGER NULL | chỉ `eight_box` |
@@ -275,7 +305,7 @@ xoá (cascade).
 | `previous_interval_days` | INTEGER NULL | chỉ `sm2` |
 | `next_interval_days` | INTEGER NULL | chỉ `sm2` |
 
-`review_kind` là cột thật, **không suy ra** từ việc so `previous_*` với `next_*`
+`kind` là cột thật, **không suy ra** từ việc so `previous_*` với `next_*`
 (BR-76, AD-11). Suy luận sai ở đúng một ca không hiếm: lượt `scheduled` trên card
 ở box 8 trả lời `remembered` cũng có `previous_box == next_box == 8`.
 
@@ -283,7 +313,7 @@ Giữ history qua các lần reset là lý do bảng này mang `scheduler_type` 
 `scheduler_generation` thay vì tra ngược lên deck: deck chỉ biết generation
 **hiện tại**, còn dòng history phải nói được nó thuộc chu kỳ nào theo luật nào.
 
-Index: `idx_history_card` trên `(card_id, reviewed_at)`; `idx_history_session`
+Index: `idx_history_card` trên `(card_id, answered_at)`; `idx_history_session`
 trên `(session_id)`.
 
 Bảng này lớn nhanh nhất — mỗi lượt đánh giá một dòng, reset không dọn bớt. Đây là
@@ -310,7 +340,7 @@ Ma trận `status` × `end_reason` hợp lệ:
 | `completed` | NULL | hết queue (BR-81) |
 | `abandoned` | `user_exit` | người dùng thoát (BR-82) |
 | `invalidated` | `scheduler_reset` | reset khi phiên đang mở (BR-83) |
-| `invalidated` | `stale_generation` | phiên generation cũ cố ghi review (BR-84) |
+| `invalidated` | `stale_generation` | phiên generation cũ cố ghi lượt học (BR-84) |
 | `failed` | `persistence_error` | lỗi không thể tiếp tục (BR-85) |
 
 Mọi tổ hợp khác là dữ liệu sai.
@@ -320,8 +350,8 @@ reset, người dùng quay lại bấm đánh giá sau khi reset. Mọi thao tá
 generation của session với generation hiện tại của root và **từ chối** nếu lệch
 (BR-46, BR-84).
 
-Các review đã ghi thành công trước khi phiên kết thúc bất thường **vẫn được giữ**
-(BR-86) — chuyển `status` không kéo theo xoá `review_history`.
+Các lượt học đã ghi thành công trước khi phiên kết thúc bất thường **vẫn được giữ**
+(BR-86) — chuyển `status` không kéo theo xoá `study_answers`.
 
 **Hàng đợi của phiên không lưu trong DB.** Nó là trạng thái tạm trong controller.
 
@@ -343,7 +373,7 @@ assets/templates/
 | `locale` | `vi`, `en`, … |
 | `title` | tên hiển thị |
 | `content_source` | nguồn gốc nội dung, cho ghi công và kiểm tra bản quyền |
-| `default_scheduler_type` | scheduler gợi ý; người dùng đổi được trước lượt review đầu |
+| `default_scheduler_type` | scheduler gợi ý; người dùng đổi được trước lượt học đầu |
 
 Template mô tả **cả cây deck**, không chỉ một danh sách card, vì bản sao phải
 dựng lại đúng cấu trúc `content_type` và `root_deck_id`.
@@ -428,8 +458,8 @@ cây" ở trên).
 ### Scheduler và generation
 
 ```sql
--- 9. Card review state không cùng scheduler hoặc generation với root (BR-48, BR-49)
-SELECT s.card_id FROM card_review_states s
+-- 9. Card study state không cùng scheduler hoặc generation với root (BR-48, BR-49)
+SELECT s.card_id FROM card_study_states s
 JOIN cards c ON c.id = s.card_id
 JOIN decks d ON d.id = c.deck_id
 JOIN decks root ON root.id = d.root_deck_id
@@ -469,12 +499,12 @@ SELECT id FROM study_sessions
 WHERE status <> 'in_progress' AND ended_at IS NULL;
 ```
 
-### Review history
+### Study answers
 
 ```sql
 -- 14. Lượt relearning làm đổi lịch (BR-78)
-SELECT id FROM review_history
-WHERE review_kind = 'relearning'
+SELECT id FROM study_answers
+WHERE kind = 'relearning'
   AND (previous_box IS NOT next_box
     OR previous_ease_factor IS NOT next_ease_factor
     OR previous_interval_days IS NOT next_interval_days);
@@ -499,8 +529,8 @@ phát hiện lúc dev.
 ## Foreign keys
 
 `PRAGMA foreign_keys = ON` trong `beforeOpen`. Không có nó, `ON DELETE CASCADE`
-chỉ là chú thích. Cần test: xoá root deck → toàn bộ cây deck con, card, review
-state, review history và study session đều biến mất (BR-03).
+chỉ là chú thích. Cần test: xoá root deck → toàn bộ cây deck con, card, study
+state, study answers và study session đều biến mất (BR-03).
 
 ## Chưa mô hình hoá
 

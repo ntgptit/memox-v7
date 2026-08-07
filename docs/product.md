@@ -7,8 +7,8 @@
 | **Scope** | Vấn đề, người dùng, quyết định nền tảng, phạm vi MVP, luồng nghiệp vụ chính. Ngoài phạm vi: cách triển khai |
 | **Source of truth for** | Phạm vi MVP · phân loại must/should/nice/out · quyết định platform, data posture, auth, dữ liệu nhạy cảm |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | T1.3a |
-| **Last updated** | 2026-07-28 |
+| **Updated by task** | M5.0a (đổi tên Review → Study) |
+| **Last updated** | 2026-08-07 |
 
 ## Problem
 
@@ -55,7 +55,7 @@ kênh E2E.
 |---|---|---|
 | Nội dung deck và flashcard người dùng tạo | Dữ liệu cá nhân | Chỉ trên thiết bị ở MVP. **Không log nội dung ở bất kỳ level nào** |
 | Ghi chú | Dữ liệu cá nhân | Như trên |
-| Lịch sử học (`review_history`) | Suy ra được thói quen và thời gian sử dụng | Không gửi ra ngoài ở MVP; không đưa vào analytics |
+| Lịch sử học (`study_answers`) | Suy ra được thói quen và thời gian sử dụng | Không gửi ra ngoài ở MVP; không đưa vào analytics |
 | File import | Có thể chứa nội dung ngoài phạm vi app | Xử lý trong bộ nhớ ứng dụng; không để lại bản sao ở thư mục dùng chung |
 | Hình ảnh, audio | Media cá nhân | Lưu trong **thư mục riêng của ứng dụng**, không phải bộ nhớ dùng chung |
 | Dữ liệu backup / export | Chứa toàn bộ những thứ trên | **Chỉ tạo khi người dùng chủ động yêu cầu** — không tự động, không chạy nền |
@@ -134,7 +134,7 @@ trạng thái người dùng gặp thường xuyên nhất sau vài tuần).
 `sm2`. Mỗi deck **bắt buộc chọn một** khi tạo. Sub-deck kế thừa scheduler của
 root deck và không chọn riêng.
 
-**Scheduler bị khoá sau lượt review đầu tiên.** Trước đó đổi tự do; sau đó muốn
+**Scheduler bị khoá sau lượt học đầu tiên.** Trước đó đổi tự do; sau đó muốn
 đổi phải **Reset learning progress**. Lý do: đổi thuật toán giữa chừng đặt ra
 những câu hỏi không có câu trả lời trung thực — box 5 tương ứng ease factor nào,
 history theo luật cũ còn giá trị gì. Mọi ánh xạ đều là bịa đặt. Khoá-và-reset
@@ -142,7 +142,7 @@ thừa nhận điều đó thẳng thắn và để người dùng biết rõ m�
 
 **Reset giữ nguyên** deck, sub-deck, flashcard, media, tag và nội dung; **xoá**
 lịch ôn, ngày đến hạn, box/ease factor/interval, trạng thái thành thạo và phiên
-đang dở. Review history cũ được giữ để tham khảo nhưng không dùng cho chu kỳ mới.
+đang dở. Study answers cũ được giữ để tham khảo nhưng không dùng cho chu kỳ mới.
 Mỗi deck có `scheduler_generation` tăng sau mỗi lần reset, và kết quả từ session
 thuộc generation cũ bị từ chối. Xem AD-09.
 
@@ -154,8 +154,8 @@ thuộc generation cũ bị từ chối. Xem AD-09.
 | `sm2` | `again`, `hard`, `good`, `easy` |
 
 UI phải render nút từ `supportedActions` của scheduler thuộc deck, không hardcode.
-Mỗi lượt đánh giá — kể cả lượt luyện lại trong phiên — được ghi vào review
-history kèm scheduler type và generation.
+Mỗi lượt đánh giá — kể cả lượt luyện lại trong phiên — được ghi vào study
+answers kèm scheduler type và generation.
 
 **Nội dung: starter deck quản lý như template.** Người dùng chọn dùng thì app tạo
 một **bản sao** vào dữ liệu cá nhân; bản sao là deck bình thường. Cập nhật

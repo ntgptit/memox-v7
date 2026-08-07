@@ -7,8 +7,8 @@
 | **Scope** | Luật nghiệp vụ, validation rule, state machine, edge case của phạm vi MVP. Ngoài phạm vi: quyết định kiến trúc (`architecture.md`), hình dạng dữ liệu (`data-model.md`), luồng người dùng (`use-cases.md`) |
 | **Source of truth for** | BR-xx · validation rule · entity state machine · edge case |
 | **Depends on** | `document-conventions.md`, `product.md`, `architecture.md` |
-| **Updated by task** | M4.10at (BR-08 sửa số, BR-89…BR-95) |
-| **Last updated** | 2026-08-02 |
+| **Updated by task** | M5.0a (đổi tên Review → Study) |
+| **Last updated** | 2026-08-07 |
 
 Format tuân theo `document-conventions.md` §6.2. Từ khoá MUST / SHOULD / MAY
 theo §3. Prose **không** chứa từ khoá là giải thích, không phải rule (§9).
@@ -71,7 +71,7 @@ với deck ở cấp 3 nó trả về deck cấp 2 chứ không phải root.
 |---|---|---|---|---|
 | BR-01 | active | Deck MUST có tên không rỗng sau khi trim, tối đa 200 ký tự. | domain | UC-02, UC-03 |
 | BR-02 | active | Tên deck MAY trùng nhau. | domain | UC-02 |
-| BR-03 | active | Xoá deck MUST xoá toàn bộ descendant, card, review state, review history và study session của nó (cascade). | db | UC-03 |
+| BR-03 | active | Xoá deck MUST xoá toàn bộ descendant, card, study state, study answers và study session của nó (cascade). | db | UC-03 |
 | BR-04 | active | Xoá deck MUST cần xác nhận, kèm số deck con và số card sẽ mất. | UI | UC-03 |
 | BR-05 | active | Scheduler thuộc về root deck. Mọi descendant ở mọi cấp MUST kế thừa `scheduler_type`, `scheduler_version` và `scheduler_generation` từ root, và MUST NOT chọn riêng. | db + invariant Q9, Q10 | AD-06, UC-05 |
 | BR-06 | active | Cột scheduler MUST chỉ có giá trị trên root deck; deck không phải root MUST để NULL và tra qua `root_deck_id`. | invariant Q10 | AD-06, UC-03 |
@@ -86,8 +86,8 @@ BR-02 đã chốt: người dùng có thể muốn hai deck "Unit 5" cho hai gi�
 | BR-07 | active | Card MUST có mặt trước và mặt sau, đều không rỗng sau khi trim. | domain | UC-04 |
 | BR-08 | active | Mặt trước MUST tối đa **60** ký tự và mặt sau MUST tối đa **240** ký tự, đo sau khi trim. | domain | UC-04 |
 | BR-95 | active | Thẻ MAY có ba trường phụ, đều tuỳ chọn: ví dụ, gợi ý và phiên âm. Mỗi trường MUST tối đa 240 ký tự sau khi trim. | domain | UC-04, BR-08 |
-| BR-09 | active | Tạo card MUST đồng thời tạo review state theo scheduler của root deck, với `scheduler_generation` hiện tại của root và `due_at = NULL`. | repository | UC-04, UC-08 |
-| BR-10 | active | Sửa nội dung card MUST NOT đụng đến review state hay review history. | repository | UC-04 |
+| BR-09 | active | Tạo card MUST đồng thời tạo study state theo scheduler của root deck, với `scheduler_generation` hiện tại của root và `due_at = NULL`. | repository | UC-04, UC-08 |
+| BR-10 | active | Sửa nội dung card MUST NOT đụng đến study state hay study answers. | repository | UC-04 |
 
 Card chỉ tồn tại trong deck có `content_type = card` (BR-63), và không bao giờ
 trong root deck (BR-58).
@@ -113,7 +113,7 @@ BR-95 để cả ba trường phụ ở 240 thay vì ba con số riêng. Chúng 
 trợ cùng bậc với mặt sau, và ba ngưỡng khác nhau cho ba ô trông giống nhau là
 thứ phải giải thích mà không mua được gì.
 
-Giá trị khởi tạo của review state theo scheduler:
+Giá trị khởi tạo của study state theo scheduler:
 
 | Scheduler | Khởi tạo |
 |---|---|
@@ -125,13 +125,13 @@ Giá trị khởi tạo của review state theo scheduler:
 | ID | Status | Rule | Enforced by | Related |
 |---|---|---|---|---|
 | BR-11 | active | Root deck MUST chọn một scheduler khi tạo: `eight_box` hoặc `sm2`. MUST NOT có mặc định ngầm bỏ qua bước chọn. | domain + invariant Q11 | AD-06, UC-02 |
-| BR-12 | active | Scheduler, version và config MAY đổi trực tiếp chừng nào root deck chưa có lượt review nào ở generation hiện tại (`first_review_at IS NULL`). | domain | AD-06, UC-03 |
-| BR-13 | active | Sau lượt review `scheduled` đầu tiên, scheduler, version và config MUST bị khoá. Đổi MUST đi qua Reset learning progress (BR-44). | domain | AD-06, UC-03, UC-07 |
-| BR-14 | active | Đổi scheduler khi chưa khoá MUST khởi tạo lại review state của toàn bộ card trong cây theo scheduler mới, trong một transaction. | repository | UC-03 |
-| BR-73 | active | MUST NOT tự động chuyển đổi review state giữa hai scheduler. | domain | AD-06, UC-09 |
+| BR-12 | active | Scheduler, version và config MAY đổi trực tiếp chừng nào root deck chưa có lượt học nào ở generation hiện tại (`first_answered_at IS NULL`). | domain | AD-06, UC-03 |
+| BR-13 | active | Sau lượt học `scheduled` đầu tiên, scheduler, version và config MUST bị khoá. Đổi MUST đi qua Reset learning progress (BR-44). | domain | AD-06, UC-03, UC-07 |
+| BR-14 | active | Đổi scheduler khi chưa khoá MUST khởi tạo lại study state của toàn bộ card trong cây theo scheduler mới, trong một transaction. | repository | UC-03 |
+| BR-73 | active | MUST NOT tự động chuyển đổi study state giữa hai scheduler. | domain | AD-06, UC-09 |
 | BR-74 | active | Di chuyển subtree sang root có scheduler hoặc generation không tương thích MUST bị chặn, hoặc MUST yêu cầu người dùng reset tường minh. | domain | AD-06, UC-09 |
 
-BR-14 dễ bị bỏ sót vì "chưa có review nên không có gì để mất". Nhưng review state
+BR-14 dễ bị bỏ sót vì "chưa có lượt học nên không có gì để mất". Nhưng study state
 đã tồn tại từ lúc tạo card (BR-09), và state của 8-box không dùng được cho SM-2.
 Bỏ bước này để lại card `sm2` với `current_box` và không có `ease_factor`.
 
@@ -252,10 +252,10 @@ và con số suy ra đi theo.
 
 | ID | Status | Rule | Enforced by | Related |
 |---|---|---|---|---|
-| BR-75 | active | `review_history` MUST có cột `review_kind` với đúng hai giá trị: `scheduled` và `relearning`. | db | AD-11 |
-| BR-76 | active | `review_kind` MUST được lưu tường minh tại thời điểm ghi. MUST NOT suy luận bằng cách so sánh trạng thái trước và sau. | repository | AD-11 |
+| BR-75 | active | `study_answers` MUST có cột `kind` với đúng hai giá trị: `scheduled` và `relearning`. | db | AD-11 |
+| BR-76 | active | `kind` MUST được lưu tường minh tại thời điểm ghi. MUST NOT suy luận bằng cách so sánh trạng thái trước và sau. | repository | AD-11 |
 | BR-77 | active | Lượt đánh giá đầu tiên của một card trong một session MUST là `scheduled`. Chỉ lượt `scheduled` MAY cập nhật `current_box`, `ease_factor`, `interval_days` và `due_at`. | repository | UC-05, AD-11 |
-| BR-78 | active | Card quay lại sau `forgotten`/`again` MUST là `relearning`. Lượt `relearning` MUST ghi review history và cập nhật `last_reviewed_at`, nhưng MUST NOT thay đổi `current_box`, `ease_factor`, `interval_days` hay `due_at`. | repository + invariant Q14 | UC-05, AD-11 |
+| BR-78 | active | Card quay lại sau `forgotten`/`again` MUST là `relearning`. Lượt `relearning` MUST ghi study answers và cập nhật `last_answered_at`, nhưng MUST NOT thay đổi `current_box`, `ease_factor`, `interval_days` hay `due_at`. | repository + invariant Q14 | UC-05, AD-11 |
 
 BR-76 đáng nói vì cách suy luận nghe rất hợp lý: "trước và sau giống nhau thì là
 relearning". Nó sai ở đúng một trường hợp và trường hợp đó không hiếm — một lượt
@@ -273,17 +273,17 @@ lịch ngày mai — người dùng vừa quên nó xong đã được cho ngh�
 
 | Cột | Quy tắc |
 |---|---|
-| `review_count` | +1 mỗi lượt `scheduled` (không tính `relearning`) |
+| `answer_count` | +1 mỗi lượt `scheduled` (không tính `relearning`) |
 | `lapse_count` | +1 khi lượt `scheduled` có action `forgotten` hoặc `again` |
-| `last_reviewed_at` | = thời điểm đánh giá, cập nhật ở cả hai loại lượt |
+| `last_answered_at` | = thời điểm đánh giá, cập nhật ở cả hai loại lượt |
 
-### BR-21 · Ghi review history
+### BR-21 · Ghi study answers
 
 **Status:** active · **Enforced by:** repository · **Related:** UC-05, AD-11
 
 Mỗi lượt đánh giá — cả `scheduled` lẫn `relearning` — MUST ghi một dòng vào
-`review_history` gồm `card_id`, `session_id`, `scheduler_type`,
-`scheduler_generation`, `review_kind`, `action`, `reviewed_at`, `next_due_at`, và
+`study_answers` gồm `card_id`, `session_id`, `scheduler_type`,
+`scheduler_generation`, `kind`, `action`, `answered_at`, `next_due_at`, và
 cặp trạng thái trước/sau của scheduler tương ứng.
 
 Ghi cả lượt `relearning` là có chủ đích: nó là dữ liệu thật về việc người dùng
@@ -312,9 +312,9 @@ phải lặp mấy lần mới nhớ — thứ cần để đánh giá chất l�
 | BR-81 | active | Hoàn thành toàn bộ queue MUST cho `completed`, `end_reason` NULL. | repository | UC-05 |
 | BR-82 | active | Người dùng chủ động thoát MUST cho `abandoned`, `end_reason = user_exit`. | repository | UC-05 |
 | BR-83 | active | Reset xảy ra khi session đang mở MUST cho `invalidated`, `end_reason = scheduler_reset`. | repository | UC-07 |
-| BR-84 | active | Session thuộc generation cũ cố ghi review MUST bị từ chối ghi, và MUST chuyển `invalidated`, `end_reason = stale_generation`. | repository | AD-09, UC-05 |
+| BR-84 | active | Session thuộc generation cũ cố ghi lượt học MUST bị từ chối ghi, và MUST chuyển `invalidated`, `end_reason = stale_generation`. | repository | AD-09, UC-05 |
 | BR-85 | active | Lỗi không thể tiếp tục MUST cho `failed`, `end_reason = persistence_error`. | repository | UC-05 |
-| BR-86 | active | Các review đã ghi thành công trước khi session kết thúc bất thường MUST được giữ, ở mọi trạng thái kết thúc. | repository | UC-05 |
+| BR-86 | active | Các lượt học đã ghi thành công trước khi session kết thúc bất thường MUST được giữ, ở mọi trạng thái kết thúc. | repository | UC-05 |
 
 BR-86 là điều phân biệt "session hỏng" với "mất tiến độ". Session chuyển sang
 `failed` hay `invalidated` không được kéo theo việc xoá các lượt đã ghi xong —
@@ -330,7 +330,7 @@ generation thì kết quả đó ghi đè trạng thái vừa được làm mớ
 |---|---|---|---|---|
 | BR-31 | active | Starter deck MUST là template, không phải deck của người dùng; MUST NOT xuất hiện trong danh sách deck và MUST NOT ôn trực tiếp được. | domain | AD-07, UC-01 |
 | BR-32 | active | Template MUST có `template_id` ổn định không đổi giữa các phiên bản app, kèm `version`, `locale`, `title`, `content_source`. | asset | AD-07 |
-| BR-33 | active | Dùng một starter deck MUST tạo bản sao: root deck mới với ID riêng, cây deck con, toàn bộ card, và review state theo scheduler đã chọn. | repository | AD-07, UC-01 |
+| BR-33 | active | Dùng một starter deck MUST tạo bản sao: root deck mới với ID riêng, cây deck con, toàn bộ card, và study state theo scheduler đã chọn. | repository | AD-07, UC-01 |
 | BR-34 | active | Bản sao MUST ghi `source_template_id` và `source_template_version` tại thời điểm sao chép. Template chỉ MAY gợi ý scheduler qua `default_scheduler_type`. | repository | AD-07, UC-01 |
 | BR-35 | active | Sau khi sao chép, bản sao MUST là deck bình thường; MUST NOT có liên kết ghi ngược về template. | domain | AD-07 |
 | BR-36 | active | Nâng version template ở bản app mới MUST NOT ghi đè, sửa hay xoá bất kỳ bản sao nào đã tồn tại. | repository | AD-07, UC-01 |
@@ -353,9 +353,9 @@ BR-87 tồn tại vì dự án chưa có nguồn nội dung từ vựng có bả
 | BR-40 | active | Mỗi root deck MUST có `scheduler_generation`, bắt đầu từ 1, +1 sau mỗi lần reset. | db | AD-09, UC-07 |
 | BR-41 | active | Reset MUST giữ nguyên: deck, toàn bộ cây deck con, flashcard, media, tag và mọi nội dung. | repository | AD-09, UC-07 |
 | BR-42 | active | Reset MUST xoá/đặt lại: active scheduler state của mọi card trong cây và mọi session đang dở. | repository | AD-09, UC-07 |
-| BR-43 | active | Review history cũ MUST được giữ lại, mang generation cũ, và MUST NOT được dùng cho chu kỳ mới. | repository | AD-09, UC-07 |
-| BR-44 | active | Sau reset, `first_review_at` MUST về NULL → scheduler mở khoá. Đây là cơ chế duy nhất để đổi scheduler sau lượt review đầu. | repository | AD-09, UC-07 |
-| BR-45 | active | Card review state, study session và review history MUST đều mang `scheduler_generation`. | db | AD-09 |
+| BR-43 | active | Study answers cũ MUST được giữ lại, mang generation cũ, và MUST NOT được dùng cho chu kỳ mới. | repository | AD-09, UC-07 |
+| BR-44 | active | Sau reset, `first_answered_at` MUST về NULL → scheduler mở khoá. Đây là cơ chế duy nhất để đổi scheduler sau lượt học đầu. | repository | AD-09, UC-07 |
+| BR-45 | active | Card study state, study session và study answers MUST đều mang `scheduler_generation`. | db | AD-09 |
 | BR-46 | active | MUST NOT chấp nhận kết quả từ session thuộc generation cũ; mọi thao tác ghi MUST so generation và từ chối nếu lệch. | repository | AD-09, UC-05 |
 | BR-47 | active | Reset và đổi scheduler MUST chạy trong một Drift transaction duy nhất. | repository | AD-09, UC-07 |
 | BR-48 | active | Bất biến 1: một cây deck MUST có đúng một active scheduler tại một thời điểm. | invariant Q9 | AD-09 |
@@ -374,8 +374,8 @@ Ba rule dưới đây chia phần còn lại, và **không** phát biểu lại 
 | ID | Status | Rule | Enforced by | Related |
 |---|---|---|---|---|
 | BR-89 | active | Trạng thái hiển thị của một thẻ MUST là một trong bốn: `new`, `beginning`, `reviewing`, `mastered`. Nó MUST được suy ra khi đọc và MUST NOT là cột trong DB. | domain | BR-88, UC-04 |
-| BR-90 | active | Thẻ chưa có lượt `scheduled` nào (`review_count = 0`) MUST là `new`, ở cả hai scheduler. | domain | BR-89, BR-20 |
-| BR-91 | active | Với thẻ đã review và chưa "đã thuộc": interval hiện tại dưới 8 ngày MUST là `beginning`, từ 8 ngày trở lên MUST là `reviewing`. Với `eight_box` đó là box 1–3 và box 4–7; với `sm2` là `interval_days` < 8 và 8…127. | domain | BR-89, BR-16, BR-88 |
+| BR-90 | active | Thẻ chưa có lượt `scheduled` nào (`answer_count = 0`) MUST là `new`, ở cả hai scheduler. | domain | BR-89, BR-20 |
+| BR-91 | active | Với thẻ đã học và chưa "đã thuộc": interval hiện tại dưới 8 ngày MUST là `beginning`, từ 8 ngày trở lên MUST là `reviewing`. Với `eight_box` đó là box 1–3 và box 4–7; với `sm2` là `interval_days` < 8 và 8…127. | domain | BR-89, BR-16, BR-88 |
 
 **Mốc 8 ngày không phải số mới.** Nó là interval của box 4 trong BR-16, và thang
 đó là luỹ thừa của hai — 1, 2, 4, **8**, 16, 32, 64, 128 — nên box 1–3 là toàn bộ
@@ -388,7 +388,7 @@ Chọn một ngưỡng riêng cho `sm2` — 7 ngày, hay 30 — sẽ khiến hai
 
 **Bốn trạng thái là nhãn hiển thị, không phải state machine.** Không có chuyển
 tiếp nào được định nghĩa giữa chúng và không có gì lưu chúng lại; chúng là một
-phép đọc `card_review_states` tại thời điểm vẽ. Thẻ đi lùi từ `reviewing` về
+phép đọc `card_study_states` tại thời điểm vẽ. Thẻ đi lùi từ `reviewing` về
 `beginning` sau một lần quên là chuyện bình thường, không phải vi phạm.
 
 ## Cờ và tag
@@ -402,7 +402,7 @@ phép đọc `card_review_states` tại thời điểm vẽ. Thẻ đi lùi từ
 BR-92 và BR-93 nói cùng một điều mà BR-41 đã nói cho reset, nhưng ở chiều khác:
 BR-41 nói reset giữ chúng lại, hai rule này nói *vì sao* — chúng thuộc nội dung,
 cùng phía với `front`/`back`, chứ không thuộc lịch. Đó cũng là lý do cờ nằm trên
-`cards` chứ không trên `card_review_states`.
+`cards` chứ không trên `card_study_states`.
 
 BR-94 là một giới hạn của **giao diện** được nâng thành rule, và nó thừa nhận
 điều đó: hàng thẻ vẽ tag thành một dãy chip, và một dãy không giới hạn sẽ tràn ở
@@ -470,7 +470,7 @@ Root deck được tạo thẳng với `content_type = 'deck'` và giá trị đ
 là cách BR-58 trở thành ràng buộc kiểm tra được bằng cùng một câu query như mọi
 deck khác.
 
-### Card review state
+### Card study state
 
 Trạng thái suy ra từ `due_at`, không lưu cột riêng.
 
@@ -497,8 +497,8 @@ lượt `relearning` không gây chuyển trạng thái nào (BR-78).
 
 | Trạng thái | Điều kiện |
 |---|---|
-| `unlocked` | `first_review_at IS NULL` |
-| `locked` | `first_review_at IS NOT NULL` |
+| `unlocked` | `first_answered_at IS NULL` |
+| `locked` | `first_answered_at IS NOT NULL` |
 
 | From | To | Trigger |
 |---|---|---|
@@ -536,13 +536,13 @@ Trạng thái kết thúc là terminal — không có đường quay lại `in_p
 | Tạo deck con dưới deck đang ở cấp 10 | Chặn trước khi ghi; parent giữ nguyên `content_type` (BR-55, BR-62) |
 | Move khiến cấp sâu nhất sau move vượt 10 | Chặn; không đổi parent, root pointer hay `content_type` của đích (BR-55, BR-71) |
 | Tạo root deck không chọn scheduler | Chặn, lỗi inline (BR-11) |
-| Đổi scheduler khi chưa có review | Cho phép, khởi tạo lại review state toàn cây (BR-14) |
-| Đổi scheduler khi đã có review | Chặn; đề nghị Reset learning progress (BR-13) |
+| Đổi scheduler khi chưa có lượt học | Cho phép, khởi tạo lại study state toàn cây (BR-14) |
+| Đổi scheduler khi đã có lượt học | Chặn; đề nghị Reset learning progress (BR-13) |
 | Mở phiên → reset ở màn khác → quay lại bấm đánh giá | Từ chối ghi; session → `invalidated`/`stale_generation` (BR-84) |
 | Reset khi đang có phiên dở | Session → `invalidated`/`scheduler_reset` trong cùng transaction (BR-83, BR-47) |
 | App bị kill giữa lúc reset | Transaction rollback; giữ nguyên generation và state cũ (BR-47) |
 | Session lỗi ghi không thể tiếp tục | Session → `failed`/`persistence_error`; các lượt đã ghi vẫn giữ (BR-85, BR-86) |
-| Card ở box 8 trả lời `remembered` trong lượt `scheduled` | Vẫn box 8, xếp lịch lại 128 ngày (BR-16). `review_kind` vẫn là `scheduled` dù box không đổi (BR-76) |
+| Card ở box 8 trả lời `remembered` trong lượt `scheduled` | Vẫn box 8, xếp lịch lại 128 ngày (BR-16). `kind` vẫn là `scheduled` dù box không đổi (BR-76) |
 | Ôn phiên trải trên nhiều deck con | Một tập action duy nhất, của root deck (BR-05, BR-30) |
 | Deck rỗng (0 card) | Empty state với hành động phù hợp `content_type`; không vào được phiên ôn |
 | Không card nào đến hạn | Empty state tích cực (BR-29), hiện thời điểm card gần nhất đến hạn |

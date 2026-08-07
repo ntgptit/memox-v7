@@ -7,8 +7,8 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M4.11h |
-| **Last updated** | 2026-08-06 |
+| **Updated by task** | M5.0a (đổi tên Review → Study) |
+| **Last updated** | 2026-08-07 |
 
 Single source of truth for project progress. Update it in the same commit as the
 work it describes. A task is `done` only when it meets the Definition of Done in
@@ -27,9 +27,9 @@ AD / UC (xem `business-rules.md`).
 | M1 · Product definition (Phase 0–1) | **done** | Đặc tả MVP đã frozen: AD-01…11, BR-01…87, UC-01…09, data model đầy đủ |
 | M2 · Project foundation (Phase 2–3, 6) | **done** | Toàn bộ 9 task đóng: M2.1 · M2.1a · M2.1b · M2.2 · M2.2b · M2.3 · M2.4 · M2.5 · M2.6. App build được trên Android (3 flavor cài song song) và Web, l10n en/vi, bootstrap có error boundary, lint + guard đều enforce. Tiếp theo: **M3.1 · Cấu trúc feature-first và ranh giới layer** |
 | M3 · Architecture & design system (Phase 4–5, 7, 12–13) | **done** | Mười hai task đóng: M3.1…M3.6 cộng M3.5a (review color system), M3.5b (áp A2 Quizlet Navy Indigo — 46 role `ColorScheme` khai báo tường minh), M3.5c (visual audit harness), M3.5d (siết tính đúng đắn của audit core), M3.5e (anchor, clip và allowance) và M3.5f (clip hỏi Flutter thay vì đoán). Cây feature-first + guard siết về `fail_on: [error, warning]`, Failure model, Riverpod foundation, design token, hai theme M3, sáu base component kèm 14 golden. Milestone đóng — không quyết định next task |
-| M4 · Router, Database & Content Management (Phase 8, 11, 14) | done | M4.1, M4.1a, M4.2, M4.3, M4.4 **done** — GoRouter tập trung với `MaterialApp.router` và 404 ở `app/fallback/`; MX-VIS-001 ép mọi production screen có strict visual audit; schema v1 toàn bộ trong `.drift`; hai named query dùng chung một định nghĩa "đến hạn"; schema v1 đã dump và commit; cả 14 bất biến chạy trên database thật. M4.4a **done** — sắp xếp lại kế hoạch theo vertical slice. M4.8 **done** — 11 shared component mang prefix `Mx` (5 mới, 6 đổi tên), 26 golden mới, rename không đổi pixel; vòng review UI/UX đóng thêm 4 lỗi accessibility có đo đạc. M4.8a **done** — responsive hardening: `MxContentShell` overflow 135px/167px ở landscape đã đóng, bốn component còn lại đã tự cuộn sẵn; màn rộng chốt giữ kéo căng. M4.8b **done** — compact scale cho màn 320: hàng list 88→80px, padding ngang button 24→12 (bốn action `sm2` từ "Ag" thành "Again"), body/label giữ nguyên cỡ, phát hiện harness test báo màn hình 0×0 từ M3.6. **M4.5, M4.6, M4.7 `descoped` trước khi triển khai** — không dòng code nào từng được viết dưới ba ID đó. M4.8–M4.12 là kế hoạch mới: shared component → Deck/Card domain+data → Deck full-stack → Card full-stack → demo hardening. M4.9 **done** — Deck/Card domain + data vertical: 6 file domain (entity/enum/contract), DAO + 3 mapper + repository impl với transaction thật, `deck.drift` recursive query, constraint conflict → `ConflictFailure`, 78 test mới (49 integration trên SQLite thật + 1 web runtime trên Chrome), cả 14 bất biến pass trên dữ liệu do repository ghi; đồng thời **đóng lỗ hổng web của M4.2**: `driftDatabase` thiếu `web:` options và `drift_worker.js` prebuilt lệch ABI với `sqlite3.wasm` — connection đã sửa, worker compile từ đúng lockfile. M4.9a **done** — giới hạn cây 10 cấp enforce ở `createSubDeck`/`moveDeck` trước mutation, subtree traversal cycle-safe bằng recursive `UNION` (bỏ cap `depth < 64` production), bất biến thứ 15 (deck sâu hơn 10 cấp), và tách `CardRepository`/`CardRepositoryImpl`/`CardDao` khỏi Deck boundary. M4.9b **done** — hoàn tất ownership vật lý: toàn bộ Card domain/data chuyển sang `lib/features/card/`, không import Deck data layer, vẫn giữ một transaction chung cho BR-09/BR-62. **M4.10 `in-progress` — slice 1 xong:** Deck root list thay review placeholder ở route `/`, `rootDecksProvider` nối `watchRootDecks()` vào UI với loading/empty/loaded/error, DI đặt ở `lib/app/di/`, `ReviewPlaceholderScreen` đã xoá, 6 strict visual audit PASS. Auto-retry của Riverpod 3 bị tắt cho provider này vì trong lúc retry state là `AsyncLoading` — một lần đọc lỗi sẽ quay spinner ~13 giây. **M4.10a `done` — quyết định product mới supersede M4.1:** MVP có Bottom Navigation Material 3, `StatefulShellRoute.indexedStack` với hai branch Decks/Review, `AppNavigationShell` + `MxNavigationBar`, `ReviewPlaceholderScreen` khôi phục làm branch 1; chuyển tab giữ branch state (đo bằng số lần subscribe), deep link `/review` mở đúng tab. **M4.10 `done`** — Deck management full-stack hoàn tất trong một PR: root list có aggregate total/due/scheduler bằng **một** query (không N+1, predicate due khớp BR-22 và có parity test với query của Review), create root kèm chọn scheduler bắt buộc, create sub-deck, nested detail `/decks/:deckId` trong Decks branch, rename, delete kèm impact, reset `content_type`, move subtree với lý do từ chối hiển thị; 645 test pass, 16 strict visual audit state PASS. Card creation là handoff **disabled kèm giải thích** sang M4.11, không phải CTA giả. **Blueprint hardening (không phải task riêng, đi kèm M4.10):** `MemoxProviderObserver` luôn log provider failure vì Riverpod 3 retry 10 lần và giữ `AsyncLoading` suốt ~13 giây; `QueryLogInterceptor` log statement + thời gian ở debug build, **không** dùng `driftRuntimeOptions.debugPrint` vì flag đó in cả bound variable tức là nội dung flashcard (AD-08) — có test chứng minh. Đo được trên SQLite thật: đọc trọn 5.000 card mất **37,8 ms**, một trang 50 card mất **1,6 ms**, nên **M4.11 MUST viết `cardsByDeck` có page size ngay từ đầu, dùng keyset chứ không `OFFSET`**. **Tối ưu Deck trước khi clone (đo bằng `EXPLAIN QUERY PLAN` + Stopwatch trên SQLite thật):** ba index một cột đổi thành composite theo thứ tự lọc-rồi-sắp — `idx_cards_deck_created (deck_id, created_at, id)`, `idx_decks_parent_created`, `idx_decks_root_created`. Trước đó **cả năm** query nóng đều kết thúc bằng `USE TEMP B-TREE FOR ORDER BY`; sau đó biến mất ở 4/5 và subquery `total` của `rootDeckSummaries` thành **covering**. Một trang 50 thẻ trong deck 5.000 thẻ: 1193µs → 102µs. `cardsDueForReview` giữ temp B-tree và sẽ giữ mãi — `ORDER BY` của nó bắt đầu bằng biểu thức `due_at IS NOT NULL`, không index nào thoả được. `schemaVersion` **giữ ở 1**: app chưa release (không tag, M8 `todo`), nên một version chưa từng ship không phải lịch sử đáng ghi; sau M8 thì cùng thay đổi này cần v2 + `onUpgrade`. `docs/data-model.md` (frozen) được sửa đúng phần index, có phép của chủ dự án. **Hai tối ưu bị loại kèm số đo:** index `(due_at, card_id)` chỉ giảm 7245µs → 6886µs (~5%) nên không đáng chi phí ghi; projection hẹp cho `allDecks` chỉ mua 0,6ms trong tổng 8ms mà 85% là mapping Dart. **Ghi nhận quan trọng:** production dùng `DriftIsolate` nên SQL chạy ở background isolate — chi phí trên UI thread là **số row** vượt biên isolate rồi map thành object, đó là lý do quyết định pagination keyset ở M4.11 quan trọng hơn index. **Deck chuyển sang layout Clean Architecture lồng (quyết định của chủ dự án, trước khi clone sang Card):** `domain/{entities,repositories,models,usecases,failures}`, `data/{repositories,mappers,datasources,models}`, `presentation/{screens,controllers,states,widgets,providers}` — tên **số nhiều** theo chuẩn ngành. 24 file nguồn + 2 audit companion di chuyển, 52 file rewrite import, codegen sinh lại; 763 test pass không đổi hành vi. **Thu được ngoài dự kiến:** sáu `check_suffix` trong `check_architecture.sh` viết theo tên **số ít** nên trước đây match **0 file** — chúng chạy, không thấy gì để kiểm, và pass. Đã trỏ lại sang tên số nhiều và thêm bốn check; giờ **23 file** được kiểm, fault injection xác nhận file sai suffix bị báo. Bốn thư mục rỗng có `.gitkeep` kèm lý do: `usecases` (repository contract chính là use-case surface), `failures` (failure dùng chung ở `core/error/`), `data/models` (không có DTO — AD-05), `providers` (mọi provider của Deck đều là controller). MX-VIS-001 giữ nguyên mọi segment dưới `presentation`, nên companion chuyển vào `test/visual_audit/screens/features/deck/screens/`. **Tách lý do thất bại thành type, và UC-09 về một chỗ (chủ dự án yêu cầu sau khi chỉ ra `domain/failures/` rỗng là triệu chứng chứ không phải trạng thái đúng):** `Failure.reason` là `Enum?` trên base type — `Enum` vì `core/` không được import feature, và trên base vì `Failure` là `sealed` nên feature **không thể** tự thêm subtype. Trước đó **15 chỗ ném `ConflictFailure` với 15 message khác nhau**, trong khi UI chỉ có `ConflictFailure() => deckConflictMessage` — 15 lý do tới người dùng thành **một câu**, vì lý do bị mã hoá vào chuỗi mà UI bị cấm render. Nay `domain/failures/` chứa `deck_conflict_failure.dart` (8 lý do) và `deck_move_failure.dart` (8 lý do move + hàm rule thuần), presentation match theo *type* của reason nên mỗi lý do có copy ARB riêng (18 key mới, en + vi). **UC-09 từng được viết hai lần** — một bản thuần sau move picker, một bản 8 `ConflictFailure` trong `moveDeck`, **không import lẫn nhau**; một rule (`sourceIsRoot`) chỉ tồn tại ở bản data nên picker không bao giờ thấy được. Nay cả hai gọi `deckMoveRejection(...)` nhận **fact** thay vì nhận cây, vì hai caller gom dữ liệu khác nhau (picker: một query rồi tính trong bộ nhớ; `moveDeck`: query từng mảnh **trong transaction** để write bị từ chối không để lại dấu vết). Guard **không** chuyển lên use case: làm vậy sẽ đẩy phần kiểm ra ngoài transaction và tạo race giữa lúc kiểm và lúc ghi. `check_suffix` thêm `/domain/failures/` → `_failure.dart` (11 check). 775 test pass (+12, trong đó có case 'mọi giá trị enum đều có rule sinh ra nó'). **Chuyển đổi sang Clean Architecture đầy đủ (chủ dự án yêu cầu — không chỉ move file):** thêm tầng **use case** 10 file trong `domain/usecases/`, một cái mỗi interaction, và `presentation/providers/` chứa DI cho chúng. **Validation chuyển từ controller vào use case** — trước đó `DeckEntity.nameProblem` chạy **hai lần**, một ở `presentation/` một ở `data/`, hai bên có thể lệch mà không gì bắt được; giờ chạy một lần ở tầng sở hữu BR-01. Controller chỉ còn double-submit guard, cờ submitting, `ref.mounted`, và map `Failure` sang state per-field — **không đọc repository nữa**. Refusal đi bằng `ValidationFailure.fieldErrors` chứ không phải `Failure.reason`, vì một form sai hai field cùng lúc mà `reason` chỉ giữ một giá trị; key lấy từ `DeckField`, là identifier không phải copy. **Cố ý KHÔNG chuyển vào use case:** BR-55 depth, BR-62 content lock, BR-68 emptiness, và rule move UC-09 — chúng cần cây *tại thời điểm ghi* và chạy trong `runInTransaction`; đặt lên use case là đẩy phần kiểm ra ngoài transaction, tức là race giữa lúc kiểm và lúc ghi. **`data/models/` vẫn rỗng có lý do:** row class Drift sinh ra *chính là* data model và nằm ở `core/database/` vì schema dùng chung; DTO riêng cho từng feature là hình dạng thứ hai cho cùng một row, và AD-05 chưa có wire format nào để mô hình hoá. Hai luật của chính dự án đã sửa có chủ ý: `_provider` thêm vào suffix cho phép của `presentation/`, và `presentation/providers/**` được loại khỏi scope `widget_ui_files` — một file chỉ làm dependency wiring thì đọc repository là đúng định nghĩa của nó. `provider_convention_test.dart` bắt được use-case provider dùng `keepAlive` ngay lúc đang thêm tầng; đã đổi sang `autoDispose`. 784 test pass (+9). **Đồng bộ toàn bộ tài liệu và harness với kiến trúc mới (chủ dự án yêu cầu):** **AD-12** ghi lại quyết định — layout lồng tên số nhiều, tầng use case một cái mỗi interaction, hướng phụ thuộc `presentation → use case → contract ← impl`, cái gì vào use case và cái gì phải ở lại trong transaction, và đánh đổi đã nhận (4 use case read mỏng, đổi lấy tính nhất quán). `CLAUDE.md` thêm sơ đồ thư mục, bảng suffix theo tầng, và nói rõ dòng *"use case chỉ khi có logic thật"* đã bị override — thay vì để hai tài liệu mâu thuẫn. `flutter-architecture/SKILL.md` và `flutter-feature-slice/SKILL.md` sửa hướng dẫn use case cùng cây thư mục; `feature_checklist.md` thêm mục **Layout (AD-12)** và bốn dòng Domain mới; deck README bỏ câu *"there is no use-case layer here"*. **Harness:** `check_suffix` nay nhận nhiều suffix (một folder có thể chấp nhận nhiều vai — `datasources/` nhận cả `_dao` và `_data_source`), thêm check cho `data/datasources`, `data/models`, `presentation/providers`; **14 check phủ 38 file** (trước sweep này: 6 check phủ 0 file). Message của rule 6 sửa lại — nó trỏ vào `core/logging`, một thư mục không tồn tại; nay chỉ sang `dart:developer` log() như hai diagnostic trong `core/` đang dùng. Mọi check mới đều fault-inject để xác nhận đỏ được. **Command/query tách bằng số đo, không bằng phán xét:** `test/app/command_query_separation_test.dart` giữ bốn count — use case đúng **một** method public; command controller chỉ `build`/`submit`/`reset`; input-state notifier một giá trị và tối đa một mutator; không controller/use case nào có `select*`, `search*`, `navigateTo*`, `show{Error,Snack}*`. Command controller được nhận diện bằng **state của nó là gì** (`build` trả `*SubmitState`), không bằng vị trí file — nên `DeckListNow` bị *chặn bởi check thứ ba* thay vì được miễn khỏi check thứ hai. **Check đầu bắt một vi phạm sống ngay lần chạy đầu:** `WatchDeckChildrenUseCase` giữ cả stream children *và* một lần đọc deck; đã tách thành `GetDeckByIdUseCase`, `deckDetail` compose hai cái — compose là việc của controller. **Cả bốn check đã fault-inject, và hai trong số đó pass rỗng lúc mới viết:** một cái có `replaceAll(r'', '/')` thay vì `r'\'` nên mọi path thành rác và `contains('/controllers/')` false với mọi file — thân loop không bao giờ chạy. Cả hai bug vô hình khi codebase còn sạch. 788 test pass (+4). **M4.10b `done` — Deck thành Golden Feature (AD-13):** rà lại Deck như thể nó là feature *mới* và đóng bốn khiếm khuyết mà một lần clone sẽ nhân bản, tất cả đều đang pass mọi test. **BR-01 có ba chủ sở hữu** (controller, repository, và screen tự dẫn lại từ chuỗi thô) → một value object `DeckName` constructor private, contract nhận nó, `Set<Enum> problems` thay `Map<String,String> fieldErrors` mà **cả hai nửa đều sai** (key là chuỗi không gì kiểm, value là copy UI bị cấm render — đó chính là lý do presentation phải tự dẫn lại). **Hai screen dựng read model từ hai query** trong khi comment khẳng định hai fact 'arrive together' → `watchDeckDetail` một `LEFT JOIN`, move picker lấy nguồn từ cùng lần emit; chứng minh bằng **đếm câu SQL** qua `QueryInterceptor` thật, vì không assertion nào về giá trị phân biệt được hai thiết kế (tiêm lại shape cũ: hai test đếm đỏ, chín test hành vi vẫn xanh). **Due count chỉ refresh khi resume**, comment ghi timer chu kỳ 'đã cân nhắc và loại' vì resume bắt cùng boundary — không đúng: ngồi ở danh sách khi card đến hạn thì badge nói 3 mà session phát 4 → `nextDueAt` trong **cùng** statement với các count, một `Timer` một-lần arm theo dữ liệu, `> :now` chặt. **Cập nhật ở deck-golden hardening:** khi emission được xử lý mà đồng hồ đã vượt `nextDueAt` (`delay <= 0`, kể cả bằng đúng `now`) thì trước đây guard chỉ `return` và count có thể đứng yên tới lần resume; nay nó refresh ngay một lần — mở lại query ở `now` mới để card vừa đến hạn được đếm — có guard chống lặp (một stale boundary tối đa một refresh, repository kẹt ở cùng boundary quá khứ không thể quay vòng), và có test cho past/future/`==now`/dispose/no-loop. **`features/` import `app/`** hai chiều → feature khai báo provider ở `di/` kiểu contract, `app/di/repository_bindings.dart` bind, `RouteNames` sang `core/navigation/`. **Clock có một chủ sở hữu:** hai repository impl từng default về `DateTime.now()` — một provider cả cây override được, và một static không gì với tới, mà cái khó với tới là cái thắng trong production; `clock` nay `required`, `lib/features/` không còn `DateTime.now()`. **Harness:** guard command/query chuyển sang **AST** (`package:analyzer`) vì cả hai khiếm khuyết của nó là tính chất của *text* — nó đếm method theo file (nên một file hai notifier đỏ oan) và cấm *chữ* `navigateTo` kể cả trong comment giải thích chính luật đó; AST cho phép phân biệt **ba** loại notifier thay vì hai. Ba guard khác cũng báo sai trên văn xuôi của chính chúng và **đều sửa ở rule**: `deck_card_boundary_test.dart` khớp `'part of'` trong comment nói file này *không* là part of gì; `memox.testing.no_real_clock_in_test` khớp doc comment nêu tên `DateTime.now()`; `common.no_commented_out_code` khớp câu văn gãy dòng `// for this assertion.`. Riverpod pin theo major thực tế trong lock (`>=3.0.0` resolve được nhưng vẫn bị chặn). **CI ra đời** — trước đó không có: `pull_request` + `push main`, format/analyze/generated/architecture/guard/docs/844 test/golden/build web, `flutter-version-file: .fvmrc`, `--no-web-resources-cdn` (hai nợ kỹ thuật đã trả). **Mọi guard giờ in số nó đã quét và coi 0 là lỗi** — việc đó phát hiện `check_architecture.sh` exit **0** khi thiếu `lib/`, tức một guard xanh cho working directory sai. **Ba khiếm khuyết ngoài kế hoạch do chính công việc này tìm ra:** `nextDueAt` về sai timezone (drift đọc `DateTime` thành local; đúng instant sai zone, chỉ lộ vì test mới so instant), lỗ exit-0 nói trên, và ba guard báo sai trên prose. **24 lần fault injection**, ghi trong báo cáo cuối. 844 test pass (+56 từ 788). **M4.10c `done` — Deck UI redesign + hợp nhất hai màn deck-list:** redesign theo reference nhưng giữ nguyên MemoX design system (mọi giá trị resolve về token đã có, `MxPillButton` là shared widget mới duy nhất, filter/sort là transform thuần chứ không phải query thứ hai); rồi khi hai màn **vẫn** khác nhau, hợp nhất `RootDeckListScreen` + `DeckDetailScreen` thành **một** `DeckListScreen(parentDeckId?)`. Nguyên nhân khác biệt không phải styling mà là dữ liệu — `deckDetail` chỉ trả tên deck con — nên thêm recursive CTE `childDeckLevel` để mỗi deck con mang đủ ba fact như deck gốc (tổng subtree, số đến hạn, scheduler resolve qua `root_deck_id`). `rootDeckSummaries` **giữ nguyên** vì root đã có covering index qua `root_deck_id`; cái giá là cùng một con số tính hai cách, nên `deck_level_parity_test.dart` khẳng định `subtree(D) == direct_cards(D) + Σ subtree(con)` ở root, branch, leaf, hai cây, và sau một lần move. 892 test pass, 97 visual audit state PASS. **Strict audit bắt một lỗi tương phản thật:** `primary` trên `surfaceMuted` chỉ 2,31:1 ở dark (sàn 3,0), nhìn mắt thấy ổn — đổi sang cặp `primaryContainer`/`onPrimaryContainer` = 8,96:1. **M4.10d `done` — breadcrumb cho màn hình đệ quy:** `MxBreadcrumb` là shared widget (không domain, không Riverpod, không tự đọc ARB), `DeckPathWidget` là adapter feature-local. Chain ancestor đến từ **cùng một statement** với level (AD-13) nên rename một ancestor đổi cả tiêu đề lẫn breadcrumb trong một frame. Hai shape typed đã thử và bị loại kèm lý do đo được — join làm nhân số dòng theo độ sâu, còn `UNION ALL` thì drift **không** expand `table.**` trong compound select và **không báo lỗi**; cách còn lại là một cột JSON, một lỗ untyped có chủ ý bịt kín ở mapper với decode total. Breadcrumb ẩn ở cấp 1–2 vì ở đó Back và tab Decks đã làm đúng việc đó. 930 test pass. **Footgun ghi lại:** một dấu `;` trong comment `--` của `.drift` cắt statement sớm và chỉ là warning, nên build xanh mà method sinh ra không tồn tại. **M4.10e `done` — bốn ghi nhận review về thị giác, đo trước sửa sau:** border của card ở light chỉ 1,40:1 trong khi dark là 1,82:1 — một cơ chế hai độ mạnh, và đó mới là lý do light nhìn phẳng; `borderSubtleLight` nay là `#BEC0C3` (1,82:1, khớp dark tới hai chữ số thập phân) và **độ lệch giữa hai mode có test chặn** chứ không chỉ có sàn. Card về hai dòng (`46 cards · 5 due · 8 boxes`). Màu và độ đậm chỉ dành cho trạng thái cần hành động. Breadcrumb bỏ bước cuối vì tiêu đề ngay trên đã nói. Bottom nav hai item kéo về giữa bằng giới hạn **tự vô hiệu** khi thêm tab. **Hai kết luận đổi sau khi đo:** giá trị border được đề xuất (`#E5E7EB`) *sáng hơn* cái đang dùng nên sẽ làm tệ hơn, và amber trên nền trắng **không** fail 4,5:1 — nó là 5,41:1, phần đúng của ghi nhận là nhấn mạnh chứ không phải tương phản. 931 test pass, 19 golden cập nhật. **M4.10f `done` — colour-system conformance audit toàn app:** quét bằng AST 112 file / 160 site, resolve theo `ThemeData` đã build, 17 vi phạm có target token cụ thể, không sửa một màu nào. **V1 lớn nhất:** ở light `surface` là `#FFFFFF` không có hue nào — trang có tint còn cái nằm trên trang thì không. **V2/V4 = 0 và đó là kết quả đo.** **Ba điều việc tính toán bác bỏ:** ceiling 1.6:1 của brief báo "too-heavy" ở **cả hai** mode nên nó bất đồng với depth model chứ không bắt regression; ba giá trị đề xuất tự tính bằng tay đều sai, giải lại bằng ràng buộc cho thấy 24° lệch seed của M4.10e là **tránh được**; và fix V1 cho `surface` làm khoảng cách card↔trang tụt 1.090 → 1.064, ghi rõ chứ không giấu. Bổ sung **MX-VIS-002** — 5 quy tắc đúng-hôm-nay vào visual audit, cả 5 đã fault-inject. **Không kiểm chứng được:** `component-map.json` không tồn tại trong repo. 943 test pass. **M4.10g `done` — chủ dự án bác tiền đề "flat by design", fix phần đáng fix:** "app không dùng shadow" chưa bao giờ là luật — không AD, không BR, không test, và `docs/checklist.md` còn yêu cầu Elevation token chưa ai làm; nó chỉ là hai đoạn comment bị hai milestone trích như ràng buộc. Sau quyết định "app cần độ nổi": V6 shadow/scrim từ tiềm ẩn thành lỗi thật (dark `#000000` → `#04040B` suy từ seed), V5 fill/border hết translucent tại điểm vẽ, màn hình lỗi đọc `platformBrightness`. **Viết rule trước, chạy cho đỏ để nó tự liệt kê chỗ mắc lỗi, rồi mới fix.** **Ba lỗi của chính harness do fault-inject phát hiện:** R8 khớp vào comment của chính nó; path chuẩn hoá rỗng nên trên Windows không quét gì; và scanner bỏ sót `Color(0x...)` không có `const` — bản audit M4.10f báo 158 site, thật ra **244**. 946 test pass, 4 golden đổi. **M4.10h `done` — elevation thật:** `AppElevation` là token mà checklist yêu cầu từ đầu và chưa ai làm. Light vẽ shadow, dark không — **đo được**: shadow dark chỉ mua ΔL* 0.26 trong khi bậc surface đã là 7.70, vì trang dark nằm đáy thang lightness. Alpha được **giải ra** chứ không chọn (light 7.62 L* so với dark 7.70). Border light hạ 1.82 → **1.50**, vào trong band 1.6 của brief — nó không còn phải gánh biên một mình. `app_theme_test.dart` đổi từ đo *tương phản border* sang đo **độ nổi của card**, vì luật cũ đúng khi border là cue duy nhất và sai ngay khi có shadow. 946 test pass, 15 golden light đổi. **M4.10i `done` — audit màu sắc về 0 vi phạm:** card light hết trắng thuần (`#FBFBFE`, seed@0.02, hue 240) cùng bốn token trắng khác; màn hình lỗi và khung web dùng token thật thay vì literal; nhãn disabled của action sheet precompute. **Một kết luận của chính agent bị bác:** M4.10g xếp 6 literal ở `error_screen` là "mirror không tránh được" vì file không đọc được `Theme` — sai, `AppColors` là hằng số biên dịch, import thẳng được. **Xung đột hai luật:** tint làm card tối đi nên phá luật ladder ≥3 L* của M3.5b; luật đó là luật của một mode không có cue nào khác, nên light hạ xuống 2.0 còn tổng độ nổi vẫn bị chặn — 7.75 so với 7.70. Thêm **R9** (mọi neutral phải mang hue của seed), đã fault-inject. 954 test pass. ****M4.10j `done` rồi `superseded` bởi M4.10k trong cùng PR** — màn design-system showcase in-app (route debug-only `/dev/design-system`) được dựng, rồi chủ dự án chọn Widgetbook để dễ maintain trước khi merge; màn in-app + cổng route + ngoại lệ l10n test đã gỡ sạch. **M4.10k `done` — Widgetbook catalog:** package `widgetbook/` riêng phụ thuộc `memox` qua path (pubspec app không đổi một dòng), theme addon dùng chính `buildLightTheme()`/`buildDarkTheme()`, 3 trang token đọc ngược từ theme đang chạy + 11 component `Mx*` mỗi cái một playground knobs, viewport có case Compact 320×568 của M4.8b; font copy vào catalog vì font khai báo trong package bị prefix `packages/<pkg>/` trong khi theme gọi tên trần; `ci.yml` thêm `pub get` lồng (root analyze tạo context cho package lồng — thiếu dep là 117 lỗi, đo bằng tái hiện) và smoke test catalog. **M4.10l `done` — backfill #57 vào catalog:** category Screens với `DeckListScreen` mount nguyên màn qua `ProviderScope` fake contract, knob 6 scenario, `GoRouter` mini trong use-case nên drill-down thật ngay trong khung catalog; `MxPillButton` playground; fake resolve scheduler qua root (BR-06) — chính catalog lộ lỗi "Eight boxes trong cây sm2" của bản fake đầu; khi #58 (breadcrumb) merge, fake dựng `ancestors` từ chuỗi id nên breadcrumb bấm được trong catalog, và `MxBreadcrumb` có playground knob depth 2–10. M4.10m `done` — giành lại phần Material tự quyết:** bảy nhóm màu framework đang vẽ mà app chưa đặt tên nay do app khai báo — barrier (dialog + sheet), progress, tooltip, text selection, divider, scrollbar. Barrier từ `Colors.black54` xám thuần sang suy từ `scrim`. **Lỗ hổng có hệ thống:** audit quét `lib/` nên màu tồn tại như mặc định framework thì vô hình với nó — đúng mục "Not verified" của M4.10f. **Một lỗi có sẵn lộ ra:** spinner dùng `primary` (mặc định Material) chỉ đạt **2.81:1** ở dark, dưới sàn 3.0; nay dùng `focusRing` (5.36 / 7.41). **Một hướng đã bỏ kèm lý do:** mở strict audit sang overlay cho 6 blocking failure toàn là chữ dưới barrier — auditor đúng nhưng sai chủ thể; thay bằng test giá trị ở tầng theme. 959 test pass. **M4.10n `done` — nâng shared widget:** icon action sheet thôi cạnh tranh với nhãn của chính nó, `MxErrorState` dùng nút chính khớp `MxEmptyState`. **Hai trong bốn nhận định của agent không đứng vững và đã báo lại thay vì sửa bừa:** input dùng `md` còn card dùng `lg` — một hệ nhất quán chứ không bất nhất; empty state đã là 16/8/24 tức là **không** đều. Cả hai là đọc ảnh nén rồi suy ra. **Một "lỗi component" hóa ra là lỗi của tấm ảnh:** `MxListTile` có đúng một caller là move-deck sheet, mà sheet là `surface`; specimen lại chụp nó trên `Scaffold` trống. Sửa ảnh, không thêm capability không caller. 959 test pass. **M4.10o `done` — AD-14 chốt hệ màu và chiều sâu.** Seed là nguồn của mọi trung tính; mỗi role một hue qua một bộ sinh; border lấy hue từ chủ của thứ nó bọc; **chiều sâu là mục tiêu đo được chứ không phải cơ chế cố định** — light 7.75 L* từ bậc surface + shadow, dark 7.70 L* từ bậc surface + border, và dark không vẽ shadow vì đo được chứ không vì thẩm mỹ. Ghi cả bốn phương án đã loại kèm milestone loại chúng. Không đổi dòng code nào. **Lý do tồn tại:** hai đoạn comment từng bị hai milestone đọc thành luật. **M4.10p `done` — token Flutter theo design system.** Chủ dự án đưa design system từ claude.ai/design về `design_system/` và chốt **`tokens/*.css` là chuẩn cho giá trị token**; Dart lệch thì Dart sửa. Mọi token số đã khớp sẵn; 11/40 token màu lệch và cả 11 lấy theo CSS. **Audit bắt được một lỗi thật:** `successLight` mới làm nhãn 14px tụt xuống 4.30:1 trên `secondaryContainer` — lời giải nằm trong chính design, `VerdictAction` của nó giữ nền trung tính đúng vì lý do đó. **Mâu thuẫn là của design:** hex làm `warning` to nhất ở light trong khi readme của nó viết "danger carries the most saturation". 14 golden đổi, 959 test pass. **M4.10q `in progress` — parity checklist với design system.** 77 dòng ghép từng artefact, 33 đã review, 12 finding, **sửa 11**. Lỗi thật: `mx_loading_state.dart` ghi đè chính cái theme M4.10j viết ra để tránh spinner 2.81:1. Breadcrumb nay gập được ở giữa (BR-55 cho 10 cấp), `MxContentShell` có `subheader` và hairline theo scroll, nav bar có hairline trên, hover thôi rơi về mặc định Material. **Bỏ elevation của Material:** AD-14 quy định chiều sâu chỉ một cơ chế, nhận thêm `elevation` là đổi luật đo được lấy luật không đo được. 959 test pass. Còn 44 dòng. **M4.10r `done` — BR-88 và `MxProgressBar`.** Nửa `eight_box` đã có sẵn trong BR-16 từ trước; BR-88 nâng nó thành rule có ID và mở sang `sm2` với `interval_days >= 128` — khớp interval của box 8, không phải 21 ngày theo quy ước Anki. `learnedCardCount` về **cùng một statement** với hai count kia (AD-13). Hai token `--color-progress-*` thôi bị hoãn vì `MxProgressBar` là caller mà M4.10p bảo còn thiếu. 973 test pass. **M4.10s `done` — deck card theo đúng design.** Thẻ phẳng + hairline, vùng mở là target riêng, due tách khỏi meta line thành chip ở chân thẻ, ba trạng thái chân thẻ, well chuyển sang trung tính khi deck đã thuộc hết. **Chip due của design trượt WCAG ở light (3.12:1)** — mâu thuẫn thứ tư của design; em giữ nền của nó và suy ra màu chữ nó thiếu, 6.38:1, cùng hue trong 1.2°. **Không làm nút "Study"** vì M5 chưa có session để bấm sang — một control chết còn tệ hơn thiếu control. 973 test pass, đã render và xem cả hai mode. **M4.10t `done` — level summary panel.** Con số đến hạn + câu nối tiếp + thanh tiến độ của cả cấp, **không đọc thêm lần nào**: số của child là cả subtree, subtree anh em rời nhau, nên cộng trong bộ nhớ ra đúng tổng và panel không bao giờ lệch thời điểm với list. "Xong" thay cho số 0 (BR-29). **Streak và nút Start studying cố ý vắng** — cả hai cần M5, và một streak luôn bằng 0 tệ hơn không có streak. 973 test pass. **M4.10u `done` — đóng nốt 77 dòng parity checklist.** 47 match, 14 đã sửa, 8 n/a, 4 chặn ở M5, 4 lệch có chủ đích. Ba chỗ sửa lần này: **A16** Dart không có token easing và chỗ duy nhất dùng curve viết `Curves.decelerate` — preset đó là `(0,0,0.2,1)` còn design là `(0,0,0,1)`; **A7** tracking 1.1 là literal; **D3** danh sách chưa có tiêu đề "Your decks"/"Sub-decks". **Sáu chỗ design tự mâu thuẫn** — kết quả giá trị nhất của cả đợt: "theo JSX" không áp được mà không đọc. 973 test pass. **M4.10v `done` — số deck con và căn hàng tiêu đề.** Đối chiếu ảnh render của design kit, hai chỗ lệch nhìn thấy được đã đóng: meta line mở đầu bằng `N deck con` (**đếm con trực tiếp**, ngược với hai count kia đếm cả subtree), và hai pill dạt về cuối hàng tiêu đề. **`Row` + `Expanded` tràn ở 320 + textScaler 2.0** — hai pill cộng lại đã rộng hơn màn hình khi chữ gấp đôi; `Wrap` lồng `Wrap` làm được cả hai. 973 test pass. **M4.10w `done` — golden render ở đúng mật độ máy thật.** Trước đây mọi golden render ở DPR 1, nên màn 420×1040 logic ra ảnh 420×1040 pixel — bằng một phần ba máy thật, và đọc review một tấm như vậy là đoán xem cạnh sai hay chỉ thiếu mẫu. **DPR 3 là con số suy ra**: mật độ của hai máy design system dựng khung kit. **Layout không đổi gì** — logic = physical / dpr — nên mọi assertion rect nguyên vẹn. 646 KB → 2.27 MB, 3.5× chứ không phải 9× vì UI phẳng nén tốt. 973 test pass. **M4.10x `done` — tìm kiếm toàn subtree.** Mảnh cuối của design đã dựng, **không query mới và không đổi contract**: use case đọc `watchAllDecks()` rồi khoanh phạm vi và dựng đường dẫn trong bộ nhớ, đúng tiền lệ move-target picker. **Ba lỗi thật chỉ test bắt được:** hai mutator trên một input-state notifier, ô search cao 20px dưới sàn 48, và chữ dính đỉnh pill vì `TextField` không được bảo `expands`. **`AppBar.bottom` là sai công cụ cho subheader** — nó bắt khai báo chiều cao trước, mà chiều cao đó phụ thuộc cỡ chữ. 28 finder hỏng vì đúng một lý do, sửa bằng một finder dùng chung. 978 test pass. **M4.10y `done` — nút đóng panel tổng kết.** Mảnh cuối của design không bị chặn bởi M5 đã đóng. **Không khoá theo cấp**: lý do design cho phép ẩn là một tâm trạng chứ không phải một chỗ, nên ẩn ở cấp gốc rồi thấy nó quay lại sau hai lần chạm là không được lắng nghe. **Luôn có thứ gì đó ở chỗ đó** — một dòng chữ thay chỗ và đưa nó về, và test đi trọn vòng chứ không dừng ở "đã biến mất". 979 test pass. **M4.10z `done` — ô search: căn dòng và focus.** Hai chỗ lệch so với design kit đã đóng. **Phép đo đầu tiên của em sai:** golden chụp cả màn chứ không phải riêng pill, nên mọi cửa sổ quét pixel rơi vào nền trang — số liệu thuyết phục mà vô nghĩa; render pill trên nền phẳng rồi nhìn mới thấy chữ cao hơn dòng icon. Nguyên nhân là hỏi `InputDecoration.constraints` cho chiều cao 48: nó nới hộp và để chữ dính trần. Focus nay đổi nền + viền mà không đổi kích thước; viền vẽ bằng màu nền thay vì trong suốt vì **alpha 0 không phải token** và audit chặn đúng. 985 test pass. M4.11 **done** (11 lát + recursive review). M4.11a **done** — fold Unicode cho search thẻ (schema v3): bốn lệnh bàn giao đã chạy thật trên máy có toolchain, snapshot v3 đã commit, và lệnh thứ tư lộ ra bốn chỗ khác còn chốt cứng "schema là v2" cộng một test card đỏ sẵn từ #121 — tất cả đã đóng, `flutter test` 1367/1367 pass, `check_drift.sh` 0 error. M4.11b…M4.11f **done** — 60/60 IT scenario chạy trên emulator thật; bốn vòng sửa hiển thị của card list (gutter đôi, pill quá rộng, `Due` tách hẳn khỏi `New` ở tầng query, badge `now` thôi nói thay cho thẻ chưa có lịch); và M4.11f đưa nhãn chip khỏi weight của button. M4.11g cho màn deck bộ ảnh render thật đầu tiên, và đưa review render về đúng mật độ M4.10w đã chốt; M4.11h gỡ bản dựng tay của màn deck khỏi `design_preview`. M4.12a…M4.12d **done** — starter template có seed idempotent; Playwright E2E chạy trên Flutter Web ở mobile viewport; 15 bất biến chạy sau **từng bước** của luồng bắt buộc và báo cáo demo flow kèm ảnh từng bước; và "design parity dưới 3%" thành một cổng chạy được — đo bằng tỉ lệ `drift` còn mở trong parity checklist (**1/80 = 1,25%**), vì so pixel giữa Chrome và Skia có một sàn không parity nào kéo xuống được. Cùng lúc phát hiện chín dòng checklist vẫn ghi `drift` sau khi code đã sửa xong từ ba milestone trước — bảy dòng đóng, hai dòng vốn là phân kỳ cố ý, một dòng thật (F15) được giữ mở có lý do. **86/86 task M4 đóng; M5 đủ điều kiện bắt đầu.** **Phase 10 (networking) hoãn** — AD-01, AD-05 |
-| M5 · Review vertical slice — UC-05 (Phase 14) | todo | Bắt đầu **sau M4.12**. Không còn là vertical slice đầu tiên — Deck/Card CRUD đã hoàn thành trong M4.8–M4.12 và M5 không triển khai lại. Review MUST NOT bắt đầu khi M4.12 chưa `done` |
-| M6 · Test suite (Phase 15) | todo | Chạy song song **từ M4.8 trở đi**, không đợi tới sau Review |
+| M4 · Router, Database & Content Management (Phase 8, 11, 14) | done | M4.1, M4.1a, M4.2, M4.3, M4.4 **done** — GoRouter tập trung với `MaterialApp.router` và 404 ở `app/fallback/`; MX-VIS-001 ép mọi production screen có strict visual audit; schema v1 toàn bộ trong `.drift`; hai named query dùng chung một định nghĩa "đến hạn"; schema v1 đã dump và commit; cả 14 bất biến chạy trên database thật. M4.4a **done** — sắp xếp lại kế hoạch theo vertical slice. M4.8 **done** — 11 shared component mang prefix `Mx` (5 mới, 6 đổi tên), 26 golden mới, rename không đổi pixel; vòng review UI/UX đóng thêm 4 lỗi accessibility có đo đạc. M4.8a **done** — responsive hardening: `MxContentShell` overflow 135px/167px ở landscape đã đóng, bốn component còn lại đã tự cuộn sẵn; màn rộng chốt giữ kéo căng. M4.8b **done** — compact scale cho màn 320: hàng list 88→80px, padding ngang button 24→12 (bốn action `sm2` từ "Ag" thành "Again"), body/label giữ nguyên cỡ, phát hiện harness test báo màn hình 0×0 từ M3.6. **M4.5, M4.6, M4.7 `descoped` trước khi triển khai** — không dòng code nào từng được viết dưới ba ID đó. M4.8–M4.12 là kế hoạch mới: shared component → Deck/Card domain+data → Deck full-stack → Card full-stack → demo hardening. M4.9 **done** — Deck/Card domain + data vertical: 6 file domain (entity/enum/contract), DAO + 3 mapper + repository impl với transaction thật, `deck.drift` recursive query, constraint conflict → `ConflictFailure`, 78 test mới (49 integration trên SQLite thật + 1 web runtime trên Chrome), cả 14 bất biến pass trên dữ liệu do repository ghi; đồng thời **đóng lỗ hổng web của M4.2**: `driftDatabase` thiếu `web:` options và `drift_worker.js` prebuilt lệch ABI với `sqlite3.wasm` — connection đã sửa, worker compile từ đúng lockfile. M4.9a **done** — giới hạn cây 10 cấp enforce ở `createSubDeck`/`moveDeck` trước mutation, subtree traversal cycle-safe bằng recursive `UNION` (bỏ cap `depth < 64` production), bất biến thứ 15 (deck sâu hơn 10 cấp), và tách `CardRepository`/`CardRepositoryImpl`/`CardDao` khỏi Deck boundary. M4.9b **done** — hoàn tất ownership vật lý: toàn bộ Card domain/data chuyển sang `lib/features/card/`, không import Deck data layer, vẫn giữ một transaction chung cho BR-09/BR-62. **M4.10 `in-progress` — slice 1 xong:** Deck root list thay study placeholder ở route `/`, `rootDecksProvider` nối `watchRootDecks()` vào UI với loading/empty/loaded/error, DI đặt ở `lib/app/di/`, `StudyPlaceholderScreen` đã xoá, 6 strict visual audit PASS. Auto-retry của Riverpod 3 bị tắt cho provider này vì trong lúc retry state là `AsyncLoading` — một lần đọc lỗi sẽ quay spinner ~13 giây. **M4.10a `done` — quyết định product mới supersede M4.1:** MVP có Bottom Navigation Material 3, `StatefulShellRoute.indexedStack` với hai branch Decks/Study, `AppNavigationShell` + `MxNavigationBar`, `StudyPlaceholderScreen` khôi phục làm branch 1; chuyển tab giữ branch state (đo bằng số lần subscribe), deep link `/study` mở đúng tab. **M4.10 `done`** — Deck management full-stack hoàn tất trong một PR: root list có aggregate total/due/scheduler bằng **một** query (không N+1, predicate due khớp BR-22 và có parity test với query của Study), create root kèm chọn scheduler bắt buộc, create sub-deck, nested detail `/decks/:deckId` trong Decks branch, rename, delete kèm impact, reset `content_type`, move subtree với lý do từ chối hiển thị; 645 test pass, 16 strict visual audit state PASS. Card creation là handoff **disabled kèm giải thích** sang M4.11, không phải CTA giả. **Blueprint hardening (không phải task riêng, đi kèm M4.10):** `MemoxProviderObserver` luôn log provider failure vì Riverpod 3 retry 10 lần và giữ `AsyncLoading` suốt ~13 giây; `QueryLogInterceptor` log statement + thời gian ở debug build, **không** dùng `driftRuntimeOptions.debugPrint` vì flag đó in cả bound variable tức là nội dung flashcard (AD-08) — có test chứng minh. Đo được trên SQLite thật: đọc trọn 5.000 card mất **37,8 ms**, một trang 50 card mất **1,6 ms**, nên **M4.11 MUST viết `cardsByDeck` có page size ngay từ đầu, dùng keyset chứ không `OFFSET`**. **Tối ưu Deck trước khi clone (đo bằng `EXPLAIN QUERY PLAN` + Stopwatch trên SQLite thật):** ba index một cột đổi thành composite theo thứ tự lọc-rồi-sắp — `idx_cards_deck_created (deck_id, created_at, id)`, `idx_decks_parent_created`, `idx_decks_root_created`. Trước đó **cả năm** query nóng đều kết thúc bằng `USE TEMP B-TREE FOR ORDER BY`; sau đó biến mất ở 4/5 và subquery `total` của `rootDeckSummaries` thành **covering**. Một trang 50 thẻ trong deck 5.000 thẻ: 1193µs → 102µs. `cardsDueForStudy` giữ temp B-tree và sẽ giữ mãi — `ORDER BY` của nó bắt đầu bằng biểu thức `due_at IS NOT NULL`, không index nào thoả được. `schemaVersion` **giữ ở 1**: app chưa release (không tag, M8 `todo`), nên một version chưa từng ship không phải lịch sử đáng ghi; sau M8 thì cùng thay đổi này cần v2 + `onUpgrade`. `docs/data-model.md` (frozen) được sửa đúng phần index, có phép của chủ dự án. **Hai tối ưu bị loại kèm số đo:** index `(due_at, card_id)` chỉ giảm 7245µs → 6886µs (~5%) nên không đáng chi phí ghi; projection hẹp cho `allDecks` chỉ mua 0,6ms trong tổng 8ms mà 85% là mapping Dart. **Ghi nhận quan trọng:** production dùng `DriftIsolate` nên SQL chạy ở background isolate — chi phí trên UI thread là **số row** vượt biên isolate rồi map thành object, đó là lý do quyết định pagination keyset ở M4.11 quan trọng hơn index. **Deck chuyển sang layout Clean Architecture lồng (quyết định của chủ dự án, trước khi clone sang Card):** `domain/{entities,repositories,models,usecases,failures}`, `data/{repositories,mappers,datasources,models}`, `presentation/{screens,controllers,states,widgets,providers}` — tên **số nhiều** theo chuẩn ngành. 24 file nguồn + 2 audit companion di chuyển, 52 file rewrite import, codegen sinh lại; 763 test pass không đổi hành vi. **Thu được ngoài dự kiến:** sáu `check_suffix` trong `check_architecture.sh` viết theo tên **số ít** nên trước đây match **0 file** — chúng chạy, không thấy gì để kiểm, và pass. Đã trỏ lại sang tên số nhiều và thêm bốn check; giờ **23 file** được kiểm, fault injection xác nhận file sai suffix bị báo. Bốn thư mục rỗng có `.gitkeep` kèm lý do: `usecases` (repository contract chính là use-case surface), `failures` (failure dùng chung ở `core/error/`), `data/models` (không có DTO — AD-05), `providers` (mọi provider của Deck đều là controller). MX-VIS-001 giữ nguyên mọi segment dưới `presentation`, nên companion chuyển vào `test/visual_audit/screens/features/deck/screens/`. **Tách lý do thất bại thành type, và UC-09 về một chỗ (chủ dự án yêu cầu sau khi chỉ ra `domain/failures/` rỗng là triệu chứng chứ không phải trạng thái đúng):** `Failure.reason` là `Enum?` trên base type — `Enum` vì `core/` không được import feature, và trên base vì `Failure` là `sealed` nên feature **không thể** tự thêm subtype. Trước đó **15 chỗ ném `ConflictFailure` với 15 message khác nhau**, trong khi UI chỉ có `ConflictFailure() => deckConflictMessage` — 15 lý do tới người dùng thành **một câu**, vì lý do bị mã hoá vào chuỗi mà UI bị cấm render. Nay `domain/failures/` chứa `deck_conflict_failure.dart` (8 lý do) và `deck_move_failure.dart` (8 lý do move + hàm rule thuần), presentation match theo *type* của reason nên mỗi lý do có copy ARB riêng (18 key mới, en + vi). **UC-09 từng được viết hai lần** — một bản thuần sau move picker, một bản 8 `ConflictFailure` trong `moveDeck`, **không import lẫn nhau**; một rule (`sourceIsRoot`) chỉ tồn tại ở bản data nên picker không bao giờ thấy được. Nay cả hai gọi `deckMoveRejection(...)` nhận **fact** thay vì nhận cây, vì hai caller gom dữ liệu khác nhau (picker: một query rồi tính trong bộ nhớ; `moveDeck`: query từng mảnh **trong transaction** để write bị từ chối không để lại dấu vết). Guard **không** chuyển lên use case: làm vậy sẽ đẩy phần kiểm ra ngoài transaction và tạo race giữa lúc kiểm và lúc ghi. `check_suffix` thêm `/domain/failures/` → `_failure.dart` (11 check). 775 test pass (+12, trong đó có case 'mọi giá trị enum đều có rule sinh ra nó'). **Chuyển đổi sang Clean Architecture đầy đủ (chủ dự án yêu cầu — không chỉ move file):** thêm tầng **use case** 10 file trong `domain/usecases/`, một cái mỗi interaction, và `presentation/providers/` chứa DI cho chúng. **Validation chuyển từ controller vào use case** — trước đó `DeckEntity.nameProblem` chạy **hai lần**, một ở `presentation/` một ở `data/`, hai bên có thể lệch mà không gì bắt được; giờ chạy một lần ở tầng sở hữu BR-01. Controller chỉ còn double-submit guard, cờ submitting, `ref.mounted`, và map `Failure` sang state per-field — **không đọc repository nữa**. Refusal đi bằng `ValidationFailure.fieldErrors` chứ không phải `Failure.reason`, vì một form sai hai field cùng lúc mà `reason` chỉ giữ một giá trị; key lấy từ `DeckField`, là identifier không phải copy. **Cố ý KHÔNG chuyển vào use case:** BR-55 depth, BR-62 content lock, BR-68 emptiness, và rule move UC-09 — chúng cần cây *tại thời điểm ghi* và chạy trong `runInTransaction`; đặt lên use case là đẩy phần kiểm ra ngoài transaction, tức là race giữa lúc kiểm và lúc ghi. **`data/models/` vẫn rỗng có lý do:** row class Drift sinh ra *chính là* data model và nằm ở `core/database/` vì schema dùng chung; DTO riêng cho từng feature là hình dạng thứ hai cho cùng một row, và AD-05 chưa có wire format nào để mô hình hoá. Hai luật của chính dự án đã sửa có chủ ý: `_provider` thêm vào suffix cho phép của `presentation/`, và `presentation/providers/**` được loại khỏi scope `widget_ui_files` — một file chỉ làm dependency wiring thì đọc repository là đúng định nghĩa của nó. `provider_convention_test.dart` bắt được use-case provider dùng `keepAlive` ngay lúc đang thêm tầng; đã đổi sang `autoDispose`. 784 test pass (+9). **Đồng bộ toàn bộ tài liệu và harness với kiến trúc mới (chủ dự án yêu cầu):** **AD-12** ghi lại quyết định — layout lồng tên số nhiều, tầng use case một cái mỗi interaction, hướng phụ thuộc `presentation → use case → contract ← impl`, cái gì vào use case và cái gì phải ở lại trong transaction, và đánh đổi đã nhận (4 use case read mỏng, đổi lấy tính nhất quán). `CLAUDE.md` thêm sơ đồ thư mục, bảng suffix theo tầng, và nói rõ dòng *"use case chỉ khi có logic thật"* đã bị override — thay vì để hai tài liệu mâu thuẫn. `flutter-architecture/SKILL.md` và `flutter-feature-slice/SKILL.md` sửa hướng dẫn use case cùng cây thư mục; `feature_checklist.md` thêm mục **Layout (AD-12)** và bốn dòng Domain mới; deck README bỏ câu *"there is no use-case layer here"*. **Harness:** `check_suffix` nay nhận nhiều suffix (một folder có thể chấp nhận nhiều vai — `datasources/` nhận cả `_dao` và `_data_source`), thêm check cho `data/datasources`, `data/models`, `presentation/providers`; **14 check phủ 38 file** (trước sweep này: 6 check phủ 0 file). Message của rule 6 sửa lại — nó trỏ vào `core/logging`, một thư mục không tồn tại; nay chỉ sang `dart:developer` log() như hai diagnostic trong `core/` đang dùng. Mọi check mới đều fault-inject để xác nhận đỏ được. **Command/query tách bằng số đo, không bằng phán xét:** `test/app/command_query_separation_test.dart` giữ bốn count — use case đúng **một** method public; command controller chỉ `build`/`submit`/`reset`; input-state notifier một giá trị và tối đa một mutator; không controller/use case nào có `select*`, `search*`, `navigateTo*`, `show{Error,Snack}*`. Command controller được nhận diện bằng **state của nó là gì** (`build` trả `*SubmitState`), không bằng vị trí file — nên `DeckListNow` bị *chặn bởi check thứ ba* thay vì được miễn khỏi check thứ hai. **Check đầu bắt một vi phạm sống ngay lần chạy đầu:** `WatchDeckChildrenUseCase` giữ cả stream children *và* một lần đọc deck; đã tách thành `GetDeckByIdUseCase`, `deckDetail` compose hai cái — compose là việc của controller. **Cả bốn check đã fault-inject, và hai trong số đó pass rỗng lúc mới viết:** một cái có `replaceAll(r'', '/')` thay vì `r'\'` nên mọi path thành rác và `contains('/controllers/')` false với mọi file — thân loop không bao giờ chạy. Cả hai bug vô hình khi codebase còn sạch. 788 test pass (+4). **M4.10b `done` — Deck thành Golden Feature (AD-13):** rà lại Deck như thể nó là feature *mới* và đóng bốn khiếm khuyết mà một lần clone sẽ nhân bản, tất cả đều đang pass mọi test. **BR-01 có ba chủ sở hữu** (controller, repository, và screen tự dẫn lại từ chuỗi thô) → một value object `DeckName` constructor private, contract nhận nó, `Set<Enum> problems` thay `Map<String,String> fieldErrors` mà **cả hai nửa đều sai** (key là chuỗi không gì kiểm, value là copy UI bị cấm render — đó chính là lý do presentation phải tự dẫn lại). **Hai screen dựng read model từ hai query** trong khi comment khẳng định hai fact 'arrive together' → `watchDeckDetail` một `LEFT JOIN`, move picker lấy nguồn từ cùng lần emit; chứng minh bằng **đếm câu SQL** qua `QueryInterceptor` thật, vì không assertion nào về giá trị phân biệt được hai thiết kế (tiêm lại shape cũ: hai test đếm đỏ, chín test hành vi vẫn xanh). **Due count chỉ refresh khi resume**, comment ghi timer chu kỳ 'đã cân nhắc và loại' vì resume bắt cùng boundary — không đúng: ngồi ở danh sách khi card đến hạn thì badge nói 3 mà session phát 4 → `nextDueAt` trong **cùng** statement với các count, một `Timer` một-lần arm theo dữ liệu, `> :now` chặt. **Cập nhật ở deck-golden hardening:** khi emission được xử lý mà đồng hồ đã vượt `nextDueAt` (`delay <= 0`, kể cả bằng đúng `now`) thì trước đây guard chỉ `return` và count có thể đứng yên tới lần resume; nay nó refresh ngay một lần — mở lại query ở `now` mới để card vừa đến hạn được đếm — có guard chống lặp (một stale boundary tối đa một refresh, repository kẹt ở cùng boundary quá khứ không thể quay vòng), và có test cho past/future/`==now`/dispose/no-loop. **`features/` import `app/`** hai chiều → feature khai báo provider ở `di/` kiểu contract, `app/di/repository_bindings.dart` bind, `RouteNames` sang `core/navigation/`. **Clock có một chủ sở hữu:** hai repository impl từng default về `DateTime.now()` — một provider cả cây override được, và một static không gì với tới, mà cái khó với tới là cái thắng trong production; `clock` nay `required`, `lib/features/` không còn `DateTime.now()`. **Harness:** guard command/query chuyển sang **AST** (`package:analyzer`) vì cả hai khiếm khuyết của nó là tính chất của *text* — nó đếm method theo file (nên một file hai notifier đỏ oan) và cấm *chữ* `navigateTo` kể cả trong comment giải thích chính luật đó; AST cho phép phân biệt **ba** loại notifier thay vì hai. Ba guard khác cũng báo sai trên văn xuôi của chính chúng và **đều sửa ở rule**: `deck_card_boundary_test.dart` khớp `'part of'` trong comment nói file này *không* là part of gì; `memox.testing.no_real_clock_in_test` khớp doc comment nêu tên `DateTime.now()`; `common.no_commented_out_code` khớp câu văn gãy dòng `// for this assertion.`. Riverpod pin theo major thực tế trong lock (`>=3.0.0` resolve được nhưng vẫn bị chặn). **CI ra đời** — trước đó không có: `pull_request` + `push main`, format/analyze/generated/architecture/guard/docs/844 test/golden/build web, `flutter-version-file: .fvmrc`, `--no-web-resources-cdn` (hai nợ kỹ thuật đã trả). **Mọi guard giờ in số nó đã quét và coi 0 là lỗi** — việc đó phát hiện `check_architecture.sh` exit **0** khi thiếu `lib/`, tức một guard xanh cho working directory sai. **Ba khiếm khuyết ngoài kế hoạch do chính công việc này tìm ra:** `nextDueAt` về sai timezone (drift đọc `DateTime` thành local; đúng instant sai zone, chỉ lộ vì test mới so instant), lỗ exit-0 nói trên, và ba guard báo sai trên prose. **24 lần fault injection**, ghi trong báo cáo cuối. 844 test pass (+56 từ 788). **M4.10c `done` — Deck UI redesign + hợp nhất hai màn deck-list:** redesign theo reference nhưng giữ nguyên MemoX design system (mọi giá trị resolve về token đã có, `MxPillButton` là shared widget mới duy nhất, filter/sort là transform thuần chứ không phải query thứ hai); rồi khi hai màn **vẫn** khác nhau, hợp nhất `RootDeckListScreen` + `DeckDetailScreen` thành **một** `DeckListScreen(parentDeckId?)`. Nguyên nhân khác biệt không phải styling mà là dữ liệu — `deckDetail` chỉ trả tên deck con — nên thêm recursive CTE `childDeckLevel` để mỗi deck con mang đủ ba fact như deck gốc (tổng subtree, số đến hạn, scheduler resolve qua `root_deck_id`). `rootDeckSummaries` **giữ nguyên** vì root đã có covering index qua `root_deck_id`; cái giá là cùng một con số tính hai cách, nên `deck_level_parity_test.dart` khẳng định `subtree(D) == direct_cards(D) + Σ subtree(con)` ở root, branch, leaf, hai cây, và sau một lần move. 892 test pass, 97 visual audit state PASS. **Strict audit bắt một lỗi tương phản thật:** `primary` trên `surfaceMuted` chỉ 2,31:1 ở dark (sàn 3,0), nhìn mắt thấy ổn — đổi sang cặp `primaryContainer`/`onPrimaryContainer` = 8,96:1. **M4.10d `done` — breadcrumb cho màn hình đệ quy:** `MxBreadcrumb` là shared widget (không domain, không Riverpod, không tự đọc ARB), `DeckPathWidget` là adapter feature-local. Chain ancestor đến từ **cùng một statement** với level (AD-13) nên rename một ancestor đổi cả tiêu đề lẫn breadcrumb trong một frame. Hai shape typed đã thử và bị loại kèm lý do đo được — join làm nhân số dòng theo độ sâu, còn `UNION ALL` thì drift **không** expand `table.**` trong compound select và **không báo lỗi**; cách còn lại là một cột JSON, một lỗ untyped có chủ ý bịt kín ở mapper với decode total. Breadcrumb ẩn ở cấp 1–2 vì ở đó Back và tab Decks đã làm đúng việc đó. 930 test pass. **Footgun ghi lại:** một dấu `;` trong comment `--` của `.drift` cắt statement sớm và chỉ là warning, nên build xanh mà method sinh ra không tồn tại. **M4.10e `done` — bốn ghi nhận review về thị giác, đo trước sửa sau:** border của card ở light chỉ 1,40:1 trong khi dark là 1,82:1 — một cơ chế hai độ mạnh, và đó mới là lý do light nhìn phẳng; `borderSubtleLight` nay là `#BEC0C3` (1,82:1, khớp dark tới hai chữ số thập phân) và **độ lệch giữa hai mode có test chặn** chứ không chỉ có sàn. Card về hai dòng (`46 cards · 5 due · 8 boxes`). Màu và độ đậm chỉ dành cho trạng thái cần hành động. Breadcrumb bỏ bước cuối vì tiêu đề ngay trên đã nói. Bottom nav hai item kéo về giữa bằng giới hạn **tự vô hiệu** khi thêm tab. **Hai kết luận đổi sau khi đo:** giá trị border được đề xuất (`#E5E7EB`) *sáng hơn* cái đang dùng nên sẽ làm tệ hơn, và amber trên nền trắng **không** fail 4,5:1 — nó là 5,41:1, phần đúng của ghi nhận là nhấn mạnh chứ không phải tương phản. 931 test pass, 19 golden cập nhật. **M4.10f `done` — colour-system conformance audit toàn app:** quét bằng AST 112 file / 160 site, resolve theo `ThemeData` đã build, 17 vi phạm có target token cụ thể, không sửa một màu nào. **V1 lớn nhất:** ở light `surface` là `#FFFFFF` không có hue nào — trang có tint còn cái nằm trên trang thì không. **V2/V4 = 0 và đó là kết quả đo.** **Ba điều việc tính toán bác bỏ:** ceiling 1.6:1 của brief báo "too-heavy" ở **cả hai** mode nên nó bất đồng với depth model chứ không bắt regression; ba giá trị đề xuất tự tính bằng tay đều sai, giải lại bằng ràng buộc cho thấy 24° lệch seed của M4.10e là **tránh được**; và fix V1 cho `surface` làm khoảng cách card↔trang tụt 1.090 → 1.064, ghi rõ chứ không giấu. Bổ sung **MX-VIS-002** — 5 quy tắc đúng-hôm-nay vào visual audit, cả 5 đã fault-inject. **Không kiểm chứng được:** `component-map.json` không tồn tại trong repo. 943 test pass. **M4.10g `done` — chủ dự án bác tiền đề "flat by design", fix phần đáng fix:** "app không dùng shadow" chưa bao giờ là luật — không AD, không BR, không test, và `docs/checklist.md` còn yêu cầu Elevation token chưa ai làm; nó chỉ là hai đoạn comment bị hai milestone trích như ràng buộc. Sau quyết định "app cần độ nổi": V6 shadow/scrim từ tiềm ẩn thành lỗi thật (dark `#000000` → `#04040B` suy từ seed), V5 fill/border hết translucent tại điểm vẽ, màn hình lỗi đọc `platformBrightness`. **Viết rule trước, chạy cho đỏ để nó tự liệt kê chỗ mắc lỗi, rồi mới fix.** **Ba lỗi của chính harness do fault-inject phát hiện:** R8 khớp vào comment của chính nó; path chuẩn hoá rỗng nên trên Windows không quét gì; và scanner bỏ sót `Color(0x...)` không có `const` — bản audit M4.10f báo 158 site, thật ra **244**. 946 test pass, 4 golden đổi. **M4.10h `done` — elevation thật:** `AppElevation` là token mà checklist yêu cầu từ đầu và chưa ai làm. Light vẽ shadow, dark không — **đo được**: shadow dark chỉ mua ΔL* 0.26 trong khi bậc surface đã là 7.70, vì trang dark nằm đáy thang lightness. Alpha được **giải ra** chứ không chọn (light 7.62 L* so với dark 7.70). Border light hạ 1.82 → **1.50**, vào trong band 1.6 của brief — nó không còn phải gánh biên một mình. `app_theme_test.dart` đổi từ đo *tương phản border* sang đo **độ nổi của card**, vì luật cũ đúng khi border là cue duy nhất và sai ngay khi có shadow. 946 test pass, 15 golden light đổi. **M4.10i `done` — audit màu sắc về 0 vi phạm:** card light hết trắng thuần (`#FBFBFE`, seed@0.02, hue 240) cùng bốn token trắng khác; màn hình lỗi và khung web dùng token thật thay vì literal; nhãn disabled của action sheet precompute. **Một kết luận của chính agent bị bác:** M4.10g xếp 6 literal ở `error_screen` là "mirror không tránh được" vì file không đọc được `Theme` — sai, `AppColors` là hằng số biên dịch, import thẳng được. **Xung đột hai luật:** tint làm card tối đi nên phá luật ladder ≥3 L* của M3.5b; luật đó là luật của một mode không có cue nào khác, nên light hạ xuống 2.0 còn tổng độ nổi vẫn bị chặn — 7.75 so với 7.70. Thêm **R9** (mọi neutral phải mang hue của seed), đã fault-inject. 954 test pass. ****M4.10j `done` rồi `superseded` bởi M4.10k trong cùng PR** — màn design-system showcase in-app (route debug-only `/dev/design-system`) được dựng, rồi chủ dự án chọn Widgetbook để dễ maintain trước khi merge; màn in-app + cổng route + ngoại lệ l10n test đã gỡ sạch. **M4.10k `done` — Widgetbook catalog:** package `widgetbook/` riêng phụ thuộc `memox` qua path (pubspec app không đổi một dòng), theme addon dùng chính `buildLightTheme()`/`buildDarkTheme()`, 3 trang token đọc ngược từ theme đang chạy + 11 component `Mx*` mỗi cái một playground knobs, viewport có case Compact 320×568 của M4.8b; font copy vào catalog vì font khai báo trong package bị prefix `packages/<pkg>/` trong khi theme gọi tên trần; `ci.yml` thêm `pub get` lồng (root analyze tạo context cho package lồng — thiếu dep là 117 lỗi, đo bằng tái hiện) và smoke test catalog. **M4.10l `done` — backfill #57 vào catalog:** category Screens với `DeckListScreen` mount nguyên màn qua `ProviderScope` fake contract, knob 6 scenario, `GoRouter` mini trong use-case nên drill-down thật ngay trong khung catalog; `MxPillButton` playground; fake resolve scheduler qua root (BR-06) — chính catalog lộ lỗi "Eight boxes trong cây sm2" của bản fake đầu; khi #58 (breadcrumb) merge, fake dựng `ancestors` từ chuỗi id nên breadcrumb bấm được trong catalog, và `MxBreadcrumb` có playground knob depth 2–10. M4.10m `done` — giành lại phần Material tự quyết:** bảy nhóm màu framework đang vẽ mà app chưa đặt tên nay do app khai báo — barrier (dialog + sheet), progress, tooltip, text selection, divider, scrollbar. Barrier từ `Colors.black54` xám thuần sang suy từ `scrim`. **Lỗ hổng có hệ thống:** audit quét `lib/` nên màu tồn tại như mặc định framework thì vô hình với nó — đúng mục "Not verified" của M4.10f. **Một lỗi có sẵn lộ ra:** spinner dùng `primary` (mặc định Material) chỉ đạt **2.81:1** ở dark, dưới sàn 3.0; nay dùng `focusRing` (5.36 / 7.41). **Một hướng đã bỏ kèm lý do:** mở strict audit sang overlay cho 6 blocking failure toàn là chữ dưới barrier — auditor đúng nhưng sai chủ thể; thay bằng test giá trị ở tầng theme. 959 test pass. **M4.10n `done` — nâng shared widget:** icon action sheet thôi cạnh tranh với nhãn của chính nó, `MxErrorState` dùng nút chính khớp `MxEmptyState`. **Hai trong bốn nhận định của agent không đứng vững và đã báo lại thay vì sửa bừa:** input dùng `md` còn card dùng `lg` — một hệ nhất quán chứ không bất nhất; empty state đã là 16/8/24 tức là **không** đều. Cả hai là đọc ảnh nén rồi suy ra. **Một "lỗi component" hóa ra là lỗi của tấm ảnh:** `MxListTile` có đúng một caller là move-deck sheet, mà sheet là `surface`; specimen lại chụp nó trên `Scaffold` trống. Sửa ảnh, không thêm capability không caller. 959 test pass. **M4.10o `done` — AD-14 chốt hệ màu và chiều sâu.** Seed là nguồn của mọi trung tính; mỗi role một hue qua một bộ sinh; border lấy hue từ chủ của thứ nó bọc; **chiều sâu là mục tiêu đo được chứ không phải cơ chế cố định** — light 7.75 L* từ bậc surface + shadow, dark 7.70 L* từ bậc surface + border, và dark không vẽ shadow vì đo được chứ không vì thẩm mỹ. Ghi cả bốn phương án đã loại kèm milestone loại chúng. Không đổi dòng code nào. **Lý do tồn tại:** hai đoạn comment từng bị hai milestone đọc thành luật. **M4.10p `done` — token Flutter theo design system.** Chủ dự án đưa design system từ claude.ai/design về `design_system/` và chốt **`tokens/*.css` là chuẩn cho giá trị token**; Dart lệch thì Dart sửa. Mọi token số đã khớp sẵn; 11/40 token màu lệch và cả 11 lấy theo CSS. **Audit bắt được một lỗi thật:** `successLight` mới làm nhãn 14px tụt xuống 4.30:1 trên `secondaryContainer` — lời giải nằm trong chính design, `VerdictAction` của nó giữ nền trung tính đúng vì lý do đó. **Mâu thuẫn là của design:** hex làm `warning` to nhất ở light trong khi readme của nó viết "danger carries the most saturation". 14 golden đổi, 959 test pass. **M4.10q `in progress` — parity checklist với design system.** 77 dòng ghép từng artefact, 33 đã review, 12 finding, **sửa 11**. Lỗi thật: `mx_loading_state.dart` ghi đè chính cái theme M4.10j viết ra để tránh spinner 2.81:1. Breadcrumb nay gập được ở giữa (BR-55 cho 10 cấp), `MxContentShell` có `subheader` và hairline theo scroll, nav bar có hairline trên, hover thôi rơi về mặc định Material. **Bỏ elevation của Material:** AD-14 quy định chiều sâu chỉ một cơ chế, nhận thêm `elevation` là đổi luật đo được lấy luật không đo được. 959 test pass. Còn 44 dòng. **M4.10r `done` — BR-88 và `MxProgressBar`.** Nửa `eight_box` đã có sẵn trong BR-16 từ trước; BR-88 nâng nó thành rule có ID và mở sang `sm2` với `interval_days >= 128` — khớp interval của box 8, không phải 21 ngày theo quy ước Anki. `learnedCardCount` về **cùng một statement** với hai count kia (AD-13). Hai token `--color-progress-*` thôi bị hoãn vì `MxProgressBar` là caller mà M4.10p bảo còn thiếu. 973 test pass. **M4.10s `done` — deck card theo đúng design.** Thẻ phẳng + hairline, vùng mở là target riêng, due tách khỏi meta line thành chip ở chân thẻ, ba trạng thái chân thẻ, well chuyển sang trung tính khi deck đã thuộc hết. **Chip due của design trượt WCAG ở light (3.12:1)** — mâu thuẫn thứ tư của design; em giữ nền của nó và suy ra màu chữ nó thiếu, 6.38:1, cùng hue trong 1.2°. **Không làm nút "Study"** vì M5 chưa có session để bấm sang — một control chết còn tệ hơn thiếu control. 973 test pass, đã render và xem cả hai mode. **M4.10t `done` — level summary panel.** Con số đến hạn + câu nối tiếp + thanh tiến độ của cả cấp, **không đọc thêm lần nào**: số của child là cả subtree, subtree anh em rời nhau, nên cộng trong bộ nhớ ra đúng tổng và panel không bao giờ lệch thời điểm với list. "Xong" thay cho số 0 (BR-29). **Streak và nút Start studying cố ý vắng** — cả hai cần M5, và một streak luôn bằng 0 tệ hơn không có streak. 973 test pass. **M4.10u `done` — đóng nốt 77 dòng parity checklist.** 47 match, 14 đã sửa, 8 n/a, 4 chặn ở M5, 4 lệch có chủ đích. Ba chỗ sửa lần này: **A16** Dart không có token easing và chỗ duy nhất dùng curve viết `Curves.decelerate` — preset đó là `(0,0,0.2,1)` còn design là `(0,0,0,1)`; **A7** tracking 1.1 là literal; **D3** danh sách chưa có tiêu đề "Your decks"/"Sub-decks". **Sáu chỗ design tự mâu thuẫn** — kết quả giá trị nhất của cả đợt: "theo JSX" không áp được mà không đọc. 973 test pass. **M4.10v `done` — số deck con và căn hàng tiêu đề.** Đối chiếu ảnh render của design kit, hai chỗ lệch nhìn thấy được đã đóng: meta line mở đầu bằng `N deck con` (**đếm con trực tiếp**, ngược với hai count kia đếm cả subtree), và hai pill dạt về cuối hàng tiêu đề. **`Row` + `Expanded` tràn ở 320 + textScaler 2.0** — hai pill cộng lại đã rộng hơn màn hình khi chữ gấp đôi; `Wrap` lồng `Wrap` làm được cả hai. 973 test pass. **M4.10w `done` — golden render ở đúng mật độ máy thật.** Trước đây mọi golden render ở DPR 1, nên màn 420×1040 logic ra ảnh 420×1040 pixel — bằng một phần ba máy thật, và đọc review một tấm như vậy là đoán xem cạnh sai hay chỉ thiếu mẫu. **DPR 3 là con số suy ra**: mật độ của hai máy design system dựng khung kit. **Layout không đổi gì** — logic = physical / dpr — nên mọi assertion rect nguyên vẹn. 646 KB → 2.27 MB, 3.5× chứ không phải 9× vì UI phẳng nén tốt. 973 test pass. **M4.10x `done` — tìm kiếm toàn subtree.** Mảnh cuối của design đã dựng, **không query mới và không đổi contract**: use case đọc `watchAllDecks()` rồi khoanh phạm vi và dựng đường dẫn trong bộ nhớ, đúng tiền lệ move-target picker. **Ba lỗi thật chỉ test bắt được:** hai mutator trên một input-state notifier, ô search cao 20px dưới sàn 48, và chữ dính đỉnh pill vì `TextField` không được bảo `expands`. **`AppBar.bottom` là sai công cụ cho subheader** — nó bắt khai báo chiều cao trước, mà chiều cao đó phụ thuộc cỡ chữ. 28 finder hỏng vì đúng một lý do, sửa bằng một finder dùng chung. 978 test pass. **M4.10y `done` — nút đóng panel tổng kết.** Mảnh cuối của design không bị chặn bởi M5 đã đóng. **Không khoá theo cấp**: lý do design cho phép ẩn là một tâm trạng chứ không phải một chỗ, nên ẩn ở cấp gốc rồi thấy nó quay lại sau hai lần chạm là không được lắng nghe. **Luôn có thứ gì đó ở chỗ đó** — một dòng chữ thay chỗ và đưa nó về, và test đi trọn vòng chứ không dừng ở "đã biến mất". 979 test pass. **M4.10z `done` — ô search: căn dòng và focus.** Hai chỗ lệch so với design kit đã đóng. **Phép đo đầu tiên của em sai:** golden chụp cả màn chứ không phải riêng pill, nên mọi cửa sổ quét pixel rơi vào nền trang — số liệu thuyết phục mà vô nghĩa; render pill trên nền phẳng rồi nhìn mới thấy chữ cao hơn dòng icon. Nguyên nhân là hỏi `InputDecoration.constraints` cho chiều cao 48: nó nới hộp và để chữ dính trần. Focus nay đổi nền + viền mà không đổi kích thước; viền vẽ bằng màu nền thay vì trong suốt vì **alpha 0 không phải token** và audit chặn đúng. 985 test pass. M4.11 **done** (11 lát + recursive review). M4.11a **done** — fold Unicode cho search thẻ (schema v3): bốn lệnh bàn giao đã chạy thật trên máy có toolchain, snapshot v3 đã commit, và lệnh thứ tư lộ ra bốn chỗ khác còn chốt cứng "schema là v2" cộng một test card đỏ sẵn từ #121 — tất cả đã đóng, `flutter test` 1367/1367 pass, `check_drift.sh` 0 error. M4.11b…M4.11f **done** — 60/60 IT scenario chạy trên emulator thật; bốn vòng sửa hiển thị của card list (gutter đôi, pill quá rộng, `Due` tách hẳn khỏi `New` ở tầng query, badge `now` thôi nói thay cho thẻ chưa có lịch); và M4.11f đưa nhãn chip khỏi weight của button. M4.11g cho màn deck bộ ảnh render thật đầu tiên, và đưa review render về đúng mật độ M4.10w đã chốt; M4.11h gỡ bản dựng tay của màn deck khỏi `design_preview`. M4.12a…M4.12d **done** — starter template có seed idempotent; Playwright E2E chạy trên Flutter Web ở mobile viewport; 15 bất biến chạy sau **từng bước** của luồng bắt buộc và báo cáo demo flow kèm ảnh từng bước; và "design parity dưới 3%" thành một cổng chạy được — đo bằng tỉ lệ `drift` còn mở trong parity checklist (**1/80 = 1,25%**), vì so pixel giữa Chrome và Skia có một sàn không parity nào kéo xuống được. Cùng lúc phát hiện chín dòng checklist vẫn ghi `drift` sau khi code đã sửa xong từ ba milestone trước — bảy dòng đóng, hai dòng vốn là phân kỳ cố ý, một dòng thật (F15) được giữ mở có lý do. **86/86 task M4 đóng; M5 đủ điều kiện bắt đầu.** **Phase 10 (networking) hoãn** — AD-01, AD-05 |
+| M5 · Study vertical slice — UC-05 (Phase 14) | todo | Bắt đầu **sau M4.12**. Không còn là vertical slice đầu tiên — Deck/Card CRUD đã hoàn thành trong M4.8–M4.12 và M5 không triển khai lại. Study MUST NOT bắt đầu khi M4.12 chưa `done` |
+| M6 · Test suite (Phase 15) | todo | Chạy song song **từ M4.8 trở đi**, không đợi tới sau Study |
 | M7 · CI/CD (Phase 19) | todo | Bắt đầu được ngay sau M2. Job Android + Web, chưa có iOS (AD-04) |
 | M8 · Release Android (Phase 16–18, 20–22) | todo | |
 | M9 · Backend Spring Boot + auth + sync (Phase 10) | todo | Sau khi M8 ổn định |
@@ -125,7 +125,7 @@ bộ, không phải chỉnh sửa tiện tay.
 ### T1.2b · Sửa thiết kế scheduler theo phản hồi
 
 - **Status:** done
-- **Goal:** Áp thiết kế: scheduler theo deck, khoá sau review đầu, reset +
+- **Goal:** Áp thiết kế: scheduler theo deck, khoá sau lượt học đầu, reset +
   generation, hai tập action khác nhau.
 - **Output:** `docs/architecture.md` (AD-06 viết lại, AD-09 mới),
   `docs/business-rules.md`, `docs/data-model.md`, `docs/use-cases.md`,
@@ -134,7 +134,7 @@ bộ, không phải chỉnh sửa tiện tay.
 - **Những gì bị đảo so với bản trước:**
   - SM-2 **vào lại MVP**.
   - 8-box đổi từ 4 mức đánh giá sang **2 action** `forgotten`/`remembered`.
-  - Scheduler chuyển sang "đổi tự do trước review đầu, khoá sau đó, mở lại bằng
+  - Scheduler chuyển sang "đổi tự do trước lượt học đầu, khoá sau đó, mở lại bằng
     reset".
   - Thêm `scheduler_generation` vào deck, card state, session và history.
 - **Acceptance criteria:**
@@ -148,7 +148,7 @@ bộ, không phải chỉnh sửa tiện tay.
 ### T1.3 · Freeze MVP specification và sửa tính nhất quán tài liệu
 
 - **Status:** done
-- **Goal:** Chốt mô hình cây deck nhiều cấp, hoàn thiện review history và session
+- **Goal:** Chốt mô hình cây deck nhiều cấp, hoàn thiện study answers và session
   lifecycle, chốt các rule còn mở, và sửa mọi mâu thuẫn giữa các tài liệu. Không
   tạo source code.
 - **Scope:** chỉ tài liệu, WBS và validation script.
@@ -160,7 +160,7 @@ bộ, không phải chỉnh sửa tiện tay.
 - **Output:**
   - `docs/business-rules.md` — thêm BR-55…BR-87, chính sách đánh số vĩnh viễn
   - `docs/data-model.md` — viết lại: `root_deck_id`, `content_type`,
-    `review_kind`, session `status`/`end_reason`, 14 query bất biến
+    `kind`, session `status`/`end_reason`, 14 query bất biến
   - `docs/use-cases.md` — UC-08 (xác lập `content_type`), UC-09 (di chuyển deck);
     UC-02…07 cập nhật
   - `docs/architecture.md` — AD-10 (cây deck), AD-11 (trạng thái tường minh)
@@ -178,7 +178,7 @@ bộ, không phải chỉnh sửa tiện tay.
         còn xuất hiện (BR-55, BR-57).
   - [x] Cây deck không có cycle — có query phát hiện (BR-69).
   - [x] Scheduler chỉ thuộc root và được descendant kế thừa (BR-05, BR-06).
-  - [x] `review_history` phân biệt `scheduled` và `relearning` bằng cột tường
+  - [x] `study_answers` phân biệt `scheduled` và `relearning` bằng cột tường
         minh (BR-75, BR-76).
   - [x] `study_sessions` có lifecycle rõ ràng với ma trận `status` × `end_reason`
         (BR-79…BR-86).
@@ -754,7 +754,7 @@ slice UC-05 cần. Không xây trọn design system trước khi có feature th�
 - **Goal:** Tạo bộ khung thư mục và làm `check_architecture.sh` chạy có ý nghĩa
   trên code thật.
 - **Scope:** `lib/app/`, `lib/core/`, `lib/shared/`, `lib/features/` theo Phase
-  4.1; một feature `review` rỗng đúng cấu trúc để script có gì để kiểm.
+  4.1; một feature `study` rỗng đúng cấu trúc để script có gì để kiểm.
 - **Out of scope:** logic nghiệp vụ; thư mục `data/remote/` (AD-01 — chưa có
   network, không tạo thư mục rỗng).
 - **Editable documents:** `docs/wbs.md`
@@ -770,9 +770,9 @@ slice UC-05 cần. Không xây trọn design system trước khi có feature th�
   - [x] **Siết guard**: cả hai profile và `code-verification-guard.yaml` về
         `fail_on: [error, warning]` + `warning_as_error: true`. → guard báo
         `No violations found`, exit 0
-- **Ba file khung, mỗi file một trách nhiệm rõ ràng:** `review_repository.dart`
-  (contract, pure Dart), `review_repository_impl.dart` (implement nó), và
-  `review_placeholder_screen.dart` — màn placeholder **chuyển từ `app.dart` vào
+- **Ba file khung, mỗi file một trách nhiệm rõ ràng:** `study_repository.dart`
+  (contract, pure Dart), `study_repository_impl.dart` (implement nó), và
+  `study_placeholder_screen.dart` — màn placeholder **chuyển từ `app.dart` vào
   feature**, nên nó có caller thật chứ không phải file giả để lấp chỗ. Contract
   cố ý rỗng: method được viết ở **M4.9** **từ nhu cầu của presentation**, đoán trước
   là viết code và test cho một lời gọi không tồn tại.
@@ -931,7 +931,7 @@ slice UC-05 cần. Không xây trọn design system trước khi có feature th�
   0.125 (luminance), mỗi bậc gấp khoảng 2.5 lần bậc trước, **cùng một họ trung
   tính**. Nút dựng theo cách đó đọc ra là đỉnh của chồng bề mặt chứ không phải
   một mảng màu — nhờ vậy **mọi sắc bão hoà được để dành cho ý nghĩa**. Điều này
-  quan trọng đúng ở đây: nút review sẽ được mã màu `forgotten`/`remembered`, và
+  quan trọng đúng ở đây: nút học sẽ được mã màu `forgotten`/`remembered`, và
   một CTA mang màu thương hiệu ngồi cạnh chúng sẽ tranh chấp với đúng hai màu
   đang mang quyết định.
 
@@ -1048,7 +1048,7 @@ slice UC-05 cần. Không xây trọn design system trước khi có feature th�
 - **Out of scope:** typography, spacing, radius, component structure, router,
   Drift.
 - **Editable documents:** `docs/wbs.md`
-- **Output:** `test/review/` (harness + 8 ảnh), và sau khi duyệt:
+- **Output:** `test/study/` (harness + 8 ảnh), và sau khi duyệt:
   `lib/core/theme/{app_colors,app_semantic_colors,app_theme}.dart`,
   `test/core/theme/`, 22 golden của shared widgets
 - **Acceptance criteria:**
@@ -1104,7 +1104,7 @@ slice UC-05 cần. Không xây trọn design system trước khi có feature th�
 - **Editable documents:** `docs/wbs.md`
 - **Output:** `lib/core/theme/{app_colors,app_theme}.dart`,
   `test/core/theme/{color_math,theme_probe,app_palette_test,color_scheme_roles_test}.dart`,
-  `test/review/` (harness + 6 ảnh), 22 golden của shared widgets
+  `test/study/` (harness + 6 ảnh), 22 golden của shared widgets
 - **Acceptance criteria:**
   - [x] `backgroundDark` giữ `#0A082D`. Không graphite hoá dark canvas.
   - [x] Bốn tầng phân biệt bằng lightness, **không** bù bằng shadow.
@@ -1128,7 +1128,7 @@ slice UC-05 cần. Không xây trọn design system trước khi có feature th�
 - **CTA ở dark đổi hướng so với M3.5a:** dùng **indigo**, không dùng
   `surfaceElevated` trung tính nữa — quyết định của chủ dự án. Ngân sách màu vẫn
   được bảo vệ, nhưng bằng cách khác: `secondaryAction` giữ trung tính, nên trên
-  màn review chỉ có đúng hai mảng bão hoà là `forgotten` và `remembered`.
+  màn study chỉ có đúng hai mảng bão hoà là `forgotten` và `remembered`.
 - **Fault injection:** đặt `surfaceDark` gần page (`#0F0C3A`) làm ba assertion
   fail đúng chỗ — bước L\* còn 2.19, và saturation card 65.7% vượt trần 41.9%.
 - **Dependencies:** M3.5a
@@ -1201,7 +1201,7 @@ slice UC-05 cần. Không xây trọn design system trước khi có feature th�
   **golden chính thức**, M4.
 - **Editable documents:** `docs/wbs.md`
 - **Output:** `test/visual_audit/{audit_model,audit_rules,audit_report,screen_auditor,audit_raster,memox_audit}.dart`,
-  ba file self-test mới, `test/review/` chuyển sang scoped allowance
+  ba file self-test mới, `test/study/` chuyển sang scoped allowance
 - **Acceptance criteria:**
   - [x] Declared color **chỉ** exact token mới pass. Blend của hai token **fail**.
   - [x] Raster: exact token pass, blend hợp lệ pass, còn lại report non-blocking.
@@ -1301,7 +1301,7 @@ slice UC-05 cần. Không xây trọn design system trước khi có feature th�
 - **Editable documents:** `docs/wbs.md`
 - **Output:** `test/visual_audit/{traversal_policy,screen_auditor,audit_allowance,audit_report,audit_model}.dart`,
   ba file tách mới (`raster_cross_check`, `marker_probe`, `audit_clip_test`,
-  `audit_allowance_test`), `test/review/deck_list_preview_test.dart`
+  `audit_allowance_test`), `test/study/deck_list_preview_test.dart`
 - **Acceptance criteria:**
   - [x] Clip lấy từ `describeApproximatePaintClip(child)`, hỏi **theo từng child**.
   - [x] `Stack`/`Flex` `hardEdge` **không** overflow → không clip.
@@ -1401,9 +1401,9 @@ slice UC-05 cần. Không xây trọn design system trước khi có feature th�
   duy nhất làm hỏng đó lộ ra — `typography` phơi từng vai trò chữ để thiếu họ
   font hay kẹt trục trọng số nhìn thấy được, `card_prompt` cho thấy màn hình
   chủ đạo thật.
-- **App shell:** `ReviewPlaceholderScreen` nay dựng từ `AppScaffoldWidget` +
+- **App shell:** `StudyPlaceholderScreen` nay dựng từ `AppScaffoldWidget` +
   `AppEmptyStateWidget`, tức bộ component được chứng minh chạy end-to-end trước
-  khi có màn hình thật phụ thuộc vào nó. Chưa triển khai màn review (M5.4).
+  khi có màn hình thật phụ thuộc vào nó. Chưa triển khai màn study (M5.4).
 - **Dependencies:** M3.5, M2.4
 - **Tests required:** widget test cho từng state; golden test light/dark; test
   overflow ở màn nhỏ và text scale 2.0 — **đã có**, `test/shared/widgets/`,
@@ -1463,7 +1463,7 @@ migration test và enforcement cho các bất biến.
   hai** file có description. Đây là cổng sẵn có, không phải copy mới.
 - **Dependencies:** M3.6
 - **Tests required:** 8 widget test — root đi qua router, `MaterialApp.router`
-  với `home == null`, `goNamed` tới review, redirect không chặn, 404 thay red
+  với `home == null`, `goNamed` tới study, redirect không chặn, 404 thay red
   screen, copy đã localization và không lộ URL, nút quay về, fallback dùng
   `AppScaffoldWidget` + `AppErrorStateWidget`
 - **Checklist phases:** 8.1, 8.2
@@ -1475,12 +1475,12 @@ migration test và enforcement cho các bất biến.
   cổng không thoả mãn được bằng file rỗng.
 - **Scope:** registry `audited_screens.dart` lái cả audit lẫn coverage check;
   `PendingAudit` có rationale và WBS task; kiểm vị trí file screen; audit thật
-  cho hai màn đang có; đổi tên `test/review/` → `test/design_preview/`.
+  cho hai màn đang có; đổi tên `test/study/` → `test/design_preview/`.
 - **Out of scope:** state matrix, golden cho màn mới, M4.2.
 - **Editable documents:** `docs/wbs.md`
 - **Output:** `test/visual_audit/screens/{audited_screens,screen_audit_coverage}.dart`,
   `screen_audit_test.dart`, `screen_audit_coverage_test.dart`;
-  `test/design_preview/` (đổi tên từ `test/review/`)
+  `test/design_preview/` (đổi tên từ `test/study/`)
 - **Acceptance criteria:**
   - [x] Màn mới trong `lib/` không đăng ký → `flutter test` **đỏ**, thông báo nêu
         đúng tên class và dòng cần thêm.
@@ -1503,11 +1503,11 @@ migration test và enforcement cho các bất biến.
 - **Hai lỗi cổng này bắt được ngay lần chạy đầu:** harness `auditMemoxScreen`
   pump một `MaterialApp` **không có localization delegate**, nên cả hai màn
   production ném lỗi và render error box của Flutter — 0 paint, mà audit vẫn báo
-  `PASS_WITH_UNRESOLVED`. Ba màn replica trong `test/review/` dùng chuỗi cứng nên
+  `PASS_WITH_UNRESOLVED`. Ba màn replica trong `test/study/` dùng chuỗi cứng nên
   chưa bao giờ chạm vào. Đã thêm delegate, và thêm `NoErrorWidgetRule` để một màn
   không build được **không bao giờ** pass — trước đó nó chỉ là
   `unknownRenderType`.
-- **`test/review/` đổi tên thành `test/design_preview/`:** ba màn trong đó là bản
+- **`test/study/` đổi tên thành `test/design_preview/`:** ba màn trong đó là bản
   sao private để tranh luận về màu trước khi có màn thật. Audit một bản sao chỉ
   chứng minh bản sao đúng. Các mục M3.5a–M3.5f vẫn ghi đường dẫn cũ vì chúng là
   ghi chép tại thời điểm đó — không sửa lại lịch sử.
@@ -1524,9 +1524,9 @@ migration test và enforcement cho các bất biến.
   `.drift`.
 - **Scope:** `core/database/connection.dart` (một chỗ duy nhất mở kết nối —
   AD-08), `app_database.dart`, `tables/*.drift` cho `decks`, `cards`,
-  `card_review_states`, `review_history`, `study_sessions`; index; `PRAGMA
+  `card_study_states`, `study_answers`, `study_sessions`; index; `PRAGMA
   foreign_keys = ON` trong `beforeOpen`.
-- **Out of scope:** named query nghiệp vụ (M4.3), DAO và repository (M4.9 cho Deck/Card, M5.0 cho Review),
+- **Out of scope:** named query nghiệp vụ (M4.3), DAO và repository (M4.9 cho Deck/Card, M5.0 cho Study),
   bảng `deck_templates` (AD-07: là asset ở MVP).
 - **Editable documents:** `docs/wbs.md`
 - **Output:** `lib/core/database/{connection,app_database}.dart`,
@@ -1537,7 +1537,7 @@ migration test và enforcement cho các bất biến.
         **đọc ngược từ SQLite**, không đọc file `.drift`.
   - [x] Không có Dart table class hand-written; toàn bộ khai báo nằm trong
         `.drift` (AD-02).
-  - [x] Xoá root deck → deck con, card, review state, history và session đều
+  - [x] Xoá root deck → deck con, card, study state, history và session đều
         biến mất, trên cây **ba cấp** với dữ liệu thật.
   - [x] `COALESCE(` không xuất hiện trong `lib/core/database/` (BR-57).
   - [x] `connection.dart` là **file duy nhất** gọi `driftDatabase`.
@@ -1547,7 +1547,7 @@ migration test và enforcement cho các bất biến.
         được**, không console error.
 - **Cột `action` bị drift âm thầm bỏ.** `ACTION` là keyword với SQL parser của
   drift: viết trần thì build **thành công**, code sinh ra **compile được**, và
-  `review_history` đơn giản là không có cột đó. Chỉ test đọc ngược cột từ SQLite
+  `study_answers` đơn giản là không có cột đó. Chỉ test đọc ngược cột từ SQLite
   bắt được — assert vào file `.drift` sẽ tự đồng ý với chính nó. Nay quote lại.
 - **Không đặt CHECK cho cặp `status` × `end_reason`.** `data-model.md` frozen chỉ
   định invariant 12 là cơ chế cưỡng chế; thêm CHECK ở đây sẽ khiến invariant đó
@@ -1569,7 +1569,7 @@ migration test và enforcement cho các bất biến.
 
 - **Status:** done
 - **Goal:** Có query nghiệp vụ dùng chung và hạ tầng test migration ngay từ v1.
-- **Scope:** `queries/study.drift` với `cardsDueForReview` và
+- **Scope:** `queries/study.drift` với `cardsDueForStudy` và
   `dueCountPerRootDeck` (dùng `root_deck_id`, nhận `:now` làm tham số — BR-57,
   AD-06); `MigrationStrategy` với `schemaVersion = 1`; export schema v1 bằng
   `drift_dev schema dump`; test migration harness.
@@ -1594,7 +1594,7 @@ migration test và enforcement cho các bất biến.
   để lần nâng sau biết ràng buộc thật nằm ở `freezed`.
 - **Dependencies:** M4.2
 - **Tests required:** 5 migration test; 6 query test gồm biên "đến hạn đúng
-  bằng now", `now` thật sự điều khiển kết quả, và card không có review state
+  bằng now", `now` thật sự điều khiển kết quả, và card không có study state
   không được phát
 - **Checklist phases:** 11.1, 15.1
 
@@ -1636,9 +1636,9 @@ migration test và enforcement cho các bất biến.
 
 - **Status:** done
 - **Goal:** Chuyển phần chưa triển khai từ layer-first sang vertical-slice-first,
-  để app có luồng quản lý nội dung demo được trước khi làm Review.
+  để app có luồng quản lý nội dung demo được trước khi làm Study.
 - **Scope:** sắp xếp lại M4 sau M4.4; giữ nguyên ID vĩnh viễn; thay M4.5–M4.7 cũ
-  bằng task kế nhiệm có caller UI thật; buộc Deck/Card hoàn chỉnh trước Review.
+  bằng task kế nhiệm có caller UI thật; buộc Deck/Card hoàn chỉnh trước Study.
 - **Out of scope:** sửa code; sửa frozen business rules; thay đổi phạm vi MVP;
   triển khai bất kỳ task mới nào.
 - **Editable documents:** `docs/wbs.md`
@@ -1648,10 +1648,10 @@ migration test và enforcement cho các bất biến.
   - [x] Không renumber ID cũ — M5.1…M5.6 giữ nguyên số.
   - [x] Không dependency nào của task **active** trỏ tới task đã `descoped`.
   - [x] Task tiếp theo là **M4.8**.
-  - [x] Review chỉ bắt đầu sau **M4.12**.
+  - [x] Study chỉ bắt đầu sau **M4.12**.
   - [x] `check_docs.sh` exit 0.
 - **Vấn đề đã sửa.** Kế hoạch cũ tiếp tục theo tầng: M4.5–M4.7 dựng toàn bộ domain
-  và data cho **cả** Deck/Card lẫn Review, rồi M5 mới có UI — mà CRUD Deck/Card
+  và data cho **cả** Deck/Card lẫn Study, rồi M5 mới có UI — mà CRUD Deck/Card
   lại nằm **ngoài** phạm vi M5. Kết quả là backend lớn dần trong khi app không có
   luồng nào demo được, và shared component thì chỉ đủ cho UC-05 vì text field,
   list item, dialog và bottom sheet đã bị loại khỏi M3.6 lúc chưa có caller.
@@ -1668,8 +1668,8 @@ migration test và enforcement cho các bất biến.
 
 | Task cũ | Trạng thái | Nội dung được chuyển tới |
 |---|---|---|
-| M4.5 | `descoped` | Deck/Card → **M4.9** · Review → **M5.0** |
-| M4.6 | `descoped` | Deck/Card → **M4.9** · Review → **M5.0** |
+| M4.5 | `descoped` | Deck/Card → **M4.9** · Study → **M5.0** |
+| M4.6 | `descoped` | Deck/Card → **M4.9** · Study → **M5.0** |
 | M4.7 | `descoped` | Fixture/demo → **M4.12** |
 | M5.1–M5.6 | giữ nguyên ID | Thực hiện sau **M4.12** |
 
@@ -1685,21 +1685,21 @@ phần có caller thật.
 - **Status:** descoped
 - **Decision:** descoped **before implementation** (M4.4a). Không dòng code nào
   từng được viết dưới ID này.
-- **Reason:** scope gộp Deck/Card và Review vào **một** domain batch, tức là tiếp
+- **Reason:** scope gộp Deck/Card và Study vào **một** domain batch, tức là tiếp
   tục layer-first trong khi app chưa có luồng quản lý nội dung nào để demo. Một
   contract viết cho cả hai slice cùng lúc buộc phải đoán nhu cầu của presentation
   chưa tồn tại — đúng cái mà acceptance criteria của chính task này cấm.
 - **Superseded by:** **M4.9** cho Deck/Card domain và repository contract ·
-  **M5.0** cho domain và repository contract riêng của Review.
+  **M5.0** cho domain và repository contract riêng của Study.
 - **Goal:** _(lịch sử)_ Có hợp đồng domain viết theo nhu cầu presentation,
   không theo hình dạng Drift.
-- **Scope:** `features/review/domain/entity/` (`DeckEntity`, `CardEntity`,
-  `CardReviewStateEntity`, `StudySessionEntity`, `ReviewHistoryEntity`), enum
-  `SchedulerType`, `ReviewAction`, `ReviewKind`, `SessionStatus`,
+- **Scope:** `features/study/domain/entity/` (`DeckEntity`, `CardEntity`,
+  `CardStudyStateEntity`, `StudySessionEntity`, `StudyAnswerEntity`), enum
+  `SchedulerType`, `StudyAction`, `StudyAnswerKind`, `SessionStatus`,
   `SessionEndReason`, `DeckContentType`; repository contract dạng abstract.
 - **Out of scope:** implementation (M4.6), use case (M5.2).
 - **Editable documents:** `docs/wbs.md`
-- **Output:** `lib/features/review/domain/`
+- **Output:** `lib/features/study/domain/`
 - **Acceptance criteria:**
   - [ ] `check_architecture.sh` exit 0 — domain không import Flutter, Drift,
         `json_annotation`.
@@ -1721,11 +1721,11 @@ phần có caller thật.
 - **Decision:** descoped **before implementation** (M4.4a). Không dòng code nào
   từng được viết dưới ID này.
 - **Reason:** data layer phải lớn lên cùng caller UI/use case của từng vertical
-  slice. Triển khai tràn toàn bộ review domain trước khi có màn hình nào gọi tới
+  slice. Triển khai tràn toàn bộ study domain trước khi có màn hình nào gọi tới
   sinh ra code không ai chứng minh được là đúng — nó chỉ được chứng minh là
   *compile được*.
 - **Superseded by:** **M4.9** cho Deck/Card data layer · **M5.0** cho data layer
-  riêng của Review.
+  riêng của Study.
 - **Goal:** _(lịch sử)_ Nối domain xuống Drift, và chặn mọi exception ở đúng
   ranh giới repository.
 - **Scope:** DAO theo feature, mapper Drift row ↔ entity, repository
@@ -1733,7 +1733,7 @@ phần có caller thật.
   bước.
 - **Out of scope:** remote data source, cache TTL, sync (AD-01, AD-05).
 - **Editable documents:** `docs/wbs.md`
-- **Output:** `lib/features/review/data/`
+- **Output:** `lib/features/study/data/`
 - **Acceptance criteria:**
   - [ ] `check_architecture.sh` exit 0 — presentation chưa tồn tại, nhưng
         `data/` không được import ngược lên.
@@ -1742,7 +1742,7 @@ phần có caller thật.
   - [ ] Repository đọc bằng `watch()` stream, không phải `Future` một lần
         (AD-01) — test khẳng định stream phát lại khi dữ liệu đổi.
   - [ ] Mapper xử lý enum lạ bằng cách map về giá trị `unknown` thay vì throw.
-  - [ ] Tạo card sinh đúng một `card_review_states` trong cùng transaction
+  - [ ] Tạo card sinh đúng một `card_study_states` trong cùng transaction
         (BR-09) — test khẳng định.
 - **Dependencies:** M4.5, M4.3 _(lịch sử — task đã descoped)_
 - **Tests required:** _(không áp dụng — descoped trước khi triển khai)_
@@ -1757,7 +1757,7 @@ phần có caller thật.
   như một backend artifact đứng riêng. Seed dữ liệu mà không có màn hình nào đọc
   nó chỉ chứng minh insert chạy được.
 - **Superseded by:** **M4.12** cho Deck/Card development fixture, seed và demo
-  E2E. Fixture riêng cho Review, nếu cần, mở rộng ở M5.
+  E2E. Fixture riêng cho Study, nếu cần, mở rộng ở M5.
 - **Goal:** _(lịch sử)_ Có dữ liệu thật để chạy vertical slice, đánh dấu rõ là
   fixture.
 - **Scope:** `assets/templates/manifest.json` + một template cây deck nhiều cấp
@@ -1766,7 +1766,7 @@ phần có caller thật.
 - **Out of scope:** nội dung production (BR-87 — thay trước M8); UI thư viện
   starter (UC-01 không thuộc M5).
 - **Editable documents:** `docs/wbs.md`
-- **Output:** `assets/templates/`, `lib/features/review/data/template_loader.dart`,
+- **Output:** `assets/templates/`, `lib/features/study/data/template_loader.dart`,
   `test/helpers/seed.dart`
 - **Acceptance criteria:**
   - [ ] Fixture có cây **ít nhất 3 cấp** để chứng minh `root_deck_id` hoạt động
@@ -1792,7 +1792,7 @@ phần có caller thật.
   widget hiện có từ prefix `App*` sang `Mx*`** — quyết định của chủ dự án: mọi
   shared widget của MemoX dùng prefix `Mx`.
 - **Out of scope:** Deck screen, Card screen (M4.10, M4.11); repository;
-  controller; review verdict control và Review screen (M5).
+  controller; study verdict control và Study screen (M5).
 - **Editable documents:** `docs/wbs.md`
 - **Output:** `lib/shared/widgets/mx_*.dart` (5 component mới + 6 component đổi
   tên), `lib/core/theme/app_theme.dart` (component theme mới),
@@ -2013,7 +2013,7 @@ phần có caller thật.
   lại khoản nợ ghi ở M4.8a. `medium = 600` vẫn cố ý không có caller và doc đã
   nói rõ vì sao.
 - **Button: giảm chiều cao thì không, giảm padding ngang thì có — và ca ép
-  phải làm là màn Review.** Chiều cao đang **đúng ở sàn** 48dp
+  phải làm là màn Study.** Chiều cao đang **đúng ở sàn** 48dp
   (`minimumSize: Size(64, 48)`), không có gì để cắt; hạ xuống 40 chỉ tiết kiệm
   8px trên màn cao 568 — 1,4% — đổi lấy ngưỡng chạm. Trong dialog thì cũng
   không chật: hai nút ở 320 dùng 233 trên 280px khả dụng, và kích thước y hệt
@@ -2031,7 +2031,7 @@ phần có caller thật.
 - **Bốn nút một hàng vẫn là bố cục sai ở 320, kể cả sau khi sửa.** 44px cho
   nhãn là vừa đủ cho "Again", không đủ cho bản dịch dài hơn, và ở textScaler
   2.0 nút cao 104. Câu trả lời đúng là **bố cục** — 2×2 hoặc `Wrap` — chứ
-  không phải token, và nó thuộc **M5** khi màn Review được dựng. Ghi lại ở đây
+  không phải token, và nó thuộc **M5** khi màn Study được dựng. Ghi lại ở đây
   để M5 không bắt đầu bằng một hàng bốn nút.
 - **Dependencies:** M3.4, M3.5, M3.6, M4.8, M4.8a
 - **Tests required:** cỡ chữ compact vs thường theo từng role, padding theo
@@ -2044,14 +2044,14 @@ phần có caller thật.
 - **Goal:** Chỉ xây domain và data mà Deck/Card management có caller thật, đủ để
   UI chạy xuyên suốt xuống Drift.
 - **Scope:** **Domain** — `DeckEntity`, `CardEntity`, phần
-  `CardReviewStateEntity` cần để tạo card đúng BR-09, `SchedulerType`,
+  `CardStudyStateEntity` cần để tạo card đúng BR-09, `SchedulerType`,
   `DeckContentType`, command/value object khi có caller thật, repository contract
   theo UC-02, UC-03, UC-04, UC-08, UC-09. **Data** — DAO Deck/Card, mapper,
   repository implementation, mapping `Failure`, `watch()` stream, transaction cho
   thao tác nhiều bước.
-- **Out of scope:** `StudySessionEntity`, `ReviewHistoryEntity`, `ReviewKind`,
-  `ReviewAction`, `SessionStatus`, `SessionEndReason`, review persistence,
-  scheduler formula, review use case (tất cả → **M5.0**, **M5.1**); controller UI.
+- **Out of scope:** `StudySessionEntity`, `StudyAnswerEntity`, `StudyAnswerKind`,
+  `StudyAction`, `SessionStatus`, `SessionEndReason`, study persistence,
+  scheduler formula, study use case (tất cả → **M5.0**, **M5.1**); controller UI.
 - **Editable documents:** `docs/wbs.md`
 - **Output:** `lib/features/deck/domain/`, `lib/features/deck/data/`
 - **Acceptance criteria:**
@@ -2071,9 +2071,9 @@ phần có caller thật.
         `cards` → bắt được `Failure`; PK trùng thật → `ConflictFailure`;
         `drift_error_mapper.dart` đổi constraint → `ConflictFailure`, có
         table-driven test 7 case.
-  - [x] Tạo card sinh **đúng một** review state, atomic (BR-09); insert state
+  - [x] Tạo card sinh **đúng một** study state, atomic (BR-09); insert state
         lỗi thì card rollback. → trigger `RAISE(ABORT)` trên
-        `card_review_states`: card **và** content-type lock cùng rollback;
+        `card_study_states`: card **và** content-type lock cùng rollback;
         `eight_box` khởi tạo box 1, `sm2` khởi tạo 2.5/0/0 — đều đọc lại từ row
         thật.
   - [x] Lần tạo child đầu tiên khoá `content_type` **trong cùng transaction**
@@ -2090,7 +2090,7 @@ phần có caller thật.
   - [x] Web phát được query Drift **thật** — đóng phần chưa kiểm còn lại của
         M4.2. → `deck_repository_web_test.dart` chạy `flutter test --platform
         chrome`: mở production `AppDatabase.open()`, insert cây 3 cấp + card,
-        chạy `deckById`/`subtreeDeckIds` (recursive CTE)/`reviewStateByCard`
+        chạy `deckById`/`subtreeDeckIds` (recursive CTE)/`studyStateByCard`
         typed query và `watchRootDecks()` thật, dọn fixture, đóng database.
         Phát hiện và sửa hai lỗi production: `driftDatabase()` thiếu `web:`
         options (web chưa từng mở được database), và `drift_worker.js` prebuilt
@@ -2098,12 +2098,12 @@ phần có caller thật.
         (`LinkError: xFileControl`) — worker nay compile từ đúng lockfile, quy
         trình ghi ở `web/WEB_ASSETS.md`.
 - **Files:** domain — `deck_entity.dart`, `card_entity.dart`,
-  `card_review_state_entity.dart`, `scheduler_type_model.dart`,
+  `card_study_state_entity.dart`, `scheduler_type_model.dart`,
   `deck_content_type_model.dart` (hai enum mang hậu tố `_model` vì guard
   `memox.naming.domain_file_role_suffix` bắt buộc hậu tố role),
   `deck_deletion_impact_model.dart`, `deck_repository.dart`. Data —
   `local/deck_dao.dart`, `deck_mapper.dart`, `card_mapper.dart`,
-  `card_review_state_mapper.dart`, `deck_repository_impl.dart` (+ 2 part
+  `card_study_state_mapper.dart`, `deck_repository_impl.dart` (+ 2 part
   `card_write_deck_repository_impl.dart`, `move_deck_repository_impl.dart` để
   giữ mỗi file dưới giới hạn của guard). Query —
   `lib/core/database/queries/deck.drift` (include vào `app_database.dart`,
@@ -2127,8 +2127,8 @@ phần có caller thật.
 - **Operation phải đủ cho:** đọc cây root và descendant · tạo root deck kèm chọn
   scheduler · tạo sub-deck · khoá `content_type` ở child đầu tiên · đổi tên · đếm
   descendant/card trước khi xoá · xoá cascade · reset `content_type` khi rỗng ·
-  di chuyển subtree · đọc card theo deck · tạo card kèm đúng một review state ·
-  sửa card không đụng review state/history · xoá card · stream phát lại.
+  di chuyển subtree · đọc card theo deck · tạo card kèm đúng một study state ·
+  sửa card không đụng study state/history · xoá card · stream phát lại.
 - **Dependencies:** M4.3, M4.4, M4.8
 - **Tests required:** unit domain, mapper (gồm enum lạ), repository integration
   trên database thật, transaction, rollback, stream, và chạy lại 14 bất biến
@@ -2150,7 +2150,7 @@ phần có caller thật.
   `card.drift` tách query card thuần; `.gitattributes` cho cặp asset `test/`;
   đồng bộ docs (BR-55, UC-08 E4, UC-09 depth formula + E5, data-model,
   CLAUDE.md, AD-10, README).
-- **Out of scope:** UI/controller/provider (M4.10, M4.11); Review domain (M5);
+- **Out of scope:** UI/controller/provider (M4.10, M4.11); Study domain (M5);
   đổi schema.
 - **Editable documents:** `docs/wbs.md`, `docs/business-rules.md`,
   `docs/use-cases.md`, `docs/data-model.md`, `docs/architecture.md`,
@@ -2179,7 +2179,7 @@ phần có caller thật.
         (`ConflictFailure`), có test trên dữ liệu corrupt thật.
   - [x] `DeckRepository` chỉ còn Deck operations; `CardRepository` /
         `CardRepositoryImpl` / `CardDao` độc lập; `createCard` vẫn atomic
-        (content lock + đúng một review state, trigger-injected rollback pass);
+        (content lock + đúng một study state, trigger-injected rollback pass);
         `deck_card_boundary_test.dart` ghim ranh giới bằng source facts.
   - [x] Bất biến Q15 thêm vào `data-model.md` + `invariant_queries.dart` +
         `verify_invariants.py` (BAD case), pair test hai chiều pass — 15/15.
@@ -2210,7 +2210,7 @@ phần có caller thật.
   `CardRepositoryImpl -> DeckDao` bằng adapter deck-context hẹp do Card sở hữu,
   dùng cùng `AppDatabase`; cập nhật import, test ownership và WBS.
 - **Out of scope:** schema/query `.drift`; hành vi CRUD; controller/UI (M4.10,
-  M4.11); Review domain (M5).
+  M4.11); Study domain (M5).
 - **Editable documents:** `docs/wbs.md`
 - **Output:** `lib/features/card/domain/`, `lib/features/card/data/`,
   `test/features/card/data/card_repository_test.dart`, cập nhật boundary test
@@ -2220,7 +2220,7 @@ phần có caller thật.
   - [x] `lib/features/card/data/` không import `lib/features/deck/data/` hoặc
         presentation của Deck; chỉ dùng Deck domain model cho invariant chung.
   - [x] `createCard` vẫn nhận một `AppDatabase` duy nhất và transaction vẫn bao
-        trọn content-type lock + card + đúng một review state (BR-09, BR-62).
+        trọn content-type lock + card + đúng một study state (BR-09, BR-62).
   - [x] Card integration test nằm dưới `test/features/card/`; boundary test
         chặn việc đưa source Card trở lại Deck.
 - **Dependencies:** M4.9a
@@ -2238,13 +2238,13 @@ phần có caller thật.
   deck/card sẽ mất; action theo `content_type`; reset `content_type` khi rỗng;
   move subtree trong phạm vi MVP; Riverpod state/controller; loading, loaded,
   empty, submitting, error; ARB en/vi; widget riêng của feature.
-- **Out of scope:** card editor (M4.11); review session (M5); UI thư viện starter
+- **Out of scope:** card editor (M4.11); study session (M5); UI thư viện starter
   (UC-01); sync/backend; media và tag.
 - **Editable documents:** `docs/wbs.md`
 - **Output:** `lib/features/deck/presentation/`, `lib/l10n/`,
   `test/features/deck/`, `test/visual_audit/screens/features/deck/`
 - **Acceptance criteria:**
-  - [x] Cold start mở **root deck list**, không phải review placeholder.
+  - [x] Cold start mở **root deck list**, không phải study placeholder.
   - [x] Root chỉ cho tạo deck (BR-58); tạo root **bắt buộc** chọn scheduler
         (BR-11).
   - [x] Sub-deck `unset` cho chọn *Create card* hoặc *Create deck*; deck đã có
@@ -2269,7 +2269,7 @@ phần có caller thật.
         hạn thì không có badge màu". Baseline production của M4.10 là 16 strict
         visual audit state, không phải một golden so pixel.
 - **Slice 1 — root deck list là Home (xong).** Chỉ luồng **đọc**. Route `/` đổi
-  từ `RouteNames.review` sang `RouteNames.decks` và render `RootDeckListScreen`;
+  từ `RouteNames.study` sang `RouteNames.decks` và render `RootDeckListScreen`;
   `rootDecksProvider` nối `DeckRepository.watchRootDecks()` vào UI qua bốn
   trạng thái loading / empty / loaded / error; retry trên error state
   `invalidate` provider nên thực sự mở `watch()` mới. ARB en/vi thêm bảy key,
@@ -2280,10 +2280,10 @@ phần có caller thật.
     **superseded bởi M4.10a.** Tại thời điểm slice 1, quyết định này giữ nguyên
     từ M4.1 và đúng: app chỉ có một destination thật. Chủ dự án sau đó quyết
     định MVP có Bottom Navigation; xem M4.10a.
-  - **~~`ReviewPlaceholderScreen` đã xoá~~** — **khôi phục ở M4.10a**, nơi nó
+  - **~~`StudyPlaceholderScreen` đã xoá~~** — **khôi phục ở M4.10a**, nơi nó
     trở thành branch 1 của navigation shell. Tại thời điểm slice 1 nó không còn
     production caller, và MX-VIS-001 coi audit của một screen đã biến mất là
-    orphan, nên xoá là đúng. `features/review/` vẫn giữ domain + data anchor
+    orphan, nên xoá là đúng. `features/study/` vẫn giữ domain + data anchor
     cho M5 suốt cả hai lần.
   - **~~DI đặt ở `lib/app/di/`~~, không ở feature:** lập luận đúng nhưng kết
     luận sai một nửa — **sửa ở M4.10b**. Chọn *implementation* thì đúng là việc
@@ -2344,7 +2344,7 @@ phần có caller thật.
     **không mang message**: domain nói rule nào sai, screen chọn copy ARB — nên
     không chuỗi kỹ thuật nào tới được nhãn field.
   - **Route lồng `/decks/:deckId` là child route của Decks branch**, nên bottom bar
-    còn, Back về đúng list, và chuyển sang Review rồi quay lại vẫn thấy deck đang
+    còn, Back về đúng list, và chuyển sang Study rồi quay lại vẫn thấy deck đang
     mở. `RoutePathParams.deckId` là constant vì hai nửa (ghi ở screen, đọc ở route
     table) do hai file khác nhau viết và một typo thì compile được.
   - **Move picker hiện mọi deck**, cái không hợp lệ bị disable **kèm lý do**, thay
@@ -2391,21 +2391,21 @@ phần có caller thật.
 ### M4.10a · App shell và Bottom Navigation
 
 - **Status:** done
-- **Goal:** MVP có Bottom Navigation Material 3 với hai destination — Decks và
-  Review — thay vì một route đơn.
+- **Goal:** MVP có Bottom Navigation Material 3 với hai destination — Decks
+và Study — thay vì một route đơn.
 - **Quyết định product mới, supersede M4.1 và slice 1 của M4.10.** M4.1 ghi
   `StatefulShellRoute` và bottom navigation là out-of-scope, và slice 1 của
   M4.10 giữ nguyên quyết định đó; **cả hai đều đúng tại thời điểm được triển
   khai** — lúc ấy app chỉ có một destination thật, và một shell một tab là một
   shell phải dựng lại. Chủ dự án hiện quyết định MVP có Bottom Navigation với
-  Review là destination thứ hai. Mục M4.1 **không** được sửa để giả vờ bottom
+Study là destination thứ hai. Mục M4.1 **không** được sửa để giả vờ bottom
   navigation từng nằm trong scope của nó; nó là ghi chép tại thời điểm đó.
 - **Scope:** `StatefulShellRoute.indexedStack` với hai branch; `AppNavigationShell`
-  ở `lib/app/shell/`; `MxNavigationBar` shared component; route `review` được
+  ở `lib/app/shell/`; `MxNavigationBar` shared component; route `study` được
   khôi phục; ARB en/vi cho nhãn điều hướng; `navigationBarTheme`; router/shared/
   shell test; 4 golden; visual audit của Deck screen chụp qua router thật.
 - **Out of scope:** Settings, Statistics, Library; FAB hoặc create action; nội
-  dung thật của Review (M5.4); deep-link platform configuration.
+  dung thật của Study (M5.4); deep-link platform configuration.
 - **Editable documents:** `docs/wbs.md`
 - **Output:** `lib/app/shell/app_navigation_shell.dart`,
   `lib/shared/widgets/mx_navigation_bar.dart`, `lib/app/router/`,
@@ -2416,10 +2416,10 @@ phần có caller thật.
   - [x] Bottom Navigation hiển thị trên Deck screen ở cả bốn trạng thái.
   - [x] Component tên `MxNavigationBar`, dùng Material 3 `NavigationBar`; không
         dùng `BottomNavigationBar` (có test khẳng định cả hai).
-  - [x] Decks là tab mặc định; Review là tab thứ hai.
-  - [x] Deep link `/review` mở đúng tab Review, không mở Decks rồi nhảy.
+  - [x] Decks là tab mặc định; Study là tab thứ hai.
+  - [x] Deep link `/study` mở đúng tab Study, không mở Decks rồi nhảy.
   - [x] Chuyển tab giữ branch state — đo bằng số lần `watchRootDecks()` được
-        gọi: một lần cho cả vòng Decks → Review → Decks.
+        gọi: một lần cho cả vòng Decks → Study → Decks.
   - [x] Reselect tab được xử lý, không throw và không điều hướng sai chỗ.
   - [x] 404 vẫn hoạt động; nút Home vẫn về Decks.
   - [x] Nhãn lấy từ ARB en/vi; không hardcode route name hay path.
@@ -2429,10 +2429,10 @@ phần có caller thật.
   - [x] 4 golden mới; strict visual audit của Deck screen **PASS** ở cả ba
         trạng thái × hai theme, ảnh đã chứa Bottom Navigation.
   - [x] Deck root list của slice 1 không bị rollback.
-- **`ReviewPlaceholderScreen` được khôi phục.** Slice 1 của M4.10 đã xoá nó vì
+- **`StudyPlaceholderScreen` được khôi phục.** Slice 1 của M4.10 đã xoá nó vì
   không còn production caller; giờ nó là branch 1 nên quay lại, cùng strict
   visual audit. ARB key đổi từ `homePlaceholderMessage` sang
-  `reviewPlaceholderMessage` — tên cũ mô tả một vai trò màn hình này không còn
+  `studyPlaceholderMessage` — tên cũ mô tả một vai trò màn hình này không còn
   giữ.
 - **Hai `Scaffold` là cố ý.** Shell mang bottom bar, mỗi màn mang
   `MxContentShell` với app bar. Đó là cấu trúc `StatefulShellRoute` được thiết
@@ -3500,7 +3500,7 @@ màu nào. Allowance đếm chính xác — 2 ở root, 3 ở level — và tr�
 - **Scope:** `deck_tile_widget.dart`, `deck_due_state_widget.dart` (mới),
   `AppColors` + `AppSemanticColors` (cặp streak container), ARB en/vi, palette
   của audit, ba test, `app_navigation_shell_test.dart`.
-- **Out of scope:** nút "Study" (chưa có màn review để bấm sang — M5), số
+- **Out of scope:** nút "Study" (chưa có màn study để bấm sang — M5), số
   sub-deck (chưa có trong `DeckSummary`).
 - **Dependencies:** M4.10r
 - **Checklist phases:** 7, 8, 14
@@ -3564,7 +3564,7 @@ hai con số của hai thời điểm khác nhau.
 hình nói rằng chẳng có gì xảy ra; BR-29 nói không có thẻ đến hạn là trạng thái
 bình thường, không phải thất bại của ngày hôm đó.
 
-**Hai thứ của design cố ý vắng mặt.** Streak chip cần `review_history` mà chưa gì
+**Hai thứ của design cố ý vắng mặt.** Streak chip cần `study_answers` mà chưa gì
 ghi vào cho tới M5 — một streak luôn bằng 0 tệ hơn không có streak. Nút "Start
 studying" cần một session để bấm sang, cùng milestone đó.
 
@@ -4706,7 +4706,7 @@ một dòng subject.
   1. **Layout + guard.** `architecture_boundary_test` giữ `domain/`, `data/`,
      `presentation/` đúng bucket như AD-15 đã giữ `presentation/widgets/`;
      Card và Review chuyển vào bucket (`data/local/` không phải tên AD-12),
-     màn Review vào `presentation/screens/` kèm companion visual audit.
+     màn Study vào `presentation/screens/` kèm companion visual audit.
   2. **Hardening.** `CardText` value object (constructor private), contract
      nhận `CardText`, xoá validate trùng ở data layer, `domain/failures/` ba
      file với enum reason, bốn use case, `di/` + binding + bootstrap.
@@ -5037,13 +5037,13 @@ cột NULL của scheduler kia.
   controller build/submit/reset + `ref.mounted`, giữ input khi lỗi), error →
   `Failure` ở biên repo (không rò Drift/SQL lên UI), band `cardStateOf` khớp SQL
   `cardStateCountsByDeck`, redirect có loop-guard (`topRoute`) + guard lỗi. Hai
-  quan sát nhỏ **không chặn, không cần sửa**: (1) hàng `review_count > 0` mà
+  quan sát nhỏ **không chặn, không cần sửa**: (1) hàng `answer_count > 0` mà
   scheduler `unknown` / `current_box` NULL được `cardStateOf` gán `isNew` nhưng
   SQL panel không đếm vào band nào (chỉ `total`) → chỉ xảy ra với dữ liệu
   hỏng/schema mới hơn; (2) audit list chưa set `deckContextToShow` nên không đo
   breadcrumb — `MxBreadcrumb` đã có golden riêng + widget test phủ logic card, nên
   chỉ là fidelity gap. Các method DAO chưa có caller production (`watchAllTags`,
-  `watchTagsForCards`, `watchFlaggedCardsByDeck`, `reviewStateByCard`) là surface
+  `watchTagsForCards`, `watchFlaggedCardsByDeck`, `studyStateByCard`) là surface
   có chủ đích cho M5, đã có DAO test — không phải dead code. **M4.11 DONE.**
 - **Hậu M4.11 — sửa lỗ hổng BR-61 (chủ dự án phát hiện).** UI đang chặn việc tạo
   card ở deck `unset`: empty state chỉ có nút tạo sub-deck kèm notice
@@ -5068,8 +5068,8 @@ cột NULL của scheduler kia.
   **Cộng phần UI mà M4.10at mở đường:** nhãn bốn trạng thái trên hàng thẻ, chip
   tag, cờ ⚑ và pill lọc theo cờ, panel tiến độ deck (vòng %, thanh phân đoạn,
   "N of M mastered"), và form gán tag trong editor.
-- **Out of scope:** review scheduler và nút **Start study** (M5.1); review
-  history UI; import/export; media; rich text. **Keyset cursor** — xem điều kiện
+- **Out of scope:** review scheduler và nút **Start study** (M5.1); study
+answers UI; import/export; media; rich text. **Keyset cursor** — xem điều kiện
   kích hoạt ở M4.10ar; cửa sổ `LIMIT` không cursor là hình dạng đã chốt cho MVP.
   **Sort control và search thẻ** — thứ tự danh sách cố định mới-trước; search là
   S1. Pill lọc theo cờ và theo trạng thái thì **trong** scope: chúng lọc, không
@@ -5086,10 +5086,10 @@ cột NULL của scheduler kia.
   - [ ] `front`/`back` trim không được rỗng, tối đa 2000 ký tự (BR-07, BR-08).
   - [ ] Card đầu tiên khoá `content_type = card` **trong cùng transaction**
         (BR-62, BR-63).
-  - [ ] Tạo card sinh **đúng một** review state, khớp scheduler và generation của
+  - [ ] Tạo card sinh **đúng một** study state, khớp scheduler và generation của
         root (BR-09); cả `eight_box` lẫn `sm2` khởi tạo đúng.
-  - [ ] Sửa card **không** đụng review state hay history (BR-10).
-  - [ ] Xoá card kéo theo review state và history bằng cascade.
+  - [ ] Sửa card **không** đụng study state hay history (BR-10).
+  - [ ] Xoá card kéo theo study state và history bằng cascade.
   - [ ] Xoá card cuối **không** tự chuyển `content_type` về `unset` (BR-67).
   - [ ] *Add another* giữ editor mở và xoá form sau khi lưu.
   - [ ] Lỗi persistence **giữ lại** nội dung form.
@@ -5310,7 +5310,7 @@ ra "1 due · 1 new" rồi mời "Start study · 1 due", tức là bảo người
 Predicate không đổi — nó đúng, và là hợp đồng của hàng đợi. Chỉ chữ đổi: nút đọc
 kích thước hàng đợi ("Start study · N cards") khi trong đó có thẻ từng học, và
 đọc "Learn N new cards" khi toàn thẻ mới; dòng meta lấy hiệu hai số nên mỗi thẻ
-chỉ đếm một lần. `new ⊆ hàng đợi` là bảo đảm được: BR-09 tạo review state với
+chỉ đếm một lần. `new ⊆ hàng đợi` là bảo đảm được: BR-09 tạo study state với
 `due_at = NULL`, BR-77 mới điền nó ở lượt `scheduled` đầu tiên.
 
 Fixture demo từng khai 23 due / 38 new — bất khả trong dữ liệu thật, và phép trừ
@@ -5379,7 +5379,7 @@ luôn, và không còn chỗ nào phải nhớ trừ.
 **`duePredicate = studyQueuePredicate & NOT isNewPredicate`.** Phủ định chính
 `isNewPredicate` chứ không viết `due_at IS NOT NULL AND due_at <= now`. Hai cách
 cho cùng kết quả **hôm nay**, vì BR-09 tạo `due_at = NULL` và BR-77 chỉ điền nó ở
-lượt `scheduled` đầu tiên nên `review_count = 0` kéo theo `due_at IS NULL`. Nhưng
+lượt `scheduled` đầu tiên nên `answer_count = 0` kéo theo `due_at IS NULL`. Nhưng
 cách thứ hai chỉ đúng chừng nào giả định đó còn đúng; cách thứ nhất **không thể**
 rời khỏi định nghĩa của `New` — `New` là gì thì `Due` là phần còn lại của hàng
 đợi. Đó là thứ cho phép panel **cộng** hai số lại thành kích thước phiên học mà
@@ -5538,7 +5538,7 @@ dùng chung với bốn pill của màn card list, và comment sẵn trong file 
   `test/support/review_render.dart`, `test/demo/card_screens_demo_test.dart`,
   7 review golden.
 - **Out of scope:** `design_preview/goldens/deck_list_*.png` — bản dựng tay cũ,
-  để nguyên vì nó là chủ thể của một audit riêng; màn Review và Settings.
+  để nguyên vì nó là chủ thể của một audit riêng; màn Study và Settings.
 - **Dependencies:** M4.10w, M4.11f
 - **Checklist phases:** 15
 - **Tests required:** render thật qua router production ở cả hai cấp và cả hai
@@ -5629,7 +5629,7 @@ cấp × hai theme. Golden còn 111 so với sàn 70.
 
 **Hai replica còn lại giữ nguyên, và đó là ranh giới.** `_ReviewScreen` và
 `_SettingsScreen` chưa có màn production nào để làm bản sao *của* — `lib/` chỉ
-có `ReviewPlaceholderScreen`. Chúng vẫn đang trả lời đúng câu hỏi mà một swatch
+có `StudyPlaceholderScreen`. Chúng vẫn đang trả lời đúng câu hỏi mà một swatch
 grid không trả lời được. Khi M5 dựng màn thật, replica tương ứng ra đi theo cùng
 cách này.
 
@@ -6139,7 +6139,7 @@ chọn file **theo đúng đường dẫn đó**, nên một file không bucket 
 
 **Seed mapper là bản sao thứ hai của BR-09, có chủ ý.** Bản gốc ở
 `features/card/data/`, mà feature này không được import. Lựa chọn còn lại là đẩy
-BR-09 vào `core/`, biến bảng khởi tạo review state thành hạ tầng chung không
+BR-09 vào `core/`, biến bảng khởi tạo study state thành hạ tầng chung không
 feature nào sở hữu. Hai mapper ngắn có test ghim từng cột là giá rẻ hơn.
 
 ### M4.12b · Playwright E2E trên Flutter Web ở mobile viewport
@@ -6151,7 +6151,7 @@ feature nào sở hữu. Hai mapper ngắn có test ghim từng cột là giá r
 - **Scope:** `e2e/` (package.json, playwright.config.ts, specs, support,
   README), `--dart-define=MEMOX_E2E` + `keepSemanticsOn` trong `bootstrap.dart`,
   job CI `web build + Playwright E2E`.
-- **Out of scope:** review session (M5); so ảnh — golden và strict visual audit
+- **Out of scope:** study session (M5); so ảnh — golden và strict visual audit
   đã sở hữu phần "trông thế nào".
 - **Dependencies:** M4.12a
 - **Checklist phases:** 15.5
@@ -6310,7 +6310,7 @@ file này cũ đi — chỉ đọc lại `lib/` mới làm được, và điều
 - **Scope:** fixture cho development/test; seed helper dùng **chính** repository
   và loader thật; persistence qua restart; Flutter Web + Playwright ở mobile
   viewport với thao tác trực tiếp trên UI; visual state matrix; regression toàn
-  slice; thay `ReviewPlaceholderScreen` làm entrypoint nếu còn; dọn placeholder
+  slice; thay `StudyPlaceholderScreen` làm entrypoint nếu còn; dọn placeholder
   và navigation demo-only không còn caller.
 - **Out of scope:** Review session (M5); nội dung production (BR-87, trước M8);
   sync/backend.
@@ -6350,14 +6350,14 @@ file này cũ đi — chỉ đọc lại `lib/` mới làm được, và điều
 
 ---
 
-## M5 · Review vertical slice — UC-05
+## M5 · Study vertical slice — UC-05
 
 Mục tiêu: luồng ôn tập chạy xuyên suốt Drift → data source → repository → use
 case → controller/state → router → màn hình → ghi kết quả → UI cập nhật.
 
 **Không còn là vertical slice đầu tiên.** Quản lý Deck/Card đã hoàn thành ở
-M4.8–M4.12, và M5 **không** triển khai lại phần đó — nó xây đúng phần Review.
-Điều kiện bắt đầu: **M4.12 `done`**. Review MUST NOT bắt đầu trước mốc đó, vì
+M4.8–M4.12, và M5 **không** triển khai lại phần đó — nó xây đúng phần Study.
+Điều kiện bắt đầu: **M4.12 `done`**. Study MUST NOT bắt đầu trước mốc đó, vì
 không có cây deck và card thật thì phiên ôn không có gì để ôn, và mọi test của nó
 sẽ phải dựng dữ liệu bằng tay — thứ M4.12 tồn tại để thay thế.
 
@@ -6365,19 +6365,69 @@ sẽ phải dựng dữ liệu bằng tay — thứ M4.12 tồn tại để thay
 login, backend, sync, media, statistics, settings, và UI thư viện starter deck.
 CRUD deck/card **đã xong ở M4**, không lặp lại ở đây.
 
-### M5.0 · Review-specific domain và data completion
+### M5.0a · Đổi tên Review → Study trong toàn bộ tài liệu
+
+- **Status:** done — chỉ `docs/` và hai script guard. `lib/`, `.drift` và
+  migration **chưa đụng tới**; xem "Còn nợ".
+- **Goal:** Gọi cùng một thứ bằng cùng một tên, trước khi M5 viết code sinh thêm
+  chỗ cho hai tên cùng tồn tại.
+- **Scope:** 6 tài liệu trong `docs/`, cộng `verify_invariants.py` (fixture
+  `CREATE TABLE`) và `check_docs.py` (pattern invariant) — hai script này chạy
+  thật các query trích từ `data-model.md`, nên phải đổi cùng lượt hoặc guard đỏ.
+- **Out of scope:** `lib/`, `.drift`, migration, ARB, golden — và toàn bộ quyết
+  định nghiệp vụ mới của Study, vì chúng chưa chốt xong.
+- **Editable documents:** `docs/product.md`, `docs/architecture.md`,
+  `docs/business-rules.md`, `docs/data-model.md`, `docs/use-cases.md`,
+  `docs/wbs.md`
+- **Output:** không file mới; 299 lượt đổi tên trong `docs/`
+- **Acceptance criteria:**
+  - [x] Tên miền là `study`; danh từ theo sau mang **đơn vị**: `study_sessions`
+        (phiên) · `study_answers` (lượt) · `card_study_states` (lịch một thẻ).
+  - [x] `review` nghĩa **rà soát** không bị đụng: `docs/reviews/`, "vòng review
+        UI/UX", "code review", "reviewer", "Review KPI".
+  - [x] `reviewing` giữ nguyên — nó là tên một giai đoạn trong `new`/`beginning`/
+        `reviewing`/`mastered`, không phải tên chức năng; đổi thành "studying" sẽ
+        mất phân biệt với `beginning`.
+  - [x] `data-model.md` mang khối nói rõ tên trong tài liệu là **tên đích** còn
+        database đang ở v3, kèm bảng tra cũ ↔ mới.
+  - [x] `check_docs.py` xanh, gồm self-test 15 invariant query; guard `memox-v7`
+        xanh.
+- **Dependencies:** M4.12
+- **Tests required:** `check_docs.py`, `verify_invariants.py` self-test, guard
+  `memox-v7`
+- **Checklist phases:** 14.1
+
+**Vì sao không thay được bằng một lệnh.** `review` ở đây mang hai nghĩa: *ôn tập*
+và *rà soát*. Riêng `wbs.md` có 228 lượt, phần lớn là nghĩa thứ hai — "vòng review
+UI/UX", "review 1:1 parity checklist". Một lệnh thay toàn cục sẽ phá đúng những
+dòng ghi lại việc rà soát đã làm. Đợt này chạy bốn bước, đo trước mỗi bước: định
+danh kỹ thuật (139) → prose nghĩa ôn tập (104) → các cụm bị **ngắt dòng** mà
+`replace` chuỗi phẳng không bắt được (9) → tab, route và định danh sót (47).
+
+**Cái suýt bị bỏ qua.** `verify_invariants.py` giữ một schema `CREATE TABLE`
+hardcode rồi chạy các invariant query trích thẳng từ `data-model.md`. Đổi tên bảng
+trong tài liệu mà quên fixture thì 15 query chạy trên schema cũ và guard đỏ —
+không phải vì tài liệu sai, mà vì hai nửa của cùng một phép kiểm nói hai thứ tiếng.
+
+**Còn nợ, và cố ý để nợ:** `lib/` (8 file/thư mục mang tên `review`), `.drift`,
+schema v4 cho rename bảng/cột, ARB (`navigationReviewLabel` → `navigationStudyLabel`,
+copy "Review" → "Study"), và các golden mang tên `review`. Chúng là task riêng vì
+cần một migration, và migration nên đi cùng đợt schema mà nghiệp vụ Study sẽ yêu
+cầu — thứ vẫn đang được chốt.
+
+### M5.0 · Study-specific domain và data completion
 
 - **Status:** todo
-- **Goal:** Bổ sung đúng phần domain và data mà **chỉ Review** cần, sau khi
+- **Goal:** Bổ sung đúng phần domain và data mà **chỉ Study** cần, sau khi
   Deck/Card demo slice đã hoàn thành.
-- **Scope:** `StudySessionEntity`, `ReviewHistoryEntity`, `ReviewAction`,
-  `ReviewKind`, `SessionStatus`, `SessionEndReason`; phần `CardReviewStateEntity`
+- **Scope:** `StudySessionEntity`, `StudyAnswerEntity`, `StudyAction`,
+  `StudyAnswerKind`, `SessionStatus`, `SessionEndReason`; phần `CardStudyStateEntity`
   dành cho review; repository contract mở rộng cho UC-05; DAO/mapper/repository
   cho session, history và ghi review atomic.
-- **Out of scope:** scheduler formula (M5.1); review use case (M5.2); controller
+- **Out of scope:** scheduler formula (M5.1); study use case (M5.2); controller
   và UI (M5.3, M5.4).
 - **Editable documents:** `docs/wbs.md`
-- **Output:** `lib/features/review/domain/`, `lib/features/review/data/`
+- **Output:** `lib/features/study/domain/`, `lib/features/study/data/`
 - **Acceptance criteria:**
   - [ ] `domain/` là Dart thuần — không Flutter, không Drift.
   - [ ] Enum phủ **đúng** tập giá trị của BR-75, BR-79, BR-80.
@@ -6388,23 +6438,23 @@ CRUD deck/card **đã xong ở M4**, không lặp lại ở đây.
         (BR-79…BR-85), và bất biến 12 vẫn pass sau bộ test.
   - [ ] Không exception persistence thô nào thoát khỏi repository.
   - [ ] Không thêm API nào chưa có caller trong M5.1–M5.5.
-- **Vì sao tách khỏi M4.9.** Domain của Review chỉ có caller khi scheduler và use
+- **Vì sao tách khỏi M4.9.** Domain của Study chỉ có caller khi scheduler và use
   case tồn tại. Gộp nó vào M4.9 sẽ lặp lại đúng sai lầm của M4.5: viết contract
   cho một presentation chưa có mặt.
 - **Dependencies:** M4.12
 - **Tests required:** entity, enum, mapper, repository transaction, rollback
 - **Checklist phases:** 14.2, 14.3, 15.1
 
-### M5.1 · `ReviewScheduler` và hai implementation
+### M5.1 · `StudyScheduler` và hai implementation
 
 - **Status:** todo
 - **Goal:** Logic xếp lịch là hàm thuần khiết, test được toàn bộ ma trận.
-- **Scope:** `domain/scheduler/review_scheduler.dart` với `supportedActions`,
+- **Scope:** `domain/scheduler/study_scheduler.dart` với `supportedActions`,
   `EightBoxScheduler` (BR-15, BR-16), `Sm2Scheduler` (BR-17, BR-18, BR-19), bảng
   interval trong scheduler config.
 - **Out of scope:** dùng scheduler trong controller (M5.3) hay ghi DB (M5.2).
 - **Editable documents:** `docs/wbs.md`
-- **Output:** `lib/features/review/domain/scheduler/`
+- **Output:** `lib/features/study/domain/scheduler/`
 - **Acceptance criteria:**
   - [ ] `next()` không gọi `DateTime.now()`; `now` là tham số (AD-06).
   - [ ] `EightBoxScheduler.supportedActions` = `[forgotten, remembered]`;
@@ -6426,25 +6476,25 @@ CRUD deck/card **đã xong ở M4**, không lặp lại ở đây.
 
 - **Status:** todo
 - **Goal:** Logic phiên ôn nằm ở domain: mở phiên, lấy card đến hạn, ghi đánh
-  giá đúng `review_kind`, từ chối generation cũ.
+  giá đúng `kind`, từ chối generation cũ.
 - **Scope:** `StartStudySessionUseCase`, `SubmitReviewUseCase`,
-  `EndStudySessionUseCase`; xác định `review_kind` tường minh (BR-76);
+  `EndStudySessionUseCase`; xác định `kind` tường minh (BR-76);
   kiểm `scheduler_generation` (BR-46, BR-84); giới hạn 50 card (BR-24).
 - **Out of scope:** hàng đợi và thứ tự trong phiên (M5.3 — đó là trạng thái tạm
   của controller).
 - **Editable documents:** `docs/wbs.md`
-- **Output:** `lib/features/review/domain/usecase/`
+- **Output:** `lib/features/study/domain/usecase/`
 - **Acceptance criteria:**
-  - [ ] Lượt đầu của một card trong phiên ghi `review_kind = scheduled`; lượt sau
+  - [ ] Lượt đầu của một card trong phiên ghi `kind = scheduled`; lượt sau
         ghi `relearning` (BR-77, BR-78) — test khẳng định.
   - [ ] Lượt `relearning` **không** đổi `current_box`, `ease_factor`,
-        `interval_days`, `due_at`; **có** đổi `last_reviewed_at` (BR-78).
+        `interval_days`, `due_at`; **có** đổi `last_answered_at` (BR-78).
   - [ ] Card box 8 + `remembered` vẫn được ghi `scheduled` dù box không đổi
         (BR-76) — test khẳng định, đây là ca mà suy luận sẽ sai.
   - [ ] Ghi review từ session có generation cũ → ném `Failure`, **không** ghi
-        `review_history`, session chuyển `invalidated`/`stale_generation`
+        `study_answers`, session chuyển `invalidated`/`stale_generation`
         (BR-84).
-  - [ ] `review_count` chỉ tăng ở lượt `scheduled`; `lapse_count` tăng khi
+  - [ ] `answer_count` chỉ tăng ở lượt `scheduled`; `lapse_count` tăng khi
         `forgotten`/`again` ở lượt `scheduled` (BR-20).
   - [ ] Một phiên lấy tối đa 50 card riêng biệt (BR-24).
 - **Dependencies:** M5.1, M5.0
@@ -6457,13 +6507,13 @@ CRUD deck/card **đã xong ở M4**, không lặp lại ở đây.
 - **Status:** todo
 - **Goal:** State immutable tách dữ liệu khỏi trạng thái tác vụ, hàng đợi xử lý
   đúng luật `relearning`.
-- **Scope:** `ReviewSessionState` (freezed), `ReviewSessionController`
+- **Scope:** `StudySessionState` (freezed), `StudySessionController`
   (`@riverpod`), hàng đợi với luật đưa card `forgotten`/`again` quay lại sau ít
   nhất 3 card (BR-26, BR-28), chống bấm đúp.
 - **Out of scope:** widget (M5.4).
 - **Editable documents:** `docs/wbs.md`
-- **Output:** `lib/features/review/presentation/state/`,
-  `lib/features/review/presentation/controller/`
+- **Output:** `lib/features/study/presentation/state/`,
+  `lib/features/study/presentation/controller/`
 - **Acceptance criteria:**
   - [ ] State immutable, có value equality; **không** có một `isLoading` chung
         cho mọi thao tác.
@@ -6485,13 +6535,13 @@ CRUD deck/card **đã xong ở M4**, không lặp lại ở đây.
 - **Status:** todo
 - **Goal:** Màn hình render đủ mọi trạng thái và nút đánh giá đúng theo
   scheduler.
-- **Scope:** `ReviewSessionScreen`, route theo tên, widget con tách theo section,
+- **Scope:** `StudySessionScreen`, route theo tên, widget con tách theo section,
   render nút từ `supportedActions` (BR-30), chuỗi lấy từ ARB.
 - **Out of scope:** màn danh sách deck đầy đủ — chỉ cần một lối vào tối thiểu để
   mở phiên ôn từ fixture.
 - **Editable documents:** `docs/wbs.md`
-- **Output:** `lib/features/review/presentation/screen/`,
-  `lib/features/review/presentation/widget/`, route mới trong `app/router/`
+- **Output:** `lib/features/study/presentation/screen/`,
+  `lib/features/study/presentation/widget/`, route mới trong `app/router/`
 - **Acceptance criteria:**
   - [ ] Deck `eight_box` hiện đúng **2** nút; deck `sm2` hiện đúng **4** nút
         (BR-30) — widget test cho cả hai.
@@ -6499,7 +6549,7 @@ CRUD deck/card **đã xong ở M4**, không lặp lại ở đây.
   - [ ] Empty state khi không còn card đến hạn là thông điệp tích cực, **không**
         phải màn lỗi (BR-29).
   - [ ] Trong lúc ghi đánh giá, nội dung card vẫn hiện và các nút bị khoá.
-  - [ ] `grep -rn "Text('" lib/features/review/presentation` không có kết quả —
+  - [ ] `grep -rn "Text('" lib/features/study/presentation` không có kết quả —
         mọi chuỗi từ ARB.
   - [ ] Render ở 320×568 và `textScaler` 2.0 → `tester.takeException()` là null.
   - [ ] Light mode và dark mode đều có widget test.
@@ -6527,12 +6577,12 @@ CRUD deck/card **đã xong ở M4**, không lặp lại ở đây.
   - [ ] Ghi thất bại không thể tiếp tục → `failed` / `persistence_error`
         (BR-85).
   - [ ] Ở **cả bốn** trường hợp, review đã ghi thành công vẫn còn trong
-        `review_history` (BR-86) — test khẳng định từng trường hợp.
+        `study_answers` (BR-86) — test khẳng định từng trường hợp.
   - [ ] Không tổ hợp `status` × `end_reason` nào ngoài ma trận ở `data-model.md`
         — bất biến Q12 của M4.4 vẫn pass sau khi chạy các luồng này.
 - **Dependencies:** M5.3, M4.4
 - **Tests required:** repository/use case test cho bốn cách kết thúc; test khẳng
-  định `review_history` được giữ ở cả bốn
+  định `study_answers` được giữ ở cả bốn
 - **Checklist phases:** 14.4, 15.1, 15.2
 
 ### M5.6 · Integration test luồng UC-05
@@ -6589,7 +6639,7 @@ của M2.
 | Đưa deck con lên thành root deck | descoped khỏi MVP | Cần quyết định scheduler mới; là tính năng riêng chứ không phải phép di chuyển | Sau MVP (UC-09 A2) |
 | Media | descoped khỏi MVP | Kéo theo lưu trữ file và đồng bộ file | Sau MVP; quy tắc reset và lưu trữ đã đặt sẵn (BR-41, AD-08) |
 | ~~Tag~~ | **đã vào MVP** | Màn card cần hiển thị và lọc theo tag; bảng `tags` + `card_tags` không kéo theo lưu trữ file như media | Đã làm ở M4.10at (BR-93, BR-94) |
-| Dải metadata trên card editor — `78% recall` và link `History` | hoãn khỏi M4.11 | Hai nửa của nó chặn bởi hai thứ khác nhau. **`% recall`** cần một BR định nghĩa "nhớ được" cho từng scheduler — `remembered` với `eight_box`, còn `sm2` phải chốt `hard\|good\|easy` có tính là nhớ không — tức cùng hình dạng BR-89…BR-91. **Link `History`** mở một màn review history, thứ M4.11 đặt thẳng vào out-of-scope | Cùng M5.x, khi review history có màn của nó. `review_history.action` đã lưu sẵn đủ dữ liệu (BR-77), nên đây là câu hỏi định nghĩa và UI, không phải câu hỏi schema |
+| Dải metadata trên card editor — `78% recall` và link `History` | hoãn khỏi M4.11 | Hai nửa của nó chặn bởi hai thứ khác nhau. **`% recall`** cần một BR định nghĩa "nhớ được" cho từng scheduler — `remembered` với `eight_box`, còn `sm2` phải chốt `hard\|good\|easy` có tính là nhớ không — tức cùng hình dạng BR-89…BR-91. **Link `History`** mở một màn study answers, thứ M4.11 đặt thẳng vào out-of-scope | Cùng M5.x, khi study answers có màn của nó. `study_answers.action` đã lưu sẵn đủ dữ liệu (BR-77), nên đây là câu hỏi định nghĩa và UI, không phải câu hỏi schema |
 | Nhập giọng nói (mic) và phát âm bằng TTS (loa) trên card editor | hoãn khỏi M4.11 | Cả hai có trong ảnh tham chiếu. Mỗi cái cần một plugin, một quyền hệ điều hành và một luồng lỗi riêng — gần với media, vốn đã hoãn | Sau MVP, cùng lúc với media |
 
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
