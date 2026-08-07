@@ -90,7 +90,7 @@ abstract final class ItFixtures {
       final future = await _card(cards, futureOnly.id, 'future-only');
 
       // BR-90/BR-91 display bands, one row each. `new-visible` keeps the state
-      // its creation wrote: review_count 0, due immediately.
+      // its creation wrote: answer_count 0, due immediately.
       await _promote(
         harness.database,
         begin.id,
@@ -205,13 +205,13 @@ abstract final class ItFixtures {
   }) async {
     final changed =
         await (db.update(
-          db.cardReviewStates,
+          db.cardStudyStates,
         )..where((tbl) => tbl.cardId.equals(cardId))).write(
-          CardReviewStatesCompanion(
+          CardStudyStatesCompanion(
             currentBox: Value<int?>(box),
-            reviewCount: Value<int>(reviews),
+            answerCount: Value<int>(reviews),
             dueAt: Value<DateTime?>(dueAt),
-            lastReviewedAt: Value<DateTime?>(
+            lastAnsweredAt: Value<DateTime?>(
               dueAt.subtract(const Duration(days: 1)),
             ),
           ),

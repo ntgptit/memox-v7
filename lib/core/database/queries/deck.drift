@@ -70,7 +70,7 @@ ORDER BY created_at ASC, id ASC;
 -- schedule a wake for a boundary that has already been crossed — a timer firing
 -- at zero delay, forever.
 --
--- One scalar subquery, evaluated once per statement, and `idx_review_states_due`
+-- One scalar subquery, evaluated once per statement, and `idx_card_study_states_due`
 -- makes it a single index seek rather than a scan. NULL means nothing is
 -- scheduled to become due at all, which is a real state — every card due, or no
 -- cards — and the screen must not set a timer for it.
@@ -82,7 +82,7 @@ SELECT
     COALESCE(learned.learnedCount, 0) AS learnedCardCount,
     COALESCE(sub.subCount, 0) AS subDeckCount,
     (
-        SELECT MIN(next.due_at) FROM card_review_states next
+        SELECT MIN(next.due_at) FROM card_study_states next
         WHERE next.due_at > :now
     ) AS nextDueAt
 FROM decks d
@@ -96,18 +96,18 @@ LEFT JOIN (
     SELECT cd.root_deck_id AS rootDeckId, COUNT(*) AS dueCount
     FROM cards c
     INNER JOIN decks cd ON cd.id = c.deck_id
-    INNER JOIN card_review_states s ON s.card_id = c.id
+    INNER JOIN card_study_states s ON s.card_id = c.id
     WHERE (s.due_at IS NULL OR s.due_at <= :now)
     GROUP BY cd.root_deck_id
 ) due ON due.rootDeckId = d.id
--- BR-88. `card_review_states` carries `scheduler_type` denormalised, so the
+-- BR-88. `card_study_states` carries `scheduler_type` denormalised, so the
 -- predicate needs no join back to decks -- and the denormalisation is what makes
 -- the two branches checkable in one pass instead of two queries.
 LEFT JOIN (
     SELECT cd.root_deck_id AS rootDeckId, COUNT(*) AS learnedCount
     FROM cards c
     INNER JOIN decks cd ON cd.id = c.deck_id
-    INNER JOIN card_review_states s ON s.card_id = c.id
+    INNER JOIN card_study_states s ON s.card_id = c.id
     WHERE (s.scheduler_type = 'eight_box' AND s.current_box = 8)
        OR (s.scheduler_type = 'sm2' AND s.interval_days >= 128)
     GROUP BY cd.root_deck_id
@@ -227,7 +227,7 @@ SELECT
     COALESCE(learned.learnedCount, 0) AS learnedCardCount,
     COALESCE(sub.subCount, 0) AS subDeckCount,
     (
-        SELECT MIN(next.due_at) FROM card_review_states next
+        SELECT MIN(next.due_at) FROM card_study_states next
         WHERE next.due_at > :now
     ) AS nextDueAt,
     (
@@ -250,7 +250,7 @@ LEFT JOIN (
     SELECT b.branch_id AS branchId, COUNT(*) AS dueCount
     FROM branch b
     INNER JOIN cards c ON c.deck_id = b.deck_id
-    INNER JOIN card_review_states s ON s.card_id = c.id
+    INNER JOIN card_study_states s ON s.card_id = c.id
     WHERE (s.due_at IS NULL OR s.due_at <= :now)
     GROUP BY b.branch_id
 ) due ON due.branchId = child.id
@@ -261,7 +261,7 @@ LEFT JOIN (
     SELECT b.branch_id AS branchId, COUNT(*) AS learnedCount
     FROM branch b
     INNER JOIN cards c ON c.deck_id = b.deck_id
-    INNER JOIN card_review_states s ON s.card_id = c.id
+    INNER JOIN card_study_states s ON s.card_id = c.id
     WHERE (s.scheduler_type = 'eight_box' AND s.current_box = 8)
        OR (s.scheduler_type = 'sm2' AND s.interval_days >= 128)
     GROUP BY b.branch_id

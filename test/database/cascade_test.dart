@@ -59,8 +59,8 @@ void main() {
 
     expect(await countOf(db, 'decks'), 3);
     expect(await countOf(db, 'cards'), 1);
-    expect(await countOf(db, 'card_review_states'), 1);
-    expect(await countOf(db, 'review_history'), 1);
+    expect(await countOf(db, 'card_study_states'), 1);
+    expect(await countOf(db, 'study_answers'), 1);
     expect(await countOf(db, 'study_sessions'), 1);
 
     await db.customStatement("DELETE FROM decks WHERE id = 'root'");
@@ -70,8 +70,8 @@ void main() {
     // sessions by deck_id. A single count would hide a chain that did not fire.
     expect(await countOf(db, 'decks'), 0);
     expect(await countOf(db, 'cards'), 0);
-    expect(await countOf(db, 'card_review_states'), 0);
-    expect(await countOf(db, 'review_history'), 0);
+    expect(await countOf(db, 'card_study_states'), 0);
+    expect(await countOf(db, 'study_answers'), 0);
     expect(await countOf(db, 'study_sessions'), 0);
   });
 
@@ -86,8 +86,8 @@ void main() {
     await db.customStatement("DELETE FROM cards WHERE id = 'card-1'");
 
     expect(await countOf(db, 'cards'), 1);
-    expect(await countOf(db, 'card_review_states'), 1);
-    expect(await countOf(db, 'review_history'), 0);
+    expect(await countOf(db, 'card_study_states'), 1);
+    expect(await countOf(db, 'study_answers'), 0);
     expect(await countOf(db, 'decks'), 3);
     expect(await countOf(db, 'study_sessions'), 1);
   });

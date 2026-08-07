@@ -76,7 +76,7 @@ SELECT
     WHERE ct.card_id = c.id
   ) AS tag_names
 FROM cards c
-INNER JOIN card_review_states s ON s.card_id = c.id
+INNER JOIN card_study_states s ON s.card_id = c.id
 WHERE $predicate
 ORDER BY $order
 LIMIT :limit;
@@ -90,14 +90,14 @@ LIMIT :limit;
 -- matching row, which is precisely the early stop the `LIMIT` and the index buy.
 cardCount:
 SELECT COUNT(*) FROM cards c
-INNER JOIN card_review_states s ON s.card_id = c.id
+INNER JOIN card_study_states s ON s.card_id = c.id
 WHERE $predicate;
 
 cardById:
 SELECT * FROM cards WHERE id = :cardId;
 
 studyStateByCard:
-SELECT * FROM card_review_states WHERE card_id = :cardId;
+SELECT * FROM card_study_states WHERE card_id = :cardId;
 
 -- The same window as `cardsByDeck`, narrowed to flagged cards (BR-92).
 --
@@ -125,30 +125,30 @@ LIMIT :limit;
 -- while the list holds a window, so projecting in Dart would mean reading every
 -- study state to produce four integers.
 --
--- `review_count = 0` is tested first and separately, mirroring `cardStateOf`:
+-- `answer_count = 0` is tested first and separately, mirroring `cardStateOf`:
 -- `eight_box` seeds `current_box = 1` at creation (BR-09), so a card that has
 -- never been reviewed would otherwise be counted as beginning.
 cardStateCountsByDeck:
 SELECT
   COUNT(*) AS total,
-  SUM(CASE WHEN s.review_count = 0 THEN 1 ELSE 0 END) AS newCount,
-  SUM(CASE WHEN s.review_count > 0 AND (
+  SUM(CASE WHEN s.answer_count = 0 THEN 1 ELSE 0 END) AS newCount,
+  SUM(CASE WHEN s.answer_count > 0 AND (
         (s.scheduler_type = 'eight_box' AND s.current_box < :reviewingBox)
      OR (s.scheduler_type = 'sm2' AND s.interval_days < :reviewingDays)
   ) THEN 1 ELSE 0 END) AS beginningCount,
-  SUM(CASE WHEN s.review_count > 0 AND (
+  SUM(CASE WHEN s.answer_count > 0 AND (
         (s.scheduler_type = 'eight_box'
            AND s.current_box >= :reviewingBox AND s.current_box < :masteredBox)
      OR (s.scheduler_type = 'sm2'
            AND s.interval_days >= :reviewingDays
            AND s.interval_days < :masteredDays)
   ) THEN 1 ELSE 0 END) AS reviewingCount,
-  SUM(CASE WHEN s.review_count > 0 AND (
+  SUM(CASE WHEN s.answer_count > 0 AND (
         (s.scheduler_type = 'eight_box' AND s.current_box >= :masteredBox)
      OR (s.scheduler_type = 'sm2' AND s.interval_days >= :masteredDays)
   ) THEN 1 ELSE 0 END) AS masteredCount
 FROM cards AS c
-INNER JOIN card_review_states AS s ON s.card_id = c.id
+INNER JOIN card_study_states AS s ON s.card_id = c.id
 WHERE c.deck_id = :deckId;
 
 -- The card list header: the deck's own name and the path of ancestors above it,

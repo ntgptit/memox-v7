@@ -59,7 +59,7 @@ void main() {
     final reviewed = await seedCardIn(tree.leaf.id, 'seen');
     // Advance one card past new.
     await h.db.customStatement(
-      'UPDATE card_review_states SET review_count = 3, current_box = 2 '
+      'UPDATE card_study_states SET answer_count = 3, current_box = 2 '
       'WHERE card_id = ?',
       <Object?>[reviewed],
     );
@@ -85,14 +85,14 @@ void main() {
       final returning = await seedCardIn(tree.leaf.id, 'seen and ripe');
       final future = await seedCardIn(tree.leaf.id, 'later');
       await h.db.customStatement(
-        'UPDATE card_review_states SET review_count = 4, due_at = ? '
+        'UPDATE card_study_states SET answer_count = 4, due_at = ? '
         'WHERE card_id = ?',
         <Object?>[_epoch(now.subtract(const Duration(days: 1))), returning],
       );
       // Reviewed, but not ripe yet — the third state the table names, and the one
       // neither pill may claim.
       await h.db.customStatement(
-        'UPDATE card_review_states SET review_count = 4, due_at = ? '
+        'UPDATE card_study_states SET answer_count = 4, due_at = ? '
         'WHERE card_id = ?',
         <Object?>[_epoch(now.add(const Duration(days: 5))), future],
       );
@@ -126,12 +126,12 @@ void main() {
     final returning = await seedCardIn(tree.leaf.id, 'seen and ripe');
     final future = await seedCardIn(tree.leaf.id, 'later');
     await h.db.customStatement(
-      'UPDATE card_review_states SET review_count = 4, due_at = ? '
+      'UPDATE card_study_states SET answer_count = 4, due_at = ? '
       'WHERE card_id = ?',
       <Object?>[_epoch(now.subtract(const Duration(days: 1))), returning],
     );
     await h.db.customStatement(
-      'UPDATE card_review_states SET review_count = 4, due_at = ? '
+      'UPDATE card_study_states SET answer_count = 4, due_at = ? '
       'WHERE card_id = ?',
       <Object?>[_epoch(now.add(const Duration(days: 5))), future],
     );
@@ -168,10 +168,10 @@ void main() {
 
   test('the state distribution counts every card by band (D5)', () async {
     final tree = await h.seedTree();
-    await seedCardIn(tree.leaf.id, 'fresh'); // new (review_count 0)
+    await seedCardIn(tree.leaf.id, 'fresh'); // new (answer_count 0)
     final mastered = await seedCardIn(tree.leaf.id, 'known');
     await h.db.customStatement(
-      'UPDATE card_review_states SET review_count = 20, current_box = 8 '
+      'UPDATE card_study_states SET answer_count = 20, current_box = 8 '
       'WHERE card_id = ?',
       <Object?>[mastered],
     );
@@ -192,11 +192,11 @@ void main() {
     final sooner = await seedCardIn(tree.leaf.id, 'sooner');
     final untouched = await seedCardIn(tree.leaf.id, 'never reviewed');
     await h.db.customStatement(
-      'UPDATE card_review_states SET due_at = ? WHERE card_id = ?',
+      'UPDATE card_study_states SET due_at = ? WHERE card_id = ?',
       <Object?>[_epoch(now.add(const Duration(days: 9))), later],
     );
     await h.db.customStatement(
-      'UPDATE card_review_states SET due_at = ? WHERE card_id = ?',
+      'UPDATE card_study_states SET due_at = ? WHERE card_id = ?',
       <Object?>[_epoch(now.add(const Duration(days: 2))), sooner],
     );
 
@@ -233,7 +233,7 @@ void main() {
       await h.cardRepository.setCardFlag(cardId: a, isFlagged: true);
       await h.cardRepository.setCardFlag(cardId: b, isFlagged: true);
       await h.db.customStatement(
-        'UPDATE card_review_states SET due_at = ? WHERE card_id = ?',
+        'UPDATE card_study_states SET due_at = ? WHERE card_id = ?',
         <Object?>[_epoch(now.add(const Duration(days: 5))), b],
       );
 

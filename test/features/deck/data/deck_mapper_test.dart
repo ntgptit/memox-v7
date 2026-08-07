@@ -25,7 +25,7 @@ void main() {
     schedulerType: schedulerType,
     schedulerVersion: 1,
     schedulerGeneration: 3,
-    firstReviewAt: localInstant,
+    firstAnsweredAt: localInstant,
     createdAt: localInstant,
     updatedAt: localInstant,
   );
@@ -42,7 +42,7 @@ void main() {
       expect(entity.contentType, DeckContentType.deck);
       expect(entity.schedulerType, SchedulerType.eightBox);
       expect(entity.schedulerGeneration, 3);
-      expect(entity.firstReviewAt, utcInstant);
+      expect(entity.firstAnsweredAt, utcInstant);
     });
 
     test('maps a sub-deck, nullable fields staying null', () {
@@ -62,7 +62,7 @@ void main() {
       expect(entity.contentType, DeckContentType.unset);
       expect(entity.schedulerType, isNull);
       expect(entity.schedulerGeneration, isNull);
-      expect(entity.firstReviewAt, isNull);
+      expect(entity.firstAnsweredAt, isNull);
     });
 
     test('timestamps come out in UTC even when the row is local time', () {
@@ -70,7 +70,7 @@ void main() {
 
       expect(entity.createdAt.isUtc, isTrue);
       expect(entity.updatedAt.isUtc, isTrue);
-      expect(entity.firstReviewAt!.isUtc, isTrue);
+      expect(entity.firstAnsweredAt!.isUtc, isTrue);
       // Same instant — conversion must not shift the moment.
       expect(entity.createdAt, utcInstant);
     });
@@ -128,12 +128,12 @@ void main() {
   group('card study state rows', () {
     test('maps an eight_box state', () {
       final entity = cardStudyStateEntityFromRow(
-        const CardReviewState(
+        const CardStudyState(
           cardId: 'card-1',
           schedulerType: 'eight_box',
           schedulerVersion: 1,
           schedulerGeneration: 1,
-          reviewCount: 0,
+          answerCount: 0,
           lapseCount: 0,
           currentBox: 1,
         ),
@@ -145,18 +145,18 @@ void main() {
       expect(entity.intervalDays, isNull);
       expect(entity.repetitions, isNull);
       expect(entity.dueAt, isNull);
-      expect(entity.lastReviewedAt, isNull);
+      expect(entity.lastAnsweredAt, isNull);
     });
 
     test('maps an sm2 state, and due_at in UTC', () {
       final entity = cardStudyStateEntityFromRow(
-        CardReviewState(
+        CardStudyState(
           cardId: 'card-2',
           schedulerType: 'sm2',
           schedulerVersion: 1,
           schedulerGeneration: 2,
           dueAt: localInstant,
-          reviewCount: 4,
+          answerCount: 4,
           lapseCount: 1,
           easeFactor: 2.5,
           intervalDays: 0,
@@ -176,12 +176,12 @@ void main() {
 
     test('an unknown scheduler type reads as unknown', () {
       final entity = cardStudyStateEntityFromRow(
-        const CardReviewState(
+        const CardStudyState(
           cardId: 'card-3',
           schedulerType: 'leitner9',
           schedulerVersion: 9,
           schedulerGeneration: 1,
-          reviewCount: 0,
+          answerCount: 0,
           lapseCount: 0,
         ),
       );

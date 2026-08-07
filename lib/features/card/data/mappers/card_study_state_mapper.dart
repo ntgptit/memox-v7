@@ -2,20 +2,20 @@ import '../../../../core/database/app_database.dart';
 import '../../domain/entities/card_study_state_entity.dart';
 import '../../../deck/domain/models/scheduler_type_model.dart';
 
-/// Maps a `card_review_states` row to the domain entity.
+/// Maps a `card_study_states` row to the domain entity.
 ///
 /// The scheduler type is read tolerantly — an unrecognised value becomes
 /// `unknown` rather than an exception — while writing `unknown` back is
 /// impossible by construction (`SchedulerType.dbValue` throws).
-CardStudyStateEntity cardStudyStateEntityFromRow(CardReviewState row) =>
+CardStudyStateEntity cardStudyStateEntityFromRow(CardStudyState row) =>
     CardStudyStateEntity(
       cardId: row.cardId,
       schedulerType: SchedulerType.fromDbValue(row.schedulerType),
       schedulerVersion: row.schedulerVersion,
       schedulerGeneration: row.schedulerGeneration,
       dueAt: row.dueAt?.toUtc(),
-      lastReviewedAt: row.lastReviewedAt?.toUtc(),
-      reviewCount: row.reviewCount,
+      lastAnsweredAt: row.lastAnsweredAt?.toUtc(),
+      answerCount: row.answerCount,
       lapseCount: row.lapseCount,
       currentBox: row.currentBox,
       easeFactor: row.easeFactor,

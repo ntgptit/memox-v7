@@ -128,7 +128,7 @@ Future<void> insertReviewState(
   int schedulerGeneration = 1,
 }) async {
   await db.customInsert(
-    'INSERT INTO card_review_states (card_id, scheduler_type, '
+    'INSERT INTO card_study_states (card_id, scheduler_type, '
     'scheduler_version, scheduler_generation, due_at) VALUES (?, ?, 1, ?, ?)',
     variables: <Variable<Object>>[
       Variable<String>(cardId),
@@ -178,20 +178,20 @@ Future<void> insertHistory(
   required String id,
   required String cardId,
   required String sessionId,
-  String reviewKind = 'scheduled',
+  String kind = 'scheduled',
   int? previousBox = 1,
   int? nextBox = 2,
 }) async {
   await db.customInsert(
-    'INSERT INTO review_history (id, card_id, session_id, scheduler_type, '
-    'scheduler_generation, review_kind, action, reviewed_at, previous_box, '
+    'INSERT INTO study_answers (id, card_id, session_id, scheduler_type, '
+    'scheduler_generation, kind, action, answered_at, previous_box, '
     'next_box) VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?, ?)',
     variables: <Variable<Object>>[
       Variable<String>(id),
       Variable<String>(cardId),
       Variable<String>(sessionId),
       const Variable<String>('eight_box'),
-      Variable<String>(reviewKind),
+      Variable<String>(kind),
       const Variable<String>('remembered'),
       Variable<DateTime>(testNow),
       if (previousBox == null)

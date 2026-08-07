@@ -23,7 +23,7 @@ import '../mappers/card_list_query_mapper.dart';
 /// repository maps them to domain entities and never lets one across (AD-01).
 /// One management-list row as it leaves the DAO: the card, its study state and
 /// its concatenated tag names. A record, so the repository maps one type.
-typedef CardListItemRow = (Card, CardReviewState, String? tagNames);
+typedef CardListItemRow = (Card, CardStudyState, String? tagNames);
 
 final class CardDao {
   CardDao(this._db);
@@ -71,7 +71,7 @@ final class CardDao {
     // generated `readsFrom` — they are read only inside the tag_names
     // subquery — so the plain watch never re-emits when a tag is added or
     // removed (IT-ORG-007/008). This merge completes the dependency set by
-    // hand: the base watch covers `cards`/`card_review_states`, and a write
+    // hand: the base watch covers `cards`/`card_study_states`, and a write
     // to either tag table triggers a re-read of the same query.
     // `card_list_tag_invalidation_test.dart` pins the behaviour.
     return Stream<List<CardListItemRow>>.multi((listener) {
@@ -123,7 +123,7 @@ final class CardDao {
   Future<Card?> cardById(String cardId) =>
       _db.cardById(cardId).getSingleOrNull();
 
-  Future<CardReviewState?> studyStateByCard(String cardId) =>
+  Future<CardStudyState?> studyStateByCard(String cardId) =>
       _db.studyStateByCard(cardId).getSingleOrNull();
 
   // ---- writes ------------------------------------------------------------
@@ -140,8 +140,8 @@ final class CardDao {
     _db.cards,
   )..where((Cards card) => card.id.equals(cardId))).go();
 
-  Future<void> insertReviewState(CardReviewStatesCompanion state) =>
-      _db.into(_db.cardReviewStates).insert(state);
+  Future<void> insertReviewState(CardStudyStatesCompanion state) =>
+      _db.into(_db.cardStudyStates).insert(state);
 
   // ---- flag ---------------------------------------------------------------
 

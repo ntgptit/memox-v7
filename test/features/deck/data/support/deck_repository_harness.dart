@@ -40,7 +40,7 @@ final class DeckRepositoryHarness {
 
   Future<List<QueryRow>> rawStates(String cardId) => db
       .customSelect(
-        'SELECT * FROM card_review_states WHERE card_id = ?',
+        'SELECT * FROM card_study_states WHERE card_id = ?',
         variables: <Variable<Object>>[Variable<String>(cardId)],
       )
       .get();

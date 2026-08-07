@@ -278,7 +278,7 @@ DeckEntity fakeRootDeck({
     contentType: contentType,
     schedulerType: schedulerType,
     schedulerGeneration: schedulerGeneration,
-    firstReviewAt: null,
+    firstAnsweredAt: null,
     createdAt: at,
     updatedAt: at,
   );
@@ -304,7 +304,7 @@ DeckEntity fakeSubDeck({
     contentType: contentType,
     schedulerType: null,
     schedulerGeneration: null,
-    firstReviewAt: null,
+    firstAnsweredAt: null,
     createdAt: at,
     updatedAt: at,
   );

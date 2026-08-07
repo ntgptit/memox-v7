@@ -120,8 +120,8 @@ final class FakeCardRepository implements CardRepository {
     DateTime? dueAt,
   ) {
     // eight_box only — enough to place the card in each display band. `isNew`
-    // is review_count 0; the rest pick a box on BR-91's ladder.
-    final (int reviewCount, int box) = switch (state) {
+    // is answer_count 0; the rest pick a box on BR-91's ladder.
+    final (int answerCount, int box) = switch (state) {
       CardState.isNew => (0, 1),
       CardState.beginning => (3, 2),
       CardState.reviewing => (6, 5),
@@ -134,8 +134,8 @@ final class FakeCardRepository implements CardRepository {
       schedulerVersion: 1,
       schedulerGeneration: 1,
       dueAt: dueAt,
-      lastReviewedAt: null,
-      reviewCount: reviewCount,
+      lastAnsweredAt: null,
+      answerCount: answerCount,
       lapseCount: 0,
       currentBox: box,
       easeFactor: null,

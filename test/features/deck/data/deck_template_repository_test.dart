@@ -56,7 +56,7 @@ void main() {
       expect(await countRows('decks'), 4);
       expect(await countRows('cards'), 3);
       // BR-09: exactly one study state per card, born with it.
-      expect(await countRows('card_review_states'), 3);
+      expect(await countRows('card_study_states'), 3);
 
       final root = (await rows(
         "SELECT * FROM decks WHERE parent_deck_id IS NULL",
@@ -141,7 +141,7 @@ void main() {
       );
 
       final state = (await rows(
-        'SELECT * FROM card_review_states LIMIT 1',
+        'SELECT * FROM card_study_states LIMIT 1',
       )).single;
       expect(state['scheduler_type'], 'sm2');
       expect(state['ease_factor'], 2.5);
@@ -151,7 +151,7 @@ void main() {
       // A copied card has never been reviewed, so it has no date yet — the same
       // state a card the user just typed is in.
       expect(state['due_at'], isNull);
-      expect(state['review_count'], 0);
+      expect(state['answer_count'], 0);
     },
   );
 

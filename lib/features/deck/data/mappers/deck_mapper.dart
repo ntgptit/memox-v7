@@ -28,7 +28,7 @@ DeckEntity deckEntityFromRow(Deck row) {
         ? null
         : SchedulerType.fromDbValue(schedulerType),
     schedulerGeneration: row.schedulerGeneration,
-    firstReviewAt: row.firstReviewAt?.toUtc(),
+    firstAnsweredAt: row.firstAnsweredAt?.toUtc(),
     createdAt: row.createdAt.toUtc(),
     updatedAt: row.updatedAt.toUtc(),
   );

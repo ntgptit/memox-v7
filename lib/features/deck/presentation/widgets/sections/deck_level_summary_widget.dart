@@ -24,7 +24,7 @@ import '../../states/deck_list_view_state.dart';
 /// has no cards of its own to leave out of the sum.
 ///
 /// **Two things the design puts here are deliberately absent.** Its streak chip
-/// needs `review_history`, which nothing writes until the review slice lands in
+/// needs `study_answers`, which nothing writes until the review slice lands in
 /// M5 — a streak that is always zero is worse than no streak. Its "Start
 /// studying" button needs a session to start, from the same milestone. Both
 /// would be controls that look live and are not.

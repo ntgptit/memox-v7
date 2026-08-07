@@ -30,7 +30,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.open() : super(openAppDatabaseConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -77,6 +77,25 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(cards, cards.backFolded);
         await _backfillFoldedSides();
       }
+
+      // v3 → v4 (M5.0l): pure rename. Two tables, six columns and three
+      // indexes take the names the specification has used since M5.0a. No
+      // column is added, dropped or rewritten, and no row is touched.
+      //
+      // **`ALTER TABLE … RENAME` rather than create-copy-drop.** SQLite has
+      // renamed columns since 3.25 and, with `legacy_alter_table` off, it also
+      // rewrites the foreign keys and index definitions that point at a renamed
+      // table. The copy approach would move every row for a change that alters
+      // no data, and would need `PRAGMA foreign_keys = OFF` around it — the one
+      // pragma this database refuses to turn off.
+      //
+      // **Raw SQL rather than `m.renameTable`.** The generated symbols always
+      // describe the *latest* schema, so naming them here would break the day a
+      // v5 arrives, exactly as `_backfillFoldedSides` explains above. These
+      // statements name only what v3 has and what v4 wants.
+      if (from < 4) {
+        await _renameForV4();
+      }
     },
 
     beforeOpen: (OpeningDetails details) async {
@@ -88,13 +107,62 @@ class AppDatabase extends _$AppDatabase {
     },
   );
 
+  /// The v3 → v4 rename, statement by statement.
+  ///
+  /// Order matters in one place: a column rename names the table it belongs to,
+  /// so tables move first and every column statement below uses the **new**
+  /// table name. Getting that backwards fails loudly rather than silently,
+  /// which is the one mercy of doing this in SQL.
+  ///
+  /// Indexes are dropped and recreated rather than renamed. SQLite has no
+  /// `ALTER INDEX`, and recreating is cheap: an index holds no data of its own.
+  ///
+  /// **Every old name below is load-bearing and must not be "fixed".** A
+  /// project-wide rename pass flattened these to `RENAME card_study_states TO
+  /// card_study_states` — statements that read tidy, compile fine, and turn the
+  /// migration into a no-op that then fails on a real v3 database because the
+  /// new table does not exist yet. `flutter analyze` cannot see inside a string;
+  /// `migration_test.dart`'s v3 → v4 group is what caught it.
+  Future<void> _renameForV4() async {
+    const List<String> statements = <String>[
+      // Tables.
+      'ALTER TABLE card_review_states RENAME TO card_study_states',
+      'ALTER TABLE review_history RENAME TO study_answers',
+
+      // Columns, on the tables under their new names.
+      'ALTER TABLE card_study_states RENAME COLUMN review_count TO answer_count',
+      'ALTER TABLE card_study_states RENAME COLUMN last_reviewed_at TO last_answered_at',
+      'ALTER TABLE study_answers RENAME COLUMN review_kind TO kind',
+      'ALTER TABLE study_answers RENAME COLUMN reviewed_at TO answered_at',
+      'ALTER TABLE decks RENAME COLUMN first_review_at TO first_answered_at',
+
+      // Indexes: drop, then recreate against the new names.
+      'DROP INDEX IF EXISTS idx_review_states_due',
+      'DROP INDEX IF EXISTS idx_history_card',
+      'DROP INDEX IF EXISTS idx_history_session',
+      'CREATE INDEX idx_card_study_states_due ON card_study_states (due_at)',
+      'CREATE INDEX idx_study_answers_card ON study_answers (card_id, answered_at)',
+      'CREATE INDEX idx_study_answers_session ON study_answers (session_id)',
+    ];
+
+    for (final statement in statements) {
+      await customStatement(statement);
+    }
+  }
+
   /// Fills `front_folded` / `back_folded` for every card that predates them.
   ///
   /// **Raw SQL, not the generated query API.** The generated symbols always
   /// describe the *latest* schema, so a step that used them would break the day
-  /// a v4 adds another column to `cards` — the migration would then be reading a
-  /// column that does not exist yet at this point in the upgrade. The two
-  /// statements below name only what v3 has.
+  /// a later version renames or adds a column — the migration would then be
+  /// naming something that does not exist yet at this point in the upgrade. The
+  /// two statements below name only what v3 has.
+  ///
+  /// That day arrived at v4, which renamed `card_review_states` and five
+  /// columns. This method still says `front_folded` and `back_folded` on
+  /// `cards`, neither of which v4 touched, so it keeps working unchanged — which
+  /// is the whole point of naming the schema of the step rather than the schema
+  /// of today.
   ///
   /// A loop rather than a batch: this runs once per device, inside the
   /// migration's transaction, and `customStatement` is the API that is certain

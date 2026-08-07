@@ -51,7 +51,7 @@ CREATE TABLE decks (
 
     -- NULL means no `scheduled` review in the current generation, so the
     -- scheduler choice is still unlocked (AD-06).
-    first_review_at DATETIME NULL,
+    first_answered_at DATETIME NULL,
 
     source_template_id TEXT NULL,
     source_template_version INTEGER NULL,

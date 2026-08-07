@@ -60,7 +60,7 @@ const Map<String, String> invariantQueries = <String, String>{
   // Q9 joins through root_deck_id. Coalescing the parent column with the id
   // returns the level-2 deck for anything at level 3 (BR-57).
   'Q9': // Card state disagrees with its root's scheduler (BR-48, BR-49)
-      'SELECT s.card_id FROM card_review_states s '
+      'SELECT s.card_id FROM card_study_states s '
       'JOIN cards c ON c.id = s.card_id '
       'JOIN decks d ON d.id = c.deck_id '
       'JOIN decks root ON root.id = d.root_deck_id '
@@ -92,8 +92,8 @@ const Map<String, String> invariantQueries = <String, String>{
 
   // ---- Review history -----------------------------------------------------
   'Q14': // A relearning review changed the schedule (BR-78)
-      'SELECT id FROM review_history '
-      "WHERE review_kind = 'relearning' "
+      'SELECT id FROM study_answers '
+      "WHERE kind = 'relearning' "
       'AND (previous_box IS NOT next_box '
       'OR previous_ease_factor IS NOT next_ease_factor '
       'OR previous_interval_days IS NOT next_interval_days)',

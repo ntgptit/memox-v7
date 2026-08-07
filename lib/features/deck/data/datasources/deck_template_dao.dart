@@ -45,6 +45,6 @@ final class DeckTemplateDao {
   Future<void> insertCard(CardsCompanion card) =>
       _db.into(_db.cards).insert(card);
 
-  Future<void> insertReviewState(CardReviewStatesCompanion state) =>
-      _db.into(_db.cardReviewStates).insert(state);
+  Future<void> insertReviewState(CardStudyStatesCompanion state) =>
+      _db.into(_db.cardStudyStates).insert(state);
 }

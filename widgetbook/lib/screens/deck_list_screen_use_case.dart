@@ -325,7 +325,7 @@ class _CatalogDeckRepository implements DeckRepository {
       contentType: DeckContentType.deck,
       schedulerType: scheduler,
       schedulerGeneration: 1,
-      firstReviewAt: null,
+      firstAnsweredAt: null,
       createdAt: _t0,
       updatedAt: _t0,
     );
@@ -345,7 +345,7 @@ class _CatalogDeckRepository implements DeckRepository {
       contentType: contentType,
       schedulerType: null,
       schedulerGeneration: null,
-      firstReviewAt: null,
+      firstAnsweredAt: null,
       createdAt: _t0,
       updatedAt: _t0,
     );

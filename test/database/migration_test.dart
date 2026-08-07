@@ -14,14 +14,14 @@ import '../drift/generated/schema.dart';
 /// below starts from `drift_schemas/drift_schema_v1.json`, which could not have
 /// been regenerated once the `.drift` files moved on.
 void main() {
-  test('the schema version is 3', () {
+  test('the schema version is 4', () {
     final db = AppDatabase(NativeDatabase.memory());
     addTearDown(db.close);
 
-    expect(db.schemaVersion, 3);
+    expect(db.schemaVersion, 4);
   });
 
-  test('onCreate builds the whole of v3 from an empty database', () async {
+  test('onCreate builds the whole of v4 from an empty database', () async {
     final db = AppDatabase(NativeDatabase.memory());
     addTearDown(db.close);
 
@@ -35,11 +35,11 @@ void main() {
         .get();
 
     expect(tables.map((row) => row.data['name']), <String>[
-      'card_review_states',
+      'card_study_states',
       'card_tags',
       'cards',
       'decks',
-      'review_history',
+      'study_answers',
       'study_sessions',
       'tags',
     ]);
@@ -67,8 +67,8 @@ void main() {
     }
   });
 
-  test('v1, v2 and v3 are the versions that exist', () {
-    expect(GeneratedHelper.versions, <int>[1, 2, 3]);
+  test('v1 through v4 are the versions that exist', () {
+    expect(GeneratedHelper.versions, <int>[1, 2, 3, 4]);
   });
 
   group('what v2 added, seen from a v1 database', () {
@@ -221,7 +221,7 @@ void main() {
 
       final db = AppDatabase(schema.newConnection());
       addTearDown(db.close);
-      await verifier.migrateAndValidate(db, 3);
+      await verifier.migrateAndValidate(db, db.schemaVersion);
 
       return db;
     }
@@ -291,7 +291,7 @@ void main() {
 
       final db = AppDatabase(schema.newConnection());
       addTearDown(db.close);
-      await verifier.migrateAndValidate(db, 3);
+      await verifier.migrateAndValidate(db, db.schemaVersion);
 
       final row = await foldedRow(db, 'c1');
       expect(row.data['front_folded'], 'động từ');

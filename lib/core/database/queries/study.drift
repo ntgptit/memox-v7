@@ -29,7 +29,7 @@ cardsDueForStudy:
 SELECT c.**
 FROM cards c
 INNER JOIN decks d ON d.id = c.deck_id
-INNER JOIN card_review_states s ON s.card_id = c.id
+INNER JOIN card_study_states s ON s.card_id = c.id
 WHERE d.root_deck_id = :rootDeckId
   AND (s.due_at IS NULL OR s.due_at <= :now)
 ORDER BY s.due_at IS NOT NULL, s.due_at ASC, c.id ASC;
@@ -41,7 +41,7 @@ dueCountPerRootDeck:
 SELECT d.root_deck_id AS rootDeckId, COUNT(*) AS dueCount
 FROM cards c
 INNER JOIN decks d ON d.id = c.deck_id
-INNER JOIN card_review_states s ON s.card_id = c.id
+INNER JOIN card_study_states s ON s.card_id = c.id
 WHERE (s.due_at IS NULL OR s.due_at <= :now)
 GROUP BY d.root_deck_id
 ORDER BY d.root_deck_id ASC;
