@@ -22,18 +22,20 @@ CREATE TABLE decks (id TEXT PRIMARY KEY, name TEXT NOT NULL,
  parent_deck_id TEXT NULL REFERENCES decks(id) ON DELETE CASCADE,
  root_deck_id TEXT NOT NULL, content_type TEXT NOT NULL, owner_id TEXT NULL,
  scheduler_type TEXT NULL, scheduler_version INTEGER NULL, scheduler_config TEXT NULL,
- scheduler_generation INTEGER NULL, first_answered_at TEXT NULL,
+ scheduler_generation INTEGER NULL, study_config TEXT NULL, first_answered_at TEXT NULL,
  source_template_id TEXT NULL, source_template_version INTEGER NULL,
  created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
 CREATE TABLE cards (id TEXT PRIMARY KEY, deck_id TEXT NOT NULL REFERENCES decks(id) ON DELETE CASCADE,
  front TEXT NOT NULL, back TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
 CREATE TABLE card_study_states (card_id TEXT PRIMARY KEY REFERENCES cards(id) ON DELETE CASCADE,
  scheduler_type TEXT NOT NULL, scheduler_version INTEGER NOT NULL, scheduler_generation INTEGER NOT NULL,
- due_at TEXT NULL, last_answered_at TEXT NULL, answer_count INTEGER NOT NULL DEFAULT 0,
+ learned_at TEXT NULL, due_at TEXT NULL, last_answered_at TEXT NULL,
+ answer_count INTEGER NOT NULL DEFAULT 0,
  lapse_count INTEGER NOT NULL DEFAULT 0, current_box INTEGER NULL, ease_factor REAL NULL,
  interval_days INTEGER NULL, repetitions INTEGER NULL);
 CREATE TABLE study_sessions (id TEXT PRIMARY KEY, deck_id TEXT NOT NULL REFERENCES decks(id) ON DELETE CASCADE,
- root_deck_id TEXT NOT NULL, scheduler_generation INTEGER NOT NULL, current_mode TEXT NOT NULL,
+ root_deck_id TEXT NOT NULL, scheduler_generation INTEGER NOT NULL,
+ session_kind TEXT NOT NULL, current_mode TEXT NOT NULL,
  status TEXT NOT NULL, end_reason TEXT NULL, cursor INTEGER NOT NULL DEFAULT 0,
  card_limit INTEGER NOT NULL DEFAULT 20,
  started_at TEXT NOT NULL, ended_at TEXT NULL);
@@ -45,6 +47,9 @@ CREATE TABLE study_answers (id TEXT PRIMARY KEY, card_id TEXT NOT NULL REFERENCE
  next_due_at TEXT NULL, previous_box INTEGER NULL, next_box INTEGER NULL,
  previous_ease_factor REAL NULL, next_ease_factor REAL NULL,
  previous_interval_days INTEGER NULL, next_interval_days INTEGER NULL);
+CREATE TABLE app_settings (id INTEGER PRIMARY KEY CHECK (id = 1),
+ card_limit INTEGER NOT NULL DEFAULT 20,
+ new_card_order TEXT NOT NULL DEFAULT 'created', updated_at TEXT NOT NULL);
 CREATE TABLE study_queue_items (
  session_id TEXT NOT NULL REFERENCES study_sessions(id) ON DELETE CASCADE,
  mode TEXT NOT NULL, round INTEGER NOT NULL DEFAULT 1,
@@ -74,12 +79,12 @@ def fresh():
 
 def good(c):
     c.executescript("""
-    INSERT INTO decks VALUES('r','Root',NULL,'r','deck',NULL,'eight_box',1,NULL,1,NULL,NULL,NULL,'t','t');
-    INSERT INTO decks VALUES('a','A','r','r','deck',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'t','t');
-    INSERT INTO decks VALUES('b','B','a','r','card',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'t','t');
+    INSERT INTO decks VALUES('r','Root',NULL,'r','deck',NULL,'eight_box',1,NULL,1,NULL,NULL,NULL,NULL,'t','t');
+    INSERT INTO decks VALUES('a','A','r','r','deck',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'t','t');
+    INSERT INTO decks VALUES('b','B','a','r','card',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'t','t');
     INSERT INTO cards VALUES('c1','b','f','k','t','t');
-    INSERT INTO card_study_states VALUES('c1','eight_box',1,1,NULL,NULL,0,0,1,NULL,NULL,NULL);
-    INSERT INTO study_sessions VALUES('s1','r','r',1,'match','completed',NULL,1,20,'t','t');
+    INSERT INTO card_study_states VALUES('c1','eight_box',1,1,'t','t','t',1,0,1,NULL,NULL,NULL);
+    INSERT INTO study_sessions VALUES('s1','r','r',1,'reviewing','match','completed',NULL,1,20,'t','t');
     INSERT INTO study_answers VALUES('h1','c1','s1','eight_box',1,'relearning','match','forgotten','t',NULL,NULL,NULL,NULL,1,1,NULL,NULL,NULL,NULL);
     INSERT INTO study_queue_items VALUES('s1','browse',1,'c1',0,'completed',0,0,NULL,0);
     INSERT INTO study_queue_items VALUES('s1','match',1,'c1',0,'completed',0,2,NULL,0);
@@ -88,9 +93,9 @@ def good(c):
 # each: query-number -> SQL that introduces exactly that violation
 BAD = {
  1: "INSERT INTO cards VALUES('cx','r','f','k','t','t');",
- 2: "INSERT INTO decks VALUES('u','U','a','r','unset',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'t','t');"
+ 2: "INSERT INTO decks VALUES('u','U','a','r','unset',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'t','t');"
     "INSERT INTO cards VALUES('cu','u','f','k','t','t');",
- 3: "INSERT INTO decks VALUES('z','Z','b','r','deck',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'t','t');",
+ 3: "INSERT INTO decks VALUES('z','Z','b','r','deck',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'t','t');",
  4: "INSERT INTO cards VALUES('ca','a','f','k','t','t');",
  5: "UPDATE decks SET content_type='card' WHERE id='r';",
  6: "UPDATE decks SET root_deck_id='wrong' WHERE id='b';",
@@ -99,8 +104,8 @@ BAD = {
  9: "UPDATE card_study_states SET scheduler_generation=99 WHERE card_id='c1';",
  10:"UPDATE decks SET scheduler_type='sm2' WHERE id='a';",
  11:"UPDATE decks SET scheduler_type=NULL WHERE id='r';",
- 12:"INSERT INTO study_sessions VALUES('s2','r','r',1,'match','completed','user_exit',0,20,'t','t');",
- 13:"INSERT INTO study_sessions VALUES('s3','r','r',1,'match','abandoned','user_exit',0,20,'t',NULL);",
+ 12:"INSERT INTO study_sessions VALUES('s2','r','r',1,'reviewing','match','completed','user_exit',0,20,'t','t');",
+ 13:"INSERT INTO study_sessions VALUES('s3','r','r',1,'reviewing','match','abandoned','user_exit',0,20,'t',NULL);",
  14:"INSERT INTO study_answers VALUES('h2','c1','s1','eight_box',1,'relearning','match','forgotten','t',NULL,NULL,NULL,NULL,1,5,NULL,NULL,NULL,NULL);",
  # A chain from the valid tree's 'a' (level 2) down to level 11 (BR-55).
  16:"INSERT INTO study_queue_items VALUES('s1','match',1,'c1x',1,'pending',0,0,NULL,0);"
@@ -114,6 +119,13 @@ BAD = {
     "INSERT INTO study_queue_items VALUES('s1','match',1,'q%d',%d,'completed',0,1,NULL,0);" % (n, n, n + 10)
     for n in range(21)
  ),
+ 24:"INSERT INTO cards VALUES('c24','b','f','k','t','t');"
+    "INSERT INTO card_study_states VALUES('c24','eight_box',1,1,'t',NULL,NULL,0,0,1,NULL,NULL,NULL);",
+ 25:"INSERT INTO cards VALUES('c25','b','f','k','t','t');"
+    "INSERT INTO card_study_states VALUES('c25','eight_box',1,1,NULL,NULL,NULL,0,0,1,NULL,NULL,NULL);"
+    "INSERT INTO study_answers VALUES('h25','c25','s1','eight_box',1,'scheduled','match','forgotten','t',NULL,NULL,NULL,NULL,1,1,NULL,NULL,NULL,NULL);",
+ 26:"INSERT INTO study_answers VALUES('h26','c1','s1','eight_box',1,'learning','match','forgotten','t',NULL,NULL,NULL,NULL,1,1,NULL,NULL,NULL,NULL);",
+ 27:"UPDATE decks SET study_config='{}' WHERE id='b';",
  21:"INSERT INTO cards VALUES('c21','b','f','k','t','t');"
     "INSERT INTO study_queue_items VALUES('s1','match',1,'c21',9,'pending',0,0,500,0);",
  22:"INSERT INTO study_answers VALUES('h22','c1','s1','eight_box',1,'scheduled','match','forgotten','t','timeout',NULL,NULL,NULL,1,1,NULL,NULL,NULL,NULL);",
@@ -124,7 +136,7 @@ BAD = {
     "INSERT INTO study_queue_items VALUES('s1','match',2,'c20',0,'pending',0,0,NULL,0);",
  15:"".join(
     "INSERT INTO decks VALUES('x%d','X','%s','r','deck',NULL,NULL,NULL,NULL,"
-    "NULL,NULL,NULL,NULL,'t','t');" % (n, 'a' if n == 3 else 'x%d' % (n - 1))
+    "NULL,NULL,NULL,NULL,NULL,'t','t');" % (n, 'a' if n == 3 else 'x%d' % (n - 1))
     for n in range(3, 12)
  ),
 }
