@@ -149,7 +149,13 @@ void main() {
     // Not exempted, bounded: `build` plus at most one mutator. That is what stops
     // "the thing that holds the odds and ends" from becoming the God Notifier by a
     // different route.
-    const sessionAllowed = <String>{'build', 'start', 'answer', 'leave'};
+    const sessionAllowed = <String>{
+      'build',
+      'start',
+      'answer',
+      'pause',
+      'leave',
+    };
     final controllers = classesUnder('/controllers/');
     var inputCount = 0;
     var sessionCount = 0;
@@ -174,6 +180,11 @@ void main() {
       // cannot mean both. Splitting them across three notifiers is worse — they
       // share the session, so the split would put one value behind three
       // owners.
+      //
+      // `pause` joined them for BR-133: a turn interrupted mid-clock has to keep
+      // what was left of it, and that is the counterpart of `leave` rather than
+      // another command. The set stays closed — a sixth name is a new
+      // responsibility and belongs somewhere else.
       if (returnType.endsWith('SessionState')) {
         sessionCount += 1;
         final extra = publicMethods(

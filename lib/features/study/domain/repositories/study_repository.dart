@@ -168,6 +168,36 @@ abstract interface class StudyRepository {
   /// if it was later answered correctly to clear the board (BR-116).
   Future<bool> buildNextRound(String sessionId);
 
+  /// Stores what is left of a turn in flight (BR-133).
+  ///
+  /// **Resume continues a turn, it does not restart one.** A `recall` turn
+  /// interrupted at four seconds comes back at four seconds; handing the user a
+  /// fresh twenty would give back time they already spent, and hiding an answer
+  /// they had already seen would ask them to un-know it.
+  ///
+  /// Only the turn in flight is written. A turn of the same card in a later
+  /// round is a different turn and starts whole.
+  Future<void> saveTurnProgress({
+    required String sessionId,
+    required StudyMode mode,
+    required String cardId,
+    int? remainingMs,
+    bool isRevealed = false,
+  });
+
+  /// Invalidates every open session of one root deck (BR-83).
+  ///
+  /// Reset learning progress moves a whole tree to a new generation, and a
+  /// session opened before it can no longer write anything (BR-84). Closing
+  /// those sessions here rather than leaving them to fail on the next answer is
+  /// what stops the app offering to continue something that cannot continue.
+  ///
+  /// Returns how many were closed.
+  Future<int> invalidateSessionsForRoot({
+    required String rootDeckId,
+    required DateTime endedAt,
+  });
+
   /// Closes a session with a [status] and [reason] the matrix allows.
   ///
   /// Turns already written stay written, in every ending (BR-86): changing the
