@@ -7,7 +7,7 @@
 | **Scope** | Vấn đề, người dùng, quyết định nền tảng, phạm vi MVP, luồng nghiệp vụ chính. Ngoài phạm vi: cách triển khai |
 | **Source of truth for** | Phạm vi MVP · phân loại must/should/nice/out · quyết định platform, data posture, auth, dữ liệu nhạy cảm |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M5.0a (đổi tên Review → Study) |
+| **Updated by task** | M5.0b (chốt nghiệp vụ Study) |
 | **Last updated** | 2026-08-07 |
 
 ## Problem
@@ -84,9 +84,30 @@ tính năng.
 |---|---|---|
 | M1 | Tạo/sửa/xoá deck | Deck tồn tại sau khi restart app; xoá deck xoá cascade toàn bộ card của nó |
 | M2 | Tạo/sửa/xoá card trong deck | Card có mặt trước/sau; sửa không làm mất lịch sử ôn tập |
-| M3 | Phiên ôn tập theo lịch SRS | Chỉ hiện card đến hạn; đánh giá kết quả cập nhật lịch ôn lần sau |
+| M3 | Phiên học theo lịch SRS, mode `review` | Chỉ hiện card đến hạn; đánh giá kết quả cập nhật lịch ôn lần sau |
 | M4 | Danh sách deck với tiến độ | Mỗi deck hiện số card đến hạn hôm nay |
 | M5 | Hoạt động đầy đủ offline | Bật chế độ máy bay, mọi chức năng trên vẫn chạy bình thường |
+
+### StudyMode — một trục riêng, không phải thuật toán
+
+App có **hai trục độc lập**, và việc tách chúng là quyết định sản phẩm chứ không
+phải chi tiết kỹ thuật:
+
+| Trục | Là gì | Ai chọn |
+|---|---|---|
+| **Thuật toán SRS** | `eight_box` · `sm2` — quyết định **khi nào** thẻ quay lại | chọn một lần lúc tạo root deck, khoá sau lượt học đầu (BR-13) |
+| **StudyMode** | `review` · `match` · `guess` · `recall` · `fill` — quyết định **cách** thẻ được hỏi | chọn lại mỗi phiên |
+
+Tập mode khả dụng là **thuộc tính của thuật toán** (BR-97): `eight_box` có cả
+năm, `sm2` chỉ có `review`. Bốn mode ngoài `review` sinh tín hiệu nhị phân —
+đúng hoặc sai — khớp tự nhiên với hai action của `eight_box`, trong khi `sm2`
+cần bốn mức và một nguồn nhị phân chỉ nuôi được hai.
+
+**Phạm vi:** `review` thuộc MVP (M3). Bốn mode còn lại là **định hướng đã chốt
+về khái niệm, chưa phân loại must/should/nice** — chúng cần ngưỡng dữ liệu tối
+thiểu riêng và một câu trả lời cho việc một lượt của chúng ghi vào lịch thế nào.
+Kiến trúc chuẩn bị cho cả năm từ đầu; UI hiện đúng số mode đang có, và màn
+chọn mode chỉ xuất hiện khi có mode thứ hai.
 
 ## Should-have
 

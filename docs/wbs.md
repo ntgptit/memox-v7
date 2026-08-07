@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.1 · M5.0a (đổi tên Review → Study) |
+| **Updated by task** | M5.0b (chốt nghiệp vụ Study) |
 | **Last updated** | 2026-08-07 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -6416,6 +6416,65 @@ schema v4 cho rename bảng/cột, ARB (`navigationReviewLabel` → `navigationS
 copy "Review" → "Study"), và các golden mang tên `review`. Chúng là task riêng vì
 cần một migration, và migration nên đi cùng đợt schema mà nghiệp vụ Study sẽ yêu
 cầu — thứ vẫn đang được chốt.
+
+### M5.0b · Chốt nghiệp vụ Study vào tài liệu frozen
+
+- **Status:** done — chỉ tài liệu và fixture của guard. Không dòng code sản phẩm
+  nào; schema vẫn v3.
+- **Goal:** Đưa các quyết định nghiệp vụ đã chốt vào đúng tài liệu sở hữu chúng,
+  trước khi M5.0 sinh code từ những tài liệu đó.
+- **Scope:** `business-rules.md` (sửa BR-16, BR-18, BR-23, BR-26, BR-30, BR-80,
+  BR-92; thêm **BR-96…BR-105**), `data-model.md` (bảng `study_queue_items`;
+  `study_sessions.mode`/`cursor`; `study_answers.mode`; ma trận `status` ×
+  `end_reason`; **3 invariant mới**), `use-cases.md` (UC-05 đảo thứ tự bước, thêm
+  A2b và A3b), `architecture.md` (**AD-16**), `product.md` (hai trục SRS ×
+  StudyMode), `verify_invariants.py` (fixture cho bảng và cột mới).
+- **Out of scope:** `lib/`, `.drift`, migration, ARB, golden. Và sáu điểm còn mở
+  — xem dưới; chúng được ghi là **chưa chốt** trong chính tài liệu thay vì đoán.
+- **Editable documents:** `docs/business-rules.md`, `docs/data-model.md`,
+  `docs/use-cases.md`, `docs/architecture.md`, `docs/product.md`, `docs/wbs.md`
+- **Output:** BR-96…BR-105, AD-16, bảng `study_queue_items`, invariant 16–18
+- **Acceptance criteria:**
+  - [x] Tập StudyMode là thuộc tính của thuật toán (`supportedModes`), cùng khuôn
+        `supportedActions` mà BR-30 đã cấm hardcode.
+  - [x] Session **chỉ** sinh từ hành động Study tường minh (BR-101).
+  - [x] Hàng đợi lưu DB và bất biến trong phiên (BR-102); UC-05 đảo bước để queue
+        được lấy **trước** khi session được tạo.
+  - [x] `interrupted` vào ma trận `status` × `end_reason` và vào invariant 12.
+  - [x] Ba invariant mới chạy được: mỗi câu fire trên đúng vi phạm của nó
+        (`verify_invariants.py` 18/18).
+  - [x] Mốc đến hạn neo 00:00 địa phương (BR-105), và AD-16 nói rõ ai quy đổi.
+  - [x] `check_docs.py` xanh; guard `memox-v7` xanh.
+- **Dependencies:** M5.0a
+- **Tests required:** `check_docs.py`, `verify_invariants.py` (18 query), guard
+  `memox-v7`
+- **Checklist phases:** 14.1
+
+**Ba quyết định đáng ghi lại vì sao, không chỉ ghi là gì.**
+
+**BR-23 đảo thứ tự** — thẻ đến hạn trước, thẻ mới lấp phần dư. Luật cũ cho thẻ
+mới đi trước, và trên một deck 200 thẻ mới cộng 30 thẻ quá hạn thì mọi phiên đều
+là 50 thẻ mới: 30 thẻ quá hạn **không bao giờ** được ôn. Nó ẩn vì deck nhỏ không
+lộ ra — chỉ hiện khi người dùng nhập một bộ lớn, tức đúng lúc mất mát là lớn nhất.
+
+**BR-102 kéo hàng đợi từ `presentation/` vào database.** Lý do không phải
+persistence: hàng đợi mang luật — thứ tự BR-23, lượt quay lại BR-26, trần BR-104 —
+và một cấu trúc mang luật nằm trong `presentation/` là chỗ luật đi ra khỏi tầm
+với của mọi phép kiểm. Đặt vào DB biến "snapshot bất biến" từ lời hứa thành ràng
+buộc, và cho phép BR-103 tồn tại.
+
+**BR-105 neo mốc đến hạn vào đầu ngày lịch.** `now + N*24h` đẩy hạn muộn dần theo
+giờ bấm: học 23:00 thì hôm sau 22:00 thẻ chưa tới hạn, và mỗi phiên đẩy thêm một
+chút — giờ học trôi về khuya cho tới khi người dùng hụt hẳn một ngày. AD-16 giữ
+`domain/` không phải biết múi giờ: scheduler trả **số ngày**, một collaborator
+nhận offset từ composition root quy ra thời điểm, đúng đường `clockProvider` đã đi.
+
+**Sáu điểm cố ý để trống**, ghi thẳng trong `business-rules.md`: ngưỡng tối thiểu
+của `match` và `recall`; `guess` so "khác nghĩa" bằng đâu; `kind` của một lượt
+thuộc bốn mode mới; trần 50 thẻ áp cho mode nào; phiên có cho chọn scope hẹp hơn
+không; và `fill` đếm eligibility theo số thẻ có `example` nên con số của nó khác
+mọi mode còn lại. Mỗi câu trả lời khác nhau cho ra một thiết kế khác nhau, nên
+đoán ở đây rẻ hơn nhưng đắt hơn nhiều ở M5.2.
 
 ### M5.0 · Study-specific domain và data completion
 

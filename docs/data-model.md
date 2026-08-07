@@ -7,7 +7,7 @@
 | **Scope** | Bảng, cột, index, quan hệ, query bất biến. Ngoài phạm vi: SQL runtime (`lib/core/database/`, chưa tồn tại) |
 | **Source of truth for** | Schema · cột và kiểu · index · query bất biến · thứ tự migration |
 | **Depends on** | `document-conventions.md`, `architecture.md`, `business-rules.md` |
-| **Updated by task** | M5.0a (đổi tên Review → Study; khối trạng thái triển khai) |
+| **Updated by task** | M5.0b (chốt nghiệp vụ Study) |
 | **Last updated** | 2026-08-07 |
 
 Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; SQL thật nằm
@@ -30,6 +30,10 @@ Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; S
 > | `StudyAnswerKind` · `StudyAction` · `StudyScheduler` | `ReviewKind` · `ReviewAction` · `ReviewScheduler` |
 > | `CardStudyStateEntity` · `StudyAnswerEntity` | `CardReviewStateEntity` · `ReviewHistoryEntity` |
 > | `features/study/` · `RouteNames.study` | `features/review/` · `RouteNames.review` |
+>
+> **Chưa tồn tại ở bất kỳ schema nào** — đến cùng đợt migration của M5:
+> bảng `study_queue_items`; `study_sessions.mode`, `study_sessions.cursor`;
+> `study_answers.mode`; và giá trị `interrupted` của `end_reason`.
 >
 > Ghi ra đây vì bài học của M4.12d: một tài liệu nói khác code mà không nói rõ nó
 > đang nói khác thì không phải tài liệu, nó là một cái bẫy. Khi migration xong,
@@ -66,7 +70,8 @@ deck_templates (asset JSON ở MVP)
        ├──► cards ──┬──► card_study_states   (1–1, mang generation)
        │            └──► study_answers       (1–n, append-only, mang generation)
        │
-       └──► study_sessions ──► study_answers
+       └──► study_sessions ──┬──► study_answers
+                             └──► study_queue_items  (hàng đợi phiên, BR-102)
 ```
 
 ---
@@ -292,6 +297,7 @@ xoá (cascade).
 | `scheduler_type` | TEXT NOT NULL | scheduler tại thời điểm đánh giá |
 | `scheduler_generation` | INTEGER NOT NULL | generation tại thời điểm đánh giá |
 | `kind` | TEXT NOT NULL | `'scheduled'` \| `'relearning'` (BR-75, BR-76) |
+| `mode` | TEXT NOT NULL | StudyMode của lượt (BR-96, BR-98) |
 | `action` | TEXT NOT NULL | `forgotten`/`remembered` hoặc `again`/`hard`/`good`/`easy` |
 | `answered_at` | DATETIME NOT NULL | UTC |
 | `next_due_at` | DATETIME NULL | hạn sau khi đánh giá |
@@ -324,8 +330,10 @@ bảng đầu tiên cần nhìn khi bàn về kích thước DB.
 | `deck_id` | TEXT NOT NULL | → `decks(id)` ON DELETE CASCADE. Deck được ôn (thường là root hoặc một nhánh) |
 | `root_deck_id` | TEXT NOT NULL | root của cây tại thời điểm mở phiên |
 | `scheduler_generation` | INTEGER NOT NULL | generation lúc mở phiên (BR-45) |
+| `mode` | TEXT NOT NULL | `review` \| `match` \| `guess` \| `recall` \| `fill` (BR-96, BR-98) |
 | `status` | TEXT NOT NULL | `in_progress` \| `completed` \| `abandoned` \| `invalidated` \| `failed` (BR-79) |
-| `end_reason` | TEXT NULL | `user_exit` \| `scheduler_reset` \| `stale_generation` \| `persistence_error` (BR-80). NULL khi `in_progress` hoặc `completed` |
+| `end_reason` | TEXT NULL | `user_exit` \| `scheduler_reset` \| `stale_generation` \| `persistence_error` \| `interrupted` (BR-80). NULL khi `in_progress` hoặc `completed` |
+| `cursor` | INTEGER NOT NULL DEFAULT 0 | số lượt đã phục vụ trong phiên; nền của BR-26 |
 | `started_at` | DATETIME NOT NULL | UTC |
 | `ended_at` | DATETIME NULL | NULL khi `in_progress` |
 
@@ -336,6 +344,7 @@ Ma trận `status` × `end_reason` hợp lệ:
 | `in_progress` | NULL | phiên đang mở |
 | `completed` | NULL | hết queue (BR-81) |
 | `abandoned` | `user_exit` | người dùng thoát (BR-82) |
+| `abandoned` | `interrupted` | phiên của ngày học trước còn `in_progress` khi mở app (BR-103) |
 | `invalidated` | `scheduler_reset` | reset khi phiên đang mở (BR-83) |
 | `invalidated` | `stale_generation` | phiên generation cũ cố ghi lượt học (BR-84) |
 | `failed` | `persistence_error` | lỗi không thể tiếp tục (BR-85) |
@@ -350,7 +359,55 @@ generation của session với generation hiện tại của root và **từ ch�
 Các lượt học đã ghi thành công trước khi phiên kết thúc bất thường **vẫn được giữ**
 (BR-86) — chuyển `status` không kéo theo xoá `study_answers`.
 
-**Hàng đợi của phiên không lưu trong DB.** Nó là trạng thái tạm trong controller.
+`interrupted` tách khỏi `user_exit` vì cùng lý do BR-76 lưu `kind` tường minh:
+"người dùng bấm thoát" và "hệ điều hành thu hồi app" là hai sự kiện khác nhau, và
+gộp chúng làm lịch sử nói rằng người dùng bỏ cuộc trong khi họ không hề.
+
+## `study_queue_items`
+
+Hàng đợi của một phiên (BR-102). Một dòng cho mỗi thẻ được nạp lúc mở phiên.
+
+| Cột | Kiểu | Ghi chú |
+|---|---|---|
+| `session_id` | TEXT NOT NULL | → `study_sessions(id)` ON DELETE CASCADE |
+| `card_id` | TEXT NOT NULL | → `cards(id)` ON DELETE CASCADE |
+| `position` | INTEGER NOT NULL | thứ tự lúc nạp (BR-23). **Bất biến trong phiên** |
+| `status` | TEXT NOT NULL | `pending` \| `completed` (BR-28) |
+| `available_at` | INTEGER NOT NULL DEFAULT 0 | mốc `cursor` tối thiểu để thẻ được phục vụ lại (BR-26) |
+| `answers_in_session` | INTEGER NOT NULL DEFAULT 0 | số lượt đã đánh giá; `0` ⇒ lượt tới là `scheduled` (BR-77) |
+
+PK là `(session_id, card_id)`. Đó cũng chính là chỗ "50 card **riêng biệt**" của
+BR-24 trở thành ràng buộc thay vì một lời hứa.
+
+### Vì sao là `cursor` + `available_at`, không phải xáo lại `position`
+
+BR-26 bắt thẻ bị quên quay lại "sau ít nhất 3 thẻ khác". Cách thẳng tay là ghi
+lại `position` rồi dịch mọi thẻ phía sau — mỗi lượt `forgotten` thành một loạt
+UPDATE, và thứ tự gốc mất luôn.
+
+Thay vào đó mỗi lượt tăng `study_sessions.cursor` lên 1, còn thẻ bị quên được đặt
+`available_at = cursor + 3`. Không dịch gì, một số thay một số:
+
+```sql
+SELECT card_id FROM study_queue_items
+WHERE session_id = :s AND status = 'pending' AND available_at <= :cursor
+ORDER BY position LIMIT 1
+```
+
+Rỗng nhưng vẫn còn `pending` nghĩa là chỉ còn thẻ đang chờ quay lại — đúng vế thứ
+hai của BR-26 ("cuối hàng đợi nếu không đủ 3") — và phục vụ thẻ có `available_at`
+nhỏ nhất. Vế đó thành một nhánh query, không phải một `if` ai đó phải nhớ viết.
+
+### Vì sao hàng đợi rời `presentation/` để vào database
+
+Tài liệu này trước đây nói hàng đợi là trạng thái tạm của controller. Nó đổi ở
+BR-102, và lý do không phải là persistence: hàng đợi **mang luật** — thứ tự
+BR-23, lượt quay lại BR-26, trần BR-104 — và một cấu trúc mang luật nằm trong
+`presentation/` là chỗ luật đi ra khỏi tầm với của mọi phép kiểm chạy được.
+
+Cái được kèm theo: phiên sống sót qua việc app bị hệ điều hành thu hồi (BR-103),
+và hàng đợi của phiên đã đóng trở thành dữ liệu thật — "phiên đó gồm những thẻ
+nào, bỏ dở bao nhiêu" — thứ hiện không tồn tại ở bất kỳ đâu.
 
 ## `deck_templates`
 
@@ -486,7 +543,7 @@ SELECT id FROM study_sessions
 WHERE NOT (
      (status = 'in_progress' AND end_reason IS NULL)
   OR (status = 'completed'   AND end_reason IS NULL)
-  OR (status = 'abandoned'   AND end_reason = 'user_exit')
+  OR (status = 'abandoned'   AND end_reason IN ('user_exit','interrupted'))
   OR (status = 'invalidated' AND end_reason IN ('scheduler_reset','stale_generation'))
   OR (status = 'failed'      AND end_reason = 'persistence_error')
 );
@@ -495,6 +552,29 @@ WHERE NOT (
 SELECT id FROM study_sessions
 WHERE status <> 'in_progress' AND ended_at IS NULL;
 ```
+
+### Hàng đợi phiên
+
+```sql
+-- 16. Session completed nhưng hàng đợi còn thẻ chưa xong (BR-81)
+SELECT s.id FROM study_sessions s
+WHERE s.status = 'completed'
+  AND EXISTS (SELECT 1 FROM study_queue_items q
+              WHERE q.session_id = s.id AND q.status = 'pending');
+
+-- 17. Bộ đếm của hàng đợi âm, hoặc lượt vượt trần BR-104
+--     1 lượt scheduled + tối đa 3 lượt relearning = 4.
+SELECT session_id FROM study_queue_items
+WHERE available_at < 0 OR answers_in_session < 0 OR answers_in_session > 4;
+
+-- 18. Một phiên nạp quá 50 thẻ (BR-24)
+SELECT session_id FROM study_queue_items
+GROUP BY session_id HAVING COUNT(*) > 50;
+```
+
+Invariant 16 là thứ giữ cho `completed` có nghĩa. Không có nó, một phiên bỏ dở
+được đánh dấu hoàn thành trông y hệt một phiên học hết — và sự khác nhau đó là
+toàn bộ nội dung của BR-81.
 
 ### Study answers
 

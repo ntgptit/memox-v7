@@ -7,7 +7,7 @@
 | **Scope** | Must-have của MVP. Ngoài phạm vi: should/nice-to-have, và mọi thứ ở mục "Điều đã cố ý không đặc tả" |
 | **Source of truth for** | UC-xx · main/alternative/error flow · UI state matrix của từng màn |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md` |
-| **Updated by task** | M99.1 · M5.0a (đổi tên Review → Study) |
+| **Updated by task** | M5.0b (chốt nghiệp vụ Study) |
 | **Last updated** | 2026-08-07 |
 
 Chỉ đặc tả must-have. Should-have và nice-to-have viết khi tới lượt — đặc tả
@@ -238,18 +238,24 @@ state.
 | **Status** | active |
 
 **Actor:** Người dùng
-**Trigger:** Bấm ôn tập trên một deck có card đến hạn
+**Trigger:** Người dùng bấm Study trên một deck. Đây là **cách duy nhất** một phiên được tạo — badge, danh sách và thông báo số đến hạn không tạo phiên (BR-101)
 **Preconditions:** Deck tồn tại và có ít nhất một card thoả BR-22
 
 Đây là luồng chạy hằng ngày và là vertical slice đầu tiên nên xây.
 
 **Main flow:**
-1. Hệ thống tạo `study_session` với `status = 'in_progress'`, `end_reason = NULL`,
-   `root_deck_id` và `scheduler_generation` hiện tại của root (BR-45, BR-79).
+1. Hệ thống xác định thuật toán SRS của root deck, rồi hiển thị các StudyMode
+   trong `supportedModes` của nó — `eight_box` có cả năm, `sm2` chỉ có `review`
+   (BR-30, BR-97). Mode không đủ dữ liệu tối thiểu bị vô hiệu hoá kèm lý do
+   (BR-99); mode không thuộc thuật toán **không** gợi ý Reset (BR-100).
 2. Hệ thống lấy card đến hạn trong cả cây theo BR-22, BR-23, tối đa 50 card riêng
-   biệt (BR-24).
-3. Hệ thống xác định scheduler của root deck và **render nút đánh giá từ
-   `supportedActions`** — 2 nút với `eight_box`, 4 nút với `sm2` (BR-30).
+   biệt (BR-24). **Không có card nào thì dừng ở đây** — xem E1; phiên **chưa**
+   được tạo.
+3. Người dùng chọn mode và bắt đầu. Hệ thống tạo `study_session` với
+   `status = 'in_progress'`, `end_reason = NULL`, `mode` đã chọn, `root_deck_id`
+   và `scheduler_generation` hiện tại của root (BR-45, BR-79, BR-98), **cùng
+   hàng đợi ghi vào `study_queue_items` trong cùng transaction** (BR-102). Nút
+   đánh giá render từ `supportedActions` — 2 nút với `eight_box`, 4 với `sm2`.
 4. Hệ thống hiện mặt trước của card đầu tiên và tiến độ phiên.
 5. Người dùng bấm lật; hệ thống hiện mặt sau kèm tập action tương ứng.
 6. Người dùng chọn một action.
@@ -274,13 +280,22 @@ state.
 - **A1 — Đánh giá `forgotten` (8-box) hoặc `again` (SM-2):** card về trạng thái
   khởi đầu theo scheduler, và **quay lại trong phiên hiện tại** sau ít nhất 3 card
   khác, hoặc cuối hàng đợi nếu không đủ 3 (BR-26).
+- **A2b — Card chạm trần 3 lượt `relearning`:** thẻ rời hàng đợi dù lượt cuối
+  vẫn là `forgotten`/`again`, và hệ thống bật cờ đánh dấu của thẻ (BR-104). Lịch
+  dài hạn đã được đặt ở lượt `scheduled` đầu tiên nên không mất gì — thẻ vẫn
+  đến hạn lại sớm. Cờ chỉ được bật, không bao giờ tự tắt (BR-92).
 - **A2 — Card quay lại được đánh giá lần nữa:** lượt đó là `relearning` (BR-78).
   Ghi history và cập nhật `last_answered_at`, nhưng không đổi lịch. Đánh giá khác
   `forgotten`/`again` thì rời hàng đợi; lại `forgotten`/`again` thì quay lại lần
   nữa.
 - **A3 — Thoát giữa phiên:** session → `abandoned`, `end_reason = user_exit`,
   `ended_at` được đặt (BR-82). Mọi đánh giá đã ghi **vẫn giữ** (BR-25, BR-86).
-  Hàng đợi không lưu; mở lại là một phiên mới.
+  Hàng đợi **được lưu** (BR-102), nên xem A3b.
+- **A3b — Mở lại app khi còn phiên `in_progress`:** cùng ngày học thì cho tiếp
+  đúng hàng đợi đó — đúng thẻ đang dở, đúng thứ tự, đúng số lượt đã dùng. Ngày
+  học khác thì phiên đó chuyển `abandoned` với `end_reason = interrupted`, và
+  người dùng dựng phiên mới (BR-103). App bị hệ điều hành thu hồi rơi vào
+  đúng nhánh này, và nó khác `user_exit`: người dùng không hề bỏ cuộc.
 - **A4 — Còn card quá hạn ngoài giới hạn 50:** ở tổng kết nói rõ còn bao nhiêu và
   cho phép bắt đầu phiên tiếp theo ngay.
 - **A5 — Xoá deck đang ôn dở:** kết thúc phiên, quay về danh sách.
