@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M5.0p (recursive review lượt ba) |
+| **Updated by task** | M5.0q (recursive review lượt bốn) |
 | **Last updated** | 2026-08-07 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -7177,6 +7177,48 @@ kiện — deck 1/3/5/20 thẻ, có/không `example`, pool đầy/rỗng — r�
 luật là một lỗ. Ba lượt review dùng ba góc khác nhau và mỗi góc bắt một loại lỗi:
 mâu thuẫn giữa các luật, luật mất kết nối, và luật đúng nhưng ghép lại thành hành
 vi sai.
+
+### M5.0q · Recursive review lượt bốn — và điểm dừng
+
+- **Status:** done — hai phát hiện, cả hai đều nhẹ. **Lượt cuối nên chạy trước
+  M5.**
+- **Goal:** Thử hai góc chưa dùng — "ai ghi và ai đọc từng cột", và "vòng đời một
+  thẻ qua nhiều ngày" — rồi đánh giá xem còn đáng rà nữa không.
+- **Scope:** `data-model.md` (bảng ánh xạ cột → BR), `business-rules.md` (ghi chú
+  hệ quả của mốc 00:00).
+- **Out of scope:** không đổi luật nào.
+- **Editable documents:** `docs/data-model.md`, `docs/business-rules.md`,
+  `docs/wbs.md`
+- **Output:** bảng ánh xạ 16 cột → BR; ghi chú day-boundary
+- **Acceptance criteria:**
+  - [x] Mọi cột của Study tra ngược được về luật yêu cầu nó.
+  - [x] Hệ quả "học lúc 23:00 thì đến hạn sau một giờ" được ghi ở nơi người đọc
+        BR-105 sẽ thấy.
+  - [x] Vòng đời 78 ngày chạy qua chín lượt ôn không sinh mâu thuẫn nào.
+- **Dependencies:** M5.0p
+- **Tests required:** `check_docs.py`, `verify_invariants.py`, guard `memox-v7`
+- **Checklist phases:** 14.1
+
+**Góc "ai ghi cột này" không tìm ra cột mồ côi, và đó là kết quả tốt.** Mười trong
+mười sáu cột không được BR nào gọi thẳng tên — nhưng mọi cột đều có một luật yêu
+cầu **hành vi** mà nó phục vụ. Đó là đúng phân công: `business-rules.md` nói luật,
+`data-model.md` nói hình dạng. Cái thiếu là chiều tra ngược, nên bảng ánh xạ 16
+dòng giờ nằm trong `data-model.md` — người viết M5 cần biết "cột này tồn tại vì
+luật nào" trước khi đụng vào nó.
+
+**Góc vòng đời chạy một thẻ qua 78 ngày và chín lượt ôn**, gồm một lần quên ở
+ngày 15: box về 1, `lapse_count` +1, rồi leo lại tới box 6. Không mâu thuẫn nào
+giữa BR-15, BR-16, BR-20, BR-88, BR-90 và BR-91. Cái nó lộ ra là một **hệ quả**,
+không phải lỗi: thẻ học xong lúc 23:00 đến hạn sau một giờ, thẻ học lúc 09:00 sau
+mười lăm giờ. Đó là giá của việc neo vào ngày lịch thay vì cộng giờ, và cái mua
+được — giờ học không trôi về khuya — lớn hơn. Giờ nó được ghi ở nơi người đọc
+BR-105 sẽ thấy.
+
+**Lợi tức đã giảm rõ rệt, và đây là chỗ nên dừng.** Bốn lượt: lượt một tìm 9 mâu
+thuẫn, lượt hai tìm 3 mất kết nối, lượt ba tìm 4 lỗ trong đó một là bug chết
+người, lượt bốn tìm 2 và cả hai chỉ là tài liệu hoá. Ba phép quét của ba lượt
+trước đều trả về 0. Rà thêm cần một góc thứ năm, và góc đó nhiều khả năng là
+**chạy code thật** — tức chính M5.
 
 ### M5.0 · Study-specific domain và data completion
 

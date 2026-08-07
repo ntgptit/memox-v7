@@ -7,7 +7,7 @@
 | **Scope** | Luật nghiệp vụ, validation rule, state machine, edge case của phạm vi MVP. Ngoài phạm vi: quyết định kiến trúc (`architecture.md`), hình dạng dữ liệu (`data-model.md`), luồng người dùng (`use-cases.md`) |
 | **Source of truth for** | BR-xx · validation rule · entity state machine · edge case |
 | **Depends on** | `document-conventions.md`, `product.md`, `architecture.md` |
-| **Updated by task** | M5.0p (recursive review lượt ba) |
+| **Updated by task** | M5.0q (recursive review lượt bốn) |
 | **Last updated** | 2026-08-07 |
 
 Format tuân theo `document-conventions.md` §6.2. Từ khoá MUST / SHOULD / MAY
@@ -590,6 +590,16 @@ mới**, không phải thẻ chưa tới hạn.
 cần học theo thứ tự bài; một deck từ vựng rời thì ngẫu nhiên tốt hơn. Bắt người
 dùng chọn một kiểu cho cả hai là bắt họ chọn sai cho một trong hai. Deck để NULL
 thì theo mặc định, nên không ai phải cấu hình gì để bắt đầu.
+
+**Mốc 00:00 làm khoảng cách đầu tiên phụ thuộc giờ học, và đó là đánh đổi đã
+nhận.** Thẻ học xong lúc 09:00 đến hạn sau 15 giờ; thẻ học xong lúc 23:00 đến hạn
+sau **một giờ**. Từ lượt ôn thứ hai trở đi thì khoảng cách đo bằng ngày lịch nên
+không còn lệch, nhưng lượt đầu tiên thì có.
+
+Đây là giá của việc neo vào **ngày lịch** thay vì cộng giờ (BR-105), và cái mua
+được lớn hơn: giờ học không trôi dần về khuya, và "đến hạn hôm nay" đúng nghĩa là
+hôm nay. Nếu sau này muốn gỡ, lối đi là mốc cắt khác 00:00 — sửa một chỗ theo AD-16,
+không phải sửa công thức.
 
 **BR-131 là BR-76 lặp lại ở một chỗ khác.** Người học tự nhận quên và người học
 hết giờ đều cho `action = forgotten`. Không có cột riêng thì hai điều đó không phân
