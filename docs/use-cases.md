@@ -7,7 +7,7 @@
 | **Scope** | Must-have của MVP. Ngoài phạm vi: should/nice-to-have, và mọi thứ ở mục "Điều đã cố ý không đặc tả" |
 | **Source of truth for** | UC-xx · main/alternative/error flow · UI state matrix của từng màn |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md` |
-| **Updated by task** | M5.0n (recursive review) |
+| **Updated by task** | M5.0o (recursive review lượt hai) |
 | **Last updated** | 2026-08-07 |
 
 Chỉ đặc tả must-have. Should-have và nice-to-have viết khi tới lượt — đặc tả
@@ -264,8 +264,11 @@ do người dùng chọn và cập nhật lịch. Chúng không bao giờ trộn
    `card_limit` (BR-23, BR-24), và tạo phiên với `session_kind = 'reviewing'`.
 5. Cả hai loại phiên ghi `card_limit` đã dùng vào phiên (BR-139) và dựng hàng đợi
    trong cùng transaction (BR-102, BR-113).
-6. Người dùng trả lời một thẻ. Hệ thống **so `session.scheduler_generation` với
-   generation hiện tại của root** (BR-46); lệch thì đi E4.
+6. Người dùng trả lời một thẻ. Nguồn của `action` tùy mode: `self_assess` lấy
+   **trực tiếp từ người dùng** qua `supportedActions` — 2 nút với `eight_box`, 4 với
+   `sm2` (BR-30); bốn mode chấm điểm chấm ra kết quả **nhị phân** rồi ánh xạ theo
+   BR-107 (BR-106). Hệ thống **so `session.scheduler_generation` với generation hiện
+   tại của root** (BR-46); lệch thì đi E4.
 7. Hệ thống xác định `kind` và ghi tường minh (BR-76):
    - phiên `learning` ⇒ `learning`, hoặc `relearning` nếu là lượt lặp trong round;
      **không đổi lịch** (BR-141, BR-143, BR-144);
@@ -394,7 +397,7 @@ khoá để tránh bấm đúp.
 
 **Postconditions:** Không đổi gì — use case chỉ đọc.
 
-**Business rules:** BR-22 — định nghĩa "đến hạn" phải khớp **hệt** UC-05, nếu
+**Business rules:** BR-142 — hai tập "chưa học" và "đến hạn" phải khớp **hệt** UC-05, nếu
 không con số ở danh sách sẽ lệch với số card thực sự ôn được. Dùng chung một
 named query. Ngoài ra BR-56, BR-57, BR-65.
 **UI states:** loading · loaded · empty · error

@@ -7,7 +7,7 @@
 | **Scope** | Bảng, cột, index, quan hệ, query bất biến. Ngoài phạm vi: SQL runtime (`lib/core/database/`, chưa tồn tại) |
 | **Source of truth for** | Schema · cột và kiểu · index · query bất biến · thứ tự migration |
 | **Depends on** | `document-conventions.md`, `architecture.md`, `business-rules.md` |
-| **Updated by task** | M5.0m (hai loại phiên học) |
+| **Updated by task** | M5.0o (recursive review lượt hai) |
 | **Last updated** | 2026-08-07 |
 
 Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; SQL thật nằm ở
@@ -17,6 +17,18 @@ Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; S
 "vòng review UI/UX", "code review" — đó là *rà soát*, không phải *ôn tập*. Đợt đổi
 tên cố tình không đụng tới chúng, nên gặp chữ `review` ở đâu đó không có nghĩa là
 sót.
+
+**Năm chỗ trong `lib/` đang implement định nghĩa đã bị thay.** Chúng **đúng với
+schema v4** và sẽ đổi cùng migration mang `learned_at`; liệt kê ở đây để không ai
+đọc chúng rồi tưởng tài liệu sai, hoặc sửa chúng trước khi có cột để sửa:
+
+| Nơi | Đang dùng | Phải thành |
+|---|---|---|
+| `card_state_model.dart` | `answerCount == 0` ⇒ `new` | `learned_at IS NULL` (BR-90) |
+| `card.drift` — `newCount` | `answer_count = 0` | `learned_at IS NULL` |
+| `deck.drift` ×2 | `due_at IS NULL OR due_at <= now` | hai số tách biệt (BR-150) |
+| `study.drift` | cùng vị từ trên cho hàng đợi | hai tập của BR-142 |
+| `card_list_query_mapper.dart` | comment nói quan hệ này "đúng hôm nay" | vị từ đổi, quan hệ giữ (invariant 24, 25) |
 
 **Chưa tồn tại ở schema nào** — đến cùng đợt migration tiếp theo của M5: bảng
 `study_queue_items`; `study_sessions.current_mode`, `cursor`, `card_limit`;

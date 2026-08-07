@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M5.0n (recursive review) |
+| **Updated by task** | M5.0o (recursive review lượt hai) |
 | **Last updated** | 2026-08-07 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -7078,6 +7078,55 @@ lần công sức. BR-150 và BR-151 đưa hai con số về đúng ngôn ngữ 
 khi đã sáu, `product.md` M3 còn ghi mode `review`, và một đoạn prose trong chính
 `business-rules.md` vẫn giải thích theo mô hình cũ. Không phép nào thay được phép
 kia: grep không hiểu mâu thuẫn giữa hai luật, mắt không quét hết 179 trích dẫn.
+
+### M5.0o · Recursive review lượt hai — đổi góc nhìn thay vì đọc lại
+
+- **Status:** done — sáu góc, hội tụ ở 0 phát hiện.
+- **Goal:** Tìm những gì lượt một không thể tìm, bằng cách soi từ phía schema,
+  invariant, code và kịch bản biên thay vì đọc lại từng luật.
+- **Scope:** `business-rules.md` (thêm **BR-153**), `use-cases.md` (UC-05 khôi
+  phục trích dẫn, UC-06), `master-flow.md`, `architecture.md`, `data-model.md`
+  (khối nợ code).
+- **Out of scope:** không đổi quyết định nghiệp vụ nào.
+- **Editable documents:** `docs/business-rules.md`, `docs/use-cases.md`,
+  `docs/master-flow.md`, `docs/architecture.md`, `docs/data-model.md`, `docs/wbs.md`
+- **Output:** BR-153; khối "năm chỗ trong `lib/` implement định nghĩa đã bị thay"
+- **Acceptance criteria:**
+  - [x] Không tài liệu nào (trừ ledger) còn trích BR đã `superseded` như luật
+        đang dùng.
+  - [x] UC-05 trích lại BR-106 và BR-107 — nguồn của `action`.
+  - [x] Mọi mode có điều kiện dựng được nội dung rõ ràng, gồm `match` (BR-153).
+  - [x] Nợ code được ghi ở nơi người viết M5 sẽ đọc.
+  - [x] Vòng cuối của cả sáu phép quét trả về **0**.
+- **Dependencies:** M5.0n
+- **Tests required:** `check_docs.py`, `verify_invariants.py`, guard `memox-v7`
+- **Checklist phases:** 14.1
+
+**Lượt một đã hội tụ, nên lặp lại nó sẽ cho đúng kết quả cũ.** Sáu góc mới:
+đối chiếu cột mà luật nhắc với schema thật; đối chiếu hai chiều giữa BR và
+invariant; tìm trích dẫn tới BR đã `superseded`; tìm BR active không xuất hiện ở
+UC nào; đọc code tìm chỗ implement định nghĩa đã đổi; và thử kịch bản biên.
+
+**Góc "BR nào biến mất khỏi UC" bắt được một mất mát thật.** Viết lại luồng chính
+UC-05 ở M5.0m đã làm rơi **BR-106 và BR-107** — chính là luật nói `action` từ đâu
+ra. Đọc UC-05 sau đợt đó không còn biết `self_assess` lấy action trực tiếp từ
+người dùng còn bốn mode kia chấm nhị phân rồi ánh xạ. Không phép kiểm nào của
+lượt một thấy được điều này: cả hai luật vẫn đúng, vẫn `active`, chỉ là không còn
+ai trích.
+
+**Góc kịch bản biên bắt được `match` với một thẻ.** Người dùng tạo deck, thêm thẻ
+đầu tiên, bấm Học mới ngay — đó là ca thật, không phải ca biên. Ghép cặp cần ít
+nhất hai cặp; một cặp thì đáp án hiển nhiên và một lượt đúng không chứng minh gì.
+BR-121 lo cho `guess`, BR-114 lo cho thẻ thiếu dữ liệu, không luật nào lo cho
+`match`. BR-153 đóng chỗ đó, và đoạn prose đi kèm liệt kê ngưỡng của cả sáu mode
+cạnh nhau — vì chúng khác nhau và trước giờ nằm rải rác.
+
+**Góc đọc code tìm ra thứ không tài liệu nào ghi.** Năm chỗ trong `lib/` đang
+implement `answer_count = 0` là "thẻ mới" và `due_at IS NULL` là "đến hạn" — cả
+hai đã bị BR-90 và BR-142 thay. Chúng **đúng với schema v4** và chỉ đổi được khi
+có `learned_at`, nhưng không tài liệu nào nói vậy: người viết M5 sẽ hoặc tưởng tài
+liệu sai, hoặc sửa code trước khi có cột để sửa. `data-model.md` giờ có bảng liệt
+kê năm chỗ đó cạnh khối "chưa tồn tại ở schema nào".
 
 ### M5.0 · Study-specific domain và data completion
 

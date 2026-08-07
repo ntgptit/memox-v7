@@ -7,7 +7,7 @@
 | **Scope** | Đồ thị chuyển tiếp giữa UC-01…UC-09, tách theo đối tượng nghiệp vụ. Ngoài phạm vi: nội dung của từng UC, mọi luật nghiệp vụ, và mọi chi tiết màn hình |
 | **Source of truth for** | Đồ thị chuyển tiếp giữa các UC · điểm vào của từng luồng · ánh xạ UC → milestone xây nó |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md`, `use-cases.md` |
-| **Updated by task** | M5.0m (hai loại phiên học) |
+| **Updated by task** | M5.0o (recursive review lượt hai) |
 | **Last updated** | 2026-08-07 |
 
 ---
@@ -164,7 +164,7 @@ phiên đang mở có thể bị vô hiệu hoá từ màn khác.
 
 ```mermaid
 flowchart TD
-    A["Bấm ôn tập trên một deck"] --> B{"Còn card đến hạn không · BR-22"}
+    A["Bấm ôn tập trên một deck"] --> B{"Còn thẻ đến hạn không · BR-142, BR-145"}
     B -->|"Không"| B1["Empty state tích cực kèm thời điểm đến hạn gần nhất; KHÔNG tạo session · UC-05 E1, BR-29"]
     B -->|"Còn"| C["Tạo study_session in_progress mang root_deck_id và generation hiện tại · BR-45, BR-79"]
     C --> D["Chọn Học mới hoặc Ôn tập · tối đa `card_limit` thẻ · BR-142, BR-24"]
