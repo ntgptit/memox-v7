@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M5.6 (integration test UC-05) |
+| **Updated by task** | M5.7r (tách WBS Study) |
 | **Last updated** | 2026-08-07 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -7795,6 +7795,12 @@ với tới chúng.
 - **Tests required:** repository/use case test cho năm cách kết thúc; test khẳng
   định `study_answers` được giữ ở cả năm; test phiên lỗi thời
 - **Checklist phases:** 14.4, 15.1, 15.2
+
+**Việc còn lại của Study nằm ở `wbs-study.md`, từ M5.7 trở đi.** M5.0…M5.6 ở
+đây đều `done`, nhưng người dùng **chưa mở được phiên học nào**: chưa có màn
+hình phên ghép sáu mode lại, và route `/study` vẫn trỏ vào placeholder. Đó là hệ quả
+của việc chia mốc theo **tầng** thay vì theo đường đi của người dùng — mỗi tầng xong và
+có test, còn thứ nối chúng lại không thuộc mốc nào.
 
 ### M5.6 · Integration test luồng UC-05
 
