@@ -7,7 +7,7 @@
 | **Scope** | Must-have của MVP. Ngoài phạm vi: should/nice-to-have, và mọi thứ ở mục "Điều đã cố ý không đặc tả" |
 | **Source of truth for** | UC-xx · main/alternative/error flow · UI state matrix của từng màn |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md` |
-| **Updated by task** | M5.0b (chốt nghiệp vụ Study) |
+| **Updated by task** | M5.0d (chuỗi stage; browse/self_assess) |
 | **Last updated** | 2026-08-07 |
 
 Chỉ đặc tả must-have. Should-have và nice-to-have viết khi tới lượt — đặc tả
@@ -244,20 +244,25 @@ state.
 Đây là luồng chạy hằng ngày và là vertical slice đầu tiên nên xây.
 
 **Main flow:**
-1. Hệ thống xác định thuật toán SRS của root deck, rồi hiển thị các StudyMode
-   trong `supportedModes` của nó — `eight_box` có cả năm, `sm2` chỉ có `review`
-   (BR-30, BR-97). Mode không đủ dữ liệu tối thiểu bị vô hiệu hoá kèm lý do
-   (BR-99); mode không thuộc thuật toán **không** gợi ý Reset (BR-100).
-2. Hệ thống lấy card đến hạn trong cả cây theo BR-22, BR-23, tối đa 50 card riêng
+1. Hệ thống lấy card đến hạn trong cả cây theo BR-22, BR-23, tối đa 50 card riêng
    biệt (BR-24). **Không có card nào thì dừng ở đây** — xem E1; phiên **chưa**
    được tạo.
-3. Người dùng chọn mode và bắt đầu. Hệ thống tạo `study_session` với
-   `status = 'in_progress'`, `end_reason = NULL`, `mode` đã chọn, `root_deck_id`
-   và `scheduler_generation` hiện tại của root (BR-45, BR-79, BR-98), **cùng
-   hàng đợi ghi vào `study_queue_items` trong cùng transaction** (BR-102). Nút
-   đánh giá render từ `supportedActions` — 2 nút với `eight_box`, 4 với `sm2`.
-4. Hệ thống hiện mặt trước của card đầu tiên và tiến độ phiên.
-5. Người dùng bấm lật; hệ thống hiện mặt sau kèm tập action tương ứng.
+2. Người dùng bấm Study. Hệ thống đọc `stageSequence` của thuật toán thuộc root
+   deck — `eight_box` → `browse`, `match`, `guess`, `recall`, `fill`; `sm2` →
+   `browse`, `self_assess` (BR-110) — rồi tạo `study_session` với
+   `status = 'in_progress'`, `end_reason = NULL`, `current_mode` = stage đầu,
+   `root_deck_id` và `scheduler_generation` hiện tại của root (BR-45, BR-79,
+   BR-98), **cùng một hàng đợi cho mỗi stage** ghi vào `study_queue_items`, tất
+   cả trong một transaction (BR-102, BR-113). Người dùng **không chọn** stage
+   (BR-109).
+3. Stage `browse` chạy trước: mỗi thẻ hiện mặt trước và mặt sau **cùng lúc**,
+   không có bước lật, không có action nào được ghi (BR-111, BR-112). Đi hết hàng
+   đợi của `browse` thì sang stage kế.
+4. Stage chấm điểm hiện thẻ theo cách của mode đó. Với `self_assess`, hệ thống
+   hiện mặt trước rồi chờ người dùng lật (BR-112); nút đánh giá render từ
+   `supportedActions` — 2 nút với `eight_box`, 4 với `sm2` (BR-30).
+5. `self_assess` lấy action trực tiếp từ người dùng; bốn mode còn lại chấm ra kết
+   quả nhị phân rồi ánh xạ theo BR-107 (BR-106).
 6. Người dùng chọn một action.
 7. Hệ thống **so `session.scheduler_generation` với generation hiện tại của root**
    (BR-46). Lệch thì đi E4.
@@ -280,6 +285,12 @@ state.
 - **A1 — Đánh giá `forgotten` (8-box) hoặc `again` (SM-2):** card về trạng thái
   khởi đầu theo scheduler, và **quay lại trong phiên hiện tại** sau ít nhất 3 card
   khác, hoặc cuối hàng đợi nếu không đủ 3 (BR-26).
+- **A0 — Hết hàng đợi của một stage:** hệ thống chuyển `current_mode` sang stage kế
+  trong `stageSequence` và chạy tiếp trên **cùng tập thẻ**, với thứ tự xoáo riêng
+  của stage đó (BR-113). Hết stage cuối mới là hết phiên (BR-81).
+- **A0b — Thẻ không đủ dữ liệu cho stage đang chạy:** bỏ qua **có ghi nhận** ở stage
+  đó, không xoá khỏi deck, và vẫn xuất hiện ở các stage khác mà nó đủ dữ liệu
+  (BR-114) — ví dụ thẻ không có `example` thì vắng ở `fill` nhưng có ở `guess`.
 - **A2b — Card chạm trần 3 lượt `relearning`:** thẻ rời hàng đợi dù lượt cuối
   vẫn là `forgotten`/`again`, và hệ thống bật cờ đánh dấu của thẻ (BR-104). Lịch
   dài hạn đã được đặt ở lượt `scheduled` đầu tiên nên không mất gì — thẻ vẫn

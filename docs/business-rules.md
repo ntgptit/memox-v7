@@ -7,7 +7,7 @@
 | **Scope** | Luật nghiệp vụ, validation rule, state machine, edge case của phạm vi MVP. Ngoài phạm vi: quyết định kiến trúc (`architecture.md`), hình dạng dữ liệu (`data-model.md`), luồng người dùng (`use-cases.md`) |
 | **Source of truth for** | BR-xx · validation rule · entity state machine · edge case |
 | **Depends on** | `document-conventions.md`, `product.md`, `architecture.md` |
-| **Updated by task** | M5.0c (kiến trúc StudyMode) |
+| **Updated by task** | M5.0d (chuỗi stage; browse/self_assess) |
 | **Last updated** | 2026-08-07 |
 
 Format tuân theo `document-conventions.md` §6.2. Từ khoá MUST / SHOULD / MAY
@@ -27,7 +27,7 @@ khi ai đó đọc và làm theo.
 
 Rule bị thay thế MUST đánh `superseded by BR-yy` ở cột Status và giữ nguyên ID.
 
-Trạng thái hiện tại: **BR-01…BR-107**, không trùng, không thiếu.
+Trạng thái hiện tại: **BR-01…BR-114**, không trùng, không thiếu.
 
 ---
 
@@ -302,7 +302,7 @@ phải lặp mấy lần mới nhớ — thứ cần để đánh giá chất l�
 | BR-27 | active | Chỉ lượt `scheduled` MAY thay đổi lịch dài hạn; các lượt sau của cùng card trong cùng session MUST là `relearning`. Chi tiết ở BR-75…BR-78. | scheduler | UC-05, AD-11 |
 | BR-28 | active | Card MUST rời hàng đợi khi được đánh giá bằng action khác `forgotten`/`again`. | controller | UC-05 |
 | BR-29 | active | Không có card nào đến hạn MUST được trình bày là trạng thái bình thường, không phải lỗi. | UI | UC-05, UC-06 |
-| BR-30 | active | UI MUST render nút đánh giá từ `supportedActions`, và danh sách StudyMode từ `supportedModes`, của scheduler thuộc root deck; MUST NOT hardcode tập nào trong hai. | UI | AD-06, UC-05, BR-97 |
+| BR-30 | active | UI MUST render nút đánh giá từ `supportedActions`, và chuỗi stage từ `stageSequence`, của scheduler thuộc root deck; MUST NOT hardcode tập nào trong hai. | UI | AD-06, UC-05, BR-97 |
 
 ## Vòng đời study session
 
@@ -414,12 +414,17 @@ tế và đủ hẹp để hàng thẻ có chiều cao đoán được.
 
 | ID | Status | Rule | Enforced by | Related |
 |---|---|---|---|---|
-| BR-96 | active | StudyMode MUST là một trong năm: `review`, `match`, `guess`, `recall`, `fill`. | domain | UC-05, BR-30 |
-| BR-97 | active | Tập StudyMode khả dụng MUST do **thuật toán SRS của root deck** khai báo qua `supportedModes`: `eight_box` = cả năm; `sm2` = chỉ `review`. MUST NOT hardcode ở UI. | scheduler | BR-30, AD-06 |
-| BR-98 | active | Mode MUST được lưu tường minh trên `study_sessions` và trên mỗi dòng `study_answers`. MUST NOT suy luận từ hình dạng dữ liệu của lượt. | db | BR-76, AD-11 |
-| BR-99 | active | Một mode MUST khả dụng chỉ khi thoả **cả hai**: nằm trong `supportedModes` của thuật toán, **và** scope hiện tại đủ dữ liệu tối thiểu của mode đó. | domain | BR-97, UC-05 |
+| BR-96 | superseded by BR-108 | StudyMode MUST là một trong năm: `review`, `match`, `guess`, `recall`, `fill`. | domain | UC-05, BR-30 |
+| BR-108 | active | StudyMode MUST là một trong sáu: `browse`, `self_assess`, `match`, `guess`, `recall`, `fill`. | domain | UC-05, BR-30 |
+| BR-109 | active | Một phiên MUST chạy một **chuỗi stage** theo thứ tự cố định do thuật toán khai báo, mỗi stage là một StudyMode. Người dùng MUST NOT chọn stage; hệ thống chuyển stage khi stage hiện tại đi hết hàng đợi của nó. | domain | BR-110, UC-05 |
+| BR-110 | active | Chuỗi stage MUST là: `eight_box` → `browse`, `match`, `guess`, `recall`, `fill`; `sm2` → `browse`, `self_assess`. | scheduler | BR-97, BR-109 |
+| BR-111 | active | `browse` MUST NOT sinh `action`, MUST NOT ghi `study_answers` và MUST NOT đổi lịch. Nó chỉ ghi tiến độ stage để Resume quay đúng chỗ. | domain | BR-106, BR-112 |
+| BR-112 | active | `browse` MUST hiển thị mặt trước và mặt sau **cùng lúc**, không có bước lật. `self_assess` MUST hiện mặt trước trước, và chỉ hiện mặt sau cùng tập action sau khi người dùng lật. | UI | BR-108, UC-05 |
+| BR-97 | active | Chuỗi stage MUST do **thuật toán SRS của root deck** khai báo qua `stageSequence` (BR-110). MUST NOT hardcode ở UI. | scheduler | BR-30, BR-110, AD-06 |
+| BR-98 | active | Stage đang chạy MUST được lưu tường minh trên `study_sessions.current_mode`, và mode của từng lượt trên `study_answers.mode`. MUST NOT suy luận từ hình dạng dữ liệu. | db | BR-76, BR-109, AD-11 |
+| BR-99 | active | Một stage MUST chạy chỉ khi thoả **cả hai**: nằm trong `stageSequence` của thuật toán, **và** phiên có ít nhất một thẻ đủ dữ liệu cho nó; stage không còn thẻ nào MUST bị bỏ qua thay vì hiện rỗng. | domain | BR-97, BR-114, UC-05 |
 | BR-100 | active | Mode bị chặn vì thuật toán MUST được trình bày là không khả dụng cho deck này, và MUST NOT gợi ý Reset learning progress như cách mở khoá. | UI | BR-13, BR-41 |
-| BR-106 | active | Mọi mode MUST sinh ra một `action` thuộc `supportedActions` của thuật toán. `review` MUST lấy action **trực tiếp từ người dùng**; bốn mode còn lại MUST chấm ra kết quả nhị phân rồi ánh xạ theo BR-107. | domain | BR-15, BR-30, AD-18 |
+| BR-106 | active | Mọi mode **trừ `browse`** MUST sinh một `action` thuộc `supportedActions` của thuật toán. `self_assess` MUST lấy action **trực tiếp từ người dùng**; `match`/`guess`/`recall`/`fill` MUST chấm ra kết quả nhị phân rồi ánh xạ theo BR-107. | domain | BR-15, BR-30, BR-111, AD-18 |
 | BR-107 | active | Với `eight_box`, kết quả nhị phân MUST ánh xạ: sai → `forgotten`, đúng → `remembered`. Hết giờ ở `recall` MUST tính là sai. | domain | BR-15, BR-96 |
 
 **Vì sao tập mode thuộc thuật toán chứ không thuộc deck.** Bốn mode ngoài
@@ -429,7 +434,7 @@ một nguồn nhị phân chỉ nuôi được hai trong bốn; ease factor sẽ
 BR-19 mà không có gì báo. Nên `sm2` giữ đúng `review`, và điều đó là **thuộc tính
 của thuật toán**, không phải một hạn chế tạm thời của UI.
 
-Hệ quả trực tiếp: `supportedModes` đứng cạnh `supportedActions` trên cùng
+Hệ quả trực tiếp: `stageSequence` đứng cạnh `supportedActions` trên cùng
 abstraction, vì cả hai trả lời cùng một câu hỏi — "thuật toán này cho phép người
 dùng làm gì". BR-30 đã cấm hardcode tập action; BR-97 là đúng câu đó cho tập mode.
 
@@ -461,7 +466,9 @@ Không đoán ở đây — mỗi câu trả lời khác nhau cho ra một thi�
 | ID | Status | Rule | Enforced by | Related |
 |---|---|---|---|---|
 | BR-101 | active | Một `study_session` MUST chỉ được tạo bởi hành động Study tường minh của người dùng. Hiển thị số đến hạn — badge, danh sách, thông báo — MUST NOT tạo session. | domain | UC-05, BR-29 |
-| BR-102 | active | Hàng đợi của phiên MUST được lưu trong database tại thời điểm mở phiên, và MUST bất biến trong suốt phiên: thay đổi deck sau đó MUST NOT đổi hàng đợi đang chạy. | db | UC-05, BR-24 |
+| BR-102 | active | Hàng đợi MUST được lưu trong database và MUST bất biến trong suốt phiên: thay đổi deck sau khi phiên mở MUST NOT đổi hàng đợi đang chạy. | db | UC-05, BR-24, BR-113 |
+| BR-113 | active | Mỗi stage MUST có hàng đợi riêng trên **cùng tập thẻ** của phiên, với thứ tự xoáo độc lập. Hai stage MUST NOT dùng chung một sequence khi phiên có từ hai thẻ trở lên. | db | BR-102, BR-109 |
+| BR-114 | active | Thẻ không đủ dữ liệu cho một stage MUST bị bỏ qua **có ghi nhận** ở stage đó, MUST NOT bị xoá khỏi deck, và MUST vẫn xuất hiện ở các stage khác mà nó đủ dữ liệu. | repository | BR-99, BR-113 |
 | BR-103 | active | Khi mở app còn session `in_progress` của **cùng ngày học**, hệ thống MUST cho phép tiếp tục phiên đó. Session `in_progress` của ngày học khác MUST chuyển `abandoned` với `end_reason = interrupted`. | repository | BR-80, BR-105 |
 | BR-104 | active | Chạm trần 3 lượt `relearning` (BR-26) MUST cho thẻ rời hàng đợi, và MUST bật cờ đánh dấu của thẻ. MUST NOT tự tắt cờ. | repository | BR-26, BR-92 |
 | BR-105 | active | `next_due_at` MUST rơi vào **00:00 giờ địa phương** của ngày thứ N, với N là interval do thuật toán trả về. Giá trị lưu vẫn là UTC. | domain | BR-16, BR-18, AD-16 |
@@ -477,6 +484,19 @@ BR-105 sửa một chỗ trôi mà không ai thấy: `now + N*24h` đẩy mốc 
 theo giờ người dùng bấm. Học lúc 23:00 thì hôm sau 22:00 thẻ **chưa** tới hạn, và
 mỗi phiên lại đẩy thêm — giờ học trôi dần về khuya cho tới khi người dùng hụt cả
 một ngày. Neo vào đầu ngày lịch làm "đến hạn hôm nay" đúng nghĩa là hôm nay.
+
+**Một thẻ đi qua nhiều stage chấm điểm, và BR-77 đã trả lời sẵn lượt nào đổi lịch.**
+Lượt đầu tiên của một thẻ trong một phiên là `scheduled` và đổi lịch; mọi lượt sau là
+`relearning`, ghi lịch sử nhưng không đổi lịch. Áp nguyên vào chuỗi stage thì **stage
+chấm điểm đầu tiên quyết định lịch**, các stage sau chỉ để luyện. Không cần luật
+mới, và `browse` không đếm vì nó không ghi lượt nào (BR-111).
+
+**Đây là hệ quả được chấp nhận có ý thức, không phải điều đã được cân nhắc đủ.**
+Sai ở Match rồi đúng cả ba stage sau vẫn cho lịch của một lần sai; đúng ở Match rồi
+sai ba stage sau vẫn cho lịch của một lần đúng. Có hai hướng khác — stage cuối
+quyết định, hoặc tổng hợp toàn chuỗi — và cả hai đều cần một luật mới. Giữ BR-77
+vì nó nhất quán với phần còn lại của hệ thống, và ghi ra đây để lần xem lại không
+phải tự phát hiện.
 
 **Chưa chốt:** trần 50 thẻ/phiên (BR-24) áp cho mọi mode hay chỉ `review`; và
 phiên có cho chọn scope hẹp hơn deck đang đứng hay không.

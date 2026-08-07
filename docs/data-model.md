@@ -7,7 +7,7 @@
 | **Scope** | Bảng, cột, index, quan hệ, query bất biến. Ngoài phạm vi: SQL runtime (`lib/core/database/`, chưa tồn tại) |
 | **Source of truth for** | Schema · cột và kiểu · index · query bất biến · thứ tự migration |
 | **Depends on** | `document-conventions.md`, `architecture.md`, `business-rules.md` |
-| **Updated by task** | M5.0b (chốt nghiệp vụ Study) |
+| **Updated by task** | M5.0d (chuỗi stage; browse/self_assess) |
 | **Last updated** | 2026-08-07 |
 
 Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; SQL thật nằm
@@ -32,8 +32,9 @@ Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; S
 > | `features/study/` · `RouteNames.study` | `features/review/` · `RouteNames.review` |
 >
 > **Chưa tồn tại ở bất kỳ schema nào** — đến cùng đợt migration của M5:
-> bảng `study_queue_items`; `study_sessions.mode`, `study_sessions.cursor`;
-> `study_answers.mode`; và giá trị `interrupted` của `end_reason`.
+> bảng `study_queue_items` (kèm cột `mode`); `study_sessions.current_mode`,
+> `study_sessions.cursor`; `study_answers.mode`; giá trị `interrupted` của
+> `end_reason`; và hai StudyMode mới `browse` / `self_assess`.
 >
 > Ghi ra đây vì bài học của M4.12d: một tài liệu nói khác code mà không nói rõ nó
 > đang nói khác thì không phải tài liệu, nó là một cái bẫy. Khi migration xong,
@@ -71,7 +72,7 @@ deck_templates (asset JSON ở MVP)
        │            └──► study_answers       (1–n, append-only, mang generation)
        │
        └──► study_sessions ──┬──► study_answers
-                             └──► study_queue_items  (hàng đợi phiên, BR-102)
+                             └──► study_queue_items  (một hàng đợi mỗi stage, BR-113)
 ```
 
 ---
@@ -297,7 +298,7 @@ xoá (cascade).
 | `scheduler_type` | TEXT NOT NULL | scheduler tại thời điểm đánh giá |
 | `scheduler_generation` | INTEGER NOT NULL | generation tại thời điểm đánh giá |
 | `kind` | TEXT NOT NULL | `'scheduled'` \| `'relearning'` (BR-75, BR-76) |
-| `mode` | TEXT NOT NULL | StudyMode của lượt (BR-96, BR-98) |
+| `mode` | TEXT NOT NULL | StudyMode của lượt (BR-108, BR-98). `browse` không bao giờ xuất hiện ở đây (BR-111) |
 | `action` | TEXT NOT NULL | `forgotten`/`remembered` hoặc `again`/`hard`/`good`/`easy` |
 | `answered_at` | DATETIME NOT NULL | UTC |
 | `next_due_at` | DATETIME NULL | hạn sau khi đánh giá |
@@ -330,7 +331,7 @@ bảng đầu tiên cần nhìn khi bàn về kích thước DB.
 | `deck_id` | TEXT NOT NULL | → `decks(id)` ON DELETE CASCADE. Deck được ôn (thường là root hoặc một nhánh) |
 | `root_deck_id` | TEXT NOT NULL | root của cây tại thời điểm mở phiên |
 | `scheduler_generation` | INTEGER NOT NULL | generation lúc mở phiên (BR-45) |
-| `mode` | TEXT NOT NULL | `review` \| `match` \| `guess` \| `recall` \| `fill` (BR-96, BR-98) |
+| `current_mode` | TEXT NOT NULL | stage đang chạy: `browse` \| `self_assess` \| `match` \| `guess` \| `recall` \| `fill` (BR-108, BR-98) |
 | `status` | TEXT NOT NULL | `in_progress` \| `completed` \| `abandoned` \| `invalidated` \| `failed` (BR-79) |
 | `end_reason` | TEXT NULL | `user_exit` \| `scheduler_reset` \| `stale_generation` \| `persistence_error` \| `interrupted` (BR-80). NULL khi `in_progress` hoặc `completed` |
 | `cursor` | INTEGER NOT NULL DEFAULT 0 | số lượt đã phục vụ trong phiên; nền của BR-26 |
@@ -370,14 +371,17 @@ Hàng đợi của một phiên (BR-102). Một dòng cho mỗi thẻ được n
 | Cột | Kiểu | Ghi chú |
 |---|---|---|
 | `session_id` | TEXT NOT NULL | → `study_sessions(id)` ON DELETE CASCADE |
+| `mode` | TEXT NOT NULL | stage mà dòng này thuộc về (BR-113) |
 | `card_id` | TEXT NOT NULL | → `cards(id)` ON DELETE CASCADE |
-| `position` | INTEGER NOT NULL | thứ tự lúc nạp (BR-23). **Bất biến trong phiên** |
+| `position` | INTEGER NOT NULL | thứ tự trong stage đó (BR-23, BR-113). **Bất biến suốt phiên** |
 | `status` | TEXT NOT NULL | `pending` \| `completed` (BR-28) |
 | `available_at` | INTEGER NOT NULL DEFAULT 0 | mốc `cursor` tối thiểu để thẻ được phục vụ lại (BR-26) |
 | `answers_in_session` | INTEGER NOT NULL DEFAULT 0 | số lượt đã đánh giá; `0` ⇒ lượt tới là `scheduled` (BR-77) |
 
-PK là `(session_id, card_id)`. Đó cũng chính là chỗ "50 card **riêng biệt**" của
-BR-24 trở thành ràng buộc thay vì một lời hứa.
+PK là `(session_id, mode, card_id)` — một thẻ xuất hiện đúng một lần **trong mỗi
+stage**, và các stage có thứ tự độc lập (BR-113). "50 card riêng biệt" của BR-24
+vì thế được đếm trên **tập thẻ của phiên**, không phải trên số dòng — xem
+invariant 18.
 
 ### Vì sao là `cursor` + `available_at`, không phải xáo lại `position`
 
@@ -567,9 +571,11 @@ WHERE s.status = 'completed'
 SELECT session_id FROM study_queue_items
 WHERE available_at < 0 OR answers_in_session < 0 OR answers_in_session > 4;
 
--- 18. Một phiên nạp quá 50 thẻ (BR-24)
+-- 18. Một phiên nạp quá 50 thẻ riêng biệt (BR-24)
+--     COUNT(DISTINCT card_id), không COUNT(*): mỗi thẻ có một dòng **mỗi stage**
+--     (BR-113), nên đếm dòng sẽ báo động giả ngay ở phiên 11 thẻ × 5 stage.
 SELECT session_id FROM study_queue_items
-GROUP BY session_id HAVING COUNT(*) > 50;
+GROUP BY session_id HAVING COUNT(DISTINCT card_id) > 50;
 ```
 
 Invariant 16 là thứ giữ cho `completed` có nghĩa. Không có nó, một phiên bỏ dở
