@@ -7,7 +7,7 @@
 | **Scope** | Luật nghiệp vụ, validation rule, state machine, edge case của phạm vi MVP. Ngoài phạm vi: quyết định kiến trúc (`architecture.md`), hình dạng dữ liệu (`data-model.md`), luồng người dùng (`use-cases.md`) |
 | **Source of truth for** | BR-xx · validation rule · entity state machine · edge case |
 | **Depends on** | `document-conventions.md`, `product.md`, `architecture.md` |
-| **Updated by task** | M5.0h (luật stage fill) |
+| **Updated by task** | M5.0i (card_limit thuộc phiên) |
 | **Last updated** | 2026-08-07 |
 
 Format tuân theo `document-conventions.md` §6.2. Từ khoá MUST / SHOULD / MAY
@@ -27,7 +27,7 @@ khi ai đó đọc và làm theo.
 
 Rule bị thay thế MUST đánh `superseded by BR-yy` ở cột Status và giữ nguyên ID.
 
-Trạng thái hiện tại: **BR-01…BR-138**, không trùng, không thiếu.
+Trạng thái hiện tại: **BR-01…BR-140**, không trùng, không thiếu.
 
 ---
 
@@ -296,7 +296,7 @@ phải lặp mấy lần mới nhớ — thứ cần để đánh giá chất l�
 |---|---|---|---|---|
 | BR-22 | active | Một phiên MUST chỉ lấy card có `due_at IS NULL OR due_at <= now`. | db | UC-05, UC-06 |
 | BR-23 | active | Thứ tự MUST là: thẻ **đến hạn** (`due_at <= now`) trước, theo `due_at` tăng dần; thẻ **mới** (`due_at IS NULL`) lấp phần còn lại của hạn ngạch BR-24. | db | UC-05 |
-| BR-24 | active | Một phiên MUST giới hạn 50 card riêng biệt. Không tính lượt `relearning`. | repository | UC-05 |
+| BR-24 | active | Một phiên MUST giới hạn số **thẻ riêng biệt** theo `study_sessions.card_limit`, mặc định **20**. Giới hạn thuộc **phiên**, không thuộc stage hay round: năm stage dùng chung một tập thẻ. | repository | UC-05, BR-139 |
 | BR-25 | active | Đánh giá MUST được ghi ngay khi người dùng bấm, không chờ hết phiên. | repository | UC-05 |
 | BR-26 | active | **Chỉ áp cho stage `self_assess`.** Card đánh giá `forgotten`/`again` MUST quay lại trong stage đó, sau ít nhất 3 card khác, hoặc cuối hàng đợi nếu không đủ 3. Bốn stage chấm điểm dùng round (BR-115). | repository | UC-05, BR-104, BR-115 |
 | BR-27 | active | Chỉ lượt `scheduled` MAY thay đổi lịch dài hạn; các lượt sau của cùng card trong cùng session MUST là `relearning`. Chi tiết ở BR-75…BR-78. | scheduler | UC-05, AD-11 |
@@ -453,9 +453,14 @@ việc có hay không có action — và đó cũng chính là toàn bộ phần
 tự viết (AD-18). `review` không còn là ngoại lệ của luồng chung; nó là mode mà
 `evaluate` trả về đúng cái người dùng vừa bấm.
 
-**Chưa chốt, và cố ý để trống:** ngưỡng tối thiểu cụ thể của `match` và `recall`;
-và một lượt của bốn stage chấm điểm ghi `kind` là gì — mục sau đáng chốt sớm nhất,
-vì `study_answers` chỉ thêm nên ghi sai không sửa lại được.
+**Chưa chốt, và cố ý để trống:** một lượt của bốn stage chấm điểm ghi `kind` là
+gì. Đây là mục cuối cùng, và đáng chốt trước khi viết code — `study_answers` chỉ
+thêm, nên ghi sai không sửa lại được.
+
+Ngưỡng riêng theo stage đã đóng ở BR-139: không có. Năm stage chạy trên **một**
+tập thẻ của phiên, và BR-140 tách bạch điều đó với điều kiện dựng được nội dung —
+`guess` cần năm nghĩa khác nhau, `fill` cần thẻ có `example`. Hai thứ đó quyết
+định stage **có chạy hay bị bỏ qua**, không quyết định lấy bao nhiêu thẻ.
 Không đoán ở đây — mỗi câu trả lời khác nhau cho ra một thiết kế khác nhau.
 
 Hai mục từng nằm trong danh sách này đã đóng: `guess` so "khác nghĩa" bằng
@@ -473,6 +478,8 @@ vì một question mượn bốn thẻ khác để dựng.
 | BR-101 | active | Một `study_session` MUST chỉ được tạo bởi hành động Study tường minh của người dùng. Hiển thị số đến hạn — badge, danh sách, thông báo — MUST NOT tạo session. | domain | UC-05, BR-29 |
 | BR-102 | active | Hàng đợi MUST được lưu trong database và MUST bất biến trong suốt phiên: thay đổi deck sau khi phiên mở MUST NOT đổi hàng đợi đang chạy. | db | UC-05, BR-24, BR-113 |
 | BR-113 | active | Mỗi stage MUST có hàng đợi riêng trên **cùng tập thẻ** của phiên, với thứ tự xoáo độc lập. Hai stage MUST NOT dùng chung một sequence khi phiên có từ hai thẻ trở lên. | db | BR-102, BR-109 |
+| BR-139 | active | Số thẻ của một phiên MUST được chốt **một lần lúc mở phiên** và lưu vào `study_sessions.card_limit`. Mọi stage và mọi round MUST chạy trên đúng tập thẻ đó; MUST NOT có ngưỡng tối thiểu hay tối đa riêng theo stage. | db | BR-24, BR-113 |
+| BR-140 | active | Điều kiện **dựng được nội dung** của một stage (BR-114, BR-121, BR-124) MUST NOT được hiểu là ngưỡng thẻ của stage đó. Chúng quyết định stage có chạy được hay bị bỏ qua, không quyết định lấy bao nhiêu thẻ. | domain | BR-99, BR-139 |
 | BR-134 | active | `fill` MUST chấm bằng cách so dạng **đã fold** của câu trả lời với `back_folded` của thẻ: trim hai đầu và hạ hoa Unicode-aware. Chính sách này **giữ nguyên dấu** — `cong` MUST NOT khớp `công`. | domain | BR-123, BR-135 |
 | BR-135 | active | Mỗi lượt `fill` MUST lưu phiên bản chính sách so khớp đã dùng. Đổi chính sách MUST tăng phiên bản, MUST NOT sửa lại các lượt cũ. | db | BR-134, AD-11 |
 | BR-136 | active | Việc dùng gợi ý MUST được ghi trên lượt, và MUST NOT tự đổi `action` hay lịch. | db | BR-106, BR-95 |
@@ -717,7 +724,7 @@ Trạng thái kết thúc là terminal — không có đường quay lại `in_p
 | Ôn phiên trải trên nhiều deck con | Một tập action duy nhất, của root deck (BR-05, BR-30) |
 | Deck rỗng (0 card) | Empty state với hành động phù hợp `content_type`; không vào được phiên ôn |
 | Không card nào đến hạn | Empty state tích cực (BR-29), hiện thời điểm card gần nhất đến hạn |
-| Bỏ 2 tuần, 400 card quá hạn | Giới hạn 50 card/phiên (BR-24); hiện số còn lại |
+| Bỏ 2 tuần, 400 card quá hạn | Giới hạn `card_limit` thẻ/phiên, mặc định 20 (BR-24); hiện số còn lại |
 | Thoát giữa phiên ôn | Giữ toàn bộ đánh giá đã ghi (BR-25, BR-86); session → `abandoned`/`user_exit` |
 | SM-2, card bị quên liên tục | `ease_factor` chạm sàn 1.3 và dừng ở đó (BR-19) |
 | Đổi giờ hệ thống / lệch múi giờ | Lưu và so sánh `due_at` bằng UTC |

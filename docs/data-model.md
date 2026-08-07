@@ -7,7 +7,7 @@
 | **Scope** | Bảng, cột, index, quan hệ, query bất biến. Ngoài phạm vi: SQL runtime (`lib/core/database/`, chưa tồn tại) |
 | **Source of truth for** | Schema · cột và kiểu · index · query bất biến · thứ tự migration |
 | **Depends on** | `document-conventions.md`, `architecture.md`, `business-rules.md` |
-| **Updated by task** | M5.0h (luật stage fill) |
+| **Updated by task** | M5.0i (card_limit thuộc phiên) |
 | **Last updated** | 2026-08-07 |
 
 Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; SQL thật nằm
@@ -33,7 +33,7 @@ Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; S
 >
 > **Chưa tồn tại ở bất kỳ schema nào** — đến cùng đợt migration của M5:
 > bảng `study_queue_items` (cột `mode`, `round`, `remaining_ms`, `is_revealed`);
-> `study_sessions.current_mode`, `study_sessions.cursor`; `study_answers.mode` và
+> `study_sessions.current_mode`, `study_sessions.cursor`, `study_sessions.card_limit`; `study_answers.mode` và
 > `study_answers.outcome_reason`, `comparison_version`, `used_hint`; giá trị
 > `interrupted` của `end_reason`; và hai
 > StudyMode mới `browse` / `self_assess`.
@@ -340,6 +340,7 @@ bảng đầu tiên cần nhìn khi bàn về kích thước DB.
 | `status` | TEXT NOT NULL | `in_progress` \| `completed` \| `abandoned` \| `invalidated` \| `failed` (BR-79) |
 | `end_reason` | TEXT NULL | `user_exit` \| `scheduler_reset` \| `stale_generation` \| `persistence_error` \| `interrupted` (BR-80). NULL khi `in_progress` hoặc `completed` |
 | `cursor` | INTEGER NOT NULL DEFAULT 0 | số lượt đã phục vụ trong phiên; nền của BR-26 |
+| `card_limit` | INTEGER NOT NULL | số thẻ tối đa của phiên, chốt lúc mở (BR-24, BR-139). Mặc định 20 |
 | `started_at` | DATETIME NOT NULL | UTC |
 | `ended_at` | DATETIME NULL | NULL khi `in_progress` |
 
@@ -387,9 +388,11 @@ Hàng đợi của một phiên (BR-102). Một dòng cho mỗi thẻ được n
 | `is_revealed` | INTEGER NOT NULL DEFAULT 0 | chỉ `recall`: đáp án đã lật chưa, để Resume không che lại (BR-133) |
 
 PK là `(session_id, mode, round, card_id)` — một thẻ xuất hiện đúng một lần **trong
-mỗi round của mỗi stage**, và mọi round có thứ tự độc lập (BR-113, BR-117). "50 card riêng biệt" của BR-24
-vì thế được đếm trên **tập thẻ của phiên**, không phải trên số dòng — xem
-invariant 18.
+mỗi round của mỗi stage**, và mọi round có thứ tự độc lập (BR-113, BR-117).
+
+Giới hạn thẻ của BR-24 vì thế được đếm trên **tập thẻ riêng biệt của phiên**,
+không phải trên số dòng — một phiên 20 thẻ × 5 stage đã là 100 dòng trước khi có
+bất kỳ round nào. Xem invariant 18.
 
 ### Vì sao là `cursor` + `available_at`, không phải xáo lại `position`
 
@@ -611,11 +614,16 @@ WHERE q.round > 1
                   WHERE p.session_id = q.session_id AND p.mode = q.mode
                     AND p.round = q.round - 1 AND p.card_id = q.card_id);
 
--- 18. Một phiên nạp quá 50 thẻ riêng biệt (BR-24)
---     COUNT(DISTINCT card_id), không COUNT(*): mỗi thẻ có một dòng **mỗi stage**
---     (BR-113), nên đếm dòng sẽ báo động giả ngay ở phiên 11 thẻ × 5 stage.
-SELECT session_id FROM study_queue_items
-GROUP BY session_id HAVING COUNT(DISTINCT card_id) > 50;
+-- 18. Một phiên nạp quá số thẻ riêng biệt nó tự khai báo (BR-24, BR-139)
+--     So với `card_limit` của **chính phiên đó**, không với một số viết cứng:
+--     mặc định là 20 nhưng người dùng sẽ cài được, và một hằng số ở đây sẽ sai
+--     ở đúng phiên đầu tiên họ đổi.
+--     COUNT(DISTINCT card_id), không COUNT(*): mỗi thẻ có một dòng **mỗi round của
+--     mỗi stage** (BR-113, BR-115), nên đếm dòng báo động giả ngay lập tức.
+SELECT q.session_id FROM study_queue_items q
+JOIN study_sessions s ON s.id = q.session_id
+GROUP BY q.session_id, s.card_limit
+HAVING COUNT(DISTINCT q.card_id) > s.card_limit;
 ```
 
 Invariant 16 là thứ giữ cho `completed` có nghĩa. Không có nó, một phiên bỏ dở
