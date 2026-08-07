@@ -1,11 +1,167 @@
-/// Contract the study feature's presentation layer depends on.
+import '../entities/study_queue_item_entity.dart';
+import '../entities/study_session_entity.dart';
+import '../models/new_card_order_model.dart';
+import '../models/study_action_model.dart';
+import '../models/study_entry_summary_model.dart';
+import '../models/study_mode_model.dart';
+import '../models/study_options_model.dart';
+import '../models/study_outcome_reason_model.dart';
+import '../models/study_session_kind_model.dart';
+import '../models/study_session_status_model.dart';
+
+/// Contract the study feature's use cases depend on.
 ///
-/// Structural anchor for `features/study/domain/`. It is deliberately empty:
-/// the methods are written in M4.5, **from what presentation turns out to
-/// need**, not from what a data source happens to offer. Guessing them now
-/// would mean writing an implementation and a test for a call nobody makes.
+/// Pure Dart: no Flutter, no Drift. AD-01 keeps the planned Spring Boot backend
+/// cheap only while that stays true, and the cost of breaking it does not show
+/// up until the backend lands.
 ///
-/// This file is pure Dart on purpose — no Flutter, no Drift. AD-01 keeps the
-/// planned Spring Boot backend cheap only while that stays true, and the cost
-/// of breaking it does not show up until the backend lands.
-abstract interface class StudyRepository {}
+/// **The queue lives behind this contract, not above it.** Every rule it carries
+/// — the ordering of BR-23, the comeback of BR-26, the round-building of BR-115
+/// and BR-116 — needs the data *as it stands at the moment of writing*. Lifting
+/// any of them into a use case would put the check outside the transaction,
+/// which is a race between the check and the write: the rule would be in a
+/// tidier place and be wrong.
+///
+/// **What the repository deliberately does not know:** which stages an algorithm
+/// runs, or in what order. [openSession] is *given* the sequence (BR-97). The
+/// alternative — the repository asking a scheduler — would put algorithm
+/// knowledge in the data layer and make a new algorithm a change in two places.
+abstract interface class StudyRepository {
+  /// Both card counts and the per-mode counts, from one statement (AD-13).
+  ///
+  /// [modes] is what the deck's algorithm offers for review (BR-146); the result
+  /// carries a count for each. Watching rather than reading once: the badge has
+  /// to fall to zero the moment the last card is answered.
+  Stream<StudyEntrySummaryModel> watchStudyEntry(
+    String deckId, {
+    required List<StudyMode> modes,
+    required DateTime now,
+  });
+
+  /// The options in force for [rootDeckId], with the deck's override applied
+  /// over the app-wide default (BR-147).
+  Future<StudyOptionsModel> effectiveOptions(String rootDeckId);
+
+  /// Opens a session and builds every stage's queue in one transaction.
+  ///
+  /// [stageSequence] comes from the algorithm (BR-97): the whole sequence for a
+  /// [StudySessionKind.learning] session, a single user-chosen mode for a
+  /// [StudySessionKind.reviewing] one (BR-109).
+  ///
+  /// The card set is chosen once, here, and shared by every stage (BR-113) — the
+  /// stages differ only in their shuffle. It never mixes the two sets (BR-142),
+  /// never exceeds [StudyOptionsModel.cardLimit] distinct cards (BR-24), and
+  /// takes **what is actually available**: eight due cards make an eight-card
+  /// session, not a twenty-card one padded with new material.
+  ///
+  /// Throws a refusal when the set is empty — for a review session that is
+  /// BR-145, and it must leave no session row behind (BR-101).
+  Future<StudySessionEntity> openSession({
+    required String deckId,
+    required StudySessionKind kind,
+    required List<StudyMode> stageSequence,
+    required int cardLimit,
+    required NewCardOrder newCardOrder,
+    required DateTime now,
+  });
+
+  /// The next card to serve, or null when the current stage has nothing left to
+  /// serve right now.
+  ///
+  /// Null does not mean the stage is finished: it also means every remaining
+  /// card is waiting out BR-26's three-card gap. [isStageExhausted] is the
+  /// question that distinguishes them, and keeping them apart is what stops a
+  /// session ending three cards early.
+  Future<StudyQueueItemEntity?> nextItem(String sessionId);
+
+  /// Whether the current stage has no `pending` rows left at all.
+  Future<bool> isStageExhausted(String sessionId);
+
+  /// Records one turn, and everything that turn implies, in one transaction
+  /// (BR-86).
+  ///
+  /// In a [StudySessionKind.reviewing] session that means: the history row, the
+  /// queue row, the session cursor, and — only on the first turn of the card,
+  /// the `scheduled` one — the schedule itself (BR-77, BR-78).
+  ///
+  /// In a [StudySessionKind.learning] session no schedule moves at all
+  /// (BR-141, BR-144). [nextDueAt] and the box/interval arguments are the
+  /// scheduler's output and are simply not passed there.
+  ///
+  /// Refuses, without writing anything, when the session's generation no longer
+  /// matches the root's (BR-84) — and marks the session `invalidated` when it
+  /// does not.
+  Future<void> submitAnswer({
+    required String sessionId,
+    required String cardId,
+    required StudyMode mode,
+    required StudyAction action,
+    required DateTime now,
+    StudyOutcomeReason? outcomeReason,
+    int? comparisonVersion,
+    bool? usedHint,
+    DateTime? nextDueAt,
+    int? nextBox,
+    double? nextEaseFactor,
+    int? nextIntervalDays,
+  });
+
+  /// Marks a card as having finished the learning chain (BR-144).
+  ///
+  /// **Completion is an event, not an answer.** It sets `learned_at`, seeds the
+  /// schedule at its lowest rung — box 1, or interval 1 — with [dueAt] at the
+  /// start of the next study day, and writes **no** `scheduled` row. Both
+  /// columns are set in the same statement, because a card holding one without
+  /// the other is what invariants 24 and 28 exist to catch.
+  ///
+  /// The card finishes when it clears the last stage **it took part in** — a
+  /// stage that skipped it for missing data does not count (BR-114). Deriving
+  /// this from "reached the last stage in the sequence" instead is what would
+  /// have frozen every card without an `example` forever.
+  Future<void> completeLearning({
+    required String cardId,
+    required DateTime learnedAt,
+    required DateTime dueAt,
+    int? box,
+    int? intervalDays,
+  });
+
+  /// Moves the session to its next stage and builds that stage's first round.
+  Future<void> advanceStage({
+    required String sessionId,
+    required StudyMode mode,
+    required DateTime now,
+  });
+
+  /// Builds the next round of the current stage from the cards that failed the
+  /// one just finished (BR-115, BR-116).
+  ///
+  /// Returns false when the failed set is empty, which is what ends a
+  /// round-based stage (BR-119). There is no round ceiling — BR-104's three is
+  /// `self_assess`'s, and applying it here would end a stage with cards still
+  /// unanswered.
+  ///
+  /// A card that failed at any point in the round belongs to the failed set even
+  /// if it was later answered correctly to clear the board (BR-116).
+  Future<bool> buildNextRound(String sessionId);
+
+  /// Closes a session with a [status] and [reason] the matrix allows.
+  ///
+  /// Turns already written stay written, in every ending (BR-86): changing the
+  /// status never deletes history.
+  Future<void> endSession({
+    required String sessionId,
+    required StudySessionStatus status,
+    required StudySessionEndReason? reason,
+    required DateTime endedAt,
+  });
+
+  /// Closes any session left `in_progress` by an earlier study day (BR-103).
+  ///
+  /// `abandoned`/`interrupted`, never `user_exit`: the user did not leave, the
+  /// app did. Returns how many were closed.
+  Future<int> abandonStaleSessions({required DateTime dayStart});
+
+  /// The session currently open for [deckId], if any.
+  Future<StudySessionEntity?> openSessionFor(String deckId);
+}

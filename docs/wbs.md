@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M5.0s (schema v5) |
+| **Updated by task** | M5.0 (nửa domain) |
 | **Last updated** | 2026-08-07 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -7329,7 +7329,7 @@ vừa — seam có thật: phần đó dựng giá trị, không trả lời l�
 
 ### M5.0 · Study domain và data — gồm cả hàng đợi
 
-- **Status:** todo
+- **Status:** in progress — nửa **domain** xong (enum, entity, failure, contract, test); nửa **data** (DAO, mapper, engine hàng đợi) là PR kế
 - **Goal:** Dựng phần domain và data mà **chỉ Study** cần, trên schema v5.
 - **Scope:** entity `StudySessionEntity`, `StudyAnswerEntity`,
   `StudyQueueItemEntity`, `CardStudyStateEntity`; enum `StudyMode` (sáu giá trị,
@@ -7357,6 +7357,19 @@ vừa — seam có thật: phần đó dựng giá trị, không trả lời l�
   - [ ] Round mới có hoán vị `position` khác round trước khi còn ≥2 thẻ (BR-117).
   - [ ] Không exception persistence thô nào thoát khỏi repository.
   - [ ] Bất biến 12 và 16…28 vẫn pass sau toàn bộ bộ test.
+**Chia làm hai PR.** Contract phải có trước để use case của M5.2 có cái để viết
+dựa vào, còn implementation đi kèm bộ test riêng của nó; gộp làm một PR thì phần
+review đáng chú ý nhất — các phép ghi trong transaction — nằm lẫn giữa vài trăm dòng
+khai báo kiểu.
+
+**Contract cố tình **không** biết thuật toán chạy stage nào.** `openSession` được
+**truyền** `stageSequence` (BR-97). Để repository hỏi scheduler thì kiến thức thuật
+toán rơi xuống tầng data, và thêm một thuật toán thành sửa hai chỗ.
+
+**`nextItem` trả null không có nghĩa stage đã xong.** Nó còn nghĩa mọi thẻ còn lại
+đang đợi hết khoảng ba thẻ của BR-26. `isStageExhausted` là câu hỏi tách hai ca đó ra;
+gộp chúng làm phiên kết thúc sớm đúng ba thẻ.
+
 - **Vì sao hàng đợi nằm ở đây, không ở M5.3.** BR-102 chuyển hàng đợi vào
   database, và các luật nó mang — thứ tự BR-23, quay lại BR-26, round BR-115 —
   đều cần **dữ liệu tại đúng thời điểm ghi**. Đó là tiêu chí `CLAUDE.md` dùng để
