@@ -7,7 +7,7 @@
 | **Scope** | Bảng, cột, index, quan hệ, query bất biến. Ngoài phạm vi: SQL runtime (`lib/core/database/`, chưa tồn tại) |
 | **Source of truth for** | Schema · cột và kiểu · index · query bất biến · thứ tự migration |
 | **Depends on** | `document-conventions.md`, `architecture.md`, `business-rules.md` |
-| **Updated by task** | M5.0q (recursive review lượt bốn) |
+| **Updated by task** | M5.0r (tồn đọng + review lượt năm) |
 | **Last updated** | 2026-08-07 |
 
 Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; SQL thật nằm ở
@@ -625,6 +625,13 @@ WHERE available_at < 0 OR answers_in_session < 0 OR round < 1
 -- 24. Thẻ đã xong học mới nhưng không có lịch (BR-144, BR-149)
 SELECT card_id FROM card_study_states
 WHERE learned_at IS NOT NULL AND due_at IS NULL;
+
+-- 28. Thẻ chưa xong học mới mà đã có lịch (BR-144)
+--     Chiều ngược của invariant 24, và nó lọt qua cả 24 lẫn 25: một thẻ có thể
+--     mang `due_at` mà chưa từng có lượt `scheduled` nào nếu đường ghi nào đó
+--     đặt lịch giữa chuỗi học mới. BR-144 nói chuỗi MUST NOT làm thế.
+SELECT card_id FROM card_study_states
+WHERE learned_at IS NULL AND due_at IS NOT NULL;
 
 -- 25. Thẻ chưa xong học mới mà đã có lượt `scheduled` (BR-144, BR-149)
 --     Chuỗi học mới ghi `learning`/`relearning` và không đổi lịch; một lượt

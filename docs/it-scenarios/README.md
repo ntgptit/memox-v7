@@ -21,6 +21,28 @@ Một test seed MAY được dùng để chuẩn bị trạng thái mà UI hiệ
 ví dụ card đã học hoặc card có ngày đến hạn. Việc seed chỉ thuộc **Tiền điều kiện**;
 mọi bước kiểm tra sau đó vẫn MUST đi qua UI.
 
+> **Bốn scenario mô tả định nghĩa "đến hạn" sẽ bị M5 thay.** Chúng **đúng với
+> code hiện tại** — 60/60 chạy pass ở M4.11b — nên **không sửa trước** khi M5
+> land, vì sửa sớm sẽ làm chúng fail trên bản đang chạy.
+>
+> | Scenario | Nói gì hôm nay | Phải thành gì sau M5 |
+> |---|---|---|
+> | `IT-DISC-005` bước 2–3 | tạo/xoá card ⇒ số **đến hạn** đổi 1 | đổi số **chưa học**; số đến hạn không nhúc nhích (BR-142, BR-150) |
+> | `IT-LIFE-001` bước 3 | card mới có "badge đến hạn ngay" | card mới thuộc tập **Học mới**, chưa có lịch (BR-90, BR-144) |
+> | `IT-ORG-003` bước 2 | "mới/đến hạn ngay trước" | hai tập tách hẳn, không cùng một thứ tự |
+> | `IT-ORG-00x` due badge | `C-P-NEW` "đến hạn ngay" | `C-P-NEW` là **chưa học**, không phải đến hạn |
+>
+> **Và profile fixture `C-P-NEW` sẽ vi phạm invariant 28.** Bảng profile trong
+> `00-agent-execution-guide.md` định nghĩa nó là *New, đến hạn ngay,
+> `due_at = T0 − 1 giờ`*. Sau M5 đó là một thẻ **chưa học xong nhưng đã có lịch**
+> — trạng thái BR-144 cấm. Profile phải thành `learned_at` NULL **và** `due_at`
+> NULL, và cần một profile mới cho "đã học, đến hạn" mà các scenario về badge đang
+> thực sự cần.
+>
+> Lý do gốc: `due_at IS NULL` từng nghĩa là *đến hạn ngay*; từ BR-142 nó nghĩa là
+> *chưa học xong*. Xem bảng nợ code trong `data-model.md` — cùng một thay đổi,
+> cùng thời điểm.
+
 AI agent MUST đọc theo thứ tự:
 
 1. File này — phạm vi và dữ liệu nghiệp vụ chung.
@@ -46,7 +68,7 @@ AI agent MUST đọc theo thứ tự:
 Các luồng sau MUST NOT được ghi nhận là pass của sản phẩm hiện tại:
 
 - UC-01 — thư viện starter deck chưa có UI.
-- UC-05 — Review mới là màn placeholder; nút Study chỉ thông báo chưa khả dụng.
+- UC-05 — Study mới là màn placeholder; nút Study chỉ thông báo chưa khả dụng.
 - UC-07 — Reset learning progress chưa có luồng hoàn chỉnh.
 - Đổi scheduler của root deck sau khi tạo chưa có bề mặt UI hoàn chỉnh.
 - Import/export, media, authentication, sync và backend nằm ngoài MVP hiện tại.

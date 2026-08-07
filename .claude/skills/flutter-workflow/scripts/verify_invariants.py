@@ -119,6 +119,8 @@ BAD = {
     "INSERT INTO study_queue_items VALUES('s1','match',1,'q%d',%d,'completed',0,1,NULL,0);" % (n, n, n + 10)
     for n in range(21)
  ),
+ 28:"INSERT INTO cards VALUES('c28','b','f','k','t','t');"
+    "INSERT INTO card_study_states VALUES('c28','eight_box',1,1,NULL,'t',NULL,0,0,1,NULL,NULL,NULL);",
  24:"INSERT INTO cards VALUES('c24','b','f','k','t','t');"
     "INSERT INTO card_study_states VALUES('c24','eight_box',1,1,'t',NULL,NULL,0,0,1,NULL,NULL,NULL);",
  25:"INSERT INTO cards VALUES('c25','b','f','k','t','t');"
