@@ -30,7 +30,7 @@ enum CardConflictReason {
 
   /// The root deck carries no scheduler, which invariant Q11 forbids. The data
   /// is corrupt; refusing is the only honest response, because a card written
-  /// now would get a review state with no schedule to follow (BR-09).
+  /// now would get a study state with no schedule to follow (BR-09).
   rootSchedulerMissing,
 
   /// The root's scheduler is a value this build does not know. Same reasoning

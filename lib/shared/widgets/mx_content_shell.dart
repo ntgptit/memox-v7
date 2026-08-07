@@ -12,7 +12,7 @@ import '../../core/theme/theme_context_extension.dart';
 /// two screens sit next to each other in a flow.
 ///
 /// The app bar sits on the **page** colour with no elevation and no scroll tint —
-/// during a review the header must stay still, because a colour shift behind the
+/// during a study session the header must stay still, because a colour shift behind the
 /// card reads as the card itself changing.
 ///
 /// **[subheader] is pinned, and that is the point.** It sits between the bar and

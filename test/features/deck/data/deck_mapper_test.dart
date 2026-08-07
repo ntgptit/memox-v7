@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/database/app_database.dart';
 import 'package:memox/features/card/data/mappers/card_mapper.dart';
-import 'package:memox/features/card/data/mappers/card_review_state_mapper.dart';
+import 'package:memox/features/card/data/mappers/card_study_state_mapper.dart';
 import 'package:memox/features/deck/data/mappers/deck_mapper.dart';
 import 'package:memox/features/deck/domain/models/deck_content_type_model.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
@@ -125,9 +125,9 @@ void main() {
     });
   });
 
-  group('card review state rows', () {
+  group('card study state rows', () {
     test('maps an eight_box state', () {
-      final entity = cardReviewStateEntityFromRow(
+      final entity = cardStudyStateEntityFromRow(
         const CardReviewState(
           cardId: 'card-1',
           schedulerType: 'eight_box',
@@ -149,7 +149,7 @@ void main() {
     });
 
     test('maps an sm2 state, and due_at in UTC', () {
-      final entity = cardReviewStateEntityFromRow(
+      final entity = cardStudyStateEntityFromRow(
         CardReviewState(
           cardId: 'card-2',
           schedulerType: 'sm2',
@@ -175,7 +175,7 @@ void main() {
     });
 
     test('an unknown scheduler type reads as unknown', () {
-      final entity = cardReviewStateEntityFromRow(
+      final entity = cardStudyStateEntityFromRow(
         const CardReviewState(
           cardId: 'card-3',
           schedulerType: 'leitner9',

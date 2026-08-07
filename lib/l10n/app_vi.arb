@@ -8,13 +8,13 @@
   "@navigationDecksLabel": {
     "description": "Bottom navigation label for the Decks destination. Kept separate from decksTitle even though the English words match: a tab label is competing for width with another label and may need to be shortened in a language where the screen title cannot be."
   },
-  "navigationReviewLabel": "Ôn tập",
-  "@navigationReviewLabel": {
+  "navigationStudyLabel": "Ôn tập",
+  "@navigationStudyLabel": {
     "description": "Bottom navigation label for the Review destination, where the user studies due cards."
   },
-  "reviewPlaceholderMessage": "MemoX đang khởi động.",
-  "@reviewPlaceholderMessage": {
-    "description": "Text on the temporary Review screen shown until the real review session screen lands (M5.4)."
+  "studyPlaceholderMessage": "MemoX đang khởi động.",
+  "@studyPlaceholderMessage": {
+    "description": "Text on the temporary Review screen shown until the real study session screen lands (M5.4)."
   },
   "decksTitle": "Bộ thẻ",
   "@decksTitle": {
@@ -64,7 +64,7 @@
         "type": "int"
       }
     },
-    "description": "How many cards in a deck are due for review right now. Only shown when the number is above zero."
+    "description": "How many cards in a deck are due for study right now. Only shown when the number is above zero."
   },
   "deckLearnedProgressLabel": "Đã thuộc {learned}/{total}",
   "@deckLearnedProgressLabel": {
@@ -413,11 +413,11 @@
   },
   "deckStudyAction": "Học",
   "@deckStudyAction": {
-    "description": "Label of the button on a deck card that starts a review session for the cards due in that deck. Shown only when at least one card is due — a deck that is finished for today has nothing to start."
+    "description": "Label of the button on a deck card that starts a study session for the cards due in that deck. Shown only when at least one card is due — a deck that is finished for today has nothing to start."
   },
   "deckStudyComingSoonMessage": "Phiên học vẫn đang được xây dựng.",
   "@deckStudyComingSoonMessage": {
-    "description": "Snackbar shown when the Study button is pressed before review sessions exist (M5). The button is present so the card layout is the real one; the message is what keeps it honest rather than dead."
+    "description": "Snackbar shown when the Study button is pressed before study sessions exist (M5). The button is present so the card layout is the real one; the message is what keeps it honest rather than dead."
   },
   "deckActionsSemanticLabel": "Tác vụ bộ thẻ",
   "@deckActionsSemanticLabel": {

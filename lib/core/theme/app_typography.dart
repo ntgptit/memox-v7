@@ -44,7 +44,7 @@ abstract final class AppTypography {
 
   /// The same prompt on a screen narrower than `AppBreakpoints.compact`. 30
   /// forces a two-word prompt onto three lines at 320 wide, which pushes the
-  /// answer below the fold — the one thing the review screen must not do.
+  /// answer below the fold — the one thing the study screen must not do.
   static const double compactCardPromptSize = 26;
 
   /// Extra tracking on the uppercase label above a group of rows.

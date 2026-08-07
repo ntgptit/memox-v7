@@ -21,7 +21,7 @@ import '../mappers/card_list_query_mapper.dart';
 ///
 /// This class speaks Drift rows and companions. They stop here: the
 /// repository maps them to domain entities and never lets one across (AD-01).
-/// One management-list row as it leaves the DAO: the card, its review state and
+/// One management-list row as it leaves the DAO: the card, its study state and
 /// its concatenated tag names. A record, so the repository maps one type.
 typedef CardListItemRow = (Card, CardReviewState, String? tagNames);
 
@@ -30,7 +30,7 @@ final class CardDao {
 
   final AppDatabase _db;
 
-  /// Runs [action] atomically — the card + review state + content-type lock
+  /// Runs [action] atomically — the card + study state + content-type lock
   /// write (BR-09, BR-62) goes through this.
   Future<T> runInTransaction<T>(Future<T> Function() action) =>
       _db.transaction(action);
@@ -123,8 +123,8 @@ final class CardDao {
   Future<Card?> cardById(String cardId) =>
       _db.cardById(cardId).getSingleOrNull();
 
-  Future<CardReviewState?> reviewStateByCard(String cardId) =>
-      _db.reviewStateByCard(cardId).getSingleOrNull();
+  Future<CardReviewState?> studyStateByCard(String cardId) =>
+      _db.studyStateByCard(cardId).getSingleOrNull();
 
   // ---- writes ------------------------------------------------------------
 

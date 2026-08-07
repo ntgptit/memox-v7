@@ -54,7 +54,7 @@ CardRepository cardRepositoryBinding(Ref ref) => CardRepositoryImpl(
 );
 
 /// The template-copy path (AD-07). Its own DAO, for the reason stated on
-/// `DeckTemplateDao`: it writes decks, cards and review states in one
+/// `DeckTemplateDao`: it writes decks, cards and study states in one
 /// transaction, which is a different job from the reads a deck list rebuild
 /// runs constantly.
 DeckTemplateRepository deckTemplateRepositoryBinding(Ref ref) =>

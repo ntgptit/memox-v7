@@ -83,7 +83,7 @@ void previewTest(String name, Widget Function() build) {
   }
 }
 
-/// A review verdict button — *Forgotten* or *Remembered*.
+/// A study verdict button — *Forgotten* or *Remembered*.
 ///
 /// Idle is a neutral tile with a semantic border and a restrained semantic
 /// label; only the chosen one takes a fill, and even then a soft one. Two

@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M5.0j (lượt đổi lịch trong chuỗi stage) |
+| **Updated by task** | M5.0k (đổi tên trong lib/) |
 | **Last updated** | 2026-08-07 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -6848,6 +6848,55 @@ thì một thẻ vừa quên ở Match vẫn leo bốn box trong một buổi, v
 BR-77 vì thế đúng sẵn dù nó được viết khi một phiên chỉ có một cách hỏi. BR-141
 không đổi hành vi — nó ghi lại lập luận, để lần sau không ai phải suy lại từ đầu
 rồi rút ra một kết luận khác.
+
+### M5.0k · Đổi tên Review → Study trong `lib/` (nửa Dart)
+
+- **Status:** done — code Dart, ARB, route, golden. **Không đụng schema**: tên
+  bảng và cột để nguyên cho M5.0l.
+- **Goal:** Đóng nửa rẻ của khoảng lệch tên giữa tài liệu và code, không kèm
+  migration.
+- **Scope:** `lib/features/review/` → `lib/features/study/`; `CardReviewStateEntity`
+  → `CardStudyStateEntity` và ba file mapper/entity đi kèm; `ReviewRepository` →
+  `StudyRepository`; `ReviewPlaceholderScreen` → `StudyPlaceholderScreen`;
+  `RouteNames.review`/`RoutePaths.review` → `study`, path `/review` → `/study`;
+  ARB `navigationReviewLabel` → `navigationStudyLabel` (copy "Review" → "Study"),
+  `reviewPlaceholderMessage` → `studyPlaceholderMessage`; tên query
+  `cardsDueForReview` → `cardsDueForStudy`, `reviewStateByCard` →
+  `studyStateByCard`; cây test và 4 golden tương ứng.
+- **Out of scope:** tên bảng/cột (`card_review_states`, `review_history`,
+  `review_count`, `first_review_at`, `reviewed_at`) và mọi định danh Drift sinh ra
+  từ chúng — M5.0l.
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/features/study/`, 4 golden đổi tên + regenerate
+- **Acceptance criteria:**
+  - [x] `flutter analyze` sạch; `flutter test` **1404 pass**.
+  - [x] guard `memox-v7`, `check_architecture`, `check_generated` xanh.
+  - [x] Không định danh Drift-generated nào bị đổi.
+  - [x] `docs/reviews/`, "reviewer", "in review" — nghĩa **rà soát** — giữ nguyên.
+- **Dependencies:** M5.0j
+- **Tests required:** toàn bộ suite, golden, guard, architecture
+- **Checklist phases:** 14.1
+
+**Ranh giới của PR này là "cái gì sinh ra từ `.drift`".** `CardReviewStateEntity`
+là entity viết tay nên đổi được ngay; `CardReviewState` — không có hậu tố
+`Entity` — là **row class Drift sinh từ bảng `card_review_states`**, nên đổi nó ở
+đây là đổi thứ sẽ bị regenerate ghi đè. Một phép thay chuỗi đã quét trúng nó và
+`flutter analyze` bắt được ngay; nếu ranh giới không rõ từ đầu thì lỗi đó lọt vào
+diff dưới dạng "sửa cho nhất quán".
+
+**Golden đổi vì copy đổi, không vì quyết định thị giác.** Tab thứ hai từ "Review"
+thành "Study" nằm trong pixel của bốn golden navigation bar. `MxNavigationBar`
+nhận label đã dịch từ caller, nên chỉ golden specimen hardcode label mới đổi —
+mọi golden khác không nhúc nhích, và đó là bằng chứng ranh giới component vẫn
+đúng.
+
+**`test/design_preview/review_screen_*` giữ nguyên tên.** Nó là preview harness
+cho `ReviewScreen.jsx` **của design kit** — tên riêng của kit, cùng loại với
+`docs/reviews/`. Đổi nó sẽ làm mất liên kết với artefact nó đang tham chiếu.
+
+**Còn nợ, và là toàn bộ nội dung của M5.0l:** tên bảng và cột, cộng `reviewCount`,
+`firstReviewAt`, `lastReviewedAt` — chúng là tên field Dart do Drift sinh từ cột,
+nên chỉ đổi được cùng migration.
 
 ### M5.0 · Study-specific domain và data completion
 

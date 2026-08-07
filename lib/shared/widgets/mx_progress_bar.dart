@@ -10,7 +10,7 @@ import '../../core/theme/theme_context_extension.dart';
 ///
 /// Two, not a free number. [MxProgressBarSize.sm] is the bar inside a row that
 /// already carries a name and a count; [MxProgressBarSize.md] is the bar that
-/// *is* the content, as a review session's own progress will be. A third would
+/// *is* the content, as a study session's own progress will be. A third would
 /// be a guess, which is the same argument that keeps the icon scale at three.
 enum MxProgressBarSize {
   /// **6, not 4.** At 4 the track read as a hairline rather than a measure, and

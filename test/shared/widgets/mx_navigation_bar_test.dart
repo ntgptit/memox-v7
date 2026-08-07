@@ -11,7 +11,7 @@ import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 /// `test/app/router/app_router_test.dart` instead.
 void main() {
   const decksLabel = 'Decks';
-  const reviewLabel = 'Review';
+  const studyLabel = 'Study';
 
   /// The two destinations the app ships, built the same way the shell builds
   /// them: an outlined icon when idle and a filled one when selected.
@@ -24,7 +24,7 @@ void main() {
     NavigationDestination(
       icon: Icon(Icons.school_outlined),
       selectedIcon: Icon(Icons.school),
-      label: reviewLabel,
+      label: studyLabel,
     ),
   ];
 
@@ -74,7 +74,7 @@ void main() {
       await pumpBar(tester);
 
       expect(find.text(decksLabel), findsOneWidget);
-      expect(find.text(reviewLabel), findsOneWidget);
+      expect(find.text(studyLabel), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
@@ -133,7 +133,7 @@ void main() {
     testWidgets('tapping a destination reports its index', (tester) async {
       final taps = await pumpBar(tester);
 
-      await tester.tap(find.text(reviewLabel));
+      await tester.tap(find.text(studyLabel));
       await tester.pumpAndSettle();
 
       expect(taps, <int>[1]);
@@ -158,7 +158,7 @@ void main() {
       // acting on the callback, a tap changes nothing.
       final taps = await pumpBar(tester);
 
-      await tester.tap(find.text(reviewLabel));
+      await tester.tap(find.text(studyLabel));
       await tester.pumpAndSettle();
 
       expect(find.byIcon(Icons.folder), findsOneWidget);
@@ -171,7 +171,7 @@ void main() {
       await pumpBar(tester);
 
       expect(find.bySemanticsLabel(RegExp(decksLabel)), findsWidgets);
-      expect(find.bySemanticsLabel(RegExp(reviewLabel)), findsWidgets);
+      expect(find.bySemanticsLabel(RegExp(studyLabel)), findsWidgets);
     });
 
     testWidgets('every destination meets the tap-target guideline', (
@@ -219,7 +219,7 @@ void main() {
       await pumpBar(tester, surface: compact);
 
       expect(find.text(decksLabel), findsOneWidget);
-      expect(find.text(reviewLabel), findsOneWidget);
+      expect(find.text(studyLabel), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 

@@ -21,7 +21,7 @@ abstract class CardEntity with _$CardEntity {
 
     /// The user's own mark on this card (BR-92). Content, not schedule — reset
     /// leaves it alone, which is why it sits here beside [front] rather than on
-    /// the review-state entity.
+    /// the study-state entity.
     required bool isFlagged,
 
     /// Optional supporting text (BR-95). `null` means never filled; the domain

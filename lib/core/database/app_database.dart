@@ -82,7 +82,7 @@ class AppDatabase extends _$AppDatabase {
     beforeOpen: (OpeningDetails details) async {
       // Without this, `ON DELETE CASCADE` is a comment. SQLite defaults foreign
       // key enforcement OFF per connection, so every deletion would leave
-      // orphaned cards, review states and history behind — silently, because
+      // orphaned cards, study states and history behind — silently, because
       // every query still runs and simply returns rows nobody can reach.
       await customStatement('PRAGMA foreign_keys = ON');
     },

@@ -119,7 +119,7 @@ Future<String> insertCard(
   return id;
 }
 
-/// Creates the review state that BR-09 says is born with the card.
+/// Creates the study state that BR-09 says is born with the card.
 Future<void> insertReviewState(
   AppDatabase db, {
   required String cardId,

@@ -23,7 +23,7 @@ part 'card_write_controller.g.dart';
 /// Edits one card's content (UC-04 A1, BR-10).
 ///
 /// No [SubmitDisposition]: an edit has nothing to add another of, so it always
-/// reports `savedAndClose`. The review state and history are untouched — the
+/// reports `savedAndClose`. The study state and history are untouched — the
 /// repository writes only to `cards`, so BR-10 holds structurally.
 @riverpod
 class CardEdit extends _$CardEdit {
@@ -63,7 +63,7 @@ class CardEdit extends _$CardEdit {
 
 /// Deletes one card (UC-04 A5, BR-67).
 ///
-/// The card's review state and history cascade; the deck's `content_type` is
+/// The card's study state and history cascade; the deck's `content_type` is
 /// left as it is, even for the last card. The confirmation is the screen's job —
 /// this only performs the delete once the user has confirmed.
 @riverpod

@@ -11,7 +11,7 @@ import 'preview_harness.dart';
 
 /// Settings — the screen that shows whether the palette survives density.
 ///
-/// A review screen has one card and two buttons; a settings screen has a dozen
+/// A study screen has one card and two buttons; a settings screen has a dozen
 /// rows, switches, dividers and one destructive action. This is where a canvas
 /// that is a little too saturated stops being atmospheric and starts being
 /// noisy, and where `danger` has to stay distinguishable from ordinary chrome

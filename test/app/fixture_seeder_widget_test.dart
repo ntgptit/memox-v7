@@ -66,7 +66,7 @@ void main() {
     final repository = await pumpFor(tester, EnvConfig.development);
 
     // Both fixtures, so a demo has an `eight_box` tree and an `sm2` one — the
-    // two schedulers render different review actions (BR-30).
+    // two schedulers render different study actions (BR-30).
     expect(repository.installed.length, 2);
   });
 

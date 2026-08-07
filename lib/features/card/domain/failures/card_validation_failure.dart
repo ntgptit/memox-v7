@@ -122,7 +122,7 @@ const int kCardDetailMaxLength = 240;
 /// **60, not 2000, since M4.10at.** The old number was a paste guard — it
 /// stopped someone dropping a whole page in, and said nothing about what a card
 /// is. A front is the term being learned, and 60 characters is the width the
-/// list row and the review card are drawn for; past that the prompt wraps to
+/// list row and the study card are drawn for; past that the prompt wraps to
 /// three lines on a phone and the answer goes below the fold.
 const int kCardFrontMaxLength = 60;
 

@@ -142,7 +142,7 @@ void main() {
 
       final summaries = await readSummaries();
       final sessionCards = await harness.db
-          .cardsDueForReview(rootId, now)
+          .cardsDueForStudy(rootId, now)
           .get();
 
       expect(summaries.single.dueCardCount, sessionCards.length);

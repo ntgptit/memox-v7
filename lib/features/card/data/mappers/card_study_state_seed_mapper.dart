@@ -11,7 +11,7 @@ const double _sm2InitialEaseFactor = 2.5;
 const int _sm2InitialIntervalDays = 0;
 const int _sm2InitialRepetitions = 0;
 
-/// The review state a card is born with (BR-09), per scheduler.
+/// The study state a card is born with (BR-09), per scheduler.
 ///
 /// A mapper, not repository logic: it turns the root's scheduler meta into the
 /// one `CardReviewStatesCompanion` the create transaction inserts, and each

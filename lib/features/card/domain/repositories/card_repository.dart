@@ -36,13 +36,13 @@ abstract interface class CardRepository {
   ///
   /// Newest first because a just-created card must be visible without scrolling
   /// (UC-04 A4). This is a management order and decides nothing about study:
-  /// the review queue is ordered by BR-23 through its own query.
+  /// the study queue is ordered by BR-23 through its own query.
   Stream<List<CardEntity>> watchCardsByDeck(
     String deckId, {
     required int limit,
   });
 
-  /// The same window as [watchCardsByDeck], each card joined to its review state
+  /// The same window as [watchCardsByDeck], each card joined to its study state
   /// and tags so a row can show its state dot, label and chips (D5, BR-89…BR-91,
   /// BR-93), narrowed by [filter] (D3).
   ///
@@ -104,7 +104,7 @@ abstract interface class CardRepository {
   /// label, not a wrong control.
   Stream<int> watchCardCountByDeck(String deckId);
 
-  /// Creates a card and exactly one review state atomically — BR-09, BR-62.
+  /// Creates a card and exactly one study state atomically — BR-09, BR-62.
   /// The state carries the root's scheduler, version and current generation,
   /// `due_at = NULL`, and the scheduler's initial values; a deck still
   /// `unset` becomes `card` in the same atomic step.
@@ -130,7 +130,7 @@ abstract interface class CardRepository {
   /// re-fetching live would only let the form's text fight an incoming change.
   Future<CardEntity> getCard(String cardId);
 
-  /// Updates card content only (BR-10) — the review state and history are
+  /// Updates card content only (BR-10) — the study state and history are
   /// untouched, structurally, because this writes only to `cards`. The three
   /// details are rewritten too (BR-95); a null clears the column, so editing a
   /// detail to empty removes it.
@@ -143,7 +143,7 @@ abstract interface class CardRepository {
     CardDetailText? pronunciation,
   });
 
-  /// Deletes a card; its review state and history cascade. The deck's
+  /// Deletes a card; its study state and history cascade. The deck's
   /// `content_type` stays as it is, even for the last card (BR-67).
   Future<void> deleteCard(String cardId);
 

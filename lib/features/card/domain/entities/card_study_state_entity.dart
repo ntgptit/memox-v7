@@ -2,7 +2,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../deck/domain/models/scheduler_type_model.dart';
 
-part 'card_review_state_entity.freezed.dart';
+part 'card_study_state_entity.freezed.dart';
 
 /// The schedule born with a card (BR-09) — the slice of it M4.9 needs to
 /// create cards correctly. Review flows extend from here in M5.0, not before.
@@ -11,8 +11,8 @@ part 'card_review_state_entity.freezed.dart';
 /// `eight_box` owns [currentBox]; `sm2` owns [easeFactor], [intervalDays] and
 /// [repetitions].
 @freezed
-abstract class CardReviewStateEntity with _$CardReviewStateEntity {
-  const factory CardReviewStateEntity({
+abstract class CardStudyStateEntity with _$CardStudyStateEntity {
+  const factory CardStudyStateEntity({
     required String cardId,
     required SchedulerType schedulerType,
     required int schedulerVersion,
@@ -29,5 +29,5 @@ abstract class CardReviewStateEntity with _$CardReviewStateEntity {
     required double? easeFactor,
     required int? intervalDays,
     required int? repetitions,
-  }) = _CardReviewStateEntity;
+  }) = _CardStudyStateEntity;
 }

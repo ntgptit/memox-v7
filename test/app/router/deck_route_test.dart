@@ -186,7 +186,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(tab(english.navigationReviewLabel));
+      await tester.tap(tab(english.navigationStudyLabel));
       await tester.pumpAndSettle();
       await tester.tap(tab(english.navigationDecksLabel));
       await tester.pumpAndSettle();

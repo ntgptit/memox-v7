@@ -18,7 +18,7 @@ import '../tables/cards.drift';
 -- window on every insert. Newest-first keeps the add-many flow at one page.
 --
 -- This order is a **management** view and decides nothing about study: the
--- review queue is `cardsDueForReview` in study.drift, ordered by BR-23.
+-- study queue is `cardsDueForStudy` in study.drift, ordered by BR-23.
 --
 -- `created_at`, never `updated_at` — editing an old card would otherwise move it
 -- to the top and take the reader's place in the list with it.
@@ -36,11 +36,11 @@ WHERE deck_id = :deckId
 ORDER BY created_at DESC, id DESC
 LIMIT :limit;
 
--- The management list, joined to each card's review state so the row can show
+-- The management list, joined to each card's study state so the row can show
 -- its state dot and label without a second read per card (D5, BR-89…BR-91).
 --
 -- **`INNER JOIN`, and it is safe because BR-09 makes it total:** every card is
--- born with exactly one review state in the same transaction, so no card can be
+-- born with exactly one study state in the same transaction, so no card can be
 -- missing its state row. The join therefore drops nothing, and reads the state
 -- for the whole window in one statement rather than N.
 --
@@ -96,7 +96,7 @@ WHERE $predicate;
 cardById:
 SELECT * FROM cards WHERE id = :cardId;
 
-reviewStateByCard:
+studyStateByCard:
 SELECT * FROM card_review_states WHERE card_id = :cardId;
 
 -- The same window as `cardsByDeck`, narrowed to flagged cards (BR-92).
@@ -123,7 +123,7 @@ LIMIT :limit;
 --
 -- The count has to be SQL rather than Dart: the panel describes the whole deck
 -- while the list holds a window, so projecting in Dart would mean reading every
--- review state to produce four integers.
+-- study state to produce four integers.
 --
 -- `review_count = 0` is tested first and separately, mirroring `cardStateOf`:
 -- `eight_box` seeds `current_box = 1` at creation (BR-09), so a card that has

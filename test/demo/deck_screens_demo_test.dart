@@ -8,7 +8,7 @@ import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 
 import '../features/deck/presentation/support/fake_deck_repository.dart';
-import '../support/review_render.dart';
+import '../support/study_render.dart';
 import '../visual_audit/deck_audit_harness.dart';
 
 /// Device-faithful renders of the **real** deck list, for a human to look at.

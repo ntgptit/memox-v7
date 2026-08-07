@@ -195,7 +195,7 @@ abstract final class AppColors {
   /// Label of a secondary (outlined) action — *End session*, *Cancel*.
   ///
   /// Deliberately neutral (saturation under 20%) rather than the brand colour.
-  /// A secondary action sits next to the review verdicts, and anything with a
+  /// A secondary action sits next to the study verdicts, and anything with a
   /// hue there competes with the two colours carrying the user's actual
   /// decision. Keeping it a separate token from [primaryLight] also stops the
   /// pairing that once shipped a label at 3.09:1 — one colour cannot be both a

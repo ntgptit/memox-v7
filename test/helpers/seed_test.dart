@@ -58,7 +58,7 @@ void main() {
       2,
     );
     expect(await count('SELECT COUNT(*) AS c FROM cards'), greaterThan(0));
-    // BR-09: every card is born with exactly one review state, so these two
+    // BR-09: every card is born with exactly one study state, so these two
     // counts can never disagree.
     expect(
       await count('SELECT COUNT(*) AS c FROM card_review_states'),

@@ -2,7 +2,7 @@ import 'package:flutter/animation.dart';
 
 /// Motion durations.
 ///
-/// Short and few. During a review session the user is answering, not watching;
+/// Short and few. During a study session the user is answering, not watching;
 /// animation that draws attention to itself costs recall.
 abstract final class AppDurations {
   /// State changes that must not feel like a jump — button press, ripple.

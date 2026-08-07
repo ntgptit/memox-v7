@@ -175,7 +175,7 @@ void main() {
     testWidgets('Study appears only where something is due, and answers', (
       tester,
     ) async {
-      // **The button is real before the feature is.** There is no review session
+      // **The button is real before the feature is.** There is no study session
       // until M5, so it says so rather than swallowing the tap — the project
       // refuses enabled-looking controls that go nowhere, and a reply is what
       // separates this from one. The layout under review is then the real one.

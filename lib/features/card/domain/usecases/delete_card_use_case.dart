@@ -3,7 +3,7 @@ import '../repositories/card_repository.dart';
 /// Deletes a card (UC-04 A2).
 ///
 /// No validation here on purpose: the confirmation happened before this is
-/// reached, and the review state and history cascade through the schema's
+/// reached, and the study state and history cascade through the schema's
 /// foreign keys rather than through a rule this layer could check.
 ///
 /// The deck's `content_type` is deliberately left alone, even when this was the

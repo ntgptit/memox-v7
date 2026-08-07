@@ -8,7 +8,7 @@ import '../repositories/card_repository.dart';
 /// the point of [parseCardSides]: an edit that validated differently from a
 /// create is a card that can be saved in a state it could not be created in.
 ///
-/// It cannot touch the review state or the history: the repository writes only
+/// It cannot touch the study state or the history: the repository writes only
 /// to `cards`, so BR-10 holds structurally rather than by remembering to.
 class UpdateCardUseCase {
   const UpdateCardUseCase(this._repository);

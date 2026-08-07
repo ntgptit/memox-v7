@@ -43,7 +43,7 @@ void main() {
               .first)
           .decks;
 
-  /// A card in [deckId], with a review state due at [dueAt] — `null` meaning
+  /// A card in [deckId], with a study state due at [dueAt] — `null` meaning
   /// never reviewed, which BR-22 counts as due.
   Future<void> card(String id, String deckId, {DateTime? dueAt}) async {
     await insertCard(harness.db, id: id, deckId: deckId);

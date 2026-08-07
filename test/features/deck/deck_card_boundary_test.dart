@@ -126,7 +126,7 @@ void main() {
       'deleteCardById(',
       'insertReviewState(',
       'cardById(',
-      'reviewStateByCard(',
+      'studyStateByCard(',
       'watchCardsByDeck(',
     ]) {
       expect(cardDao, contains(member));
@@ -137,10 +137,10 @@ void main() {
     for (final path in <String>[
       'lib/features/deck/domain/entities/card_entity.dart',
       'lib/features/deck/domain/repositories/card_repository.dart',
-      'lib/features/deck/domain/entities/card_review_state_entity.dart',
+      'lib/features/deck/domain/entities/card_study_state_entity.dart',
       'lib/features/deck/data/mappers/card_mapper.dart',
       'lib/features/deck/data/repositories/card_repository_impl.dart',
-      'lib/features/deck/data/card_review_state_mapper.dart',
+      'lib/features/deck/data/card_study_state_mapper.dart',
       'lib/features/deck/data/local/card_dao.dart',
     ]) {
       expect(

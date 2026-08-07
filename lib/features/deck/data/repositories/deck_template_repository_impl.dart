@@ -138,7 +138,7 @@ final class DeckTemplateRepositoryImpl implements DeckTemplateRepository {
       await _dao.insertCard(
         templateCardCompanion(card, cardId: cardId, deckId: deckId, now: now),
       );
-      // Exactly one review state per card, born with it and due_at NULL (BR-09).
+      // Exactly one study state per card, born with it and due_at NULL (BR-09).
       await _dao.insertReviewState(
         templateReviewStateCompanion(
           cardId,
