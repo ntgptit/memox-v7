@@ -20,7 +20,13 @@ abstract class CardStudyStateEntity with _$CardStudyStateEntity {
     /// Must equal the root's current generation (BR-49).
     required int schedulerGeneration,
 
-    /// Null means due immediately (BR-22). A new card starts null (BR-09).
+    /// Null means the card has not finished the learning chain (BR-144), and
+    /// it is what `new` means (BR-90). The learning chain writes no `scheduled`
+    /// answer at all, so `answerCount` stays 0 through all five stages.
+    required DateTime? learnedAt,
+
+    /// Null until the chain completes. Travels with [learnedAt]: never one
+    /// without the other (BR-149).
     required DateTime? dueAt,
     required DateTime? lastAnsweredAt,
     required int answerCount,

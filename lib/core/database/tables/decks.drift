@@ -53,6 +53,11 @@ CREATE TABLE decks (
     -- scheduler choice is still unlocked (AD-06).
     first_answered_at DATETIME NULL,
 
+    -- JSON overriding the app-wide study options, ROOT ONLY, same rule the
+    -- scheduler columns follow (BR-147). NULL means "use app_settings".
+    -- Invariant 20 is the enforcement.
+    study_config TEXT NULL,
+
     source_template_id TEXT NULL,
     source_template_version INTEGER NULL,
 

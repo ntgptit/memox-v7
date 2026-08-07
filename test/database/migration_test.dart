@@ -18,10 +18,10 @@ void main() {
     final db = AppDatabase(NativeDatabase.memory());
     addTearDown(db.close);
 
-    expect(db.schemaVersion, 4);
+    expect(db.schemaVersion, 5);
   });
 
-  test('onCreate builds the whole of v4 from an empty database', () async {
+  test('onCreate builds the whole of v5 from an empty database', () async {
     final db = AppDatabase(NativeDatabase.memory());
     addTearDown(db.close);
 
@@ -35,11 +35,13 @@ void main() {
         .get();
 
     expect(tables.map((row) => row.data['name']), <String>[
+      'app_settings',
       'card_study_states',
       'card_tags',
       'cards',
       'decks',
       'study_answers',
+      'study_queue_items',
       'study_sessions',
       'tags',
     ]);
@@ -68,7 +70,7 @@ void main() {
   });
 
   test('v1 through v4 are the versions that exist', () {
-    expect(GeneratedHelper.versions, <int>[1, 2, 3, 4]);
+    expect(GeneratedHelper.versions, <int>[1, 2, 3, 4, 5]);
   });
 
   group('what v2 added, seen from a v1 database', () {

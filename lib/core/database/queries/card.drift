@@ -125,25 +125,29 @@ LIMIT :limit;
 -- while the list holds a window, so projecting in Dart would mean reading every
 -- study state to produce four integers.
 --
--- `answer_count = 0` is tested first and separately, mirroring `cardStateOf`:
+-- `learned_at IS NULL` is tested first and separately, mirroring `cardStateOf`:
 -- `eight_box` seeds `current_box = 1` at creation (BR-09), so a card that has
--- never been reviewed would otherwise be counted as beginning.
+-- not finished the learning chain would otherwise be counted as beginning.
+--
+-- It replaced `answer_count = 0` at v5. The learning chain writes no `scheduled`
+-- answer (BR-144), so the old test called a card new no matter how many stages
+-- it had been through.
 cardStateCountsByDeck:
 SELECT
   COUNT(*) AS total,
-  SUM(CASE WHEN s.answer_count = 0 THEN 1 ELSE 0 END) AS newCount,
-  SUM(CASE WHEN s.answer_count > 0 AND (
+  SUM(CASE WHEN s.learned_at IS NULL THEN 1 ELSE 0 END) AS newCount,
+  SUM(CASE WHEN s.learned_at IS NOT NULL AND (
         (s.scheduler_type = 'eight_box' AND s.current_box < :reviewingBox)
      OR (s.scheduler_type = 'sm2' AND s.interval_days < :reviewingDays)
   ) THEN 1 ELSE 0 END) AS beginningCount,
-  SUM(CASE WHEN s.answer_count > 0 AND (
+  SUM(CASE WHEN s.learned_at IS NOT NULL AND (
         (s.scheduler_type = 'eight_box'
            AND s.current_box >= :reviewingBox AND s.current_box < :masteredBox)
      OR (s.scheduler_type = 'sm2'
            AND s.interval_days >= :reviewingDays
            AND s.interval_days < :masteredDays)
   ) THEN 1 ELSE 0 END) AS reviewingCount,
-  SUM(CASE WHEN s.answer_count > 0 AND (
+  SUM(CASE WHEN s.learned_at IS NOT NULL AND (
         (s.scheduler_type = 'eight_box' AND s.current_box >= :masteredBox)
      OR (s.scheduler_type = 'sm2' AND s.interval_days >= :masteredDays)
   ) THEN 1 ELSE 0 END) AS masteredCount

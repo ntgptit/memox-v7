@@ -150,11 +150,19 @@ Future<void> insertSession(
   String status = 'in_progress',
   String? endReason,
   DateTime? endedAt,
+
+  // Defaulted rather than required: every caller here is testing something
+  // else — a cascade, an invariant, a tree read — and making them all name a
+  // session kind would be ceremony that hides which one actually cares.
+  String sessionKind = 'reviewing',
+  String currentMode = 'self_assess',
+  int cardLimit = 20,
 }) async {
   await db.customInsert(
     'INSERT INTO study_sessions (id, deck_id, root_deck_id, '
-    'scheduler_generation, status, end_reason, started_at, ended_at) '
-    'VALUES (?, ?, ?, 1, ?, ?, ?, ?)',
+    'scheduler_generation, status, end_reason, session_kind, current_mode, '
+    'cursor, card_limit, started_at, ended_at) '
+    'VALUES (?, ?, ?, 1, ?, ?, ?, ?, 0, ?, ?, ?)',
     variables: <Variable<Object>>[
       Variable<String>(id),
       Variable<String>(deckId),
@@ -164,6 +172,9 @@ Future<void> insertSession(
         const Variable<String>(null)
       else
         Variable<String>(endReason),
+      Variable<String>(sessionKind),
+      Variable<String>(currentMode),
+      Variable<int>(cardLimit),
       Variable<DateTime>(testNow),
       if (endedAt == null)
         const Variable<DateTime>(null)
@@ -179,19 +190,24 @@ Future<void> insertHistory(
   required String cardId,
   required String sessionId,
   String kind = 'scheduled',
+
+  // `self_assess` is the default because it is the one mode that predates the
+  // column: every history row written before v5 was one (BR-98).
+  String mode = 'self_assess',
   int? previousBox = 1,
   int? nextBox = 2,
 }) async {
   await db.customInsert(
     'INSERT INTO study_answers (id, card_id, session_id, scheduler_type, '
-    'scheduler_generation, kind, action, answered_at, previous_box, '
-    'next_box) VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?, ?)',
+    'scheduler_generation, kind, mode, action, answered_at, previous_box, '
+    'next_box) VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?)',
     variables: <Variable<Object>>[
       Variable<String>(id),
       Variable<String>(cardId),
       Variable<String>(sessionId),
       const Variable<String>('eight_box'),
       Variable<String>(kind),
+      Variable<String>(mode),
       const Variable<String>('remembered'),
       Variable<DateTime>(testNow),
       if (previousBox == null)

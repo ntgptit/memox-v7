@@ -60,6 +60,7 @@ void main() {
         schedulerType: SchedulerType.sm2,
         schedulerVersion: 1,
         schedulerGeneration: 1,
+        learnedAt: null,
         dueAt: null,
         lastAnsweredAt: null,
         answerCount: 0,

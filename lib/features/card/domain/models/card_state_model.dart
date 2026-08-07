@@ -61,7 +61,7 @@ CardState cardStateOf(CardStudyStateEntity state) {
   // review is `new` regardless of what its columns hold. `eight_box` seeds
   // `current_box = 1` at creation (BR-09), so reading the box first would call
   // every untouched card `beginning`.
-  if (state.answerCount == 0) return CardState.isNew;
+  if (state.learnedAt == null) return CardState.isNew;
 
   return switch (state.schedulerType) {
     SchedulerType.eightBox => _eightBoxState(state.currentBox),

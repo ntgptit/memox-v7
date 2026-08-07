@@ -37,17 +37,25 @@ void main() {
     AppDatabase db, {
     required String cardId,
     required String schedulerType,
-    required int answerCount,
+    // What separates `isNew` from the three graded bands since v5 (BR-90).
+    // It used to be `answer_count`, which the learning chain never increments —
+    // a card could finish all five stages and still count as new.
+    required bool learned,
     int? currentBox,
     int? intervalDays,
   }) => db.customInsert(
     'INSERT INTO card_study_states (card_id, scheduler_type, '
-    'scheduler_version, scheduler_generation, answer_count, lapse_count, '
-    'current_box, interval_days) VALUES (?, ?, 1, 1, ?, 0, ?, ?)',
+    'scheduler_version, scheduler_generation, learned_at, due_at, '
+    'answer_count, lapse_count, current_box, interval_days) '
+    'VALUES (?, ?, 1, 1, ?, ?, ?, 0, ?, ?)',
     variables: <Variable<Object>>[
       Variable<String>(cardId),
       Variable<String>(schedulerType),
-      Variable<int>(answerCount),
+      // The pair travels together: never a schedule without a learning stamp,
+      // never a stamp without a schedule (BR-149, invariants 24 and 28).
+      if (learned) const Variable<int>(1) else const Variable<int>(null),
+      if (learned) const Variable<int>(1) else const Variable<int>(null),
+      Variable<int>(learned ? 1 : 0),
       if (currentBox == null)
         const Variable<int>(null)
       else
@@ -263,7 +271,7 @@ void main() {
         db,
         cardId: 'n',
         schedulerType: 'eight_box',
-        answerCount: 0,
+        learned: false,
         currentBox: 1,
       );
       for (final entry in <String, int>{'b': 3, 'r': 4, 'm': 8}.entries) {
@@ -272,7 +280,7 @@ void main() {
           db,
           cardId: entry.key,
           schedulerType: 'eight_box',
-          answerCount: 1,
+          learned: true,
           currentBox: entry.value,
         );
       }
@@ -294,7 +302,7 @@ void main() {
         db,
         cardId: 'n',
         schedulerType: 'sm2',
-        answerCount: 0,
+        learned: false,
         intervalDays: 0,
       );
       for (final entry in <String, int>{'b': 7, 'r': 8, 'm': 128}.entries) {
@@ -303,7 +311,7 @@ void main() {
           db,
           cardId: entry.key,
           schedulerType: 'sm2',
-          answerCount: 1,
+          learned: true,
           intervalDays: entry.value,
         );
       }
@@ -327,7 +335,7 @@ void main() {
         db,
         cardId: 'c1',
         schedulerType: 'eight_box',
-        answerCount: 0,
+        learned: false,
         currentBox: 1,
       );
 
@@ -350,7 +358,7 @@ void main() {
           db,
           cardId: 'b$box',
           schedulerType: 'eight_box',
-          answerCount: 1,
+          learned: true,
           currentBox: box,
         );
       }
