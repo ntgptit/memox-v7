@@ -1,4 +1,3 @@
-import '../entities/study_queue_item_entity.dart';
 import '../entities/study_session_entity.dart';
 import '../models/new_card_order_model.dart';
 import '../models/study_action_model.dart';
@@ -9,6 +8,7 @@ import '../models/study_mode.dart';
 import '../models/study_options_model.dart';
 import '../models/study_outcome_reason_model.dart';
 import '../models/study_session_kind_model.dart';
+import '../models/study_turn_model.dart';
 import '../models/study_session_status_model.dart';
 
 /// Contract the study feature's use cases depend on.
@@ -95,7 +95,7 @@ abstract interface class StudyRepository {
   /// card is waiting out BR-26's three-card gap. [isStageExhausted] is the
   /// question that distinguishes them, and keeping them apart is what stops a
   /// session ending three cards early.
-  Future<StudyQueueItemEntity?> nextItem(String sessionId);
+  Future<StudyTurnModel?> nextTurn(String sessionId);
 
   /// Whether the current stage has no `pending` rows left at all.
   Future<bool> isStageExhausted(String sessionId);

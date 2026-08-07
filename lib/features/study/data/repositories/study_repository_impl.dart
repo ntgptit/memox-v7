@@ -6,7 +6,7 @@ import 'package:uuid/uuid.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../../core/error/failure.dart';
 import '../../../deck/domain/models/scheduler_type_model.dart';
-import '../../domain/entities/study_queue_item_entity.dart';
+import '../../domain/models/study_turn_model.dart';
 import '../../domain/entities/study_session_entity.dart';
 import '../../domain/failures/study_refusal_failure.dart';
 import '../../domain/models/new_card_order_model.dart';

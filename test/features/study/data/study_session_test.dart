@@ -206,7 +206,7 @@ void main() {
         newCardOrder: NewCardOrder.created,
         now: StudyHarness.now,
       );
-      final card = (await h.repository.nextItem(session.id))!.cardId;
+      final card = (await h.repository.nextTurn(session.id))!.cardId;
       await h.repository.submitAnswer(
         sessionId: session.id,
         cardId: card,
@@ -273,7 +273,7 @@ void main() {
         now: StudyHarness.now,
       );
 
-      final first = (await h.repository.nextItem(session.id))!;
+      final first = (await h.repository.nextTurn(session.id))!;
       await h.repository.submitAnswer(
         sessionId: session.id,
         cardId: first.cardId,
@@ -282,9 +282,9 @@ void main() {
         now: StudyHarness.now,
       );
 
-      final second = (await h.repository.nextItem(session.id))!;
+      final second = (await h.repository.nextTurn(session.id))!;
       expect(second.cardId, isNot(first.cardId));
-      expect(second.status, StudyQueueItemStatus.pending);
+      expect(second.item.status, StudyQueueItemStatus.pending);
     });
   });
 }

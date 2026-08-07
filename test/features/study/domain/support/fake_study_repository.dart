@@ -1,6 +1,6 @@
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
-import 'package:memox/features/study/domain/entities/study_queue_item_entity.dart';
+import 'package:memox/features/study/domain/models/study_turn_model.dart';
 import 'package:memox/features/study/domain/entities/study_session_entity.dart';
 import 'package:memox/features/study/domain/failures/study_refusal_failure.dart';
 import 'package:memox/features/study/domain/models/new_card_order_model.dart';
@@ -23,7 +23,10 @@ import 'package:memox/features/study/domain/repositories/study_repository.dart';
 /// a use case makes *before* the write — which stages to run, which schedule to
 /// ask for, whether to consult a scheduler at all — and that is exactly what the
 /// recorded arguments show.
-final class FakeStudyRepository implements StudyRepository {
+/// Not `final`: two controller tests need a subclass — one that fails every
+/// write, one that defers its first read — and the alternative is a flag on the
+/// constructor for each, which spreads test-only branching through the double.
+base class FakeStudyRepository implements StudyRepository {
   FakeStudyRepository({
     this.schedulerType = SchedulerType.eightBox,
     this.cardLimit = 20,
@@ -208,7 +211,9 @@ final class FakeStudyRepository implements StudyRepository {
   Future<bool> isStageExhausted(String sessionId) async => stageExhausted;
 
   @override
-  Future<StudyQueueItemEntity?> nextItem(String sessionId) async => null;
+  Future<StudyTurnModel?> nextTurn(String sessionId) async => nextTurn_;
+
+  StudyTurnModel? nextTurn_;
 
   @override
   Future<bool> buildNextRound(String sessionId) async => false;

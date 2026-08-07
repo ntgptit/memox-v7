@@ -19,7 +19,7 @@ void main() {
   group('BR-26 · the comeback gap in self_assess', () {
     test('a forgotten card waits behind three others', () async {
       final sessionId = await h.openReview(cardCount: 5);
-      final first = (await h.repository.nextItem(sessionId))!;
+      final first = (await h.repository.nextTurn(sessionId))!;
 
       await h.repository.submitAnswer(
         sessionId: sessionId,
@@ -38,7 +38,7 @@ void main() {
       expect(row.read<int>('available_at'), 4);
       expect(row.read<String>('status'), 'pending');
 
-      final second = await h.repository.nextItem(sessionId);
+      final second = await h.repository.nextTurn(sessionId);
       expect(second!.cardId, isNot(first.cardId));
     });
 
@@ -46,7 +46,7 @@ void main() {
       // The second half of BR-26, and the branch a naive implementation drops:
       // the gap cannot be honoured, so the card is simply last.
       final sessionId = await h.openReview(cardCount: 2);
-      final first = (await h.repository.nextItem(sessionId))!;
+      final first = (await h.repository.nextTurn(sessionId))!;
 
       await h.repository.submitAnswer(
         sessionId: sessionId,
@@ -55,7 +55,7 @@ void main() {
         action: StudyAction.forgotten,
         now: StudyHarness.now,
       );
-      final second = (await h.repository.nextItem(sessionId))!;
+      final second = (await h.repository.nextTurn(sessionId))!;
       await h.repository.submitAnswer(
         sessionId: sessionId,
         cardId: second.cardId,
@@ -66,7 +66,7 @@ void main() {
 
       // Nothing is servable yet — the forgotten card is still waiting — but the
       // stage is not finished either. Conflating the two ends the session here.
-      expect(await h.repository.nextItem(sessionId), isNull);
+      expect(await h.repository.nextTurn(sessionId), isNull);
       expect(await h.repository.isStageExhausted(sessionId), isFalse);
     });
 
@@ -74,7 +74,7 @@ void main() {
       'three relearning turns push the card out and flag it (BR-104)',
       () async {
         final sessionId = await h.openReview(cardCount: 4);
-        final card = (await h.repository.nextItem(sessionId))!.cardId;
+        final card = (await h.repository.nextTurn(sessionId))!.cardId;
 
         for (var turn = 0; turn < 3; turn++) {
           await h.repository.submitAnswer(
@@ -104,7 +104,7 @@ void main() {
   group('BR-115 / BR-116 · rounds', () {
     test('a wrong answer enrols the card in the next round', () async {
       final sessionId = await h.openReview(cardCount: 4, mode: StudyMode.match);
-      final card = (await h.repository.nextItem(sessionId))!.cardId;
+      final card = (await h.repository.nextTurn(sessionId))!.cardId;
 
       await h.repository.submitAnswer(
         sessionId: sessionId,
@@ -133,7 +133,7 @@ void main() {
           cardCount: 4,
           mode: StudyMode.match,
         );
-        final card = (await h.repository.nextItem(sessionId))!.cardId;
+        final card = (await h.repository.nextTurn(sessionId))!.cardId;
 
         await h.repository.submitAnswer(
           sessionId: sessionId,
@@ -161,7 +161,7 @@ void main() {
 
     test('failing twice in one round does not enrol the card twice', () async {
       final sessionId = await h.openReview(cardCount: 4, mode: StudyMode.match);
-      final card = (await h.repository.nextItem(sessionId))!.cardId;
+      final card = (await h.repository.nextTurn(sessionId))!.cardId;
 
       await h.repository.submitAnswer(
         sessionId: sessionId,
@@ -190,7 +190,7 @@ void main() {
       final sessionId = await h.openReview(cardCount: 4, mode: StudyMode.match);
 
       for (var i = 0; i < 4; i++) {
-        final item = (await h.repository.nextItem(sessionId))!;
+        final item = (await h.repository.nextTurn(sessionId))!;
         await h.repository.submitAnswer(
           sessionId: sessionId,
           cardId: item.cardId,
