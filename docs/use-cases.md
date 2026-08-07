@@ -7,7 +7,7 @@
 | **Scope** | Must-have của MVP. Ngoài phạm vi: should/nice-to-have, và mọi thứ ở mục "Điều đã cố ý không đặc tả" |
 | **Source of truth for** | UC-xx · main/alternative/error flow · UI state matrix của từng màn |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md` |
-| **Updated by task** | M5.0d (chuỗi stage; browse/self_assess) |
+| **Updated by task** | M5.0e (round cho stage chấm điểm) |
 | **Last updated** | 2026-08-07 |
 
 Chỉ đặc tả must-have. Should-have và nice-to-have viết khi tới lượt — đặc tả
@@ -288,6 +288,10 @@ state.
 - **A0 — Hết hàng đợi của một stage:** hệ thống chuyển `current_mode` sang stage kế
   trong `stageSequence` và chạy tiếp trên **cùng tập thẻ**, với thứ tự xoáo riêng
   của stage đó (BR-113). Hết stage cuối mới là hết phiên (BR-81).
+- **A0c — Hết một round của stage chấm điểm:** tập thẻ không đạt rỗng thì stage
+  hoàn tất (BR-119); còn thẻ thì dựng round mới **chỉ từ tập đó**, với thứ tự xoáo
+  riêng (BR-115, BR-117). Thẻ từng sai trong round vẫn thuộc tập đó kể cả khi sau
+  đó làm đúng (BR-116). Không có trần số round.
 - **A0b — Thẻ không đủ dữ liệu cho stage đang chạy:** bỏ qua **có ghi nhận** ở stage
   đó, không xoá khỏi deck, và vẫn xuất hiện ở các stage khác mà nó đủ dữ liệu
   (BR-114) — ví dụ thẻ không có `example` thì vắng ở `fill` nhưng có ở `guess`.

@@ -7,7 +7,7 @@
 | **Scope** | Luật nghiệp vụ, validation rule, state machine, edge case của phạm vi MVP. Ngoài phạm vi: quyết định kiến trúc (`architecture.md`), hình dạng dữ liệu (`data-model.md`), luồng người dùng (`use-cases.md`) |
 | **Source of truth for** | BR-xx · validation rule · entity state machine · edge case |
 | **Depends on** | `document-conventions.md`, `product.md`, `architecture.md` |
-| **Updated by task** | M5.0d (chuỗi stage; browse/self_assess) |
+| **Updated by task** | M5.0e (round cho stage chấm điểm) |
 | **Last updated** | 2026-08-07 |
 
 Format tuân theo `document-conventions.md` §6.2. Từ khoá MUST / SHOULD / MAY
@@ -27,7 +27,7 @@ khi ai đó đọc và làm theo.
 
 Rule bị thay thế MUST đánh `superseded by BR-yy` ở cột Status và giữ nguyên ID.
 
-Trạng thái hiện tại: **BR-01…BR-114**, không trùng, không thiếu.
+Trạng thái hiện tại: **BR-01…BR-120**, không trùng, không thiếu.
 
 ---
 
@@ -298,7 +298,7 @@ phải lặp mấy lần mới nhớ — thứ cần để đánh giá chất l�
 | BR-23 | active | Thứ tự MUST là: thẻ **đến hạn** (`due_at <= now`) trước, theo `due_at` tăng dần; thẻ **mới** (`due_at IS NULL`) lấp phần còn lại của hạn ngạch BR-24. | db | UC-05 |
 | BR-24 | active | Một phiên MUST giới hạn 50 card riêng biệt. Không tính lượt `relearning`. | repository | UC-05 |
 | BR-25 | active | Đánh giá MUST được ghi ngay khi người dùng bấm, không chờ hết phiên. | repository | UC-05 |
-| BR-26 | active | Card đánh giá `forgotten`/`again` MUST quay lại trong phiên hiện tại, sau ít nhất 3 card khác, hoặc cuối hàng đợi nếu không đủ 3. Mỗi thẻ MUST tối đa **3 lượt `relearning`** trong một phiên; chạm trần thì thẻ rời hàng đợi. | repository | UC-05, BR-104 |
+| BR-26 | active | **Chỉ áp cho stage `self_assess`.** Card đánh giá `forgotten`/`again` MUST quay lại trong stage đó, sau ít nhất 3 card khác, hoặc cuối hàng đợi nếu không đủ 3. Bốn stage chấm điểm dùng round (BR-115). | repository | UC-05, BR-104, BR-115 |
 | BR-27 | active | Chỉ lượt `scheduled` MAY thay đổi lịch dài hạn; các lượt sau của cùng card trong cùng session MUST là `relearning`. Chi tiết ở BR-75…BR-78. | scheduler | UC-05, AD-11 |
 | BR-28 | active | Card MUST rời hàng đợi khi được đánh giá bằng action khác `forgotten`/`again`. | controller | UC-05 |
 | BR-29 | active | Không có card nào đến hạn MUST được trình bày là trạng thái bình thường, không phải lỗi. | UI | UC-05, UC-06 |
@@ -468,9 +468,15 @@ Không đoán ở đây — mỗi câu trả lời khác nhau cho ra một thi�
 | BR-101 | active | Một `study_session` MUST chỉ được tạo bởi hành động Study tường minh của người dùng. Hiển thị số đến hạn — badge, danh sách, thông báo — MUST NOT tạo session. | domain | UC-05, BR-29 |
 | BR-102 | active | Hàng đợi MUST được lưu trong database và MUST bất biến trong suốt phiên: thay đổi deck sau khi phiên mở MUST NOT đổi hàng đợi đang chạy. | db | UC-05, BR-24, BR-113 |
 | BR-113 | active | Mỗi stage MUST có hàng đợi riêng trên **cùng tập thẻ** của phiên, với thứ tự xoáo độc lập. Hai stage MUST NOT dùng chung một sequence khi phiên có từ hai thẻ trở lên. | db | BR-102, BR-109 |
+| BR-115 | active | Bốn stage chấm điểm (`match`, `guess`, `recall`, `fill`) MUST chạy theo **round**: round 1 gồm toàn bộ thẻ đủ dữ liệu của stage; mỗi round sau chỉ gồm thẻ không đạt ở round vừa xong. | repository | BR-26, BR-116 |
+| BR-116 | active | Một thẻ từng có kết quả sai trong một round MUST thuộc tập không đạt của round đó, **kể cả khi sau đó nó được làm đúng** để rời bàn. Tập này MUST được khử trùng theo thẻ. | repository | BR-20, BR-115 |
+| BR-117 | active | Mỗi round MUST có thứ tự xoáo riêng. Hai round liền nhau, và round 1 với stage trước đó, MUST NOT dùng chung một sequence khi còn từ hai thẻ trở lên. | db | BR-113 |
+| BR-118 | active | Một lượt MUST thuộc về thẻ của **vế được chọn trước** (term). Chọn nhầm vế sau MUST NOT đánh dấu thẻ sở hữu vế đó là không đạt. | domain | BR-115, BR-116 |
+| BR-119 | active | Stage chấm điểm MUST hoàn tất khi một round kết thúc mà tập không đạt rỗng. Không có trần số round. | repository | BR-115 |
+| BR-120 | active | Một stage MAY có nhiều mức phản hồi (ví dụ `almost` của `match`), nhưng mọi mức không phải "đúng" MUST vào tập không đạt và MUST ánh xạ như sai theo BR-107. Mức phản hồi MUST NOT xuất hiện trong `study_answers.action`. | domain + UI | BR-106, BR-107 |
 | BR-114 | active | Thẻ không đủ dữ liệu cho một stage MUST bị bỏ qua **có ghi nhận** ở stage đó, MUST NOT bị xoá khỏi deck, và MUST vẫn xuất hiện ở các stage khác mà nó đủ dữ liệu. | repository | BR-99, BR-113 |
 | BR-103 | active | Khi mở app còn session `in_progress` của **cùng ngày học**, hệ thống MUST cho phép tiếp tục phiên đó. Session `in_progress` của ngày học khác MUST chuyển `abandoned` với `end_reason = interrupted`. | repository | BR-80, BR-105 |
-| BR-104 | active | Chạm trần 3 lượt `relearning` (BR-26) MUST cho thẻ rời hàng đợi, và MUST bật cờ đánh dấu của thẻ. MUST NOT tự tắt cờ. | repository | BR-26, BR-92 |
+| BR-104 | active | **Chỉ áp cho stage `self_assess`.** Chạm trần 3 lượt `relearning` (BR-26) MUST cho thẻ rời hàng đợi, và MUST bật cờ đánh dấu của thẻ. MUST NOT tự tắt cờ. | repository | BR-26, BR-92 |
 | BR-105 | active | `next_due_at` MUST rơi vào **00:00 giờ địa phương** của ngày thứ N, với N là interval do thuật toán trả về. Giá trị lưu vẫn là UTC. | domain | BR-16, BR-18, AD-16 |
 
 BR-102 thay câu cũ trong `data-model.md` rằng hàng đợi là trạng thái tạm của
