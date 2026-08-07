@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.2 · M5.0c (kiến trúc StudyMode) |
+| **Updated by task** | M5.0d (chuỗi stage; browse/self_assess) |
 | **Last updated** | 2026-08-07 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -6435,7 +6435,7 @@ cầu — thứ vẫn đang được chốt.
   `docs/use-cases.md`, `docs/architecture.md`, `docs/product.md`, `docs/wbs.md`
 - **Output:** BR-96…BR-105, AD-16, bảng `study_queue_items`, invariant 16–18
 - **Acceptance criteria:**
-  - [x] Tập StudyMode là thuộc tính của thuật toán (`supportedModes`), cùng khuôn
+  - [x] Tập StudyMode là thuộc tính của thuật toán (`stageSequence`), cùng khuôn
         `supportedActions` mà BR-30 đã cấm hardcode.
   - [x] Session **chỉ** sinh từ hành động Study tường minh (BR-101).
   - [x] Hàng đợi lưu DB và bất biến trong phiên (BR-102); UC-05 đảo bước để queue
@@ -6531,6 +6531,58 @@ Trùng enum và "mode không hỗ trợ" trở thành bất khả thi về kiể
 và cấm ở đó chỉ đẩy phép map sang chỗ tệ hơn. Rule đã được thử bằng một file vi
 phạm thật trước khi commit — một rule chưa từng fire là một rule chưa ai biết có
 chạy không.
+
+### M5.0d · Một phiên là chuỗi stage, và `review` tách làm hai
+
+- **Status:** done — tài liệu và fixture guard. Không code sản phẩm.
+- **Goal:** Thay mô hình "một phiên một mode do người dùng chọn" bằng "một phiên
+  chạy chuỗi stage cố định của thuật toán", theo đặc tả Review Cards.
+- **Scope:** `business-rules.md` (BR-96 `superseded`; sửa BR-30, BR-97, BR-98,
+  BR-99, BR-102, BR-106; thêm **BR-108…BR-114**), `data-model.md`
+  (`study_sessions.current_mode`, `study_queue_items.mode`, PK ba cột, sửa
+  invariant 18), `use-cases.md` (UC-05 bỏ bước chọn mode, thêm A0 và A0b),
+  `product.md`, `architecture.md` (`supportedModes` → `stageSequence`),
+  `verify_invariants.py`.
+- **Out of scope:** ngưỡng dữ liệu tối thiểu của từng stage; UI của từng stage.
+- **Editable documents:** `docs/business-rules.md`, `docs/data-model.md`,
+  `docs/use-cases.md`, `docs/product.md`, `docs/architecture.md`, `docs/wbs.md`
+- **Output:** BR-108…BR-114; `study_queue_items` PK `(session_id, mode, card_id)`
+- **Acceptance criteria:**
+  - [x] Sáu StudyMode; `browse` và `self_assess` thay cho `review`.
+  - [x] Chuỗi stage do thuật toán khai báo (`stageSequence`), người dùng không chọn.
+  - [x] `browse` không sinh action, không ghi `study_answers`, không đổi lịch.
+  - [x] Mỗi stage có hàng đợi riêng, thứ tự xoáo độc lập; PK ba cột enforce điều đó.
+  - [x] Invariant 18 đếm `COUNT(DISTINCT card_id)` — đếm dòng sẽ báo động giả
+        ngay ở phiên 11 thẻ × 5 stage.
+  - [x] `verify_invariants.py` 18/18; `check_docs.py` xanh; guard xanh.
+- **Dependencies:** M5.0c
+- **Tests required:** `check_docs.py`, `verify_invariants.py`, guard `memox-v7`
+- **Checklist phases:** 14.1
+
+**Đặc tả Review Cards mang theo một hệ quả chết người mà chính nó không nêu.** Nó
+viết "Review tạo evidence hoàn tất stage nhưng **không tự cập nhật SRS**". Ghép với
+BR-97 — `sm2` chỉ có `review` — thì deck dùng `sm2` chạy hết phiên mà **không có
+gì ghi vào lịch**: `due_at` đứng yên vĩnh viễn, và một nửa số deck của app thôi là
+ứng dụng spaced-repetition.
+
+Gốc rễ là cái tên: `review` đang ôm hai việc khác nhau — "xem trước cho quen" và
+"lật thẻ rồi tự chấm". Mô hình chuỗi cần cái thứ nhất; SRS cần cái thứ hai; và
+`sm2` chỉ dùng được cái thứ hai vì bốn stage chấm điểm đều sinh tín hiệu nhị phân
+mà SM-2 cần bốn mức. Tách thành `browse` và `self_assess` giải cả ba ràng buộc
+bằng một đường: một tên một việc.
+
+**BR-77 đã trả lời sẵn câu "lượt nào đổi lịch" mà không cần luật mới.** Lượt đầu
+tiên của một thẻ trong phiên là `scheduled`; mọi lượt sau là `relearning`. Áp vào
+chuỗi stage thì **stage chấm điểm đầu tiên quyết định lịch**, các stage sau chỉ để
+luyện. Hệ quả được chấp nhận có ý thức chứ không phải đã cân nhắc đủ: sai ở Match
+rồi đúng ba stage sau vẫn cho lịch của một lần sai. Hai hướng khác — stage cuối
+quyết định, hoặc tổng hợp toàn chuỗi — đều cần luật mới; ghi lại trong
+`business-rules.md` để lần xem lại không phải tự phát hiện.
+
+**Invariant 18 suýt thành báo động giả.** Nó đếm số dòng `study_queue_items` mỗi
+phiên và so với trần 50 của BR-24. Khi mỗi thẻ có một dòng **mỗi stage**, một phiên
+11 thẻ × 5 stage đã là 55 dòng và invariant đỏ trên dữ liệu hoàn toàn hợp lệ. Sửa
+thành `COUNT(DISTINCT card_id)`.
 
 ### M5.0 · Study-specific domain và data completion
 

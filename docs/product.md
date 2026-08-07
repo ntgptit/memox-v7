@@ -7,7 +7,7 @@
 | **Scope** | Vấn đề, người dùng, quyết định nền tảng, phạm vi MVP, luồng nghiệp vụ chính. Ngoài phạm vi: cách triển khai |
 | **Source of truth for** | Phạm vi MVP · phân loại must/should/nice/out · quyết định platform, data posture, auth, dữ liệu nhạy cảm |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M5.0b (chốt nghiệp vụ Study) |
+| **Updated by task** | M5.0d (chuỗi stage; browse/self_assess) |
 | **Last updated** | 2026-08-07 |
 
 ## Problem
@@ -96,14 +96,25 @@ phải chi tiết kỹ thuật:
 | Trục | Là gì | Ai chọn |
 |---|---|---|
 | **Thuật toán SRS** | `eight_box` · `sm2` — quyết định **khi nào** thẻ quay lại | chọn một lần lúc tạo root deck, khoá sau lượt học đầu (BR-13) |
-| **StudyMode** | `review` · `match` · `guess` · `recall` · `fill` — quyết định **cách** thẻ được hỏi | chọn lại mỗi phiên |
+| **StudyMode** | `browse` · `self_assess` · `match` · `guess` · `recall` · `fill` — quyết định **cách** thẻ được hỏi | không ai chọn: một phiên chạy chuỗi stage cố định của thuật toán (BR-109, BR-110) |
 
-Tập mode khả dụng là **thuộc tính của thuật toán** (BR-97): `eight_box` có cả
-năm, `sm2` chỉ có `review`. Bốn mode ngoài `review` sinh tín hiệu nhị phân —
-đúng hoặc sai — khớp tự nhiên với hai action của `eight_box`, trong khi `sm2`
-cần bốn mức và một nguồn nhị phân chỉ nuôi được hai.
+**Một phiên là một chuỗi stage**, không phải một mode người dùng chọn (BR-109):
 
-**Phạm vi:** `review` thuộc MVP (M3). Bốn mode còn lại là **định hướng đã chốt
+| Thuật toán | Chuỗi stage |
+|---|---|
+| `eight_box` | `browse` → `match` → `guess` → `recall` → `fill` |
+| `sm2` | `browse` → `self_assess` |
+
+Bốn stage chấm điểm sinh tín hiệu **nhị phân** — đúng hoặc sai — khớp tự nhiên
+với hai action của `eight_box`, nhưng chỉ nuôi được hai trong bốn mức của `sm2`.
+Nên `sm2` dùng `self_assess`: người học lật thẻ và tự chấm, đúng luồng M3 mô tả.
+
+**`browse` và `self_assess` tách nhau vì chúng là hai việc khác nhau.** `browse`
+hiện cả hai mặt cùng lúc để làm quen, không chấm và không đổi lịch (BR-111);
+`self_assess` che mặt sau cho tới khi người học lật, rồi nhận đánh giá của chính
+họ. Một cái tên ôm cả hai là thứ sẽ phải giải thích lại ở mọi test và mọi màn hình.
+
+**Phạm vi:** `browse` và `self_assess` thuộc MVP (M3). Bốn stage chấm điểm là **định hướng đã chốt
 về khái niệm, chưa phân loại must/should/nice** — chúng cần ngưỡng dữ liệu tối
 thiểu riêng và một câu trả lời cho việc một lượt của chúng ghi vào lịch thế nào.
 Kiến trúc chuẩn bị cho cả năm từ đầu; UI hiện đúng số mode đang có, và màn
