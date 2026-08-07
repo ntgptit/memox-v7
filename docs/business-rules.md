@@ -7,7 +7,7 @@
 | **Scope** | Luật nghiệp vụ, validation rule, state machine, edge case của phạm vi MVP. Ngoài phạm vi: quyết định kiến trúc (`architecture.md`), hình dạng dữ liệu (`data-model.md`), luồng người dùng (`use-cases.md`) |
 | **Source of truth for** | BR-xx · validation rule · entity state machine · edge case |
 | **Depends on** | `document-conventions.md`, `product.md`, `architecture.md` |
-| **Updated by task** | M5.0n (recursive review) |
+| **Updated by task** | M5.0o (recursive review lượt hai) |
 | **Last updated** | 2026-08-07 |
 
 Format tuân theo `document-conventions.md` §6.2. Từ khoá MUST / SHOULD / MAY
@@ -27,7 +27,7 @@ khi ai đó đọc và làm theo.
 
 Rule bị thay thế MUST đánh `superseded by BR-yy` ở cột Status và giữ nguyên ID.
 
-Trạng thái hiện tại: **BR-01…BR-152**, không trùng, không thiếu.
+Trạng thái hiện tại: **BR-01…BR-153**, không trùng, không thiếu.
 
 ---
 
@@ -431,7 +431,7 @@ tế và đủ hẹp để hàng thẻ có chiều cao đoán được.
 | BR-99 | active | Trong phiên `learning`, một stage MUST chạy chỉ khi nằm trong `stageSequence` **và** có ít nhất một thẻ đủ dữ liệu; stage không còn thẻ nào MUST bị bỏ qua thay vì hiện rỗng. Trong phiên `reviewing`, không có stage nào để bỏ qua vì người dùng đã chọn: mode không đủ dữ liệu MUST bị **vô hiệu hoá ngay trên màn chọn**, kèm lý do. | domain + UI | BR-97, BR-114, BR-146, UC-05 |
 | BR-100 | active | Mode bị chặn vì thuật toán MUST được trình bày là không khả dụng cho deck này, và MUST NOT gợi ý Reset learning progress như cách mở khoá. | UI | BR-13, BR-41 |
 | BR-106 | active | Mọi mode **trừ `browse`** MUST sinh một `action` thuộc `supportedActions` của thuật toán. `self_assess` MUST lấy action **trực tiếp từ người dùng**; `match`/`guess`/`recall`/`fill` MUST chấm ra kết quả nhị phân rồi ánh xạ theo BR-107. | domain | BR-15, BR-30, BR-111, AD-18 |
-| BR-107 | active | Với `eight_box`, kết quả nhị phân MUST ánh xạ: sai → `forgotten`, đúng → `remembered`. Hết giờ ở `recall` MUST tính là sai. | domain | BR-15, BR-96 |
+| BR-107 | active | Với `eight_box`, kết quả nhị phân MUST ánh xạ: sai → `forgotten`, đúng → `remembered`. Hết giờ ở `recall` MUST tính là sai. | domain | BR-15, BR-108 |
 
 **Vì sao tập mode thuộc thuật toán chứ không thuộc deck.** Bốn mode chấm điểm
 sinh tín hiệu **nhị phân** — đúng hoặc sai. `eight_box` nhận đúng hai
@@ -511,7 +511,8 @@ vì một question mượn bốn thẻ khác để dựng.
 | BR-125 | active | Đánh giá lựa chọn MUST so bằng định danh, MUST NOT so bằng chuỗi hiển thị. | domain | BR-121 |
 | BR-126 | active | Mỗi question MUST chỉ nhận **lựa chọn đầu tiên** và sinh tối đa một lượt. Chạm lặp MUST NOT sinh lượt thứ hai. | domain | BR-25, BR-121 |
 | BR-127 | active | Thứ tự thẻ trong round và thứ tự năm lựa chọn MUST là hai hoán vị độc lập: đổi cái này MUST NOT đổi cái kia. Cả hai MUST ổn định khi Resume. | db + domain | BR-117 |
-| BR-150 | active | Badge trên danh sách deck MUST hiện **hai số** theo đúng hai tập của BR-142: số thẻ chưa học và số thẻ đến hạn ôn. MUST NOT gộp thành một số — hai tập có chi phí rất khác nhau. | UI | BR-142, BR-22 |
+| BR-153 | active | `match` MUST có ít nhất **hai** cặp trên bàn. Một cặp duy nhất làm đáp án hiển nhiên, nên stage MUST bị bỏ qua (phiên `learning`) hoặc vô hiệu hoá trên màn chọn (phiên `reviewing`) theo BR-99. | domain + UI | BR-99, BR-115 |
+| BR-150 | active | Badge trên danh sách deck MUST hiện **hai số** theo đúng hai tập của BR-142: số thẻ chưa học và số thẻ đến hạn ôn. MUST NOT gộp thành một số — hai tập có chi phí rất khác nhau. | UI | BR-142, BR-90 |
 | BR-151 | active | Pill lọc trên danh sách thẻ MUST dùng cùng định nghĩa: **New** = `learned_at IS NULL` (BR-90); **Due** = `learned_at IS NOT NULL AND due_at <= now`. Hai tập MUST rời nhau. | UI + db | BR-90, BR-142 |
 | BR-152 | active | Reset MUST đặt `learned_at` và `due_at` cùng về NULL. MUST NOT để thẻ có `learned_at` mà không có lịch (BR-149). | repository | BR-42, BR-149 |
 | BR-142 | active | MUST có đúng hai loại phiên, lưu trên `study_sessions.session_kind`: **`learning`** lấy thẻ `learned_at IS NULL`, và **`reviewing`** lấy thẻ `learned_at IS NOT NULL AND due_at <= now`. Một phiên MUST NOT trộn hai tập. | db | BR-23, BR-144 |
@@ -603,6 +604,17 @@ bắt đầu lại đủ 20 giây — nó là lượt khác, không phải phầ
 **Đếm giờ nằm ở `presentation/`, không ở `domain/`.** AD-13 và AD-16 đã chốt
 `lib/features/` không đọc đồng hồ. Handler của `recall` nhận `didTimeout` và
 `elapsedMs` như input và vẫn là hàm thuần — đúng khuôn AD-18 đặt cho mọi stage.
+
+**Mỗi mode có một ngưỡng riêng, và chúng không giống nhau.** BR-140 nói không mode
+nào có ngưỡng **số thẻ lấy ra** riêng — mọi mode của một phiên dùng chung
+một tập. Nhưng điều kiện
+**dựng được nội dung** thì có, và khác nhau: `guess` cần năm nghĩa khác nhau trong cây
+(BR-121, BR-122); `fill` cần thẻ có `example` (BR-114); `match` cần hai cặp (BR-153).
+`recall`, `self_assess` và `browse` chạy được với một thẻ.
+
+BR-153 tồn tại vì một deck mới tạo với đúng một thẻ là ca thật, không phải ca biên:
+người dùng thêm thẻ đầu tiên rồi bấm Học mới ngay. Không có luật này thì `match`
+hiện một cặp và người học ghép nó với chính nó — một lượt đúng không chứng minh gì.
 
 **BR-22 bị thay, và điều đó chạm tới code đang chạy.** Định nghĩa cũ — `due_at IS
 NULL OR due_at <= now` — đang được badge trên deck list, pill Due/New trên card
