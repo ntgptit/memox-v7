@@ -274,3 +274,33 @@ half of that list. The judgement half is still yours.
 Conventional Commits: `feat(auth): ...`, `fix(sync): ...`, `chore(deps): ...`.
 Scope is the feature name. Keep PRs small and single-purpose — no drive-by
 refactors outside the stated scope.
+
+**Sync with `main` before merging, and delete the branch only after.** Work here
+runs in worktrees and PRs land while you work, so the base you branched from is
+usually not the base you are merging into:
+
+```bash
+git fetch origin --prune
+git merge-base --is-ancestor origin/main HEAD || git merge origin/main
+```
+
+Diverged means resolve, then **run the gate again** — `flutter analyze`,
+`flutter test`, the guard, `check_docs.py` — because the run that passed against
+the old base says nothing about the new one. When the merge-base is older than
+you thought, resetting onto `origin/main` and re-applying is often cleaner than
+resolving: `docs/wbs.md` is the file two PRs touch most, and a rebuild also picks
+up documents that landed meanwhile.
+
+Then merge, **confirm it merged**, and only then delete:
+
+```bash
+gh pr merge <n> --squash
+gh pr view <n> --json state -q .state      # must print MERGED
+git push origin --delete <branch>
+```
+
+Deleting the branch first makes GitHub auto-close the PR, and a PR closed that
+way **cannot be reopened** — the only way forward is a new PR. This has cost two
+PRs already (#160, #173). Do not use `gh pr merge --delete-branch` as a shortcut:
+it also fails outright when `main` is checked out in another worktree, which is
+the normal state here.
