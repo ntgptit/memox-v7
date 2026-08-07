@@ -7,8 +7,8 @@
 | **Scope** | Quyết định ràng buộc nhiều tài liệu hoặc nhiều layer. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), hình dạng dữ liệu (`data-model.md`) |
 | **Source of truth for** | AD-xx · đánh đổi kiến trúc · phương án đã bị loại · lý do pin toolchain |
 | **Depends on** | `document-conventions.md`, `product.md` |
-| **Updated by task** | M4.10ap (AD-05) |
-| **Last updated** | 2026-08-02 |
+| **Updated by task** | M5.0a (đổi tên Review → Study) |
+| **Last updated** | 2026-08-07 |
 
 Format theo `document-conventions.md` §6.1. AD xếp theo số; ID vĩnh viễn (§7).
 
@@ -91,7 +91,7 @@ lỗi cú pháp SQL chỉ hiện lúc chạy `build_runner` chứ không phải 
 Chấp nhận được, đổi lại điểm 1.
 
 **Quy ước:** một file `.drift` cho mỗi bảng hoặc mỗi nhóm query cùng mục đích.
-Named query đặt tên theo động từ nghiệp vụ (`cardsDueForReview`), không theo hình
+Named query đặt tên theo động từ nghiệp vụ (`cardsDueForStudy`), không theo hình
 dạng SQL (`selectCardsWhereDue`).
 
 ---
@@ -207,7 +207,7 @@ retrofit.
 
 ---
 
-## AD-06 · Scheduler chọn theo deck, khoá sau lượt review đầu tiên
+## AD-06 · Scheduler chọn theo deck, khoá sau lượt học đầu tiên
 
 | | |
 |---|---|
@@ -217,24 +217,24 @@ retrofit.
 **Quyết định.** MVP hỗ trợ **hai** scheduler: `eight_box` và `sm2`. Mỗi deck
 **bắt buộc chọn một** khi tạo. Lựa chọn ở cấp deck, không phải cấp app.
 
-Scheduler đổi trực tiếp được **chừng nào deck chưa có lượt review nào**. Sau lượt
-review đầu tiên, `scheduler_type`, `scheduler_version` và `scheduler_config` của
+Scheduler đổi trực tiếp được **chừng nào deck chưa có lượt học nào**. Sau lượt
+học đầu tiên, `scheduler_type`, `scheduler_version` và `scheduler_config` của
 deck bị **khoá**. Muốn đổi sau đó, người dùng phải thực hiện **Reset learning
 progress** (AD-09).
 
 ```dart
-// domain/scheduler/review_scheduler.dart
-abstract interface class ReviewScheduler {
+// domain/scheduler/study_scheduler.dart
+abstract interface class StudyScheduler {
   SchedulerType get type;
   int get version;
 
   /// Tập action mà scheduler này chấp nhận. UI render nút từ đây,
   /// không hardcode — hai scheduler có hai tập action khác nhau.
-  List<ReviewAction> get supportedActions;
+  List<StudyAction> get supportedActions;
 
-  ReviewOutcome next({
-    required ReviewState current,
-    required ReviewAction action,
+  StudyOutcome next({
+    required CardStudyState current,
+    required StudyAction action,
     required DateTime now,
   });
 }
@@ -252,13 +252,13 @@ Không hardcode bốn nút, không hiện nút mà scheduler hiện tại không
 ôn tập hardcode 4 nút sẽ vừa sai với 8-box vừa khiến việc thêm scheduler thứ ba
 phải sửa UI — đúng thứ abstraction này tồn tại để tránh.
 
-**Vì sao khoá sau review đầu tiên thay vì cho đổi tự do.** Đổi thuật toán giữa
+**Vì sao khoá sau lượt học đầu tiên thay vì cho đổi tự do.** Đổi thuật toán giữa
 chừng đặt ra những câu hỏi không có câu trả lời trung thực: box 5 tương ứng ease
-factor nào, review history theo luật cũ còn giá trị gì cho chu kỳ mới, đổi ngược
+factor nào, study answers theo luật cũ còn giá trị gì cho chu kỳ mới, đổi ngược
 lại có khôi phục trạng thái cũ không. Mọi ánh xạ đều là bịa đặt và nó âm thầm làm
 hỏng lịch ôn.
 
-Khoá-và-reset thừa nhận điều đó thẳng thắn: trước lượt review đầu, không có gì để
+Khoá-và-reset thừa nhận điều đó thẳng thắn: trước lượt học đầu, không có gì để
 mất nên đổi tự do; sau đó, đổi nghĩa là bắt đầu lại, và người dùng biết rõ điều
 mình đánh đổi.
 
@@ -323,7 +323,7 @@ không được tạo deck trùng. Cụ thể:
   trước khi tạo — đã có bản sao từ đúng template và version đó thì không tạo nữa.
 - Người dùng **cố ý** thêm cùng một starter deck lần thứ hai là hành động hợp lệ
   và khác hoàn toàn với việc app tự tạo trùng; luồng đó phải hỏi xác nhận rõ.
-- Toàn bộ việc tạo bản sao (deck + card + review state) nằm trong **một
+- Toàn bộ việc tạo bản sao (deck + card + study state) nằm trong **một
   transaction**, để app bị kill giữa chừng không để lại deck nửa vời.
 
 **Ở MVP, `deck_templates` không cần là bảng runtime.** Template có thể chỉ là
@@ -379,7 +379,7 @@ công việc — lúc đó phạm vi rủi ro khác hẳn từ vựng.
 | **Status** | accepted |
 | **Affected documents** | `business-rules.md` (BR-40…BR-50, BR-83, BR-84) · `use-cases.md` (UC-05, UC-07) · `data-model.md` |
 
-**Quyết định.** Đổi scheduler trên deck đã có review chỉ thực hiện được qua thao
+**Quyết định.** Đổi scheduler trên deck đã có lượt học chỉ thực hiện được qua thao
 tác **Reset learning progress**. Mỗi deck có `scheduler_generation`, tăng sau mỗi
 lần reset.
 
@@ -390,10 +390,10 @@ lần reset.
 | Deck và sub-deck | Active scheduler state của mọi card |
 | Flashcard và nội dung | `due_at`, interval |
 | Media, tag | `current_box`, ease factor, repetitions |
-| Review history cũ | Mastery state |
+| Study answers cũ | Mastery state |
 | | Session đang dở |
 
-**Review history cũ được giữ lại để tham khảo, nhưng không được dùng cho chu kỳ
+**Study answers cũ được giữ lại để tham khảo, nhưng không được dùng cho chu kỳ
 mới.** Đó chính là việc `scheduler_generation` làm: mỗi dòng history, mỗi card
 schedule và mỗi study session đều mang generation, nên "thuộc chu kỳ nào" là dữ
 kiện có trong dữ liệu chứ không phải quy ước ngầm.
@@ -416,7 +416,7 @@ một deck có card thuộc hai generation, hoặc scheduler mới với card st
 cũ — cả hai đều là dữ liệu hỏng không tự phục hồi, và tệ hơn nhiều so với việc
 reset thất bại sạch sẽ.
 
-Sau reset, deck lại ở trạng thái "chưa có review", nên scheduler mở khoá và chọn
+Sau reset, deck lại ở trạng thái "chưa có lượt học", nên scheduler mở khoá và chọn
 lại được — đó là cơ chế duy nhất để đổi, và nó rơi ra tự nhiên từ định nghĩa của
 khoá.
 
@@ -485,11 +485,11 @@ tạo ra được chỉ bằng một thao tác kéo-thả sai.
 | **Status** | accepted |
 | **Affected documents** | `business-rules.md` (BR-75…BR-86) · `data-model.md` |
 
-**Quyết định.** `review_history.review_kind` và `study_sessions.status` /
+**Quyết định.** `study_answers.kind` và `study_sessions.status` /
 `end_reason` được **lưu tường minh** tại thời điểm ghi. Cấm suy ra chúng bằng cách
 so sánh trạng thái trước và sau, hoặc bằng cách đoán từ dữ liệu khác.
 
-**Vì sao, cụ thể.** Suy luận `review_kind` nghe rất hợp lý: "trước và sau giống
+**Vì sao, cụ thể.** Suy luận `kind` nghe rất hợp lý: "trước và sau giống
 nhau thì là `relearning`". Nó sai ở đúng một trường hợp, và trường hợp đó không
 hiếm — lượt `scheduled` trên card đang ở box 8 trả lời `remembered` cũng có
 `previous_box == 8` và `next_box == 8` (BR-16). Suy luận sẽ gắn nhãn nó
@@ -983,7 +983,7 @@ một bản đồ.
 
 Phương án tự nhiên nhất — group theo màn hình hay theo flow — diễn đạt domain
 tốt, nhưng taxonomy của nó **khác nhau giữa các feature**: deck có "level",
-card có "editor", review có "session". Bốn bucket cố định đổi một chút sức diễn
+card có "editor", study có "session". Bốn bucket cố định đổi một chút sức diễn
 đạt lấy một thứ đáng hơn: câu hỏi "widget này sống ở đâu" có **cùng một câu trả
 lời** ở mọi feature.
 

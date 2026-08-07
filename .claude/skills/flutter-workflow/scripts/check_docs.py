@@ -770,7 +770,7 @@ _INVARIANTS = (
     ("card state scheduler/generation mismatch",
      r"s\.scheduler_generation <> root\.scheduler_generation"),
     ("session status × end_reason matrix", r"status = 'invalidated'"),
-    ("relearning must not change schedule", r"review_kind = 'relearning'"),
+    ("relearning must not change schedule", r"kind = 'relearning'"),
 )
 
 
