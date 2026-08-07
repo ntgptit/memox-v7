@@ -1,18 +1,16 @@
 # Ảnh wireframe của năm màn học
 
-Năm ảnh do chủ dự án cung cấp ở phiên làm việc ngày 2026-08-08. Chúng đến dưới
-dạng đính kèm trong hội thoại, không phải tệp trên đĩa, nên **agent không lưu
-được** — thả tay vào đây theo đúng tên bên dưới thì tài liệu tham chiếu khớp
-ngay.
+Năm ảnh do chủ dự án cung cấp ngày 2026-08-08, đã có trong repo.
 
 | Tệp | Màn | Ghi chú |
 |---|---|---|
-| `12-review.png` | Study · Review | một thẻ, hai mặt cùng lúc |
-| `13-match.png` | Study · Match | bàn ghép cặp |
-| `14-guess.png` | Study · Guess | năm lựa chọn, trạng thái đã trả lời |
-| `15-recall.png` | Study · Recall | đáp án đang ẩn — còn thiếu state đã lật |
-| `16-fill.png` | Study · Fill | đang nhập — còn thiếu state đã chấm |
+| `review_mode.png` | Study · Review | một thẻ, hai mặt cùng lúc |
+| `match_mode.png` | Study · Match | bàn ghép cặp |
+| `guess_mode.png` | Study · Guess | năm lựa chọn, trạng thái đã trả lời |
+| `recall_mode.png` | Study · Recall | đáp án đang ẩn — còn thiếu state đã lật |
+| `fill_mode.png` | Study · Fill | đang nhập — còn thiếu state đã chấm |
 
-Mô tả bố cục và các điểm lệch với BR nằm ở `../m5-study-modes.md`. Tài liệu ấy
-đủ để dựng màn kể cả khi ảnh chưa được thả vào — ảnh là để đối chiếu, không phải
-là nguồn duy nhất.
+**Ảnh là UI concept, không phải đặc tả.** Nơi nào chúng lệch với nghiệp vụ đã
+chốt thì nghiệp vụ thắng — tám điểm lệch và phán quyết cho từng điểm nằm ở
+`../m5-study-modes.md` §7. Đọc ảnh mà bỏ §7 là cách dựng lại đúng những thứ đã bị
+bỏ.
