@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M5.0g (luật stage recall) |
+| **Updated by task** | M5.0h (luật stage fill) |
 | **Last updated** | 2026-08-07 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -6729,6 +6729,50 @@ so hai timestamp là việc kiểm được, còn thứ tự thực thi thì kh�
 được tồn tại ở `recall`, và `outcome_reason = timeout` chỉ được xuất hiện ở
 `recall` — nếu không, cột đặc thù một stage sẽ dần trở thành cột chung mà không ai
 quyết định điều đó.
+
+### M5.0h · Luật của stage `fill`: so khớp có phiên bản, và cái không lưu
+
+- **Status:** done — tài liệu và fixture guard. Stage cuối trong năm.
+- **Goal:** Chốt chính sách so khớp text của `fill` theo đặc tả Fill Card Answer.
+- **Scope:** `business-rules.md` (**BR-134…BR-138**), `data-model.md`
+  (`study_answers.comparison_version`, `used_hint`; **invariant 23**),
+  `verify_invariants.py`.
+- **Out of scope:** ngưỡng số thẻ tối thiểu của `match` và `recall`; UI.
+- **Editable documents:** `docs/business-rules.md`, `docs/data-model.md`,
+  `docs/wbs.md`
+- **Output:** BR-134…BR-138; invariant 23
+- **Acceptance criteria:**
+  - [x] So khớp dùng lại `back_folded`: trim + hạ hoa Unicode, **giữ dấu**.
+  - [x] Phiên bản chính sách lưu trên từng lượt (BR-135).
+  - [x] Dùng gợi ý được ghi nhưng không đổi `action` (BR-136).
+  - [x] Chuỗi rỗng sau trim không sinh lượt (BR-137).
+  - [x] Nội dung người dùng gõ **không** được lưu (BR-138).
+  - [x] `verify_invariants.py` **23/23**.
+- **Dependencies:** M5.0g
+- **Tests required:** `check_docs.py`, `verify_invariants.py`, guard `memox-v7`
+- **Checklist phases:** 14.1
+
+**Điều đáng kiểm nhất là `back_folded` fold những gì, không phải nó tên là gì.**
+Nếu nó bỏ dấu thì `fill` sẽ chấm "ma" bằng "mà" là đúng, và một app học từ vựng
+tiếng Việt hỏng ở đúng chỗ quan trọng nhất. Đọc `card_text_model.dart` trước khi
+dùng lại: *"Case only. `công` still does not match `cong`"* — nó trim và hạ hoa
+Unicode-aware nhưng giữ nguyên dấu, tức đúng thứ `fill` cần. Suy từ cái tên
+"folded" thì đã đi sai hướng.
+
+**BR-135 là lý do `scheduler_version` tồn tại, áp cho một thứ khác.** Một lượt đã
+ghi phải đọc lại được bằng chính luật đã tạo ra nó. Nới chính sách so khớp — ví dụ
+bỏ qua dấu câu — sẽ biến những lượt sai của hôm qua thành đúng khi đọc lại, và
+không có cách nào biết lượt nào đã được chấm theo luật nào.
+
+**BR-138 là quyết định có thể lật, và hiện nghiêng về không lưu.** Câu trả lời sai
+của người học là dữ liệu phân tích tốt, nhưng nó cũng là dữ liệu riêng tư (BR-51)
+và chưa có tính năng nào đọc nó. Thêm cột khi có caller thật thì rẻ; gỡ một cột đã
+đầy dữ liệu riêng tư thì không.
+
+**Năm stage đã có luật đầy đủ.** Còn hai mục chưa chốt: ngưỡng số thẻ tối thiểu
+của `match` và `recall`, và `kind` của một lượt thuộc bốn stage chấm điểm. Mục sau
+đáng chốt trước khi viết code — `study_answers` chỉ thêm, nên ghi sai không sửa
+lại được.
 
 ### M5.0 · Study-specific domain và data completion
 

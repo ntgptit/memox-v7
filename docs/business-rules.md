@@ -7,7 +7,7 @@
 | **Scope** | Luật nghiệp vụ, validation rule, state machine, edge case của phạm vi MVP. Ngoài phạm vi: quyết định kiến trúc (`architecture.md`), hình dạng dữ liệu (`data-model.md`), luồng người dùng (`use-cases.md`) |
 | **Source of truth for** | BR-xx · validation rule · entity state machine · edge case |
 | **Depends on** | `document-conventions.md`, `product.md`, `architecture.md` |
-| **Updated by task** | M5.0g (luật stage recall) |
+| **Updated by task** | M5.0h (luật stage fill) |
 | **Last updated** | 2026-08-07 |
 
 Format tuân theo `document-conventions.md` §6.2. Từ khoá MUST / SHOULD / MAY
@@ -27,7 +27,7 @@ khi ai đó đọc và làm theo.
 
 Rule bị thay thế MUST đánh `superseded by BR-yy` ở cột Status và giữ nguyên ID.
 
-Trạng thái hiện tại: **BR-01…BR-133**, không trùng, không thiếu.
+Trạng thái hiện tại: **BR-01…BR-138**, không trùng, không thiếu.
 
 ---
 
@@ -454,8 +454,8 @@ tự viết (AD-18). `review` không còn là ngoại lệ của luồng chung; 
 `evaluate` trả về đúng cái người dùng vừa bấm.
 
 **Chưa chốt, và cố ý để trống:** ngưỡng tối thiểu cụ thể của `match` và `recall`;
-`fill` đếm eligibility theo số thẻ có `example` khác rỗng (BR-95), nên con số của
-nó khác mọi mode còn lại; và một lượt của bốn stage chấm điểm ghi `kind` là gì.
+và một lượt của bốn stage chấm điểm ghi `kind` là gì — mục sau đáng chốt sớm nhất,
+vì `study_answers` chỉ thêm nên ghi sai không sửa lại được.
 Không đoán ở đây — mỗi câu trả lời khác nhau cho ra một thiết kế khác nhau.
 
 Hai mục từng nằm trong danh sách này đã đóng: `guess` so "khác nghĩa" bằng
@@ -473,6 +473,11 @@ vì một question mượn bốn thẻ khác để dựng.
 | BR-101 | active | Một `study_session` MUST chỉ được tạo bởi hành động Study tường minh của người dùng. Hiển thị số đến hạn — badge, danh sách, thông báo — MUST NOT tạo session. | domain | UC-05, BR-29 |
 | BR-102 | active | Hàng đợi MUST được lưu trong database và MUST bất biến trong suốt phiên: thay đổi deck sau khi phiên mở MUST NOT đổi hàng đợi đang chạy. | db | UC-05, BR-24, BR-113 |
 | BR-113 | active | Mỗi stage MUST có hàng đợi riêng trên **cùng tập thẻ** của phiên, với thứ tự xoáo độc lập. Hai stage MUST NOT dùng chung một sequence khi phiên có từ hai thẻ trở lên. | db | BR-102, BR-109 |
+| BR-134 | active | `fill` MUST chấm bằng cách so dạng **đã fold** của câu trả lời với `back_folded` của thẻ: trim hai đầu và hạ hoa Unicode-aware. Chính sách này **giữ nguyên dấu** — `cong` MUST NOT khớp `công`. | domain | BR-123, BR-135 |
+| BR-135 | active | Mỗi lượt `fill` MUST lưu phiên bản chính sách so khớp đã dùng. Đổi chính sách MUST tăng phiên bản, MUST NOT sửa lại các lượt cũ. | db | BR-134, AD-11 |
+| BR-136 | active | Việc dùng gợi ý MUST được ghi trên lượt, và MUST NOT tự đổi `action` hay lịch. | db | BR-106, BR-95 |
+| BR-137 | active | Câu trả lời rỗng sau khi trim MUST NOT sinh lượt và MUST NOT tiến checkpoint. | domain | BR-25, BR-134 |
+| BR-138 | active | Nội dung người dùng gõ ở `fill` MUST NOT được lưu. Chỉ kết cục, phiên bản chính sách và cờ dùng gợi ý được ghi. | db | BR-51, BR-52, BR-54 |
 | BR-128 | active | `recall` MUST cho tối đa **20 giây** mỗi lượt, đo bằng thời gian tương tác thực: MUST tạm dừng khi app vào nền hoặc bị ngắt, và MUST NOT tính thời gian tải nội dung. | domain + UI | AD-13, AD-16 |
 | BR-129 | active | Tại mốc hết giờ, MUST chỉ có **một** kết cục được ghi: thao tác có thời điểm **trước** mốc là reveal thủ công; tại hoặc sau mốc là hết giờ. | domain | BR-25, BR-128 |
 | BR-130 | active | Hết giờ MUST tự lật đáp án và khoá kết cục thành sai. Trong cùng lượt đó MUST NOT đổi được sang đúng. | domain | BR-107, BR-129 |
@@ -508,6 +513,22 @@ BR-105 sửa một chỗ trôi mà không ai thấy: `now + N*24h` đẩy mốc 
 theo giờ người dùng bấm. Học lúc 23:00 thì hôm sau 22:00 thẻ **chưa** tới hạn, và
 mỗi phiên lại đẩy thêm — giờ học trôi dần về khuya cho tới khi người dùng hụt cả
 một ngày. Neo vào đầu ngày lịch làm "đến hạn hôm nay" đúng nghĩa là hôm nay.
+
+**BR-134 dùng lại `back_folded`, và điều đáng kiểm là nó fold những gì.** Cột đó
+trim và hạ hoa Unicode-aware nhưng **không bỏ dấu** — `card_text_model.dart` ghi
+thẳng "Case only. `công` still does not match `cong`". Nếu nó fold cả dấu thì `fill`
+sẽ chấm "ma" bằng "mà" là đúng, và một app học từ vựng tiếng Việt hỏng ở đúng chỗ
+quan trọng nhất. Kiểm trước khi dùng lại, không suy từ cái tên.
+
+**BR-135 là lý do `scheduler_version` tồn tại, áp cho một thứ khác.** Một lượt đã ghi
+phải đọc lại được bằng chính luật đã tạo ra nó. Nới chính sách so khớp — ví dụ bỏ
+qua dấu câu — sẽ biến những lượt sai của hôm qua thành đúng khi đọc lại, và không
+có cách nào biết lượt nào đã được chấm theo luật nào.
+
+**BR-138 là quyết định có thể lật, và hiện tại nghiêng về không lưu.** Câu trả lời
+sai của người học là dữ liệu phân tích tốt, nhưng nó cũng là dữ liệu riêng tư
+(BR-51) và chưa có tính năng nào đọc nó. Thêm cột khi có caller thật thì rẻ; gỡ một
+cột đã đầy dữ liệu riêng tư thì không.
 
 **BR-131 là BR-76 lặp lại ở một chỗ khác.** Người học tự nhận quên và người học
 hết giờ đều cho `action = forgotten`. Không có cột riêng thì hai điều đó không phân
