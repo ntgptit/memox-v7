@@ -44,11 +44,11 @@ CREATE TABLE study_answers (id TEXT PRIMARY KEY, card_id TEXT NOT NULL REFERENCE
  previous_interval_days INTEGER NULL, next_interval_days INTEGER NULL);
 CREATE TABLE study_queue_items (
  session_id TEXT NOT NULL REFERENCES study_sessions(id) ON DELETE CASCADE,
- mode TEXT NOT NULL,
+ mode TEXT NOT NULL, round INTEGER NOT NULL DEFAULT 1,
  card_id TEXT NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
  position INTEGER NOT NULL, status TEXT NOT NULL,
  available_at INTEGER NOT NULL DEFAULT 0, answers_in_session INTEGER NOT NULL DEFAULT 0,
- PRIMARY KEY (session_id, mode, card_id));
+ PRIMARY KEY (session_id, mode, round, card_id));
 """
 
 # Extract the invariant queries straight out of the frozen doc, so this test
@@ -77,8 +77,8 @@ def good(c):
     INSERT INTO card_study_states VALUES('c1','eight_box',1,1,NULL,NULL,0,0,1,NULL,NULL,NULL);
     INSERT INTO study_sessions VALUES('s1','r','r',1,'match','completed',NULL,1,'t','t');
     INSERT INTO study_answers VALUES('h1','c1','s1','eight_box',1,'relearning','match','forgotten','t',NULL,1,1,NULL,NULL,NULL,NULL);
-    INSERT INTO study_queue_items VALUES('s1','browse','c1',0,'completed',0,0);
-    INSERT INTO study_queue_items VALUES('s1','match','c1',0,'completed',0,2);
+    INSERT INTO study_queue_items VALUES('s1','browse',1,'c1',0,'completed',0,0);
+    INSERT INTO study_queue_items VALUES('s1','match',1,'c1',0,'completed',0,2);
     """)
 
 # each: query-number -> SQL that introduces exactly that violation
@@ -99,16 +99,20 @@ BAD = {
  13:"INSERT INTO study_sessions VALUES('s3','r','r',1,'match','abandoned','user_exit',0,'t',NULL);",
  14:"INSERT INTO study_answers VALUES('h2','c1','s1','eight_box',1,'relearning','match','forgotten','t',NULL,1,5,NULL,NULL,NULL,NULL);",
  # A chain from the valid tree's 'a' (level 2) down to level 11 (BR-55).
- 16:"INSERT INTO study_queue_items VALUES('s1','match','c1x',1,'pending',0,0);"
+ 16:"INSERT INTO study_queue_items VALUES('s1','match',1,'c1x',1,'pending',0,0);"
     "INSERT INTO cards VALUES('c1x','b','f','k','t','t');",
- 17:"INSERT INTO study_queue_items VALUES('s1','match','c1y',2,'completed',-1,0);"
+ 17:"INSERT INTO study_queue_items VALUES('s1','match',1,'c1y',2,'completed',-1,0);"
     "INSERT INTO cards VALUES('c1y','b','f','k','t','t');",
  # 51 the trong mot phien: 50 la tran (BR-24), nen 51 la vi pham.
  18:"".join(
     "INSERT INTO cards VALUES('q%d','b','f','k','t','t');"
-    "INSERT INTO study_queue_items VALUES('s1','match','q%d',%d,'completed',0,1);" % (n, n, n + 10)
+    "INSERT INTO study_queue_items VALUES('s1','match',1,'q%d',%d,'completed',0,1);" % (n, n, n + 10)
     for n in range(51)
  ),
+ 19:"INSERT INTO cards VALUES('c19','b','f','k','t','t');"
+    "INSERT INTO study_queue_items VALUES('s1','match',3,'c19',0,'pending',0,0);",
+ 20:"INSERT INTO cards VALUES('c20','b','f','k','t','t');"
+    "INSERT INTO study_queue_items VALUES('s1','match',2,'c20',0,'pending',0,0);",
  15:"".join(
     "INSERT INTO decks VALUES('x%d','X','%s','r','deck',NULL,NULL,NULL,NULL,"
     "NULL,NULL,NULL,NULL,'t','t');" % (n, 'a' if n == 3 else 'x%d' % (n - 1))

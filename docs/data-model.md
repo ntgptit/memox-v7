@@ -7,7 +7,7 @@
 | **Scope** | Bảng, cột, index, quan hệ, query bất biến. Ngoài phạm vi: SQL runtime (`lib/core/database/`, chưa tồn tại) |
 | **Source of truth for** | Schema · cột và kiểu · index · query bất biến · thứ tự migration |
 | **Depends on** | `document-conventions.md`, `architecture.md`, `business-rules.md` |
-| **Updated by task** | M5.0d (chuỗi stage; browse/self_assess) |
+| **Updated by task** | M5.0e (round cho stage chấm điểm) |
 | **Last updated** | 2026-08-07 |
 
 Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; SQL thật nằm
@@ -372,14 +372,15 @@ Hàng đợi của một phiên (BR-102). Một dòng cho mỗi thẻ được n
 |---|---|---|
 | `session_id` | TEXT NOT NULL | → `study_sessions(id)` ON DELETE CASCADE |
 | `mode` | TEXT NOT NULL | stage mà dòng này thuộc về (BR-113) |
+| `round` | INTEGER NOT NULL DEFAULT 1 | vòng trong stage (BR-115). `browse` và `self_assess` luôn `1` |
 | `card_id` | TEXT NOT NULL | → `cards(id)` ON DELETE CASCADE |
-| `position` | INTEGER NOT NULL | thứ tự trong stage đó (BR-23, BR-113). **Bất biến suốt phiên** |
+| `position` | INTEGER NOT NULL | thứ tự trong round đó (BR-23, BR-117). **Bất biến một khi round đã dựng** |
 | `status` | TEXT NOT NULL | `pending` \| `completed` (BR-28) |
 | `available_at` | INTEGER NOT NULL DEFAULT 0 | mốc `cursor` tối thiểu để thẻ được phục vụ lại (BR-26) |
 | `answers_in_session` | INTEGER NOT NULL DEFAULT 0 | số lượt đã đánh giá; `0` ⇒ lượt tới là `scheduled` (BR-77) |
 
-PK là `(session_id, mode, card_id)` — một thẻ xuất hiện đúng một lần **trong mỗi
-stage**, và các stage có thứ tự độc lập (BR-113). "50 card riêng biệt" của BR-24
+PK là `(session_id, mode, round, card_id)` — một thẻ xuất hiện đúng một lần **trong
+mỗi round của mỗi stage**, và mọi round có thứ tự độc lập (BR-113, BR-117). "50 card riêng biệt" của BR-24
 vì thế được đếm trên **tập thẻ của phiên**, không phải trên số dòng — xem
 invariant 18.
 
@@ -567,9 +568,27 @@ WHERE s.status = 'completed'
               WHERE q.session_id = s.id AND q.status = 'pending');
 
 -- 17. Bộ đếm của hàng đợi âm, hoặc lượt vượt trần BR-104
---     1 lượt scheduled + tối đa 3 lượt relearning = 4.
+--     Trần 3 lượt relearning chỉ áp cho `self_assess` (BR-26, BR-104): 1 lượt
+--     scheduled + 3 relearning = 4. Bốn stage chấm điểm lặp bằng round và
+--     không có trần (BR-119), nên chúng không bị ràng buộc này.
 SELECT session_id FROM study_queue_items
-WHERE available_at < 0 OR answers_in_session < 0 OR answers_in_session > 4;
+WHERE available_at < 0 OR answers_in_session < 0 OR round < 1
+   OR (mode = 'self_assess' AND answers_in_session > 4);
+
+-- 19. Round nhảy số: stage có round N nhưng thiếu round N-1 (BR-115)
+SELECT q.session_id FROM study_queue_items q
+WHERE q.round > 1
+  AND NOT EXISTS (SELECT 1 FROM study_queue_items p
+                  WHERE p.session_id = q.session_id AND p.mode = q.mode
+                    AND p.round = q.round - 1);
+
+-- 20. Round sau chứa thẻ không có ở round trước (BR-115)
+--     Tập của round N MUST là con của tập round N-1.
+SELECT q.session_id FROM study_queue_items q
+WHERE q.round > 1
+  AND NOT EXISTS (SELECT 1 FROM study_queue_items p
+                  WHERE p.session_id = q.session_id AND p.mode = q.mode
+                    AND p.round = q.round - 1 AND p.card_id = q.card_id);
 
 -- 18. Một phiên nạp quá 50 thẻ riêng biệt (BR-24)
 --     COUNT(DISTINCT card_id), không COUNT(*): mỗi thẻ có một dòng **mỗi stage**

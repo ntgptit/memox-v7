@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M5.0d (chuỗi stage; browse/self_assess) |
+| **Updated by task** | M5.0e (round cho stage chấm điểm) |
 | **Last updated** | 2026-08-07 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -6583,6 +6583,56 @@ quyết định, hoặc tổng hợp toàn chuỗi — đều cần luật mới
 phiên và so với trần 50 của BR-24. Khi mỗi thẻ có một dòng **mỗi stage**, một phiên
 11 thẻ × 5 stage đã là 55 dòng và invariant đỏ trên dữ liệu hoàn toàn hợp lệ. Sửa
 thành `COUNT(DISTINCT card_id)`.
+
+### M5.0e · Stage chấm điểm lặp bằng round, không bằng hàng đợi
+
+- **Status:** done — tài liệu và fixture guard. Không code sản phẩm.
+- **Goal:** Chốt cơ chế lặp lại thẻ chưa thuộc cho bốn stage chấm điểm, theo đặc
+  tả Match Terms and Meanings.
+- **Scope:** `business-rules.md` (thu hẹp BR-26 và BR-104 về `self_assess`; thêm
+  **BR-115…BR-120**), `data-model.md` (`study_queue_items.round`, PK bốn cột, sửa
+  invariant 17, thêm **invariant 19 và 20**), `use-cases.md` (UC-05 A0c),
+  `verify_invariants.py`.
+- **Out of scope:** khi nào `match` trả `almost` thay vì `wrong`; ngưỡng dữ liệu
+  tối thiểu của từng stage.
+- **Editable documents:** `docs/business-rules.md`, `docs/data-model.md`,
+  `docs/use-cases.md`, `docs/wbs.md`
+- **Output:** BR-115…BR-120; invariant 19, 20; PK `(session_id, mode, round, card_id)`
+- **Acceptance criteria:**
+  - [x] Bốn stage chấm điểm lặp bằng round; `self_assess` giữ BR-26/BR-104.
+  - [x] Round 1 gồm toàn bộ thẻ đủ dữ liệu; round sau chỉ gồm thẻ không đạt, đã
+        khử trùng.
+  - [x] Thẻ từng sai vẫn thuộc tập không đạt kể cả sau đó làm đúng (BR-116).
+  - [x] Mỗi round có thứ tự xoáo riêng (BR-117).
+  - [x] Lượt thuộc về thẻ của **vế được chọn trước** (BR-118).
+  - [x] Không trần số round (BR-119).
+  - [x] `verify_invariants.py` **20/20**, hai câu mới fire trên đúng vi phạm.
+- **Dependencies:** M5.0d
+- **Tests required:** `check_docs.py`, `verify_invariants.py`, guard `memox-v7`
+- **Checklist phases:** 14.1
+
+**Hai cơ chế lặp cho cùng một mục đích, và chúng không chồng lên nhau được.**
+BR-26 cho thẻ sai quay lại **trong cùng hàng đợi** sau ≥3 thẻ khác, trần 3 lượt
+(BR-104). Đặc tả Match cho thẻ sai quay lại **ở round sau**, sau khi bàn hiện tại
+hết, và không giới hạn số round. Giữ cả hai nghĩa mỗi stage mới phải trả lời lại
+câu "stage này lặp kiểu gì", nên bốn stage chấm điểm thống nhất về round và
+BR-26/BR-104 thu hẹp còn `self_assess` — stage duy nhất không có "bàn" để hết.
+
+**Không trần round là quyết định của chủ dự án, ngược với BR-104.** Nó có nghĩa
+một thẻ người dùng không nhớ nổi sẽ chặn họ khỏi các stage còn lại của phiên.
+Đánh đổi được chấp nhận vì bàn nhỏ dần sau mỗi round nên tiến độ nhìn thấy được,
+khác với vòng lặp phẳng mà BR-104 tồn tại để cắt.
+
+**BR-118 chặn một lỗi quy trách nhiệm rất dễ mắc.** Ghép sai gồm hai thẻ: thẻ của
+vế được chọn trước, và thẻ sở hữu vế bị chọn nhầm. Chỉ thẻ thứ nhất không đạt —
+người dùng chưa hề nói gì về thẻ thứ hai. Đánh dấu cả hai làm tập không đạt phình
+ra theo mỗi lần nhầm tay, và thẻ đã thuộc bị kéo ngược vào round sau.
+
+**Invariant 17 phải hẹp lại cùng BR-104.** Nó đang chặn `answers_in_session > 4`
+cho mọi dòng; với round không trần thì một stage chấm điểm vượt 4 là hợp lệ. Giờ
+điều kiện đó chỉ áp khi `mode = 'self_assess'`. Bù lại, hai invariant mới giữ cấu
+trúc round trung thực: round không nhảy số, và tập của round N là con của round
+N-1 — cái thứ hai là phát biểu SQL của chính BR-115.
 
 ### M5.0 · Study-specific domain và data completion
 
