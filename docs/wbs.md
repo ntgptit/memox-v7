@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M5.0f (luật stage guess) |
+| **Updated by task** | M5.0g (luật stage recall) |
 | **Last updated** | 2026-08-07 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -6681,6 +6681,54 @@ bốn lựa chọn sẽ âm thầm đổi xác suất đoán trúng từ 20% lê
 ngưỡng tối thiểu của `guess`. Ngưỡng đó khác `match`/`recall` ở một điểm đáng chú
 ý: nó là điều kiện của **cả stage**, không phải của từng thẻ, vì một question mượn
 bốn thẻ khác để dựng.
+
+### M5.0g · Luật của stage `recall`: 20 giây, và lý do thua
+
+- **Status:** done — tài liệu và fixture guard. Không code sản phẩm.
+- **Goal:** Chốt luật đếm giờ và tự chấm của `recall` theo đặc tả Recall and
+  Self-grade, đặt phần đếm giờ đúng tầng.
+- **Scope:** `business-rules.md` (**BR-128…BR-133**), `data-model.md`
+  (`study_answers.outcome_reason`; `study_queue_items.remaining_ms`,
+  `is_revealed`; **invariant 21 và 22**), `verify_invariants.py`.
+- **Out of scope:** ngưỡng của `match` và `recall` về số thẻ tối thiểu; UI.
+- **Editable documents:** `docs/business-rules.md`, `docs/data-model.md`,
+  `docs/wbs.md`
+- **Output:** BR-128…BR-133; invariant 21, 22
+- **Acceptance criteria:**
+  - [x] 20 giây đo bằng **thời gian tương tác thực**: tạm dừng khi app vào nền,
+        không tính thời gian tải (BR-128).
+  - [x] Đua tại mốc hết giờ cho đúng **một** kết cục (BR-129).
+  - [x] Hết giờ khoá kết cục thành sai; không đổi được trong cùng lượt (BR-130).
+  - [x] `outcome_reason = timeout` là cột thật, không suy từ `action` (BR-131).
+  - [x] Nhãn màn hình không được lưu (BR-132).
+  - [x] Thời gian còn lại persist để Resume không đặt lại; lượt ở round sau bắt
+        đầu lại đủ 20 giây (BR-133).
+  - [x] `verify_invariants.py` **22/22**.
+- **Dependencies:** M5.0f
+- **Tests required:** `check_docs.py`, `verify_invariants.py`, guard `memox-v7`
+- **Checklist phases:** 14.1
+
+**BR-131 là BR-76 lặp lại ở một chỗ khác.** Người học tự nhận quên và người học
+hết giờ đều cho `action = forgotten`. Không có cột riêng thì hai điều đó không
+phân biệt được từ dữ liệu đã lưu — mà chúng nói hai chuyện rất khác nhau về chất
+lượng thẻ. `study_answers` là bảng chỉ thêm, nên một cột thiếu hôm nay không tính
+ngược được ngày mai.
+
+**BR-133 là hệ quả của BR-103, không phải một yêu cầu UI.** Phiên sống sót qua
+việc hệ điều hành thu hồi app, nên "còn bao nhiêu giây" phải nằm trong database
+chứ không trong bộ nhớ một controller. Ngược lại, một lượt mới ở round sau bắt
+đầu lại đủ 20 giây — nó là lượt khác, không phải phần còn lại của lượt cũ.
+
+**Đếm giờ nằm ở `presentation/`.** AD-13 và AD-16 đã chốt `lib/features/` không
+đọc đồng hồ. Handler của `recall` nhận `didTimeout` và `elapsedMs` như input và
+vẫn là hàm thuần — đúng khuôn AD-18 đặt cho mọi stage. Đó cũng là lý do BR-129
+phát biểu cuộc đua bằng **thời điểm của sự kiện** chứ không bằng "ai chạy trước":
+so hai timestamp là việc kiểm được, còn thứ tự thực thi thì không.
+
+**Hai invariant mới giữ cho cột mới không lan ra chỗ khác.** Trạng thái timer chỉ
+được tồn tại ở `recall`, và `outcome_reason = timeout` chỉ được xuất hiện ở
+`recall` — nếu không, cột đặc thù một stage sẽ dần trở thành cột chung mà không ai
+quyết định điều đó.
 
 ### M5.0 · Study-specific domain và data completion
 

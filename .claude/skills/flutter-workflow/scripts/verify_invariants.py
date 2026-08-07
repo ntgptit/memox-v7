@@ -39,7 +39,8 @@ CREATE TABLE study_sessions (id TEXT PRIMARY KEY, deck_id TEXT NOT NULL REFERENC
 CREATE TABLE study_answers (id TEXT PRIMARY KEY, card_id TEXT NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
  session_id TEXT NOT NULL REFERENCES study_sessions(id), scheduler_type TEXT NOT NULL,
  scheduler_generation INTEGER NOT NULL, kind TEXT NOT NULL, mode TEXT NOT NULL, action TEXT NOT NULL,
- answered_at TEXT NOT NULL, next_due_at TEXT NULL, previous_box INTEGER NULL, next_box INTEGER NULL,
+ answered_at TEXT NOT NULL, outcome_reason TEXT NULL,
+ next_due_at TEXT NULL, previous_box INTEGER NULL, next_box INTEGER NULL,
  previous_ease_factor REAL NULL, next_ease_factor REAL NULL,
  previous_interval_days INTEGER NULL, next_interval_days INTEGER NULL);
 CREATE TABLE study_queue_items (
@@ -48,6 +49,7 @@ CREATE TABLE study_queue_items (
  card_id TEXT NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
  position INTEGER NOT NULL, status TEXT NOT NULL,
  available_at INTEGER NOT NULL DEFAULT 0, answers_in_session INTEGER NOT NULL DEFAULT 0,
+ remaining_ms INTEGER NULL, is_revealed INTEGER NOT NULL DEFAULT 0,
  PRIMARY KEY (session_id, mode, round, card_id));
 """
 
@@ -76,9 +78,9 @@ def good(c):
     INSERT INTO cards VALUES('c1','b','f','k','t','t');
     INSERT INTO card_study_states VALUES('c1','eight_box',1,1,NULL,NULL,0,0,1,NULL,NULL,NULL);
     INSERT INTO study_sessions VALUES('s1','r','r',1,'match','completed',NULL,1,'t','t');
-    INSERT INTO study_answers VALUES('h1','c1','s1','eight_box',1,'relearning','match','forgotten','t',NULL,1,1,NULL,NULL,NULL,NULL);
-    INSERT INTO study_queue_items VALUES('s1','browse',1,'c1',0,'completed',0,0);
-    INSERT INTO study_queue_items VALUES('s1','match',1,'c1',0,'completed',0,2);
+    INSERT INTO study_answers VALUES('h1','c1','s1','eight_box',1,'relearning','match','forgotten','t',NULL,NULL,1,1,NULL,NULL,NULL,NULL);
+    INSERT INTO study_queue_items VALUES('s1','browse',1,'c1',0,'completed',0,0,NULL,0);
+    INSERT INTO study_queue_items VALUES('s1','match',1,'c1',0,'completed',0,2,NULL,0);
     """)
 
 # each: query-number -> SQL that introduces exactly that violation
@@ -97,22 +99,25 @@ BAD = {
  11:"UPDATE decks SET scheduler_type=NULL WHERE id='r';",
  12:"INSERT INTO study_sessions VALUES('s2','r','r',1,'match','completed','user_exit',0,'t','t');",
  13:"INSERT INTO study_sessions VALUES('s3','r','r',1,'match','abandoned','user_exit',0,'t',NULL);",
- 14:"INSERT INTO study_answers VALUES('h2','c1','s1','eight_box',1,'relearning','match','forgotten','t',NULL,1,5,NULL,NULL,NULL,NULL);",
+ 14:"INSERT INTO study_answers VALUES('h2','c1','s1','eight_box',1,'relearning','match','forgotten','t',NULL,NULL,1,5,NULL,NULL,NULL,NULL);",
  # A chain from the valid tree's 'a' (level 2) down to level 11 (BR-55).
- 16:"INSERT INTO study_queue_items VALUES('s1','match',1,'c1x',1,'pending',0,0);"
+ 16:"INSERT INTO study_queue_items VALUES('s1','match',1,'c1x',1,'pending',0,0,NULL,0);"
     "INSERT INTO cards VALUES('c1x','b','f','k','t','t');",
- 17:"INSERT INTO study_queue_items VALUES('s1','match',1,'c1y',2,'completed',-1,0);"
+ 17:"INSERT INTO study_queue_items VALUES('s1','match',1,'c1y',2,'completed',-1,0,NULL,0);"
     "INSERT INTO cards VALUES('c1y','b','f','k','t','t');",
  # 51 the trong mot phien: 50 la tran (BR-24), nen 51 la vi pham.
  18:"".join(
     "INSERT INTO cards VALUES('q%d','b','f','k','t','t');"
-    "INSERT INTO study_queue_items VALUES('s1','match',1,'q%d',%d,'completed',0,1);" % (n, n, n + 10)
+    "INSERT INTO study_queue_items VALUES('s1','match',1,'q%d',%d,'completed',0,1,NULL,0);" % (n, n, n + 10)
     for n in range(51)
  ),
+ 21:"INSERT INTO cards VALUES('c21','b','f','k','t','t');"
+    "INSERT INTO study_queue_items VALUES('s1','match',1,'c21',9,'pending',0,0,500,0);",
+ 22:"INSERT INTO study_answers VALUES('h22','c1','s1','eight_box',1,'scheduled','match','forgotten','t','timeout',NULL,1,1,NULL,NULL,NULL,NULL);",
  19:"INSERT INTO cards VALUES('c19','b','f','k','t','t');"
-    "INSERT INTO study_queue_items VALUES('s1','match',3,'c19',0,'pending',0,0);",
+    "INSERT INTO study_queue_items VALUES('s1','match',3,'c19',0,'pending',0,0,NULL,0);",
  20:"INSERT INTO cards VALUES('c20','b','f','k','t','t');"
-    "INSERT INTO study_queue_items VALUES('s1','match',2,'c20',0,'pending',0,0);",
+    "INSERT INTO study_queue_items VALUES('s1','match',2,'c20',0,'pending',0,0,NULL,0);",
  15:"".join(
     "INSERT INTO decks VALUES('x%d','X','%s','r','deck',NULL,NULL,NULL,NULL,"
     "NULL,NULL,NULL,NULL,'t','t');" % (n, 'a' if n == 3 else 'x%d' % (n - 1))
