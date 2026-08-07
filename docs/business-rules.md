@@ -7,7 +7,7 @@
 | **Scope** | Luật nghiệp vụ, validation rule, state machine, edge case của phạm vi MVP. Ngoài phạm vi: quyết định kiến trúc (`architecture.md`), hình dạng dữ liệu (`data-model.md`), luồng người dùng (`use-cases.md`) |
 | **Source of truth for** | BR-xx · validation rule · entity state machine · edge case |
 | **Depends on** | `document-conventions.md`, `product.md`, `architecture.md` |
-| **Updated by task** | M5.0i (card_limit thuộc phiên) |
+| **Updated by task** | M5.0j (lượt đổi lịch trong chuỗi stage) |
 | **Last updated** | 2026-08-07 |
 
 Format tuân theo `document-conventions.md` §6.2. Từ khoá MUST / SHOULD / MAY
@@ -27,7 +27,7 @@ khi ai đó đọc và làm theo.
 
 Rule bị thay thế MUST đánh `superseded by BR-yy` ở cột Status và giữ nguyên ID.
 
-Trạng thái hiện tại: **BR-01…BR-140**, không trùng, không thiếu.
+Trạng thái hiện tại: **BR-01…BR-141**, không trùng, không thiếu.
 
 ---
 
@@ -453,9 +453,15 @@ việc có hay không có action — và đó cũng chính là toàn bộ phần
 tự viết (AD-18). `review` không còn là ngoại lệ của luồng chung; nó là mode mà
 `evaluate` trả về đúng cái người dùng vừa bấm.
 
-**Chưa chốt, và cố ý để trống:** một lượt của bốn stage chấm điểm ghi `kind` là
-gì. Đây là mục cuối cùng, và đáng chốt trước khi viết code — `study_answers` chỉ
-thêm, nên ghi sai không sửa lại được.
+**Không còn mục nào để trống.** Câu cuối cùng — lượt nào trong chuỗi stage đổi
+lịch — được BR-141 trả lời, và câu trả lời đã nằm sẵn trong cơ chế round.
+
+**Vì sao BR-77 vẫn đúng dù nó được viết cho một phiên một cách hỏi.** BR-119 bắt
+mỗi stage lặp cho tới khi một round không còn thẻ sai, nên **lượt cuối của mọi
+stage luôn là một lần đúng** — nó không mang tín hiệu nào về trí nhớ, chỉ nói rằng
+vòng lặp đã kết thúc. Thứ duy nhất cho biết người học có thực sự nhớ hay không là
+**lần thử đầu tiên**, khi chưa có stage nào nhắc bài. Lấy kết quả cuối chuỗi sẽ
+cho mọi thẻ đều "nhớ được", và SRS mất sạch tín hiệu.
 
 Ngưỡng riêng theo stage đã đóng ở BR-139: không có. Năm stage chạy trên **một**
 tập thẻ của phiên, và BR-140 tách bạch điều đó với điều kiện dựng được nội dung —
@@ -478,6 +484,7 @@ vì một question mượn bốn thẻ khác để dựng.
 | BR-101 | active | Một `study_session` MUST chỉ được tạo bởi hành động Study tường minh của người dùng. Hiển thị số đến hạn — badge, danh sách, thông báo — MUST NOT tạo session. | domain | UC-05, BR-29 |
 | BR-102 | active | Hàng đợi MUST được lưu trong database và MUST bất biến trong suốt phiên: thay đổi deck sau khi phiên mở MUST NOT đổi hàng đợi đang chạy. | db | UC-05, BR-24, BR-113 |
 | BR-113 | active | Mỗi stage MUST có hàng đợi riêng trên **cùng tập thẻ** của phiên, với thứ tự xoáo độc lập. Hai stage MUST NOT dùng chung một sequence khi phiên có từ hai thẻ trở lên. | db | BR-102, BR-109 |
+| BR-141 | active | Trong một phiên nhiều stage, **lượt đầu tiên** của một thẻ là `scheduled` và đổi lịch (BR-77). Mọi lượt sau MUST là `relearning` — kể cả ở round retry của cùng stage lẫn ở stage kế. | repository | BR-77, BR-115, BR-119 |
 | BR-139 | active | Số thẻ của một phiên MUST được chốt **một lần lúc mở phiên** và lưu vào `study_sessions.card_limit`. Mọi stage và mọi round MUST chạy trên đúng tập thẻ đó; MUST NOT có ngưỡng tối thiểu hay tối đa riêng theo stage. | db | BR-24, BR-113 |
 | BR-140 | active | Điều kiện **dựng được nội dung** của một stage (BR-114, BR-121, BR-124) MUST NOT được hiểu là ngưỡng thẻ của stage đó. Chúng quyết định stage có chạy được hay bị bỏ qua, không quyết định lấy bao nhiêu thẻ. | domain | BR-99, BR-139 |
 | BR-134 | active | `fill` MUST chấm bằng cách so dạng **đã fold** của câu trả lời với `back_folded` của thẻ: trim hai đầu và hạ hoa Unicode-aware. Chính sách này **giữ nguyên dấu** — `cong` MUST NOT khớp `công`. | domain | BR-123, BR-135 |
