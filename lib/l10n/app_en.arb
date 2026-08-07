@@ -404,9 +404,13 @@
     "description": "Action that creates a deck inside the current deck (UC-08)."
   },
   "deckCreateChildAction": "Add to this deck",
-  "@deckCreateChildAction": { "description": "Action on an unset deck's empty state; it asks which kind of child to create (BR-61)." },
+  "@deckCreateChildAction": {
+    "description": "Action on an unset deck's empty state; it asks which kind of child to create (BR-61)."
+  },
   "deckCreateChildTitle": "What are you adding?",
-  "@deckCreateChildTitle": { "description": "Title of the sheet that offers the two choices an unset deck still has (BR-61, BR-62)." },
+  "@deckCreateChildTitle": {
+    "description": "Title of the sheet that offers the two choices an unset deck still has (BR-61, BR-62)."
+  },
   "deckCreateCardAction": "New card",
   "@deckCreateCardAction": {
     "description": "Action that would create a card in the current deck. Shown disabled in this build (UC-08, BR-61)."
@@ -619,13 +623,24 @@
   },
   "cardListShowing": "Showing {shown} of {total}",
   "@cardListShowing": {
-    "placeholders": { "shown": { "type": "int" }, "total": { "type": "int" } },
+    "placeholders": {
+      "shown": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    },
     "description": "Section label above the card list: how many of the deck's cards the current window holds (C2/C3). `shown` is the window, `total` is the whole deck."
   },
   "cardListNoMatchTitle": "No cards match",
-  "@cardListNoMatchTitle": { "description": "Shown when a filter matches no cards but the deck is not empty (D3)." },
+  "@cardListNoMatchTitle": {
+    "description": "Shown when a filter matches no cards but the deck is not empty (D3)."
+  },
   "cardListNoMatchMessage": "Try another filter, or add a card.",
-  "@cardListNoMatchMessage": { "description": "Body of the filtered-empty state (D3)." },
+  "@cardListNoMatchMessage": {
+    "description": "Body of the filtered-empty state (D3)."
+  },
   "cardListEmptyTitle": "No cards yet",
   "@cardListEmptyTitle": {
     "description": "Empty state of a card-type deck with no cards (UC-04 A3)."
@@ -640,12 +655,20 @@
   },
   "cardListLoadMore": "Load {count} more",
   "@cardListLoadMore": {
-    "placeholders": { "count": { "type": "int" } },
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
     "description": "Button at the tail of the card list that grows the window (W1b). `count` is the window step."
   },
   "cardListAllShown": "{count, plural, =1{The one card is shown} other{All {count} cards shown}}",
   "@cardListAllShown": {
-    "placeholders": { "count": { "type": "int" } },
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
     "description": "Tail line when the window covers the whole deck, so there is no load-more button (W1b)."
   },
   "cardListLoadingLabel": "Loading cards",
@@ -657,64 +680,139 @@
     "description": "Shown when the card list read fails (UC-04, E3-adjacent)."
   },
   "cardProgressTitle": "Deck progress",
-  "@cardProgressTitle": { "description": "Heading of the deck progress panel (D5)." },
+  "@cardProgressTitle": {
+    "description": "Heading of the deck progress panel (D5)."
+  },
   "cardProgressPercent": "{percent}%",
   "@cardProgressPercent": {
-    "placeholders": { "percent": { "type": "int" } },
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    },
     "description": "The mastered percentage inside the progress ring (BR-88)."
   },
   "cardProgressMastered": "{mastered} of {total} mastered",
   "@cardProgressMastered": {
-    "placeholders": { "mastered": { "type": "int" }, "total": { "type": "int" } },
+    "placeholders": {
+      "mastered": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    },
     "description": "The mastered/total line beside the ring (BR-88)."
   },
   "cardSearchHint": "Search this deck",
-  "@cardSearchHint": { "description": "Card search (S1)." },
+  "@cardSearchHint": {
+    "description": "Card search (S1)."
+  },
   "cardSearchClearLabel": "Clear search",
-  "@cardSearchClearLabel": { "description": "Card search (S1)." },
+  "@cardSearchClearLabel": {
+    "description": "Card search (S1)."
+  },
   "cardSearchEmptyTitle": "No cards match “{query}”",
-  "@cardSearchEmptyTitle": { "placeholders": { "query": { "type": "String" } }, "description": "Card search (S1)." },
+  "@cardSearchEmptyTitle": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    },
+    "description": "Card search (S1)."
+  },
   "cardSearchEmptyMessage": "Try a different word, or clear the search.",
-  "@cardSearchEmptyMessage": { "description": "Card search (S1)." },
+  "@cardSearchEmptyMessage": {
+    "description": "Card search (S1)."
+  },
   "cardSortLabel": "Sort",
-  "@cardSortLabel": { "description": "Semantic label of the card list's sort control (D3)." },
+  "@cardSortLabel": {
+    "description": "Semantic label of the card list's sort control (D3)."
+  },
   "cardSortNewest": "Newest",
-  "@cardSortNewest": { "description": "Sort option: newest cards first — the default (UC-04 A4)." },
+  "@cardSortNewest": {
+    "description": "Sort option: newest cards first — the default (UC-04 A4)."
+  },
   "cardSortDueFirst": "Due first",
-  "@cardSortDueFirst": { "description": "Sort option: cards due soonest first (BR-22)." },
+  "@cardSortDueFirst": {
+    "description": "Sort option: cards due soonest first (BR-22)."
+  },
   "cardProgressStudyAction": "{count, plural, =1{Start study · 1 card} other{Start study · {count} cards}}",
   "@cardProgressStudyAction": {
-    "placeholders": { "count": { "type": "int" } },
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
     "description": "The primary action on the deck progress panel when the queue holds at least one card the learner has seen before (D5, UC-07). `count` is the whole BR-22 queue, new cards included — it says how many cards the session will hand over, so it must not be spelled 'due': BR-22's queue and the `new`/`due`/`scheduled` state table in business-rules.md are two different vocabularies, and a card that has never been reviewed belongs to both the queue and `new`."
   },
   "cardProgressLearnAction": "{count, plural, =1{Learn 1 new card} other{Learn {count} new cards}}",
   "@cardProgressLearnAction": {
-    "placeholders": { "count": { "type": "int" } },
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
     "description": "The same action when every card in the queue is one the learner has never seen (D5, BR-90). 'Start study · 1 due' on a deck holding one untouched card told the learner a card had come back around when in fact none had been introduced yet."
   },
   "cardProgressDueNew": "{due} due · {fresh} new",
   "@cardProgressDueNew": {
-    "placeholders": { "due": { "type": "int" }, "fresh": { "type": "int" } },
+    "placeholders": {
+      "due": {
+        "type": "int"
+      },
+      "fresh": {
+        "type": "int"
+      }
+    },
     "description": "The what-to-do-now line under the mastered count, when both kinds are waiting. `due` here is the state-table sense — reviewed before and ripe again — never the BR-22 queue, which would count every new card twice on this one line (D5, BR-22, BR-90)."
   },
   "cardProgressDueOnly": "{due} due",
   "@cardProgressDueOnly": {
-    "placeholders": { "due": { "type": "int" } },
+    "placeholders": {
+      "due": {
+        "type": "int"
+      }
+    },
     "description": "The what-to-do-now line when nothing in the deck is still new. A whole sentence rather than a fragment of cardProgressDueNew — the separator and the order differ per language (D5, BR-22)."
   },
   "cardProgressNewOnly": "{fresh} new",
   "@cardProgressNewOnly": {
-    "placeholders": { "fresh": { "type": "int" } },
+    "placeholders": {
+      "fresh": {
+        "type": "int"
+      }
+    },
     "description": "The what-to-do-now line when nothing has come back around yet, which is every deck on the day it is filled (D5, BR-90)."
   },
   "cardProgressLegendItem": "{label} {count}",
   "@cardProgressLegendItem": {
-    "placeholders": { "label": { "type": "String" }, "count": { "type": "int" } },
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    },
     "description": "One state in the distribution legend: its name and count (D5)."
   },
   "cardProgressDistributionSemantics": "Distribution: {newCount} new, {beginning} beginning, {reviewing} reviewing, {mastered} mastered",
   "@cardProgressDistributionSemantics": {
-    "placeholders": { "newCount": { "type": "int" }, "beginning": { "type": "int" }, "reviewing": { "type": "int" }, "mastered": { "type": "int" } },
+    "placeholders": {
+      "newCount": {
+        "type": "int"
+      },
+      "beginning": {
+        "type": "int"
+      },
+      "reviewing": {
+        "type": "int"
+      },
+      "mastered": {
+        "type": "int"
+      }
+    },
     "description": "Screen-reader summary of the distribution bar (D5)."
   },
   "cardFilterAll": "All",
@@ -731,7 +829,14 @@
   },
   "cardFilterSemantics": "{label}, {count} cards",
   "@cardFilterSemantics": {
-    "placeholders": { "label": { "type": "String" }, "count": { "type": "int" } },
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    },
     "description": "What a screen reader announces for a filter pill (D3). The visible label dropped its count so the row would fit; a reader has no such constraint, and losing the number for Flagged would lose it entirely — the progress panel repeats All, Due and New, but nothing repeats Flagged."
   },
   "cardFilterFlagged": "Flagged",
@@ -743,193 +848,429 @@
     "description": "App-bar action on the card list that opens the editor to add a card (D4)."
   },
   "cardEditorCreateTitle": "New flashcard",
-  "@cardEditorCreateTitle": { "description": "App-bar title of the card editor in create mode (UC-04 W4)." },
+  "@cardEditorCreateTitle": {
+    "description": "App-bar title of the card editor in create mode (UC-04 W4)."
+  },
   "cardEditorClose": "Close",
-  "@cardEditorClose": { "description": "Tooltip of the editor's close button." },
+  "@cardEditorClose": {
+    "description": "Tooltip of the editor's close button."
+  },
   "cardEditorSave": "Save card",
-  "@cardEditorSave": { "description": "Primary save button in the card editor." },
+  "@cardEditorSave": {
+    "description": "Primary save button in the card editor."
+  },
   "cardEditorSaveAndAdd": "Save and add another",
-  "@cardEditorSaveAndAdd": { "description": "Second save path that keeps the form open for the next card (UC-04 A4)." },
+  "@cardEditorSaveAndAdd": {
+    "description": "Second save path that keeps the form open for the next card (UC-04 A4)."
+  },
   "cardEditorSaveFailed": "This card couldn't be saved. Your text is kept — try again.",
-  "@cardEditorSaveFailed": { "description": "Shown when a card write fails; the form keeps its content (UC-04 E3)." },
+  "@cardEditorSaveFailed": {
+    "description": "Shown when a card write fails; the form keeps its content (UC-04 E3)."
+  },
   "cardEditorEditTitle": "Edit flashcard",
-  "@cardEditorEditTitle": { "description": "App-bar title of the card editor in edit mode (UC-04 A1)." },
+  "@cardEditorEditTitle": {
+    "description": "App-bar title of the card editor in edit mode (UC-04 A1)."
+  },
   "cardEditorSaveChanges": "Save changes",
-  "@cardEditorSaveChanges": { "description": "Primary save button in the card editor in edit mode." },
+  "@cardEditorSaveChanges": {
+    "description": "Primary save button in the card editor in edit mode."
+  },
   "cardEditorProgressNote": "Editing the text doesn't change this card's study progress.",
-  "@cardEditorProgressNote": { "description": "Reassurance under the fields in edit mode: content edits never touch the review state or history (BR-10)." },
+  "@cardEditorProgressNote": {
+    "description": "Reassurance under the fields in edit mode: content edits never touch the review state or history (BR-10)."
+  },
   "cardEditorLoadingLabel": "Loading card",
-  "@cardEditorLoadingLabel": { "description": "Shown while the editor fetches the card to edit (UC-04 A1)." },
+  "@cardEditorLoadingLabel": {
+    "description": "Shown while the editor fetches the card to edit (UC-04 A1)."
+  },
   "cardEditorLoadFailed": "This card couldn't be opened. It may have been deleted.",
-  "@cardEditorLoadFailed": { "description": "Shown when the edit prefill read fails, e.g. the card was deleted elsewhere." },
+  "@cardEditorLoadFailed": {
+    "description": "Shown when the edit prefill read fails, e.g. the card was deleted elsewhere."
+  },
   "cardEditorLoadRetry": "Go back",
-  "@cardEditorLoadRetry": { "description": "Button on the editor's load-failed state that returns to the previous screen." },
+  "@cardEditorLoadRetry": {
+    "description": "Button on the editor's load-failed state that returns to the previous screen."
+  },
   "cardEditorFlagAction": "Flag card",
-  "@cardEditorFlagAction": { "description": "Tooltip of the editor's flag toggle when the card is not flagged (BR-92)." },
+  "@cardEditorFlagAction": {
+    "description": "Tooltip of the editor's flag toggle when the card is not flagged (BR-92)."
+  },
   "cardEditorUnflagAction": "Remove flag",
-  "@cardEditorUnflagAction": { "description": "Tooltip of the editor's flag toggle when the card is flagged (BR-92)." },
+  "@cardEditorUnflagAction": {
+    "description": "Tooltip of the editor's flag toggle when the card is flagged (BR-92)."
+  },
   "cardTileFlaggedSemantics": "Flagged",
-  "@cardTileFlaggedSemantics": { "description": "Screen-reader label for the flag indicator on a card row (BR-92)." },
+  "@cardTileFlaggedSemantics": {
+    "description": "Screen-reader label for the flag indicator on a card row (BR-92)."
+  },
   "cardStateNew": "New",
-  "@cardStateNew": { "description": "Row state label: no scheduled review yet (BR-90)." },
+  "@cardStateNew": {
+    "description": "Row state label: no scheduled review yet (BR-90)."
+  },
   "cardStateBeginning": "Beginning",
-  "@cardStateBeginning": { "description": "Row state label: reviewed, interval under 8 days (BR-91)." },
+  "@cardStateBeginning": {
+    "description": "Row state label: reviewed, interval under 8 days (BR-91)."
+  },
   "cardStateReviewing": "Reviewing",
-  "@cardStateReviewing": { "description": "Row state label: reviewed, interval 8 days or more, not mastered (BR-91)." },
+  "@cardStateReviewing": {
+    "description": "Row state label: reviewed, interval 8 days or more, not mastered (BR-91)."
+  },
   "cardStateMastered": "Mastered",
-  "@cardStateMastered": { "description": "Row state label: box 8 or SM-2 interval 128 days or more (BR-88)." },
+  "@cardStateMastered": {
+    "description": "Row state label: box 8 or SM-2 interval 128 days or more (BR-88)."
+  },
   "cardStateDotSemantics": "State: {label}",
   "@cardStateDotSemantics": {
-    "placeholders": { "label": { "type": "String" } },
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    },
     "description": "Screen-reader label for the state dot, naming the state it stands for (D5)."
   },
   "cardDueNow": "now",
-  "@cardDueNow": { "description": "Due badge when a card is due now — due_at null or past (D5, BR-22)." },
+  "@cardDueNow": {
+    "description": "Due badge when a card is due now — due_at null or past (D5, BR-22)."
+  },
   "cardDueInMinutes": "{minutes}m",
   "@cardDueInMinutes": {
-    "placeholders": { "minutes": { "type": "int" } },
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    },
     "description": "Due badge, compact minutes until due (D5)."
   },
   "cardDueInHours": "{hours}h",
   "@cardDueInHours": {
-    "placeholders": { "hours": { "type": "int" } },
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    },
     "description": "Due badge, compact hours until due (D5)."
   },
   "cardDueInDays": "{days}d",
   "@cardDueInDays": {
-    "placeholders": { "days": { "type": "int" } },
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    },
     "description": "Due badge, compact days until due (D5)."
   },
   "cardDueBadgeSemantics": "Due {when}",
   "@cardDueBadgeSemantics": {
-    "placeholders": { "when": { "type": "String" } },
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    },
     "description": "Screen-reader label for the due badge, wrapping the compact form (D5)."
   },
   "cardEditorTagsLabel": "Tags",
-  "@cardEditorTagsLabel": { "description": "Heading of the tag section in the card editor (BR-93)." },
+  "@cardEditorTagsLabel": {
+    "description": "Heading of the tag section in the card editor (BR-93)."
+  },
   "cardEditorTagAddHint": "Add tag",
-  "@cardEditorTagAddHint": { "description": "Placeholder of the add-tag input (W5)." },
+  "@cardEditorTagAddHint": {
+    "description": "Placeholder of the add-tag input (W5)."
+  },
   "cardEditorTagCount": "{count} / {max}",
   "@cardEditorTagCount": {
-    "placeholders": { "count": { "type": "int" }, "max": { "type": "int" } },
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    },
     "description": "Tag counter shown once a card has at least one tag (BR-94, W5)."
   },
   "cardEditorTagRemoveSemantics": "Remove tag {name}",
   "@cardEditorTagRemoveSemantics": {
-    "placeholders": { "name": { "type": "String" } },
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    },
     "description": "Screen-reader label for a tag chip's delete affordance (BR-93)."
   },
   "cardTagEmptyError": "Tag can't be empty",
-  "@cardTagEmptyError": { "description": "Inline error when the tag name is blank after trimming (BR-93)." },
+  "@cardTagEmptyError": {
+    "description": "Inline error when the tag name is blank after trimming (BR-93)."
+  },
   "cardTagTooLongError": "Tag is at the character limit",
-  "@cardTagTooLongError": { "description": "Inline error when the tag name reaches its length limit (BR-93)." },
+  "@cardTagTooLongError": {
+    "description": "Inline error when the tag name reaches its length limit (BR-93)."
+  },
   "cardTagTooManyError": "A card can hold up to 10 tags",
-  "@cardTagTooManyError": { "description": "Inline error when the card already has the maximum tags (BR-94)." },
+  "@cardTagTooManyError": {
+    "description": "Inline error when the card already has the maximum tags (BR-94)."
+  },
   "cardEditorDetailsToggle": "Add details",
-  "@cardEditorDetailsToggle": { "description": "Toggle that expands the optional detail fields in the card editor (W4/W5, BR-95)." },
+  "@cardEditorDetailsToggle": {
+    "description": "Toggle that expands the optional detail fields in the card editor (W4/W5, BR-95)."
+  },
   "cardEditorDetailsLabel": "Details",
-  "@cardEditorDetailsLabel": { "description": "Heading of the optional detail section once expanded (W5)." },
+  "@cardEditorDetailsLabel": {
+    "description": "Heading of the optional detail section once expanded (W5)."
+  },
   "cardExampleLabel": "Example",
-  "@cardExampleLabel": { "description": "Label of the optional example field (BR-95)." },
+  "@cardExampleLabel": {
+    "description": "Label of the optional example field (BR-95)."
+  },
   "cardExampleHint": "A sentence using the term",
-  "@cardExampleHint": { "description": "Placeholder of the example field (W5)." },
+  "@cardExampleHint": {
+    "description": "Placeholder of the example field (W5)."
+  },
   "cardHintLabel": "Hint",
-  "@cardHintLabel": { "description": "Label of the optional hint field (BR-95)." },
+  "@cardHintLabel": {
+    "description": "Label of the optional hint field (BR-95)."
+  },
   "cardHintHint": "A memory aid",
-  "@cardHintHint": { "description": "Placeholder of the hint field (W5)." },
+  "@cardHintHint": {
+    "description": "Placeholder of the hint field (W5)."
+  },
   "cardPronunciationLabel": "Pronunciation",
-  "@cardPronunciationLabel": { "description": "Label of the optional pronunciation field (BR-95)." },
+  "@cardPronunciationLabel": {
+    "description": "Label of the optional pronunciation field (BR-95)."
+  },
   "cardPronunciationHint": "How it sounds",
-  "@cardPronunciationHint": { "description": "Placeholder of the pronunciation field (W5)." },
+  "@cardPronunciationHint": {
+    "description": "Placeholder of the pronunciation field (W5)."
+  },
   "cardDetailTooLongError": "At the character limit",
-  "@cardDetailTooLongError": { "description": "Inline error when an optional detail reaches its length limit (BR-95)." },
+  "@cardDetailTooLongError": {
+    "description": "Inline error when an optional detail reaches its length limit (BR-95)."
+  },
   "cardEditorDangerZone": "Danger zone",
-  "@cardEditorDangerZone": { "description": "Heading above the delete action in the card editor (UC-04 A5)." },
+  "@cardEditorDangerZone": {
+    "description": "Heading above the delete action in the card editor (UC-04 A5)."
+  },
   "cardEditorDelete": "Delete card",
-  "@cardEditorDelete": { "description": "Button that opens the delete confirmation in the card editor." },
+  "@cardEditorDelete": {
+    "description": "Button that opens the delete confirmation in the card editor."
+  },
   "cardDeleteConfirmTitle": "Delete this card?",
-  "@cardDeleteConfirmTitle": { "description": "Title of the card delete confirmation dialog (UC-04 A5)." },
+  "@cardDeleteConfirmTitle": {
+    "description": "Title of the card delete confirmation dialog (UC-04 A5)."
+  },
   "cardDeleteConfirmMessage": "The card and its study history are removed. This can't be undone.",
-  "@cardDeleteConfirmMessage": { "description": "Body of the card delete confirmation, stating what is lost (BR-67)." },
+  "@cardDeleteConfirmMessage": {
+    "description": "Body of the card delete confirmation, stating what is lost (BR-67)."
+  },
   "cardDeleteConfirmAction": "Delete",
-  "@cardDeleteConfirmAction": { "description": "Confirm button on the card delete dialog." },
+  "@cardDeleteConfirmAction": {
+    "description": "Confirm button on the card delete dialog."
+  },
   "cardDeleteFailed": "This card couldn't be deleted. Try again.",
-  "@cardDeleteFailed": { "description": "Shown when a card delete fails." },
+  "@cardDeleteFailed": {
+    "description": "Shown when a card delete fails."
+  },
   "cardFrontLabel": "Front",
-  "@cardFrontLabel": { "description": "Label of the front input in the card editor." },
+  "@cardFrontLabel": {
+    "description": "Label of the front input in the card editor."
+  },
   "cardFrontHint": "The term you want to remember",
-  "@cardFrontHint": { "description": "Placeholder of the front input (W4)." },
+  "@cardFrontHint": {
+    "description": "Placeholder of the front input (W4)."
+  },
   "cardBackLabel": "Back",
-  "@cardBackLabel": { "description": "Label of the back input in the card editor." },
+  "@cardBackLabel": {
+    "description": "Label of the back input in the card editor."
+  },
   "cardBackHint": "English, Vietnamese, or both",
-  "@cardBackHint": { "description": "Placeholder of the back input (W4)." },
+  "@cardBackHint": {
+    "description": "Placeholder of the back input (W4)."
+  },
   "cardFrontEmptyError": "Front can't be empty",
-  "@cardFrontEmptyError": { "description": "Inline error when the front is blank after trimming (BR-07, UC-04 E1)." },
+  "@cardFrontEmptyError": {
+    "description": "Inline error when the front is blank after trimming (BR-07, UC-04 E1)."
+  },
   "cardFrontTooLongError": "Front is at the character limit",
-  "@cardFrontTooLongError": { "description": "Inline error when the front reaches its length limit (BR-08, UC-04 E2)." },
+  "@cardFrontTooLongError": {
+    "description": "Inline error when the front reaches its length limit (BR-08, UC-04 E2)."
+  },
   "cardBackEmptyError": "Back can't be empty",
-  "@cardBackEmptyError": { "description": "Inline error when the back is blank after trimming (BR-07, UC-04 E1)." },
+  "@cardBackEmptyError": {
+    "description": "Inline error when the back is blank after trimming (BR-07, UC-04 E1)."
+  },
   "cardBackTooLongError": "Back is at the character limit",
-  "@cardBackTooLongError": { "description": "Inline error when the back reaches its length limit (BR-08, UC-04 E2)." },
+  "@cardBackTooLongError": {
+    "description": "Inline error when the back reaches its length limit (BR-08, UC-04 E2)."
+  },
   "deckDetailOpenCardsMessage": "This deck holds flashcards.",
-  "@deckDetailOpenCardsMessage": { "description": "Body shown on a card-type deck, above the button that opens the card list (UC-04)." },
+  "@deckDetailOpenCardsMessage": {
+    "description": "Body shown on a card-type deck, above the button that opens the card list (UC-04)."
+  },
   "deckDetailOpenCardsAction": "Open cards",
-  "@deckDetailOpenCardsAction": { "description": "Button on a card-type deck that opens the card list." },
+  "@deckDetailOpenCardsAction": {
+    "description": "Button on a card-type deck that opens the card list."
+  },
   "cardTileSemantics": "{front}. {back}",
   "@cardTileSemantics": {
-    "placeholders": { "front": { "type": "String" }, "back": { "type": "String" } },
+    "placeholders": {
+      "front": {
+        "type": "String"
+      },
+      "back": {
+        "type": "String"
+      }
+    },
     "description": "Screen-reader label for a card row: front then back as one announcement (UC-04 W1)."
   },
   "studyNewCount": "New {count}",
-  "@studyNewCount": {"placeholders": {"count": {"type": "int"}}, "description": "Half of the study badge: cards that have not finished the learning chain (BR-150)."},
+  "@studyNewCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Half of the study badge: cards that have not finished the learning chain (BR-150)."
+  },
   "studyDueCount": "Due {count}",
-  "@studyDueCount": {"placeholders": {"count": {"type": "int"}}, "description": "The other half: cards already learned and now due (BR-150). Disjoint from New."},
+  "@studyDueCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "The other half: cards already learned and now due (BR-150). Disjoint from New."
+  },
   "studyStartLearning": "Learn new",
-  "@studyStartLearning": {"description": "Opens a learning session (BR-142)."},
+  "@studyStartLearning": {
+    "description": "Opens a learning session (BR-142)."
+  },
   "studyStartReview": "Review",
-  "@studyStartReview": {"description": "Opens a review session (BR-142)."},
+  "@studyStartReview": {
+    "description": "Opens a review session (BR-142)."
+  },
   "studyNothingDueMessage": "Nothing to review yet. Come back when a card is due.",
-  "@studyNothingDueMessage": {"description": "Shown instead of a review entry when nothing is due. A normal state, never an error (BR-29, BR-145)."},
+  "@studyNothingDueMessage": {
+    "description": "Shown instead of a review entry when nothing is due. A normal state, never an error (BR-29, BR-145)."
+  },
   "studyNothingNewMessage": "Every card here has been learned.",
-  "@studyNothingNewMessage": {"description": "Shown when the deck has no unlearned cards left (BR-142)."},
+  "@studyNothingNewMessage": {
+    "description": "Shown when the deck has no unlearned cards left (BR-142)."
+  },
   "studyChooseModeTitle": "How do you want to review?",
-  "@studyChooseModeTitle": {"description": "Title of the review mode chooser (BR-146)."},
+  "@studyChooseModeTitle": {
+    "description": "Title of the review mode chooser (BR-146)."
+  },
   "studyModeBrowse": "Browse",
-  "@studyModeBrowse": {"description": "Mode name: both sides at once, no grading (BR-111, BR-112)."},
+  "@studyModeBrowse": {
+    "description": "Mode name: both sides at once, no grading (BR-111, BR-112)."
+  },
   "studyModeSelfAssess": "Self-assess",
-  "@studyModeSelfAssess": {"description": "Mode name: flip, then grade yourself (BR-112)."},
+  "@studyModeSelfAssess": {
+    "description": "Mode name: flip, then grade yourself (BR-112)."
+  },
   "studyModeMatch": "Match",
-  "@studyModeMatch": {"description": "Mode name: pair terms with meanings."},
+  "@studyModeMatch": {
+    "description": "Mode name: pair terms with meanings."
+  },
   "studyModeGuess": "Guess",
-  "@studyModeGuess": {"description": "Mode name: one question, five options (BR-121)."},
+  "@studyModeGuess": {
+    "description": "Mode name: one question, five options (BR-121)."
+  },
   "studyModeRecall": "Recall",
-  "@studyModeRecall": {"description": "Mode name: twenty seconds to remember it (BR-128)."},
+  "@studyModeRecall": {
+    "description": "Mode name: twenty seconds to remember it (BR-128)."
+  },
   "studyModeFill": "Fill in",
-  "@studyModeFill": {"description": "Mode name: type the answer (BR-134)."},
+  "@studyModeFill": {
+    "description": "Mode name: type the answer (BR-134)."
+  },
   "studyModeCardCount": "{count} cards",
-  "@studyModeCardCount": {"placeholders": {"count": {"type": "int"}}, "description": "How many cards a mode can actually take. Differs per mode (BR-154)."},
+  "@studyModeCardCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "How many cards a mode can actually take. Differs per mode (BR-154)."
+  },
   "studyModeNeedsExample": "Needs cards with an example",
-  "@studyModeNeedsExample": {"description": "Why `fill` is unavailable: the field is optional (BR-114, BR-99)."},
+  "@studyModeNeedsExample": {
+    "description": "Why `fill` is unavailable: the field is optional (BR-114, BR-99)."
+  },
   "studyModeNeedsMeanings": "Needs five different meanings",
-  "@studyModeNeedsMeanings": {"description": "Why `guess` is unavailable: a question has five options (BR-121, BR-124)."},
+  "@studyModeNeedsMeanings": {
+    "description": "Why `guess` is unavailable: a question has five options (BR-121, BR-124)."
+  },
   "studyModeNeedsPairs": "Needs at least two pairs",
-  "@studyModeNeedsPairs": {"description": "Why `match` is unavailable: one pair makes the answer obvious (BR-153)."},
+  "@studyModeNeedsPairs": {
+    "description": "Why `match` is unavailable: one pair makes the answer obvious (BR-153)."
+  },
   "studyRevealAnswer": "Show answer",
-  "@studyRevealAnswer": {"description": "Flips a `self_assess` card. `browse` has no such step (BR-112)."},
+  "@studyRevealAnswer": {
+    "description": "Flips a `self_assess` card. `browse` has no such step (BR-112)."
+  },
   "studyActionForgotten": "Forgot",
-  "@studyActionForgotten": {"description": "eight_box action. The label is display only; the stored value is canonical (BR-132)."},
+  "@studyActionForgotten": {
+    "description": "eight_box action. The label is display only; the stored value is canonical (BR-132)."
+  },
   "studyActionRemembered": "Remembered",
-  "@studyActionRemembered": {"description": "eight_box action (BR-132)."},
+  "@studyActionRemembered": {
+    "description": "eight_box action (BR-132)."
+  },
   "studyActionAgain": "Again",
-  "@studyActionAgain": {"description": "sm2 action, quality 0 (BR-17)."},
+  "@studyActionAgain": {
+    "description": "sm2 action, quality 0 (BR-17)."
+  },
   "studyActionHard": "Hard",
-  "@studyActionHard": {"description": "sm2 action, quality 3 (BR-17)."},
+  "@studyActionHard": {
+    "description": "sm2 action, quality 3 (BR-17)."
+  },
   "studyActionGood": "Good",
-  "@studyActionGood": {"description": "sm2 action, quality 4 (BR-17)."},
+  "@studyActionGood": {
+    "description": "sm2 action, quality 4 (BR-17)."
+  },
   "studyActionEasy": "Easy",
-  "@studyActionEasy": {"description": "sm2 action, quality 5 (BR-17)."},
+  "@studyActionEasy": {
+    "description": "sm2 action, quality 5 (BR-17)."
+  },
   "studyContinueAction": "Next",
-  "@studyContinueAction": {"description": "Moves past a `browse` card, which produces no action (BR-111)."},
+  "@studyContinueAction": {
+    "description": "Moves past a `browse` card, which produces no action (BR-111)."
+  },
   "studySessionFinished": "Session finished.",
-  "@studySessionFinished": {"description": "Shown when every stage has run out of queue (BR-81)."}
+  "@studySessionFinished": {
+    "description": "Shown when every stage has run out of queue (BR-81)."
+  },
+  "studyRecallSecondsLeft": "{seconds}s",
+  "@studyRecallSecondsLeft": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    },
+    "description": "Countdown on a recall turn. Twenty seconds of interactive time, paused when the app is backgrounded (BR-128)."
+  },
+  "studyRecallTimedOut": "Time's up",
+  "@studyRecallTimedOut": {
+    "description": "Shown when a recall turn runs out. The outcome is locked to wrong and cannot be changed (BR-130)."
+  },
+  "studyFillInputLabel": "Type the answer",
+  "@studyFillInputLabel": {
+    "description": "Label of the fill input. What is typed is never stored (BR-138)."
+  },
+  "studyFillSubmit": "Check",
+  "@studyFillSubmit": {
+    "description": "Grades a fill answer. An empty answer produces no turn (BR-137)."
+  },
+  "studyShowHint": "Show hint",
+  "@studyShowHint": {
+    "description": "Reveals the card hint. Recorded on the turn, and deliberately without effect on the action (BR-136)."
+  },
+  "studyFillCorrect": "Correct",
+  "@studyFillCorrect": {
+    "description": "Feedback after a fill answer matched."
+  },
+  "studyFillIncorrect": "Not quite",
+  "@studyFillIncorrect": {
+    "description": "Feedback after a fill answer did not match. Diacritics count (BR-134)."
+  }
 }

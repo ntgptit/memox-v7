@@ -1239,5 +1239,38 @@
   "studySessionFinished": "Đã xong phiên học.",
   "@studySessionFinished": {
     "description": "Shown when every stage has run out of queue (BR-81)."
+  },
+  "studyRecallSecondsLeft": "{seconds} giây",
+  "@studyRecallSecondsLeft": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    },
+    "description": "Countdown on a recall turn. Twenty seconds of interactive time, paused when the app is backgrounded (BR-128)."
+  },
+  "studyRecallTimedOut": "Hết giờ",
+  "@studyRecallTimedOut": {
+    "description": "Shown when a recall turn runs out. The outcome is locked to wrong and cannot be changed (BR-130)."
+  },
+  "studyFillInputLabel": "Gõ đáp án",
+  "@studyFillInputLabel": {
+    "description": "Label of the fill input. What is typed is never stored (BR-138)."
+  },
+  "studyFillSubmit": "Kiểm tra",
+  "@studyFillSubmit": {
+    "description": "Grades a fill answer. An empty answer produces no turn (BR-137)."
+  },
+  "studyShowHint": "Xem gợi ý",
+  "@studyShowHint": {
+    "description": "Reveals the card hint. Recorded on the turn, and deliberately without effect on the action (BR-136)."
+  },
+  "studyFillCorrect": "Chính xác",
+  "@studyFillCorrect": {
+    "description": "Feedback after a fill answer matched."
+  },
+  "studyFillIncorrect": "Chưa đúng",
+  "@studyFillIncorrect": {
+    "description": "Feedback after a fill answer did not match. Diacritics count (BR-134)."
   }
 }

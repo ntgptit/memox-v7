@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M5.4b (match, guess) |
+| **Updated by task** | M5.4c (recall, fill) |
 | **Last updated** | 2026-08-07 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -7697,20 +7697,44 @@ thì thêm test cùng lúc; ghi ở đây để không ai tưởng đã phủ.
 
 #### M5.4c · `recall` và `fill`
 
-- **Status:** todo
+- **Status:** **done** — analyze sạch, 1497 test xanh (trừ golden Windows), guard sạch
 - **Scope:** đồng hồ 20 giây của `recall`, ô nhập và chấm của `fill`.
 - **Acceptance criteria:**
-  - [ ] Đồng hồ tạm dừng khi app vào nền, và không tính thời gian tải (BR-128).
-  - [ ] Tại mốc hết giờ chỉ **một** kết cục được ghi; thao tác trước mốc là
+  - [x] Đồng hồ tạm dừng khi app vào nền, và không tính thời gian tải (BR-128).
+  - [x] Tại mốc hết giờ chỉ **một** kết cục được ghi; thao tác trước mốc là
         reveal thủ công (BR-129) — test đúng ca đua này.
-  - [ ] Hết giờ tự lật đáp án, khoá kết cục thành sai, và ghi
+  - [x] Hết giờ tự lật đáp án, khoá kết cục thành sai, và ghi
         `outcome_reason = timeout` (BR-130, BR-131).
-  - [ ] Resume tiếp tục đúng `remaining_ms`, không đặt lại 20 giây; round sau bắt
+  - [x] Resume tiếp tục đúng `remaining_ms`, không đặt lại 20 giây; round sau bắt
         đầu lại đủ 20 giây (BR-133).
-  - [ ] `fill` chấm bằng `back_folded` — `cong` **không** khớp `công` (BR-134).
-  - [ ] Câu trả lời rỗng sau trim không sinh lượt, không tiến checkpoint (BR-137).
-  - [ ] Nội dung người dùng gõ **không** được lưu ở bất kỳ đâu (BR-138, BR-51).
-  - [ ] Dùng gợi ý được ghi nhưng không đổi `action` (BR-136).
+  - [x] `fill` chấm bằng `back_folded` — `cong` **không** khớp `công` (BR-134).
+  - [x] Câu trả lời rỗng sau trim không sinh lượt, không tiến checkpoint (BR-137).
+  - [x] Nội dung người dùng gõ **không** được lưu ở bất kỳ đâu (BR-138, BR-51).
+  - [x] Dùng gợi ý được ghi nhưng không đổi `action` (BR-136).
+**Biên của BR-129 đọc là đóng ở phía hết giờ — đây là chỗ tự quyết.** Luật nói
+thao tác **trước** mốc là reveal, **tại hoặc sau** mốc là hết giờ, nên
+`elapsed == 20s` tính là hết giờ. Đọc ngược lại thì cú chạm đúng giây 0 thành
+reveal — ca duy nhất người dùng không phân biệt được với trượt, và sẽ thấy như app
+đôi lúc rộng lượng ngẫu nhiên. Biên nằm ở handler chứ không ở widget, nên widget
+không tự suy lại `<= 0` rồi lệch với luật.
+
+**Chính sách fold viết lại trong `fill_mode.dart`, không mượn của Card.** Nó mang số
+phiên bản (BR-135), nên chỉ được đổi khi có người quyết định đổi. Trỏ sang helper
+của feature khác thì một sửa ở bên đó sẽ âm thầm chấm lại lịch sử ở bên này.
+
+**`FillOutcome` không mang chuỗi người dùng gõ, và đó là kiểu chứ không phải quy
+ước** (BR-138, BR-51). Chỉ kết cục, phiên bản chính sách và cờ dùng gợi ý rời khỏi
+widget. Có test khẳng định chuỗi đã gõ không xuất hiện trong outcome.
+
+**Đồng hồ đếm thời gian tương tác** (BR-128): dừng khi app rời foreground, chạy lại
+khi quay về. Không có điều này thì hai mươi giây nghe điện thoại là hai mươi giây
+trượt một thẻ người dùng chưa kịp nhìn.
+
+**Còn nợ:** `remaining_ms` và `is_revealed` mới được widget nhận và báo ra qua
+callback; **chưa có đường ghi xuống `study_queue_items`**. Resume thật sự qua lần mở
+app cần một phương thức contract nữa; thuộc M5.5 (vòng đời phiên), ghi ở đây để
+không ai tưởng BR-133 đã phủ trọn.
+
 - **Tests required:** widget test cho từng criteria; test đua reveal/timeout;
   test khẳng định không có chuỗi người dùng gõ nào chạm tới database
 
