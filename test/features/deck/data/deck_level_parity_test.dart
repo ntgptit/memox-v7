@@ -44,7 +44,7 @@ void main() {
           .decks;
 
   /// A card in [deckId], with a study state due at [dueAt] — `null` meaning
-  /// never reviewed, which BR-22 counts as due.
+  /// never learned, which since BR-142 is the *other* set and not due.
   Future<void> card(String id, String deckId, {DateTime? dueAt}) async {
     await insertCard(harness.db, id: id, deckId: deckId);
     await insertReviewState(harness.db, cardId: id, dueAt: dueAt);
@@ -101,7 +101,7 @@ void main() {
       final root = (await rootLevel()).single;
       final children = await levelUnder(tree.root.id);
 
-      expect(root.dueCardCount, 4);
+      expect(root.dueCardCount, 2);
       expect(dueOf(children), root.dueCardCount);
     });
 
@@ -147,7 +147,7 @@ void main() {
       final leafAsChild = (await levelUnder(tree.branch.id)).single;
 
       expect(leafAsChild.totalCardCount, 4);
-      expect(leafAsChild.dueCardCount, 3);
+      expect(leafAsChild.dueCardCount, 2);
       expect(await levelUnder(tree.leaf.id), isEmpty);
     });
 

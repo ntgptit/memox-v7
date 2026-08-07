@@ -94,12 +94,15 @@ void main() {
     );
   });
 
-  group('the due predicate (BR-22)', () {
+  group('the due predicate (BR-142)', () {
     /// One card per boundary case, all in the same tree.
     Future<String> seedDueCases() async {
       final tree = await harness.seedTree();
       final deckId = tree.leaf.id;
 
+      // Never learned, so no schedule (BR-149). Under BR-22 the badge counted
+      // this as due; since BR-142 it is New, and the badge's Due number must
+      // not claim a card the New number already has.
       await insertCard(harness.db, id: 'new', deckId: deckId);
       await insertReviewState(harness.db, cardId: 'new');
 
@@ -123,19 +126,19 @@ void main() {
       return tree.root.id;
     }
 
-    test('null, past and exactly-now are due; future is not', () async {
+    test('past and exactly-now are due; future and new are not', () async {
       await seedDueCases();
 
       final summaries = await readSummaries();
 
       expect(summaries.single.totalCardCount, 4);
-      // `due_at IS NULL OR due_at <= now` — three of the four.
-      expect(summaries.single.dueCardCount, 3);
+      // `learned_at IS NOT NULL AND due_at <= now` — two of the four.
+      expect(summaries.single.dueCardCount, 2);
       expect(summaries.single.hasDueCards, isTrue);
     });
 
     test('the count agrees with the list a session would hand out', () async {
-      // The parity BR-22 exists for. A badge saying 12 over a session offering
+      // The parity BR-142 exists for. A badge saying 12 over a session offering
       // 11 reads as a scheduler bug and is not one; the two predicates are
       // written character-for-character alike and this is what keeps them so.
       final rootId = await seedDueCases();
@@ -158,7 +161,7 @@ void main() {
           )
           .first;
 
-      expect(later.decks.single.dueCardCount, 4);
+      expect(later.decks.single.dueCardCount, 3);
     });
 
     test('nextDueAt is the earliest card NOT already due', () async {
@@ -190,7 +193,9 @@ void main() {
       // Nothing left to wait for. The controller must arm no timer here, and a
       // non-null value would have it wait for a boundary in the past.
       expect(snapshot.nextDueAt, isNull);
-      expect(snapshot.decks.single.dueCardCount, 4);
+      // Three of the four. The never-learned card is not waiting for a
+      // boundary — it has no schedule to arrive at (BR-149).
+      expect(snapshot.decks.single.dueCardCount, 3);
     });
 
     test('nextDueAt is null when there are no cards at all', () async {
@@ -258,8 +263,8 @@ void main() {
           .watchDeckList(parentDeckId: null, now: before.nextDueAt!)
           .first;
 
-      expect(before.decks.single.dueCardCount, 3);
-      expect(after.decks.single.dueCardCount, 4);
+      expect(before.decks.single.dueCardCount, 2);
+      expect(after.decks.single.dueCardCount, 3);
     });
   });
 

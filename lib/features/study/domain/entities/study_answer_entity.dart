@@ -3,7 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../../deck/domain/models/scheduler_type_model.dart';
 import '../models/study_action_model.dart';
 import '../models/study_answer_kind_model.dart';
-import '../models/study_mode_model.dart';
+import '../models/study_mode.dart';
 import '../models/study_outcome_reason_model.dart';
 
 part 'study_answer_entity.freezed.dart';

@@ -124,16 +124,26 @@ Future<void> insertReviewState(
   AppDatabase db, {
   required String cardId,
   DateTime? dueAt,
+  DateTime? learnedAt,
   String schedulerType = 'eight_box',
   int schedulerGeneration = 1,
 }) async {
+  // `learned_at` travels with `due_at` (BR-149). Deriving it here rather than
+  // taking a second argument is what keeps every fixture on the right side of
+  // invariants 24 and 28 without each caller having to remember: a card with a
+  // schedule finished the chain, and a card without one did not.
   await db.customInsert(
     'INSERT INTO card_study_states (card_id, scheduler_type, '
-    'scheduler_version, scheduler_generation, due_at) VALUES (?, ?, 1, ?, ?)',
+    'scheduler_version, scheduler_generation, learned_at, due_at) '
+    'VALUES (?, ?, 1, ?, ?, ?)',
     variables: <Variable<Object>>[
       Variable<String>(cardId),
       Variable<String>(schedulerType),
       Variable<int>(schedulerGeneration),
+      if (dueAt == null)
+        const Variable<DateTime>(null)
+      else
+        Variable<DateTime>(learnedAt ?? dueAt),
       if (dueAt == null)
         const Variable<DateTime>(null)
       else
