@@ -7,7 +7,7 @@
 | **Scope** | Task còn lại của Study từ M5.7 trở đi · nợ kỹ thuật của Study · việc bị chặn |
 | **Source of truth for** | Trạng thái task Study từ M5.7 · nợ kỹ thuật của Study |
 | **Depends on** | `document-conventions.md` · `wbs.md` · `business-rules.md` · `use-cases.md` |
-| **Updated by task** | M5.7r (rà soát việc còn lại của Study) |
+| **Updated by task** | M5.7r (rà soát) + design năm màn học |
 | **Last updated** | 2026-08-08 |
 
 `docs/wbs.md` giữ M5.0…M5.6 đã hoàn thành và không nhắc lại ở đây. File này giữ
@@ -41,6 +41,7 @@ M5.7 chặn mọi thứ còn lại: chưa có màn phiên học thì không ki�
 đo được thị giác, không viết được integration test qua UI.
 
 ```
+M5.17 (chốt 8 điểm lệch design ↔ BR)  ← chặn M5.7 và M5.18…M5.20
 M5.7 (màn hình + route)
  ├── M5.8  (sửa AD-12)          ── độc lập, làm song song được
  ├── M5.9  (ba đường BR-103)
@@ -49,6 +50,7 @@ M5.7 (màn hình + route)
  ├── M5.12 (ca chặn/bỏ qua stage)
  ├── M5.13 (mức `almost` của match)
  └── M5.15 (integration test qua UI) ← cần M5.9, M5.10, M5.12
+M5.18…M5.20 (dựng năm màn theo design) ← cần M5.7 và M5.17
 M5.14 blocked bởi UC-07
 M5.16 sau khi mọi màn đã ổn định
 ```
@@ -285,6 +287,96 @@ M5.16 sau khi mọi màn đã ổn định
 - **Tests required:** golden/visual audit; test text scale 2.0
 - **Checklist phases:** 12.x, 15.3
 
+### M5.17 · Chốt tám điểm lệch giữa design và BR
+
+- **Status:** todo — **chặn M5.7 và M5.18…M5.20**
+- **Goal:** Không viết một dòng UI nào dựa trên phỏng đoán về nghiệp vụ.
+- **Scope:** tám mục ở `wireframes/m5-study-modes.md` §7; ghi quyết định vào đúng
+  tài liệu sở hữu luật đó.
+- **Out of scope:** dựng màn — M5.7, M5.18…M5.20.
+- **Editable documents:** `docs/wbs-study.md`, `docs/wireframes/m5-study-modes.md`,
+  và tài liệu frozen **chỉ khi** quyết định thật sự đổi luật
+- **Output:** §7 chuyển từ "chưa chốt" sang quyết định, mỗi mục kèm lý do
+- **Acceptance criteria:**
+  - [ ] Tám mục đều có quyết định, không mục nào để ngỏ.
+  - [ ] Mục nào đổi luật thì BR tương ứng được sửa **trong cùng commit**, kèm lý
+        do — không để quyết định nằm trong wireframe còn BR nói khác.
+  - [ ] Mục nào cần dữ liệu mới (§7.5 dòng mô tả phụ) thì có mốc migration riêng,
+        không nhét vào mốc UI.
+  - [ ] `check_docs.py` xanh sau khi sửa.
+- **Ba mục có giá cao hơn hẳn năm mục còn lại.** §7.2 (một phiên trộn thẻ mới và
+  thẻ ôn) đụng thẳng BR-142 — chính luật chủ dự án yêu cầu bắt buộc ở đợt
+  brainstorm; đảo nó là làm lại `session_kind`, cách lấy thẻ và luồng hoàn tất
+  chuỗi học mới. §7.3 (bỏ đồng hồ `recall`) xoá bốn BR và hai cột đã có trong
+  schema v5. §7.4 (icon loa) mở lại quyết định hoãn media của AD-03. Năm mục còn
+  lại là chuỗi hiển thị hoặc token.
+- **Dependencies:** không
+- **Tests required:** không — đây là task quyết định; test đi cùng mốc thi hành
+- **Checklist phases:** 2.x, 14.4
+
+### M5.18 · Khung phiên học theo design
+
+- **Status:** todo
+- **Goal:** Năm màn dùng chung một khung, dựng một lần.
+- **Scope:** thanh trên (✕, pill mode, thanh tiến trình, bộ đếm `n / m`), dòng
+  ngữ cảnh, dòng gợi ý dưới cùng; token màu cho pill và thanh tiến trình.
+- **Out of scope:** thân của từng mode — M5.19, M5.20.
+- **Editable documents:** `docs/wbs-study.md`
+- **Output:** widget khung trong `presentation/widgets/sections/`, chuỗi ARB
+- **Acceptance criteria:**
+  - [ ] ✕ đóng phiên qua `leave()` và ghi `abandoned`/`user_exit` (BR-82) —
+        **không** phải pop route suông.
+  - [ ] Bộ đếm và thanh tiến trình đọc từ state, không tự đếm.
+  - [ ] Pill và thanh tiến trình lấy màu từ token, một token cho mỗi mode.
+  - [ ] Dòng gợi ý đổi theo mode và đến từ ARB.
+  - [ ] Render ở 320×568 và `textScaler` 2.0 không tràn.
+- **Dependencies:** M5.7, M5.17
+- **Tests required:** widget test cho ✕, cho bộ đếm, cho năm dòng gợi ý
+- **Checklist phases:** 14.4, 15.3
+
+### M5.19 · `browse` và `match` theo design
+
+- **Status:** todo
+- **Goal:** Hai màn khớp ảnh 12 và 13.
+- **Scope:** thẻ hai nửa có nhãn `KOREAN`/`MEANING` và đường kẻ giữa; bàn ghép
+  hai cột với ba trạng thái ô.
+- **Out of scope:** vuốt để lùi, cho tới khi §7.7 được chốt.
+- **Editable documents:** `docs/wbs-study.md`
+- **Output:** cập nhật `study_card_face_section_widget.dart` và
+  `match_board_section_widget.dart`
+- **Acceptance criteria:**
+  - [ ] `browse` hiện hai nhãn và hai mặt, không nút chấm điểm nào (BR-111).
+  - [ ] Ô `match` đã ghép **ở lại bàn** với dấu ✓ và trạng thái mờ — bản hiện tại
+        xoá ô khỏi bàn, và đó là điểm khác design.
+  - [ ] Ô đang chọn dùng nền primary đặc, chữ đảo màu, đạt tương phản ở cả hai
+        theme.
+  - [ ] Ô đã ghép không bấm lại được.
+- **Dependencies:** M5.18
+- **Tests required:** widget test ba trạng thái ô; test `browse` không có action
+- **Checklist phases:** 14.4, 15.3
+
+### M5.20 · `guess`, `recall` và `fill` theo design
+
+- **Status:** todo
+- **Goal:** Ba màn khớp ảnh 14, 15, 16 — gồm cả state thứ hai chưa có ảnh.
+- **Scope:** hàng lựa chọn có huy hiệu chữ cái và trạng thái sau trả lời; bố cục
+  đề trên / đáp án dưới / nút dưới cùng cho `recall` và `fill`.
+- **Out of scope:** icon bút chì và loa, cho tới khi §7.4 được chốt.
+- **Editable documents:** `docs/wbs-study.md`
+- **Output:** cập nhật ba widget mode
+- **Acceptance criteria:**
+  - [ ] `guess` sau trả lời: đáp án đúng xanh + ✓, lựa chọn sai đã chọn đỏ + ✕,
+        ba lựa chọn còn lại mờ — và **không** nhận thêm lượt nào (BR-126).
+  - [ ] Huy hiệu A–E là thứ tự hiển thị, **không** phải định danh; lượt vẫn ghi
+        theo `cardId` (BR-125).
+  - [ ] `recall` có state đã lật, và nó khoá kết cục (BR-130).
+  - [ ] `fill` có state đã chấm, hiện đúng/sai và không nhận nhập tiếp.
+  - [ ] Hai state thiếu ảnh được vẽ theo BR chứ không theo phỏng đoán, và ghi rõ
+        trong wireframe là do agent đề xuất.
+- **Dependencies:** M5.18
+- **Tests required:** widget test cho từng state; test huy hiệu không phải định danh
+- **Checklist phases:** 14.4, 15.3
+
 ## Nợ kỹ thuật của Study
 
 | Nợ | Vì sao còn | Đóng ở |
@@ -295,6 +387,9 @@ M5.16 sau khi mọi màn đã ổn định
 | BR-83 chưa có caller | UC-07 chưa tồn tại | M5.14 |
 | `remaining_ms` chưa được nối vào UI resume | cần màn phiên học trước | M5.7 + M5.9 |
 | Widget mode chưa ai dựng trong `lib/` | chưa có màn ghép | M5.7 |
+| Ảnh wireframe chưa có trong repo | agent không lưu được tệp đính kèm từ hội thoại | chủ dự án thả vào `wireframes/assets/m5-study-modes/` |
+| `match` xoá ô đã ghép khỏi bàn | dựng trước khi có design | M5.19 |
+| Hai state thứ hai của `recall`/`fill` chưa có ảnh | design mới cung cấp state đầu | M5.17 hoặc M5.20 |
 
 ## Việc không thuộc Study nhưng chặn Definition of Done
 
