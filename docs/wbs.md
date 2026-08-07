@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M5.0q (recursive review lượt bốn) |
+| **Updated by task** | M5.0r (tồn đọng + review lượt năm) |
 | **Last updated** | 2026-08-07 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -7219,6 +7219,47 @@ thuẫn, lượt hai tìm 3 mất kết nối, lượt ba tìm 4 lỗ trong đó
 người, lượt bốn tìm 2 và cả hai chỉ là tài liệu hoá. Ba phép quét của ba lượt
 trước đều trả về 0. Rà thêm cần một góc thứ năm, và góc đó nhiều khả năng là
 **chạy code thật** — tức chính M5.
+
+### M5.0r · Tồn đọng và recursive review lượt năm — góc "tài liệu chưa ai rà"
+
+- **Status:** done — một invariant mới, và nợ IT scenario được ghi.
+- **Goal:** Đóng tồn đọng, rồi rà bằng góc duy nhất còn lại: những tài liệu bốn
+  lượt trước chưa từng mở.
+- **Scope:** `data-model.md` (**invariant 28**), `docs/it-scenarios/README.md`
+  (bảng nợ scenario + profile fixture), `verify_invariants.py`.
+- **Out of scope:** sửa IT scenario — chúng **đúng với code hiện tại**; sửa sớm
+  làm chúng fail trên bản đang chạy.
+- **Editable documents:** `docs/data-model.md`, `docs/it-scenarios/README.md`,
+  `docs/wbs.md`
+- **Output:** invariant 28; bảng "bốn scenario và một profile phải đổi khi M5 land"
+- **Acceptance criteria:**
+  - [x] `learned_at IS NULL AND due_at IS NOT NULL` bị chặn (invariant 28).
+  - [x] `verify_invariants.py` **28/28**, câu mới fire trên đúng vi phạm.
+  - [x] Bốn IT scenario và profile `C-P-NEW` được ghi là nợ, kèm lý do và cách sửa.
+  - [x] `checklist.md` xác nhận sạch — cả ba lượt "review" đều nghĩa rà soát.
+- **Dependencies:** M5.0q
+- **Tests required:** `check_docs.py`, `verify_invariants.py`, guard `memox-v7`
+- **Checklist phases:** 14.1, 15.5
+
+**Góc thứ năm là những tài liệu chưa ai mở.** Bốn lượt trước rà `business-rules`,
+`data-model`, `use-cases`, `architecture`, `product`, `master-flow`. Chưa từng
+đụng: 60 IT scenario, `checklist.md`, `README.md` của `it-scenarios`.
+
+**Và nó tìm ra một lỗ hổng thật trong invariant.** Bảng profile fixture định nghĩa
+`C-P-NEW` là *New, đến hạn ngay, `due_at = T0 − 1 giờ`*. Sau M5 đó là thẻ **chưa
+học xong nhưng đã có lịch** — thứ BR-144 cấm. Kiểm lại thì **không invariant nào
+chặn cặp đó**: invariant 24 chặn chiều ngược (`learned_at` có mà `due_at` NULL),
+25 chặn lượt `scheduled` trên thẻ chưa học, và cặp `learned_at NULL` + `due_at NOT
+NULL` lọt qua cả hai. Invariant 28 đóng nó.
+
+Đáng chú ý là **cách** nó lộ ra: không phải bằng đọc luật, mà bằng đọc một **bảng
+dữ liệu thử** viết cho mô hình cũ. Fixture là nơi mô hình bị ép thành giá trị cụ
+thể, và giá trị cụ thể thì hoặc hợp lệ hoặc không — không có chỗ cho diễn giải.
+
+**IT scenario là nợ, không phải lỗi.** Bốn scenario mô tả `due_at IS NULL` là
+"đến hạn ngay"; chúng **đúng với schema v4** và đã chạy 60/60 ở M4.11b. Sửa bây
+giờ làm chúng fail trên bản đang chạy. Ghi vào `it-scenarios/README.md` cùng cách
+`data-model.md` ghi nợ code — cùng một thay đổi, cùng một thời điểm.
 
 ### M5.0 · Study-specific domain và data completion
 
