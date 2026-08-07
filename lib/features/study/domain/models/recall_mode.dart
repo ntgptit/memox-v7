@@ -20,7 +20,7 @@ enum RecallOutcome {
 }
 
 /// Remember it before the clock runs out.
-final class RecallModeHandler implements StudyModeHandler {
+final class RecallModeHandler extends StudyModeHandler {
   const RecallModeHandler();
 
   @override

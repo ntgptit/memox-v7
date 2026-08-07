@@ -237,6 +237,14 @@ base class FakeStudyRepository implements StudyRepository {
     required DateTime endedAt,
   }) async => 0;
 
+  final List<String> browsed = <String>[];
+
+  @override
+  Future<void> markBrowsed({
+    required String sessionId,
+    required String cardId,
+  }) async => browsed.add(cardId);
+
   @override
   Future<bool> buildNextRound(String sessionId) async => false;
 

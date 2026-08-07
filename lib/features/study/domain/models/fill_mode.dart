@@ -1,5 +1,6 @@
 import 'study_entry_summary_model.dart';
 import 'study_mode.dart';
+import 'study_turn_model.dart';
 
 /// Which comparison policy graded a turn (BR-135).
 ///
@@ -36,11 +37,20 @@ final class FillOutcome {
 /// `fill` takes only cards carrying an `example`, and that field is optional
 /// (BR-114) — which is why this is the mode whose count differs from every
 /// other, and why BR-154 forbids one shared number on the chooser.
-final class FillModeHandler implements StudyModeHandler {
+final class FillModeHandler extends StudyModeHandler {
   const FillModeHandler();
 
   @override
   int capacityFrom(StudyEntrySummaryModel summary) => summary.fillableCount;
+
+  /// Only a card carrying an example can be asked about (BR-114).
+  ///
+  /// **This is the rule that nearly froze most of a deck.** `example` is
+  /// optional, and an earlier reading had a card finish the chain only after
+  /// reaching the *last stage in the sequence* — which is this one. Every card
+  /// without an example would have waited there for good.
+  @override
+  bool canTake(StudyCardModel card) => (card.example ?? '').trim().isNotEmpty;
 
   /// The comparison policy of BR-134: trim both ends, then lower case in a
   /// Unicode-aware way.

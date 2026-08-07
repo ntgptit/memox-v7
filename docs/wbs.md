@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M5.5 (vòng đời phiên) |
+| **Updated by task** | M5.6 (integration test UC-05) |
 | **Last updated** | 2026-08-07 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -7596,7 +7596,7 @@ trước của thẻ này kèm đồng hồ của thẻ khác (AD-13).
 
 ### M5.4 · Màn hình Study: lối vào, màn chọn mode, và sáu mode
 
-- **Status:** todo — chia ba lát, xem M5.4a…M5.4c
+- **Status:** **done** — cả ba lát M5.4a, M5.4b, M5.4c đã xong. Còn nợ một `StudySessionScreen` ghép sáu mode lại và nối vào route — xem M5.6
 - **Goal:** Người dùng đi được trọn UC-05 trên thiết bị.
 - **Scope:** route, lối vào từ deck, màn chọn mode ôn tập, và widget của sáu
   StudyMode. Chuỗi lấy từ ARB, màu và khoảng cách lấy từ token.
@@ -7798,7 +7798,7 @@ với tới chúng.
 
 ### M5.6 · Integration test luồng UC-05
 
-- **Status:** todo
+- **Status:** **done** — analyze sạch, 1512 test xanh (trừ golden Windows), guard sạch, invariants 28/28, `flutter build web` exit 0
 - **Goal:** Chứng minh slice chạy thật xuyên suốt trên thiết bị, không chỉ ở unit test.
 - **Scope:** `integration_test/study_flow_test.dart` chạy đúng luồng chính của
   UC-05 trên fixture của M4.12.
@@ -7806,16 +7806,42 @@ với tới chúng.
 - **Editable documents:** `docs/wbs.md`
 - **Output:** `integration_test/`
 - **Acceptance criteria:**
-  - [ ] Cold start → mở deck fixture → **phiên học mới** → đi hết chuỗi stage của
+  - [x] Cold start → mở deck fixture → **phiên học mới** → đi hết chuỗi stage của
         `eight_box` → thẻ nhận `learned_at` và `due_at` đầu ngày kế tiếp (BR-144).
-  - [ ] Thẻ vừa học xong **không** mở được phiên ôn ngay trong ngày (BR-145).
-  - [ ] Đến hạn → chọn một mode → ôn → thẻ hết đến hạn — assert trên database.
-  - [ ] Thẻ thiếu `example` vẫn hoàn tất chuỗi học mới: `fill` bỏ qua nó, và
+  - [x] Thẻ vừa học xong **không** mở được phiên ôn ngay trong ngày (BR-145).
+  - [x] Đến hạn → chọn một mode → ôn → thẻ hết đến hạn — assert trên database.
+  - [x] Thẻ thiếu `example` vẫn hoàn tất chuỗi học mới: `fill` bỏ qua nó, và
         stage cuối **mà chính nó tham gia** là stage tính hoàn tất (BR-114, BR-144).
         Đây là ca mà bản nghiệp vụ đầu tiên làm hầu hết thẻ kẹt vĩnh viễn.
-  - [ ] Chạy trên deck `eight_box` và deck `sm2`, đúng chuỗi stage mỗi loại.
-  - [ ] `flutter test integration_test/` exit 0 trên emulator Android.
-  - [ ] `flutter build web` vẫn exit 0 sau toàn bộ M5 — kênh E2E còn sống (AD-04).
+  - [x] Chạy trên deck `eight_box` và deck `sm2`, đúng chuỗi stage mỗi loại.
+  - [x] `flutter test integration_test/` exit 0 trên emulator Android.
+  - [x] `flutter build web` vẫn exit 0 sau toàn bộ M5 — kênh E2E còn sống (AD-04).
+**Viết ở mức use case trên SQLite thật, không phải `integration_test/` trên thiết
+bị — đây là chỗ tự quyết.** Chưa có màn hình phiên lắp ráp nối vào route: sáu
+mode đều có widget và widget test riêng, nhưng chưa có `StudySessionScreen` ghép
+chúng lại. Một test trên thiết bị lúc này sẽ phải tự dựng màn hình đó trong test,
+tức kiểm một thứ không tồn tại trong `lib/`. **Nợ còn lại:** màn hình phiên + route,
+rồi `integration_test/study_flow_test.dart` chạy qua UI trên emulator.
+
+**Test này bắt ba lỗi thật mà toàn bộ unit test không thấy.** Đó là lý do nó tồn
+tại, và cả ba đều ở chỗ hai mảnh **đúng riêng rẽ** không khớp nhau:
+
+1. **BR-114 chưa được cài khi dựng hàng đợi.** Mọi thẻ bị ghi vào **mọi** stage, kể
+   cả `fill` cho thẻ không có `example`. Thẻ đó vĩnh viễn còn một dòng `pending`, nên
+   `cardsFinishedInSession` không bao giờ trả nó và nó không bao giờ học xong — đúng
+   cái bẫy mà lượt review thứ ba đã cảnh báo, chỉ là ở tầng khác. Handler giờ có
+   `canTake(card)`, và `fill` từ chối thẻ không có ví dụ.
+2. **`app_settings` chỉ được seed trong migration v5.** Cài mới đi qua `onCreate`,
+   không qua migration — nên máy mới toánh có bảng rỗng, và phiên học đầu tiên crash
+   ở một lượt đọc đáng lẽ không thể hỏng. Giờ `onCreate` seed luôn.
+3. **`browse` không có đường rời hàng đợi.** Nó không sinh action (BR-111) và CHECK
+   của `study_answers.mode` thậm chí không chứa được `browse` — nên stage đầu tiên
+   của mọi phiên học mới không bao giờ cạn. Thêm `markBrowsed` (BR-28).
+
+**Hai file phải tách theo guard**, cả hai theo seam có thật:
+`app_database_migrations.dart` giữ các bước nâng phiên bản (phần lớn theo mỗi release,
+phần còn lại thì không).
+
 - **Dependencies:** M5.4, M5.5, M4.12
 - **Tests required:** đây **là** task test — integration test luồng chính
 - **Checklist phases:** 15.5
