@@ -7,7 +7,7 @@
 | **Scope** | Bảng, cột, index, quan hệ, query bất biến. Ngoài phạm vi: SQL runtime (`lib/core/database/`, chưa tồn tại) |
 | **Source of truth for** | Schema · cột và kiểu · index · query bất biến · thứ tự migration |
 | **Depends on** | `document-conventions.md`, `architecture.md`, `business-rules.md` |
-| **Updated by task** | M5.0e (round cho stage chấm điểm) |
+| **Updated by task** | M5.0g (luật stage recall) |
 | **Last updated** | 2026-08-07 |
 
 Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; SQL thật nằm
@@ -32,9 +32,10 @@ Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; S
 > | `features/study/` · `RouteNames.study` | `features/review/` · `RouteNames.review` |
 >
 > **Chưa tồn tại ở bất kỳ schema nào** — đến cùng đợt migration của M5:
-> bảng `study_queue_items` (kèm cột `mode`); `study_sessions.current_mode`,
-> `study_sessions.cursor`; `study_answers.mode`; giá trị `interrupted` của
-> `end_reason`; và hai StudyMode mới `browse` / `self_assess`.
+> bảng `study_queue_items` (cột `mode`, `round`, `remaining_ms`, `is_revealed`);
+> `study_sessions.current_mode`, `study_sessions.cursor`; `study_answers.mode` và
+> `study_answers.outcome_reason`; giá trị `interrupted` của `end_reason`; và hai
+> StudyMode mới `browse` / `self_assess`.
 >
 > Ghi ra đây vì bài học của M4.12d: một tài liệu nói khác code mà không nói rõ nó
 > đang nói khác thì không phải tài liệu, nó là một cái bẫy. Khi migration xong,
@@ -299,6 +300,7 @@ xoá (cascade).
 | `scheduler_generation` | INTEGER NOT NULL | generation tại thời điểm đánh giá |
 | `kind` | TEXT NOT NULL | `'scheduled'` \| `'relearning'` (BR-75, BR-76) |
 | `mode` | TEXT NOT NULL | StudyMode của lượt (BR-108, BR-98). `browse` không bao giờ xuất hiện ở đây (BR-111) |
+| `outcome_reason` | TEXT NULL | `timeout` khi hết giờ ở `recall` (BR-131); NULL khi người dùng tự trả lời |
 | `action` | TEXT NOT NULL | `forgotten`/`remembered` hoặc `again`/`hard`/`good`/`easy` |
 | `answered_at` | DATETIME NOT NULL | UTC |
 | `next_due_at` | DATETIME NULL | hạn sau khi đánh giá |
@@ -378,6 +380,8 @@ Hàng đợi của một phiên (BR-102). Một dòng cho mỗi thẻ được n
 | `status` | TEXT NOT NULL | `pending` \| `completed` (BR-28) |
 | `available_at` | INTEGER NOT NULL DEFAULT 0 | mốc `cursor` tối thiểu để thẻ được phục vụ lại (BR-26) |
 | `answers_in_session` | INTEGER NOT NULL DEFAULT 0 | số lượt đã đánh giá; `0` ⇒ lượt tới là `scheduled` (BR-77) |
+| `remaining_ms` | INTEGER NULL | chỉ `recall`: thời gian còn lại của lượt đang dở (BR-133). NULL ở mọi stage khác |
+| `is_revealed` | INTEGER NOT NULL DEFAULT 0 | chỉ `recall`: đáp án đã lật chưa, để Resume không che lại (BR-133) |
 
 PK là `(session_id, mode, round, card_id)` — một thẻ xuất hiện đúng một lần **trong
 mỗi round của mỗi stage**, và mọi round có thứ tự độc lập (BR-113, BR-117). "50 card riêng biệt" của BR-24
@@ -574,6 +578,16 @@ WHERE s.status = 'completed'
 SELECT session_id FROM study_queue_items
 WHERE available_at < 0 OR answers_in_session < 0 OR round < 1
    OR (mode = 'self_assess' AND answers_in_session > 4);
+
+-- 21. Trạng thái timer nằm ngoài `recall`, hoặc vượt ngưỡng 20 giây (BR-128, BR-133)
+SELECT session_id FROM study_queue_items
+WHERE (mode <> 'recall' AND (remaining_ms IS NOT NULL OR is_revealed <> 0))
+   OR remaining_ms < 0 OR remaining_ms > 20000;
+
+-- 22. `outcome_reason = timeout` ở stage không phải `recall` (BR-131)
+SELECT id FROM study_answers
+WHERE outcome_reason IS NOT NULL
+  AND (outcome_reason <> 'timeout' OR mode <> 'recall');
 
 -- 19. Round nhảy số: stage có round N nhưng thiếu round N-1 (BR-115)
 SELECT q.session_id FROM study_queue_items q

@@ -7,7 +7,7 @@
 | **Scope** | Luật nghiệp vụ, validation rule, state machine, edge case của phạm vi MVP. Ngoài phạm vi: quyết định kiến trúc (`architecture.md`), hình dạng dữ liệu (`data-model.md`), luồng người dùng (`use-cases.md`) |
 | **Source of truth for** | BR-xx · validation rule · entity state machine · edge case |
 | **Depends on** | `document-conventions.md`, `product.md`, `architecture.md` |
-| **Updated by task** | M5.0f (luật stage guess) |
+| **Updated by task** | M5.0g (luật stage recall) |
 | **Last updated** | 2026-08-07 |
 
 Format tuân theo `document-conventions.md` §6.2. Từ khoá MUST / SHOULD / MAY
@@ -27,7 +27,7 @@ khi ai đó đọc và làm theo.
 
 Rule bị thay thế MUST đánh `superseded by BR-yy` ở cột Status và giữ nguyên ID.
 
-Trạng thái hiện tại: **BR-01…BR-127**, không trùng, không thiếu.
+Trạng thái hiện tại: **BR-01…BR-133**, không trùng, không thiếu.
 
 ---
 
@@ -473,6 +473,12 @@ vì một question mượn bốn thẻ khác để dựng.
 | BR-101 | active | Một `study_session` MUST chỉ được tạo bởi hành động Study tường minh của người dùng. Hiển thị số đến hạn — badge, danh sách, thông báo — MUST NOT tạo session. | domain | UC-05, BR-29 |
 | BR-102 | active | Hàng đợi MUST được lưu trong database và MUST bất biến trong suốt phiên: thay đổi deck sau khi phiên mở MUST NOT đổi hàng đợi đang chạy. | db | UC-05, BR-24, BR-113 |
 | BR-113 | active | Mỗi stage MUST có hàng đợi riêng trên **cùng tập thẻ** của phiên, với thứ tự xoáo độc lập. Hai stage MUST NOT dùng chung một sequence khi phiên có từ hai thẻ trở lên. | db | BR-102, BR-109 |
+| BR-128 | active | `recall` MUST cho tối đa **20 giây** mỗi lượt, đo bằng thời gian tương tác thực: MUST tạm dừng khi app vào nền hoặc bị ngắt, và MUST NOT tính thời gian tải nội dung. | domain + UI | AD-13, AD-16 |
+| BR-129 | active | Tại mốc hết giờ, MUST chỉ có **một** kết cục được ghi: thao tác có thời điểm **trước** mốc là reveal thủ công; tại hoặc sau mốc là hết giờ. | domain | BR-25, BR-128 |
+| BR-130 | active | Hết giờ MUST tự lật đáp án và khoá kết cục thành sai. Trong cùng lượt đó MUST NOT đổi được sang đúng. | domain | BR-107, BR-129 |
+| BR-131 | active | Lý do "hết giờ" MUST được lưu tường minh trên `study_answers.outcome_reason`. MUST NOT suy luận từ `action`, vì tự nhận quên và hết giờ cho cùng một `action`. | db | BR-76, BR-130 |
+| BR-132 | active | Nhãn trên màn hình (ví dụ Remembered / Forgot) MUST NOT được lưu. Chỉ `action` canonical vào `study_answers`. | db + UI | BR-106, BR-120 |
+| BR-133 | active | Thời gian còn lại và trạng thái đã lật MUST được lưu để Resume tiếp tục đúng chỗ, MUST NOT đặt lại 20 giây. Một lượt mới của thẻ ở round sau là lượt khác và MUST bắt đầu lại đủ 20 giây. | db | BR-103, BR-115, BR-128 |
 | BR-121 | active | Mỗi question của `guess` MUST có **đúng năm** lựa chọn: một đáp án đúng xuất hiện đúng một lần, và bốn distractor. MUST NOT render số lượng khác. | domain + UI | BR-99, BR-122 |
 | BR-122 | active | Distractor MUST lấy từ **toàn bộ tập thẻ của phiên**, không giới hạn ở thẻ của round hiện tại — thẻ đã đạt ở round trước vẫn làm nguồn distractor. Mỗi distractor MUST tham chiếu một thẻ khác thẻ đang hỏi. | domain | BR-115, BR-121 |
 | BR-123 | active | "Hai nghĩa khác nhau" MUST đo bằng `back_folded` (schema v3), không bằng chuỗi hiển thị. Hai thẻ cùng `back_folded` MUST NOT cùng xuất hiện trong một option set. | domain | BR-121, BR-122 |
@@ -502,6 +508,21 @@ BR-105 sửa một chỗ trôi mà không ai thấy: `now + N*24h` đẩy mốc 
 theo giờ người dùng bấm. Học lúc 23:00 thì hôm sau 22:00 thẻ **chưa** tới hạn, và
 mỗi phiên lại đẩy thêm — giờ học trôi dần về khuya cho tới khi người dùng hụt cả
 một ngày. Neo vào đầu ngày lịch làm "đến hạn hôm nay" đúng nghĩa là hôm nay.
+
+**BR-131 là BR-76 lặp lại ở một chỗ khác.** Người học tự nhận quên và người học
+hết giờ đều cho `action = forgotten`. Không có cột riêng thì hai điều đó không phân
+biệt được từ dữ liệu đã lưu — và chúng nói hai chuyện rất khác nhau về chất
+lượng thẻ. `study_answers` là bảng chỉ thêm, nên một cột thiếu hôm nay không tính
+ngược được ngày mai.
+
+**BR-133 là hệ quả của BR-103, không phải một yêu cầu UI.** Phiên sống sót qua
+việc hệ điều hành thu hồi app, nên "còn bao nhiêu giây" phải nằm trong database
+chứ không trong bộ nhớ của một controller. Ngược lại, một lượt mới ở round sau
+bắt đầu lại đủ 20 giây — nó là lượt khác, không phải phần còn lại của lượt cũ.
+
+**Đếm giờ nằm ở `presentation/`, không ở `domain/`.** AD-13 và AD-16 đã chốt
+`lib/features/` không đọc đồng hồ. Handler của `recall` nhận `didTimeout` và
+`elapsedMs` như input và vẫn là hàm thuần — đúng khuôn AD-18 đặt cho mọi stage.
 
 **BR-122 tách hai khái niệm dễ bị gộp.** *Hàng đợi* là những thẻ đang được hỏi ở
 round này; *tập thẻ của phiên* là nguồn lấy distractor. Chúng khác nhau, và gộp
