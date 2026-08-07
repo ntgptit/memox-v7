@@ -7,7 +7,7 @@
 | **Scope** | Must-have của MVP. Ngoài phạm vi: should/nice-to-have, và mọi thứ ở mục "Điều đã cố ý không đặc tả" |
 | **Source of truth for** | UC-xx · main/alternative/error flow · UI state matrix của từng màn |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md` |
-| **Updated by task** | M5.0o (recursive review lượt hai) |
+| **Updated by task** | M5.0p (recursive review lượt ba) |
 | **Last updated** | 2026-08-07 |
 
 Chỉ đặc tả must-have. Should-have và nice-to-have viết khi tới lượt — đặc tả
@@ -248,7 +248,9 @@ kết thúc bằng việc khởi tạo lịch; *ôn tập* đưa thẻ đến h�
 do người dùng chọn và cập nhật lịch. Chúng không bao giờ trộn thẻ (BR-142).
 
 **Main flow:**
-1. Người dùng bấm Study. Hệ thống đếm hai tập, **không trộn** (BR-142):
+1. Người dùng bấm Study. Còn phiên `in_progress` của cùng ngày học thì màn chọn có
+   thêm đường **tiếp tục phiên đó**; chọn một trong hai đường bên dưới sẽ đóng nó
+   lại (BR-103). Hệ thống đếm hai tập, **không trộn** (BR-142):
    **học mới** = thẻ `learned_at IS NULL`; **ôn tập** = thẻ `learned_at IS NOT
    NULL AND due_at <= now`. Cả hai hiện kèm số lượng.
 2. Tập ôn tập rỗng ⇒ lối đó không mở được, kèm thời điểm thẻ gần nhất đến hạn
@@ -259,7 +261,9 @@ do người dùng chọn và cập nhật lịch. Chúng không bao giờ trộn
    (BR-109, BR-110). Người dùng **không chọn** stage.
 4. **Chọn Ôn tập** — hệ thống hiện các mode chấm điểm của thuật toán: `eight_box`
    → `match`, `guess`, `recall`, `fill`; `sm2` → `self_assess` (BR-146). `browse`
-   không có mặt. Chỉ còn một mode thì vào thẳng, không hiện màn chọn. Sau khi
+   không có mặt. Mỗi mode hiện **số thẻ của riêng nó** (BR-154) — `fill` chỉ nhận
+   thẻ có `example` — và mode không đủ dữ liệu bị vô hiệu hoá kèm lý do (BR-99,
+   BR-153). Chỉ còn một mode thì vào thẳng, không hiện màn chọn. Sau khi
    chọn, hệ thống lấy **toàn bộ** thẻ đến hạn theo `due_at` tăng dần, tối đa
    `card_limit` (BR-23, BR-24), và tạo phiên với `session_kind = 'reviewing'`.
 5. Cả hai loại phiên ghi `card_limit` đã dùng vào phiên (BR-139) và dựng hàng đợi
@@ -279,7 +283,8 @@ do người dùng chọn và cập nhật lịch. Chúng không bao giờ trộn
    `learning` và `relearning` chỉ cập nhật `last_answered_at`.
 9. Hệ thống ghi một dòng `study_answers` kèm `kind` (BR-21) — ngay lập tức
    (BR-25).
-10. **Chỉ ở phiên `learning`:** thẻ đi hết stage cuối ⇒ hệ thống đặt `learned_at`
+10. **Chỉ ở phiên `learning`:** thẻ đi hết **stage cuối mà chính nó tham gia** — stage
+    bỏ qua nó theo BR-114 không được tính — ⇒ hệ thống đặt `learned_at`
     và khởi tạo lịch ở mức thấp nhất — `eight_box` box 1, `sm2` interval 1 — với
     `due_at` là đầu ngày học kế tiếp (BR-144, BR-105). Đây là **một sự kiện,
     không phải một lượt đánh giá**, nên không có `action` nào được ghi.
