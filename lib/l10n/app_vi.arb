@@ -404,9 +404,13 @@
     "description": "Action that creates a deck inside the current deck (UC-08)."
   },
   "deckCreateChildAction": "Thêm vào bộ thẻ này",
-  "@deckCreateChildAction": { "description": "Action on an unset deck's empty state; it asks which kind of child to create (BR-61)." },
+  "@deckCreateChildAction": {
+    "description": "Action on an unset deck's empty state; it asks which kind of child to create (BR-61)."
+  },
   "deckCreateChildTitle": "Bạn muốn thêm gì?",
-  "@deckCreateChildTitle": { "description": "Title of the sheet that offers the two choices an unset deck still has (BR-61, BR-62)." },
+  "@deckCreateChildTitle": {
+    "description": "Title of the sheet that offers the two choices an unset deck still has (BR-61, BR-62)."
+  },
   "deckCreateCardAction": "Thẻ mới",
   "@deckCreateCardAction": {
     "description": "Action that would create a card in the current deck. Shown disabled in this build (UC-08, BR-61)."
@@ -619,13 +623,24 @@
   },
   "cardListShowing": "Đang hiện {shown} trong {total}",
   "@cardListShowing": {
-    "placeholders": { "shown": { "type": "int" }, "total": { "type": "int" } },
+    "placeholders": {
+      "shown": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    },
     "description": "Section label above the card list."
   },
   "cardListNoMatchTitle": "Không có thẻ nào khớp",
-  "@cardListNoMatchTitle": { "description": "Shown when a filter matches no cards but the deck is not empty (D3)." },
+  "@cardListNoMatchTitle": {
+    "description": "Shown when a filter matches no cards but the deck is not empty (D3)."
+  },
   "cardListNoMatchMessage": "Thử bộ lọc khác, hoặc thêm thẻ.",
-  "@cardListNoMatchMessage": { "description": "Body of the filtered-empty state (D3)." },
+  "@cardListNoMatchMessage": {
+    "description": "Body of the filtered-empty state (D3)."
+  },
   "cardListEmptyTitle": "Chưa có thẻ nào",
   "@cardListEmptyTitle": {
     "description": "Empty state of a card-type deck with no cards (UC-04 A3)."
@@ -640,12 +655,20 @@
   },
   "cardListLoadMore": "Tải thêm {count}",
   "@cardListLoadMore": {
-    "placeholders": { "count": { "type": "int" } },
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
     "description": "Button that grows the window (W1b)."
   },
   "cardListAllShown": "{count, plural, =1{Đã hiện thẻ duy nhất} other{Đã hiện tất cả {count} thẻ}}",
   "@cardListAllShown": {
-    "placeholders": { "count": { "type": "int" } },
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
     "description": "Tail line when the window covers the whole deck (W1b)."
   },
   "cardListLoadingLabel": "Đang tải thẻ",
@@ -657,64 +680,139 @@
     "description": "Shown when the card list read fails."
   },
   "cardProgressTitle": "Tiến độ deck",
-  "@cardProgressTitle": { "description": "Heading of the deck progress panel (D5)." },
+  "@cardProgressTitle": {
+    "description": "Heading of the deck progress panel (D5)."
+  },
   "cardProgressPercent": "{percent}%",
   "@cardProgressPercent": {
-    "placeholders": { "percent": { "type": "int" } },
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    },
     "description": "The mastered percentage inside the progress ring (BR-88)."
   },
   "cardProgressMastered": "đã thuộc {mastered}/{total}",
   "@cardProgressMastered": {
-    "placeholders": { "mastered": { "type": "int" }, "total": { "type": "int" } },
+    "placeholders": {
+      "mastered": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    },
     "description": "The mastered/total line beside the ring (BR-88)."
   },
   "cardSearchHint": "Tìm trong bộ thẻ này",
-  "@cardSearchHint": { "description": "Card search (S1)." },
+  "@cardSearchHint": {
+    "description": "Card search (S1)."
+  },
   "cardSearchClearLabel": "Xoá tìm kiếm",
-  "@cardSearchClearLabel": { "description": "Card search (S1)." },
+  "@cardSearchClearLabel": {
+    "description": "Card search (S1)."
+  },
   "cardSearchEmptyTitle": "Không thẻ nào khớp “{query}”",
-  "@cardSearchEmptyTitle": { "placeholders": { "query": { "type": "String" } }, "description": "Card search (S1)." },
+  "@cardSearchEmptyTitle": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    },
+    "description": "Card search (S1)."
+  },
   "cardSearchEmptyMessage": "Thử từ khác, hoặc xoá tìm kiếm.",
-  "@cardSearchEmptyMessage": { "description": "Card search (S1)." },
+  "@cardSearchEmptyMessage": {
+    "description": "Card search (S1)."
+  },
   "cardSortLabel": "Sắp xếp",
-  "@cardSortLabel": { "description": "Semantic label of the card list's sort control (D3)." },
+  "@cardSortLabel": {
+    "description": "Semantic label of the card list's sort control (D3)."
+  },
   "cardSortNewest": "Mới nhất",
-  "@cardSortNewest": { "description": "Sort option: newest cards first — the default (UC-04 A4)." },
+  "@cardSortNewest": {
+    "description": "Sort option: newest cards first — the default (UC-04 A4)."
+  },
   "cardSortDueFirst": "Đến hạn trước",
-  "@cardSortDueFirst": { "description": "Sort option: cards due soonest first (BR-22)." },
+  "@cardSortDueFirst": {
+    "description": "Sort option: cards due soonest first (BR-22)."
+  },
   "cardProgressStudyAction": "{count, plural, other{Bắt đầu học · {count} thẻ}}",
   "@cardProgressStudyAction": {
-    "placeholders": { "count": { "type": "int" } },
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
     "description": "The primary action on the deck progress panel when the queue holds at least one card seen before (D5, UC-07). `count` is the whole BR-22 queue."
   },
   "cardProgressLearnAction": "{count, plural, other{Học {count} thẻ mới}}",
   "@cardProgressLearnAction": {
-    "placeholders": { "count": { "type": "int" } },
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
     "description": "The same action when every card in the queue has never been reviewed (D5, BR-90)."
   },
   "cardProgressDueNew": "{due} đến hạn · {fresh} mới",
   "@cardProgressDueNew": {
-    "placeholders": { "due": { "type": "int" }, "fresh": { "type": "int" } },
+    "placeholders": {
+      "due": {
+        "type": "int"
+      },
+      "fresh": {
+        "type": "int"
+      }
+    },
     "description": "The due/new line under the mastered count, when both kinds are waiting (D5, BR-22, BR-90)."
   },
   "cardProgressDueOnly": "{due} đến hạn",
   "@cardProgressDueOnly": {
-    "placeholders": { "due": { "type": "int" } },
+    "placeholders": {
+      "due": {
+        "type": "int"
+      }
+    },
     "description": "The what-to-do-now line when nothing is still new (D5, BR-22)."
   },
   "cardProgressNewOnly": "{fresh} mới",
   "@cardProgressNewOnly": {
-    "placeholders": { "fresh": { "type": "int" } },
+    "placeholders": {
+      "fresh": {
+        "type": "int"
+      }
+    },
     "description": "The what-to-do-now line when nothing has come back around yet (D5, BR-90)."
   },
   "cardProgressLegendItem": "{label} {count}",
   "@cardProgressLegendItem": {
-    "placeholders": { "label": { "type": "String" }, "count": { "type": "int" } },
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    },
     "description": "One state in the distribution legend: its name and count (D5)."
   },
   "cardProgressDistributionSemantics": "Phân bố: {newCount} mới, {beginning} bắt đầu, {reviewing} đang ôn, {mastered} đã thuộc",
   "@cardProgressDistributionSemantics": {
-    "placeholders": { "newCount": { "type": "int" }, "beginning": { "type": "int" }, "reviewing": { "type": "int" }, "mastered": { "type": "int" } },
+    "placeholders": {
+      "newCount": {
+        "type": "int"
+      },
+      "beginning": {
+        "type": "int"
+      },
+      "reviewing": {
+        "type": "int"
+      },
+      "mastered": {
+        "type": "int"
+      }
+    },
     "description": "Screen-reader summary of the distribution bar (D5)."
   },
   "cardFilterAll": "Tất cả",
@@ -731,7 +829,14 @@
   },
   "cardFilterSemantics": "{label}, {count} thẻ",
   "@cardFilterSemantics": {
-    "placeholders": { "label": { "type": "String" }, "count": { "type": "int" } },
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    },
     "description": "What a screen reader announces for a filter pill (D3)."
   },
   "cardFilterFlagged": "Đã gắn cờ",
@@ -743,141 +848,396 @@
     "description": "App-bar action on the card list that opens the editor (D4)."
   },
   "cardEditorCreateTitle": "Thẻ mới",
-  "@cardEditorCreateTitle": { "description": "App-bar title of the card editor in create mode." },
+  "@cardEditorCreateTitle": {
+    "description": "App-bar title of the card editor in create mode."
+  },
   "cardEditorClose": "Đóng",
-  "@cardEditorClose": { "description": "Tooltip of the editor's close button." },
+  "@cardEditorClose": {
+    "description": "Tooltip of the editor's close button."
+  },
   "cardEditorSave": "Lưu thẻ",
-  "@cardEditorSave": { "description": "Primary save button." },
+  "@cardEditorSave": {
+    "description": "Primary save button."
+  },
   "cardEditorSaveAndAdd": "Lưu và thêm thẻ nữa",
-  "@cardEditorSaveAndAdd": { "description": "Second save path (UC-04 A4)." },
+  "@cardEditorSaveAndAdd": {
+    "description": "Second save path (UC-04 A4)."
+  },
   "cardEditorSaveFailed": "Không lưu được thẻ này. Nội dung vẫn được giữ — hãy thử lại.",
-  "@cardEditorSaveFailed": { "description": "Shown when a card write fails (UC-04 E3)." },
+  "@cardEditorSaveFailed": {
+    "description": "Shown when a card write fails (UC-04 E3)."
+  },
   "cardEditorEditTitle": "Sửa thẻ",
-  "@cardEditorEditTitle": { "description": "App-bar title of the card editor in edit mode (UC-04 A1)." },
+  "@cardEditorEditTitle": {
+    "description": "App-bar title of the card editor in edit mode (UC-04 A1)."
+  },
   "cardEditorSaveChanges": "Lưu thay đổi",
-  "@cardEditorSaveChanges": { "description": "Primary save button in the card editor in edit mode." },
+  "@cardEditorSaveChanges": {
+    "description": "Primary save button in the card editor in edit mode."
+  },
   "cardEditorProgressNote": "Sửa nội dung không làm thay đổi tiến độ học của thẻ này.",
-  "@cardEditorProgressNote": { "description": "Reassurance under the fields in edit mode (BR-10)." },
+  "@cardEditorProgressNote": {
+    "description": "Reassurance under the fields in edit mode (BR-10)."
+  },
   "cardEditorLoadingLabel": "Đang tải thẻ",
-  "@cardEditorLoadingLabel": { "description": "Shown while the editor fetches the card to edit (UC-04 A1)." },
+  "@cardEditorLoadingLabel": {
+    "description": "Shown while the editor fetches the card to edit (UC-04 A1)."
+  },
   "cardEditorLoadFailed": "Không mở được thẻ này. Có thể thẻ đã bị xóa.",
-  "@cardEditorLoadFailed": { "description": "Shown when the edit prefill read fails." },
+  "@cardEditorLoadFailed": {
+    "description": "Shown when the edit prefill read fails."
+  },
   "cardEditorLoadRetry": "Quay lại",
-  "@cardEditorLoadRetry": { "description": "Button on the editor's load-failed state that returns to the previous screen." },
+  "@cardEditorLoadRetry": {
+    "description": "Button on the editor's load-failed state that returns to the previous screen."
+  },
   "cardEditorFlagAction": "Gắn cờ thẻ",
-  "@cardEditorFlagAction": { "description": "Tooltip of the editor's flag toggle when the card is not flagged (BR-92)." },
+  "@cardEditorFlagAction": {
+    "description": "Tooltip of the editor's flag toggle when the card is not flagged (BR-92)."
+  },
   "cardEditorUnflagAction": "Bỏ cờ",
-  "@cardEditorUnflagAction": { "description": "Tooltip of the editor's flag toggle when the card is flagged (BR-92)." },
+  "@cardEditorUnflagAction": {
+    "description": "Tooltip of the editor's flag toggle when the card is flagged (BR-92)."
+  },
   "cardTileFlaggedSemantics": "Đã gắn cờ",
-  "@cardTileFlaggedSemantics": { "description": "Screen-reader label for the flag indicator on a card row (BR-92)." },
+  "@cardTileFlaggedSemantics": {
+    "description": "Screen-reader label for the flag indicator on a card row (BR-92)."
+  },
   "cardStateNew": "Mới",
-  "@cardStateNew": { "description": "Row state label: no scheduled review yet (BR-90)." },
+  "@cardStateNew": {
+    "description": "Row state label: no scheduled review yet (BR-90)."
+  },
   "cardStateBeginning": "Bắt đầu",
-  "@cardStateBeginning": { "description": "Row state label: reviewed, interval under 8 days (BR-91)." },
+  "@cardStateBeginning": {
+    "description": "Row state label: reviewed, interval under 8 days (BR-91)."
+  },
   "cardStateReviewing": "Đang ôn",
-  "@cardStateReviewing": { "description": "Row state label: reviewed, interval 8 days or more, not mastered (BR-91)." },
+  "@cardStateReviewing": {
+    "description": "Row state label: reviewed, interval 8 days or more, not mastered (BR-91)."
+  },
   "cardStateMastered": "Đã thuộc",
-  "@cardStateMastered": { "description": "Row state label: box 8 or SM-2 interval 128 days or more (BR-88)." },
+  "@cardStateMastered": {
+    "description": "Row state label: box 8 or SM-2 interval 128 days or more (BR-88)."
+  },
   "cardStateDotSemantics": "Trạng thái: {label}",
   "@cardStateDotSemantics": {
-    "placeholders": { "label": { "type": "String" } },
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    },
     "description": "Screen-reader label for the state dot, naming the state it stands for (D5)."
   },
   "cardDueNow": "bây giờ",
-  "@cardDueNow": { "description": "Due badge when a card is due now — due_at null or past (D5, BR-22)." },
+  "@cardDueNow": {
+    "description": "Due badge when a card is due now — due_at null or past (D5, BR-22)."
+  },
   "cardDueInMinutes": "{minutes}m",
   "@cardDueInMinutes": {
-    "placeholders": { "minutes": { "type": "int" } },
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    },
     "description": "Due badge, compact minutes until due (D5)."
   },
   "cardDueInHours": "{hours}h",
   "@cardDueInHours": {
-    "placeholders": { "hours": { "type": "int" } },
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    },
     "description": "Due badge, compact hours until due (D5)."
   },
   "cardDueInDays": "{days}d",
   "@cardDueInDays": {
-    "placeholders": { "days": { "type": "int" } },
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    },
     "description": "Due badge, compact days until due (D5)."
   },
   "cardDueBadgeSemantics": "Đến hạn {when}",
   "@cardDueBadgeSemantics": {
-    "placeholders": { "when": { "type": "String" } },
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    },
     "description": "Screen-reader label for the due badge, wrapping the compact form (D5)."
   },
   "cardEditorTagsLabel": "Thẻ nhãn",
-  "@cardEditorTagsLabel": { "description": "Heading of the tag section in the card editor (BR-93)." },
+  "@cardEditorTagsLabel": {
+    "description": "Heading of the tag section in the card editor (BR-93)."
+  },
   "cardEditorTagAddHint": "Thêm nhãn",
-  "@cardEditorTagAddHint": { "description": "Placeholder of the add-tag input (W5)." },
+  "@cardEditorTagAddHint": {
+    "description": "Placeholder of the add-tag input (W5)."
+  },
   "cardEditorTagCount": "{count} / {max}",
   "@cardEditorTagCount": {
-    "placeholders": { "count": { "type": "int" }, "max": { "type": "int" } },
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    },
     "description": "Tag counter shown once a card has at least one tag (BR-94, W5)."
   },
   "cardEditorTagRemoveSemantics": "Xóa nhãn {name}",
   "@cardEditorTagRemoveSemantics": {
-    "placeholders": { "name": { "type": "String" } },
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    },
     "description": "Screen-reader label for a tag chip's delete affordance (BR-93)."
   },
   "cardTagEmptyError": "Nhãn không được để trống",
-  "@cardTagEmptyError": { "description": "Inline error when the tag name is blank after trimming (BR-93)." },
+  "@cardTagEmptyError": {
+    "description": "Inline error when the tag name is blank after trimming (BR-93)."
+  },
   "cardTagTooLongError": "Nhãn đã đạt giới hạn ký tự",
-  "@cardTagTooLongError": { "description": "Inline error when the tag name reaches its length limit (BR-93)." },
+  "@cardTagTooLongError": {
+    "description": "Inline error when the tag name reaches its length limit (BR-93)."
+  },
   "cardTagTooManyError": "Một thẻ chứa tối đa 10 nhãn",
-  "@cardTagTooManyError": { "description": "Inline error when the card already has the maximum tags (BR-94)." },
+  "@cardTagTooManyError": {
+    "description": "Inline error when the card already has the maximum tags (BR-94)."
+  },
   "cardEditorDetailsToggle": "Thêm chi tiết",
-  "@cardEditorDetailsToggle": { "description": "Toggle that expands the optional detail fields (W4/W5, BR-95)." },
+  "@cardEditorDetailsToggle": {
+    "description": "Toggle that expands the optional detail fields (W4/W5, BR-95)."
+  },
   "cardEditorDetailsLabel": "Chi tiết",
-  "@cardEditorDetailsLabel": { "description": "Heading of the optional detail section once expanded (W5)." },
+  "@cardEditorDetailsLabel": {
+    "description": "Heading of the optional detail section once expanded (W5)."
+  },
   "cardExampleLabel": "Ví dụ",
-  "@cardExampleLabel": { "description": "Label of the optional example field (BR-95)." },
+  "@cardExampleLabel": {
+    "description": "Label of the optional example field (BR-95)."
+  },
   "cardExampleHint": "Một câu dùng từ này",
-  "@cardExampleHint": { "description": "Placeholder of the example field (W5)." },
+  "@cardExampleHint": {
+    "description": "Placeholder of the example field (W5)."
+  },
   "cardHintLabel": "Gợi ý",
-  "@cardHintLabel": { "description": "Label of the optional hint field (BR-95)." },
+  "@cardHintLabel": {
+    "description": "Label of the optional hint field (BR-95)."
+  },
   "cardHintHint": "Mẹo ghi nhớ",
-  "@cardHintHint": { "description": "Placeholder of the hint field (W5)." },
+  "@cardHintHint": {
+    "description": "Placeholder of the hint field (W5)."
+  },
   "cardPronunciationLabel": "Phiên âm",
-  "@cardPronunciationLabel": { "description": "Label of the optional pronunciation field (BR-95)." },
+  "@cardPronunciationLabel": {
+    "description": "Label of the optional pronunciation field (BR-95)."
+  },
   "cardPronunciationHint": "Cách phát âm",
-  "@cardPronunciationHint": { "description": "Placeholder of the pronunciation field (W5)." },
+  "@cardPronunciationHint": {
+    "description": "Placeholder of the pronunciation field (W5)."
+  },
   "cardDetailTooLongError": "Đã đạt giới hạn ký tự",
-  "@cardDetailTooLongError": { "description": "Inline error when an optional detail reaches its length limit (BR-95)." },
+  "@cardDetailTooLongError": {
+    "description": "Inline error when an optional detail reaches its length limit (BR-95)."
+  },
   "cardEditorDangerZone": "Vùng nguy hiểm",
-  "@cardEditorDangerZone": { "description": "Heading above the delete action (UC-04 A5)." },
+  "@cardEditorDangerZone": {
+    "description": "Heading above the delete action (UC-04 A5)."
+  },
   "cardEditorDelete": "Xóa thẻ",
-  "@cardEditorDelete": { "description": "Button that opens the delete confirmation." },
+  "@cardEditorDelete": {
+    "description": "Button that opens the delete confirmation."
+  },
   "cardDeleteConfirmTitle": "Xóa thẻ này?",
-  "@cardDeleteConfirmTitle": { "description": "Title of the card delete confirmation dialog (UC-04 A5)." },
+  "@cardDeleteConfirmTitle": {
+    "description": "Title of the card delete confirmation dialog (UC-04 A5)."
+  },
   "cardDeleteConfirmMessage": "Thẻ và lịch sử học của nó sẽ bị xóa. Không thể hoàn tác.",
-  "@cardDeleteConfirmMessage": { "description": "Body of the card delete confirmation (BR-67)." },
+  "@cardDeleteConfirmMessage": {
+    "description": "Body of the card delete confirmation (BR-67)."
+  },
   "cardDeleteConfirmAction": "Xóa",
-  "@cardDeleteConfirmAction": { "description": "Confirm button on the card delete dialog." },
+  "@cardDeleteConfirmAction": {
+    "description": "Confirm button on the card delete dialog."
+  },
   "cardDeleteFailed": "Không xóa được thẻ này. Hãy thử lại.",
-  "@cardDeleteFailed": { "description": "Shown when a card delete fails." },
+  "@cardDeleteFailed": {
+    "description": "Shown when a card delete fails."
+  },
   "cardFrontLabel": "Mặt trước",
-  "@cardFrontLabel": { "description": "Label of the front input." },
+  "@cardFrontLabel": {
+    "description": "Label of the front input."
+  },
   "cardFrontHint": "Từ bạn muốn nhớ",
-  "@cardFrontHint": { "description": "Placeholder of the front input." },
+  "@cardFrontHint": {
+    "description": "Placeholder of the front input."
+  },
   "cardBackLabel": "Mặt sau",
-  "@cardBackLabel": { "description": "Label of the back input." },
+  "@cardBackLabel": {
+    "description": "Label of the back input."
+  },
   "cardBackHint": "Tiếng Anh, tiếng Việt, hoặc cả hai",
-  "@cardBackHint": { "description": "Placeholder of the back input." },
+  "@cardBackHint": {
+    "description": "Placeholder of the back input."
+  },
   "cardFrontEmptyError": "Mặt trước không được để trống",
-  "@cardFrontEmptyError": { "description": "Inline error (BR-07)." },
+  "@cardFrontEmptyError": {
+    "description": "Inline error (BR-07)."
+  },
   "cardFrontTooLongError": "Mặt trước đã đạt giới hạn ký tự",
-  "@cardFrontTooLongError": { "description": "Inline error (BR-08)." },
+  "@cardFrontTooLongError": {
+    "description": "Inline error (BR-08)."
+  },
   "cardBackEmptyError": "Mặt sau không được để trống",
-  "@cardBackEmptyError": { "description": "Inline error (BR-07)." },
+  "@cardBackEmptyError": {
+    "description": "Inline error (BR-07)."
+  },
   "cardBackTooLongError": "Mặt sau đã đạt giới hạn ký tự",
-  "@cardBackTooLongError": { "description": "Inline error (BR-08)." },
+  "@cardBackTooLongError": {
+    "description": "Inline error (BR-08)."
+  },
   "deckDetailOpenCardsMessage": "Bộ thẻ này chứa các thẻ ghi nhớ.",
-  "@deckDetailOpenCardsMessage": { "description": "Body shown on a card-type deck (UC-04)." },
+  "@deckDetailOpenCardsMessage": {
+    "description": "Body shown on a card-type deck (UC-04)."
+  },
   "deckDetailOpenCardsAction": "Mở thẻ",
-  "@deckDetailOpenCardsAction": { "description": "Button that opens the card list." },
+  "@deckDetailOpenCardsAction": {
+    "description": "Button that opens the card list."
+  },
   "cardTileSemantics": "{front}. {back}",
   "@cardTileSemantics": {
-    "placeholders": { "front": { "type": "String" }, "back": { "type": "String" } },
+    "placeholders": {
+      "front": {
+        "type": "String"
+      },
+      "back": {
+        "type": "String"
+      }
+    },
     "description": "Screen-reader label for a card row (UC-04 W1)."
+  },
+  "studyNewCount": "Mới {count}",
+  "@studyNewCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Half of the study badge: cards that have not finished the learning chain (BR-150)."
+  },
+  "studyDueCount": "Đến hạn {count}",
+  "@studyDueCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "The other half: cards already learned and now due (BR-150). Disjoint from New."
+  },
+  "studyStartLearning": "Học mới",
+  "@studyStartLearning": {
+    "description": "Opens a learning session (BR-142)."
+  },
+  "studyStartReview": "Ôn tập",
+  "@studyStartReview": {
+    "description": "Opens a review session (BR-142)."
+  },
+  "studyNothingDueMessage": "Chưa có thẻ nào đến hạn. Quay lại khi có thẻ cần ôn nhé.",
+  "@studyNothingDueMessage": {
+    "description": "Shown instead of a review entry when nothing is due. A normal state, never an error (BR-29, BR-145)."
+  },
+  "studyNothingNewMessage": "Mọi thẻ ở đây đều đã học xong.",
+  "@studyNothingNewMessage": {
+    "description": "Shown when the deck has no unlearned cards left (BR-142)."
+  },
+  "studyChooseModeTitle": "Bạn muốn ôn kiểu nào?",
+  "@studyChooseModeTitle": {
+    "description": "Title of the review mode chooser (BR-146)."
+  },
+  "studyModeBrowse": "Xem lại",
+  "@studyModeBrowse": {
+    "description": "Mode name: both sides at once, no grading (BR-111, BR-112)."
+  },
+  "studyModeSelfAssess": "Tự đánh giá",
+  "@studyModeSelfAssess": {
+    "description": "Mode name: flip, then grade yourself (BR-112)."
+  },
+  "studyModeMatch": "Ghép cặp",
+  "@studyModeMatch": {
+    "description": "Mode name: pair terms with meanings."
+  },
+  "studyModeGuess": "Chọn đáp án",
+  "@studyModeGuess": {
+    "description": "Mode name: one question, five options (BR-121)."
+  },
+  "studyModeRecall": "Nhớ lại",
+  "@studyModeRecall": {
+    "description": "Mode name: twenty seconds to remember it (BR-128)."
+  },
+  "studyModeFill": "Điền từ",
+  "@studyModeFill": {
+    "description": "Mode name: type the answer (BR-134)."
+  },
+  "studyModeCardCount": "{count} thẻ",
+  "@studyModeCardCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "How many cards a mode can actually take. Differs per mode (BR-154)."
+  },
+  "studyModeNeedsExample": "Cần thẻ có ví dụ",
+  "@studyModeNeedsExample": {
+    "description": "Why `fill` is unavailable: the field is optional (BR-114, BR-99)."
+  },
+  "studyModeNeedsMeanings": "Cần năm nghĩa khác nhau",
+  "@studyModeNeedsMeanings": {
+    "description": "Why `guess` is unavailable: a question has five options (BR-121, BR-124)."
+  },
+  "studyModeNeedsPairs": "Cần ít nhất hai cặp",
+  "@studyModeNeedsPairs": {
+    "description": "Why `match` is unavailable: one pair makes the answer obvious (BR-153)."
+  },
+  "studyRevealAnswer": "Xem đáp án",
+  "@studyRevealAnswer": {
+    "description": "Flips a `self_assess` card. `browse` has no such step (BR-112)."
+  },
+  "studyActionForgotten": "Quên rồi",
+  "@studyActionForgotten": {
+    "description": "eight_box action. The label is display only; the stored value is canonical (BR-132)."
+  },
+  "studyActionRemembered": "Nhớ được",
+  "@studyActionRemembered": {
+    "description": "eight_box action (BR-132)."
+  },
+  "studyActionAgain": "Lại",
+  "@studyActionAgain": {
+    "description": "sm2 action, quality 0 (BR-17)."
+  },
+  "studyActionHard": "Khó",
+  "@studyActionHard": {
+    "description": "sm2 action, quality 3 (BR-17)."
+  },
+  "studyActionGood": "Được",
+  "@studyActionGood": {
+    "description": "sm2 action, quality 4 (BR-17)."
+  },
+  "studyActionEasy": "Dễ",
+  "@studyActionEasy": {
+    "description": "sm2 action, quality 5 (BR-17)."
+  },
+  "studyContinueAction": "Tiếp",
+  "@studyContinueAction": {
+    "description": "Moves past a `browse` card, which produces no action (BR-111)."
+  },
+  "studySessionFinished": "Đã xong phiên học.",
+  "@studySessionFinished": {
+    "description": "Shown when every stage has run out of queue (BR-81)."
   }
 }
