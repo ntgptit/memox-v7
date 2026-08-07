@@ -7,7 +7,7 @@
 | **Scope** | Đồ thị chuyển tiếp giữa UC-01…UC-09, tách theo đối tượng nghiệp vụ. Ngoài phạm vi: nội dung của từng UC, mọi luật nghiệp vụ, và mọi chi tiết màn hình |
 | **Source of truth for** | Đồ thị chuyển tiếp giữa các UC · điểm vào của từng luồng · ánh xạ UC → milestone xây nó |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md`, `use-cases.md` |
-| **Updated by task** | M99.1 |
+| **Updated by task** | M5.0a (đổi tên Review → Study) |
 | **Last updated** | 2026-08-07 |
 
 ---
@@ -112,8 +112,8 @@ flowchart TD
     H -->|"Không"| H1["Chặn, phải xoá hết nội dung trước · UC-03 E3, BR-68"]
     H -->|"Rỗng"| H2["Xác nhận rồi đặt unset · UC-03 A3"]
 
-    B -->|"Đổi chế độ ôn tập · chỉ root"| I{"first_review_at"}
-    I -->|"NULL"| I1["Mở khoá: cảnh báo rồi khởi tạo lại review state toàn cây · UC-03, BR-14"]
+    B -->|"Đổi chế độ ôn tập · chỉ root"| I{"first_answered_at"}
+    I -->|"NULL"| I1["Mở khoá: cảnh báo rồi khởi tạo lại study state toàn cây · UC-03, BR-14"]
     I -->|"Đã có"| I2["Khoá, hiện kèm lối đi sang Reset learning progress · UC-03 A1, BR-13"]
     I2 --> I3["UC-07 · mục 5"]
 ```
@@ -140,13 +140,13 @@ flowchart TD
     C -->|"Thêm"| D["Nhập mặt trước và mặt sau"]
     D --> E{"Validate · BR-07, BR-08"}
     E -->|"Rỗng hoặc quá dài"| E1["Lỗi inline ở đúng ô · UC-04 E1, E2"]
-    E -->|"Hợp lệ"| F["Tạo card và review state trong cùng transaction, theo scheduler của root · BR-09"]
-    F -->|"Ghi thất bại"| F1["Hiện lỗi, giữ nội dung, không tạo card thiếu review state · UC-04 E3"]
+    E -->|"Hợp lệ"| F["Tạo card và study state trong cùng transaction, theo scheduler của root · BR-09"]
+    F -->|"Ghi thất bại"| F1["Hiện lỗi, giữ nội dung, không tạo card thiếu study state · UC-04 E3"]
     F -->|"Thành công"| G["Giữ form mở và xoá trống các ô · UC-04 A4"]
     G --> B
 
-    C -->|"Sửa"| H["Đổi nội dung; review state và history không đổi · UC-04 A1, BR-10"]
-    C -->|"Xoá"| I["Xác nhận, xoá kèm review state và history của card đó · UC-04 A2"]
+    C -->|"Sửa"| H["Đổi nội dung; study state và history không đổi · UC-04 A1, BR-10"]
+    C -->|"Xoá"| I["Xác nhận, xoá kèm study state và history của card đó · UC-04 A2"]
     I --> I1["content_type giữ nguyên kể cả khi đó là card cuối cùng · BR-67"]
 ```
 
@@ -175,8 +175,8 @@ flowchart TD
     G --> H{"session.generation còn khớp root không · BR-46"}
     H -->|"Lệch"| H1["Từ chối ghi; session invalidated, end_reason stale_generation · UC-05 E4, BR-84"]
     H -->|"Khớp"| I{"Lượt đầu tiên của card này trong phiên"}
-    I -->|"Đúng"| J["review_kind = scheduled: tính lịch mới rồi ghi history · BR-77"]
-    I -->|"Không"| K["review_kind = relearning: chỉ cập nhật last_reviewed_at · BR-78"]
+    I -->|"Đúng"| J["kind = scheduled: tính lịch mới rồi ghi history · BR-77"]
+    I -->|"Không"| K["kind = relearning: chỉ cập nhật last_answered_at · BR-78"]
 
     J --> L{"Action có phải forgotten hoặc again"}
     K --> L
@@ -190,8 +190,8 @@ flowchart TD
     G -->|"Thoát giữa phiên"| Q["session abandoned, end_reason user_exit; mọi đánh giá đã ghi vẫn giữ · UC-05 A3, BR-82, BR-86"]
 
     R["Đặt lại tiến độ học trên root · UC-07"] --> S["Xác nhận, nêu rõ giữ gì và mất gì; chọn chế độ mới ngay tại đây"]
-    S --> T["Một transaction: generation +1, first_review_at NULL, khởi tạo lại review state toàn cây, mọi session in_progress → invalidated · BR-40, BR-42, BR-44, BR-47, BR-83"]
-    T --> U["review_history giữ nguyên, mang generation cũ · BR-43"]
+    S --> T["Một transaction: generation +1, first_answered_at NULL, khởi tạo lại study state toàn cây, mọi session in_progress → invalidated · BR-40, BR-42, BR-44, BR-47, BR-83"]
+    T --> U["study_answers giữ nguyên, mang generation cũ · BR-43"]
     T -.->|"Phiên đang mở ở màn khác"| H1
 ```
 
@@ -214,7 +214,7 @@ lại ở đây; cột cuối chỉ nói cái gì đã có trong `lib/` hôm nay
 | UC-02 | deck | M4.10 | Đủ |
 | UC-03 | deck | M4.10 | Đổi tên, xoá kèm impact, đưa `content_type` về `unset` đã có. **Đổi chế độ ôn tập chưa có** — không có use case nào cho nó |
 | UC-04 | card | M4.11 | Đủ, và **nhiều hơn UC-04 mô tả**: cờ, tag và ba trường phụ (BR-92…BR-95) |
-| UC-05 | review | M5 | Chưa xây. `lib/features/review/` mới có một repository chưa có method và một placeholder screen |
+| UC-05 | review | M5 | Chưa xây. `lib/features/study/` mới có một repository chưa có method và một placeholder screen |
 | UC-06 | deck | M4.10 | Đủ, cộng tìm kiếm toàn subtree — thứ UC-06 không nhắc tới |
 | UC-07 | review | M5 | Chưa xây |
 | UC-08 | deck | M4.10 | Đủ |
