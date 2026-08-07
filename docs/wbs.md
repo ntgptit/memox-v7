@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M5.0r (tồn đọng + review lượt năm) |
+| **Updated by task** | M5 replan (kế hoạch thi hành sau brainstorm) |
 | **Last updated** | 2026-08-07 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -6362,6 +6362,13 @@ M4.8–M4.12, và M5 **không** triển khai lại phần đó — nó xây đú
 không có cây deck và card thật thì phiên ôn không có gì để ôn, và mọi test của nó
 sẽ phải dựng dữ liệu bằng tay — thứ M4.12 tồn tại để thay thế.
 
+**Thứ tự thi hành sau brainstorm.** Kế hoạch M5.0…M5.6 ở bản đầu được viết trước
+M5.0a–M5.0r và mô tả mô hình một-loại-phiên đã bị thay. Nội dung từng task đã
+viết lại; **ID và ý nghĩa của chúng giữ nguyên** theo quyết định ở M4.4a — M5.4
+vẫn là "màn hình Study", và bốn chỗ khác trong tài liệu trỏ tới nó vẫn đúng. Hai
+thay đổi về hình dạng: schema v5 tách thành **M5.0s** đứng trước mọi thứ, và hàng
+đợi chuyển từ M5.3 xuống **M5.0** vì BR-102 đưa nó vào database.
+
 **Ngoài phạm vi M5** (nêu một lần, áp cho mọi task bên dưới): import/export,
 login, backend, sync, media, statistics, settings, và UI thư viện starter deck.
 CRUD deck/card **đã xong ở M4**, không lặp lại ở đây.
@@ -7261,195 +7268,298 @@ thể, và giá trị cụ thể thì hoặc hợp lệ hoặc không — không
 giờ làm chúng fail trên bản đang chạy. Ghi vào `it-scenarios/README.md` cùng cách
 `data-model.md` ghi nợ code — cùng một thay đổi, cùng một thời điểm.
 
-### M5.0 · Study-specific domain và data completion
+### M5.0s · Schema v5: toàn bộ cột và bảng mà Study cần
 
 - **Status:** todo
-- **Goal:** Bổ sung đúng phần domain và data mà **chỉ Study** cần, sau khi
-  Deck/Card demo slice đã hoàn thành.
-- **Scope:** `StudySessionEntity`, `StudyAnswerEntity`, `StudyAction`,
-  `StudyAnswerKind`, `SessionStatus`, `SessionEndReason`; phần `CardStudyStateEntity`
-  dành cho review; repository contract mở rộng cho UC-05; DAO/mapper/repository
-  cho session, history và ghi review atomic.
-- **Out of scope:** scheduler formula (M5.1); study use case (M5.2); controller
-  và UI (M5.3, M5.4).
+- **Goal:** Đưa `data-model.md` sau brainstorm vào SQLite, một lần, trước khi có
+  dòng code Study nào chạm vào nó.
+- **Scope:** `card_study_states.learned_at`; `study_sessions.session_kind`,
+  `current_mode`, `cursor`, `card_limit`; `study_answers.mode`, `outcome_reason`,
+  `comparison_version`, `used_hint` và giá trị `learning` của `kind`;
+  `decks.study_config`; bảng `study_queue_items` và `app_settings`; migration
+  v4 → v5 và snapshot `drift_schema_v5.json`.
+- **Out of scope:** mọi thứ đọc các cột này — entity, repository, use case đều là
+  M5.0 trở đi. Năm chỗ trong `lib/` đang dùng định nghĩa cũ (`answer_count = 0`
+  là "mới") **có** đổi ở đây, vì `learned_at` đến ở chính migration này và để lại
+  thì hai định nghĩa "mới" cùng chạy.
+- **Editable documents:** `docs/data-model.md` (bảng thứ tự migration), `docs/wbs.md`
+- **Output:** `lib/core/database/tables/*.drift`, `app_database.dart`,
+  `drift_schemas/drift_schema_v5.json`, `test/database/migration_v5_test.dart`
+- **Acceptance criteria:**
+  - [ ] `kind` nhận thêm `learning`; `end_reason` nhận thêm `interrupted`.
+  - [ ] `study_queue_items` PK là `(session_id, mode, round, card_id)` (BR-113).
+  - [ ] `app_settings` có `CHECK (id = 1)` — bảng không thể có dòng thứ hai.
+  - [ ] Migration v1→v5, v2→v5, v3→v5 và v4→v5 đều mở được; test khẳng định dữ
+        liệu v4 giữ nguyên giá trị sau khi lên v5.
+  - [ ] Thẻ đang có `due_at` từ trước v5 nhận `learned_at` = `due_at` chứ không
+        NULL — nếu để NULL, invariant 28 đỏ ngay lần mở app đầu tiên sau cập nhật.
+  - [ ] `verify_invariants.py` 28/28 chạy trên fixture đã đồng bộ với v5.
+  - [ ] `SchemaVerifier.migrateAndValidate(db, db.schemaVersion)` xanh.
+- **Vì sao một migration chứ không phải năm.** Mỗi cột ở đây vô nghĩa nếu thiếu
+  các cột còn lại: `session_kind` không có `learned_at` thì không chia được hai
+  tập, `study_queue_items` không có `current_mode` thì không biết stage nào đang
+  chạy. Chia nhỏ chỉ tạo ra những phiên bản trung gian không phiên bản nào của
+  app từng chạy — tức những migration không ai test thật.
+- **Dependencies:** M5.0r
+- **Tests required:** `migration_v5_test.dart` cho bốn đường lên; test backfill
+  `learned_at`; `verify_invariants.py`
+- **Checklist phases:** 8.3, 14.3
+
+### M5.0 · Study domain và data — gồm cả hàng đợi
+
+- **Status:** todo
+- **Goal:** Dựng phần domain và data mà **chỉ Study** cần, trên schema v5.
+- **Scope:** entity `StudySessionEntity`, `StudyAnswerEntity`,
+  `StudyQueueItemEntity`, `CardStudyStateEntity`; enum `StudyMode` (sáu giá trị,
+  BR-108), `StudySessionKind`, `StudyAnswerKind` (ba giá trị, BR-75),
+  `StudyAction`, `SessionStatus`, `SessionEndReason`, `NewCardOrder`; repository
+  contract cho UC-05; DAO, mapper, `StudyRepositoryImpl` — **kể cả engine hàng
+  đợi**: dựng hàng đợi lúc mở phiên, `cursor`/`available_at` của BR-26, dựng
+  round kế tiếp của BR-115/BR-116, ghi lượt atomic, và sự kiện hoàn tất chuỗi
+  học mới của BR-144.
+- **Out of scope:** công thức scheduler (M5.1); use case (M5.2); controller và
+  UI (M5.3, M5.4).
 - **Editable documents:** `docs/wbs.md`
 - **Output:** `lib/features/study/domain/`, `lib/features/study/data/`
 - **Acceptance criteria:**
   - [ ] `domain/` là Dart thuần — không Flutter, không Drift.
-  - [ ] Enum phủ **đúng** tập giá trị của BR-75, BR-79, BR-80.
   - [ ] Repository contract không nhận hay trả kiểu sinh bởi Drift (AD-01).
-  - [ ] Cập nhật card state và insert history là **một** transaction — nửa vời
-        không tồn tại được (BR-86).
-  - [ ] Chuyển trạng thái session enforce đúng ma trận `status` × `end_reason`
-        (BR-79…BR-85), và bất biến 12 vẫn pass sau bộ test.
+  - [ ] Ghi một lượt = cập nhật queue item + insert `study_answers` (+ cập nhật
+        `card_study_states` nếu là `scheduled`) trong **một** transaction (BR-86).
+  - [ ] Hoàn tất chuỗi học mới đặt `learned_at` **và** `due_at` cùng lúc, trong
+        một transaction, và **không** ghi lượt `scheduled` nào (BR-144, BR-149).
+  - [ ] `forgotten` ở `self_assess` đặt `available_at = cursor + 3`; khi hàng đợi
+        còn dưới 3 thẻ khác, thẻ vẫn quay lại ở cuối — test cả hai nhánh (BR-26).
+  - [ ] Round kế tiếp chỉ gồm thẻ **từng sai** trong round vừa xong, kể cả thẻ sau
+        đó làm đúng để rời bàn (BR-116) — test khẳng định đúng ca này.
+  - [ ] Round mới có hoán vị `position` khác round trước khi còn ≥2 thẻ (BR-117).
   - [ ] Không exception persistence thô nào thoát khỏi repository.
-  - [ ] Không thêm API nào chưa có caller trong M5.1–M5.5.
-- **Vì sao tách khỏi M4.9.** Domain của Study chỉ có caller khi scheduler và use
-  case tồn tại. Gộp nó vào M4.9 sẽ lặp lại đúng sai lầm của M4.5: viết contract
-  cho một presentation chưa có mặt.
-- **Dependencies:** M4.12
-- **Tests required:** entity, enum, mapper, repository transaction, rollback
+  - [ ] Bất biến 12 và 16…28 vẫn pass sau toàn bộ bộ test.
+- **Vì sao hàng đợi nằm ở đây, không ở M5.3.** BR-102 chuyển hàng đợi vào
+  database, và các luật nó mang — thứ tự BR-23, quay lại BR-26, round BR-115 —
+  đều cần **dữ liệu tại đúng thời điểm ghi**. Đó là tiêu chí `CLAUDE.md` dùng để
+  quyết định cái gì MUST NOT lên use case: kiểm ở trên repository là đặt phép
+  kiểm ra ngoài transaction. WBS bản trước xếp hàng đợi vào M5.3 vì khi đó nó còn
+  là trạng thái tạm của controller; BR-102 đã bỏ điều đó.
+- **Dependencies:** M5.0s
+- **Tests required:** entity, enum, mapper; repository test cho transaction và
+  rollback; test riêng cho BR-26 hai nhánh, BR-116, BR-117, BR-144
 - **Checklist phases:** 14.2, 14.3, 15.1
 
-### M5.1 · `StudyScheduler` và hai implementation
+### M5.1 · `StudyScheduler` — chuỗi stage và hai implementation
 
 - **Status:** todo
-- **Goal:** Logic xếp lịch là hàm thuần khiết, test được toàn bộ ma trận.
+- **Goal:** Thuật toán SRS là hàm thuần khiết, và nó là nơi **duy nhất** biết
+  stage nào chạy theo thứ tự nào.
 - **Scope:** `domain/scheduler/study_scheduler.dart` với `supportedActions`,
-  `EightBoxScheduler` (BR-15, BR-16), `Sm2Scheduler` (BR-17, BR-18, BR-19), bảng
-  interval trong scheduler config.
-- **Out of scope:** dùng scheduler trong controller (M5.3) hay ghi DB (M5.2).
+  **`stageSequence`** (BR-97, BR-110) và **`reviewModes`** (BR-146);
+  `EightBoxScheduler` (BR-15, BR-16), `Sm2Scheduler` (BR-17, BR-18, BR-19); ánh
+  xạ kết quả nhị phân → action của BR-107.
+- **Out of scope:** dùng scheduler trong controller (M5.3) hay ghi DB (M5.0).
 - **Editable documents:** `docs/wbs.md`
 - **Output:** `lib/features/study/domain/scheduler/`
 - **Acceptance criteria:**
   - [ ] `next()` không gọi `DateTime.now()`; `now` là tham số (AD-06).
-  - [ ] `EightBoxScheduler.supportedActions` = `[forgotten, remembered]`;
-        `Sm2Scheduler.supportedActions` = `[again, hard, good, easy]` (BR-30).
-  - [ ] Ma trận 8 box × 2 action của `eight_box` đều có test và khớp BR-15,
-        BR-16.
-  - [ ] `sm2`: `ease_factor` không bao giờ xuống dưới 1.3 kể cả sau 50 lượt
-        `again` liên tiếp (BR-19) — có test.
-  - [ ] `sm2`: `repetitions` 0 → interval 1; 1 → 6; ≥2 → `round(interval * ef)`
-        (BR-18) — có test.
+  - [ ] `eight_box`: `stageSequence` = `[browse, match, guess, recall, fill]`,
+        `reviewModes` = `[match, guess, recall, fill]`,
+        `supportedActions` = `[forgotten, remembered]` (BR-110, BR-146, BR-30).
+  - [ ] `sm2`: `stageSequence` = `[browse, self_assess]`,
+        `reviewModes` = `[self_assess]`,
+        `supportedActions` = `[again, hard, good, easy]`.
+  - [ ] `browse` không nằm trong `reviewModes` của bất kỳ thuật toán nào (BR-146).
+  - [ ] Ma trận 8 box × 2 action của `eight_box` đều có test và khớp BR-15, BR-16.
   - [ ] Card box 8 trả lời `remembered` vẫn ở box 8, hạn +128 ngày (BR-16).
+  - [ ] `sm2`: `ease_factor` không xuống dưới 1.3 kể cả sau 50 lượt `again` (BR-19).
+  - [ ] `sm2`: `repetitions` 0 → interval 1; 1 → 6; ≥2 → `round(interval * ef)` (BR-18).
   - [ ] `domain/scheduler/` không import Flutter hay Drift.
 - **Dependencies:** M5.0
 - **Tests required:** unit test toàn ma trận `eight_box`; unit test công thức
-  `sm2` gồm biên sàn ease factor; test `supportedActions` của cả hai
+  `sm2` gồm biên sàn ease factor; test `stageSequence`, `reviewModes`,
+  `supportedActions` của cả hai
 - **Checklist phases:** 14.2, 15.1
 
-### M5.2 · Use case phiên ôn và ghi kết quả
+### M5.2 · Use case: mở phiên, ghi lượt, hoàn tất, đóng phiên
 
 - **Status:** todo
-- **Goal:** Logic phiên ôn nằm ở domain: mở phiên, lấy card đến hạn, ghi đánh
-  giá đúng `kind`, từ chối generation cũ.
-- **Scope:** `StartStudySessionUseCase`, `SubmitReviewUseCase`,
-  `EndStudySessionUseCase`; xác định `kind` tường minh (BR-76);
-  kiểm `scheduler_generation` (BR-46, BR-84); giới hạn `card_limit` thẻ (BR-24).
-- **Out of scope:** hàng đợi và thứ tự trong phiên (M5.3 — đó là trạng thái tạm
-  của controller).
+- **Goal:** Mỗi tương tác của UC-05 có đúng một use case, và không use case nào
+  đọc repository của feature khác.
+- **Scope:** `StartLearningSessionUseCase`, `StartReviewingSessionUseCase`,
+  `SubmitStudyAnswerUseCase`, `AdvanceStageUseCase`, `EndStudySessionUseCase`,
+  `WatchStudyEntryUseCase` (một lượt đọc trả **cả hai** số của BR-150 và số thẻ
+  từng mode của BR-154).
+- **Out of scope:** hàng đợi (M5.0 — nó chạy trong transaction); UI (M5.3, M5.4).
 - **Editable documents:** `docs/wbs.md`
-- **Output:** `lib/features/study/domain/usecase/`
+- **Output:** `lib/features/study/domain/usecases/`
 - **Acceptance criteria:**
-  - [ ] Lượt đầu của một card trong phiên ghi `kind = scheduled`; lượt sau
-        ghi `relearning` (BR-77, BR-78) — test khẳng định.
-  - [ ] Lượt `relearning` **không** đổi `current_box`, `ease_factor`,
-        `interval_days`, `due_at`; **có** đổi `last_answered_at` (BR-78).
-  - [ ] Card box 8 + `remembered` vẫn được ghi `scheduled` dù box không đổi
-        (BR-76) — test khẳng định, đây là ca mà suy luận sẽ sai.
-  - [ ] Ghi review từ session có generation cũ → ném `Failure`, **không** ghi
-        `study_answers`, session chuyển `invalidated`/`stale_generation`
-        (BR-84).
-  - [ ] `answer_count` chỉ tăng ở lượt `scheduled`; `lapse_count` tăng khi
-        `forgotten`/`again` ở lượt `scheduled` (BR-20).
-  - [ ] Một phiên lấy tối đa `card_limit` thẻ riêng biệt, mặc định 20 (BR-24).
+  - [ ] Phiên `learning` chỉ lấy thẻ `learned_at IS NULL`; phiên `reviewing` chỉ
+        lấy `learned_at IS NOT NULL AND due_at <= now`. Không phiên nào trộn (BR-142).
+  - [ ] Mở `reviewing` khi tập đến hạn rỗng → `Failure`, **không** tạo session
+        (BR-145, BR-101) — test khẳng định không có dòng nào được ghi.
+  - [ ] Phiên `learning` không sinh lượt `scheduled` nào (BR-141, BR-144).
+  - [ ] Trong `reviewing`, lượt đầu của mỗi thẻ ghi `scheduled`, các lượt sau ghi
+        `relearning`, và `relearning` **không** đổi `due_at`/`current_box` (BR-77, BR-78).
+  - [ ] Thẻ box 8 + `remembered` vẫn ghi `scheduled` dù box không đổi (BR-76) —
+        đây là ca mà suy luận sẽ sai.
+  - [ ] Ghi từ session có generation cũ → `Failure`, không ghi `study_answers`,
+        session chuyển `invalidated`/`stale_generation` (BR-84).
+  - [ ] `card_limit` chốt một lần lúc mở phiên; đổi tùy chọn sau đó không ảnh
+        hưởng phiên đang chạy (BR-139).
+  - [ ] Giá trị hiệu lực của tùy chọn = `decks.study_config` của root nếu có,
+        ngược lại `app_settings` (BR-147) — test cả hai nhánh.
+  - [ ] Một lượt đọc duy nhất trả cả số chưa học lẫn số đến hạn (AD-13).
 - **Dependencies:** M5.1, M5.0
-- **Tests required:** unit test cho từng acceptance criteria ở trên, dùng
-  repository fake; test riêng cho ca box-8 và ca generation cũ
+- **Tests required:** unit test cho từng acceptance criteria, dùng repository
+  fake; test riêng cho ca box-8, ca generation cũ, và ca mở `reviewing` rỗng
 - **Checklist phases:** 14.2, 15.1
 
-### M5.3 · Controller, state và hàng đợi phiên ôn
+### M5.3 · Controller và state của phiên
 
 - **Status:** todo
-- **Goal:** State immutable tách dữ liệu khỏi trạng thái tác vụ, hàng đợi xử lý
-  đúng luật `relearning`.
+- **Goal:** State immutable, tách dữ liệu khỏi trạng thái tác vụ; controller là
+  lớp mỏng gọi use case, không giữ luật.
 - **Scope:** `StudySessionState` (freezed), `StudySessionController`
-  (`@riverpod`), hàng đợi với luật đưa card `forgotten`/`again` quay lại sau ít
-  nhất 3 card (BR-26, BR-28), chống bấm đúp.
-- **Out of scope:** widget (M5.4).
+  (`@riverpod`), chống bấm đúp, chuyển stage khi hàng đợi của stage cạn.
+- **Out of scope:** hàng đợi (M5.0); widget (M5.4).
 - **Editable documents:** `docs/wbs.md`
-- **Output:** `lib/features/study/presentation/state/`,
-  `lib/features/study/presentation/controller/`
+- **Output:** `lib/features/study/presentation/states/`,
+  `lib/features/study/presentation/controllers/`
 - **Acceptance criteria:**
-  - [ ] State immutable, có value equality; **không** có một `isLoading` chung
-        cho mọi thao tác.
-  - [ ] Controller không giữ `BuildContext`.
-  - [ ] Card `forgotten` quay lại sau ít nhất 3 card khác, hoặc cuối hàng đợi nếu
-        không đủ 3 (BR-26) — test khẳng định cả hai nhánh.
-  - [ ] Bấm hai lần liên tiếp cùng một action chỉ ghi **một** review — test
-        khẳng định.
-  - [ ] Đánh giá sau khi controller bị dispose không throw (`ref.mounted`).
+  - [ ] State immutable, có value equality; **không** có một `isLoading` chung.
+  - [ ] Controller không giữ `BuildContext` — `command_query_separation_test` xanh.
+  - [ ] Bấm hai lần liên tiếp cùng một action chỉ ghi **một** lượt (BR-126, BR-25).
+  - [ ] Ghi lượt sau khi controller bị dispose không throw (`ref.mounted`).
+  - [ ] Controller **không** tự quyết thứ tự thẻ hay thẻ nào quay lại — nó đọc
+        thẻ kế tiếp từ use case; test khẳng định bằng cách đếm lời gọi.
   - [ ] Test chuyển trạng thái: initial → loading → loaded; loading → error;
         submitting thành công; submitting thất bại.
 - **Dependencies:** M5.2, M3.3
-- **Tests required:** controller test cho toàn bộ chuyển trạng thái ở trên, chạy
-  bằng `ProviderContainer`, không cần widget
+- **Tests required:** controller test cho toàn bộ chuyển trạng thái, chạy bằng
+  `ProviderContainer`, không cần widget
 - **Checklist phases:** 9.2, 9.3, 15.2
 
-### M5.4 · Màn hình ôn tập và route
+### M5.4 · Màn hình Study: lối vào, màn chọn mode, và sáu mode
+
+- **Status:** todo — chia ba lát, xem M5.4a…M5.4c
+- **Goal:** Người dùng đi được trọn UC-05 trên thiết bị.
+- **Scope:** route, lối vào từ deck, màn chọn mode ôn tập, và widget của sáu
+  StudyMode. Chuỗi lấy từ ARB, màu và khoảng cách lấy từ token.
+- **Out of scope:** thống kê phiên (M5.5).
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `lib/features/study/presentation/screens/`,
+  `lib/features/study/presentation/widgets/{sections,items,overlays,support}/`,
+  route mới trong `app/router/`
+- **Acceptance criteria (áp cho cả ba lát):**
+  - [ ] Nút action render từ `supportedActions`, không hardcode (BR-30, BR-97).
+  - [ ] `grep -rn "Text('" lib/features/study/presentation` không có kết quả.
+  - [ ] Mọi widget nằm đúng một trong bốn bucket của AD-15.
+  - [ ] Render ở 320×568 và `textScaler` 2.0 → `takeException()` là null.
+  - [ ] Light và dark mode đều có widget test.
+  - [ ] Mọi màn và component dùng chung đăng ký trong Widgetbook.
+- **Dependencies:** M5.3, M4.1, M3.6
+- **Tests required:** xem từng lát
+- **Checklist phases:** 14.4, 15.3
+
+#### M5.4a · Lối vào, màn chọn mode, `browse` và `self_assess`
 
 - **Status:** todo
-- **Goal:** Màn hình render đủ mọi trạng thái và nút đánh giá đúng theo
-  scheduler.
-- **Scope:** `StudySessionScreen`, route theo tên, widget con tách theo section,
-  render nút từ `supportedActions` (BR-30), chuỗi lấy từ ARB.
-- **Out of scope:** màn danh sách deck đầy đủ — chỉ cần một lối vào tối thiểu để
-  mở phiên ôn từ fixture.
-- **Editable documents:** `docs/wbs.md`
-- **Output:** `lib/features/study/presentation/screen/`,
-  `lib/features/study/presentation/widget/`, route mới trong `app/router/`
+- **Scope:** badge hai số của BR-150, màn chọn mode với số thẻ **mỗi mode**
+  (BR-154), `browse` (hai mặt cùng lúc, không có bước lật — BR-112) và
+  `self_assess` (lật rồi mới hiện action — BR-112).
 - **Acceptance criteria:**
-  - [ ] Deck `eight_box` hiện đúng **2** nút; deck `sm2` hiện đúng **4** nút
-        (BR-30) — widget test cho cả hai.
+  - [ ] Deck `eight_box` hiện **4** lựa chọn ôn tập; deck `sm2` vào thẳng
+        `self_assess` không hiện màn chọn (BR-146).
+  - [ ] Mode không đủ dữ liệu bị vô hiệu hoá **kèm lý do**, không bị ẩn (BR-99).
+  - [ ] Không có đường nào mở phiên ôn khi tập đến hạn rỗng (BR-29, BR-145).
+  - [ ] `browse` không có nút action nào (BR-111).
   - [ ] Bốn trạng thái loading, empty, error, loaded đều có widget test.
-  - [ ] Empty state khi không còn card đến hạn là thông điệp tích cực, **không**
-        phải màn lỗi (BR-29).
-  - [ ] Trong lúc ghi đánh giá, nội dung card vẫn hiện và các nút bị khoá.
-  - [ ] `grep -rn "Text('" lib/features/study/presentation` không có kết quả —
-        mọi chuỗi từ ARB.
-  - [ ] Render ở 320×568 và `textScaler` 2.0 → `tester.takeException()` là null.
-  - [ ] Light mode và dark mode đều có widget test.
-- **Dependencies:** M5.3, M4.1, M3.6
-- **Tests required:** widget test cho 4 trạng thái × 2 scheduler; test overflow
-  màn nhỏ và text scale 2.0; test dark mode
-- **Checklist phases:** 14.4, 15.3
+- **Tests required:** widget test 4 trạng thái × 2 thuật toán; test màn chọn khi
+  một mode bị vô hiệu hoá; test deck `sm2` bỏ qua màn chọn
+
+#### M5.4b · `match` và `guess`
+
+- **Status:** todo
+- **Scope:** bàn ghép cặp của `match`, câu hỏi năm lựa chọn của `guess`.
+- **Acceptance criteria:**
+  - [ ] `match` dưới hai cặp thì bỏ qua (phiên học) hoặc vô hiệu hoá (phiên ôn)
+        — không bao giờ render bàn một cặp (BR-153).
+  - [ ] Chọn nhầm vế sau **không** đánh dấu thẻ sở hữu vế đó là sai (BR-118).
+  - [ ] `guess` render đúng **năm** lựa chọn, đáp án đúng xuất hiện đúng một lần
+        (BR-121); hai thẻ cùng `back_folded` không cùng xuất hiện (BR-123).
+  - [ ] Chọn được ghi bằng định danh, không bằng chuỗi hiển thị (BR-125).
+  - [ ] Chạm lặp trên một question chỉ sinh một lượt (BR-126).
+  - [ ] Thứ tự thẻ và thứ tự lựa chọn là hai hoán vị độc lập, ổn định khi Resume
+        (BR-127).
+- **Tests required:** widget test cho từng criteria; test khẳng định `almost` của
+  `match` vào tập không đạt nhưng **không** vào `study_answers.action` (BR-120)
+
+#### M5.4c · `recall` và `fill`
+
+- **Status:** todo
+- **Scope:** đồng hồ 20 giây của `recall`, ô nhập và chấm của `fill`.
+- **Acceptance criteria:**
+  - [ ] Đồng hồ tạm dừng khi app vào nền, và không tính thời gian tải (BR-128).
+  - [ ] Tại mốc hết giờ chỉ **một** kết cục được ghi; thao tác trước mốc là
+        reveal thủ công (BR-129) — test đúng ca đua này.
+  - [ ] Hết giờ tự lật đáp án, khoá kết cục thành sai, và ghi
+        `outcome_reason = timeout` (BR-130, BR-131).
+  - [ ] Resume tiếp tục đúng `remaining_ms`, không đặt lại 20 giây; round sau bắt
+        đầu lại đủ 20 giây (BR-133).
+  - [ ] `fill` chấm bằng `back_folded` — `cong` **không** khớp `công` (BR-134).
+  - [ ] Câu trả lời rỗng sau trim không sinh lượt, không tiến checkpoint (BR-137).
+  - [ ] Nội dung người dùng gõ **không** được lưu ở bất kỳ đâu (BR-138, BR-51).
+  - [ ] Dùng gợi ý được ghi nhưng không đổi `action` (BR-136).
+- **Tests required:** widget test cho từng criteria; test đua reveal/timeout;
+  test khẳng định không có chuỗi người dùng gõ nào chạm tới database
 
 ### M5.5 · Vòng đời phiên và kết thúc đúng trạng thái
 
 - **Status:** todo
-- **Goal:** Phiên luôn kết thúc ở đúng `status` và `end_reason`, và review đã ghi
+- **Goal:** Phiên luôn kết thúc ở đúng `status` và `end_reason`, và lượt đã ghi
   không bao giờ mất.
 - **Scope:** chuyển trạng thái `completed` / `abandoned` / `invalidated` /
-  `failed` kèm `end_reason` (BR-81…BR-86), màn tổng kết phiên tối thiểu.
+  `failed` kèm `end_reason` (BR-81…BR-86), **dọn phiên lỗi thời của ngày trước**
+  (BR-103), màn tổng kết phiên tối thiểu.
 - **Out of scope:** thống kê đầy đủ (ngoài MVP slice).
 - **Editable documents:** `docs/wbs.md`
 - **Output:** cập nhật use case và controller của M5.2, M5.3; widget tổng kết
 - **Acceptance criteria:**
-  - [ ] Hết hàng đợi → `completed`, `end_reason` NULL, `ended_at` được đặt
-        (BR-81).
+  - [ ] Hết mọi hàng đợi → `completed`, `end_reason` NULL, `ended_at` được đặt (BR-81).
   - [ ] Người dùng thoát → `abandoned` / `user_exit` (BR-82).
-  - [ ] Reset deck khi phiên đang mở → `invalidated` / `scheduler_reset`
-        (BR-83).
-  - [ ] Ghi thất bại không thể tiếp tục → `failed` / `persistence_error`
-        (BR-85).
-  - [ ] Ở **cả bốn** trường hợp, review đã ghi thành công vẫn còn trong
-        `study_answers` (BR-86) — test khẳng định từng trường hợp.
-  - [ ] Không tổ hợp `status` × `end_reason` nào ngoài ma trận ở `data-model.md`
-        — bất biến Q12 của M4.4 vẫn pass sau khi chạy các luồng này.
+  - [ ] Phiên `in_progress` của ngày học trước, khi mở app → `abandoned` /
+        `interrupted`, **không** phải `user_exit` (BR-103) — test khẳng định.
+  - [ ] Reset deck khi phiên đang mở → `invalidated` / `scheduler_reset` (BR-83).
+  - [ ] Ghi thất bại không thể tiếp tục → `failed` / `persistence_error` (BR-85).
+  - [ ] Ở **cả năm** trường hợp, lượt đã ghi vẫn còn trong `study_answers` (BR-86).
+  - [ ] Thẻ bỏ dở giữa chuỗi học mới **không** giữ `learned_at`, và phiên lỗi thời
+        không cho ghi tiếp — một thẻ MUST NOT được ghi `scheduled` hai lần bởi hai
+        phiên học mới khác nhau.
+  - [ ] Không tổ hợp `status` × `end_reason` nào ngoài ma trận `data-model.md` —
+        bất biến 12 vẫn pass sau khi chạy các luồng này.
 - **Dependencies:** M5.3, M4.4
-- **Tests required:** repository/use case test cho bốn cách kết thúc; test khẳng
-  định `study_answers` được giữ ở cả bốn
+- **Tests required:** repository/use case test cho năm cách kết thúc; test khẳng
+  định `study_answers` được giữ ở cả năm; test phiên lỗi thời
 - **Checklist phases:** 14.4, 15.1, 15.2
 
 ### M5.6 · Integration test luồng UC-05
 
 - **Status:** todo
-- **Goal:** Chứng minh slice chạy thật xuyên suốt trên thiết bị, không chỉ ở
-  unit test.
-- **Scope:** `integration_test/review_flow_test.dart` chạy đúng luồng chính của
+- **Goal:** Chứng minh slice chạy thật xuyên suốt trên thiết bị, không chỉ ở unit test.
+- **Scope:** `integration_test/study_flow_test.dart` chạy đúng luồng chính của
   UC-05 trên fixture của M4.12.
 - **Out of scope:** Playwright + Flutter Web (M7 sẽ nối vào CI).
 - **Editable documents:** `docs/wbs.md`
 - **Output:** `integration_test/`
 - **Acceptance criteria:**
-  - [ ] Cold start → mở deck fixture → phiên ôn → đánh giá một card → thoát →
-        mở lại → card đã ôn **không** còn đến hạn.
-  - [ ] Đánh giá `forgotten` → card quay lại trong phiên → đánh giá
-        `remembered` → hôm sau vẫn ở box 1 (BR-77) — assert trên database.
-  - [ ] Chạy trên deck `eight_box` và deck `sm2`, đúng số nút mỗi loại.
+  - [ ] Cold start → mở deck fixture → **phiên học mới** → đi hết chuỗi stage của
+        `eight_box` → thẻ nhận `learned_at` và `due_at` đầu ngày kế tiếp (BR-144).
+  - [ ] Thẻ vừa học xong **không** mở được phiên ôn ngay trong ngày (BR-145).
+  - [ ] Đến hạn → chọn một mode → ôn → thẻ hết đến hạn — assert trên database.
+  - [ ] Thẻ thiếu `example` vẫn hoàn tất chuỗi học mới: `fill` bỏ qua nó, và
+        stage cuối **mà chính nó tham gia** là stage tính hoàn tất (BR-114, BR-144).
+        Đây là ca mà bản nghiệp vụ đầu tiên làm hầu hết thẻ kẹt vĩnh viễn.
+  - [ ] Chạy trên deck `eight_box` và deck `sm2`, đúng chuỗi stage mỗi loại.
   - [ ] `flutter test integration_test/` exit 0 trên emulator Android.
-  - [ ] `flutter build web` vẫn exit 0 sau toàn bộ M5 — kênh E2E còn sống
-        (AD-04).
+  - [ ] `flutter build web` vẫn exit 0 sau toàn bộ M5 — kênh E2E còn sống (AD-04).
 - **Dependencies:** M5.4, M5.5, M4.12
 - **Tests required:** đây **là** task test — integration test luồng chính
 - **Checklist phases:** 15.5
