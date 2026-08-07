@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M5.0m (hai loại phiên học) |
+| **Updated by task** | M5.0n (recursive review) |
 | **Last updated** | 2026-08-07 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -6956,6 +6956,11 @@ trường hợp.
 "target là `db.schemaVersion`, không phải literal". Bump lên v4 làm cả hai đỏ ngay.
 Đã đổi sang `db.schemaVersion`, nên v5 sẽ không lặp lại.
 
+> **M5.0b…M5.0j mô tả mô hình một-phiên-một-chuỗi, đã bị M5.0m thay.** Các mục đó
+> giữ nguyên vì lý do trong chúng vẫn là lý do — nhưng chỗ nào chúng nói "một phiên
+> chạy năm stage", "thẻ mới lấp phần dư" hay "stage chấm điểm đầu tiên quyết định
+> lịch", đó là mô hình cũ. `business-rules.md` là nơi đọc trạng thái hiện tại.
+
 ### M5.0m · Hai loại phiên: học mới và ôn tập
 
 - **Status:** done — tài liệu và fixture guard. Viết lại phần lớn nghiệp vụ Study
@@ -7021,6 +7026,58 @@ phải có lịch; thẻ chưa có `learned_at` không được mang lượt `sc
 `kind = 'learning'` không được xuất hiện ngoài phiên học mới; tùy chọn học không
 được nằm trên deck con. Cả bốn đã được chứng minh fire trên vi phạm của chính
 chúng trước khi commit.
+
+### M5.0n · Recursive review nghiệp vụ Study trước khi viết code
+
+- **Status:** done — chín vòng, dừng khi vòng cuối không tìm thêm được gì.
+- **Goal:** Bắt các luật cũ chưa theo kịp mô hình hai loại phiên, **trước** khi
+  M5 sinh code từ chúng.
+- **Scope:** `business-rules.md` (sửa 12 BR, thêm **BR-150…BR-152**),
+  `use-cases.md` (UC-05 A0/A1/A2b, UC-07), `product.md`, `architecture.md`,
+  `wbs.md`.
+- **Out of scope:** không đổi quyết định nghiệp vụ nào — chỉ đưa các luật cũ về
+  đúng mô hình đã chốt ở M5.0m.
+- **Editable documents:** `docs/business-rules.md`, `docs/use-cases.md`,
+  `docs/product.md`, `docs/architecture.md`, `docs/wbs.md`
+- **Output:** BR-150, BR-151, BR-152
+- **Acceptance criteria:**
+  - [x] Không BR nào còn nói lượt đầu của thẻ trong **mọi** phiên là `scheduled`.
+  - [x] Không tài liệu nào còn định nghĩa "thẻ mới" bằng `answer_count`.
+  - [x] Reset không còn để lại thẻ `learned_at` mà không có lịch (BR-152).
+  - [x] Badge và pill có luật riêng, cùng ngôn ngữ với popup Study (BR-150,
+        BR-151).
+  - [x] Vòng cuối của phép quét không tìm thêm phát hiện nào.
+  - [x] `check_docs.py`, `verify_invariants.py` 27/27, guard xanh.
+- **Dependencies:** M5.0m
+- **Tests required:** `check_docs.py`, `verify_invariants.py`, guard `memox-v7`
+- **Checklist phases:** 14.1
+
+**Mười hai luật cũ nói bằng từ vựng của mô hình đã bị thay.** Nặng nhất là BR-77
+— *"lượt đầu tiên của một thẻ trong một session MUST là `scheduled`"* — mâu thuẫn
+thẳng BR-144, vốn nói phiên học mới không sinh lượt `scheduled` nào. Hai luật cùng
+`active`, cùng nói về cùng một lượt, và nói ngược nhau. Cùng loại: BR-27, BR-20
+(*"cả **hai** loại lượt"* khi đã có ba), BR-113, BR-28 (`browse` không sinh action
+nào để mà "khác `forgotten`"), và BR-99 (*"stage bị bỏ qua"* không áp được khi
+người dùng đã **chọn** mode).
+
+**Một mâu thuẫn chỉ lộ ra khi đọc invariant vừa viết.** BR-41/BR-42 nói Reset xoá
+lịch nhưng giữ nội dung; nếu `learned_at` thuộc "nội dung" thì mỗi lần Reset để
+lại một thẻ **đã học xong nhưng không có lịch** — đúng thứ invariant 24 được viết
+để chặn, và một thẻ không thuộc tập nào trong hai tập của BR-142. BR-152 đưa cả
+hai về NULL cùng lúc.
+
+**BR-22 bị thay, và nó chạm tới code đang chạy.** Badge trên deck list, pill
+Due/New trên card list và `cardsDueForStudy` đều implement `due_at IS NULL OR
+due_at <= now`. Trong mô hình mới `due_at IS NULL` nghĩa là *chưa học xong*, không
+phải *đến hạn ngay* — nên một con số gộp hai tập đang trộn hai việc chênh nhau năm
+lần công sức. BR-150 và BR-151 đưa hai con số về đúng ngôn ngữ popup Study dùng.
+
+**Phép quét bằng máy tìm được thứ đọc bằng mắt bỏ sót**, và ngược lại. Bốn vòng
+đầu đọc từng BR; bốn vòng sau grep theo mẫu — "lấp phần dư", "năm mode", "mode
+`review`", "answer_count = 0" — và bắt được `architecture.md` AD-18 nói "năm mode"
+khi đã sáu, `product.md` M3 còn ghi mode `review`, và một đoạn prose trong chính
+`business-rules.md` vẫn giải thích theo mô hình cũ. Không phép nào thay được phép
+kia: grep không hiểu mâu thuẫn giữa hai luật, mắt không quét hết 179 trích dẫn.
 
 ### M5.0 · Study-specific domain và data completion
 
