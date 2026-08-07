@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M5.0e (round cho stage chấm điểm) |
+| **Updated by task** | M5.0f (luật stage guess) |
 | **Last updated** | 2026-08-07 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -6633,6 +6633,54 @@ cho mọi dòng; với round không trần thì một stage chấm điểm vư�
 điều kiện đó chỉ áp khi `mode = 'self_assess'`. Bù lại, hai invariant mới giữ cấu
 trúc round trung thực: round không nhảy số, và tập của round N là con của round
 N-1 — cái thứ hai là phát biểu SQL của chính BR-115.
+
+### M5.0f · Luật của stage `guess`: năm lựa chọn, và nguồn distractor
+
+- **Status:** done — chỉ tài liệu. Không code, không schema mới.
+- **Goal:** Chốt luật dựng question của `guess` theo đặc tả Guess Card Meaning,
+  dùng lại cơ chế sẵn có thay vì thêm khái niệm.
+- **Scope:** `business-rules.md` (thêm **BR-121…BR-127**; đóng hai mục trong danh
+  sách chưa chốt).
+- **Out of scope:** ngưỡng của `match`, `recall`, `fill`; UI của stage.
+- **Editable documents:** `docs/business-rules.md`, `docs/wbs.md`
+- **Output:** BR-121…BR-127
+- **Acceptance criteria:**
+  - [x] Đúng năm lựa chọn mỗi question, một đúng và bốn distractor (BR-121).
+  - [x] Distractor lấy từ **tập thẻ của phiên**, không từ round hiện tại (BR-122).
+  - [x] "Khác nghĩa" đo bằng `back_folded`, không định nghĩa phép chuẩn hoá thứ
+        hai (BR-123).
+  - [x] Tách ca "pool không đủ" khỏi ca "question hỏng" (BR-124).
+  - [x] Đánh giá bằng định danh, không bằng chuỗi hiển thị (BR-125).
+  - [x] Một lựa chọn đầu tiên, một lượt (BR-126).
+  - [x] Thứ tự thẻ và thứ tự lựa chọn là hai hoán vị độc lập (BR-127).
+- **Dependencies:** M5.0e
+- **Tests required:** `check_docs.py`, guard `memox-v7`
+- **Checklist phases:** 14.1
+
+**Không thêm bảng, không thêm cột — cả bảy luật dựng trên thứ đã có.**
+
+**BR-122 tách hai khái niệm dễ bị gộp.** *Hàng đợi* là những thẻ đang được hỏi ở
+round này; *tập thẻ của phiên* là nguồn lấy distractor. Gộp lại thì retry round
+còn một thẻ sẽ không đủ năm lựa chọn — đúng ca mà BR-115 tạo ra thường xuyên
+nhất. Thẻ đã đạt rời hàng đợi nhưng **không** rời tập nguồn.
+
+**BR-123 dùng lại `back_folded` thay vì định nghĩa phép chuẩn hoá thứ hai.** Cột
+đó có từ schema v3 (M4.11a) cho search: đã trim, hạ hoa và fold Unicode. Một phép
+normalize riêng cho `guess` sẽ trôi khỏi phép kia ngay lần đầu có ai sửa một
+trong hai, và không ai biết để sửa cả hai.
+
+**BR-124 là chỗ đặc tả gốc và BR-114 nói ngược nhau — và cả hai đều đúng, cho hai
+ca khác nhau.** Đặc tả nói thiếu distractor là lỗi chặn; BR-114 nói thẻ thiếu dữ
+liệu thì bỏ qua có ghi nhận. Deck chỉ có ba thẻ thì `guess` **không bao giờ** dựng
+được question, và hiện lỗi mỗi phiên là đổ cho người dùng một thứ họ không sửa
+được bằng thao tác nào trong phiên — bỏ qua stage mới đúng, và BR-99 đã có sẵn câu
+đó. Nhưng khi tập đủ năm mà một question vẫn hỏng thì chặn lại là đúng: render
+bốn lựa chọn sẽ âm thầm đổi xác suất đoán trúng từ 20% lên 25%.
+
+**Hai mục rời khỏi danh sách chưa chốt.** `guess` so "khác nghĩa" bằng đâu, và
+ngưỡng tối thiểu của `guess`. Ngưỡng đó khác `match`/`recall` ở một điểm đáng chú
+ý: nó là điều kiện của **cả stage**, không phải của từng thẻ, vì một question mượn
+bốn thẻ khác để dựng.
 
 ### M5.0 · Study-specific domain và data completion
 
