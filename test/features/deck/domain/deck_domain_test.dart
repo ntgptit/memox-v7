@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/card/domain/entities/card_entity.dart';
-import 'package:memox/features/card/domain/entities/card_review_state_entity.dart';
+import 'package:memox/features/card/domain/entities/card_study_state_entity.dart';
 import 'package:memox/features/deck/domain/models/deck_content_type_model.dart';
 import 'package:memox/features/deck/domain/models/deck_deletion_impact_model.dart';
 import 'package:memox/features/deck/domain/entities/deck_entity.dart';
@@ -42,7 +42,7 @@ void main() {
       expect(deck.name, 'Deck');
     });
 
-    test('cards and review states carry value equality too', () {
+    test('cards and study states carry value equality too', () {
       CardEntity buildCard() => CardEntity(
         id: 'card-1',
         deckId: 'deck-1',
@@ -55,7 +55,7 @@ void main() {
         createdAt: createdAt,
         updatedAt: createdAt,
       );
-      CardReviewStateEntity buildState() => const CardReviewStateEntity(
+      CardStudyStateEntity buildState() => const CardStudyStateEntity(
         cardId: 'card-1',
         schedulerType: SchedulerType.sm2,
         schedulerVersion: 1,

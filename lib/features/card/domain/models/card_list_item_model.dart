@@ -1,5 +1,5 @@
 import '../entities/card_entity.dart';
-import '../entities/card_review_state_entity.dart';
+import '../entities/card_study_state_entity.dart';
 import 'card_state_model.dart';
 
 /// One row of the management list: a card and the slice of its schedule the row
@@ -17,12 +17,12 @@ import 'card_state_model.dart';
 class CardListItemModel {
   const CardListItemModel({
     required this.card,
-    required this.reviewState,
+    required this.studyState,
     this.tagNames = const <String>[],
   });
 
   final CardEntity card;
-  final CardReviewStateEntity reviewState;
+  final CardStudyStateEntity studyState;
 
   /// The card's tag names, for the row's chip strip (BR-93). Names only — the
   /// row does not act on a tag, so it needs no id; the editor owns tag edits and
@@ -30,9 +30,9 @@ class CardListItemModel {
   final List<String> tagNames;
 
   /// The four-way display state (BR-90/BR-91/BR-88).
-  CardState get state => cardStateOf(reviewState);
+  CardState get state => cardStateOf(studyState);
 
   /// When this card next comes due, or null for "due now" (BR-22). The badge
   /// reads it against `clockProvider`'s now — no widget touches the wall clock.
-  DateTime? get dueAt => reviewState.dueAt;
+  DateTime? get dueAt => studyState.dueAt;
 }

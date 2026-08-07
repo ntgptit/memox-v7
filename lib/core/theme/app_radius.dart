@@ -9,7 +9,7 @@ abstract final class AppRadius {
   /// Buttons and inputs.
   static const double md = 12;
 
-  /// Cards and sheets — the review card itself.
+  /// Cards and sheets — the study card itself.
   static const double lg = 16;
 
   /// Fully rounded, for pill-shaped controls.

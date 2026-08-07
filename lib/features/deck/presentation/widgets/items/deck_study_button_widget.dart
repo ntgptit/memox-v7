@@ -14,12 +14,12 @@ const double _kPillHeight = 32;
 ///
 /// **It says the feature is not built rather than doing nothing.** The project
 /// refuses enabled-looking controls that go nowhere — `DeckNoticeWidget` exists
-/// for exactly that reason — and until the review session lands (M5) there is no
+/// for exactly that reason — and until the study session lands (M5) there is no
 /// session to start. A button that answers, even to say "not yet", is a
 /// different thing from one that swallows the tap: the layout under review is
 /// the real one, and the honesty is in the reply.
 ///
-/// TODO(#89): replace the snackbar with the review session route. The button,
+/// TODO(#89): replace the snackbar with the study session route. The button,
 /// its label and the rule that it appears only when something is due are already
 /// what M5 needs; only `onPressed` changes.
 ///

@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/features/card/domain/entities/card_review_state_entity.dart';
+import 'package:memox/features/card/domain/entities/card_study_state_entity.dart';
 import 'package:memox/features/card/domain/models/card_state_model.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 
@@ -12,8 +12,8 @@ import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 /// on an off-by-one at box 4 and at box 8, which are the only two places the
 /// arithmetic can be wrong.
 void main() {
-  CardReviewStateEntity eightBox({required int box, int reviewCount = 1}) =>
-      CardReviewStateEntity(
+  CardStudyStateEntity eightBox({required int box, int reviewCount = 1}) =>
+      CardStudyStateEntity(
         cardId: 'c1',
         schedulerType: SchedulerType.eightBox,
         schedulerVersion: 1,
@@ -28,8 +28,8 @@ void main() {
         repetitions: null,
       );
 
-  CardReviewStateEntity sm2({required int? days, int reviewCount = 1}) =>
-      CardReviewStateEntity(
+  CardStudyStateEntity sm2({required int? days, int reviewCount = 1}) =>
+      CardStudyStateEntity(
         cardId: 'c1',
         schedulerType: SchedulerType.sm2,
         schedulerVersion: 1,
@@ -134,7 +134,7 @@ void main() {
     test('a scheduler this build does not know reads as new', () {
       // One row written by a newer version must not take down every screen
       // that lists cards — the same argument that put `unknown` on the enum.
-      const state = CardReviewStateEntity(
+      const state = CardStudyStateEntity(
         cardId: 'c1',
         schedulerType: SchedulerType.unknown,
         schedulerVersion: 99,

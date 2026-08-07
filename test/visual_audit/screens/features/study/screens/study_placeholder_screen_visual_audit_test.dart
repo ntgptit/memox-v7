@@ -2,7 +2,7 @@
 library;
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/features/review/presentation/screens/review_placeholder_screen.dart';
+import 'package:memox/features/study/presentation/screens/study_placeholder_screen.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_content_shell.dart';
 
@@ -11,9 +11,9 @@ import '../../../../audit_allowance.dart';
 import '../../../../audit_model.dart';
 import '../../../../screen_auditor.dart';
 
-/// Strict visual audit for `ReviewPlaceholderScreen`.
+/// Strict visual audit for `StudyPlaceholderScreen`.
 ///
-/// Companion of `lib/features/review/presentation/screens/review_placeholder_screen.dart`,
+/// Companion of `lib/features/study/presentation/screens/study_placeholder_screen.dart`,
 /// at the mirrored path. `MX-VIS-001` checks that this file exists, imports that
 /// screen, and calls the strict helper — a file that merely sits at the right
 /// path proves nothing.
@@ -22,8 +22,8 @@ import '../../../../screen_auditor.dart';
 /// allowance with a reason. PASS_WITH_UNRESOLVED fails.
 void main() {
   memoxProductionScreenAuditTest(
-    'review_placeholder_screen',
-    () => const ReviewPlaceholderScreen(),
+    'study_placeholder_screen',
+    () => const StudyPlaceholderScreen(),
     anchors: <AuditAnchor>[
       AuditAnchor.type('shell', MxContentShell),
       AuditAnchor.type('empty_state', MxEmptyState),

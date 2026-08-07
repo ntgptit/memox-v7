@@ -220,7 +220,7 @@ final class DeckRepositoryImpl
   @override
   Future<void> deleteDeck(String deckId) => _guard(() async {
     await _requireDeckRow(deckId);
-    // Descendants, cards, review states, history and sessions cascade from
+    // Descendants, cards, study states, history and sessions cascade from
     // this one delete (BR-03) — enforced by the schema's foreign keys.
     await _dao.deleteDeckById(deckId);
   });

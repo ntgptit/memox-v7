@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/card/domain/entities/card_entity.dart';
-import 'package:memox/features/card/domain/entities/card_review_state_entity.dart';
+import 'package:memox/features/card/domain/entities/card_study_state_entity.dart';
 import 'package:memox/features/card/domain/entities/tag_entity.dart';
 import 'package:memox/features/card/domain/models/card_list_filter_model.dart';
 import 'package:memox/features/card/domain/models/card_list_item_model.dart';
@@ -96,7 +96,7 @@ final class FakeCardRepository implements CardRepository {
   );
 
   /// A list item in a chosen display [state], built by handing `cardStateOf` a
-  /// review state that resolves to it (BR-90/BR-91/BR-88).
+  /// study state that resolves to it (BR-90/BR-91/BR-88).
   /// [dueAt] left null is a card that has never been scheduled, which is what
   /// the row draws no due badge for. A test that wants the badge has to say
   /// when — passing a date is the only way to get one.
@@ -110,11 +110,11 @@ final class FakeCardRepository implements CardRepository {
     DateTime? dueAt,
   }) => CardListItemModel(
     card: card(id, front: front, back: back, isFlagged: isFlagged),
-    reviewState: _reviewStateFor(id, state, dueAt),
+    studyState: _reviewStateFor(id, state, dueAt),
     tagNames: tagNames,
   );
 
-  CardReviewStateEntity _reviewStateFor(
+  CardStudyStateEntity _reviewStateFor(
     String cardId,
     CardState state,
     DateTime? dueAt,
@@ -128,7 +128,7 @@ final class FakeCardRepository implements CardRepository {
       CardState.mastered => (12, kMasteredBox),
     };
 
-    return CardReviewStateEntity(
+    return CardStudyStateEntity(
       cardId: cardId,
       schedulerType: SchedulerType.eightBox,
       schedulerVersion: 1,

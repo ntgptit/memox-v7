@@ -1,5 +1,5 @@
 import '../../../deck/domain/models/scheduler_type_model.dart';
-import '../entities/card_review_state_entity.dart';
+import '../entities/card_study_state_entity.dart';
 
 /// How far along a card is, as a screen shows it (BR-89).
 ///
@@ -56,7 +56,7 @@ const int kMasteredBox = 8;
 /// [CardState.isNew] rather than throwing, for the same reason the enum tolerates
 /// it at all: one unrecognised row must not take down every screen that lists
 /// cards.
-CardState cardStateOf(CardReviewStateEntity state) {
+CardState cardStateOf(CardStudyStateEntity state) {
   // BR-90, and it is checked before either scheduler: a card with no scheduled
   // review is `new` regardless of what its columns hold. `eight_box` seeds
   // `current_box = 1` at creation (BR-09), so reading the box first would call

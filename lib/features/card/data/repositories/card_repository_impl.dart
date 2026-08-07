@@ -22,7 +22,7 @@ import '../../domain/repositories/card_repository.dart';
 import '../datasources/card_list_read_data_source.dart';
 import '../datasources/deck_context_read_data_source.dart';
 import '../mappers/card_mapper.dart';
-import '../mappers/card_review_state_seed_mapper.dart';
+import '../mappers/card_study_state_seed_mapper.dart';
 import '../mappers/tag_mapper.dart';
 import '../datasources/card_dao.dart';
 import '../datasources/card_deck_context_dao.dart';
@@ -186,7 +186,7 @@ final class CardRepositoryImpl implements CardRepository {
           updatedAt: now,
         ),
       );
-      // Exactly one review state, born with the card (BR-09); due_at NULL.
+      // Exactly one study state, born with the card (BR-09); due_at NULL.
       await _cardDao.insertReviewState(
         initialReviewStateFromScheduler(id, scheduler),
       );

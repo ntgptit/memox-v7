@@ -9,8 +9,8 @@ import '../../shared/widgets/mx_navigation_bar.dart';
 /// It owns the [StatefulNavigationShell], the outer `Scaffold`, the bottom bar
 /// and the branch-switching callback — and nothing else. It reads no provider,
 /// touches no repository and holds no state of its own: the selected index
-/// lives in the router, which is what makes a deep link to `/review` open on
-/// the Review tab instead of opening Decks and then jumping.
+/// lives in the router, which is what makes a deep link to `/study` open on
+/// the Study tab instead of opening Decks and then jumping.
 ///
 /// **Two Scaffolds, on purpose.** This one carries the bottom bar; each screen
 /// carries its own `MxContentShell`, which is a `Scaffold` with the app bar. It
@@ -48,7 +48,7 @@ class AppNavigationShell extends StatelessWidget {
           NavigationDestination(
             icon: const Icon(Icons.school_outlined),
             selectedIcon: const Icon(Icons.school),
-            label: context.l10n.navigationReviewLabel,
+            label: context.l10n.navigationStudyLabel,
           ),
         ],
       ),

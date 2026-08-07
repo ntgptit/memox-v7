@@ -25,7 +25,7 @@ import '../tables/cards.drift';
 -- Coalescing the parent column with the id would mean "my parent, or me if I
 -- have none", which returns the level-2 deck for anything at level 3 — right
 -- for a one-level tree, which is what makes it dangerous.
-cardsDueForReview:
+cardsDueForStudy:
 SELECT c.**
 FROM cards c
 INNER JOIN decks d ON d.id = c.deck_id

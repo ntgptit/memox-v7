@@ -155,8 +155,8 @@ ThemeData buildDarkTheme() => _buildTheme(
   const AppSemanticColors.dark(),
   background: AppColors.backgroundDark,
   // Indigo in both modes, so the brand is the same object in light and dark.
-  // The colour it does NOT compete with is the review verdict pair: those are
-  // the only two saturated fills on a review screen, and `secondaryAction` is
+  // The colour it does NOT compete with is the study verdict pair: those are
+  // the only two saturated fills on a study screen, and `secondaryAction` is
   // kept neutral precisely so nothing else in the row has a hue.
   actionFill: AppColors.primaryDark,
   actionLabel: AppColors.onPrimaryDark,
@@ -225,7 +225,7 @@ ThemeData _buildTheme(
     appBarTheme: AppBarTheme(
       backgroundColor: background,
       foregroundColor: scheme.onSurface,
-      // No tint on scroll: during a review the header must stay still, because
+      // No tint on scroll: during a study session the header must stay still, because
       // a colour shift behind the card reads as the card itself changing.
       scrolledUnderElevation: 0,
       elevation: 0,

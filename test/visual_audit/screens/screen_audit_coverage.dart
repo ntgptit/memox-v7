@@ -27,7 +27,7 @@ class ScreenAuditPair {
   final String screenPath;
   final String auditPath;
 
-  /// `ReviewPlaceholderScreen`, derived from the file name.
+  /// `StudyPlaceholderScreen`, derived from the file name.
   String get screenClass {
     final base = screenPath.split('/').last.replaceAll('.dart', '');
 
@@ -42,9 +42,9 @@ String _posix(String path) => path.replaceAll(r'\', '/');
 
 /// Every production screen file, with the companion path it requires.
 ///
-/// `lib/features/review/presentation/screens/review_placeholder_screen.dart`
-/// →  `test/visual_audit/screens/features/review/screens/
-///     review_placeholder_screen_visual_audit_test.dart`
+/// `lib/features/study/presentation/screens/study_placeholder_screen.dart`
+/// →  `test/visual_audit/screens/features/study/screens/
+///     study_placeholder_screen_visual_audit_test.dart`
 List<ScreenAuditPair> discoverScreenPairs(Directory libRoot) {
   final pairs = <ScreenAuditPair>[];
 

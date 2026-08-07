@@ -71,7 +71,7 @@ void main() {
     );
     await expectEveryInvariantClean('after creating a card');
 
-    // ---- edit it: content changes, the review state must not (BR-10) -------
+    // ---- edit it: content changes, the study state must not (BR-10) -------
     await h.cardRepository.updateCard(
       cardId: card.id,
       front: CardText.parse('kimchi jjigae', side: CardSide.front).text!,

@@ -118,7 +118,7 @@ final class QueryLogInterceptor extends QueryInterceptor {
   /// conclusion from `INSERT INTO cards (rowid 1)` is that a card exists.
   ///
   /// That matters here more than in most codebases: `createCard` writes a card
-  /// and its review state as one unit (BR-09), and reset writes a whole
+  /// and its study state as one unit (BR-09), and reset writes a whole
   /// generation change as one (BR-11). "Did this commit" is the question those
   /// operations are designed around.
   ///

@@ -6,7 +6,7 @@ import '../../features/card/presentation/providers/card_use_case_provider.dart';
 import '../../features/card/presentation/screens/card_editor_screen.dart';
 import '../../features/card/presentation/screens/card_list_screen.dart';
 import '../../features/deck/presentation/screens/deck_list_screen.dart';
-import '../../features/review/presentation/screens/review_placeholder_screen.dart';
+import '../../features/study/presentation/screens/study_placeholder_screen.dart';
 import '../fallback/route_not_found_screen.dart';
 import '../shell/app_navigation_shell.dart';
 import '../../core/navigation/route_names.dart';
@@ -124,9 +124,9 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
           StatefulShellBranch(
             routes: <RouteBase>[
               GoRoute(
-                path: RoutePaths.review,
-                name: RouteNames.review,
-                builder: (context, state) => const ReviewPlaceholderScreen(),
+                path: RoutePaths.study,
+                name: RouteNames.study,
+                builder: (context, state) => const StudyPlaceholderScreen(),
               ),
             ],
           ),

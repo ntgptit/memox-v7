@@ -39,7 +39,7 @@ const List<NavigationDestination> navigationDestinations =
       NavigationDestination(
         icon: Icon(Icons.school_outlined),
         selectedIcon: Icon(Icons.school),
-        label: 'Review',
+        label: 'Study',
       ),
     ];
 

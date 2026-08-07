@@ -48,7 +48,7 @@ void main() {
       expect(roomy.textTheme.titleLarge!.fontSize, 22);
     });
 
-    testWidgets('the review card prompt gets smaller', (tester) async {
+    testWidgets('the study card prompt gets smaller', (tester) async {
       final compact = await themeAt(tester, small);
       final roomy = await themeAt(tester, normal);
 
@@ -129,7 +129,7 @@ void main() {
       expect(compactPadding.vertical, roomyPadding.vertical);
     });
 
-    testWidgets('four review actions keep their labels at 320', (tester) async {
+    testWidgets('four study actions keep their labels at 320', (tester) async {
       // The case that made the padding worth changing. `sm2` renders four
       // actions; at 320 each button gets 68px, and 24-a-side padding left 20 for
       // the label — "Again" came out as "Ag" and the rest broke mid-word. At

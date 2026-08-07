@@ -87,8 +87,8 @@ void main() {
       final subtree = await db.subtreeDeckIds(root.id).get();
       expect(subtree.toSet(), <String>{root.id, branch.id, leaf.id});
 
-      // BR-09 held over the web path: exactly one review state, box 1.
-      final state = await db.reviewStateByCard(card.id).getSingle();
+      // BR-09 held over the web path: exactly one study state, box 1.
+      final state = await db.studyStateByCard(card.id).getSingle();
       expect(state.currentBox, 1);
       expect(state.dueAt, isNull);
 

@@ -1,7 +1,7 @@
 import '../../../../core/database/app_database.dart';
 import '../../domain/models/card_list_item_model.dart';
 import 'card_mapper.dart';
-import 'card_review_state_mapper.dart';
+import 'card_study_state_mapper.dart';
 
 /// Maps the parts of a joined list row to the projection.
 ///
@@ -18,11 +18,11 @@ const String _tagSeparator = '\u{1F}';
 
 CardListItemModel cardListItemFromParts(
   Card card,
-  CardReviewState reviewState,
+  CardReviewState studyState,
   String? tagNames,
 ) => CardListItemModel(
   card: cardEntityFromRow(card),
-  reviewState: cardReviewStateEntityFromRow(reviewState),
+  studyState: cardStudyStateEntityFromRow(studyState),
   tagNames: _splitTagNames(tagNames),
 );
 

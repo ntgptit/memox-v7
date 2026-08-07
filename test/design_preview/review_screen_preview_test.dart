@@ -10,7 +10,7 @@ import '../visual_audit/memox_audit.dart';
 import '../visual_audit/screen_auditor.dart';
 import 'preview_harness.dart';
 
-/// The review screen — the one that decides the palette.
+/// The study screen — the one that decides the palette.
 ///
 /// Everything else in the app is chrome around this. If the flashcard is not
 /// the most prominent thing here, the palette is wrong regardless of how the

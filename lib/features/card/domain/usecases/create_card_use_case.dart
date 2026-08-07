@@ -11,7 +11,7 @@ import '../repositories/card_repository.dart';
 /// The rules that need the tree as it stands at the moment of writing stay in
 /// the repository, inside its transaction: BR-58 (no card under a root), BR-63
 /// (a deck holds one kind of thing), the BR-62 first-card content lock and the
-/// BR-09 review state. Checking any of them here would answer a question about
+/// BR-09 study state. Checking any of them here would answer a question about
 /// a moment that has already passed by the time the write runs.
 class CreateCardUseCase {
   const CreateCardUseCase(this._repository);

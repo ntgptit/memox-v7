@@ -45,7 +45,7 @@ void main() {
   }
 
   test(
-    'a copy writes the whole tree, its cards and their review states',
+    'a copy writes the whole tree, its cards and their study states',
     () async {
       final outcome = await repository.installTemplate(
         eightBoxFixtureTemplate(),
@@ -55,7 +55,7 @@ void main() {
       // root + branch + two leaves.
       expect(await countRows('decks'), 4);
       expect(await countRows('cards'), 3);
-      // BR-09: exactly one review state per card, born with it.
+      // BR-09: exactly one study state per card, born with it.
       expect(await countRows('card_review_states'), 3);
 
       final root = (await rows(

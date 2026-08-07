@@ -13,13 +13,13 @@ import '../../../database/support/test_database.dart';
 import '../../deck/data/support/deck_repository_harness.dart';
 
 /// Card integration tests on a real SQLite database: create with exactly one
-/// review state (BR-09), per-scheduler initialisation, edit isolation (BR-10)
+/// study state (BR-09), per-scheduler initialisation, edit isolation (BR-10)
 /// and delete cascade (BR-67).
 void main() {
   final h = installDeckRepositoryHarness();
 
   group('createCard', () {
-    test('creates the card and exactly one review state (BR-09)', () async {
+    test('creates the card and exactly one study state (BR-09)', () async {
       final tree = await h.seedTree();
       final card = await h.cardRepository.createCard(
         deckId: tree.leaf.id,
@@ -100,7 +100,7 @@ void main() {
           throwsA(isA<Failure>()),
         );
 
-        // No card without a review state can exist (BR-09) — and the deck's
+        // No card without a study state can exist (BR-09) — and the deck's
         // content_type went back to unset with it.
         expect(await h.countAll('cards'), 0);
         expect(await h.countAll('card_review_states'), 0);
@@ -149,7 +149,7 @@ void main() {
     }
 
     test(
-      'editing content leaves the review state byte-identical (BR-10)',
+      'editing content leaves the study state byte-identical (BR-10)',
       () async {
         final seeded = await seedCard();
         final before = (await h.rawStates(seeded.card.id)).single.data;
@@ -307,7 +307,7 @@ void main() {
 
   group('watchCardListItems (D5)', () {
     test(
-      'joins each card to its review state; a new card reads isNew',
+      'joins each card to its study state; a new card reads isNew',
       () async {
         final tree = await h.seedTree();
         await h.cardRepository.createCard(

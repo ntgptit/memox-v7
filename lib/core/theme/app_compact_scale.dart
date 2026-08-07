@@ -27,7 +27,7 @@ ThemeData applyCompactScale(ThemeData base) {
       // Word ..." on a 320-wide screen; the name is the one thing that screen
       // is about.
       titleLarge: texts.titleLarge?.copyWith(fontSize: 20),
-      // The review card prompt, the app's one deliberately large style.
+      // The study card prompt, the app's one deliberately large style.
       headlineMedium: texts.headlineMedium?.copyWith(
         fontSize: AppTypography.compactCardPromptSize,
       ),
@@ -44,7 +44,7 @@ ThemeData applyCompactScale(ThemeData base) {
     // opposite of what "make the button smaller" would do and the only version
     // that helps.
     //
-    // Measured: four review actions in a row at 320 give each button 68px. At
+    // Measured: four study actions in a row at 320 give each button 68px. At
     // 24 a side the padding takes 48 of that and leaves 20 for the label, so
     // "Again" renders as "Ag" and the rest break mid-word — at normal text
     // scale, with no overflow and no exception. At 12 a side the label gets 44.

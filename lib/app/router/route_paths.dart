@@ -37,7 +37,7 @@ abstract final class RoutePaths {
   static const String cardCreateRelative = 'new';
   static const String cardEditRelative = ':cardId/edit';
 
-  /// The review branch. A real path rather than a sub-path of `/` so that a
-  /// deep link can open the app directly on the Review tab.
-  static const String review = '/review';
+  /// The study branch. A real path rather than a sub-path of `/` so that a
+  /// deep link can open the app directly on the Study tab.
+  static const String study = '/study';
 }

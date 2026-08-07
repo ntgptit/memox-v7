@@ -14,12 +14,12 @@ import 'package:memox/features/card/presentation/screens/card_editor_screen.dart
 import 'package:memox/features/card/presentation/screens/card_list_screen.dart';
 
 import '../features/card/presentation/support/fake_card_repository.dart';
-import '../support/review_render.dart';
+import '../support/study_render.dart';
 
 /// DEMO renders (not assertions): captures the real card screens with seeded
 /// content as PNGs, so the card management UI can be reviewed without the web
 /// database. Device-faithful — soft shadows, via `pumpReview` (see
-/// `test/support/review_render.dart` for why the shadow flag matters). Tagged
+/// `test/support/study_render.dart` for why the shadow flag matters). Tagged
 /// `golden`+`review` like the design previews, so CI runs it on the windows
 /// golden job and excludes it on Linux. Run with:
 ///   flutter test --update-goldens --tags golden test/demo/card_screens_demo_test.dart

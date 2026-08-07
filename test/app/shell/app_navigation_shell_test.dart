@@ -113,10 +113,10 @@ void main() {
       await pumpShell(
         tester,
         FakeDeckRepository(),
-        initialLocation: RoutePaths.review,
+        initialLocation: RoutePaths.study,
       );
 
-      expect(find.text(english.reviewPlaceholderMessage), findsOneWidget);
+      expect(find.text(english.studyPlaceholderMessage), findsOneWidget);
       expect(find.byType(MxNavigationBar), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
@@ -210,7 +210,7 @@ void main() {
       await tester.tap(
         find.descendant(
           of: find.byType(MxNavigationBar),
-          matching: find.text(english.navigationReviewLabel),
+          matching: find.text(english.navigationStudyLabel),
         ),
       );
       await tester.pumpAndSettle();

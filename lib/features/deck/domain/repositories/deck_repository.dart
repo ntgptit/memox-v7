@@ -100,7 +100,7 @@ abstract interface class DeckRepository {
   /// What deleting [deckId] would remove — shown before the delete (BR-04).
   Future<DeckDeletionImpact> getDeletionImpact(String deckId);
 
-  /// Deletes a deck; descendants, cards, review states, history and sessions
+  /// Deletes a deck; descendants, cards, study states, history and sessions
   /// go with it by cascade (BR-03).
   Future<void> deleteDeck(String deckId);
 

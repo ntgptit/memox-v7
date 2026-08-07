@@ -30,7 +30,7 @@ void main() {
     return db;
   }
 
-  /// A review state with the columns this file needs to control directly. The
+  /// A study state with the columns this file needs to control directly. The
   /// shared helper does not expose box or interval, and inventing values for
   /// them is the whole point here.
   Future<void> stateFor(
@@ -189,7 +189,7 @@ void main() {
 
       await insertCard(db, id: 'c1', deckId: 'leaf');
       await insertCard(db, id: 'c2', deckId: 'leaf');
-      // The count joins the review state, which BR-09 says is born with the
+      // The count joins the study state, which BR-09 says is born with the
       // card — the fixture has to honour that invariant to be read at all.
       await insertReviewState(db, cardId: 'c1');
       await insertReviewState(db, cardId: 'c2');

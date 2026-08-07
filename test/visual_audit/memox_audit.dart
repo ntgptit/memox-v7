@@ -99,7 +99,7 @@ Future<ScreenAudit> auditMemoxScreen(
 /// The one-liner a screen test uses: audit light and dark, assert both.
 ///
 /// [expectation] defaults to [AuditExpectation.noViolations] — the exploratory
-/// bar, which is honest for the preview screens: they still contain a text field
+/// bar, which is honest for the pstudy screens: they still contain a text field
 /// and an `Ink` layer nobody has measured yet, and the report says so on every
 /// run. A production screen should be raised to [AuditExpectation.complete] once
 /// each remaining skip is either measurable or carries a written allowance.

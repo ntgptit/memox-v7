@@ -34,7 +34,7 @@ CardsCompanion templateCardCompanion(
   updatedAt: now,
 );
 
-/// The review state a copied card is born with (BR-09), per scheduler.
+/// The study state a copied card is born with (BR-09), per scheduler.
 ///
 /// **A second copy of the card feature's `initialReviewStateFromScheduler`, and
 /// deliberately so.** That one lives in `features/card/data/`, which this

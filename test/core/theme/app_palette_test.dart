@@ -195,7 +195,7 @@ void main() {
 
   group('secondary action', () {
     test('is neutral, and is not the brand colour', () {
-      // It sits beside the review verdicts. Anything with a hue there competes
+      // It sits beside the study verdicts. Anything with a hue there competes
       // with the two colours carrying the user's actual decision.
       const neutral = 0.20;
 

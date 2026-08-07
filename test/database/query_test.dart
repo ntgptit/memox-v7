@@ -72,11 +72,11 @@ void main() {
     );
   }
 
-  test('cardsDueForReview returns exactly the due cards of one tree', () async {
+  test('cardsDueForStudy returns exactly the due cards of one tree', () async {
     final db = openTestDatabase();
     await seed(db);
 
-    final due = await db.cardsDueForReview('root-a', testNow).get();
+    final due = await db.cardsDueForStudy('root-a', testNow).get();
 
     expect(due.map((row) => row.c.id).toSet(), <String>{
       'a-null',
@@ -109,7 +109,7 @@ void main() {
     final counts = await db.dueCountPerRootDeck(testNow).get();
 
     for (final row in counts) {
-      final listed = await db.cardsDueForReview(row.rootDeckId, testNow).get();
+      final listed = await db.cardsDueForStudy(row.rootDeckId, testNow).get();
 
       expect(
         listed.length,
@@ -128,10 +128,10 @@ void main() {
     await seed(db);
 
     final earlier = await db
-        .cardsDueForReview('root-a', testNow.subtract(const Duration(days: 2)))
+        .cardsDueForStudy('root-a', testNow.subtract(const Duration(days: 2)))
         .get();
     final later = await db
-        .cardsDueForReview('root-a', testNow.add(const Duration(days: 2)))
+        .cardsDueForStudy('root-a', testNow.add(const Duration(days: 2)))
         .get();
 
     expect(earlier.map((row) => row.c.id).toSet(), <String>{
@@ -146,7 +146,7 @@ void main() {
     });
   });
 
-  test('a card with no review state is not offered', () async {
+  test('a card with no study state is not offered', () async {
     // BR-09 says a card is born with a state, so a card without one is broken
     // data rather than a due card. The inner join is what decides that, and it
     // is worth pinning: an outer join here would quietly hand the session a card
@@ -155,7 +155,7 @@ void main() {
     await seed(db);
     await insertCard(db, id: 'a-stateless', deckId: 'leaf-a');
 
-    final due = await db.cardsDueForReview('root-a', testNow).get();
+    final due = await db.cardsDueForStudy('root-a', testNow).get();
 
     expect(due.map((row) => row.c.id), isNot(contains('a-stateless')));
   });

@@ -238,7 +238,7 @@ void main() {
         destinations: navigationDestinations,
       ),
     ),
-    'mx_navigation_bar_review': const Scaffold(
+    'mx_navigation_bar_study': const Scaffold(
       body: SizedBox.expand(),
       bottomNavigationBar: MxNavigationBar(
         selectedIndex: 1,

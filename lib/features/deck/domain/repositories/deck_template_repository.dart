@@ -7,7 +7,7 @@ import '../models/scheduler_type_model.dart';
 /// outcome on every launch after the first, and a caller reading `false` has to
 /// guess whether that meant "already there" or "it failed".
 enum DeckTemplateInstallOutcome {
-  /// A copy was written: root, sub-decks, cards and review states (BR-33).
+  /// A copy was written: root, sub-decks, cards and study states (BR-33).
   installed,
 
   /// A copy of this `(template_id, version)` already existed, so nothing was

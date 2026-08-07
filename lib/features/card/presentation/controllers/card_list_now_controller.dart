@@ -17,7 +17,7 @@ part 'card_list_now_controller.g.dart';
 /// the badge feeds a due *count* that launches a session, so a stale number is a
 /// wrong control; here it is a relative label — "in 4d" a minute stale is a stale
 /// label, not a wrong action — so resume-refresh is enough, and the boundary wake
-/// waits for the review flow that actually depends on it.
+/// waits for the study flow that actually depends on it.
 @riverpod
 class CardListNow extends _$CardListNow {
   @override

@@ -4,7 +4,7 @@ import '../tables/cards.drift';
 -- Typed queries for tags and the card flag (M4.10at).
 --
 -- Separate from `card.drift` because they are a different table family: these
--- touch `tags` and `card_tags`, and nothing here reads a review state.
+-- touch `tags` and `card_tags`, and nothing here reads a study state.
 
 -- Does this name already exist for this owner (BR-93)?
 --
