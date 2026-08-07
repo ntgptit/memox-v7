@@ -13,6 +13,7 @@ CardStudyStateEntity cardStudyStateEntityFromRow(CardStudyState row) =>
       schedulerType: SchedulerType.fromDbValue(row.schedulerType),
       schedulerVersion: row.schedulerVersion,
       schedulerGeneration: row.schedulerGeneration,
+      learnedAt: row.learnedAt?.toUtc(),
       dueAt: row.dueAt?.toUtc(),
       lastAnsweredAt: row.lastAnsweredAt?.toUtc(),
       answerCount: row.answerCount,

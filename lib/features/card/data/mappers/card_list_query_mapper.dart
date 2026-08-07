@@ -35,8 +35,12 @@ import '../../domain/models/card_text_model.dart';
 Expression<bool> studyQueuePredicate(CardStudyStates s, DateTime now) =>
     s.dueAt.isNull() | s.dueAt.isSmallerOrEqualValue(now);
 
-/// BR-90: never reviewed.
-Expression<bool> isNewPredicate(CardStudyStates s) => s.answerCount.equals(0);
+/// BR-90: has not finished the learning chain.
+///
+/// Not `answer_count = 0`: the chain writes no `scheduled` answer, so a card can
+/// go through all five stages and still read zero. That definition called every
+/// card new forever.
+Expression<bool> isNewPredicate(CardStudyStates s) => s.learnedAt.isNull();
 
 /// The Due pill's set: in the study queue, and **not** new.
 ///
@@ -50,9 +54,10 @@ Expression<bool> isNewPredicate(CardStudyStates s) => s.answerCount.equals(0);
 ///
 /// **Subtracted structurally, not by a second date test.** Writing this as
 /// `due_at IS NOT NULL AND due_at <= now` would also read as disjoint from New,
-/// but only while `answer_count = 0` implies `due_at IS NULL` — true today by
-/// BR-09 and BR-77, and true only as long as nothing schedules a card it has
-/// not reviewed. Negating the New predicate itself cannot come apart from it:
+/// but only while New implies `due_at IS NULL`. Since v5 that is guaranteed both
+/// ways by invariants 24 and 28 rather than by convention — but the structural
+/// form costs nothing and does not depend on the guarantee holding.
+/// Negating the New predicate itself cannot come apart from it:
 /// whatever New means, Due is the rest of the queue. So `Due + New` is exactly
 /// the queue, which is what lets the progress panel add them.
 ///

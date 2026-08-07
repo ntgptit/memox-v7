@@ -49,11 +49,13 @@ void main() {
     );
 
     expect(rows.map((row) => row['name']), <String>[
+      'app_settings',
       'card_study_states',
       'card_tags',
       'cards',
       'decks',
       'study_answers',
+      'study_queue_items',
       'study_sessions',
       'tags',
     ]);
@@ -73,6 +75,7 @@ void main() {
         'scheduler_config',
         'scheduler_generation',
         'first_answered_at',
+        'study_config',
         'source_template_id',
         'source_template_version',
         'created_at',
@@ -99,6 +102,7 @@ void main() {
         'scheduler_type',
         'scheduler_version',
         'scheduler_generation',
+        'learned_at',
         'due_at',
         'last_answered_at',
         'answer_count',
@@ -115,6 +119,10 @@ void main() {
         'scheduler_type',
         'scheduler_generation',
         'kind',
+        'mode',
+        'outcome_reason',
+        'comparison_version',
+        'used_hint',
         'action',
         'answered_at',
         'next_due_at',
@@ -132,8 +140,30 @@ void main() {
         'scheduler_generation',
         'status',
         'end_reason',
+        'session_kind',
+        'current_mode',
+        'cursor',
+        'card_limit',
         'started_at',
         'ended_at',
+      ],
+      'study_queue_items': <String>[
+        'session_id',
+        'mode',
+        'round',
+        'card_id',
+        'position',
+        'status',
+        'available_at',
+        'answers_in_session',
+        'remaining_ms',
+        'is_revealed',
+      ],
+      'app_settings': <String>[
+        'id',
+        'card_limit',
+        'new_card_order',
+        'updated_at',
       ],
     };
 
@@ -250,6 +280,7 @@ void main() {
       'idx_decks_root_created',
       'idx_study_answers_card',
       'idx_study_answers_session',
+      'idx_study_queue_serving',
       'idx_tags_owner_folded',
     ]);
   });

@@ -163,7 +163,7 @@ void main() {
   test('the schema version is 4', () async {
     final db = openTestDatabase();
 
-    expect(db.schemaVersion, 4);
+    expect(db.schemaVersion, 5);
   });
 
   test('the only scheduler numbers in SQL are BR-88s two thresholds', () {

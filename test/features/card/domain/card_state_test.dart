@@ -12,15 +12,19 @@ import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 /// on an off-by-one at box 4 and at box 8, which are the only two places the
 /// arithmetic can be wrong.
 void main() {
-  CardStudyStateEntity eightBox({required int box, int answerCount = 1}) =>
+  // `isNew` is `learned_at IS NULL` since v5 (BR-90), not `answer_count = 0`:
+  // the learning chain writes no `scheduled` answer, so the count stays 0
+  // through every stage.
+  CardStudyStateEntity eightBox({required int box, bool learned = true}) =>
       CardStudyStateEntity(
         cardId: 'c1',
         schedulerType: SchedulerType.eightBox,
         schedulerVersion: 1,
         schedulerGeneration: 1,
+        learnedAt: learned ? DateTime.utc(2026) : null,
         dueAt: null,
         lastAnsweredAt: null,
-        answerCount: answerCount,
+        answerCount: 1,
         lapseCount: 0,
         currentBox: box,
         easeFactor: null,
@@ -28,15 +32,16 @@ void main() {
         repetitions: null,
       );
 
-  CardStudyStateEntity sm2({required int? days, int answerCount = 1}) =>
+  CardStudyStateEntity sm2({required int? days, bool learned = true}) =>
       CardStudyStateEntity(
         cardId: 'c1',
         schedulerType: SchedulerType.sm2,
         schedulerVersion: 1,
         schedulerGeneration: 1,
+        learnedAt: learned ? DateTime.utc(2026) : null,
         dueAt: null,
         lastAnsweredAt: null,
-        answerCount: answerCount,
+        answerCount: 1,
         lapseCount: 0,
         currentBox: null,
         easeFactor: 2.5,
@@ -51,8 +56,8 @@ void main() {
         // `eight_box` seeds `current_box = 1` at creation (BR-09), so a
         // projection that read the box first would call every untouched card
         // `beginning` and the state would never be reachable.
-        expect(cardStateOf(eightBox(box: 1, answerCount: 0)), CardState.isNew);
-        expect(cardStateOf(sm2(days: 0, answerCount: 0)), CardState.isNew);
+        expect(cardStateOf(eightBox(box: 1, learned: false)), CardState.isNew);
+        expect(cardStateOf(sm2(days: 0, learned: false)), CardState.isNew);
       },
     );
 
@@ -139,6 +144,7 @@ void main() {
         schedulerType: SchedulerType.unknown,
         schedulerVersion: 99,
         schedulerGeneration: 1,
+        learnedAt: null,
         dueAt: null,
         lastAnsweredAt: null,
         answerCount: 5,

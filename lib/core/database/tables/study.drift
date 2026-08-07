@@ -23,12 +23,37 @@ CREATE TABLE study_sessions (
     ),
 
     -- NULL while in progress or after a normal completion (BR-80).
+    --
+    -- `interrupted` is separate from `user_exit` for the reason BR-76 stores
+    -- `kind` rather than deriving it: "the user pressed exit" and "the OS
+    -- reclaimed the app" are different events, and merging them makes the
+    -- history say somebody gave up when they did not (BR-103).
     end_reason TEXT NULL CHECK (
         end_reason IS NULL
         OR end_reason IN (
-            'user_exit', 'scheduler_reset', 'stale_generation', 'persistence_error'
+            'user_exit', 'scheduler_reset', 'stale_generation',
+            'persistence_error', 'interrupted'
         )
     ),
+
+    -- The two card sets never mix (BR-142): `learning` takes cards with
+    -- `learned_at IS NULL`, `reviewing` takes cards already learned and due.
+    session_kind TEXT NOT NULL CHECK (session_kind IN ('learning', 'reviewing')),
+
+    -- The stage running right now (BR-98). Stored, never inferred from the
+    -- shape of the data. A `reviewing` session holds one value for its whole
+    -- life; a `learning` session walks the algorithm's `stageSequence`.
+    current_mode TEXT NOT NULL CHECK (
+        current_mode IN ('browse', 'self_assess', 'match', 'guess', 'recall', 'fill')
+    ),
+
+    -- Turns served so far. This is what BR-26 counts against: a forgotten card
+    -- gets `available_at = cursor + 3` instead of every later row being shifted.
+    cursor INTEGER NOT NULL DEFAULT 0,
+
+    -- Fixed once, when the session opens, from the effective option (BR-139).
+    -- Changing the setting afterwards must not move a running session.
+    card_limit INTEGER NOT NULL,
 
     started_at DATETIME NOT NULL,
     ended_at DATETIME NULL
@@ -60,7 +85,30 @@ CREATE TABLE study_answers (
     -- (BR-76, AD-11). The inference is wrong in a case that is not rare: a
     -- `scheduled` review answered `remembered` on a box-8 card also has
     -- previous_box == next_box == 8.
-    kind TEXT NOT NULL CHECK (kind IN ('scheduled', 'relearning')),
+    -- `learning` belongs to the new-card chain: it records history and changes
+    -- no schedule, and never appears in a `reviewing` session (BR-143).
+    kind TEXT NOT NULL CHECK (kind IN ('learning', 'scheduled', 'relearning')),
+
+    -- The stage this turn came from (BR-98). `browse` produces no action and
+    -- writes no row here at all (BR-111), so it can never appear.
+    mode TEXT NOT NULL CHECK (
+        mode IN ('self_assess', 'match', 'guess', 'recall', 'fill')
+    ),
+
+    -- Stored, not inferred from `action`: owning up to a blank and running out
+    -- of time produce the same `action`, and only one of them is a timeout
+    -- (BR-131). Invariant 22 keeps it to `recall`.
+    outcome_reason TEXT NULL CHECK (
+        outcome_reason IS NULL OR outcome_reason IN ('timeout')
+    ),
+
+    -- `fill` only. Which comparison policy graded this turn (BR-135): changing
+    -- the policy bumps the version and must never re-grade older turns.
+    comparison_version INTEGER NULL,
+
+    -- `fill` only. Recorded, and deliberately without effect on `action` or the
+    -- schedule (BR-136).
+    used_hint INTEGER NULL CHECK (used_hint IS NULL OR used_hint IN (0, 1)),
 
     -- eight_box uses forgotten/remembered, sm2 uses again/hard/good/easy.
     --
@@ -87,3 +135,79 @@ CREATE TABLE study_answers (
 CREATE INDEX idx_study_answers_card ON study_answers (card_id, answered_at);
 
 CREATE INDEX idx_study_answers_session ON study_answers (session_id);
+
+-- One row per card per round per stage of a session (BR-102, BR-113).
+--
+-- The queue left `presentation/` because it CARRIES RULES -- BR-23 ordering,
+-- BR-26 comeback, BR-104's ceiling -- and a rule-bearing structure inside a
+-- controller is a rule out of reach of every check that can actually be run.
+-- Surviving the OS reclaiming the app (BR-103) is the bonus, not the reason.
+CREATE TABLE study_queue_items (
+    session_id TEXT NOT NULL REFERENCES study_sessions (id) ON DELETE CASCADE,
+
+    -- Each stage gets its own queue over the SAME card set, shuffled
+    -- independently (BR-113).
+    mode TEXT NOT NULL CHECK (
+        mode IN ('browse', 'self_assess', 'match', 'guess', 'recall', 'fill')
+    ),
+
+    -- Round within the stage (BR-115). `browse` and `self_assess` stay at 1:
+    -- they do not use rounds, they repeat via BR-26.
+    round INTEGER NOT NULL DEFAULT 1,
+
+    card_id TEXT NOT NULL REFERENCES cards (id) ON DELETE CASCADE,
+
+    -- Order inside this round (BR-23, BR-117). Immutable once the round is
+    -- built -- that is the whole point of `available_at` below.
+    position INTEGER NOT NULL,
+
+    status TEXT NOT NULL CHECK (status IN ('pending', 'completed')),
+
+    -- The lowest session `cursor` at which this card may be served again
+    -- (BR-26). A forgotten card sets it to `cursor + 3`; nothing else moves.
+    --
+    -- The blunt alternative -- rewrite `position` and shift everything after
+    -- it -- turns one `forgotten` into a burst of UPDATEs and loses the
+    -- original order. One number replacing one number does not.
+    available_at INTEGER NOT NULL DEFAULT 0,
+
+    -- Turns graded so far in this session; 0 means the next one is `scheduled`
+    -- (BR-77) and it is what BR-104's ceiling of 3 counts.
+    answers_in_session INTEGER NOT NULL DEFAULT 0,
+
+    -- `recall` only, and both exist so Resume continues the turn instead of
+    -- restarting it (BR-133). Invariant 21 keeps them off every other stage
+    -- and inside 0..20000.
+    remaining_ms INTEGER NULL,
+    is_revealed INTEGER NOT NULL DEFAULT 0,
+
+    -- A card appears exactly once per round per stage (BR-113, BR-117).
+    PRIMARY KEY (session_id, mode, round, card_id)
+);
+
+-- Serving the next card: the ordering rule as a query, not as an `if` somebody
+-- has to remember to write.
+CREATE INDEX idx_study_queue_serving
+    ON study_queue_items (session_id, mode, round, status, available_at, position);
+
+-- Exactly one row, for the local profile (BR-147).
+--
+-- A one-row table with real columns rather than key-value: key-value reads more
+-- flexibly and turns every value into TEXT and every read into an unchecked
+-- cast, while this shape lets `drift_dev` type-check at build time and makes
+-- adding an option a migration -- the right level of ceremony for something
+-- that changes how people study.
+CREATE TABLE app_settings (
+    -- The CHECK is what keeps the table at one row. Without it, "the settings"
+    -- becomes "whichever row the query happened to read first".
+    id INTEGER NOT NULL PRIMARY KEY CHECK (id = 1),
+
+    -- A ceiling PER SESSION, not per day (BR-24). The number of sessions in a
+    -- day is deliberately unlimited.
+    card_limit INTEGER NOT NULL DEFAULT 20,
+
+    new_card_order TEXT NOT NULL DEFAULT 'created'
+        CHECK (new_card_order IN ('created', 'random')),
+
+    updated_at DATETIME NOT NULL
+);

@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M5 replan (kế hoạch thi hành sau brainstorm) |
+| **Updated by task** | M5.0s (schema v5) |
 | **Last updated** | 2026-08-07 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -7270,7 +7270,7 @@ giờ làm chúng fail trên bản đang chạy. Ghi vào `it-scenarios/README.m
 
 ### M5.0s · Schema v5: toàn bộ cột và bảng mà Study cần
 
-- **Status:** todo
+- **Status:** **done** — analyze sạch, 1424 test xanh, guard sạch, invariants 28/28
 - **Goal:** Đưa `data-model.md` sau brainstorm vào SQLite, một lần, trước khi có
   dòng code Study nào chạm vào nó.
 - **Scope:** `card_study_states.learned_at`; `study_sessions.session_kind`,
@@ -7286,20 +7286,42 @@ giờ làm chúng fail trên bản đang chạy. Ghi vào `it-scenarios/README.m
 - **Output:** `lib/core/database/tables/*.drift`, `app_database.dart`,
   `drift_schemas/drift_schema_v5.json`, `test/database/migration_v5_test.dart`
 - **Acceptance criteria:**
-  - [ ] `kind` nhận thêm `learning`; `end_reason` nhận thêm `interrupted`.
-  - [ ] `study_queue_items` PK là `(session_id, mode, round, card_id)` (BR-113).
-  - [ ] `app_settings` có `CHECK (id = 1)` — bảng không thể có dòng thứ hai.
-  - [ ] Migration v1→v5, v2→v5, v3→v5 và v4→v5 đều mở được; test khẳng định dữ
+  - [x] `kind` nhận thêm `learning`; `end_reason` nhận thêm `interrupted`.
+  - [x] `study_queue_items` PK là `(session_id, mode, round, card_id)` (BR-113).
+  - [x] `app_settings` có `CHECK (id = 1)` — bảng không thể có dòng thứ hai.
+  - [x] Migration v1→v5, v2→v5, v3→v5 và v4→v5 đều mở được; test khẳng định dữ
         liệu v4 giữ nguyên giá trị sau khi lên v5.
-  - [ ] Thẻ đang có `due_at` từ trước v5 nhận `learned_at` = `due_at` chứ không
-        NULL — nếu để NULL, invariant 28 đỏ ngay lần mở app đầu tiên sau cập nhật.
-  - [ ] `verify_invariants.py` 28/28 chạy trên fixture đã đồng bộ với v5.
-  - [ ] `SchemaVerifier.migrateAndValidate(db, db.schemaVersion)` xanh.
+  - [x] Thẻ đang có `due_at` từ trước v5 nhận `learned_at` =
+        `COALESCE(last_answered_at, due_at)` chứ không NULL — để NULL thì invariant
+        28 đỏ ngay lần mở app đầu tiên sau cập nhật. Tiêu chí ban đầu viết
+        `learned_at = due_at`; `due_at` là một ngày ở tương lai, không phải thời
+        điểm học xong.
+  - [x] `verify_invariants.py` 28/28 chạy trên fixture đã đồng bộ với v5.
+  - [x] `SchemaVerifier.migrateAndValidate(db, db.schemaVersion)` xanh.
 - **Vì sao một migration chứ không phải năm.** Mỗi cột ở đây vô nghĩa nếu thiếu
   các cột còn lại: `session_kind` không có `learned_at` thì không chia được hai
   tập, `study_queue_items` không có `current_mode` thì không biết stage nào đang
   chạy. Chia nhỏ chỉ tạo ra những phiên bản trung gian không phiên bản nào của
   app từng chạy — tức những migration không ai test thật.
+**Hai bảng phải dựng lại, không phải `ALTER`.** SQLite không đổi được `CHECK`, mà
+`study_answers.kind` thêm `learning` còn `study_sessions.end_reason` thêm
+`interrupted`. Đó là dạng migration duy nhất có thể mất sạch dữ liệu mà
+`migrateAndValidate` không thấy — nó so schema, và bảng rỗng thì schema vẫn đúng.
+Nên mọi test ở đây gieo dòng trước rồi đọc lại sau.
+
+**SQL viết tay phải nói `INTEGER`, không phải `DATETIME`.** Drift dịch kiểu thời
+gian giúp ở `.drift`; SQL viết tay thì không, và `migrateAndValidate` từ chối cặp
+lệch đó. Bảy dòng đầu tiên viết `DATETIME` đều đỏ.
+
+**Định nghĩa "mới" đổi cùng migration, không để lại.** Năm chỗ trong `lib/` dùng
+`answer_count = 0` chuyển sang `learned_at IS NULL` (BR-90). Để lại thì hai định
+nghĩa "mới" cùng chạy, và cái cũ sai hẳn: chuỗi học mới không ghi lượt `scheduled`
+nào, nên một thẻ đi hết năm stage vẫn đọc ra `answer_count = 0`.
+
+**Một việc ngoài danh sách, do guard đòi:** `fake_card_repository.dart` vượt 400
+dòng vì đúng một dòng thêm vào. Tách `CardFixtures` thành mixin riêng thay vì cắt cho
+vừa — seam có thật: phần đó dựng giá trị, không trả lời lời gọi repository nào.
+
 - **Dependencies:** M5.0r
 - **Tests required:** `migration_v5_test.dart` cho bốn đường lên; test backfill
   `learned_at`; `verify_invariants.py`

@@ -86,8 +86,18 @@ CREATE TABLE card_study_states (
     scheduler_version INTEGER NOT NULL,
     scheduler_generation INTEGER NOT NULL,
 
-    -- Shared by every scheduler. NULL means due immediately, which is why the
-    -- due predicate has to test for NULL and not only for a timestamp (BR-22).
+    -- NULL means the card has not finished the learning chain (BR-144). Set
+    -- once, at the completion event, and back to NULL only by Reset (BR-152).
+    --
+    -- This column, not `answer_count`, is what "new" means (BR-90). The learning
+    -- chain writes no `scheduled` answer at all, so a card can go through five
+    -- stages and still read `answer_count = 0` — the definition it replaced
+    -- would have called it new forever.
+    learned_at DATETIME NULL,
+
+    -- Shared by every scheduler. NULL and `learned_at` NULL travel together:
+    -- no schedule until the chain completes, and never a schedule without one
+    -- (BR-149, invariants 24 and 28).
     due_at DATETIME NULL,
 
     -- Updated by `scheduled` and by `relearning` alike (BR-20).
