@@ -162,6 +162,15 @@ final class StudyDao {
           ))
           .write(values);
 
+  /// Open sessions of one root deck.
+  Future<List<StudySession>> openSessionsForRoot(String rootDeckId) =>
+      (_db.select(_db.studySessions)..where(
+            (s) =>
+                s.rootDeckId.equals(rootDeckId) &
+                s.status.equals('in_progress'),
+          ))
+          .get();
+
   Future<void> insertAnswer(StudyAnswersCompanion answer) =>
       _db.into(_db.studyAnswers).insert(answer);
 

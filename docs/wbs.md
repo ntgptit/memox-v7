@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M5.4c (recall, fill) |
+| **Updated by task** | M5.5 (vòng đời phiên) |
 | **Last updated** | 2026-08-07 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -7740,7 +7740,7 @@ không ai tưởng BR-133 đã phủ trọn.
 
 ### M5.5 · Vòng đời phiên và kết thúc đúng trạng thái
 
-- **Status:** todo
+- **Status:** **done** — analyze sạch, 1506 test xanh (trừ golden Windows), guard sạch, invariants 28/28
 - **Goal:** Phiên luôn kết thúc ở đúng `status` và `end_reason`, và lượt đã ghi
   không bao giờ mất.
 - **Scope:** chuyển trạng thái `completed` / `abandoned` / `invalidated` /
@@ -7750,18 +7750,47 @@ không ai tưởng BR-133 đã phủ trọn.
 - **Editable documents:** `docs/wbs.md`
 - **Output:** cập nhật use case và controller của M5.2, M5.3; widget tổng kết
 - **Acceptance criteria:**
-  - [ ] Hết mọi hàng đợi → `completed`, `end_reason` NULL, `ended_at` được đặt (BR-81).
-  - [ ] Người dùng thoát → `abandoned` / `user_exit` (BR-82).
-  - [ ] Phiên `in_progress` của ngày học trước, khi mở app → `abandoned` /
+  - [x] Hết mọi hàng đợi → `completed`, `end_reason` NULL, `ended_at` được đặt (BR-81).
+  - [x] Người dùng thoát → `abandoned` / `user_exit` (BR-82).
+  - [x] Phiên `in_progress` của ngày học trước, khi mở app → `abandoned` /
         `interrupted`, **không** phải `user_exit` (BR-103) — test khẳng định.
-  - [ ] Reset deck khi phiên đang mở → `invalidated` / `scheduler_reset` (BR-83).
-  - [ ] Ghi thất bại không thể tiếp tục → `failed` / `persistence_error` (BR-85).
-  - [ ] Ở **cả năm** trường hợp, lượt đã ghi vẫn còn trong `study_answers` (BR-86).
-  - [ ] Thẻ bỏ dở giữa chuỗi học mới **không** giữ `learned_at`, và phiên lỗi thời
+  - [x] Reset deck khi phiên đang mở → `invalidated` / `scheduler_reset` (BR-83).
+  - [x] Ghi thất bại không thể tiếp tục → `failed` / `persistence_error` (BR-85).
+  - [x] Ở **cả năm** trường hợp, lượt đã ghi vẫn còn trong `study_answers` (BR-86).
+  - [x] Thẻ bỏ dở giữa chuỗi học mới **không** giữ `learned_at`, và phiên lỗi thời
         không cho ghi tiếp — một thẻ MUST NOT được ghi `scheduled` hai lần bởi hai
         phiên học mới khác nhau.
-  - [ ] Không tổ hợp `status` × `end_reason` nào ngoài ma trận `data-model.md` —
+  - [x] Không tổ hợp `status` × `end_reason` nào ngoài ma trận `data-model.md` —
         bất biến 12 vẫn pass sau khi chạy các luồng này.
+**Đã đóng nợ BR-133 từ M5.4c.** `saveTurnProgress` ghi `remaining_ms` và
+`is_revealed` xuống `study_queue_items`, và `nextTurn` mang chúng trở lại. Controller
+có thêm `pause()` — **chỗ tự quyết**: `command_query_separation_test` cho session
+controller đúng `build/start/answer/leave`, giờ thành năm với `pause`. Nó không phải
+lệnh thứ ba mà là cặp của `leave`: `leave` kết thúc phiên, `pause` treo một lượt đang
+dở. Tập vẫn đóng — tên thứ sáu là trách nhiệm mới và thuộc chỗ khác.
+
+**Một lỗi thật do test bắt.** Bản đầu của `saveTurnProgress` chỉ hỏi "stage còn round
+pending không". Nhưng round thấp nhất còn pending do **các thẻ khác** quyết định, nên
+một thẻ vừa trả lời xong vẫn ra một round — và progress ghi đè lên hàng đã completed
+của chính nó, làm Resume phục vụ lại thẻ người dùng đã học. Giờ chỉ hàng còn
+`pending` mới nhận progress.
+
+**BR-85 nằm ở controller, phân biệt theo loại lỗi.** `ConflictFailure` là từ chối có
+thể thử lại — thẻ ở lại trên màn hình. Mọi lỗi khác là phép ghi không xảy ra và
+không thể thử cho thành, nên phiên đóng `failed`/`persistence_error`. Việc đóng
+phiên là best effort và nuốt lỗi có chủ đích: lý do gọi nó là một phép ghi vừa thất
+bại, và thất bại khi ghi nhận thất bại không phải thứ thứ hai để báo người dùng.
+
+**BR-83 có thao tác nhưng chưa có caller — đây là nợ còn treo.**
+`invalidateSessionsForRoot` đã có và có test, nhưng **Reset learning progress (UC-07)
+chưa tồn tại** trong `lib/features/deck/`, nên chưa ai gọi. Nối dây là việc của UC-07,
+và là một quyết định cross-feature riêng: Deck sẽ phải phụ thuộc contract của Study.
+
+**Tách file theo seam mà luật vốn đã vẽ.** `study_lifecycle_repository_impl.dart`
+giữ mọi thứ đổi `status` của phiên — và **không chạm `study_answers`**. Chính sự
+vắng mặt đó là BR-86: lượt đã ghi sống qua cả năm cách kết thúc vì không cách nào
+với tới chúng.
+
 - **Dependencies:** M5.3, M4.4
 - **Tests required:** repository/use case test cho năm cách kết thúc; test khẳng
   định `study_answers` được giữ ở cả năm; test phiên lỗi thời

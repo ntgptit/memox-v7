@@ -1,5 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/error/failure.dart';
+
 import '../../../../core/time/clock_provider.dart';
 import '../../../../core/time/time_zone_provider.dart';
 import '../../di/study_repository_provider.dart';
@@ -110,12 +112,74 @@ class StudySessionController extends _$StudySessionController {
       state = state.copyWith(isSubmitting: false);
 
       await _pullTurn();
-    } on Object catch (error) {
-      // The card stays on screen. A failed write must not look like a card that
-      // was answered and moved past.
+    } on ConflictFailure catch (error) {
+      // A refusal is recoverable: the card stays on screen and the user can try
+      // again. A failed write must not look like a card that was answered and
+      // moved past.
       if (!ref.mounted) return;
       state = state.copyWith(isSubmitting: false, error: error);
+    } on Object catch (error) {
+      // Anything else is a write that did not happen and cannot be retried into
+      // working — BR-85's `persistence_error`. The session ends rather than
+      // pretending, because a session that keeps taking answers it cannot store
+      // is worse than one that stops and says so.
+      //
+      // Turns already written stay written (BR-86): ending a session never
+      // touches `study_answers`.
+      await _failSession();
+
+      if (!ref.mounted) return;
+      state = state.copyWith(
+        isSubmitting: false,
+        isFinished: true,
+        error: error,
+      );
     }
+  }
+
+  /// Ends the session as `failed`/`persistence_error` (BR-85).
+  ///
+  /// Best effort by necessity: the reason it is being called is that a write
+  /// just failed, so this one may fail too. Letting that propagate would replace
+  /// the real error with a second one and tell the user nothing.
+  Future<void> _failSession() async {
+    final session = state.session;
+    if (session == null) return;
+
+    try {
+      await EndStudySessionUseCase(ref.read(studyRepositoryProvider)).call(
+        sessionId: session.id,
+        status: StudySessionStatus.failed,
+        reason: StudySessionEndReason.persistenceError,
+        now: ref.read(clockProvider)(),
+      );
+    } on Object catch (_) {
+      // Deliberately swallowed, and narrowly: the caller is already reporting a
+      // failure, and a failure to record the failure is not a second thing to
+      // show somebody.
+    }
+  }
+
+  /// Stores what is left of the turn in flight (BR-133).
+  ///
+  /// **The counterpart of [leave], not another command.** `leave` ends the
+  /// session; this suspends a turn so the app being taken away does not cost
+  /// the user the seconds they had left. Nothing about the domain changes — the
+  /// queue row keeps its status and its round.
+  Future<void> pause({int? remainingMs, bool isRevealed = false}) async {
+    final session = state.session;
+    final turn = state.turn;
+    if (session == null || turn == null || state.isFinished) return;
+
+    await ref
+        .read(studyRepositoryProvider)
+        .saveTurnProgress(
+          sessionId: session.id,
+          mode: session.currentMode,
+          cardId: turn.cardId,
+          remainingMs: remainingMs,
+          isRevealed: isRevealed,
+        );
   }
 
   /// Closes the session because the user left (BR-82).

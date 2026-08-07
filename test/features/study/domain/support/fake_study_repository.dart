@@ -215,6 +215,28 @@ base class FakeStudyRepository implements StudyRepository {
 
   StudyTurnModel? nextTurn_;
 
+  final List<({String cardId, int? remainingMs, bool isRevealed})> progress =
+      <({String cardId, int? remainingMs, bool isRevealed})>[];
+
+  @override
+  Future<void> saveTurnProgress({
+    required String sessionId,
+    required StudyMode mode,
+    required String cardId,
+    int? remainingMs,
+    bool isRevealed = false,
+  }) async => progress.add((
+    cardId: cardId,
+    remainingMs: remainingMs,
+    isRevealed: isRevealed,
+  ));
+
+  @override
+  Future<int> invalidateSessionsForRoot({
+    required String rootDeckId,
+    required DateTime endedAt,
+  }) async => 0;
+
   @override
   Future<bool> buildNextRound(String sessionId) async => false;
 

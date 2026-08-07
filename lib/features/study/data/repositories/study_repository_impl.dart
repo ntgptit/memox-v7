@@ -25,6 +25,7 @@ import '../datasources/study_dao.dart';
 import '../mappers/study_mapper.dart';
 
 part 'study_queue_repository_impl.dart';
+part 'study_lifecycle_repository_impl.dart';
 
 /// How many other cards a forgotten one waits behind (BR-26).
 const int kSelfAssessComebackGap = 3;
@@ -49,7 +50,7 @@ const int kInitialIntervalDays = 1;
 /// It is also the boundary where a Drift exception becomes a domain `Failure`.
 /// Nothing above it sees a `DriftWrappedException`.
 final class StudyRepositoryImpl
-    with _StudyQueueOperations
+    with _StudyQueueOperations, _StudyLifecycleOperations
     implements StudyRepository {
   StudyRepositoryImpl(
     this._dao, {
@@ -269,59 +270,72 @@ final class StudyRepositoryImpl
   }
 
   @override
-  Future<void> endSession({
+  Future<void> saveTurnProgress({
     required String sessionId,
-    required StudySessionStatus status,
-    required StudySessionEndReason? reason,
-    required DateTime endedAt,
+    required StudyMode mode,
+    required String cardId,
+    int? remainingMs,
+    bool isRevealed = false,
   }) async {
-    if (!status.isValidWith(reason)) {
-      throw ConflictFailure(
-        message: 'Invalid outcome: ${status.dbValue} with ${reason?.dbValue}',
-      );
-    }
+    final round = await _dao.currentRound(
+      sessionId: sessionId,
+      mode: mode.dbValue,
+    );
 
-    // Turns already written stay written, in every ending (BR-86). Nothing here
-    // touches `study_answers`, and that is the whole guarantee.
-    await _dao.updateSession(
-      sessionId,
-      StudySessionsCompanion(
-        status: Value<String>(status.dbValue),
-        endReason: Value<String?>(reason?.dbValue),
-        endedAt: Value<DateTime?>(endedAt),
+    if (round == null) return;
+
+    // **The stage having a pending round is not the same as *this card* still
+    // being in it.** The lowest pending round is decided by whichever cards are
+    // left, so a card answered a moment ago still resolves to a round — and
+    // writing progress against its completed row would make Resume serve a card
+    // the user has already answered. Only a row that is still pending may take
+    // progress.
+    final item = await _dao.queueItem(
+      sessionId: sessionId,
+      mode: mode.dbValue,
+      round: round,
+      cardId: cardId,
+    );
+    if (item == null || item.status != 'pending') return;
+
+    await _dao.updateQueueItem(
+      sessionId: sessionId,
+      mode: mode.dbValue,
+      round: round,
+      cardId: cardId,
+      values: StudyQueueItemsCompanion(
+        remainingMs: Value<int?>(remainingMs),
+        isRevealed: Value<int>(isRevealed ? 1 : 0),
       ),
     );
   }
 
   @override
-  Future<int> abandonStaleSessions({required DateTime dayStart}) =>
-      _dao.runInTransaction(() async {
-        final stale = await _dao.staleOpenSessions(dayStart);
+  Future<int> invalidateSessionsForRoot({
+    required String rootDeckId,
+    required DateTime endedAt,
+  }) => _dao.runInTransaction(() async {
+    final open = await _dao.openSessionsForRoot(rootDeckId);
 
-        for (final session in stale) {
-          await _dao.updateSession(
-            session.id,
-            StudySessionsCompanion(
-              status: Value<String>(StudySessionStatus.abandoned.dbValue),
-              // `interrupted`, never `user_exit`: the user did not leave, the
-              // app did (BR-103). Merging them makes the history say somebody
-              // gave up when they did not.
-              endReason: Value<String?>(
-                StudySessionEndReason.interrupted.dbValue,
-              ),
-              endedAt: Value<DateTime?>(dayStart),
-            ),
-          );
-        }
+    for (final session in open) {
+      await _dao.updateSession(
+        session.id,
+        StudySessionsCompanion(
+          status: Value<String>(StudySessionStatus.invalidated.dbValue),
+          // `scheduler_reset`, not `stale_generation`: the difference is who
+          // noticed. This is the reset closing its own sessions; the other is a
+          // session discovering afterwards that it had been outrun (BR-83,
+          // BR-84).
+          endReason: Value<String?>(
+            StudySessionEndReason.schedulerReset.dbValue,
+          ),
+          endedAt: Value<DateTime?>(endedAt),
+        ),
+      );
+    }
 
-        return stale.length;
-      });
-
-  @override
-  Future<StudySessionEntity?> openSessionFor(String deckId) async {
-    final row = await _dao.openSessionForDeck(deckId);
-    return row == null ? null : studySessionEntityFromRow(row);
-  }
+    return open.length;
+  });
 
   /// Refuses a write the session cannot accept (BR-79, BR-84).
   ///
