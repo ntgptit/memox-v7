@@ -1,6 +1,7 @@
 import 'fill_mode.dart';
 import 'guess_mode.dart';
 import 'match_mode.dart';
+import 'recall_mode.dart';
 import 'study_entry_summary_model.dart';
 
 /// One of the six ways a card can be put in front of the user (BR-108).
@@ -108,11 +109,13 @@ abstract interface class StudyModeHandler {
 
 /// Every mode that needs nothing built: it takes whatever is due.
 ///
-/// `browse`, `self_assess` and `recall` all show one card and ask about it, so
-/// there is no content to assemble and no threshold to clear. Giving them a
-/// shared handler rather than three identical ones is what keeps the difference
-/// between modes readable — the file that has something in it is the file with a
-/// rule.
+/// `browse` and `self_assess` both show one card and ask about it, so there is
+/// no content to assemble and no threshold to clear. Giving them a shared
+/// handler rather than two identical ones is what keeps the difference between
+/// modes readable — the file that has something in it is the file with a rule.
+///
+/// `recall` has the same capacity and its own handler, because the clock is a
+/// rule even though the card set is not.
 final class PlainModeHandler implements StudyModeHandler {
   const PlainModeHandler();
 
@@ -134,7 +137,7 @@ final class PlainModeHandler implements StudyModeHandler {
 StudyModeHandler? studyModeHandler(StudyMode mode) => switch (mode) {
   StudyMode.browse => const PlainModeHandler(),
   StudyMode.selfAssess => const PlainModeHandler(),
-  StudyMode.recall => const PlainModeHandler(),
+  StudyMode.recall => const RecallModeHandler(),
   StudyMode.match => const MatchModeHandler(),
   StudyMode.guess => const GuessModeHandler(),
   StudyMode.fill => const FillModeHandler(),

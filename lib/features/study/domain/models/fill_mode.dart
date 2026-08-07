@@ -1,16 +1,79 @@
 import 'study_entry_summary_model.dart';
 import 'study_mode.dart';
 
+/// Which comparison policy graded a turn (BR-135).
+///
+/// **Stored on every `fill` answer, and never applied retroactively.** Changing
+/// how answers are compared bumps this number; old rows keep the version they
+/// were graded under, so a history row still means what it meant when it was
+/// written.
+const int kFillComparisonVersion = 1;
+
+/// What one typed answer produced.
+///
+/// **The text the user typed is not in here, on purpose** (BR-138, BR-51).
+/// Only the outcome, the policy version and whether a hint was used ever leave
+/// this class — card content is private data, and a wrong answer is the most
+/// private thing in the app.
+final class FillOutcome {
+  const FillOutcome({
+    required this.isCorrect,
+    required this.comparisonVersion,
+    required this.hasUsedHint,
+  });
+
+  final bool isCorrect;
+  final int comparisonVersion;
+
+  /// Recorded, and deliberately without effect on the action or the schedule
+  /// (BR-136). Whether a hint makes an answer worth less is a judgement nobody
+  /// has made; recording it keeps the option open without pretending.
+  final bool hasUsedHint;
+}
+
 /// Type the answer.
 ///
-/// The grading policy and the widget arrive with M5.4c. What exists here is the
-/// one thing the chooser needs before then, and the reason it needs it: `fill`
-/// takes only cards carrying an `example`, and that field is optional (BR-114).
-/// Every other mode takes whatever is due, which is why this is the mode whose
-/// count differs — and why BR-154 forbids one shared number.
+/// `fill` takes only cards carrying an `example`, and that field is optional
+/// (BR-114) — which is why this is the mode whose count differs from every
+/// other, and why BR-154 forbids one shared number on the chooser.
 final class FillModeHandler implements StudyModeHandler {
   const FillModeHandler();
 
   @override
   int capacityFrom(StudyEntrySummaryModel summary) => summary.fillableCount;
+
+  /// The comparison policy of BR-134: trim both ends, then lower case in a
+  /// Unicode-aware way.
+  ///
+  /// **Diacritics survive.** `cong` is not `công`, and folding them together
+  /// would mark a wrong answer right in the one language this app was built for.
+  /// Dart's `toLowerCase` is Unicode-aware; SQLite's `lower()` is ASCII-only,
+  /// which is why the folded column exists at all.
+  ///
+  /// **Restated here rather than borrowed from the Card feature.** The policy is
+  /// versioned by [kFillComparisonVersion], so it has to change only when
+  /// somebody decides to change it — pointing at a helper another feature owns
+  /// would let an edit over there silently re-grade history over here.
+  static String fold(String value) => value.trim().toLowerCase();
+
+  /// Grades one answer, or returns null when there is nothing to grade.
+  ///
+  /// **Null for an empty answer** (BR-137). Not "wrong": a blank field is
+  /// somebody tapping submit by accident, and recording it as a failure would
+  /// bury a card the user never actually got wrong. It also must not advance the
+  /// checkpoint, which is what returning null lets the caller do.
+  FillOutcome? grade({
+    required String input,
+    required String backFolded,
+    required bool hasUsedHint,
+  }) {
+    final folded = fold(input);
+    if (folded.isEmpty) return null;
+
+    return FillOutcome(
+      isCorrect: folded == backFolded,
+      comparisonVersion: kFillComparisonVersion,
+      hasUsedHint: hasUsedHint,
+    );
+  }
 }
