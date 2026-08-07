@@ -188,6 +188,8 @@ Bốn action: `again`, `hard`, `good`, `easy`.
 **Status:** active · **Enforced by:** scheduler · **Related:** AD-06
 
 ```
+ease_factor = <giá trị mới theo BR-19>      ← chạy TRƯỚC
+
 nếu q < 3:
     repetitions = 0
     interval_days = 1
@@ -199,6 +201,18 @@ ngược lại:
 ```
 
 `next_due_at` = đầu ngày học thứ `interval_days`, theo đúng BR-105 như `eight_box`.
+
+**Thứ tự là một phần của luật, không phải chi tiết triển khai.** `ease_factor`
+trong phép nhân MUST là giá trị **sau** khi BR-19 đã chạy cho chính lượt này —
+không phải giá trị thẻ mang vào lượt. Hai cách đọc chỉ khác nhau ở những action
+làm đổi hệ số: với `good` (q=4) hệ số không đổi nên không phân biệt được, còn
+`hard` (q=3) hạ 2.5 xuống 2.36, và một thẻ đang ở interval 10 ngày nhận 24 ngày
+theo luật này thay vì 25.
+
+Bản đầu của tài liệu không nói thứ tự, nên M5.1 triển khai theo cách đọc sát chữ
+— nhân với hệ số cũ — và chủ dự án chốt lại hướng ngược lại. Ghi thẳng vào đây
+thay vì để trong commit message, vì đây đúng là loại mơ hồ mà người đọc kế tiếp
+sẽ tự suy lại và suy khác.
 
 ### BR-19 · Cập nhật ease factor
 

@@ -85,21 +85,22 @@ void main() {
       expect(result.schedule.repetitions, 3);
     });
 
-    test('the multiplication uses the factor the card arrived with', () {
-      // BR-18 and BR-19 are two rules, and BR-18's `ease_factor` is the card's
-      // stored value. Folding the new factor in first makes every interval
-      // slightly longer than the rule as written, and the drift compounds.
+    test('the multiplication uses the factor BR-19 just produced', () {
+      // The order is part of BR-18: the ease factor updates first, then the
+      // interval multiplies by the new value.
       //
-      // `good` raises the factor from 2.5 to 2.5, so the case that separates
-      // the two readings is `hard`, which lowers it to 2.36.
+      // `good` leaves the factor at 2.5, so it cannot tell the two readings
+      // apart. `hard` can: it takes 2.5 to 2.36, and a card at ten days lands
+      // on 24 rather than 25. This test is the whole difference between the
+      // readings, which is why it names both numbers.
       final result = answer(
         action: StudyAction.hard,
         repetitions: 2,
         intervalDays: 10,
       );
 
-      // 10 × 2.5 = 25, not 10 × 2.36 = 24.
-      expect(result.intervalDays, 25);
+      // 10 × 2.36 = 23.6 → 24, not 10 × 2.5 = 25.
+      expect(result.intervalDays, 24);
       expect(result.schedule.easeFactor, closeTo(2.36, 0.0001));
     });
 
