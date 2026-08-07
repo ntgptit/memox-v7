@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M5.0h (luật stage fill) |
+| **Updated by task** | M5.0i (card_limit thuộc phiên) |
 | **Last updated** | 2026-08-07 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -6774,6 +6774,49 @@ của `match` và `recall`, và `kind` của một lượt thuộc bốn stage c
 đáng chốt trước khi viết code — `study_answers` chỉ thêm, nên ghi sai không sửa
 lại được.
 
+### M5.0i · Giới hạn thẻ thuộc phiên, mặc định 20, và lưu trên chính phiên
+
+- **Status:** done — tài liệu và fixture guard.
+- **Goal:** Chốt rằng năm stage dùng chung một tập thẻ, đổi trần từ 50 xuống 20,
+  và chuẩn bị sẵn cho việc người dùng cài đặt số lượng.
+- **Scope:** `business-rules.md` (sửa BR-24; thêm **BR-139**, **BR-140**),
+  `data-model.md` (`study_sessions.card_limit`; viết lại invariant 18),
+  `use-cases.md`, `master-flow.md`, `verify_invariants.py`.
+- **Out of scope:** UI cài đặt số thẻ mỗi phiên — đến khi có màn Settings.
+- **Editable documents:** `docs/business-rules.md`, `docs/data-model.md`,
+  `docs/use-cases.md`, `docs/master-flow.md`, `docs/wbs.md`
+- **Output:** BR-139, BR-140; `study_sessions.card_limit`
+- **Acceptance criteria:**
+  - [x] Giới hạn thuộc **phiên**, không thuộc stage hay round (BR-139).
+  - [x] Mặc định 20, chốt một lần lúc mở phiên và lưu vào `card_limit`.
+  - [x] Không stage nào có ngưỡng tối thiểu/tối đa riêng (BR-139).
+  - [x] Điều kiện dựng được nội dung **không** bị hiểu thành ngưỡng thẻ (BR-140).
+  - [x] Invariant 18 so với `card_limit` của chính phiên, không với hằng số.
+  - [x] `verify_invariants.py` **23/23**; `check_docs.py` xanh.
+- **Dependencies:** M5.0h
+- **Tests required:** `check_docs.py`, `verify_invariants.py`, guard `memox-v7`
+- **Checklist phases:** 14.1
+
+**Con số 20 không phải phần khó — chỗ nó được lưu mới là.** Người dùng sẽ cài đặt
+được số thẻ mỗi phiên, nên một invariant viết `> 50` (hay `> 20`) sẽ sai ở đúng
+phiên đầu tiên họ đổi, và sai theo kiểu tệ nhất: đỏ trên dữ liệu hoàn toàn hợp lệ.
+Nên `card_limit` được chốt **một lần lúc mở phiên** và lưu trên chính phiên đó;
+invariant 18 `JOIN` về đọc con số ấy. Đây là pattern repo đã dùng ba lần —
+`scheduler_version`, `scheduler_generation`, `comparison_version`: một bản ghi
+phải đọc lại được bằng chính tham số đã tạo ra nó.
+
+**BR-140 tách hai thứ đang bị gọi cùng một tên.** "Ngưỡng của stage" có thể hiểu
+là *stage này lấy bao nhiêu thẻ* — không còn tồn tại, năm stage dùng chung một tập
+— hoặc *stage này có dựng được nội dung không*: `guess` cần năm nghĩa khác nhau
+(BR-121, BR-124), `fill` cần thẻ có `example` (BR-114). Vế thứ hai vẫn còn và
+quyết định stage **chạy hay bị bỏ qua**, không quyết định lấy bao nhiêu thẻ. Gộp
+hai vế lại là cách một stage bị bỏ qua vì lý do sai.
+
+**Còn đúng một mục chưa chốt trong toàn bộ nghiệp vụ Study:** một lượt của bốn
+stage chấm điểm ghi `kind` là gì. BR-77 nói lượt đầu của thẻ trong phiên là
+`scheduled`, nhưng nó được viết khi một phiên chỉ có một cách hỏi; giờ một thẻ có
+thể có bốn lượt trong một phiên, và đó là ca BR-77 chưa từng phải xử lý.
+
 ### M5.0 · Study-specific domain và data completion
 
 - **Status:** todo
@@ -6838,7 +6881,7 @@ lại được.
   giá đúng `kind`, từ chối generation cũ.
 - **Scope:** `StartStudySessionUseCase`, `SubmitReviewUseCase`,
   `EndStudySessionUseCase`; xác định `kind` tường minh (BR-76);
-  kiểm `scheduler_generation` (BR-46, BR-84); giới hạn 50 card (BR-24).
+  kiểm `scheduler_generation` (BR-46, BR-84); giới hạn `card_limit` thẻ (BR-24).
 - **Out of scope:** hàng đợi và thứ tự trong phiên (M5.3 — đó là trạng thái tạm
   của controller).
 - **Editable documents:** `docs/wbs.md`
@@ -6855,7 +6898,7 @@ lại được.
         (BR-84).
   - [ ] `answer_count` chỉ tăng ở lượt `scheduled`; `lapse_count` tăng khi
         `forgotten`/`again` ở lượt `scheduled` (BR-20).
-  - [ ] Một phiên lấy tối đa 50 card riêng biệt (BR-24).
+  - [ ] Một phiên lấy tối đa `card_limit` thẻ riêng biệt, mặc định 20 (BR-24).
 - **Dependencies:** M5.1, M5.0
 - **Tests required:** unit test cho từng acceptance criteria ở trên, dùng
   repository fake; test riêng cho ca box-8 và ca generation cũ

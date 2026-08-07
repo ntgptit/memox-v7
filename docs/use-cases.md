@@ -7,7 +7,7 @@
 | **Scope** | Must-have của MVP. Ngoài phạm vi: should/nice-to-have, và mọi thứ ở mục "Điều đã cố ý không đặc tả" |
 | **Source of truth for** | UC-xx · main/alternative/error flow · UI state matrix của từng màn |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md` |
-| **Updated by task** | M5.0e (round cho stage chấm điểm) |
+| **Updated by task** | M5.0i (card_limit thuộc phiên) |
 | **Last updated** | 2026-08-07 |
 
 Chỉ đặc tả must-have. Should-have và nice-to-have viết khi tới lượt — đặc tả
@@ -244,8 +244,8 @@ state.
 Đây là luồng chạy hằng ngày và là vertical slice đầu tiên nên xây.
 
 **Main flow:**
-1. Hệ thống lấy card đến hạn trong cả cây theo BR-22, BR-23, tối đa 50 card riêng
-   biệt (BR-24). **Không có card nào thì dừng ở đây** — xem E1; phiên **chưa**
+1. Hệ thống lấy card đến hạn trong cả cây theo BR-22, BR-23, tối đa `card_limit` thẻ riêng
+   biệt — mặc định 20 (BR-24, BR-139). **Không có card nào thì dừng ở đây** — xem E1; phiên **chưa**
    được tạo.
 2. Người dùng bấm Study. Hệ thống đọc `stageSequence` của thuật toán thuộc root
    deck — `eight_box` → `browse`, `match`, `guess`, `recall`, `fill`; `sm2` →

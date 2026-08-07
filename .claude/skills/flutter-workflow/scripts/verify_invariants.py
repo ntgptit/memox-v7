@@ -35,6 +35,7 @@ CREATE TABLE card_study_states (card_id TEXT PRIMARY KEY REFERENCES cards(id) ON
 CREATE TABLE study_sessions (id TEXT PRIMARY KEY, deck_id TEXT NOT NULL REFERENCES decks(id) ON DELETE CASCADE,
  root_deck_id TEXT NOT NULL, scheduler_generation INTEGER NOT NULL, current_mode TEXT NOT NULL,
  status TEXT NOT NULL, end_reason TEXT NULL, cursor INTEGER NOT NULL DEFAULT 0,
+ card_limit INTEGER NOT NULL DEFAULT 20,
  started_at TEXT NOT NULL, ended_at TEXT NULL);
 CREATE TABLE study_answers (id TEXT PRIMARY KEY, card_id TEXT NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
  session_id TEXT NOT NULL REFERENCES study_sessions(id), scheduler_type TEXT NOT NULL,
@@ -78,7 +79,7 @@ def good(c):
     INSERT INTO decks VALUES('b','B','a','r','card',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'t','t');
     INSERT INTO cards VALUES('c1','b','f','k','t','t');
     INSERT INTO card_study_states VALUES('c1','eight_box',1,1,NULL,NULL,0,0,1,NULL,NULL,NULL);
-    INSERT INTO study_sessions VALUES('s1','r','r',1,'match','completed',NULL,1,'t','t');
+    INSERT INTO study_sessions VALUES('s1','r','r',1,'match','completed',NULL,1,20,'t','t');
     INSERT INTO study_answers VALUES('h1','c1','s1','eight_box',1,'relearning','match','forgotten','t',NULL,NULL,NULL,NULL,1,1,NULL,NULL,NULL,NULL);
     INSERT INTO study_queue_items VALUES('s1','browse',1,'c1',0,'completed',0,0,NULL,0);
     INSERT INTO study_queue_items VALUES('s1','match',1,'c1',0,'completed',0,2,NULL,0);
@@ -98,19 +99,20 @@ BAD = {
  9: "UPDATE card_study_states SET scheduler_generation=99 WHERE card_id='c1';",
  10:"UPDATE decks SET scheduler_type='sm2' WHERE id='a';",
  11:"UPDATE decks SET scheduler_type=NULL WHERE id='r';",
- 12:"INSERT INTO study_sessions VALUES('s2','r','r',1,'match','completed','user_exit',0,'t','t');",
- 13:"INSERT INTO study_sessions VALUES('s3','r','r',1,'match','abandoned','user_exit',0,'t',NULL);",
+ 12:"INSERT INTO study_sessions VALUES('s2','r','r',1,'match','completed','user_exit',0,20,'t','t');",
+ 13:"INSERT INTO study_sessions VALUES('s3','r','r',1,'match','abandoned','user_exit',0,20,'t',NULL);",
  14:"INSERT INTO study_answers VALUES('h2','c1','s1','eight_box',1,'relearning','match','forgotten','t',NULL,NULL,NULL,NULL,1,5,NULL,NULL,NULL,NULL);",
  # A chain from the valid tree's 'a' (level 2) down to level 11 (BR-55).
  16:"INSERT INTO study_queue_items VALUES('s1','match',1,'c1x',1,'pending',0,0,NULL,0);"
     "INSERT INTO cards VALUES('c1x','b','f','k','t','t');",
  17:"INSERT INTO study_queue_items VALUES('s1','match',1,'c1y',2,'completed',-1,0,NULL,0);"
     "INSERT INTO cards VALUES('c1y','b','f','k','t','t');",
- # 51 the trong mot phien: 50 la tran (BR-24), nen 51 la vi pham.
+ # 21 the trong mot phien: card_limit mac dinh la 20 (BR-24), nen 21 la vi pham.
+ # Nguong doc tu chinh session chu khong viet cung, xem invariant 18.
  18:"".join(
     "INSERT INTO cards VALUES('q%d','b','f','k','t','t');"
     "INSERT INTO study_queue_items VALUES('s1','match',1,'q%d',%d,'completed',0,1,NULL,0);" % (n, n, n + 10)
-    for n in range(51)
+    for n in range(21)
  ),
  21:"INSERT INTO cards VALUES('c21','b','f','k','t','t');"
     "INSERT INTO study_queue_items VALUES('s1','match',1,'c21',9,'pending',0,0,500,0);",
