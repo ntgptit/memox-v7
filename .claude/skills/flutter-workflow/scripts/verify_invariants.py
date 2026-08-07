@@ -33,14 +33,21 @@ CREATE TABLE card_study_states (card_id TEXT PRIMARY KEY REFERENCES cards(id) ON
  lapse_count INTEGER NOT NULL DEFAULT 0, current_box INTEGER NULL, ease_factor REAL NULL,
  interval_days INTEGER NULL, repetitions INTEGER NULL);
 CREATE TABLE study_sessions (id TEXT PRIMARY KEY, deck_id TEXT NOT NULL REFERENCES decks(id) ON DELETE CASCADE,
- root_deck_id TEXT NOT NULL, scheduler_generation INTEGER NOT NULL, status TEXT NOT NULL,
- end_reason TEXT NULL, started_at TEXT NOT NULL, ended_at TEXT NULL);
+ root_deck_id TEXT NOT NULL, scheduler_generation INTEGER NOT NULL, mode TEXT NOT NULL,
+ status TEXT NOT NULL, end_reason TEXT NULL, cursor INTEGER NOT NULL DEFAULT 0,
+ started_at TEXT NOT NULL, ended_at TEXT NULL);
 CREATE TABLE study_answers (id TEXT PRIMARY KEY, card_id TEXT NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
  session_id TEXT NOT NULL REFERENCES study_sessions(id), scheduler_type TEXT NOT NULL,
- scheduler_generation INTEGER NOT NULL, kind TEXT NOT NULL, action TEXT NOT NULL,
+ scheduler_generation INTEGER NOT NULL, kind TEXT NOT NULL, mode TEXT NOT NULL, action TEXT NOT NULL,
  answered_at TEXT NOT NULL, next_due_at TEXT NULL, previous_box INTEGER NULL, next_box INTEGER NULL,
  previous_ease_factor REAL NULL, next_ease_factor REAL NULL,
  previous_interval_days INTEGER NULL, next_interval_days INTEGER NULL);
+CREATE TABLE study_queue_items (
+ session_id TEXT NOT NULL REFERENCES study_sessions(id) ON DELETE CASCADE,
+ card_id TEXT NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
+ position INTEGER NOT NULL, status TEXT NOT NULL,
+ available_at INTEGER NOT NULL DEFAULT 0, answers_in_session INTEGER NOT NULL DEFAULT 0,
+ PRIMARY KEY (session_id, card_id));
 """
 
 # Extract the invariant queries straight out of the frozen doc, so this test
@@ -67,8 +74,9 @@ def good(c):
     INSERT INTO decks VALUES('b','B','a','r','card',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'t','t');
     INSERT INTO cards VALUES('c1','b','f','k','t','t');
     INSERT INTO card_study_states VALUES('c1','eight_box',1,1,NULL,NULL,0,0,1,NULL,NULL,NULL);
-    INSERT INTO study_sessions VALUES('s1','r','r',1,'completed',NULL,'t','t');
-    INSERT INTO study_answers VALUES('h1','c1','s1','eight_box',1,'relearning','forgotten','t',NULL,1,1,NULL,NULL,NULL,NULL);
+    INSERT INTO study_sessions VALUES('s1','r','r',1,'review','completed',NULL,1,'t','t');
+    INSERT INTO study_answers VALUES('h1','c1','s1','eight_box',1,'relearning','review','forgotten','t',NULL,1,1,NULL,NULL,NULL,NULL);
+    INSERT INTO study_queue_items VALUES('s1','c1',0,'completed',0,2);
     """)
 
 # each: query-number -> SQL that introduces exactly that violation
@@ -85,10 +93,20 @@ BAD = {
  9: "UPDATE card_study_states SET scheduler_generation=99 WHERE card_id='c1';",
  10:"UPDATE decks SET scheduler_type='sm2' WHERE id='a';",
  11:"UPDATE decks SET scheduler_type=NULL WHERE id='r';",
- 12:"INSERT INTO study_sessions VALUES('s2','r','r',1,'completed','user_exit','t','t');",
- 13:"INSERT INTO study_sessions VALUES('s3','r','r',1,'abandoned','user_exit','t',NULL);",
- 14:"INSERT INTO study_answers VALUES('h2','c1','s1','eight_box',1,'relearning','forgotten','t',NULL,1,5,NULL,NULL,NULL,NULL);",
+ 12:"INSERT INTO study_sessions VALUES('s2','r','r',1,'review','completed','user_exit',0,'t','t');",
+ 13:"INSERT INTO study_sessions VALUES('s3','r','r',1,'review','abandoned','user_exit',0,'t',NULL);",
+ 14:"INSERT INTO study_answers VALUES('h2','c1','s1','eight_box',1,'relearning','review','forgotten','t',NULL,1,5,NULL,NULL,NULL,NULL);",
  # A chain from the valid tree's 'a' (level 2) down to level 11 (BR-55).
+ 16:"INSERT INTO study_queue_items VALUES('s1','c1x',1,'pending',0,0);"
+    "INSERT INTO cards VALUES('c1x','b','f','k','t','t');",
+ 17:"INSERT INTO study_queue_items VALUES('s1','c1y',2,'completed',-1,0);"
+    "INSERT INTO cards VALUES('c1y','b','f','k','t','t');",
+ # 51 the trong mot phien: 50 la tran (BR-24), nen 51 la vi pham.
+ 18:"".join(
+    "INSERT INTO cards VALUES('q%d','b','f','k','t','t');"
+    "INSERT INTO study_queue_items VALUES('s1','q%d',%d,'completed',0,1);" % (n, n, n + 10)
+    for n in range(51)
+ ),
  15:"".join(
     "INSERT INTO decks VALUES('x%d','X','%s','r','deck',NULL,NULL,NULL,NULL,"
     "NULL,NULL,NULL,NULL,'t','t');" % (n, 'a' if n == 3 else 'x%d' % (n - 1))

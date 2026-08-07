@@ -7,7 +7,7 @@
 | **Scope** | Luật nghiệp vụ, validation rule, state machine, edge case của phạm vi MVP. Ngoài phạm vi: quyết định kiến trúc (`architecture.md`), hình dạng dữ liệu (`data-model.md`), luồng người dùng (`use-cases.md`) |
 | **Source of truth for** | BR-xx · validation rule · entity state machine · edge case |
 | **Depends on** | `document-conventions.md`, `product.md`, `architecture.md` |
-| **Updated by task** | M5.0a (đổi tên Review → Study) |
+| **Updated by task** | M5.0b (chốt nghiệp vụ Study) |
 | **Last updated** | 2026-08-07 |
 
 Format tuân theo `document-conventions.md` §6.2. Từ khoá MUST / SHOULD / MAY
@@ -27,7 +27,7 @@ khi ai đó đọc và làm theo.
 
 Rule bị thay thế MUST đánh `superseded by BR-yy` ở cột Status và giữ nguyên ID.
 
-Trạng thái hiện tại: **BR-01…BR-95**, không trùng, không thiếu.
+Trạng thái hiện tại: **BR-01…BR-105**, không trùng, không thiếu.
 
 ---
 
@@ -160,7 +160,8 @@ Hai action: `forgotten` và `remembered`.
 |---|---|---|---|---|---|---|---|---|
 | Ngày | 1 | 2 | 4 | 8 | 16 | 32 | 64 | 128 |
 
-`next_due_at = now + interval(box đích)`.
+`next_due_at` = đầu ngày học thứ `interval(box đích)` — 00:00 giờ địa phương,
+lưu bằng UTC (BR-105). Không phải `now + N*24h`: xem AD-16.
 
 Box 8 là box cuối. Card ở box 8 trả lời `remembered` vẫn ở box 8 và xếp lịch lại
 sau 128 ngày — không có trạng thái "tốt nghiệp" khiến card biến mất, vì trí nhớ
@@ -197,7 +198,7 @@ ngược lại:
     repetitions = repetitions + 1
 ```
 
-`next_due_at = now + interval_days`.
+`next_due_at` = đầu ngày học thứ `interval_days`, theo đúng BR-105 như `eight_box`.
 
 ### BR-19 · Cập nhật ease factor
 
@@ -294,21 +295,21 @@ phải lặp mấy lần mới nhớ — thứ cần để đánh giá chất l�
 | ID | Status | Rule | Enforced by | Related |
 |---|---|---|---|---|
 | BR-22 | active | Một phiên MUST chỉ lấy card có `due_at IS NULL OR due_at <= now`. | db | UC-05, UC-06 |
-| BR-23 | active | Thứ tự MUST là: card mới (`due_at IS NULL`) trước, sau đó theo `due_at` tăng dần. | db | UC-05 |
+| BR-23 | active | Thứ tự MUST là: thẻ **đến hạn** (`due_at <= now`) trước, theo `due_at` tăng dần; thẻ **mới** (`due_at IS NULL`) lấp phần còn lại của hạn ngạch BR-24. | db | UC-05 |
 | BR-24 | active | Một phiên MUST giới hạn 50 card riêng biệt. Không tính lượt `relearning`. | repository | UC-05 |
 | BR-25 | active | Đánh giá MUST được ghi ngay khi người dùng bấm, không chờ hết phiên. | repository | UC-05 |
-| BR-26 | active | Card đánh giá `forgotten`/`again` MUST quay lại trong phiên hiện tại, sau ít nhất 3 card khác, hoặc cuối hàng đợi nếu không đủ 3. | controller | UC-05 |
+| BR-26 | active | Card đánh giá `forgotten`/`again` MUST quay lại trong phiên hiện tại, sau ít nhất 3 card khác, hoặc cuối hàng đợi nếu không đủ 3. Mỗi thẻ MUST tối đa **3 lượt `relearning`** trong một phiên; chạm trần thì thẻ rời hàng đợi. | repository | UC-05, BR-104 |
 | BR-27 | active | Chỉ lượt `scheduled` MAY thay đổi lịch dài hạn; các lượt sau của cùng card trong cùng session MUST là `relearning`. Chi tiết ở BR-75…BR-78. | scheduler | UC-05, AD-11 |
 | BR-28 | active | Card MUST rời hàng đợi khi được đánh giá bằng action khác `forgotten`/`again`. | controller | UC-05 |
 | BR-29 | active | Không có card nào đến hạn MUST được trình bày là trạng thái bình thường, không phải lỗi. | UI | UC-05, UC-06 |
-| BR-30 | active | UI MUST render nút đánh giá từ `supportedActions` của scheduler thuộc root deck; MUST NOT hardcode tập action. | UI | AD-06, UC-05 |
+| BR-30 | active | UI MUST render nút đánh giá từ `supportedActions`, và danh sách StudyMode từ `supportedModes`, của scheduler thuộc root deck; MUST NOT hardcode tập nào trong hai. | UI | AD-06, UC-05, BR-97 |
 
 ## Vòng đời study session
 
 | ID | Status | Rule | Enforced by | Related |
 |---|---|---|---|---|
 | BR-79 | active | `study_sessions.status` MUST có đúng năm giá trị: `in_progress`, `completed`, `abandoned`, `invalidated`, `failed`. | db + invariant Q12 | AD-11, UC-05 |
-| BR-80 | active | `study_sessions.end_reason` MUST có bốn giá trị: `user_exit`, `scheduler_reset`, `stale_generation`, `persistence_error`; NULL khi kết thúc bình thường hoặc chưa kết thúc. | db + invariant Q12 | AD-11, UC-05 |
+| BR-80 | active | `study_sessions.end_reason` MUST có năm giá trị: `user_exit`, `scheduler_reset`, `stale_generation`, `persistence_error`, `interrupted`; NULL khi kết thúc bình thường hoặc chưa kết thúc. | db + invariant Q12 | AD-11, UC-05 |
 | BR-81 | active | Hoàn thành toàn bộ queue MUST cho `completed`, `end_reason` NULL. | repository | UC-05 |
 | BR-82 | active | Người dùng chủ động thoát MUST cho `abandoned`, `end_reason = user_exit`. | repository | UC-05 |
 | BR-83 | active | Reset xảy ra khi session đang mở MUST cho `invalidated`, `end_reason = scheduler_reset`. | repository | UC-07 |
@@ -395,7 +396,7 @@ phép đọc `card_study_states` tại thời điểm vẽ. Thẻ đi lùi từ 
 
 | ID | Status | Rule | Enforced by | Related |
 |---|---|---|---|---|
-| BR-92 | active | Cờ đánh dấu thẻ MUST là nội dung: sửa thẻ và reset learning progress MUST NOT đụng tới nó; xoá thẻ MUST xoá nó theo cascade. | db + repository | BR-10, BR-41 |
+| BR-92 | active | Cờ đánh dấu thẻ MUST là nội dung: sửa thẻ và reset learning progress MUST NOT đụng tới nó; xoá thẻ MUST xoá nó theo cascade. Hệ thống MAY **bật** cờ (BR-104) nhưng MUST NOT tự tắt — bỏ dấu là hành động của người dùng. | db + repository | BR-10, BR-41, BR-104 |
 | BR-93 | active | Tag MUST là nội dung, quan hệ nhiều-nhiều với thẻ. Tên tag MUST không rỗng sau trim, MUST tối đa 50 ký tự, và MUST là duy nhất không phân biệt hoa thường. | domain + db | BR-41, UC-04 |
 | BR-94 | active | Một thẻ MUST mang tối đa 10 tag. | domain | BR-93 |
 
@@ -408,6 +409,67 @@ BR-94 là một giới hạn của **giao diện** được nâng thành rule, v
 điều đó: hàng thẻ vẽ tag thành một dãy chip, và một dãy không giới hạn sẽ tràn ở
 320 với `textScaler` 2.0. Mười là con số đủ rộng để không ai gặp phải trong thực
 tế và đủ hẹp để hàng thẻ có chiều cao đoán được.
+
+## StudyMode
+
+| ID | Status | Rule | Enforced by | Related |
+|---|---|---|---|---|
+| BR-96 | active | StudyMode MUST là một trong năm: `review`, `match`, `guess`, `recall`, `fill`. | domain | UC-05, BR-30 |
+| BR-97 | active | Tập StudyMode khả dụng MUST do **thuật toán SRS của root deck** khai báo qua `supportedModes`: `eight_box` = cả năm; `sm2` = chỉ `review`. MUST NOT hardcode ở UI. | scheduler | BR-30, AD-06 |
+| BR-98 | active | Mode MUST được lưu tường minh trên `study_sessions` và trên mỗi dòng `study_answers`. MUST NOT suy luận từ hình dạng dữ liệu của lượt. | db | BR-76, AD-11 |
+| BR-99 | active | Một mode MUST khả dụng chỉ khi thoả **cả hai**: nằm trong `supportedModes` của thuật toán, **và** scope hiện tại đủ dữ liệu tối thiểu của mode đó. | domain | BR-97, UC-05 |
+| BR-100 | active | Mode bị chặn vì thuật toán MUST được trình bày là không khả dụng cho deck này, và MUST NOT gợi ý Reset learning progress như cách mở khoá. | UI | BR-13, BR-41 |
+
+**Vì sao tập mode thuộc thuật toán chứ không thuộc deck.** Bốn mode ngoài
+`review` sinh tín hiệu **nhị phân** — đúng hoặc sai. `eight_box` nhận đúng hai
+action (`forgotten`/`remembered`) nên ánh xạ là một-một. `sm2` cần bốn mức, và
+một nguồn nhị phân chỉ nuôi được hai trong bốn; ease factor sẽ trôi hẹp dần theo
+BR-19 mà không có gì báo. Nên `sm2` giữ đúng `review`, và điều đó là **thuộc tính
+của thuật toán**, không phải một hạn chế tạm thời của UI.
+
+Hệ quả trực tiếp: `supportedModes` đứng cạnh `supportedActions` trên cùng
+abstraction, vì cả hai trả lời cùng một câu hỏi — "thuật toán này cho phép người
+dùng làm gì". BR-30 đã cấm hardcode tập action; BR-97 là đúng câu đó cho tập mode.
+
+BR-100 tồn tại vì lối thoát duy nhất là có thật nhưng không được phép đề nghị:
+thuật toán khoá sau lượt `scheduled` đầu tiên (BR-13) và chỉ Reset mới mở, mà
+Reset xoá toàn bộ tiến độ học. Một dòng copy gợi ý điều đó đang đề nghị người
+dùng đánh đổi thứ họ không định đánh đổi.
+
+**Chưa chốt, và cố ý để trống:** ngưỡng tối thiểu cụ thể của `match` và `recall`;
+`guess` so "khác nghĩa" bằng đâu (`back_folded` có sẵn nhưng khác chuỗi ≠ khác
+nghĩa); `fill` đếm eligibility theo số thẻ có `example` khác rỗng (BR-95), nên con
+số của nó khác mọi mode còn lại; và một lượt của bốn mode mới ghi `kind` là gì.
+Không đoán ở đây — mỗi câu trả lời khác nhau cho ra một thiết kế khác nhau.
+
+---
+
+## Phiên học — cách mở, cách giữ, cách đóng
+
+| ID | Status | Rule | Enforced by | Related |
+|---|---|---|---|---|
+| BR-101 | active | Một `study_session` MUST chỉ được tạo bởi hành động Study tường minh của người dùng. Hiển thị số đến hạn — badge, danh sách, thông báo — MUST NOT tạo session. | domain | UC-05, BR-29 |
+| BR-102 | active | Hàng đợi của phiên MUST được lưu trong database tại thời điểm mở phiên, và MUST bất biến trong suốt phiên: thay đổi deck sau đó MUST NOT đổi hàng đợi đang chạy. | db | UC-05, BR-24 |
+| BR-103 | active | Khi mở app còn session `in_progress` của **cùng ngày học**, hệ thống MUST cho phép tiếp tục phiên đó. Session `in_progress` của ngày học khác MUST chuyển `abandoned` với `end_reason = interrupted`. | repository | BR-80, BR-105 |
+| BR-104 | active | Chạm trần 3 lượt `relearning` (BR-26) MUST cho thẻ rời hàng đợi, và MUST bật cờ đánh dấu của thẻ. MUST NOT tự tắt cờ. | repository | BR-26, BR-92 |
+| BR-105 | active | `next_due_at` MUST rơi vào **00:00 giờ địa phương** của ngày thứ N, với N là interval do thuật toán trả về. Giá trị lưu vẫn là UTC. | domain | BR-16, BR-18, AD-16 |
+
+BR-102 thay câu cũ trong `data-model.md` rằng hàng đợi là trạng thái tạm của
+controller. Lý do đổi: hàng đợi mang **luật**, không chỉ mang thứ tự — thứ tự
+BR-23, lượt quay lại BR-26, trần BR-104 — và một cấu trúc mang luật nằm trong
+`presentation/` là chỗ luật đi ra khỏi tầm với của mọi phép kiểm. Đặt nó vào
+database biến "snapshot bất biến" từ một lời hứa thành một ràng buộc, và cho phép
+BR-103 tồn tại: một phiên sống sót qua việc app bị hệ điều hành thu hồi.
+
+BR-105 sửa một chỗ trôi mà không ai thấy: `now + N*24h` đẩy mốc đến hạn muộn dần
+theo giờ người dùng bấm. Học lúc 23:00 thì hôm sau 22:00 thẻ **chưa** tới hạn, và
+mỗi phiên lại đẩy thêm — giờ học trôi dần về khuya cho tới khi người dùng hụt cả
+một ngày. Neo vào đầu ngày lịch làm "đến hạn hôm nay" đúng nghĩa là hôm nay.
+
+**Chưa chốt:** trần 50 thẻ/phiên (BR-24) áp cho mọi mode hay chỉ `review`; và
+phiên có cho chọn scope hẹp hơn deck đang đứng hay không.
+
+---
 
 ## Dữ liệu riêng tư
 

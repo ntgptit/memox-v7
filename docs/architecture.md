@@ -7,7 +7,7 @@
 | **Scope** | Quyết định ràng buộc nhiều tài liệu hoặc nhiều layer. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), hình dạng dữ liệu (`data-model.md`) |
 | **Source of truth for** | AD-xx · đánh đổi kiến trúc · phương án đã bị loại · lý do pin toolchain |
 | **Depends on** | `document-conventions.md`, `product.md` |
-| **Updated by task** | M5.0a (đổi tên Review → Study) |
+| **Updated by task** | M5.0b (chốt nghiệp vụ Study) |
 | **Last updated** | 2026-08-07 |
 
 Format theo `document-conventions.md` §6.1. AD xếp theo số; ID vĩnh viễn (§7).
@@ -1061,3 +1061,43 @@ suffix. Một luật hai bản trong hai script là hai bản sẽ trôi khỏi 
   tin; test nhóm theo behavior từ trước và giữ nguyên.
 - **Barrel export** — che import site khỏi guard và biến mọi đổi tên thành
   breaking change hai chỗ.
+
+---
+
+## AD-16 · "Đầu ngày học" vào từ composition root; scheduler trả số ngày, không trả thời điểm
+
+| | |
+|---|---|
+| **Status** | accepted |
+| **Affected documents** | `business-rules.md` (BR-105) · `data-model.md` · `wbs.md` |
+| **Decision** | `StudyScheduler.next()` trả về **số ngày** cùng trạng thái mới của thẻ, không bao giờ trả `due_at`. Việc quy "N ngày nữa" thành một thời điểm UTC neo ở 00:00 giờ địa phương do một collaborator của domain đảm nhiệm, và múi giờ vào từ composition root như `clockProvider`. |
+
+### Vì sao có quyết định này
+
+BR-105 đổi mốc đến hạn từ `now + N*24h` sang đầu ngày lịch. Nghe như một phép
+tính, nhưng nó kéo theo một thứ `domain/` không được phép biết: **múi giờ**.
+
+Ba chỗ có thể đặt phép quy đổi, và hai chỗ sai:
+
+| Đặt ở | Vì sao không |
+|---|---|
+| `next()` nhận thêm `dayStart` | Trộn hai luật độc lập vào một hàm: công thức SRS (BR-15…BR-19) và ranh giới ngày (BR-105). Mọi test ma trận 8 box × 2 action từ đó phải dựng một mốc ngày để kiểm một phép cộng số nguyên |
+| Repository làm tròn khi ghi | Một luật nghiệp vụ nằm trong `data/`, và `next_due_at` ghi vào `study_answers` sẽ lệch với thứ scheduler vừa nói — lịch sử không còn tái tạo được |
+
+Nên `next()` trả `intervalDays`, và một value object của domain nhận `now` cùng
+offset để tính mốc. Ma trận scheduler vẫn test được bằng số nguyên; ranh giới
+ngày test riêng, gồm các ca chỉ lộ ra ở biên: 23:59, đổi giờ mùa, và thiết bị đổi
+múi giờ giữa hai phiên.
+
+**Múi giờ vào từ ngoài, không đọc trong feature.** Đây là đúng bài học của
+`clockProvider` (AD-13): một fallback riêng bên trong repository biến "bây giờ"
+thành hai thứ — một provider cả cây override được, và một static không gì với
+tới — và cái không với tới được là cái chạy trong production. Ranh giới ngày có
+cùng hình dạng rủi ro, nên đi cùng đường.
+
+### Hệ quả
+
+- `lib/features/study/` MUST NOT gọi `DateTime.now()`, và cũng MUST NOT đọc múi
+  giờ thiết bị trực tiếp.
+- Test của scheduler không cần biết ngày là gì.
+- Đổi mốc cắt sau này — nếu có ai muốn 04:00 thay vì 00:00 — là sửa một chỗ.
