@@ -7,7 +7,7 @@
 | **Scope** | Luật nghiệp vụ, validation rule, state machine, edge case của phạm vi MVP. Ngoài phạm vi: quyết định kiến trúc (`architecture.md`), hình dạng dữ liệu (`data-model.md`), luồng người dùng (`use-cases.md`) |
 | **Source of truth for** | BR-xx · validation rule · entity state machine · edge case |
 | **Depends on** | `document-conventions.md`, `product.md`, `architecture.md` |
-| **Updated by task** | M5.0b (chốt nghiệp vụ Study) |
+| **Updated by task** | M5.0c (kiến trúc StudyMode) |
 | **Last updated** | 2026-08-07 |
 
 Format tuân theo `document-conventions.md` §6.2. Từ khoá MUST / SHOULD / MAY
@@ -27,7 +27,7 @@ khi ai đó đọc và làm theo.
 
 Rule bị thay thế MUST đánh `superseded by BR-yy` ở cột Status và giữ nguyên ID.
 
-Trạng thái hiện tại: **BR-01…BR-105**, không trùng, không thiếu.
+Trạng thái hiện tại: **BR-01…BR-107**, không trùng, không thiếu.
 
 ---
 
@@ -419,6 +419,8 @@ tế và đủ hẹp để hàng thẻ có chiều cao đoán được.
 | BR-98 | active | Mode MUST được lưu tường minh trên `study_sessions` và trên mỗi dòng `study_answers`. MUST NOT suy luận từ hình dạng dữ liệu của lượt. | db | BR-76, AD-11 |
 | BR-99 | active | Một mode MUST khả dụng chỉ khi thoả **cả hai**: nằm trong `supportedModes` của thuật toán, **và** scope hiện tại đủ dữ liệu tối thiểu của mode đó. | domain | BR-97, UC-05 |
 | BR-100 | active | Mode bị chặn vì thuật toán MUST được trình bày là không khả dụng cho deck này, và MUST NOT gợi ý Reset learning progress như cách mở khoá. | UI | BR-13, BR-41 |
+| BR-106 | active | Mọi mode MUST sinh ra một `action` thuộc `supportedActions` của thuật toán. `review` MUST lấy action **trực tiếp từ người dùng**; bốn mode còn lại MUST chấm ra kết quả nhị phân rồi ánh xạ theo BR-107. | domain | BR-15, BR-30, AD-17 |
+| BR-107 | active | Với `eight_box`, kết quả nhị phân MUST ánh xạ: sai → `forgotten`, đúng → `remembered`. Hết giờ ở `recall` MUST tính là sai. | domain | BR-15, BR-96 |
 
 **Vì sao tập mode thuộc thuật toán chứ không thuộc deck.** Bốn mode ngoài
 `review` sinh tín hiệu **nhị phân** — đúng hoặc sai. `eight_box` nhận đúng hai
@@ -435,6 +437,16 @@ BR-100 tồn tại vì lối thoát duy nhất là có thật nhưng không đư
 thuật toán khoá sau lượt `scheduled` đầu tiên (BR-13) và chỉ Reset mới mở, mà
 Reset xoá toàn bộ tiến độ học. Một dòng copy gợi ý điều đó đang đề nghị người
 dùng đánh đổi thứ họ không định đánh đổi.
+
+**BR-106 gỡ một mâu thuẫn nghe rất hợp lý.** `review` thường được mô tả là "không
+có đúng/sai" — đúng, theo nghĩa **không có máy chấm**: người học tự đánh giá. Nhưng
+nó vẫn sinh ra `forgotten`/`remembered`, và nếu đọc thành "không sinh action" thì
+**không mode nào cập nhật lịch** và toàn bộ SRS biến mất cùng M3 của `product.md`.
+
+Khác biệt thật giữa năm mode vì thế nằm gọn ở **nguồn** của action, không phải ở
+việc có hay không có action — và đó cũng chính là toàn bộ phần mỗi handler phải
+tự viết (AD-17). `review` không còn là ngoại lệ của luồng chung; nó là mode mà
+`evaluate` trả về đúng cái người dùng vừa bấm.
 
 **Chưa chốt, và cố ý để trống:** ngưỡng tối thiểu cụ thể của `match` và `recall`;
 `guess` so "khác nghĩa" bằng đâu (`back_folded` có sẵn nhưng khác chuỗi ≠ khác

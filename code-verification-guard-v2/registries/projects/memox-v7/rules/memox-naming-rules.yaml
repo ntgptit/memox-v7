@@ -53,13 +53,13 @@ rules:
     enabled: true
     message: >-
       Files under domain/ must end in _entity, _repository, _use_case, _scheduler,
-      _failure or _model.
+      _mode, _failure or _model.
     include:
       - lib/features/*/domain/**/*.dart
     exclude:
       - '**/*.g.dart'
       - '**/*.freezed.dart'
-    pattern: '^[a-z0-9_]+_(?:entity|repository|use_case|scheduler|failure|model)\.dart$'
+    pattern: '^[a-z0-9_]+_(?:entity|repository|use_case|scheduler|mode|failure|model)\.dart$'
     tags:
       - memox
       - naming
