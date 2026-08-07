@@ -7,7 +7,7 @@
 | **Scope** | Bảng, cột, index, quan hệ, query bất biến. Ngoài phạm vi: SQL runtime (`lib/core/database/`, chưa tồn tại) |
 | **Source of truth for** | Schema · cột và kiểu · index · query bất biến · thứ tự migration |
 | **Depends on** | `document-conventions.md`, `architecture.md`, `business-rules.md` |
-| **Updated by task** | M5.0g (luật stage recall) |
+| **Updated by task** | M5.0h (luật stage fill) |
 | **Last updated** | 2026-08-07 |
 
 Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; SQL thật nằm
@@ -34,7 +34,8 @@ Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; S
 > **Chưa tồn tại ở bất kỳ schema nào** — đến cùng đợt migration của M5:
 > bảng `study_queue_items` (cột `mode`, `round`, `remaining_ms`, `is_revealed`);
 > `study_sessions.current_mode`, `study_sessions.cursor`; `study_answers.mode` và
-> `study_answers.outcome_reason`; giá trị `interrupted` của `end_reason`; và hai
+> `study_answers.outcome_reason`, `comparison_version`, `used_hint`; giá trị
+> `interrupted` của `end_reason`; và hai
 > StudyMode mới `browse` / `self_assess`.
 >
 > Ghi ra đây vì bài học của M4.12d: một tài liệu nói khác code mà không nói rõ nó
@@ -301,6 +302,8 @@ xoá (cascade).
 | `kind` | TEXT NOT NULL | `'scheduled'` \| `'relearning'` (BR-75, BR-76) |
 | `mode` | TEXT NOT NULL | StudyMode của lượt (BR-108, BR-98). `browse` không bao giờ xuất hiện ở đây (BR-111) |
 | `outcome_reason` | TEXT NULL | `timeout` khi hết giờ ở `recall` (BR-131); NULL khi người dùng tự trả lời |
+| `comparison_version` | INTEGER NULL | chỉ `fill`: phiên bản chính sách so khớp đã dùng (BR-135) |
+| `used_hint` | INTEGER NULL | chỉ `fill`: 0 \| 1. Ghi nhận, không đổi `action` (BR-136) |
 | `action` | TEXT NOT NULL | `forgotten`/`remembered` hoặc `again`/`hard`/`good`/`easy` |
 | `answered_at` | DATETIME NOT NULL | UTC |
 | `next_due_at` | DATETIME NULL | hạn sau khi đánh giá |
@@ -578,6 +581,10 @@ WHERE s.status = 'completed'
 SELECT session_id FROM study_queue_items
 WHERE available_at < 0 OR answers_in_session < 0 OR round < 1
    OR (mode = 'self_assess' AND answers_in_session > 4);
+
+-- 23. Cột đặc thù `fill` xuất hiện ở stage khác (BR-135, BR-136)
+SELECT id FROM study_answers
+WHERE mode <> 'fill' AND (comparison_version IS NOT NULL OR used_hint IS NOT NULL);
 
 -- 21. Trạng thái timer nằm ngoài `recall`, hoặc vượt ngưỡng 20 giây (BR-128, BR-133)
 SELECT session_id FROM study_queue_items
