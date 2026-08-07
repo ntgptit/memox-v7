@@ -101,6 +101,11 @@ base class FakeStudyRepository implements StudyRepository {
   @override
   Future<StudyScheduleModel?> scheduleOf(String cardId) async => schedule;
 
+  List<StudyCardModel> cards = const <StudyCardModel>[];
+
+  @override
+  Future<List<StudyCardModel>> sessionCards(String sessionId) async => cards;
+
   @override
   Future<List<String>> cardsFinishedInSession(String sessionId) async =>
       finishedCardIds;

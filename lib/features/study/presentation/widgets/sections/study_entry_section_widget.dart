@@ -17,8 +17,8 @@ import '../../../domain/models/study_entry_summary_model.dart';
 /// **Nothing due means no way in, and that is a normal screen** (BR-29, BR-145).
 /// Studying ahead is a rule rather than a missing feature, so the review button
 /// is absent with an explanation rather than present and refusing.
-class StudyEntrySection extends StatelessWidget {
-  const StudyEntrySection({
+class StudyEntrySectionWidget extends StatelessWidget {
+  const StudyEntrySectionWidget({
     required this.summary,
     required this.onLearn,
     required this.onReview,

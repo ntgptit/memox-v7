@@ -53,7 +53,7 @@ void main() {
     String cardId = 'c1',
   }) => tester.pumpWidget(
     wrapForTest(
-      StudyCardFaceSection(
+      StudyCardFaceSectionWidget(
         turn: turnOf(cardId),
         actions: actions,
         onAction: onAction ?? (_) {},
@@ -160,7 +160,7 @@ void main() {
 
     await tester.pumpWidget(
       wrapForTest(
-        StudyCardFaceSection(
+        StudyCardFaceSectionWidget(
           turn: turnOf('c1'),
           actions: sm2,
           onAction: (_) {},

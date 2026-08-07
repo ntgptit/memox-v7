@@ -11,7 +11,7 @@ import 'package:memox/app/router/app_router.dart';
 import 'package:memox/core/navigation/route_names.dart';
 import 'package:memox/app/router/route_paths.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
-import 'package:memox/features/study/presentation/screens/study_placeholder_screen.dart';
+import 'package:memox/features/study/presentation/screens/study_entry_screen.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_content_shell.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
@@ -113,7 +113,7 @@ void main() {
       await tester.tap(tab(english.navigationStudyLabel));
       await tester.pumpAndSettle();
 
-      expect(find.byType(StudyPlaceholderScreen), findsOneWidget);
+      expect(find.byType(StudyEntryScreen), findsOneWidget);
       expect(selectedTab(tester), 1);
       expect(tester.takeException(), isNull);
     });
@@ -140,7 +140,7 @@ void main() {
       // make the back button land somewhere they never chose to be.
       await pumpApp(tester, initialLocation: RoutePaths.study);
 
-      expect(find.byType(StudyPlaceholderScreen), findsOneWidget);
+      expect(find.byType(StudyEntryScreen), findsOneWidget);
       expect(find.byType(DeckListScreen), findsNothing);
       expect(selectedTab(tester), 1);
     });
@@ -218,7 +218,7 @@ void main() {
       router.goNamed(RouteNames.study);
       await tester.pumpAndSettle();
 
-      expect(find.byType(StudyPlaceholderScreen), findsOneWidget);
+      expect(find.byType(StudyEntryScreen), findsOneWidget);
       // Navigating by name from outside the bar must still leave the bar
       // telling the truth — the selected index comes from the router, not from
       // whichever widget happened to trigger the navigation.

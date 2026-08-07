@@ -58,7 +58,15 @@ M5.16 sau khi mọi màn đã ổn định
 
 ### M5.7 · Màn hình phiên học và lối vào
 
-- **Status:** todo — **chặn mọi mốc còn lại**
+- **Status:** in progress — nhánh `claude/m5-7-study-screens` đã đẩy lên, **đừng
+  `reset --hard` mất nó**. Đã xong: `sessionCards` trên contract/impl/fake,
+  `StudyEntryController`, `studyModeView` (Map mode→widget), `StudyEntryScreen`,
+  `StudySessionScreen`, route đã nối, placeholder đã xoá, `app_router_test` xanh.
+  **Còn lại đúng ba việc**: (1) hai file visual audit theo MX-VIS-001 cho hai màn
+  mới — `screen_audit_coverage_test` đang đỏ, mẫu ở
+  `test/visual_audit/screens/features/study/screens/`; (2) xoá file audit của
+  placeholder đã chết; (3) `app_navigation_shell_test` cần override
+  `studyRepositoryProvider` vì nhánh Study giờ đọc dữ liệu thật.
 - **Goal:** Người dùng mở app, thấy số thẻ, bấm học, và đi hết một phiên.
 - **Scope:** `StudyEntryScreen` thay `StudyPlaceholderScreen`;
   `StudySessionScreen` đọc `StudySessionController` và render đúng widget mode;

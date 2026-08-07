@@ -176,6 +176,14 @@ abstract interface class StudyRepository {
   /// if it was later answered correctly to clear the board (BR-116).
   Future<bool> buildNextRound(String sessionId);
 
+  /// Every card of a session, with content.
+  ///
+  /// `match` lays out a board and `guess` draws distractors, so both need the
+  /// whole set rather than the one card being served (BR-121, BR-153). Read once
+  /// when the session opens: the set is fixed for the session's whole life
+  /// (BR-102), so re-reading it per turn would be the same answer at a cost.
+  Future<List<StudyCardModel>> sessionCards(String sessionId);
+
   /// Stores what is left of a turn in flight (BR-133).
   ///
   /// **Resume continues a turn, it does not restart one.** A `recall` turn

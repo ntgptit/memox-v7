@@ -31,6 +31,13 @@ abstract class StudySessionState with _$StudySessionState {
     /// `eight_box` deck.
     @Default(<StudyAction>[]) List<StudyAction> actions,
 
+    /// Every card of the session, for the stages that need the whole set.
+    ///
+    /// `match` lays out a board and `guess` draws distractors from it (BR-121,
+    /// BR-153). Fixed for the session's life (BR-102), so it is read once when
+    /// the session opens rather than per turn.
+    @Default(<StudyCardModel>[]) List<StudyCardModel> sessionCards,
+
     /// Opening the session. Nothing is on screen yet.
     @Default(false) bool isOpening,
 

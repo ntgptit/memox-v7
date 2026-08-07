@@ -21,8 +21,8 @@ import '../support/study_labels_widget.dart';
 /// [actions] comes from the scheduler (BR-30). This widget never decides how
 /// many buttons there are — a hardcoded pair is wrong for every `sm2` deck and a
 /// hardcoded four is wrong for every `eight_box` one.
-class StudyCardFaceSection extends StatelessWidget {
-  const StudyCardFaceSection({
+class StudyCardFaceSectionWidget extends StatelessWidget {
+  const StudyCardFaceSectionWidget({
     required this.turn,
     required this.actions,
     required this.onAction,
