@@ -7,7 +7,7 @@
 | **Scope** | Vấn đề, người dùng, quyết định nền tảng, phạm vi MVP, luồng nghiệp vụ chính. Ngoài phạm vi: cách triển khai |
 | **Source of truth for** | Phạm vi MVP · phân loại must/should/nice/out · quyết định platform, data posture, auth, dữ liệu nhạy cảm |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M5.0m (hai loại phiên học) |
+| **Updated by task** | M5.0n (recursive review) |
 | **Last updated** | 2026-08-07 |
 
 ## Problem
@@ -84,7 +84,7 @@ tính năng.
 |---|---|---|
 | M1 | Tạo/sửa/xoá deck | Deck tồn tại sau khi restart app; xoá deck xoá cascade toàn bộ card của nó |
 | M2 | Tạo/sửa/xoá card trong deck | Card có mặt trước/sau; sửa không làm mất lịch sử ôn tập |
-| M3 | Phiên học theo lịch SRS, mode `review` | Chỉ hiện card đến hạn; đánh giá kết quả cập nhật lịch ôn lần sau |
+| M3 | Phiên học theo lịch SRS | Chỉ hiện card đến hạn; đánh giá kết quả cập nhật lịch ôn lần sau |
 | M4 | Danh sách deck với tiến độ | Mỗi deck hiện số card đến hạn hôm nay |
 | M5 | Hoạt động đầy đủ offline | Bật chế độ máy bay, mọi chức năng trên vẫn chạy bình thường |
 

@@ -7,7 +7,7 @@
 | **Scope** | Quyết định ràng buộc nhiều tài liệu hoặc nhiều layer. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), hình dạng dữ liệu (`data-model.md`) |
 | **Source of truth for** | AD-xx · đánh đổi kiến trúc · phương án đã bị loại · lý do pin toolchain |
 | **Depends on** | `document-conventions.md`, `product.md` |
-| **Updated by task** | M5.0d (chuỗi stage; browse/self_assess) |
+| **Updated by task** | M5.0n (recursive review) |
 | **Last updated** | 2026-08-07 |
 
 Format theo `document-conventions.md` §6.1. AD xếp theo số; ID vĩnh viễn (§7).
@@ -1181,7 +1181,7 @@ mục sinh sẵn mời gọi việc điền vào cho đủ, kể cả những ch
 |---|---|
 | **Status** | accepted |
 | **Affected documents** | `business-rules.md` (BR-96…BR-100, BR-106, BR-107) · `CLAUDE.md` · `code-verification-guard-v2` naming rules |
-| **Decision** | Mỗi StudyMode là một class thuần implement `StudyModeHandler` với đúng hai trách nhiệm: `validateInput` và `evaluate`. Luồng chung của một lượt học nằm trong **use case**, không nằm trong một abstract base mà năm mode kế thừa. Phân giải mode là **một** `switch` exhaustive trên enum, ở đúng một chỗ. |
+| **Decision** | Mỗi StudyMode là một class thuần implement `StudyModeHandler` với đúng hai trách nhiệm: `validateInput` và `evaluate`. Luồng chung của một lượt học nằm trong **use case**, không nằm trong một abstract base mà sáu mode kế thừa. Phân giải mode là **một** `switch` exhaustive trên enum, ở đúng một chỗ. |
 
 ### Vì sao không phải Template Method
 
@@ -1218,7 +1218,7 @@ mất thay vì phải canh bằng contract test.
 
 ### Fail-fast lúc biên dịch, không phải lúc khởi động
 
-Registry kiểu factory-nhận-collection kiểm "đủ năm mode" lúc khởi động. Dart 3
+Registry kiểu factory-nhận-collection kiểm "đủ số mode" lúc khởi động. Dart 3
 kiểm sớm hơn:
 
 ```dart

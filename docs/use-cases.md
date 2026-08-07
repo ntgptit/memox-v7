@@ -7,7 +7,7 @@
 | **Scope** | Must-have của MVP. Ngoài phạm vi: should/nice-to-have, và mọi thứ ở mục "Điều đã cố ý không đặc tả" |
 | **Source of truth for** | UC-xx · main/alternative/error flow · UI state matrix của từng màn |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md` |
-| **Updated by task** | M5.0m (hai loại phiên học) |
+| **Updated by task** | M5.0n (recursive review) |
 | **Last updated** | 2026-08-07 |
 
 Chỉ đặc tả must-have. Should-have và nice-to-have viết khi tới lượt — đặc tả
@@ -287,12 +287,14 @@ do người dùng chọn và cập nhật lịch. Chúng không bao giờ trộn
     (BR-81). Hiện tổng kết.
 
 **Alternative flows:**
-- **A1 — Đánh giá `forgotten` (8-box) hoặc `again` (SM-2):** card về trạng thái
-  khởi đầu theo scheduler, và **quay lại trong phiên hiện tại** sau ít nhất 3 card
-  khác, hoặc cuối hàng đợi nếu không đủ 3 (BR-26).
-- **A0 — Hết hàng đợi của một stage:** hệ thống chuyển `current_mode` sang stage kế
-  trong `stageSequence` và chạy tiếp trên **cùng tập thẻ**, với thứ tự xoáo riêng
-  của stage đó (BR-113). Hết stage cuối mới là hết phiên (BR-81).
+- **A1 — Thẻ trả lời sai:** cách nó quay lại **tùy mode**, không tùy loại phiên.
+  Với `self_assess`: quay lại trong cùng hàng đợi sau ít nhất 3 thẻ khác, trần 3
+  lượt (BR-26, BR-104). Với bốn mode chấm điểm: thẻ ở lại tập không đạt và quay lại
+  ở **round sau**, không trần (BR-115, BR-119) — xem A0c.
+- **A0 — Hết hàng đợi của một stage (chỉ phiên `learning`):** hệ thống chuyển
+  `current_mode` sang stage kế trong `stageSequence` và chạy tiếp trên **cùng tập
+  thẻ**, với thứ tự xoáo riêng (BR-113). Hết stage cuối mới là hết phiên (BR-81).
+  Phiên `reviewing` chỉ có một mode, nên hết hàng đợi là hết phiên.
 - **A0c — Hết một round của stage chấm điểm:** tập thẻ không đạt rỗng thì stage
   hoàn tất (BR-119); còn thẻ thì dựng round mới **chỉ từ tập đó**, với thứ tự xoáo
   riêng (BR-115, BR-117). Thẻ từng sai trong round vẫn thuộc tập đó kể cả khi sau
@@ -300,10 +302,12 @@ do người dùng chọn và cập nhật lịch. Chúng không bao giờ trộn
 - **A0b — Thẻ không đủ dữ liệu cho stage đang chạy:** bỏ qua **có ghi nhận** ở stage
   đó, không xoá khỏi deck, và vẫn xuất hiện ở các stage khác mà nó đủ dữ liệu
   (BR-114) — ví dụ thẻ không có `example` thì vắng ở `fill` nhưng có ở `guess`.
-- **A2b — Card chạm trần 3 lượt `relearning`:** thẻ rời hàng đợi dù lượt cuối
-  vẫn là `forgotten`/`again`, và hệ thống bật cờ đánh dấu của thẻ (BR-104). Lịch
-  dài hạn đã được đặt ở lượt `scheduled` đầu tiên nên không mất gì — thẻ vẫn
-  đến hạn lại sớm. Cờ chỉ được bật, không bao giờ tự tắt (BR-92).
+- **A2b — Thẻ chạm trần 3 lượt `relearning` ở `self_assess`:** thẻ rời hàng đợi dù
+  lượt cuối vẫn là `forgotten`/`again`, và hệ thống bật cờ đánh dấu (BR-104).
+  Trong phiên `reviewing`, lịch đã được đặt ở lượt `scheduled` đầu nên thẻ vẫn đến
+  hạn lại sớm. Trong phiên `learning`, thẻ chưa có lịch và cũng chưa `learned_at`,
+  nên nó ở lại tập học mới — cờ là dấu cho lần sau. Cờ chỉ được bật, không bao
+  giờ tự tắt (BR-92).
 - **A2 — Card quay lại được đánh giá lần nữa:** lượt đó là `relearning` (BR-78).
   Ghi history và cập nhật `last_answered_at`, nhưng không đổi lịch. Đánh giá khác
   `forgotten`/`again` thì rời hàng đợi; lại `forgotten`/`again` thì quay lại lần
@@ -414,7 +418,8 @@ giải thích vì sao chế độ ôn tập đang bị khoá (UC-03 A1)
    - **Giữ nguyên:** deck, toàn bộ cây deck con, flashcard, media, tag, mọi nội
      dung, và lịch sử ôn tập cũ (để tham khảo).
    - **Mất:** lịch ôn hiện tại, ngày đến hạn, box / ease factor / interval, trạng
-     thái thành thạo, và phiên đang dở.
+     thái thành thạo, phiên đang dở, và **dấu đã học xong lần đầu** — mọi thẻ
+     trở lại tập Học mới và đi lại chuỗi stage (BR-152, BR-142).
 3. Người dùng có thể chọn **chế độ ôn tập mới** ngay trong bước này — đây là mục
    đích chính của thao tác.
 4. Người dùng xác nhận.
