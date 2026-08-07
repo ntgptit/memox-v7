@@ -1,0 +1,228 @@
+import 'package:memox/core/error/failure.dart';
+import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
+import 'package:memox/features/study/domain/entities/study_queue_item_entity.dart';
+import 'package:memox/features/study/domain/entities/study_session_entity.dart';
+import 'package:memox/features/study/domain/failures/study_refusal_failure.dart';
+import 'package:memox/features/study/domain/models/new_card_order_model.dart';
+import 'package:memox/features/study/domain/models/study_action_model.dart';
+import 'package:memox/features/study/domain/models/study_deck_context_model.dart';
+import 'package:memox/features/study/domain/models/study_entry_summary_model.dart';
+import 'package:memox/features/study/domain/models/study_mode.dart';
+import 'package:memox/features/study/domain/models/study_options_model.dart';
+import 'package:memox/features/study/domain/models/study_outcome_reason_model.dart';
+import 'package:memox/features/study/domain/models/study_schedule_model.dart';
+import 'package:memox/features/study/domain/models/study_session_kind_model.dart';
+import 'package:memox/features/study/domain/models/study_session_status_model.dart';
+import 'package:memox/features/study/domain/repositories/study_repository.dart';
+
+/// A `StudyRepository` a use-case test drives by hand.
+///
+/// **It records arguments rather than simulating a queue.** The queue engine is
+/// tested against a real database in `test/features/study/data/`; repeating any
+/// of it here would test the double. What these tests are about is the decision
+/// a use case makes *before* the write — which stages to run, which schedule to
+/// ask for, whether to consult a scheduler at all — and that is exactly what the
+/// recorded arguments show.
+final class FakeStudyRepository implements StudyRepository {
+  FakeStudyRepository({
+    this.schedulerType = SchedulerType.eightBox,
+    this.cardLimit = 20,
+    this.newCardOrder = NewCardOrder.created,
+    this.schedule = const StudyScheduleModel(box: 3),
+    this.stageExhausted = true,
+    this.finishedCardIds = const <String>[],
+    this.openSessionFails = false,
+  });
+
+  final SchedulerType schedulerType;
+  final int cardLimit;
+  final NewCardOrder newCardOrder;
+  final StudyScheduleModel? schedule;
+  final bool stageExhausted;
+  final List<String> finishedCardIds;
+
+  /// Makes [openSession] refuse the way the real one does when nothing is due.
+  final bool openSessionFails;
+
+  final List<({StudySessionKind kind, List<StudyMode> stages, int limit})>
+  opened = <({StudySessionKind kind, List<StudyMode> stages, int limit})>[];
+
+  final List<
+    ({
+      String cardId,
+      StudyMode mode,
+      StudyAction action,
+      DateTime? nextDueAt,
+      int? nextBox,
+      int? nextIntervalDays,
+      double? nextEaseFactor,
+    })
+  >
+  answers =
+      <
+        ({
+          String cardId,
+          StudyMode mode,
+          StudyAction action,
+          DateTime? nextDueAt,
+          int? nextBox,
+          int? nextIntervalDays,
+          double? nextEaseFactor,
+        })
+      >[];
+
+  final List<({String cardId, DateTime learnedAt, DateTime dueAt, int? box})>
+  completed =
+      <({String cardId, DateTime learnedAt, DateTime dueAt, int? box})>[];
+
+  final List<StudyMode> advancedTo = <StudyMode>[];
+  final List<({StudySessionStatus status, StudySessionEndReason? reason})>
+  ended = <({StudySessionStatus status, StudySessionEndReason? reason})>[];
+
+  DateTime? abandonedBefore;
+  StudySessionEntity? openSession_;
+
+  @override
+  Future<StudyDeckContextModel> deckContext(String deckId) async =>
+      StudyDeckContextModel(
+        deckId: deckId,
+        rootDeckId: 'root',
+        schedulerType: schedulerType,
+        schedulerGeneration: 1,
+      );
+
+  @override
+  Future<StudyOptionsModel> effectiveOptions(String rootDeckId) async =>
+      StudyOptionsModel(cardLimit: cardLimit, newCardOrder: newCardOrder);
+
+  @override
+  Future<StudyScheduleModel?> scheduleOf(String cardId) async => schedule;
+
+  @override
+  Future<List<String>> cardsFinishedInSession(String sessionId) async =>
+      finishedCardIds;
+
+  @override
+  Future<StudySessionEntity> openSession({
+    required String deckId,
+    required StudySessionKind kind,
+    required List<StudyMode> stageSequence,
+    required int cardLimit,
+    required NewCardOrder newCardOrder,
+    required DateTime now,
+  }) async {
+    if (openSessionFails) {
+      throw const ConflictFailure(
+        message: 'Nothing to study',
+        reason: StudyRefusalReason.nothingDueToReview,
+      );
+    }
+
+    opened.add((kind: kind, stages: stageSequence, limit: cardLimit));
+
+    return StudySessionEntity(
+      id: 'session-1',
+      deckId: deckId,
+      rootDeckId: 'root',
+      schedulerGeneration: 1,
+      kind: kind,
+      currentMode: stageSequence.first,
+      status: StudySessionStatus.inProgress,
+      endReason: null,
+      cursor: 0,
+      cardLimit: cardLimit,
+      startedAt: now,
+      endedAt: null,
+    );
+  }
+
+  @override
+  Future<void> submitAnswer({
+    required String sessionId,
+    required String cardId,
+    required StudyMode mode,
+    required StudyAction action,
+    required DateTime now,
+    StudyOutcomeReason? outcomeReason,
+    int? comparisonVersion,
+    bool? usedHint,
+    DateTime? nextDueAt,
+    int? nextBox,
+    double? nextEaseFactor,
+    int? nextIntervalDays,
+  }) async {
+    answers.add((
+      cardId: cardId,
+      mode: mode,
+      action: action,
+      nextDueAt: nextDueAt,
+      nextBox: nextBox,
+      nextIntervalDays: nextIntervalDays,
+      nextEaseFactor: nextEaseFactor,
+    ));
+  }
+
+  @override
+  Future<void> completeLearning({
+    required String cardId,
+    required DateTime learnedAt,
+    required DateTime dueAt,
+    int? box,
+    int? intervalDays,
+  }) async {
+    completed.add((
+      cardId: cardId,
+      learnedAt: learnedAt,
+      dueAt: dueAt,
+      box: box,
+    ));
+  }
+
+  @override
+  Future<void> advanceStage({
+    required String sessionId,
+    required StudyMode mode,
+    required DateTime now,
+  }) async => advancedTo.add(mode);
+
+  @override
+  Future<void> endSession({
+    required String sessionId,
+    required StudySessionStatus status,
+    required StudySessionEndReason? reason,
+    required DateTime endedAt,
+  }) async => ended.add((status: status, reason: reason));
+
+  @override
+  Future<int> abandonStaleSessions({required DateTime dayStart}) async {
+    abandonedBefore = dayStart;
+
+    return 0;
+  }
+
+  @override
+  Future<StudySessionEntity?> openSessionFor(String deckId) async =>
+      openSession_;
+
+  @override
+  Future<bool> isStageExhausted(String sessionId) async => stageExhausted;
+
+  @override
+  Future<StudyQueueItemEntity?> nextItem(String sessionId) async => null;
+
+  @override
+  Future<bool> buildNextRound(String sessionId) async => false;
+
+  @override
+  Stream<StudyEntrySummaryModel> watchStudyEntry(
+    String deckId, {
+    required DateTime now,
+  }) => Stream<StudyEntrySummaryModel>.value(
+    const StudyEntrySummaryModel(
+      newCount: 3,
+      dueCount: 4,
+      fillableCount: 1,
+      distinctMeanings: 4,
+    ),
+  );
+}

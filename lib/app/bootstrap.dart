@@ -12,6 +12,7 @@ import '../core/time/clock_provider.dart';
 import '../features/card/di/card_repository_provider.dart';
 import '../features/deck/di/deck_repository_provider.dart';
 import '../features/deck/di/deck_template_provider.dart';
+import '../features/study/di/study_repository_provider.dart';
 import 'di/repository_bindings.dart';
 import 'app.dart';
 import 'config/env_config.dart';
@@ -116,6 +117,7 @@ Widget buildRootWidget(
     deckRepositoryProvider.overrideWith(deckRepositoryBinding),
     cardRepositoryProvider.overrideWith(cardRepositoryBinding),
     deckTemplateRepositoryProvider.overrideWith(deckTemplateRepositoryBinding),
+    studyRepositoryProvider.overrideWith(studyRepositoryBinding),
     if (database != null) appDatabaseProvider.overrideWithValue(database),
     if (now != null) clockProvider.overrideWithValue(now),
   ],

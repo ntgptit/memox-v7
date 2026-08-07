@@ -103,6 +103,27 @@ final class StudyDao {
     _db.cardStudyStates,
   )..where((s) => s.cardId.equals(cardId))).getSingleOrNull();
 
+  /// Cards of a session that have no `pending` row left anywhere in it.
+  ///
+  /// Raw SQL rather than the generated API because the shape is an anti-join,
+  /// and drift's query builder spells that as a correlated subquery either way.
+  Future<List<String>> cardsWithNothingPending(String sessionId) async {
+    final rows = await _db
+        .customSelect(
+          'SELECT DISTINCT q.card_id AS cardId FROM study_queue_items q '
+          'WHERE q.session_id = ? '
+          '  AND NOT EXISTS ('
+          '    SELECT 1 FROM study_queue_items p '
+          "    WHERE p.session_id = q.session_id AND p.card_id = q.card_id "
+          "      AND p.status = 'pending')",
+          variables: <Variable<Object>>[Variable<String>(sessionId)],
+          readsFrom: <TableInfo<Table, Object?>>{_db.studyQueueItems},
+        )
+        .get();
+
+    return rows.map((row) => row.read<String>('cardId')).toList();
+  }
+
   Future<AppSetting> appSettings() => _db.appSettingsRow().getSingle();
 
   // ---- writes ------------------------------------------------------------

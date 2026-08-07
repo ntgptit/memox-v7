@@ -2,7 +2,9 @@ import '../entities/study_queue_item_entity.dart';
 import '../entities/study_session_entity.dart';
 import '../models/new_card_order_model.dart';
 import '../models/study_action_model.dart';
+import '../models/study_deck_context_model.dart';
 import '../models/study_entry_summary_model.dart';
+import '../models/study_schedule_model.dart';
 import '../models/study_mode.dart';
 import '../models/study_options_model.dart';
 import '../models/study_outcome_reason_model.dart';
@@ -37,6 +39,27 @@ abstract interface class StudyRepository {
     String deckId, {
     required DateTime now,
   });
+
+  /// The root, the algorithm and the generation of one deck, in one read.
+  ///
+  /// A use case needs all three before it can open a session, and reading them
+  /// separately lets a session be opened against a root that was reset between
+  /// two of the reads (AD-13).
+  Future<StudyDeckContextModel> deckContext(String deckId);
+
+  /// The schedule numbers of one card, for the scheduler to work from.
+  ///
+  /// Null when the card has no study state — broken data rather than a card
+  /// that has never been studied, since BR-09 creates the state with the card.
+  Future<StudyScheduleModel?> scheduleOf(String cardId);
+
+  /// Cards of this session with no `pending` row left in any stage.
+  ///
+  /// **"Every stage it took part in", not "every stage in the sequence"**
+  /// (BR-144, BR-114). A card the `fill` stage skipped for want of an `example`
+  /// has no row there to be pending, so it finishes with the others — which is
+  /// what stops most of the deck from being frozen forever.
+  Future<List<String>> cardsFinishedInSession(String sessionId);
 
   /// The options in force for [rootDeckId], with the deck's override applied
   /// over the app-wide default (BR-147).

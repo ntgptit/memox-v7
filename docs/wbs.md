@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M5.1a (BR-18 ease factor order) |
+| **Updated by task** | M5.2 (use case) |
 | **Last updated** | 2026-08-07 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -7486,7 +7486,7 @@ dữ liệu kỳ vọng của nhiều chỗ và đổi hướng thành một đ�
 
 ### M5.2 · Use case: mở phiên, ghi lượt, hoàn tất, đóng phiên
 
-- **Status:** todo
+- **Status:** **done** — analyze sạch, 1541 test xanh, guard sạch
 - **Goal:** Mỗi tương tác của UC-05 có đúng một use case, và không use case nào
   đọc repository của feature khác.
 - **Scope:** `StartLearningSessionUseCase`, `StartReviewingSessionUseCase`,
@@ -7497,22 +7497,46 @@ dữ liệu kỳ vọng của nhiều chỗ và đổi hướng thành một đ�
 - **Editable documents:** `docs/wbs.md`
 - **Output:** `lib/features/study/domain/usecases/`
 - **Acceptance criteria:**
-  - [ ] Phiên `learning` chỉ lấy thẻ `learned_at IS NULL`; phiên `reviewing` chỉ
+  - [x] Phiên `learning` chỉ lấy thẻ `learned_at IS NULL`; phiên `reviewing` chỉ
         lấy `learned_at IS NOT NULL AND due_at <= now`. Không phiên nào trộn (BR-142).
-  - [ ] Mở `reviewing` khi tập đến hạn rỗng → `Failure`, **không** tạo session
+  - [x] Mở `reviewing` khi tập đến hạn rỗng → `Failure`, **không** tạo session
         (BR-145, BR-101) — test khẳng định không có dòng nào được ghi.
-  - [ ] Phiên `learning` không sinh lượt `scheduled` nào (BR-141, BR-144).
-  - [ ] Trong `reviewing`, lượt đầu của mỗi thẻ ghi `scheduled`, các lượt sau ghi
+  - [x] Phiên `learning` không sinh lượt `scheduled` nào (BR-141, BR-144).
+  - [x] Trong `reviewing`, lượt đầu của mỗi thẻ ghi `scheduled`, các lượt sau ghi
         `relearning`, và `relearning` **không** đổi `due_at`/`current_box` (BR-77, BR-78).
-  - [ ] Thẻ box 8 + `remembered` vẫn ghi `scheduled` dù box không đổi (BR-76) —
+  - [x] Thẻ box 8 + `remembered` vẫn ghi `scheduled` dù box không đổi (BR-76) —
         đây là ca mà suy luận sẽ sai.
-  - [ ] Ghi từ session có generation cũ → `Failure`, không ghi `study_answers`,
+  - [x] Ghi từ session có generation cũ → `Failure`, không ghi `study_answers`,
         session chuyển `invalidated`/`stale_generation` (BR-84).
-  - [ ] `card_limit` chốt một lần lúc mở phiên; đổi tùy chọn sau đó không ảnh
+  - [x] `card_limit` chốt một lần lúc mở phiên; đổi tùy chọn sau đó không ảnh
         hưởng phiên đang chạy (BR-139).
-  - [ ] Giá trị hiệu lực của tùy chọn = `decks.study_config` của root nếu có,
+  - [x] Giá trị hiệu lực của tùy chọn = `decks.study_config` của root nếu có,
         ngược lại `app_settings` (BR-147) — test cả hai nhánh.
-  - [ ] Một lượt đọc duy nhất trả cả số chưa học lẫn số đến hạn (AD-13).
+  - [x] Một lượt đọc duy nhất trả cả số chưa học lẫn số đến hạn (AD-13).
+**Một use case cho cả hai loại phiên, không phải hai.** WBS đặt tên
+`StartLearningSessionUseCase` và `StartReviewingSessionUseCase`, nhưng mở phiên là
+**một** tương tác; cái khác nhau là lấy tập thẻ nào và chạy stage nào, mà cả hai đều
+do thuật toán và BR-142 trả lời sẵn. Tách đôi sẽ nhân đôi phần đọc tùy chọn, đọc
+generation và xử lý từ chối — và hai bản sao ấy sẽ trôi khỏi nhau. Tên thực tế:
+`StartStudySessionUseCase`.
+
+**Thêm `ResumeStudyDayUseCase`, không có trong scope ban đầu.** BR-103 cần **một** lời
+gọi: đóng phiên của ngày trước rồi mới tìm phiên hôm nay. Tách làm hai cho phép
+caller gọi ngược thứ tự và mời người dùng tiếp tục đúng phiên nó vừa đóng.
+
+**Ba phương thức contract phải thêm.** Use case cần biết thuật toán của root
+(`deckContext`), số liệu lịch của thẻ để đưa cho scheduler (`scheduleOf`), và thẻ nào
+đã xong mọi stage để đánh dấu học xong (`cardsFinishedInSession`). Cái thứ ba là nơi
+BR-114 sống: nó hỏi "không còn dòng `pending` nào", chứ không hỏi "đã qua stage cuối
+của chuỗi" — thẻ bị `fill` bỏ qua vì thiếu `example` không có dòng nào ở đó để mà
+pending, nên nó xong cùng những thẻ khác.
+
+**Đọc lịch ngoài transaction rồi ghi trong transaction.** Use case đọc `scheduleOf`,
+tính bằng scheduler, rồi gọi `submitAnswer`. Về lý thuyết là một khoảng hở; thực tế
+mỗi deck chỉ có một phiên mở (BR-101) và không đường ghi nào khác đổi lịch, nên
+không có ai để đua. Đưa phép tính vào trong transaction sẽ đặt công thức SRS vào
+`data/`, đổi một rủi ro lý thuyết lấy một vi phạm kiến trúc thật.
+
 - **Dependencies:** M5.1, M5.0
 - **Tests required:** unit test cho từng acceptance criteria, dùng repository
   fake; test riêng cho ca box-8, ca generation cũ, và ca mở `reviewing` rỗng
