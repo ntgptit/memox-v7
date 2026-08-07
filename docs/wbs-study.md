@@ -7,7 +7,7 @@
 | **Scope** | Task còn lại của Study từ M5.7 trở đi · nợ kỹ thuật của Study · việc bị chặn |
 | **Source of truth for** | Trạng thái task Study từ M5.7 · nợ kỹ thuật của Study |
 | **Depends on** | `document-conventions.md` · `wbs.md` · `business-rules.md` · `use-cases.md` |
-| **Updated by task** | M5.17 (chốt tám điểm lệch) |
+| **Updated by task** | M5.17 (chốt tám điểm lệch) — sửa §7.8 |
 | **Last updated** | 2026-08-08 |
 
 `docs/wbs.md` giữ M5.0…M5.6 đã hoàn thành và không nhắc lại ở đây. File này giữ
@@ -311,9 +311,15 @@ mâu thuẫn BR `active` → theo BR; design đề xuất thứ chưa luật nà
 tự đặt luật, để ngoài MVP; design khác ở chỗ thuần thị giác → giữ design.
 
 Kết quả cụ thể: bỏ icon loa và icon bút chì, bỏ dòng mô tả phụ của `guess`, bỏ
-vuốt-lùi, đổi `BOARD` thành `ROUND`, đổi pill `REVIEW` thành nhãn `browse`, bỏ
-phần trộn NEW+REVIEW; **thêm** đồng hồ cho `recall` mà ảnh không có; giữ hai họ
-màu.
+vuốt-lùi, bỏ hai họ màu, đổi `BOARD` thành `ROUND`, đổi pill `REVIEW` thành
+nhãn `browse`, bỏ phần trộn NEW+REVIEW; **thêm** đồng hồ cho `recall` mà ảnh
+không có.
+
+**Chỉ lấy UI concept từ ảnh.** Màu, kiểu chữ, khoảng cách và component đều lấy
+của dự án; không dựng bảng màu hay theme mới. Hai họ màu của ảnh bị bỏ vì bộ
+token không có màu nghĩa là "mode nào", và màu xanh lá gần nhất là `success` —
+nghĩa là **đúng**. Dùng nó làm màu nhận dạng `recall` thì pill trông như một
+phán quyết trước khi người dùng trả lời.
 
 - **Ba mục có giá cao hơn hẳn năm mục còn lại.** §7.2 (một phiên trộn thẻ mới và
   thẻ ôn) đụng thẳng BR-142 — chính luật chủ dự án yêu cầu bắt buộc ở đợt
@@ -330,7 +336,7 @@ màu.
 - **Status:** todo
 - **Goal:** Năm màn dùng chung một khung, dựng một lần.
 - **Scope:** thanh trên (✕, pill mode, thanh tiến trình, bộ đếm `n / m`), dòng
-  ngữ cảnh, dòng gợi ý dưới cùng; token màu cho pill và thanh tiến trình.
+  ngữ cảnh, dòng gợi ý dưới cùng.
 - **Out of scope:** thân của từng mode — M5.19, M5.20.
 - **Đã chốt ở M5.17:** bộ đếm chỉ đếm tập của phiên đang chạy (§7.2); mode
   `recall` thay bộ đếm bằng thời gian còn lại (§7.3).
@@ -340,7 +346,9 @@ màu.
   - [ ] ✕ đóng phiên qua `leave()` và ghi `abandoned`/`user_exit` (BR-82) —
         **không** phải pop route suông.
   - [ ] Bộ đếm và thanh tiến trình đọc từ state, không tự đếm.
-  - [ ] Pill và thanh tiến trình lấy màu từ token, một token cho mỗi mode.
+  - [ ] Pill và thanh tiến trình dùng token **đang có** — `primaryAccent`,
+        `progressTrack`, `progressFill`. **Không** thêm token màu nào, và
+        **không** dùng `success` làm màu nhận dạng mode (§7.8).
   - [ ] Dòng gợi ý đổi theo mode và đến từ ARB.
   - [ ] Bộ đếm **không** trộn hai tập thẻ (BR-142, §7.2).
   - [ ] Ở `recall`, thanh trên hiện thời gian còn lại (BR-128, §7.3), và nó đọc
@@ -365,7 +373,8 @@ màu.
   - [ ] Ô `match` đã ghép **ở lại bàn** với dấu ✓ và trạng thái mờ — bản hiện tại
         xoá ô khỏi bàn, và đó là điểm khác design.
   - [ ] Ô đang chọn dùng nền primary đặc, chữ đảo màu, đạt tương phản ở cả hai
-        theme.
+        theme — màu từ `ColorScheme`, không đặt thẳng trong widget.
+  - [ ] Ô đã ghép dùng `success` đúng nghĩa "đúng", không phải để trang trí.
   - [ ] Ô đã ghép không bấm lại được.
   - [ ] Pill của `browse` dùng nhãn `browse`, không phải `REVIEW` (§7.1).
   - [ ] Dòng ngữ cảnh của `match` ghi **round**, không phải board (§7.6).

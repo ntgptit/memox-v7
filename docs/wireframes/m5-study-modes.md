@@ -7,14 +7,25 @@
 | **Scope** | Khung phiên học, và năm màn `browse` · `match` · `guess` · `recall` · `fill`. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), luồng (`use-cases.md`), giá trị token (`design_system/tokens/`) |
 | **Source of truth for** | Bố cục màn học · phán quyết cho tám điểm design lệch với BR |
 | **Depends on** | `document-conventions.md`, `business-rules.md` (BR-108…BR-154), `wbs-study.md` (M5.7…M5.20) |
-| **Updated by task** | M5.17 (chốt tám điểm lệch) |
+| **Updated by task** | M5.17 (chốt tám điểm lệch) — sửa §7.8 |
 | **Last updated** | 2026-08-08 |
 
 Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham chiếu bằng ID.
 
-**Ảnh là UI concept, không phải đặc tả.** Chủ dự án đã chốt: nơi nào design
-lệch với nghiệp vụ đã chốt thì nghiệp vụ thắng — §7 ghi phán quyết cho từng
-điểm. Dựng màn theo ảnh mà bỏ §7 là cách dựng lại đúng những thứ đã bị bỏ.
+**Ảnh là UI concept, không phải đặc tả.** Chủ dự án đã chốt hai điều:
+
+| Lấy từ ảnh | Lấy từ dự án |
+|---|---|
+| Bố cục và thứ bậc thị giác | Màu — `AppSemanticColors` và `ColorScheme` |
+| Luồng thao tác của từng mode | Kiểu chữ — `context.texts` |
+| Thành phần nào có mặt trên màn | Khoảng cách — `AppSpacing` |
+| Trạng thái nào cần phân biệt | Component — `Mx*` trong `shared/widgets/` |
+
+**Không dựng bảng màu hay theme mới.** Nếu một hiệu ứng trong ảnh không diễn
+đạt được bằng token đang có thì đó là một quyết định về token — nêu ra, không
+tự đẻ màu. Và nơi nào ảnh lệch với nghiệp vụ đã chốt thì nghiệp vụ thắng: §7
+ghi phán quyết cho từng điểm. Dựng màn theo ảnh mà bỏ §7 là cách dựng lại đúng
+những thứ đã bị bỏ.
 
 ## 1. Ảnh gốc
 
@@ -58,9 +69,9 @@ Cả năm màn chia đúng một khung, và đây là thứ nên dựng trước
 - **Dòng ngữ cảnh** dưới thanh trên: tên deck và thông tin phụ của mode.
 - **Dòng gợi ý dưới cùng**: một câu chỉ dẫn thao tác, có icon dẫn đầu.
 
-**Hai họ màu.** `browse`/`match`/`guess` dùng xanh dương (màu primary);
-`recall`/`fill` dùng xanh lá. Giữ nguyên vì thuần thị giác, nhưng **màu không
-mang nghĩa nghiệp vụ** — xem §7.8.
+**Màu lấy từ token của dự án, không lấy từ ảnh.** Ảnh chia mode thành hai họ
+màu; bộ token hiện có không có màu nào mang nghĩa "đây là mode nào" — xem §7.8
+để biết vì sao chia như ảnh lại làm hỏng nghĩa của `success`.
 
 ## 3. Study · Review (`review_mode`)
 
@@ -187,21 +198,29 @@ thước bàn và cách chia — không phải một nhãn đổi chữ.
 và cho lùi sẽ mở ra câu hỏi lùi có đổi `cursor` không — tức một luật mới. Quy tắc
 2. Dòng gợi ý dưới `browse` vì thế chỉ nói cách đi tiếp.
 
-### 7.8 Hai họ màu — **giữ design**
+### 7.8 Hai họ màu — **bỏ, dùng token của dự án**
 
-Không BR nào nói về màu của mode, nên đây là quy tắc 3: thuần thị giác, giữ
-nguyên. Mỗi mode một token màu; **màu không mang nghĩa nghiệp vụ** và không được
-dùng làm cách duy nhất để phân biệt trạng thái (M5.16).
+Ảnh cho `browse`/`match`/`guess` màu xanh dương và `recall`/`fill` màu xanh lá.
+Bản trước của tài liệu này chốt "giữ design, mỗi mode một token màu". **Sai, và
+chủ dự án đã chỉnh: chỉ lấy UI concept từ ảnh; màu, theme và token dùng của dự
+án.**
 
-## 8. Điều design **khớp** với BR đang có
+Có một lý do kỹ thuật mạnh hơn cả yêu cầu ấy. Bộ token hiện có —
+`AppSemanticColors` — không có màu nào nghĩa là "mode này là mode nào". Màu xanh
+lá gần nhất là `success`, và nó có nghĩa **đúng**. Đem `success` làm màu nhận
+dạng cho `recall` thì pill của mode trông như một phán quyết: người dùng thấy màu
+"đúng" trước cả khi trả lời, và ở `match`/`guess` — nơi `success` thật sự đánh
+dấu ô ghép đúng — cùng một màu sẽ mang hai nghĩa trên cùng một màn.
 
-Ghi lại để không ai đi chốt lại thứ đã đúng:
+Nên:
 
-- `guess` đúng **năm** lựa chọn (BR-121), có trạng thái đúng/sai rõ ràng.
-- `fill` có nút `Hint` riêng, tách khỏi `Check` — khớp BR-136 (ghi nhận việc dùng
-  gợi ý, không đổi kết quả).
-- `match` chọn vế trước rồi vế sau — khớp BR-118 (lượt thuộc về vế được chọn
-  trước).
-- `browse` không có nút chấm điểm nào — khớp BR-111.
-- Nút ✕ thay vì back — khớp với việc thoát phiên là hành động có ghi nhận
-  (BR-82).
+- pill mode và thanh tiến trình dùng **một** accent chung: `primaryAccent` với
+  `progressTrack`/`progressFill`. Mode phân biệt bằng **chữ trên pill**, không
+  bằng màu.
+- `success` và `danger` giữ đúng nghĩa: đúng và sai. Chỉ dùng cho kết quả một
+  lượt, không dùng cho nhận dạng mode.
+- Nếu sau này muốn màu riêng cho từng mode thì đó là một quyết định về token —
+  thêm vào `AppSemanticColors` kèm lý do, không đặt màu thẳng trong widget.
+
+Cái *concept* của ảnh vẫn giữ: có pill tên mode, có thanh tiến trình, trạng thái
+đúng/sai phân biệt được. Chỉ giá trị màu là của dự án.
