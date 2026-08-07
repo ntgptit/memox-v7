@@ -7,7 +7,7 @@
 | **Scope** | Quyết định ràng buộc nhiều tài liệu hoặc nhiều layer. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), hình dạng dữ liệu (`data-model.md`) |
 | **Source of truth for** | AD-xx · đánh đổi kiến trúc · phương án đã bị loại · lý do pin toolchain |
 | **Depends on** | `document-conventions.md`, `product.md` |
-| **Updated by task** | M99.2 (AD-17) |
+| **Updated by task** | M99.2 (AD-17) · M5.0c (AD-18, kiến trúc StudyMode) |
 | **Last updated** | 2026-08-07 |
 
 Format theo `document-conventions.md` §6.1. AD xếp theo số; ID vĩnh viễn (§7).
@@ -1172,3 +1172,94 @@ kiểm được.
 **Sinh feature bằng script scaffold.** Loại vì nó tối ưu đúng cái phần rẻ nhất —
 tạo thư mục — và tự động hoá đúng cái sai mà AD này tồn tại để chặn: một cây thư
 mục sinh sẵn mời gọi việc điền vào cho đủ, kể cả những chỗ feature đó không cần.
+
+---
+
+## AD-18 · StudyMode là Strategy được use case gọi, không phải Template Method trong một abstract base
+
+| | |
+|---|---|
+| **Status** | accepted |
+| **Affected documents** | `business-rules.md` (BR-96…BR-100, BR-106, BR-107) · `CLAUDE.md` · `code-verification-guard-v2` naming rules |
+| **Decision** | Mỗi StudyMode là một class thuần implement `StudyModeHandler` với đúng hai trách nhiệm: `validateInput` và `evaluate`. Luồng chung của một lượt học nằm trong **use case**, không nằm trong một abstract base mà năm mode kế thừa. Phân giải mode là **một** `switch` exhaustive trên enum, ở đúng một chỗ. |
+
+### Vì sao không phải Template Method
+
+Đề xuất ban đầu — `StudyMode` interface → `AbstractStudyMode` giữ `process()` →
+năm concrete override hook — là khuôn quen của Java/Spring và mục tiêu của nó
+đúng: gom luồng chung, tránh `switch` rải rác, thêm mode không sửa luồng đang
+chạy. Cái không chuyển sang được là **chỗ đặt luồng chung**.
+
+Luồng của một lượt học gồm mười bước, và bảy trong số đó là I/O phải nằm **trong
+một transaction**: ghi `study_answers`, cập nhật `card_study_states`, tăng
+`cursor`, đặt `available_at`, `answers_in_session`, đóng phiên khi hết hàng đợi.
+`CLAUDE.md` cấm hoisting đúng loại luật này ra khỏi repository — kiểm ngoài
+transaction là một race giữa lúc kiểm và lúc ghi.
+
+Nếu `process()` của abstract base làm những bước đó thì base phải cầm một
+repository và mở transaction, tức `domain/` mode trở thành nơi chứa I/O. Nếu nó
+**không** làm, thì phần chung còn lại đúng ba bước, quá mỏng để dựng một tầng kế
+thừa cho năm class.
+
+Nên luồng chung ở nơi nó vốn thuộc về: `SubmitStudyAnswerUseCase`. Use case
+**chính là** template method — nó chạy mười bước và gọi handler ở giữa. Mode trở
+thành Strategy:
+
+```dart
+final handler = studyModeHandler(session.mode);
+handler.validateInput(context, input);
+final evaluation = handler.evaluate(context, input);   // thuần, không I/O
+await repository.recordAnswer(evaluation, ...);        // 1 transaction
+```
+
+Cái được kèm theo: Dart không có final method, nên một `process()` public luôn
+override được. Không có `process()` thì cũng không có gì để bypass — vấn đề biến
+mất thay vì phải canh bằng contract test.
+
+### Fail-fast lúc biên dịch, không phải lúc khởi động
+
+Registry kiểu factory-nhận-collection kiểm "đủ năm mode" lúc khởi động. Dart 3
+kiểm sớm hơn:
+
+```dart
+StudyModeHandler studyModeHandler(StudyMode mode) => switch (mode) {
+  StudyMode.review => const ReviewModeHandler(),
+  StudyMode.match  => const MatchModeHandler(),
+  StudyMode.guess  => const GuessModeHandler(),
+  StudyMode.recall => const RecallModeHandler(),
+  StudyMode.fill   => const FillModeHandler(),
+};
+```
+
+Thiếu một nhánh là **lỗi biên dịch**. Trùng enum và "mode không hỗ trợ" bất khả
+thi về kiểu. Thêm mode thứ sáu thì compiler chỉ thẳng vào mọi chỗ chưa xử lý —
+đó là thứ một registry runtime không làm được.
+
+Điều này **không** mâu thuẫn với "không rải `switch` theo mode": switch tồn tại ở
+đúng một điểm phân giải. Cái bị cấm là switch **thứ hai** trong controller hay
+use case, và nó được cưỡng chế bằng rule của `code-verification-guard-v2`, không
+bằng code review.
+
+### Ranh giới
+
+- `domain/modes/*_mode.dart` là Dart thuần: không repository, không `DateTime.now()`,
+  không random. Đếm giờ của Recall vào bằng `didTimeout` trong input (AD-13, AD-16);
+  thứ tự xáo cố định trong phiên nên chỉ chạy một lần lúc nạp hàng đợi (BR-102).
+- Handler không gọi handler khác. Chuyển mode do luồng chung quyết định.
+- `evaluate` trả `StudyEvaluation` canonical — không widget, không chuỗi đã dịch,
+  không row của Drift.
+
+### Cái không lấy từ đề xuất gốc, và vì sao
+
+Đề xuất dùng từ vựng **Attempt · checkpoint · round · nextRoundFailedCardIds**.
+Repo đã có đủ những khái niệm đó dưới tên khác kể từ BR-102, nên dựng thêm một bộ
+tên là dựng hai mô hình cho một thứ — và đó là lỗi tốn kém nhất trong nhóm này, vì
+cả hai đều chạy được:
+
+| Đề xuất gốc | Repo |
+|---|---|
+| Attempt | một dòng `study_answers` |
+| checkpoint | `study_sessions.cursor` + trạng thái `study_queue_items` |
+| nextRoundFailedCardIds | `available_at = cursor + 3` (BR-26) |
+| mastery retry round | lượt `relearning`, trần 3 (BR-104) |
+| deterministic shuffle | `position` cố định trong phiên (BR-102) |

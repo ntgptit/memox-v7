@@ -212,6 +212,7 @@ _SUFFIX_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("/domain/usecases/", ("_use_case.dart",)),
     ("/domain/models/", ("_model.dart",)),
     ("/domain/failures/", ("_failure.dart",)),
+    ("/domain/modes/", ("_mode.dart",)),
     ("/data/mappers/", ("_mapper.dart",)),
     ("/data/repositories/", ("_repository_impl.dart",)),
     ("/data/datasources/", ("_dao.dart", "_data_source.dart")),

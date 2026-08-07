@@ -254,7 +254,7 @@ suffix removes a file from the rules meant to cover it.
 
 | Layer | Allowed suffixes |
 |---|---|
-| `domain/` | `_entity` · `_repository` · `_use_case` · `_model` · `_failure` · `_scheduler` |
+| `domain/` | `_entity` · `_repository` · `_use_case` · `_model` · `_failure` · `_scheduler` · `_mode` |
 | `data/` | `_repository_impl` · `_mapper` · `_dao` · `_data_source` · `_model` · `_loader` |
 | `di/` | `_provider` · `_bindings` |
 | `presentation/` | `_screen` · `_controller` · `_state` · `_widget` · `_provider` · `_page` · `_view` |

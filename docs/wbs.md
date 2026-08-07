@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.2 |
+| **Updated by task** | M99.2 · M5.0c (kiến trúc StudyMode) |
 | **Last updated** | 2026-08-07 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -6475,6 +6475,62 @@ thuộc bốn mode mới; trần 50 thẻ áp cho mode nào; phiên có cho ch�
 không; và `fill` đếm eligibility theo số thẻ có `example` nên con số của nó khác
 mọi mode còn lại. Mỗi câu trả lời khác nhau cho ra một thiết kế khác nhau, nên
 đoán ở đây rẻ hơn nhưng đắt hơn nhiều ở M5.2.
+
+### M5.0c · Kiến trúc StudyMode: Strategy, một điểm phân giải, và suffix `_mode`
+
+- **Status:** done — tài liệu, naming contract và một guard rule. Không dòng code
+  sản phẩm nào.
+- **Goal:** Chốt hình dạng triển khai của năm StudyMode trước khi M5.1 viết class
+  đầu tiên, để năm mode không mọc thành năm bản sao của cùng một luồng.
+- **Scope:** `architecture.md` (**AD-18**), `business-rules.md` (**BR-106**,
+  **BR-107**), `CLAUDE.md` + `memox-naming-rules.yaml` +
+  `check_architecture.py` (thêm suffix `_mode`), `scopes.yaml` +
+  `memox-architecture-rules.yaml` (rule `single_study_mode_dispatch`).
+- **Out of scope:** viết handler thật (M5.1); sáu điểm nghiệp vụ còn mở của
+  M5.0b.
+- **Editable documents:** `docs/architecture.md`, `docs/business-rules.md`,
+  `docs/wbs.md`, `CLAUDE.md`
+- **Output:** AD-18, BR-106, BR-107, rule `memox.architecture.single_study_mode_dispatch`
+- **Acceptance criteria:**
+  - [x] Suffix `_mode` được cả ba nơi giữ danh sách chấp nhận: `CLAUDE.md`, guard
+        YAML, `check_architecture.py`. Thiếu một nơi là file bị từ chối ở nơi còn lại.
+  - [x] AD-17 nói rõ vì sao **không** dùng Template Method ở đây.
+  - [x] BR-106 gỡ mâu thuẫn "review không có đúng/sai".
+  - [x] Rule chặn nhánh `StudyMode` thứ hai trong `domain/`/`data/` **đã được
+        chứng minh là fire** trên một file thử, rồi dọn sạch.
+  - [x] `check_docs.py` xanh; guard `memox-v7` xanh (70 rule).
+- **Dependencies:** M5.0b
+- **Tests required:** `check_docs.py`, guard `memox-v7`
+- **Checklist phases:** 14.1, 14.2
+
+**Đề xuất gốc là Java, và phần không chuyển sang được là chỗ đặt luồng chung.**
+Khuôn `interface → abstract base giữ process() → năm concrete override hook` có
+mục tiêu đúng. Nhưng luồng một lượt học có mười bước, bảy trong đó là I/O phải nằm
+trong **một transaction** — ghi `study_answers`, cập nhật `card_study_states`,
+tăng `cursor`, đặt `available_at`, `answers_in_session`, đóng phiên khi hết hàng
+đợi. `CLAUDE.md` cấm hoisting đúng loại luật đó ra khỏi repository.
+
+Nên hoặc abstract base cầm repository và mở transaction — biến `domain/` thành nơi
+chứa I/O — hoặc nó không làm bảy bước ấy, và phần chung còn lại đúng ba bước, quá
+mỏng để dựng một tầng kế thừa cho năm class. Luồng chung vì thế ở lại
+`SubmitStudyAnswerUseCase`: use case **chính là** template method, mode trở thành
+Strategy với hai trách nhiệm thuần — `validateInput` và `evaluate`.
+
+Kèm theo một cái được không định trước: Dart không có final method, nên một
+`process()` public luôn override được. Không có `process()` thì cũng không có gì
+để bypass — vấn đề biến mất thay vì phải canh bằng contract test, đúng thứ đề xuất
+gốc phải dặn ở mục 5.
+
+**Fail-fast chuyển từ startup sang compile.** Registry kiểu factory-nhận-collection
+kiểm "đủ năm mode" lúc khởi động; `switch` exhaustive trên enum của Dart 3 kiểm
+lúc biên dịch, và thêm mode thứ sáu thì compiler chỉ thẳng vào mọi chỗ chưa xử lý.
+Trùng enum và "mode không hỗ trợ" trở thành bất khả thi về kiểu.
+
+**Rule mới không cấm switch, nó cấm switch thứ hai.** Phạm vi cố ý dừng ở
+`domain/` và `data/`: map một mode sang nhãn hay icon là việc của `presentation/`,
+và cấm ở đó chỉ đẩy phép map sang chỗ tệ hơn. Rule đã được thử bằng một file vi
+phạm thật trước khi commit — một rule chưa từng fire là một rule chưa ai biết có
+chạy không.
 
 ### M5.0 · Study-specific domain và data completion
 
