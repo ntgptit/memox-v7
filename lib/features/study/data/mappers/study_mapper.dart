@@ -1,3 +1,5 @@
+import 'package:drift/drift.dart';
+
 import '../../../../core/database/app_database.dart';
 import '../../domain/entities/study_queue_item_entity.dart';
 import '../../domain/entities/study_session_entity.dart';
@@ -5,6 +7,9 @@ import '../../domain/models/study_mode.dart';
 import '../../domain/models/study_queue_item_status_model.dart';
 import '../../domain/models/study_session_kind_model.dart';
 import '../../domain/models/study_session_status_model.dart';
+import '../../domain/models/study_entry_summary_model.dart';
+import '../../domain/models/study_schedule_model.dart';
+import '../../domain/models/study_session_summary_model.dart';
 import '../../domain/models/study_turn_model.dart';
 
 /// Drift rows in, domain entities out. Nothing Drift-shaped crosses this file
@@ -59,3 +64,49 @@ StudyCardModel studyCardModelFromRow(Card row) => StudyCardModel(
   pronunciation: row.pronunciation,
   backFolded: row.backFolded,
 );
+
+/// The one summary row, read by name.
+///
+/// A `QueryRow` rather than a generated companion because the statement behind
+/// it is four correlated subqueries — drift generates no class for a shape it
+/// did not write. Reading it here keeps the untyped access in the file whose job
+/// is exactly that: rows in, domain out.
+StudySessionSummaryModel studySessionSummaryFromRow(QueryRow row) {
+  final endReason = row.read<String?>('endReason');
+
+  return StudySessionSummaryModel(
+    kind: StudySessionKind.fromDbValue(row.read<String>('kind')),
+    status: StudySessionStatus.fromDbValue(row.read<String>('status')),
+    endReason: endReason == null
+        ? null
+        : StudySessionEndReason.fromDbValue(endReason),
+    finishedCards: row.read<int>('finishedCards'),
+    answeredCards: row.read<int>('answeredCards'),
+    wrongTurns: row.read<int>('wrongTurns'),
+    totalTurns: row.read<int>('totalTurns'),
+  );
+}
+
+/// The two entry counts and the two mode gates (BR-150, BR-153).
+///
+/// The nulls are real: a deck with no cards at all produces no rows to count,
+/// and SQL says nothing rather than zero.
+StudyEntrySummaryModel studyEntrySummaryFromRow(StudyEntryCountsResult row) =>
+    StudyEntrySummaryModel(
+      newCount: row.newCount ?? 0,
+      dueCount: row.dueCount ?? 0,
+      fillableCount: row.fillableCount ?? 0,
+      distinctMeanings: row.distinctMeanings,
+    );
+
+/// A card-s schedule, whichever algorithm wrote it.
+///
+/// Both algorithms- columns live on one row, and each reads only its own —
+/// `eight_box` has no ease factor and `sm2` has no box (AD-08).
+StudyScheduleModel studyScheduleFromRow(CardStudyState row) =>
+    StudyScheduleModel(
+      box: row.currentBox,
+      easeFactor: row.easeFactor,
+      intervalDays: row.intervalDays,
+      repetitions: row.repetitions,
+    );

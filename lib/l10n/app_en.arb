@@ -1157,25 +1157,33 @@
   },
   "studySummaryLearned": "{count, plural, =0{No cards finished learning} =1{1 card finished learning} other{{count} cards finished learning}}",
   "@studySummaryLearned": {
-    "description": "Learning sessions: cards that completed the whole stage chain and became schedulable (BR-144).",
     "placeholders": {
-      "count": { "type": "int" }
-    }
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Learning sessions: cards that completed the whole stage chain and became schedulable (BR-144)."
   },
   "studySummaryReviewed": "{count, plural, =0{No cards reviewed} =1{1 card reviewed} other{{count} cards reviewed}}",
   "@studySummaryReviewed": {
-    "description": "Reviewing sessions: distinct cards that produced at least one graded turn.",
     "placeholders": {
-      "count": { "type": "int" }
-    }
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Reviewing sessions: distinct cards that produced at least one graded turn."
   },
   "studySummaryWrong": "{count, plural, =1{1 wrong out of {total}} other{{count} wrong out of {total}}}",
   "@studySummaryWrong": {
-    "description": "Wrong turns against every graded turn. Counted with the algorithm's own wrong action (BR-107).",
     "placeholders": {
-      "count": { "type": "int" },
-      "total": { "type": "int" }
-    }
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    },
+    "description": "Wrong turns against every graded turn. Counted with the algorithm's own lapse actions (BR-20)."
   },
   "studySummaryBackToDeck": "Back to deck",
   "@studySummaryBackToDeck": {
