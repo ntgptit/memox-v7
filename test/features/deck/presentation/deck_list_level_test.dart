@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/features/deck/presentation/widgets/items/deck_study_button_widget.dart';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/deck/domain/entities/deck_entity.dart';
 import 'package:memox/features/deck/domain/models/deck_content_type_model.dart';
@@ -206,10 +207,13 @@ void main() {
       expect(find.text(english.deckStudyAction), findsOneWidget);
       expect(find.text(english.deckLearnedPercentLabel(100)), findsOneWidget);
 
-      await tester.tap(find.text(english.deckStudyAction));
-      await tester.pumpAndSettle();
-
-      expect(find.text(english.deckStudyComingSoonMessage), findsOneWidget);
+      // The tap goes to a route this harness does not mount, so the assertion
+      // is that the button *is* the deck's own — the id it would carry. Where
+      // it lands is the router's contract and is asserted there.
+      final button = tester.widget<DeckStudyButtonWidget>(
+        find.byType(DeckStudyButtonWidget),
+      );
+      expect(button.deckId, 'c1');
     });
 
     testWidgets('a child shows the same four facts a root deck does', (

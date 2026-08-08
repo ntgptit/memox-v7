@@ -40,10 +40,14 @@ final class StudyDao {
   ) => _db.dueCardsInTree(rootDeckId, now, limit).get();
 
   /// The four numbers the entry point needs, watched as one row (AD-13).
+  ///
+  /// Takes the deck the user opened — root or branch. The query resolves the
+  /// root itself (BR-06, BR-57); it used to take a root and be handed whatever
+  /// the screen had, so a study entry opened on a sub-deck counted nothing.
   Stream<StudyEntryCountsResult> watchEntryCounts(
-    String rootDeckId,
+    String deckId,
     DateTime now,
-  ) => _db.studyEntryCounts(now, rootDeckId).watchSingle();
+  ) => _db.studyEntryCounts(now, deckId).watchSingle();
 
   Future<StudyQueueItem?> nextQueueItem({
     required String sessionId,

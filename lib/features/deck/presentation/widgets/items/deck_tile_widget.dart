@@ -241,7 +241,10 @@ class _DeckStateRegion extends StatelessWidget {
                 // due" good news, and a greyed control says you cannot do the
                 // thing when the truth is there is nothing to do.
                 if (summary.hasDueCards)
-                  DeckStudyButtonWidget(dueCardCount: summary.dueCardCount)
+                  DeckStudyButtonWidget(
+                    deckId: summary.deck.id,
+                    dueCardCount: summary.dueCardCount,
+                  )
                 else if (summary.totalCardCount > 0)
                   Text(
                     context.l10n.deckLearnedPercentLabel(

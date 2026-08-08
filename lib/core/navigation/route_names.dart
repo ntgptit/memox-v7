@@ -30,9 +30,13 @@ abstract final class RouteNames {
   /// branch and the bottom bar remains visible.
   static const String deckDetail = 'deckDetail';
 
-  /// The study surface. Branch 1 of the shell; still a placeholder until the
-  /// real session screen lands in M5.4.
+  /// The study surface. Branch 1 of the shell.
   static const String study = 'study';
+
+  /// One deck's study entry. A child of [deckDetail], so studying pushes onto
+  /// the Decks branch: the bottom bar stays and Back returns to the deck the
+  /// session was started from, rather than to whatever the Study tab last held.
+  static const String deckStudy = 'deckStudy';
 
   /// The card list of a card-type deck. A child of [deckDetail], so it stays in
   /// the Decks branch and the bottom bar remains visible (UC-04).
