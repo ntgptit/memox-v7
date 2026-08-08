@@ -121,6 +121,10 @@ class _RecallTimerSectionWidgetState extends State<RecallTimerSectionWidget>
     setState(
       () => _remaining = const RecallModeHandler().remainingAfter(elapsed),
     );
+    // Reported on every tick, not only when the clock stops: the frame draws
+    // the countdown in its top bar (§7.3), and a value that only arrives at the
+    // end is a bar that shows twenty seconds for twenty seconds.
+    widget.onRemainingChanged?.call(_remaining);
 
     if (const RecallModeHandler().outcomeFor(elapsed: elapsed) !=
         RecallOutcome.timedOut) {
@@ -148,13 +152,13 @@ class _RecallTimerSectionWidgetState extends State<RecallTimerSectionWidget>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        Text(
-          _outcome == RecallOutcome.timedOut
-              ? l10n.studyRecallTimedOut
-              : l10n.studyRecallSecondsLeft(_remaining.inSeconds),
-          style: context.texts.titleMedium,
-        ),
-        const SizedBox(height: AppSpacing.md),
+        // The countdown itself is in the frame's top bar (§7.3); what stays here
+        // is the one thing the bar cannot say — that this turn is over and its
+        // outcome is locked to wrong (BR-130).
+        if (_outcome == RecallOutcome.timedOut) ...<Widget>[
+          Text(l10n.studyRecallTimedOut, style: context.texts.titleMedium),
+          const SizedBox(height: AppSpacing.md),
+        ],
         MxCard(
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.xl),

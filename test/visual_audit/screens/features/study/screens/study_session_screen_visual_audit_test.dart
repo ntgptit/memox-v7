@@ -41,6 +41,7 @@ void main() {
       remainingMs: null,
       isRevealed: false,
     ),
+    progress: StudyStageProgressModel(done: 0, total: 1),
     card: StudyCardModel(
       id: 'c1',
       front: 'ephemeral',
@@ -84,11 +85,13 @@ void main() {
         itemId: 'shell',
         reason: SkipReason.rasterOnly,
         detailContains: '_RenderInkFeatures',
-        expectedMatches: 2,
         rationale:
-            'The Material ink layers of the Scaffold and the AppBar. The card '
-            'itself is an MxCard with no ink of its own, and the reveal button '
-            'is off-surface at this size; the overlay colours are asserted in '
+            'The Scaffold Material ink layer, and the only one: this screen has '
+            'no AppBar. Its top bar is the session frame, which carries the '
+            'mode and the ✕ that ends the session (BR-82) — a Material bar '
+            'above it would name the screen twice and offer a back arrow that '
+            'pops the route with the session still open. The card is an MxCard '
+            'with no ink of its own; the overlay colours are asserted in '
             'app_theme_test.dart.',
       ),
     ],

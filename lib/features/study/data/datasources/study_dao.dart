@@ -56,6 +56,13 @@ final class StudyDao {
     required String mode,
   }) => _db.pendingInStage(sessionId, mode).getSingle();
 
+  /// Done and total for one round of a stage — the counter and the bar.
+  Future<StageRoundProgressResult> stageRoundProgress({
+    required String sessionId,
+    required String mode,
+    required int round,
+  }) => _db.stageRoundProgress(sessionId, mode, round).getSingle();
+
   /// The lowest pending round of a stage — the one being served.
   ///
   /// Null when nothing is pending. Written as a raw statement because

@@ -31,6 +31,7 @@ void main() {
       remainingMs: null,
       isRevealed: false,
     ),
+    progress: const StudyStageProgressModel(done: 0, total: 1),
     card: StudyCardModel(
       id: id,
       front: 'front-$id',
@@ -115,19 +116,25 @@ void main() {
     ) async {
       // BR-133: Resume continues the turn. Restarting at twenty seconds hands
       // back time the user already spent.
+      //
+      // Read from what the widget *reports* rather than from what it draws: the
+      // countdown itself now lives in the session frame's top bar (§7.3), and
+      // this widget's job is to own the clock and say what is left.
+      final reported = <Duration>[];
       await tester.pumpWidget(
         wrapForTest(
           RecallTimerSectionWidget(
             turn: turnOf('c1'),
             initialRemaining: const Duration(seconds: 4),
             onOutcome: (_) {},
+            onRemainingChanged: reported.add,
           ),
         ),
       );
       await tester.pump(const Duration(milliseconds: 100));
 
-      expect(find.text('3s'), findsOneWidget);
-      expect(find.text('19s'), findsNothing);
+      expect(reported.last.inSeconds, 3);
+      expect(reported.any((left) => left.inSeconds >= 19), isFalse);
 
       await tester.pump(const Duration(seconds: 4));
       await tester.pump();
@@ -137,22 +144,31 @@ void main() {
     testWidgets('a later round starts the full limit again (BR-133)', (
       tester,
     ) async {
+      final reported = <Duration>[];
       await tester.pumpWidget(
         wrapForTest(
-          RecallTimerSectionWidget(turn: turnOf('c1'), onOutcome: (_) {}),
+          RecallTimerSectionWidget(
+            turn: turnOf('c1'),
+            onOutcome: (_) {},
+            onRemainingChanged: reported.add,
+          ),
         ),
       );
       await tester.pump(const Duration(seconds: 5));
 
       await tester.pumpWidget(
         wrapForTest(
-          RecallTimerSectionWidget(turn: turnOf('c2'), onOutcome: (_) {}),
+          RecallTimerSectionWidget(
+            turn: turnOf('c2'),
+            onOutcome: (_) {},
+            onRemainingChanged: reported.add,
+          ),
         ),
       );
       await tester.pump(const Duration(milliseconds: 100));
 
       // A turn of a different card is a different turn.
-      expect(find.text('19s'), findsOneWidget);
+      expect(reported.last.inSeconds, 19);
 
       await tester.pump(kRecallTurnLimit);
     });

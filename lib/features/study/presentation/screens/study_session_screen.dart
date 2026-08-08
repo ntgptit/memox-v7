@@ -1,10 +1,8 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_spacing.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_empty_state.dart';
@@ -15,9 +13,10 @@ import '../../domain/models/study_mode.dart';
 import '../../domain/models/study_session_kind_model.dart';
 import '../controllers/study_session_controller.dart';
 import '../states/study_session_state.dart';
+import '../../domain/models/recall_mode.dart';
 import '../widgets/sections/study_blocked_section_widget.dart';
+import '../widgets/sections/study_session_frame_section_widget.dart';
 import '../widgets/sections/study_summary_section_widget.dart';
-import '../widgets/support/study_labels_widget.dart';
 import '../widgets/support/study_mode_view_widget.dart';
 
 /// One study session, from the first card to the last.
@@ -52,12 +51,21 @@ class StudySessionScreen extends ConsumerStatefulWidget {
 }
 
 class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
-  /// Shuffles the board and the option order.
+  /// What is left of a `recall` turn, for the frame's top bar (§7.3).
   ///
-  /// Held by the state rather than made per build: a fresh `Random` every frame
-  /// would re-deal the board on every rebuild, and the answer would move under
-  /// the user's finger.
-  final Random _random = Random();
+  /// **A notifier rather than screen state.** The clock ticks at 10Hz; putting
+  /// it in `setState` would rebuild the body with it, and a body that re-deals
+  /// its board ten times a second moves the answer under the user's finger.
+  /// Only the figure listens.
+  final ValueNotifier<Duration> _recallRemaining = ValueNotifier<Duration>(
+    kRecallTurnLimit,
+  );
+
+  @override
+  void dispose() {
+    _recallRemaining.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -82,14 +90,37 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(studySessionControllerProvider(widget.deckId));
 
+    final session = state.session;
+
+    // The frame is the five screens' shared chrome, and it needs a session to
+    // say anything at all — before one opens there is no mode, no deck name and
+    // no round to count. The transient states below draw without it rather than
+    // drawing a frame full of blanks.
+    final body = _body(state);
+    final turn = state.turn;
+
     return MxContentShell(
-      title: state.session == null
-          ? context.l10n.studyStartLearning
-          : context.studyMode(state.session!.currentMode),
-      body: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: _body(state),
-      ),
+      // No app-bar title, and therefore no app bar at all: the frame's own top
+      // bar carries the mode and the ✕, and a Material bar above it would be a
+      // second bar naming the same screen — with a back arrow that pops the
+      // route and leaves the session open, which is the one thing BR-82 forbids.
+      //
+      // No padding of its own either. The shell already applies the screen
+      // gutter, and the second one this used to add made the 320px case tight
+      // enough that the top row's own children were the first thing to go.
+      body: session == null || turn == null || state.isFinished
+          ? body
+          : StudySessionFrameSectionWidget(
+              mode: session.currentMode,
+              kind: session.kind,
+              deckName: state.deckName,
+              progress: turn.progress,
+              timeLeft: session.currentMode == StudyMode.recall
+                  ? _recallRemaining
+                  : null,
+              onClose: () => unawaited(_controller.leave()),
+              child: body,
+            ),
     );
   }
 
@@ -136,7 +167,7 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
     final view = studyModeView(
       mode: session.currentMode,
       state: state,
-      random: _random,
+      onRecallTick: (remaining) => _recallRemaining.value = remaining,
       onAnswer: (action, {outcomeReason, comparisonVersion, hasUsedHint}) =>
           unawaited(
             _controller.answer(

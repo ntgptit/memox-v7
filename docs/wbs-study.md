@@ -7,7 +7,7 @@
 | **Scope** | Task còn lại của Study từ M5.7 trở đi · nợ kỹ thuật của Study · việc bị chặn |
 | **Source of truth for** | Trạng thái task Study từ M5.7 · nợ kỹ thuật của Study |
 | **Depends on** | `document-conventions.md` · `wbs.md` · `business-rules.md` · `use-cases.md` |
-| **Updated by task** | M5.13 (cột `action` chỉ nhận canonical) |
+| **Updated by task** | M5.18 (khung phiên học) |
 | **Last updated** | 2026-08-08 |
 
 `docs/wbs.md` giữ M5.0…M5.6 đã hoàn thành và không nhắc lại ở đây. File này giữ
@@ -51,7 +51,8 @@ M5.7 (màn hình + route)
  ├── M5.12 (ca chặn/bỏ qua stage)
  ├── M5.13 (cột `action` chỉ nhận canonical)  ✔ done
  └── M5.15 (integration test qua UI) ← cần M5.9, M5.10, M5.12
-M5.18…M5.20 (dựng năm màn theo design) ← cần M5.7
+M5.18 (khung phiên học)  ✔ done
+M5.19…M5.20 (dựng năm màn theo design) ← cần M5.18
 M5.14 blocked bởi UC-07
 M5.16 sau khi mọi màn đã ổn định
 ```
@@ -500,7 +501,7 @@ phán quyết trước khi người dùng trả lời.
 
 ### M5.18 · Khung phiên học theo design
 
-- **Status:** todo
+- **Status:** **done** — analyze sạch, 1599 test xanh, visual audit xanh, guard sạch
 - **Goal:** Năm màn dùng chung một khung, dựng một lần.
 - **Scope:** thanh trên (✕, pill mode, thanh tiến trình, bộ đếm `n / m`), dòng
   ngữ cảnh, dòng gợi ý dưới cùng.
@@ -510,20 +511,70 @@ phán quyết trước khi người dùng trả lời.
 - **Editable documents:** `docs/wbs-study.md`
 - **Output:** widget khung trong `presentation/widgets/sections/`, chuỗi ARB
 - **Acceptance criteria:**
-  - [ ] ✕ đóng phiên qua `leave()` và ghi `abandoned`/`user_exit` (BR-82) —
+  - [x] ✕ đóng phiên qua `leave()` và ghi `abandoned`/`user_exit` (BR-82) —
         **không** phải pop route suông.
-  - [ ] Bộ đếm và thanh tiến trình đọc từ state, không tự đếm.
-  - [ ] Pill và thanh tiến trình dùng token **đang có** — `primaryAccent`,
+  - [x] Bộ đếm và thanh tiến trình đọc từ state, không tự đếm.
+  - [x] Pill và thanh tiến trình dùng token **đang có** — `primaryAccent`,
         `progressTrack`, `progressFill`. **Không** thêm token màu nào, và
         **không** dùng `success` làm màu nhận dạng mode (§7.8).
-  - [ ] Dòng gợi ý đổi theo mode và đến từ ARB.
-  - [ ] Bộ đếm **không** trộn hai tập thẻ (BR-142, §7.2).
-  - [ ] Ở `recall`, thanh trên hiện thời gian còn lại (BR-128, §7.3), và nó đọc
+  - [x] Dòng gợi ý đổi theo mode và đến từ ARB.
+  - [x] Bộ đếm **không** trộn hai tập thẻ (BR-142, §7.2).
+  - [x] Ở `recall`, thanh trên hiện thời gian còn lại (BR-128, §7.3), và nó đọc
         được bằng screen reader chứ không chỉ bằng màu.
-  - [ ] Render ở 320×568 và `textScaler` 2.0 không tràn.
+  - [x] Render ở 320×568 và `textScaler` 2.0 không tràn.
+- **Kết quả:** `StudySessionFrameSectionWidget` là khung dùng chung; màn phiên
+  học bọc thân của mode vào nó. Bộ đếm và thanh tiến trình đọc
+  `StudyTurnModel.progress`, đến từ **cùng một lượt đọc** với thẻ và dòng hàng
+  đợi (AD-13) — câu `stageRoundProgress` đếm **round đang chạy**, không đếm cả
+  stage, vì stage ghi danh thẻ trượt vào round sau ngay lúc trượt (BR-116) nên
+  tổng của stage sẽ **tăng trong lúc người dùng trả lời** và thanh đi lùi.
+- **Không có app bar nữa.** Khung *chính là* thanh trên. Một `AppBar` phía trên
+  nó là hai thanh cùng đặt tên một màn, kèm mũi tên back pop route và **để phiên
+  mở** — đúng thứ BR-82 cấm.
+- **Pill mode không phải `MxPillButton(onPressed: null)`.** Component ấy render
+  callback null thành *disabled* (alpha 38%, ngoài palette); đây là một cái tên,
+  không phải nút bị tắt. Đúng lỗi đã bắt được ở M5.7. Pill dùng `surfaceMuted`
+  làm nền và `primaryAccent` làm chữ — `primaryAccent` vốn là "brand hue as
+  text", biến thể đủ sáng để đạt AA trên nền tối, khác `primary`.
+- **Đồng hồ `recall` đi qua `ValueNotifier`, không qua `setState`.** Nó tick
+  10Hz; đưa vào state màn hình là rebuild luôn cả thân mode. Chuỗi hiển thị là
+  "Còn N giây" chứ không phải một con số trần, vì đó cũng là thứ screen reader
+  đọc — một đồng hồ chỉ đọc được bằng màu thì không đọc được.
+- **Recursive review tìm ra bốn lỗi, cả bốn đã sửa trong mốc này:**
+  - **Bàn ghép được chia lại mỗi lần rebuild.** `studyModeView` nhận một
+    `Random` do màn hình giữ và **tiêu thụ nó mỗi lượt build** — khoá nút trong
+    lúc ghi là đủ để xáo lại — nên đáp án dịch chuyển dưới ngón tay người dùng.
+    Chú thích trong code lại khẳng định điều ngược lại: giữ `Random` ở state chỉ
+    làm mỗi lần chia *khác nhau*, không làm nó ngừng chia lại. BR-127 còn đòi cả
+    hai thứ tự **ổn định khi Resume**, điều một generator sống không bao giờ làm
+    được. Nay seed dựng từ (phiên, stage, round) cho bàn ghép và thêm `cardId`
+    cho năm lựa chọn — hai hoán vị độc lập đúng như BR-127.
+  - **`deckName` được nối vào model nhưng không nối vào state.** Dòng ngữ cảnh
+    render " · Review" — thiếu tên deck, im lặng, vì `@Default('')`. Test ở mức
+    màn hình bắt được; ba test widget của khung thì không, vì chúng tự dựng dữ
+    liệu.
+  - **Màn phiên học pad hai lần.** `MxContentShell` đã áp gutter, màn hình bọc
+    thêm một `Padding(lg)` nữa. Ở 320px chỗ chật thêm ấy là thứ đẩy các con của
+    hàng trên ra ngoài trước tiên.
+  - **Không test nào chạm câu SQL của bộ đếm.** Mọi widget đều được *đưa* một
+    `StudyStageProgressModel` do test dựng, nên một câu đếm sai round vẫn để tất
+    cả xanh. Nay `study_canonical_action_test.dart` kiểm nó trên SQLite thật.
+- **`onRemainingChanged` từng không ai gọi.** Nó chỉ bắn lúc đồng hồ dừng, và
+  không caller nào trong `lib/`. Nay bắn mỗi tick và màn hình nghe — nên khung
+  có số để vẽ, và đây cũng là nửa **ghi** của BR-133 mà M5.9 chỉ nối được nửa
+  **đọc**.
+- **Quyết định của agent, không có trong docs:** dòng ngữ cảnh là
+  `<tên deck> · <loại phiên>`. Ảnh ghi `VOCAB — CHAPTER 1 · ÔN TẬP`, tức có
+  đường dẫn deck; dựng đường dẫn cần thêm một lượt đọc cây deck, và §7.2 chỉ đòi
+  không trộn hai tập. Tên deck lấy được **miễn phí** vì `deckContext` vốn đã đọc
+  dòng deck ấy.
 - **Dependencies:** M5.7, M5.17
 - **Tests required:** widget test cho ✕, cho bộ đếm, cho năm dòng gợi ý
 - **Checklist phases:** 14.4, 15.3
+- **Tests:** `study_session_frame_test.dart` (12),
+  `study_session_screen_widget_test.dart` (3, đường đi từ màn hình thật),
+  `study_blocked_widget_test.dart` nhóm *the deal is seeded* (2),
+  `study_canonical_action_test.dart` nhóm *the counter a turn carries* (2)
 
 ### M5.19 · `browse` và `match` theo design
 

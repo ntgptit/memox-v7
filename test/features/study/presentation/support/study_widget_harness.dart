@@ -9,17 +9,23 @@ import 'package:memox/l10n/generated/app_localizations.dart';
 /// read tokens, and a default theme would let a hardcoded colour pass a test it
 /// should fail. Real localizations for the same reason: a widget that reached
 /// for a literal instead of ARB would still render, and the test would agree.
-Widget wrapForTest(Widget child, {Brightness brightness = Brightness.light}) =>
-    MaterialApp(
-      theme: brightness == Brightness.dark
-          ? buildDarkTheme()
-          : buildLightTheme(),
-      localizationsDelegates: const <LocalizationsDelegate<Object>>[
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: Scaffold(body: SingleChildScrollView(child: child)),
-    );
+/// [isScrollable] false for a widget that fills the height it is given — the
+/// session frame does, because its body sits in an `Expanded`, and an unbounded
+/// height inside a scroll view is an assertion rather than a layout.
+Widget wrapForTest(
+  Widget child, {
+  Brightness brightness = Brightness.light,
+  bool isScrollable = true,
+}) => MaterialApp(
+  theme: brightness == Brightness.dark ? buildDarkTheme() : buildLightTheme(),
+  localizationsDelegates: const <LocalizationsDelegate<Object>>[
+    AppLocalizations.delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+  ],
+  supportedLocales: AppLocalizations.supportedLocales,
+  home: Scaffold(
+    body: isScrollable ? SingleChildScrollView(child: child) : child,
+  ),
+);

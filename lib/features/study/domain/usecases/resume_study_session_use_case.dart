@@ -30,6 +30,7 @@ class ResumeStudySessionUseCase {
 
     return StudySessionStartModel(
       session: session,
+      deckName: context.deckName,
       schedulerType: context.schedulerType,
       actions: scheduler.supportedActions,
       cards: await _repository.sessionCards(session.id),

@@ -24,6 +24,7 @@ void main() {
       remainingMs: null,
       isRevealed: false,
     ),
+    progress: const StudyStageProgressModel(done: 0, total: 1),
     card: StudyCardModel(
       id: id,
       front: 'front-$id',

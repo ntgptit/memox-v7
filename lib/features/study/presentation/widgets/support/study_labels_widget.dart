@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../domain/models/study_action_model.dart';
 import '../../../domain/models/study_mode.dart';
+import '../../../domain/models/study_session_kind_model.dart';
 
 /// Copy for the Study vocabulary, in one place.
 ///
@@ -40,6 +41,28 @@ extension StudyLabels on BuildContext {
         StudyMode.fill: l10n.studyModeFill,
       }[mode] ??
       mode.name;
+
+  /// The one-line instruction at the bottom of the session frame.
+  ///
+  /// A map for the same reason [studyMode] is one, and there is no fallback
+  /// sentence: a mode with no hint gets an empty line rather than another mode's
+  /// instruction, which would tell the user to do something this screen cannot
+  /// do. The empty line is visible in the widget test, and the wrong sentence
+  /// would not be.
+  String? studyModeHint(StudyMode mode) => <StudyMode, String>{
+    StudyMode.browse: l10n.studyHintBrowse,
+    StudyMode.selfAssess: l10n.studyHintSelfAssess,
+    StudyMode.match: l10n.studyHintMatch,
+    StudyMode.guess: l10n.studyHintGuess,
+    StudyMode.recall: l10n.studyHintRecall,
+    StudyMode.fill: l10n.studyHintFill,
+  }[mode];
+
+  /// Which of the two card sets this session is working through (BR-142).
+  String studySessionKind(StudySessionKind kind) => switch (kind) {
+    StudySessionKind.learning => l10n.studyKindLearning,
+    StudySessionKind.reviewing => l10n.studyKindReviewing,
+  };
 
   /// Why a mode is offered but cannot run (BR-99).
   ///

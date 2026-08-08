@@ -91,6 +91,7 @@ base class FakeStudyRepository implements StudyRepository {
   Future<StudyDeckContextModel> deckContext(String deckId) async =>
       StudyDeckContextModel(
         deckId: deckId,
+        deckName: 'Korean',
         rootDeckId: 'root',
         schedulerType: schedulerType,
         schedulerGeneration: 1,
