@@ -16,6 +16,7 @@ import '../../domain/models/study_answer_kind_model.dart';
 import '../../domain/models/study_deck_context_model.dart';
 import '../../domain/models/study_entry_summary_model.dart';
 import '../../domain/models/study_schedule_model.dart';
+import '../../domain/models/study_scheduler.dart';
 import '../../domain/models/study_mode.dart';
 import '../../domain/models/study_options_model.dart';
 import '../../domain/models/study_outcome_reason_model.dart';

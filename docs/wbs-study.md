@@ -7,7 +7,7 @@
 | **Scope** | Task còn lại của Study từ M5.7 trở đi · nợ kỹ thuật của Study · việc bị chặn |
 | **Source of truth for** | Trạng thái task Study từ M5.7 · nợ kỹ thuật của Study |
 | **Depends on** | `document-conventions.md` · `wbs.md` · `business-rules.md` · `use-cases.md` |
-| **Updated by task** | M5.8 (controller gọi use case) |
+| **Updated by task** | M5.13 (cột `action` chỉ nhận canonical) |
 | **Last updated** | 2026-08-08 |
 
 `docs/wbs.md` giữ M5.0…M5.6 đã hoàn thành và không nhắc lại ở đây. File này giữ
@@ -49,7 +49,7 @@ M5.7 (màn hình + route)
  ├── M5.10 (tổng kết phiên)
  ├── M5.11 (tùy chọn hai tầng)
  ├── M5.12 (ca chặn/bỏ qua stage)
- ├── M5.13 (mức `almost` của match)
+ ├── M5.13 (cột `action` chỉ nhận canonical)  ✔ done
  └── M5.15 (integration test qua UI) ← cần M5.9, M5.10, M5.12
 M5.18…M5.20 (dựng năm màn theo design) ← cần M5.7
 M5.14 blocked bởi UC-07
@@ -326,26 +326,75 @@ một Reset rơi vào giữa để lại màn hình cầm phiên của trước 
   `study_session_flow_test.dart` đổi sang `exhaustedAnswers` — một cờ boolean chỉ
   nói được "mọi stage đều xong", tức là một kịch bản khác hẳn.
 
-### M5.13 · Mức phản hồi `almost` của `match` (BR-120)
+### M5.13 · Mức phản hồi của `match`, và cột `action` chỉ nhận canonical (BR-120)
 
-- **Status:** todo
-- **Goal:** `match` có mức phản hồi giữa, và nó không rò vào lịch sử.
-- **Scope:** mức `almost` khi chọn gần đúng; ánh xạ như **sai** theo BR-107; vào
-  tập không đạt của round.
+- **Status:** **done** — analyze sạch, 1576 test xanh, visual audit xanh, guard sạch
+- **Goal:** `study_answers.action` chỉ nhận action canonical của thuật toán, và
+  mọi kết cục không phải "đúng" vào tập không đạt của round.
+- **Scope:** phép chặn action ngoại lai ở đúng chỗ ghi; test khẳng định hai điều
+  của BR-120 cùng lúc.
 - **Out of scope:** mức phản hồi cho mode khác.
 - **Editable documents:** `docs/wbs-study.md`
-- **Output:** `match_mode.dart` + widget bàn ghép
+- **Output:** `study_queue_repository_impl.dart`, `study_mode.dart`,
+  `study_mode_view_widget.dart`, `study_canonical_action_test.dart`
 - **Acceptance criteria:**
-  - [ ] `almost` vào tập không đạt của round (BR-116, BR-120).
-  - [ ] `almost` **không** xuất hiện trong `study_answers.action` — cột đó chỉ
-        nhận action canonical của thuật toán (BR-120, BR-132).
-  - [ ] Có test khẳng định đúng hai điều trên, cùng lúc.
-- **M5.4b đóng mốc với tiêu chí BR-120 **chưa có test**, vì widget khi đó chỉ sinh
-  đúng/sai nhị phân nên không có gì để kiểm.** Mốc này thêm mức phản hồi và test
-  cùng lúc — thêm mức trước rồi test sau là cách tiêu chí ấy bị bỏ quên lần nữa.
+  - [x] Kết cục không phải "đúng" vào tập không đạt của round (BR-116, BR-120),
+        và ở lại đó kể cả khi sau đó thẻ được làm đúng.
+  - [x] `study_answers.action` **chỉ** nhận action canonical của thuật toán
+        (BR-120, BR-132) — action của thuật toán kia bị **từ chối trước khi
+        ghi**, không phải rollback sau khi ghi một phần.
+  - [x] Có test khẳng định đúng hai điều trên, cùng lúc.
+- **Quyết định nghiệp vụ của chủ dự án (2026-08-08), thay thế phạm vi cũ của mốc
+  này:** *"ở thuật toán SRS 8 box, chỉ có đúng và sai, không có bất kỳ trạng thái
+  nào khác trong từng study stage."* Nên **`almost` không được dựng ở MVP**.
+  BR-120 dùng **MAY** cho mức phản hồi thứ ba, nên phán quyết này không sửa luật
+  nào và không tài liệu frozen nào phải đổi — nó chỉ nói cái MAY ấy không được
+  dùng. `docs/wbs.md:6603` vốn đã ghi "khi nào `match` trả `almost`" là **ngoài
+  phạm vi** M5.0e, tức câu hỏi này chưa từng có câu trả lời trong docs.
+- **Nửa còn lại của BR-120 thì có thật, và nó đang không được thi hành ở đâu cả.**
+  Bỏ `almost` không làm mốc này rỗng: câu "cột đó chỉ nhận action canonical"
+  trước nay không phép kiểm nào bảo đảm. `submitAnswer` ghi bất kỳ `StudyAction`
+  nào được đưa vào, nên một thẻ `eight_box` nhận được `easy` và một thẻ `sm2`
+  nhận được `remembered`. Cả hai lưu sạch sẽ rồi **không đọc lại được**:
+  `isLapse` bảo `easy` không phải lượt sai, và `EightBoxScheduler` không có nhánh
+  nào cho nó — dòng lịch sử ấy vĩnh viễn được chấm là "đúng".
+- **Luật ở `domain/`, câu hỏi đặt ở chỗ ghi.** `isCanonicalAction` sống cạnh
+  `schedulerFor` trong `study_scheduler.dart` vì luật là của thuật toán; nó được
+  *gọi* bên trong `runInTransaction`, nơi `scheduler_type` của chính thẻ đang có
+  sẵn. Đây đúng là hai nửa `CLAUDE.md` tách ra có chủ đích. Guard 400 dòng của CI
+  bắt bản đầu (414 dòng) và đó là thứ đẩy luật về đúng chỗ của nó.
+- **Chặn đặt trong transaction, hỏi chính thẻ.** `card_study_states.scheduler_type`
+  đang được đọc sẵn để ghi vào dòng lịch sử vài dòng bên dưới, nên phép kiểm tốn
+  **không** thêm truy vấn nào. Hỏi thẻ thay vì hỏi caller là thứ làm luật không
+  thể bị vòng qua: một use case quên kiểm, hoặc kiểm theo deck đã đổi thuật toán,
+  vẫn không đi qua được. `SchedulerType.unknown` cũng bị từ chối — thẻ do bản
+  build mới hơn ghi thì **đọc** được, nhưng không có gì bản này ghi lên đó là
+  canonical cho một thuật toán nó chưa từng nghe tên.
+- **Phép kiểm được chứng minh bằng cách tái tạo vi phạm.** Gỡ đúng một dòng chặn
+  ra, hai test đỏ đúng chỗ, rồi khôi phục. Xanh trên code sạch không chứng minh gì.
+- **Recursive review tìm ra hai lỗi, cả hai đã sửa trong mốc này:**
+  - **`_send` nuốt action null trong im lặng.** `binaryAction` trả `null` khi
+    `schedulerFor` không nhận ra thuật toán của deck; `studyModeView` vẫn dựng
+    bàn ghép, người dùng chạm ô, và **không gì xảy ra** — không ghi, không báo,
+    không đường ra ngoài force-quit. Đúng loại lỗi M5.12 vừa sửa ở một tầng khác.
+    Nay `studyModeView` từ chối dựng khi `mode.isBinaryGraded` mà không có ánh xạ,
+    và màn hình rơi vào `StudyBlockedSectionWidget` — nói rõ và mời rời phiên.
+  - **Test BR-124 cũ sẽ vẫn xanh trên một implementation bỏ qua hoàn toàn BR-124.**
+    Nó dựng `StudySessionState` không đặt `schedulerType`, mà mặc định là
+    `unknown` — nên sau sửa trên, view trả null vì *lý do khác*. Nay test đặt
+    `eightBox` tường minh, và có test đối chứng khẳng định cùng stage ấy **dựng
+    được** khi thuật toán đã biết.
+- **Quyết định của agent, không có trong docs:** `StudyMode.isBinaryGraded` viết
+  là `producesAnswer && this != selfAssess` — đúng như BR-106 phát biểu — chứ
+  không phải một danh sách bốn mode. Danh sách là chỗ thứ hai tập mode được lưu,
+  và nó lệch vào ngày có mode thứ bảy. Nó trùng tập với `usesRounds` một cách
+  tình cờ; gộp hai getter sẽ làm một mode chấm điểm mà không dùng round trở nên
+  không diễn đạt được.
 - **Dependencies:** M5.7
 - **Tests required:** test tập không đạt; test `action` canonical
 - **Checklist phases:** 14.4, 15.1
+- **Tests:** `study_canonical_action_test.dart` (4, trên SQLite thật),
+  `study_blocked_widget_test.dart` (+2)
 
 ### M5.14 · Reset learning progress đóng phiên đang mở (BR-83)
 
@@ -531,7 +580,7 @@ phán quyết trước khi người dùng trả lời.
 |---|---|---|
 | Controller đọc thẳng repository ở 4 chỗ | không phép kiểm nào bắt được; guard kiểm import, không kiểm lời gọi | M5.8 |
 | ~~`study_config` chưa được parse~~ | `study_config_mapper.dart` parse và ghi; hỏng thì về mặc định | xong ở M5.11 |
-| BR-120 chưa có test | `match` chưa có mức `almost` để kiểm | M5.13 |
+| ~~BR-120 chưa có test~~ | chủ dự án chốt `eight_box` chỉ có đúng/sai nên `almost` không dựng; nửa "chỉ nhận action canonical" nay bị chặn trong transaction và có test | xong ở M5.13 |
 | BR-83 chưa có caller | UC-07 chưa tồn tại | M5.14 |
 | ~~`remaining_ms` chưa được nối vào UI resume~~ | `RecallTimerSectionWidget` nhận `initialRemaining` từ queue item; test BR-133 ở `recall_fill_widget_test.dart` | xong ở M5.9 |
 | Widget mode chưa ai dựng trong `lib/` | chưa có màn ghép | M5.7 |

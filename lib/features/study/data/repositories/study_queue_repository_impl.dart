@@ -186,6 +186,20 @@ mixin _StudyQueueOperations {
         throw const NotFoundFailure(message: 'Card has no study state');
       }
 
+      // BR-120, asked of the card's own row rather than of the caller, and
+      // inside the transaction: a use case that forgot to check, or checked
+      // against a deck that has changed algorithm since, still cannot get past
+      // here. It costs no query — the type is already read for the row below.
+      if (!isCanonicalAction(
+        action,
+        type: SchedulerType.fromDbValue(state.schedulerType),
+      )) {
+        throw ConflictFailure(
+          message:
+              'This deck\'s algorithm does not use "${action.dbValue}" here',
+        );
+      }
+
       // The one place `kind` is decided, and it is decided from the session and
       // the queue row rather than from what the schedule looks like afterwards
       // (BR-76). A `scheduled` turn answered `remembered` on a box-8 card leaves

@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 import 'package:memox/features/study/domain/entities/study_queue_item_entity.dart';
 import 'package:memox/features/study/domain/models/study_action_model.dart';
 import 'package:memox/features/study/domain/models/study_mode.dart';
@@ -53,6 +54,11 @@ void main() {
       state: StudySessionState(
         turn: turnOf(StudyMode.guess, pool.first),
         sessionCards: pool,
+        // Named, not defaulted. The default is `unknown`, and a graded stage on
+        // an unknown algorithm is refused for a *different* reason — so leaving
+        // it out would let this test pass without BR-124 being implemented at
+        // all.
+        schedulerType: SchedulerType.eightBox,
       ),
       onAnswer: (action, {outcomeReason, comparisonVersion, hasUsedHint}) =>
           answers.add(action),
@@ -63,6 +69,56 @@ void main() {
     expect(view, isNull);
     // BR-124: nothing is recorded, and the card is not skipped.
     expect(answers, isEmpty);
+  });
+
+  test('a graded stage on an unrecognised algorithm yields no view', () {
+    // `schedulerFor` returns null for an algorithm this build has never heard
+    // of, so `binaryAction` has no answer and every grade taken here would be
+    // dropped on the way out. Building the board anyway is a screen that eats
+    // taps: the user matches a pair, nothing moves, nothing is written, and
+    // force-quitting is the only way out.
+    final answers = <StudyAction>[];
+    final pool = <StudyCardModel>[card('c0', back: 'a'), card('c1', back: 'b')];
+
+    final view = studyModeView(
+      mode: StudyMode.match,
+      state: StudySessionState(
+        turn: turnOf(StudyMode.match, pool.first),
+        sessionCards: pool,
+        // Spelled out even though it is the default: this test is *about* the
+        // unknown algorithm, and a reader who cannot see that from the call has
+        // to go looking for what the default happens to be today.
+        // ignore: avoid_redundant_argument_values
+        schedulerType: SchedulerType.unknown,
+      ),
+      onAnswer: (action, {outcomeReason, comparisonVersion, hasUsedHint}) =>
+          answers.add(action),
+      onContinue: () {},
+      random: Random(1),
+    );
+
+    expect(view, isNull);
+    expect(answers, isEmpty);
+  });
+
+  test('the same stage builds once the algorithm is known', () {
+    // The counterpart, and it is what stops the guard above from being "match
+    // never renders": two pairs on `eight_box` is a board.
+    final pool = <StudyCardModel>[card('c0', back: 'a'), card('c1', back: 'b')];
+
+    final view = studyModeView(
+      mode: StudyMode.match,
+      state: StudySessionState(
+        turn: turnOf(StudyMode.match, pool.first),
+        sessionCards: pool,
+        schedulerType: SchedulerType.eightBox,
+      ),
+      onAnswer: (action, {outcomeReason, comparisonVersion, hasUsedHint}) {},
+      onContinue: () {},
+      random: Random(1),
+    );
+
+    expect(view, isNotNull);
   });
 
   testWidgets('the blocked state says what did not happen', (tester) async {
