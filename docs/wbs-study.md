@@ -7,7 +7,7 @@
 | **Scope** | Task còn lại của Study từ M5.7 trở đi · nợ kỹ thuật của Study · việc bị chặn |
 | **Source of truth for** | Trạng thái task Study từ M5.7 · nợ kỹ thuật của Study |
 | **Depends on** | `document-conventions.md` · `wbs.md` · `business-rules.md` · `use-cases.md` |
-| **Updated by task** | M5.7 (màn hình phiên học) |
+| **Updated by task** | M5.8 (controller gọi use case) |
 | **Last updated** | 2026-08-08 |
 
 `docs/wbs.md` giữ M5.0…M5.6 đã hoàn thành và không nhắc lại ở đây. File này giữ
@@ -108,7 +108,7 @@ cuối". Đúng với `eight_box` và là trùng hợp: với `sm2` nó chấm `
 
 ### M5.8 · Controller gọi use case, không gọi repository
 
-- **Status:** todo — **vi phạm AD-12 đang tồn tại**
+- **Status:** **done** — analyze sạch, 1513 test xanh, guard sạch
 - **Goal:** Không tầng `presentation/` nào đọc thẳng repository.
 - **Scope:** bốn lời gọi trong `study_session_controller.dart` —
   `deckContext`, `markBrowsed`, `nextTurn`, `saveTurnProgress` — chuyển thành use
@@ -117,12 +117,28 @@ cuối". Đúng với `eight_box` và là trùng hợp: với `sm2` nó chấm `
 - **Editable documents:** `docs/wbs-study.md`
 - **Output:** `lib/features/study/domain/usecases/`, controller đã sửa, test kiến trúc
 - **Acceptance criteria:**
-  - [ ] `grep -n "repository\." study_session_controller.dart` chỉ còn lời gọi
+  - [x] `grep -n "repository\." study_session_controller.dart` chỉ còn lời gọi
         qua use case.
-  - [ ] Mỗi use case mới là **một** tương tác, không phải một lớp bọc mỏng gom
+  - [x] Mỗi use case mới là **một** tương tác, không phải một lớp bọc mỏng gom
         nhiều thứ.
-  - [ ] Có test kiến trúc (hoặc rule guard) chặn `presentation/` gọi thẳng
+  - [x] Có test kiến trúc (hoặc rule guard) chặn `presentation/` gọi thẳng
         phương thức repository — hiện không phép kiểm nào bắt được điều này.
+**Phép kiểm mới so hình dạng AST, không so chuỗi.** Bản đầu hỏi "nguồn có chứa
+`.read(` và `RepositoryProvider` không" — và bắt luôn mọi
+`SomeUseCase(ref.read(repoProvider)).call()`, tức đúng cái pattern cần giữ. Điều
+quan trọng là thứ **được gọi lên** có *chính là* lượt đọc hay chỉ chứa một lượt
+đọc bên trong. Nó bắt cả hai dạng: gọi chuỗi, và gọi qua biến cục bộ — dạng thứ
+hai chính là dạng đã trốn qua bốn PR.
+
+**Phép kiểm đã được chứng minh bằng cách tái tạo vi phạm.** Xanh trên code sạch
+không chứng minh gì; em đổi một lời gọi về dạng cũ, test đỏ đúng dòng đó, rồi
+khôi phục.
+
+**`start()` gộp ba lượt đọc thành một.** Trước đây mở phiên là ba lời gọi — mở
+phiên, hỏi deck chạy thuật toán nào, rồi lấy tập thẻ. Ba lượt đọc là ba ảnh chụp:
+một Reset rơi vào giữa để lại màn hình cầm phiên của trước đó và tập thẻ của sau
+đó. `StudySessionStartModel` trả cả bốn thứ trong một lượt (AD-13).
+
 - **Đây là lỗi do M5.3 và M5.5 để lại.** `CLAUDE.md` viết rõ *"A controller calls
   a use case; it does **not** read a repository"*, và cả `check_architecture.sh`
   lẫn `architecture_boundary_test` đều không bắt được — chúng kiểm **import**,

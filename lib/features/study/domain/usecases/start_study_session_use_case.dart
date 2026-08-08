@@ -1,5 +1,5 @@
 import '../../../../core/error/failure.dart';
-import '../entities/study_session_entity.dart';
+import '../models/study_session_start_model.dart';
 import '../failures/study_refusal_failure.dart';
 import '../models/study_mode.dart';
 import '../models/study_scheduler.dart';
@@ -23,7 +23,7 @@ class StartStudySessionUseCase {
 
   final StudyRepository _repository;
 
-  Future<StudySessionEntity> call({
+  Future<StudySessionStartModel> call({
     required String deckId,
     required StudySessionKind kind,
     required DateTime now,
@@ -54,13 +54,23 @@ class StartStudySessionUseCase {
     // setting afterwards must not move a session that is already running.
     final options = await _repository.effectiveOptions(context.rootDeckId);
 
-    return _repository.openSession(
+    final session = await _repository.openSession(
       deckId: deckId,
       kind: kind,
       stageSequence: stageSequence,
       cardLimit: options.cardLimit,
       newCardOrder: options.newCardOrder,
       now: now,
+    );
+
+    // The card set comes back with the session rather than in a second call:
+    // three reads are three snapshots, and a Reset landing between them leaves
+    // the screen holding halves of two different worlds (AD-13).
+    return StudySessionStartModel(
+      session: session,
+      schedulerType: context.schedulerType,
+      actions: scheduler.supportedActions,
+      cards: await _repository.sessionCards(session.id),
     );
   }
 

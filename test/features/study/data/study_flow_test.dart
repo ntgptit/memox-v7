@@ -126,7 +126,7 @@ void main() {
       );
       expect(fillCards.map((r) => r.read<String>('card_id')), <String>['c0']);
 
-      await playThrough(session.id);
+      await playThrough(session.session.id);
 
       final learned = await rows(
         'SELECT card_id, learned_at, due_at, current_box FROM '
@@ -154,7 +154,7 @@ void main() {
       final session = await StartStudySessionUseCase(
         repository,
       ).call(deckId: 'd1', kind: StudySessionKind.learning, now: now);
-      await playThrough(session.id);
+      await playThrough(session.session.id);
 
       final kinds = await rows('SELECT DISTINCT kind FROM study_answers');
 
@@ -174,7 +174,7 @@ void main() {
       final session = await StartStudySessionUseCase(
         repository,
       ).call(deckId: 'd1', kind: StudySessionKind.learning, now: now);
-      await playThrough(session.id);
+      await playThrough(session.session.id);
 
       expect(
         await rows(
@@ -199,7 +199,7 @@ void main() {
       final session = await StartStudySessionUseCase(
         repository,
       ).call(deckId: 'd1', kind: StudySessionKind.learning, now: now);
-      await playThrough(session.id);
+      await playThrough(session.session.id);
     }
 
     test('a card learned today cannot be reviewed today (BR-145)', () async {
@@ -230,10 +230,10 @@ void main() {
         reviewMode: StudyMode.match,
         now: tomorrow,
       );
-      final card = (await repository.nextTurn(session.id))!.cardId;
+      final card = (await repository.nextTurn(session.session.id))!.cardId;
 
       await SubmitStudyAnswerUseCase(repository).call(
-        session: session,
+        session: session.session,
         cardId: card,
         mode: StudyMode.match,
         action: StudyAction.remembered,
@@ -266,7 +266,7 @@ void main() {
       final session = await StartStudySessionUseCase(
         repository,
       ).call(deckId: 'd1', kind: StudySessionKind.learning, now: now);
-      await playThrough(session.id);
+      await playThrough(session.session.id);
 
       final summary = await repository.watchStudyEntry('d1', now: now).first;
 

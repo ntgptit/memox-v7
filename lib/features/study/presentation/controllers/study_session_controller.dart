@@ -8,11 +8,13 @@ import '../../di/study_repository_provider.dart';
 import '../../domain/models/study_action_model.dart';
 import '../../domain/models/study_mode.dart';
 import '../../domain/models/study_outcome_reason_model.dart';
-import '../../domain/models/study_scheduler.dart';
 import '../../domain/models/study_session_kind_model.dart';
 import '../../domain/models/study_session_status_model.dart';
 import '../../domain/usecases/advance_study_stage_use_case.dart';
 import '../../domain/usecases/end_study_session_use_case.dart';
+import '../../domain/usecases/get_next_turn_use_case.dart';
+import '../../domain/usecases/mark_browsed_use_case.dart';
+import '../../domain/usecases/save_turn_progress_use_case.dart';
 import '../../domain/usecases/start_study_session_use_case.dart';
 import '../../domain/usecases/submit_study_answer_use_case.dart';
 import '../states/study_session_state.dart';
@@ -41,32 +43,23 @@ class StudySessionController extends _$StudySessionController {
   }) async {
     state = state.copyWith(isOpening: true, error: null);
 
-    final repository = ref.read(studyRepositoryProvider);
     try {
-      final session = await StartStudySessionUseCase(repository).call(
-        deckId: deckId,
-        kind: kind,
-        reviewMode: reviewMode,
-        now: ref.read(clockProvider)(),
-      );
-
-      final context = await repository.deckContext(deckId);
-      final actions = schedulerFor(context.schedulerType)?.supportedActions;
-
-      // A guard rather than a fallback: an empty action list means a screen with
-      // no way to answer, and showing that is worse than failing to open.
-      if (actions == null) {
-        throw StateError('Deck has no scheduler this build understands');
-      }
-
-      final cards = await repository.sessionCards(session.id);
+      final opened =
+          await StartStudySessionUseCase(
+            ref.read(studyRepositoryProvider),
+          ).call(
+            deckId: deckId,
+            kind: kind,
+            reviewMode: reviewMode,
+            now: ref.read(clockProvider)(),
+          );
 
       if (!ref.mounted) return;
       state = state.copyWith(
-        session: session,
-        actions: actions,
-        schedulerType: context.schedulerType,
-        sessionCards: cards,
+        session: opened.session,
+        schedulerType: opened.schedulerType,
+        actions: opened.actions,
+        sessionCards: opened.cards,
         isOpening: false,
       );
 
@@ -104,10 +97,9 @@ class StudySessionController extends _$StudySessionController {
       // shown and moved past (BR-111, BR-28). The schema cannot even hold
       // `browse` as an answer mode, so this is a branch rather than a value.
       if (session.currentMode == StudyMode.browse) {
-        await repository.markBrowsed(
-          sessionId: session.id,
-          cardId: turn.cardId,
-        );
+        await MarkBrowsedUseCase(
+          repository,
+        ).call(sessionId: session.id, cardId: turn.cardId);
 
         if (!ref.mounted) return;
         state = state.copyWith(isSubmitting: false);
@@ -190,15 +182,13 @@ class StudySessionController extends _$StudySessionController {
     final turn = state.turn;
     if (session == null || turn == null || state.isFinished) return;
 
-    await ref
-        .read(studyRepositoryProvider)
-        .saveTurnProgress(
-          sessionId: session.id,
-          mode: session.currentMode,
-          cardId: turn.cardId,
-          remainingMs: remainingMs,
-          isRevealed: isRevealed,
-        );
+    await SaveTurnProgressUseCase(ref.read(studyRepositoryProvider)).call(
+      sessionId: session.id,
+      mode: session.currentMode,
+      cardId: turn.cardId,
+      remainingMs: remainingMs,
+      isRevealed: isRevealed,
+    );
   }
 
   /// Closes the session because the user left (BR-82).
@@ -251,7 +241,7 @@ class StudySessionController extends _$StudySessionController {
         return;
       }
 
-      final turn = await repository.nextTurn(session.id);
+      final turn = await GetNextTurnUseCase(repository).call(session.id);
       if (!ref.mounted) return;
 
       state = state.copyWith(
