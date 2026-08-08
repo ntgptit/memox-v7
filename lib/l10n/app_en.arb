@@ -1463,5 +1463,29 @@
   "studyHintFill": "Type the answer, then check",
   "@studyHintFill": {
     "description": "Bottom hint line for fill. Diacritics count (BR-134)."
+  },
+  "studyMatchContext": "{round, plural, other{Round {round}}} · {remaining, plural, =1{1 pair left} other{{remaining} pairs left}}",
+  "@studyMatchContext": {
+    "placeholders": {
+      "round": {
+        "type": "int"
+      },
+      "remaining": {
+        "type": "int"
+      }
+    },
+    "description": "The match board's line of context. Round, not board: the design says BOARD 1 OF 3 and 'board' is a word no rule owns — BR-115 and BR-117 have only rounds (§7.6). Splitting a round into smaller boards would need a rule saying how big a board is, not a relabelled string."
+  },
+  "studyCardFaceTerm": "Term",
+  "@studyCardFaceTerm": {
+    "description": "Label on the top half of a study card. The design says KOREAN; no deck or card carries a language, and naming one in the UI would invent a field. Term is what the column actually holds."
+  },
+  "studyCardFaceMeaning": "Meaning",
+  "@studyCardFaceMeaning": {
+    "description": "Label on the bottom half of a study card, over the back of the card."
+  },
+  "studyMatchPaired": "Paired",
+  "@studyMatchPaired": {
+    "description": "Announced for a match tile that has been paired correctly. The tick beside it is decoration; this is what a screen reader reads, because a pair marked only in green is not marked for everyone."
   }
 }

@@ -14,6 +14,7 @@ void main() {
     StudyMode mode = StudyMode.match,
     StudySessionKind kind = StudySessionKind.reviewing,
     StudyStageProgressModel progress = const StudyStageProgressModel(
+      round: 1,
       done: 3,
       total: 8,
     ),
@@ -62,7 +63,9 @@ void main() {
     // there is nothing here to accumulate.
     await pumpFrame(
       tester,
-      frame(progress: const StudyStageProgressModel(done: 4, total: 8)),
+      frame(
+        progress: const StudyStageProgressModel(round: 1, done: 4, total: 8),
+      ),
     );
 
     expect(find.text('4 / 8'), findsOneWidget);
@@ -85,7 +88,9 @@ void main() {
     (tester) async {
       await pumpFrame(
         tester,
-        frame(progress: const StudyStageProgressModel(done: 0, total: 0)),
+        frame(
+          progress: const StudyStageProgressModel(round: 1, done: 0, total: 0),
+        ),
       );
 
       final indicator = tester.widget<LinearProgressIndicator>(
@@ -100,13 +105,22 @@ void main() {
   ) async {
     // §7.2, BR-142: one card set, named. Never "12 NEW · 11 REVIEW" side by
     // side, which is the design the ruling threw out.
-    await pumpFrame(tester, frame(kind: StudySessionKind.learning));
+    // `guess`, because `match` adds a round to this line and the pair being
+    // checked here is deck and kind.
+    await pumpFrame(
+      tester,
+      frame(mode: StudyMode.guess, kind: StudySessionKind.learning),
+    );
     expect(find.text('Korean · Learning'), findsOneWidget);
 
     // Named even though it is the default: the pair is the point of the test,
     // and a reader should not have to look up which one the helper picks.
     // ignore: avoid_redundant_argument_values
-    await pumpFrame(tester, frame(kind: StudySessionKind.reviewing));
+    await pumpFrame(
+      tester,
+      // ignore: avoid_redundant_argument_values
+      frame(mode: StudyMode.guess, kind: StudySessionKind.reviewing),
+    );
     expect(find.text('Korean · Review'), findsOneWidget);
   });
 
@@ -202,5 +216,35 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(find.text('3 / 8'), findsOneWidget);
+  });
+
+  testWidgets('match adds its round and how many pairs are left', (
+    tester,
+  ) async {
+    // §7.6. Round, not board: BR-115 and BR-117 have only rounds, and splitting
+    // one into smaller boards would need a rule saying how big a board is —
+    // not a relabelled string.
+    await pumpFrame(
+      tester,
+      frame(
+        // Named, because the mode is the subject of this test.
+        // ignore: avoid_redundant_argument_values
+        mode: StudyMode.match,
+        progress: const StudyStageProgressModel(round: 2, done: 3, total: 8),
+      ),
+    );
+
+    expect(
+      find.text('Korean · Review · Round 2 · 5 pairs left'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('and no other mode adds anything to that line', (tester) async {
+    // The counterpart. Without it, "match says round" also passes on a line
+    // that says round for every mode.
+    await pumpFrame(tester, frame(mode: StudyMode.guess));
+
+    expect(find.text('Korean · Review'), findsOneWidget);
   });
 }

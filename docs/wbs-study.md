@@ -7,7 +7,7 @@
 | **Scope** | Task còn lại của Study từ M5.7 trở đi · nợ kỹ thuật của Study · việc bị chặn |
 | **Source of truth for** | Trạng thái task Study từ M5.7 · nợ kỹ thuật của Study |
 | **Depends on** | `document-conventions.md` · `wbs.md` · `business-rules.md` · `use-cases.md` |
-| **Updated by task** | M5.18 (khung phiên học) |
+| **Updated by task** | M5.19 (`browse` và `match` theo design) |
 | **Last updated** | 2026-08-08 |
 
 `docs/wbs.md` giữ M5.0…M5.6 đã hoàn thành và không nhắc lại ở đây. File này giữ
@@ -52,7 +52,8 @@ M5.7 (màn hình + route)
  ├── M5.13 (cột `action` chỉ nhận canonical)  ✔ done
  └── M5.15 (integration test qua UI) ← cần M5.9, M5.10, M5.12
 M5.18 (khung phiên học)  ✔ done
-M5.19…M5.20 (dựng năm màn theo design) ← cần M5.18
+M5.19 (`browse` và `match`)  ✔ done
+M5.20 (`guess`, `recall`, `fill`) ← cần M5.18
 M5.14 blocked bởi UC-07
 M5.16 sau khi mọi màn đã ổn định
 ```
@@ -578,7 +579,7 @@ phán quyết trước khi người dùng trả lời.
 
 ### M5.19 · `browse` và `match` theo design
 
-- **Status:** todo
+- **Status:** **done** — analyze sạch, 1601 test xanh, visual audit xanh, guard sạch
 - **Goal:** Hai màn khớp ảnh 12 và 13.
 - **Scope:** thẻ hai nửa có nhãn `KOREAN`/`MEANING` và đường kẻ giữa; bàn ghép
   hai cột với ba trạng thái ô.
@@ -587,18 +588,45 @@ phán quyết trước khi người dùng trả lời.
 - **Output:** cập nhật `study_card_face_section_widget.dart` và
   `match_board_section_widget.dart`
 - **Acceptance criteria:**
-  - [ ] `browse` hiện hai nhãn và hai mặt, không nút chấm điểm nào (BR-111).
-  - [ ] Ô `match` đã ghép **ở lại bàn** với dấu ✓ và trạng thái mờ — bản hiện tại
+  - [x] `browse` hiện hai nhãn và hai mặt, không nút chấm điểm nào (BR-111).
+  - [x] Ô `match` đã ghép **ở lại bàn** với dấu ✓ và trạng thái mờ — bản hiện tại
         xoá ô khỏi bàn, và đó là điểm khác design.
-  - [ ] Ô đang chọn dùng nền primary đặc, chữ đảo màu, đạt tương phản ở cả hai
+  - [x] Ô đang chọn dùng nền primary đặc, chữ đảo màu, đạt tương phản ở cả hai
         theme — màu từ `ColorScheme`, không đặt thẳng trong widget.
-  - [ ] Ô đã ghép dùng `success` đúng nghĩa "đúng", không phải để trang trí.
-  - [ ] Ô đã ghép không bấm lại được.
-  - [ ] Pill của `browse` dùng nhãn `browse`, không phải `REVIEW` (§7.1).
-  - [ ] Dòng ngữ cảnh của `match` ghi **round**, không phải board (§7.6).
+  - [x] Ô đã ghép dùng `success` đúng nghĩa "đúng", không phải để trang trí.
+  - [x] Ô đã ghép không bấm lại được.
+  - [x] Pill của `browse` dùng nhãn `browse`, không phải `REVIEW` (§7.1) — vốn đã
+        đúng từ M5.18: pill đọc `studyMode(mode)`, và `browse` là `Browse`.
+  - [x] Dòng ngữ cảnh của `match` ghi **round**, không phải board (§7.6).
+- **Kết quả:** thẻ của `browse`/`self_assess` chia hai nửa có nhãn và một đường
+  kẻ mảnh — hai nửa là thứ làm người đọc hiểu đây là *hai mặt của một thứ*, còn
+  hai đoạn xếp chồng đọc thành hai sự kiện về nó. Bàn ghép có `MatchTileWidget`
+  với ba trạng thái; `StudyStageProgressModel` thêm `round`, nên khung tự dựng
+  được dòng `Round 2 · 5 pairs left` mà không cần lượt đọc nào thêm.
+- **Vì sao ô đã ghép ở lại bàn.** Xoá nó làm mọi hàng bên dưới dồn lên, nên ô
+  người dùng sắp bấm **dịch chỗ ngay lúc họ bấm một ô khác** — và cái bàn mà họ
+  vừa thuộc hình dạng thì biến mất.
+- **Quyết định của agent, không có trong docs — hai cái:**
+  - **Nhãn nửa trên là `Term`, không phải `KOREAN`.** Không deck và không card
+    nào mang ngôn ngữ; in `KOREAN` lên màn là đặt một trường không tồn tại trong
+    dữ liệu (quy tắc 2 của §7).
+  - **Ô đã ghép không có nền xanh nhạt.** Ảnh tô nền xanh rất nhạt;
+    `AppSemanticColors` có `success` và không có container đi kèm, mà thêm token
+    là quyết định token — M5.19 ghi rõ đó là **ngoài phạm vi**. Dấu ✓, chữ
+    `success` và độ mờ mang đủ trạng thái mà không phải bịa một màu.
+- **Recursive review tìm ra một lỗi, đã sửa trong mốc này:** `didUpdateWidget`
+  so bàn bằng `identical`. Bàn được **dựng lại mỗi lượt build** từ shuffle có
+  seed (BR-127, M5.18), nên `identical` luôn sai — khoá nút trong lúc ghi là đủ
+  — và **mọi dấu ✓ người dùng vừa kiếm được sẽ biến mất ngay khi họ trả lời**.
+  Nay so bằng *nội dung* bàn: chính cái seed làm ván bài tái lập được là thứ làm
+  nội dung dùng được như định danh. Test cũ "round mới xoá dấu ✓" vẫn xanh trên
+  bản hỏng ấy, nên có thêm test đối chứng: dựng lại **cùng một ván** thì dấu ✓
+  phải còn.
 - **Dependencies:** M5.18
 - **Tests required:** widget test ba trạng thái ô; test `browse` không có action
 - **Checklist phases:** 14.4, 15.3
+- **Tests:** `match_guess_widget_test.dart` nhóm *the match board* (7),
+  `study_session_frame_test.dart` (+2 dòng ngữ cảnh của match)
 
 ### M5.20 · `guess`, `recall` và `fill` theo design
 
@@ -636,7 +664,7 @@ phán quyết trước khi người dùng trả lời.
 | ~~`remaining_ms` chưa được nối vào UI resume~~ | `RecallTimerSectionWidget` nhận `initialRemaining` từ queue item; test BR-133 ở `recall_fill_widget_test.dart` | xong ở M5.9 |
 | Widget mode chưa ai dựng trong `lib/` | chưa có màn ghép | M5.7 |
 | ~~Ảnh wireframe chưa có trong repo~~ | chủ dự án đã thả vào `wireframes/assets/m5-study-modes/` | xong |
-| `match` xoá ô đã ghép khỏi bàn | dựng trước khi có design | M5.19 |
+| ~~`match` xoá ô đã ghép khỏi bàn~~ | ô đã ghép nay ở lại bàn với ✓ và độ mờ | xong ở M5.19 |
 | Hai state thứ hai của `recall`/`fill` chưa có ảnh | design mới cung cấp state đầu | M5.20 — vẽ theo BR, ghi rõ là agent đề xuất |
 
 | Màn Study chưa có mặt trong Widgetbook | M5.7 thêm hai màn, M5.11 thêm màn thứ ba, không màn nào được đăng ký; `widgetbook/lib/screens/` mới chỉ có `DeckListScreen` | mốc riêng — cần fake repository dùng được từ package `widgetbook/` |

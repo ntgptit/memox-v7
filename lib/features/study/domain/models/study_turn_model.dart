@@ -40,6 +40,11 @@ abstract class StudyCardModel with _$StudyCardModel {
 @freezed
 abstract class StudyStageProgressModel with _$StudyStageProgressModel {
   const factory StudyStageProgressModel({
+    /// Which round this is. The frame names it (§7.6): the design says
+    /// `BOARD 1 OF 3`, and "board" is a word no rule owns — BR-115 and BR-117
+    /// have only rounds, so the label says round.
+    required int round,
+
     required int done,
     required int total,
   }) = _StudyStageProgressModel;
@@ -48,6 +53,9 @@ abstract class StudyStageProgressModel with _$StudyStageProgressModel {
 
   /// 0 to 1, and 0 rather than NaN for a round with nothing in it.
   double get fraction => total <= 0 ? 0 : done / total;
+
+  /// How many of this round's cards are still unanswered.
+  int get remaining => total - done < 0 ? 0 : total - done;
 }
 
 /// One turn: where the card sits in the queue, what the card says, and how far

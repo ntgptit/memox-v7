@@ -99,22 +99,39 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
   Widget build(BuildContext context) {
     final texts = context.texts;
 
+    final l10n = context.l10n;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
+        // One card split in two by a hairline, rather than two stacked blocks.
+        // The halves are what say "these are the two sides of one thing"; two
+        // paragraphs in a column read as two facts about it.
         MxCard(
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.xl),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(widget.turn.card.front, style: texts.headlineSmall),
-                if (_showsBack) ...<Widget>[
-                  const SizedBox(height: AppSpacing.lg),
-                  Text(widget.turn.card.back, style: texts.bodyLarge),
-                ],
+          padding: const EdgeInsets.all(AppSpacing.xl),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              _CardHalf(
+                label: l10n.studyCardFaceTerm,
+                text: widget.turn.card.front,
+                style: texts.headlineSmall,
+              ),
+              if (_showsBack) ...<Widget>[
+                const SizedBox(height: AppSpacing.lg),
+                Divider(
+                  height: AppSpacing.xs,
+                  color: context.semanticColors.borderSubtle,
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                _CardHalf(
+                  label: l10n.studyCardFaceMeaning,
+                  text: widget.turn.card.back,
+                  style: texts.titleMedium,
+                ),
               ],
-            ),
+            ],
           ),
         ),
         const SizedBox(height: AppSpacing.xl),
@@ -157,4 +174,38 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
       ],
     ];
   }
+}
+
+/// One side of the card: a small muted label, then the text it names.
+///
+/// The label is what makes the two halves readable as *sides* rather than as a
+/// word and a sentence. It is `Term`/`Meaning` rather than the design's
+/// `KOREAN`: no deck and no card carries a language, and printing one would put
+/// a field in the UI that does not exist in the data.
+class _CardHalf extends StatelessWidget {
+  const _CardHalf({
+    required this.label,
+    required this.text,
+    required this.style,
+  });
+
+  final String label;
+  final String text;
+  final TextStyle? style;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    mainAxisSize: MainAxisSize.min,
+    children: <Widget>[
+      Text(
+        label.toUpperCase(),
+        style: context.texts.labelSmall?.copyWith(
+          color: context.colors.onSurfaceVariant,
+        ),
+      ),
+      const SizedBox(height: AppSpacing.sm),
+      Text(text, style: style),
+    ],
+  );
 }
