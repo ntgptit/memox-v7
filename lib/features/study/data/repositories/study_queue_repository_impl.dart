@@ -186,6 +186,8 @@ mixin _StudyQueueOperations {
         throw const NotFoundFailure(message: 'Card has no study state');
       }
 
+      _refuseForeignAction(action, schedulerType: state.schedulerType);
+
       // The one place `kind` is decided, and it is decided from the session and
       // the queue row rather than from what the schedule looks like afterwards
       // (BR-76). A `scheduled` turn answered `remembered` on a box-8 card leaves
@@ -296,6 +298,40 @@ mixin _StudyQueueOperations {
       StudySessionsCompanion(cursor: Value<int>(session.cursor + 1)),
     );
   });
+
+  /// Refuses an action the card's own algorithm does not understand (BR-120).
+  ///
+  /// **The column takes canonical actions and nothing else** — not a feedback
+  /// level, not a screen label (BR-132), and not the other algorithm's
+  /// vocabulary. Until now nothing said so: `submitAnswer` wrote whatever
+  /// [StudyAction] it was handed, so an `eight_box` card could take `easy` and
+  /// an `sm2` card `remembered`. Both store cleanly and both are unreadable
+  /// afterwards — `isLapse` says `easy` was not a lapse, and `EightBoxScheduler`
+  /// has no branch for it, so the row grades as "right" forever.
+  ///
+  /// **Inside the transaction, from the card's own row.** The scheduler type is
+  /// already being read for the history row a few lines down, so this costs no
+  /// extra query, and asking the card rather than the caller is what makes the
+  /// rule impossible to bypass: a use case that forgot to check, or checked
+  /// against a deck that changed algorithm since, still cannot get past here.
+  ///
+  /// [SchedulerType.unknown] refuses too. A card written by a newer build may be
+  /// *read* (that is what the enum value is for), but nothing this build could
+  /// write to it would be canonical for an algorithm it has never heard of.
+  void _refuseForeignAction(
+    StudyAction action, {
+    required String schedulerType,
+  }) {
+    final scheduler = schedulerFor(SchedulerType.fromDbValue(schedulerType));
+    if (scheduler != null && scheduler.supportedActions.contains(action)) {
+      return;
+    }
+
+    throw ConflictFailure(
+      message:
+          'This deck\'s algorithm does not use "${action.dbValue}" as an answer',
+    );
+  }
 
   /// What the answer does to the queue — the half of the rules that differ by
   /// mode.

@@ -67,6 +67,20 @@ enum StudyMode {
   /// in one place instead of in every caller's `if`.
   bool get producesAnswer => this != browse && this != unknown;
 
+  /// Whether this mode grades to right/wrong and then asks the algorithm what
+  /// that maps to (BR-106, BR-107).
+  ///
+  /// **Every mode that answers, except [selfAssess]** — which takes the action
+  /// straight from the user and so needs no mapping at all. Written as the rule
+  /// reads rather than as a list of four, because a list is a second place the
+  /// set of modes lives and it drifts the day a seventh mode arrives.
+  ///
+  /// It happens to select the same four as [usesRounds]. That is a coincidence
+  /// of the current algorithms, not one rule: rounds are about how a stage
+  /// repeats, this is about where the action comes from, and merging them would
+  /// make a future mode that grades without rounds impossible to express.
+  bool get isBinaryGraded => producesAnswer && this != selfAssess;
+
   /// Whether this mode repeats by round rather than by BR-26's comeback.
   ///
   /// The four graded modes do (BR-115); [selfAssess] does not, and [browse] has

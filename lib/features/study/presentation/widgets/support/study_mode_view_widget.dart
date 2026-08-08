@@ -46,6 +46,20 @@ Widget? studyModeView({
   final turn = state.turn;
   if (turn == null) return null;
 
+  // A graded stage whose algorithm has no right/wrong mapping has nowhere to
+  // send an answer (BR-107). It happens when the deck runs an algorithm this
+  // build does not recognise — `schedulerFor` returns null, and so does every
+  // grade taken on this screen.
+  //
+  // **Refusing to build is the point.** Building the board anyway is what used
+  // to happen, and `_send` then dropped each answer on the floor: the user taps
+  // a tile, nothing moves, nothing is written, and there is no way out but
+  // force-quitting. Exactly the failure M5.12 fixed one layer down. Null here
+  // routes to the blocked state, which says so and offers to leave (BR-82).
+  if (mode.isBinaryGraded && _actionFor(state, isCorrect: true) == null) {
+    return null;
+  }
+
   final builders = <StudyMode, Widget? Function()>{
     StudyMode.browse: () => StudyCardFaceSectionWidget(
       turn: turn,
