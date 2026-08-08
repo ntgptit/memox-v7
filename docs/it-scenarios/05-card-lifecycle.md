@@ -29,7 +29,7 @@
 |---|---|---|
 | 1 | Nhập front `abandon`, back `từ bỏ` | Hai giá trị hiển thị đúng |
 | 2 | Chạm Lưu | Quay về danh sách; card mới xuất hiện ở đầu |
-| 3 | Quan sát card | Hiện đúng front/back, state New và badge đến hạn ngay cho card mới |
+| 3 | Quan sát card | Hiện đúng front/back và state New; card chưa có due badge vì chưa hoàn tất chuỗi học mới (BR-90, BR-144) |
 | 4 | Restart app và mở lại deck | Card vẫn tồn tại |
 
 ## IT-CARD-003 — Validation mặt trước và mặt sau

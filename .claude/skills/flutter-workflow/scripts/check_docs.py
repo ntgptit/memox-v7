@@ -483,6 +483,9 @@ _IT_PROFILES = {
     "DEV-LINK",
     "UI-FIXTURE",
     "UI-LARGE",
+    "UI-CLOCK",
+    "UI-MULTI",
+    "UI-FAULT",
 }
 _IT_CLEANUPS = {"CLEAN-RESET", "CLEAN-DELETE-CREATED", "CLEAN-PRESERVE", "CLEAN-NONE"}
 
@@ -567,10 +570,10 @@ def _check_it_scenario_contract() -> None:
 
     setup_ids = set()
     for line in _lines(_IT_GUIDE):
-        if not line.startswith("### "):
+        if not re.match(r"^#{3,4} ", line):
             continue
         setup_ids.update(re.findall(r"\bSETUP-[A-Z0-9-]+", line))
-        setup_ids.update(re.findall(r"\bS-(?:PROGRESS|DUE|LARGE)\b", line))
+        setup_ids.update(re.findall(r"\bS-[A-Z0-9-]+", line))
 
     for scenario_id, cells in catalog_rows.items():
         if len(cells) != 7:

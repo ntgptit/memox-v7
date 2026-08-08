@@ -1,97 +1,109 @@
-# Bộ scenario kiểm thử tích hợp theo hành trình người dùng
+# Bộ kịch bản kiểm thử tích hợp theo hành trình người dùng
 
 | | |
 |---|---|
-| **Status** | active |
-| **Purpose** | Định nghĩa phạm vi, điểm bắt đầu và dữ liệu chung cho người hoặc AI agent thực thi IT scenario trên chức năng hiện có |
-| **Scope** | Navigation, Deck và Card đã hoàn thành; ngoài phạm vi là Review session, starter deck, reset learning progress, sync và backend |
-| **Source of truth for** | Chỉ mục và quy ước thực thi bộ IT scenario hiện tại |
-| **Depends on** | `../product.md`, `../business-rules.md`, `../use-cases.md`, `../wbs.md` |
-| **Updated by task** | Yêu cầu viết IT scenario ngày 2026-08-05 |
-| **Last updated** | 2026-08-05 |
+| **Status** | đang áp dụng |
+| **Purpose** | Định nghĩa phạm vi, điểm bắt đầu và dữ liệu chung cho người hoặc AI agent thực thi kịch bản IT trên chức năng hiện có |
+| **Scope** | Điều hướng, bộ thẻ, thẻ ghi nhớ, chức năng học theo UC-05 và Đặt lại tiến độ học theo UC-07; ngoài phạm vi là bộ thẻ mẫu, đồng bộ và máy chủ |
+| **Source of truth for** | Chỉ mục và quy ước thực thi bộ kịch bản IT hiện tại |
+| **Depends on** | `../product.md`, `../business-rules.md`, `../use-cases.md`, `../wbs.md`, `../wbs-study.md`, `../wireframes/m5-study-modes.md` |
+| **Updated by task** | Bổ sung kịch bản IT cho chức năng học, rà soát đệ quy ba vòng và chuẩn hóa tiếng Việt ngày 2026-08-08 |
+| **Last updated** | 2026-08-08 |
 
 ## 1. Mục tiêu
 
-Bộ tài liệu này kiểm tra MemoX như một người dùng thật: mở app, chạm vào thành
-phần nhìn thấy, nhập dữ liệu, điều hướng, đóng/mở lại app và quan sát kết quả.
-Scenario MUST NOT gọi trực tiếp controller, repository, DAO hoặc sửa database để
+Bộ tài liệu này kiểm tra MemoX như một người dùng thật: mở ứng dụng, chạm vào
+thành phần nhìn thấy, nhập dữ liệu, điều hướng, đóng/mở lại ứng dụng và quan sát
+kết quả. Kịch bản MUST NOT gọi trực tiếp bộ điều khiển, kho dữ liệu, DAO hoặc sửa cơ sở dữ liệu để
 bỏ qua UI trong phần **Các bước thực hiện**.
 
-Một test seed MAY được dùng để chuẩn bị trạng thái mà UI hiện tại chưa thể tự tạo,
-ví dụ card đã học hoặc card có ngày đến hạn. Việc seed chỉ thuộc **Tiền điều kiện**;
+Một bộ dữ liệu kiểm thử MAY được dùng để chuẩn bị trạng thái mà giao diện hiện tại chưa thể tự tạo,
+ví dụ thẻ đã học hoặc thẻ có ngày đến hạn. Việc nạp dữ liệu dựng sẵn chỉ thuộc **Tiền điều kiện**;
 mọi bước kiểm tra sau đó vẫn MUST đi qua UI.
 
-> **Bốn scenario mô tả định nghĩa "đến hạn" sẽ bị M5 thay.** Chúng **đúng với
-> code hiện tại** — 60/60 chạy pass ở M4.11b — nên **không sửa trước** khi M5
-> land, vì sửa sớm sẽ làm chúng fail trên bản đang chạy.
->
-> | Scenario | Nói gì hôm nay | Phải thành gì sau M5 |
-> |---|---|---|
-> | `IT-DISC-005` bước 2–3 | tạo/xoá card ⇒ số **đến hạn** đổi 1 | đổi số **chưa học**; số đến hạn không nhúc nhích (BR-142, BR-150) |
-> | `IT-LIFE-001` bước 3 | card mới có "badge đến hạn ngay" | card mới thuộc tập **Học mới**, chưa có lịch (BR-90, BR-144) |
-> | `IT-ORG-003` bước 2 | "mới/đến hạn ngay trước" | hai tập tách hẳn, không cùng một thứ tự |
-> | `IT-ORG-00x` due badge | `C-P-NEW` "đến hạn ngay" | `C-P-NEW` là **chưa học**, không phải đến hạn |
->
-> **Và profile fixture `C-P-NEW` sẽ vi phạm invariant 28.** Bảng profile trong
-> `00-agent-execution-guide.md` định nghĩa nó là *New, đến hạn ngay,
-> `due_at = T0 − 1 giờ`*. Sau M5 đó là một thẻ **chưa học xong nhưng đã có lịch**
-> — trạng thái BR-144 cấm. Profile phải thành `learned_at` NULL **và** `due_at`
-> NULL, và cần một profile mới cho "đã học, đến hạn" mà các scenario về badge đang
-> thực sự cần.
->
-> Lý do gốc: `due_at IS NULL` từng nghĩa là *đến hạn ngay*; từ BR-142 nó nghĩa là
-> *chưa học xong*. Xem bảng nợ code trong `data-model.md` — cùng một thay đổi,
-> cùng thời điểm.
+Từ M5, hai tập thẻ học MUST tách hẳn theo BR-142: **Học mới** có `learned_at IS
+NULL`; **Ôn tập** có `learned_at IS NOT NULL AND due_at <= now`. Thẻ mới không
+được gọi là “đến hạn”. Bộ dữ liệu dựng sẵn hoặc kịch bản cũ nào còn dùng định nghĩa trước M5 là
+`DOC-DRIFT`, không phải bằng chứng cho sản phẩm.
+
+Phần chức năng học gồm **63 kịch bản** tách theo năm tệp năng lực; không phải 63
+ca trong Bảng quyết định. Mỗi ID là một hành trình người dùng có tiền điều kiện,
+thao tác, tiêu chí kết luận và mức sẵn sàng độc lập.
 
 AI agent MUST đọc theo thứ tự:
 
 1. File này — phạm vi và dữ liệu nghiệp vụ chung.
-2. [`00-agent-execution-guide.md`](00-agent-execution-guide.md) — cách setup,
+2. [`00-agent-execution-guide.md`](00-agent-execution-guide.md) — cách chuẩn bị,
    kết luận và báo cáo mà không suy đoán.
-3. [`scenario-catalog.md`](scenario-catalog.md) — readiness, profile, setup,
-   cleanup và traceability của đúng scenario ID.
-4. File capability chứa các bước của scenario.
+3. [`scenario-catalog.md`](scenario-catalog.md) — mức sẵn sàng, hồ sơ thực thi,
+   chuẩn bị, dọn dẹp và truy vết của đúng ID kịch bản.
+4. Tệp năng lực chứa các bước của kịch bản.
 
 ## 2. Phạm vi hiện tại
 
 | Nhóm | Trạng thái | Tài liệu |
 |---|---|---|
 | Giao thức thực thi cho AI agent | Bắt buộc đọc | [`00-agent-execution-guide.md`](00-agent-execution-guide.md) |
-| Catalog từng scenario ID | Bắt buộc tra cứu | [`scenario-catalog.md`](scenario-catalog.md) |
-| Khởi động, navigation, continuity | Có thể kiểm thử | [`01-navigation-and-continuity.md`](01-navigation-and-continuity.md) |
-| Vòng đời root deck | Có thể kiểm thử | [`02-root-deck-lifecycle.md`](02-root-deck-lifecycle.md) |
-| Cây deck, `content_type`, move | Có thể kiểm thử | [`03-deck-tree-and-content-type.md`](03-deck-tree-and-content-type.md) |
-| Tìm kiếm, lọc, sắp xếp, tiến độ deck | Có thể kiểm thử | [`04-deck-discovery-and-progress.md`](04-deck-discovery-and-progress.md) |
-| Vòng đời card | Có thể kiểm thử | [`05-card-lifecycle.md`](05-card-lifecycle.md) |
-| Tìm kiếm, metadata, lọc, tiến độ card | Có thể kiểm thử | [`06-card-discovery-and-organization.md`](06-card-discovery-and-organization.md) |
+| Danh mục từng ID kịch bản | Bắt buộc tra cứu | [`scenario-catalog.md`](scenario-catalog.md) |
+| Khởi động, điều hướng, tiếp tục | Có thể kiểm thử | [`01-navigation-and-continuity.md`](01-navigation-and-continuity.md) |
+| Vòng đời bộ thẻ gốc | Có thể kiểm thử | [`02-root-deck-lifecycle.md`](02-root-deck-lifecycle.md) |
+| Cây bộ thẻ, `content_type`, di chuyển | Có thể kiểm thử | [`03-deck-tree-and-content-type.md`](03-deck-tree-and-content-type.md) |
+| Tìm kiếm, lọc, sắp xếp, tiến độ bộ thẻ | Có thể kiểm thử | [`04-deck-discovery-and-progress.md`](04-deck-discovery-and-progress.md) |
+| Vòng đời thẻ | Có thể kiểm thử | [`05-card-lifecycle.md`](05-card-lifecycle.md) |
+| Tìm kiếm, siêu dữ liệu, lọc, tiến độ thẻ | Có thể kiểm thử | [`06-card-discovery-and-organization.md`](06-card-discovery-and-organization.md) |
+| Điểm vào chức năng học và tùy chọn | Có thể kiểm thử | [`07-study-entry-and-options.md`](07-study-entry-and-options.md) |
+| Phiên học mới | Có thể kiểm thử | [`08-study-learning-session.md`](08-study-learning-session.md) |
+| Phiên ôn tập và thuật toán xếp lịch | Cần bộ dữ liệu Study v2 cho phần lớn kịch bản | [`09-study-review-session.md`](09-study-review-session.md) |
+| Sáu chế độ học | Có thể kiểm thử; một số ca biên cần dữ liệu dựng sẵn | [`10-study-modes.md`](10-study-modes.md) |
+| Tiếp tục phiên, ngoại tuyến và lỗi | Hỗn hợp `READY`/`FIXTURE-BLOCKED`/`KNOWN-GAP` | [`11-study-continuity-and-failures.md`](11-study-continuity-and-failures.md) |
 
-Các luồng sau MUST NOT được ghi nhận là pass của sản phẩm hiện tại:
+Các luồng sau MUST NOT được ghi nhận là đạt của sản phẩm hiện tại:
 
-- UC-01 — thư viện starter deck chưa có UI.
-- UC-05 — Study mới là màn placeholder; nút Study chỉ thông báo chưa khả dụng.
-- UC-07 — Reset learning progress chưa có luồng hoàn chỉnh.
-- Đổi scheduler của root deck sau khi tạo chưa có bề mặt UI hoàn chỉnh.
-- Import/export, media, authentication, sync và backend nằm ngoài MVP hiện tại.
+- UC-01 — thư viện bộ thẻ khởi đầu chưa có giao diện.
+- Đổi trực tiếp thuật toán xếp lịch của bộ thẻ gốc đã khóa mà không đi qua
+  Đặt lại tiến độ học không phải luồng được hỗ trợ.
+- Nhập/xuất, nội dung đa phương tiện, xác thực, đồng bộ và máy chủ nằm ngoài MVP hiện tại.
 
-## 3. Quy ước scenario
+## 3. Quy ước kịch bản
 
 | Trường | Ý nghĩa |
 |---|---|
-| ID | Ổn định theo nhóm: `IT-NAV`, `IT-DECK`, `IT-TREE`, `IT-DISC`, `IT-CARD`, `IT-ORG` |
-| Ưu tiên `P0` | Luồng chính hoặc bất biến nghiệp vụ; hỏng thì không thể demo/release slice Deck/Card |
+| ID | Ổn định theo năng lực: các nhóm cũ và `IT-STUDY`, `IT-LEARN`, `IT-REVIEW`, `IT-MODE`, `IT-CONT` |
+| Ưu tiên `P0` | Luồng chính hoặc bất biến nghiệp vụ; hỏng thì không thể tin cậy hoặc phát hành năng lực tương ứng, đặc biệt chức năng học |
 | Ưu tiên `P1` | Chức năng quan trọng nhưng có đường vòng hoặc không chặn luồng chính |
 | Ưu tiên `P2` | Trạng thái phụ, usability hoặc dữ liệu lớn |
-| Tiền điều kiện | Trạng thái có trước khi người dùng bắt đầu scenario |
-| Các bước | Chỉ thao tác qua bề mặt nhìn thấy và kết quả quan sát được |
-| Hậu điều kiện | Dữ liệu còn lại để quyết định có thể nối scenario hay phải reset app data |
+| Tiền điều kiện | Trạng thái có trước khi người dùng bắt đầu kịch bản |
+| Các bước | Thao tác nghiệp vụ qua bề mặt nhìn thấy; tiêu chí chỉ kiểm được ở dữ liệu lưu trữ phải dùng công cụ kiểm tra chỉ đọc theo hướng dẫn thực thi |
+| Hậu điều kiện | Dữ liệu còn lại để quyết định có thể nối kịch bản hay phải đặt lại dữ liệu ứng dụng |
 
-`Readiness`, execution profile, setup và cleanup không lặp lại trong từng
-scenario. Chúng nằm trong một dòng duy nhất theo ID tại `scenario-catalog.md`.
-Giá trị cleanup chính là hợp đồng hậu điều kiện để scenario kế tiếp không vô
+Mức sẵn sàng (`Readiness`), hồ sơ thực thi, chuẩn bị và dọn dẹp không lặp lại trong từng
+kịch bản. Chúng nằm trong một dòng duy nhất theo ID tại `scenario-catalog.md`.
+Giá trị dọn dẹp chính là hợp đồng hậu điều kiện để kịch bản kế tiếp không vô
 tình nhận dữ liệu sót lại.
 
-Mỗi scenario SHOULD chạy độc lập. Nếu chạy nối chuỗi, tester MUST dùng đúng hậu
-điều kiện của scenario trước làm tiền điều kiện cho scenario sau.
+Mỗi kịch bản SHOULD chạy độc lập. Nếu chạy nối chuỗi, người kiểm thử MUST dùng đúng hậu
+điều kiện của kịch bản trước làm tiền điều kiện cho kịch bản sau.
+
+### 3.1. Thuật ngữ dành cho người rà soát và AI agent
+
+Phần diễn giải MUST dùng tiếng Việt có dấu. Chỉ giữ tiếng Anh trong dấu backtick
+khi đó là enum, tên trường dữ liệu, mã chuẩn bị hoặc nhãn phải đối chiếu nguyên văn.
+
+| Cách gọi trong tài liệu | Giá trị canonical khi cần đối chiếu |
+|---|---|
+| phiên học thẻ mới | `learning` |
+| phiên ôn tập | `reviewing` |
+| giai đoạn học | `stage` |
+| chế độ học | `mode` |
+| hàng đợi | `queue` |
+| tập thẻ đã chốt khi mở phiên | `snapshot` |
+| thuật toán xếp lịch | `scheduler` |
+| bộ dữ liệu dựng sẵn | `fixture` |
+| tiêu chí kết luận | `oracle` |
+| thẻ mới / thẻ đến hạn | nhãn `New` / `Due` nếu giao diện dùng đúng hai nhãn này |
+
+AI agent MUST hiểu cột bên trái là ngôn ngữ rà soát; cột bên phải chỉ dùng để
+đối chiếu tài liệu kỹ thuật hoặc giao diện, không phải một khái niệm thứ hai.
 
 ## 4. Môi trường và dữ liệu chuẩn
 
@@ -99,54 +111,61 @@ Mỗi scenario SHOULD chạy độc lập. Nếu chạy nối chuỗi, tester MU
 
 - Target chính: Android, locale tiếng Việt, kích thước màn hình điện thoại.
 - Web MAY dùng làm kênh E2E development nhưng không thay thế vòng xác nhận Android.
-- Với scenario offline, bật chế độ máy bay **sau khi app và test data đã sẵn sàng**.
-- “Khởi động lại app” nghĩa là đóng hẳn process rồi mở lại, không chỉ chuyển tab.
+- Với kịch bản ngoại tuyến, bật chế độ máy bay **sau khi ứng dụng và dữ liệu kiểm thử đã sẵn sàng**.
+- “Khởi động lại ứng dụng” nghĩa là đóng hẳn tiến trình rồi mở lại, không chỉ chuyển tab.
 
 ### 4.2. Dữ liệu tạo qua UI
 
 | Mã | Dữ liệu |
 |---|---|
-| `D-EB` | Root deck `Giao tiếp hằng ngày`, scheduler Eight Box |
-| `D-SM2` | Root deck `IELTS 2026`, scheduler SM-2 |
-| `D-BRANCH` | Deck con `Vocabulary`, loại `deck` sau khi có child |
-| `D-LEAF` | Deck con `Academic words`, loại `card` sau khi tạo card đầu tiên |
-| `C-001` | Front `abandon`, back `từ bỏ`, example `He abandoned the plan.`, pronunciation `/əˈbændən/` |
-| `C-002` | Front `benevolent`, back `nhân từ`, hint `starts with bene`, tag `IELTS` |
-| `C-003` | Front `concise`, back `ngắn gọn`, tag `Writing`, flagged |
+| `D-EB` | Bộ thẻ gốc `Giao tiếp hằng ngày`, thuật toán Eight Box |
+| `D-SM2` | Bộ thẻ gốc `IELTS 2026`, thuật toán SM-2 |
+| `D-BRANCH` | Bộ thẻ con `Vocabulary`, loại `deck` sau khi có bộ thẻ con |
+| `D-LEAF` | Bộ thẻ con `Academic words`, loại `card` sau khi tạo thẻ đầu tiên |
+| `C-001` | Mặt trước `abandon`, mặt sau `từ bỏ`, câu ví dụ `He abandoned the plan.`, phát âm `/əˈbændən/` |
+| `C-002` | Mặt trước `benevolent`, mặt sau `nhân từ`, gợi ý `starts with bene`, nhãn `IELTS` |
+| `C-003` | Mặt trước `concise`, mặt sau `ngắn gọn`, nhãn `Writing`, đã gắn cờ |
 
 ### 4.3. Dữ liệu seed dành riêng cho trạng thái học
 
-Các mã `S-PROGRESS`, `S-DUE` và `S-LARGE` có contract xác định tại
-[`00-agent-execution-guide.md`](00-agent-execution-guide.md), và loader hiện
-thực chúng nằm ở `integration_test/support/it_fixtures.dart` (v1).
+Các mã `S-PROGRESS`, `S-DUE`, `S-LARGE` và `S-STUDY-*` có hợp đồng xác định tại
+[`00-agent-execution-guide.md`](00-agent-execution-guide.md). Loader v1 hiện có
+chỉ còn hợp lệ cho `S-LARGE`; `S-PROGRESS`/`S-DUE` v1 đã bị thay thế vì vi phạm
+BR-142/BR-144. Bộ nạp và công cụ kiểm tra Study v2 chưa có nên catalog giữ các kịch bản tương
+ứng ở `FIXTURE-BLOCKED`.
 
-Agent MUST NOT tự tạo SQL hoặc sửa database để vượt blocker. Seed MUST dùng nội
+Agent MUST NOT tự tạo SQL hoặc sửa cơ sở dữ liệu để vượt trở ngại. Dữ liệu dựng sẵn MUST dùng nội
 dung giả, không dùng dữ liệu cá nhân thật.
 
 ## 5. Traceability nghiệp vụ
 
 | Nguồn | Scenario chính |
 |---|---|
-| UC-02 — tạo root deck | `IT-DECK-001`, `IT-DECK-002`, `IT-DECK-003`, `IT-DECK-004` |
-| UC-03 — sửa/xoá deck | `IT-DECK-005`, `IT-DECK-006`, `IT-DECK-007`, `IT-DECK-008`, `IT-TREE-007`, `IT-TREE-008`, `IT-TREE-014` |
-| UC-04 — quản lý card | `IT-CARD-001` tới `IT-CARD-011`; `IT-ORG-001` tới `IT-ORG-012` |
-| UC-06 — danh sách deck và tiến độ | `IT-DISC-001` tới `IT-DISC-008`; `IT-ORG-011` |
+| UC-02 — tạo bộ thẻ gốc | `IT-DECK-001`, `IT-DECK-002`, `IT-DECK-003`, `IT-DECK-004` |
+| UC-03 — sửa/xoá bộ thẻ | `IT-DECK-005`, `IT-DECK-006`, `IT-DECK-007`, `IT-DECK-008`, `IT-TREE-007`, `IT-TREE-008`, `IT-TREE-014` |
+| UC-04 — quản lý thẻ | `IT-CARD-001` tới `IT-CARD-011`; `IT-ORG-001` tới `IT-ORG-012` |
+| UC-06 — danh sách bộ thẻ và tiến độ | `IT-DISC-001` tới `IT-DISC-008`; `IT-ORG-011` |
 | UC-08 — tạo phần tử con, xác lập loại | `IT-TREE-001` tới `IT-TREE-008`; `IT-TREE-013` |
-| UC-09 — di chuyển deck | `IT-TREE-009` tới `IT-TREE-013` |
-| M4.12 — demo Deck/Card E2E | `IT-NAV-006`, `IT-NAV-007`, các scenario `UI-FIXTURE` và `UI-LARGE` |
+| UC-09 — di chuyển bộ thẻ | `IT-TREE-009` tới `IT-TREE-013` |
+| UC-05 — điểm vào và tùy chọn | `IT-STUDY-001` tới `IT-STUDY-013` |
+| UC-05 — học mới | `IT-LEARN-001` tới `IT-LEARN-012` |
+| UC-05 — ôn tập và thuật toán xếp lịch | `IT-REVIEW-001` tới `IT-REVIEW-010` |
+| UC-05 — StudyMode | `IT-MODE-001` tới `IT-MODE-015` |
+| UC-05 — tiếp tục và lỗi | `IT-CONT-001` tới `IT-CONT-013` |
+| M4.12 — trình diễn E2E bộ thẻ/thẻ | `IT-NAV-006`, `IT-NAV-007`, các kịch bản `UI-FIXTURE` và `UI-LARGE` |
 
 Bảng trên giúp người đọc định hướng. Traceability machine-readable theo từng ID
-nằm tại [`scenario-catalog.md`](scenario-catalog.md) và là nguồn canonical.
+nằm tại [`scenario-catalog.md`](scenario-catalog.md) và là nguồn chuẩn.
 
 ## 6. Definition of ready cho AI agent
 
-Một scenario chỉ sẵn sàng để agent chạy khi:
+Một kịch bản chỉ sẵn sàng để agent chạy khi:
 
-- ID tồn tại đúng một lần trong scenario file và đúng một lần trong catalog.
+- ID tồn tại đúng một lần trong tệp kịch bản và đúng một lần trong danh mục.
 - Catalog ghi `READY`.
-- Setup ID có recipe hoặc artifact được triển khai.
-- Agent điều khiển được platform/profile yêu cầu.
-- Expected result có thể kết luận theo quy tắc assertion trong execution guide.
+- Mã chuẩn bị có công thức hoặc hiện vật đã được triển khai.
+- Agent điều khiển được nền tảng và hồ sơ thực thi yêu cầu.
+- Kết quả mong đợi có thể kết luận theo quy tắc kiểm tra trong hướng dẫn thực thi.
 
 Thiếu một điều kiện trên thì agent MUST báo `BLOCKED` hoặc `DOC-DRIFT`; không tự
 điền phần còn thiếu bằng phỏng đoán.
