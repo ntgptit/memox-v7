@@ -91,7 +91,6 @@ Widget? studyModeView({
       child: StudyCardFaceSectionWidget(
         turn: turn,
         viewedCard: state.viewedCard,
-        onBack: state.canLookBack ? onLookBack : null,
         // `browse` produces no action at all (BR-111), so it gets no buttons
         // and one way forward.
         actions: const <StudyAction>[],

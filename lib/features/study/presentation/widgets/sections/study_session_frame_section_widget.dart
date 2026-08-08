@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_icon_button.dart';
@@ -34,7 +35,7 @@ class StudySessionFrameSectionWidget extends StatelessWidget {
   const StudySessionFrameSectionWidget({
     required this.mode,
     required this.kind,
-    required this.deckName,
+    required this.cardCount,
     required this.progress,
     required this.onClose,
     required this.child,
@@ -45,7 +46,11 @@ class StudySessionFrameSectionWidget extends StatelessWidget {
 
   final StudyMode mode;
   final StudySessionKind kind;
-  final String deckName;
+
+  /// How many cards the session holds — the figure the context line shows and
+  /// the one the bar is measured against. Fixed for the session's life
+  /// (BR-102).
+  final int cardCount;
 
   /// Read from the turn, never counted here (§7.2). A screen keeping its own
   /// tally is a second copy of the queue, and the copy is the one the user sees
@@ -91,7 +96,7 @@ class StudySessionFrameSectionWidget extends StatelessWidget {
       _ContextLine(
         mode: mode,
         kind: kind,
-        deckName: deckName,
+        cardCount: cardCount,
         progress: progress,
       ),
       const SizedBox(height: AppSpacing.lg),
@@ -102,26 +107,38 @@ class StudySessionFrameSectionWidget extends StatelessWidget {
   );
 }
 
-/// Which deck, which kind of session, and whatever the mode adds (§7.2, §7.6).
+/// How many cards this session holds, and which set they are (§7.2, BR-142).
+///
+/// **It used to say `<deck> · Learning`, and that is what it was changed from.**
+/// The deck was chosen two screens ago and the word "Learning" repeats the mode
+/// chip beside it — between them they told a learner nothing to act on. The size
+/// of the session does: it is the number the progress bar is measured against.
+///
+/// **One set, never two.** The design's `12 NEW · 11 REVIEW` cannot be built:
+/// BR-142 gives a session exactly one of the two card sets, so a line showing
+/// both would be describing two sessions.
+///
+/// Uppercase here and not on the old line, because nothing in it is content the
+/// user typed — uppercasing a deck name is editing what somebody wrote.
 class _ContextLine extends StatelessWidget {
   const _ContextLine({
     required this.mode,
     required this.kind,
-    required this.deckName,
+    required this.cardCount,
     required this.progress,
   });
 
   final StudyMode mode;
   final StudySessionKind kind;
-  final String deckName;
+  final int cardCount;
   final StudyStageProgressModel progress;
 
   @override
   Widget build(BuildContext context) {
-    final base = context.l10n.studyFrameContext(
-      deckName,
-      context.studySessionKind(kind),
-    );
+    final l10n = context.l10n;
+    final base = kind == StudySessionKind.learning
+        ? l10n.studyFrameSetLearning(cardCount)
+        : l10n.studyFrameSetReviewing(cardCount);
     final extra = context.studyModeContext(
       mode,
       round: progress.round,
@@ -130,8 +147,9 @@ class _ContextLine extends StatelessWidget {
 
     return Text(
       extra == null ? base : '$base · $extra',
-      style: context.texts.labelMedium?.copyWith(
+      style: context.texts.labelSmall?.copyWith(
         color: context.colors.onSurfaceVariant,
+        letterSpacing: AppTypography.sectionLabelTracking,
       ),
       textAlign: TextAlign.center,
       maxLines: 2,
@@ -159,18 +177,32 @@ class _TopBar extends StatelessWidget {
 
     return Row(
       children: <Widget>[
+        // **Compact, and the progress track is the reason.** At the full 48 the
+        // ✕, the pill and the figure left the track about half the row, which
+        // reads as an indicator rather than a measure. It gives up width only —
+        // the button keeps its 48 of height, so a thumb still has the whole bar
+        // to land in vertically.
         MxIconButton(
           icon: Icons.close,
           semanticLabel: l10n.studyFrameClose,
           onPressed: onClose,
+          isCompact: true,
         ),
+        const SizedBox(width: AppSpacing.xs),
+        // **`flex: 0`, and the zero is the whole point.** These two size to
+        // their content, and a bare `Flexible` defaults to `flex: 1` — so each
+        // was *allocated* a third of the free space, used what it needed, and
+        // the remainder collected as dead space at the end of the row. Measured
+        // at 393 wide: a 108px track with 118px of nothing after the counter.
+        // At zero they are laid out first and `Expanded` below takes everything
+        // that is left, which is what makes the track read as a measure rather
+        // than an indicator.
+        //
+        // They are still `Flexible` rather than bare children: at 320px with
+        // `textScaler` 2.0 the pill and the figure together overran the row by
+        // 19px, and loose fit is what lets them give that back.
+        Flexible(flex: 0, child: _ModePill(mode: mode)),
         const SizedBox(width: AppSpacing.sm),
-        // **Every child of this row flexes, and that is not tidiness.** At
-        // 320px with `textScaler` 2.0 the pill and the figure together overran
-        // the row by 19px — the ✕ is fixed, so a bar that only let the *track*
-        // shrink had nothing left to give once the track hit zero.
-        Flexible(child: _ModePill(mode: mode)),
-        const SizedBox(width: AppSpacing.md),
         // Bare track: the bar's own header would put the same figure above it,
         // and the figure already sits at the end of this row. It announces
         // nothing either — the trailing figure carries the one announcement, so
@@ -181,8 +213,9 @@ class _TopBar extends StatelessWidget {
             size: MxProgressBarSize.sm,
           ),
         ),
-        const SizedBox(width: AppSpacing.md),
+        const SizedBox(width: AppSpacing.sm),
         Flexible(
+          flex: 0,
           child: _TrailingFigure(progress: progress, timeLeft: timeLeft),
         ),
       ],
@@ -239,7 +272,7 @@ class _Figure extends StatelessWidget {
     maxLines: 1,
     softWrap: false,
     overflow: TextOverflow.ellipsis,
-    style: context.texts.labelLarge?.copyWith(
+    style: context.texts.labelMedium?.copyWith(
       color: context.colors.onSurface,
       fontWeight: FontWeight.w600,
       // Tabular figures so a counter ticking 9 -> 10 does not shift the row.
@@ -267,7 +300,7 @@ class _ModePill extends StatelessWidget {
     ),
     child: Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
+        horizontal: AppSpacing.sm,
         vertical: AppSpacing.xs,
       ),
       child: Text(

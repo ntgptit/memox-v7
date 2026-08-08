@@ -8,6 +8,7 @@ import 'package:memox/features/study/domain/models/study_queue_item_status_model
 import 'package:memox/features/study/domain/models/study_turn_model.dart';
 import 'package:memox/features/study/presentation/widgets/sections/study_card_face_section_widget.dart';
 
+import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
 
 import 'support/study_widget_harness.dart';
@@ -89,47 +90,30 @@ void main() {
 
       expect(find.text('front-c1'), findsOneWidget);
       expect(find.text('back-c1'), findsOneWidget);
-      // No flip, and nothing to grade: `browse` writes no history row at all.
+      // No flip, nothing to grade, and no control either: `browse` writes no
+      // history row at all, and moving on is the swipe (BR-155).
       expect(find.text('Show answer'), findsNothing);
       expect(find.text('Remembered'), findsNothing);
-      expect(find.text('Next'), findsOneWidget);
+      expect(find.text('Next'), findsNothing);
     });
 
-    testWidgets('the trail has a control, not only a gesture (BR-155)', (
+    testWidgets('browse draws no control at all (BR-111, BR-155)', (
       tester,
     ) async {
-      // A 70px horizontal drag is unavailable to a screen reader, so a
-      // swipe-only trail is a feature that exists and cannot be reached. The
-      // control is **absent** at the front of a round rather than disabled: a
-      // disabled button advertises somewhere there is no way to go.
-      var steps = 0;
+      // Moving between cards is the swipe, so a Next button beside it was a
+      // second way to do the one thing the gesture already does — while taking
+      // a band of screen from the card, which is the whole content of this
+      // mode. The screen-reader path is a pair of custom semantics actions on
+      // the swipe, asserted where the swipe is.
       await pump(
         tester,
         actions: const <StudyAction>[],
         shouldShowBackImmediately: true,
       );
+
+      expect(find.text('Next'), findsNothing);
       expect(find.bySemanticsLabel('Previous card'), findsNothing);
-
-      await tester.pumpWidget(
-        wrapForTest(
-          StudyCardFaceSectionWidget(
-            turn: turnOf('c1'),
-            actions: const <StudyAction>[],
-            onAction: (_) {},
-            onContinue: () {},
-            onBack: () => steps += 1,
-            shouldShowBackImmediately: true,
-          ),
-          isScrollable: false,
-        ),
-      );
-
-      await tester.tap(find.bySemanticsLabel('Previous card'));
-      await tester.pump();
-
-      expect(steps, 1);
-      // And it is a second way through, not a replacement: forward stays.
-      expect(find.text('Next'), findsOneWidget);
+      expect(find.byType(MxActionButton), findsNothing);
     });
 
     testWidgets('an earlier card is drawn in place of the turn-s (BR-155)', (

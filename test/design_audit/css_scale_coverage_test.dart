@@ -114,11 +114,13 @@ const Set<String> _asserted = <String>{
   '--touch-target-min',
   '--icon-sm',
   '--icon-md',
+  '--icon-md-compact',
   '--icon-lg',
   // radius.css
   '--radius-sm',
   '--radius-md',
   '--radius-lg',
+  '--radius-xl',
   '--radius-pill',
   // layout.css
   '--breakpoint-compact',

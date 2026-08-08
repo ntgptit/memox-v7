@@ -44,6 +44,10 @@ void main() {
     test('icon sizes', () {
       expect(CssTokens.number('spacing.css', '--icon-sm'), AppIconSize.sm);
       expect(CssTokens.number('spacing.css', '--icon-md'), AppIconSize.md);
+      expect(
+        CssTokens.number('spacing.css', '--icon-md-compact'),
+        AppIconSize.mdCompact,
+      );
       expect(CssTokens.number('spacing.css', '--icon-lg'), AppIconSize.lg);
     });
 
@@ -51,6 +55,7 @@ void main() {
       expect(CssTokens.number('radius.css', '--radius-sm'), AppRadius.sm);
       expect(CssTokens.number('radius.css', '--radius-md'), AppRadius.md);
       expect(CssTokens.number('radius.css', '--radius-lg'), AppRadius.lg);
+      expect(CssTokens.number('radius.css', '--radius-xl'), AppRadius.xl);
       expect(CssTokens.number('radius.css', '--radius-pill'), AppRadius.pill);
     });
 

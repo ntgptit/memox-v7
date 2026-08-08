@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/time/clock_provider.dart';
@@ -302,6 +303,94 @@ void main() {
       await drag(tester, -(kStudySwipeThreshold + 40));
 
       expect(deck.events, isEmpty);
+    });
+  });
+
+  group('the screen-reader path', () {
+    /// The custom actions a `Semantics` node offers: label to action id.
+    Map<String, int> actionsOf(WidgetTester tester) {
+      final node = tester.getSemantics(find.byType(StudySwipeDeckWidget));
+      final ids = node.getSemanticsData().customSemanticsActionIds ?? <int>[];
+
+      return <String, int>{
+        for (final id in ids)
+          CustomSemanticsAction.getAction(id)!.label ?? '?': id,
+      };
+    }
+
+    /// Fires one, the way a screen reader does.
+    void invoke(WidgetTester tester, int id) {
+      final node = tester.getSemantics(find.byType(StudySwipeDeckWidget));
+      tester.binding.performSemanticsAction(
+        SemanticsActionEvent(
+          type: SemanticsAction.customAction,
+          nodeId: node.id,
+          viewId: tester.view.viewId,
+          arguments: id,
+        ),
+      );
+    }
+
+    Future<Map<String, int>> pumpAndRead(
+      WidgetTester tester, {
+      required bool canGoBack,
+      required List<String> events,
+    }) async {
+      await tester.pumpWidget(
+        wrapForTest(
+          StudySwipeDeckWidget(
+            cardKey: 'card-1',
+            canGoBack: canGoBack,
+            onForward: () => events.add('forward'),
+            onBack: () => events.add('back'),
+            child: const SizedBox(height: 300, child: Text('card')),
+          ),
+        ),
+      );
+
+      return actionsOf(tester);
+    }
+
+    testWidgets('both moves are offered when there is a trail', (tester) async {
+      // **Removing the buttons made this the only way through** for anyone who
+      // cannot make a 70dp horizontal drag. Nothing else in the suite would
+      // notice it disappearing: the screen renders identically without it.
+      final handle = tester.ensureSemantics();
+      final events = <String>[];
+
+      final actions = await pumpAndRead(
+        tester,
+        canGoBack: true,
+        events: events,
+      );
+
+      expect(actions.keys.toSet(), <String>{'Next', 'Previous card'});
+
+      // Labelled *and* wired. A label pointing at the wrong callback is the
+      // failure a label-only assertion cannot see.
+      invoke(tester, actions['Previous card']!);
+      invoke(tester, actions['Next']!);
+      expect(events, <String>['back', 'forward']);
+
+      handle.dispose();
+    });
+
+    testWidgets('back is not offered when there is nothing behind', (
+      tester,
+    ) async {
+      // Same reason a disabled button would have been wrong: an action that
+      // does nothing is worse than an action that is not there.
+      final handle = tester.ensureSemantics();
+      final events = <String>[];
+
+      final actions = await pumpAndRead(
+        tester,
+        canGoBack: false,
+        events: events,
+      );
+
+      expect(actions.keys.toList(), <String>['Next']);
+      handle.dispose();
     });
   });
 }

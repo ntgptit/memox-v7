@@ -188,7 +188,13 @@ class _StudyEntryScreenState extends ConsumerState<StudyEntryScreen> {
   }) async {
     _refresh();
 
-    await Navigator.of(context).push(
+    // **The root navigator, so the session is the whole screen.** Pushed on the
+    // branch navigator it sat inside the shell and kept the bottom bar, which
+    // offers two ways out of a session that BR-82 says has exactly one: the ✕,
+    // which ends it as `abandoned`/`user_exit`. A tab switch left the session
+    // open and the app then offered to resume something the user thought they
+    // had walked away from.
+    await Navigator.of(context, rootNavigator: true).push(
       MaterialPageRoute<void>(
         builder: (_) => StudySessionScreen(
           deckId: deckId,

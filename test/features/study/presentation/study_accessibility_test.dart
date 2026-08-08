@@ -64,7 +64,7 @@ void main() {
     child: StudySessionFrameSectionWidget(
       mode: mode,
       kind: StudySessionKind.learning,
-      deckName: 'Korean',
+      cardCount: 12,
       progress: const StudyStageProgressModel(
         round: 1,
         done: 2,
@@ -166,7 +166,7 @@ void main() {
         StudySessionFrameSectionWidget(
           mode: StudyMode.recall,
           kind: StudySessionKind.learning,
-          deckName: 'Korean',
+          cardCount: 12,
           progress: const StudyStageProgressModel(
             round: 1,
             done: 2,

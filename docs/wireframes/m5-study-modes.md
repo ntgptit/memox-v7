@@ -45,6 +45,11 @@ tức mỗi màn còn một state thứ hai (đã lật / đã chấm) **chưa c
 
 ## 2. Khung dùng chung của mọi màn học
 
+> **Cập nhật sau spec layout của chủ dự án.** Ba điểm của khung đã đổi: dòng
+> context nói **cỡ phiên** thay vì tên deck, nút ✕ hẹp lại còn 36 để thanh tiến
+> trình có chỗ, và phiên học mở **ngoài** shell nên không còn thanh nav dưới.
+> Chi tiết ở §8.3.
+
 Cả năm màn chia đúng một khung, và đây là thứ nên dựng trước:
 
 ```
@@ -82,7 +87,11 @@ mảnh:
   lớn nhất màn hình.
 - nửa dưới: nhãn `MEANING`; nghĩa căn giữa, cỡ vừa.
 
-Không có nút hành động nào — khớp BR-111.
+Không có nút nào, kể cả nút đi tiếp — khớp BR-111 và BR-155. Chuyển thẻ là **vuốt**;
+một nút Next cạnh cử chỉ là cách thứ hai để làm đúng một việc mà cử chỉ đã làm,
+trong khi ăn mất một dải màn hình vốn thuộc về thẻ — thứ duy nhất mode này có.
+Đường cho screen reader là hai *custom semantics action* gắn trên chính vùng
+vuốt, không vẽ gì ra màn.
 
 Một chỗ ảnh không được làm theo: pill ghi `REVIEW`, trong khi mode tên `browse`
 (§7.1). Vuốt để lùi thì **có** — xem lại, không ghi gì (BR-155, §7.7).
@@ -327,3 +336,34 @@ constant added quietly, off-scale, for one screen"*. Nếu sau này muốn khớ
 cùng lúc, không phải một sửa đổi của màn Study.
 
 Phần vuốt thẻ của spec nằm ở §7.7, vì nó lật lại một quyết định cũ.
+
+### 8.3 Khung phiên học, sau phản hồi trên ảnh chụp
+
+Bốn điểm chủ dự án chỉ ra trên ảnh chạy thật, và cái gì đã đổi:
+
+**Dòng context `Living room · Learning` không nói gì.** Deck đã được chọn từ hai
+màn trước, còn chữ *Learning* lặp lại đúng cái pill bên cạnh — cộng lại chúng
+không cho người học điều gì để hành động. Nay dòng ấy nói **cỡ của phiên**:
+`12 THẺ MỚI` hoặc `12 THẺ ĐẾN HẠN`. Đó chính là con số thanh tiến trình đang đo.
+
+Vẫn **một tập, không bao giờ hai**: `12 NEW · 11 REVIEW` của design không dựng
+được, vì BR-142 cho một phiên đúng một trong hai tập — in cả hai là mô tả hai
+phiên. Viết HOA ở đây an toàn, khác với tên deck: không có gì trong dòng này là
+nội dung người dùng gõ vào.
+
+**Thanh tiến trình quá ngắn — và nguyên nhân không phải cỡ icon.** Đo ở khung 393
+rộng: thanh chỉ **108px**, và có **118px chết** sau bộ đếm. `Flexible` mặc định
+`flex: 1`, nên pill và bộ đếm mỗi cái được *cấp* một phần ba khoảng trống, dùng
+đúng phần chúng cần, và phần thừa dồn xuống cuối hàng. Đặt `flex: 0` cho cả hai
+thì `Expanded` của thanh lấy hết phần còn lại: **226px**, hàng không còn chỗ chết.
+Có test đo, vì không phép kiểm nào về chữ nhìn thấy được lỗi này.
+
+Nút ✕ cũng hẹp lại còn **36** theo spec, và chỉ nhường **chiều ngang** — nó giữ
+nguyên 48 chiều cao, nên ngón tay vẫn có cả thanh để chạm.
+
+**Nút Next đã bỏ** — xem §3 và BR-155.
+
+**Phiên học mở ngoài shell.** Trước đây nó push trên navigator của nhánh nên giữ
+thanh nav dưới, tức là có hai đường ra khỏi một phiên mà BR-82 nói chỉ có một:
+nút ✕, đóng phiên thành `abandoned`/`user_exit`. Đổi tab để nguyên phiên đang mở,
+và lần sau app mời resume đúng cái người dùng tưởng đã bỏ.

@@ -29,6 +29,11 @@
 
 /* --- MxIconButton ----------------------------------------------------- */
 .mx-iconbtn{display:inline-flex;align-items:center;justify-content:center;width:var(--touch-target-min);height:var(--touch-target-min);border-radius:var(--radius-md);border:0;background:transparent;color:var(--color-text-secondary);cursor:pointer;transition:background-color var(--duration-fast) var(--ease-standard)}
+/* Width only. The button spends 36 of a row and keeps its full 48 of height,
+   so a thumb still has the whole bar to land in. Matches
+   MxIconButton(isCompact: true). */
+.mx-iconbtn--compact{width:36px}
+.mx-iconbtn--compact svg{width:var(--icon-md-compact);height:var(--icon-md-compact)}
 .mx-iconbtn:hover{background:color-mix(in srgb,var(--color-text-secondary) 8%,transparent)}
 .mx-iconbtn:active{background:color-mix(in srgb,var(--color-primary) 12%,transparent)}
 .mx-iconbtn:focus-visible{outline:none;box-shadow:inset 0 0 0 var(--border-focus) var(--color-primary)}
@@ -85,6 +90,9 @@
    card's surface has already curved inward and the colour runs past the corner.
    Only the card knows the real geometry. */
 .mx-card{box-sizing:border-box;background:var(--color-surface);border:var(--border-hairline) solid var(--color-border-subtle);border-radius:var(--radius-lg);box-shadow:var(--shadow-card);text-align:left;display:block;width:100%;overflow:hidden}
+/* The study card, and only it: a surface filling the screen reads tighter at
+   the same corner a list row wears. Matches MxCard(radius: AppRadius.xl). */
+.mx-card--focal{border-radius:var(--radius-xl)}
 .mx-card--none,.mx-card--flat{box-shadow:var(--shadow-none)}
 .mx-card--raised{box-shadow:var(--shadow-raised)}
 .mx-card--overlay{box-shadow:var(--shadow-overlay)}

@@ -1008,3 +1008,50 @@ thẻ đã chấm lên đó là mời chấm lại (BR-126) — có test cho vi�
   nhiệm, nên chúng gộp lại; allowlist của guard được nới đúng một tên, kèm lý do
   vì sao offset không thể ở trong một notifier riêng (nó phải bị xoá khi lượt
   đổi, nên tách ra là đặt một giá trị dưới hai chủ).
+
+### Khung phiên học theo phản hồi ảnh chụp, sau BR-155
+
+- **Status:** **done** — analyze sạch, 1660 unit + 30 visual audit + 115 golden
+  xanh, cả bốn guard sạch
+- **Nguồn:** chủ dự án chạy app thật, chụp màn hình và nêu năm điểm.
+
+| Điểm | Đã làm |
+|---|---|
+| Nhãn *"Swipe left for next, right to go back"* không có | `studyHintBrowse` nay nói đúng câu đó; mô tả ARB cũ vẫn ghi *"there is no swipe back"* — đã sửa theo BR-155 |
+| `Living room · Learning` không có ý nghĩa | dòng context nay nói **cỡ phiên**: `12 THẺ MỚI` / `12 THẺ ĐẾN HẠN` |
+| Nút Next vẫn còn dù đã có vuốt | bỏ hẳn; đường cho screen reader là hai custom semantics action trên vùng vuốt |
+| Thanh tiến trình quá ngắn | 108px → **226px** ở khung 393 |
+| Vào phiên vẫn bọc nav bottom | phiên push trên **root navigator** |
+
+**Thanh tiến trình: nguyên nhân không phải cỡ icon.** Đo mới thấy: `Flexible`
+mặc định `flex: 1`, nên pill và bộ đếm mỗi cái được *cấp* một phần ba khoảng
+trống, dùng đúng phần cần, và phần thừa dồn thành **118px chết** ở cuối hàng.
+`flex: 0` cho cả hai thì `Expanded` của thanh lấy hết. Có test đo, vì không phép
+kiểm nào về chữ nhìn thấy được lỗi này.
+
+**Nút ✕ hẹp còn 36 theo spec, nhường chiều ngang thôi** — giữ nguyên 48 chiều
+cao. `MxIconButton` có `isCompact`, `MxCard` có `radius`; `AppRadius.xl = 20` và
+`AppIconSize.mdCompact = 20` thêm vào **cả hai kit**, kèm modifier CSS và test
+parity. Đây là ba thứ đã bị em từ chối ở §8.2 của wireframe; chủ dự án yêu cầu
+lại nên đã dựng.
+
+### Bug `recall` vẽ "lượt đã chốt" đè lên câu hỏi đang mở
+
+Suite IT chạy trên emulator sau BR-155: **64/66**, hai kịch bản đỏ, cả hai ở
+`it_study_test.dart`. Chẩn đoán ban đầu của em là hồi quy do vuốt thẻ — **sai**.
+
+Log nói rõ: robot tìm nút *Show answer* ở stage `recall` mà màn đang hiện *"This
+turn is settled. The next round starts a fresh twenty seconds."*
+
+`didUpdateWidget` của ba widget mode chỉ so `cardId`. Một lượt `recall` **hết
+giờ** được ghi danh vào round sau (BR-116), và round sau phục vụ **cùng
+`cardId`** — nên guard đọc lượt mới thành lượt cũ, giữ nguyên `_outcome`, và vẽ
+màn "đã chốt" lên một câu hỏi đang mở, không còn nút nào để đi tiếp.
+
+Nó **không** do việc gì mới: chỉ hiện ra khi có lượt thật sự hết giờ, tức là trên
+máy chậm. Suite trước đó xanh vì chưa lượt nào timeout.
+
+`fill` và `self_assess` cùng lỗi ấy — một ô nhập còn giữ lần gõ trước, một thẻ
+còn lật sẵn. Khái niệm "cùng một lượt" nay ở `StudyTurnModel.isSameTurnAs`, so cả
+`cardId` **và** `round`, để cái thứ tư không lặp lại. Có test, và đã **chứng minh
+test bắt được** bằng cách đổi tạm về so id thôi rồi xem nó đỏ.
