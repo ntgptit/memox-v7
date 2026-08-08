@@ -74,6 +74,14 @@ final class StudyDao {
     required int round,
   }) => _db.completedCardsInRound(sessionId, mode, round).get();
 
+  /// Every card of a round, in the order the round serves them — what `match`
+  /// deals its boards from (BR-156).
+  Future<List<String>> cardsInRound({
+    required String sessionId,
+    required String mode,
+    required int round,
+  }) => _db.cardsInRound(sessionId, mode, round).get();
+
   /// The lowest pending round of a stage — the one being served.
   ///
   /// Null when nothing is pending. Written as a raw statement because

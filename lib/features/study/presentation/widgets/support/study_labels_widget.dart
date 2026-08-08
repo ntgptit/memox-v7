@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../domain/models/match_mode.dart';
 import '../../../domain/models/study_action_model.dart';
 import '../../../domain/models/study_mode.dart';
 import '../../../domain/models/study_session_kind_model.dart';
+import '../../../domain/models/study_turn_model.dart';
 
 /// Copy for the Study vocabulary, in one place.
 ///
@@ -78,13 +80,37 @@ extension StudyLabels on BuildContext {
   /// A map, and only `match` has an entry — nothing else has a fact the top bar
   /// does not already carry. Null means the line is deck and kind alone, which
   /// is the honest answer rather than a repeated mode name.
+  ///
+  /// **`match` names its board, and the pairs it counts are that board's**
+  /// (BR-156). The top bar already measures the whole round, so repeating the
+  /// round's remainder here would say the same thing twice and leave the one
+  /// fact the user cannot see anywhere — that finishing these five is not
+  /// finishing the round — unsaid.
   String? studyModeContext(
     StudyMode mode, {
-    required int round,
-    required int remaining,
-  }) => <StudyMode, String>{
-    StudyMode.match: l10n.studyMatchContext(round, remaining),
-  }[mode];
+    required StudyStageProgressModel progress,
+  }) {
+    if (mode != StudyMode.match) return null;
+
+    const handler = MatchModeHandler();
+    final boards = handler.boardCount(progress.total);
+    final index = handler.boardIndexFor(
+      done: progress.done,
+      cardCount: progress.total,
+    );
+    final dealt = index * kMatchPairsPerBoard;
+    final onBoard = progress.total - dealt < kMatchPairsPerBoard
+        ? progress.total - dealt
+        : kMatchPairsPerBoard;
+    final left = onBoard - (progress.done - dealt);
+
+    return l10n.studyMatchContext(
+      progress.round,
+      index + 1,
+      boards,
+      left < 0 ? 0 : left,
+    );
+  }
 
   /// Which of the two card sets this session is working through (BR-142).
   String studySessionKind(StudySessionKind kind) => switch (kind) {

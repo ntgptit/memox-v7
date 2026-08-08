@@ -247,12 +247,13 @@ void main() {
     expect(find.text('3 / 8'), findsOneWidget);
   });
 
-  testWidgets('match adds its round and how many pairs are left', (
+  testWidgets('match names its board and counts that board s pairs', (
     tester,
   ) async {
-    // §7.6. Round, not board: BR-115 and BR-117 have only rounds, and splitting
-    // one into smaller boards would need a rule saying how big a board is —
-    // not a relabelled string.
+    // BR-156. A round of 8 is dealt into two boards; 3 answered puts the user
+    // on board 1 with 2 of its 5 pairs left. The counter in the top bar still
+    // measures the round — this line is the only place the split is visible,
+    // and without it finishing five reads as finishing the round.
     await pumpFrame(
       tester,
       frame(
@@ -269,11 +270,38 @@ void main() {
     );
 
     expect(
-      find.text('12 CARDS DUE · ROUND 2 · 5 PAIRS LEFT'),
+      find.text('12 CARDS DUE · ROUND 2 · BOARD 1/2 · 2 PAIRS LEFT'),
       findsOneWidget,
       reason:
-          'The line is uppercased where the two fragments are joined, so a '
-          'mode that adds sentence-case copy cannot leave half of it shouting.',
+          'The line is uppercased where the fragments are joined, so a mode '
+          'that adds sentence-case copy cannot leave half of it shouting.',
+    );
+  });
+
+  testWidgets('the last board of a round counts only its own remainder', (
+    tester,
+  ) async {
+    // The same round, five answered: board 2 of 2, and it holds the three the
+    // first board did not. Counting the round here instead would say 3 left on
+    // a board of 3 and 3 left again on a board of 5 — the same number for two
+    // different situations.
+    await pumpFrame(
+      tester,
+      frame(
+        // ignore: avoid_redundant_argument_values
+        mode: StudyMode.match,
+        progress: const StudyStageProgressModel(
+          round: 2,
+          done: 5,
+          total: 8,
+          completedCardIds: <String>[],
+        ),
+      ),
+    );
+
+    expect(
+      find.text('12 CARDS DUE · ROUND 2 · BOARD 2/2 · 3 PAIRS LEFT'),
+      findsOneWidget,
     );
   });
 

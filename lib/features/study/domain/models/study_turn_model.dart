@@ -55,6 +55,21 @@ abstract class StudyStageProgressModel with _$StudyStageProgressModel {
     /// unmounts the board between turns — so a widget remembering its own ticks
     /// forgets them every card, and the same pair could be answered again.
     required List<String> completedCardIds,
+
+    /// Every card of this round, in the order the round serves them (BR-156).
+    ///
+    /// **`match` deals its boards from this, not from the session's cards.** A
+    /// board is at most [kMatchPairsPerBoard] pairs and the round is dealt into
+    /// consecutive boards; dealing from the session instead is the same list
+    /// only in round 1, and from round 2 it laid out every card in the session
+    /// under a counter that was already down to the failures.
+    ///
+    /// **Defaulted rather than required, and the default is a fallback, not a
+    /// blank.** Every repository read fills it; the widget tests that build a
+    /// progress by hand care about the counter and would each grow a card list
+    /// that says nothing. A caller finding it empty falls back to the card set
+    /// it already has, which is what the board did before this existed.
+    @Default(<String>[]) List<String> roundCardIds,
   }) = _StudyStageProgressModel;
 
   const StudyStageProgressModel._();

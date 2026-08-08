@@ -176,11 +176,7 @@ class _ContextLine extends StatelessWidget {
     final base = kind == StudySessionKind.learning
         ? l10n.studyFrameSetLearning(cardCount)
         : l10n.studyFrameSetReviewing(cardCount);
-    final extra = context.studyModeContext(
-      mode,
-      round: progress.round,
-      remaining: progress.remaining,
-    );
+    final extra = context.studyModeContext(mode, progress: progress);
 
     return Text(
       // **Uppercased here, not in the ARB.** The line is composed from two
