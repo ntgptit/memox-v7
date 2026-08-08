@@ -1189,6 +1189,50 @@
   "@studySummaryBackToDeck": {
     "description": "Leaves the summary."
   },
+  "studyOptionsTitle": "Bạn học thế nào",
+  "@studyOptionsTitle": {
+    "description": "Title of the study options screen (BR-147)."
+  },
+  "studyOptionsCardLimitLabel": "Số thẻ mỗi phiên",
+  "@studyOptionsCardLimitLabel": {
+    "description": "The ceiling on distinct cards in one session (BR-24)."
+  },
+  "studyOptionsCardLimitNotANumber": "Hãy nhập một con số",
+  "@studyOptionsCardLimitNotANumber": {
+    "description": "Shown when the card-limit field holds something that is not a number."
+  },
+  "studyOptionsCardLimitOutOfRange": "Từ {min} đến {max}",
+  "@studyOptionsCardLimitOutOfRange": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    },
+    "description": "Shown when the card limit is outside its bounds. The bounds are a UI safety limit, not a business rule."
+  },
+  "studyOptionsOrderLabel": "Thứ tự thẻ mới",
+  "@studyOptionsOrderLabel": {
+    "description": "How new cards are ordered in a learning session (BR-148)."
+  },
+  "studyOptionsOrderCreated": "Theo lúc thêm",
+  "@studyOptionsOrderCreated": {
+    "description": "New cards arrive in the order they were created. The default (BR-148)."
+  },
+  "studyOptionsOrderRandom": "Xáo trộn",
+  "@studyOptionsOrderRandom": {
+    "description": "New cards arrive shuffled (BR-148)."
+  },
+  "studyOptionsNextSessionNote": "Áp dụng từ phiên học kế tiếp.",
+  "@studyOptionsNextSessionNote": {
+    "description": "States BR-139: a running session keeps the ceiling it opened with."
+  },
+  "studyOptionsSave": "Lưu",
+  "@studyOptionsSave": {
+    "description": "Saves the study options."
+  },
   "studyResumeTitle": "Bạn còn một phiên đang dở",
   "@studyResumeTitle": {
     "description": "Title of the three-path sheet shown when a session from the same study day is still in progress (BR-103)."

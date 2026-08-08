@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:drift/drift.dart' hide isNull;
+import 'package:drift/drift.dart' hide isNotNull, isNull;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/database/app_database.dart';
 import 'package:memox/core/error/failure.dart';

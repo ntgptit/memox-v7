@@ -1189,6 +1189,50 @@
   "@studySummaryBackToDeck": {
     "description": "Leaves the summary."
   },
+  "studyOptionsTitle": "Study options",
+  "@studyOptionsTitle": {
+    "description": "Title of the study options screen (BR-147)."
+  },
+  "studyOptionsCardLimitLabel": "Cards per session",
+  "@studyOptionsCardLimitLabel": {
+    "description": "The ceiling on distinct cards in one session (BR-24)."
+  },
+  "studyOptionsCardLimitNotANumber": "Enter a number",
+  "@studyOptionsCardLimitNotANumber": {
+    "description": "Shown when the card-limit field holds something that is not a number."
+  },
+  "studyOptionsCardLimitOutOfRange": "Between {min} and {max}",
+  "@studyOptionsCardLimitOutOfRange": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    },
+    "description": "Shown when the card limit is outside its bounds. The bounds are a UI safety limit, not a business rule."
+  },
+  "studyOptionsOrderLabel": "New card order",
+  "@studyOptionsOrderLabel": {
+    "description": "How new cards are ordered in a learning session (BR-148)."
+  },
+  "studyOptionsOrderCreated": "As added",
+  "@studyOptionsOrderCreated": {
+    "description": "New cards arrive in the order they were created. The default (BR-148)."
+  },
+  "studyOptionsOrderRandom": "Shuffled",
+  "@studyOptionsOrderRandom": {
+    "description": "New cards arrive shuffled (BR-148)."
+  },
+  "studyOptionsNextSessionNote": "Takes effect from your next session.",
+  "@studyOptionsNextSessionNote": {
+    "description": "States BR-139: a running session keeps the ceiling it opened with."
+  },
+  "studyOptionsSave": "Save",
+  "@studyOptionsSave": {
+    "description": "Saves the study options."
+  },
   "studyResumeTitle": "You left a session open",
   "@studyResumeTitle": {
     "description": "Title of the three-path sheet shown when a session from the same study day is still in progress (BR-103)."

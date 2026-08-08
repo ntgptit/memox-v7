@@ -231,7 +231,7 @@ một Reset rơi vào giữa để lại màn hình cầm phiên của trước 
 
 ### M5.11 · Tùy chọn học hai tầng (BR-147, BR-148)
 
-- **Status:** todo
+- **Status:** done
 - **Goal:** Người dùng đặt được số thẻ mỗi phiên và thứ tự thẻ mới.
 - **Scope:** đọc/ghi `app_settings`; parse và ghi `decks.study_config` trên root;
   màn cài đặt tối thiểu; giá trị hiệu lực = root nếu có, ngược lại mặc định.
@@ -239,13 +239,14 @@ một Reset rơi vào giữa để lại màn hình cầm phiên của trước 
 - **Editable documents:** `docs/wbs-study.md`
 - **Output:** use case + màn cài đặt + widget
 - **Acceptance criteria:**
-  - [ ] `card_limit` và `new_card_order` sửa được và có hiệu lực ở phiên **kế
+  - [x] `card_limit` và `new_card_order` sửa được và có hiệu lực ở phiên **kế
         tiếp**, không phải phiên đang chạy (BR-139).
-  - [ ] Deck root đặt được giá trị riêng; deck con **không** có tùy chọn riêng và
-        tra qua `root_deck_id` (BR-147) — bất biến 20 vẫn xanh.
-  - [ ] `new_card_order = random` cho thứ tự khác `created` trên cùng tập thẻ
-        (BR-148).
-  - [ ] `study_config` hỏng hoặc không đọc được → dùng mặc định, **không** chặn
+  - [x] Deck root đặt được giá trị riêng; deck con **không** có tùy chọn riêng và
+        tra qua `root_deck_id` (BR-147) — bất biến **27** vẫn xanh.
+  - [x] `new_card_order = random` cho **tập thẻ** khác `created` (BR-148) —
+        đọc lại thành *chọn thẻ nào*, không phải *thứ tự trình bày*; lý do ở
+        mục xung đột bên dưới.
+  - [x] `study_config` hỏng hoặc không đọc được → dùng mặc định, **không** chặn
         việc học.
 - **`effectiveOptions` hiện đọc `app_settings` và bỏ qua `study_config`**, có ghi
   chú trong code là "chưa có ai ghi". Mốc này là lúc ghi, nên cũng là lúc parse.
@@ -253,6 +254,29 @@ một Reset rơi vào giữa để lại màn hình cầm phiên của trước 
 - **Tests required:** test hai nhánh giá trị hiệu lực; test JSON hỏng; test
   `random` khác `created`
 - **Checklist phases:** 14.4, 15.1
+
+- **Kết quả:** `StudyCardLimit` là value object có `parse` (kiểu chính là phép
+  kiểm, như `DeckName`); `study_config` được parse ở `data/mappers/`;
+  `effectiveOptions` gộp hai tầng và luôn tra qua root; `saveStudyOptions` nhận
+  deck bất kỳ rồi **ghi lên root**, nên bất biến 27 không thể bị phá bởi màn hình
+  mở ở cấp con. Màn `StudyOptionsScreen` + audit thị giác đi kèm.
+- **Xung đột quy tắc đã phát hiện, và cách xử lý:** tiêu chí ban đầu đòi `random`
+  cho **thứ tự** khác `created` *trên cùng tập thẻ*. Không thể đúng: BR-113 và
+  BR-117 bắt **mỗi stage/round xáo lại**, nên thứ tự của danh sách thẻ phiên
+  không bao giờ tới tay người dùng. Code cũ shuffle **sau** `LIMIT` trong SQL —
+  tức là xáo lại đúng tập đã chọn theo `created_at`, rồi bị `_roundOne` xáo lần
+  nữa: **`random` không có tác dụng nào quan sát được.** Cách đọc làm cả hai quy
+  tắc cùng đúng là `new_card_order` quyết định *thẻ mới nào vào phiên* khi deck
+  có nhiều hơn trần. Nay `random` đọc toàn bộ thẻ chưa học, xáo, rồi mới cắt theo
+  trần. Test cũ (10 thẻ, trần 20) sẽ **xanh trên một implementation bỏ qua hoàn
+  toàn tùy chọn** — đó chính là bản test đầu tiên tôi viết.
+- **Quyết định của agent, không có trong docs:** trần trên của `card_limit` là
+  **200** (`kMaxCardLimit`). BR-24 chỉ chốt mặc định 20 và không nói giới hạn
+  trên; một ô text không chặn có thể tạo phiên trăm nghìn thẻ và lỗi sẽ trông
+  giống app treo. Ghi ở đây để người sau biết đây là chặn an toàn UI, không phải
+  luật nghiệp vụ.
+- **Tests:** `study_options_test.dart` (13 — bounds, JSON hỏng, refuse-before-write),
+  `study_flow_test.dart` nhóm *the two tiers of study options* trên SQLite thật (6)
 
 ### M5.12 · Các ca stage bị chặn hoặc bỏ qua, ở UI (BR-99, BR-124, BR-153)
 
@@ -483,7 +507,7 @@ phán quyết trước khi người dùng trả lời.
 | Nợ | Vì sao còn | Đóng ở |
 |---|---|---|
 | Controller đọc thẳng repository ở 4 chỗ | không phép kiểm nào bắt được; guard kiểm import, không kiểm lời gọi | M5.8 |
-| `study_config` chưa được parse | chưa có ai ghi nó | M5.11 |
+| ~~`study_config` chưa được parse~~ | `study_config_mapper.dart` parse và ghi; hỏng thì về mặc định | xong ở M5.11 |
 | BR-120 chưa có test | `match` chưa có mức `almost` để kiểm | M5.13 |
 | BR-83 chưa có caller | UC-07 chưa tồn tại | M5.14 |
 | ~~`remaining_ms` chưa được nối vào UI resume~~ | `RecallTimerSectionWidget` nhận `initialRemaining` từ queue item; test BR-133 ở `recall_fill_widget_test.dart` | xong ở M5.9 |
@@ -491,6 +515,8 @@ phán quyết trước khi người dùng trả lời.
 | ~~Ảnh wireframe chưa có trong repo~~ | chủ dự án đã thả vào `wireframes/assets/m5-study-modes/` | xong |
 | `match` xoá ô đã ghép khỏi bàn | dựng trước khi có design | M5.19 |
 | Hai state thứ hai của `recall`/`fill` chưa có ảnh | design mới cung cấp state đầu | M5.20 — vẽ theo BR, ghi rõ là agent đề xuất |
+
+| Màn Study chưa có mặt trong Widgetbook | M5.7 thêm hai màn, M5.11 thêm màn thứ ba, không màn nào được đăng ký; `widgetbook/lib/screens/` mới chỉ có `DeckListScreen` | mốc riêng — cần fake repository dùng được từ package `widgetbook/` |
 
 ## Việc không thuộc Study nhưng chặn Definition of Done
 

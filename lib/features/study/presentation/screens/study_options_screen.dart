@@ -1,0 +1,81 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../../core/state/submit_outcome.dart';
+import '../../../../core/theme/app_spacing.dart';
+import '../../../../l10n/l10n_extension.dart';
+import '../../../../shared/widgets/mx_async_view.dart';
+import '../../../../shared/widgets/mx_content_shell.dart';
+import '../../../../shared/widgets/mx_error_state.dart';
+import '../../domain/models/new_card_order_model.dart';
+import '../../domain/models/study_options_model.dart';
+import '../controllers/study_options_controller.dart';
+import '../controllers/study_options_write_controller.dart';
+import '../states/study_options_submit_state.dart';
+import '../widgets/sections/study_options_section_widget.dart';
+
+/// How much to study, and in what order (BR-147, BR-148).
+///
+/// **Whichever deck opened it, the values belong to the root.** A sub-deck
+/// carries no options of its own, so editing here and editing from the root are
+/// the same edit — the repository resolves through `root_deck_id` rather than
+/// this screen deciding, which is what keeps invariant 20 true no matter which
+/// level the user happened to be on.
+class StudyOptionsScreen extends ConsumerWidget {
+  const StudyOptionsScreen({required this.deckId, super.key});
+
+  final String deckId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // A saved change closes the screen. Watching the transition rather than
+    // acting inside `submit` is what keeps the controller free of a
+    // `BuildContext` it must never hold.
+    ref.listen(studyOptionsWriteControllerProvider(deckId), (_, next) {
+      if (next.outcome != SubmitOutcome.savedAndClose) return;
+      if (!context.mounted) return;
+
+      Navigator.of(context).pop();
+    });
+
+    final submit = ref.watch(studyOptionsWriteControllerProvider(deckId));
+
+    return MxContentShell(
+      title: context.l10n.studyOptionsTitle,
+      body: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: MxAsyncView<StudyOptionsModel>(
+          value: ref.watch(studyOptionsProvider(deckId)),
+          loadingLabel: context.l10n.studyOptionsTitle,
+          error: (_, _) => MxErrorState(
+            title: context.l10n.studyOptionsTitle,
+            message: context.l10n.studyOptionsNextSessionNote,
+          ),
+          data: (options) => StudyOptionsSectionWidget(
+            initialCardLimit: options.cardLimit,
+            initialNewCardOrder: options.newCardOrder,
+            isSubmitting: submit.isSubmitting,
+            cardLimitProblem: submit.cardLimitProblem,
+            onSave: (rawCardLimit, newCardOrder) =>
+                _save(ref, rawCardLimit, newCardOrder),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// The notifier, read when the button is pressed rather than during a build.
+  ///
+  /// `ref.read` inside `build()` takes a value without subscribing, which is how
+  /// a screen ends up showing state it will never be told has changed — the
+  /// guard rule `no_ref_read_in_build` exists for exactly that, and it caught
+  /// this.
+  void _save(WidgetRef ref, String rawCardLimit, NewCardOrder newCardOrder) =>
+      unawaited(
+        ref
+            .read(studyOptionsWriteControllerProvider(deckId).notifier)
+            .submit(rawCardLimit: rawCardLimit, newCardOrder: newCardOrder),
+      );
+}

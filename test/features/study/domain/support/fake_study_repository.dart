@@ -11,6 +11,7 @@ import 'package:memox/features/study/domain/models/study_mode.dart';
 import 'package:memox/features/study/domain/models/study_options_model.dart';
 import 'package:memox/features/study/domain/models/study_outcome_reason_model.dart';
 import 'package:memox/features/study/domain/models/study_schedule_model.dart';
+import 'package:memox/features/study/domain/models/study_card_limit_model.dart';
 import 'package:memox/features/study/domain/models/study_session_kind_model.dart';
 import 'package:memox/features/study/domain/models/study_session_summary_model.dart';
 import 'package:memox/features/study/domain/models/study_session_status_model.dart';
@@ -212,6 +213,25 @@ base class FakeStudyRepository implements StudyRepository {
   @override
   Future<StudySessionEntity?> openSessionFor(String deckId) async =>
       openSession_;
+
+  /// What was saved, and against which deck.
+  ///
+  /// The deck is recorded because BR-147 is about *where* the write lands: the
+  /// repository resolves to the root, and only the argument shows whether a
+  /// caller was allowed to skip that.
+  final List<({String deckId, int cardLimit, NewCardOrder order})>
+  savedOptions = <({String deckId, int cardLimit, NewCardOrder order})>[];
+
+  @override
+  Future<void> saveStudyOptions({
+    required String deckId,
+    required StudyCardLimit cardLimit,
+    required NewCardOrder newCardOrder,
+  }) async => savedOptions.add((
+    deckId: deckId,
+    cardLimit: cardLimit.value,
+    order: newCardOrder,
+  ));
 
   /// What the summary read returns, and what it was asked.
   ///

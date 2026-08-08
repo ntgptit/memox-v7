@@ -29,6 +29,10 @@ final class StudyDao {
   Future<List<NewCardsInTreeResult>> newCards(String rootDeckId, int limit) =>
       _db.newCardsInTree(rootDeckId, limit).get();
 
+  /// Every unlearned card of a tree, for the `random` ordering (BR-148).
+  Future<List<NewCardsInTreeAllResult>> allNewCards(String rootDeckId) =>
+      _db.newCardsInTreeAll(rootDeckId).get();
+
   Future<List<DueCardsInTreeResult>> dueCards(
     String rootDeckId,
     DateTime now,
@@ -177,6 +181,14 @@ final class StudyDao {
       (_db.select(_db.cards)..where((c) => c.id.equals(id))).getSingleOrNull();
 
   Future<AppSetting> appSettings() => _db.appSettingsRow().getSingle();
+
+  /// Writes a root deck-s study options, and touches nothing else on the row.
+  Future<void> updateDeckStudyConfig({
+    required String deckId,
+    required String studyConfig,
+  }) => (_db.update(_db.decks)..where((d) => d.id.equals(deckId))).write(
+    DecksCompanion(studyConfig: Value<String?>(studyConfig)),
+  );
 
   // ---- writes ------------------------------------------------------------
 

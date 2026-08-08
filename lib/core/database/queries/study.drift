@@ -44,6 +44,25 @@ WHERE d.root_deck_id = :rootDeckId
 ORDER BY c.created_at ASC, c.id ASC
 LIMIT :limit;
 
+-- Every unlearned card of a tree, for `new_card_order = random` (BR-148).
+--
+-- **No LIMIT, and that is the whole difference.** Applying the ceiling in SQL
+-- and shuffling afterwards reorders a set that was already chosen by
+-- `created_at` — and BR-113 reshuffles every stage anyway, so the reordering is
+-- invisible and the option has no effect at all. Choosing at random means
+-- choosing from everything, so the limit is applied after the shuffle.
+--
+-- Bounded by the deck-s unlearned cards, and only read when the user picked
+-- `random`.
+newCardsInTreeAll:
+SELECT c.**
+FROM cards c
+INNER JOIN decks d ON d.id = c.deck_id
+INNER JOIN card_study_states s ON s.card_id = c.id
+WHERE d.root_deck_id = :rootDeckId
+  AND s.learned_at IS NULL
+ORDER BY c.created_at ASC, c.id ASC;
+
 -- Cards that finished the chain and have come due, for a `reviewing` session.
 --
 -- `due_at` ascending is BR-23. No `IS NULL` branch: since v5 a card without a
