@@ -7,8 +7,8 @@
 | **Scope** | Task còn lại của Study từ M5.7 trở đi · nợ kỹ thuật của Study · việc bị chặn |
 | **Source of truth for** | Trạng thái task Study từ M5.7 · nợ kỹ thuật của Study |
 | **Depends on** | `document-conventions.md` · `wbs.md` · `business-rules.md` · `use-cases.md` |
-| **Updated by task** | suite IT trở lại 66/66 |
-| **Last updated** | 2026-08-08 |
+| **Updated by task** | `MxSessionTopBar` — vòng review ảnh chụp thứ hai |
+| **Last updated** | 2026-08-09 |
 
 `docs/wbs.md` giữ M5.0…M5.6 đã hoàn thành và không nhắc lại ở đây. File này giữ
 **những gì còn lại**, đánh số tiếp từ M5.7 để không ID nào trùng và mọi tham chiếu
@@ -1055,3 +1055,40 @@ máy chậm. Suite trước đó xanh vì chưa lượt nào timeout.
 còn lật sẵn. Khái niệm "cùng một lượt" nay ở `StudyTurnModel.isSameTurnAs`, so cả
 `cardId` **và** `round`, để cái thứ tư không lặp lại. Có test, và đã **chứng minh
 test bắt được** bằng cách đổi tạm về so id thôi rồi xem nó đỏ.
+
+### `MxSessionTopBar` và dòng gợi ý, sau vòng review ảnh chụp thứ hai
+
+Chủ dự án review thanh trên của phiên học năm vòng liên tiếp. Kết quả không phải
+năm lần chỉnh số mà là **một component chung** và **hai quy tắc đặt mép**; số đo
+đầy đủ ở `wireframes/m5-study-modes.md` §8.4 và §8.5.
+
+**Ba lỗi có thật, cả ba đều không phép kiểm nào thấy được:**
+
+- `MxIconButton.isCompact` ràng buộc hộp còn 36 và **ràng buộc ấy chưa bao giờ có
+  tác dụng** — `MaterialTapTargetSize.padded` bơm lại về 48 rồi căn giữa cái 36
+  bên trong. Hàng vẫn tiêu 48 *và* glyph lùi 14 so với chỗ nút bắt đầu, trong khi
+  bộ đếm đầu kia dừng đúng gutter. Hai đầu lùi khác nhau chính là cái đọc ra
+  thành "thanh header lệch tâm".
+- Test `320×568 @ textScale 2.0` dựng khung ở **nguyên 320** vì harness không có
+  shell, còn production chỉ có 296 — nó chưa bao giờ đo đúng thứ đang chạy. Khi
+  khung tự đặt gutter thì test khớp production và hàng **tràn 5.9px** với tên mode
+  dài. Mức chặn chip nay đo theo *phần còn lại sau nút và hai khoảng*, không theo
+  cả hàng.
+- Tách hai đầu thành hai giá trị làm `start` tính ra **−2** ở gutter compact 12
+  (glyph nằm sau hộp nó 14). `Padding` assert với inset âm và hạ **năm** test ở
+  320 cùng lúc. Đã clamp ở 0.
+
+**Không thu vùng chạm của nút ✕.** 48 là `AppSpacing.minimumTouchTarget` và
+`androidTapTargetGuideline` khẳng định nó ở hai chỗ. Các mẹo "vẽ tràn ra ngoài ô"
+— `Transform`, `OverflowBox` — cắt **vùng hit** theo ô cha trong khi `Semantics`
+vẫn khai 48×48: gate xanh, chỉ ngón tay người dùng biết là hỏng. Khoảng cách ✕ →
+chip khép lại bằng cách **bỏ spacer**, vì 14px còn lại là vùng chạm chứ không
+phải không khí.
+
+**Dòng gợi ý** hạ xuống `bodySmall`, căn giữa, và icon theo mode: `»` cho
+`browse` (đi giữa các thẻ), `✓` cho bốn mode còn lại (thao tác trên thẻ đang
+hiện) — đúng như năm ảnh wireframe vẽ. Câu của `browse` rút theo ảnh.
+
+`MxSessionTopBar` nằm ở `lib/shared/widgets/`, **không biết `StudyMode` là gì**:
+nhận một chữ cho chip, một `0…1` cho thanh, một widget cho ô cuối. Có golden
+light/dark, stress specimen với tên dài, và mục Widgetbook.

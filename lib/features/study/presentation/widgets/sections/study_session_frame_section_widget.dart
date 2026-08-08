@@ -1,13 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
-import '../../../../../shared/widgets/mx_icon_button.dart';
-import '../../../../../shared/widgets/mx_progress_bar.dart';
+import '../../../../../shared/widgets/mx_content_shell.dart';
+import '../../../../../shared/widgets/mx_session_top_bar.dart';
 import '../../../domain/models/study_mode.dart';
 import '../../../domain/models/study_session_kind_model.dart';
 import '../../../domain/models/study_turn_model.dart';
@@ -25,12 +24,23 @@ import '../support/study_labels_widget.dart';
 /// time the user came back the app would offer to resume something they thought
 /// they had closed.
 ///
-/// **One accent, and mode is told apart by the word on the pill** (§7.8). The
+/// **One accent, and mode is told apart by the word on the chip** (§7.8). The
 /// design gives modes two colour families; this app has no token meaning "which
 /// mode is this", and the nearest green is `success`, which means *correct* — a
-/// pill in it reads as a verdict handed down before the user has answered, and
+/// chip in it reads as a verdict handed down before the user has answered, and
 /// on `match` the same colour would then mark both "this mode" and "this pair
-/// was right" on one screen.
+/// was right" on one screen. That is why `MxSessionTopBar` takes a *word* and no
+/// colour: there is nothing for a caller to vary.
+///
+/// **The bar itself is `MxSessionTopBar`, and it is not study's.** Nothing in it
+/// is about cards — a way out, a name, a measure and a figure is what any
+/// full-screen task shows. Keeping it here would have meant the next such screen
+/// re-deriving the gap either side of the track, which is the drift §8.4 was
+/// spent measuring.
+///
+/// **The frame gutters itself.** The bar's ✕ has to reach the screen edge, so
+/// the screen passes `padding: EdgeInsets.zero` to `MxContentShell` and every
+/// other band here applies [mxScreenGutter] on its own.
 class StudySessionFrameSectionWidget extends StatelessWidget {
   const StudySessionFrameSectionWidget({
     required this.mode,
@@ -83,28 +93,54 @@ class StudySessionFrameSectionWidget extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: <Widget>[
-      _TopBar(
-        mode: mode,
-        progress: progress,
-        timeLeft: timeLeft,
-        onClose: onClose,
+  Widget build(BuildContext context) {
+    // The screen hands the frame an ungutter'd region so the bar's ✕ can reach
+    // the edge (see `MxSessionTopBar`), which makes every *other* band here
+    // responsible for its own gutter. Read once from the same helper the shell
+    // uses, so the frame and the screens either side of it agree at 320 too.
+    final gutter = mxScreenGutter(context);
+
+    return Padding(
+      // Vertical only, and it is the half of the screen padding the shell is no
+      // longer applying. Horizontal is per band below, because exactly one band
+      // must not have it.
+      padding: EdgeInsets.symmetric(vertical: gutter),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          MxSessionTopBar(
+            label: context.studyMode(mode),
+            progress: progress.fraction,
+            trailing: _TrailingFigure(progress: progress, timeLeft: timeLeft),
+            onClose: onClose,
+            closeLabel: context.l10n.studyFrameClose,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: gutter),
+            child: _ContextLine(
+              mode: mode,
+              kind: kind,
+              cardCount: cardCount,
+              progress: progress,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: gutter),
+              child: child,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: gutter),
+            child: _HintLine(mode: mode, hintOverride: hintOverride),
+          ),
+        ],
       ),
-      const SizedBox(height: AppSpacing.sm),
-      _ContextLine(
-        mode: mode,
-        kind: kind,
-        cardCount: cardCount,
-        progress: progress,
-      ),
-      const SizedBox(height: AppSpacing.lg),
-      Expanded(child: child),
-      const SizedBox(height: AppSpacing.lg),
-      _HintLine(mode: mode, hintOverride: hintOverride),
-    ],
-  );
+    );
+  }
 }
 
 /// How many cards this session holds, and which set they are (§7.2, BR-142).
@@ -154,71 +190,6 @@ class _ContextLine extends StatelessWidget {
       textAlign: TextAlign.center,
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
-    );
-  }
-}
-
-class _TopBar extends StatelessWidget {
-  const _TopBar({
-    required this.mode,
-    required this.progress,
-    required this.timeLeft,
-    required this.onClose,
-  });
-
-  final StudyMode mode;
-  final StudyStageProgressModel progress;
-  final ValueListenable<Duration>? timeLeft;
-  final VoidCallback onClose;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-
-    return Row(
-      children: <Widget>[
-        // **Compact, and the progress track is the reason.** At the full 48 the
-        // ✕, the pill and the figure left the track about half the row, which
-        // reads as an indicator rather than a measure. It gives up width only —
-        // the button keeps its 48 of height, so a thumb still has the whole bar
-        // to land in vertically.
-        MxIconButton(
-          icon: Icons.close,
-          semanticLabel: l10n.studyFrameClose,
-          onPressed: onClose,
-          isCompact: true,
-        ),
-        const SizedBox(width: AppSpacing.xs),
-        // **`flex: 0`, and the zero is the whole point.** These two size to
-        // their content, and a bare `Flexible` defaults to `flex: 1` — so each
-        // was *allocated* a third of the free space, used what it needed, and
-        // the remainder collected as dead space at the end of the row. Measured
-        // at 393 wide: a 108px track with 118px of nothing after the counter.
-        // At zero they are laid out first and `Expanded` below takes everything
-        // that is left, which is what makes the track read as a measure rather
-        // than an indicator.
-        //
-        // They are still `Flexible` rather than bare children: at 320px with
-        // `textScaler` 2.0 the pill and the figure together overran the row by
-        // 19px, and loose fit is what lets them give that back.
-        Flexible(flex: 0, child: _ModePill(mode: mode)),
-        const SizedBox(width: AppSpacing.sm),
-        // Bare track: the bar's own header would put the same figure above it,
-        // and the figure already sits at the end of this row. It announces
-        // nothing either — the trailing figure carries the one announcement, so
-        // a screen reader hears the count once rather than twice.
-        Expanded(
-          child: MxProgressBar(
-            value: progress.fraction,
-            size: MxProgressBarSize.sm,
-          ),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Flexible(
-          flex: 0,
-          child: _TrailingFigure(progress: progress, timeLeft: timeLeft),
-        ),
-      ],
     );
   }
 }
@@ -281,44 +252,15 @@ class _Figure extends StatelessWidget {
   );
 }
 
-/// The mode's name, as a label rather than a control.
-///
-/// **Not `MxPillButton` with a null callback.** That component renders a null
-/// callback as *disabled* — the label drops to 38% alpha and leaves the palette
-/// — and this is not a control that has been switched off, it is a name. The
-/// same mistake cost the entry screen its two counters in M5.7.
-class _ModePill extends StatelessWidget {
-  const _ModePill({required this.mode});
-
-  final StudyMode mode;
-
-  @override
-  Widget build(BuildContext context) => DecoratedBox(
-    decoration: BoxDecoration(
-      color: context.semanticColors.surfaceMuted,
-      borderRadius: BorderRadius.circular(AppRadius.pill),
-    ),
-    child: Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs,
-      ),
-      child: Text(
-        context.studyMode(mode),
-        style: context.texts.labelMedium?.copyWith(
-          // `primaryAccent` is the brand hue *as text* — the variant held light
-          // enough to pass AA on a dark surface, which `primary` is not.
-          color: context.semanticColors.primaryAccent,
-          fontWeight: FontWeight.w600,
-        ),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
-    ),
-  );
-}
-
 /// One line of instruction, and it changes with the mode.
+///
+/// **Centred, and one step below body size.** It is a caption under the card,
+/// not a paragraph of the screen: left-aligned at body size it read as content
+/// the card had spilled, and it is the only thing on this screen that is neither
+/// the card nor the chrome measuring it.
+///
+/// The glyph comes from the mode (`studyModeHintIcon`) because the sentence does
+/// — a direction and an instruction do not take the same mark.
 class _HintLine extends StatelessWidget {
   const _HintLine({required this.mode, required this.hintOverride});
 
@@ -330,21 +272,27 @@ class _HintLine extends StatelessWidget {
     final hint = hintOverride ?? context.studyModeHint(mode);
     if (hint == null) return const SizedBox.shrink();
 
+    final style = context.texts.bodySmall?.copyWith(
+      color: context.colors.onSurfaceVariant,
+    );
+
     return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Icon(
-          Icons.check_circle_outline,
-          size: context.texts.bodyMedium?.fontSize,
+          context.studyModeHintIcon(mode),
+          // Tied to the line's own size rather than an icon step, so the mark
+          // and the sentence stay the same weight when either moves.
+          size: style?.fontSize,
           color: context.colors.onSurfaceVariant,
         ),
         const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: Text(
-            hint,
-            style: context.texts.bodyMedium?.copyWith(
-              color: context.colors.onSurfaceVariant,
-            ),
-          ),
+        // `Flexible`, not `Expanded`: the row is centred, so a child that took
+        // all the width would put the glyph back on the left margin and undo it.
+        // Loose fit is still needed — at 320 with `textScaler` 2.0 the sentence
+        // is wider than the screen and has to be allowed to wrap.
+        Flexible(
+          child: Text(hint, style: style, textAlign: TextAlign.center),
         ),
       ],
     );

@@ -4,6 +4,7 @@ import 'package:memox/shared/widgets/mx_confirm_dialog.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
 import 'package:memox/shared/widgets/mx_progress_bar.dart';
 import 'package:memox/shared/widgets/mx_search_field.dart';
+import 'package:memox/shared/widgets/mx_session_top_bar.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
 
 /// Specimen widgets for the golden suite.
@@ -293,4 +294,47 @@ class SearchFieldSpecimen extends StatelessWidget {
   }
 
   static void _ignore(String _) {}
+}
+
+/// The session bar, twice: an ordinary word and one long enough to be cut.
+///
+/// **Its whole reason to be pinned is the two ends of the row.** The ✕ hangs
+/// into the gutter so its glyph lands *at* it, the figure stops at the gutter,
+/// and the track takes everything between — three relationships that no
+/// assertion about a single widget can hold, and that a wrapper adding padding
+/// silently breaks. So the specimen is deliberately unpadded horizontally: that
+/// is the region the bar is designed for, and a golden taken inside a gutter
+/// would record the layout it must never be given.
+class SessionTopBarSpecimen extends StatelessWidget {
+  const SessionTopBarSpecimen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Padding(
+        padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
+        child: Column(
+          children: <Widget>[
+            MxSessionTopBar(
+              label: 'Browse',
+              progress: 0.3,
+              trailing: Text('3 / 10'),
+              onClose: _noop,
+              closeLabel: 'Close session',
+            ),
+            SizedBox(height: AppSpacing.xl),
+            MxSessionTopBar(
+              label: 'Ghép cặp từ và nghĩa',
+              progress: 0.85,
+              trailing: Text('0:12'),
+              onClose: _noop,
+              closeLabel: 'Close session',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static void _noop() {}
 }

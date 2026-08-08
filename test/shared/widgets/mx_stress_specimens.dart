@@ -14,6 +14,7 @@ import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 import 'package:memox/shared/widgets/mx_pill_button.dart';
 import 'package:memox/shared/widgets/mx_progress_bar.dart';
 import 'package:memox/shared/widgets/mx_search_field.dart';
+import 'package:memox/shared/widgets/mx_session_top_bar.dart';
 import 'package:memox/shared/widgets/mx_text_button.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
 
@@ -116,6 +117,22 @@ List<MxStressSpecimen> stressSpecimens() => <MxStressSpecimen>[
     name: 'MxProgressBar',
     build: () =>
         const MxProgressBar(value: 0.62, label: kLongLabel, valueLabel: '62%'),
+  ),
+  MxStressSpecimen(
+    // A mode name long enough to want the whole row is the case that breaks
+    // this bar: the chip has to give way and ellipsize, because the figure
+    // beside it is a count and a truncated count is a wrong one. The chip is
+    // laid out inflexibly so the track gets the true remainder, so nothing in
+    // the row would yield on its own — the cap is what makes it.
+    name: 'MxSessionTopBar',
+    build: () => const MxSessionTopBar(
+      label: kLongLabel,
+      progress: 0.62,
+      trailing: Text('12 / 240'),
+      onClose: _noop,
+      closeLabel: kLongLabel,
+    ),
+    isInteractive: true,
   ),
   MxStressSpecimen(
     name: 'MxCard',

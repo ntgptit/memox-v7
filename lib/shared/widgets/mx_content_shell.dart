@@ -216,9 +216,17 @@ class _MxSubheader extends StatelessWidget {
   }
 }
 
-/// 16 normally, 12 below [AppBreakpoints.compact] — the design uses the same two
-/// numbers at the same breakpoint.
-EdgeInsets _defaultPadding(BuildContext context) {
+/// The screen gutter: 16 normally, 12 below [AppBreakpoints.compact] — the
+/// design uses the same two numbers at the same breakpoint.
+///
+/// Public because a screen that opts out of [MxContentShell.padding] to let one
+/// band bleed to the edge still has to line the *rest* of itself up with every
+/// other screen. Re-deriving the breakpoint rule at the call site is how the two
+/// drift apart, and the drift only shows below 360 where nobody looks.
+double mxScreenGutter(BuildContext context) {
   final isCompact = AppBreakpoints.isCompact(MediaQuery.sizeOf(context).width);
-  return EdgeInsets.all(isCompact ? AppSpacing.md : AppSpacing.lg);
+  return isCompact ? AppSpacing.md : AppSpacing.lg;
 }
+
+EdgeInsets _defaultPadding(BuildContext context) =>
+    EdgeInsets.all(mxScreenGutter(context));

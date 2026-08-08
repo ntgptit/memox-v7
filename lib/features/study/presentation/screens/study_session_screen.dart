@@ -104,11 +104,23 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
       // second bar naming the same screen — with a back arrow that pops the
       // route and leaves the session open, which is the one thing BR-82 forbids.
       //
-      // No padding of its own either. The shell already applies the screen
-      // gutter, and the second one this used to add made the 320px case tight
-      // enough that the top row's own children were the first thing to go.
+      // **No gutter from the shell, and the frame applies its own.** The
+      // session's top bar puts a 48×48 close button first; inside a 16px gutter
+      // its glyph lands at 30 while the counter at the other end stops at the
+      // gutter, and a row inset differently at each end reads as off-centre.
+      // The bar therefore needs a region that starts at the safe-area edge, the
+      // way `AppBar` gives its leading icon one. `EdgeInsets.zero` here, and
+      // `StudySessionFrameSectionWidget` gutters the context line, the body and
+      // the hint itself — from `mxScreenGutter`, so 320 still gets 12.
+      padding: EdgeInsets.zero,
       body: session == null || turn == null || state.isFinished
-          ? body
+          // The transient states draw without the frame, so nothing has
+          // guttered them — they get it here rather than inheriting an
+          // edge-to-edge region meant for one bar.
+          ? Padding(
+              padding: EdgeInsets.all(mxScreenGutter(context)),
+              child: body,
+            )
           : StudySessionFrameSectionWidget(
               mode: session.currentMode,
               kind: session.kind,

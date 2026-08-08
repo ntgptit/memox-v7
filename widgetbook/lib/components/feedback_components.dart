@@ -1,6 +1,9 @@
+import 'package:flutter/material.dart';
+import 'package:memox/core/theme/app_spacing.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
 import 'package:memox/shared/widgets/mx_loading_state.dart';
+import 'package:memox/shared/widgets/mx_session_top_bar.dart';
 import 'package:widgetbook/widgetbook.dart';
 
 import '../support/catalog_page.dart';
@@ -89,6 +92,57 @@ WidgetbookComponent loadingStateComponent() {
 
           return CatalogCenterPage(
             child: MxLoadingState(semanticsLabel: semanticsLabel),
+          );
+        },
+      ),
+    ],
+  );
+}
+
+/// The session bar, with no horizontal padding around it on purpose.
+///
+/// [CatalogCenterPage] would add the screen gutter, and the gutter is the one
+/// thing this component must not be given: its close button hangs into it so the
+/// ✕ glyph lands *at* the gutter while the trailing figure stops on it. Padded,
+/// the catalog would show a bar that is off-centre by exactly the amount the
+/// component exists to remove.
+WidgetbookComponent sessionTopBarComponent() {
+  return WidgetbookComponent(
+    name: 'MxSessionTopBar',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'Playground',
+        builder: (context) {
+          final label = context.knobs.string(
+            label: 'label',
+            initialValue: 'Browse',
+          );
+          final progress = context.knobs.double.slider(
+            label: 'progress',
+            initialValue: 0.3,
+          );
+          final trailing = context.knobs.string(
+            label: 'trailing',
+            initialValue: '3 / 10',
+          );
+
+          return Scaffold(
+            body: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                child: Column(
+                  children: <Widget>[
+                    MxSessionTopBar(
+                      label: label,
+                      progress: progress,
+                      trailing: Text(trailing),
+                      onClose: _noop,
+                      closeLabel: 'Close session',
+                    ),
+                  ],
+                ),
+              ),
+            ),
           );
         },
       ),
