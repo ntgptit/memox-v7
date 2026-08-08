@@ -21,9 +21,12 @@ void main() {
     test('a learning session runs the whole stage sequence (BR-110)', () async {
       final repository = FakeStudyRepository();
 
-      await StartStudySessionUseCase(
-        repository,
-      ).call(deckId: 'deck-1', kind: StudySessionKind.learning, now: now);
+      await StartStudySessionUseCase(repository).call(
+        deckId: 'deck-1',
+        kind: StudySessionKind.learning,
+        now: now,
+        utcOffset: Duration.zero,
+      );
 
       expect(repository.opened.single.stages, <StudyMode>[
         StudyMode.browse,
@@ -39,9 +42,12 @@ void main() {
       // holding its own would be wrong for every deck on the other algorithm.
       final repository = FakeStudyRepository(schedulerType: SchedulerType.sm2);
 
-      await StartStudySessionUseCase(
-        repository,
-      ).call(deckId: 'deck-1', kind: StudySessionKind.learning, now: now);
+      await StartStudySessionUseCase(repository).call(
+        deckId: 'deck-1',
+        kind: StudySessionKind.learning,
+        now: now,
+        utcOffset: Duration.zero,
+      );
 
       expect(repository.opened.single.stages, <StudyMode>[
         StudyMode.browse,
@@ -59,6 +65,7 @@ void main() {
           kind: StudySessionKind.reviewing,
           reviewMode: StudyMode.recall,
           now: now,
+          utcOffset: Duration.zero,
         );
 
         expect(repository.opened.single.stages, <StudyMode>[StudyMode.recall]);
@@ -76,6 +83,7 @@ void main() {
           kind: StudySessionKind.reviewing,
           reviewMode: StudyMode.fill,
           now: now,
+          utcOffset: Duration.zero,
         ),
         throwsA(
           isA<ConflictFailure>().having(
@@ -97,6 +105,7 @@ void main() {
           kind: StudySessionKind.reviewing,
           reviewMode: StudyMode.browse,
           now: now,
+          utcOffset: Duration.zero,
         ),
         throwsA(isA<ConflictFailure>()),
       );
@@ -110,9 +119,12 @@ void main() {
       );
 
       await expectLater(
-        StartStudySessionUseCase(
-          repository,
-        ).call(deckId: 'deck-1', kind: StudySessionKind.learning, now: now),
+        StartStudySessionUseCase(repository).call(
+          deckId: 'deck-1',
+          kind: StudySessionKind.learning,
+          now: now,
+          utcOffset: Duration.zero,
+        ),
         throwsA(isA<ConflictFailure>()),
       );
     });
@@ -122,9 +134,12 @@ void main() {
       () async {
         final repository = FakeStudyRepository(cardLimit: 7);
 
-        final session = await StartStudySessionUseCase(
-          repository,
-        ).call(deckId: 'deck-1', kind: StudySessionKind.learning, now: now);
+        final session = await StartStudySessionUseCase(repository).call(
+          deckId: 'deck-1',
+          kind: StudySessionKind.learning,
+          now: now,
+          utcOffset: Duration.zero,
+        );
 
         expect(repository.opened.single.limit, 7);
         expect(session.session.cardLimit, 7);
@@ -142,6 +157,7 @@ void main() {
           kind: StudySessionKind.reviewing,
           reviewMode: StudyMode.match,
           now: now,
+          utcOffset: Duration.zero,
         ),
         throwsA(
           isA<ConflictFailure>().having(

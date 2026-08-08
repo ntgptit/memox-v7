@@ -43,6 +43,30 @@ void main() {
   );
 
   group('recall', () {
+    testWidgets('a resumed turn starts at the time it was left (BR-133)', (
+      tester,
+    ) async {
+      // The half of resuming a session that the user actually feels. Reading
+      // the stored session back but restarting the clock at the full limit
+      // would be a free extension of every paused turn, and the resume path
+      // would look correct in every other respect.
+      final outcomes = <RecallOutcome>[];
+      await tester.pumpWidget(
+        wrapForTest(
+          RecallTimerSectionWidget(
+            turn: turnOf('c1'),
+            initialRemaining: const Duration(seconds: 3),
+            onOutcome: outcomes.add,
+          ),
+        ),
+      );
+
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pump();
+
+      expect(outcomes, <RecallOutcome>[RecallOutcome.timedOut]);
+    });
+
     testWidgets('running out reveals the answer and locks it wrong', (
       tester,
     ) async {

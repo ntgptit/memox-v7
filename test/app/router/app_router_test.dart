@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/features/study/di/study_repository_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:memox/app/app.dart';
 import 'package:memox/app/config/env_config.dart';
@@ -18,6 +19,7 @@ import 'package:memox/shared/widgets/mx_error_state.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 
 import '../../features/deck/presentation/support/fake_deck_repository.dart';
+import '../../features/study/domain/support/fake_study_repository.dart';
 
 /// The route table, exercised through the real app root.
 ///
@@ -64,6 +66,7 @@ void main() {
       ProviderScope(
         overrides: [
           envConfigProvider.overrideWithValue(EnvConfig.development),
+          studyRepositoryProvider.overrideWithValue(FakeStudyRepository()),
           deckRepositoryProvider.overrideWithValue(
             repository ?? FakeDeckRepository(),
           ),

@@ -116,9 +116,12 @@ void main() {
       // which is most of them.
       await seed(cardCount: 3, withExample: const <String>{'c0'});
 
-      final session = await StartStudySessionUseCase(
-        repository,
-      ).call(deckId: 'd1', kind: StudySessionKind.learning, now: now);
+      final session = await StartStudySessionUseCase(repository).call(
+        deckId: 'd1',
+        kind: StudySessionKind.learning,
+        now: now,
+        utcOffset: Duration.zero,
+      );
 
       // The two cards without an example have no `fill` row to be stuck in.
       final fillCards = await rows(
@@ -151,9 +154,12 @@ void main() {
     test('the chain writes no scheduled turn at all (BR-141)', () async {
       await seed(cardCount: 2, withExample: const <String>{'c0', 'c1'});
 
-      final session = await StartStudySessionUseCase(
-        repository,
-      ).call(deckId: 'd1', kind: StudySessionKind.learning, now: now);
+      final session = await StartStudySessionUseCase(repository).call(
+        deckId: 'd1',
+        kind: StudySessionKind.learning,
+        now: now,
+        utcOffset: Duration.zero,
+      );
       await playThrough(session.session.id);
 
       final kinds = await rows('SELECT DISTINCT kind FROM study_answers');
@@ -171,9 +177,12 @@ void main() {
 
     test('invariants 24 and 28 hold after the whole flow', () async {
       await seed(cardCount: 3, withExample: const <String>{'c0'});
-      final session = await StartStudySessionUseCase(
-        repository,
-      ).call(deckId: 'd1', kind: StudySessionKind.learning, now: now);
+      final session = await StartStudySessionUseCase(repository).call(
+        deckId: 'd1',
+        kind: StudySessionKind.learning,
+        now: now,
+        utcOffset: Duration.zero,
+      );
       await playThrough(session.session.id);
 
       expect(
@@ -196,9 +205,12 @@ void main() {
   group('what happens next', () {
     /// Learns everything, so the deck holds only due-or-not-yet-due cards.
     Future<void> learnEverything() async {
-      final session = await StartStudySessionUseCase(
-        repository,
-      ).call(deckId: 'd1', kind: StudySessionKind.learning, now: now);
+      final session = await StartStudySessionUseCase(repository).call(
+        deckId: 'd1',
+        kind: StudySessionKind.learning,
+        now: now,
+        utcOffset: Duration.zero,
+      );
       await playThrough(session.session.id);
     }
 
@@ -214,6 +226,7 @@ void main() {
           kind: StudySessionKind.reviewing,
           reviewMode: StudyMode.match,
           now: now,
+          utcOffset: Duration.zero,
         ),
         throwsA(isA<ConflictFailure>()),
       );
@@ -229,6 +242,7 @@ void main() {
         kind: StudySessionKind.reviewing,
         reviewMode: StudyMode.match,
         now: tomorrow,
+        utcOffset: Duration.zero,
       );
       final card = (await repository.nextTurn(session.session.id))!.cardId;
 
@@ -263,9 +277,12 @@ void main() {
 
     test('the two card sets never overlap (BR-142, BR-151)', () async {
       await seed(cardCount: 4, withExample: const <String>{'c0'});
-      final session = await StartStudySessionUseCase(
-        repository,
-      ).call(deckId: 'd1', kind: StudySessionKind.learning, now: now);
+      final session = await StartStudySessionUseCase(repository).call(
+        deckId: 'd1',
+        kind: StudySessionKind.learning,
+        now: now,
+        utcOffset: Duration.zero,
+      );
       await playThrough(session.session.id);
 
       final summary = await repository.watchStudyEntry('d1', now: now).first;
