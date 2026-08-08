@@ -2,11 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/features/study/domain/models/guess_mode.dart';
 import 'package:memox/features/study/domain/models/match_mode.dart';
 import 'package:memox/features/study/domain/models/study_turn_model.dart';
-import 'package:memox/features/study/presentation/widgets/items/guess_option_item_widget.dart';
-import 'package:memox/features/study/presentation/widgets/sections/guess_question_section_widget.dart';
 import 'package:memox/features/study/presentation/widgets/sections/match_board_section_widget.dart';
 
 import 'package:memox/core/theme/app_semantic_colors.dart';
