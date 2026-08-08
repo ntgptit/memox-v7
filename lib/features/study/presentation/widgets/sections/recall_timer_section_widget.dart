@@ -86,9 +86,15 @@ class _RecallTimerSectionWidgetState extends State<RecallTimerSectionWidget>
   void didUpdateWidget(RecallTimerSectionWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (oldWidget.turn.cardId == widget.turn.cardId) return;
+    // **The card *and* the round** — see `StudyTurnModel.isSameTurnAs`. A recall
+    // turn that runs out of time is enrolled into the next round, which serves
+    // the same `cardId`; comparing ids alone kept `_outcome` claimed and drew
+    // "this turn is settled" over a live question, with no way forward. It only
+    // appeared once a turn actually timed out, which is why the integration
+    // suite found it on a slow device and never on a fast one.
+    if (oldWidget.turn.isSameTurnAs(widget.turn)) return;
 
-    // A new card is a new turn: full limit, and the outcome claim released.
+    // A new turn: full limit, and the outcome claim released.
     _outcome = null;
     _remaining = widget.initialRemaining ?? kRecallTurnLimit;
     _start();

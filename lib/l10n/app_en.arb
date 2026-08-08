@@ -1354,7 +1354,7 @@
   "@studyBrowsePreviousCard": {
     "description": "Steps back to a card already seen in this round (BR-155). Looking only — nothing is re-recorded and the queue does not move. Named as a control because the swipe that does the same thing is unreachable to a screen reader."
   },
-  "studyBrowseLookingBack": "Looking back — nothing is being recorded",
+  "studyBrowseLookingBack": "Looking back — swipe left to return",
   "@studyBrowseLookingBack": {
     "description": "Replaces the hint line while an already-seen card is on screen (BR-155), so the user is not left thinking the session has gone backwards."
   },
@@ -1444,9 +1444,27 @@
     },
     "description": "Takes the counter's place in the top bar during a recall turn (BR-128). Spelled out rather than a bare number because it is also what a screen reader announces — the clock must not be readable only by its colour."
   },
-  "studyHintBrowse": "Read both sides, then continue",
+  "studyHintBrowse": "Swipe left for the next card, right to look back",
   "@studyHintBrowse": {
-    "description": "Bottom hint line for browse. Only forward: there is no swipe back, because nothing says what going back would do to the cursor."
+    "description": "Bottom hint line for browse, and the only instruction the mode gives. Both directions since BR-155; going back is looking, so the wording says look rather than return."
+  },
+  "studyFrameSetLearning": "{count, plural, =1{1 NEW CARD} other{{count} NEW CARDS}}",
+  "@studyFrameSetLearning": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "The context line of a `learning` session (BR-142). The deck name and the word Learning said nothing a learner acts on; how many cards this session holds does. Uppercase is safe here and not on a deck name — nothing in it is content the user typed."
+  },
+  "studyFrameSetReviewing": "{count, plural, =1{1 CARD DUE} other{{count} CARDS DUE}}",
+  "@studyFrameSetReviewing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "The same line for a `reviewing` session. Never both counts on one line — BR-142 keeps the two sets apart, and a session holds exactly one of them."
   },
   "studyHintSelfAssess": "Flip the card, then say how it went",
   "@studyHintSelfAssess": {

@@ -53,7 +53,10 @@ class _FillAnswerSectionWidgetState extends State<FillAnswerSectionWidget> {
   void didUpdateWidget(FillAnswerSectionWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (oldWidget.turn.cardId == widget.turn.cardId) return;
+    // The round too, not the id alone: a card answered wrongly comes back in
+    // the next round with the same id, and a field still holding the last
+    // attempt is a turn the user cannot start clean (`isSameTurnAs`).
+    if (oldWidget.turn.isSameTurnAs(widget.turn)) return;
 
     // A new card starts clean: empty field, hint unused, gradable again.
     _input.clear();

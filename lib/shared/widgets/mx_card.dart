@@ -38,7 +38,7 @@ import '../../core/theme/theme_context_extension.dart';
 /// card that wrapped the whole `DecoratedBox` in one drew every state underneath
 /// an opaque surface colour — a tappable card with no visible feedback at all.
 /// The `Material` is transparent and hosts only the ink; the ripple is clipped to
-/// the same [AppRadius.lg] the border uses, and the card looks identical when
+/// the same [radius] the border uses, and the card looks identical when
 /// [onTap] is null.
 ///
 /// **Every interaction state is declared, and until this task none of them was.**
@@ -55,12 +55,21 @@ class MxCard extends StatefulWidget {
     required this.child,
     this.padding = const EdgeInsets.all(AppSpacing.lg),
     this.elevation = AppElevation.card,
+    this.radius = AppRadius.lg,
     this.onTap,
     super.key,
   });
 
   final Widget child;
   final EdgeInsetsGeometry padding;
+
+  /// The corner, for the one card that wants a different one.
+  ///
+  /// [AppRadius.xl] is the study card: a surface filling the screen reads
+  /// tighter at the same corner as a list row does. Every other caller leaves
+  /// this alone, and the four places the radius is used below — border, clip,
+  /// ink and focus ring — all read it, so they cannot disagree.
+  final double radius;
 
   /// How far this card sits above the page. [AppElevation.none] returns it to a
   /// flat bordered panel, which is what a card *inside* another surface wants —
@@ -104,7 +113,7 @@ class _MxCardState extends State<MxCard> {
         : Border.all(color: context.semanticColors.borderSubtle);
     final decoration = BoxDecoration(
       color: scheme.surface,
-      borderRadius: BorderRadius.circular(AppRadius.lg),
+      borderRadius: BorderRadius.circular(widget.radius),
       border: border,
       boxShadow: shadowsFor(widget.elevation, scheme),
     );
@@ -117,7 +126,7 @@ class _MxCardState extends State<MxCard> {
     // `antiAlias`, not `hardEdge`: a 16px curve stepped by whole pixels is
     // visible against a hairline border.
     final content = ClipRRect(
-      borderRadius: BorderRadius.circular(AppRadius.lg),
+      borderRadius: BorderRadius.circular(widget.radius),
       child: Padding(padding: widget.padding, child: widget.child),
     );
 
@@ -148,7 +157,7 @@ class _MxCardState extends State<MxCard> {
             // set from three different places. It also clips to the card's own
             // corner, because `borderRadius` below governs the whole ink layer.
             overlayColor: AppInteractionStates.cardOverlay(scheme),
-            borderRadius: BorderRadius.circular(AppRadius.lg),
+            borderRadius: BorderRadius.circular(widget.radius),
             child: content,
           ),
         ),

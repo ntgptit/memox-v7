@@ -110,7 +110,7 @@ void main() {
 
     // The deck name comes from the same read as the session (AD-13), so it is
     // on screen without a second query.
-    expect(find.text('Korean · Review'), findsOneWidget);
+    expect(find.textContaining('CARDS DUE'), findsOneWidget);
     expect(find.text('2 / 5'), findsOneWidget);
     expect(find.text('Flip the card, then say how it went'), findsOneWidget);
     expect(find.text('사과'), findsOneWidget);

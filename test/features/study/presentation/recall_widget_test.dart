@@ -22,11 +22,12 @@ void main() {
     String back = 'công',
     String? hint,
     String? example,
+    int round = 1,
   }) => StudyTurnModel(
     item: StudyQueueItemEntity(
       sessionId: 's1',
       mode: StudyMode.recall,
-      round: 1,
+      round: round,
       cardId: id,
       position: 0,
       status: StudyQueueItemStatus.pending,
@@ -35,11 +36,11 @@ void main() {
       remainingMs: null,
       isRevealed: false,
     ),
-    progress: const StudyStageProgressModel(
-      round: 1,
+    progress: StudyStageProgressModel(
+      round: round,
       done: 0,
       total: 1,
-      completedCardIds: <String>[],
+      completedCardIds: const <String>[],
     ),
     card: StudyCardModel(
       id: id,
@@ -182,6 +183,39 @@ void main() {
 
       // A turn of a different card is a different turn.
       expect(reported.last.inSeconds, 19);
+
+      await tester.pump(kRecallTurnLimit);
+    });
+
+    testWidgets('the same card in a later round is a new turn (BR-116)', (
+      tester,
+    ) async {
+      // **The bug this is here for shipped, and only a slow device found it.**
+      // A recall turn that runs out of time is enrolled into the next round,
+      // and that round serves the **same** `cardId`. The widget compared ids
+      // alone, read the new turn as the old one, kept its outcome claimed — and
+      // drew "this turn is settled" over a live question with nothing to press.
+      // The integration suite hit it the first time a turn actually timed out.
+      await tester.pumpWidget(
+        wrapForTest(
+          RecallTimerSectionWidget(turn: turnOf('c1'), onOutcome: (_) {}),
+        ),
+      );
+      await tester.pump(kRecallTurnLimit);
+      expect(find.text('Show answer'), findsNothing, reason: 'timed out');
+
+      await tester.pumpWidget(
+        wrapForTest(
+          RecallTimerSectionWidget(
+            turn: turnOf('c1', round: 2),
+            onOutcome: (_) {},
+          ),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 100));
+
+      // Answerable again, because it is a question the user has not answered.
+      expect(find.text('Show answer'), findsOneWidget);
 
       await tester.pump(kRecallTurnLimit);
     });

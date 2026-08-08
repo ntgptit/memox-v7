@@ -3,6 +3,7 @@
 :root{
   --radius-sm:8px;   /* chips, badges, small indicators */
   --radius-md:12px;  /* buttons and inputs */
-  --radius-lg:16px;  /* cards and sheets — the review card itself */
+  --radius-lg:16px;  /* cards and sheets */
+  --radius-xl:20px;  /* the study card — the one surface a screen is built around */
   --radius-pill:999px;
 }

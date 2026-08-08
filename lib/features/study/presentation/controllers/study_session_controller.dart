@@ -83,7 +83,6 @@ class StudySessionController extends _$StudySessionController {
       if (!ref.mounted) return;
       state = state.copyWith(
         session: opened.session,
-        deckName: opened.deckName,
         schedulerType: opened.schedulerType,
         actions: opened.actions,
         sessionCards: opened.cards,

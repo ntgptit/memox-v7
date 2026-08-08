@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_stroke.dart';
 import '../../../../../core/theme/app_typography.dart';
@@ -7,7 +8,6 @@ import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../../../shared/widgets/mx_card.dart';
-import '../../../../../shared/widgets/mx_icon_button.dart';
 import '../../../domain/models/study_action_model.dart';
 import '../../../domain/models/study_turn_model.dart';
 import '../support/study_labels_widget.dart';
@@ -31,7 +31,6 @@ class StudyCardFaceSectionWidget extends StatelessWidget {
     required this.onAction,
     required this.onContinue,
     this.viewedCard,
-    this.onBack,
     this.shouldShowBackImmediately = false,
     this.isLocked = false,
     super.key,
@@ -46,14 +45,6 @@ class StudyCardFaceSectionWidget extends StatelessWidget {
   /// the answerable card, because those belong to the turn rather than to
   /// whatever is being looked at.
   final StudyCardModel? viewedCard;
-
-  /// Steps back along the trail of cards already seen (BR-155).
-  ///
-  /// **Null when there is nothing behind**, which is also what hides the
-  /// control. It exists because the gesture alone would make the trail
-  /// unreachable to anyone who cannot make a 70px horizontal drag — a screen
-  /// reader in particular has no way to perform one.
-  final VoidCallback? onBack;
 
   /// Empty for `browse`, which produces no action (BR-111).
   final List<StudyAction> actions;
@@ -77,7 +68,6 @@ class StudyCardFaceSectionWidget extends StatelessWidget {
     onAction: onAction,
     onContinue: onContinue,
     viewedCard: viewedCard,
-    onBack: onBack,
     shouldShowBackImmediately: shouldShowBackImmediately,
     isLocked: isLocked,
   );
@@ -90,7 +80,6 @@ class _StudyCardFaceView extends StatefulWidget {
     required this.onAction,
     required this.onContinue,
     required this.viewedCard,
-    required this.onBack,
     required this.shouldShowBackImmediately,
     required this.isLocked,
   });
@@ -100,7 +89,6 @@ class _StudyCardFaceView extends StatefulWidget {
   final ValueChanged<StudyAction> onAction;
   final VoidCallback onContinue;
   final StudyCardModel? viewedCard;
-  final VoidCallback? onBack;
   final bool shouldShowBackImmediately;
   final bool isLocked;
 
@@ -115,9 +103,11 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
   void didUpdateWidget(_StudyCardFaceView oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // A new card arrives face down. Without this the flip state survives into
-    // the next card, and every card after the first shows its answer already.
-    if (oldWidget.turn.cardId != widget.turn.cardId) _isRevealed = false;
+    // A new turn arrives face down. Without this the flip state survives into
+    // the next card, and every card after the first shows its answer already —
+    // including the same card coming back in a later round, which is what
+    // `isSameTurnAs` is for.
+    if (!oldWidget.turn.isSameTurnAs(widget.turn)) _isRevealed = false;
   }
 
   bool get _showsBack => widget.shouldShowBackImmediately || _isRevealed;
@@ -131,6 +121,7 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
     final texts = context.texts;
 
     final l10n = context.l10n;
+    final controls = _controls(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -150,6 +141,10 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
             // full width between the side insets, which is what makes it a
             // fold rather than a separator dropped between two blocks.
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            // The focal surface of the app gets the focal corner. Every other
+            // card keeps `AppRadius.lg`; this one fills the screen, and the
+            // same corner reads tighter at that size.
+            radius: AppRadius.xl,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
@@ -196,8 +191,14 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
             ),
           ),
         ),
-        const SizedBox(height: AppSpacing.xl),
-        ..._controls(context),
+        // **The gap belongs to the controls, so it goes when they do.** `browse`
+        // draws none (BR-155), and a fixed gap under the card left 24px of
+        // nothing below it — the exact shape of the complaint this screen was
+        // rebuilt to answer.
+        if (controls.isNotEmpty) ...<Widget>[
+          const SizedBox(height: AppSpacing.xl),
+          ...controls,
+        ],
       ],
     );
   }
@@ -206,36 +207,14 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
     // `browse` grades nothing, so it gets one way forward and no judgement to
     // make (BR-111). Showing it disabled action buttons would ask a question it
     // is not allowed to record an answer to.
-    if (widget.actions.isEmpty) {
-      final onBack = widget.onBack;
-
-      return <Widget>[
-        Row(
-          children: <Widget>[
-            // **The gesture is not the only way back** (BR-155). A 70px
-            // horizontal drag is unavailable to anyone driving the app with a
-            // screen reader or a switch, so the trail would exist and be
-            // unreachable. Absent — not disabled — at the front of a round,
-            // where a disabled control would advertise a place to go that
-            // there is no way to get to.
-            if (onBack != null) ...<Widget>[
-              MxIconButton(
-                icon: Icons.arrow_back,
-                semanticLabel: context.l10n.studyBrowsePreviousCard,
-                onPressed: widget.isLocked ? null : onBack,
-              ),
-              const SizedBox(width: AppSpacing.sm),
-            ],
-            Expanded(
-              child: MxActionButton(
-                label: context.l10n.studyContinueAction,
-                onPressed: widget.isLocked ? null : widget.onContinue,
-              ),
-            ),
-          ],
-        ),
-      ];
-    }
+    // **`browse` has no controls, because it has nothing to ask** (BR-111).
+    // Moving between cards is the swipe (BR-155), and a Next button beside it
+    // was a second way to do the one thing the gesture already does — while
+    // taking a band of the screen from the card, which is the whole content of
+    // this mode. What the button was carrying for accessibility is now a pair
+    // of custom semantics actions on the swipe itself, so a screen reader has
+    // the same two moves without anything being drawn.
+    if (widget.actions.isEmpty) return const <Widget>[];
 
     if (!_showsBack) {
       return <Widget>[

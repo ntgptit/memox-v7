@@ -10,5 +10,5 @@
   --space-xxl:32px; /* around a lone focal element */
   /* A floor, not a step: smallest side of anything a finger has to hit. */
   --touch-target-min:48px;
-  --icon-sm:16px;--icon-md:24px;--icon-lg:40px;
+  --icon-sm:16px;--icon-md:24px;--icon-md-compact:20px;--icon-lg:40px;
 }

@@ -2,9 +2,11 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 
 import '../../../../../core/theme/app_durations.dart';
 import '../../../../../core/theme/app_motion_policy.dart';
+import '../../../../../l10n/l10n_extension.dart';
 
 /// How far a drag must travel before it counts as a swipe.
 ///
@@ -145,6 +147,31 @@ class _StudySwipeDeckWidgetState extends State<StudySwipeDeckWidget>
     // the platform flag can change while the session is open.
     _settle.duration = AppMotionPolicy.durationOf(context, AppDurations.normal);
 
+    final l10n = context.l10n;
+
+    // **The gesture is not the only way through** (BR-155). A 70dp horizontal
+    // drag cannot be performed by a screen reader or a switch, so without this
+    // the mode would have no way forward at all once its button was removed.
+    // Custom actions put both moves in the reader's action menu and draw
+    // nothing — which is the point: the card is the content of this mode, and a
+    // button beside it was a band of screen doing what the swipe does.
+    //
+    // Back is offered only when there is somewhere to go, for the same reason a
+    // disabled button would have been wrong: an action that does nothing is
+    // worse than an action that is not there.
+    return Semantics(
+      customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
+        CustomSemanticsAction(label: l10n.studyContinueAction):
+            widget.onForward,
+        if (widget.canGoBack)
+          CustomSemanticsAction(label: l10n.studyBrowsePreviousCard):
+              widget.onBack,
+      },
+      child: _gestureLayer(),
+    );
+  }
+
+  Widget _gestureLayer() {
     return GestureDetector(
       // Horizontal only: the card's halves scroll vertically at a large text
       // scale, and claiming the vertical axis here would take that away.

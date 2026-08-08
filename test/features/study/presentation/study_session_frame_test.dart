@@ -6,6 +6,7 @@ import 'package:memox/features/study/domain/models/study_mode.dart';
 import 'package:memox/features/study/domain/models/study_session_kind_model.dart';
 import 'package:memox/features/study/domain/models/study_turn_model.dart';
 import 'package:memox/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart';
+import 'package:memox/shared/widgets/mx_progress_bar.dart';
 
 import 'support/study_widget_harness.dart';
 
@@ -25,7 +26,7 @@ void main() {
   }) => StudySessionFrameSectionWidget(
     mode: mode,
     kind: kind,
-    deckName: 'Korean',
+    cardCount: 12,
     progress: progress,
     timeLeft: timeLeft,
     onClose: onClose ?? () {},
@@ -112,18 +113,25 @@ void main() {
     },
   );
 
-  testWidgets('the context line names the deck and the session kind', (
+  testWidgets('the context line sizes the session and names its set', (
     tester,
   ) async {
-    // §7.2, BR-142: one card set, named. Never "12 NEW · 11 REVIEW" side by
-    // side, which is the design the ruling threw out.
+    // §7.2, BR-142: **one** card set, sized. Never "12 NEW · 11 REVIEW" side by
+    // side — a session holds one of the two sets, so a line showing both is
+    // describing two sessions.
+    //
+    // It used to read `Korean · Learning`. The deck was chosen two screens ago
+    // and "Learning" repeats the chip beside it; between them they gave a
+    // learner nothing to act on. How many cards there are is the number the
+    // bar is measured against.
+    //
     // `guess`, because `match` adds a round to this line and the pair being
-    // checked here is deck and kind.
+    // checked here is the count and the set.
     await pumpFrame(
       tester,
       frame(mode: StudyMode.guess, kind: StudySessionKind.learning),
     );
-    expect(find.text('Korean · Learning'), findsOneWidget);
+    expect(find.text('12 NEW CARDS'), findsOneWidget);
 
     // Named even though it is the default: the pair is the point of the test,
     // and a reader should not have to look up which one the helper picks.
@@ -133,14 +141,14 @@ void main() {
       // ignore: avoid_redundant_argument_values
       frame(mode: StudyMode.guess, kind: StudySessionKind.reviewing),
     );
-    expect(find.text('Korean · Review'), findsOneWidget);
+    expect(find.text('12 CARDS DUE'), findsOneWidget);
   });
 
   testWidgets('every mode gets its own hint line, and it comes from ARB', (
     tester,
   ) async {
     const hints = <StudyMode, String>{
-      StudyMode.browse: 'Read both sides, then continue',
+      StudyMode.browse: 'Swipe left for the next card, right to look back',
       StudyMode.selfAssess: 'Flip the card, then say how it went',
       StudyMode.match: 'Tap a term, then its meaning',
       StudyMode.guess: 'Choose the right meaning',
@@ -257,10 +265,7 @@ void main() {
       ),
     );
 
-    expect(
-      find.text('Korean · Review · Round 2 · 5 pairs left'),
-      findsOneWidget,
-    );
+    expect(find.text('12 CARDS DUE · Round 2 · 5 pairs left'), findsOneWidget);
   });
 
   testWidgets('and no other mode adds anything to that line', (tester) async {
@@ -268,6 +273,36 @@ void main() {
     // that says round for every mode.
     await pumpFrame(tester, frame(mode: StudyMode.guess));
 
-    expect(find.text('Korean · Review'), findsOneWidget);
+    expect(find.text('12 CARDS DUE'), findsOneWidget);
+  });
+
+  testWidgets('the progress track gets what the row does not need', (
+    tester,
+  ) async {
+    // **Measured, because the failure was invisible to every other test.** A
+    // bare `Flexible` defaults to `flex: 1`, so the pill and the counter were
+    // each allocated a third of the free space, took what they needed, and left
+    // the rest as dead space at the end of the row: at 393 wide the track was
+    // 108px with 118px of nothing after the counter. Nothing overflowed and
+    // nothing was missing — it simply read as an indicator rather than a
+    // measure, which is not something an assertion about text can see.
+    tester.view.physicalSize = const Size(393, 852);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await pumpFrame(tester, frame(mode: StudyMode.browse));
+
+    final row = tester.getRect(find.byType(Row).first);
+    final bar = tester.getRect(find.byType(MxProgressBar));
+    final figure = tester.getRect(find.text('3 / 8'));
+
+    expect(
+      bar.width,
+      greaterThan(row.width * 0.5),
+      reason: 'the track is back to a share of the row; it was ${bar.width}',
+    );
+    // And the row ends where its last child ends. Slack here is the symptom:
+    // it is space the track was refused.
+    expect(figure.right, closeTo(row.right, 1));
   });
 }

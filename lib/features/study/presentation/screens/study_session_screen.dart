@@ -112,7 +112,7 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
           : StudySessionFrameSectionWidget(
               mode: session.currentMode,
               kind: session.kind,
-              deckName: state.deckName,
+              cardCount: state.sessionCards.length,
               progress: turn.progress,
               timeLeft: session.currentMode == StudyMode.recall
                   ? _recallRemaining

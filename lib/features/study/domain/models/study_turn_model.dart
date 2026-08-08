@@ -89,4 +89,19 @@ abstract class StudyTurnModel with _$StudyTurnModel {
   const StudyTurnModel._();
 
   String get cardId => card.id;
+
+  /// Whether [other] is the same turn, which is **not** the same card.
+  ///
+  /// **A card comes back** (BR-116). A stage enrols a card it was answered
+  /// wrongly on into the next round, and that round serves the same `cardId` —
+  /// so a mode widget asking "is this still the turn I was drawing?" by id
+  /// alone answers yes to a turn the user has not answered yet, and keeps
+  /// whatever it was holding: a revealed back, a typed answer, a settled
+  /// outcome. All three of those shipped, and the last one drew "this turn is
+  /// settled" over a live question with no way forward.
+  ///
+  /// It lives here rather than in each widget because three of them had already
+  /// spelled it the short way, and a fourth would have too.
+  bool isSameTurnAs(StudyTurnModel other) =>
+      cardId == other.cardId && item.round == other.item.round;
 }

@@ -7,6 +7,7 @@ import 'package:memox/features/study/presentation/widgets/sections/guess_questio
 import 'package:memox/features/study/presentation/widgets/sections/match_board_section_widget.dart';
 import 'package:memox/features/study/presentation/widgets/sections/recall_timer_section_widget.dart';
 import 'package:memox/features/study/presentation/widgets/sections/study_card_face_section_widget.dart';
+import 'package:memox/features/study/presentation/widgets/support/study_swipe_deck_widget.dart';
 import 'package:memox/shared/widgets/mx_search_field.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
 

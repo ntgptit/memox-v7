@@ -13,6 +13,11 @@ part of 'it_robot.dart';
 /// suite times out — which is the failure mode that once cost 34 minutes.
 const int _kMaxStudyTurns = 60;
 
+/// How far a swipe travels. Comfortably past `kStudySwipeThreshold`, so a change
+/// to the threshold shows up as a failing card change rather than as a robot
+/// that silently stops advancing.
+const double _kSwipeTravel = 160;
+
 extension ItRobotStudyDriving on ItRobot {
   /// Answers the turn on screen correctly, whichever stage it belongs to.
   ///
@@ -119,14 +124,20 @@ extension ItRobotStudyDriving on ItRobot {
     return true;
   }
 
-  /// `browse` moves on; `self_assess` takes the action straight from the user.
+  /// `browse` is swiped past; `self_assess` takes the action from the user.
   Future<bool> _answerCardFace() async {
     if (find.byType(StudyCardFaceSectionWidget).evaluate().isEmpty) {
       return false;
     }
 
-    if (find.text(ItText.studyContinue).evaluate().isNotEmpty) {
-      await tapText(ItText.studyContinue);
+    // **`browse` has no control at all** (BR-111, BR-155). It used to have a
+    // Next button and this robot tapped it; the button was removed because
+    // moving between cards is the swipe, and the band of screen it took belongs
+    // to the card, which is the entire content of this mode.
+    final deck = find.byType(StudySwipeDeckWidget);
+    if (deck.evaluate().isNotEmpty) {
+      await _tester.drag(deck, const Offset(-_kSwipeTravel, 0));
+      await _harness.settle();
 
       return true;
     }
