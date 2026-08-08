@@ -529,6 +529,7 @@ vì một question mượn bốn thẻ khác để dựng.
 | BR-153 | active | `match` MUST có ít nhất **hai** cặp trên bàn. Một cặp duy nhất làm đáp án hiển nhiên, nên stage MUST bị bỏ qua (phiên `learning`) hoặc vô hiệu hoá trên màn chọn (phiên `reviewing`) theo BR-99. | domain + UI | BR-99, BR-115 |
 | BR-150 | active | Badge trên danh sách deck MUST hiện **hai số** theo đúng hai tập của BR-142: số thẻ chưa học và số thẻ đến hạn ôn. MUST NOT gộp thành một số — hai tập có chi phí rất khác nhau. | UI | BR-142, BR-90 |
 | BR-151 | active | Pill lọc trên danh sách thẻ MUST dùng cùng định nghĩa: **New** = `learned_at IS NULL` (BR-90); **Due** = `learned_at IS NOT NULL AND due_at <= now`. Hai tập MUST rời nhau. | UI + db | BR-90, BR-142 |
+| BR-155 | active | Chỉ stage `browse` MUST cho xem lại thẻ đã qua trong cùng round, bằng vuốt hoặc bằng một control tương đương. Đây là **xem, không phải trả lời**: thẻ MUST giữ nguyên `completed`, `study_sessions.cursor` MUST NOT lùi, và tiến lại qua thẻ đó MUST NOT ghi lượt thứ hai hay tăng `cursor` lần hai. Các stage khác MUST NOT có thao tác này. | UI + domain | BR-111, BR-25, BR-126 |
 | BR-152 | active | Reset MUST đặt `learned_at` và `due_at` cùng về NULL. MUST NOT để thẻ có `learned_at` mà không có lịch (BR-149). | repository | BR-42, BR-149 |
 | BR-142 | active | MUST có đúng hai loại phiên, lưu trên `study_sessions.session_kind`: **`learning`** lấy thẻ `learned_at IS NULL`, và **`reviewing`** lấy thẻ `learned_at IS NOT NULL AND due_at <= now`. Một phiên MUST NOT trộn hai tập. | db | BR-23, BR-144 |
 | BR-143 | active | `kind = 'learning'` MUST dành cho lượt trong chuỗi học mới: ghi lịch sử, không đổi lịch. MUST NOT xuất hiện trong phiên `reviewing`. | db | BR-75, BR-141 |
@@ -647,6 +648,24 @@ list và query `cardsDueForStudy` implement. Trong mô hình mới, `due_at IS N
 không còn nghĩa "đến hạn ngay" mà nghĩa "chưa học xong", nên một con số gom cả
 hai đang trộn hai việc có chi phí khác hẳn nhau: 20 thẻ mới tốn gấp năm lần 20
 thẻ ôn. BR-150 và BR-151 đưa hai con số đó về đúng ngôn ngữ mà popup Study dùng.
+
+**BR-155 tồn tại vì `browse` là stage duy nhất không có câu hỏi nào.** Năm stage
+còn lại đều lấy một câu trả lời từ thẻ đang hiện; đặt một thẻ đã trả lời lên đó
+là mời người dùng chấm lại thứ phiên đã chấm — BR-126 nói mỗi câu hỏi sinh tối đa
+một lượt, và một màn cho phép quay lại thẻ đã chấm là đường đi thẳng tới lượt thứ
+hai. `browse` không chấm gì (BR-111), nên quay lại nó không mâu thuẫn với điều gì.
+
+Chỗ dễ sai là **lùi rồi tiến**. Nếu lùi làm `cursor` giảm thì tiến lại sẽ đi qua
+`markBrowsed` một lần nữa: thẻ được ghi hai lần và bộ đếm nhảy quá tay. Vì vậy
+BR-155 nói rõ lùi **không** đụng tới queue — nó chỉ đổi thẻ nào đang được vẽ. Bộ
+đếm và thanh tiến trình vẫn mô tả lượt đang mở, nên màn hình MUST nói rõ đang xem
+lại; nếu không, một thẻ đã qua trông như phiên vừa tự lùi.
+
+Chỗ dễ sai thứ hai là **thứ tự của vết đã xem**. Danh sách thẻ đã xong của một
+round trước đây được đọc không kèm `ORDER BY`; `match` dùng nó như một tập nên
+không thấy gì, còn `browse` đi ngược nó nên thứ tự là bắt buộc. Câu truy vấn nay
+sắp theo `position` — thứ tự queue phục vụ, cũng chính là thứ tự người dùng đã
+thấy trong một round phục vụ mỗi thẻ đúng một lần.
 
 **BR-152 tồn tại vì invariant 24 đã bắt được một mâu thuẫn.** Reset xoá lịch;
 nếu nó giữ `learned_at` thì mỗi lần reset sẽ để lại một thẻ "đã học xong nhưng

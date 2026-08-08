@@ -94,6 +94,72 @@ void main() {
       expect(find.text('Remembered'), findsNothing);
       expect(find.text('Next'), findsOneWidget);
     });
+
+    testWidgets('the trail has a control, not only a gesture (BR-155)', (
+      tester,
+    ) async {
+      // A 70px horizontal drag is unavailable to a screen reader, so a
+      // swipe-only trail is a feature that exists and cannot be reached. The
+      // control is **absent** at the front of a round rather than disabled: a
+      // disabled button advertises somewhere there is no way to go.
+      var steps = 0;
+      await pump(
+        tester,
+        actions: const <StudyAction>[],
+        shouldShowBackImmediately: true,
+      );
+      expect(find.bySemanticsLabel('Previous card'), findsNothing);
+
+      await tester.pumpWidget(
+        wrapForTest(
+          StudyCardFaceSectionWidget(
+            turn: turnOf('c1'),
+            actions: const <StudyAction>[],
+            onAction: (_) {},
+            onContinue: () {},
+            onBack: () => steps += 1,
+            shouldShowBackImmediately: true,
+          ),
+          isScrollable: false,
+        ),
+      );
+
+      await tester.tap(find.bySemanticsLabel('Previous card'));
+      await tester.pump();
+
+      expect(steps, 1);
+      // And it is a second way through, not a replacement: forward stays.
+      expect(find.text('Next'), findsOneWidget);
+    });
+
+    testWidgets('an earlier card is drawn in place of the turn-s (BR-155)', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrapForTest(
+          StudyCardFaceSectionWidget(
+            turn: turnOf('c1'),
+            viewedCard: const StudyCardModel(
+              id: 'c0',
+              front: 'front-c0',
+              back: 'back-c0',
+              example: null,
+              hint: null,
+              pronunciation: null,
+              backFolded: 'back-c0',
+            ),
+            actions: const <StudyAction>[],
+            onAction: (_) {},
+            onContinue: () {},
+            shouldShowBackImmediately: true,
+          ),
+          isScrollable: false,
+        ),
+      );
+
+      expect(find.text('front-c0'), findsOneWidget);
+      expect(find.text('front-c1'), findsNothing);
+    });
   });
 
   group('self_assess', () {

@@ -8,7 +8,6 @@ import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_empty_state.dart';
 import '../../../../shared/widgets/mx_error_state.dart';
 import '../../../../shared/widgets/mx_loading_state.dart';
-import '../../domain/models/study_action_model.dart';
 import '../../domain/models/study_mode.dart';
 import '../../domain/models/study_session_kind_model.dart';
 import '../controllers/study_session_controller.dart';
@@ -119,6 +118,12 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
                   ? _recallRemaining
                   : null,
               onClose: () => unawaited(_controller.leave()),
+              // BR-155: the chrome keeps describing the live turn, so the one
+              // line that speaks to the user has to say the card under it is
+              // not that turn.
+              hintOverride: state.isLookingBack
+                  ? context.l10n.studyBrowseLookingBack
+                  : null,
               child: body,
             ),
     );
@@ -190,9 +195,13 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
                 ),
               ),
       // `browse` grades nothing, so moving on is the whole interaction
-      // (BR-111). The controller sees the mode and turns this into
-      // `markBrowsed`, discarding the action before it reaches any write.
-      onContinue: () => unawaited(_controller.answer(_noAction)),
+      // (BR-111). The controller decides whether that means marking the card
+      // browsed or stepping forward along the trail the user has swiped back
+      // along — a screen that decided it would be the thing marking a card
+      // browsed twice (BR-155).
+      onContinue: () =>
+          unawaited(_controller.browseStep(StudyBrowseStep.forward)),
+      onLookBack: () => unawaited(_controller.browseStep(StudyBrowseStep.back)),
     );
 
     // BR-124's blocking case, and it is **not** the finished state.
@@ -212,11 +221,3 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
         );
   }
 }
-
-/// The placeholder `browse` hands over, and which never reaches a write.
-///
-/// `answer` takes an action because five of the six modes produce one; `browse`
-/// does not (BR-111), and the controller drops this before touching the
-/// database. Named rather than written inline so the next reader asks what it is
-/// instead of assuming `browse` grades cards as remembered.
-const _noAction = StudyAction.remembered;

@@ -16,6 +16,7 @@ import '../sections/guess_question_section_widget.dart';
 import '../sections/match_board_section_widget.dart';
 import '../sections/recall_timer_section_widget.dart';
 import '../sections/study_card_face_section_widget.dart';
+import 'study_swipe_deck_widget.dart';
 
 /// What the session screen tells a mode's widget when an answer arrives.
 typedef StudyAnswerSink =
@@ -51,6 +52,9 @@ Widget? studyModeView({
   required StudySessionState state,
   required StudyAnswerSink onAnswer,
   required VoidCallback onContinue,
+
+  /// Steps back along `browse`'s trail of cards already seen (BR-155).
+  required VoidCallback onLookBack,
   ValueChanged<Duration>? onRecallTick,
   void Function({required Duration remaining, required bool isRevealed})?
   onRecallSuspend,
@@ -73,15 +77,29 @@ Widget? studyModeView({
   }
 
   final builders = <StudyMode, Widget? Function()>{
-    StudyMode.browse: () => StudyCardFaceSectionWidget(
-      turn: turn,
-      // `browse` produces no action at all (BR-111), so it gets no buttons and
-      // one way forward.
-      actions: const <StudyAction>[],
-      onAction: (_) {},
-      onContinue: onContinue,
-      shouldShowBackImmediately: true,
+    // **`browse` is the one mode that can be walked backwards** (BR-155). Every
+    // other mode takes an answer from the card on screen, so putting an
+    // already-answered card there would offer to grade what the session has
+    // graded — which is why the swipe wraps this entry alone rather than the
+    // body as a whole.
+    StudyMode.browse: () => StudySwipeDeckWidget(
+      cardKey: (state.viewedCard ?? turn.card).id,
+      canGoBack: state.canLookBack,
       isLocked: state.isSubmitting,
+      onForward: onContinue,
+      onBack: onLookBack,
+      child: StudyCardFaceSectionWidget(
+        turn: turn,
+        viewedCard: state.viewedCard,
+        onBack: state.canLookBack ? onLookBack : null,
+        // `browse` produces no action at all (BR-111), so it gets no buttons
+        // and one way forward.
+        actions: const <StudyAction>[],
+        onAction: (_) {},
+        onContinue: onContinue,
+        shouldShowBackImmediately: true,
+        isLocked: state.isSubmitting,
+      ),
     ),
     StudyMode.selfAssess: () => StudyCardFaceSectionWidget(
       turn: turn,

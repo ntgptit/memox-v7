@@ -23,6 +23,22 @@ import '../states/study_session_state.dart';
 
 part 'study_session_controller.g.dart';
 
+/// The placeholder `browse` hands over, and which never reaches a write.
+///
+/// [StudySessionController.answer] takes an action because five of the six modes
+/// produce one; `browse` does not (BR-111), and the branch for it drops this
+/// before touching the database. Named rather than written inline so the next
+/// reader asks what it is instead of assuming `browse` grades cards as
+/// remembered.
+const _browseHasNoAction = StudyAction.remembered;
+
+/// Which way a `browse` step goes (BR-155).
+///
+/// An enum rather than a boolean: `browseStep(true)` at a call site says
+/// nothing, and the two directions are not each other's negation — forward from
+/// the live turn writes, and nothing else here does.
+enum StudyBrowseStep { forward, back }
+
 /// Drives one study session.
 ///
 /// **It holds no rule.** Which card comes next, whether a forgotten one comes
@@ -168,6 +184,49 @@ class StudySessionController extends _$StudySessionController {
     }
   }
 
+  /// Moves `browse` one card along the round, either way (BR-155).
+  ///
+  /// **One name, because from the user's side it is one thing** — the same
+  /// swipe with the sign flipped, and the same trail walked in two directions.
+  /// Two methods would also put the "am I looking at history?" test in the
+  /// screen, and the screen would then be what decides whether a card gets
+  /// marked browsed, which is how a card already answered gets answered twice.
+  ///
+  /// **Going back writes nothing and moves nothing.** The card stays
+  /// `completed`, the session's `cursor` stays where it is, and stepping
+  /// forward again neither re-records the card nor advances past it a second
+  /// time — the queue is not consulted at all, because looking is not
+  /// answering. Only stepping forward *from the live turn* touches it.
+  ///
+  /// `browse` only. Every other mode takes an answer from the card on screen,
+  /// so putting an already-answered card there would offer to grade something
+  /// the session has already graded (BR-126).
+  Future<void> browseStep(StudyBrowseStep step) {
+    if (step == StudyBrowseStep.forward && !state.isLookingBack) {
+      return answer(_browseHasNoAction);
+    }
+
+    if (state.session?.currentMode != StudyMode.browse) {
+      return Future<void>.value();
+    }
+    if (state.isSubmitting) return Future<void>.value();
+
+    final next = step == StudyBrowseStep.back
+        ? state.browseLookBack + 1
+        : state.browseLookBack - 1;
+
+    // Off either end is a step there is nowhere to take. Clamping silently
+    // would make the gesture read as accepted; returning leaves the card where
+    // it is, which is what "refused" looks like.
+    if (next < 0 || next > state.seenCardIds.length) {
+      return Future<void>.value();
+    }
+
+    state = state.copyWith(browseLookBack: next);
+
+    return Future<void>.value();
+  }
+
   /// Reads what the session came to, once it has ended.
   ///
   /// **Read back rather than accumulated.** A running tally in the controller
@@ -298,6 +357,12 @@ class StudySessionController extends _$StudySessionController {
         session: session.copyWith(currentMode: mode),
         turn: turn,
         isAdvancing: false,
+        // **A new card arrives at the front of the trail** (BR-155). The offset
+        // counts backwards from the live turn, so one left over from the
+        // previous card would put a card the user has already walked past on
+        // screen in place of the one they just moved to — and nothing about the
+        // screen would say so.
+        browseLookBack: 0,
       );
     } on Object catch (error) {
       if (!ref.mounted) return;
