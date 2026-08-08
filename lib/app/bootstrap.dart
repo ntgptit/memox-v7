@@ -9,10 +9,6 @@ import '../core/database/app_database.dart';
 import '../core/database/app_database_provider.dart';
 import '../core/state/provider_observer.dart';
 import '../core/time/clock_provider.dart';
-import '../features/card/di/card_repository_provider.dart';
-import '../features/deck/di/deck_repository_provider.dart';
-import '../features/deck/di/deck_template_provider.dart';
-import '../features/study/di/study_repository_provider.dart';
 import 'di/repository_bindings.dart';
 import 'app.dart';
 import 'config/env_config.dart';
@@ -123,11 +119,8 @@ Widget buildRootWidget(
     envConfigProvider.overrideWithValue(config),
     // The composition root binding a contract to an implementation. Each
     // feature declares its provider as the domain type and never names the
-    // `*Impl`; these are the lines that do.
-    deckRepositoryProvider.overrideWith(deckRepositoryBinding),
-    cardRepositoryProvider.overrideWith(cardRepositoryBinding),
-    deckTemplateRepositoryProvider.overrideWith(deckTemplateRepositoryBinding),
-    studyRepositoryProvider.overrideWith(studyRepositoryBinding),
+    // `*Impl`; `repositoryBindingOverrides` is the list that does.
+    ...repositoryBindingOverrides(),
     if (database != null) appDatabaseProvider.overrideWithValue(database),
     if (now != null) clockProvider.overrideWithValue(now),
   ],

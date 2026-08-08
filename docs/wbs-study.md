@@ -7,7 +7,7 @@
 | **Scope** | Task còn lại của Study từ M5.7 trở đi · nợ kỹ thuật của Study · việc bị chặn |
 | **Source of truth for** | Trạng thái task Study từ M5.7 · nợ kỹ thuật của Study |
 | **Depends on** | `document-conventions.md` · `wbs.md` · `business-rules.md` · `use-cases.md` |
-| **Updated by task** | M5.14 đóng cùng UC-07 |
+| **Updated by task** | vá hồi quy IT do UC-07 gây ra |
 | **Last updated** | 2026-08-08 |
 
 `docs/wbs.md` giữ M5.0…M5.6 đã hoàn thành và không nhắc lại ở đây. File này giữ
@@ -763,7 +763,7 @@ phán quyết trước khi người dùng trả lời.
 | ~~IT chưa đi hết chuỗi 5 stage tới `learned_at`~~ | robot đọc bàn ghép và câu hỏi từ chính widget app vừa dựng; 20 lượt, 15 câu trả lời, 5 thẻ nhận `learned_at` | xong |
 | ~~`pause()` không có caller — nửa **ghi** của BR-133~~ | `RecallTimerSectionWidget.onSuspended` bắn khi app rời foreground với lượt còn mở; màn hình gọi `pause()`. Round-trip có test trên SQLite thật | xong |
 | ~~Màn Study chưa có mặt trong Widgetbook~~ | `StudyCatalogRepository` là fake riêng của catalog; ba màn Study đã đăng ký | xong ở M5.16 |
-| 10 kịch bản IT còn đỏ (từ 15) | nguyên nhân chung — fixture seed ghi đè `CLEAN-RESET` — đã sửa; 10 ca còn lại có nguyên nhân khác, và `IT-CARD-005` đã soi được một nửa: ở bước 4 màn hình vẫn là editor **tạo mới** với ô Front rỗng, tức `enterNthField(0, …)` không tới đích | lượt điều tra riêng — thuộc Card, không thuộc Study |
+| Kịch bản IT còn đỏ | **Hai hồi quy do phát triển, không phải nợ có sẵn** — xem mục dưới. Sau khi vá cả hai, phần còn lại vẫn cần một lượt đo trên cây sạch để quy trách nhiệm | lượt điều tra riêng |
 
 ### Nửa **ghi** của BR-133, đóng sau M5.16
 
@@ -844,6 +844,34 @@ phán quyết trước khi người dùng trả lời.
 - **Tests:** `it_study_test.dart` (+2, gồm khẳng định **một lượt mỗi thẻ mỗi
   stage chấm điểm**), `match_board_widget_test.dart` (+2),
   `it_robot_study.dart` — nửa lái phiên học của robot.
+
+### Suite IT đỏ vì hồi quy, không vì nợ có sẵn
+
+- **Status:** hai nguyên nhân đã tìm ra và vá; phần còn lại chưa quy được trách nhiệm
+- **Câu hỏi của chủ dự án:** *"việc này do degrade do phát triển chức năng mới à?"*
+  Trả lời: **đúng**, và em đã kết luận sai một lần trước đó — lần chạy 49/15 đầu
+  tiên diễn ra **trên nhánh đã có thay đổi của em**, nên "có sẵn trên main" là
+  suy luận chứ không phải phép đo. Đúng thứ mục golden bên dưới cảnh báo.
+- **Bằng chứng từ lịch sử git, không phải từ cảm nhận:** `it_*_test.dart` lần cuối
+  được sửa ở #145 (2026-08-05) với ghi chú **60/60 PASS**.
+  `FixtureSeederWidget` ra đời ở #155 (**2026-08-06**) — một ngày sau. Bảy mươi PR
+  chạy giữa mốc đó và mốc bắt đầu phiên này, và không PR nào chạy lại suite: IT
+  **không nằm trong CI**.
+- **Hồi quy thứ hai là của em, ở PR #229 (UC-07).** `deckRepositoryBinding` mọc
+  thêm phụ thuộc vào `studyRepositoryProvider`; `ItHarness` tự viết danh sách
+  binding gồm **hai** dòng, nên provider thứ ba là contract-only và đọc nó ném
+  ngay trong `wipeAllData()` — tức trong `ItHarness.open()`, trước bước đầu tiên
+  của **mọi** kịch bản. Đo được: **0 xanh / 66 đỏ**. Unit gate vẫn xanh suốt, vì
+  CI không chạy IT.
+- **Vá bằng cách xoá cả lớp lỗi, không chỉ ca này.** `repositoryBindingOverrides()`
+  là **một** danh sách, dùng bởi composition root và bởi cả hai container của
+  harness. Một binding mọc thêm phụ thuộc nay không thể phá một container được
+  viết từ danh sách ấy.
+- **Và có test đơn vị cho chính lớp lỗi đó**, vì CI không chạy IT:
+  `bootstrap_test.dart` dựng container từ chính danh sách rồi **đọc từng
+  contract** — declaration nào chỉ được khai báo mà chưa bind thì ném. **Đã chứng
+  minh** bằng cách bỏ `studyRepositoryProvider` khỏi danh sách: test đỏ, rồi khôi
+  phục.
 
 ## Việc không thuộc Study nhưng chặn Definition of Done
 
