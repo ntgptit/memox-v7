@@ -39,6 +39,7 @@ void main() {
       await tester.pumpWidget(
         wrapForTest(
           GuessQuestionSectionWidget(question: question, onChosen: (_) {}),
+          isScrollable: false,
         ),
       );
 
@@ -58,6 +59,7 @@ void main() {
             question: question,
             onChosen: (option) => chosen.add(option.cardId),
           ),
+          isScrollable: false,
         ),
       );
 
@@ -80,6 +82,7 @@ void main() {
             question: question,
             onChosen: (option) => chosen.add(option.cardId),
           ),
+          isScrollable: false,
         ),
       );
 
@@ -102,6 +105,7 @@ void main() {
             question: q,
             onChosen: (option) => chosen.add(option.cardId),
           ),
+          isScrollable: false,
         ),
       );
 
@@ -152,6 +156,7 @@ void main() {
       await tester.pumpWidget(
         wrapForTest(
           GuessQuestionSectionWidget(question: questionOf(), onChosen: (_) {}),
+          isScrollable: false,
         ),
       );
 
@@ -178,6 +183,7 @@ void main() {
             question: questionOf(),
             onChosen: (option) => chosen.add(option.cardId),
           ),
+          isScrollable: false,
         ),
       );
 
@@ -196,6 +202,7 @@ void main() {
       await tester.pumpWidget(
         wrapForTest(
           GuessQuestionSectionWidget(question: questionOf(), onChosen: (_) {}),
+          isScrollable: false,
         ),
       );
 
@@ -224,6 +231,7 @@ void main() {
       await tester.pumpWidget(
         wrapForTest(
           GuessQuestionSectionWidget(question: reversed, onChosen: (_) {}),
+          isScrollable: false,
         ),
       );
       await tester.pump();

@@ -7,7 +7,7 @@
 | **Scope** | Khung phiên học, và năm màn `browse` · `match` · `guess` · `recall` · `fill`. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), luồng (`use-cases.md`), giá trị token (`design_system/tokens/`) |
 | **Source of truth for** | Bố cục màn học · phán quyết cho tám điểm design lệch với BR |
 | **Depends on** | `document-conventions.md`, `business-rules.md` (BR-108…BR-154), `wbs-study.md` (M5.7…M5.20) |
-| **Updated by task** | Phản hồi đúng/sai của `match` — thêm §8.8 |
+| **Updated by task** | Màn `guess` theo handout layout — thêm §8.9 |
 | **Last updated** | 2026-08-09 |
 
 Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham chiếu bằng ID.
@@ -607,3 +607,41 @@ vẫn chấm mình thẻ của term — đó là thứ được ghi lại, khác
   chính ô đó — nên suốt nhịp ấy ô chỉ đang *đi tới* xanh rồi quay đầu ngay: một
   vệt tím, xanh không hiện ra lần nào. Nhịp phải dài hơn chuyển màu; `slow` cho
   120ms màu đã đứng yên.
+
+### 8.9 Màn `guess` theo handout layout 390×780
+
+Handout của `guess` **không đụng vào phán quyết nào** — §7.5 đã chốt mỗi lựa chọn
+chỉ hiện nghĩa, và handout cũng viết đúng thế ("meaning only, nothing else").
+Nên dựng nguyên.
+
+**Thẻ đề là `Expanded`, không phải chiều cao cố định** — handout gọi đích danh
+đây là bug làm tràn lựa chọn. Năm hàng là chiều cao biết trước; thuật ngữ thì
+không, vì nó có thể một từ hoặc bốn từ. Đặt sàn `AppGuessPrompt.cardMinHeight` =
+180 rồi để thẻ ăn phần còn lại.
+
+Thẻ thêm một dòng overline `WHAT IS THIS?` — thuật ngữ nằm một mình trên thẻ là
+một từ không kèm câu hỏi, còn chip `GUESS` ở thanh trên chỉ gọi tên bài tập chứ
+không gọi tên việc phải làm. Cùng dáng với dòng ngữ cảnh: nhỏ, hoa, giãn chữ, mờ.
+
+Bốn trạng thái hàng, dịch sang token:
+
+| handout | dự án |
+|---|---|
+| correct `mastery` @14% nền, @40% viền | `success` qua `Color.alphaBlend`, R7 |
+| wrong `danger` @10% nền, @35% viền, chữ `error` | `danger` — trong app này `error` **là** `danger` |
+| faded opacity 0.36 | đúng 0.36 (trước là 0.5) |
+| badge 28, viền 1.5, opacity 0.85 | `AppStroke.input` = 1.5 |
+| chữ 16/w500 | `titleMedium` (16/w600) — thang chữ không có w500, đẻ một weight cho một hàng là đúng thứ `app_typography.dart` sinh ra để chặn |
+| min-height 50 | `minimumTouchTarget` = 48 — sàn của một control là con số dự án đã có |
+| icon verdict 18 | `AppIconSize.sm` = 16 |
+| transition 200ms `cubic-bezier(0.2,0,0,1)` | `AppDurations.normal` + `standard`, qua `AppMotionPolicy` |
+
+**Nền có tô, không chỉ viền.** Handout đúng ở chỗ này: chỉ viền thì màn đã trả
+lời đọc ra thành năm hàng cùng trọng lượng với hai cái mép có màu, mắt phải đi
+tìm cái nào là cái nào.
+
+**Còn thiếu, có chủ đích:** handout ghi dòng gợi ý sau khi trả lời là
+`Answer shown — the correct option is highlighted`, tức `guess` có **hai** dòng
+gợi ý. Cờ "đã trả lời" hiện nằm trong state của section, chưa tới được khung.
+`recall` và `fill` cũng cần đúng cơ chế ấy (ẩn/hiện, nhập/sai), nên nối một lần
+cùng hai màn đó thay vì ba lần rời.

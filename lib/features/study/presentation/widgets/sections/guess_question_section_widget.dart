@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_elevation.dart';
+import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
+import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../domain/models/guess_mode.dart';
 import '../items/guess_option_item_widget.dart';
@@ -75,23 +79,30 @@ class _GuessQuestionSectionWidgetState
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: <Widget>[
-      MxCard(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.xl),
-          child: Text(
-            widget.question.term.front,
-            style: context.texts.headlineSmall,
+      // **The card takes what the options leave, and never a fixed height.**
+      // Five rows are a known height; the prompt is not, because a term can be
+      // one word or four. Sizing the card instead and letting the options take
+      // the rest is what pushed the fifth option off the screen — the handout
+      // calls that out by name.
+      Expanded(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minHeight: AppGuessPrompt.cardMinHeight,
           ),
+          child: _PromptCard(term: widget.question.term.front),
         ),
       ),
-      const SizedBox(height: AppSpacing.lg),
-      for (final (index, option) in widget.question.options.indexed)
+      const SizedBox(height: AppSpacing.md),
+      for (final (index, option)
+          in widget.question.options.indexed) ...<Widget>[
+        if (index > 0) const SizedBox(height: AppSpacing.sm),
         GuessOptionItemWidget(
           badge: _badgeFor(index),
           text: option.text,
           state: _stateOf(option),
           onTap: _canChoose ? () => _choose(option) : null,
         ),
+      ],
     ],
   );
 
@@ -112,6 +123,65 @@ class _GuessQuestionSectionWidgetState
   }
 }
 
+/// The prompt: what is being asked, then the thing being asked about.
+///
+/// **An overline rather than nothing.** A term alone on a card is a word with no
+/// question attached, and the mode chip in the top bar says `GUESS` — which
+/// names the exercise, not the task. The line is the same shape as the context
+/// line above it: small, uppercase, tracked, and quiet.
+class _PromptCard extends StatelessWidget {
+  const _PromptCard({required this.term});
+
+  final String term;
+
+  @override
+  Widget build(BuildContext context) => MxCard(
+    // `raised` and a 20 corner: this is the focal surface of the screen, and it
+    // is read against five rows that carry neither.
+    elevation: AppElevation.raised,
+    radius: AppRadius.xl,
+    padding: const EdgeInsets.symmetric(
+      horizontal: AppSpacing.lg,
+      vertical: AppSpacing.xl,
+    ),
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Text(
+          context.l10n.studyGuessOverline.toUpperCase(),
+          style: context.texts.labelSmall?.copyWith(
+            color: context.colors.onSurfaceVariant,
+            letterSpacing: AppTypography.sectionLabelTracking,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: AppSpacing.md),
+        Flexible(
+          child: Text(
+            term,
+            // `headlineMedium` is documented as *the card prompt* — 30 with
+            // −0.5 tracking, which is the handout's 32/−0.5 landing on a step
+            // this scale already has.
+            style: context.texts.headlineMedium,
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 3,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 /// `A`. The badges run from here in display order, and go no further than the
 /// five options BR-121 allows.
 const int _firstBadgeLetter = 0x41;
+
+/// What the prompt card decides for itself.
+abstract final class AppGuessPrompt {
+  /// The card gives way to the options, but only so far.
+  ///
+  /// Below this the term stops being the focus of the screen and starts being a
+  /// caption over a list — which is the opposite of what the mode asks.
+  static const double cardMinHeight = 180;
+}

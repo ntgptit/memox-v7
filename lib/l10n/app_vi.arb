@@ -1520,6 +1520,10 @@
   "@studyMatchPaired": {
     "description": "Announced for a match tile that has been paired correctly. The tick beside it is decoration; this is what a screen reader reads, because a pair marked only in green is not marked for everyone."
   },
+  "studyGuessOverline": "Đây là gì?",
+  "@studyGuessOverline": {
+    "description": "The small uppercase line above the term on a guess prompt card."
+  },
   "studyGuessCorrectAnswer": "Đáp án đúng",
   "@studyGuessCorrectAnswer": {
     "description": "Announced for the right option once a guess question has been answered. The green tick beside it marks it for people who can see it; this marks it for everyone."
