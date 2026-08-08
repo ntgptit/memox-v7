@@ -1,9 +1,9 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
   "scannedFiles": 299,
-  "totalSites": 348,
+  "totalSites": 350,
   "byElementKind": {
-    "other": 268,
+    "other": 270,
     "background": 11,
     "shadow": 1,
     "border": 11,
@@ -12,7 +12,7 @@
   },
   "bySourceKind": {
     "shared-constant": 141,
-    "blend-source": 3,
+    "blend-source": 5,
     "Colors-material": 5,
     "hardcoded-literal": 95,
     "opacity-modified-token": 11,
@@ -3452,6 +3452,28 @@
       "resolved_value_dark": "#F2808F"
     },
     {
+      "file": "lib/features/study/presentation/widgets/sections/match_board_section_widget.dart",
+      "line": 249,
+      "widget_context": "MatchTileWidget",
+      "element_kind": "other",
+      "source_kind": "blend-source",
+      "expression": "semantic.success.withValues(alpha: AppMatchTile.pairedFillAlpha)",
+      "token": "semantic.success",
+      "resolved_value_light": "#10795C",
+      "resolved_value_dark": "#4FC79B"
+    },
+    {
+      "file": "lib/features/study/presentation/widgets/sections/match_board_section_widget.dart",
+      "line": 257,
+      "widget_context": "MatchTileWidget",
+      "element_kind": "other",
+      "source_kind": "blend-source",
+      "expression": "semantic.success.withValues(alpha: AppMatchTile.pairedOutlineAlpha)",
+      "token": "semantic.success",
+      "resolved_value_light": "#10795C",
+      "resolved_value_dark": "#4FC79B"
+    },
+    {
       "file": "lib/features/study/presentation/widgets/sections/recall_timer_section_widget.dart",
       "line": 214,
       "widget_context": "_RecallTimerSectionWidgetState",
@@ -3497,7 +3519,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart",
-      "line": 187,
+      "line": 194,
       "widget_context": "_ContextLine",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3508,7 +3530,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart",
-      "line": 247,
+      "line": 254,
       "widget_context": "_Figure",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3519,7 +3541,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart",
-      "line": 276,
+      "line": 283,
       "widget_context": "_HintLine",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3530,7 +3552,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart",
-      "line": 287,
+      "line": 297,
       "widget_context": "_HintLine",
       "element_kind": "icon",
       "source_kind": "theme-token",
@@ -3805,7 +3827,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_session_top_bar.dart",
-      "line": 230,
+      "line": 231,
       "widget_context": "_Chip",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -3816,7 +3838,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_session_top_bar.dart",
-      "line": 243,
+      "line": 247,
       "widget_context": "_Chip",
       "element_kind": "text",
       "source_kind": "theme-token",

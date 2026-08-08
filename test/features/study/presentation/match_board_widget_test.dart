@@ -162,12 +162,18 @@ void main() {
       // rather than being two values written into this widget.
       expect(label.style?.color, scheme.onPrimary);
 
-      final tile = tester.widget<Material>(
+      // The surface is painted by the tile's own `AnimatedContainer`, not by
+      // the `Material` — the `Material` is transparent and exists for the
+      // ripple, so the state transition can be animated at all.
+      final tile = tester.widget<AnimatedContainer>(
         find
-            .ancestor(of: find.text('front-a'), matching: find.byType(Material))
+            .ancestor(
+              of: find.text('front-a'),
+              matching: find.byType(AnimatedContainer),
+            )
             .first,
       );
-      expect(tile.color, scheme.primary);
+      expect((tile.decoration! as BoxDecoration).color, scheme.primary);
     });
 
     testWidgets('the ticks survive a rebuild of the same deal', (tester) async {

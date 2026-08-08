@@ -150,7 +150,7 @@ void main() {
     const hints = <StudyMode, String>{
       StudyMode.browse: 'Swipe left for next, right to go back',
       StudyMode.selfAssess: 'Flip the card, then say how it went',
-      StudyMode.match: 'Tap a term, then its meaning',
+      StudyMode.match: 'Tap a term, then its meaning to match',
       StudyMode.guess: 'Choose the right meaning',
       StudyMode.recall: 'Recall it, then show the answer',
       StudyMode.fill: 'Type the answer, then check',
@@ -166,13 +166,16 @@ void main() {
     }
   });
 
-  testWidgets('the mode pill names the mode', (tester) async {
+  testWidgets('the mode chip names the mode, uppercased', (tester) async {
+    // The ARB holds the word as written and the chip uppercases it, so a mode
+    // name is one string in one place rather than a second all-caps copy that
+    // a translator has to keep in step.
     await pumpFrame(tester, frame(mode: StudyMode.guess));
-    expect(find.text('Guess'), findsOneWidget);
+    expect(find.text('GUESS'), findsOneWidget);
 
     await pumpFrame(tester, frame(mode: StudyMode.fill));
-    expect(find.text('Fill in'), findsOneWidget);
-    expect(find.text('Guess'), findsNothing);
+    expect(find.text('FILL IN'), findsOneWidget);
+    expect(find.text('GUESS'), findsNothing);
   });
 
   testWidgets('recall replaces the counter with the clock, in words', (
@@ -265,7 +268,13 @@ void main() {
       ),
     );
 
-    expect(find.text('12 CARDS DUE · Round 2 · 5 pairs left'), findsOneWidget);
+    expect(
+      find.text('12 CARDS DUE · ROUND 2 · 5 PAIRS LEFT'),
+      findsOneWidget,
+      reason:
+          'The line is uppercased where the two fragments are joined, so a '
+          'mode that adds sentence-case copy cannot leave half of it shouting.',
+    );
   });
 
   testWidgets('and no other mode adds anything to that line', (tester) async {

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_icon_size.dart';
 import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_typography.dart';
 import '../../core/theme/theme_context_extension.dart';
 import 'mx_content_shell.dart';
 import 'mx_icon_button.dart';
@@ -236,12 +237,16 @@ class _Chip extends StatelessWidget {
         vertical: AppSpacing.xs,
       ),
       child: Text(
-        label,
+        // Uppercase, and the caller passes the word as written. A chip is a
+        // *classification*, not the sentence a screen wrote — the same reason
+        // the context line under it is uppercase and a deck name never is.
+        label.toUpperCase(),
         style: context.texts.labelMedium?.copyWith(
           // `primaryAccent` is the brand hue *as text* — the variant held light
           // enough to pass AA on a dark surface, which `primary` is not.
           color: context.semanticColors.primaryAccent,
           fontWeight: FontWeight.w600,
+          letterSpacing: AppTypography.sectionLabelTracking,
         ),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,

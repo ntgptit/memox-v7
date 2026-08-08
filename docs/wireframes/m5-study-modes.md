@@ -7,7 +7,7 @@
 | **Scope** | Khung phiên học, và năm màn `browse` · `match` · `guess` · `recall` · `fill`. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), luồng (`use-cases.md`), giá trị token (`design_system/tokens/`) |
 | **Source of truth for** | Bố cục màn học · phán quyết cho tám điểm design lệch với BR |
 | **Depends on** | `document-conventions.md`, `business-rules.md` (BR-108…BR-154), `wbs-study.md` (M5.7…M5.20) |
-| **Updated by task** | UI review khung phiên học — thêm §8.4 (thanh trên lệch tâm, dòng gợi ý) và §8.5 (`MxSessionTopBar`) |
+| **Updated by task** | Bàn ghép `match` theo handout layout — thêm §8.6 và §8.7 |
 | **Last updated** | 2026-08-09 |
 
 Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham chiếu bằng ID.
@@ -111,6 +111,8 @@ tại, vốn xoá ô khỏi bàn.
 
 Dòng ngữ cảnh trong ảnh ghi `BOARD 1 OF 3`; "board" không có trong BR nên nhãn
 dùng round: `ROUND 1 · 4 PAIRS LEFT` (§7.6).
+
+**Lưới lấp đầy chiều cao, cho tới khi không lấp được** — xem §8.6.
 
 ## 5. Study · Guess (`guess_mode`)
 
@@ -504,3 +506,52 @@ Chip vì thế bị chặn bởi `_kChipMaxWidthFraction` (2/5 bề rộng thanh
 bình thường mức chặn rộng hơn chữ nên không đổi gì, ở 320 @ 2.0 nó là thứ nhường
 lại chỗ thay vì tràn. Bộ đếm **không** bị chặn — nó là con số, và một con số bị
 cắt là một con số sai.
+
+### 8.6 Bàn ghép của `match`, theo handout layout 390×780
+
+Handout dựng lưới **2 cột × 5 hàng**, `gap 8` hai chiều, mọi ô bằng nhau, ô cao
+`(605 − 4×8)/5 ≈ 113` và ghi rõ *đừng hard-code, để nó flex*. Đã dựng đúng vậy:
+`Column` gồm N hàng `Expanded`, mỗi hàng là `Row` hai `Expanded`. Đo ở 390×780:
+bàn **358 × 628** ở `16…374 / 104…732`, ô **175 × 119.2**, bước hàng 127.2 =
+119.2 + 8. Không còn dải trống dưới ô cuối.
+
+**Năm hàng là nội dung của mock, không phải luật.** Bàn giữ **cả round**
+(BR-115) và BR-153 chỉ đặt sàn hai cặp — nên mười thẻ là bàn mười hàng, hai thẻ
+là bàn hai hàng. Hàng lúc nào cũng flex thì ca đầu cho ô cao 48 ở textScale 2.0
+và ca sau cho hai tấm 300px. Vì vậy flex **có sàn**: `AppMatchTile.minRowHeight`
+= `minimumTouchTarget`, nhân theo textScaler — một ô là *control* trước khi là
+layout — và bàn không đạt sàn thì **cuộn** thay vì lấp. Mọi bàn vừa vẫn lấp
+chính xác, tức là mọi bàn mock nói tới.
+
+Ba trạng thái ô theo handout, dịch sang token của dự án:
+
+| handout | dự án |
+|---|---|
+| `mastery` | `AppSemanticColors.success` — `card_state_widget.dart` đã sơn `CardState.mastered` bằng nó, hai tên là một token |
+| nền matched `mastery @12%`, viền `@30%` | `Color.alphaBlend` trên `surfaceContainerLowest`, **không** vẽ trong suốt |
+| radius 12 · gap 8 · transition 200ms `cubic-bezier(0.2,0,0,1)` | `AppRadius.md` · `AppSpacing.sm` · `AppDurations.normal` + `AppDurations.standard` — trùng khít, không thêm token |
+| front 18/w700, back 14/w600 | `titleMedium` (16/w600) và `titleSmall` (14/w600) — thang chữ không có 18 |
+| icon ✓ đứng **trước** chữ, gap 6 | đúng ảnh mẫu; gap = `AppSpacing.xs` |
+
+**Nền matched phải blend, không được vẽ trong suốt.** `color_source_rules_test`
+R7 cấm fill/border translucent: nó composite với thứ đằng sau lúc paint, nên một
+token ra hai giá trị trên hai mặt nền. `Color.alphaBlend` chốt màu lúc build,
+trên đúng mặt nền ô đang nằm. Đây cũng là lý do bản M5.19 từng **từ chối** nền
+xanh nhạt và ghi "không có token" — có cách, chỉ là không phải cách trong suốt.
+
+### 8.7 Ba điểm của handout không làm theo, và vì sao
+
+| handout | dự án giữ | lý do |
+|---|---|---|
+| gutter **14** | **16** (12 ở compact) | 14 không có trong `AppSpacing`. README ảnh wireframe đã chốt: bố cục lấy từ ảnh, **khoảng cách lấy từ dự án** |
+| nút ✕ **36×36** | **48×48** | `AppSpacing.minimumTouchTarget`; `androidTapTargetGuideline` khẳng định ở `study_accessibility_test.dart` và stress suite. §8.5 ghi đầy đủ |
+| thanh tiến trình cao **4** | **6** (`MxProgressBarSize.sm`) | đã đo và chốt: ở 4 nó đọc thành sợi tóc chứ không phải một phép đo, và trên thẻ deck nó còn ăn sâu vào góc bo hơn |
+| chip nền `accent @10%` | `surfaceMuted` + `primaryAccent` | §7.8 và bảng §8.2 đã bác đúng điểm này |
+| bộ đếm `paddingRight 10` | `_trailingInset` = gutter + `xl` | §8.5, sau bốn vòng review |
+
+Cái **có** làm theo từ phần chrome của handout: chip viết HOA kèm letter-spacing
+(§2 cũng đã ghi "pill chữ hoa"), và icon dòng gợi ý lên `AppIconSize.sm` = 16.
+
+Nhân đó sửa một lỗi thật: dòng ngữ cảnh ghép từ hai chuỗi mà chỉ một chuỗi viết
+hoa, nên `match` in ra `5 CARDS DUE · Round 1 · 4 pairs left` — một câu đeo nửa
+cái nhãn. Nay viết hoa **ở chỗ ghép**, để ARB giữ chữ chứ không giữ kiểu.
