@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/app/app.dart';
+import 'package:memox/app/startup/fixture_seeder_widget.dart';
 import 'package:memox/app/bootstrap.dart';
 import 'package:memox/app/config/env_config.dart';
 import 'package:memox/app/config/env_config_provider.dart';
@@ -161,6 +162,44 @@ void main() {
 
       expect(container.read(envConfigProvider), same(EnvConfig.staging));
       expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('the fixture seed can be switched off, and defaults on', (
+      tester,
+    ) async {
+      // **The end-to-end suite needs this off, and that is not a preference.**
+      // `CLEAN-RESET` wipes the library before a scenario; the seed then copies
+      // the shipped decks back one frame later, so a scenario asserting an empty
+      // library found "Everyday English" — and whether it did came down to which
+      // finished first, which is why fifteen scenarios failed intermittently.
+      //
+      // The default stays on: an app launched without saying anything is the
+      // app, and a development build demoable out of the box is what the seeder
+      // was added for (BR-87).
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            deckRepositoryProvider.overrideWithValue(FakeDeckRepository()),
+          ],
+          child: buildRootWidget(EnvConfig.staging, shouldSeedFixtures: false),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byType(FixtureSeederWidget), findsNothing);
+      expect(find.byType(MemoxApp), findsOneWidget);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            deckRepositoryProvider.overrideWithValue(FakeDeckRepository()),
+          ],
+          child: buildRootWidget(EnvConfig.staging),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byType(FixtureSeederWidget), findsOneWidget);
     });
 
     testWidgets('the root binds every repository the features declare', (

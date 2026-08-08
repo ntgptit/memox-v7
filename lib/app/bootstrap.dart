@@ -104,10 +104,20 @@ Future<void> bootstrap(EnvConfig config) async {
 /// hosted by the outermost container, so it resolves `deckRepositoryProvider`
 /// there, where the bindings below have not been installed, and the screen
 /// renders "a provider that is in error state" instead of its data.
+/// [shouldSeedFixtures] false stops the development fixture seed from running.
+///
+/// **The end-to-end suite owns its own data, and the seed writes into it.**
+/// `CLEAN-RESET` wipes the library before a scenario; the seeder then copies the
+/// shipped decks back in one frame later, so a scenario asserting an empty
+/// library found "Everyday English" instead — and whether it did depended on
+/// which of the two finished first, which is why the failures looked
+/// intermittent. A scenario that wants content loads it explicitly through
+/// `ItFixtures`.
 Widget buildRootWidget(
   EnvConfig config, {
   AppDatabase? database,
   DateTime Function()? now,
+  bool shouldSeedFixtures = true,
 }) => ProviderScope(
   overrides: [
     envConfigProvider.overrideWithValue(config),
@@ -133,7 +143,9 @@ Widget buildRootWidget(
   // The fixture seed sits inside the scope so it reads the bindings above,
   // and wraps rather than replaces the app so the first frame is the deck
   // list rather than a spinner waiting on assets.
-  child: const FixtureSeederWidget(child: MemoxApp()),
+  child: shouldSeedFixtures
+      ? const FixtureSeederWidget(child: MemoxApp())
+      : const MemoxApp(),
 );
 
 /// Installs the three error boundaries and returns a callback that puts the
