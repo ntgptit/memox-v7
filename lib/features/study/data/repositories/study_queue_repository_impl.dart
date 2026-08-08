@@ -38,15 +38,27 @@ mixin _StudyQueueOperations {
       return due.map((row) => studyCardModelFromRow(row.c)).toList();
     }
 
-    // `random` is applied here rather than in SQL: `RANDOM()` cannot be seeded,
-    // so a shuffle done in the query could not be pinned by a test. Over-reading
-    // then shuffling would be fairer, but it also reads the whole deck to throw
-    // most of it away — and BR-148 asks for an order, not for a sample.
-    final fresh = await _dao.newCards(rootDeckId, cardLimit);
-    final cards = fresh.map((row) => studyCardModelFromRow(row.c)).toList();
-    if (newCardOrder == NewCardOrder.random) cards.shuffle(_random);
+    // `random` shuffles **before** the ceiling, and that ordering is the rule
+    // rather than a detail. BR-113 gives every stage its own shuffle, so the
+    // order this list is in never reaches the user — the only thing
+    // `new_card_order` can decide is *which* new cards enter the session when
+    // the deck has more than the limit. Shuffling after `LIMIT` reorders a set
+    // already chosen by `created_at`, which is the same set every time: the
+    // option looked implemented and did nothing at all.
+    //
+    // The shuffle stays in Dart because `RANDOM()` in SQL cannot be seeded, and
+    // a shuffle no test can pin is a shuffle nobody can check.
+    if (newCardOrder == NewCardOrder.created) {
+      final fresh = await _dao.newCards(rootDeckId, cardLimit);
 
-    return cards;
+      return fresh.map((row) => studyCardModelFromRow(row.c)).toList();
+    }
+
+    final all = await _dao.allNewCards(rootDeckId);
+    final cards = all.map((row) => studyCardModelFromRow(row.c)).toList()
+      ..shuffle(_random);
+
+    return cards.take(cardLimit).toList();
   }
 
   /// Round 1 of a stage: every card the stage can use, in an order of its own.

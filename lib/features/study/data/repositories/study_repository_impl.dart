@@ -11,6 +11,7 @@ import '../../domain/entities/study_session_entity.dart';
 import '../../domain/failures/study_refusal_failure.dart';
 import '../../domain/models/new_card_order_model.dart';
 import '../../domain/models/study_action_model.dart';
+import '../../domain/models/study_card_limit_model.dart';
 import '../../domain/models/study_answer_kind_model.dart';
 import '../../domain/models/study_deck_context_model.dart';
 import '../../domain/models/study_entry_summary_model.dart';
@@ -23,8 +24,10 @@ import '../../domain/models/study_session_summary_model.dart';
 import '../../domain/models/study_session_status_model.dart';
 import '../../domain/repositories/study_repository.dart';
 import '../datasources/study_dao.dart';
+import '../mappers/study_config_mapper.dart';
 import '../mappers/study_mapper.dart';
 
+part 'study_options_repository_impl.dart';
 part 'study_queue_repository_impl.dart';
 part 'study_lifecycle_repository_impl.dart';
 
@@ -51,7 +54,10 @@ const int kInitialIntervalDays = 1;
 /// It is also the boundary where a Drift exception becomes a domain `Failure`.
 /// Nothing above it sees a `DriftWrappedException`.
 final class StudyRepositoryImpl
-    with _StudyQueueOperations, _StudyLifecycleOperations
+    with
+        _StudyOptionsOperations,
+        _StudyQueueOperations,
+        _StudyLifecycleOperations
     implements StudyRepository {
   StudyRepositoryImpl(
     this._dao, {
@@ -136,19 +142,6 @@ final class StudyRepositoryImpl
   @override
   Future<List<String>> cardsFinishedInSession(String sessionId) =>
       _dao.cardsWithNothingPending(sessionId);
-
-  @override
-  Future<StudyOptionsModel> effectiveOptions(String rootDeckId) async {
-    final settings = await _dao.appSettings();
-
-    // The deck-level override of BR-147 is read but not yet parsed: no screen
-    // writes `study_config` until M5.4a, and a parser with no writer is a
-    // parser nobody has tested against real input.
-    return StudyOptionsModel(
-      cardLimit: settings.cardLimit,
-      newCardOrder: NewCardOrder.fromDbValue(settings.newCardOrder),
-    );
-  }
 
   @override
   Future<StudySessionEntity> openSession({

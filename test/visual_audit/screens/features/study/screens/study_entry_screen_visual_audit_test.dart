@@ -44,21 +44,23 @@ void main() {
         itemId: 'shell',
         reason: SkipReason.rasterOnly,
         detailContains: '_RenderInkFeatures',
-        expectedMatches: 4,
+        expectedMatches: 5,
         rationale:
-            'The Material ink layers of the Scaffold, the AppBar and the two '
-            'entry buttons. Splash and highlight paint into these; the overlay '
-            'colours are asserted in app_theme_test.dart.',
+            'The Material ink layers of the Scaffold, the AppBar, the app-bar '
+            'options IconButton and the two entry buttons. Splash and highlight '
+            'paint into these; the overlay colours are asserted in '
+            'app_theme_test.dart.',
       ),
       AuditSkipAllowance(
         itemId: 'shell',
         reason: SkipReason.customPainter,
         detailContains: '_ShapeBorderPainter',
-        expectedMatches: 2,
+        expectedMatches: 3,
         rationale:
-            'The two entry buttons draw their rounded shapes through a '
-            'ShapeBorder painter; both shapes come from the component themes '
-            'and are pinned by the mx_components goldens.',
+            'The two entry buttons and the app-bar options IconButton draw '
+            'their rounded shapes through a ShapeBorder painter; all three come '
+            'from the component themes and are pinned by the mx_components '
+            'goldens.',
       ),
     ],
   );

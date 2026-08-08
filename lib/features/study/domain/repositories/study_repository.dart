@@ -1,6 +1,7 @@
 import '../entities/study_session_entity.dart';
 import '../models/new_card_order_model.dart';
 import '../models/study_action_model.dart';
+import '../models/study_card_limit_model.dart';
 import '../models/study_deck_context_model.dart';
 import '../models/study_entry_summary_model.dart';
 import '../models/study_schedule_model.dart';
@@ -65,6 +66,22 @@ abstract interface class StudyRepository {
   /// The options in force for [rootDeckId], with the deck's override applied
   /// over the app-wide default (BR-147).
   Future<StudyOptionsModel> effectiveOptions(String rootDeckId);
+
+  /// Stores a root deck's override of the study options (BR-147).
+  ///
+  /// **[deckId] may be any deck in the tree; the write lands on its root.**
+  /// Options belong to the root the same way the scheduler does, and resolving
+  /// here rather than asking the caller to is what makes invariant 20 —
+  /// "no sub-deck carries a `study_config`" — unbreakable by a screen that
+  /// happened to be opened one level down.
+  ///
+  /// Takes a [StudyCardLimit] rather than an `int`: the bounds are the type-s,
+  /// so this signature says the value has already been through them.
+  Future<void> saveStudyOptions({
+    required String deckId,
+    required StudyCardLimit cardLimit,
+    required NewCardOrder newCardOrder,
+  });
 
   /// Opens a session and builds every stage's queue in one transaction.
   ///

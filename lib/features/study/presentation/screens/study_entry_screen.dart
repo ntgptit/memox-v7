@@ -8,6 +8,7 @@ import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_error_state.dart';
+import '../../../../shared/widgets/mx_icon_button.dart';
 import '../../domain/entities/study_session_entity.dart';
 import '../../domain/models/study_entry_summary_model.dart';
 import '../../domain/models/study_mode.dart';
@@ -18,6 +19,7 @@ import '../controllers/study_review_modes_controller.dart';
 import '../widgets/overlays/study_mode_chooser_widget.dart';
 import '../widgets/overlays/study_resume_widget.dart';
 import '../widgets/sections/study_entry_section_widget.dart';
+import 'study_options_screen.dart';
 import 'study_session_screen.dart';
 
 /// The way into a deck's study flow.
@@ -108,6 +110,13 @@ class _StudyEntryScreenState extends ConsumerState<StudyEntryScreen> {
   @override
   Widget build(BuildContext context) => MxContentShell(
     title: context.l10n.appTitle,
+    actions: <Widget>[
+      MxIconButton(
+        icon: Icons.tune,
+        semanticLabel: context.l10n.studyOptionsTitle,
+        onPressed: () => unawaited(_openOptions(context)),
+      ),
+    ],
     body: Padding(
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: MxAsyncView<StudyEntrySummaryModel>(
@@ -187,6 +196,22 @@ class _StudyEntryScreenState extends ConsumerState<StudyEntryScreen> {
           reviewMode: reviewMode,
           shouldResume: shouldResume,
         ),
+      ),
+    );
+
+    if (!mounted) return;
+    _refresh();
+  }
+
+  /// Opens the options, and re-reads on the way back.
+  ///
+  /// The card limit is one of the two numbers this screen is about, so coming
+  /// back from changing it to a screen still showing the old one would be the
+  /// same disagreement as returning from a session — see [_open].
+  Future<void> _openOptions(BuildContext context) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => StudyOptionsScreen(deckId: deckId),
       ),
     );
 
