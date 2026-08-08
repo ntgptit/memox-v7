@@ -7,7 +7,7 @@
 | **Scope** | Task còn lại của Study từ M5.7 trở đi · nợ kỹ thuật của Study · việc bị chặn |
 | **Source of truth for** | Trạng thái task Study từ M5.7 · nợ kỹ thuật của Study |
 | **Depends on** | `document-conventions.md` · `wbs.md` · `business-rules.md` · `use-cases.md` |
-| **Updated by task** | M5.16 (kiểm thị giác và tiếp cận) |
+| **Updated by task** | dọn config chết trong guard |
 | **Last updated** | 2026-08-08 |
 
 `docs/wbs.md` giữ M5.0…M5.6 đã hoàn thành và không nhắc lại ở đây. File này giữ
@@ -779,6 +779,11 @@ số test báo trong M5 đều chạy với `--exclude-tags golden`. Cần một
 riêng, **không gộp vào mốc Study** — gộp vào sẽ làm một mốc Study đỏ vì lý do
 không thuộc Study.
 
-**Config chết trong guard.** Rule `memox.architecture.single_study_mode_dispatch`
-loại trừ `study_mode_resolver.dart`, nhưng rule naming cấm suffix `_resolver`
-dưới `domain/` — không file nào tên đó tồn tại được. Phần exclude ấy nên bị xoá.
+**~~Config chết trong guard~~ — đã xoá.** Rule
+`memox.architecture.single_study_mode_dispatch` loại trừ `study_mode_resolver.dart`,
+nhưng `memox.naming.domain_file_role_suffix` cấm suffix `_resolver` dưới
+`domain/` — không file nào tên đó tồn tại được, nên dòng exclude ấy che một thứ
+không có thật. Đã xoá khỏi `scopes.yaml`, và thông điệp của rule sửa từ *"in the
+resolver"* thành *"beside the enum in `study_mode.dart`"*, tức nói đúng chỗ luật
+thật sự sống. **Đã chứng minh rule vẫn bắt** bằng cách tạo một switch thứ hai
+trên `StudyMode` dưới `domain/usecases/`: guard đỏ đúng dòng đó, rồi xoá đi.
