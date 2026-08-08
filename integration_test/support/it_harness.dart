@@ -95,6 +95,12 @@ final class ItHarness {
         EnvConfig.development,
         database: _database,
         now: () => _now,
+        // **The suite owns its data.** `wipeAllData` runs before this, and the
+        // development fixture seed would copy the shipped decks back in one
+        // frame later — so a scenario asserting an empty library found
+        // "Everyday English", and whether it did came down to which finished
+        // first. A scenario that wants content loads it through `ItFixtures`.
+        shouldSeedFixtures: false,
       ),
     );
     await settle();

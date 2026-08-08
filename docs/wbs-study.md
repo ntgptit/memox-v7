@@ -7,7 +7,7 @@
 | **Scope** | Task còn lại của Study từ M5.7 trở đi · nợ kỹ thuật của Study · việc bị chặn |
 | **Source of truth for** | Trạng thái task Study từ M5.7 · nợ kỹ thuật của Study |
 | **Depends on** | `document-conventions.md` · `wbs.md` · `business-rules.md` · `use-cases.md` |
-| **Updated by task** | nối nửa **ghi** của BR-133 |
+| **Updated by task** | tắt fixture seed cho suite IT |
 | **Last updated** | 2026-08-08 |
 
 `docs/wbs.md` giữ M5.0…M5.6 đã hoàn thành và không nhắc lại ở đây. File này giữ
@@ -766,7 +766,7 @@ phán quyết trước khi người dùng trả lời.
 | ~~`pause()` không có caller — nửa **ghi** của BR-133~~ | `RecallTimerSectionWidget.onSuspended` bắn khi app rời foreground với lượt còn mở; màn hình gọi `pause()`. Round-trip có test trên SQLite thật | xong |
 
 | ~~Màn Study chưa có mặt trong Widgetbook~~ | `StudyCatalogRepository` là fake riêng của catalog; ba màn Study đã đăng ký | xong ở M5.16 |
-| 15 kịch bản IT Deck/Card/Disc/Tree đỏ | có trước M5; dạng "không thấy `No decks yet`" sau khi xoá | lượt điều tra riêng — không thuộc Study |
+| 10 kịch bản IT còn đỏ (từ 15) | nguyên nhân chung — fixture seed ghi đè `CLEAN-RESET` — đã sửa; 10 ca còn lại có nguyên nhân khác | lượt điều tra riêng — không thuộc Study |
 
 ### Nửa **ghi** của BR-133, đóng sau M5.16
 
@@ -789,6 +789,33 @@ phán quyết trước khi người dùng trả lời.
   `study_turn_progress_test.dart` (3, round-trip trên SQLite thật) —
   `recall_fill_widget_test.dart` tách đôi ở guard 400 dòng thành
   `recall_widget_test.dart` và `fill_widget_test.dart`.
+
+### Fixture seed ghi đè `CLEAN-RESET` của suite IT, đóng sau M5.16
+
+- **Status:** **done** — 49 xanh/15 đỏ → **54 xanh/10 đỏ** trên emulator;
+  analyze sạch, 1623 test xanh, guard sạch
+- **Nguyên nhân, đo được chứ không đoán:** `ItHarness.launchApp` dựng app với
+  `EnvConfig.development`, và `FixtureSeederWidget` chỉ chạy ở development — nên
+  ngay sau `wipeAllData()`, một frame sau, deck starter **"Everyday English"**
+  được chép lại vào đúng cơ sở dữ liệu mà kịch bản vừa dọn. Kịch bản nào khẳng
+  định thư viện rỗng thì thấy nó; kịch bản nào đếm deck thì đếm nhầm. Và vì đó
+  là cuộc đua giữa hai việc bất đồng bộ, **có lần đỏ có lần không** — đúng cái
+  làm nó trông như flake.
+- **Cách sửa: suite sở hữu dữ liệu của nó.** `buildRootWidget` nhận
+  `shouldSeedFixtures`, mặc định **bật** — một app khởi động mà không nói gì thì
+  vẫn là app, và bản development demo được ngay là lý do seeder tồn tại (BR-87).
+  Suite IT tắt nó; kịch bản nào cần nội dung thì nạp tường minh qua `ItFixtures`,
+  như `loadDueLibrary` vẫn làm.
+- **Chẩn đoán bằng cách in đúng thứ trên màn hình.** Ba lượt: `trace` (6 chuỗi
+  đầu, không đủ), rồi `visibleText` đầy đủ — và tên deck starter hiện ra ở chuỗi
+  thứ bảy. Trước đó mọi giả thuyết đều sai.
+- **Còn 10 ca đỏ, nguyên nhân khác.** Reporter nêu bốn: `IT-CARD-005`,
+  `IT-CARD-009`, `IT-DISC-001`, `IT-DISC-003`. `IT-CARD-005` đã soi tới nơi: ở
+  bước 4 màn hình vẫn là editor **tạo mới** với ô Front rỗng, tức bước trước đó
+  không lưu — một lỗi khác hẳn, thuộc Card. Ghi vào bảng nợ.
+- **Tests:** `bootstrap_test.dart` — *the fixture seed can be switched off, and
+  defaults on*. Cả hai chiều, vì chỉ kiểm chiều tắt thì một
+  `buildRootWidget` bỏ seeder hẳn cũng xanh.
 
 ## Việc không thuộc Study nhưng chặn Definition of Done
 
