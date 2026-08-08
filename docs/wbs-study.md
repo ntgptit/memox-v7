@@ -7,7 +7,7 @@
 | **Scope** | Task còn lại của Study từ M5.7 trở đi · nợ kỹ thuật của Study · việc bị chặn |
 | **Source of truth for** | Trạng thái task Study từ M5.7 · nợ kỹ thuật của Study |
 | **Depends on** | `document-conventions.md` · `wbs.md` · `business-rules.md` · `use-cases.md` |
-| **Updated by task** | `MxSessionTopBar` — vòng review ảnh chụp thứ hai |
+| **Updated by task** | bàn ghép `match` theo handout layout |
 | **Last updated** | 2026-08-09 |
 
 `docs/wbs.md` giữ M5.0…M5.6 đã hoàn thành và không nhắc lại ở đây. File này giữ
@@ -1092,3 +1092,30 @@ hiện) — đúng như năm ảnh wireframe vẽ. Câu của `browse` rút theo
 `MxSessionTopBar` nằm ở `lib/shared/widgets/`, **không biết `StudyMode` là gì**:
 nhận một chữ cho chip, một `0…1` cho thanh, một widget cho ô cuối. Có golden
 light/dark, stress specimen với tên dài, và mục Widgetbook.
+
+### Bàn ghép `match` theo handout layout 390×780
+
+Handout thứ hai của chủ dự án, lần này cho `match`. Bố cục dựng đúng: `Column`
+gồm N hàng `Expanded`, mỗi hàng hai `Expanded`, `gap 8` hai chiều. Đo ở 390×780:
+bàn **358 × 628**, ô **175 × 119.2**, bước hàng 127.2 — không còn dải trống dưới
+ô cuối. Số đo đầy đủ và bảng dịch token ở `wireframes/m5-study-modes.md` §8.6.
+
+**Điều handout không nói và code phải trả lời:** năm hàng là nội dung của mock,
+không phải luật. Bàn giữ cả round (BR-115), BR-153 chỉ đặt sàn hai cặp — mười
+thẻ là mười hàng. Flex vì thế có **sàn** `minimumTouchTarget` nhân theo
+textScaler, và bàn không đạt sàn thì cuộn. Đã kiểm 320 @ textScale 2.0.
+
+**Nền ô đã ghép giờ dựng được**, sau khi M5.19 từng từ chối vì "không có token":
+`Color.alphaBlend(success @12%, surfaceContainerLowest)`. Không phải thiếu token
+mà là không được vẽ **trong suốt** — `color_source_rules_test` R7 cấm fill và
+border translucent vì chúng composite lúc paint, nên một token ra hai giá trị
+trên hai mặt nền. `mastery` của handout chính là `success` của dự án;
+`card_state_widget.dart` đã sơn `CardState.mastered` bằng nó.
+
+**Ba giá trị của handout không làm theo** — gutter 14, nút ✕ 36×36, thanh tiến
+trình cao 4 — cùng lý do và cùng chỗ ghi: §8.7. Hai giá trị **có** làm theo: chip
+viết HOA kèm letter-spacing, và icon dòng gợi ý lên `AppIconSize.sm`.
+
+Nhân đó sửa một lỗi thật: dòng ngữ cảnh ghép hai chuỗi mà chỉ một chuỗi viết
+hoa, nên `match` in `5 CARDS DUE · Round 1 · 4 pairs left`. Nay viết hoa ở chỗ
+ghép, ARB giữ chữ chứ không giữ kiểu.

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_durations.dart';
 import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
@@ -20,6 +21,21 @@ import '../../../domain/models/match_mode.dart';
 /// it, so the tile the user was about to press moves the instant they press
 /// something else — and the board they had learned the shape of is gone. It goes
 /// quiet instead: `success` and a tick, dimmed, and no longer a target.
+///
+/// ## The grid fills the height, until it cannot
+///
+/// Two columns, one pair per row, `sm` both ways, and every row an [Expanded] so
+/// the board ends exactly where the hint line begins — no strip of dead page
+/// under the last tile and no arithmetic that only holds at one screen size.
+///
+/// **The handout's five rows are the mock's content, not a rule.** A board holds
+/// the whole round (BR-115) and BR-153 only sets a floor of two pairs, so ten
+/// cards is a ten-row board and two is a two-row one. Rows that always flex
+/// would make the first case 48px tall at 2.0 text scale and the second a pair
+/// of 300px slabs. So the flex has a floor — [AppMatchTile.minRowHeight], scaled
+/// with the text, because a tile is a tap target before it is a layout — and a
+/// board that cannot meet it scrolls instead. Every board that fits still fills
+/// exactly, which is every board the mock covers.
 class MatchBoardSectionWidget extends StatefulWidget {
   const MatchBoardSectionWidget({
     required this.board,
@@ -111,29 +127,62 @@ class _MatchBoardSectionWidgetState extends State<MatchBoardSectionWidget> {
   }
 
   @override
-  Widget build(BuildContext context) => Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final rowCount = widget.board.terms.length;
+      // Scaled, because the floor is about a finger and a line of text, and
+      // both grow with the user's text setting. A fixed 48 would let a board
+      // fill exactly at 2.0 and clip every tile on it.
+      final minRowHeight = MediaQuery.textScalerOf(
+        context,
+      ).scale(AppMatchTile.minRowHeight);
+      final needed = rowCount * minRowHeight + (rowCount - 1) * AppSpacing.sm;
+      final fillsExactly =
+          constraints.hasBoundedHeight && needed <= constraints.maxHeight;
+
+      final rows = Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          for (var index = 0; index < rowCount; index++) ...<Widget>[
+            if (index > 0) const SizedBox(height: AppSpacing.sm),
+            if (fillsExactly)
+              Expanded(child: _row(index))
+            else
+              ConstrainedBox(
+                constraints: BoxConstraints(minHeight: minRowHeight),
+                // The two tiles in a row are the same height even when one
+                // wraps and the other does not; without this the shorter one
+                // floats and the board reads as ragged.
+                child: IntrinsicHeight(child: _row(index)),
+              ),
+          ],
+        ],
+      );
+
+      if (fillsExactly) return rows;
+
+      return SingleChildScrollView(child: rows);
+    },
+  );
+
+  /// One pair's row. The two sides are independent shuffles (BR-127), so a row
+  /// index means "the nth tile on each side" and never "these two go together".
+  Widget _row(int index) => Row(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
     children: <Widget>[
-      Expanded(child: _column(widget.board.terms, isTerm: true)),
-      const SizedBox(width: AppSpacing.md),
-      Expanded(child: _column(widget.board.meanings, isTerm: false)),
+      Expanded(child: _tile(widget.board.terms[index], isTerm: true)),
+      const SizedBox(width: AppSpacing.sm),
+      Expanded(child: _tile(widget.board.meanings[index], isTerm: false)),
     ],
   );
 
-  Widget _column(List<MatchTile> tiles, {required bool isTerm}) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: <Widget>[
-      for (final tile in tiles) ...<Widget>[
-        MatchTileWidget(
-          text: tile.text,
-          state: _stateOf(tile, isTerm: isTerm),
-          onTap: widget.isLocked
-              ? null
-              : () => isTerm ? _selectTerm(tile) : _selectMeaning(tile),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-      ],
-    ],
+  Widget _tile(MatchTile tile, {required bool isTerm}) => MatchTileWidget(
+    text: tile.text,
+    isTerm: isTerm,
+    state: _stateOf(tile, isTerm: isTerm),
+    onTap: widget.isLocked
+        ? null
+        : () => isTerm ? _selectTerm(tile) : _selectMeaning(tile),
   );
 
   MatchTileState _stateOf(MatchTile tile, {required bool isTerm}) {
@@ -158,24 +207,32 @@ enum MatchTileState { idle, selected, paired }
 /// file.** Selected is `primary` with `onPrimary` on it — a pair Material keeps
 /// contrasting in both themes. Paired is `success`, and only because it means
 /// exactly what `success` means: this answer was right. It is not the mode's
-/// colour and not decoration (§7.8).
+/// colour and not decoration (§7.8). The handout calls that role `mastery`;
+/// this app already spends `success` on it — `card_state_widget.dart` paints
+/// `CardState.mastered` with it — so the two names are one token.
 ///
-/// A paired tile has no fill of its own. The design tints it a very pale green,
-/// and there is no token for that — `AppSemanticColors` has `success` and no
-/// container beside it. Adding one is a token decision, which M5.19 puts out of
-/// scope; the tick, the `success` label and the dimming carry the state without
-/// inventing a colour.
+/// **The paired tint is blended, not painted translucent.** A `BorderSide` or a
+/// fill at 12% composites against whatever is behind it at paint time, so one
+/// token renders as two values over two surfaces; `color_source_rules_test.dart`
+/// R7 fails it. `Color.alphaBlend` resolves the same colour at build time
+/// against the surface the tile actually sits on, which is what makes the tint a
+/// value somebody chose.
 class MatchTileWidget extends StatelessWidget {
   const MatchTileWidget({
     required this.text,
     required this.state,
     required this.onTap,
+    this.isTerm = true,
     super.key,
   });
 
   final String text;
   final MatchTileState state;
   final VoidCallback? onTap;
+
+  /// Which side of the board this is, and therefore how loud it reads: a term
+  /// is what the eye scans for, a meaning is what it checks against.
+  final bool isTerm;
 
   bool get _isPaired => state == MatchTileState.paired;
 
@@ -185,11 +242,33 @@ class MatchTileWidget extends StatelessWidget {
     final semantic = context.semanticColors;
     final isSelected = state == MatchTileState.selected;
 
+    final ground = scheme.surfaceContainerLowest;
+    final background = switch (state) {
+      MatchTileState.selected => scheme.primary,
+      MatchTileState.paired => Color.alphaBlend(
+        semantic.success.withValues(alpha: AppMatchTile.pairedFillAlpha),
+        ground,
+      ),
+      MatchTileState.idle => ground,
+    };
+    final outline = switch (state) {
+      MatchTileState.selected => scheme.primary,
+      MatchTileState.paired => Color.alphaBlend(
+        semantic.success.withValues(alpha: AppMatchTile.pairedOutlineAlpha),
+        ground,
+      ),
+      MatchTileState.idle => semantic.borderSubtle,
+    };
     final foreground = switch (state) {
       MatchTileState.selected => scheme.onPrimary,
       MatchTileState.paired => semantic.success,
       MatchTileState.idle => scheme.onSurface,
     };
+
+    final style =
+        (isTerm ? context.texts.titleMedium : context.texts.titleSmall)
+            ?.copyWith(color: foreground);
+    final radius = BorderRadius.circular(AppRadius.md);
 
     return Semantics(
       selected: isSelected,
@@ -200,43 +279,57 @@ class MatchTileWidget extends StatelessWidget {
         // Paired tiles stay on the board and stop competing for attention. The
         // remaining pairs are the ones still being worked on.
         opacity: _isPaired ? AppMatchTile.pairedOpacity : 1,
-        child: Material(
-          color: isSelected ? scheme.primary : scheme.surface,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppRadius.md),
-            side: BorderSide(
-              color: isSelected ? scheme.primary : semantic.borderSubtle,
-            ),
+        child: AnimatedContainer(
+          // Three states on one tile and the user causes every change, so the
+          // move has to be visible without being waited on.
+          duration: AppDurations.normal,
+          curve: AppDurations.standard,
+          decoration: BoxDecoration(
+            color: background,
+            borderRadius: radius,
+            border: Border.all(color: outline),
           ),
-          child: InkWell(
-            // A paired tile is finished, not merely busy: BR-116 has already
-            // recorded it, and a second tap could only record it twice.
-            onTap: _isPaired ? null : onTap,
-            borderRadius: BorderRadius.circular(AppRadius.md),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: AppSpacing.md,
-              ),
-              child: Row(
-                children: <Widget>[
-                  Expanded(
-                    child: Text(
-                      text,
-                      style: context.texts.bodyMedium?.copyWith(
-                        color: foreground,
+          child: Material(
+            // The container paints the surface; this exists for the ripple.
+            type: MaterialType.transparency,
+            child: InkWell(
+              // A paired tile is finished, not merely busy: BR-116 has already
+              // recorded it, and a second tap could only record it twice.
+              onTap: _isPaired ? null : onTap,
+              borderRadius: radius,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.md,
+                ),
+                child: Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      if (_isPaired) ...<Widget>[
+                        Icon(
+                          Icons.check,
+                          size: style?.fontSize,
+                          color: foreground,
+                        ),
+                        const SizedBox(width: AppSpacing.xs),
+                      ],
+                      Flexible(
+                        child: Text(
+                          text,
+                          style: style,
+                          textAlign: TextAlign.center,
+                          // The row's height is the grid's to decide, so a long
+                          // term gives way rather than pushing the board out of
+                          // shape.
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                  if (_isPaired) ...<Widget>[
-                    const SizedBox(width: AppSpacing.sm),
-                    Icon(
-                      Icons.check,
-                      size: context.texts.bodyMedium?.fontSize,
-                      color: semantic.success,
-                    ),
-                  ],
-                ],
+                ),
               ),
             ),
           ),
@@ -246,12 +339,29 @@ class MatchTileWidget extends StatelessWidget {
   }
 }
 
-/// The one number this tile decides for itself, and it is not a colour.
+/// The numbers this tile decides for itself, and none of them is a colour.
 abstract final class AppMatchTile {
   /// How far a paired tile recedes.
   ///
-  /// **0.6, not lower.** A paired tile still has to be readable — it is the
+  /// **0.7, not lower.** A paired tile still has to be readable — it is the
   /// record of what the user got right, and a tile faded to the point of
   /// guessing is a tile they will tap again to check.
-  static const double pairedOpacity = 0.6;
+  static const double pairedOpacity = 0.7;
+
+  /// How much `success` a paired tile's fill carries, blended into the surface
+  /// under it. Enough to read as a state, not enough to compete with the
+  /// selected tile, which is the only solid colour on the board.
+  static const double pairedFillAlpha = 0.12;
+
+  /// The same for its outline. Heavier than the fill because a hairline has a
+  /// tenth of the area to say it with.
+  static const double pairedOutlineAlpha = 0.3;
+
+  /// The shortest a row is allowed to get before the board stops filling the
+  /// height and starts scrolling.
+  ///
+  /// [AppSpacing.minimumTouchTarget], because a tile is a control: a board of
+  /// twelve pairs that divided the height evenly would hand a thumb 40px rows,
+  /// and the grid looking tidy is worth less than the taps landing.
+  static const double minRowHeight = AppSpacing.minimumTouchTarget;
 }

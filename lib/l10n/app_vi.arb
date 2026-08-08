@@ -1470,7 +1470,7 @@
   "@studyHintSelfAssess": {
     "description": "Bottom hint line for self-assess, the one mode that takes the action straight from the user (BR-106)."
   },
-  "studyHintMatch": "Chạm một từ, rồi chạm nghĩa của nó",
+  "studyHintMatch": "Chạm một từ, rồi chạm nghĩa của nó để ghép",
   "@studyHintMatch": {
     "description": "Bottom hint line for match. Term first: the turn belongs to the term's card (BR-118)."
   },

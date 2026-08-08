@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
@@ -182,7 +183,13 @@ class _ContextLine extends StatelessWidget {
     );
 
     return Text(
-      extra == null ? base : '$base · $extra',
+      // **Uppercased here, not in the ARB.** The line is composed from two
+      // strings and only one of them was written in caps, so `match` rendered
+      // `5 CARDS DUE · Round 1 · 4 pairs left` — a sentence wearing half a
+      // label. Doing it at the join makes the case a property of the line
+      // rather than of whichever fragment a translator happened to shout, and
+      // leaves the ARB holding words rather than styling.
+      (extra == null ? base : '$base · $extra').toUpperCase(),
       style: context.texts.labelSmall?.copyWith(
         color: context.colors.onSurfaceVariant,
         letterSpacing: AppTypography.sectionLabelTracking,
@@ -281,9 +288,12 @@ class _HintLine extends StatelessWidget {
       children: <Widget>[
         Icon(
           context.studyModeHintIcon(mode),
-          // Tied to the line's own size rather than an icon step, so the mark
-          // and the sentence stay the same weight when either moves.
-          size: style?.fontSize,
+          // **The icon step, not the line's font size.** Tying it to the text
+          // put a 12px glyph beside 12px copy, and a mark that small reads as a
+          // speck rather than as the thing that classifies the sentence.
+          // [AppIconSize.sm] is the step named for exactly this — inline with
+          // body text — and it is what the handout asks for.
+          size: AppIconSize.sm,
           color: context.colors.onSurfaceVariant,
         ),
         const SizedBox(width: AppSpacing.sm),
