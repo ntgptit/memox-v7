@@ -12,10 +12,6 @@
   "@navigationStudyLabel": {
     "description": "Bottom navigation label for the Study destination, where the user studies due cards. Kept separate from a screen title for the same reason as decksTitle: a tab label competes for width and may need shortening where a title does not."
   },
-  "studyPlaceholderMessage": "MemoX is starting up.",
-  "@studyPlaceholderMessage": {
-    "description": "Text on the temporary Study screen shown until the real study session screen lands (M5.4)."
-  },
   "decksTitle": "Decks",
   "@decksTitle": {
     "description": "App bar title of the home screen, which lists the user's root decks. A deck is a folder of flashcards."

@@ -33,7 +33,7 @@ void main() {
     ) async {
       await tester.pumpWidget(
         wrapForTest(
-          StudyEntrySection(
+          StudyEntrySectionWidget(
             summary: summaryOf(),
             onLearn: () {},
             onReview: () {},
@@ -54,7 +54,7 @@ void main() {
       var reviewed = false;
       await tester.pumpWidget(
         wrapForTest(
-          StudyEntrySection(
+          StudyEntrySectionWidget(
             summary: summaryOf(dueCount: 0),
             onLearn: () {},
             onReview: () => reviewed = true,
@@ -72,7 +72,7 @@ void main() {
     testWidgets('with nothing new the learn entry is gone too', (tester) async {
       await tester.pumpWidget(
         wrapForTest(
-          StudyEntrySection(
+          StudyEntrySectionWidget(
             summary: summaryOf(newCount: 0),
             onLearn: () {},
             onReview: () {},

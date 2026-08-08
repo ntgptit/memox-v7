@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../../deck/domain/models/scheduler_type_model.dart';
+
 import '../../domain/entities/study_session_entity.dart';
 import '../../domain/models/study_action_model.dart';
 import '../../domain/models/study_turn_model.dart';
@@ -24,12 +26,23 @@ abstract class StudySessionState with _$StudySessionState {
     /// The turn on screen. Null while loading, and again once the session ends.
     StudyTurnModel? turn,
 
+    /// The deck's algorithm, so a graded mode can ask it what right and wrong
+    /// mean (BR-107) instead of guessing from the shape of [actions].
+    @Default(SchedulerType.unknown) SchedulerType schedulerType,
+
     /// The actions this deck's algorithm offers (BR-30).
     ///
     /// Empty until the session opens. The screen renders buttons from this and
     /// never from a list of its own — a hardcoded four is wrong for every
     /// `eight_box` deck.
     @Default(<StudyAction>[]) List<StudyAction> actions,
+
+    /// Every card of the session, for the stages that need the whole set.
+    ///
+    /// `match` lays out a board and `guess` draws distractors from it (BR-121,
+    /// BR-153). Fixed for the session's life (BR-102), so it is read once when
+    /// the session opens rather than per turn.
+    @Default(<StudyCardModel>[]) List<StudyCardModel> sessionCards,
 
     /// Opening the session. Nothing is on screen yet.
     @Default(false) bool isOpening,

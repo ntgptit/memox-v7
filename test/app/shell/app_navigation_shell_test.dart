@@ -7,6 +7,7 @@ import 'package:memox/app/app.dart';
 import 'package:memox/app/config/env_config.dart';
 import 'package:memox/app/config/env_config_provider.dart';
 import 'package:memox/features/deck/di/deck_repository_provider.dart';
+import 'package:memox/features/study/di/study_repository_provider.dart';
 import 'package:memox/app/router/app_router.dart';
 import 'package:memox/app/router/route_paths.dart';
 import 'package:memox/app/shell/app_navigation_shell.dart';
@@ -22,6 +23,8 @@ import 'package:memox/shared/widgets/mx_loading_state.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 
 import '../../features/deck/presentation/support/fake_deck_repository.dart';
+
+import '../../features/study/domain/support/fake_study_repository.dart';
 
 /// The chrome, exercised through the real router.
 ///
@@ -52,6 +55,10 @@ void main() {
         overrides: [
           envConfigProvider.overrideWithValue(EnvConfig.development),
           deckRepositoryProvider.overrideWithValue(repository),
+          // The Study branch reads real data since M5.7, so the shell needs a
+          // study repository too. The bar is what this test is about, and it
+          // has to survive that branch rendering as well as the deck one.
+          studyRepositoryProvider.overrideWithValue(FakeStudyRepository()),
         ],
         child: MediaQuery(
           data: MediaQueryData(textScaler: TextScaler.linear(textScale)),
@@ -116,7 +123,10 @@ void main() {
         initialLocation: RoutePaths.study,
       );
 
-      expect(find.text(english.studyPlaceholderMessage), findsOneWidget);
+      // The branch shows the real entry screen since M5.7. What this test is
+      // about is the bar surviving that branch, so it asserts the screen
+      // rendered at all rather than which copy it happens to carry.
+      expect(find.text(english.studyNewCount(3)), findsOneWidget);
       expect(find.byType(MxNavigationBar), findsOneWidget);
       expect(tester.takeException(), isNull);
     });

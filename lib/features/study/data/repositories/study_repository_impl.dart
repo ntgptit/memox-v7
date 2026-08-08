@@ -120,6 +120,21 @@ final class StudyRepositoryImpl
   }
 
   @override
+  Future<List<StudyCardModel>> sessionCards(String sessionId) async {
+    final ids = await _dao.sessionCardIds(sessionId);
+    final cards = <StudyCardModel>[];
+
+    for (final id in ids) {
+      final row = await _dao.cardById(id);
+      if (row == null) continue;
+
+      cards.add(studyCardModelFromRow(row));
+    }
+
+    return cards;
+  }
+
+  @override
   Future<List<String>> cardsFinishedInSession(String sessionId) =>
       _dao.cardsWithNothingPending(sessionId);
 

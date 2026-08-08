@@ -6,7 +6,7 @@ import '../../features/card/presentation/providers/card_use_case_provider.dart';
 import '../../features/card/presentation/screens/card_editor_screen.dart';
 import '../../features/card/presentation/screens/card_list_screen.dart';
 import '../../features/deck/presentation/screens/deck_list_screen.dart';
-import '../../features/study/presentation/screens/study_placeholder_screen.dart';
+import '../../features/study/presentation/screens/study_entry_screen.dart';
 import '../fallback/route_not_found_screen.dart';
 import '../shell/app_navigation_shell.dart';
 import '../../core/navigation/route_names.dart';
@@ -126,7 +126,10 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
               GoRoute(
                 path: RoutePaths.study,
                 name: RouteNames.study,
-                builder: (context, state) => const StudyPlaceholderScreen(),
+                // The fixture deck until a deck picker feeds this branch a
+                // real id (M5.9). The screen itself takes any deck.
+                builder: (context, state) =>
+                    const StudyEntryScreen(deckId: kStudyBranchDeckId),
               ),
             ],
           ),
@@ -197,3 +200,11 @@ Future<bool> _deckHoldsCards(ProviderContainer container, String deckId) async {
     return false;
   }
 }
+
+/// The deck the Study tab opens.
+///
+/// **A constant, and deliberately visible.** The Study branch of the navigation
+/// shell has no deck to point at yet — choosing one is the resume screen's job
+/// (M5.9). Naming it here rather than hiding a literal in the builder is what
+/// makes the gap something a reader trips over instead of inherits.
+const String kStudyBranchDeckId = 'fixture-root-a';

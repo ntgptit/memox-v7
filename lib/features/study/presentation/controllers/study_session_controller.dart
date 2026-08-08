@@ -59,10 +59,14 @@ class StudySessionController extends _$StudySessionController {
         throw StateError('Deck has no scheduler this build understands');
       }
 
+      final cards = await repository.sessionCards(session.id);
+
       if (!ref.mounted) return;
       state = state.copyWith(
         session: session,
         actions: actions,
+        schedulerType: context.schedulerType,
+        sessionCards: cards,
         isOpening: false,
       );
 
