@@ -324,6 +324,7 @@ void main() {
       ),
     ),
     'mx_progress_bar': const ProgressBarSpecimen(),
+    'mx_session_top_bar': const SessionTopBarSpecimen(),
     'mx_search_field': const SearchFieldSpecimen(),
     'mx_pill_group': const PillGroupSpecimen(),
   };

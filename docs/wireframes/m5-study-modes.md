@@ -7,8 +7,8 @@
 | **Scope** | Khung phiên học, và năm màn `browse` · `match` · `guess` · `recall` · `fill`. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), luồng (`use-cases.md`), giá trị token (`design_system/tokens/`) |
 | **Source of truth for** | Bố cục màn học · phán quyết cho tám điểm design lệch với BR |
 | **Depends on** | `document-conventions.md`, `business-rules.md` (BR-108…BR-154), `wbs-study.md` (M5.7…M5.20) |
-| **Updated by task** | M5.20 (state thứ hai của `recall` và `fill`) — thêm §6.1 |
-| **Last updated** | 2026-08-08 |
+| **Updated by task** | UI review khung phiên học — thêm §8.4 (thanh trên lệch tâm, dòng gợi ý) và §8.5 (`MxSessionTopBar`) |
+| **Last updated** | 2026-08-09 |
 
 Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham chiếu bằng ID.
 
@@ -359,7 +359,8 @@ thì `Expanded` của thanh lấy hết phần còn lại: **226px**, hàng khô
 Có test đo, vì không phép kiểm nào về chữ nhìn thấy được lỗi này.
 
 Nút ✕ cũng hẹp lại còn **36** theo spec, và chỉ nhường **chiều ngang** — nó giữ
-nguyên 48 chiều cao, nên ngón tay vẫn có cả thanh để chạm.
+nguyên 48 chiều cao, nên ngón tay vẫn có cả thanh để chạm. *(Ràng buộc 36 này
+không có tác dụng thật, và đã bị gỡ — xem §8.4 và §8.5.)*
 
 **Nút Next đã bỏ** — xem §3 và BR-155.
 
@@ -367,3 +368,139 @@ nguyên 48 chiều cao, nên ngón tay vẫn có cả thanh để chạm.
 thanh nav dưới, tức là có hai đường ra khỏi một phiên mà BR-82 nói chỉ có một:
 nút ✕, đóng phiên thành `abandoned`/`user_exit`. Đổi tab để nguyên phiên đang mở,
 và lần sau app mời resume đúng cái người dùng tưởng đã bỏ.
+
+### 8.4 Thanh trên lệch tâm và dòng gợi ý, sau lần đo thứ hai
+
+**Ràng buộc 36 của nút ✕ chưa bao giờ có tác dụng.** Đo ở khung 393: hộp nút vẫn
+là **48×48**. `MaterialTapTargetSize.padded` bơm hộp 36 trở lại 48 rồi căn giữa
+cái 36 bên trong, nên hàng vẫn tiêu 48 *và* glyph ✕ nằm lùi vào **14px** so với
+chỗ nút bắt đầu. Đầu kia của hàng — bộ đếm `3 / 10` — lại kết thúc đúng mép
+gutter. Hai đầu lùi vào không bằng nhau chính là cái đọc ra thành "thanh header
+bị lệch, chưa nằm ở trung tâm": phần nhìn thấy được của hàng có tâm ở 203.5
+trong khi cột nội dung có tâm ở 196.5.
+
+Nay `isCompact` **không đụng vào vùng chạm nữa, chỉ dời glyph**: giữ nguyên
+48×48, `alignment: AlignmentDirectional.centerStart` kéo glyph ra sát mép. Đo
+lại: glyph bắt đầu ở **16**, bộ đếm kết thúc ở **377**, tâm hàng **196.5** —
+đúng tâm cột nội dung. Khoảng `xs` sau nút cũng bỏ, vì hộp nút đã tự chừa 28px
+trống phía sau glyph. Thanh tiến trình được thêm 4px: **198**.
+
+**Dòng gợi ý: căn giữa, nhỏ hơn một bậc, và icon theo mode.** Trước đây nó căn
+trái ở cỡ `bodyMedium` với `Expanded`, tức là chiếm hết bề ngang và đọc ra như
+một đoạn nội dung thẻ bị tràn xuống. Ảnh wireframe vẽ nó là một dòng chú thích
+căn giữa — đo trên ảnh ra ~12px, tức `bodySmall`. Dựng theo ảnh: `Row` căn giữa,
+`Flexible` thay `Expanded` (Expanded sẽ đẩy icon về lại lề trái), chữ
+`textAlign: center`. Đo lại ở 393: cụm icon + chữ rộng 234, tâm **196.5**.
+
+Icon **không còn dùng chung một glyph**. Bốn mode có câu gợi ý mô tả thao tác
+trên chính thẻ đang hiện thì giữ dấu ✓ — đúng như `match_mode`, `guess_mode`,
+`recall_mode` vẽ, và đổi `check_circle_outline` thành `check` cho khớp ảnh.
+`browse` là ngoại lệ: câu của nó nói về việc **đi giữa các thẻ**, và ảnh
+`review_mode` vẽ dấu `»` chứ không phải ✓ — một dấu ✓ cạnh "swipe left for next"
+đọc ra như một phán quyết về thẻ thay vì một hướng để đi. Bảng tra theo enum ở
+`studyModeHintIcon`, không thêm `switch` thứ hai trong `presentation/` (AD-18).
+
+**Câu của `browse` rút ngắn theo ảnh**: `Swipe left for next, right to go back`.
+Bản dài cũ tràn hai dòng khi hạ xuống cỡ chú thích. BR-155 vẫn đúng — vuốt phải
+là *xem lại*, không ghi gì; `studyBrowseLookingBack` là dòng nói rõ điều đó khi
+người dùng đang thật sự nhìn lại.
+
+### 8.5 Thanh trên tách thành `MxSessionTopBar`, và chip sát lại nút ✕
+
+Lần sửa ở §8.4 kéo glyph ✕ ra sát mép gutter, và **làm khoảng cách ✕ → chip
+rộng gấp đôi**: 14px thành 28px. Vùng chạm 48×48 là nguyên nhân, đúng như chủ
+dự án đoán — glyph 20px nằm sát mép trái của hộp 48 thì 28px còn lại của hộp
+nằm chết giữa nó và chip.
+
+**Không thu hộp lại được.** 48 là `AppSpacing.minimumTouchTarget`, và
+`study_accessibility_test.dart` khẳng định `androidTapTargetGuideline`. Mọi
+cách "vẽ tràn ra ngoài ô" — `Transform`, `OverflowBox` — đều mất phần chạm nằm
+ngoài ô, vì hit test của Flutter bị chặn bởi kích thước ô cha; vùng chạm co lại
+mà `Semantics` vẫn khai 48×48, tức là hỏng *im lặng*.
+
+Cách đúng là cách `AppBar` đặt icon leading của nó: **thanh trên chạy sát mép
+màn hình**, nút hở vào gutter, glyph rơi *đúng* lên gutter. Màn truyền
+`padding: EdgeInsets.zero` cho `MxContentShell`; khung tự đặt gutter cho dòng
+ngữ cảnh, thân và dòng gợi ý bằng `mxScreenGutter` (public hoá từ
+`_defaultPadding`, để 320 vẫn ra 12 chứ không phải 16 chép tay).
+
+Đo lại ở 393, so với ảnh mẫu (đo trên chính file PNG, neo theo mép trái thẻ và
+mép phải bộ đếm, tỉ lệ 1.335):
+
+| | ảnh mẫu | trước | sau |
+|---|---|---|---|
+| glyph ✕ | 20.5…33.2 | 16…36 | **16…36** |
+| mặt chip bắt đầu | 54.9 | 64 | **50** |
+| khoảng ✕ → chip | 21.7 | 28 | **14** |
+| thanh tiến trình | 201.5 | 206 | **188** |
+| bộ đếm kết thúc | 377 | 377 | **353** |
+
+**Hai đầu của thanh không dùng chung một giá trị, và đó là kết luận sau bốn
+vòng review.** Thử cho cả hai bằng nhau rồi: nút ✕ đọc ra thành bị đẩy sâu vào
+trong màn. Một *control* thì neo ở mép nó đóng — `AppBar` đặt icon leading của nó
+đúng như vậy — còn một *nhãn* thì nằm trong. Cái **không** được phép là chiều
+ngược lại: glyph thụt vào trong khi bộ đếm sát mép, vì hàng có control bị chôn và
+chữ đang rơi khỏi mép thì đọc ra là hỏng chứ không phải là có bố cục. Đó chính là
+thứ vòng review đầu tiên báo.
+
+Nên có hai hàm chứ không một hằng:
+
+- `_leadingInset` = **gutter**. Glyph ✕ rơi lên 16 (320: 14 — xem dưới).
+- `_trailingInset` = **gutter + `xl`**. Hộp bộ đếm hết ở 353, tức lùi 24 so với
+  mép thẻ và vượt qua cả cột chữ của thẻ (`TERM`/`MEANING` ở 32). Sâu như vậy vì
+  ở mép không có gì để đứng lên: mép thẻ full-bleed chỉ **1.38:1** so với nền
+  trang ở light, ruột thẻ **1.06:1** — bộ đếm từng được đo *sát khít* mép ấy,
+  đúng từng pixel, mà vẫn bị báo là vượt ra ngoài, hai lần. Tránh hẳn ra là thứ
+  chấm dứt câu hỏi.
+
+**Clamp ở 0 là bắt buộc, không phải phòng xa.** Gutter compact là 12 còn glyph
+nằm sau hộp nó 14, nên start đúng phải là −2; `Padding` assert với inset âm, và
+nó hạ **năm** test ở 320 ngay khoảnh khắc hai đầu thôi dùng chung giá trị. Bị
+clamp thì glyph rơi lên 14 thay vì 12 — hai pixel mà compact scale chịu được, đổi
+lại thanh dựng được ở đó.
+
+Giá phải trả: thanh tiến trình 206 → **188**. Và ở 320 @ textScale 2.0 hàng từng
+hụt 5.9px, nên mức chặn chip đổi từ *2/5 bề rộng thanh* sang **2/5 phần còn lại
+sau nút và hai khoảng `sm`**: 64 đó là cố định, chiếm 1/5 hàng ở 393 nhưng 1/4 ở
+278, nên đo theo cả hàng là âm thầm hứa cho chip *nhiều* hơn đúng lúc nó phải
+nhường.
+
+**Không có spacer nào giữa nút ✕ và chip, và đó là cách khép khoảng cách chứ
+không phải thu nút.** Khoảng trống mắt nhìn thấy không phải spacing: nút căn
+giữa glyph 20px trong hộp 48px, nên `_kGlyphInset` = 14 của chính hộp nó đã nằm
+sau glyph rồi. Thêm một `sm` lên trên thành 22; bỏ hẳn thì mặt chip rơi đúng
+**54**, tức chỗ ảnh mẫu đặt nó (54.9). 14 còn lại **là vùng chạm**, không phải
+không khí.
+
+Thu nút là cách còn lại, và nó tốn đúng 48×48 mà `androidTapTargetGuideline`
+khẳng định ở cả `study_accessibility_test.dart` lẫn stress suite. Tệ hơn: các mẹo
+quen tay để thu — `Transform`, `OverflowBox` — cắt **vùng hit** theo ô cha trong
+khi `Semantics` vẫn khai 48×48, nên gate vẫn xanh và chỉ ngón tay người dùng biết
+là hỏng.
+
+**Hai đầu thanh lùi vào một `xs` so với gutter, không nằm trên gutter.** Chủ dự
+án báo bộ đếm "vượt mép" hai lần, trong khi đo từng cột pixel thì hộp chữ và hộp
+thẻ **kết thúc đúng cùng 377**, và mực của số `0` còn dừng trước mực viền thẻ
+1px. Cái sai không phải toạ độ mà là thứ để gióng: viền thẻ chỉ **1.38:1** so với
+nền trang ở light (ruột thẻ 1.06:1), trong khi glyph ✕ và bộ đếm đậm hơn hẳn. Một
+nét nặng đặt *đúng* lên một nét mờ thì đọc ra thành đè lên nó. `_opticalInset` =
+gutter + `sm` là câu trả lời (`xs` là lần thử đầu, vẫn còn chật), và **cả hai đầu
+cùng lùi bằng một giá trị**: chỉ lùi bộ đếm sẽ kéo tâm hàng lệch đi một nửa
+lượng lùi so với tâm cột nội dung — đúng cái lỗi đầu tiên đã sửa. Một hằng, đặt
+ở hai đầu, là thứ khiến hai bên không thể trôi khỏi nhau.
+
+**Thanh trên nay là `MxSessionTopBar` trong `lib/shared/widgets/`.** Nó vốn đã
+dùng chung cho cả năm mode — khung phiên học chỉ có một — nhưng nằm `private`
+trong feature nên màn toàn-màn-hình tiếp theo sẽ phải dựng lại nó. Component
+không biết `StudyMode` là gì: nhận một *chữ* cho chip, một `0…1` cho thanh, và
+một widget cho ô cuối (bộ đếm, hoặc đồng hồ của `recall`). Chỉ có chip đổi giữa
+năm mode, đúng như yêu cầu.
+
+**Một lỗi tràn có thật lộ ra khi làm việc này.** Test 320×568 @ textScale 2.0
+trước đây dựng khung ở **nguyên 320** vì harness không có shell, trong khi
+production chỉ có 296 — nên nó chưa bao giờ đo đúng thứ đang chạy. Nay khung tự
+đặt gutter, test và production khớp nhau, và hàng tràn 7.5px với tên mode dài.
+Chip vì thế bị chặn bởi `_kChipMaxWidthFraction` (2/5 bề rộng thanh): ở mọi khổ
+bình thường mức chặn rộng hơn chữ nên không đổi gì, ở 320 @ 2.0 nó là thứ nhường
+lại chỗ thay vì tràn. Bộ đếm **không** bị chặn — nó là con số, và một con số bị
+cắt là một con số sai.

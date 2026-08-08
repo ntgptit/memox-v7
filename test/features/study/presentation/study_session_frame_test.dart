@@ -148,7 +148,7 @@ void main() {
     tester,
   ) async {
     const hints = <StudyMode, String>{
-      StudyMode.browse: 'Swipe left for the next card, right to look back',
+      StudyMode.browse: 'Swipe left for next, right to go back',
       StudyMode.selfAssess: 'Flip the card, then say how it went',
       StudyMode.match: 'Tap a term, then its meaning',
       StudyMode.guess: 'Choose the right meaning',

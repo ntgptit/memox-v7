@@ -1444,9 +1444,9 @@
     },
     "description": "Takes the counter's place in the top bar during a recall turn (BR-128). Spelled out rather than a bare number because it is also what a screen reader announces — the clock must not be readable only by its colour."
   },
-  "studyHintBrowse": "Swipe left for the next card, right to look back",
+  "studyHintBrowse": "Swipe left for next, right to go back",
   "@studyHintBrowse": {
-    "description": "Bottom hint line for browse, and the only instruction the mode gives. Both directions since BR-155; going back is looking, so the wording says look rather than return."
+    "description": "Bottom hint line for browse, and the only instruction the mode gives. Both directions since BR-155. Shortened to the wireframe's wording — the long form wrapped to two lines once the hint moved to caption size."
   },
   "studyFrameSetLearning": "{count, plural, =1{1 NEW CARD} other{{count} NEW CARDS}}",
   "@studyFrameSetLearning": {

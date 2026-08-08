@@ -3,10 +3,6 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_icon_size.dart';
 import '../../core/theme/app_spacing.dart';
 
-/// What a compact icon button spends of a row. The height stays at
-/// `AppSpacing.minimumTouchTarget`.
-const double _kCompactWidth = 36;
-
 /// An action with no visible label.
 ///
 /// [semanticLabel] is **required**, and that is the entire reason this widget
@@ -21,12 +17,10 @@ const double _kCompactWidth = 36;
 /// node instead and leaves all three intact.
 ///
 /// Size comes from `AppIconSize` and the 48×48 minimum from
-/// `IconButtonThemeData`. [isCompact] is the one adjustment, and it gives up
-/// **width only**: the button spends 36 of a row instead of 48 and keeps the
-/// full 48 of height, so a thumb still has the whole bar to land in vertically.
-/// It exists for the study session's top bar, where the close button shares a
-/// row with a progress track that has to read as a measure — see
-/// `AppIconSize.mdCompact`. There is no parameter that shrinks both axes.
+/// `IconButtonThemeData`. [isCompact] is the one adjustment, and it moves the
+/// **glyph**, never the target. It exists for the study session's top bar, where
+/// the close button shares a row with a progress track that has to read as a
+/// measure — see `AppIconSize.mdCompact`.
 class MxIconButton extends StatelessWidget {
   const MxIconButton({
     required this.icon,
@@ -51,11 +45,17 @@ class MxIconButton extends StatelessWidget {
   /// two cannot drift apart.
   final String? tooltip;
 
-  /// Narrows the button to 36 wide, keeping its 48 of height.
+  /// Drops the glyph to [AppIconSize.mdCompact], for a control sharing a row
+  /// with something that needs the width.
   ///
-  /// For a control sharing a row with something that needs the width. The
-  /// glyph drops to [AppIconSize.mdCompact] with it — a 24px icon in a 36px box
-  /// leaves six pixels either side and reads as cramped rather than compact.
+  /// **It does not make the button narrower, and it never did.** This used to
+  /// constrain the box to 36 wide; Material's tap-target padding re-inflated it
+  /// to 48 and centred the 36 inside, so the row spent 48 either way. The
+  /// constraint is gone rather than fixed — 48 is [AppSpacing.minimumTouchTarget]
+  /// and shrinking below it fails `androidTapTargetGuideline`, which
+  /// `study_accessibility_test.dart` asserts. A row that needs its leading glyph
+  /// closer to the screen edge than 14px has to be laid out edge-to-edge; see
+  /// `MxSessionTopBar`.
   final bool isCompact;
 
   @override
@@ -65,7 +65,7 @@ class MxIconButton extends StatelessWidget {
       tooltip: tooltip ?? semanticLabel,
       constraints: isCompact
           ? const BoxConstraints.tightFor(
-              width: _kCompactWidth,
+              width: AppSpacing.minimumTouchTarget,
               height: AppSpacing.minimumTouchTarget,
             )
           : null,

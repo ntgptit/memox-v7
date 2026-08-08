@@ -1,13 +1,13 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 298,
+  "scannedFiles": 299,
   "totalSites": 348,
   "byElementKind": {
-    "other": 267,
+    "other": 268,
     "background": 11,
     "shadow": 1,
     "border": 11,
-    "text": 46,
+    "text": 45,
     "icon": 12
   },
   "bySourceKind": {
@@ -3497,7 +3497,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart",
-      "line": 151,
+      "line": 187,
       "widget_context": "_ContextLine",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3508,7 +3508,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart",
-      "line": 276,
+      "line": 247,
       "widget_context": "_Figure",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3519,31 +3519,9 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart",
-      "line": 298,
-      "widget_context": "_ModePill",
-      "element_kind": "background",
-      "source_kind": "theme-token",
-      "expression": "context.semanticColors.surfaceMuted",
-      "token": "semantic.surfaceMuted",
-      "resolved_value_light": "#EAECF1",
-      "resolved_value_dark": "#28254B"
-    },
-    {
-      "file": "lib/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart",
-      "line": 311,
-      "widget_context": "_ModePill",
-      "element_kind": "text",
-      "source_kind": "theme-token",
-      "expression": "context.semanticColors.primaryAccent",
-      "token": "semantic.primaryAccent",
-      "resolved_value_light": "unresolvable: semantic.primaryAccent not in the dumped theme",
-      "resolved_value_dark": "unresolvable: semantic.primaryAccent not in the dumped theme"
-    },
-    {
-      "file": "lib/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart",
-      "line": 338,
+      "line": 276,
       "widget_context": "_HintLine",
-      "element_kind": "icon",
+      "element_kind": "other",
       "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",
       "token": "colorScheme.onSurfaceVariant",
@@ -3552,9 +3530,9 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart",
-      "line": 345,
+      "line": 287,
       "widget_context": "_HintLine",
-      "element_kind": "text",
+      "element_kind": "icon",
       "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",
       "token": "colorScheme.onSurfaceVariant",
@@ -3824,6 +3802,28 @@
       "token": "colorScheme.onSurface",
       "resolved_value_light": "#16182B",
       "resolved_value_dark": "#EDEDF6"
+    },
+    {
+      "file": "lib/shared/widgets/mx_session_top_bar.dart",
+      "line": 230,
+      "widget_context": "_Chip",
+      "element_kind": "background",
+      "source_kind": "theme-token",
+      "expression": "context.semanticColors.surfaceMuted",
+      "token": "semantic.surfaceMuted",
+      "resolved_value_light": "#EAECF1",
+      "resolved_value_dark": "#28254B"
+    },
+    {
+      "file": "lib/shared/widgets/mx_session_top_bar.dart",
+      "line": 243,
+      "widget_context": "_Chip",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.semanticColors.primaryAccent",
+      "token": "semantic.primaryAccent",
+      "resolved_value_light": "unresolvable: semantic.primaryAccent not in the dumped theme",
+      "resolved_value_dark": "unresolvable: semantic.primaryAccent not in the dumped theme"
     },
     {
       "file": "lib/shared/widgets/mx_text_button.dart",

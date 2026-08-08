@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../domain/models/study_action_model.dart';
@@ -57,6 +57,21 @@ extension StudyLabels on BuildContext {
     StudyMode.recall: l10n.studyHintRecall,
     StudyMode.fill: l10n.studyHintFill,
   }[mode];
+
+  /// The glyph that opens the hint line, which is not the same for every mode.
+  ///
+  /// A check is the default because four of the six hints describe an action the
+  /// user performs on the card in front of them. `browse` is the exception: its
+  /// hint is about moving between cards, and a check beside "swipe left for
+  /// next" reads as a verdict on the card rather than a direction to go in.
+  ///
+  /// A map keyed by the enum for the same reason [studyModeHint] is one — AD-18
+  /// spends the single exhaustive dispatch on the mode in the resolver.
+  IconData studyModeHintIcon(StudyMode mode) =>
+      <StudyMode, IconData>{
+        StudyMode.browse: Icons.keyboard_double_arrow_right,
+      }[mode] ??
+      Icons.check;
 
   /// What a mode adds to the frame's context line, if anything.
   ///
