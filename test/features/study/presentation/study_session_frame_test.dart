@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/app_spacing.dart';
 import 'package:memox/features/study/domain/models/study_mode.dart';
 import 'package:memox/features/study/domain/models/study_session_kind_model.dart';
 import 'package:memox/features/study/domain/models/study_turn_model.dart';
@@ -198,11 +199,17 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
+    // **With the screen gutter, and that is the whole test.** Without it this
+    // measured 320px of usable width where the screen gives 272, and passed on
+    // a top bar that overflowed by 19px in production — M5.16 found it.
     await tester.pumpWidget(
       wrapForTest(
         MediaQuery(
           data: const MediaQueryData(textScaler: TextScaler.linear(2)),
-          child: frame(),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: frame(),
+          ),
         ),
         isScrollable: false,
       ),

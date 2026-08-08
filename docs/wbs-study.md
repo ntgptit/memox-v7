@@ -7,7 +7,7 @@
 | **Scope** | Task còn lại của Study từ M5.7 trở đi · nợ kỹ thuật của Study · việc bị chặn |
 | **Source of truth for** | Trạng thái task Study từ M5.7 · nợ kỹ thuật của Study |
 | **Depends on** | `document-conventions.md` · `wbs.md` · `business-rules.md` · `use-cases.md` |
-| **Updated by task** | M5.15 (integration test qua UI) |
+| **Updated by task** | M5.16 (kiểm thị giác và tiếp cận) |
 | **Last updated** | 2026-08-08 |
 
 `docs/wbs.md` giữ M5.0…M5.6 đã hoàn thành và không nhắc lại ở đây. File này giữ
@@ -55,7 +55,7 @@ M5.18 (khung phiên học)  ✔ done
 M5.19 (`browse` và `match`)  ✔ done
 M5.20 (`guess`, `recall`, `fill`)  ✔ done
 M5.14 blocked bởi UC-07
-M5.16 sau khi mọi màn đã ổn định
+M5.16 (thị giác + tiếp cận)  ✔ done
 ```
 
 ### M5.7 · Màn hình phiên học và lối vào
@@ -469,7 +469,8 @@ một Reset rơi vào giữa để lại màn hình cầm phiên của trước 
 
 ### M5.16 · Kiểm thị giác và tiếp cận cho màn Study
 
-- **Status:** todo
+- **Status:** **done** — analyze sạch, 1617 test xanh, visual audit xanh,
+  catalog smoke xanh, guard sạch
 - **Goal:** Màn Study đạt cùng chuẩn thị giác như Deck và Card.
 - **Scope:** đăng ký Widgetbook đủ màn mới; visual audit theo MX-VIS-001; tương
   phản, vùng chạm, thứ tự đọc màn hình.
@@ -477,13 +478,49 @@ một Reset rơi vào giữa để lại màn hình cầm phiên của trước 
 - **Editable documents:** `docs/wbs-study.md`
 - **Output:** entry Widgetbook, báo cáo audit
 - **Acceptance criteria:**
-  - [ ] Mọi màn Study mới có entry Widgetbook.
-  - [ ] Tương phản chữ đạt ngưỡng ở cả light và dark.
-  - [ ] Nút action của phiên đạt vùng chạm tối thiểu, kể cả khi có bốn nút `sm2`.
-  - [ ] Đồng hồ `recall` đọc được bằng screen reader, không chỉ bằng màu.
+  - [x] Mọi màn Study mới có entry Widgetbook — cả ba: `StudyEntryScreen`,
+        `StudySessionScreen`, `StudyOptionsScreen`.
+  - [x] Tương phản chữ đạt ngưỡng ở cả light và dark.
+  - [x] Nút action của phiên đạt vùng chạm tối thiểu, kể cả khi có bốn nút `sm2`
+        (`androidTapTargetGuideline` **và** `iOSTapTargetGuideline`, hai theme).
+  - [x] Đồng hồ `recall` đọc được bằng screen reader, không chỉ bằng màu — chuỗi
+        là "Còn N giây", không phải một con số trần.
+- **Nợ Widgetbook đóng bằng một fake riêng của catalog.** Test double của app nằm
+  dưới `test/`, mà một package khác **không import được** — đó chính là lý do màn
+  Deck có mặt trong catalog còn ba màn Study thì không. Nay có
+  `widgetbook/lib/screens/study_catalog_repository.dart`, và nó cố tình *ngu*:
+  đọc thì tất định theo scenario, ghi thì no-op. Catalog trưng trạng thái, không
+  mô phỏng phiên học. Không luật nào được cài lại trong đó — chuỗi stage, tập
+  action, hậu quả của một câu sai vẫn do use case và scheduler thật quyết định.
+- **Tương phản đo từ token, không đo bằng `textContrastGuideline`.** Guideline ấy
+  lấy mẫu **pixel đã render** của một semantics node; với một dòng 14px nét
+  mảnh thì phần lớn pixel của glyph là khử răng cưa, nên nó báo **1.92:1** ở
+  light cho cặp màu đo được **6.3:1**, và **3.90:1** ở dark cho cặp đo được
+  **7.3:1**. Một con số không ai nhìn thấy thì không phải con số để gate — chính
+  `audit_rules.dart` của repo cũng đã nói vậy ở chỗ nó bảo caller đi đọc raster.
+  Nay test đo `contrast()` trên đúng ba cặp khung tự viết chữ:
+  `onSurfaceVariant`/`surface`, `onSurface`/`surface`, và
+  `primaryAccent`/`surfaceMuted` — cặp thứ ba là chính lập luận của §7.8.
+- **Recursive review — đúng hơn là chính mốc này — tìm ra một lỗi thật:** thanh
+  trên **tràn 19px** ở 320×568 với `textScaler` 2.0. Nút ✕ có bề rộng cố định,
+  nên khi chỉ thanh tiến trình được co, hết đường co là tràn. Nay **mọi** con của
+  hàng ấy đều `Flexible`, và bộ đếm cắt bằng ellipsis.
+- **Và test cũ đã bỏ lọt nó vì một lý do đáng ghi:** ca 320×568 trong
+  `study_session_frame_test.dart` dựng khung **không có gutter của màn hình**,
+  tức đo 320px chỗ dùng được trong khi màn thật chỉ cho 272px. Nay test ấy bọc
+  đúng `Padding(lg)` mà `MxContentShell` áp trong production.
+- **Ghi nhận trung thực về `flutter test integration_test/` (tiêu chí của M5.15):**
+  chạy cả thư mục trên emulator cho **49 xanh / 15 đỏ**. Cả 15 đều là kịch bản
+  Deck/Card/Disc/Tree có sẵn — dạng "không tìm thấy `No decks yet`" sau khi xoá
+  — **không** kịch bản nào chạm Study, và `it_study_test.dart` xanh cả 4. Đây là
+  nợ có trước, ghi vào bảng nợ chứ không gộp vào mốc Study (cùng lý do golden
+  `deck_screens_demo_test` được để riêng).
 - **Dependencies:** M5.7, M5.9, M5.10
 - **Tests required:** golden/visual audit; test text scale 2.0
 - **Checklist phases:** 12.x, 15.3
+- **Tests:** `study_accessibility_test.dart` (7),
+  `study_session_frame_test.dart` ca 320×568 nay đo đúng bề rộng,
+  `widgetbook/test/catalog_smoke_test.dart` phủ ba màn mới
 
 ### M5.17 · Chốt tám điểm lệch giữa design và BR
 
@@ -730,7 +767,8 @@ phán quyết trước khi người dùng trả lời.
 | IT chưa đi hết chuỗi 5 stage tới `learned_at` | 25 lượt tương tác/kịch bản, mỗi lượt `match` phải tìm cặp trên bàn xáo; kết quả đã có test ở tầng dữ liệu | mốc riêng — cần robot biết đọc bàn ghép |
 | `pause()` không có caller — nửa **ghi** của BR-133 | M5.18 nối tick vào khung, không nối vào `pause()`; entry M5.18 từng nói nhầm là đã xong | mốc riêng — cần quyết định lifecycle nào ghi và ghi `is_revealed` bằng gì |
 
-| Màn Study chưa có mặt trong Widgetbook | M5.7 thêm hai màn, M5.11 thêm màn thứ ba, không màn nào được đăng ký; `widgetbook/lib/screens/` mới chỉ có `DeckListScreen` | mốc riêng — cần fake repository dùng được từ package `widgetbook/` |
+| ~~Màn Study chưa có mặt trong Widgetbook~~ | `StudyCatalogRepository` là fake riêng của catalog; ba màn Study đã đăng ký | xong ở M5.16 |
+| 15 kịch bản IT Deck/Card/Disc/Tree đỏ | có trước M5; dạng "không thấy `No decks yet`" sau khi xoá | lượt điều tra riêng — không thuộc Study |
 
 ## Việc không thuộc Study nhưng chặn Definition of Done
 
