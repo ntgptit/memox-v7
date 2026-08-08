@@ -15,6 +15,11 @@ abstract class StudyDeckContextModel with _$StudyDeckContextModel {
   const factory StudyDeckContextModel({
     required String deckId,
 
+    /// The name of the deck being studied — the branch the user opened, not the
+    /// root. It rides along because the session frame shows it and the deck row
+    /// is already being read; a second read for one string is a second snapshot.
+    required String deckName,
+
     /// Resolved through `root_deck_id`, never by walking parents (BR-57).
     required String rootDeckId,
 

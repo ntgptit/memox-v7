@@ -29,6 +29,7 @@ import '../mappers/study_config_mapper.dart';
 import '../mappers/study_mapper.dart';
 
 part 'study_options_repository_impl.dart';
+part 'study_queue_layout_repository_impl.dart';
 part 'study_queue_repository_impl.dart';
 part 'study_lifecycle_repository_impl.dart';
 
@@ -57,6 +58,7 @@ const int kInitialIntervalDays = 1;
 final class StudyRepositoryImpl
     with
         _StudyOptionsOperations,
+        _StudyQueueLayoutOperations,
         _StudyQueueOperations,
         _StudyLifecycleOperations
     implements StudyRepository {
@@ -99,6 +101,7 @@ final class StudyRepositoryImpl
 
     return StudyDeckContextModel(
       deckId: deck.id,
+      deckName: deck.name,
       rootDeckId: deck.rootDeckId,
       schedulerType: SchedulerType.fromDbValue(root.schedulerType ?? ''),
       schedulerGeneration: root.schedulerGeneration ?? 1,

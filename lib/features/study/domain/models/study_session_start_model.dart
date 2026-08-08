@@ -18,6 +18,10 @@ abstract class StudySessionStartModel with _$StudySessionStartModel {
   const factory StudySessionStartModel({
     required StudySessionEntity session,
 
+    /// The deck the user opened, for the frame's context line. From the same
+    /// read as the algorithm (AD-13).
+    required String deckName,
+
     /// The deck's algorithm, so a graded mode can ask it what right and wrong
     /// mean (BR-107) rather than guessing.
     required SchedulerType schedulerType,

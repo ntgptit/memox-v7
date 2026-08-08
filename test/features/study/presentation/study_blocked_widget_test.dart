@@ -1,13 +1,16 @@
-import 'dart:math';
-
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/widgets.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
+import 'package:memox/features/study/domain/entities/study_session_entity.dart';
 import 'package:memox/features/study/domain/entities/study_queue_item_entity.dart';
 import 'package:memox/features/study/domain/models/study_action_model.dart';
 import 'package:memox/features/study/domain/models/study_mode.dart';
 import 'package:memox/features/study/domain/models/study_queue_item_status_model.dart';
+import 'package:memox/features/study/domain/models/study_session_kind_model.dart';
+import 'package:memox/features/study/domain/models/study_session_status_model.dart';
 import 'package:memox/features/study/domain/models/study_turn_model.dart';
 import 'package:memox/features/study/presentation/states/study_session_state.dart';
+import 'package:memox/features/study/presentation/widgets/sections/match_board_section_widget.dart';
 import 'package:memox/features/study/presentation/widgets/sections/study_blocked_section_widget.dart';
 import 'package:memox/features/study/presentation/widgets/support/study_mode_view_widget.dart';
 
@@ -40,6 +43,7 @@ void main() {
           isRevealed: false,
         ),
         card: forCard,
+        progress: const StudyStageProgressModel(done: 0, total: 3),
       );
 
   test('a question that cannot be built yields no view and no answer', () {
@@ -63,7 +67,6 @@ void main() {
       onAnswer: (action, {outcomeReason, comparisonVersion, hasUsedHint}) =>
           answers.add(action),
       onContinue: () {},
-      random: Random(1),
     );
 
     expect(view, isNull);
@@ -94,7 +97,6 @@ void main() {
       onAnswer: (action, {outcomeReason, comparisonVersion, hasUsedHint}) =>
           answers.add(action),
       onContinue: () {},
-      random: Random(1),
     );
 
     expect(view, isNull);
@@ -115,7 +117,6 @@ void main() {
       ),
       onAnswer: (action, {outcomeReason, comparisonVersion, hasUsedHint}) {},
       onContinue: () {},
-      random: Random(1),
     );
 
     expect(view, isNotNull);
@@ -144,5 +145,78 @@ void main() {
     await tester.pump();
 
     expect(left, isTrue);
+  });
+
+  group('the deal is seeded, not drawn from a live generator (BR-127)', () {
+    // The bug this replaces: `studyModeView` took a `Random` held by the screen
+    // and consumed it on every build, so any rebuild — locking the buttons
+    // during a write was enough — re-dealt the board and reordered the five
+    // options. BR-127 also wants both stable across a Resume, which a live
+    // generator can never be.
+    StudySessionState stateFor(StudyMode mode, List<StudyCardModel> pool) =>
+        StudySessionState(
+          session: StudySessionEntity(
+            id: 's1',
+            deckId: 'd1',
+            rootDeckId: 'd1',
+            schedulerGeneration: 1,
+            kind: StudySessionKind.reviewing,
+            currentMode: mode,
+            status: StudySessionStatus.inProgress,
+            endReason: null,
+            cursor: 0,
+            cardLimit: 20,
+            startedAt: DateTime.utc(2026, 8, 7),
+            endedAt: null,
+          ),
+          turn: turnOf(mode, pool.first),
+          sessionCards: pool,
+          schedulerType: SchedulerType.eightBox,
+        );
+
+    List<String> boardOrder(Widget view) => (view as MatchBoardSectionWidget)
+        .board
+        .meanings
+        .map((tile) => tile.cardId)
+        .toList();
+
+    test('the match board is identical on a second build', () {
+      final pool = <StudyCardModel>[
+        for (var i = 0; i < 8; i++) card('c$i', back: 'b$i'),
+      ];
+      final state = stateFor(StudyMode.match, pool);
+
+      Widget build() => studyModeView(
+        mode: StudyMode.match,
+        state: state,
+        onAnswer: (action, {outcomeReason, comparisonVersion, hasUsedHint}) {},
+        onContinue: () {},
+      )!;
+
+      expect(boardOrder(build()), boardOrder(build()));
+    });
+
+    test('and a different round deals a different board', () {
+      // The counterpart: without it, "stable across builds" also passes on a
+      // board that is never shuffled at all.
+      final pool = <StudyCardModel>[
+        for (var i = 0; i < 8; i++) card('c$i', back: 'b$i'),
+      ];
+      final roundOne = stateFor(StudyMode.match, pool);
+      final roundTwo = roundOne.copyWith(
+        turn: roundOne.turn!.copyWith(
+          item: roundOne.turn!.item.copyWith(round: 2),
+        ),
+      );
+
+      Widget build(StudySessionState state) => studyModeView(
+        mode: StudyMode.match,
+        state: state,
+        onAnswer: (action, {outcomeReason, comparisonVersion, hasUsedHint}) {},
+        onContinue: () {},
+      )!;
+
+      expect(boardOrder(build(roundOne)), isNot(boardOrder(build(roundTwo))));
+    });
   });
 }

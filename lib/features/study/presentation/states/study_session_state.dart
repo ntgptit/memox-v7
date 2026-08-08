@@ -24,6 +24,10 @@ abstract class StudySessionState with _$StudySessionState {
     /// Null until the session has opened.
     StudySessionEntity? session,
 
+    /// The deck being studied, for the frame's context line. Empty until the
+    /// session opens, which is also when the frame has nothing to draw.
+    @Default('') String deckName,
+
     /// The turn on screen. Null while loading, and again once the session ends.
     StudyTurnModel? turn,
 

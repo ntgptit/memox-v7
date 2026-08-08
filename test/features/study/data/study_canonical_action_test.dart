@@ -170,4 +170,69 @@ void main() {
       expect(await actionsIn(session.id), <String>['good']);
     });
   });
+
+  group('the counter a turn carries', () {
+    // **The one place this is checkable.** Every widget above is handed a
+    // `StudyStageProgressModel` built by the test, so a counting query that read
+    // the wrong round — or the whole stage — would leave all of them green and
+    // put a bar on screen that walks backwards as failed cards enrol into the
+    // next round (BR-116).
+    test('counts the round being served, not the stage', () async {
+      final sessionId = await harness.openReview(
+        cardCount: 3,
+        mode: StudyMode.match,
+      );
+
+      final first = await harness.repository.nextTurn(sessionId);
+      expect(first!.progress.done, 0);
+      expect(first.progress.total, 3);
+
+      // One right and one wrong. The wrong one also enrols a round-2 row, which
+      // is exactly what a stage-wide count would fold into the total.
+      await harness.repository.submitAnswer(
+        sessionId: sessionId,
+        cardId: first.cardId,
+        mode: StudyMode.match,
+        action: StudyAction.remembered,
+        now: StudyHarness.now,
+      );
+
+      final second = await harness.repository.nextTurn(sessionId);
+      await harness.repository.submitAnswer(
+        sessionId: sessionId,
+        cardId: second!.cardId,
+        mode: StudyMode.match,
+        action: StudyAction.forgotten,
+        now: StudyHarness.now,
+      );
+
+      final third = await harness.repository.nextTurn(sessionId);
+      expect(third!.progress.done, 2);
+      expect(third.progress.total, 3, reason: 'round 2 is a separate total');
+    });
+
+    test('and starts over when the next round begins', () async {
+      final sessionId = await harness.openReview(
+        cardCount: 2,
+        mode: StudyMode.match,
+      );
+
+      for (var i = 0; i < 2; i++) {
+        final turn = await harness.repository.nextTurn(sessionId);
+        await harness.repository.submitAnswer(
+          sessionId: sessionId,
+          cardId: turn!.cardId,
+          mode: StudyMode.match,
+          action: StudyAction.forgotten,
+          now: StudyHarness.now,
+        );
+      }
+
+      // Both failed, so round 2 holds both and none of them is answered yet.
+      final roundTwo = await harness.repository.nextTurn(sessionId);
+      expect(roundTwo!.item.round, 2);
+      expect(roundTwo.progress.done, 0);
+      expect(roundTwo.progress.total, 2);
+    });
+  });
 }

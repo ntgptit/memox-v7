@@ -36,12 +36,21 @@ typedef StudyAnswerSink =
 /// A handler cannot return the widget either — handlers are `domain/`, and
 /// `domain/` may not know Flutter. So the mapping lives here, in the layer that
 /// is allowed to know both.
+///
+/// **The shuffles are seeded, not drawn from a live generator** (BR-127). A
+/// `Random` handed in from the screen is consumed on every build, so the board
+/// was re-dealt and the five options reordered every time anything rebuilt the
+/// screen — locking the buttons during a write was enough — and the answer moved
+/// under the user's finger. BR-127 also wants both orders stable across a
+/// Resume, which a live generator can never be. A seed made of the facts that
+/// identify the deal gives the same layout every build and a different one every
+/// round.
 Widget? studyModeView({
   required StudyMode mode,
   required StudySessionState state,
   required StudyAnswerSink onAnswer,
   required VoidCallback onContinue,
-  required Random random,
+  ValueChanged<Duration>? onRecallTick,
 }) {
   final turn = state.turn;
   if (turn == null) return null;
@@ -78,23 +87,30 @@ Widget? studyModeView({
       onContinue: onContinue,
       isLocked: state.isSubmitting,
     ),
+    // The board belongs to the round, so its seed does not include the card —
+    // mixing one in would re-deal between two cards of the same round.
     StudyMode.match: () => _matchView(
-      turn: turn,
       state: state,
       onAnswer: onAnswer,
-      random: random,
+      random: Random(_seedFor(state, turn: turn, isPerCard: false)),
     ),
+    // The five options belong to one question, so this one does. BR-127 wants
+    // the two permutations independent, and different seeds are what makes them
+    // so.
     StudyMode.guess: () => _guessView(
       turn: turn,
       state: state,
       onAnswer: onAnswer,
-      random: random,
+      random: Random(_seedFor(state, turn: turn, isPerCard: true)),
     ),
     StudyMode.recall: () => RecallTimerSectionWidget(
       turn: turn,
       initialRemaining: turn.item.remainingMs == null
           ? null
           : Duration(milliseconds: turn.item.remainingMs!),
+      // The clock is drawn in the frame's top bar (§7.3), so the widget that
+      // owns the countdown reports it rather than showing it.
+      onRemainingChanged: onRecallTick,
       onOutcome: (outcome) => _send(
         onAnswer,
         _actionFor(state, isCorrect: outcome == RecallOutcome.revealed),
@@ -131,8 +147,23 @@ Widget? studyModeView({
 StudyAction? _actionFor(StudySessionState state, {required bool isCorrect}) =>
     schedulerFor(state.schedulerType)?.binaryAction(isCorrect: isCorrect);
 
-Widget? _matchView({
+/// The seed a stage's shuffle is drawn from (BR-127).
+///
+/// Made of what identifies the deal — the session, the stage, the round, and for
+/// a per-question deal the card — so it is the same on every rebuild and after a
+/// Resume, and different in the next round.
+int _seedFor(
+  StudySessionState state, {
   required StudyTurnModel turn,
+  required bool isPerCard,
+}) => Object.hash(
+  state.session?.id,
+  turn.item.mode,
+  turn.item.round,
+  isPerCard ? turn.cardId : null,
+);
+
+Widget? _matchView({
   required StudySessionState state,
   required StudyAnswerSink onAnswer,
   required Random random,

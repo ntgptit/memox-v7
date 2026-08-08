@@ -134,6 +134,26 @@ SELECT COUNT(*) AS pendingCount
 FROM study_queue_items
 WHERE session_id = :sessionId AND mode = :mode AND status = 'pending';
 
+-- How far the running round of a stage has got: how many of its cards are done,
+-- and how many it holds.
+--
+-- **One round, not the whole stage.** A stage that has enrolled a failed card
+-- into round N+1 would otherwise show a total that grows while the user answers,
+-- and a bar that goes backwards reads as a bug rather than as a second pass.
+--
+-- **One statement, not two counts.** The screen shows the figure and the bar
+-- from the same pair; read separately they can straddle a write and the bar ends
+-- up drawn against a total from before the answer that just landed (AD-13).
+--
+-- It counts rows of this stage only, so it can never mix the two card sets
+-- BR-142 keeps apart — a session holds one of them and its queue holds no other.
+stageRoundProgress:
+SELECT
+  COUNT(*) AS total,
+  COUNT(*) FILTER (WHERE status <> 'pending') AS done
+FROM study_queue_items
+WHERE session_id = :sessionId AND mode = :mode AND round = :round;
+
 -- The lowest pending round of a stage — the round currently being served.
 currentRoundOf:
 SELECT MIN(round) AS round

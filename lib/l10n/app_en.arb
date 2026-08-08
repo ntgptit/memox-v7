@@ -1390,5 +1390,78 @@
   "studyFillIncorrect": "Not quite",
   "@studyFillIncorrect": {
     "description": "Feedback after a fill answer did not match. Diacritics count (BR-134)."
+  },
+  "studyFrameClose": "Close session",
+  "@studyFrameClose": {
+    "description": "The X in the session's top bar. Not a back arrow: leaving ends the session as abandoned/user_exit (BR-82), which is a consequence rather than a step backwards."
+  },
+  "studyFrameProgress": "{done} / {total}",
+  "@studyFrameProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    },
+    "description": "The counter beside the session progress bar. It counts the round currently being served, and only the one card set this session holds — a learning session never shows review cards beside its own (BR-142)."
+  },
+  "studyFrameProgressLabel": "Round progress",
+  "@studyFrameProgressLabel": {
+    "description": "Accessible name of the session progress bar, so a screen reader announces what the figure beside it measures."
+  },
+  "studyFrameContext": "{deck} · {kind}",
+  "@studyFrameContext": {
+    "placeholders": {
+      "deck": {
+        "type": "String"
+      },
+      "kind": {
+        "type": "String"
+      }
+    },
+    "description": "The context line under the top bar: which deck, and which of the two session kinds is running (BR-142)."
+  },
+  "studyKindLearning": "Learning",
+  "@studyKindLearning": {
+    "description": "Session kind: cards that have never finished the learning chain (BR-142)."
+  },
+  "studyKindReviewing": "Review",
+  "@studyKindReviewing": {
+    "description": "Session kind: cards that are learned and due (BR-142)."
+  },
+  "studyFrameTimeLeft": "{seconds}s left",
+  "@studyFrameTimeLeft": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    },
+    "description": "Takes the counter's place in the top bar during a recall turn (BR-128). Spelled out rather than a bare number because it is also what a screen reader announces — the clock must not be readable only by its colour."
+  },
+  "studyHintBrowse": "Read both sides, then continue",
+  "@studyHintBrowse": {
+    "description": "Bottom hint line for browse. Only forward: there is no swipe back, because nothing says what going back would do to the cursor."
+  },
+  "studyHintSelfAssess": "Flip the card, then say how it went",
+  "@studyHintSelfAssess": {
+    "description": "Bottom hint line for self-assess, the one mode that takes the action straight from the user (BR-106)."
+  },
+  "studyHintMatch": "Tap a term, then its meaning",
+  "@studyHintMatch": {
+    "description": "Bottom hint line for match. Term first: the turn belongs to the term's card (BR-118)."
+  },
+  "studyHintGuess": "Choose the right meaning",
+  "@studyHintGuess": {
+    "description": "Bottom hint line for guess. One choice only, and the first one counts (BR-126)."
+  },
+  "studyHintRecall": "Recall it, then show the answer",
+  "@studyHintRecall": {
+    "description": "Bottom hint line for recall. The clock is in the top bar (BR-128)."
+  },
+  "studyHintFill": "Type the answer, then check",
+  "@studyHintFill": {
+    "description": "Bottom hint line for fill. Diacritics count (BR-134)."
   }
 }

@@ -1,14 +1,14 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 288,
-  "totalSites": 331,
+  "scannedFiles": 290,
+  "totalSites": 337,
   "byElementKind": {
     "other": 263,
-    "background": 10,
+    "background": 11,
     "shadow": 1,
     "border": 10,
-    "text": 36,
-    "icon": 11
+    "text": 40,
+    "icon": 12
   },
   "bySourceKind": {
     "shared-constant": 141,
@@ -16,7 +16,7 @@
     "Colors-material": 5,
     "hardcoded-literal": 95,
     "opacity-modified-token": 11,
-    "theme-token": 76
+    "theme-token": 82
   },
   "sites": [
     {
@@ -3368,6 +3368,72 @@
       "line": 139,
       "widget_context": "_DeckSearchRow",
       "element_kind": "icon",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart",
+      "line": 86,
+      "widget_context": "StudySessionFrameSectionWidget",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart",
+      "line": 191,
+      "widget_context": "_Figure",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurface",
+      "token": "colorScheme.onSurface",
+      "resolved_value_light": "#16182B",
+      "resolved_value_dark": "#EDEDF6"
+    },
+    {
+      "file": "lib/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart",
+      "line": 213,
+      "widget_context": "_ModePill",
+      "element_kind": "background",
+      "source_kind": "theme-token",
+      "expression": "context.semanticColors.surfaceMuted",
+      "token": "semantic.surfaceMuted",
+      "resolved_value_light": "#EAECF1",
+      "resolved_value_dark": "#28254B"
+    },
+    {
+      "file": "lib/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart",
+      "line": 226,
+      "widget_context": "_ModePill",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.semanticColors.primaryAccent",
+      "token": "semantic.primaryAccent",
+      "resolved_value_light": "unresolvable: semantic.primaryAccent not in the dumped theme",
+      "resolved_value_dark": "unresolvable: semantic.primaryAccent not in the dumped theme"
+    },
+    {
+      "file": "lib/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart",
+      "line": 252,
+      "widget_context": "_HintLine",
+      "element_kind": "icon",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart",
+      "line": 259,
+      "widget_context": "_HintLine",
+      "element_kind": "text",
       "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",
       "token": "colorScheme.onSurfaceVariant",

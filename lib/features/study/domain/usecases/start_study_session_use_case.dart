@@ -93,6 +93,7 @@ class StartStudySessionUseCase {
     // the screen holding halves of two different worlds (AD-13).
     return StudySessionStartModel(
       session: session,
+      deckName: context.deckName,
       schedulerType: context.schedulerType,
       actions: scheduler.supportedActions,
       cards: await _repository.sessionCards(session.id),
