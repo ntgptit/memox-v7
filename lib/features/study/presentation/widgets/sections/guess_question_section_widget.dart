@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../shared/widgets/mx_card.dart';
-import '../../../../../shared/widgets/mx_list_tile.dart';
 import '../../../domain/models/guess_mode.dart';
+import '../items/guess_option_item_widget.dart';
 
 /// One term and five meanings (BR-121).
 ///
@@ -15,6 +15,13 @@ import '../../../domain/models/guess_mode.dart';
 ///
 /// **A choice is reported by identity, never by its text** (BR-125). Two cards
 /// can display the same string; comparing text grades whichever matched first.
+/// The A–E badges are the same rule seen from the other side: they are the
+/// display order, rebuilt each shuffle, and nothing reads them back.
+///
+/// **After an answer the question stays on screen and stops taking input**
+/// (BR-126). The right option is marked right whether or not it was picked — a
+/// screen that only marks your choice leaves you knowing you were wrong and not
+/// what was right.
 class GuessQuestionSectionWidget extends StatefulWidget {
   const GuessQuestionSectionWidget({
     required this.question,
@@ -78,11 +85,33 @@ class _GuessQuestionSectionWidgetState
         ),
       ),
       const SizedBox(height: AppSpacing.lg),
-      for (final option in widget.question.options)
-        MxListTile(
-          title: option.text,
+      for (final (index, option) in widget.question.options.indexed)
+        GuessOptionItemWidget(
+          badge: _badgeFor(index),
+          text: option.text,
+          state: _stateOf(option),
           onTap: _canChoose ? () => _choose(option) : null,
         ),
     ],
   );
+
+  /// A, B, C… from the row's position.
+  ///
+  /// Built here rather than stored on the option, because storing it would make
+  /// it look like something a turn could be recorded against (BR-125).
+  String _badgeFor(int index) => String.fromCharCode(_firstBadgeLetter + index);
+
+  GuessOptionState _stateOf(GuessOption option) {
+    final chosen = _chosenCardId;
+    if (chosen == null) return GuessOptionState.open;
+
+    if (widget.question.isCorrect(option)) return GuessOptionState.correct;
+    if (option.cardId == chosen) return GuessOptionState.chosenWrong;
+
+    return GuessOptionState.dimmed;
+  }
 }
+
+/// `A`. The badges run from here in display order, and go no further than the
+/// five options BR-121 allows.
+const int _firstBadgeLetter = 0x41;

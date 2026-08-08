@@ -86,7 +86,9 @@ void main() {
       expect(outcomes, <RecallOutcome>[RecallOutcome.timedOut]);
       // The user still learns the card they just lost (BR-130).
       expect(find.text('công'), findsOneWidget);
-      expect(find.text("Time's up"), findsOneWidget);
+      // One line, not two: the verdict and why there is no button left belong
+      // together, so the sentence is matched rather than the phrase.
+      expect(find.textContaining("Time's up"), findsOneWidget);
     });
 
     testWidgets('a reveal before the mark is the only outcome (BR-129)', (
@@ -138,7 +140,9 @@ void main() {
 
       await tester.pump(const Duration(seconds: 4));
       await tester.pump();
-      expect(find.text("Time's up"), findsOneWidget);
+      // One line, not two: the verdict and why there is no button left belong
+      // together, so the sentence is matched rather than the phrase.
+      expect(find.textContaining("Time's up"), findsOneWidget);
     });
 
     testWidgets('a later round starts the full limit again (BR-133)', (
@@ -296,6 +300,74 @@ void main() {
 
       expect(find.text('công'), findsNothing);
       expect(find.text('Show hint'), findsOneWidget);
+    });
+  });
+
+  group('the second states neither mode has an image for', () {
+    // Drawn from BR-129, BR-130, BR-134 and BR-137 rather than guessed, and
+    // recorded as an agent proposal in `docs/wireframes/m5-study-modes.md` §6.
+    testWidgets('recall, once revealed, offers nothing further and says why', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrapForTest(
+          RecallTimerSectionWidget(turn: turnOf('c1'), onOutcome: (_) {}),
+        ),
+      );
+
+      expect(find.text('Answer hidden'), findsOneWidget);
+      expect(find.text('công'), findsNothing);
+
+      await tester.tap(find.text('Show answer'));
+      await tester.pump();
+
+      expect(find.text('công'), findsOneWidget);
+      expect(find.text('Show answer'), findsNothing);
+      // Without the sentence, an answer on screen and no control looks exactly
+      // like a screen that stopped responding.
+      expect(find.textContaining('This turn is settled'), findsOneWidget);
+
+      await tester.pump(kRecallTurnLimit);
+    });
+
+    testWidgets('fill, once graded, shows the card-s own back, not the input', (
+      tester,
+    ) async {
+      // BR-138: what the learner typed is never stored, and never echoed back
+      // either. The card is what is shown.
+      await tester.pumpWidget(
+        wrapForTest(
+          FillAnswerSectionWidget(turn: turnOf('c1'), onGraded: (_) {}),
+        ),
+      );
+
+      await tester.enterText(find.byType(TextField), 'cong');
+      await tester.tap(find.text('Check'));
+      await tester.pump();
+
+      expect(find.text('Not quite'), findsOneWidget);
+      expect(find.text('The answer: công'), findsOneWidget);
+      expect(find.text('Check'), findsNothing);
+      expect(tester.widget<TextField>(find.byType(TextField)).enabled, isFalse);
+    });
+
+    testWidgets('and a correct fill does not spell the answer back', (
+      tester,
+    ) async {
+      // The counterpart: the line exists to tell somebody what they missed, and
+      // showing it to somebody who got it right reads as a correction.
+      await tester.pumpWidget(
+        wrapForTest(
+          FillAnswerSectionWidget(turn: turnOf('c1'), onGraded: (_) {}),
+        ),
+      );
+
+      await tester.enterText(find.byType(TextField), 'công');
+      await tester.tap(find.text('Check'));
+      await tester.pump();
+
+      expect(find.text('Correct'), findsOneWidget);
+      expect(find.textContaining('The answer:'), findsNothing);
     });
   });
 }
