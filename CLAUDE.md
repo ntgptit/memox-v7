@@ -285,6 +285,43 @@ CI green.
 Run `.claude/skills/flutter-workflow/scripts/dod_check.sh` for the mechanical
 half of that list. The judgement half is still yours.
 
+### A new feature means re-running the integration suite, on a device
+
+**Adding anything under `lib/features/` is not done until `integration_test/`
+has been run on an emulator and is green.** CI does not run it and deliberately
+will not: an Android emulator on a GitHub runner costs 30–45 minutes a run and
+is the flakiest thing in a pipeline, which buys less than it costs. So this is a
+local gate, and it is on you.
+
+```bash
+flutter test integration_test/ -d emulator-5554 --flavor development
+```
+
+The flavor is required — the app has three and Gradle produces no APK without
+one. The baseline is **66 passing, 0 failing**; anything less is a regression
+until proven otherwise, against `origin/main` and not against a hunch.
+
+**This rule exists because the suite was broken for seventy PRs and nobody
+knew.** It was recorded 60/60 green, and by the time it was next run it was
+0/66. Three causes, none of them a test being wrong:
+
+- a startup fixture seeder copied the shipped decks back **one frame after** the
+  suite wiped the database;
+- `deckRepositoryBinding` grew a dependency on a second feature's contract, and
+  a hand-written binding list in the test harness did not have it — so every
+  scenario threw in `setUp`;
+- the schema's `learned_at` split (BR-90, BR-151) changed what "due" means, and
+  the fixture that simulates a learned card was never updated.
+
+Every one of them is *a rule or a wire changed, and the thing that simulates it
+did not follow* — which is exactly what a unit test cannot see and an
+integration test exists to catch. All three passed `flutter analyze`, the full
+unit suite and the guard on the way in.
+
+**`lib/app/` counts too, and that is where two of the three came from.** A
+binding, a startup widget or a route touches every feature at once; the suite is
+the only thing that notices.
+
 ## Commits
 
 Conventional Commits: `feat(auth): ...`, `fix(sync): ...`, `chore(deps): ...`.
