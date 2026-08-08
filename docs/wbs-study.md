@@ -7,7 +7,7 @@
 | **Scope** | Task còn lại của Study từ M5.7 trở đi · nợ kỹ thuật của Study · việc bị chặn |
 | **Source of truth for** | Trạng thái task Study từ M5.7 · nợ kỹ thuật của Study |
 | **Depends on** | `document-conventions.md` · `wbs.md` · `business-rules.md` · `use-cases.md` |
-| **Updated by task** | vá hồi quy IT do UC-07 gây ra |
+| **Updated by task** | fixture IT ghi thiếu `learned_at` |
 | **Last updated** | 2026-08-08 |
 
 `docs/wbs.md` giữ M5.0…M5.6 đã hoàn thành và không nhắc lại ở đây. File này giữ
@@ -763,7 +763,7 @@ phán quyết trước khi người dùng trả lời.
 | ~~IT chưa đi hết chuỗi 5 stage tới `learned_at`~~ | robot đọc bàn ghép và câu hỏi từ chính widget app vừa dựng; 20 lượt, 15 câu trả lời, 5 thẻ nhận `learned_at` | xong |
 | ~~`pause()` không có caller — nửa **ghi** của BR-133~~ | `RecallTimerSectionWidget.onSuspended` bắn khi app rời foreground với lượt còn mở; màn hình gọi `pause()`. Round-trip có test trên SQLite thật | xong |
 | ~~Màn Study chưa có mặt trong Widgetbook~~ | `StudyCatalogRepository` là fake riêng của catalog; ba màn Study đã đăng ký | xong ở M5.16 |
-| Kịch bản IT còn đỏ | **Hai hồi quy do phát triển, không phải nợ có sẵn** — xem mục dưới. Sau khi vá cả hai, phần còn lại vẫn cần một lượt đo trên cây sạch để quy trách nhiệm | lượt điều tra riêng |
+| 7 kịch bản IT còn đỏ | **Ba hồi quy do phát triển đã tìm ra và vá** — xem mục dưới. Bảy ca còn lại là drift copy/số đếm, mỗi ca một nguyên nhân riêng | lượt điều tra riêng, thuộc Deck/Card |
 
 ### Nửa **ghi** của BR-133, đóng sau M5.16
 
@@ -872,6 +872,23 @@ phán quyết trước khi người dùng trả lời.
   contract** — declaration nào chỉ được khai báo mà chưa bind thì ném. **Đã chứng
   minh** bằng cách bỏ `studyRepositoryProvider` khỏi danh sách: test đỏ, rồi khôi
   phục.
+- **Hồi quy thứ ba, cùng một câu chuyện lần thứ ba.** `ItFixtures._promote` "thăng
+  hạng" một thẻ bằng cách ghi `due_at`, `current_box`, `answer_count` — và
+  **không bao giờ ghi `learned_at`**. Từ schema v5, BR-90 định nghĩa *New* là
+  `learned_at IS NULL` và BR-151 định nghĩa *Due* là `learned_at` có **và**
+  `due_at` đã tới. Nên mọi thẻ fixture đọc ra là New vĩnh viễn, mang một lịch mà
+  nó không được phép có (BR-149) — đúng thứ invariant 28 tồn tại để bắt. Sáu
+  kịch bản khẳng định badge, filter và pill đếm số đang đo đúng cái đó.
+- **Con số đo được, từng bước:** `0/66` (binding) → `56/10` → `59/7` (fixture).
+- **Bảy ca còn lại là drift copy/số đếm, mỗi ca một nguyên nhân**, và đã ghi đúng
+  triệu chứng thay vì một con số: `IT-DISC-001` không thấy `2 due`; `IT-ORG-005`
+  không thấy `All 4`; `IT-ORG-012` không thấy `Showing 65 of 65`; `IT-CARD-005`
+  dừng ở editor **tạo mới** với ô Front rỗng; còn `IT-NAV-002`, `IT-ORG-001`,
+  `IT-ORG-004` chưa soi.
+- **Bài học chung của cả ba, và nó không phải về Study:** IT **không nằm trong
+  CI**. Bảy mươi PR chạy giữa lần ghi `60/60 PASS` và mốc bắt đầu phiên này, mỗi
+  PR gate xanh, và không PR nào biết mình vừa làm đỏ suite. Ba nguyên nhân đều là
+  *một luật hoặc một dây nối đổi, còn thứ mô phỏng nó thì không đổi theo*.
 
 ## Việc không thuộc Study nhưng chặn Definition of Done
 

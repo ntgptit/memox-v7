@@ -196,6 +196,13 @@ abstract final class ItFixtures {
   /// A raw table update on purpose — see the class comment. Only the columns a
   /// review would change are touched; scheduler type, version and generation
   /// keep what card creation wrote.
+  /// When a promoted card finished the learning chain.
+  ///
+  /// Well before [kT0] and before every `due_at` these loaders write, because
+  /// that is what "already learned, now on a schedule" means. The exact instant
+  /// is never asserted; that it exists is (BR-149).
+  static final DateTime _kLearnedAt = kT0.subtract(const Duration(days: 60));
+
   static Future<void> _promote(
     AppDatabase db,
     String cardId, {
@@ -214,6 +221,15 @@ abstract final class ItFixtures {
             lastAnsweredAt: Value<DateTime?>(
               dueAt.subtract(const Duration(days: 1)),
             ),
+            // **`learned_at` travels with `due_at`, and leaving it out is what
+            // broke six scenarios at once.** Since schema v5 "new" means
+            // `learned_at IS NULL` (BR-90) and "due" means it is set *and*
+            // `due_at` has arrived (BR-151) — so a fixture that promoted a card
+            // by writing only `due_at` produced a card the app reads as New
+            // forever, with a schedule it is not allowed to have (BR-149,
+            // invariant 28). Every due badge, due filter and progress pill in
+            // the fixture scenarios was asserting against that.
+            learnedAt: Value<DateTime?>(_kLearnedAt),
           ),
         );
     if (changed != 1) {
