@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/study/domain/models/study_entry_summary_model.dart';
 import 'package:memox/features/study/domain/models/study_mode.dart';
 import 'package:memox/features/study/presentation/widgets/overlays/study_mode_chooser_widget.dart';
+import 'package:memox/features/study/presentation/widgets/overlays/study_resume_widget.dart';
 import 'package:memox/features/study/presentation/widgets/sections/study_entry_section_widget.dart';
 
 import 'support/study_widget_harness.dart';
@@ -200,5 +201,46 @@ void main() {
 
       expect(chosen, <StudyMode>[StudyMode.recall]);
     });
+  });
+
+  group('the three paths (BR-103)', () {
+    /// All three, every time this sheet is shown.
+    ///
+    /// The sheet only exists when there is a session to continue, so a variant
+    /// with two paths would be the entry screen behind it — see
+    /// `study_entry_screen.dart`, which is where "show nothing" is decided.
+    testWidgets('offers continue, learn and review', (tester) async {
+      await tester.pumpWidget(wrapForTest(StudyResumeWidget(onChoice: (_) {})));
+
+      expect(find.text('Continue'), findsOneWidget);
+      expect(find.text('Learn new'), findsOneWidget);
+      expect(find.text('Review'), findsOneWidget);
+    });
+
+    testWidgets('says that starting new ends the open session', (tester) async {
+      // Before the tap, not in a toast afterwards: a session ended by surprise
+      // cannot be un-ended, because the row is already written.
+      await tester.pumpWidget(wrapForTest(StudyResumeWidget(onChoice: (_) {})));
+
+      expect(find.textContaining('ends the open session'), findsOneWidget);
+    });
+
+    for (final path in <({String label, StudyResumeChoice choice})>[
+      (label: 'Continue', choice: StudyResumeChoice.resume),
+      (label: 'Learn new', choice: StudyResumeChoice.learn),
+      (label: 'Review', choice: StudyResumeChoice.review),
+    ]) {
+      testWidgets('${path.label} reports ${path.choice.name}', (tester) async {
+        final chosen = <StudyResumeChoice>[];
+        await tester.pumpWidget(
+          wrapForTest(StudyResumeWidget(onChoice: chosen.add)),
+        );
+
+        await tester.tap(find.text(path.label));
+        await tester.pump();
+
+        expect(chosen, <StudyResumeChoice>[path.choice]);
+      });
+    }
   });
 }

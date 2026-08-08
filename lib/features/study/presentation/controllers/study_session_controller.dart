@@ -14,6 +14,7 @@ import '../../domain/usecases/advance_study_stage_use_case.dart';
 import '../../domain/usecases/end_study_session_use_case.dart';
 import '../../domain/usecases/get_next_turn_use_case.dart';
 import '../../domain/usecases/mark_browsed_use_case.dart';
+import '../../domain/usecases/resume_study_session_use_case.dart';
 import '../../domain/usecases/save_turn_progress_use_case.dart';
 import '../../domain/usecases/start_study_session_use_case.dart';
 import '../../domain/usecases/submit_study_answer_use_case.dart';
@@ -37,22 +38,30 @@ class StudySessionController extends _$StudySessionController {
   StudySessionState build(String deckId) => const StudySessionState();
 
   /// Opens a session and pulls the first turn.
+  ///
+  /// **[shouldResume] picks up the open one instead of opening a new one**
+  /// (BR-103). It is a parameter rather than a second method because everything
+  /// after the first line is identical — both end with a session, a scheduler
+  /// and a card set — and a `resume()` that duplicated the rest is a second copy
+  /// of the failure handling, which is where the two would drift.
   Future<void> start({
     required StudySessionKind kind,
     StudyMode? reviewMode,
+    bool shouldResume = false,
   }) async {
     state = state.copyWith(isOpening: true, error: null);
 
     try {
-      final opened =
-          await StartStudySessionUseCase(
-            ref.read(studyRepositoryProvider),
-          ).call(
-            deckId: deckId,
-            kind: kind,
-            reviewMode: reviewMode,
-            now: ref.read(clockProvider)(),
-          );
+      final repository = ref.read(studyRepositoryProvider);
+      final opened = shouldResume
+          ? await ResumeStudySessionUseCase(repository).call(deckId)
+          : await StartStudySessionUseCase(repository).call(
+              deckId: deckId,
+              kind: kind,
+              reviewMode: reviewMode,
+              now: ref.read(clockProvider)(),
+              utcOffset: ref.read(utcOffsetProvider)(),
+            );
 
       if (!ref.mounted) return;
       state = state.copyWith(

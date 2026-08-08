@@ -1135,6 +1135,18 @@
     },
     "description": "The other half: cards already learned and now due (BR-150). Disjoint from New."
   },
+  "studyResumeTitle": "You left a session open",
+  "@studyResumeTitle": {
+    "description": "Title of the three-path sheet shown when a session from the same study day is still in progress (BR-103)."
+  },
+  "studyResumeBody": "Pick up where you stopped, or start something new — starting new ends the open session.",
+  "@studyResumeBody": {
+    "description": "Says what the two other paths cost, so ending a session is never a surprise (BR-103)."
+  },
+  "studyResumeContinue": "Continue",
+  "@studyResumeContinue": {
+    "description": "Resumes the open session with its queue, cursor and remaining time intact (BR-133)."
+  },
   "studyStartLearning": "Learn new",
   "@studyStartLearning": {
     "description": "Opens a learning session (BR-142)."

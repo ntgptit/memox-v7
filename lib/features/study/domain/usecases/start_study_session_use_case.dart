@@ -3,7 +3,9 @@ import '../models/study_session_start_model.dart';
 import '../failures/study_refusal_failure.dart';
 import '../models/study_mode.dart';
 import '../models/study_scheduler.dart';
+import '../models/study_day_model.dart';
 import '../models/study_session_kind_model.dart';
+import '../models/study_session_status_model.dart';
 import '../repositories/study_repository.dart';
 
 /// Opens a session of a chosen kind (UC-05).
@@ -27,6 +29,7 @@ class StartStudySessionUseCase {
     required String deckId,
     required StudySessionKind kind,
     required DateTime now,
+    required Duration utcOffset,
 
     /// Required for a review session, ignored for a learning one.
     StudyMode? reviewMode,
@@ -53,6 +56,28 @@ class StartStudySessionUseCase {
     // Read once, here, and frozen onto the session (BR-139). Changing the
     // setting afterwards must not move a session that is already running.
     final options = await _repository.effectiveOptions(context.rootDeckId);
+
+    // BR-103: choosing to start something new ends whatever was still open,
+    // and ends it as `user_exit` — the user chose.
+    //
+    // **The stale sweep runs first, and that ordering is the rule.** A session
+    // from an earlier day is `interrupted`, never `user_exit` — the user did not
+    // leave, the app did. Without this line the two labels come down to which
+    // screen happened to run first, and history written with the wrong label
+    // cannot be recomputed later (BR-76).
+    await _repository.abandonStaleSessions(
+      dayStart: StudyDayModel(now: now, utcOffset: utcOffset).startOfToday,
+    );
+
+    final open = await _repository.openSessionFor(deckId);
+    if (open != null) {
+      await _repository.endSession(
+        sessionId: open.id,
+        status: StudySessionStatus.abandoned,
+        reason: StudySessionEndReason.userExit,
+        endedAt: now,
+      );
+    }
 
     final session = await _repository.openSession(
       deckId: deckId,

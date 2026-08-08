@@ -150,7 +150,7 @@ một Reset rơi vào giữa để lại màn hình cầm phiên của trước 
 
 ### M5.9 · Ba đường lúc mở app (BR-103)
 
-- **Status:** todo
+- **Status:** done
 - **Goal:** Mở app còn phiên dở của **cùng ngày học** thì được chọn, không bị ép.
 - **Scope:** màn chọn ba đường — tiếp tục phiên dở, Học mới, Ôn tập; chọn một
   trong hai đường sau thì phiên dở chuyển `abandoned`/`user_exit`.
@@ -158,18 +158,34 @@ một Reset rơi vào giữa để lại màn hình cầm phiên của trước 
 - **Editable documents:** `docs/wbs-study.md`
 - **Output:** widget overlay ba đường, nối vào `StudyEntryScreen`
 - **Acceptance criteria:**
-  - [ ] Phiên `in_progress` cùng ngày học → hiện đủ ba đường.
-  - [ ] Chọn Học mới hoặc Ôn tập → phiên cũ thành `abandoned`/`user_exit`, **không**
+  - [x] Phiên `in_progress` cùng ngày học → hiện đủ ba đường.
+  - [x] Chọn Học mới hoặc Ôn tập → phiên cũ thành `abandoned`/`user_exit`, **không**
         phải `interrupted` (BR-103).
-  - [ ] Tiếp tục → phiên cũ giữ nguyên `status`, và `recall` tiếp đúng
+  - [x] Tiếp tục → phiên cũ giữ nguyên `status`, và `recall` tiếp đúng
         `remaining_ms` đã lưu (BR-133).
-  - [ ] Không có phiên dở → không hiện màn này chút nào.
+  - [x] Không có phiên dở → không hiện màn này chút nào.
 - **`ResumeStudyDayUseCase` đã có từ M5.2 và chưa ai gọi.** Mốc này là phần UI của
   nó, không phải viết lại logic.
 - **Dependencies:** M5.7
 - **Tests required:** widget test ba nhánh; test khẳng định `end_reason` đúng ở
   mỗi nhánh
 - **Checklist phases:** 14.4, 15.3
+
+- **Kết quả:** `ResumeStudySessionUseCase` mới trả về đúng
+  `StudySessionStartModel` như lúc mở phiên, nên màn phiên không cần biết phiên
+  cũ hay mới. `StartStudySessionUseCase` tự đóng phiên đang mở — đặt ở use case
+  chứ không ở màn hình, vì một luật mà caller có thể quên thì sẽ bị quên.
+- **Recursive review tìm thêm hai lỗi, cả hai đã sửa trong mốc này:**
+  - `StartStudySessionUseCase` đóng *mọi* phiên đang mở thành `user_exit`, kể cả
+    phiên của ngày hôm trước — nhãn đúng của nó là `interrupted`. Nay quét
+    `abandonStaleSessions` trước, nên thứ tự quyết định nhãn chứ không phải màn
+    hình nào chạy trước.
+  - Sau khi chọn Học mới, `studyResumeProvider` vẫn giữ phiên vừa bị đóng trong
+    cache; lần vào sau sẽ mời học tiếp một phiên không còn tồn tại và
+    `ResumeStudySessionUseCase` ném `NotFoundFailure`. Nay `_open` invalidate cả
+    hai read trước khi đẩy màn.
+- **Tests:** `test/features/study/domain/study_resume_paths_test.dart` (6),
+  `study_entry_widget_test.dart` nhóm *the three paths* (5)
 
 ### M5.10 · Màn tổng kết phiên
 
@@ -450,7 +466,7 @@ phán quyết trước khi người dùng trả lời.
 | `study_config` chưa được parse | chưa có ai ghi nó | M5.11 |
 | BR-120 chưa có test | `match` chưa có mức `almost` để kiểm | M5.13 |
 | BR-83 chưa có caller | UC-07 chưa tồn tại | M5.14 |
-| `remaining_ms` chưa được nối vào UI resume | cần màn phiên học trước | M5.7 + M5.9 |
+| ~~`remaining_ms` chưa được nối vào UI resume~~ | `RecallTimerSectionWidget` nhận `initialRemaining` từ queue item; test BR-133 ở `recall_fill_widget_test.dart` | xong ở M5.9 |
 | Widget mode chưa ai dựng trong `lib/` | chưa có màn ghép | M5.7 |
 | ~~Ảnh wireframe chưa có trong repo~~ | chủ dự án đã thả vào `wireframes/assets/m5-study-modes/` | xong |
 | `match` xoá ô đã ghép khỏi bàn | dựng trước khi có design | M5.19 |

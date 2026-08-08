@@ -1135,6 +1135,18 @@
     },
     "description": "The other half: cards already learned and now due (BR-150). Disjoint from New."
   },
+  "studyResumeTitle": "Bạn còn một phiên đang dở",
+  "@studyResumeTitle": {
+    "description": "Title of the three-path sheet shown when a session from the same study day is still in progress (BR-103)."
+  },
+  "studyResumeBody": "Học tiếp từ chỗ đang dở, hoặc bắt đầu phiên mới — bắt đầu mới sẽ kết thúc phiên đang dở.",
+  "@studyResumeBody": {
+    "description": "Says what the two other paths cost, so ending a session is never a surprise (BR-103)."
+  },
+  "studyResumeContinue": "Học tiếp",
+  "@studyResumeContinue": {
+    "description": "Resumes the open session with its queue, cursor and remaining time intact (BR-133)."
+  },
   "studyStartLearning": "Học mới",
   "@studyStartLearning": {
     "description": "Opens a learning session (BR-142)."

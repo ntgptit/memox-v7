@@ -29,11 +29,17 @@ class StudySessionScreen extends ConsumerStatefulWidget {
     required this.deckId,
     required this.kind,
     this.reviewMode,
+    this.shouldResume = false,
     super.key,
   });
 
   final String deckId;
   final StudySessionKind kind;
+
+  /// Continue the session already open for this deck, rather than opening a new
+  /// one (BR-103). [kind] and [reviewMode] are then the resumed session's own,
+  /// passed for the title before the load returns.
+  final bool shouldResume;
 
   /// The mode the user chose, for a review session (BR-109). Null for a
   /// learning session, which walks the algorithm's whole sequence.
@@ -61,7 +67,11 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
       unawaited(
         ref
             .read(studySessionControllerProvider(widget.deckId).notifier)
-            .start(kind: widget.kind, reviewMode: widget.reviewMode),
+            .start(
+              kind: widget.kind,
+              reviewMode: widget.reviewMode,
+              shouldResume: widget.shouldResume,
+            ),
       );
     });
   }
