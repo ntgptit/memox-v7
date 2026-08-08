@@ -53,13 +53,12 @@ void main() {
     await robot.createSubDeck('Vocabulary');
     await robot.openDeck('Vocabulary');
 
-    // Step 1: Review announces itself as not ready, without pretending to start
-    // a session.
-    await robot.tapText(ItText.reviewTab);
+    // Step 1: the Study tab opens its own branch rather than the deck list.
+    await robot.tapText(ItText.studyTab);
     expect(
       find.text(ItText.decksEmpty),
       findsNothing,
-      reason: 'Review tab showed the deck list; screen ${robot.visibleText}',
+      reason: 'the Study tab showed the deck list; ${robot.visibleText}',
     );
 
     // Step 2 and 3: coming back lands on D-BRANCH, not the root list — the

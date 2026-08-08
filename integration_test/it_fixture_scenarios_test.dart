@@ -133,7 +133,7 @@ void main() {
     // Step 1: the baseline — a learned, flagged, due card.
     await robot.scrollToText('beginning-visible');
     expect(find.text('BEGINNING'), findsWidgets);
-    expect(find.byIcon(Icons.flag), findsWidgets);
+    expect(robot.rowFlags(), findsWidgets);
     expect(find.text('now'), findsWidgets);
 
     // Step 2: edit only the text.
@@ -150,7 +150,7 @@ void main() {
       reason: 'editing text moved the display state; ${robot.visibleText}',
     );
     expect(
-      find.byIcon(Icons.flag),
+      robot.rowFlags(),
       findsWidgets,
       reason: 'editing text dropped the flag; ${robot.visibleText}',
     );
@@ -171,13 +171,21 @@ void main() {
     await robot.expectRowOrder('new-visible', 'beginning-visible');
     await robot.expectRowOrder('beginning-visible', 'reviewing-visible');
 
-    // Step 2: due-first keeps the same head — due-now cards before future ones.
+    // Step 2: due-first is `due_at ASC` with NULLs first, so the never-learned
+    // card heads the list and the two that have come back around follow in the
+    // order they came back — `reviewing-visible` at `T0 − 1 day` before
+    // `beginning-visible` at `T0 − 5 minutes`. It is **not** the newest-first
+    // order, which is the point: the two sorts agree on the head and disagree
+    // in the middle.
+    //
+    // This read `new → beginning → reviewing` while the fixture dated
+    // `C-P-REVIEW` two days into the future instead of one day into the past.
     await robot.scrollToTop();
     await robot.tapBySemantics('Sort');
     await robot.tapText('Due first');
     await robot.waitCardListSteady();
-    await robot.expectRowOrder('new-visible', 'beginning-visible');
-    await robot.expectRowOrder('beginning-visible', 'reviewing-visible');
+    await robot.expectRowOrder('new-visible', 'reviewing-visible');
+    await robot.expectRowOrder('reviewing-visible', 'beginning-visible');
 
     // Step 3: a filter composes with the sort instead of overriding it.
     await robot.tapTextContaining('Flagged');
@@ -198,29 +206,36 @@ void main() {
     await robot.openDeck('Due library');
     await robot.openDeck('Mixed due');
 
-    // Step 1: All 4 · Due 1 · New 1 · Flagged 1, as numbers, not vibes.
+    // Step 1: All 4 · Due 2 · New 1 · Flagged 1, as numbers, not vibes — the
+    // profile in `00-agent-execution-guide.md` §S-DUE, to the digit.
     //
-    // **Due is 1, not 2, and that is the point of the pill.** All four cards
-    // sit in one deck: one never opened, one that has come back around, one
-    // scheduled ahead, one finished. BR-22's session queue holds the first two
-    // — but `CardListFilter.due` subtracts New from that queue, so Due counts
-    // only the card that has actually returned. While Due was the bare queue
-    // this line read `Due 2 · New 1` for three distinct cards, and `new-visible`
-    // answered to both pills.
-    for (final pill in <String>['All 4', 'Due 1', 'New 1', 'Flagged 1']) {
+    // **Due and New never describe the same card** (BR-151). One card was never
+    // opened, two have come back around, one is scheduled ahead. These counts
+    // read `Due 1` for as long as the fixture dated `C-P-REVIEW` into the future
+    // instead of one day into the past — right about a fixture that was wrong.
+    //
+    // **Read from the accessible name, not from the visible label.** The pills
+    // dropped their counts from the label when every pill gained an icon and the
+    // row stopped fitting 390 — the numbers moved to `cardFilterSemantics` and
+    // to the progress panel. Asserting the old label would be asserting a design
+    // that was deliberately changed; asserting the semantics is asserting the
+    // count, which is what the scenario is named after.
+    for (final pill in <String>[
+      'All, 4 cards',
+      'Due, 2 cards',
+      'New, 1 cards',
+      'Flagged, 1 cards',
+    ]) {
       expect(
-        find.textContaining(pill),
+        find.bySemanticsLabel(pill),
         findsWidgets,
         reason: 'pill "$pill" is missing or wrong; ${robot.visibleText}',
       );
     }
 
-    // Step 2: Due keeps the returning card and nothing else — including not the
-    // new one, which is the pill's whole job.
-    //
-    // `Due 1` rather than `Due`: the panel above the pills carries "1 due · 1
-    // new", and a bare prefix would be one tap away from landing on prose.
-    await robot.tapTextContaining('Due 1');
+    // Step 2: Due keeps the two cards that have come back around and nothing
+    // else — including not the new one, which is the pill's whole job.
+    await robot.tapBySemantics('Due, 2 cards');
     await robot.waitCardListSteady();
     expect(
       find.text('new-visible'),
@@ -228,23 +243,23 @@ void main() {
       reason: 'Due let a never-reviewed card through; ${robot.visibleText}',
     );
     expect(find.text('beginning-visible'), findsWidgets);
-    expect(find.text('reviewing-visible'), findsNothing);
+    expect(find.text('reviewing-visible'), findsWidgets);
     expect(find.text('mastered-visible'), findsNothing);
 
     // Step 3: New keeps only the unlearned card.
-    await robot.tapTextContaining('New 1');
+    await robot.tapBySemantics('New, 1 cards');
     await robot.waitCardListSteady();
     expect(find.text('new-visible'), findsWidgets);
     expect(find.text('beginning-visible'), findsNothing);
 
     // Step 4: Flagged keeps only the flagged card.
-    await robot.tapTextContaining('Flagged');
+    await robot.tapBySemantics('Flagged, 1 cards');
     await robot.waitCardListSteady();
     expect(find.text('beginning-visible'), findsWidgets);
     expect(find.text('new-visible'), findsNothing);
 
     // Step 5: All brings the deck back.
-    await robot.tapTextContaining('All 4');
+    await robot.tapBySemantics('All, 4 cards');
     await robot.waitCardListSteady();
     await robot.scrollToText('mastered-visible');
     expect(find.text('mastered-visible'), findsWidgets);
@@ -265,7 +280,10 @@ void main() {
     const expectations = <(String, String, String?)>[
       ('new-visible', 'NEW', 'now'),
       ('beginning-visible', 'BEGINNING', 'now'),
-      ('reviewing-visible', 'REVIEWING', '2d'),
+      // Due a day ago, so the badge is the same "now" the other returned card
+      // wears. It read `2d` while the fixture dated this card two days into the
+      // future instead of one day into the past.
+      ('reviewing-visible', 'REVIEWING', 'now'),
       ('mastered-visible', 'MASTERED', '30d'),
     ];
     for (final (front, state, badge) in expectations) {

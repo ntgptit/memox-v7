@@ -222,4 +222,37 @@ extension ItRobotListDriving on ItRobot {
     await _tester.tap(find.byElementPredicate((e) => e == appBar.first));
     await _harness.settle();
   }
+
+  /// The row for the card whose front is [front], scrolled into view.
+  ///
+  /// **Scoped to `CardTileWidget`, and that is not pedantry.** The search field
+  /// holds the query, so `find.text('abandon')` matches after searching for
+  /// "abandon" whether or not any row survived the filter — IT-ORG-001's first
+  /// step passed on exactly that echo. Scoping to the row asserts the list.
+  Finder cardRow(String front) => find.descendant(
+    of: find.byType(CardTileWidget),
+    matching: find.text(front),
+  );
+
+  /// Brings the row for [front] into view, then hands back its finder.
+  ///
+  /// A one-result list still needs this: the progress panel, the filter pills
+  /// and the learn action stand above the rows, so on a phone the first row of
+  /// a short list is below the fold and a lazy list has not built it.
+  Future<Finder> ensureCardRow(String front) async {
+    await scrollToText(front);
+
+    return cardRow(front);
+  }
+
+  /// The flag glyph **on a row**, not anywhere on screen.
+  ///
+  /// **The Flagged filter pill wears the same `Icons.flag`** — deliberately, so
+  /// the pill and the badge read as one idea. A bare `find.byIcon(Icons.flag)`
+  /// therefore always matches, which made IT-ORG-004's first three steps pass
+  /// without a flag ever reaching a card and its last step the only honest one.
+  Finder rowFlags() => find.descendant(
+    of: find.byType(CardTileWidget),
+    matching: find.byIcon(Icons.flag),
+  );
 }

@@ -98,12 +98,18 @@ abstract final class ItFixtures {
         reviews: 3,
         dueAt: kT0.subtract(const Duration(minutes: 5)),
       );
+      // **`T0 − 1 day`, from the profile in `00-agent-execution-guide.md` §S-DUE.**
+      // It said `T0 + 2 days`, which is the *Future only* card's date, and that
+      // made `Due` one rather than two. It went unnoticed while BR-22 counted a
+      // card with `due_at IS NULL` as due — the never-learned card made the
+      // number two by accident. BR-142 dropped that clause, and the fixture's
+      // own error became the visible one.
       await _promote(
         harness.database,
         review.id,
         box: 5,
         reviews: 6,
-        dueAt: kT0.add(const Duration(days: 2)),
+        dueAt: kT0.subtract(const Duration(days: 1)),
       );
       await _promote(
         harness.database,

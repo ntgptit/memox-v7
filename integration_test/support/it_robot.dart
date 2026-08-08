@@ -62,7 +62,24 @@ final class ItRobot {
       findsWidgets,
       reason: 'no "$label" on screen; visible text was $visibleText',
     );
-    await _tester.tap(finder.first);
+    await _tapVisible(finder.first);
+  }
+
+  /// Taps [target] after making sure the tap can actually reach it.
+  ///
+  /// **"Found" and "tappable" are different facts, and three scenarios failed on
+  /// the gap.** A widget below the fold is still built and still found, and
+  /// `tester.tap` then presses its centre — which hit-tests whatever *is* there,
+  /// the bottom navigation bar included. IT-CARD-005 pressed Save card on a form
+  /// scrolled past the button and read the unchanged screen as a failed save;
+  /// IT-ORG-012 pressed Load 50 more and opened the Study tab.
+  ///
+  /// `ensureVisible` is a no-op when nothing above the widget scrolls, so this
+  /// costs nothing on the screens that never had the problem.
+  Future<void> _tapVisible(Finder target) async {
+    await _tester.ensureVisible(target);
+    await _tester.pump();
+    await _tester.tap(target);
     await _harness.settle();
   }
 
@@ -132,6 +149,16 @@ final class ItRobot {
       await _tester.dragFrom(centre, const Offset(0, -260));
       await _tester.pump(const Duration(milliseconds: 60));
     }
+    await _harness.settle();
+
+    // **Existing is not the same as reachable.** The loop above stops the
+    // moment the widget is *built*, and the last row of a list is built while
+    // still lying under the bottom navigation bar — so a tap on its centre
+    // hit-tests the bar instead. IT-ORG-012 tapped "Load 50 more" and landed on
+    // the Study tab, then failed three assertions later on a screen it had
+    // never meant to open.
+    if (target.evaluate().isEmpty) return;
+    await _tester.ensureVisible(target.first);
     await _harness.settle();
   }
 
@@ -323,8 +350,7 @@ final class ItRobot {
       findsWidgets,
       reason: 'no "$fragment" on screen; $visibleText',
     );
-    await _tester.tap(target.first);
-    await _harness.settle();
+    await _tapVisible(target.first);
   }
 
   /// Adds a tag through the editor's tag field.
