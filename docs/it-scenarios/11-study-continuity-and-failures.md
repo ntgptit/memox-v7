@@ -6,8 +6,8 @@
 | **Purpose** | Chứng minh phiên học tồn tại đúng qua vòng đời ứng dụng và kết thúc trung thực khi người dùng, thao tác đặt lại hoặc lỗi lưu trữ làm gián đoạn |
 | **Scope** | Tiếp tục phiên, thoát chủ động, gián đoạn qua ngày, hàng đợi bất biến, xóa bộ thẻ, ngoại tuyến, lỗi ghi có thể/không thể phục hồi và thế hệ dữ liệu cũ |
 | **Source of truth for** | Kịch bản IT về khả năng tiếp tục và xử lý lỗi của chức năng học |
-| **Depends on** | `README.md`, `00-agent-execution-guide.md`, `../business-rules.md` (BR-25, BR-79…86, BR-102…105, BR-127, BR-133), `../use-cases.md` (UC-05, UC-07), `../wbs-study.md` (M5.10, M5.14) |
-| **Updated by task** | Bổ sung kịch bản IT cho chức năng học, rà soát đệ quy ba vòng và chuẩn hóa tiếng Việt ngày 2026-08-08 |
+| **Depends on** | `README.md`, `00-agent-execution-guide.md`, `../business-rules.md` (BR-25, BR-79…86, BR-102…105, BR-127, BR-133), `../use-cases.md` (UC-05, UC-07), `../wbs-study.md` (M5.9, M5.10, M5.14) |
+| **Updated by task** | Bổ sung nhánh Ôn tập khi khôi phục phiên cùng ngày ngày 2026-08-08 |
 | **Last updated** | 2026-08-08 |
 
 ## IT-CONT-001 — Tiến trình bị hệ điều hành thu hồi trong cùng ngày vẫn Tiếp tục đúng điểm dừng
@@ -164,3 +164,15 @@
 | 2 | Quan sát tiến độ | Thẻ hiện tại và điểm dừng chưa bị bỏ qua; không có kết cục học giả được ghi |
 | 3 | Tắt lỗi và chạm Thử lại | Chính thẻ đó tải lại thành công; phiên không bị dựng mới hoặc đổi thứ tự |
 | 4 | Hoàn tất lượt bằng thao tác bình thường | Chỉ lượt người dùng vừa thực hiện được tính và phiên tiếp tục |
+
+## IT-CONT-014 — Chọn Ôn tập khi có phiên cùng ngày đóng phiên cũ do người dùng bỏ
+
+- **Ưu tiên:** P0
+- **Tiền điều kiện:** `S-STUDY-MIXED-EB-V2`; đã bắt đầu Học mới, hoàn tất ít nhất một lượt rồi buộc đóng tiến trình và mở lại trong cùng ngày học.
+
+| Bước | Thao tác người dùng | Kết quả mong đợi |
+|---|---|---|
+| 1 | Mở lại Study | Màn chọn hiện đủ ba đường Tiếp tục, Học mới và Ôn tập; phiên cũ chưa bị đóng chỉ vì quan sát màn |
+| 2 | Không chọn Tiếp tục; chọn Ôn tập rồi chọn một chế độ khả dụng | Phiên học mới cũ được đóng và một phiên `reviewing` mới mở; không có hai phiên cùng `in_progress` |
+| 3 | Thoát phiên ôn tập rồi mở lại Study | Phiên học mới cũ không còn được mời Tiếp tục; các lượt đã ghi trước khi bỏ phiên vẫn còn trong tiến độ |
+| 4 | Dùng công cụ kiểm tra chỉ đọc Study v2 | Phiên cũ là `abandoned/user_exit`, không phải `interrupted`; phiên ôn tập mang đúng loại `reviewing` |

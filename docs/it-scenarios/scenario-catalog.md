@@ -7,7 +7,7 @@
 | **Scope** | Toàn bộ kịch bản IT hiện có trong `docs/it-scenarios`; không lặp lại các bước thao tác |
 | **Source of truth for** | Mức sẵn sàng, hồ sơ thực thi, chuẩn bị, dọn dẹp và truy vết theo từng ID kịch bản IT |
 | **Depends on** | `README.md`, `00-agent-execution-guide.md`, mười một tệp kịch bản theo nhóm chức năng |
-| **Updated by task** | Bổ sung 63 kịch bản IT cho chức năng học và rà soát đệ quy ba vòng ngày 2026-08-08 |
+| **Updated by task** | Bổ sung kịch bản điều hướng cho chức năng học ngày 2026-08-08 |
 | **Last updated** | 2026-08-08 |
 
 Agent MUST tìm ID ở danh mục này trước khi chạy. Cột tệp chỉ tới tài liệu chứa
@@ -19,12 +19,15 @@ các bước gốc. Ý nghĩa mức sẵn sàng, hồ sơ thực thi, chuẩn b�
 | ID | Tệp | Mức sẵn sàng | Hồ sơ | Chuẩn bị | Dọn dẹp | Truy vết |
 |---|---|---|---|---|---|---|
 | IT-NAV-001 | `01-navigation-and-continuity.md` | READY | UI | SETUP-EMPTY | CLEAN-RESET | UC-06 |
-| IT-NAV-002 | `01-navigation-and-continuity.md` | READY | UI | SETUP-TREE-UNSET | CLEAN-RESET | M4.10a |
+| IT-NAV-002 | `01-navigation-and-continuity.md` | READY | UI | SETUP-TREE-UNSET | CLEAN-RESET | BR-101, M4.10a, M5.7 |
 | IT-NAV-003 | `01-navigation-and-continuity.md` | READY | UI | SETUP-TREE-CARD | CLEAN-RESET | UC-06 |
 | IT-NAV-004 | `01-navigation-and-continuity.md` | READY | UI | SETUP-TREE-CARD | CLEAN-RESET | UC-06 |
 | IT-NAV-005 | `01-navigation-and-continuity.md` | READY | DEV-LINK | SETUP-EMPTY | CLEAN-RESET | M4.1 |
 | IT-NAV-006 | `01-navigation-and-continuity.md` | READY | UI-RESTART | SETUP-EMPTY | CLEAN-RESET | UC-02, UC-03, UC-04, UC-08, M4.12 |
 | IT-NAV-007 | `01-navigation-and-continuity.md` | READY | UI-DEVICE | SETUP-TREE-CARD | CLEAN-RESET | M5, AD-01 |
+| IT-NAV-008 | `01-navigation-and-continuity.md` | READY | UI | SETUP-STUDY-SCOPE | CLEAN-RESET | UC-05, BR-101, M5.15 |
+| IT-NAV-009 | `01-navigation-and-continuity.md` | FIXTURE-BLOCKED | UI-FIXTURE | S-STUDY-REVIEW-EB-V2 | CLEAN-RESET | UC-05, BR-101, BR-146, M5.15 |
+| IT-NAV-010 | `01-navigation-and-continuity.md` | READY | UI | SETUP-STUDY-EB-5-FULL | CLEAN-RESET | UC-05 A3, BR-82, docs/wireframes/m5-study-modes.md |
 
 ## Vòng đời bộ thẻ gốc
 
@@ -191,6 +194,7 @@ các bước gốc. Ý nghĩa mức sẵn sàng, hồ sơ thực thi, chuẩn b�
 | IT-CONT-011 | `11-study-continuity-and-failures.md` | FIXTURE-BLOCKED | UI-FAULT | S-STUDY-FAILURE-V2 | CLEAN-RESET | UC-05 E2, BR-25 |
 | IT-CONT-012 | `11-study-continuity-and-failures.md` | FIXTURE-BLOCKED | UI-FAULT | S-STUDY-FAILURE-V2 | CLEAN-RESET | UC-05 E3, BR-85, BR-86 |
 | IT-CONT-013 | `11-study-continuity-and-failures.md` | FIXTURE-BLOCKED | UI-FAULT | S-STUDY-FAILURE-V2 | CLEAN-RESET | UC-05 E5 |
+| IT-CONT-014 | `11-study-continuity-and-failures.md` | FIXTURE-BLOCKED | UI-RESTART | S-STUDY-MIXED-EB-V2 | CLEAN-RESET | UC-05, BR-82, BR-103 |
 
 ## Bất biến của danh mục
 
