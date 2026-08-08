@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/card/presentation/widgets/items/card_tile_widget.dart';
 import 'package:memox/features/deck/presentation/widgets/items/deck_tile_widget.dart';
+import 'package:memox/features/study/presentation/widgets/sections/fill_answer_section_widget.dart';
+import 'package:memox/features/study/presentation/widgets/sections/guess_question_section_widget.dart';
+import 'package:memox/features/study/presentation/widgets/sections/match_board_section_widget.dart';
+import 'package:memox/features/study/presentation/widgets/sections/recall_timer_section_widget.dart';
+import 'package:memox/features/study/presentation/widgets/sections/study_card_face_section_widget.dart';
 import 'package:memox/shared/widgets/mx_search_field.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
 
@@ -11,6 +16,7 @@ import 'it_text.dart';
 export 'it_text.dart';
 
 part 'it_robot_lists.dart';
+part 'it_robot_study.dart';
 
 /// User-level actions the scenarios are written in terms of.
 ///

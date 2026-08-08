@@ -56,6 +56,11 @@ mixin _StudyQueueOperations on _StudyQueueLayoutOperations {
       mode: session.currentMode,
       round: row.round,
     );
+    final completed = await _dao.completedInRound(
+      sessionId: sessionId,
+      mode: session.currentMode,
+      round: row.round,
+    );
 
     return StudyTurnModel(
       item: studyQueueItemEntityFromRow(row),
@@ -64,6 +69,7 @@ mixin _StudyQueueOperations on _StudyQueueLayoutOperations {
         round: row.round,
         done: progress.done,
         total: progress.total,
+        completedCardIds: completed,
       ),
     );
   }

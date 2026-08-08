@@ -43,7 +43,12 @@ void main() {
           isRevealed: false,
         ),
         card: forCard,
-        progress: const StudyStageProgressModel(round: 1, done: 0, total: 3),
+        progress: const StudyStageProgressModel(
+          round: 1,
+          done: 0,
+          total: 3,
+          completedCardIds: <String>[],
+        ),
       );
 
   test('a question that cannot be built yields no view and no answer', () {
@@ -64,8 +69,9 @@ void main() {
         // all.
         schedulerType: SchedulerType.eightBox,
       ),
-      onAnswer: (action, {outcomeReason, comparisonVersion, hasUsedHint}) =>
-          answers.add(action),
+      onAnswer:
+          (action, {cardId, outcomeReason, comparisonVersion, hasUsedHint}) =>
+              answers.add(action),
       onContinue: () {},
     );
 
@@ -94,8 +100,9 @@ void main() {
         // ignore: avoid_redundant_argument_values
         schedulerType: SchedulerType.unknown,
       ),
-      onAnswer: (action, {outcomeReason, comparisonVersion, hasUsedHint}) =>
-          answers.add(action),
+      onAnswer:
+          (action, {cardId, outcomeReason, comparisonVersion, hasUsedHint}) =>
+              answers.add(action),
       onContinue: () {},
     );
 
@@ -115,7 +122,8 @@ void main() {
         sessionCards: pool,
         schedulerType: SchedulerType.eightBox,
       ),
-      onAnswer: (action, {outcomeReason, comparisonVersion, hasUsedHint}) {},
+      onAnswer:
+          (action, {cardId, outcomeReason, comparisonVersion, hasUsedHint}) {},
       onContinue: () {},
     );
 
@@ -189,7 +197,14 @@ void main() {
       Widget build() => studyModeView(
         mode: StudyMode.match,
         state: state,
-        onAnswer: (action, {outcomeReason, comparisonVersion, hasUsedHint}) {},
+        onAnswer:
+            (
+              action, {
+              cardId,
+              outcomeReason,
+              comparisonVersion,
+              hasUsedHint,
+            }) {},
         onContinue: () {},
       )!;
 
@@ -212,7 +227,14 @@ void main() {
       Widget build(StudySessionState state) => studyModeView(
         mode: StudyMode.match,
         state: state,
-        onAnswer: (action, {outcomeReason, comparisonVersion, hasUsedHint}) {},
+        onAnswer:
+            (
+              action, {
+              cardId,
+              outcomeReason,
+              comparisonVersion,
+              hasUsedHint,
+            }) {},
         onContinue: () {},
       )!;
 

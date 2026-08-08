@@ -47,6 +47,14 @@ abstract class StudyStageProgressModel with _$StudyStageProgressModel {
 
     required int done,
     required int total,
+
+    /// The cards of this round already answered.
+    ///
+    /// **`match` needs the identities, not just the count** (§4). Its board
+    /// keeps a paired tile in place and stops it being a target, and the screen
+    /// unmounts the board between turns — so a widget remembering its own ticks
+    /// forgets them every card, and the same pair could be answered again.
+    required List<String> completedCardIds,
   }) = _StudyStageProgressModel;
 
   const StudyStageProgressModel._();

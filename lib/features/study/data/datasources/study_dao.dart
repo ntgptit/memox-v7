@@ -67,6 +67,13 @@ final class StudyDao {
     required int round,
   }) => _db.stageRoundProgress(sessionId, mode, round).getSingle();
 
+  /// The cards of a round that are already done — the board's ticks (§4).
+  Future<List<String>> completedInRound({
+    required String sessionId,
+    required String mode,
+    required int round,
+  }) => _db.completedCardsInRound(sessionId, mode, round).get();
+
   /// The lowest pending round of a stage — the one being served.
   ///
   /// Null when nothing is pending. Written as a raw statement because

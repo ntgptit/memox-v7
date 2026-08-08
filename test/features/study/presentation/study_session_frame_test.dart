@@ -18,6 +18,7 @@ void main() {
       round: 1,
       done: 3,
       total: 8,
+      completedCardIds: <String>[],
     ),
     ValueListenable<Duration>? timeLeft,
     VoidCallback? onClose,
@@ -65,7 +66,12 @@ void main() {
     await pumpFrame(
       tester,
       frame(
-        progress: const StudyStageProgressModel(round: 1, done: 4, total: 8),
+        progress: const StudyStageProgressModel(
+          round: 1,
+          done: 4,
+          total: 8,
+          completedCardIds: <String>[],
+        ),
       ),
     );
 
@@ -90,7 +96,12 @@ void main() {
       await pumpFrame(
         tester,
         frame(
-          progress: const StudyStageProgressModel(round: 1, done: 0, total: 0),
+          progress: const StudyStageProgressModel(
+            round: 1,
+            done: 0,
+            total: 0,
+            completedCardIds: <String>[],
+          ),
         ),
       );
 
@@ -237,7 +248,12 @@ void main() {
         // Named, because the mode is the subject of this test.
         // ignore: avoid_redundant_argument_values
         mode: StudyMode.match,
-        progress: const StudyStageProgressModel(round: 2, done: 3, total: 8),
+        progress: const StudyStageProgressModel(
+          round: 2,
+          done: 3,
+          total: 8,
+          completedCardIds: <String>[],
+        ),
       ),
     );
 

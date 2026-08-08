@@ -161,6 +161,19 @@ SELECT
 FROM study_queue_items
 WHERE session_id = :sessionId AND mode = :mode AND round = :round;
 
+-- Which cards of a round are already done.
+--
+-- **The board's ticks are data, not widget memory** (§4). A paired tile stays on
+-- the board and stops being a target — and the screen swaps to its loading state
+-- between turns, which unmounts the board and takes that memory with it. Every
+-- pair then became tappable again and the same card could be answered twice.
+-- Read here, the marks survive anything the widget tree does.
+completedCardsInRound:
+SELECT card_id
+FROM study_queue_items
+WHERE session_id = :sessionId AND mode = :mode AND round = :round
+  AND status <> 'pending';
+
 -- The lowest pending round of a stage — the round currently being served.
 currentRoundOf:
 SELECT MIN(round) AS round

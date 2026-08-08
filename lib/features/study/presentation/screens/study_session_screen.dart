@@ -178,15 +178,17 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
           isRevealed: isRevealed,
         ),
       ),
-      onAnswer: (action, {outcomeReason, comparisonVersion, hasUsedHint}) =>
-          unawaited(
-            _controller.answer(
-              action,
-              outcomeReason: outcomeReason,
-              comparisonVersion: comparisonVersion,
-              usedHint: hasUsedHint,
-            ),
-          ),
+      onAnswer:
+          (action, {cardId, outcomeReason, comparisonVersion, hasUsedHint}) =>
+              unawaited(
+                _controller.answer(
+                  action,
+                  cardId: cardId,
+                  outcomeReason: outcomeReason,
+                  comparisonVersion: comparisonVersion,
+                  usedHint: hasUsedHint,
+                ),
+              ),
       // `browse` grades nothing, so moving on is the whole interaction
       // (BR-111). The controller sees the mode and turns this into
       // `markBrowsed`, discarding the action before it reaches any write.

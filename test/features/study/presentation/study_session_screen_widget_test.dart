@@ -42,7 +42,12 @@ void main() {
           remainingMs: null,
           isRevealed: false,
         ),
-        progress: StudyStageProgressModel(round: 1, done: done, total: total),
+        progress: StudyStageProgressModel(
+          round: 1,
+          done: done,
+          total: total,
+          completedCardIds: <String>[],
+        ),
         card: const StudyCardModel(
           id: 'c1',
           front: '사과',

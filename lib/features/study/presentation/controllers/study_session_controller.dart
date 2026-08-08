@@ -88,8 +88,16 @@ class StudySessionController extends _$StudySessionController {
   /// real: a write takes long enough for a second tap to land inside it. The
   /// check reads [StudySessionState.isSubmitting] rather than a private flag so
   /// the buttons and the guard cannot disagree about whether input is open.
+  /// [cardId] names the card the turn belongs to, when it is not the one the
+  /// queue is serving.
+  ///
+  /// **`match` is the mode this exists for** (BR-118). Its board lays out the
+  /// whole round, so the pair a person reaches for is rarely the card at the
+  /// head of the queue — and defaulting to that one recorded every turn against
+  /// the wrong card. Every other mode shows one card and passes nothing.
   Future<void> answer(
     StudyAction action, {
+    String? cardId,
     StudyOutcomeReason? outcomeReason,
     int? comparisonVersion,
     bool? usedHint,
@@ -110,7 +118,7 @@ class StudySessionController extends _$StudySessionController {
       if (session.currentMode == StudyMode.browse) {
         await MarkBrowsedUseCase(
           repository,
-        ).call(sessionId: session.id, cardId: turn.cardId);
+        ).call(sessionId: session.id, cardId: cardId ?? turn.cardId);
 
         if (!ref.mounted) return;
         state = state.copyWith(isSubmitting: false);
@@ -120,7 +128,7 @@ class StudySessionController extends _$StudySessionController {
 
       await SubmitStudyAnswerUseCase(repository).call(
         session: session,
-        cardId: turn.cardId,
+        cardId: cardId ?? turn.cardId,
         mode: session.currentMode,
         action: action,
         now: ref.read(clockProvider)(),
