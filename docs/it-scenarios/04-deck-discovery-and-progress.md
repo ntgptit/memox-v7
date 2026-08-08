@@ -6,9 +6,9 @@
 | **Purpose** | Kiểm tra người dùng tìm, lọc, sắp xếp và đọc trạng thái học của deck trên mọi cấp cây |
 | **Scope** | Deck tile, summary, due filter, sort, subtree search, empty/no-result và cập nhật tức thời |
 | **Source of truth for** | Scenario IT về danh sách, discovery và progress của deck |
-| **Depends on** | `README.md`, `../business-rules.md` (BR-22, BR-29, BR-56, BR-57, BR-65), `../use-cases.md` (UC-06) |
-| **Updated by task** | Yêu cầu viết IT scenario ngày 2026-08-05 |
-| **Last updated** | 2026-08-05 |
+| **Depends on** | `README.md`, `../business-rules.md` (BR-29, BR-56, BR-57, BR-65, BR-142, BR-150), `../use-cases.md` (UC-06) |
+| **Updated by task** | Đồng bộ định nghĩa New/Due sau M5 ngày 2026-08-08 |
+| **Last updated** | 2026-08-08 |
 
 ## IT-DISC-001 — Deck tile trình bày đủ thông tin ra quyết định
 
@@ -92,7 +92,7 @@
 
 | Bước | Thao tác người dùng | Kết quả mong đợi |
 |---|---|---|
-| 1 | Ghi lại tổng card và card đến hạn trên ancestor | Có baseline rõ ràng |
-| 2 | Tạo một card mới trong `D-LEAF`, rồi Back về ancestor | Tổng card tăng đúng 1 và số đến hạn tăng đúng 1 mà không cần pull-to-refresh/restart |
-| 3 | Xoá card vừa tạo, quay lại ancestor | Tổng card giảm đúng 1 và số đến hạn giảm đúng 1 về baseline |
+| 1 | Ghi lại tổng card, New và Due trên ancestor | Có baseline ba số rõ ràng |
+| 2 | Tạo một card mới trong `D-LEAF`, rồi Back về ancestor | Tổng và New tăng đúng 1; Due không đổi vì card chưa học; không cần pull-to-refresh/restart |
+| 3 | Xoá card vừa tạo, quay lại ancestor | Tổng và New giảm đúng 1 về baseline; Due vẫn không đổi |
 | 4 | Khi summary panel đang hiện, chạm ẩn rồi gọi hiện lại | Panel ẩn/hiện theo hành động người dùng; số liệu không đổi sai |

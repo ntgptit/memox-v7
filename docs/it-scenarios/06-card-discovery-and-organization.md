@@ -6,9 +6,9 @@
 | **Purpose** | Kiểm tra người dùng tìm card, sắp xếp, gắn cờ/tag, lọc và đọc tiến độ từ card list |
 | **Scope** | Search front/back, sort, filter pills, flag, tag, state/due badge, progress panel và tải thêm |
 | **Source of truth for** | Scenario IT về discovery và organization của card |
-| **Depends on** | `README.md`, `../business-rules.md` (BR-22, BR-89…95), `../use-cases.md` (UC-04) |
-| **Updated by task** | Yêu cầu viết IT scenario ngày 2026-08-05 |
-| **Last updated** | 2026-08-05 |
+| **Depends on** | `README.md`, `../business-rules.md` (BR-89…95, BR-142, BR-151), `../use-cases.md` (UC-04) |
+| **Updated by task** | Đồng bộ định nghĩa New/Due sau M5 ngày 2026-08-08 |
+| **Last updated** | 2026-08-08 |
 
 ## IT-ORG-001 — Tìm card theo mặt trước và mặt sau
 
@@ -38,8 +38,8 @@
 
 | Bước | Thao tác người dùng | Kết quả mong đợi |
 |---|---|---|
-| 1 | Chọn sắp xếp Mới nhất | Thứ tự là `C-P-NEW`, `C-P-BEGIN`, `C-P-REVIEW`, `C-P-MASTER` |
-| 2 | Chọn Đến hạn trước | Thứ tự là `C-P-NEW`, `C-P-BEGIN`, `C-P-REVIEW`, `C-P-MASTER`: mới/đến hạn ngay trước các hạn tương lai |
+| 1 | Chọn sắp xếp Mới nhất | Thứ tự khớp `created_at` giảm dần của fixture; mỗi card xuất hiện đúng một lần |
+| 2 | Chọn Đến hạn trước | Hai card đã học và đang Due (`C-P-BEGIN`, `C-P-REVIEW`) đứng trước card future; `C-P-NEW` không bị gọi là Due |
 | 3 | Chọn một filter rồi đổi sort | Filter và sort kết hợp; không làm xuất hiện card ngoài filter |
 
 ## IT-ORG-004 — Gắn cờ và bỏ cờ một card
@@ -62,7 +62,7 @@
 | Bước | Thao tác người dùng | Kết quả mong đợi |
 |---|---|---|
 | 1 | Quan sát bốn filter pill | Hiện chính xác All 4, Due 2, New 1 và Flagged 1 |
-| 2 | Chọn Due | Chỉ hiện `C-P-NEW` và `C-P-BEGIN` |
+| 2 | Chọn Due | Chỉ hiện `C-P-BEGIN` và `C-P-REVIEW`; `C-P-NEW` không xuất hiện |
 | 3 | Chọn New | Chỉ hiện card chưa học |
 | 4 | Chọn Flagged | Chỉ hiện card đã gắn cờ |
 | 5 | Chọn All | Tất cả card trở lại |
@@ -115,12 +115,12 @@
 ## IT-ORG-010 — Trạng thái, due badge và progress panel nhất quán
 
 - **Ưu tiên:** P0
-- **Tiền điều kiện:** Dùng `S-PROGRESS` và `S-DUE` trong cùng deck.
+- **Tiền điều kiện:** Dùng `S-PROGRESS` v2; nó dùng chung contract dữ liệu với alias S-DUE.
 
 | Bước | Thao tác người dùng | Kết quả mong đợi |
 |---|---|---|
 | 1 | Mở card list | Mỗi row hiện đúng một state: New, Beginning, Reviewing hoặc Mastered |
-| 2 | Quan sát due badge | `C-P-NEW` và `C-P-BEGIN` hiện đến hạn ngay; `C-P-REVIEW` còn 2 ngày; `C-P-MASTER` còn 30 ngày |
+| 2 | Quan sát due badge | `C-P-NEW` không có due badge; hai card Due hiện quá hạn/đến hạn; card future hiện số ngày còn lại đúng fixture |
 | 3 | Quan sát progress panel | Tổng 4; mỗi state có 1 card; Mastered là 1/4 và 25% |
 | 4 | Gắn/bỏ cờ hoặc sửa text một card | Progress không thay đổi vì các thao tác này không phải review |
 
