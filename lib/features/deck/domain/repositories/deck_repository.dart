@@ -109,6 +109,27 @@ abstract interface class DeckRepository {
   /// root decks, whose content type is invariant.
   Future<void> resetContentType(String deckId);
 
+  /// Resets a root deck's learning progress, optionally onto a new scheduler
+  /// (UC-07).
+  ///
+  /// **The one way to change a locked scheduler** (BR-13, BR-44). Everything
+  /// lands together or not at all — BR-47: the generation goes up (BR-40),
+  /// `first_answered_at` goes back to NULL, every card in the tree returns to
+  /// the state it was born in (BR-42, BR-09) with `learned_at` and `due_at`
+  /// both NULL (BR-152), and every open session of the tree ends `invalidated`
+  /// (BR-83).
+  ///
+  /// **What it does not touch:** the tree, `content_type`, card content, tags
+  /// or media (BR-41), and `study_answers` — the old history stays, carrying
+  /// the old generation (BR-43).
+  ///
+  /// Refused for anything but a root: the scheduler and the generation belong
+  /// to the root (BR-05), so there is no such operation one level down.
+  Future<void> resetLearningProgress({
+    required String rootDeckId,
+    required SchedulerType schedulerType,
+  });
+
   /// Moves [deckId] and its whole subtree under [targetParentDeckId]
   /// (UC-09, BR-69…BR-74), rewriting `root_deck_id` for every node
   /// atomically — BR-71. Refused when the deepest resulting level would

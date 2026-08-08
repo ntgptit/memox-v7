@@ -4,6 +4,8 @@ import 'package:memox/features/deck/domain/models/deck_name_model.dart';
 import 'package:memox/core/database/app_database.dart';
 import 'package:memox/features/card/data/repositories/card_repository_impl.dart';
 import 'package:memox/features/deck/data/repositories/deck_repository_impl.dart';
+import 'package:memox/features/study/data/datasources/study_dao.dart';
+import 'package:memox/features/study/data/repositories/study_repository_impl.dart';
 import 'package:memox/features/deck/data/datasources/deck_dao.dart';
 import 'package:memox/features/deck/domain/entities/deck_entity.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
@@ -116,6 +118,7 @@ DeckRepositoryHarness installDeckRepositoryHarness() {
     DateTime clock() => harness.currentInstant;
     harness.deckRepository = DeckRepositoryImpl(
       DeckDao(harness.db),
+      study: StudyRepositoryImpl(StudyDao(harness.db)),
       idGenerator: nextId,
       clock: clock,
     );

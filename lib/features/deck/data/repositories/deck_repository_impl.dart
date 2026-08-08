@@ -13,10 +13,12 @@ import '../../domain/models/deck_name_model.dart';
 import '../../domain/repositories/deck_repository.dart';
 import '../../domain/models/deck_list_snapshot_model.dart';
 import '../../domain/models/scheduler_type_model.dart';
+import '../../../study/domain/repositories/study_repository.dart';
 import '../mappers/deck_mapper.dart';
 import '../datasources/deck_dao.dart';
 
 part 'move_deck_repository_impl.dart';
+part 'deck_reset_repository_impl.dart';
 
 /// A fresh root deck starts at scheduler version 1, generation 1 (BR-40).
 const int _initialSchedulerVersion = 1;
@@ -36,13 +38,24 @@ const int _initialSchedulerGeneration = 1;
 /// the part file as a private mixin, purely to keep each source file
 /// readable; it is one class and one library.
 final class DeckRepositoryImpl
-    with _MoveDeckOperation
+    with _MoveDeckOperation, _ResetLearningProgressOperation
     implements DeckRepository {
   DeckRepositoryImpl(
     this._dao, {
     required DateTime Function() clock,
+
+    /// Study's own contract, for the one thing Reset owes it: closing the
+    /// sessions a reset invalidates (BR-83). It is the **domain** contract —
+    /// the architecture guard forbids reaching into another feature's `data/`
+    /// and its own message points here instead.
+    required StudyRepository study,
     String Function()? idGenerator,
   }) : _idGenerator = idGenerator ?? const Uuid().v4,
+       // Same reason as `clock` below: the field is private because the reset
+       // operation is a `part of` this library and reads it, and Dart forbids a
+       // named parameter starting with an underscore.
+       // ignore: prefer_initializing_formals
+       _study = study,
        // The initializing formal the lint asks for would be
        // `required this._clock`, and Dart forbids a named parameter starting
        // with an underscore. The field has to stay private — the move operation
@@ -52,6 +65,9 @@ final class DeckRepositoryImpl
 
   @override
   final DeckDao _dao;
+
+  @override
+  final StudyRepository _study;
 
   /// Client-generated UUIDs (AD-03); injectable so tests are deterministic.
   final String Function() _idGenerator;

@@ -11,6 +11,7 @@ import '../../features/deck/data/repositories/deck_template_repository_impl.dart
 import '../../features/deck/domain/repositories/deck_repository.dart';
 import '../../features/deck/domain/repositories/deck_template_repository.dart';
 import '../../features/study/data/datasources/study_dao.dart';
+import '../../features/study/di/study_repository_provider.dart';
 import '../../features/study/data/repositories/study_repository_impl.dart';
 import '../../features/study/domain/repositories/study_repository.dart';
 
@@ -40,6 +41,12 @@ DeckRepository deckRepositoryBinding(Ref ref) => DeckRepositoryImpl(
   // From `clockProvider` rather than a default inside the repository, so "now"
   // has one owner the whole tree can override.
   clock: ref.watch(clockProvider),
+  // **The first place two features are wired to each other, and it is here on
+  // purpose.** Reset has to close the sessions it invalidates (BR-83) without
+  // leaving the single write BR-47 requires, so Deck's repository takes Study's
+  // *domain* contract. The root is what decides which implementation satisfies
+  // it — which is the whole reason this file exists.
+  study: ref.watch(studyRepositoryProvider),
 );
 
 /// **The database itself, not a DAO — and the difference is the point of this

@@ -356,3 +356,37 @@ WHERE id IN (
     )
     SELECT id FROM subtree
 );
+
+-- Every card in a tree, back to the state a card is born in (BR-42, BR-09).
+--
+-- **One statement, because BR-47 says one transaction and this is the bulk of
+-- it.** A per-card loop would be the same writes with more places to stop
+-- halfway, and the tree is the unit the rule talks about.
+--
+-- `learned_at` and `due_at` go NULL together (BR-152): a card with one and not
+-- the other is exactly what invariants 24 and 28 exist to catch. The per-
+-- scheduler columns arrive as parameters rather than as two statements — the
+-- caller already knows which scheduler is being written, and a second UPDATE
+-- would be a second chance for the two to disagree.
+--
+-- `study_answers` is untouched. The old history stays, carrying the old
+-- generation (BR-43).
+resetTreeStudyStates:
+UPDATE card_study_states
+SET scheduler_type = :schedulerType,
+    scheduler_generation = :generation,
+    learned_at = NULL,
+    due_at = NULL,
+    last_answered_at = NULL,
+    answer_count = 0,
+    lapse_count = 0,
+    current_box = :currentBox,
+    ease_factor = :easeFactor,
+    interval_days = :intervalDays,
+    repetitions = :repetitions
+WHERE card_id IN (
+  SELECT c.id
+  FROM cards c
+  INNER JOIN decks d ON d.id = c.deck_id
+  WHERE d.root_deck_id = :rootDeckId
+);

@@ -8,6 +8,8 @@ import 'package:memox/core/database/query_log_interceptor.dart';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/deck/data/datasources/deck_dao.dart';
 import 'package:memox/features/deck/data/repositories/deck_repository_impl.dart';
+import 'package:memox/features/study/data/datasources/study_dao.dart';
+import 'package:memox/features/study/data/repositories/study_repository_impl.dart';
 import 'package:memox/features/deck/domain/entities/deck_entity.dart';
 import 'package:memox/features/deck/domain/models/deck_list_snapshot_model.dart';
 import 'package:memox/features/deck/domain/models/deck_name_model.dart';
@@ -53,6 +55,7 @@ void main() {
     idCounter = 0;
     repository = DeckRepositoryImpl(
       DeckDao(db),
+      study: StudyRepositoryImpl(StudyDao(db)),
       idGenerator: () => 'gen-${++idCounter}',
       clock: () => testNow,
     );

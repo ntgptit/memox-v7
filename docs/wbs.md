@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M5.7r (tách WBS Study) |
+| **Updated by task** | M5.21 (UC-07 Reset learning progress) |
 | **Last updated** | 2026-08-07 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -7851,6 +7851,69 @@ phần còn lại thì không).
 - **Dependencies:** M5.4, M5.5, M4.12
 - **Tests required:** đây **là** task test — integration test luồng chính
 - **Checklist phases:** 15.5
+
+### M5.21 · UC-07 Reset learning progress
+
+- **Status:** **done** — analyze sạch, 1637 test xanh, 115 golden xanh, visual
+  audit xanh, guard sạch, invariant 28/28
+- **Goal:** Người dùng học lại một cây deck từ đầu, và đổi được thuật toán đã khoá.
+- **Scope:** `resetLearningProgress` trên `DeckRepository` chạy trọn trong một
+  transaction; use case; hộp xác nhận hai danh sách kèm chọn scheduler; lối vào
+  từ hàng deck gốc; đóng phiên đang mở (BR-83) — tức đóng luôn **M5.14**.
+- **Out of scope:** đổi `study_config` khi reset. UC-07 bước 5 cho phép *"nếu
+  người dùng đã chọn"*, mà màn này chỉ chọn scheduler; tùy chọn học là preference
+  hai tầng của BR-147 và xoá nó không nằm trong danh sách "Mất" của BR-50.
+- **Editable documents:** `docs/wbs.md`, `docs/wbs-study.md`
+- **Output:** `deck_reset_repository_impl.dart`, `reset_learning_progress_use_case.dart`,
+  `deck_reset_progress_widget.dart`, `deck_scheduler_picker_widget.dart`
+- **Acceptance criteria:**
+  - [x] Generation +1 đúng một (BR-40); `first_answered_at` về NULL (BR-44).
+  - [x] Mọi thẻ trong cây về đúng state lúc **mới tạo** (BR-42, BR-09), với
+        `learned_at` và `due_at` cùng NULL (BR-152) — tức về tập Học mới, không
+        phải chỉ "đến hạn ngay".
+  - [x] `study_answers` còn nguyên, mang generation cũ (BR-43); cây và
+        `content_type` không đổi (BR-41).
+  - [x] Phiên `in_progress` của cây thành `invalidated` / `scheduler_reset`
+        (BR-83) — **M5.14 đóng ở đây**.
+  - [x] Tất cả trong **một** lượt ghi (BR-47), kể cả phần đóng phiên.
+  - [x] Xác nhận nêu **cả hai** danh sách (BR-50), và chọn scheduler nằm ngay
+        trong đó (UC-07 bước 3).
+  - [x] Reset trên deck con bị từ chối trước khi ghi (A4); deck chưa học gì vẫn
+        cho reset và nói rõ không có gì để mất (A2).
+- **Hướng phụ thuộc do chủ dự án chốt:** Deck sở hữu thao tác và gọi **contract
+  domain** của Study. Đây là phụ thuộc **hành vi** đầu tiên giữa hai feature —
+  import model giữa feature đã có sẵn (Card ↔ Deck), nhưng chưa feature nào từng
+  gọi `domain/repositories/` của feature khác. Chính thông điệp của
+  `check_architecture.py` chỉ đường đó: nó cấm với tay vào `data/` và bảo *"expose
+  a domain contract"*.
+- **Vì sao phụ thuộc phải nằm ở repository chứ không ở use case.** Đặt lời gọi
+  Study ở use case thì nó chạy **ngoài** transaction của Deck — hai lượt ghi, và
+  BR-47 nói một. Repository là tầng duy nhất mở được transaction, nên
+  `DeckRepositoryImpl` nhận `StudyRepository`; `invalidateSessionsForRoot` tự mở
+  transaction của nó và Drift ghép vào cái đang chạy. Composition root là chỗ
+  quyết định implementation nào thoả contract — đúng việc của nó.
+- **Bảng khởi tạo BR-09 tách thành mapper dùng chung.** Sau reset thẻ phải ở
+  đúng state lúc **mới sinh**, không phải một state thứ ba chỉ tồn tại sau reset.
+  Card ghi nó lúc tạo thẻ, Deck ghi nó lúc reset; một bản sao thứ hai là hai bản
+  sao sẽ lệch.
+- **Guard bắt hai lỗi, và cả hai là do câu chữ.** Rule
+  `no_transaction_outside_data_layer` khớp `transaction\s*\(`, còn chú thích
+  của em viết *"transaction (BR-47)"* — nên nó đỏ ở một file DI và một contract
+  domain. Rule đúng về code và thô về văn xuôi; chỗ sai là câu chữ, nên câu chữ
+  đổi. Cũng vì lượt này mà `deck_list_screen.dart` và `fake_deck_repository.dart`
+  vượt 400 dòng và được tách theo seam có thật: sliver danh sách ra
+  `sections/`, builder dữ liệu ra `deck_fixtures.dart`.
+- **Quyết định của agent, không có trong docs:** lối vào chỉ đặt ở **hàng deck**
+  trong danh sách, không đặt ở menu khi đang đứng *bên trong* deck. Chỉ hàng deck
+  biết `learnedCardCount`, mà con số đó quyết định BR-50 hiện danh sách "Mất" hay
+  câu "chưa có gì để mất" (A2). Menu ở trong deck đọc **con** của nó, không đọc
+  số này — offer từ đó là đoán.
+- **Dependencies:** M5.5 (`invalidateSessionsForRoot`), M4.9
+- **Tests required:** test tầng dữ liệu trên SQLite thật cho từng BR; widget test
+  cho BR-50 và cho hai nhánh A1/A2
+- **Checklist phases:** 14.4, 15.1, 15.3
+- **Tests:** `deck_reset_progress_test.dart` (6, SQLite thật),
+  `deck_reset_progress_widget_test.dart` (6)
 
 ---
 

@@ -7,6 +7,7 @@ import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../../../shared/widgets/mx_confirm_dialog.dart';
 import '../../../../../shared/widgets/mx_text_field.dart';
 import '../../../domain/models/scheduler_type_model.dart';
+import '../items/deck_scheduler_picker_widget.dart';
 import '../support/deck_labels_widget.dart';
 import '../../../domain/failures/deck_validation_failure.dart';
 import '../../../domain/models/deck_name_model.dart';
@@ -119,7 +120,7 @@ class _DeckFormWidgetState extends State<DeckFormWidget> {
         ),
         if (widget.isSchedulerRequired) ...<Widget>[
           const SizedBox(height: AppSpacing.md),
-          _SchedulerPicker(
+          DeckSchedulerPickerWidget(
             selected: _scheduler,
             isEnabled: !state.isSubmitting,
             errorText: state.isSchedulerMissing
@@ -195,77 +196,3 @@ class _DeckFormWidgetState extends State<DeckFormWidget> {
 /// Radio rows rather than a dropdown: a dropdown has to show something when
 /// closed, and whatever it shows becomes a default — which is exactly what
 /// BR-11 forbids. Nothing is selected until the user selects it.
-class _SchedulerPicker extends StatelessWidget {
-  const _SchedulerPicker({
-    required this.selected,
-    required this.isEnabled,
-    required this.errorText,
-    required this.onChanged,
-  });
-
-  final SchedulerType? selected;
-  final bool isEnabled;
-  final String? errorText;
-  final ValueChanged<SchedulerType?> onChanged;
-
-  /// `unknown` is deliberately absent: it exists for reading a value a newer
-  /// build wrote and is not a choice anyone may make (BR-11).
-  static void _ignoreChange(SchedulerType? _) {}
-
-  static const List<SchedulerType> _choices = <SchedulerType>[
-    SchedulerType.eightBox,
-    SchedulerType.sm2,
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text(
-          context.l10n.schedulerSectionLabel,
-          style: context.texts.labelLarge,
-        ),
-        // `RadioGroup`, not `RadioListTile.groupValue`: the per-tile group
-        // parameters are deprecated as of Flutter 3.32 and this project treats
-        // analyzer warnings as failures.
-        // `RadioGroup.onChanged` is required and non-nullable, so the disabled
-        // state lives on each tile instead. Both are set: `enabled` greys the
-        // row and takes it out of the focus order, and the guarded callback
-        // means a tap that somehow lands mid-submit changes nothing.
-        RadioGroup<SchedulerType>(
-          groupValue: selected,
-          onChanged: isEnabled ? onChanged : _ignoreChange,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              for (final choice in _choices)
-                RadioListTile<SchedulerType>(
-                  value: choice,
-                  enabled: isEnabled,
-                  title: Text(context.schedulerLabel(choice)),
-                  subtitle: Text(context.schedulerDescription(choice)),
-                  contentPadding: EdgeInsets.zero,
-                ),
-            ],
-          ),
-        ),
-        Text(
-          context.l10n.schedulerLockNotice,
-          style: context.texts.bodySmall?.copyWith(
-            color: context.colors.onSurfaceVariant,
-          ),
-        ),
-        if (errorText != null) ...<Widget>[
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            errorText!,
-            style: context.texts.bodySmall?.copyWith(
-              color: context.semanticColors.danger,
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-}

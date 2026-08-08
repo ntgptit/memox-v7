@@ -106,6 +106,9 @@ extension DeckLabels on BuildContext {
     DeckConflictReason.deckStillHasCards => l10n.deckConflictStillHasCards,
     DeckConflictReason.deckStillHasSubDecks =>
       l10n.deckConflictStillHasSubDecks,
+    DeckConflictReason.resetNeedsRootDeck => l10n.deckConflictResetNeedsRoot,
+    DeckConflictReason.resetSchedulerUnknown =>
+      l10n.deckConflictResetSchedulerUnknown,
     DeckConflictReason.unknownContentType =>
       l10n.deckConflictUnknownContentType,
     DeckConflictReason.deckDepthUnknowable => l10n.deckConflictDepthUnknowable,
