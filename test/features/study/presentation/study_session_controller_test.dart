@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/time/clock_provider.dart';
 import 'package:memox/core/time/time_zone_provider.dart';
+import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 import 'package:memox/features/study/di/study_repository_provider.dart';
 import 'package:memox/features/study/domain/entities/study_queue_item_entity.dart';
 import 'package:memox/features/study/domain/models/study_action_model.dart';
@@ -264,6 +265,87 @@ void main() {
     container.dispose();
 
     await expectLater(pending, completes);
+  });
+
+  group('the summary of a finished session', () {
+    test('is read once, not once per number (AD-13)', () async {
+      // Four counts and a status, from one instant. Read separately they would
+      // each be right and describe five different moments — and the one that
+      // matters most, `status`, is the one a later read can change.
+      final repository = FakeStudyRepository(
+        finishedCardIds: const <String>['card-1'],
+      );
+      final container = containerWith(repository);
+
+      await container
+          .read(studySessionControllerProvider('deck-1').notifier)
+          .start(
+            kind: StudySessionKind.reviewing,
+            reviewMode: StudyMode.recall,
+          );
+
+      final state = container.read(studySessionControllerProvider('deck-1'));
+      expect(state.isFinished, isTrue);
+      expect(state.summary, isNotNull);
+      expect(repository.summaryReads, 1);
+    });
+
+    test('takes eight_box-s own lapse action (BR-20)', () async {
+      final repository = FakeStudyRepository(
+        finishedCardIds: const <String>['card-1'],
+      );
+      final container = containerWith(repository);
+
+      await container
+          .read(studySessionControllerProvider('deck-1').notifier)
+          .start(
+            kind: StudySessionKind.reviewing,
+            reviewMode: StudyMode.recall,
+          );
+
+      expect(repository.summaryWrongActions, <StudyAction>[
+        StudyAction.forgotten,
+      ]);
+    });
+
+    test('takes sm2-s own, which is a different value', () async {
+      // The reason the actions are a parameter at all. A query naming
+      // `forgotten` would report a spotless session on every sm2 deck, and the
+      // number would look plausible.
+      //
+      // It is also why this is not `binaryAction`: sm2 returns null for that
+      // one by design (BR-106), so asking it here would have counted nothing.
+      final repository = FakeStudyRepository(
+        schedulerType: SchedulerType.sm2,
+        finishedCardIds: const <String>['card-1'],
+      );
+      final container = containerWith(repository);
+
+      await container
+          .read(studySessionControllerProvider('deck-1').notifier)
+          .start(
+            kind: StudySessionKind.reviewing,
+            reviewMode: StudyMode.selfAssess,
+          );
+
+      expect(repository.summaryWrongActions, <StudyAction>[StudyAction.again]);
+    });
+
+    test(
+      'leaving also produces one, so the screen can say it stopped',
+      () async {
+        final repository = FakeStudyRepository()..nextTurn_ = turnOf('c1');
+        final container = containerWith(repository);
+        final controller = container.read(
+          studySessionControllerProvider('deck-1').notifier,
+        );
+
+        await controller.start(kind: StudySessionKind.learning);
+        await controller.leave();
+
+        expect(repository.summaryReads, 1);
+      },
+    );
   });
 }
 

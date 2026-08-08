@@ -1135,6 +1135,60 @@
     },
     "description": "The other half: cards already learned and now due (BR-150). Disjoint from New."
   },
+  "studySummaryCompletedTitle": "Đã xong phiên học",
+  "@studySummaryCompletedTitle": {
+    "description": "Heading of the summary after a session that ran to its natural end."
+  },
+  "studySummaryStoppedTitle": "Phiên học đã dừng",
+  "@studySummaryStoppedTitle": {
+    "description": "Heading after a session that ended early — abandoned or failed. Deliberately not congratulatory."
+  },
+  "studySummaryStoppedByExit": "Bạn đã rời đi trước khi hết. Mọi câu đã trả lời đều được lưu.",
+  "@studySummaryStoppedByExit": {
+    "description": "Explains an abandoned session, and that no work was lost (BR-86)."
+  },
+  "studySummaryStoppedByError": "Có thứ không lưu được nên phiên phải dừng. Mọi câu trả lời trước đó vẫn được lưu.",
+  "@studySummaryStoppedByError": {
+    "description": "Explains a session ended by a failed write (BR-85, BR-86)."
+  },
+  "studySummaryStoppedByReset": "Tiến trình học của deck bị đặt lại trong lúc phiên còn mở.",
+  "@studySummaryStoppedByReset": {
+    "description": "Explains a session invalidated by a reset (BR-83, BR-84)."
+  },
+  "studySummaryLearned": "{count, plural, =0{Chưa thẻ nào học xong} other{{count} thẻ đã học xong}}",
+  "@studySummaryLearned": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Learning sessions: cards that completed the whole stage chain and became schedulable (BR-144)."
+  },
+  "studySummaryReviewed": "{count, plural, =0{Chưa ôn thẻ nào} other{{count} thẻ đã ôn}}",
+  "@studySummaryReviewed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Reviewing sessions: distinct cards that produced at least one graded turn."
+  },
+  "studySummaryWrong": "{count, plural, other{sai {count} trên {total} lượt}}",
+  "@studySummaryWrong": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    },
+    "description": "Wrong turns against every graded turn. Counted with the algorithm's own lapse actions (BR-20)."
+  },
+  "studySummaryBackToDeck": "Về deck",
+  "@studySummaryBackToDeck": {
+    "description": "Leaves the summary."
+  },
   "studyResumeTitle": "Bạn còn một phiên đang dở",
   "@studyResumeTitle": {
     "description": "Title of the three-path sheet shown when a session from the same study day is still in progress (BR-103)."

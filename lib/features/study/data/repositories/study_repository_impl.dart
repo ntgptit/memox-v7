@@ -19,6 +19,7 @@ import '../../domain/models/study_mode.dart';
 import '../../domain/models/study_options_model.dart';
 import '../../domain/models/study_outcome_reason_model.dart';
 import '../../domain/models/study_session_kind_model.dart';
+import '../../domain/models/study_session_summary_model.dart';
 import '../../domain/models/study_session_status_model.dart';
 import '../../domain/repositories/study_repository.dart';
 import '../datasources/study_dao.dart';
@@ -74,16 +75,7 @@ final class StudyRepositoryImpl
   Stream<StudyEntrySummaryModel> watchStudyEntry(
     String deckId, {
     required DateTime now,
-  }) => _dao
-      .watchEntryCounts(deckId, now)
-      .map(
-        (row) => StudyEntrySummaryModel(
-          newCount: row.newCount ?? 0,
-          dueCount: row.dueCount ?? 0,
-          fillableCount: row.fillableCount ?? 0,
-          distinctMeanings: row.distinctMeanings,
-        ),
-      );
+  }) => _dao.watchEntryCounts(deckId, now).map(studyEntrySummaryFromRow);
 
   @override
   Future<StudyDeckContextModel> deckContext(String deckId) async {
@@ -109,15 +101,22 @@ final class StudyRepositoryImpl
   @override
   Future<StudyScheduleModel?> scheduleOf(String cardId) async {
     final state = await _dao.studyStateOf(cardId);
-    if (state == null) return null;
 
-    return StudyScheduleModel(
-      box: state.currentBox,
-      easeFactor: state.easeFactor,
-      intervalDays: state.intervalDays,
-      repetitions: state.repetitions,
-    );
+    return state == null ? null : studyScheduleFromRow(state);
   }
+
+  @override
+  Future<StudySessionSummaryModel> sessionSummary({
+    required String sessionId,
+    required List<StudyAction> wrongActions,
+  }) async => studySessionSummaryFromRow(
+    await _dao.sessionSummaryRow(
+      sessionId: sessionId,
+      wrongActions: wrongActions
+          .map((action) => action.dbValue)
+          .toList(growable: false),
+    ),
+  );
 
   @override
   Future<List<StudyCardModel>> sessionCards(String sessionId) async {

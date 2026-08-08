@@ -124,6 +124,55 @@ final class StudyDao {
     return rows.map((row) => row.read<String>('cardId')).toList();
   }
 
+  /// Everything the summary screen shows, in one statement.
+  ///
+  /// Four correlated subqueries rather than four round trips: the counts and the
+  /// session's own outcome have to describe the same instant, and separate reads
+  /// let a summary pair the counts of a completed session with the status of a
+  /// failed one (AD-13).
+  ///
+  /// **No algorithm knowledge here.** Which actions mean "wrong" arrive as
+  /// parameters, because `eight_box` says `forgotten` and `sm2` says `again`; a
+  /// query naming either would report a clean sheet on half the decks. An empty
+  /// list matches nothing, which `IN ()` cannot express in SQLite — hence the
+  /// explicit `0`.
+  Future<QueryRow> sessionSummaryRow({
+    required String sessionId,
+    required List<String> wrongActions,
+  }) {
+    final wrongFilter = wrongActions.isEmpty
+        ? '0'
+        : 'a."action" IN (${List<String>.filled(wrongActions.length, '?').join(', ')})';
+
+    return _db
+        .customSelect(
+          'SELECT s.session_kind AS kind, s.status AS status, s.end_reason AS endReason, '
+          '  (SELECT COUNT(DISTINCT q.card_id) FROM study_queue_items q '
+          '     WHERE q.session_id = s.id '
+          '       AND NOT EXISTS (SELECT 1 FROM study_queue_items p '
+          '         WHERE p.session_id = q.session_id AND p.card_id = q.card_id '
+          "         AND p.status = 'pending')) AS finishedCards, "
+          '  (SELECT COUNT(DISTINCT a.card_id) FROM study_answers a '
+          '     WHERE a.session_id = s.id) AS answeredCards, '
+          '  (SELECT COUNT(*) FROM study_answers a '
+          '     WHERE a.session_id = s.id AND '
+          '$wrongFilter) AS wrongTurns, '
+          '  (SELECT COUNT(*) FROM study_answers a '
+          '     WHERE a.session_id = s.id) AS totalTurns '
+          'FROM study_sessions s WHERE s.id = ?',
+          variables: <Variable<Object>>[
+            ...wrongActions.map(Variable<String>.new),
+            Variable<String>(sessionId),
+          ],
+          readsFrom: <TableInfo<Table, Object?>>{
+            _db.studySessions,
+            _db.studyQueueItems,
+            _db.studyAnswers,
+          },
+        )
+        .getSingle();
+  }
+
   Future<Card?> cardById(String id) =>
       (_db.select(_db.cards)..where((c) => c.id.equals(id))).getSingleOrNull();
 

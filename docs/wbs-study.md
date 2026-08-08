@@ -189,7 +189,7 @@ một Reset rơi vào giữa để lại màn hình cầm phiên của trước 
 
 ### M5.10 · Màn tổng kết phiên
 
-- **Status:** todo
+- **Status:** done
 - **Goal:** Kết thúc phiên nói được vừa rồi đã xảy ra chuyện gì.
 - **Scope:** màn tổng kết tối thiểu sau khi phiên `completed`: số thẻ đã học
   xong, số thẻ đã ôn, số lượt sai; đường quay lại deck.
@@ -197,17 +197,37 @@ một Reset rơi vào giữa để lại màn hình cầm phiên của trước 
 - **Editable documents:** `docs/wbs-study.md`
 - **Output:** widget tổng kết + chuỗi ARB
 - **Acceptance criteria:**
-  - [ ] Phiên `learning` xong hiện số thẻ vừa hoàn tất chuỗi (BR-144).
-  - [ ] Phiên `reviewing` xong hiện số thẻ đã ôn và số lượt sai.
-  - [ ] Phiên kết thúc bất thường (`abandoned`/`failed`) **không** hiện tổng kết
+  - [x] Phiên `learning` xong hiện số thẻ vừa hoàn tất chuỗi (BR-144).
+  - [x] Phiên `reviewing` xong hiện số thẻ đã ôn và số lượt sai.
+  - [x] Phiên kết thúc bất thường (`abandoned`/`failed`) **không** hiện tổng kết
         như một thành tựu — nó nói phiên đã dừng và vì sao, không tô hồng.
-  - [ ] Số liệu đến từ **một** lượt đọc, không phải bốn (AD-13).
+  - [x] Số liệu đến từ **một** lượt đọc, không phải bốn (AD-13).
 - **M5.5 có "màn tổng kết phiên tối thiểu" trong Scope nhưng không dựng.** Ghi ở
   đây thay vì sửa entry cũ: mốc đó đã `done` với phần vòng đời, và việc còn thiếu
   là một mốc riêng chứ không phải một dòng chưa tick.
 - **Dependencies:** M5.7
 - **Tests required:** widget test cho ba loại kết thúc; test một-lượt-đọc
 - **Checklist phases:** 14.4, 15.3
+
+- **Kết quả:** `StudySessionSummaryModel` mang cả `status`/`end_reason` lẫn bốn
+  con số, đọc bằng **một** câu SQL — bốn câu là bốn thời điểm, và cái dễ đổi
+  nhất giữa chúng chính là `status`. `StudySummarySectionWidget` đổi tiêu đề
+  theo `hasCompleted`, nên phiên dừng vì lỗi ghi không đội lốt thành tựu.
+- **Recursive review tìm thêm ba lỗi, cả ba đã sửa trong mốc này:**
+  - Bản đầu hỏi `binaryAction` để biết hành động nào là sai. `sm2` trả `null`
+    cho câu hỏi đó **có chủ đích** (BR-106), nên mọi deck `sm2` sẽ báo 0 lượt
+    sai — con số vẫn trông hợp lý. Câu hỏi đúng là `StudyAction.isLapse`
+    (BR-20), lọc trên `supportedActions` của chính thuật toán.
+  - Cột là `session_kind`, không phải `kind`. Fake repository không thể bắt
+    được; test chạy trên SQLite thật bắt ngay ở lần chạy đầu.
+  - Về lại màn entry sau khi học xong vẫn thấy số đếm cũ. `_open` nay refresh cả
+    hai đầu — trước khi đẩy màn và sau khi quay lại — vì phiên học chính là thứ
+    làm số đếm đổi.
+- **Chuỗi đếm dùng ICU plural** như phần còn lại của app: "1 cards reviewed" là
+  dạng người dùng gặp nhiều nhất ở phiên ôn ngắn.
+- **Tests:** `study_summary_widget_test.dart` (6), `study_session_controller_test.dart`
+  nhóm *the summary of a finished session* (4), `study_flow_test.dart` nhóm cùng
+  tên trên SQLite thật (2)
 
 ### M5.11 · Tùy chọn học hai tầng (BR-147, BR-148)
 

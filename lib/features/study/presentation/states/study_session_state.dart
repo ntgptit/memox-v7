@@ -4,6 +4,7 @@ import '../../../deck/domain/models/scheduler_type_model.dart';
 
 import '../../domain/entities/study_session_entity.dart';
 import '../../domain/models/study_action_model.dart';
+import '../../domain/models/study_session_summary_model.dart';
 import '../../domain/models/study_turn_model.dart';
 
 part 'study_session_state.freezed.dart';
@@ -57,6 +58,13 @@ abstract class StudySessionState with _$StudySessionState {
 
     /// The session ran out of queue, or was closed.
     @Default(false) bool isFinished,
+
+    /// What the session came to, once it has ended (BR-79, BR-80).
+    ///
+    /// Null while it runs, and null too when the summary itself could not be
+    /// read — the screen then says the session ended without inventing numbers
+    /// for it.
+    StudySessionSummaryModel? summary,
 
     /// Set when something failed. Carries the reason, never a sentence — the
     /// screen maps it to copy.

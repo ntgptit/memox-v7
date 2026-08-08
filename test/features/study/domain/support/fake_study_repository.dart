@@ -12,6 +12,7 @@ import 'package:memox/features/study/domain/models/study_options_model.dart';
 import 'package:memox/features/study/domain/models/study_outcome_reason_model.dart';
 import 'package:memox/features/study/domain/models/study_schedule_model.dart';
 import 'package:memox/features/study/domain/models/study_session_kind_model.dart';
+import 'package:memox/features/study/domain/models/study_session_summary_model.dart';
 import 'package:memox/features/study/domain/models/study_session_status_model.dart';
 import 'package:memox/features/study/domain/repositories/study_repository.dart';
 
@@ -211,6 +212,41 @@ base class FakeStudyRepository implements StudyRepository {
   @override
   Future<StudySessionEntity?> openSessionFor(String deckId) async =>
       openSession_;
+
+  /// What the summary read returns, and what it was asked.
+  ///
+  /// The actions are recorded because they are the whole point of the
+  /// parameter: a summary that asked for `forgotten` on an `sm2` deck would
+  /// report a clean sheet, and only the argument shows that.
+  StudySessionSummaryModel? summary_;
+  List<StudyAction>? summaryWrongActions;
+
+  /// How many times the summary was read.
+  ///
+  /// Counted because the rule is about the number of reads, not their content:
+  /// four statements would return four correct numbers from four different
+  /// instants (AD-13).
+  int summaryReads = 0;
+
+  @override
+  Future<StudySessionSummaryModel> sessionSummary({
+    required String sessionId,
+    required List<StudyAction> wrongActions,
+  }) async {
+    summaryReads += 1;
+    summaryWrongActions = wrongActions;
+
+    return summary_ ??
+        const StudySessionSummaryModel(
+          kind: StudySessionKind.learning,
+          status: StudySessionStatus.completed,
+          endReason: null,
+          finishedCards: 0,
+          answeredCards: 0,
+          wrongTurns: 0,
+          totalTurns: 0,
+        );
+  }
 
   @override
   Future<bool> isStageExhausted(String sessionId) async => stageExhausted;

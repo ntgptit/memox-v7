@@ -73,14 +73,14 @@ class _StudyEntryScreenState extends ConsumerState<StudyEntryScreen> {
 
     switch (choice) {
       case StudyResumeChoice.resume:
-        _open(
+        await _open(
           context,
           kind: open.kind,
           reviewMode: open.currentMode,
           shouldResume: true,
         );
       case StudyResumeChoice.learn:
-        _open(context, kind: StudySessionKind.learning);
+        await _open(context, kind: StudySessionKind.learning);
       case StudyResumeChoice.review:
         final summary = await ref.read(studyEntryProvider(deckId).future);
         if (!mounted) return;
@@ -119,7 +119,8 @@ class _StudyEntryScreenState extends ConsumerState<StudyEntryScreen> {
         ),
         data: (summary) => StudyEntrySectionWidget(
           summary: summary,
-          onLearn: () => _open(context, kind: StudySessionKind.learning),
+          onLearn: () =>
+              unawaited(_open(context, kind: StudySessionKind.learning)),
           onReview: () => unawaited(_chooseMode(context, ref, summary)),
         ),
       ),
@@ -159,29 +160,42 @@ class _StudyEntryScreenState extends ConsumerState<StudyEntryScreen> {
     return _open(context, kind: StudySessionKind.reviewing, reviewMode: chosen);
   }
 
-  void _open(
+  /// Opens a session, and refreshes this screen on both sides of it.
+  ///
+  /// **Before**, because both reads describe the deck as it stands *now*:
+  /// leaving them cached would let a later visit offer to continue a session
+  /// this one just ended, and the resume would fail on a session the database
+  /// no longer has.
+  ///
+  /// **After**, because a session is exactly the thing that changes them. Coming
+  /// back from finishing four cards to a screen still saying three are new is
+  /// the summary and the counts disagreeing about the same minute — and the
+  /// summary is the one that just told the truth.
+  Future<void> _open(
     BuildContext context, {
     required StudySessionKind kind,
     StudyMode? reviewMode,
     bool shouldResume = false,
-  }) {
-    // Both reads describe the deck *before* this session. Leaving them cached
-    // would let a later visit offer to continue a session this one just ended,
-    // and the resume would then fail on a session the database no longer has.
-    ref.invalidate(studyResumeProvider(deckId));
-    ref.invalidate(studyEntryProvider(deckId));
+  }) async {
+    _refresh();
 
-    unawaited(
-      Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => StudySessionScreen(
-            deckId: deckId,
-            kind: kind,
-            reviewMode: reviewMode,
-            shouldResume: shouldResume,
-          ),
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => StudySessionScreen(
+          deckId: deckId,
+          kind: kind,
+          reviewMode: reviewMode,
+          shouldResume: shouldResume,
         ),
       ),
     );
+
+    if (!mounted) return;
+    _refresh();
+  }
+
+  void _refresh() {
+    ref.invalidate(studyResumeProvider(deckId));
+    ref.invalidate(studyEntryProvider(deckId));
   }
 }
