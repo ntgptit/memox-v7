@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
@@ -7,6 +8,7 @@ import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../../../core/theme/app_elevation.dart';
+import '../../../../../core/theme/app_radius.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../domain/models/recall_mode.dart';
 import '../../../domain/models/study_turn_model.dart';
@@ -181,20 +183,42 @@ class _RecallTimerSectionWidgetState extends State<RecallTimerSectionWidget>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        // The prompt on top, the answer area under it, the action at the
-        // bottom — the layout `fill` uses too, because the two turns ask the
-        // same thing in two ways.
-        MxCard(
-          padding: const EdgeInsets.all(AppSpacing.xl),
-          child: Text(
-            widget.turn.card.front,
-            style: context.texts.headlineSmall,
+        // **Two cards of equal weight, and the ratio is the layout** (§8.10).
+        // The prompt and the space where the answer will be are the same size
+        // because they are the same question seen twice — sizing the prompt to
+        // its text made the answer area whatever was left, which is a different
+        // shape on every card.
+        Expanded(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minHeight: AppStudyPair.cardMinHeight,
+            ),
+            child: MxCard(
+              elevation: AppElevation.raised,
+              radius: AppRadius.xl,
+              child: Center(
+                child: Text(
+                  widget.turn.card.front,
+                  style: context.texts.headlineMedium,
+                  textAlign: TextAlign.center,
+                  maxLines: 4,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
           ),
         ),
-        const SizedBox(height: AppSpacing.lg),
-        _AnswerArea(
-          answer: _isRevealed ? widget.turn.card.back : null,
-          hiddenLabel: l10n.studyRecallAnswerHidden,
+        const SizedBox(height: AppSpacing.md),
+        Expanded(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minHeight: AppStudyPair.cardMinHeight,
+            ),
+            child: _AnswerArea(
+              answer: _isRevealed ? widget.turn.card.back : null,
+              hiddenLabel: l10n.studyRecallAnswerHidden,
+            ),
+          ),
         ),
         const SizedBox(height: AppSpacing.lg),
         // **The second state of this screen, which the design has no image
@@ -202,12 +226,14 @@ class _RecallTimerSectionWidgetState extends State<RecallTimerSectionWidget>
         // exactly one outcome and it cannot be changed, so there is no button
         // left to offer — and a screen with the answer showing and no control
         // is indistinguishable from one that stopped responding unless it says
-        // why.
+        // why. The handout’s `Forgot` / `Got it` pair is that same ruling seen
+        // from the other side, and was refused for the same reason.
         if (_isRevealed)
           Text(
             _outcome == RecallOutcome.timedOut
                 ? '${l10n.studyRecallTimedOut} · ${l10n.studyRecallLocked}'
                 : l10n.studyRecallLocked,
+            textAlign: TextAlign.center,
             style: context.texts.bodyMedium?.copyWith(
               color: _outcome == RecallOutcome.timedOut
                   ? semantic.danger
@@ -215,9 +241,13 @@ class _RecallTimerSectionWidgetState extends State<RecallTimerSectionWidget>
             ),
           )
         else
-          MxActionButton(
-            label: l10n.studyRevealAnswer,
-            onPressed: () => _claim(RecallOutcome.revealed),
+          // Hugs rather than fills: one action centred under two cards reads as
+          // the way on, where a full-width bar reads as the screen floor.
+          Align(
+            child: MxActionButton(
+              label: l10n.studyRevealAnswer,
+              onPressed: () => _claim(RecallOutcome.revealed),
+            ),
           ),
       ],
     );
@@ -229,6 +259,11 @@ class _RecallTimerSectionWidgetState extends State<RecallTimerSectionWidget>
 /// It carries a label while it is covered: an empty box is nothing at all to a
 /// screen reader, and "there is an answer here and it is hidden" is a fact about
 /// the turn rather than decoration.
+///
+/// **One step down from the prompt, and flat** (§8.10). Two raised cards read as
+/// two prompts; the step is what says one of them is waiting to be filled. No
+/// shadow either — a shadow under a card that is already inside a shadowed one
+/// reads as a rendering fault rather than as depth.
 class _AnswerArea extends StatelessWidget {
   const _AnswerArea({required this.answer, required this.hiddenLabel});
 
@@ -241,15 +276,91 @@ class _AnswerArea extends StatelessWidget {
 
     return MxCard(
       elevation: AppElevation.none,
-      padding: const EdgeInsets.all(AppSpacing.xl),
-      child: revealed == null
-          ? Text(
-              hiddenLabel,
-              style: context.texts.bodyMedium?.copyWith(
-                color: context.colors.onSurfaceVariant,
+      radius: AppRadius.xl,
+      color: context.colors.surfaceContainerLow,
+      child: Center(
+        child: revealed == null
+            ? _HiddenBar(label: hiddenLabel)
+            : Text(
+                revealed,
+                style: context.texts.bodyMedium,
+                textAlign: TextAlign.center,
+                maxLines: 6,
+                overflow: TextOverflow.ellipsis,
               ),
-            )
-          : Text(revealed, style: context.texts.titleMedium),
+      ),
     );
   }
+}
+
+/// What stands in for the answer while it is covered.
+///
+/// **A bar, not a sentence.** The panel used to write "the answer is hidden" in
+/// the place the answer will appear — a line of text a learner reads instead of
+/// recalling. A blurred bar is the same fact with nothing to read, and the
+/// sentence survives where it was always doing the work: in `Semantics`.
+class _HiddenBar extends StatelessWidget {
+  const _HiddenBar({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    label: label,
+    child: ImageFiltered(
+      // Blur rather than a lower opacity: a faint bar reads as a control that
+      // has been switched off, a soft one reads as something not yet in focus.
+      imageFilter: ImageFilter.blur(
+        sigmaX: AppRecallAnswer.hiddenBlur,
+        sigmaY: AppRecallAnswer.hiddenBlur,
+      ),
+      child: SizedBox(
+        width: AppRecallAnswer.hiddenBarWidth,
+        height: AppRecallAnswer.hiddenBarHeight,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            // Blended, never translucent: `color_source_rules_test` R7 fails a
+            // fill that composites at paint time.
+            color: Color.alphaBlend(
+              context.colors.surfaceContainerHigh.withValues(
+                alpha: AppRecallAnswer.hiddenBarAlpha,
+              ),
+              context.colors.surfaceContainerLow,
+            ),
+            borderRadius: BorderRadius.circular(AppRadius.pill),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+/// The placeholder’s own numbers.
+abstract final class AppRecallAnswer {
+  /// Wide enough to read as a line of text that is coming, narrow enough not to
+  /// read as an input field waiting to be typed in.
+  static const double hiddenBarWidth = 140;
+  static const double hiddenBarHeight = 14;
+
+  /// How much of `surfaceContainerHigh` the bar carries over the card under it.
+  static const double hiddenBarAlpha = 0.7;
+
+  /// Soft, not gone. Enough that the eye stops trying to resolve it.
+  static const double hiddenBlur = 2;
+}
+
+/// What the two-card study screens agree on.
+///
+/// `recall` and `fill` ask the same thing in two directions, so they share a
+/// skeleton: a prompt above, the space for an answer below, both `Expanded` and
+/// both floored here. A screen that let one card shrink past this stopped being
+/// a pair and started being a heading over a box.
+abstract final class AppStudyPair {
+  static const double cardMinHeight = 160;
+
+  /// How wide one action in the row under the cards may get.
+  ///
+  /// Two buttons stretched across a phone read as a toolbar; capped and centred
+  /// they read as a choice. One button on its own hugs its label instead.
+  static const double ctaMaxWidth = 160;
 }

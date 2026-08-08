@@ -7,7 +7,7 @@
 | **Scope** | Task còn lại của Study từ M5.7 trở đi · nợ kỹ thuật của Study · việc bị chặn |
 | **Source of truth for** | Trạng thái task Study từ M5.7 · nợ kỹ thuật của Study |
 | **Depends on** | `document-conventions.md` · `wbs.md` · `business-rules.md` · `use-cases.md` |
-| **Updated by task** | phản hồi đúng/sai của bàn ghép |
+| **Updated by task** | `guess`, `recall`, `fill` theo handout layout |
 | **Last updated** | 2026-08-09 |
 
 `docs/wbs.md` giữ M5.0…M5.6 đã hoàn thành và không nhắc lại ở đây. File này giữ
@@ -1189,3 +1189,30 @@ Tách file theo guard: ô sang `widgets/items/match_tile_widget.dart` (AD-15 —
 `items/` là hàng lặp lại và các phần của nó), test tách thành
 `match_board_feedback_test.dart` theo đúng đường nối: file cũ nói về cái gì được
 **ghi lại**, file mới nói về cái gì được **nói ra**.
+
+
+### `guess`, `recall`, `fill` theo handout layout 390×780
+
+Ba handout cùng lúc. `guess` **không đụng phán quyết nào** nên dựng nguyên
+(§8.9). `recall` và `fill` đâm vào bốn thứ đã chốt, chủ dự án quyết từng điểm
+bằng popup, chi tiết ở §8.10.
+
+**Thứ đáng giá nhất lấy từ handout là cái tỉ lệ**: hai thẻ `Expanded` ngang
+nhau, cùng sàn 160. Trước đó thẻ đề co theo chữ của nó còn vùng đáp án lấy
+phần thừa — mỗi thẻ một hình dạng. `guess` cùng bệnh theo chiều ngược: thẻ đề
+cố định làm lựa chọn thứ năm tràn ra ngoài màn — handout gọi đích danh.
+
+`MxCard` thêm tham số `color` (nhận một **vai** của `ColorScheme`), để thẻ đáp án
+lùi một bậc so với thẻ đề. Hai thẻ cùng nổi đọc ra thành hai câu hỏi.
+
+Chỗ ẩn đáp án của `recall` đổi từ một câu sang một thanh mờ: câu "đáp án đang
+ẩn" đặt đúng chỗ đáp án sẽ hiện là một dòng chữ người học đọc thay vì nhớ
+lại. Câu đó ở lại trong `Semantics`, nơi nó vốn làm việc.
+
+Ba file test phải pump **không cuộn** (`isScrollable: false`): ba section giờ lấp
+đầy chiều cao được giao, còn scroll view giao cho chúng chiều cao vô hạn.
+
+**Còn nợ, có chủ đích:** `Try again` / `Mark correct` của `fill` — cả hai quyết
+định một lượt **ghi gì**, không phải hai cái nút. Đề xuất "hoãn việc ghi" đang
+chờ duyệt ở §8.10. Và dòng gợi ý hai trạng thái cho cả ba màn — cùng một cơ
+chế, nối một lần.

@@ -7,7 +7,7 @@
 | **Scope** | Khung phiên học, và năm màn `browse` · `match` · `guess` · `recall` · `fill`. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), luồng (`use-cases.md`), giá trị token (`design_system/tokens/`) |
 | **Source of truth for** | Bố cục màn học · phán quyết cho tám điểm design lệch với BR |
 | **Depends on** | `document-conventions.md`, `business-rules.md` (BR-108…BR-154), `wbs-study.md` (M5.7…M5.20) |
-| **Updated by task** | Màn `guess` theo handout layout — thêm §8.9 |
+| **Updated by task** | Màn `recall` và `fill` theo handout layout — thêm §8.10 |
 | **Last updated** | 2026-08-09 |
 
 Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham chiếu bằng ID.
@@ -645,3 +645,66 @@ tìm cái nào là cái nào.
 gợi ý. Cờ "đã trả lời" hiện nằm trong state của section, chưa tới được khung.
 `recall` và `fill` cũng cần đúng cơ chế ấy (ẩn/hiện, nhập/sai), nên nối một lần
 cùng hai màn đó thay vì ba lần rời.
+
+
+### 8.10 `recall` và `fill` theo handout layout 390×780
+
+Hai handout này **đâm vào bốn phán quyết đã chốt**, khác hẳn `guess`. Chủ dự
+án đã quyết từng điểm bằng popup:
+
+| handout | chốt | hệ quả |
+|---|---|---|
+| accent `mastery` cho chip + thanh tiến trình | **không**, giữ `primary` | §7.8 nguyên vẹn. `mastery` trong app này **là** `success` = *đúng*, nên chip RECALL xanh là phán quyết phát ra trước khi người ta trả lời; trên `fill` sai thì thành chrome xanh đè trên đáp án đỏ |
+| icon bút chì / loa / undo | **hoãn cả ba** | §7.4 nguyên vẹn. Loa không dựng được thật — `card_media` chưa có trong data model (AD-03) |
+| `recall` bỏ đồng hồ, thêm `Forgot` / `Got it` | **giữ BR-128 và §6.1** | Đó là đổi **định nghĩa của mode**, không phải đổi layout: BR-129 cho đúng một kết cục mỗi lượt và BR-130 khoá nó, nên hai nút kia không có gì để ghi |
+| `fill` thêm `Try again`, `Mark correct`, hiện chữ đã gõ | **có, nhưng chưa dựng** | cả ba quyết định một lượt **ghi gì** — xem dưới |
+
+**Cái đã lấy từ handout, và nó là phần đáng giá nhất:** hai thẻ là **`Expanded`
+ngang nhau**, cùng sàn `AppStudyPair.cardMinHeight` = 160. Trước đó thẻ đề co
+theo chữ của nó còn vùng đáp án lấy phần thừa — tức là mỗi thẻ một hình dạng
+khác nhau. Chúng hỏi cùng một thứ theo hai chiều, nên chúng bằng nhau.
+
+Thẻ dưới **lùi một bậc** (`surfaceContainerLow`) và **phẳng**: hai thẻ cùng nổi
+đọc ra thành hai câu hỏi, còn cái bậc là thứ nói một trong hai đang chờ được
+điền. `MxCard` vì thế có thêm tham số `color` — một **vai** của `ColorScheme`,
+không phải một màu.
+
+**Chỗ ẩn đáp án giờ là một thanh mờ, không phải một câu.** Panel cũ viết "đáp
+án đang ẩn" đúng chỗ đáp án sẽ hiện ra — một dòng chữ người học **đọc thay vì
+nhớ lại**. Thanh 140×14 blur 2px nói cùng sự thật mà không có gì để đọc; câu cũ
+ở lại đúng chỗ nó vốn làm việc: trong `Semantics`. Blur chứ không hạ opacity —
+một thanh mờ nhạt đọc ra là control bị tắt, một thanh nhoè đọc ra là thứ chưa
+rõ.
+
+**Hàng CTA ôm chữ, không kéo hết bề ngang** (`AppStudyPair.ctaMaxWidth` = 160 cho
+mỗi nút khi có hai). Một nút kéo hết ngang dưới hai thẻ đọc ra là sàn của màn
+hình, căn giữa thì đọc ra là đường đi tiếp.
+
+#### Còn lại: `fill` cần một BR trước khi dựng tiếp
+
+`Try again` và `Mark correct` không phải hai cái nút — chúng quyết định **một
+lượt ghi gì xuống `study_answers`**:
+
+- `fill` hiện **ghi ngay khi bấm Check**. Cho trả lời lại thì lần hai là lượt thứ
+  hai (đụng cách đếm round của BR-115 và nguyên tắc một-lượt của BR-126), hay là
+  sửa lượt cũ (đụng BR-135/AD-11: lượt đã ghi thì bất biến)?
+- `Mark correct` là người dùng ghi đè kết quả chấm mà BR-134 sở hữu, trong khi
+  BR-116 nói thẻ đã sai trong một round thì **vẫn thuộc tập trượt của round đó
+  kể cả khi sau đó làm đúng**.
+
+Đề xuất đang chờ duyệt: **hoãn việc ghi** — bấm Check mà sai thì chưa ghi gì,
+lượt chỉ được ghi khi người dùng chọn lối ra (`Try again` → gõ lại → Check ghi
+một lượt theo kết quả cuối; `Mark correct` ghi một lượt đúng kèm `outcome_reason`
+nói rõ là người dùng tự khẳng định). Một lượt một thẻ, BR-126 và BR-135 nguyên
+vẹn. Giá: app bị kill lúc đang ở trạng thái sai thì lượt đó mất — cần BR-103
+(resume) nói rõ trạng thái sai chưa-ghi được khôi phục thế nào.
+
+Việc hiện lại chữ đã gõ (gạch ngang) thì **không** đụng BR-138 — luật đó cấm
+**lưu**, không cấm hiển thị — nhưng lật lại phán quyết ở §6.1, nên đi cùng gói
+trên.
+
+#### Còn thiếu, có chủ đích
+
+Dòng gợi ý hai trạng thái (`guess` trước/sau khi trả lời, `recall` ẩn/hiện,
+`fill` nhập/sai) — cả ba cần đúng một cơ chế: cờ "đã xong" trong state của
+section phải tới được `hintOverride` của khung. Nối một lần cho cả ba.

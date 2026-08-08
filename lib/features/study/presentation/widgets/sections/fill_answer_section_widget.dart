@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_elevation.dart';
+import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../../../shared/widgets/mx_card.dart';
-import '../../../../../shared/widgets/mx_text_button.dart';
+import 'recall_timer_section_widget.dart';
 import '../../../../../shared/widgets/mx_text_field.dart';
 import '../../../domain/models/fill_mode.dart';
 import '../../../domain/models/study_turn_model.dart';
@@ -99,68 +101,165 @@ class _FillAnswerSectionWidgetState extends State<FillAnswerSectionWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        MxCard(
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.xl),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  widget.turn.card.example ?? widget.turn.card.front,
-                  style: context.texts.headlineSmall,
+        // **The same skeleton as `recall`, because it is the same question in
+        // the other direction** (§8.10): a prompt above, the space for an answer
+        // below, both `Expanded` and both floored at the same height.
+        Expanded(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minHeight: AppStudyPair.cardMinHeight,
+            ),
+            child: MxCard(
+              elevation: AppElevation.raised,
+              radius: AppRadius.xl,
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Flexible(
+                      child: Text(
+                        widget.turn.card.example ?? widget.turn.card.front,
+                        style: context.texts.bodyLarge,
+                        textAlign: TextAlign.center,
+                        maxLines: 6,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (_hasUsedHint && hint != null) ...<Widget>[
+                      const SizedBox(height: AppSpacing.md),
+                      Text(
+                        hint,
+                        style: context.texts.bodyMedium?.copyWith(
+                          color: context.colors.onSurfaceVariant,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ],
                 ),
-                if (_hasUsedHint && hint != null) ...<Widget>[
-                  const SizedBox(height: AppSpacing.md),
-                  Text(hint, style: context.texts.bodyMedium),
-                ],
-              ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        Expanded(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minHeight: AppStudyPair.cardMinHeight,
+            ),
+            child: MxCard(
+              elevation: AppElevation.none,
+              radius: AppRadius.xl,
+              color: context.colors.surfaceContainerLow,
+              child: Center(child: _answerArea(context)),
             ),
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
-        MxTextField(
-          controller: _input,
-          label: l10n.studyFillInputLabel,
-          isEnabled: !widget.isLocked && !_isGraded,
-          onSubmitted: (_) => _submit(),
-        ),
-        if (hint != null && !_hasUsedHint)
-          MxTextButton(
-            label: l10n.studyShowHint,
-            // Recorded on the turn, and with no effect on the action or the
-            // schedule (BR-136).
-            onPressed: widget.isLocked || _isGraded
-                ? null
-                : () => setState(() => _hasUsedHint = true),
-          ),
-        const SizedBox(height: AppSpacing.md),
-        // **The second state of this screen, which the design has no image
-        // for.** Drawn from BR-134 and BR-137 rather than guessed: the verdict
-        // is what the turn recorded, the field is closed because a second
-        // answer would be a second turn, and a wrong answer is shown the card's
-        // own back — never what the learner typed, which is not stored and not
-        // echoed (BR-138).
-        if (_wasCorrect != null) ...<Widget>[
-          Text(
-            _wasCorrect! ? l10n.studyFillCorrect : l10n.studyFillIncorrect,
-            style: context.texts.titleMedium?.copyWith(
-              color: _wasCorrect!
-                  ? context.semanticColors.success
-                  : context.semanticColors.danger,
-            ),
-          ),
-          if (!_wasCorrect!) ...<Widget>[
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              l10n.studyFillTheAnswerWas(widget.turn.card.back),
-              style: context.texts.bodyMedium,
-            ),
+        _CtaRow(
+          children: <Widget>[
+            if (hint != null && !_hasUsedHint)
+              MxActionButton(
+                label: l10n.studyShowHint,
+                variant: MxActionButtonVariant.secondary,
+                // Recorded on the turn, and with no effect on the action or the
+                // schedule (BR-136).
+                onPressed: widget.isLocked || _isGraded
+                    ? null
+                    : () => setState(() => _hasUsedHint = true),
+              ),
+            if (!_isGraded)
+              MxActionButton(
+                label: l10n.studyFillSubmit,
+                onPressed: widget.isLocked ? null : _submit,
+              ),
           ],
-        ] else
-          MxActionButton(
-            label: l10n.studyFillSubmit,
-            onPressed: widget.isLocked ? null : _submit,
+        ),
+      ],
+    );
+  }
+
+  /// What the lower card holds: the field, or the verdict once it is graded.
+  ///
+  /// **The second state of this screen, which the design has no image for.**
+  /// Drawn from BR-134 and BR-137 rather than guessed: the verdict is what the
+  /// turn recorded, the field is closed because a second answer would be a
+  /// second turn, and a wrong answer is shown the card’s own back — never what
+  /// the learner typed, which is not stored and not echoed (BR-138, §6.1).
+  ///
+  /// The handout asks for the typed answer struck through, with `Try again` and
+  /// `Mark correct` beside it. All three are held: each of them decides what a
+  /// turn *writes*, and that is a rule this screen does not get to invent — see
+  /// §8.10.
+  Widget _answerArea(BuildContext context) {
+    final l10n = context.l10n;
+    final graded = _wasCorrect;
+
+    if (graded == null) {
+      return MxTextField(
+        controller: _input,
+        label: l10n.studyFillInputLabel,
+        isEnabled: !widget.isLocked && !_isGraded,
+        onSubmitted: (_) => _submit(),
+      );
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Text(
+          graded ? l10n.studyFillCorrect : l10n.studyFillIncorrect,
+          style: context.texts.titleMedium?.copyWith(
+            color: graded
+                ? context.semanticColors.success
+                : context.semanticColors.danger,
           ),
+          textAlign: TextAlign.center,
+        ),
+        if (!graded) ...<Widget>[
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            l10n.studyFillTheAnswerWas(widget.turn.card.back),
+            style: context.texts.bodyMedium,
+            textAlign: TextAlign.center,
+            maxLines: 4,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// The row of actions under the two cards.
+///
+/// Centred and capped rather than stretched: one or two buttons under a pair of
+/// cards read as the way on, where a full-width bar reads as the screen floor.
+/// Empty when the turn is graded and there is nothing left to offer — the same
+/// shape `recall` takes for the same reason (BR-129).
+class _CtaRow extends StatelessWidget {
+  const _CtaRow({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    if (children.isEmpty) return const SizedBox.shrink();
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        for (final (index, child) in children.indexed) ...<Widget>[
+          if (index > 0) const SizedBox(width: AppSpacing.md),
+          Flexible(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: AppStudyPair.ctaMaxWidth,
+              ),
+              child: child,
+            ),
+          ),
+        ],
       ],
     );
   }

@@ -53,6 +53,7 @@ void main() {
       await tester.pumpWidget(
         wrapForTest(
           FillAnswerSectionWidget(turn: turnOf('c1'), onGraded: graded.add),
+          isScrollable: false,
         ),
       );
 
@@ -70,6 +71,7 @@ void main() {
       await tester.pumpWidget(
         wrapForTest(
           FillAnswerSectionWidget(turn: turnOf('c1'), onGraded: graded.add),
+          isScrollable: false,
         ),
       );
 
@@ -88,6 +90,7 @@ void main() {
       await tester.pumpWidget(
         wrapForTest(
           FillAnswerSectionWidget(turn: turnOf('c1'), onGraded: graded.add),
+          isScrollable: false,
         ),
       );
 
@@ -106,6 +109,7 @@ void main() {
       await tester.pumpWidget(
         wrapForTest(
           FillAnswerSectionWidget(turn: turnOf('c1'), onGraded: graded.add),
+          isScrollable: false,
         ),
       );
 
@@ -128,6 +132,7 @@ void main() {
             turn: turnOf('c1', hint: 'starts with c'),
             onGraded: graded.add,
           ),
+          isScrollable: false,
         ),
       );
 
@@ -151,6 +156,7 @@ void main() {
             turn: turnOf('c1', hint: 'h'),
             onGraded: (_) {},
           ),
+          isScrollable: false,
         ),
       );
       await tester.enterText(find.byType(TextField), 'công');
@@ -163,6 +169,7 @@ void main() {
             turn: turnOf('c2', hint: 'h'),
             onGraded: (_) {},
           ),
+          isScrollable: false,
         ),
       );
       await tester.pump();
@@ -183,6 +190,7 @@ void main() {
       await tester.pumpWidget(
         wrapForTest(
           FillAnswerSectionWidget(turn: turnOf('c1'), onGraded: (_) {}),
+          isScrollable: false,
         ),
       );
 
@@ -193,7 +201,10 @@ void main() {
       expect(find.text('Not quite'), findsOneWidget);
       expect(find.text('The answer: công'), findsOneWidget);
       expect(find.text('Check'), findsNothing);
-      expect(tester.widget<TextField>(find.byType(TextField)).enabled, isFalse);
+      // The field is gone rather than merely disabled: the lower card holds one
+      // thing at a time, and once the turn is graded that thing is the verdict.
+      // A second answer would be a second turn either way (BR-137).
+      expect(find.byType(TextField), findsNothing);
     });
 
     testWidgets('and a correct fill does not spell the answer back', (
@@ -204,6 +215,7 @@ void main() {
       await tester.pumpWidget(
         wrapForTest(
           FillAnswerSectionWidget(turn: turnOf('c1'), onGraded: (_) {}),
+          isScrollable: false,
         ),
       );
 
