@@ -8,6 +8,7 @@ import '../models/study_mode.dart';
 import '../models/study_options_model.dart';
 import '../models/study_outcome_reason_model.dart';
 import '../models/study_session_kind_model.dart';
+import '../models/study_session_summary_model.dart';
 import '../models/study_turn_model.dart';
 import '../models/study_session_status_model.dart';
 
@@ -183,6 +184,22 @@ abstract interface class StudyRepository {
   /// when the session opens: the set is fixed for the session's whole life
   /// (BR-102), so re-reading it per turn would be the same answer at a cost.
   Future<List<StudyCardModel>> sessionCards(String sessionId);
+
+  /// Everything a summary screen shows about a finished session, in one read.
+  ///
+  /// **One statement, not four** (AD-13). Cards finished, cards answered, wrong
+  /// turns and the session's own outcome are four questions, and asking them
+  /// separately is four snapshots: a summary can then report the counts of a
+  /// completed session next to the status of one that failed a moment later.
+  ///
+  /// [wrongActions] are the algorithm's own lapse actions (BR-20), supplied by
+  /// the caller rather than assumed here — `eight_box` says `forgotten` and
+  /// `sm2` says `again`, and a query that named one would report a spotless
+  /// session on every deck using the other. An empty list counts nothing.
+  Future<StudySessionSummaryModel> sessionSummary({
+    required String sessionId,
+    required List<StudyAction> wrongActions,
+  });
 
   /// Stores what is left of a turn in flight (BR-133).
   ///

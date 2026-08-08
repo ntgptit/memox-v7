@@ -19,6 +19,7 @@ import '../../domain/models/study_mode.dart';
 import '../../domain/models/study_options_model.dart';
 import '../../domain/models/study_outcome_reason_model.dart';
 import '../../domain/models/study_session_kind_model.dart';
+import '../../domain/models/study_session_summary_model.dart';
 import '../../domain/models/study_session_status_model.dart';
 import '../../domain/repositories/study_repository.dart';
 import '../datasources/study_dao.dart';
@@ -116,6 +117,32 @@ final class StudyRepositoryImpl
       easeFactor: state.easeFactor,
       intervalDays: state.intervalDays,
       repetitions: state.repetitions,
+    );
+  }
+
+  @override
+  Future<StudySessionSummaryModel> sessionSummary({
+    required String sessionId,
+    required List<StudyAction> wrongActions,
+  }) async {
+    final row = await _dao.sessionSummaryRow(
+      sessionId: sessionId,
+      wrongActions: wrongActions
+          .map((action) => action.dbValue)
+          .toList(growable: false),
+    );
+    final endReason = row.read<String?>('endReason');
+
+    return StudySessionSummaryModel(
+      kind: StudySessionKind.fromDbValue(row.read<String>('kind')),
+      status: StudySessionStatus.fromDbValue(row.read<String>('status')),
+      endReason: endReason == null
+          ? null
+          : StudySessionEndReason.fromDbValue(endReason),
+      finishedCards: row.read<int>('finishedCards'),
+      answeredCards: row.read<int>('answeredCards'),
+      wrongTurns: row.read<int>('wrongTurns'),
+      totalTurns: row.read<int>('totalTurns'),
     );
   }
 

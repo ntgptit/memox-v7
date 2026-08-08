@@ -13,6 +13,7 @@ import '../../domain/models/study_session_status_model.dart';
 import '../../domain/usecases/advance_study_stage_use_case.dart';
 import '../../domain/usecases/end_study_session_use_case.dart';
 import '../../domain/usecases/get_next_turn_use_case.dart';
+import '../../domain/usecases/get_session_summary_use_case.dart';
 import '../../domain/usecases/mark_browsed_use_case.dart';
 import '../../domain/usecases/resume_study_session_use_case.dart';
 import '../../domain/usecases/save_turn_progress_use_case.dart';
@@ -154,6 +155,35 @@ class StudySessionController extends _$StudySessionController {
         isFinished: true,
         error: error,
       );
+      await _loadSummary();
+    }
+  }
+
+  /// Reads what the session came to, once it has ended.
+  ///
+  /// **Read back rather than accumulated.** A running tally in the controller
+  /// would be a second copy of numbers the database already holds, and the two
+  /// disagree the moment a write is refused — the tally counts the tap, the
+  /// table counts the row. It also reads `status` from the same statement, so a
+  /// session that ended by failing cannot be summarised as one that finished.
+  ///
+  /// A failure here leaves [StudySessionState.summary] null on purpose: the
+  /// session has genuinely ended, and refusing to say so because the epilogue
+  /// could not be read would be the worse answer.
+  Future<void> _loadSummary() async {
+    final session = state.session;
+    if (session == null) return;
+
+    try {
+      final summary = await GetSessionSummaryUseCase(
+        ref.read(studyRepositoryProvider),
+      ).call(sessionId: session.id, schedulerType: state.schedulerType);
+
+      if (!ref.mounted) return;
+      state = state.copyWith(summary: summary);
+    } on Object catch (_) {
+      // Narrow by intent, not by type: every failure here has the same right
+      // answer, which is to show the end of the session without counts.
     }
   }
 
@@ -216,6 +246,7 @@ class StudySessionController extends _$StudySessionController {
 
     if (!ref.mounted) return;
     state = state.copyWith(isFinished: true, turn: null);
+    await _loadSummary();
   }
 
   /// Reads the next turn, advancing the stage when this one has run dry.
@@ -246,6 +277,7 @@ class StudySessionController extends _$StudySessionController {
           isFinished: true,
           turn: null,
         );
+        await _loadSummary();
 
         return;
       }

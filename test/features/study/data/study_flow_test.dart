@@ -9,6 +9,7 @@ import 'package:memox/features/study/data/repositories/study_repository_impl.dar
 import 'package:memox/features/study/domain/models/study_action_model.dart';
 import 'package:memox/features/study/domain/models/study_mode.dart';
 import 'package:memox/features/study/domain/models/study_session_kind_model.dart';
+import 'package:memox/features/study/domain/models/study_session_status_model.dart';
 import 'package:memox/features/study/domain/usecases/advance_study_stage_use_case.dart';
 import 'package:memox/features/study/domain/usecases/start_study_session_use_case.dart';
 import 'package:memox/features/study/domain/usecases/submit_study_answer_use_case.dart';
@@ -299,6 +300,69 @@ void main() {
       expect(tomorrow.dueCount, 4);
       // `fill` still only takes the one card that has an example.
       expect(tomorrow.fillableCount, 1);
+    });
+  });
+
+  group('the summary of a finished session', () {
+    test('counts the chain, the cards and the mistakes', () async {
+      // Against a real database because the counts are the query: three
+      // subqueries over two tables, one of them an anti-join. A fake would
+      // return whatever it was told and prove only that the caller can read a
+      // map.
+      await seed(cardCount: 2, withExample: const <String>{'c0', 'c1'});
+
+      final session = await StartStudySessionUseCase(repository).call(
+        deckId: 'd1',
+        kind: StudySessionKind.learning,
+        now: now,
+        utcOffset: vietnam,
+      );
+      await playThrough(session.session.id);
+
+      final summary = await repository.sessionSummary(
+        sessionId: session.session.id,
+        wrongActions: const <StudyAction>[StudyAction.forgotten],
+      );
+
+      expect(summary.kind, StudySessionKind.learning);
+      expect(summary.status, StudySessionStatus.completed);
+      expect(summary.endReason, isNull);
+      expect(summary.finishedCards, 2);
+      expect(summary.answeredCards, 2);
+      // `playThrough` answers `remembered` every time, and `browse` writes no
+      // row at all (BR-111) — so every graded turn is a right one.
+      expect(summary.wrongTurns, 0);
+      expect(summary.totalTurns, greaterThan(0));
+    });
+
+    test('an action the algorithm does not use counts nothing', () async {
+      // The failure mode the parameter exists to prevent, run forwards: ask an
+      // `eight_box` session for `sm2`-s wrong action and every mistake
+      // disappears. The number stays plausible, which is what makes it
+      // dangerous.
+      await seed(cardCount: 2, withExample: const <String>{'c0', 'c1'});
+
+      final session = await StartStudySessionUseCase(repository).call(
+        deckId: 'd1',
+        kind: StudySessionKind.learning,
+        now: now,
+        utcOffset: vietnam,
+      );
+      await playThrough(session.session.id);
+
+      final wrong = await repository.sessionSummary(
+        sessionId: session.session.id,
+        wrongActions: const <StudyAction>[StudyAction.again],
+      );
+      final none = await repository.sessionSummary(
+        sessionId: session.session.id,
+        wrongActions: const <StudyAction>[],
+      );
+
+      expect(wrong.wrongTurns, 0);
+      expect(none.wrongTurns, 0);
+      // The rest of the numbers are unaffected — only the filter changed.
+      expect(none.totalTurns, wrong.totalTurns);
     });
   });
 }

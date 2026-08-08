@@ -15,6 +15,7 @@ import '../../domain/models/study_mode.dart';
 import '../../domain/models/study_session_kind_model.dart';
 import '../controllers/study_session_controller.dart';
 import '../states/study_session_state.dart';
+import '../widgets/sections/study_summary_section_widget.dart';
 import '../widgets/support/study_labels_widget.dart';
 import '../widgets/support/study_mode_view_widget.dart';
 
@@ -112,7 +113,18 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
       return MxLoadingState(semanticsLabel: context.l10n.appTitle);
     }
     if (state.isFinished) {
-      return MxEmptyState(title: context.l10n.studySessionFinished);
+      // No summary means the read failed, not that nothing happened. The
+      // session has ended either way, and inventing counts for it would be
+      // worse than saying only that.
+      final summary = state.summary;
+      if (summary == null) {
+        return MxEmptyState(title: context.l10n.studySessionFinished);
+      }
+
+      return StudySummarySectionWidget(
+        summary: summary,
+        onBackToDeck: () => Navigator.of(context).pop(),
+      );
     }
 
     final session = state.session;
