@@ -7,7 +7,7 @@
 | **Scope** | Task còn lại của Study từ M5.7 trở đi · nợ kỹ thuật của Study · việc bị chặn |
 | **Source of truth for** | Trạng thái task Study từ M5.7 · nợ kỹ thuật của Study |
 | **Depends on** | `document-conventions.md` · `wbs.md` · `business-rules.md` · `use-cases.md` |
-| **Updated by task** | IT đi hết chuỗi 5 stage |
+| **Updated by task** | gộp lại bảng nợ bị tách đôi |
 | **Last updated** | 2026-08-08 |
 
 `docs/wbs.md` giữ M5.0…M5.6 đã hoàn thành và không nhắc lại ở đây. File này giữ
@@ -759,9 +759,8 @@ phán quyết trước khi người dùng trả lời.
 | ~~Hai state thứ hai của `recall`/`fill` chưa có ảnh~~ | vẽ theo BR và ghi vào wireframe §6.1 là agent đề xuất | xong ở M5.20 |
 | ~~IT chưa đi hết chuỗi 5 stage tới `learned_at`~~ | robot đọc bàn ghép và câu hỏi từ chính widget app vừa dựng; 20 lượt, 15 câu trả lời, 5 thẻ nhận `learned_at` | xong |
 | ~~`pause()` không có caller — nửa **ghi** của BR-133~~ | `RecallTimerSectionWidget.onSuspended` bắn khi app rời foreground với lượt còn mở; màn hình gọi `pause()`. Round-trip có test trên SQLite thật | xong |
-
 | ~~Màn Study chưa có mặt trong Widgetbook~~ | `StudyCatalogRepository` là fake riêng của catalog; ba màn Study đã đăng ký | xong ở M5.16 |
-| 10 kịch bản IT còn đỏ (từ 15) | nguyên nhân chung — fixture seed ghi đè `CLEAN-RESET` — đã sửa; 10 ca còn lại có nguyên nhân khác | lượt điều tra riêng — không thuộc Study |
+| 10 kịch bản IT còn đỏ (từ 15) | nguyên nhân chung — fixture seed ghi đè `CLEAN-RESET` — đã sửa; 10 ca còn lại có nguyên nhân khác, và `IT-CARD-005` đã soi được một nửa: ở bước 4 màn hình vẫn là editor **tạo mới** với ô Front rỗng, tức `enterNthField(0, …)` không tới đích | lượt điều tra riêng — thuộc Card, không thuộc Study |
 
 ### Nửa **ghi** của BR-133, đóng sau M5.16
 
