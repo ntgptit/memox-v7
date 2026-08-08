@@ -9,6 +9,7 @@ import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_error_state.dart';
+import '../../domain/models/new_card_order_model.dart';
 import '../../domain/models/study_options_model.dart';
 import '../controllers/study_options_controller.dart';
 import '../controllers/study_options_write_controller.dart';
@@ -57,17 +58,24 @@ class StudyOptionsScreen extends ConsumerWidget {
             initialNewCardOrder: options.newCardOrder,
             isSubmitting: submit.isSubmitting,
             cardLimitProblem: submit.cardLimitProblem,
-            onSave: (rawCardLimit, newCardOrder) => unawaited(
-              ref
-                  .read(studyOptionsWriteControllerProvider(deckId).notifier)
-                  .submit(
-                    rawCardLimit: rawCardLimit,
-                    newCardOrder: newCardOrder,
-                  ),
-            ),
+            onSave: (rawCardLimit, newCardOrder) =>
+                _save(ref, rawCardLimit, newCardOrder),
           ),
         ),
       ),
     );
   }
+
+  /// The notifier, read when the button is pressed rather than during a build.
+  ///
+  /// `ref.read` inside `build()` takes a value without subscribing, which is how
+  /// a screen ends up showing state it will never be told has changed — the
+  /// guard rule `no_ref_read_in_build` exists for exactly that, and it caught
+  /// this.
+  void _save(WidgetRef ref, String rawCardLimit, NewCardOrder newCardOrder) =>
+      unawaited(
+        ref
+            .read(studyOptionsWriteControllerProvider(deckId).notifier)
+            .submit(rawCardLimit: rawCardLimit, newCardOrder: newCardOrder),
+      );
 }

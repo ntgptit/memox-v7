@@ -40,7 +40,7 @@ StudyOptionsOverride studyOptionsOverrideFromJson(String? raw) {
     return kNoStudyOptionsOverride;
   }
 
-  if (decoded is! Map<String, dynamic>) return kNoStudyOptionsOverride;
+  if (decoded is! Map<String, Object?>) return kNoStudyOptionsOverride;
 
   final limit = decoded[kStudyConfigCardLimit];
   final order = decoded[kStudyConfigNewCardOrder];

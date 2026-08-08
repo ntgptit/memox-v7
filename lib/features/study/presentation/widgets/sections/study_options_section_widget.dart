@@ -64,7 +64,9 @@ class _StudyOptionsSectionWidgetState extends State<StudyOptionsSectionWidget> {
         MxTextField(
           controller: _cardLimit,
           label: l10n.studyOptionsCardLimitLabel,
-          hintText: '$kDefaultCardLimit',
+          // No hint: the field opens holding the value in force, so a hint
+          // would be a second copy of the same number — and the default is not
+          // what this deck necessarily uses.
           keyboardType: TextInputType.number,
           errorText: _cardLimitError(context),
         ),
