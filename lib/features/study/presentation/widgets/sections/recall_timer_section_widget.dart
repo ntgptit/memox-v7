@@ -28,6 +28,7 @@ class RecallTimerSectionWidget extends StatefulWidget {
     required this.onOutcome,
     this.initialRemaining,
     this.onRemainingChanged,
+    this.onSuspended,
     super.key,
   });
 
@@ -43,9 +44,22 @@ class RecallTimerSectionWidget extends StatefulWidget {
   /// than something read off the card.
   final Duration? initialRemaining;
 
-  /// Reports what is left, so an interrupted turn can be resumed rather than
-  /// restarted.
+  /// Reports what is left on every tick, so the frame can draw the countdown.
+  ///
+  /// **Display only.** It fires ten times a second; persisting on it would be
+  /// ten writes a second for a number nobody reads until the app comes back.
   final ValueChanged<Duration>? onRemainingChanged;
+
+  /// Fires once, when the app leaves the foreground with this turn still open.
+  ///
+  /// **This is the moment BR-133 is about**, and the only one: the clock stops
+  /// (BR-128), so what is left has to be written down or the turn restarts at
+  /// twenty seconds the next time it is served. It carries `isRevealed` as well
+  /// — true is unreachable today, because revealing *is* the outcome (BR-129),
+  /// but the widget reports what it actually holds rather than a constant, so a
+  /// design that ever separates the two needs no second wiring.
+  final void Function({required Duration remaining, required bool isRevealed})?
+  onSuspended;
 
   @override
   State<RecallTimerSectionWidget> createState() =>
@@ -111,6 +125,13 @@ class _RecallTimerSectionWidgetState extends State<RecallTimerSectionWidget>
     _timer?.cancel();
     _timer = null;
     widget.onRemainingChanged?.call(_remaining);
+
+    // A turn that already has an outcome has nothing to resume: it was answered
+    // the instant it was revealed (BR-129), and the row it would be written
+    // against is no longer pending.
+    if (_outcome != null) return;
+
+    widget.onSuspended?.call(remaining: _remaining, isRevealed: _isRevealed);
   }
 
   void _onTick() {

@@ -51,6 +51,8 @@ Widget? studyModeView({
   required StudyAnswerSink onAnswer,
   required VoidCallback onContinue,
   ValueChanged<Duration>? onRecallTick,
+  void Function({required Duration remaining, required bool isRevealed})?
+  onRecallSuspend,
 }) {
   final turn = state.turn;
   if (turn == null) return null;
@@ -111,6 +113,8 @@ Widget? studyModeView({
       // The clock is drawn in the frame's top bar (§7.3), so the widget that
       // owns the countdown reports it rather than showing it.
       onRemainingChanged: onRecallTick,
+      // And what is left when the app is taken away gets written down (BR-133).
+      onSuspended: onRecallSuspend,
       onOutcome: (outcome) => _send(
         onAnswer,
         _actionFor(state, isCorrect: outcome == RecallOutcome.revealed),

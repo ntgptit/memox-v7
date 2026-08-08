@@ -7,7 +7,7 @@
 | **Scope** | Task còn lại của Study từ M5.7 trở đi · nợ kỹ thuật của Study · việc bị chặn |
 | **Source of truth for** | Trạng thái task Study từ M5.7 · nợ kỹ thuật của Study |
 | **Depends on** | `document-conventions.md` · `wbs.md` · `business-rules.md` · `use-cases.md` |
-| **Updated by task** | dọn config chết trong guard |
+| **Updated by task** | nối nửa **ghi** của BR-133 |
 | **Last updated** | 2026-08-08 |
 
 `docs/wbs.md` giữ M5.0…M5.6 đã hoàn thành và không nhắc lại ở đây. File này giữ
@@ -630,10 +630,8 @@ phán quyết trước khi người dùng trả lời.
   có số để vẽ.
 - **Đính chính, phát hiện ở lượt recursive review của M5.20:** bản đầu của mục
   trên viết rằng việc này *"cũng là nửa ghi của BR-133"*. **Sai.** Tick được nối
-  vào `ValueNotifier` của khung, không nối vào `pause()` — và
-  `StudySessionController.pause()` vẫn **không có caller nào trong `lib/`**. Nửa
-  đọc của BR-133 xong từ M5.9; nửa ghi vẫn còn nợ, và nay nằm trong bảng nợ kỹ
-  thuật thay vì bị coi là đã xong.
+  vào `ValueNotifier` của khung, không nối vào `pause()`. Nửa ghi đã đóng ở một
+  lượt riêng sau M5.16 — xem mục dưới bảng nợ.
 - **Quyết định của agent, không có trong docs:** dòng ngữ cảnh là
   `<tên deck> · <loại phiên>`. Ảnh ghi `VOCAB — CHAPTER 1 · ÔN TẬP`, tức có
   đường dẫn deck; dựng đường dẫn cần thêm một lượt đọc cây deck, và §7.2 chỉ đòi
@@ -765,10 +763,32 @@ phán quyết trước khi người dùng trả lời.
 | ~~`match` xoá ô đã ghép khỏi bàn~~ | ô đã ghép nay ở lại bàn với ✓ và độ mờ | xong ở M5.19 |
 | ~~Hai state thứ hai của `recall`/`fill` chưa có ảnh~~ | vẽ theo BR và ghi vào wireframe §6.1 là agent đề xuất | xong ở M5.20 |
 | IT chưa đi hết chuỗi 5 stage tới `learned_at` | 25 lượt tương tác/kịch bản, mỗi lượt `match` phải tìm cặp trên bàn xáo; kết quả đã có test ở tầng dữ liệu | mốc riêng — cần robot biết đọc bàn ghép |
-| `pause()` không có caller — nửa **ghi** của BR-133 | M5.18 nối tick vào khung, không nối vào `pause()`; entry M5.18 từng nói nhầm là đã xong | mốc riêng — cần quyết định lifecycle nào ghi và ghi `is_revealed` bằng gì |
+| ~~`pause()` không có caller — nửa **ghi** của BR-133~~ | `RecallTimerSectionWidget.onSuspended` bắn khi app rời foreground với lượt còn mở; màn hình gọi `pause()`. Round-trip có test trên SQLite thật | xong |
 
 | ~~Màn Study chưa có mặt trong Widgetbook~~ | `StudyCatalogRepository` là fake riêng của catalog; ba màn Study đã đăng ký | xong ở M5.16 |
 | 15 kịch bản IT Deck/Card/Disc/Tree đỏ | có trước M5; dạng "không thấy `No decks yet`" sau khi xoá | lượt điều tra riêng — không thuộc Study |
+
+### Nửa **ghi** của BR-133, đóng sau M5.16
+
+- **Status:** **done** — analyze sạch, 1622 test xanh, guard sạch
+- **Vấn đề:** `RecallTimerSectionWidget` đọc `initialRemaining` từ dòng hàng đợi
+  từ M5.9, còn **không caller nào trong `lib/`** từng ghi giá trị vào đó. Tức là
+  một cột luôn NULL và một widget luôn bắt đầu lại ở hai mươi giây — luật được
+  viết, cột được tạo, và đường nối thì không có.
+- **Tín hiệu là "app rời foreground", không phải "đồng hồ dừng".** Tick bắn 10
+  lần mỗi giây; ghi theo nó là mười lượt ghi mỗi giây cho một con số không ai đọc
+  cho tới khi app quay lại. Nay `onSuspended` bắn **một** lần, đúng lúc BR-128
+  dừng đồng hồ.
+- **Lượt đã có kết cục thì không báo gì.** Lật đáp án *chính là* kết cục
+  (BR-129), nên dòng hàng đợi của nó không còn `pending` — repository vốn đã từ
+  chối, và việc không hỏi là nửa không phụ thuộc vào việc ai đó nhớ.
+- **`isRevealed` được báo theo đúng thứ widget đang giữ**, dù `true` hôm nay
+  không tới được: nếu sau này thiết kế tách "lật" khỏi "trả lời" thì đường dây
+  đã đúng sẵn, không phải nối lần hai.
+- **Tests:** `recall_widget_test.dart` nhóm *what the clock writes down* (2),
+  `study_turn_progress_test.dart` (3, round-trip trên SQLite thật) —
+  `recall_fill_widget_test.dart` tách đôi ở guard 400 dòng thành
+  `recall_widget_test.dart` và `fill_widget_test.dart`.
 
 ## Việc không thuộc Study nhưng chặn Definition of Done
 

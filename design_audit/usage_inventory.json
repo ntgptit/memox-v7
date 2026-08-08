@@ -3409,7 +3409,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/recall_timer_section_widget.dart",
-      "line": 187,
+      "line": 208,
       "widget_context": "_RecallTimerSectionWidgetState",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3420,7 +3420,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/recall_timer_section_widget.dart",
-      "line": 222,
+      "line": 243,
       "widget_context": "_AnswerArea",
       "element_kind": "text",
       "source_kind": "theme-token",
