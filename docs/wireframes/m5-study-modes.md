@@ -7,7 +7,7 @@
 | **Scope** | Khung phiên học, và năm màn `browse` · `match` · `guess` · `recall` · `fill`. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), luồng (`use-cases.md`), giá trị token (`design_system/tokens/`) |
 | **Source of truth for** | Bố cục màn học · phán quyết cho tám điểm design lệch với BR |
 | **Depends on** | `document-conventions.md`, `business-rules.md` (BR-108…BR-154), `wbs-study.md` (M5.7…M5.20) |
-| **Updated by task** | Bàn ghép `match` theo handout layout — thêm §8.6 và §8.7 |
+| **Updated by task** | Phản hồi đúng/sai của `match` — thêm §8.8 |
 | **Last updated** | 2026-08-09 |
 
 Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham chiếu bằng ID.
@@ -104,7 +104,9 @@ Lưới hai cột, mỗi hàng một cặp ô. Ba trạng thái ô:
 |---|---|
 | chưa chọn | nền surface, viền mảnh |
 | đang chọn (vế trước) | nền primary đặc, chữ trắng |
-| đã ghép đúng | nền xanh lá rất nhạt, chữ xanh lá, có ✓, mờ đi |
+| vừa ghép đúng | nền xanh lá rất nhạt, chữ xanh lá, có ✓ — **một nhịp rồi tan** (§8.8) |
+| vừa ghép sai | nền `error`, có ✕ — một nhịp rồi về idle (§8.8) |
+| đã xong | ô rỗng, chỉ còn viền mờ (§8.8) |
 
 Ô đã ghép **vẫn nằm nguyên chỗ** chứ không biến mất — khác với bản M5.4b hiện
 tại, vốn xoá ô khỏi bàn.
@@ -557,3 +559,51 @@ Cái **có** làm theo từ phần chrome của handout: chip viết HOA kèm le
 Nhân đó sửa một lỗi thật: dòng ngữ cảnh ghép từ hai chuỗi mà chỉ một chuỗi viết
 hoa, nên `match` in ra `5 CARDS DUE · Round 1 · 4 pairs left` — một câu đeo nửa
 cái nhãn. Nay viết hoa **ở chỗ ghép**, để ARB giữ chữ chứ không giữ kiểu.
+
+### 8.8 Phản hồi đúng/sai của `match`
+
+Chủ dự án nêu hai ý, và **cả hai đều đúng chỗ đau**:
+
+1. sai thì hiện **không có phản hồi nào** — chọn sai chỉ xoá lựa chọn, nhìn hệt
+   như bấm hụt;
+2. ô đã ghép giữ màu xanh tới hết round là **rác thị giác** — ba trạng thái
+   (idle, selected, matched) cùng tồn tại, mà cái thứ ba là việc đã xong.
+
+§4 từng chốt "ô ở nguyên chỗ", và lý do của nó là **reflow**, không phải là màu:
+bỏ ô thì hàng dưới dồn lên, và từ khi lưới lấp đầy chiều cao (§8.6) thì mọi ô
+còn lại còn phình to. Đề xuất của chủ dự án bỏ đúng cái đó ra — *biến mất nhưng
+không dồn* — nên §4 giữ nguyên tinh thần, chỉ đổi cách thực hiện:
+
+| | làm gì |
+|---|---|
+| đúng | ô sang `success` + ✓ trong `AppMatchTile.successFlash`, rồi **nội dung tan**, ô ở lại rỗng |
+| ô rỗng | không vẽ nền (thủng thật), viền `borderSubtle` pha 45% trên nền trang |
+| sai | **cả hai** ô sang `error` + ✕ trong `AppMatchTile.wrongHold`, rồi tự về idle |
+| cả hai | không khoá thao tác — chạm term kế tiếp cắt màu đỏ ngay |
+
+Cái ô rỗng còn làm được một việc nữa: nó là **bằng chứng tiến độ**. Nhìn bàn là
+biết còn mấy cặp, không cần đọc dòng ngữ cảnh, và không tốn một màu nào.
+
+**800ms của đề xuất ban đầu không dựng.** `AppDurations.slow = 320` được ghi là
+*trần* của mọi chuyển động trong app, lý do: trong phiên học người ta đang trả
+lời chứ không đang xem. Bàn năm cặp sai bốn lần ở 800ms là **3.2 giây chết**,
+chồng lên thời gian khoá sẵn có trong lúc ghi DB. Chốt 320ms, và bù độ rõ bằng
+việc giữ màu **trên cả hai ô** thay vì bằng thời gian.
+
+**Không đánh dấu bằng riêng màu.** ✓ và ✕ đi kèm, và cả hai trạng thái có
+`Semantics` value — `studyMatchPaired` và `studyMatchWrong`. WCAG 1.4.1. Ô rỗng
+**vẫn** announce là đã ghép, nếu không thì screen reader mất luôn cặp đó khỏi bàn.
+
+Sai tô đỏ **cả hai** ô vì cái *ghép* mới sai, không phải một ô nào sai. BR-118
+vẫn chấm mình thẻ của term — đó là thứ được ghi lại, khác với thứ được nói ra.
+
+**Hai lỗi chỉ render mới thấy, không phép kiểm nào bắt được:**
+
+- ô rỗng vẽ bằng `scheme.surface` ra **sáng hơn** nền trang. Đo ở dark: trang là
+  `(10, 8, 45)`, `surface` là `(26, 24, 56)`, còn nền ô là `surfaceContainerLowest`
+  = `(10, 3, 38)`. Một cái lỗ sáng hơn xung quanh thì đọc thành ô mới chứ không
+  phải ô đã xoá. Nay không vẽ nền gì cả, viền pha trên `scaffoldBackgroundColor`.
+- nhịp xanh đặt bằng `AppDurations.normal`, **đúng bằng** thời gian chuyển màu của
+  chính ô đó — nên suốt nhịp ấy ô chỉ đang *đi tới* xanh rồi quay đầu ngay: một
+  vệt tím, xanh không hiện ra lần nào. Nhịp phải dài hơn chuyển màu; `slow` cho
+  120ms màu đã đứng yên.

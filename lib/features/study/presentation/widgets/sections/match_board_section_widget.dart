@@ -1,11 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/app_durations.dart';
-import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/theme/theme_context_extension.dart';
-import '../../../../../l10n/l10n_extension.dart';
 import '../../../domain/models/match_mode.dart';
+import '../items/match_tile_widget.dart';
 
 /// The pairing board (BR-153, BR-118).
 ///
@@ -17,10 +16,22 @@ import '../../../domain/models/match_mode.dart';
 /// The board is built by the handler, which is also what refuses to lay out
 /// fewer than two pairs — a single pair makes the answer the only thing left.
 ///
-/// **A paired tile stays where it is** (§4). Removing it reflows every row below
-/// it, so the tile the user was about to press moves the instant they press
-/// something else — and the board they had learned the shape of is gone. It goes
-/// quiet instead: `success` and a tick, dimmed, and no longer a target.
+/// **A paired tile leaves its slot behind** (§4, §8.8). What §4 forbade was the
+/// board *reflowing*: remove a tile and every row under it moves, so the tile
+/// the user was about to press shifts the instant they press something else —
+/// and since the grid fills the height, the survivors would grow as well. So the
+/// content goes and the slot stays: a beat of `success` and a tick, then the
+/// words fade out and a faint outline holds the place.
+///
+/// **Keeping the green tile forever was the wrong half of that decision.** Three
+/// states then compete on one board — idle, selected and paired — and the last
+/// of them is finished business. What it was carrying, *how many pairs are
+/// left*, an empty slot says better and without a colour.
+///
+/// **A wrong pair is told, and it was not before.** Picking the wrong meaning
+/// used to clear the selection and nothing else, so it looked exactly like a
+/// missed tap. Both tiles go `error` for [AppMatchTile.wrongHold] and come back
+/// on their own — colour held, input not.
 ///
 /// ## The grid fills the height, until it cannot
 ///
@@ -72,8 +83,33 @@ class MatchBoardSectionWidget extends StatefulWidget {
 class _MatchBoardSectionWidgetState extends State<MatchBoardSectionWidget> {
   MatchTile? _selectedTerm;
 
-  /// Cards already paired. They stay on the board; this is what marks them.
+  /// Cards already paired. Their slots stay on the board; this is what empties
+  /// them.
   final Set<String> _matched = <String>{};
+
+  /// The pair that just landed, for as long as it is still flashing green.
+  ///
+  /// One at a time on purpose: an answer takes a database write to come back,
+  /// and two correct pairs inside [AppMatchTile.successFlash] is not a sequence
+  /// a person can produce. If one ever did, the earlier flash gives up its beat
+  /// and goes straight to cleared, which is the honest outcome — a tile cannot
+  /// be halfway between marked and gone.
+  String? _flashingCardId;
+
+  /// The two tiles of the pair that was just wrong. Two ids, not one: the term
+  /// and the meaning belong to different cards, which is the whole reason the
+  /// answer was wrong.
+  ({String termId, String meaningId})? _wrongPair;
+
+  Timer? _flashTimer;
+  Timer? _wrongTimer;
+
+  @override
+  void dispose() {
+    _flashTimer?.cancel();
+    _wrongTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   void didUpdateWidget(MatchBoardSectionWidget oldWidget) {
@@ -91,7 +127,15 @@ class _MatchBoardSectionWidgetState extends State<MatchBoardSectionWidget> {
     // contents usable as the board's identity.
     if (_layoutOf(oldWidget.board) == _layoutOf(widget.board)) return;
 
+    // A new deal takes the old one's timers with it. Left running, a flash
+    // started on the board that just left would clear a tile on the board that
+    // just arrived — and the two boards share no cards, so it would clear
+    // whichever tile happened to hold that id next.
+    _flashTimer?.cancel();
+    _wrongTimer?.cancel();
     _selectedTerm = null;
+    _flashingCardId = null;
+    _wrongPair = null;
     _matched.clear();
   }
 
@@ -106,7 +150,14 @@ class _MatchBoardSectionWidgetState extends State<MatchBoardSectionWidget> {
   void _selectTerm(MatchTile term) {
     if (widget.isLocked) return;
 
-    setState(() => _selectedTerm = term);
+    setState(() {
+      // Reaching for the next pair ends the last one's complaint. The red holds
+      // colour, not input — waiting it out would be the board refusing a tap it
+      // has no reason to refuse.
+      _wrongTimer?.cancel();
+      _wrongPair = null;
+      _selectedTerm = term;
+    });
   }
 
   void _selectMeaning(MatchTile meaning) {
@@ -120,10 +171,47 @@ class _MatchBoardSectionWidgetState extends State<MatchBoardSectionWidget> {
 
     setState(() {
       _selectedTerm = null;
-      if (isCorrect) _matched.add(term.cardId);
+      if (isCorrect) {
+        _matched.add(term.cardId);
+        _flashingCardId = term.cardId;
+        _wrongPair = null;
+      } else {
+        _wrongPair = (termId: term.cardId, meaningId: meaning.cardId);
+      }
     });
 
+    if (isCorrect) {
+      _hold(_flashTimer, AppMatchTile.successFlash, () {
+        _flashingCardId = null;
+      }, assign: (timer) => _flashTimer = timer);
+    } else {
+      _hold(_wrongTimer, AppMatchTile.wrongHold, () {
+        _wrongPair = null;
+      }, assign: (timer) => _wrongTimer = timer);
+    }
+
     widget.onPairAttempt(term, isCorrect: isCorrect);
+  }
+
+  /// Holds a transient state for [duration], then drops it.
+  ///
+  /// **`mounted` is checked inside the callback, not before the timer.** The
+  /// board is unmounted between turns — the screen swaps to its loading state —
+  /// and a `setState` on a dead `State` is the crash this whole feature is one
+  /// careless timer away from.
+  void _hold(
+    Timer? previous,
+    Duration duration,
+    VoidCallback drop, {
+    required void Function(Timer) assign,
+  }) {
+    previous?.cancel();
+    assign(
+      Timer(duration, () {
+        if (!mounted) return;
+        setState(drop);
+      }),
+    );
   }
 
   @override
@@ -185,10 +273,24 @@ class _MatchBoardSectionWidgetState extends State<MatchBoardSectionWidget> {
         : () => isTerm ? _selectTerm(tile) : _selectMeaning(tile),
   );
 
+  /// The order matters: the two transient states outrank the settled ones, and
+  /// `paired` outranks `cleared` so the pair that just landed gets its beat
+  /// before its slot empties.
   MatchTileState _stateOf(MatchTile tile, {required bool isTerm}) {
+    final wrong = _wrongPair;
+    if (wrong != null &&
+        tile.cardId == (isTerm ? wrong.termId : wrong.meaningId)) {
+      return MatchTileState.wrong;
+    }
+    if (_flashingCardId == tile.cardId) return MatchTileState.paired;
+
+    // From the queue, this is a pair answered before the board was mounted —
+    // on the way back from the loading state between turns. It never flashes:
+    // the beat belongs to the tap that caused it, and replaying it on every
+    // rebuild would light the board up for answers minutes old.
     if (_matched.contains(tile.cardId) ||
         widget.pairedCardIds.contains(tile.cardId)) {
-      return MatchTileState.paired;
+      return MatchTileState.cleared;
     }
     if (isTerm && _selectedTerm?.cardId == tile.cardId) {
       return MatchTileState.selected;
@@ -196,172 +298,4 @@ class _MatchBoardSectionWidgetState extends State<MatchBoardSectionWidget> {
 
     return MatchTileState.idle;
   }
-}
-
-/// The three states a tile on the board can be in (§4).
-enum MatchTileState { idle, selected, paired }
-
-/// One tile, in whichever of the three states it is.
-///
-/// **Colours come from `ColorScheme` and `AppSemanticColors`, never from this
-/// file.** Selected is `primary` with `onPrimary` on it — a pair Material keeps
-/// contrasting in both themes. Paired is `success`, and only because it means
-/// exactly what `success` means: this answer was right. It is not the mode's
-/// colour and not decoration (§7.8). The handout calls that role `mastery`;
-/// this app already spends `success` on it — `card_state_widget.dart` paints
-/// `CardState.mastered` with it — so the two names are one token.
-///
-/// **The paired tint is blended, not painted translucent.** A `BorderSide` or a
-/// fill at 12% composites against whatever is behind it at paint time, so one
-/// token renders as two values over two surfaces; `color_source_rules_test.dart`
-/// R7 fails it. `Color.alphaBlend` resolves the same colour at build time
-/// against the surface the tile actually sits on, which is what makes the tint a
-/// value somebody chose.
-class MatchTileWidget extends StatelessWidget {
-  const MatchTileWidget({
-    required this.text,
-    required this.state,
-    required this.onTap,
-    this.isTerm = true,
-    super.key,
-  });
-
-  final String text;
-  final MatchTileState state;
-  final VoidCallback? onTap;
-
-  /// Which side of the board this is, and therefore how loud it reads: a term
-  /// is what the eye scans for, a meaning is what it checks against.
-  final bool isTerm;
-
-  bool get _isPaired => state == MatchTileState.paired;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = context.colors;
-    final semantic = context.semanticColors;
-    final isSelected = state == MatchTileState.selected;
-
-    final ground = scheme.surfaceContainerLowest;
-    final background = switch (state) {
-      MatchTileState.selected => scheme.primary,
-      MatchTileState.paired => Color.alphaBlend(
-        semantic.success.withValues(alpha: AppMatchTile.pairedFillAlpha),
-        ground,
-      ),
-      MatchTileState.idle => ground,
-    };
-    final outline = switch (state) {
-      MatchTileState.selected => scheme.primary,
-      MatchTileState.paired => Color.alphaBlend(
-        semantic.success.withValues(alpha: AppMatchTile.pairedOutlineAlpha),
-        ground,
-      ),
-      MatchTileState.idle => semantic.borderSubtle,
-    };
-    final foreground = switch (state) {
-      MatchTileState.selected => scheme.onPrimary,
-      MatchTileState.paired => semantic.success,
-      MatchTileState.idle => scheme.onSurface,
-    };
-
-    final style =
-        (isTerm ? context.texts.titleMedium : context.texts.titleSmall)
-            ?.copyWith(color: foreground);
-    final radius = BorderRadius.circular(AppRadius.md);
-
-    return Semantics(
-      selected: isSelected,
-      // A tick in green marks the pair for people who can see it. This is what
-      // marks it for everyone else.
-      value: _isPaired ? context.l10n.studyMatchPaired : null,
-      child: Opacity(
-        // Paired tiles stay on the board and stop competing for attention. The
-        // remaining pairs are the ones still being worked on.
-        opacity: _isPaired ? AppMatchTile.pairedOpacity : 1,
-        child: AnimatedContainer(
-          // Three states on one tile and the user causes every change, so the
-          // move has to be visible without being waited on.
-          duration: AppDurations.normal,
-          curve: AppDurations.standard,
-          decoration: BoxDecoration(
-            color: background,
-            borderRadius: radius,
-            border: Border.all(color: outline),
-          ),
-          child: Material(
-            // The container paints the surface; this exists for the ripple.
-            type: MaterialType.transparency,
-            child: InkWell(
-              // A paired tile is finished, not merely busy: BR-116 has already
-              // recorded it, and a second tap could only record it twice.
-              onTap: _isPaired ? null : onTap,
-              borderRadius: radius,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md,
-                  vertical: AppSpacing.md,
-                ),
-                child: Center(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      if (_isPaired) ...<Widget>[
-                        Icon(
-                          Icons.check,
-                          size: style?.fontSize,
-                          color: foreground,
-                        ),
-                        const SizedBox(width: AppSpacing.xs),
-                      ],
-                      Flexible(
-                        child: Text(
-                          text,
-                          style: style,
-                          textAlign: TextAlign.center,
-                          // The row's height is the grid's to decide, so a long
-                          // term gives way rather than pushing the board out of
-                          // shape.
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// The numbers this tile decides for itself, and none of them is a colour.
-abstract final class AppMatchTile {
-  /// How far a paired tile recedes.
-  ///
-  /// **0.7, not lower.** A paired tile still has to be readable — it is the
-  /// record of what the user got right, and a tile faded to the point of
-  /// guessing is a tile they will tap again to check.
-  static const double pairedOpacity = 0.7;
-
-  /// How much `success` a paired tile's fill carries, blended into the surface
-  /// under it. Enough to read as a state, not enough to compete with the
-  /// selected tile, which is the only solid colour on the board.
-  static const double pairedFillAlpha = 0.12;
-
-  /// The same for its outline. Heavier than the fill because a hairline has a
-  /// tenth of the area to say it with.
-  static const double pairedOutlineAlpha = 0.3;
-
-  /// The shortest a row is allowed to get before the board stops filling the
-  /// height and starts scrolling.
-  ///
-  /// [AppSpacing.minimumTouchTarget], because a tile is a control: a board of
-  /// twelve pairs that divided the height evenly would hand a thumb 40px rows,
-  /// and the grid looking tidy is worth less than the taps landing.
-  static const double minRowHeight = AppSpacing.minimumTouchTarget;
 }

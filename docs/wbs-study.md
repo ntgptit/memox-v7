@@ -7,7 +7,7 @@
 | **Scope** | Task còn lại của Study từ M5.7 trở đi · nợ kỹ thuật của Study · việc bị chặn |
 | **Source of truth for** | Trạng thái task Study từ M5.7 · nợ kỹ thuật của Study |
 | **Depends on** | `document-conventions.md` · `wbs.md` · `business-rules.md` · `use-cases.md` |
-| **Updated by task** | BR-156 — `match` chia round thành bàn năm cặp |
+| **Updated by task** | phản hồi đúng/sai của bàn ghép |
 | **Last updated** | 2026-08-09 |
 
 `docs/wbs.md` giữ M5.0…M5.6 đã hoàn thành và không nhắc lại ở đây. File này giữ
@@ -1156,3 +1156,36 @@ round quyết định (BR-117), và chỉ hai vế bị xoáo (BR-127). Đổi s
 Nhân đó đo được một thứ nữa: `BOARD 1 OF 2` vừa khít một dòng ở 390 với đúng hai
 pixel dư, rồi tràn xuống hai dòng khi số đổi từ `1` sang `2` — một dòng mà hình
 dạng phụ thuộc vào việc đang ở bàn nào. Rút thành `BOARD 1/2`.
+
+### Phản hồi đúng/sai của bàn ghép
+
+Chủ dự án nêu hai ý; cả hai đúng chỗ đau. Sai **không có phản hồi nào** — chọn
+sai chỉ xoá lựa chọn, nhìn hệt như bấm hụt. Và ô đã ghép giữ xanh tới hết round
+là rác thị giác. Thiết kế và số đo ở `wireframes/m5-study-modes.md` §8.8.
+
+§4 chốt "ô ở nguyên chỗ" vì **reflow**, không vì màu. Đề xuất *biến mất nhưng
+không dồn* bỏ đúng cái đó ra, nên §4 giữ tinh thần và chỉ đổi cách làm: nội dung
+tan, ô ở lại rỗng. Ô rỗng còn là bằng chứng tiến độ — nhìn bàn biết còn mấy cặp,
+không tốn màu nào.
+
+800ms của đề xuất ban đầu không dựng: `AppDurations.slow = 320` là **trần** đã
+ghi của app, và bàn năm cặp sai bốn lần ở 800ms là 3.2 giây chết chồng lên thời
+gian khoá lúc ghi DB. Chốt 320, bù độ rõ bằng việc tô **cả hai** ô thay vì bằng
+thời gian, và **không khoá thao tác** — chạm term kế tiếp cắt đỏ ngay.
+
+**Hai lỗi chỉ render mới thấy:**
+
+- ô rỗng vẽ bằng `scheme.surface` ra *sáng hơn* nền trang (dark: trang
+  `(10,8,45)`, `surface` `(26,24,56)`, nền ô `(10,3,38)`) — lỗ sáng hơn xung
+  quanh đọc thành ô mới. Nay không vẽ nền, viền pha trên `scaffoldBackgroundColor`.
+- nhịp xanh đặt bằng `AppDurations.normal`, **đúng bằng** thời gian chuyển màu
+  của ô, nên suốt nhịp ô chỉ đang đi tới xanh rồi quay đầu: một vệt tím, xanh
+  không hiện lần nào. Nhịp phải dài hơn chuyển màu.
+
+Cả hai đều qua `flutter analyze`, guard và toàn bộ unit suite. Đây là lý do quy
+trình review bằng ảnh render tồn tại.
+
+Tách file theo guard: ô sang `widgets/items/match_tile_widget.dart` (AD-15 —
+`items/` là hàng lặp lại và các phần của nó), test tách thành
+`match_board_feedback_test.dart` theo đúng đường nối: file cũ nói về cái gì được
+**ghi lại**, file mới nói về cái gì được **nói ra**.
