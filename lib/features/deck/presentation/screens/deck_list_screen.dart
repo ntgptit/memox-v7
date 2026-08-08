@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
-import '../../../../core/navigation/route_names.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
@@ -12,7 +10,6 @@ import '../../../../shared/widgets/mx_icon_button.dart';
 import '../../domain/entities/deck_entity.dart';
 import '../../domain/models/deck_content_type_model.dart';
 import '../../domain/models/deck_list_snapshot_model.dart';
-import '../../domain/models/deck_summary_model.dart';
 import '../controllers/deck_list_controller.dart';
 import '../controllers/deck_list_view_controller.dart';
 import '../states/deck_list_view_state.dart';
@@ -20,15 +17,12 @@ import '../widgets/overlays/deck_actions_widget.dart';
 import '../widgets/overlays/deck_confirm_widget.dart';
 import '../widgets/overlays/deck_create_child_widget.dart';
 import '../widgets/sections/deck_level_error_widget.dart';
+import '../widgets/sections/deck_list_sliver_widget.dart';
 import '../widgets/sections/deck_summary_section_widget.dart';
 import '../widgets/sections/deck_list_toolbar_widget.dart';
 import '../widgets/sections/deck_level_body_widget.dart';
 import '../widgets/sections/deck_subheader_widget.dart';
-import '../widgets/items/deck_tile_widget.dart';
 import '../widgets/sections/deck_card_handoff_widget.dart';
-
-/// Space under the last card. It was 112 while a floating action hovered.
-const double _kListBottomInset = AppSpacing.lg;
 
 /// The toolbar's two commands, bound to a `ref`.
 ///
@@ -147,16 +141,15 @@ class _DeckLevel extends StatelessWidget {
         if (_mayCreate(parent))
           MxIconButton(
             // The same glyph at every level. It was `add` at the root and
-            // `create_new_folder` inside a deck, which made one action look like
-            // two — and the thing being created is a deck in both cases.
+            // `create_new_folder` inside a deck, which made one action look
+            // like two — the thing created is a deck in both cases.
             icon: Icons.add,
             semanticLabel: _createLabel(context, parent),
             tooltip: _createLabel(context, parent),
             onPressed: () => _startCreate(context, parent),
           ),
-        // Only when there is a deck to act on. The root level is not a deck, so
-        // there is nothing to rename, move or delete from up here — the rows have
-        // their own menus for that.
+        // Only when there is a deck to act on: the root level is not a deck,
+        // and the rows have their own menus.
         if (parent != null)
           MxIconButton(
             icon: Icons.more_vert,
@@ -167,10 +160,9 @@ class _DeckLevel extends StatelessWidget {
               mayOfferReset: snapshot.mayOfferReset,
               // The deck being viewed is gone, so staying here would show a
               // not-found state the user did not ask for. Going **up one
-              // level** — not to the root — is where the deck was: the user
-              // was inside it, and its siblings are what they were browsing.
-              // Landing at the root instead reads as though more than the one
-              // deck had gone.
+              // level** — not to the root — is where the deck was, and its
+              // siblings are what the user was browsing. Landing at the root
+              // reads as though more than the one deck had gone.
               onDeleted: () => leaveDeletedDeck(context, parent),
             ),
           ),
@@ -240,7 +232,7 @@ class _DeckLevel extends StatelessWidget {
             ),
           ),
         ),
-        _DeckListSliver(
+        DeckListSliverWidget(
           summaries: applyDeckListView(
             snapshot.decks,
             filter: filter,
@@ -317,84 +309,5 @@ class _DeckLevel extends StatelessWidget {
     // An `unset` deck is asked which kind of child (BR-61); a settled one goes
     // straight to the matching form (BR-66).
     return showCreateChildForm(context, parent: parent);
-  }
-}
-
-/// The visible decks, or the note that the filter matched none of them.
-///
-/// Empty here means exactly one thing: this level has decks, and the due-only
-/// filter matched none of them. The "nothing here at all" cases never reach this
-/// widget — `_DeckLevel` answers them before the toolbar is even built, because
-/// they need different words and different actions.
-class _DeckListSliver extends StatelessWidget {
-  const _DeckListSliver({required this.summaries, required this.onClearFilter});
-
-  final List<DeckSummary> summaries;
-  final VoidCallback onClearFilter;
-
-  @override
-  Widget build(BuildContext context) {
-    if (summaries.isEmpty) {
-      // `hasScrollBody: false` so the state is sized to its content and centred
-      // in what is left, rather than stretched down a viewport it does not fill.
-      return SliverFillRemaining(
-        hasScrollBody: false,
-        child: MxEmptyState(
-          // `MxEmptyState`'s default check-mark, left unset on purpose: nothing
-          // due means the reviews are finished, which is the one state in this
-          // feature where that icon tells the truth.
-          title: context.l10n.decksNoDueTitle,
-          message: context.l10n.decksNoDueMessage,
-          actionLabel: context.l10n.decksShowAllAction,
-          onAction: onClearFilter,
-        ),
-      );
-    }
-
-    return SliverPadding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        0,
-        AppSpacing.lg,
-        _kListBottomInset,
-      ),
-      sliver: SliverList.separated(
-        itemCount: summaries.length,
-        // `lg`: the track on each card's base makes that boundary loud, so 12
-        // after it read as part of the card rather than as the space between.
-        separatorBuilder: (context, index) =>
-            const SizedBox(height: AppSpacing.lg),
-        itemBuilder: (context, index) {
-          final summary = summaries[index];
-
-          return DeckTileWidget(
-            summary: summary,
-            // By name, with the id as a path parameter. The literal path would
-            // work today and break silently the first time the route moves.
-            //
-            // `push`, not `go`: `go` replaces the one `/decks/:deckId` entry,
-            // so Back from level 5 landed on the root list. The breadcrumb
-            // keeps `go` — a jump *should* replace the stack (IT-NAV-003/004).
-            onTap: () => context.pushNamed(
-              RouteNames.deckDetail,
-              pathParameters: <String, String>{
-                RoutePathParams.deckId: summary.deck.id,
-              },
-            ),
-            onActions: () => showDeckActions(
-              context,
-              deck: summary.deck,
-              // Whether a deck may be reset is a question about its own
-              // children, answered on its own level where they are known.
-              // Offering it from the level above would mean guessing.
-              mayOfferReset: false,
-              // Deleting from a list leaves the user on that list; there is
-              // nowhere to navigate back from.
-              onDeleted: () {},
-            ),
-          );
-        },
-      ),
-    );
   }
 }

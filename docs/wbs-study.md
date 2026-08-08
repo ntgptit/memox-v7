@@ -7,7 +7,7 @@
 | **Scope** | Task còn lại của Study từ M5.7 trở đi · nợ kỹ thuật của Study · việc bị chặn |
 | **Source of truth for** | Trạng thái task Study từ M5.7 · nợ kỹ thuật của Study |
 | **Depends on** | `document-conventions.md` · `wbs.md` · `business-rules.md` · `use-cases.md` |
-| **Updated by task** | gộp lại bảng nợ bị tách đôi |
+| **Updated by task** | M5.14 đóng cùng UC-07 |
 | **Last updated** | 2026-08-08 |
 
 `docs/wbs.md` giữ M5.0…M5.6 đã hoàn thành và không nhắc lại ở đây. File này giữ
@@ -54,7 +54,7 @@ M5.7 (màn hình + route)
 M5.18 (khung phiên học)  ✔ done
 M5.19 (`browse` và `match`)  ✔ done
 M5.20 (`guess`, `recall`, `fill`)  ✔ done
-M5.14 blocked bởi UC-07
+M5.14 (đóng cùng UC-07)  ✔ done
 M5.16 (thị giác + tiếp cận)  ✔ done
 ```
 
@@ -400,20 +400,23 @@ một Reset rơi vào giữa để lại màn hình cầm phiên của trước 
 
 ### M5.14 · Reset learning progress đóng phiên đang mở (BR-83)
 
-- **Status:** blocked — chờ UC-07
+- **Status:** **done** — đóng cùng UC-07 (M5.21 ở `wbs.md`)
 - **Goal:** Reset một cây deck thì mọi phiên đang mở của nó đóng `invalidated`.
 - **Scope:** nối `invalidateSessionsForRoot` vào luồng Reset của Deck.
 - **Out of scope:** bản thân Reset — đó là UC-07.
 - **Editable documents:** `docs/wbs-study.md`
 - **Output:** một lời gọi trong use case Reset của Deck
 - **Acceptance criteria:**
-  - [ ] Reset khi phiên đang mở → phiên thành `invalidated`/`scheduler_reset`
+  - [x] Reset khi phiên đang mở → phiên thành `invalidated`/`scheduler_reset`
         (BR-83), **không** phải `stale_generation`.
-  - [ ] Lượt đã ghi vẫn còn trong `study_answers` (BR-86).
+  - [x] Lượt đã ghi vẫn còn trong `study_answers` (BR-86, BR-43).
 - **Thao tác đã có và có test từ M5.5; thiếu đúng một caller.** Chặn thật:
   `lib/features/deck/` chưa có use case Reset nào. Nối dây là **quyết định
   cross-feature**: Deck sẽ phải phụ thuộc contract của Study, và đó là hướng phụ
   thuộc mới trong repo này — cần quyết định tường minh chứ không lặng lẽ thêm.
+- **Chốt và đóng.** Chủ dự án chọn *"Deck sở hữu, gọi contract Study"*, và UC-07
+  được dựng trọn ở M5.21 (`wbs.md`). Caller nằm **trong transaction của Deck**,
+  không ở use case — đặt ở use case là hai lượt ghi, mà BR-47 nói một.
 - **Dependencies:** UC-07 (chưa có mốc)
 - **Tests required:** test luồng Reset đóng phiên
 - **Checklist phases:** 14.4, 15.1
@@ -751,7 +754,7 @@ phán quyết trước khi người dùng trả lời.
 | Controller đọc thẳng repository ở 4 chỗ | không phép kiểm nào bắt được; guard kiểm import, không kiểm lời gọi | M5.8 |
 | ~~`study_config` chưa được parse~~ | `study_config_mapper.dart` parse và ghi; hỏng thì về mặc định | xong ở M5.11 |
 | ~~BR-120 chưa có test~~ | chủ dự án chốt `eight_box` chỉ có đúng/sai nên `almost` không dựng; nửa "chỉ nhận action canonical" nay bị chặn trong transaction và có test | xong ở M5.13 |
-| BR-83 chưa có caller | UC-07 chưa tồn tại | M5.14 |
+| ~~BR-83 chưa có caller~~ | UC-07 dựng ở M5.21; Deck gọi `invalidateSessionsForRoot` trong chính transaction của reset | xong ở M5.14 |
 | ~~`remaining_ms` chưa được nối vào UI resume~~ | `RecallTimerSectionWidget` nhận `initialRemaining` từ queue item; test BR-133 ở `recall_fill_widget_test.dart` | xong ở M5.9 |
 | Widget mode chưa ai dựng trong `lib/` | chưa có màn ghép | M5.7 |
 | ~~Ảnh wireframe chưa có trong repo~~ | chủ dự án đã thả vào `wireframes/assets/m5-study-modes/` | xong |

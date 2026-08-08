@@ -409,6 +409,12 @@ class _CatalogDeckRepository implements DeckRepository {
   Future<void> resetContentType(String deckId) async {}
 
   @override
+  Future<void> resetLearningProgress({
+    required String rootDeckId,
+    required SchedulerType schedulerType,
+  }) async {}
+
+  @override
   Future<void> moveDeck({
     required String deckId,
     required String targetParentDeckId,

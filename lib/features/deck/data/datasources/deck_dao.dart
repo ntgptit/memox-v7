@@ -1,4 +1,6 @@
 import '../../../../core/database/app_database.dart';
+import '../../domain/models/scheduler_type_model.dart';
+import '../mappers/study_state_reset_mapper.dart';
 
 /// Data access for the Deck side of the vertical.
 ///
@@ -105,6 +107,30 @@ final class DeckDao {
   )..where((Decks deck) => deck.id.equals(deckId))).go();
 
   /// Rewrites `root_deck_id` for [deckId] and its whole subtree (BR-71).
+  /// Every card in a tree, back to the state a card is born in (BR-42, BR-09).
+  ///
+  /// Takes the scheduler as a domain value rather than a string plus four
+  /// nullable numbers: which columns a scheduler owns is a rule, and a caller
+  /// passing them by hand is a caller that can pass `eight_box` with an ease
+  /// factor.
+  Future<int> resetTreeStudyStates({
+    required String rootDeckId,
+    required SchedulerType schedulerType,
+    required int generation,
+  }) {
+    final initial = initialStudyColumnsFor(schedulerType);
+
+    return _db.resetTreeStudyStates(
+      schedulerType.dbValue,
+      generation,
+      initial.box,
+      initial.ease,
+      initial.interval,
+      initial.repetitions,
+      rootDeckId,
+    );
+  }
+
   Future<int> updateSubtreeRootDeck({
     required String deckId,
     required String newRootDeckId,

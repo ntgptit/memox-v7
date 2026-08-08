@@ -32,6 +32,16 @@ enum DeckConflictReason {
   /// Resetting a deck that still holds sub-decks (BR-68).
   deckStillHasSubDecks,
 
+  /// Resetting learning progress on something that is not a root. The
+  /// scheduler and the generation belong to the root (BR-05), so a reset one
+  /// level down would either do nothing or quietly reset a sibling's tree.
+  resetNeedsRootDeck,
+
+  /// Resetting onto a study mode this build does not know. It has no `dbValue`,
+  /// so the write is impossible rather than merely refused — the check exists
+  /// to make that an answer instead of a crash.
+  resetSchedulerUnknown,
+
   /// The stored `content_type` is a value this build does not know — the deck
   /// was written by a newer version. Refused rather than guessed at, because
   /// altering it could contradict a rule the newer schema attached to it.

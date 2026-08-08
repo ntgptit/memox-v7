@@ -188,6 +188,39 @@ class ResetContentTypeController extends _$ResetContentTypeController {
   void reset() => state = const DeckSubmitState();
 }
 
+/// Resets a root deck's learning progress, onto a scheduler the user picks
+/// (UC-07).
+///
+/// **The scheduler is a parameter of the submit, not of the controller.** It is
+/// chosen inside the confirmation and can change up to the moment Reset is
+/// pressed; holding it in the provider key would make every change a new
+/// controller, and the submitting flag would reset with it.
+@riverpod
+class ResetLearningProgressController
+    extends _$ResetLearningProgressController {
+  @override
+  DeckSubmitState build(String rootDeckId) => const DeckSubmitState();
+
+  Future<void> submit({required SchedulerType schedulerType}) async {
+    if (!state.canSubmit) return;
+
+    state = const DeckSubmitState(isSubmitting: true);
+    try {
+      await ref.read(resetLearningProgressUseCaseProvider)(
+        rootDeckId: rootDeckId,
+        schedulerType: schedulerType,
+      );
+      if (!ref.mounted) return;
+      state = const DeckSubmitState(outcome: SubmitOutcome.savedAndClose);
+    } on Failure catch (failure) {
+      if (!ref.mounted) return;
+      state = DeckSubmitState(failure: failure);
+    }
+  }
+
+  void reset() => state = const DeckSubmitState();
+}
+
 /// Moves a deck and its whole subtree under another parent (UC-09).
 ///
 /// The picker disables targets it can already tell are illegal, but this still

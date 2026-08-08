@@ -1508,5 +1508,49 @@
       }
     },
     "description": "Shown after a fill answer was graded wrong. What the learner typed is never stored or echoed (BR-138); the card's own back is what is shown back to them."
+  },
+  "deckConflictResetNeedsRoot": "Ti\u1ebfn \u0111\u1ed9 h\u1ecdc \u0111\u01b0\u1ee3c \u0111\u1eb7t l\u1ea1i \u1edf deck g\u1ed1c.",
+  "@deckConflictResetNeedsRoot": {
+    "description": "Refusal shown when a reset is attempted below the root. The study mode and the generation belong to the root (BR-05), so there is no such operation one level down (UC-07 A4)."
+  },
+  "deckConflictResetSchedulerUnknown": "Phi\u00ean b\u1ea3n \u1ee9ng d\u1ee5ng n\u00e0y kh\u00f4ng bi\u1ebft ch\u1ebf \u0111\u1ed9 h\u1ecdc \u0111\u00f3.",
+  "@deckConflictResetSchedulerUnknown": {
+    "description": "Refusal shown when a reset would write a scheduler this build does not recognise. Reachable only from data written by a newer version."
+  },
+  "deckResetProgressAction": "\u0110\u1eb7t l\u1ea1i ti\u1ebfn \u0111\u1ed9 h\u1ecdc",
+  "@deckResetProgressAction": {
+    "description": "The action on a root deck that clears every card's schedule so the tree can be learned again - and the only way to change a study mode after the first card has been learned (BR-13, BR-44, UC-07)."
+  },
+  "deckResetProgressTitle": "\u0110\u1eb7t l\u1ea1i ti\u1ebfn \u0111\u1ed9 h\u1ecdc?",
+  "@deckResetProgressTitle": {
+    "description": "Heading of the confirmation. BR-50 requires it to state both what is kept and what is lost."
+  },
+  "deckResetProgressKeptTitle": "Gi\u1eef nguy\u00ean",
+  "@deckResetProgressKeptTitle": {
+    "description": "Heading of the first of BR-50's two lists."
+  },
+  "deckResetProgressKeptBody": "To\u00e0n b\u1ed9 deck, deck con, th\u1ebb, tag v\u00e0 ghi ch\u00fa \u2014 c\u00f9ng l\u1ecbch s\u1eed \u00f4n t\u1eadp c\u0169 \u0111\u1ec3 tham kh\u1ea3o.",
+  "@deckResetProgressKeptBody": {
+    "description": "What a reset leaves alone (BR-41, BR-43). The history is named explicitly because losing it is what people fear about a reset."
+  },
+  "deckResetProgressLostTitle": "M\u1ea5t",
+  "@deckResetProgressLostTitle": {
+    "description": "Heading of the second of BR-50's two lists."
+  },
+  "deckResetProgressLostBody": "L\u1ecbch \u00f4n, ng\u00e0y \u0111\u1ebfn h\u1ea1n v\u00e0 ti\u1ebfn \u0111\u1ed9 c\u1ee7a m\u1ecdi th\u1ebb \u2014 c\u00f9ng m\u1ecdi phi\u00ean \u0111ang d\u1edf. T\u1ea5t c\u1ea3 th\u1ebb tr\u1edf l\u1ea1i t\u1eadp H\u1ecdc m\u1edbi v\u00e0 h\u1ecdc l\u1ea1i t\u1eeb \u0111\u1ea7u.",
+  "@deckResetProgressLostBody": {
+    "description": "What a reset destroys (BR-42, BR-152, BR-83). The last sentence is the consequence people miss: cards do not merely become due, they walk the whole learning chain again (BR-142)."
+  },
+  "deckResetProgressSchedulerLabel": "Ch\u1ebf \u0111\u1ed9 h\u1ecdc sau khi \u0111\u1eb7t l\u1ea1i",
+  "@deckResetProgressSchedulerLabel": {
+    "description": "Label of the scheduler picker inside the confirmation. Changing it is the main purpose of the operation (UC-07 step 3), and the reset is the only mechanism that unlocks it (BR-44)."
+  },
+  "deckResetProgressNothingToLose": "Deck n\u00e0y ch\u01b0a h\u1ecdc th\u1ebb n\u00e0o, n\u00ean kh\u00f4ng c\u00f3 ti\u1ebfn \u0111\u1ed9 n\u00e0o \u0111\u1ec3 m\u1ea5t.",
+  "@deckResetProgressNothingToLose": {
+    "description": "Shown instead of the Lost list when the deck has no learned cards (UC-07 A2). The operation is still allowed - it is how the study mode is changed."
+  },
+  "deckResetProgressConfirm": "\u0110\u1eb7t l\u1ea1i",
+  "@deckResetProgressConfirm": {
+    "description": "Confirms the reset. Destructive, so it carries the danger styling."
   }
 }

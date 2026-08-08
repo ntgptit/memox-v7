@@ -1508,5 +1508,49 @@
       }
     },
     "description": "Shown after a fill answer was graded wrong. What the learner typed is never stored or echoed (BR-138); the card's own back is what is shown back to them."
+  },
+  "deckConflictResetNeedsRoot": "Learning progress is reset on the top-level deck.",
+  "@deckConflictResetNeedsRoot": {
+    "description": "Refusal shown when a reset is attempted below the root. The study mode and the generation belong to the root (BR-05), so there is no such operation one level down (UC-07 A4)."
+  },
+  "deckConflictResetSchedulerUnknown": "That study mode isn't known to this version of the app.",
+  "@deckConflictResetSchedulerUnknown": {
+    "description": "Refusal shown when a reset would write a scheduler this build does not recognise. Reachable only from data written by a newer version."
+  },
+  "deckResetProgressAction": "Reset learning progress",
+  "@deckResetProgressAction": {
+    "description": "The action on a root deck that clears every card's schedule so the tree can be learned again - and the only way to change a study mode after the first card has been learned (BR-13, BR-44, UC-07)."
+  },
+  "deckResetProgressTitle": "Reset learning progress?",
+  "@deckResetProgressTitle": {
+    "description": "Heading of the confirmation. BR-50 requires it to state both what is kept and what is lost."
+  },
+  "deckResetProgressKeptTitle": "Kept",
+  "@deckResetProgressKeptTitle": {
+    "description": "Heading of the first of BR-50's two lists."
+  },
+  "deckResetProgressKeptBody": "Every deck, sub-deck, card, tag and note - and your past review history, for reference.",
+  "@deckResetProgressKeptBody": {
+    "description": "What a reset leaves alone (BR-41, BR-43). The history is named explicitly because losing it is what people fear about a reset."
+  },
+  "deckResetProgressLostTitle": "Lost",
+  "@deckResetProgressLostTitle": {
+    "description": "Heading of the second of BR-50's two lists."
+  },
+  "deckResetProgressLostBody": "Every card's schedule, due date and progress - and any session still open. All cards go back to New and learn from the start.",
+  "@deckResetProgressLostBody": {
+    "description": "What a reset destroys (BR-42, BR-152, BR-83). The last sentence is the consequence people miss: cards do not merely become due, they walk the whole learning chain again (BR-142)."
+  },
+  "deckResetProgressSchedulerLabel": "Study mode after the reset",
+  "@deckResetProgressSchedulerLabel": {
+    "description": "Label of the scheduler picker inside the confirmation. Changing it is the main purpose of the operation (UC-07 step 3), and the reset is the only mechanism that unlocks it (BR-44)."
+  },
+  "deckResetProgressNothingToLose": "Nothing has been studied in this deck yet, so there is no progress to lose.",
+  "@deckResetProgressNothingToLose": {
+    "description": "Shown instead of the Lost list when the deck has no learned cards (UC-07 A2). The operation is still allowed - it is how the study mode is changed."
+  },
+  "deckResetProgressConfirm": "Reset",
+  "@deckResetProgressConfirm": {
+    "description": "Confirms the reset. Destructive, so it carries the danger styling."
   }
 }

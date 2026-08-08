@@ -9,6 +9,7 @@ import '../../../domain/failures/deck_validation_failure.dart';
 import '../../../domain/models/deck_content_type_model.dart';
 import '../../../domain/entities/deck_entity.dart';
 import 'deck_confirm_widget.dart';
+import 'deck_reset_progress_widget.dart';
 import 'deck_form_widget.dart';
 import '../../controllers/deck_write_controller.dart';
 import 'move_deck_sheet_widget.dart';
@@ -32,6 +33,16 @@ Future<void> showDeckActions(
   required DeckEntity deck,
   required bool mayOfferReset,
   required VoidCallback onDeleted,
+
+  /// Whether Reset learning progress is offered, and whether it has anything to
+  /// take away (UC-07, A2).
+  ///
+  /// **Null means the caller cannot see the counts, so it does not offer it.**
+  /// The level *inside* a deck reads its children, not the deck's own learned
+  /// total — offering the action from there would mean guessing which of BR-50's
+  /// two lists to show, and the guess would be a warning about nothing on a deck
+  /// nobody has studied.
+  bool? hasLearnedCards,
 }) async {
   final action = await showModalBottomSheet<_DeckAction>(
     context: context,
@@ -58,6 +69,15 @@ Future<void> showDeckActions(
             icon: Icons.restart_alt,
             onPressed: () => Navigator.of(sheetContext).pop(_DeckAction.reset),
           ),
+        // A root deck only: the scheduler and the generation belong to the root
+        // (BR-05), so there is no such operation one level down (UC-07 A4).
+        if (deck.isRoot && hasLearnedCards != null)
+          MxActionSheetAction(
+            label: sheetContext.l10n.deckResetProgressAction,
+            icon: Icons.restore,
+            onPressed: () =>
+                Navigator.of(sheetContext).pop(_DeckAction.resetProgress),
+          ),
         MxActionSheetAction(
           label: sheetContext.l10n.deckDeleteAction,
           icon: Icons.delete_outline,
@@ -77,12 +97,21 @@ Future<void> showDeckActions(
       await showDeckMoveSheet(context, deckId: deck.id);
     case _DeckAction.reset:
       await showDeckResetContentTypeConfirm(context, deck: deck);
+    case _DeckAction.resetProgress:
+      await showDeckResetProgressConfirm(
+        context,
+        deck: deck,
+        hasLearnedCards: hasLearnedCards ?? false,
+      );
     case _DeckAction.delete:
       await showDeckDeleteConfirm(context, deck: deck, onDeleted: onDeleted);
   }
 }
 
-enum _DeckAction { rename, move, reset, delete }
+/// `reset` is the content-type reset (BR-68); `resetProgress` is UC-07. Two
+/// different operations that both read as "reset" in English, which is why the
+/// enum spells them apart rather than the copy alone.
+enum _DeckAction { rename, move, reset, resetProgress, delete }
 
 /// The rename form (UC-03).
 Future<void> showDeckRenameForm(
