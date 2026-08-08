@@ -69,6 +69,7 @@ void main() {
             initialRemaining: const Duration(seconds: 3),
             onOutcome: outcomes.add,
           ),
+          isScrollable: false,
         ),
       );
 
@@ -85,6 +86,7 @@ void main() {
       await tester.pumpWidget(
         wrapForTest(
           RecallTimerSectionWidget(turn: turnOf('c1'), onOutcome: outcomes.add),
+          isScrollable: false,
         ),
       );
 
@@ -110,6 +112,7 @@ void main() {
       await tester.pumpWidget(
         wrapForTest(
           RecallTimerSectionWidget(turn: turnOf('c1'), onOutcome: outcomes.add),
+          isScrollable: false,
         ),
       );
 
@@ -141,6 +144,7 @@ void main() {
             onOutcome: (_) {},
             onRemainingChanged: reported.add,
           ),
+          isScrollable: false,
         ),
       );
       await tester.pump(const Duration(milliseconds: 100));
@@ -166,6 +170,7 @@ void main() {
             onOutcome: (_) {},
             onRemainingChanged: reported.add,
           ),
+          isScrollable: false,
         ),
       );
       await tester.pump(const Duration(seconds: 5));
@@ -177,6 +182,7 @@ void main() {
             onOutcome: (_) {},
             onRemainingChanged: reported.add,
           ),
+          isScrollable: false,
         ),
       );
       await tester.pump(const Duration(milliseconds: 100));
@@ -199,6 +205,7 @@ void main() {
       await tester.pumpWidget(
         wrapForTest(
           RecallTimerSectionWidget(turn: turnOf('c1'), onOutcome: (_) {}),
+          isScrollable: false,
         ),
       );
       await tester.pump(kRecallTurnLimit);
@@ -210,6 +217,7 @@ void main() {
             turn: turnOf('c1', round: 2),
             onOutcome: (_) {},
           ),
+          isScrollable: false,
         ),
       );
       await tester.pump(const Duration(milliseconds: 100));
@@ -230,10 +238,14 @@ void main() {
       await tester.pumpWidget(
         wrapForTest(
           RecallTimerSectionWidget(turn: turnOf('c1'), onOutcome: (_) {}),
+          isScrollable: false,
         ),
       );
 
-      expect(find.text('Answer hidden'), findsOneWidget);
+      // A blurred bar rather than a sentence: a line of text where the answer
+      // will appear is a line a learner reads instead of recalling. The
+      // sentence stays where it was always doing the work.
+      expect(find.bySemanticsLabel('Answer hidden'), findsOneWidget);
       expect(find.text('công'), findsNothing);
 
       await tester.tap(find.text('Show answer'));
@@ -264,6 +276,7 @@ void main() {
             onSuspended: ({required remaining, required isRevealed}) =>
                 suspended.add((remaining: remaining, isRevealed: isRevealed)),
           ),
+          isScrollable: false,
         ),
       );
 
@@ -293,6 +306,7 @@ void main() {
             onSuspended: ({required remaining, required isRevealed}) =>
                 suspended.add(remaining),
           ),
+          isScrollable: false,
         ),
       );
 

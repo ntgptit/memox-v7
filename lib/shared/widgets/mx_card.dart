@@ -56,6 +56,7 @@ class MxCard extends StatefulWidget {
     this.padding = const EdgeInsets.all(AppSpacing.lg),
     this.elevation = AppElevation.card,
     this.radius = AppRadius.lg,
+    this.color,
     this.onTap,
     super.key,
   });
@@ -75,6 +76,13 @@ class MxCard extends StatefulWidget {
   /// flat bordered panel, which is what a card *inside* another surface wants —
   /// a shadow stacked on a shadow reads as a rendering fault rather than depth.
   final double elevation;
+
+  /// The card's surface, when it must not be `surface`.
+  ///
+  /// Null is the answer almost everywhere. It exists for a screen holding two
+  /// cards that mean different things — a prompt and the space for an answer —
+  /// where the pair only reads as a pair if one of them steps down.
+  final Color? color;
 
   /// Makes the whole card a target. Null leaves it a plain surface.
   ///
@@ -112,7 +120,11 @@ class _MxCardState extends State<MxCard> {
           )
         : Border.all(color: context.semanticColors.borderSubtle);
     final decoration = BoxDecoration(
-      color: scheme.surface,
+      // **A role, not a colour.** `surface` is the card; a caller passes another
+      // *scheme* role when the card is one step down from the surface around it
+      // — a study screen's answer area against its prompt, which is how the
+      // reader knows one is waiting to be filled and the other is not.
+      color: widget.color ?? scheme.surface,
       borderRadius: BorderRadius.circular(widget.radius),
       border: border,
       boxShadow: shadowsFor(widget.elevation, scheme),
