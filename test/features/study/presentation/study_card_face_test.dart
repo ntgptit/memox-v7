@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/app_spacing.dart';
 import 'package:memox/features/study/domain/entities/study_queue_item_entity.dart';
 import 'package:memox/features/study/domain/models/study_action_model.dart';
 import 'package:memox/features/study/domain/models/study_mode.dart';
 import 'package:memox/features/study/domain/models/study_queue_item_status_model.dart';
 import 'package:memox/features/study/domain/models/study_turn_model.dart';
 import 'package:memox/features/study/presentation/widgets/sections/study_card_face_section_widget.dart';
+
+import 'package:memox/shared/widgets/mx_card.dart';
 
 import 'support/study_widget_harness.dart';
 
@@ -67,6 +70,10 @@ void main() {
         shouldShowBackImmediately: shouldShowBackImmediately,
         isLocked: isLocked,
       ),
+      // **Not scrollable, because that is the production condition.** The card
+      // takes the whole height the frame gives it (§3), so an unbounded parent
+      // is not a gentler test — it is a different widget.
+      isScrollable: false,
     ),
   );
 
@@ -174,9 +181,93 @@ void main() {
           shouldShowBackImmediately: true,
         ),
         brightness: Brightness.dark,
+        isScrollable: false,
       ),
     );
 
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('the card takes the height it is given, split down the middle', (
+    tester,
+  ) async {
+    // **§3: one card filling the whole height, halved by a hairline.** It read
+    // as a 188px card in an 852px frame with four hundred pixels of nothing
+    // under the controls, because an earlier pass dropped the `Flexible` to get
+    // a test to compile and wrote the loss down as "the card keeps its natural
+    // height". Measured here so the next such trade fails instead of shipping.
+    tester.view.physicalSize = const Size(393, 852);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      wrapForTest(
+        SizedBox(
+          height: 700,
+          child: StudyCardFaceSectionWidget(
+            turn: turnOf('c1'),
+            actions: const <StudyAction>[],
+            onAction: (_) {},
+            onContinue: () {},
+            shouldShowBackImmediately: true,
+          ),
+        ),
+        isScrollable: false,
+      ),
+    );
+
+    final card = tester.getRect(find.byType(MxCard));
+    expect(
+      card.height,
+      greaterThan(700 * 0.7),
+      reason: 'the card is hugging its content again; it was ${card.height}',
+    );
+
+    // The hairline is the middle, not a gap after the first block.
+    final divider = tester.getRect(find.byType(Divider));
+    expect(divider.center.dy, closeTo(card.center.dy, 24));
+
+    // **And it reaches both sides of the card.** The halves own their top and
+    // bottom insets so that the card only pads its sides — which is what lets
+    // the rule run the full inner width and read as a fold. Under one uniform
+    // inset the rule stopped short at both ends and the halves read as two
+    // cards stacked. Measured, because nothing else here would notice.
+    expect(divider.width, closeTo(card.width - AppSpacing.lg * 2, 1));
+
+    // And each side is centred in its own half, which is what makes the two
+    // read as sides of one card rather than a heading and a paragraph.
+    final front = tester.getRect(find.text('front-c1'));
+    expect(front.center.dy, closeTo((card.top + divider.center.dy) / 2, 40));
+  });
+
+  testWidgets('before the flip the single half is centred in the whole card', (
+    tester,
+  ) async {
+    // The short inset exists to bring the term close to the rule. With no rule
+    // on screen it only pushed the term off centre, which is the branch the
+    // measured test above cannot see because it always reveals the back.
+    tester.view.physicalSize = const Size(393, 852);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      wrapForTest(
+        SizedBox(
+          height: 700,
+          child: StudyCardFaceSectionWidget(
+            turn: turnOf('c1'),
+            actions: eightBox,
+            onAction: (_) {},
+            onContinue: () {},
+          ),
+        ),
+        isScrollable: false,
+      ),
+    );
+
+    expect(find.byType(Divider), findsNothing);
+    final card = tester.getRect(find.byType(MxCard));
+    final front = tester.getRect(find.text('front-c1'));
+    expect(front.center.dy, closeTo(card.center.dy, 8));
   });
 }

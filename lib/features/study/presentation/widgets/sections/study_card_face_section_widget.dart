@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/app_stroke.dart';
+import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
@@ -104,34 +106,65 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        // One card split in two by a hairline, rather than two stacked blocks.
-        // The halves are what say "these are the two sides of one thing"; two
-        // paragraphs in a column read as two facts about it.
-        MxCard(
-          padding: const EdgeInsets.all(AppSpacing.xl),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              _CardHalf(
-                label: l10n.studyCardFaceTerm,
-                text: widget.turn.card.front,
-                style: texts.headlineSmall,
-              ),
-              if (_showsBack) ...<Widget>[
-                const SizedBox(height: AppSpacing.lg),
-                Divider(
-                  height: AppSpacing.xs,
-                  color: context.semanticColors.borderSubtle,
+        // **One card taking the whole height, split in two by a hairline** —
+        // `m5-study-modes.md` §3. It hugged its content until now, which left a
+        // card of 188px in a frame of 852 and four hundred pixels of nothing
+        // under the controls. The halves are also what say "these are the two
+        // sides of one thing"; two paragraphs in a column read as two facts
+        // about it.
+        Expanded(
+          child: MxCard(
+            // **The card pads its sides; each half pads its own ends.** One
+            // uniform inset put as much air either side of the rule as at the
+            // card's outer edge, and the halves then read as two cards stacked
+            // rather than the two faces of one (§3). The rule itself runs the
+            // full width between the side insets, which is what makes it a
+            // fold rather than a separator dropped between two blocks.
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Expanded(
+                  child: _CardHalf(
+                    label: l10n.studyCardFaceTerm,
+                    text: widget.turn.card.front,
+                    // The token whose own doc calls it "the card prompt", and
+                    // this is that card: largest on screen (§3).
+                    style: texts.headlineMedium,
+                    // **The tight end is the one facing the rule, so it is only
+                    // tight when there is a rule to face.** Before the flip
+                    // `self_assess` is a single half filling the card, and the
+                    // short inset then had nothing under it — the term sat off
+                    // centre in its own card for no reason the user could see.
+                    padding: _showsBack
+                        ? const EdgeInsets.only(
+                            top: AppSpacing.lg,
+                            bottom: AppSpacing.sm,
+                          )
+                        : const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                  ),
                 ),
-                const SizedBox(height: AppSpacing.lg),
-                _CardHalf(
-                  label: l10n.studyCardFaceMeaning,
-                  text: widget.turn.card.back,
-                  style: texts.titleMedium,
-                ),
+                if (_showsBack) ...<Widget>[
+                  Divider(
+                    // The rule and nothing else: the space around it belongs to
+                    // the halves, so a change of padding moves one thing.
+                    height: AppStroke.hairline,
+                    color: context.semanticColors.borderSubtle,
+                  ),
+                  Expanded(
+                    child: _CardHalf(
+                      label: l10n.studyCardFaceMeaning,
+                      text: widget.turn.card.back,
+                      style: texts.headlineSmall,
+                      padding: const EdgeInsets.only(
+                        top: AppSpacing.sm,
+                        bottom: AppSpacing.lg,
+                      ),
+                    ),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
         const SizedBox(height: AppSpacing.xl),
@@ -176,36 +209,56 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
   }
 }
 
-/// One side of the card: a small muted label, then the text it names.
+/// One side of the card: a small muted label in the corner, and the text it
+/// names centred in what is left.
 ///
-/// The label is what makes the two halves readable as *sides* rather than as a
-/// word and a sentence. It is `Term`/`Meaning` rather than the design's
-/// `KOREAN`: no deck and no card carries a language, and printing one would put
-/// a field in the UI that does not exist in the data.
+/// **The label is in the corner and the content is in the middle** (§3). Both
+/// halves are the same shape, so the eye reads them as two sides of one card
+/// rather than as a heading and a paragraph — and the centre is where the eye
+/// lands when a card flips.
+///
+/// The label is `Term`/`Meaning` rather than the design's `KOREAN`: no deck and
+/// no card carries a language, and printing one would put a field in the UI
+/// that does not exist in the data.
 class _CardHalf extends StatelessWidget {
   const _CardHalf({
     required this.label,
     required this.text,
     required this.style,
+    required this.padding,
   });
 
   final String label;
   final String text;
   final TextStyle? style;
 
+  /// Asymmetric on purpose — see the card above. Vertical only; the sides
+  /// belong to the card so that the rule between the halves can reach them.
+  final EdgeInsetsGeometry padding;
+
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    mainAxisSize: MainAxisSize.min,
-    children: <Widget>[
-      Text(
-        label.toUpperCase(),
-        style: context.texts.labelSmall?.copyWith(
-          color: context.colors.onSurfaceVariant,
+  Widget build(BuildContext context) => Padding(
+    padding: padding,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          label.toUpperCase(),
+          style: context.texts.labelSmall?.copyWith(
+            color: context.colors.onSurfaceVariant,
+            letterSpacing: AppTypography.sectionLabelTracking,
+          ),
         ),
-      ),
-      const SizedBox(height: AppSpacing.sm),
-      Text(text, style: style),
-    ],
+        Expanded(
+          child: Center(
+            child: SingleChildScrollView(
+              // The half is a fixed share of the card, so at a large text scale
+              // a long meaning has to be able to move rather than overflow.
+              child: Text(text, style: style, textAlign: TextAlign.center),
+            ),
+          ),
+        ),
+      ],
+    ),
   );
 }

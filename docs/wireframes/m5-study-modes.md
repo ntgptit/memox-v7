@@ -254,3 +254,53 @@ Nên:
 
 Cái *concept* của ảnh vẫn giữ: có pill tên mode, có thanh tiến trình, trạng thái
 đúng/sai phân biệt được. Chỉ giá trị màu là của dự án.
+
+## 8. Spec layout của design kit cho Study · Review — **đối chiếu với token**
+
+Chủ dự án đưa một spec layout viết bằng JS của một design kit **khác** repo này
+(khung 390×780, kèm số đo cho từng thành phần). Mục này ghi lại từng con số của
+spec đã đi về đâu, vì phần lớn chúng **đã có sẵn trong token** và phần còn lại
+thì không đáng đổi lấy cái giá phải trả.
+
+Nguyên tắc chủ dự án chốt khi duyệt: *thêm token nếu giá trị thực sự thiếu; còn
+số lẻ thì làm tròn về thang đang có.* Mục 8.2 áp dụng đúng nguyên tắc ấy cho hai
+trường hợp mà giá phải trả chỉ lộ ra sau khi đọc code.
+
+### 8.1 Đã làm theo
+
+| Spec | Trong code |
+|---|---|
+| Thẻ chiếm hết chiều cao, `Expanded` / `Divider` / `Expanded` | đúng như vậy — xem §3 |
+| Thẻ `padding: 0`, mỗi nửa tự pad | thẻ pad **hai bên** `AppSpacing.lg`, mỗi nửa pad trên–dưới |
+| Nửa trên `20/16/8`, nửa dưới `8/16/20` | `lg/–/sm` và `sm/–/lg` (16 và 8) |
+| Đường kẻ 1px, lề hai bên | `AppStroke.hairline`, `borderSubtle`, chạy hết bề ngang trong lề |
+| Nghĩa 24 / w600 | `headlineSmall` — trùng khít, trước đây là `titleLarge` (22) |
+| Overline nhỏ, hoa, mờ, góc trái | `labelSmall` + `AppTypography.sectionLabelTracking` |
+| Gutter màn hình 14 | `AppSpacing.lg` = 16 (làm tròn), vốn đã đúng từ trước |
+
+Cái **đường kẻ chạm được hai mép thẻ** là điểm ăn thua của nhóm này. Trước đây
+thẻ pad đều 24 mọi phía, nên đường kẻ hụt 24 mỗi đầu và hai nửa đọc thành *hai
+thẻ xếp chồng* chứ không phải hai mặt của một thẻ. Có test đo bề ngang đường kẻ.
+
+### 8.2 Không làm theo, và giá phải trả nếu làm
+
+| Spec | Vì sao không |
+|---|---|
+| Thuật ngữ cỡ **32** | `headlineMedium` = `AppTypography.cardPromptSize` = 30, và doc của chính token gọi nó là *"the card prompt"*. Nó còn có `compactCardPromptSize` = 26 cho màn dưới breakpoint, kèm lý do đo được: 30 đã đẩy prompt hai chữ xuống ba dòng ở 320. Đổi 30→32 phải sửa thang chữ, web kit và `css_scale_parity_test` — cho 2px |
+| Chữ đậm **w700** | Cả hai họ chữ đều là **variable font**. Doc của `AppTypography` ghi rõ `fontWeight` một mình không kéo trục `wght` — phải kèm `fontVariations`. `copyWith(fontWeight:)` tại chỗ dùng vì thế là một thay đổi **không có tác dụng** trên một số renderer |
+| Bo góc thẻ **20**, **bỏ viền** | `MxCard` là component dùng chung, bo `AppRadius.lg` ở bốn chỗ (viền, clip, ink, focus ring), và có bản song sinh `.mx-card` bên `design_system/`. Thêm `AppRadius.xl` rồi thêm tham số cho `MxCard` + `--radius-xl` + modifier bên web — cho 4px, ở đúng một màn |
+| Icon ✕ cỡ **20**, nút **36** | `MxIconButton` cũng dùng chung, cố định `AppIconSize.md` và 48×48. Cùng một cái giá như trên |
+| Thanh tiến trình cao **4** | `MxProgressBarSize.sm` = 6, và comment tại chỗ ghi lý do đã thử 4: *"At 4 the figure sat on the track"* |
+| Dòng context viết **HOA** | Dòng đó chứa **tên deck** — nội dung người dùng nhập. Viết hoa nội dung của người dùng là sửa dữ liệu của họ để lấy hình thức |
+| `12 NEW · 11 REVIEW` và bộ đếm trộn hai tập | BR-142 cấm trộn thẻ mới với thẻ ôn trong một phiên; §7.2 đã chốt |
+| Pill mode dùng `primary` trên `primary @10%` | §7.8 đã chốt `primaryAccent` trên `surfaceMuted` |
+
+Ba dòng đầu là **quyết định của agent**, chủ dự án đã duyệt nguyên tắc chứ chưa
+duyệt từng dòng. Điểm chung của cả ba: con số của spec chỉ lệch vài pixel, nhưng
+để đạt nó phải cho một component **dùng chung** mọc thêm biến thể chỉ phục vụ một
+màn — đúng cái điều mà test `design_tokens_test.dart` gọi tên là *"a seventh
+constant added quietly, off-scale, for one screen"*. Nếu sau này muốn khớp mock
+đến từng pixel thì đó là một quyết định về **design system**, làm cho cả hai kit
+cùng lúc, không phải một sửa đổi của màn Study.
+
+Phần vuốt thẻ của spec không nằm ở đây: nó lật lại §7.7 nên có mục riêng.
