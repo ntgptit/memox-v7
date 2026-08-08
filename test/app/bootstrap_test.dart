@@ -10,6 +10,13 @@ import 'package:memox/app/startup/fixture_seeder_widget.dart';
 import 'package:memox/app/bootstrap.dart';
 import 'package:memox/app/config/env_config.dart';
 import 'package:memox/app/config/env_config_provider.dart';
+import 'package:memox/app/di/repository_bindings.dart';
+import 'package:memox/features/card/di/card_repository_provider.dart';
+import 'package:memox/features/card/domain/repositories/card_repository.dart';
+import 'package:memox/features/deck/di/deck_template_provider.dart';
+import 'package:memox/features/deck/domain/repositories/deck_template_repository.dart';
+import 'package:memox/features/study/di/study_repository_provider.dart';
+import 'package:memox/features/study/domain/repositories/study_repository.dart';
 import 'package:memox/features/deck/di/deck_repository_provider.dart';
 import 'package:memox/core/database/app_database_provider.dart';
 import 'package:memox/core/database/app_database.dart';
@@ -200,6 +207,40 @@ void main() {
       await tester.pump();
 
       expect(find.byType(FixtureSeederWidget), findsOneWidget);
+    });
+
+    test('the binding list satisfies its own bindings', () {
+      // **A container built from this list must be able to read everything in
+      // it.** A binding may depend on another contract — `deckRepositoryBinding`
+      // needs `studyRepositoryProvider` for the sessions a reset invalidates
+      // (UC-07, BR-83) — and a caller that assembled its own shorter list then
+      // reads a contract-only provider and throws.
+      //
+      // That is not hypothetical: `ItHarness` listed two bindings by hand, and
+      // the day the deck binding grew its third dependency all sixty-six
+      // end-to-end scenarios failed in setUp. The integration suite does not run
+      // in CI, so nothing said so for four merges. This is the check that costs
+      // no emulator.
+      final database = AppDatabase(NativeDatabase.memory());
+      addTearDown(database.close);
+
+      final container = ProviderContainer(
+        overrides: [
+          ...repositoryBindingOverrides(),
+          appDatabaseProvider.overrideWithValue(database),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      // Reading is the assertion: each declaration's body throws, so a provider
+      // that is merely declared cannot come back as a repository.
+      expect(container.read(deckRepositoryProvider), isA<DeckRepositoryImpl>());
+      expect(container.read(cardRepositoryProvider), isA<CardRepository>());
+      expect(container.read(studyRepositoryProvider), isA<StudyRepository>());
+      expect(
+        container.read(deckTemplateRepositoryProvider),
+        isA<DeckTemplateRepository>(),
+      );
     });
 
     testWidgets('the root binds every repository the features declare', (

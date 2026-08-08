@@ -3,7 +3,10 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../core/database/app_database_provider.dart';
 import '../../core/time/clock_provider.dart';
 import '../../features/card/data/repositories/card_repository_impl.dart';
+import '../../features/card/di/card_repository_provider.dart';
 import '../../features/card/domain/repositories/card_repository.dart';
+import '../../features/deck/di/deck_repository_provider.dart';
+import '../../features/deck/di/deck_template_provider.dart';
 import '../../features/deck/data/datasources/deck_dao.dart';
 import '../../features/deck/data/datasources/deck_template_dao.dart';
 import '../../features/deck/data/repositories/deck_repository_impl.dart';
@@ -83,3 +86,23 @@ DeckTemplateRepository deckTemplateRepositoryBinding(Ref ref) =>
 /// production would make every session lay its cards out in the same order.
 StudyRepository studyRepositoryBinding(Ref ref) =>
     StudyRepositoryImpl(StudyDao(ref.watch(appDatabaseProvider)));
+
+/// Every contract the app binds, as one list.
+///
+/// **It exists because a hand-written subset of it broke sixty-six end-to-end
+/// scenarios at once.** `ItHarness` built its own container listing only the two
+/// bindings it thought it needed; when `deckRepositoryBinding` grew a dependency
+/// on `studyRepositoryProvider` (UC-07, BR-83), that provider was contract-only
+/// in the harness's container and reading it threw — before the first step of
+/// every scenario ran.
+///
+/// The list is the fix rather than a third line in the harness: a binding that
+/// grows a dependency can no longer break a container that was written from
+/// this. Anything a caller wants to substitute — the database, the clock — goes
+/// *after* it, because a later override wins.
+List<Override> repositoryBindingOverrides() => <Override>[
+  deckRepositoryProvider.overrideWith(deckRepositoryBinding),
+  cardRepositoryProvider.overrideWith(cardRepositoryBinding),
+  deckTemplateRepositoryProvider.overrideWith(deckTemplateRepositoryBinding),
+  studyRepositoryProvider.overrideWith(studyRepositoryBinding),
+];

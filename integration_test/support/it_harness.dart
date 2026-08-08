@@ -9,7 +9,6 @@ import 'package:memox/core/navigation/route_names.dart';
 import 'package:memox/core/database/app_database.dart';
 import 'package:memox/core/database/app_database_provider.dart';
 import 'package:memox/core/time/clock_provider.dart';
-import 'package:memox/features/card/di/card_repository_provider.dart';
 import 'package:memox/features/deck/di/deck_repository_provider.dart';
 import 'package:memox/features/deck/domain/entities/deck_entity.dart';
 
@@ -210,9 +209,12 @@ final class ItHarness {
   /// rows carry the same timestamps real use would have produced.
   ProviderContainer seedContainer() => ProviderContainer(
     overrides: [
+      // The whole list, not the two this happens to read. A binding that grows
+      // a dependency on a third contract must not be able to break a container
+      // that was written before it did — which is exactly how UC-07 turned every
+      // scenario red at once.
+      ...repositoryBindingOverrides(),
       appDatabaseProvider.overrideWithValue(_database!),
-      deckRepositoryProvider.overrideWith(deckRepositoryBinding),
-      cardRepositoryProvider.overrideWith(cardRepositoryBinding),
       clockProvider.overrideWithValue(() => _now),
     ],
   );
@@ -227,10 +229,11 @@ final class ItHarness {
   Future<void> wipeAllData() async {
     final container = ProviderContainer(
       overrides: [
+        // The same list the composition root installs. A contract left unbound
+        // is contract-only, and reading it throws — in teardown, where it takes
+        // the scenario with it.
+        ...repositoryBindingOverrides(),
         appDatabaseProvider.overrideWithValue(_database!),
-        // The same binding the composition root installs. Without it the
-        // provider is contract-only and reading it throws.
-        deckRepositoryProvider.overrideWith(deckRepositoryBinding),
       ],
     );
     try {
