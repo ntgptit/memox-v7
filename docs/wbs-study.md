@@ -358,6 +358,11 @@ một Reset rơi vào giữa để lại màn hình cầm phiên của trước 
   nhận được `remembered`. Cả hai lưu sạch sẽ rồi **không đọc lại được**:
   `isLapse` bảo `easy` không phải lượt sai, và `EightBoxScheduler` không có nhánh
   nào cho nó — dòng lịch sử ấy vĩnh viễn được chấm là "đúng".
+- **Luật ở `domain/`, câu hỏi đặt ở chỗ ghi.** `isCanonicalAction` sống cạnh
+  `schedulerFor` trong `study_scheduler.dart` vì luật là của thuật toán; nó được
+  *gọi* bên trong `runInTransaction`, nơi `scheduler_type` của chính thẻ đang có
+  sẵn. Đây đúng là hai nửa `CLAUDE.md` tách ra có chủ đích. Guard 400 dòng của CI
+  bắt bản đầu (414 dòng) và đó là thứ đẩy luật về đúng chỗ của nó.
 - **Chặn đặt trong transaction, hỏi chính thẻ.** `card_study_states.scheduler_type`
   đang được đọc sẵn để ghi vào dòng lịch sử vài dòng bên dưới, nên phép kiểm tốn
   **không** thêm truy vấn nào. Hỏi thẻ thay vì hỏi caller là thứ làm luật không

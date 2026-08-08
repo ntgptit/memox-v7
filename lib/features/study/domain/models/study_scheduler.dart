@@ -73,3 +73,22 @@ StudyScheduler? schedulerFor(SchedulerType type) => switch (type) {
   SchedulerType.sm2 => const Sm2Scheduler(),
   SchedulerType.unknown => null,
 };
+
+/// Whether [action] is one this algorithm actually understands (BR-120).
+///
+/// **The question `study_answers.action` has to answer before a row is written**
+/// — the column takes canonical actions and nothing else: not a feedback level,
+/// not a screen label (BR-132), not the other algorithm's vocabulary. An
+/// `eight_box` card handed `easy` stores cleanly and cannot be read back:
+/// `isLapse` says it was not a lapse and `EightBoxScheduler` has no branch for
+/// it, so the row grades as "right" forever.
+///
+/// It lives here because the rule is the algorithm's, and it is *asked* inside
+/// the write transaction, where the card's own scheduler type is at hand — the
+/// two halves CLAUDE.md keeps apart on purpose.
+///
+/// [SchedulerType.unknown] is never canonical. A card written by a newer build
+/// may be *read*, but nothing this build could write to it belongs to an
+/// algorithm it has never heard of.
+bool isCanonicalAction(StudyAction action, {required SchedulerType type}) =>
+    schedulerFor(type)?.supportedActions.contains(action) ?? false;
