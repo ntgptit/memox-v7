@@ -134,14 +134,12 @@ void main() {
         wrapForTest(
           frame(
             StudyMode.selfAssess,
-            SingleChildScrollView(
-              child: StudyCardFaceSectionWidget(
-                turn: turnOf(),
-                actions: actions,
-                onAction: (_) {},
-                onContinue: () {},
-                shouldShowBackImmediately: true,
-              ),
+            StudyCardFaceSectionWidget(
+              turn: turnOf(),
+              actions: actions,
+              onAction: (_) {},
+              onContinue: () {},
+              shouldShowBackImmediately: true,
             ),
           ),
           brightness: brightness,
@@ -213,14 +211,12 @@ void main() {
           data: const MediaQueryData(textScaler: TextScaler.linear(2)),
           child: frame(
             StudyMode.selfAssess,
-            SingleChildScrollView(
-              child: StudyCardFaceSectionWidget(
-                turn: turnOf(back: 'quả táo đỏ trên bàn ăn sáng nay'),
-                actions: schedulerFor(SchedulerType.sm2)!.supportedActions,
-                onAction: (_) {},
-                onContinue: () {},
-                shouldShowBackImmediately: true,
-              ),
+            StudyCardFaceSectionWidget(
+              turn: turnOf(back: 'quả táo đỏ trên bàn ăn sáng nay'),
+              actions: schedulerFor(SchedulerType.sm2)!.supportedActions,
+              onAction: (_) {},
+              onContinue: () {},
+              shouldShowBackImmediately: true,
             ),
           ),
         ),
