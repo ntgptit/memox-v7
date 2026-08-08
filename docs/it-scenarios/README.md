@@ -26,9 +26,13 @@ NULL`; **Ôn tập** có `learned_at IS NOT NULL AND due_at <= now`. Thẻ mới
 được gọi là “đến hạn”. Bộ dữ liệu dựng sẵn hoặc kịch bản cũ nào còn dùng định nghĩa trước M5 là
 `DOC-DRIFT`, không phải bằng chứng cho sản phẩm.
 
-Phần chức năng học gồm **63 kịch bản** tách theo năm tệp năng lực; không phải 63
+Phần chức năng học gồm **64 kịch bản** tách theo năm tệp năng lực; không phải 64
 ca trong Bảng quyết định. Mỗi ID là một hành trình người dùng có tiền điều kiện,
 thao tác, tiêu chí kết luận và mức sẵn sàng độc lập.
+
+Bốn kịch bản Navigation liên quan trực tiếp tới chức năng học là `IT-NAV-002` và
+`IT-NAV-008` tới `IT-NAV-010`. Vì vậy tổng phạm vi Study cần kiểm kê khi chạy là
+**68 kịch bản**: 64 kịch bản năng lực Study cộng bốn kịch bản điều hướng.
 
 AI agent MUST đọc theo thứ tự:
 
@@ -55,7 +59,7 @@ AI agent MUST đọc theo thứ tự:
 | Phiên học mới | Có thể kiểm thử | [`08-study-learning-session.md`](08-study-learning-session.md) |
 | Phiên ôn tập và thuật toán xếp lịch | Cần bộ dữ liệu Study v2 cho phần lớn kịch bản | [`09-study-review-session.md`](09-study-review-session.md) |
 | Sáu chế độ học | Có thể kiểm thử; một số ca biên cần dữ liệu dựng sẵn | [`10-study-modes.md`](10-study-modes.md) |
-| Tiếp tục phiên, ngoại tuyến và lỗi | Hỗn hợp `READY`/`FIXTURE-BLOCKED`/`KNOWN-GAP` | [`11-study-continuity-and-failures.md`](11-study-continuity-and-failures.md) |
+| Tiếp tục phiên, ngoại tuyến và lỗi | Hỗn hợp `READY`/`FIXTURE-BLOCKED` | [`11-study-continuity-and-failures.md`](11-study-continuity-and-failures.md) |
 
 Các luồng sau MUST NOT được ghi nhận là đạt của sản phẩm hiện tại:
 
@@ -148,10 +152,11 @@ dung giả, không dùng dữ liệu cá nhân thật.
 | UC-08 — tạo phần tử con, xác lập loại | `IT-TREE-001` tới `IT-TREE-008`; `IT-TREE-013` |
 | UC-09 — di chuyển bộ thẻ | `IT-TREE-009` tới `IT-TREE-013` |
 | UC-05 — điểm vào và tùy chọn | `IT-STUDY-001` tới `IT-STUDY-013` |
+| UC-05 — điều hướng Study | `IT-NAV-002`, `IT-NAV-008` tới `IT-NAV-010` |
 | UC-05 — học mới | `IT-LEARN-001` tới `IT-LEARN-012` |
 | UC-05 — ôn tập và thuật toán xếp lịch | `IT-REVIEW-001` tới `IT-REVIEW-010` |
 | UC-05 — StudyMode | `IT-MODE-001` tới `IT-MODE-015` |
-| UC-05 — tiếp tục và lỗi | `IT-CONT-001` tới `IT-CONT-013` |
+| UC-05 — tiếp tục và lỗi | `IT-CONT-001` tới `IT-CONT-014` |
 | M4.12 — trình diễn E2E bộ thẻ/thẻ | `IT-NAV-006`, `IT-NAV-007`, các kịch bản `UI-FIXTURE` và `UI-LARGE` |
 
 Bảng trên giúp người đọc định hướng. Traceability machine-readable theo từng ID

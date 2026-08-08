@@ -1,14 +1,14 @@
-# IT scenarios — Khởi động, navigation và continuity
+# Kịch bản IT — Khởi động, điều hướng và tiếp tục
 
 | | |
 |---|---|
-| **Status** | active |
-| **Purpose** | Kiểm tra người dùng đi vào đúng điểm bắt đầu, di chuyển giữa các nhánh và không mất ngữ cảnh Deck/Card |
-| **Scope** | Cold start, bottom navigation, back, breadcrumb, route không hợp lệ, hành trình Deck/Card xuyên suốt |
-| **Source of truth for** | Scenario IT về navigation và continuity của chức năng hiện có |
-| **Depends on** | `README.md`, `../use-cases.md` (UC-04, UC-06), `../wbs.md` (M4.10a, M4.11, M4.12) |
-| **Updated by task** | Yêu cầu viết IT scenario ngày 2026-08-05 |
-| **Last updated** | 2026-08-05 |
+| **Status** | đang áp dụng |
+| **Purpose** | Kiểm tra người dùng đi vào đúng điểm bắt đầu, di chuyển giữa các nhánh và không mất ngữ cảnh bộ thẻ, thẻ hoặc phiên học |
+| **Scope** | Khởi động nguội, thanh điều hướng dưới, Back, đường dẫn phân cấp, route không hợp lệ và hành trình bộ thẻ/thẻ/Study xuyên suốt |
+| **Source of truth for** | Kịch bản IT về điều hướng và khả năng tiếp tục của chức năng hiện có |
+| **Depends on** | `README.md`, `../use-cases.md` (UC-04, UC-05, UC-06), `../business-rules.md` (BR-82, BR-101, BR-103), `../wbs.md` (M4.10a, M4.11, M4.12), `../wbs-study.md` (M5.7, M5.9, M5.15), `../wireframes/m5-study-modes.md` |
+| **Updated by task** | Bổ sung điều hướng cho chức năng học ngày 2026-08-08 |
+| **Last updated** | 2026-08-08 |
 
 ## IT-NAV-001 — Cold start mở đúng danh sách Deck
 
@@ -21,16 +21,16 @@
 | 2 | Quan sát bottom navigation | Tab Deck đang được chọn |
 | 3 | Quan sát nội dung | Hiện danh sách Deck; nếu chưa có dữ liệu thì hiện empty state kèm hành động tạo deck |
 
-## IT-NAV-002 — Chuyển tab và quay lại giữ nguyên deck đang mở
+## IT-NAV-002 — Chuyển giữa tab Bộ thẻ và Ôn tập giữ nguyên bộ thẻ đang mở
 
 - **Ưu tiên:** P1
 - **Tiền điều kiện:** Có cây `D-EB > D-BRANCH`; người dùng đang ở trong `D-BRANCH`.
 
 | Bước | Thao tác người dùng | Kết quả mong đợi |
 |---|---|---|
-| 1 | Chạm tab Review | Tab Review được chọn; màn hình thông báo tính năng Review chưa sẵn sàng, không giả vờ bắt đầu phiên học |
-| 2 | Chạm tab Deck | Quay lại đúng `D-BRANCH`, không bị đưa về root deck list |
-| 3 | Quan sát breadcrumb và danh sách | Breadcrumb và nội dung tại cấp đang mở vẫn đúng |
+| 1 | Chạm tab Ôn tập | Tab Ôn tập được chọn; hiện bề mặt Study thật, không còn thông báo tính năng chưa sẵn sàng, không tạo phiên chỉ vì đổi tab |
+| 2 | Chạm tab Bộ thẻ | Quay lại đúng `D-BRANCH`, không bị đưa về danh sách bộ thẻ gốc |
+| 3 | Quan sát đường dẫn phân cấp và danh sách | Đường dẫn và nội dung tại cấp đang mở vẫn đúng; không có phiên Study mới để Tiếp tục |
 
 ## IT-NAV-003 — Back đi lên đúng một cấp trong cây
 
@@ -93,3 +93,39 @@
 | 3 | Tạo, sửa rồi gắn cờ một card trong `D-LEAF` | Mọi thay đổi được phản ánh trên UI |
 | 4 | Đóng hẳn rồi mở lại app khi vẫn offline | Deck và card vừa thay đổi vẫn còn |
 | 5 | Xoá card vừa tạo | Card bị xoá thành công khi không có mạng |
+
+## IT-NAV-008 — Back từ màn vào học quay về đúng bộ thẻ nguồn mà không tạo phiên
+
+- **Ưu tiên:** P0
+- **Tiền điều kiện:** `SETUP-STUDY-SCOPE`; người dùng đang mở bộ thẻ con `Lesson A`; chưa có phiên đang dở.
+
+| Bước | Thao tác người dùng | Kết quả mong đợi |
+|---|---|---|
+| 1 | Chạm Học từ `Lesson A` | Màn vào học mở cho đúng `Lesson A`, hiện `New 3`; không lấy hai thẻ của `Lesson B` |
+| 2 | Bấm Back của hệ thống khi chưa chọn loại phiên | Quay về đúng `Lesson A`, không về bộ thẻ gốc hoặc tab Ôn tập |
+| 3 | Quan sát đường dẫn và danh sách thẻ | Ngữ cảnh `Lesson A` còn nguyên; không có route Study trùng trong ngăn xếp |
+| 4 | Mở Học lần nữa | Không có hành động Tiếp tục hoặc tổng kết vì lần mở trước chưa tạo phiên |
+
+## IT-NAV-009 — Back qua màn chọn chế độ không tạo phiên và giữ đúng ngăn xếp
+
+- **Ưu tiên:** P0
+- **Tiền điều kiện:** `S-STUDY-REVIEW-EB-V2`; đang ở bộ thẻ chứa các thẻ đến hạn; chưa có phiên đang dở.
+
+| Bước | Thao tác người dùng | Kết quả mong đợi |
+|---|---|---|
+| 1 | Chạm Học rồi chọn Ôn tập | Màn chọn chế độ Eight Box mở; chưa có chế độ nào được chọn |
+| 2 | Bấm Back của hệ thống | Quay đúng màn vào học của bộ thẻ đó; chưa tạo phiên ôn tập |
+| 3 | Bấm Back của hệ thống lần nữa | Quay đúng bộ thẻ nguồn, không về danh sách bộ thẻ gốc hoặc tab Ôn tập |
+| 4 | Mở Học lại | Không có phiên để Tiếp tục; số `New`/`Due` không đổi chỉ vì đã đi qua màn chọn |
+
+## IT-NAV-010 — Back của hệ thống trong phiên dùng cùng hợp đồng thoát như nút ✕
+
+- **Ưu tiên:** P0
+- **Tiền điều kiện:** `SETUP-STUDY-EB-5-FULL`; đã bắt đầu Học mới và hoàn tất ít nhất một lượt; phiên đang `in_progress`.
+
+| Bước | Thao tác người dùng | Kết quả mong đợi |
+|---|---|---|
+| 1 | Bấm Back của hệ thống | Hiện cùng xác nhận thoát như nút ✕; màn phiên không bị đóng âm thầm |
+| 2 | Hủy xác nhận | Vẫn ở đúng chế độ, vòng, thẻ và tiến độ; phiên còn `in_progress` |
+| 3 | Bấm Back lần nữa và xác nhận thoát | Phiên dừng do người dùng, hiện trạng thái đã dừng thay vì tổng kết thành tích và có lối về đúng bộ thẻ |
+| 4 | Mở lại màn vào học | Không có Tiếp tục cho phiên đã thoát; các lượt ghi thành công trước đó vẫn được giữ |
