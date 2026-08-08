@@ -33,18 +33,31 @@ class AdvanceStudyStageUseCase {
       return session.currentMode;
     }
 
-    final next = await _nextStage(session);
-    if (next != null) {
+    // **Keeps going while each stage it lands on is also exhausted** (BR-99).
+    // A stage that cannot run on this session-s card set is written with no rows
+    // at all, so it is exhausted from the moment the session opens — `guess`
+    // under five distinct meanings, `match` under two pairs. Advancing once and
+    // returning that stage hands the caller a stage with no turn in it, and a
+    // null turn is indistinguishable from the end of the session: the session
+    // stops with cards still unanswered.
+    //
+    // Bounded by the algorithm-s stage sequence, which is a fixed list of five.
+    var current = session;
+    while (true) {
+      final next = await _nextStage(current);
+      if (next == null) break;
+
       await _repository.advanceStage(
-        sessionId: session.id,
+        sessionId: current.id,
         mode: next,
         now: now,
       );
+      current = current.copyWith(currentMode: next);
 
-      return next;
+      if (!await _repository.isStageExhausted(current.id)) return next;
     }
 
-    await _finish(session: session, now: now, utcOffset: utcOffset);
+    await _finish(session: current, now: now, utcOffset: utcOffset);
 
     return null;
   }

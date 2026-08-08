@@ -77,9 +77,19 @@ mixin _StudyQueueOperations {
     required List<StudyCardModel> cards,
   }) {
     final handler = studyModeHandler(mode);
+
+    // A stage that cannot run on this card set gets no rows at all (BR-99).
+    // With none it is exhausted from the start, so the session advances past it
+    // — the same path a `fill` stage takes when no card carries an example. The
+    // alternative, which is what used to happen, is a stage full of rows whose
+    // widget renders nothing and a session with nowhere to go.
+    if (!(handler?.canRunOn(cards) ?? false)) {
+      return const <StudyQueueItemsCompanion>[];
+    }
+
     final usable = <StudyCardModel>[
       for (final card in cards)
-        if (handler?.canTake(card) ?? false) card,
+        if (handler!.canTake(card)) card,
     ]..shuffle(_random);
 
     return <StudyQueueItemsCompanion>[

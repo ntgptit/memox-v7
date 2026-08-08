@@ -1233,6 +1233,18 @@
   "@studyOptionsSave": {
     "description": "Saves the study options."
   },
+  "studyStageBlockedTitle": "Thẻ này không hiển thị được ở đây",
+  "@studyStageBlockedTitle": {
+    "description": "Shown when a stage was allowed to run but could not build content for the card on screen (BR-124). The card is not skipped and no turn is recorded."
+  },
+  "studyStageBlockedBody": "Không lượt nào được ghi và thẻ vẫn giữ nguyên vị trí. Bạn có thể rời phiên và quay lại sau.",
+  "@studyStageBlockedBody": {
+    "description": "Says what did not happen, so a blocked stage does not read as lost work (BR-124, BR-86)."
+  },
+  "studyLeaveSession": "Rời phiên học",
+  "@studyLeaveSession": {
+    "description": "Ends the session as abandoned/user_exit (BR-82)."
+  },
   "studyResumeTitle": "Bạn còn một phiên đang dở",
   "@studyResumeTitle": {
     "description": "Title of the three-path sheet shown when a session from the same study day is still in progress (BR-103)."

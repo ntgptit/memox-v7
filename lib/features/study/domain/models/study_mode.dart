@@ -121,6 +121,22 @@ abstract class StudyModeHandler {
   /// Defaulting to true is right for every mode but one: only `fill` needs a
   /// field the card may not have.
   bool canTake(StudyCardModel card) => true;
+
+  /// Whether this mode can run **at all** on a session-s card set (BR-99).
+  ///
+  /// **A different question from [canTake], and the difference is the bug this
+  /// exists to fix.** `canTake` asks about one card; this asks about the set.
+  /// `match` needs two pairs and `guess` needs five distinct meanings — neither
+  /// is a property any single card has, so a per-card check passes every card
+  /// and the stage is laid out anyway. It then renders nothing and the session
+  /// stops with no card, no message and no way forward.
+  ///
+  /// Answering it when the queue is written is what makes the stage *skipped*
+  /// rather than *stuck*: with no rows it is exhausted, and the session advances
+  /// past it exactly as it does past a `fill` stage no card could join (BR-114).
+  /// The card set is fixed for the session-s whole life (BR-102), so the answer
+  /// cannot change under it.
+  bool canRunOn(List<StudyCardModel> cards) => true;
 }
 
 /// Every mode that needs nothing built: it takes whatever is due.

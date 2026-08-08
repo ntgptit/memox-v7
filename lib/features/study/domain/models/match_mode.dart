@@ -55,6 +55,10 @@ final class MatchModeHandler extends StudyModeHandler {
   ///
   /// **Two independent shuffles** (BR-127): if one order drove the other, the
   /// board would read straight across and the answer would be the row number.
+  /// Below two pairs there is no board to play (BR-153).
+  @override
+  bool canRunOn(List<StudyCardModel> cards) => cards.length >= kMinMatchPairs;
+
   MatchBoard? buildBoard(List<StudyCardModel> cards, Random random) {
     if (cards.length < kMinMatchPairs) return null;
 

@@ -15,6 +15,7 @@ import '../../domain/models/study_mode.dart';
 import '../../domain/models/study_session_kind_model.dart';
 import '../controllers/study_session_controller.dart';
 import '../states/study_session_state.dart';
+import '../widgets/sections/study_blocked_section_widget.dart';
 import '../widgets/sections/study_summary_section_widget.dart';
 import '../widgets/support/study_labels_widget.dart';
 import '../widgets/support/study_mode_view_widget.dart';
@@ -151,10 +152,21 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
       onContinue: () => unawaited(_controller.answer(_noAction)),
     );
 
-    // A mode that cannot build content for this card renders nothing rather
-    // than something broken (BR-99, BR-124). The session is not stuck: the
-    // controller is still the thing that advances it.
-    return view ?? MxEmptyState(title: context.l10n.studySessionFinished);
+    // BR-124's blocking case, and it is **not** the finished state.
+    //
+    // A stage that cannot run at all no longer reaches here: `canRunOn` keeps it
+    // out of the queue, so the session skips it (BR-99). What is left is one
+    // card the stage could not build content for — no turn is written, the card
+    // is not skipped, and the session therefore cannot move on by itself.
+    //
+    // It used to render `SizedBox.shrink()`, which is a blank screen: nothing to
+    // read, nothing to tap, and force-quitting the only way out. Saying what
+    // happened and offering to leave is the difference between a rule being
+    // enforced and a rule being enforced silently.
+    return view ??
+        StudyBlockedSectionWidget(
+          onLeave: () => unawaited(_controller.leave()),
+        );
   }
 }
 
