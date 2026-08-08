@@ -155,6 +155,7 @@ void main() {
       'answer',
       'pause',
       'leave',
+      'browseStep',
     };
     final controllers = classesUnder('/controllers/');
     var inputCount = 0;
@@ -183,8 +184,19 @@ void main() {
       //
       // `pause` joined them for BR-133: a turn interrupted mid-clock has to keep
       // what was left of it, and that is the counterpart of `leave` rather than
-      // another command. The set stays closed — a sixth name is a new
-      // responsibility and belongs somewhere else.
+      // another command.
+      //
+      // `browseStep` joined them for BR-155, and it is **one** name on purpose.
+      // Walking `browse`'s trail forward and back is the same swipe with the
+      // sign flipped, and a first draft that spelled it `lookBack` plus
+      // `browseForward` was two names for one responsibility. It could not live
+      // in a notifier of its own either: the offset is counted from the live
+      // turn and has to be cleared when that turn changes, so a separate owner
+      // would put one value behind two — the split this test's own reasoning
+      // rejects above.
+      //
+      // The set stays closed. A seventh name is a new responsibility and
+      // belongs somewhere else.
       if (returnType.endsWith('SessionState')) {
         sessionCount += 1;
         final extra = publicMethods(

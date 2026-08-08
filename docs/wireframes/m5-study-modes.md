@@ -84,9 +84,8 @@ mảnh:
 
 Không có nút hành động nào — khớp BR-111.
 
-Hai chỗ ảnh không được làm theo: pill ghi `REVIEW` (mode tên `browse`, §7.1),
-và dòng dưới mời vuốt phải để lùi (`cursor` chỉ tiến, §7.7). Dòng gợi ý chỉ
-nói cách đi tiếp.
+Một chỗ ảnh không được làm theo: pill ghi `REVIEW`, trong khi mode tên `browse`
+(§7.1). Vuốt để lùi thì **có** — xem lại, không ghi gì (BR-155, §7.7).
 
 ## 4. Study · Match (`match_mode`)
 
@@ -222,11 +221,35 @@ BR-115 và BR-117 chỉ có **round**. Nhãn hiện round: `ROUND 1 · 4 PAIRS L
 Nếu sau này muốn chia một round thành nhiều bàn nhỏ thì đó là một BR mới nói kích
 thước bàn và cách chia — không phải một nhãn đổi chữ.
 
-### 7.7 Vuốt phải để quay lại thẻ trước — **bỏ**
+### 7.7 Vuốt phải để quay lại thẻ trước — **đã dựng, BR-155**
 
-`cursor` chỉ tiến, và nó là nền của BR-26. Không luật nào cho xem lại thẻ đã qua,
-và cho lùi sẽ mở ra câu hỏi lùi có đổi `cursor` không — tức một luật mới. Quy tắc
-2. Dòng gợi ý dưới `browse` vì thế chỉ nói cách đi tiếp.
+*Trước đây mục này ghi "bỏ", với lý do `cursor` chỉ tiến. Chủ dự án đã lật lại
+quyết định và yêu cầu dựng cả hai chiều; BR-155 được viết cho nó.*
+
+Lý do cũ vẫn đúng và chính nó là hình dạng của luật mới: `cursor` **vẫn** chỉ
+tiến. Lùi là **xem**, không phải trả lời — thẻ giữ nguyên `completed`, `cursor`
+đứng yên, và tiến lại qua thẻ đó không ghi lượt thứ hai. Cái thay đổi không phải
+queue mà là *thẻ nào đang được vẽ*.
+
+Chỉ `browse` có thao tác này. Năm stage còn lại đều lấy câu trả lời từ thẻ đang
+hiện, nên đặt một thẻ đã chấm lên đó là mời chấm lại (BR-126).
+
+Ba điều màn hình phải làm:
+
+- **Vuốt trái là tiến, vuốt phải là lùi**, ngưỡng 70dp; dưới ngưỡng thì thẻ trôi
+  về chỗ cũ. Vuốt phải khi không còn gì phía sau cũng trôi về — cử chỉ đọc thành
+  *bị từ chối*, không phải *không nghe thấy*.
+- **Phải có đường không-cử-chỉ.** Một thao tác chỉ có bằng kéo ngang 70dp là
+  không tồn tại với người dùng screen reader. Nút `Thẻ trước` hiện cạnh nút tiếp
+  khi có vết phía sau, và **vắng mặt** khi không — nút disabled sẽ quảng cáo một
+  chỗ không có cách nào tới.
+- **Dòng gợi ý phải nói đang xem lại.** Bộ đếm và thanh tiến trình vẫn mô tả lượt
+  đang mở, nên nếu không có câu này thì một thẻ đã qua trông như phiên tự lùi.
+
+Thẻ **không** bị ném ra khỏi màn rồi mới đổi như trong design kit. Muốn ném thì
+phải giữ thẻ cũ ở đâu đó trong lúc nó bay, và nếu bước đi bị từ chối thì thẻ nằm
+ngoài màn không có gì kéo về. Trôi về chỗ cũ rồi để nội dung mới hiện ra tại chỗ
+thì không bao giờ kẹt — mất cú ném, không mất cử chỉ. **Quyết định của agent.**
 
 ### 7.8 Hai họ màu — **bỏ, dùng token của dự án**
 
@@ -303,4 +326,4 @@ constant added quietly, off-scale, for one screen"*. Nếu sau này muốn khớ
 đến từng pixel thì đó là một quyết định về **design system**, làm cho cả hai kit
 cùng lúc, không phải một sửa đổi của màn Study.
 
-Phần vuốt thẻ của spec không nằm ở đây: nó lật lại §7.7 nên có mục riêng.
+Phần vuốt thẻ của spec nằm ở §7.7, vì nó lật lại một quyết định cũ.

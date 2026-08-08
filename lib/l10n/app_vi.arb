@@ -1350,6 +1350,14 @@
   "@studyContinueAction": {
     "description": "Moves past a `browse` card, which produces no action (BR-111)."
   },
+  "studyBrowsePreviousCard": "Thẻ trước",
+  "@studyBrowsePreviousCard": {
+    "description": "Steps back to a card already seen in this round (BR-155). Looking only — nothing is re-recorded and the queue does not move. Named as a control because the swipe that does the same thing is unreachable to a screen reader."
+  },
+  "studyBrowseLookingBack": "Đang xem lại — không ghi nhận gì",
+  "@studyBrowseLookingBack": {
+    "description": "Replaces the hint line while an already-seen card is on screen (BR-155), so the user is not left thinking the session has gone backwards."
+  },
   "studySessionFinished": "Đã xong phiên học.",
   "@studySessionFinished": {
     "description": "Shown when every stage has run out of queue (BR-81)."

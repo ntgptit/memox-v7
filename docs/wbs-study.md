@@ -941,3 +941,70 @@ không có thật. Đã xoá khỏi `scopes.yaml`, và thông điệp của rule
 resolver"* thành *"beside the enum in `study_mode.dart`"*, tức nói đúng chỗ luật
 thật sự sống. **Đã chứng minh rule vẫn bắt** bằng cách tạo một switch thứ hai
 trên `StudyMode` dưới `domain/usecases/`: guard đỏ đúng dòng đó, rồi xoá đi.
+
+### BR-155 · Xem lại thẻ đã qua trong `browse`, sau M5.20
+
+- **Status:** **done** — analyze sạch, 1658 unit + 30 visual audit + 115 golden
+  xanh, cả bốn guard sạch
+- **Nguồn:** chủ dự án đưa spec layout của một design kit khác cho màn
+  Study · Review, trong đó có cử chỉ vuốt. Vuốt để lùi trước đây đã bị **loại**
+  ở §7.7 với lý do `cursor` chỉ tiến; chủ dự án lật lại quyết định đó và chốt
+  **dựng cả hai chiều, và lùi chỉ để xem**.
+- **Luật mới:** BR-155 trong `docs/business-rules.md`. §7.7 của
+  `docs/wireframes/m5-study-modes.md` viết lại từ "bỏ" thành "đã dựng".
+
+Lý do cũ vẫn đúng và chính nó là hình dạng của luật mới: `cursor` **không** lùi.
+Lùi chỉ đổi *thẻ nào đang được vẽ* — thẻ giữ nguyên `completed`, không ghi gì, và
+tiến lại qua thẻ đó không gọi `markBrowsed` lần thứ hai. Nếu lùi có đụng vào
+queue thì tiến lại sẽ ghi thẻ hai lần và bộ đếm nhảy gấp đôi; đó là ca hỏng mà
+luật này tồn tại để chặn, và nó có test riêng.
+
+Chỉ `browse`. Năm stage còn lại đều lấy câu trả lời từ thẻ đang hiện, nên đặt một
+thẻ đã chấm lên đó là mời chấm lại (BR-126) — có test cho việc `match` không lùi
+được.
+
+**Recursive review tìm ra bốn thứ:**
+
+1. **Vết thẻ đã xem được đọc bằng câu truy vấn không có `ORDER BY`.** `browse` đi
+   ngược danh sách ấy nên thứ tự quyết định "thẻ trước là thẻ nào";
+   `match` — người đọc duy nhất trước đây — dùng nó như một tập nên không thể
+   thấy. Đã thêm `ORDER BY position`.
+
+   **Nhưng test viết ra để bắt lỗi này đã không bắt được, và điều đó được ghi
+   đúng như vậy trong chính test.** Dựng lại ba hàng theo thứ tự rowid **ngược**
+   với `position`, câu truy vấn cũ vẫn trả về đúng thứ tự `position`: planner
+   chọn index trên `(session_id, mode, round)` và index đó đi theo `position`.
+   `ORDER BY` vẫn được thêm — một thứ tự chỉ đúng nhờ query plan hiện tại là thứ
+   tự sẽ không ai được báo khi plan đổi — nhưng test đứng **cho** hợp đồng chứ
+   không **chống** lại câu truy vấn cũ.
+
+2. **Bản nháp đầu của test thứ tự tự viết `ORDER BY` của nó**, nên assert đúng
+   câu SQL do chính test viết ra và không chạm gì tới app. Đã sửa để đọc qua
+   `nextTurn` → `progress.completedCardIds`.
+
+3. **Offset lùi sống sót qua thẻ kế tiếp.** Nó đếm ngược từ lượt đang mở, nên một
+   offset còn sót lại sẽ vẽ đè một thẻ người dùng đã đi qua lên thẻ vừa tới — và
+   không có gì trên màn nói điều đó. `_pullTurn` nay đặt lại về 0; có test.
+
+4. **`isLookingBack` vẫn đúng khi không còn lượt nào.** `leave()` xoá `turn`
+   nhưng để nguyên offset, nên state tự nhận là đang hiện một thẻ cũ trong khi
+   không giữ thẻ nào. Nay `isLookingBack` đòi có `turn`.
+
+**Quyết định của agent, không có trong docs:**
+
+- **Vuốt phải có control tương đương, không chỉ có cử chỉ.** Kéo ngang 70dp là
+  thao tác không tồn tại với người dùng screen reader, nên một vết chỉ tới được
+  bằng vuốt là tính năng có mà không ai chạm tới. Nút `Thẻ trước` hiện cạnh nút
+  tiếp khi có vết, và **vắng mặt** khi không — nút disabled quảng cáo một chỗ
+  không có đường tới.
+- **Thẻ không bị ném ra khỏi màn rồi mới đổi** như design kit mô tả. Ném thì phải
+  giữ thẻ cũ ở đâu đó trong lúc bay, và nếu bước đi bị từ chối thì thẻ nằm ngoài
+  màn không có gì kéo về. Trôi về chỗ cũ rồi để nội dung mới hiện tại chỗ thì
+  không bao giờ kẹt. Animation đi qua `AppMotionPolicy`, nên nó tắt khi hệ điều
+  hành bật reduce-motion.
+- **`browseStep` là **một** tên, không phải hai.** `lookBack` + `browseForward`
+  làm guard `command_query_separation_test` đỏ, và guard đúng: tập tên của
+  session controller được cố ý đóng. Hai chiều của cùng một cú vuốt là một trách
+  nhiệm, nên chúng gộp lại; allowlist của guard được nới đúng một tên, kèm lý do
+  vì sao offset không thể ở trong một notifier riêng (nó phải bị xoá khi lượt
+  đổi, nên tách ra là đặt một giá trị dưới hai chủ).

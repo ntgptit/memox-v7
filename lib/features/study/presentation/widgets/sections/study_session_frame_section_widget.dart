@@ -38,6 +38,7 @@ class StudySessionFrameSectionWidget extends StatelessWidget {
     required this.progress,
     required this.onClose,
     required this.child,
+    this.hintOverride,
     this.timeLeft,
     super.key,
   });
@@ -64,6 +65,16 @@ class StudySessionFrameSectionWidget extends StatelessWidget {
   final ValueListenable<Duration>? timeLeft;
 
   final VoidCallback onClose;
+
+  /// Replaces the mode's own hint for as long as it is non-null.
+  ///
+  /// **The hint says what to do next, so a screen doing something other than the
+  /// mode's usual thing has to be able to say so.** `browse` uses it while the
+  /// user is looking back along the trail (BR-155): the counter and the bar
+  /// still describe the live turn, and without a word here a card the user has
+  /// already passed reads as the session having gone backwards.
+  final String? hintOverride;
+
   final Widget child;
 
   @override
@@ -86,7 +97,7 @@ class StudySessionFrameSectionWidget extends StatelessWidget {
       const SizedBox(height: AppSpacing.lg),
       Expanded(child: child),
       const SizedBox(height: AppSpacing.lg),
-      _HintLine(mode: mode),
+      _HintLine(mode: mode, hintOverride: hintOverride),
     ],
   );
 }
@@ -276,13 +287,14 @@ class _ModePill extends StatelessWidget {
 
 /// One line of instruction, and it changes with the mode.
 class _HintLine extends StatelessWidget {
-  const _HintLine({required this.mode});
+  const _HintLine({required this.mode, required this.hintOverride});
 
   final StudyMode mode;
+  final String? hintOverride;
 
   @override
   Widget build(BuildContext context) {
-    final hint = context.studyModeHint(mode);
+    final hint = hintOverride ?? context.studyModeHint(mode);
     if (hint == null) return const SizedBox.shrink();
 
     return Row(

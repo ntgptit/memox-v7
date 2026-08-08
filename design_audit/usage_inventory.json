@@ -1,6 +1,6 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 297,
+  "scannedFiles": 298,
   "totalSites": 348,
   "byElementKind": {
     "other": 267,
@@ -3475,7 +3475,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_card_face_section_widget.dart",
-      "line": 145,
+      "line": 181,
       "widget_context": "_StudyCardFaceViewState",
       "element_kind": "border",
       "source_kind": "theme-token",
@@ -3486,7 +3486,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_card_face_section_widget.dart",
-      "line": 241,
+      "line": 299,
       "widget_context": "_CardHalf",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3497,7 +3497,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart",
-      "line": 123,
+      "line": 134,
       "widget_context": "_ContextLine",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3508,7 +3508,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart",
-      "line": 232,
+      "line": 243,
       "widget_context": "_Figure",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3519,7 +3519,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart",
-      "line": 254,
+      "line": 265,
       "widget_context": "_ModePill",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -3530,7 +3530,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart",
-      "line": 267,
+      "line": 278,
       "widget_context": "_ModePill",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3541,7 +3541,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart",
-      "line": 293,
+      "line": 305,
       "widget_context": "_HintLine",
       "element_kind": "icon",
       "source_kind": "theme-token",
@@ -3552,7 +3552,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart",
-      "line": 300,
+      "line": 312,
       "widget_context": "_HintLine",
       "element_kind": "text",
       "source_kind": "theme-token",

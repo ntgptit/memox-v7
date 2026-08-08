@@ -7,6 +7,7 @@ import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../../../shared/widgets/mx_card.dart';
+import '../../../../../shared/widgets/mx_icon_button.dart';
 import '../../../domain/models/study_action_model.dart';
 import '../../../domain/models/study_turn_model.dart';
 import '../support/study_labels_widget.dart';
@@ -29,12 +30,30 @@ class StudyCardFaceSectionWidget extends StatelessWidget {
     required this.actions,
     required this.onAction,
     required this.onContinue,
+    this.viewedCard,
+    this.onBack,
     this.shouldShowBackImmediately = false,
     this.isLocked = false,
     super.key,
   });
 
   final StudyTurnModel turn;
+
+  /// The card to draw, when it is not the turn's own.
+  ///
+  /// `browse` puts an earlier card back on screen while the user looks back
+  /// (BR-155). The **turn** still governs the flip state and the identity of
+  /// the answerable card, because those belong to the turn rather than to
+  /// whatever is being looked at.
+  final StudyCardModel? viewedCard;
+
+  /// Steps back along the trail of cards already seen (BR-155).
+  ///
+  /// **Null when there is nothing behind**, which is also what hides the
+  /// control. It exists because the gesture alone would make the trail
+  /// unreachable to anyone who cannot make a 70px horizontal drag — a screen
+  /// reader in particular has no way to perform one.
+  final VoidCallback? onBack;
 
   /// Empty for `browse`, which produces no action (BR-111).
   final List<StudyAction> actions;
@@ -57,6 +76,8 @@ class StudyCardFaceSectionWidget extends StatelessWidget {
     actions: actions,
     onAction: onAction,
     onContinue: onContinue,
+    viewedCard: viewedCard,
+    onBack: onBack,
     shouldShowBackImmediately: shouldShowBackImmediately,
     isLocked: isLocked,
   );
@@ -68,6 +89,8 @@ class _StudyCardFaceView extends StatefulWidget {
     required this.actions,
     required this.onAction,
     required this.onContinue,
+    required this.viewedCard,
+    required this.onBack,
     required this.shouldShowBackImmediately,
     required this.isLocked,
   });
@@ -76,6 +99,8 @@ class _StudyCardFaceView extends StatefulWidget {
   final List<StudyAction> actions;
   final ValueChanged<StudyAction> onAction;
   final VoidCallback onContinue;
+  final StudyCardModel? viewedCard;
+  final VoidCallback? onBack;
   final bool shouldShowBackImmediately;
   final bool isLocked;
 
@@ -96,6 +121,10 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
   }
 
   bool get _showsBack => widget.shouldShowBackImmediately || _isRevealed;
+
+  /// What is on screen, which is the turn's card unless the user is looking
+  /// back along the trail (BR-155).
+  StudyCardModel get _card => widget.viewedCard ?? widget.turn.card;
 
   @override
   Widget build(BuildContext context) {
@@ -127,7 +156,7 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
                 Expanded(
                   child: _CardHalf(
                     label: l10n.studyCardFaceTerm,
-                    text: widget.turn.card.front,
+                    text: _card.front,
                     // The token whose own doc calls it "the card prompt", and
                     // this is that card: largest on screen (§3).
                     style: texts.headlineMedium,
@@ -154,7 +183,7 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
                   Expanded(
                     child: _CardHalf(
                       label: l10n.studyCardFaceMeaning,
-                      text: widget.turn.card.back,
+                      text: _card.back,
                       style: texts.headlineSmall,
                       padding: const EdgeInsets.only(
                         top: AppSpacing.sm,
@@ -178,10 +207,32 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
     // make (BR-111). Showing it disabled action buttons would ask a question it
     // is not allowed to record an answer to.
     if (widget.actions.isEmpty) {
+      final onBack = widget.onBack;
+
       return <Widget>[
-        MxActionButton(
-          label: context.l10n.studyContinueAction,
-          onPressed: widget.isLocked ? null : widget.onContinue,
+        Row(
+          children: <Widget>[
+            // **The gesture is not the only way back** (BR-155). A 70px
+            // horizontal drag is unavailable to anyone driving the app with a
+            // screen reader or a switch, so the trail would exist and be
+            // unreachable. Absent — not disabled — at the front of a round,
+            // where a disabled control would advertise a place to go that
+            // there is no way to get to.
+            if (onBack != null) ...<Widget>[
+              MxIconButton(
+                icon: Icons.arrow_back,
+                semanticLabel: context.l10n.studyBrowsePreviousCard,
+                onPressed: widget.isLocked ? null : onBack,
+              ),
+              const SizedBox(width: AppSpacing.sm),
+            ],
+            Expanded(
+              child: MxActionButton(
+                label: context.l10n.studyContinueAction,
+                onPressed: widget.isLocked ? null : widget.onContinue,
+              ),
+            ),
+          ],
         ),
       ];
     }

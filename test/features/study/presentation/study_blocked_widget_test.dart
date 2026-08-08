@@ -73,6 +73,7 @@ void main() {
           (action, {cardId, outcomeReason, comparisonVersion, hasUsedHint}) =>
               answers.add(action),
       onContinue: () {},
+      onLookBack: () {},
     );
 
     expect(view, isNull);
@@ -104,6 +105,7 @@ void main() {
           (action, {cardId, outcomeReason, comparisonVersion, hasUsedHint}) =>
               answers.add(action),
       onContinue: () {},
+      onLookBack: () {},
     );
 
     expect(view, isNull);
@@ -125,6 +127,7 @@ void main() {
       onAnswer:
           (action, {cardId, outcomeReason, comparisonVersion, hasUsedHint}) {},
       onContinue: () {},
+      onLookBack: () {},
     );
 
     expect(view, isNotNull);
@@ -206,6 +209,7 @@ void main() {
               hasUsedHint,
             }) {},
         onContinue: () {},
+        onLookBack: () {},
       )!;
 
       expect(boardOrder(build()), boardOrder(build()));
@@ -236,6 +240,7 @@ void main() {
               hasUsedHint,
             }) {},
         onContinue: () {},
+        onLookBack: () {},
       )!;
 
       expect(boardOrder(build(roundOne)), isNot(boardOrder(build(roundTwo))));

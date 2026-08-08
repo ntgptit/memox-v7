@@ -168,11 +168,24 @@ WHERE session_id = :sessionId AND mode = :mode AND round = :round;
 -- between turns, which unmounts the board and takes that memory with it. Every
 -- pair then became tappable again and the same card could be answered twice.
 -- Read here, the marks survive anything the widget tree does.
+-- **Ordered by position, and the order is load-bearing** (BR-155). `match` reads
+-- this as a set of ticks and could not tell, but `browse` walks it backwards as
+-- the trail of cards already seen — and a round serves each card once, in
+-- `position` order, so `position` order is the order they were seen in.
+--
+-- Without the `ORDER BY` this returned position order anyway: the planner picks
+-- the index on (session_id, mode, round) and that walks in position order. It
+-- was measured — rows re-inserted in reverse still came back in position order,
+-- and the test that tried to catch it stayed green. Which is the reason the
+-- clause is here rather than the reason it is not: the app needs the order, and
+-- an order that is a property of the current query plan is one nobody will be
+-- told about when the plan changes.
 completedCardsInRound:
 SELECT card_id
 FROM study_queue_items
 WHERE session_id = :sessionId AND mode = :mode AND round = :round
-  AND status <> 'pending';
+  AND status <> 'pending'
+ORDER BY position;
 
 -- The lowest pending round of a stage — the round currently being served.
 currentRoundOf:
