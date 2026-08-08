@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/study/domain/entities/study_queue_item_entity.dart';
-import 'package:memox/features/study/domain/models/fill_mode.dart';
 import 'package:memox/features/study/domain/models/recall_mode.dart';
 import 'package:memox/features/study/domain/models/study_mode.dart';
 import 'package:memox/features/study/domain/models/study_queue_item_status_model.dart';
 import 'package:memox/features/study/domain/models/study_turn_model.dart';
-import 'package:memox/features/study/presentation/widgets/sections/fill_answer_section_widget.dart';
 import 'package:memox/features/study/presentation/widgets/sections/recall_timer_section_widget.dart';
 
 import 'support/study_widget_harness.dart';
 
-/// The clock and the text field, and the four ways they must not record.
+/// Twenty seconds, one outcome, and what is written down when the app is taken
+/// away.
+///
+/// **Split from `fill` at the 400-line guard, and the seam is a real one.** The
+/// two shared a file while both were "a card and one control"; the second states
+/// and BR-133's suspend path pushed the pair past the limit, and they were never
+/// one subject — one is a clock, the other is a text field.
 void main() {
   StudyTurnModel turnOf(
     String id, {
@@ -178,132 +182,7 @@ void main() {
     });
   });
 
-  group('fill', () {
-    testWidgets('an empty answer records nothing (BR-137)', (tester) async {
-      final graded = <FillOutcome>[];
-      await tester.pumpWidget(
-        wrapForTest(
-          FillAnswerSectionWidget(turn: turnOf('c1'), onGraded: graded.add),
-        ),
-      );
-
-      await tester.tap(find.text('Check'));
-      await tester.pump();
-      await tester.enterText(find.byType(TextField), '   ');
-      await tester.tap(find.text('Check'));
-      await tester.pump();
-
-      expect(graded, isEmpty);
-    });
-
-    testWidgets('diacritics decide the outcome (BR-134)', (tester) async {
-      final graded = <FillOutcome>[];
-      await tester.pumpWidget(
-        wrapForTest(
-          FillAnswerSectionWidget(turn: turnOf('c1'), onGraded: graded.add),
-        ),
-      );
-
-      await tester.enterText(find.byType(TextField), 'cong');
-      await tester.tap(find.text('Check'));
-      await tester.pump();
-
-      expect(graded.single.isCorrect, isFalse);
-      expect(find.text('Not quite'), findsOneWidget);
-    });
-
-    testWidgets('a matching answer is correct despite case and spaces', (
-      tester,
-    ) async {
-      final graded = <FillOutcome>[];
-      await tester.pumpWidget(
-        wrapForTest(
-          FillAnswerSectionWidget(turn: turnOf('c1'), onGraded: graded.add),
-        ),
-      );
-
-      await tester.enterText(find.byType(TextField), '  CÔNG ');
-      await tester.tap(find.text('Check'));
-      await tester.pump();
-
-      expect(graded.single.isCorrect, isTrue);
-      expect(find.text('Correct'), findsOneWidget);
-    });
-
-    testWidgets('a second submit on the same card records nothing', (
-      tester,
-    ) async {
-      final graded = <FillOutcome>[];
-      await tester.pumpWidget(
-        wrapForTest(
-          FillAnswerSectionWidget(turn: turnOf('c1'), onGraded: graded.add),
-        ),
-      );
-
-      await tester.enterText(find.byType(TextField), 'công');
-      await tester.tap(find.text('Check'));
-      await tester.pump();
-      await tester.testTextInput.receiveAction(TextInputAction.done);
-      await tester.pump();
-
-      expect(graded, hasLength(1));
-    });
-
-    testWidgets('a hint is recorded and does not change the outcome (BR-136)', (
-      tester,
-    ) async {
-      final graded = <FillOutcome>[];
-      await tester.pumpWidget(
-        wrapForTest(
-          FillAnswerSectionWidget(
-            turn: turnOf('c1', hint: 'starts with c'),
-            onGraded: graded.add,
-          ),
-        ),
-      );
-
-      await tester.tap(find.text('Show hint'));
-      await tester.pump();
-      expect(find.text('starts with c'), findsOneWidget);
-
-      await tester.enterText(find.byType(TextField), 'công');
-      await tester.tap(find.text('Check'));
-      await tester.pump();
-
-      expect(graded.single.hasUsedHint, isTrue);
-      // The hint is a note on the turn, not a penalty.
-      expect(graded.single.isCorrect, isTrue);
-    });
-
-    testWidgets('a new card clears the field and the hint', (tester) async {
-      await tester.pumpWidget(
-        wrapForTest(
-          FillAnswerSectionWidget(
-            turn: turnOf('c1', hint: 'h'),
-            onGraded: (_) {},
-          ),
-        ),
-      );
-      await tester.enterText(find.byType(TextField), 'công');
-      await tester.tap(find.text('Show hint'));
-      await tester.pump();
-
-      await tester.pumpWidget(
-        wrapForTest(
-          FillAnswerSectionWidget(
-            turn: turnOf('c2', hint: 'h'),
-            onGraded: (_) {},
-          ),
-        ),
-      );
-      await tester.pump();
-
-      expect(find.text('công'), findsNothing);
-      expect(find.text('Show hint'), findsOneWidget);
-    });
-  });
-
-  group('the second states neither mode has an image for', () {
+  group('the second state the design has no image for', () {
     // Drawn from BR-129, BR-130, BR-134 and BR-137 rather than guessed, and
     // recorded as an agent proposal in `docs/wireframes/m5-study-modes.md` §6.
     testWidgets('recall, once revealed, offers nothing further and says why', (
@@ -329,45 +208,61 @@ void main() {
 
       await tester.pump(kRecallTurnLimit);
     });
+  });
 
-    testWidgets('fill, once graded, shows the card-s own back, not the input', (
-      tester,
-    ) async {
-      // BR-138: what the learner typed is never stored, and never echoed back
-      // either. The card is what is shown.
+  group('what the clock writes down when the app is taken away (BR-133)', () {
+    testWidgets('an open turn reports what is left, once', (tester) async {
+      // BR-128 stops the clock when the app leaves the foreground. Without this
+      // report the seconds it stopped at are lost, and the turn starts over at
+      // twenty the next time it is served — which is the whole reason
+      // `remaining_ms` is a column.
+      final suspended = <({Duration remaining, bool isRevealed})>[];
       await tester.pumpWidget(
         wrapForTest(
-          FillAnswerSectionWidget(turn: turnOf('c1'), onGraded: (_) {}),
+          RecallTimerSectionWidget(
+            turn: turnOf('c1'),
+            onOutcome: (_) {},
+            onSuspended: ({required remaining, required isRevealed}) =>
+                suspended.add((remaining: remaining, isRevealed: isRevealed)),
+          ),
         ),
       );
 
-      await tester.enterText(find.byType(TextField), 'cong');
-      await tester.tap(find.text('Check'));
+      await tester.pump(const Duration(seconds: 6));
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
       await tester.pump();
 
-      expect(find.text('Not quite'), findsOneWidget);
-      expect(find.text('The answer: công'), findsOneWidget);
-      expect(find.text('Check'), findsNothing);
-      expect(tester.widget<TextField>(find.byType(TextField)).enabled, isFalse);
+      expect(suspended, hasLength(1));
+      expect(suspended.single.remaining.inSeconds, 14);
+      expect(suspended.single.isRevealed, isFalse);
+
+      await tester.pump(kRecallTurnLimit);
     });
 
-    testWidgets('and a correct fill does not spell the answer back', (
+    testWidgets('a turn that already has an outcome reports nothing', (
       tester,
     ) async {
-      // The counterpart: the line exists to tell somebody what they missed, and
-      // showing it to somebody who got it right reads as a correction.
+      // Revealing *is* the outcome (BR-129), so the row this would be written
+      // against is no longer pending. The repository refuses it anyway; not
+      // asking is the half that does not depend on remembering to.
+      final suspended = <Duration>[];
       await tester.pumpWidget(
         wrapForTest(
-          FillAnswerSectionWidget(turn: turnOf('c1'), onGraded: (_) {}),
+          RecallTimerSectionWidget(
+            turn: turnOf('c1'),
+            onOutcome: (_) {},
+            onSuspended: ({required remaining, required isRevealed}) =>
+                suspended.add(remaining),
+          ),
         ),
       );
 
-      await tester.enterText(find.byType(TextField), 'công');
-      await tester.tap(find.text('Check'));
+      await tester.tap(find.text('Show answer'));
+      await tester.pump();
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
       await tester.pump();
 
-      expect(find.text('Correct'), findsOneWidget);
-      expect(find.textContaining('The answer:'), findsNothing);
+      expect(suspended, isEmpty);
     });
   });
 }

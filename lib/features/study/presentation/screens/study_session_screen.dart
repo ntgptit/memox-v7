@@ -168,6 +168,16 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
       mode: session.currentMode,
       state: state,
       onRecallTick: (remaining) => _recallRemaining.value = remaining,
+      // BR-133's write half. The clock stops when the app goes to the
+      // background (BR-128); without this the seconds it stopped at are lost
+      // and the turn starts over at twenty the next time it is served — which
+      // is the whole reason `remaining_ms` is a column.
+      onRecallSuspend: ({required remaining, required isRevealed}) => unawaited(
+        _controller.pause(
+          remainingMs: remaining.inMilliseconds,
+          isRevealed: isRevealed,
+        ),
+      ),
       onAnswer: (action, {outcomeReason, comparisonVersion, hasUsedHint}) =>
           unawaited(
             _controller.answer(
