@@ -7,7 +7,7 @@
 | **Scope** | Task còn lại của Study từ M5.7 trở đi · nợ kỹ thuật của Study · việc bị chặn |
 | **Source of truth for** | Trạng thái task Study từ M5.7 · nợ kỹ thuật của Study |
 | **Depends on** | `document-conventions.md` · `wbs.md` · `business-rules.md` · `use-cases.md` |
-| **Updated by task** | tắt fixture seed cho suite IT |
+| **Updated by task** | golden deck cũ hơn lần đổi tên Review → Study |
 | **Last updated** | 2026-08-08 |
 
 `docs/wbs.md` giữ M5.0…M5.6 đã hoàn thành và không nhắc lại ở đây. File này giữ
@@ -819,12 +819,23 @@ phán quyết trước khi người dùng trả lời.
 
 ## Việc không thuộc Study nhưng chặn Definition of Done
 
-**Golden `deck_screens_demo_test` lệch 0.06% trên Windows.** Hỏng sẵn trên `main`
-từ trước M5 — kiểm bằng cách stash toàn bộ thay đổi rồi chạy lại trên cây sạch.
-Chúng là golden bound theo Windows, chạy ở CI job riêng, nên gate CI vẫn xanh và
-số test báo trong M5 đều chạy với `--exclude-tags golden`. Cần một lượt điều tra
-riêng, **không gộp vào mốc Study** — gộp vào sẽ làm một mốc Study đỏ vì lý do
-không thuộc Study.
+**~~Golden `deck_screens_demo_test` lệch 0.06% trên Windows~~ — không phải drift,
+là golden cũ.** Lượt điều tra riêng đã chạy, và chẩn đoán trong tài liệu này sai
+một nửa: đúng là hỏng sẵn trên `main` từ trước M5, nhưng **không** phải do cách
+Windows dựng chữ.
+
+Đọc `isolatedDiff.png` thì chỉ đúng **một từ** khác nhau, ở hai chỗ: nhãn tab
+dưới cùng và nút trên thẻ deck. Golden ghi **"Review"**, màn hình dựng
+**"Study"**. `git log -S` chỉ thẳng: PR #186 đổi tên Review → Study trong `lib/`,
+còn bốn ảnh golden lần cuối được cập nhật ở #160 — **trước** #186. Bốn ảnh chỉ
+đơn giản là chưa được dựng lại.
+
+Con số 0.06% / 1946px **giống hệt nhau ở cả bốn** đáng ra đã là manh mối: một
+khác biệt do renderer sẽ rải khắp ảnh và không thể trùng số pixel ở bốn khung
+hình khác nội dung.
+
+Đã dựng lại bằng `--update-goldens` **trên Windows**, đúng nền mà CI job
+`goldens (windows)` chạy. Toàn bộ 115 golden xanh.
 
 **~~Config chết trong guard~~ — đã xoá.** Rule
 `memox.architecture.single_study_mode_dispatch` loại trừ `study_mode_resolver.dart`,
