@@ -43,7 +43,7 @@ void main() {
           isRevealed: false,
         ),
         card: forCard,
-        progress: const StudyStageProgressModel(done: 0, total: 3),
+        progress: const StudyStageProgressModel(round: 1, done: 0, total: 3),
       );
 
   test('a question that cannot be built yields no view and no answer', () {

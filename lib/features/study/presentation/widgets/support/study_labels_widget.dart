@@ -58,6 +58,19 @@ extension StudyLabels on BuildContext {
     StudyMode.fill: l10n.studyHintFill,
   }[mode];
 
+  /// What a mode adds to the frame's context line, if anything.
+  ///
+  /// A map, and only `match` has an entry — nothing else has a fact the top bar
+  /// does not already carry. Null means the line is deck and kind alone, which
+  /// is the honest answer rather than a repeated mode name.
+  String? studyModeContext(
+    StudyMode mode, {
+    required int round,
+    required int remaining,
+  }) => <StudyMode, String>{
+    StudyMode.match: l10n.studyMatchContext(round, remaining),
+  }[mode];
+
   /// Which of the two card sets this session is working through (BR-142).
   String studySessionKind(StudySessionKind kind) => switch (kind) {
     StudySessionKind.learning => l10n.studyKindLearning,

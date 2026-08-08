@@ -61,6 +61,7 @@ mixin _StudyQueueOperations on _StudyQueueLayoutOperations {
       item: studyQueueItemEntityFromRow(row),
       card: studyCardModelFromRow(card),
       progress: StudyStageProgressModel(
+        round: row.round,
         done: progress.done,
         total: progress.total,
       ),

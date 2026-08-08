@@ -77,17 +77,11 @@ class StudySessionFrameSectionWidget extends StatelessWidget {
         onClose: onClose,
       ),
       const SizedBox(height: AppSpacing.sm),
-      Text(
-        context.l10n.studyFrameContext(
-          deckName,
-          context.studySessionKind(kind),
-        ),
-        style: context.texts.labelMedium?.copyWith(
-          color: context.colors.onSurfaceVariant,
-        ),
-        textAlign: TextAlign.center,
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
+      _ContextLine(
+        mode: mode,
+        kind: kind,
+        deckName: deckName,
+        progress: progress,
       ),
       const SizedBox(height: AppSpacing.lg),
       Expanded(child: child),
@@ -95,6 +89,44 @@ class StudySessionFrameSectionWidget extends StatelessWidget {
       _HintLine(mode: mode),
     ],
   );
+}
+
+/// Which deck, which kind of session, and whatever the mode adds (§7.2, §7.6).
+class _ContextLine extends StatelessWidget {
+  const _ContextLine({
+    required this.mode,
+    required this.kind,
+    required this.deckName,
+    required this.progress,
+  });
+
+  final StudyMode mode;
+  final StudySessionKind kind;
+  final String deckName;
+  final StudyStageProgressModel progress;
+
+  @override
+  Widget build(BuildContext context) {
+    final base = context.l10n.studyFrameContext(
+      deckName,
+      context.studySessionKind(kind),
+    );
+    final extra = context.studyModeContext(
+      mode,
+      round: progress.round,
+      remaining: progress.remaining,
+    );
+
+    return Text(
+      extra == null ? base : '$base · $extra',
+      style: context.texts.labelMedium?.copyWith(
+        color: context.colors.onSurfaceVariant,
+      ),
+      textAlign: TextAlign.center,
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
 }
 
 class _TopBar extends StatelessWidget {
