@@ -260,7 +260,19 @@ void main() {
         ),
       );
 
-      expect(find.byIcon(Icons.check), findsNWidgets(2));
+      // A pair the queue already knows about comes back **cleared**, not
+      // flashing: the green beat belongs to the tap that earned it, and
+      // replaying it on every remount would light the board up for answers
+      // minutes old. It still announces itself, or a screen reader would lose
+      // the pair off the board entirely.
+      expect(find.byIcon(Icons.check), findsNothing);
+      for (final label in <String>['front-a', 'back-a']) {
+        expect(
+          tester.getSemantics(find.text(label)).value,
+          'Paired',
+          reason: '$label is a cleared slot and must still say so',
+        );
+      }
 
       final attempts = <String>[];
       await tester.pumpWidget(

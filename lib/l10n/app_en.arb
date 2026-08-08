@@ -1512,6 +1512,10 @@
   "@studyCardFaceMeaning": {
     "description": "Label on the bottom half of a study card, over the back of the card."
   },
+  "studyMatchWrong": "Not a pair",
+  "@studyMatchWrong": {
+    "description": "Announced for the two match tiles of a pairing that was wrong, for as long as they are red. The cross beside them is decoration; this is what a screen reader reads. It says the pairing was wrong rather than that either card is wrong — BR-118 grades the term, and the meaning was never the thing being asked about."
+  },
   "studyMatchPaired": "Paired",
   "@studyMatchPaired": {
     "description": "Announced for a match tile that has been paired correctly. The tick beside it is decoration; this is what a screen reader reads, because a pair marked only in green is not marked for everyone."

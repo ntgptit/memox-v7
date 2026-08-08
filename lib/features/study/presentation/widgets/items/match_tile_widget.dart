@@ -1,0 +1,301 @@
+import 'package:flutter/material.dart';
+
+import '../../../../../core/theme/app_durations.dart';
+import '../../../../../core/theme/app_motion_policy.dart';
+import '../../../../../core/theme/app_radius.dart';
+import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/theme_context_extension.dart';
+import '../../../../../l10n/l10n_extension.dart';
+
+/// What a tile on the board can be showing (§4, §8.8).
+///
+/// **Five, and two of them are transient.** `paired` and `wrong` are held for a
+/// fixed beat by the board and then give way — `paired` to [MatchTileState
+/// .cleared], `wrong` back to [MatchTileState.idle]. Nothing persists either,
+/// because neither is a fact about the card: the queue records the answer, and
+/// these two say only that the app saw the tap.
+enum MatchTileState {
+  idle,
+  selected,
+
+  /// The pair just landed. Green, ticked, and on its way out.
+  paired,
+
+  /// This pair was wrong. Red, crossed, and on its way back to [idle].
+  wrong,
+
+  /// Paired and finished with — the slot stays, the content is gone.
+  cleared,
+}
+
+/// One tile, in whichever of the five states it is.
+///
+/// **Colours come from `ColorScheme` and `AppSemanticColors`, never from this
+/// file.** Selected is `primary` on `onPrimary` and wrong is `error` on
+/// `onError` — two pairs Material keeps contrasting in both themes, and `error`
+/// is this app's `danger` rather than a second red (`app_theme.dart`). Paired is
+/// `success`, and only because it means exactly what `success` means: this
+/// answer was right. It is not the mode's colour and not decoration (§7.8). The
+/// handout calls that role `mastery`; this app already spends `success` on it —
+/// `card_state_widget.dart` paints `CardState.mastered` with it — so the two
+/// names are one token.
+///
+/// **The tints are blended, not painted translucent.** A `BorderSide` or a fill
+/// at 12% composites against whatever is behind it at paint time, so one token
+/// renders as two values over two surfaces; `color_source_rules_test.dart` R7
+/// fails it. `Color.alphaBlend` resolves the same colour at build time against
+/// the surface the tile actually sits on.
+///
+/// **Neither result is marked by colour alone.** `paired` carries a tick and
+/// `wrong` a cross, and both carry a `Semantics` value — a board whose only
+/// answer is a hue answers nobody using a screen reader, and fails WCAG 1.4.1
+/// for everyone who cannot tell the two hues apart.
+class MatchTileWidget extends StatelessWidget {
+  const MatchTileWidget({
+    required this.text,
+    required this.state,
+    required this.onTap,
+    this.isTerm = true,
+    super.key,
+  });
+
+  final String text;
+  final MatchTileState state;
+  final VoidCallback? onTap;
+
+  /// Which side of the board this is, and therefore how loud it reads: a term
+  /// is what the eye scans for, a meaning is what it checks against.
+  final bool isTerm;
+
+  bool get _isCleared => state == MatchTileState.cleared;
+
+  @override
+  Widget build(BuildContext context) {
+    final skin = _TileSkin.of(context, state);
+    final style =
+        (isTerm ? context.texts.titleMedium : context.texts.titleSmall)
+            ?.copyWith(color: skin.foreground);
+    final radius = BorderRadius.circular(AppRadius.md);
+    // **Only the transition is reduced, never the beat a state is held for.**
+    // The hold is feedback; the crossfade is decoration, and `AppMotionPolicy`
+    // is written for exactly that line — it says an animation that decorates a
+    // state change may go, not that the feedback may.
+    final motion = AppMotionPolicy.durationOf(context, AppDurations.normal);
+
+    return Semantics(
+      selected: state == MatchTileState.selected,
+      // The tick and the cross mark these for people who can see them; this is
+      // what marks them for everyone else. A cleared slot keeps saying it, or a
+      // screen reader loses the pair off the board altogether.
+      value: switch (state) {
+        MatchTileState.paired ||
+        MatchTileState.cleared => context.l10n.studyMatchPaired,
+        MatchTileState.wrong => context.l10n.studyMatchWrong,
+        _ => null,
+      },
+      child: AnimatedContainer(
+        duration: motion,
+        curve: AppDurations.standard,
+        decoration: BoxDecoration(
+          color: skin.background,
+          borderRadius: radius,
+          border: Border.all(color: skin.outline),
+        ),
+        child: Material(
+          // The container paints the surface; this exists for the ripple.
+          type: MaterialType.transparency,
+          child: InkWell(
+            // A cleared tile is finished, not merely busy: BR-116 has already
+            // recorded it and a second tap could only record it twice. A tile
+            // still showing its result is not a target either — that answer is
+            // in flight.
+            onTap: _isTappable ? onTap : null,
+            borderRadius: radius,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.md,
+              ),
+              child: Center(
+                child: AnimatedOpacity(
+                  // The content leaving *is* the pair disappearing. The slot
+                  // does not move, so nothing anyone was reaching for shifts.
+                  opacity: _isCleared ? 0 : 1,
+                  duration: motion,
+                  curve: AppDurations.standard,
+                  child: _content(skin, style),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  bool get _isTappable =>
+      state == MatchTileState.idle || state == MatchTileState.selected;
+
+  Widget _content(_TileSkin skin, TextStyle? style) => Row(
+    mainAxisSize: MainAxisSize.min,
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: <Widget>[
+      if (skin.mark case final mark?) ...<Widget>[
+        Icon(mark, size: style?.fontSize, color: skin.foreground),
+        const SizedBox(width: AppSpacing.xs),
+      ],
+      Flexible(
+        child: Text(
+          text,
+          style: style,
+          textAlign: TextAlign.center,
+          // The row's height is the grid's to decide, so a long term gives way
+          // rather than pushing the board out of shape.
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+    ],
+  );
+}
+
+/// What one state looks like, resolved against the theme.
+///
+/// A type rather than four locals in `build()`: the four values are one
+/// decision each and they have to agree — a foreground picked for a fill it is
+/// not sitting on is the bug this shape makes hard to write.
+class _TileSkin {
+  const _TileSkin({
+    required this.background,
+    required this.outline,
+    required this.foreground,
+    required this.mark,
+  });
+
+  factory _TileSkin.of(BuildContext context, MatchTileState state) {
+    final scheme = context.colors;
+    final semantic = context.semanticColors;
+    final ground = scheme.surfaceContainerLowest;
+    // **The page, read from the scaffold rather than guessed at.** `surface` is
+    // not it: measured in dark, the page is `(10, 8, 45)`, `surface` is
+    // `(26, 24, 56)` and `surfaceContainerLowest` — the tile's own fill — is
+    // `(10, 3, 38)`. A cleared slot painted `surface` came out *lighter* than
+    // the page it was meant to be a hole in, which reads as a new tile rather
+    // than an emptied one.
+    final page = Theme.of(context).scaffoldBackgroundColor;
+
+    return switch (state) {
+      MatchTileState.selected => _TileSkin(
+        background: scheme.primary,
+        outline: scheme.primary,
+        foreground: scheme.onPrimary,
+        mark: null,
+      ),
+      MatchTileState.wrong => _TileSkin(
+        background: scheme.error,
+        outline: scheme.error,
+        foreground: scheme.onError,
+        mark: Icons.close,
+      ),
+      MatchTileState.paired => _TileSkin(
+        background: Color.alphaBlend(
+          semantic.success.withValues(alpha: AppMatchTile.pairedFillAlpha),
+          ground,
+        ),
+        outline: Color.alphaBlend(
+          semantic.success.withValues(alpha: AppMatchTile.pairedOutlineAlpha),
+          ground,
+        ),
+        foreground: semantic.success,
+        mark: Icons.check,
+      ),
+      // A cleared slot sits on the *page*, not on the tile surface: the hole is
+      // what says the pair is gone, and a tile-coloured hole is just a tile
+      // with no words on it. The outline is faint rather than absent — with
+      // four of five pairs cleared, the tile still in play would otherwise
+      // float in an empty page with nothing left to say the grid is a grid.
+      MatchTileState.cleared => _TileSkin(
+        // **Null, not the page colour.** Nothing painted is a truer hole than
+        // a colour that happens to match, and it stays a hole if the surface
+        // behind the board ever changes. The outline still has to be solid —
+        // R7 — so *that* is blended against the page.
+        background: null,
+        outline: Color.alphaBlend(
+          semantic.borderSubtle.withValues(
+            alpha: AppMatchTile.clearedOutlineAlpha,
+          ),
+          page,
+        ),
+        foreground: scheme.onSurface,
+        mark: null,
+      ),
+      MatchTileState.idle => _TileSkin(
+        background: ground,
+        outline: semantic.borderSubtle,
+        foreground: scheme.onSurface,
+        mark: null,
+      ),
+    };
+  }
+
+  /// Null paints nothing, which is what a cleared slot wants.
+  final Color? background;
+
+  final Color outline;
+  final Color foreground;
+  final IconData? mark;
+}
+
+/// The numbers this tile decides for itself, and none of them is a colour.
+abstract final class AppMatchTile {
+  /// How long a correct pair stays green before its content leaves.
+  ///
+  /// **A beat, not a pause.** Long enough that the eye registers *right* rather
+  /// than merely *gone* — a disappearance on its own reads the same as a missed
+  /// tap to someone who was guessing. Short enough that two of them never sit on
+  /// the board at once, which is the clutter that made keeping them there
+  /// permanently the wrong answer.
+  ///
+  /// **It has to outlast the tile's own transition, and at `normal` it did
+  /// not.** The container crossfades over [AppDurations.normal]; with the hold
+  /// set to the same value the tile spent every millisecond of it easing from
+  /// selected *towards* green and then turned straight round — a purple smear,
+  /// and green never once on screen. At `slow` the colour lands and is held for
+  /// 120ms, which is the part anybody actually sees. Caught by rendering it,
+  /// not by any test: both durations were tokens and both were defensible.
+  static const Duration successFlash = AppDurations.slow;
+
+  /// How long a wrong pair stays red before the board goes back to idle.
+  ///
+  /// [AppDurations.slow] is the longest anything in this app is allowed to take,
+  /// and this is the one place worth spending it: the user has to see *which
+  /// two* tiles were wrong together, and a pair is two glances.
+  ///
+  /// **It holds colour, it does not hold input.** Reaching for the next term
+  /// clears it early. A board of five pairs answered wrong four times would
+  /// otherwise spend three seconds refusing taps it has no reason to refuse.
+  static const Duration wrongHold = AppDurations.slow;
+
+  /// How much `success` a paired tile's fill carries, blended into the surface
+  /// under it. Enough to read as a state, not enough to compete with the
+  /// selected tile, which is the only solid colour on the board.
+  static const double pairedFillAlpha = 0.12;
+
+  /// The same for its outline. Heavier than the fill because a hairline has a
+  /// tenth of the area to say it with.
+  static const double pairedOutlineAlpha = 0.3;
+
+  /// How much of `borderSubtle` a cleared slot keeps.
+  ///
+  /// Under half, so emptied slots recede behind the pairs still in play while
+  /// the grid stays legible as a grid.
+  static const double clearedOutlineAlpha = 0.45;
+
+  /// The shortest a row is allowed to get before the board stops filling the
+  /// height and starts scrolling.
+  ///
+  /// [AppSpacing.minimumTouchTarget], because a tile is a control: a board of
+  /// twelve pairs that divided the height evenly would hand a thumb 40px rows,
+  /// and the grid looking tidy is worth less than the taps landing.
+  static const double minRowHeight = AppSpacing.minimumTouchTarget;
+}
