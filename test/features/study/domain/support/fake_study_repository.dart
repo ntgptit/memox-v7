@@ -268,8 +268,23 @@ base class FakeStudyRepository implements StudyRepository {
         );
   }
 
+  /// Answers for successive `isStageExhausted` calls, consumed in order.
+  ///
+  /// One boolean is not enough now that advancing walks past every exhausted
+  /// stage (BR-99): "this stage is done and the next one is not" takes two
+  /// answers, and a single flag can only say "every stage is done", which ends
+  /// the session.
+  final List<bool> exhaustedAnswers = <bool>[];
+  int _exhaustedCalls = 0;
+
   @override
-  Future<bool> isStageExhausted(String sessionId) async => stageExhausted;
+  Future<bool> isStageExhausted(String sessionId) async {
+    final index = _exhaustedCalls++;
+
+    return index < exhaustedAnswers.length
+        ? exhaustedAnswers[index]
+        : stageExhausted;
+  }
 
   @override
   Future<StudyTurnModel?> nextTurn(String sessionId) async => nextTurn_;

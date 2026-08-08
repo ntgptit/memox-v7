@@ -36,6 +36,12 @@ final class GuessModeHandler extends StudyModeHandler {
   int capacityFrom(StudyEntrySummaryModel summary) =>
       summary.distinctMeanings >= kGuessOptionCount ? summary.dueCount : 0;
 
+  /// Below five distinct meanings no question can be built from this set
+  /// (BR-121), so the stage never runs rather than failing per card.
+  @override
+  bool canRunOn(List<StudyCardModel> cards) =>
+      cards.map((card) => card.back).toSet().length >= kGuessOptionCount;
+
   /// Builds one question, or null when five distinct meanings cannot be found.
   ///
   /// **Distinctness is measured on `back_folded`, not on the displayed string**

@@ -46,7 +46,7 @@ Widget? studyModeView({
   final turn = state.turn;
   if (turn == null) return null;
 
-  final builders = <StudyMode, Widget Function()>{
+  final builders = <StudyMode, Widget? Function()>{
     StudyMode.browse: () => StudyCardFaceSectionWidget(
       turn: turn,
       // `browse` produces no action at all (BR-111), so it gets no buttons and
@@ -117,7 +117,7 @@ Widget? studyModeView({
 StudyAction? _actionFor(StudySessionState state, {required bool isCorrect}) =>
     schedulerFor(state.schedulerType)?.binaryAction(isCorrect: isCorrect);
 
-Widget _matchView({
+Widget? _matchView({
   required StudyTurnModel turn,
   required StudySessionState state,
   required StudyAnswerSink onAnswer,
@@ -125,10 +125,12 @@ Widget _matchView({
 }) {
   final board = const MatchModeHandler().buildBoard(state.sessionCards, random);
 
-  // Below two pairs the board is not worth playing (BR-153). The stage is
-  // skipped rather than rendered short, and returning nothing lets the session
-  // screen say so instead of drawing half a board.
-  if (board == null) return const SizedBox.shrink();
+  // Below two pairs there is no board (BR-153). The stage should never have
+  // been laid out — `canRunOn` keeps it out of the queue — so reaching here at
+  // all means the card set changed under a session, which BR-102 forbids.
+  // Null rather than an empty box: the screen then says the stage cannot run
+  // instead of drawing a blank nobody can act on.
+  if (board == null) return null;
 
   return MatchBoardSectionWidget(
     board: board,
@@ -138,7 +140,7 @@ Widget _matchView({
   );
 }
 
-Widget _guessView({
+Widget? _guessView({
   required StudyTurnModel turn,
   required StudySessionState state,
   required StudyAnswerSink onAnswer,
@@ -152,8 +154,13 @@ Widget _guessView({
 
   // BR-124's blocking case: the stage was allowed to run and this one question
   // still could not be built. Nothing renders, nothing is recorded, and the card
-  // is not skipped.
-  if (question == null) return const SizedBox.shrink();
+  // is **not** skipped — which means the session cannot move on by itself.
+  //
+  // Null rather than `SizedBox.shrink()`. An empty box is indistinguishable
+  // from a screen that failed to build: the user sees nothing, taps nothing, and
+  // the only way out is force-quitting. Null lets the screen say what happened
+  // and offer to leave the session (BR-82).
+  if (question == null) return null;
 
   return GuessQuestionSectionWidget(
     question: question,

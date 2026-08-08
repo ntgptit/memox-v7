@@ -280,7 +280,7 @@ một Reset rơi vào giữa để lại màn hình cầm phiên của trước 
 
 ### M5.12 · Các ca stage bị chặn hoặc bỏ qua, ở UI (BR-99, BR-124, BR-153)
 
-- **Status:** todo
+- **Status:** done
 - **Goal:** Stage không dựng được nội dung thì hành xử đúng, không render hỏng.
 - **Scope:** `guess` không dựng được một question cụ thể → **chặn**: không render,
   không ghi lượt, không bỏ qua thẻ, không tiến checkpoint (BR-124); stage không
@@ -290,18 +290,41 @@ một Reset rơi vào giữa để lại màn hình cầm phiên của trước 
 - **Editable documents:** `docs/wbs-study.md`
 - **Output:** nhánh xử lý trong `StudySessionScreen` và các widget mode
 - **Acceptance criteria:**
-  - [ ] `GuessModeHandler.buildQuestion` trả null → màn hình **không** render câu
+  - [x] `GuessModeHandler.buildQuestion` trả null → màn hình **không** render câu
         hỏi rỗng và **không** ghi lượt nào.
-  - [ ] Phiên học có stage không thẻ nào → stage đó bị bỏ qua, phiên vẫn chạy tiếp.
-  - [ ] `match` dưới hai cặp trong phiên học → bỏ qua; trong phiên ôn → đã bị vô
+  - [x] Phiên học có stage không thẻ nào → stage đó bị bỏ qua, phiên vẫn chạy tiếp.
+  - [x] `match` dưới hai cặp trong phiên học → bỏ qua; trong phiên ôn → đã bị vô
         hiệu hoá từ màn chọn.
-  - [ ] Không ca nào ở trên làm phiên kẹt hoặc kết thúc sớm.
+  - [x] Không ca nào ở trên làm phiên kẹt hoặc kết thúc sớm.
 - **Handler đã trả `null` đúng chỗ từ M5.4b; chưa ai xử lý `null` đó.** Đây là
   phần còn thiếu ở phía gọi, không phải ở phía luật.
 - **Dependencies:** M5.7
 - **Tests required:** widget test cho từng ca; test khẳng định không lượt nào
   được ghi ở ca chặn
 - **Checklist phases:** 14.4, 15.3
+
+- **Ghi chú của mốc này sai một nửa.** "Handler đã trả `null` đúng chỗ, chưa ai
+  xử lý" — thực ra `studyModeView` **có** xử lý, bằng `SizedBox.shrink()`. Tức là
+  màn hình trắng: không chữ để đọc, không nút để bấm, và cách duy nhất thoát là
+  tắt app. Luật được thi hành, nhưng thi hành trong im lặng thì nhìn hệt như crash.
+- **Hai luật bị gộp làm một, và đó là gốc của lỗi:** `canTake` hỏi về **một thẻ**,
+  còn "hai cặp" (BR-153) và "năm nghĩa khác nhau" (BR-121) là tính chất của **tập
+  thẻ**. Kiểm theo từng thẻ thì thẻ nào cũng đạt, nên stage vẫn được dựng hàng đợi
+  đầy đủ rồi render ra rỗng. Nay có `StudyModeHandler.canRunOn(cards)`: stage
+  không chạy được thì **không có dòng nào** trong hàng đợi, nên nó exhausted từ
+  đầu và bị bỏ qua đúng như stage `fill` mà không thẻ nào có `example` (BR-114).
+- **`AdvanceStudyStageUseCase` phải đi tiếp, không chỉ đi một bước.** Advance một
+  lần rồi trả về stage vẫn rỗng thì caller nhận `turn == null` — mà null không
+  phân biệt được với "phiên đã hết". Phiên dừng khi vẫn còn thẻ chưa trả lời. Nay
+  nó lặp qua mọi stage exhausted, chặn trên là dãy 5 stage của thuật toán.
+- **Ca chặn BR-124 giờ là một trạng thái có nội dung:** `StudyBlockedSectionWidget`
+  nói rõ *không lượt nào được ghi và thẻ vẫn giữ nguyên vị trí*, và chỉ có một
+  hành động là rời phiên — BR-124 cấm bỏ qua thẻ, nên không có đường nào "đi tiếp"
+  để mời mà không phá luật.
+- **Tests:** `study_blocked_stage_test.dart` (9), `study_blocked_widget_test.dart` (3),
+  `study_skipped_stage_flow_test.dart` trên SQLite thật (2), và
+  `study_session_flow_test.dart` đổi sang `exhaustedAnswers` — một cờ boolean chỉ
+  nói được "mọi stage đều xong", tức là một kịch bản khác hẳn.
 
 ### M5.13 · Mức phản hồi `almost` của `match` (BR-120)
 

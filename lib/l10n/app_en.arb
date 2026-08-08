@@ -1233,6 +1233,18 @@
   "@studyOptionsSave": {
     "description": "Saves the study options."
   },
+  "studyStageBlockedTitle": "This card cannot be shown here",
+  "@studyStageBlockedTitle": {
+    "description": "Shown when a stage was allowed to run but could not build content for the card on screen (BR-124). The card is not skipped and no turn is recorded."
+  },
+  "studyStageBlockedBody": "Nothing was recorded, and the card keeps its place. You can leave this session and come back to it.",
+  "@studyStageBlockedBody": {
+    "description": "Says what did not happen, so a blocked stage does not read as lost work (BR-124, BR-86)."
+  },
+  "studyLeaveSession": "Leave session",
+  "@studyLeaveSession": {
+    "description": "Ends the session as abandoned/user_exit (BR-82)."
+  },
   "studyResumeTitle": "You left a session open",
   "@studyResumeTitle": {
     "description": "Title of the three-path sheet shown when a session from the same study day is still in progress (BR-103)."

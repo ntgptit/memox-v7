@@ -148,7 +148,12 @@ void main() {
     });
 
     test('an exhausted stage moves to the next one in the sequence', () async {
-      final repository = FakeStudyRepository();
+      // Two answers: this stage is done, the next one is not. One flag can only
+      // say "every stage is done", which is a different scenario entirely — and
+      // now that advancing walks past every exhausted stage (BR-99), it is the
+      // scenario that ends the session.
+      final repository = FakeStudyRepository()
+        ..exhaustedAnswers.addAll(<bool>[true, false]);
 
       final mode = await AdvanceStudyStageUseCase(repository).call(
         session: sessionOf(
@@ -163,31 +168,34 @@ void main() {
       expect(repository.advancedTo, <StudyMode>[StudyMode.guess]);
     });
 
-    test('the last stage finishes the cards and closes the session', () async {
-      final repository = FakeStudyRepository(
-        finishedCardIds: const <String>['card-1', 'card-2'],
-      );
+    test(
+      'every stage exhausted finishes the cards and closes the session',
+      () async {
+        final repository = FakeStudyRepository(
+          finishedCardIds: const <String>['card-1', 'card-2'],
+        );
 
-      final mode = await AdvanceStudyStageUseCase(repository).call(
-        session: sessionOf(
-          kind: StudySessionKind.learning,
-          mode: StudyMode.fill,
-        ),
-        now: now,
-        utcOffset: vietnam,
-      );
+        final mode = await AdvanceStudyStageUseCase(repository).call(
+          session: sessionOf(
+            kind: StudySessionKind.learning,
+            mode: StudyMode.fill,
+          ),
+          now: now,
+          utcOffset: vietnam,
+        );
 
-      expect(mode, isNull);
-      expect(repository.completed.map((c) => c.cardId), <String>[
-        'card-1',
-        'card-2',
-      ]);
-      // BR-144: the lowest rung, due at the start of the next study day.
-      expect(repository.completed.first.box, 1);
-      expect(repository.completed.first.dueAt, DateTime.utc(2026, 8, 7, 17));
-      expect(repository.ended.single.status, StudySessionStatus.completed);
-      expect(repository.ended.single.reason, isNull);
-    });
+        expect(mode, isNull);
+        expect(repository.completed.map((c) => c.cardId), <String>[
+          'card-1',
+          'card-2',
+        ]);
+        // BR-144: the lowest rung, due at the start of the next study day.
+        expect(repository.completed.first.box, 1);
+        expect(repository.completed.first.dueAt, DateTime.utc(2026, 8, 7, 17));
+        expect(repository.ended.single.status, StudySessionStatus.completed);
+        expect(repository.ended.single.reason, isNull);
+      },
+    );
 
     test('completion writes no answer at all (BR-144)', () async {
       // It is an event, not a turn. A `scheduled` row here would make the card
