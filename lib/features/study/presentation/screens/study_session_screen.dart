@@ -69,9 +69,6 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(studySessionControllerProvider(widget.deckId));
-    final controller = ref.read(
-      studySessionControllerProvider(widget.deckId).notifier,
-    );
 
     return MxContentShell(
       title: state.session == null
@@ -79,15 +76,22 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
           : context.studyMode(state.session!.currentMode),
       body: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
-        child: _body(state: state, controller: controller),
+        child: _body(state),
       ),
     );
   }
 
-  Widget _body({
-    required StudySessionState state,
-    required StudySessionController controller,
-  }) {
+  /// The notifier, read at the moment a callback fires rather than during a
+  /// build.
+  ///
+  /// `ref.read` inside `build()` takes a value without subscribing, which is
+  /// how a screen ends up showing state it will never be told has changed —
+  /// the guard rule `no_ref_read_in_build` exists for exactly that, and it
+  /// caught this.
+  StudySessionController get _controller =>
+      ref.read(studySessionControllerProvider(widget.deckId).notifier);
+
+  Widget _body(StudySessionState state) {
     if (state.error != null) {
       return MxErrorState(
         title: context.l10n.appTitle,
@@ -112,7 +116,7 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
       random: _random,
       onAnswer: (action, {outcomeReason, comparisonVersion, hasUsedHint}) =>
           unawaited(
-            controller.answer(
+            _controller.answer(
               action,
               outcomeReason: outcomeReason,
               comparisonVersion: comparisonVersion,
@@ -120,12 +124,9 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
             ),
           ),
       // `browse` grades nothing, so moving on is the whole interaction
-      // (BR-111). The controller turns it into `markBrowsed`.
-      onContinue: () => unawaited(
-        controller.answer(
-          state.actions.isEmpty ? _noAction : state.actions.last,
-        ),
-      ),
+      // (BR-111). The controller sees the mode and turns this into
+      // `markBrowsed`, discarding the action before it reaches any write.
+      onContinue: () => unawaited(_controller.answer(_noAction)),
     );
 
     // A mode that cannot build content for this card renders nothing rather
@@ -135,9 +136,10 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
   }
 }
 
-/// The action `browse` passes when the algorithm declares none it could use.
+/// The placeholder `browse` hands over, and which never reaches a write.
 ///
-/// Unreachable in practice — every algorithm has at least two actions — but the
-/// call needs a value and inventing one at the call site is how a wrong action
-/// reaches the database.
+/// `answer` takes an action because five of the six modes produce one; `browse`
+/// does not (BR-111), and the controller drops this before touching the
+/// database. Named rather than written inline so the next reader asks what it is
+/// instead of assuming `browse` grades cards as remembered.
 const _noAction = StudyAction.remembered;

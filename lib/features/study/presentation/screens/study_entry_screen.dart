@@ -8,13 +8,11 @@ import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_error_state.dart';
-import '../../../deck/domain/models/scheduler_type_model.dart';
-import '../../di/study_repository_provider.dart';
 import '../../domain/models/study_entry_summary_model.dart';
 import '../../domain/models/study_mode.dart';
-import '../../domain/models/study_scheduler.dart';
 import '../../domain/models/study_session_kind_model.dart';
 import '../controllers/study_entry_controller.dart';
+import '../controllers/study_review_modes_controller.dart';
 import '../widgets/overlays/study_mode_chooser_widget.dart';
 import '../widgets/sections/study_entry_section_widget.dart';
 import 'study_session_screen.dart';
@@ -59,10 +57,8 @@ class StudyEntryScreen extends ConsumerWidget {
     WidgetRef ref,
     StudyEntrySummaryModel summary,
   ) async {
-    final scheduler = schedulerFor(await _schedulerTypeOf(ref));
-    if (scheduler == null || !context.mounted) return;
-
-    final modes = scheduler.reviewModes;
+    final modes = await ref.read(studyReviewModesProvider(deckId).future);
+    if (modes.isEmpty || !context.mounted) return;
     if (modes.length == 1) {
       return _open(
         context,
@@ -83,12 +79,6 @@ class StudyEntryScreen extends ConsumerWidget {
     if (chosen == null || !context.mounted) return;
 
     return _open(context, kind: StudySessionKind.reviewing, reviewMode: chosen);
-  }
-
-  Future<SchedulerType> _schedulerTypeOf(WidgetRef ref) async {
-    final context = await ref.read(studyRepositoryProvider).deckContext(deckId);
-
-    return context.schedulerType;
   }
 
   void _open(

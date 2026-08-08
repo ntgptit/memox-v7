@@ -65,6 +65,7 @@ class StudySessionController extends _$StudySessionController {
       state = state.copyWith(
         session: session,
         actions: actions,
+        schedulerType: context.schedulerType,
         sessionCards: cards,
         isOpening: false,
       );

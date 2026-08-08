@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
-import '../../../../../shared/widgets/mx_pill_button.dart';
 import '../../../domain/models/study_entry_summary_model.dart';
 
 /// The way into a deck's study flow: two numbers, and up to two ways in.
@@ -38,19 +38,19 @@ class StudyEntrySectionWidget extends StatelessWidget {
       children: <Widget>[
         Row(
           children: <Widget>[
-            // Not selected, and not selectable: these report, they do not
-            // filter. The pill is reused for its shape and its contrast, which
-            // is what the two counts need to sit beside each other legibly.
-            MxPillButton(
-              label: l10n.studyNewCount(summary.newCount),
-              isSelected: false,
-              onPressed: null,
+            // Plain text, not a disabled pill. A first draft used
+            // `MxPillButton(onPressed: null)` for the shape, and the visual
+            // audit refused it: a disabled control renders its label at 38%
+            // alpha, which is not a palette colour — and these are readouts,
+            // not controls somebody is being stopped from pressing.
+            Text(
+              l10n.studyNewCount(summary.newCount),
+              style: context.texts.titleMedium,
             ),
-            const SizedBox(width: AppSpacing.sm),
-            MxPillButton(
-              label: l10n.studyDueCount(summary.dueCount),
-              isSelected: false,
-              onPressed: null,
+            const SizedBox(width: AppSpacing.lg),
+            Text(
+              l10n.studyDueCount(summary.dueCount),
+              style: context.texts.titleMedium,
             ),
           ],
         ),

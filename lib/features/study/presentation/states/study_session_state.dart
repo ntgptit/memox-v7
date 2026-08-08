@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../../deck/domain/models/scheduler_type_model.dart';
+
 import '../../domain/entities/study_session_entity.dart';
 import '../../domain/models/study_action_model.dart';
 import '../../domain/models/study_turn_model.dart';
@@ -23,6 +25,10 @@ abstract class StudySessionState with _$StudySessionState {
 
     /// The turn on screen. Null while loading, and again once the session ends.
     StudyTurnModel? turn,
+
+    /// The deck's algorithm, so a graded mode can ask it what right and wrong
+    /// mean (BR-107) instead of guessing from the shape of [actions].
+    @Default(SchedulerType.unknown) SchedulerType schedulerType,
 
     /// The actions this deck's algorithm offers (BR-30).
     ///

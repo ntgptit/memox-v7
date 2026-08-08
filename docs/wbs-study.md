@@ -7,7 +7,7 @@
 | **Scope** | Task còn lại của Study từ M5.7 trở đi · nợ kỹ thuật của Study · việc bị chặn |
 | **Source of truth for** | Trạng thái task Study từ M5.7 · nợ kỹ thuật của Study |
 | **Depends on** | `document-conventions.md` · `wbs.md` · `business-rules.md` · `use-cases.md` |
-| **Updated by task** | M5.17 (chốt tám điểm lệch) — sửa §7.8 |
+| **Updated by task** | M5.7 (màn hình phiên học) |
 | **Last updated** | 2026-08-08 |
 
 `docs/wbs.md` giữ M5.0…M5.6 đã hoàn thành và không nhắc lại ở đây. File này giữ
@@ -58,15 +58,7 @@ M5.16 sau khi mọi màn đã ổn định
 
 ### M5.7 · Màn hình phiên học và lối vào
 
-- **Status:** in progress — nhánh `claude/m5-7-study-screens` đã đẩy lên, **đừng
-  `reset --hard` mất nó**. Đã xong: `sessionCards` trên contract/impl/fake,
-  `StudyEntryController`, `studyModeView` (Map mode→widget), `StudyEntryScreen`,
-  `StudySessionScreen`, route đã nối, placeholder đã xoá, `app_router_test` xanh.
-  **Còn lại đúng ba việc**: (1) hai file visual audit theo MX-VIS-001 cho hai màn
-  mới — `screen_audit_coverage_test` đang đỏ, mẫu ở
-  `test/visual_audit/screens/features/study/screens/`; (2) xoá file audit của
-  placeholder đã chết; (3) `app_navigation_shell_test` cần override
-  `studyRepositoryProvider` vì nhánh Study giờ đọc dữ liệu thật.
+- **Status:** **done** — analyze sạch, 1512 test xanh, visual audit xanh, guard sạch
 - **Goal:** Người dùng mở app, thấy số thẻ, bấm học, và đi hết một phiên.
 - **Scope:** `StudyEntryScreen` thay `StudyPlaceholderScreen`;
   `StudySessionScreen` đọc `StudySessionController` và render đúng widget mode;
@@ -76,17 +68,36 @@ M5.16 sau khi mọi màn đã ổn định
 - **Output:** `lib/features/study/presentation/screens/`, route mới trong
   `app/router/`, đăng ký Widgetbook
 - **Acceptance criteria:**
-  - [ ] Ánh xạ mode → widget là **`Map`**, không phải `switch`. Guard AD-18 chỉ
+  - [x] Ánh xạ mode → widget là **`Map`**, không phải `switch`. Guard AD-18 chỉ
         cho một switch trên `StudyMode` và nó ở `study_mode.dart`; handler không
         được trả widget vì `domain/` không biết Flutter.
-  - [ ] Deck `eight_box` đi được trọn chuỗi `browse → match → guess → recall →
+  - [x] Deck `eight_box` đi được trọn chuỗi `browse → match → guess → recall →
         fill`; deck `sm2` đi `browse → self_assess`.
-  - [ ] Bốn trạng thái loading, empty, error, loaded đều có widget test.
-  - [ ] Không đường nào mở phiên ôn khi tập đến hạn rỗng (BR-29, BR-145).
-  - [ ] `grep -rn "Text('" lib/features/study/presentation` không có kết quả.
-  - [ ] Render ở 320×568 và `textScaler` 2.0 → `takeException()` là null.
-  - [ ] Light và dark đều có widget test.
-  - [ ] `study_placeholder_screen.dart` bị xoá, không còn tham chiếu.
+  - [x] Bốn trạng thái loading, empty, error, loaded đều có widget test.
+  - [x] Không đường nào mở phiên ôn khi tập đến hạn rỗng (BR-29, BR-145).
+  - [x] `grep -rn "Text('" lib/features/study/presentation` không có kết quả.
+  - [x] Render ở 320×568 và `textScaler` 2.0 → `takeException()` là null.
+  - [x] Light và dark đều có widget test.
+  - [x] `study_placeholder_screen.dart` bị xoá, không còn tham chiếu.
+**Visual audit bắt một lỗi thật, và đó là lý do nó tồn tại.** Hai ô đếm dùng
+`MxPillButton(onPressed: null)` cho có hình pill; component render chúng thành
+**disabled** — chữ ở alpha 38%, không thuộc palette. Mà chúng không phải nút bị
+vô hiệu hoá, chúng là số liệu đọc. Giờ là `Text` với token thật.
+
+**Guard bắt hai vi phạm, một cái em vừa tạo thêm.** `StudyEntryScreen` đọc thẳng
+`studyRepositoryProvider` để biết mode nào khả dụng — đúng loại vi phạm M5.8
+sinh ra để dọn, và em thêm một cái mới. Sửa ngay bằng `GetReviewModesUseCase` và
+`StudyReviewModes` controller. Cái thứ hai: `ref.read` trong `build()` lấy giá
+trị mà không đăng ký, nên màn hình có thể hiện state không bao giờ được báo là
+đã đổi; notifier giờ đọc trong callback.
+
+**Lượt recursive review sau khi gate xanh tìm ra chỗ thứ ba.** `_actionFor` suy
+đúng/sai từ **vị trí** trong danh sách action — "sai là cái đầu, đúng là cái
+cuối". Đúng với `eight_box` và là trùng hợp: với `sm2` nó chấm `easy` cho mọi câu
+đúng. BR-107 vốn đã nằm trên scheduler dưới dạng `binaryAction`, và hàm ấy trả
+`null` cho thuật toán không có stage chấm điểm — đúng để chỗ sai lộ ra. Giờ
+`presentation` hỏi scheduler thay vì chép lại luật.
+
 - **Vì sao ánh xạ bằng `Map`.** `study_labels_widget.dart` đã dùng đúng cách này
   và vì đúng lý do: một `switch` thứ hai trên `StudyMode` là chỗ chính sách của
   một mode rò ra khỏi handler. `Map` đọc y hệt và giữ luật.

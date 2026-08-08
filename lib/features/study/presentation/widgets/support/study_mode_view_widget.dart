@@ -7,6 +7,7 @@ import '../../../domain/models/match_mode.dart';
 import '../../../domain/models/recall_mode.dart';
 import '../../../domain/models/study_action_model.dart';
 import '../../../domain/models/study_mode.dart';
+import '../../../domain/models/study_scheduler.dart';
 import '../../../domain/models/study_outcome_reason_model.dart';
 import '../../../domain/models/study_turn_model.dart';
 import '../../states/study_session_state.dart';
@@ -80,7 +81,8 @@ Widget? studyModeView({
       initialRemaining: turn.item.remainingMs == null
           ? null
           : Duration(milliseconds: turn.item.remainingMs!),
-      onOutcome: (outcome) => onAnswer(
+      onOutcome: (outcome) => _send(
+        onAnswer,
         _actionFor(state, isCorrect: outcome == RecallOutcome.revealed),
         // Running out is stored as the reason, never inferred from the action:
         // owning up to a blank produces the same action (BR-131).
@@ -92,7 +94,8 @@ Widget? studyModeView({
     StudyMode.fill: () => FillAnswerSectionWidget(
       turn: turn,
       isLocked: state.isSubmitting,
-      onGraded: (outcome) => onAnswer(
+      onGraded: (outcome) => _send(
+        onAnswer,
         _actionFor(state, isCorrect: outcome.isCorrect),
         comparisonVersion: outcome.comparisonVersion,
         hasUsedHint: outcome.hasUsedHint,
@@ -103,18 +106,16 @@ Widget? studyModeView({
   return builders[mode]?.call();
 }
 
-/// Maps a graded outcome to an action of the deck's algorithm (BR-107).
+/// Maps a graded outcome to an action, by asking the algorithm (BR-107).
 ///
-/// Taken from [StudySessionState.actions] rather than named here: `eight_box`
-/// has `forgotten`/`remembered` and `sm2` has four others, and a screen that
-/// wrote either pair down would be wrong for half the decks (BR-30).
-StudyAction _actionFor(StudySessionState state, {required bool isCorrect}) {
-  final actions = state.actions;
-
-  // Wrong is the first action of the set, right is the last — which is the
-  // order both algorithms declare them in.
-  return isCorrect ? actions.last : actions.first;
-}
+/// **Not derived from the order of [StudySessionState.actions].** A first draft
+/// took "wrong is the first, right is the last", which happens to be true of
+/// `eight_box` and is a coincidence: it would score an `sm2` deck `easy` for
+/// every correct answer. The rule already lives on the scheduler, and it returns
+/// null for an algorithm with no graded stage precisely so a caller cannot get
+/// this wrong quietly.
+StudyAction? _actionFor(StudySessionState state, {required bool isCorrect}) =>
+    schedulerFor(state.schedulerType)?.binaryAction(isCorrect: isCorrect);
 
 Widget _matchView({
   required StudyTurnModel turn,
@@ -133,7 +134,7 @@ Widget _matchView({
     board: board,
     isLocked: state.isSubmitting,
     onPairAttempt: (_, {required isCorrect}) =>
-        onAnswer(_actionFor(state, isCorrect: isCorrect)),
+        _send(onAnswer, _actionFor(state, isCorrect: isCorrect)),
   );
 }
 
@@ -157,7 +158,32 @@ Widget _guessView({
   return GuessQuestionSectionWidget(
     question: question,
     isLocked: state.isSubmitting,
-    onChosen: (option) =>
-        onAnswer(_actionFor(state, isCorrect: question.isCorrect(option))),
+    onChosen: (option) => _send(
+      onAnswer,
+      _actionFor(state, isCorrect: question.isCorrect(option)),
+    ),
+  );
+}
+
+/// Passes an action on, and drops a null.
+///
+/// Null means the deck's algorithm has no graded stage, so a graded mode is
+/// running on a deck that should never have offered it (BR-146). Recording
+/// something would be worse than recording nothing: the turn would carry an
+/// action the algorithm does not understand.
+void _send(
+  StudyAnswerSink sink,
+  StudyAction? action, {
+  StudyOutcomeReason? outcomeReason,
+  int? comparisonVersion,
+  bool? hasUsedHint,
+}) {
+  if (action == null) return;
+
+  sink(
+    action,
+    outcomeReason: outcomeReason,
+    comparisonVersion: comparisonVersion,
+    hasUsedHint: hasUsedHint,
   );
 }
