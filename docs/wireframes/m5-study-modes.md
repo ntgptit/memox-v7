@@ -109,8 +109,10 @@ Lưới hai cột, mỗi hàng một cặp ô. Ba trạng thái ô:
 Ô đã ghép **vẫn nằm nguyên chỗ** chứ không biến mất — khác với bản M5.4b hiện
 tại, vốn xoá ô khỏi bàn.
 
-Dòng ngữ cảnh trong ảnh ghi `BOARD 1 OF 3`; "board" không có trong BR nên nhãn
-dùng round: `ROUND 1 · 4 PAIRS LEFT` (§7.6).
+Dòng ngữ cảnh trong ảnh ghi `BOARD 1 OF 3`. §7.6 từng bác vì "board" không có
+trong BR — **nay có**: BR-156 chia một round thành các bàn năm cặp, nên nhãn ghi
+cả hai: `ROUND 1 · BOARD 1/2 · 5 PAIRS LEFT`. Số cặp đếm là của **bàn**, vì thanh
+header đã đo cả round rồi.
 
 **Lưới lấp đầy chiều cao, cho tới khi không lấp được** — xem §8.6.
 

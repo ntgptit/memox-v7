@@ -187,6 +187,24 @@ WHERE session_id = :sessionId AND mode = :mode AND round = :round
   AND status <> 'pending'
 ORDER BY position;
 
+-- Every card of a round, answered or not, in the order the round serves them.
+--
+-- **`match` deals a round into boards and needs to know what the round holds**
+-- (BR-156). It was dealing from the session's whole card list instead, which is
+-- the same thing only in round 1: from round 2 the queue holds just the cards
+-- that failed (BR-115) while the board still laid out all of them, so the
+-- counter said `0 / 3` under a board of ten.
+--
+-- `position` order for the same reason `completedCardsInRound` uses it: it is
+-- the round's own shuffle (BR-117), it is stable across a Resume, and a board
+-- that re-chunked itself on every read would move a pair out from under the
+-- finger about to press it.
+cardsInRound:
+SELECT card_id
+FROM study_queue_items
+WHERE session_id = :sessionId AND mode = :mode AND round = :round
+ORDER BY position;
+
 -- The lowest pending round of a stage — the round currently being served.
 currentRoundOf:
 SELECT MIN(round) AS round

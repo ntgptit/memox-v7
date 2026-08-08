@@ -61,6 +61,13 @@ mixin _StudyQueueOperations on _StudyQueueLayoutOperations {
       mode: session.currentMode,
       round: row.round,
     );
+    // What the round holds, not what the session holds (BR-156). `match` deals
+    // its boards from this; from round 2 the two are different lists.
+    final roundCardIds = await _dao.cardsInRound(
+      sessionId: sessionId,
+      mode: session.currentMode,
+      round: row.round,
+    );
 
     return StudyTurnModel(
       item: studyQueueItemEntityFromRow(row),
@@ -70,6 +77,7 @@ mixin _StudyQueueOperations on _StudyQueueLayoutOperations {
         done: progress.done,
         total: progress.total,
         completedCardIds: completed,
+        roundCardIds: roundCardIds,
       ),
     );
   }

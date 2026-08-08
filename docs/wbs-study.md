@@ -7,7 +7,7 @@
 | **Scope** | Task còn lại của Study từ M5.7 trở đi · nợ kỹ thuật của Study · việc bị chặn |
 | **Source of truth for** | Trạng thái task Study từ M5.7 · nợ kỹ thuật của Study |
 | **Depends on** | `document-conventions.md` · `wbs.md` · `business-rules.md` · `use-cases.md` |
-| **Updated by task** | bàn ghép `match` theo handout layout |
+| **Updated by task** | BR-156 — `match` chia round thành bàn năm cặp |
 | **Last updated** | 2026-08-09 |
 
 `docs/wbs.md` giữ M5.0…M5.6 đã hoàn thành và không nhắc lại ở đây. File này giữ
@@ -1119,3 +1119,40 @@ viết HOA kèm letter-spacing, và icon dòng gợi ý lên `AppIconSize.sm`.
 Nhân đó sửa một lỗi thật: dòng ngữ cảnh ghép hai chuỗi mà chỉ một chuỗi viết
 hoa, nên `match` in `5 CARDS DUE · Round 1 · 4 pairs left`. Nay viết hoa ở chỗ
 ghép, ARB giữ chữ chứ không giữ kiểu.
+
+### BR-156 · `match` chia round thành bàn năm cặp
+
+Ảnh chụp máy thật: mười thẻ ra một bàn hai mươi ô, ô cao 106 và người học phải
+quét cả màn cho mỗi lần chạm. Chủ dự án chốt: **dù tổng thẻ là 10 hay 20 thì mỗi
+lúc chỉ bày năm cặp.** Ba quyết định kèm theo, hỏi và chốt bằng popup:
+
+| | chốt |
+|---|---|
+| round 11 thẻ chia sao | **đúng 5, bàn cuối lấy phần dư** → 5, 5, 1 |
+| bộ đếm thanh header đo gì | **cả round** (`0 / 10`), không reset mỗi bàn |
+| dòng ngữ cảnh | thêm bàn: `10 NEW CARDS · ROUND 1 · BOARD 1/2 · 5 PAIRS LEFT` |
+
+Bàn một cặp **vi phạm BR-153 như đã viết**. Đã nêu trước khi hỏi và chủ dự án
+chọn phương án đó, nên BR-156 phát biểu luôn phạm vi: sàn hai cặp của BR-153 áp
+cho **stage**, không cho từng bàn — nó quyết định stage có chạy hay bị bỏ qua
+theo BR-99, khác với cái đuôi của một round người học đã làm gần hết.
+
+**Lỗi có sẵn phải sửa cùng lúc.** Bàn đang dựng từ `state.sessionCards` — *toàn
+bộ* thẻ của phiên. BR-115 nói round 2 chỉ gồm thẻ trượt round 1, nên ở round 2
+bộ đếm ghi `0 / 3` trong khi bàn vẫn bày đủ mười cặp. Không chia bàn thì không
+lộ; chia bàn thì sai ngay từ chỉ số bàn. Nay có query `cardsInRound` và
+`StudyStageProgressModel.roundCardIds`, đọc trong **cùng một** `nextTurn` với
+counter (AD-13).
+
+`roundCardIds` để `@Default([])` chứ không `required`: mọi lượt đọc từ repository
+đều điền, còn mười lăm test dựng progress bằng tay thì quan tâm bộ đếm và sẽ phải
+mọc thêm một danh sách thẻ chẳng nói lên gì. Rỗng thì caller lùi về tập thẻ nó
+đang có — đúng hành vi cũ.
+
+Chia chunk **trước** khi xoáo, nên thẻ nào ở bàn nào là do thứ tự `position` của
+round quyết định (BR-117), và chỉ hai vế bị xoáo (BR-127). Đổi seed không đẩy
+được một thẻ sang bàn khác — có test.
+
+Nhân đó đo được một thứ nữa: `BOARD 1 OF 2` vừa khít một dòng ở 390 với đúng hai
+pixel dư, rồi tràn xuống hai dòng khi số đổi từ `1` sang `2` — một dòng mà hình
+dạng phụ thuộc vào việc đang ở bàn nào. Rút thành `BOARD 1/2`.

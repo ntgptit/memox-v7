@@ -1486,17 +1486,23 @@
   "@studyHintFill": {
     "description": "Bottom hint line for fill. Diacritics count (BR-134)."
   },
-  "studyMatchContext": "{round, plural, other{Round {round}}} · {remaining, plural, =1{1 pair left} other{{remaining} pairs left}}",
+  "studyMatchContext": "{round, plural, other{Round {round}}} · Board {board}/{boards} · {remaining, plural, =1{1 pair left} other{{remaining} pairs left}}",
   "@studyMatchContext": {
     "placeholders": {
       "round": {
+        "type": "int"
+      },
+      "board": {
+        "type": "int"
+      },
+      "boards": {
         "type": "int"
       },
       "remaining": {
         "type": "int"
       }
     },
-    "description": "The match board's line of context. Round, not board: the design says BOARD 1 OF 3 and 'board' is a word no rule owns — BR-115 and BR-117 have only rounds (§7.6). Splitting a round into smaller boards would need a rule saying how big a board is, not a relabelled string."
+    "description": "The match board's line of context. Board is a word BR-156 now owns, so the design's BOARD 1 OF 3 is back — §7.6 refused it only while no rule said how big a board was. The pairs counted are this board's, not the round's: the top bar already measures the round, and the fact worth saying here is that finishing these five is not finishing it. `2/2` rather than `2 of 2` because the long form fit on one line at 390 with two pixels to spare and then wrapped the moment the digit changed from 1 to 2 — a line whose shape depends on which board you are on."
   },
   "studyCardFaceTerm": "Term",
   "@studyCardFaceTerm": {

@@ -186,13 +186,50 @@ int _seedFor(
   isPerCard ? turn.cardId : null,
 );
 
+/// The round's cards, resolved against the session's content in the round's own
+/// order (BR-156, BR-117).
+///
+/// The queue knows *which* cards a round holds; only the session read knows what
+/// is on them. An id with no card is skipped rather than defaulted — a blank
+/// tile is a tile the user would tap.
+List<StudyCardModel> _roundCards({
+  required StudyTurnModel turn,
+  required StudySessionState state,
+}) {
+  final ids = turn.progress.roundCardIds;
+  if (ids.isEmpty) return state.sessionCards;
+
+  final byId = <String, StudyCardModel>{
+    for (final card in state.sessionCards) card.id: card,
+  };
+
+  return <StudyCardModel>[for (final id in ids) ?byId[id]];
+}
+
 Widget? _matchView({
   required StudyTurnModel turn,
   required StudySessionState state,
   required StudyAnswerSink onAnswer,
   required Random random,
 }) {
-  final board = const MatchModeHandler().buildBoard(state.sessionCards, random);
+  // **The round's cards, in the round's order** (BR-156). `sessionCards` is
+  // every card the session opened with; from round 2 the queue holds only the
+  // ones that failed, and dealing from the session laid all of them out under a
+  // counter that had already dropped to the failures.
+  //
+  // Falls back to the session's cards when the round list is empty, which is a
+  // hand-built progress in a widget test rather than anything a repository read
+  // produces — see `StudyStageProgressModel.roundCardIds`.
+  final roundCards = _roundCards(turn: turn, state: state);
+  const handler = MatchModeHandler();
+  final board = handler.buildBoard(
+    roundCards,
+    random,
+    boardIndex: handler.boardIndexFor(
+      done: turn.progress.done,
+      cardCount: roundCards.length,
+    ),
+  );
 
   // Below two pairs there is no board (BR-153). The stage should never have
   // been laid out — `canRunOn` keeps it out of the queue — so reaching here at
