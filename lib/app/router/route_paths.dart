@@ -40,4 +40,7 @@ abstract final class RoutePaths {
   /// The study branch. A real path rather than a sub-path of `/` so that a
   /// deep link can open the app directly on the Study tab.
   static const String study = '/study';
+
+  /// One deck's study entry, relative to `/decks/:deckId`.
+  static const String deckStudyRelative = 'study';
 }

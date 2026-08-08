@@ -79,6 +79,17 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
                           state.pathParameters[RoutePathParams.deckId],
                     ),
                     routes: <RouteBase>[
+                      // Studying one deck, nested so it pushes onto the Decks
+                      // branch: Back returns to the deck the session started
+                      // from, and the bottom bar stays. The Study *tab* is a
+                      // different thing — it has no deck of its own.
+                      GoRoute(
+                        path: RoutePaths.deckStudyRelative,
+                        name: RouteNames.deckStudy,
+                        builder: (context, state) => StudyEntryScreen(
+                          deckId: state.pathParameters[RoutePathParams.deckId]!,
+                        ),
+                      ),
                       // The card list of a card-type deck, nested so its URL is
                       // `/decks/<id>/cards` and it stays inside the Decks branch.
                       // A deck screen sends the user here (BR-63); the card

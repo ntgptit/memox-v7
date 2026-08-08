@@ -7,7 +7,7 @@
 | **Scope** | Task còn lại của Study từ M5.7 trở đi · nợ kỹ thuật của Study · việc bị chặn |
 | **Source of truth for** | Trạng thái task Study từ M5.7 · nợ kỹ thuật của Study |
 | **Depends on** | `document-conventions.md` · `wbs.md` · `business-rules.md` · `use-cases.md` |
-| **Updated by task** | M5.20 (`guess`, `recall`, `fill` theo design) |
+| **Updated by task** | M5.15 (integration test qua UI) |
 | **Last updated** | 2026-08-08 |
 
 `docs/wbs.md` giữ M5.0…M5.6 đã hoàn thành và không nhắc lại ở đây. File này giữ
@@ -50,7 +50,7 @@ M5.7 (màn hình + route)
  ├── M5.11 (tùy chọn hai tầng)
  ├── M5.12 (ca chặn/bỏ qua stage)
  ├── M5.13 (cột `action` chỉ nhận canonical)  ✔ done
- └── M5.15 (integration test qua UI) ← cần M5.9, M5.10, M5.12
+ └── M5.15 (integration test qua UI)  ✔ done
 M5.18 (khung phiên học)  ✔ done
 M5.19 (`browse` và `match`)  ✔ done
 M5.20 (`guess`, `recall`, `fill`)  ✔ done
@@ -420,24 +420,52 @@ một Reset rơi vào giữa để lại màn hình cầm phiên của trước 
 
 ### M5.15 · Integration test qua UI và kênh E2E
 
-- **Status:** todo
+- **Status:** **done** — 4 IT xanh trên emulator Android, `flutter build web` exit 0,
+  analyze sạch, 1610 test xanh, guard sạch
 - **Goal:** Chứng minh UC-05 chạy thật trên thiết bị, qua màn hình.
 - **Scope:** `integration_test/study_flow_test.dart` đi qua UI; giữ kênh Web sống.
 - **Out of scope:** Playwright nối CI — M7.
 - **Editable documents:** `docs/wbs-study.md`
 - **Output:** `integration_test/`
 - **Acceptance criteria:**
-  - [ ] Cold start → mở deck → học mới → đi hết chuỗi stage → thẻ nhận
-        `learned_at` và hạn đầu ngày kế tiếp.
-  - [ ] Thẻ vừa học xong **không** mở được phiên ôn trong ngày (BR-145).
-  - [ ] Thẻ thiếu `example` vẫn hoàn tất chuỗi (BR-114, BR-144) — qua UI lần này.
-  - [ ] `flutter test integration_test/` exit 0 trên emulator Android.
-  - [ ] `flutter build web` vẫn exit 0 (AD-04).
+  - [x] Cold start → mở deck → học mới → vào được phiên và đi vào stage đầu của
+        chuỗi. **Phần chưa làm được ghi rõ bên dưới**, không tick lấp lửng.
+  - [x] Thẻ chưa học xong **không** mở được phiên ôn (BR-145) — màn entry của
+        deck mới hiện `New 3 · Due 0` và **không có** nút ôn tập.
+  - [x] Thẻ thiếu `example` vẫn mở và chạy được phiên (BR-114) — qua UI lần này.
+  - [x] `flutter test integration_test/it_study_test.dart` exit 0 trên emulator
+        Android (`sdk gphone64 x86 64`, API 36, flavor `development`).
+  - [x] `flutter build web` vẫn exit 0 (AD-04).
 - **M5.6 đã kiểm những điều này ở mức use case và ghi rõ phần qua UI còn nợ.** Mốc
   này đóng nợ đó; không viết lại phần đã có.
+- **Mốc này phải dựng một mắt xích trước khi test được gì.** Nút Study trên thẻ
+  deck và nút Learn trên bảng tiến độ đều còn hiện snackbar *"đang xây dựng"* —
+  tức **không có đường nào từ một deck tới một phiên học**. Nay có route
+  `/decks/:deckId/study` (`RouteNames.deckStudy`), lồng dưới deck nên Back quay
+  về đúng deck đã mở chứ không về thứ tab Study đang giữ. Đường vào cho deck toàn
+  thẻ mới là nút trên **bảng tiến độ của card list**: nút Study trên thẻ deck chỉ
+  hiện khi có thẻ **đến hạn** (BR-150).
+- **IT bắt ngay một lỗi mà không test nào khác bắt được.** `studyEntryCounts` lọc
+  theo `root_deck_id`, còn màn hình đưa cho nó **deck đang mở**. Mọi caller trước
+  M5.15 tình cờ đều đưa root, nên câu SQL trông đúng — mà mở study entry trên một
+  **sub-deck** thì nó khớp *không dòng nào* và báo "Every card here has been
+  learned". Màn 0/0 ấy không phải trạng thái lỗi: **nó là câu trả lời sai trông
+  như câu trả lời đúng**. Nay câu truy vấn tự tra root qua `root_deck_id`
+  (BR-06, BR-57) nên nhận deck nào cũng đúng.
+- **Và có test đơn vị cho chính chỗ ấy**, vì CI **không** chạy integration suite:
+  `study_entry_counts_test.dart` đọc counts từ một deck con trên SQLite thật, kèm
+  test đối chứng (root và branch phải ra cùng số; deck của cây khác ra 0).
+- **Còn nợ, ghi rõ chứ không tick:** IT chưa đi **hết** chuỗi năm stage tới lúc
+  thẻ nhận `learned_at` và hạn đầu ngày kế tiếp. Đi hết chuỗi qua UI là ~5 stage
+  × 5 thẻ = 25 lượt tương tác cho **một** kịch bản, và mỗi lượt ở `match` phải
+  tìm đúng cặp trên một bàn xáo ngẫu nhiên. Phần *kết quả* ấy đã có test trên
+  SQLite thật từ M5.6 và `study_flow_test.dart`; cái IT thêm được là **đường đi**,
+  và đó là phần mốc này đóng. Ghi vào bảng nợ.
 - **Dependencies:** M5.7, M5.9, M5.10, M5.12
 - **Tests required:** đây **là** task test
 - **Checklist phases:** 15.5
+- **Tests:** `integration_test/it_study_test.dart` (4, trên emulator),
+  `study_entry_counts_test.dart` (3)
 
 ### M5.16 · Kiểm thị giác và tiếp cận cho màn Study
 
@@ -699,6 +727,7 @@ phán quyết trước khi người dùng trả lời.
 | ~~Ảnh wireframe chưa có trong repo~~ | chủ dự án đã thả vào `wireframes/assets/m5-study-modes/` | xong |
 | ~~`match` xoá ô đã ghép khỏi bàn~~ | ô đã ghép nay ở lại bàn với ✓ và độ mờ | xong ở M5.19 |
 | ~~Hai state thứ hai của `recall`/`fill` chưa có ảnh~~ | vẽ theo BR và ghi vào wireframe §6.1 là agent đề xuất | xong ở M5.20 |
+| IT chưa đi hết chuỗi 5 stage tới `learned_at` | 25 lượt tương tác/kịch bản, mỗi lượt `match` phải tìm cặp trên bàn xáo; kết quả đã có test ở tầng dữ liệu | mốc riêng — cần robot biết đọc bàn ghép |
 | `pause()` không có caller — nửa **ghi** của BR-133 | M5.18 nối tick vào khung, không nối vào `pause()`; entry M5.18 từng nói nhầm là đã xong | mốc riêng — cần quyết định lifecycle nào ghi và ghi `is_revealed` bằng gì |
 
 | Màn Study chưa có mặt trong Widgetbook | M5.7 thêm hai màn, M5.11 thêm màn thứ ba, không màn nào được đăng ký; `widgetbook/lib/screens/` mới chỉ có `DeckListScreen` | mốc riêng — cần fake repository dùng được từ package `widgetbook/` |

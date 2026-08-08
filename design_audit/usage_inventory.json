@@ -2980,7 +2980,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 140,
+      "line": 148,
       "widget_context": "_StudyAction",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -2991,7 +2991,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 188,
+      "line": 196,
       "widget_context": "_ProgressRing",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3002,7 +3002,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 189,
+      "line": 197,
       "widget_context": "_ProgressRing",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -3013,7 +3013,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 235,
+      "line": 243,
       "widget_context": "_Headline",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3024,7 +3024,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_progress_panel_widget.dart",
-      "line": 261,
+      "line": 269,
       "widget_context": "_Headline",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3112,7 +3112,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/items/deck_study_button_widget.dart",
-      "line": 84,
+      "line": 92,
       "widget_context": "DeckStudyButtonWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3156,7 +3156,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/items/deck_tile_widget.dart",
-      "line": 252,
+      "line": 255,
       "widget_context": "_DeckStateRegion",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3167,7 +3167,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/items/deck_tile_widget.dart",
-      "line": 253,
+      "line": 256,
       "widget_context": "_DeckStateRegion",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3178,7 +3178,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/items/deck_tile_widget.dart",
-      "line": 324,
+      "line": 327,
       "widget_context": "_DeckMetaLine",
       "element_kind": "other",
       "source_kind": "theme-token",

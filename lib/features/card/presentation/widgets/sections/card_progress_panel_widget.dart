@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../../../core/navigation/route_names.dart';
 
 import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_icon_size.dart';
@@ -111,8 +114,13 @@ class _StudyAction extends ConsumerWidget {
       // same as the gap inside a section.
       padding: const EdgeInsets.only(top: AppSpacing.xl),
       child: FilledButton(
-        onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.deckStudyComingSoonMessage)),
+        // The learner's way in for a deck whose cards are all new: the deck
+        // tile's own Study button appears only when something is *due*
+        // (BR-150), so without this a freshly filled deck had no path to a
+        // session at all.
+        onPressed: () => context.goNamed(
+          RouteNames.deckStudy,
+          pathParameters: <String, String>{RoutePathParams.deckId: deckId},
         ),
         style: ButtonStyle(
           minimumSize: const WidgetStatePropertyAll<Size>(

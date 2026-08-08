@@ -84,6 +84,13 @@ LIMIT :limit;
 -- (BR-154). Read separately they are separate snapshots, and the screen can then
 -- draw a badge from before a write beside a chooser from after it.
 --
+-- **It takes the deck the user opened, root or branch, and resolves the root
+-- itself** (BR-06, BR-57). It used to take a root id and be handed whatever the
+-- screen had: every caller happened to pass a root, so a study entry opened on a
+-- *sub-deck* counted nothing and told the learner every card was already
+-- learned. The subquery is also what keeps these counts agreeing with what a
+-- session would actually serve — `openSession` takes the whole root tree.
+--
 -- `fillable` is the count `fill` can actually take: that mode needs an
 -- `example`, and it is optional, so a twenty-card review can be three cards long
 -- in that mode. `distinctMeanings` is what `guess` needs five of (BR-121,
@@ -102,7 +109,7 @@ SELECT
 FROM cards c
 INNER JOIN decks d ON d.id = c.deck_id
 INNER JOIN card_study_states s ON s.card_id = c.id
-WHERE d.root_deck_id = :rootDeckId;
+WHERE d.root_deck_id = (SELECT root_deck_id FROM decks WHERE id = :deckId);
 
 -- The next card to serve (BR-23, BR-26).
 --

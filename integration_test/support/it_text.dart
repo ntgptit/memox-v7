@@ -30,4 +30,17 @@ abstract final class ItText {
   static const String flagCard = 'Flag card';
   static const String unflagCard = 'Remove flag';
   static const String addTagHint = 'Add tag';
+
+  // Study (M5.15). The counts and the two entry buttons come from the study
+  // entry screen; the rest is the session frame every mode wears.
+  /// The card list's progress panel, on a deck whose cards are all new. It is
+  /// the only way into a first session: the deck tile's Study button appears
+  /// only when something is due (BR-150).
+  static const String studyLearnEntry = 'new cards';
+  static const String studyLearnNew = 'Learn new';
+  static const String studyReview = 'Review';
+  static const String studyBrowseMode = 'Browse';
+  static const String studyBrowseHint = 'Read both sides, then continue';
+  static const String studyContinue = 'Next';
+  static const String studyClose = 'Close session';
 }
