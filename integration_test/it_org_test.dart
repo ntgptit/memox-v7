@@ -47,10 +47,16 @@ void main() {
     final robot = await threeCards(harness, tester);
 
     // Step 1: a front-side term narrows the list to its card.
+    //
+    // **Asserted on the row, not on the screen.** The search field holds the
+    // query, so `find.text('abandon')` matches the field whether or not any row
+    // survived — this step passed on that echo for as long as the progress panel
+    // has been pushing the first row below the fold.
+    expect(await robot.ensureCardRow('abandon'), findsWidgets);
     await robot.enterCardSearch('abandon');
-    expect(find.text('abandon'), findsWidgets);
+    expect(await robot.ensureCardRow('abandon'), findsWidgets);
     expect(
-      find.text('benevolent'),
+      robot.cardRow('benevolent'),
       findsNothing,
       reason: 'search did not narrow the list; ${robot.visibleText}',
     );
@@ -58,11 +64,11 @@ void main() {
     // Step 2: a back-side meaning matches too — search reads both sides.
     await robot.enterCardSearch('nhân từ');
     expect(
-      find.text('benevolent'),
+      await robot.ensureCardRow('benevolent'),
       findsWidgets,
       reason: 'the back side is not searchable; ${robot.visibleText}',
     );
-    expect(find.text('abandon'), findsNothing);
+    expect(robot.cardRow('abandon'), findsNothing);
 
     // Step 3: clearing brings everything back.
     await robot.enterCardSearch('');
@@ -103,7 +109,7 @@ void main() {
     await robot.tapBySemantics(ItText.cardEditorClose);
     await robot.scrollToText('concise');
     expect(
-      find.byIcon(Icons.flag),
+      robot.rowFlags(),
       findsWidgets,
       reason: 'the flag did not reach the row; ${robot.visibleText}',
     );
@@ -113,7 +119,7 @@ void main() {
     await robot.openDeck('Giao tiếp hằng ngày');
     await robot.openDeck('Academic words');
     await robot.scrollToText('concise');
-    expect(find.byIcon(Icons.flag), findsWidgets);
+    expect(robot.rowFlags(), findsWidgets);
 
     // Step 4: tapping again clears it.
     await robot.tapText('concise');
@@ -121,7 +127,7 @@ void main() {
     await robot.tapBySemantics(ItText.cardEditorClose);
     await robot.scrollToText('concise');
     expect(
-      find.byIcon(Icons.flag),
+      robot.rowFlags(),
       findsNothing,
       reason: 'the flag survived being cleared; ${robot.visibleText}',
     );

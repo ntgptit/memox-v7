@@ -22,7 +22,10 @@ abstract final class ItText {
   static const String resetContentType = 'Allow cards or decks again';
   static const String allowBoth = 'Allow both';
   static const String decksTab = 'Decks';
-  static const String reviewTab = 'Review';
+
+  /// The second tab. It read `Review` until #186 renamed Review to Study in
+  /// `lib/` — the same rename that left four deck goldens a version behind.
+  static const String studyTab = 'Study';
   static const String cardEditorClose = 'Close';
   static const String detailsToggle = 'Add details';
   static const String detailsLabel = 'Details';

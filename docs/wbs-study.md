@@ -7,7 +7,7 @@
 | **Scope** | Task còn lại của Study từ M5.7 trở đi · nợ kỹ thuật của Study · việc bị chặn |
 | **Source of truth for** | Trạng thái task Study từ M5.7 · nợ kỹ thuật của Study |
 | **Depends on** | `document-conventions.md` · `wbs.md` · `business-rules.md` · `use-cases.md` |
-| **Updated by task** | fixture IT ghi thiếu `learned_at` |
+| **Updated by task** | suite IT trở lại 66/66 |
 | **Last updated** | 2026-08-08 |
 
 `docs/wbs.md` giữ M5.0…M5.6 đã hoàn thành và không nhắc lại ở đây. File này giữ
@@ -763,7 +763,7 @@ phán quyết trước khi người dùng trả lời.
 | ~~IT chưa đi hết chuỗi 5 stage tới `learned_at`~~ | robot đọc bàn ghép và câu hỏi từ chính widget app vừa dựng; 20 lượt, 15 câu trả lời, 5 thẻ nhận `learned_at` | xong |
 | ~~`pause()` không có caller — nửa **ghi** của BR-133~~ | `RecallTimerSectionWidget.onSuspended` bắn khi app rời foreground với lượt còn mở; màn hình gọi `pause()`. Round-trip có test trên SQLite thật | xong |
 | ~~Màn Study chưa có mặt trong Widgetbook~~ | `StudyCatalogRepository` là fake riêng của catalog; ba màn Study đã đăng ký | xong ở M5.16 |
-| 7 kịch bản IT còn đỏ | **Ba hồi quy do phát triển đã tìm ra và vá** — xem mục dưới. Bảy ca còn lại là drift copy/số đếm, mỗi ca một nguyên nhân riêng | lượt điều tra riêng, thuộc Deck/Card |
+| ~~Kịch bản IT đỏ~~ | Bảy nguyên nhân, tất cả đã vá; suite trở lại **66/66** | xong |
 
 ### Nửa **ghi** của BR-133, đóng sau M5.16
 
@@ -879,12 +879,35 @@ phán quyết trước khi người dùng trả lời.
   `due_at` đã tới. Nên mọi thẻ fixture đọc ra là New vĩnh viễn, mang một lịch mà
   nó không được phép có (BR-149) — đúng thứ invariant 28 tồn tại để bắt. Sáu
   kịch bản khẳng định badge, filter và pill đếm số đang đo đúng cái đó.
-- **Con số đo được, từng bước:** `0/66` (binding) → `56/10` → `59/7` (fixture).
-- **Bảy ca còn lại là drift copy/số đếm, mỗi ca một nguyên nhân**, và đã ghi đúng
-  triệu chứng thay vì một con số: `IT-DISC-001` không thấy `2 due`; `IT-ORG-005`
-  không thấy `All 4`; `IT-ORG-012` không thấy `Showing 65 of 65`; `IT-CARD-005`
-  dừng ở editor **tạo mới** với ô Front rỗng; còn `IT-NAV-002`, `IT-ORG-001`,
-  `IT-ORG-004` chưa soi.
+- **Con số đo được, từng bước:** `0/66` (binding) → `56/10` → `59/7` (fixture)
+  → **`66/66`**.
+- **Bảy ca còn lại, bảy nguyên nhân, tất cả đã vá — suite trở lại `66/66`.**
+  Bốn trong số đó là **test xanh vì lý do sai**, tức tệ hơn test đỏ:
+  - **Fixture mâu thuẫn spec của chính nó.** `00-agent-execution-guide.md` §S-DUE
+    ghi `C-P-REVIEW` đến hạn `T0 − 1 ngày`; code ghi `T0 + 2 ngày` — vốn là ngày
+    của thẻ *Future only*. Nên `Due` là 1 chứ không phải 2. Nó ẩn suốt thời gian
+    BR-22 còn tính thẻ `due_at IS NULL` là đến hạn: thẻ chưa học làm con số thành
+    2 một cách tình cờ. BR-142 bỏ mệnh đề ấy, và lỗi của fixture mới lộ ra.
+    Sửa fixture xong thì `IT-ORG-003`, `IT-ORG-005`, `IT-ORG-010` đỏ — vì chúng
+    được viết theo fixture **sai**. Nay cả ba theo spec.
+  - **Pill bỏ số đếm khỏi nhãn** (khi mỗi pill có icon thì hàng không còn vừa
+    390) — số chuyển sang `cardFilterSemantics`. Test đọc nhãn cũ; nay đọc
+    accessible name, tức đọc đúng con số mà tên kịch bản nói tới.
+  - **`find.byIcon(Icons.flag)` luôn khớp**, vì pill *Flagged* dùng **cùng** icon
+    ấy — có chủ đích. Nên ba bước đầu của `IT-ORG-004` xanh **mà không thẻ nào
+    từng được gắn cờ**, và bước cuối là bước duy nhất trung thực. Nay có
+    `robot.rowFlags()` chỉ tìm trong `CardTileWidget`.
+  - **`find.text('abandon')` khớp chữ trong ô tìm kiếm**, nên bước 1 của
+    `IT-ORG-001` xanh dù không hàng nào sống sót qua filter. Nay có
+    `robot.cardRow()`.
+  - **Tab đổi tên Review → Study** ở #186 — cùng thủ phạm với bốn golden cũ.
+  - **"Tìm thấy" khác "chạm được", và ba kịch bản chết ở đúng khoảng cách đó.**
+    Widget dưới màn hình vẫn được dựng và vẫn tìm thấy; `tester.tap` bấm vào tâm
+    nó và hit-test **thứ đang ở đó** — kể cả thanh điều hướng dưới.
+    `IT-ORG-012` bấm "Load 50 more" và **mở tab Study**; `IT-CARD-005` bấm "Save
+    card" trên form đã cuộn qua nút, rồi đọc màn hình không đổi thành "lưu thất
+    bại". Nay mọi cú chạm của robot đi qua `_tapVisible`, và `scrollToText` kết
+    thúc bằng `ensureVisible`.
 - **Bài học chung của cả ba, và nó không phải về Study:** IT **không nằm trong
   CI**. Bảy mươi PR chạy giữa lần ghi `60/60 PASS` và mốc bắt đầu phiên này, mỗi
   PR gate xanh, và không PR nào biết mình vừa làm đỏ suite. Ba nguyên nhân đều là
