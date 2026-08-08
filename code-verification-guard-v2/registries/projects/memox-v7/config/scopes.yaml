@@ -170,17 +170,24 @@ scopes:
       - '**/*.freezed.dart'
 
   # Business layers that must NOT branch on StudyMode. Dispatch belongs to one
-  # exhaustive switch in the resolver (AD-17); a handler owns its own mode, so it
-  # never needs to ask. presentation/ is deliberately absent: mapping a mode to a
-  # label or an icon is presentation, not policy, and forbidding it there would
-  # push that mapping somewhere worse.
+  # exhaustive switch beside the enum, in `study_mode.dart` (AD-18); a handler
+  # owns its own mode, so it never needs to ask. presentation/ is deliberately
+  # absent: mapping a mode to a label or an icon is presentation, not policy, and
+  # forbidding it there would push that mapping somewhere worse.
+  #
+  # `**/*_mode.dart` is the one exemption, and it is the only one that can be.
+  # This scope used to exempt `study_mode_resolver.dart` as well — a file that
+  # cannot exist: `memox.naming.domain_file_role_suffix` admits no `_resolver`
+  # suffix under domain/, so the two rules could never both be satisfied by that
+  # name. Dead config in a guard is worse than no config: it reads as a
+  # permission somebody relied on, and the next reader spends time looking for
+  # the file it protects.
   study_mode_non_dispatch:
     include:
       - lib/features/*/domain/**/*.dart
       - lib/features/*/data/**/*.dart
     exclude:
       - '**/*_mode.dart'
-      - '**/study_mode_resolver.dart'
       - '**/*.g.dart'
       - '**/*.freezed.dart'
       - '**/*.drift.dart'
