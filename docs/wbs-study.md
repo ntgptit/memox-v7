@@ -7,7 +7,7 @@
 | **Scope** | Task còn lại của Study từ M5.7 trở đi · nợ kỹ thuật của Study · việc bị chặn |
 | **Source of truth for** | Trạng thái task Study từ M5.7 · nợ kỹ thuật của Study |
 | **Depends on** | `document-conventions.md` · `wbs.md` · `business-rules.md` · `use-cases.md` |
-| **Updated by task** | golden deck cũ hơn lần đổi tên Review → Study |
+| **Updated by task** | IT đi hết chuỗi 5 stage |
 | **Last updated** | 2026-08-08 |
 
 `docs/wbs.md` giữ M5.0…M5.6 đã hoàn thành và không nhắc lại ở đây. File này giữ
@@ -428,8 +428,8 @@ một Reset rơi vào giữa để lại màn hình cầm phiên của trước 
 - **Editable documents:** `docs/wbs-study.md`
 - **Output:** `integration_test/`
 - **Acceptance criteria:**
-  - [x] Cold start → mở deck → học mới → vào được phiên và đi vào stage đầu của
-        chuỗi. **Phần chưa làm được ghi rõ bên dưới**, không tick lấp lửng.
+  - [x] Cold start → mở deck → học mới → **đi hết chuỗi stage** → thẻ nhận
+        `learned_at` và hạn sau đó. Nửa sau đóng ở lượt riêng — xem mục dưới.
   - [x] Thẻ chưa học xong **không** mở được phiên ôn (BR-145) — màn entry của
         deck mới hiện `New 3 · Due 0` và **không có** nút ôn tập.
   - [x] Thẻ thiếu `example` vẫn mở và chạy được phiên (BR-114) — qua UI lần này.
@@ -455,12 +455,7 @@ một Reset rơi vào giữa để lại màn hình cầm phiên của trước 
 - **Và có test đơn vị cho chính chỗ ấy**, vì CI **không** chạy integration suite:
   `study_entry_counts_test.dart` đọc counts từ một deck con trên SQLite thật, kèm
   test đối chứng (root và branch phải ra cùng số; deck của cây khác ra 0).
-- **Còn nợ, ghi rõ chứ không tick:** IT chưa đi **hết** chuỗi năm stage tới lúc
-  thẻ nhận `learned_at` và hạn đầu ngày kế tiếp. Đi hết chuỗi qua UI là ~5 stage
-  × 5 thẻ = 25 lượt tương tác cho **một** kịch bản, và mỗi lượt ở `match` phải
-  tìm đúng cặp trên một bàn xáo ngẫu nhiên. Phần *kết quả* ấy đã có test trên
-  SQLite thật từ M5.6 và `study_flow_test.dart`; cái IT thêm được là **đường đi**,
-  và đó là phần mốc này đóng. Ghi vào bảng nợ.
+- **Phần đi hết chuỗi đóng ở lượt riêng sau M5.16** — xem mục dưới bảng nợ.
 - **Dependencies:** M5.7, M5.9, M5.10, M5.12
 - **Tests required:** đây **là** task test
 - **Checklist phases:** 15.5
@@ -762,7 +757,7 @@ phán quyết trước khi người dùng trả lời.
 | ~~Ảnh wireframe chưa có trong repo~~ | chủ dự án đã thả vào `wireframes/assets/m5-study-modes/` | xong |
 | ~~`match` xoá ô đã ghép khỏi bàn~~ | ô đã ghép nay ở lại bàn với ✓ và độ mờ | xong ở M5.19 |
 | ~~Hai state thứ hai của `recall`/`fill` chưa có ảnh~~ | vẽ theo BR và ghi vào wireframe §6.1 là agent đề xuất | xong ở M5.20 |
-| IT chưa đi hết chuỗi 5 stage tới `learned_at` | 25 lượt tương tác/kịch bản, mỗi lượt `match` phải tìm cặp trên bàn xáo; kết quả đã có test ở tầng dữ liệu | mốc riêng — cần robot biết đọc bàn ghép |
+| ~~IT chưa đi hết chuỗi 5 stage tới `learned_at`~~ | robot đọc bàn ghép và câu hỏi từ chính widget app vừa dựng; 20 lượt, 15 câu trả lời, 5 thẻ nhận `learned_at` | xong |
 | ~~`pause()` không có caller — nửa **ghi** của BR-133~~ | `RecallTimerSectionWidget.onSuspended` bắn khi app rời foreground với lượt còn mở; màn hình gọi `pause()`. Round-trip có test trên SQLite thật | xong |
 
 | ~~Màn Study chưa có mặt trong Widgetbook~~ | `StudyCatalogRepository` là fake riêng của catalog; ba màn Study đã đăng ký | xong ở M5.16 |
@@ -816,6 +811,37 @@ phán quyết trước khi người dùng trả lời.
 - **Tests:** `bootstrap_test.dart` — *the fixture seed can be switched off, and
   defaults on*. Cả hai chiều, vì chỉ kiểm chiều tắt thì một
   `buildRootWidget` bỏ seeder hẳn cũng xanh.
+
+### IT đi hết chuỗi 5 stage, đóng sau M5.16
+
+- **Status:** **done** — 6 IT xanh trên emulator; analyze sạch, 1625 test xanh,
+  visual audit xanh, guard sạch
+- **Robot đọc màn hình, không chép luật.** Cặp đúng, lựa chọn đúng và cách viết
+  đúng đều lấy ra từ chính widget app vừa dựng — đúng như người dùng đọc màn
+  hình — nên nó không thể lệch khỏi scheduler theo kiểu một robot giữ bản sao
+  đáp án.
+- **Con số cuối khớp đúng luật:** **20 lượt**, **15 câu trả lời**, 5 thẻ nhận
+  `learned_at`. `browse` không ghi lượt nào (BR-111), `fill` không nhận thẻ nào
+  vì không thẻ nào có `example` (BR-114) — nên chuỗi là
+  browse → match → guess → recall.
+- **Và nó bắt hai lỗi thật, cả hai chỉ lộ ra khi đi hết chuỗi:**
+  - **Lượt `match` bị ghi cho thẻ của hàng đợi, không phải thẻ của term đã
+    chọn** — vi phạm BR-118. Bàn ghép bày cả round, nên cặp người dùng với tay
+    tới hiếm khi là thẻ đang ở đầu hàng đợi. `MatchBoardSectionWidget` **vẫn
+    luôn** báo term nào được chọn; `_matchView` vứt nó đi và `answer()` mặc định
+    lấy `turn.cardId`. Nay `answer()` nhận `cardId`, và chỉ `match` truyền.
+  - **Bàn ghép mất dấu ✓ giữa hai lượt.** Màn hình đổi sang trạng thái loading
+    khi chuyển thẻ, tức **gỡ bàn khỏi cây widget** và mang theo bộ nhớ `_matched`
+    của nó — nên mọi ô đã ghép quay lại bấm được ở thẻ kế tiếp, và **cùng một
+    thẻ bị ghi nhiều lượt**. IT đo được: `match` ghi **9 lượt cho 5 thẻ**. Nay
+    tập đã ghép đọc từ hàng đợi (`completedCardsInRound`) và đi cùng lượt đọc
+    của turn (AD-13) — dấu ✓ là **dữ liệu**, không phải trí nhớ của widget.
+- **Vì sao không test nào khác bắt được:** cả hai chỉ xuất hiện khi bàn sống qua
+  nhiều lượt liên tiếp trên một phiên thật. Widget test dựng bàn rồi bấm hai
+  lần; test tầng dữ liệu không có bàn.
+- **Tests:** `it_study_test.dart` (+2, gồm khẳng định **một lượt mỗi thẻ mỗi
+  stage chấm điểm**), `match_board_widget_test.dart` (+2),
+  `it_robot_study.dart` — nửa lái phiên học của robot.
 
 ## Việc không thuộc Study nhưng chặn Definition of Done
 

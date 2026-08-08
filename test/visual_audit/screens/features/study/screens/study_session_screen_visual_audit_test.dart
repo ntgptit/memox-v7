@@ -41,7 +41,12 @@ void main() {
       remainingMs: null,
       isRevealed: false,
     ),
-    progress: StudyStageProgressModel(round: 1, done: 0, total: 1),
+    progress: StudyStageProgressModel(
+      round: 1,
+      done: 0,
+      total: 1,
+      completedCardIds: <String>[],
+    ),
     card: StudyCardModel(
       id: 'c1',
       front: 'ephemeral',

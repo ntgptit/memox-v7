@@ -174,7 +174,12 @@ class StudyCatalogRepository implements StudyRepository {
       isRevealed: false,
     ),
     card: _cards.first,
-    progress: const StudyStageProgressModel(round: 1, done: 2, total: 5),
+    progress: const StudyStageProgressModel(
+      round: 1,
+      done: 2,
+      total: 5,
+      completedCardIds: <String>[],
+    ),
   );
 
   @override

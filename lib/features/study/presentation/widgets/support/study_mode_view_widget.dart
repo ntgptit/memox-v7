@@ -21,6 +21,7 @@ import '../sections/study_card_face_section_widget.dart';
 typedef StudyAnswerSink =
     void Function(
       StudyAction action, {
+      String? cardId,
       StudyOutcomeReason? outcomeReason,
       int? comparisonVersion,
       bool? hasUsedHint,
@@ -92,6 +93,7 @@ Widget? studyModeView({
     // The board belongs to the round, so its seed does not include the card —
     // mixing one in would re-deal between two cards of the same round.
     StudyMode.match: () => _matchView(
+      turn: turn,
       state: state,
       onAnswer: onAnswer,
       random: Random(_seedFor(state, turn: turn, isPerCard: false)),
@@ -168,6 +170,7 @@ int _seedFor(
 );
 
 Widget? _matchView({
+  required StudyTurnModel turn,
   required StudySessionState state,
   required StudyAnswerSink onAnswer,
   required Random random,
@@ -183,9 +186,18 @@ Widget? _matchView({
 
   return MatchBoardSectionWidget(
     board: board,
+    pairedCardIds: turn.progress.completedCardIds.toSet(),
     isLocked: state.isSubmitting,
-    onPairAttempt: (_, {required isCorrect}) =>
-        _send(onAnswer, _actionFor(state, isCorrect: isCorrect)),
+    // **The term's card, not the queue's** (BR-118). The board lays out the
+    // whole round, so the pair a person reaches for is rarely the card the
+    // queue happens to be serving — and every turn was being recorded against
+    // that one instead. The widget has always reported which term was picked;
+    // this is the caller finally using it.
+    onPairAttempt: (term, {required isCorrect}) => _send(
+      onAnswer,
+      _actionFor(state, isCorrect: isCorrect),
+      cardId: term.cardId,
+    ),
   );
 }
 
@@ -230,6 +242,7 @@ Widget? _guessView({
 void _send(
   StudyAnswerSink sink,
   StudyAction? action, {
+  String? cardId,
   StudyOutcomeReason? outcomeReason,
   int? comparisonVersion,
   bool? hasUsedHint,
@@ -238,6 +251,7 @@ void _send(
 
   sink(
     action,
+    cardId: cardId,
     outcomeReason: outcomeReason,
     comparisonVersion: comparisonVersion,
     hasUsedHint: hasUsedHint,

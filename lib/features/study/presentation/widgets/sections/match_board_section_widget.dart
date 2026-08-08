@@ -24,11 +24,21 @@ class MatchBoardSectionWidget extends StatefulWidget {
   const MatchBoardSectionWidget({
     required this.board,
     required this.onPairAttempt,
+    this.pairedCardIds = const <String>{},
     this.isLocked = false,
     super.key,
   });
 
   final MatchBoard board;
+
+  /// The cards this round has already taken, read from the queue.
+  ///
+  /// **The ticks cannot live only in this widget's state.** The screen swaps to
+  /// its loading state between turns, which unmounts the board — so a paired
+  /// tile came back tappable on the very next card, and the same pair could be
+  /// answered again. What this widget still keeps is the tick for the answer in
+  /// flight, which the queue does not know about yet.
+  final Set<String> pairedCardIds;
 
   /// Reports the term that was picked and whether the meaning matched it.
   ///
@@ -127,7 +137,10 @@ class _MatchBoardSectionWidgetState extends State<MatchBoardSectionWidget> {
   );
 
   MatchTileState _stateOf(MatchTile tile, {required bool isTerm}) {
-    if (_matched.contains(tile.cardId)) return MatchTileState.paired;
+    if (_matched.contains(tile.cardId) ||
+        widget.pairedCardIds.contains(tile.cardId)) {
+      return MatchTileState.paired;
+    }
     if (isTerm && _selectedTerm?.cardId == tile.cardId) {
       return MatchTileState.selected;
     }

@@ -235,6 +235,72 @@ void main() {
       expect(find.byIcon(Icons.check), findsNothing);
     });
 
+    testWidgets('a tick the queue knows about survives losing the widget', (
+      tester,
+    ) async {
+      // **The bug this replaces was invisible from inside the widget.** The
+      // screen swaps to its loading state between turns, which unmounts the
+      // board and takes its private `_matched` set with it — so every paired
+      // tile came back tappable on the very next card, and the same pair could
+      // be answered again. The end-to-end run found it as nine `match` turns
+      // recorded for five cards.
+      await tester.pumpWidget(
+        wrapForTest(
+          MatchBoardSectionWidget(
+            board: board,
+            pairedCardIds: const <String>{'a'},
+            onPairAttempt: (_, {required isCorrect}) {},
+          ),
+        ),
+      );
+
+      expect(find.byIcon(Icons.check), findsNWidgets(2));
+
+      final attempts = <String>[];
+      await tester.pumpWidget(
+        wrapForTest(
+          MatchBoardSectionWidget(
+            board: board,
+            pairedCardIds: const <String>{'a'},
+            onPairAttempt: (term, {required isCorrect}) =>
+                attempts.add(term.cardId),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('front-a'), warnIfMissed: false);
+      await tester.pump();
+      await tester.tap(find.text('back-a'), warnIfMissed: false);
+      await tester.pump();
+
+      expect(attempts, isEmpty);
+    });
+
+    testWidgets('the attempt names the term, not whatever is on the queue', (
+      tester,
+    ) async {
+      // BR-118. The board lays out the whole round, so the pair a person
+      // reaches for is rarely the card at the head of the queue — and the view
+      // used to discard the term and record against that one instead.
+      final attempts = <String>[];
+      await tester.pumpWidget(
+        wrapForTest(
+          MatchBoardSectionWidget(
+            board: board,
+            onPairAttempt: (term, {required isCorrect}) =>
+                attempts.add(term.cardId),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('front-c'));
+      await tester.pump();
+      await tester.tap(find.text('back-c'));
+      await tester.pump();
+
+      expect(attempts, <String>['c']);
+    });
+
     testWidgets('a locked board records nothing', (tester) async {
       final attempts = <String>[];
       await tester.pumpWidget(

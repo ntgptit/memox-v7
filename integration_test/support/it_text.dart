@@ -43,4 +43,8 @@ abstract final class ItText {
   static const String studyBrowseHint = 'Read both sides, then continue';
   static const String studyContinue = 'Next';
   static const String studyClose = 'Close session';
+  static const String studyRevealAnswer = 'Show answer';
+  static const String studyFillSubmit = 'Check';
+  static const String studyActionRemembered = 'Remembered';
+  static const String studyBackToDeck = 'Back to deck';
 }

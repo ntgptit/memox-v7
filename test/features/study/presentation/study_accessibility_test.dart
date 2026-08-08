@@ -44,7 +44,12 @@ void main() {
       pronunciation: null,
       backFolded: back,
     ),
-    progress: const StudyStageProgressModel(round: 1, done: 2, total: 5),
+    progress: const StudyStageProgressModel(
+      round: 1,
+      done: 2,
+      total: 5,
+      completedCardIds: <String>[],
+    ),
   );
 
   /// The frame under the gutter its screen gives it.
@@ -60,7 +65,12 @@ void main() {
       mode: mode,
       kind: StudySessionKind.learning,
       deckName: 'Korean',
-      progress: const StudyStageProgressModel(round: 1, done: 2, total: 5),
+      progress: const StudyStageProgressModel(
+        round: 1,
+        done: 2,
+        total: 5,
+        completedCardIds: <String>[],
+      ),
       onClose: () {},
       child: child,
     ),
@@ -159,7 +169,12 @@ void main() {
           mode: StudyMode.recall,
           kind: StudySessionKind.learning,
           deckName: 'Korean',
-          progress: const StudyStageProgressModel(round: 1, done: 2, total: 5),
+          progress: const StudyStageProgressModel(
+            round: 1,
+            done: 2,
+            total: 5,
+            completedCardIds: <String>[],
+          ),
           timeLeft: clock,
           onClose: () {},
           child: const Text('body'),

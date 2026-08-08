@@ -14,13 +14,24 @@ import 'support/it_robot.dart';
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
+  final harnesses = <ItRobot, ItHarness>{};
+
   Future<ItRobot> start(WidgetTester tester) async {
     final harness = await ItHarness.open(tester);
     addTearDown(harness.dispose);
     await harness.launchApp();
 
-    return ItRobot(tester, harness);
+    final robot = ItRobot(tester, harness);
+    harnesses[robot] = harness;
+
+    return robot;
   }
+
+  /// The database behind a robot, for the assertions a screen cannot make.
+  ///
+  /// `learned_at` and `due_at` are not on any screen — BR-144 sets them as the
+  /// consequence of finishing, and the UI shows only that the counts changed.
+  ItHarness harnessOf(ItRobot robot) => harnesses[robot]!;
 
   /// A card deck holding [fronts], reached the way a person reaches it.
   Future<void> seedDeck(ItRobot robot, List<(String, String)> cards) async {
@@ -142,4 +153,106 @@ void main() {
       expect(find.text(ItText.studyBrowseHint), findsNothing);
     },
   );
+
+  testWidgets(
+    'a learning session runs the whole chain and schedules the cards',
+    (tester) async {
+      // **The part M5.15 left owed, and the only claim that needs the whole
+      // chain.** BR-144 makes finishing an *event*, not an answer: the card
+      // takes `learned_at` and its first schedule once it has cleared every
+      // stage it joined — so nothing short of walking to the end observes it.
+      //
+      // None of these cards carries an example, so `fill` takes none of them
+      // (BR-114) and the chain is browse → match → guess → recall. That they
+      // still finish is BR-114's other half, through the UI this time.
+      final robot = await start(tester);
+      await seedDeck(robot, <(String, String)>[
+        ('사과', 'apple'),
+        ('물', 'water'),
+        ('책', 'book'),
+        ('산', 'mountain'),
+        ('바다', 'sea'),
+      ]);
+
+      await robot.tapTextContaining(ItText.studyLearnEntry);
+      await robot.tapText(ItText.studyLearnNew);
+
+      final turns = await robot.studyUntilFinished();
+      robot.trace('after $turns turns');
+
+      expect(find.text(ItText.studyBackToDeck), findsOneWidget);
+
+      // **One turn per card per graded stage, and this is the assertion that
+      // matters.** Before the board read its ticks from the queue, `match`
+      // recorded nine turns for five cards: the screen unmounts the board
+      // between turns, every paired tile came back tappable, and the same pair
+      // could be answered again.
+      final byMode = await harnessOf(robot).database
+          .customSelect(
+            'SELECT mode, COUNT(*) AS turns, COUNT(DISTINCT card_id) AS cards '
+            'FROM study_answers GROUP BY mode ORDER BY mode',
+          )
+          .get();
+
+      expect(
+        <String, List<int>>{
+          for (final row in byMode)
+            row.read<String>('mode'): <int>[
+              row.read<int>('turns'),
+              row.read<int>('cards'),
+            ],
+        },
+        <String, List<int>>{
+          'guess': <int>[5, 5],
+          'match': <int>[5, 5],
+          'recall': <int>[5, 5],
+        },
+        reason: 'one turn per card per graded stage; browse records none',
+      );
+
+      final states = await harnessOf(robot).database
+          .customSelect('SELECT learned_at, due_at FROM card_study_states')
+          .get();
+
+      expect(states, hasLength(5));
+      for (final row in states) {
+        expect(
+          row.read<int?>('learned_at'),
+          isNotNull,
+          reason: 'a card finished the chain without being marked learned',
+        );
+        // BR-105 and BR-144: the first schedule is the start of the next study
+        // day, never "twenty-four hours from now".
+        expect(row.read<int?>('due_at'), isNotNull);
+        expect(
+          row.read<int>('due_at'),
+          greaterThan(row.read<int>('learned_at')),
+        );
+      }
+    },
+  );
+
+  testWidgets('and a card just learned cannot be reviewed the same day', (
+    tester,
+  ) async {
+    // BR-145, and it is only observable *after* the chain: the review entry has
+    // to be absent while the cards are due tomorrow rather than today.
+    final robot = await start(tester);
+    await seedDeck(robot, <(String, String)>[
+      ('사과', 'apple'),
+      ('물', 'water'),
+      ('책', 'book'),
+      ('산', 'mountain'),
+      ('바다', 'sea'),
+    ]);
+
+    await robot.tapTextContaining(ItText.studyLearnEntry);
+    await robot.tapText(ItText.studyLearnNew);
+    await robot.studyUntilFinished();
+    await robot.tapText(ItText.studyBackToDeck);
+
+    expect(find.text('New 0'), findsOneWidget);
+    expect(find.text('Due 0'), findsOneWidget);
+    expect(find.textContaining('Nothing to review yet'), findsOneWidget);
+  });
 }
