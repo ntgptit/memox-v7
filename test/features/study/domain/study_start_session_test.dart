@@ -127,7 +127,7 @@ void main() {
         ).call(deckId: 'deck-1', kind: StudySessionKind.learning, now: now);
 
         expect(repository.opened.single.limit, 7);
-        expect(session.cardLimit, 7);
+        expect(session.session.cardLimit, 7);
       },
     );
 
