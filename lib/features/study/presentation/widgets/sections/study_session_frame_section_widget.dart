@@ -154,7 +154,11 @@ class _TopBar extends StatelessWidget {
           onPressed: onClose,
         ),
         const SizedBox(width: AppSpacing.sm),
-        _ModePill(mode: mode),
+        // **Every child of this row flexes, and that is not tidiness.** At
+        // 320px with `textScaler` 2.0 the pill and the figure together overran
+        // the row by 19px — the ✕ is fixed, so a bar that only let the *track*
+        // shrink had nothing left to give once the track hit zero.
+        Flexible(child: _ModePill(mode: mode)),
         const SizedBox(width: AppSpacing.md),
         // Bare track: the bar's own header would put the same figure above it,
         // and the figure already sits at the end of this row. It announces
@@ -167,7 +171,9 @@ class _TopBar extends StatelessWidget {
           ),
         ),
         const SizedBox(width: AppSpacing.md),
-        _TrailingFigure(progress: progress, timeLeft: timeLeft),
+        Flexible(
+          child: _TrailingFigure(progress: progress, timeLeft: timeLeft),
+        ),
       ],
     );
   }
@@ -219,6 +225,9 @@ class _Figure extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
     text,
+    maxLines: 1,
+    softWrap: false,
+    overflow: TextOverflow.ellipsis,
     style: context.texts.labelLarge?.copyWith(
       color: context.colors.onSurface,
       fontWeight: FontWeight.w600,

@@ -10,6 +10,7 @@ import 'components/feedback_components.dart';
 import 'components/form_components.dart';
 import 'components/overlay_components.dart';
 import 'screens/deck_list_screen_use_case.dart';
+import 'screens/study_screens_use_case.dart';
 import 'support/catalog_page.dart';
 import 'tokens/color_sections.dart';
 import 'tokens/scale_sections.dart';
@@ -113,7 +114,10 @@ class MemoxWidgetbook extends StatelessWidget {
       directories: <WidgetbookNode>[
         WidgetbookCategory(
           name: 'Screens',
-          children: <WidgetbookNode>[deckListScreenComponent()],
+          children: <WidgetbookNode>[
+            deckListScreenComponent(),
+            ...studyScreenComponents(),
+          ],
         ),
         WidgetbookCategory(
           name: 'Design tokens',

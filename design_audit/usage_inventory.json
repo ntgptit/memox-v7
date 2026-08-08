@@ -3464,7 +3464,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart",
-      "line": 223,
+      "line": 232,
       "widget_context": "_Figure",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3475,7 +3475,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart",
-      "line": 245,
+      "line": 254,
       "widget_context": "_ModePill",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -3486,7 +3486,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart",
-      "line": 258,
+      "line": 267,
       "widget_context": "_ModePill",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3497,7 +3497,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart",
-      "line": 284,
+      "line": 293,
       "widget_context": "_HintLine",
       "element_kind": "icon",
       "source_kind": "theme-token",
@@ -3508,7 +3508,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart",
-      "line": 291,
+      "line": 300,
       "widget_context": "_HintLine",
       "element_kind": "text",
       "source_kind": "theme-token",
