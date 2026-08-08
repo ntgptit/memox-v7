@@ -131,12 +131,29 @@ class _FillAnswerSectionWidgetState extends State<FillAnswerSectionWidget> {
                 : () => setState(() => _hasUsedHint = true),
           ),
         const SizedBox(height: AppSpacing.md),
-        if (_wasCorrect != null)
+        // **The second state of this screen, which the design has no image
+        // for.** Drawn from BR-134 and BR-137 rather than guessed: the verdict
+        // is what the turn recorded, the field is closed because a second
+        // answer would be a second turn, and a wrong answer is shown the card's
+        // own back — never what the learner typed, which is not stored and not
+        // echoed (BR-138).
+        if (_wasCorrect != null) ...<Widget>[
           Text(
             _wasCorrect! ? l10n.studyFillCorrect : l10n.studyFillIncorrect,
-            style: context.texts.titleMedium,
-          )
-        else
+            style: context.texts.titleMedium?.copyWith(
+              color: _wasCorrect!
+                  ? context.semanticColors.success
+                  : context.semanticColors.danger,
+            ),
+          ),
+          if (!_wasCorrect!) ...<Widget>[
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              l10n.studyFillTheAnswerWas(widget.turn.card.back),
+              style: context.texts.bodyMedium,
+            ),
+          ],
+        ] else
           MxActionButton(
             label: l10n.studyFillSubmit,
             onPressed: widget.isLocked ? null : _submit,

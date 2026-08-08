@@ -1,13 +1,13 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 290,
-  "totalSites": 339,
+  "scannedFiles": 291,
+  "totalSites": 344,
   "byElementKind": {
-    "other": 263,
+    "other": 264,
     "background": 11,
     "shadow": 1,
     "border": 11,
-    "text": 41,
+    "text": 45,
     "icon": 12
   },
   "bySourceKind": {
@@ -16,7 +16,7 @@
     "Colors-material": 5,
     "hardcoded-literal": 95,
     "opacity-modified-token": 11,
-    "theme-token": 84
+    "theme-token": 89
   },
   "sites": [
     {
@@ -3368,6 +3368,61 @@
       "line": 139,
       "widget_context": "_DeckSearchRow",
       "element_kind": "icon",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/study/presentation/widgets/items/guess_option_item_widget.dart",
+      "line": 131,
+      "widget_context": "_Badge",
+      "element_kind": "other",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/study/presentation/widgets/sections/fill_answer_section_widget.dart",
+      "line": 145,
+      "widget_context": "_FillAnswerSectionWidgetState",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.semanticColors.success",
+      "token": "semantic.success",
+      "resolved_value_light": "#10795C",
+      "resolved_value_dark": "#4FC79B"
+    },
+    {
+      "file": "lib/features/study/presentation/widgets/sections/fill_answer_section_widget.dart",
+      "line": 146,
+      "widget_context": "_FillAnswerSectionWidgetState",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.semanticColors.danger",
+      "token": "semantic.danger",
+      "resolved_value_light": "#C02B3A",
+      "resolved_value_dark": "#F2808F"
+    },
+    {
+      "file": "lib/features/study/presentation/widgets/sections/recall_timer_section_widget.dart",
+      "line": 187,
+      "widget_context": "_RecallTimerSectionWidgetState",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/study/presentation/widgets/sections/recall_timer_section_widget.dart",
+      "line": 222,
+      "widget_context": "_AnswerArea",
+      "element_kind": "text",
       "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",
       "token": "colorScheme.onSurfaceVariant",

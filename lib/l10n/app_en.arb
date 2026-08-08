@@ -1487,5 +1487,30 @@
   "studyMatchPaired": "Paired",
   "@studyMatchPaired": {
     "description": "Announced for a match tile that has been paired correctly. The tick beside it is decoration; this is what a screen reader reads, because a pair marked only in green is not marked for everyone."
+  },
+  "studyGuessCorrectAnswer": "Correct answer",
+  "@studyGuessCorrectAnswer": {
+    "description": "Announced for the right option once a guess question has been answered. The green tick beside it marks it for people who can see it; this marks it for everyone."
+  },
+  "studyGuessYourAnswer": "Your answer, incorrect",
+  "@studyGuessYourAnswer": {
+    "description": "Announced for the option the learner picked when it was wrong. Red and a cross carry it visually (BR-126: the first choice is the only one)."
+  },
+  "studyRecallLocked": "This turn is settled. The next round starts a fresh twenty seconds.",
+  "@studyRecallLocked": {
+    "description": "Shown once a recall turn has an outcome. BR-129 and BR-130: exactly one outcome per turn, and running out cannot be turned back into a right answer. Saying so is what stops the revealed answer reading as a screen that stopped responding."
+  },
+  "studyRecallAnswerHidden": "Answer hidden",
+  "@studyRecallAnswerHidden": {
+    "description": "Label of the covered answer area on a recall turn, before it is revealed. The area is a blank panel; without a label a screen reader finds nothing there at all."
+  },
+  "studyFillTheAnswerWas": "The answer: {answer}",
+  "@studyFillTheAnswerWas": {
+    "placeholders": {
+      "answer": {
+        "type": "String"
+      }
+    },
+    "description": "Shown after a fill answer was graded wrong. What the learner typed is never stored or echoed (BR-138); the card's own back is what is shown back to them."
   }
 }

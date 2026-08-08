@@ -6,6 +6,7 @@ import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
+import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../domain/models/recall_mode.dart';
 import '../../../domain/models/study_turn_model.dart';
@@ -148,44 +149,80 @@ class _RecallTimerSectionWidgetState extends State<RecallTimerSectionWidget>
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final semantic = context.semanticColors;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        // The countdown itself is in the frame's top bar (§7.3); what stays here
-        // is the one thing the bar cannot say — that this turn is over and its
-        // outcome is locked to wrong (BR-130).
-        if (_outcome == RecallOutcome.timedOut) ...<Widget>[
-          Text(l10n.studyRecallTimedOut, style: context.texts.titleMedium),
-          const SizedBox(height: AppSpacing.md),
-        ],
+        // The prompt on top, the answer area under it, the action at the
+        // bottom — the layout `fill` uses too, because the two turns ask the
+        // same thing in two ways.
         MxCard(
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.xl),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  widget.turn.card.front,
-                  style: context.texts.headlineSmall,
-                ),
-                // Running out reveals the answer as well, so the user still
-                // learns something from the card they just lost (BR-130).
-                if (_isRevealed) ...<Widget>[
-                  const SizedBox(height: AppSpacing.lg),
-                  Text(widget.turn.card.back, style: context.texts.bodyLarge),
-                ],
-              ],
-            ),
+          padding: const EdgeInsets.all(AppSpacing.xl),
+          child: Text(
+            widget.turn.card.front,
+            style: context.texts.headlineSmall,
           ),
         ),
-        const SizedBox(height: AppSpacing.xl),
-        if (!_isRevealed)
+        const SizedBox(height: AppSpacing.lg),
+        _AnswerArea(
+          answer: _isRevealed ? widget.turn.card.back : null,
+          hiddenLabel: l10n.studyRecallAnswerHidden,
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        // **The second state of this screen, which the design has no image
+        // for.** Drawn from BR-129 and BR-130 rather than guessed: the turn has
+        // exactly one outcome and it cannot be changed, so there is no button
+        // left to offer — and a screen with the answer showing and no control
+        // is indistinguishable from one that stopped responding unless it says
+        // why.
+        if (_isRevealed)
+          Text(
+            _outcome == RecallOutcome.timedOut
+                ? '${l10n.studyRecallTimedOut} · ${l10n.studyRecallLocked}'
+                : l10n.studyRecallLocked,
+            style: context.texts.bodyMedium?.copyWith(
+              color: _outcome == RecallOutcome.timedOut
+                  ? semantic.danger
+                  : context.colors.onSurfaceVariant,
+            ),
+          )
+        else
           MxActionButton(
             label: l10n.studyRevealAnswer,
             onPressed: () => _claim(RecallOutcome.revealed),
           ),
       ],
+    );
+  }
+}
+
+/// The panel the answer sits behind, and then in.
+///
+/// It carries a label while it is covered: an empty box is nothing at all to a
+/// screen reader, and "there is an answer here and it is hidden" is a fact about
+/// the turn rather than decoration.
+class _AnswerArea extends StatelessWidget {
+  const _AnswerArea({required this.answer, required this.hiddenLabel});
+
+  final String? answer;
+  final String hiddenLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final revealed = answer;
+
+    return MxCard(
+      elevation: AppElevation.none,
+      padding: const EdgeInsets.all(AppSpacing.xl),
+      child: revealed == null
+          ? Text(
+              hiddenLabel,
+              style: context.texts.bodyMedium?.copyWith(
+                color: context.colors.onSurfaceVariant,
+              ),
+            )
+          : Text(revealed, style: context.texts.titleMedium),
     );
   }
 }

@@ -7,7 +7,7 @@
 | **Scope** | Task còn lại của Study từ M5.7 trở đi · nợ kỹ thuật của Study · việc bị chặn |
 | **Source of truth for** | Trạng thái task Study từ M5.7 · nợ kỹ thuật của Study |
 | **Depends on** | `document-conventions.md` · `wbs.md` · `business-rules.md` · `use-cases.md` |
-| **Updated by task** | M5.19 (`browse` và `match` theo design) |
+| **Updated by task** | M5.20 (`guess`, `recall`, `fill` theo design) |
 | **Last updated** | 2026-08-08 |
 
 `docs/wbs.md` giữ M5.0…M5.6 đã hoàn thành và không nhắc lại ở đây. File này giữ
@@ -53,7 +53,7 @@ M5.7 (màn hình + route)
  └── M5.15 (integration test qua UI) ← cần M5.9, M5.10, M5.12
 M5.18 (khung phiên học)  ✔ done
 M5.19 (`browse` và `match`)  ✔ done
-M5.20 (`guess`, `recall`, `fill`) ← cần M5.18
+M5.20 (`guess`, `recall`, `fill`)  ✔ done
 M5.14 blocked bởi UC-07
 M5.16 sau khi mọi màn đã ổn định
 ```
@@ -562,8 +562,13 @@ phán quyết trước khi người dùng trả lời.
     cả xanh. Nay `study_canonical_action_test.dart` kiểm nó trên SQLite thật.
 - **`onRemainingChanged` từng không ai gọi.** Nó chỉ bắn lúc đồng hồ dừng, và
   không caller nào trong `lib/`. Nay bắn mỗi tick và màn hình nghe — nên khung
-  có số để vẽ, và đây cũng là nửa **ghi** của BR-133 mà M5.9 chỉ nối được nửa
-  **đọc**.
+  có số để vẽ.
+- **Đính chính, phát hiện ở lượt recursive review của M5.20:** bản đầu của mục
+  trên viết rằng việc này *"cũng là nửa ghi của BR-133"*. **Sai.** Tick được nối
+  vào `ValueNotifier` của khung, không nối vào `pause()` — và
+  `StudySessionController.pause()` vẫn **không có caller nào trong `lib/`**. Nửa
+  đọc của BR-133 xong từ M5.9; nửa ghi vẫn còn nợ, và nay nằm trong bảng nợ kỹ
+  thuật thay vì bị coi là đã xong.
 - **Quyết định của agent, không có trong docs:** dòng ngữ cảnh là
   `<tên deck> · <loại phiên>`. Ảnh ghi `VOCAB — CHAPTER 1 · ÔN TẬP`, tức có
   đường dẫn deck; dựng đường dẫn cần thêm một lượt đọc cây deck, và §7.2 chỉ đòi
@@ -630,7 +635,7 @@ phán quyết trước khi người dùng trả lời.
 
 ### M5.20 · `guess`, `recall` và `fill` theo design
 
-- **Status:** todo
+- **Status:** **done** — analyze sạch, 1607 test xanh, visual audit xanh, guard sạch
 - **Goal:** Ba màn khớp ảnh 14, 15, 16 — gồm cả state thứ hai chưa có ảnh.
 - **Scope:** hàng lựa chọn có huy hiệu chữ cái và trạng thái sau trả lời; bố cục
   đề trên / đáp án dưới / nút dưới cùng cho `recall` và `fill`.
@@ -639,19 +644,47 @@ phán quyết trước khi người dùng trả lời.
 - **Editable documents:** `docs/wbs-study.md`
 - **Output:** cập nhật ba widget mode
 - **Acceptance criteria:**
-  - [ ] `guess` sau trả lời: đáp án đúng xanh + ✓, lựa chọn sai đã chọn đỏ + ✕,
+  - [x] `guess` sau trả lời: đáp án đúng xanh + ✓, lựa chọn sai đã chọn đỏ + ✕,
         ba lựa chọn còn lại mờ — và **không** nhận thêm lượt nào (BR-126).
-  - [ ] Huy hiệu A–E là thứ tự hiển thị, **không** phải định danh; lượt vẫn ghi
+  - [x] Huy hiệu A–E là thứ tự hiển thị, **không** phải định danh; lượt vẫn ghi
         theo `cardId` (BR-125).
-  - [ ] Mỗi lựa chọn chỉ hiện nghĩa, không có dòng mô tả phụ (§7.5).
-  - [ ] `recall` không có icon loa và icon bút chì (§7.4).
-  - [ ] `recall` có state đã lật, và nó khoá kết cục (BR-130).
-  - [ ] `fill` có state đã chấm, hiện đúng/sai và không nhận nhập tiếp.
-  - [ ] Hai state thiếu ảnh được vẽ theo BR chứ không theo phỏng đoán, và ghi rõ
-        trong wireframe là do agent đề xuất.
+  - [x] Mỗi lựa chọn chỉ hiện nghĩa, không có dòng mô tả phụ (§7.5).
+  - [x] `recall` không có icon loa và icon bút chì (§7.4).
+  - [x] `recall` có state đã lật, và nó khoá kết cục (BR-130).
+  - [x] `fill` có state đã chấm, hiện đúng/sai và không nhận nhập tiếp.
+  - [x] Hai state thiếu ảnh được vẽ theo BR chứ không theo phỏng đoán, và ghi rõ
+        trong wireframe là do agent đề xuất — `m5-study-modes.md` §6.1.
+- **Kết quả:** `GuessOptionItemWidget` (bucket `items/`) có bốn state;
+  `recall` và `fill` đổi sang cùng một bố cục *đề trên · vùng đáp án · hành động
+  dưới cùng*, vì hai lượt học ấy hỏi cùng một thứ theo hai cách.
+- **Đáp án đúng luôn được đánh dấu đúng, kể cả khi người dùng không chọn nó.**
+  Một màn chỉ đánh dấu lựa chọn của bạn để bạn lại **biết mình sai mà không biết
+  cái gì đúng** — mà đó chính là thứ lượt học này tồn tại để dạy.
+- **Huy hiệu A–E dựng từ vị trí hàng, không lưu trên `GuessOption`.** Lưu nó lên
+  option làm nó *trông như* thứ một lượt có thể ghi theo (BR-125), và ghế thì đổi
+  mỗi lần xáo (BR-127). Nó cũng bị `ExcludeSemantics` — screen reader đọc "A,
+  apple" thì nghĩa bị chôn sau một số ghế sắp đổi.
+- **Quyết định của agent, ghi vào wireframe §6.1 — hai state không có ảnh:**
+  - **`recall` sau khi lật không còn nút nào**, vì BR-129 cho đúng một kết cục và
+    BR-130 khoá nó. Nhưng màn có đáp án và không nút trông **hệt như màn treo**,
+    nên chỗ nút cũ là một câu nói rõ lượt đã chốt. Trước khi lật, vùng đáp án
+    mang nhãn — một ô rỗng là *không có gì* với screen reader.
+  - **`fill` sau khi chấm** đóng ô nhập và hiện mặt sau **của thẻ** khi sai, chưa
+    bao giờ hiện lại thứ người dùng gõ (BR-138). Đúng thì không hiện dòng đáp án:
+    dòng ấy nói cho người trượt biết họ thiếu gì, đưa cho người làm đúng thì nó
+    đọc thành lời đính chính.
+- **Recursive review tìm ra một chỗ, và nó nằm ở mốc trước:** mục
+  `onRemainingChanged` của M5.18 khẳng định việc nối tick "cũng là nửa ghi của
+  BR-133". Không phải — tick được nối vào `ValueNotifier` của khung, còn
+  `StudySessionController.pause()` vẫn không có caller nào trong `lib/`. Đã đính
+  chính trong entry M5.18 và ghi vào bảng nợ, vì một dòng WBS nói xong một việc
+  chưa xong là đúng thứ tệ hơn không có WBS.
 - **Dependencies:** M5.18
 - **Tests required:** widget test cho từng state; test huy hiệu không phải định danh
 - **Checklist phases:** 14.4, 15.3
+- **Tests:** `guess_question_widget_test.dart` (7, tách khỏi
+  `match_board_widget_test.dart` ở guard 400 dòng),
+  `recall_fill_widget_test.dart` nhóm *the second states* (3)
 
 ## Nợ kỹ thuật của Study
 
@@ -665,7 +698,8 @@ phán quyết trước khi người dùng trả lời.
 | Widget mode chưa ai dựng trong `lib/` | chưa có màn ghép | M5.7 |
 | ~~Ảnh wireframe chưa có trong repo~~ | chủ dự án đã thả vào `wireframes/assets/m5-study-modes/` | xong |
 | ~~`match` xoá ô đã ghép khỏi bàn~~ | ô đã ghép nay ở lại bàn với ✓ và độ mờ | xong ở M5.19 |
-| Hai state thứ hai của `recall`/`fill` chưa có ảnh | design mới cung cấp state đầu | M5.20 — vẽ theo BR, ghi rõ là agent đề xuất |
+| ~~Hai state thứ hai của `recall`/`fill` chưa có ảnh~~ | vẽ theo BR và ghi vào wireframe §6.1 là agent đề xuất | xong ở M5.20 |
+| `pause()` không có caller — nửa **ghi** của BR-133 | M5.18 nối tick vào khung, không nối vào `pause()`; entry M5.18 từng nói nhầm là đã xong | mốc riêng — cần quyết định lifecycle nào ghi và ghi `is_revealed` bằng gì |
 
 | Màn Study chưa có mặt trong Widgetbook | M5.7 thêm hai màn, M5.11 thêm màn thứ ba, không màn nào được đăng ký; `widgetbook/lib/screens/` mới chỉ có `DeckListScreen` | mốc riêng — cần fake repository dùng được từ package `widgetbook/` |
 

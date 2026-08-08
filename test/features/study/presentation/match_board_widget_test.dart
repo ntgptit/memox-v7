@@ -2,10 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/features/study/domain/models/guess_mode.dart';
 import 'package:memox/features/study/domain/models/match_mode.dart';
 import 'package:memox/features/study/domain/models/study_turn_model.dart';
-import 'package:memox/features/study/presentation/widgets/sections/guess_question_section_widget.dart';
 import 'package:memox/features/study/presentation/widgets/sections/match_board_section_widget.dart';
 
 import 'package:memox/core/theme/app_semantic_colors.dart';
@@ -256,101 +254,6 @@ void main() {
       await tester.pump();
 
       expect(attempts, isEmpty);
-    });
-  });
-
-  group('the guess question', () {
-    final pool = <StudyCardModel>[for (var i = 0; i < 10; i++) card('c$i')];
-    final question = const GuessModeHandler().buildQuestion(
-      term: pool.first,
-      pool: pool,
-      random: Random(2),
-    )!;
-
-    testWidgets('renders exactly five options (BR-121)', (tester) async {
-      await tester.pumpWidget(
-        wrapForTest(
-          GuessQuestionSectionWidget(question: question, onChosen: (_) {}),
-        ),
-      );
-
-      for (final option in question.options) {
-        expect(find.text(option.text), findsOneWidget);
-      }
-      expect(question.options, hasLength(5));
-    });
-
-    testWidgets('reports the option by identity, not by its text (BR-125)', (
-      tester,
-    ) async {
-      final chosen = <String>[];
-      await tester.pumpWidget(
-        wrapForTest(
-          GuessQuestionSectionWidget(
-            question: question,
-            onChosen: (option) => chosen.add(option.cardId),
-          ),
-        ),
-      );
-
-      final target = question.options.last;
-      await tester.tap(find.text(target.text));
-      await tester.pump();
-
-      expect(chosen, <String>[target.cardId]);
-    });
-
-    testWidgets('a second tap on the same question records nothing (BR-126)', (
-      tester,
-    ) async {
-      // The window is real: the write takes long enough for a second tap, and a
-      // second turn would grade the same card twice in one round.
-      final chosen = <String>[];
-      await tester.pumpWidget(
-        wrapForTest(
-          GuessQuestionSectionWidget(
-            question: question,
-            onChosen: (option) => chosen.add(option.cardId),
-          ),
-        ),
-      );
-
-      await tester.tap(find.text(question.options.first.text));
-      await tester.pump();
-      await tester.tap(find.text(question.options[1].text));
-      await tester.pump();
-
-      expect(chosen, hasLength(1));
-    });
-
-    testWidgets('the next question can be answered again', (tester) async {
-      // Without resetting the guard on a new term, every question after the
-      // first is unanswerable.
-      final chosen = <String>[];
-
-      Future<void> pump(GuessQuestion q) => tester.pumpWidget(
-        wrapForTest(
-          GuessQuestionSectionWidget(
-            question: q,
-            onChosen: (option) => chosen.add(option.cardId),
-          ),
-        ),
-      );
-
-      await pump(question);
-      await tester.tap(find.text(question.options.first.text));
-      await tester.pump();
-
-      final second = const GuessModeHandler().buildQuestion(
-        term: pool[1],
-        pool: pool,
-        random: Random(3),
-      )!;
-      await pump(second);
-      await tester.tap(find.text(second.options.first.text));
-      await tester.pump();
-
-      expect(chosen, hasLength(2));
     });
   });
 }

@@ -7,7 +7,7 @@
 | **Scope** | Khung phiên học, và năm màn `browse` · `match` · `guess` · `recall` · `fill`. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), luồng (`use-cases.md`), giá trị token (`design_system/tokens/`) |
 | **Source of truth for** | Bố cục màn học · phán quyết cho tám điểm design lệch với BR |
 | **Depends on** | `document-conventions.md`, `business-rules.md` (BR-108…BR-154), `wbs-study.md` (M5.7…M5.20) |
-| **Updated by task** | M5.17 (chốt tám điểm lệch) — sửa §7.8 |
+| **Updated by task** | M5.20 (state thứ hai của `recall` và `fill`) — thêm §6.1 |
 | **Last updated** | 2026-08-08 |
 
 Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham chiếu bằng ID.
@@ -126,6 +126,36 @@ viền và `Check` đặc.
 Ảnh có **icon bút chì** trên cả hai và **icon loa** ở `recall`; cả hai **không
 dựng** ở MVP (§7.4). Ảnh **không** có đồng hồ, còn BR-128 bắt buộc phải có —
 `recall` thêm thời gian còn lại vào thanh trên (§7.3).
+
+### 6.1 State thứ hai của `recall` và `fill` — **agent đề xuất, vẽ theo BR**
+
+Tiêu đề khung của hai ảnh ghi `1/2`: mỗi màn còn một state chưa có ảnh. Hai bố
+cục dưới đây **do agent đề xuất ở M5.20**, suy từ BR chứ không từ ảnh. Ghi ở đây
+để người sau biết chúng chưa qua tay người thiết kế.
+
+**`recall`, sau khi lật.** Vùng đáp án đổi từ tấm che sang chính mặt sau của
+thẻ, và **không còn nút nào**:
+
+- BR-129 cho đúng **một** kết cục mỗi lượt, BR-130 khoá nó — nên không có hành
+  động nào còn hợp lệ để mời.
+- Nhưng một màn có đáp án hiện ra và không nút nào trông **hệt như màn bị treo**.
+  Nên chỗ nút cũ là một câu nói rõ lượt đã chốt và vòng sau bắt đầu lại đủ hai
+  mươi giây (BR-133). Hết giờ thì câu ấy mở đầu bằng "Time's up" và dùng
+  `danger`; tự lật thì dùng màu chữ phụ.
+- Trước khi lật, vùng đáp án mang nhãn "đáp án đang ẩn". Một ô rỗng là **không
+  có gì** với screen reader, còn "có đáp án ở đây và nó đang ẩn" là một sự thật
+  về lượt học.
+
+**`fill`, sau khi chấm.** Ô nhập đóng lại, và kết cục hiện bằng `success` hoặc
+`danger`:
+
+- Đóng ô nhập vì một câu trả lời thứ hai là một lượt thứ hai (BR-137, và cùng lý
+  do với BR-126 ở `guess`).
+- Sai thì hiện **mặt sau của thẻ**, không phải thứ người dùng đã gõ: BR-138 nói
+  nội dung gõ vào không được lưu, và dội nó lại màn hình là cùng một dữ liệu chỉ
+  đi theo hướng khác.
+- Đúng thì **không** hiện dòng đáp án. Dòng đó tồn tại để nói cho người trượt
+  biết họ thiếu gì; đưa cho người làm đúng thì nó đọc thành một lời đính chính.
 
 ## 7. Điểm lệch giữa design và BR — **đã chốt**
 
