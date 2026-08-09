@@ -7,7 +7,7 @@
 | **Scope** | 133 kịch bản của `scenario-catalog.md`. Ngoài phạm vi: đánh giá chất lượng của test đã có |
 | **Source of truth for** | Danh sách việc còn phải viết ở `HOST-FLOW`/`HOST-WIDGET` |
 | **Depends on** | `scenario-catalog.md`, `12-testing-pyramid-audit.md` |
-| **Updated by task** | Refactor IT theo Testing Pyramid — bước 5 |
+| **Updated by task** | Refactor IT theo Testing Pyramid — bước 6 |
 | **Last updated** | 2026-08-09 |
 
 **Bản đồ này là danh sách việc, không phải giấy chứng nhận.** Nó nối kịch bản
@@ -25,23 +25,24 @@ bản muốn. Vì vậy cột trạng thái đọc là:
 
 | Trạng thái | Số kịch bản |
 |---|---|
-| đã có | **129** |
-| một phần | **1** |
-| chưa có | **3** |
+| đã có | **133** |
+| một phần | **0** |
+| chưa có | **0** |
 
 19 tệp test chạy trên SQLite thật (`openTestDatabase` hoặc
 `NativeDatabase.memory`), nên nền `HOST-FLOW` không phải dựng từ đầu.
 
 ## Kịch bản còn thiếu luật chưa được test nào nhắc tới
 
-Đây là danh sách việc thật sự của bước 5.
+**Không còn.** Bốn mục cuối đã đóng ở bước 6; đây là nơi chúng hạ cánh, giữ lại
+để lần sau không phải lần ngược.
 
-| ID | Profile | Luật chưa có test nào nhắc |
+| ID | Profile | Test host |
 |---|---|---|
-| IT-NAV-005 | `HOST-WIDGET` | — |
-| IT-ORG-012 | `HOST-WIDGET` | — |
-| IT-MODE-013 | `HOST-WIDGET` | — |
-| IT-STUDY-006 | `HOST-WIDGET + HOST-FLOW` | BR-100 |
+| IT-NAV-005 | `HOST-WIDGET` | `test/integration/widgets/navigation_widget_test.dart` |
+| IT-ORG-012 | `HOST-WIDGET` | `test/integration/flows/card_window_flow_test.dart` (nửa SQL) + `test/features/card/presentation/card_list_screen_test.dart` (nửa màn hình) |
+| IT-MODE-013 | `HOST-WIDGET` | `test/integration/widgets/study_mode_accessibility_widget_test.dart` (bước 2) + `test/features/study/presentation/study_accessibility_test.dart` (bước 1, 4) |
+| IT-STUDY-006 | `HOST-WIDGET + HOST-FLOW` | `test/integration/widgets/blocked_mode_widget_test.dart` (BR-100) |
 
 ## Kịch bản đã có test host nhắc tới mọi luật
 

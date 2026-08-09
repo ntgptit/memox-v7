@@ -4,6 +4,7 @@ import 'package:memox/features/card/presentation/widgets/items/card_tile_widget.
 import 'package:memox/features/deck/presentation/widgets/items/deck_tile_widget.dart';
 import 'package:memox/features/study/presentation/widgets/sections/fill_answer_section_widget.dart';
 import 'package:memox/features/study/presentation/widgets/sections/guess_question_section_widget.dart';
+import 'package:memox/features/study/presentation/widgets/items/match_tile_widget.dart';
 import 'package:memox/features/study/presentation/widgets/sections/match_board_section_widget.dart';
 import 'package:memox/features/study/presentation/widgets/sections/recall_timer_section_widget.dart';
 import 'package:memox/features/study/presentation/widgets/sections/study_card_face_section_widget.dart';
