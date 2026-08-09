@@ -1319,3 +1319,31 @@ còn BR-117 bắt mỗi round có **thứ tự xoáo riêng** — khẳng địn
 giá: khi trần cắt, nó lấy đúng những thẻ **quá hạn lâu nhất**. Một trần lấy nhầm
 phía sẽ để món nợ cũ nhất lớn mãi, và không phép kiểm thứ tự nào trong hàng đợi
 nhìn thấy điều đó.
+
+### Refactor IT — nhóm learning/review
+
+`test/integration/flows/answer_kind_flow_test.dart`, sáu test cho sáu luật chưa
+test nào chạm: **BR-21, BR-27, BR-28, BR-75, BR-140, BR-143**. Phủ IT-REVIEW-005,
+IT-LEARN-005, IT-LEARN-006, IT-LEARN-009, IT-LEARN-010, IT-STUDY-006.
+
+Cả sáu xoay quanh một câu: **một lượt ghi xuống cái gì, và nó được gọi là gì.**
+
+- Phiên `learning` ghi `kind = 'learning'`, **không bao giờ** `scheduled`; phiên
+  `reviewing` ngược lại (BR-143). Đây là luật một dòng mà hậu quả không sửa được:
+  lịch sử ghi sai nhãn thì **không tính lại được**.
+- Lượt `learning` có `next_due_at` NULL và không đụng `due_at` của thẻ (BR-27,
+  BR-144). Lịch được ghi khi **chuỗi kết thúc**, không phải bởi từng câu trả lời
+  trong chuỗi.
+- Lượt đã chấm ghi **cặp trạng thái trước/sau** chứ không chỉ kết cục (BR-21).
+  Một dòng chỉ lưu action thì không bao giờ trả lời được câu "hộp 3 có giúp
+  không?".
+- `forgotten` **giữ** thẻ trong round; chỉ action khác mới thả nó ra (BR-28).
+- CHECK của cột `kind` được **thử phá** trực tiếp: một ràng buộc không ai chạm
+  vào là một ràng buộc không ai biết là đã mất.
+
+Vì sao đọc từ SQLite ra chứ không tin lời gọi vừa ghi: suy `kind` ra sau bằng
+cách so lịch trước/sau **sai** với một lượt `scheduled` của thẻ hộp 8 — hộp không
+nhúc nhích, nên phép so nói "chẳng có gì xảy ra".
+
+Còn lại 10 luật: BR-02, BR-46, BR-80, BR-98, BR-100, BR-122, BR-131 và ba luật
+của nhóm entry/options.
