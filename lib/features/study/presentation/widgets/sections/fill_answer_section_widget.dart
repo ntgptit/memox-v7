@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
+import '../../../../../shared/widgets/mx_card.dart';
 import 'recall_timer_section_widget.dart';
 import '../../../../../shared/widgets/mx_text_field.dart';
 import '../../../domain/models/fill_mode.dart';
@@ -100,45 +102,70 @@ class _FillAnswerSectionWidgetState extends State<FillAnswerSectionWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        // **The prompt is text on the page, not a card, and `fill` is now the
-        // one stage of the pair that says so.** It shared `recall`'s skeleton —
-        // two cards of equal weight — because it is the same question in the
-        // other direction, and that held while the prompt was a word. It is not:
-        // a real prompt is a sentence with a gloss in it, "Business fails / Kinh
-        // doanh thất bại (Cụm từ, chỉ việc kinh doanh không thành công, âm Hán
-        // Việt: Sự nghiệp bại…)", and a centred `maxLines: 6` card ellipsised it
-        // while leaving most of its own height empty. Left-aligned running text
-        // wraps as far as it needs and stops.
-        Text(
-          widget.turn.card.example ?? widget.turn.card.front,
-          style: context.texts.titleLarge,
-        ),
-        if (_hasUsedHint && hint != null) ...<Widget>[
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            hint,
-            style: context.texts.bodyMedium?.copyWith(
-              color: context.colors.onSurfaceVariant,
+        // **The same skeleton as `recall`, because it is the same question in
+        // the other direction** (§8.10): a prompt above, the space for an answer
+        // below, both `Expanded` and both floored at the same height.
+        Expanded(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minHeight: AppStudyPair.cardMinHeight,
+            ),
+            child: MxCard(
+              elevation: AppElevation.raised,
+              radius: AppRadius.xl,
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Flexible(
+                      child: Text(
+                        widget.turn.card.example ?? widget.turn.card.front,
+                        style: context.texts.bodyLarge,
+                        textAlign: TextAlign.center,
+                        maxLines: 6,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (_hasUsedHint && hint != null) ...<Widget>[
+                      const SizedBox(height: AppSpacing.md),
+                      Text(
+                        hint,
+                        style: context.texts.bodyMedium?.copyWith(
+                          color: context.colors.onSurfaceVariant,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
             ),
           ),
-        ],
-        const SizedBox(height: AppSpacing.xl),
-        _answerArea(context),
-        // The actions sit under the answer, and the empty space under *them*
-        // rather than inside a card that had nothing to hold.
-        const Spacer(),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        Expanded(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minHeight: AppStudyPair.cardMinHeight,
+            ),
+            child: MxCard(
+              elevation: AppElevation.none,
+              radius: AppRadius.xl,
+              color: context.colors.surfaceContainerLow,
+              child: Center(child: _answerArea(context)),
+            ),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.lg),
         _CtaRow(
           children: <Widget>[
-            // Gone once the turn is graded, not disabled: a hint after the
-            // answer is on screen has nothing left to hint at, and a dead
-            // button under a verdict reads as something that failed to work.
-            if (hint != null && !_hasUsedHint && !_isGraded)
+            if (hint != null && !_hasUsedHint)
               MxActionButton(
                 label: l10n.studyShowHint,
                 variant: MxActionButtonVariant.secondary,
                 // Recorded on the turn, and with no effect on the action or the
                 // schedule (BR-136).
-                onPressed: widget.isLocked
+                onPressed: widget.isLocked || _isGraded
                     ? null
                     : () => setState(() => _hasUsedHint = true),
               ),
