@@ -1443,3 +1443,83 @@ Ba kịch bản còn lại đã có sẵn coverage và **không viết lại** (
 **Bản đồ coverage: 133 đã có · 0 một phần · 0 không có.** `test/integration/`
 36 test, xanh. Còn lại là bước 7 — thu `integration_test/` xuống 8 kịch bản
 `DEVICE-E2E` thật.
+
+### Refactor IT — bước 7: bộ device thu về đúng ranh giới nền tảng
+
+`integration_test/` từ **9 file / 67 kịch bản** xuống **1 file / 8 kịch bản**.
+Tổng dòng của thư mục từ 4149 xuống 1193.
+
+Việc xoá an toàn vì đúng một lý do: **mọi luật nghiệp vụ mà 67 kịch bản kia đi
+qua nay đã được `flutter test` chứng minh** — 133/133 dòng của
+`14-host-coverage-map.md`, trên SQLite thật, chạy ở mọi PR. Cái còn lại là cái
+host không với tới:
+
+| Kịch bản | Ranh giới nó tồn tại vì |
+|---|---|
+| IT-PLAT-001 | Bootstrap của engine, đường database do nền tảng cấp, asset bundle của bản đã cài |
+| IT-PLAT-002 | File thật trên bộ nhớ thiết bị, ghi bởi executor này đọc bởi executor khác |
+| IT-PLAT-003 | `study_sessions.cursor` nằm trên đĩa chứ không trong RAM |
+| IT-PLAT-004 | URL đến từ ngoài app, trên kênh của hệ điều hành |
+| IT-PLAT-005 | Cử chỉ back của Android và đường nó tới `PopScope` |
+| IT-PLAT-006 | Một bản dựng **không chạy được**: thiếu asset, sai flavor, R8, migration |
+| IT-NAV-007 | Quản lý nội dung khi tắt sóng |
+| IT-CONT-008 | Cả một phiên học khi tắt sóng |
+
+**Luật nghiệp vụ cố ý không khẳng định lại ở đây.** Một kịch bản device đi lại
+một luật là bản sao chậm hơn và dễ vỡ hơn của một test host — và bản sao mới là
+cái mục ruỗng, vì nó vẫn xanh trong lúc luật đổi bên dưới, do không ai nhìn vào
+bộ device cho tới khi nó đã đỏ.
+
+**Một seam mới, và một seam bị xoá.** `ItHarness.deliverDeepLink` gửi
+`pushRouteInformation` trên kênh `flutter/navigation` — đúng đường một deep link
+đi vào, qua `RouteInformationProvider` rồi mới tới `GoRouter`. `openLocation`
+(`appRouter.go`) bị xoá cùng lúc: để cả hai thì kịch bản sau sẽ chọn cái yếu
+hơn, vì nó ngắn hơn và luôn chạy được.
+
+**Hai giới hạn, ghi ra chứ không che.**
+
+`restartApp` bỏ cây widget, đóng executor rồi mở lại đúng file đó. Nó **không**
+phải cái chết của tiến trình: `flutter test` không giết được tiến trình nó đang
+chạy trong đó rồi đi tiếp. Nên IT-PLAT-002 và IT-PLAT-003 chứng minh byte đã
+chạm file và sống lâu hơn các đối tượng đã ghi nó — đúng cái khẳng định đáng
+giá — còn nửa "OS kill" thì vẫn nợ. Tương tự, `deliverDeepLink` không chứng minh
+được intent filter của Android; phần đó là `adb shell am start -a
+android.intent.action.VIEW`.
+
+**Airplane mode là tiền điều kiện của lượt chạy, không phải một bước.** Không
+widget nào tắt được sóng, nên `ci-device.yml` làm việc đó:
+`adb shell cmd connectivity airplane-mode enable` trước, `disable` sau, cả hai
+đều `|| true` — thiết bị từ chối lệnh là lượt chạy yếu hơn, không phải lượt chạy
+hỏng.
+
+**Support chết đã xoá, không để lại.** `it_fixtures.dart` (248 dòng) không còn ai
+gọi — 8 kịch bản device tự dựng trạng thái tối thiểu qua UI. `it_robot_lists.dart`
+(258 dòng) cùng 6 helper trong `it_robot.dart` (`enterSearch`, `backToDeckLevel`,
+`dismissSheet`, `revealOptionalFields`, `deleteOpenCard`, `tapBySemantics`,
+`addTag`) chỉ phục vụ các kịch bản đã chuyển sang host.
+
+**Bộ device tìm ra một lỗi thật ngay lần chạy đầu, và đó là toàn bộ lý do nó tồn
+tại.** IT-PLAT-005 đỏ: cử chỉ back của Android pop route và để
+`study_sessions.status` ở `in_progress` — đúng thứ BR-82 cấm. Trong `lib/` không
+có `PopScope` nào. Trớ trêu là comment ở `study_session_screen.dart` đã nêu đúng
+nguy cơ này khi giải thích vì sao bỏ app bar: *"a back arrow that pops the route
+and leaves the session open, which is the one thing BR-82 forbids"* — cửa của
+AppBar đã bịt, cửa của hệ điều hành thì không. Host không thấy được, vì host
+không có cử chỉ.
+
+Sửa ở app chứ không hạ chuẩn test: `PopScope` từ chối pop khi phiên còn sống rồi
+gọi đúng `_controller.leave()` mà nút ✕ gọi — vì ✕ cũng không pop, nó kết thúc
+phiên và trao màn tổng kết. Một cử chỉ back nhảy qua tổng kết sẽ là hợp đồng thứ
+hai, im lặng hơn, cho cùng một hành động.
+
+**Ba thứ khác chỉ lộ trên thiết bị, và không cái nào là lỗi nghiệp vụ:** chip
+mode đã viết hoa từ #239 nên `find.text('Browse')` khớp rỗng; `browse` bỏ nút
+Next từ BR-155 nên phải vuốt; và một lượt `recall` đã chốt **không có control
+nào** (BR-129/BR-130) nên robot tap bừa rồi báo sai chỗ. Cả ba đều là "luật đổi,
+thứ mô phỏng nó không theo" — đúng loại lỗi unit test không thấy.
+
+`waitForText` được thêm vì `settle()` trả về ngay khi không còn frame nào được
+xếp, mà một màn đang chờ một truy vấn thì không xếp frame nào — nên "còn một câu
+query nữa" trông y hệt "sẽ không bao giờ tới".
+
+**Kết quả: 8/8 xanh trên emulator-5554**, `flutter test integration_test/`.

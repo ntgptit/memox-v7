@@ -422,40 +422,31 @@ Một cơ sở dữ liệu kiểm thử dùng công cụ tiêm lỗi có ba ch�
 rồi phục hồi, lỗi lưu trữ không thể tiếp tục, và lỗi đọc thẻ một lần rồi phục hồi.
 Công cụ tiêm lỗi MUST không sửa dữ liệu người dùng và MUST có bước kết thúc xác nhận đã tắt lỗi.
 
-### 6.3. Bộ dữ liệu bộ thẻ/thẻ v1 cũ
+### 6.3. Bộ dữ liệu v1 cũ — đã xoá ở bước 7
 
-| | |
-|---|---|
-| **Đường dẫn hiện vật** | `integration_test/support/it_fixtures.dart` |
-| **Phiên bản** | `v1` — bản cũ, không hợp lệ cho BR-142/BR-144 |
-| **Cách nạp** | `ItFixtures.loadDueLibrary(harness)` / `ItFixtures.loadLargeDeck(harness)` — gọi trước `launchApp`, đồng hồ đã cố định tại `T0` |
-| **Đặt lại** | Mỗi trình nạp tự xóa sạch trước khi nạp dữ liệu, nên nạp hai lần cho đúng một kết quả |
-| **Đường ghi** | Bộ thẻ/thẻ qua đúng hợp đồng kho dữ liệu với đồng hồ tiêm theo từng thẻ; trạng thái ôn tập của trình nạp cũ ghi trực tiếp bảng cũ và vì vậy MUST NOT được dùng làm bằng chứng chức năng học. Trình nạp v2 phải thay đường này bằng luồng học/API dữ liệu dựng sẵn kiểm tra bất biến đã mô tả ở §6.2. |
+`integration_test/support/it_fixtures.dart` **không còn tồn tại**. Nó nạp dữ
+liệu cho các kịch bản `HOST-FLOW`/`HOST-WIDGET` nay chạy bằng `flutter test`, và
+chính nó là thứ ghi thẳng vào bảng trạng thái ôn tập — đường ghi mà mục này vẫn
+luôn nói là MUST NOT dùng làm bằng chứng chức năng học.
 
-Đặc tả dữ liệu giữ nguyên bên dưới; loader ở trên là hiện thực của nó.
+Fixture của các kịch bản host sống ở `test/helpers/fixtures/study_fixtures.dart`.
+Chúng dựng dữ liệu trên SQLite in-memory trong tiến trình test, nên "không được
+ghi vào database" — luật viết cho một thiết bị — không áp vào chúng.
 
-### S-PROGRESS và S-DUE v1 — đã được thay thế, không chạy
+Tám kịch bản `DEVICE-E2E` còn lại **không dùng loader nào**: mỗi kịch bản tạo
+đúng trạng thái tối thiểu nó cần, qua giao diện, bằng `ItRobot`. Đó là điều kiện
+tiên quyết chứ không phải bước, và nó giữ cho bộ device không mọc lại một tầng
+fixture thứ hai.
 
-Hai mã cũ trong `it_fixtures.dart` từng coi thẻ mới là “đến hạn ngay”; bản đó vi
-phạm BR-142/BR-144 và bất biến 28. Tên chuẩn bị được giữ cho danh mục cũ, nhưng
-chỉ được chạy khi trình nạp v2 hiện thực đúng hợp đồng
-`S-DUE / S-PROGRESS / S-STUDY-MIXED-EB-V2` ở trên. Agent MUST NOT phục dựng
-kết quả mong đợi cũ từ mã nguồn của bộ dữ liệu v1.
+### S-DUE · S-PROGRESS · S-LARGE — không còn là hồ sơ của bộ device
 
-### S-LARGE
+Ba hồ sơ này mô tả dữ liệu cho kịch bản khám phá, tiến độ và danh sách lớn. Cả
+ba nay chạy ở host: `S-LARGE` là `test/integration/flows/card_window_flow_test.dart`
+(65 thẻ, cửa sổ 50 → 65), `S-DUE`/`S-PROGRESS` là `sDue`/`sProgress` trong
+`test/helpers/fixtures/study_fixtures.dart`.
 
-| Thuộc tính | Giá trị |
-|---|---|
-| Bộ thẻ | `Large deck 65` |
-| Số thẻ | 65 |
-| Mặt trước | `card-001` tới `card-065` |
-| Mặt sau | `meaning-001` tới `meaning-065` |
-| Trạng thái | Tất cả là thẻ mới |
-| Cờ/nhãn | Không |
-| Thứ tự tạo | `card-001` trước, `card-065` sau |
-
-Kết quả mong đợi: lần đọc đầu hiện 50/65; sau tải thêm hiện 65/65; mọi mặt trước xuất hiện
-đúng một lần trong tập kết quả cuối.
+Đặc tả dữ liệu của chúng vẫn có giá trị như **hợp đồng**, nhưng nơi hiện thực
+hợp đồng ấy đã đổi. Agent MUST NOT dựng lại loader v1 trong `integration_test/`.
 
 ## 7. Hợp đồng dọn dẹp
 

@@ -100,48 +100,68 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
     final body = _body(state);
     final turn = state.turn;
 
-    return MxContentShell(
-      // No app-bar title, and therefore no app bar at all: the frame's own top
-      // bar carries the mode and the ✕, and a Material bar above it would be a
-      // second bar naming the same screen — with a back arrow that pops the
-      // route and leaves the session open, which is the one thing BR-82 forbids.
+    return PopScope(
+      // **The other back arrow, and it took a device to find it.** Removing the
+      // app bar closed one door — see the comment below — and left the one the
+      // operating system opens: Android's back gesture popped the route and
+      // left `study_sessions.status` at `in_progress`, which is precisely what
+      // BR-82 forbids. Nothing on a host notices, because a host has no
+      // gesture; `IT-PLAT-005` is the scenario that does.
       //
-      // **No gutter from the shell, and the frame applies its own.** The
-      // session's top bar puts a 48×48 close button first; inside a 16px gutter
-      // its glyph lands at 30 while the counter at the other end stops at the
-      // gutter, and a row inset differently at each end reads as off-centre.
-      // The bar therefore needs a region that starts at the safe-area edge, the
-      // way `AppBar` gives its leading icon one. `EdgeInsets.zero` here, and
-      // `StudySessionFrameSectionWidget` gutters the context line, the body and
-      // the hint itself — from `mxScreenGutter`, so 320 still gets 12.
-      padding: EdgeInsets.zero,
-      body: session == null || turn == null || state.isFinished
-          // The transient states draw without the frame, so nothing has
-          // guttered them — they get it here rather than inheriting an
-          // edge-to-edge region meant for one bar.
-          ? Padding(
-              padding: EdgeInsets.all(mxScreenGutter(context)),
-              child: body,
-            )
-          : StudySessionFrameSectionWidget(
-              mode: session.currentMode,
-              kind: session.kind,
-              cardCount: state.sessionCards.length,
-              progress: turn.progress,
-              timeLeft: session.currentMode == StudyMode.recall
-                  ? _recallRemaining
-                  : null,
-              onClose: () => unawaited(_controller.leave()),
-              // BR-155: the chrome keeps describing the live turn, so the one
-              // line that speaks to the user has to say the card under it is
-              // not that turn.
-              hintOverride: _hintOverrideFor(
-                turn,
+      // Refusing the pop rather than ending on the way out, because the ✕ does
+      // not pop either: it ends the session and hands over the summary, and a
+      // back gesture that skipped the summary would be a second, quieter
+      // contract for the same action. Once the session is finished the screen
+      // pops normally — the summary's own Back to deck is that pop.
+      canPop: session == null || state.isFinished,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        unawaited(_controller.leave());
+      },
+      child: MxContentShell(
+        // No app-bar title, and therefore no app bar at all: the frame's own top
+        // bar carries the mode and the ✕, and a Material bar above it would be a
+        // second bar naming the same screen — with a back arrow that pops the
+        // route and leaves the session open, which is the one thing BR-82
+        // forbids.
+        //
+        // **No gutter from the shell, and the frame applies its own.** The
+        // session's top bar puts a 48×48 close button first; inside a 16px gutter
+        // its glyph lands at 30 while the counter at the other end stops at the
+        // gutter, and a row inset differently at each end reads as off-centre.
+        // The bar therefore needs a region that starts at the safe-area edge, the
+        // way `AppBar` gives its leading icon one. `EdgeInsets.zero` here, and
+        // `StudySessionFrameSectionWidget` gutters the context line, the body and
+        // the hint itself — from `mxScreenGutter`, so 320 still gets 12.
+        padding: EdgeInsets.zero,
+        body: session == null || turn == null || state.isFinished
+            // The transient states draw without the frame, so nothing has
+            // guttered them — they get it here rather than inheriting an
+            // edge-to-edge region meant for one bar.
+            ? Padding(
+                padding: EdgeInsets.all(mxScreenGutter(context)),
+                child: body,
+              )
+            : StudySessionFrameSectionWidget(
                 mode: session.currentMode,
-                isLookingBack: state.isLookingBack,
+                kind: session.kind,
+                cardCount: state.sessionCards.length,
+                progress: turn.progress,
+                timeLeft: session.currentMode == StudyMode.recall
+                    ? _recallRemaining
+                    : null,
+                onClose: () => unawaited(_controller.leave()),
+                // BR-155: the chrome keeps describing the live turn, so the one
+                // line that speaks to the user has to say the card under it is
+                // not that turn.
+                hintOverride: _hintOverrideFor(
+                  turn,
+                  mode: session.currentMode,
+                  isLookingBack: state.isLookingBack,
+                ),
+                child: body,
               ),
-              child: body,
-            ),
+      ),
     );
   }
 

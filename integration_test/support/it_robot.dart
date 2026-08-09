@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/features/card/presentation/widgets/items/card_tile_widget.dart';
 import 'package:memox/features/deck/presentation/widgets/items/deck_tile_widget.dart';
 import 'package:memox/features/study/presentation/widgets/sections/fill_answer_section_widget.dart';
 import 'package:memox/features/study/presentation/widgets/sections/guess_question_section_widget.dart';
@@ -9,7 +8,6 @@ import 'package:memox/features/study/presentation/widgets/sections/match_board_s
 import 'package:memox/features/study/presentation/widgets/sections/recall_timer_section_widget.dart';
 import 'package:memox/features/study/presentation/widgets/sections/study_card_face_section_widget.dart';
 import 'package:memox/features/study/presentation/widgets/support/study_swipe_deck_widget.dart';
-import 'package:memox/shared/widgets/mx_search_field.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
 
 import 'it_harness.dart';
@@ -17,7 +15,6 @@ import 'it_text.dart';
 
 export 'it_text.dart';
 
-part 'it_robot_lists.dart';
 part 'it_robot_study.dart';
 
 /// User-level actions the scenarios are written in terms of.
@@ -105,24 +102,6 @@ final class ItRobot {
     await _harness.settle();
   }
 
-  /// Types into the deck search field.
-  ///
-  /// Scoped to `MxSearchField` for the mirror of the reason `enterNthField` is
-  /// scoped to `MxTextField`: the two must never be confused for one another.
-  Future<void> enterSearch(String query) async {
-    final field = find.descendant(
-      of: find.byType(MxSearchField),
-      matching: find.byType(TextField),
-    );
-    expect(
-      field,
-      findsWidgets,
-      reason: 'no search field on screen; visible text was $visibleText',
-    );
-    await _tester.enterText(field.first, query);
-    await _harness.settle();
-  }
-
   /// Scrolls until [label] is on screen, then leaves it there.
   ///
   /// A control below the fold is not tappable, and `tester.tap` on it throws
@@ -180,29 +159,6 @@ final class ItRobot {
 
     return best.localToGlobal(best.size.center(Offset.zero));
   }
-
-  /// Backs out until the deck level's own create action is reachable.
-  ///
-  /// Choosing "New card" on an undecided deck navigates to the card editor,
-  /// which sits under that deck's *card list* route. Backing out once lands on
-  /// the card list — an empty one, which reads as "this deck holds cards" even
-  /// though nothing was saved and `content_type` is still `unset`
-  /// (card_repository_impl.dart:164 changes it only inside the create
-  /// transaction). One more step up reaches the deck level itself.
-  Future<void> backToDeckLevel() async {
-    for (var i = 0; i < 3; i++) {
-      if (find.text(ItText.addToThisDeck).evaluate().isNotEmpty) return;
-      await _harness.pressBack();
-    }
-  }
-
-  /// Dismisses a bottom sheet or menu without choosing anything.
-  ///
-  /// The choose-a-kind sheet and the deck row menu carry no Cancel button —
-  /// they are dismissed by the system back gesture or a tap outside, which is
-  /// what a user actually does. Only the deck *form* has a Cancel, because it
-  /// has input worth confirming the loss of.
-  Future<void> dismissSheet() => _harness.pressBack();
 
   // ---- setup recipes -------------------------------------------------------
 
@@ -301,24 +257,22 @@ final class ItRobot {
     await tapText(ItText.saveCard);
   }
 
-  /// Expands the editor's optional-details section if it is still collapsed.
+  /// Pumps until [label] is on screen, or fails saying what was there instead.
   ///
-  /// The section is a disclosure: closed on a new card, already open when the
-  /// card being edited has details saved. Both states are normal, so the robot
-  /// only taps when the toggle is the thing on screen.
-  Future<void> revealOptionalFields() async {
-    await scrollToText(ItText.detailsToggle);
-    if (find.text(ItText.detailsToggle).evaluate().isEmpty) return;
-    await tapText(ItText.detailsToggle);
-  }
+  /// **`settle` is not enough for a screen waiting on a read.** It returns as
+  /// soon as nothing is scheduling frames, and a widget waiting on a database
+  /// round-trip schedules nothing at all — so a state that is one query away
+  /// looks identical to a state that will never arrive. This gives the query
+  /// real frames to land in, and still fails with the visible text rather than
+  /// hanging.
+  Future<void> waitForText(String label, {int tries = 30}) async {
+    for (var i = 0; i < tries; i++) {
+      if (find.text(label).evaluate().isNotEmpty) return;
+      await _tester.pump(const Duration(milliseconds: 100));
+      await _harness.settle();
+    }
 
-  /// Opens [front] from the list and deletes it through the danger zone.
-  Future<void> deleteOpenCard(String front) async {
-    await scrollToText(front);
-    await tapText(front);
-    await scrollToText(ItText.deleteCard);
-    await tapText(ItText.deleteCard);
-    await tapText(ItText.delete);
+    fail('"$label" never appeared; $visibleText');
   }
 
   /// Taps an icon control by the label it announces.
@@ -326,7 +280,8 @@ final class ItRobot {
   /// Tries tooltip first, then semantics. The editor's close and flag buttons
   /// carry their label as a `tooltip`, which only becomes a semantics label
   /// once the tooltip widget builds — so looking for one alone misses the
-  /// other depending on where the control lives.
+  /// other depending on where the control lives. Neither is findable by text,
+  /// which is what `tapText` looks for.
   Future<void> tapBySemantics(String label) async {
     final byTooltip = find.byTooltip(label);
     if (byTooltip.evaluate().isNotEmpty) {
@@ -353,35 +308,5 @@ final class ItRobot {
       reason: 'no "$fragment" on screen; $visibleText',
     );
     await _tapVisible(target.first);
-  }
-
-  /// Adds a tag through the editor's tag field.
-  ///
-  /// Taps the field before typing, every time: `receiveAction(done)` closes
-  /// the live IME connection, so the `enterText` of the *next* call lands on a
-  /// dead connection and the field silently keeps its old text (seen on device
-  /// as the blank's "3/50" counter surviving into the following tag — the
-  /// widget itself is fine, `card_tag_after_error_test.dart` proves it). The
-  /// tap re-focuses the field and opens a fresh connection, and the guard
-  /// below turns any regression of this from a wrong-label mystery back into
-  /// an explicit failure.
-  Future<void> addTag(String name) async {
-    await scrollToText(ItText.addTagHint);
-    final field = find.byWidgetPredicate(
-      (w) => w is TextField && w.decoration?.hintText == ItText.addTagHint,
-    );
-    expect(field, findsWidgets, reason: 'no tag field; $visibleText');
-    await _tester.tap(field.first);
-    await _harness.settle();
-    await _tester.enterText(field.first, name);
-    await _tester.pump();
-    final typed = _tester.widget<TextField>(field.first).controller?.text;
-    expect(
-      typed,
-      name,
-      reason: 'tag field did not take "$name" — IME connection was stale',
-    );
-    await _tester.testTextInput.receiveAction(TextInputAction.done);
-    await _harness.settle();
   }
 }
