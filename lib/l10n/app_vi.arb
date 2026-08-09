@@ -1474,6 +1474,10 @@
   "@studyHintMatch": {
     "description": "Bottom hint line for match. Term first: the turn belongs to the term's card (BR-118)."
   },
+  "studyHintGuessAnswered": "Đã hiện đáp án — lựa chọn đúng được tô sáng",
+  "@studyHintGuessAnswered": {
+    "description": "Replaces the guess hint once a choice is in."
+  },
   "studyHintGuess": "Chọn nghĩa đúng",
   "@studyHintGuess": {
     "description": "Bottom hint line for guess. One choice only, and the first one counts (BR-126)."

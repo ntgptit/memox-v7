@@ -124,6 +124,38 @@ void main() {
 
       expect(chosen, hasLength(2));
     });
+    testWidgets('it reports once when the question stops asking', (
+      tester,
+    ) async {
+      // The frame owns the hint line and only this widget knows the answer is
+      // in (§8.11). Reported from the tap handler, never from build: a parent
+      // setState during a build is the one way this plumbing goes wrong.
+      var resolved = 0;
+      await tester.pumpWidget(
+        wrapForTest(
+          GuessQuestionSectionWidget(
+            question: question,
+            onChosen: (_) {},
+            onResolved: () => resolved++,
+          ),
+          isScrollable: false,
+        ),
+      );
+
+      expect(resolved, 0);
+
+      await tester.tap(find.text(question.options.first.text));
+      await tester.pump();
+      expect(resolved, 1);
+
+      // BR-126 allows one turn, so it also allows one report.
+      await tester.tap(
+        find.text(question.options.last.text),
+        warnIfMissed: false,
+      );
+      await tester.pump();
+      expect(resolved, 1);
+    });
   });
 
   group('the guess question after an answer', () {

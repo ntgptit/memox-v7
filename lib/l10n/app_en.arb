@@ -1474,6 +1474,10 @@
   "@studyHintMatch": {
     "description": "Bottom hint line for match. Term first: the turn belongs to the term's card (BR-118)."
   },
+  "studyHintGuessAnswered": "Answer shown — the correct option is highlighted",
+  "@studyHintGuessAnswered": {
+    "description": "Replaces the guess hint once a choice is in. The question stays on screen and the right option is marked whether or not it was picked (BR-126), so the line has to describe what is being looked at rather than repeat an instruction that no longer applies."
+  },
   "studyHintGuess": "Choose the right meaning",
   "@studyHintGuess": {
     "description": "Bottom hint line for guess. One choice only, and the first one counts (BR-126)."

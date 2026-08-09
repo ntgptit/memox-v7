@@ -10,12 +10,14 @@ import '../../../../shared/widgets/mx_error_state.dart';
 import '../../../../shared/widgets/mx_loading_state.dart';
 import '../../domain/models/study_mode.dart';
 import '../../domain/models/study_session_kind_model.dart';
+import '../../domain/models/study_turn_model.dart';
 import '../controllers/study_session_controller.dart';
 import '../states/study_session_state.dart';
 import '../../domain/models/recall_mode.dart';
 import '../widgets/sections/study_blocked_section_widget.dart';
 import '../widgets/sections/study_session_frame_section_widget.dart';
 import '../widgets/sections/study_summary_section_widget.dart';
+import '../widgets/support/study_labels_widget.dart';
 import '../widgets/support/study_mode_view_widget.dart';
 
 /// One study session, from the first card to the last.
@@ -133,13 +135,28 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
               // BR-155: the chrome keeps describing the live turn, so the one
               // line that speaks to the user has to say the card under it is
               // not that turn.
-              hintOverride: state.isLookingBack
-                  ? context.l10n.studyBrowseLookingBack
-                  : null,
+              hintOverride: _hintOverrideFor(
+                turn,
+                mode: session.currentMode,
+                isLookingBack: state.isLookingBack,
+              ),
               child: body,
             ),
     );
   }
+
+  /// Which turn the body has finished asking about, if any (§8.11).
+  ///
+  /// **A key rather than a flag.** A boolean has to be cleared when the card
+  /// changes, and the place that clears it is a second place that has to know
+  /// what a new turn looks like. Comparing keys means a stale value is simply
+  /// not the current turn, and answers itself.
+  String? _resolvedTurnKey;
+
+  /// One turn, named by the pair that makes it one: a round serves each card
+  /// once, and the next round serves some of them again.
+  static String _turnKey(StudyTurnModel turn) =>
+      '${turn.item.round}:${turn.cardId}';
 
   /// The notifier, read at the moment a callback fires rather than during a
   /// build.
@@ -150,6 +167,23 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
   /// caught this.
   StudySessionController get _controller =>
       ref.read(studySessionControllerProvider(widget.deckId).notifier);
+
+  /// What replaces the mode’s usual hint, if anything.
+  ///
+  /// Two callers, in order. `browse` is looking back along its trail (BR-155):
+  /// the counter and the bar still describe the live turn, so without a word
+  /// here a card the user has already passed reads as the session having gone
+  /// backwards. Otherwise, a body that has stopped asking says so (§8.11).
+  String? _hintOverrideFor(
+    StudyTurnModel turn, {
+    required StudyMode mode,
+    required bool isLookingBack,
+  }) {
+    if (isLookingBack) return context.l10n.studyBrowseLookingBack;
+    if (_resolvedTurnKey != _turnKey(turn)) return null;
+
+    return context.studyModeHintResolved(mode);
+  }
 
   Widget _body(StudySessionState state) {
     if (state.error != null) {
@@ -184,6 +218,14 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
     final view = studyModeView(
       mode: session.currentMode,
       state: state,
+      // The body knows when it has stopped asking; the frame owns the line that
+      // says what to do next (§8.11). Keyed by the turn rather than reset on a
+      // change, so there is no second place that has to notice a new card.
+      onResolved: () {
+        final resolved = state.turn;
+        if (resolved == null) return;
+        setState(() => _resolvedTurnKey = _turnKey(resolved));
+      },
       onRecallTick: (remaining) => _recallRemaining.value = remaining,
       // BR-133's write half. The clock stops when the app goes to the
       // background (BR-128); without this the seconds it stopped at are lost

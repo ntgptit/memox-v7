@@ -55,6 +55,10 @@ Widget? studyModeView({
 
   /// Steps back along `browse`'s trail of cards already seen (BR-155).
   required VoidCallback onLookBack,
+
+  /// Called when the body stops asking and starts telling, so the frame can
+  /// swap its hint line for one that describes what is on screen (§8.11).
+  VoidCallback? onResolved,
   ValueChanged<Duration>? onRecallTick,
   void Function({required Duration remaining, required bool isRevealed})?
   onRecallSuspend,
@@ -123,6 +127,7 @@ Widget? studyModeView({
       state: state,
       onAnswer: onAnswer,
       random: Random(_seedFor(state, turn: turn, isPerCard: true)),
+      onResolved: onResolved,
     ),
     StudyMode.recall: () => RecallTimerSectionWidget(
       turn: turn,
@@ -260,6 +265,7 @@ Widget? _guessView({
   required StudySessionState state,
   required StudyAnswerSink onAnswer,
   required Random random,
+  VoidCallback? onResolved,
 }) {
   final question = const GuessModeHandler().buildQuestion(
     term: turn.card,
@@ -278,6 +284,7 @@ Widget? _guessView({
   if (question == null) return null;
 
   return GuessQuestionSectionWidget(
+    onResolved: onResolved,
     question: question,
     isLocked: state.isSubmitting,
     onChosen: (option) => _send(

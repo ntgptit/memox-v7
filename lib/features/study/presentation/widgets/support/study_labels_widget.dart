@@ -60,6 +60,20 @@ extension StudyLabels on BuildContext {
     StudyMode.fill: l10n.studyHintFill,
   }[mode];
 
+  /// What the hint line says once the body has stopped asking (§8.11).
+  ///
+  /// **A map with one entry, and the emptiness is the finding.** Only `guess`
+  /// keeps an answered state on screen long enough to describe: the learner is
+  /// reading five options to see which was right. `recall` and `fill` write the
+  /// moment they resolve and the next card follows, and each already prints a
+  /// sentence in its own body — a second copy in the hint line would be the
+  /// same words twice on one screen.
+  ///
+  /// Null therefore means *keep the mode’s usual hint*, which is what the frame
+  /// does with it.
+  String? studyModeHintResolved(StudyMode mode) =>
+      <StudyMode, String>{StudyMode.guess: l10n.studyHintGuessAnswered}[mode];
+
   /// The glyph that opens the hint line, which is not the same for every mode.
   ///
   /// A check is the default because four of the six hints describe an action the
