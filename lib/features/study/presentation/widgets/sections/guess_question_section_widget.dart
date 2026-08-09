@@ -30,12 +30,21 @@ class GuessQuestionSectionWidget extends StatefulWidget {
   const GuessQuestionSectionWidget({
     required this.question,
     required this.onChosen,
+    this.onResolved,
     this.isLocked = false,
     super.key,
   });
 
   final GuessQuestion question;
   final ValueChanged<GuessOption> onChosen;
+
+  /// Fired once, when the question stops asking and starts telling.
+  ///
+  /// **The frame owns the hint line, and only this widget knows the answer is
+  /// in.** Reported from the tap handler rather than from `build` — a parent
+  /// `setState` during a build is the one way this plumbing can go wrong, and
+  /// there is no reason to run it from there.
+  final VoidCallback? onResolved;
 
   /// True while the answer is being written: the question stays visible and the
   /// options stop responding (BR-25).
@@ -73,6 +82,7 @@ class _GuessQuestionSectionWidgetState
 
     setState(() => _chosenCardId = option.cardId);
     widget.onChosen(option);
+    widget.onResolved?.call();
   }
 
   @override

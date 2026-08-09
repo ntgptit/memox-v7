@@ -7,7 +7,7 @@
 | **Scope** | Khung phiên học, và năm màn `browse` · `match` · `guess` · `recall` · `fill`. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), luồng (`use-cases.md`), giá trị token (`design_system/tokens/`) |
 | **Source of truth for** | Bố cục màn học · phán quyết cho tám điểm design lệch với BR |
 | **Depends on** | `document-conventions.md`, `business-rules.md` (BR-108…BR-154), `wbs-study.md` (M5.7…M5.20) |
-| **Updated by task** | Màn `recall` và `fill` theo handout layout — thêm §8.10 |
+| **Updated by task** | Dòng gợi ý hai trạng thái — thêm §8.11 |
 | **Last updated** | 2026-08-09 |
 
 Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham chiếu bằng ID.
@@ -708,3 +708,30 @@ trên.
 Dòng gợi ý hai trạng thái (`guess` trước/sau khi trả lời, `recall` ẩn/hiện,
 `fill` nhập/sai) — cả ba cần đúng một cơ chế: cờ "đã xong" trong state của
 section phải tới được `hintOverride` của khung. Nối một lần cho cả ba.
+
+
+### 8.11 Dòng gợi ý đổi khi thân màn thôi hỏi
+
+Handout của `guess` ghi dòng gợi ý sau khi trả lời là
+`Answer shown — the correct option is highlighted`. Không dựng được ngay ở §8.9
+vì cờ "đã trả lời" nằm trong state của section, còn dòng gợi ý thuộc khung.
+
+**Cơ chế: section báo một lần, màn giữ một khoá.** `onResolved` bắn từ chính
+tay cầm sự kiện — không bao giờ từ `build`, vì `setState` của cha trong lúc cha
+đang build là cách duy nhất đường dây này hỏng.
+
+Màn lưu `_resolvedTurnKey` = `round:cardId` chứ **không phải một `bool`**. Một
+bool phải được *xoá* khi sang thẻ mới, và chỗ xoá nó là một chỗ thứ hai phải
+biết thế nào là một lượt mới — đúng cái bệnh đã sinh ra bug "lượt đã chốt vẽ đè
+lên câu hỏi đang mở" của `recall`. So khoá thì giá trị cũ đơn giản là không phải
+lượt hiện tại, và nó tự trả lời.
+
+**Bản đồ `studyModeHintResolved` chỉ có một dòng, và sự trống rỗng đó mới là
+phát hiện.** Chỉ `guess` giữ trạng thái đã-trả-lời trên màn đủ lâu để có gì mà
+mô tả: người học đang đọc năm lựa chọn để xem cái nào đúng. `recall` và `fill`
+ghi ngay khi chốt và thẻ sau nối tiếp, và mỗi màn đã tự in một câu trong thân
+của nó — một bản sao thứ hai ở dòng gợi ý là cùng một câu hai lần trên một màn
+hình. Null vì thế có nghĩa là *giữ dòng gợi ý thường của mode*.
+
+Đường dây ở lại cho `fill`: khi `Try again` / `Mark correct` được chốt thì hai
+trạng thái nhập/sai của nó đã có sẵn chỗ để nói.
