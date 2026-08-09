@@ -30,7 +30,6 @@ void main() {
       MediaQuery(
         data: MediaQueryData(textScaler: TextScaler.linear(textScale)),
         child: GuessOptionItemWidget(
-          badge: 'A',
           text: 'to give up',
           state: state,
           onTap: state == GuessOptionState.open ? () {} : null,
@@ -39,19 +38,23 @@ void main() {
     ),
   );
 
-  testWidgets('IT-MODE-013 · the meaning is announced and the seat letter is '
-      'not', (tester) async {
+  testWidgets('IT-MODE-013 · a row announces the meaning and nothing else', (
+    tester,
+  ) async {
+    // The A–E badge this once guarded is gone: it took 44pt off every row, and
+    // the content this app is for runs to three lines. What the step still
+    // needs is that the row reads as its meaning — so the assertion is that
+    // there is one string on the row and it is the one being chosen between.
     await pumpOption(tester, GuessOptionState.open);
 
     expect(find.text('to give up'), findsOneWidget);
-    expect(find.text('A'), findsOneWidget);
-    expect(
-      find.bySemanticsLabel('A'),
-      findsNothing,
-      reason:
-          'BR-127 reshuffles the letters, so a reader who hears "A" has been '
-          'told the one thing about the row that will not be true next time',
-    );
+    for (final letter in <String>['A', 'B', 'C', 'D', 'E']) {
+      expect(
+        find.text(letter),
+        findsNothing,
+        reason: 'a seat letter is a fact about the row that BR-127 reshuffles',
+      );
+    }
   });
 
   testWidgets('IT-MODE-013 · a graded option says its verdict in words, not '
