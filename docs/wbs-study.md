@@ -1254,3 +1254,32 @@ Hành động: 89 reclassify · 35 split · 3 keep. Không kịch bản nào b�
 **Còn lại (§18 bước 4–7):** fixture builder, app harness cho HOST-WIDGET, dời và
 viết test HOST-FLOW/HOST-WIDGET, rồi mới thu `integration_test/`. Không xoá test
 cũ trước khi coverage tương đương đã xanh.
+
+### Refactor IT — bước 4 và mở màn bước 5
+
+**Fixture builder** ở `test/helpers/fixtures/study_fixtures.dart`, đặt tên đúng
+theo mã `Chuẩn bị` của catalog: dòng kịch bản ghi `S-DUE` thì test gọi `sDue`.
+Một cái tên, hai chỗ, không có bước phiên dịch nào ở giữa.
+
+Phủ được: DB rỗng · root deck · cây deck · card · card đã học · card đến hạn ·
+card hạn tương lai · trạng thái Eight Box (`current_box`) · trạng thái SM-2
+(`ease_factor`, `interval_days`, `repetitions`) · session đang dở · study queue ·
+`scheduler_generation`. Mọi mốc thời gian dẫn xuất từ `testNow`, mọi id cố định.
+
+`insertCard` được mở rộng để nhận `front`/`back` và **ghi `back_folded`**. Mặc
+định cũ để cột ấy rỗng, mà BR-123 đo hai nghĩa khác nhau bằng chính dạng đã
+fold — nên một fixture cũ làm mọi câu hỏi `guess` không dựng được, vì một lý do
+chẳng liên quan gì tới kịch bản đang kiểm.
+
+**Năm kịch bản `FIXTURE-BLOCKED` đầu tiên đã chạy được**, ở
+`test/integration/flows/discovery_and_progress_flow_test.dart`: IT-DISC-001F,
+IT-DISC-003F, IT-ORG-003, IT-ORG-005, IT-ORG-010. Chúng **chưa từng chạy lần
+nào** — không phải "chưa được kiểm" mà là "không chạy được". Điểm chung: cả năm
+đều xoay quanh một *predicate trên hàng tại một mốc thời gian biết trước*, thứ rẻ
+nhất để chứng minh ở tầng này và đắt nhất khi chứng minh qua màn hình.
+
+Fixture `S-DUE` đặt một thẻ đến hạn **đúng bằng** `now` có chủ đích: một predicate
+sai ở biên vẫn qua được mọi test chỉ dựng từ "hôm qua" và "ngày mai".
+
+Còn lại của bước 5–7: 83 HOST-FLOW và 67 HOST-WIDGET nữa, app harness cho
+HOST-WIDGET, rồi mới thu `integration_test/`.
