@@ -7,7 +7,7 @@
 | **Scope** | Khung phiên học, và năm màn `browse` · `match` · `guess` · `recall` · `fill`. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), luồng (`use-cases.md`), giá trị token (`design_system/tokens/`) |
 | **Source of truth for** | Bố cục màn học · phán quyết cho tám điểm design lệch với BR |
 | **Depends on** | `document-conventions.md`, `business-rules.md` (BR-108…BR-154), `wbs-study.md` (M5.7…M5.20) |
-| **Updated by task** | Rà soát UI 5 stage — `guess` bỏ huy hiệu A–E (§5), `fill` rời bố cục cặp thẻ (§6) |
+| **Updated by task** | Rà soát UI 5 stage — `guess` bỏ huy hiệu A–E (§5), `fill` làm lại vùng đáp án (§6) |
 | **Last updated** | 2026-08-10 |
 
 Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham chiếu bằng ID.
@@ -144,18 +144,15 @@ không phải một tiêu đề.
 Cùng một bố cục: **thẻ đề ở trên, vùng đáp án ở dưới, nút hành động dưới cùng.**
 
 `recall`: vùng đáp án là một khối mờ có vạch giả; nút chính `Show answer`.
-`fill`: ô nhập, hai nút — `Hint` viền và `Check` đặc.
+`fill`: vùng đáp án là ô nhập, có con trỏ; hai nút — `Hint` viền và `Check` đặc.
 
-**`fill` đã tách khỏi bố cục cặp thẻ, và không còn "chữ căn giữa cỡ lớn".** Cả
-hai điều đó đúng khi đề bài là một từ. Đề bài thật không phải: nó là một câu kèm
-chú giải — *"Business fails / Kinh doanh thất bại (Cụm từ, chỉ việc kinh doanh
-không thành công, âm Hán Việt: Sự nghiệp bại…)"* — và một thẻ căn giữa
-`maxLines: 6` vừa cắt đuôi nó vừa để trống phần lớn chiều cao của chính mình.
+**Bố cục cặp thẻ giữ nguyên.** Thay đổi dưới đây chỉ nằm *bên trong* vùng đáp án
+của `fill`; thẻ đề, hai `Expanded` và sàn chiều cao chung với `recall` không đụng
+tới.
 
-Bố cục hiện tại: **đề bài là chữ chạy trên nền trang**, canh trái, xuống dòng
-đến đâu cao đến đó; ngay dưới là ô nhập với nhãn nổi; hành động ở đáy. Không thẻ,
-không panel rỗng. `recall` giữ nguyên cặp thẻ — nó *có* một khối phải vẽ ở chỗ
-đáp án, còn `fill` thì chỗ đó là ô nhập.
+**Bỏ "chữ căn giữa cỡ lớn".** Ô nhập dùng đúng kiểu chữ mặc định của input trong
+app, canh trái — một ô căn giữa cỡ 24 là kiểu input thứ hai, mà `MxTextField` tồn
+tại để chỉ có một.
 
 Sau khi chấm: một dòng kết cục bằng `success`/`danger`, và **chỉ khi sai** mới có
 nhãn `Đáp án` cùng một khối viền `success` chứa mặt sau của thẻ. Trả lời đúng thì
