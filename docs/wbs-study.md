@@ -1347,3 +1347,38 @@ nhúc nhích, nên phép so nói "chẳng có gì xảy ra".
 
 Còn lại 10 luật: BR-02, BR-46, BR-80, BR-98, BR-100, BR-122, BR-131 và ba luật
 của nhóm entry/options.
+
+### Refactor IT — hết luật cho HOST-FLOW
+
+Hai file cuối của bước 5:
+
+- `stored_not_inferred_flow_test.dart` — **BR-46, BR-80, BR-98, BR-122, BR-131**
+  (IT-CONT-003, IT-CONT-010, IT-MODE-001, IT-MODE-009, IT-MODE-015).
+- `deck_naming_flow_test.dart` — **BR-02** (IT-DECK-002).
+
+Bốn trong năm luật của file đầu nói **cùng một điều về những cột khác nhau: nó
+được lưu, không được suy ra.** Mode của một lượt, lý do một lượt kết thúc, lý do
+một phiên kết thúc, thế hệ dữ liệu một phiên thuộc về — mỗi thứ đều là một sự
+thật mà app *gần như* dựng lại được từ hình dạng dữ liệu, và "gần như" chính là
+vấn đề: tự nhận quên và hết giờ cho ra **cùng một `action`**; một lượt
+`scheduled` của thẻ hộp 8 không làm hộp nhúc nhích. Một cột được suy lại là một
+cột sai đúng ở chỗ nó quan trọng, và lịch sử thì không tính lại được.
+
+BR-46 là bug "reset tự huỷ reset": một phiên mở trước khi Đặt lại thuộc thế hệ 1,
+reset đẩy deck sang 2, và nếu câu trả lời đang bay vẫn hạ cánh thì reset âm thầm
+tự huỷ chính nó. Test khẳng định nó bị từ chối **nguyên tử** — không để lại nửa
+nào.
+
+BR-02 đáng một test **chính vì nó trông như một sự sơ suất.** Luật nói tên deck
+được phép trùng, còn mọi bản năng của người sắp thêm unique index thì nói ngược
+lại. Hai deck cùng tên dưới hai gốc khác nhau là cách một cái cây được tổ chức
+bình thường; một ràng buộc thêm vào "cho chắc" sẽ từ chối đúng hình dạng mà sản
+phẩm cố ý cho phép — và nó sẽ không nổ ở đâu cả, chỉ đến vài tuần sau dưới dạng
+"tôi không tạo được deck".
+
+**Bản đồ coverage: 129 đã có · 1 một phần · 3 không có luật nào.**
+
+Còn lại đều là `HOST-WIDGET` và đều **chờ bước 6**: BR-100 (`UI` scope — mode bị
+chặn phải trình bày là không khả dụng, và MUST NOT gợi ý Reset), cùng IT-NAV-005,
+IT-ORG-012, IT-MODE-013 vốn không truy vết tới BR nào. Không luật nghiệp vụ nào
+còn chờ ở HOST-FLOW.
