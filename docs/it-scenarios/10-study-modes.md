@@ -48,6 +48,9 @@
 
 ## IT-MODE-004 — `Match` quy kết lượt cho thuật ngữ được chọn trước và giữ thẻ sai sang vòng sau
 
+> **Tách thành** — `IT-MODE-004` (`HOST-WIDGET`) · `IT-MODE-004F` (`HOST-FLOW`). Lý do và ranh giới ở
+> [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) mục C.
+
 - **Ưu tiên:** P0
 - **Tiền điều kiện:** `SETUP-STUDY-EB-5-FULL`; đi bằng giao diện tới vòng 1 của `Match`.
 
@@ -59,6 +62,9 @@
 | 4 | Quan sát phản hồi và ngữ cảnh trong cả vòng | Chỉ có đúng/sai, không có `Almost`; ngữ cảnh dùng nhãn Vòng và số cặp còn lại, không dùng khái niệm Bàn |
 
 ## IT-MODE-005 — `Guess` luôn có đúng năm lựa chọn khác nghĩa và chỉ nhận lần chạm đầu
+
+> **Tách thành** — `IT-MODE-005` (`HOST-WIDGET`) · `IT-MODE-005F` (`HOST-FLOW`). Lý do và ranh giới ở
+> [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) mục C.
 
 - **Ưu tiên:** P0
 - **Tiền điều kiện:** `SETUP-STUDY-EB-5-FULL`; đi bằng UI tới Guess với năm `back_folded` khác nhau.
@@ -95,6 +101,9 @@
 
 ## IT-MODE-008 — `Recall` đo 20 giây tương tác, lật thủ công trước hạn được ưu tiên
 
+> **Tách thành** — `IT-MODE-008` (`HOST-WIDGET`) · `IT-MODE-008F` (`HOST-FLOW`). Lý do và ranh giới ở
+> [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) mục C.
+
 - **Ưu tiên:** P0
 - **Tiền điều kiện:** `SETUP-STUDY-EB-5-FULL`; đi bằng giao diện tới một lượt `Recall` mới; đo được đồng hồ.
 
@@ -106,6 +115,9 @@
 | 4 | Quan sát trạng thái sau khi lật | Có lời xác nhận lượt đã chốt; màn hình không giống bị treo và chỉ vòng sau mới bắt đầu lại 20 giây |
 
 ## IT-MODE-009 — `Recall` hết giờ tự lật, khóa kết cục sai và giữ thời gian khi Tiếp tục
+
+> **Tách thành** — `IT-MODE-009` (`HOST-WIDGET`) · `IT-MODE-009F` (`HOST-FLOW`). Lý do và ranh giới ở
+> [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) mục C.
 
 - **Ưu tiên:** P0
 - **Tiền điều kiện:** `SETUP-STUDY-EB-5-FULL`; đi tới `Recall`, giữ ứng dụng ở phía trước tới khi đồng hồ nằm trong `12.0…12.8` giây; chưa lật.

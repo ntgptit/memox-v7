@@ -8,7 +8,7 @@
 | **Source of truth for** | Giao thức AI agent thực thi bộ kịch bản IT |
 | **Depends on** | `README.md`, `scenario-catalog.md`, `../business-rules.md`, `../use-cases.md`, `../wbs.md` |
 | **Updated by task** | Bổ sung hợp đồng thực thi cho chức năng học và chuẩn hóa tiếng Việt ngày 2026-08-08 |
-| **Last updated** | 2026-08-08 |
+| **Last updated** | 2026-08-09 |
 
 ## 1. Điểm bắt đầu bắt buộc
 
@@ -49,32 +49,42 @@ tự điền phần còn thiếu rồi ghi nhận kịch bản đạt.
 
 | Giá trị | Agent được làm gì |
 |---|---|
-| `READY` | Có thể dựng tiền điều kiện bằng giao diện hoặc khả năng phát triển hiện có và chạy ngay |
-| `FIXTURE-BLOCKED` | Kịch bản hợp lệ nhưng bộ dữ liệu dựng sẵn xác định chưa được triển khai; MUST NOT tự sửa cơ sở dữ liệu để giả lập |
+| `READY` | Có thể dựng tiền điều kiện và chạy ngay |
+| `FIXTURE-BLOCKED` | Kịch bản hợp lệ nhưng bộ dữ liệu dựng sẵn xác định chưa được triển khai |
 | `KNOWN-GAP` | Hành vi mong đợi đúng theo nghiệp vụ nhưng giao diện hiện tại được biết là chưa đủ; chạy để xác nhận khoảng trống, MUST NOT ghi sản phẩm đạt |
 
-`FIXTURE-BLOCKED` chỉ được đổi thành `READY` sau khi bộ dữ liệu dựng sẵn có đường
-dẫn hiện vật, cách nạp và kiểm tra phiên bản được bổ sung vào mục 6. Việc một
-agent có thể viết SQL không làm trở ngại này biến mất.
+**`FIXTURE-BLOCKED` chỉ còn nghĩa với `DEVICE-E2E`.** Ở đó luật cũ vẫn giữ
+nguyên: agent MUST NOT sửa cơ sở dữ liệu của thiết bị để giả lập tiền điều kiện,
+vì một bộ dữ liệu không có đường dẫn hiện vật và phiên bản thì không tái lập
+được. Với `HOST-FLOW` và `HOST-WIDGET` thì trở ngại ấy không tồn tại: test tự
+tạo database in-memory của chính nó, nên dựng hàng là một phần của test chứ
+không phải một sự can thiệp vào máy ai cả.
 
 ## 3. Hồ sơ thực thi
 
-| Hồ sơ | Yêu cầu |
-|---|---|
-| `UI` | Chạm, nhập và cuộn qua thành phần nhìn thấy; phù hợp kiểm thử thủ công và E2E giao diện |
-| `UI-RESTART` | Như `UI`, đồng thời đóng hẳn tiến trình và mở lại tại bước được chỉ định |
-| `UI-DEVICE` | Cần quyền điều khiển thiết bị ngoài ứng dụng, ví dụ chế độ máy bay |
-| `DEV-LINK` | Cần mở URL/deep link phát triển; không áp dụng cho điều hướng bản phát hành thông thường |
-| `UI-FIXTURE` | Các bước thuần giao diện nhưng phần chuẩn bị cần bộ dữ liệu dựng sẵn được phê duyệt |
-| `UI-LARGE` | Như `UI-FIXTURE`, thêm dữ liệu lớn và kiểm đếm đầy đủ |
-| `UI-CLOCK` | Thao tác giao diện với đồng hồ được cố định hoặc dịch chuyển qua công cụ được phê duyệt; chuẩn bị có thể qua giao diện hoặc bộ dữ liệu dựng sẵn; MUST NOT đổi đồng hồ hệ thống của máy cá nhân |
-| `UI-MULTI` | Cần hai bề mặt hoặc tiến trình ứng dụng được điều khiển để mô phỏng thay đổi đồng thời; mỗi bề mặt phải dùng cùng cơ sở dữ liệu kiểm thử |
-| `UI-FAULT` | Cần công cụ tiêm lỗi được phê duyệt tại ranh giới kho dữ liệu/cơ sở dữ liệu; MUST NOT làm đầy đĩa hoặc phá cơ sở dữ liệu thật để tạo lỗi |
+Đúng **ba** hồ sơ. Luật chọn nằm ở `12-testing-pyramid-audit.md`; luật ngắn gọn
+là: **luôn chọn tầng thấp nhất bắt được đúng loại lỗi.**
 
-Bộ khung tự động hóa Android đã tồn tại trong `integration_test/`. Hồ sơ thực thi
-vẫn mô tả **bằng chứng bắt buộc**, không tự động biến một kịch bản thành có thể
-chạy: `UI-CLOCK`, `UI-MULTI` và `UI-FAULT` chỉ là `READY` khi đúng khả năng tương
-ứng có hiện vật và phiên bản trong mục 6.
+| Hồ sơ | Chạy bằng | Dùng cho |
+|---|---|---|
+| `HOST-FLOW` | `flutter test` | Use case + repository + DAO + Drift + SQLite in-memory thật, clock inject, `Random` có seed. Không render UI nếu không cần. Luật nghiệp vụ, scheduler, truy vấn, transaction, hàng đợi, tính `due_at`, resume, generation |
+| `HOST-WIDGET` | `flutter test` | Pump app/widget thật trên `ProviderScope`, GoRouter, localization và database thật. Thao tác người dùng, form, dialog, điều hướng, trạng thái loading/empty/error, việc UI phản ánh đúng state nghiệp vụ |
+| `DEVICE-E2E` | Android/iOS emulator hoặc thiết bị | Chỉ những gì hai hồ sơ trên không chứng minh nổi: khởi động nguội, chết tiến trình, deep link từ hệ điều hành, cử chỉ nền tảng, plugin native, smoke trước phát hành |
+
+Modifier được phép khi nó nói thêm một điều kiện thật, ví dụ `HOST-FLOW-CLOCK`
+hay `DEVICE-E2E-RESTART`. Hồ sơ gốc MUST luôn là một trong ba giá trị trên.
+
+**Các hồ sơ cũ đã bị bỏ** — `UI`, `UI-FIXTURE`, `UI-CLOCK`, `UI-RESTART`,
+`UI-DEVICE`, `UI-MULTI`, `UI-FAULT`, `UI-LARGE`, `DEV-LINK`. Chúng mô tả *cách
+thao tác*, không mô tả *ranh giới thực thi*, nên mọi kịch bản đều rơi vào
+emulator theo mặc định. Bảng ánh xạ cũ→mới nằm ở `12-testing-pyramid-audit.md`
+mục C.
+
+**Hai luật không được nới:**
+
+- `DEVICE-E2E` MUST NOT là nơi kiểm một luật nghiệp vụ mà `HOST-FLOW` kiểm được.
+- Một kịch bản MUST NOT bị hạ xuống host bằng cách mock database. SQLite phải
+  thật; in-memory là được, giả thì không.
 
 ## 4. Môi trường xác định
 

@@ -56,6 +56,9 @@
 
 ## IT-NAV-005 — Route không hợp lệ có lối phục hồi an toàn
 
+> **Tách thành** — `IT-NAV-005` (`HOST-WIDGET`) · `IT-PLAT-004` (`DEVICE-E2E`). Lý do và ranh giới ở
+> [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) mục C.
+
 - **Ưu tiên:** P1
 - **Tiền điều kiện:** Có thể mở URL/deep link development trỏ tới route không tồn tại.
 
@@ -65,6 +68,9 @@
 | 2 | Chạm hành động quay về Deck | Mở danh sách root deck và tab Deck được chọn |
 
 ## IT-NAV-006 — Hành trình Deck/Card xuyên suốt và còn dữ liệu sau restart
+
+> **Tách thành** — `IT-NAV-006` (`HOST-FLOW`) · `IT-PLAT-002` (`DEVICE-E2E`). Lý do và ranh giới ở
+> [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) mục C.
 
 - **Ưu tiên:** P0
 - **Tiền điều kiện:** App ở trạng thái trống; có thể đóng hẳn và mở lại app.
@@ -119,6 +125,9 @@
 | 4 | Mở Học lại | Không có phiên để Tiếp tục; số `New`/`Due` không đổi chỉ vì đã đi qua màn chọn |
 
 ## IT-NAV-010 — Back của hệ thống trong phiên dùng cùng hợp đồng thoát như nút ✕
+
+> **Tách thành** — `IT-NAV-010` (`HOST-WIDGET`) · `IT-PLAT-005` (`DEVICE-E2E`). Lý do và ranh giới ở
+> [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) mục C.
 
 - **Ưu tiên:** P0
 - **Tiền điều kiện:** `SETUP-STUDY-EB-5-FULL`; đã bắt đầu Học mới và hoàn tất ít nhất một lượt; phiên đang `in_progress`.

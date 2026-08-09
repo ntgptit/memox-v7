@@ -476,17 +476,27 @@ _IT_GUIDE = f"{_IT_DIR}/00-agent-execution-guide.md"
 _IT_HEAD_RE = re.compile(r"^## (IT-[A-Z]+-[0-9]{3}) — .+$")
 _IT_CATALOG_RE = re.compile(r"^\| (IT-[A-Z]+-[0-9]{3}) \|")
 _IT_READINESS = {"READY", "FIXTURE-BLOCKED", "KNOWN-GAP"}
-_IT_PROFILES = {
-    "UI",
-    "UI-RESTART",
-    "UI-DEVICE",
-    "DEV-LINK",
-    "UI-FIXTURE",
-    "UI-LARGE",
-    "UI-CLOCK",
-    "UI-MULTI",
-    "UI-FAULT",
-}
+# The three execution profiles, and nothing else. The old set — UI, UI-RESTART,
+# UI-FIXTURE, UI-CLOCK, UI-MULTI, UI-FAULT, UI-LARGE, UI-DEVICE, DEV-LINK —
+# described *how a human taps*, not *where a test runs*, so every scenario fell
+# to the emulator by default and none of them gated a pull request. See
+# docs/it-scenarios/12-testing-pyramid-audit.md.
+#
+# A modifier is allowed after a base profile (HOST-FLOW-CLOCK,
+# DEVICE-E2E-RESTART) as long as the base is one of these three.
+_IT_BASE_PROFILES = ("HOST-FLOW", "HOST-WIDGET", "DEVICE-E2E")
+
+
+def _is_it_profile(value: str) -> bool:
+    """A cell holds one profile, or two joined by ` + ` when a scenario splits."""
+    parts = [p.strip().strip("`") for p in value.split("+")]
+    if not parts or len(parts) > 2:
+        return False
+
+    return all(
+        any(p == base or p.startswith(base + "-") for base in _IT_BASE_PROFILES)
+        for p in parts
+    )
 _IT_CLEANUPS = {"CLEAN-RESET", "CLEAN-DELETE-CREATED", "CLEAN-PRESERVE", "CLEAN-NONE"}
 
 
@@ -575,14 +585,25 @@ def _check_it_scenario_contract() -> None:
         setup_ids.update(re.findall(r"\bSETUP-[A-Z0-9-]+", line))
         setup_ids.update(re.findall(r"\bS-[A-Z0-9-]+", line))
 
+    # Every ID named in the migration matrix of the audit. A split half lives
+    # there before it lives in a test file, and the catalog is allowed to point
+    # at it — but only at one that is written down.
+    matrix_ids = set()
+    for line in _lines(f"{_IT_DIR}/12-testing-pyramid-audit.md"):
+        if line.startswith("| IT-"):
+            matrix_ids.update(re.findall(r"\bIT-[A-Z]+-\d+[A-Z]?\b", line))
+
     for scenario_id, cells in catalog_rows.items():
-        if len(cells) != 7:
+        # Eight since the pyramid refactor: `Dẫn xuất` names the scenarios a
+        # split was derived into, which is what keeps traceability when one row
+        # becomes a host test and a device test.
+        if len(cells) != 8:
             _fail(
                 "IT catalog row has wrong column count",
-                f"{_IT_CATALOG}:{catalog[scenario_id][1]}: {scenario_id} has {len(cells)}, expected 7",
+                f"{_IT_CATALOG}:{catalog[scenario_id][1]}: {scenario_id} has {len(cells)}, expected 8",
             )
             continue
-        _id, file_name, readiness, profile, setup, cleanup, trace = cells
+        _id, file_name, readiness, profile, derived, setup, cleanup, trace = cells
         scenario_path = f"{_IT_DIR}/{file_name}"
         if not (_REPO / scenario_path).is_file():
             _fail("IT catalog file does not exist", f"{scenario_id}: {scenario_path}")
@@ -593,8 +614,19 @@ def _check_it_scenario_contract() -> None:
             )
         if readiness not in _IT_READINESS:
             _fail("invalid IT readiness", f"{scenario_id}: {readiness}")
-        if profile not in _IT_PROFILES:
+        if not _is_it_profile(profile):
             _fail("invalid IT execution profile", f"{scenario_id}: {profile}")
+        for derived_id in (x.strip() for x in derived.split("·")):
+            if derived_id in {"", "—"}:
+                continue
+            # A derived scenario is real if it either has its own heading —
+            # the IT-PLAT ones do — or appears in the migration matrix, which
+            # is where a split half is defined until its test is written.
+            if derived_id not in headings and derived_id not in matrix_ids:
+                _fail(
+                    "IT catalog derives from a scenario that does not exist",
+                    f"{scenario_id}: {derived_id}",
+                )
         setup_base = setup.split(":", 1)[0]
         if setup_base not in setup_ids:
             _fail("undefined IT setup", f"{scenario_id}: {setup}")

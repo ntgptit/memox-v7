@@ -135,12 +135,22 @@ jobs:
           fi
           echo "material fonts reachable at $FONTS/roboto-regular.ttf"
 
-      # Targeted, not the full suite: the AST/provider convention guards in
-      # test/app, and the Deck domain + data + controller/presentation tests — the
-      # ones that protect the feature being used as a template. `--exclude-tags
-      # golden` because goldens are windows-bound and run in ci-full.
-      - name: provider/AST convention and Deck tests
-        run: flutter test --exclude-tags golden test/app test/features/deck
+      # **The whole host suite, not a slice of it.** This step used to run
+      # `test/app` and `test/features/deck` only, which meant the study
+      # scheduler, every repository, the database queries and the migrations
+      # were not checked by any pull request — they waited for `ci-full.yml`,
+      # which is manual. Between that and `integration_test/` never running in
+      # CI at all, the project had no automatic gate on business correctness.
+      #
+      # That is the whole point of the testing-pyramid refactor: every
+      # `HOST-FLOW` and `HOST-WIDGET` scenario runs here, on a plain runner,
+      # with a real in-memory SQLite and no emulator. See
+      # `docs/it-scenarios/12-testing-pyramid-audit.md`.
+      #
+      # `--exclude-tags golden` because goldens are rasterised on Windows and
+      # run in `ci-full.yml`; they check pixels, not behaviour.
+      - name: host test suite (unit · database · HOST-FLOW · HOST-WIDGET · guards)
+        run: flutter test --exclude-tags golden
 
       # One smoke test: every registered use-case must construct and the shell
       # must build. A catalog nobody runs in CI is a catalog that rots the
