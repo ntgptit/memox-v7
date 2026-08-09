@@ -146,4 +146,40 @@ void main() {
       });
     }
   }
+
+  for (final (label, brightness) in <(String, Brightness)>[
+    ('light', Brightness.light),
+    ('dark', Brightness.dark),
+  ]) {
+    // **`fill` while typing, because that is the state the handout draws.**
+    // `fill_mode.png` is titled "đang nhập" and §6 asks for the typed value
+    // centred and large — a floating label sits left and small until something
+    // is in the field, so an empty render cannot show the thing being specified.
+    testWidgets('study fill typing — $label', (tester) async {
+      final cards = deck();
+      final repository = FakeStudyRepository(stageExhausted: false)
+        ..cards = cards
+        ..nextTurn_ = turnFor(StudyMode.fill, first: cards.first);
+
+      await pumpReview(
+        tester,
+        ReviewApp(
+          brightness: brightness,
+          home: studyScreenWith(
+            repository,
+            const StudySessionScreen(
+              deckId: 'deck-1',
+              kind: StudySessionKind.reviewing,
+              reviewMode: StudyMode.fill,
+            ),
+          ),
+        ),
+      );
+
+      await tester.enterText(find.byType(TextField), 'phù du');
+      await tester.pumpAndSettle();
+
+      await matchesReviewGolden('goldens/study_fill_typing_$label.png');
+    });
+  }
 }

@@ -201,6 +201,11 @@ class _FillAnswerSectionWidgetState extends State<FillAnswerSectionWidget> {
         label: l10n.studyFillInputLabel,
         isEnabled: !widget.isLocked && !_isGraded,
         onSubmitted: (_) => _submit(),
+        // The handout's "centred and large" (§6). It is the answer to the card
+        // above it, not a field on a form — and the prompt it answers is
+        // centred at 30.
+        textAlign: TextAlign.center,
+        textStyle: context.texts.headlineSmall,
       );
     }
 

@@ -319,14 +319,19 @@ class _HiddenBar extends StatelessWidget {
         height: AppRecallAnswer.hiddenBarHeight,
         child: DecoratedBox(
           decoration: BoxDecoration(
-            // Blended, never translucent: `color_source_rules_test` R7 fails a
-            // fill that composites at paint time.
-            color: Color.alphaBlend(
-              context.colors.surfaceContainerHigh.withValues(
-                alpha: AppRecallAnswer.hiddenBarAlpha,
-              ),
-              context.colors.surfaceContainerLow,
-            ),
+            // **Drawn from `borderControl`, not from a surface step.** A step
+            // between two neighbouring surfaces is by construction a small one:
+            // this bar measured 1.09:1 against the panel in light and 1.16:1 in
+            // dark, which is the one graphical object on the screen carrying
+            // "there is an answer here and it is hidden" — exactly what WCAG
+            // 1.4.11 asks 3:1 of. The border token is the project's 3:1 value
+            // and already the right hue.
+            //
+            // The token itself, not a blend of it: at 0.9 the bar measured
+            // 2.75:1 against the panel because the blur eats the peak before
+            // the alpha does. Solid either way — `color_source_rules_test` R7
+            // fails a fill that composites at paint time, and this one does not.
+            color: context.semanticColors.borderControl,
             borderRadius: BorderRadius.circular(AppRadius.pill),
           ),
         ),
@@ -341,9 +346,6 @@ abstract final class AppRecallAnswer {
   /// read as an input field waiting to be typed in.
   static const double hiddenBarWidth = 140;
   static const double hiddenBarHeight = 14;
-
-  /// How much of `surfaceContainerHigh` the bar carries over the card under it.
-  static const double hiddenBarAlpha = 0.7;
 
   /// Soft, not gone. Enough that the eye stops trying to resolve it.
   static const double hiddenBlur = 2;

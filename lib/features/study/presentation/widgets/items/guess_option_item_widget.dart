@@ -86,7 +86,10 @@ class GuessOptionItemWidget extends StatelessWidget {
         semantic.danger.withValues(alpha: AppGuessOption.wrongOutlineAlpha),
         ground,
       ),
-      GuessOptionState.open || GuessOptionState.dimmed => semantic.borderSubtle,
+      // The row's fill sits 1.06:1 from the page, so the border is doing all
+      // the separating — and a row is a control (WCAG 1.4.11), not a card.
+      GuessOptionState.open ||
+      GuessOptionState.dimmed => semantic.borderControl,
     };
     final verdict = switch (state) {
       GuessOptionState.correct => Icons.check,

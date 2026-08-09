@@ -221,7 +221,7 @@ class _TileSkin {
         // R7 — so *that* is blended against the page.
         background: null,
         outline: Color.alphaBlend(
-          semantic.borderSubtle.withValues(
+          semantic.borderControl.withValues(
             alpha: AppMatchTile.clearedOutlineAlpha,
           ),
           page,
@@ -231,7 +231,9 @@ class _TileSkin {
       ),
       MatchTileState.idle => _TileSkin(
         background: ground,
-        outline: semantic.borderSubtle,
+        // A tile is the control here, and its fill is 1.03:1 from the dark page
+        // — the outline is the whole grid (WCAG 1.4.11).
+        outline: semantic.borderControl,
         foreground: scheme.onSurface,
         mark: null,
       ),
