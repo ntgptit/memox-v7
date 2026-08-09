@@ -1283,3 +1283,39 @@ sai ở biên vẫn qua được mọi test chỉ dựng từ "hôm qua" và "ng
 
 Còn lại của bước 5–7: 83 HOST-FLOW và 67 HOST-WIDGET nữa, app harness cho
 HOST-WIDGET, rồi mới thu `integration_test/`.
+
+### Refactor IT — bản đồ coverage, và khối lượng còn lại nhỏ hơn tưởng nhiều
+
+Trước khi viết nhóm tiếp theo, dựng `14-host-coverage-map.md` bằng dữ liệu: nối
+từng kịch bản với test host **nhắc tới cùng ID luật**. Kết quả đổi hẳn kế hoạch:
+
+| Trạng thái | Số kịch bản |
+|---|---|
+| đã có test host nhắc tới **mọi** luật | **107** |
+| một phần | 23 |
+| chưa có | 3 |
+
+Nghĩa là "83 HOST-FLOW còn phải viết" là con số sai. Việc thật sự là **16 luật**
+chưa test nào chạm: BR-02, BR-21, BR-23, BR-24, BR-27, BR-28, BR-46, BR-75,
+BR-80, BR-98, BR-100, BR-102, BR-122, BR-131, BR-140, BR-143.
+
+Cả nhóm TREE (14 kịch bản) **đã được chứng minh sẵn** ở
+`deck_repository_tree_test.dart` và các file cạnh nó, trên SQLite thật. Viết lại
+chúng là vi phạm §5 chứ không phải hoàn thành §18.
+
+**Bản đồ là danh sách việc, không phải giấy chứng nhận.** Một test nhắc BR-62 gần
+như chắc chắn đang kiểm BR-62, nhưng chưa chắc khẳng định **đúng cái** kịch bản
+cần. Bước còn lại với 107 kịch bản kia là *đọc và xác nhận*, không phải viết lại.
+
+Đã viết `test/integration/flows/session_freeze_flow_test.dart` cho bốn luật đầu
+tiên trong danh sách: BR-23, BR-24, BR-102 — sáu test, phủ IT-STUDY-010,
+IT-STUDY-011, IT-REVIEW-004, IT-LEARN-011, IT-CONT-006 và nửa host của
+IT-CONT-001.
+
+**Một chỗ suýt ghi sai luật vào test.** Bản đầu khẳng định hàng đợi ôn tập xếp
+theo `due_at` tăng dần và nó đỏ. Đọc lại thì BR-23 chi phối **thẻ nào được lấy**,
+còn BR-117 bắt mỗi round có **thứ tự xoáo riêng** — khẳng định position theo
+`due_at` là khẳng định ngược lại BR-117. Test nay kiểm thứ BR-23 thật sự đáng
+giá: khi trần cắt, nó lấy đúng những thẻ **quá hạn lâu nhất**. Một trần lấy nhầm
+phía sẽ để món nợ cũ nhất lớn mãi, và không phép kiểm thứ tự nào trong hàng đợi
+nhìn thấy điều đó.
