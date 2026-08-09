@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/app/bootstrap.dart';
@@ -139,14 +140,31 @@ final class ItHarness {
     }
   }
 
-  /// Opens an arbitrary location, the way a deep link would.
+  /// Delivers a location the way the **operating system** delivers one.
   ///
-  /// Only ever a precondition. `DEV-LINK` scenarios need the app to *start* on
-  /// a URL no in-app control can produce — a stale link, a typo, a route that
-  /// was removed — and there is no widget to tap that gets there. Every step
-  /// after this one still goes through the UI.
-  Future<void> openLocation(String location) async {
-    appRouter.go(location);
+  /// Not [openLocation], and the difference is the entire point of
+  /// `IT-PLAT-004`. `appRouter.go` is the app calling itself; a deep link
+  /// arrives on the `flutter/navigation` channel as `pushRouteInformation`,
+  /// crosses into the framework, and reaches `GoRouter` through
+  /// `RouteInformationProvider` — a path with three seams in it that
+  /// `openLocation` skips entirely.
+  ///
+  /// What this still does **not** prove is the Android intent filter that
+  /// decides the OS hands the URL to MemoX at all. Nothing inside
+  /// `flutter test` can prove that: the handoff happens before the process
+  /// this code runs in exists. That half is `adb shell am start -a
+  /// android.intent.action.VIEW -d URL`, and it is written down as owed in
+  /// `docs/wbs-study.md` rather than papered over here.
+  Future<void> deliverDeepLink(String location) async {
+    await _tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+      'flutter/navigation',
+      const JSONMethodCodec().encodeMethodCall(
+        MethodCall('pushRouteInformation', <String, Object?>{
+          'location': location,
+        }),
+      ),
+      (_) {},
+    );
     await settle();
   }
 

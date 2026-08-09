@@ -99,8 +99,22 @@ extension ItRobotStudyDriving on ItRobot {
   }
 
   /// `recall`: revealing is the outcome (BR-129), so one tap is the whole turn.
+  ///
+  /// **A settled turn carries no control at all**, and that is the rule rather
+  /// than a missing button: the outcome is taken and cannot be changed, so the
+  /// screen says so and waits for the queue to hand over the next turn (BR-130).
+  /// A robot that tapped regardless failed here with "no Show answer on screen"
+  /// and named the wrong thing — the turn was answered, the next one had simply
+  /// not arrived. Waiting is the honest move; if the queue never moves,
+  /// [studyUntilFinished] still ends at its turn cap and says where it stuck.
   Future<bool> _answerRecall() async {
     if (find.byType(RecallTimerSectionWidget).evaluate().isEmpty) return false;
+
+    if (find.text(ItText.studyRevealAnswer).evaluate().isEmpty) {
+      await _harness.settle();
+
+      return true;
+    }
 
     await tapText(ItText.studyRevealAnswer);
 

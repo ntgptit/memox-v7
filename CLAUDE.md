@@ -298,8 +298,18 @@ flutter test integration_test/ -d emulator-5554 --flavor development
 ```
 
 The flavor is required — the app has three and Gradle produces no APK without
-one. The baseline is **66 passing, 0 failing**; anything less is a regression
+one. The baseline is **8 passing, 0 failing**; anything less is a regression
 until proven otherwise, against `origin/main` and not against a hunch.
+
+**Eight, not sixty-seven, since the testing-pyramid refactor.** Business
+correctness moved to `flutter test`, which CI runs on every PR — 133 of 133
+scenarios in `docs/it-scenarios/14-host-coverage-map.md`. What is left on a
+device is what a host cannot reach: the engine's bootstrap, a real file on
+device storage, an OS deep link, Android's back gesture, and a release build
+that does not run. A scenario added here that walks a business rule is in the
+wrong place, and it is the copy that rots — it stays green while the rule
+changes underneath it, because nobody looks at a device suite until it is
+already red.
 
 **This rule exists because the suite was broken for seventy PRs and nobody
 knew.** It was recorded 60/60 green, and by the time it was next run it was

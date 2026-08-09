@@ -64,6 +64,12 @@ jobs:
 
       # The flavor is not optional: the app declares three and Gradle produces
       # no APK without one.
+      #
+      # Airplane mode is a **precondition** of IT-NAV-007 and IT-CONT-008, not a
+      # step inside them: no widget can turn the radios off, so the run does it.
+      # `|| true` on both ends because a device that refuses the command is a
+      # weaker run, not a failed one — and the two scenarios then assert the
+      # same things online, which is still true, just less interesting.
       - name: run the device suite
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -72,7 +78,12 @@ jobs:
           arch: x86_64
           profile: pixel_6
           disable-animations: true
-          script: flutter test integration_test/ --flavor development
+          script: |
+            adb shell cmd connectivity airplane-mode enable || true
+            flutter test integration_test/ --flavor development
+            status=$?
+            adb shell cmd connectivity airplane-mode disable || true
+            exit $status
 
       - name: upload failure logs
         if: failure()
