@@ -1544,14 +1544,9 @@
   "@studyRecallAnswerHidden": {
     "description": "Label of the covered answer area on a recall turn, before it is revealed. The area is a blank panel; without a label a screen reader finds nothing there at all."
   },
-  "studyFillTheAnswerWas": "The answer: {answer}",
-  "@studyFillTheAnswerWas": {
-    "placeholders": {
-      "answer": {
-        "type": "String"
-      }
-    },
-    "description": "Shown after a fill answer was graded wrong. What the learner typed is never stored or echoed (BR-138); the card's own back is what is shown back to them."
+  "studyFillAnswerLabel": "The answer",
+  "@studyFillAnswerLabel": {
+    "description": "Heading over the block that shows the card's own back after a fill turn is graded. A label rather than a sentence: it sits above the answer, the way the prompt sits above the field."
   },
   "deckConflictResetNeedsRoot": "Learning progress is reset on the top-level deck.",
   "@deckConflictResetNeedsRoot": {

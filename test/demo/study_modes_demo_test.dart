@@ -181,5 +181,39 @@ void main() {
 
       await matchesReviewGolden('goldens/study_fill_typing_$label.png');
     });
+
+    // **The graded state, which no render covered.** It is the one place the
+    // verdict tokens are drawn, and BR-138 makes it the one place that has to
+    // be checked for what it does *not* show: the learner's own attempt is not
+    // stored and is not echoed, so a wrong turn shows the card's back and
+    // nothing else.
+    testWidgets('study fill graded — $label', (tester) async {
+      final cards = deck();
+      final repository = FakeStudyRepository(stageExhausted: false)
+        ..cards = cards
+        ..nextTurn_ = turnFor(StudyMode.fill, first: cards.first);
+
+      await pumpReview(
+        tester,
+        ReviewApp(
+          brightness: brightness,
+          home: studyScreenWith(
+            repository,
+            const StudySessionScreen(
+              deckId: 'deck-1',
+              kind: StudySessionKind.reviewing,
+              reviewMode: StudyMode.fill,
+            ),
+          ),
+        ),
+      );
+
+      await tester.enterText(find.byType(TextField), 'sai rồi');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Check'));
+      await tester.pumpAndSettle();
+
+      await matchesReviewGolden('goldens/study_fill_graded_$label.png');
+    });
   }
 }

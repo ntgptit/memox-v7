@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/app_elevation.dart';
+import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
-import '../../../../../shared/widgets/mx_card.dart';
 import 'recall_timer_section_widget.dart';
 import '../../../../../shared/widgets/mx_text_field.dart';
 import '../../../domain/models/fill_mode.dart';
@@ -101,70 +100,45 @@ class _FillAnswerSectionWidgetState extends State<FillAnswerSectionWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        // **The same skeleton as `recall`, because it is the same question in
-        // the other direction** (§8.10): a prompt above, the space for an answer
-        // below, both `Expanded` and both floored at the same height.
-        Expanded(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              minHeight: AppStudyPair.cardMinHeight,
-            ),
-            child: MxCard(
-              elevation: AppElevation.raised,
-              radius: AppRadius.xl,
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Flexible(
-                      child: Text(
-                        widget.turn.card.example ?? widget.turn.card.front,
-                        style: context.texts.bodyLarge,
-                        textAlign: TextAlign.center,
-                        maxLines: 6,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    if (_hasUsedHint && hint != null) ...<Widget>[
-                      const SizedBox(height: AppSpacing.md),
-                      Text(
-                        hint,
-                        style: context.texts.bodyMedium?.copyWith(
-                          color: context.colors.onSurfaceVariant,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ],
-                ),
-              ),
+        // **The prompt is text on the page, not a card, and `fill` is now the
+        // one stage of the pair that says so.** It shared `recall`'s skeleton —
+        // two cards of equal weight — because it is the same question in the
+        // other direction, and that held while the prompt was a word. It is not:
+        // a real prompt is a sentence with a gloss in it, "Business fails / Kinh
+        // doanh thất bại (Cụm từ, chỉ việc kinh doanh không thành công, âm Hán
+        // Việt: Sự nghiệp bại…)", and a centred `maxLines: 6` card ellipsised it
+        // while leaving most of its own height empty. Left-aligned running text
+        // wraps as far as it needs and stops.
+        Text(
+          widget.turn.card.example ?? widget.turn.card.front,
+          style: context.texts.titleLarge,
+        ),
+        if (_hasUsedHint && hint != null) ...<Widget>[
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            hint,
+            style: context.texts.bodyMedium?.copyWith(
+              color: context.colors.onSurfaceVariant,
             ),
           ),
-        ),
-        const SizedBox(height: AppSpacing.md),
-        Expanded(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              minHeight: AppStudyPair.cardMinHeight,
-            ),
-            child: MxCard(
-              elevation: AppElevation.none,
-              radius: AppRadius.xl,
-              color: context.colors.surfaceContainerLow,
-              child: Center(child: _answerArea(context)),
-            ),
-          ),
-        ),
-        const SizedBox(height: AppSpacing.lg),
+        ],
+        const SizedBox(height: AppSpacing.xl),
+        _answerArea(context),
+        // The actions sit under the answer, and the empty space under *them*
+        // rather than inside a card that had nothing to hold.
+        const Spacer(),
         _CtaRow(
           children: <Widget>[
-            if (hint != null && !_hasUsedHint)
+            // Gone once the turn is graded, not disabled: a hint after the
+            // answer is on screen has nothing left to hint at, and a dead
+            // button under a verdict reads as something that failed to work.
+            if (hint != null && !_hasUsedHint && !_isGraded)
               MxActionButton(
                 label: l10n.studyShowHint,
                 variant: MxActionButtonVariant.secondary,
                 // Recorded on the turn, and with no effect on the action or the
                 // schedule (BR-136).
-                onPressed: widget.isLocked || _isGraded
+                onPressed: widget.isLocked
                     ? null
                     : () => setState(() => _hasUsedHint = true),
               ),
@@ -179,18 +153,18 @@ class _FillAnswerSectionWidgetState extends State<FillAnswerSectionWidget> {
     );
   }
 
-  /// What the lower card holds: the field, or the verdict once it is graded.
+  /// The field, or what the turn recorded once it is graded.
   ///
-  /// **The second state of this screen, which the design has no image for.**
-  /// Drawn from BR-134 and BR-137 rather than guessed: the verdict is what the
-  /// turn recorded, the field is closed because a second answer would be a
-  /// second turn, and a wrong answer is shown the card’s own back — never what
-  /// the learner typed, which is not stored and not echoed (BR-138, §6.1).
+  /// **The verdict is a line and a block, and the block never holds what the
+  /// learner typed.** BR-138 keeps the typed string out of storage and off the
+  /// screen, so a wrong answer is shown the card's own back — which is the thing
+  /// worth taking away — under its own label. The reference design puts the
+  /// learner's attempt in a box of its own beside it; that box would be empty
+  /// here, and drawing an empty one to match a picture is how a screen starts
+  /// implying it kept something it did not.
   ///
-  /// The handout asks for the typed answer struck through, with `Try again` and
-  /// `Mark correct` beside it. All three are held: each of them decides what a
-  /// turn *writes*, and that is a rule this screen does not get to invent — see
-  /// §8.10.
+  /// `Try again` and `Mark correct` are still held: each decides what a turn
+  /// *writes*, which is a rule this screen does not get to invent (§8.10).
   Widget _answerArea(BuildContext context) {
     final l10n = context.l10n;
     final graded = _wasCorrect;
@@ -201,42 +175,96 @@ class _FillAnswerSectionWidgetState extends State<FillAnswerSectionWidget> {
         label: l10n.studyFillInputLabel,
         isEnabled: !widget.isLocked && !_isGraded,
         onSubmitted: (_) => _submit(),
-        // The handout's "centred and large" (§6). It is the answer to the card
-        // above it, not a field on a form — and the prompt it answers is
-        // centred at 30.
-        textAlign: TextAlign.center,
-        textStyle: context.texts.headlineSmall,
       );
     }
 
+    final semantic = context.semanticColors;
+
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Text(
           graded ? l10n.studyFillCorrect : l10n.studyFillIncorrect,
           style: context.texts.titleMedium?.copyWith(
-            color: graded
-                ? context.semanticColors.success
-                : context.semanticColors.danger,
+            color: graded ? semantic.success : semantic.danger,
           ),
-          textAlign: TextAlign.center,
         ),
+        // **The block only appears after a wrong turn, and that is a rule, not
+        // a layout choice.** It exists to tell somebody what they missed;
+        // spelling the answer back to somebody who just typed it reads as a
+        // correction of something they got right. A correct turn gets the line
+        // and nothing else.
+        //
+        // The label sits above the block it names, the way the prompt sits
+        // above the field.
         if (!graded) ...<Widget>[
-          const SizedBox(height: AppSpacing.sm),
+          const SizedBox(height: AppSpacing.md),
           Text(
-            l10n.studyFillTheAnswerWas(widget.turn.card.back),
-            style: context.texts.bodyMedium,
-            textAlign: TextAlign.center,
-            maxLines: 4,
-            overflow: TextOverflow.ellipsis,
+            l10n.studyFillAnswerLabel,
+            style: context.texts.labelMedium?.copyWith(color: semantic.success),
           ),
+          const SizedBox(height: AppSpacing.sm),
+          _AnswerBlock(text: widget.turn.card.back, accent: semantic.success),
         ],
       ],
     );
   }
 }
 
-/// The row of actions under the two cards.
+/// The card's back, framed in the verdict colour.
+///
+/// **Blended, never translucent** — `color_source_rules_test` R7 fails a fill
+/// that composites at paint time, so the tint is resolved against the surface
+/// the block actually sits on.
+class _AnswerBlock extends StatelessWidget {
+  const _AnswerBlock({required this.text, required this.accent});
+
+  final String text;
+  final Color accent;
+
+  @override
+  Widget build(BuildContext context) {
+    final ground = context.colors.surface;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.md,
+      ),
+      decoration: BoxDecoration(
+        color: Color.alphaBlend(
+          accent.withValues(alpha: AppFillAnswer.blockFillAlpha),
+          ground,
+        ),
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        border: Border.all(
+          color: Color.alphaBlend(
+            accent.withValues(alpha: AppFillAnswer.blockOutlineAlpha),
+            ground,
+          ),
+        ),
+      ),
+      child: Row(
+        children: <Widget>[
+          Icon(Icons.check, size: AppIconSize.sm, color: accent),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(child: Text(text, style: context.texts.bodyMedium)),
+        ],
+      ),
+    );
+  }
+}
+
+/// The numbers the graded block decides.
+abstract final class AppFillAnswer {
+  /// The same pair `guess` uses for an answered row: the fill carries the
+  /// verdict quietly and the outline carries it at a strength a hairline needs.
+  static const double blockFillAlpha = 0.14;
+  static const double blockOutlineAlpha = 0.4;
+}
+
+/// The row of actions under the answer.
 ///
 /// Centred and capped rather than stretched: one or two buttons under a pair of
 /// cards read as the way on, where a full-width bar reads as the screen floor.
