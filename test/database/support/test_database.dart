@@ -102,15 +102,23 @@ Future<String> insertCard(
   AppDatabase db, {
   required String id,
   required String deckId,
+  String? front,
+  String? back,
 }) async {
+  // ** is written, not left to its default.** BR-123 measures two
+  // meanings as different by the folded form, so a fixture whose cards all fold
+  // to the empty string makes every `guess` question unbuildable — for a reason
+  // that has nothing to do with the scenario under test.
+  final backText = back ?? 'back $id';
   await db.customInsert(
-    'INSERT INTO cards (id, deck_id, front, back, created_at, updated_at) '
-    'VALUES (?, ?, ?, ?, ?, ?)',
+    'INSERT INTO cards (id, deck_id, front, back, back_folded, created_at, '
+    'updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
     variables: <Variable<Object>>[
       Variable<String>(id),
       Variable<String>(deckId),
-      Variable<String>('front $id'),
-      Variable<String>('back $id'),
+      Variable<String>(front ?? 'front $id'),
+      Variable<String>(backText),
+      Variable<String>(backText.trim().toLowerCase()),
       Variable<DateTime>(testNow),
       Variable<DateTime>(testNow),
     ],
