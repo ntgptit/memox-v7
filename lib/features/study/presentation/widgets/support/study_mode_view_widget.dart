@@ -180,16 +180,40 @@ StudyAction? _actionFor(StudySessionState state, {required bool isCorrect}) =>
 /// Made of what identifies the deal — the session, the stage, the round, and for
 /// a per-question deal the card — so it is the same on every rebuild and after a
 /// Resume, and different in the next round.
+///
+/// **Hashed by hand, because `Object.hash` is not stable across a restart.**
+/// Dart randomises `String.hashCode` per isolate, so the same session id seeds a
+/// different shuffle in the next process — which is stable on a rebuild and
+/// *not* stable on the Resume BR-127 names. A reopened session dealt its match
+/// board and its five options in a new arrangement, and the giveaway was a
+/// golden render of `guess` that produced a different option order on every run
+/// of the same test.
+///
+/// FNV-1a over the same parts, masked to 31 bits so the value stays a positive
+/// int on the web, where an `int` is a double.
 int _seedFor(
   StudySessionState state, {
   required StudyTurnModel turn,
   required bool isPerCard,
-}) => Object.hash(
-  state.session?.id,
-  turn.item.mode,
-  turn.item.round,
-  isPerCard ? turn.cardId : null,
-);
+}) {
+  var hash = _fnvOffset;
+  void mix(String value) {
+    for (final unit in value.codeUnits) {
+      hash = ((hash ^ unit) * _fnvPrime) & _seedMask;
+    }
+  }
+
+  mix(state.session?.id ?? '');
+  mix(turn.item.mode.name);
+  mix('${turn.item.round}');
+  if (isPerCard) mix(turn.cardId);
+
+  return hash;
+}
+
+const int _fnvOffset = 0x811c9dc5;
+const int _fnvPrime = 0x01000193;
+const int _seedMask = 0x7fffffff;
 
 /// The round's cards, resolved against the session's content in the round's own
 /// order (BR-156, BR-117).
