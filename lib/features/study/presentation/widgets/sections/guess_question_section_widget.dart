@@ -19,8 +19,8 @@ import '../items/guess_option_item_widget.dart';
 ///
 /// **A choice is reported by identity, never by its text** (BR-125). Two cards
 /// can display the same string; comparing text grades whichever matched first.
-/// The A–E badges are the same rule seen from the other side: they are the
-/// display order, rebuilt each shuffle, and nothing reads them back.
+/// A row therefore carries no seat letter at all — see
+/// `guess_option_item_widget.dart` for why the handout's A–E circles are gone.
 ///
 /// **After an answer the question stays on screen and stops taking input**
 /// (BR-126). The right option is marked right whether or not it was picked — a
@@ -86,41 +86,124 @@ class _GuessQuestionSectionWidgetState
   }
 
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: <Widget>[
-      // **The card takes what the options leave, and never a fixed height.**
-      // Five rows are a known height; the prompt is not, because a term can be
-      // one word or four. Sizing the card instead and letting the options take
-      // the rest is what pushed the fifth option off the screen — the handout
-      // calls that out by name.
-      Expanded(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minHeight: AppGuessPrompt.cardMinHeight,
-          ),
+  Widget build(BuildContext context) => LayoutBuilder(builder: _body);
+
+  /// The band split, decided once from the height the screen actually has.
+  ///
+  /// **Neither half is `Expanded` any more, and that is the whole fix.** Two
+  /// equal flex children split the body down the middle, so capping the card at
+  /// 320 left the rest of its half as a band of nothing between the question and
+  /// the answers — the card got smaller and the hole got bigger. Measuring
+  /// first gives the card exactly its height and hands every remaining point to
+  /// the rows.
+  ///
+  /// The rule: **the card takes its ceiling, unless that would push the rows
+  /// off the bottom — then it gives way, down to its own floor.**
+  ///
+  /// **What the rows need is measured, not assumed.** Sizing the card against a
+  /// flat 48pt per row is right until a meaning wraps, and then the card kept
+  /// its full 320 while the options ran off into a scroll — the one thing this
+  /// screen should not do, because the five options are the question. Asking
+  /// each row how tall its text actually is lets the card yield by exactly the
+  /// wrap's cost: a three-line meaning takes 40pt off the card instead of 40pt
+  /// off the bottom of the list.
+  ///
+  /// So a phone with short meanings gets a 320pt card over five roomy rows; the
+  /// same phone with one three-line meaning gets a smaller card and still no
+  /// scroll; and only when even a 180pt card cannot free enough — a very small
+  /// screen, or several long meanings at double text — does the band scroll.
+  Widget _body(BuildContext context, BoxConstraints constraints) {
+    final rows = widget.question.options.length;
+    final gaps = AppSpacing.sm * (rows - 1);
+    final needed =
+        gaps +
+        widget.question.options.fold<double>(
+          0,
+          (total, option) =>
+              total +
+              AppGuessOption.naturalHeightOf(
+                context,
+                option.text,
+                width: constraints.maxWidth,
+              ),
+        );
+    final cardHeight = (constraints.maxHeight - AppSpacing.md - needed).clamp(
+      AppGuessPrompt.cardMinHeight,
+      AppGuessPrompt.cardMaxHeight,
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        SizedBox(
+          height: cardHeight,
           child: _PromptCard(term: widget.question.term.front),
         ),
-      ),
-      const SizedBox(height: AppSpacing.md),
-      for (final (index, option)
-          in widget.question.options.indexed) ...<Widget>[
-        if (index > 0) const SizedBox(height: AppSpacing.sm),
-        GuessOptionItemWidget(
-          badge: _badgeFor(index),
-          text: option.text,
-          state: _stateOf(option),
-          onTap: _canChoose ? () => _choose(option) : null,
-        ),
+        const SizedBox(height: AppSpacing.md),
+        Expanded(child: LayoutBuilder(builder: _options)),
       ],
-    ],
-  );
+    );
+  }
 
-  /// A, B, C… from the row's position.
+  /// The five rows: an equal share of the band each, and more when their text
+  /// needs it.
   ///
-  /// Built here rather than stored on the option, because storing it would make
-  /// it look like something a turn could be recorded against (BR-125).
-  String _badgeFor(int index) => String.fromCharCode(_firstBadgeLetter + index);
+  /// **A floor, never a ceiling, and that distinction is the whole method.**
+  /// Five `Expanded` rows was tried first and it divides the band whatever the
+  /// band is — at 320x568 with double text they came out 26pt tall with a 10pt
+  /// line inside, a row nobody can read. That failure is worse than the overflow
+  /// it replaced, because an overflow paints a warning stripe and a crushed row
+  /// paints a normal-looking screen.
+  ///
+  /// So each row is given `share` as a *minimum*. With room, every row is the
+  /// same size and the list runs from the card down to the last row with nothing
+  /// left over. When a meaning wraps — and real ones do, "Deep sleep / Giấc ngủ
+  /// sâu (Danh từ, …)" is three lines — that row grows past its share and the
+  /// band scrolls. Five options that must all be shown (BR-121) are not
+  /// something to shrink until they fit, and a meaning the learner is choosing
+  /// between is not something to ellipsize.
+  Widget _options(BuildContext context, BoxConstraints constraints) {
+    final rows = widget.question.options.length;
+    final gaps = AppSpacing.sm * (rows - 1);
+    final natural = <double>[
+      for (final option in widget.question.options)
+        AppGuessOption.naturalHeightOf(
+          context,
+          option.text,
+          width: constraints.maxWidth,
+        ),
+    ];
+
+    // **The surplus is shared, the shortfall is not taken back.** An earlier
+    // version handed every row the same `share` of the band, which inflated the
+    // four short rows straight back over whatever the long one needed — the
+    // card had already given way and the list scrolled anyway. Growing each row
+    // by the *same amount* instead keeps the long row long, fills the band
+    // exactly, and leaves nothing to scroll.
+    final surplus =
+        constraints.maxHeight - gaps - natural.fold<double>(0, (a, b) => a + b);
+    final bonus = surplus > 0 ? surplus / rows : 0.0;
+
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          for (final (index, option)
+              in widget.question.options.indexed) ...<Widget>[
+            if (index > 0) const SizedBox(height: AppSpacing.sm),
+            ConstrainedBox(
+              constraints: BoxConstraints(minHeight: natural[index] + bonus),
+              child: GuessOptionItemWidget(
+                text: option.text,
+                state: _stateOf(option),
+                onTap: _canChoose ? () => _choose(option) : null,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
 
   GuessOptionState _stateOf(GuessOption option) {
     final chosen = _chosenCardId;
@@ -183,10 +266,6 @@ class _PromptCard extends StatelessWidget {
   );
 }
 
-/// `A`. The badges run from here in display order, and go no further than the
-/// five options BR-121 allows.
-const int _firstBadgeLetter = 0x41;
-
 /// What the prompt card decides for itself.
 abstract final class AppGuessPrompt {
   /// The card gives way to the options, but only so far.
@@ -194,4 +273,14 @@ abstract final class AppGuessPrompt {
   /// Below this the term stops being the focus of the screen and starts being a
   /// caption over a list — which is the opposite of what the mode asks.
   static const double cardMinHeight = 180;
+
+  /// And a ceiling, so the card stops absorbing every point the options leave.
+  ///
+  /// **320 is `recall` and `fill`'s prompt, rounded to the 8pt step.** Those two
+  /// settle their card at 312 on the 393x852 reference because they split the
+  /// body into a pair; `guess` has five rows instead of a second card, so it
+  /// cannot reach the same number by the same mechanism — it has to be told.
+  /// The remaining 8pt is under a third of a line and keeps the value on the
+  /// grid every other spacing token sits on.
+  static const double cardMaxHeight = 320;
 }

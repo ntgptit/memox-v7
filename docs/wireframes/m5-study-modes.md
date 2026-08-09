@@ -7,8 +7,8 @@
 | **Scope** | Khung phiên học, và năm màn `browse` · `match` · `guess` · `recall` · `fill`. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), luồng (`use-cases.md`), giá trị token (`design_system/tokens/`) |
 | **Source of truth for** | Bố cục màn học · phán quyết cho tám điểm design lệch với BR |
 | **Depends on** | `document-conventions.md`, `business-rules.md` (BR-108…BR-154), `wbs-study.md` (M5.7…M5.20) |
-| **Updated by task** | Dòng gợi ý hai trạng thái — thêm §8.11 |
-| **Last updated** | 2026-08-09 |
+| **Updated by task** | Rà soát UI 5 stage — bỏ huy hiệu A–E của `guess` (§5) |
+| **Last updated** | 2026-08-10 |
 
 Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham chiếu bằng ID.
 
@@ -121,13 +121,23 @@ header đã đo cả round rồi.
 ## 5. Study · Guess (`guess_mode`)
 
 - Thẻ đề ở trên: nhãn `WHAT IS THIS?` rồi thuật ngữ cỡ lớn.
-- Năm hàng lựa chọn A–E. Mỗi hàng: huy hiệu tròn chứa chữ cái, nhãn chính, và
-  **một dòng mô tả phụ** cỡ nhỏ.
+- Năm hàng lựa chọn. Mỗi hàng chỉ có nghĩa của thẻ.
 - Sau khi trả lời: đáp án đúng nền xanh lá + ✓; lựa chọn sai đã chọn nền đỏ + ✕;
   ba lựa chọn còn lại mờ đi.
 
 Dòng mô tả phụ không có trường nào chứa, nên **không dựng** ở MVP: mỗi lựa chọn
 chỉ hiện nghĩa (§7.5).
+
+**Huy hiệu tròn A–E: đã dựng, rồi gỡ.** Ảnh vẽ một vòng tròn chứa chữ cái ở đầu
+mỗi hàng. Nó tốn **44pt** mỗi hàng — vòng tròn 28 cộng khoảng cách 16 — trên một
+màn rộng 393. Với nội dung ảnh mẫu dùng ("apple") thì không thấy; với nội dung
+sản phẩm này phục vụ — *"Deep sleep / Giấc ngủ sâu (Danh từ, trạng thái ngủ ngon
+không bị gián đoạn…)"* — 44pt ấy là **một dòng nghĩa trên cả năm hàng**, đổi lấy
+một số ghế mà BR-127 xáo lại ở lượt sau và **không có gì đọc ngược nó**: một
+lượt được ghi bằng `cardId`, không bao giờ bằng vị trí (BR-125).
+
+Chữ trên hàng cũng hạ từ 16/w600 xuống 14/w400 cùng lý do: một nghĩa là một câu,
+không phải một tiêu đề.
 
 ## 6. Study · Recall (`recall_mode`) và Study · Fill (`fill_mode`)
 

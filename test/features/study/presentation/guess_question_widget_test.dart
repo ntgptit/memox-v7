@@ -227,10 +227,15 @@ void main() {
       expect(chosen, <String>['c']);
     });
 
-    testWidgets('the badge is the seat, not the card (BR-125)', (tester) async {
-      // Same five options in a different order: the letters stay A–E in place
-      // while the card under each of them changes. Anything reading a badge
-      // back would grade whoever happened to sit there.
+    testWidgets('a row carries the meaning and nothing that names a seat', (
+      tester,
+    ) async {
+      // What used to stand here checked that the A–E badge was the row's
+      // position rather than the card's name. The badge is gone — it cost 44pt
+      // of every row on a 393pt screen, which is a line of meaning on content
+      // that runs to three — so the guard moves to the shape underneath it:
+      // a row renders exactly one string, the meaning, and BR-125 is carried by
+      // `reports the option by identity` above.
       await tester.pumpWidget(
         wrapForTest(
           GuessQuestionSectionWidget(question: questionOf(), onChosen: (_) {}),
@@ -238,38 +243,21 @@ void main() {
         ),
       );
 
-      String badgeAbove(String text) => tester
+      final texts = tester
           .widgetList<Text>(
             find.descendant(
-              of: find
-                  .ancestor(
-                    of: find.text(text),
-                    matching: find.byType(GuessOptionItemWidget),
-                  )
-                  .first,
+              of: find.byType(GuessOptionItemWidget).first,
               matching: find.byType(Text),
             ),
           )
-          .first
-          .data!;
+          .map((text) => text.data)
+          .toList();
 
-      expect(badgeAbove('back-a'), 'A');
-      expect(badgeAbove('back-e'), 'E');
-
-      final reversed = GuessQuestion(
-        term: card('a'),
-        options: questionOf().options.reversed.toList(),
-      );
-      await tester.pumpWidget(
-        wrapForTest(
-          GuessQuestionSectionWidget(question: reversed, onChosen: (_) {}),
-          isScrollable: false,
-        ),
-      );
-      await tester.pump();
-
-      expect(badgeAbove('back-e'), 'A');
-      expect(badgeAbove('back-a'), 'E');
+      expect(texts, hasLength(1));
+      expect(texts.single, startsWith('back-'));
+      for (final letter in <String>['A', 'B', 'C', 'D', 'E']) {
+        expect(find.text(letter), findsNothing);
+      }
     });
   });
 }

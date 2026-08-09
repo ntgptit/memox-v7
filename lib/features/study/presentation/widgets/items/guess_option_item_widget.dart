@@ -5,7 +5,6 @@ import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_motion_policy.dart';
 import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/theme/app_stroke.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 
@@ -18,13 +17,16 @@ import '../../../../../l10n/l10n_extension.dart';
 /// yours. Everything else recedes.
 enum GuessOptionState { open, correct, chosenWrong, dimmed }
 
-/// One row of a `guess` question: a letter, a meaning, and afterwards a verdict.
+/// One row of a `guess` question: a meaning, and afterwards a verdict.
 ///
-/// **The letter is the row's position, not the card's name** (BR-125). A turn is
-/// recorded by `cardId`; the badge exists so a learner can say "C" out loud, and
-/// it is rebuilt from the display order every time the options are shuffled. Any
-/// code that read it back as an identifier would grade whichever card happened
-/// to sit in that seat.
+/// **No A–E badge.** The handout draws a lettered circle on each row (§5) and it
+/// was built; it is gone because of what it cost on a real deck. The circle plus
+/// its gap took 44pt off every row on a screen 393pt wide, and the content this
+/// app is for is not "apple" — it is "Deep sleep / Giấc ngủ sâu (Danh từ, trạng
+/// thái ngủ ngon không bị gián đoạn…)". Those 44pt were a line of meaning on
+/// every one of the five rows, spent on a seat number that changes with the next
+/// shuffle (BR-127) and that nothing reads back — a turn is recorded by `cardId`
+/// (BR-125), never by position. Ruling recorded in the handout's §5.
 ///
 /// **No secondary description line** (§7.5). `cards` has no field for an
 /// extended meaning, and borrowing `hint` — which belongs to `fill` (BR-136) —
@@ -38,15 +40,11 @@ enum GuessOptionState { open, correct, chosenWrong, dimmed }
 /// value over the surface the row actually sits on.
 class GuessOptionItemWidget extends StatelessWidget {
   const GuessOptionItemWidget({
-    required this.badge,
     required this.text,
     required this.state,
     required this.onTap,
     super.key,
   });
-
-  /// The letter shown in the circle: A for the first row, B for the second.
-  final String badge;
 
   /// Already-localized card content.
   final String text;
@@ -130,22 +128,20 @@ class GuessOptionItemWidget extends StatelessWidget {
               onTap: onTap,
               borderRadius: radius,
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.lg,
-                  vertical: AppSpacing.sm,
-                ),
+                padding: AppGuessOption.rowPadding,
                 child: Row(
                   children: <Widget>[
-                    _Badge(letter: badge, accent: accent),
-                    const SizedBox(width: AppSpacing.md),
                     Expanded(
                       child: Text(
                         text,
-                        // 16, and `titleMedium` is the step that is 16. The
-                        // handout asks for w500, which is not a weight in this
-                        // scale — inventing one for a single row is the drift
-                        // `app_typography.dart` exists to stop.
-                        style: context.texts.titleMedium?.copyWith(
+                        // **14 and regular, not 16 and semibold.** A meaning is
+                        // a sentence, not a heading: real content here runs to
+                        // "Deep sleep / Giấc ngủ sâu (Danh từ, trạng thái ngủ
+                        // ngon không bị gián đoạn…)" and at 16/w600 five of
+                        // those are a wall. `bodyMedium` also carries the 1.45
+                        // line height, which is what makes the third line of a
+                        // wrapped meaning readable rather than crowded.
+                        style: context.texts.bodyMedium?.copyWith(
                           color: accent ?? scheme.onSurface,
                         ),
                       ),
@@ -165,55 +161,48 @@ class GuessOptionItemWidget extends StatelessWidget {
   }
 }
 
-/// The circle holding the row's letter.
-class _Badge extends StatelessWidget {
-  const _Badge({required this.letter, required this.accent});
-
-  final String letter;
-  final Color? accent;
-
-  @override
-  Widget build(BuildContext context) {
-    final colour = accent ?? context.colors.onSurfaceVariant;
-
-    return Opacity(
-      // Just under full. The badge is a handle, not a verdict, and at full
-      // strength it competes with the meaning beside it — which is the thing
-      // being chosen between.
-      opacity: AppGuessOption.badgeOpacity,
-      child: Container(
-        width: AppGuessOption.badgeSize,
-        height: AppGuessOption.badgeSize,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: colour, width: AppStroke.input),
-        ),
-        child: ExcludeSemantics(
-          // The letter is a handle for the eye, not a name. Announcing it would
-          // read every option as "A, apple" and bury the meaning behind a seat
-          // number that changes with the next shuffle (BR-127).
-          child: Text(
-            letter,
-            style: context.texts.labelMedium?.copyWith(
-              color: colour,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 /// The numbers this row decides, and none of them is a colour.
 abstract final class AppGuessOption {
-  /// The badge circle. The verdict glyph beside it is [AppIconSize.sm] — a
-  /// smaller mark, because the badge names the row and the glyph only judges it.
-  static const double badgeSize = 28;
+  /// The inset around a row's text. Public because the section measures a row
+  /// before it decides how much height the prompt card may keep — and a second
+  /// copy of these numbers over there would drift the first time one changed.
+  static const EdgeInsets rowPadding = EdgeInsets.symmetric(
+    horizontal: AppSpacing.lg,
+    vertical: AppSpacing.sm,
+  );
 
-  /// How far the badge sits behind the meaning it labels.
-  static const double badgeOpacity = 0.85;
+  /// The border the row draws, counted on both edges.
+  static const double rowBorder = 2;
+
+  /// How tall this row wants to be for [text] at [width].
+  ///
+  /// **Measured, not guessed, and that is what keeps the screen still.** The
+  /// section used to size the prompt card against a 48pt floor per row, which
+  /// is right until a meaning wraps — and then the card kept its ceiling while
+  /// the options ran off the bottom into a scroll. Asking the text how tall it
+  /// is lets the card give way by exactly the amount the wrap costs.
+  ///
+  /// The same style and the same insets the row builds with, so the two cannot
+  /// disagree: a measurement that drifts from the widget is worse than none,
+  /// because it looks authoritative.
+  static double naturalHeightOf(
+    BuildContext context,
+    String text, {
+    required double width,
+  }) {
+    final style = context.texts.bodyMedium;
+    final painter = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+    )..layout(maxWidth: width - rowPadding.horizontal - rowBorder);
+
+    final content = painter.height + rowPadding.vertical + rowBorder;
+    painter.dispose();
+    final floor = MediaQuery.textScalerOf(context).scale(rowMinHeight);
+
+    return content > floor ? content : floor;
+  }
 
   /// The shortest a row may be. [AppSpacing.minimumTouchTarget] rather than the
   /// handout's 50: five of these are the only controls on the screen, and the
