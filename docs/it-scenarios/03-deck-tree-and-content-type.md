@@ -12,6 +12,9 @@
 
 ## IT-TREE-001 — Root deck chỉ cho tạo deck con
 
+> **Tách thành** — `IT-TREE-001` (`HOST-WIDGET`) · `IT-TREE-001F` (`HOST-FLOW`). Lý do và ranh giới ở
+> [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) mục C.
+
 - **Ưu tiên:** P0
 - **Tiền điều kiện:** Có root `D-EB`, chưa có child.
 
@@ -32,6 +35,9 @@
 
 ## IT-TREE-003 — Card đầu tiên cố định deck thành loại card
 
+> **Tách thành** — `IT-TREE-003` (`HOST-WIDGET`) · `IT-TREE-003F` (`HOST-FLOW`). Lý do và ranh giới ở
+> [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) mục C.
+
 - **Ưu tiên:** P0
 - **Tiền điều kiện:** Có deck con `D-LEAF` đang rỗng và chưa định loại.
 
@@ -43,6 +49,9 @@
 | 4 | Rời màn hình rồi mở lại `D-LEAF` | Tự đi vào danh sách card, không hiện danh sách sub-deck rỗng |
 
 ## IT-TREE-004 — Deck con đầu tiên cố định deck thành loại deck
+
+> **Tách thành** — `IT-TREE-004` (`HOST-WIDGET`) · `IT-TREE-004F` (`HOST-FLOW`). Lý do và ranh giới ở
+> [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) mục C.
 
 - **Ưu tiên:** P0
 - **Tiền điều kiện:** Có deck con `Grammar` đang rỗng và chưa định loại.
@@ -77,6 +86,9 @@
 
 ## IT-TREE-007 — Reset loại nội dung của deck rỗng
 
+> **Tách thành** — `IT-TREE-007` (`HOST-WIDGET`) · `IT-TREE-007F` (`HOST-FLOW`). Lý do và ranh giới ở
+> [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) mục C.
+
 - **Ưu tiên:** P0
 - **Tiền điều kiện:** Deck con `Grammar` đang rỗng nhưng loại hiện tại là deck.
 
@@ -99,6 +111,9 @@
 | 2 | Xoá hết child, mở lại menu | Hành động reset mới xuất hiện |
 
 ## IT-TREE-009 — Di chuyển sub-deck tới đích hợp lệ trong cùng cây
+
+> **Tách thành** — `IT-TREE-009` (`HOST-WIDGET`) · `IT-TREE-009F` (`HOST-FLOW`). Lý do và ranh giới ở
+> [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) mục C.
 
 - **Ưu tiên:** P0
 - **Tiền điều kiện:** `D-EB` có hai branch `Vocabulary` và `Grammar`; `D-LEAF` nằm trong `Vocabulary`; `Grammar` có thể chứa deck.

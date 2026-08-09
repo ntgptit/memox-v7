@@ -12,6 +12,9 @@
 
 ## IT-CONT-001 — Tiến trình bị hệ điều hành thu hồi trong cùng ngày vẫn Tiếp tục đúng điểm dừng
 
+> **Tách thành** — `IT-CONT-001` (`HOST-FLOW`) · `IT-PLAT-003` (`DEVICE-E2E`). Lý do và ranh giới ở
+> [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) mục C.
+
 - **Ưu tiên:** P0
 - **Tiền điều kiện:** `SETUP-STUDY-EB-5-FULL`; người dùng chưa bấm ✕.
 
@@ -84,6 +87,9 @@
 
 ## IT-CONT-007 — Xóa bộ thẻ đang học kết thúc phiên và phục hồi điều hướng
 
+> **Tách thành** — `IT-CONT-007` (`HOST-FLOW`) · `IT-CONT-007W` (`HOST-WIDGET`). Lý do và ranh giới ở
+> [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) mục C.
+
 - **Ưu tiên:** P0
 - **Tiền điều kiện:** `S-STUDY-RESUME-V2`; cửa sổ thứ hai có thể xóa đúng bộ thẻ/bộ thẻ gốc.
 
@@ -154,6 +160,9 @@
 | 4 | Tắt bộ tạo lỗi, khởi động lại và xem tiến độ | Hai lượt đã thành công vẫn giữ; hành động gây lỗi không được ghi một phần |
 
 ## IT-CONT-013 — Lỗi đọc thẻ cho phép Thử lại mà không làm mất điểm dừng
+
+> **Tách thành** — `IT-CONT-013` (`HOST-FLOW`) · `IT-CONT-013W` (`HOST-WIDGET`). Lý do và ranh giới ở
+> [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) mục C.
 
 - **Ưu tiên:** P0
 - **Tiền điều kiện:** `S-STUDY-FAILURE-V2` ở chế độ lỗi đọc một lần rồi phục hồi; phiên đang ở thẻ đã biết.

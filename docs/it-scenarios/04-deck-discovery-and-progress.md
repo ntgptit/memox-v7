@@ -12,6 +12,9 @@
 
 ## IT-DISC-001 — Deck tile trình bày đủ thông tin ra quyết định
 
+> **Tách thành** — `IT-DISC-001` (`HOST-WIDGET`) · `IT-DISC-001F` (`HOST-FLOW`). Lý do và ranh giới ở
+> [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) mục C.
+
 - **Ưu tiên:** P0
 - **Tiền điều kiện:** Fixture `S-DUE` đã được nạp, clock được pin tại `T0`.
 
@@ -32,6 +35,9 @@
 | 2 | Quan sát màn hình | Không hiện error state và không yêu cầu retry |
 
 ## IT-DISC-003 — Lọc chỉ các deck đang có card đến hạn
+
+> **Tách thành** — `IT-DISC-003` (`HOST-WIDGET`) · `IT-DISC-003F` (`HOST-FLOW`). Lý do và ranh giới ở
+> [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) mục C.
 
 - **Ưu tiên:** P1
 - **Tiền điều kiện:** Fixture `S-DUE` đã được nạp; đang ở level `Due library` tại `T0`.
@@ -54,6 +60,9 @@
 
 ## IT-DISC-005 — Sắp xếp theo tên và gần đây
 
+> **Tách thành** — `IT-DISC-005` (`HOST-WIDGET`) · `IT-DISC-005F` (`HOST-FLOW`). Lý do và ranh giới ở
+> [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) mục C.
+
 - **Ưu tiên:** P1
 - **Tiền điều kiện:** Có ba deck cùng cấp: `beta`, `Alpha`, `gamma`, với thời điểm tạo/cập nhật khác nhau.
 
@@ -64,6 +73,9 @@
 | 3 | Đổi bộ lọc rồi quay về tất cả | Kiểu sắp xếp đang chọn vẫn được áp dụng |
 
 ## IT-DISC-006 — Tìm deck trong đúng phạm vi subtree
+
+> **Tách thành** — `IT-DISC-006` (`HOST-WIDGET`) · `IT-DISC-006F` (`HOST-FLOW`). Lý do và ranh giới ở
+> [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) mục C.
 
 - **Ưu tiên:** P0
 - **Tiền điều kiện:** `D-EB > Vocabulary > Academic words`; `D-SM2` có deck khác cũng chứa chữ `Academic`.

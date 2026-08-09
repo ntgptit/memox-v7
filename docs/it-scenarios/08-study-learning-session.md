@@ -12,6 +12,9 @@
 
 ## IT-LEARN-001 — Eight Box đi đúng chuỗi năm giai đoạn
 
+> **Tách thành** — `IT-LEARN-001` (`HOST-FLOW`) · `IT-LEARN-001W` (`HOST-WIDGET`). Lý do và ranh giới ở
+> [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) mục C.
+
 - **Ưu tiên:** P0
 - **Tiền điều kiện:** `SETUP-STUDY-EB-5-FULL`.
 

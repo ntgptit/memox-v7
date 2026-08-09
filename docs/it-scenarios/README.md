@@ -7,19 +7,34 @@
 | **Scope** | Điều hướng, bộ thẻ, thẻ ghi nhớ, chức năng học theo UC-05 và Đặt lại tiến độ học theo UC-07; ngoài phạm vi là bộ thẻ mẫu, đồng bộ và máy chủ |
 | **Source of truth for** | Chỉ mục và quy ước thực thi bộ kịch bản IT hiện tại |
 | **Depends on** | `../product.md`, `../business-rules.md`, `../use-cases.md`, `../wbs.md`, `../wbs-study.md`, `../wireframes/m5-study-modes.md` |
-| **Updated by task** | Bổ sung kịch bản IT cho chức năng học, rà soát đệ quy ba vòng và chuẩn hóa tiếng Việt ngày 2026-08-08 |
-| **Last updated** | 2026-08-08 |
+| **Updated by task** | Refactor IT theo Testing Pyramid — ba execution profile |
+| **Last updated** | 2026-08-09 |
 
 ## 1. Mục tiêu
 
-Bộ tài liệu này kiểm tra MemoX như một người dùng thật: mở ứng dụng, chạm vào
-thành phần nhìn thấy, nhập dữ liệu, điều hướng, đóng/mở lại ứng dụng và quan sát
-kết quả. Kịch bản MUST NOT gọi trực tiếp bộ điều khiển, kho dữ liệu, DAO hoặc sửa cơ sở dữ liệu để
-bỏ qua UI trong phần **Các bước thực hiện**.
+Bộ tài liệu này mô tả MemoX hoạt động đúng ở mức hành trình người dùng. **Nó
+không nói kịch bản phải chạy ở đâu** — cột `Profile` của
+[`scenario-catalog.md`](scenario-catalog.md) nói điều đó, và luật chọn nằm ở
+[`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md).
 
-Một bộ dữ liệu kiểm thử MAY được dùng để chuẩn bị trạng thái mà giao diện hiện tại chưa thể tự tạo,
-ví dụ thẻ đã học hoặc thẻ có ngày đến hạn. Việc nạp dữ liệu dựng sẵn chỉ thuộc **Tiền điều kiện**;
-mọi bước kiểm tra sau đó vẫn MUST đi qua UI.
+**Ba hồ sơ, và cái tên nói đúng chỗ chạy:**
+
+| Profile | Chạy bằng | Chứng minh cái gì |
+|---|---|---|
+| `HOST-FLOW` | `flutter test` | Luật nghiệp vụ, scheduler, truy vấn, transaction, hàng đợi, `due_at`, resume — qua use case và repository thật trên SQLite in-memory thật |
+| `HOST-WIDGET` | `flutter test` | Người dùng thao tác được qua giao diện Flutter thật, và giao diện phản ánh đúng state nghiệp vụ |
+| `DEVICE-E2E` | emulator/thiết bị | Chỉ ranh giới với hệ điều hành: khởi động nguội, chết tiến trình, deep link, cử chỉ nền tảng, smoke phát hành |
+
+**Luật cũ "mọi bước kiểm tra MUST đi qua UI" đã được thu hẹp về đúng chỗ của
+nó.** Nó vẫn áp cho `DEVICE-E2E`: ở đó, gọi thẳng repository là bỏ qua chính cái
+ranh giới đang cần chứng minh. Nhưng áp nó cho *mọi* kịch bản là lý do khiến
+127/127 kịch bản đòi emulator, và vì thế không kịch bản nào chặn được một pull
+request nào. Một luật `due_at` chứng minh bằng use case + SQLite thật là bằng
+chứng **mạnh hơn**, không yếu hơn, so với việc đọc một con số trên màn hình.
+
+Một bộ dữ liệu dựng sẵn MAY được dùng để chuẩn bị trạng thái. Với `DEVICE-E2E`
+nó vẫn phải có đường dẫn hiện vật và phiên bản; với hai hồ sơ host thì test tự
+tạo database của chính nó, nên "dựng sẵn" chỉ là mã dựng hàng.
 
 Từ M5, hai tập thẻ học MUST tách hẳn theo BR-142: **Học mới** có `learned_at IS
 NULL`; **Ôn tập** có `learned_at IS NOT NULL AND due_at <= now`. Thẻ mới không

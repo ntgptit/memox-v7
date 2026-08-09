@@ -23,6 +23,9 @@
 
 ## IT-REVIEW-002 — Phiên ôn tập Eight Box chạy đúng một chế độ đã chọn
 
+> **Tách thành** — `IT-REVIEW-002` (`HOST-FLOW`) · `IT-REVIEW-002W` (`HOST-WIDGET`). Lý do và ranh giới ở
+> [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) mục C.
+
 - **Ưu tiên:** P0
 - **Tiền điều kiện:** `S-STUDY-REVIEW-EB-V2`.
 

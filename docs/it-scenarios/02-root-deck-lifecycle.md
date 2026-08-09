@@ -12,6 +12,9 @@
 
 ## IT-DECK-001 — Tạo root deck dùng Eight Box
 
+> **Tách thành** — `IT-DECK-001` (`HOST-WIDGET`) · `IT-DECK-001F` (`HOST-FLOW`). Lý do và ranh giới ở
+> [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) mục C.
+
 - **Ưu tiên:** P0
 - **Tiền điều kiện:** Đang ở root deck list.
 
@@ -70,6 +73,9 @@
 
 ## IT-DECK-006 — Đổi tên root deck
 
+> **Tách thành** — `IT-DECK-006` (`HOST-WIDGET`) · `IT-DECK-006F` (`HOST-FLOW`). Lý do và ranh giới ở
+> [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) mục C.
+
 - **Ưu tiên:** P0
 - **Tiền điều kiện:** Có `D-EB`.
 
@@ -92,6 +98,9 @@
 | 3 | Mở lại `D-EB` và đi tới các card | Deck, descendants và card vẫn còn nguyên |
 
 ## IT-DECK-008 — Xác nhận xoá root deck và toàn bộ cây
+
+> **Tách thành** — `IT-DECK-008` (`HOST-WIDGET`) · `IT-DECK-008F` (`HOST-FLOW`). Lý do và ranh giới ở
+> [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) mục C.
 
 - **Ưu tiên:** P0
 - **Tiền điều kiện:** Như IT-DECK-007 và dữ liệu này không dùng chung với scenario khác.

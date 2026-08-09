@@ -12,6 +12,9 @@
 
 ## IT-ORG-001 — Tìm card theo mặt trước và mặt sau
 
+> **Tách thành** — `IT-ORG-001` (`HOST-WIDGET`) · `IT-ORG-001F` (`HOST-FLOW`). Lý do và ranh giới ở
+> [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) mục C.
+
 - **Ưu tiên:** P0
 - **Tiền điều kiện:** `D-LEAF` có `C-001`, `C-002`, `C-003`.
 
@@ -43,6 +46,9 @@
 | 3 | Chọn một filter rồi đổi sort | Filter và sort kết hợp; không làm xuất hiện card ngoài filter |
 
 ## IT-ORG-004 — Gắn cờ và bỏ cờ một card
+
+> **Tách thành** — `IT-ORG-004` (`HOST-WIDGET`) · `IT-ORG-004F` (`HOST-FLOW`). Lý do và ranh giới ở
+> [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) mục C.
 
 - **Ưu tiên:** P0
 - **Tiền điều kiện:** `C-003` chưa flagged.
@@ -79,6 +85,9 @@
 
 ## IT-ORG-007 — Thêm và tái sử dụng tag không phân biệt hoa thường
 
+> **Tách thành** — `IT-ORG-007` (`HOST-WIDGET`) · `IT-ORG-007F` (`HOST-FLOW`). Lý do và ranh giới ở
+> [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) mục C.
+
 - **Ưu tiên:** P1
 - **Tiền điều kiện:** Có `C-001` và `C-002`, chưa có tag.
 
@@ -113,6 +122,9 @@
 | 4 | Thử thêm tag thứ 11 | Bị từ chối với thông báo rõ; 10 tag cũ còn nguyên |
 
 ## IT-ORG-010 — Trạng thái, due badge và progress panel nhất quán
+
+> **Tách thành** — `IT-ORG-010` (`HOST-WIDGET`) · `IT-ORG-010F` (`HOST-FLOW`). Lý do và ranh giới ở
+> [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) mục C.
 
 - **Ưu tiên:** P0
 - **Tiền điều kiện:** Dùng `S-PROGRESS` v2; nó dùng chung contract dữ liệu với alias S-DUE.

@@ -12,6 +12,9 @@
 
 ## IT-STUDY-001 — Màn vào học tách thẻ mới và thẻ đến hạn thành hai tập rời nhau
 
+> **Tách thành** — `IT-STUDY-001` (`HOST-WIDGET`) · `IT-STUDY-001F` (`HOST-FLOW`). Lý do và ranh giới ở
+> [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) mục C.
+
 - **Ưu tiên:** P0
 - **Tiền điều kiện:** `S-STUDY-MIXED-EB-V2` tại `T0`.
 
@@ -47,6 +50,9 @@
 
 ## IT-STUDY-004 — Eight Box chỉ đưa các chế độ chấm điểm hợp lệ vào ôn tập
 
+> **Tách thành** — `IT-STUDY-004` (`HOST-WIDGET`) · `IT-STUDY-004F` (`HOST-FLOW`). Lý do và ranh giới ở
+> [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) mục C.
+
 - **Ưu tiên:** P0
 - **Tiền điều kiện:** `S-STUDY-REVIEW-EB-V2`.
 
@@ -69,6 +75,9 @@
 | 3 | Lật thẻ | Hiện bốn hành động `Again`, `Hard`, `Good`, `Easy`; không có `Forgotten`/`Remembered` |
 
 ## IT-STUDY-006 — Chế độ thiếu dữ liệu bị vô hiệu hóa kèm lý do, không mở màn rỗng
+
+> **Tách thành** — `IT-STUDY-006` (`HOST-WIDGET`) · `IT-STUDY-006F` (`HOST-FLOW`). Lý do và ranh giới ở
+> [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) mục C.
 
 - **Ưu tiên:** P0
 - **Tiền điều kiện:** `S-STUDY-REVIEW-EB-MINIMAL-V2`.
@@ -93,6 +102,9 @@
 | 3 | Thoát, mở lại Ôn tập và chọn `Recall` | `Recall` dùng đủ năm thẻ đến hạn; mẫu số là 5 |
 
 ## IT-STUDY-008 — Tùy chọn toàn ứng dụng được giữ sau khi khởi động lại
+
+> **Tách thành** — `IT-STUDY-008` (`HOST-FLOW`) · `IT-PLAT-002` (`DEVICE-E2E`). Lý do và ranh giới ở
+> [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) mục C.
 
 - **Ưu tiên:** P1
 - **Tiền điều kiện:** `SETUP-STUDY-EB-21`; bộ thẻ gốc chưa có giá trị ghi đè.

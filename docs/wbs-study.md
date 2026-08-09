@@ -1216,3 +1216,41 @@ Ba file test phải pump **không cuộn** (`isScrollable: false`): ba section g
 định một lượt **ghi gì**, không phải hai cái nút. Đề xuất "hoãn việc ghi" đang
 chờ duyệt ở §8.10. Và dòng gợi ý hai trạng thái cho cả ba màn — cùng một cơ
 chế, nối một lần.
+
+### Refactor IT theo Testing Pyramid — bước 1–3 và bước 8
+
+Audit đầy đủ 127 kịch bản ở `it-scenarios/12-testing-pyramid-audit.md`. Phân bố
+đề xuất: **88 HOST-FLOW · 67 HOST-WIDGET · 8 DEVICE-E2E** (5%, dưới ngưỡng 25%).
+Hành động: 89 reclassify · 35 split · 3 keep. Không kịch bản nào bị xoá.
+
+**Hai phát hiện về cổng CI, và cái thứ hai nghiêm trọng hơn cái thứ nhất:**
+
+1. `integration_test/` **chưa bao giờ chạy trong CI**. 127 kịch bản không chặn
+   một pull request nào — đó là lý do cơ học khiến suite đỏ 0/66 suốt bảy mươi
+   PR mà không ai biết.
+2. Bước test của `ci.yml` chỉ chạy `test/app` và `test/features/deck`. **Bộ lập
+   lịch, mọi repository, toàn bộ truy vấn database và các migration cũng không
+   được kiểm bởi PR nào** — chúng chờ `ci-full.yml`, vốn chạy thủ công. Cộng
+   lại: trước lần này, dự án không có cổng tự động nào cho tính đúng nghiệp vụ.
+
+Đã làm trong lượt này:
+
+- `00-agent-execution-guide.md` §2–3 viết lại còn **ba** profile. Chín hồ sơ cũ
+  (`UI`, `UI-FIXTURE`, `UI-RESTART`, …) mô tả *cách tay người chạm*, không mô tả
+  *ranh giới thực thi* — nên mọi kịch bản rơi vào emulator theo mặc định.
+- `scenario-catalog.md`: 133 dòng (127 + 6 `IT-PLAT`), cột `Hồ sơ` → `Profile`,
+  thêm cột `Dẫn xuất`. `check_docs.py` học schema mới: profile phải thuộc ba giá
+  trị (cho phép modifier và cặp khi tách), và ID dẫn xuất phải có thật — hoặc là
+  một tiêu đề kịch bản, hoặc một dòng trong ma trận migration.
+- `13-platform-boundaries.md`: sáu kịch bản `IT-PLAT` gom lại thứ mà **hai mươi**
+  kịch bản `UI-RESTART` đang lặp. Restart là **một** ranh giới nền tảng, không
+  phải một luật nghiệp vụ.
+- 35 kịch bản bị tách đã có dòng "Tách thành" ngay dưới tiêu đề.
+- `ci.yml` chạy **toàn bộ** host suite (`flutter test --exclude-tags golden`) —
+  1678 test, ~51 giây cục bộ, không cần emulator.
+- `ci-device.yml` mới: `DEVICE-E2E` trên emulator, chạy theo tag phát hành và
+  workflow_dispatch. Nightly để sẵn dạng comment.
+
+**Còn lại (§18 bước 4–7):** fixture builder, app harness cho HOST-WIDGET, dời và
+viết test HOST-FLOW/HOST-WIDGET, rồi mới thu `integration_test/`. Không xoá test
+cũ trước khi coverage tương đương đã xanh.

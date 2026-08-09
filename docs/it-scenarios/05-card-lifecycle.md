@@ -22,6 +22,9 @@
 
 ## IT-CARD-002 — Tạo card với hai mặt bắt buộc
 
+> **Tách thành** — `IT-CARD-002` (`HOST-WIDGET`) · `IT-CARD-002F` (`HOST-FLOW`). Lý do và ranh giới ở
+> [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) mục C.
+
 - **Ưu tiên:** P0
 - **Tiền điều kiện:** Đang ở editor tạo card trong `D-LEAF`.
 
@@ -92,6 +95,9 @@
 
 ## IT-CARD-008 — Sửa card và giữ vị trí quản lý ổn định
 
+> **Tách thành** — `IT-CARD-008` (`HOST-WIDGET`) · `IT-CARD-008F` (`HOST-FLOW`). Lý do và ranh giới ở
+> [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) mục C.
+
 - **Ưu tiên:** P0
 - **Tiền điều kiện:** Có ít nhất ba card; `C-001` không phải card mới nhất.
 
@@ -114,6 +120,9 @@
 | 3 | Quan sát lại card | State label, due badge và cờ giữ nguyên |
 
 ## IT-CARD-010 — Huỷ và xác nhận xoá card
+
+> **Tách thành** — `IT-CARD-010` (`HOST-WIDGET`) · `IT-CARD-010F` (`HOST-FLOW`). Lý do và ranh giới ở
+> [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) mục C.
 
 - **Ưu tiên:** P0
 - **Tiền điều kiện:** Có `C-001`.
