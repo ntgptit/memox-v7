@@ -199,7 +199,10 @@ void main() {
       await tester.pump();
 
       expect(find.text('Not quite'), findsOneWidget);
-      expect(find.text('The answer: công'), findsOneWidget);
+      // A label over a block, not a sentence: the answer is the thing to take
+      // away, so it is given its own frame rather than folded into prose.
+      expect(find.text('The answer'), findsOneWidget);
+      expect(find.text('công'), findsOneWidget);
       expect(find.text('Check'), findsNothing);
       // The field is gone rather than merely disabled: the lower card holds one
       // thing at a time, and once the turn is graded that thing is the verdict.
