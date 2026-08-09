@@ -37,6 +37,8 @@ class MxTextField extends StatelessWidget {
     this.shouldAutofocus = false,
     this.onChanged,
     this.onSubmitted,
+    this.textAlign = TextAlign.start,
+    this.textStyle,
     super.key,
   });
 
@@ -81,11 +83,27 @@ class MxTextField extends StatelessWidget {
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
 
+  /// How the typed value sits in the field.
+  ///
+  /// **Two axes, and only one of them is closed.** This widget refuses a
+  /// `decoration` on purpose — a caller that could pass one would invent a
+  /// second input *style*, and then there are two. The text itself is a
+  /// different question: `fill` asks a learner to type one word as the answer to
+  /// a card, and the handout draws that centred and large (§6) for the same
+  /// reason the card above it is centred and large. Left-aligned 16 in a field
+  /// under a 30pt prompt reads as a form field on a study screen.
+  final TextAlign textAlign;
+
+  /// The typed value's own style. Null keeps the theme's.
+  final TextStyle? textStyle;
+
   @override
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
       focusNode: focusNode,
+      textAlign: textAlign,
+      style: textStyle,
       autofocus: shouldAutofocus,
       enabled: isEnabled,
       readOnly: isReadOnly,

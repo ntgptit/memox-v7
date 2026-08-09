@@ -22,6 +22,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     required this.surfaceMuted,
     required this.surfaceElevated,
     required this.borderSubtle,
+    required this.borderControl,
     required this.focusRing,
     required this.secondaryAction,
     required this.disabledSurface,
@@ -41,6 +42,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       surfaceMuted = AppColors.surfaceMutedLight,
       surfaceElevated = AppColors.surfaceElevatedLight,
       borderSubtle = AppColors.borderSubtleLight,
+      borderControl = AppColors.borderControlLight,
       focusRing = AppColors.focusRingLight,
       secondaryAction = AppColors.secondaryActionLight,
       disabledSurface = AppColors.disabledSurfaceLight,
@@ -59,6 +61,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       surfaceMuted = AppColors.surfaceMutedDark,
       surfaceElevated = AppColors.surfaceElevatedDark,
       borderSubtle = AppColors.borderSubtleDark,
+      borderControl = AppColors.borderControlDark,
       focusRing = AppColors.focusRingDark,
       secondaryAction = AppColors.secondaryActionDark,
       disabledSurface = AppColors.disabledSurfaceDark,
@@ -94,6 +97,22 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
 
   final Color borderSubtle;
 
+  /// The edge of something a finger acts on — a text field, a tappable row, a
+  /// board tile — where the edge is the only thing saying so.
+  ///
+  /// **A second border token, and the reason is a measurement.** [borderSubtle]
+  /// is 1.38:1 against the light page and 2.32:1 against the dark one; WCAG
+  /// 1.4.11 asks 3:1 of the visual information required to *identify* a user
+  /// interface component. A card is identified by the text inside it and its
+  /// subtle edge is decoration, which is the exemption the rule grants. An empty
+  /// text field is not: with a placeholder and nothing else, its border is the
+  /// whole statement that there is somewhere to type. Five `guess` option rows
+  /// and ten `match` tiles are the same case — their fills sit 1.06:1 and 1.03:1
+  /// from the page, so the border is doing all the separating.
+  ///
+  /// The same edge stated louder, not a different one: same hue, same stroke.
+  final Color borderControl;
+
   /// Input border while focused. Focus shifts hue, never stroke width.
   final Color focusRing;
 
@@ -123,6 +142,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     Color? surfaceMuted,
     Color? surfaceElevated,
     Color? borderSubtle,
+    Color? borderControl,
     Color? focusRing,
     Color? secondaryAction,
     Color? disabledSurface,
@@ -141,6 +161,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       surfaceMuted: surfaceMuted ?? this.surfaceMuted,
       surfaceElevated: surfaceElevated ?? this.surfaceElevated,
       borderSubtle: borderSubtle ?? this.borderSubtle,
+      borderControl: borderControl ?? this.borderControl,
       focusRing: focusRing ?? this.focusRing,
       secondaryAction: secondaryAction ?? this.secondaryAction,
       disabledSurface: disabledSurface ?? this.disabledSurface,
@@ -175,6 +196,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       surfaceMuted: Color.lerp(surfaceMuted, other.surfaceMuted, t)!,
       surfaceElevated: Color.lerp(surfaceElevated, other.surfaceElevated, t)!,
       borderSubtle: Color.lerp(borderSubtle, other.borderSubtle, t)!,
+      borderControl: Color.lerp(borderControl, other.borderControl, t)!,
       focusRing: Color.lerp(focusRing, other.focusRing, t)!,
       secondaryAction: Color.lerp(secondaryAction, other.secondaryAction, t)!,
       disabledSurface: Color.lerp(disabledSurface, other.disabledSurface, t)!,

@@ -31,8 +31,12 @@ InputDecorationTheme buildInputDecorationTheme(
     horizontal: AppSpacing.lg,
     vertical: AppSpacing.md,
   ),
-  border: _inputBorder(semantic.borderSubtle),
-  enabledBorder: _inputBorder(semantic.borderSubtle),
+  // **`borderControl`, not `borderSubtle`.** An empty field with a placeholder
+  // and nothing else is identified by its edge alone, which is exactly the
+  // information WCAG 1.4.11 asks 3:1 of; the hairline measured 1.38:1 in light.
+  // A card's edge stays subtle because a card is identified by its content.
+  border: _inputBorder(semantic.borderControl),
+  enabledBorder: _inputBorder(semantic.borderControl),
   focusedBorder: _inputBorder(semantic.focusRing),
   errorBorder: _inputBorder(semantic.danger),
   focusedErrorBorder: _inputBorder(semantic.danger),
@@ -40,7 +44,7 @@ InputDecorationTheme buildInputDecorationTheme(
   // `disabledSurface`: this is the *hairline* faded, that is the *ink*.
   disabledBorder: _inputBorder(
     Color.alphaBlend(
-      semantic.borderSubtle.withValues(alpha: 0.5),
+      semantic.borderControl.withValues(alpha: 0.5),
       scheme.surface,
     ),
   ),

@@ -141,6 +141,12 @@ abstract final class AppColors {
   // reads on OLED. Same hue and saturation (0.41), lightness only.
   static const Color borderSubtleDark = Color(0xFF4C487A);
 
+  /// A control's edge at the 3:1 WCAG 1.4.11 asks — cleared against every
+  /// neighbour it touches. Why a control and not a card, and the measurements:
+  /// `AppSemanticColors.borderControl`.
+  static const Color borderControlLight = Color(0xFF8D8D95);
+  static const Color borderControlDark = Color(0xFF66628D);
+
   /// Input border while focused. Focus shifts *hue*, never stroke width —
   /// Material's default doubles the stroke, which reads as the field shouting.
   static const Color focusRingLight = Color(0xFF4141C0);
