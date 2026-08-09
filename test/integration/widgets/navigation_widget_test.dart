@@ -1,0 +1,84 @@
+import 'dart:async';
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/app/fallback/route_not_found_screen.dart';
+import 'package:memox/app/router/route_paths.dart';
+import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
+
+import '../../helpers/app_harness/host_widget_app.dart';
+import '../../helpers/fixtures/study_fixtures.dart';
+
+/// `HOST-WIDGET` for the navigation scenarios — IT-NAV-001, IT-NAV-003 and
+/// IT-NAV-005.
+///
+/// **These were classed `UI` and therefore ran only on an emulator, and not one
+/// of them needs a device.** What each asserts is where GoRouter put the user,
+/// and GoRouter is a Dart object: it resolves the same route table on a host as
+/// on a phone. The only navigation fact a phone knows and a host does not is how
+/// the *operating system* hands a link or a back gesture over, and that is what
+/// `IT-PLAT-004` and `IT-PLAT-005` are for.
+void main() {
+  testWidgets('IT-NAV-001 · a cold start lands on the deck list', (
+    tester,
+  ) async {
+    await runHostApp(tester, now: fixtureNow, (app) async {
+      expect(app.router.state.uri.toString(), RoutePaths.decks);
+      expect(
+        tester.takeException(),
+        isNull,
+        reason:
+            'a first frame that throws is the failure a user reports as '
+            '"the app does not open"',
+      );
+    });
+  });
+
+  testWidgets('IT-NAV-005 · an unknown route lands somewhere with a way out', (
+    tester,
+  ) async {
+    // The half of the scenario that is the router's: the 404 page and its
+    // recovery. An OS-originated deep link is `IT-PLAT-004`, and it is the only
+    // part of this that a device can show and a host cannot.
+    await runHostApp(
+      tester,
+      now: fixtureNow,
+      initialLocation: '/no-such-place',
+      (app) async {
+        expect(tester.takeException(), isNull);
+        // Asserted on what is on screen, not on `router.state`: with no route
+        // matched the match list is empty and reading the location throws
+        // `Bad state: No element`. Which is itself the finding — a 404 is the
+        // one location the router cannot describe, so any code that reaches for
+        // `router.state` to decide what to show breaks exactly here.
+        expect(find.byType(RouteNotFoundScreen), findsOneWidget);
+        // Not "some widget is on screen": a 404 that silently redirected to the
+        // deck list would satisfy that and would hide a broken link forever.
+        expect(find.byType(DeckListScreen), findsNothing);
+        // And it has the way out the scenario is named for.
+        expect(find.text('Go home'), findsOneWidget);
+      },
+    );
+  });
+
+  testWidgets('IT-NAV-003 · opening a deck and going back leaves the stack '
+      'where it started', (tester) async {
+    final db = createHostDatabase();
+    final fixture = await deckWithCards(db, cardCount: 2);
+
+    await runHostApp(tester, database: db, now: fixtureNow, (app) async {
+      expect(app.router.state.uri.toString(), RoutePaths.decks);
+
+      unawaited(app.router.push('/decks/${fixture.rootId}'));
+      await settleHostApp(tester);
+      expect(app.router.state.uri.toString(), isNot(RoutePaths.decks));
+
+      // `pop`, not a second `go`: the scenario is about the back affordance,
+      // and a `go` would rewrite the stack rather than walk it.
+      app.router.pop();
+      await settleHostApp(tester);
+
+      expect(app.router.state.uri.toString(), RoutePaths.decks);
+      expect(tester.takeException(), isNull);
+    });
+  });
+}

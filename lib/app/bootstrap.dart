@@ -4,6 +4,7 @@ import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../core/database/app_database.dart';
 import '../core/database/app_database_provider.dart';
@@ -113,6 +114,7 @@ Widget buildRootWidget(
   EnvConfig config, {
   AppDatabase? database,
   DateTime Function()? now,
+  GoRouter? router,
   bool shouldSeedFixtures = true,
 }) => ProviderScope(
   overrides: [
@@ -136,9 +138,13 @@ Widget buildRootWidget(
   // The fixture seed sits inside the scope so it reads the bindings above,
   // and wraps rather than replaces the app so the first frame is the deck
   // list rather than a spinner waiting on assets.
+  // [router] is the third seam, and it is a test-only one for the reason
+  // `MemoxApp.router` documents: a `GoRouter` carries navigation history, so
+  // one shared instance lets a route entered by one test decide where the next
+  // one starts. Production passes nothing and gets the single `appRouter`.
   child: shouldSeedFixtures
-      ? const FixtureSeederWidget(child: MemoxApp())
-      : const MemoxApp(),
+      ? FixtureSeederWidget(child: MemoxApp(router: router))
+      : MemoxApp(router: router),
 );
 
 /// Installs the three error boundaries and returns a callback that puts the

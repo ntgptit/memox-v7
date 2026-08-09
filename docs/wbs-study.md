@@ -1382,3 +1382,64 @@ Còn lại đều là `HOST-WIDGET` và đều **chờ bước 6**: BR-100 (`UI`
 chặn phải trình bày là không khả dụng, và MUST NOT gợi ý Reset), cùng IT-NAV-005,
 IT-ORG-012, IT-MODE-013 vốn không truy vết tới BR nào. Không luật nghiệp vụ nào
 còn chờ ở HOST-FLOW.
+
+### Refactor IT — bước 6: app harness cho `HOST-WIDGET`
+
+`test/helpers/app_harness/host_widget_app.dart` mount **ứng dụng thật** trên
+host: `ProviderScope` thật, bindings thật, GoRouter thật, localization và theme
+thật, trên SQLite in-memory và một đồng hồ được tiêm.
+
+**Nó gọi `buildRootWidget`, không tự dựng `ProviderScope`.** Đây là toàn bộ
+thiết kế: một harness tự liệt kê bindings bằng tay chính là cách dự án này mất
+bộ integration một lần rồi — `deckRepositoryBinding` mọc thêm một phụ thuộc,
+danh sách chép tay trong harness thì không, và mọi kịch bản ném lỗi ở `setUp`.
+Dùng lại composition root nghĩa là binding thêm vào app là binding test có
+ngay, và là binding test **không thể** bỏ sót trong im lặng.
+
+`buildRootWidget` được thêm một seam thứ ba — `GoRouter? router` — vì `GoRouter`
+mang lịch sử điều hướng: một instance dùng chung sẽ để route của test này quyết
+định test sau bắt đầu ở đâu.
+
+**Hai thứ chỉ lộ ra khi chạy thật, và cả hai đều không phải lỗi của test.**
+
+`pumpAndSettle` treo 10 phút rồi chết bằng timeout không nói màn hình nào. Màn
+đang chờ một stream chưa emit thì không bao giờ ngừng xếp frame. Thay bằng
+`settleHostApp` — pump có trần — nên một màn kẹt hỏng ở đúng câu khẳng định của
+kịch bản, thay vì treo cả lượt chạy.
+
+Nghiêm trọng hơn: `A Timer is still pending even after the widget tree was
+disposed`. Deck list hẹn một one-shot cho biên `due` kế tiếp; flutter_test kết
+thúc test bằng cách unmount cây rồi assert không còn timer, còn Riverpod dispose
+scope trễ một microtask — nên assert nổ trước, trên một test không làm gì sai,
+với thông điệp nói về một timer nó không hề nhắc. Tệ hơn nữa, lỗi này **đầu độc
+cả file**: test kế tiếp thừa hưởng timer treo và *hang* thay vì fail — đúng 7
+phút trong lần chạy đầu.
+
+Vì vậy mount và unmount là **một lời gọi**: `runHostApp(tester, body)`. Một test
+không thể lấy vế đầu mà bỏ vế sau.
+
+**Bốn kịch bản cuối cùng của bản đồ coverage đã có test.**
+
+| Kịch bản | Ở đâu | Khẳng định gì |
+|---|---|---|
+| IT-NAV-001 · IT-NAV-003 · IT-NAV-005 | `test/integration/widgets/navigation_widget_test.dart` | Cold start rơi vào deck list; mở deck rồi `pop` quay về đúng chỗ; route không tồn tại hiện `RouteNotFoundScreen` **và không** âm thầm chuyển hướng về deck list |
+| IT-STUDY-006 (BR-100) | `test/integration/widgets/blocked_mode_widget_test.dart` | Mode bị chặn nói **dữ liệu nó cần** và không gì khác — không câu nào trên màn chọn chứa "reset" hay "learning progress" |
+| IT-ORG-012 | `test/integration/flows/card_window_flow_test.dart` | 65 card, cửa sổ 50 → 65: không trùng row, không mất row, thứ tự của lần đọc trước giữ nguyên |
+| IT-MODE-013 (bước 2) | `test/integration/widgets/study_mode_accessibility_widget_test.dart` | Option của `Guess` đọc ra **nghĩa** và **kết quả bằng chữ**; chữ cái A–E bị `ExcludeSemantics` giữ ngoài |
+
+**IT-NAV-005 tự nó là một phát hiện.** Ở route không khớp, `RouteMatchList` rỗng
+và đọc `router.state` ném `Bad state: No element`. Nghĩa là 404 là **địa điểm
+duy nhất router không mô tả được** — nên bất kỳ đoạn code nào với tay vào
+`router.state` để quyết định vẽ gì sẽ vỡ đúng ở đây. Test khẳng định trên cái
+đang hiển thị, không trên `router.state`.
+
+Ba kịch bản còn lại đã có sẵn coverage và **không viết lại** (§5 cấm lặp): bước
+1, 3, 4 của IT-MODE-013 nằm ở `study_accessibility_test.dart`,
+`recall_widget_test.dart` và hai file match; nửa màn hình của IT-ORG-012 nằm ở
+`card_list_screen_test.dart`. Cái viết mới là đúng nửa mà lớp kia không với tới
+— và với IT-ORG-012 đó là nửa SQL, vì fake repository đồng ý với một `LIMIT` có
+`ORDER BY` không ổn định hệt như với một cái ổn định.
+
+**Bản đồ coverage: 133 đã có · 0 một phần · 0 không có.** `test/integration/`
+36 test, xanh. Còn lại là bước 7 — thu `integration_test/` xuống 8 kịch bản
+`DEVICE-E2E` thật.
