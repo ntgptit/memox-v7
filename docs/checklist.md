@@ -7,8 +7,8 @@
 | **Scope** | Quy trình phát triển. Ngoài phạm vi: mọi quyết định riêng của memox |
 | **Source of truth for** | Danh sách 22 phase · Definition of Done · thứ tự triển khai khuyến nghị |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | T1.3a |
-| **Last updated** | 2026-07-28 |
+| **Updated by task** | M99.3 (Refactor IT theo Testing Pyramid) |
+| **Last updated** | 2026-08-09 |
 
 Tài liệu tra cứu, MUST NOT đọc tuần tự. Tiến độ thật ở [`wbs.md`](wbs.md).
 
@@ -460,6 +460,13 @@ lib/
       Offline/online, App restart, Deep link.
 - [ ] Có thể dùng Flutter Web kết hợp Playwright để kiểm tra flow sớm.
 - [ ] Sau cùng vẫn kiểm tra trên Android/iOS thật.
+- [ ] **Bộ E2E chỉ giữ thứ máy host không với tới**: bootstrap của engine, file
+      thật trên bộ nhớ thiết bị, deep link do hệ điều hành bàn giao, cử chỉ back
+      của hệ thống, và một bản dựng phát hành không chạy được. Luật nghiệp vụ
+      MUST chạy ở tầng host.
+- [ ] **Một kịch bản E2E đi lại một luật nghiệp vụ là bản sao chậm hơn và dễ vỡ
+      hơn của một test host** — và bản sao mới là cái mục ruỗng, vì nó vẫn xanh
+      trong lúc luật đổi bên dưới. Không ai nhìn vào bộ E2E cho tới khi nó đã đỏ.
 
 ---
 
@@ -513,8 +520,14 @@ lib/
 - [ ] `dart format --output=none --set-exit-if-changed .`
 - [ ] `flutter analyze`.
 - [ ] Chạy code generation; kiểm tra generated code không bị thiếu hoặc cũ.
-- [ ] Chạy unit/widget tests và golden tests.
+- [ ] Chạy **toàn bộ** suite chạy được trên host, không chọn riêng vài thư mục.
+      Một bước test chỉ chạy một phần là **cổng giả**: pipeline xanh trong khi
+      phần lớn test chưa từng chạy, và không có gì nói ra điều đó.
+- [ ] Chạy golden tests.
 - [ ] Build Android; build iOS nếu runner hỗ trợ; build web nếu thuộc phạm vi.
+- [ ] Nếu bộ E2E trên thiết bị quá chậm hoặc quá dễ vỡ để chạy mỗi PR, tách nó
+      sang workflow riêng và **ghi rõ nó không chạy ở PR** — một bộ test không
+      chạy mà không ai biết là tệ hơn một bộ test không tồn tại.
 - [ ] Không merge khi pipeline thất bại.
 
 ### 19.2. Pull request quality gate

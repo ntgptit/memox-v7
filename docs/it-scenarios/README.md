@@ -7,7 +7,7 @@
 | **Scope** | Điều hướng, bộ thẻ, thẻ ghi nhớ, chức năng học theo UC-05 và Đặt lại tiến độ học theo UC-07; ngoài phạm vi là bộ thẻ mẫu, đồng bộ và máy chủ |
 | **Source of truth for** | Chỉ mục và quy ước thực thi bộ kịch bản IT hiện tại |
 | **Depends on** | `../product.md`, `../business-rules.md`, `../use-cases.md`, `../wbs.md`, `../wbs-study.md`, `../wireframes/m5-study-modes.md` |
-| **Updated by task** | Refactor IT theo Testing Pyramid — ba execution profile |
+| **Updated by task** | M99.3 (Refactor IT theo Testing Pyramid — 8 bước, đã đóng) |
 | **Last updated** | 2026-08-09 |
 
 ## 1. Mục tiêu
@@ -74,7 +74,15 @@ AI agent MUST đọc theo thứ tự:
 | Phiên học mới | Có thể kiểm thử | [`08-study-learning-session.md`](08-study-learning-session.md) |
 | Phiên ôn tập và thuật toán xếp lịch | Cần bộ dữ liệu Study v2 cho phần lớn kịch bản | [`09-study-review-session.md`](09-study-review-session.md) |
 | Sáu chế độ học | Có thể kiểm thử; một số ca biên cần dữ liệu dựng sẵn | [`10-study-modes.md`](10-study-modes.md) |
-| Tiếp tục phiên, ngoại tuyến và lỗi | Hỗn hợp `READY`/`FIXTURE-BLOCKED` | [`11-study-continuity-and-failures.md`](11-study-continuity-and-failures.md) |
+| Tiếp tục phiên, ngoại tuyến và lỗi | Có thể kiểm thử | [`11-study-continuity-and-failures.md`](11-study-continuity-and-failures.md) |
+| Phân loại lại 100% danh mục theo Testing Pyramid | Tham chiếu | [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) |
+| Ranh giới nền tảng — thứ duy nhất còn cần thiết bị | Có thể kiểm thử | [`13-platform-boundaries.md`](13-platform-boundaries.md) |
+| Kịch bản nào đã có test host chứng minh | Danh sách việc | [`14-host-coverage-map.md`](14-host-coverage-map.md) |
+
+**Không còn kịch bản `FIXTURE-BLOCKED` nào** — cả 133 dòng của
+`scenario-catalog.md` đều `READY`. Phần lớn trở ngại cũ là giả: luật "không được
+ghi thẳng vào cơ sở dữ liệu" là luật viết cho **một thiết bị**, không áp cho một
+test host tự dựng SQLite in-memory của chính nó (§4.3).
 
 Các luồng sau MUST NOT được ghi nhận là đạt của sản phẩm hiện tại:
 
@@ -130,8 +138,14 @@ AI agent MUST hiểu cột bên trái là ngôn ngữ rà soát; cột bên ph�
 
 - Target chính: Android, locale tiếng Việt, kích thước màn hình điện thoại.
 - Web MAY dùng làm kênh E2E development nhưng không thay thế vòng xác nhận Android.
-- Với kịch bản ngoại tuyến, bật chế độ máy bay **sau khi ứng dụng và dữ liệu kiểm thử đã sẵn sàng**.
-- “Khởi động lại ứng dụng” nghĩa là đóng hẳn tiến trình rồi mở lại, không chỉ chuyển tab.
+- Chế độ máy bay là **tiền điều kiện của lượt chạy, không phải một bước**: không
+  widget nào tắt được sóng, nên `ci-device.yml` bật trước và tắt sau khi chạy.
+- “Khởi động lại ứng dụng” nghĩa là đóng hẳn tiến trình rồi mở lại, không chỉ
+  chuyển tab. **Bên trong `flutter test` thì không làm được điều đó** — một tiến
+  trình không tự giết mình rồi đi tiếp. `ItHarness.restartApp` bỏ cây widget,
+  đóng executor và mở lại đúng file: nó chứng minh byte đã chạm đĩa và sống lâu
+  hơn các đối tượng đã ghi nó, còn nửa "hệ điều hành thu hồi" thì vẫn nợ và được
+  ghi là nợ ở `wbs-study.md`.
 
 ### 4.2. Dữ liệu tạo qua UI
 
@@ -148,13 +162,24 @@ AI agent MUST hiểu cột bên trái là ngôn ngữ rà soát; cột bên ph�
 ### 4.3. Dữ liệu seed dành riêng cho trạng thái học
 
 Các mã `S-PROGRESS`, `S-DUE`, `S-LARGE` và `S-STUDY-*` có hợp đồng xác định tại
-[`00-agent-execution-guide.md`](00-agent-execution-guide.md). Loader v1 hiện có
-chỉ còn hợp lệ cho `S-LARGE`; `S-PROGRESS`/`S-DUE` v1 đã bị thay thế vì vi phạm
-BR-142/BR-144. Bộ nạp và công cụ kiểm tra Study v2 chưa có nên catalog giữ các kịch bản tương
-ứng ở `FIXTURE-BLOCKED`.
+[`00-agent-execution-guide.md`](00-agent-execution-guide.md). **Hợp đồng giữ
+nguyên; nơi hiện thực nó đã đổi.** Loader v1 trong `integration_test/` đã bị xoá
+— chính nó là thứ ghi thẳng vào bảng trạng thái ôn tập, đường ghi mà mục này vẫn
+luôn nói là không được dùng làm bằng chứng chức năng học. Fixture của kịch bản
+host nay ở `test/helpers/fixtures/study_fixtures.dart`.
 
-Agent MUST NOT tự tạo SQL hoặc sửa cơ sở dữ liệu để vượt trở ngại. Dữ liệu dựng sẵn MUST dùng nội
-dung giả, không dùng dữ liệu cá nhân thật.
+**Tám kịch bản `DEVICE-E2E` không dùng loader nào.** Mỗi kịch bản tự dựng đúng
+trạng thái tối thiểu nó cần, qua giao diện. Đó là điều kiện tiên quyết chứ không
+phải một bước, và nó giữ cho bộ device không mọc lại một tầng fixture thứ hai.
+
+**Luật "không tự tạo SQL" là luật của thiết bị, không phải của mọi tầng.** Agent
+MUST NOT sửa cơ sở dữ liệu **của ứng dụng đang chạy trên thiết bị** để vượt trở
+ngại — làm thế là chứng minh một trạng thái mà sản phẩm không tự đến được. Một
+test host dựng SQLite in-memory của chính nó thì không nằm trong luật ấy: cơ sở
+dữ liệu đó *là* fixture, và đọc nhầm chỗ này từng giữ hàng chục kịch bản ở
+`FIXTURE-BLOCKED` mà không có lý do thật.
+
+Dữ liệu dựng sẵn MUST dùng nội dung giả, không dùng dữ liệu cá nhân thật.
 
 ## 5. Traceability nghiệp vụ
 
@@ -173,6 +198,7 @@ dung giả, không dùng dữ liệu cá nhân thật.
 | UC-05 — StudyMode | `IT-MODE-001` tới `IT-MODE-015` |
 | UC-05 — tiếp tục và lỗi | `IT-CONT-001` tới `IT-CONT-014` |
 | M4.12 — trình diễn E2E bộ thẻ/thẻ | `IT-NAV-006`, `IT-NAV-007`, các kịch bản `UI-FIXTURE` và `UI-LARGE` |
+| Ranh giới nền tảng — thứ duy nhất còn chạy trên thiết bị | `IT-PLAT-001` tới `IT-PLAT-006`; `IT-NAV-007`, `IT-CONT-008` |
 
 Bảng trên giúp người đọc định hướng. Traceability machine-readable theo từng ID
 nằm tại [`scenario-catalog.md`](scenario-catalog.md) và là nguồn chuẩn.
@@ -184,7 +210,9 @@ Một kịch bản chỉ sẵn sàng để agent chạy khi:
 - ID tồn tại đúng một lần trong tệp kịch bản và đúng một lần trong danh mục.
 - Catalog ghi `READY`.
 - Mã chuẩn bị có công thức hoặc hiện vật đã được triển khai.
-- Agent điều khiển được nền tảng và hồ sơ thực thi yêu cầu.
+- Agent điều khiển được nền tảng và hồ sơ thực thi yêu cầu. Cột `Profile` của
+  `scenario-catalog.md` là thứ quyết định kịch bản chạy ở đâu — tài liệu kịch
+  bản MUST NOT phát biểu lại điều đó.
 - Kết quả mong đợi có thể kết luận theo quy tắc kiểm tra trong hướng dẫn thực thi.
 
 Thiếu một điều kiện trên thì agent MUST báo `BLOCKED` hoặc `DOC-DRIFT`; không tự
