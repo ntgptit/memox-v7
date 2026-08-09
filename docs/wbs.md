@@ -7,8 +7,8 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M5.21 (UC-07 Reset learning progress) |
-| **Last updated** | 2026-08-07 |
+| **Updated by task** | M99.3 (Refactor IT theo Testing Pyramid) |
+| **Last updated** | 2026-08-09 |
 
 Single source of truth for project progress. Update it in the same commit as the
 work it describes. A task is `done` only when it meets the Definition of Done in
@@ -33,7 +33,7 @@ AD / UC (xem `business-rules.md`).
 | M7 · CI/CD (Phase 19) | todo | Bắt đầu được ngay sau M2. Job Android + Web, chưa có iOS (AD-04) |
 | M8 · Release Android (Phase 16–18, 20–22) | todo | |
 | M9 · Backend Spring Boot + auth + sync (Phase 10) | todo | Sau khi M8 ổn định |
-| M99 · Adhoc | — | Task chủ dự án giao trực tiếp, ngoài chuỗi phụ thuộc. M99.1 **done** — `master-flow.md`. M99.2 **done** — Deck và Card thành bản tham chiếu (AD-17) |
+| M99 · Adhoc | — | Task chủ dự án giao trực tiếp, ngoài chuỗi phụ thuộc. M99.1 **done** — `master-flow.md`. M99.2 **done** — Deck và Card thành bản tham chiếu (AD-17). M99.3 **done** — refactor toàn bộ IT theo Testing Pyramid: 133/133 kịch bản có coverage host, `integration_test/` còn 8 kịch bản `DEVICE-E2E`, và CI lần đầu có cổng tự động cho tính đúng đắn nghiệp vụ |
 
 ---
 
@@ -8048,6 +8048,67 @@ cho regex là đổi một luật đúng lấy một luật kiểm được. Ghi
 (vi phạm DoD, ghi ở `card/README.md` §6); `DECK_GOLDEN_FEATURE_REPORT.md` vẫn nằm
 ở gốc repo không ai trỏ tới; và UC-04 vẫn không nhắc cờ với tag dù BR-93/BR-95
 khai `Related: UC-04` — sửa nó là mở một tài liệu frozen.
+
+
+### M99.3 · Refactor toàn bộ IT scenarios theo Testing Pyramid
+
+- **Status:** **done** — 8 bước đóng, PR #244…#252. Host suite **1714 pass**,
+  device suite **8/8 pass** trên emulator, guard 70 rule sạch, `check_docs` sạch.
+- **Goal:** Tính đúng đắn nghiệp vụ phải chạy bằng `flutter test` ở **mọi PR**,
+  và chỉ hành vi nền tảng thật mới cần emulator.
+- **Scope:** 3 profile thực thi (`HOST-FLOW` · `HOST-WIDGET` · `DEVICE-E2E`) áp
+  cho 100% danh mục; `docs/it-scenarios/` (audit, ranh giới nền tảng, bản đồ
+  coverage, catalog 8 cột); `test/integration/` (mới); `test/helpers/app_harness/`
+  và `test/helpers/fixtures/` (mới); `integration_test/` thu nhỏ; `ci.yml` và
+  `ci-device.yml`; `check_docs.py` học schema catalog mới.
+- **Out of scope:** đổi luật nghiệp vụ nào; viết lại coverage đã có (§5 cấm lặp);
+  fill `Try again` / `Mark correct` — cần migration cho CHECK của `outcome_reason`
+  và một BR mới, xem `wbs-study.md`.
+- **Dependencies:** M5.21 (Study đóng đủ 5 mode và UC-07)
+- **Checklist phases:** 15, 19
+- **Tests required:** toàn bộ — đây là task về test. Gate: host suite xanh,
+  device suite xanh **trên máy thật**, và không kịch bản nào mất traceability
+  UC/BR.
+- **Editable documents:** `CLAUDE.md`, `docs/wbs.md`, `docs/wbs-study.md`,
+  `docs/it-scenarios/*`
+- **Output:** `docs/it-scenarios/12-testing-pyramid-audit.md`,
+  `13-platform-boundaries.md`, `14-host-coverage-map.md`,
+  `test/integration/`, `.github/workflows/ci-device.yml`
+- **Acceptance criteria:**
+  - [x] 100% danh mục được phân loại lại; 127 kịch bản → 163 sau khi tách.
+  - [x] Báo cáo audit viết **trước** khi sửa một dòng test nào.
+  - [x] Bản đồ coverage: **133 đã có · 0 một phần · 0 chưa có**.
+  - [x] `integration_test/` còn đúng 8 kịch bản `DEVICE-E2E`.
+  - [x] CI chạy toàn bộ host suite ở mọi PR; device tách sang workflow riêng.
+  - [x] Không lặp coverage giữa các tầng, và không xoá test cũ trước khi có
+        tương đương.
+
+**Điều task này thật sự phát hiện, và nó không nằm trong đề bài.**
+`integration_test/` **chưa bao giờ chạy trong CI**, và bước test của `ci.yml`
+chỉ chạy `test/app` cộng `test/features/deck`. Nghĩa là dự án **không có cổng tự
+động nào cho tính đúng đắn nghiệp vụ** — 1714 test tồn tại và không ai bắt buộc
+chúng xanh. Đây là lỗ hổng lớn hơn mọi thứ việc phân loại lại kịch bản gộp lại.
+
+**`FIXTURE-BLOCKED` phần lớn là chướng ngại giả.** Luật "không được ghi thẳng vào
+database" là luật viết cho **một thiết bị**, không phải cho một test host tự dựng
+SQLite in-memory của chính nó. Nhận ra điều đó kéo khối lượng còn lại từ ~150
+test ước tính xuống **16 luật** chưa ai chạm.
+
+**Bộ device tìm ra một lỗi thật ở lần chạy đầu tiên sau khi thu nhỏ.** Cử chỉ
+back của Android pop route và để `study_sessions.status` ở `in_progress` — đúng
+thứ BR-82 cấm; trong `lib/` không có `PopScope` nào. Comment trong
+`study_session_screen.dart` đã nêu đúng nguy cơ ấy khi giải thích vì sao bỏ app
+bar: cửa của AppBar đã bịt, cửa của hệ điều hành thì không. Không test host nào
+thấy được, vì host không có cử chỉ.
+
+**Hai giới hạn giữ nguyên, ghi ra chứ không che.** `restartApp` không phải cái
+chết của tiến trình — `flutter test` không giết được tiến trình nó đang chạy
+trong đó; IT-PLAT-002/003 chứng minh byte đã chạm file và sống lâu hơn đối tượng
+đã ghi nó, còn nửa "OS kill" vẫn nợ. `deliverDeepLink` đi đúng kênh
+`flutter/navigation` nhưng không chứng minh được intent filter của Android; phần
+đó là `adb shell am start`.
+
+Chi tiết từng bước, từng phát hiện và từng con số: `docs/wbs-study.md`.
 
 
 ## Blocker
