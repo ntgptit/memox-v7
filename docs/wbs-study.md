@@ -1934,3 +1934,27 @@ row vẫn `pending`, cặp thứ hai không chen được vào lúc cặp đầu
 +3 (leave giữa advance, leave giữa write, write hỏng sau leave). `PendingCommit`
 thay cho `Completer<void>`: `Completer<void>` chỉ nói "xong", đúng cái hình dạng
 đã cho phép board đọc một lần từ chối thành một lần thành công.
+
+#### Summary rời controller: một query không bao giờ thuộc về một command
+
+Guard 400 dòng là thứ ép phải nhìn lại, nhưng lý do tách được mới là điểm chính:
+**đọc summary là một query**. Nó có ba call site trong controller — hết stage,
+`leave()`, và nhánh failure — nên summary chỉ đúng bằng người cuối cùng nhớ đủ cả
+ba; và `StudySessionState.summary` sống lâu hơn phiên, nên quên một call site là
+hiện số của phiên trước dưới tiêu đề phiên mới.
+
+Nay là `studySessionSummaryProvider(deckId)`: màn hình hỏi đúng lúc nhánh
+`isFinished` cần, không ai phải nhớ gọi. Controller còn 380 dòng và guard sạch.
+
+Hai convention của repo bắt được lỗi ngay khi viết:
+`provider_convention_test.dart` từ chối family key không phải String/int (một cặp
+named parameter là record key, so sánh bằng identity → cache một entry mỗi
+rebuild) và bắt buộc `@Riverpod(retry: noAutomaticRetry)` cho async provider dưới
+`features/*/presentation/`. Nên provider key bằng `deckId` và đọc session id với
+scheduler type từ chính controller — không dựng bản sao thứ hai của hai dữ kiện
+đã có chủ.
+
+`study_session_summary_test.dart` giữ nguyên các claim cũ (một read chứ không
+phải một read mỗi con số — AD-13; lapse action đúng theo scheduler) và thêm hai
+cái chỉ có nghĩa sau khi tách: phiên đang chạy **không** đọc summary lần nào, và
+một read hỏng là "phiên kết thúc không có số" chứ không phải một lỗi.

@@ -12,6 +12,7 @@ import '../../domain/models/study_mode.dart';
 import '../../domain/models/study_session_kind_model.dart';
 import '../../domain/models/study_turn_model.dart';
 import '../controllers/study_session_controller.dart';
+import '../controllers/study_session_summary_controller.dart';
 import '../states/study_session_state.dart';
 import '../../domain/models/recall_mode.dart';
 import '../widgets/sections/study_blocked_section_widget.dart';
@@ -233,18 +234,25 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
     // content". Only the device suite saw it: on a host the first read resolves
     // inside the same frame the session opens in.
     if (state.isFinished) {
-      // No summary means the read failed, not that nothing happened. The
+      // **Watched, not held.** The epilogue is a read the screen makes once the
+      // session is over, so it belongs to a provider rather than to a field the
+      // controller has to remember to fill from three places — one of them a
+      // failure path, where forgetting shows the previous session's numbers.
+      //
+      // No summary means the read failed, not that nothing happened: the
       // session has ended either way, and inventing counts for it would be
       // worse than saying only that.
-      final summary = state.summary;
-      if (summary == null) {
-        return MxEmptyState(title: context.l10n.studySessionFinished);
-      }
-
-      return StudySummarySectionWidget(
-        summary: summary,
-        onBackToDeck: () => Navigator.of(context).pop(),
-      );
+      return ref
+          .watch(studySessionSummaryProvider(widget.deckId))
+          .maybeWhen(
+            data: (summary) => summary == null
+                ? MxEmptyState(title: context.l10n.studySessionFinished)
+                : StudySummarySectionWidget(
+                    summary: summary,
+                    onBackToDeck: () => Navigator.of(context).pop(),
+                  ),
+            orElse: () => MxLoadingState(semanticsLabel: context.l10n.appTitle),
+          );
     }
 
     final session = state.session;

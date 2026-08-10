@@ -14,7 +14,6 @@ import '../../domain/models/study_session_kind_model.dart';
 import '../../domain/models/study_session_status_model.dart';
 import '../../domain/usecases/end_study_session_use_case.dart';
 import '../../domain/usecases/get_next_stage_turn_use_case.dart';
-import '../../domain/usecases/get_session_summary_use_case.dart';
 import '../../domain/usecases/mark_browsed_use_case.dart';
 import '../../domain/usecases/resume_study_session_use_case.dart';
 import '../../domain/usecases/save_turn_progress_use_case.dart';
@@ -194,8 +193,7 @@ class StudySessionController extends _$StudySessionController {
       await held;
 
       // Two awaits, and the user can leave inside either. Nothing below may run
-      // for a session that has ended — `_loadSummary` included, which `leave`
-      // owns once it has ended one.
+      // for a session that has ended.
       if (!_isCurrent(epoch)) return;
 
       if (mode == null) {
@@ -205,7 +203,7 @@ class StudySessionController extends _$StudySessionController {
           turn: null,
         );
 
-        return _loadSummary();
+        return;
       }
 
       state = state.copyWith(
@@ -242,7 +240,6 @@ class StudySessionController extends _$StudySessionController {
 
     if (!_isCurrent(epoch)) return;
     state = state.copyWith(isSubmitting: false, isFinished: true, error: error);
-    await _loadSummary();
   }
 
   /// Moves `browse` one card along the round, either way (BR-155).
@@ -316,30 +313,6 @@ class StudySessionController extends _$StudySessionController {
     }
   }
 
-  /// Reads what the session came to, once it has ended.
-  ///
-  /// **Read back rather than accumulated.** A tally would be a second copy of
-  /// numbers the database holds, and the two disagree the moment a write is
-  /// refused. `status` comes from the same statement, so a session that ended by
-  /// failing cannot be summarised as one that finished. A failure here leaves
-  /// [StudySessionState.summary] null on purpose.
-  Future<void> _loadSummary() async {
-    final session = state.session;
-    if (session == null) return;
-
-    try {
-      final summary = await GetSessionSummaryUseCase(
-        ref.read(studyRepositoryProvider),
-      ).call(sessionId: session.id, schedulerType: state.schedulerType);
-
-      if (!ref.mounted) return;
-      state = state.copyWith(summary: summary);
-    } on Object catch (_) {
-      // Narrow by intent, not by type: every failure here has the same answer,
-      // which is to show the end of the session without counts.
-    }
-  }
-
   /// Ends the session as `failed`/`persistence_error` (BR-85), best effort:
   /// the reason it is called is that a write just failed, so this one may fail
   /// too — and letting that propagate would replace the real error with a
@@ -403,6 +376,5 @@ class StudySessionController extends _$StudySessionController {
 
     if (!ref.mounted) return;
     state = state.copyWith(isFinished: true, turn: null);
-    await _loadSummary();
   }
 }
