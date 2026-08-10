@@ -8,6 +8,7 @@ import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../../../shared/widgets/mx_card.dart';
+import '../../../domain/models/study_answer_commit_model.dart';
 import '../../../domain/models/study_action_model.dart';
 import '../../../domain/models/study_turn_model.dart';
 import '../support/study_labels_widget.dart';
@@ -63,6 +64,7 @@ class StudyCardFaceSectionWidget extends StatelessWidget {
     required this.actions,
     required this.onAction,
     required this.onContinue,
+    this.onFeedbackShown,
     this.viewedCard,
     this.shouldShowBackImmediately = false,
     this.emphasis = StudyFaceEmphasis.promptFirst,
@@ -83,7 +85,19 @@ class StudyCardFaceSectionWidget extends StatelessWidget {
   /// Empty for `browse`, which produces no action (BR-111).
   final List<StudyAction> actions;
 
-  final ValueChanged<StudyAction> onAction;
+  /// Writes the action and hands back what the transaction did (BR-157).
+  ///
+  /// **A `ValueChanged` here silently threw the receipt away.** Dart lets a
+  /// function returning a value stand in for a `void` one, so this compiled
+  /// while dropping the only thing that says the write happened — and
+  /// `self_assess` stopped moving to the next card at all, because nothing was
+  /// left to call [onFeedbackShown] with.
+  final Future<StudyAnswerCommitModel?> Function(StudyAction) onAction;
+
+  /// Called once the answer has committed; completes when the session has moved
+  /// on (BR-158). `self_assess` has no verdict to read — the user just gave it —
+  /// so `studyModeFeedback` holds it for zero and this is simply the advance.
+  final Future<void> Function({required bool isCorrect})? onFeedbackShown;
 
   /// Used by `browse`, which has nothing to grade and only moves on.
   final VoidCallback onContinue;
@@ -104,6 +118,7 @@ class StudyCardFaceSectionWidget extends StatelessWidget {
     turn: turn,
     actions: actions,
     onAction: onAction,
+    onFeedbackShown: onFeedbackShown,
     onContinue: onContinue,
     viewedCard: viewedCard,
     shouldShowBackImmediately: shouldShowBackImmediately,
@@ -118,6 +133,7 @@ class _StudyCardFaceView extends StatefulWidget {
     required this.actions,
     required this.onAction,
     required this.onContinue,
+    this.onFeedbackShown,
     required this.viewedCard,
     required this.shouldShowBackImmediately,
     required this.emphasis,
@@ -126,7 +142,8 @@ class _StudyCardFaceView extends StatefulWidget {
 
   final StudyTurnModel turn;
   final List<StudyAction> actions;
-  final ValueChanged<StudyAction> onAction;
+  final Future<StudyAnswerCommitModel?> Function(StudyAction) onAction;
+  final Future<void> Function({required bool isCorrect})? onFeedbackShown;
   final VoidCallback onContinue;
   final StudyCardModel? viewedCard;
   final bool shouldShowBackImmediately;
@@ -139,6 +156,33 @@ class _StudyCardFaceView extends StatefulWidget {
 
 class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
   bool _isRevealed = false;
+
+  /// True while an action's transaction is open.
+  ///
+  /// **Local, because the parent cannot be quick enough.** The controller's
+  /// `isSubmitting` reaches this widget on the next rebuild, and a second tap
+  /// fits inside that gap — BR-126 says one question yields at most one turn.
+  bool _isSubmitting = false;
+
+  /// Writes the action, then moves on — in that order (BR-157, BR-158).
+  ///
+  /// A null receipt is a write that did not happen, or one belonging to a
+  /// session the user has already left. Either way the card stays and the
+  /// buttons come back if there is still a session to answer.
+  Future<void> _grade(StudyAction action) async {
+    if (_isSubmitting) return;
+
+    setState(() => _isSubmitting = true);
+    final commit = await widget.onAction(action);
+    if (!mounted) return;
+
+    setState(() => _isSubmitting = false);
+    if (commit == null) return;
+
+    // `self_assess` has nothing new to read — the verdict is the user's own —
+    // so `studyModeFeedback` holds it for zero and this is the advance.
+    await widget.onFeedbackShown?.call(isCorrect: !action.isLapse);
+  }
 
   @override
   void didUpdateWidget(_StudyCardFaceView oldWidget) {
@@ -286,7 +330,9 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
       for (final action in widget.actions) ...<Widget>[
         MxActionButton(
           label: context.studyAction(action),
-          onPressed: widget.isLocked ? null : () => widget.onAction(action),
+          onPressed: widget.isLocked || _isSubmitting
+              ? null
+              : () => _grade(action),
         ),
         const SizedBox(height: AppSpacing.sm),
       ],

@@ -67,6 +67,17 @@ abstract class StudySessionState with _$StudySessionState {
     @Default(false) bool isSubmitting,
 
     /// The session ran out of queue, or was closed.
+    /// True from the moment ✕ or the back gesture is taken until the session has
+    /// actually ended (BR-82).
+    ///
+    /// **A state, not the absence of one.** `leave` used to clear the busy flags
+    /// and then await `EndStudySession` — so for the length of that write the
+    /// screen was mounted, unlocked and answerable, and the session it would
+    /// have been answering was already leaving. Named here so every guard can
+    /// ask the same question, and so the screen can keep the card visible while
+    /// refusing to act on it.
+    @Default(false) bool isLeaving,
+
     @Default(false) bool isFinished,
 
     /// What the session came to, once it has ended (BR-79, BR-80).
@@ -94,7 +105,18 @@ abstract class StudySessionState with _$StudySessionState {
   ///
   /// One place, so "locked while writing" cannot be spelled three different ways
   /// across six mode widgets.
-  bool get canAnswer => turn != null && !isSubmitting && !isFinished;
+  /// Whether an answer may be started at all.
+  ///
+  /// **`isLeaving` belongs here, and its absence was a race.** Leaving is a trip
+  /// to the database like any other, and for its whole length the card was still
+  /// on screen with its buttons live — so a tap landing inside it started a turn
+  /// on a session already on its way out.
+  bool get canAnswer =>
+      turn != null &&
+      !isSubmitting &&
+      !isAdvancing &&
+      !isLeaving &&
+      !isFinished;
 
   /// The cards of this round already answered, oldest first.
   ///
@@ -111,7 +133,21 @@ abstract class StudySessionState with _$StudySessionState {
   /// nothing flashes — and during both, input has to be refused. Asking only
   /// about `isSubmitting` left the whole fetch open, which is a window a second
   /// tap fits inside.
-  bool get isBusy => isSubmitting || isAdvancing;
+  bool get isBusy => isSubmitting || isAdvancing || isLeaving;
+
+  /// The session is over and nothing is in flight.
+  ///
+  /// **One definition of the terminal invariant**, because there are three ways
+  /// to reach it — the last card, the ✕, and a write that could not be stored —
+  /// and each used to spell it out again. A copy that forgets `isLeaving` locks
+  /// the screen behind the summary; one that forgets `turn` puts a card there.
+  StudySessionState get ended => copyWith(
+    isFinished: true,
+    isLeaving: false,
+    isSubmitting: false,
+    isAdvancing: false,
+    turn: null,
+  );
 
   bool get canLookBack => browseLookBack < seenCardIds.length;
 

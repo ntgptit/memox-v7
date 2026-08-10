@@ -1,3 +1,4 @@
+import 'package:memox/features/study/domain/models/study_answer_commit_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_spacing.dart';
@@ -11,6 +12,7 @@ import 'package:memox/features/study/presentation/widgets/sections/study_card_fa
 import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
 
+import 'support/study_commit_stub.dart';
 import 'support/study_widget_harness.dart';
 
 /// `browse` and `self_assess`, which differ by exactly one thing (BR-112).
@@ -59,7 +61,7 @@ void main() {
     bool shouldShowBackImmediately = false,
     StudyFaceEmphasis emphasis = StudyFaceEmphasis.promptFirst,
     bool isLocked = false,
-    void Function(StudyAction)? onAction,
+    Future<StudyAnswerCommitModel?> Function(StudyAction)? onAction,
     VoidCallback? onContinue,
     String cardId = 'c1',
   }) => tester.pumpWidget(
@@ -67,7 +69,7 @@ void main() {
       StudyCardFaceSectionWidget(
         turn: turnOf(cardId),
         actions: actions,
-        onAction: onAction ?? (_) {},
+        onAction: onAction ?? (_) async => commitOf('c'),
         onContinue: onContinue ?? () {},
         shouldShowBackImmediately: shouldShowBackImmediately,
         emphasis: emphasis,
@@ -205,7 +207,7 @@ void main() {
               backFolded: 'back-c0',
             ),
             actions: const <StudyAction>[],
-            onAction: (_) {},
+            onAction: (_) async => null,
             onContinue: () {},
             shouldShowBackImmediately: true,
           ),
@@ -273,7 +275,10 @@ void main() {
         actions: eightBox,
         shouldShowBackImmediately: true,
         isLocked: true,
-        onAction: tapped.add,
+        onAction: (action) async {
+          tapped.add(action);
+          return commitOf('c');
+        },
       );
 
       // BR-25: the content must not vanish between the tap and the next card.
@@ -298,7 +303,7 @@ void main() {
         StudyCardFaceSectionWidget(
           turn: turnOf('c1'),
           actions: sm2,
-          onAction: (_) {},
+          onAction: (_) async => null,
           onContinue: () {},
           shouldShowBackImmediately: true,
         ),
@@ -329,7 +334,7 @@ void main() {
           child: StudyCardFaceSectionWidget(
             turn: turnOf('c1'),
             actions: const <StudyAction>[],
-            onAction: (_) {},
+            onAction: (_) async => null,
             onContinue: () {},
             shouldShowBackImmediately: true,
           ),
@@ -379,7 +384,7 @@ void main() {
           child: StudyCardFaceSectionWidget(
             turn: turnOf('c1'),
             actions: eightBox,
-            onAction: (_) {},
+            onAction: (_) async => null,
             onContinue: () {},
           ),
         ),

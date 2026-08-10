@@ -1917,8 +1917,13 @@ Sửa: `_epoch` trong controller. `leave()` tăng epoch **trước** khi await (
 phiên cũng là một chuyến đi database, và một operation đang bay có thể đáp vào
 giữa nó); mọi state write sau một `await` hỏi `_isCurrent(epoch)`. Không có gì bị
 huỷ — transaction vẫn commit vì BR-25 muốn thế — thứ đổi là kết quả của nó có
-được phép chạm tới màn hình hay không. `submitAnswer` vẫn **trả** receipt khi
-stale: row đã được ghi, và người gọi tự quyết định vẽ gì.
+được phép chạm tới màn hình hay không.
+
+**Row đã commit vẫn ở lại (BR-25, BR-86), nhưng acknowledgement gửi lên
+presentation phải là `null`.** Bản đầu trả receipt khi stale với lý do "row đã
+ghi, người gọi tự quyết" — sai, vì receipt không có nghĩa *đã ghi*, nó có nghĩa
+**được phép đi tiếp lifecycle**: vẽ verdict rồi gọi `advance`. Một phiên người
+dùng đã rời không còn lifecycle nào để đi tiếp, nên `null` là câu trả lời đúng.
 
 **Tách file do guard 400 dòng:** `MatchBoardGridWidget` (hình học của bàn — bao
 nhiêu hàng, cao bao nhiêu — tách khỏi cái quyết định một cú chạm *nghĩa là gì*),
@@ -1958,3 +1963,45 @@ scheduler type từ chính controller — không dựng bản sao thứ hai củ
 phải một read mỗi con số — AD-13; lapse action đúng theo scheduler) và thêm hai
 cái chỉ có nghĩa sau khi tách: phiên đang chạy **không** đọc summary lần nào, và
 một read hỏng là "phiên kết thúc không có số" chứ không phải một lỗi.
+
+### `leave` là một terminal operation, không phải sự vắng mặt của trạng thái
+
+Hai regression còn lại sau `65feb42`, và cả hai đều **biên dịch được**.
+
+**1. Epoch chặn được operation cũ, không chặn được interaction mới.** `leave()`
+tăng epoch rồi đặt `isSubmitting`/`isAdvancing` về false **trước** khi
+`EndStudySession` commit — nên suốt chiều dài của write đó, màn hình vẫn mounted,
+vẫn mở khoá, vẫn trả lời được. Một cú chạm rơi vào cửa sổ ấy bắt đầu một lượt
+trên phiên đang rời; nó capture epoch **mới** nên staleness check không đụng tới
+nó, và widget vẫn vẽ verdict rồi gọi `advance()`.
+
+Sửa: `isLeaving` là một task state thật. `isBusy` gồm nó, `canAnswer` từ chối khi
+submitting/advancing/leaving/finished/không turn, `advance`/`browseStep`/`pause`
+no-op khi leaving, và `leave()` **giương cờ** thay vì hạ hai cờ khác. Hai lần bấm
+lọt vào cùng một write chỉ sinh một EndSession — ✕ và back gesture có thể là cùng
+một cú bấm (BR-82).
+
+`EndSession` hỏng thì **không nuốt exception**: bỏ `isLeaving`, giữ error, màn
+không bị khoá vĩnh viễn. Một phiên không kết thúc được thì vẫn đang chạy, và một
+màn khoá mãi tệ hơn một màn nói rằng ✕ không ăn.
+
+**2. `self_assess` mất luôn bước advance, và nó biên dịch được vì Dart cho phép
+một hàm có giá trị trả về đứng thay một hàm `void`.** Khi answer sink bắt đầu trả
+receipt, `ValueChanged<StudyAction>` của `StudyCardFaceSectionWidget` nhận nó rồi
+vứt đi — không còn gì để gọi `onFeedbackShown`, nên mode ghi xong đáp án rồi ngồi
+lại đúng thẻ đó mãi. Không analyzer nào phàn nàn về một giá trị trả về bị bỏ; chỉ
+một test theo dõi **bước kế tiếp** mới thấy.
+
+Sửa trong đúng phần shared control flow: `onAction` trả receipt, widget có guard
+double-tap cục bộ (`isSubmitting` của controller chỉ tới widget ở rebuild sau, và
+một cú chạm thứ hai lọt vừa khe đó — BR-126), commit xong mới gọi
+`onFeedbackShown`. `studyModeFeedback(selfAssess)` vẫn là `Duration.zero` vì
+không có verdict mới nào để đọc — verdict là của chính người dùng.
+
+**Bằng chứng:** `study_leave_race_test.dart` (6 test, và **thứ tự chạy là điểm
+chính**: mỗi test giữ `endSession` mở, thao tác bên trong, rồi release theo thứ
+tự một người thật tạo ra — answer trước, ✕ giữa, database cuối. Một test `await
+leave()` rồi mới release thì bỏ qua đúng cửa sổ cần bắt);
+`study_self_assess_lifecycle_test.dart` (4 test: commit → advance đúng một lần,
+receipt `null` → không advance và bấm lại được, chạm hai lần trong lúc ghi chỉ
+một write, đang ghi thì chưa advance).

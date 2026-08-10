@@ -21,17 +21,14 @@ import 'package:memox/features/study/domain/models/study_session_summary_model.d
 import 'package:memox/features/study/domain/models/study_session_status_model.dart';
 import 'package:memox/features/study/domain/repositories/study_repository.dart';
 
-/// A `StudyRepository` a use-case test drives by hand.
-///
-/// **It records arguments rather than simulating a queue.** The queue engine is
-/// tested against a real database in `test/features/study/data/`; repeating any
-/// of it here would test the double. What these tests are about is the decision
-/// a use case makes *before* the write — which stages to run, which schedule to
-/// ask for, whether to consult a scheduler at all — and that is exactly what the
-/// recorded arguments show.
-/// Not `final`: two controller tests need a subclass — one that fails every
-/// write, one that defers its first read — and the alternative is a flag on the
-/// constructor for each, which spreads test-only branching through the double.
+/// A `StudyRepository` a use-case test drives by hand, which **records
+/// arguments rather than simulating a queue.** The queue engine is
+/// tested against a real database in `test/features/study/data/`; repeating it
+/// here would test the double. These tests are about the decision a use case
+/// makes *before* the write — which stage, which schedule, which scheduler.
+/// Not `final`: controller tests subclass it — one fails every write, one defers
+/// its first read — and the alternative is a constructor flag for each, which
+/// spreads test-only branching through the double.
 base class FakeStudyRepository implements StudyRepository {
   FakeStudyRepository({
     this.schedulerType = SchedulerType.eightBox,
@@ -237,7 +234,20 @@ base class FakeStudyRepository implements StudyRepository {
     required StudySessionStatus status,
     required StudySessionEndReason? reason,
     required DateTime endedAt,
-  }) async => ended.add((status: status, reason: reason));
+  }) async {
+    final gate = endSessionGate;
+    if (gate != null) await gate.future;
+    if (endSessionFails) throw StateError('the session could not be ended');
+
+    ended.add((status: status, reason: reason));
+  }
+
+  /// Holds every `endSession` open: the window between pressing ✕ and the
+  /// session ending, where the screen used to take another answer.
+  Completer<void>? endSessionGate;
+
+  /// Makes ending fail — a session that could not end is still running.
+  bool endSessionFails = false;
 
   @override
   Future<int> abandonStaleSessions({required DateTime dayStart}) async {
@@ -333,16 +343,13 @@ base class FakeStudyRepository implements StudyRepository {
 
   StudyTurnModel? nextTurn_;
 
-  /// Holds every write open, so a test can stand between the tap and the
-  /// commit — the window BR-157 is about.
+  /// Holds every write open: the window between the tap and the commit that
+  /// BR-157 is about.
   Completer<void>? submitGate;
 
-  /// How many times a turn has been read.
-  ///
-  /// **A count, because the change under test is an absence.** `match` writes
-  /// every pair and reads once a board; nothing about a working board says so,
-  /// and the only way to catch a reload creeping back in between two taps is to
-  /// count the reads.
+  /// How many times a turn has been read. **A count, because the change under
+  /// test is an absence:** `match` reads once a board, and counting is the only
+  /// way to catch a reload creeping back between two taps.
   int nextTurnCalls = 0;
 
   final List<({String cardId, int? remainingMs, bool isRevealed})> progress =
