@@ -74,6 +74,22 @@ abstract class StudyStageProgressModel with _$StudyStageProgressModel {
 
   const StudyStageProgressModel._();
 
+  /// This progress with one more card answered correctly.
+  ///
+  /// **`match` moves its own counter between fetches** — a board answers five
+  /// pairs and re-reading the round after each one costs four reads and four
+  /// unmounts of the board being played. Idempotent, because a rebuild between
+  /// the write and this can carry a progress that already holds the card, and
+  /// counting it twice puts `done` past `total` and deals a board that does not
+  /// exist.
+  StudyStageProgressModel withCleared(String cardId) =>
+      completedCardIds.contains(cardId)
+      ? this
+      : copyWith(
+          done: done + 1,
+          completedCardIds: <String>[...completedCardIds, cardId],
+        );
+
   /// 0 to 1, and 0 rather than NaN for a round with nothing in it.
   double get fraction => total <= 0 ? 0 : done / total;
 

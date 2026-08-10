@@ -171,6 +171,131 @@ void main() {
     });
   });
 
+  group('what a wrong `match` pair does to the queue (BR-118)', () {
+    /// Every queue row of this session, as `(round, cardId, status)`.
+    ///
+    /// Read from the database rather than through the repository: the claim is
+    /// about which rows exist and what state they are in, and the read API
+    /// deliberately hides that.
+    Future<List<(int, String, String)>> queueRows(String sessionId) async {
+      final rows = await harness.rows(
+        "SELECT round, card_id, status FROM study_queue_items "
+        "WHERE session_id = '$sessionId' AND mode = 'match' "
+        'ORDER BY round, card_id',
+      );
+
+      return <(int, String, String)>[
+        for (final row in rows)
+          (
+            row.read<int>('round'),
+            row.read<String>('card_id'),
+            row.read<String>('status'),
+          ),
+      ];
+    }
+
+    test('keeps this round pending and enrols the next one, once', () async {
+      final sessionId = await harness.openReview(
+        cardCount: 2,
+        mode: StudyMode.match,
+      );
+      final cardId = (await harness.repository.nextTurn(sessionId))!.cardId;
+
+      // Twice, because a board keeps the pair on screen and a person who got it
+      // wrong once will reach for it again.
+      for (var i = 0; i < 2; i++) {
+        await harness.repository.submitAnswer(
+          sessionId: sessionId,
+          cardId: cardId,
+          mode: StudyMode.match,
+          action: StudyAction.forgotten,
+          now: StudyHarness.now,
+        );
+      }
+
+      final rows = await queueRows(sessionId);
+
+      // The row it was answered on is still open: the pair is still on the
+      // board, and `completedCardIds` — which is what empties a slot — must not
+      // contain it.
+      expect(
+        rows.where((row) => row.$1 == 1 && row.$2 == cardId),
+        <(int, String, String)>[(1, cardId, 'pending')],
+      );
+
+      // And exactly one round-2 row, not two. `enrolInRound` inserts-or-ignores
+      // for precisely this: failing the same card four times is one enrolment
+      // (BR-116).
+      expect(rows.where((row) => row.$1 == 2 && row.$2 == cardId).length, 1);
+    });
+
+    test('a later correct pair completes the row it was answered on', () async {
+      final sessionId = await harness.openReview(
+        cardCount: 2,
+        mode: StudyMode.match,
+      );
+      final cardId = (await harness.repository.nextTurn(sessionId))!.cardId;
+
+      for (final action in <StudyAction>[
+        StudyAction.forgotten,
+        StudyAction.remembered,
+      ]) {
+        await harness.repository.submitAnswer(
+          sessionId: sessionId,
+          cardId: cardId,
+          mode: StudyMode.match,
+          action: action,
+          now: StudyHarness.now,
+        );
+      }
+
+      final rows = await queueRows(sessionId);
+
+      expect(
+        rows.where((row) => row.$1 == 1 && row.$2 == cardId),
+        <(int, String, String)>[(1, cardId, 'completed')],
+      );
+
+      // The enrolment stands. BR-116: a card that failed at any point in a
+      // round belongs to that round's failed set *even after* it is answered
+      // correctly to clear the board — clearing it here is what would let a
+      // later right answer erase the earlier wrong one.
+      expect(rows.where((row) => row.$1 == 2 && row.$2 == cardId).length, 1);
+    });
+
+    test(
+      'a reopened session sees the same cleared and pending pairs',
+      () async {
+        final sessionId = await harness.openReview(
+          cardCount: 2,
+          mode: StudyMode.match,
+        );
+        final cards = await harness.repository.sessionCards(sessionId);
+
+        await harness.repository.submitAnswer(
+          sessionId: sessionId,
+          cardId: cards.first.id,
+          mode: StudyMode.match,
+          action: StudyAction.remembered,
+          now: StudyHarness.now,
+        );
+        await harness.repository.submitAnswer(
+          sessionId: sessionId,
+          cardId: cards.last.id,
+          mode: StudyMode.match,
+          action: StudyAction.forgotten,
+          now: StudyHarness.now,
+        );
+
+        // What the board reads back to decide which slots are empty. The one
+        // answered wrongly must not be in it, or the pair the user still has to
+        // find disappears when the screen next refreshes.
+        final turn = await harness.repository.nextTurn(sessionId);
+        expect(turn!.progress.completedCardIds, <String>[cards.first.id]);
+      },
+    );
+  });
+
   group('the counter a turn carries', () {
     // **The one place this is checkable.** Every widget above is handed a
     // `StudyStageProgressModel` built by the test, so a counting query that read
@@ -206,8 +331,13 @@ void main() {
         now: StudyHarness.now,
       );
 
+      // **One, not two: only the correct pair is done** (BR-118). `match` lays
+      // the whole round out at once, so a card answered wrongly is still on
+      // screen and still has to be paired — its row stays `pending`, and the
+      // counter says how many pairs have left the board rather than how many
+      // taps were taken.
       final third = await harness.repository.nextTurn(sessionId);
-      expect(third!.progress.done, 2);
+      expect(third!.progress.done, 1);
       expect(third.progress.total, 3, reason: 'round 2 is a separate total');
     });
 
@@ -217,18 +347,41 @@ void main() {
         mode: StudyMode.match,
       );
 
-      for (var i = 0; i < 2; i++) {
-        final turn = await harness.repository.nextTurn(sessionId);
-        await harness.repository.submitAnswer(
-          sessionId: sessionId,
-          cardId: turn!.cardId,
-          mode: StudyMode.match,
-          action: StudyAction.forgotten,
-          now: StudyHarness.now,
-        );
+      // Both cards by id, because `match` serves the board rather than one
+      // card: after this the queue's head does not move on a wrong answer, so
+      // reading `nextTurn` twice would answer the same pair twice.
+      final cardIds = <String>[
+        for (final card in await harness.repository.sessionCards(sessionId))
+          card.id,
+      ];
+
+      Future<void> answerAll(StudyAction action) async {
+        for (final cardId in cardIds) {
+          await harness.repository.submitAnswer(
+            sessionId: sessionId,
+            cardId: cardId,
+            mode: StudyMode.match,
+            action: action,
+            now: StudyHarness.now,
+          );
+        }
       }
 
-      // Both failed, so round 2 holds both and none of them is answered yet.
+      await answerAll(StudyAction.forgotten);
+
+      // **A wrong pair does not finish the round, and that is the point**
+      // (BR-118). Both rows are still `pending`, so the board still holds both
+      // pairs and round 1 is still what the session is serving. The old effect
+      // marked them `completed` and the board they were on emptied under the
+      // user.
+      final stillRoundOne = await harness.repository.nextTurn(sessionId);
+      expect(stillRoundOne!.item.round, 1);
+      expect(stillRoundOne.progress.done, 0);
+
+      await answerAll(StudyAction.remembered);
+
+      // Paired at last, so round 1 closes — and both are in round 2 anyway,
+      // because failing once put them there (BR-116).
       final roundTwo = await harness.repository.nextTurn(sessionId);
       expect(roundTwo!.item.round, 2);
       expect(roundTwo.progress.done, 0);

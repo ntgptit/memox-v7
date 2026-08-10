@@ -280,22 +280,28 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
           isRevealed: isRevealed,
         ),
       ),
-      onAnswer:
-          (action, {cardId, outcomeReason, comparisonVersion, hasUsedHint}) =>
-              unawaited(
-                _controller.answer(
-                  action,
-                  cardId: cardId,
-                  outcomeReason: outcomeReason,
-                  comparisonVersion: comparisonVersion,
-                  usedHint: hasUsedHint,
-                ),
-              ),
+      onAnswer: (action, {outcomeReason, comparisonVersion, hasUsedHint}) =>
+          unawaited(
+            _controller.answer(
+              action,
+              outcomeReason: outcomeReason,
+              comparisonVersion: comparisonVersion,
+              usedHint: hasUsedHint,
+            ),
+          ),
       // `browse` grades nothing, so moving on is the whole interaction
       // (BR-111). The controller decides whether that means marking the card
       // browsed or stepping forward along the trail the user has swiped back
       // along — a screen that decided it would be the thing marking a card
       // browsed twice (BR-155).
+      // **`match` writes without fetching, and fetches once per board.** Every
+      // other mode's answer ends in a reload, which is right for a screen
+      // showing one card and wrong for a board showing five: it unmounted the
+      // board between pairs and put a spinner where the feedback should have
+      // been.
+      onMatchAttempt: ({required cardId, required action}) =>
+          _controller.answer(action, cardId: cardId, shouldAdvance: false),
+      onMatchBoardComplete: _controller.advanceMatchBoard,
       onContinue: () =>
           unawaited(_controller.browseStep(StudyBrowseStep.forward)),
       onLookBack: () => unawaited(_controller.browseStep(StudyBrowseStep.back)),

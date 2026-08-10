@@ -1713,3 +1713,82 @@ Một bẫy nữa: `matchesSemantics` khẳng định **cả node**, nên nó đ
 không liên quan mà ô mang hợp lệ. Đọc `Semantics.properties.selected` từ widget,
 và phải lọc theo property — `InkWell` với `Material` bọc text bằng node riêng,
 node gần nhất không phải của ô.
+
+### Match — chọn được từ cả hai phía, ghi từng cặp, tải từng bàn
+
+Bốn thứ trong một vòng, và ba trong số đó là lỗi chứ không phải tinh chỉnh.
+
+**1. Bàn chỉ nhận term trước — và đó là một luật không ai viết ra.** State chỉ có
+`_selectedTerm`, nên chạm nghĩa trước rơi vào hư không: không lựa chọn, không
+lượt, không dấu hiệu nào cho biết đã có gì xảy ra. Nửa số cú chạm một người bình
+thường làm bị bỏ im lặng, và dòng hint phải đi dạy một thứ tự mà trò chơi không
+cần. BR-118 quy định *thẻ nào trả lời cho cặp* — luôn là thẻ sở hữu term — chứ
+chưa bao giờ quy định phải chạm phía nào trước; nó nay nói đúng điều đó. Bốn kết
+cục cho một cú chạm: giữ, bỏ giữ, chuyển lựa chọn trong cùng cột, hoặc hoàn tất
+một cặp. Chuẩn hoá về `(term, meaning)` nên chạm nghĩa trước không đổi ai chịu
+trách nhiệm cho lỗi.
+
+**2. Nhịp giữ 320ms là một phép so sai đơn vị.** `AppDurations.slow` là trần
+*chuyển động*; nhịp giữ là thời gian một trạng thái **đứng yên để đọc**. Đặt hai
+thứ bằng nhau, trên một crossfade 200ms, để lại 120ms màu đứng yên — và kể cả
+120ms ấy cũng không tới người dùng, vì màn gọi tải lượt kế tiếp ngay sau khi ghi
+xong và bàn bị tháo khỏi cây widget. Nay 500ms cho đúng, 700ms cho sai; sai lâu
+hơn vì phải tìm ra *hai ô nào* sai với nhau, còn đúng chỉ xác nhận điều đã biết.
+Lo ngại "3.2 giây chết" của bản cũ dựa trên tiền đề nhịp giữ khoá thao tác —
+không còn đúng: chạm ô kế tiếp cắt nhịp ngay, và cặp đang ghi DB không đóng băng
+bàn (`isLocked` bỏ khỏi `match`).
+
+**3. Reload sau *từng cặp* mới là thứ gây giật, không phải một lần ghi SQLite.**
+Mỗi attempt gọi lại advance + get-next-turn: đọc lại session, queue, thẻ,
+progress, và thay cả thân màn bằng loading state. Bàn năm cặp trả giá năm lần.
+Tách làm hai: `submitMatchAttempt` ghi rồi dừng, cập nhật `completedCardIds` tại
+chỗ; `advanceMatchBoard` chỉ chạy khi mọi cặp trên bàn đã ghép đúng. Lô 20 thẻ
+vẫn 20 transaction — BR-25 không nhân nhượng — nhưng 4 lần chuyển bàn thay vì 20
+lần reload. Callback trả `Future` nên ô chỉ đánh dấu sau khi ghi xong: bàn vẽ thứ
+database đang giữ, không đoán theo cú chạm.
+
+**4. Lỗi nghiệp vụ: ghép sai vẫn đánh dấu hàng queue `completed`.** `match` dùng
+chung queue effect với các graded mode khác, mà ở những mode đó thẻ rời màn ngay
+sau khi trả lời. Ở `match` thẻ **vẫn trên bàn**, nên `completedCardIds` — thứ
+quyết định slot nào rỗng — chứa luôn thẻ vừa sai, và nó biến mất khỏi bàn ngay
+lần refresh kế tiếp. Nay `match` + lapse: ghi answer/history, tăng
+`answersInSession`, enroll round kế tiếp đúng một lần (`insertOrIgnore`, nên sai
+bốn lần vẫn một hàng — BR-116), và **giữ hàng round hiện tại ở `pending`**. Ghép
+đúng lại mới chuyển `completed`, và không xoá enrollment đã tạo.
+
+Hệ quả phải chấp nhận: round 1 của `match` chỉ kết thúc khi **mọi cặp đã ghép
+đúng** — điều đó luôn xảy ra được vì nghĩa đúng nằm sẵn trên bàn. Hai test cũ ở
+`study_canonical_action_test.dart` khoá hành vi cũ (`done` đếm cả lượt sai, hai
+lượt sai đủ mở round 2) đã viết lại theo luật mới.
+
+**Không đổi:** meaning trái / term phải, typography, `minRowHeight`, feedback
+bằng viền + chữ + icon (không nền đặc), năm trạng thái ô, slot ở lại không
+reflow, ✓/✕ và Semantics, chrome phiên, BR-25, BR-156, eight-box mapping, SM-2,
+scheduler, schema. Không thêm API batch.
+
+**Dọn kèm theo, vì thay đổi này làm chúng thành thừa:** `answer()` mất tham số
+`cardId` (chỉ `match` từng dùng, và `match` không đi qua đó nữa) — cùng với nó là
+`StudyAnswerSink.cardId`; `browse` gọi thẳng `MarkBrowsedUseCase` thay vì mượn
+đường chấm điểm và một hằng số `_browseHasNoAction` chỉ tồn tại để bị vứt đi ở
+nhánh đầu tiên; `answer()` và `submitMatchAttempt` dùng chung một `_submit` và
+một `_writeFailed`; `StudyBrowseStep` chuyển sang cạnh `StudySessionState`.
+
+**Bằng chứng:** `match_board_layout_test.dart` (+3: cả hai chiều chọn đều ghi cho
+thẻ của term, chạm lại để bỏ, chạm ô khác cùng cột chuyển lựa chọn),
+`match_board_feedback_test.dart` (+3: nhịp còn sống trước mốc và hết sau mốc, cặp
+chỉ được đánh dấu sau khi write resolve, bàn chỉ gọi tải một lần sau cặp cuối),
+`study_match_commands_test.dart` (file mới, 5 test: attempt không fetch, đúng thì
+counter chạy, sai thì bàn nguyên vẹn, đếm hai lần không vượt round, advance là
+lần đọc duy nhất), `study_canonical_action_test.dart` (+3 test queue: sai giữ
+`pending` và enroll một lần, đúng lại mới `completed` mà không xoá enrollment, mở
+lại session thấy đúng cặp đã cleared). Tám golden Match chụp lại vì dòng hint đổi.
+
+**Hai guard đã chỉ vào cùng một chỗ, và cả hai đều đúng.** Bản nháp đầu thêm
+`submitMatchAttempt` **và** `advanceMatchBoard`, làm controller vượt trần 400
+dòng, đồng thời `command_query_separation_test.dart` báo tên thứ bảy và thứ tám
+trên một tập lệnh cố ý đóng. Đó không phải hai lỗi lint mà là một tín hiệu: viết
+một cặp lệnh mới cho `match` là dựng lối ghi thứ hai. Nay chỉ còn **một** lệnh
+mới — `advanceMatchBoard` — còn phần ghi là chính `answer` với hai tham số
+(`cardId` quay lại, `shouldAdvance` mới), và `_pullTurn` là nhánh chứ không phải
+đuôi bắt buộc. Lý do tên thứ bảy được nhận ghi ngay trong CQS test, cạnh lý do
+của `browseStep` và `pause`.

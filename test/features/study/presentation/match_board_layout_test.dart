@@ -48,7 +48,8 @@ void main() {
     required Size region,
     double textScale = 1,
     Set<String> pairedCardIds = const <String>{},
-    void Function(MatchTile term, {required bool isCorrect})? onPairAttempt,
+    Future<void> Function(MatchTile term, {required bool isCorrect})?
+    onPairAttempt,
   }) => MediaQuery(
     data: MediaQueryData(textScaler: TextScaler.linear(textScale)),
     child: Center(
@@ -58,7 +59,7 @@ void main() {
         child: MatchBoardSectionWidget(
           board: board,
           pairedCardIds: pairedCardIds,
-          onPairAttempt: onPairAttempt ?? (_, {required isCorrect}) {},
+          onPairAttempt: onPairAttempt ?? (_, {required isCorrect}) async {},
         ),
       ),
     ),
@@ -85,41 +86,95 @@ void main() {
     );
   });
 
-  testWidgets('a meaning tapped first is still not an answer (BR-118)', (
+  testWidgets('either side may be picked first, and both record the term', (
     tester,
   ) async {
-    // The order on screen reversed; the order of the interaction did not. A
-    // meaning tapped alone would have to guess which term it belonged to, and
-    // that guess would be recorded as a turn the user never gave.
-    final attempts = <(String, bool)>[];
+    // **The board used to refuse half the taps a person makes.** Only a term
+    // could be held, so a meaning tapped first went nowhere at all — no
+    // selection, no attempt, no sign that anything had happened. BR-118 fixes
+    // which *card* answers for the pair, not which tile is touched first.
+    // A different card each way round: the board keeps its state across a
+    // rebuild of the same deal (BR-127), so re-running with card `a` would find
+    // it already cleared by the first pass.
+    for (final order in <List<String>>[
+      <String>['front-a', 'back-a', 'a'],
+      <String>['back-b', 'front-b', 'b'],
+    ]) {
+      final attempts = <(String, bool)>[];
+      await pump(
+        tester,
+        boardIn(
+          region: region,
+          onPairAttempt: (term, {required isCorrect}) async =>
+              attempts.add((term.cardId, isCorrect)),
+        ),
+      );
+
+      await tester.tap(find.text(order.first));
+      await tester.pump();
+      expect(
+        _stateOf(tester, order.first),
+        MatchTileState.selected,
+        reason: '${order.first} did not take the selection',
+      );
+
+      await tester.tap(find.text(order[1]));
+      await tester.pump();
+
+      expect(attempts, <(String, bool)>[
+        (order.last, true),
+      ], reason: 'picking ${order.first} first changed who answered');
+
+      await tester.pump(AppMatchTile.successFlash);
+      await tester.pumpAndSettle();
+    }
+  });
+
+  testWidgets('tapping the held tile again puts it down', (tester) async {
+    // Without this the only way out of a selection is to answer with it, so a
+    // mis-tap becomes a recorded turn.
+    final attempts = <String>[];
     await pump(
       tester,
       boardIn(
         region: region,
-        onPairAttempt: (term, {required isCorrect}) =>
-            attempts.add((term.cardId, isCorrect)),
+        onPairAttempt: (term, {required isCorrect}) async =>
+            attempts.add(term.cardId),
       ),
     );
 
     await tester.tap(find.text('back-a'));
     await tester.pump();
+    await tester.tap(find.text('back-a'));
+    await tester.pump();
 
+    expect(_stateOf(tester, 'back-a'), MatchTileState.idle);
     expect(attempts, isEmpty);
-    expect(
-      tester
-          .widgetList<MatchTileWidget>(find.byType(MatchTileWidget))
-          .where((tile) => tile.state == MatchTileState.selected),
-      isEmpty,
+  });
+
+  testWidgets('a second tile on the same side moves the selection', (
+    tester,
+  ) async {
+    // Two tiles from one column are not a pair — this is the user changing
+    // their mind, which must cost a card nothing.
+    final attempts = <String>[];
+    await pump(
+      tester,
+      boardIn(
+        region: region,
+        onPairAttempt: (term, {required isCorrect}) async =>
+            attempts.add(term.cardId),
+      ),
     );
 
     await tester.tap(find.text('front-a'));
     await tester.pump();
-    await tester.tap(find.text('back-a'));
+    await tester.tap(find.text('front-b'));
     await tester.pump();
 
-    expect(attempts, <(String, bool)>[('a', true)]);
-
-    await tester.pump(AppMatchTile.successFlash);
+    expect(_stateOf(tester, 'front-a'), MatchTileState.idle);
+    expect(_stateOf(tester, 'front-b'), MatchTileState.selected);
+    expect(attempts, isEmpty);
   });
 
   testWidgets('a wrong pair still belongs to the term (BR-118)', (
@@ -132,7 +187,7 @@ void main() {
       tester,
       boardIn(
         region: region,
-        onPairAttempt: (term, {required isCorrect}) =>
+        onPairAttempt: (term, {required isCorrect}) async =>
             attempts.add((term.cardId, isCorrect)),
       ),
     );

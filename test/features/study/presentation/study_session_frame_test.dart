@@ -150,7 +150,7 @@ void main() {
     const hints = <StudyMode, String>{
       StudyMode.browse: 'Swipe left for next, right to go back',
       StudyMode.selfAssess: 'Flip the card, then say how it went',
-      StudyMode.match: 'Tap a term, then its meaning to match',
+      StudyMode.match: 'Tap one tile, then its match',
       StudyMode.guess: 'Choose the right meaning',
       StudyMode.recall: 'Recall it, then show the answer',
       StudyMode.fill: 'Type the answer, then check',
