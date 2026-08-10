@@ -6,6 +6,7 @@ import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 import 'package:memox/features/study/di/study_repository_provider.dart';
 import 'package:memox/features/study/domain/entities/study_queue_item_entity.dart';
 import 'package:memox/features/study/domain/models/study_action_model.dart';
+import 'package:memox/features/study/domain/models/study_answer_commit_model.dart';
 import 'package:memox/features/study/domain/models/study_mode.dart';
 import 'package:memox/features/study/domain/models/study_outcome_reason_model.dart';
 import 'package:memox/features/study/domain/models/study_queue_item_status_model.dart';
@@ -131,8 +132,8 @@ void main() {
           reviewMode: StudyMode.match,
         );
 
-        final first = controller.answer(StudyAction.remembered);
-        final second = controller.answer(StudyAction.remembered);
+        final first = controller.submitAnswer(StudyAction.remembered);
+        final second = controller.submitAnswer(StudyAction.remembered);
         await Future.wait(<Future<void>>[first, second]);
 
         expect(repository.answers, hasLength(1));
@@ -161,7 +162,7 @@ void main() {
         fireImmediately: true,
       );
 
-      await controller.answer(StudyAction.remembered);
+      await controller.submitAnswer(StudyAction.remembered);
 
       expect(states, isNot(contains(false)));
     });
@@ -178,7 +179,7 @@ void main() {
         reviewMode: StudyMode.match,
       );
 
-      await controller.answer(StudyAction.remembered);
+      await controller.submitAnswer(StudyAction.remembered);
       final state = container.read(studySessionControllerProvider('deck-1'));
 
       expect(state.error, isNotNull);
@@ -193,7 +194,7 @@ void main() {
 
       await container
           .read(studySessionControllerProvider('deck-1').notifier)
-          .answer(StudyAction.remembered);
+          .submitAnswer(StudyAction.remembered);
 
       expect(repository.answers, isEmpty);
     });
@@ -360,7 +361,7 @@ final class _FailingRepository extends FakeStudyRepository {
   _FailingRepository() : super(stageExhausted: false);
 
   @override
-  Future<void> submitAnswer({
+  Future<StudyAnswerCommitModel> submitAnswer({
     required String sessionId,
     required String cardId,
     required StudyMode mode,

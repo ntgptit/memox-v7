@@ -1,3 +1,4 @@
+import 'study_lapse_policy_model.dart';
 import 'study_entry_summary_model.dart';
 import 'study_mode.dart';
 
@@ -22,6 +23,10 @@ enum RecallOutcome {
 /// Remember it before the clock runs out.
 final class RecallModeHandler extends StudyModeHandler {
   const RecallModeHandler();
+
+  @override
+  StudyLapsePolicy get lapsePolicy =>
+      StudyLapsePolicy.completeAndEnrollNextRound;
 
   @override
   int capacityFrom(StudyEntrySummaryModel summary) => summary.dueCount;

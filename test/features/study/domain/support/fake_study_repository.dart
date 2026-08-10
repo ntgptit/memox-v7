@@ -8,6 +8,9 @@ import 'package:memox/features/study/domain/models/new_card_order_model.dart';
 import 'package:memox/features/study/domain/models/study_action_model.dart';
 import 'package:memox/features/study/domain/models/study_deck_context_model.dart';
 import 'package:memox/features/study/domain/models/study_entry_summary_model.dart';
+import 'package:memox/features/study/domain/models/study_answer_commit_model.dart';
+import 'package:memox/features/study/domain/models/study_queue_item_status_model.dart';
+import 'package:memox/features/study/domain/models/study_lapse_policy_model.dart';
 import 'package:memox/features/study/domain/models/study_mode.dart';
 import 'package:memox/features/study/domain/models/study_options_model.dart';
 import 'package:memox/features/study/domain/models/study_outcome_reason_model.dart';
@@ -149,7 +152,7 @@ base class FakeStudyRepository implements StudyRepository {
   }
 
   @override
-  Future<void> submitAnswer({
+  Future<StudyAnswerCommitModel> submitAnswer({
     required String sessionId,
     required String cardId,
     required StudyMode mode,
@@ -172,6 +175,23 @@ base class FakeStudyRepository implements StudyRepository {
       nextIntervalDays: nextIntervalDays,
       nextEaseFactor: nextEaseFactor,
     ));
+
+    // **Read from the mode's policy, not invented here.** The receipt is what
+    // the controller acts on, so a fake that always said `completed` would let
+    // a `match` lapse clear its slot in every widget test while the database
+    // keeps the row open (BR-118).
+    final retains =
+        action.isLapse &&
+        studyModeHandler(mode)?.lapsePolicy ==
+            StudyLapsePolicy.retainAndEnrollNextRound;
+
+    return StudyAnswerCommitModel(
+      cardId: cardId,
+      round: 1,
+      currentItemStatus: retains
+          ? StudyQueueItemStatus.pending
+          : StudyQueueItemStatus.completed,
+    );
   }
 
   @override

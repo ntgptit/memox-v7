@@ -761,6 +761,41 @@ Callback giữa bàn và controller trả về `Future`: ô chỉ được đán
 khi ghi xong, nên bàn vẽ đúng thứ database đang giữ chứ không đoán theo cú chạm.
 Một ghi bị từ chối để nguyên cặp trên bàn.
 
+### 8.12 Thời gian đọc kết quả của từng mode
+
+**Nhịp giữ không phải animation.** `AppDurations` là thang *chuyển động*, rung
+cao nhất 320ms vì lâu hơn thế đọc thành lag. Những con số dưới đây là *ngân sách
+đọc*: người ta cần bao lâu để tiếp nhận thứ màn hình vừa nói, và câu trả lời phụ
+thuộc hoàn toàn vào việc nó nói bao nhiêu. Vì thế chúng là component constant
+(`AppStudyFeedback`), không phải token motion.
+
+| Mode | Đúng | Sai | Ranh giới chuyển |
+|---|---:|---:|---|
+| `browse` | — | — | mỗi lần vuốt tới |
+| `match` | 500ms (ô) | 700ms (ô) | chỉ sau cặp cuối của bàn |
+| `guess` | 700ms | 1200ms | hết feedback |
+| `recall` | 1800ms (revealed) | 2200ms (hết giờ) | hết feedback |
+| `fill` | 800ms | 2200ms | hết feedback |
+| `self_assess` | — | — | ngay sau khi ghi |
+
+**Sai luôn dài hơn đúng.** Một câu đúng cần được *nhận ra*; một câu sai cần được
+đọc, tìm trong danh sách, rồi hiểu. Khoảng cách rộng nhất ở chỗ phần sửa mang
+nhiều chữ nhất — `fill` sai là một chính tả phải so bằng mắt với chính tả mình
+vừa gõ.
+
+**Không có nút Continue.** Mọi mode tự chuyển; thứ thay đổi là *khi nào*, không
+phải *ai bấm*. `match` là ngoại lệ duy nhất về chủ thể: bàn tự giữ nhịp của ô
+(`AppMatchTile.successFlash`/`wrongHold`) vì chỉ nó biết cặp vừa xong có phải cặp
+cuối hay không, nên `studyModeFeedback(match)` bằng 0 và bàn tự gọi chuyển.
+
+**Không mode nào bị tháo khỏi cây widget để tải thứ thay thế nó** (BR-158).
+`advance(minimumVisible:)` chạy song song việc đọc lượt kế tiếp và việc đợi hết
+nhịp, rồi mới đổi — fetch chậm không tốn thêm gì, fetch nhanh vẫn phải chờ hết
+nhịp. Trạng thái tải toàn thân nay chỉ còn cho một ca: phiên chưa có lượt nào.
+
+**Kết quả chỉ được vẽ sau khi commit** (BR-157). Ghi hỏng thì không có feedback
+và không chuyển lượt — thẻ ở nguyên chỗ cũ thay vì trôi qua như thể đã được ghi.
+
 ### 8.9 Màn `guess` theo handout layout 390×780
 
 Handout của `guess` **không đụng vào phán quyết nào** — §7.5 đã chốt mỗi lựa chọn

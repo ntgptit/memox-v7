@@ -7,7 +7,7 @@
 | **Scope** | Luật nghiệp vụ, validation rule, state machine, edge case của phạm vi MVP. Ngoài phạm vi: quyết định kiến trúc (`architecture.md`), hình dạng dữ liệu (`data-model.md`), luồng người dùng (`use-cases.md`) |
 | **Source of truth for** | BR-xx · validation rule · entity state machine · edge case |
 | **Depends on** | `document-conventions.md`, `product.md`, `architecture.md` |
-| **Updated by task** | BR-118 — `match` nhận cả hai chiều chọn, và cặp sai giữ hàng queue ở `pending` |
+| **Updated by task** | BR-157, BR-158 — commit trước feedback, và đơn vị học ở lại màn hình trong lúc tải lượt kế tiếp |
 | **Last updated** | 2026-08-10 |
 
 Format tuân theo `document-conventions.md` §6.2. Từ khoá MUST / SHOULD / MAY
@@ -544,6 +544,8 @@ vì một question mượn bốn thẻ khác để dựng.
 | BR-116 | active | Một thẻ từng có kết quả sai trong một round MUST thuộc tập không đạt của round đó, **kể cả khi sau đó nó được làm đúng** để rời bàn. Tập này MUST được khử trùng theo thẻ. | repository | BR-20, BR-115 |
 | BR-117 | active | Mỗi round MUST có thứ tự xoáo riêng. Hai round liền nhau, và round 1 với stage trước đó, MUST NOT dùng chung một sequence khi còn từ hai thẻ trở lên. | db | BR-113 |
 | BR-118 | active | Một lượt MUST thuộc về thẻ sở hữu **term**, bất kể vế nào được chạm trước; chạm meaning trước MUST được chấp nhận. Chọn nhầm meaning MUST NOT đánh dấu thẻ sở hữu meaning đó là không đạt. Một cặp sai MUST giữ hàng queue của round hiện tại ở `pending` — thẻ ở lại bàn để ghép lại — và MUST enroll thẻ vào round kế tiếp đúng một lần. | domain | BR-115, BR-116 |
+| BR-157 | active | Giao diện MUST chỉ hiển thị kết quả của một lượt **sau khi** transaction ghi lượt đó đã commit; trạng thái đã chấm MUST NOT được vẽ dựa trên thao tác của người dùng trước khi có xác nhận ghi. Ghi thất bại MUST NOT bắt đầu feedback và MUST NOT chuyển lượt. | UI + repository | BR-25, BR-85 |
+| BR-158 | active | Đơn vị học đang hiển thị MUST ở lại màn hình trong suốt thời gian đọc kết quả và trong suốt lúc tải lượt kế tiếp; MUST NOT thay thân màn bằng trạng thái tải giữa hai lượt. Trạng thái tải toàn thân MUST chỉ dùng khi phiên chưa có lượt nào. Mỗi mode MUST khai báo thời lượng hiển thị kết quả của mình. | UI | BR-25, BR-157 |
 | BR-119 | active | Mode dùng round MUST hoàn tất khi một round kết thúc mà tập không đạt rỗng. Không có trần số round. Trần 3 của BR-104 là của `self_assess`, không áp ở đây. | repository | BR-115, BR-104 |
 | BR-120 | active | Một stage MAY có nhiều mức phản hồi (ví dụ `almost` của `match`), nhưng mọi mức không phải "đúng" MUST vào tập không đạt và MUST ánh xạ như sai theo BR-107. Mức phản hồi MUST NOT xuất hiện trong `study_answers.action`. | domain + UI | BR-106, BR-107 |
 | BR-114 | active | Thẻ không đủ dữ liệu cho một stage MUST bị bỏ qua **có ghi nhận** ở stage đó, MUST NOT bị xoá khỏi deck, và MUST vẫn xuất hiện ở các stage khác mà nó đủ dữ liệu. | repository | BR-99, BR-113 |

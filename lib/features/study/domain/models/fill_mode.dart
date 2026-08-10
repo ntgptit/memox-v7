@@ -1,3 +1,4 @@
+import 'study_lapse_policy_model.dart';
 import 'study_entry_summary_model.dart';
 import 'study_mode.dart';
 import 'study_turn_model.dart';
@@ -39,6 +40,10 @@ final class FillOutcome {
 /// other, and why BR-154 forbids one shared number on the chooser.
 final class FillModeHandler extends StudyModeHandler {
   const FillModeHandler();
+
+  @override
+  StudyLapsePolicy get lapsePolicy =>
+      StudyLapsePolicy.completeAndEnrollNextRound;
 
   @override
   int capacityFrom(StudyEntrySummaryModel summary) => summary.fillableCount;

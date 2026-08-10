@@ -6,6 +6,7 @@ import 'package:memox/features/study/domain/models/study_action_model.dart';
 import 'package:memox/features/study/domain/models/study_card_limit_model.dart';
 import 'package:memox/features/study/domain/models/study_deck_context_model.dart';
 import 'package:memox/features/study/domain/models/study_entry_summary_model.dart';
+import 'package:memox/features/study/domain/models/study_answer_commit_model.dart';
 import 'package:memox/features/study/domain/models/study_mode.dart';
 import 'package:memox/features/study/domain/models/study_options_model.dart';
 import 'package:memox/features/study/domain/models/study_outcome_reason_model.dart';
@@ -242,7 +243,7 @@ class StudyCatalogRepository implements StudyRepository {
   }) async {}
 
   @override
-  Future<void> submitAnswer({
+  Future<StudyAnswerCommitModel> submitAnswer({
     required String sessionId,
     required String cardId,
     required StudyMode mode,
@@ -255,7 +256,13 @@ class StudyCatalogRepository implements StudyRepository {
     int? nextBox,
     double? nextEaseFactor,
     int? nextIntervalDays,
-  }) async {}
+  }) async => StudyAnswerCommitModel(
+    cardId: cardId,
+    round: 1,
+    // The catalog never advances a session, so any status is a lie of the same
+    // size; `completed` is the one that reads as "this went through".
+    currentItemStatus: StudyQueueItemStatus.completed,
+  );
 
   @override
   Future<void> markBrowsed({

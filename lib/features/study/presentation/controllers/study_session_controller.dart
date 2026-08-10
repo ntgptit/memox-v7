@@ -5,14 +5,14 @@ import '../../../../core/error/failure.dart';
 import '../../../../core/time/clock_provider.dart';
 import '../../../../core/time/time_zone_provider.dart';
 import '../../di/study_repository_provider.dart';
+import '../../domain/models/study_answer_commit_model.dart';
 import '../../domain/models/study_action_model.dart';
 import '../../domain/models/study_mode.dart';
 import '../../domain/models/study_outcome_reason_model.dart';
 import '../../domain/models/study_session_kind_model.dart';
 import '../../domain/models/study_session_status_model.dart';
-import '../../domain/usecases/advance_study_stage_use_case.dart';
 import '../../domain/usecases/end_study_session_use_case.dart';
-import '../../domain/usecases/get_next_turn_use_case.dart';
+import '../../domain/usecases/get_next_stage_turn_use_case.dart';
 import '../../domain/usecases/get_session_summary_use_case.dart';
 import '../../domain/usecases/mark_browsed_use_case.dart';
 import '../../domain/usecases/resume_study_session_use_case.dart';
@@ -73,14 +73,14 @@ class StudySessionController extends _$StudySessionController {
         isOpening: false,
       );
 
-      await _pullTurn();
+      await advance();
     } on Object catch (error) {
       if (!ref.mounted) return;
       state = state.copyWith(isOpening: false, error: error);
     }
   }
 
-  /// Records an answer, then pulls the next turn.
+  /// Records an answer. **Writes only — it fetches nothing.**
   ///
   /// **The double-tap guard is the first line, and it has to be.** BR-25 and
   /// BR-126 both say one question yields at most one turn, and a write takes
@@ -88,65 +88,129 @@ class StudySessionController extends _$StudySessionController {
   /// [StudySessionState.isSubmitting] rather than a private flag so the buttons
   /// and the guard cannot disagree.
   ///
-  /// **[cardId] is for `match` alone**, whose board lays out the whole round, so
-  /// the pair a person reaches for is rarely the card the queue is serving.
+  /// **Writing and advancing used to be one call, and that is what made the
+  /// feedback unreachable.** [advance] re-reads the session, the queue, the card
+  /// and the progress and swaps the body while it does; running it the moment a
+  /// write landed meant every mode's verdict — the green option, the revealed
+  /// back, the ticked pair — was drawn into a widget that was already being
+  /// unmounted. Now the mode decides how long its answer stays on screen and
+  /// calls [advance] itself.
   ///
-  /// **[shouldAdvance] is for `match` alone too, and it is the performance of
-  /// the mode.** BR-25 keeps the write; what goes is the *read* that followed —
-  /// [_pullTurn] re-reads everything and swaps the body for a spinner, so five
-  /// pairs cost five reloads and unmounted the board each time. False writes and
-  /// stops; [advanceMatchBoard] does the one read a board owes.
+  /// **The status comes back from the transaction, never from the action.**
+  /// `isLapse` is what the user did; what happened to the row is the mode's
+  /// [StudyLapsePolicy], and two modes turn the same lapse into different rows.
+  /// A `completed` receipt clears the card from the round's progress in memory,
+  /// which is what lets `match` answer five pairs on one board without a read
+  /// between them. A `pending` one moves nothing (BR-118).
   ///
-  /// The board waits on the returned future, and a wrong pair writes and enrols
-  /// (BR-116) but clears nothing: its row stays `pending`, so it stays on the
-  /// board to try again (BR-118).
-  Future<void> answer(
+  /// [cardId] names the card when it is not the one the queue is serving —
+  /// `match` alone, whose board lays out the whole round.
+  Future<StudyAnswerCommitModel?> submitAnswer(
     StudyAction action, {
     String? cardId,
-    bool shouldAdvance = true,
     StudyOutcomeReason? outcomeReason,
     int? comparisonVersion,
     bool? usedHint,
   }) async {
-    if (!state.canAnswer) return;
+    if (!state.canAnswer) return null;
 
     final session = state.session;
     final turn = state.turn;
-    if (session == null || turn == null) return;
+    if (session == null || turn == null) return null;
 
     state = state.copyWith(isSubmitting: true, error: null);
 
     try {
-      await SubmitStudyAnswerUseCase(ref.read(studyRepositoryProvider)).call(
-        session: session,
-        cardId: cardId ?? turn.cardId,
-        mode: session.currentMode,
-        action: action,
-        now: ref.read(clockProvider)(),
-        utcOffset: ref.read(utcOffsetProvider)(),
-        outcomeReason: outcomeReason,
-        comparisonVersion: comparisonVersion,
-        usedHint: usedHint,
+      final commit =
+          await SubmitStudyAnswerUseCase(
+            ref.read(studyRepositoryProvider),
+          ).call(
+            session: session,
+            cardId: cardId ?? turn.cardId,
+            mode: session.currentMode,
+            action: action,
+            now: ref.read(clockProvider)(),
+            utcOffset: ref.read(utcOffsetProvider)(),
+            outcomeReason: outcomeReason,
+            comparisonVersion: comparisonVersion,
+            usedHint: usedHint,
+          );
+
+      if (!ref.mounted) return null;
+
+      state = state.copyWith(
+        isSubmitting: false,
+        turn: commit.isCleared
+            ? turn.copyWith(progress: turn.progress.withCleared(commit.cardId))
+            : turn,
       );
+
+      return commit;
+    } on Object catch (error) {
+      await _writeFailed(error);
+
+      return null;
+    }
+  }
+
+  /// Moves to the next turn, board, round or stage — **without taking the
+  /// current one off screen first**.
+  ///
+  /// [minimumVisible] is how long the answer the user just gave has to stay
+  /// readable. The read and the wait run together, so a slow fetch costs
+  /// nothing extra and a fast one still leaves the verdict up: the swap happens
+  /// when both are done. `Duration.zero` for a mode with nothing to read, which
+  /// is `browse`.
+  ///
+  /// **The turn stays in state throughout.** It used to be cleared into a
+  /// loading state, so every mode flashed a spinner between two cards that
+  /// differ by one string — and the mode that suffered most was the one whose
+  /// board the user was still looking at. A full-body loading state is now for
+  /// one case only: a session that has no turn yet.
+  Future<void> advance({Duration minimumVisible = Duration.zero}) async {
+    final session = state.session;
+    if (session == null || state.isAdvancing) return;
+
+    state = state.copyWith(isAdvancing: true);
+
+    try {
+      final read = GetNextStageTurnUseCase(ref.read(studyRepositoryProvider))
+          .call(
+            session: session,
+            now: ref.read(clockProvider)(),
+            utcOffset: ref.read(utcOffsetProvider)(),
+          );
+      final held = minimumVisible == Duration.zero
+          ? Future<void>.value()
+          : Future<void>.delayed(minimumVisible);
+      final (mode, turn) = await read;
+      await held;
 
       if (!ref.mounted) return;
 
-      if (shouldAdvance) {
-        state = state.copyWith(isSubmitting: false);
+      if (mode == null) {
+        state = state.copyWith(
+          isAdvancing: false,
+          isFinished: true,
+          turn: null,
+        );
 
-        return _pullTurn();
+        return _loadSummary();
       }
 
-      // A lapse leaves the board alone: the row stays `pending`, so the pair
-      // stays where it is to be tried again (BR-118).
       state = state.copyWith(
-        isSubmitting: false,
-        turn: action.isLapse || cardId == null
-            ? turn
-            : turn.copyWith(progress: turn.progress.withCleared(cardId)),
+        session: session.copyWith(currentMode: mode),
+        turn: turn,
+        isAdvancing: false,
+        // **A new card arrives at the front of the trail** (BR-155). The offset
+        // counts backwards from the live turn, so one left over from the last
+        // card would put a card already walked past on screen in place of the
+        // one just moved to — and nothing would say so.
+        browseLookBack: 0,
       );
     } on Object catch (error) {
-      await _writeFailed(error);
+      if (!ref.mounted) return;
+      state = state.copyWith(isAdvancing: false, error: error);
     }
   }
 
@@ -167,20 +231,6 @@ class StudySessionController extends _$StudySessionController {
     if (!ref.mounted) return;
     state = state.copyWith(isSubmitting: false, isFinished: true, error: error);
     await _loadSummary();
-  }
-
-  /// Fetches the next board, round or stage — once the current one is done.
-  ///
-  /// The counterpart to `answer(..., shouldAdvance: false)`, so a loading state
-  /// appears at a board boundary rather than between two taps. Why it is a
-  /// seventh name: `command_query_separation_test.dart`.
-  Future<void> advanceMatchBoard() {
-    if (state.session?.currentMode != StudyMode.match) {
-      return Future<void>.value();
-    }
-    if (state.isSubmitting || state.isAdvancing) return Future<void>.value();
-
-    return _pullTurn();
   }
 
   /// Moves `browse` one card along the round, either way (BR-155).
@@ -205,7 +255,7 @@ class StudySessionController extends _$StudySessionController {
     // shortcut, which is the one branch that writes: a second swipe arriving
     // while the first was still fetching went straight to `answer()` and marked
     // the same card browsed twice. `isAdvancing` covers exactly that window —
-    // `answer()` clears `isSubmitting` before `_pullTurn` sets `isAdvancing`,
+    // `submitAnswer` clears `isSubmitting` before `advance` sets `isAdvancing`,
     // so guarding only the first leaves the second wide open (BR-155: stepping
     // forward again writes no second turn and moves no cursor twice).
     if (state.session?.currentMode != StudyMode.browse) {
@@ -252,7 +302,7 @@ class StudySessionController extends _$StudySessionController {
       if (!ref.mounted) return;
       state = state.copyWith(isSubmitting: false);
 
-      await _pullTurn();
+      await advance();
     } on Object catch (error) {
       await _writeFailed(error);
     }
@@ -346,55 +396,5 @@ class StudySessionController extends _$StudySessionController {
     if (!ref.mounted) return;
     state = state.copyWith(isFinished: true, turn: null);
     await _loadSummary();
-  }
-
-  /// Reads the next turn, advancing the stage when this one has run dry.
-  ///
-  /// **A null turn is not the end of the session.** It can also mean every
-  /// remaining card is waiting out BR-26's three-card gap; the stage decides
-  /// which. Treating null as "finished" ends a session with cards unanswered.
-  Future<void> _pullTurn() async {
-    final session = state.session;
-    if (session == null) return;
-
-    state = state.copyWith(isAdvancing: true);
-
-    final repository = ref.read(studyRepositoryProvider);
-    try {
-      final mode = await AdvanceStudyStageUseCase(repository).call(
-        session: session,
-        now: ref.read(clockProvider)(),
-        utcOffset: ref.read(utcOffsetProvider)(),
-      );
-
-      if (!ref.mounted) return;
-
-      if (mode == null) {
-        state = state.copyWith(
-          isAdvancing: false,
-          isFinished: true,
-          turn: null,
-        );
-
-        return _loadSummary();
-      }
-
-      final turn = await GetNextTurnUseCase(repository).call(session.id);
-      if (!ref.mounted) return;
-
-      state = state.copyWith(
-        session: session.copyWith(currentMode: mode),
-        turn: turn,
-        isAdvancing: false,
-        // **A new card arrives at the front of the trail** (BR-155). The offset
-        // counts backwards from the live turn, so one left over from the last
-        // card would put a card already walked past on screen in place of the
-        // one just moved to — and nothing would say so.
-        browseLookBack: 0,
-      );
-    } on Object catch (error) {
-      if (!ref.mounted) return;
-      state = state.copyWith(isAdvancing: false, error: error);
-    }
   }
 }

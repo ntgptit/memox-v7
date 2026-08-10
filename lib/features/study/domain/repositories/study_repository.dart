@@ -1,3 +1,4 @@
+import '../models/study_answer_commit_model.dart';
 import '../entities/study_session_entity.dart';
 import '../models/new_card_order_model.dart';
 import '../models/study_action_model.dart';
@@ -132,7 +133,7 @@ abstract interface class StudyRepository {
   /// Refuses, without writing anything, when the session's generation no longer
   /// matches the root's (BR-84) — and marks the session `invalidated` when it
   /// does not.
-  Future<void> submitAnswer({
+  Future<StudyAnswerCommitModel> submitAnswer({
     required String sessionId,
     required String cardId,
     required StudyMode mode,

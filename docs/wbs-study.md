@@ -1792,3 +1792,56 @@ mới — `advanceMatchBoard` — còn phần ghi là chính `answer` với hai 
 (`cardId` quay lại, `shouldAdvance` mới), và `_pullTurn` là nhánh chứ không phải
 đuôi bắt buộc. Lý do tên thứ bảy được nhận ghi ngay trong CQS test, cạnh lý do
 của `browseStep` và `pause`.
+
+### Lifecycle dùng chung cho năm mode — ghi, đọc được, rồi mới chuyển
+
+Vòng Match trước để lộ một thứ lớn hơn Match: **`answer()` gộp hai việc**, ghi
+đáp án và tải lượt kế tiếp. Gộp như vậy thì mọi feedback đã viết cho `guess`,
+`recall` và `fill` đều không bao giờ đọc được — fetch bắt đầu ngay khi write trả
+về, thân màn bị thay bằng spinner, và ô vừa xanh/đỏ được vẽ vào một widget đang
+trên đường bị tháo. Sửa riêng cho Match sẽ đẻ tiếp `submitGuessAttempt()`,
+`advanceRecall()`…
+
+**Bốn tầng, mỗi tầng một câu hỏi:**
+
+| tầng | trả lời |
+|---|---|
+| `studyModeHandler(mode)` | Strategy của mode: capacity, `canTake`, `canRunOn`, **`lapsePolicy`** |
+| `SubmitStudyAnswerUseCase` | luồng chung mười bước, trả `StudyAnswerCommitModel` |
+| repository | thi hành policy trong một transaction, trả status đã ghi |
+| `studyModeView` + `studyModeFeedback(mode)` | thân màn của mode, và ngân sách đọc của nó |
+
+**`if (mode == StudyMode.match)` trong data layer đã bỏ.** Mode khai báo
+`StudyLapsePolicy` — `noAnswer` / `spacedRetry` / `completeAndEnrollNextRound` /
+`retainAndEnrollNextRound` — và repository chỉ thi hành. Tầng dữ liệu không còn
+nhận diện mode nào, tức không còn nhánh exhaustive thứ hai mà AD-18 cấm.
+
+**Receipt, không suy luận.** `submitAnswer` trả `StudyAnswerCommitModel`
+(`cardId`, `round`, `currentItemStatus`). Controller không được suy status từ
+`action.isLapse`: cùng một lapse, `match` giữ hàng `pending` còn ba mode kia đóng
+nó — đoán sai thì một ô trên bàn biến mất trong khi database vẫn giữ nó mở.
+
+**`submitAnswer` + `advance(minimumVisible:)` thay cho `answer(shouldAdvance:)`.**
+`advance` giữ nguyên `state.turn` trong lúc đọc, chạy song song việc đọc và việc
+đợi, rồi mới đổi — fetch chậm không tốn thêm, fetch nhanh vẫn phải chờ hết nhịp.
+Tập lệnh của controller vẫn bảy tên; `command_query_separation_test.dart` ghi lý
+do tách ngay cạnh lý do của `browseStep` và `pause`.
+
+**Không mode nào bị tháo để tải thứ thay thế** (BR-158). Test cũ
+`a non-browse mode still shows loading while advancing` khẳng định đúng hành vi
+sai — nay là `no mode is unmounted to fetch its replacement`.
+
+**`isBusy` thay cho `isSubmitting` ở mọi `isLocked`** trừ `match`: thẻ ở lại màn
+suốt cả write lẫn fetch, nên cả hai khoảng đều phải từ chối input. Trước đó chỉ
+write được che, và cả quãng fetch là một cửa sổ cho cú chạm thứ hai. `match` giữ
+`isLocked: false` vì bàn có bốn cặp khác đang chờ; nó tự khoá ở cuối bàn.
+
+**Ngân sách đọc là component constant, không phải token motion** (§8.12):
+guess 700/1200, recall 1800/2200, fill 800/2200, match giữ nhịp ở ô 500/700.
+Sai luôn dài hơn đúng — một câu đúng cần được nhận ra, một câu sai cần được đọc,
+tìm và hiểu.
+
+**Dọn kèm:** `_nextTurn` trong controller ghép hai use case — đúng hình dạng
+AD-13 cấm (hai read là hai snapshot). Thành `GetNextStageTurnUseCase`, một read
+trả cả mode lẫn turn. Builder map của presentation thành `switch` exhaustive:
+thiếu một khoá là màn trống lúc chạy, thiếu một nhánh là lỗi biên dịch.
