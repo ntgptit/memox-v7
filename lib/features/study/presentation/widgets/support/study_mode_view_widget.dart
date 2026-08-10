@@ -4,7 +4,6 @@ import 'package:flutter/widgets.dart';
 
 import '../../../domain/models/guess_mode.dart';
 import '../../../domain/models/match_mode.dart';
-import '../../../domain/models/recall_mode.dart';
 import '../../../domain/models/study_action_model.dart';
 import '../../../domain/models/study_answer_commit_model.dart';
 import '../../../domain/models/study_mode.dart';
@@ -203,6 +202,8 @@ Widget? studyModeView({
     ),
     StudyMode.recall => () => RecallTimerSectionWidget(
       turn: turn,
+      isLocked: state.isBusy,
+      onResolved: onResolved,
       initialRemaining: turn.item.remainingMs == null
           ? null
           : Duration(milliseconds: turn.item.remainingMs!),
@@ -211,14 +212,16 @@ Widget? studyModeView({
       onRemainingChanged: onRecallTick,
       // And what is left when the app is taken away gets written down (BR-133).
       onSuspended: onRecallSuspend,
+      // **Three outcomes, and the widget no longer sends one for looking.**
+      // Reveal used to arrive here as `RecallOutcome.revealed` and was mapped to
+      // *correct*, so giving up early promoted the card (BR-159). What reaches
+      // this line now is a verdict the learner gave, or a clock that ran out.
       onOutcome: (outcome) => _send(
         onAnswer,
-        _actionFor(state, isCorrect: outcome == RecallOutcome.revealed),
+        _actionFor(state, isCorrect: outcome.isCorrect),
         // Running out is stored as the reason, never inferred from the action:
         // owning up to a blank produces the same action (BR-131).
-        outcomeReason: outcome == RecallOutcome.timedOut
-            ? StudyOutcomeReason.timeout
-            : null,
+        outcomeReason: outcome.reason,
       ),
       onFeedbackShown: onFeedbackShown,
     ),

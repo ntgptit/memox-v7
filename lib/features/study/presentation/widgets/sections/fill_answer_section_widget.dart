@@ -229,7 +229,7 @@ class _FillAnswerSectionWidgetState extends State<FillAnswerSectionWidget> {
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
-        _CtaRow(
+        StudyCtaRowWidget(
           children: <Widget>[
             // **The slot stays even once the hint is spent.** Removing it let
             // Check slide into the middle of the row the moment somebody used a

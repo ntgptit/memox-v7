@@ -7,7 +7,7 @@
 | **Scope** | Luật nghiệp vụ, validation rule, state machine, edge case của phạm vi MVP. Ngoài phạm vi: quyết định kiến trúc (`architecture.md`), hình dạng dữ liệu (`data-model.md`), luồng người dùng (`use-cases.md`) |
 | **Source of truth for** | BR-xx · validation rule · entity state machine · edge case |
 | **Depends on** | `document-conventions.md`, `product.md`, `architecture.md` |
-| **Updated by task** | BR-134 — `fill` hỏi bằng `back`, chấm bằng `front_folded`, sửa sai hiện `front` |
+| **Updated by task** | BR-134 — `fill` hỏi bằng `back`, chấm bằng `front_folded`, sửa sai hiện `front` · BR-159, BR-160 — mở đáp án ở `recall` không phải là một kết cục, và hai kết thúc của nó có nhịp khác nhau; BR-129/130/133 chỉnh theo |
 | **Last updated** | 2026-08-11 |
 
 Format tuân theo `document-conventions.md` §6.2. Từ khoá MUST / SHOULD / MAY
@@ -513,11 +513,11 @@ vì một question mượn bốn thẻ khác để dựng.
 | BR-137 | active | Câu trả lời rỗng sau khi trim MUST NOT sinh lượt và MUST NOT tiến checkpoint. | domain | BR-25, BR-134 |
 | BR-138 | active | Nội dung người dùng gõ ở `fill` MUST NOT được lưu. Chỉ kết cục, phiên bản chính sách và cờ dùng gợi ý được ghi. | db | BR-51, BR-52, BR-54 |
 | BR-128 | active | `recall` MUST cho tối đa **20 giây** mỗi lượt, đo bằng thời gian tương tác thực: MUST tạm dừng khi app vào nền hoặc bị ngắt, và MUST NOT tính thời gian tải nội dung. | domain + UI | AD-13, AD-16 |
-| BR-129 | active | Tại mốc hết giờ, MUST chỉ có **một** kết cục được ghi: thao tác có thời điểm **trước** mốc là reveal thủ công; tại hoặc sau mốc là hết giờ. | domain | BR-25, BR-128 |
-| BR-130 | active | Hết giờ MUST tự lật đáp án và khoá kết cục thành sai. Trong cùng lượt đó MUST NOT đổi được sang đúng. | domain | BR-107, BR-129 |
+| BR-129 | active | Một lượt `recall` MUST ghi **tối đa một** đáp án. Tại mốc hết giờ MUST chỉ một nhánh thắng: thao tác có thời điểm **trước** mốc là reveal thủ công (không ghi gì — BR-159); tại hoặc sau mốc là hết giờ (ghi sai — BR-160). MUST NOT vừa vào tự đánh giá vừa ghi hết giờ. | domain + UI | BR-25, BR-128, BR-159, BR-160 |
+| BR-130 | active | Hết giờ MUST khoá kết cục thành sai và MUST tự lật đáp án **sau khi** ghi đã commit (BR-157). Trong cùng lượt đó MUST NOT đổi được sang đúng, kể cả khi ghi thất bại — retry MUST gửi lại đúng kết quả sai đó và MUST NOT mở lại lựa chọn của người học. | domain + UI | BR-107, BR-129, BR-157 |
 | BR-131 | active | Lý do "hết giờ" MUST được lưu tường minh trên `study_answers.outcome_reason`. MUST NOT suy luận từ `action`, vì tự nhận quên và hết giờ cho cùng một `action`. | db | BR-76, BR-130 |
 | BR-132 | active | Nhãn trên màn hình (ví dụ Remembered / Forgot) MUST NOT được lưu. Chỉ `action` canonical vào `study_answers`. | db + UI | BR-106, BR-120 |
-| BR-133 | active | Thời gian còn lại và trạng thái đã lật MUST được lưu để Resume tiếp tục đúng chỗ, MUST NOT đặt lại 20 giây. Một lượt mới của thẻ ở round sau là lượt khác và MUST bắt đầu lại đủ 20 giây. | db | BR-103, BR-115, BR-128 |
+| BR-133 | active | Thời gian còn lại và trạng thái đã lật MUST được lưu để Resume tiếp tục đúng chỗ, MUST NOT đặt lại 20 giây. Lượt Resume với `is_revealed = true` và còn thời gian MUST quay lại **tự đánh giá** với đáp án đang hiện và đồng hồ đã dừng, MUST NOT chạy lại đồng hồ. Một lượt mới của thẻ ở round sau là lượt khác và MUST bắt đầu lại đủ 20 giây với đáp án ẩn. | db + UI | BR-103, BR-115, BR-128, BR-159 |
 | BR-121 | active | Mỗi question của `guess` MUST có **đúng năm** lựa chọn: một đáp án đúng xuất hiện đúng một lần, và bốn distractor. MUST NOT render số lượng khác. | domain + UI | BR-99, BR-122 |
 | BR-122 | active | Distractor MUST lấy từ thẻ **đã học xong** (`learned_at IS NOT NULL`) **hoặc đang trong phiên hiện tại**, trong cùng cây deck. Mỗi distractor MUST tham chiếu một thẻ khác thẻ đang hỏi. | domain | BR-115, BR-121, BR-142 |
 | BR-123 | active | "Hai nghĩa khác nhau" MUST đo bằng `back_folded` (schema v3), không bằng chuỗi hiển thị. Hai thẻ cùng `back_folded` MUST NOT cùng xuất hiện trong một option set. | domain | BR-121, BR-122 |
@@ -546,6 +546,8 @@ vì một question mượn bốn thẻ khác để dựng.
 | BR-118 | active | Một lượt MUST thuộc về thẻ sở hữu **term**, bất kể vế nào được chạm trước; chạm meaning trước MUST được chấp nhận. Chọn nhầm meaning MUST NOT đánh dấu thẻ sở hữu meaning đó là không đạt. Một cặp sai MUST giữ hàng queue của round hiện tại ở `pending` — thẻ ở lại bàn để ghép lại — và MUST enroll thẻ vào round kế tiếp đúng một lần. | domain | BR-115, BR-116 |
 | BR-157 | active | Giao diện MUST chỉ hiển thị kết quả của một lượt **sau khi** transaction ghi lượt đó đã commit; trạng thái đã chấm MUST NOT được vẽ dựa trên thao tác của người dùng trước khi có xác nhận ghi. Ghi thất bại MUST NOT bắt đầu feedback và MUST NOT chuyển lượt. | UI + repository | BR-25, BR-85 |
 | BR-158 | active | Đơn vị học đang hiển thị MUST ở lại màn hình trong suốt thời gian đọc kết quả và trong suốt lúc tải lượt kế tiếp; MUST NOT thay thân màn bằng trạng thái tải giữa hai lượt. Trạng thái tải toàn thân MUST chỉ dùng khi phiên chưa có lượt nào. Mỗi mode MUST khai báo thời lượng hiển thị kết quả của mình. | UI | BR-25, BR-157 |
+| BR-159 | active | Ở `recall`, mở đáp án MUST NOT là một kết cục: nó MUST NOT ghi `study_answers`, MUST NOT được chấm đúng hay sai, và MUST dừng đồng hồ rồi chuyển sang **tự đánh giá** với đúng hai lựa chọn — nhớ được (đúng) và đã quên (sai). Chỉ lựa chọn của người học MUST được ghi, đúng một lần cho một lượt. | domain + UI | BR-107, BR-120, BR-129, BR-132 |
+| BR-160 | active | Hai kết thúc của `recall` MUST có nhịp khác nhau. Tự đánh giá: sau khi commit MUST tự chuyển lượt, MUST NOT giữ thêm một thời lượng cố định và MUST NOT hiện nút Tiếp theo. Hết giờ: sau khi commit MUST hiện trạng thái đã bị tính sai và một nút Tiếp theo, MUST NOT tự chuyển theo thời lượng; bấm Tiếp theo MUST chỉ chuyển lượt và MUST NOT ghi thêm đáp án nào. | UI | BR-129, BR-130, BR-157, BR-158 |
 | BR-119 | active | Mode dùng round MUST hoàn tất khi một round kết thúc mà tập không đạt rỗng. Không có trần số round. Trần 3 của BR-104 là của `self_assess`, không áp ở đây. | repository | BR-115, BR-104 |
 | BR-120 | active | Một stage MAY có nhiều mức phản hồi (ví dụ `almost` của `match`), nhưng mọi mức không phải "đúng" MUST vào tập không đạt và MUST ánh xạ như sai theo BR-107. Mức phản hồi MUST NOT xuất hiện trong `study_answers.action`. | domain + UI | BR-106, BR-107 |
 | BR-114 | active | Thẻ không đủ dữ liệu cho một stage MUST bị bỏ qua **có ghi nhận** ở stage đó, MUST NOT bị xoá khỏi deck, và MUST vẫn xuất hiện ở các stage khác mà nó đủ dữ liệu. | repository | BR-99, BR-113 |
@@ -618,6 +620,19 @@ không còn lệch, nhưng lượt đầu tiên thì có.
 được lớn hơn: giờ học không trôi dần về khuya, và "đến hạn hôm nay" đúng nghĩa là
 hôm nay. Nếu sau này muốn gỡ, lối đi là mốc cắt khác 00:00 — sửa một chỗ theo AD-16,
 không phải sửa công thức.
+
+**BR-159 sửa một lỗi chấm điểm, không phải một lỗi giao diện.** Mở đáp án từng
+*là* kết cục "đúng": người học bấm Xem đáp án ở giây thứ tư và thẻ được thăng
+hộp vì đã bỏ cuộc. 8-box cần đúng một bit bằng chứng cho mỗi lượt, và bằng chứng
+ấy chỉ người học có — nhìn vào mặt sau không nói gì về việc có nhớ hay không.
+Nên reveal là **trạng thái trình bày**, còn kết cục là thứ người học nói ra.
+
+**BR-160 là hệ quả của việc hai kết thúc do hai người bấm giờ.** Tự đánh giá xảy
+ra *sau* khi người học đã đọc mặt sau, nên giữ màn hình thêm một nhịp là bắt họ
+chờ trên thứ họ đọc xong rồi. Hết giờ thì ngược lại: mặt sau là chữ họ chưa từng
+thấy, trên một thẻ vừa mất vì đồng hồ — không ai chọn hộ được thời lượng ấy, nên
+nó kết thúc ở một nút họ bấm. Một con số cố định phục vụ cả hai thì sai cả hai
+lần, và 1800/2200ms đang đo một việc không ai làm.
 
 **BR-131 là BR-76 lặp lại ở một chỗ khác.** Người học tự nhận quên và người học
 hết giờ đều cho `action = forgotten`. Không có cột riêng thì hai điều đó không phân

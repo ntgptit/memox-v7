@@ -7,7 +7,7 @@
 | **Scope** | Khung phiên học, và năm màn `browse` · `match` · `guess` · `recall` · `fill`. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), luồng (`use-cases.md`), giá trị token (`design_system/tokens/`) |
 | **Source of truth for** | Bố cục màn học · phán quyết cho tám điểm design lệch với BR |
 | **Depends on** | `document-conventions.md`, `business-rules.md` (BR-108…BR-154), `wbs-study.md` (M5.7…M5.20) |
-| **Updated by task** | `fill` làm lại vùng đáp án lần hai — thẻ dưới **là** input surface, bỏ ô viền lồng trong thẻ, đề đổi sang `back` và chấm bằng `front_folded` (BR-134), phán quyết mặc lên viền thẻ, hàng CTA giữ đủ hai chỗ (§6, §8.10) · `guess` bỏ nền phán quyết — đúng/sai chỉ còn viền + chữ + icon, ba hàng còn lại lùi về 0.7 thay vì 0.36, reset theo lượt thay vì `cardId`, ngân sách đọc 800/1800ms (§5, §8.9, §8.12) · Rà soát UI 5 stage — `match` nhận cả hai chiều chọn và giữ trạng thái đủ lâu để đọc (§4, §8.8), chuyển feedback sang viền + chữ thay vì nền đặc (§4), đổi meaning sang trái, hạ thang chữ và nâng sàn hàng lên 112 (§4, §8.6), `guess` bỏ huy hiệu A–E (§5), `fill` làm lại vùng đáp án (§6), `browse` cân bằng hai mặt và đổi nhãn (§3) |
+| **Updated by task** | `fill` làm lại vùng đáp án lần hai — thẻ dưới **là** input surface, bỏ ô viền lồng trong thẻ, đề đổi sang `back` và chấm bằng `front_folded` (BR-134), phán quyết mặc lên viền thẻ, hàng CTA giữ đủ hai chỗ (§6, §8.10) · `recall` tách lật khỏi chấm — lật mở tự đánh giá, hết giờ ghi sai rồi chờ `Next` (§6.1, §8.12) · `guess` bỏ nền phán quyết — đúng/sai chỉ còn viền + chữ + icon, ba hàng còn lại lùi về 0.7 thay vì 0.36, reset theo lượt thay vì `cardId`, ngân sách đọc 800/1800ms (§5, §8.9, §8.12) · Rà soát UI 5 stage — `match` nhận cả hai chiều chọn và giữ trạng thái đủ lâu để đọc (§4, §8.8), chuyển feedback sang viền + chữ thay vì nền đặc (§4), đổi meaning sang trái, hạ thang chữ và nâng sàn hàng lên 112 (§4, §8.6), `guess` bỏ huy hiệu A–E (§5), `fill` làm lại vùng đáp án (§6), `browse` cân bằng hai mặt và đổi nhãn (§3) |
 | **Last updated** | 2026-08-11 |
 
 Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham chiếu bằng ID.
@@ -284,18 +284,45 @@ Tiêu đề khung của hai ảnh ghi `1/2`: mỗi màn còn một state chưa c
 cục dưới đây **do agent đề xuất ở M5.20**, suy từ BR chứ không từ ảnh. Ghi ở đây
 để người sau biết chúng chưa qua tay người thiết kế.
 
-**`recall`, sau khi lật.** Vùng đáp án đổi từ tấm che sang chính mặt sau của
-thẻ, và **không còn nút nào**:
+**`recall`, sau khi lật — viết lại, vì bản cũ chấm điểm một cái liếc.** Bản
+trước nói lật *là* kết cục và màn sau đó không còn nút nào. Điều đó đúng theo
+BR-129 như nó được viết khi ấy, và sai theo nghiệp vụ: bấm `Show answer` ghi
+action *đúng* của scheduler, nên người học bỏ cuộc ở giây thứ tư được thăng hộp
+vì đã bỏ cuộc (BR-159).
 
-- BR-129 cho đúng **một** kết cục mỗi lượt, BR-130 khoá nó — nên không có hành
-  động nào còn hợp lệ để mời.
-- Nhưng một màn có đáp án hiện ra và không nút nào trông **hệt như màn bị treo**.
-  Nên chỗ nút cũ là một câu nói rõ lượt đã chốt và vòng sau bắt đầu lại đủ hai
-  mươi giây (BR-133). Hết giờ thì câu ấy mở đầu bằng "Time's up" và dùng
-  `danger`; tự lật thì dùng màu chữ phụ.
+Vùng đáp án vẫn đổi từ tấm che sang mặt sau của thẻ. Thứ đổi là hàng dưới nó:
+
+- **Lật xong là một câu hỏi, không phải một kết luận.** Hai nút ngang thay chỗ
+  `Show answer`: `Đã quên` là secondary bên trái, `Nhớ được` là primary bên
+  phải. Chưa ghi gì cho tới khi một trong hai được bấm.
+- **Hết giờ là một câu trả lời của hệ thống** (BR-160). Ghi sai kèm
+  `outcome_reason = timeout`, **rồi mới** lật (BR-157), rồi hiện một dòng
+  `danger` — `Time's up · counted as forgotten…` — và một nút `Next` duy nhất.
+  Không tự chuyển theo thời lượng: mặt sau là chữ người học chưa từng thấy, nên
+  họ đọc bao lâu là quyền của họ. `Next` chỉ chuyển lượt, không ghi gì.
+- **Hàng dưới luôn là một hàng nút cùng chiều cao**, ở cả năm phase. Chỉ dòng
+  chữ phía trên nó là xuất hiện rồi biến mất — màn hình đổi kích thước giữa hai
+  phase sẽ làm dịch chính đoạn chữ người học đang đọc.
 - Trước khi lật, vùng đáp án mang nhãn "đáp án đang ẩn". Một ô rỗng là **không
   có gì** với screen reader, còn "có đáp án ở đây và nó đang ẩn" là một sự thật
   về lượt học.
+- Dòng gợi ý của khung đổi sang `The answer is showing` khi thân màn báo đã lật
+  (§8.11) — gợi ý mặc định "Recall it, then show the answer" nói về một màn đã
+  đi qua rồi.
+
+Năm phase của màn này, và cột cuối là thứ dễ sai nhất:
+
+| Phase | Mặt trước | Mặt sau | Hành động | Ghi DB |
+|---|---|---|---|---|
+| đang đếm ngược | hiện | ẩn | `Show answer` | 0 |
+| tự đánh giá | hiện | hiện | `Đã quên` + `Nhớ được` | 0 |
+| đang ghi tự đánh giá | hiện | hiện | vô hiệu hoá | đúng 1 |
+| đang ghi hết giờ | hiện | **ẩn** | vô hiệu hoá | đúng 1, kèm `timeout` |
+| đọc lại sau hết giờ | hiện | hiện | `Next` | 0 |
+
+Ghi thất bại không thêm một phase mới cho tự đánh giá — nó quay lại đúng hai nút
+để bấm lại. Hết giờ thì có: BR-130 cấm quay về lựa chọn, nên chỗ đó là một dòng
+`danger` và một nút `Retry` gửi lại **cùng** kết quả sai ấy.
 
 **`fill`, sau khi chấm.** Ô nhập đóng lại, và kết cục hiện bằng `success` hoặc
 `danger`:
@@ -798,7 +825,7 @@ thuộc hoàn toàn vào việc nó nói bao nhiêu. Vì thế chúng là compon
 | `browse` | — | — | mỗi lần vuốt tới |
 | `match` | 500ms (ô) | 700ms (ô) | chỉ sau cặp cuối của bàn |
 | `guess` | 800ms | 1800ms | hết feedback |
-| `recall` | 1800ms (revealed) | 2200ms (hết giờ) | hết feedback |
+| `recall` | — | — | tự đánh giá: ngay sau commit · hết giờ: khi bấm `Next` |
 | `fill` | 800ms | 2200ms | hết feedback |
 | `self_assess` | — | — | ngay sau khi ghi |
 
@@ -807,8 +834,15 @@ thuộc hoàn toàn vào việc nó nói bao nhiêu. Vì thế chúng là compon
 nhiều chữ nhất — `fill` sai là một chính tả phải so bằng mắt với chính tả mình
 vừa gõ.
 
-**Không có nút Continue.** Mọi mode tự chuyển; thứ thay đổi là *khi nào*, không
-phải *ai bấm*. `match` là ngoại lệ duy nhất về chủ thể: bàn tự giữ nhịp của ô
+**`recall` không có ngân sách đọc nào, và đó là kết luận chứ không phải thiếu
+sót** (BR-160). Hai kết thúc của nó do hai người bấm giờ: tự đánh giá xảy ra
+*sau* khi người học đọc xong mặt sau, nên giữ thêm một nhịp là bắt họ chờ trên
+thứ họ đọc xong rồi; còn hết giờ đưa cho họ mặt sau của một thẻ vừa mất, và
+không ai chọn hộ được thời lượng ấy. 1800/2200ms trước đây đang đo một việc
+không ai làm.
+
+**Không có nút Continue — trừ `recall` sau khi hết giờ.** Mọi mode còn lại tự
+chuyển; thứ thay đổi là *khi nào*, không phải *ai bấm*. `match` là ngoại lệ duy nhất về chủ thể: bàn tự giữ nhịp của ô
 (`AppMatchTile.successFlash`/`wrongHold`) vì chỉ nó biết cặp vừa xong có phải cặp
 cuối hay không, nên `studyModeFeedback(match)` bằng 0 và bàn tự gọi chuyển.
 

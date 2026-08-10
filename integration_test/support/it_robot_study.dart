@@ -159,26 +159,45 @@ extension ItRobotStudyDriving on ItRobot {
     return true;
   }
 
-  /// `recall`: revealing is the outcome (BR-129), so one tap is the whole turn.
+  /// `recall`: reveal, then say which it was — **two taps, one answer**.
   ///
-  /// **A settled turn carries no control at all**, and that is the rule rather
-  /// than a missing button: the outcome is taken and cannot be changed, so the
-  /// screen says so and waits for the queue to hand over the next turn (BR-130).
-  /// A robot that tapped regardless failed here with "no Show answer on screen"
-  /// and named the wrong thing — the turn was answered, the next one had simply
-  /// not arrived. Waiting is the honest move; if the queue never moves,
-  /// [studyUntilFinished] still ends at its turn cap and says where it stuck.
+  /// **Revealing used to be the whole turn, and that was the bug** (BR-159).
+  /// Pressing *Show answer* wrote the correct action and pulled the next card,
+  /// so this robot could tap once and call the turn answered. It now opens a
+  /// question instead, and the robot answers it the way a learner who knew the
+  /// card would.
+  ///
+  /// The other ending needs no reveal and takes no verdict: a turn the clock
+  /// took has already written its wrong answer and is waiting on *Next*
+  /// (BR-130). Both endings are checked by what is on screen rather than by
+  /// timing, because on a slow device the clock can win a turn this robot meant
+  /// to answer.
   Future<bool> _answerRecall() async {
     if (find.byType(RecallTimerSectionWidget).evaluate().isEmpty) return false;
 
-    if (find.text(ItText.studyRevealAnswer).evaluate().isEmpty) {
-      await _harness.settle();
+    if (find.text(ItText.studyRevealAnswer).evaluate().isNotEmpty) {
+      await tapText(ItText.studyRevealAnswer);
+    }
+
+    if (find.text(ItText.studyActionRemembered).evaluate().isNotEmpty) {
+      await tapText(ItText.studyActionRemembered);
+      await _holdFeedback(StudyMode.recall);
 
       return true;
     }
 
-    await tapText(ItText.studyRevealAnswer);
-    await _holdFeedback(StudyMode.recall);
+    // Timed out. The answer is in; what is left is reading the back for as long
+    // as the learner wants, which for a robot is no time at all.
+    if (find.text(ItText.studyContinue).evaluate().isNotEmpty) {
+      await tapText(ItText.studyContinue);
+
+      return true;
+    }
+
+    // A write is still open, or the next turn has not arrived. Waiting is the
+    // honest move; if the queue never moves, [studyUntilFinished] still ends at
+    // its turn cap and says where it stuck.
+    await _harness.settle();
 
     return true;
   }

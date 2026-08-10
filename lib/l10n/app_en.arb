@@ -1540,9 +1540,17 @@
   "@studyGuessYourAnswer": {
     "description": "Announced for the option the learner picked when it was wrong. Red and a cross carry it visually (BR-126: the first choice is the only one)."
   },
-  "studyRecallLocked": "This turn is settled. The next round starts a fresh twenty seconds.",
-  "@studyRecallLocked": {
-    "description": "Shown once a recall turn has an outcome. BR-129 and BR-130: exactly one outcome per turn, and running out cannot be turned back into a right answer. Saying so is what stops the revealed answer reading as a screen that stopped responding."
+  "studyHintRecallAnswered": "The answer is showing",
+  "@studyHintRecallAnswered": {
+    "description": "Bottom hint line for recall once the back is uncovered — by the learner pressing Show answer, or by the clock. The mode's usual hint asks them to recall it first, which is a line about a screen that has moved on."
+  },
+  "studyRecallCountedForgotten": "counted as forgotten. The next round starts a fresh twenty seconds.",
+  "@studyRecallCountedForgotten": {
+    "description": "Second half of the line shown once a recall timeout has been written, after studyRecallTimedOut. BR-130: running out is wrong and cannot be turned back into a right answer, so the screen says which it was rather than leaving the learner to infer it from a card that moved on."
+  },
+  "studyRecallTimedOutUnsaved": "Time's up, and this answer could not be saved. Try again.",
+  "@studyRecallTimedOutUnsaved": {
+    "description": "Shown when the timeout write was refused. The outcome stays wrong (BR-130) — the only thing on offer is the same answer again, never the choice the clock already took away."
   },
   "studyRecallAnswerHidden": "Answer hidden",
   "@studyRecallAnswerHidden": {

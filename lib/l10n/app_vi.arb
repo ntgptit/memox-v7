@@ -1326,7 +1326,7 @@
   "@studyRevealAnswer": {
     "description": "Flips a `self_assess` card. `browse` has no such step (BR-112)."
   },
-  "studyActionForgotten": "Quên rồi",
+  "studyActionForgotten": "Đã quên",
   "@studyActionForgotten": {
     "description": "eight_box action. The label is display only; the stored value is canonical (BR-132)."
   },
@@ -1540,9 +1540,17 @@
   "@studyGuessYourAnswer": {
     "description": "Announced for the option the learner picked when it was wrong. Red and a cross carry it visually (BR-126: the first choice is the only one)."
   },
-  "studyRecallLocked": "Lượt này đã chốt. Vòng sau bắt đầu lại đủ hai mươi giây.",
-  "@studyRecallLocked": {
-    "description": "Shown once a recall turn has an outcome. BR-129 and BR-130: exactly one outcome per turn, and running out cannot be turned back into a right answer. Saying so is what stops the revealed answer reading as a screen that stopped responding."
+  "studyHintRecallAnswered": "Đáp án đang hiện",
+  "@studyHintRecallAnswered": {
+    "description": "Bottom hint line for recall once the back is uncovered — by the learner pressing Show answer, or by the clock. The mode's usual hint asks them to recall it first, which is a line about a screen that has moved on."
+  },
+  "studyRecallCountedForgotten": "tính là đã quên. Vòng sau bắt đầu lại đủ hai mươi giây.",
+  "@studyRecallCountedForgotten": {
+    "description": "Second half of the line shown once a recall timeout has been written, after studyRecallTimedOut. BR-130: running out is wrong and cannot be turned back into a right answer, so the screen says which it was rather than leaving the learner to infer it from a card that moved on."
+  },
+  "studyRecallTimedOutUnsaved": "Hết giờ, và kết quả này chưa lưu được. Hãy thử lại.",
+  "@studyRecallTimedOutUnsaved": {
+    "description": "Shown when the timeout write was refused. The outcome stays wrong (BR-130) — the only thing on offer is the same answer again, never the choice the clock already took away."
   },
   "studyRecallAnswerHidden": "Đáp án đang ẩn",
   "@studyRecallAnswerHidden": {
