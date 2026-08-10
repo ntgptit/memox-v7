@@ -7,7 +7,7 @@
 | **Scope** | Khung phiên học, và năm màn `browse` · `match` · `guess` · `recall` · `fill`. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), luồng (`use-cases.md`), giá trị token (`design_system/tokens/`) |
 | **Source of truth for** | Bố cục màn học · phán quyết cho tám điểm design lệch với BR |
 | **Depends on** | `document-conventions.md`, `business-rules.md` (BR-108…BR-154), `wbs-study.md` (M5.7…M5.20) |
-| **Updated by task** | Rà soát UI 5 stage — `guess` bỏ huy hiệu A–E (§5), `fill` làm lại vùng đáp án (§6), `browse` cân bằng hai mặt và đổi nhãn (§3) |
+| **Updated by task** | Rà soát UI 5 stage — `match` chia hai giọng cho hai cột (§4, §8.6), `guess` bỏ huy hiệu A–E (§5), `fill` làm lại vùng đáp án (§6), `browse` cân bằng hai mặt và đổi nhãn (§3) |
 | **Last updated** | 2026-08-10 |
 
 Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham chiếu bằng ID.
@@ -141,6 +141,25 @@ cả hai: `ROUND 1 · BOARD 1/2 · 5 PAIRS LEFT`. Số cặp đếm là của **
 header đã đo cả round rồi.
 
 **Lưới lấp đầy chiều cao, cho tới khi không lấp được** — xem §8.6.
+
+**Hai cột là hai giọng, đúng thứ bậc `browse` đã chốt ở §3.** BR-08 định nghĩa
+sẵn hai vế: front là **từ vựng tiếng Hàn**, tối đa 60 ký tự, thứ mắt quét; back
+là **nghĩa tiếng mẹ đẻ**, tối đa 240, thứ mắt đọc. Vậy nên:
+
+| cột | vai trò | kiểu chữ | số dòng |
+|---|---|---|---|
+| front (term) | quét | `titleLarge` @ `AppTypography.withWeight(w500)` | 2, rồi ellipsis |
+| back (meaning) | đọc | `bodyMedium` (14/w400) | 4, rồi ellipsis |
+
+Padding dọc `AppSpacing.sm` — bốn dòng nghĩa cần chiều cao, và chiều cao của ô
+là của lưới chứ không của chữ (§8.6).
+
+**Cả hai cột từng dùng một vai title in đậm, cắt ở hai dòng.** Nó đọc được suốt
+một vòng review vì fixture cho mọi thẻ một nghĩa hai chữ — ca không bao giờ
+xuống dòng. Khi fixture mang đúng nghĩa BR-08 cho phép thì bàn tự lộ: một câu
+giải thích in cùng giọng với từ nó đang giải thích, rồi cụt ở dòng thứ hai.
+`match_tile_widget_test.dart` khoá lại quyết định này mà không cần thẻ đó có
+mặt; `study_match_light.png` / `study_match_dark.png` là ảnh của bàn có nó.
 
 ## 5. Study · Guess (`guess_mode`)
 
@@ -580,7 +599,7 @@ Ba trạng thái ô theo handout, dịch sang token của dự án:
 | `mastery` | `AppSemanticColors.success` — `card_state_widget.dart` đã sơn `CardState.mastered` bằng nó, hai tên là một token |
 | nền matched `mastery @12%`, viền `@30%` | `Color.alphaBlend` trên `surfaceContainerLowest`, **không** vẽ trong suốt |
 | radius 12 · gap 8 · transition 200ms `cubic-bezier(0.2,0,0,1)` | `AppRadius.md` · `AppSpacing.sm` · `AppDurations.normal` + `AppDurations.standard` — trùng khít, không thêm token |
-| front 18/w700, back 14/w600 | `titleMedium` (16/w600) và `titleSmall` (14/w600) — thang chữ không có 18 |
+| front 18/w700, back 14/w600 | `titleLarge` @ `w500` và `bodyMedium` — xem §4 |
 | icon ✓ đứng **trước** chữ, gap 6 | đúng ảnh mẫu; gap = `AppSpacing.xs` |
 
 **Nền matched phải blend, không được vẽ trong suốt.** `color_source_rules_test`

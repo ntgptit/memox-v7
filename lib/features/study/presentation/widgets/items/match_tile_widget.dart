@@ -4,6 +4,7 @@ import '../../../../../core/theme/app_durations.dart';
 import '../../../../../core/theme/app_motion_policy.dart';
 import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 
@@ -72,8 +73,18 @@ class MatchTileWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skin = _TileSkin.of(context, state);
+    // **The board's two columns carry the same hierarchy `browse` carries**
+    // (BR-08): the front is the Korean term, capped at 60 characters and there
+    // to be scanned; the back is the meaning, up to 240, and there to be read.
+    // Both used a title role in bold, which put a four-line gloss in the same
+    // voice as the word it explains and then cut it at two lines.
     final style =
-        (isTerm ? context.texts.titleMedium : context.texts.titleSmall)
+        (isTerm
+                ? AppTypography.withWeight(
+                    context.texts.titleLarge!,
+                    FontWeight.w500,
+                  )
+                : context.texts.bodyMedium)
             ?.copyWith(color: skin.foreground);
     final radius = BorderRadius.circular(AppRadius.md);
     // **Only the transition is reduced, never the beat a state is held for.**
@@ -112,9 +123,12 @@ class MatchTileWidget extends StatelessWidget {
             onTap: _isTappable ? onTap : null,
             borderRadius: radius,
             child: Padding(
+              // Tighter at the ends than at the sides: a meaning that runs to
+              // four lines needs the height, and the horizontal inset is what
+              // keeps it off the tile's edge.
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.md,
-                vertical: AppSpacing.md,
+                vertical: AppSpacing.sm,
               ),
               child: Center(
                 child: AnimatedOpacity(
@@ -149,9 +163,11 @@ class MatchTileWidget extends StatelessWidget {
           text,
           style: style,
           textAlign: TextAlign.center,
-          // The row's height is the grid's to decide, so a long term gives way
-          // rather than pushing the board out of shape.
-          maxLines: 2,
+          // The row's height is the grid's to decide, so text gives way rather
+          // than pushing the board out of shape. A term has 60 characters to
+          // spend and fits in two lines; a meaning has 240 and needs four
+          // before an ellipsis is a fair summary of it.
+          maxLines: isTerm ? 2 : 4,
           overflow: TextOverflow.ellipsis,
         ),
       ),

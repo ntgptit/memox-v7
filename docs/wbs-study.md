@@ -1579,3 +1579,29 @@ hai vòng liền.
 vừa bị bác. Nhãn hiện tại không sai — nó gọi tên cột — nhưng `TERM`/`MEANING`
 nay lại đúng nghiệp vụ và nói được nhiều hơn. Chưa đổi lại vì chủ dự án chưa yêu
 cầu, và đổi nhãn lần thứ ba mà không có yêu cầu là churn.
+
+### Match — hai cột, hai giọng (ưu tiên `eight_box`)
+
+Cùng thứ bậc `browse` vừa chốt, áp cho ô trên bàn ghép. Ô front giữ vai quét —
+`titleLarge` @ `w500`, tối đa 2 dòng; ô back giữ vai đọc — `bodyMedium` (14/w400),
+tối đa 4 dòng rồi ellipsis. Padding dọc xuống `AppSpacing.sm` để bốn dòng ấy có
+chỗ. Lưới, năm cặp một bàn, thứ tự chọn term-trước-meaning, chấm điểm nhị phân,
+năm trạng thái ô, thanh tiến trình và `Semantics` **không đụng tới**; SM-2,
+scheduler, domain model và API công khai cũng vậy.
+
+**Vì sao trước đó không ai thấy.** Cả hai cột dùng chung `titleMedium`/`titleSmall`
+in đậm, và fixture cho mọi thẻ một nghĩa hai chữ — ca không bao giờ xuống dòng,
+nên bàn trông cân. Nó chỉ lộ khi fixture mang đúng nghĩa BR-08 cho phép: một câu
+giải thích in cùng giọng với từ nó giải thích, rồi cụt ở dòng thứ hai.
+
+**Fixture sai lần thứ hai, theo một kiểu khác.** `turnFor` hardcode
+`roundCardIds` là id của deck mặc định (`c1`…`c5`), nên bàn của deck Match
+(`m1`…`m5`) không phân giải được thẻ nào và render ra lưới rỗng. Ba assertion
+thêm ở vòng Browse — frame, chip, một mẩu nội dung — là thứ duy nhất bắt được;
+golden vẫn xanh vì ảnh của bàn rỗng cũng là một ảnh. `roundCardIds` nay lấy từ
+chính deck truyền vào.
+
+**Bằng chứng:** `match_tile_widget_test.dart` (4 test — vai chữ của từng cột, quan
+hệ term > meaning, ellipsis không tràn), `match_board_widget_test.dart` và
+`match_board_feedback_test.dart` giữ nguyên xanh, `study_match_light.png` /
+`study_match_dark.png` chụp lại ở 390×780.

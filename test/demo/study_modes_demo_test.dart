@@ -96,29 +96,59 @@ void main() {
     ...deck().skip(1),
   ];
 
-  StudyTurnModel turnFor(StudyMode mode, {required StudyCardModel first}) =>
-      StudyTurnModel(
-        item: StudyQueueItemEntity(
-          sessionId: 'session-1',
-          mode: mode,
-          round: 1,
-          cardId: first.id,
-          position: 0,
-          status: StudyQueueItemStatus.pending,
-          availableAt: 0,
-          answersInSession: 0,
-          remainingMs: null,
-          isRevealed: false,
-        ),
-        progress: const StudyStageProgressModel(
-          round: 1,
-          done: 2,
-          total: 5,
-          completedCardIds: <String>[],
-          roundCardIds: <String>['c1', 'c2', 'c3', 'c4', 'c5'],
-        ),
-        card: first,
-      );
+  /// `match`'s deck: Korean terms on the front, meanings on the back.
+  ///
+  /// **One meaning is deliberately long, and every front is deliberately
+  /// short.** BR-08 gives the front 60 characters and the back 240 because the
+  /// front is the prompt and the back is a gloss in two languages. A board of
+  /// two-word meanings is the case that never wraps — and the case that hid the
+  /// meaning column being drawn in the same bold voice as the term, then cut at
+  /// two lines.
+  List<StudyCardModel> matchDeck() => <StudyCardModel>[
+    card(
+      'm1',
+      front: '부끄러워하다',
+      back:
+          'Be shy / Ngượng ngùng (Động từ, thể hiện sự e ngại trong giao '
+          'tiếp)',
+    ),
+    card('m2', front: '연구자', back: 'Researcher / Nhà nghiên cứu'),
+    card('m3', front: '물', back: 'Water / Nước'),
+    card('m4', front: '책', back: 'Book / Sách'),
+    card('m5', front: '바다', back: 'Sea / Biển'),
+  ];
+
+  /// The turn a render opens on.
+  ///
+  /// **`roundCardIds` comes from the deck, never from a literal.** It was
+  /// hardcoded to the default deck's ids, so a mode with its own fixture dealt
+  /// a board of cards the session did not contain — `match` rendered an empty
+  /// grid and the assertion that caught it was the only thing that noticed.
+  StudyTurnModel turnFor(
+    StudyMode mode, {
+    required List<StudyCardModel> cards,
+  }) => StudyTurnModel(
+    item: StudyQueueItemEntity(
+      sessionId: 'session-1',
+      mode: mode,
+      round: 1,
+      cardId: cards.first.id,
+      position: 0,
+      status: StudyQueueItemStatus.pending,
+      availableAt: 0,
+      answersInSession: 0,
+      remainingMs: null,
+      isRevealed: false,
+    ),
+    progress: StudyStageProgressModel(
+      round: 1,
+      done: 2,
+      total: 5,
+      completedCardIds: const <String>[],
+      roundCardIds: <String>[for (final c in cards) c.id],
+    ),
+    card: cards.first,
+  );
 
   /// A string the mode is guaranteed to put on screen. `fill` asks about the
   /// card's example rather than its front, so one field cannot cover all five.
@@ -150,10 +180,14 @@ void main() {
       ('dark', Brightness.dark),
     ]) {
       testWidgets('study ${mode.name} — $label', (tester) async {
-        final cards = mode == StudyMode.browse ? browseDeck() : deck();
+        final cards = switch (mode) {
+          StudyMode.browse => browseDeck(),
+          StudyMode.match => matchDeck(),
+          _ => deck(),
+        };
         final repository = FakeStudyRepository(stageExhausted: false)
           ..cards = cards
-          ..nextTurn_ = turnFor(mode, first: cards.first);
+          ..nextTurn_ = turnFor(mode, cards: cards);
 
         await pumpReview(
           tester,
@@ -224,7 +258,7 @@ void main() {
       final cards = deck();
       final repository = FakeStudyRepository(stageExhausted: false)
         ..cards = cards
-        ..nextTurn_ = turnFor(StudyMode.fill, first: cards.first);
+        ..nextTurn_ = turnFor(StudyMode.fill, cards: cards);
 
       await pumpReview(
         tester,
@@ -256,7 +290,7 @@ void main() {
       final cards = deck();
       final repository = FakeStudyRepository(stageExhausted: false)
         ..cards = cards
-        ..nextTurn_ = turnFor(StudyMode.fill, first: cards.first);
+        ..nextTurn_ = turnFor(StudyMode.fill, cards: cards);
 
       await pumpReview(
         tester,
