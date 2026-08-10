@@ -804,8 +804,10 @@ có write nào bắt đầu cho tới khi widget nói. Khoá này dài đúng b�
 
 Sau khi commit thì **màu không khoá gì cả**: cặp vừa xử lý giữ 500/700ms của nó,
 còn người dùng ghép cặp tiếp theo ngay được, và chạm ô mới cắt màu đỏ sớm như
-trước. Câu cũ ở đây — *"một cặp đang ghi DB không đóng băng bàn"* — nói ngược:
-đúng lúc ghi mới là lúc bàn đóng, còn đúng lúc giữ màu thì bàn mở.
+trước.
+
+Hai nửa của contract, nói gọn: **transaction đang chạy thì bàn đóng; feedback sau
+commit thì bàn mở.**
 
 Bản ghi "20 transaction nhưng chỉ 4 lần chuyển bàn" (§8.8b) không đổi: khoá
 single-flight kéo dài đúng một transaction mỗi cặp, và BR-25 vẫn được giữ.

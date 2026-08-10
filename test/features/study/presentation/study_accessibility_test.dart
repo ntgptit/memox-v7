@@ -137,7 +137,7 @@ void main() {
             StudyCardFaceSectionWidget(
               turn: turnOf(),
               actions: actions,
-              onAction: (_) {},
+              onAction: (_) async => null,
               onContinue: () {},
               shouldShowBackImmediately: true,
             ),
@@ -214,7 +214,7 @@ void main() {
             StudyCardFaceSectionWidget(
               turn: turnOf(back: 'quả táo đỏ trên bàn ăn sáng nay'),
               actions: schedulerFor(SchedulerType.sm2)!.supportedActions,
-              onAction: (_) {},
+              onAction: (_) async => null,
               onContinue: () {},
               shouldShowBackImmediately: true,
             ),

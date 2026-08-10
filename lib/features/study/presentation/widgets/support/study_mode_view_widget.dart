@@ -157,9 +157,10 @@ Widget? studyModeView({
         turn: turn,
         viewedCard: state.viewedCard,
         // `browse` produces no action at all (BR-111), so it gets no buttons
-        // and one way forward.
+        // and one way forward — and therefore nothing to write, which is what
+        // the null receipt says.
         actions: const <StudyAction>[],
-        onAction: (_) {},
+        onAction: (_) async => null,
         onContinue: onContinue,
         shouldShowBackImmediately: true,
         // The front is the term and the back is its meaning (BR-08), so the
@@ -171,7 +172,8 @@ Widget? studyModeView({
     StudyMode.selfAssess => () => StudyCardFaceSectionWidget(
       turn: turn,
       actions: state.actions,
-      onAction: onAnswer,
+      onAction: onAnswer.call,
+      onFeedbackShown: onFeedbackShown,
       onContinue: onContinue,
       isLocked: state.isBusy,
     ),
