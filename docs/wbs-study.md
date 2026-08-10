@@ -1605,3 +1605,56 @@ chính deck truyền vào.
 hệ term > meaning, ellipsis không tràn), `match_board_widget_test.dart` và
 `match_board_feedback_test.dart` giữ nguyên xanh, `study_match_light.png` /
 `study_match_dark.png` chụp lại ở 390×780.
+
+### Match — ba ảnh trạng thái đè lên quyết định cột (ưu tiên `eight_box`)
+
+Vòng #266 ở ngay trên vẫn đứng như một bản ghi: nó là vòng tách hai giọng cho hai
+cột. Vòng này đè lên hai điểm của nó bằng ba ảnh trạng thái thật.
+
+**Thứ tự cột đảo: meaning trái, Korean phải.** Mắt đọc khối dài trước rồi quét
+cột ngắn để đối chiếu, nên khối sáu dòng thuộc về bên trái. Chỉ vị trí trình bày
+đổi — hai danh sách trong domain không bị đảo, không bị dựng lại — và **thao tác
+giữ nguyên: term tiếng Hàn vẫn phải chọn trước** (BR-118). Đây là chỗ dễ hỏng
+nhất của thay đổi này: hoán vị hai `Expanded` rất dễ mang theo cả handler, và kết
+quả trông không có gì sai.
+
+**Typography #266 vẫn lớn hơn ảnh, và bốn dòng vẫn cụt.** Term xuống
+`titleMedium` @ `w500`; meaning xuống `bodySmall` với sáu dòng. Chữ nhỏ hơn không
+hạ vai trò của nghĩa — chiều cao ô thuộc về lưới, nên cỡ chữ đổi lấy **sức
+chứa**: một nghĩa thật (hai ngôn ngữ, từ loại, ghi chú cách dùng) vừa sáu dòng
+trong đúng cái ô từng chứa bốn.
+
+**`minRowHeight` không còn là `minimumTouchTarget`.** Nó là 112, và mọi phần của
+nó do typography phía trên quyết định: `bodySmall` 12/16, sáu dòng, padding `sm`
+trên dưới — `6 × 16 + 2 × 8`. Ô vẫn là control và 112 vượt 48 rất xa; thứ đổi là
+ràng buộc quyết định.
+
+**Không đổi:** `MatchModeHandler`, shuffle, cách chia bàn, kết quả nhị phân của
+eight-box, BR-118, BR-156, `successFlash`/`wrongHold`/motion policy, năm trạng
+thái ô, cách giữ slot sau khi nội dung tan, Semantics và dấu ✓/✕, chrome của
+phiên, token màu. SM-2, scheduler, database, domain model và API công khai không
+nằm trong phạm vi.
+
+**Ba trạng thái trong ảnh trước đây không có ảnh nào trong repo.** `wrong` và
+`paired` chỉ tồn tại trong một nhịp rồi tự huỷ, nên **không** render nào settle
+được có thể chứa chúng, và bàn giữa round có khoảng trống là trạng thái thứ ba.
+`study_match_states_demo_test.dart` chụp cả ba, sáng và tối.
+
+Hai bẫy phải trả giá mới thấy, cả hai đều cho ra một bức ảnh trông có chủ đích:
+
+1. **Ô đã cleared vẫn giữ `Text` trong cây ở opacity 0.** Assert bằng
+   `findsNothing` là sai câu hỏi — slot ở lại chính là điều đang được kiểm.
+2. **Một `pump()` sau khi tap chụp đúng frame đầu của crossfade.** Nền là
+   `AnimatedContainer` chạy `AppDurations.normal` còn màu chữ đổi ngay trong
+   frame của tap, nên ảnh đầu tiên là chữ `onError` trắng trên nền còn gần như
+   trắng — đọc thành "ô mất chữ", không phải "ô báo sai". Phải pump hai lần: một
+   frame để animation khởi động, rồi `normal` để nó tới đích, và cả hai vẫn nằm
+   trong `wrongHold`/`successFlash` (320ms) nên nhịp chưa hết.
+
+**Bằng chứng:** `match_tile_widget_test.dart` (6 test — vai chữ và `fontVariations`
+của term, vai chữ của meaning, quan hệ term > meaning, ellipsis ở đúng sàn 112,
+padding đều, và ba component constant), `match_board_layout_test.dart` (7 test —
+thứ tự cột, meaning-first không tạo lượt, sai vẫn thuộc term, cleared không
+reflow, năm hàng lấp vừa, scale 2.0 chuyển sang cuộn, hai ô cùng hàng bằng chiều
+cao), `match_board_widget_test.dart` và `match_board_feedback_test.dart` giữ
+nguyên xanh, tám golden Match chụp lại ở 393×852.

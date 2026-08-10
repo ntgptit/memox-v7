@@ -98,24 +98,46 @@ void main() {
 
   /// `match`'s deck: Korean terms on the front, meanings on the back.
   ///
-  /// **One meaning is deliberately long, and every front is deliberately
-  /// short.** BR-08 gives the front 60 characters and the back 240 because the
-  /// front is the prompt and the back is a gloss in two languages. A board of
-  /// two-word meanings is the case that never wraps — and the case that hid the
-  /// meaning column being drawn in the same bold voice as the term, then cut at
-  /// two lines.
+  /// **Four long meanings and one short one, because density is the thing being
+  /// judged.** BR-08 gives the front 60 characters and the back 240 because the
+  /// front is the prompt and the back is a gloss in two languages plus the note
+  /// that says which to use. A board of two-word meanings is the case that never
+  /// wraps — and the case that hid the meaning column being drawn in the same
+  /// bold voice as the term, then cut at two lines. These are the shape of the
+  /// decks this app is actually for: five and six lines each, and one deliberate
+  /// short one so a sparse tile can be checked for centring in the same render.
   List<StudyCardModel> matchDeck() => <StudyCardModel>[
     card(
       'm1',
-      front: '부끄러워하다',
+      front: '애석하다',
       back:
-          'Be shy / Ngượng ngùng (Động từ, thể hiện sự e ngại trong giao '
-          'tiếp)',
+          'Regrettable, lamentable / Rất đáng tiếc, đáng thương tiếc (Tính từ, '
+          'sắc thái trang trọng; hay dùng trong tin tức, tai nạn hoặc mất mát '
+          'lớn)',
     ),
-    card('m2', front: '연구자', back: 'Researcher / Nhà nghiên cứu'),
-    card('m3', front: '물', back: 'Water / Nước'),
-    card('m4', front: '책', back: 'Book / Sách'),
-    card('m5', front: '바다', back: 'Sea / Biển'),
+    card(
+      'm2',
+      front: '허전하다',
+      back:
+          'Empty, hollow / Trống rỗng, hụt hẫng (Tính từ, dùng khi cảm thấy '
+          'mất mát hoặc thiếu vắng sau chia tay, kết thúc, hoặc khi một điều '
+          'quen thuộc không còn nữa)',
+    ),
+    card(
+      'm3',
+      front: '민망하다',
+      back:
+          'Embarrassed, awkward / Ngại, khó xử, bối rối vì tình huống (Tính '
+          'từ, dùng khi tình huống trở nên awkward hoặc khiến mình thấy ngại)',
+    ),
+    card(
+      'm4',
+      front: '초조하다',
+      back:
+          'Nervous, impatient / Sốt ruột, nóng ruột, bồn chồn (Tính từ, dùng '
+          'khi đang chờ đợi hoặc lo vì điều gì chưa xảy ra)',
+    ),
+    card('m5', front: '부끄러워하다', back: 'Be shy / Ngượng ngùng'),
   ];
 
   /// The turn a render opens on.
