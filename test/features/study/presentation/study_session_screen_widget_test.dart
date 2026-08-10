@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,6 +16,8 @@ import 'package:memox/features/study/domain/models/study_session_kind_model.dart
 import 'package:memox/features/study/domain/models/study_session_status_model.dart';
 import 'package:memox/features/study/domain/models/study_turn_model.dart';
 import 'package:memox/features/study/presentation/screens/study_session_screen.dart';
+import 'package:memox/features/study/presentation/widgets/support/study_swipe_deck_widget.dart';
+import 'package:memox/shared/widgets/mx_loading_state.dart';
 import 'package:memox/l10n/generated/app_localizations.dart';
 
 import '../domain/support/fake_study_repository.dart';
@@ -114,6 +118,43 @@ void main() {
     expect(find.text('2 / 5'), findsOneWidget);
     expect(find.text('Flip the card, then say how it went'), findsOneWidget);
     expect(find.text('사과'), findsOneWidget);
+  });
+
+  testWidgets('the card stays on screen while the next turn is fetched', (
+    tester,
+  ) async {
+    // **The layout shift `browse` showed on every step.** Advancing replaced
+    // the whole body with a spinner, so each swipe threw the card away, drew a
+    // loading state and drew the next card — two full relayouts between two
+    // cards that differ by one string. The turn is still in state for the whole
+    // of that write-then-fetch, so it has to stay on screen.
+    final repository = await pumpSession(
+      tester,
+      mode: StudyMode.browse,
+      kind: StudySessionKind.learning,
+    );
+
+    expect(find.text('사과'), findsOneWidget);
+
+    final gate = Completer<void>();
+    repository.advanceGate = gate;
+
+    await tester.drag(
+      find.byType(StudySwipeDeckWidget),
+      const Offset(-(kStudySwipeThreshold + 20), 0),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(
+      find.byType(MxLoadingState),
+      findsNothing,
+      reason: 'a turn is still in state, so there is nothing to wait for',
+    );
+    expect(find.text('사과'), findsOneWidget);
+
+    gate.complete();
+    await tester.pumpAndSettle();
   });
 
   testWidgets('closing ends the session rather than popping the route', (

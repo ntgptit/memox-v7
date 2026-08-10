@@ -9,6 +9,7 @@ import 'package:memox/features/study/domain/models/study_queue_item_status_model
 import 'package:memox/features/study/domain/models/study_session_kind_model.dart';
 import 'package:memox/features/study/domain/models/study_turn_model.dart';
 import 'package:memox/features/study/presentation/screens/study_session_screen.dart';
+import 'package:memox/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart';
 
 import '../features/study/domain/support/fake_study_repository.dart';
 import '../support/study_render.dart';
@@ -79,6 +80,25 @@ void main() {
     ),
   ];
 
+  /// `browse`'s deck, whose first card carries a front that wraps.
+  ///
+  /// **The realistic case, and the one a one-word fixture hid.** A front is not
+  /// a term: decks in this app hold "Be shy / Ngượng ngùng (Động từ, thể hiện
+  /// sự e ngại trong giao tiếp)" on it. Rendered at the prompt size that used
+  /// to be hardcoded here, three headline lines swallowed the card and left the
+  /// back in the corner of its own half — so the render that guards the
+  /// balance has to contain one.
+  List<StudyCardModel> browseDeck() => <StudyCardModel>[
+    card(
+      'b1',
+      front:
+          'Be shy / Ngượng ngùng (Động từ, thể hiện sự e ngại trong giao '
+          'tiếp)',
+      back: 'ngượng ngùng',
+    ),
+    ...deck().skip(1),
+  ];
+
   StudyTurnModel turnFor(StudyMode mode, {required StudyCardModel first}) =>
       StudyTurnModel(
         item: StudyQueueItemEntity(
@@ -103,6 +123,22 @@ void main() {
         card: first,
       );
 
+  /// A string the mode is guaranteed to put on screen. `fill` asks about the
+  /// card's example rather than its front, so one field cannot cover all five.
+  String contentOf(StudyMode mode, StudyCardModel card) =>
+      mode == StudyMode.fill ? card.example! : card.front;
+
+  /// The mode chip as the top bar draws it — uppercased at the join (#239).
+  String chipOf(StudyMode mode) => switch (mode) {
+    StudyMode.browse => 'BROWSE',
+    StudyMode.match => 'MATCH',
+    StudyMode.guess => 'GUESS',
+    StudyMode.recall => 'RECALL',
+    StudyMode.fill => 'FILL IN',
+    StudyMode.selfAssess => 'SELF ASSESS',
+    StudyMode.unknown => 'UNKNOWN',
+  };
+
   const stages = <StudyMode>[
     StudyMode.browse,
     StudyMode.match,
@@ -117,7 +153,7 @@ void main() {
       ('dark', Brightness.dark),
     ]) {
       testWidgets('study ${mode.name} — $label', (tester) async {
-        final cards = deck();
+        final cards = mode == StudyMode.browse ? browseDeck() : deck();
         final repository = FakeStudyRepository(stageExhausted: false)
           ..cards = cards
           ..nextTurn_ = turnFor(mode, first: cards.first);
@@ -130,17 +166,32 @@ void main() {
               repository,
               StudySessionScreen(
                 deckId: 'deck-1',
-                // **A reviewing session, because it runs exactly one mode.** A
-                // learning session walks the algorithm's whole sequence and
-                // opens on `browse` whatever `reviewMode` says — which is how
-                // the first pass of this file rendered five identical browse
-                // screens under five different names.
-                kind: StudySessionKind.reviewing,
-                reviewMode: mode,
+                // **A reviewing session runs exactly one mode — except for
+                // `browse`, which a reviewing session refuses outright.**
+                // BR-146 offers only the graded modes for review, so opening
+                // `browse` this way produced "Nothing to review yet" and the
+                // golden recorded an empty state under the name of a screen it
+                // never rendered. A learning session walks the algorithm's
+                // sequence and opens *on* `browse`, which is where the mode
+                // actually lives.
+                kind: mode == StudyMode.browse
+                    ? StudySessionKind.learning
+                    : StudySessionKind.reviewing,
+                reviewMode: mode == StudyMode.browse ? null : mode,
               ),
             ),
           ),
         );
+
+        // **The golden cannot be the only witness.** It recorded "Nothing to
+        // review yet" under the name `study_browse` for as long as the fixture
+        // opened the wrong session kind, and a picture of the wrong screen
+        // looks exactly as green as a picture of the right one. These three
+        // assertions are what a wrong screen cannot satisfy: the mode's own
+        // chip, the frame that carries it, and a piece of the card's content.
+        expect(find.byType(StudySessionFrameSectionWidget), findsOneWidget);
+        expect(find.text(chipOf(mode)), findsOneWidget);
+        expect(find.text(contentOf(mode, cards.first)), findsWidgets);
 
         await matchesReviewGolden('goldens/study_${mode.name}_$label.png');
       });

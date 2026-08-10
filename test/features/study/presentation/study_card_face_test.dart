@@ -57,6 +57,7 @@ void main() {
     WidgetTester tester, {
     required List<StudyAction> actions,
     bool shouldShowBackImmediately = false,
+    StudyFaceEmphasis emphasis = StudyFaceEmphasis.promptFirst,
     bool isLocked = false,
     void Function(StudyAction)? onAction,
     VoidCallback? onContinue,
@@ -69,6 +70,7 @@ void main() {
         onAction: onAction ?? (_) {},
         onContinue: onContinue ?? () {},
         shouldShowBackImmediately: shouldShowBackImmediately,
+        emphasis: emphasis,
         isLocked: isLocked,
       ),
       // **Not scrollable, because that is the production condition.** The card
@@ -95,6 +97,66 @@ void main() {
       expect(find.text('Show answer'), findsNothing);
       expect(find.text('Remembered'), findsNothing);
       expect(find.text('Next'), findsNothing);
+    });
+
+    testWidgets('the halves are labelled by column, not by content', (
+      tester,
+    ) async {
+      // `front` is not guaranteed to be a term and `back` is not guaranteed to
+      // be a meaning — a deck may hold the meaning on the front — so the old
+      // Term/Meaning pair mislabelled both halves of such a card. The label
+      // names the column it draws.
+      await pump(
+        tester,
+        actions: const <StudyAction>[],
+        shouldShowBackImmediately: true,
+        emphasis: StudyFaceEmphasis.peers,
+      );
+
+      expect(find.text('FRONT'), findsOneWidget);
+      expect(find.text('BACK'), findsOneWidget);
+      for (final stale in <String>['TERM', 'MEANING', 'KOREAN']) {
+        expect(find.text(stale), findsNothing);
+      }
+    });
+
+    testWidgets('peers give both faces the same typographic role (BR-112)', (
+      tester,
+    ) async {
+      // Both faces are on screen to be read and neither is the question, so
+      // neither may be sized as one. A front sized as a prompt takes three
+      // headline lines for a real gloss and swallows the card.
+      await pump(
+        tester,
+        actions: const <StudyAction>[],
+        shouldShowBackImmediately: true,
+        emphasis: StudyFaceEmphasis.peers,
+      );
+
+      final front = tester.widget<Text>(find.text('front-c1'));
+      final back = tester.widget<Text>(find.text('back-c1'));
+
+      expect(front.style, isNotNull);
+      expect(front.style?.fontSize, back.style?.fontSize);
+    });
+
+    testWidgets('promptFirst keeps the front larger than the back', (
+      tester,
+    ) async {
+      // The counterpart, and the reason the emphasis is a parameter rather
+      // than a second reading of `shouldShowBackImmediately`: `self_assess`
+      // asks the front as a question, so it must not lose its hierarchy when
+      // `browse` gives its own faces equal weight.
+      await pump(
+        tester,
+        actions: const <StudyAction>[StudyAction.remembered],
+        shouldShowBackImmediately: true,
+      );
+
+      final front = tester.widget<Text>(find.text('front-c1'));
+      final back = tester.widget<Text>(find.text('back-c1'));
+
+      expect(front.style?.fontSize, greaterThan(back.style!.fontSize!));
     });
 
     testWidgets('browse draws no control at all (BR-111, BR-155)', (

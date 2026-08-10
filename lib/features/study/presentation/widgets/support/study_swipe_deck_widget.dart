@@ -159,13 +159,22 @@ class _StudySwipeDeckWidgetState extends State<StudySwipeDeckWidget>
     // Back is offered only when there is somewhere to go, for the same reason a
     // disabled button would have been wrong: an action that does nothing is
     // worse than an action that is not there.
+    // **Locked means locked for both paths.** `isLocked` guarded the drag and
+    // not these, so while the previous step was still being written a reader
+    // could invoke Continue again — the one way through the mode that a screen
+    // reader has, and the one the gesture's own guard did not cover. Offered
+    // rather than disabled-and-present: an action that does nothing is worse
+    // than an action that is not there, which is the same reason Back appears
+    // only when there is somewhere to go.
     return Semantics(
       customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
-        CustomSemanticsAction(label: l10n.studyContinueAction):
-            widget.onForward,
-        if (widget.canGoBack)
-          CustomSemanticsAction(label: l10n.studyBrowsePreviousCard):
-              widget.onBack,
+        if (!widget.isLocked) ...<CustomSemanticsAction, VoidCallback>{
+          CustomSemanticsAction(label: l10n.studyContinueAction):
+              widget.onForward,
+          if (widget.canGoBack)
+            CustomSemanticsAction(label: l10n.studyBrowsePreviousCard):
+                widget.onBack,
+        },
       },
       child: _gestureLayer(),
     );

@@ -24,6 +24,25 @@ import '../support/study_labels_widget.dart';
 /// [actions] comes from the scheduler (BR-30). This widget never decides how
 /// many buttons there are — a hardcoded pair is wrong for every `sm2` deck and a
 /// hardcoded four is wrong for every `eight_box` one.
+/// How the two faces relate to each other, which is what decides their sizes.
+///
+/// **A named contract rather than a second reading of
+/// [StudyCardFaceSectionWidget.shouldShowBackImmediately].** The two happen to
+/// move together today — `browse` shows both at once and treats them as peers,
+/// `self_assess` reveals the back and treats the front as the prompt — but they
+/// are different questions, and a widget that inferred one from the other would
+/// silently pick a hierarchy the next mode never asked for.
+enum StudyFaceEmphasis {
+  /// Both faces are there to be read, and neither is the question. `browse`
+  /// (BR-112): the front and the back are two sides of one thing, so they take
+  /// the same typographic role and a long front cannot swallow the card.
+  peers,
+
+  /// The front is the prompt and the back is the answer it is checked against.
+  /// `self_assess`: the front is the largest thing on screen until the flip.
+  promptFirst,
+}
+
 class StudyCardFaceSectionWidget extends StatelessWidget {
   const StudyCardFaceSectionWidget({
     required this.turn,
@@ -32,6 +51,7 @@ class StudyCardFaceSectionWidget extends StatelessWidget {
     required this.onContinue,
     this.viewedCard,
     this.shouldShowBackImmediately = false,
+    this.emphasis = StudyFaceEmphasis.promptFirst,
     this.isLocked = false,
     super.key,
   });
@@ -57,6 +77,10 @@ class StudyCardFaceSectionWidget extends StatelessWidget {
   /// `browse` sets this; `self_assess` leaves it false and reveals on tap.
   final bool shouldShowBackImmediately;
 
+  /// Whether the two faces are peers or a prompt and its answer. See
+  /// [StudyFaceEmphasis].
+  final StudyFaceEmphasis emphasis;
+
   /// True while an answer is being written. The card **stays** visible and only
   /// the controls stop responding (BR-25).
   final bool isLocked;
@@ -69,6 +93,7 @@ class StudyCardFaceSectionWidget extends StatelessWidget {
     onContinue: onContinue,
     viewedCard: viewedCard,
     shouldShowBackImmediately: shouldShowBackImmediately,
+    emphasis: emphasis,
     isLocked: isLocked,
   );
 }
@@ -81,6 +106,7 @@ class _StudyCardFaceView extends StatefulWidget {
     required this.onContinue,
     required this.viewedCard,
     required this.shouldShowBackImmediately,
+    required this.emphasis,
     required this.isLocked,
   });
 
@@ -90,6 +116,7 @@ class _StudyCardFaceView extends StatefulWidget {
   final VoidCallback onContinue;
   final StudyCardModel? viewedCard;
   final bool shouldShowBackImmediately;
+  final StudyFaceEmphasis emphasis;
   final bool isLocked;
 
   @override
@@ -150,11 +177,11 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
               children: <Widget>[
                 Expanded(
                   child: _CardHalf(
-                    label: l10n.studyCardFaceTerm,
+                    label: l10n.studyCardFaceFront,
                     text: _card.front,
-                    // The token whose own doc calls it "the card prompt", and
-                    // this is that card: largest on screen (§3).
-                    style: texts.headlineMedium,
+                    style: widget.emphasis == StudyFaceEmphasis.peers
+                        ? texts.headlineSmall
+                        : texts.headlineMedium,
                     // **The tight end is the one facing the rule, so it is only
                     // tight when there is a rule to face.** Before the flip
                     // `self_assess` is a single half filling the card, and the
@@ -177,7 +204,7 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
                   ),
                   Expanded(
                     child: _CardHalf(
-                      label: l10n.studyCardFaceMeaning,
+                      label: l10n.studyCardFaceBack,
                       text: _card.back,
                       style: texts.headlineSmall,
                       padding: const EdgeInsets.only(

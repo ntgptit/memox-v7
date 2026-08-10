@@ -1508,13 +1508,13 @@
     },
     "description": "The match board's line of context. Board is a word BR-156 now owns, so the design's BOARD 1 OF 3 is back — §7.6 refused it only while no rule said how big a board was. The pairs counted are this board's, not the round's: the top bar already measures the round, and the fact worth saying here is that finishing these five is not finishing it. `2/2` rather than `2 of 2` because the long form fit on one line at 390 with two pixels to spare and then wrapped the moment the digit changed from 1 to 2 — a line whose shape depends on which board you are on."
   },
-  "studyCardFaceTerm": "Term",
-  "@studyCardFaceTerm": {
-    "description": "Label on the top half of a study card. The design says KOREAN; no deck or card carries a language, and naming one in the UI would invent a field. Term is what the column actually holds."
+  "studyCardFaceFront": "Front",
+  "@studyCardFaceFront": {
+    "description": "Label on the top half of a study card, over the card's front. Named for the column it shows, not for what a deck happens to put there: `front` is not guaranteed to be a term and `back` is not guaranteed to be a meaning — a deck may hold the meaning on the front and the term on the back, and the old Term/Meaning pair then labelled both halves wrongly."
   },
-  "studyCardFaceMeaning": "Meaning",
-  "@studyCardFaceMeaning": {
-    "description": "Label on the bottom half of a study card, over the back of the card."
+  "studyCardFaceBack": "Back",
+  "@studyCardFaceBack": {
+    "description": "Label on the bottom half of a study card, over the card's back. See studyCardFaceFront for why it names the column."
   },
   "studyMatchWrong": "Not a pair",
   "@studyMatchWrong": {
