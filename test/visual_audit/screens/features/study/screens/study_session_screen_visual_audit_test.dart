@@ -49,12 +49,12 @@ void main() {
     ),
     card: StudyCardModel(
       id: 'c1',
-      front: 'ephemeral',
-      back: 'short-lived',
+      front: '사과',
+      back: 'apple / quả táo',
       example: null,
       hint: null,
       pronunciation: null,
-      backFolded: 'short-lived',
+      backFolded: 'apple / quả táo',
     ),
   );
 
