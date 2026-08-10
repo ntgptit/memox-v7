@@ -2,6 +2,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/app_durations.dart';
+import 'package:memox/core/theme/app_semantic_colors.dart';
+import 'package:memox/core/theme/app_stroke.dart';
 import 'package:memox/features/study/domain/models/match_mode.dart';
 import 'package:memox/features/study/domain/models/study_turn_model.dart';
 import 'package:memox/features/study/presentation/widgets/items/match_tile_widget.dart';
@@ -51,9 +54,23 @@ void main() {
       await tester.tap(find.text('front-a'));
       await tester.pump();
       await tester.tap(find.text('back-a'));
-      await tester.pump();
+      await _settleColour(tester);
 
       expect(find.byIcon(Icons.check), findsNWidgets(2));
+
+      // **Both tiles say it on their edge, and neither says it with a fill.**
+      // Every answer touches two tiles, so a solid state doubles its own area
+      // — and a six-line meaning under a solid green stops reading as a
+      // sentence. The surface stays exactly what an idle tile has.
+      for (final label in <String>['front-a', 'back-a']) {
+        expect(_fill(tester, label), _idleFill(tester));
+        expect(_edge(tester, label).color, _semantic(tester).success);
+        expect(_edge(tester, label).width, AppStroke.input);
+        expect(
+          tester.widget<Text>(find.text(label)).style?.color,
+          _semantic(tester).success,
+        );
+      }
 
       await tester.pump(AppMatchTile.successFlash);
       await tester.pumpAndSettle();
@@ -83,10 +100,27 @@ void main() {
       expect(find.byIcon(Icons.close), findsNWidgets(2));
       expect(tester.getSemantics(find.text('front-a')).value, 'Not a pair');
 
+      await _settleColour(tester);
+      for (final label in <String>['front-a', 'back-b']) {
+        expect(_fill(tester, label), _idleFill(tester));
+        expect(_edge(tester, label).color, _semantic(tester).danger);
+        expect(_edge(tester, label).width, AppStroke.input);
+        expect(
+          tester.widget<Text>(find.text(label)).style?.color,
+          _semantic(tester).danger,
+        );
+      }
+
       await tester.pump(AppMatchTile.wrongHold);
       await tester.pumpAndSettle();
 
       expect(find.byIcon(Icons.close), findsNothing);
+
+      // Back to idle on the edge and the ink too, not just the mark.
+      for (final label in <String>['front-a', 'back-b']) {
+        expect(_edge(tester, label).color, _semantic(tester).borderControl);
+        expect(_edge(tester, label).width, AppStroke.hairline);
+      }
     });
 
     testWidgets('reaching for the next term ends the red early', (
@@ -103,19 +137,59 @@ void main() {
       expect(find.byIcon(Icons.close), findsNWidgets(2));
 
       await tester.tap(find.text('front-b'));
-      await tester.pump();
+      await _settleColour(tester);
 
       expect(find.byIcon(Icons.close), findsNothing);
 
       // And the tap was a real selection, not just a dismissal.
-      final label = tester.widget<Text>(find.text('front-b'));
-      final scheme = Theme.of(tester.element(find.text('front-b'))).colorScheme;
-      expect(label.style?.color, scheme.onPrimary);
+      expect(
+        tester.widget<Text>(find.text('front-b')).style?.color,
+        _semantic(tester).primaryAccent,
+      );
+      expect(_edge(tester, 'front-b').color, _semantic(tester).primaryAccent);
 
       await tester.pump(AppMatchTile.wrongHold);
     });
   });
 }
+
+/// Lets the tile's crossfade land, while its hold is still running.
+///
+/// One pump starts the `AnimatedContainer`; the second carries it the whole
+/// duration. Both fit inside `wrongHold` and `successFlash`, which are `slow`
+/// against the transition's `normal` — a single pump would read the previous
+/// state's colours and pass for the wrong reason.
+Future<void> _settleColour(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pump(AppDurations.normal);
+}
+
+AppSemanticColors _semantic(WidgetTester tester) => Theme.of(
+  tester.element(find.byType(MatchBoardSectionWidget)),
+).extension<AppSemanticColors>()!;
+
+/// What the tile showing [label] paints behind its text.
+Color? _fill(WidgetTester tester, String label) =>
+    (_tileOf(tester, label).decoration! as BoxDecoration).color;
+
+/// What that tile draws its edge with.
+BorderSide _edge(WidgetTester tester, String label) =>
+    (_tileOf(tester, label).decoration! as BoxDecoration).border!.top;
+
+/// The fill of a tile nobody has touched — read from the board rather than
+/// named, so this stays a *relation* between states and not a second copy of
+/// the token.
+Color? _idleFill(WidgetTester tester) => _fill(tester, 'front-c');
+
+AnimatedContainer _tileOf(WidgetTester tester, String label) =>
+    tester.widget<AnimatedContainer>(
+      find
+          .ancestor(
+            of: find.text(label),
+            matching: find.byType(AnimatedContainer),
+          )
+          .first,
+    );
 
 /// The fade a cleared slot takes its content out with.
 Finder _fadeOver(String label) => find

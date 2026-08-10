@@ -7,7 +7,7 @@
 | **Scope** | Khung phiên học, và năm màn `browse` · `match` · `guess` · `recall` · `fill`. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), luồng (`use-cases.md`), giá trị token (`design_system/tokens/`) |
 | **Source of truth for** | Bố cục màn học · phán quyết cho tám điểm design lệch với BR |
 | **Depends on** | `document-conventions.md`, `business-rules.md` (BR-108…BR-154), `wbs-study.md` (M5.7…M5.20) |
-| **Updated by task** | Rà soát UI 5 stage — `match` đổi meaning sang trái, hạ thang chữ và nâng sàn hàng lên 112 (§4, §8.6), `guess` bỏ huy hiệu A–E (§5), `fill` làm lại vùng đáp án (§6), `browse` cân bằng hai mặt và đổi nhãn (§3) |
+| **Updated by task** | Rà soát UI 5 stage — `match` chuyển feedback sang viền + chữ thay vì nền đặc (§4), đổi meaning sang trái, hạ thang chữ và nâng sàn hàng lên 112 (§4, §8.6), `guess` bỏ huy hiệu A–E (§5), `fill` làm lại vùng đáp án (§6), `browse` cân bằng hai mặt và đổi nhãn (§3) |
 | **Last updated** | 2026-08-10 |
 
 Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham chiếu bằng ID.
@@ -126,13 +126,37 @@ Lưới hai cột. **Một hàng là hai ô cùng chỉ số, không phải mộ
 là hai hoán vị độc lập (BR-127), nên hai ô cạnh nhau gần như không bao giờ thuộc
 cùng một thẻ. Năm trạng thái ô:
 
-| Trạng thái | Hình thức |
-|---|---|
-| chưa chọn | nền surface, viền mảnh |
-| đang chọn (vế trước) | nền primary đặc, chữ trắng |
-| vừa ghép đúng | nền xanh lá rất nhạt, chữ xanh lá, có ✓ — **một nhịp rồi tan** (§8.8) |
-| vừa ghép sai | nền `error`, có ✕ — một nhịp rồi về idle (§8.8) |
-| đã xong | ô rỗng, chỉ còn viền mờ (§8.8) |
+**Trạng thái đổi viền và chữ, không đổi nền.** Cả năm đều ngồi trên đúng
+`surfaceContainerLowest` của ô idle; chỉ `cleared` là ngoại lệ và nó không vẽ
+nền nào cả.
+
+| Trạng thái | Nền | Viền | Độ dày | Chữ / icon |
+|---|---|---|---|---|
+| chưa chọn | `surfaceContainerLowest` | `borderControl` | `AppStroke.hairline` | `onSurface` |
+| đang chọn (vế trước) | *không đổi* | `primaryAccent` | `AppStroke.input` | `primaryAccent` |
+| vừa ghép đúng | *không đổi* | `success` | `AppStroke.input` | `success` + ✓ — **một nhịp rồi tan** (§8.8) |
+| vừa ghép sai | *không đổi* | `danger` | `AppStroke.input` | `danger` + ✕ — một nhịp rồi về idle (§8.8) |
+| đã xong | **không vẽ** | viền cleared mờ | `AppStroke.hairline` | nội dung tan (§8.8) |
+
+**Tô kín ô là thứ làm bàn rối.** Mỗi lượt chạm **hai** ô, nên một trạng thái đặc
+tự nhân đôi diện tích của nó; trên bàn mười slot đó là một phần năm màn hình đổi
+màu cùng lúc, và một nghĩa sáu dòng dưới nền `error` đặc thôi đọc như một câu và
+thành một panel cảnh báo. Thông tin chưa bao giờ nằm ở diện tích — nó nằm ở hue,
+ở dấu ✓/✕ và ở `Semantics` value, cả ba thứ một đường viền 1.5px chở đủ y hệt
+trong khi bàn đứng yên.
+
+`selected` dùng `primaryAccent` chứ không phải `primary`: nay nó là **chữ trên
+surface**, mà `primary` cố ý được giữ dưới headline của thẻ để một CTA đặc không
+lấn — đọc 3.33:1 dạng chữ trần trên nền tối. `danger` và `success` giữ nguyên
+token cũ.
+
+**Ripple của `InkWell` giữ nguyên** — nó là phản hồi cho *thao tác chạm*, không
+phải trạng thái. Nhưng ripple là `primary @ pressed` phủ cả ô và `InkRipple` mờ
+đi trong ~375ms, dài hơn `wrongHold`/`successFlash` (320ms): nên trên máy thật
+**vẫn có một mảng tím nhạt phủ ô trong suốt nhịp giữ trạng thái**, và ba golden
+transient chụp đúng khoảnh khắc đó. Ở dark gần như không thấy; ở light thì thấy.
+Đây là ripple, không phải fill của trạng thái — nếu sau này muốn bàn yên hơn nữa
+thì đó là quyết định về ripple, và là một task riêng.
 
 Ghép xong thì **nội dung biến mất, ô ở lại**: slot vẫn chiếm đúng chỗ cũ với
 một viền mờ. Xoá ô khỏi bàn — như bản M5.4b từng làm — làm mọi ô bên dưới dịch
@@ -624,16 +648,19 @@ Ba trạng thái ô theo handout, dịch sang token của dự án:
 | handout | dự án |
 |---|---|
 | `mastery` | `AppSemanticColors.success` — `card_state_widget.dart` đã sơn `CardState.mastered` bằng nó, hai tên là một token |
-| nền matched `mastery @12%`, viền `@30%` | `Color.alphaBlend` trên `surfaceContainerLowest`, **không** vẽ trong suốt |
+| nền matched `mastery @12%`, viền `@30%` | **không làm theo** — trạng thái chỉ đổi viền và chữ, nền giữ nguyên (§4). `mastery @12%` từng được dựng bằng `Color.alphaBlend` và đã gỡ cùng `pairedFillAlpha`/`pairedOutlineAlpha` |
 | radius 12 · gap 8 · transition 200ms `cubic-bezier(0.2,0,0,1)` | `AppRadius.md` · `AppSpacing.sm` · `AppDurations.normal` + `AppDurations.standard` — trùng khít, không thêm token |
 | front 18/w700, back 14/w600 | `titleMedium` @ `w500` và `bodySmall` — xem §4 |
 | icon ✓ đứng **trước** chữ, gap 6 | đúng ảnh mẫu; gap = `AppSpacing.xs` |
 
-**Nền matched phải blend, không được vẽ trong suốt.** `color_source_rules_test`
-R7 cấm fill/border translucent: nó composite với thứ đằng sau lúc paint, nên một
-token ra hai giá trị trên hai mặt nền. `Color.alphaBlend` chốt màu lúc build,
-trên đúng mặt nền ô đang nằm. Đây cũng là lý do bản M5.19 từng **từ chối** nền
-xanh nhạt và ghi "không có token" — có cách, chỉ là không phải cách trong suốt.
+**Nền matched nay không tồn tại, và lập luận cũ vẫn cần giữ.** Khi còn vẽ nền
+`mastery @12%` thì nó **phải blend, không được trong suốt**:
+`color_source_rules_test` R7 cấm fill/border translucent vì nó composite với thứ
+đằng sau lúc paint, nên một token ra hai giá trị trên hai mặt nền. Ghi lại ở đây
+vì `cleared` vẫn dùng đúng kỹ thuật đó cho viền mờ của nó, và vì bản M5.19 từng
+**từ chối** nền xanh nhạt với lý do "không có token" — có cách, chỉ là không
+phải cách trong suốt. Cái bị bác bỏ ở vòng này là *diện tích*, không phải kỹ
+thuật.
 
 ### 8.7 Ba điểm của handout không làm theo, và vì sao
 

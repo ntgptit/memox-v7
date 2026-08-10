@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/theme/app_durations.dart';
+import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/core/theme/app_stroke.dart';
 import 'package:memox/features/study/presentation/widgets/items/match_tile_widget.dart';
 
 import 'support/study_widget_harness.dart';
@@ -29,10 +32,12 @@ void main() {
     required String text,
     required bool isTerm,
     double? height,
+    MatchTileState state = MatchTileState.idle,
+    Brightness brightness = Brightness.light,
   }) async {
     final tile = MatchTileWidget(
       text: text,
-      state: MatchTileState.idle,
+      state: state,
       onTap: () {},
       isTerm: isTerm,
     );
@@ -40,9 +45,27 @@ void main() {
     await tester.pumpWidget(
       wrapForTest(
         height == null ? tile : SizedBox(height: height, child: tile),
+        brightness: brightness,
       ),
     );
+    // Past the `AnimatedContainer`'s whole duration: its first frame still
+    // holds the previous state's colours, and a skin assertion that reads it
+    // passes for the wrong reason.
+    await tester.pump();
+    await tester.pump(AppDurations.normal);
   }
+
+  BoxDecoration skinOf(WidgetTester tester) =>
+      tester
+              .widget<AnimatedContainer>(find.byType(AnimatedContainer).first)
+              .decoration!
+          as BoxDecoration;
+
+  AppSemanticColors semanticOf(WidgetTester tester) => Theme.of(
+    tester.element(find.byType(MatchTileWidget)),
+  ).extension<AppSemanticColors>()!;
+
+  Color? fillFor(WidgetTester tester) => skinOf(tester).color;
 
   testWidgets('a term is the scanned voice: titleMedium, medium, two lines', (
     tester,
@@ -123,6 +146,157 @@ void main() {
         vertical: AppSpacing.sm,
       ),
     );
+  });
+
+  group('a state changes the edge and the ink, never the surface', () {
+    // **The contract of this round, stated as a relation.** Selected, wrong and
+    // paired used to fill the tile — `primary`, `error`, a `success` tint — and
+    // every answer touches two tiles, so on a ten-slot board a fifth of the
+    // screen changed colour at once and a six-line meaning turned into a
+    // warning panel. The hue, the mark and the `Semantics` value carry the
+    // information; the area never did.
+    for (final (label, state) in <(String, MatchTileState)>[
+      ('selected', MatchTileState.selected),
+      ('wrong', MatchTileState.wrong),
+      ('paired', MatchTileState.paired),
+    ]) {
+      testWidgets('$label sits on the same surface as idle', (tester) async {
+        await pumpTile(tester, text: term, isTerm: true);
+        final idle = fillFor(tester);
+
+        await pumpTile(tester, text: term, isTerm: true, state: state);
+
+        expect(fillFor(tester), idle);
+        expect(fillFor(tester), isNotNull);
+      });
+
+      testWidgets('$label paints no role colour behind its text', (
+        tester,
+      ) async {
+        await pumpTile(tester, text: term, isTerm: true, state: state);
+
+        final scheme = Theme.of(
+          tester.element(find.byType(MatchTileWidget)),
+        ).colorScheme;
+        final semantic = semanticOf(tester);
+
+        expect(fillFor(tester), isNot(scheme.primary));
+        expect(fillFor(tester), isNot(scheme.error));
+        expect(fillFor(tester), isNot(semantic.success));
+        expect(fillFor(tester), isNot(semantic.danger));
+        expect(fillFor(tester), isNot(semantic.primaryAccent));
+      });
+    }
+
+    testWidgets('idle is a hairline in the control border', (tester) async {
+      await pumpTile(tester, text: term, isTerm: true);
+
+      final semantic = semanticOf(tester);
+      expect(skinOf(tester).border!.top.color, semantic.borderControl);
+      expect(skinOf(tester).border!.top.width, AppStroke.hairline);
+      expect(
+        textOf(tester, term).style?.color,
+        Theme.of(
+          tester.element(find.byType(MatchTileWidget)),
+        ).colorScheme.onSurface,
+      );
+    });
+
+    testWidgets('selected is primaryAccent on the edge and the label', (
+      tester,
+    ) async {
+      // `primaryAccent`, not `primary`: this is a label on a surface now, and
+      // `primary` is deliberately held below the card's headline so a filled
+      // CTA never outshines it — 3.33:1 as bare text on the dark page.
+      await pumpTile(
+        tester,
+        text: term,
+        isTerm: true,
+        state: MatchTileState.selected,
+      );
+
+      final accent = semanticOf(tester).primaryAccent;
+      expect(skinOf(tester).border!.top.color, accent);
+      expect(skinOf(tester).border!.top.width, AppStroke.input);
+      expect(textOf(tester, term).style?.color, accent);
+      expect(find.byType(Icon), findsNothing);
+    });
+
+    testWidgets('wrong is danger on the edge, the label and the ✕', (
+      tester,
+    ) async {
+      await pumpTile(
+        tester,
+        text: term,
+        isTerm: true,
+        state: MatchTileState.wrong,
+      );
+
+      final danger = semanticOf(tester).danger;
+      expect(skinOf(tester).border!.top.color, danger);
+      expect(skinOf(tester).border!.top.width, AppStroke.input);
+      expect(textOf(tester, term).style?.color, danger);
+      expect(tester.widget<Icon>(find.byIcon(Icons.close)).color, danger);
+    });
+
+    testWidgets('paired is success on the edge, the label and the ✓', (
+      tester,
+    ) async {
+      await pumpTile(
+        tester,
+        text: term,
+        isTerm: true,
+        state: MatchTileState.paired,
+      );
+
+      final success = semanticOf(tester).success;
+      expect(skinOf(tester).border!.top.color, success);
+      expect(skinOf(tester).border!.top.width, AppStroke.input);
+      expect(textOf(tester, term).style?.color, success);
+      expect(tester.widget<Icon>(find.byIcon(Icons.check)).color, success);
+    });
+
+    testWidgets('cleared paints nothing at all', (tester) async {
+      // Still the one exception, and the reason is unchanged: nothing painted
+      // is a truer hole than a colour that happens to match the page.
+      await pumpTile(
+        tester,
+        text: term,
+        isTerm: true,
+        state: MatchTileState.cleared,
+      );
+
+      expect(fillFor(tester), isNull);
+      expect(skinOf(tester).border!.top.width, AppStroke.hairline);
+    });
+
+    testWidgets('dark mode makes the same three choices', (tester) async {
+      // The states are tokens, not values, so dark needs no second decision —
+      // but the fill relation is the thing most likely to be broken by a
+      // brightness-specific tweak, so it is checked in both.
+      await pumpTile(
+        tester,
+        text: term,
+        isTerm: true,
+        brightness: Brightness.dark,
+      );
+      final idle = fillFor(tester);
+
+      for (final state in <MatchTileState>[
+        MatchTileState.selected,
+        MatchTileState.wrong,
+        MatchTileState.paired,
+      ]) {
+        await pumpTile(
+          tester,
+          text: term,
+          isTerm: true,
+          state: state,
+          brightness: Brightness.dark,
+        );
+        expect(fillFor(tester), idle, reason: '$state changed the surface');
+      }
+    });
   });
 
   test('the row floor is what the typography above it implies', () {

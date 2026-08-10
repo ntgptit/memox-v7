@@ -1658,3 +1658,58 @@ thứ tự cột, meaning-first không tạo lượt, sai vẫn thuộc term, cl
 reflow, năm hàng lấp vừa, scale 2.0 chuyển sang cuộn, hai ô cùng hàng bằng chiều
 cao), `match_board_widget_test.dart` và `match_board_feedback_test.dart` giữ
 nguyên xanh, tám golden Match chụp lại ở 393×852.
+
+### Match — trạng thái là viền và chữ, không phải nền
+
+Ba ảnh nữa từ chủ dự án, cùng một nhận xét: board chớp quá mạnh. `selected` phủ
+kín ô bằng `primary`, `wrong` phủ kín **hai** ô bằng `danger`, `paired` phủ nền
+xanh lên hai ô.
+
+**Nguyên nhân là diện tích, không phải duration.** Mỗi lượt chạm hai ô, nên một
+trạng thái đặc tự nhân đôi diện tích của nó; trên bàn mười slot đó là một phần
+năm màn hình đổi màu cùng lúc. Và vì meaning nay dài tới sáu dòng, một nền
+`error` đặc biến cả đoạn văn thành một panel cảnh báo — một lượt ghép sai bình
+thường đọc thành lỗi hệ thống. `wrongHold`/`successFlash` **không** bị rút ngắn:
+nhịp giữ là feedback, không phải thứ gây chói.
+
+**Skin mới:** cả năm trạng thái ngồi trên đúng `surfaceContainerLowest` của idle;
+chỉ viền, chữ và icon đổi. `selected` → `primaryAccent`, `wrong` → `danger`,
+`paired` → `success`, độ dày lên `AppStroke.input` (1.5) từ `hairline` (1).
+`cleared` giữ ngoại lệ duy nhất: `background: null`, vì nó phải đọc như một
+**lỗ** chứ không phải một ô trống.
+
+`primaryAccent` chứ không phải `primary`, và đây là điểm dễ làm sai: `primary`
+cố ý được giữ dưới headline của thẻ để một CTA đặc không lấn, nên dạng **chữ
+trần** nó đọc 3.33:1 trên nền tối. Ô nay không còn nền primary, nên chữ là thứ
+phải đọc được.
+
+Gỡ `AppMatchTile.pairedFillAlpha` và `pairedOutlineAlpha` — không còn caller.
+`clearedOutlineAlpha` ở lại vì viền của `cleared` vẫn blend.
+
+**Ripple giữ nguyên, và nó vẫn là một mảng màu — đã đo, đã ghi.** Ripple là
+`primary @ pressed` phủ cả ô; `InkRipple` mờ đi trong ~375ms, dài hơn hold
+320ms. Nghĩa là trên máy thật vẫn có một mảng tím nhạt phủ ô **trong suốt** nhịp
+giữ trạng thái, và ba golden transient chụp đúng khoảnh khắc đó — thấy rõ ở
+light, gần như không thấy ở dark. Đó là phản hồi cho thao tác chạm chứ không
+phải fill của trạng thái, nên vòng này không đụng; nếu muốn bàn yên hơn nữa thì
+đó là một quyết định riêng về ripple.
+
+**Không đổi:** meaning trái / term phải, thứ tự chọn, BR-118, hai ô cùng báo sai
+rồi tự reset, hai ô cùng báo đúng rồi nội dung tan, slot ở lại không reflow,
+✓/✕ và Semantics, chạm term kế tiếp vẫn kết thúc red sớm, typography, padding,
+maxLines, `minRowHeight`, eight-box mapping, SM-2, scheduler, repository,
+database.
+
+**Bằng chứng:** `match_tile_widget_test.dart` +12 test (quan hệ
+`background(selected|wrong|paired) == background(idle)` là contract chính, cộng
+kiểm không state nào có nền bằng `primary`/`error`/`success`/`danger`, skin từng
+state, `cleared` không vẽ nền, và cả ba quan hệ lặp lại ở dark);
+`match_board_widget_test.dart` đổi "a selected term is filled" → "is outlined";
+`match_board_feedback_test.dart` mở rộng cả hai kịch bản — nền vẫn là idle, viền
+đúng token, và sau `wrongHold` viền/chữ quay về `borderControl`/hairline. Tám
+golden Match chụp lại.
+
+Một bẫy nữa: `matchesSemantics` khẳng định **cả node**, nên nó đỏ vì những flag
+không liên quan mà ô mang hợp lệ. Đọc `Semantics.properties.selected` từ widget,
+và phải lọc theo property — `InkWell` với `Material` bọc text bằng node riêng,
+node gần nhất không phải của ô.
