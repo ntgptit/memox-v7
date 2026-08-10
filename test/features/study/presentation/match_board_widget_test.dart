@@ -6,7 +6,9 @@ import 'package:memox/features/study/domain/models/match_mode.dart';
 import 'package:memox/features/study/domain/models/study_turn_model.dart';
 import 'package:memox/features/study/presentation/widgets/sections/match_board_section_widget.dart';
 
+import 'package:memox/core/theme/app_durations.dart';
 import 'package:memox/core/theme/app_semantic_colors.dart';
+import 'package:memox/core/theme/app_stroke.dart';
 
 import 'support/study_widget_harness.dart';
 
@@ -142,7 +144,7 @@ void main() {
       expect(attempts, <String>['a']);
     });
 
-    testWidgets('a selected term is filled, and says so', (tester) async {
+    testWidgets('a selected term is outlined, and says so', (tester) async {
       await tester.pumpWidget(
         wrapForTest(
           MatchBoardSectionWidget(
@@ -153,14 +155,19 @@ void main() {
       );
 
       await tester.tap(find.text('front-a'));
+      // Far enough for the tile's `AnimatedContainer` to reach its target: one
+      // frame to start the transition, then its whole duration.
       await tester.pump();
+      await tester.pump(AppDurations.normal);
 
-      final scheme = Theme.of(tester.element(find.text('front-a'))).colorScheme;
+      final theme = Theme.of(tester.element(find.text('front-a')));
+      final accent = theme.extension<AppSemanticColors>()!.primaryAccent;
       final label = tester.widget<Text>(find.text('front-a'));
 
-      // From `ColorScheme`, so the pair keeps its contrast in both themes
-      // rather than being two values written into this widget.
-      expect(label.style?.color, scheme.onPrimary);
+      // `primaryAccent`, not `primary`: this is a label on a surface now, and
+      // `primary` is deliberately held below the card's headline — 3.33:1 as
+      // bare text on the dark page.
+      expect(label.style?.color, accent);
 
       // The surface is painted by the tile's own `AnimatedContainer`, not by
       // the `Material` — the `Material` is transparent and exists for the
@@ -173,7 +180,33 @@ void main() {
             )
             .first,
       );
-      expect((tile.decoration! as BoxDecoration).color, scheme.primary);
+      final decoration = tile.decoration! as BoxDecoration;
+
+      // **The fill does not move, and that is the point.** A selected tile used
+      // to be a solid block of `primary`; on a ten-slot board that is a fifth
+      // of the screen changing at once, and the answer was never in the area.
+      expect(decoration.color, theme.colorScheme.surfaceContainerLowest);
+      expect(decoration.border!.top.color, accent);
+      expect(decoration.border!.top.width, AppStroke.input);
+
+      // Read from the widget rather than the compiled node: `matchesSemantics`
+      // asserts the *whole* node, so it fails on every unrelated flag the tile
+      // legitimately carries.
+      // From the tile's own `Semantics`, picked by the property it sets:
+      // `InkWell` and `Material` wrap the text in nodes of their own, and the
+      // closest one is not the tile's.
+      expect(
+        tester
+            .widgetList<Semantics>(
+              find.ancestor(
+                of: find.text('front-a'),
+                matching: find.byType(Semantics),
+              ),
+            )
+            .map((widget) => widget.properties.selected)
+            .whereType<bool>(),
+        <bool>[true],
+      );
     });
 
     testWidgets('the ticks survive a rebuild of the same deal', (tester) async {

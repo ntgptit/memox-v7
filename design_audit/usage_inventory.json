@@ -1,18 +1,18 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
   "scannedFiles": 301,
-  "totalSites": 363,
+  "totalSites": 361,
   "byElementKind": {
-    "other": 279,
+    "other": 278,
     "background": 13,
     "shadow": 1,
-    "border": 14,
+    "border": 13,
     "text": 44,
     "icon": 12
   },
   "bySourceKind": {
     "shared-constant": 143,
-    "blend-source": 12,
+    "blend-source": 10,
     "Colors-material": 5,
     "hardcoded-literal": 97,
     "opacity-modified-token": 11,
@@ -3508,29 +3508,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/items/match_tile_widget.dart",
-      "line": 227,
-      "widget_context": "_TileSkin",
-      "element_kind": "other",
-      "source_kind": "blend-source",
-      "expression": "semantic.success.withValues(alpha: AppMatchTile.pairedFillAlpha)",
-      "token": "semantic.success",
-      "resolved_value_light": "#10795C",
-      "resolved_value_dark": "#4FC79B"
-    },
-    {
-      "file": "lib/features/study/presentation/widgets/items/match_tile_widget.dart",
-      "line": 231,
-      "widget_context": "_TileSkin",
-      "element_kind": "border",
-      "source_kind": "blend-source",
-      "expression": "semantic.success.withValues(alpha: AppMatchTile.pairedOutlineAlpha)",
-      "token": "semantic.success",
-      "resolved_value_light": "#10795C",
-      "resolved_value_dark": "#4FC79B"
-    },
-    {
-      "file": "lib/features/study/presentation/widgets/items/match_tile_widget.dart",
-      "line": 249,
+      "line": 255,
       "widget_context": "_TileSkin",
       "element_kind": "border",
       "source_kind": "blend-source",

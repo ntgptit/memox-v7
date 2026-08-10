@@ -4,6 +4,7 @@ import '../../../../../core/theme/app_durations.dart';
 import '../../../../../core/theme/app_motion_policy.dart';
 import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/app_stroke.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -31,21 +32,29 @@ enum MatchTileState {
 
 /// One tile, in whichever of the five states it is.
 ///
-/// **Colours come from `ColorScheme` and `AppSemanticColors`, never from this
-/// file.** Selected is `primary` on `onPrimary` and wrong is `error` on
-/// `onError` — two pairs Material keeps contrasting in both themes, and `error`
-/// is this app's `danger` rather than a second red (`app_theme.dart`). Paired is
-/// `success`, and only because it means exactly what `success` means: this
-/// answer was right. It is not the mode's colour and not decoration (§7.8). The
-/// handout calls that role `mastery`; this app already spends `success` on it —
-/// `card_state_widget.dart` paints `CardState.mastered` with it — so the two
-/// names are one token.
+/// **A state changes the edge and the ink. It never changes the surface.**
+/// Selected, wrong and paired all sit on the same `surfaceContainerLowest` an
+/// idle tile sits on, and say what they are with a heavier outline, a coloured
+/// label and — for the two results — a mark.
 ///
-/// **The tints are blended, not painted translucent.** A `BorderSide` or a fill
-/// at 12% composites against whatever is behind it at paint time, so one token
-/// renders as two values over two surfaces; `color_source_rules_test.dart` R7
-/// fails it. `Color.alphaBlend` resolves the same colour at build time against
-/// the surface the tile actually sits on.
+/// **Filling the tile was the thing that made the board unreadable.** Every
+/// answer touches *two* tiles, so a solid state doubled its own area; on a
+/// ten-slot board that is a fifth of the screen changing colour at once, and a
+/// six-line meaning under a solid `error` stops being a sentence and becomes a
+/// warning panel. The information was never in the area — it is in the hue, the
+/// mark and the `Semantics` value, all three of which a 1.5px edge carries
+/// exactly as well while the board stays still.
+///
+/// **Colours come from `ColorScheme` and `AppSemanticColors`, never from this
+/// file.** Selected is `primaryAccent` rather than `primary`: it is the variant
+/// this app keeps legible *as a label on a surface*, which is what the tile now
+/// needs — `primary` is held below the card's headline so a filled CTA never
+/// outshines it, and reads 3.33:1 as bare text on the dark page. Wrong is
+/// `danger`, never a second red. Paired is `success`, and only because it means
+/// exactly what `success` means: this answer was right. It is not the mode's
+/// colour and not decoration (§7.8). The handout calls that role `mastery`; this
+/// app already spends `success` on it — `card_state_widget.dart` paints
+/// `CardState.mastered` with it — so the two names are one token.
 ///
 /// **Neither result is marked by colour alone.** `paired` carries a tick and
 /// `wrong` a cross, and both carry a `Semantics` value — a board whose only
@@ -120,7 +129,7 @@ class MatchTileWidget extends StatelessWidget {
         decoration: BoxDecoration(
           color: skin.background,
           borderRadius: radius,
-          border: Border.all(color: skin.outline),
+          border: Border.all(color: skin.outline, width: skin.outlineWidth),
         ),
         child: Material(
           // The container paints the surface; this exists for the ripple.
@@ -186,13 +195,16 @@ class MatchTileWidget extends StatelessWidget {
 
 /// What one state looks like, resolved against the theme.
 ///
-/// A type rather than four locals in `build()`: the four values are one
-/// decision each and they have to agree — a foreground picked for a fill it is
-/// not sitting on is the bug this shape makes hard to write.
+/// A type rather than five locals in `build()`: the values are one decision each
+/// and they have to agree — a foreground picked for a fill it is not sitting on
+/// is the bug this shape makes hard to write. The fill is now the *same* in four
+/// of the five states, which makes that agreement easier to keep and the
+/// remaining exception, [MatchTileState.cleared], easier to see.
 class _TileSkin {
   const _TileSkin({
     required this.background,
     required this.outline,
+    required this.outlineWidth,
     required this.foreground,
     required this.mark,
   });
@@ -209,31 +221,25 @@ class _TileSkin {
     // than an emptied one.
     final page = Theme.of(context).scaffoldBackgroundColor;
 
+    // The three live states differ from idle in exactly two ways: which colour
+    // the edge and the ink take, and that the edge steps up from a hairline to
+    // an input's weight. Written once, because three near-identical constructor
+    // calls are three places for the fill to drift apart.
+    _TileSkin marked(Color colour, IconData? mark) => _TileSkin(
+      background: ground,
+      outline: colour,
+      // `input`, not `focus`: 2px is the ring that says *keyboard focus is
+      // here*, and a board where half the tiles wore it would leave the focus
+      // indicator nothing of its own to say.
+      outlineWidth: AppStroke.input,
+      foreground: colour,
+      mark: mark,
+    );
+
     return switch (state) {
-      MatchTileState.selected => _TileSkin(
-        background: scheme.primary,
-        outline: scheme.primary,
-        foreground: scheme.onPrimary,
-        mark: null,
-      ),
-      MatchTileState.wrong => _TileSkin(
-        background: scheme.error,
-        outline: scheme.error,
-        foreground: scheme.onError,
-        mark: Icons.close,
-      ),
-      MatchTileState.paired => _TileSkin(
-        background: Color.alphaBlend(
-          semantic.success.withValues(alpha: AppMatchTile.pairedFillAlpha),
-          ground,
-        ),
-        outline: Color.alphaBlend(
-          semantic.success.withValues(alpha: AppMatchTile.pairedOutlineAlpha),
-          ground,
-        ),
-        foreground: semantic.success,
-        mark: Icons.check,
-      ),
+      MatchTileState.selected => marked(semantic.primaryAccent, null),
+      MatchTileState.wrong => marked(semantic.danger, Icons.close),
+      MatchTileState.paired => marked(semantic.success, Icons.check),
       // A cleared slot sits on the *page*, not on the tile surface: the hole is
       // what says the pair is gone, and a tile-coloured hole is just a tile
       // with no words on it. The outline is faint rather than absent — with
@@ -251,6 +257,7 @@ class _TileSkin {
           ),
           page,
         ),
+        outlineWidth: AppStroke.hairline,
         foreground: scheme.onSurface,
         mark: null,
       ),
@@ -259,16 +266,24 @@ class _TileSkin {
         // A tile is the control here, and its fill is 1.03:1 from the dark page
         // — the outline is the whole grid (WCAG 1.4.11).
         outline: semantic.borderControl,
+        outlineWidth: AppStroke.hairline,
         foreground: scheme.onSurface,
         mark: null,
       ),
     };
   }
 
-  /// Null paints nothing, which is what a cleared slot wants.
+  /// Null paints nothing, which is what a cleared slot wants. Every other state
+  /// paints the same surface — a state is an edge and an ink, not a fill.
   final Color? background;
 
   final Color outline;
+
+  /// How heavy that edge is. The only geometry a state is allowed to change,
+  /// and it changes it by half a pixel — enough to read as deliberate, small
+  /// enough that nothing beside the tile moves.
+  final double outlineWidth;
+
   final Color foreground;
   final IconData? mark;
 }
@@ -302,15 +317,6 @@ abstract final class AppMatchTile {
   /// clears it early. A board of five pairs answered wrong four times would
   /// otherwise spend three seconds refusing taps it has no reason to refuse.
   static const Duration wrongHold = AppDurations.slow;
-
-  /// How much `success` a paired tile's fill carries, blended into the surface
-  /// under it. Enough to read as a state, not enough to compete with the
-  /// selected tile, which is the only solid colour on the board.
-  static const double pairedFillAlpha = 0.12;
-
-  /// The same for its outline. Heavier than the fill because a hairline has a
-  /// tenth of the area to say it with.
-  static const double pairedOutlineAlpha = 0.3;
 
   /// How much of `borderSubtle` a cleared slot keeps.
   ///

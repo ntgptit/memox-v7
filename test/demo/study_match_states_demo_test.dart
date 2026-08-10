@@ -205,20 +205,18 @@ void main() {
 /// what marks it for everyone else, and a golden cannot check it.
 /// Lets the tile's crossfade finish, while its hold is still running.
 ///
-/// **One pump was not enough, and the picture it produced looked deliberate.**
-/// The tile's fill is an `AnimatedContainer` over [AppDurations.normal] while
-/// the label's colour changes on the same frame as the tap — so a single frame
-/// after a wrong answer is `onError` white on a fill still most of the way to
-/// white, which reads as a tile that lost its text rather than one saying no.
-/// [AppMatchTile.wrongHold] and [AppMatchTile.successFlash] are both `slow`
-/// (320ms) against `normal` (200ms), so there is a window where the colour has
-/// landed and the hold has not expired. That window is the state worth
-/// photographing, and it is the one a user sees.
+/// **One pump photographs the first frame of the transition, not the state.**
+/// A tile's edge and ink change over [AppDurations.normal], so a single frame
+/// after the tap still has the border at its idle weight and hue — a picture of
+/// a board that has not reacted yet, which is indistinguishable from one that
+/// never did. [AppMatchTile.wrongHold] and [AppMatchTile.successFlash] are both
+/// `slow` (320ms) against `normal` (200ms), so there is a window where the
+/// colour has landed and the hold has not expired. That window is the state
+/// worth photographing, and it is the one a user sees.
 ///
 /// Two pumps, not one: the first is the frame the tap's `setState` produces —
-/// where the `AnimatedContainer` *starts* from its old colour — and the second
-/// is the one that lands on the new one. A single `pump(normal)` photographs
-/// the first frame of the transition, which is still the previous state's fill.
+/// where the `AnimatedContainer` *starts* — and the second is the one that
+/// lands on the target.
 Future<void> _settleColour(WidgetTester tester) async {
   await tester.pump();
   await tester.pump(AppDurations.normal);
