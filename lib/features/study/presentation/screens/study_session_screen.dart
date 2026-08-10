@@ -91,6 +91,28 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // **Said once, when it happens** (BR-82). A recoverable failure has to be
+    // *told*, not merely survived: the ✕ did nothing visible, and a screen that
+    // simply carries on reads as a dead button. The bar offers the one action
+    // that makes sense — try again — and dismissing it leaves the user studying,
+    // which is the other honest option.
+    ref.listen(studySessionControllerProvider(widget.deckId), (previous, next) {
+      if (next.error == null || next.turn == null) return;
+      if (previous?.error == next.error) return;
+
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.studyLeaveFailed),
+            action: SnackBarAction(
+              label: context.l10n.retryAction,
+              onPressed: () => unawaited(_controller.leave()),
+            ),
+          ),
+        );
+    });
+
     final state = ref.watch(studySessionControllerProvider(widget.deckId));
 
     final session = state.session;
@@ -208,7 +230,16 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
   }
 
   Widget _body(StudySessionState state) {
-    if (state.error != null) {
+    // **An error with a card behind it is recoverable, and replacing the card
+    // is what made it look otherwise.** A failed `EndStudySession` left the
+    // session running with its turn intact, and this branch swapped the whole
+    // body for "Nothing to review yet" — a message about an empty deck, shown
+    // over a card the user could still answer. The full-body state is for the
+    // case it was written for: an error with nothing to fall back on.
+    //
+    // A persistence failure on a *write* still lands here, because it ends the
+    // session (BR-85) and so clears the turn — that behaviour is untouched.
+    if (state.error != null && state.turn == null) {
       return MxErrorState(
         title: context.l10n.appTitle,
         message: context.l10n.studyNothingDueMessage,

@@ -1237,6 +1237,10 @@
   "@studyStageBlockedBody": {
     "description": "Says what did not happen, so a blocked stage does not read as lost work (BR-124, BR-86)."
   },
+  "studyLeaveFailed": "Could not leave the session. Your answers are saved.",
+  "@studyLeaveFailed": {
+    "description": "Shown when EndStudySession fails. Recoverable: the card stays on screen and the session can be continued or left again (BR-82, BR-85)."
+  },
   "studyLeaveSession": "Leave session",
   "@studyLeaveSession": {
     "description": "Ends the session as abandoned/user_exit (BR-82)."

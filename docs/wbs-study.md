@@ -1981,9 +1981,8 @@ no-op khi leaving, và `leave()` **giương cờ** thay vì hạ hai cờ khác.
 lọt vào cùng một write chỉ sinh một EndSession — ✕ và back gesture có thể là cùng
 một cú bấm (BR-82).
 
-`EndSession` hỏng thì **không nuốt exception**: bỏ `isLeaving`, giữ error, màn
-không bị khoá vĩnh viễn. Một phiên không kết thúc được thì vẫn đang chạy, và một
-màn khoá mãi tệ hơn một màn nói rằng ✕ không ăn.
+`EndSession` hỏng thì **không nuốt exception** — nhưng "vẫn answerable" không
+được kết luận từ riêng `canAnswer`; xem mục recovery bên dưới.
 
 **2. `self_assess` mất luôn bước advance, và nó biên dịch được vì Dart cho phép
 một hàm có giá trị trả về đứng thay một hàm `void`.** Khi answer sink bắt đầu trả
@@ -2005,3 +2004,41 @@ leave()` rồi mới release thì bỏ qua đúng cửa sổ cần bắt);
 `study_self_assess_lifecycle_test.dart` (4 test: commit → advance đúng một lần,
 receipt `null` → không advance và bấm lại được, chạm hai lần trong lúc ghi chỉ
 một write, đang ghi thì chưa advance).
+
+### Leave thất bại: hai câu hỏi khác nhau, và epoch chỉ trả lời một
+
+Vòng trước ghi "leave hỏng thì màn vẫn answerable" và chứng minh bằng một test
+chỉ đọc `canAnswer` khi **không có operation nào đang bay**. Đó là kết luận rút
+từ ca dễ nhất.
+
+**Epoch nói *kết quả này có được phép lên màn hình không*; nó không nói *operation
+đã xong chưa*.** Nhánh stale `return` **trước** khi hạ `isSubmitting`/
+`isAdvancing`. Leave thành công thì không thấy, vì terminal state xoá sạch cờ.
+Leave **thất bại** thì đó là toàn bộ vấn đề: phiên quay lại với một cờ busy kẹt
+`true`, `canAnswer` false — một tấm thẻ nằm đó mà không làm gì được.
+
+Hạ cờ trong `catch` còn tệ hơn: write có thể vẫn đang mở, mở khoá đè lên nó là
+mời người dùng trả lời cùng một thẻ hai lần (BR-126).
+
+**Nên recovery làm ba việc, theo thứ tự:** đợi thứ đang bay `settled()`; rồi mới
+hạ cờ; rồi `advance()` để **đọc lại** — vì câu trả lời rất có thể đã commit trong
+lúc `EndSession` hỏng (stale guard chặn receipt, không chặn row), nên turn trong
+state có thể là thẻ hàng đợi đã đi qua, và mời lại nó là ghi hai lần.
+
+`StudyOperations` (`presentation/states/`) giữ epoch cùng hai completer, vì đó là
+hai câu hỏi khác nhau về cùng một operation.
+
+**Màn hình**: `error != null` từng thay cả thân màn bằng "Nothing to review yet"
+— một câu về deck rỗng, vẽ đè lên tấm thẻ người dùng vẫn trả lời được. Nay full-
+body error chỉ dành cho ca nó vốn được viết ra: lỗi mà **không còn turn nào** để
+quay về. Persistence failure lúc submit không đổi hành vi, vì nó kết thúc phiên
+(BR-85) nên turn bị xoá và vẫn đi đúng nhánh cũ. Lỗi rời phiên nay là một
+SnackBar có nút Retry (`retryAction` sẵn có, `studyLeaveFailed` mới) — nói ra
+thay vì im lặng, và bỏ qua nó thì người dùng học tiếp.
+
+**Bằng chứng, và cả hai thứ tự đều được kiểm:** `study_leave_recovery_test.dart`
+— write/read settle **trước** khi leave hỏng, và **sau** khi leave hỏng (thứ tự
+thứ hai là thứ một bản vá ngây thơ không sống sót). Mỗi ca khẳng định: không cờ
+nào kẹt, không answer trùng, turn khớp repository, và phiên tiếp tục hoặc rời lại
+được. Đã tiêm lỗi: với hành vi cũ, **4/6 test đỏ**. Widget test chứng minh màn
+không mất thẻ và không hiện "Nothing due".

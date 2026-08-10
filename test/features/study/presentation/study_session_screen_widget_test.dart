@@ -17,6 +17,7 @@ import 'package:memox/features/study/domain/models/study_session_kind_model.dart
 import 'package:memox/features/study/domain/models/study_session_status_model.dart';
 import 'package:memox/features/study/domain/models/study_turn_model.dart';
 import 'package:memox/features/study/presentation/controllers/study_session_controller.dart';
+import 'package:memox/shared/widgets/mx_error_state.dart';
 import 'package:memox/features/study/presentation/screens/study_session_screen.dart';
 import 'package:memox/features/study/presentation/widgets/sections/study_blocked_section_widget.dart';
 import 'package:memox/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart';
@@ -160,6 +161,60 @@ void main() {
 
     gate.complete();
     await tester.pumpAndSettle();
+  });
+
+  testWidgets('a session that could not be left keeps its card and says so', (
+    tester,
+  ) async {
+    // **The failure used to erase the screen.** `error != null` swapped the
+    // whole body for "Nothing to review yet" — a message about an empty deck,
+    // drawn over a card the user could still answer. A recoverable failure has
+    // to leave something to recover *to*.
+    final repository = await pumpSession(
+      tester,
+      mode: StudyMode.selfAssess,
+      kind: StudySessionKind.reviewing,
+    );
+    repository.endSessionFails = true;
+
+    await tester.tap(find.byTooltip('Close session'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(MxErrorState), findsNothing);
+    expect(
+      find.text('Nothing to review yet. Come back when a card is due.'),
+      findsNothing,
+    );
+    expect(find.byType(StudySessionFrameSectionWidget), findsOneWidget);
+    expect(find.text('사과'), findsOneWidget);
+
+    // Told, and offered the one action that makes sense. Dismissing it leaves
+    // the user studying, which is the other honest option.
+    expect(
+      find.text('Could not leave the session. Your answers are saved.'),
+      findsOneWidget,
+    );
+    expect(find.text('Retry'), findsOneWidget);
+  });
+
+  testWidgets('retrying from the bar leaves once the write succeeds', (
+    tester,
+  ) async {
+    final repository = await pumpSession(
+      tester,
+      mode: StudyMode.selfAssess,
+      kind: StudySessionKind.reviewing,
+    );
+    repository.endSessionFails = true;
+
+    await tester.tap(find.byTooltip('Close session'));
+    await tester.pumpAndSettle();
+
+    repository.endSessionFails = false;
+    await tester.tap(find.text('Retry'));
+    await tester.pumpAndSettle();
+
+    expect(repository.ended, hasLength(1));
   });
 
   testWidgets('no mode is unmounted to fetch its replacement', (tester) async {
