@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_button_themes.dart';
 import 'package:memox/core/theme/app_colors.dart';
+import 'package:memox/core/theme/app_material_roles.dart';
 import 'package:memox/core/theme/app_interaction_states.dart';
-import 'package:memox/core/theme/app_semantic_colors.dart';
-import 'package:memox/core/theme/app_theme.dart';
 
 import 'css_tokens.dart';
 
@@ -23,12 +21,13 @@ import 'css_tokens.dart';
 /// or named in [_notBroughtOver] with a reason — so a token *added* to the kit
 /// fails this file until someone decides about it.
 ///
-/// Colours only. The scales — spacing, radius, motion, the type ramp — are in
-/// `css_scale_parity_test.dart`, split off at the 400-line guard.
+/// Colours only, and only the ones the app **copied**. The scales — spacing,
+/// radius, motion, the type ramp — are in `css_scale_parity_test.dart`; the
+/// tokens Dart *derives* rather than copies are in `css_derived_parity_test
+/// .dart`. Both split off at the 400-line guard, and the second split along the
+/// line [_derived] already drew: "equal to the kit" is the wrong question for a
+/// derivation, so those tokens were never checked the way this file checks.
 void main() {
-  final ThemeData light = buildLightTheme();
-  final ThemeData dark = buildDarkTheme();
-
   /// The CSS colour tokens the app has brought over, by scope.
   ///
   /// Keyed by the CSS name so the completeness check below can subtract this set
@@ -68,38 +67,44 @@ void main() {
       AppColors.primaryAccentDark,
     ),
     '--color-primary-container': (
-      AppColors.primaryContainerLight,
-      AppColors.primaryContainerDark,
+      AppMaterialRoles.primaryContainerLight,
+      AppMaterialRoles.primaryContainerDark,
     ),
     '--color-on-primary-container': (
-      AppColors.onPrimaryContainerLight,
-      AppColors.onPrimaryContainerDark,
+      AppMaterialRoles.onPrimaryContainerLight,
+      AppMaterialRoles.onPrimaryContainerDark,
     ),
-    '--color-secondary': (AppColors.secondaryLight, AppColors.secondaryDark),
+    '--color-secondary': (
+      AppMaterialRoles.secondaryLight,
+      AppMaterialRoles.secondaryDark,
+    ),
     '--color-on-secondary': (
-      AppColors.onSecondaryLight,
-      AppColors.onSecondaryDark,
+      AppMaterialRoles.onSecondaryLight,
+      AppMaterialRoles.onSecondaryDark,
     ),
     '--color-secondary-container': (
-      AppColors.secondaryContainerLight,
-      AppColors.secondaryContainerDark,
+      AppMaterialRoles.secondaryContainerLight,
+      AppMaterialRoles.secondaryContainerDark,
     ),
     '--color-on-secondary-container': (
-      AppColors.onSecondaryContainerLight,
-      AppColors.onSecondaryContainerDark,
+      AppMaterialRoles.onSecondaryContainerLight,
+      AppMaterialRoles.onSecondaryContainerDark,
     ),
-    '--color-tertiary': (AppColors.tertiaryLight, AppColors.tertiaryDark),
+    '--color-tertiary': (
+      AppMaterialRoles.tertiaryLight,
+      AppMaterialRoles.tertiaryDark,
+    ),
     '--color-on-tertiary': (
-      AppColors.onTertiaryLight,
-      AppColors.onTertiaryDark,
+      AppMaterialRoles.onTertiaryLight,
+      AppMaterialRoles.onTertiaryDark,
     ),
     '--color-tertiary-container': (
-      AppColors.tertiaryContainerLight,
-      AppColors.tertiaryContainerDark,
+      AppMaterialRoles.tertiaryContainerLight,
+      AppMaterialRoles.tertiaryContainerDark,
     ),
     '--color-on-tertiary-container': (
-      AppColors.onTertiaryContainerLight,
-      AppColors.onTertiaryContainerDark,
+      AppMaterialRoles.onTertiaryContainerLight,
+      AppMaterialRoles.onTertiaryContainerDark,
     ),
     '--color-secondary-action': (
       AppColors.secondaryActionLight,
@@ -113,14 +118,17 @@ void main() {
     // `error` is `danger`, not a second red system — AD-05. The CSS says the
     // same thing by pointing both names at one literal.
     '--color-error': (AppColors.dangerLight, AppColors.dangerDark),
-    '--color-on-error': (AppColors.onErrorLight, AppColors.onErrorDark),
+    '--color-on-error': (
+      AppMaterialRoles.onErrorLight,
+      AppMaterialRoles.onErrorDark,
+    ),
     '--color-error-container': (
-      AppColors.errorContainerLight,
-      AppColors.errorContainerDark,
+      AppMaterialRoles.errorContainerLight,
+      AppMaterialRoles.errorContainerDark,
     ),
     '--color-on-error-container': (
-      AppColors.onErrorContainerLight,
-      AppColors.onErrorContainerDark,
+      AppMaterialRoles.onErrorContainerLight,
+      AppMaterialRoles.onErrorContainerDark,
     ),
     // --- progress and reward ---
     '--color-progress-track': (
@@ -141,44 +149,44 @@ void main() {
     ),
     // --- Material surface container ladder ---
     '--color-surface-container-lowest': (
-      AppColors.surfaceContainerLowestLight,
-      AppColors.surfaceContainerLowestDark,
+      AppMaterialRoles.surfaceContainerLowestLight,
+      AppMaterialRoles.surfaceContainerLowestDark,
     ),
     '--color-surface-container-low': (
-      AppColors.surfaceContainerLowLight,
-      AppColors.surfaceContainerLowDark,
+      AppMaterialRoles.surfaceContainerLowLight,
+      AppMaterialRoles.surfaceContainerLowDark,
     ),
     '--color-surface-container': (
-      AppColors.surfaceContainerLight,
-      AppColors.surfaceContainerDark,
+      AppMaterialRoles.surfaceContainerLight,
+      AppMaterialRoles.surfaceContainerDark,
     ),
     '--color-surface-container-high': (
-      AppColors.surfaceContainerHighLight,
-      AppColors.surfaceContainerHighDark,
+      AppMaterialRoles.surfaceContainerHighLight,
+      AppMaterialRoles.surfaceContainerHighDark,
     ),
     '--color-surface-container-highest': (
-      AppColors.surfaceContainerHighestLight,
-      AppColors.surfaceContainerHighestDark,
+      AppMaterialRoles.surfaceContainerHighestLight,
+      AppMaterialRoles.surfaceContainerHighestDark,
     ),
     '--color-surface-dim': (
-      AppColors.surfaceDimLight,
-      AppColors.surfaceDimDark,
+      AppMaterialRoles.surfaceDimLight,
+      AppMaterialRoles.surfaceDimDark,
     ),
     '--color-surface-bright': (
-      AppColors.surfaceBrightLight,
-      AppColors.surfaceBrightDark,
+      AppMaterialRoles.surfaceBrightLight,
+      AppMaterialRoles.surfaceBrightDark,
     ),
     '--color-inverse-surface': (
-      AppColors.inverseSurfaceLight,
-      AppColors.inverseSurfaceDark,
+      AppMaterialRoles.inverseSurfaceLight,
+      AppMaterialRoles.inverseSurfaceDark,
     ),
     '--color-on-inverse-surface': (
-      AppColors.onInverseSurfaceLight,
-      AppColors.onInverseSurfaceDark,
+      AppMaterialRoles.onInverseSurfaceLight,
+      AppMaterialRoles.onInverseSurfaceDark,
     ),
     '--color-inverse-primary': (
-      AppColors.inversePrimaryLight,
-      AppColors.inversePrimaryDark,
+      AppMaterialRoles.inversePrimaryLight,
+      AppMaterialRoles.inversePrimaryDark,
     ),
     // --- chrome ---
     '--color-shadow': (AppColors.shadowLight, AppColors.shadowDark),
@@ -294,76 +302,6 @@ void main() {
           reason: '$name is claimed here but colors.css does not declare it',
         );
       }
-    });
-  });
-
-  group('what the app derives still lands on the kit\'s value', () {
-    test('the disabled surface stays within four units of the kit', () {
-      // **A tolerance, not an equality, and `IMPORT_LEDGER.md` is where that
-      // was decided.** CSS cannot blend at build time, so the kit carries a
-      // literal where Dart carries `onSurface @ 12% over surface`; they land
-      // four units apart at most, and deriving is what kept dark correct when
-      // the surface ladder moved onto the page's hue. Wide enough for the
-      // transcription gap, far too narrow for a token actually re-pointed.
-      for (final (String scope, ColorScheme scheme) in <(String, ColorScheme)>[
-        (':root', light.colorScheme),
-        ('[data-theme="dark"]', dark.colorScheme),
-      ]) {
-        final derived = disabledSurfaceTint(scheme);
-        final declared = CssTokens.color(
-          'colors.css',
-          '--color-disabled-surface',
-          scope: scope,
-        );
-
-        for (final (String channel, double a, double b)
-            in <(String, double, double)>[
-              ('red', derived.r, declared.r),
-              ('green', derived.g, declared.g),
-              ('blue', derived.b, declared.b),
-            ]) {
-          expect(
-            (a - b).abs() * 255,
-            lessThanOrEqualTo(4),
-            reason:
-                '--color-disabled-surface $channel in $scope: the derivation '
-                'and the kit have parted company by more than the '
-                'transcription gap the ledger records',
-          );
-        }
-      }
-    });
-
-    test('the semantic extension carries the kit\'s values', () {
-      // The theme extension is what a widget actually reads, so parity at
-      // `AppColors` is only half the claim.
-      final semanticLight = light.extension<AppSemanticColors>()!;
-      final semanticDark = dark.extension<AppSemanticColors>()!;
-
-      expect(
-        semanticLight.progressFill,
-        CssTokens.color('colors.css', '--color-progress-fill'),
-      );
-      expect(
-        semanticDark.progressFill,
-        CssTokens.color(
-          'colors.css',
-          '--color-progress-fill',
-          scope: '[data-theme="dark"]',
-        ),
-      );
-      expect(
-        semanticLight.streakContainer,
-        CssTokens.color('colors.css', '--color-streak-container'),
-      );
-      expect(
-        semanticDark.streakContainer,
-        CssTokens.color(
-          'colors.css',
-          '--color-streak-container',
-          scope: '[data-theme="dark"]',
-        ),
-      );
     });
   });
 }

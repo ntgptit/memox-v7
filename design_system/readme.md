@@ -9,7 +9,7 @@ This design system is a recreation of that product's real visual language, compi
 | Source | What was taken |
 |---|---|
 | **https://github.com/ntgptit/memox-v7** (branch `main`) | Everything below |
-| `lib/core/theme/` — `app_colors.dart`, `app_typography.dart`, `app_spacing.dart`, `app_radius.dart`, `app_elevation.dart`, `app_icon_size.dart`, `app_durations.dart`, `app_breakpoints.dart`, `app_semantic_colors.dart`, `app_theme.dart`, `app_button_themes.dart`, `app_compact_scale.dart` | Every token in `tokens/` |
+| `lib/core/theme/` — `app_colors.dart`, `app_material_roles.dart`, `app_typography.dart`, `app_spacing.dart`, `app_radius.dart`, `app_elevation.dart`, `app_icon_size.dart`, `app_durations.dart`, `app_breakpoints.dart`, `app_semantic_colors.dart`, `app_theme.dart`, `app_button_themes.dart`, `app_compact_scale.dart` | Every token in `tokens/` |
 | `lib/shared/widgets/mx_*.dart` | The component inventory in `components/` |
 | `lib/features/deck/presentation/` | The deck-level screen, tile, toolbar and form in the UI kit |
 | `test/design_preview/` and its goldens | The Library, Review and Settings screens, and the verdict / section-label treatments |

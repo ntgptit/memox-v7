@@ -14,6 +14,9 @@ void main() {
   /// second source of truth for a value the theme already owns.
   const declarationFiles = <String>{
     'lib/core/theme/app_colors.dart',
+    // The `ColorScheme` roles split out of `app_colors.dart` at the 400-line
+    // guard. Same job, same permission — it is the other half of one file.
+    'lib/core/theme/app_material_roles.dart',
     'lib/core/theme/app_theme.dart',
     'lib/core/theme/app_semantic_colors.dart',
     'lib/core/theme/app_button_themes.dart',

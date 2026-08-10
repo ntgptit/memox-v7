@@ -242,8 +242,12 @@ class _ColorVisitor extends RecursiveAstVisitor<void> {
 
     if (prefix == 'Colors') {
       _record(node, 'Colors-material', 'Colors.$name');
-    } else if (prefix == 'AppColors') {
-      _record(node, 'shared-constant', 'AppColors.$name');
+    } else if (prefix == 'AppColors' || prefix == 'AppMaterialRoles') {
+      // Both classes are one declaration surface split at the 400-line guard.
+      // Matching on `AppColors` alone dropped 68 sites in `app_theme.dart` out
+      // of the inventory the moment the split landed — not reclassified, gone,
+      // which is the failure an audit is least able to notice about itself.
+      _record(node, 'shared-constant', '$prefix.$name');
     }
     super.visitPrefixedIdentifier(node);
   }
