@@ -1,22 +1,22 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
   "scannedFiles": 300,
-  "totalSites": 362,
+  "totalSites": 363,
   "byElementKind": {
-    "other": 278,
-    "background": 12,
+    "other": 279,
+    "background": 13,
     "shadow": 1,
-    "border": 13,
-    "text": 46,
+    "border": 14,
+    "text": 44,
     "icon": 12
   },
   "bySourceKind": {
     "shared-constant": 143,
-    "blend-source": 10,
+    "blend-source": 12,
     "Colors-material": 5,
     "hardcoded-literal": 97,
     "opacity-modified-token": 11,
-    "theme-token": 96
+    "theme-token": 95
   },
   "sites": [
     {
@@ -3508,7 +3508,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/items/match_tile_widget.dart",
-      "line": 202,
+      "line": 218,
       "widget_context": "_TileSkin",
       "element_kind": "other",
       "source_kind": "blend-source",
@@ -3519,7 +3519,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/items/match_tile_widget.dart",
-      "line": 206,
+      "line": 222,
       "widget_context": "_TileSkin",
       "element_kind": "border",
       "source_kind": "blend-source",
@@ -3530,7 +3530,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/items/match_tile_widget.dart",
-      "line": 224,
+      "line": 240,
       "widget_context": "_TileSkin",
       "element_kind": "border",
       "source_kind": "blend-source",
@@ -3541,7 +3541,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/fill_answer_section_widget.dart",
-      "line": 133,
+      "line": 134,
       "widget_context": "_FillAnswerSectionWidgetState",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3552,7 +3552,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/fill_answer_section_widget.dart",
-      "line": 153,
+      "line": 154,
       "widget_context": "_FillAnswerSectionWidgetState",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3563,25 +3563,36 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/fill_answer_section_widget.dart",
-      "line": 219,
-      "widget_context": "_FillAnswerSectionWidgetState",
-      "element_kind": "text",
+      "line": 255,
+      "widget_context": "_AnswerBlock",
+      "element_kind": "other",
       "source_kind": "theme-token",
-      "expression": "context.semanticColors.success",
-      "token": "semantic.success",
-      "resolved_value_light": "#10795C",
-      "resolved_value_dark": "#4FC79B"
+      "expression": "context.colors.surface",
+      "token": "colorScheme.surface",
+      "resolved_value_light": "#FBFBFE",
+      "resolved_value_dark": "#1A1838"
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/fill_answer_section_widget.dart",
-      "line": 220,
-      "widget_context": "_FillAnswerSectionWidgetState",
-      "element_kind": "text",
-      "source_kind": "theme-token",
-      "expression": "context.semanticColors.danger",
-      "token": "semantic.danger",
-      "resolved_value_light": "#C02B3A",
-      "resolved_value_dark": "#F2808F"
+      "line": 264,
+      "widget_context": "_AnswerBlock",
+      "element_kind": "background",
+      "source_kind": "blend-source",
+      "expression": "accent.withValues(alpha: AppFillAnswer.blockFillAlpha)",
+      "token": null,
+      "resolved_value_light": "unresolvable: value depends on runtime state",
+      "resolved_value_dark": "unresolvable: value depends on runtime state"
+    },
+    {
+      "file": "lib/features/study/presentation/widgets/sections/fill_answer_section_widget.dart",
+      "line": 270,
+      "widget_context": "_AnswerBlock",
+      "element_kind": "border",
+      "source_kind": "blend-source",
+      "expression": "accent.withValues(alpha: AppFillAnswer.blockOutlineAlpha)",
+      "token": null,
+      "resolved_value_light": "unresolvable: value depends on runtime state",
+      "resolved_value_dark": "unresolvable: value depends on runtime state"
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/guess_question_section_widget.dart",
@@ -3629,7 +3640,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_card_face_section_widget.dart",
-      "line": 176,
+      "line": 225,
       "widget_context": "_StudyCardFaceViewState",
       "element_kind": "border",
       "source_kind": "theme-token",
@@ -3640,7 +3651,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_card_face_section_widget.dart",
-      "line": 278,
+      "line": 333,
       "widget_context": "_CardHalf",
       "element_kind": "text",
       "source_kind": "theme-token",
