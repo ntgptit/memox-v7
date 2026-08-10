@@ -208,7 +208,10 @@ class StudySessionController extends _$StudySessionController {
     if (state.session?.currentMode != StudyMode.browse) {
       return Future<void>.value();
     }
-    if (state.isSubmitting) return Future<void>.value();
+    // Advancing as well as submitting: a forward step writes the progress and
+    // then pulls the next turn, and only the write was guarded — so the fetch
+    // was a window in which a second step counted (BR-155's "no second turn").
+    if (state.isSubmitting || state.isAdvancing) return Future<void>.value();
 
     final next = step == StudyBrowseStep.back
         ? state.browseLookBack + 1

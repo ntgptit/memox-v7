@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 import 'package:memox/features/study/domain/models/study_turn_model.dart';
@@ -194,7 +195,17 @@ base class FakeStudyRepository implements StudyRepository {
     required String sessionId,
     required StudyMode mode,
     required DateTime now,
-  }) async => advancedTo.add(mode);
+  }) async {
+    advancedTo.add(mode);
+    // Held open by a test that needs the screen *while* it is advancing — the
+    // window in which the body used to swap the card for a spinner. Null in
+    // every other test, so nothing waits by accident.
+    final gate = advanceGate;
+    if (gate != null) await gate.future;
+  }
+
+  /// Set to hold [advanceStage] open until the test completes it.
+  Completer<void>? advanceGate;
 
   @override
   Future<void> endSession({

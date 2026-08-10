@@ -89,7 +89,11 @@ Widget? studyModeView({
     StudyMode.browse: () => StudySwipeDeckWidget(
       cardKey: (state.viewedCard ?? turn.card).id,
       canGoBack: state.canLookBack,
-      isLocked: state.isSubmitting,
+      // **`isAdvancing` too, not just `isSubmitting`.** Stepping forward from
+      // the live turn writes the browse progress and *then* pulls the next
+      // turn; only the write was covered, so the whole fetch was a window in
+      // which a second swipe counted.
+      isLocked: state.isSubmitting || state.isAdvancing,
       onForward: onContinue,
       onBack: onLookBack,
       child: StudyCardFaceSectionWidget(
@@ -101,7 +105,12 @@ Widget? studyModeView({
         onAction: (_) {},
         onContinue: onContinue,
         shouldShowBackImmediately: true,
-        isLocked: state.isSubmitting,
+        // **Peers, and that is BR-112 seen from the typography side.** Both
+        // faces are on screen to be read; sizing the front as a prompt let a
+        // long one — a gloss with a part of speech in it — take three headline
+        // lines and push the back into the corner of its own half.
+        emphasis: StudyFaceEmphasis.peers,
+        isLocked: state.isSubmitting || state.isAdvancing,
       ),
     ),
     StudyMode.selfAssess: () => StudyCardFaceSectionWidget(

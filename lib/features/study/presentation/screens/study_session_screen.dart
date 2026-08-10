@@ -212,7 +212,14 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
         message: context.l10n.studyNothingDueMessage,
       );
     }
-    if (state.isOpening || state.isAdvancing) {
+    // **A spinner only when there is nothing to keep on screen.** Advancing
+    // used to replace the whole body, so every step of `browse` threw the card
+    // away, drew a spinner, and drew the next card — a full layout shift
+    // between two cards that differ by one string. The turn is still in state
+    // for the whole of that write-then-fetch, so it stays on screen and the
+    // content is swapped underneath it when the new one lands. Opening is the
+    // case where there genuinely is no turn yet, and it still gets the spinner.
+    if ((state.isOpening || state.isAdvancing) && state.turn == null) {
       return MxLoadingState(semanticsLabel: context.l10n.appTitle);
     }
     if (state.isFinished) {

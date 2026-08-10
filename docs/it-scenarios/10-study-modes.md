@@ -22,17 +22,26 @@
 | 3 | Chủ động thoát, mở Ôn tập và chọn `Recall` | Cùng khung nhưng loại phiên là Ôn tập; tiến độ chỉ của tập `Due` và vị trí số đếm được thay bằng đồng hồ `Recall` |
 | 4 | Quan sát màu trước và sau một kết cục | Màu thành công/nguy hiểm chỉ xuất hiện cho kết quả đúng/sai, không dùng làm màu nhận diện chế độ trước khi trả lời |
 
-## IT-MODE-002 — `Browse` hiện hai mặt cùng lúc và chỉ cho đi tiếp
+## IT-MODE-002 — `Browse` hiện hai mặt cùng lúc, đi tiếp và xem lại bằng vuốt
 
 - **Ưu tiên:** P0
 - **Tiền điều kiện:** `SETUP-STUDY-EB-5-FULL`; chọn Học mới để vào Browse.
 
 | Bước | Thao tác người dùng | Kết quả mong đợi |
 |---|---|---|
-| 1 | Quan sát thẻ | Mặt trước và mặt sau cùng hiện, phân tách bằng đường kẻ và nhãn Thuật ngữ/Ý nghĩa |
+| 1 | Quan sát thẻ | Mặt trước và mặt sau cùng hiện trong **một** thẻ, phân tách bằng đường kẻ và nhãn Mặt trước/Mặt sau |
 | 2 | Quan sát nhãn chế độ | Nhãn là `Browse`, không phải `Review` |
-| 3 | Kiểm tra hành động | Không có lật thẻ, hành động xếp lịch, vuốt lùi, biểu tượng loa hoặc biểu tượng sửa thẻ |
-| 4 | Chạm Tiếp tục | Tiến đúng một điểm dừng; không hiện phán quyết đúng/sai |
+| 3 | Kiểm tra hành động | Không có lật thẻ, hành động xếp lịch, nút Tiếp tục/Quay lại nhìn thấy được, biểu tượng loa hoặc biểu tượng sửa thẻ |
+| 4 | Vuốt sang trái | Tiến đúng một điểm dừng; không hiện phán quyết đúng/sai |
+| 5 | Vuốt sang phải | Hiện lại thẻ đã qua trong cùng round; điểm dừng và tiến độ **không** đổi |
+| 6 | Vuốt trái trở lại thẻ đang sống rồi vuốt trái lần nữa | Chỉ tiến một điểm dừng; thẻ đã xem lại **không** bị ghi lượt thứ hai |
+| 7 | Duyệt bằng trình đọc màn hình | Có custom action tương đương cho Tiếp tục và Thẻ trước; Thẻ trước chỉ xuất hiện khi có chỗ để lùi |
+
+**Bước 3 và 4 từng nói ngược với BR-155.** Bảng cũ ghi "không có vuốt lùi" và
+"chạm Tiếp tục", trong khi BR-155 bắt buộc `browse` — và chỉ `browse` — cho xem
+lại thẻ đã qua bằng vuốt hoặc một control tương đương, còn BR-111 thì không cho
+mode này có bất kỳ hành động chấm điểm nào. Cái không tồn tại là **nút** Tiếp
+tục, không phải thao tác đi tiếp.
 
 ## IT-MODE-003 — `Match` giữ nguyên bàn và phân biệt ba trạng thái ô
 
