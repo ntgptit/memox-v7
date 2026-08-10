@@ -5,6 +5,7 @@ import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_motion_policy.dart';
 import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/app_stroke.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 
@@ -32,12 +33,16 @@ enum GuessOptionState { open, correct, chosenWrong, dimmed }
 /// extended meaning, and borrowing `hint` — which belongs to `fill` (BR-136) —
 /// would make one column mean two different things depending on the screen.
 ///
-/// **A verdict fills the row, it does not merely outline it** (§8.9). The
-/// handout tints the whole surface, and it is right to: outlined alone, the
-/// answered state reads as four rows of the same weight with two coloured edges,
-/// and the eye has to hunt for which is which. The tints are blended rather than
-/// painted translucent — `color_source_rules_test` R7 — so one token is one
-/// value over the surface the row actually sits on.
+/// **A verdict is an edge, an ink and a mark — never a fill** (§8.9). The tint
+/// was here first, on the argument that an outline alone leaves the eye hunting.
+/// It does not: five rows of running text are a page, and colouring two of them
+/// end to end turns a screen the learner is *reading* into a screen shouting at
+/// them. `match` reached the same answer for the same reason, and a row whose
+/// meaning runs to four lines has more area to shout with than a tile does.
+///
+/// What keeps it findable instead: the border steps up in weight, the text
+/// takes the verdict's colour — the whole sentence, not a chip on it — and the
+/// tick or cross sits at the end of the row.
 class GuessOptionItemWidget extends StatelessWidget {
   const GuessOptionItemWidget({
     required this.text,
@@ -66,31 +71,14 @@ class GuessOptionItemWidget extends StatelessWidget {
       GuessOptionState.chosenWrong => semantic.danger,
       GuessOptionState.open || GuessOptionState.dimmed => null,
     };
-    final fill = switch (state) {
-      GuessOptionState.correct => Color.alphaBlend(
-        semantic.success.withValues(alpha: AppGuessOption.correctFillAlpha),
-        ground,
-      ),
-      GuessOptionState.chosenWrong => Color.alphaBlend(
-        semantic.danger.withValues(alpha: AppGuessOption.wrongFillAlpha),
-        ground,
-      ),
-      GuessOptionState.open || GuessOptionState.dimmed => ground,
-    };
-    final outline = switch (state) {
-      GuessOptionState.correct => Color.alphaBlend(
-        semantic.success.withValues(alpha: AppGuessOption.correctOutlineAlpha),
-        ground,
-      ),
-      GuessOptionState.chosenWrong => Color.alphaBlend(
-        semantic.danger.withValues(alpha: AppGuessOption.wrongOutlineAlpha),
-        ground,
-      ),
-      // The row's fill sits 1.06:1 from the page, so the border is doing all
-      // the separating — and a row is a control (WCAG 1.4.11), not a card.
-      GuessOptionState.open ||
-      GuessOptionState.dimmed => semantic.borderControl,
-    };
+    // The surface never moves. Every state sits on the row's own fill, and the
+    // one that reads differently is the one that says so at its edge.
+    final outline =
+        accent ??
+        // The row's fill sits 1.06:1 from the page, so the border is doing all
+        // the separating — and a row is a control (WCAG 1.4.11), not a card.
+        semantic.borderControl;
+    final outlineWidth = accent == null ? AppStroke.hairline : AppStroke.input;
     final verdict = switch (state) {
       GuessOptionState.correct => Icons.check,
       GuessOptionState.chosenWrong => Icons.close,
@@ -120,9 +108,9 @@ class GuessOptionItemWidget extends StatelessWidget {
             minHeight: AppGuessOption.rowMinHeight,
           ),
           decoration: BoxDecoration(
-            color: fill,
+            color: ground,
             borderRadius: radius,
-            border: Border.all(color: outline),
+            border: Border.all(color: outline, width: outlineWidth),
           ),
           child: Material(
             // The container paints the surface; this exists for the ripple.
@@ -174,8 +162,10 @@ abstract final class AppGuessOption {
     vertical: AppSpacing.sm,
   );
 
-  /// The border the row draws, counted on both edges.
-  static const double rowBorder = 2;
+  /// The border the row draws, counted on both edges — at its heaviest, so the
+  /// measurement below is a ceiling rather than a number that is right for four
+  /// rows out of five.
+  static const double rowBorder = AppStroke.input * 2;
 
   /// How tall this row wants to be for [text] at [width].
   ///
@@ -217,19 +207,10 @@ abstract final class AppGuessOption {
   /// **Readable, not erased.** They are still four of the five meanings the
   /// learner was choosing between, and a row faded past reading turns the
   /// after-answer screen into one line of feedback with no context around it.
-  static const double dimmedOpacity = 0.36;
-
-  /// How much of its verdict colour an answered row carries as fill, blended
-  /// into the surface under it.
   ///
-  /// The wrong row is quieter than the right one on purpose: the answer is what
-  /// the learner has to take away, and the mistake is already marked by being
-  /// the row with a cross on it.
-  static const double correctFillAlpha = 0.14;
-  static const double wrongFillAlpha = 0.1;
-
-  /// The same for the outline. Heavier than the fill, because a hairline has a
-  /// fraction of the area to say it with.
-  static const double correctOutlineAlpha = 0.4;
-  static const double wrongOutlineAlpha = 0.35;
+  /// It was 0.36, which is under the 4.5:1 body text needs against this surface
+  /// — the rows the learner was *comparing* were the ones that disappeared. The
+  /// verdict rows no longer carry a fill, so recession is the only thing
+  /// separating them and it can afford to be gentle.
+  static const double dimmedOpacity = 0.7;
 }

@@ -7,8 +7,8 @@
 | **Scope** | Task còn lại của Study từ M5.7 trở đi · nợ kỹ thuật của Study · việc bị chặn |
 | **Source of truth for** | Trạng thái task Study từ M5.7 · nợ kỹ thuật của Study |
 | **Depends on** | `document-conventions.md` · `wbs.md` · `business-rules.md` · `use-cases.md` |
-| **Updated by task** | `guess`, `recall`, `fill` theo handout layout |
-| **Last updated** | 2026-08-09 |
+| **Updated by task** | `guess` bỏ nền phán quyết — viền + chữ + icon, hàng mờ 0.7, reset theo lượt, ngân sách đọc 800/1800ms |
+| **Last updated** | 2026-08-11 |
 
 `docs/wbs.md` giữ M5.0…M5.6 đã hoàn thành và không nhắc lại ở đây. File này giữ
 **những gì còn lại**, đánh số tiếp từ M5.7 để không ID nào trùng và mọi tham chiếu
@@ -912,6 +912,51 @@ phán quyết trước khi người dùng trả lời.
   CI**. Bảy mươi PR chạy giữa lần ghi `60/60 PASS` và mốc bắt đầu phiên này, mỗi
   PR gate xanh, và không PR nào biết mình vừa làm đỏ suite. Ba nguyên nhân đều là
   *một luật hoặc một dây nối đổi, còn thứ mô phỏng nó thì không đổi theo*.
+
+### `guess` bỏ nền phán quyết, đóng sau M5.25
+
+- **Status:** **done** — analyze sạch, gate xanh, sáu golden mới
+- **Vào từ ba ảnh concept của `guess`**, và chốt theo kiểu đã dùng cho `match`:
+  giữ những chỗ repo đang làm đúng hơn ảnh, chỉ lấy phần ảnh nói đúng.
+- **Giữ nguyên, vì repo đúng hơn concept:** khung phiên và thẻ đề, thứ tự
+  prompt → năm lựa chọn → dòng gợi ý, chữ hàng căn trái ở `bodyMedium` và
+  **không ellipsis** (một nghĩa là thứ người học đang cân nhắc, không phải một
+  tiêu đề để cắt), không app bar, không nút sửa, không nút loa (§7.4).
+- **Đổi: phán quyết là mép, chữ và dấu — không còn nền.** Trước đây hàng đúng và
+  hàng sai tô nền `success`/`danger` blend theo R7. Năm hàng chữ chạy dài là một
+  trang giấy; tô kín hai hàng biến màn hình đang *đọc* thành màn hình đang quát.
+  Nay: viền lên `AppStroke.input`, cả câu mang màu phán quyết, ✓/✕ ở cuối hàng.
+  `match` đã đi tới cùng kết luận ở #269.
+- **Không copy ảnh thứ ba.** Ảnh đó chỉ đánh dấu lựa chọn của người dùng. Đáp án
+  đúng **luôn** được đánh dấu, kể cả khi người học chọn sai (BR-126) — không thì
+  màn để lại đúng một thông tin "bạn sai", thiếu mất thứ duy nhất đáng học.
+- **`dimmedOpacity` 0.36 → 0.7.** 0.36 nằm dưới 4.5:1 mà chữ thân cần trên nền
+  này, tức ba hàng *đang được so sánh* chính là ba hàng biến mất. Nền phán quyết
+  đã bỏ nên độ lùi là thứ duy nhất còn phân tách, và nó có thể nhẹ tay.
+- **Reset theo lượt, không theo `cardId`.** `GuessQuestionSectionWidget` nhận
+  `turn` và so bằng `StudyTurnModel.isSameTurnAs`. Một thẻ trả lời sai quay lại ở
+  vòng sau với **cùng** id (BR-116), nên so id là không so gì cả: phán quyết cũ
+  ở lại trên hàng và khoá "đã trả lời" cũng ở lại — câu hỏi vòng hai không thể
+  trả lời được. Vế còn lại cũng phải đúng: rebuild trong một lượt không được xoá
+  phán quyết người dùng đang đọc.
+- **Ngân sách đọc 700→800ms (đúng) và 1200→1800ms (sai).** Sai là một cuộc tìm
+  kiếm, không phải một cái liếc: tìm hàng mình chọn, rồi tìm đáp án đúng trong
+  năm nghĩa mỗi nghĩa ba bốn dòng, rồi đọc nó. 1200ms đang bấm giờ cho việc khác.
+- **Không đụng:** SM-2, ánh xạ scheduler, schema, luật lập lịch.
+- **Tests:** `guess_question_widget_test.dart` (6 — thêm *the same card next
+  round is a new question* và *a rebuild inside one turn keeps the answer
+  given*), `guess_answered_widget_test.dart` (5, tách ra ở guard 400 dòng —
+  thêm *a verdict is an edge and an ink, never a fill* và *the rows nobody
+  picked stay readable*), `study_guess_states_demo_test.dart` (6 golden:
+  open/correct/wrong × light/dark).
+- **Golden dùng nghĩa dài thật, không phải fixture một từ.** Mọi quyết định bố
+  cục của màn này — chữ căn trái, không ellipsis, thẻ đề nhường chỗ để năm hàng
+  vừa — tồn tại vì nghĩa thật chạy ba bốn dòng ở hai thứ tiếng. Dựng trên
+  "apple" thì cả năm hàng một dòng và màn trông như một câu đố dán tường.
+- **Một chỗ chỉ ảnh mới thấy:** hai `pump` không đủ — vệt ink của cú chạm còn
+  đang tan, tức là còn một mảng màu trên đúng cái hàng mà thay đổi này vừa gỡ
+  nền đi. Golden phải `pumpAndSettle` (an toàn vì không truyền `onFeedbackShown`).
+- **Docs:** `m5-study-modes.md` §5, §8.9, §8.12.
 
 ## Việc không thuộc Study nhưng chặn Definition of Done
 

@@ -76,6 +76,7 @@ void main() {
     }) async {
       final widget = GuessQuestionSectionWidget(
         question: question,
+        turn: turnOf('a'),
         onChosen: (_) => write.future,
         onFeedbackShown: ({required isCorrect}) async => shown?.add(isCorrect),
       );
@@ -145,6 +146,7 @@ void main() {
         wrapForTest(
           GuessQuestionSectionWidget(
             question: question,
+            turn: turnOf('a'),
             onChosen: (_) {
               writes += 1;
 
