@@ -7,7 +7,7 @@
 | **Scope** | Khung phiên học, và năm màn `browse` · `match` · `guess` · `recall` · `fill`. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), luồng (`use-cases.md`), giá trị token (`design_system/tokens/`) |
 | **Source of truth for** | Bố cục màn học · phán quyết cho tám điểm design lệch với BR |
 | **Depends on** | `document-conventions.md`, `business-rules.md` (BR-108…BR-154), `wbs-study.md` (M5.7…M5.20) |
-| **Updated by task** | Rà soát UI 5 stage — `match` chia hai giọng cho hai cột (§4, §8.6), `guess` bỏ huy hiệu A–E (§5), `fill` làm lại vùng đáp án (§6), `browse` cân bằng hai mặt và đổi nhãn (§3) |
+| **Updated by task** | Rà soát UI 5 stage — `match` đổi meaning sang trái, hạ thang chữ và nâng sàn hàng lên 112 (§4, §8.6), `guess` bỏ huy hiệu A–E (§5), `fill` làm lại vùng đáp án (§6), `browse` cân bằng hai mặt và đổi nhãn (§3) |
 | **Last updated** | 2026-08-10 |
 
 Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham chiếu bằng ID.
@@ -122,7 +122,9 @@ Một chỗ ảnh không được làm theo: pill ghi `REVIEW`, trong khi mode t
 
 ## 4. Study · Match (`match_mode`)
 
-Lưới hai cột, mỗi hàng một cặp ô. Ba trạng thái ô:
+Lưới hai cột. **Một hàng là hai ô cùng chỉ số, không phải một cặp** — hai cột
+là hai hoán vị độc lập (BR-127), nên hai ô cạnh nhau gần như không bao giờ thuộc
+cùng một thẻ. Năm trạng thái ô:
 
 | Trạng thái | Hình thức |
 |---|---|
@@ -132,8 +134,11 @@ Lưới hai cột, mỗi hàng một cặp ô. Ba trạng thái ô:
 | vừa ghép sai | nền `error`, có ✕ — một nhịp rồi về idle (§8.8) |
 | đã xong | ô rỗng, chỉ còn viền mờ (§8.8) |
 
-Ô đã ghép **vẫn nằm nguyên chỗ** chứ không biến mất — khác với bản M5.4b hiện
-tại, vốn xoá ô khỏi bàn.
+Ghép xong thì **nội dung biến mất, ô ở lại**: slot vẫn chiếm đúng chỗ cũ với
+một viền mờ. Xoá ô khỏi bàn — như bản M5.4b từng làm — làm mọi ô bên dưới dịch
+lên, tức là dịch ngay khi người dùng đang với tay tới một ô khác. Và vì hai cột
+xáo độc lập, hai khoảng trống của một thẻ thường nằm ở **hai hàng khác nhau**;
+đó là bàn đang chạy đúng, không phải một lỗ thủng.
 
 Dòng ngữ cảnh trong ảnh ghi `BOARD 1 OF 3`. §7.6 từng bác vì "board" không có
 trong BR — **nay có**: BR-156 chia một round thành các bàn năm cặp, nên nhãn ghi
@@ -144,22 +149,39 @@ header đã đo cả round rồi.
 
 **Hai cột là hai giọng, đúng thứ bậc `browse` đã chốt ở §3.** BR-08 định nghĩa
 sẵn hai vế: front là **từ vựng tiếng Hàn**, tối đa 60 ký tự, thứ mắt quét; back
-là **nghĩa tiếng mẹ đẻ**, tối đa 240, thứ mắt đọc. Vậy nên:
+là **nghĩa tiếng mẹ đẻ**, tối đa 240, thứ mắt đọc.
 
-| cột | vai trò | kiểu chữ | số dòng |
-|---|---|---|---|
-| front (term) | quét | `titleLarge` @ `AppTypography.withWeight(w500)` | 2, rồi ellipsis |
-| back (meaning) | đọc | `bodyMedium` (14/w400) | 4, rồi ellipsis |
+| cột | vế | vai trò | kiểu chữ | số dòng |
+|---|---|---|---|---|
+| **trái** | back (meaning) | đọc | `bodySmall` (12/w400) | 6, rồi ellipsis |
+| **phải** | front (term) | quét | `titleMedium` @ `AppTypography.withWeight(w500)` | 2, rồi ellipsis |
 
-Padding dọc `AppSpacing.sm` — bốn dòng nghĩa cần chiều cao, và chiều cao của ô
-là của lưới chứ không của chữ (§8.6).
+Padding ô `AppSpacing.sm` cả bốn phía. `AppMatchTile.minRowHeight = 112`, và
+không một phần nào của nó là số chọn tay: `bodySmall` là 12/16, nghĩa được sáu
+dòng, ô chèn `sm` trên dưới — `6 × 16 + 2 × 8 = 112`.
 
-**Cả hai cột từng dùng một vai title in đậm, cắt ở hai dòng.** Nó đọc được suốt
-một vòng review vì fixture cho mọi thẻ một nghĩa hai chữ — ca không bao giờ
-xuống dòng. Khi fixture mang đúng nghĩa BR-08 cho phép thì bàn tự lộ: một câu
-giải thích in cùng giọng với từ nó đang giải thích, rồi cụt ở dòng thứ hai.
-`match_tile_widget_test.dart` khoá lại quyết định này mà không cần thẻ đó có
-mặt; `study_match_light.png` / `study_match_dark.png` là ảnh của bàn có nó.
+**Meaning bên trái, và chỉ thứ tự trình bày đổi.** Mắt đọc khối dài trước rồi
+quét cột ngắn để đối chiếu; đặt khối sáu dòng bên trái là thứ cho phép lượt quét
+đó chạy một chiều. Không có gì trong domain bị đảo hay dựng lại — vẫn là hai
+hoán vị cũ, xếp ngược lại — và **thao tác không đổi: vẫn phải chọn term tiếng
+Hàn trước** (BR-118), nên ô bên phải mới là ô mở một lượt.
+
+**Chữ nhỏ hơn không làm nghĩa thành vế phụ; nó mua sức chứa.** Chiều cao ô thuộc
+về lưới, nên cỡ chữ ở đây đổi lấy *số chữ đọc được*: ở `bodySmall`, một nghĩa
+thật — hai ngôn ngữ, từ loại, ghi chú cách dùng — vừa sáu dòng trong đúng cái ô
+từng chứa bốn dòng `bodyMedium`. Một nghĩa cụt giữa câu đáng giá thấp hơn một
+nghĩa nhỏ hơn một cỡ.
+
+**Hai vòng trước đều lớn hơn cần thiết, và mỗi vòng lộ ra vì một lý do khác.**
+Vòng #266 hạ cả hai cột khỏi một vai title in đậm chung — lỗi đó ẩn suốt một
+vòng review vì fixture cho mọi thẻ một nghĩa hai chữ, ca không bao giờ xuống
+dòng. Vòng này hạ tiếp: `titleLarge` 22px vẫn to hơn ảnh tham chiếu, và bốn dòng
+vẫn cắt giữa câu trên dữ liệu thật.
+
+`match_tile_widget_test.dart` khoá typography và `minRowHeight`;
+`match_board_layout_test.dart` khoá thứ tự cột, BR-118 sau khi đảo cột, và việc
+slot đã xong không làm bàn reflow. Ảnh: `study_match_{light,dark}.png` và ba cặp
+`study_match_progress_{idle,wrong,paired}_{light,dark}.png`.
 
 ## 5. Study · Guess (`guess_mode`)
 
@@ -584,13 +606,18 @@ Handout dựng lưới **2 cột × 5 hàng**, `gap 8` hai chiều, mọi ô b�
 bàn **358 × 628** ở `16…374 / 104…732`, ô **175 × 119.2**, bước hàng 127.2 =
 119.2 + 8. Không còn dải trống dưới ô cuối.
 
-**Năm hàng là nội dung của mock, không phải luật.** Bàn giữ **cả round**
-(BR-115) và BR-153 chỉ đặt sàn hai cặp — nên mười thẻ là bàn mười hàng, hai thẻ
-là bàn hai hàng. Hàng lúc nào cũng flex thì ca đầu cho ô cao 48 ở textScale 2.0
-và ca sau cho hai tấm 300px. Vì vậy flex **có sàn**: `AppMatchTile.minRowHeight`
-= `minimumTouchTarget`, nhân theo textScaler — một ô là *control* trước khi là
-layout — và bàn không đạt sàn thì **cuộn** thay vì lấp. Mọi bàn vừa vẫn lấp
-chính xác, tức là mọi bàn mock nói tới.
+**Năm hàng là trần, không phải nội dung của mock.** BR-156 chia một round thành
+các bàn tối đa năm cặp, nên round mười hai thẻ là ba bàn và bàn cuối có thể chỉ
+còn một cặp. Biên độ vì thế hẹp nhưng vẫn có: hàng lúc nào cũng flex thì bàn hai
+cặp thành hai tấm 300px, còn bàn năm cặp ở textScale 2.0 thành năm hàng 48px. Vì
+vậy flex **có sàn**: `AppMatchTile.minRowHeight` = **112**, nhân theo textScaler,
+và bàn không đạt sàn thì **cuộn** thay vì bóp. Ở scale 1.0 năm hàng cần
+`5 × 112 + 4 × 8 = 592`, vùng bàn của review surface là 628 — nên mọi bàn một
+điện thoại thật hiển thị vẫn lấp chính xác.
+
+Sàn không còn là `minimumTouchTarget`. Ô vẫn là *control* và 112 vượt 48 rất xa;
+thứ đổi là ràng buộc quyết định: nay nó là sáu dòng nghĩa (§4), không phải ngón
+tay.
 
 Ba trạng thái ô theo handout, dịch sang token của dự án:
 
@@ -599,7 +626,7 @@ Ba trạng thái ô theo handout, dịch sang token của dự án:
 | `mastery` | `AppSemanticColors.success` — `card_state_widget.dart` đã sơn `CardState.mastered` bằng nó, hai tên là một token |
 | nền matched `mastery @12%`, viền `@30%` | `Color.alphaBlend` trên `surfaceContainerLowest`, **không** vẽ trong suốt |
 | radius 12 · gap 8 · transition 200ms `cubic-bezier(0.2,0,0,1)` | `AppRadius.md` · `AppSpacing.sm` · `AppDurations.normal` + `AppDurations.standard` — trùng khít, không thêm token |
-| front 18/w700, back 14/w600 | `titleLarge` @ `w500` và `bodyMedium` — xem §4 |
+| front 18/w700, back 14/w600 | `titleMedium` @ `w500` và `bodySmall` — xem §4 |
 | icon ✓ đứng **trước** chữ, gap 6 | đúng ảnh mẫu; gap = `AppSpacing.xs` |
 
 **Nền matched phải blend, không được vẽ trong suốt.** `color_source_rules_test`

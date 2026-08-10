@@ -23,6 +23,10 @@ import '../items/match_tile_widget.dart';
 /// content goes and the slot stays: a beat of `success` and a tick, then the
 /// words fade out and a faint outline holds the place.
 ///
+/// The two blanks a finished card leaves are usually **not** in the same row,
+/// because the two columns are independent shuffles (BR-127). That is the board
+/// working, not a bug: a row is two tiles at the same index, never a pair.
+///
 /// **Keeping the green tile forever was the wrong half of that decision.** Three
 /// states then compete on one board — idle, selected and paired — and the last
 /// of them is finished business. What it was carrying, *how many pairs are
@@ -35,18 +39,19 @@ import '../items/match_tile_widget.dart';
 ///
 /// ## The grid fills the height, until it cannot
 ///
-/// Two columns, one pair per row, `sm` both ways, and every row an [Expanded] so
-/// the board ends exactly where the hint line begins — no strip of dead page
+/// Two columns, one row per index, `sm` both ways, and every row an [Expanded]
+/// so the board ends exactly where the hint line begins — no strip of dead page
 /// under the last tile and no arithmetic that only holds at one screen size.
 ///
-/// **The handout's five rows are the mock's content, not a rule.** A board holds
-/// the whole round (BR-115) and BR-153 only sets a floor of two pairs, so ten
-/// cards is a ten-row board and two is a two-row one. Rows that always flex
-/// would make the first case 48px tall at 2.0 text scale and the second a pair
-/// of 300px slabs. So the flex has a floor — [AppMatchTile.minRowHeight], scaled
-/// with the text, because a tile is a tap target before it is a layout — and a
-/// board that cannot meet it scrolls instead. Every board that fits still fills
-/// exactly, which is every board the mock covers.
+/// **Five rows is a ceiling, not the mock's content.** BR-156 splits a round
+/// into boards of at most five pairs, so a round of twelve is three boards and
+/// the last one can be a single pair. What varies is therefore small, but it
+/// still varies: rows that always flex would give a two-pair board a pair of
+/// 300px slabs, and a five-pair board 48px rows at 2.0 text scale. So the flex
+/// has a floor — [AppMatchTile.minRowHeight], scaled with the text — and a board
+/// that cannot meet it scrolls instead of squeezing. At 1.0 the floor is 112 and
+/// five rows need 592, which the review surface's board area clears, so every
+/// board a phone shows still fills exactly.
 class MatchBoardSectionWidget extends StatefulWidget {
   const MatchBoardSectionWidget({
     required this.board,
@@ -253,14 +258,25 @@ class _MatchBoardSectionWidgetState extends State<MatchBoardSectionWidget> {
     },
   );
 
-  /// One pair's row. The two sides are independent shuffles (BR-127), so a row
-  /// index means "the nth tile on each side" and never "these two go together".
+  /// One row of the board. The two sides are independent shuffles (BR-127), so a
+  /// row index means "the nth tile on each side" and never "these two go
+  /// together" — which is also why a finished card can leave its two blanks in
+  /// two different rows.
+  ///
+  /// **Meanings on the left, terms on the right, and only the order is
+  /// presentational.** The eye reads the long column first and scans the short
+  /// one against it; putting the six-line block on the left is what lets that
+  /// scan run in one direction. Nothing in the domain is reversed or rebuilt to
+  /// do it — these are the same two permutations, laid out the other way round —
+  /// and the interaction is untouched: the Korean term is still what must be
+  /// picked first, so it is still the right-hand tile that calls [_selectTerm]
+  /// (BR-118).
   Widget _row(int index) => Row(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: <Widget>[
-      Expanded(child: _tile(widget.board.terms[index], isTerm: true)),
-      const SizedBox(width: AppSpacing.sm),
       Expanded(child: _tile(widget.board.meanings[index], isTerm: false)),
+      const SizedBox(width: AppSpacing.sm),
+      Expanded(child: _tile(widget.board.terms[index], isTerm: true)),
     ],
   );
 

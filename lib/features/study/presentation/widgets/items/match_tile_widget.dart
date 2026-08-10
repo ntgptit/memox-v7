@@ -76,15 +76,25 @@ class MatchTileWidget extends StatelessWidget {
     // **The board's two columns carry the same hierarchy `browse` carries**
     // (BR-08): the front is the Korean term, capped at 60 characters and there
     // to be scanned; the back is the meaning, up to 240, and there to be read.
-    // Both used a title role in bold, which put a four-line gloss in the same
-    // voice as the word it explains and then cut it at two lines.
+    //
+    // **The smaller role does not make the meaning the lesser column.** A tile's
+    // height belongs to the grid, so type size here buys *capacity*: at
+    // `bodySmall` a real gloss — two languages, a part of speech, a usage note —
+    // fits six lines inside the same slot that held four at `bodyMedium`, and a
+    // meaning cut mid-sentence is worth less than one a size smaller. The term
+    // drops with it, to `titleMedium` at `w500`: it only has to be found, and it
+    // is the only Hangul on its side of the board.
+    //
+    // `withWeight` rather than `copyWith(fontWeight:)` — the faces here are
+    // variable, so the weight has to move in `fontVariations` too or the render
+    // stays at the style's own weight while every test agrees it changed.
     final style =
         (isTerm
                 ? AppTypography.withWeight(
-                    context.texts.titleLarge!,
+                    context.texts.titleMedium!,
                     FontWeight.w500,
                   )
-                : context.texts.bodyMedium)
+                : context.texts.bodySmall)
             ?.copyWith(color: skin.foreground);
     final radius = BorderRadius.circular(AppRadius.md);
     // **Only the transition is reduced, never the beat a state is held for.**
@@ -123,13 +133,12 @@ class MatchTileWidget extends StatelessWidget {
             onTap: _isTappable ? onTap : null,
             borderRadius: radius,
             child: Padding(
-              // Tighter at the ends than at the sides: a meaning that runs to
-              // four lines needs the height, and the horizontal inset is what
-              // keeps it off the tile's edge.
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: AppSpacing.sm,
-              ),
+              // Even on all four sides, and `sm` because six lines of meaning
+              // need the width as much as the height. `md` at the sides cost
+              // eight logical pixels of every line — which is a word per line
+              // on a 175-wide tile, and the six-line budget was bought to hold
+              // words.
+              padding: const EdgeInsets.all(AppSpacing.sm),
               child: Center(
                 child: AnimatedOpacity(
                   // The content leaving *is* the pair disappearing. The slot
@@ -164,10 +173,10 @@ class MatchTileWidget extends StatelessWidget {
           style: style,
           textAlign: TextAlign.center,
           // The row's height is the grid's to decide, so text gives way rather
-          // than pushing the board out of shape. A term has 60 characters to
-          // spend and fits in two lines; a meaning has 240 and needs four
-          // before an ellipsis is a fair summary of it.
-          maxLines: isTerm ? 2 : 4,
+          // than pushing the board out of shape.
+          maxLines: isTerm
+              ? AppMatchTile.termMaxLines
+              : AppMatchTile.meaningMaxLines,
           overflow: TextOverflow.ellipsis,
         ),
       ),
@@ -309,11 +318,31 @@ abstract final class AppMatchTile {
   /// the grid stays legible as a grid.
   static const double clearedOutlineAlpha = 0.45;
 
+  /// How many lines the Korean term is given. Sixty characters of Hangul at
+  /// `titleMedium` reach the second line and no further.
+  static const int termMaxLines = 2;
+
+  /// How many lines the meaning is given.
+  ///
+  /// Six, because that is what BR-08's 240 characters actually take at
+  /// `bodySmall` on a half-width tile: an English gloss, a native one, and the
+  /// parenthetical that says which of the two a learner should use. Four cut
+  /// that mid-sentence, and an ellipsis in the middle of a usage note is
+  /// indistinguishable from a deck with bad data.
+  static const int meaningMaxLines = 6;
+
   /// The shortest a row is allowed to get before the board stops filling the
   /// height and starts scrolling.
   ///
-  /// [AppSpacing.minimumTouchTarget], because a tile is a control: a board of
-  /// twelve pairs that divided the height evenly would hand a thumb 40px rows,
-  /// and the grid looking tidy is worth less than the taps landing.
-  static const double minRowHeight = AppSpacing.minimumTouchTarget;
+  /// **112, and every part of it is [meaningMaxLines].** `bodySmall` is 12/16 —
+  /// six lines is 96 — and the tile insets `AppSpacing.sm` top and bottom:
+  /// `6 × 16 + 2 × 8 = 112`. So this is not a chosen number but the height the
+  /// typography above already implies, and the two move together or the board
+  /// silently starts ellipsising the sixth line it was sized to show.
+  ///
+  /// It was [AppSpacing.minimumTouchTarget] while the meaning had four lines and
+  /// the floor was only about a thumb. A tile is still a control, and 112 clears
+  /// 48 with room to spare; what changed is that the tap target stopped being
+  /// the binding constraint.
+  static const double minRowHeight = 112;
 }
