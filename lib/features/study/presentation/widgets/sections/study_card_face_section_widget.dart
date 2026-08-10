@@ -12,6 +12,31 @@ import '../../../domain/models/study_action_model.dart';
 import '../../../domain/models/study_turn_model.dart';
 import '../support/study_labels_widget.dart';
 
+/// Which face is the focal one, which is what decides both faces' roles.
+///
+/// **A named contract rather than a second reading of
+/// [StudyCardFaceSectionWidget.shouldShowBackImmediately].** The two happen to
+/// move together today, but they are different questions, and a widget that
+/// inferred one from the other would silently pick a hierarchy the next mode
+/// never asked for.
+enum StudyFaceEmphasis {
+  /// The front carries context and the back is what the eye should land on.
+  ///
+  /// `browse` (BR-112). A front here is not a term — decks hold "Be shy /
+  /// Ngượng ngùng (Động từ, thể hiện sự e ngại trong giao tiếp)" on it — so it
+  /// is a sentence to read, at a body role and a regular weight. The back is
+  /// the thing being learned, and it takes the title role.
+  ///
+  /// The first attempt gave both faces one role and called them peers. That
+  /// fixed the front swallowing the card and lost the point of the screen: two
+  /// equal blocks say nothing about which one to look at.
+  frontSupportingBack,
+
+  /// The front is the prompt and the back is the answer it is checked against.
+  /// `self_assess`: the front is the largest thing on screen until the flip.
+  promptFirst,
+}
+
 /// The card in front of the user, in the two modes that only show it.
 ///
 /// **`browse` and `self_assess` differ by exactly one thing, so they share a
@@ -24,25 +49,6 @@ import '../support/study_labels_widget.dart';
 /// [actions] comes from the scheduler (BR-30). This widget never decides how
 /// many buttons there are — a hardcoded pair is wrong for every `sm2` deck and a
 /// hardcoded four is wrong for every `eight_box` one.
-/// How the two faces relate to each other, which is what decides their sizes.
-///
-/// **A named contract rather than a second reading of
-/// [StudyCardFaceSectionWidget.shouldShowBackImmediately].** The two happen to
-/// move together today — `browse` shows both at once and treats them as peers,
-/// `self_assess` reveals the back and treats the front as the prompt — but they
-/// are different questions, and a widget that inferred one from the other would
-/// silently pick a hierarchy the next mode never asked for.
-enum StudyFaceEmphasis {
-  /// Both faces are there to be read, and neither is the question. `browse`
-  /// (BR-112): the front and the back are two sides of one thing, so they take
-  /// the same typographic role and a long front cannot swallow the card.
-  peers,
-
-  /// The front is the prompt and the back is the answer it is checked against.
-  /// `self_assess`: the front is the largest thing on screen until the flip.
-  promptFirst,
-}
-
 class StudyCardFaceSectionWidget extends StatelessWidget {
   const StudyCardFaceSectionWidget({
     required this.turn,
@@ -179,8 +185,14 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
                   child: _CardHalf(
                     label: l10n.studyCardFaceFront,
                     text: _card.front,
-                    style: widget.emphasis == StudyFaceEmphasis.peers
-                        ? texts.headlineSmall
+                    // **A body role for the supporting face.** A front here is
+                    // a sentence with a gloss in it, not a term; at a headline
+                    // role and w600 it read as the thing to learn and took the
+                    // whole card. `self_assess` keeps the prompt role, because
+                    // there the front *is* the question until the flip.
+                    style:
+                        widget.emphasis == StudyFaceEmphasis.frontSupportingBack
+                        ? texts.bodyLarge
                         : texts.headlineMedium,
                     // **The tight end is the one facing the rule, so it is only
                     // tight when there is a rule to face.** Before the flip
@@ -206,7 +218,18 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
                     child: _CardHalf(
                       label: l10n.studyCardFaceBack,
                       text: _card.back,
-                      style: texts.headlineSmall,
+                      // The focal face of `browse`, one step down in weight so
+                      // it leads without shouting — `withWeight` rather than a
+                      // literal, so the family and the line height stay the
+                      // scale's.
+                      style:
+                          widget.emphasis ==
+                              StudyFaceEmphasis.frontSupportingBack
+                          ? AppTypography.withWeight(
+                              texts.titleLarge!,
+                              FontWeight.w500,
+                            )
+                          : texts.headlineSmall,
                       padding: const EdgeInsets.only(
                         top: AppSpacing.sm,
                         bottom: AppSpacing.lg,

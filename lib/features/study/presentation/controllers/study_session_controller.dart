@@ -201,17 +201,21 @@ class StudySessionController extends _$StudySessionController {
   /// so putting an already-answered card there would offer to grade something
   /// the session has already graded (BR-126).
   Future<void> browseStep(StudyBrowseStep step) {
-    if (step == StudyBrowseStep.forward && !state.isLookingBack) {
-      return answer(_browseHasNoAction);
-    }
-
+    // **Every guard, before either branch.** They used to sit under the forward
+    // shortcut, which is the one branch that writes: a second swipe arriving
+    // while the first was still fetching went straight to `answer()` and marked
+    // the same card browsed twice. `isAdvancing` covers exactly that window —
+    // `answer()` clears `isSubmitting` before `_pullTurn` sets `isAdvancing`,
+    // so guarding only the first leaves the second wide open (BR-155: stepping
+    // forward again writes no second turn and moves no cursor twice).
     if (state.session?.currentMode != StudyMode.browse) {
       return Future<void>.value();
     }
-    // Advancing as well as submitting: a forward step writes the progress and
-    // then pulls the next turn, and only the write was guarded — so the fetch
-    // was a window in which a second step counted (BR-155's "no second turn").
     if (state.isSubmitting || state.isAdvancing) return Future<void>.value();
+
+    if (step == StudyBrowseStep.forward && !state.isLookingBack) {
+      return answer(_browseHasNoAction);
+    }
 
     final next = step == StudyBrowseStep.back
         ? state.browseLookBack + 1

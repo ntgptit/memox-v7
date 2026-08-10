@@ -10,11 +10,13 @@ import 'package:memox/core/time/clock_provider.dart';
 import 'package:memox/core/time/time_zone_provider.dart';
 import 'package:memox/features/study/di/study_repository_provider.dart';
 import 'package:memox/features/study/domain/entities/study_queue_item_entity.dart';
+import 'package:memox/features/study/domain/models/study_action_model.dart';
 import 'package:memox/features/study/domain/models/study_mode.dart';
 import 'package:memox/features/study/domain/models/study_queue_item_status_model.dart';
 import 'package:memox/features/study/domain/models/study_session_kind_model.dart';
 import 'package:memox/features/study/domain/models/study_session_status_model.dart';
 import 'package:memox/features/study/domain/models/study_turn_model.dart';
+import 'package:memox/features/study/presentation/controllers/study_session_controller.dart';
 import 'package:memox/features/study/presentation/screens/study_session_screen.dart';
 import 'package:memox/features/study/presentation/widgets/support/study_swipe_deck_widget.dart';
 import 'package:memox/shared/widgets/mx_loading_state.dart';
@@ -67,12 +69,13 @@ void main() {
     WidgetTester tester, {
     required StudyMode mode,
     required StudySessionKind kind,
+    SchedulerType schedulerType = SchedulerType.sm2,
   }) async {
     // `sm2`, so `self_assess` is a review mode the algorithm actually offers
     // (BR-146). Asking an `eight_box` deck for it is refused, and the screen
     // would then be its error state rather than a session.
     final repository = FakeStudyRepository(
-      schedulerType: SchedulerType.sm2,
+      schedulerType: schedulerType,
       stageExhausted: false,
     )..nextTurn_ = turnOf(mode);
 
@@ -137,7 +140,7 @@ void main() {
     expect(find.text('사과'), findsOneWidget);
 
     final gate = Completer<void>();
-    repository.advanceGate = gate;
+    repository.nextTurnGate = gate;
 
     await tester.drag(
       find.byType(StudySwipeDeckWidget),
@@ -155,6 +158,64 @@ void main() {
 
     gate.complete();
     await tester.pumpAndSettle();
+  });
+
+  testWidgets('a non-browse mode still shows loading while advancing', (
+    tester,
+  ) async {
+    // **The counterpart, and the reason the first fix was too wide.** Keeping
+    // the body for every mode turns advancing into a global interaction lock,
+    // which is wrong for `match`: its board answers several pairs in a row on
+    // one screen and the moment between them is not a moment to freeze. Keeping
+    // the card is `browse` behaviour, asked of `browse` alone.
+    // `fill` on an `eight_box` deck. Two false starts worth recording: `match`
+    // on the `sm2` fixture is refused before it reaches the fetch — `sm2` offers
+    // no board (BR-146) — so the test would have passed without entering the
+    // window it claims to check; and `recall` runs a countdown, so nothing on
+    // that screen ever settles. `fill` is a non-browse eight-box mode with an
+    // algorithm that accepts an answer and no timer.
+    final repository = await pumpSession(
+      tester,
+      mode: StudyMode.fill,
+      kind: StudySessionKind.reviewing,
+      schedulerType: SchedulerType.eightBox,
+    );
+
+    final gate = Completer<void>();
+    repository.nextTurnGate = gate;
+
+    // Straight at the controller: `match` advances from a graded answer, and
+    // driving the board to grade one is a different test's subject.
+    unawaited(
+      tester
+                  .element(find.byType(StudySessionScreen))
+                  .findAncestorWidgetOfExactType<ProviderScope>() ==
+              null
+          ? Future<void>.value()
+          : Future<void>.value(),
+    );
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(StudySessionScreen)),
+    );
+    unawaited(
+      container
+          .read(studySessionControllerProvider('deck-1').notifier)
+          .answer(StudyAction.remembered),
+    );
+    // Plain pumps, never `pumpAndSettle`: the state under test *is* the
+    // loading state, and its spinner animates forever — settling waits for a
+    // screen that has no intention of stopping. Enough frames to get past the
+    // write and into the fetch, where the gate holds it.
+    for (var i = 0; i < 6; i++) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+
+    expect(find.byType(MxLoadingState), findsOneWidget);
+
+    gate.complete();
+    for (var i = 0; i < 6; i++) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
   });
 
   testWidgets('closing ends the session rather than popping the route', (
