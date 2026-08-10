@@ -1,9 +1,9 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 305,
-  "totalSites": 361,
+  "scannedFiles": 312,
+  "totalSites": 357,
   "byElementKind": {
-    "other": 278,
+    "other": 274,
     "background": 13,
     "shadow": 1,
     "border": 13,
@@ -12,7 +12,7 @@
   },
   "bySourceKind": {
     "shared-constant": 143,
-    "blend-source": 10,
+    "blend-source": 6,
     "Colors-material": 5,
     "hardcoded-literal": 97,
     "opacity-modified-token": 11,
@@ -3463,50 +3463,6 @@
       "resolved_value_dark": "#A8A7C4"
     },
     {
-      "file": "lib/features/study/presentation/widgets/items/guess_option_item_widget.dart",
-      "line": 71,
-      "widget_context": "GuessOptionItemWidget",
-      "element_kind": "other",
-      "source_kind": "blend-source",
-      "expression": "semantic.success.withValues(alpha: AppGuessOption.correctFillAlpha)",
-      "token": "semantic.success",
-      "resolved_value_light": "#10795C",
-      "resolved_value_dark": "#4FC79B"
-    },
-    {
-      "file": "lib/features/study/presentation/widgets/items/guess_option_item_widget.dart",
-      "line": 75,
-      "widget_context": "GuessOptionItemWidget",
-      "element_kind": "other",
-      "source_kind": "blend-source",
-      "expression": "semantic.danger.withValues(alpha: AppGuessOption.wrongFillAlpha)",
-      "token": "semantic.danger",
-      "resolved_value_light": "#C02B3A",
-      "resolved_value_dark": "#F2808F"
-    },
-    {
-      "file": "lib/features/study/presentation/widgets/items/guess_option_item_widget.dart",
-      "line": 82,
-      "widget_context": "GuessOptionItemWidget",
-      "element_kind": "other",
-      "source_kind": "blend-source",
-      "expression": "semantic.success.withValues(alpha: AppGuessOption.correctOutlineAlpha)",
-      "token": "semantic.success",
-      "resolved_value_light": "#10795C",
-      "resolved_value_dark": "#4FC79B"
-    },
-    {
-      "file": "lib/features/study/presentation/widgets/items/guess_option_item_widget.dart",
-      "line": 86,
-      "widget_context": "GuessOptionItemWidget",
-      "element_kind": "other",
-      "source_kind": "blend-source",
-      "expression": "semantic.danger.withValues(alpha: AppGuessOption.wrongOutlineAlpha)",
-      "token": "semantic.danger",
-      "resolved_value_light": "#C02B3A",
-      "resolved_value_dark": "#F2808F"
-    },
-    {
       "file": "lib/features/study/presentation/widgets/items/match_tile_widget.dart",
       "line": 255,
       "widget_context": "_TileSkin",
@@ -3519,7 +3475,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/fill_answer_section_widget.dart",
-      "line": 134,
+      "line": 172,
       "widget_context": "_FillAnswerSectionWidgetState",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3530,7 +3486,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/fill_answer_section_widget.dart",
-      "line": 154,
+      "line": 192,
       "widget_context": "_FillAnswerSectionWidgetState",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3541,7 +3497,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/fill_answer_section_widget.dart",
-      "line": 255,
+      "line": 293,
       "widget_context": "_AnswerBlock",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3552,7 +3508,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/fill_answer_section_widget.dart",
-      "line": 264,
+      "line": 302,
       "widget_context": "_AnswerBlock",
       "element_kind": "background",
       "source_kind": "blend-source",
@@ -3563,7 +3519,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/fill_answer_section_widget.dart",
-      "line": 270,
+      "line": 308,
       "widget_context": "_AnswerBlock",
       "element_kind": "border",
       "source_kind": "blend-source",
@@ -3574,7 +3530,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/guess_question_section_widget.dart",
-      "line": 246,
+      "line": 306,
       "widget_context": "_PromptCard",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3584,19 +3540,8 @@
       "resolved_value_dark": "#A8A7C4"
     },
     {
-      "file": "lib/features/study/presentation/widgets/sections/recall_timer_section_widget.dart",
-      "line": 240,
-      "widget_context": "_RecallTimerSectionWidgetState",
-      "element_kind": "text",
-      "source_kind": "theme-token",
-      "expression": "context.colors.onSurfaceVariant",
-      "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#565C72",
-      "resolved_value_dark": "#A8A7C4"
-    },
-    {
-      "file": "lib/features/study/presentation/widgets/sections/recall_timer_section_widget.dart",
-      "line": 280,
+      "file": "lib/features/study/presentation/widgets/sections/recall_timer_pieces_widget.dart",
+      "line": 30,
       "widget_context": "_AnswerArea",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3606,8 +3551,8 @@
       "resolved_value_dark": "unresolvable: colorScheme.surfaceContainerLow not in the dumped theme"
     },
     {
-      "file": "lib/features/study/presentation/widgets/sections/recall_timer_section_widget.dart",
-      "line": 334,
+      "file": "lib/features/study/presentation/widgets/sections/recall_timer_pieces_widget.dart",
+      "line": 84,
       "widget_context": "_HiddenBar",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -3617,8 +3562,19 @@
       "resolved_value_dark": "unresolvable: semantic.borderControl not in the dumped theme"
     },
     {
+      "file": "lib/features/study/presentation/widgets/sections/recall_timer_section_widget.dart",
+      "line": 283,
+      "widget_context": "_RecallTimerSectionWidgetState",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
+    },
+    {
       "file": "lib/features/study/presentation/widgets/sections/study_card_face_section_widget.dart",
-      "line": 225,
+      "line": 269,
       "widget_context": "_StudyCardFaceViewState",
       "element_kind": "border",
       "source_kind": "theme-token",
@@ -3629,7 +3585,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_card_face_section_widget.dart",
-      "line": 333,
+      "line": 379,
       "widget_context": "_CardHalf",
       "element_kind": "text",
       "source_kind": "theme-token",

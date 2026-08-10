@@ -9,6 +9,7 @@ import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_card.dart';
+import '../../../domain/models/study_turn_model.dart';
 import '../../../domain/models/study_answer_commit_model.dart';
 import '../../../domain/models/guess_mode.dart';
 import '../items/guess_option_item_widget.dart';
@@ -32,6 +33,7 @@ import '../items/guess_option_item_widget.dart';
 class GuessQuestionSectionWidget extends StatefulWidget {
   const GuessQuestionSectionWidget({
     required this.question,
+    required this.turn,
     required this.onChosen,
     this.onFeedbackShown,
     this.onResolved,
@@ -40,6 +42,16 @@ class GuessQuestionSectionWidget extends StatefulWidget {
   });
 
   final GuessQuestion question;
+
+  /// The turn this question belongs to, and the only sound thing to reset on.
+  ///
+  /// **A card id does not identify a turn.** A card answered wrongly comes back
+  /// in the next round (BR-116), and `question.term.id` is then the same string
+  /// it was — so the guard survived, the chosen row stayed marked, and the
+  /// question could not be answered a second time at all. `isSameTurnAs`
+  /// compares the round as well, which is what makes two visits to one card two
+  /// different questions.
+  final StudyTurnModel turn;
 
   /// Writes the answer and hands back what the transaction did (BR-157).
   final Future<StudyAnswerCommitModel?> Function(GuessOption) onChosen;
@@ -78,9 +90,12 @@ class _GuessQuestionSectionWidgetState
   void didUpdateWidget(GuessQuestionSectionWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // A new question is a new turn. Without this the guard survives the card
-    // change and the next question cannot be answered at all.
-    if (oldWidget.question.term.id != widget.question.term.id) {
+    // **The turn, not the card.** A card answered wrongly comes back next round
+    // with the same id, so comparing ids let the previous visit's verdict — and
+    // its answered-already guard — carry straight over into a question that had
+    // not been asked yet. Comparing the turn means a rebuild inside one question
+    // resets nothing and a new round resets everything.
+    if (!oldWidget.turn.isSameTurnAs(widget.turn)) {
       _chosenCardId = null;
       _isSubmitting = false;
     }

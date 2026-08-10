@@ -114,6 +114,7 @@ Widget? _guessView({
   return GuessQuestionSectionWidget(
     onResolved: onResolved,
     question: question,
+    turn: turn,
     isLocked: state.isBusy,
     onChosen: (option) => _send(
       onAnswer,

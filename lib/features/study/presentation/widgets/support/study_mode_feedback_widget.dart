@@ -33,10 +33,14 @@ final class StudyModeFeedback {
 /// The reading budgets, named one at a time so each is a decision with a reason
 /// rather than a number inside a table.
 abstract final class AppStudyFeedback {
-  /// Five rows, one of them now green and possibly one red: finding both is two
-  /// scans of the same list.
-  static const Duration guessCorrect = Duration(milliseconds: 700);
-  static const Duration guessWrong = Duration(milliseconds: 1200);
+  /// Right is one row confirmed, and the eye is already on it.
+  static const Duration guessCorrect = Duration(milliseconds: 800);
+
+  /// **Wrong is a search, and 1200ms was timing the wrong task.** The learner
+  /// has to find the row they picked, then find the right answer somewhere among
+  /// five meanings that each run to three or four lines, then read it. That is
+  /// not a glance.
+  static const Duration guessWrong = Duration(milliseconds: 1800);
 
   /// The longest of the five, and the only mode where the answer was never on
   /// screen before: the back of the card is new text either way.

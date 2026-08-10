@@ -7,8 +7,8 @@
 | **Scope** | Khung phiên học, và năm màn `browse` · `match` · `guess` · `recall` · `fill`. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), luồng (`use-cases.md`), giá trị token (`design_system/tokens/`) |
 | **Source of truth for** | Bố cục màn học · phán quyết cho tám điểm design lệch với BR |
 | **Depends on** | `document-conventions.md`, `business-rules.md` (BR-108…BR-154), `wbs-study.md` (M5.7…M5.20) |
-| **Updated by task** | Rà soát UI 5 stage — `match` nhận cả hai chiều chọn và giữ trạng thái đủ lâu để đọc (§4, §8.8), chuyển feedback sang viền + chữ thay vì nền đặc (§4), đổi meaning sang trái, hạ thang chữ và nâng sàn hàng lên 112 (§4, §8.6), `guess` bỏ huy hiệu A–E (§5), `fill` làm lại vùng đáp án (§6), `browse` cân bằng hai mặt và đổi nhãn (§3) |
-| **Last updated** | 2026-08-10 |
+| **Updated by task** | `guess` bỏ nền phán quyết — đúng/sai chỉ còn viền + chữ + icon, ba hàng còn lại lùi về 0.7 thay vì 0.36, reset theo lượt thay vì `cardId`, ngân sách đọc 800/1800ms (§5, §8.9, §8.12) · Rà soát UI 5 stage — `match` nhận cả hai chiều chọn và giữ trạng thái đủ lâu để đọc (§4, §8.8), chuyển feedback sang viền + chữ thay vì nền đặc (§4), đổi meaning sang trái, hạ thang chữ và nâng sàn hàng lên 112 (§4, §8.6), `guess` bỏ huy hiệu A–E (§5), `fill` làm lại vùng đáp án (§6), `browse` cân bằng hai mặt và đổi nhãn (§3) |
+| **Last updated** | 2026-08-11 |
 
 Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham chiếu bằng ID.
 
@@ -216,8 +216,12 @@ slot đã xong không làm bàn reflow. Ảnh: `study_match_{light,dark}.png` v�
 
 - Thẻ đề ở trên: nhãn `WHAT IS THIS?` rồi thuật ngữ cỡ lớn.
 - Năm hàng lựa chọn. Mỗi hàng chỉ có nghĩa của thẻ.
-- Sau khi trả lời: đáp án đúng nền xanh lá + ✓; lựa chọn sai đã chọn nền đỏ + ✕;
-  ba lựa chọn còn lại mờ đi.
+- Sau khi trả lời: đáp án đúng **viền + chữ** `success` kèm ✓; lựa chọn sai đã
+  chọn **viền + chữ** `danger` kèm ✕; ba lựa chọn còn lại lùi lại nhưng vẫn đọc
+  được. **Không hàng nào đổi nền** (§8.9).
+- **Đáp án đúng luôn được đánh dấu, kể cả khi người học chọn sai** (BR-126). Màn
+  chỉ đánh dấu lựa chọn của người dùng để lại đúng một thông tin — "bạn sai" —
+  mà thiếu mất thông tin duy nhất đáng học: vậy đúng là cái nào.
 
 Dòng mô tả phụ không có trường nào chứa, nên **không dựng** ở MVP: mỗi lựa chọn
 chỉ hiện nghĩa (§7.5).
@@ -773,7 +777,7 @@ thuộc hoàn toàn vào việc nó nói bao nhiêu. Vì thế chúng là compon
 |---|---:|---:|---|
 | `browse` | — | — | mỗi lần vuốt tới |
 | `match` | 500ms (ô) | 700ms (ô) | chỉ sau cặp cuối của bàn |
-| `guess` | 700ms | 1200ms | hết feedback |
+| `guess` | 800ms | 1800ms | hết feedback |
 | `recall` | 1800ms (revealed) | 2200ms (hết giờ) | hết feedback |
 | `fill` | 800ms | 2200ms | hết feedback |
 | `self_assess` | — | — | ngay sau khi ghi |
@@ -831,18 +835,33 @@ Bốn trạng thái hàng, dịch sang token:
 
 | handout | dự án |
 |---|---|
-| correct `mastery` @14% nền, @40% viền | `success` qua `Color.alphaBlend`, R7 |
-| wrong `danger` @10% nền, @35% viền, chữ `error` | `danger` — trong app này `error` **là** `danger` |
-| faded opacity 0.36 | đúng 0.36 (trước là 0.5) |
+| correct `mastery` @14% nền, @40% viền | **không nền**; viền `success` đặc ở `AppStroke.input`, chữ `success`, ✓ |
+| wrong `danger` @10% nền, @35% viền, chữ `error` | **không nền**; viền `danger` đặc, chữ `danger`, ✕ — trong app này `error` **là** `danger` |
+| faded opacity 0.36 | **0.7** — 0.36 rơi xuống dưới 4.5:1 mà chữ thân cần |
 | badge 28, viền 1.5, opacity 0.85 | `AppStroke.input` = 1.5 |
 | chữ 16/w500 | `titleMedium` (16/w600) — thang chữ không có w500, đẻ một weight cho một hàng là đúng thứ `app_typography.dart` sinh ra để chặn |
 | min-height 50 | `minimumTouchTarget` = 48 — sàn của một control là con số dự án đã có |
 | icon verdict 18 | `AppIconSize.sm` = 16 |
 | transition 200ms `cubic-bezier(0.2,0,0,1)` | `AppDurations.normal` + `standard`, qua `AppMotionPolicy` |
 
-**Nền có tô, không chỉ viền.** Handout đúng ở chỗ này: chỉ viền thì màn đã trả
-lời đọc ra thành năm hàng cùng trọng lượng với hai cái mép có màu, mắt phải đi
-tìm cái nào là cái nào.
+**Phán quyết là mép, chữ và dấu — không bao giờ là nền.** Chỗ này trước đây theo
+handout, với lập luận rằng chỉ viền thì mắt phải đi tìm. Không phải vậy: năm hàng
+chữ chạy dài là một trang giấy, tô kín hai hàng trong đó biến màn hình người học
+đang *đọc* thành màn hình đang quát vào mặt họ. `match` đã đi tới cùng kết luận
+vì cùng lý do (§8.8), và một hàng có nghĩa dài bốn dòng còn nhiều diện tích để
+quát hơn một ô `match`.
+
+Thứ giữ cho nó vẫn dễ tìm: viền **tăng độ dày** (`AppStroke.input` so với hairline
+của hàng chưa chọn), chữ **cả câu** mang màu phán quyết chứ không phải một chip
+dán lên, và ✓/✕ nằm cuối hàng. Ba hàng còn lại lùi về `dimmedOpacity` = 0.7 —
+chúng vẫn là bốn trong năm nghĩa mà người học vừa cân nhắc, nên nhòe quá mức làm
+màn sau-khi-trả-lời mất luôn ngữ cảnh của chính nó.
+
+**Câu hỏi được reset theo *lượt*, không theo `cardId`.** Một thẻ trả lời sai quay
+lại ở vòng sau với cùng id (BR-116), nên so `question.term.id` là không so gì cả:
+phán quyết của lần trước ở lại trên hàng và khoá "đã trả lời" cũng ở lại, để lại
+một câu hỏi không thể trả lời. `StudyTurnModel.isSameTurnAs` so cả vòng, nên
+rebuild trong một lượt không xoá gì và sang vòng mới thì xoá sạch.
 
 **Còn thiếu, có chủ đích:** handout ghi dòng gợi ý sau khi trả lời là
 `Answer shown — the correct option is highlighted`, tức `guess` có **hai** dòng
