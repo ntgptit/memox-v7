@@ -25,12 +25,20 @@ import '../support/study_render.dart';
 ///   flutter test --update-goldens --tags golden test/demo/card_screens_demo_test.dart
 /// PNGs land in test/demo/goldens/.
 ///
-/// **Latin sample content on purpose.** `flutter_test`'s golden renderer does not
-/// exercise the CJK `fontFamilyFallback` the app wires (see
-/// `AppTypography.cjkFallbackFamily`), so seeding Korean here would render tofu
-/// boxes in the PNG even though a device shows the script. The fallback wiring is
-/// proven instead by `test/core/theme/cjk_fallback_test.dart`; these renders use
-/// English vocabulary so the layout is faithful.
+/// **Korean sample content, because that is the content the app exists for.**
+/// These renders carried English vocabulary for months on the stated grounds that
+/// the golden renderer "does not exercise the CJK `fontFamilyFallback`". It does.
+/// What it could not do was reach a face nobody registered: `NotoSansKR` was in
+/// `pubspec.yaml` and on every rung of `AppTypography`, and absent from
+/// `test/flutter_test_config.dart`. Hangul came out as boxes, and the fixtures
+/// were moved to Latin so the pictures stayed readable — which removed the
+/// evidence rather than the fault.
+///
+/// Latin also made the renders unfaithful in a way that matters for review:
+/// Hangul syllables are full-width and set taller, so a five-syllable front
+/// occupies roughly what a ten-character Latin word does, and the row, the prompt
+/// and the wrap points all sit differently. The vocabulary here is the same set
+/// the Widgetbook catalog and `integration_test/` use, so the three agree.
 /// **A card past `isNew` gets a due date, because a real one has.** BR-77 fills
 /// `due_at` on the first `scheduled` review, so only a never-reviewed card has
 /// none — and the row draws no due badge for those. Leaving every fixture row at
@@ -59,10 +67,10 @@ final DateTime _demoDueAt = DateTime.utc(2020);
 // The deck the card list belongs to (W1): its name titles the screen and its
 // ancestors draw the breadcrumb.
 const DeckContextModel _demoContext = DeckContextModel(
-  deckName: 'English · IELTS',
+  deckName: 'Korean · TOPIK I',
   ancestors: <DeckBreadcrumbSegment>[
     DeckBreadcrumbSegment(id: 'lang', name: 'Languages'),
-    DeckBreadcrumbSegment(id: 'en', name: 'English'),
+    DeckBreadcrumbSegment(id: 'ko', name: 'Korean'),
   ],
 );
 
@@ -102,35 +110,28 @@ ProviderScope _scope(FakeCardRepository repo, Widget home, Brightness mode) =>
 void main() {
   testWidgets('card list — full row (state, flag, due badge)', (tester) async {
     final repo = _demoList(<CardListItemModel>[
-      demoItem('c1', 'ephemeral', 'short-lived / phù du', CardState.isNew),
-      demoItem('c2', 'ubiquitous', 'everywhere / khắp nơi', CardState.mastered),
+      demoItem('c1', '사과', 'apple / quả táo', CardState.isNew),
+      demoItem('c2', '바다', 'sea / biển', CardState.mastered),
+      // The two five-syllable fronts are the wide case: a Hangul syllable is
+      // full-width, so these run about as far as a ten-letter Latin word and are
+      // what the row has to survive.
       demoItem(
         'c3',
-        'meticulous',
-        'very careful / tỉ mỉ',
+        '감사합니다',
+        'thank you / cảm ơn',
         CardState.beginning,
         flag: true,
       ),
-      demoItem(
-        'c4',
-        'resilient',
-        'quick to recover / kiên cường',
-        CardState.reviewing,
-      ),
-      demoItem('c5', 'candid', 'frank, honest / thẳng thắn', CardState.isNew),
+      demoItem('c4', '책', 'book / quyển sách', CardState.reviewing),
+      demoItem('c5', '물', 'water / nước', CardState.isNew),
       demoItem(
         'c6',
-        'pragmatic',
-        'practical / thực dụng',
+        '안녕하세요',
+        'hello / xin chào',
         CardState.beginning,
         flag: true,
       ),
-      demoItem(
-        'c7',
-        'eloquent',
-        'fluent, persuasive / hùng biện',
-        CardState.mastered,
-      ),
+      demoItem('c7', '산', 'mountain / ngọn núi', CardState.mastered),
     ]);
     addTearDown(repo.dispose);
 
@@ -144,15 +145,15 @@ void main() {
 
   testWidgets('card list — dark', (tester) async {
     final repo = _demoList(<CardListItemModel>[
-      demoItem('c1', 'ephemeral', 'short-lived / phù du', CardState.isNew),
+      demoItem('c1', '사과', 'apple / quả táo', CardState.isNew),
       demoItem(
         'c3',
-        'meticulous',
-        'very careful / tỉ mỉ',
+        '감사합니다',
+        'thank you / cảm ơn',
         CardState.beginning,
         flag: true,
       ),
-      demoItem('c2', 'ubiquitous', 'everywhere / khắp nơi', CardState.mastered),
+      demoItem('c2', '바다', 'sea / biển', CardState.mastered),
     ]);
     addTearDown(repo.dispose);
 
@@ -171,8 +172,10 @@ void main() {
     addTearDown(repo.dispose);
     repo.cardToGet = repo.card(
       'c3',
-      front: 'meticulous',
-      back: 'showing great attention to detail / rất tỉ mỉ, cẩn thận',
+      front: '감사합니다',
+      back:
+          'thank you, to someone older or senior / cảm ơn, dùng với người '
+          'lớn tuổi hoặc cấp trên',
       // Flagged, so the review render shows the app-bar flag in its active amber.
       isFlagged: true,
     );
@@ -187,8 +190,8 @@ void main() {
     );
     repo.emitTags(
       <dynamic>[
-        repo.tag('t1', name: 'noun'),
-        repo.tag('t2', name: 'places'),
+        repo.tag('t1', name: 'greeting'),
+        repo.tag('t2', name: 'polite'),
       ].cast(),
     );
     await tester.pumpAndSettle();

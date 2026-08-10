@@ -26,17 +26,51 @@ abstract final class AppTypography {
   static const String displayFamily = 'PlusJakartaSans';
   static const String bodyFamily = 'Inter';
 
-  /// The CJK fallback face, behind both primary families on every text style.
+  /// The CJK fallback faces, behind both primary families on every text style.
   ///
   /// Inter and Plus Jakarta Sans are Latin-only, so a card whose content is
-  /// Korean (or Japanese/Chinese) would render as tofu boxes on any platform
+  /// Korean, Japanese or Chinese would render as tofu boxes on any platform
   /// whose system font happens not to cover the script — the web build most of
-  /// all. Naming this as `fontFamilyFallback` on each style means Flutter reaches
-  /// for it only for the glyphs the primary lacks, so Latin UI text is untouched
-  /// and the fallback carries the vocabulary. It is a variable font with a `wght`
-  /// axis, so the same [_wght] setting drives its weight too.
+  /// all. Naming these as `fontFamilyFallback` on each style means Flutter
+  /// reaches for them only for the glyphs the primary lacks, so Latin UI text is
+  /// untouched and the fallback carries the vocabulary. All three are variable
+  /// fonts with a `wght` axis, so the same [_wght] setting drives their weight
+  /// too — which is why they are subset but *not* instanced to a static weight:
+  /// a static fallback would report the right weight and paint one weight, the
+  /// exact failure [withWeight] exists to prevent.
+  ///
+  /// **The order is the contract, and only one part of it is arbitrary.** Korean
+  /// is first because it is what the app is for. Japanese before Simplified
+  /// Chinese decides the glyph *form* of the thousands of Han characters both
+  /// cover: the same codepoint is drawn differently in the two regional
+  /// conventions, the fallback chain takes the first face that has it, and there
+  /// is no way to satisfy both from one list. Japanese wins because its script
+  /// cannot be read at all without kanji, while Chinese in Japanese forms stays
+  /// legible. `NotoSansKR` is deliberately in front of both despite carrying no
+  /// Han at all — it costs nothing and keeps "Korean first" true by inspection.
+  ///
+  /// **Each face is subset, and what was dropped is a decision, not a default.**
+  /// All three keep everyday text — kana, Hangul, the main CJK Unified block,
+  /// CJK punctuation, halfwidth/fullwidth forms — and drop Extension A, the
+  /// compatibility ideographs and everything beyond the BMP. Those are historical
+  /// and specialist characters; carrying them costs megabytes a vocabulary deck
+  /// will not spend.
+  ///
+  /// **Every family named here MUST also be loaded by
+  /// `test/flutter_test_config.dart`.** `flutter test` does not populate declared
+  /// fonts from the bundle, and a fallback naming a family the test collection
+  /// lacks is silently skipped — which is how Korean rendered as `NO GLYPH` in
+  /// every golden for months while a test asserting this very list stayed green.
   static const String cjkFallbackFamily = 'NotoSansKR';
-  static const List<String> _cjkFallback = <String>[cjkFallbackFamily];
+  static const String japaneseFallbackFamily = 'NotoSansJP';
+  static const String simplifiedChineseFallbackFamily = 'NotoSansSC';
+
+  /// The fallback chain, in the order the renderer walks it.
+  static const List<String> cjkFallback = <String>[
+    cjkFallbackFamily,
+    japaneseFallbackFamily,
+    simplifiedChineseFallbackFamily,
+  ];
 
   /// The front of a review card — the one place the app deliberately gets
   /// large, because that text is the task.
@@ -95,7 +129,7 @@ abstract final class AppTypography {
     double tracking = 0,
   }) => (base ?? const TextStyle()).copyWith(
     fontFamily: displayFamily,
-    fontFamilyFallback: _cjkFallback,
+    fontFamilyFallback: cjkFallback,
     fontWeight: weight,
     fontVariations: _wght(weight),
     fontSize: size,
@@ -112,7 +146,7 @@ abstract final class AppTypography {
     double tracking = 0,
   }) => (base ?? const TextStyle()).copyWith(
     fontFamily: bodyFamily,
-    fontFamilyFallback: _cjkFallback,
+    fontFamilyFallback: cjkFallback,
     fontWeight: weight,
     fontVariations: _wght(weight),
     fontSize: size,

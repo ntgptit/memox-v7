@@ -4,8 +4,12 @@
    Sizes are the Material 3 scale, with the two the app deliberately overrides:
    headline-md (the card prompt) at 30/1.22/-0.5, and body-md leading at 1.45. */
 :root{
-  --font-display:"Plus Jakarta Sans","Inter",system-ui,sans-serif;
-  --font-body:"Inter",system-ui,sans-serif;
+  /* The CJK faces sit behind the Latin primary in both stacks and in the same
+     order as AppTypography.cjkFallback — Korean, then Japanese, then Simplified
+     Chinese, because JP and SC draw thousands of shared Han codepoints in
+     different regional forms and the first face that has the glyph wins. */
+  --font-display:"Plus Jakarta Sans","Inter","Noto Sans KR","Noto Sans JP","Noto Sans SC",system-ui,sans-serif;
+  --font-body:"Inter","Noto Sans KR","Noto Sans JP","Noto Sans SC",system-ui,sans-serif;
 
   --text-display-lg:57px;--leading-display-lg:64px;
   --text-display-md:45px;--leading-display-md:52px;
