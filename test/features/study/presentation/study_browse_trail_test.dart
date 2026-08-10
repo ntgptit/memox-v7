@@ -9,6 +9,7 @@ import 'package:memox/features/study/domain/models/study_mode.dart';
 import 'package:memox/features/study/domain/models/study_queue_item_status_model.dart';
 import 'package:memox/features/study/domain/models/study_session_kind_model.dart';
 import 'package:memox/features/study/domain/models/study_turn_model.dart';
+import 'package:memox/features/study/presentation/controllers/study_browse_trail_controller.dart';
 import 'package:memox/features/study/presentation/controllers/study_session_controller.dart';
 import 'package:memox/features/study/presentation/states/study_session_state.dart';
 
@@ -64,6 +65,7 @@ void main() {
     ({
       FakeStudyRepository repository,
       StudySessionController controller,
+      StudyBrowseTrailController trail,
       ProviderContainer container,
     })
   >
@@ -92,6 +94,11 @@ void main() {
       (_, _) {},
     );
     addTearDown(sub.close);
+    final trailSub = container.listen(
+      studyBrowseTrailControllerProvider('deck-1'),
+      (_, _) {},
+    );
+    addTearDown(trailSub.close);
 
     final controller = container.read(
       studySessionControllerProvider('deck-1').notifier,
@@ -112,6 +119,13 @@ void main() {
     return (
       repository: repository,
       controller: controller,
+      // Held like the session's, and for the same reason: both are
+      // `autoDispose`, and a test that awaits between two calls without a
+      // listener lets them go — the failure then reads as "Ref used after
+      // dispose" and says nothing about what was being tested.
+      trail: container.read(
+        studyBrowseTrailControllerProvider('deck-1').notifier,
+      ),
       container: container,
     );
   }
@@ -119,11 +133,15 @@ void main() {
   test('stepping back draws the previous card and writes nothing', () async {
     final open = await openBrowse(seen: <String>['card-1', 'card-2']);
 
-    await open.controller.browseStep(StudyBrowseStep.back);
+    await open.trail.step(StudyBrowseStep.back);
 
     final state = open.controller.state;
-    expect(state.viewedCard?.id, 'card-2', reason: 'the one just before');
-    expect(state.isLookingBack, isTrue);
+    expect(
+      state.viewedCardAt(open.trail.state)?.id,
+      'card-2',
+      reason: 'the one just before',
+    );
+    expect(state.isLookingBackAt(open.trail.state), isTrue);
     // The whole rule: looking is free.
     expect(open.repository.browsed, isEmpty);
     expect(open.repository.answers, isEmpty);
@@ -134,23 +152,23 @@ void main() {
   test('two steps back reach the card before that', () async {
     final open = await openBrowse(seen: <String>['card-1', 'card-2']);
 
-    await open.controller.browseStep(StudyBrowseStep.back);
-    await open.controller.browseStep(StudyBrowseStep.back);
+    await open.trail.step(StudyBrowseStep.back);
+    await open.trail.step(StudyBrowseStep.back);
 
-    expect(open.controller.state.viewedCard?.id, 'card-1');
+    expect(open.controller.state.viewedCardAt(open.trail.state)?.id, 'card-1');
     expect(open.repository.browsed, isEmpty);
   });
 
   test('a step back past the start of the trail is refused', () async {
     final open = await openBrowse(seen: <String>['card-1']);
 
-    await open.controller.browseStep(StudyBrowseStep.back);
-    await open.controller.browseStep(StudyBrowseStep.back);
+    await open.trail.step(StudyBrowseStep.back);
+    await open.trail.step(StudyBrowseStep.back);
 
     // Not clamped silently to some other card: the second step does nothing,
     // and the card on screen is the one the first step reached.
-    expect(open.controller.state.browseLookBack, 1);
-    expect(open.controller.state.viewedCard?.id, 'card-1');
+    expect(open.trail.state, 1);
+    expect(open.controller.state.viewedCardAt(open.trail.state)?.id, 'card-1');
   });
 
   test(
@@ -161,11 +179,14 @@ void main() {
       // written twice and the counter jumps by two.
       final open = await openBrowse(seen: <String>['card-1', 'card-2']);
 
-      await open.controller.browseStep(StudyBrowseStep.back);
-      await open.controller.browseStep(StudyBrowseStep.forward);
+      await open.trail.step(StudyBrowseStep.back);
+      await open.trail.step(StudyBrowseStep.forward);
 
-      expect(open.controller.state.isLookingBack, isFalse);
-      expect(open.controller.state.viewedCard?.id, 'card-3');
+      expect(open.controller.state.isLookingBackAt(open.trail.state), isFalse);
+      expect(
+        open.controller.state.viewedCardAt(open.trail.state)?.id,
+        'card-3',
+      );
       expect(open.repository.browsed, isEmpty);
     },
   );
@@ -173,7 +194,7 @@ void main() {
   test('forward from the live turn is still a browsed card (BR-111)', () async {
     final open = await openBrowse(seen: <String>['card-1']);
 
-    await open.controller.browseStep(StudyBrowseStep.forward);
+    await open.trail.step(StudyBrowseStep.forward);
 
     expect(open.repository.browsed, <String>['card-3']);
     expect(open.repository.answers, isEmpty, reason: 'browse grades nothing');
@@ -191,11 +212,11 @@ void main() {
       final gate = Completer<void>();
       open.repository.nextTurnGate = gate;
 
-      unawaited(open.controller.browseStep(StudyBrowseStep.forward));
+      unawaited(open.trail.step(StudyBrowseStep.forward));
       await Future<void>.delayed(Duration.zero);
 
       // The fetch is held open here; this is the window.
-      await open.controller.browseStep(StudyBrowseStep.forward);
+      await open.trail.step(StudyBrowseStep.forward);
 
       expect(open.repository.browsed, <String>[
         'card-3',
@@ -213,8 +234,8 @@ void main() {
     // where the first forward step left them.
     final open = await openBrowse(seen: <String>['card-1', 'card-2']);
 
-    await open.controller.browseStep(StudyBrowseStep.back);
-    await open.controller.browseStep(StudyBrowseStep.forward);
+    await open.trail.step(StudyBrowseStep.back);
+    await open.trail.step(StudyBrowseStep.forward);
 
     expect(open.repository.browsed, isEmpty);
     expect(open.repository.answers, isEmpty);
@@ -227,30 +248,30 @@ void main() {
     // walked past drawn over it — with nothing on screen saying so.
     final open = await openBrowse(seen: <String>['card-1', 'card-2']);
 
-    await open.controller.browseStep(StudyBrowseStep.back);
-    expect(open.controller.state.isLookingBack, isTrue);
+    await open.trail.step(StudyBrowseStep.back);
+    expect(open.controller.state.isLookingBackAt(open.trail.state), isTrue);
 
     open.repository.nextTurn_ = browseTurn(
       'card-4',
       seen: <String>['card-1', 'card-2', 'card-3'],
     );
-    await open.controller.browseStep(StudyBrowseStep.forward);
-    await open.controller.browseStep(StudyBrowseStep.forward);
+    await open.trail.step(StudyBrowseStep.forward);
+    await open.trail.step(StudyBrowseStep.forward);
 
     expect(open.controller.state.turn?.cardId, 'card-4');
-    expect(open.controller.state.browseLookBack, 0);
-    expect(open.controller.state.viewedCard?.id, 'card-4');
+    expect(open.trail.state, 0);
+    expect(open.controller.state.viewedCardAt(open.trail.state)?.id, 'card-4');
   });
 
   test('a round with nothing behind it cannot be stepped back', () async {
     final open = await openBrowse();
 
-    expect(open.controller.state.canLookBack, isFalse);
+    expect(open.controller.state.canLookBackFrom(open.trail.state), isFalse);
 
-    await open.controller.browseStep(StudyBrowseStep.back);
+    await open.trail.step(StudyBrowseStep.back);
 
-    expect(open.controller.state.isLookingBack, isFalse);
-    expect(open.controller.state.viewedCard?.id, 'card-3');
+    expect(open.controller.state.isLookingBackAt(open.trail.state), isFalse);
+    expect(open.controller.state.viewedCardAt(open.trail.state)?.id, 'card-3');
   });
 
   test('a graded stage cannot be stepped back at all', () async {
@@ -288,8 +309,11 @@ void main() {
       reviewMode: StudyMode.match,
     );
 
-    await controller.browseStep(StudyBrowseStep.back);
+    final trail = container.read(
+      studyBrowseTrailControllerProvider('deck-1').notifier,
+    );
+    await trail.step(StudyBrowseStep.back);
 
-    expect(controller.state.isLookingBack, isFalse);
+    expect(controller.state.isLookingBackAt(trail.state), isFalse);
   });
 }

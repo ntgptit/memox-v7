@@ -5,7 +5,6 @@ import '../../../../core/error/failure.dart';
 import '../../../../core/time/clock_provider.dart';
 import '../../../../core/time/time_zone_provider.dart';
 import '../../di/study_repository_provider.dart';
-import '../../domain/entities/study_session_entity.dart';
 import '../../domain/models/study_answer_commit_model.dart';
 import '../../domain/models/study_action_model.dart';
 import '../../domain/models/study_mode.dart';
@@ -216,10 +215,6 @@ class StudySessionController extends _$StudySessionController {
         session: session.copyWith(currentMode: mode),
         turn: turn,
         isAdvancing: false,
-        // **A new card arrives at the front of the trail** (BR-155): the offset
-        // counts backwards from the live turn, so one left over would put a card
-        // already walked past on screen in place of the one just moved to.
-        browseLookBack: 0,
       );
     } on Object catch (error) {
       // A stale failure is not this session's failure: writing it would put an
@@ -253,24 +248,13 @@ class StudySessionController extends _$StudySessionController {
     state = state.copyWith(isSubmitting: false, isFinished: true, error: error);
   }
 
-  /// Moves `browse` one card along the round, either way (BR-155).
+  /// Marks the live `browse` card seen, then fetches the next (BR-155).
   ///
-  /// **One name, because from the user's side it is one thing** — the same
-  /// swipe with the sign flipped. Two would put the "am I looking at history?"
-  /// test in the screen, and the screen would then decide whether a card gets
-  /// marked browsed, which is how one gets answered twice.
-  ///
-  /// **Going back writes nothing and moves nothing:** the card stays
-  /// `completed`, `cursor` stays put, and stepping forward again neither
-  /// re-records it nor advances past it twice. `browse` only — every other mode
-  /// answers the card on screen, so putting an already-answered card there
-  /// would offer to grade what the session has graded (BR-126).
-  Future<void> browseStep(StudyBrowseStep step) async {
-    // **Every guard, before either branch.** They used to sit under the forward
-    // shortcut — the one branch that writes — so a second swipe arriving during
-    // the fetch marked the same card browsed twice. `isSubmitting` is cleared
-    // before `isAdvancing` is set, so guarding only the first leaves that window
-    // wide open (BR-155).
+  /// Not `submitAnswer`: `browse` produces no action (BR-111), so going through
+  /// there meant inventing one for a grading method to discard. Public because
+  /// `StudyBrowseTrailController` owns the *offset* and this owns the *write* —
+  /// stepping forward from the live turn is the one move that touches the queue.
+  Future<void> markBrowsed() async {
     final session = state.session;
     final turn = state.turn;
     if (session == null ||
@@ -280,26 +264,6 @@ class StudySessionController extends _$StudySessionController {
       return;
     }
 
-    if (step == StudyBrowseStep.forward && !state.isLookingBack) {
-      return _markBrowsed(session, turn.cardId);
-    }
-
-    final next = step == StudyBrowseStep.back
-        ? state.browseLookBack + 1
-        : state.browseLookBack - 1;
-
-    // Off either end is a step there is nowhere to take. Clamping silently
-    // would read as accepted; returning leaves the card where it is, which is
-    // what "refused" looks like.
-    if (next < 0 || next > state.seenCardIds.length) return;
-
-    state = state.copyWith(browseLookBack: next);
-  }
-
-  /// Marks the live `browse` card seen, then fetches the next. Not
-  /// `submitAnswer`: `browse` produces no action (BR-111), so going through
-  /// there meant inventing one for a grading method to discard.
-  Future<void> _markBrowsed(StudySessionEntity session, String cardId) async {
     final epoch = _ops.epoch;
     final done = _ops.startWrite();
     state = state.copyWith(isSubmitting: true, error: null);
@@ -307,7 +271,7 @@ class StudySessionController extends _$StudySessionController {
     try {
       await MarkBrowsedUseCase(
         ref.read(studyRepositoryProvider),
-      ).call(sessionId: session.id, cardId: cardId);
+      ).call(sessionId: session.id, cardId: turn.cardId);
 
       if (!_isCurrent(epoch)) return;
       state = state.copyWith(isSubmitting: false);

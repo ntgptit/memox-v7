@@ -2042,3 +2042,37 @@ thứ hai là thứ một bản vá ngây thơ không sống sót). Mỗi ca kh�
 nào kẹt, không answer trùng, turn khớp repository, và phiên tiếp tục hoặc rời lại
 được. Đã tiêm lỗi: với hành vi cũ, **4/6 test đỏ**. Widget test chứng minh màn
 không mất thẻ và không hiện "Nothing due".
+
+### Tách controller: ranh giới là "nhìn lại không phải trả lời"
+
+Trần 400 dòng đã ép nhìn lại `StudySessionController` bốn PR liền, và mỗi lần lời
+đáp là nén prose. Lần này tách thật.
+
+**Tách bằng cơ chế ngôn ngữ là bất khả, và đã kiểm chứng chứ không suy đoán:**
+Dart không có partial class; base class do Riverpod sinh là private nên không
+`mixin ... on` được; và extension trong một `part` cũng không chạm được `state` —
+analyzer báo `invalid_use_of_protected_member` cùng
+`invalid_use_of_visible_for_testing_member`. Đã thử, đã revert.
+
+**Nên tách bằng trách nhiệm, theo đúng câu tài liệu đã viết sẵn từ BR-155:
+*looking is not answering*.** Offset nhìn lại của `browse` là view state — thẻ
+nó đưa lên màn hình đã `completed` rồi, `cursor` không dịch, không row nào bị ghi
+lại, và tiến lại không ghi thêm gì. Nó chưa bao giờ là command của phiên.
+
+- `StudyBrowseTrailController` giữ **một giá trị** (offset) và **một mutator**
+  (`step`) — đúng hình dạng mọi input-state notifier khác.
+- `StudySessionController` giữ `markBrowsed()`: nước đi duy nhất của `browse`
+  chạm vào hàng đợi. Quyết định "đang nhìn lại hay không" vẫn nằm ở **một** chỗ
+  (trail), không rơi vào screen — đó là thứ ngăn một thẻ bị mark browsed hai lần.
+- `browseLookBack` rời `StudySessionState`; `viewedCard`/`canLookBack`/
+  `isLookingBack` thành `viewedCardAt(offset)`/`canLookBackFrom(offset)`/
+  `isLookingBackAt(offset)` — phép suy diễn ở lại cạnh turn và card set mà nó suy
+  từ đó, chỉ có offset là tham số.
+
+**Một lập luận cũ trong `command_query_separation_test.dart` hoá ra sai, và đã
+sửa tại chỗ.** Nó viết rằng offset không thể có chủ riêng vì phải reset khi turn
+đổi, nên chủ thứ hai sẽ là "một giá trị hai người ghi". Không đúng: reset là một
+**listener** trên turn, không phải người ghi thứ hai. Một giá trị, một chủ, cộng
+một subscription tới thứ nó đếm ngược từ đó.
+
+Kết quả: controller 423 → **387**, guard sạch lần đầu sau bốn PR.

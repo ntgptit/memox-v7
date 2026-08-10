@@ -11,6 +11,7 @@ import '../../../../shared/widgets/mx_loading_state.dart';
 import '../../domain/models/study_mode.dart';
 import '../../domain/models/study_session_kind_model.dart';
 import '../../domain/models/study_turn_model.dart';
+import '../controllers/study_browse_trail_controller.dart';
 import '../controllers/study_session_controller.dart';
 import '../controllers/study_session_summary_controller.dart';
 import '../states/study_session_state.dart';
@@ -181,7 +182,11 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
                 hintOverride: _hintOverrideFor(
                   turn,
                   mode: session.currentMode,
-                  isLookingBack: state.isLookingBack,
+                  isLookingBack: state.isLookingBackAt(
+                    ref.watch(
+                      studyBrowseTrailControllerProvider(widget.deckId),
+                    ),
+                  ),
                 ),
                 child: body,
               ),
@@ -211,6 +216,10 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
   /// caught this.
   StudySessionController get _controller =>
       ref.read(studySessionControllerProvider(widget.deckId).notifier);
+
+  /// `browse`'s trail, which owns the offset rather than the queue (BR-155).
+  StudyBrowseTrailController get _trail =>
+      ref.read(studyBrowseTrailControllerProvider(widget.deckId).notifier);
 
   /// What replaces the mode’s usual hint, if anything.
   ///
@@ -291,6 +300,7 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
       return MxLoadingState(semanticsLabel: context.l10n.appTitle);
     }
 
+    final trail = ref.watch(studyBrowseTrailControllerProvider(widget.deckId));
     final view = studyModeView(
       mode: session.currentMode,
       state: state,
@@ -344,9 +354,9 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
       onMatchAttempt: ({required cardId, required action}) =>
           _controller.submitAnswer(action, cardId: cardId),
       onMatchBoardComplete: _controller.advance,
-      onContinue: () =>
-          unawaited(_controller.browseStep(StudyBrowseStep.forward)),
-      onLookBack: () => unawaited(_controller.browseStep(StudyBrowseStep.back)),
+      browseLookBack: trail,
+      onContinue: () => unawaited(_trail.step(StudyBrowseStep.forward)),
+      onLookBack: () => unawaited(_trail.step(StudyBrowseStep.back)),
     );
 
     // BR-124's blocking case, and it is **not** the finished state.

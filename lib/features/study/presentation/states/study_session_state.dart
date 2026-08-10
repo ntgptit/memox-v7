@@ -83,17 +83,6 @@ abstract class StudySessionState with _$StudySessionState {
     /// What the session came to, once it has ended (BR-79, BR-80).
     ///
 
-    /// How many cards back from the live turn the user has swiped, in `browse`
-    /// (BR-155).
-    ///
-    /// **View state, and only view state.** Zero is the card the queue is
-    /// serving. Anything above it is a card already marked `completed`, put back
-    /// on screen to be looked at — the session's `cursor` does not move, no row
-    /// is rewritten, and coming forward again re-records nothing. It is reset
-    /// whenever a new turn arrives, because an offset that survived the card it
-    /// was counted from would silently show history in place of the next card.
-    @Default(0) int browseLookBack,
-
     /// Set when something failed. Carries the reason, never a sentence — the
     /// screen maps it to copy.
     Object? error,
@@ -149,7 +138,13 @@ abstract class StudySessionState with _$StudySessionState {
     turn: null,
   );
 
-  bool get canLookBack => browseLookBack < seenCardIds.length;
+  /// Whether there is an earlier card to go back to from [lookBack] (BR-155).
+  ///
+  /// **The offset is a parameter, not a field.** It belongs to
+  /// `StudyBrowseTrailController` — it is view state, and the session's own
+  /// state is about what the queue is serving. Derivation stays here, next to
+  /// the turn and the card set it derives from.
+  bool canLookBackFrom(int lookBack) => lookBack < seenCardIds.length;
 
   /// Whether the card on screen is one already seen rather than the live turn.
   ///
@@ -158,7 +153,7 @@ abstract class StudySessionState with _$StudySessionState {
   /// state would claim to be showing an earlier card while holding no card at
   /// all — which is the sort of thing that is invisible until the day something
   /// renders from it.
-  bool get isLookingBack => browseLookBack > 0 && turn != null;
+  bool isLookingBackAt(int lookBack) => lookBack > 0 && turn != null;
 
   /// The card to draw: the live turn's, or an earlier one while looking back.
   ///
@@ -167,12 +162,12 @@ abstract class StudySessionState with _$StudySessionState {
   /// empty card face would be a screen that has silently lost its content. The
   /// live card is wrong by one position; a blank card is wrong about what the
   /// app is for.
-  StudyCardModel? get viewedCard {
+  StudyCardModel? viewedCardAt(int lookBack) {
     final live = turn?.card;
-    if (!isLookingBack) return live;
+    if (!isLookingBackAt(lookBack)) return live;
 
     final seen = seenCardIds;
-    final index = seen.length - browseLookBack;
+    final index = seen.length - lookBack;
     if (index < 0 || index >= seen.length) return live;
 
     final id = seen[index];
