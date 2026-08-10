@@ -91,20 +91,25 @@ deck hay card nào mang ngôn ngữ, và `front` cũng không đảm bảo là t
 một bộ thẻ hoàn toàn có thể để nghĩa ở mặt trước và từ ở mặt sau, lúc đó cặp
 `Thuật ngữ`/`Ý nghĩa` dán sai nhãn cho cả hai nửa.
 
-**Mặt trước là ngữ cảnh, mặt sau là tiêu điểm** — `StudyFaceEmphasis.
-frontSupportingBack`. Front dùng `bodyLarge` (body role, regular): một front
-thật là *"Be shy / Ngượng ngùng (Động từ, thể hiện sự e ngại trong giao tiếp)"*
-— một câu để đọc, không phải một tiêu đề. Back dùng `titleLarge` hạ xuống w500
-bằng `AppTypography.withWeight`, nên nó dẫn mà không gào.
+**Mặt trước là tiêu điểm, mặt sau giải thích nó** —
+`StudyFaceEmphasis.backSupportingFront`. Front dùng `titleLarge` hạ w500 bằng
+`AppTypography.withWeight`; back dùng `bodyLarge`.
 
-**Lần sửa đầu cho hai mặt cùng một vai và gọi chúng là "peers".** Nó chữa được
-việc front nuốt cả thẻ và làm mất luôn ý nghĩa của màn hình: hai khối bằng nhau
-không nói gì về việc nên nhìn vào đâu. Ảnh concept đặt nghĩa nhỏ ở trên và từ
-cần học lớn ở dưới, và đó là điều đúng cần lấy.
+**BR-08 quyết định chiều này, và nó đã quyết từ trước khi widget tồn tại.** Mặt
+trước trần 60 ký tự vì nó là prompt điện thoại vẽ trên một dòng; mặt sau trần
+240 vì *"một nghĩa chứa nhiều hơn một từ — hai ngôn ngữ, ngăn bằng dấu phẩy"*.
+Front giữ từ vựng, back giữ nghĩa tiếng mẹ đẻ.
 
-`self_assess` không đổi: ở đó mặt trước **là** câu hỏi cho tới khi lật, nên nó
-giữ vai prompt. Khác biệt đi qua một tham số có tên chứ không suy ra từ cờ "có
-hiện mặt sau ngay không" — hai câu hỏi khác nhau tình cờ cùng đáp án.
+**Hai lần trước đi vòng mới tới đây, và cả hai cùng một nguyên nhân.** Lần đầu
+cho front vai prompt, một nghĩa thật nuốt cả thẻ; lần hai gọi hai mặt là
+"peers", chữa được cái đó và để lại hai khối bằng nhau không nói gì về chỗ cần
+nhìn. Cả hai đều suy luận từ một fixture có front dài **67 ký tự** — dữ liệu
+BR-08 cấm và app từ chối lưu. Render của một thẻ không thể tồn tại còn tệ hơn
+không có render.
+
+`self_assess` không đổi: mặt trước **là** câu hỏi cho tới khi lật, nên nó giữ
+vai prompt lớn hơn. Khác biệt đi qua một tham số có tên chứ không suy ra từ cờ
+"có hiện mặt sau ngay không".
 
 Không có nút nào, kể cả nút đi tiếp — khớp BR-111 và BR-155. Chuyển thẻ là **vuốt**;
 một nút Next cạnh cử chỉ là cách thứ hai để làm đúng một việc mà cử chỉ đã làm,

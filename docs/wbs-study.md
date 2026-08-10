@@ -1553,3 +1553,29 @@ khi `_pullTurn` bật `isAdvancing`, nên vuốt thứ hai rơi đúng vào khe 
 mà `AdvanceStudyStageUseCase` chỉ gọi hàm đó khi stage đã cạn — nên gate không
 bao giờ đóng và test "giữ card" xanh mà chưa từng vào cửa sổ nó khai là đang
 kiểm. Chuyển sang `nextTurn`, điểm mà mọi lần advance đều đi qua.
+
+### Browse — chiều typography bị ngược, và vì sao
+
+Chủ dự án chỉ ra nghiệp vụ: **front giữ từ vựng tiếng Hàn, back giữ nghĩa tiếng
+mẹ đẻ.** `BR-08` đã nói đúng điều đó từ lâu — front trần 60 ký tự vì nó là
+prompt vẽ trên một dòng, back trần 240 vì một nghĩa chứa hai ngôn ngữ — và tôi
+đã suy ngược nó hai lần liên tiếp.
+
+**Nguyên nhân gốc là một fixture bất hợp lệ.** Render Browse dùng front dài 67
+ký tự; `CardText.parse` từ chối chuỗi đó, nên bức ảnh mọi quyết định typography
+rút ra là ảnh của một thẻ **không người dùng nào tạo được**. Từ đó tôi kết luận
+"front không đảm bảo là term" và đổi nhãn `TERM`/`MEANING` thành `FRONT`/`BACK`,
+rồi hạ front xuống vai phụ. Cả hai đều là suy luận từ dữ liệu không hợp lệ.
+
+Sửa: front `titleLarge` w500 (tiêu điểm), back `bodyLarge` (giải thích), variant
+đổi tên `frontSupportingBack` → `backSupportingFront`. Fixture về đúng hình:
+`부끄러워하다` ở front, nghĩa dài ở back.
+
+**Guard để không tái diễn:** render test khẳng định mọi thẻ trong fixture thoả
+BR-08 trước khi chụp. Một bức ảnh xanh của dữ liệu bất khả thi là thứ đã dạy sai
+hai vòng liền.
+
+**Còn mở:** nhãn `FRONT`/`BACK` được đổi từ `TERM`/`MEANING` dựa trên tiền đề
+vừa bị bác. Nhãn hiện tại không sai — nó gọi tên cột — nhưng `TERM`/`MEANING`
+nay lại đúng nghiệp vụ và nói được nhiều hơn. Chưa đổi lại vì chủ dự án chưa yêu
+cầu, và đổi nhãn lần thứ ba mà không có yêu cầu là churn.

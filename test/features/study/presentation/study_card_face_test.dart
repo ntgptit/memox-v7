@@ -110,7 +110,7 @@ void main() {
         tester,
         actions: const <StudyAction>[],
         shouldShowBackImmediately: true,
-        emphasis: StudyFaceEmphasis.frontSupportingBack,
+        emphasis: StudyFaceEmphasis.backSupportingFront,
       );
 
       expect(find.text('FRONT'), findsOneWidget);
@@ -120,18 +120,18 @@ void main() {
       }
     });
 
-    testWidgets('the front supports and the back leads (BR-112)', (
+    testWidgets('the front leads and the back explains (BR-08, BR-112)', (
       tester,
     ) async {
-      // A front here is a sentence with a gloss in it, not a term: at a
-      // headline role and w600 it read as the thing to learn and took the whole
-      // card. Body role and regular for the supporting face; the title role,
-      // one step down in weight, for the one the eye should land on.
+      // **BR-08 fixes the direction.** The front is capped at 60 characters
+      // because it is the prompt; the back at 240 because a meaning carries two
+      // languages. So the term takes the title role and the meaning a body one
+      // — a role that holds 240 characters without shouting.
       await pump(
         tester,
         actions: const <StudyAction>[],
         shouldShowBackImmediately: true,
-        emphasis: StudyFaceEmphasis.frontSupportingBack,
+        emphasis: StudyFaceEmphasis.backSupportingFront,
       );
 
       final texts = Theme.of(
@@ -140,14 +140,14 @@ void main() {
       final front = tester.widget<Text>(find.text('front-c1'));
       final back = tester.widget<Text>(find.text('back-c1'));
 
-      expect(front.style?.fontSize, texts.bodyLarge?.fontSize);
-      expect(front.style?.fontWeight, FontWeight.w400);
-      expect(back.style?.fontSize, texts.titleLarge?.fontSize);
-      expect(back.style?.fontWeight, FontWeight.w500);
+      expect(front.style?.fontSize, texts.titleLarge?.fontSize);
+      expect(front.style?.fontWeight, FontWeight.w500);
+      expect(back.style?.fontSize, texts.bodyLarge?.fontSize);
+      expect(back.style?.fontWeight, FontWeight.w400);
       expect(
-        back.style?.fontSize,
-        greaterThan(front.style!.fontSize!),
-        reason: 'the focal face is the larger one',
+        front.style?.fontSize,
+        greaterThan(back.style!.fontSize!),
+        reason: 'the term is the focal face; the meaning explains it',
       );
     });
 

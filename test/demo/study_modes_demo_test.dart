@@ -3,6 +3,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/features/card/domain/failures/card_validation_failure.dart';
 import 'package:memox/features/study/domain/entities/study_queue_item_entity.dart';
 import 'package:memox/features/study/domain/models/study_mode.dart';
 import 'package:memox/features/study/domain/models/study_queue_item_status_model.dart';
@@ -75,24 +76,22 @@ void main() {
     card('c5', front: '바다', back: 'biển', example: '바다가 잔잔했어요.'),
   ];
 
-  /// `browse`'s deck, whose first card carries a front that wraps.
+  /// `browse`'s deck: a Korean term on the front, its meaning on the back.
   ///
-  /// **The realistic case, and the one a one-word fixture hid.** A front is not
-  /// a term: decks in this app hold "부끄러워하다 / Ngượng ngùng (Động từ, thể
-  /// hiện sự e ngại trong giao tiếp)" on it. Rendered at the prompt size that
-  /// used to be hardcoded here, three headline lines swallowed the card and
-  /// left the back in the corner of its own half — so the render that guards
-  /// the balance has to contain one.
-  ///
-  /// The Korean term leads it, as it does on a real card, which also makes this
-  /// the one fixture where Hangul and Latin wrap in the same paragraph.
+  /// **The shape BR-08 already fixed, and the one two earlier passes got
+  /// backwards.** The front is capped at 60 characters because it is the prompt
+  /// a phone draws on one line; the back at 240 because "một nghĩa chứa nhiều
+  /// hơn một từ — hai ngôn ngữ, ngăn bằng dấu phẩy". The fixture before this one
+  /// put a 67-character gloss on the *front* — data the app refuses to save —
+  /// and every typography decision taken from that render was reasoning about a
+  /// card the product cannot hold.
   List<StudyCardModel> browseDeck() => <StudyCardModel>[
     card(
       'b1',
-      front:
-          '부끄러워하다 / Ngượng ngùng (Động từ, thể hiện sự e ngại trong giao '
+      front: '부끄러워하다',
+      back:
+          'Be shy / Ngượng ngùng (Động từ, thể hiện sự e ngại trong giao '
           'tiếp)',
-      back: 'ngượng ngùng',
     ),
     ...deck().skip(1),
   ];
@@ -180,6 +179,23 @@ void main() {
             ),
           ),
         );
+
+        // **BR-08, asserted on the fixture itself.** Two passes of typography
+        // were reasoned out of a render whose front was 67 characters — longer
+        // than the product allows, so the card on screen was one no user could
+        // ever create. A picture of impossible data is worse than no picture.
+        for (final subject in cards) {
+          expect(
+            subject.front.length,
+            lessThanOrEqualTo(CardSide.front.maxLength),
+            reason: 'BR-08 caps the front at ${CardSide.front.maxLength}',
+          );
+          expect(
+            subject.back.length,
+            lessThanOrEqualTo(CardSide.back.maxLength),
+            reason: 'BR-08 caps the back at ${CardSide.back.maxLength}',
+          );
+        }
 
         // **The golden cannot be the only witness.** It recorded "Nothing to
         // review yet" under the name `study_browse` for as long as the fixture
