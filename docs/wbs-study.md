@@ -7,7 +7,7 @@
 | **Scope** | Task còn lại của Study từ M5.7 trở đi · nợ kỹ thuật của Study · việc bị chặn |
 | **Source of truth for** | Trạng thái task Study từ M5.7 · nợ kỹ thuật của Study |
 | **Depends on** | `document-conventions.md` · `wbs.md` · `business-rules.md` · `use-cases.md` |
-| **Updated by task** | `guess` bỏ nền phán quyết — viền + chữ + icon, hàng mờ 0.7, reset theo lượt, ngân sách đọc 800/1800ms |
+| **Updated by task** | `recall` tách lật khỏi chấm — lật mở tự đánh giá, hết giờ ghi sai rồi chờ `Next` |
 | **Last updated** | 2026-08-11 |
 
 `docs/wbs.md` giữ M5.0…M5.6 đã hoàn thành và không nhắc lại ở đây. File này giữ
@@ -957,6 +957,53 @@ phán quyết trước khi người dùng trả lời.
   đang tan, tức là còn một mảng màu trên đúng cái hàng mà thay đổi này vừa gỡ
   nền đi. Golden phải `pumpAndSettle` (an toàn vì không truyền `onFeedbackShown`).
 - **Docs:** `m5-study-modes.md` §5, §8.9, §8.12.
+
+### `recall` tách lật khỏi chấm, đóng sau #279
+
+- **Status:** **done** — analyze sạch, gate xanh, 6 golden mới, không chạy emulator
+- **Lỗi, phát biểu đúng chỗ nó nằm:** `RecallOutcome.revealed` vừa là *mặt sau
+  đang hiện* vừa là *đáp án đúng*. Bấm `Show answer` ghi action đúng của
+  scheduler rồi kéo thẻ kế tiếp, nên người học bỏ cuộc ở giây thứ tư được **thăng
+  hộp vì đã bỏ cuộc**, và màn hình không hỏi họ câu nào. Đây là lỗi chấm điểm,
+  không phải lỗi nhãn: sửa chữ trên nút không đổi được thứ đã ghi vào
+  `study_answers`.
+- **Hai câu hỏi, hai kiểu.** `RecallPhase` (presentation) trả lời *màn hình đang
+  hiện gì*; `RecallOutcome` (domain) trả lời *người học biết gì* — nay là
+  `remembered` / `forgotten` / `timedOut`, và chỉ ba giá trị đó ghi được.
+- **Luồng A — lật trước mốc:** dừng đồng hồ, hiện mặt sau, **không ghi gì**, đổi
+  hàng nút thành `Đã quên` + `Nhớ được`. Chọn một trong hai ghi đúng một lượt,
+  chờ commit, rồi tự chuyển. Không nút `Next`, không giữ thêm nhịp nào.
+- **Luồng B — hết giờ:** claim đúng một lần, ghi sai kèm
+  `outcome_reason = timeout`, **chờ commit rồi mới** lật (BR-157), hiện dòng
+  `danger` và nút `Next`. Không tự chuyển theo thời lượng; `Next` chỉ chuyển
+  lượt, không ghi.
+- **`studyModeFeedback(recall)` thành `none()`, và đó là thay đổi typed nhỏ nhất
+  có thể** (BR-160). Không thêm policy mới, không đụng bốn mode kia: mode nào tự
+  bấm giờ cho phần đọc của mình thì khai báo 0, đúng như `match` đã làm từ #269.
+- **Ghi thất bại xử lý khác nhau ở hai luồng, có chủ đích.** Tự đánh giá quay lại
+  hai nút để bấm lại. Hết giờ **không** — BR-130 cấm biến một thẻ mất vì đồng hồ
+  thành đúng chỉ vì database bận, nên phase `timedOutUnrecorded` chỉ mời gửi lại
+  đúng kết quả sai ấy.
+- **Resume đọc `is_revealed` lần đầu tiên.** Cột có từ M5.9 và luôn được ghi
+  `false`, vì lật *là* kết cục — nay lật là một trạng thái sống. `is_revealed`
+  còn thời gian → về tự đánh giá với đồng hồ đã dừng; hết thời gian → về đọc lại,
+  không ghi lần hai. Cùng thẻ ở round sau vẫn là lượt khác (`isSameTurnAs`).
+- **Robot của integration suite đã sửa theo.** Nó tap `Show answer` một lần rồi
+  coi lượt là xong; giờ nó trả lời câu hỏi vừa mở ra, và nhận cả nhánh hết giờ
+  bằng thứ đang hiện trên màn chứ không bằng thời gian. Suite **chưa chạy** —
+  task này không chạy emulator; đây là nợ đã ghi, không phải điều đã kiểm.
+- **Không đụng:** SM-2, ánh xạ scheduler, schema, luật lập lịch, use case
+  save/resume (`is_revealed` đã round-trip từ M5.9 và có test SQLite thật).
+- **Tests:** `recall_widget_test.dart` (10), `recall_timeout_widget_test.dart`
+  (11, mới), `recall_view_wiring_test.dart` (4, mới — action + reason ở đúng chỗ
+  BR-131 hạ cánh), `recall_fill_mode_test.dart` (+2 nhóm outcome),
+  `study_commit_before_feedback_test.dart` (nhóm recall viết lại),
+  `study_lapse_policy_test.dart` (recall chuyển sang nhóm không giữ nhịp),
+  `study_recall_states_demo_test.dart` (6 golden: đếm ngược / tự đánh giá / hết
+  giờ × light+dark).
+- **Docs:** BR-159, BR-160 mới; BR-129, BR-130, BR-133 chỉnh theo;
+  `m5-study-modes.md` §6.1 viết lại kèm bảng phase, §8.12 bỏ ngân sách của
+  `recall`.
 
 ## Việc không thuộc Study nhưng chặn Definition of Done
 

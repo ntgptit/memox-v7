@@ -13,10 +13,19 @@ import '../../../../../shared/widgets/mx_card.dart';
 import '../../../domain/models/study_answer_commit_model.dart';
 import '../../../domain/models/recall_mode.dart';
 import '../../../domain/models/study_turn_model.dart';
+import '../../states/recall_phase_state.dart';
 
 part 'recall_timer_pieces_widget.dart';
 
-/// One card, twenty seconds, one outcome (BR-128 … BR-131).
+/// One card, twenty seconds, and **one** answer — given by the learner, not by
+/// the act of looking (BR-128 … BR-133).
+///
+/// **Revealing the back is not an answer, and it used to be.** *Show answer*
+/// wrote the scheduler's *correct* action and pulled the next card: a learner
+/// who gave up at four seconds had the card promoted a box for giving up, and
+/// the screen never asked them anything. 8-box needs one bit of evidence per
+/// turn and only the learner has it, so the reveal now opens a question —
+/// *Forgot* or *Remembered* — and that is what gets written.
 ///
 /// **The clock counts interactive time.** It stops when the app leaves the
 /// foreground and resumes when it comes back, so a phone call does not fail a
@@ -24,9 +33,17 @@ part 'recall_timer_pieces_widget.dart';
 /// which is what keeps load time out of the count.
 ///
 /// **Exactly one outcome per turn** (BR-129). A tap and the final tick can land
-/// in the same instant; `_outcome` is claimed once and whichever arrives first
-/// wins. Letting both through writes two turns for one question; letting neither
-/// through hangs the session.
+/// in the same instant; [RecallPhase] is the claim, it moves one way only, and
+/// every transition below checks the phase it is leaving. Letting both through
+/// writes two turns for one question; letting neither through hangs the session.
+///
+/// **The two endings are not the same shape, and that is deliberate.** An
+/// assessment the learner gave advances the moment it commits — they have
+/// already read the back, so a held verdict would be the app pausing on
+/// something they are done with. A timeout has to be *read*: the card was lost
+/// to a clock, the back is new text, and there is nothing to rush them past it
+/// for. So the timeout ends at a *Next* the learner presses, and
+/// `studyModeFeedback(recall)` carries no duration for either.
 class RecallTimerSectionWidget extends StatefulWidget {
   const RecallTimerSectionWidget({
     required this.turn,
@@ -35,18 +52,27 @@ class RecallTimerSectionWidget extends StatefulWidget {
     this.initialRemaining,
     this.onRemainingChanged,
     this.onSuspended,
+    this.onResolved,
+    this.isLocked = false,
     super.key,
   });
 
   final StudyTurnModel turn;
 
-  /// Called once, with the outcome that was claimed.
   /// Writes the outcome and hands back what the transaction did (BR-157).
+  ///
+  /// Called at most once per turn, and never for a reveal.
   final Future<StudyAnswerCommitModel?> Function(RecallOutcome outcome)
   onOutcome;
 
-  /// Called once the back of the card is on screen; completes when the session
-  /// has moved on (BR-158).
+  /// Called once the turn is done being looked at, and completes when the
+  /// session has moved on (BR-158).
+  ///
+  /// **For `recall` this is the *end* of the reading, not the start of it.**
+  /// Every other mode says "my verdict is now on screen, hold it for the
+  /// budget"; here there is no budget to hold, because the two endings time
+  /// themselves — an assessment is done being read before it is even given, and
+  /// a timeout is done when the learner presses *Next*.
   final Future<void> Function({required bool isCorrect})? onFeedbackShown;
 
   /// What was left of a turn interrupted earlier (BR-133).
@@ -62,16 +88,29 @@ class RecallTimerSectionWidget extends StatefulWidget {
   /// ten writes a second for a number nobody reads until the app comes back.
   final ValueChanged<Duration>? onRemainingChanged;
 
-  /// Fires once, when the app leaves the foreground with this turn still open.
+  /// Fires once, when the app leaves the foreground with this turn still
+  /// unanswered.
   ///
   /// **This is the moment BR-133 is about**, and the only one: the clock stops
   /// (BR-128), so what is left has to be written down or the turn restarts at
-  /// twenty seconds the next time it is served. It carries `isRevealed` as well
-  /// — true is unreachable today, because revealing *is* the outcome (BR-129),
-  /// but the widget reports what it actually holds rather than a constant, so a
-  /// design that ever separates the two needs no second wiring.
+  /// twenty seconds the next time it is served. `isRevealed` is no longer a
+  /// constant with a hopeful comment attached — a turn suspended between the
+  /// reveal and the assessment is a real state now, and resuming it has to put
+  /// the back back on screen rather than start the clock again.
   final void Function({required Duration remaining, required bool isRevealed})?
   onSuspended;
+
+  /// Fired once, when the turn stops asking the learner to recall and starts
+  /// showing them the back (§8.11).
+  ///
+  /// **The frame owns the hint line, and only this widget knows the card is
+  /// uncovered.** Reported from the handler rather than from `build` — a parent
+  /// `setState` during a build is the one way this plumbing can go wrong.
+  final VoidCallback? onResolved;
+
+  /// True while the session is writing or fetching: the card stays on screen
+  /// and its controls stop responding (BR-25, BR-158).
+  final bool isLocked;
 
   @override
   State<RecallTimerSectionWidget> createState() =>
@@ -81,17 +120,17 @@ class RecallTimerSectionWidget extends StatefulWidget {
 class _RecallTimerSectionWidgetState extends State<RecallTimerSectionWidget>
     with WidgetsBindingObserver {
   static const Duration _tick = Duration(milliseconds: 100);
+  static const RecallModeHandler _handler = RecallModeHandler();
 
   late Duration _remaining;
+  late RecallPhase _phase;
   Timer? _timer;
-  RecallOutcome? _outcome;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _remaining = widget.initialRemaining ?? kRecallTurnLimit;
-    _start();
+    _restart();
   }
 
   @override
@@ -100,17 +139,37 @@ class _RecallTimerSectionWidgetState extends State<RecallTimerSectionWidget>
 
     // **The card *and* the round** — see `StudyTurnModel.isSameTurnAs`. A recall
     // turn that runs out of time is enrolled into the next round, which serves
-    // the same `cardId`; comparing ids alone kept `_outcome` claimed and drew
-    // "this turn is settled" over a live question, with no way forward. It only
-    // appeared once a turn actually timed out, which is why the integration
-    // suite found it on a slow device and never on a fast one.
+    // the same `cardId`; comparing ids alone kept the phase claimed and drew a
+    // settled turn over a live question, with no way forward. It only appeared
+    // once a turn actually timed out, which is why the integration suite found
+    // it on a slow device and never on a fast one.
     if (oldWidget.turn.isSameTurnAs(widget.turn)) return;
 
-    // A new turn: full limit, and the outcome claim released.
-    _outcome = null;
-    _claimed = null;
+    _restart();
+  }
+
+  /// Takes the turn as it stands: a full limit, or whatever was left of it.
+  ///
+  /// **Where the turn resumes is a fact about the queue row, not a default.**
+  /// `isRevealed` with time still on the clock is a learner who pressed *Show
+  /// answer* and was interrupted before saying which it was; giving them a
+  /// running clock and a covered card back would ask them to un-know the answer
+  /// (BR-133).
+  void _restart() {
     _remaining = widget.initialRemaining ?? kRecallTurnLimit;
+    _phase = _phaseFor(_remaining);
     _start();
+  }
+
+  RecallPhase _phaseFor(Duration remaining) {
+    if (!widget.turn.item.isRevealed) return RecallPhase.countdownRunning;
+
+    // Revealed with the clock spent is a turn whose timeout was already
+    // written: it is being re-read, not re-answered, so it must not submit a
+    // second time (BR-129).
+    return _handler.didTimeOut(elapsed: kRecallTurnLimit - remaining)
+        ? RecallPhase.timedOutReview
+        : RecallPhase.selfAssessment;
   }
 
   @override
@@ -133,9 +192,11 @@ class _RecallTimerSectionWidgetState extends State<RecallTimerSectionWidget>
     super.dispose();
   }
 
+  /// Runs the clock, and **only** for the one phase that has a clock.
   void _start() {
     _timer?.cancel();
-    if (_claimed != null) return;
+    _timer = null;
+    if (_phase != RecallPhase.countdownRunning) return;
 
     _timer = Timer.periodic(_tick, (_) => _onTick());
   }
@@ -145,83 +206,123 @@ class _RecallTimerSectionWidgetState extends State<RecallTimerSectionWidget>
     _timer = null;
     widget.onRemainingChanged?.call(_remaining);
 
-    // A turn that already has an outcome has nothing to resume: it was answered
-    // the instant it was revealed (BR-129), and the row it would be written
-    // against is no longer pending.
-    if (_claimed != null) return;
+    // A turn with a write behind it has nothing to resume: the row it would be
+    // saved against is no longer pending, and BR-85 has ended the session if
+    // the write failed.
+    if (!_phase.isUnanswered) return;
 
-    widget.onSuspended?.call(remaining: _remaining, isRevealed: _isRevealed);
+    widget.onSuspended?.call(
+      remaining: _remaining,
+      isRevealed: _phase == RecallPhase.selfAssessment,
+    );
   }
 
   void _onTick() {
+    // A timer that fires once more after the phase was claimed is not an event:
+    // `Timer.periodic` can deliver a tick already queued when it was cancelled.
+    if (_phase != RecallPhase.countdownRunning) return;
+
     final elapsed = kRecallTurnLimit - _remaining + _tick;
 
-    // The handler decides which side of the mark this is (BR-129), rather than
-    // the widget re-deriving `<= zero` and getting the inclusive boundary
-    // subtly different from the rule.
-    setState(
-      () => _remaining = const RecallModeHandler().remainingAfter(elapsed),
-    );
+    setState(() => _remaining = _handler.remainingAfter(elapsed));
     // Reported on every tick, not only when the clock stops: the frame draws
     // the countdown in its top bar (§7.3), and a value that only arrives at the
     // end is a bar that shows twenty seconds for twenty seconds.
     widget.onRemainingChanged?.call(_remaining);
 
-    if (const RecallModeHandler().outcomeFor(elapsed: elapsed) !=
-        RecallOutcome.timedOut) {
-      return;
-    }
+    if (!_handler.didTimeOut(elapsed: elapsed)) return;
 
-    _claim(RecallOutcome.timedOut);
+    _timeOut();
   }
 
-  /// The outcome being written, before there is anything to show for it.
+  /// Uncovers the back. **Writes nothing** (BR-159).
   ///
-  /// **Two fields, because they answer two questions.** [_claimed] closes the
-  /// turn — the clock stops here, and neither a second tap nor the timeout that
-  /// lands in the same instant can take it again (BR-129). [_outcome] is what
-  /// reveals the back of the card, and it is set only once the write holding
-  /// that outcome has committed (BR-157). While they were one field, a refused
-  /// write left the answer revealed and the session with no record of it.
-  RecallOutcome? _claimed;
-
-  /// Takes the single outcome, or does nothing if it is already taken.
-  void _claim(RecallOutcome outcome) {
-    if (_claimed != null) return;
+  /// The second guard is the race BR-129 names: a tap handled in the same frame
+  /// the clock reaches zero. The mark is inclusive on the timeout side, so at
+  /// exactly zero the timeout wins and this returns without stopping anything —
+  /// the tick that is about to run claims the turn.
+  void _reveal() {
+    if (_phase != RecallPhase.countdownRunning) return;
+    if (_handler.didTimeOut(elapsed: kRecallTurnLimit - _remaining)) return;
 
     _timer?.cancel();
-    setState(() => _claimed = outcome);
-    unawaited(_grade(outcome));
+    _timer = null;
+    setState(() => _phase = RecallPhase.selfAssessment);
+    widget.onResolved?.call();
   }
 
-  /// Writes the outcome, then reveals what it was — in that order (BR-157).
+  /// The learner's own verdict, which is the only evidence this mode produces.
+  void _assess(RecallOutcome outcome) {
+    if (_phase != RecallPhase.selfAssessment) return;
+
+    setState(() => _phase = RecallPhase.submittingAssessment);
+    unawaited(_write(outcome));
+  }
+
+  void _timeOut() {
+    if (_phase != RecallPhase.countdownRunning) return;
+
+    _timer?.cancel();
+    _timer = null;
+    setState(() => _phase = RecallPhase.timedOutSubmitting);
+    unawaited(_write(RecallOutcome.timedOut));
+  }
+
+  /// Writes the outcome, then shows what it was worth — in that order (BR-157).
   ///
-  /// A null receipt hands the turn back: the clock is spent either way, but a
-  /// revealed card that the session cannot account for is worse than a turn the
-  /// user has to claim again.
-  Future<void> _grade(RecallOutcome outcome) async {
+  /// **A refused write puts the turn back where it can be answered, and the two
+  /// endings put it back in different places.** An assessment returns to the
+  /// choice, because the learner still has one to make. A timeout does not
+  /// (BR-130): the clock is spent, and a screen that offered *Remembered* after
+  /// a failed timeout would be turning a missed card into a correct one because
+  /// the database was busy.
+  Future<void> _write(RecallOutcome outcome) async {
     final commit = await widget.onOutcome(outcome);
     if (!mounted) return;
 
     if (commit == null) {
-      setState(() => _claimed = null);
+      setState(
+        () => _phase = outcome == RecallOutcome.timedOut
+            ? RecallPhase.timedOutUnrecorded
+            : RecallPhase.selfAssessment,
+      );
 
       return;
     }
 
-    setState(() => _outcome = outcome);
+    if (outcome == RecallOutcome.timedOut) {
+      setState(() => _phase = RecallPhase.timedOutReview);
+      widget.onResolved?.call();
 
-    await widget.onFeedbackShown?.call(
-      isCorrect: outcome == RecallOutcome.revealed,
+      return;
+    }
+
+    setState(() => _phase = RecallPhase.advancing);
+    await widget.onFeedbackShown?.call(isCorrect: outcome.isCorrect);
+  }
+
+  /// Leaves a turn the clock already settled. **No write** — the answer was
+  /// recorded before this button existed.
+  void _next() {
+    if (_phase != RecallPhase.timedOutReview) return;
+
+    setState(() => _phase = RecallPhase.advancing);
+    unawaited(
+      widget.onFeedbackShown?.call(isCorrect: false) ?? Future<void>.value(),
     );
   }
 
-  bool get _isRevealed => _outcome != null;
+  /// One more attempt at the same wrong answer, and no other.
+  void _retryTimeOut() {
+    if (_phase != RecallPhase.timedOutUnrecorded) return;
+
+    setState(() => _phase = RecallPhase.timedOutSubmitting);
+    unawaited(_write(RecallOutcome.timedOut));
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final semantic = context.semanticColors;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -258,40 +359,20 @@ class _RecallTimerSectionWidgetState extends State<RecallTimerSectionWidget>
               minHeight: AppStudyPair.cardMinHeight,
             ),
             child: _AnswerArea(
-              answer: _isRevealed ? widget.turn.card.back : null,
+              answer: _phase.isBackVisible ? widget.turn.card.back : null,
               hiddenLabel: l10n.studyRecallAnswerHidden,
             ),
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
-        // **The second state of this screen, which the design has no image
-        // for.** Drawn from BR-129 and BR-130 rather than guessed: the turn has
-        // exactly one outcome and it cannot be changed, so there is no button
-        // left to offer — and a screen with the answer showing and no control
-        // is indistinguishable from one that stopped responding unless it says
-        // why. The handout’s `Forgot` / `Got it` pair is that same ruling seen
-        // from the other side, and was refused for the same reason.
-        if (_isRevealed)
-          Text(
-            _outcome == RecallOutcome.timedOut
-                ? '${l10n.studyRecallTimedOut} · ${l10n.studyRecallLocked}'
-                : l10n.studyRecallLocked,
-            textAlign: TextAlign.center,
-            style: context.texts.bodyMedium?.copyWith(
-              color: _outcome == RecallOutcome.timedOut
-                  ? semantic.danger
-                  : context.colors.onSurfaceVariant,
-            ),
-          )
-        else
-          // Hugs rather than fills: one action centred under two cards reads as
-          // the way on, where a full-width bar reads as the screen floor.
-          Align(
-            child: MxActionButton(
-              label: l10n.studyRevealAnswer,
-              onPressed: () => _claim(RecallOutcome.revealed),
-            ),
-          ),
+        _RecallActionArea(
+          phase: _phase,
+          isLocked: widget.isLocked,
+          onReveal: _reveal,
+          onAssess: _assess,
+          onNext: _next,
+          onRetry: _retryTimeOut,
+        ),
       ],
     );
   }

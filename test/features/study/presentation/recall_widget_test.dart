@@ -1,292 +1,276 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/features/study/domain/entities/study_queue_item_entity.dart';
 import 'package:memox/features/study/domain/models/recall_mode.dart';
-import 'package:memox/features/study/domain/models/study_mode.dart';
-import 'package:memox/features/study/domain/models/study_queue_item_status_model.dart';
 import 'package:memox/features/study/domain/models/study_turn_model.dart';
 import 'package:memox/features/study/presentation/widgets/sections/recall_timer_section_widget.dart';
 
+import 'support/recall_turn_fixture.dart';
 import 'support/study_commit_stub.dart';
 import 'support/study_widget_harness.dart';
 
-/// Twenty seconds, one outcome, and what is written down when the app is taken
-/// away.
+/// Twenty seconds, a look at the back, and **then** an answer.
 ///
-/// **Split from `fill` at the 400-line guard, and the seam is a real one.** The
-/// two shared a file while both were "a card and one control"; the second states
-/// and BR-133's suspend path pushed the pair past the limit, and they were never
-/// one subject — one is a clock, the other is a text field.
+/// **What this file is here to stop is the mode grading a glance.** *Show
+/// answer* used to write the scheduler's correct action and pull the next card:
+/// a learner who gave up at four seconds had the card promoted a box for giving
+/// up, and was never asked anything. Every test below is some version of the
+/// same question — how many answers did that produce, and who gave them.
+///
+/// The clock's other ending lives in `recall_timeout_widget_test.dart`; the two
+/// were one file until the phases pushed them past the 400-line guard, and the
+/// seam is real. This half is the learner's; that half is the clock's.
 void main() {
-  StudyTurnModel turnOf(
-    String id, {
-    String back = 'công',
-    String? hint,
-    String? example,
-    int round = 1,
-  }) => StudyTurnModel(
-    item: StudyQueueItemEntity(
-      sessionId: 's1',
-      mode: StudyMode.recall,
-      round: round,
-      cardId: id,
-      position: 0,
-      status: StudyQueueItemStatus.pending,
-      availableAt: 0,
-      answersInSession: 0,
-      remainingMs: null,
-      isRevealed: false,
-    ),
-    progress: StudyStageProgressModel(
-      round: round,
-      done: 0,
-      total: 1,
-      completedCardIds: const <String>[],
-    ),
-    card: StudyCardModel(
-      id: id,
-      front: 'front-$id',
-      back: back,
-      example: example,
-      hint: hint,
-      pronunciation: null,
-      backFolded: back,
-    ),
-  );
-
-  group('recall', () {
-    testWidgets('a resumed turn starts at the time it was left (BR-133)', (
+  group('recall · before anything is written', () {
+    testWidgets('opens on the front alone, with nothing recorded', (
       tester,
     ) async {
-      // The half of resuming a session that the user actually feels. Reading
-      // the stored session back but restarting the clock at the full limit
-      // would be a free extension of every paused turn, and the resume path
-      // would look correct in every other respect.
       final outcomes = <RecallOutcome>[];
       await tester.pumpWidget(
         wrapForTest(
           RecallTimerSectionWidget(
-            turn: turnOf('c1'),
-            initialRemaining: const Duration(seconds: 3),
+            turn: recallTurn('c1'),
             onOutcome: (outcome) async {
               outcomes.add(outcome);
 
-              return commitOf('c');
+              return commitOf('c1');
             },
           ),
           isScrollable: false,
         ),
       );
 
-      await tester.pump(const Duration(seconds: 3));
-      await tester.pump();
-
-      expect(outcomes, <RecallOutcome>[RecallOutcome.timedOut]);
-    });
-
-    testWidgets('running out reveals the answer and locks it wrong', (
-      tester,
-    ) async {
-      final outcomes = <RecallOutcome>[];
-      await tester.pumpWidget(
-        wrapForTest(
-          RecallTimerSectionWidget(
-            turn: turnOf('c1'),
-            onOutcome: (value) async {
-              outcomes.add(value);
-
-              return commitOf('c');
-            },
-          ),
-          isScrollable: false,
-        ),
-      );
-
+      expect(find.text('front-c1'), findsOneWidget);
       expect(find.text('công'), findsNothing);
-
-      await tester.pump(kRecallTurnLimit);
-      await tester.pump();
-
-      expect(outcomes, <RecallOutcome>[RecallOutcome.timedOut]);
-      // The user still learns the card they just lost (BR-130).
-      expect(find.text('công'), findsOneWidget);
-      // One line, not two: the verdict and why there is no button left belong
-      // together, so the sentence is matched rather than the phrase.
-      expect(find.textContaining("Time's up"), findsOneWidget);
-    });
-
-    testWidgets('a reveal before the mark is the only outcome (BR-129)', (
-      tester,
-    ) async {
-      // The race the rule is written for: one tap, then the clock runs past
-      // zero. Exactly one outcome may reach the caller.
-      final outcomes = <RecallOutcome>[];
-      await tester.pumpWidget(
-        wrapForTest(
-          RecallTimerSectionWidget(
-            turn: turnOf('c1'),
-            onOutcome: (value) async {
-              outcomes.add(value);
-
-              return commitOf('c');
-            },
-          ),
-          isScrollable: false,
-        ),
-      );
-
-      await tester.pump(const Duration(seconds: 3));
-      await tester.tap(find.text('Show answer'));
-      await tester.pump();
-
-      await tester.pump(kRecallTurnLimit);
-      await tester.pump();
-
-      expect(outcomes, <RecallOutcome>[RecallOutcome.revealed]);
-    });
-
-    testWidgets('a resumed turn keeps what was left, not a fresh limit', (
-      tester,
-    ) async {
-      // BR-133: Resume continues the turn. Restarting at twenty seconds hands
-      // back time the user already spent.
-      //
-      // Read from what the widget *reports* rather than from what it draws: the
-      // countdown itself now lives in the session frame's top bar (§7.3), and
-      // this widget's job is to own the clock and say what is left.
-      final reported = <Duration>[];
-      await tester.pumpWidget(
-        wrapForTest(
-          RecallTimerSectionWidget(
-            turn: turnOf('c1'),
-            initialRemaining: const Duration(seconds: 4),
-            onOutcome: (_) async => commitOf('c'),
-            onRemainingChanged: reported.add,
-          ),
-          isScrollable: false,
-        ),
-      );
-      await tester.pump(const Duration(milliseconds: 100));
-
-      expect(reported.last.inSeconds, 3);
-      expect(reported.any((left) => left.inSeconds >= 19), isFalse);
-
-      await tester.pump(const Duration(seconds: 4));
-      await tester.pump();
-      // One line, not two: the verdict and why there is no button left belong
-      // together, so the sentence is matched rather than the phrase.
-      expect(find.textContaining("Time's up"), findsOneWidget);
-    });
-
-    testWidgets('a later round starts the full limit again (BR-133)', (
-      tester,
-    ) async {
-      final reported = <Duration>[];
-      await tester.pumpWidget(
-        wrapForTest(
-          RecallTimerSectionWidget(
-            turn: turnOf('c1'),
-            onOutcome: (_) async => commitOf('c'),
-            onRemainingChanged: reported.add,
-          ),
-          isScrollable: false,
-        ),
-      );
-      await tester.pump(const Duration(seconds: 5));
-
-      await tester.pumpWidget(
-        wrapForTest(
-          RecallTimerSectionWidget(
-            turn: turnOf('c2'),
-            onOutcome: (_) async => commitOf('c'),
-            onRemainingChanged: reported.add,
-          ),
-          isScrollable: false,
-        ),
-      );
-      await tester.pump(const Duration(milliseconds: 100));
-
-      // A turn of a different card is a different turn.
-      expect(reported.last.inSeconds, 19);
-
-      await tester.pump(kRecallTurnLimit);
-    });
-
-    testWidgets('the same card in a later round is a new turn (BR-116)', (
-      tester,
-    ) async {
-      // **The bug this is here for shipped, and only a slow device found it.**
-      // A recall turn that runs out of time is enrolled into the next round,
-      // and that round serves the **same** `cardId`. The widget compared ids
-      // alone, read the new turn as the old one, kept its outcome claimed — and
-      // drew "this turn is settled" over a live question with nothing to press.
-      // The integration suite hit it the first time a turn actually timed out.
-      await tester.pumpWidget(
-        wrapForTest(
-          RecallTimerSectionWidget(
-            turn: turnOf('c1'),
-            onOutcome: (_) async => commitOf('c'),
-          ),
-          isScrollable: false,
-        ),
-      );
-      await tester.pump(kRecallTurnLimit);
-      expect(find.text('Show answer'), findsNothing, reason: 'timed out');
-
-      await tester.pumpWidget(
-        wrapForTest(
-          RecallTimerSectionWidget(
-            turn: turnOf('c1', round: 2),
-            onOutcome: (_) async => commitOf('c'),
-          ),
-          isScrollable: false,
-        ),
-      );
-      await tester.pump(const Duration(milliseconds: 100));
-
-      // Answerable again, because it is a question the user has not answered.
-      expect(find.text('Show answer'), findsOneWidget);
-
-      await tester.pump(kRecallTurnLimit);
-    });
-  });
-
-  group('the second state the design has no image for', () {
-    // Drawn from BR-129, BR-130, BR-134 and BR-137 rather than guessed, and
-    // recorded as an agent proposal in `docs/wireframes/m5-study-modes.md` §6.
-    testWidgets('recall, once revealed, offers nothing further and says why', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        wrapForTest(
-          RecallTimerSectionWidget(
-            turn: turnOf('c1'),
-            onOutcome: (_) async => commitOf('c'),
-          ),
-          isScrollable: false,
-        ),
-      );
-
       // A blurred bar rather than a sentence: a line of text where the answer
-      // will appear is a line a learner reads instead of recalling. The
-      // sentence stays where it was always doing the work.
+      // will appear is a line a learner reads instead of recalling.
       expect(find.bySemanticsLabel('Answer hidden'), findsOneWidget);
-      expect(find.text('công'), findsNothing);
+      expect(find.text('Show answer'), findsOneWidget);
+      expect(outcomes, isEmpty);
 
+      await tester.pump(kRecallTurnLimit);
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('showing the answer stops the clock and writes nothing', (
+      tester,
+    ) async {
+      // **The whole point of the change, in one test.** Looking at the back is
+      // not evidence of recall, so the reveal produces a question rather than a
+      // grade — and the clock has no business running under a card the learner
+      // is already reading.
+      final outcomes = <RecallOutcome>[];
+      final reported = <Duration>[];
+      await tester.pumpWidget(
+        wrapForTest(
+          RecallTimerSectionWidget(
+            turn: recallTurn('c1'),
+            onOutcome: (outcome) async {
+              outcomes.add(outcome);
+
+              return commitOf('c1');
+            },
+            onRemainingChanged: reported.add,
+          ),
+          isScrollable: false,
+        ),
+      );
+
+      await tester.pump(const Duration(seconds: 3));
       await tester.tap(find.text('Show answer'));
       await tester.pump();
 
       expect(find.text('công'), findsOneWidget);
-      expect(find.text('Show answer'), findsNothing);
-      // Without the sentence, an answer on screen and no control looks exactly
-      // like a screen that stopped responding.
-      expect(find.textContaining('This turn is settled'), findsOneWidget);
+      expect(find.text('Forgot'), findsOneWidget);
+      expect(find.text('Remembered'), findsOneWidget);
+      expect(outcomes, isEmpty, reason: 'a reveal is not an answer');
 
-      await tester.pump(kRecallTurnLimit);
+      // The clock is stopped, not merely ignored: nothing new is reported and
+      // no timeout lands where the mark would have been.
+      final atReveal = reported.last;
+      await tester.pump(kRecallTurnLimit * 2);
+      await tester.pumpAndSettle();
+
+      expect(reported.last, atReveal);
+      expect(outcomes, isEmpty);
+      expect(find.text('Remembered'), findsOneWidget);
     });
   });
 
-  group('what the clock writes down when the app is taken away (BR-133)', () {
+  group('recall · the learner answers', () {
+    /// Every assessment path is the same three questions, so they are asked
+    /// once: how many writes, in which order against the advance, and what was
+    /// written.
+    Future<
+      ({List<RecallOutcome> outcomes, List<String> order, List<bool> shown})
+    >
+    answer(WidgetTester tester, String label, {StudyTurnModel? turn}) async {
+      final outcomes = <RecallOutcome>[];
+      final order = <String>[];
+      final shown = <bool>[];
+
+      await tester.pumpWidget(
+        wrapForTest(
+          RecallTimerSectionWidget(
+            turn: turn ?? recallTurn('c1'),
+            onOutcome: (outcome) async {
+              outcomes.add(outcome);
+              order.add('write');
+
+              return commitOf('c1');
+            },
+            onFeedbackShown: ({required isCorrect}) async {
+              order.add('advance');
+              shown.add(isCorrect);
+            },
+          ),
+          isScrollable: false,
+        ),
+      );
+
+      await tester.tap(find.text('Show answer'));
+      await tester.pump();
+      await tester.tap(find.text(label));
+      await tester.pumpAndSettle();
+
+      return (outcomes: outcomes, order: order, shown: shown);
+    }
+
+    testWidgets('Remembered writes one correct answer, then advances', (
+      tester,
+    ) async {
+      final result = await answer(tester, 'Remembered');
+
+      expect(result.outcomes, <RecallOutcome>[RecallOutcome.remembered]);
+      expect(result.order, <String>['write', 'advance'], reason: 'BR-157');
+      expect(result.shown, <bool>[true]);
+    });
+
+    testWidgets('Forgot writes one wrong answer, then advances', (
+      tester,
+    ) async {
+      final result = await answer(tester, 'Forgot');
+
+      expect(result.outcomes, <RecallOutcome>[RecallOutcome.forgotten]);
+      expect(result.order, <String>['write', 'advance']);
+      expect(result.shown, <bool>[false]);
+    });
+
+    testWidgets('nothing is held between the commit and the next card', (
+      tester,
+    ) async {
+      // **`recall` no longer has a reading budget, and that is a decision.** The
+      // learner reads the back *before* answering, so a hold afterwards pauses
+      // them on something they are done with. Asserted by settling nothing: if
+      // the mode still waited out 1800ms, this advance would not have arrived.
+      final order = <String>[];
+      await tester.pumpWidget(
+        wrapForTest(
+          RecallTimerSectionWidget(
+            turn: recallTurn('c1'),
+            onOutcome: (_) async => commitOf('c1'),
+            onFeedbackShown: ({required isCorrect}) async =>
+                order.add('advance'),
+          ),
+          isScrollable: false,
+        ),
+      );
+
+      await tester.tap(find.text('Show answer'));
+      await tester.pump();
+      await tester.tap(find.text('Remembered'));
+      await tester.pump();
+
+      expect(order, <String>['advance']);
+    });
+
+    testWidgets('a second tap during the write is not a second answer', (
+      tester,
+    ) async {
+      // The write takes long enough for a second tap to land inside it, and a
+      // second turn would grade the same card twice in one round (BR-25,
+      // BR-126).
+      var writes = 0;
+      final write = PendingCommit();
+      await tester.pumpWidget(
+        wrapForTest(
+          RecallTimerSectionWidget(
+            turn: recallTurn('c1'),
+            onOutcome: (_) {
+              writes += 1;
+
+              return write.future;
+            },
+          ),
+          isScrollable: false,
+        ),
+      );
+
+      await tester.tap(find.text('Show answer'));
+      await tester.pump();
+      await tester.tap(find.text('Remembered'));
+      await tester.pump();
+      await tester.tap(find.text('Remembered'), warnIfMissed: false);
+      await tester.pump();
+      await tester.tap(find.text('Forgot'), warnIfMissed: false);
+      await tester.pump();
+
+      expect(writes, 1);
+
+      write.commit('c1');
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('a refused write leaves the choice open to try again', (
+      tester,
+    ) async {
+      // Not advancing is half of it. The other half is that the learner keeps
+      // the answer they were giving: a screen that swallowed the tap and left
+      // two live buttons would be indistinguishable from one that recorded it.
+      final write = PendingCommit();
+      PendingCommit? write2;
+      var writes = 0;
+      final shown = <bool>[];
+      await tester.pumpWidget(
+        wrapForTest(
+          RecallTimerSectionWidget(
+            turn: recallTurn('c1'),
+            onOutcome: (_) {
+              writes += 1;
+
+              return (write2 ?? write).future;
+            },
+            onFeedbackShown: ({required isCorrect}) async =>
+                shown.add(isCorrect),
+          ),
+          isScrollable: false,
+        ),
+      );
+
+      await tester.tap(find.text('Show answer'));
+      await tester.pump();
+      await tester.tap(find.text('Forgot'));
+      await tester.pump();
+      write.refuse();
+      await tester.pumpAndSettle();
+
+      expect(shown, isEmpty, reason: 'nothing was recorded, so nothing moves');
+      expect(find.text('công'), findsOneWidget, reason: 'the back stays up');
+      expect(find.text('Forgot'), findsOneWidget);
+      expect(find.text('Remembered'), findsOneWidget);
+
+      // Live, not merely drawn: the retry is the reason the buttons came back.
+      final second = PendingCommit();
+      write2 = second;
+      await tester.tap(find.text('Forgot'));
+      await tester.pump();
+
+      expect(writes, 2);
+      second.commit('c1');
+      await tester.pumpAndSettle();
+    });
+  });
+
+  group('recall · what the app being taken away writes down (BR-133)', () {
     testWidgets('an open turn reports what is left, once', (tester) async {
       // BR-128 stops the clock when the app leaves the foreground. Without this
       // report the seconds it stopped at are lost, and the turn starts over at
@@ -296,8 +280,8 @@ void main() {
       await tester.pumpWidget(
         wrapForTest(
           RecallTimerSectionWidget(
-            turn: turnOf('c1'),
-            onOutcome: (_) async => commitOf('c'),
+            turn: recallTurn('c1'),
+            onOutcome: (_) async => commitOf('c1'),
             onSuspended: ({required remaining, required isRevealed}) =>
                 suspended.add((remaining: remaining, isRevealed: isRevealed)),
           ),
@@ -314,20 +298,51 @@ void main() {
       expect(suspended.single.isRevealed, isFalse);
 
       await tester.pump(kRecallTurnLimit);
+      await tester.pumpAndSettle();
     });
 
-    testWidgets('a turn that already has an outcome reports nothing', (
+    testWidgets('a revealed turn reports the reveal, not just the clock', (
       tester,
     ) async {
-      // Revealing *is* the outcome (BR-129), so the row this would be written
-      // against is no longer pending. The repository refuses it anyway; not
-      // asking is the half that does not depend on remembering to.
-      final suspended = <Duration>[];
+      // **`isRevealed: true` was unreachable and is now the ordinary case.** A
+      // learner interrupted between the reveal and the verdict has to come back
+      // to the back of the card — resuming them into a running clock over a
+      // covered answer would ask them to un-know it.
+      final suspended = <({Duration remaining, bool isRevealed})>[];
       await tester.pumpWidget(
         wrapForTest(
           RecallTimerSectionWidget(
-            turn: turnOf('c1'),
-            onOutcome: (_) async => commitOf('c'),
+            turn: recallTurn('c1'),
+            onOutcome: (_) async => commitOf('c1'),
+            onSuspended: ({required remaining, required isRevealed}) =>
+                suspended.add((remaining: remaining, isRevealed: isRevealed)),
+          ),
+          isScrollable: false,
+        ),
+      );
+
+      await tester.pump(const Duration(seconds: 8));
+      await tester.tap(find.text('Show answer'));
+      await tester.pump();
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      await tester.pump();
+
+      expect(suspended, hasLength(1));
+      expect(suspended.single.isRevealed, isTrue);
+      expect(suspended.single.remaining.inSeconds, 12);
+    });
+
+    testWidgets('a turn already being written reports nothing', (tester) async {
+      // The row it would be saved against is no longer pending. The repository
+      // refuses it anyway; not asking is the half that does not depend on
+      // anyone remembering to.
+      final suspended = <Duration>[];
+      final write = PendingCommit();
+      await tester.pumpWidget(
+        wrapForTest(
+          RecallTimerSectionWidget(
+            turn: recallTurn('c1'),
+            onOutcome: (_) => write.future,
             onSuspended: ({required remaining, required isRevealed}) =>
                 suspended.add(remaining),
           ),
@@ -337,10 +352,15 @@ void main() {
 
       await tester.tap(find.text('Show answer'));
       await tester.pump();
+      await tester.tap(find.text('Remembered'));
+      await tester.pump();
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
       await tester.pump();
 
       expect(suspended, isEmpty);
+
+      write.commit('c1');
+      await tester.pumpAndSettle();
     });
   });
 }
