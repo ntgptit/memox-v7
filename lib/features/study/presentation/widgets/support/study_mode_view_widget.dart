@@ -93,6 +93,10 @@ Widget? studyModeView({
   /// Steps back along `browse`'s trail of cards already seen (BR-155).
   required VoidCallback onLookBack,
 
+  /// How many cards back the trail is looking, owned by
+  /// `StudyBrowseTrailController`. Zero is the card the queue is serving.
+  int browseLookBack = 0,
+
   /// Called when the body stops asking and starts telling, so the frame can
   /// swap its hint line for one that describes what is on screen (§8.11).
   VoidCallback? onResolved,
@@ -144,8 +148,8 @@ Widget? studyModeView({
     // graded — which is why the swipe wraps this entry alone rather than the
     // body as a whole.
     StudyMode.browse => () => StudySwipeDeckWidget(
-      cardKey: (state.viewedCard ?? turn.card).id,
-      canGoBack: state.canLookBack,
+      cardKey: (state.viewedCardAt(browseLookBack) ?? turn.card).id,
+      canGoBack: state.canLookBackFrom(browseLookBack),
       // **`isAdvancing` too, not just `isSubmitting`.** Stepping forward from
       // the live turn writes the browse progress and *then* pulls the next
       // turn; only the write was covered, so the whole fetch was a window in
@@ -155,7 +159,7 @@ Widget? studyModeView({
       onBack: onLookBack,
       child: StudyCardFaceSectionWidget(
         turn: turn,
-        viewedCard: state.viewedCard,
+        viewedCard: state.viewedCardAt(browseLookBack),
         // `browse` produces no action at all (BR-111), so it gets no buttons
         // and one way forward — and therefore nothing to write, which is what
         // the null receipt says.

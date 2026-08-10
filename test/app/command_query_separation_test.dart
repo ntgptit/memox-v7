@@ -7,9 +7,8 @@ import 'support/command_query_scan.dart';
 ///
 /// The failure mode is a `DeckNotifier` that grows `loadDecks`, `createDeck`,
 /// `deleteDeck`, `selectDeck`, `searchDeck`, `navigateToDeck`, `showError` — each
-/// addition individually reasonable, the result a class nobody can change safely.
-/// It never arrives as one commit, so a review will not catch it; a method count
-/// will.
+/// addition reasonable, the result a class nobody can change safely. It never
+/// arrives as one commit, so a review will not catch it; a method count will.
 ///
 /// **Parsed, not matched.** The scanning machinery — which walks a real Dart AST
 /// so a comment or a string literal cannot produce a false hit — lives in
@@ -156,7 +155,7 @@ void main() {
       'advance',
       'pause',
       'leave',
-      'browseStep',
+      'markBrowsed',
     };
     final controllers = classesUnder('/controllers/');
     var inputCount = 0;
@@ -187,14 +186,16 @@ void main() {
       // what was left of it, and that is the counterpart of `leave` rather than
       // another command.
       //
-      // `browseStep` joined them for BR-155, and it is **one** name on purpose.
-      // Walking `browse`'s trail forward and back is the same swipe with the
-      // sign flipped, and a first draft that spelled it `lookBack` plus
-      // `browseForward` was two names for one responsibility. It could not live
-      // in a notifier of its own either: the offset is counted from the live
-      // turn and has to be cleared when that turn changes, so a separate owner
-      // would put one value behind two — the split this test's own reasoning
-      // rejects above.
+      // `markBrowsed` is the browse move that **writes** (BR-155). The offset it
+      // used to arrive with has left: the look-back position is view state — the
+      // card it puts on screen is already `completed`, no row is rewritten — and
+      // it is `StudyBrowseTrailController` now, one value and one mutator like
+      // every other input-state notifier.
+      //
+      // An earlier note here said that offset could not have an owner of its
+      // own, because it must be cleared when the turn changes and a second owner
+      // would put one value behind two. That was wrong: clearing it is a
+      // *listener* on the turn, not a second writer of it.
       //
       // `answer` became `submitAnswer` **plus** `advance`, and that is one
       // responsibility split rather than two added. Writing an answer and
