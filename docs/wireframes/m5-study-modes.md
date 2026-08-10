@@ -7,7 +7,7 @@
 | **Scope** | Khung phiên học, và năm màn `browse` · `match` · `guess` · `recall` · `fill`. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), luồng (`use-cases.md`), giá trị token (`design_system/tokens/`) |
 | **Source of truth for** | Bố cục màn học · phán quyết cho tám điểm design lệch với BR |
 | **Depends on** | `document-conventions.md`, `business-rules.md` (BR-108…BR-154), `wbs-study.md` (M5.7…M5.20) |
-| **Updated by task** | Rà soát UI 5 stage — `guess` bỏ huy hiệu A–E (§5), `fill` làm lại vùng đáp án (§6) |
+| **Updated by task** | Rà soát UI 5 stage — `guess` bỏ huy hiệu A–E (§5), `fill` làm lại vùng đáp án (§6), `browse` cân bằng hai mặt và đổi nhãn (§3) |
 | **Last updated** | 2026-08-10 |
 
 Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham chiếu bằng ID.
@@ -83,9 +83,21 @@ màu; bộ token hiện có không có màu nào mang nghĩa "đây là mode nà
 Thân là **một thẻ duy nhất chiếm toàn bộ chiều cao**, chia đôi bằng một đường kẻ
 mảnh:
 
-- nửa trên: nhãn `KOREAN` (chữ nhỏ, hoa, mờ) ở góc trái; mặt trước căn giữa, cỡ
-  lớn nhất màn hình.
-- nửa dưới: nhãn `MEANING`; nghĩa căn giữa, cỡ vừa.
+- nửa trên: nhãn `FRONT` (chữ nhỏ, hoa, mờ) ở góc trái; mặt trước căn giữa.
+- nửa dưới: nhãn `BACK`; mặt sau căn giữa, **cùng cỡ với nửa trên**.
+
+**Nhãn gọi tên cột, không gọi tên nội dung.** Ảnh ghi `KOREAN`/`MEANING`; không
+deck hay card nào mang ngôn ngữ, và `front` cũng không đảm bảo là thuật ngữ —
+một bộ thẻ hoàn toàn có thể để nghĩa ở mặt trước và từ ở mặt sau, lúc đó cặp
+`Thuật ngữ`/`Ý nghĩa` dán sai nhãn cho cả hai nửa.
+
+**Hai nửa cùng một vai typography trong `browse`, và đó là BR-112 nhìn từ phía
+chữ.** Cả hai mặt đều đang ở đó để đọc, không mặt nào là câu hỏi. Cho mặt trước
+cỡ prompt khiến một front dài — *"Be shy / Ngượng ngùng (Động từ, thể hiện sự e
+ngại trong giao tiếp)"* — chiếm ba dòng headline và nuốt cả thẻ. `self_assess`
+thì ngược lại: mặt trước **là** câu hỏi cho tới khi lật, nên nó giữ cỡ prompt.
+Khác biệt ấy đi qua một tham số có tên (`StudyFaceEmphasis`) chứ không suy ra từ
+cờ "có hiện mặt sau ngay không" — hai câu hỏi khác nhau tình cờ cùng đáp án.
 
 Không có nút nào, kể cả nút đi tiếp — khớp BR-111 và BR-155. Chuyển thẻ là **vuốt**;
 một nút Next cạnh cử chỉ là cách thứ hai để làm đúng một việc mà cử chỉ đã làm,
@@ -475,7 +487,7 @@ Nên có hai hàm chứ không một hằng:
 
 - `_leadingInset` = **gutter**. Glyph ✕ rơi lên 16 (320: 14 — xem dưới).
 - `_trailingInset` = **gutter + `xl`**. Hộp bộ đếm hết ở 353, tức lùi 24 so với
-  mép thẻ và vượt qua cả cột chữ của thẻ (`TERM`/`MEANING` ở 32). Sâu như vậy vì
+  mép thẻ và vượt qua cả cột chữ của thẻ (`FRONT`/`BACK` ở 32). Sâu như vậy vì
   ở mép không có gì để đứng lên: mép thẻ full-bleed chỉ **1.38:1** so với nền
   trang ở light, ruột thẻ **1.06:1** — bộ đếm từng được đo *sát khít* mép ấy,
   đúng từng pixel, mà vẫn bị báo là vượt ra ngoài, hai lần. Tránh hẳn ra là thứ
