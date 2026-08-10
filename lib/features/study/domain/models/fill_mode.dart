@@ -9,7 +9,19 @@ import 'study_turn_model.dart';
 /// how answers are compared bumps this number; old rows keep the version they
 /// were graded under, so a history row still means what it meant when it was
 /// written.
-const int kFillComparisonVersion = 1;
+///
+/// **2 since the direction was fixed**, and that is the case this number exists
+/// for. Version 1 compared the answer with `back_folded`; version 2 compares it
+/// with `front_folded`. Leaving it at 1 would have made one number mean two
+/// different policies — every row already in `study_answers` says "graded
+/// against the back" and every new one would say "graded against the front"
+/// under the same label, which is precisely the ambiguity BR-135 forbids and
+/// which nothing downstream could unpick afterwards.
+///
+/// The folding itself — trim, then Unicode-aware lower case — is unchanged; it
+/// is *which string is folded against* that moved, and a policy version covers
+/// the comparison as a whole.
+const int kFillComparisonVersion = 2;
 
 /// What one typed answer produced.
 ///

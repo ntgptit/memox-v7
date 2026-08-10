@@ -1024,6 +1024,11 @@ phán quyết trước khi người dùng trả lời.
   - `StudyCardModel` nhận thêm `frontFolded`, đọc thẳng từ cột `cards.front_folded`
     đã có sẵn. Fold lại trong UI là chính sách thứ hai, và BR-135 đánh version cho
     đúng một chính sách.
+  - **`kFillComparisonVersion` 1 → 2** (bắt được ở review PR #281). Đổi vế so
+    sánh *là* đổi chính sách: để nguyên số 1 thì mọi dòng `study_answers` cũ ghi
+    "chấm theo mặt sau" và mọi dòng mới ghi "chấm theo mặt trước" dưới cùng một
+    nhãn — đúng cái mơ hồ BR-135 tồn tại để chặn, và không ai gỡ lại được về sau.
+    Cách fold (trim rồi hạ hoa Unicode-aware) không đổi.
 - **Đổi: thẻ dưới *là* vùng nhập, không *chứa* vùng nhập.** Bản trước đặt một
   `MxTextField` viền cao 56 vào giữa một thẻ cao hơn 200 — thẻ trong thẻ, hai
   khoảng trống không thuộc về cái nào, vùng chạm thật bằng một phần năm vùng
