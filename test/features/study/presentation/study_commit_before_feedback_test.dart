@@ -36,6 +36,7 @@ void main() {
     example: 'an example with ___ in it',
     hint: null,
     pronunciation: null,
+    frontFolded: 'front-$id',
     backFolded: 'back-$id',
   );
 
@@ -193,7 +194,7 @@ void main() {
       final write = PendingCommit();
       await pumpField(tester, write);
 
-      await tester.enterText(find.byType(TextField), 'back-c1');
+      await tester.enterText(find.byType(TextField), 'front-c1');
       await tester.pump();
       await tester.tap(find.text('Check'));
       await tester.pumpAndSettle();
@@ -212,7 +213,7 @@ void main() {
       final shown = <bool>[];
       await pumpField(tester, write, shown: shown);
 
-      await tester.enterText(find.byType(TextField), 'back-c1');
+      await tester.enterText(find.byType(TextField), 'front-c1');
       await tester.pump();
       await tester.tap(find.text('Check'));
       await tester.pump();
@@ -230,16 +231,39 @@ void main() {
       final shown = <bool>[];
       await pumpField(tester, write, shown: shown);
 
-      await tester.enterText(find.byType(TextField), 'back-c1');
+      await tester.enterText(find.byType(TextField), 'front-c1');
       await tester.pump();
       await tester.tap(find.text('Check'));
       await tester.pump();
       write.refuse();
       await tester.pumpAndSettle();
 
-      expect(find.byType(TextField), findsOneWidget);
+      final field = tester.widget<TextField>(find.byType(TextField));
       expect(find.text('Check'), findsOneWidget);
       expect(shown, isEmpty);
+      // Nothing cleared and nothing greyed: the turn never happened, so the
+      // answer is still the one the learner is waiting on.
+      expect(field.controller!.text, 'front-c1');
+      expect(field.readOnly, isFalse);
+      // And the caret is back, so the retry is a second tap on Check rather
+      // than a tap on the card followed by one on Check.
+      expect(field.focusNode!.hasFocus, isTrue);
+    });
+
+    testWidgets('a locked session cannot be typed into', (tester) async {
+      // `isLocked` is the session already busy with somebody else's write.
+      await tester.pumpWidget(
+        wrapForTest(
+          FillAnswerSectionWidget(
+            turn: turnOf('c1'),
+            isLocked: true,
+            onGraded: (_) async => commitOf('c1'),
+          ),
+          isScrollable: false,
+        ),
+      );
+
+      expect(tester.widget<TextField>(find.byType(TextField)).readOnly, isTrue);
     });
   });
 

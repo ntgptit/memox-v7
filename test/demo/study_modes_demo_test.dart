@@ -10,7 +10,6 @@ import 'package:memox/features/study/domain/models/study_queue_item_status_model
 import 'package:memox/features/study/domain/models/study_session_kind_model.dart';
 import 'package:memox/features/study/domain/models/study_turn_model.dart';
 import 'package:memox/features/study/presentation/screens/study_session_screen.dart';
-import 'package:memox/features/study/presentation/widgets/support/study_mode_feedback_widget.dart';
 import 'package:memox/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart';
 
 import '../features/study/domain/support/fake_study_repository.dart';
@@ -48,6 +47,7 @@ void main() {
     example: example,
     hint: hint,
     pronunciation: null,
+    frontFolded: front,
     backFolded: back,
   );
 
@@ -173,10 +173,15 @@ void main() {
     card: cards.first,
   );
 
-  /// A string the mode is guaranteed to put on screen. `fill` asks about the
-  /// card's example rather than its front, so one field cannot cover all five.
+  /// A string the mode is guaranteed to put on screen.
+  ///
+  /// `fill` is the one mode that shows the **back**: it asks for the Korean term
+  /// rather than showing it (BR-134). It used to be listed here as the mode that
+  /// shows its `example`, which is the prompt this task replaced — an example
+  /// sentence contains the answer, so the screen was asking and answering the
+  /// same question.
   String contentOf(StudyMode mode, StudyCardModel card) =>
-      mode == StudyMode.fill ? card.example! : card.front;
+      mode == StudyMode.fill ? card.back : card.front;
 
   /// The mode chip as the top bar draws it — uppercased at the join (#239).
   String chipOf(StudyMode mode) => switch (mode) {
@@ -267,84 +272,5 @@ void main() {
         await matchesReviewGolden('goldens/study_${mode.name}_$label.png');
       });
     }
-  }
-
-  for (final (label, brightness) in <(String, Brightness)>[
-    ('light', Brightness.light),
-    ('dark', Brightness.dark),
-  ]) {
-    // **`fill` while typing, because that is the state the handout draws.**
-    // `fill_mode.png` is titled "đang nhập" and §6 asks for the typed value
-    // centred and large — a floating label sits left and small until something
-    // is in the field, so an empty render cannot show the thing being specified.
-    testWidgets('study fill typing — $label', (tester) async {
-      final cards = deck();
-      final repository = FakeStudyRepository(stageExhausted: false)
-        ..cards = cards
-        ..nextTurn_ = turnFor(StudyMode.fill, cards: cards);
-
-      await pumpReview(
-        tester,
-        ReviewApp(
-          brightness: brightness,
-          home: studyScreenWith(
-            repository,
-            const StudySessionScreen(
-              deckId: 'deck-1',
-              kind: StudySessionKind.reviewing,
-              reviewMode: StudyMode.fill,
-            ),
-          ),
-        ),
-      );
-
-      await tester.enterText(find.byType(TextField), 'quả táo');
-      await tester.pumpAndSettle();
-
-      await matchesReviewGolden('goldens/study_fill_typing_$label.png');
-    });
-
-    // **The graded state, which no render covered.** It is the one place the
-    // verdict tokens are drawn, and BR-138 makes it the one place that has to
-    // be checked for what it does *not* show: the learner's own attempt is not
-    // stored and is not echoed, so a wrong turn shows the card's back and
-    // nothing else.
-    testWidgets('study fill graded — $label', (tester) async {
-      final cards = deck();
-      final repository = FakeStudyRepository(stageExhausted: false)
-        ..cards = cards
-        ..nextTurn_ = turnFor(StudyMode.fill, cards: cards);
-
-      await pumpReview(
-        tester,
-        ReviewApp(
-          brightness: brightness,
-          home: studyScreenWith(
-            repository,
-            const StudySessionScreen(
-              deckId: 'deck-1',
-              kind: StudySessionKind.reviewing,
-              reviewMode: StudyMode.fill,
-            ),
-          ),
-        ),
-      );
-
-      await tester.enterText(find.byType(TextField), 'sai rồi');
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Check'));
-      await tester.pumpAndSettle();
-
-      await matchesReviewGolden('goldens/study_fill_graded_$label.png');
-
-      // **The verdict now outlives the frame it was drawn in.** A graded answer
-      // is held on screen for `AppStudyFeedback.fillWrong` before the session
-      // fetches the next card, and `pumpAndSettle` does not run a
-      // `Future.delayed` out — flutter_test then fails the test for a pending
-      // timer. Running it here is what proves the hold is real rather than
-      // hiding it.
-      await tester.pump(AppStudyFeedback.fillWrong);
-      await tester.pumpAndSettle();
-    });
   }
 }

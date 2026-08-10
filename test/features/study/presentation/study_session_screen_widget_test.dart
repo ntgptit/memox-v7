@@ -64,6 +64,7 @@ void main() {
           example: null,
           hint: null,
           pronunciation: null,
+          frontFolded: '사과',
           backFolded: 'apple',
         ),
       );

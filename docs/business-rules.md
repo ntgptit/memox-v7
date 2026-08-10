@@ -7,7 +7,7 @@
 | **Scope** | Luật nghiệp vụ, validation rule, state machine, edge case của phạm vi MVP. Ngoài phạm vi: quyết định kiến trúc (`architecture.md`), hình dạng dữ liệu (`data-model.md`), luồng người dùng (`use-cases.md`) |
 | **Source of truth for** | BR-xx · validation rule · entity state machine · edge case |
 | **Depends on** | `document-conventions.md`, `product.md`, `architecture.md` |
-| **Updated by task** | BR-159, BR-160 — mở đáp án ở `recall` không phải là một kết cục, và hai kết thúc của nó có nhịp khác nhau; BR-129/130/133 chỉnh theo |
+| **Updated by task** | BR-134 — `fill` hỏi bằng `back`, chấm bằng `front_folded`, sửa sai hiện `front` · BR-159, BR-160 — mở đáp án ở `recall` không phải là một kết cục, và hai kết thúc của nó có nhịp khác nhau; BR-129/130/133 chỉnh theo |
 | **Last updated** | 2026-08-11 |
 
 Format tuân theo `document-conventions.md` §6.2. Từ khoá MUST / SHOULD / MAY
@@ -507,7 +507,7 @@ vì một question mượn bốn thẻ khác để dựng.
 | BR-141 | active | Trong phiên **học mới**, mọi lượt MUST là `learning` hoặc `relearning` và MUST NOT đổi lịch (BR-144). Trong phiên **ôn tập**, lượt đầu tiên của mỗi thẻ là `scheduled` và đổi lịch; mọi lượt lặp sau đó là `relearning`. | repository | BR-77, BR-115, BR-144 |
 | BR-139 | active | Số thẻ của một phiên MUST được chốt **một lần lúc mở phiên** từ tùy chọn hiệu lực (BR-147) và lưu vào `study_sessions.card_limit`. Đổi tùy chọn sau đó MUST NOT ảnh hưởng phiên đang chạy. | db | BR-24, BR-147 |
 | BR-140 | active | Điều kiện **dựng được nội dung** của một stage (BR-114, BR-121, BR-124) MUST NOT được hiểu là ngưỡng thẻ của stage đó. Chúng quyết định stage có chạy được hay bị bỏ qua, không quyết định lấy bao nhiêu thẻ. | domain | BR-99, BR-139 |
-| BR-134 | active | `fill` MUST chấm bằng cách so dạng **đã fold** của câu trả lời với `back_folded` của thẻ: trim hai đầu và hạ hoa Unicode-aware. Chính sách này **giữ nguyên dấu** — `cong` MUST NOT khớp `công`. | domain | BR-123, BR-135 |
+| BR-134 | active | `fill` MUST hiển thị **mặt sau** của thẻ làm đề bài và MUST yêu cầu người học gõ **mặt trước**: theo BR-08, `front` giữ term (tiếng Hàn) và `back` giữ nghĩa. Việc chấm MUST so dạng **đã fold** của câu trả lời với `front_folded` của thẻ — trim hai đầu và hạ hoa Unicode-aware — và khi sai, đáp án hiển thị MUST là `front`. Chính sách này **giữ nguyên dấu** — `cong` MUST NOT khớp `công`. | domain | BR-08, BR-123, BR-135 |
 | BR-135 | active | Mỗi lượt `fill` MUST lưu phiên bản chính sách so khớp đã dùng. Đổi chính sách MUST tăng phiên bản, MUST NOT sửa lại các lượt cũ. | db | BR-134, AD-11 |
 | BR-136 | active | Việc dùng gợi ý MUST được ghi trên lượt, và MUST NOT tự đổi `action` hay lịch. | db | BR-106, BR-95 |
 | BR-137 | active | Câu trả lời rỗng sau khi trim MUST NOT sinh lượt và MUST NOT tiến checkpoint. | domain | BR-25, BR-134 |

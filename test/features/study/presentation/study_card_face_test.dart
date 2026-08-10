@@ -43,6 +43,7 @@ void main() {
       example: null,
       hint: null,
       pronunciation: null,
+      frontFolded: 'front-$id',
       backFolded: 'back-$id',
     ),
   );
@@ -197,15 +198,9 @@ void main() {
         wrapForTest(
           StudyCardFaceSectionWidget(
             turn: turnOf('c1'),
-            viewedCard: const StudyCardModel(
-              id: 'c0',
-              front: 'front-c0',
-              back: 'back-c0',
-              example: null,
-              hint: null,
-              pronunciation: null,
-              backFolded: 'back-c0',
-            ),
+            // The same fixture the turn is built from, one card earlier — a
+            // second literal here is a second definition of what a card is.
+            viewedCard: turnOf('c0').card,
             actions: const <StudyAction>[],
             onAction: (_) async => null,
             onContinue: () {},

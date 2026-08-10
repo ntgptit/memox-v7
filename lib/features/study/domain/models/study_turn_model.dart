@@ -24,8 +24,22 @@ abstract class StudyCardModel with _$StudyCardModel {
     required String? hint,
     required String? pronunciation,
 
-    /// The folded back, for grading `fill` and for telling two meanings apart
-    /// in `guess` (BR-123, BR-134). Diacritics intact: `cong` is not `công`.
+    /// The folded front, which is what `fill` grades against (BR-134).
+    ///
+    /// **The term, not the meaning, and that is the whole direction of the
+    /// mode.** `fill` shows the card's back — the English/Vietnamese gloss — and
+    /// asks for the Korean term, so the string an answer is compared with is the
+    /// folded *front*. Grading against [backFolded] marked a correct Korean
+    /// answer wrong and a learner echoing the prompt right, which is a screen
+    /// that looks entirely reasonable and teaches the wrong thing.
+    ///
+    /// Read from `cards.front_folded` rather than folded here: the column
+    /// already exists, and a second fold in the presentation layer is a second
+    /// policy that drifts from the one BR-135 versions.
+    required String frontFolded,
+
+    /// The folded back, for telling two meanings apart in `guess` (BR-123).
+    /// Diacritics intact: `cong` is not `công`.
     required String backFolded,
   }) = _StudyCardModel;
 }

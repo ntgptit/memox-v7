@@ -119,10 +119,23 @@ WidgetbookComponent cardComponent() {
             maxLines: 3,
           );
           final isTappable = context.knobs.boolean(label: 'tappable');
+          // A **role**, never a free colour — the same contract `color` has.
+          // `fill`'s answer card wears its verdict on this edge rather than in a
+          // panel drawn inside it.
+          final edge = context.knobs.object.dropdown<String>(
+            label: 'borderColor',
+            options: <String>['default', 'success', 'danger', 'focusRing'],
+          );
 
           return CatalogCenterPage(
             child: MxCard(
               onTap: isTappable ? _noop : null,
+              borderColor: switch (edge) {
+                'success' => context.semanticColors.success,
+                'danger' => context.semanticColors.danger,
+                'focusRing' => context.semanticColors.focusRing,
+                _ => null,
+              },
               child: Text(content, style: context.texts.bodyMedium),
             ),
           );

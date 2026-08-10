@@ -1381,7 +1381,7 @@
   },
   "studyFillInputLabel": "Gõ đáp án",
   "@studyFillInputLabel": {
-    "description": "Label of the fill input. What is typed is never stored (BR-138)."
+    "description": "Names the fill answer field. The whole lower card is the input, so this is both the centred placeholder and the screen-reader name — there is no floating label. What is typed is never stored (BR-138)."
   },
   "studyFillSubmit": "Kiểm tra",
   "@studyFillSubmit": {
@@ -1397,7 +1397,7 @@
   },
   "studyFillIncorrect": "Chưa đúng",
   "@studyFillIncorrect": {
-    "description": "Feedback after a fill answer did not match. Diacritics count (BR-134)."
+    "description": "Feedback after a fill answer did not match the card's front. Diacritics count (BR-134)."
   },
   "studyFrameClose": "Đóng phiên",
   "@studyFrameClose": {
@@ -1558,7 +1558,7 @@
   },
   "studyFillAnswerLabel": "Đáp án",
   "@studyFillAnswerLabel": {
-    "description": "Heading over the block that shows the card's own back after a fill turn is graded. A label rather than a sentence: it sits above the answer, the way the prompt sits above the field."
+    "description": "Heading over the card's own front — the Korean term — shown on the answer card after a fill turn is graded wrong (BR-134). A correct turn does not get it: spelling the answer back to somebody who just typed it reads as a correction."
   },
   "deckConflictResetNeedsRoot": "Ti\u1ebfn \u0111\u1ed9 h\u1ecdc \u0111\u01b0\u1ee3c \u0111\u1eb7t l\u1ea1i \u1edf deck g\u1ed1c.",
   "@deckConflictResetNeedsRoot": {

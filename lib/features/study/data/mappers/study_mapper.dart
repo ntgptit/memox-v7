@@ -62,6 +62,7 @@ StudyCardModel studyCardModelFromRow(Card row) => StudyCardModel(
   example: row.example,
   hint: row.hint,
   pronunciation: row.pronunciation,
+  frontFolded: row.frontFolded,
   backFolded: row.backFolded,
 );
 

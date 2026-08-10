@@ -7,7 +7,7 @@
 | **Scope** | Khung phiên học, và năm màn `browse` · `match` · `guess` · `recall` · `fill`. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), luồng (`use-cases.md`), giá trị token (`design_system/tokens/`) |
 | **Source of truth for** | Bố cục màn học · phán quyết cho tám điểm design lệch với BR |
 | **Depends on** | `document-conventions.md`, `business-rules.md` (BR-108…BR-154), `wbs-study.md` (M5.7…M5.20) |
-| **Updated by task** | `recall` tách lật khỏi chấm — lật mở tự đánh giá, hết giờ ghi sai rồi chờ `Next` (§6.1, §8.12) · `guess` bỏ nền phán quyết — đúng/sai chỉ còn viền + chữ + icon, ba hàng còn lại lùi về 0.7 thay vì 0.36, reset theo lượt thay vì `cardId`, ngân sách đọc 800/1800ms (§5, §8.9, §8.12) · Rà soát UI 5 stage — `match` nhận cả hai chiều chọn và giữ trạng thái đủ lâu để đọc (§4, §8.8), chuyển feedback sang viền + chữ thay vì nền đặc (§4), đổi meaning sang trái, hạ thang chữ và nâng sàn hàng lên 112 (§4, §8.6), `guess` bỏ huy hiệu A–E (§5), `fill` làm lại vùng đáp án (§6), `browse` cân bằng hai mặt và đổi nhãn (§3) |
+| **Updated by task** | `fill` làm lại vùng đáp án lần hai — thẻ dưới **là** input surface, bỏ ô viền lồng trong thẻ, đề đổi sang `back` và chấm bằng `front_folded` (BR-134), phán quyết mặc lên viền thẻ, hàng CTA giữ đủ hai chỗ (§6, §8.10) · `recall` tách lật khỏi chấm — lật mở tự đánh giá, hết giờ ghi sai rồi chờ `Next` (§6.1, §8.12) · `guess` bỏ nền phán quyết — đúng/sai chỉ còn viền + chữ + icon, ba hàng còn lại lùi về 0.7 thay vì 0.36, reset theo lượt thay vì `cardId`, ngân sách đọc 800/1800ms (§5, §8.9, §8.12) · Rà soát UI 5 stage — `match` nhận cả hai chiều chọn và giữ trạng thái đủ lâu để đọc (§4, §8.8), chuyển feedback sang viền + chữ thay vì nền đặc (§4), đổi meaning sang trái, hạ thang chữ và nâng sàn hàng lên 112 (§4, §8.6), `guess` bỏ huy hiệu A–E (§5), `fill` làm lại vùng đáp án (§6), `browse` cân bằng hai mặt và đổi nhãn (§3) |
 | **Last updated** | 2026-08-11 |
 
 Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham chiếu bằng ID.
@@ -242,20 +242,37 @@ không phải một tiêu đề.
 Cùng một bố cục: **thẻ đề ở trên, vùng đáp án ở dưới, nút hành động dưới cùng.**
 
 `recall`: vùng đáp án là một khối mờ có vạch giả; nút chính `Show answer`.
-`fill`: vùng đáp án là ô nhập, có con trỏ; hai nút — `Hint` viền và `Check` đặc.
+`fill`: **toàn bộ thẻ dưới là vùng nhập**, có con trỏ; hai nút — `Hint` viền và
+`Check` đặc.
 
 **Bố cục cặp thẻ giữ nguyên.** Thay đổi dưới đây chỉ nằm *bên trong* vùng đáp án
 của `fill`; thẻ đề, hai `Expanded` và sàn chiều cao chung với `recall` không đụng
-tới.
+tới. Header và ProgressBar cũng không đụng tới.
 
-**Bỏ "chữ căn giữa cỡ lớn".** Ô nhập dùng đúng kiểu chữ mặc định của input trong
-app, canh trái — một ô căn giữa cỡ 24 là kiểu input thứ hai, mà `MxTextField` tồn
-tại để chỉ có một.
+**Hướng của `fill`: đề là nghĩa, đáp án là term** (BR-134). Thẻ trên hiện
+`card.back`; người học gõ `card.front`. Thẻ trên MUST NOT hiện `example` — câu ví
+dụ chứa sẵn từ phải gõ, nên màn hình vừa hỏi vừa trả lời.
 
-Sau khi chấm: một dòng kết cục bằng `success`/`danger`, và **chỉ khi sai** mới có
-nhãn `Đáp án` cùng một khối viền `success` chứa mặt sau của thẻ. Trả lời đúng thì
-không lặp lại đáp án — nói lại thứ người ta vừa gõ đúng đọc như một lời đính
-chính.
+**Không có ô nhập con bên trong thẻ.** `MxCard` **là** input surface: editable
+`expands` phủ hết thẻ, chạm bất kỳ đâu trong thẻ đều focus, và cả sáu trạng thái
+viền của `InputDecoration` bị tắt. Bản trước dựng một `MxTextField` viền nằm giữa
+một thẻ cao gấp bốn — một thẻ trong thẻ, vùng chạm thật chỉ bằng một phần năm
+vùng trông có vẻ chạm được. Viền của thẻ dưới chuyển sang `focusRing` khi đang
+nhập, vì lúc này thẻ đóng vai một field.
+
+Chữ đã gõ căn giữa hai trục ở một bậc trên nghĩa (`titleLarge`) — đủ nổi cho một
+từ tiếng Hàn, không phóng đại. Placeholder dùng `hintStyle` của theme, căn giữa,
+và bị loại khỏi semantics vì `Semantics(label:)` đã đặt tên cho field.
+
+Sau khi chấm: kết cục hiện **trên chính thẻ dưới** — viền `success`/`danger`, một
+icon, một dòng chữ, và `card.front` (term chuẩn). Không dựng khối con, không tô
+kín nền bằng màu phán quyết. **Chỉ khi sai** mới có nhãn `Đáp án` phía trên term.
+Trả lời đúng thì không có nhãn đó — nói lại thứ người ta vừa gõ đúng đọc như một
+lời đính chính. Cả hai trạng thái MUST NOT lặp lại nghĩa: nó đang nằm ngay trên.
+
+Hàng CTA giữ **cả hai chỗ** suốt lượt: `Hint` tắt thay vì biến mất sau khi dùng,
+`Check` tắt khi ô rỗng (BR-137) và trong lúc ghi. Bỏ một nút làm hàng căn giữa
+lại và đẩy nút chính sang chỗ khác giữa lúc ngón tay đang đi xuống.
 
 Ảnh có **icon bút chì** trên cả hai và **icon loa** ở `recall`; cả hai **không
 dựng** ở MVP (§7.4). Ảnh **không** có đồng hồ, còn BR-128 bắt buộc phải có —
@@ -312,11 +329,14 @@ Ghi thất bại không thêm một phase mới cho tự đánh giá — nó qua
 
 - Đóng ô nhập vì một câu trả lời thứ hai là một lượt thứ hai (BR-137, và cùng lý
   do với BR-126 ở `guess`).
-- Sai thì hiện **mặt sau của thẻ**, không phải thứ người dùng đã gõ: BR-138 nói
-  nội dung gõ vào không được lưu, và dội nó lại màn hình là cùng một dữ liệu chỉ
-  đi theo hướng khác.
-- Đúng thì **không** hiện dòng đáp án. Dòng đó tồn tại để nói cho người trượt
+- Sai thì hiện **mặt trước của thẻ** — term tiếng Hàn (BR-134) — chứ không phải
+  thứ người dùng đã gõ: BR-138 nói nội dung gõ vào không được lưu, và dội nó lại
+  màn hình là cùng một dữ liệu chỉ đi theo hướng khác. Mục này ghi "mặt sau" cho
+  tới khi hướng của mode được sửa; lúc đó đề bài chính là mặt sau, nên sửa lỗi
+  bằng mặt sau là in lại đúng câu hỏi.
+- Đúng thì **không** hiện nhãn `Đáp án`. Nhãn đó tồn tại để nói cho người trượt
   biết họ thiếu gì; đưa cho người làm đúng thì nó đọc thành một lời đính chính.
+  Term vẫn ở lại trên thẻ để lời xác nhận có cái gì để xác nhận.
 
 ## 7. Điểm lệch giữa design và BR — **đã chốt**
 
@@ -936,6 +956,36 @@ rõ.
 **Hàng CTA ôm chữ, không kéo hết bề ngang** (`AppStudyPair.ctaMaxWidth` = 160 cho
 mỗi nút khi có hai). Một nút kéo hết ngang dưới hai thẻ đọc ra là sàn của màn
 hình, căn giữa thì đọc ra là đường đi tiếp.
+
+#### `fill`: thẻ dưới **là** input, không chứa input
+
+Cái bậc ở trên nói thẻ dưới đang chờ được điền; bản dựng đầu tiên rồi lại đặt một
+`MxTextField` viền vào giữa nó. Kết quả là thẻ-trong-thẻ: một hộp cao 56 nằm giữa
+một thẻ cao hơn 200, khoảng trống trên dưới không thuộc về cái nào, và vùng chạm
+thật nhỏ hơn nhiều vùng trông có vẻ chạm được.
+
+Bản này bỏ hộp trong đi. Editable dùng `expands: true` nên phủ đúng thẻ trừ
+padding của `MxCard`; một `GestureDetector` opaque bọc ngoài để dải padding cũng
+là vùng chạm. Sáu trạng thái viền của `InputDecoration` — `border`,
+`enabledBorder`, `focusedBorder`, `errorBorder`, `focusedErrorBorder`,
+`disabledBorder` — đều `none`: `InputDecorationTheme` cấp năm cái sau độc lập, nên
+chỉ tắt `border` là viền cũ quay lại đúng lúc field nhận focus, tức là đúng cái
+trạng thái không ai chụp màn hình.
+
+**`MxTextField` không diễn được hình này, và ép nó thì đắt hơn.** Hợp đồng của nó
+là một field *đã trang trí*: nó từ chối `InputDecoration` để cả app chỉ có một
+kiểu input (M3.5). Cái màn này cần đúng sự vắng mặt của kiểu đó, cộng `expands`,
+`textAlignVertical` và content inset bằng 0 — hoặc là thêm một kiểu công khai thứ
+hai cho đúng một caller, hoặc là chọc một lỗ cho mọi caller truyền decoration.
+Cả hai đều lớn hơn một editable private nằm trong feature cần nó. Thứ
+`MxTextField` bảo vệ vẫn được giữ bằng cách khác: không màu, bán kính hay khoảng
+cách nào ở đó là literal, kiểu chữ lấy từ `context.texts`, và không caller nào
+với tới được decoration.
+
+`MxCard` vì thế có thêm `borderColor` — như `color`, đây là một **vai** semantic
+(`success` / `danger` / `focusRing`), không phải một màu tự do. Nó tồn tại vì
+phán quyết thuộc về chính cái thẻ người ta gõ vào: một khối viền vẽ *bên trong*
+thẻ là đúng cái lồng nhau vừa gỡ ra.
 
 #### Còn lại: `fill` cần một BR trước khi dựng tiếp
 

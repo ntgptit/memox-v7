@@ -9,7 +9,19 @@ import 'study_turn_model.dart';
 /// how answers are compared bumps this number; old rows keep the version they
 /// were graded under, so a history row still means what it meant when it was
 /// written.
-const int kFillComparisonVersion = 1;
+///
+/// **2 since the direction was fixed**, and that is the case this number exists
+/// for. Version 1 compared the answer with `back_folded`; version 2 compares it
+/// with `front_folded`. Leaving it at 1 would have made one number mean two
+/// different policies — every row already in `study_answers` says "graded
+/// against the back" and every new one would say "graded against the front"
+/// under the same label, which is precisely the ambiguity BR-135 forbids and
+/// which nothing downstream could unpick afterwards.
+///
+/// The folding itself — trim, then Unicode-aware lower case — is unchanged; it
+/// is *which string is folded against* that moved, and a policy version covers
+/// the comparison as a whole.
+const int kFillComparisonVersion = 2;
 
 /// What one typed answer produced.
 ///
@@ -73,20 +85,27 @@ final class FillModeHandler extends StudyModeHandler {
 
   /// Grades one answer, or returns null when there is nothing to grade.
   ///
+  /// **Against the folded *front*, and the direction is the mode** (BR-134).
+  /// `fill` puts the card's back — the English/Vietnamese meaning — on the
+  /// prompt and asks for the Korean term, so the string an answer is measured
+  /// against is [StudyCardModel.frontFolded]. It graded against the back for as
+  /// long as the prompt was the example sentence: a learner typing the Korean
+  /// word was marked wrong, and one echoing the gloss back was marked right.
+  ///
   /// **Null for an empty answer** (BR-137). Not "wrong": a blank field is
   /// somebody tapping submit by accident, and recording it as a failure would
   /// bury a card the user never actually got wrong. It also must not advance the
   /// checkpoint, which is what returning null lets the caller do.
   FillOutcome? grade({
     required String input,
-    required String backFolded,
+    required String frontFolded,
     required bool hasUsedHint,
   }) {
     final folded = fold(input);
     if (folded.isEmpty) return null;
 
     return FillOutcome(
-      isCorrect: folded == backFolded,
+      isCorrect: folded == frontFolded,
       comparisonVersion: kFillComparisonVersion,
       hasUsedHint: hasUsedHint,
     );

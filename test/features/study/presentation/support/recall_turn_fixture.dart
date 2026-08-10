@@ -42,6 +42,7 @@ StudyTurnModel recallTurn(
     example: null,
     hint: null,
     pronunciation: null,
+    frontFolded: 'front-$id',
     backFolded: back,
   ),
 );

@@ -106,6 +106,7 @@ class StudyCatalogRepository implements StudyRepository {
         example: entry.$3,
         hint: index == 0 ? 'Starts with a.' : null,
         pronunciation: null,
+        frontFolded: entry.$1.toLowerCase(),
         backFolded: entry.$2.toLowerCase(),
       ),
   ];

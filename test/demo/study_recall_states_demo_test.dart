@@ -39,6 +39,7 @@ void main() {
     example: null,
     hint: null,
     pronunciation: null,
+    frontFolded: '허전하다',
     backFolded: 'Empty, hollow',
   );
 
