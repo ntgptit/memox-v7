@@ -92,8 +92,11 @@ jobs:
       - name: generated code freshness
         run: bash .claude/skills/flutter-workflow/scripts/check_generated.sh --skip-rebuild
 
+      # The same script the local gate runs, so the two cannot disagree about
+      # which files are in scope. `.` worked here — a fresh clone has no
+      # worktrees — but it was a second definition of one check.
       - name: dart format
-        run: dart format --output=none --set-exit-if-changed .
+        run: bash .claude/skills/flutter-workflow/scripts/check_format.sh
 
       - name: flutter analyze
         run: flutter analyze --no-fatal-infos
