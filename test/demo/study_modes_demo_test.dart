@@ -53,30 +53,25 @@ void main() {
   List<StudyCardModel> deck() => <StudyCardModel>[
     card(
       'c1',
-      front: 'ephemeral',
-      back: 'phù du',
-      example: 'Fame is ephemeral.',
-      hint: 'starts with e',
+      front: '사과',
+      back: 'quả táo',
+      example: '사과를 먹었어요.',
+      hint: 'bắt đầu bằng 사',
     ),
     card(
       'c2',
-      front: 'benevolent',
+      front: '안녕하세요',
       // **One deliberately long meaning, in the shape a real deck uses.** Every
       // option being two words is the case that never wraps, and the case that
       // hid how a row behaves for the content this app is actually for.
       back:
-          'Benevolent / Nhân từ (Tính từ, có lòng tốt và mong điều tốt cho '
-          'người khác, âm Hán Việt: Nhân từ; Nhân: người, Từ: hiền lành)',
-      example: 'A benevolent king.',
+          'Xin chào / Chào hỏi lịch sự (Câu chào dùng với người lớn tuổi hoặc '
+          'người mới gặp; 안녕: bình an, 하세요: đuôi câu thể lịch sự)',
+      example: '안녕하세요, 반갑습니다.',
     ),
-    card('c3', front: 'concise', back: 'ngắn gọn', example: 'Keep it concise.'),
-    card('c4', front: 'abandon', back: 'từ bỏ', example: 'He abandoned it.'),
-    card(
-      'c5',
-      front: 'resilient',
-      back: 'kiên cường',
-      example: 'A resilient team.',
-    ),
+    card('c3', front: '물', back: 'nước', example: '물 한 잔 주세요.'),
+    card('c4', front: '책', back: 'quyển sách', example: '그녀는 책을 읽었어요.'),
+    card('c5', front: '바다', back: 'biển', example: '바다가 잔잔했어요.'),
   ];
 
   StudyTurnModel turnFor(StudyMode mode, {required StudyCardModel first}) =>
@@ -176,7 +171,7 @@ void main() {
         ),
       );
 
-      await tester.enterText(find.byType(TextField), 'phù du');
+      await tester.enterText(find.byType(TextField), 'quả táo');
       await tester.pumpAndSettle();
 
       await matchesReviewGolden('goldens/study_fill_typing_$label.png');

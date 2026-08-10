@@ -65,8 +65,8 @@ Widget _editorInEditMode() {
   final repository = FakeCardRepository();
   repository.cardToGet = repository.card(
     'card-1',
-    front: 'ephemeral',
-    back: 'lasting a short time',
+    front: '감사합니다',
+    back: 'thank you, to someone senior',
   );
 
   return cardScreenWith(

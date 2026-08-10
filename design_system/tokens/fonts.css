@@ -10,3 +10,14 @@
    Nothing else in design_system/ differs from the source project. */
 @font-face{font-family:"Plus Jakarta Sans";src:url("../../assets/fonts/PlusJakartaSans-Variable.ttf") format("truetype-variations");font-weight:200 800;font-style:normal;font-display:swap}
 @font-face{font-family:"Inter";src:url("../../assets/fonts/Inter-Variable.ttf") format("truetype-variations");font-weight:100 900;font-style:normal;font-display:swap}
+
+/* CJK fallback, mirroring AppTypography.cjkFallback in the app. Both stacks in
+   typography.css name these behind their Latin primary, so a Korean, Japanese or
+   Chinese card renders the script here too — until now the kit had no CJK face
+   at all and fell through to system-ui, which is what the app was fixing.
+   `unicode-range` keeps the browser from downloading megabytes for a page of
+   Latin: the file is fetched only when a glyph in its range is actually used.
+   Ranges match what each face was subset to. */
+@font-face{font-family:"Noto Sans KR";src:url("../../assets/fonts/NotoSansKR-Variable.ttf") format("truetype-variations");font-weight:100 900;font-style:normal;font-display:swap;unicode-range:U+1100-11FF,U+3130-318F,U+AC00-D7A3}
+@font-face{font-family:"Noto Sans JP";src:url("../../assets/fonts/NotoSansJP-Variable.ttf") format("truetype-variations");font-weight:100 900;font-style:normal;font-display:swap;unicode-range:U+3000-303F,U+3040-309F,U+30A0-30FF,U+31F0-31FF,U+4E00-9FFF,U+FF00-FFEF}
+@font-face{font-family:"Noto Sans SC";src:url("../../assets/fonts/NotoSansSC-Variable.ttf") format("truetype-variations");font-weight:100 900;font-style:normal;font-display:swap;unicode-range:U+3000-303F,U+4E00-9FFF,U+FF00-FFEF}

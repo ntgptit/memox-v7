@@ -58,9 +58,32 @@ Future<void> _loadAppFonts() async {
 /// The app's own faces, loaded from `assets/fonts/` exactly as the app ships
 /// them. Loading anything else here would make goldens record type the app
 /// never renders.
+///
+/// **Every family a `TextStyle` can name belongs here, fallbacks included.**
+/// `NotoSansKR` is not decoration: `AppTypography` puts it in
+/// `fontFamilyFallback` on all fifteen rungs, and a fallback naming a family the
+/// test collection does not hold is not a fallback — the engine skips it and
+/// lands on `flutter_test`'s own face, which draws `NO GLYPH`. So every Korean
+/// card front rendered as a box, in the goldens of an app for learning Korean,
+/// for as long as the font was in the bundle but not here.
+///
+/// It cost more than boxes in a picture. The cause was read the other way round
+/// — that the test renderer does not run `fontFamilyFallback` at all — and on
+/// that reading the demo and audit fixtures were moved to English vocabulary and
+/// the wiring was checked by a test that asserts the *name* is present in the
+/// style. Both are what you would build if the renderer really could not show
+/// the script; neither can fail when it can. It can: registered here, the same
+/// styles render Hangul, and the Latin goldens do not move by a byte.
+///
+/// The rule that prevents the next one: this map is not "the app's two faces",
+/// it is **every family named anywhere in `AppTypography`**. Adding a face to
+/// `pubspec.yaml` is half the change.
 const Map<String, String> _appFonts = <String, String>{
   'Inter': 'assets/fonts/Inter-Variable.ttf',
   'PlusJakartaSans': 'assets/fonts/PlusJakartaSans-Variable.ttf',
+  'NotoSansKR': 'assets/fonts/NotoSansKR-Variable.ttf',
+  'NotoSansJP': 'assets/fonts/NotoSansJP-Variable.ttf',
+  'NotoSansSC': 'assets/fonts/NotoSansSC-Variable.ttf',
 };
 
 /// Family name to the SDK font files that make it up.

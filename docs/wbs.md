@@ -7,8 +7,8 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.3 (Refactor IT theo Testing Pyramid) |
-| **Last updated** | 2026-08-09 |
+| **Updated by task** | M99.5 (Font tiếng Hàn trong golden harness) |
+| **Last updated** | 2026-08-10 |
 
 Single source of truth for project progress. Update it in the same commit as the
 work it describes. A task is `done` only when it meets the Definition of Done in
@@ -33,7 +33,7 @@ AD / UC (xem `business-rules.md`).
 | M7 · CI/CD (Phase 19) | todo | Bắt đầu được ngay sau M2. Job Android + Web, chưa có iOS (AD-04) |
 | M8 · Release Android (Phase 16–18, 20–22) | todo | |
 | M9 · Backend Spring Boot + auth + sync (Phase 10) | todo | Sau khi M8 ổn định |
-| M99 · Adhoc | — | Task chủ dự án giao trực tiếp, ngoài chuỗi phụ thuộc. M99.1 **done** — `master-flow.md`. M99.2 **done** — Deck và Card thành bản tham chiếu (AD-17). M99.3 **done** — refactor toàn bộ IT theo Testing Pyramid: 133/133 kịch bản có coverage host, `integration_test/` còn 8 kịch bản `DEVICE-E2E`, và CI lần đầu có cổng tự động cho tính đúng đắn nghiệp vụ |
+| M99 · Adhoc | — | Task chủ dự án giao trực tiếp, ngoài chuỗi phụ thuộc. M99.1 **done** — `master-flow.md`. M99.2 **done** — Deck và Card thành bản tham chiếu (AD-17). M99.3 **done** — refactor toàn bộ IT theo Testing Pyramid: 133/133 kịch bản có coverage host, `integration_test/` còn 8 kịch bản `DEVICE-E2E`, và CI lần đầu có cổng tự động cho tính đúng đắn nghiệp vụ. M99.5 **done** — golden harness chưa bao giờ nạp `NotoSansKR`, nên mọi chữ Hàn trong mọi golden là ô `NO GLYPH`; đã nạp đủ ba face CJK, bổ sung Nhật/Trung, và fixture demo trở lại tiếng Hàn |
 
 ---
 
@@ -8109,6 +8109,100 @@ trong đó; IT-PLAT-002/003 chứng minh byte đã chạm file và sống lâu h
 đó là `adb shell am start`.
 
 Chi tiết từng bước, từng phát hiện và từng con số: `docs/wbs-study.md`.
+
+
+### M99.5 · Font tiếng Hàn chưa bao giờ được nạp vào golden harness
+
+- **Status:** **done** — 1848/1848 test pass, `flutter analyze` sạch (kể cả
+  package `widgetbook/`), `dart format` sạch, guard `memox-v7` 0 error,
+  `check_docs` sạch, parity gate `test/design_audit` xanh.
+- **Goal:** Mọi family mà một `TextStyle` gọi tên MUST được
+  `test/flutter_test_config.dart` nạp; golden của một app học tiếng Hàn MUST
+  hiện chữ Hàn.
+- **Scope:** `test/flutter_test_config.dart`, `lib/core/theme/app_typography.dart`,
+  `pubspec.yaml`, `design_system/tokens/fonts.css` + `typography.css`,
+  `test/core/theme/cjk_fallback_test.dart`, fixture của `test/demo/` và
+  `test/visual_audit/`, 15 golden trong `test/demo/goldens/`, 4 file font mới
+  trong `assets/fonts/`.
+- **Out of scope:** luật nghiệp vụ; nội dung starter deck; tên deck trong
+  `deck_screens_demo_test.dart` (không chứa nội dung thẻ).
+- **Dependencies:** không
+- **Checklist phases:** 7, 12, 15
+- **Editable documents:** `docs/wbs.md`
+- **Output:** `assets/fonts/NotoSansJP-Variable.ttf`,
+  `assets/fonts/NotoSansSC-Variable.ttf` + hai file OFL
+- **Tests required:** toàn bộ suite; 15 golden sinh lại; test render mới phải
+  được chứng minh là fail khi gỡ font khỏi harness
+- **Acceptance criteria:**
+  - [x] `_appFonts` nạp cả ba face CJK; test render fail nếu thiếu một face.
+  - [x] `cjk_fallback_test.dart` phủ **15/15** rung, không phải 6.
+  - [x] Golden demo hiện Hangul thật; 80 golden Latin **không** phải sinh lại.
+  - [x] Cả hai kit (Flutter + `design_system`) mang cùng chuỗi fallback.
+
+**Nguyên nhân gốc là một dòng thiếu, và nó sống 7 ngày vì lời giải thích sai
+được ghi lại như sự thật.** `NotoSansKR` vào `pubspec.yaml` và vào cả 15 rung ở
+`4d40c48` (PR #126, 2026-08-03). `test/flutter_test_config.dart` lần cuối bị sửa
+ở `77f7970` (2026-07-29) và **chưa từng bị chạm lại**. `flutter test` không nạp
+font khai báo trong bundle — chính file đó đã ghi điều này cho Inter và
+PlusJakartaSans — nên family `NotoSansKR` không tồn tại trong font collection
+của test, `fontFamilyFallback` trỏ vào hư không, và engine rơi về face của
+`flutter_test`, vẽ ra ô `NO GLYPH`.
+
+**Điều làm nó đắt hơn một lỗi hiển thị: nguyên nhân bị đọc ngược.** Commit body
+của #126 ghi "the golden renderer does not exercise the fallback", và câu đó
+được chép vào `card_screens_demo_test.dart`, `cjk_fallback_test.dart` và
+`app_typography.dart`. Trên cách đọc đó, hai quyết định đều hợp lý: fixture demo
+và visual audit chuyển hết sang từ vựng tiếng Anh, và việc kiểm chứng hạ xuống
+thành một test đọc *tên* family trong style. Cả hai đều là thứ ta sẽ dựng nếu
+renderer thật sự không vẽ được — và cả hai đều **không thể fail khi nó vẽ
+được**. Đo bằng probe: cùng một `TextStyle`, chưa nạp font ra 4 ô `NO GLYPH`,
+nạp rồi ra `사과 안녕`. Renderer luôn chạy fallback; nó chỉ không với tới được
+một font không ai đăng ký.
+
+**Test cũ pass suốt thời gian đó, và đó là bằng chứng nó kiểm sai thứ.** Khi gỡ
+lại một dòng font khỏi harness để kiểm chứng, hai test wiring vẫn xanh, chỉ test
+render mới đỏ. `cjk_fallback_test.dart` cũng chỉ phủ 6/15 rung, và
+`headlineMedium` — mặt trước thẻ review, chỗ chữ Hàn to nhất màn hình — không
+nằm trong sáu rung đó.
+
+**Fixture Latin không chỉ giấu lỗi, nó còn làm ảnh review sai.** Âm tiết Hangul
+là full-width và đặt cao hơn, nên một mặt trước 5 âm tiết chiếm chỗ xấp xỉ một
+từ Latin 10 ký tự: chiều cao hàng, điểm xuống dòng và ascender mà contrast của
+nhãn được đo trên đó đều khác. Bộ từ vựng dùng lại đúng bộ mà Widgetbook và
+`integration_test/` đã dùng, nên ba nơi nói cùng một thứ.
+
+**Nhật và Trung: bundle chỉ có Hangul, và tài liệu nói quá điều đó.** Parse cmap
+của `NotoSansKR-Variable.ttf`: 11.172/11.172 âm tiết Hangul, **0/96 hiragana,
+0/96 katakana, 0/20.992 Han**. Hai câu "Korean/Japanese/Chinese" trong
+`app_typography.dart` và `cjk_fallback_test.dart` vì thế sai trên máy thật, chứ
+không riêng trong test. Chủ dự án chọn bổ sung font thay vì hạ tài liệu.
+
+**Số đo quyết định hình dạng bản vá, không phải trực giác.**
+
+| | |
+|---|---|
+| NotoSansJP nguyên bản → subset | 9,15 MB → **8,13 MB** |
+| NotoSansSC nguyên bản → subset | 16,95 MB → **12,93 MB** |
+| Chi phí lên test | **+188 ms / 18 file** (~10 ms mỗi process) |
+| Golden Latin phải sinh lại | **0 / 80** |
+
+Subset giữ chữ đời thường — kana, Hangul, khối CJK Unified chính, dấu câu CJK,
+halfwidth/fullwidth — và bỏ Extension A, ideograph tương thích, mọi thứ ngoài
+BMP. **Trục variable được giữ dù `gvar` chiếm ~40% dung lượng** (bỏ đi tiết kiệm
+8,4 MB): app truyền weight qua `fontVariations`, nên một face static sẽ báo đúng
+weight và vẽ sai weight — đúng lỗi mà `AppTypography.withWeight` viết cả một
+đoạn để ngăn.
+
+**Thứ tự trong chuỗi fallback là một quyết định, không phải một danh sách.**
+Hàn trước vì đó là thứ app dạy. Nhật trước Trung quyết định *hình dạng* của hàng
+nghìn Han mà cả hai cùng phủ — cùng codepoint, hai quy ước tự dạng, và chain lấy
+face đầu tiên có glyph. Không có cách nào chiều cả hai từ một danh sách.
+
+**`design_system` chưa từng có face CJK nào.** Cả hai stack chỉ có Latin rồi
+`system-ui`, nên chữ Hàn trong kit web rơi về font hệ thống — đúng thứ mà bên
+Flutter đang sửa. Đã thêm ba `@font-face` kèm `unicode-range` (trình duyệt chỉ
+tải khi trang thật sự dùng glyph trong dải đó) và nối vào cả `--font-display`
+lẫn `--font-body`, cùng thứ tự với `AppTypography.cjkFallback`.
 
 
 ## Blocker

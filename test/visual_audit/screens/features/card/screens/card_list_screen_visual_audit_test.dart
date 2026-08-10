@@ -38,15 +38,19 @@ void main() {
       <dynamic>[
         FakeCardRepository().listItem(
           'c1',
-          front: 'ephemeral',
-          back: 'short-lived',
+          // Korean fronts, because that is what the screen carries in use and
+          // Hangul is what the audit then measures — full-width syllables set
+          // taller than Latin, so the row height and the ascender the label
+          // contrast is read against are both the real ones.
+          front: '사과',
+          back: 'apple / quả táo',
           isFlagged: true,
-          tagNames: <String>['noun', 'people'],
+          tagNames: <String>['noun', 'food'],
         ),
         FakeCardRepository().listItem(
           'c2',
-          front: 'ubiquitous',
-          back: 'everywhere',
+          front: '안녕하세요',
+          back: 'hello / xin chào',
           state: CardState.mastered,
           // Scheduled and overdue, so the row draws its due badge and the audit
           // measures that pill's fill and label. A never-scheduled card renders
