@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/deck/presentation/widgets/items/deck_tile_widget.dart';
+import 'package:memox/features/study/domain/models/study_mode.dart';
+import 'package:memox/features/study/presentation/widgets/support/study_mode_feedback_widget.dart';
 import 'package:memox/features/study/presentation/widgets/sections/fill_answer_section_widget.dart';
 import 'package:memox/features/study/presentation/widgets/sections/guess_question_section_widget.dart';
 import 'package:memox/features/study/presentation/widgets/items/match_tile_widget.dart';

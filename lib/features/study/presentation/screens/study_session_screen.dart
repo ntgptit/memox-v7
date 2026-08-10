@@ -257,8 +257,13 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
     // scope. The turn now stays in state for the whole fetch, and every mode
     // locks its own input while `isAdvancing` is true.
     //
-    // A full-body loading state is left with one case: a session that has no
-    // turn to show yet, handled by the `session == null` branch below.
+    // A full-body loading state is left with one case, and it is the case
+    // below: a session whose first read has not come back. Removing the
+    // `isAdvancing` branch without adding this one turned the first moment of
+    // every session into `StudyBlockedSectionWidget` — `studyModeView` returns
+    // null with no turn, and the screen reads that as "this stage cannot build
+    // content". Only the device suite saw it: on a host the first read resolves
+    // inside the same frame the session opens in.
     if (state.isFinished) {
       // No summary means the read failed, not that nothing happened. The
       // session has ended either way, and inventing counts for it would be
@@ -275,7 +280,7 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
     }
 
     final session = state.session;
-    if (session == null) {
+    if (session == null || state.turn == null) {
       return MxLoadingState(semanticsLabel: context.l10n.appTitle);
     }
 

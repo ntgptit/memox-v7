@@ -18,6 +18,7 @@ import 'package:memox/features/study/domain/models/study_session_status_model.da
 import 'package:memox/features/study/domain/models/study_turn_model.dart';
 import 'package:memox/features/study/presentation/controllers/study_session_controller.dart';
 import 'package:memox/features/study/presentation/screens/study_session_screen.dart';
+import 'package:memox/features/study/presentation/widgets/sections/study_blocked_section_widget.dart';
 import 'package:memox/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart';
 import 'package:memox/features/study/presentation/widgets/support/study_swipe_deck_widget.dart';
 import 'package:memox/shared/widgets/mx_loading_state.dart';
@@ -198,6 +199,10 @@ void main() {
 
     expect(find.byType(MxLoadingState), findsNothing);
     expect(find.byType(StudySessionFrameSectionWidget), findsOneWidget);
+    // The card itself, not just its chrome: the body is what used to be
+    // replaced, and a frame around a blocked state would satisfy the line
+    // above while showing the user nothing to act on.
+    expect(find.byType(StudyBlockedSectionWidget), findsNothing);
 
     gate.complete();
     for (var i = 0; i < 6; i++) {

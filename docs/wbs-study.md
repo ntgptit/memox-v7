@@ -1845,3 +1845,35 @@ tìm và hiểu.
 AD-13 cấm (hai read là hai snapshot). Thành `GetNextStageTurnUseCase`, một read
 trả cả mode lẫn turn. Builder map của presentation thành `switch` exhaustive:
 thiếu một khoá là màn trống lúc chạy, thiếu một nhánh là lỗi biên dịch.
+
+#### Device suite bắt hai lỗi mà 1910 test trên host không thấy
+
+Chạy trên emulator lần đầu: **5/8**. Ba lần chạy nữa mới về 8/8, và không lần
+nào là "sửa test cho xanh".
+
+**1. Khoảnh khắc đầu tiên của mọi phiên học là một màn báo lỗi.** Bỏ nhánh
+`isAdvancing` khỏi `_body` mà không viết nhánh thay thế cho ca "chưa có turn
+nào": lần `advance()` đầu tiên không có turn để giữ, `studyModeView` trả null, và
+màn hình đọc null thành *"stage này không dựng được nội dung"* →
+`StudyBlockedSectionWidget`. Comment tự viết đã nói trạng thái tải toàn thân chỉ
+còn một ca — rồi không viết cái ca đó. Host không thấy vì lần đọc đầu tiên xong
+ngay trong frame mở phiên; chỉ độ trễ thật mới lộ ra.
+
+Test màn hình nay khẳng định thêm **không có `StudyBlockedSectionWidget`**: một
+cái frame bọc quanh màn blocked vẫn thoả assertion "không có `MxLoadingState`"
+trong khi người dùng chẳng có gì để thao tác.
+
+**2. Robot giả định "có bàn nghĩa là có ô để chạm".** Từ BR-158, cặp cuối cleared
+và bàn **vẫn mounted** trong lúc phiên tải bàn kế tiếp — `firstWhere` ném
+`Bad state: No element` và không nói gì hữu ích. Bàn không còn ô mở là bàn *đã
+xong*, không phải bàn kẹt: đợi, đúng như người dùng làm.
+
+**Và một thứ không phải lỗi app: robot không đợi hết nhịp.** Nhịp giữ là một
+`Future.delayed` — nó không schedule frame nào, nên `pumpAndSettle` đi xuyên qua.
+Robot trả lời thẻ kế tiếp trong lúc màn hình còn hiện kết quả thẻ trước, đốt lượt,
+chạm trần 60 lượt. `_holdFeedback` đọc `studyModeFeedback` — cùng nguồn với app,
+nên ngân sách đọc đổi thì robot đi theo thay vì lệch âm thầm.
+
+Thông báo lỗi của `studyUntilFinished` nay nêu **stage nào** đang trên màn. Lần
+chạy thứ hai chỉ nói "không có gì để trả lời"; lần thứ ba nói "stage was none —
+no mode body was built", và đó là câu chỉ thẳng vào lỗi 1.
