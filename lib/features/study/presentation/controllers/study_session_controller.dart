@@ -15,10 +15,10 @@ import '../../domain/models/study_session_status_model.dart';
 import '../../domain/usecases/end_study_session_use_case.dart';
 import '../../domain/usecases/get_next_stage_turn_use_case.dart';
 import '../../domain/usecases/mark_browsed_use_case.dart';
-import '../../domain/usecases/resume_study_session_use_case.dart';
 import '../../domain/usecases/save_turn_progress_use_case.dart';
-import '../../domain/usecases/start_study_session_use_case.dart';
+import '../../domain/usecases/open_study_session_use_case.dart';
 import '../../domain/usecases/submit_study_answer_use_case.dart';
+import '../states/study_operations_state.dart';
 import '../states/study_session_state.dart';
 
 part 'study_session_controller.g.dart';
@@ -51,16 +51,15 @@ class StudySessionController extends _$StudySessionController {
     state = state.copyWith(isOpening: true, error: null);
 
     try {
-      final repository = ref.read(studyRepositoryProvider);
-      final opened = shouldResume
-          ? await ResumeStudySessionUseCase(repository).call(deckId)
-          : await StartStudySessionUseCase(repository).call(
-              deckId: deckId,
-              kind: kind,
-              reviewMode: reviewMode,
-              now: ref.read(clockProvider)(),
-              utcOffset: ref.read(utcOffsetProvider)(),
-            );
+      final opened =
+          await OpenStudySessionUseCase(ref.read(studyRepositoryProvider)).call(
+            deckId: deckId,
+            kind: kind,
+            reviewMode: reviewMode,
+            shouldResume: shouldResume,
+            now: ref.read(clockProvider)(),
+            utcOffset: ref.read(utcOffsetProvider)(),
+          );
 
       if (!ref.mounted) return;
       state = state.copyWith(
@@ -78,27 +77,27 @@ class StudySessionController extends _$StudySessionController {
     }
   }
 
-  /// Which run of the session the writes in flight belong to.
+  /// What is in flight, and which run of the session it belongs to.
   ///
-  /// **`ref.mounted` is not enough.** A write and a read both take long enough
-  /// for the user to press ✕ inside them, and the notifier is still mounted
-  /// afterwards — so a stale future set a turn or an error on a session that had
-  /// ended. Nothing is cancelled: the transaction still commits, because BR-25
-  /// wants it to; what changes is whether its result reaches the screen.
-  int _epoch = 0;
+  /// **`ref.mounted` is not enough.** ✕ can be pressed inside a write or a read,
+  /// and the notifier is still mounted afterwards — so a stale future set a turn
+  /// or an error on a session that had ended. Nothing is cancelled: the
+  /// transaction still commits (BR-25); what changes is whether its result
+  /// reaches the screen.
+  final StudyOperations _ops = StudyOperations();
 
   /// Whether an operation begun at [epoch] may still write to state.
-  bool _isCurrent(int epoch) => ref.mounted && epoch == _epoch;
+  bool _isCurrent(int epoch) => ref.mounted && _ops.isCurrent(epoch);
 
   /// Records an answer. **Writes only — it fetches nothing.**
   ///
   /// **The double-tap guard is first, and has to be** (BR-25, BR-126): a write
   /// takes long enough for a second tap to land inside it.
   ///
-  /// **Writing and advancing used to be one call, and that is what made every
-  /// mode's feedback unreachable** — running [advance] the moment a write landed
-  /// drew each verdict into a widget already on its way out. The mode decides
-  /// how long its answer stays up and calls [advance] itself.
+  /// **Writing and advancing used to be one call, which made every mode's
+  /// feedback unreachable** — running [advance] the moment a write landed drew
+  /// each verdict into a widget on its way out. The mode decides how long its
+  /// answer stays up and calls [advance] itself.
   ///
   /// **The status comes back from the transaction, never from the action.**
   /// `isLapse` is what the user did; what happened to the row is the mode's
@@ -120,7 +119,8 @@ class StudySessionController extends _$StudySessionController {
     final turn = state.turn;
     if (session == null || turn == null) return null;
 
-    final epoch = _epoch;
+    final epoch = _ops.epoch;
+    final done = _ops.startWrite();
     state = state.copyWith(isSubmitting: true, error: null);
 
     try {
@@ -160,6 +160,8 @@ class StudySessionController extends _$StudySessionController {
       await _writeFailed(error, epoch: epoch);
 
       return null;
+    } finally {
+      done();
     }
   }
 
@@ -183,7 +185,8 @@ class StudySessionController extends _$StudySessionController {
       return;
     }
 
-    final epoch = _epoch;
+    final epoch = _ops.epoch;
+    final done = _ops.startRead();
     state = state.copyWith(isAdvancing: true);
 
     try {
@@ -223,6 +226,8 @@ class StudySessionController extends _$StudySessionController {
       // error over a summary the user is already reading.
       if (!_isCurrent(epoch)) return;
       state = state.copyWith(isAdvancing: false, error: error);
+    } finally {
+      done();
     }
   }
 
@@ -295,7 +300,8 @@ class StudySessionController extends _$StudySessionController {
   /// `submitAnswer`: `browse` produces no action (BR-111), so going through
   /// there meant inventing one for a grading method to discard.
   Future<void> _markBrowsed(StudySessionEntity session, String cardId) async {
-    final epoch = _epoch;
+    final epoch = _ops.epoch;
+    final done = _ops.startWrite();
     state = state.copyWith(isSubmitting: true, error: null);
 
     try {
@@ -309,7 +315,33 @@ class StudySessionController extends _$StudySessionController {
       await advance();
     } on Object catch (error) {
       await _writeFailed(error, epoch: epoch);
+    } finally {
+      done();
     }
+  }
+
+  /// Brings a session back after leaving it failed.
+  ///
+  /// **Not swallowed, and not a blanket reset.** The session is still running,
+  /// so the screen has to come back — but a write open when ✕ was pressed may
+  /// still be open, and clearing `isSubmitting` on top of it invites the same
+  /// card to be answered twice. So it waits for what is in flight to *settle*
+  /// first, then re-reads: the answer may well have committed while
+  /// `EndSession` failed — the stale guard stopped its receipt, not its row —
+  /// so the turn in state can be one the queue has moved past, and offering it
+  /// again would record it twice (BR-126).
+  Future<void> _leaveFailed(Object error) async {
+    await _ops.settled();
+    if (!ref.mounted) return;
+
+    state = state.copyWith(
+      isLeaving: false,
+      isSubmitting: false,
+      isAdvancing: false,
+      error: error,
+    );
+
+    await advance();
   }
 
   /// Ends the session as `failed`/`persistence_error` (BR-85), best effort:
@@ -369,7 +401,7 @@ class StudySessionController extends _$StudySessionController {
     // anything starting after this line captures the new epoch and passes the
     // staleness check. That is what `isLeaving` refuses — clearing the busy
     // flags here, as this used to, unlocked the screen for the whole write.
-    _epoch += 1;
+    _ops.invalidate();
     state = state.copyWith(isLeaving: true);
 
     try {
@@ -382,14 +414,7 @@ class StudySessionController extends _$StudySessionController {
         now: ref.read(clockProvider)(),
       );
     } on Object catch (error) {
-      // **Not swallowed.** A session that could not be ended is still running,
-      // and a screen locked on `isLeaving` forever is worse than one saying the
-      // ✕ did not work: the user can try again, or answer the card in front of
-      // them.
-      if (!ref.mounted) return;
-      state = state.copyWith(isLeaving: false, error: error);
-
-      return;
+      return _leaveFailed(error);
     }
 
     if (!ref.mounted) return;
