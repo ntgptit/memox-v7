@@ -8207,6 +8207,71 @@ tải khi trang thật sự dùng glyph trong dải đó) và nối vào cả `-
 lẫn `--font-body`, cùng thứ tự với `AppTypography.cjkFallback`.
 
 
+### M99.6 · `app_colors.dart` chạm trần guard — tách theo câu hỏi mà mỗi token trả lời
+
+- **Status:** **done** — 1860/1860 test pass, `flutter analyze` sạch, guard
+  `memox-v7` **0 warning** (trước đó 1), `check_docs` sạch, parity gate
+  `test/design_audit` xanh, `dart format` sạch trên `lib`/`test`/`widgetbook`/
+  `integration_test`.
+- **Goal:** Không token màu nào MUST bị chặn bởi trần 400 dòng, và đường cắt
+  MUST là một ranh giới trách nhiệm chứ không phải một chỗ cắt cho vừa số dòng.
+- **Scope:** `lib/core/theme/app_colors.dart` (406 → 339),
+  `lib/core/theme/app_material_roles.dart` (mới), `app_theme.dart`,
+  `test/support/app_palette.dart`, `test/design_audit/css_token_parity_test.dart`,
+  `test/design_audit/css_derived_parity_test.dart` (mới),
+  `test/design_audit/color_usage_scan.dart`, `test/design_audit/audit_scan_steps.dart`,
+  `test/visual_audit/color_source_rules_test.dart`, `design_system/readme.md`.
+- **Out of scope:** mọi **giá trị** màu. Không hex nào đổi; `violations.json`
+  vẫn 0 và `usage_inventory.json` vẫn đếm 363 site.
+- **Dependencies:** M4.10an (token `borderControl` — cái chạm trần)
+- **Checklist phases:** 6
+- **Tests required:** không có test mới nào cho một refactor không đổi hành vi;
+  cái đã có là cái phải xanh — `test/core/theme/`, `test/design_audit/`,
+  `test/visual_audit/` — cộng `git diff` của `design_audit/*.json` phải trống
+  ngoài số dòng, vì đó là thứ duy nhất thấy được vùng phủ bị mất.
+- **Editable documents:** `docs/wbs.md`, `design_system/readme.md`
+- **Output:** `lib/core/theme/app_material_roles.dart`,
+  `test/design_audit/css_derived_parity_test.dart`
+- **Acceptance criteria:**
+  - [x] Guard `no_large_source_file` không còn cảnh báo file nào dưới
+        `lib/core/theme/` — guard `memox-v7` chạy 0 warning.
+  - [x] `violations.json` giữ nguyên `totalViolations: 0`.
+  - [x] Tổng site trong `usage_inventory.json` không giảm — vẫn 363.
+  - [x] Không hex nào xuất hiện trong diff ngoài việc dời file.
+
+**Đường cắt là câu hỏi mà token trả lời.** `AppColors` trả lời *ở đây màu này
+nghĩa là gì* — một trang, cạnh của một thẻ, một câu trả lời nhớ được.
+`AppMaterialRoles` trả lời *Material sẽ vẽ gì nếu không ai nói* — nấc thang
+container của Dialog, cặp `on` của một role MVP chưa dùng. Cùng là token màu,
+khác hẳn lý do sửa: bộ đầu đổi khi sản phẩm đổi ý, bộ sau đổi khi một component
+Material lần đầu được dựng. `primary`, `surface`, `outline`, `error`, `shadow`,
+`scrim` ở lại `AppColors` vì mỗi cái là quyết định của memox mà Material tình
+cờ có sẵn một ô để đựng.
+
+**Ba thứ phải sửa mà bản ghi nợ không dự đoán được**, và cả ba đều là "một cái
+tên lớp mới thì không ai biết nó là gì":
+
+1. `color_source_rules_test.dart` R2 và `audit_scan_steps.dart` V3 mỗi cái giữ
+   một allowlist file được phép viết hex. File mới không có trong đó, nên 46
+   hằng số vừa dời sang lập tức thành vi phạm.
+2. **Scanner của audit chỉ nhận `AppColors.`**, nên 68 site trong
+   `app_theme.dart` không bị phân loại lại — chúng **biến mất** khỏi
+   `usage_inventory.json`. Báo cáo vẫn ghi *Violations 0* và tổng site tụt từ
+   363 xuống 295. Một audit mất vùng phủ trông y hệt một audit sạch, và đây là
+   thứ nó ít có khả năng tự thấy nhất. Bắt được vì `git diff` của file sinh ra
+   là một phần của gate, không phải vì có test nào hỏi.
+
+**`css_token_parity_test.dart` cũng vượt trần vì đúng một dòng import**, nên
+tách tiếp theo seam file đó đã tự vạch: nhóm "app derive chứ không chép" sang
+`css_derived_parity_test.dart`. Với một phép blend thì "bằng giá trị của kit" là
+câu hỏi sai — CSS không blend lúc build — nên hai nhóm vốn đã hỏi hai câu khác
+nhau.
+
+**Một comment lạc chỗ được trả về đúng hằng số.** Doc của `shadow`/`scrim` nằm
+phía trên doc của `webLetterbox` và cả hai cùng gắn vào `webLetterbox`; ai đọc
+`shadowLight` sẽ không thấy gì, ai đọc `webLetterbox` sẽ thấy lời giải thích về
+bóng đổ.
+
 ## Blocker
 
 | Blocker | Ảnh hưởng | Cách gỡ |
@@ -8273,7 +8338,7 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 | Pin Flutter ở `.fvmrc` **khai báo** chứ không **cưỡng chế** | M2.2 | Chạy `flutter` trực tiếp trên máy có version khác vẫn build được và không cảnh báo. Đây đúng là lỗi đã xảy ra: M2.1 chạy 3.44.8, phiên sau khởi động trên 3.44.6, không có gì phát hiện ra | **Đã trả một nửa ở M4.10b:** cả hai job CI dùng `flutter-version-file: .fvmrc`, nên `.fvmrc` là nguồn duy nhất và CI không thể lệch. **Chưa trả:** máy lập trình viên vẫn chạy version nào cũng được — cần một check so `flutter --version` với `.fvmrc` trong `dod_check.sh` |
 | ~~7 file skill vẫn bảo chạy `dart run custom_lint`~~ | M2.2 | Skill vẫn hướng dẫn cài và chạy một package không cài được; phiên sau sẽ tin skill và loay hoay | **Đã trả ở M2.2b.** Cả 7 file đã trỏ sang guard. `docs/checklist.md` **cố ý giữ nguyên**: nó `frozen for MVP`, và mục "Ngoài phạm vi: mọi quyết định riêng của memox" nói rõ nó mô tả quy trình 22 phase chung — `custom_lint` ở đó là khuyến nghị Flutter phổ thông, còn quyết định riêng của memox sống ở file này (§5 canonical location) |
 | `dependencies.md` vẫn liệt kê `sqlite3_flutter_libs` | M2.2 | Package đó nay là tombstone (`0.6.0+eol`, không có native code). Skill nói sai còn tệ hơn không có skill — phiên sau sẽ cài lại nó | Sửa `.claude/skills/flutter-project-setup/references/dependencies.md`: thay bằng ghi chú rằng `sqlite3` 3.x cấp native lib qua native assets. Ngoài `Editable documents` của M2.2 nên chưa sửa ở đây |
-| `app_colors.dart` vượt trần 400 dòng của guard | M99.4 | Guard báo `no_large_source_file` (406/400). Cảnh báo chứ không lỗi nên CI vẫn xanh, nhưng **file đang ở đúng trần**: token tiếp theo bất kỳ cũng sẽ vượt, và `borderControl` chỉ tình cờ là cái đầu tiên | Tách khối `// --- Material roles` (99 dòng) ra `AppMaterialRoles` riêng. **Không dùng `part` được** — Dart không có partial class, đã thử và hỏng. Chạm 4 file: `app_colors.dart`, `app_theme.dart`, `test/design_audit/css_token_parity_test.dart`, `test/support/app_palette.dart`. Cố ý không làm trong PR UI: đây là refactor riêng, và trộn vào một PR đổi màu sẽ giấu mất cả hai |
+| ~~`app_colors.dart` vượt trần 400 dòng của guard~~ | M99.4 | Guard báo `no_large_source_file` (406/400). Cảnh báo chứ không lỗi nên CI vẫn xanh, nhưng **file đang ở đúng trần**: token tiếp theo bất kỳ cũng sẽ vượt, và `borderControl` chỉ tình cờ là cái đầu tiên | **Đã trả ở M99.5.** Khối `// --- Material roles` tách ra `lib/core/theme/app_material_roles.dart` (`AppMaterialRoles`), `app_colors.dart` còn 339 dòng. `part` vẫn không dùng được — Dart không có partial class. Chạm nhiều hơn 4 file đã dự đoán: hai allowlist (`color_source_rules_test.dart`, `audit_scan_steps.dart`) và **scanner của audit** cũng phải biết tên lớp mới, xem M99.6 |
 | Nội dung starter là fixture, không phải nội dung production | T1.3 | Không phát hành được với nội dung này | Tìm nguồn nội dung có bản quyền rõ ràng trước M8 (BR-87) |
 | `sqlite3.wasm` và `drift_worker.js` là binary vendored trong `web/` | M4.2 | Không có bước build nào sinh ra chúng và không có bước build nào báo khi chúng cũ: app compile, load, rồi **không mở được database**. Nâng `drift` mà quên tải lại worker không có triệu chứng nào cho tới khi ai đó mở trình duyệt | `test/database/web_assets_test.dart` so version trong `pubspec.lock` với version đã pin, kèm `web/WEB_ASSETS.md` ghi URL tải. Đã kiểm tiêm lỗi: đổi `drift` thành 2.99.0 làm test đỏ |
 | Server phát web chưa gửi COOP/COEP | M4.2 | `crossOriginIsolated` là `false`, nên drift chọn backend lưu trữ kém hơn OPFS. Không có lỗi nào — chỉ là hiệu năng và độ bền khác đi, âm thầm | Thêm `Cross-Origin-Opener-Policy: same-origin` và `Cross-Origin-Embedder-Policy: require-corp` vào server phát web ở M7, và kiểm lại `crossOriginIsolated` trong E2E |
