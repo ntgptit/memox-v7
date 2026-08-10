@@ -5,6 +5,11 @@ Flutter application, rebuilt from scratch against `docs/checklist.md`.
 **Stack:** Flutter (stable) · Riverpod 3.x + codegen · GoRouter · Drift/SQLite · Material 3 + design tokens
 **Architecture:** Pragmatic Clean Architecture, feature-first.
 
+**`AGENTS.md` exists for agents that load that filename instead of this one, and
+it is a pointer — keep it one.** Nothing in this file is Claude-specific, so the
+moment `AGENTS.md` starts restating a rule there are two contracts, and the one
+nobody edits is the one somebody follows.
+
 ## Reading order
 
 Read these two before anything else, in this order:
