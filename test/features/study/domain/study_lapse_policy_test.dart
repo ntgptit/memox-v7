@@ -76,30 +76,35 @@ void main() {
       }
     });
 
-    test('every graded mode holds its answer on screen', () {
+    test('the modes that read a verdict back hold it on screen', () {
       // The bug this whole change exists for: `guess`, `recall` and `fill`
       // inherited a flow that fetched the next card the moment the write
       // returned, so their verdicts were drawn into a widget already being
-      // unmounted. Zero here would be that bug returning.
-      for (final mode in <StudyMode>[
-        StudyMode.guess,
-        StudyMode.recall,
-        StudyMode.fill,
-      ]) {
+      // unmounted. Zero here would be that bug returning — for the two modes
+      // that still put a verdict up and take it away themselves.
+      for (final mode in <StudyMode>[StudyMode.guess, StudyMode.fill]) {
         expect(studyModeFeedback(mode).correct, greaterThan(Duration.zero));
         expect(studyModeFeedback(mode).wrong, greaterThan(Duration.zero));
       }
     });
 
-    test('the modes that read nothing back wait for nothing', () {
+    test('the modes that time their own reading wait for nothing', () {
       // `browse` grades no card (BR-111) and `self_assess` is the user's own
       // verdict — they already know it. `match` is zero for a different reason:
       // its beats belong to the tile, because only the board knows whether the
       // pair that just landed was the last one.
+      //
+      // **`recall` joined them, and it is the interesting one** (BR-160). Its
+      // two endings are timed by different people. An assessment is given
+      // *after* the learner has read the back, so a hold afterwards pauses them
+      // on something they are done with; a timeout hands them a back they have
+      // never seen and ends at a *Next* they press. One number could serve
+      // neither, and 1800/2200ms was answering a question nobody had asked.
       for (final mode in <StudyMode>[
         StudyMode.browse,
         StudyMode.selfAssess,
         StudyMode.match,
+        StudyMode.recall,
       ]) {
         expect(studyModeFeedback(mode).correct, Duration.zero);
         expect(studyModeFeedback(mode).wrong, Duration.zero);

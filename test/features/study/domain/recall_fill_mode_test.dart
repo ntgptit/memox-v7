@@ -1,18 +1,19 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/study/domain/models/fill_mode.dart';
 import 'package:memox/features/study/domain/models/recall_mode.dart';
+import 'package:memox/features/study/domain/models/study_outcome_reason_model.dart';
 
 /// The two rules that decide an outcome without anybody pressing a button.
 void main() {
-  group('recall · the single outcome (BR-129)', () {
+  group('recall · where the mark falls (BR-129)', () {
     const handler = RecallModeHandler();
 
-    test('one millisecond before the mark is a manual reveal', () {
+    test('one millisecond before the mark the turn is still open', () {
       expect(
-        handler.outcomeFor(
+        handler.didTimeOut(
           elapsed: kRecallTurnLimit - const Duration(milliseconds: 1),
         ),
-        RecallOutcome.revealed,
+        isFalse,
       );
     });
 
@@ -20,18 +21,15 @@ void main() {
       // The boundary BR-129 names, and the one a user cannot tell apart from a
       // miss: reading it the other way makes the exact-zero tap generous at
       // random.
-      expect(
-        handler.outcomeFor(elapsed: kRecallTurnLimit),
-        RecallOutcome.timedOut,
-      );
+      expect(handler.didTimeOut(elapsed: kRecallTurnLimit), isTrue);
     });
 
     test('past the mark stays a timeout', () {
       expect(
-        handler.outcomeFor(
+        handler.didTimeOut(
           elapsed: kRecallTurnLimit + const Duration(seconds: 5),
         ),
-        RecallOutcome.timedOut,
+        isTrue,
       );
     });
 
@@ -50,6 +48,27 @@ void main() {
         handler.remainingAfter(const Duration(seconds: 5)),
         const Duration(seconds: 15),
       );
+    });
+  });
+
+  group('recall · what an outcome is worth (BR-159)', () {
+    test('only the learner saying so is correct', () {
+      // **The rule this group exists for.** `revealed` used to be an outcome
+      // and mapped to *correct*, so pressing Show answer promoted the card a
+      // box — a learner who gave up at four seconds was graded as if they had
+      // known it. Looking at the back is not evidence of recall, and there is
+      // no longer an outcome that says it is.
+      expect(RecallOutcome.remembered.isCorrect, isTrue);
+      expect(RecallOutcome.forgotten.isCorrect, isFalse);
+      expect(RecallOutcome.timedOut.isCorrect, isFalse);
+    });
+
+    test('running out is the only one that carries a reason (BR-131)', () {
+      // Owning up to a blank and running out of time write the same action, so
+      // the reason is the only thing that tells them apart afterwards.
+      expect(RecallOutcome.timedOut.reason, StudyOutcomeReason.timeout);
+      expect(RecallOutcome.forgotten.reason, isNull);
+      expect(RecallOutcome.remembered.reason, isNull);
     });
   });
 

@@ -1,6 +1,6 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 312,
+  "scannedFiles": 313,
   "totalSites": 357,
   "byElementKind": {
     "other": 274,
@@ -3541,7 +3541,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/recall_timer_pieces_widget.dart",
-      "line": 30,
+      "line": 31,
       "widget_context": "_AnswerArea",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3552,7 +3552,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/recall_timer_pieces_widget.dart",
-      "line": 84,
+      "line": 85,
       "widget_context": "_HiddenBar",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -3562,15 +3562,15 @@
       "resolved_value_dark": "unresolvable: semantic.borderControl not in the dumped theme"
     },
     {
-      "file": "lib/features/study/presentation/widgets/sections/recall_timer_section_widget.dart",
-      "line": 283,
-      "widget_context": "_RecallTimerSectionWidgetState",
+      "file": "lib/features/study/presentation/widgets/sections/recall_timer_pieces_widget.dart",
+      "line": 158,
+      "widget_context": "_RecallActionArea",
       "element_kind": "text",
       "source_kind": "theme-token",
-      "expression": "context.colors.onSurfaceVariant",
-      "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#565C72",
-      "resolved_value_dark": "#A8A7C4"
+      "expression": "context.semanticColors.danger",
+      "token": "semantic.danger",
+      "resolved_value_light": "#C02B3A",
+      "resolved_value_dark": "#F2808F"
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_card_face_section_widget.dart",

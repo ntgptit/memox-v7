@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/study/domain/models/guess_mode.dart';
 import 'package:memox/features/study/domain/entities/study_queue_item_entity.dart';
+import 'package:memox/features/study/domain/models/recall_mode.dart';
 import 'package:memox/features/study/domain/models/study_mode.dart';
 import 'package:memox/features/study/domain/models/study_queue_item_status_model.dart';
 import 'package:memox/features/study/domain/models/study_turn_model.dart';
@@ -242,103 +243,114 @@ void main() {
     });
   });
 
-  group('recall reveals nothing until the write is in', () {
+  group('recall writes nothing for a look (BR-159)', () {
     Future<void> pumpTimer(
       WidgetTester tester,
       PendingCommit write, {
       List<bool>? shown,
+      List<String>? order,
     }) => tester.pumpWidget(
       wrapForTest(
         RecallTimerSectionWidget(
           turn: turnOf('c1'),
-          onOutcome: (_) => write.future,
-          onFeedbackShown: ({required isCorrect}) async =>
-              shown?.add(isCorrect),
+          onOutcome: (_) {
+            order?.add('write');
+
+            return write.future;
+          },
+          onFeedbackShown: ({required isCorrect}) async {
+            order?.add('advance');
+            shown?.add(isCorrect);
+          },
         ),
         isScrollable: false,
       ),
     );
 
-    testWidgets('the back stays covered while the write is open', (
+    testWidgets('revealing the back opens no transaction at all', (
       tester,
     ) async {
+      // **The strongest form of "commit before feedback" is having nothing to
+      // commit.** Reveal used to write the correct action and reveal on the
+      // receipt, which made a glance at the back worth a promotion. What it
+      // does now is uncover the card and ask.
+      final order = <String>[];
       final write = PendingCommit();
-      await pumpTimer(tester, write);
+      await pumpTimer(tester, write, order: order);
 
       await tester.tap(find.text('Show answer'));
       await tester.pump();
 
-      expect(find.text('back-c1'), findsNothing);
-
-      write.commit('c1');
-      await tester.pumpAndSettle();
+      expect(order, isEmpty);
+      expect(write.isPending, isTrue);
+      expect(find.text('back-c1'), findsOneWidget);
+      expect(find.text('Remembered'), findsOneWidget);
     });
 
-    testWidgets('the back is revealed once the write has committed', (
+    testWidgets('the verdict advances only once its write has committed', (
       tester,
     ) async {
-      final write = PendingCommit();
+      final order = <String>[];
       final shown = <bool>[];
-      await pumpTimer(tester, write, shown: shown);
+      final write = PendingCommit();
+      await pumpTimer(tester, write, shown: shown, order: order);
 
       await tester.tap(find.text('Show answer'));
       await tester.pump();
+      await tester.tap(find.text('Remembered'));
+      await tester.pump();
+
+      expect(order, <String>['write'], reason: 'nothing has moved on yet');
+
       write.commit('c1');
       await tester.pumpAndSettle();
 
-      expect(find.text('back-c1'), findsOneWidget);
+      expect(order, <String>['write', 'advance']);
       expect(shown, <bool>[true]);
     });
 
-    testWidgets('a refused write hands the turn back rather than revealing', (
+    testWidgets('a refused verdict advances nothing and keeps the choice', (
       tester,
     ) async {
-      // The clock is spent either way, but a revealed card the session cannot
-      // account for is worse than a turn the user has to claim again.
-      final write = PendingCommit();
       final shown = <bool>[];
+      final write = PendingCommit();
       await pumpTimer(tester, write, shown: shown);
 
       await tester.tap(find.text('Show answer'));
+      await tester.pump();
+      await tester.tap(find.text('Forgot'));
       await tester.pump();
       write.refuse();
       await tester.pumpAndSettle();
 
-      expect(find.text('back-c1'), findsNothing);
-      expect(find.text('Show answer'), findsOneWidget);
       expect(shown, isEmpty);
+      expect(find.text('back-c1'), findsOneWidget);
+      expect(find.text('Forgot'), findsOneWidget);
     });
 
-    testWidgets('a second reveal during the write is not a second answer', (
+    testWidgets('a timeout stays covered until its write is in', (
       tester,
     ) async {
-      var writes = 0;
+      // The one place the back is still held back: the verdict belongs to the
+      // clock, and printing it over an open transaction is a claim the session
+      // cannot back up.
       final write = PendingCommit();
-      await tester.pumpWidget(
-        wrapForTest(
-          RecallTimerSectionWidget(
-            turn: turnOf('c1'),
-            onOutcome: (_) {
-              writes += 1;
+      await pumpTimer(tester, write);
 
-              return write.future;
-            },
-          ),
-          isScrollable: false,
-        ),
-      );
-
-      await tester.tap(find.text('Show answer'));
+      await tester.pump(kRecallTurnLimit);
       await tester.pump();
-      if (find.text('Show answer').evaluate().isNotEmpty) {
-        await tester.tap(find.text('Show answer'));
-        await tester.pump();
-      }
 
-      expect(writes, 1);
+      // The row is what earns the sentence. The control keeps its place so the
+      // screen does not resize under the learner, but it has no target.
+      expect(find.text('back-c1'), findsNothing);
+      expect(find.textContaining("Time's up"), findsNothing);
 
       write.commit('c1');
       await tester.pumpAndSettle();
+
+      expect(find.text('back-c1'), findsOneWidget);
+      expect(find.textContaining("Time's up"), findsOneWidget);
+      expect(find.text('Next'), findsOneWidget);
     });
   });
 }

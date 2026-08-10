@@ -195,7 +195,7 @@ class _FillAnswerSectionWidgetState extends State<FillAnswerSectionWidget> {
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
-        _CtaRow(
+        StudyCtaRowWidget(
           children: <Widget>[
             if (hint != null && !_hasUsedHint)
               MxActionButton(
@@ -327,38 +327,4 @@ abstract final class AppFillAnswer {
   /// verdict quietly and the outline carries it at a strength a hairline needs.
   static const double blockFillAlpha = 0.14;
   static const double blockOutlineAlpha = 0.4;
-}
-
-/// The row of actions under the answer.
-///
-/// Centred and capped rather than stretched: one or two buttons under a pair of
-/// cards read as the way on, where a full-width bar reads as the screen floor.
-/// Empty when the turn is graded and there is nothing left to offer — the same
-/// shape `recall` takes for the same reason (BR-129).
-class _CtaRow extends StatelessWidget {
-  const _CtaRow({required this.children});
-
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    if (children.isEmpty) return const SizedBox.shrink();
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        for (final (index, child) in children.indexed) ...<Widget>[
-          if (index > 0) const SizedBox(width: AppSpacing.md),
-          Flexible(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: AppStudyPair.ctaMaxWidth,
-              ),
-              child: child,
-            ),
-          ),
-        ],
-      ],
-    );
-  }
 }

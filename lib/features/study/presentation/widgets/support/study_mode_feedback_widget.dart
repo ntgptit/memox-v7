@@ -42,13 +42,6 @@ abstract final class AppStudyFeedback {
   /// not a glance.
   static const Duration guessWrong = Duration(milliseconds: 1800);
 
-  /// The longest of the five, and the only mode where the answer was never on
-  /// screen before: the back of the card is new text either way.
-  static const Duration recallRevealed = Duration(milliseconds: 1800);
-
-  /// A turn that ran out of time has a verdict *and* a reason to take in.
-  static const Duration recallTimedOut = Duration(milliseconds: 2200);
-
   /// Right is a tick beside what you typed.
   static const Duration fillCorrect = Duration(milliseconds: 800);
 
@@ -74,10 +67,13 @@ StudyModeFeedback studyModeFeedback(StudyMode mode) => switch (mode) {
     correct: AppStudyFeedback.guessCorrect,
     wrong: AppStudyFeedback.guessWrong,
   ),
-  StudyMode.recall => const StudyModeFeedback(
-    correct: AppStudyFeedback.recallRevealed,
-    wrong: AppStudyFeedback.recallTimedOut,
-  ),
+  // **`recall` times its own reading, and neither of its endings is a budget.**
+  // An assessment is given *after* the learner has read the back — holding the
+  // screen afterwards would pause them on something they are done with. A
+  // timeout is the opposite: the card was lost to a clock, so the reading has
+  // no length anyone else can pick, and it ends at a *Next* the learner
+  // presses. A fixed 1800/2200ms tried to answer both and was wrong twice.
+  StudyMode.recall => const StudyModeFeedback.none(),
   StudyMode.fill => const StudyModeFeedback(
     correct: AppStudyFeedback.fillCorrect,
     wrong: AppStudyFeedback.fillWrong,
