@@ -78,16 +78,19 @@ void main() {
   /// `browse`'s deck, whose first card carries a front that wraps.
   ///
   /// **The realistic case, and the one a one-word fixture hid.** A front is not
-  /// a term: decks in this app hold "Be shy / Ngượng ngùng (Động từ, thể hiện
-  /// sự e ngại trong giao tiếp)" on it. Rendered at the prompt size that used
-  /// to be hardcoded here, three headline lines swallowed the card and left the
-  /// back in the corner of its own half — so the render that guards the
-  /// balance has to contain one.
+  /// a term: decks in this app hold "부끄러워하다 / Ngượng ngùng (Động từ, thể
+  /// hiện sự e ngại trong giao tiếp)" on it. Rendered at the prompt size that
+  /// used to be hardcoded here, three headline lines swallowed the card and
+  /// left the back in the corner of its own half — so the render that guards
+  /// the balance has to contain one.
+  ///
+  /// The Korean term leads it, as it does on a real card, which also makes this
+  /// the one fixture where Hangul and Latin wrap in the same paragraph.
   List<StudyCardModel> browseDeck() => <StudyCardModel>[
     card(
       'b1',
       front:
-          'Be shy / Ngượng ngùng (Động từ, thể hiện sự e ngại trong giao '
+          '부끄러워하다 / Ngượng ngùng (Động từ, thể hiện sự e ngại trong giao '
           'tiếp)',
       back: 'ngượng ngùng',
     ),

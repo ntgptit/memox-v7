@@ -8122,7 +8122,7 @@ Chi tiết từng bước, từng phát hiện và từng con số: `docs/wbs-st
 - **Scope:** `test/flutter_test_config.dart`, `lib/core/theme/app_typography.dart`,
   `pubspec.yaml`, `design_system/tokens/fonts.css` + `typography.css`,
   `test/core/theme/cjk_fallback_test.dart`, fixture của `test/demo/` và
-  `test/visual_audit/`, 15 golden trong `test/demo/goldens/`, 4 file font mới
+  `test/visual_audit/`, 17 golden trong `test/demo/goldens/`, 4 file font mới
   trong `assets/fonts/`.
 - **Out of scope:** luật nghiệp vụ; nội dung starter deck; tên deck trong
   `deck_screens_demo_test.dart` (không chứa nội dung thẻ).
@@ -8136,7 +8136,8 @@ Chi tiết từng bước, từng phát hiện và từng con số: `docs/wbs-st
 - **Acceptance criteria:**
   - [x] `_appFonts` nạp cả ba face CJK; test render fail nếu thiếu một face.
   - [x] `cjk_fallback_test.dart` phủ **15/15** rung, không phải 6.
-  - [x] Golden demo hiện Hangul thật; 80 golden Latin **không** phải sinh lại.
+  - [x] Golden demo hiện Hangul thật; 80 golden Latin **không** phải sinh
+        lại.
   - [x] Cả hai kit (Flutter + `design_system`) mang cùng chuỗi fallback.
 
 **Nguyên nhân gốc là một dòng thiếu, và nó sống 7 ngày vì lời giải thích sai
@@ -8185,6 +8186,7 @@ không riêng trong test. Chủ dự án chọn bổ sung font thay vì hạ tà
 | NotoSansSC nguyên bản → subset | 16,95 MB → **12,93 MB** |
 | Chi phí lên test | **+188 ms / 18 file** (~10 ms mỗi process) |
 | Golden Latin phải sinh lại | **0 / 80** |
+| Golden demo sinh lại | **17** (15 + 2 của `browse` sau khi merge #261) |
 
 Subset giữ chữ đời thường — kana, Hangul, khối CJK Unified chính, dấu câu CJK,
 halfwidth/fullwidth — và bỏ Extension A, ideograph tương thích, mọi thứ ngoài
