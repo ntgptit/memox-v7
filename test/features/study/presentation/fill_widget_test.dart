@@ -1,122 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/features/study/domain/entities/study_queue_item_entity.dart';
-import 'package:memox/features/study/domain/models/fill_mode.dart';
-import 'package:memox/features/study/domain/models/study_mode.dart';
-import 'package:memox/features/study/domain/models/study_queue_item_status_model.dart';
-import 'package:memox/features/study/domain/models/study_turn_model.dart';
-import 'package:memox/features/study/presentation/widgets/sections/fill_answer_section_widget.dart';
 
-import 'support/study_commit_stub.dart';
-import 'support/study_widget_harness.dart';
+import 'support/fill_harness.dart';
 
-/// Typing the answer, and what happens to it afterwards — which is nothing
-/// (BR-138).
+/// Read the meaning, type the term — and what a submit costs.
+///
+/// The fixture and the finders live in `support/fill_harness.dart`; the card
+/// that *is* the field is `fill_answer_surface_test.dart`.
 void main() {
-  StudyTurnModel turnOf(
-    String id, {
-    String back = 'công',
-    String? hint,
-    String? example,
-  }) => StudyTurnModel(
-    item: StudyQueueItemEntity(
-      sessionId: 's1',
-      mode: StudyMode.recall,
-      round: 1,
-      cardId: id,
-      position: 0,
-      status: StudyQueueItemStatus.pending,
-      availableAt: 0,
-      answersInSession: 0,
-      remainingMs: null,
-      isRevealed: false,
-    ),
-    progress: const StudyStageProgressModel(
-      round: 1,
-      done: 0,
-      total: 1,
-      completedCardIds: <String>[],
-    ),
-    card: StudyCardModel(
-      id: id,
-      front: 'front-$id',
-      back: back,
-      example: example,
-      hint: hint,
-      pronunciation: null,
-      backFolded: back,
-    ),
-  );
-
-  group('fill', () {
-    testWidgets('an empty answer records nothing (BR-137)', (tester) async {
-      final graded = <FillOutcome>[];
-      await tester.pumpWidget(
-        wrapForTest(
-          FillAnswerSectionWidget(
-            turn: turnOf('c1'),
-            onGraded: (outcome) async {
-              graded.add(outcome);
-
-              return commitOf('c');
-            },
-          ),
-          isScrollable: false,
-        ),
-      );
-
-      await tester.tap(find.text('Check'));
-      await tester.pump();
-      await tester.enterText(find.byType(TextField), '   ');
-      await tester.tap(find.text('Check'));
-      await tester.pump();
-
-      expect(graded, isEmpty);
-    });
-
-    testWidgets('diacritics decide the outcome (BR-134)', (tester) async {
-      final graded = <FillOutcome>[];
-      await tester.pumpWidget(
-        wrapForTest(
-          FillAnswerSectionWidget(
-            turn: turnOf('c1'),
-            onGraded: (outcome) async {
-              graded.add(outcome);
-
-              return commitOf('c');
-            },
-          ),
-          isScrollable: false,
-        ),
-      );
-
-      await tester.enterText(find.byType(TextField), 'cong');
-      await tester.tap(find.text('Check'));
-      await tester.pump();
-
-      expect(graded.single.isCorrect, isFalse);
-      expect(find.text('Not quite'), findsOneWidget);
-    });
-
-    testWidgets('a matching answer is correct despite case and spaces', (
+  group('fill · the question and the answer are the two sides of one card', () {
+    testWidgets('the prompt is the meaning, which is the card-s back', (
       tester,
     ) async {
-      final graded = <FillOutcome>[];
-      await tester.pumpWidget(
-        wrapForTest(
-          FillAnswerSectionWidget(
-            turn: turnOf('c1'),
-            onGraded: (outcome) async {
-              graded.add(outcome);
+      await pumpFill(tester, fillTurnOf('c1'));
 
-              return commitOf('c');
-            },
-          ),
-          isScrollable: false,
-        ),
-      );
+      expect(find.text('quả táo'), findsOneWidget);
+    });
 
-      await tester.enterText(find.byType(TextField), '  CÔNG ');
+    testWidgets('the prompt is never the term the learner has to produce', (
+      tester,
+    ) async {
+      // Both readings of the old prompt: the example sentence, which contains
+      // the answer, and the front, which *is* the answer. Either one asks and
+      // answers the same question.
+      await pumpFill(tester, fillTurnOf('c1', example: '사과를 먹었어요.'));
+
+      expect(find.text('사과'), findsNothing);
+      expect(find.text('사과를 먹었어요.'), findsNothing);
+    });
+
+    testWidgets('typing the Korean term is correct (BR-134)', (tester) async {
+      final graded = await pumpFill(tester, fillTurnOf('c1'));
+
+      await tester.enterText(find.byType(TextField), '사과');
+      await tester.pump();
       await tester.tap(find.text('Check'));
       await tester.pump();
 
@@ -124,25 +41,111 @@ void main() {
       expect(find.text('Correct'), findsOneWidget);
     });
 
-    testWidgets('a second submit on the same card records nothing', (
+    testWidgets('typing the meaning back is not an answer', (tester) async {
+      // The regression the direction change exists for: graded against the back
+      // this was the *right* answer.
+      final graded = await pumpFill(tester, fillTurnOf('c1'));
+
+      await tester.enterText(find.byType(TextField), 'quả táo');
+      await tester.pump();
+      await tester.tap(find.text('Check'));
+      await tester.pump();
+
+      expect(graded.single.isCorrect, isFalse);
+    });
+
+    testWidgets('case and surrounding space do not count', (tester) async {
+      final graded = await pumpFill(tester, fillTurnOf('c1', front: 'Công'));
+
+      await tester.enterText(find.byType(TextField), '  CÔNG ');
+      await tester.pump();
+      await tester.tap(find.text('Check'));
+      await tester.pump();
+
+      expect(graded.single.isCorrect, isTrue);
+    });
+
+    testWidgets('diacritics decide the outcome (BR-134)', (tester) async {
+      final graded = await pumpFill(tester, fillTurnOf('c1', front: 'công'));
+
+      await tester.enterText(find.byType(TextField), 'cong');
+      await tester.pump();
+      await tester.tap(find.text('Check'));
+      await tester.pump();
+
+      expect(graded.single.isCorrect, isFalse);
+      expect(find.text('Not quite'), findsOneWidget);
+    });
+  });
+
+  group('fill · what a submit costs', () {
+    testWidgets('an empty answer records nothing (BR-137)', (tester) async {
+      final graded = await pumpFill(tester, fillTurnOf('c1'));
+
+      await tester.tap(find.text('Check'));
+      await tester.pump();
+      await tester.enterText(find.byType(TextField), '   ');
+      await tester.pump();
+      await tester.tap(find.text('Check'));
+      await tester.pump();
+
+      expect(graded, isEmpty);
+    });
+
+    testWidgets('Check is disabled until there is something to check', (
       tester,
     ) async {
-      final graded = <FillOutcome>[];
-      await tester.pumpWidget(
-        wrapForTest(
-          FillAnswerSectionWidget(
-            turn: turnOf('c1'),
-            onGraded: (outcome) async {
-              graded.add(outcome);
+      await pumpFill(tester, fillTurnOf('c1'));
 
-              return commitOf('c');
-            },
-          ),
-          isScrollable: false,
-        ),
+      expect(
+        tester.widget<ButtonStyleButton>(fillCheckButton()).enabled,
+        isFalse,
       );
 
-      await tester.enterText(find.byType(TextField), 'công');
+      await tester.enterText(find.byType(TextField), '  ');
+      await tester.pump();
+      expect(
+        tester.widget<ButtonStyleButton>(fillCheckButton()).enabled,
+        isFalse,
+        reason: 'whitespace is not an answer (BR-137)',
+      );
+
+      await tester.enterText(find.byType(TextField), '사과');
+      await tester.pump();
+      expect(
+        tester.widget<ButtonStyleButton>(fillCheckButton()).enabled,
+        isTrue,
+      );
+    });
+
+    testWidgets('IME Done takes the same path as Check', (tester) async {
+      final graded = await pumpFill(tester, fillTurnOf('c1'));
+
+      await tester.enterText(find.byType(TextField), '사과');
+      await tester.pump();
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pump();
+
+      expect(graded.single.isCorrect, isTrue);
+    });
+
+    testWidgets('Done on an empty field is not an answer either', (
+      tester,
+    ) async {
+      final graded = await pumpFill(tester, fillTurnOf('c1'));
+
+      await tester.showKeyboard(find.byType(TextField));
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pump();
+
+      expect(graded, isEmpty);
+    });
+
+    testWidgets('Check then Done is still one write', (tester) async {
+      final graded = await pumpFill(tester, fillTurnOf('c1'));
+
+      await tester.enterText(find.byType(TextField), '사과');
+      await tester.pump();
       await tester.tap(find.text('Check'));
       await tester.pump();
       await tester.testTextInput.receiveAction(TextInputAction.done);
@@ -150,123 +153,92 @@ void main() {
 
       expect(graded, hasLength(1));
     });
-
-    testWidgets('a hint is recorded and does not change the outcome (BR-136)', (
-      tester,
-    ) async {
-      final graded = <FillOutcome>[];
-      await tester.pumpWidget(
-        wrapForTest(
-          FillAnswerSectionWidget(
-            turn: turnOf('c1', hint: 'starts with c'),
-            onGraded: (outcome) async {
-              graded.add(outcome);
-
-              return commitOf('c');
-            },
-          ),
-          isScrollable: false,
-        ),
-      );
-
-      await tester.tap(find.text('Show hint'));
-      await tester.pump();
-      expect(find.text('starts with c'), findsOneWidget);
-
-      await tester.enterText(find.byType(TextField), 'công');
-      await tester.tap(find.text('Check'));
-      await tester.pump();
-
-      expect(graded.single.hasUsedHint, isTrue);
-      // The hint is a note on the turn, not a penalty.
-      expect(graded.single.isCorrect, isTrue);
-    });
-
-    testWidgets('a new card clears the field and the hint', (tester) async {
-      await tester.pumpWidget(
-        wrapForTest(
-          FillAnswerSectionWidget(
-            turn: turnOf('c1', hint: 'h'),
-            onGraded: (_) async => commitOf('c'),
-          ),
-          isScrollable: false,
-        ),
-      );
-      await tester.enterText(find.byType(TextField), 'công');
-      await tester.tap(find.text('Show hint'));
-      await tester.pump();
-
-      await tester.pumpWidget(
-        wrapForTest(
-          FillAnswerSectionWidget(
-            turn: turnOf('c2', hint: 'h'),
-            onGraded: (_) async => commitOf('c'),
-          ),
-          isScrollable: false,
-        ),
-      );
-      await tester.pump();
-
-      expect(find.text('công'), findsNothing);
-      expect(find.text('Show hint'), findsOneWidget);
-    });
   });
 
-  group('the second state the design has no image for', () {
-    // Drawn from BR-134, BR-137 and BR-138 rather than guessed, and recorded as
-    // an agent proposal in `docs/wireframes/m5-study-modes.md` §6.1.
-    testWidgets('fill, once graded, shows the card-s own back, not the input', (
+  group('fill · a new turn starts clean', () {
+    testWidgets('a new card clears the field, the hint and the verdict', (
       tester,
     ) async {
-      // BR-138: what the learner typed is never stored, and never echoed back
-      // either. The card is what is shown.
-      await tester.pumpWidget(
-        wrapForTest(
-          FillAnswerSectionWidget(
-            turn: turnOf('c1'),
-            onGraded: (_) async => commitOf('c'),
-          ),
-          isScrollable: false,
-        ),
-      );
-
-      await tester.enterText(find.byType(TextField), 'cong');
+      await pumpFill(tester, fillTurnOf('c1', hint: 'h'));
+      await tester.enterText(find.byType(TextField), '바다');
+      await tester.pump();
+      await tester.tap(find.text('Show hint'));
+      await tester.pump();
       await tester.tap(find.text('Check'));
       await tester.pump();
-
       expect(find.text('Not quite'), findsOneWidget);
-      // A label over a block, not a sentence: the answer is the thing to take
-      // away, so it is given its own frame rather than folded into prose.
-      expect(find.text('The answer'), findsOneWidget);
-      expect(find.text('công'), findsOneWidget);
-      expect(find.text('Check'), findsNothing);
-      // The field is gone rather than merely disabled: the lower card holds one
-      // thing at a time, and once the turn is graded that thing is the verdict.
-      // A second answer would be a second turn either way (BR-137).
-      expect(find.byType(TextField), findsNothing);
+
+      await pumpFill(tester, fillTurnOf('c2', hint: 'h'));
+      await tester.pump();
+
+      expect(find.text('바다'), findsNothing);
+      expect(find.text('Not quite'), findsNothing);
+      expect(find.byType(TextField), findsOneWidget);
+      expect(
+        tester.widget<TextField>(find.byType(TextField)).controller!.text,
+        isEmpty,
+      );
     });
 
-    testWidgets('and a correct fill does not spell the answer back', (
+    testWidgets('the same card in a later round resets just as fully', (
       tester,
     ) async {
-      // The counterpart: the line exists to tell somebody what they missed, and
-      // showing it to somebody who got it right reads as a correction.
-      await tester.pumpWidget(
-        wrapForTest(
-          FillAnswerSectionWidget(
-            turn: turnOf('c1'),
-            onGraded: (_) async => commitOf('c'),
-          ),
-          isScrollable: false,
-        ),
-      );
-
-      await tester.enterText(find.byType(TextField), 'công');
+      // BR-116 sends a failed card round again with the same id, so comparing
+      // ids alone leaves the previous attempt on screen over a live question.
+      await pumpFill(tester, fillTurnOf('c1', hint: 'h'));
+      await tester.enterText(find.byType(TextField), '바다');
+      await tester.pump();
+      await tester.tap(find.text('Show hint'));
+      await tester.pump();
       await tester.tap(find.text('Check'));
       await tester.pump();
 
-      expect(find.text('Correct'), findsOneWidget);
-      expect(find.textContaining('The answer:'), findsNothing);
+      await pumpFill(tester, fillTurnOf('c1', hint: 'h', round: 2));
+      await tester.pump();
+
+      expect(find.text('Not quite'), findsNothing);
+      expect(find.text('h'), findsNothing);
+      expect(
+        tester.widget<TextField>(find.byType(TextField)).controller!.text,
+        isEmpty,
+      );
+    });
+
+    testWidgets('the keyboard carries over to the next card', (tester) async {
+      // `fill` is answered by typing, several cards in a row. Reaching for the
+      // card again after every turn is the cost of losing this.
+      await pumpFill(tester, fillTurnOf('c1'));
+      await tester.showKeyboard(find.byType(TextField));
+      await tester.enterText(find.byType(TextField), '사과');
+      await tester.pump();
+      await tester.tap(find.text('Check'));
+      await tester.pump();
+
+      await pumpFill(tester, fillTurnOf('c2'));
+      await tester.pumpAndSettle();
+
+      expect(isFillFieldFocused(tester), isTrue);
+    });
+
+    testWidgets('a card answered without the keyboard does not summon it', (
+      tester,
+    ) async {
+      // Somebody who dismissed the keyboard before checking is not asking for
+      // it back.
+      await pumpFill(tester, fillTurnOf('c1'));
+      await tester.enterText(find.byType(TextField), '사과');
+      await tester.pump();
+      tester.testTextInput.hide();
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pump();
+
+      await tester.tap(find.text('Check'));
+      await tester.pump();
+
+      await pumpFill(tester, fillTurnOf('c2'));
+      await tester.pumpAndSettle();
+
+      expect(isFillFieldFocused(tester), isFalse);
     });
   });
 }

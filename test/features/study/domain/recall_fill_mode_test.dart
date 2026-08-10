@@ -56,8 +56,28 @@ void main() {
   group('fill · the comparison policy (BR-134)', () {
     const handler = FillModeHandler();
 
-    FillOutcome? grade(String input, String backFolded) =>
-        handler.grade(input: input, backFolded: backFolded, hasUsedHint: false);
+    FillOutcome? grade(String input, String frontFolded) => handler.grade(
+      input: input,
+      frontFolded: frontFolded,
+      hasUsedHint: false,
+    );
+
+    test('the answer is measured against the front, not the back', () {
+      // **The direction of the mode** (BR-134). `fill` shows the card's back —
+      // its meaning — and asks for the front, the Korean term. Graded the other
+      // way round, a learner typing the term was marked wrong and a learner
+      // copying the prompt back was marked right.
+      expect(grade('사과', '사과')!.isCorrect, isTrue);
+      expect(grade('quả táo', '사과')!.isCorrect, isFalse);
+    });
+
+    test('a Korean term folds to itself — trimmed, and no case to lose', () {
+      // Hangul is caseless, so the whole policy for the language this mode is
+      // actually for reduces to the trim. It still has to hold: a keyboard that
+      // commits a trailing space would otherwise fail every correct answer.
+      expect(grade('  사과 ', '사과')!.isCorrect, isTrue);
+      expect(FillModeHandler.fold(' 안녕하세요 '), '안녕하세요');
+    });
 
     test('diacritics count — cong is not công', () {
       // The case this whole policy exists for, in the language the app was
@@ -92,12 +112,12 @@ void main() {
     test('a hint is recorded and changes nothing else (BR-136)', () {
       final withHint = handler.grade(
         input: 'công',
-        backFolded: 'công',
+        frontFolded: 'công',
         hasUsedHint: true,
       )!;
       final without = handler.grade(
         input: 'công',
-        backFolded: 'công',
+        frontFolded: 'công',
         hasUsedHint: false,
       )!;
 

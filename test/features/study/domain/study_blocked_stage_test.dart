@@ -22,6 +22,7 @@ void main() {
     example: 'ex-$id',
     hint: null,
     pronunciation: null,
+    frontFolded: 'front-$id',
     backFolded: back ?? 'back-$id',
   );
 

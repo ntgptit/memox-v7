@@ -7,7 +7,7 @@
 | **Scope** | Task còn lại của Study từ M5.7 trở đi · nợ kỹ thuật của Study · việc bị chặn |
 | **Source of truth for** | Trạng thái task Study từ M5.7 · nợ kỹ thuật của Study |
 | **Depends on** | `document-conventions.md` · `wbs.md` · `business-rules.md` · `use-cases.md` |
-| **Updated by task** | `guess` bỏ nền phán quyết — viền + chữ + icon, hàng mờ 0.7, reset theo lượt, ngân sách đọc 800/1800ms |
+| **Updated by task** | `fill` — thẻ dưới là input surface, bỏ ô viền lồng trong thẻ, đề đổi sang `back` và chấm bằng `front_folded` (BR-134) |
 | **Last updated** | 2026-08-11 |
 
 `docs/wbs.md` giữ M5.0…M5.6 đã hoàn thành và không nhắc lại ở đây. File này giữ
@@ -764,6 +764,8 @@ phán quyết trước khi người dùng trả lời.
 | ~~`pause()` không có caller — nửa **ghi** của BR-133~~ | `RecallTimerSectionWidget.onSuspended` bắn khi app rời foreground với lượt còn mở; màn hình gọi `pause()`. Round-trip có test trên SQLite thật | xong |
 | ~~Màn Study chưa có mặt trong Widgetbook~~ | `StudyCatalogRepository` là fake riêng của catalog; ba màn Study đã đăng ký | xong ở M5.16 |
 | ~~Kịch bản IT đỏ~~ | Bảy nguyên nhân, tất cả đã vá; suite trở lại **66/66** | xong |
+| 13 golden `fill` được rasterise trên Linux | phiên làm việc này không có Windows; repo chốt golden là pixel Windows (`dart_test.yaml`, job `goldens (windows)` của `ci-full`). Ảnh đúng về bố cục, sai về antialias — cùng lệch ~0,37% mà mọi golden Study đang có khi chạy trên Linux | chạy `flutter test --tags golden --update-goldens` trên Windows trước khi merge |
+| `fill` vẫn chỉ nhận thẻ có `example` (BR-114, BR-154) | đề bài nay là `back`, nên `example` không còn là dữ liệu mà stage cần — nhưng gỡ điều kiện là đổi **tập thẻ** của một stage, đụng `fillableCount`, BR-140 và màn chọn mode. Giữ nguyên có chủ đích để không mở rộng phạm vi | cần một quyết định sản phẩm riêng |
 
 ### Nửa **ghi** của BR-133, đóng sau M5.16
 
@@ -957,6 +959,65 @@ phán quyết trước khi người dùng trả lời.
   đang tan, tức là còn một mảng màu trên đúng cái hàng mà thay đổi này vừa gỡ
   nền đi. Golden phải `pumpAndSettle` (an toàn vì không truyền `onFeedbackShown`).
 - **Docs:** `m5-study-modes.md` §5, §8.9, §8.12.
+
+### `fill` — thẻ dưới là input surface, và hướng front/back được sửa
+
+- **Status:** **done** — analyze sạch, targeted test xanh, mười ba golden `fill`
+  dựng lại. **Golden chưa được rasterise lại trên Windows** — xem nợ kỹ thuật.
+- **Vào từ bốn ảnh concept của `fill`**, chốt theo kiểu đã dùng cho `match` và
+  `guess`: ảnh quyết bố cục và thứ bậc, token/màu/chữ lấy từ app (§7.8).
+- **Lỗi nghiệp vụ tìm thấy trên đường, và nó lớn hơn cái bố cục.** `fill` hiển
+  thị `example ?? front` làm đề và chấm bằng `back_folded`. Cả hai đều ngược:
+  BR-08 đặt term tiếng Hàn ở `front` và nghĩa ở `back`, nên màn hình đang đưa ra
+  câu ví dụ **chứa sẵn từ phải gõ** rồi chấm đúng cho người gõ lại nghĩa. Một
+  người học gõ đúng term bị chấm sai. Bố cục đúng mà chấm sai mặt thẻ thì vẫn là
+  một màn hình sai.
+  - Đề nay là `card.back`; đáp án mong đợi và đáp án hiển thị khi sai là
+    `card.front`; so sánh dùng `frontFolded`.
+  - `StudyCardModel` nhận thêm `frontFolded`, đọc thẳng từ cột `cards.front_folded`
+    đã có sẵn. Fold lại trong UI là chính sách thứ hai, và BR-135 đánh version cho
+    đúng một chính sách.
+- **Đổi: thẻ dưới *là* vùng nhập, không *chứa* vùng nhập.** Bản trước đặt một
+  `MxTextField` viền cao 56 vào giữa một thẻ cao hơn 200 — thẻ trong thẻ, hai
+  khoảng trống không thuộc về cái nào, vùng chạm thật bằng một phần năm vùng
+  trông có vẻ chạm được. Nay editable `expands` phủ hết thẻ, `GestureDetector`
+  opaque bọc ngoài để cả dải padding focus được, và **sáu** trạng thái viền của
+  `InputDecoration` đều `none` — tắt mỗi `border` thì `InputDecorationTheme` vẽ
+  lại viền đúng lúc field nhận focus, tức là đúng cái trạng thái không ai chụp.
+- **`MxTextField` không diễn được hình này** — hợp đồng của nó là một field *đã
+  trang trí*, cố ý không nhận `InputDecoration` để cả app chỉ có một kiểu input
+  (M3.5). Thêm kiểu công khai thứ hai cho một caller, hay mở lỗ decoration cho
+  mọi caller, đều lớn hơn một editable private trong feature cần nó. Thứ nó bảo
+  vệ vẫn giữ: không literal màu/bán kính/khoảng cách, chữ từ `context.texts`,
+  decoration không caller nào với tới.
+- **Phán quyết mặc lên chính thẻ đó.** `MxCard` thêm `borderColor` — một **vai**
+  semantic như `color`, không phải màu tự do. Đúng/sai là viền + icon + một dòng
+  chữ + term chuẩn; không khối con, không tô kín nền. Sai mới có nhãn `Đáp án`,
+  và không lượt nào lặp lại nghĩa đang nằm ngay trên.
+- **Hàng CTA giữ đủ hai chỗ suốt lượt.** `Hint` tắt thay vì biến mất, `Check`
+  tắt khi ô rỗng (BR-137) và trong lúc ghi. Bỏ một nút làm hàng căn giữa lại và
+  đẩy nút chính sang chỗ khác giữa lúc ngón tay đang đi xuống.
+- **Focus có vòng đời, không có `Future.delayed`.** `fill` là mode gõ nhiều thẻ
+  liên tiếp, nên bàn phím phải theo sang thẻ sau — nhưng chỉ khi người học vẫn
+  đang gõ lúc bấm Check. Ai tự tắt bàn phím trước khi chấm thì không bị gọi nó
+  dậy. Xin focus trong `addPostFrameCallback`: field của lượt mới chưa tồn tại ở
+  `didUpdateWidget`, và một khoảng chờ đoán mò chỉ đúng trên máy đã đo.
+- **Đề dài không bị cắt.** Thẻ đề cuộn thay vì `maxLines: 6` + ellipsis. BR-08
+  cho `back` 240 ký tự vì một nghĩa thật là hai thứ tiếng cộng ghi chú; ellipsis
+  giấu đúng nửa phân biệt hai thẻ giống nhau, và chiều cao ngoài của thẻ do
+  `Expanded` quyết định dù sao.
+- **Không đụng:** header, `MxSessionTopBar`, ProgressBar, dòng ngữ cảnh, ngân
+  sách đọc, `hasUsedHint`, chống double-submit, ánh xạ 8Box, và bố cục của
+  `browse` / `match` / `guess` / `recall` / `self_assess`.
+- **Rule `fill` chỉ nhận thẻ có `example` (BR-114, BR-154) giữ nguyên có chủ
+  đích** — xem nợ kỹ thuật.
+- **Tests:** `recall_fill_mode_test.dart` (+2 — chấm theo `front`, fold một term
+  tiếng Hàn), `fill_widget_test.dart` (26, viết lại quanh fixture đúng shape
+  BR-08), `study_commit_before_feedback_test.dart` (+1, và refused-write nay
+  kiểm cả nội dung, `readOnly` và focus), `study_modes_demo_test.dart` (13 golden
+  `fill`: idle / typing / hint / correct / incorrect / long meaning × light+dark,
+  cộng một render 412×915 với keyboard inset).
+- **Docs:** `business-rules.md` BR-134, `m5-study-modes.md` §6, §6.1, §8.10.
 
 ## Việc không thuộc Study nhưng chặn Definition of Done
 

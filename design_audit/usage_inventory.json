@@ -1,22 +1,22 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 312,
-  "totalSites": 357,
+  "scannedFiles": 313,
+  "totalSites": 356,
   "byElementKind": {
     "other": 274,
-    "background": 13,
+    "background": 12,
     "shadow": 1,
-    "border": 13,
-    "text": 44,
+    "border": 12,
+    "text": 45,
     "icon": 12
   },
   "bySourceKind": {
     "shared-constant": 143,
-    "blend-source": 6,
+    "blend-source": 4,
     "Colors-material": 5,
     "hardcoded-literal": 97,
     "opacity-modified-token": 11,
-    "theme-token": 95
+    "theme-token": 96
   },
   "sites": [
     {
@@ -3474,9 +3474,9 @@
       "resolved_value_dark": "unresolvable: semantic.borderControl not in the dumped theme"
     },
     {
-      "file": "lib/features/study/presentation/widgets/sections/fill_answer_section_widget.dart",
-      "line": 172,
-      "widget_context": "_FillAnswerSectionWidgetState",
+      "file": "lib/features/study/presentation/widgets/sections/fill_answer_pieces_widget.dart",
+      "line": 60,
+      "widget_context": "_PromptCard",
       "element_kind": "text",
       "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",
@@ -3485,9 +3485,9 @@
       "resolved_value_dark": "#A8A7C4"
     },
     {
-      "file": "lib/features/study/presentation/widgets/sections/fill_answer_section_widget.dart",
-      "line": 192,
-      "widget_context": "_FillAnswerSectionWidgetState",
+      "file": "lib/features/study/presentation/widgets/sections/fill_answer_pieces_widget.dart",
+      "line": 113,
+      "widget_context": "_AnswerCard",
       "element_kind": "other",
       "source_kind": "theme-token",
       "expression": "context.colors.surfaceContainerLow",
@@ -3496,37 +3496,26 @@
       "resolved_value_dark": "unresolvable: colorScheme.surfaceContainerLow not in the dumped theme"
     },
     {
-      "file": "lib/features/study/presentation/widgets/sections/fill_answer_section_widget.dart",
-      "line": 293,
-      "widget_context": "_AnswerBlock",
+      "file": "lib/features/study/presentation/widgets/sections/fill_answer_pieces_widget.dart",
+      "line": 216,
+      "widget_context": "_FillInput",
       "element_kind": "other",
       "source_kind": "theme-token",
-      "expression": "context.colors.surface",
-      "token": "colorScheme.surface",
-      "resolved_value_light": "#FBFBFE",
-      "resolved_value_dark": "#1A1838"
+      "expression": "context.colors.primary",
+      "token": "colorScheme.primary",
+      "resolved_value_light": "#4646B4",
+      "resolved_value_dark": "#5656C9"
     },
     {
-      "file": "lib/features/study/presentation/widgets/sections/fill_answer_section_widget.dart",
-      "line": 302,
-      "widget_context": "_AnswerBlock",
-      "element_kind": "background",
-      "source_kind": "blend-source",
-      "expression": "accent.withValues(alpha: AppFillAnswer.blockFillAlpha)",
-      "token": null,
-      "resolved_value_light": "unresolvable: value depends on runtime state",
-      "resolved_value_dark": "unresolvable: value depends on runtime state"
-    },
-    {
-      "file": "lib/features/study/presentation/widgets/sections/fill_answer_section_widget.dart",
-      "line": 308,
-      "widget_context": "_AnswerBlock",
-      "element_kind": "border",
-      "source_kind": "blend-source",
-      "expression": "accent.withValues(alpha: AppFillAnswer.blockOutlineAlpha)",
-      "token": null,
-      "resolved_value_light": "unresolvable: value depends on runtime state",
-      "resolved_value_dark": "unresolvable: value depends on runtime state"
+      "file": "lib/features/study/presentation/widgets/sections/fill_answer_pieces_widget.dart",
+      "line": 331,
+      "widget_context": "_Verdict",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/guess_question_section_widget.dart",
@@ -3794,7 +3783,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_card.dart",
-      "line": 121,
+      "line": 137,
       "widget_context": "_MxCardState",
       "element_kind": "border",
       "source_kind": "theme-token",

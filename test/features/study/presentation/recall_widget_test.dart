@@ -50,6 +50,7 @@ void main() {
       example: example,
       hint: hint,
       pronunciation: null,
+      frontFolded: 'front-$id',
       backFolded: back,
     ),
   );

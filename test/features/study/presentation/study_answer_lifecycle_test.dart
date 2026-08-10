@@ -54,6 +54,7 @@ void main() {
       example: null,
       hint: null,
       pronunciation: null,
+      frontFolded: 'front',
       backFolded: 'back',
     ),
   );

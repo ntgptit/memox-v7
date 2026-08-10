@@ -57,6 +57,7 @@ class MxCard extends StatefulWidget {
     this.elevation = AppElevation.card,
     this.radius = AppRadius.lg,
     this.color,
+    this.borderColor,
     this.onTap,
     super.key,
   });
@@ -83,6 +84,20 @@ class MxCard extends StatefulWidget {
   /// cards that mean different things — a prompt and the space for an answer —
   /// where the pair only reads as a pair if one of them steps down.
   final Color? color;
+
+  /// The card's hairline, when the edge is carrying a state.
+  ///
+  /// Null is `borderSubtle`, which is every card that is only a card. It exists
+  /// for a surface whose *whole* meaning has changed — `fill`'s answer card once
+  /// the turn is graded, where the verdict belongs to the card the learner typed
+  /// into rather than to a panel drawn inside it. A semantic role from
+  /// `AppSemanticColors`, the same way [color] takes a role from `ColorScheme`:
+  /// a caller passing an arbitrary colour would be inventing a second card
+  /// style, which is the thing this widget exists to prevent.
+  ///
+  /// Keyboard focus still wins — a focused tappable card draws its focus ring
+  /// over this, because "you are here" outranks "this is how it went".
+  final Color? borderColor;
 
   /// Makes the whole card a target. Null leaves it a plain surface.
   ///
@@ -118,7 +133,9 @@ class _MxCardState extends State<MxCard> {
         ? Border.fromBorderSide(
             AppInteractionStates.focusRing(context.semanticColors),
           )
-        : Border.all(color: context.semanticColors.borderSubtle);
+        : Border.all(
+            color: widget.borderColor ?? context.semanticColors.borderSubtle,
+          );
     final decoration = BoxDecoration(
       // **A role, not a colour.** `surface` is the card; a caller passes another
       // *scheme* role when the card is one step down from the surface around it

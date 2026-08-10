@@ -270,6 +270,7 @@ void main() {
           example: null,
           hint: null,
           pronunciation: null,
+          frontFolded: 'f$i',
           backFolded: 'b$i',
         ),
     ];

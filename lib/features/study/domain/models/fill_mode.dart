@@ -73,20 +73,27 @@ final class FillModeHandler extends StudyModeHandler {
 
   /// Grades one answer, or returns null when there is nothing to grade.
   ///
+  /// **Against the folded *front*, and the direction is the mode** (BR-134).
+  /// `fill` puts the card's back — the English/Vietnamese meaning — on the
+  /// prompt and asks for the Korean term, so the string an answer is measured
+  /// against is [StudyCardModel.frontFolded]. It graded against the back for as
+  /// long as the prompt was the example sentence: a learner typing the Korean
+  /// word was marked wrong, and one echoing the gloss back was marked right.
+  ///
   /// **Null for an empty answer** (BR-137). Not "wrong": a blank field is
   /// somebody tapping submit by accident, and recording it as a failure would
   /// bury a card the user never actually got wrong. It also must not advance the
   /// checkpoint, which is what returning null lets the caller do.
   FillOutcome? grade({
     required String input,
-    required String backFolded,
+    required String frontFolded,
     required bool hasUsedHint,
   }) {
     final folded = fold(input);
     if (folded.isEmpty) return null;
 
     return FillOutcome(
-      isCorrect: folded == backFolded,
+      isCorrect: folded == frontFolded,
       comparisonVersion: kFillComparisonVersion,
       hasUsedHint: hasUsedHint,
     );
