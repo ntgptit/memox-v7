@@ -19,6 +19,29 @@ const int _kMaxStudyTurns = 60;
 const double _kSwipeTravel = 160;
 
 extension ItRobotStudyDriving on ItRobot {
+  /// Waits out the window in which the answer just given is on screen.
+  ///
+  /// **A person cannot answer the next card until this has passed, and neither
+  /// can the robot.** Every graded mode holds its verdict for a fixed beat
+  /// before the session swaps in the next turn (BR-158, §8.12) — and the beat is
+  /// a `Future.delayed`, which schedules no frames, so `pumpAndSettle` returns
+  /// straight through it. Without this the robot answered a card that was still
+  /// showing the previous card's result, burned turns doing it, and ran out at
+  /// the turn cap.
+  ///
+  /// The wrong-answer budget, because it is the longer of the two and the robot
+  /// does not know which way the grade went until the screen changes.
+  Future<void> _holdFeedback(StudyMode mode) async {
+    final feedback = studyModeFeedback(mode);
+    final longest = feedback.wrong > feedback.correct
+        ? feedback.wrong
+        : feedback.correct;
+    if (longest == Duration.zero) return;
+
+    await _tester.pump(longest + const Duration(milliseconds: 200));
+    await _harness.settle();
+  }
+
   /// Answers the turn on screen correctly, whichever stage it belongs to.
   ///
   /// **It reads the screen rather than the rules.** The right pair, the right
@@ -47,11 +70,36 @@ extension ItRobotStudyDriving on ItRobot {
         isTrue,
         reason:
             'turn $turn had nothing to answer and no summary; '
-            'visible text was $visibleText',
+            'the stage was ${_stageOnScreen()} and the visible text was '
+            '$visibleText',
       );
     }
 
     fail('the session was still running after $_kMaxStudyTurns turns');
+  }
+
+  /// Which mode's body is on screen, for a failure message that names it.
+  ///
+  /// A blocked screen says only that the stage could not build content; which
+  /// stage that was is the first thing anybody reading the failure asks.
+  String _stageOnScreen() {
+    if (find.byType(MatchBoardSectionWidget).evaluate().isNotEmpty) {
+      return 'match';
+    }
+    if (find.byType(GuessQuestionSectionWidget).evaluate().isNotEmpty) {
+      return 'guess';
+    }
+    if (find.byType(RecallTimerSectionWidget).evaluate().isNotEmpty) {
+      return 'recall';
+    }
+    if (find.byType(FillAnswerSectionWidget).evaluate().isNotEmpty) {
+      return 'fill';
+    }
+    if (find.byType(StudyCardFaceSectionWidget).evaluate().isNotEmpty) {
+      return 'browse or self_assess';
+    }
+
+    return 'none — no mode body was built';
   }
 
   /// `match`: the board says which meaning belongs to the selected term.
@@ -68,6 +116,18 @@ extension ItRobotStudyDriving on ItRobot {
         .where((tile) => tile.state == MatchTileState.idle)
         .map((tile) => tile.text)
         .toSet();
+
+    // **A board with nothing open is a board that has been finished**, not a
+    // board that is stuck. Its last pair is cleared and the session is fetching
+    // the next one underneath it — the board stays mounted throughout (BR-158),
+    // which is the whole point of the change that made this case reachable.
+    // Waiting is what a person does; `firstWhere` threw `Bad state: No element`
+    // and named nothing.
+    if (open.isEmpty) {
+      await _harness.settle();
+
+      return true;
+    }
 
     final widget = _tester.widget<MatchBoardSectionWidget>(board);
     final term = widget.board.terms.firstWhere(
@@ -94,6 +154,7 @@ extension ItRobotStudyDriving on ItRobot {
     );
 
     await tapText(correct.text);
+    await _holdFeedback(StudyMode.guess);
 
     return true;
   }
@@ -117,6 +178,7 @@ extension ItRobotStudyDriving on ItRobot {
     }
 
     await tapText(ItText.studyRevealAnswer);
+    await _holdFeedback(StudyMode.recall);
 
     return true;
   }
@@ -134,6 +196,7 @@ extension ItRobotStudyDriving on ItRobot {
     );
     await _harness.settle();
     await tapText(ItText.studyFillSubmit);
+    await _holdFeedback(StudyMode.fill);
 
     return true;
   }

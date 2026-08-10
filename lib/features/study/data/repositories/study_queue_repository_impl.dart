@@ -94,7 +94,7 @@ mixin _StudyQueueOperations on _StudyQueueLayoutOperations {
     return pending == 0;
   }
 
-  Future<void> submitAnswer({
+  Future<StudyAnswerCommitModel> submitAnswer({
     required String sessionId,
     required String cardId,
     required StudyMode mode,
@@ -192,12 +192,17 @@ mixin _StudyQueueOperations on _StudyQueueLayoutOperations {
         ),
       );
 
-      await _applyQueueEffect(
+      final status = await _applyQueueEffect(
         session: session,
         item: item,
         mode: mode,
         action: action,
         round: round,
+      );
+      final commit = StudyAnswerCommitModel(
+        cardId: cardId,
+        round: round,
+        currentItemStatus: status,
       );
 
       await _dao.updateSession(
@@ -216,7 +221,7 @@ mixin _StudyQueueOperations on _StudyQueueLayoutOperations {
           );
         }
 
-        return;
+        return commit;
       }
 
       await _dao.updateStudyState(
@@ -231,6 +236,8 @@ mixin _StudyQueueOperations on _StudyQueueLayoutOperations {
           intervalDays: Value<int?>(nextIntervalDays ?? state.intervalDays),
         ),
       );
+
+      return commit;
     });
   }
 
@@ -266,8 +273,19 @@ mixin _StudyQueueOperations on _StudyQueueLayoutOperations {
   });
 
   /// What the answer does to the queue — the half of the rules that differ by
-  /// mode.
-  Future<void> _applyQueueEffect({
+  /// mode, executed from the mode's own [StudyLapsePolicy] rather than from its
+  /// name.
+  ///
+  /// **This used to open with `if (mode == StudyMode.match)`.** That is a second
+  /// exhaustive branch on [StudyMode], in the layer furthest from the one file
+  /// AD-18 allows one in — and it would have grown a third arm the first time
+  /// another mode wanted to keep its card on screen. The policy says what to do;
+  /// nothing here knows which mode asked.
+  ///
+  /// Returns the status the row holds afterwards, because the caller cannot
+  /// work it out: `isLapse` is what the user did, and two policies turn the same
+  /// lapse into different rows.
+  Future<StudyQueueItemStatus> _applyQueueEffect({
     required StudySession session,
     required StudyQueueItem item,
     required StudyMode mode,
@@ -276,100 +294,94 @@ mixin _StudyQueueOperations on _StudyQueueLayoutOperations {
   }) async {
     final answers = item.answersInSession + 1;
 
-    Future<void> writeItem(StudyQueueItemsCompanion values) =>
-        _dao.updateQueueItem(
-          sessionId: session.id,
-          mode: mode.dbValue,
-          round: round,
-          cardId: item.cardId,
-          values: values,
-        );
-
-    if (!action.isLapse) {
-      return writeItem(
-        StudyQueueItemsCompanion(
-          status: const Value<String>('completed'),
-          answersInSession: Value<int>(answers),
-        ),
+    Future<StudyQueueItemStatus> writeItem(
+      StudyQueueItemsCompanion values, {
+      required StudyQueueItemStatus status,
+    }) async {
+      await _dao.updateQueueItem(
+        sessionId: session.id,
+        mode: mode.dbValue,
+        round: round,
+        cardId: item.cardId,
+        values: values,
       );
+
+      return status;
     }
 
-    // **`match` keeps its row `pending`, and only `match` does** (BR-118).
-    // Its board lays out the whole round at once, so a card answered wrongly is
-    // still *on screen* — and every other mode's effect, `completed` plus an
-    // enrolment, took it off. `completedCardIds` is what the board reads to
-    // empty a slot, so the tile the user got wrong disappeared the moment the
-    // screen refreshed and there was nothing left to try again.
-    //
-    // The enrolment into round N+1 still happens, and for the same reason it
-    // happens everywhere else: BR-116 says a card that failed at any point in a
-    // round belongs to that round's failed set even if it is later answered
-    // correctly to clear the board. `enrolInRound` inserts-or-ignores, so
-    // failing the same card four times enrols it once.
-    if (mode == StudyMode.match) {
-      await _dao.enrolInRound(
-        StudyQueueItemsCompanion.insert(
-          sessionId: session.id,
-          mode: mode.dbValue,
-          round: Value<int>(round + 1),
-          cardId: item.cardId,
-          position: _random.nextInt(1 << 30),
-          status: 'pending',
-        ),
-      );
-
-      return writeItem(
-        StudyQueueItemsCompanion(answersInSession: Value<int>(answers)),
-      );
-    }
-
-    if (mode.usesRounds) {
-      // **Enrolled at the moment of failure, not when the round ends.** BR-116
-      // says a card that failed at any point in a round belongs to the failed
-      // set even if it is later answered correctly to clear the board — and the
-      // only way a later correct answer cannot erase that is for the record to
-      // already exist. Round N+1's membership *is* the record.
-      //
-      // Its position is drawn at random rather than taken from failure order,
-      // which is what gives the next round its own shuffle (BR-117).
-      await _dao.enrolInRound(
-        StudyQueueItemsCompanion.insert(
-          sessionId: session.id,
-          mode: mode.dbValue,
-          round: Value<int>(round + 1),
-          cardId: item.cardId,
-          position: _random.nextInt(1 << 30),
-          status: 'pending',
-        ),
-      );
-
-      return writeItem(
-        StudyQueueItemsCompanion(
-          status: const Value<String>('completed'),
-          answersInSession: Value<int>(answers),
-        ),
-      );
-    }
-
-    // `self_assess`: the card stays in this one queue and comes back after at
-    // least three others (BR-26) — or leaves and gets flagged once it has used
-    // its three turns (BR-104).
-    if (answers >= kSelfAssessRelearningCeiling) {
-      await _dao.flagCard(item.cardId);
-
-      return writeItem(
-        StudyQueueItemsCompanion(
-          status: const Value<String>('completed'),
-          answersInSession: Value<int>(answers),
-        ),
-      );
-    }
-
-    return writeItem(
+    Future<StudyQueueItemStatus> complete() => writeItem(
       StudyQueueItemsCompanion(
+        status: const Value<String>('completed'),
         answersInSession: Value<int>(answers),
-        availableAt: Value<int>(session.cursor + 1 + kSelfAssessComebackGap),
+      ),
+      status: StudyQueueItemStatus.completed,
+    );
+
+    if (!action.isLapse) return complete();
+
+    // **Enrolled at the moment of failure, not when the round ends.** BR-116
+    // says a card that failed at any point in a round belongs to the failed set
+    // even if it is later answered correctly to clear the board — and the only
+    // way a later correct answer cannot erase that is for the record to already
+    // exist. Round N+1's membership *is* the record.
+    //
+    // Its position is drawn at random rather than taken from failure order,
+    // which is what gives the next round its own shuffle (BR-117).
+    // `insertOrIgnore`, so failing the same card four times enrols it once.
+    Future<void> enrolNextRound() => _dao.enrolInRound(
+      StudyQueueItemsCompanion.insert(
+        sessionId: session.id,
+        mode: mode.dbValue,
+        round: Value<int>(round + 1),
+        cardId: item.cardId,
+        position: _random.nextInt(1 << 30),
+        status: 'pending',
       ),
     );
+
+    switch (studyModeHandler(mode)?.lapsePolicy) {
+      case StudyLapsePolicy.retainAndEnrollNextRound:
+        await enrolNextRound();
+
+        // The row stays open: the card is still on the board and still has to
+        // be answered (BR-118).
+        return writeItem(
+          StudyQueueItemsCompanion(answersInSession: Value<int>(answers)),
+          status: StudyQueueItemStatus.pending,
+        );
+
+      case StudyLapsePolicy.completeAndEnrollNextRound:
+        await enrolNextRound();
+
+        return complete();
+
+      case StudyLapsePolicy.spacedRetry:
+        // The card stays in this one queue and comes back after at least three
+        // others (BR-26) — or leaves and gets flagged once it has used its
+        // three turns (BR-104).
+        if (answers >= kSelfAssessRelearningCeiling) {
+          await _dao.flagCard(item.cardId);
+
+          return complete();
+        }
+
+        return writeItem(
+          StudyQueueItemsCompanion(
+            answersInSession: Value<int>(answers),
+            availableAt: Value<int>(
+              session.cursor + 1 + kSelfAssessComebackGap,
+            ),
+          ),
+          status: StudyQueueItemStatus.pending,
+        );
+
+      // `browse` records no answer at all (BR-111), so it never reaches here;
+      // a mode this build does not recognise cannot be run either (BR-107).
+      // Completing the row is the safe reading of both: it is what the row
+      // would have done before any policy existed.
+      case StudyLapsePolicy.noAnswer:
+      case null:
+        return complete();
+    }
   }
 }

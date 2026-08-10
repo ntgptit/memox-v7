@@ -18,7 +18,7 @@ guess.
 
 | | |
 |---|---|
-| Files scanned (`lib/`, hand-written) | 301 |
+| Files scanned (`lib/`, hand-written) | 305 |
 | Colour sites found | 361 |
 | Violations | 0 |
 

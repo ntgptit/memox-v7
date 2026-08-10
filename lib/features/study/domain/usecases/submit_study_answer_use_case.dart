@@ -1,3 +1,4 @@
+import '../models/study_answer_commit_model.dart';
 import '../../../../core/error/failure.dart';
 import '../entities/study_session_entity.dart';
 import '../models/study_action_model.dart';
@@ -26,7 +27,7 @@ class SubmitStudyAnswerUseCase {
 
   final StudyRepository _repository;
 
-  Future<void> call({
+  Future<StudyAnswerCommitModel> call({
     required StudySessionEntity session,
     required String cardId,
     required StudyMode mode,
@@ -78,7 +79,7 @@ class SubmitStudyAnswerUseCase {
     // Passed on every turn, including the `relearning` ones. The repository is
     // what decides they change nothing (BR-78) — it knows whether this is the
     // card's first turn in the session, and this does not.
-    await _repository.submitAnswer(
+    return _repository.submitAnswer(
       sessionId: session.id,
       cardId: cardId,
       mode: mode,

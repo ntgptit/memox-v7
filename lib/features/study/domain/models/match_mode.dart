@@ -1,3 +1,4 @@
+import 'study_lapse_policy_model.dart';
 import 'dart:math';
 
 import 'study_entry_summary_model.dart';
@@ -61,6 +62,9 @@ final class MatchBoard {
 /// Pair the term with its meaning.
 final class MatchModeHandler extends StudyModeHandler {
   const MatchModeHandler();
+
+  @override
+  StudyLapsePolicy get lapsePolicy => StudyLapsePolicy.retainAndEnrollNextRound;
 
   @override
   int capacityFrom(StudyEntrySummaryModel summary) =>

@@ -10,6 +10,7 @@ import 'package:memox/features/study/domain/models/study_queue_item_status_model
 import 'package:memox/features/study/domain/models/study_session_kind_model.dart';
 import 'package:memox/features/study/domain/models/study_turn_model.dart';
 import 'package:memox/features/study/presentation/screens/study_session_screen.dart';
+import 'package:memox/features/study/presentation/widgets/support/study_mode_feedback_widget.dart';
 import 'package:memox/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart';
 
 import '../features/study/domain/support/fake_study_repository.dart';
@@ -335,6 +336,15 @@ void main() {
       await tester.pumpAndSettle();
 
       await matchesReviewGolden('goldens/study_fill_graded_$label.png');
+
+      // **The verdict now outlives the frame it was drawn in.** A graded answer
+      // is held on screen for `AppStudyFeedback.fillWrong` before the session
+      // fetches the next card, and `pumpAndSettle` does not run a
+      // `Future.delayed` out — flutter_test then fails the test for a pending
+      // timer. Running it here is what proves the hold is real rather than
+      // hiding it.
+      await tester.pump(AppStudyFeedback.fillWrong);
+      await tester.pumpAndSettle();
     });
   }
 }

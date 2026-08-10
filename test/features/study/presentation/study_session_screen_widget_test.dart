@@ -18,6 +18,8 @@ import 'package:memox/features/study/domain/models/study_session_status_model.da
 import 'package:memox/features/study/domain/models/study_turn_model.dart';
 import 'package:memox/features/study/presentation/controllers/study_session_controller.dart';
 import 'package:memox/features/study/presentation/screens/study_session_screen.dart';
+import 'package:memox/features/study/presentation/widgets/sections/study_blocked_section_widget.dart';
+import 'package:memox/features/study/presentation/widgets/sections/study_session_frame_section_widget.dart';
 import 'package:memox/features/study/presentation/widgets/support/study_swipe_deck_widget.dart';
 import 'package:memox/shared/widgets/mx_loading_state.dart';
 import 'package:memox/l10n/generated/app_localizations.dart';
@@ -160,20 +162,13 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('a non-browse mode still shows loading while advancing', (
-    tester,
-  ) async {
-    // **The counterpart, and the reason the first fix was too wide.** Keeping
-    // the body for every mode turns advancing into a global interaction lock,
-    // which is wrong for `match`: its board answers several pairs in a row on
-    // one screen and the moment between them is not a moment to freeze. Keeping
-    // the card is `browse` behaviour, asked of `browse` alone.
-    // `fill` on an `eight_box` deck. Two false starts worth recording: `match`
-    // on the `sm2` fixture is refused before it reaches the fetch — `sm2` offers
-    // no board (BR-146) — so the test would have passed without entering the
-    // window it claims to check; and `recall` runs a countdown, so nothing on
-    // that screen ever settles. `fill` is a non-browse eight-box mode with an
-    // algorithm that accepts an answer and no timer.
+  testWidgets('no mode is unmounted to fetch its replacement', (tester) async {
+    // **This test used to assert the opposite, and the opposite was the bug.**
+    // Advancing replaced the whole body with a spinner for every mode but
+    // `browse` — so the answer a person had just given was drawn into a widget
+    // already on its way out, and the verdict each mode had gone to some
+    // trouble to show was never on screen long enough to read. `browse` was
+    // exempted first; the exemption was right and its scope was wrong.
     final repository = await pumpSession(
       tester,
       mode: StudyMode.fill,
@@ -184,33 +179,30 @@ void main() {
     final gate = Completer<void>();
     repository.nextTurnGate = gate;
 
-    // Straight at the controller: `match` advances from a graded answer, and
-    // driving the board to grade one is a different test's subject.
-    unawaited(
-      tester
-                  .element(find.byType(StudySessionScreen))
-                  .findAncestorWidgetOfExactType<ProviderScope>() ==
-              null
-          ? Future<void>.value()
-          : Future<void>.value(),
-    );
     final container = ProviderScope.containerOf(
       tester.element(find.byType(StudySessionScreen)),
     );
-    unawaited(
-      container
-          .read(studySessionControllerProvider('deck-1').notifier)
-          .answer(StudyAction.remembered),
+    final controller = container.read(
+      studySessionControllerProvider('deck-1').notifier,
     );
-    // Plain pumps, never `pumpAndSettle`: the state under test *is* the
-    // loading state, and its spinner animates forever — settling waits for a
-    // screen that has no intention of stopping. Enough frames to get past the
-    // write and into the fetch, where the gate holds it.
+    unawaited(
+      controller
+          .submitAnswer(StudyAction.remembered)
+          .then((_) => controller.advance()),
+    );
+
+    // Plain pumps, never `pumpAndSettle`: the fetch is held open by the gate,
+    // so settling waits for something with no intention of finishing.
     for (var i = 0; i < 6; i++) {
       await tester.pump(const Duration(milliseconds: 16));
     }
 
-    expect(find.byType(MxLoadingState), findsOneWidget);
+    expect(find.byType(MxLoadingState), findsNothing);
+    expect(find.byType(StudySessionFrameSectionWidget), findsOneWidget);
+    // The card itself, not just its chrome: the body is what used to be
+    // replaced, and a frame around a blocked state would satisfy the line
+    // above while showing the user nothing to act on.
+    expect(find.byType(StudyBlockedSectionWidget), findsNothing);
 
     gate.complete();
     for (var i = 0; i < 6; i++) {

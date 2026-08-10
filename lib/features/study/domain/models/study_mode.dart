@@ -3,6 +3,7 @@ import 'guess_mode.dart';
 import 'match_mode.dart';
 import 'recall_mode.dart';
 import 'study_entry_summary_model.dart';
+import 'study_lapse_policy_model.dart';
 import 'study_turn_model.dart';
 
 /// One of the six ways a card can be put in front of the user (BR-108).
@@ -115,6 +116,15 @@ abstract class StudyModeHandler {
   /// Handlers are stateless values, so every one of them is a `const`.
   const StudyModeHandler();
 
+  /// What a wrong answer does to the queue row it was given on.
+  ///
+  /// **The rule that used to be an `if` in the repository.** A mode is the only
+  /// thing that knows whether its card is still on screen after a wrong answer,
+  /// and that is the whole difference between the four policies. Stating it
+  /// here keeps the data layer executing a policy rather than recognising a
+  /// mode, which is the second exhaustive branch AD-18 does not allow.
+  StudyLapsePolicy get lapsePolicy;
+
   /// How many of the session's due cards this mode can actually take (BR-154).
   ///
   /// Zero means offered but unable to build content — disabled on the chooser
@@ -162,8 +172,18 @@ abstract class StudyModeHandler {
 ///
 /// `recall` has the same capacity and its own handler, because the clock is a
 /// rule even though the card set is not.
+///
+/// **The policy is a constructor argument, and that is the one place the two
+/// differ.** `browse` records nothing and `self_assess` retries on a gap, so
+/// they are no longer identical — but they are identical in everything a
+/// *handler* does, and splitting the class would duplicate the capacity rule to
+/// carry one enum value. The resolver below is where the difference is stated,
+/// which is where every other per-mode difference is stated too.
 final class PlainModeHandler extends StudyModeHandler {
-  const PlainModeHandler();
+  const PlainModeHandler(this.lapsePolicy);
+
+  @override
+  final StudyLapsePolicy lapsePolicy;
 
   @override
   int capacityFrom(StudyEntrySummaryModel summary) => summary.dueCount;
@@ -181,8 +201,8 @@ final class PlainModeHandler extends StudyModeHandler {
 /// cannot make. [StudyMode.unknown] has none by construction: a mode this build
 /// does not recognise cannot be run, only read.
 StudyModeHandler? studyModeHandler(StudyMode mode) => switch (mode) {
-  StudyMode.browse => const PlainModeHandler(),
-  StudyMode.selfAssess => const PlainModeHandler(),
+  StudyMode.browse => const PlainModeHandler(StudyLapsePolicy.noAnswer),
+  StudyMode.selfAssess => const PlainModeHandler(StudyLapsePolicy.spacedRetry),
   StudyMode.recall => const RecallModeHandler(),
   StudyMode.match => const MatchModeHandler(),
   StudyMode.guess => const GuessModeHandler(),

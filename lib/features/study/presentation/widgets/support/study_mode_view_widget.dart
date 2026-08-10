@@ -98,20 +98,31 @@ Widget? studyModeView({
     return null;
   }
 
-  final builders = <StudyMode, Widget? Function()>{
+  // **A `switch`, and this is the presentation half of AD-18's one dispatch.**
+  // It was a `Map<StudyMode, Widget? Function()>` on the reading that AD-18
+  // allows exactly one exhaustive branch — but what AD-18 forbids is a second
+  // branch in the *controller or the use case*, the layers that decide what a
+  // turn does. This one decides what a turn looks like, which is the one
+  // question `domain/` may not answer at all: it may not import Flutter.
+  //
+  // The map cost what a map always costs here — a mode left out of it built
+  // nothing and said nothing, at runtime, on the screen. A missing arm below is
+  // a compile error, which is the whole reason the domain resolver is a switch
+  // too.
+  final builder = switch (mode) {
     // **`browse` is the one mode that can be walked backwards** (BR-155). Every
     // other mode takes an answer from the card on screen, so putting an
     // already-answered card there would offer to grade what the session has
     // graded — which is why the swipe wraps this entry alone rather than the
     // body as a whole.
-    StudyMode.browse: () => StudySwipeDeckWidget(
+    StudyMode.browse => () => StudySwipeDeckWidget(
       cardKey: (state.viewedCard ?? turn.card).id,
       canGoBack: state.canLookBack,
       // **`isAdvancing` too, not just `isSubmitting`.** Stepping forward from
       // the live turn writes the browse progress and *then* pulls the next
       // turn; only the write was covered, so the whole fetch was a window in
       // which a second swipe counted.
-      isLocked: state.isSubmitting || state.isAdvancing,
+      isLocked: state.isBusy,
       onForward: onContinue,
       onBack: onLookBack,
       child: StudyCardFaceSectionWidget(
@@ -126,19 +137,19 @@ Widget? studyModeView({
         // The front is the term and the back is its meaning (BR-08), so the
         // front leads and the back explains.
         emphasis: StudyFaceEmphasis.backSupportingFront,
-        isLocked: state.isSubmitting || state.isAdvancing,
+        isLocked: state.isBusy,
       ),
     ),
-    StudyMode.selfAssess: () => StudyCardFaceSectionWidget(
+    StudyMode.selfAssess => () => StudyCardFaceSectionWidget(
       turn: turn,
       actions: state.actions,
       onAction: onAnswer,
       onContinue: onContinue,
-      isLocked: state.isSubmitting,
+      isLocked: state.isBusy,
     ),
     // The board belongs to the round, so its seed does not include the card —
     // mixing one in would re-deal between two cards of the same round.
-    StudyMode.match: () => _matchView(
+    StudyMode.match => () => _matchView(
       turn: turn,
       state: state,
       random: Random(_seedFor(state, turn: turn, isPerCard: false)),
@@ -148,14 +159,14 @@ Widget? studyModeView({
     // The five options belong to one question, so this one does. BR-127 wants
     // the two permutations independent, and different seeds are what makes them
     // so.
-    StudyMode.guess: () => _guessView(
+    StudyMode.guess => () => _guessView(
       turn: turn,
       state: state,
       onAnswer: onAnswer,
       random: Random(_seedFor(state, turn: turn, isPerCard: true)),
       onResolved: onResolved,
     ),
-    StudyMode.recall: () => RecallTimerSectionWidget(
+    StudyMode.recall => () => RecallTimerSectionWidget(
       turn: turn,
       initialRemaining: turn.item.remainingMs == null
           ? null
@@ -175,9 +186,9 @@ Widget? studyModeView({
             : null,
       ),
     ),
-    StudyMode.fill: () => FillAnswerSectionWidget(
+    StudyMode.fill => () => FillAnswerSectionWidget(
       turn: turn,
-      isLocked: state.isSubmitting,
+      isLocked: state.isBusy,
       onGraded: (outcome) => _send(
         onAnswer,
         _actionFor(state, isCorrect: outcome.isCorrect),
@@ -185,9 +196,11 @@ Widget? studyModeView({
         hasUsedHint: outcome.hasUsedHint,
       ),
     ),
+    // A mode this build does not recognise cannot be run, only read (BR-107).
+    StudyMode.unknown => null,
   };
 
-  return builders[mode]?.call();
+  return builder?.call();
 }
 
 /// Maps a graded outcome to an action, by asking the algorithm (BR-107).
@@ -350,7 +363,7 @@ Widget? _guessView({
   return GuessQuestionSectionWidget(
     onResolved: onResolved,
     question: question,
-    isLocked: state.isSubmitting,
+    isLocked: state.isBusy,
     onChosen: (option) => _send(
       onAnswer,
       _actionFor(state, isCorrect: question.isCorrect(option)),

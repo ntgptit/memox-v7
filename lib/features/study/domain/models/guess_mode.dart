@@ -1,3 +1,4 @@
+import 'study_lapse_policy_model.dart';
 import 'dart:math';
 
 import 'study_entry_summary_model.dart';
@@ -31,6 +32,10 @@ final class GuessQuestion {
 /// Pick the meaning out of five.
 final class GuessModeHandler extends StudyModeHandler {
   const GuessModeHandler();
+
+  @override
+  StudyLapsePolicy get lapsePolicy =>
+      StudyLapsePolicy.completeAndEnrollNextRound;
 
   @override
   int capacityFrom(StudyEntrySummaryModel summary) =>

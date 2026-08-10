@@ -1792,3 +1792,88 @@ mới — `advanceMatchBoard` — còn phần ghi là chính `answer` với hai 
 (`cardId` quay lại, `shouldAdvance` mới), và `_pullTurn` là nhánh chứ không phải
 đuôi bắt buộc. Lý do tên thứ bảy được nhận ghi ngay trong CQS test, cạnh lý do
 của `browseStep` và `pause`.
+
+### Lifecycle dùng chung cho năm mode — ghi, đọc được, rồi mới chuyển
+
+Vòng Match trước để lộ một thứ lớn hơn Match: **`answer()` gộp hai việc**, ghi
+đáp án và tải lượt kế tiếp. Gộp như vậy thì mọi feedback đã viết cho `guess`,
+`recall` và `fill` đều không bao giờ đọc được — fetch bắt đầu ngay khi write trả
+về, thân màn bị thay bằng spinner, và ô vừa xanh/đỏ được vẽ vào một widget đang
+trên đường bị tháo. Sửa riêng cho Match sẽ đẻ tiếp `submitGuessAttempt()`,
+`advanceRecall()`…
+
+**Bốn tầng, mỗi tầng một câu hỏi:**
+
+| tầng | trả lời |
+|---|---|
+| `studyModeHandler(mode)` | Strategy của mode: capacity, `canTake`, `canRunOn`, **`lapsePolicy`** |
+| `SubmitStudyAnswerUseCase` | luồng chung mười bước, trả `StudyAnswerCommitModel` |
+| repository | thi hành policy trong một transaction, trả status đã ghi |
+| `studyModeView` + `studyModeFeedback(mode)` | thân màn của mode, và ngân sách đọc của nó |
+
+**`if (mode == StudyMode.match)` trong data layer đã bỏ.** Mode khai báo
+`StudyLapsePolicy` — `noAnswer` / `spacedRetry` / `completeAndEnrollNextRound` /
+`retainAndEnrollNextRound` — và repository chỉ thi hành. Tầng dữ liệu không còn
+nhận diện mode nào, tức không còn nhánh exhaustive thứ hai mà AD-18 cấm.
+
+**Receipt, không suy luận.** `submitAnswer` trả `StudyAnswerCommitModel`
+(`cardId`, `round`, `currentItemStatus`). Controller không được suy status từ
+`action.isLapse`: cùng một lapse, `match` giữ hàng `pending` còn ba mode kia đóng
+nó — đoán sai thì một ô trên bàn biến mất trong khi database vẫn giữ nó mở.
+
+**`submitAnswer` + `advance(minimumVisible:)` thay cho `answer(shouldAdvance:)`.**
+`advance` giữ nguyên `state.turn` trong lúc đọc, chạy song song việc đọc và việc
+đợi, rồi mới đổi — fetch chậm không tốn thêm, fetch nhanh vẫn phải chờ hết nhịp.
+Tập lệnh của controller vẫn bảy tên; `command_query_separation_test.dart` ghi lý
+do tách ngay cạnh lý do của `browseStep` và `pause`.
+
+**Không mode nào bị tháo để tải thứ thay thế** (BR-158). Test cũ
+`a non-browse mode still shows loading while advancing` khẳng định đúng hành vi
+sai — nay là `no mode is unmounted to fetch its replacement`.
+
+**`isBusy` thay cho `isSubmitting` ở mọi `isLocked`** trừ `match`: thẻ ở lại màn
+suốt cả write lẫn fetch, nên cả hai khoảng đều phải từ chối input. Trước đó chỉ
+write được che, và cả quãng fetch là một cửa sổ cho cú chạm thứ hai. `match` giữ
+`isLocked: false` vì bàn có bốn cặp khác đang chờ; nó tự khoá ở cuối bàn.
+
+**Ngân sách đọc là component constant, không phải token motion** (§8.12):
+guess 700/1200, recall 1800/2200, fill 800/2200, match giữ nhịp ở ô 500/700.
+Sai luôn dài hơn đúng — một câu đúng cần được nhận ra, một câu sai cần được đọc,
+tìm và hiểu.
+
+**Dọn kèm:** `_nextTurn` trong controller ghép hai use case — đúng hình dạng
+AD-13 cấm (hai read là hai snapshot). Thành `GetNextStageTurnUseCase`, một read
+trả cả mode lẫn turn. Builder map của presentation thành `switch` exhaustive:
+thiếu một khoá là màn trống lúc chạy, thiếu một nhánh là lỗi biên dịch.
+
+#### Device suite bắt hai lỗi mà 1910 test trên host không thấy
+
+Chạy trên emulator lần đầu: **5/8**. Ba lần chạy nữa mới về 8/8, và không lần
+nào là "sửa test cho xanh".
+
+**1. Khoảnh khắc đầu tiên của mọi phiên học là một màn báo lỗi.** Bỏ nhánh
+`isAdvancing` khỏi `_body` mà không viết nhánh thay thế cho ca "chưa có turn
+nào": lần `advance()` đầu tiên không có turn để giữ, `studyModeView` trả null, và
+màn hình đọc null thành *"stage này không dựng được nội dung"* →
+`StudyBlockedSectionWidget`. Comment tự viết đã nói trạng thái tải toàn thân chỉ
+còn một ca — rồi không viết cái ca đó. Host không thấy vì lần đọc đầu tiên xong
+ngay trong frame mở phiên; chỉ độ trễ thật mới lộ ra.
+
+Test màn hình nay khẳng định thêm **không có `StudyBlockedSectionWidget`**: một
+cái frame bọc quanh màn blocked vẫn thoả assertion "không có `MxLoadingState`"
+trong khi người dùng chẳng có gì để thao tác.
+
+**2. Robot giả định "có bàn nghĩa là có ô để chạm".** Từ BR-158, cặp cuối cleared
+và bàn **vẫn mounted** trong lúc phiên tải bàn kế tiếp — `firstWhere` ném
+`Bad state: No element` và không nói gì hữu ích. Bàn không còn ô mở là bàn *đã
+xong*, không phải bàn kẹt: đợi, đúng như người dùng làm.
+
+**Và một thứ không phải lỗi app: robot không đợi hết nhịp.** Nhịp giữ là một
+`Future.delayed` — nó không schedule frame nào, nên `pumpAndSettle` đi xuyên qua.
+Robot trả lời thẻ kế tiếp trong lúc màn hình còn hiện kết quả thẻ trước, đốt lượt,
+chạm trần 60 lượt. `_holdFeedback` đọc `studyModeFeedback` — cùng nguồn với app,
+nên ngân sách đọc đổi thì robot đi theo thay vì lệch âm thầm.
+
+Thông báo lỗi của `studyUntilFinished` nay nêu **stage nào** đang trên màn. Lần
+chạy thứ hai chỉ nói "không có gì để trả lời"; lần thứ ba nói "stage was none —
+no mode body was built", và đó là câu chỉ thẳng vào lỗi 1.

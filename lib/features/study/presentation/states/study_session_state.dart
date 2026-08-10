@@ -109,6 +109,15 @@ abstract class StudySessionState with _$StudySessionState {
       turn?.progress.completedCardIds ?? const <String>[];
 
   /// Whether there is an earlier card to go back to (BR-155).
+  /// Whether a write or a fetch is in flight.
+  ///
+  /// **One name, because a mode has one question to ask.** The card stays on
+  /// screen for both — the write so the answer can be read, the fetch so
+  /// nothing flashes — and during both, input has to be refused. Asking only
+  /// about `isSubmitting` left the whole fetch open, which is a window a second
+  /// tap fits inside.
+  bool get isBusy => isSubmitting || isAdvancing;
+
   bool get canLookBack => browseLookBack < seenCardIds.length;
 
   /// Whether the card on screen is one already seen rather than the live turn.

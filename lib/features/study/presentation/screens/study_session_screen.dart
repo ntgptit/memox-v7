@@ -8,7 +8,9 @@ import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_empty_state.dart';
 import '../../../../shared/widgets/mx_error_state.dart';
 import '../../../../shared/widgets/mx_loading_state.dart';
+import '../../domain/models/study_action_model.dart';
 import '../../domain/models/study_mode.dart';
+import '../../domain/models/study_outcome_reason_model.dart';
 import '../../domain/models/study_session_kind_model.dart';
 import '../../domain/models/study_turn_model.dart';
 import '../controllers/study_session_controller.dart';
@@ -17,6 +19,7 @@ import '../../domain/models/recall_mode.dart';
 import '../widgets/sections/study_blocked_section_widget.dart';
 import '../widgets/sections/study_session_frame_section_widget.dart';
 import '../widgets/sections/study_summary_section_widget.dart';
+import '../widgets/support/study_mode_feedback_widget.dart';
 import '../widgets/support/study_labels_widget.dart';
 import '../widgets/support/study_mode_view_widget.dart';
 
@@ -165,6 +168,36 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
     );
   }
 
+  /// Writes the answer, holds it on screen, then moves on.
+  ///
+  /// **Three steps, one order, every mode.** A failed write returns no receipt
+  /// and stops here: nothing is held and nothing advances, so a card whose
+  /// answer was refused stays exactly where it was rather than sliding past as
+  /// though it had been recorded.
+  Future<void> _submitThenAdvance(
+    StudyAction action, {
+    required StudyMode mode,
+    StudyOutcomeReason? outcomeReason,
+    int? comparisonVersion,
+    bool? hasUsedHint,
+  }) async {
+    final commit = await _controller.submitAnswer(
+      action,
+      outcomeReason: outcomeReason,
+      comparisonVersion: comparisonVersion,
+      usedHint: hasUsedHint,
+    );
+    if (commit == null || !mounted) return;
+
+    // Read from the action rather than from the receipt: what the user got
+    // right is what decides how long they need to look at it, while the receipt
+    // says what happened to the row (BR-118) — two different questions that
+    // agree in four modes out of five.
+    await _controller.advance(
+      minimumVisible: studyModeFeedback(mode).of(isCorrect: !action.isLapse),
+    );
+  }
+
   /// Which turn the body has finished asking about, if any (§8.11).
   ///
   /// **A key rather than a flag.** A boolean has to be cleared when the card
@@ -205,15 +238,6 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
     return context.studyModeHintResolved(mode);
   }
 
-  /// Whether this frame is `browse` mid-step with a card still worth drawing.
-  ///
-  /// The turn stays in state for the whole write-then-fetch, so there is
-  /// something to keep; the swipe and the reader actions are locked for the
-  /// same window in `studyModeView`, so keeping it cannot mean acting on it
-  /// twice (BR-155).
-  bool _browseKeepsItsCard(StudySessionState state) =>
-      state.turn != null && state.session?.currentMode == StudyMode.browse;
-
   Widget _body(StudySessionState state) {
     if (state.error != null) {
       return MxErrorState(
@@ -224,20 +248,22 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
     if (state.isOpening) {
       return MxLoadingState(semanticsLabel: context.l10n.appTitle);
     }
-    // **`browse` keeps its card while the next turn is fetched; nothing else
-    // does.** Advancing used to replace the whole body, so every step of
-    // `browse` threw the card away, drew a spinner and drew the next card — a
-    // full layout shift between two cards that differ by one string.
+    // **Nothing is unmounted to fetch its replacement.** Advancing used to
+    // replace the whole body, so every mode threw its card away, drew a
+    // spinner and drew the next card — a full layout shift between two cards
+    // that differ by one string, and, worse, the frame in which the answer the
+    // user had just given was supposed to be readable. `browse` was exempted
+    // from it first; the exemption was the right behaviour and the wrong
+    // scope. The turn now stays in state for the whole fetch, and every mode
+    // locks its own input while `isAdvancing` is true.
     //
-    // **And the first fix was too wide.** Keeping the body for *every* mode
-    // makes advancing a global interaction lock, which is wrong for `match`:
-    // its board answers several pairs in a row on one screen, and the moment
-    // between them is not a moment to freeze. This is `browse` behaviour —
-    // one card, one swipe, one fetch — so it is asked of `browse` alone, by
-    // mode and not by scheduler.
-    if (state.isAdvancing && !_browseKeepsItsCard(state)) {
-      return MxLoadingState(semanticsLabel: context.l10n.appTitle);
-    }
+    // A full-body loading state is left with one case, and it is the case
+    // below: a session whose first read has not come back. Removing the
+    // `isAdvancing` branch without adding this one turned the first moment of
+    // every session into `StudyBlockedSectionWidget` — `studyModeView` returns
+    // null with no turn, and the screen reads that as "this stage cannot build
+    // content". Only the device suite saw it: on a host the first read resolves
+    // inside the same frame the session opens in.
     if (state.isFinished) {
       // No summary means the read failed, not that nothing happened. The
       // session has ended either way, and inventing counts for it would be
@@ -254,7 +280,7 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
     }
 
     final session = state.session;
-    if (session == null) {
+    if (session == null || state.turn == null) {
       return MxLoadingState(semanticsLabel: context.l10n.appTitle);
     }
 
@@ -280,13 +306,20 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
           isRevealed: isRevealed,
         ),
       ),
+      // **Write, let the answer be read, then move.** Every mode goes through
+      // the same three steps; what differs is only how long the middle one
+      // lasts, and that is `studyModeFeedback` rather than anything here. Until
+      // this existed the fetch began the instant the write returned, so the
+      // green option, the revealed back and the graded field were all drawn
+      // into a widget already on its way out.
       onAnswer: (action, {outcomeReason, comparisonVersion, hasUsedHint}) =>
           unawaited(
-            _controller.answer(
+            _submitThenAdvance(
               action,
+              mode: session.currentMode,
               outcomeReason: outcomeReason,
               comparisonVersion: comparisonVersion,
-              usedHint: hasUsedHint,
+              hasUsedHint: hasUsedHint,
             ),
           ),
       // `browse` grades nothing, so moving on is the whole interaction
@@ -294,14 +327,13 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
       // browsed or stepping forward along the trail the user has swiped back
       // along — a screen that decided it would be the thing marking a card
       // browsed twice (BR-155).
-      // **`match` writes without fetching, and fetches once per board.** Every
-      // other mode's answer ends in a reload, which is right for a screen
-      // showing one card and wrong for a board showing five: it unmounted the
-      // board between pairs and put a spinner where the feedback should have
-      // been.
+      //
+      // **`match` is the one mode that answers more than once per turn**, so it
+      // writes and advances on its own schedule: a pair per write, and the
+      // fetch only after the last pair of a board.
       onMatchAttempt: ({required cardId, required action}) =>
-          _controller.answer(action, cardId: cardId, shouldAdvance: false),
-      onMatchBoardComplete: _controller.advanceMatchBoard,
+          _controller.submitAnswer(action, cardId: cardId),
+      onMatchBoardComplete: _controller.advance,
       onContinue: () =>
           unawaited(_controller.browseStep(StudyBrowseStep.forward)),
       onLookBack: () => unawaited(_controller.browseStep(StudyBrowseStep.back)),

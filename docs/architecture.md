@@ -1240,6 +1240,52 @@ thi về kiểu. Thêm mode thứ sáu thì compiler chỉ thẳng vào mọi ch
 use case, và nó được cưỡng chế bằng rule của `code-verification-guard-v2`, không
 bằng code review.
 
+### Hai resolver, và vì sao đó không phải hai `switch` rải rác
+
+Câu cấm của quyết định này là **switch thứ hai trong controller hay use case** —
+tầng quyết định *một lượt làm gì*. Nó không cấm presentation có resolver riêng,
+và presentation buộc phải có: `domain/` không được import Flutter, nên không
+nơi nào trong domain trả về được một widget.
+
+Nên có đúng hai điểm phân giải, mỗi tầng một:
+
+| resolver | ở đâu | trả về |
+|---|---|---|
+| `studyModeHandler(mode)` | `domain/models/study_mode.dart` | Strategy: capacity, `canTake`, `canRunOn`, `lapsePolicy` |
+| `studyModeView(...)` + `studyModeFeedback(mode)` | `presentation/widgets/support/` | thân màn của mode, và thời lượng hiển thị kết quả của nó |
+
+Controller, use case và repository **không** có nhánh nào theo mode. Cái cuối
+cùng bị bỏ đi là `if (mode == StudyMode.match)` trong queue effect: mode nay
+khai báo `StudyLapsePolicy` và repository chỉ thi hành policy đó, nên tầng dữ
+liệu không còn nhận diện mode nào cả.
+
+Cả hai đều là `switch` chứ không phải `Map`: thiếu một nhánh là lỗi biên dịch,
+còn thiếu một khoá là một màn hình trống lúc chạy. Bản `Map` của presentation đã
+tồn tại đúng đến khi nó phải trả thêm một thứ cho mỗi mode.
+
+### Lifecycle của một lượt là của luồng chung, không của mode
+
+Ghi và tải là **hai** thao tác, và gộp chúng làm một là thứ khiến mọi feedback
+vừa viết ra không bao giờ đọc được:
+
+```text
+mode driver → controller.submitAnswer()   → use case → repository transaction
+                                                          ↓ commit receipt
+           ← mode hiển thị kết quả ← controller cập nhật progress tại chỗ
+                     ↓
+           controller.advance(minimumVisible:)  ← đọc lượt kế tiếp *dưới* feedback
+```
+
+`submitAnswer` không tải gì; `advance(minimumVisible:)` giữ nguyên lượt đang
+hiển thị, chạy song song việc đọc và việc đợi, rồi mới đổi. Mode quyết định
+`minimumVisible` qua `studyModeFeedback`; nó không được gọi repository, không
+tự cập nhật tiến độ bền vững và không giữ scheduler logic.
+
+Trạng thái hàng queue sau transaction về theo `StudyAnswerCommitModel`. Controller
+**không** được suy ra từ `action.isLapse`: cùng một lapse, `match` giữ hàng
+`pending` còn ba mode chấm điểm còn lại đóng nó — và đoán sai thì một ô trên bàn
+biến mất trong khi database vẫn giữ nó mở.
+
 ### Ranh giới
 
 - `domain/modes/*_mode.dart` là Dart thuần: không repository, không `DateTime.now()`,

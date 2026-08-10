@@ -152,11 +152,11 @@ void main() {
     const sessionAllowed = <String>{
       'build',
       'start',
-      'answer',
+      'submitAnswer',
+      'advance',
       'pause',
       'leave',
       'browseStep',
-      'advanceMatchBoard',
     };
     final controllers = classesUnder('/controllers/');
     var inputCount = 0;
@@ -196,15 +196,14 @@ void main() {
       // would put one value behind two — the split this test's own reasoning
       // rejects above.
       //
-      // `advanceMatchBoard` joined them last, and it is the only one that is
-      // not a way to change the session: it takes no action and writes
-      // nothing. It exists because a board's *write* and a board's *fetch*
-      // happen at different moments — the write when a pair lands (BR-25), the
-      // fetch after the last pair's beat has been seen. The write half is
-      // `answer(..., shouldAdvance: false)`, so this is not a second way to
-      // answer; folding the two together would mean fetching on every pair,
-      // which is the reload that unmounted the board being played five times a
-      // board.
+      // `answer` became `submitAnswer` **plus** `advance`, and that is one
+      // responsibility split rather than two added. Writing an answer and
+      // fetching what comes next happen at different moments for every mode:
+      // the write when the user acts (BR-25), the fetch once the answer has
+      // been on screen long enough to read. While they were one call the fetch
+      // began the instant the write returned, so every mode's verdict was
+      // drawn into a widget already being unmounted — and `match`, which
+      // answers five pairs on one board, paid for five reloads a board.
       //
       // The set stays closed. An eighth name is a new responsibility and
       // belongs somewhere else.
