@@ -14,7 +14,9 @@ without re-checking.
       genuinely blocked the task, that is a design conversation, not a workaround.
 
 ## Code
-- [ ] `dart format` produces no changes.
+- [ ] `dart format` produces no changes — run `check_format.sh`, not
+      `dart format .`, which walks into the worktrees under `.claude/` and
+      formats other branches' source (and crashes on their build output).
 - [ ] `flutter analyze` is clean — zero errors *and* zero warnings.
 - [ ] No new dependency without a stated reason.
 - [ ] Layer boundaries hold (`check_architecture.sh` passes).
