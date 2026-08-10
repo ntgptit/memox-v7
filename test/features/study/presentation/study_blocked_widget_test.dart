@@ -14,6 +14,7 @@ import 'package:memox/features/study/presentation/widgets/sections/match_board_s
 import 'package:memox/features/study/presentation/widgets/sections/study_blocked_section_widget.dart';
 import 'package:memox/features/study/presentation/widgets/support/study_mode_view_widget.dart';
 
+import 'support/study_commit_stub.dart';
 import 'support/study_widget_harness.dart';
 
 /// BR-124's blocking case, seen from the widget layer.
@@ -70,8 +71,17 @@ void main() {
         schedulerType: SchedulerType.eightBox,
       ),
       onAnswer:
-          (action, {cardId, outcomeReason, comparisonVersion, hasUsedHint}) =>
-              answers.add(action),
+          (
+            action, {
+            cardId,
+            outcomeReason,
+            comparisonVersion,
+            hasUsedHint,
+          }) async {
+            answers.add(action);
+
+            return commitOf('c');
+          },
       onContinue: () {},
       onLookBack: () {},
     );
@@ -102,8 +112,17 @@ void main() {
         schedulerType: SchedulerType.unknown,
       ),
       onAnswer:
-          (action, {cardId, outcomeReason, comparisonVersion, hasUsedHint}) =>
-              answers.add(action),
+          (
+            action, {
+            cardId,
+            outcomeReason,
+            comparisonVersion,
+            hasUsedHint,
+          }) async {
+            answers.add(action);
+
+            return commitOf('c');
+          },
       onContinue: () {},
       onLookBack: () {},
     );
@@ -125,7 +144,13 @@ void main() {
         schedulerType: SchedulerType.eightBox,
       ),
       onAnswer:
-          (action, {cardId, outcomeReason, comparisonVersion, hasUsedHint}) {},
+          (
+            action, {
+            cardId,
+            outcomeReason,
+            comparisonVersion,
+            hasUsedHint,
+          }) async => commitOf('c'),
       onContinue: () {},
       onLookBack: () {},
     );
@@ -207,7 +232,7 @@ void main() {
               outcomeReason,
               comparisonVersion,
               hasUsedHint,
-            }) {},
+            }) async => commitOf('c'),
         onContinue: () {},
         onLookBack: () {},
       )!;
@@ -238,7 +263,7 @@ void main() {
               outcomeReason,
               comparisonVersion,
               hasUsedHint,
-            }) {},
+            }) async => commitOf('c'),
         onContinue: () {},
         onLookBack: () {},
       )!;

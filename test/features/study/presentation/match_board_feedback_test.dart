@@ -11,6 +11,7 @@ import 'package:memox/features/study/domain/models/study_turn_model.dart';
 import 'package:memox/features/study/presentation/widgets/items/match_tile_widget.dart';
 import 'package:memox/features/study/presentation/widgets/sections/match_board_section_widget.dart';
 
+import 'support/study_commit_stub.dart';
 import 'support/study_widget_harness.dart';
 
 /// What the board says back when a pair lands, right or wrong (§8.8).
@@ -39,7 +40,7 @@ void main() {
     wrapForTest(
       MatchBoardSectionWidget(
         board: board,
-        onPairAttempt: (_, {required isCorrect}) async {},
+        onPairAttempt: (_, {required isCorrect}) async => commitOf('c'),
       ),
     ),
   );
@@ -196,7 +197,8 @@ void main() {
         wrapForTest(
           MatchBoardSectionWidget(
             board: board,
-            onPairAttempt: (_, {required isCorrect}) => gate.future,
+            onPairAttempt: (term, {required isCorrect}) =>
+                gate.future.then((_) => commitOf(term.cardId)),
           ),
         ),
       );
@@ -227,7 +229,7 @@ void main() {
         wrapForTest(
           MatchBoardSectionWidget(
             board: board,
-            onPairAttempt: (_, {required isCorrect}) async {},
+            onPairAttempt: (_, {required isCorrect}) async => commitOf('c'),
             onBoardComplete: () async => fetches++,
           ),
         ),

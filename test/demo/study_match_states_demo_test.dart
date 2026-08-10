@@ -7,7 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_durations.dart';
 import 'package:memox/features/study/domain/models/match_mode.dart';
+import 'package:memox/features/study/domain/models/study_answer_commit_model.dart';
 import 'package:memox/features/study/domain/models/study_mode.dart';
+import 'package:memox/features/study/domain/models/study_queue_item_status_model.dart';
 import 'package:memox/features/study/domain/models/study_session_kind_model.dart';
 import 'package:memox/features/study/domain/models/study_turn_model.dart';
 import 'package:memox/features/study/presentation/widgets/items/match_tile_widget.dart';
@@ -123,7 +125,17 @@ void main() {
         child: MatchBoardSectionWidget(
           board: board,
           pairedCardIds: paired,
-          onPairAttempt: (_, {required isCorrect}) async {},
+          // **A committed receipt, because the board now waits for one**
+          // (BR-157). A no-op returning null would photograph a board that
+          // refused every pair, which is a real state but not this one.
+          onPairAttempt: (term, {required isCorrect}) async =>
+              StudyAnswerCommitModel(
+                cardId: term.cardId,
+                round: 1,
+                currentItemStatus: isCorrect
+                    ? StudyQueueItemStatus.completed
+                    : StudyQueueItemStatus.pending,
+              ),
         ),
       ),
     ),

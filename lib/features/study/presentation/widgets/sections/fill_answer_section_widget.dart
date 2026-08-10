@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_elevation.dart';
@@ -10,6 +12,7 @@ import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import 'recall_timer_section_widget.dart';
 import '../../../../../shared/widgets/mx_text_field.dart';
+import '../../../domain/models/study_answer_commit_model.dart';
 import '../../../domain/models/fill_mode.dart';
 import '../../../domain/models/study_turn_model.dart';
 
@@ -27,6 +30,7 @@ class FillAnswerSectionWidget extends StatefulWidget {
   const FillAnswerSectionWidget({
     required this.turn,
     required this.onGraded,
+    this.onFeedbackShown,
     this.isLocked = false,
     super.key,
   });
@@ -35,7 +39,12 @@ class FillAnswerSectionWidget extends StatefulWidget {
 
   /// Called with the outcome only. The typed string is not a parameter, and
   /// that is the design.
-  final ValueChanged<FillOutcome> onGraded;
+  /// Writes the outcome and hands back what the transaction did (BR-157).
+  final Future<StudyAnswerCommitModel?> Function(FillOutcome) onGraded;
+
+  /// Called once the verdict is on screen; completes when the session has moved
+  /// on (BR-158).
+  final Future<void> Function({required bool isCorrect})? onFeedbackShown;
 
   final bool isLocked;
 
@@ -65,6 +74,7 @@ class _FillAnswerSectionWidgetState extends State<FillAnswerSectionWidget> {
     _input.clear();
     _hasUsedHint = false;
     _isGraded = false;
+    _isSubmitting = false;
     _wasCorrect = null;
   }
 
@@ -74,8 +84,15 @@ class _FillAnswerSectionWidgetState extends State<FillAnswerSectionWidget> {
     super.dispose();
   }
 
+  /// The submission being written, before there is anything to show for it.
+  ///
+  /// **Separate from [_isGraded], which is what paints the verdict** (BR-157).
+  /// They were one field, so Check turned the field green on the tap and left
+  /// it green when the write was refused.
+  bool _isSubmitting = false;
+
   void _submit() {
-    if (widget.isLocked || _isGraded) return;
+    if (widget.isLocked || _isGraded || _isSubmitting) return;
 
     final outcome = _handler.grade(
       input: _input.text,
@@ -87,11 +104,32 @@ class _FillAnswerSectionWidgetState extends State<FillAnswerSectionWidget> {
     // wrong would bury a card the user never actually got wrong.
     if (outcome == null) return;
 
+    setState(() => _isSubmitting = true);
+    unawaited(_grade(outcome));
+  }
+
+  /// Writes the outcome, then shows the verdict — in that order (BR-157).
+  ///
+  /// A null receipt leaves the field as it was, still typed in and still
+  /// submittable: a graded screen the session has no answer for would ask the
+  /// user to move on from a turn that never happened.
+  Future<void> _grade(FillOutcome outcome) async {
+    final commit = await widget.onGraded(outcome);
+    if (!mounted) return;
+
+    if (commit == null) {
+      setState(() => _isSubmitting = false);
+
+      return;
+    }
+
     setState(() {
+      _isSubmitting = false;
       _isGraded = true;
       _wasCorrect = outcome.isCorrect;
     });
-    widget.onGraded(outcome);
+
+    await widget.onFeedbackShown?.call(isCorrect: outcome.isCorrect);
   }
 
   @override

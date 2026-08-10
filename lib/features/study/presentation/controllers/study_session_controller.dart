@@ -5,6 +5,7 @@ import '../../../../core/error/failure.dart';
 import '../../../../core/time/clock_provider.dart';
 import '../../../../core/time/time_zone_provider.dart';
 import '../../di/study_repository_provider.dart';
+import '../../domain/entities/study_session_entity.dart';
 import '../../domain/models/study_answer_commit_model.dart';
 import '../../domain/models/study_action_model.dart';
 import '../../domain/models/study_mode.dart';
@@ -13,7 +14,6 @@ import '../../domain/models/study_session_kind_model.dart';
 import '../../domain/models/study_session_status_model.dart';
 import '../../domain/usecases/end_study_session_use_case.dart';
 import '../../domain/usecases/get_next_stage_turn_use_case.dart';
-import '../../domain/usecases/get_session_summary_use_case.dart';
 import '../../domain/usecases/mark_browsed_use_case.dart';
 import '../../domain/usecases/resume_study_session_use_case.dart';
 import '../../domain/usecases/save_turn_progress_use_case.dart';
@@ -26,13 +26,12 @@ part 'study_session_controller.g.dart';
 /// Drives one study session.
 ///
 /// **It holds no rule.** Which card comes next, whether a forgotten one comes
-/// back, when a round ends — all of that is decided inside a transaction and
-/// read back through `nextTurn`. A controller that kept its own queue would be
-/// keeping a second copy of the rules, and the copy would be the one the user
-/// sees.
+/// back, when a round ends — all decided inside a transaction and read back
+/// through `nextTurn`. A controller with its own queue would keep a second copy
+/// of the rules, and the copy is the one the user sees.
 ///
-/// The one thing it does own is what nothing below it can see: that a person can
-/// tap twice before the first write returns.
+/// What it owns is what nothing below it can see: that a person can tap twice
+/// before the first write returns, and can leave inside one.
 @riverpod
 class StudySessionController extends _$StudySessionController {
   @override
@@ -41,10 +40,9 @@ class StudySessionController extends _$StudySessionController {
   /// Opens a session and pulls the first turn.
   ///
   /// **[shouldResume] picks up the open one instead of opening a new one**
-  /// (BR-103). It is a parameter rather than a second method because everything
-  /// after the first line is identical — both end with a session, a scheduler
-  /// and a card set — and a `resume()` that duplicated the rest is a second copy
-  /// of the failure handling, which is where the two would drift.
+  /// (BR-103). A parameter rather than a second method: everything after the
+  /// first line is identical, and a `resume()` duplicating the rest would be a
+  /// second copy of the failure handling, which is where the two would drift.
   Future<void> start({
     required StudySessionKind kind,
     StudyMode? reviewMode,
@@ -80,31 +78,36 @@ class StudySessionController extends _$StudySessionController {
     }
   }
 
+  /// Which run of the session the writes in flight belong to.
+  ///
+  /// **`ref.mounted` is not enough.** A write and a read both take long enough
+  /// for the user to press ✕ inside them, and the notifier is still mounted
+  /// afterwards — so a stale future set a turn or an error on a session that had
+  /// already ended, putting a card back on screen behind Back to deck. Nothing
+  /// is cancelled: the transaction still commits, because BR-25 wants it to.
+  /// What changes is whether its result may reach the screen.
+  int _epoch = 0;
+
+  /// Whether an operation begun at [epoch] may still write to state.
+  bool _isCurrent(int epoch) => ref.mounted && epoch == _epoch;
+
   /// Records an answer. **Writes only — it fetches nothing.**
   ///
-  /// **The double-tap guard is the first line, and it has to be.** BR-25 and
-  /// BR-126 both say one question yields at most one turn, and a write takes
-  /// long enough for a second tap to land inside it. It reads
-  /// [StudySessionState.isSubmitting] rather than a private flag so the buttons
-  /// and the guard cannot disagree.
+  /// **The double-tap guard is the first line, and it has to be** (BR-25,
+  /// BR-126): a write takes long enough for a second tap to land inside it.
   ///
-  /// **Writing and advancing used to be one call, and that is what made the
-  /// feedback unreachable.** [advance] re-reads the session, the queue, the card
-  /// and the progress and swaps the body while it does; running it the moment a
-  /// write landed meant every mode's verdict — the green option, the revealed
-  /// back, the ticked pair — was drawn into a widget that was already being
-  /// unmounted. Now the mode decides how long its answer stays on screen and
-  /// calls [advance] itself.
+  /// **Writing and advancing used to be one call, and that is what made every
+  /// mode's feedback unreachable** — [advance] swaps the body, so running it the
+  /// moment a write landed drew each verdict into a widget already on its way
+  /// out. The mode now decides how long its answer stays up and calls [advance].
   ///
   /// **The status comes back from the transaction, never from the action.**
   /// `isLapse` is what the user did; what happened to the row is the mode's
-  /// [StudyLapsePolicy], and two modes turn the same lapse into different rows.
-  /// A `completed` receipt clears the card from the round's progress in memory,
-  /// which is what lets `match` answer five pairs on one board without a read
-  /// between them. A `pending` one moves nothing (BR-118).
-  ///
-  /// [cardId] names the card when it is not the one the queue is serving —
-  /// `match` alone, whose board lays out the whole round.
+  /// [StudyLapsePolicy]. A `completed` receipt clears the card from the round's
+  /// progress in memory — which is what lets `match` answer five pairs on one
+  /// board without a read between them — and a `pending` one moves nothing
+  /// (BR-118). [cardId] names the card when it is not the one the queue is
+  /// serving: `match` alone, whose board lays out the whole round.
   Future<StudyAnswerCommitModel?> submitAnswer(
     StudyAction action, {
     String? cardId,
@@ -118,6 +121,7 @@ class StudySessionController extends _$StudySessionController {
     final turn = state.turn;
     if (session == null || turn == null) return null;
 
+    final epoch = _epoch;
     state = state.copyWith(isSubmitting: true, error: null);
 
     try {
@@ -136,7 +140,10 @@ class StudySessionController extends _$StudySessionController {
             usedHint: usedHint,
           );
 
-      if (!ref.mounted) return null;
+      // A session that ended while this was open owns the terminal state. The
+      // receipt is still returned — the row *was* written — and the caller's own
+      // `mounted` check decides what to draw.
+      if (!_isCurrent(epoch)) return commit;
 
       state = state.copyWith(
         isSubmitting: false,
@@ -147,7 +154,7 @@ class StudySessionController extends _$StudySessionController {
 
       return commit;
     } on Object catch (error) {
-      await _writeFailed(error);
+      await _writeFailed(error, epoch: epoch);
 
       return null;
     }
@@ -156,21 +163,20 @@ class StudySessionController extends _$StudySessionController {
   /// Moves to the next turn, board, round or stage — **without taking the
   /// current one off screen first**.
   ///
-  /// [minimumVisible] is how long the answer the user just gave has to stay
-  /// readable. The read and the wait run together, so a slow fetch costs
-  /// nothing extra and a fast one still leaves the verdict up: the swap happens
-  /// when both are done. `Duration.zero` for a mode with nothing to read, which
-  /// is `browse`.
+  /// [minimumVisible] is how long the answer just given has to stay readable.
+  /// The read and the wait run together, so a slow fetch costs nothing extra and
+  /// a fast one still leaves the verdict up: the swap happens when both are
+  /// done. `Duration.zero` for a mode with nothing to read.
   ///
   /// **The turn stays in state throughout.** It used to be cleared into a
-  /// loading state, so every mode flashed a spinner between two cards that
-  /// differ by one string — and the mode that suffered most was the one whose
-  /// board the user was still looking at. A full-body loading state is now for
-  /// one case only: a session that has no turn yet.
+  /// loading state, so every mode flashed a spinner between two cards differing
+  /// by one string. A full-body loading state is now for one case: a session
+  /// that has no turn yet.
   Future<void> advance({Duration minimumVisible = Duration.zero}) async {
     final session = state.session;
-    if (session == null || state.isAdvancing) return;
+    if (session == null || state.isAdvancing || state.isFinished) return;
 
+    final epoch = _epoch;
     state = state.copyWith(isAdvancing: true);
 
     try {
@@ -186,7 +192,9 @@ class StudySessionController extends _$StudySessionController {
       final (mode, turn) = await read;
       await held;
 
-      if (!ref.mounted) return;
+      // Two awaits, and the user can leave inside either. Nothing below may run
+      // for a session that has ended.
+      if (!_isCurrent(epoch)) return;
 
       if (mode == null) {
         state = state.copyWith(
@@ -195,21 +203,22 @@ class StudySessionController extends _$StudySessionController {
           turn: null,
         );
 
-        return _loadSummary();
+        return;
       }
 
       state = state.copyWith(
         session: session.copyWith(currentMode: mode),
         turn: turn,
         isAdvancing: false,
-        // **A new card arrives at the front of the trail** (BR-155). The offset
-        // counts backwards from the live turn, so one left over from the last
-        // card would put a card already walked past on screen in place of the
-        // one just moved to — and nothing would say so.
+        // **A new card arrives at the front of the trail** (BR-155): the offset
+        // counts backwards from the live turn, so one left over would put a card
+        // already walked past on screen in place of the one just moved to.
         browseLookBack: 0,
       );
     } on Object catch (error) {
-      if (!ref.mounted) return;
+      // A stale failure is not this session's failure: writing it would put an
+      // error over a summary the user is already reading.
+      if (!_isCurrent(epoch)) return;
       state = state.copyWith(isAdvancing: false, error: error);
     }
   }
@@ -218,9 +227,10 @@ class StudySessionController extends _$StudySessionController {
   /// and only one ends the session. A [ConflictFailure] is recoverable. Anything
   /// else is BR-85's `persistence_error`, so the session ends rather than taking
   /// answers it cannot store; turns already written stay written (BR-86).
-  Future<void> _writeFailed(Object error) async {
+  Future<void> _writeFailed(Object error, {required int epoch}) async {
+    if (!_isCurrent(epoch)) return;
+
     if (error is ConflictFailure) {
-      if (!ref.mounted) return;
       state = state.copyWith(isSubmitting: false, error: error);
 
       return;
@@ -228,43 +238,42 @@ class StudySessionController extends _$StudySessionController {
 
     await _failSession();
 
-    if (!ref.mounted) return;
+    if (!_isCurrent(epoch)) return;
     state = state.copyWith(isSubmitting: false, isFinished: true, error: error);
-    await _loadSummary();
   }
 
   /// Moves `browse` one card along the round, either way (BR-155).
   ///
   /// **One name, because from the user's side it is one thing** — the same
-  /// swipe with the sign flipped, and the same trail walked in two directions.
-  /// Two methods would also put the "am I looking at history?" test in the
-  /// screen, and the screen would then be what decides whether a card gets
-  /// marked browsed, which is how a card already answered gets answered twice.
+  /// swipe with the sign flipped. Two would put the "am I looking at history?"
+  /// test in the screen, and the screen would then be what decides whether a
+  /// card gets marked browsed, which is how one gets answered twice.
   ///
-  /// **Going back writes nothing and moves nothing.** The card stays
-  /// `completed`, the session's `cursor` stays where it is, and stepping
-  /// forward again neither re-records the card nor advances past it a second
-  /// time — the queue is not consulted at all, because looking is not
-  /// answering. Only stepping forward *from the live turn* touches it.
+  /// **Going back writes nothing and moves nothing:** the card stays
+  /// `completed`, `cursor` stays put, and stepping forward again neither
+  /// re-records it nor advances past it twice. Only stepping forward *from the
+  /// live turn* touches the queue at all.
   ///
-  /// `browse` only. Every other mode takes an answer from the card on screen,
-  /// so putting an already-answered card there would offer to grade something
-  /// the session has already graded (BR-126).
+  /// `browse` only: every other mode answers the card on screen, so putting an
+  /// already-answered card there would offer to grade what the session has
+  /// already graded (BR-126).
   Future<void> browseStep(StudyBrowseStep step) {
     // **Every guard, before either branch.** They used to sit under the forward
-    // shortcut, which is the one branch that writes: a second swipe arriving
-    // while the first was still fetching went straight to `answer()` and marked
-    // the same card browsed twice. `isAdvancing` covers exactly that window —
-    // `submitAnswer` clears `isSubmitting` before `advance` sets `isAdvancing`,
-    // so guarding only the first leaves the second wide open (BR-155: stepping
-    // forward again writes no second turn and moves no cursor twice).
+    // shortcut — the one branch that writes — so a second swipe arriving during
+    // the fetch marked the same card browsed twice. `isSubmitting` is cleared
+    // before `isAdvancing` is set, so guarding only the first leaves that window
+    // wide open (BR-155).
     if (state.session?.currentMode != StudyMode.browse) {
       return Future<void>.value();
     }
     if (state.isSubmitting || state.isAdvancing) return Future<void>.value();
 
+    final session = state.session;
+    final turn = state.turn;
+    if (session == null || turn == null) return Future<void>.value();
+
     if (step == StudyBrowseStep.forward && !state.isLookingBack) {
-      return _markBrowsed();
+      return _markBrowsed(session, turn.cardId);
     }
 
     final next = step == StudyBrowseStep.back
@@ -272,8 +281,8 @@ class StudySessionController extends _$StudySessionController {
         : state.browseLookBack - 1;
 
     // Off either end is a step there is nowhere to take. Clamping silently
-    // would make the gesture read as accepted; returning leaves the card where
-    // it is, which is what "refused" looks like.
+    // would read as accepted; returning leaves the card where it is, which is
+    // what "refused" looks like.
     if (next < 0 || next > state.seenCardIds.length) {
       return Future<void>.value();
     }
@@ -283,64 +292,31 @@ class StudySessionController extends _$StudySessionController {
     return Future<void>.value();
   }
 
-  /// Moves past the live `browse` card: mark it seen, then fetch the next.
-  ///
-  /// **Not [answer], which is where this used to go.** `browse` produces no
-  /// action (BR-111), so it had to invent one for a grading method to discard.
-  Future<void> _markBrowsed() async {
-    final session = state.session;
-    final turn = state.turn;
-    if (session == null || turn == null) return;
-
+  /// Marks the live `browse` card seen, then fetches the next. Not
+  /// `submitAnswer`: `browse` produces no action (BR-111), so going through
+  /// there meant inventing one for a grading method to discard.
+  Future<void> _markBrowsed(StudySessionEntity session, String cardId) async {
+    final epoch = _epoch;
     state = state.copyWith(isSubmitting: true, error: null);
 
     try {
       await MarkBrowsedUseCase(
         ref.read(studyRepositoryProvider),
-      ).call(sessionId: session.id, cardId: turn.cardId);
+      ).call(sessionId: session.id, cardId: cardId);
 
-      if (!ref.mounted) return;
+      if (!_isCurrent(epoch)) return;
       state = state.copyWith(isSubmitting: false);
 
       await advance();
     } on Object catch (error) {
-      await _writeFailed(error);
+      await _writeFailed(error, epoch: epoch);
     }
   }
 
-  /// Reads what the session came to, once it has ended.
-  ///
-  /// **Read back rather than accumulated.** A tally would be a second copy of
-  /// numbers the database holds, and the two disagree the moment a write is
-  /// refused — the tally counts the tap, the
-  /// table counts the row. It also reads `status` from the same statement, so a
-  /// session that ended by failing cannot be summarised as one that finished.
-  ///
-  /// A failure here leaves [StudySessionState.summary] null on purpose: the
-  /// session has genuinely ended, and refusing to say so because the epilogue
-  /// could not be read would be the worse answer.
-  Future<void> _loadSummary() async {
-    final session = state.session;
-    if (session == null) return;
-
-    try {
-      final summary = await GetSessionSummaryUseCase(
-        ref.read(studyRepositoryProvider),
-      ).call(sessionId: session.id, schedulerType: state.schedulerType);
-
-      if (!ref.mounted) return;
-      state = state.copyWith(summary: summary);
-    } on Object catch (_) {
-      // Narrow by intent, not by type: every failure here has the same right
-      // answer, which is to show the end of the session without counts.
-    }
-  }
-
-  /// Ends the session as `failed`/`persistence_error` (BR-85).
-  ///
-  /// Best effort by necessity: the reason it is being called is that a write
-  /// just failed, so this one may fail too. Letting that propagate would replace
-  /// the real error with a second one and tell the user nothing.
+  /// Ends the session as `failed`/`persistence_error` (BR-85), best effort:
+  /// the reason it is called is that a write just failed, so this one may fail
+  /// too — and letting that propagate would replace the real error with a
+  /// second one that tells the user nothing.
   Future<void> _failSession() async {
     final session = state.session;
     if (session == null) return;
@@ -353,18 +329,16 @@ class StudySessionController extends _$StudySessionController {
         now: ref.read(clockProvider)(),
       );
     } on Object catch (_) {
-      // Deliberately swallowed, and narrowly: the caller is already reporting a
-      // failure, and a failure to record the failure is not a second thing to
-      // show somebody.
+      // Swallowed narrowly: the caller is already reporting a failure, and a
+      // failure to record it is not a second thing to show somebody.
     }
   }
 
   /// Stores what is left of the turn in flight (BR-133).
   ///
   /// **The counterpart of [leave], not another command.** `leave` ends the
-  /// session; this suspends a turn so the app being taken away does not cost
-  /// the user the seconds they had left. Nothing about the domain changes — the
-  /// queue row keeps its status and its round.
+  /// session; this suspends a turn so the app being taken away does not cost the
+  /// seconds the user had left. The queue row keeps its status and its round.
   Future<void> pause({int? remainingMs, bool isRevealed = false}) async {
     final session = state.session;
     final turn = state.turn;
@@ -384,6 +358,13 @@ class StudySessionController extends _$StudySessionController {
     final session = state.session;
     if (session == null || state.isFinished) return;
 
+    // **Before the await, not after.** Ending the session is itself a trip to
+    // the database, and a read or a write in flight lands inside it. Moving the
+    // epoch on here makes every one stale, so the terminal state is this
+    // method's alone.
+    _epoch += 1;
+    state = state.copyWith(isAdvancing: false, isSubmitting: false);
+
     await EndStudySessionUseCase(ref.read(studyRepositoryProvider)).call(
       sessionId: session.id,
       status: StudySessionStatus.abandoned,
@@ -395,6 +376,5 @@ class StudySessionController extends _$StudySessionController {
 
     if (!ref.mounted) return;
     state = state.copyWith(isFinished: true, turn: null);
-    await _loadSummary();
   }
 }

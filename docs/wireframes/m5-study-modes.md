@@ -703,7 +703,7 @@ không dồn* — nên §4 giữ nguyên tinh thần, chỉ đổi cách thực 
 | đúng | ô sang `success` + ✓ trong `AppMatchTile.successFlash` = **500ms**, rồi **nội dung tan**, ô ở lại rỗng |
 | ô rỗng | không vẽ nền (thủng thật), viền `borderSubtle` pha 45% trên nền trang |
 | sai | **cả hai** ô sang `danger` + ✕ trong `AppMatchTile.wrongHold` = **700ms**, rồi tự về idle |
-| cả hai | không khoá thao tác — chạm ô kế tiếp cắt màu ngay, và một cặp đang ghi DB không đóng băng bàn |
+| cả hai | màu **không** khoá thao tác: chạm ô kế tiếp cắt màu ngay. Riêng lúc transaction của một cặp chưa commit thì bàn không nhận cặp mới — xem dưới |
 
 Cái ô rỗng còn làm được một việc nữa: nó là **bằng chứng tiến độ**. Nhìn bàn là
 biết còn mấy cặp, không cần đọc dòng ngữ cảnh, và không tốn một màu nào.
@@ -795,6 +795,20 @@ nhịp. Trạng thái tải toàn thân nay chỉ còn cho một ca: phiên chư
 
 **Kết quả chỉ được vẽ sau khi commit** (BR-157). Ghi hỏng thì không có feedback
 và không chuyển lượt — thẻ ở nguyên chỗ cũ thay vì trôi qua như thể đã được ghi.
+
+**Khoá là của transaction, không phải của nhịp giữ màu.** Persistence hiện là
+single-flight: controller nhận một submission một lúc và từ chối cái thứ hai
+bằng receipt `null`. Nên trong lúc một cặp **chưa commit**, bàn không nhận cặp
+mới — bàn tự giữ trạng thái đó chứ không đợi parent rebuild, vì parent chưa biết
+có write nào bắt đầu cho tới khi widget nói. Khoá này dài đúng bằng transaction.
+
+Sau khi commit thì **màu không khoá gì cả**: cặp vừa xử lý giữ 500/700ms của nó,
+còn người dùng ghép cặp tiếp theo ngay được, và chạm ô mới cắt màu đỏ sớm như
+trước. Câu cũ ở đây — *"một cặp đang ghi DB không đóng băng bàn"* — nói ngược:
+đúng lúc ghi mới là lúc bàn đóng, còn đúng lúc giữ màu thì bàn mở.
+
+Bản ghi "20 transaction nhưng chỉ 4 lần chuyển bàn" (§8.8b) không đổi: khoá
+single-flight kéo dài đúng một transaction mỗi cặp, và BR-25 vẫn được giữ.
 
 ### 8.9 Màn `guess` theo handout layout 390×780
 

@@ -166,6 +166,9 @@ base class FakeStudyRepository implements StudyRepository {
     double? nextEaseFactor,
     int? nextIntervalDays,
   }) async {
+    final gate = submitGate;
+    if (gate != null) await gate.future;
+
     answers.add((
       cardId: cardId,
       mode: mode,
@@ -329,6 +332,10 @@ base class FakeStudyRepository implements StudyRepository {
   }
 
   StudyTurnModel? nextTurn_;
+
+  /// Holds every write open, so a test can stand between the tap and the
+  /// commit — the window BR-157 is about.
+  Completer<void>? submitGate;
 
   /// How many times a turn has been read.
   ///

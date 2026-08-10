@@ -1,3 +1,4 @@
+import 'package:memox/features/study/domain/models/study_answer_commit_model.dart';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import 'package:memox/features/study/domain/models/study_turn_model.dart';
 import 'package:memox/features/study/presentation/widgets/items/match_tile_widget.dart';
 import 'package:memox/features/study/presentation/widgets/sections/match_board_section_widget.dart';
 
+import 'support/study_commit_stub.dart';
 import 'support/study_widget_harness.dart';
 
 /// How the board is **laid out**, and what that layout must not change.
@@ -48,7 +50,10 @@ void main() {
     required Size region,
     double textScale = 1,
     Set<String> pairedCardIds = const <String>{},
-    Future<void> Function(MatchTile term, {required bool isCorrect})?
+    Future<StudyAnswerCommitModel?> Function(
+      MatchTile term, {
+      required bool isCorrect,
+    })?
     onPairAttempt,
   }) => MediaQuery(
     data: MediaQueryData(textScaler: TextScaler.linear(textScale)),
@@ -59,7 +64,8 @@ void main() {
         child: MatchBoardSectionWidget(
           board: board,
           pairedCardIds: pairedCardIds,
-          onPairAttempt: onPairAttempt ?? (_, {required isCorrect}) async {},
+          onPairAttempt:
+              onPairAttempt ?? (_, {required isCorrect}) async => commitOf('c'),
         ),
       ),
     ),
@@ -105,8 +111,11 @@ void main() {
         tester,
         boardIn(
           region: region,
-          onPairAttempt: (term, {required isCorrect}) async =>
-              attempts.add((term.cardId, isCorrect)),
+          onPairAttempt: (term, {required isCorrect}) async {
+            attempts.add((term.cardId, isCorrect));
+
+            return commitOf(term.cardId);
+          },
         ),
       );
 
@@ -138,8 +147,11 @@ void main() {
       tester,
       boardIn(
         region: region,
-        onPairAttempt: (term, {required isCorrect}) async =>
-            attempts.add(term.cardId),
+        onPairAttempt: (term, {required isCorrect}) async {
+          attempts.add(term.cardId);
+
+          return commitOf(term.cardId);
+        },
       ),
     );
 
@@ -162,8 +174,11 @@ void main() {
       tester,
       boardIn(
         region: region,
-        onPairAttempt: (term, {required isCorrect}) async =>
-            attempts.add(term.cardId),
+        onPairAttempt: (term, {required isCorrect}) async {
+          attempts.add(term.cardId);
+
+          return commitOf(term.cardId);
+        },
       ),
     );
 
@@ -187,8 +202,11 @@ void main() {
       tester,
       boardIn(
         region: region,
-        onPairAttempt: (term, {required isCorrect}) async =>
-            attempts.add((term.cardId, isCorrect)),
+        onPairAttempt: (term, {required isCorrect}) async {
+          attempts.add((term.cardId, isCorrect));
+
+          return commitOf(term.cardId);
+        },
       ),
     );
 
