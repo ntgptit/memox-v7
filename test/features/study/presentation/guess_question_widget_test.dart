@@ -8,6 +8,7 @@ import 'package:memox/features/study/domain/models/study_turn_model.dart';
 import 'package:memox/features/study/presentation/widgets/items/guess_option_item_widget.dart';
 import 'package:memox/features/study/presentation/widgets/sections/guess_question_section_widget.dart';
 
+import 'support/study_commit_stub.dart';
 import 'support/study_widget_harness.dart';
 
 /// One term, five meanings, and what the screen looks like once one is picked.
@@ -38,7 +39,10 @@ void main() {
     testWidgets('renders exactly five options (BR-121)', (tester) async {
       await tester.pumpWidget(
         wrapForTest(
-          GuessQuestionSectionWidget(question: question, onChosen: (_) {}),
+          GuessQuestionSectionWidget(
+            question: question,
+            onChosen: (_) async => commitOf('c'),
+          ),
           isScrollable: false,
         ),
       );
@@ -57,7 +61,11 @@ void main() {
         wrapForTest(
           GuessQuestionSectionWidget(
             question: question,
-            onChosen: (option) => chosen.add(option.cardId),
+            onChosen: (option) async {
+              chosen.add(option.cardId);
+
+              return commitOf('c');
+            },
           ),
           isScrollable: false,
         ),
@@ -80,7 +88,11 @@ void main() {
         wrapForTest(
           GuessQuestionSectionWidget(
             question: question,
-            onChosen: (option) => chosen.add(option.cardId),
+            onChosen: (option) async {
+              chosen.add(option.cardId);
+
+              return commitOf('c');
+            },
           ),
           isScrollable: false,
         ),
@@ -103,7 +115,11 @@ void main() {
         wrapForTest(
           GuessQuestionSectionWidget(
             question: q,
-            onChosen: (option) => chosen.add(option.cardId),
+            onChosen: (option) async {
+              chosen.add(option.cardId);
+
+              return commitOf('c');
+            },
           ),
           isScrollable: false,
         ),
@@ -135,7 +151,7 @@ void main() {
         wrapForTest(
           GuessQuestionSectionWidget(
             question: question,
-            onChosen: (_) {},
+            onChosen: (_) async => commitOf('c'),
             onResolved: () => resolved++,
           ),
           isScrollable: false,
@@ -187,7 +203,10 @@ void main() {
       // and not what was right.
       await tester.pumpWidget(
         wrapForTest(
-          GuessQuestionSectionWidget(question: questionOf(), onChosen: (_) {}),
+          GuessQuestionSectionWidget(
+            question: questionOf(),
+            onChosen: (_) async => commitOf('c'),
+          ),
           isScrollable: false,
         ),
       );
@@ -213,7 +232,11 @@ void main() {
         wrapForTest(
           GuessQuestionSectionWidget(
             question: questionOf(),
-            onChosen: (option) => chosen.add(option.cardId),
+            onChosen: (option) async {
+              chosen.add(option.cardId);
+
+              return commitOf('c');
+            },
           ),
           isScrollable: false,
         ),
@@ -238,7 +261,10 @@ void main() {
       // `reports the option by identity` above.
       await tester.pumpWidget(
         wrapForTest(
-          GuessQuestionSectionWidget(question: questionOf(), onChosen: (_) {}),
+          GuessQuestionSectionWidget(
+            question: questionOf(),
+            onChosen: (_) async => commitOf('c'),
+          ),
           isScrollable: false,
         ),
       );

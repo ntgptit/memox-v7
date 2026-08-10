@@ -7,6 +7,7 @@ import 'package:memox/features/study/domain/models/study_queue_item_status_model
 import 'package:memox/features/study/domain/models/study_turn_model.dart';
 import 'package:memox/features/study/presentation/widgets/sections/fill_answer_section_widget.dart';
 
+import 'support/study_commit_stub.dart';
 import 'support/study_widget_harness.dart';
 
 /// Typing the answer, and what happens to it afterwards — which is nothing
@@ -52,7 +53,14 @@ void main() {
       final graded = <FillOutcome>[];
       await tester.pumpWidget(
         wrapForTest(
-          FillAnswerSectionWidget(turn: turnOf('c1'), onGraded: graded.add),
+          FillAnswerSectionWidget(
+            turn: turnOf('c1'),
+            onGraded: (outcome) async {
+              graded.add(outcome);
+
+              return commitOf('c');
+            },
+          ),
           isScrollable: false,
         ),
       );
@@ -70,7 +78,14 @@ void main() {
       final graded = <FillOutcome>[];
       await tester.pumpWidget(
         wrapForTest(
-          FillAnswerSectionWidget(turn: turnOf('c1'), onGraded: graded.add),
+          FillAnswerSectionWidget(
+            turn: turnOf('c1'),
+            onGraded: (outcome) async {
+              graded.add(outcome);
+
+              return commitOf('c');
+            },
+          ),
           isScrollable: false,
         ),
       );
@@ -89,7 +104,14 @@ void main() {
       final graded = <FillOutcome>[];
       await tester.pumpWidget(
         wrapForTest(
-          FillAnswerSectionWidget(turn: turnOf('c1'), onGraded: graded.add),
+          FillAnswerSectionWidget(
+            turn: turnOf('c1'),
+            onGraded: (outcome) async {
+              graded.add(outcome);
+
+              return commitOf('c');
+            },
+          ),
           isScrollable: false,
         ),
       );
@@ -108,7 +130,14 @@ void main() {
       final graded = <FillOutcome>[];
       await tester.pumpWidget(
         wrapForTest(
-          FillAnswerSectionWidget(turn: turnOf('c1'), onGraded: graded.add),
+          FillAnswerSectionWidget(
+            turn: turnOf('c1'),
+            onGraded: (outcome) async {
+              graded.add(outcome);
+
+              return commitOf('c');
+            },
+          ),
           isScrollable: false,
         ),
       );
@@ -130,7 +159,11 @@ void main() {
         wrapForTest(
           FillAnswerSectionWidget(
             turn: turnOf('c1', hint: 'starts with c'),
-            onGraded: graded.add,
+            onGraded: (outcome) async {
+              graded.add(outcome);
+
+              return commitOf('c');
+            },
           ),
           isScrollable: false,
         ),
@@ -154,7 +187,7 @@ void main() {
         wrapForTest(
           FillAnswerSectionWidget(
             turn: turnOf('c1', hint: 'h'),
-            onGraded: (_) {},
+            onGraded: (_) async => commitOf('c'),
           ),
           isScrollable: false,
         ),
@@ -167,7 +200,7 @@ void main() {
         wrapForTest(
           FillAnswerSectionWidget(
             turn: turnOf('c2', hint: 'h'),
-            onGraded: (_) {},
+            onGraded: (_) async => commitOf('c'),
           ),
           isScrollable: false,
         ),
@@ -189,7 +222,10 @@ void main() {
       // either. The card is what is shown.
       await tester.pumpWidget(
         wrapForTest(
-          FillAnswerSectionWidget(turn: turnOf('c1'), onGraded: (_) {}),
+          FillAnswerSectionWidget(
+            turn: turnOf('c1'),
+            onGraded: (_) async => commitOf('c'),
+          ),
           isScrollable: false,
         ),
       );
@@ -217,7 +253,10 @@ void main() {
       // showing it to somebody who got it right reads as a correction.
       await tester.pumpWidget(
         wrapForTest(
-          FillAnswerSectionWidget(turn: turnOf('c1'), onGraded: (_) {}),
+          FillAnswerSectionWidget(
+            turn: turnOf('c1'),
+            onGraded: (_) async => commitOf('c'),
+          ),
           isScrollable: false,
         ),
       );

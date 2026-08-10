@@ -8,9 +8,7 @@ import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_empty_state.dart';
 import '../../../../shared/widgets/mx_error_state.dart';
 import '../../../../shared/widgets/mx_loading_state.dart';
-import '../../domain/models/study_action_model.dart';
 import '../../domain/models/study_mode.dart';
-import '../../domain/models/study_outcome_reason_model.dart';
 import '../../domain/models/study_session_kind_model.dart';
 import '../../domain/models/study_turn_model.dart';
 import '../controllers/study_session_controller.dart';
@@ -168,36 +166,6 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
     );
   }
 
-  /// Writes the answer, holds it on screen, then moves on.
-  ///
-  /// **Three steps, one order, every mode.** A failed write returns no receipt
-  /// and stops here: nothing is held and nothing advances, so a card whose
-  /// answer was refused stays exactly where it was rather than sliding past as
-  /// though it had been recorded.
-  Future<void> _submitThenAdvance(
-    StudyAction action, {
-    required StudyMode mode,
-    StudyOutcomeReason? outcomeReason,
-    int? comparisonVersion,
-    bool? hasUsedHint,
-  }) async {
-    final commit = await _controller.submitAnswer(
-      action,
-      outcomeReason: outcomeReason,
-      comparisonVersion: comparisonVersion,
-      usedHint: hasUsedHint,
-    );
-    if (commit == null || !mounted) return;
-
-    // Read from the action rather than from the receipt: what the user got
-    // right is what decides how long they need to look at it, while the receipt
-    // says what happened to the row (BR-118) — two different questions that
-    // agree in four modes out of five.
-    await _controller.advance(
-      minimumVisible: studyModeFeedback(mode).of(isCorrect: !action.isLapse),
-    );
-  }
-
   /// Which turn the body has finished asking about, if any (§8.11).
   ///
   /// **A key rather than a flag.** A boolean has to be cleared when the card
@@ -306,22 +274,25 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
           isRevealed: isRevealed,
         ),
       ),
-      // **Write, let the answer be read, then move.** Every mode goes through
-      // the same three steps; what differs is only how long the middle one
-      // lasts, and that is `studyModeFeedback` rather than anything here. Until
-      // this existed the fetch began the instant the write returned, so the
-      // green option, the revealed back and the graded field were all drawn
-      // into a widget already on its way out.
-      onAnswer: (action, {outcomeReason, comparisonVersion, hasUsedHint}) =>
-          unawaited(
-            _submitThenAdvance(
-              action,
-              mode: session.currentMode,
-              outcomeReason: outcomeReason,
-              comparisonVersion: comparisonVersion,
-              hasUsedHint: hasUsedHint,
-            ),
-          ),
+      // **Write, let the mode draw the answer, then move** — three steps, and
+      // the screen owns the first and the last. The middle one belongs to the
+      // mode, because only it knows when its verdict actually became visible:
+      // a hold measured from the tap spends itself on the transaction, and one
+      // measured from the write starts before anything is drawn (BR-157, §8.12).
+      onAnswer:
+          (action, {cardId, outcomeReason, comparisonVersion, hasUsedHint}) =>
+              _controller.submitAnswer(
+                action,
+                cardId: cardId,
+                outcomeReason: outcomeReason,
+                comparisonVersion: comparisonVersion,
+                usedHint: hasUsedHint,
+              ),
+      onFeedbackShown: ({required isCorrect}) => _controller.advance(
+        minimumVisible: studyModeFeedback(
+          session.currentMode,
+        ).of(isCorrect: isCorrect),
+      ),
       // `browse` grades nothing, so moving on is the whole interaction
       // (BR-111). The controller decides whether that means marking the card
       // browsed or stepping forward along the trail the user has swiped back

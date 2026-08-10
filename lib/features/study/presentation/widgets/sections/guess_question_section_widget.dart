@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_elevation.dart';
@@ -7,6 +9,7 @@ import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_card.dart';
+import '../../../domain/models/study_answer_commit_model.dart';
 import '../../../domain/models/guess_mode.dart';
 import '../items/guess_option_item_widget.dart';
 
@@ -30,13 +33,20 @@ class GuessQuestionSectionWidget extends StatefulWidget {
   const GuessQuestionSectionWidget({
     required this.question,
     required this.onChosen,
+    this.onFeedbackShown,
     this.onResolved,
     this.isLocked = false,
     super.key,
   });
 
   final GuessQuestion question;
-  final ValueChanged<GuessOption> onChosen;
+
+  /// Writes the answer and hands back what the transaction did (BR-157).
+  final Future<StudyAnswerCommitModel?> Function(GuessOption) onChosen;
+
+  /// Called once the graded rows are on screen; completes when the session has
+  /// moved on (BR-158).
+  final Future<void> Function({required bool isCorrect})? onFeedbackShown;
 
   /// Fired once, when the question stops asking and starts telling.
   ///
@@ -72,17 +82,52 @@ class _GuessQuestionSectionWidgetState
     // change and the next question cannot be answered at all.
     if (oldWidget.question.term.id != widget.question.term.id) {
       _chosenCardId = null;
+      _isSubmitting = false;
     }
   }
 
-  bool get _canChoose => !widget.isLocked && _chosenCardId == null;
+  /// The tap being written, before there is anything to show for it.
+  ///
+  /// **Separate from [_chosenCardId], which is what paints the verdict.** They
+  /// were one field, so the green row appeared on the tap and stayed there even
+  /// when the write was refused — BR-157 exists for exactly that. This one only
+  /// closes the question to further taps.
+  bool _isSubmitting = false;
+
+  bool get _canChoose =>
+      !widget.isLocked && !_isSubmitting && _chosenCardId == null;
 
   void _choose(GuessOption option) {
     if (!_canChoose) return;
 
-    setState(() => _chosenCardId = option.cardId);
-    widget.onChosen(option);
+    setState(() => _isSubmitting = true);
+    unawaited(_grade(option));
+  }
+
+  /// Writes the choice, then shows what it was worth — in that order (BR-157).
+  ///
+  /// A null receipt is a write that did not happen, so the question goes back to
+  /// accepting a tap: refusing one *and* showing nothing would leave a screen
+  /// that has stopped responding for no stated reason.
+  Future<void> _grade(GuessOption option) async {
+    final commit = await widget.onChosen(option);
+    if (!mounted) return;
+
+    if (commit == null) {
+      setState(() => _isSubmitting = false);
+
+      return;
+    }
+
+    setState(() {
+      _isSubmitting = false;
+      _chosenCardId = option.cardId;
+    });
     widget.onResolved?.call();
+
+    await widget.onFeedbackShown?.call(
+      isCorrect: widget.question.isCorrect(option),
+    );
   }
 
   @override

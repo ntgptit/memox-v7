@@ -7,6 +7,7 @@ import 'package:memox/features/study/domain/models/study_queue_item_status_model
 import 'package:memox/features/study/domain/models/study_turn_model.dart';
 import 'package:memox/features/study/presentation/widgets/sections/recall_timer_section_widget.dart';
 
+import 'support/study_commit_stub.dart';
 import 'support/study_widget_harness.dart';
 
 /// Twenty seconds, one outcome, and what is written down when the app is taken
@@ -67,7 +68,11 @@ void main() {
           RecallTimerSectionWidget(
             turn: turnOf('c1'),
             initialRemaining: const Duration(seconds: 3),
-            onOutcome: outcomes.add,
+            onOutcome: (outcome) async {
+              outcomes.add(outcome);
+
+              return commitOf('c');
+            },
           ),
           isScrollable: false,
         ),
@@ -85,7 +90,14 @@ void main() {
       final outcomes = <RecallOutcome>[];
       await tester.pumpWidget(
         wrapForTest(
-          RecallTimerSectionWidget(turn: turnOf('c1'), onOutcome: outcomes.add),
+          RecallTimerSectionWidget(
+            turn: turnOf('c1'),
+            onOutcome: (value) async {
+              outcomes.add(value);
+
+              return commitOf('c');
+            },
+          ),
           isScrollable: false,
         ),
       );
@@ -111,7 +123,14 @@ void main() {
       final outcomes = <RecallOutcome>[];
       await tester.pumpWidget(
         wrapForTest(
-          RecallTimerSectionWidget(turn: turnOf('c1'), onOutcome: outcomes.add),
+          RecallTimerSectionWidget(
+            turn: turnOf('c1'),
+            onOutcome: (value) async {
+              outcomes.add(value);
+
+              return commitOf('c');
+            },
+          ),
           isScrollable: false,
         ),
       );
@@ -141,7 +160,7 @@ void main() {
           RecallTimerSectionWidget(
             turn: turnOf('c1'),
             initialRemaining: const Duration(seconds: 4),
-            onOutcome: (_) {},
+            onOutcome: (_) async => commitOf('c'),
             onRemainingChanged: reported.add,
           ),
           isScrollable: false,
@@ -167,7 +186,7 @@ void main() {
         wrapForTest(
           RecallTimerSectionWidget(
             turn: turnOf('c1'),
-            onOutcome: (_) {},
+            onOutcome: (_) async => commitOf('c'),
             onRemainingChanged: reported.add,
           ),
           isScrollable: false,
@@ -179,7 +198,7 @@ void main() {
         wrapForTest(
           RecallTimerSectionWidget(
             turn: turnOf('c2'),
-            onOutcome: (_) {},
+            onOutcome: (_) async => commitOf('c'),
             onRemainingChanged: reported.add,
           ),
           isScrollable: false,
@@ -204,7 +223,10 @@ void main() {
       // The integration suite hit it the first time a turn actually timed out.
       await tester.pumpWidget(
         wrapForTest(
-          RecallTimerSectionWidget(turn: turnOf('c1'), onOutcome: (_) {}),
+          RecallTimerSectionWidget(
+            turn: turnOf('c1'),
+            onOutcome: (_) async => commitOf('c'),
+          ),
           isScrollable: false,
         ),
       );
@@ -215,7 +237,7 @@ void main() {
         wrapForTest(
           RecallTimerSectionWidget(
             turn: turnOf('c1', round: 2),
-            onOutcome: (_) {},
+            onOutcome: (_) async => commitOf('c'),
           ),
           isScrollable: false,
         ),
@@ -237,7 +259,10 @@ void main() {
     ) async {
       await tester.pumpWidget(
         wrapForTest(
-          RecallTimerSectionWidget(turn: turnOf('c1'), onOutcome: (_) {}),
+          RecallTimerSectionWidget(
+            turn: turnOf('c1'),
+            onOutcome: (_) async => commitOf('c'),
+          ),
           isScrollable: false,
         ),
       );
@@ -272,7 +297,7 @@ void main() {
         wrapForTest(
           RecallTimerSectionWidget(
             turn: turnOf('c1'),
-            onOutcome: (_) {},
+            onOutcome: (_) async => commitOf('c'),
             onSuspended: ({required remaining, required isRevealed}) =>
                 suspended.add((remaining: remaining, isRevealed: isRevealed)),
           ),
@@ -302,7 +327,7 @@ void main() {
         wrapForTest(
           RecallTimerSectionWidget(
             turn: turnOf('c1'),
-            onOutcome: (_) {},
+            onOutcome: (_) async => commitOf('c'),
             onSuspended: ({required remaining, required isRevealed}) =>
                 suspended.add(remaining),
           ),

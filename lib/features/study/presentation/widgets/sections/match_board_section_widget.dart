@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_spacing.dart';
+import '../../../domain/models/study_answer_commit_model.dart';
 import '../../../domain/models/match_mode.dart';
 import '../items/match_tile_widget.dart';
+import '../support/match_board_grid_widget.dart';
 
 /// The pairing board (BR-153, BR-118).
 ///
@@ -36,18 +38,7 @@ import '../items/match_tile_widget.dart';
 /// mark for [AppMatchTile.wrongHold] and come back on their own — colour held,
 /// input not.
 ///
-/// ## The grid fills the height, until it cannot
-///
-/// Two columns, one row per index, `sm` both ways, and every row an [Expanded]
-/// so the board ends exactly where the hint line begins — no strip of dead page
-/// under the last tile and no arithmetic that only holds at one screen size.
-///
-/// **Five rows is a ceiling, not the mock's content** (BR-156), and what varies
-/// is small but real: rows that always flex would give a two-pair board a pair
-/// of 300px slabs and a five-pair board 48px rows at 2.0 text scale. So the flex
-/// has a floor — [AppMatchTile.minRowHeight], scaled with the text — and a board
-/// that cannot meet it scrolls instead of squeezing. The arithmetic is in
-/// `docs/wireframes/m5-study-modes.md` §8.6.
+/// The geometry — how many rows and how tall — is `MatchBoardGridWidget`.
 class MatchBoardSectionWidget extends StatefulWidget {
   const MatchBoardSectionWidget({
     required this.board,
@@ -77,7 +68,10 @@ class MatchBoardSectionWidget extends StatefulWidget {
   /// **It returns a `Future`, and the board waits on it.** A pair is cleared
   /// only once the write resolves, so a refused write leaves the tile where it
   /// was instead of emptying a slot the session will not remember.
-  final Future<void> Function(MatchTile term, {required bool isCorrect})
+  final Future<StudyAnswerCommitModel?> Function(
+    MatchTile term, {
+    required bool isCorrect,
+  })
   onPairAttempt;
 
   /// Called once every pair has landed, after the last one's beat.
@@ -131,6 +125,20 @@ class _MatchBoardSectionWidgetState extends State<MatchBoardSectionWidget> {
   /// second time.
   bool _isFinishing = false;
 
+  /// True while a pair's transaction is open.
+  ///
+  /// **Persistence is single-flight, so the board has to be too.** The
+  /// controller takes one submission at a time and refuses the second with a
+  /// null receipt — which, before the receipt was typed, the board read as a
+  /// successful write and cleared the pair on. Holding it here closes the gap
+  /// between the tap and the parent's rebuild, which `isLocked` alone cannot:
+  /// the parent does not know a write has started until this widget tells it.
+  ///
+  /// **It is the transaction, not the feedback.** It clears the moment the
+  /// receipt arrives, so the 500/700ms a pair holds its colour is time the rest
+  /// of the board is free to be played (§8.8).
+  bool _isSubmitting = false;
+
   @override
   void dispose() {
     _flashTimer?.cancel();
@@ -164,6 +172,7 @@ class _MatchBoardSectionWidgetState extends State<MatchBoardSectionWidget> {
     _flashingCardId = null;
     _wrongPair = null;
     _isFinishing = false;
+    _isSubmitting = false;
     _matched.clear();
   }
 
@@ -179,7 +188,7 @@ class _MatchBoardSectionWidgetState extends State<MatchBoardSectionWidget> {
   /// nothing held yet holds this tile; the same tile again puts it down; a tile
   /// on the same side moves the selection; one opposite completes a pair.
   void _select(MatchTile tile) {
-    if (widget.isLocked || _isFinishing) return;
+    if (widget.isLocked || _isFinishing || _isSubmitting) return;
 
     final held = _selectedTile;
 
@@ -226,32 +235,55 @@ class _MatchBoardSectionWidgetState extends State<MatchBoardSectionWidget> {
   void _answerWith({required MatchTile held, required MatchTile tile}) {
     final term = held.isTerm ? held : tile;
     final meaning = held.isTerm ? tile : held;
-    final isCorrect = widget.board.isPair(term, meaning);
 
+    // **Nothing is coloured here.** The selection is released so the pair stops
+    // looking half-made, and the write goes out — but green and red both wait
+    // for the receipt (BR-157). Setting `_wrongPair` on the tap was the same
+    // bug as clearing on completion: a screen saying something the database
+    // does not.
     setState(() {
       _selectedTile = null;
-      _wrongPair = isCorrect
-          ? null
-          : (termId: term.cardId, meaningId: meaning.cardId);
+      _isSubmitting = true;
     });
 
+    unawaited(
+      _land(
+        term,
+        isCorrect: widget.board.isPair(term, meaning),
+        meaning: meaning,
+      ),
+    );
+  }
+
+  /// Submits the attempt and, once it has committed, marks the pair.
+  ///
+  /// **A null receipt is a write that did not happen** — refused, or a second
+  /// submission arriving while the first was open. The pair goes back to idle:
+  /// no tick, no red, no cleared slot, no board-complete. Anything else would be
+  /// the board reporting a turn the session has no record of.
+  Future<void> _land(
+    MatchTile term, {
+    required bool isCorrect,
+    required MatchTile meaning,
+  }) async {
+    final commit = await widget.onPairAttempt(term, isCorrect: isCorrect);
+    if (!mounted) return;
+
+    setState(() => _isSubmitting = false);
+    if (commit == null) return;
+
     if (!isCorrect) {
+      // The row stays open (BR-118) — which is what the receipt says — so the
+      // pair stays playable and only its colour is held.
+      setState(
+        () => _wrongPair = (termId: term.cardId, meaningId: meaning.cardId),
+      );
       _hold(_wrongTimer, AppMatchTile.wrongHold, () {
         _wrongPair = null;
       }, assign: (timer) => _wrongTimer = timer);
+
+      return;
     }
-
-    unawaited(_land(term, isCorrect: isCorrect));
-  }
-
-  /// Submits the attempt and, if it stood, marks the pair.
-  ///
-  /// **The tick belongs to the write, not to the tap:** `_matched` is added
-  /// once the future resolves, so a refused write leaves the pair on the board
-  /// rather than emptying a slot the session will not remember.
-  Future<void> _land(MatchTile term, {required bool isCorrect}) async {
-    await widget.onPairAttempt(term, isCorrect: isCorrect);
-    if (!mounted || !isCorrect) return;
 
     setState(() {
       _matched.add(term.cardId);
@@ -304,42 +336,9 @@ class _MatchBoardSectionWidgetState extends State<MatchBoardSectionWidget> {
   }
 
   @override
-  Widget build(BuildContext context) => LayoutBuilder(
-    builder: (context, constraints) {
-      final rowCount = widget.board.terms.length;
-      // Scaled, because the floor is about a finger and a line of text, and
-      // both grow with the user's text setting. A fixed 48 would let a board
-      // fill exactly at 2.0 and clip every tile on it.
-      final minRowHeight = MediaQuery.textScalerOf(
-        context,
-      ).scale(AppMatchTile.minRowHeight);
-      final needed = rowCount * minRowHeight + (rowCount - 1) * AppSpacing.sm;
-      final fillsExactly =
-          constraints.hasBoundedHeight && needed <= constraints.maxHeight;
-
-      final rows = Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          for (var index = 0; index < rowCount; index++) ...<Widget>[
-            if (index > 0) const SizedBox(height: AppSpacing.sm),
-            if (fillsExactly)
-              Expanded(child: _row(index))
-            else
-              ConstrainedBox(
-                constraints: BoxConstraints(minHeight: minRowHeight),
-                // The two tiles in a row are the same height even when one
-                // wraps and the other does not; without this the shorter one
-                // floats and the board reads as ragged.
-                child: IntrinsicHeight(child: _row(index)),
-              ),
-          ],
-        ],
-      );
-
-      if (fillsExactly) return rows;
-
-      return SingleChildScrollView(child: rows);
-    },
+  Widget build(BuildContext context) => MatchBoardGridWidget(
+    rowCount: widget.board.terms.length,
+    rowBuilder: _row,
   );
 
   /// One row of the board. The two sides are independent shuffles (BR-127), so a

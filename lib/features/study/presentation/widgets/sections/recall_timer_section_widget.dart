@@ -10,8 +10,11 @@ import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_radius.dart';
 import '../../../../../shared/widgets/mx_card.dart';
+import '../../../domain/models/study_answer_commit_model.dart';
 import '../../../domain/models/recall_mode.dart';
 import '../../../domain/models/study_turn_model.dart';
+
+part 'recall_timer_pieces_widget.dart';
 
 /// One card, twenty seconds, one outcome (BR-128 … BR-131).
 ///
@@ -28,6 +31,7 @@ class RecallTimerSectionWidget extends StatefulWidget {
   const RecallTimerSectionWidget({
     required this.turn,
     required this.onOutcome,
+    this.onFeedbackShown,
     this.initialRemaining,
     this.onRemainingChanged,
     this.onSuspended,
@@ -37,7 +41,13 @@ class RecallTimerSectionWidget extends StatefulWidget {
   final StudyTurnModel turn;
 
   /// Called once, with the outcome that was claimed.
-  final void Function(RecallOutcome outcome) onOutcome;
+  /// Writes the outcome and hands back what the transaction did (BR-157).
+  final Future<StudyAnswerCommitModel?> Function(RecallOutcome outcome)
+  onOutcome;
+
+  /// Called once the back of the card is on screen; completes when the session
+  /// has moved on (BR-158).
+  final Future<void> Function({required bool isCorrect})? onFeedbackShown;
 
   /// What was left of a turn interrupted earlier (BR-133).
   ///
@@ -98,6 +108,7 @@ class _RecallTimerSectionWidgetState extends State<RecallTimerSectionWidget>
 
     // A new turn: full limit, and the outcome claim released.
     _outcome = null;
+    _claimed = null;
     _remaining = widget.initialRemaining ?? kRecallTurnLimit;
     _start();
   }
@@ -124,7 +135,7 @@ class _RecallTimerSectionWidgetState extends State<RecallTimerSectionWidget>
 
   void _start() {
     _timer?.cancel();
-    if (_outcome != null) return;
+    if (_claimed != null) return;
 
     _timer = Timer.periodic(_tick, (_) => _onTick());
   }
@@ -137,7 +148,7 @@ class _RecallTimerSectionWidgetState extends State<RecallTimerSectionWidget>
     // A turn that already has an outcome has nothing to resume: it was answered
     // the instant it was revealed (BR-129), and the row it would be written
     // against is no longer pending.
-    if (_outcome != null) return;
+    if (_claimed != null) return;
 
     widget.onSuspended?.call(remaining: _remaining, isRevealed: _isRevealed);
   }
@@ -164,13 +175,45 @@ class _RecallTimerSectionWidgetState extends State<RecallTimerSectionWidget>
     _claim(RecallOutcome.timedOut);
   }
 
+  /// The outcome being written, before there is anything to show for it.
+  ///
+  /// **Two fields, because they answer two questions.** [_claimed] closes the
+  /// turn — the clock stops here, and neither a second tap nor the timeout that
+  /// lands in the same instant can take it again (BR-129). [_outcome] is what
+  /// reveals the back of the card, and it is set only once the write holding
+  /// that outcome has committed (BR-157). While they were one field, a refused
+  /// write left the answer revealed and the session with no record of it.
+  RecallOutcome? _claimed;
+
   /// Takes the single outcome, or does nothing if it is already taken.
   void _claim(RecallOutcome outcome) {
-    if (_outcome != null) return;
+    if (_claimed != null) return;
 
     _timer?.cancel();
+    setState(() => _claimed = outcome);
+    unawaited(_grade(outcome));
+  }
+
+  /// Writes the outcome, then reveals what it was — in that order (BR-157).
+  ///
+  /// A null receipt hands the turn back: the clock is spent either way, but a
+  /// revealed card that the session cannot account for is worse than a turn the
+  /// user has to claim again.
+  Future<void> _grade(RecallOutcome outcome) async {
+    final commit = await widget.onOutcome(outcome);
+    if (!mounted) return;
+
+    if (commit == null) {
+      setState(() => _claimed = null);
+
+      return;
+    }
+
     setState(() => _outcome = outcome);
-    widget.onOutcome(outcome);
+
+    await widget.onFeedbackShown?.call(
+      isCorrect: outcome == RecallOutcome.revealed,
+    );
   }
 
   bool get _isRevealed => _outcome != null;
@@ -252,117 +295,4 @@ class _RecallTimerSectionWidgetState extends State<RecallTimerSectionWidget>
       ],
     );
   }
-}
-
-/// The panel the answer sits behind, and then in.
-///
-/// It carries a label while it is covered: an empty box is nothing at all to a
-/// screen reader, and "there is an answer here and it is hidden" is a fact about
-/// the turn rather than decoration.
-///
-/// **One step down from the prompt, and flat** (§8.10). Two raised cards read as
-/// two prompts; the step is what says one of them is waiting to be filled. No
-/// shadow either — a shadow under a card that is already inside a shadowed one
-/// reads as a rendering fault rather than as depth.
-class _AnswerArea extends StatelessWidget {
-  const _AnswerArea({required this.answer, required this.hiddenLabel});
-
-  final String? answer;
-  final String hiddenLabel;
-
-  @override
-  Widget build(BuildContext context) {
-    final revealed = answer;
-
-    return MxCard(
-      elevation: AppElevation.none,
-      radius: AppRadius.xl,
-      color: context.colors.surfaceContainerLow,
-      child: Center(
-        child: revealed == null
-            ? _HiddenBar(label: hiddenLabel)
-            : Text(
-                revealed,
-                style: context.texts.bodyMedium,
-                textAlign: TextAlign.center,
-                maxLines: 6,
-                overflow: TextOverflow.ellipsis,
-              ),
-      ),
-    );
-  }
-}
-
-/// What stands in for the answer while it is covered.
-///
-/// **A bar, not a sentence.** The panel used to write "the answer is hidden" in
-/// the place the answer will appear — a line of text a learner reads instead of
-/// recalling. A blurred bar is the same fact with nothing to read, and the
-/// sentence survives where it was always doing the work: in `Semantics`.
-class _HiddenBar extends StatelessWidget {
-  const _HiddenBar({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) => Semantics(
-    label: label,
-    child: ImageFiltered(
-      // Blur rather than a lower opacity: a faint bar reads as a control that
-      // has been switched off, a soft one reads as something not yet in focus.
-      imageFilter: ImageFilter.blur(
-        sigmaX: AppRecallAnswer.hiddenBlur,
-        sigmaY: AppRecallAnswer.hiddenBlur,
-      ),
-      child: SizedBox(
-        width: AppRecallAnswer.hiddenBarWidth,
-        height: AppRecallAnswer.hiddenBarHeight,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            // **Drawn from `borderControl`, not from a surface step.** A step
-            // between two neighbouring surfaces is by construction a small one:
-            // this bar measured 1.09:1 against the panel in light and 1.16:1 in
-            // dark, which is the one graphical object on the screen carrying
-            // "there is an answer here and it is hidden" — exactly what WCAG
-            // 1.4.11 asks 3:1 of. The border token is the project's 3:1 value
-            // and already the right hue.
-            //
-            // The token itself, not a blend of it: at 0.9 the bar measured
-            // 2.75:1 against the panel because the blur eats the peak before
-            // the alpha does. Solid either way — `color_source_rules_test` R7
-            // fails a fill that composites at paint time, and this one does not.
-            color: context.semanticColors.borderControl,
-            borderRadius: BorderRadius.circular(AppRadius.pill),
-          ),
-        ),
-      ),
-    ),
-  );
-}
-
-/// The placeholder’s own numbers.
-abstract final class AppRecallAnswer {
-  /// Wide enough to read as a line of text that is coming, narrow enough not to
-  /// read as an input field waiting to be typed in.
-  static const double hiddenBarWidth = 140;
-  static const double hiddenBarHeight = 14;
-
-  /// Soft, not gone. Enough that the eye stops trying to resolve it.
-  static const double hiddenBlur = 2;
-}
-
-/// What the two-card study screens agree on.
-///
-/// `recall` and `fill` ask the same thing in two directions, so they share a
-/// skeleton: a prompt above, the space for an answer below, both `Expanded` and
-/// both floored here. A screen that let one card shrink past this stopped being
-/// a pair and started being a heading over a box.
-abstract final class AppStudyPair {
-  static const double cardMinHeight = 160;
-
-  /// How wide one action in the row under the cards may get.
-  ///
-  /// Two buttons stretched across a phone read as a toolbar; capped and centred
-  /// they read as a choice. One button on its own hugs its label instead.
-  static const double ctaMaxWidth = 160;
 }

@@ -221,6 +221,94 @@ void main() {
 
       expect(repository.nextTurnCalls, reads + 1);
     });
+    test(
+      'leaving mid-advance does not let the old read revive the turn',
+      () async {
+        // The scenario the epoch exists for: the read is in flight, the user
+        // presses ✕, and the read comes back to a session that has ended. It used
+        // to write a turn straight back over the summary.
+        final (repository, controller) = await openMatch();
+        final gate = Completer<void>();
+        repository.nextTurnGate = gate;
+
+        final advancing = controller.advance();
+        await Future<void>.delayed(Duration.zero);
+
+        await controller.leave();
+        gate.complete();
+        await advancing;
+
+        expect(controller.state.isFinished, isTrue);
+        expect(controller.state.turn, isNull);
+        expect(controller.state.isAdvancing, isFalse);
+        expect(controller.state.error, isNull);
+      },
+    );
+
+    test(
+      'leaving mid-write does not let the old answer revive the turn',
+      () async {
+        // The write still commits — BR-25 wants it to — but its result is not
+        // allowed to reach a screen that has moved on.
+        final (repository, controller) = await openMatch();
+        final gate = Completer<void>();
+        repository.submitGate = gate;
+
+        final submitting = controller.submitAnswer(
+          StudyAction.remembered,
+          cardId: 'card-1',
+        );
+        await Future<void>.delayed(Duration.zero);
+
+        await controller.leave();
+        gate.complete();
+        await submitting;
+
+        expect(controller.state.isFinished, isTrue);
+        expect(controller.state.turn, isNull);
+        expect(controller.state.isSubmitting, isFalse);
+        expect(
+          repository.answers,
+          hasLength(1),
+          reason: 'the row was still written',
+        );
+      },
+    );
+
+    test(
+      'a write that fails after leaving does not overwrite the summary',
+      () async {
+        // A stale failure is not this session's failure: an error banner over a
+        // summary the user is already reading is worse than a silent one.
+        final repository = _FailingAfterGate()..nextTurn_ = turnOf('card-1');
+        final container = containerWith(repository);
+        final controller = container.read(
+          studySessionControllerProvider('deck-1').notifier,
+        );
+        await controller.start(
+          kind: StudySessionKind.reviewing,
+          reviewMode: StudyMode.match,
+        );
+        container.listen(
+          studySessionControllerProvider('deck-1'),
+          (_, _) {},
+          fireImmediately: true,
+        );
+
+        final submitting = controller.submitAnswer(
+          StudyAction.remembered,
+          cardId: 'card-1',
+        );
+        await Future<void>.delayed(Duration.zero);
+
+        await controller.leave();
+        repository.gate.complete();
+        await submitting;
+
+        expect(controller.state.isFinished, isTrue);
+        expect(controller.state.error, isNull);
+      },
+    );
   });
 }
 
@@ -243,4 +331,32 @@ final class _RefusingRepository extends FakeStudyRepository {
     double? nextEaseFactor,
     int? nextIntervalDays,
   }) async => throw const ConflictFailure(message: 'refused');
+}
+
+/// Holds every write open, then throws — a failure that lands after the user
+/// has left.
+final class _FailingAfterGate extends FakeStudyRepository {
+  _FailingAfterGate() : super(stageExhausted: false);
+
+  final Completer<void> gate = Completer<void>();
+
+  @override
+  Future<StudyAnswerCommitModel> submitAnswer({
+    required String sessionId,
+    required String cardId,
+    required StudyMode mode,
+    required StudyAction action,
+    required DateTime now,
+    StudyOutcomeReason? outcomeReason,
+    int? comparisonVersion,
+    bool? usedHint,
+    DateTime? nextDueAt,
+    int? nextBox,
+    double? nextEaseFactor,
+    int? nextIntervalDays,
+  }) async {
+    await gate.future;
+
+    throw StateError('the write failed after the session ended');
+  }
 }

@@ -1877,3 +1877,60 @@ nên ngân sách đọc đổi thì robot đi theo thay vì lệch âm thầm.
 Thông báo lỗi của `studyUntilFinished` nay nêu **stage nào** đang trên màn. Lần
 chạy thứ hai chỉ nói "không có gì để trả lời"; lần thứ ba nói "stage was none —
 no mode body was built", và đó là câu chỉ thẳng vào lỗi 1.
+
+### Ba lỗi async lifecycle còn lại, và một `Future<void>` là gốc của hai trong số đó
+
+**1. Match coi "Future hoàn thành" là "đã commit".** `StudyMatchAttemptSink` khai
+`Future<void>` trong khi controller trả `Future<StudyAnswerCommitModel?>` — receipt
+bị xoá ngay ở typedef. `_land()` thêm term vào `_matched` mỗi khi Future hoàn
+thành, nên hai thứ khác nhau cùng làm cặp biến mất: một ghi bị từ chối, và một
+submission thứ hai bị controller trả `null` (persistence là single-flight). Cả hai
+đọc thành "thành công".
+
+Sửa: typedef trả receipt; `_land` chỉ đánh dấu khi receipt khác `null`; thêm
+`_isSubmitting` cục bộ trong board để chặn khoảng trống trước khi parent rebuild —
+parent không biết có write nào bắt đầu cho tới khi widget nói.
+
+**2. Cả năm mode vẽ kết quả trước commit.** `guess` đặt `_chosenCardId`, `recall`
+đặt `_outcome`, `fill` đặt `_isGraded`, `match` đặt `_wrongPair` — tất cả ngay
+trong handler của cú chạm, rồi mới gọi callback. Đó là BR-157 bị vi phạm ở bốn
+chỗ, và không chỗ nào kiểm được vì callback là `void`: không có khoảnh khắc nào
+giữa cú chạm và write để một test đứng vào.
+
+Sửa: mỗi mode tách **hai** field — cái đóng câu hỏi lại (`_isSubmitting`,
+`_claimed`) và cái vẽ kết quả (`_chosenCardId`, `_outcome`, `_isGraded`,
+`_wrongPair`). Cái đầu đặt lúc chạm, cái sau chỉ đặt sau receipt. Receipt `null`
+trả màn về trạng thái hỏi lại được — từ chối *và* không nói gì là một màn hình
+ngừng phản hồi không lý do.
+
+**Nhịp giữ bắt đầu từ lúc kết quả hiện ra**, không phải lúc chạm và cũng không
+phải lúc write xong: mode gọi `onFeedbackShown(isCorrect:)` sau `setState`, screen
+mới chạy `advance(minimumVisible:)`. Đo từ cú chạm thì nhịp tiêu vào transaction;
+đo từ write thì nó bắt đầu trước khi có gì được vẽ. Orchestration vẫn ở một chỗ:
+screen ghi và screen chuyển lượt, mode chỉ nói "đã hiện rồi".
+
+**3. Advance cũ ghi state sau khi đã leave.** `advance()` chỉ kiểm `ref.mounted`,
+mà notifier vẫn mounted sau khi `leave()` chạy — nên một read đang bay về sau đó
+ghi turn/mode/error đè lên phiên đã kết thúc.
+
+Sửa: `_epoch` trong controller. `leave()` tăng epoch **trước** khi await (kết thúc
+phiên cũng là một chuyến đi database, và một operation đang bay có thể đáp vào
+giữa nó); mọi state write sau một `await` hỏi `_isCurrent(epoch)`. Không có gì bị
+huỷ — transaction vẫn commit vì BR-25 muốn thế — thứ đổi là kết quả của nó có
+được phép chạm tới màn hình hay không. `submitAnswer` vẫn **trả** receipt khi
+stale: row đã được ghi, và người gọi tự quyết định vẽ gì.
+
+**Tách file do guard 400 dòng:** `MatchBoardGridWidget` (hình học của bàn — bao
+nhiêu hàng, cao bao nhiêu — tách khỏi cái quyết định một cú chạm *nghĩa là gì*),
+`study_mode_bodies_widget.dart` và `recall_timer_pieces_widget.dart` (đều là
+`part`, giữ nguyên library nên resolver vẫn là một nhánh exhaustive — AD-18).
+
+**Bằng chứng:** `study_commit_before_feedback_test.dart` (11 test — với mỗi mode:
+pending không vẽ gì, commit mới vẽ, `null` không vẽ và không giữ nhịp, chạm hai
+lần chỉ một write); `match_board_feedback_test.dart` +5 (correct pending chưa
+tick, correct refused ở lại bàn, wrong pending chưa đỏ, wrong commit mới đỏ và
+row vẫn `pending`, cặp thứ hai không chen được vào lúc cặp đầu đang ghi — và ghép
+được ngay sau khi commit, tức màu không khoá); `study_answer_lifecycle_test.dart`
++3 (leave giữa advance, leave giữa write, write hỏng sau leave). `PendingCommit`
+thay cho `Completer<void>`: `Completer<void>` chỉ nói "xong", đúng cái hình dạng
+đã cho phép board đọc một lần từ chối thành một lần thành công.
