@@ -150,6 +150,38 @@ void main() {
       await matchesReviewGolden('goldens/study_match_progress_idle_$label.png');
     });
 
+    // **The state the other three are judged against, and the only one that was
+    // missing.** `idle`, `wrong` and `paired` all had a picture; the tile a
+    // person has just tapped did not — and it is the one the mode cannot work
+    // without. Every tap in `match` is two: this is what the board looks like
+    // between them, for as long as it takes to find the other half.
+    //
+    // It is also the state with the least to say. Since #269 a selection is an
+    // edge and an ink on the same fill an idle tile carries, so the whole signal
+    // is a hairline and a colour shift in the text — against a board of nine
+    // other tiles that are still white. Whether that is enough is a question a
+    // render answers and a token table does not.
+    testWidgets('match holding a selected tile — $label', (tester) async {
+      await pumpReview(tester, screen(brightness: brightness));
+
+      await tester.tap(find.text(subject.front));
+      await _settleColour(tester);
+
+      // Exactly one tile is selected, and it is not marked by an icon: `paired`
+      // and `wrong` carry ✓ and ✕, selection carries neither. So the assertion
+      // is the absence of both inside the board — a selection that grew a mark
+      // would be reading as a result.
+      expect(_boardIcons(Icons.check), findsNothing);
+      expect(_boardIcons(Icons.close), findsNothing);
+
+      await matchesReviewGolden(
+        'goldens/study_match_progress_selected_$label.png',
+      );
+
+      // No hold to run out — selection waits for the second tap, not a timer —
+      // so the board is left exactly as photographed.
+    });
+
     testWidgets('match holding a wrong pair — $label', (tester) async {
       await pumpReview(tester, screen(brightness: brightness));
 
