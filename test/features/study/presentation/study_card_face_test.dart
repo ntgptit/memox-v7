@@ -110,7 +110,7 @@ void main() {
         tester,
         actions: const <StudyAction>[],
         shouldShowBackImmediately: true,
-        emphasis: StudyFaceEmphasis.peers,
+        emphasis: StudyFaceEmphasis.frontSupportingBack,
       );
 
       expect(find.text('FRONT'), findsOneWidget);
@@ -120,33 +120,43 @@ void main() {
       }
     });
 
-    testWidgets('peers give both faces the same typographic role (BR-112)', (
+    testWidgets('the front supports and the back leads (BR-112)', (
       tester,
     ) async {
-      // Both faces are on screen to be read and neither is the question, so
-      // neither may be sized as one. A front sized as a prompt takes three
-      // headline lines for a real gloss and swallows the card.
+      // A front here is a sentence with a gloss in it, not a term: at a
+      // headline role and w600 it read as the thing to learn and took the whole
+      // card. Body role and regular for the supporting face; the title role,
+      // one step down in weight, for the one the eye should land on.
       await pump(
         tester,
         actions: const <StudyAction>[],
         shouldShowBackImmediately: true,
-        emphasis: StudyFaceEmphasis.peers,
+        emphasis: StudyFaceEmphasis.frontSupportingBack,
       );
 
+      final texts = Theme.of(
+        tester.element(find.byType(MxCard).first),
+      ).textTheme;
       final front = tester.widget<Text>(find.text('front-c1'));
       final back = tester.widget<Text>(find.text('back-c1'));
 
-      expect(front.style, isNotNull);
-      expect(front.style?.fontSize, back.style?.fontSize);
+      expect(front.style?.fontSize, texts.bodyLarge?.fontSize);
+      expect(front.style?.fontWeight, FontWeight.w400);
+      expect(back.style?.fontSize, texts.titleLarge?.fontSize);
+      expect(back.style?.fontWeight, FontWeight.w500);
+      expect(
+        back.style?.fontSize,
+        greaterThan(front.style!.fontSize!),
+        reason: 'the focal face is the larger one',
+      );
     });
 
     testWidgets('promptFirst keeps the front larger than the back', (
       tester,
     ) async {
-      // The counterpart, and the reason the emphasis is a parameter rather
-      // than a second reading of `shouldShowBackImmediately`: `self_assess`
-      // asks the front as a question, so it must not lose its hierarchy when
-      // `browse` gives its own faces equal weight.
+      // `self_assess`, unchanged by any of this: there the front *is* the
+      // question until the flip, and it must not inherit `browse`'s hierarchy.
+      // This is the assertion that makes the parameter worth its name.
       await pump(
         tester,
         actions: const <StudyAction>[StudyAction.remembered],

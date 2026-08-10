@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/time/clock_provider.dart';
@@ -58,7 +59,13 @@ void main() {
       );
 
   /// A controller on an open `learning` session, whose first stage is `browse`.
-  Future<({FakeStudyRepository repository, StudySessionController controller})>
+  Future<
+    ({
+      FakeStudyRepository repository,
+      StudySessionController controller,
+      ProviderContainer container,
+    })
+  >
   openBrowse({List<String> seen = const []}) async {
     final repository = FakeStudyRepository(stageExhausted: false)
       ..nextTurn_ = browseTurn('card-3', seen: seen)
@@ -74,6 +81,16 @@ void main() {
       ],
     );
     addTearDown(container.dispose);
+
+    // **Held with a listener, not just read.** The controller is `autoDispose`;
+    // a test that awaits between two calls without one lets it go, and the
+    // failure then reads as "Ref used after dispose" and says nothing about
+    // what was being tested.
+    final sub = container.listen(
+      studySessionControllerProvider('deck-1'),
+      (_, _) {},
+    );
+    addTearDown(sub.close);
 
     final controller = container.read(
       studySessionControllerProvider('deck-1').notifier,
@@ -91,7 +108,11 @@ void main() {
           'assumes it',
     );
 
-    return (repository: repository, controller: controller);
+    return (
+      repository: repository,
+      controller: controller,
+      container: container,
+    );
   }
 
   test('stepping back draws the previous card and writes nothing', () async {
@@ -157,6 +178,48 @@ void main() {
     expect(open.repository.answers, isEmpty, reason: 'browse grades nothing');
   });
 
+  test(
+    'a second forward while the fetch is in flight writes nothing extra',
+    () async {
+      // **The guard used to sit under the forward branch, which is the one branch
+      // that writes.** `answer()` clears `isSubmitting` before `_pullTurn` sets
+      // `isAdvancing`, so a second swipe arriving in that window went straight
+      // past both checks and marked the same card browsed twice — BR-155's "no
+      // second turn and no second cursor step", broken by the ordering alone.
+      final open = await openBrowse(seen: <String>['card-1']);
+      final gate = Completer<void>();
+      open.repository.nextTurnGate = gate;
+
+      unawaited(open.controller.browseStep(StudyBrowseStep.forward));
+      await Future<void>.delayed(Duration.zero);
+
+      // The fetch is held open here; this is the window.
+      await open.controller.browseStep(StudyBrowseStep.forward);
+
+      expect(open.repository.browsed, <String>[
+        'card-3',
+      ], reason: 'one swipe, one card marked browsed');
+      expect(open.repository.answers, isEmpty, reason: 'browse grades nothing');
+
+      gate.complete();
+      await Future<void>.delayed(Duration.zero);
+    },
+  );
+
+  test('looking back and stepping forward again writes nothing', () async {
+    // BR-155: looking is not answering. Walking back along the trail and
+    // returning to the live card must leave the queue and the cursor exactly
+    // where the first forward step left them.
+    final open = await openBrowse(seen: <String>['card-1', 'card-2']);
+
+    await open.controller.browseStep(StudyBrowseStep.back);
+    await open.controller.browseStep(StudyBrowseStep.forward);
+
+    expect(open.repository.browsed, isEmpty);
+    expect(open.repository.answers, isEmpty);
+    expect(open.repository.advancedTo, isEmpty);
+  });
+
   test('a new turn puts the trail back at its front', () async {
     // An offset outlives the card it was counted from unless something clears
     // it, and the next card would then arrive with a card the user has already
@@ -205,6 +268,16 @@ void main() {
       ],
     );
     addTearDown(container.dispose);
+
+    // **Held with a listener, not just read.** The controller is `autoDispose`;
+    // a test that awaits between two calls without one lets it go, and the
+    // failure then reads as "Ref used after dispose" and says nothing about
+    // what was being tested.
+    final sub = container.listen(
+      studySessionControllerProvider('deck-1'),
+      (_, _) {},
+    );
+    addTearDown(sub.close);
 
     final controller = container.read(
       studySessionControllerProvider('deck-1').notifier,

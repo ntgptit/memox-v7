@@ -197,15 +197,16 @@ base class FakeStudyRepository implements StudyRepository {
     required DateTime now,
   }) async {
     advancedTo.add(mode);
-    // Held open by a test that needs the screen *while* it is advancing — the
-    // window in which the body used to swap the card for a spinner. Null in
-    // every other test, so nothing waits by accident.
-    final gate = advanceGate;
-    if (gate != null) await gate.future;
   }
 
-  /// Set to hold [advanceStage] open until the test completes it.
-  Completer<void>? advanceGate;
+  /// Set to hold [nextTurn] open until the test completes it.
+  ///
+  /// **On `nextTurn`, not on `advanceStage`.** A stage that is not exhausted
+  /// never reaches `advanceStage` — `AdvanceStudyStageUseCase` returns the
+  /// current mode and stops — so a gate there is a gate the fetch walks past.
+  /// Every advance goes through `nextTurn`, which is the window the screen
+  /// calls `isAdvancing`.
+  Completer<void>? nextTurnGate;
 
   @override
   Future<void> endSession({
@@ -299,7 +300,12 @@ base class FakeStudyRepository implements StudyRepository {
   }
 
   @override
-  Future<StudyTurnModel?> nextTurn(String sessionId) async => nextTurn_;
+  Future<StudyTurnModel?> nextTurn(String sessionId) async {
+    final gate = nextTurnGate;
+    if (gate != null) await gate.future;
+
+    return nextTurn_;
+  }
 
   StudyTurnModel? nextTurn_;
 

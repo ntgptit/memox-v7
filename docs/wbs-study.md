@@ -1523,3 +1523,33 @@ xếp, mà một màn đang chờ một truy vấn thì không xếp frame nào 
 query nữa" trông y hệt "sẽ không bao giờ tới".
 
 **Kết quả: 8/8 xanh trên emulator-5554**, `flutter test integration_test/`.
+
+### Browse — chỉnh sau vòng review (ưu tiên `eight_box`)
+
+Ba thứ vòng trước làm sai hoặc làm quá tay, sửa lại trong phạm vi `browse`.
+Không đụng `Sm2Scheduler`, không đụng `self_assess`, không thêm action nào vào
+luồng eight-box. BR-106/107/110/111/112/146/155 **không đổi** — đây là UI và
+thứ tự guard, không phải nghiệp vụ.
+
+**1. Typography.** Vòng trước map cả hai mặt vào `headlineSmall` 24/w600 và gọi
+là "peers". Nó chữa được việc front nuốt thẻ nhưng xoá mất hierarchy: hai khối
+bằng nhau không nói gì về chỗ cần nhìn. Nay front `bodyLarge` (regular, là một
+câu để đọc), back `titleLarge` hạ w500 qua `AppTypography.withWeight`. Variant
+đổi tên `peers` → `frontSupportingBack` vì cái tên cũ đã mô tả sai quan hệ.
+
+**2. Giữ card khi advancing bị áp toàn màn hình.** `_body` bỏ spinner cho *mọi*
+mode, tức biến advancing thành khoá tương tác toàn cục — sai với `match`, vốn
+trả lời nhiều cặp liên tiếp trên cùng một bàn. Nay chỉ `browse` có turn mới giữ
+card; mọi mode khác giữ nguyên hành vi cũ. Phân biệt theo **mode**, không theo
+scheduler.
+
+**3. Guard `browseStep()` nằm sau nhánh forward.** Nhánh forward-từ-live-turn là
+câu lệnh đầu tiên và `return` trước mọi guard, nên `isAdvancing` chỉ bảo vệ
+nhánh xem lại — đúng nhánh *không* ghi gì. `answer()` xoá `isSubmitting` trước
+khi `_pullTurn` bật `isAdvancing`, nên vuốt thứ hai rơi đúng vào khe đó và
+`markBrowsed` chạy hai lần. Guard nay đứng trước cả hai nhánh.
+
+**Một cái bẫy trong test đáng ghi.** Gate của fake ban đầu đặt ở `advanceStage`,
+mà `AdvanceStudyStageUseCase` chỉ gọi hàm đó khi stage đã cạn — nên gate không
+bao giờ đóng và test "giữ card" xanh mà chưa từng vào cửa sổ nó khai là đang
+kiểm. Chuyển sang `nextTurn`, điểm mà mọi lần advance đều đi qua.

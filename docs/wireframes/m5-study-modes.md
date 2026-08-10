@@ -91,13 +91,20 @@ deck hay card nào mang ngôn ngữ, và `front` cũng không đảm bảo là t
 một bộ thẻ hoàn toàn có thể để nghĩa ở mặt trước và từ ở mặt sau, lúc đó cặp
 `Thuật ngữ`/`Ý nghĩa` dán sai nhãn cho cả hai nửa.
 
-**Hai nửa cùng một vai typography trong `browse`, và đó là BR-112 nhìn từ phía
-chữ.** Cả hai mặt đều đang ở đó để đọc, không mặt nào là câu hỏi. Cho mặt trước
-cỡ prompt khiến một front dài — *"Be shy / Ngượng ngùng (Động từ, thể hiện sự e
-ngại trong giao tiếp)"* — chiếm ba dòng headline và nuốt cả thẻ. `self_assess`
-thì ngược lại: mặt trước **là** câu hỏi cho tới khi lật, nên nó giữ cỡ prompt.
-Khác biệt ấy đi qua một tham số có tên (`StudyFaceEmphasis`) chứ không suy ra từ
-cờ "có hiện mặt sau ngay không" — hai câu hỏi khác nhau tình cờ cùng đáp án.
+**Mặt trước là ngữ cảnh, mặt sau là tiêu điểm** — `StudyFaceEmphasis.
+frontSupportingBack`. Front dùng `bodyLarge` (body role, regular): một front
+thật là *"Be shy / Ngượng ngùng (Động từ, thể hiện sự e ngại trong giao tiếp)"*
+— một câu để đọc, không phải một tiêu đề. Back dùng `titleLarge` hạ xuống w500
+bằng `AppTypography.withWeight`, nên nó dẫn mà không gào.
+
+**Lần sửa đầu cho hai mặt cùng một vai và gọi chúng là "peers".** Nó chữa được
+việc front nuốt cả thẻ và làm mất luôn ý nghĩa của màn hình: hai khối bằng nhau
+không nói gì về việc nên nhìn vào đâu. Ảnh concept đặt nghĩa nhỏ ở trên và từ
+cần học lớn ở dưới, và đó là điều đúng cần lấy.
+
+`self_assess` không đổi: ở đó mặt trước **là** câu hỏi cho tới khi lật, nên nó
+giữ vai prompt. Khác biệt đi qua một tham số có tên chứ không suy ra từ cờ "có
+hiện mặt sau ngay không" — hai câu hỏi khác nhau tình cờ cùng đáp án.
 
 Không có nút nào, kể cả nút đi tiếp — khớp BR-111 và BR-155. Chuyển thẻ là **vuốt**;
 một nút Next cạnh cử chỉ là cách thứ hai để làm đúng một việc mà cử chỉ đã làm,
