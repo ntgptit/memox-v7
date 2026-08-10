@@ -7,7 +7,7 @@
 | **Scope** | Khung phiên học, và năm màn `browse` · `match` · `guess` · `recall` · `fill`. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), luồng (`use-cases.md`), giá trị token (`design_system/tokens/`) |
 | **Source of truth for** | Bố cục màn học · phán quyết cho tám điểm design lệch với BR |
 | **Depends on** | `document-conventions.md`, `business-rules.md` (BR-108…BR-154), `wbs-study.md` (M5.7…M5.20) |
-| **Updated by task** | Rà soát UI 5 stage — `match` chuyển feedback sang viền + chữ thay vì nền đặc (§4), đổi meaning sang trái, hạ thang chữ và nâng sàn hàng lên 112 (§4, §8.6), `guess` bỏ huy hiệu A–E (§5), `fill` làm lại vùng đáp án (§6), `browse` cân bằng hai mặt và đổi nhãn (§3) |
+| **Updated by task** | Rà soát UI 5 stage — `match` nhận cả hai chiều chọn và giữ trạng thái đủ lâu để đọc (§4, §8.8), chuyển feedback sang viền + chữ thay vì nền đặc (§4), đổi meaning sang trái, hạ thang chữ và nâng sàn hàng lên 112 (§4, §8.6), `guess` bỏ huy hiệu A–E (§5), `fill` làm lại vùng đáp án (§6), `browse` cân bằng hai mặt và đổi nhãn (§3) |
 | **Last updated** | 2026-08-10 |
 
 Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham chiếu bằng ID.
@@ -134,8 +134,8 @@ nền nào cả.
 |---|---|---|---|---|
 | chưa chọn | `surfaceContainerLowest` | `borderControl` | `AppStroke.hairline` | `onSurface` |
 | đang chọn (vế trước) | *không đổi* | `primaryAccent` | `AppStroke.input` | `primaryAccent` |
-| vừa ghép đúng | *không đổi* | `success` | `AppStroke.input` | `success` + ✓ — **một nhịp rồi tan** (§8.8) |
-| vừa ghép sai | *không đổi* | `danger` | `AppStroke.input` | `danger` + ✕ — một nhịp rồi về idle (§8.8) |
+| vừa ghép đúng | *không đổi* | `success` | `AppStroke.input` | `success` + ✓ — giữ **500ms** rồi tan (§8.8) |
+| vừa ghép sai | *không đổi* | `danger` | `AppStroke.input` | `danger` + ✕ — giữ **700ms** rồi về idle (§8.8) |
 | đã xong | **không vẽ** | viền cleared mờ | `AppStroke.hairline` | nội dung tan (§8.8) |
 
 **Tô kín ô là thứ làm bàn rối.** Mỗi lượt chạm **hai** ô, nên một trạng thái đặc
@@ -151,12 +151,11 @@ lấn — đọc 3.33:1 dạng chữ trần trên nền tối. `danger` và `suc
 token cũ.
 
 **Ripple của `InkWell` giữ nguyên** — nó là phản hồi cho *thao tác chạm*, không
-phải trạng thái. Nhưng ripple là `primary @ pressed` phủ cả ô và `InkRipple` mờ
-đi trong ~375ms, dài hơn `wrongHold`/`successFlash` (320ms): nên trên máy thật
-**vẫn có một mảng tím nhạt phủ ô trong suốt nhịp giữ trạng thái**, và ba golden
-transient chụp đúng khoảnh khắc đó. Ở dark gần như không thấy; ở light thì thấy.
-Đây là ripple, không phải fill của trạng thái — nếu sau này muốn bàn yên hơn nữa
-thì đó là quyết định về ripple, và là một task riêng.
+phải trạng thái. Ripple là `primary @ pressed` phủ cả ô và `InkRipple` mờ đi
+trong ~375ms; từ khi nhịp giữ lên 500/700ms nó **kết thúc trước** nhịp thay vì
+kéo dài quá nó, nên mảng tím chỉ còn là vệt của cú chạm chứ không còn phủ suốt
+trạng thái. Ba golden transient chụp ở mốc chuyển màu vừa xong nên vẫn thấy nó ở
+light; dark gần như không thấy.
 
 Ghép xong thì **nội dung biến mất, ô ở lại**: slot vẫn chiếm đúng chỗ cũ với
 một viền mờ. Xoá ô khỏi bàn — như bản M5.4b từng làm — làm mọi ô bên dưới dịch
@@ -187,8 +186,14 @@ dòng, ô chèn `sm` trên dưới — `6 × 16 + 2 × 8 = 112`.
 **Meaning bên trái, và chỉ thứ tự trình bày đổi.** Mắt đọc khối dài trước rồi
 quét cột ngắn để đối chiếu; đặt khối sáu dòng bên trái là thứ cho phép lượt quét
 đó chạy một chiều. Không có gì trong domain bị đảo hay dựng lại — vẫn là hai
-hoán vị cũ, xếp ngược lại — và **thao tác không đổi: vẫn phải chọn term tiếng
-Hàn trước** (BR-118), nên ô bên phải mới là ô mở một lượt.
+hoán vị cũ, xếp ngược lại.
+
+**Chạm được từ cả hai phía.** Chạm một ô bất kỳ để giữ nó, chạm lại chính nó để
+bỏ, chạm ô khác cùng cột để chuyển lựa chọn, chạm ô phía đối diện để tạo một
+lượt. BR-118 quy định *thẻ nào trả lời cho cặp đó* — luôn là thẻ sở hữu term —
+chứ không quy định phải chạm phía nào trước. Bản trước chỉ giữ được term, nên
+chạm nghĩa trước rơi vào hư không: không lựa chọn, không lượt, không dấu hiệu
+nào cho biết đã có gì xảy ra.
 
 **Chữ nhỏ hơn không làm nghĩa thành vế phụ; nó mua sức chứa.** Chiều cao ô thuộc
 về lưới, nên cỡ chữ ở đây đổi lấy *số chữ đọc được*: ở `bodySmall`, một nghĩa
@@ -695,19 +700,26 @@ không dồn* — nên §4 giữ nguyên tinh thần, chỉ đổi cách thực 
 
 | | làm gì |
 |---|---|
-| đúng | ô sang `success` + ✓ trong `AppMatchTile.successFlash`, rồi **nội dung tan**, ô ở lại rỗng |
+| đúng | ô sang `success` + ✓ trong `AppMatchTile.successFlash` = **500ms**, rồi **nội dung tan**, ô ở lại rỗng |
 | ô rỗng | không vẽ nền (thủng thật), viền `borderSubtle` pha 45% trên nền trang |
-| sai | **cả hai** ô sang `error` + ✕ trong `AppMatchTile.wrongHold`, rồi tự về idle |
-| cả hai | không khoá thao tác — chạm term kế tiếp cắt màu đỏ ngay |
+| sai | **cả hai** ô sang `danger` + ✕ trong `AppMatchTile.wrongHold` = **700ms**, rồi tự về idle |
+| cả hai | không khoá thao tác — chạm ô kế tiếp cắt màu ngay, và một cặp đang ghi DB không đóng băng bàn |
 
 Cái ô rỗng còn làm được một việc nữa: nó là **bằng chứng tiến độ**. Nhìn bàn là
 biết còn mấy cặp, không cần đọc dòng ngữ cảnh, và không tốn một màu nào.
 
-**800ms của đề xuất ban đầu không dựng.** `AppDurations.slow = 320` được ghi là
-*trần* của mọi chuyển động trong app, lý do: trong phiên học người ta đang trả
-lời chứ không đang xem. Bàn năm cặp sai bốn lần ở 800ms là **3.2 giây chết**,
-chồng lên thời gian khoá sẵn có trong lúc ghi DB. Chốt 320ms, và bù độ rõ bằng
-việc giữ màu **trên cả hai ô** thay vì bằng thời gian.
+**320ms là một phép so sai đơn vị, và đã sửa: nay 500ms cho đúng, 700ms cho
+sai.** Lập luận cũ lấy `AppDurations.slow = 320` vì đó là *trần chuyển động* của
+app — nhưng **nhịp giữ không phải chuyển động**. Chuyển động là thời gian một
+trạng thái *đi tới*; nhịp giữ là thời gian nó *đứng yên để đọc*. Đặt hai thứ
+bằng nhau — 320 giữ trên một crossfade 200 — để lại đúng 120ms màu đứng yên, và
+lo ngại "3.2 giây chết" của bản cũ dựa trên một tiền đề nay không còn: nhịp giữ
+**không khoá thao tác**, chạm ô kế tiếp cắt nó ngay, và cặp đang ghi DB không
+đóng băng cả bàn.
+
+Sai giữ lâu hơn đúng vì có nhiều thứ phải đọc hơn: người dùng phải tìm ra *hai ô
+nào* sai với nhau — hai lượt nhìn — còn một cặp đúng chỉ xác nhận điều họ đã
+biết.
 
 **Không đánh dấu bằng riêng màu.** ✓ và ✕ đi kèm, và cả hai trạng thái có
 `Semantics` value — `studyMatchPaired` và `studyMatchWrong`. WCAG 1.4.1. Ô rỗng
@@ -724,8 +736,30 @@ vẫn chấm mình thẻ của term — đó là thứ được ghi lại, khác
   phải ô đã xoá. Nay không vẽ nền gì cả, viền pha trên `scaffoldBackgroundColor`.
 - nhịp xanh đặt bằng `AppDurations.normal`, **đúng bằng** thời gian chuyển màu của
   chính ô đó — nên suốt nhịp ấy ô chỉ đang *đi tới* xanh rồi quay đầu ngay: một
-  vệt tím, xanh không hiện ra lần nào. Nhịp phải dài hơn chuyển màu; `slow` cho
-  120ms màu đã đứng yên.
+  vệt tím, xanh không hiện ra lần nào. Nhịp phải dài hơn chuyển màu. `slow` cho
+  120ms màu đứng yên, và **kể cả 120ms ấy cũng không tới được người dùng**: màn
+  gọi tải lượt kế tiếp ngay sau khi ghi xong, bàn bị tháo khỏi cây widget trước
+  khi nhịp chạy hết. Sửa cả hai: nhịp thành 500/700ms, và bàn chỉ được thay ở
+  ranh giới bàn (§8.8b).
+
+### 8.8b Bàn chỉ được thay ở ranh giới bàn
+
+**Ghi từng cặp, tải từng bàn.** BR-25 buộc ghi ngay khi người dùng trả lời, và
+điều đó không đổi: mỗi cặp vẫn là một transaction riêng. Thứ bỏ đi là *lần đọc*
+đi kèm — trước đây mỗi attempt gọi lại luồng advance + get-next-turn, đọc lại
+session, queue, thẻ và progress, rồi thay cả thân màn bằng loading state. Bàn
+năm cặp trả giá năm lần như vậy, và ô vừa chạm biến mất dưới một spinner trước
+khi phản hồi của chính nó chạy xong.
+
+Nay: bàn tự cập nhật `completedCardIds` tại chỗ sau khi ghi thành công, và chỉ
+gọi tải bàn kế tiếp khi **mọi cặp trên bàn đã ghép đúng** — sau khi nhịp xanh của
+cặp cuối chạy hết. Lô 20 thẻ: vẫn 20 transaction, nhưng 4 lần chuyển bàn thay vì
+20 lần reload. `MxLoadingState` chỉ được phép xuất hiện ở ranh giới **bàn, round
+hoặc stage**.
+
+Callback giữa bàn và controller trả về `Future`: ô chỉ được đánh dấu đã ghép sau
+khi ghi xong, nên bàn vẽ đúng thứ database đang giữ chứ không đoán theo cú chạm.
+Một ghi bị từ chối để nguyên cặp trên bàn.
 
 ### 8.9 Màn `guess` theo handout layout 390×780
 

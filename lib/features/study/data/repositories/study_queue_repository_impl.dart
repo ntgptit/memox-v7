@@ -294,6 +294,35 @@ mixin _StudyQueueOperations on _StudyQueueLayoutOperations {
       );
     }
 
+    // **`match` keeps its row `pending`, and only `match` does** (BR-118).
+    // Its board lays out the whole round at once, so a card answered wrongly is
+    // still *on screen* — and every other mode's effect, `completed` plus an
+    // enrolment, took it off. `completedCardIds` is what the board reads to
+    // empty a slot, so the tile the user got wrong disappeared the moment the
+    // screen refreshed and there was nothing left to try again.
+    //
+    // The enrolment into round N+1 still happens, and for the same reason it
+    // happens everywhere else: BR-116 says a card that failed at any point in a
+    // round belongs to that round's failed set even if it is later answered
+    // correctly to clear the board. `enrolInRound` inserts-or-ignores, so
+    // failing the same card four times enrols it once.
+    if (mode == StudyMode.match) {
+      await _dao.enrolInRound(
+        StudyQueueItemsCompanion.insert(
+          sessionId: session.id,
+          mode: mode.dbValue,
+          round: Value<int>(round + 1),
+          cardId: item.cardId,
+          position: _random.nextInt(1 << 30),
+          status: 'pending',
+        ),
+      );
+
+      return writeItem(
+        StudyQueueItemsCompanion(answersInSession: Value<int>(answers)),
+      );
+    }
+
     if (mode.usesRounds) {
       // **Enrolled at the moment of failure, not when the round ends.** BR-116
       // says a card that failed at any point in a round belongs to the failed

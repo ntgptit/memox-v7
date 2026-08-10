@@ -290,7 +290,7 @@ class _TileSkin {
 
 /// The numbers this tile decides for itself, and none of them is a colour.
 abstract final class AppMatchTile {
-  /// How long a correct pair stays green before its content leaves.
+  /// How long a correct pair stays marked before its content leaves.
   ///
   /// **A beat, not a pause.** Long enough that the eye registers *right* rather
   /// than merely *gone* — a disappearance on its own reads the same as a missed
@@ -298,25 +298,26 @@ abstract final class AppMatchTile {
   /// the board at once, which is the clutter that made keeping them there
   /// permanently the wrong answer.
   ///
-  /// **It has to outlast the tile's own transition, and at `normal` it did
-  /// not.** The container crossfades over [AppDurations.normal]; with the hold
-  /// set to the same value the tile spent every millisecond of it easing from
-  /// selected *towards* green and then turned straight round — a purple smear,
-  /// and green never once on screen. At `slow` the colour lands and is held for
-  /// 120ms, which is the part anybody actually sees. Caught by rendering it,
-  /// not by any test: both durations were tokens and both were defensible.
-  static const Duration successFlash = AppDurations.slow;
+  /// **A hold is how long a state is *visible*; a transition is how long it
+  /// takes to arrive.** They were confused while this was
+  /// [AppDurations.slow] — 320ms against a 200ms crossfade, which left 120ms
+  /// where the colour was actually standing still. `AppDurations` is a scale
+  /// for *motion*, and the longest thing in it is deliberately short; borrowing
+  /// its top rung for a legibility budget is how the budget ended up at a third
+  /// of what it needed. 500ms is 300ms of the state at rest.
+  static const Duration successFlash = Duration(milliseconds: 500);
 
-  /// How long a wrong pair stays red before the board goes back to idle.
+  /// How long a wrong pair stays marked before the board goes back to idle.
   ///
-  /// [AppDurations.slow] is the longest anything in this app is allowed to take,
-  /// and this is the one place worth spending it: the user has to see *which
-  /// two* tiles were wrong together, and a pair is two glances.
+  /// Longer than [successFlash] because there is more to read: the user has to
+  /// find *which two* tiles were wrong together, and a pair is two glances,
+  /// where a correct pair is a confirmation of something already known.
   ///
-  /// **It holds colour, it does not hold input.** Reaching for the next term
-  /// clears it early. A board of five pairs answered wrong four times would
-  /// otherwise spend three seconds refusing taps it has no reason to refuse.
-  static const Duration wrongHold = AppDurations.slow;
+  /// **It holds colour, it does not hold input.** Reaching for the next tile
+  /// clears it early, and a write in flight never freezes the board — a board
+  /// of five pairs answered wrong four times would otherwise spend three
+  /// seconds refusing taps it has no reason to refuse.
+  static const Duration wrongHold = Duration(milliseconds: 700);
 
   /// How much of `borderSubtle` a cleared slot keeps.
   ///

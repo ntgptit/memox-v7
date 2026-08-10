@@ -47,7 +47,7 @@ void main() {
         wrapForTest(
           MatchBoardSectionWidget(
             board: board,
-            onPairAttempt: (term, {required isCorrect}) =>
+            onPairAttempt: (term, {required isCorrect}) async =>
                 attempts.add(term.cardId),
           ),
         ),
@@ -70,7 +70,7 @@ void main() {
         wrapForTest(
           MatchBoardSectionWidget(
             board: board,
-            onPairAttempt: (term, {required isCorrect}) =>
+            onPairAttempt: (term, {required isCorrect}) async =>
                 attempts.add((cardId: term.cardId, isCorrect: isCorrect)),
           ),
         ),
@@ -95,7 +95,7 @@ void main() {
         wrapForTest(
           MatchBoardSectionWidget(
             board: board,
-            onPairAttempt: (_, {required isCorrect}) {},
+            onPairAttempt: (_, {required isCorrect}) async {},
           ),
         ),
       );
@@ -123,7 +123,7 @@ void main() {
         wrapForTest(
           MatchBoardSectionWidget(
             board: board,
-            onPairAttempt: (term, {required isCorrect}) =>
+            onPairAttempt: (term, {required isCorrect}) async =>
                 attempts.add(term.cardId),
           ),
         ),
@@ -149,7 +149,7 @@ void main() {
         wrapForTest(
           MatchBoardSectionWidget(
             board: board,
-            onPairAttempt: (_, {required isCorrect}) {},
+            onPairAttempt: (_, {required isCorrect}) async {},
           ),
         ),
       );
@@ -221,7 +221,7 @@ void main() {
             card('b'),
             card('c'),
           ], Random(1))!,
-          onPairAttempt: (_, {required isCorrect}) {},
+          onPairAttempt: (_, {required isCorrect}) async {},
         ),
       );
 
@@ -246,7 +246,7 @@ void main() {
         wrapForTest(
           MatchBoardSectionWidget(
             board: board,
-            onPairAttempt: (_, {required isCorrect}) {},
+            onPairAttempt: (_, {required isCorrect}) async {},
           ),
         ),
       );
@@ -265,7 +265,7 @@ void main() {
               card('b'),
               card('c'),
             ], Random(2))!,
-            onPairAttempt: (_, {required isCorrect}) {},
+            onPairAttempt: (_, {required isCorrect}) async {},
           ),
         ),
       );
@@ -288,7 +288,7 @@ void main() {
           MatchBoardSectionWidget(
             board: board,
             pairedCardIds: const <String>{'a'},
-            onPairAttempt: (_, {required isCorrect}) {},
+            onPairAttempt: (_, {required isCorrect}) async {},
           ),
         ),
       );
@@ -313,7 +313,7 @@ void main() {
           MatchBoardSectionWidget(
             board: board,
             pairedCardIds: const <String>{'a'},
-            onPairAttempt: (term, {required isCorrect}) =>
+            onPairAttempt: (term, {required isCorrect}) async =>
                 attempts.add(term.cardId),
           ),
         ),
@@ -338,7 +338,7 @@ void main() {
         wrapForTest(
           MatchBoardSectionWidget(
             board: board,
-            onPairAttempt: (term, {required isCorrect}) =>
+            onPairAttempt: (term, {required isCorrect}) async =>
                 attempts.add(term.cardId),
           ),
         ),
@@ -359,7 +359,7 @@ void main() {
           MatchBoardSectionWidget(
             board: board,
             isLocked: true,
-            onPairAttempt: (term, {required isCorrect}) =>
+            onPairAttempt: (term, {required isCorrect}) async =>
                 attempts.add(term.cardId),
           ),
         ),

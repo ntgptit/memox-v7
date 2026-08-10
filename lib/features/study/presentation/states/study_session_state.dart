@@ -9,6 +9,17 @@ import '../../domain/models/study_turn_model.dart';
 
 part 'study_session_state.freezed.dart';
 
+/// Which way a `browse` step goes (BR-155).
+///
+/// An enum rather than a boolean: `browseStep(true)` at a call site says
+/// nothing, and the two directions are not each other's negation — forward from
+/// the live turn writes, and nothing else does.
+///
+/// Here rather than in the controller because it is part of the same vocabulary
+/// as [StudySessionState.browseLookBack], and because a controller file is for
+/// commands, not for the types they take.
+enum StudyBrowseStep { forward, back }
+
 /// What a study screen is doing right now.
 ///
 /// **Three task flags, one per operation, and none of them called `isLoading`.**

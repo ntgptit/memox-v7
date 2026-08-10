@@ -301,6 +301,7 @@ base class FakeStudyRepository implements StudyRepository {
 
   @override
   Future<StudyTurnModel?> nextTurn(String sessionId) async {
+    nextTurnCalls++;
     final gate = nextTurnGate;
     if (gate != null) await gate.future;
 
@@ -308,6 +309,14 @@ base class FakeStudyRepository implements StudyRepository {
   }
 
   StudyTurnModel? nextTurn_;
+
+  /// How many times a turn has been read.
+  ///
+  /// **A count, because the change under test is an absence.** `match` writes
+  /// every pair and reads once a board; nothing about a working board says so,
+  /// and the only way to catch a reload creeping back in between two taps is to
+  /// count the reads.
+  int nextTurnCalls = 0;
 
   final List<({String cardId, int? remainingMs, bool isRevealed})> progress =
       <({String cardId, int? remainingMs, bool isRevealed})>[];

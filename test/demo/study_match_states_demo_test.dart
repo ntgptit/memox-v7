@@ -123,7 +123,7 @@ void main() {
         child: MatchBoardSectionWidget(
           board: board,
           pairedCardIds: paired,
-          onPairAttempt: (_, {required isCorrect}) {},
+          onPairAttempt: (_, {required isCorrect}) async {},
         ),
       ),
     ),

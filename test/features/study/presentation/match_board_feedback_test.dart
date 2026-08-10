@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -38,7 +39,7 @@ void main() {
     wrapForTest(
       MatchBoardSectionWidget(
         board: board,
-        onPairAttempt: (_, {required isCorrect}) {},
+        onPairAttempt: (_, {required isCorrect}) async {},
       ),
     ),
   );
@@ -149,6 +150,100 @@ void main() {
       expect(_edge(tester, 'front-b').color, _semantic(tester).primaryAccent);
 
       await tester.pump(AppMatchTile.wrongHold);
+    });
+
+    testWidgets('a mark is held long enough to be read, and no longer', (
+      tester,
+    ) async {
+      // **A hold is how long a state is visible; a transition is how long it
+      // takes to arrive.** They were the same 320ms token, which left 120ms of
+      // the state actually standing still — and the board was unmounted for the
+      // next fetch before even that had run. The numbers are asserted from both
+      // sides so a future tidy-up cannot quietly shorten them again.
+      await pumpBoard(tester);
+
+      await tester.tap(find.text('front-a'));
+      await tester.pump();
+      await tester.tap(find.text('back-b'));
+      await _settleColour(tester);
+
+      await tester.pump(AppMatchTile.wrongHold - AppDurations.normal * 2);
+      expect(find.byIcon(Icons.close), findsNWidgets(2));
+
+      await tester.pump(AppDurations.normal * 2);
+      await tester.pumpAndSettle();
+      expect(find.byIcon(Icons.close), findsNothing);
+
+      expect(
+        AppMatchTile.wrongHold,
+        greaterThan(AppMatchTile.successFlash),
+        reason: 'a wrong pair is two glances, a correct one is a confirmation',
+      );
+      expect(
+        AppMatchTile.successFlash,
+        greaterThan(AppDurations.normal),
+        reason: 'a hold shorter than its own transition is never seen at rest',
+      );
+    });
+
+    testWidgets('a pair is cleared only once its write resolves', (
+      tester,
+    ) async {
+      // The board used to tick on the tap. A refused write then left a slot
+      // emptied for an answer the session does not have.
+      final gate = Completer<void>();
+      await tester.pumpWidget(
+        wrapForTest(
+          MatchBoardSectionWidget(
+            board: board,
+            onPairAttempt: (_, {required isCorrect}) => gate.future,
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('front-a'));
+      await tester.pump();
+      await tester.tap(find.text('back-a'));
+      await _settleColour(tester);
+
+      expect(find.byIcon(Icons.check), findsNothing);
+
+      gate.complete();
+      await tester.pump();
+      expect(find.byIcon(Icons.check), findsNWidgets(2));
+
+      await tester.pump(AppMatchTile.successFlash);
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('the next board is asked for once, after the last pair', (
+      tester,
+    ) async {
+      // **The whole point of the change.** Every attempt used to end in a
+      // fetch, so a board of three cost three reloads and three unmounts of the
+      // board being played. Now the board is what says it is finished.
+      var fetches = 0;
+      await tester.pumpWidget(
+        wrapForTest(
+          MatchBoardSectionWidget(
+            board: board,
+            onPairAttempt: (_, {required isCorrect}) async {},
+            onBoardComplete: () async => fetches++,
+          ),
+        ),
+      );
+
+      for (final id in <String>['a', 'b', 'c']) {
+        await tester.tap(find.text('front-$id'));
+        await tester.pump();
+        await tester.tap(find.text('back-$id'));
+        await tester.pump();
+        expect(fetches, 0, reason: 'fetched in the middle of a board');
+        await tester.pump(AppMatchTile.successFlash);
+      }
+
+      await tester.pumpAndSettle();
+      expect(fetches, 1);
     });
   });
 }

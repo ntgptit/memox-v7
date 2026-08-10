@@ -19,10 +19,22 @@ import '../sections/study_card_face_section_widget.dart';
 import 'study_swipe_deck_widget.dart';
 
 /// What the session screen tells a mode's widget when an answer arrives.
+/// One `match` pair, written on its own and awaited by the board.
+///
+/// **Separate from [StudyAnswerSink] because the two do different things.** An
+/// answer sink is fire-and-forget and ends in a fetch; this returns a `Future`
+/// the board waits on and fetches nothing, so five pairs on a board cost five
+/// writes and one read instead of five of each (BR-25 keeps the writes). It is
+/// the same command underneath — `answer(..., shouldAdvance: false)`.
+typedef StudyMatchAttemptSink =
+    Future<void> Function({
+      required String cardId,
+      required StudyAction action,
+    });
+
 typedef StudyAnswerSink =
     void Function(
       StudyAction action, {
-      String? cardId,
       StudyOutcomeReason? outcomeReason,
       int? comparisonVersion,
       bool? hasUsedHint,
@@ -59,6 +71,12 @@ Widget? studyModeView({
   /// Called when the body stops asking and starts telling, so the frame can
   /// swap its hint line for one that describes what is on screen (§8.11).
   VoidCallback? onResolved,
+
+  /// Writes one `match` pair and resolves when the database has it.
+  StudyMatchAttemptSink? onMatchAttempt,
+
+  /// Fetches the next board, once every pair on this one has landed.
+  Future<void> Function()? onMatchBoardComplete,
   ValueChanged<Duration>? onRecallTick,
   void Function({required Duration remaining, required bool isRevealed})?
   onRecallSuspend,
@@ -123,8 +141,9 @@ Widget? studyModeView({
     StudyMode.match: () => _matchView(
       turn: turn,
       state: state,
-      onAnswer: onAnswer,
       random: Random(_seedFor(state, turn: turn, isPerCard: false)),
+      onMatchAttempt: onMatchAttempt,
+      onMatchBoardComplete: onMatchBoardComplete,
     ),
     // The five options belong to one question, so this one does. BR-127 wants
     // the two permutations independent, and different seeds are what makes them
@@ -245,8 +264,9 @@ List<StudyCardModel> _roundCards({
 Widget? _matchView({
   required StudyTurnModel turn,
   required StudySessionState state,
-  required StudyAnswerSink onAnswer,
   required Random random,
+  StudyMatchAttemptSink? onMatchAttempt,
+  Future<void> Function()? onMatchBoardComplete,
 }) {
   // **The round's cards, in the round's order** (BR-156). `sessionCards` is
   // every card the session opened with; from round 2 the queue holds only the
@@ -277,17 +297,30 @@ Widget? _matchView({
   return MatchBoardSectionWidget(
     board: board,
     pairedCardIds: turn.progress.completedCardIds.toSet(),
-    isLocked: state.isSubmitting,
+    // **`isLocked` is left at its default of false, and that is a change.** It
+    // used to follow `state.isSubmitting`: `match` is the one mode whose next
+    // interaction is already on screen, so freezing the whole board for the
+    // length of a transaction made every other pair wait for one the user had
+    // finished with. The board guards the pair in flight itself.
     // **The term's card, not the queue's** (BR-118). The board lays out the
     // whole round, so the pair a person reaches for is rarely the card the
     // queue happens to be serving — and every turn was being recorded against
     // that one instead. The widget has always reported which term was picked;
     // this is the caller finally using it.
-    onPairAttempt: (term, {required isCorrect}) => _send(
-      onAnswer,
-      _actionFor(state, isCorrect: isCorrect),
-      cardId: term.cardId,
-    ),
+    onPairAttempt: (term, {required isCorrect}) {
+      // A null action means the deck runs a scheduler this build has no binary
+      // mapping for (BR-107) — the same case the guard above already refuses to
+      // build a body at all, so it cannot arise here. Written as a value rather
+      // than a `!` so that if it ever does, it is a write that does not happen
+      // rather than a crash.
+      final action = _actionFor(state, isCorrect: isCorrect);
+      if (action == null || onMatchAttempt == null) {
+        return Future<void>.value();
+      }
+
+      return onMatchAttempt(cardId: term.cardId, action: action);
+    },
+    onBoardComplete: onMatchBoardComplete,
   );
 }
 
@@ -334,7 +367,6 @@ Widget? _guessView({
 void _send(
   StudyAnswerSink sink,
   StudyAction? action, {
-  String? cardId,
   StudyOutcomeReason? outcomeReason,
   int? comparisonVersion,
   bool? hasUsedHint,
@@ -343,7 +375,6 @@ void _send(
 
   sink(
     action,
-    cardId: cardId,
     outcomeReason: outcomeReason,
     comparisonVersion: comparisonVersion,
     hasUsedHint: hasUsedHint,

@@ -1470,9 +1470,9 @@
   "@studyHintSelfAssess": {
     "description": "Bottom hint line for self-assess, the one mode that takes the action straight from the user (BR-106)."
   },
-  "studyHintMatch": "Tap a term, then its meaning to match",
+  "studyHintMatch": "Tap one tile, then its match",
   "@studyHintMatch": {
-    "description": "Bottom hint line for match. Term first: the turn belongs to the term's card (BR-118)."
+    "description": "Bottom hint line for match. Either side may be picked first; the turn belongs to the card owning the Korean term (BR-118)."
   },
   "studyHintGuessAnswered": "Answer shown — the correct option is highlighted",
   "@studyHintGuessAnswered": {

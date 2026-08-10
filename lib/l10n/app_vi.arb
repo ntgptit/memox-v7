@@ -1470,9 +1470,9 @@
   "@studyHintSelfAssess": {
     "description": "Bottom hint line for self-assess, the one mode that takes the action straight from the user (BR-106)."
   },
-  "studyHintMatch": "Chạm một từ, rồi chạm nghĩa của nó để ghép",
+  "studyHintMatch": "Chạm một ô, rồi chạm ô ghép với nó",
   "@studyHintMatch": {
-    "description": "Bottom hint line for match. Term first: the turn belongs to the term's card (BR-118)."
+    "description": "Bottom hint line for match. Either side may be picked first; the turn belongs to the card owning the Korean term (BR-118)."
   },
   "studyHintGuessAnswered": "Đã hiện đáp án — lựa chọn đúng được tô sáng",
   "@studyHintGuessAnswered": {

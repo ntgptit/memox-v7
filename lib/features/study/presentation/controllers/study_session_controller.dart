@@ -23,22 +23,6 @@ import '../states/study_session_state.dart';
 
 part 'study_session_controller.g.dart';
 
-/// The placeholder `browse` hands over, and which never reaches a write.
-///
-/// [StudySessionController.answer] takes an action because five of the six modes
-/// produce one; `browse` does not (BR-111), and the branch for it drops this
-/// before touching the database. Named rather than written inline so the next
-/// reader asks what it is instead of assuming `browse` grades cards as
-/// remembered.
-const _browseHasNoAction = StudyAction.remembered;
-
-/// Which way a `browse` step goes (BR-155).
-///
-/// An enum rather than a boolean: `browseStep(true)` at a call site says
-/// nothing, and the two directions are not each other's negation — forward from
-/// the live turn writes, and nothing else here does.
-enum StudyBrowseStep { forward, back }
-
 /// Drives one study session.
 ///
 /// **It holds no rule.** Which card comes next, whether a forgotten one comes
@@ -96,23 +80,30 @@ class StudySessionController extends _$StudySessionController {
     }
   }
 
-  /// Records an answer for the card on screen, then pulls the next turn.
+  /// Records an answer, then pulls the next turn.
   ///
   /// **The double-tap guard is the first line, and it has to be.** BR-25 and
-  /// BR-126 both say one question yields at most one turn, and the window is
-  /// real: a write takes long enough for a second tap to land inside it. The
-  /// check reads [StudySessionState.isSubmitting] rather than a private flag so
-  /// the buttons and the guard cannot disagree about whether input is open.
-  /// [cardId] names the card the turn belongs to, when it is not the one the
-  /// queue is serving.
+  /// BR-126 both say one question yields at most one turn, and a write takes
+  /// long enough for a second tap to land inside it. It reads
+  /// [StudySessionState.isSubmitting] rather than a private flag so the buttons
+  /// and the guard cannot disagree.
   ///
-  /// **`match` is the mode this exists for** (BR-118). Its board lays out the
-  /// whole round, so the pair a person reaches for is rarely the card at the
-  /// head of the queue — and defaulting to that one recorded every turn against
-  /// the wrong card. Every other mode shows one card and passes nothing.
+  /// **[cardId] is for `match` alone**, whose board lays out the whole round, so
+  /// the pair a person reaches for is rarely the card the queue is serving.
+  ///
+  /// **[shouldAdvance] is for `match` alone too, and it is the performance of
+  /// the mode.** BR-25 keeps the write; what goes is the *read* that followed —
+  /// [_pullTurn] re-reads everything and swaps the body for a spinner, so five
+  /// pairs cost five reloads and unmounted the board each time. False writes and
+  /// stops; [advanceMatchBoard] does the one read a board owes.
+  ///
+  /// The board waits on the returned future, and a wrong pair writes and enrols
+  /// (BR-116) but clears nothing: its row stays `pending`, so it stays on the
+  /// board to try again (BR-118).
   Future<void> answer(
     StudyAction action, {
     String? cardId,
+    bool shouldAdvance = true,
     StudyOutcomeReason? outcomeReason,
     int? comparisonVersion,
     bool? usedHint,
@@ -125,23 +116,8 @@ class StudySessionController extends _$StudySessionController {
 
     state = state.copyWith(isSubmitting: true, error: null);
 
-    final repository = ref.read(studyRepositoryProvider);
     try {
-      // `browse` produces no action, so there is nothing to submit — it is
-      // shown and moved past (BR-111, BR-28). The schema cannot even hold
-      // `browse` as an answer mode, so this is a branch rather than a value.
-      if (session.currentMode == StudyMode.browse) {
-        await MarkBrowsedUseCase(
-          repository,
-        ).call(sessionId: session.id, cardId: cardId ?? turn.cardId);
-
-        if (!ref.mounted) return;
-        state = state.copyWith(isSubmitting: false);
-
-        return _pullTurn();
-      }
-
-      await SubmitStudyAnswerUseCase(repository).call(
+      await SubmitStudyAnswerUseCase(ref.read(studyRepositoryProvider)).call(
         session: session,
         cardId: cardId ?? turn.cardId,
         mode: session.currentMode,
@@ -154,33 +130,57 @@ class StudySessionController extends _$StudySessionController {
       );
 
       if (!ref.mounted) return;
-      state = state.copyWith(isSubmitting: false);
 
-      await _pullTurn();
-    } on ConflictFailure catch (error) {
-      // A refusal is recoverable: the card stays on screen and the user can try
-      // again. A failed write must not look like a card that was answered and
-      // moved past.
-      if (!ref.mounted) return;
-      state = state.copyWith(isSubmitting: false, error: error);
-    } on Object catch (error) {
-      // Anything else is a write that did not happen and cannot be retried into
-      // working — BR-85's `persistence_error`. The session ends rather than
-      // pretending, because a session that keeps taking answers it cannot store
-      // is worse than one that stops and says so.
-      //
-      // Turns already written stay written (BR-86): ending a session never
-      // touches `study_answers`.
-      await _failSession();
+      if (shouldAdvance) {
+        state = state.copyWith(isSubmitting: false);
 
-      if (!ref.mounted) return;
+        return _pullTurn();
+      }
+
+      // A lapse leaves the board alone: the row stays `pending`, so the pair
+      // stays where it is to be tried again (BR-118).
       state = state.copyWith(
         isSubmitting: false,
-        isFinished: true,
-        error: error,
+        turn: action.isLapse || cardId == null
+            ? turn
+            : turn.copyWith(progress: turn.progress.withCleared(cardId)),
       );
-      await _loadSummary();
+    } on Object catch (error) {
+      await _writeFailed(error);
     }
+  }
+
+  /// What a refused or failed write does — one policy, because two copies drift
+  /// and only one ends the session. A [ConflictFailure] is recoverable. Anything
+  /// else is BR-85's `persistence_error`, so the session ends rather than taking
+  /// answers it cannot store; turns already written stay written (BR-86).
+  Future<void> _writeFailed(Object error) async {
+    if (error is ConflictFailure) {
+      if (!ref.mounted) return;
+      state = state.copyWith(isSubmitting: false, error: error);
+
+      return;
+    }
+
+    await _failSession();
+
+    if (!ref.mounted) return;
+    state = state.copyWith(isSubmitting: false, isFinished: true, error: error);
+    await _loadSummary();
+  }
+
+  /// Fetches the next board, round or stage — once the current one is done.
+  ///
+  /// The counterpart to `answer(..., shouldAdvance: false)`, so a loading state
+  /// appears at a board boundary rather than between two taps. Why it is a
+  /// seventh name: `command_query_separation_test.dart`.
+  Future<void> advanceMatchBoard() {
+    if (state.session?.currentMode != StudyMode.match) {
+      return Future<void>.value();
+    }
+    if (state.isSubmitting || state.isAdvancing) return Future<void>.value();
+
+    return _pullTurn();
   }
 
   /// Moves `browse` one card along the round, either way (BR-155).
@@ -214,7 +214,7 @@ class StudySessionController extends _$StudySessionController {
     if (state.isSubmitting || state.isAdvancing) return Future<void>.value();
 
     if (step == StudyBrowseStep.forward && !state.isLookingBack) {
-      return answer(_browseHasNoAction);
+      return _markBrowsed();
     }
 
     final next = step == StudyBrowseStep.back
@@ -233,11 +233,36 @@ class StudySessionController extends _$StudySessionController {
     return Future<void>.value();
   }
 
+  /// Moves past the live `browse` card: mark it seen, then fetch the next.
+  ///
+  /// **Not [answer], which is where this used to go.** `browse` produces no
+  /// action (BR-111), so it had to invent one for a grading method to discard.
+  Future<void> _markBrowsed() async {
+    final session = state.session;
+    final turn = state.turn;
+    if (session == null || turn == null) return;
+
+    state = state.copyWith(isSubmitting: true, error: null);
+
+    try {
+      await MarkBrowsedUseCase(
+        ref.read(studyRepositoryProvider),
+      ).call(sessionId: session.id, cardId: turn.cardId);
+
+      if (!ref.mounted) return;
+      state = state.copyWith(isSubmitting: false);
+
+      await _pullTurn();
+    } on Object catch (error) {
+      await _writeFailed(error);
+    }
+  }
+
   /// Reads what the session came to, once it has ended.
   ///
-  /// **Read back rather than accumulated.** A running tally in the controller
-  /// would be a second copy of numbers the database already holds, and the two
-  /// disagree the moment a write is refused — the tally counts the tap, the
+  /// **Read back rather than accumulated.** A tally would be a second copy of
+  /// numbers the database holds, and the two disagree the moment a write is
+  /// refused — the tally counts the tap, the
   /// table counts the row. It also reads `status` from the same statement, so a
   /// session that ended by failing cannot be summarised as one that finished.
   ///
@@ -326,9 +351,8 @@ class StudySessionController extends _$StudySessionController {
   /// Reads the next turn, advancing the stage when this one has run dry.
   ///
   /// **A null turn is not the end of the session.** It can also mean every
-  /// remaining card is waiting out BR-26's three-card gap, and the stage decides
-  /// which of the two it is. Treating null as "finished" ends a session with
-  /// cards still unanswered.
+  /// remaining card is waiting out BR-26's three-card gap; the stage decides
+  /// which. Treating null as "finished" ends a session with cards unanswered.
   Future<void> _pullTurn() async {
     final session = state.session;
     if (session == null) return;
@@ -351,9 +375,8 @@ class StudySessionController extends _$StudySessionController {
           isFinished: true,
           turn: null,
         );
-        await _loadSummary();
 
-        return;
+        return _loadSummary();
       }
 
       final turn = await GetNextTurnUseCase(repository).call(session.id);
@@ -364,10 +387,9 @@ class StudySessionController extends _$StudySessionController {
         turn: turn,
         isAdvancing: false,
         // **A new card arrives at the front of the trail** (BR-155). The offset
-        // counts backwards from the live turn, so one left over from the
-        // previous card would put a card the user has already walked past on
-        // screen in place of the one they just moved to — and nothing about the
-        // screen would say so.
+        // counts backwards from the live turn, so one left over from the last
+        // card would put a card already walked past on screen in place of the
+        // one just moved to — and nothing would say so.
         browseLookBack: 0,
       );
     } on Object catch (error) {

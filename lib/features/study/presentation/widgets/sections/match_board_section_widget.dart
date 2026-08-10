@@ -8,34 +8,33 @@ import '../items/match_tile_widget.dart';
 
 /// The pairing board (BR-153, BR-118).
 ///
-/// **A turn belongs to the term that was picked first, not to the meaning that
-/// was picked second** (BR-118). Choosing the wrong meaning marks the *term's*
-/// card failed; the card that happens to own that meaning was never being asked
+/// **A turn belongs to the card that owns the term, whichever tile was touched
+/// first** (BR-118). The card that owns the meaning was never being asked
 /// about, and grading it would punish a card for sitting on the board.
 ///
-/// The board is built by the handler, which is also what refuses to lay out
-/// fewer than two pairs — a single pair makes the answer the only thing left.
+/// The handler builds it, and refuses fewer than two pairs — a single pair
+/// makes the answer the only thing left.
 ///
 /// **A paired tile leaves its slot behind** (§4, §8.8). What §4 forbade was the
 /// board *reflowing*: remove a tile and every row under it moves, so the tile
 /// the user was about to press shifts the instant they press something else —
-/// and since the grid fills the height, the survivors would grow as well. So the
-/// content goes and the slot stays: a beat of `success` and a tick, then the
-/// words fade out and a faint outline holds the place.
+/// and since the grid fills the height, the survivors grow as well. So the
+/// content goes and the slot stays: a beat and a tick, then the words fade out
+/// and a faint outline holds the place.
 ///
 /// The two blanks a finished card leaves are usually **not** in the same row,
-/// because the two columns are independent shuffles (BR-127). That is the board
-/// working, not a bug: a row is two tiles at the same index, never a pair.
+/// because the columns are independent shuffles (BR-127): a row is two tiles at
+/// the same index, never a pair.
 ///
-/// **Keeping the green tile forever was the wrong half of that decision.** Three
-/// states then compete on one board — idle, selected and paired — and the last
-/// of them is finished business. What it was carrying, *how many pairs are
-/// left*, an empty slot says better and without a colour.
+/// **Keeping the green tile forever was the wrong half of that decision.** It
+/// would put three states on one board — idle, selected and paired — and the
+/// last is finished business. What it carried, *how many pairs are left*, an
+/// empty slot says better and without a colour.
 ///
-/// **A wrong pair is told, and it was not before.** Picking the wrong meaning
-/// used to clear the selection and nothing else, so it looked exactly like a
-/// missed tap. Both tiles go `error` for [AppMatchTile.wrongHold] and come back
-/// on their own — colour held, input not.
+/// **A wrong pair is told, and it was not before.** Picking wrong used to clear
+/// the selection and nothing else, so it looked like a missed tap. Both tiles
+/// mark for [AppMatchTile.wrongHold] and come back on their own — colour held,
+/// input not.
 ///
 /// ## The grid fills the height, until it cannot
 ///
@@ -43,19 +42,17 @@ import '../items/match_tile_widget.dart';
 /// so the board ends exactly where the hint line begins — no strip of dead page
 /// under the last tile and no arithmetic that only holds at one screen size.
 ///
-/// **Five rows is a ceiling, not the mock's content.** BR-156 splits a round
-/// into boards of at most five pairs, so a round of twelve is three boards and
-/// the last one can be a single pair. What varies is therefore small, but it
-/// still varies: rows that always flex would give a two-pair board a pair of
-/// 300px slabs, and a five-pair board 48px rows at 2.0 text scale. So the flex
+/// **Five rows is a ceiling, not the mock's content** (BR-156), and what varies
+/// is small but real: rows that always flex would give a two-pair board a pair
+/// of 300px slabs and a five-pair board 48px rows at 2.0 text scale. So the flex
 /// has a floor — [AppMatchTile.minRowHeight], scaled with the text — and a board
-/// that cannot meet it scrolls instead of squeezing. At 1.0 the floor is 112 and
-/// five rows need 592, which the review surface's board area clears, so every
-/// board a phone shows still fills exactly.
+/// that cannot meet it scrolls instead of squeezing. The arithmetic is in
+/// `docs/wireframes/m5-study-modes.md` §8.6.
 class MatchBoardSectionWidget extends StatefulWidget {
   const MatchBoardSectionWidget({
     required this.board,
     required this.onPairAttempt,
+    this.onBoardComplete,
     this.pairedCardIds = const <String>{},
     this.isLocked = false,
     super.key,
@@ -76,7 +73,20 @@ class MatchBoardSectionWidget extends StatefulWidget {
   ///
   /// The caller turns that into an action through the scheduler (BR-107); this
   /// widget never names `forgotten` or `remembered`, because `sm2` has neither.
-  final void Function(MatchTile term, {required bool isCorrect}) onPairAttempt;
+  ///
+  /// **It returns a `Future`, and the board waits on it.** A pair is cleared
+  /// only once the write resolves, so a refused write leaves the tile where it
+  /// was instead of emptying a slot the session will not remember.
+  final Future<void> Function(MatchTile term, {required bool isCorrect})
+  onPairAttempt;
+
+  /// Called once every pair has landed, after the last one's beat.
+  ///
+  /// **The one read `match` pays for.** Fetching after every attempt reloaded
+  /// session, queue, card and progress and swapped the board for a spinner,
+  /// five times a board. Null so a widget test can drive the board with no
+  /// controller behind it.
+  final Future<void> Function()? onBoardComplete;
 
   final bool isLocked;
 
@@ -86,13 +96,20 @@ class MatchBoardSectionWidget extends StatefulWidget {
 }
 
 class _MatchBoardSectionWidgetState extends State<MatchBoardSectionWidget> {
-  MatchTile? _selectedTerm;
+  /// The tile waiting for its partner, whichever side it came from.
+  ///
+  /// **It was `_selectedTerm`, and the type was the rule.** Only a term could
+  /// be held, so a meaning tapped first was dropped: the board silently refused
+  /// half the taps a person makes, and the hint line had to teach an order the
+  /// game does not need. A pair is unordered — what BR-118 fixes is which
+  /// *card* answers for it, and that is settled when the pair completes.
+  MatchTile? _selectedTile;
 
   /// Cards already paired. Their slots stay on the board; this is what empties
   /// them.
   final Set<String> _matched = <String>{};
 
-  /// The pair that just landed, for as long as it is still flashing green.
+  /// The pair that just landed, for as long as it is still marked.
   ///
   /// One at a time on purpose: an answer takes a database write to come back,
   /// and two correct pairs inside [AppMatchTile.successFlash] is not a sequence
@@ -108,6 +125,11 @@ class _MatchBoardSectionWidgetState extends State<MatchBoardSectionWidget> {
 
   Timer? _flashTimer;
   Timer? _wrongTimer;
+
+  /// True from the moment the last pair lands until the caller takes the board
+  /// away. Without it a tap arriving during the fetch asks for the next board a
+  /// second time.
+  bool _isFinishing = false;
 
   @override
   void dispose() {
@@ -138,9 +160,10 @@ class _MatchBoardSectionWidgetState extends State<MatchBoardSectionWidget> {
     // whichever tile happened to hold that id next.
     _flashTimer?.cancel();
     _wrongTimer?.cancel();
-    _selectedTerm = null;
+    _selectedTile = null;
     _flashingCardId = null;
     _wrongPair = null;
+    _isFinishing = false;
     _matched.clear();
   }
 
@@ -152,51 +175,112 @@ class _MatchBoardSectionWidgetState extends State<MatchBoardSectionWidget> {
     for (final tile in board.meanings) tile.cardId,
   ].join(',');
 
-  void _selectTerm(MatchTile term) {
-    if (widget.isLocked) return;
+  /// One tap, from either column. Four outcomes and only the last is an answer:
+  /// nothing held yet holds this tile; the same tile again puts it down; a tile
+  /// on the same side moves the selection; one opposite completes a pair.
+  void _select(MatchTile tile) {
+    if (widget.isLocked || _isFinishing) return;
 
-    setState(() {
-      // Reaching for the next pair ends the last one's complaint. The red holds
-      // colour, not input — waiting it out would be the board refusing a tap it
-      // has no reason to refuse.
-      _wrongTimer?.cancel();
-      _wrongPair = null;
-      _selectedTerm = term;
-    });
+    final held = _selectedTile;
+
+    if (held == null) {
+      setState(() {
+        // Reaching for the next pair ends the last one's complaint. The red
+        // holds colour, not input — waiting it out would be the board refusing
+        // a tap it has no reason to refuse.
+        _wrongTimer?.cancel();
+        _wrongPair = null;
+        _selectedTile = tile;
+      });
+
+      return;
+    }
+
+    // Tapping what is already held puts it down; without this the only way out
+    // of a selection is to answer with it, and a mis-tap becomes a turn.
+    if (_isSameTile(held, tile)) {
+      setState(() => _selectedTile = null);
+
+      return;
+    }
+
+    // Two tiles from one column are not a pair and never an attempt — this is
+    // the user changing their mind, which costs a card nothing.
+    if (held.isTerm == tile.isTerm) {
+      setState(() => _selectedTile = tile);
+
+      return;
+    }
+
+    _answerWith(held: held, tile: tile);
   }
 
-  void _selectMeaning(MatchTile meaning) {
-    final term = _selectedTerm;
+  static bool _isSameTile(MatchTile a, MatchTile b) =>
+      a.cardId == b.cardId && a.isTerm == b.isTerm;
 
-    // A meaning tapped with no term chosen is not an answer. Guessing which
-    // term it "probably" meant would record a turn the user never gave.
-    if (widget.isLocked || term == null) return;
-
+  /// The two tiles of a completed pair, normalised and submitted.
+  ///
+  /// **The card is the term's, whichever tile was touched first** (BR-118): the
+  /// meaning's card was never the one being asked about, so picking it first
+  /// must not change who answers for the mistake.
+  void _answerWith({required MatchTile held, required MatchTile tile}) {
+    final term = held.isTerm ? held : tile;
+    final meaning = held.isTerm ? tile : held;
     final isCorrect = widget.board.isPair(term, meaning);
 
     setState(() {
-      _selectedTerm = null;
-      if (isCorrect) {
-        _matched.add(term.cardId);
-        _flashingCardId = term.cardId;
-        _wrongPair = null;
-      } else {
-        _wrongPair = (termId: term.cardId, meaningId: meaning.cardId);
-      }
+      _selectedTile = null;
+      _wrongPair = isCorrect
+          ? null
+          : (termId: term.cardId, meaningId: meaning.cardId);
     });
 
-    if (isCorrect) {
-      _hold(_flashTimer, AppMatchTile.successFlash, () {
-        _flashingCardId = null;
-      }, assign: (timer) => _flashTimer = timer);
-    } else {
+    if (!isCorrect) {
       _hold(_wrongTimer, AppMatchTile.wrongHold, () {
         _wrongPair = null;
       }, assign: (timer) => _wrongTimer = timer);
     }
 
-    widget.onPairAttempt(term, isCorrect: isCorrect);
+    unawaited(_land(term, isCorrect: isCorrect));
   }
+
+  /// Submits the attempt and, if it stood, marks the pair.
+  ///
+  /// **The tick belongs to the write, not to the tap:** `_matched` is added
+  /// once the future resolves, so a refused write leaves the pair on the board
+  /// rather than emptying a slot the session will not remember.
+  Future<void> _land(MatchTile term, {required bool isCorrect}) async {
+    await widget.onPairAttempt(term, isCorrect: isCorrect);
+    if (!mounted || !isCorrect) return;
+
+    setState(() {
+      _matched.add(term.cardId);
+      _flashingCardId = term.cardId;
+    });
+
+    _hold(_flashTimer, AppMatchTile.successFlash, () {
+      _flashingCardId = null;
+    }, assign: (timer) => _flashTimer = timer);
+
+    if (!_isBoardCleared) return;
+
+    // **The board is taken away here, and only after the beat.** One that
+    // swapped the instant its last pair landed would show the tick for a single
+    // frame, so the pair that finished the round would be the one the user
+    // never saw confirmed.
+    _isFinishing = true;
+    await Future<void>.delayed(AppMatchTile.successFlash);
+    if (!mounted) return;
+
+    await widget.onBoardComplete?.call();
+  }
+
+  /// Whether every card on this board has been answered correctly.
+  bool get _isBoardCleared => widget.board.terms.every(
+    (tile) =>
+        _matched.contains(tile.cardId) ||
+        widget.pairedCardIds.contains(tile.cardId),
+  );
 
   /// Holds a transient state for [duration], then drops it.
   ///
@@ -267,9 +351,9 @@ class _MatchBoardSectionWidgetState extends State<MatchBoardSectionWidget> {
   /// presentational.** The eye reads the long column first and scans the short
   /// one against it; putting the six-line block on the left is what lets that
   /// scan run in one direction. Nothing in the domain is reversed or rebuilt to
-  /// do it — these are the same two permutations, laid out the other way round —
-  /// and the interaction is untouched: the Korean term is still what must be
-  /// picked first, so it is still the right-hand tile that calls [_selectTerm]
+  /// do it — these are the same two permutations, laid out the other way round.
+  /// Neither column opens a turn on its own either: both call [_select], and
+  /// which card the turn belongs to is settled when the pair completes
   /// (BR-118).
   Widget _row(int index) => Row(
     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -284,9 +368,7 @@ class _MatchBoardSectionWidgetState extends State<MatchBoardSectionWidget> {
     text: tile.text,
     isTerm: isTerm,
     state: _stateOf(tile, isTerm: isTerm),
-    onTap: widget.isLocked
-        ? null
-        : () => isTerm ? _selectTerm(tile) : _selectMeaning(tile),
+    onTap: widget.isLocked ? null : () => _select(tile),
   );
 
   /// The order matters: the two transient states outrank the settled ones, and
@@ -308,7 +390,8 @@ class _MatchBoardSectionWidgetState extends State<MatchBoardSectionWidget> {
         widget.pairedCardIds.contains(tile.cardId)) {
       return MatchTileState.cleared;
     }
-    if (isTerm && _selectedTerm?.cardId == tile.cardId) {
+    final held = _selectedTile;
+    if (held != null && _isSameTile(held, tile)) {
       return MatchTileState.selected;
     }
 
