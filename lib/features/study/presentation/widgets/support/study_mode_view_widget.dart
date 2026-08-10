@@ -105,12 +105,9 @@ Widget? studyModeView({
         onAction: (_) {},
         onContinue: onContinue,
         shouldShowBackImmediately: true,
-        // **The front supports, the back is the focus** — the concept's
-        // hierarchy, and BR-112 seen from the typography side. Both faces are
-        // on screen to be read; sizing the front as a prompt let a long one —
-        // a gloss with a part of speech in it — take three headline lines and
-        // push the back into the corner of its own half.
-        emphasis: StudyFaceEmphasis.frontSupportingBack,
+        // The front is the term and the back is its meaning (BR-08), so the
+        // front leads and the back explains.
+        emphasis: StudyFaceEmphasis.backSupportingFront,
         isLocked: state.isSubmitting || state.isAdvancing,
       ),
     ),

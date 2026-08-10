@@ -20,17 +20,25 @@ import '../support/study_labels_widget.dart';
 /// inferred one from the other would silently pick a hierarchy the next mode
 /// never asked for.
 enum StudyFaceEmphasis {
-  /// The front carries context and the back is what the eye should land on.
+  /// The front is what the eye should land on and the back explains it.
   ///
-  /// `browse` (BR-112). A front here is not a term — decks hold "Be shy /
-  /// Ngượng ngùng (Động từ, thể hiện sự e ngại trong giao tiếp)" on it — so it
-  /// is a sentence to read, at a body role and a regular weight. The back is
-  /// the thing being learned, and it takes the title role.
+  /// `browse` (BR-112). **BR-08 is what settles the direction, and it settled
+  /// it long before this widget existed:** the front is capped at 60 characters
+  /// because it is the prompt a phone draws on one line, and the back at 240
+  /// because "một nghĩa chứa nhiều hơn một từ — hai ngôn ngữ, ngăn bằng dấu
+  /// phẩy". A term on the front, its meaning on the back.
   ///
-  /// The first attempt gave both faces one role and called them peers. That
-  /// fixed the front swallowing the card and lost the point of the screen: two
-  /// equal blocks say nothing about which one to look at.
-  frontSupportingBack,
+  /// Two earlier attempts got here the long way. The first gave the front the
+  /// prompt role and a real meaning swallowed the card; the second called the
+  /// faces peers, which fixed that and left two equal blocks saying nothing
+  /// about where to look. Both were reasoning from a fixture whose front was 67
+  /// characters — data BR-08 forbids and the app would refuse to save.
+  ///
+  /// So: the front takes the title role at w500, and the back a body role,
+  /// which is what carries 240 characters without shouting. Both are a step
+  /// under [promptFirst], because here they are read together rather than one
+  /// at a time.
+  backSupportingFront,
 
   /// The front is the prompt and the back is the answer it is checked against.
   /// `self_assess`: the front is the largest thing on screen until the flip.
@@ -185,14 +193,16 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
                   child: _CardHalf(
                     label: l10n.studyCardFaceFront,
                     text: _card.front,
-                    // **A body role for the supporting face.** A front here is
-                    // a sentence with a gloss in it, not a term; at a headline
-                    // role and w600 it read as the thing to learn and took the
-                    // whole card. `self_assess` keeps the prompt role, because
-                    // there the front *is* the question until the flip.
+                    // The focal face — the term (BR-08) — at the title role and
+                    // one step down in weight so it leads without shouting.
+                    // `self_assess` keeps the larger prompt role, because there
+                    // the front is the question and nothing shares the card.
                     style:
-                        widget.emphasis == StudyFaceEmphasis.frontSupportingBack
-                        ? texts.bodyLarge
+                        widget.emphasis == StudyFaceEmphasis.backSupportingFront
+                        ? AppTypography.withWeight(
+                            texts.titleLarge!,
+                            FontWeight.w500,
+                          )
                         : texts.headlineMedium,
                     // **The tight end is the one facing the rule, so it is only
                     // tight when there is a rule to face.** Before the flip
@@ -218,17 +228,12 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
                     child: _CardHalf(
                       label: l10n.studyCardFaceBack,
                       text: _card.back,
-                      // The focal face of `browse`, one step down in weight so
-                      // it leads without shouting — `withWeight` rather than a
-                      // literal, so the family and the line height stay the
-                      // scale's.
+                      // The supporting face: a meaning runs to 240 characters
+                      // (BR-08), which is a body role's job, not a heading's.
                       style:
                           widget.emphasis ==
-                              StudyFaceEmphasis.frontSupportingBack
-                          ? AppTypography.withWeight(
-                              texts.titleLarge!,
-                              FontWeight.w500,
-                            )
+                              StudyFaceEmphasis.backSupportingFront
+                          ? texts.bodyLarge
                           : texts.headlineSmall,
                       padding: const EdgeInsets.only(
                         top: AppSpacing.sm,
