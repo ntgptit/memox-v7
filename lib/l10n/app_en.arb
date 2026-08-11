@@ -10,7 +10,35 @@
   },
   "navigationStudyLabel": "Study",
   "@navigationStudyLabel": {
-    "description": "Bottom navigation label for the Study destination, where the user studies due cards. Kept separate from a screen title for the same reason as decksTitle: a tab label competes for width and may need shortening where a title does not."
+    "description": "Bottom navigation label for the Study destination, covering both learning new cards and reviewing due ones. Kept separate from a screen title for the same reason as decksTitle: a tab label competes for width and may need shortening where a title does not."
+  },
+  "navigationProgressLabel": "Progress",
+  "@navigationProgressLabel": {
+    "description": "Bottom navigation label for the Progress destination. The branch shows a placeholder until the statistics feature exists (AD-19); the label names the destination, not the placeholder."
+  },
+  "navigationSettingsLabel": "Settings",
+  "@navigationSettingsLabel": {
+    "description": "Bottom navigation label for the Settings destination. The branch shows a placeholder until app settings exist (AD-19)."
+  },
+  "progressTitle": "Progress",
+  "@progressTitle": {
+    "description": "App bar title of the Progress branch. Kept separate from navigationProgressLabel for the same reason as decksTitle: a tab label competes for width, a title does not."
+  },
+  "progressPlaceholderTitle": "Progress is being developed",
+  "@progressPlaceholderTitle": {
+    "description": "Heading of the Progress placeholder (AD-19). States plainly that the feature is not in this build rather than showing controls that do nothing."
+  },
+  "progressPlaceholderMessage": "Your current study activity is still saved for use when the feature is ready.",
+  "@progressPlaceholderMessage": {
+    "description": "Body of the Progress placeholder. Carries the one fact a learner needs while waiting: study history is already recorded (review_history is append-only), so nothing is lost before the feature ships."
+  },
+  "settingsTitle": "Settings",
+  "@settingsTitle": {
+    "description": "App bar title of the Settings branch. Kept separate from navigationSettingsLabel for the same reason as decksTitle: a tab label competes for width, a title does not."
+  },
+  "settingsPlaceholderTitle": "App settings are being developed",
+  "@settingsPlaceholderTitle": {
+    "description": "Heading of the Settings placeholder (AD-19). The whole message — there is no reassurance to add because no user preference exists yet to be kept or lost."
   },
   "decksTitle": "Decks",
   "@decksTitle": {

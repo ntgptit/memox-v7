@@ -10,9 +10,13 @@ import '../../core/theme/theme_context_extension.dart';
 /// space. Capping the row and centring it puts them either side of the middle.
 ///
 /// Multiplied by the destination count, so **the cap disarms itself**: at four
-/// destinations the row wants more width than a phone has and the constraint
-/// stops applying, which is the arrangement Material designed the even split for.
-/// A fixed maximum would instead have to be revisited every time a tab is added.
+/// destinations the row wants more width than a phone has, the screen becomes
+/// the binding constraint, and the bar fills it edge to edge — which is the
+/// arrangement Material designed the even split for. A fixed maximum would
+/// instead have to be revisited every time a tab is added. The `Flexible` in
+/// the build is what hands the screen's width down so the cap can lose to it;
+/// without it the row believes the width is unbounded and four destinations
+/// overflow a 393dp surface by 87px (M99.7).
 ///
 /// Seamless because `navigationBarTheme.backgroundColor` and
 /// `scaffoldBackgroundColor` are the same token: the bar paints the page colour,
@@ -100,17 +104,25 @@ class MxNavigationBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: destinations.length * widthPerNavigationDestination,
-            ),
-            // `labelBehavior` deliberately not set here: `navigationBarTheme`
-            // owns it, and a second spelling of the same decision is how the
-            // two drift apart.
-            child: NavigationBar(
-              selectedIndex: selectedIndex,
-              onDestinationSelected: onDestinationSelected,
-              destinations: destinations,
+          // `Flexible`, because a `Row` gives a plain child unbounded width:
+          // the cap then always wins, and the moment it exceeds the screen —
+          // four destinations at 120dp on a 393dp phone — the row overflows.
+          // Loose flex hands the child the screen's width as a *maximum*
+          // instead, so the bar takes min(cap, screen): capped and centred
+          // with two destinations, edge to edge with four.
+          Flexible(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: destinations.length * widthPerNavigationDestination,
+              ),
+              // `labelBehavior` deliberately not set here: `navigationBarTheme`
+              // owns it, and a second spelling of the same decision is how the
+              // two drift apart.
+              child: NavigationBar(
+                selectedIndex: selectedIndex,
+                onDestinationSelected: onDestinationSelected,
+                destinations: destinations,
+              ),
             ),
           ),
         ],

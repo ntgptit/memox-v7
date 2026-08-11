@@ -6,9 +6,9 @@
 | **Purpose** | Kiểm tra người dùng đi vào đúng điểm bắt đầu, di chuyển giữa các nhánh và không mất ngữ cảnh bộ thẻ, thẻ hoặc phiên học |
 | **Scope** | Khởi động nguội, thanh điều hướng dưới, Back, đường dẫn phân cấp, route không hợp lệ và hành trình bộ thẻ/thẻ/Study xuyên suốt |
 | **Source of truth for** | Kịch bản IT về điều hướng và khả năng tiếp tục của chức năng hiện có |
-| **Depends on** | `README.md`, `../use-cases.md` (UC-04, UC-05, UC-06), `../business-rules.md` (BR-82, BR-101, BR-103), `../wbs.md` (M4.10a, M4.11, M4.12), `../wbs-study.md` (M5.7, M5.9, M5.15), `../wireframes/m5-study-modes.md` |
-| **Updated by task** | Bổ sung điều hướng cho chức năng học ngày 2026-08-08 |
-| **Last updated** | 2026-08-08 |
+| **Depends on** | `README.md`, `../use-cases.md` (UC-04, UC-05, UC-06), `../business-rules.md` (BR-82, BR-101, BR-103), `../architecture.md` (AD-19), `../wbs.md` (M4.10a, M4.11, M4.12, M99.7), `../wbs-study.md` (M5.7, M5.9, M5.15), `../wireframes/m5-study-modes.md` |
+| **Updated by task** | M99.7 (Bottom navigation IA scaffold — bốn destination, AD-19) |
+| **Last updated** | 2026-08-11 |
 
 ## IT-NAV-001 — Cold start mở đúng danh sách Deck
 
@@ -21,14 +21,14 @@
 | 2 | Quan sát bottom navigation | Tab Deck đang được chọn |
 | 3 | Quan sát nội dung | Hiện danh sách Deck; nếu chưa có dữ liệu thì hiện empty state kèm hành động tạo deck |
 
-## IT-NAV-002 — Chuyển giữa tab Bộ thẻ và Ôn tập giữ nguyên bộ thẻ đang mở
+## IT-NAV-002 — Chuyển giữa tab Bộ thẻ và Học giữ nguyên bộ thẻ đang mở
 
 - **Ưu tiên:** P1
 - **Tiền điều kiện:** Có cây `D-EB > D-BRANCH`; người dùng đang ở trong `D-BRANCH`.
 
 | Bước | Thao tác người dùng | Kết quả mong đợi |
 |---|---|---|
-| 1 | Chạm tab Ôn tập | Tab Ôn tập được chọn; hiện bề mặt Study thật, không còn thông báo tính năng chưa sẵn sàng, không tạo phiên chỉ vì đổi tab |
+| 1 | Chạm tab Học | Tab Học được chọn; hiện bề mặt Study thật, không còn thông báo tính năng chưa sẵn sàng, không tạo phiên chỉ vì đổi tab |
 | 2 | Chạm tab Bộ thẻ | Quay lại đúng `D-BRANCH`, không bị đưa về danh sách bộ thẻ gốc |
 | 3 | Quan sát đường dẫn phân cấp và danh sách | Đường dẫn và nội dung tại cấp đang mở vẫn đúng; không có phiên Study mới để Tiếp tục |
 
@@ -108,7 +108,7 @@
 | Bước | Thao tác người dùng | Kết quả mong đợi |
 |---|---|---|
 | 1 | Chạm Học từ `Lesson A` | Màn vào học mở cho đúng `Lesson A`, hiện `New 3`; không lấy hai thẻ của `Lesson B` |
-| 2 | Bấm Back của hệ thống khi chưa chọn loại phiên | Quay về đúng `Lesson A`, không về bộ thẻ gốc hoặc tab Ôn tập |
+| 2 | Bấm Back của hệ thống khi chưa chọn loại phiên | Quay về đúng `Lesson A`, không về bộ thẻ gốc hoặc tab Học |
 | 3 | Quan sát đường dẫn và danh sách thẻ | Ngữ cảnh `Lesson A` còn nguyên; không có route Study trùng trong ngăn xếp |
 | 4 | Mở Học lần nữa | Không có hành động Tiếp tục hoặc tổng kết vì lần mở trước chưa tạo phiên |
 
@@ -121,7 +121,7 @@
 |---|---|---|
 | 1 | Chạm Học rồi chọn Ôn tập | Màn chọn chế độ Eight Box mở; chưa có chế độ nào được chọn |
 | 2 | Bấm Back của hệ thống | Quay đúng màn vào học của bộ thẻ đó; chưa tạo phiên ôn tập |
-| 3 | Bấm Back của hệ thống lần nữa | Quay đúng bộ thẻ nguồn, không về danh sách bộ thẻ gốc hoặc tab Ôn tập |
+| 3 | Bấm Back của hệ thống lần nữa | Quay đúng bộ thẻ nguồn, không về danh sách bộ thẻ gốc hoặc tab Học |
 | 4 | Mở Học lại | Không có phiên để Tiếp tục; số `New`/`Due` không đổi chỉ vì đã đi qua màn chọn |
 
 ## IT-NAV-010 — Back của hệ thống trong phiên dùng cùng hợp đồng thoát như nút ✕
@@ -138,3 +138,24 @@
 | 2 | Hủy xác nhận | Vẫn ở đúng chế độ, vòng, thẻ và tiến độ; phiên còn `in_progress` |
 | 3 | Bấm Back lần nữa và xác nhận thoát | Phiên dừng do người dùng, hiện trạng thái đã dừng thay vì tổng kết thành tích và có lối về đúng bộ thẻ |
 | 4 | Mở lại màn vào học | Không có Tiếp tục cho phiên đã thoát; các lượt ghi thành công trước đó vẫn được giữ |
+
+## IT-NAV-011 — Bốn destination top-level, hai placeholder không tạo phiên và không ghi DB
+
+- **Ưu tiên:** P1
+- **Tiền điều kiện:** App đã cài, dữ liệu bất kỳ; không có phiên Study đang dở.
+- **Liên kết:** AD-19; UC-06 cho cold start.
+
+| Bước | Thao tác người dùng | Kết quả mong đợi |
+|---|---|---|
+| 1 | Mở app và quan sát bottom navigation | Đúng bốn destination theo thứ tự Bộ thẻ · Học · Tiến độ · Cài đặt; tab Bộ thẻ đang được chọn |
+| 2 | Chạm tab Tiến độ | Placeholder Tiến độ hiện icon, tiêu đề và mô tả "đang được phát triển"; không có số liệu thống kê nào; không tạo phiên Study; không có ghi database nào |
+| 3 | Chạm tab Cài đặt | Placeholder Cài đặt hiện tương tự; không có tùy chọn giả nào bật/tắt được; không tạo phiên; không ghi database |
+| 4 | Mở deep link `/progress` khi app đã đóng | App mở thẳng placeholder Tiến độ và tab Tiến độ được chọn |
+| 5 | Mở deep link `/settings` khi app đã đóng | App mở thẳng placeholder Cài đặt và tab Cài đặt được chọn |
+| 6 | Từ một bộ thẻ con đang mở, chạm Tiến độ rồi quay lại Bộ thẻ | Quay đúng bộ thẻ con đang mở — chuyển qua placeholder không làm mất ngăn xếp của branch khác |
+| 7 | Chạm lại tab đang được chọn | Branch quay về màn gốc của nó theo đúng hành vi reselect hiện có, không lỗi |
+| 8 | Xem bốn nhãn ở màn 320dp và text scale 2.0 | Nhãn Bộ thẻ/Học/Tiến độ/Cài đặt vẫn đọc được, không tràn; nội dung placeholder cuộn được thay vì tràn |
+
+Phần host của kịch bản này chạy ở `test/integration/widgets/navigation_widget_test.dart`
+(đếm số dòng của mọi bảng trước và sau khi thăm hai placeholder) và
+`test/app/router/app_router_test.dart` (deep link, thứ tự tab, giữ ngăn xếp).

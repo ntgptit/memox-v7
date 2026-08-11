@@ -33,6 +33,14 @@ abstract final class RouteNames {
   /// The study surface. Branch 1 of the shell.
   static const String study = 'study';
 
+  /// The progress surface. Branch 2 of the shell — a presentation-only
+  /// placeholder until the statistics feature exists (AD-19).
+  static const String progress = 'progress';
+
+  /// The settings surface. Branch 3 of the shell — a presentation-only
+  /// placeholder until app settings exist (AD-19).
+  static const String settings = 'settings';
+
   /// One deck's study entry. A child of [deckDetail], so studying pushes onto
   /// the Decks branch: the bottom bar stays and Back returns to the deck the
   /// session was started from, rather than to whatever the Study tab last held.

@@ -1,0 +1,58 @@
+@Tags(<String>['golden', 'screen-audit'])
+library;
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/features/progress/presentation/screens/progress_placeholder_screen.dart';
+import 'package:memox/shared/widgets/mx_content_shell.dart';
+import 'package:memox/shared/widgets/mx_empty_state.dart';
+
+import '../../../../memox_audit.dart';
+import '../../../../audit_allowance.dart';
+import '../../../../audit_model.dart';
+import '../../../../screen_auditor.dart';
+
+/// Strict visual audit for `ProgressPlaceholderScreen`.
+///
+/// Companion of
+/// `lib/features/progress/presentation/screens/progress_placeholder_screen.dart`,
+/// at the mirrored path.
+///
+/// The screen is presentation-only (AD-19): no provider, no repository, no
+/// router reference — so it audits in isolation with nothing overridden, the
+/// same way `RouteNotFoundScreen` does.
+void main() {
+  memoxProductionScreenAuditTest(
+    'progress_placeholder_screen',
+    () => const ProgressPlaceholderScreen(),
+    anchors: <AuditAnchor>[
+      AuditAnchor.type('shell', MxContentShell),
+      AuditAnchor.type('empty_state', MxEmptyState),
+    ],
+    allowances: const <AuditSkipAllowance>[
+      // Same two raster-only surfaces as every other shell-framed screen; the
+      // reasoning is spelled out in the RouteNotFoundScreen companion.
+      AuditSkipAllowance(
+        itemId: 'screen',
+        reason: SkipReason.rasterOnly,
+        detailContains: '_RenderColoredBox',
+        rationale:
+            'The page-transition backdrop of this route. '
+            '_FadeForwardsPageTransition wraps every opaque route in a '
+            'ColoredBox that paints Colors.transparent at rest and '
+            'ColorScheme.surface only mid-transition. It is NOT the Scaffold '
+            'background, which is asserted in app_theme_test.dart.',
+      ),
+      AuditSkipAllowance(
+        itemId: 'shell',
+        reason: SkipReason.rasterOnly,
+        detailContains: '_RenderInkFeatures',
+        // Two, not one: the shell mounts an AppBar for its title, and AppBar
+        // brings a second Material with its own ink layer.
+        expectedMatches: 2,
+        rationale:
+            'The Scaffold and AppBar Material ink layers. Splash and highlight '
+            'are painted onto Material, so no render object carries them.',
+      ),
+    ],
+  );
+}

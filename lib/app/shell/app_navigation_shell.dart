@@ -50,6 +50,16 @@ class AppNavigationShell extends StatelessWidget {
             selectedIcon: const Icon(Icons.school),
             label: context.l10n.navigationStudyLabel,
           ),
+          NavigationDestination(
+            icon: const Icon(Icons.insights_outlined),
+            selectedIcon: const Icon(Icons.insights),
+            label: context.l10n.navigationProgressLabel,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.settings_outlined),
+            selectedIcon: const Icon(Icons.settings),
+            label: context.l10n.navigationSettingsLabel,
+          ),
         ],
       ),
     );

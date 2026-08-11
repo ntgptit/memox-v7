@@ -5,10 +5,11 @@
 /// one place lets a path change without every call site changing with it, which
 /// is the whole reason navigation goes through names.
 ///
-/// **Only paths with a real caller live here.** Declaring `/settings`,
-/// `/statistics` or `/library` in advance would fix a URL shape before the
-/// screen exists to argue with it, and a constant nobody uses reads as a
-/// decision that has been made when it has not.
+/// **Only paths with a real route live here.** Declaring `/library` in advance
+/// would fix a URL shape before the screen exists to argue with it, and a
+/// constant nobody uses reads as a decision that has been made when it has
+/// not. [progress] and [settings] cleared that bar with AD-19: each is a real
+/// shell branch with a screen — a placeholder, but a rendered, navigable one.
 abstract final class RoutePaths {
   /// The app's home, and the initial branch of the navigation shell: content
   /// management is what the user opens the app into.
@@ -43,4 +44,13 @@ abstract final class RoutePaths {
 
   /// One deck's study entry, relative to `/decks/:deckId`.
   static const String deckStudyRelative = 'study';
+
+  /// The progress branch. A real path for the same reason as [study]: a deep
+  /// link must open the app directly on the Progress tab. The screen behind it
+  /// is a placeholder — the branch is scaffolded ahead of the feature (AD-19).
+  static const String progress = '/progress';
+
+  /// The settings branch. Same contract as [progress]: a real, deep-linkable
+  /// branch whose screen is a placeholder until app settings exist (AD-19).
+  static const String settings = '/settings';
 }

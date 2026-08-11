@@ -56,6 +56,7 @@ void main() {
     WidgetTester tester, {
     String? initialLocation,
     FakeDeckRepository? repository,
+    FakeStudyRepository? studyRepository,
   }) async {
     final router = initialLocation == null
         ? createAppRouter()
@@ -66,7 +67,9 @@ void main() {
       ProviderScope(
         overrides: [
           envConfigProvider.overrideWithValue(EnvConfig.development),
-          studyRepositoryProvider.overrideWithValue(FakeStudyRepository()),
+          studyRepositoryProvider.overrideWithValue(
+            studyRepository ?? FakeStudyRepository(),
+          ),
           deckRepositoryProvider.overrideWithValue(
             repository ?? FakeDeckRepository(),
           ),
@@ -189,14 +192,21 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('the bar is present on both branches', (tester) async {
+    testWidgets('the bar is present on every branch', (tester) async {
       await pumpApp(tester);
       expect(find.byType(MxNavigationBar), findsOneWidget);
 
-      await tester.tap(tab(english.navigationStudyLabel));
-      await tester.pumpAndSettle();
+      for (final label in <String>[
+        english.navigationStudyLabel,
+        english.navigationProgressLabel,
+        english.navigationSettingsLabel,
+        english.navigationDecksLabel,
+      ]) {
+        await tester.tap(tab(label));
+        await tester.pumpAndSettle();
 
-      expect(find.byType(MxNavigationBar), findsOneWidget);
+        expect(find.byType(MxNavigationBar), findsOneWidget);
+      }
     });
   });
 

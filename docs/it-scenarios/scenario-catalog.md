@@ -7,8 +7,8 @@
 | **Scope** | Toàn bộ kịch bản IT hiện có trong `docs/it-scenarios`; không lặp lại các bước thao tác |
 | **Source of truth for** | Mức sẵn sàng, hồ sơ thực thi, chuẩn bị, dọn dẹp và truy vết theo từng ID kịch bản IT |
 | **Depends on** | `README.md`, `00-agent-execution-guide.md`, mười một tệp kịch bản theo nhóm chức năng |
-| **Updated by task** | Refactor IT theo Testing Pyramid — ba execution profile |
-| **Last updated** | 2026-08-09 |
+| **Updated by task** | M99.7 (Bottom navigation IA scaffold — IT-NAV-011) |
+| **Last updated** | 2026-08-11 |
 
 Agent MUST tìm ID ở danh mục này trước khi chạy. **Cột `Profile` quyết định lệnh chạy**: `HOST-FLOW` và `HOST-WIDGET` chạy bằng `flutter test`, chỉ `DEVICE-E2E` cần emulator hoặc thiết bị. Bảng ánh xạ hồ sơ cũ sang mới và lý do từng dòng nằm ở [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md). Cột tệp chỉ tới tài liệu chứa
 các bước gốc. Ý nghĩa mức sẵn sàng, hồ sơ thực thi, chuẩn bị và dọn dẹp nằm trong
@@ -28,6 +28,7 @@ các bước gốc. Ý nghĩa mức sẵn sàng, hồ sơ thực thi, chuẩn b�
 | IT-NAV-008 | `01-navigation-and-continuity.md` | READY | `HOST-WIDGET` | — | SETUP-STUDY-SCOPE | CLEAN-RESET | UC-05, BR-101, M5.15 |
 | IT-NAV-009 | `01-navigation-and-continuity.md` | READY | `HOST-WIDGET` | — | S-STUDY-REVIEW-EB-V2 | CLEAN-RESET | UC-05, BR-101, BR-146, M5.15 |
 | IT-NAV-010 | `01-navigation-and-continuity.md` | READY | `HOST-WIDGET` | IT-PLAT-005 | SETUP-STUDY-EB-5-FULL | CLEAN-RESET | UC-05 A3, BR-82, docs/wireframes/m5-study-modes.md |
+| IT-NAV-011 | `01-navigation-and-continuity.md` | READY | `HOST-WIDGET` | — | SETUP-EMPTY | CLEAN-RESET | AD-19, M99.7 |
 
 ## Vòng đời bộ thẻ gốc
 

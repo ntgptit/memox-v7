@@ -7,8 +7,8 @@
 | **Scope** | Quyết định ràng buộc nhiều tài liệu hoặc nhiều layer. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), hình dạng dữ liệu (`data-model.md`) |
 | **Source of truth for** | AD-xx · đánh đổi kiến trúc · phương án đã bị loại · lý do pin toolchain |
 | **Depends on** | `document-conventions.md`, `product.md` |
-| **Updated by task** | M5.0o (recursive review lượt hai) |
-| **Last updated** | 2026-08-07 |
+| **Updated by task** | M99.7 (Bottom navigation IA scaffold — AD-19) |
+| **Last updated** | 2026-08-11 |
 
 Format theo `document-conventions.md` §6.1. AD xếp theo số; ID vĩnh viễn (§7).
 
@@ -1309,3 +1309,45 @@ cả hai đều chạy được:
 | nextRoundFailedCardIds | `available_at = cursor + 3` (BR-26) |
 | mastery retry round | lượt `relearning`, trần 3 (BR-104) |
 | deterministic shuffle | `position` cố định trong phiên (BR-102) |
+
+## AD-19 · Scaffold bốn navigation branch top-level trước khi mọi feature hoàn thành
+
+| | |
+|---|---|
+| **Status** | accepted |
+| **Affected documents** | `product.md` · `it-scenarios/01-navigation-and-continuity.md` · `wbs.md` (M99.7) |
+
+**Decision.** Navigation shell khai báo đúng bốn `StatefulShellBranch`, theo thứ
+tự cố định: **Decks (0) · Study (1) · Progress (2) · Settings (3)**. Decks vẫn
+là cold-start branch (UC-06). Progress và Settings MUST chỉ có
+presentation-only placeholder screen: placeholder MUST NOT tạo domain entity,
+repository, provider, DAO, bảng, dữ liệu mẫu hay persistence nào — không đọc
+provider, không mở session, không ghi database khi vào, thoát hoặc chuyển tab.
+Mỗi branch có path thật (`/progress`, `/settings`) để deep link mở đúng tab.
+Thư viện starter thuộc branch Decks; MUST NOT có tab Profile chừng nào chưa có
+auth/profile domain (AD-03).
+
+**Context.** Sản phẩm cần IA ổn định cho năm study mode và các capability sắp
+tới (thống kê S2, tùy chọn ứng dụng), trong khi Progress và Settings chưa có
+nghiệp vụ canonical nào. Hai con đường đều xấu: chờ feature xong mới thêm tab
+nghĩa là shell, URL contract và toàn bộ navigation test đổi lại lần nữa ở thời
+điểm đắt hơn; còn dựng fake data cho màn hình "trông như xong" là viết spec ở
+tầng sai — docs mới là nơi nghiệp vụ được chốt, và một thống kê bịa ra sẽ được
+người dùng lẫn phiên làm việc sau tin là thật.
+
+**Consequences.** IA và deep-link contract đóng băng sớm: feature thật sau này
+thay một screen trong một branch có sẵn, không đụng router hay shell. Người
+dùng thấy rõ tính năng đang phát triển thay vì một tab đột nhiên xuất hiện.
+Giá phải trả: hai placeholder và test route của chúng phải được duy trì, và tab
+scaffold dễ bị đọc nhầm là feature đã xong — WBS và `product.md` phải nói rõ
+điều ngược lại. Một hệ quả đã đo được: bốn destination vượt trần
+`4 × 120dp` của `MxNavigationBar` trên màn 393dp, nên cap bề rộng phải nhường
+cho bề rộng màn hình (M99.7) — đúng hành vi Material thiết kế cho even split.
+
+**Rejected alternatives.** Giữ hai tab cho tới khi mọi feature xong — trả chi
+phí sửa shell/contract/test lần nữa vào lúc đắt nhất. Fake statistics/settings
+data để màn hình trông hoàn chỉnh — gây hiểu nhầm và tạo kiến trúc không có
+nghiệp vụ đứng sau. Toast "đang phát triển" thay cho branch thật — không deep
+link được, không giữ stack, và toast không phải một destination. Đưa Starter
+Library hoặc Profile thành tab top-level — starter là child flow của Decks
+(AD-07), còn Profile chưa có domain nào đứng sau (AD-03).

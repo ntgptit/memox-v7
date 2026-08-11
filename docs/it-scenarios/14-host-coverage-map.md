@@ -4,11 +4,11 @@
 |---|---|
 | **Status** | đang áp dụng |
 | **Purpose** | Nói rõ kịch bản nào đã có test host chứng minh, kịch bản nào chưa, để bước 5–7 chỉ viết cái còn thiếu |
-| **Scope** | 133 kịch bản của `scenario-catalog.md`. Ngoài phạm vi: đánh giá chất lượng của test đã có |
+| **Scope** | 134 kịch bản của `scenario-catalog.md`. Ngoài phạm vi: đánh giá chất lượng của test đã có |
 | **Source of truth for** | Danh sách việc còn phải viết ở `HOST-FLOW`/`HOST-WIDGET` |
 | **Depends on** | `scenario-catalog.md`, `12-testing-pyramid-audit.md` |
-| **Updated by task** | Refactor IT theo Testing Pyramid — bước 6 |
-| **Last updated** | 2026-08-09 |
+| **Updated by task** | M99.7 (IT-NAV-011) |
+| **Last updated** | 2026-08-11 |
 
 **Bản đồ này là danh sách việc, không phải giấy chứng nhận.** Nó nối kịch bản
 với test *nhắc tới cùng một ID luật*. Một test nhắc BR-62 gần như chắc chắn
@@ -25,7 +25,7 @@ bản muốn. Vì vậy cột trạng thái đọc là:
 
 | Trạng thái | Số kịch bản |
 |---|---|
-| đã có | **133** |
+| đã có | **134** |
 | một phần | **0** |
 | chưa có | **0** |
 
@@ -57,6 +57,7 @@ bản muốn. Vì vậy cột trạng thái đọc là:
 | IT-NAV-008 | `HOST-WIDGET` | UC-05, BR-101 | `test/features/study/data/study_flow_test.dart` |
 | IT-NAV-009 | `HOST-WIDGET` | UC-05, BR-101, BR-146 | `test/features/study/data/study_flow_test.dart` |
 | IT-NAV-010 | `HOST-WIDGET` | UC-05, BR-82 | `test/features/study/data/study_flow_test.dart` |
+| IT-NAV-011 | `HOST-WIDGET` | AD-19 | `test/integration/widgets/navigation_widget_test.dart` |
 | IT-DECK-001 | `HOST-WIDGET + HOST-FLOW` | UC-02, BR-11 | `test/features/deck/data/deck_repository_impl_test.dart` |
 | IT-DECK-002 | `HOST-WIDGET` | UC-02, BR-02 | `test/features/deck/data/deck_repository_impl_test.dart` |
 | IT-DECK-003 | `HOST-WIDGET` | UC-02, BR-01, BR-11 | `test/features/deck/data/deck_repository_impl_test.dart` |
