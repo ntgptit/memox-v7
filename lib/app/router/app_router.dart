@@ -6,6 +6,8 @@ import '../../features/card/presentation/providers/card_use_case_provider.dart';
 import '../../features/card/presentation/screens/card_editor_screen.dart';
 import '../../features/card/presentation/screens/card_list_screen.dart';
 import '../../features/deck/presentation/screens/deck_list_screen.dart';
+import '../../features/progress/presentation/screens/progress_placeholder_screen.dart';
+import '../../features/settings/presentation/screens/settings_placeholder_screen.dart';
 import '../../features/study/presentation/screens/study_entry_screen.dart';
 import '../fallback/route_not_found_screen.dart';
 import '../shell/app_navigation_shell.dart';
@@ -36,11 +38,14 @@ final GoRouter appRouter = createAppRouter();
 /// which is the only way to reach [RouteNotFoundScreen] without asking the
 /// production code to accept a bad path.
 ///
-/// **Two branches, one shell.** `StatefulShellRoute.indexedStack` keeps a
+/// **Four branches, one shell.** `StatefulShellRoute.indexedStack` keeps a
 /// separate `Navigator` per branch, so each tab keeps its own stack and its own
-/// scroll position while the other is on screen. A plain set of top-level
+/// scroll position while another is on screen. A plain set of top-level
 /// routes would rebuild the destination from scratch on every tab switch, which
-/// is the "why did my place in the list disappear" bug.
+/// is the "why did my place in the list disappear" bug. Progress and Settings
+/// are branches ahead of their features (AD-19): each holds a single
+/// presentation-only placeholder route, so the deep-link contract and the tab
+/// order are settled before the content is.
 GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
   return GoRouter(
     initialLocation: initialLocation,
@@ -141,6 +146,27 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
                 // real id (M5.9). The screen itself takes any deck.
                 builder: (context, state) =>
                     const StudyEntryScreen(deckId: kStudyBranchDeckId),
+              ),
+            ],
+          ),
+          // The two scaffolded branches (AD-19). One route each, and the
+          // screens are presentation-only: entering, leaving or switching to
+          // them must read no repository, open no session and write nothing.
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: RoutePaths.progress,
+                name: RouteNames.progress,
+                builder: (context, state) => const ProgressPlaceholderScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: RoutePaths.settings,
+                name: RouteNames.settings,
+                builder: (context, state) => const SettingsPlaceholderScreen(),
               ),
             ],
           ),

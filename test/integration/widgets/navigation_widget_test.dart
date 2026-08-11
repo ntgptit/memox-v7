@@ -4,12 +4,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/app/fallback/route_not_found_screen.dart';
 import 'package:memox/app/router/route_paths.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
+import 'package:memox/features/progress/presentation/screens/progress_placeholder_screen.dart';
+import 'package:memox/features/settings/presentation/screens/settings_placeholder_screen.dart';
 
 import '../../helpers/app_harness/host_widget_app.dart';
 import '../../helpers/fixtures/study_fixtures.dart';
 
-/// `HOST-WIDGET` for the navigation scenarios — IT-NAV-001, IT-NAV-003 and
-/// IT-NAV-005.
+/// `HOST-WIDGET` for the navigation scenarios — IT-NAV-001, IT-NAV-003,
+/// IT-NAV-005 and IT-NAV-011.
 ///
 /// **These were classed `UI` and therefore ran only on an emulator, and not one
 /// of them needs a device.** What each asserts is where GoRouter put the user,
@@ -78,6 +80,45 @@ void main() {
       await settleHostApp(tester);
 
       expect(app.router.state.uri.toString(), RoutePaths.decks);
+      expect(tester.takeException(), isNull);
+    });
+  });
+
+  testWidgets('IT-NAV-011 · the scaffolded branches render their placeholders '
+      'without a session or a database write', (tester) async {
+    // The strong half of AD-19's boundary, against the **real** wiring: the
+    // fake-repository test in `test/app/router/` proves the placeholders call
+    // nothing on the study contract, but only a real database can prove no
+    // binding underneath them writes on its own. Every table is counted rather
+    // than the two obvious ones — the failure this guards against is precisely
+    // a write nobody expected.
+    final db = createHostDatabase();
+
+    Future<Map<String, int>> rowCounts() async => <String, int>{
+      for (final table in db.allTables)
+        table.actualTableName: (await db.select(table).get()).length,
+    };
+
+    await runHostApp(tester, database: db, now: fixtureNow, (app) async {
+      final before = await rowCounts();
+
+      // `go`, not `push`: a tab switch replaces the visible branch, exactly
+      // what tapping the destination does — pushing a branch root onto another
+      // branch's stack is not a navigation the shell ever performs.
+      app.router.go(RoutePaths.progress);
+      await settleHostApp(tester);
+      expect(app.router.state.uri.toString(), RoutePaths.progress);
+      expect(find.byType(ProgressPlaceholderScreen), findsOneWidget);
+
+      app.router.go(RoutePaths.settings);
+      await settleHostApp(tester);
+      expect(app.router.state.uri.toString(), RoutePaths.settings);
+      expect(find.byType(SettingsPlaceholderScreen), findsOneWidget);
+
+      app.router.go(RoutePaths.decks);
+      await settleHostApp(tester);
+
+      expect(await rowCounts(), before);
       expect(tester.takeException(), isNull);
     });
   });

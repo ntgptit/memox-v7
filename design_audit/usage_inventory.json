@@ -1,6 +1,6 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 314,
+  "scannedFiles": 316,
   "totalSites": 356,
   "byElementKind": {
     "other": 274,
@@ -3849,7 +3849,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_navigation_bar.dart",
-      "line": 97,
+      "line": 101,
       "widget_context": "MxNavigationBar",
       "element_kind": "border",
       "source_kind": "theme-token",

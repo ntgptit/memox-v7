@@ -7,8 +7,8 @@
 | **Scope** | Vấn đề, người dùng, quyết định nền tảng, phạm vi MVP, luồng nghiệp vụ chính. Ngoài phạm vi: cách triển khai |
 | **Source of truth for** | Phạm vi MVP · phân loại must/should/nice/out · quyết định platform, data posture, auth, dữ liệu nhạy cảm |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M5.0n (recursive review) |
-| **Last updated** | 2026-08-07 |
+| **Updated by task** | M99.7 (Bottom navigation IA scaffold) |
+| **Last updated** | 2026-08-11 |
 
 ## Problem
 
@@ -158,6 +158,20 @@ chọn mode chỉ xuất hiện khi có mode thứ hai.
 | Phân quyền theo role | Chỉ có một loại user, kể cả sau khi có auth | Chưa có kế hoạch |
 | Chia sẻ deck giữa người dùng | Cần backend | Sau đồng bộ |
 | Audio / hình ảnh trong card | Kéo theo lưu trữ file, đồng bộ file, nén ảnh — một khối lượng riêng | Sau MVP |
+
+## Điều hướng top-level
+
+App dùng đúng **bốn** destination ở bottom navigation, thứ tự cố định:
+**Bộ thẻ (Decks) · Học (Study) · Tiến độ (Progress) · Cài đặt (Settings)**.
+Quyết định, ràng buộc placeholder và các phương án bị loại nằm ở AD-19.
+
+- Cold start mở Decks (UC-06).
+- Progress và Settings hiện chỉ là scaffold/placeholder: có tab và route
+  **không** có nghĩa hai feature này đã hoàn thành. Thống kê vẫn là
+  should-have (S2); tùy chọn ứng dụng chưa có nghiệp vụ nào được chốt.
+- Thư viện starter (M6) là child flow bên trong Decks, không phải tab riêng.
+- Không có tab Profile chừng nào chưa có auth/profile domain — nhất quán với
+  "Đăng nhập / tài khoản" ở Explicitly out of MVP.
 
 ## Primary business flows
 

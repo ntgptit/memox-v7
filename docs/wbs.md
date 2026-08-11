@@ -7,8 +7,8 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.5 (Font tiếng Hàn trong golden harness) |
-| **Last updated** | 2026-08-10 |
+| **Updated by task** | M99.7 (Bottom navigation IA scaffold) |
+| **Last updated** | 2026-08-11 |
 
 Single source of truth for project progress. Update it in the same commit as the
 work it describes. A task is `done` only when it meets the Definition of Done in
@@ -33,7 +33,7 @@ AD / UC (xem `business-rules.md`).
 | M7 · CI/CD (Phase 19) | todo | Bắt đầu được ngay sau M2. Job Android + Web, chưa có iOS (AD-04) |
 | M8 · Release Android (Phase 16–18, 20–22) | todo | |
 | M9 · Backend Spring Boot + auth + sync (Phase 10) | todo | Sau khi M8 ổn định |
-| M99 · Adhoc | — | Task chủ dự án giao trực tiếp, ngoài chuỗi phụ thuộc. M99.1 **done** — `master-flow.md`. M99.2 **done** — Deck và Card thành bản tham chiếu (AD-17). M99.3 **done** — refactor toàn bộ IT theo Testing Pyramid: 133/133 kịch bản có coverage host, `integration_test/` còn 8 kịch bản `DEVICE-E2E`, và CI lần đầu có cổng tự động cho tính đúng đắn nghiệp vụ. M99.5 **done** — golden harness chưa bao giờ nạp `NotoSansKR`, nên mọi chữ Hàn trong mọi golden là ô `NO GLYPH`; đã nạp đủ ba face CJK, bổ sung Nhật/Trung, và fixture demo trở lại tiếng Hàn |
+| M99 · Adhoc | — | Task chủ dự án giao trực tiếp, ngoài chuỗi phụ thuộc. M99.1 **done** — `master-flow.md`. M99.2 **done** — Deck và Card thành bản tham chiếu (AD-17). M99.3 **done** — refactor toàn bộ IT theo Testing Pyramid: 133/133 kịch bản có coverage host, `integration_test/` còn 8 kịch bản `DEVICE-E2E`, và CI lần đầu có cổng tự động cho tính đúng đắn nghiệp vụ. M99.5 **done** — golden harness chưa bao giờ nạp `NotoSansKR`, nên mọi chữ Hàn trong mọi golden là ô `NO GLYPH`; đã nạp đủ ba face CJK, bổ sung Nhật/Trung, và fixture demo trở lại tiếng Hàn. M99.7 **done** — bottom navigation lên bốn branch (Decks · Học · Tiến độ · Cài đặt, AD-19); Progress/Settings là placeholder presentation-only, hai feature này **chưa** hoàn thành |
 
 ---
 
@@ -8271,6 +8271,64 @@ nhau.
 phía trên doc của `webLetterbox` và cả hai cùng gắn vào `webLetterbox`; ai đọc
 `shadowLight` sẽ không thấy gì, ai đọc `webLetterbox` sẽ thấy lời giải thích về
 bóng đổ.
+
+### M99.7 · Bottom navigation IA scaffold — bốn branch trước khi feature hoàn thành
+
+- **Status:** **done** — targeted tests xanh (router 51, shell, placeholder,
+  IT-NAV-011 host), `flutter analyze` sạch, guard sạch, `check_docs` sạch.
+  Golden pixel không chạy được trên container Linux (goldens raster trên
+  Windows — xem ci-full.yml); bố cục bốn tab và hai placeholder đã được render
+  và kiểm tra bằng mắt ở 393dp và 320dp × text scale 2.0, cả bản tiếng Việt.
+- **Goal:** IA bốn destination (Decks · Study · Progress · Settings) thành
+  contract ổn định của shell và deep link, trước khi Progress/Settings có
+  nghiệp vụ (AD-19).
+- **Scope:** `route_names.dart`, `route_paths.dart`, `app_router.dart` (hai
+  `StatefulShellBranch` mới), `app_navigation_shell.dart` (bốn destination),
+  `mx_navigation_bar.dart` (xem ghi chú dưới), hai placeholder screen
+  presentation-only, ARB en/vi (nhãn tab, copy placeholder; Study tiếng Việt
+  đổi "Ôn tập" → "Học"), Widgetbook, targeted tests, visual-audit companion,
+  `product.md`, `architecture.md` (AD-19), `it-scenarios/01` (IT-NAV-011).
+- **Out of scope:** mọi nghiệp vụ Progress/Settings — không domain, không
+  data, không provider, không fake statistics/preference. Không đổi cold-start
+  destination, không đổi Study, không Profile tab. `business-rules.md`,
+  `use-cases.md`, `master-flow.md` giữ nguyên: placeholder navigation chưa
+  phải use case nghiệp vụ và AD-19 đã là canonical location của quyết định.
+- **Editable documents:** `docs/wbs.md`, `docs/product.md`,
+  `docs/architecture.md`, `docs/it-scenarios/01-navigation-and-continuity.md`,
+  `docs/it-scenarios/scenario-catalog.md`,
+  `docs/it-scenarios/14-host-coverage-map.md`, `docs/it-scenarios/README.md`
+  (ba file cuối: IT-NAV-011 phải vào danh mục và bản đồ coverage, và tổng số
+  kịch bản 133 → 134 xuất hiện ở cả ba)
+- **Output:** `lib/features/progress/presentation/screens/progress_placeholder_screen.dart`,
+  `lib/features/settings/presentation/screens/settings_placeholder_screen.dart`,
+  hai visual-audit companion, `widgetbook/lib/screens/placeholder_screens_use_case.dart`
+- **Acceptance criteria:**
+  - [x] Bốn destination đúng thứ tự Decks · Study · Progress · Settings; cold
+        start vẫn Decks; tiếng Việt hiện "Học".
+  - [x] `/progress` và `/settings` là branch thật: deep link mở đúng screen và
+        chọn đúng tab; chuyển tab giữ stack của branch khác; reselect giữ hành
+        vi hiện có.
+  - [x] Placeholder chỉ dùng `MxContentShell` + `MxEmptyState` + token; không
+        đọc provider (test pump không có `ProviderScope`), không mở study
+        session, không ghi database (IT-NAV-011 đếm mọi bảng trước/sau).
+  - [x] Không overflow ở 320dp và text scale 2.0.
+- **Dependencies:** M4.1 (GoRouter foundation), M4.10 (shell hai branch)
+- **Tests required:** `test/app/router/app_router_test.dart` (nhóm AD-19),
+  `test/app/shell/app_navigation_shell_test.dart` (bốn destination, nhãn vi,
+  placeholder ở compact), hai
+  `test/features/{progress,settings}/.../*_placeholder_screen_test.dart`,
+  `IT-NAV-011` trong `test/integration/widgets/navigation_widget_test.dart`,
+  hai visual-audit companion (MX-VIS-001).
+- **Checklist phases:** 8
+
+**`MxNavigationBar` phải sửa, với bằng chứng đo được.** Cap
+`4 × 120dp = 480dp` vượt bề rộng 393dp, và `Row` cấp cho con một bề rộng
+không giới hạn nên cap luôn thắng: bốn destination tràn 87px — đúng điều kiện
+"chỉ sửa shared component khi có bằng chứng overflow". Sửa bằng một `Flexible`
+loose để bề rộng màn hình được truyền xuống làm trần thứ hai: hai destination
+giữ nguyên bố cục cũ (cap 240 vẫn nhỏ hơn màn), bốn destination trải đủ mép —
+đúng even split Material thiết kế. Golden của component với hai destination vì
+thế không đổi bố cục.
 
 ## Blocker
 

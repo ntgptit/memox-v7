@@ -8,9 +8,37 @@
   "@navigationDecksLabel": {
     "description": "Bottom navigation label for the Decks destination. Kept separate from decksTitle even though the English words match: a tab label is competing for width with another label and may need to be shortened in a language where the screen title cannot be."
   },
-  "navigationStudyLabel": "Ôn tập",
+  "navigationStudyLabel": "Học",
   "@navigationStudyLabel": {
-    "description": "Bottom navigation label for the Review destination, where the user studies due cards."
+    "description": "Bottom navigation label for the Study destination. \"Học\" rather than \"Ôn tập\": the branch covers both learning new cards and reviewing due ones, and \"Ôn tập\" names only the second half."
+  },
+  "navigationProgressLabel": "Tiến độ",
+  "@navigationProgressLabel": {
+    "description": "Bottom navigation label for the Progress destination. The branch shows a placeholder until the statistics feature exists (AD-19)."
+  },
+  "navigationSettingsLabel": "Cài đặt",
+  "@navigationSettingsLabel": {
+    "description": "Bottom navigation label for the Settings destination. The branch shows a placeholder until app settings exist (AD-19)."
+  },
+  "progressTitle": "Tiến độ",
+  "@progressTitle": {
+    "description": "App bar title of the Progress branch."
+  },
+  "progressPlaceholderTitle": "Tính năng Tiến độ đang được phát triển",
+  "@progressPlaceholderTitle": {
+    "description": "Heading of the Progress placeholder (AD-19)."
+  },
+  "progressPlaceholderMessage": "Các lượt học hiện tại vẫn được lưu để sử dụng khi tính năng hoàn tất.",
+  "@progressPlaceholderMessage": {
+    "description": "Body of the Progress placeholder: study history is already recorded, nothing is lost while waiting."
+  },
+  "settingsTitle": "Cài đặt",
+  "@settingsTitle": {
+    "description": "App bar title of the Settings branch."
+  },
+  "settingsPlaceholderTitle": "Các tùy chọn ứng dụng đang được phát triển",
+  "@settingsPlaceholderTitle": {
+    "description": "Heading of the Settings placeholder (AD-19)."
   },
   "decksTitle": "Bộ thẻ",
   "@decksTitle": {
