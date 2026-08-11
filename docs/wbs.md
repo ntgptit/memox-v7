@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.7 (Bottom navigation IA scaffold) |
+| **Updated by task** | M99.8 (Nhãn tab Decks → Thư viện/Library) |
 | **Last updated** | 2026-08-11 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -33,7 +33,7 @@ AD / UC (xem `business-rules.md`).
 | M7 · CI/CD (Phase 19) | todo | Bắt đầu được ngay sau M2. Job Android + Web, chưa có iOS (AD-04) |
 | M8 · Release Android (Phase 16–18, 20–22) | todo | |
 | M9 · Backend Spring Boot + auth + sync (Phase 10) | todo | Sau khi M8 ổn định |
-| M99 · Adhoc | — | Task chủ dự án giao trực tiếp, ngoài chuỗi phụ thuộc. M99.1 **done** — `master-flow.md`. M99.2 **done** — Deck và Card thành bản tham chiếu (AD-17). M99.3 **done** — refactor toàn bộ IT theo Testing Pyramid: 133/133 kịch bản có coverage host, `integration_test/` còn 8 kịch bản `DEVICE-E2E`, và CI lần đầu có cổng tự động cho tính đúng đắn nghiệp vụ. M99.5 **done** — golden harness chưa bao giờ nạp `NotoSansKR`, nên mọi chữ Hàn trong mọi golden là ô `NO GLYPH`; đã nạp đủ ba face CJK, bổ sung Nhật/Trung, và fixture demo trở lại tiếng Hàn. M99.7 **done** — bottom navigation lên bốn branch (Decks · Học · Tiến độ · Cài đặt, AD-19); Progress/Settings là placeholder presentation-only, hai feature này **chưa** hoàn thành |
+| M99 · Adhoc | — | Task chủ dự án giao trực tiếp, ngoài chuỗi phụ thuộc. M99.1 **done** — `master-flow.md`. M99.2 **done** — Deck và Card thành bản tham chiếu (AD-17). M99.3 **done** — refactor toàn bộ IT theo Testing Pyramid: 133/133 kịch bản có coverage host, `integration_test/` còn 8 kịch bản `DEVICE-E2E`, và CI lần đầu có cổng tự động cho tính đúng đắn nghiệp vụ. M99.5 **done** — golden harness chưa bao giờ nạp `NotoSansKR`, nên mọi chữ Hàn trong mọi golden là ô `NO GLYPH`; đã nạp đủ ba face CJK, bổ sung Nhật/Trung, và fixture demo trở lại tiếng Hàn. M99.7 **done** — bottom navigation lên bốn branch (AD-19); Progress/Settings là placeholder presentation-only, hai feature này **chưa** hoàn thành. M99.8 **done** — nhãn tab đầu đổi Decks/Bộ thẻ → Library/Thư viện; branch nội bộ và title màn hình vẫn là Decks |
 
 ---
 
@@ -8329,6 +8329,32 @@ loose để bề rộng màn hình được truyền xuống làm trần thứ h
 giữ nguyên bố cục cũ (cap 240 vẫn nhỏ hơn màn), bốn destination trải đủ mép —
 đúng even split Material thiết kế. Golden của component với hai destination vì
 thế không đổi bố cục.
+
+### M99.8 · Nhãn tab Decks → Thư viện/Library
+
+- **Status:** **done** — targeted tests xanh, `flutter analyze` sạch,
+  `check_docs` sạch, `dart format` sạch.
+- **Goal:** Tab đầu của bottom navigation nói đúng phạm vi của nó — cả cây
+  deck, thẻ bên trong và luồng starter — thay vì chỉ tầng trên cùng.
+- **Scope:** `navigationDecksLabel` trong hai ARB (en "Library", vi
+  "Thư viện") + mô tả; `ItText.decksTab` của device suite; các comment test
+  viện dẫn "cả title lẫn tab đều là Decks" (không còn đúng); nhãn tab trong
+  `docs/it-scenarios/01` và mục Điều hướng top-level của `docs/product.md`.
+- **Out of scope:** mọi định danh nội bộ — `RouteNames.decks`, branch Decks,
+  feature `deck/`, `decksTitle` của app bar — đều giữ nguyên. Không đổi
+  thứ tự tab, không đổi icon, không đổi cold start.
+- **Editable documents:** `docs/wbs.md`, `docs/product.md`,
+  `docs/it-scenarios/01-navigation-and-continuity.md`
+- **Output:** không file mới — một nhãn l10n đổi giá trị.
+- **Acceptance criteria:**
+  - [x] Bar hiện Library/Thư viện ở vị trí 0; ba tab còn lại không đổi.
+  - [x] Test thứ tự/nhãn của shell vẫn xanh qua getter l10n, không sửa test.
+  - [x] Docs nhắc nhãn tab dùng từ mới; định danh nội bộ giữ "Decks".
+- **Dependencies:** M99.7
+- **Tests required:** không test mới — nhãn đọc qua l10n getter nên
+  `app_navigation_shell_destinations_test.dart` và các test router hiện có
+  chính là cái phải xanh; cộng `test/l10n/` (parity + hardcoded strings).
+- **Checklist phases:** 12
 
 ## Blocker
 

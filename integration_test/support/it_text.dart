@@ -21,7 +21,10 @@ abstract final class ItText {
   static const String move = 'Move';
   static const String resetContentType = 'Allow cards or decks again';
   static const String allowBoth = 'Allow both';
-  static const String decksTab = 'Decks';
+
+  /// The first tab. It read `Decks` until the Library rename in `lib/` —
+  /// the tab now names the whole content library, not just its top level.
+  static const String decksTab = 'Library';
 
   /// The deck level's way into its card list (BR-63, W1).
   static const String openCards = 'Open cards';
