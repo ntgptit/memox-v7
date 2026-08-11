@@ -161,6 +161,12 @@ void main() {
       // origin passed while every step still carried `sm` of leading padding,
       // so the box sat on the gutter and the word sat 8px inside it — which is
       // what a reader sees and what was reported.
+      // The field rests collapsed since the density pass, so the shared left
+      // edge is asserted against it opened — the state in which both exist.
+      final english = AppLocalizationsEn();
+      await tester.tap(find.bySemanticsLabel(english.deckSearchOpenLabel));
+      await tester.pumpAndSettle();
+
       expect(
         tester.getTopLeft(find.byIcon(Icons.home_outlined)).dx,
         tester.getTopLeft(find.byType(MxSearchField)).dx,

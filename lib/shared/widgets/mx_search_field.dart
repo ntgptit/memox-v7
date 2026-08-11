@@ -33,6 +33,7 @@ class MxSearchField extends StatefulWidget {
     required this.hintText,
     this.resultCount,
     this.clearSemanticLabel,
+    this.shouldAutofocus = false,
     super.key,
   });
 
@@ -48,6 +49,14 @@ class MxSearchField extends StatefulWidget {
 
   /// Already-localized label for the clear button.
   final String? clearSemanticLabel;
+
+  /// Focus the field the moment it appears.
+  ///
+  /// For a field that is *revealed* by a control rather than resting on the
+  /// page: the tap that opened it was the request to type, and making the user
+  /// tap a second time into the field they just asked for is a step with no
+  /// information in it. The HTML kit's `autofocus` attribute, as a parameter.
+  final bool shouldAutofocus;
 
   @override
   State<MxSearchField> createState() => _MxSearchFieldState();
@@ -143,6 +152,7 @@ class _MxSearchFieldState extends State<MxSearchField> {
               child: TextField(
                 controller: _controller,
                 focusNode: _focusNode,
+                autofocus: widget.shouldAutofocus,
                 onChanged: widget.onChanged,
                 textInputAction: TextInputAction.search,
                 style: context.texts.bodyMedium,

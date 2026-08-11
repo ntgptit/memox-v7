@@ -22,8 +22,8 @@ It owns the **deck tree** and nothing else. Card content belongs to
 
 | Kind | Where to read it |
 |---|---|
-| Routes | `RouteNames.decks` (`/`), `RouteNames.deckDetail` (`decks/:deckId`) |
-| Screen | `DeckListScreen(parentDeckId?)` — **one** screen, recursive. M4.10c merged the root list and the detail view once the only difference left was which data they were given |
+| Routes | `RouteNames.decks` (`/`), `RouteNames.deckDetail` (`decks/:deckId`), `RouteNames.starterLibrary` (`starter`) — the template catalog an empty library offers (UC-01) |
+| Screen | `DeckListScreen(parentDeckId?)` — **one** screen, recursive; `StarterLibraryScreen` — the starter catalog. M4.10c merged the root list and the detail view once the only difference left was which data they were given |
 | Contract | `DeckRepository` (`domain/repositories/deck_repository.dart`) |
 | Entity | `DeckEntity` |
 | Value object | `DeckName` — the only way to construct a valid deck name (BR-01) |

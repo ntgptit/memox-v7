@@ -19,6 +19,7 @@ final class _RecordingTemplateRepository implements DeckTemplateRepository {
   Future<DeckTemplateInstallOutcome> installTemplate(
     DeckTemplate template, {
     SchedulerType? schedulerType,
+    bool allowDuplicate = false,
   }) async {
     final failure = failWith;
     if (failure != null) throw failure;
@@ -26,6 +27,12 @@ final class _RecordingTemplateRepository implements DeckTemplateRepository {
 
     return outcome;
   }
+
+  @override
+  Future<Set<({String templateId, int version})>> installedTemplateKeys() =>
+      Future<Set<({String templateId, int version})>>.value(
+        <({String templateId, int version})>{},
+      );
 }
 
 /// Which flavors seed, and what a failure does to the launch (M4.12, AD-07).

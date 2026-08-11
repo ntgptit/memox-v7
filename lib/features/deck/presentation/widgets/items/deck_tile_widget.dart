@@ -115,11 +115,15 @@ class _DeckHeadRegion extends StatelessWidget {
       // `sm` here made the optical right gutter 20 against the left's 16, which
       // is visible as a card whose contents sit slightly left of centre. 4 + 12
       // is the 16 every other element on the screen starts from.
+      // `md` on top since the density pass: the concept's list shows five rows
+      // where this screen showed two and a half, and most of the difference was
+      // resting padding. 12 over the well still clears the card edge; the
+      // title's own line-height does the rest.
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
-        AppSpacing.lg,
+        AppSpacing.md,
         AppSpacing.xs,
-        AppSpacing.sm,
+        AppSpacing.xs,
       ),
       child: Row(
         // Top, not centre. Once the name wraps -- a long deck title, or any
@@ -240,7 +244,10 @@ class _DeckStateRegion extends StatelessWidget {
                 // instead. Not a *disabled* Study button — BR-29 makes "nothing
                 // due" good news, and a greyed control says you cannot do the
                 // thing when the truth is there is nothing to do.
-                if (summary.hasDueCards)
+                // **New counts too** (BR-150, BR-142). `hasDueCards` alone hid
+                // the button on a deck of twenty unlearned cards — a learner's
+                // first deck, which is the one deck that must offer Study.
+                if (summary.hasStudyableCards)
                   DeckStudyButtonWidget(
                     deckId: summary.deck.id,
                     dueCardCount: summary.dueCardCount,

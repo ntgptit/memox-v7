@@ -4,6 +4,7 @@ import 'package:memox/core/theme/app_spacing.dart';
 import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
 import 'package:memox/features/deck/presentation/widgets/sections/deck_level_summary_widget.dart';
+import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_search_field.dart';
 
 import 'support/deck_screen_harness.dart';
@@ -20,6 +21,7 @@ import 'support/fake_deck_repository.dart';
 /// same-width, same-radius surfaces, which read as a single glued blob.
 /// Only geometry after layout can see a sum, hence `getRect`.
 void main() {
+  final english = AppLocalizationsEn();
   // Both sides of the breakpoint: the strip pads itself differently in each
   // (`mx_content_shell.dart`), and the glue was reported on a compact device.
   const surfaces = <String, Size>{
@@ -43,6 +45,11 @@ void main() {
           screen: const DeckListScreen(),
           surface: entry.value,
         );
+
+        // The field rests collapsed since the density pass; the gap under
+        // measure is the one a *searching* user sees, so open it first.
+        await tester.tap(find.bySemanticsLabel(english.deckSearchOpenLabel));
+        await tester.pumpAndSettle();
 
         final searchBottom = tester.getRect(find.byType(MxSearchField)).bottom;
         final summaryTop = tester

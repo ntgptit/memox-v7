@@ -72,12 +72,20 @@ List<AuditSkipAllowance> deckShellAllowances({
   int breadcrumbSteps = 0,
   bool hasFloatingAction = false,
 
-  /// Whether the level's subheader carries the search field. Every deck level
-  /// does; the parameter exists so a state that renders no shell at all does not
-  /// have to opt out of it silently.
+  /// Whether the level's subheader carries the search *control*. Every deck
+  /// level does; the parameter exists so a state that renders no shell at all
+  /// does not have to opt out of it silently.
+  ///
+  /// **A toggle now, not a field.** The density pass collapsed the resting
+  /// field into an icon button in the breadcrumb strip, so at rest a level
+  /// contributes one more InkWell host and no `RenderEditable` at all — the
+  /// field, its decoration and its cursor painter exist only after the toggle
+  /// is pressed, which no audited state does. The mx_search_field_* goldens
+  /// still pin the field itself.
   bool hasSearchField = true,
 }) {
-  final iconButtons = screenIconButtons + (hasBackButton ? 1 : 0);
+  final iconButtons =
+      screenIconButtons + (hasBackButton ? 1 : 0) + (hasSearchField ? 1 : 0);
   final floatingActions = hasFloatingAction ? 1 : 0;
   // Every one of these hosts an InkWell inside its own Material.
   final inkHosts =
@@ -89,43 +97,10 @@ List<AuditSkipAllowance> deckShellAllowances({
       floatingActions;
   // The InkWell's rounded clip, once per host that has one. Icon buttons draw a
   // `_ShapeBorderPainter` instead, which is counted separately below.
-  //
-  // The search field adds one of its own: a `TextField` paints its cursor and
-  // selection through an unnamed `CustomPaint`, and it is there whether or not
-  // anything has been typed.
   final unnamedPainters =
-      tappableCards +
-      pills +
-      breadcrumbSteps +
-      floatingActions +
-      (hasSearchField ? 1 : 0);
+      tappableCards + pills + breadcrumbSteps + floatingActions;
 
   return <AuditSkipAllowance>[
-    if (hasSearchField)
-      AuditSkipAllowance(
-        itemId: screenItemId,
-        reason: SkipReason.rasterOnly,
-        detailContains: 'RenderEditable',
-        rationale:
-            'A TextField paints its text, its hint and its cursor into a '
-            'RenderEditable, which reports no colour. The field takes its style '
-            'from the body text theme and its fill from surfaceMuted; the pill '
-            'and both of its states are pinned by the mx_search_field_* '
-            'goldens.',
-        // Three: the text, the hint and the cursor layer are separate paints on
-        // one field.
-        expectedMatches: 3,
-      ),
-    if (hasSearchField)
-      AuditSkipAllowance(
-        itemId: screenItemId,
-        reason: SkipReason.rasterOnly,
-        detailContains: '_RenderDecoration',
-        rationale:
-            "InputDecorator's own render object. Every border on this field is "
-            'InputBorder.none — the pill around it is the decoration — so there '
-            'is nothing here to read a colour from.',
-      ),
     // One per Navigator: the harness's own MaterialApp, GoRouter's root, and the
     // branch.
     const AuditSkipAllowance(
@@ -230,12 +205,17 @@ List<AuditSkipAllowance> deckShellAllowances({
 /// cannot excuse each other, and so a second button appearing on either shows up
 /// as a miscount.
 List<AuditSkipAllowance> mxActionButtonAllowances(
-  String itemId,
-) => <AuditSkipAllowance>[
+  String itemId, {
+
+  /// How many MxActionButtons the item holds. The empty library holds two
+  /// since UC-01 put the starter catalog beside the blank deck.
+  int buttons = 1,
+}) => <AuditSkipAllowance>[
   AuditSkipAllowance(
     itemId: itemId,
     reason: SkipReason.customPainter,
     detailContains: '_ShapeBorderPainter',
+    expectedMatches: buttons,
     rationale:
         'MxActionButton renders a Filled/OutlinedButton, which draws its '
         'border with a CustomPainter, so the stroke exists in no render '
@@ -247,6 +227,7 @@ List<AuditSkipAllowance> mxActionButtonAllowances(
     itemId: itemId,
     reason: SkipReason.rasterOnly,
     detailContains: '_RenderInkFeatures',
+    expectedMatches: buttons,
     rationale:
         "The button's own Material ink layer. Splash and highlight are "
         'painted onto Material, so no render object carries them, and the '

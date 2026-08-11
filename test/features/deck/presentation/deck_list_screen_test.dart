@@ -75,9 +75,14 @@ void main() {
       final empty = tester.widget<MxEmptyState>(find.byType(MxEmptyState));
       expect(find.text(english.decksEmptyTitle), findsOneWidget);
       expect(find.text(english.decksEmptyMessage), findsOneWidget);
-      // Unlike M4.10 slice 1, the action now leads somewhere real.
-      expect(empty.actionLabel, english.deckCreateRootAction);
+      // **Two ways forward, and ready-made content leads** (UC-01). Production
+      // seeds nothing, so this is a real first-run screen: the starter catalog
+      // is the primary action and the blank deck stays one tap away as the
+      // quieter second path.
+      expect(empty.actionLabel, english.deckStarterLibraryAction);
       expect(empty.onAction, isNotNull);
+      expect(empty.secondaryActionLabel, english.deckCreateRootAction);
+      expect(empty.onSecondaryAction, isNotNull);
       expect(find.byType(MxErrorState), findsNothing);
       expect(tester.takeException(), isNull);
     });

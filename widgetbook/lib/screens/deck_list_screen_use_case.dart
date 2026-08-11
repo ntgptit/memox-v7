@@ -355,6 +355,7 @@ class _CatalogDeckRepository implements DeckRepository {
     DeckEntity deck, {
     required int total,
     required int due,
+    int newCards = 0,
     int? learned,
     int subDecks = 0,
     SchedulerType? scheduler,
@@ -362,6 +363,7 @@ class _CatalogDeckRepository implements DeckRepository {
     return DeckSummary(
       deck: deck,
       totalCardCount: total,
+      newCardCount: newCards,
       dueCardCount: due,
       // Two thirds by default rather than zero or full: a catalog whose bars are
       // all empty shows the component's least interesting state, and one whose

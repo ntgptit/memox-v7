@@ -36,6 +36,7 @@ void main() {
       id: 'd1',
       name: 'Academic Word List',
       totalCardCount: 570,
+      newCardCount: 46,
       dueCardCount: 12,
       learnedCardCount: 120,
       subDeckCount: 4,
@@ -57,6 +58,18 @@ void main() {
       subDeckCount: 1,
     ),
     fakeSummary(id: 'd4', name: 'Business email', subDeckCount: 3),
+  ];
+
+  /// The states the density pass and BR-150 added: an empty production
+  /// library offering its two ways in, and a new-only deck keeping its Study.
+  List<DeckSummary> newOnly() => <DeckSummary>[
+    fakeSummary(
+      id: 'd1',
+      name: 'Korean vocabulary',
+      totalCardCount: 20,
+      newCardCount: 20,
+      subDeckCount: 2,
+    ),
   ];
 
   for (final (String mode, Brightness brightness) in <(String, Brightness)>[
@@ -93,6 +106,7 @@ void main() {
             name: 'Nouns',
             parentId: 'd1a',
             totalCardCount: 60,
+            newCardCount: 14,
             dueCardCount: 7,
             learnedCardCount: 22,
           ),
@@ -120,6 +134,33 @@ void main() {
       );
 
       await matchesReviewGolden('goldens/deck_list_level_$mode.png');
+    });
+
+    testWidgets('deck list — empty library, $mode', (tester) async {
+      // The production first-run: nothing seeded, two ways forward (UC-01).
+      await pumpReview(
+        tester,
+        ReviewApp(
+          home: deckShellWith(FakeDeckRepository()),
+          brightness: brightness,
+        ),
+      );
+
+      await matchesReviewGolden('goldens/deck_list_empty_$mode.png');
+    });
+
+    testWidgets('deck list — new-only deck keeps Study, $mode', (tester) async {
+      // BR-150's poster case: twenty unlearned cards, nothing due, and the
+      // Study button present anyway.
+      await pumpReview(
+        tester,
+        ReviewApp(
+          home: deckShellWith(FakeDeckRepository.withSummaries(newOnly())),
+          brightness: brightness,
+        ),
+      );
+
+      await matchesReviewGolden('goldens/deck_list_new_only_$mode.png');
     });
   }
 }

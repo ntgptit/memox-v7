@@ -49,6 +49,7 @@ final class DeckTemplateRepositoryImpl implements DeckTemplateRepository {
   Future<DeckTemplateInstallOutcome> installTemplate(
     DeckTemplate template, {
     SchedulerType? schedulerType,
+    bool allowDuplicate = false,
   }) async {
     try {
       return await _dao.runInTransaction(() async {
@@ -56,12 +57,29 @@ final class DeckTemplateRepositoryImpl implements DeckTemplateRepository {
           templateId: template.templateId,
           version: template.version,
         );
-        if (existing > 0) return DeckTemplateInstallOutcome.alreadyPresent;
+        // BR-38's deliberate second copy skips only this short-circuit; the
+        // check still runs inside the transaction so the *default* path stays
+        // race-free (BR-37).
+        if (existing > 0 && !allowDuplicate) {
+          return DeckTemplateInstallOutcome.alreadyPresent;
+        }
 
         await _copy(template, schedulerType ?? template.defaultSchedulerType);
 
         return DeckTemplateInstallOutcome.installed;
       });
+    } on Failure {
+      rethrow;
+    } on Object catch (error) {
+      throw mapDatabaseError(error);
+    }
+  }
+
+  @override
+  Future<Set<({String templateId, int version})>>
+  installedTemplateKeys() async {
+    try {
+      return await _dao.installedTemplateKeys();
     } on Failure {
       rethrow;
     } on Object catch (error) {

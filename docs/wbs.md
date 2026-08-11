@@ -8356,6 +8356,85 @@ thế không đổi bố cục.
   chính là cái phải xanh; cộng `test/l10n/` (parity + hardcoded strings).
 - **Checklist phases:** 12
 
+### M99.9 · Library đọc được khối lượng học thật — New/Due tách đôi, Starter Library, và mật độ theo concept
+
+- **Status:** **done** — deck + app tests xanh, golden dựng lại và đã soát bằng
+  mắt, `check_docs` sạch, guard sạch, không chạy emulator.
+- **Goal:** BR-150 thành sự thật trên màn Library: hai con số New/Due tách
+  biệt từ đúng hai tập của BR-142, nút Study không biến mất trên deck toàn thẻ
+  mới, và một thư viện production rỗng có lối vào nội dung.
+- **Scope:** projection của hai named query deck, `DeckSummary` + predicate,
+  badge/tile/summary/Study CTA, Starter Library (screen + route + BR-38),
+  search thu gọn và mật độ tile; docs và golden đi kèm.
+- **Out of scope:** SM-2, schema, bottom navigation (ngoài route con Starter),
+  màu theo concept, language-pair selector, hidden-card counter.
+- **Editable documents:** `docs/wbs.md`, `docs/use-cases.md`,
+  `docs/it-scenarios/04-deck-discovery-and-progress.md`,
+  `docs/it-scenarios/14-host-coverage-map.md`,
+  `docs/reviews/design-parity-checklist.md`, `lib/features/deck/README.md`
+- **Output:** `newCardCount` end-to-end; `StarterLibraryScreen` +
+  `starterInstallController` + `InstallDeckTemplateUseCase` +
+  `GetInstalledTemplateKeysUseCase`; badge hai chip; summary compact; search
+  thu gọn; 4 golden state mới.
+- **Acceptance criteria:**
+  - [x] Tile hiện New và Due tách biệt (BR-150); Study CTA khi một trong hai
+        khác 0; 0/0 không có CTA enabled; "No cards" ≠ "Nothing due".
+  - [x] Summary không "caught up" khi còn New; hiện đủ New/Due/progress.
+  - [x] Một statement mỗi level, không N+1 (`deck_level_read_test` vẫn đếm 1).
+  - [x] Empty root có hai CTA; Starter cài qua transaction, BR-37/BR-38 đúng
+        như UC-01 A2; fail có retry, không copy nửa vời.
+  - [x] Ba deck đầy đủ ở 393×852 khi summary mở; không mất breadcrumb, subtree
+        search, filter/sort, touch target, text scale.
+- **Dependencies:** M99.7, M99.8
+- **Tests required:** data (subtree/disjoint/parity/single-statement), domain
+  (ba predicate), widget (tile/summary/starter), golden root+level+empty+new-only
+- **Checklist phases:** 14.2, 14.4
+- **Vấn đề, phát biểu ở tầng nghiệp vụ:** badge, nút Study và summary đều đọc
+  `dueCardCount` — một nửa của BR-142. Deck hai mươi thẻ chưa học hiện "All
+  caught up", không nút Study, không con số nào nói về hai mươi thẻ đó. Đây là
+  BR-150 bị vi phạm chứ không phải thẩm mỹ.
+- **`newCardCount` đi ra từ cùng statement** — `rootDeckSummaries` và
+  `childDeckLevel` mỗi query thêm một LEFT JOIN cùng dạng với `due`, predicate
+  chữ-đối-chữ với `newCardsInTree` của Study (BR-90); không query thứ hai,
+  không N+1, `nextDueAt`/scheduler/ancestry vẫn cùng snapshot.
+  `deck_level_read_test` đếm statement vẫn 1.
+- **Ba predicate có tên** trên `DeckSummary`: `hasNewCards` · `hasDueCards` ·
+  `hasStudyableCards` — nút Study hỏi câu thứ ba, badge hiện cả hai số, và
+  không widget nào còn tự so sánh để rồi gộp nhầm hai tập.
+- **Summary hết nói dối:** "caught up" chỉ khi **cả hai** tập rỗng; New-only
+  lấy số New làm headline; mixed thì Due dẫn và New đi cạnh. Panel gọn lại một
+  dòng `titleLarge` + câu, `auto` theo studyable thay vì theo due.
+- **Starter Library (UC-01, BR-87):** production không seed, nên empty root
+  giờ có hai lối — `Browse starter library` (primary) và `New deck`.
+  Màn catalog mới tại `RouteNames.starterLibrary` (`/starter`, trong branch
+  Library): tên, số card, ngôn ngữ, nguồn, notice fixture BR-87; chọn scheduler
+  trước khi copy (BR-34); install qua transaction hiện có (BR-39). **BR-38 dựng
+  đúng như use case A2:** template đã có hiện `Added`, tap → confirm "đã tồn
+  tại", đồng ý mới tạo bản sao thứ hai qua `allowDuplicate` — đường seed tự
+  động vẫn idempotent tuyệt đối (BR-37).
+- **Mật độ theo concept, màu theo token:** search thu gọn thành icon trong
+  strip breadcrumb (subtree search, clear, focus, 48px giữ nguyên — chỉ *khi
+  nào* field mount là đổi); summary `md` padding; tile bớt `lg→md/xs` ở đầu
+  card. 393×852: ba deck đầy đủ khi summary mở. Phân kỳ với design_system ghi ở
+  `docs/reviews/design-parity-checklist.md` mục "Library density pass".
+- **Không đụng:** một `DeckListScreen` đệ quy, breadcrumb, filter/sort thật,
+  stream Drift, due-boundary refresh, full-tile target + overflow riêng,
+  "No cards" ≠ "Nothing due", transaction các luồng ghi, light/dark, ARB,
+  text scale 2.0.
+- **Tests:** `deck_new_count_test` (6, SQLite thật — subtree mọi độ sâu, hai
+  tập rời nhau, thẻ mới tăng New không đổi Due, học xong rời New, parity
+  root/child), `deck_summary_predicate_test` (5), `deck_tile_counts_test` (10,
+  gồm text-scale 2.0@320), `deck_summary_new_test` (3),
+  `starter_library_test` (7 — disclose/BR-87, cài đặt, cancel, BR-38 hai
+  nhánh, fail+retry, manifest rỗng), `deck_template_repository_test` (+2:
+  BR-38 duplicate có chủ ý, `installedTemplateKeys`). Golden: root/level/empty/
+  new-only × light+dark, tất cả đã xem lại bằng mắt.
+- **Documents:** `use-cases.md` UC-01/UC-06 (task này được phép chạm file
+  frozen vì nêu đích danh), `it-scenarios/04` + `14-host-coverage-map`,
+  `deck/README.md`, `design-parity-checklist.md`.
+- **Không có `docs/business/navigation/navigation-flow.md` trong repo** — route
+  Starter ghi ở README của feature và bảng route của `app_router.dart`.
+
 ## Blocker
 
 | Blocker | Ảnh hưởng | Cách gỡ |

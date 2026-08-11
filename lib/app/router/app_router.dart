@@ -6,6 +6,7 @@ import '../../features/card/presentation/providers/card_use_case_provider.dart';
 import '../../features/card/presentation/screens/card_editor_screen.dart';
 import '../../features/card/presentation/screens/card_list_screen.dart';
 import '../../features/deck/presentation/screens/deck_list_screen.dart';
+import '../../features/deck/presentation/screens/starter_library_screen.dart';
 import '../../features/progress/presentation/screens/progress_placeholder_screen.dart';
 import '../../features/settings/presentation/screens/settings_placeholder_screen.dart';
 import '../../features/study/presentation/screens/study_entry_screen.dart';
@@ -66,6 +67,14 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
                 // depth is an argument rather than a different widget.
                 builder: (context, state) => const DeckListScreen(),
                 routes: <RouteBase>[
+                  // The starter catalog, a sibling of the deck detail so an
+                  // empty library can offer content without leaving the
+                  // branch (UC-01).
+                  GoRoute(
+                    path: RoutePaths.starterLibraryRelative,
+                    name: RouteNames.starterLibrary,
+                    builder: (context, state) => const StarterLibraryScreen(),
+                  ),
                   // A child route, so a deck screen pushes onto the Decks
                   // branch: the bottom bar stays, Back returns to the list, and
                   // switching to Review and back finds the deck still open.

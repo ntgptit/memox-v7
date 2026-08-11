@@ -78,6 +78,7 @@ rootDeckSummaries:
 SELECT
     d.**,
     COALESCE(total.cardCount, 0) AS totalCardCount,
+    COALESCE(new.newCount, 0) AS newCardCount,
     COALESCE(due.dueCount, 0) AS dueCardCount,
     COALESCE(learned.learnedCount, 0) AS learnedCardCount,
     COALESCE(sub.subCount, 0) AS subDeckCount,
@@ -86,6 +87,20 @@ SELECT
         WHERE next.due_at > :now
     ) AS nextDueAt
 FROM decks d
+-- BR-90, BR-150. The badge's other number: cards that have not finished the
+-- learning chain. Character-for-character the predicate `newCardsInTree` in
+-- `study.drift` selects with, because the badge and the session it opens have
+-- to count the same set — `query_test.dart` holds all of them to one answer.
+-- Disjoint from `due` by construction: one is `learned_at IS NULL`, the other
+-- `IS NOT NULL`, so no card can be in both and the two may be summed.
+LEFT JOIN (
+    SELECT cd.root_deck_id AS rootDeckId, COUNT(*) AS newCount
+    FROM cards c
+    INNER JOIN decks cd ON cd.id = c.deck_id
+    INNER JOIN card_study_states s ON s.card_id = c.id
+    WHERE s.learned_at IS NULL
+    GROUP BY cd.root_deck_id
+) new ON new.rootDeckId = d.id
 LEFT JOIN (
     SELECT cd.root_deck_id AS rootDeckId, COUNT(*) AS cardCount
     FROM cards c
@@ -223,6 +238,7 @@ SELECT
     child.**,
     root.scheduler_type AS inheritedSchedulerType,
     COALESCE(total.cardCount, 0) AS totalCardCount,
+    COALESCE(new.newCount, 0) AS newCardCount,
     COALESCE(due.dueCount, 0) AS dueCardCount,
     COALESCE(learned.learnedCount, 0) AS learnedCardCount,
     COALESCE(sub.subCount, 0) AS subDeckCount,
@@ -246,6 +262,17 @@ LEFT JOIN (
     INNER JOIN cards c ON c.deck_id = b.deck_id
     GROUP BY b.branch_id
 ) total ON total.branchId = child.id
+-- BR-90, BR-150, per branch. Same predicate as the root query above, repeated
+-- for the same reason the learned one is: drift generates from the statement
+-- text, and a view would put the rule somewhere neither query names.
+LEFT JOIN (
+    SELECT b.branch_id AS branchId, COUNT(*) AS newCount
+    FROM branch b
+    INNER JOIN cards c ON c.deck_id = b.deck_id
+    INNER JOIN card_study_states s ON s.card_id = c.id
+    WHERE s.learned_at IS NULL
+    GROUP BY b.branch_id
+) new ON new.branchId = child.id
 LEFT JOIN (
     SELECT b.branch_id AS branchId, COUNT(*) AS dueCount
     FROM branch b

@@ -27,6 +27,11 @@ abstract final class RoutePaths {
   /// so the URL says what it points at.
   static const String deckDetailRelative = 'decks/:deckId';
 
+  /// The starter catalog, **relative** to [decks] so the full location is
+  /// `/starter` inside the Library branch — the bottom bar stays, and Back
+  /// returns to the list that offered it.
+  static const String starterLibraryRelative = 'starter';
+
   /// A card-type deck's card list, **relative** to [deckDetailRelative] so the
   /// full location is `/decks/<id>/cards` and it nests inside the deck route —
   /// the bottom bar stays and Back returns to the deck tree.

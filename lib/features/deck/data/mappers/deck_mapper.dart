@@ -63,6 +63,7 @@ DeckListSnapshot rootLevelFromRows(List<RootDeckSummariesResult> rows) =>
           DeckSummary(
             deck: deckEntityFromRow(row.d),
             totalCardCount: row.totalCardCount,
+            newCardCount: row.newCardCount,
             dueCardCount: row.dueCardCount,
             learnedCardCount: row.learnedCardCount,
             subDeckCount: row.subDeckCount,
@@ -105,6 +106,7 @@ DeckListSnapshot childLevelFromRows(List<ChildDeckLevelResult> rows) {
           DeckSummary(
             deck: deckEntityFromRow(child),
             totalCardCount: row.totalCardCount,
+            newCardCount: row.newCardCount,
             dueCardCount: row.dueCardCount,
             learnedCardCount: row.learnedCardCount,
             subDeckCount: row.subDeckCount,

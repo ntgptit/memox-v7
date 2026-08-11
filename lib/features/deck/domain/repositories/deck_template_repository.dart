@@ -42,8 +42,26 @@ abstract interface class DeckTemplateRepository {
   /// Returns [DeckTemplateInstallOutcome.alreadyPresent] without writing when a
   /// copy is already there, rather than throwing: on the path that calls this
   /// — startup — "already installed" is the normal case, not an error.
+  /// [allowDuplicate] is BR-38's deliberate exception: a user who has
+  /// confirmed "this already exists" may add a second copy on purpose. It
+  /// bypasses only the idempotency short-circuit — the copy itself is the same
+  /// transaction — and nothing automatic may ever pass true: the seed path and
+  /// the default install stay idempotent (BR-37).
   Future<DeckTemplateInstallOutcome> installTemplate(
     DeckTemplate template, {
     SchedulerType? schedulerType,
+    bool allowDuplicate = false,
   });
+
+  /// The identities of templates the library already holds a copy of, as the
+  /// same `(template_id, version)` pairs the idempotency check uses (BR-37).
+  ///
+  /// One read for the whole catalog rather than a per-template probe: the
+  /// starter screen marks every row from one snapshot, and a loop of existence
+  /// checks would be the N+1 UC-06 names.
+  ///
+  /// **Advisory, never authoritative.** The install transaction re-checks
+  /// inside itself; this exists so the screen can *say* a template is already
+  /// added instead of offering a copy that BR-37 will refuse to make.
+  Future<Set<({String templateId, int version})>> installedTemplateKeys();
 }

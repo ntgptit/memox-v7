@@ -64,7 +64,8 @@ void main() {
         screenIconButtons: 1,
         screenItemId: 'deck_screen',
       ),
-      ...mxActionButtonAllowances('empty_state'),
+      // Two ways forward since UC-01: the starter catalog and the blank deck.
+      ...mxActionButtonAllowances('empty_state', buttons: 2),
     ],
   );
 
