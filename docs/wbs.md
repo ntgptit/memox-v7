@@ -8294,7 +8294,11 @@ bóng đổ.
   `use-cases.md`, `master-flow.md` giữ nguyên: placeholder navigation chưa
   phải use case nghiệp vụ và AD-19 đã là canonical location của quyết định.
 - **Editable documents:** `docs/wbs.md`, `docs/product.md`,
-  `docs/architecture.md`, `docs/it-scenarios/01-navigation-and-continuity.md`
+  `docs/architecture.md`, `docs/it-scenarios/01-navigation-and-continuity.md`,
+  `docs/it-scenarios/scenario-catalog.md`,
+  `docs/it-scenarios/14-host-coverage-map.md`, `docs/it-scenarios/README.md`
+  (ba file cuối: IT-NAV-011 phải vào danh mục và bản đồ coverage, và tổng số
+  kịch bản 133 → 134 xuất hiện ở cả ba)
 - **Output:** `lib/features/progress/presentation/screens/progress_placeholder_screen.dart`,
   `lib/features/settings/presentation/screens/settings_placeholder_screen.dart`,
   hai visual-audit companion, `widgetbook/lib/screens/placeholder_screens_use_case.dart`

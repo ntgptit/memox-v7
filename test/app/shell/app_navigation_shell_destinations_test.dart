@@ -89,12 +89,14 @@ void main() {
         'textScaler 2.0', (tester) async {
       // The same overflow shape as the deck empty state, on the branch that is
       // nothing but a centred column — and with four destinations the bar is
-      // at its widest, so this is the tightest fit the shell has.
+      // at its widest, so this is the tightest fit the shell has. 320, the
+      // narrowest supported surface, not the 360 the sibling file's `compact`
+      // constant uses: the claim being tested is M99.7's, and it says 320.
       await pumpShell(
         tester,
         FakeDeckRepository(),
         initialLocation: RoutePaths.progress,
-        surface: const Size(360, 640),
+        surface: const Size(320, 568),
         textScale: 2,
       );
 
@@ -102,6 +104,40 @@ void main() {
       final bar = tester.getRect(find.byType(MxNavigationBar));
 
       expect(empty.bottom, lessThanOrEqualTo(bar.top));
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('all four labels stay inside the bar at 320 with '
+        'textScaler 2.0', (tester) async {
+      // The narrowest supported surface at the largest supported text scale is
+      // where a fourth destination would push labels out of their slots. Each
+      // label must still be present exactly once and laid out inside the bar —
+      // an overflow would also surface as an exception, so both are asserted.
+      await pumpShell(
+        tester,
+        FakeDeckRepository(),
+        surface: const Size(320, 568),
+        textScale: 2,
+      );
+
+      final bar = tester.getRect(find.byType(MxNavigationBar));
+      for (final label in <String>[
+        english.navigationDecksLabel,
+        english.navigationStudyLabel,
+        english.navigationProgressLabel,
+        english.navigationSettingsLabel,
+      ]) {
+        final labelFinder = find.descendant(
+          of: find.byType(MxNavigationBar),
+          matching: find.text(label),
+        );
+        expect(labelFinder, findsOneWidget);
+
+        final labelRect = tester.getRect(labelFinder);
+        expect(labelRect.left, greaterThanOrEqualTo(bar.left));
+        expect(labelRect.right, lessThanOrEqualTo(bar.right));
+        expect(labelRect.bottom, lessThanOrEqualTo(bar.bottom));
+      }
       expect(tester.takeException(), isNull);
     });
   });

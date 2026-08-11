@@ -144,14 +144,20 @@
 - **Ưu tiên:** P1
 - **Tiền điều kiện:** App đã cài, dữ liệu bất kỳ; không có phiên Study đang dở.
 - **Liên kết:** AD-19; UC-06 cho cold start.
+- **Phạm vi deep link:** các bước 4–5 là điều hướng **in-process** — router phân
+  giải `/progress`/`/settings` làm initial location (URL development, cùng cơ
+  chế IT-NAV-005). App **chưa** khai báo `ACTION_VIEW` intent filter, nên OS
+  handoff của một deep link lạnh chưa tồn tại để kiểm; khi intent được wiring,
+  phần đó MUST tách thành một kịch bản `DEVICE-E2E` riêng như cặp
+  IT-NAV-005 · IT-PLAT-004.
 
 | Bước | Thao tác người dùng | Kết quả mong đợi |
 |---|---|---|
 | 1 | Mở app và quan sát bottom navigation | Đúng bốn destination theo thứ tự Bộ thẻ · Học · Tiến độ · Cài đặt; tab Bộ thẻ đang được chọn |
 | 2 | Chạm tab Tiến độ | Placeholder Tiến độ hiện icon, tiêu đề và mô tả "đang được phát triển"; không có số liệu thống kê nào; không tạo phiên Study; không có ghi database nào |
 | 3 | Chạm tab Cài đặt | Placeholder Cài đặt hiện tương tự; không có tùy chọn giả nào bật/tắt được; không tạo phiên; không ghi database |
-| 4 | Mở deep link `/progress` khi app đã đóng | App mở thẳng placeholder Tiến độ và tab Tiến độ được chọn |
-| 5 | Mở deep link `/settings` khi app đã đóng | App mở thẳng placeholder Cài đặt và tab Cài đặt được chọn |
+| 4 | Khởi động app với location `/progress` (in-process, xem Phạm vi deep link) | App mở thẳng placeholder Tiến độ và tab Tiến độ được chọn, không đi qua Decks |
+| 5 | Khởi động app với location `/settings` (in-process, xem Phạm vi deep link) | App mở thẳng placeholder Cài đặt và tab Cài đặt được chọn, không đi qua Decks |
 | 6 | Từ một bộ thẻ con đang mở, chạm Tiến độ rồi quay lại Bộ thẻ | Quay đúng bộ thẻ con đang mở — chuyển qua placeholder không làm mất ngăn xếp của branch khác |
 | 7 | Chạm lại tab đang được chọn | Branch quay về màn gốc của nó theo đúng hành vi reselect hiện có, không lỗi |
 | 8 | Xem bốn nhãn ở màn 320dp và text scale 2.0 | Nhãn Bộ thẻ/Học/Tiến độ/Cài đặt vẫn đọc được, không tràn; nội dung placeholder cuộn được thay vì tràn |
