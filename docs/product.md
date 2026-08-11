@@ -7,7 +7,7 @@
 | **Scope** | Vấn đề, người dùng, quyết định nền tảng, phạm vi MVP, luồng nghiệp vụ chính. Ngoài phạm vi: cách triển khai |
 | **Source of truth for** | Phạm vi MVP · phân loại must/should/nice/out · quyết định platform, data posture, auth, dữ liệu nhạy cảm |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.7 (Bottom navigation IA scaffold) |
+| **Updated by task** | M99.8 (Nhãn tab Decks → Thư viện/Library) |
 | **Last updated** | 2026-08-11 |
 
 ## Problem
@@ -162,14 +162,16 @@ chọn mode chỉ xuất hiện khi có mode thứ hai.
 ## Điều hướng top-level
 
 App dùng đúng **bốn** destination ở bottom navigation, thứ tự cố định:
-**Bộ thẻ (Decks) · Học (Study) · Tiến độ (Progress) · Cài đặt (Settings)**.
+**Thư viện (Library) · Học (Study) · Tiến độ (Progress) · Cài đặt (Settings)**.
+Nhãn tab đầu là "Thư viện" — cả cây deck, thẻ bên trong và luồng starter —
+trong khi branch nội bộ và màn hình gốc của nó vẫn là Decks.
 Quyết định, ràng buộc placeholder và các phương án bị loại nằm ở AD-19.
 
 - Cold start mở Decks (UC-06).
 - Progress và Settings hiện chỉ là scaffold/placeholder: có tab và route
   **không** có nghĩa hai feature này đã hoàn thành. Thống kê vẫn là
   should-have (S2); tùy chọn ứng dụng chưa có nghiệp vụ nào được chốt.
-- Thư viện starter (M6) là child flow bên trong Decks, không phải tab riêng.
+- Thư viện starter (M6) là child flow bên trong tab Thư viện (branch Decks), không phải tab riêng.
 - Không có tab Profile chừng nào chưa có auth/profile domain — nhất quán với
   "Đăng nhập / tài khoản" ở Explicitly out of MVP.
 

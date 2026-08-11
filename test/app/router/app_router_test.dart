@@ -37,10 +37,11 @@ void main() {
 
   /// The tab label, not the screen title.
   ///
-  /// In English `decksTitle` and `navigationDecksLabel` are both "Decks", so a
-  /// bare `find.text('Decks')` matches the app bar and the tab at once and
-  /// every tap becomes ambiguous. Scoping to the bar is what keeps these tests
-  /// about navigation.
+  /// Scoped to the bar because a tab label and a screen title are allowed to
+  /// collide — `decksTitle` and `navigationDecksLabel` were both "Decks" until
+  /// the Library rename, and a bare `find.text` matched the app bar and the
+  /// tab at once, making every tap ambiguous. The scoping is what keeps these
+  /// tests about navigation whether or not the two strings currently differ.
   Finder tab(String label) => find.descendant(
     of: find.byType(MxNavigationBar),
     matching: find.text(label),

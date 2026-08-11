@@ -4,9 +4,9 @@
   "@appTitle": {
     "description": "Application name. Shown as the MaterialApp title and in the Android task switcher. Not translated — it is a product name."
   },
-  "navigationDecksLabel": "Decks",
+  "navigationDecksLabel": "Library",
   "@navigationDecksLabel": {
-    "description": "Bottom navigation label for the Decks destination. Kept separate from decksTitle even though the English words match: a tab label is competing for width with another label and may need to be shortened in a language where the screen title cannot be."
+    "description": "Bottom navigation label for the Decks branch. \"Library\" rather than \"Decks\": the tab is the whole content library — the deck tree, the cards inside it, and the starter-library flow — while \"Decks\" named only its top level. The screen title (decksTitle) deliberately stays \"Decks\": the tab names the destination, the app bar names the list on it."
   },
   "navigationStudyLabel": "Study",
   "@navigationStudyLabel": {

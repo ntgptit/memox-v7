@@ -210,9 +210,10 @@ void main() {
         initialLocation: '/decks/deck-1',
       );
 
-      // Scoped to the strip: the bottom navigation carries its own "Decks"
-      // label, and a bare text finder would be ambiguous about which control
-      // this test is exercising.
+      // Scoped to the strip: labels elsewhere on the screen — the bottom
+      // navigation's tab, the app bar — are allowed to collide with the
+      // breadcrumb's, so a bare text finder would be ambiguous about which
+      // control this test is exercising.
       await tester.tap(
         find.descendant(
           of: find.byType(MxBreadcrumb),
