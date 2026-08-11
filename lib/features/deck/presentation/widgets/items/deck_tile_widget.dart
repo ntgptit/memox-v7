@@ -9,7 +9,7 @@ import '../../../../../shared/widgets/mx_icon_button.dart';
 import '../../../../../shared/widgets/mx_progress_bar.dart';
 import '../../../domain/models/deck_content_type_model.dart';
 import '../../../domain/models/deck_summary_model.dart';
-import 'deck_due_state_widget.dart';
+import 'deck_workload_line_widget.dart';
 import 'deck_icon_area_widget.dart';
 import 'deck_study_button_widget.dart';
 import '../support/deck_labels_widget.dart';
@@ -182,25 +182,20 @@ class _DeckHeadRegion extends StatelessWidget {
   }
 }
 
-/// The height a progress track occupies, reserved on decks that have none.
+/// The card's lower bands: what is waiting, then how far through it is and
+/// what to do about it.
 ///
-/// **Read from the component, not copied.** It was a literal 4, and the moment
-/// `MxProgressBarSize.sm` went to 6 the decks with no cards were two pixels
-/// shorter than the rest — a rhythm that had been fixed on purpose, broken by a
-/// number that had stopped being the same number.
-
-/// The card's lower bands: what you can do about the deck, then how far through
-/// it is.
+/// **Anatomy, fixed:** header (identity + menu) · workload line (`7 Due ·
+/// 14 New`) · action row (gauge, percentage, Study). The workload comes first
+/// because it is the decision input — a reader scans *what is pending* before
+/// choosing to act — and Study sits beside the gauge because the gauge answers
+/// "how far through", which is the same question at a different tense.
 ///
-/// **The verbs get a row of their own.** The kit's card ends in a foot holding
-/// the due state, a Study pill and the row menu; folding the bar and the chip
-/// onto one line left the second verb nowhere to go. The menu moved up to sit
-/// with the deck's identity, so this row carries only what a user *does*.
-///
-/// **The track sits on the card's bottom edge, not between the counts and the
-/// verbs.** In the middle it cut the card in two; on the edge it is a base the
-/// card stands on. It is the one element that ignores the side padding, and it
-/// is drawn `flush` so the card's corner is the only rounding.
+/// **The track moved inside the surface.** It ran flush along the card's
+/// bottom edge, where it read as a decorated border — and a selected-state
+/// underline on cards that cannot be selected. Inset to the card's own content
+/// padding it reads as a measurement again, and the percentage sits directly
+/// beside the thing it measures.
 class _DeckStateRegion extends StatelessWidget {
   const _DeckStateRegion({required this.summary});
 
@@ -208,94 +203,109 @@ class _DeckStateRegion extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Padding(
-          // `lg` under the row: the track below it is 4px of colour on the very
-          // edge, so it adds no breathing room of its own the way a margin
-          // would.
-          // **`sm` below, against `lg` above the card's first row — and that is
-          // what makes them look equal.** The row is the 48 touch-target floor
-          // but the Study pill paints 32, so it already sits 8 clear of the row's
-          // bottom edge; `lg` here put 24 of visible space under it against 16
-          // over the well at the top. 8 + 8 is the 16 the top has. The chip and
-          // the figure are shorter than the pill and end up with a little more,
-          // which is what a small mark needs to sit level with a filled one.
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.lg,
-            0,
-            AppSpacing.lg,
-            AppSpacing.sm,
-          ),
-          // **Fixed to the touch-target floor.** The Study pill paints 32 but its
-          // hit area is 48, so a card with something due grew 24px taller than
-          // one without and the column stepped. The row is the floor's height on
-          // every card, whatever is standing in it.
-          child: SizedBox(
-            height: AppSpacing.minimumTouchTarget,
-            child: Row(
-              children: <Widget>[
-                Expanded(child: DeckDueStateWidget(summary: summary)),
-                // **The slot Study will take, and what stands in it until then.**
-                // A deck with nothing waiting has no verb to offer and the row
-                // read as a card missing a piece; the figure is what is true
-                // instead. Not a *disabled* Study button — BR-29 makes "nothing
-                // due" good news, and a greyed control says you cannot do the
-                // thing when the truth is there is nothing to do.
-                // **New counts too** (BR-150, BR-142). `hasDueCards` alone hid
-                // the button on a deck of twenty unlearned cards — a learner's
-                // first deck, which is the one deck that must offer Study.
-                if (summary.hasStudyableCards)
-                  DeckStudyButtonWidget(
-                    deckId: summary.deck.id,
-                    dueCardCount: summary.dueCardCount,
-                  )
-                else if (summary.totalCardCount > 0)
-                  Text(
-                    context.l10n.deckLearnedPercentLabel(
-                      (summary.learnedFraction * 100).round(),
+    final isEmpty = summary.totalCardCount == 0;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        0,
+        AppSpacing.lg,
+        AppSpacing.md,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          DeckWorkloadLineWidget(summary: summary),
+          // A deck with no cards has no denominator, so there is no gauge to
+          // draw and no verb to offer — the workload line already says
+          // "No cards", and a 0% bar under it would be a measurement of
+          // nothing.
+          if (!isEmpty) ...<Widget>[
+            const SizedBox(height: AppSpacing.sm),
+            _DeckActionRow(summary: summary),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// The gauge, its figure, and — when there is anything to study — the verb.
+///
+/// **A minimum of the touch floor, never a fixed height.** Fixed at 48 the row
+/// clipped at text scale 2.0; unconstrained, a completed card (no Study pill)
+/// sat 24px shorter than its neighbours and the column stepped. The floor
+/// keeps the rhythm; large text is still free to grow past it.
+class _DeckActionRow extends StatelessWidget {
+  const _DeckActionRow({required this.summary});
+
+  final DeckSummary summary;
+
+  @override
+  Widget build(BuildContext context) {
+    final percent = (summary.learnedFraction * 100).round();
+
+    return Container(
+      constraints: const BoxConstraints(
+        minHeight: AppSpacing.minimumTouchTarget,
+      ),
+      alignment: AlignmentDirectional.centerStart,
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            // One semantics node for the pair: the gauge and its figure are
+            // one fact, and a reader should hear "82 of 180 learned,
+            // 46 percent learned" once, not a bar and then a stray number.
+            child: Semantics(
+              label: context.l10n.deckLearnedProgressLabel(
+                summary.learnedCardCount,
+                summary.totalCardCount,
+              ),
+              value: context.l10n.deckLearnedPercentLabel(percent),
+              child: ExcludeSemantics(
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: MxProgressBar(
+                        size: MxProgressBarSize.sm,
+                        value: summary.learnedFraction,
+                      ),
                     ),
-                    style: context.texts.labelMedium?.copyWith(
-                      color: summary.isFullyLearned
-                          ? context.semanticColors.success
-                          : context.colors.onSurfaceVariant,
-                      fontWeight: FontWeight.w600,
+                    const SizedBox(width: AppSpacing.sm),
+                    Text(
+                      context.l10n.deckLearnedPercentLabel(percent),
+                      style: context.texts.labelMedium?.copyWith(
+                        // Success is earned at 100% and only there — the same
+                        // moment the gauge's own fill turns (BR-88). Anything
+                        // less is the neutral figure, whatever today's due
+                        // count happens to be.
+                        color: summary.isFullyLearned
+                            ? context.semanticColors.success
+                            : context.colors.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
                     ),
-                    maxLines: 1,
-                  ),
-              ],
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
-        // A deck with no cards has no progress to draw — an empty track would be
-        // a measurement of nothing — but it still reserves the height, so a list
-        // mixing filled and empty decks keeps one rhythm. Reserving space claims
-        // nothing; drawing a 0% track would.
-        if (summary.totalCardCount == 0)
-          // Not `const`: an enum field is not a constant expression, and reading
-          // the real height beats a literal that can fall out of step.
-          SizedBox(height: MxProgressBarSize.sm.trackHeight)
-        else
-          // No clip here: `MxCard` clips its own content, and a `ClipRRect`
-          // around the bar would clamp the card's 16 radius down to the bar's
-          // own height and cut the wrong shape — the bug this replaced.
-          Semantics(
-            label: context.l10n.deckLearnedProgressLabel(
-              summary.learnedCardCount,
-              summary.totalCardCount,
+          // **New counts too** (BR-150, BR-142): `hasDueCards` alone hid the
+          // button on a deck of twenty unlearned cards. Absent — not disabled —
+          // when both sets are empty: BR-29 makes "nothing pending" good news,
+          // and a greyed verb says you cannot do the thing when the truth is
+          // there is nothing to do.
+          if (summary.hasStudyableCards) ...<Widget>[
+            const SizedBox(width: AppSpacing.md),
+            DeckStudyButtonWidget(
+              deckId: summary.deck.id,
+              dueCardCount: summary.dueCardCount,
             ),
-            value: context.l10n.deckLearnedPercentLabel(
-              (summary.learnedFraction * 100).round(),
-            ),
-            child: MxProgressBar(
-              size: MxProgressBarSize.sm,
-              shape: MxProgressBarShape.flush,
-              value: summary.learnedFraction,
-            ),
-          ),
-      ],
+          ],
+        ],
+      ),
     );
   }
 }

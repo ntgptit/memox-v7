@@ -249,7 +249,10 @@ void main() {
         reason: 'the card count',
       );
       expect(
-        find.textContaining(english.deckDueCountLabel(7)),
+        find.descendant(
+          of: find.byType(DeckTileWidget),
+          matching: find.textContaining('7 ${english.deckDueMetricWord}'),
+        ),
         findsOneWidget,
         reason: 'the due count',
       );

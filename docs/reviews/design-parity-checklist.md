@@ -594,3 +594,19 @@ không lấy màu hay tính năng ngoài domain.
 | Summary một dòng `titleLarge` + câu, padding `md` | ✅ `deck_level_summary_widget.dart` | ❌ chưa | Kit đang là bản hai tầng cũ |
 | Tile: đầu card `md/xs` thay `lg/sm` | ✅ `deck_tile_widget.dart` | ❌ chưa | Mật độ: 3 deck đủ khi summary mở, 393×852 |
 
+## Deck tile anatomy pass (refine, 2026-08-11)
+
+Chốt anatomy ba băng và color-role cho tile + summary. Concept chỉ cho
+hierarchy; mọi màu là token.
+
+| Quyết định | Flutter | design_system | Ghi chú |
+|---|---|---|---|
+| Workload line `7 Due · 14 New` đứng riêng trên hàng action; luôn hiện cả hai số, kể cả 0; bỏ micro-label `NEW` | ✅ `deck_workload_line_widget.dart` | ❌ chưa | Due = `streak-container`/`on-streak-container` + clock (không bao giờ danger); New = ink `info` trên surface, zero lùi về `on-surface-variant` |
+| Gauge vào trong surface, cùng hàng với `%` và Study; bỏ track flush đáy card | ✅ `_DeckActionRow` trong `deck_tile_widget.dart` | ❌ chưa | Track/fill = `progress-track`/`progress-fill`, success chỉ ở 100% (đã là contract của `MxProgressBar`) |
+| Summary metric-first: `12 Due  14 New` + dòng learned + bar, bỏ câu văn dài | ✅ `deck_level_summary_widget.dart` | ❌ chưa | Numeral `on-surface` titleLarge, word `on-surface-variant`/role ink |
+| Study giữ tonal `secondary-container` | ✅ (không đổi) | ✅ | |
+
+Contrast đo tại `deck_workload_role_test.dart`: info/surface 5.23:1 (light),
+7.84:1 (dark); onStreakContainer/streakContainer ≥ 4.5:1 hai theme;
+progressFill/progressTrack ≥ 3:1 hai theme.
+

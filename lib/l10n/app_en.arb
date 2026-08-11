@@ -123,32 +123,6 @@
   "@deckSummaryShowAction": {
     "description": "Brings the panel back after it has been dismissed. Named so it is obvious what returns."
   },
-  "deckSummaryCaughtUpFigure": "All",
-  "@deckSummaryCaughtUpFigure": {
-    "description": "Replaces the due figure when nothing is waiting. A zero in a large display face reads as a failure; the word does not."
-  },
-  "deckSummaryCaughtUp": "caught up — nothing due here today",
-  "@deckSummaryCaughtUp": {
-    "description": "Sits under the All figure. Lower case because it continues the figure above it as one sentence."
-  },
-  "deckSummaryDueAcrossLibrary": "{count, plural, other{cards due across your library today}}",
-  "@deckSummaryDueAcrossLibrary": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    },
-    "description": "Sits under the due figure at the root level. The count is the figure itself, so the sentence does not repeat it."
-  },
-  "deckSummaryDueInDeck": "{count, plural, other{cards due in this deck today}}",
-  "@deckSummaryDueInDeck": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    },
-    "description": "The same sentence inside a deck, where the scope is that deck rather than the whole library."
-  },
   "decksSectionLabelRoot": "Your decks",
   "@decksSectionLabelRoot": {
     "description": "Heads the list at the root level, beside the filter and sort pills. Uppercased by the widget, not here."
@@ -217,60 +191,88 @@
     },
     "description": "Says what was searched, so the user can tell an empty result from a search that looked in the wrong place."
   },
-  "deckNewCountLabel": "{count, plural, other{{count} new}}",
-  "@deckNewCountLabel": {"description": "Chip on a deck tile: cards still on the learning chain (learned_at IS NULL, BR-90). Shown beside the due chip, never merged with it (BR-150).", "placeholders": {"count": {"type": "int"}}},
-  "deckSummaryNewToLearn": "{count, plural, =1{new card to learn} other{new cards to learn}}",
-  "@deckSummaryNewToLearn": {"description": "Summary sentence when nothing is due but new cards remain. The level is NOT caught up in this state (BR-150).", "placeholders": {"count": {"type": "int"}}},
-  "deckSummaryNewBesideDue": "{newCount, plural, other{and {newCount} new to learn}}",
-  "@deckSummaryNewBesideDue": {"description": "Second line of the summary when both sets are non-empty.", "placeholders": {"newCount": {"type": "int"}}},
   "deckStarterLibraryAction": "Browse starter library",
-  "@deckStarterLibraryAction": {"description": "Empty-root CTA that opens the starter template catalog (UC-01)."},
+  "@deckStarterLibraryAction": {
+    "description": "Empty-root CTA that opens the starter template catalog (UC-01)."
+  },
   "starterLibraryTitle": "Starter library",
-  "@starterLibraryTitle": {"description": "Title of the starter template catalog screen."},
+  "@starterLibraryTitle": {
+    "description": "Title of the starter template catalog screen."
+  },
   "starterLibraryFixtureNotice": "These decks are practice fixtures written for development and testing, not published course content.",
-  "@starterLibraryFixtureNotice": {"description": "BR-87: current starter content must be described as fixture, never presented as production content."},
+  "@starterLibraryFixtureNotice": {
+    "description": "BR-87: current starter content must be described as fixture, never presented as production content."
+  },
   "starterLibraryCardCount": "{count, plural, =1{1 card} other{{count} cards}}",
-  "@starterLibraryCardCount": {"description": "Card total on a starter template row.", "placeholders": {"count": {"type": "int"}}},
-  "starterLibrarySource": "Source: {source}",
-  "@starterLibrarySource": {"description": "Content source line on a starter template row (BR-87).", "placeholders": {"source": {"type": "String"}}},
-  "starterLibraryInstallAction": "Add to library",
-  "@starterLibraryInstallAction": {"description": "Copies the template into the user's decks (BR-33)."},
-  "starterLibraryInstalledLabel": "Added",
-  "@starterLibraryInstalledLabel": {"description": "Shown on a template that is already in the library (BR-37)."},
-  "starterLibraryAlreadyInstalledTitle": "Already in your library",
-  "@starterLibraryAlreadyInstalledTitle": {"description": "Dialog title when installing a template that was installed before."},
-  "starterLibraryAlreadyInstalledMessage": "This starter deck was added earlier. Adding it again copies nothing \u2014 your existing copy and its progress stay as they are (BR-37).",
-  "@starterLibraryAlreadyInstalledMessage": {"description": "Confirm body for a deliberate re-add (BR-38): the user must be told a copy exists before a second one is made. Cancel copies nothing."},
-  "starterLibraryAddAgainAction": "Add a second copy",
-  "@starterLibraryAddAgainAction": {"description": "Confirm action of the BR-38 dialog: proceeds to the scheduler sheet and installs a deliberate duplicate."},
-  "starterLibrarySchedulerPrompt": "Review schedule",
-  "@starterLibrarySchedulerPrompt": {"description": "Label above the scheduler picker in the install sheet. The template only suggests a default (BR-34)."},
-  "starterLibraryInstallFailed": "Could not add this deck. Nothing was copied.",
-  "@starterLibraryInstallFailed": {"description": "Install failure line; the transaction rolled back (BR-39). Shown with a retry."},
-  "starterLibraryEmpty": "No starter decks are published in this build.",
-  "@starterLibraryEmpty": {"description": "Catalog screen with an empty manifest."},
-  "starterLibraryLocaleLabel": "Language: {locale}",
-  "@starterLibraryLocaleLabel": {"description": "Locale line on a starter template row.", "placeholders": {"locale": {"type": "String"}}},
-  "deckSearchOpenLabel": "Search decks",
-  "@deckSearchOpenLabel": {"description": "Opens the search field in the Library subheader. The field is collapsed to this control at rest."},
-  "deckSearchCloseLabel": "Close search",
-  "@deckSearchCloseLabel": {"description": "Collapses the search field; if a query is running it is cleared first, so no result set survives its own input."},
-  "deckDueNowLabel": "{count, plural, other{{count} due now}}",
-  "@deckDueNowLabel": {
+  "@starterLibraryCardCount": {
     "placeholders": {
       "count": {
         "type": "int"
       }
     },
-    "description": "The filled chip on a deck card. \"now\" because it sits beside a Nothing due state and the difference is about this moment, not about the deck."
+    "description": "Card total on a starter template row."
+  },
+  "starterLibrarySource": "Source: {source}",
+  "@starterLibrarySource": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    },
+    "description": "Content source line on a starter template row (BR-87)."
+  },
+  "starterLibraryInstallAction": "Add to library",
+  "@starterLibraryInstallAction": {
+    "description": "Copies the template into the user's decks (BR-33)."
+  },
+  "starterLibraryInstalledLabel": "Added",
+  "@starterLibraryInstalledLabel": {
+    "description": "Shown on a template that is already in the library (BR-37)."
+  },
+  "starterLibraryAlreadyInstalledTitle": "Already in your library",
+  "@starterLibraryAlreadyInstalledTitle": {
+    "description": "Dialog title when installing a template that was installed before."
+  },
+  "starterLibraryAlreadyInstalledMessage": "This starter deck was added earlier. Adding it again copies nothing — your existing copy and its progress stay as they are (BR-37).",
+  "@starterLibraryAlreadyInstalledMessage": {
+    "description": "Confirm body for a deliberate re-add (BR-38): the user must be told a copy exists before a second one is made. Cancel copies nothing."
+  },
+  "starterLibraryAddAgainAction": "Add a second copy",
+  "@starterLibraryAddAgainAction": {
+    "description": "Confirm action of the BR-38 dialog: proceeds to the scheduler sheet and installs a deliberate duplicate."
+  },
+  "starterLibrarySchedulerPrompt": "Review schedule",
+  "@starterLibrarySchedulerPrompt": {
+    "description": "Label above the scheduler picker in the install sheet. The template only suggests a default (BR-34)."
+  },
+  "starterLibraryInstallFailed": "Could not add this deck. Nothing was copied.",
+  "@starterLibraryInstallFailed": {
+    "description": "Install failure line; the transaction rolled back (BR-39). Shown with a retry."
+  },
+  "starterLibraryEmpty": "No starter decks are published in this build.",
+  "@starterLibraryEmpty": {
+    "description": "Catalog screen with an empty manifest."
+  },
+  "starterLibraryLocaleLabel": "Language: {locale}",
+  "@starterLibraryLocaleLabel": {
+    "placeholders": {
+      "locale": {
+        "type": "String"
+      }
+    },
+    "description": "Locale line on a starter template row."
+  },
+  "deckSearchOpenLabel": "Search decks",
+  "@deckSearchOpenLabel": {
+    "description": "Opens the search field in the Library subheader. The field is collapsed to this control at rest."
+  },
+  "deckSearchCloseLabel": "Close search",
+  "@deckSearchCloseLabel": {
+    "description": "Collapses the search field; if a query is running it is cleared first, so no result set survives its own input."
   },
   "deckNoCardsLabel": "No cards yet",
   "@deckNoCardsLabel": {
     "description": "Shown on a deck card that holds no cards at all -- distinct from Nothing due, which means there are cards and none is waiting."
-  },
-  "deckNoDueLabel": "Nothing due",
-  "@deckNoDueLabel": {
-    "description": "Shown on a deck row when no card is due. Neutral wording on purpose — having nothing due is a normal state, not a problem (BR-29)."
   },
   "deckPathSemanticLabel": "Deck path",
   "@deckPathSemanticLabel": {
@@ -1669,5 +1671,13 @@
   "deckResetProgressConfirm": "Reset",
   "@deckResetProgressConfirm": {
     "description": "Confirms the reset. Destructive, so it carries the danger styling."
+  },
+  "deckDueMetricWord": "Due",
+  "@deckDueMetricWord": {
+    "description": "The word half of the due metric; the tile and the summary compose '<count> Due'. Due is time-pressure, carried by streakContainer — never danger (BR-150, BR-29)."
+  },
+  "deckNewMetricWord": "New",
+  "@deckNewMetricWord": {
+    "description": "The word half of the new metric; composed as '<count> New'. Foreground is semantic info on the neutral surface — never a filled container, never success (BR-90, BR-150)."
   }
 }

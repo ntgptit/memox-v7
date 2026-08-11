@@ -107,7 +107,15 @@ void main() {
         find.textContaining(english.deckCardCountLabel(120)),
         findsOneWidget,
       );
-      expect(find.textContaining(english.deckDueNowLabel(7)), findsOneWidget);
+      // Scoped to a tile: the summary metric says the same words above the
+      // list, and both saying "7 Due" is the design working, not a duplicate.
+      expect(
+        find.descendant(
+          of: find.byType(DeckTileWidget),
+          matching: find.textContaining('7 ${english.deckDueMetricWord}'),
+        ),
+        findsOneWidget,
+      );
       expect(
         find.textContaining(english.schedulerEightBoxShortLabel),
         findsWidgets,
@@ -124,11 +132,15 @@ void main() {
         screen: const DeckListScreen(),
       );
 
-      // **Two states, not one.** One fixture has cards and none of them due;
-      // the other has no cards at all. Both used to read "Nothing due", which
-      // told a user who had just created a deck that they were up to date with
-      // it. M4.10s split them, and asserting both is what keeps them split.
-      expect(find.textContaining(english.deckNoDueLabel), findsOneWidget);
+      // **Two states, not one.** One fixture has cards and none of them due --
+      // its workload line states the zeroes outright, `0 Due . 0 New`, because
+      // an absent metric is a convention a reader should never need (BR-150).
+      // The other has no cards at all and says so instead. Asserting both is
+      // what keeps them split.
+      expect(
+        find.textContaining('0 ${english.deckDueMetricWord}'),
+        findsOneWidget,
+      );
       expect(find.textContaining(english.deckNoCardsLabel), findsOneWidget);
     });
 
@@ -146,12 +158,23 @@ void main() {
       // `schedule` on a filled chip, not `notifications_active` on the well.
       // The well now says what the deck is made of; what is waiting says so in
       // the foot, where it can be a pill rather than a tint on a glyph.
-      expect(find.byIcon(Icons.schedule), findsOneWidget);
+      // On the tile's chip and on the summary's metric alike, so at least one
+      // — the assertion is that the icon exists beside the words, not a count
+      // of surfaces that speak the same language.
+      expect(find.byIcon(Icons.schedule), findsWidgets);
       // **The words are the chip's own text now, not a semantic label on a
       // glyph.** The glyph used to be the only carrier, so it needed a label
       // nobody could see; the chip says "7 due now" in words a sighted user
       // reads and a screen reader announces from the same string.
-      expect(find.textContaining(english.deckDueNowLabel(7)), findsOneWidget);
+      // Scoped to a tile: the summary metric says the same words above the
+      // list, and both saying "7 Due" is the design working, not a duplicate.
+      expect(
+        find.descendant(
+          of: find.byType(DeckTileWidget),
+          matching: find.textContaining('7 ${english.deckDueMetricWord}'),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('a later emission updates the list without a manual refresh', (

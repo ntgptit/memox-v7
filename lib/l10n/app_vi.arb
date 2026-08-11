@@ -123,32 +123,6 @@
   "@deckSummaryShowAction": {
     "description": "Đưa panel trở lại sau khi đã ẩn."
   },
-  "deckSummaryCaughtUpFigure": "Xong",
-  "@deckSummaryCaughtUpFigure": {
-    "description": "Thay cho số khi không còn thẻ nào đến hạn. Số 0 ở cỡ chữ lớn đọc như một thất bại."
-  },
-  "deckSummaryCaughtUp": "đã ôn hết — hôm nay không còn thẻ nào ở đây",
-  "@deckSummaryCaughtUp": {
-    "description": "Nằm dưới chữ Xong, nối tiếp thành một câu."
-  },
-  "deckSummaryDueAcrossLibrary": "{count, plural, other{thẻ đến hạn trong thư viện hôm nay}}",
-  "@deckSummaryDueAcrossLibrary": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    },
-    "description": "Nằm dưới con số ở cấp gốc. Con số chính là nó nên câu không lặp lại."
-  },
-  "deckSummaryDueInDeck": "{count, plural, other{thẻ đến hạn trong deck này hôm nay}}",
-  "@deckSummaryDueInDeck": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    },
-    "description": "Cùng câu đó khi ở trong một deck."
-  },
   "decksSectionLabelRoot": "Deck của bạn",
   "@decksSectionLabelRoot": {
     "description": "Tiêu đề của danh sách ở cấp gốc, cạnh hai pill lọc và sắp xếp. Widget tự viết hoa."
@@ -216,33 +190,6 @@
       }
     },
     "description": "Nói rõ đã tìm ở đâu."
-  },
-  "deckNewCountLabel": "{count, plural, other{{count} mới}}",
-  "@deckNewCountLabel": {
-    "description": "Chip on a deck tile: cards still on the learning chain (learned_at IS NULL, BR-90). Shown beside the due chip, never merged with it (BR-150).",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "deckSummaryNewToLearn": "{count, plural, other{thẻ mới cần học}}",
-  "@deckSummaryNewToLearn": {
-    "description": "Summary sentence when nothing is due but new cards remain. The level is NOT caught up in this state (BR-150).",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "deckSummaryNewBesideDue": "{newCount, plural, other{và {newCount} thẻ mới cần học}}",
-  "@deckSummaryNewBesideDue": {
-    "description": "Second line of the summary when both sets are non-empty.",
-    "placeholders": {
-      "newCount": {
-        "type": "int"
-      }
-    }
   },
   "deckStarterLibraryAction": "Xem thư viện mẫu",
   "@deckStarterLibraryAction": {
@@ -323,22 +270,9 @@
   "@deckSearchCloseLabel": {
     "description": "Collapses the search field; if a query is running it is cleared first, so no result set survives its own input."
   },
-  "deckDueNowLabel": "{count, plural, other{{count} thẻ đến hạn}}",
-  "@deckDueNowLabel": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    },
-    "description": "Chip trên deck card. Khác với trạng thái không có thẻ đến hạn."
-  },
   "deckNoCardsLabel": "Chưa có thẻ nào",
   "@deckNoCardsLabel": {
     "description": "Deck chưa có thẻ nào — khác với có thẻ nhưng không cái nào đến hạn."
-  },
-  "deckNoDueLabel": "Không có thẻ đến hạn",
-  "@deckNoDueLabel": {
-    "description": "Shown on a deck row when no card is due. Neutral wording on purpose — having nothing due is a normal state, not a problem (BR-29)."
   },
   "deckPathSemanticLabel": "Đường dẫn bộ thẻ",
   "@deckPathSemanticLabel": {
@@ -1737,5 +1671,13 @@
   "deckResetProgressConfirm": "Đặt lại",
   "@deckResetProgressConfirm": {
     "description": "Confirms the reset. Destructive, so it carries the danger styling."
+  },
+  "deckDueMetricWord": "đến hạn",
+  "@deckDueMetricWord": {
+    "description": "The word half of the due metric; the tile and the summary compose '<count> Due'. Due is time-pressure, carried by streakContainer — never danger (BR-150, BR-29)."
+  },
+  "deckNewMetricWord": "mới",
+  "@deckNewMetricWord": {
+    "description": "The word half of the new metric; composed as '<count> New'. Foreground is semantic info on the neutral surface — never a filled container, never success (BR-90, BR-150)."
   }
 }

@@ -8435,6 +8435,42 @@ thế không đổi bố cục.
 - **Không có `docs/business/navigation/navigation-flow.md` trong repo** — route
   Starter ghi ở README của feature và bảng route của `app_router.dart`.
 
+### M99.10 · Deck tile anatomy — workload line, gauge vào surface, summary metric-first
+
+- **Status:** **done** — deck tests xanh, golden dựng lại và soát bằng mắt,
+  guard + audit sạch, không chạy emulator.
+- **Goal:** Chốt anatomy ba băng của tile theo concept: identity → workload →
+  action; và color-role đúng semantic cho từng phần.
+- **Scope:** `deck_workload_line_widget.dart` (mới, thay
+  `deck_due_state_widget.dart`), `_DeckStateRegion`/`_DeckActionRow` của tile,
+  summary metric-first, hai key l10n `deckDueMetricWord`/`deckNewMetricWord`
+  (8 key câu văn cũ gỡ bỏ), test role/contrast mới.
+- **Out of scope:** query New/Due, Study routing, breadcrumb, search,
+  filter/sort, Starter flow, theme palette.
+- **Editable documents:** `docs/wbs.md`, `docs/reviews/design-parity-checklist.md`
+- **Output:** tile ba băng; `7 Due · 14 New` luôn đủ hai số kể cả 0; gauge
+  inset cùng hàng `%` + Study; summary mở bằng hai metric thay câu văn.
+- **Acceptance criteria:**
+  - [x] Due/New nằm trên hàng progress + Study; không còn micro-label `NEW`.
+  - [x] Due = streakContainer (không danger); New = ink `info` đạt ≥4.5:1 hai
+        theme (đo 5.23/7.84, `deck_workload_role_test.dart`); zero lùi neutral.
+  - [x] Study tonal `secondaryContainer`; ẩn (không disable) khi 0/0.
+  - [x] Gauge dùng progress token, success chỉ ở 100%; inset theo padding card;
+        không còn track flush đáy.
+  - [x] Completed không tô xanh card; cùng chiều cao card kề bên (floor 48
+        trên action row, minimum chứ không fixed).
+  - [x] Empty deck: `No cards`, không gauge, không hiện `0 Due · 0 New`.
+  - [x] 320px @ textScale 2.0 không overflow; light/dark role mapping có test.
+- **Dependencies:** M99.9
+- **Tests required:** state matrix widget test (mixed/new-only/due-only/idle/
+  completed/empty/compact), role + contrast per theme, golden root+level 2 theme
+- **Checklist phases:** 14.2, 14.4
+- **Tests:** `deck_tile_counts_test.dart` (11), `deck_workload_role_test.dart`
+  (3 — role mapping light/dark + đo WCAG), `deck_summary_new_test.dart` (3),
+  cập nhật `deck_list_screen_test` / `deck_list_level_test` /
+  `deck_list_summary_test`. Golden root/level/empty/new-only × light+dark, đã
+  xem lại bằng mắt.
+
 ## Blocker
 
 | Blocker | Ảnh hưởng | Cách gỡ |

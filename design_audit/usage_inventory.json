@@ -1,13 +1,13 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
   "scannedFiles": 321,
-  "totalSites": 363,
+  "totalSites": 366,
   "byElementKind": {
     "other": 278,
     "background": 12,
     "shadow": 1,
     "border": 12,
-    "text": 48,
+    "text": 51,
     "icon": 12
   },
   "bySourceKind": {
@@ -16,7 +16,7 @@
     "Colors-material": 5,
     "hardcoded-literal": 97,
     "opacity-modified-token": 11,
-    "theme-token": 103
+    "theme-token": 106
   },
   "sites": [
     {
@@ -3166,28 +3166,6 @@
       "resolved_value_dark": "#A8A7C4"
     },
     {
-      "file": "lib/features/deck/presentation/widgets/items/deck_due_state_widget.dart",
-      "line": 51,
-      "widget_context": "DeckDueStateWidget",
-      "element_kind": "text",
-      "source_kind": "theme-token",
-      "expression": "context.colors.onSurfaceVariant",
-      "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#565C72",
-      "resolved_value_dark": "#A8A7C4"
-    },
-    {
-      "file": "lib/features/deck/presentation/widgets/items/deck_due_state_widget.dart",
-      "line": 83,
-      "widget_context": "DeckDueStateWidget",
-      "element_kind": "other",
-      "source_kind": "theme-token",
-      "expression": "context.colors.onSurfaceVariant",
-      "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#565C72",
-      "resolved_value_dark": "#A8A7C4"
-    },
-    {
       "file": "lib/features/deck/presentation/widgets/items/deck_icon_area_widget.dart",
       "line": 47,
       "widget_context": "DeckIconArea",
@@ -3266,8 +3244,8 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/items/deck_tile_widget.dart",
-      "line": 262,
-      "widget_context": "_DeckStateRegion",
+      "line": 284,
+      "widget_context": "_DeckActionRow",
       "element_kind": "text",
       "source_kind": "theme-token",
       "expression": "context.semanticColors.success",
@@ -3277,8 +3255,8 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/items/deck_tile_widget.dart",
-      "line": 263,
-      "widget_context": "_DeckStateRegion",
+      "line": 285,
+      "widget_context": "_DeckActionRow",
       "element_kind": "text",
       "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",
@@ -3288,7 +3266,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/items/deck_tile_widget.dart",
-      "line": 334,
+      "line": 344,
       "widget_context": "_DeckMetaLine",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3296,6 +3274,61 @@
       "token": "colorScheme.onSurfaceVariant",
       "resolved_value_light": "#565C72",
       "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/deck/presentation/widgets/items/deck_workload_line_widget.dart",
+      "line": 41,
+      "widget_context": "DeckWorkloadLineWidget",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/deck/presentation/widgets/items/deck_workload_line_widget.dart",
+      "line": 49,
+      "widget_context": "DeckWorkloadLineWidget",
+      "element_kind": "other",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/deck/presentation/widgets/items/deck_workload_line_widget.dart",
+      "line": 87,
+      "widget_context": "_DueMetric",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/deck/presentation/widgets/items/deck_workload_line_widget.dart",
+      "line": 144,
+      "widget_context": "_NewMetric",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/deck/presentation/widgets/items/deck_workload_line_widget.dart",
+      "line": 145,
+      "widget_context": "_NewMetric",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.semanticColors.info",
+      "token": "semantic.info",
+      "resolved_value_light": "#3F6E97",
+      "resolved_value_dark": "#8DB4D8"
     },
     {
       "file": "lib/features/deck/presentation/widgets/overlays/deck_form_widget.dart",
@@ -3398,7 +3431,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_level_summary_widget.dart",
-      "line": 85,
+      "line": 86,
       "widget_context": "DeckLevelSummaryWidget",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -3409,7 +3442,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_level_summary_widget.dart",
-      "line": 87,
+      "line": 88,
       "widget_context": "DeckLevelSummaryWidget",
       "element_kind": "border",
       "source_kind": "theme-token",
@@ -3420,25 +3453,25 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_level_summary_widget.dart",
-      "line": 197,
-      "widget_context": "_SummaryHeadline",
-      "element_kind": "other",
-      "source_kind": "theme-token",
-      "expression": "context.semanticColors.success",
-      "token": "semantic.success",
-      "resolved_value_light": "#10795C",
-      "resolved_value_dark": "#4FC79B"
-    },
-    {
-      "file": "lib/features/deck/presentation/widgets/sections/deck_level_summary_widget.dart",
-      "line": 204,
-      "widget_context": "_SummaryHeadline",
+      "line": 174,
+      "widget_context": "_SummaryMetric",
       "element_kind": "other",
       "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",
       "token": "colorScheme.onSurfaceVariant",
       "resolved_value_light": "#565C72",
       "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/deck/presentation/widgets/sections/deck_level_summary_widget.dart",
+      "line": 209,
+      "widget_context": "_SummaryMetric",
+      "element_kind": "other",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurface",
+      "token": "colorScheme.onSurface",
+      "resolved_value_light": "#16182B",
+      "resolved_value_dark": "#EDEDF6"
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_list_toolbar_widget.dart",

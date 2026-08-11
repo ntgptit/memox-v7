@@ -3,17 +3,19 @@ import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
 import 'package:memox/features/deck/presentation/widgets/sections/deck_level_summary_widget.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
+import 'package:memox/shared/widgets/mx_progress_bar.dart';
 
 import 'support/deck_fixtures.dart';
 import 'support/deck_screen_harness.dart';
 import 'support/fake_deck_repository.dart';
 
-/// What the level's headline claims, against what the level actually holds
-/// (BR-150).
+/// The metric-first summary: two numbers, then the learned line (BR-150).
 ///
-/// **"Caught up" is earned by both sets being empty.** The headline used to
-/// follow the due count alone, so a library of nothing but unlearned cards
-/// opened on a green "All caught up" — true of reviews, false of the day.
+/// **The sentence is gone on purpose.** "12 cards due in this deck today, and
+/// 14 new to learn" wrapped at large scales and buried the two figures a
+/// reader scans for. The panel now opens with `12 Due · 14 New` in the same
+/// order and roles as every tile — and both numbers stay on screen at zero,
+/// because absence-means-zero is the convention this panel exists to kill.
 void main() {
   final english = AppLocalizationsEn();
 
@@ -22,7 +24,39 @@ void main() {
     matching: matching,
   );
 
-  testWidgets('new-only: the headline is the new count, not caught up', (
+  Finder metric(int count, String word) =>
+      inSummary(find.textContaining('$count $word', findRichText: true));
+
+  testWidgets('mixed: both metrics lead, learned line follows', (tester) async {
+    await pumpDeckScreen(
+      tester,
+      repository: FakeDeckRepository.withSummaries(<DeckSummary>[
+        fakeSummary(
+          id: 'd1',
+          name: 'Working',
+          totalCardCount: 180,
+          newCardCount: 14,
+          dueCardCount: 12,
+          learnedCardCount: 82,
+        ),
+      ]),
+      screen: const DeckListScreen(),
+    );
+
+    expect(find.byType(DeckLevelSummaryWidget), findsOneWidget);
+    expect(metric(12, english.deckDueMetricWord), findsOneWidget);
+    expect(metric(14, english.deckNewMetricWord), findsOneWidget);
+    // The learned line and its figure ride the shared progress component,
+    // announced as one semantics node.
+    expect(
+      inSummary(
+        find.bySemanticsLabel(english.deckLearnedProgressLabel(82, 180)),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('new-only: the zero stays on the due side, no completion claim', (
     tester,
   ) async {
     await pumpDeckScreen(
@@ -40,52 +74,18 @@ void main() {
 
     // The panel opened by itself: new cards are work, so `auto` shows it.
     expect(find.byType(DeckLevelSummaryWidget), findsOneWidget);
-    expect(
-      inSummary(
-        find.textContaining(
-          english.deckSummaryNewToLearn(20),
-          findRichText: true,
-        ),
-      ),
-      findsOneWidget,
+    expect(metric(0, english.deckDueMetricWord), findsOneWidget);
+    expect(metric(20, english.deckNewMetricWord), findsOneWidget);
+
+    final bar = tester.widget<MxProgressBar>(
+      inSummary(find.byType(MxProgressBar)),
     );
-    expect(
-      inSummary(
-        find.textContaining(english.deckSummaryCaughtUp, findRichText: true),
-      ),
-      findsNothing,
-    );
+    expect(bar.value, 0);
   });
 
-  testWidgets('mixed: due leads the headline and new rides beside it', (
+  testWidgets('both sets empty: two zeroes, stated, not a sentence', (
     tester,
   ) async {
-    await pumpDeckScreen(
-      tester,
-      repository: FakeDeckRepository.withSummaries(<DeckSummary>[
-        fakeSummary(
-          id: 'd1',
-          name: 'Working',
-          totalCardCount: 30,
-          newCardCount: 12,
-          dueCardCount: 4,
-        ),
-      ]),
-      screen: const DeckListScreen(),
-    );
-
-    expect(
-      inSummary(
-        find.textContaining(
-          english.deckSummaryNewBesideDue(12),
-          findRichText: true,
-        ),
-      ),
-      findsOneWidget,
-    );
-  });
-
-  testWidgets('both sets empty: caught up, at last honestly', (tester) async {
     await pumpDeckScreen(
       tester,
       repository: FakeDeckRepository.withSummaries(<DeckSummary>[
@@ -107,11 +107,12 @@ void main() {
     await tester.tap(find.text(english.deckSummaryShowAction));
     await tester.pumpAndSettle();
 
-    expect(
-      inSummary(
-        find.textContaining(english.deckSummaryCaughtUp, findRichText: true),
-      ),
-      findsOneWidget,
+    expect(metric(0, english.deckDueMetricWord), findsOneWidget);
+    expect(metric(0, english.deckNewMetricWord), findsOneWidget);
+    // 100% learned: the shared bar carries the success moment on its own.
+    final bar = tester.widget<MxProgressBar>(
+      inSummary(find.byType(MxProgressBar)),
     );
+    expect(bar.value, 1);
   });
 }

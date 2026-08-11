@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
@@ -97,17 +98,26 @@ class DeckLevelSummaryWidget extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
+                // **Metrics, not a sentence.** The panel used to open with
+                // "12 cards due in this deck today, and 14 new to learn" --
+                // prose that wraps at large scales and buries the two numbers
+                // a reader is actually scanning for. The numbers now lead, in
+                // the same Due-then-New order and the same roles as every
+                // tile, so the eye learns one grammar for the whole screen.
                 Expanded(
-                  child: _SummaryHeadline(
-                    newCount: newCount,
-                    dueCount: dueCount,
-                    isRoot: snapshot.parent == null,
+                  child: Wrap(
+                    spacing: AppSpacing.lg,
+                    runSpacing: AppSpacing.xs,
+                    children: <Widget>[
+                      _SummaryMetric.due(count: dueCount),
+                      _SummaryMetric.fresh(count: newCount),
+                    ],
                   ),
                 ),
-                // Top-aligned against the figure rather than centred on the
+                // Top-aligned against the figures rather than centred on the
                 // block: the panel grows a progress bar under it, and a close
-                // button that drifted downwards as it did would stop reading as
-                // belonging to the panel's own corner.
+                // button that drifted downwards as it did would stop reading
+                // as belonging to the panel's own corner.
                 MxIconButton(
                   icon: Icons.close,
                   semanticLabel: context.l10n.deckSummaryHideLabel,
@@ -117,9 +127,12 @@ class DeckLevelSummaryWidget extends StatelessWidget {
             ),
             if (cardCount > 0) ...<Widget>[
               const SizedBox(height: AppSpacing.sm),
+              // The learned line and the bar come as one component, and use
+              // the same progress tokens as every tile: track, fill, and
+              // success only at 100%.
               MxProgressBar(
                 size: MxProgressBarSize.sm,
-                value: cardCount == 0 ? 0 : learnedCount / cardCount,
+                value: learnedCount / cardCount,
                 label: context.l10n.deckLearnedProgressLabel(
                   learnedCount,
                   cardCount,
@@ -136,77 +149,76 @@ class DeckLevelSummaryWidget extends StatelessWidget {
   }
 }
 
-/// The figure and the sentence that continues it — both sets, always.
-class _SummaryHeadline extends StatelessWidget {
-  const _SummaryHeadline({
-    required this.newCount,
-    required this.dueCount,
-    required this.isRoot,
-  });
+/// One number and its word: `12 Due` / `14 New`.
+///
+/// The numeral is `onSurface` at title weight -- it is the datum -- and the
+/// word is the quiet label beside it. Due keeps the tile's
+/// clock-on-streakContainer mark when it is non-zero; New keeps the tile's
+/// `info` ink. Zeroes stay on screen in the neutral variant: the absence
+/// convention is exactly what the metric-first panel exists to kill (BR-150).
+class _SummaryMetric extends StatelessWidget {
+  const _SummaryMetric.due({required this.count}) : isDue = true;
 
-  final int newCount;
-  final int dueCount;
-  final bool isRoot;
+  const _SummaryMetric.fresh({required this.count}) : isDue = false;
+
+  final int count;
+  final bool isDue;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    // **The word, not a zero — and only when both sets are empty.** A `0` set
-    // large is the loudest thing on the screen saying nothing happened; BR-29
-    // makes "nothing due" a normal state. But the word is earned by having
-    // nothing to do at all: with new cards waiting, the level is not caught up,
-    // it just has no deadline yet (BR-150).
-    final isCaughtUp = dueCount == 0 && newCount == 0;
+    final semantic = context.semanticColors;
+    final word = isDue
+        ? context.l10n.deckDueMetricWord
+        : context.l10n.deckNewMetricWord;
+    final wordInk = count == 0
+        ? context.colors.onSurfaceVariant
+        : isDue
+        ? semantic.onStreakContainer
+        : semantic.info;
 
-    // Due leads when it exists — it expires, new does not. New takes the
-    // headline only when it is the only work there is.
-    final figure = isCaughtUp
-        ? l10n.deckSummaryCaughtUpFigure
-        : dueCount > 0
-        ? '$dueCount'
-        : '$newCount';
-    final dueSentence = isRoot
-        ? l10n.deckSummaryDueAcrossLibrary(dueCount)
-        : l10n.deckSummaryDueInDeck(dueCount);
-    final sentence = isCaughtUp
-        ? l10n.deckSummaryCaughtUp
-        : dueCount > 0
-        // Both numbers on one line when both sets are non-empty, never merged
-        // into one figure (BR-150).
-        ? (newCount > 0
-              ? '$dueSentence, ${l10n.deckSummaryNewBesideDue(newCount)}'
-              : dueSentence)
-        : l10n.deckSummaryNewToLearn(newCount);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        // One line holding the figure and its sentence: the stacked version
-        // cost a text row and read as a banner. `titleLarge` rather than a
-        // display face for the same reason — the list is the hero.
+        if (isDue && count > 0) ...<Widget>[
+          // The tile's time-pressure mark, at metric scale: the clock on its
+          // own small streakContainer well, so the panel and the rows speak
+          // one language without turning the whole panel into a warning
+          // surface.
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: semantic.streakContainer,
+              borderRadius: BorderRadius.circular(AppRadius.pill),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.xs),
+              child: Icon(
+                Icons.schedule,
+                size: AppIconSize.sm,
+                color: semantic.onStreakContainer,
+              ),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.xs),
+        ],
         Text.rich(
           TextSpan(
             children: <InlineSpan>[
               TextSpan(
-                text: figure,
+                text: '$count ',
                 style: context.texts.titleLarge?.copyWith(
-                  // Green only when it is good news. Left in the default ink
-                  // the word "All" reads as a label; in `success` it reads as
-                  // a result.
-                  color: isCaughtUp ? context.semanticColors.success : null,
+                  color: context.colors.onSurface,
                 ),
               ),
-              const TextSpan(text: ' '),
               TextSpan(
-                text: sentence,
-                style: context.texts.bodySmall?.copyWith(
-                  color: context.colors.onSurfaceVariant,
+                text: word,
+                style: context.texts.labelMedium?.copyWith(
+                  color: wordInk,
+                  fontWeight: count == 0 ? null : FontWeight.w600,
                 ),
               ),
             ],
           ),
-          maxLines: 3,
+          maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
       ],
