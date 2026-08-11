@@ -7,8 +7,8 @@
 | **Scope** | Must-have của MVP. Ngoài phạm vi: should/nice-to-have, và mọi thứ ở mục "Điều đã cố ý không đặc tả" |
 | **Source of truth for** | UC-xx · main/alternative/error flow · UI state matrix của từng màn |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md` |
-| **Updated by task** | M5.0p (recursive review lượt ba) |
-| **Last updated** | 2026-08-07 |
+| **Updated by task** | Library New/Due — UC-06 hiện hai số theo BR-150, UC-01 sửa hệ quả BR-142 (bản sao là thẻ New, không phải đến hạn) |
+| **Last updated** | 2026-08-11 |
 
 Chỉ đặc tả must-have. Should-have và nice-to-have viết khi tới lượt — đặc tả
 trước những thứ có thể bị cắt là lãng phí.
@@ -53,8 +53,10 @@ tham chiếu ngược về đây bằng ID và không phát biểu lại luồng
    `content_type = 'deck'`, `root_deck_id = id`, `scheduler_generation = 1`; toàn
    bộ cây deck con với `content_type` đúng theo template; toàn bộ card; và study
 state theo scheduler đã chọn (BR-09, BR-33).
-9. Bản sao xuất hiện trong danh sách deck, toàn card mới nên đến hạn hết.
-10. Người dùng ôn được ngay.
+9. Bản sao xuất hiện trong danh sách deck. Toàn bộ card là thẻ **chưa học**
+   (`learned_at IS NULL`), nên badge của deck hiện số New chứ không phải số
+   đến hạn (BR-142, BR-150).
+10. Người dùng bấm Study và bắt đầu phiên **học mới** ngay.
 
 **Alternative flows:**
 - **A1 — Bỏ qua thư viện, tự tạo deck:** đi thẳng UC-02.
@@ -382,7 +384,8 @@ khoá để tránh bấm đúp.
 **Main flow:**
 1. Hệ thống lấy toàn bộ root deck kèm số card đến hạn — **một query gộp** theo
    `root_deck_id`, không phải N+1 query và không duyệt cây trong Dart.
-2. Người dùng thấy mỗi deck với tên, tổng số card trong cây, số card đến hạn, và
+2. Người dùng thấy mỗi deck với tên, tổng số card trong cây, **hai** số của
+   BR-150 — card chưa học (New) và card đến hạn (Due), không bao giờ gộp — và
    chế độ ôn tập đang dùng.
 3. Deck có card đến hạn được làm nổi bật bằng **cả biểu tượng lẫn chữ**, không
    chỉ bằng màu.

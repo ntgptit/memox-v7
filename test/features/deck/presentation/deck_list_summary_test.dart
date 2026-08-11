@@ -110,7 +110,19 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(DeckLevelSummaryWidget), findsOneWidget);
-      expect(find.text(english.deckSummaryCaughtUpFigure), findsOneWidget);
+      // Scoped to the panel, and `textContaining` with rich text: the figure
+      // and its sentence are one `Text.rich` since the compact pass, and the
+      // filter pill's "All decks" would otherwise match the same word.
+      expect(
+        find.descendant(
+          of: find.byType(DeckLevelSummaryWidget),
+          matching: find.textContaining(
+            english.deckSummaryCaughtUpFigure,
+            findRichText: true,
+          ),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('dismissing it keeps it dismissed where something is due', (

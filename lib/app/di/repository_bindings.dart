@@ -8,10 +8,12 @@ import '../../features/card/domain/repositories/card_repository.dart';
 import '../../features/deck/di/deck_repository_provider.dart';
 import '../../features/deck/di/deck_template_provider.dart';
 import '../../features/deck/data/datasources/deck_dao.dart';
+import '../../features/deck/data/datasources/deck_template_data_source.dart';
 import '../../features/deck/data/datasources/deck_template_dao.dart';
 import '../../features/deck/data/repositories/deck_repository_impl.dart';
 import '../../features/deck/data/repositories/deck_template_repository_impl.dart';
 import '../../features/deck/domain/repositories/deck_repository.dart';
+import '../../features/deck/domain/models/deck_template_model.dart';
 import '../../features/deck/domain/repositories/deck_template_repository.dart';
 import '../../features/study/data/datasources/study_dao.dart';
 import '../../features/study/di/study_repository_provider.dart';
@@ -87,6 +89,14 @@ DeckTemplateRepository deckTemplateRepositoryBinding(Ref ref) =>
 StudyRepository studyRepositoryBinding(Ref ref) =>
     StudyRepositoryImpl(StudyDao(ref.watch(appDatabaseProvider)));
 
+/// The starter catalog: the shipped assets, decoded once (UC-01).
+///
+/// A `Future` binding rather than a repository: there is no database and no
+/// stream behind it, only the bundle the app was built with — which is why the
+/// data source is not a repository either.
+Future<List<DeckTemplate>> deckTemplateCatalogBinding(Ref ref) =>
+    const DeckTemplateDataSource().loadAll();
+
 /// Every contract the app binds, as one list.
 ///
 /// **It exists because a hand-written subset of it broke sixty-six end-to-end
@@ -104,5 +114,6 @@ List<Override> repositoryBindingOverrides() => <Override>[
   deckRepositoryProvider.overrideWith(deckRepositoryBinding),
   cardRepositoryProvider.overrideWith(cardRepositoryBinding),
   deckTemplateRepositoryProvider.overrideWith(deckTemplateRepositoryBinding),
+  deckTemplateCatalogProvider.overrideWith(deckTemplateCatalogBinding),
   studyRepositoryProvider.overrideWith(studyRepositoryBinding),
 ];

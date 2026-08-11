@@ -39,6 +39,28 @@ final class DeckTemplateDao {
     return row.read(_db.decks.id.count()) ?? 0;
   }
 
+  /// Every distinct `(source_template_id, source_template_version)` pair in
+  /// the decks table — the copies that exist, whatever became of their names.
+  Future<Set<({String templateId, int version})>>
+  installedTemplateKeys() async {
+    final query = _db.selectOnly(_db.decks, distinct: true)
+      ..addColumns(<Expression<Object>>[
+        _db.decks.sourceTemplateId,
+        _db.decks.sourceTemplateVersion,
+      ])
+      ..where(_db.decks.sourceTemplateId.isNotNull());
+    final rows = await query.get();
+
+    return <({String templateId, int version})>{
+      for (final row in rows)
+        if (row.read(_db.decks.sourceTemplateId) case final String id)
+          (
+            templateId: id,
+            version: row.read(_db.decks.sourceTemplateVersion) ?? 0,
+          ),
+    };
+  }
+
   Future<void> insertDeck(DecksCompanion deck) =>
       _db.into(_db.decks).insert(deck);
 

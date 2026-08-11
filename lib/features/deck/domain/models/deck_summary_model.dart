@@ -25,7 +25,16 @@ abstract class DeckSummary with _$DeckSummary {
     /// Cards anywhere in this deck's subtree, at any depth.
     required int totalCardCount,
 
-    /// Of those, how many were due at the `now` used for the read (BR-22).
+    /// Of those, how many have not finished the learning chain (BR-90).
+    ///
+    /// `learned_at IS NULL` — the same predicate a `learning` session selects
+    /// with (BR-142), so the number on the row and the session it opens count
+    /// the same set. Disjoint from [dueCardCount] by construction: one side of
+    /// `learned_at`, never both.
+    required int newCardCount,
+
+    /// Of those, how many were due at the `now` used for the read (BR-22):
+    /// `learned_at IS NOT NULL AND due_at <= now`, the `reviewing` set.
     required int dueCardCount,
 
     /// Of those, how many count as learned (BR-88).
@@ -74,11 +83,23 @@ abstract class DeckSummary with _$DeckSummary {
   bool get isFullyLearned =>
       totalCardCount > 0 && learnedCardCount == totalCardCount;
 
-  /// Whether anything is waiting to be studied.
+  /// Whether any card is still on the learning chain (BR-90).
+  bool get hasNewCards => newCardCount > 0;
+
+  /// Whether any learned card has come due (BR-142's `reviewing` set).
   ///
   /// A predicate rather than letting each widget compare against zero: BR-29 says
   /// "nothing due" is a normal state and not an error, and a screen that
   /// re-derives the comparison in three places is a screen where one of them
   /// eventually renders it as a warning.
   bool get hasDueCards => dueCardCount > 0;
+
+  /// Whether a study session has anything at all to serve (BR-150).
+  ///
+  /// **The two sets are named separately because they cost differently** — a
+  /// new card is a learning chain, a due card is one review — and this exists
+  /// so nothing collapses them by accident: the Study button asks this, the
+  /// badge shows both, and `hasDueCards` alone was hiding the button on a deck
+  /// of twenty unlearned cards.
+  bool get hasStudyableCards => hasNewCards || hasDueCards;
 }

@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_spacing.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../../core/navigation/route_names.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
@@ -260,8 +263,14 @@ class _DeckLevel extends StatelessWidget {
         icon: Icons.folder_outlined,
         title: context.l10n.decksEmptyTitle,
         message: context.l10n.decksEmptyMessage,
-        actionLabel: context.l10n.deckCreateRootAction,
-        onAction: () => showCreateRootDeckForm(context),
+        // **Ready-made content leads** (UC-01). Production seeds nothing, so
+        // this state is a real first-run screen, and a person who installed a
+        // flashcard app is more likely to want cards than an empty folder —
+        // the blank deck stays one tap away as the quieter second path.
+        actionLabel: context.l10n.deckStarterLibraryAction,
+        onAction: () => context.goNamed(RouteNames.starterLibrary),
+        secondaryActionLabel: context.l10n.deckCreateRootAction,
+        onSecondaryAction: () => showCreateRootDeckForm(context),
       );
     }
 

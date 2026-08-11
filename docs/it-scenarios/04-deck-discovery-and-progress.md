@@ -7,8 +7,8 @@
 | **Scope** | Deck tile, summary, due filter, sort, subtree search, empty/no-result và cập nhật tức thời |
 | **Source of truth for** | Scenario IT về danh sách, discovery và progress của deck |
 | **Depends on** | `README.md`, `../business-rules.md` (BR-29, BR-56, BR-57, BR-65, BR-142, BR-150), `../use-cases.md` (UC-06) |
-| **Updated by task** | Đồng bộ định nghĩa New/Due sau M5 ngày 2026-08-08 |
-| **Last updated** | 2026-08-08 |
+| **Updated by task** | BR-150 trên tile: bước 1 của IT-DISC-001 yêu cầu cả hai số New/Due, khớp badge hai chip của Library |
+| **Last updated** | 2026-08-11 |
 
 ## IT-DISC-001 — Deck tile trình bày đủ thông tin ra quyết định
 
@@ -20,7 +20,7 @@
 
 | Bước | Thao tác người dùng | Kết quả mong đợi |
 |---|---|---|
-| 1 | Mở root deck list | Tile `Due library` hiện Eight Box, 5 card toàn cây, 2 card đến hạn và 2 sub-deck trực tiếp |
+| 1 | Mở root deck list | Tile `Due library` hiện Eight Box, 5 card toàn cây, **số New và số Due là hai con số tách biệt** (BR-150) — 2 card đến hạn — và 2 sub-deck trực tiếp |
 | 2 | Quan sát deck có card đến hạn | Trạng thái đến hạn được truyền đạt bằng chữ và biểu tượng, không chỉ bằng màu |
 | 3 | Mở một child level | Tile child dùng cùng cách trình bày, số liệu đúng với subtree đó |
 

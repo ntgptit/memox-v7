@@ -7,7 +7,7 @@
 | **Scope** | 134 kịch bản của `scenario-catalog.md`. Ngoài phạm vi: đánh giá chất lượng của test đã có |
 | **Source of truth for** | Danh sách việc còn phải viết ở `HOST-FLOW`/`HOST-WIDGET` |
 | **Depends on** | `scenario-catalog.md`, `12-testing-pyramid-audit.md` |
-| **Updated by task** | M99.7 (IT-NAV-011) |
+| **Updated by task** | BR-150 coverage — hai số New/Due có test widget + data thật, không còn chỉ Due |
 | **Last updated** | 2026-08-11 |
 
 **Bản đồ này là danh sách việc, không phải giấy chứng nhận.** Nó nối kịch bản
@@ -80,9 +80,9 @@ bản muốn. Vì vậy cột trạng thái đọc là:
 | IT-TREE-012 | `HOST-FLOW` | UC-09, BR-73, BR-74 | `test/features/deck/data/deck_repository_move_test.dart` |
 | IT-TREE-013 | `HOST-FLOW` | UC-08, UC-09, BR-55 | `test/features/deck/data/deck_repository_impl_test.dart` |
 | IT-TREE-014 | `HOST-FLOW` | UC-03, BR-67, BR-68 | `test/app/router/deck_route_test.dart` |
-| IT-DISC-001 | `HOST-WIDGET + HOST-FLOW` | UC-06, BR-142, BR-150 | `test/features/deck/data/deck_level_read_test.dart` |
+| IT-DISC-001 | `HOST-WIDGET + HOST-FLOW` | UC-06, BR-142, BR-150 | `test/features/deck/data/deck_level_read_test.dart` · BR-150: `test/features/deck/presentation/deck_tile_counts_test.dart`, `test/features/deck/data/deck_new_count_test.dart` |
 | IT-DISC-002 | `HOST-WIDGET` | UC-06, BR-29 | `test/features/deck/data/deck_level_read_test.dart` |
-| IT-DISC-003 | `HOST-WIDGET + HOST-FLOW` | UC-06, BR-142, BR-150 | `test/features/deck/data/deck_level_read_test.dart` |
+| IT-DISC-003 | `HOST-WIDGET + HOST-FLOW` | UC-06, BR-142, BR-150 | `test/features/deck/data/deck_level_read_test.dart` · BR-150: `test/features/deck/presentation/deck_tile_counts_test.dart` |
 | IT-DISC-004 | `HOST-WIDGET` | UC-06, BR-29 | `test/features/deck/data/deck_level_read_test.dart` |
 | IT-DISC-005 | `HOST-WIDGET + HOST-FLOW` | UC-06 | `test/features/deck/data/deck_level_read_test.dart` |
 | IT-DISC-006 | `HOST-WIDGET + HOST-FLOW` | UC-06, BR-56, BR-57 | `test/features/deck/data/deck_level_read_test.dart` |

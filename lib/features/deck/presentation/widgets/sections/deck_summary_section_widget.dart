@@ -49,28 +49,20 @@ class DeckSummarySectionWidget extends ConsumerWidget {
     final isVisible = switch (ref.watch(deckSummaryVisibilityChoiceProvider)) {
       DeckSummaryVisibility.shown => true,
       DeckSummaryVisibility.hidden => false,
-      DeckSummaryVisibility.auto => DeckLevelSummaryWidget.hasDue(snapshot),
+      DeckSummaryVisibility.auto => DeckLevelSummaryWidget.hasStudyable(
+        snapshot,
+      ),
     };
 
     return Padding(
-      // **`xl` above: with the shell's `xs` under the search field the
-      // separation is 28.** The other half of evening out the field's two
-      // sides — 24 of visible space above it, 28 below, where it used to be 36
-      // against 16. The pixels the field gave back by moving up toward the
-      // breadcrumb land here, so the strip and this panel have not moved at
-      // all; only the field slid. There is no height budget to spend against —
-      // the body is one scroll view and nothing floats — and
-      // `deck_list_spacing_test.dart` measures this gap.
-      //
-      // **The bottom drops one step on a compact screen.** The other half of
-      // the 17 pixels the breadcrumb strip cost the pinned chrome at 320 with
-      // `textScaler` 2.0; the toolbar's own section break gives the first half.
-      // Taken from below rather than above because the gap above is the one
-      // `deck_list_spacing_test.dart` measures, and because moving body pixels
-      // *up* only increases the last row's clearance from the floating action.
+      // `md` above since the density pass: the field this gap used to clear is
+      // collapsed into the breadcrumb strip at rest, so what sits above the
+      // panel now is the strip itself — a section break against chrome, not
+      // against another floating surface. `deck_list_spacing_test.dart` still
+      // measures the opened-field case and `sm` is its floor.
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
-        AppSpacing.xl,
+        AppSpacing.md,
         AppSpacing.lg,
         AppSpacing.lg,
       ),

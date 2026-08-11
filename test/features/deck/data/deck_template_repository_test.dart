@@ -118,6 +118,32 @@ void main() {
     expect(await countRows('cards'), cardsAfterFirst);
   });
 
+  test('a confirmed re-add makes one deliberate duplicate (BR-38)', () async {
+    await repository.installTemplate(eightBoxFixtureTemplate());
+    final decksAfterFirst = await countRows('decks');
+
+    final second = await repository.installTemplate(
+      eightBoxFixtureTemplate(),
+      allowDuplicate: true,
+    );
+
+    // A whole second tree, carrying the same source pair: the user said yes to
+    // exactly this, and the automatic path above still refuses it.
+    expect(second, DeckTemplateInstallOutcome.installed);
+    expect(await countRows('decks'), decksAfterFirst * 2);
+  });
+
+  test('installedTemplateKeys reports the copies that exist (BR-37)', () async {
+    expect(await repository.installedTemplateKeys(), isEmpty);
+
+    await repository.installTemplate(eightBoxFixtureTemplate());
+
+    final keys = await repository.installedTemplateKeys();
+    expect(keys, hasLength(1));
+    expect(keys.single.templateId, eightBoxFixtureTemplate().templateId);
+    expect(keys.single.version, eightBoxFixtureTemplate().version);
+  });
+
   test('a new template version installs beside the old copy (BR-36)', () async {
     await repository.installTemplate(eightBoxFixtureTemplate());
     // The same template id, one version on. BR-36 forbids touching the existing

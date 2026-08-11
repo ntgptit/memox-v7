@@ -16,6 +16,8 @@ class MxEmptyState extends StatelessWidget {
     this.message,
     this.actionLabel,
     this.onAction,
+    this.secondaryActionLabel,
+    this.onSecondaryAction,
     this.icon = Icons.check_circle_outline,
     super.key,
   }) : assert(
@@ -24,6 +26,15 @@ class MxEmptyState extends StatelessWidget {
          'button renders and does nothing; with only a callback it never '
          'renders at all — and either way the build below drops it silently, so '
          'the screen looks deliberately action-free and no test fails.',
+       ),
+       assert(
+         (secondaryActionLabel == null) == (onSecondaryAction == null),
+         'Same rule as the primary pair.',
+       ),
+       assert(
+         secondaryActionLabel == null || actionLabel != null,
+         'A secondary action needs a primary to be secondary to: alone it '
+         'would render as the one action, styled as though it were not.',
        );
 
   /// Already-localized. The screen owns the copy.
@@ -31,6 +42,14 @@ class MxEmptyState extends StatelessWidget {
   final String? message;
   final String? actionLabel;
   final VoidCallback? onAction;
+
+  /// A second way forward, under the first and quieter than it.
+  ///
+  /// For the empty state that genuinely has two next steps — an empty library
+  /// offers ready-made content *and* a blank deck (UC-01) — where hiding one
+  /// behind the other would decide for the user which kind of start theirs is.
+  final String? secondaryActionLabel;
+  final VoidCallback? onSecondaryAction;
   final IconData icon;
 
   @override
@@ -61,6 +80,15 @@ class MxEmptyState extends StatelessWidget {
             if (actionLabel != null && onAction != null) ...<Widget>[
               const SizedBox(height: AppSpacing.xl),
               MxActionButton(label: actionLabel!, onPressed: onAction),
+            ],
+            if (secondaryActionLabel != null &&
+                onSecondaryAction != null) ...<Widget>[
+              const SizedBox(height: AppSpacing.sm),
+              MxActionButton(
+                label: secondaryActionLabel!,
+                variant: MxActionButtonVariant.secondary,
+                onPressed: onSecondaryAction,
+              ),
             ],
           ],
         ),

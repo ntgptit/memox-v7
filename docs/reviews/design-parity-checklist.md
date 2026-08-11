@@ -580,3 +580,17 @@ a permanent red light, and a permanent red light gets muted.
 The share of open drift is the same threshold on a quantity that is about the
 design instead of about two rasterisers. It is also the quantity a reader of this
 file can act on: each unit is a row, and the row says which file to open.
+
+## Library density pass (concept 2026-08-11)
+
+Concept: hai ảnh `1-Photo-1.jpg` / `2-Photo-2.jpg` trong
+`.codex-remote-attachments/.../b43d1d34…/`. Quyết định lấy **bố cục và mật độ**,
+không lấy màu hay tính năng ngoài domain.
+
+| Quyết định | Flutter | design_system | Ghi chú |
+|---|---|---|---|
+| Search thu gọn thành icon trong strip breadcrumb, bấm mới mở field (autofocus) | ✅ `deck_subheader_widget.dart`, `MxSearchField.shouldAutofocus` | ❌ chưa — `.mx-search` giữ nguyên, kit chưa có trạng thái thu gọn | **Phân kỳ cố ý, ghi tại đây.** Component không đổi; thứ đổi là *khi nào* màn deck mount nó. Kit HTML là mock tĩnh nên trạng thái nghỉ/mở cần một mock mới — làm khi đụng kit lần sau |
+| Badge hai chip New/Due trên tile (BR-150) | ✅ `deck_due_state_widget.dart` | ❌ chưa — kit còn một chip due | Cùng PR sau của kit; contract màu: due = `--color-streak-container`, new = viền `--border-hairline` + ink phụ |
+| Summary một dòng `titleLarge` + câu, padding `md` | ✅ `deck_level_summary_widget.dart` | ❌ chưa | Kit đang là bản hai tầng cũ |
+| Tile: đầu card `md/xs` thay `lg/sm` | ✅ `deck_tile_widget.dart` | ❌ chưa | Mật độ: 3 deck đủ khi summary mở, 393×852 |
+

@@ -217,6 +217,112 @@
     },
     "description": "Nói rõ đã tìm ở đâu."
   },
+  "deckNewCountLabel": "{count, plural, other{{count} mới}}",
+  "@deckNewCountLabel": {
+    "description": "Chip on a deck tile: cards still on the learning chain (learned_at IS NULL, BR-90). Shown beside the due chip, never merged with it (BR-150).",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deckSummaryNewToLearn": "{count, plural, other{thẻ mới cần học}}",
+  "@deckSummaryNewToLearn": {
+    "description": "Summary sentence when nothing is due but new cards remain. The level is NOT caught up in this state (BR-150).",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deckSummaryNewBesideDue": "{newCount, plural, other{và {newCount} thẻ mới cần học}}",
+  "@deckSummaryNewBesideDue": {
+    "description": "Second line of the summary when both sets are non-empty.",
+    "placeholders": {
+      "newCount": {
+        "type": "int"
+      }
+    }
+  },
+  "deckStarterLibraryAction": "Xem thư viện mẫu",
+  "@deckStarterLibraryAction": {
+    "description": "Empty-root CTA that opens the starter template catalog (UC-01)."
+  },
+  "starterLibraryTitle": "Thư viện mẫu",
+  "@starterLibraryTitle": {
+    "description": "Title of the starter template catalog screen."
+  },
+  "starterLibraryFixtureNotice": "Các bộ thẻ này là dữ liệu mẫu viết cho phát triển và kiểm thử, không phải nội dung giáo trình chính thức.",
+  "@starterLibraryFixtureNotice": {
+    "description": "BR-87: current starter content must be described as fixture, never presented as production content."
+  },
+  "starterLibraryCardCount": "{count, plural, other{{count} thẻ}}",
+  "@starterLibraryCardCount": {
+    "description": "Card total on a starter template row.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "starterLibrarySource": "Nguồn: {source}",
+  "@starterLibrarySource": {
+    "description": "Content source line on a starter template row (BR-87).",
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "starterLibraryInstallAction": "Thêm vào thư viện",
+  "@starterLibraryInstallAction": {
+    "description": "Copies the template into the user's decks (BR-33)."
+  },
+  "starterLibraryInstalledLabel": "Đã thêm",
+  "@starterLibraryInstalledLabel": {
+    "description": "Shown on a template that is already in the library (BR-37)."
+  },
+  "starterLibraryAlreadyInstalledTitle": "Đã có trong thư viện",
+  "@starterLibraryAlreadyInstalledTitle": {
+    "description": "Dialog title when installing a template that was installed before."
+  },
+  "starterLibraryAlreadyInstalledMessage": "Bộ thẻ mẫu này đã được thêm trước đó. Bạn có thể thêm một bản sao thứ hai — bản hiện có và tiến độ học giữ nguyên.",
+  "@starterLibraryAlreadyInstalledMessage": {
+    "description": "Confirm body for a deliberate re-add (BR-38): the user must be told a copy exists before a second one is made. Cancel copies nothing."
+  },
+  "starterLibraryAddAgainAction": "Thêm bản sao thứ hai",
+  "@starterLibraryAddAgainAction": {
+    "description": "Confirm action of the BR-38 dialog: proceeds to the scheduler sheet and installs a deliberate duplicate."
+  },
+  "starterLibrarySchedulerPrompt": "Lịch ôn tập",
+  "@starterLibrarySchedulerPrompt": {
+    "description": "Label above the scheduler picker in the install sheet. The template only suggests a default (BR-34)."
+  },
+  "starterLibraryInstallFailed": "Không thêm được bộ thẻ này. Chưa có gì được sao chép.",
+  "@starterLibraryInstallFailed": {
+    "description": "Install failure line; the transaction rolled back (BR-39). Shown with a retry."
+  },
+  "starterLibraryEmpty": "Bản dựng này chưa công bố bộ thẻ mẫu nào.",
+  "@starterLibraryEmpty": {
+    "description": "Catalog screen with an empty manifest."
+  },
+  "starterLibraryLocaleLabel": "Ngôn ngữ: {locale}",
+  "@starterLibraryLocaleLabel": {
+    "description": "Locale line on a starter template row.",
+    "placeholders": {
+      "locale": {
+        "type": "String"
+      }
+    }
+  },
+  "deckSearchOpenLabel": "Tìm bộ thẻ",
+  "@deckSearchOpenLabel": {
+    "description": "Opens the search field in the Library subheader. The field is collapsed to this control at rest."
+  },
+  "deckSearchCloseLabel": "Đóng tìm kiếm",
+  "@deckSearchCloseLabel": {
+    "description": "Collapses the search field; if a query is running it is cleared first, so no result set survives its own input."
+  },
   "deckDueNowLabel": "{count, plural, other{{count} thẻ đến hạn}}",
   "@deckDueNowLabel": {
     "placeholders": {
@@ -1588,47 +1694,47 @@
   "@studyFillAnswerLabel": {
     "description": "Heading over the card's own front — the Korean term — shown on the answer card after a fill turn is graded wrong (BR-134). A correct turn does not get it: spelling the answer back to somebody who just typed it reads as a correction."
   },
-  "deckConflictResetNeedsRoot": "Ti\u1ebfn \u0111\u1ed9 h\u1ecdc \u0111\u01b0\u1ee3c \u0111\u1eb7t l\u1ea1i \u1edf deck g\u1ed1c.",
+  "deckConflictResetNeedsRoot": "Tiến độ học được đặt lại ở deck gốc.",
   "@deckConflictResetNeedsRoot": {
     "description": "Refusal shown when a reset is attempted below the root. The study mode and the generation belong to the root (BR-05), so there is no such operation one level down (UC-07 A4)."
   },
-  "deckConflictResetSchedulerUnknown": "Phi\u00ean b\u1ea3n \u1ee9ng d\u1ee5ng n\u00e0y kh\u00f4ng bi\u1ebft ch\u1ebf \u0111\u1ed9 h\u1ecdc \u0111\u00f3.",
+  "deckConflictResetSchedulerUnknown": "Phiên bản ứng dụng này không biết chế độ học đó.",
   "@deckConflictResetSchedulerUnknown": {
     "description": "Refusal shown when a reset would write a scheduler this build does not recognise. Reachable only from data written by a newer version."
   },
-  "deckResetProgressAction": "\u0110\u1eb7t l\u1ea1i ti\u1ebfn \u0111\u1ed9 h\u1ecdc",
+  "deckResetProgressAction": "Đặt lại tiến độ học",
   "@deckResetProgressAction": {
     "description": "The action on a root deck that clears every card's schedule so the tree can be learned again - and the only way to change a study mode after the first card has been learned (BR-13, BR-44, UC-07)."
   },
-  "deckResetProgressTitle": "\u0110\u1eb7t l\u1ea1i ti\u1ebfn \u0111\u1ed9 h\u1ecdc?",
+  "deckResetProgressTitle": "Đặt lại tiến độ học?",
   "@deckResetProgressTitle": {
     "description": "Heading of the confirmation. BR-50 requires it to state both what is kept and what is lost."
   },
-  "deckResetProgressKeptTitle": "Gi\u1eef nguy\u00ean",
+  "deckResetProgressKeptTitle": "Giữ nguyên",
   "@deckResetProgressKeptTitle": {
     "description": "Heading of the first of BR-50's two lists."
   },
-  "deckResetProgressKeptBody": "To\u00e0n b\u1ed9 deck, deck con, th\u1ebb, tag v\u00e0 ghi ch\u00fa \u2014 c\u00f9ng l\u1ecbch s\u1eed \u00f4n t\u1eadp c\u0169 \u0111\u1ec3 tham kh\u1ea3o.",
+  "deckResetProgressKeptBody": "Toàn bộ deck, deck con, thẻ, tag và ghi chú — cùng lịch sử ôn tập cũ để tham khảo.",
   "@deckResetProgressKeptBody": {
     "description": "What a reset leaves alone (BR-41, BR-43). The history is named explicitly because losing it is what people fear about a reset."
   },
-  "deckResetProgressLostTitle": "M\u1ea5t",
+  "deckResetProgressLostTitle": "Mất",
   "@deckResetProgressLostTitle": {
     "description": "Heading of the second of BR-50's two lists."
   },
-  "deckResetProgressLostBody": "L\u1ecbch \u00f4n, ng\u00e0y \u0111\u1ebfn h\u1ea1n v\u00e0 ti\u1ebfn \u0111\u1ed9 c\u1ee7a m\u1ecdi th\u1ebb \u2014 c\u00f9ng m\u1ecdi phi\u00ean \u0111ang d\u1edf. T\u1ea5t c\u1ea3 th\u1ebb tr\u1edf l\u1ea1i t\u1eadp H\u1ecdc m\u1edbi v\u00e0 h\u1ecdc l\u1ea1i t\u1eeb \u0111\u1ea7u.",
+  "deckResetProgressLostBody": "Lịch ôn, ngày đến hạn và tiến độ của mọi thẻ — cùng mọi phiên đang dở. Tất cả thẻ trở lại tập Học mới và học lại từ đầu.",
   "@deckResetProgressLostBody": {
     "description": "What a reset destroys (BR-42, BR-152, BR-83). The last sentence is the consequence people miss: cards do not merely become due, they walk the whole learning chain again (BR-142)."
   },
-  "deckResetProgressSchedulerLabel": "Ch\u1ebf \u0111\u1ed9 h\u1ecdc sau khi \u0111\u1eb7t l\u1ea1i",
+  "deckResetProgressSchedulerLabel": "Chế độ học sau khi đặt lại",
   "@deckResetProgressSchedulerLabel": {
     "description": "Label of the scheduler picker inside the confirmation. Changing it is the main purpose of the operation (UC-07 step 3), and the reset is the only mechanism that unlocks it (BR-44)."
   },
-  "deckResetProgressNothingToLose": "Deck n\u00e0y ch\u01b0a h\u1ecdc th\u1ebb n\u00e0o, n\u00ean kh\u00f4ng c\u00f3 ti\u1ebfn \u0111\u1ed9 n\u00e0o \u0111\u1ec3 m\u1ea5t.",
+  "deckResetProgressNothingToLose": "Deck này chưa học thẻ nào, nên không có tiến độ nào để mất.",
   "@deckResetProgressNothingToLose": {
     "description": "Shown instead of the Lost list when the deck has no learned cards (UC-07 A2). The operation is still allowed - it is how the study mode is changed."
   },
-  "deckResetProgressConfirm": "\u0110\u1eb7t l\u1ea1i",
+  "deckResetProgressConfirm": "Đặt lại",
   "@deckResetProgressConfirm": {
     "description": "Confirms the reset. Destructive, so it carries the danger styling."
   }

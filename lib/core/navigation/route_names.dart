@@ -41,6 +41,11 @@ abstract final class RouteNames {
   /// placeholder until app settings exist (AD-19).
   static const String settings = 'settings';
 
+  /// The starter template catalog. A child of [decks], so it stays inside the
+  /// Library branch and Back returns to the (possibly empty) list that offered
+  /// it (UC-01).
+  static const String starterLibrary = 'starterLibrary';
+
   /// One deck's study entry. A child of [deckDetail], so studying pushes onto
   /// the Decks branch: the bottom bar stays and Back returns to the deck the
   /// session was started from, rather than to whatever the Study tab last held.
