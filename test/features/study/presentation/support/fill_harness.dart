@@ -87,6 +87,57 @@ Future<List<FillOutcome>> pumpFill(
   return graded;
 }
 
+/// Pumps the section into a real viewport, optionally with a soft keyboard
+/// under it and text at [textScale].
+///
+/// **The layout claims of this screen are claims about height**, and a golden
+/// is the wrong place to keep them: the project's goldens are Windows pixels
+/// and the Linux job excludes them (`dart_test.yaml`), so a picture asserts
+/// nothing on the platform CI runs the host suite on. These numbers do.
+///
+/// The keyboard arrives as a view inset rather than as a smaller surface,
+/// because that is how Android delivers it — `Scaffold` then takes it off the
+/// body, which is the mechanism the two `Expanded` cards actually shrink
+/// through.
+Future<void> pumpFillInViewport(
+  WidgetTester tester,
+  StudyTurnModel turn, {
+  Size surface = kAndroidViewport,
+  double keyboardInset = 0,
+  double textScale = 1,
+}) async {
+  tester.view.devicePixelRatio = 1;
+  tester.view.physicalSize = surface;
+  tester.view.viewInsets = FakeViewPadding(bottom: keyboardInset);
+  addTearDown(tester.view.reset);
+
+  await tester.pumpWidget(
+    wrapForTest(
+      Builder(
+        // `copyWith` rather than a fresh `MediaQueryData`: a bare one would
+        // hand the subtree a zero size and no insets, which is the two facts
+        // this helper exists to set.
+        builder: (context) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: TextScaler.linear(textScale)),
+          child: FillAnswerSectionWidget(
+            turn: turn,
+            onGraded: (_) async => commitOf(turn.cardId),
+          ),
+        ),
+      ),
+      isScrollable: false,
+    ),
+  );
+}
+
+/// The viewport the UI contract names: a mid-range Android phone, logical.
+const Size kAndroidViewport = Size(412, 915);
+
+/// The upper of the two cards — the one that asks.
+Finder fillPromptCard() => find.byType(MxCard).first;
+
 /// The lower of the two cards — the one that is the field.
 Finder fillAnswerCard() => find.byType(MxCard).last;
 

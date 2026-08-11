@@ -1069,7 +1069,18 @@ phán quyết trước khi người dùng trả lời.
   kiểm cả nội dung, `readOnly` và focus), `study_modes_demo_test.dart` (13 golden
   `fill`: idle / typing / hint / correct / incorrect / long meaning × light+dark,
   cộng một render 412×915 với keyboard inset).
-- **Docs:** `business-rules.md` BR-134, `m5-study-modes.md` §6, §6.1, §8.10.
+- **Lượt rà lại (`làm lại`): bốn test đo chiều cao thay cho một tấm ảnh.**
+  Ba khẳng định bố cục của task này — hai thẻ cân nhau, keyboard co cả hai chứ
+  không co một, Check không chui xuống dưới IME — trước đó chỉ nằm trong golden
+  `study_fill_keyboard_light.png`. Golden của repo là pixel Windows và job Linux
+  loại chúng ra (`dart_test.yaml`), nên trên đúng nền mà host suite chạy ở CI thì
+  ba khẳng định ấy **không được kiểm bởi bất cứ thứ gì**. Nay chúng là số đo
+  trong `fill_answer_surface_test.dart`, cộng một ca 320×568 ở text scale 2.0 với
+  nghĩa dài 240 ký tự. Ảnh vẫn giữ — nó bắt được cái số đo không bắt được.
+- **Docs:** `business-rules.md` BR-134 (kể cả đoạn giải thích còn ghi
+  `back_folded` — đã sửa ở lượt rà lại), `m5-study-modes.md` §6, §6.1, §8.10,
+  và hai acceptance criteria cũ trong `wbs.md` (M5.0h, M5.4c) được chú thích là
+  đã bị thay vế so sánh.
 
 ## Việc không thuộc Study nhưng chặn Definition of Done
 

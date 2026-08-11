@@ -6749,7 +6749,10 @@ quyết định điều đó.
   `docs/wbs.md`
 - **Output:** BR-134…BR-138; invariant 23
 - **Acceptance criteria:**
-  - [x] So khớp dùng lại `back_folded`: trim + hạ hoa Unicode, **giữ dấu**.
+  - [x] So khớp dùng lại một cột đã fold sẵn: trim + hạ hoa Unicode, **giữ dấu**.
+        *(Vế so sánh ghi lúc chốt task này là `back_folded`; nó đã đổi sang
+        `front_folded` khi hướng của `fill` được sửa — BR-134, `kFillComparisonVersion`
+        2, xem `wbs-study.md` mục `fill`. Phép fold không đổi.)*
   - [x] Phiên bản chính sách lưu trên từng lượt (BR-135).
   - [x] Dùng gợi ý được ghi nhưng không đổi `action` (BR-136).
   - [x] Chuỗi rỗng sau trim không sinh lượt (BR-137).
@@ -7707,7 +7710,9 @@ thì thêm test cùng lúc; ghi ở đây để không ai tưởng đã phủ.
         `outcome_reason = timeout` (BR-130, BR-131).
   - [x] Resume tiếp tục đúng `remaining_ms`, không đặt lại 20 giây; round sau bắt
         đầu lại đủ 20 giây (BR-133).
-  - [x] `fill` chấm bằng `back_folded` — `cong` **không** khớp `công` (BR-134).
+  - [x] `fill` chấm bằng cột đã fold — `cong` **không** khớp `công` (BR-134).
+        *(Chấm bằng `back_folded` khi task này đóng; đổi sang `front_folded` cùng
+        lần sửa hướng của `fill` — xem `wbs-study.md`.)*
   - [x] Câu trả lời rỗng sau trim không sinh lượt, không tiến checkpoint (BR-137).
   - [x] Nội dung người dùng gõ **không** được lưu ở bất kỳ đâu (BR-138, BR-51).
   - [x] Dùng gợi ý được ghi nhưng không đổi `action` (BR-136).

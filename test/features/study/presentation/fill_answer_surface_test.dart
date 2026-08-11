@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/features/study/presentation/widgets/sections/recall_timer_section_widget.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
 
@@ -82,6 +83,69 @@ void main() {
         findsOneWidget,
         reason: 'the name survives the placeholder leaving',
       );
+    });
+  });
+
+  group('fill · the two cards share the height they are given', () {
+    testWidgets('they are the same height with the keyboard down', (
+      tester,
+    ) async {
+      await pumpFillInViewport(tester, fillTurnOf('c1'));
+
+      expect(
+        tester.getSize(fillAnswerCard()).height,
+        closeTo(tester.getSize(fillPromptCard()).height, 1),
+      );
+    });
+
+    testWidgets('the keyboard shrinks both of them, not one', (tester) async {
+      await pumpFillInViewport(tester, fillTurnOf('c1'));
+      final open = tester.getSize(fillPromptCard()).height;
+
+      await pumpFillInViewport(tester, fillTurnOf('c1'), keyboardInset: 300);
+
+      final prompt = tester.getSize(fillPromptCard()).height;
+      final answer = tester.getSize(fillAnswerCard()).height;
+
+      expect(prompt, lessThan(open), reason: 'the pair gave up the space');
+      expect(answer, closeTo(prompt, 1), reason: 'and gave it up together');
+      // A pair where one card is a strip over a box is the shape the floor in
+      // `AppStudyPair` exists to refuse.
+      expect(answer, greaterThanOrEqualTo(AppStudyPair.cardMinHeight));
+    });
+
+    testWidgets('Check stays above the keyboard', (tester) async {
+      await pumpFillInViewport(tester, fillTurnOf('c1'), keyboardInset: 300);
+
+      expect(
+        tester.getRect(fillCheckButton()).bottom,
+        lessThanOrEqualTo(kAndroidViewport.height - 300),
+        reason: 'the primary action must not sit under the IME',
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('a long meaning and double text scale do not overflow', (
+      tester,
+    ) async {
+      // The smallest screen the project supports, the largest scale, and a
+      // meaning at the 240 characters BR-08 allows — the case that overflows
+      // if anything does. The prompt scrolls inside its card rather than
+      // pushing the pair apart.
+      await pumpFillInViewport(
+        tester,
+        fillTurnOf(
+          'c1',
+          back:
+              'Empty, hollow / Trống rỗng, hụt hẫng (Tính từ, dùng khi cảm '
+              'thấy mất mát hoặc thiếu vắng sau chia tay, kết thúc, hoặc khi '
+              'một điều quen thuộc không còn nữa)',
+        ),
+        surface: const Size(320, 568),
+        textScale: 2,
+      );
+
+      expect(tester.takeException(), isNull);
     });
   });
 

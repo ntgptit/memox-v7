@@ -567,11 +567,19 @@ theo giờ người dùng bấm. Học lúc 23:00 thì hôm sau 22:00 thẻ **ch
 mỗi phiên lại đẩy thêm — giờ học trôi dần về khuya cho tới khi người dùng hụt cả
 một ngày. Neo vào đầu ngày lịch làm "đến hạn hôm nay" đúng nghĩa là hôm nay.
 
-**BR-134 dùng lại `back_folded`, và điều đáng kiểm là nó fold những gì.** Cột đó
+**BR-134 dùng lại `front_folded`, và điều đáng kiểm là nó fold những gì.** Cột đó
 trim và hạ hoa Unicode-aware nhưng **không bỏ dấu** — `card_text_model.dart` ghi
 thẳng "Case only. `công` still does not match `cong`". Nếu nó fold cả dấu thì `fill`
 sẽ chấm "ma" bằng "mà" là đúng, và một app học từ vựng tiếng Việt hỏng ở đúng chỗ
 quan trọng nhất. Kiểm trước khi dùng lại, không suy từ cái tên.
+
+**Vế so sánh là `front_folded` chứ không phải `back_folded`, và đó là chỗ đã sửa.**
+BR-08 đặt term tiếng Hàn ở `front` và nghĩa ở `back`; `fill` hỏi bằng nghĩa nên thứ
+người học gõ ra là term, tức mặt trước. So với `back_folded` thì người gõ đúng term
+bị chấm sai còn người chép lại nghĩa trên đề bài được chấm đúng — cùng một phép fold,
+sai đúng một vế. Hai cột fold y hệt nhau, nên đọc tên cột không phát hiện được nhầm
+lẫn này; chỉ có hướng của mode mới nói được vế nào đúng. Đổi vế **là** đổi chính
+sách, nên nó đi kèm `kFillComparisonVersion` 1 → 2 theo BR-135.
 
 **BR-135 là lý do `scheduler_version` tồn tại, áp cho một thứ khác.** Một lượt đã ghi
 phải đọc lại được bằng chính luật đã tạo ra nó. Nới chính sách so khớp — ví dụ bỏ
