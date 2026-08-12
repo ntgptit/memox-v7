@@ -56,6 +56,8 @@ final List<Color> lightPaletteTokens = <Color>[
   AppMaterialRoles.inverseSurfaceLight,
   AppMaterialRoles.onInverseSurfaceLight,
   AppMaterialRoles.inversePrimaryLight,
+  AppColors.disabledSurfaceLight,
+  AppColors.onDisabledLight,
   AppColors.shadowLight,
   AppColors.scrimLight,
 ];
@@ -106,6 +108,8 @@ final List<Color> darkPaletteTokens = <Color>[
   AppMaterialRoles.inverseSurfaceDark,
   AppMaterialRoles.onInverseSurfaceDark,
   AppMaterialRoles.inversePrimaryDark,
+  AppColors.disabledSurfaceDark,
+  AppColors.onDisabledDark,
   AppColors.shadowDark,
   AppColors.scrimDark,
   // The `*Fixed` family is the same in both schemes, so the dark scheme

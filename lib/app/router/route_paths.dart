@@ -43,6 +43,10 @@ abstract final class RoutePaths {
   static const String cardCreateRelative = 'new';
   static const String cardEditRelative = ':cardId/edit';
 
+  /// The import wizard, **relative** to [cardListRelative]: the full location
+  /// is `/decks/<id>/cards/import` (UC-10, wireframe M4.12).
+  static const String cardImportRelative = 'import';
+
   /// The study branch. A real path rather than a sub-path of `/` so that a
   /// deep link can open the app directly on the Study tab.
   static const String study = '/study';

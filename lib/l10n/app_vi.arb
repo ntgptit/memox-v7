@@ -1910,5 +1910,442 @@
       }
     },
     "description": "What a screen reader hears for an overdue deck's status icon, instead of the visual '+7d'. Counts and days are plain numbers so the sentence stays translatable."
+  },
+  "cardImportTitle": "Nhập thẻ",
+  "cardImportBreadcrumbLabel": "Nhập",
+  "cardImportDeckContextLabel": "{deckName} · {count} thẻ",
+  "cardImportStepSemantics": "Bước {step} trên 3",
+  "cardImportStepSourceLabel": "Nguồn",
+  "cardImportStepPreviewLabel": "Xem trước",
+  "cardImportStepImportLabel": "Nhập",
+  "cardImportChooseSourceHeading": "1 · Chọn nguồn",
+  "cardImportUploadOptionTitle": "Tải tệp lên",
+  "cardImportUploadOptionSubtitle": "CSV, TSV, XLSX",
+  "cardImportPasteOptionTitle": "Dán văn bản",
+  "cardImportPasteOptionSubtitle": "Các dòng CSV hoặc TSV",
+  "cardImportChoosePrompt": "Chọn một tệp để xem trước",
+  "cardImportChooseFileAction": "Chọn tệp",
+  "cardImportReplaceFileAction": "Thay tệp",
+  "cardImportPastePlaceholder": "front,back,tags{newline}사과,táo,trái cây",
+  "cardImportPasteLabel": "Các dòng cần nhập",
+  "cardImportInfoTitle": "Mỗi dòng tạo một thẻ",
+  "cardImportInfoBody": "Mặt trước và mặt sau là bắt buộc. Bạn sẽ chọn cột tương ứng ở bước sau.",
+  "cardImportInfoBusinessHint": "Mặt trước là từ tiếng Hàn. Mặt sau là nghĩa của từ.",
+  "cardImportPreviewAction": "Xem trước bản nhập",
+  "cardImportParsingLabel": "Đang đọc các dòng…",
+  "cardImportSheetLabel": "Trang tính",
+  "cardImportHeaderToggleLabel": "Dòng đầu là tên cột",
+  "cardImportColumnFallbackLabel": "Cột {letter}",
+  "cardImportMappingHeading": "Ghép cột",
+  "cardImportIgnoreColumnLabel": "Bỏ qua",
+  "cardImportFieldFrontLabel": "Mặt trước",
+  "cardImportFieldBackLabel": "Mặt sau",
+  "cardImportFieldExampleLabel": "Ví dụ",
+  "cardImportFieldHintLabel": "Gợi ý",
+  "cardImportFieldPronunciationLabel": "Phát âm",
+  "cardImportFieldTagsLabel": "Thẻ phân loại",
+  "cardImportMappingRequiredNote": "Mặt trước và mặt sau đều phải có một cột.",
+  "cardImportSummaryTotalLabel": "Tổng số dòng: {count}",
+  "cardImportSummaryReadyLabel": "Sẵn sàng: {count}",
+  "cardImportSummaryDuplicateLabel": "Trùng lặp: {count}",
+  "cardImportSummaryInvalidLabel": "Không hợp lệ: {count}",
+  "cardImportSummaryBlankLabel": "Dòng trống bỏ qua: {count}",
+  "cardImportIncludeDuplicatesLabel": "Bao gồm thẻ trùng",
+  "cardImportRowStatusReadyLabel": "Sẵn sàng",
+  "cardImportRowStatusInvalidLabel": "Không hợp lệ",
+  "cardImportRowStatusDuplicateExistingLabel": "Đã có trong bộ thẻ",
+  "cardImportRowStatusDuplicateInFileLabel": "Trùng trong tệp",
+  "cardImportRowStatusBlankLabel": "Dòng trống",
+  "cardImportRowNumberLabel": "Dòng {number}",
+  "cardImportContinueAction": "Tiếp tục",
+  "cardImportBackAction": "Quay lại",
+  "cardImportConfirmHeading": "Sẵn sàng nhập",
+  "cardImportConfirmTargetLabel": "Vào {deckName}",
+  "cardImportConfirmWriteLabel": "{count} thẻ sẽ được nhập",
+  "cardImportConfirmDuplicateSkipLabel": "{count} thẻ trùng sẽ được bỏ qua",
+  "cardImportConfirmDuplicateIncludeLabel": "{count} thẻ trùng cũng sẽ được nhập",
+  "cardImportConfirmInvalidLabel": "{count} dòng không hợp lệ bị loại",
+  "cardImportSubmitAction": "Nhập {count} thẻ",
+  "cardImportSubmittingLabel": "Đang nhập…",
+  "cardImportTryAgainAction": "Thử lại",
+  "cardImportResultHeading": "Nhập xong",
+  "cardImportResultImportedLabel": "Đã nhập: {count}",
+  "cardImportResultDuplicatesLabel": "Trùng lặp bỏ qua: {count}",
+  "cardImportResultInvalidLabel": "Dòng không hợp lệ bỏ qua: {count}",
+  "cardImportViewCardsAction": "Xem thẻ",
+  "cardImportAnotherAction": "Nhập tệp khác",
+  "cardImportDiscardTitle": "Bỏ bản nhập?",
+  "cardImportDiscardMessage": "Nguồn đã chọn và cách ghép cột sẽ bị mất.",
+  "cardImportDiscardConfirmAction": "Bỏ",
+  "cardImportEntryAction": "Nhập thẻ",
+  "cardImportErrorUnsupportedFile": "Loại tệp này không được hỗ trợ. Hãy chọn tệp CSV, TSV hoặc XLSX.",
+  "cardImportErrorInvalidEncoding": "Tệp không phải UTF-8. Hãy xuất lại tệp ở dạng UTF-8 rồi thử lại.",
+  "cardImportErrorEmptySource": "Nguồn này không có dòng nào để nhập.",
+  "cardImportErrorEmptySheet": "Trang tính này không có dòng nào. Hãy chọn trang khác.",
+  "cardImportErrorUnreadableFile": "Không đọc được tệp. Hãy xuất một bản mới rồi thử lại.",
+  "cardImportParseErrorTitle": "Không đọc được nguồn",
+  "cardImportRowIssueTagTooLong": "Có thẻ phân loại dài quá 50 ký tự",
+  "cardImportRowIssueTooManyTags": "Quá 10 thẻ phân loại",
+  "cardImportMoreRowsLabel": "…và {count} dòng nữa",
+  "@cardImportTitle": {
+      "description": "App bar title of the import wizard (UC-10)."
+  },
+  "@cardImportBreadcrumbLabel": {
+      "description": "The wizard's own, non-tappable breadcrumb segment."
+  },
+  "@cardImportDeckContextLabel": {
+      "placeholders": {
+          "deckName": {
+              "type": "String"
+          },
+          "count": {
+              "type": "int"
+          }
+      },
+      "description": "Context chip under the breadcrumb: target deck and its current card count."
+  },
+  "@cardImportStepSemantics": {
+      "placeholders": {
+          "step": {
+              "type": "int"
+          }
+      },
+      "description": "Screen-reader label of one stepper node."
+  },
+  "@cardImportStepSourceLabel": {
+      "description": "Stepper label of step 1."
+  },
+  "@cardImportStepPreviewLabel": {
+      "description": "Stepper label of step 2."
+  },
+  "@cardImportStepImportLabel": {
+      "description": "Stepper label of step 3."
+  },
+  "@cardImportChooseSourceHeading": {
+      "description": "Heading over the two source options."
+  },
+  "@cardImportUploadOptionTitle": {
+      "description": "Title of the upload source card."
+  },
+  "@cardImportUploadOptionSubtitle": {
+      "description": "Formats the upload card names. Never mentions .apkg — out of scope."
+  },
+  "@cardImportPasteOptionTitle": {
+      "description": "Title of the paste source card."
+  },
+  "@cardImportPasteOptionSubtitle": {
+      "description": "What the paste card accepts."
+  },
+  "@cardImportChoosePrompt": {
+      "description": "Prompt in the upload panel. No drag-and-drop copy: not a primary capability on Android."
+  },
+  "@cardImportChooseFileAction": {
+      "description": "Button opening the system file picker."
+  },
+  "@cardImportReplaceFileAction": {
+      "description": "Button replacing the already-picked file."
+  },
+  "@cardImportPastePlaceholder": {
+      "placeholders": {
+          "newline": {
+              "type": "String"
+          }
+      },
+      "description": "Placeholder of the paste box — sample shape, not user data."
+  },
+  "@cardImportPasteLabel": {
+      "description": "Label of the paste text box."
+  },
+  "@cardImportInfoTitle": {
+      "description": "Title of the info panel on the Source step."
+  },
+  "@cardImportInfoBody": {
+      "description": "Body of the info panel. Never hardcodes a column order — mapping decides."
+  },
+  "@cardImportInfoBusinessHint": {
+      "description": "One-line content guidance under the info body."
+  },
+  "@cardImportPreviewAction": {
+      "description": "Primary action of the Source step."
+  },
+  "@cardImportParsingLabel": {
+      "description": "Loading label while the source parses."
+  },
+  "@cardImportSheetLabel": {
+      "description": "Label of the XLSX sheet selector."
+  },
+  "@cardImportHeaderToggleLabel": {
+      "description": "Toggle deciding whether row 1 is data (UC-10 A3)."
+  },
+  "@cardImportColumnFallbackLabel": {
+      "placeholders": {
+          "letter": {
+              "type": "String"
+          }
+      },
+      "description": "Stable name of an unmapped column when there is no header."
+  },
+  "@cardImportMappingHeading": {
+      "description": "Heading over the mapping list."
+  },
+  "@cardImportIgnoreColumnLabel": {
+      "description": "Mapping choice that drops a source column."
+  },
+  "@cardImportFieldFrontLabel": {
+      "description": "Mapping destination: the card's front."
+  },
+  "@cardImportFieldBackLabel": {
+      "description": "Mapping destination: the card's back."
+  },
+  "@cardImportFieldExampleLabel": {
+      "description": "Mapping destination: the example detail."
+  },
+  "@cardImportFieldHintLabel": {
+      "description": "Mapping destination: the hint detail."
+  },
+  "@cardImportFieldPronunciationLabel": {
+      "description": "Mapping destination: the pronunciation detail."
+  },
+  "@cardImportFieldTagsLabel": {
+      "description": "Mapping destination: the semicolon-separated tags cell."
+  },
+  "@cardImportMappingRequiredNote": {
+      "description": "Inline note when the required mapping is incomplete (BR-169)."
+  },
+  "@cardImportSummaryTotalLabel": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      },
+      "description": "Preview summary line."
+  },
+  "@cardImportSummaryReadyLabel": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      },
+      "description": "Preview summary line."
+  },
+  "@cardImportSummaryDuplicateLabel": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      },
+      "description": "Preview summary line (BR-170)."
+  },
+  "@cardImportSummaryInvalidLabel": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      },
+      "description": "Preview summary line."
+  },
+  "@cardImportSummaryBlankLabel": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      },
+      "description": "Preview summary line (BR-169)."
+  },
+  "@cardImportIncludeDuplicatesLabel": {
+      "description": "Toggle writing duplicates as new cards (BR-170)."
+  },
+  "@cardImportRowStatusReadyLabel": {
+      "description": "Row status chip."
+  },
+  "@cardImportRowStatusInvalidLabel": {
+      "description": "Row status chip."
+  },
+  "@cardImportRowStatusDuplicateExistingLabel": {
+      "description": "Row status chip: duplicate of an existing card (BR-170)."
+  },
+  "@cardImportRowStatusDuplicateInFileLabel": {
+      "description": "Row status chip: repeats an earlier row (BR-170)."
+  },
+  "@cardImportRowStatusBlankLabel": {
+      "description": "Row status chip: skipped empty row."
+  },
+  "@cardImportRowNumberLabel": {
+      "placeholders": {
+          "number": {
+              "type": "int"
+          }
+      },
+      "description": "Source row number on one preview row."
+  },
+  "@cardImportContinueAction": {
+      "description": "Primary action of the Preview step."
+  },
+  "@cardImportBackAction": {
+      "description": "Secondary action returning to the previous step."
+  },
+  "@cardImportConfirmHeading": {
+      "description": "Heading of the confirm view on step 3."
+  },
+  "@cardImportConfirmTargetLabel": {
+      "placeholders": {
+          "deckName": {
+              "type": "String"
+          }
+      },
+      "description": "Confirm line naming the target deck."
+  },
+  "@cardImportConfirmWriteLabel": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      },
+      "description": "Confirm line: what will be written."
+  },
+  "@cardImportConfirmDuplicateSkipLabel": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      },
+      "description": "Confirm line when duplicates are excluded."
+  },
+  "@cardImportConfirmDuplicateIncludeLabel": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      },
+      "description": "Confirm line when duplicates are included."
+  },
+  "@cardImportConfirmInvalidLabel": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      },
+      "description": "Confirm line: invalid rows never import."
+  },
+  "@cardImportSubmitAction": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      },
+      "description": "Primary action committing the batch (BR-171)."
+  },
+  "@cardImportSubmittingLabel": {
+      "description": "Progress label while the one transaction runs."
+  },
+  "@cardImportTryAgainAction": {
+      "description": "Recovery action after a failed commit (UC-10 E5)."
+  },
+  "@cardImportResultHeading": {
+      "description": "Heading of the result view."
+  },
+  "@cardImportResultImportedLabel": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      },
+      "description": "Result line."
+  },
+  "@cardImportResultDuplicatesLabel": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      },
+      "description": "Result line."
+  },
+  "@cardImportResultInvalidLabel": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      },
+      "description": "Result line."
+  },
+  "@cardImportViewCardsAction": {
+      "description": "Result action returning to the card list."
+  },
+  "@cardImportAnotherAction": {
+      "description": "Result action resetting the draft, keeping the deck."
+  },
+  "@cardImportDiscardTitle": {
+      "description": "Title of the dirty-draft confirm on Close/Back."
+  },
+  "@cardImportDiscardMessage": {
+      "description": "Body of the dirty-draft confirm."
+  },
+  "@cardImportDiscardConfirmAction": {
+      "description": "Confirming button of the dirty-draft dialog."
+  },
+  "@cardImportEntryAction": {
+      "description": "The entry point label in the card list menu, empty state and unset-deck sheet."
+  },
+  "@cardImportErrorUnsupportedFile": {
+      "description": "Typed error: unsupported extension."
+  },
+  "@cardImportErrorInvalidEncoding": {
+      "description": "Typed error: wrong encoding (BR-173)."
+  },
+  "@cardImportErrorEmptySource": {
+      "description": "Typed error: empty file or pasted text."
+  },
+  "@cardImportErrorEmptySheet": {
+      "description": "Typed error: empty XLSX sheet."
+  },
+  "@cardImportErrorUnreadableFile": {
+      "description": "Typed error: corrupt or protected file."
+  },
+  "@cardImportParseErrorTitle": {
+      "description": "Title over a typed parse error on the Preview step."
+  },
+  "@cardImportRowIssueTagTooLong": {
+      "description": "Row reason: tag name over the BR-93 limit."
+  },
+  "@cardImportRowIssueTooManyTags": {
+      "description": "Row reason: over the BR-94 cap."
+  },
+  "@cardImportMoreRowsLabel": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      },
+      "description": "Footer under the truncated preview list."
+  },
+  "cardImportFileMetaLabel": "{extension} · {size}",
+  "@cardImportFileMetaLabel": {
+      "placeholders": {
+          "extension": {
+              "type": "String"
+          },
+          "size": {
+              "type": "String"
+          }
+      },
+      "description": "Extension and size line under the picked file's name (M4.12 W2)."
+  },
+  "cardImportFileSizeKilobytes": "{count} KB",
+  "@cardImportFileSizeKilobytes": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      },
+      "description": "File size in kilobytes, rounded up so nothing reads as zero."
+  },
+  "cardImportFileSizeMegabytes": "{count} MB",
+  "@cardImportFileSizeMegabytes": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      },
+      "description": "File size in megabytes, rounded up."
   }
 }

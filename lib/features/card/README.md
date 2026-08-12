@@ -119,10 +119,24 @@ means editing a `frozen for MVP` document and has not been done.
 
 ---
 
-## 6 · Known gaps
+## 6 · Card Transfer (M99.19, AD-20)
 
-- **Not in the Widgetbook catalog.** `widgetbook/lib/screens/` holds
-  `DeckListScreen` only; `CardListScreen` and `CardEditorScreen` are absent,
-  against the Definition of Done in `CLAUDE.md`. Card's screens are covered by
-  the strict visual audit and by review renders in `test/demo/`, but not by the
-  catalog.
+Import v1 đứng trên một nền dùng chung: canonical schema sáu field ở
+`card_transfer_field_model.dart` (header lowercase English, không localize;
+tag nối `;`), decoder Strategy theo format với registry duy nhất
+`cardTransferDecoderFor`, và ba stage model raw document → mapped → canonical
+record. Ba contract hẹp — `CardImportSourceRepository` (picker),
+`CardTransferRepository` (decode), `CardImportRepository` (commit) — để mỗi
+test chỉ fake nửa nó gọi; `card_transfer_boundary_test.dart` ghim các ranh
+giới bằng source scan. Export chưa tồn tại và không có API chết chờ nó; khi
+tới lượt, encoder strategy + resolver + export repository đứng cạnh các
+contract này mà không sửa Import.
+
+---
+
+## 7 · Known gaps
+
+- **Partially in the Widgetbook catalog.** `CardImportScreen` is registered
+  (M99.19); `CardListScreen` and `CardEditorScreen` are still absent, against
+  the Definition of Done in `CLAUDE.md`. Those two are covered by the strict
+  visual audit and by review renders in `test/demo/`, but not by the catalog.

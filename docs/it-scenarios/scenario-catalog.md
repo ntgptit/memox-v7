@@ -92,6 +92,8 @@ các bước gốc. Ý nghĩa mức sẵn sàng, hồ sơ thực thi, chuẩn b�
 | IT-CARD-011 | `05-card-lifecycle.md` | READY | `HOST-FLOW` | — | SETUP-CARD-SINGLE | CLEAN-RESET | UC-04 A2, BR-163 |
 | IT-CARD-012 | `05-card-lifecycle.md` | READY | `HOST-FLOW` | — | SETUP-CARD-SINGLE | CLEAN-RESET | UC-04 A5, BR-163, BR-165 |
 | IT-CARD-013 | `05-card-lifecycle.md` | READY | `HOST-FLOW` | — | SETUP-TREE-CARD | CLEAN-RESET | UC-04 E5, BR-165 |
+| IT-CARD-014 | `05-card-lifecycle.md` | READY | `HOST-WIDGET` + `HOST-FLOW` | — | SETUP-CARD-EMPTY-TYPED | CLEAN-RESET | UC-10, BR-169, BR-171, BR-172 |
+| IT-CARD-015 | `05-card-lifecycle.md` | READY | `HOST-FLOW` | — | SETUP-CARD-BASIC | CLEAN-RESET | UC-10 E4, UC-10 E5, BR-168, BR-170, BR-171 |
 
 ## Khám phá và tổ chức thẻ
 

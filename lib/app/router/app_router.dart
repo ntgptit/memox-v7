@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/card/presentation/providers/card_use_case_provider.dart';
 import '../../features/card/presentation/screens/card_editor_screen.dart';
+import '../../features/card/presentation/screens/card_import_screen.dart';
 import '../../features/card/presentation/screens/card_list_screen.dart';
 import '../../features/deck/presentation/screens/deck_list_screen.dart';
 import '../../features/deck/presentation/screens/starter_library_screen.dart';
@@ -124,6 +125,18 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
                             path: RoutePaths.cardCreateRelative,
                             name: RouteNames.cardEditor,
                             builder: (context, state) => CardEditorScreen(
+                              deckId:
+                                  state.pathParameters[RoutePathParams.deckId]!,
+                            ),
+                          ),
+                          // The import wizard (UC-10): a sibling of the
+                          // editor under the card list, so Back and the
+                          // post-import "View cards" both land on the list
+                          // whose Drift stream already shows the new rows.
+                          GoRoute(
+                            path: RoutePaths.cardImportRelative,
+                            name: RouteNames.cardImport,
+                            builder: (context, state) => CardImportScreen(
                               deckId:
                                   state.pathParameters[RoutePathParams.deckId]!,
                             ),

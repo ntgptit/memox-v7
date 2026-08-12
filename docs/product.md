@@ -7,8 +7,8 @@
 | **Scope** | Vấn đề, người dùng, quyết định nền tảng, phạm vi MVP, luồng nghiệp vụ chính. Ngoài phạm vi: cách triển khai |
 | **Source of truth for** | Phạm vi MVP · phân loại must/should/nice/out · quyết định platform, data posture, auth, dữ liệu nhạy cảm |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.8 (Nhãn tab Decks → Thư viện/Library) |
-| **Last updated** | 2026-08-11 |
+| **Updated by task** | M99.19 (Import card: N1 nửa import thành task đang triển khai) |
+| **Last updated** | 2026-08-12 |
 
 ## Problem
 
@@ -144,7 +144,7 @@ chọn mode chỉ xuất hiện khi có mode thứ hai.
 
 | # | Feature | Notes |
 |---|---|---|
-| N1 | Import/export CSV | Phụ thuộc câu hỏi về nguồn nội dung ở trên |
+| N1 | Import/export | Import CSV/TSV/XLSX đang triển khai (M99.19, UC-10). Export vẫn nice-to-have |
 | N2 | Nhắc nhở ôn tập hằng ngày | Cần notification permission |
 | N3 | Tag/phân loại card | |
 
@@ -234,5 +234,7 @@ người dùng thấy đầu tiên và nó định hình toàn bộ trải nghi�
 |---|---|---|
 | M6 | Thư viện starter deck với sao chép vào dữ liệu cá nhân | Cài mới → mở app → chọn một starter deck → ôn được ngay. Sửa bản sao rồi cập nhật app lên version template mới thì nội dung đã sửa **không** bị ghi đè. Mở lại app **không** tạo deck trùng |
 
-Import/export CSV (N1) vẫn ở nice-to-have — thư viện starter đã giải quyết vấn đề
-"app trống lúc mới cài", vốn là lý do chính khiến N1 hấp dẫn.
+Nửa import của N1 được nâng thành task đang triển khai ở M99.19 (UC-10): thư
+viện starter giải quyết "app trống lúc mới cài", nhưng không giải quyết "bộ thẻ
+của tôi đang nằm trong một file" — và nhập tay từng card không phải câu trả lời
+cho một file nghìn dòng. Export vẫn ở nice-to-have.

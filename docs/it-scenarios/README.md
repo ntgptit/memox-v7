@@ -79,7 +79,7 @@ AI agent MUST đọc theo thứ tự:
 | Ranh giới nền tảng — thứ duy nhất còn cần thiết bị | Có thể kiểm thử | [`13-platform-boundaries.md`](13-platform-boundaries.md) |
 | Kịch bản nào đã có test host chứng minh | Danh sách việc | [`14-host-coverage-map.md`](14-host-coverage-map.md) |
 
-**Không còn kịch bản `FIXTURE-BLOCKED` nào** — cả 138 dòng của
+**Không còn kịch bản `FIXTURE-BLOCKED` nào** — cả 140 dòng của
 `scenario-catalog.md` đều `READY`. Phần lớn trở ngại cũ là giả: luật "không được
 ghi thẳng vào cơ sở dữ liệu" là luật viết cho **một thiết bị**, không áp cho một
 test host tự dựng SQLite in-memory của chính nó (§4.3).
