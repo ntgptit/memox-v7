@@ -7,8 +7,8 @@
 | **Scope** | Card list, card editor, xoá card, các state của hai màn đó. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), luồng người dùng (`use-cases.md`), giá trị token (`design_system/tokens/`), màn review (M5.1) |
 | **Source of truth for** | Bố cục màn card M4.11 · quyết định UI đã chốt và còn mở của task này |
 | **Depends on** | `document-conventions.md`, `use-cases.md` (UC-04, UC-08), `business-rules.md` (BR-88…BR-94), `data-model.md` (schema v2), `wbs.md` (M4.10at, M4.11) |
-| **Updated by task** | M4.10at |
-| **Last updated** | 2026-08-02 |
+| **Updated by task** | M99.17 |
+| **Last updated** | 2026-08-12 |
 
 Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc đều tham chiếu bằng ID
 (BR-xx, UC-xx) theo `document-conventions.md` §5; chỗ nào wireframe và BR có vẻ
@@ -30,6 +30,7 @@ Nó cũng không phải design reference để đo pixel. Acceptance criteria c�
 | 2026-08-02 | M4.11 | — | Nhận hai ảnh tham chiếu chế độ sửa. W6b vẽ lại đầy đủ: optional details mở sẵn, tag chip, danger zone. Chốt D10–D11. Dải metadata, mic và TTS ghi vào `wbs.md` §Deferred. |
 | 2026-08-02 | M4.10at | — | Nhận màn tham chiếu thứ hai (editor). W4–W6b vẽ lại theo nó. BR-08 siết 2000 → 60/240; BR-95 thêm ba trường phụ. Chốt D6–D9; mở Q12–Q13. |
 | 2026-08-02 | M4.10at | — | Chủ dự án chốt đưa tag, cờ và panel tiến độ vào MVP, chèn M4.10at trước M4.11. Q8–Q11 đóng bằng BR-89…BR-94 và schema v2. D3 sửa: lọc vào scope, sort vẫn ngoài. Nhãn `LEARNING` → `BEGINNING`. |
+| 2026-08-12 | M99.17 | Codex | Đồng bộ màn đã triển khai và định hướng quản lý dữ liệu: tạo thủ công là luồng nhỏ qua app-bar `+`; Back một dòng là summary, tap mở editor để xem đủ; search/filter/sort phục vụ tìm card; import/export là hướng bulk-management sau MVP. |
 
 ---
 
@@ -39,8 +40,8 @@ Nó cũng không phải design reference để đo pixel. Acceptance criteria c�
 |---|---|---|---|
 | D1 | Card editor là **full-screen route**, không phải bottom sheet | Hai ô tới 2000 ký tự (BR-08) cộng luồng thêm liên tiếp (UC-04 A4) không vừa sheet ở 320×568 với `textScaler` 2.0. Lệch khỏi tiền lệ deck form (`showDeckRenameForm`) một cách có chủ đích. | 2026-08-02 |
 | D2 | Hàng card hiện **front + back + chip trạng thái ôn tập** | Quét được cả cặp mà không phải mở từng card. Chip đọc từ `card_review_states` mà BR-09 đã tạo sẵn lúc tạo card, nên không cần dữ liệu mới. | 2026-08-02 |
-| D3 | **Không** search, **không** sort. Pill **lọc** thì có | Sort đổi `ORDER BY` và mâu thuẫn C1 mà M4.10ar chốt; search thẻ là S1. Lọc chỉ thêm `WHERE` nên không đụng thứ tự hay cửa sổ — xem §4.3. Sửa lại D3 bản đầu, vốn gộp cả ba thành một. | 2026-08-02 |
-| D4 | FAB là **extended** (`+ New card`), không phải icon tròn | Từ ảnh tham chiếu. Màn này chỉ có một hành động chính và nó cần được gọi tên — một dấu `+` trần trên màn đầy thẻ không nói nó tạo *thẻ* hay tạo *deck con*. Cùng lý do `MxActionButton` không có variant chỉ-icon. | 2026-08-02 |
+| D3 | Search, filter và sort đều là control thật của danh sách | Card list phục vụ tìm và sửa một card cụ thể; cả ba control phải biến đổi query thật, không phải affordance trang trí. Chúng cho phép giữ card tile đủ thoáng thay vì đổi màn thành bảng dữ liệu dày đặc. | 2026-08-12 |
+| D4 | Tạo card thủ công dùng app-bar `+`, không dùng extended FAB | Tạo từng card là luồng khối lượng nhỏ; app-bar giữ action nhất quán với Library và không nhấn quá mức lên manual entry. Import/export sau MVP mới là đường quản lý hàng loạt và sẽ có entry riêng khi use case được đặc tả. | 2026-08-12 |
 | D6 | Editor có **thanh hành động ghim đáy**, và `Save & add another` sống ở đó | Ảnh tham chiếu có `Cancel` + `Save card` ở đáy nhưng **không** có add-another, trong khi UC-04 A4 (frozen) đòi giữ form mở. `Cancel` bỏ đi vì `✕` ở app bar đã làm đúng việc đó; chỗ trống thành add-another. | 2026-08-02 |
 | D7 | Ba trường phụ nằm trong một **disclosure đóng mặc định** | BR-95 cho cả ba là tuỳ chọn. Mở sẵn biến form hai ô thành form năm ô cho việc thường gặp nhất. | 2026-08-02 |
 | D8 | Deck hiện **read-only**, không phải picker | Đổi deck đích nghĩa là thẻ có thể sang root khác scheduler hoặc khác generation — đúng thứ BR-73/BR-74 đang chặn. Deck là ngữ cảnh màn đang mở. | 2026-08-02 |
@@ -48,6 +49,7 @@ Nó cũng không phải design reference để đo pixel. Acceptance criteria c�
 | D11 | `OPTIONAL DETAILS` **đóng khi rỗng, mở khi đã có nội dung** | Ảnh tạo cho thấy disclosure đóng, ảnh sửa cho thấy ba ô mở sẵn — không mâu thuẫn, mà là cùng một quy tắc ở hai trạng thái. Đóng một ô đang có chữ là giấu nội dung của chính người dùng. | 2026-08-02 |
 | D9 | **Không** có nút micro nhập giọng nói | Ảnh tham chiếu có. Nó cần plugin, quyền hệ điều hành và một luồng lỗi riêng; không nằm trong scope M4.11 và gần với media, vốn đã hoãn. | 2026-08-02 |
 | D5 | Hàng card là **bốn phần**: dot trạng thái · front · back · nhãn trạng thái, cộng badge hạn bên phải | Từ ảnh tham chiếu. Thay chip đơn của bản đầu. Ba tín hiệu trạng thái trả lời ba câu khác nhau — xem bảng ở §4.3 — và gộp lại thành một chip là mất hai trong ba. | 2026-08-02 |
+| D12 | Back trên tile là summary một dòng có ellipsis; tap toàn tile mở editor để xem đủ | Tăng thành hai hay ba dòng vẫn phải cắt với Back dài và làm chiều cao list biến động. Danh sách dùng để nhận diện; editor full-screen đã là đường detail + edit nên không dựng thêm màn read-only trùng trách nhiệm. | 2026-08-12 |
 
 **D2 có một ranh giới phải giữ, và nó dịch chỗ ở M4.10at.** M4.11 **đọc**
 `card_review_states` để vẽ nhãn và badge — kể cả `current_box` và `interval_days`,
@@ -129,9 +131,7 @@ màn deck detail **đầy đủ** — tức đích đến, không phải phạm 
 │  │    BEGINNING  ⟨noun⟩ ⟨places⟩          │  │
 │  └────────────────────────────────────────┘  │
 │                                              │
-│                     ┌────────────────────┐   │
-│                     │  +   New card      │   │  extended FAB
-│                     └────────────────────┘   │
+│  App bar `+` → New card                      │
 └──────────────────────────────────────────────┘
 ```
 
@@ -145,9 +145,9 @@ chặn bởi ba thứ khác nhau — nên gộp chúng thành "để sau" là m�
 | Back · title · `⋮` · breadcrumb | có | **M4.11** |
 | `7 CARDS` / dòng đếm | có (C3) | **M4.11** |
 | Hàng: dot · front · back · state · due badge | có | **M4.11** |
-| Extended FAB `+ New card` | — | **M4.11** — xem D4 |
-| Nút `🔍` search | — | **Chặn bởi scope.** `wbs.md` M4.11: search thẻ là S1 |
-| Sort `⇅ Due first` | có | **Chặn bởi scope**, và mâu thuẫn C1 (thứ tự cố định) |
+| App-bar `+` → New card | — | **M4.11** — xem D4 |
+| Nút `🔍` search | — | **Đã triển khai sau M4.11** — xem D3 |
+| Sort | có | **Đã triển khai sau M4.11** — xem D3 |
 | `▷ Start study` | có | **M5.1** — review nằm ngoài M4.11 |
 | Pill lọc `All / Due now / New / ⚑` | M4.10at | **M4.11** — lọc, không đổi thứ tự |
 | Panel Deck progress + vòng 62% | M4.10at (BR-89…BR-91) | **M4.11** |
@@ -215,9 +215,7 @@ search, sort, và Start study. Mọi thứ khác được build ở M4.11.
 │  │    BEGINNING  ⟨noun⟩ ⟨places⟩          │  │
 │  └────────────────────────────────────────┘  │
 │                                              │
-│                     ┌────────────────────┐   │
-│                     │  +   New card      │   │
-│                     └────────────────────┘   │
+│  App bar `+` → New card                      │
 └──────────────────────────────────────────────┘
 ```
 

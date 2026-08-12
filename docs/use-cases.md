@@ -7,7 +7,7 @@
 | **Scope** | Must-have của MVP. Ngoài phạm vi: should/nice-to-have, và mọi thứ ở mục "Điều đã cố ý không đặc tả" |
 | **Source of truth for** | UC-xx · main/alternative/error flow · UI state matrix của từng màn |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md` |
-| **Updated by task** | UC-03 A4 — xác nhận đúng chế độ đang chạy là no-op (BR-12) |
+| **Updated by task** | M99.17 — import/export được chốt là hướng quản lý hàng loạt sau MVP; chưa đặc tả UC trước khi triển khai |
 | **Last updated** | 2026-08-12 |
 
 Chỉ đặc tả must-have. Should-have và nice-to-have viết khi tới lượt — đặc tả
@@ -645,7 +645,7 @@ Create có ba hành vi khác nhau tuỳ trạng thái deck.
 | Tìm kiếm card (S1) | Should-have, chưa tới lượt |
 | Thống kê / streak (S2) | Should-have — `study_answers` với `kind` đã đủ dữ liệu |
 | Đảo chiều card (S3) | Should-have |
-| Import/export (N1) | Nice-to-have; thư viện starter đã giải quyết vấn đề app trống |
+| Import/export (N1) | **Planned sau MVP; hướng quản lý hàng loạt chính.** Tạo card thủ công vẫn dành cho lượng nhỏ và chỉnh ngoại lệ. Khi triển khai MUST đặc tả preview, mapping, validation, kết quả batch, lỗi/rollback và quyền riêng tư trước khi viết code; không suy các contract đó từ dòng backlog này. |
 | Nhắc nhở hằng ngày (N2) | Nice-to-have, cần quyền notification |
 | Media và tag trong card | Ngoài MVP; quy tắc reset (BR-41) và lưu trữ (AD-08) đã đặt sẵn |
 | Đăng nhập, đồng bộ | Ngoài MVP (AD-03) |
