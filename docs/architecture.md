@@ -431,8 +431,8 @@ khoá.
 
 **Quyết định.** Deck lồng được nhiều cấp — tối đa 10, root là cấp 1 (BR-55).
 Root deck chỉ chứa deck con — không bao giờ chứa card trực tiếp. Mỗi deck không phải root mang `content_type` với ba giá
-trị `unset` / `card` / `deck`, xác lập bởi lần tạo phần tử con đầu tiên và sau đó
-không đổi trừ khi reset tường minh.
+trị `unset` / `card` / `deck`, do **hệ thống tự duy trì** theo direct children
+(BR-163).
 
 ### Vì sao `content_type` thay vì cho phép trộn
 
@@ -447,9 +447,18 @@ hình dạng.
 card hay chia nhỏ tiếp. Lần tạo phần tử con đầu tiên tự nói lên điều đó, nên đó là
 lúc xác lập.
 
-**Xoá hết nội dung không đưa `content_type` về `unset`.** Tự động quay về nghe
-tiện nhưng khiến cấu trúc đổi âm thầm sau một thao tác xoá. Reset `content_type`
-là thao tác riêng, có xác nhận, chỉ khi deck rỗng (BR-68).
+**Lifecycle tự động hai chiều (BR-163, sửa từ M99.15).** Phần tử con **đầu tiên**
+xác lập type; phần tử con **cuối cùng** rời đi mở khoá type về `unset`. Cả hai
+chiều MUST nằm trong cùng transaction với mutation sinh ra chúng — create, delete
+card, delete deck, move deck — nên một lần ghi hỏng rollback cả nội dung lẫn
+type. Root deck nằm ngoài: nó luôn `deck`, kể cả khi không còn con (BR-58).
+
+**Phương án bị loại — "reset thủ công có xác nhận" (BR-68 cũ).** Thiết kế ban
+đầu bắt người dùng bấm một hành động riêng để gỡ type, với lý do "cấu trúc chỉ
+đổi khi ai đó thực sự muốn". Nó giả định sai rằng `content_type` là lựa chọn của
+người dùng — BR-60 cấm chọn, BR-62 tự xác lập — và cái giá là một deck rỗng bị
+khoá loại mà lối thoát nằm trong action sheet. Ngoài ra check-rỗng-rồi-ghi ở
+tầng UI là race giữa hai transaction, và mutation từ repository khác vẫn bỏ sót.
 
 ### Vì sao `root_deck_id` chứ không phải tra ngược từng cấp
 

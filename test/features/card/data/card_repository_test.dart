@@ -223,14 +223,33 @@ void main() {
     });
 
     test(
-      'deleting the last card does NOT reset content_type (BR-67)',
+      'deleting the last card puts the deck back to unset (BR-163)',
       () async {
+        // The other half of the lifecycle `createCard` owns: the first card
+        // locks the deck to `card`, the last one leaving unlocks it. Before
+        // M99.15 this asserted the opposite under BR-67, which left a deck
+        // typed and empty — a state the user could only escape through a manual
+        // reset buried in an action sheet.
         final seeded = await seedCard();
         await h.cardRepository.deleteCard(seeded.card.id);
 
-        expect(await h.contentTypeOf(seeded.leaf.id), 'card');
+        expect(await h.contentTypeOf(seeded.leaf.id), 'unset');
       },
     );
+
+    test('deleting one of several cards leaves the type alone', () async {
+      final seeded = await seedCard();
+      await h.cardRepository.createCard(
+        deckId: seeded.leaf.id,
+        front: cardText('second'),
+        back: cardText('card', side: CardSide.back),
+      );
+
+      await h.cardRepository.deleteCard(seeded.card.id);
+
+      expect(await h.contentTypeOf(seeded.leaf.id), 'card');
+      expect(await h.countAll('cards'), 1);
+    });
 
     // "A refused write leaves the card untouched (BR-07)" used to be asserted
     // here, by handing the repository a blank side and checking the row after.

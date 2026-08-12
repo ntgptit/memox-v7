@@ -596,8 +596,8 @@ phải mở editor mười lần, còn người đang phân vân thì thấy nú
 
 Câu mô tả trong danger zone nói rõ **cái gì mất và cái gì ở lại** — history mất
 theo, các thẻ khác trong deck thì không. Đó là hậu quả người dùng không đoán
-được từ chữ "xoá", và nó cũng là lý do `content_type` giữ nguyên khi xoá thẻ
-cuối (BR-67).
+được từ chữ "xoá". Xoá thẻ **cuối cùng** còn một hậu quả nữa: deck mất loại nội
+dung và quay về chưa định loại (BR-163).
 
 ---
 
@@ -636,9 +636,11 @@ trên hàng bị bỏ vì góc phải đã là badge hạn và cờ ⚑. Danger 
 là thứ bù lại — người không đoán ra long-press vẫn tìm được nút xoá bằng cách
 mở thẻ, là điều họ sẽ làm để xem nội dung trước khi xoá.
 
-**Xoá card cuối cùng** đưa list về W2 (`No cards yet`), **không** về W3:
-`content_type` giữ nguyên `card` theo BR-67. Deck không hỏi lại câu đã trả lời.
-Phủ UC-04 A2.
+**Xoá card cuối cùng** không dừng ở list nữa. Deck trở về `unset` trong cùng
+transaction (BR-163), nên điều hướng đi qua màn hình deck: còn thẻ thì redirect
+đưa người dùng lại card list, hết thẻ thì họ ở lại deck và chọn được Tạo card
+hay Tạo sub-deck. W2 (`No cards yet`) vì thế là trạng thái của một bộ lọc, không
+còn là trạng thái ổn định của deck rỗng. Phủ UC-04 A2.
 
 ---
 

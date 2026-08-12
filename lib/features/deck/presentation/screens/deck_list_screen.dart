@@ -160,7 +160,6 @@ class _DeckLevel extends StatelessWidget {
             onPressed: () => showDeckActions(
               context,
               deck: parent,
-              mayOfferReset: snapshot.mayOfferReset,
               // The deck being viewed is gone, so staying here would show a
               // not-found state the user did not ask for. Going **up one
               // level** — not to the root — is where the deck was, and its

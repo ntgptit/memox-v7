@@ -65,7 +65,6 @@ void main() {
       'createRootDeck',
       'createSubDeck',
       'moveDeck',
-      'resetContentType',
     ]) {
       expect(
         contract,

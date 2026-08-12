@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/card/domain/failures/card_validation_failure.dart';
+import 'package:memox/features/deck/domain/entities/deck_entity.dart';
 import 'package:memox/features/deck/domain/models/deck_name_model.dart';
 import 'package:memox/core/error/failure.dart';
-import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 
 import '../../card/data/support/card_text_fixture.dart';
 import '../../../database/support/test_database.dart';
@@ -97,65 +97,121 @@ void main() {
     });
   });
 
-  group('resetContentType', () {
-    test('succeeds on an empty sub-deck (BR-68)', () async {
+  group('content_type follows the direct children (BR-163)', () {
+    test('deleting the last child deck unsets a non-root parent', () async {
+      // The transition BR-67 used to forbid. `branch` holds exactly `leaf`;
+      // once `leaf` is gone the branch describes nothing, so the type goes
+      // with it — in the same transaction as the delete.
       final tree = await h.seedTree();
-      final card = await h.cardRepository.createCard(
-        deckId: tree.leaf.id,
-        front: cardText('f'),
-        back: cardText('b', side: CardSide.back),
-      );
-      await h.cardRepository.deleteCard(card.id);
-      // BR-67: still 'card' after the delete...
-      expect(await h.contentTypeOf(tree.leaf.id), 'card');
+      await h.deckRepository.deleteDeck(tree.leaf.id);
 
-      // ...until the explicit reset (BR-68).
-      await h.deckRepository.resetContentType(tree.leaf.id);
-      expect(await h.contentTypeOf(tree.leaf.id), 'unset');
+      expect(await h.contentTypeOf(tree.branch.id), 'unset');
     });
 
-    test('is blocked while the deck still has a card', () async {
+    test('deleting one of several child decks keeps the type', () async {
+      final tree = await h.seedTree();
+      await h.deckRepository.createSubDeck(
+        name: DeckName.parse('Sibling').name!,
+        parentDeckId: tree.branch.id,
+      );
+
+      await h.deckRepository.deleteDeck(tree.leaf.id);
+
+      expect(await h.contentTypeOf(tree.branch.id), 'deck');
+    });
+
+    test('deleting the last child under a root leaves the root deck', () async {
+      // A root is `deck` forever (BR-58), and an empty root is ordinary.
+      final tree = await h.seedTree();
+      await h.deckRepository.deleteDeck(tree.branch.id);
+
+      expect(await h.contentTypeOf(tree.root.id), 'deck');
+    });
+
+    test('a deck that still holds a card keeps card after a sibling '
+        'delete', () async {
+      // The guard against unsetting on the wrong count: `leaf` holds a card,
+      // so removing something else must not touch it.
       final tree = await h.seedTree();
       await h.cardRepository.createCard(
         deckId: tree.leaf.id,
         front: cardText('f'),
         back: cardText('b', side: CardSide.back),
       );
-
-      await expectLater(
-        h.deckRepository.resetContentType(tree.leaf.id),
-        throwsA(isA<ConflictFailure>()),
+      final sibling = await h.deckRepository.createSubDeck(
+        name: DeckName.parse('Sibling').name!,
+        parentDeckId: tree.branch.id,
       );
+
+      await h.deckRepository.deleteDeck(sibling.id);
+
       expect(await h.contentTypeOf(tree.leaf.id), 'card');
-    });
-
-    test('is blocked while the deck still has a child deck', () async {
-      final tree = await h.seedTree();
-
-      await expectLater(
-        h.deckRepository.resetContentType(tree.branch.id),
-        throwsA(isA<ConflictFailure>()),
-      );
       expect(await h.contentTypeOf(tree.branch.id), 'deck');
     });
 
-    test('is blocked on a root — a root is deck forever (BR-58)', () async {
-      final root = await h.deckRepository.createRootDeck(
-        name: DeckName.parse('Root').name!,
-        schedulerType: SchedulerType.eightBox,
+    test('moving the last child out unsets the source and types the '
+        'target', () async {
+      // Both ends of one move, one transaction: the target gains its first
+      // child and the old parent loses its last.
+      final tree = await h.seedTree();
+      final target = await h.deckRepository.createSubDeck(
+        name: DeckName.parse('Target').name!,
+        parentDeckId: tree.root.id,
       );
 
-      await expectLater(
-        h.deckRepository.resetContentType(root.id),
-        throwsA(isA<ConflictFailure>()),
+      await h.deckRepository.moveDeck(
+        deckId: tree.leaf.id,
+        targetParentDeckId: target.id,
       );
+
+      expect(await h.contentTypeOf(tree.branch.id), 'unset');
+      expect(await h.contentTypeOf(target.id), 'deck');
     });
 
-    test('deleting the last child deck does not auto-reset (BR-67)', () async {
+    test('moving a child that leaves a sibling behind keeps the source '
+        'typed', () async {
       final tree = await h.seedTree();
-      await h.deckRepository.deleteDeck(tree.leaf.id);
+      await h.deckRepository.createSubDeck(
+        name: DeckName.parse('Stays').name!,
+        parentDeckId: tree.branch.id,
+      );
+      final target = await h.deckRepository.createSubDeck(
+        name: DeckName.parse('Target').name!,
+        parentDeckId: tree.root.id,
+      );
+
+      await h.deckRepository.moveDeck(
+        deckId: tree.leaf.id,
+        targetParentDeckId: target.id,
+      );
 
       expect(await h.contentTypeOf(tree.branch.id), 'deck');
+    });
+
+    test('a refused move changes neither parent nor either type', () async {
+      // UC-09 E1: moving a deck into its own subtree. Everything the move
+      // would have written — pointer, root pointers, target type, old-parent
+      // type — has to be untouched, which is the rollback this rule shares
+      // with every other refused write.
+      final tree = await h.seedTree();
+
+      await expectLater(
+        h.deckRepository.moveDeck(
+          deckId: tree.branch.id,
+          targetParentDeckId: tree.leaf.id,
+        ),
+        throwsA(isA<ConflictFailure>()),
+      );
+
+      expect(await h.contentTypeOf(tree.branch.id), 'deck');
+      expect(await h.contentTypeOf(tree.leaf.id), 'unset');
+      final branch = await h.deckRepository.watchAllDecks().first;
+      expect(
+        branch
+            .firstWhere((DeckEntity d) => d.id == tree.branch.id)
+            .parentDeckId,
+        tree.root.id,
+      );
     });
   });
 }

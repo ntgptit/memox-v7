@@ -7,7 +7,7 @@
 | **Scope** | Must-have của MVP. Ngoài phạm vi: should/nice-to-have, và mọi thứ ở mục "Điều đã cố ý không đặc tả" |
 | **Source of truth for** | UC-xx · main/alternative/error flow · UI state matrix của từng màn |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md` |
-| **Updated by task** | BR-162 — UC-06 bước 3: tile total Due/New + icon vàng/đỏ, hero bốn tập 2×2; UC-07 bước 6 sửa postcondition Reset (card về Học mới, không phải Due ngay) |
+| **Updated by task** | BR-163 — `content_type` do hệ thống tự duy trì: UC-03/UC-04/UC-08/UC-09 bỏ reset thủ công, phần tử con cuối rời đi thì sub-deck tự về `unset` |
 | **Last updated** | 2026-08-11 |
 
 Chỉ đặc tả must-have. Should-have và nice-to-have viết khi tới lượt — đặc tả
@@ -167,26 +167,25 @@ chọn: Create deck (BR-59). Việc tạo phần tử con nằm ở UC-08.
   kèm giải thích và lối đi tới Reset learning progress (UC-07). Không ẩn đi — ẩn
   khiến người dùng tưởng tính năng không tồn tại (BR-13).
 - **A2 — Sửa deck con:** không có phần chọn chế độ (BR-06).
-- **A3 — Đưa `content_type` về `unset`:** chỉ hiện khi deck đang rỗng; hỏi xác
-  nhận; sau đó deck lại cho chọn cả hai loại phần tử con (BR-68). Không tự động
-  xảy ra khi xoá hết nội dung (BR-67).
-- **A4 — Huỷ xác nhận xoá:** không xảy ra gì.
+- **A3 — Huỷ xác nhận xoá:** không xảy ra gì.
 
 **Error flows:**
 - **E1 — Deck đã bị xoá ở nơi khác:** thao tác không thành, quay về danh sách với
   thông báo nhẹ nhàng.
 - **E2 — Đổi chế độ thất bại giữa chừng:** transaction rollback; deck giữ nguyên
   scheduler cũ và study state cũ.
-- **E3 — Đưa `content_type` về `unset` khi deck không rỗng:** chặn, giải thích
-  phải xoá hết nội dung trước (BR-68).
-- **E4 — Xoá thất bại:** hiện lỗi; deck còn nguyên vẹn.
+- **E3 — Xoá thất bại:** hiện lỗi; deck còn nguyên vẹn, và `content_type` của
+  deck cha cũng không đổi — cả hai nằm trong một transaction (BR-163).
 
 **Postconditions:**
 - Sau đổi chế độ: `scheduler_type` mới, mọi study state trong cây khởi tạo lại,
   `scheduler_generation` **không đổi** (chưa có gì để reset).
 - Sau xoá: không còn deck con, card, study state, history hay session mồ côi.
+- Sau xoá một deck con: nếu deck cha là **sub-deck** và vừa mất phần tử con cuối
+  cùng, `content_type` của nó tự về `unset` trong cùng transaction (BR-163). Deck
+  cha là root thì giữ `deck` (BR-58).
 
-**Business rules:** BR-01, BR-03, BR-04, BR-06, BR-12, BR-13, BR-14, BR-67, BR-68
+**Business rules:** BR-01, BR-03, BR-04, BR-06, BR-12, BR-13, BR-14, BR-163
 **UI states:** loaded · submitting · error
 
 ---
@@ -215,8 +214,12 @@ Card đầu tiên của một deck `unset` được tạo qua UC-08, và chính 
 **Alternative flows:**
 - **A1 — Sửa card:** nội dung đổi; study state và history **không** đổi (BR-10).
 - **A2 — Xoá card:** hỏi xác nhận; xoá kèm study state và history của card đó.
-  `content_type` **giữ nguyên** kể cả khi xoá card cuối cùng (BR-67).
-- **A3 — Deck rỗng:** empty state với hành động "Thêm card".
+  Nếu đó là card **cuối cùng**, deck atomically trở về `content_type = unset`
+  trong cùng transaction (BR-163); sau đó người dùng quay về màn hình deck và
+  lại chọn được tạo card hay tạo sub-deck. "Deck `card` rỗng" không còn là một
+  trạng thái ổn định của hệ thống.
+- **A3 — Deck còn card nhưng danh sách rỗng theo bộ lọc:** empty state của bộ
+  lọc, không phải của deck.
 - **A4 — Thêm liên tiếp nhiều card:** sau khi lưu, giữ form mở và xoá trống các ô.
 
 **Error flows:**
@@ -228,7 +231,7 @@ state.
 **Postconditions:** Card tồn tại kèm đúng một study state, đúng scheduler và
 đúng generation của root deck.
 
-**Business rules:** BR-07, BR-08, BR-09, BR-10, BR-63, BR-67
+**Business rules:** BR-07, BR-08, BR-09, BR-10, BR-63, BR-163
 **UI states:** loading · loaded · empty · submitting · error
 
 ---
@@ -523,8 +526,10 @@ Create có ba hành vi khác nhau tuỳ trạng thái deck.
 - **A1 — Deck đã `card`:** không có lựa chọn tạo deck con, ở bất kỳ đâu trong UI
   (BR-63).
 - **A2 — Deck đã `deck`:** không có lựa chọn tạo card (BR-64).
-- **A3 — Xoá phần tử con cuối cùng:** `content_type` **giữ nguyên** (BR-67). Muốn
-  đổi loại phải reset `content_type` tường minh (UC-03 A3, BR-68).
+- **A3 — Phần tử con cuối cùng rời đi:** xoá card cuối, xoá deck con cuối hoặc
+  di chuyển deck con cuối sang cha khác đều đưa `content_type` của sub-deck về
+  `unset`, trong cùng transaction với mutation đó (BR-163). Không có thao tác
+  reset thủ công nào, và không cần có.
 - **A4 — Huỷ giữa chừng:** không tạo gì và **không** xác lập `content_type` —
   `content_type` chỉ đổi cùng với việc phần tử con thực sự được tạo (BR-62).
 
@@ -532,7 +537,8 @@ Create có ba hành vi khác nhau tuỳ trạng thái deck.
 - **E1 — Validate thất bại** (tên deck rỗng, card thiếu mặt): lỗi inline; không
   tạo gì và không đổi `content_type`.
 - **E2 — Ghi thất bại giữa chừng:** transaction rollback. Deck giữ nguyên
-  `content_type` cũ và không có phần tử con nửa vời (BR-62).
+  `content_type` cũ và không có phần tử con nửa vời (BR-62) — chiều xoá cũng
+  vậy: mutation và thay đổi type cùng sống hoặc cùng chết (BR-163).
 - **E3 — Cố tạo card trong root deck:** không có đường nào tới được trạng thái
   này qua UI (BR-59). Nếu xảy ra qua deep link hoặc lỗi lập trình, từ chối và log
   — đây là vi phạm BR-58 và validation phải bắt được.
@@ -545,7 +551,7 @@ Create có ba hành vi khác nhau tuỳ trạng thái deck.
 - Deck không đồng thời chứa card và deck con (BR-65).
 - Deck con mới có `root_deck_id` đúng bằng root của cha (BR-56, BR-72).
 
-**Business rules:** BR-09, BR-55, BR-56, BR-58…BR-68, BR-72
+**Business rules:** BR-09, BR-55, BR-56, BR-58…BR-66, BR-72, BR-163
 **UI states:** initial · submitting · error
 
 ---
@@ -574,7 +580,9 @@ Create có ba hành vi khác nhau tuỳ trạng thái deck.
 3. Hệ thống thực hiện **trong một transaction** (BR-71):
    - đặt `parent_deck_id` của deck nguồn thành deck đích;
    - cập nhật `root_deck_id` cho **toàn bộ subtree** của deck nguồn;
-   - nếu đích đang `unset`, đặt `content_type = 'deck'` (BR-62).
+   - nếu đích đang `unset`, đặt `content_type = 'deck'` (BR-62);
+   - nếu deck cha **cũ** là sub-deck và vừa mất phần tử con cuối cùng, đặt
+     `content_type` của nó về `unset` (BR-163); cha cũ là root thì giữ `deck`.
 4. Cây được vẽ lại.
 
 **Alternative flows:**
@@ -591,8 +599,10 @@ Create có ba hành vi khác nhau tuỳ trạng thái deck.
 - **E3 — Root đích khác scheduler hoặc generation:** **chặn**, và đề nghị đặt lại
   tiến độ học một cách tường minh (BR-74). Không im lặng chuyển đổi state — không
   có ánh xạ nào có cơ sở giữa box và ease factor (BR-73).
-- **E4 — Thất bại giữa chừng:** transaction rollback (BR-71). Không có descendant
-  nào trỏ sai root (BR-72).
+- **E4 — Thất bại giữa chừng:** transaction rollback (BR-71) — con trỏ cha, con
+  trỏ root của cả subtree, `content_type` của đích **và** `content_type` của cha
+  cũ cùng quay lại nguyên trạng (BR-163). Không có descendant nào trỏ sai root
+  (BR-72).
 - **E5 — Vượt độ sâu tối đa:** `targetDepth + subtreeHeight > 10` → chặn trước
   khi ghi (BR-55). Không đổi `parent_deck_id`, `root_deck_id`, `content_type`
   của đích hay bất kỳ timestamp nào.
@@ -602,10 +612,12 @@ Create có ba hành vi khác nhau tuỳ trạng thái deck.
 - Mọi deck trong subtree đã di chuyển có `root_deck_id` đúng bằng root mới
   (BR-56, BR-72).
 - Không deck nào đồng thời chứa card và deck con (BR-65).
+- Deck đích `unset` nhận phần tử con đầu tiên thành `deck`; cha cũ là sub-deck
+  mất phần tử con cuối thành `unset`; cha cũ còn sibling giữ `deck` (BR-163).
 - Không có card study state nào lệch scheduler hoặc generation so với root
   (BR-48, BR-49).
 
-**Business rules:** BR-55, BR-56, BR-62, BR-64, BR-69…BR-74
+**Business rules:** BR-55, BR-56, BR-62, BR-64, BR-69…BR-74, BR-163
 **UI states:** loaded · submitting · error
 
 ---

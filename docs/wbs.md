@@ -8662,6 +8662,60 @@ thế không đổi bố cục.
   streak), `deck_summary_overdue_test` (viết lại, 12),
   `deck_summary_new_test`, `deck_list_screen_test`, golden 6 file.
 
+### M99.15 · `content_type` là trạng thái hệ thống, không phải lựa chọn người dùng
+
+- **Status:** **done** — `dod_check.sh` xanh (format, analyze, 2170 test,
+  generated, architecture, guard, docs); không chạy emulator.
+- **Goal:** BR-163 — mọi mutation direct children cập nhật `content_type` trong
+  cùng transaction; sub-deck mất phần tử con cuối tự về `unset`; bỏ hoàn toàn
+  reset thủ công. Root vẫn bất biến `deck` (BR-58).
+- **Scope:** BR-67/BR-68 → superseded, BR-163 active; AD-10 lifecycle hai
+  chiều; invariant Q29; `deleteCard`/`deleteDeck`/`moveDeck` cập nhật type
+  atomically; migration data-only v6 normalize empty typed sub-deck; xoá
+  `resetContentType` khỏi domain/data/presentation/l10n; điều hướng sau khi
+  xoá card đi qua `RouteNames.deckDetail`.
+- **Out of scope:** scheduler, SM-2/Eight Box, StudyMode, Reset learning
+  progress (BR-42/BR-44 — nghiệp vụ khác hoàn toàn), layout/theme/token,
+  `moveCard` (chưa tồn tại — không tạo API giả).
+- **Editable documents:** `docs/wbs.md`, `docs/business-rules.md`,
+  `docs/architecture.md` (AD-10), `docs/data-model.md`, `docs/use-cases.md`
+  (UC-03, UC-04, UC-08, UC-09), `docs/master-flow.md`,
+  `docs/wireframes/m4-11-card-management.md`, `docs/it-scenarios/*`,
+  `CLAUDE.md`, `lib/features/deck/README.md`, `lib/features/card/README.md`
+- **Output:** xoá card cuối → deck `unset`; xoá/di chuyển child deck cuối →
+  parent non-root `unset`; target `unset` nhận child đầu → `deck`; dữ liệu v5
+  cũ được normalize; UI không còn hành động reset content type.
+- **Acceptance criteria:**
+  - [x] BR-67/BR-68 `superseded by BR-163`; BR-163 active, enforced by
+        repository + invariant Q29.
+  - [x] Ba mutation (delete card, delete deck, move deck) cập nhật
+        `content_type` **trong cùng transaction**; lỗi giữa chừng rollback cả
+        mutation lẫn type.
+  - [x] Root luôn `deck`; deck còn nội dung giữ nguyên type.
+  - [x] Migration v6 data-only normalize empty typed non-root deck về `unset`,
+        không đụng root, không đụng deck còn nội dung, không đổi `updated_at`,
+        không mất card/state/history/session.
+  - [x] Q29 có trong `data-model.md`, `verify_invariants.py`,
+        `invariant_queries.dart`, `invariants_test.dart`; đỏ đúng khi có empty
+        typed non-root deck.
+  - [x] Không còn reference production tới `resetContentType`,
+        `ResetDeckContentType`, `mayOfferReset`, `deckResetContentType`, ba
+        failure reason chỉ phục vụ reset.
+  - [x] Sau khi xoá card, điều hướng đi qua `RouteNames.deckDetail`: còn card
+        thì redirect về CardList, hết card thì ở lại DeckDetail với hai lựa
+        chọn tạo.
+  - [x] `dod_check.sh` xanh; không chạy emulator.
+- **Dependencies:** M99.14
+- **Tests required:** repository transitions + rollback, migration v5→v6 và
+  old→latest, invariant Q29 hai chiều, presentation/router sau delete
+- **Checklist phases:** 9.3, 10.2, 14.2
+- **Tests:** `migration_v6_test` (mới, 10), `invariants_test` (+Q29 hai chiều,
+  +root rỗng), `deck_repository_tree_test` (nhóm BR-163 viết lại, 7),
+  `card_repository_test` (xoá card cuối/không cuối), `deck_level_read_test`
+  (stream phản ánh unset), `card_editor_edit_test` (harness router lồng),
+  `deck_level_actions_test`/`deck_edit_controller_test`/`submit_disposition_test`
+  (bỏ manual reset), `migration_test`/`query_test` (schemaVersion 6).
+
 ## Blocker
 
 | Blocker | Ảnh hưởng | Cách gỡ |

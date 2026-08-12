@@ -17,7 +17,7 @@ import '../controllers/card_editor_load_controller.dart';
 import '../controllers/card_flag_controller.dart';
 import '../controllers/card_write_controller.dart';
 import '../states/card_submit_state.dart';
-import '../widgets/overlays/card_confirm_widget.dart';
+import '../widgets/sections/card_danger_zone_widget.dart';
 import '../widgets/sections/card_details_section_widget.dart';
 import '../widgets/sections/card_flag_toggle_widget.dart';
 import '../widgets/sections/card_tag_section_widget.dart';
@@ -267,39 +267,13 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
           const SizedBox(height: AppSpacing.xl),
           CardTagSectionWidget(cardId: cardId),
           const SizedBox(height: AppSpacing.xxl),
-          _dangerZone(context, cardId, disabled: busy),
+          CardDangerZoneWidget(
+            deckId: widget.deckId,
+            cardId: cardId,
+            isDisabled: busy,
+          ),
         ],
       ),
-    );
-  }
-
-  Widget _dangerZone(
-    BuildContext context,
-    String cardId, {
-    required bool disabled,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        Text(
-          context.l10n.cardEditorDangerZone,
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-            color: Theme.of(context).colorScheme.error,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.md),
-        MxActionButton(
-          label: context.l10n.cardEditorDelete,
-          variant: MxActionButtonVariant.destructive,
-          onPressed: disabled
-              ? null
-              : () => showCardDeleteConfirm(
-                  context,
-                  cardId: cardId,
-                  onDeleted: () => Navigator.of(context).pop(),
-                ),
-        ),
-      ],
     );
   }
 

@@ -52,15 +52,15 @@ các bước gốc. Ý nghĩa mức sẵn sàng, hồ sơ thực thi, chuẩn b�
 | IT-TREE-003 | `03-deck-tree-and-content-type.md` | READY | `HOST-WIDGET` + `HOST-FLOW` | IT-TREE-003F | SETUP-TREE-UNSET | CLEAN-RESET | UC-08, BR-62, BR-63 |
 | IT-TREE-004 | `03-deck-tree-and-content-type.md` | READY | `HOST-WIDGET` + `HOST-FLOW` | IT-TREE-004F | SETUP-UNSET-CHILD:Grammar | CLEAN-RESET | UC-08, BR-62, BR-64 |
 | IT-TREE-005 | `03-deck-tree-and-content-type.md` | READY | `HOST-FLOW` | — | SETUP-UNSET-CHILD:Unclassified | CLEAN-RESET | UC-08 E1, BR-62 |
-| IT-TREE-006 | `03-deck-tree-and-content-type.md` | READY | `HOST-FLOW` | — | SETUP-DECK-TYPED-WITH-CHILD | CLEAN-RESET | UC-08 A3, BR-67 |
-| IT-TREE-007 | `03-deck-tree-and-content-type.md` | READY | `HOST-WIDGET` + `HOST-FLOW` | IT-TREE-007F | SETUP-DECK-TYPED-EMPTY | CLEAN-RESET | UC-03 A3, BR-68 |
-| IT-TREE-008 | `03-deck-tree-and-content-type.md` | READY | `HOST-FLOW` | — | SETUP-TREE-UNSET | CLEAN-RESET | UC-03 E3, BR-68 |
+| IT-TREE-006 | `03-deck-tree-and-content-type.md` | READY | `HOST-FLOW` | — | SETUP-DECK-TYPED-WITH-CHILD | CLEAN-RESET | UC-08 A3, BR-163 |
+| IT-TREE-007 | `03-deck-tree-and-content-type.md` | READY | `HOST-FLOW` | — | SETUP-TREE-UNSET | CLEAN-RESET | UC-09, BR-163 |
+| IT-TREE-008 | `03-deck-tree-and-content-type.md` | READY | `HOST-FLOW` | — | SETUP-TREE-UNSET | CLEAN-RESET | UC-08 A3, BR-163 |
 | IT-TREE-009 | `03-deck-tree-and-content-type.md` | READY | `HOST-WIDGET` + `HOST-FLOW` | IT-TREE-009F | SETUP-MOVE-TREE | CLEAN-RESET | UC-09, BR-71 |
 | IT-TREE-010 | `03-deck-tree-and-content-type.md` | READY | `HOST-FLOW` | — | SETUP-CYCLE-TREE | CLEAN-RESET | UC-09 E1, BR-69, BR-70 |
 | IT-TREE-011 | `03-deck-tree-and-content-type.md` | READY | `HOST-FLOW` | — | SETUP-MOVE-TREE | CLEAN-RESET | UC-09 E2, BR-64 |
 | IT-TREE-012 | `03-deck-tree-and-content-type.md` | READY | `HOST-FLOW` | — | SETUP-CROSS-SCHEDULER-MOVE | CLEAN-RESET | UC-09 E3, BR-73, BR-74 |
 | IT-TREE-013 | `03-deck-tree-and-content-type.md` | READY | `HOST-FLOW` | — | SETUP-DEEP-10 | CLEAN-RESET | UC-08 E4, UC-09 E5, BR-55 |
-| IT-TREE-014 | `03-deck-tree-and-content-type.md` | READY | `HOST-FLOW` | — | SETUP-CARD-EMPTY-TYPED | CLEAN-RESET | UC-03 A3, BR-67, BR-68 |
+| IT-TREE-014 | `03-deck-tree-and-content-type.md` | READY | `HOST-FLOW` | — | SETUP-CARD-EMPTY-TYPED | CLEAN-RESET | UC-04 A2, BR-163 |
 
 ## Khám phá bộ thẻ và tiến độ
 
@@ -89,7 +89,7 @@ các bước gốc. Ý nghĩa mức sẵn sàng, hồ sơ thực thi, chuẩn b�
 | IT-CARD-008 | `05-card-lifecycle.md` | READY | `HOST-WIDGET` + `HOST-FLOW` | IT-CARD-008F | SETUP-CARD-BASIC | CLEAN-RESET | UC-04 A1, BR-10 |
 | IT-CARD-009 | `05-card-lifecycle.md` | READY | `HOST-FLOW` | — | S-PROGRESS | CLEAN-RESET | UC-04 A1, BR-10, BR-92 |
 | IT-CARD-010 | `05-card-lifecycle.md` | READY | `HOST-WIDGET` + `HOST-FLOW` | IT-CARD-010F | SETUP-CARD-BASIC | CLEAN-RESET | UC-04 A2 |
-| IT-CARD-011 | `05-card-lifecycle.md` | READY | `HOST-FLOW` | — | SETUP-CARD-SINGLE | CLEAN-RESET | UC-04 A2, BR-67 |
+| IT-CARD-011 | `05-card-lifecycle.md` | READY | `HOST-FLOW` | — | SETUP-CARD-SINGLE | CLEAN-RESET | UC-04 A2, BR-163 |
 
 ## Khám phá và tổ chức thẻ
 

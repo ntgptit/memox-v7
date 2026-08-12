@@ -128,6 +128,10 @@ BAD = {
     "INSERT INTO study_answers VALUES('h25','c25','s1','eight_box',1,'scheduled','match','forgotten','t',NULL,NULL,NULL,NULL,1,1,NULL,NULL,NULL,NULL);",
  26:"INSERT INTO study_answers VALUES('h26','c1','s1','eight_box',1,'learning','match','forgotten','t',NULL,NULL,NULL,NULL,1,1,NULL,NULL,NULL,NULL);",
  27:"UPDATE decks SET study_config='{}' WHERE id='b';",
+ # A sub-deck that kept its type after everything left it (BR-163). 'a' is a
+ # non-root 'deck' whose only child is 'b'; drop 'b' and its card and 'a' is
+ # the empty typed deck invariant 29 exists to catch.
+ 29:"DELETE FROM decks WHERE id='b';",
  21:"INSERT INTO cards VALUES('c21','b','f','k','t','t');"
     "INSERT INTO study_queue_items VALUES('s1','match',1,'c21',9,'pending',0,0,500,0);",
  22:"INSERT INTO study_answers VALUES('h22','c1','s1','eight_box',1,'scheduled','match','forgotten','t','timeout',NULL,NULL,NULL,1,1,NULL,NULL,NULL,NULL);",

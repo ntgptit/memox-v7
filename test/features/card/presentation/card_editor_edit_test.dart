@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:memox/core/error/failure.dart';
+import 'package:memox/core/navigation/route_names.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/features/card/di/card_repository_provider.dart';
 import 'package:memox/features/card/presentation/screens/card_editor_screen.dart';
@@ -13,15 +15,45 @@ import 'support/fake_card_repository.dart';
 /// The editor in edit mode (UC-04 A1, A5): prefill from the loaded card, save
 /// through `updateCard`, and the danger-zone delete.
 void main() {
-  Future<void> pump(
+  /// The editor, mounted under a router.
+  ///
+  /// **A real `GoRouter`, not a bare `home:`.** Deleting a card navigates to
+  /// the deck by name (BR-163: the last card leaves the deck `unset`, which has
+  /// no card list to pop back to), so a harness without a router would make the
+  /// delete path throw where production works. The stand-in deck screen is a
+  /// marker widget — where the app *goes* is this file's business; what the
+  /// deck then renders is `test/app/router/`'s.
+  Future<GoRouter> pump(
     WidgetTester tester,
     FakeCardRepository repository, {
     String cardId = 'card-1',
   }) async {
+    final router = GoRouter(
+      initialLocation: '/decks/deck-1/editor',
+      routes: <RouteBase>[
+        GoRoute(
+          path: '/decks/:deckId',
+          name: RouteNames.deckDetail,
+          builder: (context, state) =>
+              const Scaffold(body: Text('deck detail')),
+          // Nested, as in production: the editor sits under the deck, so a
+          // save can pop back to something and a delete can navigate to it.
+          routes: <RouteBase>[
+            GoRoute(
+              path: 'editor',
+              builder: (context, state) =>
+                  CardEditorScreen(deckId: 'deck-1', cardId: cardId),
+            ),
+          ],
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+
     await tester.pumpWidget(
       ProviderScope(
         overrides: [cardRepositoryProvider.overrideWithValue(repository)],
-        child: MaterialApp(
+        child: MaterialApp.router(
           theme: buildLightTheme(),
           localizationsDelegates: const <LocalizationsDelegate<Object>>[
             AppLocalizations.delegate,
@@ -30,12 +62,14 @@ void main() {
             GlobalCupertinoLocalizations.delegate,
           ],
           supportedLocales: AppLocalizations.supportedLocales,
-          home: CardEditorScreen(deckId: 'deck-1', cardId: cardId),
+          routerConfig: router,
         ),
       ),
     );
     // Let the prefill future resolve.
     await tester.pumpAndSettle();
+
+    return router;
   }
 
   testWidgets('edit mode prefills the loaded card and titles itself Edit', (
@@ -270,5 +304,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(repository.deletes.single, 'card-1');
+    // And it leaves through the deck, not by popping to a card list that an
+    // `unset` deck no longer has (BR-163). Which screen the deck then shows —
+    // list or deck detail — is the router's redirect to decide.
+    expect(find.text('deck detail'), findsOneWidget);
   });
 }

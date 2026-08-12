@@ -21,17 +21,6 @@ enum DeckConflictReason {
   /// Creating a sub-deck under a deck already at level 10 (BR-55).
   parentAtMaxDepth,
 
-  /// Resetting the content type of a root deck. A root always holds decks, and
-  /// that is invariant (BR-58).
-  rootContentTypeFixed,
-
-  /// Resetting a deck that still holds cards (BR-68). Emptying it first is the
-  /// user's move, and it is deliberately not done for them.
-  deckStillHasCards,
-
-  /// Resetting a deck that still holds sub-decks (BR-68).
-  deckStillHasSubDecks,
-
   /// Resetting learning progress on something that is not a root. The
   /// scheduler and the generation belong to the root (BR-05), so a reset one
   /// level down would either do nothing or quietly reset a sibling's tree.

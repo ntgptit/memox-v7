@@ -57,6 +57,35 @@ extension _AppDatabaseMigrations on AppDatabase {
     }
   }
 
+  /// The v5 → v6 upgrade: data only, no DDL (BR-163).
+  ///
+  /// Every non-root deck still carrying a content type while holding neither a
+  /// direct card nor a direct child deck goes back to `'unset'`. That set is
+  /// exactly invariant 29, so this statement is the invariant's own predicate
+  /// used as an `UPDATE`.
+  ///
+  /// **Root decks are left alone** — a root is `'deck'` forever (BR-58) and an
+  /// empty root is an ordinary state, not a violation.
+  ///
+  /// **`updated_at` is deliberately not touched.** A migration is not a user
+  /// edit; stamping it would reshuffle every affected deck to the top of the
+  /// Recent sort on first launch after the upgrade, which reads as data the
+  /// user does not remember changing.
+  ///
+  /// Nothing is deleted: cards, study states, history and sessions are
+  /// untouched by construction — this statement writes one column of `decks`.
+  Future<void> _upgradeToV6() async {
+    await customStatement(
+      "UPDATE decks SET content_type = 'unset' "
+      'WHERE parent_deck_id IS NOT NULL '
+      "  AND content_type IN ('card', 'deck') "
+      '  AND NOT EXISTS (SELECT 1 FROM cards c WHERE c.deck_id = decks.id) '
+      '  AND NOT EXISTS ('
+      '    SELECT 1 FROM decks child WHERE child.parent_deck_id = decks.id'
+      '  )',
+    );
+  }
+
   /// The v4 → v5 upgrade.
   ///
   /// Two of these steps CANNOT be an `ALTER TABLE`: SQLite has no way to change

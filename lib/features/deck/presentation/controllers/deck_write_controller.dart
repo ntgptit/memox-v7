@@ -160,34 +160,6 @@ class DeleteDeckController extends _$DeleteDeckController {
   void reset() => state = const DeckSubmitState();
 }
 
-/// Puts an empty sub-deck's content type back to `unset` (UC-03 A3, BR-68).
-///
-/// The screen only offers this when it believes the deck is empty, but the
-/// repository is the boundary that decides: the tree can change between the
-/// dialog opening and the confirm landing, and a `ConflictFailure` then arrives
-/// here and is rendered as a conflict message rather than a crash.
-@riverpod
-class ResetContentTypeController extends _$ResetContentTypeController {
-  @override
-  DeckSubmitState build(String deckId) => const DeckSubmitState();
-
-  Future<void> submit() async {
-    if (!state.canSubmit) return;
-
-    state = const DeckSubmitState(isSubmitting: true);
-    try {
-      await ref.read(resetDeckContentTypeUseCaseProvider)(deckId);
-      if (!ref.mounted) return;
-      state = const DeckSubmitState(outcome: SubmitOutcome.savedAndClose);
-    } on Failure catch (failure) {
-      if (!ref.mounted) return;
-      state = DeckSubmitState(failure: failure);
-    }
-  }
-
-  void reset() => state = const DeckSubmitState();
-}
-
 /// Resets a root deck's learning progress, onto a scheduler the user picks
 /// (UC-07).
 ///
