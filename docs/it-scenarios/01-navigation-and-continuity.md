@@ -165,3 +165,18 @@
 Phần host của kịch bản này chạy ở `test/integration/widgets/navigation_widget_test.dart`
 (đếm số dòng của mọi bảng trước và sau khi thăm hai placeholder) và
 `test/app/router/app_router_test.dart` (deep link, thứ tự tab, giữ ngăn xếp).
+
+## IT-NAV-012 — Import wizard là full-screen task phía trên shell
+
+- **Ưu tiên:** P0
+- **Tiền điều kiện:** Một deck loại card có card, và một sub-deck `unset` cùng cây.
+- **Liên kết:** UC-10, AD-20, M4.12 W5/W6.
+
+| Bước | Thao tác người dùng | Kết quả mong đợi |
+|---|---|---|
+| 1 | Mở Import từ overflow của Card List | Wizard che toàn màn; **không** còn bottom navigation bar; URL là `/decks/<id>/cards/import` |
+| 2 | Bấm Close khi chưa có draft | Quay về đúng Card List vừa rời; bottom bar trở lại |
+| 3 | Mở Import từ sheet tạo của deck `unset`, rồi Close | Quay về deck detail của chính deck đó — không rơi vào Card List; deck vẫn `unset` và vẫn đủ lựa chọn Create card/Create sub-deck |
+| 4 | Ở bước Preview/Import bấm Android Back | Lùi một bước và giữ state; ở bước Source thì hành xử như Close |
+| 5 | Bấm Import N cards rồi thử Close/Back ngay khi đang ghi | Mọi navigation trơ cho tới khi transaction kết thúc; xong thì hoạt động lại |
+| 6 | Deep link thẳng vào URL import rồi Close | Không crash; rơi về route canonical của deck (card list với deck loại card) |

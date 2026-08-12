@@ -4,7 +4,7 @@
 |---|---|
 | **Status** | đang áp dụng |
 | **Purpose** | Nói rõ kịch bản nào đã có test host chứng minh, kịch bản nào chưa, để bước 5–7 chỉ viết cái còn thiếu |
-| **Scope** | 140 kịch bản của `scenario-catalog.md`. Ngoài phạm vi: đánh giá chất lượng của test đã có |
+| **Scope** | 141 kịch bản của `scenario-catalog.md`. Ngoài phạm vi: đánh giá chất lượng của test đã có |
 | **Source of truth for** | Danh sách việc còn phải viết ở `HOST-FLOW`/`HOST-WIDGET` |
 | **Depends on** | `scenario-catalog.md`, `12-testing-pyramid-audit.md` |
 | **Updated by task** | M99.18 — bốn kịch bản bulk management, mỗi cái nối tới test host đã viết |
@@ -25,7 +25,7 @@ bản muốn. Vì vậy cột trạng thái đọc là:
 
 | Trạng thái | Số kịch bản |
 |---|---|
-| đã có | **140** |
+| đã có | **141** |
 | một phần | **0** |
 | chưa có | **0** |
 
@@ -47,6 +47,7 @@ bản muốn. Vì vậy cột trạng thái đọc là:
 | IT-ORG-014 | `HOST-WIDGET + HOST-FLOW` | UC-04 A6, UC-04 E6, BR-166 | `test/features/card/presentation/card_selection_test.dart` (xác nhận) + `test/features/card/data/card_bulk_mutation_test.dart` (all-or-nothing) |
 | IT-CARD-014 | `HOST-WIDGET + HOST-FLOW` | UC-10, BR-169, BR-171, BR-172 | `test/features/card/presentation/card_import_wizard_test.dart` (wizard) + `test/features/card/data/card_import_repository_test.dart` (state/tag/content type) |
 | IT-CARD-015 | `HOST-FLOW` | UC-10 E4, UC-10 E5, BR-168, BR-170, BR-171 | `test/features/card/data/card_import_repository_test.dart` (recheck + fault-injection rollback) |
+| IT-NAV-012 | `HOST-WIDGET` | UC-10, AD-20 | `test/app/router/card_import_route_test.dart` (shell/close/deep-link) + `test/features/card/presentation/card_import_commit_flow_test.dart` (khoá khi commit) |
 | IT-MODE-013 | `HOST-WIDGET` | `test/integration/widgets/study_mode_accessibility_widget_test.dart` (bước 2) + `test/features/study/presentation/study_accessibility_test.dart` (bước 1, 4) |
 | IT-STUDY-006 | `HOST-WIDGET + HOST-FLOW` | `test/integration/widgets/blocked_mode_widget_test.dart` (BR-100) |
 
