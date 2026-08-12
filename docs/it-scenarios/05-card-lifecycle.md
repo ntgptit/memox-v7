@@ -6,7 +6,7 @@
 | **Purpose** | Kiểm tra người dùng tạo, thêm liên tiếp, sửa, xoá và giữ nội dung card đúng nghiệp vụ |
 | **Scope** | Card list, create/edit form, required/optional fields, discard, persistence, delete và dữ liệu học không bị ảnh hưởng khi sửa |
 | **Source of truth for** | Scenario IT về vòng đời card hiện có |
-| **Depends on** | `README.md`, `../business-rules.md` (BR-07…10, BR-67, BR-92, BR-95), `../use-cases.md` (UC-04) |
+| **Depends on** | `README.md`, `../business-rules.md` (BR-07…10, BR-92, BR-95, BR-163), `../use-cases.md` (UC-04) |
 | **Updated by task** | Yêu cầu viết IT scenario ngày 2026-08-05 |
 | **Last updated** | 2026-08-05 |
 
@@ -134,13 +134,15 @@
 | 3 | Mở lại và chọn Xoá, sau đó xác nhận | Quay về danh sách; card biến mất |
 | 4 | Restart app | Card không xuất hiện lại |
 
-## IT-CARD-011 — Xoá card cuối không biến deck thành deck chứa sub-deck
+## IT-CARD-011 — Xoá card cuối đưa deck về chưa định loại
 
 - **Ưu tiên:** P0
 - **Tiền điều kiện:** Một deck loại card chỉ còn đúng một card.
+- **Liên kết:** UC-04 A2, BR-163. *(Hành vi cũ "loại không tự reset" theo BR-67
+  đã bị supersede ở M99.15.)*
 
 | Bước | Thao tác người dùng | Kết quả mong đợi |
 |---|---|---|
-| 1 | Xoá card cuối và xác nhận | Danh sách chuyển thành empty state thêm card |
-| 2 | Chạm hành động tạo | Chỉ mở editor card, không cho tạo sub-deck trực tiếp |
-| 3 | Quay về rồi mở lại deck | Vẫn vào card list rỗng; loại nội dung không tự reset |
+| 1 | Xoá card cuối và xác nhận | Điều hướng về màn hình deck; card, study state và history của nó biến mất cùng nhau |
+| 2 | Chạm hành động tạo | Có cả Tạo card và Tạo deck |
+| 3 | Xoá một card khi deck vẫn còn card khác | Ở lại card list; loại vẫn là card |

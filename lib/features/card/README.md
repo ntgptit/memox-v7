@@ -102,7 +102,7 @@ time: BR-89…BR-91. Creation with its review state in one transaction: BR-09.
 Editing never touching the schedule: BR-10.
 
 `content_type` interactions — a card being the first child of an `unset` deck —
-are BR-60…BR-68 and belong to Deck; Card participates in that transaction but
+are BR-60…BR-66 and BR-163, and they belong to Deck; Card participates in that transaction but
 does not state the rule.
 
 **UC-04 is out of date against this feature** and is recorded as such in

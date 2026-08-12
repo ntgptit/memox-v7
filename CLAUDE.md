@@ -60,8 +60,10 @@ and they are the ones most likely to be violated by accident:
   of thing.** Creating or moving a deck past level 10 is refused before
   anything is written (BR-55). A root deck holds only sub-decks — never cards.
   A new sub-deck starts `content_type = unset`; the first child created sets it
-  to `card` or `deck`, and from then on it holds only that. Emptying a deck
-  does not reset the type; that is a separate confirmed action. Resolve the
+  to `card` or `deck`, and from then on it holds only that. **Emptying a
+  sub-deck puts it back to `unset`** — the system maintains the type in the
+  same transaction as the delete or move that removed the last direct child
+  (BR-163); there is no manual reset. A root deck stays `deck` forever. Resolve the
   root via `root_deck_id` — **never** `COALESCE(parent_deck_id, id)`, which
   silently returns the wrong deck from the third level down.
 - **Scheduler belongs to the root deck and is locked after the first review.**

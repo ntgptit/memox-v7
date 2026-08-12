@@ -6,7 +6,6 @@ import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_sheet.dart';
 import '../../../../../shared/widgets/mx_form_sheet.dart';
 import '../../../domain/failures/deck_validation_failure.dart';
-import '../../../domain/models/deck_content_type_model.dart';
 import '../../../domain/entities/deck_entity.dart';
 import 'deck_confirm_widget.dart';
 import 'deck_reset_progress_widget.dart';
@@ -23,15 +22,16 @@ import 'move_deck_sheet_widget.dart';
 /// you reached the deck from.
 ///
 /// Every action's *availability* is decided here from the deck's own state
-/// (BR-58, BR-59, BR-66, BR-68); every action's *legality* is decided by the
-/// repository. Reset, for example, is offered when this screen can see no child
-/// decks, and refused by the repository if the deck still holds cards — which is
-/// the only correct division, because this screen does not read the card
-/// feature.
+/// (BR-58, BR-59, BR-66); every action's *legality* is decided by the
+/// repository.
+///
+/// **There is no content-type action any more (BR-163).** It used to offer
+/// "allow both kinds again" on an empty typed deck; the type is now system
+/// state that the delete and move transactions maintain themselves, so the
+/// sheet has one fewer thing to explain.
 Future<void> showDeckActions(
   BuildContext context, {
   required DeckEntity deck,
-  required bool mayOfferReset,
   required VoidCallback onDeleted,
 
   /// Whether Reset learning progress is offered, and whether it has anything to
@@ -63,12 +63,6 @@ Future<void> showDeckActions(
             icon: Icons.drive_file_move_outlined,
             onPressed: () => Navigator.of(sheetContext).pop(_DeckAction.move),
           ),
-        if (mayOfferReset && deck.contentType != DeckContentType.unset)
-          MxActionSheetAction(
-            label: sheetContext.l10n.deckResetContentTypeAction,
-            icon: Icons.restart_alt,
-            onPressed: () => Navigator.of(sheetContext).pop(_DeckAction.reset),
-          ),
         // A root deck only: the scheduler and the generation belong to the root
         // (BR-05), so there is no such operation one level down (UC-07 A4).
         if (deck.isRoot && hasLearnedCards != null)
@@ -95,8 +89,6 @@ Future<void> showDeckActions(
       await showDeckRenameForm(context, deck: deck);
     case _DeckAction.move:
       await showDeckMoveSheet(context, deckId: deck.id);
-    case _DeckAction.reset:
-      await showDeckResetContentTypeConfirm(context, deck: deck);
     case _DeckAction.resetProgress:
       await showDeckResetProgressConfirm(
         context,
@@ -108,10 +100,10 @@ Future<void> showDeckActions(
   }
 }
 
-/// `reset` is the content-type reset (BR-68); `resetProgress` is UC-07. Two
-/// different operations that both read as "reset" in English, which is why the
-/// enum spells them apart rather than the copy alone.
-enum _DeckAction { rename, move, reset, resetProgress, delete }
+/// `resetProgress` is UC-07 — Reset learning progress, a scheduler operation.
+/// It kept its long name after the content-type reset was removed (BR-163),
+/// because "reset" alone was never enough to tell the two apart.
+enum _DeckAction { rename, move, resetProgress, delete }
 
 /// The rename form (UC-03).
 Future<void> showDeckRenameForm(

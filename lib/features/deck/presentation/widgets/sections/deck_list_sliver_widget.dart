@@ -94,7 +94,6 @@ class DeckListSliverWidget extends StatelessWidget {
               // Whether a deck may be reset is a question about its own
               // children, answered on its own level where they are known.
               // Offering it from the level above would mean guessing.
-              mayOfferReset: false,
               // The one place that knows the learned total, so the one place
               // Reset learning progress is offered from (UC-07).
               hasLearnedCards: summary.learnedCardCount > 0,

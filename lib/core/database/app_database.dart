@@ -31,7 +31,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.open() : super(openAppDatabaseConnection());
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -122,6 +122,20 @@ class AppDatabase extends _$AppDatabase {
       // nobody ever really tested.
       if (from < 5) {
         await _upgradeToV5();
+      }
+
+      // v5 -> v6 (M99.15): no schema change at all — a data-only normalise.
+      //
+      // BR-67 used to allow a sub-deck to keep `content_type = 'card'` or
+      // `'deck'` after its last child was deleted; BR-163 makes that state
+      // invalid (invariant 29) and the write paths now prevent it. Existing
+      // databases were written under the old rule, so the rows that are legal
+      // v5 and illegal v6 have to be fixed here — future writes alone would
+      // leave a user's tree permanently failing an invariant nobody could see.
+      //
+      // Last, so it runs on top of whatever the v1…v5 steps just produced.
+      if (from < 6) {
+        await _upgradeToV6();
       }
     },
 

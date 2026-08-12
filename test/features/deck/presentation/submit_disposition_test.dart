@@ -77,7 +77,7 @@ void main() {
     );
 
     test('the four non-repeating operations always close', () async {
-      // Rename, delete, reset and move have nothing to add another of, so they
+      // Rename, delete and move have nothing to add another of, so they
       // take no disposition at all — the type makes the wrong call impossible
       // rather than merely unlikely.
       final repository = FakeDeckRepository();
@@ -90,16 +90,12 @@ void main() {
           .read(deleteDeckControllerProvider('deck-2').notifier)
           .submit();
       await container
-          .read(resetContentTypeControllerProvider('deck-3').notifier)
-          .submit();
-      await container
           .read(moveDeckControllerProvider('deck-4').notifier)
           .submit(targetParentDeckId: 'target');
 
       for (final state in <DeckSubmitState>[
         container.read(renameDeckControllerProvider('deck-1')),
         container.read(deleteDeckControllerProvider('deck-2')),
-        container.read(resetContentTypeControllerProvider('deck-3')),
         container.read(moveDeckControllerProvider('deck-4')),
       ]) {
         expect(state.outcome, SubmitOutcome.savedAndClose);

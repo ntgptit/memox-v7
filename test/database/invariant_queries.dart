@@ -1,4 +1,4 @@
-/// The 15 invariant queries, copied verbatim from `data-model.md`.
+/// The 16 invariant queries, copied verbatim from `data-model.md`.
 ///
 /// Frozen source. Nothing here may be reworded to make a test pass — the
 /// document is the specification, and a query edited to suit a fixture stops
@@ -22,6 +22,14 @@ const Map<String, String> invariantQueries = <String, String>{
       "SELECT d.id FROM decks d WHERE d.content_type = 'unset' "
       'AND (EXISTS (SELECT 1 FROM cards c WHERE c.deck_id = d.id) '
       'OR EXISTS (SELECT 1 FROM decks s WHERE s.parent_deck_id = d.id))',
+
+  'Q29': // A sub-deck kept its type after everything left it (BR-163)
+      'SELECT d.id FROM decks d '
+      'WHERE d.parent_deck_id IS NOT NULL '
+      "AND d.content_type IN ('card', 'deck') "
+      'AND NOT EXISTS (SELECT 1 FROM cards c WHERE c.deck_id = d.id) '
+      'AND NOT EXISTS '
+      '(SELECT 1 FROM decks child WHERE child.parent_deck_id = d.id)',
 
   'Q3': // content_type = 'card' but has sub-decks (BR-63)
       "SELECT d.id FROM decks d WHERE d.content_type = 'card' "

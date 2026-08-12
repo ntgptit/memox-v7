@@ -104,7 +104,7 @@ chỉ đổi execution profile (§11).
 | IT-CARD-008 | IT-CARD-008 / IT-CARD-008F | ``HOST-WIDGET` + `HOST-FLOW`` | `HOST-WIDGET` + `HOST-FLOW` | split | Editing keeps list position (UI) and the edited row persists (SQL). |
 | IT-CARD-009 | same | ``HOST-FLOW`` | `HOST-FLOW` | reclassify | Editing content MUST NOT touch card_review_states — the single most important cross-table invariant here, and only the DB can show it. |
 | IT-CARD-010 | IT-CARD-010 / IT-CARD-010F | ``HOST-WIDGET` + `HOST-FLOW`` | `HOST-WIDGET` + `HOST-FLOW` | split | Confirm dialog vs the delete actually landing. |
-| IT-CARD-011 | same | ``HOST-FLOW`` | `HOST-FLOW` | reclassify | Deleting the last card must not flip content_type (BR-67). |
+| IT-CARD-011 | same | ``HOST-FLOW`` | `HOST-FLOW` | reclassify | Deleting the last card puts the deck back to `unset` in one transaction (BR-163). |
 | IT-CONT-001 | IT-CONT-001 / IT-PLAT-003 | ``HOST-FLOW`` | `HOST-FLOW` + `DEVICE-E2E` | split | Resuming at the stored cursor (BR-79/102/103) is a DB read; being killed by the OS is the platform boundary. |
 | IT-CONT-002 | same | ``HOST-FLOW`` | `HOST-FLOW` | reclassify | Starting a new session abandons the same-day one (BR-82/103) — a status transition. |
 | IT-CONT-003 | same | ``HOST-FLOW`` | `HOST-FLOW` | reclassify | A session from a previous study day is closed as interrupted (BR-80/86/103) — needs an injected clock, not a device. |
@@ -212,8 +212,8 @@ chỉ đổi execution profile (§11).
 | IT-TREE-003 | IT-TREE-003 / IT-TREE-003F | ``HOST-WIDGET` + `HOST-FLOW`` | `HOST-WIDGET` + `HOST-FLOW` | split | First-child locking is a transaction rule (BR-62/63); the UI only stops offering the other kind. |
 | IT-TREE-004 | IT-TREE-004 / IT-TREE-004F | ``HOST-WIDGET` + `HOST-FLOW`` | `HOST-WIDGET` + `HOST-FLOW` | split | Same rule, the other branch. |
 | IT-TREE-005 | same | ``HOST-FLOW`` | `HOST-FLOW` | reclassify | A refused write must leave content_type unset — provable only against the DB. |
-| IT-TREE-006 | same | ``HOST-FLOW`` | `HOST-FLOW` | reclassify | Emptying a deck does not reset its type; pure persistence (BR-67). |
-| IT-TREE-007 | IT-TREE-007 / IT-TREE-007F | ``HOST-WIDGET` + `HOST-FLOW`` | `HOST-WIDGET` + `HOST-FLOW` | split | Confirmed reset is a dialog; the reset itself is a transaction (BR-68). |
+| IT-TREE-006 | same | ``HOST-FLOW`` | `HOST-FLOW` | reclassify | Emptying a sub-deck resets its type in the same transaction; pure persistence (BR-163). |
+| IT-TREE-007 | same | ``HOST-WIDGET` + `HOST-FLOW`` | `HOST-FLOW` | reclassify | Manual reset is gone (BR-163); the ID now covers the move transition, which is pure persistence. |
 | IT-TREE-008 | same | ``HOST-FLOW`` | `HOST-FLOW` | reclassify | Refusal to reset a non-empty deck is a repository guard. |
 | IT-TREE-009 | IT-TREE-009 / IT-TREE-009F | ``HOST-WIDGET` + `HOST-FLOW`` | `HOST-WIDGET` + `HOST-FLOW` | split | Move UI vs the subtree rewrite (root_deck_id, depth) in one transaction. |
 | IT-TREE-010 | same | ``HOST-FLOW`` | `HOST-FLOW` | reclassify | Cycle refusal (BR-69/70) is checked inside the write. |

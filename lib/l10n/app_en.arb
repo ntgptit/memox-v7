@@ -524,22 +524,6 @@
   "@deckDeleteConfirmAction": {
     "description": "Destructive confirm button of the delete-deck dialog."
   },
-  "deckResetContentTypeAction": "Allow cards or decks again",
-  "@deckResetContentTypeAction": {
-    "description": "Action that puts an empty sub-deck's content type back to unset (BR-68). Worded as what it enables, because 'reset content type' is implementation language."
-  },
-  "deckResetContentTypeTitle": "Allow both kinds again?",
-  "@deckResetContentTypeTitle": {
-    "description": "Title of the reset-content-type confirmation."
-  },
-  "deckResetContentTypeMessage": "This deck will accept either a card or a sub-deck next, and the first one you add decides again.",
-  "@deckResetContentTypeMessage": {
-    "description": "Body of the reset-content-type confirmation, explaining what changes (BR-68, BR-62)."
-  },
-  "deckResetContentTypeConfirmAction": "Allow both",
-  "@deckResetContentTypeConfirmAction": {
-    "description": "Confirm button of the reset-content-type dialog."
-  },
   "deckMoveAction": "Move",
   "@deckMoveAction": {
     "description": "Action that opens the move picker for a deck (UC-09)."
@@ -651,18 +635,6 @@
         "type": "int"
       }
     },
-    "description": "Why a deck write was refused (UC-09, BR-55, BR-58, BR-68)."
-  },
-  "deckConflictRootContentTypeFixed": "A top-level deck always holds decks.",
-  "@deckConflictRootContentTypeFixed": {
-    "description": "Why a deck write was refused (UC-09, BR-55, BR-58, BR-68)."
-  },
-  "deckConflictStillHasCards": "The deck still has cards. Remove them first.",
-  "@deckConflictStillHasCards": {
-    "description": "Why a deck write was refused (UC-09, BR-55, BR-58, BR-68)."
-  },
-  "deckConflictStillHasSubDecks": "The deck still has decks inside it. Remove them first.",
-  "@deckConflictStillHasSubDecks": {
     "description": "Why a deck write was refused (UC-09, BR-55, BR-58, BR-68)."
   },
   "deckConflictUnknownContentType": "This deck was made by a newer version of the app.",

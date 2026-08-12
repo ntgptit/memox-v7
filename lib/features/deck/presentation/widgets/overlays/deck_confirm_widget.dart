@@ -35,17 +35,6 @@ Future<void> showDeckDeleteConfirm(
   ),
 );
 
-Future<void> showDeckResetContentTypeConfirm(
-  BuildContext context, {
-  required DeckEntity deck,
-}) => showDialog<void>(
-  context: context,
-  builder: (dialogContext) => _ResetContentTypeDialog(
-    deckId: deck.id,
-    onClose: () => Navigator.of(dialogContext).pop(),
-  ),
-);
-
 /// Reads the deletion impact, then asks (BR-04).
 ///
 /// The read happens inside the dialog so the numbers are as fresh as the moment
@@ -107,46 +96,6 @@ class _DeleteDeckDialogState extends ConsumerState<_DeleteDeckDialog> {
           isSubmitting: submit.isSubmitting || impact == null,
           onConfirm: () => ref.read(provider.notifier).submit(),
           onCancel: widget.onClose,
-        );
-      },
-    );
-  }
-}
-
-/// Confirms putting an empty sub-deck back to `unset` (BR-68).
-///
-/// A plain widget wrapping a `Consumer`: the dialog's chrome does not depend on
-/// the provider, only its message and its buttons do, and scoping the watch says
-/// so. It also keeps the two-argument `build` signature — which the project guard
-/// misreads as a Riverpod 2 generated ref type — out of this file.
-class _ResetContentTypeDialog extends StatelessWidget {
-  const _ResetContentTypeDialog({required this.deckId, required this.onClose});
-
-  final String deckId;
-  final VoidCallback onClose;
-
-  @override
-  Widget build(BuildContext context) {
-    final provider = resetContentTypeControllerProvider(deckId);
-
-    return Consumer(
-      builder: (context, ref, child) {
-        final submit = ref.watch(provider);
-
-        ref.listen<DeckSubmitState>(provider, (previous, next) {
-          if (next.shouldClose && !(previous?.shouldClose ?? false)) onClose();
-        });
-
-        return MxConfirmDialog(
-          title: context.l10n.deckResetContentTypeTitle,
-          message: submit.failure != null
-              ? context.deckWriteFailure(submit.failure!)
-              : context.l10n.deckResetContentTypeMessage,
-          confirmLabel: context.l10n.deckResetContentTypeConfirmAction,
-          cancelLabel: context.l10n.commonCancelAction,
-          isSubmitting: submit.isSubmitting,
-          onConfirm: () => ref.read(provider.notifier).submit(),
-          onCancel: onClose,
         );
       },
     );

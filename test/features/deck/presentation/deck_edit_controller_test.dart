@@ -142,39 +142,6 @@ void main() {
     });
   });
 
-  group('reset content type (UC-03 A3, BR-68)', () {
-    test('resets and reports done', () async {
-      final repository = FakeDeckRepository();
-      final container = containerWith(repository);
-
-      await container
-          .read(resetContentTypeControllerProvider('deck-1').notifier)
-          .submit();
-
-      expect(repository.resets, <String>['deck-1']);
-    });
-
-    test('a non-empty deck is refused by the repository, not by the UI', () async {
-      // The tree can change between the dialog opening and the confirm landing,
-      // so the repository is the boundary that decides. A conflict arriving here
-      // is the system working, not a crash.
-      final container = containerWith(
-        FakeDeckRepository(
-          writeFailure: const ConflictFailure(message: 'still has cards'),
-        ),
-      );
-
-      await container
-          .read(resetContentTypeControllerProvider('deck-1').notifier)
-          .submit();
-
-      expect(
-        container.read(resetContentTypeControllerProvider('deck-1')).failure,
-        isA<ConflictFailure>(),
-      );
-    });
-  });
-
   group('move (UC-09)', () {
     test('submits the chosen target', () async {
       final repository = FakeDeckRepository();

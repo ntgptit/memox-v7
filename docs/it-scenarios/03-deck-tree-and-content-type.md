@@ -74,41 +74,51 @@
 | 3 | Chọn tạo Deck, để tên trống và gửi | Hiện lỗi inline; không tạo deck |
 | 4 | Đóng form và mở lại hành động Tạo | Vẫn có đủ hai lựa chọn |
 
-## IT-TREE-006 — Xoá child cuối không tự đổi loại deck
+## IT-TREE-006 — Xoá child cuối đưa sub-deck về chưa định loại
 
 - **Ưu tiên:** P0
-- **Tiền điều kiện:** Deck `Grammar` loại deck chỉ có một child `Tenses`.
+- **Tiền điều kiện:** Deck con `Grammar` loại deck chỉ có một child `Tenses`.
+- **Liên kết:** UC-08 A3, BR-163. *(Hành vi cũ "loại giữ nguyên" theo BR-67 đã bị
+  supersede ở M99.15.)*
 
 | Bước | Thao tác người dùng | Kết quả mong đợi |
 |---|---|---|
-| 1 | Xoá `Tenses` và xác nhận | `Grammar` trở thành empty state |
-| 2 | Chạm Tạo | Chỉ được tạo deck; app không tự cho tạo card |
+| 1 | Xoá `Tenses` và xác nhận | `Grammar` trở thành empty state và `content_type` về `unset` trong cùng transaction |
+| 2 | Chạm Tạo | Có cả Tạo card và Tạo deck — deck đã mở khoá loại |
+| 3 | Lặp lại với một root rỗng | Root vẫn chỉ cho tạo deck: root bất biến `deck` (BR-58) |
 
-## IT-TREE-007 — Reset loại nội dung của deck rỗng
+## IT-TREE-007 — Di chuyển child cuối đi cũng mở khoá loại của deck nguồn
 
-> **Tách thành** — `IT-TREE-007` (`HOST-WIDGET`) · `IT-TREE-007F` (`HOST-FLOW`). Lý do và ranh giới ở
-> [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md) mục C.
+> **Kịch bản đổi nội dung ở M99.15.** ID giữ nguyên; hành vi cũ là reset thủ
+> công theo BR-68 và đã bị BR-163 thay thế. Di chuyển là con đường thứ hai làm
+> deck mất phần tử con cuối, nên nó thế chỗ ở đây.
 
 - **Ưu tiên:** P0
-- **Tiền điều kiện:** Deck con `Grammar` đang rỗng nhưng loại hiện tại là deck.
+- **Tiền điều kiện:** `D-BRANCH` chỉ có `D-LEAF`; tồn tại một deck đích khác đang chưa định loại.
+- **Liên kết:** UC-09, BR-163.
 
 | Bước | Thao tác người dùng | Kết quả mong đợi |
 |---|---|---|
-| 1 | Mở menu của chính `Grammar` | Có hành động đặt lại loại nội dung |
-| 2 | Chọn đặt lại | Hiện hộp xác nhận; chưa thay đổi gì trước khi xác nhận |
-| 3 | Huỷ | Deck vẫn chỉ cho tạo deck |
-| 4 | Thực hiện lại và xác nhận | Deck trở về trạng thái chưa định loại |
-| 5 | Chạm Tạo | Có cả Tạo card và Tạo deck |
+| 1 | Di chuyển `D-LEAF` sang deck đích | `D-LEAF` xuất hiện ở đích cùng toàn bộ card |
+| 2 | Mở deck đích | Đích đã thành loại deck: chỉ cho tạo deck con |
+| 3 | Mở `D-BRANCH` | Đã trở về chưa định loại: có cả Tạo card và Tạo deck |
+| 4 | Lặp lại khi `D-BRANCH` còn một child khác | `D-BRANCH` giữ nguyên loại deck |
 
-## IT-TREE-008 — Deck còn nội dung không cho reset loại
+## IT-TREE-008 — Deck còn nội dung giữ nguyên loại
+
+> **Kịch bản đổi nội dung ở M99.15**, cùng lý do IT-TREE-007: không còn hành
+> động reset để chặn, nhưng ràng buộc "còn nội dung thì giữ loại" vẫn phải đúng
+> và nay là hệ quả của BR-163 chứ không phải của một nút bị ẩn.
 
 - **Ưu tiên:** P0
-- **Tiền điều kiện:** `D-BRANCH` đang chứa `D-LEAF`.
+- **Tiền điều kiện:** `D-BRANCH` đang chứa `D-LEAF` và một deck con thứ hai.
+- **Liên kết:** UC-08 A3, BR-163, invariant Q29.
 
 | Bước | Thao tác người dùng | Kết quả mong đợi |
 |---|---|---|
-| 1 | Mở menu của `D-BRANCH` | Không có hành động reset loại nội dung khi deck chưa rỗng |
-| 2 | Xoá hết child, mở lại menu | Hành động reset mới xuất hiện |
+| 1 | Xoá `D-LEAF`, xác nhận | `D-BRANCH` vẫn là loại deck; nút Tạo vẫn chỉ cho tạo deck con |
+| 2 | Xoá nốt deck con còn lại | Lúc này `D-BRANCH` mới trở về chưa định loại |
+| 3 | Chạm Tạo | Có cả Tạo card và Tạo deck |
 
 ## IT-TREE-009 — Di chuyển sub-deck tới đích hợp lệ trong cùng cây
 
@@ -168,16 +178,16 @@
 | 2 | Tạo card trong deck cấp 10 đang chưa định loại | Card vẫn có thể được tạo vì không làm cây sâu thêm |
 | 3 | Với một subtree có chiều cao làm đích vượt cấp 10, thử move subtree vào đích sâu | Đích bị từ chối; subtree vẫn ở vị trí cũ |
 
-## IT-TREE-014 — Reset deck loại card sau khi đã xoá card cuối
+## IT-TREE-014 — Xoá card cuối mở khoá lại loại nội dung của deck
 
 - **Ưu tiên:** P0
-- **Tiền điều kiện:** Một deck con đã được xác lập là loại card và hiện rỗng sau khi xoá card cuối.
-- **Liên kết:** UC-03 A3, BR-67, BR-68.
-- **Agent note:** Catalog đánh dấu `KNOWN-GAP`; kết quả phù hợp hiện tại là `KNOWN-GAP-CONFIRMED` cho tới khi có lối quản lý deck từ card list rỗng.
+- **Tiền điều kiện:** Một deck con loại card chỉ còn đúng một card.
+- **Liên kết:** UC-04 A2, BR-163. *(Trước M99.15 kịch bản này mô tả reset thủ
+  công theo BR-67/BR-68 và mang `KNOWN-GAP`; gap đã đóng bằng chuyển đổi tự
+  động.)*
 
 | Bước | Thao tác người dùng | Kết quả mong đợi |
 |---|---|---|
-| 1 | Từ card list rỗng, mở hành động quản lý deck | Có lối vào thao tác đặt lại loại nội dung; người dùng không bị mắc kẹt vĩnh viễn ở loại card |
-| 2 | Chọn đặt lại loại nội dung | Hiện xác nhận và giải thích deck phải đang rỗng |
-| 3 | Xác nhận | Quay về trạng thái deck chưa định loại |
-| 4 | Chạm Tạo | Có cả Tạo card và Tạo deck |
+| 1 | Xoá card cuối và xác nhận | Người dùng về màn hình deck, không mắc kẹt ở card list rỗng |
+| 2 | Quan sát deck | Deck ở trạng thái chưa định loại; không cần thao tác quản trị nào |
+| 3 | Chạm Tạo | Có cả Tạo card và Tạo deck |

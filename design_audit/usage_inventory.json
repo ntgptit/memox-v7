@@ -2881,7 +2881,7 @@
     },
     {
       "file": "lib/features/card/presentation/screens/card_editor_screen.dart",
-      "line": 287,
+      "line": 318,
       "widget_context": "_CardEditorScreenState",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -2892,18 +2892,7 @@
     },
     {
       "file": "lib/features/card/presentation/screens/card_editor_screen.dart",
-      "line": 344,
-      "widget_context": "_CardEditorScreenState",
-      "element_kind": "text",
-      "source_kind": "theme-token",
-      "expression": "Theme.of(context).colorScheme.error",
-      "token": "colorScheme.error",
-      "resolved_value_light": "#C02B3A",
-      "resolved_value_dark": "#F2808F"
-    },
-    {
-      "file": "lib/features/card/presentation/screens/card_editor_screen.dart",
-      "line": 375,
+      "line": 349,
       "widget_context": "_CardEditorScreenState",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -2999,6 +2988,17 @@
       "token": "colorScheme.onSurfaceVariant",
       "resolved_value_light": "#565C72",
       "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/card/presentation/widgets/sections/card_danger_zone_widget.dart",
+      "line": 50,
+      "widget_context": "CardDangerZoneWidget",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "Theme.of(context).colorScheme.error",
+      "token": "colorScheme.error",
+      "resolved_value_light": "#C02B3A",
+      "resolved_value_dark": "#F2808F"
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_details_section_widget.dart",
@@ -3530,7 +3530,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 93,
+      "line": 95,
       "widget_context": "<top-level>",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3541,7 +3541,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 231,
+      "line": 233,
       "widget_context": "_OverdueSummaryMetric",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3552,7 +3552,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 232,
+      "line": 234,
       "widget_context": "_OverdueSummaryMetric",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3563,7 +3563,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 234,
+      "line": 236,
       "widget_context": "_OverdueSummaryMetric",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3574,7 +3574,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 237,
+      "line": 239,
       "widget_context": "_OverdueSummaryMetric",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3585,7 +3585,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 238,
+      "line": 240,
       "widget_context": "_OverdueSummaryMetric",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3596,7 +3596,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 270,
+      "line": 272,
       "widget_context": "_DueTodaySummaryMetric",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3607,7 +3607,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 274,
+      "line": 276,
       "widget_context": "_DueTodaySummaryMetric",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3615,28 +3615,6 @@
       "token": "colorScheme.onSurfaceVariant",
       "resolved_value_light": "#565C72",
       "resolved_value_dark": "#A8A7C4"
-    },
-    {
-      "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 305,
-      "widget_context": "_ScheduledSummaryMetric",
-      "element_kind": "other",
-      "source_kind": "theme-token",
-      "expression": "context.colors.onSurfaceVariant",
-      "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#565C72",
-      "resolved_value_dark": "#A8A7C4"
-    },
-    {
-      "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 306,
-      "widget_context": "_ScheduledSummaryMetric",
-      "element_kind": "other",
-      "source_kind": "theme-token",
-      "expression": "context.semanticColors.surfaceMuted",
-      "token": "semantic.surfaceMuted",
-      "resolved_value_light": "#EAECF1",
-      "resolved_value_dark": "#28254B"
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
@@ -3651,7 +3629,29 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 330,
+      "line": 308,
+      "widget_context": "_ScheduledSummaryMetric",
+      "element_kind": "other",
+      "source_kind": "theme-token",
+      "expression": "context.semanticColors.surfaceMuted",
+      "token": "semantic.surfaceMuted",
+      "resolved_value_light": "#EAECF1",
+      "resolved_value_dark": "#28254B"
+    },
+    {
+      "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
+      "line": 309,
+      "widget_context": "_ScheduledSummaryMetric",
+      "element_kind": "other",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
+      "line": 332,
       "widget_context": "_NewSummaryMetric",
       "element_kind": "other",
       "source_kind": "theme-token",

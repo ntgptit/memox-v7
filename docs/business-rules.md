@@ -49,17 +49,23 @@ Nền tảng của mô hình dữ liệu, nên đặt đầu tiên dù ID cao h�
 | BR-64 | active | `content_type = deck`: deck MUST chỉ chứa deck con; MUST NOT chứa card trực tiếp. | db + invariant Q4 | UC-08, UC-09 |
 | BR-65 | active | Một deck MUST NOT đồng thời chứa card và deck con. | db + invariant Q3, Q4 | AD-10, UC-06 |
 | BR-66 | active | Sau khi `content_type` được xác lập, nút Create MUST chỉ hiển thị hành động tương ứng. | UI | UC-08 |
-| BR-67 | active | Xoá hết nội dung MUST NOT tự động đưa `content_type` về `unset`. | domain | AD-10, UC-04 |
-| BR-68 | active | Đưa `content_type` về `unset` MUST là thao tác riêng, có xác nhận, và chỉ thực hiện được khi deck rỗng. | domain + UI | AD-10, UC-03 |
+| BR-67 | superseded by BR-163 | Xoá hết nội dung MUST NOT tự động đưa `content_type` về `unset`. | domain | AD-10, UC-04 |
+| BR-68 | superseded by BR-163 | Đưa `content_type` về `unset` MUST là thao tác riêng, có xác nhận, và chỉ thực hiện được khi deck rỗng. | domain + UI | AD-10, UC-03 |
+| BR-163 | active | Với mọi sub-deck, `content_type` MUST được hệ thống cập nhật **atomically trong cùng transaction với mutation direct children**: `unset` khi không còn direct child nào, `card` khi chứa direct card, `deck` khi chứa direct child deck. Root deck vẫn bất biến `deck` theo BR-58. Người dùng MUST NOT có thao tác reset `content_type` thủ công. Transaction thất bại MUST rollback cả mutation lẫn thay đổi `content_type`. | repository + invariant Q29 | AD-10, UC-03, UC-04, UC-08, UC-09 |
 | BR-69 | active | Cây deck MUST NOT có cycle. | invariant Q8 | AD-10, UC-09 |
 | BR-70 | active | MUST NOT di chuyển một deck vào chính nó hoặc vào descendant của nó. | domain | UC-09 |
 | BR-71 | active | Di chuyển subtree MUST cập nhật `root_deck_id` cho toàn bộ subtree trong một transaction. | repository | AD-10, UC-09 |
 | BR-72 | active | MUST NOT có descendant trỏ sai root. | invariant Q6 | AD-10, UC-09 |
 
-BR-67 và BR-68 tách nhau là có chủ đích. Tự động quay về `unset` khi deck rỗng
-nghe tiện, nhưng nó khiến `content_type` đổi âm thầm sau một thao tác xoá — người
-dùng xoá card cuối cùng rồi lần sau thấy deck bỗng cho tạo deck con. Bắt đó thành
-thao tác tường minh giữ cho cấu trúc cây chỉ đổi khi ai đó thực sự muốn.
+**BR-67 và BR-68 bị BR-163 thay thế (M99.15).** Lập luận cũ — "quay về `unset`
+tự động khiến cấu trúc đổi âm thầm" — giả định `content_type` là một lựa chọn của
+người dùng. Nó không phải: BR-60 cấm chọn lúc tạo và BR-62 xác lập nó tự động từ
+phần tử con đầu tiên. Nó là **metadata hệ thống tự duy trì** để cưỡng chế "một deck
+chỉ chứa một loại" (BR-65), nên hướng ngược lại cũng phải tự động: create đã
+đổi type atomically, còn delete/move thì không — bất đối xứng đó để lại deck rỗng
+nhưng vẫn `card`/`deck`, một trạng thái người dùng không thoát ra được nếu không
+biết tới một nút reset chôn trong action sheet. Reset thủ công vì thế là thao tác
+quản trị không mua được giá trị nghiệp vụ nào, và BR-163 xóa nó.
 
 BR-57 cấm đúng một biểu thức đã từng xuất hiện trong tài liệu.
 `COALESCE(parent_deck_id, id)` cho ra "cha, hoặc chính nó nếu không có cha", nên

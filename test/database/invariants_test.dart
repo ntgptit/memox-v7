@@ -84,14 +84,20 @@ void main() {
     });
   }
 
-  test('all fifteen invariants are present', () {
-    // The list itself is a claim. Losing one would leave fourteen green tests
-    // and no sign that the fifteenth ever existed.
-    expect(invariantQueries.keys, hasLength(15));
+  test('all sixteen invariants are present', () {
+    // The list itself is a claim. Losing one would leave fifteen green tests
+    // and no sign that the sixteenth ever existed.
+    //
+    // Q29 keeps the number `data-model.md` gave it rather than becoming Q16:
+    // the host set is a subset of the document's numbering, and renumbering to
+    // close the gap would make every citation of an invariant ambiguous about
+    // which document version it meant.
+    expect(invariantQueries.keys, hasLength(16));
     expect(
       invariantQueries.keys,
       containsAll(<String>[for (var i = 1; i <= 15; i++) 'Q$i']),
     );
+    expect(invariantQueries.keys, contains('Q29'));
   });
 
   invariant(
@@ -266,6 +272,32 @@ void main() {
     // Only the node past the limit — levels 3..10 are legal.
     expectOffenders: <String>['d11'],
   );
+
+  invariant(
+    'Q29',
+    'a sub-deck kept its type after everything left it (BR-163)',
+    breakIt: (db) => insertSubDeck(
+      db,
+      id: 'emptied',
+      parentId: 'root',
+      rootDeckId: 'root',
+      // The exact state BR-163 makes impossible and the v6 migration
+      // normalises away: typed, non-root, and holding nothing.
+      contentType: 'card',
+    ),
+    expectOffenders: <String>['emptied'],
+  );
+
+  test('an empty root keeps its type without tripping Q29', () async {
+    // The other side of the rule. Root is `deck` forever (BR-58), so an empty
+    // one is ordinary — an invariant that fired here would make every
+    // freshly-created root a violation.
+    final db = openTestDatabase();
+    await seedValid(db);
+    await insertRootDeck(db, id: 'empty-root');
+
+    expect(await check(db, 'Q29'), isEmpty);
+  });
 
   test('one defect trips only the invariants that genuinely cover it', () async {
     // Guards the pairs above from passing for the wrong reason: if every

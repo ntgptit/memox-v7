@@ -109,7 +109,7 @@ flowchart TD
     G -->|"Hợp lệ"| G5["Đổi parent và root_deck_id toàn subtree trong một transaction · BR-71"]
 
     B -->|"Đưa content_type về unset"| H{"Deck có rỗng không"}
-    H -->|"Không"| H1["Chặn, phải xoá hết nội dung trước · UC-03 E3, BR-68"]
+    H -->|"Không"| H1["Không có nhánh này: content_type do hệ thống tự duy trì · BR-163"]
     H -->|"Rỗng"| H2["Xác nhận rồi đặt unset · UC-03 A3"]
 
     B -->|"Đổi chế độ ôn tập · chỉ root"| I{"first_answered_at"}
@@ -147,12 +147,12 @@ flowchart TD
 
     C -->|"Sửa"| H["Đổi nội dung; study state và history không đổi · UC-04 A1, BR-10"]
     C -->|"Xoá"| I["Xác nhận, xoá kèm study state và history của card đó · UC-04 A2"]
-    I --> I1["content_type giữ nguyên kể cả khi đó là card cuối cùng · BR-67"]
+    I --> I1["Card cuối cùng bị xoá → deck tự về unset trong cùng transaction · BR-163"]
 ```
 
 **`I1` là cạnh dễ vẽ sai nhất trong tài liệu này.** Xoá hết card **không** đưa
 deck về `unset`; muốn đổi loại phải qua nhánh `H` ở mục 3, và đó là một hành động
-được xác nhận riêng (BR-68).
+do hệ thống tự duy trì cùng mutation direct children (BR-163).
 
 ---
 
@@ -226,7 +226,7 @@ Ghi lại chứ **không** sửa ở đây: cả ba đều thuộc `use-cases.md
 `frozen for MVP`, và M99.1 không có quyền sửa nó ngoài dòng trỏ sang tài liệu này.
 
 1. **UC-04 không nhắc cờ và tag.** BR-93 và BR-95 khai `Related: UC-04`, nhưng
-   dòng `Business rules` của UC-04 chỉ liệt kê BR-07…BR-10, BR-63, BR-67. Tham
+   dòng `Business rules` của UC-04 chỉ liệt kê BR-07…BR-10, BR-63, BR-163. Tham
    chiếu một chiều: BR biết UC, UC không biết BR.
 2. **UC-06 không nhắc tìm kiếm.** `search_decks_use_case.dart` tồn tại và màn
    danh sách có ô tìm kiếm toàn thư viện; UC-06 xếp tìm kiếm card vào mục "cố ý
