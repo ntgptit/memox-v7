@@ -57,14 +57,63 @@ void main() {
     }
 
     /// A repository whose snapshot always claims the same next boundary.
-    FakeDeckRepository servingBoundary(DateTime? nextDueAt) =>
-        FakeDeckRepository(
-          deckList: (_) => Stream<DeckListSnapshot>.value(
-            fakeListSnapshot(<DeckSummary>[
-              fakeSummary(id: '1', name: 'Japanese', totalCardCount: 4),
-            ], nextDueAt: nextDueAt),
-          ),
-        );
+    FakeDeckRepository servingBoundary(
+      DateTime? nextDueAt, {
+      DateTime? nextOverdueTickAt,
+    }) => FakeDeckRepository(
+      deckList: (_) => Stream<DeckListSnapshot>.value(
+        fakeListSnapshot(
+          <DeckSummary>[
+            fakeSummary(id: '1', name: 'Japanese', totalCardCount: 4),
+          ],
+          nextDueAt: nextDueAt,
+          nextOverdueTickAt: nextOverdueTickAt,
+        ),
+      ),
+    );
+
+    testWidgets('every card already due still arms the midnight tick', (
+      tester,
+    ) async {
+      // The hole the second boundary closes (BR-161): with every scheduled
+      // card already due, `nextDueAt` goes null — which is exactly when the
+      // overdue badge still has to gain a day at local midnight. Without this
+      // timer a list left open overnight kept saying "+2d" forever.
+      final DateTime midnight = fixedNow.add(const Duration(hours: 5));
+      final repository = servingBoundary(null, nextOverdueTickAt: midnight);
+      final fixture = driven(repository, start: fixedNow);
+      await tester.pump();
+      expect(repository.deckListCallCount, 1);
+
+      await tester.pump(const Duration(hours: 4));
+      expect(repository.deckListCallCount, 1, reason: 'not before midnight');
+
+      fixture.setNow(midnight.add(const Duration(seconds: 1)));
+      await tester.pump(const Duration(hours: 2));
+
+      expect(repository.deckListCallCount, 2);
+      expect(
+        repository.readInstants.last,
+        midnight.add(const Duration(seconds: 1)),
+        reason: 'the re-read measures the new day, and the badge with it',
+      );
+    });
+
+    testWidgets('the earlier of the two boundaries wins', (tester) async {
+      // A future due card an hour out beats a midnight five hours out; the
+      // re-read then derives the next midnight from its own emission.
+      final DateTime dueAt = fixedNow.add(const Duration(hours: 1));
+      final DateTime midnight = fixedNow.add(const Duration(hours: 5));
+      final repository = servingBoundary(dueAt, nextOverdueTickAt: midnight);
+      final fixture = driven(repository, start: fixedNow);
+      await tester.pump();
+      expect(repository.deckListCallCount, 1);
+
+      fixture.setNow(dueAt.add(const Duration(seconds: 1)));
+      await tester.pump(const Duration(hours: 1, minutes: 1));
+
+      expect(repository.deckListCallCount, 2);
+    });
 
     testWidgets('a boundary in the future re-reads when it is crossed', (
       tester,

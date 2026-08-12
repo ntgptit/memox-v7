@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:memox/core/theme/app_spacing.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
 import 'package:memox/features/deck/presentation/widgets/items/deck_study_button_widget.dart';
 import 'package:memox/features/deck/presentation/widgets/items/deck_tile_widget.dart';
+import 'package:memox/features/deck/presentation/widgets/items/deck_workload_line_widget.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_progress_bar.dart';
 
-import 'support/deck_fixtures.dart';
 import 'support/deck_screen_harness.dart';
 import 'support/fake_deck_repository.dart';
 
@@ -66,14 +67,32 @@ void main() {
       );
     });
 
-    testWidgets('the due chip carries the clock, and no NEW micro-label '
-        'survives', (tester) async {
+    testWidgets('the block is words; the only icon is the status square', (
+      tester,
+    ) async {
       await pump(tester, summary);
 
-      expect(onTile(find.byIcon(Icons.schedule)), findsOneWidget);
-      // The old chip drew a tiny "NEW" glyph and then said "14 new" beside it —
-      // the same word twice at two sizes. The metric is the only carrier now.
-      expect(find.byIcon(Icons.fiber_new_outlined), findsNothing);
+      // The icon-per-metric grammar is gone by measurement: five anchors on a
+      // three-line block wrapped the metadata and grew the card. The facts
+      // read as text, and the one glyph left is the schedule status.
+      expect(onTile(find.byIcon(Icons.style_outlined)), findsNothing);
+      expect(onTile(find.byIcon(Icons.account_tree_outlined)), findsNothing);
+      expect(onTile(find.byIcon(Icons.auto_awesome_outlined)), findsNothing);
+      expect(
+        find.descendant(
+          of: find.byType(DeckWorkloadLineWidget),
+          matching: find.byType(Icon),
+        ),
+        findsNothing,
+      );
+      // Seven due with zero overdue days is the due-today state.
+      expect(onTile(find.byIcon(Icons.event)), findsOneWidget);
+
+      // One typography for the pair.
+      final dueStyle = tester.widget<Text>(onTile(find.text(due(7)))).style;
+      final newStyle = tester.widget<Text>(onTile(find.text(fresh(14)))).style;
+      expect(dueStyle?.fontSize, newStyle?.fontSize);
+      expect(dueStyle?.fontWeight, newStyle?.fontWeight);
     });
 
     testWidgets('the gauge is inset with the card content, not flush at the '
@@ -114,6 +133,10 @@ void main() {
       expect(find.byType(DeckStudyButtonWidget), findsOneWidget);
       // Nothing due today is not "done": no success ink anywhere on the tile.
       expect(find.byIcon(Icons.check_circle), findsNothing);
+      // Nothing due: the status square rests on the outlined calendar, and
+      // the workload line carries no icons at all.
+      expect(onTile(find.byIcon(Icons.event_outlined)), findsOneWidget);
+      expect(onTile(find.byIcon(Icons.schedule)), findsNothing);
     });
   });
 
@@ -177,12 +200,16 @@ void main() {
       learnedCardCount: 60,
     );
 
-    testWidgets('success lives on the check and the full gauge only', (
+    testWidgets('success lives on the gauge and its figure alone', (
       tester,
     ) async {
       await pump(tester, summary);
 
-      expect(find.byIcon(Icons.check_circle), findsOneWidget);
+      // No check glyph any more: the full gauge and its success figure are
+      // the completion signal, and the status square answers "when" — for a
+      // deck with nothing due, an outlined calendar at rest.
+      expect(find.byIcon(Icons.check_circle), findsNothing);
+      expect(onTile(find.byIcon(Icons.event_outlined)), findsOneWidget);
       expect(onTile(find.text(due(0))), findsOneWidget);
       expect(onTile(find.text(fresh(0))), findsOneWidget);
       expect(
@@ -200,12 +227,12 @@ void main() {
       expect(bar.value, 1);
     });
 
-    testWidgets('sits at the same height as a studyable neighbour', (
-      tester,
-    ) async {
-      // The completed card has no Study pill, and without a floor on the
-      // action row it sat 24px shorter — a column that steps at the exact
-      // moment a deck is finished. The floor keeps one rhythm.
+    testWidgets('is honestly shorter than a studyable neighbour — no phantom '
+        '48px band', (tester) async {
+      // The touch floor belongs to the Study button. A completed card has no
+      // button, so forcing its action row to the 48 floor bought equal heights
+      // with a band of nothing — the imbalance the spacing patch removed. The
+      // completed card must now be shorter, by roughly the pill's cushion.
       await pumpDeckScreen(
         tester,
         repository: FakeDeckRepository.withSummaries(<DeckSummary>[
@@ -227,13 +254,72 @@ void main() {
         screen: const DeckListScreen(),
       );
 
-      final tiles = find
+      final heights = find
           .byType(DeckTileWidget)
           .evaluate()
           .map((element) => element.size!.height)
           .toList();
-      expect(tiles, hasLength(2));
-      expect(tiles.first, tiles.last);
+      expect(heights, hasLength(2));
+      expect(
+        heights.last,
+        lessThan(heights.first),
+        reason: 'a completed card carries no empty action floor',
+      );
+    });
+
+    testWidgets('keeps the Study touch target at the 48 floor', (tester) async {
+      // The visual pill paints 32; the floor is the hit area, and trimming the
+      // row's resting height must never trim this.
+      await pump(
+        tester,
+        fakeSummary(
+          id: 'd1',
+          name: 'Nouns',
+          totalCardCount: 60,
+          newCardCount: 14,
+          dueCardCount: 7,
+          learnedCardCount: 22,
+        ),
+      );
+
+      expect(
+        tester.getSize(find.byType(DeckStudyButtonWidget)).height,
+        greaterThanOrEqualTo(AppSpacing.minimumTouchTarget),
+      );
+    });
+  });
+
+  group('large counts (999 Due, 999 New)', () {
+    testWidgets('nothing is clipped, and the pair may wrap', (tester) async {
+      await pump(
+        tester,
+        fakeSummary(
+          id: 'd1',
+          name: 'Backlog',
+          totalCardCount: 2000,
+          newCardCount: 999,
+          dueCardCount: 999,
+          learnedCardCount: 500,
+        ),
+      );
+
+      expect(onTile(find.text(due(999))), findsOneWidget);
+      expect(onTile(find.text(fresh(999))), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  });
+
+  group('the scheduler names itself only where it distinguishes', () {
+    testWidgets('the root list shows it', (tester) async {
+      await pump(
+        tester,
+        fakeSummary(id: 'd1', name: 'Nouns', totalCardCount: 60),
+      );
+
+      expect(
+        onTile(find.textContaining(english.schedulerEightBoxShortLabel)),
+        findsOneWidget,
+      );
     });
   });
 
@@ -246,6 +332,12 @@ void main() {
       await pump(tester, summary);
 
       expect(find.text(english.deckNoCardsLabel), findsOneWidget);
+      // The resting sentence sits on the same axis as the title — the indent
+      // applies to the whole workload line, whatever it is saying.
+      expect(
+        tester.getRect(find.byType(DeckWorkloadLineWidget)).left,
+        tester.getRect(find.text('Brand new')).left,
+      );
       // A gauge needs a denominator; an empty deck has none, so there is no
       // bar to draw rather than a 0% one.
       expect(
@@ -287,6 +379,20 @@ void main() {
       expect(onTile(find.text(fresh(14))), findsOneWidget);
       expect(find.byType(DeckStudyButtonWidget), findsOneWidget);
       expect(tester.takeException(), isNull);
+
+      // The separator can never be an orphan: it shares a row with the metric
+      // it introduces, so if the group wraps, the dot travels with `14 New`
+      // and sits on the same line.
+      final dot = tester.getRect(
+        find
+            .descendant(
+              of: find.byType(DeckWorkloadLineWidget),
+              matching: find.text('·'),
+            )
+            .first,
+      );
+      final fresh14 = tester.getRect(onTile(find.text(fresh(14))));
+      expect(dot.center.dy, closeTo(fresh14.center.dy, 1));
     });
   });
 }

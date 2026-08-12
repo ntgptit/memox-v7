@@ -116,7 +116,7 @@ void main() {
         find.descendant(
           of: find.byType(DeckLevelSummaryWidget),
           matching: find.textContaining(
-            '0 ${english.deckDueMetricWord}',
+            '0 ${english.deckHeroDueTodayMetricWord}',
             findRichText: true,
           ),
         ),

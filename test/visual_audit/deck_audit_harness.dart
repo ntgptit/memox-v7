@@ -81,6 +81,7 @@ FakeDeckRepository servingDeckLevel(
       parent: deck,
       decks: children,
       nextDueAt: null,
+      nextOverdueTickAt: null,
     ),
   ),
   allDecks: () => Stream<List<DeckEntity>>.value(<DeckEntity>[deck]),

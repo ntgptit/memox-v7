@@ -25,5 +25,10 @@ class WatchDeckListUseCase {
   Stream<DeckListSnapshot> call({
     required String? parentDeckId,
     required DateTime now,
-  }) => _repository.watchDeckList(parentDeckId: parentDeckId, now: now);
+    required Duration utcOffset,
+  }) => _repository.watchDeckList(
+    parentDeckId: parentDeckId,
+    now: now,
+    utcOffset: utcOffset,
+  );
 }

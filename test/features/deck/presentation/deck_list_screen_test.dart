@@ -155,13 +155,10 @@ void main() {
         screen: const DeckListScreen(),
       );
 
-      // `schedule` on a filled chip, not `notifications_active` on the well.
-      // The well now says what the deck is made of; what is waiting says so in
-      // the foot, where it can be a pill rather than a tint on a glyph.
-      // On the tile's chip and on the summary's metric alike, so at least one
-      // — the assertion is that the icon exists beside the words, not a count
+      // The filled due-today calendar on the status well (BR-161/BR-162) —
+      // the assertion is that an icon exists beside the words, not a count
       // of surfaces that speak the same language.
-      expect(find.byIcon(Icons.schedule), findsWidgets);
+      expect(find.byIcon(Icons.event), findsWidgets);
       // **The words are the chip's own text now, not a semantic label on a
       // glyph.** The glyph used to be the only carrier, so it needed a label
       // nobody could see; the chip says "7 due now" in words a sighted user

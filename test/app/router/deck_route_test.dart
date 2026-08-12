@@ -97,12 +97,14 @@ void main() {
                 parent: null,
                 decks: <DeckSummary>[],
                 nextDueAt: null,
+                nextOverdueTickAt: null,
               )
             : DeckListSnapshot(
                 ancestors: const <DeckPathSegment>[],
                 parent: fakeRootDeck(id: id, name: 'Japanese N5'),
                 decks: const <DeckSummary>[],
                 nextDueAt: null,
+                nextOverdueTickAt: null,
               ),
       ),
     );

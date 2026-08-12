@@ -75,6 +75,7 @@ class FakeDeckRepository implements DeckRepository {
         ancestors: const <DeckPathSegment>[],
         decks: summaries,
         nextDueAt: nextDueAt,
+        nextOverdueTickAt: null,
       ),
     ),
   );
@@ -95,6 +96,7 @@ class FakeDeckRepository implements DeckRepository {
         ancestors: ancestors,
         decks: children,
         nextDueAt: nextDueAt,
+        nextOverdueTickAt: null,
       ),
     ),
   );
@@ -124,6 +126,7 @@ class FakeDeckRepository implements DeckRepository {
           ancestors: <DeckPathSegment>[],
           decks: <DeckSummary>[],
           nextDueAt: null,
+          nextOverdueTickAt: null,
         ),
       );
 
@@ -171,6 +174,7 @@ class FakeDeckRepository implements DeckRepository {
   Stream<DeckListSnapshot> watchDeckList({
     required String? parentDeckId,
     required DateTime now,
+    required Duration utcOffset,
   }) {
     deckListCallCount += 1;
     deckListParents.add(parentDeckId);

@@ -30,9 +30,14 @@ final class DeckDao {
   Stream<List<Deck>> watchRootDecks() => _db.rootDecks().watch();
 
   /// Root decks with their aggregate card and due counts, one statement
-  /// (UC-06). [now] is a parameter so the due boundary is testable (BR-22).
-  Stream<List<RootDeckSummariesResult>> watchRootDeckSummaries(DateTime now) =>
-      _db.rootDeckSummaries(now).watch();
+  /// (UC-06). [now] is a parameter so the due boundary is testable (BR-22);
+  /// [startOfToday] is the local-day boundary the overdue partition cuts at
+  /// (BR-162), computed by the caller from `LocalDayModel` — SQL never
+  /// derives a local midnight itself.
+  Stream<List<RootDeckSummariesResult>> watchRootDeckSummaries({
+    required DateTime now,
+    required DateTime startOfToday,
+  }) => _db.rootDeckSummaries(now, startOfToday).watch();
 
   /// Every deck, for the move-target picker (UC-09).
   Stream<List<Deck>> watchAllDecks() => _db.allDecks().watch();
@@ -56,7 +61,8 @@ final class DeckDao {
   Stream<List<ChildDeckLevelResult>> watchChildDeckLevel({
     required String parentDeckId,
     required DateTime now,
-  }) => _db.childDeckLevel(parentDeckId, now).watch();
+    required DateTime startOfToday,
+  }) => _db.childDeckLevel(parentDeckId, now, startOfToday).watch();
 
   Future<Deck?> deckById(String deckId) =>
       _db.deckById(deckId).getSingleOrNull();

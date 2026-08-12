@@ -55,6 +55,10 @@ enum DeckListScenario {
   fewRoots('a few root decks'),
   longNames('long Vietnamese names'),
   manyDecks('25 decks'),
+  overdue('mixed workload with backlog'),
+  overdueOnly('overdue only'),
+  dueTodayOnly('due today only'),
+  newOnly('new cards only'),
   nothingDue('nothing due'),
   empty('no decks yet'),
   error('read fails');
@@ -130,6 +134,7 @@ class _CatalogDeckRepository implements DeckRepository {
   Stream<DeckListSnapshot> watchDeckList({
     required String? parentDeckId,
     required DateTime now,
+    required Duration utcOffset,
   }) {
     if (scenario == DeckListScenario.error) {
       return Stream<DeckListSnapshot>.error(
@@ -144,6 +149,7 @@ class _CatalogDeckRepository implements DeckRepository {
           decks: _roots(),
           ancestors: const <DeckPathSegment>[],
           nextDueAt: null,
+          nextOverdueTickAt: null,
         ),
       );
     }
@@ -156,6 +162,7 @@ class _CatalogDeckRepository implements DeckRepository {
         decks: _childrenOf(parent),
         ancestors: _ancestorsOf(parentDeckId),
         nextDueAt: null,
+        nextOverdueTickAt: null,
       ),
     );
   }
@@ -213,17 +220,73 @@ class _CatalogDeckRepository implements DeckRepository {
         ];
       case DeckListScenario.nothingDue:
         return <DeckSummary>[
-          _summary(_root('r1', 'IELTS Academic'), total: 120, due: 0),
+          _summary(
+            _root('r1', 'IELTS Academic'),
+            total: 120,
+            due: 0,
+            learned: 120,
+          ),
           _summary(
             _root('r2', 'Kanji N3', scheduler: SchedulerType.sm2),
             total: 300,
             due: 0,
+            learned: 300,
+          ),
+        ];
+      // The hero's overdue state (BR-161): the summary above the list carries
+      // the missed calendar and the +7d badge for the level's oldest backlog.
+      case DeckListScenario.overdue:
+        return <DeckSummary>[
+          _summary(
+            _root('r1', 'Academic Word List'),
+            total: 570,
+            due: 12,
+            newCards: 46,
+            overdueCards: 8,
+            overdueDays: 7,
+          ),
+          _summary(
+            _root('r2', 'Kanji N3', scheduler: SchedulerType.sm2),
+            total: 300,
+            due: 3,
+          ),
+        ];
+      // Backlog with nothing else: Overdue is the only non-zero metric.
+      case DeckListScenario.overdueOnly:
+        return <DeckSummary>[
+          _summary(
+            _root('r1', 'Academic Word List'),
+            total: 570,
+            due: 9,
+            overdueCards: 9,
+            overdueDays: 12,
+          ),
+        ];
+      // Today's reviews only: the middle metric carries the headline.
+      case DeckListScenario.dueTodayOnly:
+        return <DeckSummary>[
+          _summary(_root('r1', 'IELTS Academic'), total: 120, due: 6),
+        ];
+      // New promoted to the focal point: nothing due, work still waiting.
+      case DeckListScenario.newOnly:
+        return <DeckSummary>[
+          _summary(
+            _root('r1', 'Korean vocabulary'),
+            total: 20,
+            due: 0,
+            newCards: 20,
+            learned: 0,
           ),
         ];
       case DeckListScenario.fewRoots:
       case DeckListScenario.error:
         return <DeckSummary>[
-          _summary(_root('r1', 'IELTS Academic'), total: 120, due: 8),
+          _summary(
+            _root('r1', 'IELTS Academic'),
+            total: 120,
+            due: 8,
+            newCards: 14,
+          ),
           _summary(
             _root('r2', 'Kanji N3', scheduler: SchedulerType.sm2),
             total: 300,
@@ -356,6 +419,8 @@ class _CatalogDeckRepository implements DeckRepository {
     required int total,
     required int due,
     int newCards = 0,
+    int overdueCards = 0,
+    int overdueDays = 0,
     int? learned,
     int subDecks = 0,
     SchedulerType? scheduler,
@@ -365,6 +430,8 @@ class _CatalogDeckRepository implements DeckRepository {
       totalCardCount: total,
       newCardCount: newCards,
       dueCardCount: due,
+      overdueCardCount: overdueCards,
+      overdueDayCount: overdueDays,
       // Two thirds by default rather than zero or full: a catalog whose bars are
       // all empty shows the component's least interesting state, and one whose
       // bars are all complete shows only the success colour. A caller that cares

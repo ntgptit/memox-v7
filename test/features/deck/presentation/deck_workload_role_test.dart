@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_colors.dart';
+import 'package:memox/core/theme/app_material_roles.dart';
 import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
+import 'package:memox/features/deck/presentation/widgets/items/deck_icon_area_widget.dart';
 import 'package:memox/features/deck/presentation/widgets/items/deck_study_button_widget.dart';
+import 'package:memox/features/deck/presentation/widgets/items/deck_tile_widget.dart';
 import 'package:memox/features/deck/presentation/widgets/items/deck_workload_line_widget.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 
 import '../../../support/color_math.dart';
-import 'support/deck_fixtures.dart';
 import 'support/deck_screen_harness.dart';
 import 'support/fake_deck_repository.dart';
 
@@ -51,42 +53,35 @@ void main() {
 
       // Scoped to the workload line: the summary states the same words above
       // the list, and an unscoped text finder matches both.
-      Finder onLine(String text) => find.descendant(
+      Finder onLine(Finder matching) => find.descendant(
         of: find.byType(DeckWorkloadLineWidget),
-        matching: find.text(text),
+        matching: matching,
       );
 
-      // Due: time-pressure container, never danger.
-      final chip = tester.widget<DecoratedBox>(
-        find
-            .ancestor(
-              of: onLine('7 ${english.deckDueMetricWord}'),
-              matching: find.descendant(
-                of: find.byType(DeckWorkloadLineWidget),
-                matching: find.byType(DecoratedBox),
-              ),
-            )
-            .first,
-      );
-      final chipFill = (chip.decoration as BoxDecoration).color;
-      expect(chipFill, semantic.streakContainer);
-      expect(chipFill, isNot(scheme.error));
-      expect(chipFill, isNot(semantic.danger));
+      // The workload is plain text: no icons, no containers — the schedule
+      // urgency lives on the large status icon now (BR-161), and nothing on
+      // this line may be danger.
+      expect(onLine(find.byType(Icon)), findsNothing);
+      expect(onLine(find.byType(DecoratedBox)), findsNothing);
 
-      final chipInk = tester
-          .widget<Text>(onLine('7 ${english.deckDueMetricWord}'))
-          .style
-          ?.color;
-      expect(chipInk, semantic.onStreakContainer);
+      final dueStyle = tester
+          .widget<Text>(onLine(find.text('7 ${english.deckDueMetricWord}')))
+          .style;
+      expect(dueStyle?.color, semantic.onStreakContainer);
+      expect(dueStyle?.color, isNot(semantic.danger));
+      expect(dueStyle?.color, isNot(scheme.error));
 
-      // New: info ink as a text metric — no container at all.
-      final newInk = tester
-          .widget<Text>(onLine('14 ${english.deckNewMetricWord}'))
-          .style
-          ?.color;
-      expect(newInk, semantic.info);
-      expect(newInk, isNot(scheme.primary));
-      expect(newInk, isNot(semantic.success));
+      // The two worded metrics are one typography: same size, same weight —
+      // the pair reads level, and only the ink differs.
+      final newStyle = tester
+          .widget<Text>(onLine(find.text('14 ${english.deckNewMetricWord}')))
+          .style;
+      expect(newStyle?.color, semantic.info);
+      expect(newStyle?.color, isNot(scheme.primary));
+      expect(newStyle?.color, isNot(semantic.success));
+      expect(dueStyle?.fontSize, newStyle?.fontSize);
+      expect(dueStyle?.fontWeight, FontWeight.w600);
+      expect(newStyle?.fontWeight, FontWeight.w600);
 
       // Study: the tonal pair, not primary and not any workload colour.
       final study = tester.widget<FilledButton>(
@@ -102,6 +97,221 @@ void main() {
     });
   }
 
+  group('the status icon: three schedule states (BR-161)', () {
+    Future<DeckIconArea> pumpIcon(
+      WidgetTester tester, {
+      required int due,
+      required int newCards,
+      required int learned,
+      int overdueDays = 0,
+      int total = 60,
+    }) async {
+      await pumpDeckScreen(
+        tester,
+        repository: FakeDeckRepository.withSummaries(<DeckSummary>[
+          fakeSummary(
+            id: 'd1',
+            name: 'Nouns',
+            totalCardCount: total,
+            newCardCount: newCards,
+            dueCardCount: due,
+            overdueDayCount: overdueDays,
+            learnedCardCount: learned,
+          ),
+        ]),
+        screen: const DeckListScreen(),
+      );
+
+      return tester.widget<DeckIconArea>(find.byType(DeckIconArea));
+    }
+
+    AppSemanticColors semanticOf(WidgetTester tester) => Theme.of(
+      tester.element(find.byType(DeckIconArea)),
+    ).extension<AppSemanticColors>()!;
+
+    ColorScheme schemeOf(WidgetTester tester) =>
+        Theme.of(tester.element(find.byType(DeckIconArea))).colorScheme;
+
+    testWidgets('not due: outlined calendar on the muted well', (tester) async {
+      final icon = await pumpIcon(tester, due: 0, newCards: 0, learned: 30);
+      final semantic = semanticOf(tester);
+
+      expect(icon.icon, Icons.event_outlined);
+      expect(icon.wellColor, semantic.surfaceMuted);
+      expect(icon.tint, schemeOf(tester).onSurfaceVariant);
+    });
+
+    testWidgets('due today: filled calendar on the streak container', (
+      tester,
+    ) async {
+      // Actionable and entirely normal — but one colour per state (M99.14):
+      // the workload words and the hero already speak due-today in the amber
+      // time-pressure role, and a purple well beside a yellow "7 Due" read as
+      // two different states. Not the brand container, and not a warning.
+      final icon = await pumpIcon(tester, due: 7, newCards: 14, learned: 22);
+      final semantic = semanticOf(tester);
+      final scheme = schemeOf(tester);
+
+      expect(icon.icon, Icons.event);
+      expect(icon.wellColor, semantic.streakContainer);
+      expect(icon.tint, semantic.onStreakContainer);
+      expect(icon.wellColor, isNot(scheme.primaryContainer));
+    });
+
+    testWidgets('overdue: missed calendar goes red — the error container '
+        'pair', (tester) async {
+      // Owner decision on BR-161: missed is a red-letter state, and only
+      // missed — due-today stays on the brand container so the two scan
+      // apart. The M3 pair carries its own contrast guarantee.
+      final icon = await pumpIcon(
+        tester,
+        due: 5,
+        newCards: 0,
+        learned: 20,
+        overdueDays: 3,
+      );
+      final semantic = semanticOf(tester);
+      final scheme = schemeOf(tester);
+
+      expect(icon.icon, Icons.event_busy);
+      expect(icon.wellColor, scheme.errorContainer);
+      expect(icon.tint, scheme.onErrorContainer);
+      // The red belongs to overdue alone: nothing borrows the streak amber.
+      expect(icon.wellColor, isNot(semantic.streakContainer));
+    });
+
+    testWidgets('100% learned with due today is still due today', (
+      tester,
+    ) async {
+      // The case the status exists for: "learned everything" does not mean
+      // "nothing to do today". Completion belongs to the progress bar.
+      final icon = await pumpIcon(tester, due: 5, newCards: 0, learned: 60);
+
+      expect(icon.icon, Icons.event);
+      expect(icon.icon, isNot(Icons.check_circle));
+    });
+
+    testWidgets('100% learned with overdue is still overdue', (tester) async {
+      final icon = await pumpIcon(
+        tester,
+        due: 5,
+        newCards: 0,
+        learned: 60,
+        overdueDays: 7,
+      );
+
+      expect(icon.icon, Icons.event_busy);
+    });
+
+    testWidgets('100% learned and nothing due rests at not-due — no check', (
+      tester,
+    ) async {
+      // The check glyph left this square: the full success gauge and its 100%
+      // figure already say completed, and the square answers "when", not
+      // "how far".
+      final icon = await pumpIcon(tester, due: 0, newCards: 0, learned: 60);
+
+      expect(icon.icon, Icons.event_outlined);
+      expect(find.byIcon(Icons.check_circle), findsNothing);
+    });
+
+    testWidgets('new-only is not time pressure: not-due treatment, Study on', (
+      tester,
+    ) async {
+      final icon = await pumpIcon(tester, due: 0, newCards: 14, learned: 22);
+      final semantic = semanticOf(tester);
+
+      expect(icon.icon, Icons.event_outlined);
+      expect(icon.wellColor, semantic.surfaceMuted);
+      expect(find.byType(DeckStudyButtonWidget), findsOneWidget);
+    });
+  });
+
+  group('the overdue badge', () {
+    Future<void> pumpOverdue(WidgetTester tester, int days) => pumpDeckScreen(
+      tester,
+      repository: FakeDeckRepository.withSummaries(<DeckSummary>[
+        fakeSummary(
+          id: 'd1',
+          name: 'Backlog',
+          totalCardCount: 60,
+          dueCardCount: 12,
+          overdueDayCount: days,
+          learnedCardCount: 30,
+        ),
+      ]),
+      screen: const DeckListScreen(),
+    );
+
+    // Scoped to the tile: the level summary above the list now states the
+    // same overdue badge for the level (BR-161), and this group is about the
+    // tile's. The summary's own copy is asserted in
+    // `deck_summary_overdue_test.dart`.
+    Finder onTile(Finder matching) =>
+        find.descendant(of: find.byType(DeckTileWidget), matching: matching);
+
+    testWidgets('one day reads compact, and the reader hears the sentence', (
+      tester,
+    ) async {
+      await pumpOverdue(tester, 1);
+
+      expect(
+        onTile(find.text(english.deckOverdueBadgeLabel(1))),
+        findsOneWidget,
+      );
+      expect(
+        onTile(find.bySemanticsLabel(english.deckOverdueSemanticLabel(12, 1))),
+        findsOneWidget,
+        reason: 'a screen reader gets the sentence, not +1d',
+      );
+    });
+
+    testWidgets('seven days', (tester) async {
+      await pumpOverdue(tester, 7);
+
+      expect(
+        onTile(find.text(english.deckOverdueBadgeLabel(7))),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('the badge wears the same red family as the well', (
+      tester,
+    ) async {
+      // Solid error fill, onError text — the count is part of the overdue
+      // state, not a neutral annotation floating over it.
+      await pumpOverdue(tester, 7);
+      final scheme = Theme.of(
+        tester.element(find.byType(DeckListScreen)),
+      ).colorScheme;
+
+      final label = onTile(find.text(english.deckOverdueBadgeLabel(7)));
+      final text = tester.widget<Text>(label);
+      expect(text.style?.color, scheme.onError);
+
+      final chip = tester.widget<DecoratedBox>(
+        find.ancestor(of: label, matching: find.byType(DecoratedBox)).first,
+      );
+      expect((chip.decoration as BoxDecoration).color, scheme.error);
+    });
+
+    testWidgets('a hundred days caps at 99+', (tester) async {
+      await pumpOverdue(tester, 100);
+
+      expect(
+        onTile(find.text(english.deckOverdueBadgeCapLabel)),
+        findsOneWidget,
+      );
+      expect(find.text(english.deckOverdueBadgeLabel(100)), findsNothing);
+    });
+
+    testWidgets('due today carries no badge', (tester) async {
+      await pumpOverdue(tester, 0);
+
+      expect(find.textContaining('+'), findsNothing);
+    });
+  });
+
   test('the pairs this mapping leans on clear WCAG', () {
     // Body-size text, so 4.5:1 (WCAG 1.4.3). Asserted against the surfaces the
     // metrics actually sit on. If a palette edit ever fails one of these, the
@@ -109,13 +319,26 @@ void main() {
     final pairs = <String, (Color, Color)>{
       'info on light surface': (AppColors.infoLight, AppColors.surfaceLight),
       'info on dark surface': (AppColors.infoDark, AppColors.surfaceDark),
-      'due ink on its container, light': (
+      // The whole due metric — clock and words — sits directly on the
+      // surface in the streak ink. Measured 7.22:1 light / 8.58:1 dark when
+      // the well was dropped; this holds the pair to the body-text floor.
+      'due ink on light surface': (
         AppColors.onStreakContainerLight,
-        AppColors.streakContainerLight,
+        AppColors.surfaceLight,
       ),
-      'due ink on its container, dark': (
+      'due ink on dark surface': (
         AppColors.onStreakContainerDark,
-        AppColors.streakContainerDark,
+        AppColors.surfaceDark,
+      ),
+      // The overdue badge: onError on the solid error fill. Measured 5.76:1
+      // light / 6.8:1 dark when the badge went red with the well (BR-161).
+      'badge text on light error fill': (
+        AppMaterialRoles.onErrorLight,
+        AppColors.dangerLight,
+      ),
+      'badge text on dark error fill': (
+        AppMaterialRoles.onErrorDark,
+        AppColors.dangerDark,
       ),
     };
 

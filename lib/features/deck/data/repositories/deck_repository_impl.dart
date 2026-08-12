@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../../core/error/drift_error_mapper.dart';
 import '../../../../core/error/failure.dart';
+import '../../../../core/time/local_day_model.dart';
 import '../../domain/models/deck_content_type_model.dart';
 import '../../domain/models/deck_deletion_impact_model.dart';
 import '../../domain/entities/deck_entity.dart';
@@ -92,21 +93,36 @@ final class DeckRepositoryImpl
   Stream<DeckListSnapshot> watchDeckList({
     required String? parentDeckId,
     required DateTime now,
+    required Duration utcOffset,
   }) {
     // Two statements, one per shape of the question, and never both for one
     // screen state. A root's subtree is reachable through `root_deck_id` in a flat
     // GROUP BY (BR-56); a deeper level has no such column and has to be walked.
     // Generalising them into one query would mean paying for the walk at the root,
     // where the aggregate is already covering-index fast.
+    //
+    // The overdue partition cuts at the local day boundary (BR-162), derived
+    // here from the same `now`/offset the mapper receives — one clock reading
+    // for the counts, the boundary, and the badge arithmetic. Crossing local
+    // midnight needs no write: the tick timer re-invokes this read, and the
+    // new `startOfToday` moves yesterday's due-today cards into overdue.
+    final startOfToday = LocalDayModel(
+      now: now,
+      utcOffset: utcOffset,
+    ).startOfToday;
     if (parentDeckId == null) {
       return _guardStream(
-        _dao.watchRootDeckSummaries(now),
-      ).map(rootLevelFromRows);
+        _dao.watchRootDeckSummaries(now: now, startOfToday: startOfToday),
+      ).map((rows) => rootLevelFromRows(rows, now: now, utcOffset: utcOffset));
     }
 
     return _guardStream(
-      _dao.watchChildDeckLevel(parentDeckId: parentDeckId, now: now),
-    ).map(childLevelFromRows);
+      _dao.watchChildDeckLevel(
+        parentDeckId: parentDeckId,
+        now: now,
+        startOfToday: startOfToday,
+      ),
+    ).map((rows) => childLevelFromRows(rows, now: now, utcOffset: utcOffset));
   }
 
   @override

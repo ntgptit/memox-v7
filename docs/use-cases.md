@@ -7,7 +7,7 @@
 | **Scope** | Must-have của MVP. Ngoài phạm vi: should/nice-to-have, và mọi thứ ở mục "Điều đã cố ý không đặc tả" |
 | **Source of truth for** | UC-xx · main/alternative/error flow · UI state matrix của từng màn |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md` |
-| **Updated by task** | Library New/Due — UC-06 hiện hai số theo BR-150, UC-01 sửa hệ quả BR-142 (bản sao là thẻ New, không phải đến hạn) |
+| **Updated by task** | BR-162 — UC-06 bước 3: tile total Due/New + icon vàng/đỏ, hero breakdown ba tập |
 | **Last updated** | 2026-08-11 |
 
 Chỉ đặc tả must-have. Should-have và nice-to-have viết khi tới lượt — đặc tả
@@ -388,7 +388,12 @@ khoá để tránh bấm đúp.
    BR-150 — card chưa học (New) và card đến hạn (Due), không bao giờ gộp — và
    chế độ ôn tập đang dùng.
 3. Deck có card đến hạn được làm nổi bật bằng **cả biểu tượng lẫn chữ**, không
-   chỉ bằng màu.
+   chỉ bằng màu. Deck tile hiển thị **total Due + New**; biểu tượng lớn phân ba
+   trạng thái lịch theo BR-161 — chưa đến hạn (outlined, neutral), đến hạn hôm
+   nay (filled, vai time-pressure vàng/streak), quá hạn (missed + badge số ngày,
+   cặp error container đỏ) — khác nhau bằng hình dạng/fill/badge chứ không chỉ
+   màu. Hero level summary breakdown thành ba tập rời nhau Overdue/Due today/New
+   theo BR-162.
 4. Mở một deck hiển thị nội dung theo `content_type`: danh sách deck con, hoặc
    danh sách card, không bao giờ cả hai (BR-65).
 

@@ -80,6 +80,8 @@ SELECT
     COALESCE(total.cardCount, 0) AS totalCardCount,
     COALESCE(new.newCount, 0) AS newCardCount,
     COALESCE(due.dueCount, 0) AS dueCardCount,
+    COALESCE(due.overdueCount, 0) AS overdueCardCount,
+    due.oldestDueAt AS oldestDueAt,
     COALESCE(learned.learnedCount, 0) AS learnedCardCount,
     COALESCE(sub.subCount, 0) AS subDeckCount,
     (
@@ -107,8 +109,24 @@ LEFT JOIN (
     INNER JOIN decks cd ON cd.id = c.deck_id
     GROUP BY cd.root_deck_id
 ) total ON total.rootDeckId = d.id
+-- `oldestDueAt` rides the same grouped subquery as the count (BR-161): it is
+-- the `due_at` of the subtree's oldest due card, which is what the overdue
+-- badge measures its days from. Same predicate, same snapshot, no second
+-- statement.
+--
+-- `overdueCount` splits the same set, in the same pass (BR-162): of the due
+-- cards this GROUP BY already visits, how many came due before today began.
+-- `:startOfToday` is the local day boundary computed by the caller from
+-- `LocalDayModel` (BR-105) — SQL never derives a local midnight itself, for
+-- the same reason `:now` is a parameter and not a clock function. The set is
+-- a partition, so `dueCount = overdueCount + (due today)` by construction,
+-- and crossing local midnight moves cards between the halves with no write:
+-- the next read simply carries a later boundary.
 LEFT JOIN (
-    SELECT cd.root_deck_id AS rootDeckId, COUNT(*) AS dueCount
+    SELECT cd.root_deck_id AS rootDeckId, COUNT(*) AS dueCount,
+           SUM(CASE WHEN s.due_at < :startOfToday THEN 1 ELSE 0 END)
+               AS overdueCount,
+           MIN(s.due_at) AS oldestDueAt
     FROM cards c
     INNER JOIN decks cd ON cd.id = c.deck_id
     INNER JOIN card_study_states s ON s.card_id = c.id
@@ -186,8 +204,17 @@ ORDER BY created_at ASC, id ASC;
 -- NULL by rule, and the review it is part of uses the root's. Reading it here
 -- rather than leaving the caller to look it up keeps the level one statement.
 --
--- The `nextDueAt` scalar is character-for-character the one in
--- `rootDeckSummaries`, and for the same reason: it is when these counts expire.
+-- **`nextDueAt` is scoped to this level's subtrees, unlike the root's.** The
+-- root screen shows every tree, so the whole database is its horizon and the
+-- global MIN in `rootDeckSummaries` is correct there. A level inside a deck
+-- shows only the child subtrees the `branch` walk maps — a card scheduled in
+-- some unrelated tree changing state does not move any number on this screen,
+-- and a boundary taken from it would wake the controller to re-run this query
+-- for a snapshot guaranteed identical. So the scalar reads through `branch`:
+-- the earliest instant at which one of *these* counts changes, or NULL when
+-- nothing on this level is scheduled to. Same `:now` as the counts, and
+-- strictly `>`: a card due exactly at `:now` is already inside `dueCount`,
+-- and returning it here would schedule a zero-delay timer, forever.
 --
 -- **`ancestryJson` — the path back up, in this same statement.** The breadcrumb
 -- has to agree with the title. Renaming an ancestor while a descendant is open
@@ -240,10 +267,15 @@ SELECT
     COALESCE(total.cardCount, 0) AS totalCardCount,
     COALESCE(new.newCount, 0) AS newCardCount,
     COALESCE(due.dueCount, 0) AS dueCardCount,
+    COALESCE(due.overdueCount, 0) AS overdueCardCount,
+    due.oldestDueAt AS oldestDueAt,
     COALESCE(learned.learnedCount, 0) AS learnedCardCount,
     COALESCE(sub.subCount, 0) AS subDeckCount,
     (
-        SELECT MIN(next.due_at) FROM card_study_states next
+        SELECT MIN(next.due_at)
+        FROM branch fb
+        INNER JOIN cards fc ON fc.deck_id = fb.deck_id
+        INNER JOIN card_study_states next ON next.card_id = fc.id
         WHERE next.due_at > :now
     ) AS nextDueAt,
     (
@@ -273,8 +305,15 @@ LEFT JOIN (
     WHERE s.learned_at IS NULL
     GROUP BY b.branch_id
 ) new ON new.branchId = child.id
+-- BR-161, per branch: the oldest due card of each child's subtree, same
+-- predicate and same grouped pass as the count. `overdueCount` partitions the
+-- same set at `:startOfToday` (BR-162), exactly as the root query does — see
+-- the comment there for why the boundary is a parameter.
 LEFT JOIN (
-    SELECT b.branch_id AS branchId, COUNT(*) AS dueCount
+    SELECT b.branch_id AS branchId, COUNT(*) AS dueCount,
+           SUM(CASE WHEN s.due_at < :startOfToday THEN 1 ELSE 0 END)
+               AS overdueCount,
+           MIN(s.due_at) AS oldestDueAt
     FROM branch b
     INNER JOIN cards c ON c.deck_id = b.deck_id
     INNER JOIN card_study_states s ON s.card_id = c.id

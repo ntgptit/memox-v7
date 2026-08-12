@@ -19,13 +19,21 @@ void main() {
 
   Future<List<DeckSummary>> rootLevel() async =>
       (await harness.deckRepository
-              .watchDeckList(parentDeckId: null, now: now)
+              .watchDeckList(
+                parentDeckId: null,
+                now: now,
+                utcOffset: Duration.zero,
+              )
               .first)
           .decks;
 
   Future<List<DeckSummary>> levelUnder(String deckId) async =>
       (await harness.deckRepository
-              .watchDeckList(parentDeckId: deckId, now: now)
+              .watchDeckList(
+                parentDeckId: deckId,
+                now: now,
+                utcOffset: Duration.zero,
+              )
               .first)
           .decks;
 

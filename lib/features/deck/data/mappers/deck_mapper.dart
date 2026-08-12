@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import '../../../../core/database/app_database.dart';
 import '../../../../core/error/failure.dart';
+import '../../../../core/time/local_day_model.dart';
 import '../../domain/entities/deck_entity.dart';
 import '../../domain/models/deck_content_type_model.dart';
 import '../../domain/models/deck_list_snapshot_model.dart';
@@ -53,25 +54,43 @@ DeckEntity deckEntityFromRow(Deck row) {
 /// `DateTime.fromMillisecondsSinceEpoch`, which produces a **local** value for the
 /// right instant. The instant is correct either way, but a local `DateTime` in a
 /// domain model breaks equality against the UTC values everything else uses.
-DeckListSnapshot rootLevelFromRows(List<RootDeckSummariesResult> rows) =>
-    DeckListSnapshot(
-      parent: null,
-      // The root level is the top: there is nothing above it to name.
-      ancestors: const <DeckPathSegment>[],
-      decks: <DeckSummary>[
-        for (final RootDeckSummariesResult row in rows)
-          DeckSummary(
-            deck: deckEntityFromRow(row.d),
-            totalCardCount: row.totalCardCount,
-            newCardCount: row.newCardCount,
-            dueCardCount: row.dueCardCount,
-            learnedCardCount: row.learnedCardCount,
-            subDeckCount: row.subDeckCount,
-            schedulerType: SchedulerType.fromDbValue(row.d.schedulerType ?? ''),
-          ),
-      ],
-      nextDueAt: rows.isEmpty ? null : rows.first.nextDueAt?.toUtc(),
-    );
+DeckListSnapshot rootLevelFromRows(
+  List<RootDeckSummariesResult> rows, {
+  required DateTime now,
+  required Duration utcOffset,
+}) {
+  final day = LocalDayModel(now: now, utcOffset: utcOffset);
+  final decks = <DeckSummary>[
+    for (final RootDeckSummariesResult row in rows)
+      DeckSummary(
+        deck: deckEntityFromRow(row.d),
+        totalCardCount: row.totalCardCount,
+        newCardCount: row.newCardCount,
+        dueCardCount: row.dueCardCount,
+        overdueCardCount: overdueCountOf(
+          dueCardCount: row.dueCardCount,
+          overdueCardCount: row.overdueCardCount,
+        ),
+        overdueDayCount: overdueDaysOf(
+          day,
+          dueCardCount: row.dueCardCount,
+          oldestDueAt: row.oldestDueAt,
+        ),
+        learnedCardCount: row.learnedCardCount,
+        subDeckCount: row.subDeckCount,
+        schedulerType: SchedulerType.fromDbValue(row.d.schedulerType ?? ''),
+      ),
+  ];
+
+  return DeckListSnapshot(
+    parent: null,
+    // The root level is the top: there is nothing above it to name.
+    ancestors: const <DeckPathSegment>[],
+    decks: decks,
+    nextDueAt: rows.isEmpty ? null : rows.first.nextDueAt?.toUtc(),
+    nextOverdueTickAt: overdueTickOf(day, decks),
+  );
+}
 
 /// One deck and what is directly inside it, each child carrying its subtree's
 /// aggregate.
@@ -92,32 +111,98 @@ DeckListSnapshot rootLevelFromRows(List<RootDeckSummariesResult> rows) =>
 /// read from the child's **root**. A sub-deck's own column is NULL by rule (BR-06),
 /// so using it would leave every deck below the first level with no study mode on
 /// screen — which is exactly the kind of blank the unified list exists to remove.
-DeckListSnapshot childLevelFromRows(List<ChildDeckLevelResult> rows) {
+DeckListSnapshot childLevelFromRows(
+  List<ChildDeckLevelResult> rows, {
+  required DateTime now,
+  required Duration utcOffset,
+}) {
   if (rows.isEmpty) {
     throw const NotFoundFailure(message: 'That deck no longer exists.');
   }
 
+  final day = LocalDayModel(now: now, utcOffset: utcOffset);
+  final decks = <DeckSummary>[
+    for (final ChildDeckLevelResult row in rows)
+      if (row.child case final Deck child)
+        DeckSummary(
+          deck: deckEntityFromRow(child),
+          totalCardCount: row.totalCardCount,
+          newCardCount: row.newCardCount,
+          dueCardCount: row.dueCardCount,
+          overdueCardCount: overdueCountOf(
+            dueCardCount: row.dueCardCount,
+            overdueCardCount: row.overdueCardCount,
+          ),
+          overdueDayCount: overdueDaysOf(
+            day,
+            dueCardCount: row.dueCardCount,
+            oldestDueAt: row.oldestDueAt,
+          ),
+          learnedCardCount: row.learnedCardCount,
+          subDeckCount: row.subDeckCount,
+          schedulerType: SchedulerType.fromDbValue(
+            row.inheritedSchedulerType ?? '',
+          ),
+        ),
+  ];
+
   return DeckListSnapshot(
     parent: deckEntityFromRow(rows.first.parent),
     ancestors: deckPathFromJson(rows.first.ancestryJson),
-    decks: <DeckSummary>[
-      for (final ChildDeckLevelResult row in rows)
-        if (row.child case final Deck child)
-          DeckSummary(
-            deck: deckEntityFromRow(child),
-            totalCardCount: row.totalCardCount,
-            newCardCount: row.newCardCount,
-            dueCardCount: row.dueCardCount,
-            learnedCardCount: row.learnedCardCount,
-            subDeckCount: row.subDeckCount,
-            schedulerType: SchedulerType.fromDbValue(
-              row.inheritedSchedulerType ?? '',
-            ),
-          ),
-    ],
+    decks: decks,
     nextDueAt: rows.first.nextDueAt?.toUtc(),
+    nextOverdueTickAt: overdueTickOf(day, decks),
   );
 }
+
+/// The badge's day count for one row (BR-161).
+///
+/// **Zero without due cards, and never silent about a broken aggregate.** The
+/// query computes `oldestDueAt` in the same grouped pass as `dueCardCount`, so
+/// a positive count with no instant cannot come from production SQL — only
+/// from a hand-built fixture that skipped half the aggregate. Inventing a
+/// zero for it would render a healthy-looking deck over an inconsistent read.
+int overdueDaysOf(
+  LocalDayModel day, {
+  required int dueCardCount,
+  required DateTime? oldestDueAt,
+}) {
+  if (dueCardCount == 0) return 0;
+  if (oldestDueAt == null) {
+    throw StateError(
+      'dueCardCount is $dueCardCount but the aggregate carried no '
+      'oldestDueAt — the two come from one grouped subquery, so this read '
+      'is inconsistent.',
+    );
+  }
+
+  return day.completedDaysSince(oldestDueAt.toUtc());
+}
+
+/// The overdue half of the due partition, checked at the boundary (BR-162).
+///
+/// The query counts both halves in one grouped pass, so production SQL cannot
+/// return an overdue count outside `[0, dueCardCount]` — only a hand-built
+/// fixture that set the two independently can, and letting it through would
+/// hand the hero a negative "due today" to render.
+int overdueCountOf({required int dueCardCount, required int overdueCardCount}) {
+  if (overdueCardCount < 0 || overdueCardCount > dueCardCount) {
+    throw StateError(
+      'overdueCardCount is $overdueCardCount against dueCardCount '
+      '$dueCardCount — the two are one partition from one grouped subquery, '
+      'so this read is inconsistent.',
+    );
+  }
+
+  return overdueCardCount;
+}
+
+/// When this level's overdue badges next move: local midnight, if anything is
+/// due at all (BR-161).
+DateTime? overdueTickOf(LocalDayModel day, List<DeckSummary> decks) =>
+    decks.any((DeckSummary summary) => summary.dueCardCount > 0)
+    ? day.startOfTomorrow
+    : null;
 
 /// The ancestor chain, decoded from the one JSON column `childDeckLevel` returns.
 ///

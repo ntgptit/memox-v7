@@ -55,6 +55,7 @@ abstract interface class DeckRepository {
   Stream<DeckListSnapshot> watchDeckList({
     required String? parentDeckId,
     required DateTime now,
+    required Duration utcOffset,
   });
 
   /// Every deck in the database, for building a move-target picker (UC-09).

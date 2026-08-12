@@ -33,13 +33,21 @@ void main() {
 
   Future<List<DeckSummary>> rootLevel() async =>
       (await harness.deckRepository
-              .watchDeckList(parentDeckId: null, now: now)
+              .watchDeckList(
+                parentDeckId: null,
+                now: now,
+                utcOffset: Duration.zero,
+              )
               .first)
           .decks;
 
   Future<List<DeckSummary>> levelUnder(String deckId) async =>
       (await harness.deckRepository
-              .watchDeckList(parentDeckId: deckId, now: now)
+              .watchDeckList(
+                parentDeckId: deckId,
+                now: now,
+                utcOffset: Duration.zero,
+              )
               .first)
           .decks;
 
@@ -192,21 +200,119 @@ void main() {
     });
   });
 
-  group('the due boundary is the same instant at both levels', () {
-    test('a root and the level inside it carry one nextDueAt', () async {
-      // The controller arms a timer from this. Two levels disagreeing would mean
-      // navigating into a deck silently rescheduled the refresh.
-      final tree = await seedLopsided();
+  group('the due boundary is scoped to the level it wakes', () {
+    // Equality between the root and a level used to be asserted here, and it
+    // was the wrong invariant: it held only because the child query read the
+    // global MIN. A future card in an unrelated tree would then wake a level
+    // whose every number was guaranteed unchanged — a refresh and a recursive
+    // query for nothing. The root screen shows every tree, so the global
+    // boundary is *its* correct scope; a level's boundary is its own subtrees'.
+    Future<({DeckEntity root, DeckEntity branch, DeckEntity leaf})> seedA({
+      required Duration dueIn,
+    }) async {
+      final tree = await harness.seedTree(prefix: 'A-');
+      await card('a-future', tree.leaf.id, dueAt: now.add(dueIn));
+
+      return tree;
+    }
+
+    Future<void> seedX({required Duration dueIn}) async {
+      final other = await harness.seedTree(prefix: 'X-');
+      await card('x-future', other.leaf.id, dueAt: now.add(dueIn));
+    }
+
+    Future<DateTime?> levelBoundary(String deckId, {DateTime? at}) async =>
+        (await harness.deckRepository
+                .watchDeckList(
+                  parentDeckId: deckId,
+                  now: at ?? now,
+                  utcOffset: Duration.zero,
+                )
+                .first)
+            .nextDueAt;
+
+    test('the root screen still watches every tree', () async {
+      // Every root is on screen at the root level, so the earliest boundary
+      // anywhere is the earliest instant this screen's numbers change.
+      await seedA(dueIn: const Duration(minutes: 5));
+      await seedX(dueIn: const Duration(minutes: 2));
 
       final rootSnapshot = await harness.deckRepository
-          .watchDeckList(parentDeckId: null, now: now)
-          .first;
-      final levelSnapshot = await harness.deckRepository
-          .watchDeckList(parentDeckId: tree.root.id, now: now)
+          .watchDeckList(parentDeckId: null, now: now, utcOffset: Duration.zero)
           .first;
 
-      expect(rootSnapshot.nextDueAt, now.add(const Duration(days: 3)));
-      expect(levelSnapshot.nextDueAt, rootSnapshot.nextDueAt);
+      expect(rootSnapshot.nextDueAt, now.add(const Duration(minutes: 2)));
+    });
+
+    test('inside a tree, the boundary is that subtree\'s own', () async {
+      // X's two-minute card is invisible to every number on A's level, so it
+      // must be invisible to A's timer too.
+      final tree = await seedA(dueIn: const Duration(minutes: 5));
+      await seedX(dueIn: const Duration(minutes: 2));
+
+      expect(
+        await levelBoundary(tree.root.id),
+        now.add(const Duration(minutes: 5)),
+      );
+    });
+
+    test('reading the level again at its boundary raises its count', () async {
+      // The scoped boundary has to be worth waking for: at that instant, this
+      // level's own due count moves.
+      final tree = await seedA(dueIn: const Duration(minutes: 5));
+      await seedX(dueIn: const Duration(minutes: 2));
+
+      Future<int> dueAt(DateTime at) async => dueOf(
+        (await harness.deckRepository
+                .watchDeckList(
+                  parentDeckId: tree.root.id,
+                  now: at,
+                  utcOffset: Duration.zero,
+                )
+                .first)
+            .decks,
+      );
+
+      expect(await dueAt(now), 0);
+      expect(await dueAt(now.add(const Duration(minutes: 5))), 1);
+    });
+
+    test('a card due exactly now is counted, never the boundary', () async {
+      // Same one-character rule as the root query: `<= now` belongs to the
+      // count, `> now` to the boundary. A boundary at `now` is a zero-delay
+      // timer, forever.
+      final tree = await harness.seedTree(prefix: 'A-');
+      await card('a-now', tree.leaf.id, dueAt: now);
+      await card(
+        'a-later',
+        tree.leaf.id,
+        dueAt: now.add(const Duration(minutes: 5)),
+      );
+
+      final snapshot = await harness.deckRepository
+          .watchDeckList(
+            parentDeckId: tree.root.id,
+            now: now,
+            utcOffset: Duration.zero,
+          )
+          .first;
+
+      expect(dueOf(snapshot.decks), 1);
+      expect(snapshot.nextDueAt, now.add(const Duration(minutes: 5)));
+    });
+
+    test('a level with nothing scheduled ahead has no boundary', () async {
+      // Even while another tree has a future card: null means "nothing to
+      // wait for on this screen", and the controller arms no timer.
+      final tree = await harness.seedTree(prefix: 'A-');
+      await card(
+        'a-due',
+        tree.leaf.id,
+        dueAt: now.subtract(const Duration(days: 1)),
+      );
+      await seedX(dueIn: const Duration(minutes: 2));
+
+      expect(await levelBoundary(tree.root.id), isNull);
     });
   });
 }

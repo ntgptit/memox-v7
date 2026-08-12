@@ -24,7 +24,11 @@ void main() {
 
   Future<List<DeckSummary>> readSummaries() async =>
       (await harness.deckRepository
-              .watchDeckList(parentDeckId: null, now: now)
+              .watchDeckList(
+                parentDeckId: null,
+                now: now,
+                utcOffset: Duration.zero,
+              )
               .first)
           .decks;
 
@@ -158,6 +162,7 @@ void main() {
           .watchDeckList(
             parentDeckId: null,
             now: now.add(const Duration(hours: 1)),
+            utcOffset: Duration.zero,
           )
           .first;
 
@@ -174,7 +179,7 @@ void main() {
       await seedDueCases();
 
       final snapshot = await harness.deckRepository
-          .watchDeckList(parentDeckId: null, now: now)
+          .watchDeckList(parentDeckId: null, now: now, utcOffset: Duration.zero)
           .first;
 
       expect(snapshot.nextDueAt, now.add(const Duration(minutes: 1)));
@@ -187,6 +192,7 @@ void main() {
           .watchDeckList(
             parentDeckId: null,
             now: now.add(const Duration(hours: 1)),
+            utcOffset: Duration.zero,
           )
           .first;
 
@@ -205,7 +211,7 @@ void main() {
       );
 
       final snapshot = await harness.deckRepository
-          .watchDeckList(parentDeckId: null, now: now)
+          .watchDeckList(parentDeckId: null, now: now, utcOffset: Duration.zero)
           .first;
 
       expect(snapshot.decks, hasLength(1));
@@ -217,7 +223,7 @@ void main() {
       // row to read the scalar off, and `null` is the truth rather than a value
       // that went missing.
       final snapshot = await harness.deckRepository
-          .watchDeckList(parentDeckId: null, now: now)
+          .watchDeckList(parentDeckId: null, now: now, utcOffset: Duration.zero)
           .first;
 
       expect(snapshot.decks, isEmpty);
@@ -244,7 +250,7 @@ void main() {
       );
 
       final snapshot = await harness.deckRepository
-          .watchDeckList(parentDeckId: null, now: now)
+          .watchDeckList(parentDeckId: null, now: now, utcOffset: Duration.zero)
           .first;
 
       expect(snapshot.nextDueAt, now.add(const Duration(minutes: 7)));
@@ -256,11 +262,15 @@ void main() {
       // the timer would be waking the screen for nothing.
       await seedDueCases();
       final before = await harness.deckRepository
-          .watchDeckList(parentDeckId: null, now: now)
+          .watchDeckList(parentDeckId: null, now: now, utcOffset: Duration.zero)
           .first;
 
       final after = await harness.deckRepository
-          .watchDeckList(parentDeckId: null, now: before.nextDueAt!)
+          .watchDeckList(
+            parentDeckId: null,
+            now: before.nextDueAt!,
+            utcOffset: Duration.zero,
+          )
           .first;
 
       expect(before.decks.single.dueCardCount, 2);
@@ -274,7 +284,7 @@ void main() {
       // write touches `decks`, and Drift invalidates the aggregate on that.
       final emissions = <List<DeckSummary>>[];
       final subscription = harness.deckRepository
-          .watchDeckList(parentDeckId: null, now: now)
+          .watchDeckList(parentDeckId: null, now: now, utcOffset: Duration.zero)
           .listen((snapshot) => emissions.add(snapshot.decks));
       addTearDown(subscription.cancel);
 
@@ -312,7 +322,7 @@ void main() {
       final tree = await harness.seedTree();
       final emissions = <List<DeckSummary>>[];
       final subscription = harness.deckRepository
-          .watchDeckList(parentDeckId: null, now: now)
+          .watchDeckList(parentDeckId: null, now: now, utcOffset: Duration.zero)
           .listen((snapshot) => emissions.add(snapshot.decks));
       addTearDown(subscription.cancel);
 

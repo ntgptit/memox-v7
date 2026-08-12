@@ -1,3 +1,5 @@
+import '../../../../core/time/local_day_model.dart';
+
 /// Turns "N days from now" into the moment BR-105 actually means.
 ///
 /// **The due moment is 00:00 local time of the Nth day, stored as UTC** — not
@@ -23,28 +25,20 @@ final class StudyDayModel {
   /// Local time minus UTC. Positive east of Greenwich.
   final Duration utcOffset;
 
+  /// One implementation of midnight for the whole app: the deck list's
+  /// overdue badge (BR-161) does the same arithmetic, and two copies of it is
+  /// how one screen says "due today" while another says "1 day overdue" about
+  /// the same card.
+  LocalDayModel get _day => LocalDayModel(now: now, utcOffset: utcOffset);
+
   /// Midnight, local time, of the day [days] after today — as a UTC instant.
   ///
   /// `days: 0` is the start of today, which is what a session uses to decide
   /// whether a session left open belongs to an earlier study day (BR-103).
   /// `days: 1` is tomorrow, where a card lands when it finishes the learning
   /// chain (BR-144).
-  DateTime startOfDayAfter(int days) {
-    final local = now.toUtc().add(utcOffset);
-
-    // Constructed as UTC and then shifted back, rather than built as a local
-    // `DateTime`: `DateTime(y, m, d)` uses the *host's* zone, which in a test
-    // is whatever machine happens to run it. Building the arithmetic out of a
-    // UTC value and one explicit offset is what makes 23:59 reproducible.
-    final midnightLocal = DateTime.utc(
-      local.year,
-      local.month,
-      local.day,
-    ).add(Duration(days: days));
-
-    return midnightLocal.subtract(utcOffset);
-  }
+  DateTime startOfDayAfter(int days) => _day.startOfDayAfter(days);
 
   /// The start of the current study day (BR-105).
-  DateTime get startOfToday => startOfDayAfter(0);
+  DateTime get startOfToday => _day.startOfToday;
 }

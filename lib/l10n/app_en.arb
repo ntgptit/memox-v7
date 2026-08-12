@@ -6,7 +6,7 @@
   },
   "navigationDecksLabel": "Library",
   "@navigationDecksLabel": {
-    "description": "Bottom navigation label for the Decks branch. \"Library\" rather than \"Decks\": the tab is the whole content library — the deck tree, the cards inside it, and the starter-library flow — while \"Decks\" named only its top level. The screen title (decksTitle) deliberately stays \"Decks\": the tab names the destination, the app bar names the list on it."
+    "description": "Bottom navigation label for the Decks branch. \"Library\" rather than \"Decks\": the tab is the whole content library — the deck tree, the cards inside it, and the starter-library flow — while \"Decks\" named only its top level. The screen title (decksTitle) says the same word, synced by owner decision 2026-08-12 — the tab and its screen must read as one place."
   },
   "navigationStudyLabel": "Study",
   "@navigationStudyLabel": {
@@ -40,9 +40,9 @@
   "@settingsPlaceholderTitle": {
     "description": "Heading of the Settings placeholder (AD-19). The whole message — there is no reassurance to add because no user preference exists yet to be kept or lost."
   },
-  "decksTitle": "Decks",
+  "decksTitle": "Library",
   "@decksTitle": {
-    "description": "App bar title of the home screen, which lists the user's root decks. A deck is a folder of flashcards."
+    "description": "App bar title of the home screen, synced with navigationDecksLabel (owner decision, 2026-08-12): the tab and the screen it lands on say the same word, because a tab called Library opening a screen called Decks read as two places."
   },
   "decksLoadingLabel": "Loading decks",
   "@decksLoadingLabel": {
@@ -111,9 +111,9 @@
     },
     "description": "The figure at the right-hand end of a deck's progress bar. Whole percent -- a decimal on a 4px bar is precision nobody can act on."
   },
-  "deckFullyLearnedSemanticLabel": "Fully learned",
-  "@deckFullyLearnedSemanticLabel": {
-    "description": "Announced on the glyph of a deck whose every card is learned (BR-88). The only state this glyph carries in words as well as in colour."
+  "deckSummaryTodayLabel": "Today",
+  "@deckSummaryTodayLabel": {
+    "description": "Eyebrow of the level summary hero: the time scope the two workload figures describe. One word on purpose — it scopes, it does not narrate."
   },
   "deckSummaryHideLabel": "Hide summary",
   "@deckSummaryHideLabel": {
@@ -481,7 +481,7 @@
   },
   "deckStudyAction": "Study",
   "@deckStudyAction": {
-    "description": "Label of the button on a deck card that starts a study session for the cards due in that deck. Shown only when at least one card is due — a deck that is finished for today has nothing to start."
+    "description": "Label of the button on a deck card that starts a study session for that deck. Shown when the deck has due or new cards (BR-150) — hidden only when both sets are empty, because then there is nothing to start."
   },
   "deckActionsSemanticLabel": "Deck actions",
   "@deckActionsSemanticLabel": {
@@ -1674,10 +1674,103 @@
   },
   "deckDueMetricWord": "Due",
   "@deckDueMetricWord": {
-    "description": "The word half of the due metric; the tile and the summary compose '<count> Due'. Due is time-pressure, carried by streakContainer — never danger (BR-150, BR-29)."
+    "description": "The word half of the due metric; the tile and the summary compose '<count> Due'. Due-today keeps the streakContainer time-pressure role; overdue wears the error pair per BR-161 (BR-150, BR-29)."
   },
   "deckNewMetricWord": "New",
   "@deckNewMetricWord": {
     "description": "The word half of the new metric; composed as '<count> New'. Foreground is semantic info on the neutral surface — never a filled container, never success (BR-90, BR-150)."
+  },
+  "deckHeroOverdueMetricWord": "Overdue",
+  "@deckHeroOverdueMetricWord": {
+    "description": "Word half of the hero's first metric (BR-162): due cards that came due before today began. Error semantic role when non-zero; the deck tile keeps deckDueMetricWord for the undivided total."
+  },
+  "deckHeroDueTodayMetricWord": "Due today",
+  "@deckHeroDueTodayMetricWord": {
+    "description": "Word half of the hero's second metric (BR-162): due cards whose due_at belongs to today's local day. Streak time-pressure role when non-zero."
+  },
+  "deckHeroNewMetricWord": "New",
+  "@deckHeroNewMetricWord": {
+    "description": "Word half of the hero's third metric (BR-150): cards still on the learning chain. Info role when non-zero."
+  },
+  "deckHeroOverdueAgedMetricWord": "Overdue (+{days}d)",
+  "@deckHeroOverdueAgedMetricWord": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    },
+    "description": "Word half of the hero's overdue metric while a backlog exists (BR-162): the set name with the oldest card's age in parentheses. Text, not a chip — a chip beside one cell of the metric grid breaks the column alignment."
+  },
+  "deckHeroOverdueAgedCapMetricWord": "Overdue (99+d)",
+  "@deckHeroOverdueAgedCapMetricWord": {
+    "description": "The aged overdue word past the badge cap: the exact figure stops being information at this size, matching deckOverdueBadgeCapLabel."
+  },
+  "deckHeroOverdueSemanticLabel": "{count} overdue cards; oldest is {days} days overdue",
+  "@deckHeroOverdueSemanticLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "days": {
+        "type": "int"
+      }
+    },
+    "description": "Screen-reader sentence for the hero's overdue metric (BR-162). The count is cards overdue; the days are the age of the oldest backlog card — two different units, both named. Replaces the +Nd shorthand, which is excluded from semantics."
+  },
+  "deckHeroDueTodaySemanticLabel": "{count} cards due today",
+  "@deckHeroDueTodaySemanticLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Screen-reader sentence for the hero's due-today metric (BR-162)."
+  },
+  "deckHeroNewSemanticLabel": "{count} new cards",
+  "@deckHeroNewSemanticLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Screen-reader sentence for the hero's new metric (BR-150)."
+  },
+  "deckHeroScheduledMetricWord": "Scheduled",
+  "@deckHeroScheduledMetricWord": {
+    "description": "Word half of the hero's fourth metric (BR-162): learned cards resting until a future review. Always the neutral role — this is the set with nothing to do."
+  },
+  "deckHeroScheduledSemanticLabel": "{count} cards scheduled for later",
+  "@deckHeroScheduledSemanticLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Screen-reader sentence for the hero's scheduled metric (BR-162)."
+  },
+  "deckOverdueBadgeLabel": "+{days}d",
+  "@deckOverdueBadgeLabel": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    },
+    "description": "Compact overdue badge on the deck status icon (BR-161): completed local days since the subtree's oldest due card. Kept terse on purpose; the full sentence lives in deckOverdueSemanticLabel."
+  },
+  "deckOverdueBadgeCapLabel": "99+",
+  "@deckOverdueBadgeCapLabel": {
+    "description": "The badge past 99 days: an exact count of a hundred-day backlog is noise at this size."
+  },
+  "deckOverdueSemanticLabel": "{count} cards due; oldest card is {days} days overdue",
+  "@deckOverdueSemanticLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "days": {
+        "type": "int"
+      }
+    },
+    "description": "What a screen reader hears for an overdue deck's status icon, instead of the visual '+7d'. Counts and days are plain numbers so the sentence stays translatable."
   }
 }
