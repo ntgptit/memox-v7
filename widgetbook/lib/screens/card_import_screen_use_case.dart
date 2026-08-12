@@ -68,11 +68,11 @@ class _CardImportDemo extends StatelessWidget {
   Widget build(BuildContext context) {
     final importer = _CatalogImportRepository(
       existingKeys: scenario == CardImportScenario.duplicates
-          ? <String>{
+          ? <CardImportDuplicateKey>{
               cardImportDuplicateKey(frontFolded: '사과', backFolded: 'apple'),
               cardImportDuplicateKey(frontFolded: '바다', backFolded: 'sea'),
             }
-          : <String>{},
+          : <CardImportDuplicateKey>{},
     );
 
     return ProviderScope(
@@ -147,11 +147,12 @@ final class _CatalogSourceRepository implements CardImportSourceRepository {
 final class _CatalogImportRepository implements CardImportRepository {
   _CatalogImportRepository({required this.existingKeys});
 
-  final Set<String> existingKeys;
+  final Set<CardImportDuplicateKey> existingKeys;
 
   @override
-  Future<Set<String>> readExistingDuplicateKeys(String deckId) async =>
-      existingKeys;
+  Future<Set<CardImportDuplicateKey>> readExistingDuplicateKeys(
+    String deckId,
+  ) async => existingKeys;
 
   @override
   Future<CardImportResult> commitImport({
@@ -159,7 +160,7 @@ final class _CatalogImportRepository implements CardImportRepository {
     required CardImportPlan plan,
   }) async {
     var imported = 0, skipped = 0;
-    final seen = <String>{};
+    final seen = <CardImportDuplicateKey>{};
     for (final record in plan.records) {
       final key = record.duplicateKey;
       final isDuplicate = existingKeys.contains(key) || seen.contains(key);

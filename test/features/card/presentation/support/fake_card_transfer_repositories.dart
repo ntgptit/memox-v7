@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/card/data/datasources/card_transfer_resolver_data_source.dart';
 import 'package:memox/features/card/domain/models/card_import_preview_model.dart';
@@ -48,13 +50,18 @@ final class FakeCardImportSourceRepository
 /// The commit contract: records every plan, applies the staged keys the way
 /// the real recheck would, and fails on demand (UC-10 E5).
 final class FakeCardImportCommitRepository implements CardImportRepository {
-  Set<String> existingKeys = <String>{};
+  Set<CardImportDuplicateKey> existingKeys = <CardImportDuplicateKey>{};
   Failure? nextCommitFailure;
   final List<CardImportPlan> commits = <CardImportPlan>[];
 
   @override
-  Future<Set<String>> readExistingDuplicateKeys(String deckId) async =>
-      existingKeys;
+  Future<Set<CardImportDuplicateKey>> readExistingDuplicateKeys(
+    String deckId,
+  ) async => existingKeys;
+
+  /// When set, the commit parks on this until the test completes it — how
+  /// the submitting lock is observed mid-flight (F).
+  Completer<void>? commitGate;
 
   @override
   Future<CardImportResult> commitImport({
@@ -62,11 +69,13 @@ final class FakeCardImportCommitRepository implements CardImportRepository {
     required CardImportPlan plan,
   }) async {
     commits.add(plan);
+    final gate = commitGate;
+    if (gate != null) await gate.future;
     final failure = nextCommitFailure;
     if (failure != null) throw failure;
 
     var imported = 0, skipped = 0;
-    final seen = <String>{};
+    final seen = <CardImportDuplicateKey>{};
     for (final record in plan.records) {
       final key = record.duplicateKey;
       final isDuplicate = existingKeys.contains(key) || seen.contains(key);

@@ -25,7 +25,7 @@ void main() {
 
   CardImportPreview classify(
     List<List<String>> rows, {
-    Set<String> existing = const <String>{},
+    Set<CardImportDuplicateKey> existing = const <CardImportDuplicateKey>{},
     bool hasHeader = true,
   }) => classifyImportRows(
     sheet: sheet(rows),
@@ -170,7 +170,7 @@ void main() {
           header,
           <String>['사과', 'APPLE', '', ''],
         ],
-        existing: <String>{key},
+        existing: <CardImportDuplicateKey>{key},
       );
 
       expect(preview.rows.single.status, CardImportRowStatus.duplicateExisting);

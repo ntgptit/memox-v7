@@ -32,7 +32,18 @@ final class CardImportWizardHarness {
     ],
   );
 
-  Future<void> pump(WidgetTester tester) async {
+  Future<void> pump(
+    WidgetTester tester, {
+    Size? surface,
+    double textScale = 1,
+    Locale? locale,
+  }) async {
+    if (surface != null) {
+      tester.view.physicalSize = surface;
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+    }
+
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -43,6 +54,7 @@ final class CardImportWizardHarness {
         ],
         child: MaterialApp(
           theme: buildLightTheme(),
+          locale: locale,
           localizationsDelegates: const <LocalizationsDelegate<Object>>[
             AppLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
@@ -50,7 +62,10 @@ final class CardImportWizardHarness {
             GlobalCupertinoLocalizations.delegate,
           ],
           supportedLocales: AppLocalizations.supportedLocales,
-          home: const CardImportScreen(deckId: 'deck-1'),
+          home: MediaQuery(
+            data: MediaQueryData(textScaler: TextScaler.linear(textScale)),
+            child: const CardImportScreen(deckId: 'deck-1'),
+          ),
         ),
       ),
     );
