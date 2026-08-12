@@ -7,7 +7,7 @@
 | **Scope** | Must-have của MVP. Ngoài phạm vi: should/nice-to-have, và mọi thứ ở mục "Điều đã cố ý không đặc tả" |
 | **Source of truth for** | UC-xx · main/alternative/error flow · UI state matrix của từng màn |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md` |
-| **Updated by task** | BR-162 — UC-06 bước 3: tile total Due/New + icon vàng/đỏ, hero breakdown ba tập |
+| **Updated by task** | BR-162 — UC-06 bước 3: tile total Due/New + icon vàng/đỏ, hero bốn tập 2×2; UC-07 bước 6 sửa postcondition Reset (card về Học mới, không phải Due ngay) |
 | **Last updated** | 2026-08-11 |
 
 Chỉ đặc tả must-have. Should-have và nice-to-have viết khi tới lượt — đặc tả
@@ -392,8 +392,10 @@ khoá để tránh bấm đúp.
    trạng thái lịch theo BR-161 — chưa đến hạn (outlined, neutral), đến hạn hôm
    nay (filled, vai time-pressure vàng/streak), quá hạn (missed + badge số ngày,
    cặp error container đỏ) — khác nhau bằng hình dạng/fill/badge chứ không chỉ
-   màu. Hero level summary breakdown thành ba tập rời nhau Overdue/Due today/New
-   theo BR-162.
+   màu. Hero level summary breakdown thành bốn tập rời nhau
+   Overdue/Due today/New/Scheduled theo BR-162 — lưới 2×2, mỗi hàng căn theo
+   alphabetic baseline; Scheduled là tập trung tính, không actionable và không
+   bao giờ là primary metric.
 4. Mở một deck hiển thị nội dung theo `content_type`: danh sách deck con, hoặc
    danh sách card, không bao giờ cả hai (BR-65).
 
@@ -449,7 +451,9 @@ giải thích vì sao chế độ ôn tập đang bị khoá (UC-03 A1)
      `end_reason = scheduler_reset`, `ended_at` được đặt (BR-83);
    - **không** đụng tới `study_answers` (BR-43), và **không** đụng tới
      `content_type` hay cấu trúc cây (BR-41).
-6. Người dùng quay về deck, toàn bộ card ở trạng thái mới và đến hạn ngay.
+6. Người dùng quay về deck; toàn bộ card đã trở lại trạng thái Học mới
+   (`learned_at`/`due_at` về NULL) và chưa thuộc tập Due/Reviewing; scheduler
+   được mở khoá lại, lịch sử trả lời cũ vẫn được giữ.
 
 **Alternative flows:**
 - **A1 — Reset mà không đổi chế độ:** hợp lệ. Dùng khi người dùng chỉ muốn học lại

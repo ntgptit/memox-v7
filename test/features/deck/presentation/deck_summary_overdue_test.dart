@@ -18,9 +18,10 @@ import 'package:memox/shared/widgets/mx_progress_bar.dart';
 import 'support/deck_screen_harness.dart';
 import 'support/fake_deck_repository.dart';
 
-/// The hero's three disjoint sets, inside a deck (BR-162): descending into A
-/// keeps the level's own breakdown on the panel — Overdue, Due today, New —
-/// and the `+Nd` badge stays pinned to the overdue metric.
+/// The hero's four disjoint sets, inside a deck (BR-162): descending into A
+/// keeps the level's own breakdown on the 2×2 baseline-aligned grid —
+/// Overdue, Due today, New, Scheduled — and the oldest backlog's age stays
+/// worded into the overdue metric.
 ///
 /// The core fixture is the mandated scenario: A holds B and C; C carries the
 /// workload. The panel at A's level folds the child subtrees.
@@ -172,7 +173,7 @@ void main() {
       expect(onPanel(find.text(english.deckSummaryTodayLabel)), findsOneWidget);
     });
 
-    testWidgets('the screen reader hears three sentences, each once', (
+    testWidgets('the screen reader hears four sentences, each once', (
       tester,
     ) async {
       await pumpLevel(
