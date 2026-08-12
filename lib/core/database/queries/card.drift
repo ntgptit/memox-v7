@@ -252,3 +252,14 @@ SELECT
     ) AS ancestryJson
 FROM decks self
 WHERE self.id = :deckId;
+
+-- The duplicate identities already in one deck, for import's BR-170 check —
+-- one statement for the whole preview and again for the in-transaction
+-- recheck, never a per-row lookup.
+cardKeysInDeck:
+SELECT front_folded, back_folded FROM cards WHERE deck_id = :deckId;
+
+-- The tags a batch would reuse, by folded identity (BR-93) — array-bound so
+-- an import with thirty distinct tags is one statement, not thirty.
+tagsByFoldedNames:
+SELECT * FROM tags WHERE name_folded IN :foldedNames;
