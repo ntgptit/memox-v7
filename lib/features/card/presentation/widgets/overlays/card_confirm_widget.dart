@@ -6,7 +6,7 @@ import '../../../../../shared/widgets/mx_confirm_dialog.dart';
 import '../../controllers/card_write_controller.dart';
 import '../../states/card_submit_state.dart';
 
-/// The delete confirmation for one card (UC-04 A5, BR-67).
+/// The delete confirmation for one card (UC-04 A2, BR-163).
 ///
 /// The same shape as `showDeckDeleteConfirm`: a `showX` entry point, and a
 /// `Consumer` that reads the delete controller and reports back through
@@ -15,7 +15,7 @@ import '../../states/card_submit_state.dart';
 /// pops once the write reports `savedAndClose`.
 ///
 /// **Counts nothing.** Unlike a deck, a card takes only itself and its own
-/// history; the message is a fixed sentence (BR-67), so there is no impact read
+/// history; the message is a fixed sentence, so there is no impact read
 /// to make before asking.
 Future<void> showCardDeleteConfirm(
   BuildContext context, {

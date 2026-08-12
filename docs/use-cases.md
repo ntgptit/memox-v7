@@ -7,7 +7,7 @@
 | **Scope** | Must-have của MVP. Ngoài phạm vi: should/nice-to-have, và mọi thứ ở mục "Điều đã cố ý không đặc tả" |
 | **Source of truth for** | UC-xx · main/alternative/error flow · UI state matrix của từng màn |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md` |
-| **Updated by task** | M99.17 — import/export được chốt là hướng quản lý hàng loạt sau MVP; chưa đặc tả UC trước khi triển khai |
+| **Updated by task** | BR-165…BR-167 — UC-04 thêm A5 (di chuyển thẻ), A6 (chọn nhiều), E5, E6 |
 | **Last updated** | 2026-08-12 |
 
 Chỉ đặc tả must-have. Should-have và nice-to-have viết khi tới lượt — đặc tả
@@ -232,10 +232,26 @@ Card đầu tiên của một deck `unset` được tạo qua UC-08, và chính 
   trạng thái ổn định của hệ thống.
 - **A3 — Deck còn card nhưng danh sách rỗng theo bộ lọc:** empty state của bộ
   lọc, không phải của deck.
+- **A5 — Di chuyển thẻ sang deck khác:** chọn deck đích trong cùng root; thẻ giữ
+  nguyên id, nội dung, study state, history, cờ và tag — chỉ đổi chỗ (BR-165).
+  Deck nguồn mất thẻ cuối thì về `unset`, deck đích đang `unset` thì thành
+  `card`, cùng transaction (BR-163).
+- **A6 — Chọn nhiều thẻ:** long-press một thẻ hoặc dùng action **Select** trên
+  app bar để vào chế độ chọn. Thanh hành động ngữ cảnh hiện số đã chọn và các
+  thao tác hàng loạt: Move, Add tag, Flag, Remove flag, Delete. **Select all**
+  chọn toàn bộ tập kết quả theo filter và search hiện tại, không chỉ phần đã
+  tải (BR-167). Mỗi thao tác là all-or-nothing (BR-166).
 - **A4 — Thêm liên tiếp nhiều card:** sau khi lưu, giữ form mở và xoá trống các ô.
 
 **Error flows:**
 - **E1 — Mặt trước hoặc mặt sau rỗng:** lỗi inline ở đúng ô đó.
+- **E5 — Deck đích không hợp lệ:** picker chỉ liệt kê deck cùng root, không phải
+  root, không phải loại `deck`, và không phải chính deck nguồn. Nếu một thao tác
+  vẫn tới được repository với đích không hợp lệ — deep link, hoặc cây đổi giữa
+  lúc mở picker và lúc xác nhận — nó bị từ chối kèm lý do có kiểu và không ghi
+  gì (BR-165).
+- **E6 — Một thẻ trong lô vi phạm:** cả lô rollback; danh sách và selection giữ
+  nguyên, lỗi nêu rõ vì sao (BR-166).
 - **E2 — Vượt 2000 ký tự:** lỗi inline, chặn nhập thêm.
 - **E3 — Ghi thất bại:** hiện lỗi, giữ nội dung; không tạo card không có study
 state.
@@ -243,7 +259,7 @@ state.
 **Postconditions:** Card tồn tại kèm đúng một study state, đúng scheduler và
 đúng generation của root deck.
 
-**Business rules:** BR-07, BR-08, BR-09, BR-10, BR-63, BR-163
+**Business rules:** BR-07, BR-08, BR-09, BR-10, BR-63, BR-163, BR-165, BR-166, BR-167
 **UI states:** loading · loaded · empty · submitting · error
 
 ---

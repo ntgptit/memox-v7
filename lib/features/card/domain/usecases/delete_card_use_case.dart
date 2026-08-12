@@ -6,8 +6,9 @@ import '../repositories/card_repository.dart';
 /// reached, and the study state and history cascade through the schema's
 /// foreign keys rather than through a rule this layer could check.
 ///
-/// The deck's `content_type` is deliberately left alone, even when this was the
-/// last card (BR-67) — resetting it is a separate, confirmed action.
+/// When this was the deck's last card the deck goes back to `unset` in the
+/// same write — BR-163 makes the type system state, not a setting, so there is
+/// nothing for the user to reset afterwards.
 class DeleteCardUseCase {
   const DeleteCardUseCase(this._repository);
 

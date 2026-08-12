@@ -14,7 +14,7 @@ import '../../deck/data/support/deck_repository_harness.dart';
 
 /// Card integration tests on a real SQLite database: create with exactly one
 /// study state (BR-09), per-scheduler initialisation, edit isolation (BR-10)
-/// and delete cascade (BR-67).
+/// and delete cascade (BR-163).
 void main() {
   final h = installDeckRepositoryHarness();
 

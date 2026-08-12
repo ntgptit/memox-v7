@@ -17,7 +17,7 @@ import '../models/scheduler_type_model.dart';
 ///   (BR-11);
 /// - `NotFoundFailure` — the referenced deck does not exist;
 /// - `ConflictFailure` — the operation contradicts the current tree state:
-///   content-type rules (BR-58, BR-63, BR-64), a non-empty reset (BR-68), an
+///   content-type rules (BR-58, BR-63, BR-64, BR-163), an
 ///   illegal move (BR-70, BR-74), a tree deeper than
 ///   `DeckEntity.maxTreeDepth` (BR-55), or a database constraint conflict;
 /// - `DatabaseFailure` — any other persistence error.

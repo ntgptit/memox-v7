@@ -11,7 +11,7 @@ import '../mappers/study_state_reset_mapper.dart';
 ///
 /// Card CRUD lives in `CardDao`; the two card-shaped queries kept here
 /// (`directCardCount`, `subtreeCardCount`) serve Deck use cases — the
-/// content-type reset (BR-68) and the deletion confirm (BR-04).
+/// automatic content-type unset (BR-163) and the deletion confirm (BR-04).
 ///
 /// This class speaks Drift rows and companions. They stop here: the repository
 /// maps them to domain entities and never lets one across (AD-01).

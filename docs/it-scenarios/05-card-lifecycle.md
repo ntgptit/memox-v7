@@ -146,3 +146,29 @@
 | 1 | Xoá card cuối và xác nhận | Điều hướng về màn hình deck; card, study state và history của nó biến mất cùng nhau |
 | 2 | Chạm hành động tạo | Có cả Tạo card và Tạo deck |
 | 3 | Xoá một card khi deck vẫn còn card khác | Ở lại card list; loại vẫn là card |
+
+## IT-CARD-012 — Chuyển card sang deck khác cùng cây giữ nguyên tiến độ
+
+- **Ưu tiên:** P0
+- **Tiền điều kiện:** Hai deck cùng root: nguồn loại `card` có đúng một card đã học và có tag, đích `unset`.
+- **Liên kết:** UC-04 A5, BR-165, BR-163.
+
+| Bước | Thao tác người dùng | Kết quả mong đợi |
+|---|---|---|
+| 1 | Ghi nhận state label, due badge, cờ và tag của card | Có baseline |
+| 2 | Nhấn giữ card, chọn Move, chọn deck đích | Card biến mất khỏi danh sách nguồn |
+| 3 | Mở deck đích | Card ở đó, mọi thứ ở bước 1 giữ nguyên |
+| 4 | Quan sát hai deck | Nguồn về `unset` (hiện cả hai lựa chọn tạo), đích thành loại `card` |
+| 5 | Restart app | Cả bốn thay đổi vẫn còn |
+
+## IT-CARD-013 — Đích không hợp lệ bị từ chối trước khi ghi
+
+- **Ưu tiên:** P0
+- **Tiền điều kiện:** Một root khác đã tồn tại, cùng scheduler và cùng generation với root hiện tại.
+- **Liên kết:** UC-04 E5, BR-165.
+
+| Bước | Thao tác người dùng | Kết quả mong đợi |
+|---|---|---|
+| 1 | Mở picker Move từ một selection | Danh sách chỉ có deck cùng root, không có root, không có deck đang chứa deck con, không có chính deck nguồn |
+| 2 | Gọi move tới một deck ở root khác | Bị từ chối kèm lý do; **không** tự đổi scheduler dù hai root trùng chế độ |
+| 3 | Quan sát dữ liệu sau lần từ chối | `deck_id`, `content_type` hai đầu và `updated_at` đều không đổi |

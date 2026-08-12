@@ -3,6 +3,7 @@ import 'package:memox/features/card/domain/entities/tag_entity.dart';
 import 'package:memox/features/card/domain/models/card_list_filter_model.dart';
 import 'package:memox/features/card/domain/models/card_list_item_model.dart';
 import 'package:memox/features/card/domain/models/card_list_sort_model.dart';
+import 'package:memox/features/card/domain/models/card_move_target_model.dart';
 import 'package:memox/features/card/domain/models/card_state_distribution_model.dart';
 import 'package:memox/features/card/domain/models/card_text_model.dart';
 import 'package:memox/features/card/domain/models/deck_context_model.dart';
@@ -169,6 +170,62 @@ final class CountingCardRepository implements CardRepository {
 
   @override
   Future<bool> readDeckHoldsCards(String deckId) async => false;
+
+  // ---- bulk (BR-165, BR-166, BR-167) --------------------------------------
+
+  final List<({List<String> cardIds, String targetDeckId})> moveCalls =
+      <({List<String> cardIds, String targetDeckId})>[];
+  final List<List<String>> bulkDeleteCalls = <List<String>>[];
+  final List<({List<String> cardIds, bool isFlagged})> bulkFlagCalls =
+      <({List<String> cardIds, bool isFlagged})>[];
+  final List<({List<String> cardIds, String name})> bulkTagCalls =
+      <({List<String> cardIds, String name})>[];
+  final List<({String deckId, CardListFilter filter, String? searchTerm})>
+  idsMatchingCalls =
+      <({String deckId, CardListFilter filter, String? searchTerm})>[];
+  List<String> idsMatching = const <String>[];
+
+  @override
+  Future<void> moveCards({
+    required List<String> cardIds,
+    required String targetDeckId,
+  }) async => moveCalls.add((cardIds: cardIds, targetDeckId: targetDeckId));
+
+  @override
+  Future<void> deleteCards(List<String> cardIds) async =>
+      bulkDeleteCalls.add(cardIds);
+
+  @override
+  Future<void> setCardsFlag({
+    required List<String> cardIds,
+    required bool isFlagged,
+  }) async => bulkFlagCalls.add((cardIds: cardIds, isFlagged: isFlagged));
+
+  @override
+  Future<void> addTagToCards({
+    required List<String> cardIds,
+    required TagName name,
+  }) async => bulkTagCalls.add((cardIds: cardIds, name: name.value));
+
+  @override
+  Future<List<String>> readCardIdsMatching(
+    String deckId, {
+    CardListFilter filter = CardListFilter.all,
+    String? searchTerm,
+    DateTime? now,
+  }) async {
+    idsMatchingCalls.add((
+      deckId: deckId,
+      filter: filter,
+      searchTerm: searchTerm,
+    ));
+
+    return idsMatching;
+  }
+
+  @override
+  Stream<List<CardMoveTarget>> watchMoveTargets(String sourceDeckId) =>
+      const Stream<List<CardMoveTarget>>.empty();
 }
 
 /// A never-read card for `catchError` returns whose type must be `CardEntity`.

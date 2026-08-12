@@ -4,11 +4,11 @@
 |---|---|
 | **Status** | đang áp dụng |
 | **Purpose** | Nói rõ kịch bản nào đã có test host chứng minh, kịch bản nào chưa, để bước 5–7 chỉ viết cái còn thiếu |
-| **Scope** | 134 kịch bản của `scenario-catalog.md`. Ngoài phạm vi: đánh giá chất lượng của test đã có |
+| **Scope** | 138 kịch bản của `scenario-catalog.md`. Ngoài phạm vi: đánh giá chất lượng của test đã có |
 | **Source of truth for** | Danh sách việc còn phải viết ở `HOST-FLOW`/`HOST-WIDGET` |
 | **Depends on** | `scenario-catalog.md`, `12-testing-pyramid-audit.md` |
-| **Updated by task** | BR-150 coverage — hai số New/Due có test widget + data thật, không còn chỉ Due |
-| **Last updated** | 2026-08-11 |
+| **Updated by task** | M99.18 — bốn kịch bản bulk management, mỗi cái nối tới test host đã viết |
+| **Last updated** | 2026-08-12 |
 
 **Bản đồ này là danh sách việc, không phải giấy chứng nhận.** Nó nối kịch bản
 với test *nhắc tới cùng một ID luật*. Một test nhắc BR-62 gần như chắc chắn
@@ -25,7 +25,7 @@ bản muốn. Vì vậy cột trạng thái đọc là:
 
 | Trạng thái | Số kịch bản |
 |---|---|
-| đã có | **134** |
+| đã có | **138** |
 | một phần | **0** |
 | chưa có | **0** |
 
@@ -41,6 +41,10 @@ bản muốn. Vì vậy cột trạng thái đọc là:
 |---|---|---|
 | IT-NAV-005 | `HOST-WIDGET` | `test/integration/widgets/navigation_widget_test.dart` |
 | IT-ORG-012 | `HOST-WIDGET` | `test/integration/flows/card_window_flow_test.dart` (nửa SQL) + `test/features/card/presentation/card_list_screen_test.dart` (nửa màn hình) |
+| IT-CARD-012 | `HOST-FLOW` | UC-04 A5, BR-163, BR-165 | `test/features/card/data/card_move_repository_test.dart` |
+| IT-CARD-013 | `HOST-FLOW` | UC-04 E5, BR-165 | `test/features/card/data/card_move_repository_test.dart` |
+| IT-ORG-013 | `HOST-WIDGET` | UC-04 A6, BR-167 | `test/features/card/presentation/card_selection_test.dart` |
+| IT-ORG-014 | `HOST-WIDGET + HOST-FLOW` | UC-04 A6, UC-04 E6, BR-166 | `test/features/card/presentation/card_selection_test.dart` (xác nhận) + `test/features/card/data/card_bulk_mutation_test.dart` (all-or-nothing) |
 | IT-MODE-013 | `HOST-WIDGET` | `test/integration/widgets/study_mode_accessibility_widget_test.dart` (bước 2) + `test/features/study/presentation/study_accessibility_test.dart` (bước 1, 4) |
 | IT-STUDY-006 | `HOST-WIDGET + HOST-FLOW` | `test/integration/widgets/blocked_mode_widget_test.dart` (BR-100) |
 

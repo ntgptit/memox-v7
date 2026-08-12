@@ -1,17 +1,20 @@
 @Tags(<String>['golden', 'review'])
 library;
 
-import 'package:flutter/material.dart' show Brightness, Widget;
+import 'package:flutter/material.dart' show Brightness, Icons, Widget;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/card/di/card_repository_provider.dart';
 import 'package:memox/features/card/domain/models/card_list_filter_model.dart';
 import 'package:memox/features/card/domain/models/card_list_item_model.dart';
 import 'package:memox/features/card/domain/models/card_state_distribution_model.dart';
+import 'package:memox/features/card/domain/models/card_move_target_model.dart';
 import 'package:memox/features/card/domain/models/card_state_model.dart';
 import 'package:memox/features/card/domain/models/deck_context_model.dart';
 import 'package:memox/features/card/presentation/screens/card_editor_screen.dart';
 import 'package:memox/features/card/presentation/screens/card_list_screen.dart';
+import 'package:memox/features/card/presentation/widgets/items/card_tile_widget.dart';
+import 'package:memox/l10n/generated/app_localizations_en.dart';
 
 import '../features/card/presentation/support/fake_card_repository.dart';
 import '../support/study_render.dart';
@@ -198,4 +201,149 @@ void main() {
 
     await matchesReviewGolden('goldens/card_editor_edit.png');
   });
+
+  testWidgets('card list — selection mode, two rows chosen', (tester) async {
+    final repo = _demoList(_demoRows());
+    addTearDown(repo.dispose);
+
+    await pumpReview(
+      tester,
+      _scope(repo, const CardListScreen(deckId: 'demo'), Brightness.light),
+    );
+    await _enterSelection(tester, taps: 2);
+
+    await matchesReviewGolden('goldens/card_list_selection_light.png');
+  });
+
+  testWidgets('card list — selection mode, dark', (tester) async {
+    final repo = _demoList(_demoRows());
+    addTearDown(repo.dispose);
+
+    await pumpReview(
+      tester,
+      _scope(repo, const CardListScreen(deckId: 'demo'), Brightness.dark),
+    );
+    await _enterSelection(tester, taps: 2);
+
+    await matchesReviewGolden('goldens/card_list_selection_dark.png');
+  });
+
+  testWidgets('card list — Select all covers the filtered deck', (
+    tester,
+  ) async {
+    // 142 rows matched, seven loaded: the label has to say the number the
+    // action would act on, not the number on screen (BR-167).
+    final repo = _demoList(_demoRows())
+      ..idsMatching = <String>[for (var i = 0; i < 142; i++) 'c$i'];
+    addTearDown(repo.dispose);
+
+    await pumpReview(
+      tester,
+      _scope(repo, const CardListScreen(deckId: 'demo'), Brightness.light),
+    );
+    await _enterSelection(tester);
+    await tester.tap(find.byIcon(Icons.select_all));
+    await tester.pumpAndSettle();
+
+    await matchesReviewGolden('goldens/card_list_select_all_light.png');
+  });
+
+  testWidgets('bulk delete — the confirmation names count and consequence', (
+    tester,
+  ) async {
+    final repo = _demoList(_demoRows());
+    addTearDown(repo.dispose);
+
+    await pumpReview(
+      tester,
+      _scope(repo, const CardListScreen(deckId: 'demo'), Brightness.light),
+    );
+    await _enterSelection(tester, taps: 2);
+    await _openBulkAction(
+      tester,
+      AppLocalizationsEn().cardSelectionDeleteAction,
+    );
+
+    await matchesReviewGolden('goldens/card_bulk_delete_dialog_light.png');
+  });
+
+  testWidgets('move picker — legal targets in the same tree', (tester) async {
+    final repo = _demoList(_demoRows())
+      ..moveTargets = const <CardMoveTarget>[
+        CardMoveTarget(
+          deckId: 'd1',
+          name: 'TOPIK I · Unit 2',
+          parentName: 'Korean',
+        ),
+        CardMoveTarget(
+          deckId: 'd2',
+          name: 'Everyday phrases',
+          parentName: 'Korean',
+        ),
+        CardMoveTarget(deckId: 'd3', name: 'Hard words', parentName: 'Korean'),
+      ];
+    addTearDown(repo.dispose);
+
+    await pumpReview(
+      tester,
+      _scope(repo, const CardListScreen(deckId: 'demo'), Brightness.light),
+    );
+    await _enterSelection(tester, taps: 2);
+    await _openBulkAction(tester, AppLocalizationsEn().cardSelectionMoveAction);
+
+    await matchesReviewGolden('goldens/card_move_picker_light.png');
+  });
+
+  testWidgets('move picker — nothing legal to move into', (tester) async {
+    // The empty state is the common case in a shallow tree, so it is a render
+    // worth reviewing rather than an edge case: it must explain why, not just
+    // show a blank sheet.
+    final repo = _demoList(_demoRows());
+    addTearDown(repo.dispose);
+
+    await pumpReview(
+      tester,
+      _scope(repo, const CardListScreen(deckId: 'demo'), Brightness.light),
+    );
+    await _enterSelection(tester, taps: 2);
+    await _openBulkAction(tester, AppLocalizationsEn().cardSelectionMoveAction);
+
+    await matchesReviewGolden('goldens/card_move_picker_empty_light.png');
+  });
+}
+
+/// The seven-row spread the list renders in every selection demo.
+List<CardListItemModel> _demoRows() => <CardListItemModel>[
+  demoItem('c1', '사과', 'apple / quả táo', CardState.isNew),
+  demoItem('c2', '바다', 'sea / biển', CardState.mastered),
+  demoItem(
+    'c3',
+    '감사합니다',
+    'thank you / cảm ơn',
+    CardState.beginning,
+    flag: true,
+  ),
+  demoItem('c4', '책', 'book / quyển sách', CardState.reviewing),
+  demoItem('c5', '물', 'water / nước', CardState.isNew),
+  demoItem('c6', '안녕하세요', 'hello / xin chào', CardState.beginning, flag: true),
+  demoItem('c7', '산', 'mountain / ngọn núi', CardState.mastered),
+];
+
+/// Long-presses the first row, then taps [taps] - 1 more — the gesture a user
+/// makes rather than a controller call, so the render is of the real entry path.
+Future<void> _enterSelection(WidgetTester tester, {int taps = 1}) async {
+  await tester.longPress(find.byType(CardTileWidget).first);
+  await tester.pumpAndSettle();
+  for (var i = 1; i < taps; i++) {
+    await tester.tap(find.byType(CardTileWidget).at(i));
+    await tester.pumpAndSettle();
+  }
+}
+
+/// Opens the overflow and picks one bulk action by its label.
+Future<void> _openBulkAction(WidgetTester tester, String label) async {
+  await tester.tap(find.byIcon(Icons.more_vert));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text(label).last);
+  await tester.pumpAndSettle();
 }

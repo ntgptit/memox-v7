@@ -59,6 +59,7 @@ class MxCard extends StatefulWidget {
     this.color,
     this.borderColor,
     this.onTap,
+    this.onLongPress,
     super.key,
   });
 
@@ -108,6 +109,11 @@ class MxCard extends StatefulWidget {
   /// a card whose contents genuinely do not name it, that is the point to add it,
   /// with the caller in hand to check the announcement against.
   final VoidCallback? onTap;
+
+  /// Long-press on the whole surface — the Android gesture for entering a
+  /// selection mode. Optional and independent of [onTap]: a card may be
+  /// tappable without being selectable, and the ink layer already exists.
+  final VoidCallback? onLongPress;
 
   @override
   State<MxCard> createState() => _MxCardState();
@@ -181,6 +187,7 @@ class _MxCardState extends State<MxCard> {
           type: MaterialType.transparency,
           child: InkWell(
             onTap: tap,
+            onLongPress: widget.onLongPress,
             onFocusChange: _onFocusChanged,
             // One property for hover, press and focus, so the three cannot be
             // set from three different places. It also clips to the card's own

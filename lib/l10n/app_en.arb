@@ -590,7 +590,7 @@
   },
   "deckConflictMessage": "That is not possible with this deck right now.",
   "@deckConflictMessage": {
-    "description": "Shown when a deck write is refused because the tree changed or a rule forbids it — a non-empty reset, an illegal move, a depth limit (BR-55, BR-64, BR-68, BR-70, BR-74). The specific rule is explained by the control that was used."
+    "description": "Shown when a deck write is refused because the tree changed or a rule forbids it — a non-empty reset, an illegal move, a depth limit (BR-55, BR-64, BR-70, BR-74, BR-165). The specific rule is explained by the control that was used."
   },
   "startupErrorTitle": "MemoX could not start",
   "@startupErrorTitle": {
@@ -622,11 +622,11 @@
   },
   "deckMoveRejectRootDeck": "A top-level deck cannot be moved into another deck.",
   "@deckMoveRejectRootDeck": {
-    "description": "Why a deck write was refused (UC-09, BR-55, BR-58, BR-68)."
+    "description": "Why a deck write was refused (UC-09, BR-55, BR-58, BR-165)."
   },
   "deckConflictParentHoldsCards": "This deck holds cards, so it cannot hold decks.",
   "@deckConflictParentHoldsCards": {
-    "description": "Why a deck write was refused (UC-09, BR-55, BR-58, BR-68)."
+    "description": "Why a deck write was refused (UC-09, BR-55, BR-58, BR-165)."
   },
   "deckConflictParentAtMaxDepth": "This deck already sits at the deepest allowed level ({limit}).",
   "@deckConflictParentAtMaxDepth": {
@@ -635,19 +635,19 @@
         "type": "int"
       }
     },
-    "description": "Why a deck write was refused (UC-09, BR-55, BR-58, BR-68)."
+    "description": "Why a deck write was refused (UC-09, BR-55, BR-58, BR-165)."
   },
   "deckConflictUnknownContentType": "This deck was made by a newer version of the app.",
   "@deckConflictUnknownContentType": {
-    "description": "Why a deck write was refused (UC-09, BR-55, BR-58, BR-68)."
+    "description": "Why a deck write was refused (UC-09, BR-55, BR-58, BR-165)."
   },
   "deckConflictDepthUnknowable": "This deck sits deeper than the app supports.",
   "@deckConflictDepthUnknowable": {
-    "description": "Why a deck write was refused (UC-09, BR-55, BR-58, BR-68)."
+    "description": "Why a deck write was refused (UC-09, BR-55, BR-58, BR-165)."
   },
   "deckConflictHeightUnknowable": "This deck holds more nested levels than the app supports.",
   "@deckConflictHeightUnknowable": {
-    "description": "Why a deck write was refused (UC-09, BR-55, BR-58, BR-68)."
+    "description": "Why a deck write was refused (UC-09, BR-55, BR-58, BR-165)."
   },
   "cardListTitle": "Flashcards",
   "@cardListTitle": {
@@ -1077,6 +1077,136 @@
   "@cardDetailTooLongError": {
     "description": "Inline error when an optional detail reaches its length limit (BR-95)."
   },
+  "cardSelectAction": "Select",
+  "@cardSelectAction": {
+    "description": "App-bar action that enters selection mode without a long-press (UC-04 A6). A visible affordance, because a hidden gesture is no entry point for someone who does not know it."
+  },
+  "cardSelectionCountLabel": "{count} selected",
+  "@cardSelectionCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Contextual bar title while a subset is selected (BR-167)."
+  },
+  "cardSelectionAllLabel": "All {count} cards selected",
+  "@cardSelectionAllLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Contextual bar title after Select all: the selection covers the whole filtered result, not only the loaded rows (BR-167)."
+  },
+  "cardSelectionCloseLabel": "Leave selection",
+  "@cardSelectionCloseLabel": {
+    "description": "Screen-reader label of the contextual bar's close button."
+  },
+  "cardSelectAllAction": "Select all",
+  "@cardSelectAllAction": {
+    "description": "Selects every card the current filter and search match (BR-167)."
+  },
+  "cardSelectionMoveAction": "Move",
+  "@cardSelectionMoveAction": {
+    "description": "Bulk action: move the selection into another deck of the same tree (BR-165)."
+  },
+  "cardSelectionAddTagAction": "Add tag",
+  "@cardSelectionAddTagAction": {
+    "description": "Bulk action: add one tag to every selected card (BR-166)."
+  },
+  "cardSelectionFlagAction": "Flag",
+  "@cardSelectionFlagAction": {
+    "description": "Bulk action: set the flag on every selected card. Explicit, never a toggle (BR-166)."
+  },
+  "cardSelectionUnflagAction": "Remove flag",
+  "@cardSelectionUnflagAction": {
+    "description": "Bulk action: clear the flag on every selected card."
+  },
+  "cardSelectionDeleteAction": "Delete",
+  "@cardSelectionDeleteAction": {
+    "description": "Bulk action: delete the selection. Destructive role."
+  },
+  "cardSelectionMoreLabel": "More actions",
+  "@cardSelectionMoreLabel": {
+    "description": "Screen-reader label of the contextual bar's overflow, which holds the actions that do not fit a narrow screen."
+  },
+  "cardSelectedSemanticLabel": "Selected",
+  "@cardSelectedSemanticLabel": {
+    "description": "Announced for a selected row beside its content: selection is never carried by colour alone."
+  },
+  "cardBulkDeleteTitle": "Delete {count} cards?",
+  "@cardBulkDeleteTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Title of the bulk delete confirmation. Names the number rather than asking a generic 'are you sure' (UC-04 A6)."
+  },
+  "cardBulkDeleteMessage": "Their study history is deleted too. This can't be undone.",
+  "@cardBulkDeleteMessage": {
+    "description": "Body of the bulk delete confirmation: what is lost beyond the cards themselves."
+  },
+  "cardBulkDeleteConfirmAction": "Delete cards",
+  "@cardBulkDeleteConfirmAction": {
+    "description": "Destructive confirm button of the bulk delete dialog."
+  },
+  "cardBulkDeletedMessage": "{count} cards deleted",
+  "@cardBulkDeletedMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Result message after a bulk delete commits. A statement of what happened, deliberately not an Undo: this build cannot restore the study history it cascaded."
+  },
+  "cardBulkMovedMessage": "{count} cards moved",
+  "@cardBulkMovedMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Result message after a bulk move commits."
+  },
+  "cardBulkUpdatedMessage": "{count} cards updated",
+  "@cardBulkUpdatedMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Result message after a bulk flag or tag write commits."
+  },
+  "cardMoveTargetTitle": "Move to deck",
+  "@cardMoveTargetTitle": {
+    "description": "Title of the move-target picker (UC-04 A5)."
+  },
+  "cardMoveEmptyTitle": "No deck to move to",
+  "@cardMoveEmptyTitle": {
+    "description": "Empty state of the move picker: every candidate was excluded (BR-165)."
+  },
+  "cardMoveEmptyMessage": "Cards move only into another deck of this same tree that can hold cards.",
+  "@cardMoveEmptyMessage": {
+    "description": "Explains why the picker is empty and what would make a target valid."
+  },
+  "cardConflictMoveSameDeck": "The card is already in that deck.",
+  "@cardConflictMoveSameDeck": {
+    "description": "Typed refusal reason for a move (BR-165)."
+  },
+  "cardConflictMoveTargetIsRoot": "A top-level deck holds decks, not cards.",
+  "@cardConflictMoveTargetIsRoot": {
+    "description": "Typed refusal reason for a move (BR-58, BR-165)."
+  },
+  "cardConflictMoveTargetHoldsDecks": "That deck holds decks, so it can't hold cards.",
+  "@cardConflictMoveTargetHoldsDecks": {
+    "description": "Typed refusal reason for a move (BR-64, BR-165)."
+  },
+  "cardConflictMoveCrossRoot": "A card can't move to a deck in another tree.",
+  "@cardConflictMoveCrossRoot": {
+    "description": "Typed refusal reason for a move (BR-165). Refused even when both trees happen to use the same scheduler."
+  },
   "cardEditorDangerZone": "Danger zone",
   "@cardEditorDangerZone": {
     "description": "Heading above the delete action in the card editor (UC-04 A5)."
@@ -1091,7 +1221,7 @@
   },
   "cardDeleteConfirmMessage": "The card and its study history are removed. This can't be undone.",
   "@cardDeleteConfirmMessage": {
-    "description": "Body of the card delete confirmation, stating what is lost (BR-67)."
+    "description": "Body of the card delete confirmation, stating what is lost. Deleting the last card also returns the deck to unset (BR-163)."
   },
   "cardDeleteConfirmAction": "Delete",
   "@cardDeleteConfirmAction": {

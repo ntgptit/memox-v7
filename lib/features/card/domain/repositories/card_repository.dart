@@ -4,6 +4,7 @@ import '../failures/tag_validation_failure.dart';
 import '../models/card_list_filter_model.dart';
 import '../models/card_list_item_model.dart';
 import '../models/card_list_sort_model.dart';
+import '../models/card_move_target_model.dart';
 import '../models/card_state_distribution_model.dart';
 import '../models/card_text_model.dart';
 import '../models/deck_context_model.dart';
@@ -143,9 +144,77 @@ abstract interface class CardRepository {
     CardDetailText? pronunciation,
   });
 
-  /// Deletes a card; its study state and history cascade. The deck's
-  /// `content_type` stays as it is, even for the last card (BR-67).
+  /// Deletes a card; its study state and history cascade. Deleting the last
+  /// card returns the deck to `unset` in the same write — BR-163 makes the type
+  /// system state, not a setting.
   Future<void> deleteCard(String cardId);
+
+  /// Moves [cardIds] into [targetDeckId] — one transaction, all or nothing
+  /// (BR-165, BR-166).
+  ///
+  /// **The one primitive both callers use.** Moving a single card passes a
+  /// one-element list; there is no second transaction path to keep in step.
+  /// Only `deck_id` and `updated_at` are written: id, both faces, the three
+  /// details, study state, review history, flag, tags and `created_at` all
+  /// survive the move untouched.
+  ///
+  /// Refuses — without writing anything — a target that is the source deck,
+  /// a root, a deck holding sub-decks, or a deck in another tree. Both ends of
+  /// the move keep their content type honest in the same transaction: an
+  /// emptied source goes back to `unset`, an `unset` target becomes `card`
+  /// (BR-163).
+  Future<void> moveCards({
+    required List<String> cardIds,
+    required String targetDeckId,
+  });
+
+  /// Deletes [cardIds] with their study state and history — one transaction
+  /// (BR-166). A deck left empty goes back to `unset` (BR-163).
+  Future<void> deleteCards(List<String> cardIds);
+
+  /// Sets the flag on [cardIds] to [isFlagged] (BR-92, BR-166).
+  ///
+  /// **Explicit, never a toggle.** A batch toggle derived from the first card
+  /// flips a mixed selection into another mixed selection, which is not an
+  /// outcome any user asked for.
+  Future<void> setCardsFlag({
+    required List<String> cardIds,
+    required bool isFlagged,
+  });
+
+  /// Adds one tag to every card in [cardIds] (BR-93, BR-94, BR-166).
+  ///
+  /// Reuses the tag that owns the folded name, is a no-op for a card that
+  /// already carries it, and refuses the **whole** batch if any card would
+  /// pass ten tags.
+  Future<void> addTagToCards({
+    required List<String> cardIds,
+    required TagName name,
+  });
+
+  /// The decks [sourceDeckId]'s cards may move into (BR-165, UC-04 A5).
+  ///
+  /// Watched rather than read once: the picker stays open while the tree can
+  /// change under it, and a deck that stops being a legal target should leave
+  /// the list rather than be refused after the tap.
+  ///
+  /// Every row is legal by construction — same root, not a root, not holding
+  /// sub-decks, not the source — so the picker renders the list and does not
+  /// re-derive the rule.
+  Stream<List<CardMoveTarget>> watchMoveTargets(String sourceDeckId);
+
+  /// The ids a deck's list currently matches, under the same filter and search
+  /// term the screen is showing (BR-167).
+  ///
+  /// For Select all. Ids only: the selection is a set of strings, and carrying
+  /// every front and back across the isolate boundary to build it is the cost
+  /// this exists to avoid.
+  Future<List<String>> readCardIdsMatching(
+    String deckId, {
+    CardListFilter filter = CardListFilter.all,
+    String? searchTerm,
+    DateTime? now,
+  });
 
   /// Sets the user's flag on a card (BR-92).
   ///

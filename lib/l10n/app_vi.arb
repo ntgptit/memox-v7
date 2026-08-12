@@ -590,7 +590,7 @@
   },
   "deckConflictMessage": "Hiện không thể làm điều đó với bộ thẻ này.",
   "@deckConflictMessage": {
-    "description": "Shown when a deck write is refused because the tree changed or a rule forbids it — a non-empty reset, an illegal move, a depth limit (BR-55, BR-64, BR-68, BR-70, BR-74). The specific rule is explained by the control that was used."
+    "description": "Shown when a deck write is refused because the tree changed or a rule forbids it — a non-empty reset, an illegal move, a depth limit (BR-55, BR-64, BR-70, BR-74, BR-165). The specific rule is explained by the control that was used."
   },
   "startupErrorTitle": "Không khởi động được MemoX",
   "@startupErrorTitle": {
@@ -627,10 +627,10 @@
   "deckConflictDepthUnknowable": "Bộ thẻ này nằm sâu hơn mức ứng dụng hỗ trợ.",
   "deckConflictHeightUnknowable": "Bộ thẻ này chứa nhiều cấp lồng hơn mức ứng dụng hỗ trợ.",
   "@deckMoveRejectRootDeck": {
-    "description": "Lý do một thao tác ghi bộ thẻ bị từ chối (UC-09, BR-55, BR-58, BR-68)."
+    "description": "Lý do một thao tác ghi bộ thẻ bị từ chối (UC-09, BR-55, BR-58, BR-165)."
   },
   "@deckConflictParentHoldsCards": {
-    "description": "Lý do một thao tác ghi bộ thẻ bị từ chối (UC-09, BR-55, BR-58, BR-68)."
+    "description": "Lý do một thao tác ghi bộ thẻ bị từ chối (UC-09, BR-55, BR-58, BR-165)."
   },
   "@deckConflictParentAtMaxDepth": {
     "placeholders": {
@@ -638,16 +638,16 @@
         "type": "int"
       }
     },
-    "description": "Lý do một thao tác ghi bộ thẻ bị từ chối (UC-09, BR-55, BR-58, BR-68)."
+    "description": "Lý do một thao tác ghi bộ thẻ bị từ chối (UC-09, BR-55, BR-58, BR-165)."
   },
   "@deckConflictUnknownContentType": {
-    "description": "Lý do một thao tác ghi bộ thẻ bị từ chối (UC-09, BR-55, BR-58, BR-68)."
+    "description": "Lý do một thao tác ghi bộ thẻ bị từ chối (UC-09, BR-55, BR-58, BR-165)."
   },
   "@deckConflictDepthUnknowable": {
-    "description": "Lý do một thao tác ghi bộ thẻ bị từ chối (UC-09, BR-55, BR-58, BR-68)."
+    "description": "Lý do một thao tác ghi bộ thẻ bị từ chối (UC-09, BR-55, BR-58, BR-165)."
   },
   "@deckConflictHeightUnknowable": {
-    "description": "Lý do một thao tác ghi bộ thẻ bị từ chối (UC-09, BR-55, BR-58, BR-68)."
+    "description": "Lý do một thao tác ghi bộ thẻ bị từ chối (UC-09, BR-55, BR-58, BR-165)."
   },
   "cardListTitle": "Thẻ ghi nhớ",
   "@cardListTitle": {
@@ -1077,6 +1077,136 @@
   "@cardDetailTooLongError": {
     "description": "Inline error when an optional detail reaches its length limit (BR-95)."
   },
+  "cardSelectAction": "Chọn",
+  "@cardSelectAction": {
+    "description": "App-bar action that enters selection mode without a long-press (UC-04 A6). A visible affordance, because a hidden gesture is no entry point for someone who does not know it."
+  },
+  "cardSelectionCountLabel": "Đã chọn {count}",
+  "@cardSelectionCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Contextual bar title while a subset is selected (BR-167)."
+  },
+  "cardSelectionAllLabel": "Đã chọn tất cả {count} thẻ",
+  "@cardSelectionAllLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Contextual bar title after Select all: the selection covers the whole filtered result, not only the loaded rows (BR-167)."
+  },
+  "cardSelectionCloseLabel": "Thoát chế độ chọn",
+  "@cardSelectionCloseLabel": {
+    "description": "Screen-reader label of the contextual bar's close button."
+  },
+  "cardSelectAllAction": "Chọn tất cả",
+  "@cardSelectAllAction": {
+    "description": "Selects every card the current filter and search match (BR-167)."
+  },
+  "cardSelectionMoveAction": "Chuyển",
+  "@cardSelectionMoveAction": {
+    "description": "Bulk action: move the selection into another deck of the same tree (BR-165)."
+  },
+  "cardSelectionAddTagAction": "Gắn thẻ",
+  "@cardSelectionAddTagAction": {
+    "description": "Bulk action: add one tag to every selected card (BR-166)."
+  },
+  "cardSelectionFlagAction": "Đánh dấu cờ",
+  "@cardSelectionFlagAction": {
+    "description": "Bulk action: set the flag on every selected card. Explicit, never a toggle (BR-166)."
+  },
+  "cardSelectionUnflagAction": "Bỏ cờ",
+  "@cardSelectionUnflagAction": {
+    "description": "Bulk action: clear the flag on every selected card."
+  },
+  "cardSelectionDeleteAction": "Xoá",
+  "@cardSelectionDeleteAction": {
+    "description": "Bulk action: delete the selection. Destructive role."
+  },
+  "cardSelectionMoreLabel": "Thêm thao tác",
+  "@cardSelectionMoreLabel": {
+    "description": "Screen-reader label of the contextual bar's overflow, which holds the actions that do not fit a narrow screen."
+  },
+  "cardSelectedSemanticLabel": "Đã chọn",
+  "@cardSelectedSemanticLabel": {
+    "description": "Announced for a selected row beside its content: selection is never carried by colour alone."
+  },
+  "cardBulkDeleteTitle": "Xoá {count} thẻ?",
+  "@cardBulkDeleteTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Title of the bulk delete confirmation. Names the number rather than asking a generic 'are you sure' (UC-04 A6)."
+  },
+  "cardBulkDeleteMessage": "Lịch sử học của chúng cũng bị xoá. Không thể hoàn tác.",
+  "@cardBulkDeleteMessage": {
+    "description": "Body of the bulk delete confirmation: what is lost beyond the cards themselves."
+  },
+  "cardBulkDeleteConfirmAction": "Xoá thẻ",
+  "@cardBulkDeleteConfirmAction": {
+    "description": "Destructive confirm button of the bulk delete dialog."
+  },
+  "cardBulkDeletedMessage": "Đã xoá {count} thẻ",
+  "@cardBulkDeletedMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Result message after a bulk delete commits. A statement of what happened, deliberately not an Undo: this build cannot restore the study history it cascaded."
+  },
+  "cardBulkMovedMessage": "Đã chuyển {count} thẻ",
+  "@cardBulkMovedMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Result message after a bulk move commits."
+  },
+  "cardBulkUpdatedMessage": "Đã cập nhật {count} thẻ",
+  "@cardBulkUpdatedMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Result message after a bulk flag or tag write commits."
+  },
+  "cardMoveTargetTitle": "Chuyển tới bộ thẻ",
+  "@cardMoveTargetTitle": {
+    "description": "Title of the move-target picker (UC-04 A5)."
+  },
+  "cardMoveEmptyTitle": "Không có bộ thẻ nào để chuyển tới",
+  "@cardMoveEmptyTitle": {
+    "description": "Empty state of the move picker: every candidate was excluded (BR-165)."
+  },
+  "cardMoveEmptyMessage": "Thẻ chỉ chuyển được sang bộ thẻ khác trong cùng cây và bộ thẻ đó phải chứa được thẻ.",
+  "@cardMoveEmptyMessage": {
+    "description": "Explains why the picker is empty and what would make a target valid."
+  },
+  "cardConflictMoveSameDeck": "Thẻ đã nằm trong bộ thẻ đó.",
+  "@cardConflictMoveSameDeck": {
+    "description": "Typed refusal reason for a move (BR-165)."
+  },
+  "cardConflictMoveTargetIsRoot": "Bộ thẻ cấp cao nhất chứa bộ thẻ con, không chứa thẻ.",
+  "@cardConflictMoveTargetIsRoot": {
+    "description": "Typed refusal reason for a move (BR-58, BR-165)."
+  },
+  "cardConflictMoveTargetHoldsDecks": "Bộ thẻ đó đang chứa bộ thẻ con nên không thể chứa thẻ.",
+  "@cardConflictMoveTargetHoldsDecks": {
+    "description": "Typed refusal reason for a move (BR-64, BR-165)."
+  },
+  "cardConflictMoveCrossRoot": "Không thể chuyển thẻ sang bộ thẻ thuộc cây khác.",
+  "@cardConflictMoveCrossRoot": {
+    "description": "Typed refusal reason for a move (BR-165). Refused even when both trees happen to use the same scheduler."
+  },
   "cardEditorDangerZone": "Vùng nguy hiểm",
   "@cardEditorDangerZone": {
     "description": "Heading above the delete action (UC-04 A5)."
@@ -1091,7 +1221,7 @@
   },
   "cardDeleteConfirmMessage": "Thẻ và lịch sử học của nó sẽ bị xóa. Không thể hoàn tác.",
   "@cardDeleteConfirmMessage": {
-    "description": "Body of the card delete confirmation (BR-67)."
+    "description": "Body of the card delete confirmation. Deleting the last card also returns the deck to unset (BR-163)."
   },
   "cardDeleteConfirmAction": "Xóa",
   "@cardDeleteConfirmAction": {

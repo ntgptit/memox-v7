@@ -7,7 +7,7 @@
 | **Scope** | Luật nghiệp vụ, validation rule, state machine, edge case của phạm vi MVP. Ngoài phạm vi: quyết định kiến trúc (`architecture.md`), hình dạng dữ liệu (`data-model.md`), luồng người dùng (`use-cases.md`) |
 | **Source of truth for** | BR-xx · validation rule · entity state machine · edge case |
 | **Depends on** | `document-conventions.md`, `product.md`, `architecture.md` |
-| **Updated by task** | BR-164 mới — đổi scheduler khi chưa khoá phải đóng session đang mở; BR-12 và BR-13 nói rõ ai ghi khoá, khi nào, và rằng chọn lại đúng chế độ cũ là no-op |
+| **Updated by task** | BR-165, BR-166, BR-167 — di chuyển thẻ trong cùng root; mutation hàng loạt all-or-nothing; selection theo toàn bộ tập đã lọc |
 | **Last updated** | 2026-08-12 |
 
 Format tuân theo `document-conventions.md` §6.2. Từ khoá MUST / SHOULD / MAY
@@ -426,6 +426,9 @@ phép đọc `card_study_states` tại thời điểm vẽ. Thẻ đi lùi từ 
 | BR-92 | active | Cờ đánh dấu thẻ MUST là nội dung: sửa thẻ và reset learning progress MUST NOT đụng tới nó; xoá thẻ MUST xoá nó theo cascade. Hệ thống MAY **bật** cờ (BR-104) nhưng MUST NOT tự tắt — bỏ dấu là hành động của người dùng. | db + repository | BR-10, BR-41, BR-104 |
 | BR-93 | active | Tag MUST là nội dung, quan hệ nhiều-nhiều với thẻ. Tên tag MUST không rỗng sau trim, MUST tối đa 50 ký tự, và MUST là duy nhất không phân biệt hoa thường. | domain + db | BR-41, UC-04 |
 | BR-94 | active | Một thẻ MUST mang tối đa 10 tag. | domain | BR-93 |
+| BR-165 | active | Di chuyển thẻ MUST chỉ xảy ra giữa hai sub-deck **cùng một root**. Deck đích MUST NOT là root (BR-58), MUST có `content_type` là `unset` hoặc `card`, và MUST NOT là `deck` (BR-64). Deck đích MUST khác deck nguồn. Di chuyển **cross-root** MUST bị từ chối bằng một lý do có kiểu riêng, **kể cả khi hai root tình cờ cùng scheduler và cùng generation** — BR-73/BR-74 cấm chuyển đổi study state, và "tình cờ giống nhau" không phải một phép ánh xạ. Di chuyển MUST giữ nguyên: id thẻ, nội dung hai mặt và ba trường phụ, study state, toàn bộ review history, cờ, quan hệ tag và `created_at`. MUST chỉ ghi `deck_id` và `updated_at` của thẻ; MUST NOT đụng `scheduler_type`, `scheduler_generation` hay bất kỳ cột lịch nào. Nếu deck nguồn mất thẻ cuối, `content_type` của nó MUST về `unset`; nếu deck đích đang `unset`, nó MUST thành `card` — cả hai trong **cùng transaction** với việc dời thẻ (BR-163). | repository | AD-10, UC-04, BR-58, BR-64, BR-73, BR-74, BR-163 |
+| BR-166 | active | Mọi mutation hàng loạt trên thẻ — di chuyển, xoá, đặt/bỏ cờ, gắn tag — MUST là **all-or-nothing trong đúng một transaction**: một thẻ vi phạm làm cả lô rollback, và MUST NOT có partial success không được đặc tả. Gắn tag hàng loạt MUST giữ nguyên quy tắc đơn lẻ: dùng lại tag theo tên đã fold (BR-93), trần 10 tag mỗi thẻ (BR-94), và **idempotent** khi thẻ đã có tag đó. Chỉ cần một thẻ chạm trần là cả lô bị từ chối. Đặt cờ hàng loạt MUST là lệnh tường minh `Set flagged` / `Remove flag`, MUST NOT là toggle suy ra từ thẻ đầu tiên. Xoá hàng loạt MUST cascade study state và history như xoá đơn lẻ, và MUST đưa deck về `unset` nếu đó là những thẻ cuối (BR-163). | repository | UC-04, BR-92, BR-93, BR-94, BR-163 |
+| BR-167 | active | Chọn nhiều thẻ MUST áp dụng lên **toàn bộ tập kết quả** của deck hiện tại theo đúng filter và search term đang bật, MUST NOT chỉ giới hạn trong cửa sổ phân trang đã tải. "Select all" MUST đọc danh sách id qua cùng vị từ mà danh sách và các pill đếm dùng, MUST NOT tải nội dung thẻ chỉ để lấy id. Khi filter, search term, sort hoặc deck đổi, selection MUST bị xoá — một selection không nhìn thấy được là một mutation người dùng không đồng ý. Sau mutation thành công MUST xoá selection; khi thất bại MUST giữ selection và nêu lỗi, MUST NOT báo thành công. | UI + repository | UC-04, BR-166 |
 
 BR-92 và BR-93 nói cùng một điều mà BR-41 đã nói cho reset, nhưng ở chiều khác:
 BR-41 nói reset giữ chúng lại, hai rule này nói *vì sao* — chúng thuộc nội dung,
@@ -807,11 +810,12 @@ client validation là trải nghiệm, không phải bảo mật.
 |---|---|---|
 | unset | card | tạo card đầu tiên (BR-62) |
 | unset | deck | tạo deck con đầu tiên (BR-62) |
-| card | unset | thao tác reset content_type tường minh, chỉ khi rỗng (BR-68) |
-| deck | unset | thao tác reset content_type tường minh, chỉ khi rỗng (BR-68) |
+| card | unset | xoá card cuối cùng, hoặc chuyển card cuối cùng đi nơi khác — tự động, trong cùng transaction (BR-163, BR-165) |
+| deck | unset | xoá deck con cuối cùng, hoặc chuyển deck con cuối cùng đi nơi khác — tự động, trong cùng transaction (BR-163) |
 
-**Chuyển đổi không hợp lệ:** `card` → `deck` và `deck` → `card` trực tiếp; tự
-động về `unset` khi xoá hết nội dung (BR-67).
+**Chuyển đổi không hợp lệ:** `card` → `deck` và `deck` → `card` trực tiếp — một
+deck đang có nội dung không đổi loại. Đường duy nhất giữa hai loại là đi qua
+`unset`, và `unset` chỉ đạt được bằng cách deck thật sự rỗng (BR-163).
 
 Root deck được tạo thẳng với `content_type = 'deck'` và giá trị đó bất biến — đó
 là cách BR-58 trở thành ràng buộc kiểm tra được bằng cùng một câu query như mọi
@@ -875,8 +879,9 @@ Trạng thái kết thúc là terminal — không có đường quay lại `in_p
 | Bấm Create ở root deck | Chỉ có lựa chọn Create deck (BR-59) |
 | Bấm Create ở sub-deck `unset` | Hiện hai lựa chọn (BR-61) |
 | Bấm Create ở sub-deck `content_type = card` | Chỉ có Create card (BR-66) |
-| Xoá card cuối cùng của deck `content_type = card` | `content_type` giữ nguyên `card` (BR-67) |
-| Muốn đổi deck rỗng từ `card` sang chứa deck con | Phải reset `content_type` tường minh (BR-68) |
+| Xoá card cuối cùng của deck `content_type = card` | `content_type` về `unset` trong cùng transaction (BR-163) |
+| Chuyển card cuối cùng sang deck khác cùng root | Nguồn về `unset`, đích thành `card` — một transaction (BR-165) |
+| Muốn đổi deck rỗng từ `card` sang chứa deck con | Rỗng là đã `unset`; tạo deck con luôn được (BR-163) |
 | Kéo deck vào descendant của chính nó | Chặn, lỗi rõ ràng (BR-70) |
 | Di chuyển subtree sang root khác scheduler | Chặn, đề nghị reset (BR-74) |
 | Cây sâu 4–5 cấp | Hoạt động bình thường; root tra qua `root_deck_id` (BR-56, BR-57) |
