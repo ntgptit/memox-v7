@@ -1,4 +1,5 @@
-/// What a deck holds — one kind of child, never both (BR-60…BR-68, AD-10).
+/// What a deck holds — one kind of child, never both (BR-60…BR-66, BR-163,
+/// AD-10).
 ///
 /// `unknown` exists for reading only, mirroring [SchedulerType]: an
 /// unrecognised stored value maps to it, and mapping it back fails fast so it

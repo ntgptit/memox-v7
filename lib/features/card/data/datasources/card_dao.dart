@@ -224,4 +224,111 @@ final class CardDao {
                 link.cardId.equals(cardId) & link.tagId.equals(tagId),
           ))
           .go();
+
+  // ---- bulk (BR-165, BR-166, BR-167) --------------------------------------
+
+  /// **SQLite's bind-variable ceiling, honoured once here.** A statement may
+  /// carry 999 parameters by default, and an `IN` list of ids spends one each.
+  /// Every bulk call below therefore runs in chunks; the caller holds the
+  /// transaction open around them, so a chunked write is still one atomic step
+  /// (BR-166). 500 leaves room for the statement's own parameters.
+  static const int idChunkSize = 500;
+
+  static Iterable<List<String>> _chunks(List<String> ids) sync* {
+    for (var start = 0; start < ids.length; start += idChunkSize) {
+      final end = start + idChunkSize;
+      yield ids.sublist(start, end > ids.length ? ids.length : end);
+    }
+  }
+
+  /// The ids a predicate matches — Select all, without the window (BR-167).
+  Future<List<String>> cardIdsMatching({
+    required String deckId,
+    required CardListFilter filter,
+    String? searchTerm,
+    DateTime? now,
+  }) => _db
+      .cardIdsMatching(
+        (c, s) => cardListPredicate(
+          c: c,
+          s: s,
+          deckId: deckId,
+          filter: filter,
+          searchTerm: searchTerm,
+          now: now,
+        ),
+      )
+      .get();
+
+  /// Where each card lives and which tree that is, for move validation.
+  Future<List<CardDeckContextForIdsResult>> cardDeckContextForIds(
+    List<String> cardIds,
+  ) async {
+    final rows = <CardDeckContextForIdsResult>[];
+    for (final chunk in _chunks(cardIds)) {
+      rows.addAll(await _db.cardDeckContextForIds(chunk).get());
+    }
+
+    return rows;
+  }
+
+  Future<void> moveCardsToDeck({
+    required List<String> cardIds,
+    required String deckId,
+    required DateTime updatedAt,
+  }) async {
+    for (final chunk in _chunks(cardIds)) {
+      await _db.moveCardsToDeck(deckId, updatedAt, chunk);
+    }
+  }
+
+  Future<void> deleteCardsByIds(List<String> cardIds) async {
+    for (final chunk in _chunks(cardIds)) {
+      await _db.deleteCardsByIds(chunk);
+    }
+  }
+
+  Future<void> setCardsFlagByIds({
+    required List<String> cardIds,
+    required bool isFlagged,
+    required DateTime updatedAt,
+  }) async {
+    for (final chunk in _chunks(cardIds)) {
+      // `is_flagged` is INTEGER in SQLite; drift hands the column through
+      // as `int`, so the boolean is mapped here rather than in three
+      // call sites.
+      await _db.setCardsFlagByIds(isFlagged ? 1 : 0, updatedAt, chunk);
+    }
+  }
+
+  /// Card id → how many tags it already carries. Absent means zero.
+  Future<Map<String, int>> tagCountsForCards(List<String> cardIds) async {
+    final counts = <String, int>{};
+    for (final chunk in _chunks(cardIds)) {
+      for (final row in await _db.tagCountsForCards(chunk).get()) {
+        counts[row.cardId] = row.tagCount;
+      }
+    }
+
+    return counts;
+  }
+
+  /// Which of [cardIds] already carry [tagId] — the idempotent half of a bulk
+  /// tag, and the cards that must not be counted against the cap twice.
+  Future<Set<String>> cardsAlreadyTagged({
+    required String tagId,
+    required List<String> cardIds,
+  }) async {
+    final tagged = <String>{};
+    for (final chunk in _chunks(cardIds)) {
+      tagged.addAll(await _db.cardsAlreadyTagged(chunk, tagId).get());
+    }
+
+    return tagged;
+  }
+
+  /// Cards still sitting directly in [deckId] — the count BR-163 reads to
+  /// decide whether a source deck kept its content type.
+  Future<int> directCardCount(String deckId) =>
+      _db.directCardCount(deckId).getSingle();
 }

@@ -342,6 +342,29 @@ LEFT JOIN (
 WHERE parent.id = :parentId
 ORDER BY child.created_at ASC, child.id ASC;
 
+-- Where a card may move to (BR-165).
+--
+-- Same tree as the source, never a root, never a deck holding sub-decks, and
+-- never the source itself. The parent's name rides along so a picker can tell
+-- two same-named decks apart without a second read.
+--
+-- **It lives in `deck.drift` and is read through the Card feature's own
+-- adapter** (`CardDeckContextDao`, the seam `createCard` already uses). The
+-- Card feature may not import Deck's Dart (AD-13); a query file is not Dart,
+-- and the alternative — a copy of this statement in `card.drift` — made drift
+-- 2.34 silently decline to analyse that whole file, dropping every query in it
+-- with no error reported anywhere.
+cardMoveTargets:
+SELECT d.id AS deckId, d.name AS deckName, d.content_type AS contentType,
+       p.name AS parentName
+FROM decks d
+LEFT JOIN decks p ON p.id = d.parent_deck_id
+WHERE d.root_deck_id = :rootDeckId
+  AND d.parent_deck_id IS NOT NULL
+  AND d.id != :sourceDeckId
+  AND (d.content_type = 'unset' OR d.content_type = 'card')
+ORDER BY d.name ASC, d.id ASC;
+
 -- An arbitrary deck's subtree — itself plus every descendant.
 subtreeDeckIds:
 WITH RECURSIVE subtree (id) AS (
@@ -387,7 +410,8 @@ WITH RECURSIVE walk (id, height) AS (
 )
 SELECT MAX(height) AS height FROM walk;
 
--- Direct children only — the emptiness check for BR-68.
+-- Direct children only — the emptiness check the auto-unset runs on
+-- (BR-163) and the one the move rules read.
 directChildDeckCount:
 SELECT COUNT(*) AS childCount FROM decks WHERE parent_deck_id = :deckId;
 

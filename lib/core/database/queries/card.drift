@@ -1,4 +1,5 @@
 import '../tables/cards.drift';
+import '../tables/tags.drift';
 
 -- Typed queries for the Card side of the Deck/Card vertical (M4.9a).
 --
@@ -92,6 +93,62 @@ cardCount:
 SELECT COUNT(*) FROM cards c
 INNER JOIN card_study_states s ON s.card_id = c.id
 WHERE $predicate;
+
+-- Just the ids a predicate matches, for Select all (BR-167).
+--
+-- **The same `$predicate` as the list and the count**, so "select all" selects
+-- exactly what the screen is showing — one definition of due, of new, of a
+-- search term, shared by three statements. A second predicate here is how a
+-- user ends up deleting rows they had filtered away.
+--
+-- **Ids only, and no `LIMIT`.** The window belongs to the list; a selection
+-- covers the whole result set by definition. Returning `cards.**` would carry
+-- every front, back and detail across the isolate boundary to compute a set of
+-- strings — the reason this is a separate statement rather than a reuse of
+-- `cardListItems`.
+cardIdsMatching:
+SELECT c.id FROM cards c
+INNER JOIN card_study_states s ON s.card_id = c.id
+WHERE $predicate;
+
+-- Where each card lives, and which tree that deck belongs to (BR-165).
+--
+-- One statement for the whole batch: a move validates same-root, non-root
+-- target and target content type, and doing that per card would be N reads
+-- inside the transaction for a question one join answers.
+cardDeckContextForIds:
+SELECT c.id AS cardId, d.id AS deckId, d.root_deck_id AS rootDeckId,
+       d.parent_deck_id AS parentDeckId, d.content_type AS contentType
+FROM cards c
+INNER JOIN decks d ON d.id = c.deck_id
+WHERE c.id IN :cardIds;
+
+-- The three bulk writes. Each is one statement over an id list, so a batch is
+-- one round trip and one atomic step rather than N of each (BR-166).
+moveCardsToDeck:
+UPDATE cards SET deck_id = :deckId, updated_at = :updatedAt
+WHERE id IN :cardIds;
+
+deleteCardsByIds:
+DELETE FROM cards WHERE id IN :cardIds;
+
+setCardsFlagByIds:
+UPDATE cards SET is_flagged = :isFlagged, updated_at = :updatedAt
+WHERE id IN :cardIds;
+
+-- How many tags each card in the batch already carries, for the BR-94 cap.
+-- Cards with no tags are absent from the result, which the caller reads as 0.
+tagCountsForCards:
+SELECT ct.card_id AS cardId, COUNT(*) AS tagCount
+FROM card_tags AS ct
+WHERE ct.card_id IN :cardIds
+GROUP BY ct.card_id;
+
+-- Which cards of the batch already carry this tag, so linking is idempotent
+-- (BR-166) and the cap counts only the cards that would actually gain one.
+cardsAlreadyTagged:
+SELECT ct.card_id AS cardId FROM card_tags AS ct
+WHERE ct.card_id IN :cardIds AND ct.tag_id = :tagId;
 
 cardById:
 SELECT * FROM cards WHERE id = :cardId;

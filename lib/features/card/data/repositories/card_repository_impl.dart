@@ -14,6 +14,7 @@ import '../../domain/failures/tag_validation_failure.dart';
 import '../../domain/models/card_list_filter_model.dart';
 import '../../domain/models/card_list_item_model.dart';
 import '../../domain/models/card_list_sort_model.dart';
+import '../../domain/models/card_move_target_model.dart';
 import '../../domain/models/card_state_distribution_model.dart';
 import '../../domain/models/card_text_model.dart';
 import '../../domain/models/deck_context_model.dart';
@@ -27,6 +28,8 @@ import '../mappers/tag_mapper.dart';
 import '../datasources/card_dao.dart';
 import '../datasources/card_deck_context_dao.dart';
 
+part 'card_bulk_repository_impl.dart';
+
 /// Drift-backed [CardRepository].
 ///
 /// Builds all its adapters from the one [AppDatabase] it is handed, so
@@ -37,7 +40,9 @@ import '../datasources/card_deck_context_dao.dart';
 ///
 /// Same boundary as `DeckRepositoryImpl`: below, rows and Drift exceptions;
 /// above, entities and [Failure].
-final class CardRepositoryImpl implements CardRepository {
+final class CardRepositoryImpl
+    with _CardBulkOperations
+    implements CardRepository {
   CardRepositoryImpl(
     AppDatabase database, {
     required DateTime Function() clock,
@@ -51,6 +56,7 @@ final class CardRepositoryImpl implements CardRepository {
        // ignore: prefer_initializing_formals
        _clock = clock;
 
+  @override
   final CardDao _cardDao;
 
   /// The list reads (windowed rows, filter counts), split out for size.
@@ -60,13 +66,16 @@ final class CardRepositoryImpl implements CardRepository {
   final DeckContextReadDataSource _deckContextReads;
 
   /// For the deck side of the createCard invariant only (BR-62 lock).
+  @override
   final CardDeckContextDao _deckContextDao;
 
   /// Client-generated UUIDs (AD-03); injectable so tests are deterministic.
+  @override
   final String Function() _idGenerator;
 
   /// Injected — no default. A `?? DateTime.now()` fallback gives "now" two
   /// owners and the unreachable static wins in production. UTC always.
+  @override
   final DateTime Function() _clock;
 
   @override
@@ -224,37 +233,14 @@ final class CardRepositoryImpl implements CardRepository {
     return cardEntityFromRow(await _requireCardRow(cardId));
   });
 
-  /// Deletes a card and, when it was the deck's last one, gives the deck its
-  /// content type back (BR-163).
+  /// Deletes a card, and hands the deck its content type back when that was
+  /// the last one (BR-163).
   ///
-  /// **One transaction, opened before the first read.** The emptiness count
-  /// must be taken after the delete and before anything else may write:
-  /// outside a transaction those are two snapshots, and a card created between
-  /// them leaves a deck marked `unset` while holding one — invariant Q2 broken
-  /// by a race nothing reports. The deck row is written through the Card-side
-  /// adapter, same `AppDatabase` and so the same transaction, exactly as
-  /// `createCard` locks an `unset` deck to `card`.
+  /// **One element into the bulk primitive.** A second transaction path for
+  /// "just this card" is a second place for the emptied-deck rule to be
+  /// forgotten; `deleteCards` owns it once (BR-166).
   @override
-  Future<void> deleteCard(String cardId) => _guard(
-    () => _cardDao.runInTransaction(() async {
-      final card = await _requireCardRow(cardId);
-      // State and history cascade from this one delete.
-      await _cardDao.deleteCardById(cardId);
-
-      if (await _deckContextDao.directCardCount(card.deckId) > 0) return;
-
-      // The last direct card is gone, so the deck holds nothing and its type
-      // is no longer describing anything. A root never reaches this line: it
-      // cannot hold cards at all (BR-58).
-      await _deckContextDao.updateDeckById(
-        card.deckId,
-        DecksCompanion(
-          contentType: Value<String>(DeckContentType.unset.dbValue),
-          updatedAt: Value<DateTime>(_clock()),
-        ),
-      );
-    }),
-  );
+  Future<void> deleteCard(String cardId) => deleteCards(<String>[cardId]);
 
   @override
   Stream<List<TagEntity>> watchCardTags(String cardId) => _cardDao
@@ -265,39 +251,8 @@ final class CardRepositoryImpl implements CardRepository {
       );
 
   @override
-  Future<void> addCardTag({
-    required String cardId,
-    required TagName name,
-  }) => _guard(
-    () => _cardDao.runInTransaction(() async {
-      await _requireCardRow(cardId);
-      // BR-94 inside the transaction: the count and the link must be atomic, or
-      // two racing adds both pass an eleventh tag past a "9 so far" check.
-      final existing = await _cardDao.tagCountForCard(cardId);
-      if (existing >= kMaxTagsPerCard) {
-        refuseInvalidTag(<TagValidationProblem>{
-          TagValidationProblem.tooManyTags,
-        });
-      }
-
-      // Reuse the tag owning this folded name (BR-93); mint one only if none.
-      final owned = await _cardDao.tagByFoldedName(name.folded);
-      final tagId = owned?.id ?? _idGenerator();
-      if (owned == null) {
-        await _cardDao.insertTag(
-          TagsCompanion.insert(
-            id: tagId,
-            name: name.value,
-            nameFolded: name.folded,
-            createdAt: _clock(),
-          ),
-        );
-      }
-
-      // Idempotent — the DAO ignores a pair the card already carries.
-      await _cardDao.linkTag(cardId, tagId);
-    }),
-  );
+  Future<void> addCardTag({required String cardId, required TagName name}) =>
+      addTagToCards(cardIds: <String>[cardId], name: name);
 
   @override
   Future<void> removeCardTag({required String cardId, required String tagId}) =>
@@ -311,15 +266,12 @@ final class CardRepositoryImpl implements CardRepository {
       _cardDao.watchCardFlag(cardId).handleError(_rethrowMapped);
 
   @override
-  Future<void> setCardFlag({
-    required String cardId,
-    required bool isFlagged,
-  }) => _guard(() async {
-    await _requireCardRow(cardId);
-    // Only `is_flagged` moves (BR-92); the companion covers that one column.
-    await _cardDao.setCardFlag(cardId, isFlagged: isFlagged);
-  });
+  /// Only `is_flagged` moves (BR-92) — one element into the bulk primitive,
+  /// which is the one place that statement lives.
+  Future<void> setCardFlag({required String cardId, required bool isFlagged}) =>
+      setCardsFlag(cardIds: <String>[cardId], isFlagged: isFlagged);
 
+  @override
   Future<T> _guard<T>(Future<T> Function() action) async {
     try {
       return await action();
@@ -335,6 +287,7 @@ final class CardRepositoryImpl implements CardRepository {
     throw mapDatabaseError(error);
   }
 
+  @override
   Future<Deck> _requireDeckRow(String deckId) async {
     final row = await _deckContextDao.deckById(deckId);
     if (row == null) {
@@ -360,6 +313,7 @@ final class CardRepositoryImpl implements CardRepository {
   }
 
   /// A deck's content type, refusing a value this build does not know.
+  @override
   DeckContentType _knownContentType(Deck deck) {
     final type = DeckContentType.fromDbValue(deck.contentType);
     if (type == DeckContentType.unknown) {

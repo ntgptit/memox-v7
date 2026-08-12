@@ -28,6 +28,21 @@ enum CardConflictReason {
   /// altering it could contradict a rule the newer schema attached to it.
   unknownContentType,
 
+  /// Moving a card into the deck it already sits in (BR-165). Not an error the
+  /// picker can produce — it hides the source — but the repository decides.
+  moveTargetIsSameDeck,
+
+  /// Moving a card into a root deck. A root holds only sub-decks (BR-58).
+  moveTargetIsRoot,
+
+  /// Moving a card into a deck that holds sub-decks (BR-64).
+  moveTargetHoldsDecks,
+
+  /// Moving a card into another tree (BR-165). Refused even when both roots
+  /// happen to run the same scheduler and generation: BR-73/BR-74 forbid
+  /// converting study state, and "identical by coincidence" is not a mapping.
+  moveCrossRoot,
+
   /// The root deck carries no scheduler, which invariant Q11 forbids. The data
   /// is corrupt; refusing is the only honest response, because a card written
   /// now would get a study state with no schedule to follow (BR-09).

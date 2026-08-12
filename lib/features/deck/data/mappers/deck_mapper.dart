@@ -101,8 +101,9 @@ DeckListSnapshot rootLevelFromRows(
 ///
 /// * **no rows at all** — the deck does not exist, which surfaces as
 ///   [NotFoundFailure]. The screen renders a way back, not a retry (UC-03 E1).
-/// * **one row, `child` null** — the deck exists and is empty, so reset may be
-///   offered (BR-68).
+/// * **one row, `child` null** — the deck exists and is empty, so it renders
+///   its empty state. Emptying it also unset its `content_type` inside the same
+///   transaction that removed the last child (BR-163); nothing is offered here.
 ///
 /// `rows.first.parent` is the same deck in every row by construction: the join is
 /// keyed on `parent.id = :parentId`.

@@ -31,4 +31,14 @@ final class CardDeckContextDao {
       (_db.update(
         _db.decks,
       )..where((Decks deck) => deck.id.equals(deckId))).write(changes);
+
+  /// The decks this card's deck may move into (BR-165).
+  ///
+  /// Watched, not read once: the picker stays open while the tree can change
+  /// under it, and a target that stops being valid must leave the list rather
+  /// than be refused after the tap.
+  Stream<List<CardMoveTargetsResult>> watchMoveTargets({
+    required String rootDeckId,
+    required String sourceDeckId,
+  }) => _db.cardMoveTargets(rootDeckId, sourceDeckId).watch();
 }
