@@ -8604,25 +8604,26 @@ thế không đổi bố cục.
   matrix + eyebrow + anchors, responsive 320@2.0, visibility round-trip,
   golden root+level+new-only hai theme
 - **Checklist phases:** 14.2, 14.4
-- **Tests:** `deck_summary_new_test` (viết lại hierarchy), 
+- **Tests:** `deck_summary_new_test` (viết lại hierarchy),
   `deck_summary_overdue_test` (11), `deck_list_summary_test`,
   `deck_list_spacing_test`, golden 6 file.
 
-### M99.14 · Thống nhất màu Due; hero ba tập Overdue/Due today/New
+### M99.14 · Thống nhất màu Due; hero bốn tập Overdue/Due today/New/Scheduled
 
 - **Status:** **done** — deck data+domain+presentation xanh (238+84+216),
   golden 6 file dựng lại và soát mắt hai theme, analyze + widgetbook sạch,
   không chạy emulator.
 - **Goal:** BR-162 — (1) một trạng thái một màu: tile `dueToday` đổi từ
   `primaryContainer` sang streak pair, khớp hero và workload words; (2) hero
-  hiển thị ba tập rời nhau `Overdue`/`Due today`/`New`, tổng Reviewing
-  không đổi nghĩa.
+  hiển thị bốn tập rời nhau `Overdue`/`Due today`/`New`/`Scheduled` trên
+  lưới 2×2, bốn ô cộng đúng bằng tổng thẻ; tổng Reviewing không đổi
+  nghĩa.
 - **Scope:** aggregate projection (`overdueCount` trong cùng grouped due
   subquery của `rootDeckSummaries` + `childDeckLevel`, tham số
   `:startOfToday` từ `LocalDayModel`); DAO/repository truyền boundary; mapper
   + invariant `overdueCountOf`; `DeckSummary.overdueCardCount` +
-  `dueTodayCardCount`; level sums; color grammar icon; hero ba metric +
-  emphasis; l10n hero keys en+vi; tests; goldens; widgetbook; BR-162, UC-06,
+  `dueTodayCardCount` + `scheduledCardCount` (suy ra); level sums; color
+  grammar icon; hero bốn metric 2×2 baseline-aligned + emphasis; l10n hero keys en+vi; tests; goldens; widgetbook; BR-162, UC-06,
   parity checklist, README.
 - **Out of scope:** scheduler, Study queue/selection, database schema, routes,
   deck tile density (tile vẫn total Due + New).
@@ -8644,10 +8645,11 @@ thế không đổi bố cục.
         DB write (test hai lần đọc cùng dữ liệu).
   - [x] Tile `dueToday` = streak pair (test đảo pin `primaryContainer`);
         overdue vẫn đỏ + badge; notDue neutral.
-  - [x] Hero: ba metric rời nhau, thứ tự cố định, emphasis theo tập khẩn
-        cấp nhất; badge = tuổi, nằm cạnh Overdue; ba câu semantics đọc
-        đúng một lần; 320@2.0 wrap không overflow; all-zero mở tay thấy ba
-        số 0.
+  - [x] Hero: bốn metric rời nhau trên lưới 2×2, mỗi hàng căn alphabetic
+        baseline, thứ tự cố định, emphasis theo tập khẩn cấp nhất —
+        Scheduled trung tính, không bao giờ primary; tuổi backlog ghi trong
+        ngoặc cạnh Overdue; bốn câu semantics đọc đúng một lần; 320@2.0
+        wrap không overflow; all-zero mở tay thấy bốn ô cùng cỡ.
   - [x] Widgetbook: mixed / overdue-only / due-today-only / new-only /
         caught-up.
 - **Dependencies:** M99.13
@@ -8655,7 +8657,7 @@ thế không đổi bố cục.
   future/new/midnight/nested), domain sums + invariant, tile role matrix,
   hero matrix + semantics + responsive, golden 6 file hai theme
 - **Checklist phases:** 14.2, 14.4
-- **Tests:** `deck_overdue_aggregate_test` (+7 partition), 
+- **Tests:** `deck_overdue_aggregate_test` (+7 partition),
   `deck_schedule_status_test` (+7), `deck_workload_role_test` (dueToday
   streak), `deck_summary_overdue_test` (viết lại, 12),
   `deck_summary_new_test`, `deck_list_screen_test`, golden 6 file.

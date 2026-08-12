@@ -9,7 +9,9 @@ import '../../../domain/models/deck_list_snapshot_model.dart';
 import '../items/deck_overdue_badge_widget.dart';
 
 /// The hero's metric band: the four disjoint sets of BR-162, most-urgent
-/// first, as one wrapping row.
+/// first, as an explicit 2×2 grid — two rows of two `Expanded` cells, each
+/// row aligned on the alphabetic baseline. Together the four cells sum to
+/// every card the level holds.
 ///
 /// Split from `deck_level_summary_widget.dart` at the 400-line guard, and the
 /// seam is real: the panel owns the card, the header and the progress band;
@@ -121,7 +123,7 @@ class _MetricIconWell extends StatelessWidget {
   }
 }
 
-/// One hero metric: anchor, numeral, word — one shape for all three sets, so
+/// One hero metric: anchor, numeral, word — one shape for all four sets, so
 /// only the glyph, the semantic fill and the emphasis differ (BR-162).
 ///
 /// Each caller wraps this in its own `Semantics` sentence and excludes these
