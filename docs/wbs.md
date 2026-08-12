@@ -9019,6 +9019,70 @@ thế không đổi bố cục.
   router, submit-lock, reset, responsive
 - **Checklist phases:** 9.3, 14.2
 
+### M99.19a · Card Import — ma trận 8 trạng thái trình bày
+
+- **Status:** **done** — targeted suites + analyzer + visual audit xanh; 12
+  golden demo (8 trạng thái ổn định + biến thể) render lại và soát bằng mắt;
+  full `dod_check.sh` xanh sau toàn bộ sửa đổi. Emulator không chạy cho task
+  này (UI-only, không chạm `lib/app/`, binding hay schema).
+- **Goal:** Wizard import đúng luồng nhưng UI chưa kể chuyện theo trạng thái:
+  file đã chọn vẫn hiện cả bộ chọn, parsing chỉ là spinner trần, preview đếm
+  bằng năm dòng text, submit và kết quả chen trong bước 3, stepper không phân
+  biệt completed/current/future. Concept 8 ảnh chốt ma trận trạng thái.
+- **Scope:** phase trình bày dẫn xuất `CardImportPhase` (enum, không persist,
+  không factory, không đổi domain/data); card tóm tắt nguồn dùng chung Source
+  (Replace/Remove) và Preview (context + `Parsing…`/`N rows detected`); panel
+  parsing với copy reassurance; heading `2 · Preview` + `N of N ready` + chip
+  trạng thái (Ready luôn hiện, còn lại > 0); panel submit indeterminate duy
+  nhất + khoá điều hướng; outcome mode cùng route (title `Import results`, ẩn
+  breadcrumb/chip/stepper) với 4 mặt: complete / with skips / no cards added /
+  commit failure (`Back to preview` + `Try again` trên plan đã giữ); stepper
+  3 mặt với check earned + semantics `bước · tên · trạng thái`; toàn bộ copy
+  mới EN+VI; wireframe M4.12 thêm W8.
+- **Out of scope:** đổi BR/UC (hành vi nghiệp vụ giữ nguyên); export; thêm số
+  liệu invalid vào contract commit (hai nguồn số liệu giữ tách theo AD-20);
+  emulator suite.
+- **Editable documents:** `docs/wireframes/m4-12-card-import.md`,
+  `docs/wbs.md`
+- **Output:** `card_import_state.dart` (+`CardImportPhase`,
+  `deriveCardImportPhase`), `card_import_screen.dart` (outcome mode),
+  `card_import_stepper_widget.dart` (3 mặt node),
+  `card_import_source_summary_widget.dart` (mới),
+  `card_import_submit_progress_widget.dart` (mới),
+  `card_import_result_widget.dart` (mới),
+  `card_import_action_bar_widget.dart` (CTA theo phase),
+  `card_import_source_step_widget.dart`, `card_import_preview_step_widget.dart`,
+  `card_import_confirm_step_widget.dart`,
+  `card_import_row_preview_widget.dart`, ARB EN+VI; test mới
+  `card_import_states_test.dart` (upload/parsing/stepper/outcomes), cập nhật
+  wizard + commit-flow test; goldens demo 12 ảnh; widgetbook thêm scenario
+  commit-failure.
+- **Acceptance criteria:**
+  - [x] File đã chọn: card tóm tắt (tên ≤2 dòng · `CSV · 1 KB · Ready to
+        preview`), tap = Replace, X = Remove qua invalidate; picker hủy giữ
+        file cũ; Source mang check.
+  - [x] Parsing: panel `Reading your file…/rows…` + reassurance; primary
+        disabled `Parsing…`; không lặp bộ chọn; không ghi gì (test bằng
+        `parseGate` Completer).
+  - [x] Preview: `N of N ready` + chip có icon+chữ+số; hàng invalid mang lý
+        do có kiểu từ validation hiện có; không import trực tiếp từ Preview.
+  - [x] Submitting: đúng một `CircularProgressIndicator`, không determinate,
+        không "X of Y"; Close/Back/submit lần hai trơ tới khi transaction
+        kết thúc.
+  - [x] Outcome: title `Import results`, chrome wizard ẩn; Added từ
+        `CardImportResult`, invalid/blank từ preview; blank-only vẫn là mặt
+        success; imported = 0 là `No new cards added` (info); failure có
+        `Back to preview` giữ nguyên draft không re-parse và `Try again`
+        không tạo transaction chồng.
+  - [x] Stepper: completed/current/future phân biệt bằng glyph + semantics;
+        check là earned; outcome ẩn stepper; không tap-jump.
+  - [x] Goldens 8 trạng thái ổn định render trên Windows và soát bằng mắt;
+        visual audit `card_import_screen` PASS.
+- **Dependencies:** M99.19, M99.20
+- **Tests required:** như Output; ba file wizard test + demo goldens + visual
+  audit
+- **Checklist phases:** 9.3, 14.2
+
 ## Blocker
 
 | Blocker | Ảnh hưởng | Cách gỡ |

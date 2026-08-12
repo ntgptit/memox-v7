@@ -46,11 +46,17 @@ void main() {
 
       expect(h.importer.commits, hasLength(1));
       expect(h.importer.commits.single.records, hasLength(2));
-      expect(find.text(english.cardImportResultHeading), findsOneWidget);
+      // The outcome mode (state 6): the hero names the count and the deck,
+      // the summary card carries the Added row, and the wizard chrome is
+      // gone — the stepper with it.
+      expect(find.text(english.cardImportSuccessTitle), findsOneWidget);
       expect(
-        find.text(english.cardImportResultImportedLabel(2)),
+        find.text(english.cardImportSuccessBody(2, 'TOPIK I')),
         findsOneWidget,
       );
+      expect(find.text(english.cardImportAddedRowLabel), findsOneWidget);
+      expect(find.text(english.cardImportResultsTitle), findsOneWidget);
+      expect(find.text(english.cardImportStepSourceLabel), findsNothing);
       // The commit latched: no second batch is reachable from here.
       expect(find.text(english.cardImportAnotherAction), findsOneWidget);
     });
@@ -65,8 +71,12 @@ void main() {
       await tester.tap(find.text(english.cardImportSubmitAction(2)));
       await tester.pumpAndSettle();
 
+      // The failure face (state 8): outcome layout, the deck-untouched
+      // reassurance, and the two ways forward.
+      expect(find.text(english.cardImportFailureTitle), findsOneWidget);
+      expect(find.text(english.cardImportFailureBody), findsOneWidget);
       expect(find.text(english.cardImportTryAgainAction), findsOneWidget);
-      expect(find.text(english.cardImportConfirmHeading), findsOneWidget);
+      expect(find.text(english.cardImportBackToPreviewAction), findsOneWidget);
 
       // Try again succeeds without re-picking or re-mapping anything.
       h.importer.nextCommitFailure = null;
@@ -74,7 +84,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(h.importer.commits, hasLength(2));
-      expect(find.text(english.cardImportResultHeading), findsOneWidget);
+      expect(find.text(english.cardImportSuccessTitle), findsOneWidget);
     });
 
     testWidgets('Import another file resets the draft and returns to '
@@ -112,18 +122,21 @@ void main() {
       await tester.tap(find.text(english.cardImportSubmitAction(2)));
       await tester.pump();
 
-      // Mid-commit: Close is disabled and opens nothing.
+      // Mid-commit the submit panel is on screen (state 5): the count, the
+      // don't-close line, and Close disabled — tapping it opens nothing.
+      expect(find.text(english.cardImportSubmittingTitle(2)), findsOneWidget);
+      expect(find.text(english.cardImportSubmittingBody), findsOneWidget);
       await tester.tap(find.byIcon(Icons.close), warnIfMissed: false);
       await tester.pump();
       expect(find.text(english.cardImportDiscardTitle), findsNothing);
-      expect(find.text(english.cardImportConfirmHeading), findsOneWidget);
+      expect(find.text(english.cardImportSubmittingTitle(2)), findsOneWidget);
 
       // System Back neither steps back nor leaves.
       final dynamic widgetsAppState = tester.state(find.byType(WidgetsApp));
       // ignore: avoid_dynamic_calls
       await widgetsAppState.didPopRoute();
       await tester.pump();
-      expect(find.text(english.cardImportConfirmHeading), findsOneWidget);
+      expect(find.text(english.cardImportSubmittingTitle(2)), findsOneWidget);
       expect(find.text(english.cardImportMappingHeading), findsNothing);
 
       // A second press cannot start a second batch: the primary is in its
@@ -136,7 +149,7 @@ void main() {
       // alive again.
       gate.complete();
       await tester.pumpAndSettle();
-      expect(find.text(english.cardImportResultHeading), findsOneWidget);
+      expect(find.text(english.cardImportSuccessTitle), findsOneWidget);
       expect(h.importer.commits, hasLength(1));
     });
   });

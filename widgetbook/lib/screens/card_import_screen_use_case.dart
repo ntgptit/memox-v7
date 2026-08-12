@@ -48,11 +48,14 @@ WidgetbookComponent cardImportScreenComponent() {
 }
 
 /// The states worth staging: a clean target, a target where every pasted row
-/// is already present (BR-170), and a source the decoder refuses (E1).
+/// is already present (BR-170), a source the decoder refuses (E1), and a
+/// commit that fails and rolls back (state 8) — the one outcome interaction
+/// alone cannot reach.
 enum CardImportScenario {
   cleanDeck('empty-ish target deck'),
   duplicates('deck already holds the rows'),
-  parseError('source refuses to parse');
+  parseError('source refuses to parse'),
+  commitFailure('commit fails and rolls back');
 
   const CardImportScenario(this.label);
 
@@ -73,6 +76,7 @@ class _CardImportDemo extends StatelessWidget {
               cardImportDuplicateKey(frontFolded: '바다', backFolded: 'sea'),
             }
           : <CardImportDuplicateKey>{},
+      shouldFailCommit: scenario == CardImportScenario.commitFailure,
     );
 
     return ProviderScope(
@@ -145,9 +149,13 @@ final class _CatalogSourceRepository implements CardImportSourceRepository {
 }
 
 final class _CatalogImportRepository implements CardImportRepository {
-  _CatalogImportRepository({required this.existingKeys});
+  _CatalogImportRepository({
+    required this.existingKeys,
+    this.shouldFailCommit = false,
+  });
 
   final Set<CardImportDuplicateKey> existingKeys;
+  final bool shouldFailCommit;
 
   @override
   Future<Set<CardImportDuplicateKey>> readExistingDuplicateKeys(
@@ -159,6 +167,10 @@ final class _CatalogImportRepository implements CardImportRepository {
     required String deckId,
     required CardImportPlan plan,
   }) async {
+    if (shouldFailCommit) {
+      throw const DatabaseFailure(message: 'catalog: staged commit failure');
+    }
+
     var imported = 0, skipped = 0;
     final seen = <CardImportDuplicateKey>{};
     for (final record in plan.records) {

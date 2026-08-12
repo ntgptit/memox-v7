@@ -20,8 +20,17 @@ final class FakeCardTransferRepository implements CardTransferRepository {
   /// stages a multi-sheet workbook without building XLSX bytes.
   CardTransferDocument? documentToReturn;
 
+  /// When set, parse parks on this until the test completes it — how the
+  /// Parsing face (M4.12 state 2) is observed mid-decode.
+  Completer<void>? parseGate;
+
+  int parseCalls = 0;
+
   @override
   Future<CardTransferDocument> parse(CardTransferSource source) async {
+    parseCalls += 1;
+    final gate = parseGate;
+    if (gate != null) await gate.future;
     final failure = nextParseFailure;
     if (failure != null) throw failure;
 

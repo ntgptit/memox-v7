@@ -1,6 +1,9 @@
 @Tags(<String>['golden', 'review'])
 library;
 
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -10,6 +13,8 @@ import 'package:memox/features/card/di/card_repository_provider.dart';
 import 'package:memox/features/card/di/card_transfer_repository_provider.dart';
 import 'package:memox/features/card/domain/failures/card_transfer_failure.dart';
 import 'package:memox/features/card/domain/models/card_import_preview_model.dart';
+import 'package:memox/features/card/domain/models/card_transfer_format_model.dart';
+import 'package:memox/features/card/domain/models/card_transfer_source_model.dart';
 import 'package:memox/features/card/domain/models/deck_context_model.dart';
 import 'package:memox/features/card/presentation/screens/card_import_screen.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
@@ -37,6 +42,15 @@ const String _demoRows =
     '바다,sea,nature;water\n'
     '감사합니다,,polite\n'
     '산,mountain,nature\n'
+    '산,mountain,nature\n';
+
+/// The all-valid variant: every row imports, so Preview reads "4 of 4 ready"
+/// (state 3) and the result is the plain success face (state 6).
+const String _validRows =
+    'front,back,tags\n'
+    '사과,apple,fruit\n'
+    '바다,sea,nature;water\n'
+    '감사합니다,thank you,polite\n'
     '산,mountain,nature\n';
 
 void main() {
@@ -72,12 +86,22 @@ void main() {
     ),
   );
 
-  Future<void> pasteAndPreview(WidgetTester tester) async {
+  Future<void> pasteAndPreview(
+    WidgetTester tester, {
+    String rows = _demoRows,
+  }) async {
     await tester.tap(find.text(english.cardImportPasteOptionTitle));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField), _demoRows);
+    await tester.enterText(find.byType(TextField), rows);
     await tester.pumpAndSettle();
     await tester.tap(find.text(english.cardImportPreviewAction));
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> submitFromPreview(WidgetTester tester, int count) async {
+    await tester.tap(find.text(english.cardImportContinueAction));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(english.cardImportSubmitAction(count)));
     await tester.pumpAndSettle();
   }
 
@@ -91,6 +115,21 @@ void main() {
     await matchesReviewGolden('goldens/card_import_source_dark.png');
   });
 
+  testWidgets('source — file ready with the compact summary (state 1)', (
+    tester,
+  ) async {
+    picker.fileToPick = CardTransferFileSource(
+      name: 'topik_vocab_week3.csv',
+      bytes: Uint8List.fromList(utf8.encode(_demoRows)),
+      format: CardTransferFormat.csv,
+    );
+    await pumpReview(tester, scope(Brightness.light));
+    await tester.tap(find.text(english.cardImportChooseFileAction));
+    await tester.pumpAndSettle();
+
+    await matchesReviewGolden('goldens/card_import_source_ready_light.png');
+  });
+
   testWidgets('source — paste selected with rows typed', (tester) async {
     await pumpReview(tester, scope(Brightness.light));
     await tester.tap(find.text(english.cardImportPasteOptionTitle));
@@ -99,6 +138,13 @@ void main() {
     await tester.pumpAndSettle();
 
     await matchesReviewGolden('goldens/card_import_paste_light.png');
+  });
+
+  testWidgets('preview — every row ready (state 3)', (tester) async {
+    await pumpReview(tester, scope(Brightness.light));
+    await pasteAndPreview(tester, rows: _validRows);
+
+    await matchesReviewGolden('goldens/card_import_preview_valid_light.png');
   });
 
   testWidgets('preview — mixed ready, invalid and duplicates', (tester) async {
@@ -133,14 +179,49 @@ void main() {
     await matchesReviewGolden('goldens/card_import_confirm_light.png');
   });
 
-  testWidgets('import — result, dark', (tester) async {
+  testWidgets('result — import complete (state 6)', (tester) async {
+    await pumpReview(tester, scope(Brightness.light));
+    await pasteAndPreview(tester, rows: _validRows);
+    await submitFromPreview(tester, 4);
+
+    await matchesReviewGolden('goldens/card_import_result_complete_light.png');
+  });
+
+  testWidgets('result — imported with skips, dark (state 7)', (tester) async {
+    // The mixed paste: one invalid row and one in-file duplicate skipped —
+    // the tertiary hero, the per-cause rows, and the fix-it hint.
     await pumpReview(tester, scope(Brightness.dark));
     await pasteAndPreview(tester);
+    await submitFromPreview(tester, 3);
+
+    await matchesReviewGolden('goldens/card_import_result_skips_dark.png');
+  });
+
+  testWidgets('result — no new cards added (edge case)', (tester) async {
+    await pumpReview(tester, scope(Brightness.light));
+    await pasteAndPreview(tester, rows: _validRows);
     await tester.tap(find.text(english.cardImportContinueAction));
     await tester.pumpAndSettle();
-    await tester.tap(find.text(english.cardImportSubmitAction(3)));
+    // Every row landed through another writer between preview and commit;
+    // the in-transaction recheck skips them all (BR-170).
+    importer.existingKeys = <CardImportDuplicateKey>{
+      cardImportDuplicateKey(frontFolded: '사과', backFolded: 'apple'),
+      cardImportDuplicateKey(frontFolded: '바다', backFolded: 'sea'),
+      cardImportDuplicateKey(frontFolded: '감사합니다', backFolded: 'thank you'),
+      cardImportDuplicateKey(frontFolded: '산', backFolded: 'mountain'),
+    };
+    await tester.tap(find.text(english.cardImportSubmitAction(4)));
     await tester.pumpAndSettle();
 
-    await matchesReviewGolden('goldens/card_import_result_dark.png');
+    await matchesReviewGolden('goldens/card_import_result_zero_light.png');
+  });
+
+  testWidgets('result — commit failure (state 8)', (tester) async {
+    importer.nextCommitFailure = const DatabaseFailure(message: 'demo');
+    await pumpReview(tester, scope(Brightness.light));
+    await pasteAndPreview(tester, rows: _validRows);
+    await submitFromPreview(tester, 4);
+
+    await matchesReviewGolden('goldens/card_import_failure_light.png');
   });
 }

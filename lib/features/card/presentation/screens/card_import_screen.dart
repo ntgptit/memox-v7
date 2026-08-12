@@ -17,6 +17,7 @@ import '../widgets/sections/card_import_action_bar_widget.dart';
 import '../widgets/sections/card_import_confirm_step_widget.dart';
 import '../widgets/sections/card_import_context_widget.dart';
 import '../widgets/sections/card_import_preview_step_widget.dart';
+import '../widgets/sections/card_import_result_widget.dart';
 import '../widgets/sections/card_import_source_step_widget.dart';
 import '../widgets/sections/card_import_stepper_widget.dart';
 import '../states/card_import_state.dart';
@@ -150,6 +151,45 @@ class _CardImportScreenState extends ConsumerState<CardImportScreen> {
       ..watch(cardImportHeaderChoiceProvider(deckId))
       ..watch(cardImportDuplicateChoiceProvider(deckId));
 
+    // The presentation phase (M4.12): one derived answer to "what face is
+    // on screen", computed here and passed down so the stepper, the body and
+    // the bar can never disagree. The parse and preview are watched only
+    // once the wizard has left Source — watching them earlier would start
+    // the decode before the user pressed Preview (I4).
+    final isPastSource = step != CardImportStep.source;
+    final isParsing =
+        step == CardImportStep.preview &&
+        ref.watch(cardImportDocumentProvider(deckId)).isLoading;
+    final preview = isPastSource
+        ? ref.watch(cardImportPreviewProvider(deckId)).value
+        : null;
+    final phase = deriveCardImportPhase(
+      step: step,
+      isParsing: isParsing,
+      submit: submit,
+      invalidCount: preview?.invalidCount ?? 0,
+    );
+
+    // Which steps have *earned* their check (stepper contract): Source once
+    // a source exists, Preview once the rows are classified, mapped and at
+    // least one is importable.
+    final mapping = isPastSource
+        ? ref.watch(cardImportMappingDraftProvider(deckId))
+        : null;
+    final shouldIncludeDuplicates = ref.watch(
+      cardImportDuplicateChoiceProvider(deckId),
+    );
+    final completed = <CardImportStep>{
+      if (_isDirty) CardImportStep.source,
+      if (preview != null &&
+          (mapping?.isComplete ?? false) &&
+          preview.importableCount(
+                shouldIncludeDuplicates: shouldIncludeDuplicates,
+              ) >
+              0)
+        CardImportStep.preview,
+    };
+
     return PopScope<Object?>(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
@@ -159,36 +199,13 @@ class _CardImportScreenState extends ConsumerState<CardImportScreen> {
         unawaited(_handleSystemBack());
       },
       child: Scaffold(
-        appBar: AppBar(
-          leading: MxIconButton(
-            icon: Icons.close,
-            semanticLabel: context.l10n.cardImportTitle,
-            tooltip: context.l10n.commonCancelAction,
-            // Locked while the one transaction runs (F): it cannot honestly
-            // be cancelled, so the exit does not pretend otherwise.
-            onPressed: submit.isSubmitting ? null : _cancel,
-          ),
-          title: Text(context.l10n.cardImportTitle),
-        ),
+        appBar: _appBar(phase, isSubmitting: submit.isSubmitting),
         body: SafeArea(
           child: Column(
             children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.lg,
-                  AppSpacing.sm,
-                  AppSpacing.lg,
-                  AppSpacing.sm,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    CardImportContextWidget(deckId: deckId),
-                    const SizedBox(height: AppSpacing.sm),
-                    CardImportStepperWidget(current: step),
-                  ],
-                ),
-              ),
+              // The breadcrumb, context chip and stepper leave with the
+              // wizard: on an outcome the hero is the focal point (state 6).
+              if (!phase.isOutcome) _wizardHeader(step, completed),
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.fromLTRB(
@@ -197,21 +214,23 @@ class _CardImportScreenState extends ConsumerState<CardImportScreen> {
                     AppSpacing.lg,
                     AppSpacing.xl,
                   ),
-                  child: switch (step) {
-                    CardImportStep.source => CardImportSourceStepWidget(
-                      deckId: deckId,
-                      pasteController: _pasteController,
-                    ),
-                    CardImportStep.preview => CardImportPreviewStepWidget(
-                      deckId: deckId,
-                    ),
-                    CardImportStep.confirm => _confirmBody(deckId),
-                  },
+                  child: phase.isOutcome
+                      ? _outcomeBody(deckId, phase)
+                      : switch (step) {
+                          CardImportStep.source => CardImportSourceStepWidget(
+                            deckId: deckId,
+                            pasteController: _pasteController,
+                          ),
+                          CardImportStep.preview => CardImportPreviewStepWidget(
+                            deckId: deckId,
+                          ),
+                          CardImportStep.confirm => _confirmBody(deckId),
+                        },
                 ),
               ),
               CardImportActionBarWidget(
                 deckId: deckId,
-                step: step,
+                phase: phase,
                 submit: submit,
                 pasteController: _pasteController,
                 onReset: _resetDraft,
@@ -220,6 +239,48 @@ class _CardImportScreenState extends ConsumerState<CardImportScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  PreferredSizeWidget _appBar(
+    CardImportPhase phase, {
+    required bool isSubmitting,
+  }) {
+    return AppBar(
+      leading: MxIconButton(
+        icon: Icons.close,
+        semanticLabel: context.l10n.cardImportTitle,
+        tooltip: context.l10n.commonCancelAction,
+        // Locked while the one commit runs (F): it cannot honestly be
+        // cancelled, so the exit does not pretend otherwise.
+        onPressed: isSubmitting ? null : _cancel,
+      ),
+      // An outcome retitles the bar (state 6): the wizard's name is for
+      // work in progress, the result's for what it did.
+      title: Text(
+        phase.isOutcome
+            ? context.l10n.cardImportResultsTitle
+            : context.l10n.cardImportTitle,
+      ),
+    );
+  }
+
+  Widget _wizardHeader(CardImportStep step, Set<CardImportStep> completed) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.sm,
+        AppSpacing.lg,
+        AppSpacing.sm,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          CardImportContextWidget(deckId: widget.deckId),
+          const SizedBox(height: AppSpacing.sm),
+          CardImportStepperWidget(current: step, completed: completed),
+        ],
       ),
     );
   }
@@ -241,6 +302,22 @@ class _CardImportScreenState extends ConsumerState<CardImportScreen> {
       deckName: deckName,
       preview: preview,
       shouldIncludeDuplicates: shouldIncludeDuplicates,
+    );
+  }
+
+  Widget _outcomeBody(String deckId, CardImportPhase phase) {
+    final submit = ref.watch(commitCardImportProvider(deckId));
+    final preview = ref.watch(cardImportPreviewProvider(deckId)).value;
+    final deckName =
+        ref.watch(deckContextProvider(deckId)).value?.deckName ?? '';
+
+    return CardImportResultWidget(
+      phase: phase,
+      deckName: deckName,
+      result: submit.result,
+      invalidCount: preview?.invalidCount ?? 0,
+      blankCount: preview?.blankCount ?? 0,
+      failure: submit.failure,
     );
   }
 }

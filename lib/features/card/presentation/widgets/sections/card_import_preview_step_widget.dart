@@ -8,14 +8,15 @@ import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../../../shared/widgets/mx_error_state.dart';
 import '../../../../../shared/widgets/mx_loading_state.dart';
-import '../../../domain/models/card_import_preview_model.dart';
 import '../../../domain/models/card_transfer_document_model.dart';
 import '../../../domain/models/card_transfer_field_model.dart';
 import '../../controllers/card_import_draft_controller.dart';
 import '../../controllers/card_import_query_controller.dart';
+import '../../states/card_import_state.dart';
 import '../items/card_import_mapping_row_widget.dart';
-import '../items/card_import_row_preview_widget.dart';
 import '../support/card_import_labels_widget.dart';
+import 'card_import_preview_summary_widget.dart';
+import 'card_import_source_summary_widget.dart';
 
 /// Free functions rather than inline reads in `build()`, the same shape
 /// every widget in this feature uses for its commands.
@@ -36,19 +37,6 @@ void _assignColumn(
     .read(cardImportMappingDraftProvider(deckId).notifier)
     .assign(column, field);
 
-void _updateDuplicateChoice(
-  WidgetRef ref,
-  String deckId, {
-  required bool value,
-}) => ref
-    .read(cardImportDuplicateChoiceProvider(deckId).notifier)
-    .update(shouldIncludeDuplicates: value);
-
-/// How many preview rows render before the "…and N more" footer takes over
-/// (wireframe W3's 10–20 band). Display truncation only: the counts and the
-/// commit always cover every row.
-const int kCardImportPreviewRowLimit = 15;
-
 /// Step 2 — sheet, header, mapping and the classified rows (UC-10 steps 4–5).
 class CardImportPreviewStepWidget extends ConsumerWidget {
   const CardImportPreviewStepWidget({required this.deckId, super.key});
@@ -59,16 +47,117 @@ class CardImportPreviewStepWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final document = ref.watch(cardImportDocumentProvider(deckId));
 
-    return document.when(
-      loading: () =>
-          MxLoadingState(semanticsLabel: context.l10n.cardImportParsingLabel),
-      error: (error, _) => MxErrorState(
-        title: context.l10n.cardImportParseErrorTitle,
-        message: error is Failure
-            ? context.cardImportFailureLabel(error)
-            : context.l10n.cardListError,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        // The chosen source stays as one compact line of context (state 2) —
+        // never the whole chooser again, and never the pasted content
+        // itself, which is private (BR-173).
+        _SourceContext(deckId: deckId, document: document),
+        const SizedBox(height: AppSpacing.lg),
+        document.when(
+          loading: () => _ParsingPanel(deckId: deckId),
+          error: (error, _) => MxErrorState(
+            title: context.l10n.cardImportParseErrorTitle,
+            message: error is Failure
+                ? context.cardImportFailureLabel(error)
+                : context.l10n.cardListError,
+          ),
+          data: (parsed) => _LoadedPreview(deckId: deckId, document: parsed),
+        ),
+      ],
+    );
+  }
+}
+
+/// The compact source line above the preview: filename (or the pasted-text
+/// stand-in), format and size, and a status that moves with the decode —
+/// parsing first, then how many rows arrived. Context only: no replace, no
+/// remove — changing the source from here is a navigation back to Source.
+class _SourceContext extends ConsumerWidget {
+  const _SourceContext({required this.deckId, required this.document});
+
+  final String deckId;
+  final AsyncValue<CardTransferDocument> document;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final kind = ref.watch(cardImportSourceChoiceProvider(deckId));
+    final file = ref.watch(cardImportFilePickChoiceProvider(deckId)).file;
+    final sheetName = ref.watch(cardImportSheetChoiceProvider(deckId));
+
+    final sheet = document.value?.sheetNamed(sheetName);
+    // No status on a failed parse: the error panel below already says what
+    // happened, and "0 rows detected" would contradict it.
+    final String? status = document.isLoading
+        ? l10n.cardImportFileParsingStatus
+        : sheet != null
+        ? l10n.cardImportFileRowsDetected(sheet.rows.length)
+        : null;
+
+    if (kind == CardImportSourceKind.upload && file != null) {
+      final meta = l10n.cardImportFileMetaLabel(
+        file.format.name.toUpperCase(),
+        context.cardImportFileSizeLabel(file.bytes.length),
+      );
+
+      return CardImportSourceSummaryWidget(
+        title: file.name,
+        subtitle: status == null
+            ? meta
+            : l10n.cardImportSourceStatusLine(meta, status),
+      );
+    }
+
+    return CardImportSourceSummaryWidget(
+      title: l10n.cardImportPastedSourceLabel,
+      subtitle: status,
+    );
+  }
+}
+
+/// The parse in progress (state 2): one steady panel — a loader, what is
+/// being read, and the reassurance that nothing is written until Import is
+/// confirmed. Its shape never changes, so rows arriving replace it without
+/// the layout jumping.
+class _ParsingPanel extends ConsumerWidget {
+  const _ParsingPanel({required this.deckId});
+
+  final String deckId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final kind = ref.watch(cardImportSourceChoiceProvider(deckId));
+
+    return MxCard(
+      child: Column(
+        children: <Widget>[
+          const SizedBox(height: AppSpacing.md),
+          Semantics(
+            label: l10n.cardImportParsingLabel,
+            child: const CircularProgressIndicator(),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Text(
+            kind == CardImportSourceKind.upload
+                ? l10n.cardImportParsingFileTitle
+                : l10n.cardImportParsingPasteTitle,
+            style: context.texts.titleMedium,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            l10n.cardImportParsingReassurance,
+            style: context.texts.bodySmall?.copyWith(
+              color: context.colors.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppSpacing.md),
+        ],
       ),
-      data: (parsed) => _LoadedPreview(deckId: deckId, document: parsed),
     );
   }
 }
@@ -149,7 +238,7 @@ class _LoadedPreview extends ConsumerWidget {
                 ? context.cardImportFailureLabel(error)
                 : context.l10n.cardListError,
           ),
-          data: (rows) => _PreviewSummary(
+          data: (rows) => CardImportPreviewSummaryWidget(
             deckId: deckId,
             preview: rows,
             shouldIncludeDuplicates: shouldIncludeDuplicates,
@@ -203,81 +292,6 @@ class _SheetSelector extends StatelessWidget {
             ),
           ),
         ),
-      ],
-    );
-  }
-}
-
-/// The counts, the duplicate policy, and the first rows (UC-10 step 5).
-class _PreviewSummary extends ConsumerWidget {
-  const _PreviewSummary({
-    required this.deckId,
-    required this.preview,
-    required this.shouldIncludeDuplicates,
-  });
-
-  final String deckId;
-  final CardImportPreview preview;
-  final bool shouldIncludeDuplicates;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = context.l10n;
-    final shown = preview.rows.take(kCardImportPreviewRowLimit).toList();
-    final hiddenCount = preview.rows.length - shown.length;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        MxCard(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                l10n.cardImportSummaryTotalLabel(preview.totalRows),
-                style: context.texts.bodyMedium,
-              ),
-              Text(
-                l10n.cardImportSummaryReadyLabel(preview.readyCount),
-                style: context.texts.bodyMedium,
-              ),
-              Text(
-                l10n.cardImportSummaryDuplicateLabel(preview.duplicateCount),
-                style: context.texts.bodyMedium,
-              ),
-              Text(
-                l10n.cardImportSummaryInvalidLabel(preview.invalidCount),
-                style: context.texts.bodyMedium,
-              ),
-              Text(
-                l10n.cardImportSummaryBlankLabel(preview.blankCount),
-                style: context.texts.bodyMedium,
-              ),
-            ],
-          ),
-        ),
-        SwitchListTile(
-          value: shouldIncludeDuplicates,
-          contentPadding: EdgeInsets.zero,
-          title: Text(
-            l10n.cardImportIncludeDuplicatesLabel,
-            style: context.texts.bodyMedium,
-          ),
-          onChanged: (value) =>
-              _updateDuplicateChoice(ref, deckId, value: value),
-        ),
-        for (final row in shown) CardImportRowPreviewWidget(row: row),
-        if (hiddenCount > 0)
-          Padding(
-            padding: const EdgeInsets.only(top: AppSpacing.xs),
-            child: Text(
-              l10n.cardImportMoreRowsLabel(hiddenCount),
-              style: context.texts.bodySmall?.copyWith(
-                color: context.colors.onSurfaceVariant,
-              ),
-            ),
-          ),
       ],
     );
   }

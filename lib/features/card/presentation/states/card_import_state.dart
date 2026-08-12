@@ -53,3 +53,83 @@ final class CardImportSubmitState {
 
   bool get isDone => result != null;
 }
+
+/// The wizard's presentation phase (M4.12 states 1–8): which face the screen,
+/// the stepper and the action bar all show right now.
+///
+/// **Derived, never stored.** [CardImportStep] stays the only navigation
+/// state; this classification is computed fresh each build from the step, the
+/// parse, the mapping and the commit — a sealed answer to "what is on
+/// screen", replacing the boolean soup that would otherwise be re-derived,
+/// slightly differently, in every widget.
+enum CardImportPhase {
+  /// Step 1, with or without a chosen source.
+  source,
+
+  /// Step 2 mounted and the decode still running (state 2).
+  parsing,
+
+  /// Step 2 with rows on screen — classified, mapped or waiting on mapping.
+  preview,
+
+  /// Step 3, nothing committed yet (the Confirm face).
+  confirm,
+
+  /// The one transaction is in flight (state 5).
+  submitting,
+
+  /// Wrote everything it meant to: no invalid rows, no duplicates skipped.
+  completed,
+
+  /// Wrote some and skipped some (state 7).
+  completedWithSkips,
+
+  /// The transaction succeeded but the in-transaction recheck skipped every
+  /// row — not a failure, and never presented as one (BR-170).
+  noCardsAdded,
+
+  /// The transaction failed and rolled back; the draft is intact (state 8).
+  commitFailure;
+
+  /// True for the four faces that replace the wizard chrome with an outcome
+  /// (states 6–8): the app bar retitles and the breadcrumb, context chip and
+  /// stepper leave so the hero is the focal point.
+  bool get isOutcome => switch (this) {
+    CardImportPhase.completed ||
+    CardImportPhase.completedWithSkips ||
+    CardImportPhase.noCardsAdded ||
+    CardImportPhase.commitFailure => true,
+    _ => false,
+  };
+}
+
+/// The one place the classification is computed, so every widget agrees.
+///
+/// [invalidCount] comes from the preview (the commit never saw those rows);
+/// the skip decision inside [submit]'s result comes from the transaction's
+/// own recheck — the two sources the result faces are required to keep apart.
+CardImportPhase deriveCardImportPhase({
+  required CardImportStep step,
+  required bool isParsing,
+  required CardImportSubmitState submit,
+  required int invalidCount,
+}) {
+  final result = submit.result;
+  if (result != null) {
+    if (result.imported == 0) return CardImportPhase.noCardsAdded;
+    if (invalidCount > 0 || result.duplicatesSkipped > 0) {
+      return CardImportPhase.completedWithSkips;
+    }
+
+    return CardImportPhase.completed;
+  }
+  if (submit.isSubmitting) return CardImportPhase.submitting;
+  if (submit.failure != null) return CardImportPhase.commitFailure;
+
+  return switch (step) {
+    CardImportStep.source => CardImportPhase.source,
+    CardImportStep.preview =>
+      isParsing ? CardImportPhase.parsing : CardImportPhase.preview,
+    CardImportStep.confirm => CardImportPhase.confirm,
+  };
+}
