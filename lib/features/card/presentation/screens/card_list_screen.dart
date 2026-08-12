@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/navigation/route_names.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/theme_context_extension.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
@@ -12,33 +11,34 @@ import '../../../../shared/widgets/mx_empty_state.dart';
 import '../../../../shared/widgets/mx_error_state.dart';
 import '../../../../shared/widgets/mx_icon_button.dart';
 import '../../../../shared/widgets/mx_search_field.dart';
-import '../../../../shared/widgets/mx_text_button.dart';
 import '../../domain/models/card_list_filter_model.dart';
 import '../../domain/models/card_list_item_model.dart';
 import '../../domain/models/deck_context_model.dart';
 import '../controllers/card_list_controller.dart';
 import '../controllers/card_list_filter_controller.dart';
-import '../controllers/card_list_now_controller.dart';
-import '../controllers/card_list_window_controller.dart';
+import '../controllers/card_bulk_controller.dart';
+import '../controllers/card_selection_controller.dart';
 import '../controllers/deck_context_controller.dart';
-import '../widgets/items/card_tile_widget.dart';
 import '../widgets/sections/card_breadcrumb_widget.dart';
+import '../widgets/overlays/card_bulk_overlays_widget.dart';
 import '../widgets/sections/card_filter_bar_widget.dart';
-import '../widgets/sections/card_progress_panel_widget.dart';
-import '../widgets/support/card_sort_control_widget.dart';
-
-/// Grows the read window by one step (W1b).
-///
-/// A free function, not a closure in `build()`: `ref.read` inside a build reads
-/// without subscribing and is almost always the bug the guard forbids, so a
-/// command is written where the guard can tell it apart — the same shape
-/// `deck_list_toolbar_widget.dart` uses for its filter and sort.
-void _growWindow(WidgetRef ref, String deckId) =>
-    ref.read(cardListWindowProvider(deckId).notifier).grow();
+import '../widgets/sections/card_list_body_widget.dart';
+import '../widgets/sections/card_selection_bar_widget.dart';
 
 /// Types into the search field (S1). A free function for the same reason.
 void _updateSearch(WidgetRef ref, String deckId, String query) =>
     ref.read(cardListSearchQueryProvider(deckId).notifier).update(query);
+
+/// Enters selection mode from the app-bar action, and leaves it from Back
+/// (UC-04 A6). Free functions for the same reason `_updateSearch` is one: a
+/// `ref.read` written inline in `build()` is indistinguishable — to the guard
+/// and to a reader — from the unsubscribed read that silently stops a widget
+/// updating.
+void _beginSelection(WidgetRef ref, String deckId) =>
+    ref.read(cardSelectionProvider(deckId).notifier).begin();
+
+void _clearSelection(WidgetRef ref, String deckId) =>
+    ref.read(cardSelectionProvider(deckId).notifier).clear();
 
 /// Re-subscribes both reads that render the card-list frame.
 ///
@@ -98,6 +98,15 @@ class CardListScreen extends ConsumerWidget {
     // The deck's name and breadcrumb (W1). Null until the read lands or if the
     // deck has vanished — the title then falls back to the generic label.
     final deckContext = ref.watch(deckContextProvider(deckId)).value;
+    final selection = ref.watch(cardSelectionProvider(deckId));
+    // Any bulk command in flight disables the bar. Four states rather than
+    // one flag on the selection: the spinner belongs to the write that is
+    // running, not to the set of rows it runs over.
+    final isBulkBusy =
+        ref.watch(moveCardsProvider(deckId)).isSubmitting ||
+        ref.watch(deleteCardsProvider(deckId)).isSubmitting ||
+        ref.watch(setCardsFlagProvider(deckId)).isSubmitting ||
+        ref.watch(addTagToCardsProvider(deckId)).isSubmitting;
 
     return MxContentShell(
       title: deckContext?.deckName ?? context.l10n.cardListTitle,
@@ -118,36 +127,78 @@ class CardListScreen extends ConsumerWidget {
       // `primaryContainer`, a second emphasis tone for the same "add" the deck
       // screen renders in `primary`; one app-bar icon keeps that consistent.
       actions: <Widget>[
-        MxIconButton(
-          icon: Icons.add,
-          semanticLabel: context.l10n.cardListNewAction,
-          tooltip: context.l10n.cardListNewAction,
-          onPressed: () => _openEditor(context),
-        ),
+        // A visible way into selection mode. Long-press is the platform
+        // gesture and it has no affordance at all, so a user who does not
+        // already know it would never find bulk management (UC-04 A6).
+        if (deckTotal > 0 && !selection.isSelecting)
+          MxIconButton(
+            icon: Icons.checklist,
+            semanticLabel: context.l10n.cardSelectAction,
+            tooltip: context.l10n.cardSelectAction,
+            onPressed: () => _beginSelection(ref, deckId),
+          ),
+        // Creating a card is not a thing to offer mid-selection: it leaves the
+        // screen, which would abandon the selection to open an editor the user
+        // did not ask for.
+        if (!selection.isSelecting)
+          MxIconButton(
+            icon: Icons.add,
+            semanticLabel: context.l10n.cardListNewAction,
+            tooltip: context.l10n.cardListNewAction,
+            onPressed: () => _openEditor(context),
+          ),
       ],
-      body: MxAsyncView<List<CardListItemModel>>(
-        value: cards,
-        loadingLabel: context.l10n.cardListLoadingLabel,
-        error: (_, _) => MxErrorState(
-          title: context.l10n.unexpectedErrorTitle,
-          message: context.l10n.cardListError,
-          retryLabel: context.l10n.retryAction,
-          onRetry: () => _retryCardList(ref, deckId),
-        ),
-        data: (list) => list.isEmpty
-            ? _empty(
-                context,
-                filter,
-                ref.watch(cardListSearchQueryProvider(deckId)),
-              )
-            : _Loaded(
+      // Back leaves selection first (UC-04 A6): a user who selected twenty
+      // cards and pressed Back meant "stop selecting", not "leave the deck".
+      body: PopScope<Object?>(
+        canPop: !selection.isSelecting,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          _clearSelection(ref, deckId);
+        },
+        child: Column(
+          children: <Widget>[
+            if (selection.isSelecting)
+              CardSelectionBarWidget(
                 deckId: deckId,
-                items: list,
-                // The count trails the window by at most a frame (C3); until its
-                // first value arrives the window length is the honest floor.
-                total: count.value ?? list.length,
-                onOpen: (item) => _openEditor(context, cardId: item.card.id),
+                isBusy: isBulkBusy,
+                onMove: () => bulkMove(context, ref, deckId),
+                onAddTag: () => bulkAddTag(context, ref, deckId),
+                onFlag: () => bulkFlag(context, ref, deckId, isFlagged: true),
+                onUnflag: () =>
+                    bulkFlag(context, ref, deckId, isFlagged: false),
+                onDelete: () => bulkDelete(context, ref, deckId),
               ),
+            Expanded(
+              child: MxAsyncView<List<CardListItemModel>>(
+                value: cards,
+                loadingLabel: context.l10n.cardListLoadingLabel,
+                error: (_, _) => MxErrorState(
+                  title: context.l10n.unexpectedErrorTitle,
+                  message: context.l10n.cardListError,
+                  retryLabel: context.l10n.retryAction,
+                  onRetry: () => _retryCardList(ref, deckId),
+                ),
+                data: (list) => list.isEmpty
+                    ? _empty(
+                        context,
+                        filter,
+                        ref.watch(cardListSearchQueryProvider(deckId)),
+                      )
+                    : CardListBodyWidget(
+                        deckId: deckId,
+                        items: list,
+                        // The count trails the window by at most a frame (C3);
+                        // until its first value arrives the window length is the
+                        // honest floor.
+                        total: count.value ?? list.length,
+                        onOpen: (item) =>
+                            _openEditor(context, cardId: item.card.id),
+                      ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -199,136 +250,6 @@ class CardListScreen extends ConsumerWidget {
     if (filter != CardListFilter.all) return const _NoMatch();
 
     return _Empty(onAdd: () => _openEditor(context));
-  }
-}
-
-class _Loaded extends ConsumerWidget {
-  const _Loaded({
-    required this.deckId,
-    required this.items,
-    required this.total,
-    required this.onOpen,
-  });
-
-  final String deckId;
-  final List<CardListItemModel> items;
-  final int total;
-  final void Function(CardListItemModel item) onOpen;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final hasMore = items.length < total;
-    // One "now" for the whole list, from the composition root — every badge is
-    // measured against the same instant, and the tile never reads the clock.
-    final now = ref.watch(cardListNowProvider);
-
-    // Two header rows scroll above the cards: the progress panel (D5) and the
-    // "showing N of M" line. The filter pills pin in the subheader instead, so
-    // they stay reachable while the panel scrolls away.
-    const headerCount = 2;
-
-    return ListView.separated(
-      // `xl` on top, not `md`: with the shell no longer padding this scroll view
-      // the only space above the panel would be the subheader's `xs`, and the
-      // panel would sit tighter under the pills than it did before the double
-      // gutter was removed. `xl` under the strip's `xs` is the 28 the deck
-      // list's first section already stands at.
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        AppSpacing.xl,
-        AppSpacing.lg,
-        AppSpacing.xxl,
-      ),
-      itemCount: items.length + headerCount + 1,
-      // A plain gap between everything: each card row is now its own bordered
-      // surface (MxCard, like the deck list), so the separation is the space
-      // between cards, not a hairline drawn through one dense block.
-      separatorBuilder: (context, index) =>
-          const SizedBox(height: AppSpacing.md),
-      itemBuilder: (context, index) {
-        if (index == 0) {
-          return CardProgressPanelWidget(deckId: deckId);
-        }
-        if (index == 1) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-            child: Row(
-              children: <Widget>[
-                Expanded(
-                  child: Text(
-                    context.l10n.cardListShowing(items.length, total),
-                    style: context.texts.labelSmall?.copyWith(
-                      color: context.colors.onSurfaceVariant,
-                      letterSpacing: 1.1,
-                    ),
-                  ),
-                ),
-                CardSortControlWidget(deckId: deckId),
-              ],
-            ),
-          );
-        }
-        final cardIndex = index - headerCount;
-        if (cardIndex < items.length) {
-          final item = items[cardIndex];
-          return CardTileWidget(
-            item: item,
-            now: now,
-            onTap: () => onOpen(item),
-          );
-        }
-
-        return _Tail(
-          deckId: deckId,
-          shown: items.length,
-          total: total,
-          hasMore: hasMore,
-        );
-      },
-    );
-  }
-}
-
-/// The bottom of the window: a load-more button while rows remain, or the line
-/// that says the whole deck is on screen (W1b).
-class _Tail extends ConsumerWidget {
-  const _Tail({
-    required this.deckId,
-    required this.shown,
-    required this.total,
-    required this.hasMore,
-  });
-
-  final String deckId;
-  final int shown;
-  final int total;
-  final bool hasMore;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    if (!hasMore) {
-      return Padding(
-        padding: const EdgeInsets.only(top: AppSpacing.lg),
-        child: Center(
-          child: Text(
-            context.l10n.cardListAllShown(total),
-            style: context.texts.bodySmall?.copyWith(
-              color: context.colors.onSurfaceVariant,
-            ),
-          ),
-        ),
-      );
-    }
-
-    return Padding(
-      padding: const EdgeInsets.only(top: AppSpacing.lg),
-      child: Center(
-        child: MxTextButton(
-          label: context.l10n.cardListLoadMore(kCardWindowSize),
-          onPressed: () => _growWindow(ref, deckId),
-        ),
-      ),
-    );
   }
 }
 

@@ -1,6 +1,12 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../di/card_repository_provider.dart';
+import '../../domain/usecases/add_tag_to_cards_use_case.dart';
+import '../../domain/usecases/delete_cards_use_case.dart';
+import '../../domain/usecases/move_cards_use_case.dart';
+import '../../domain/usecases/read_card_ids_matching_use_case.dart';
+import '../../domain/usecases/set_cards_flag_use_case.dart';
+import '../../domain/usecases/watch_card_move_targets_use_case.dart';
 import '../../domain/usecases/create_card_use_case.dart';
 import '../../domain/usecases/delete_card_use_case.dart';
 import '../../domain/usecases/get_card_use_case.dart';
@@ -86,3 +92,29 @@ WatchDeckContextUseCase watchDeckContextUseCase(Ref ref) =>
 @riverpod
 ReadDeckHoldsCardsUseCase readDeckHoldsCardsUseCase(Ref ref) =>
     ReadDeckHoldsCardsUseCase(ref.watch(cardRepositoryProvider));
+
+/// The bulk mutations behind selection mode (UC-04 A6).
+@riverpod
+MoveCardsUseCase moveCardsUseCase(Ref ref) =>
+    MoveCardsUseCase(ref.watch(cardRepositoryProvider));
+
+@riverpod
+DeleteCardsUseCase deleteCardsUseCase(Ref ref) =>
+    DeleteCardsUseCase(ref.watch(cardRepositoryProvider));
+
+@riverpod
+SetCardsFlagUseCase setCardsFlagUseCase(Ref ref) =>
+    SetCardsFlagUseCase(ref.watch(cardRepositoryProvider));
+
+@riverpod
+AddTagToCardsUseCase addTagToCardsUseCase(Ref ref) =>
+    AddTagToCardsUseCase(ref.watch(cardRepositoryProvider));
+
+/// Select all: the ids the live filter and search match (BR-167).
+@riverpod
+ReadCardIdsMatchingUseCase readCardIdsMatchingUseCase(Ref ref) =>
+    ReadCardIdsMatchingUseCase(ref.watch(cardRepositoryProvider));
+
+@riverpod
+WatchCardMoveTargetsUseCase watchCardMoveTargetsUseCase(Ref ref) =>
+    WatchCardMoveTargetsUseCase(ref.watch(cardRepositoryProvider));

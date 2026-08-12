@@ -36,6 +36,9 @@ class CardTileWidget extends StatelessWidget {
     required this.item,
     required this.now,
     required this.onTap,
+    this.onLongPress,
+    this.isSelectionMode = false,
+    this.isSelected = false,
     super.key,
   });
 
@@ -46,21 +49,74 @@ class CardTileWidget extends StatelessWidget {
   final DateTime now;
   final VoidCallback onTap;
 
+  /// Enters selection mode (UC-04 A6). Null outside the list — the editor's
+  /// preview has nothing to select.
+  final VoidCallback? onLongPress;
+
+  /// Whether the list is selecting. The row changes what a tap *means*, so it
+  /// has to know: outside the mode a tap opens the editor, inside it toggles.
+  final bool isSelectionMode;
+  final bool isSelected;
+
   @override
   Widget build(BuildContext context) {
-    return MxCard(
-      elevation: AppElevation.none,
-      onTap: onTap,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          _StateDot(item: item),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(child: _CardFace(item: item)),
-          // No gap here — `_TrailingBadges` owns it, because it can render
-          // nothing at all.
-          _TrailingBadges(item: item, now: now),
-        ],
+    // Selection is announced, not just tinted: a screen reader hears the state
+    // and a colour-blind reader sees the check, so colour is never the only
+    // signal (UC-04 A6).
+    return Semantics(
+      selected: isSelectionMode ? isSelected : null,
+      label: isSelected ? context.l10n.cardSelectedSemanticLabel : null,
+      child: MxCard(
+        elevation: AppElevation.none,
+        onTap: onTap,
+        onLongPress: onLongPress,
+        // A tinted surface *and* a border, both from tokens. The height does
+        // not move between the two states — the check replaces the state dot
+        // in the same column rather than being inserted beside it — so a list
+        // does not reflow as the user selects.
+        color: isSelected ? context.colors.secondaryContainer : null,
+        borderColor: isSelected ? context.colors.secondary : null,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            isSelectionMode
+                ? _SelectionMark(isSelected: isSelected)
+                : _StateDot(item: item),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(child: _CardFace(item: item)),
+            // No gap here — `_TrailingBadges` owns it, because it can render
+            // nothing at all.
+            _TrailingBadges(item: item, now: now),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The check that replaces the state dot while selecting.
+///
+/// **Same column, same footprint.** An indicator inserted beside the dot would
+/// shift every row sideways the moment selection starts and back again when it
+/// ends; swapping in place keeps the list still. Shape carries the state as
+/// much as colour does — a filled check against an empty circle.
+class _SelectionMark extends StatelessWidget {
+  const _SelectionMark({required this.isSelected});
+
+  final bool isSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: _stateDotSize,
+      height: _stateDotSize,
+      child: FittedBox(
+        child: Icon(
+          isSelected ? Icons.check_circle : Icons.circle_outlined,
+          color: isSelected
+              ? context.colors.secondary
+              : context.colors.onSurfaceVariant,
+        ),
       ),
     );
   }

@@ -61,7 +61,7 @@ class CardEdit extends _$CardEdit {
   void reset() => state = const CardSubmitState();
 }
 
-/// Deletes one card (UC-04 A5, BR-67).
+/// Deletes one card (UC-04 A2, BR-163).
 ///
 /// The card's study state and history cascade; the deck's `content_type` is
 /// left as it is, even for the last card. The confirmation is the screen's job —
