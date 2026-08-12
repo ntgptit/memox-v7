@@ -151,10 +151,12 @@ chọn: Create deck (BR-59). Việc tạo phần tử con nằm ở UC-08.
    (`first_answered_at IS NULL`, BR-12).
 2. Người dùng chọn chế độ khác.
 3. Hệ thống cảnh báo study state của **toàn bộ card trong cây** sẽ được khởi tạo
-   lại theo chế độ mới (BR-14).
+   lại theo chế độ mới (BR-14), và phiên học đang mở sẽ bị đóng (BR-164). Đây
+   **không** phải Reset learning progress: không có generation nào bị tiêu, không
+   có lịch sử nào bị bỏ, nên cảnh báo này MUST NOT dùng giọng phá huỷ của UC-07.
 4. Người dùng xác nhận.
-5. Hệ thống đổi scheduler **và** khởi tạo lại study state toàn cây — trong một
-   transaction.
+5. Hệ thống đổi scheduler, khởi tạo lại study state toàn cây, **và** đóng mọi
+   phiên đang mở của cây — trong một transaction (BR-14, BR-164).
 
 **Main flow (xoá):**
 1. Hệ thống hỏi xác nhận, nêu rõ số deck con và số card sẽ mất (BR-04).
@@ -177,16 +179,22 @@ chọn: Create deck (BR-59). Việc tạo phần tử con nằm ở UC-08.
   thông báo nhẹ nhàng.
 - **E2 — Đổi chế độ thất bại giữa chừng:** transaction rollback; deck giữ nguyên
   scheduler cũ và study state cũ.
+- **E5 — Scheduler bị khoá trong lúc bảng chọn đang mở:** người dùng học xong một
+  thẻ ở màn khác giữa lúc bảng chọn mở. Repository đọc lại `first_answered_at`
+  **bên trong** transaction (BR-13) và từ chối; màn hình hiện lý do và lối đi tới
+  Reset. Trạng thái vẽ trên màn hình MUST NOT là thứ quyết định thao tác có hợp lệ
+  hay không.
 - **E3 — Đưa `content_type` về `unset` khi deck không rỗng:** chặn, giải thích
   phải xoá hết nội dung trước (BR-68).
 - **E4 — Xoá thất bại:** hiện lỗi; deck còn nguyên vẹn.
 
 **Postconditions:**
 - Sau đổi chế độ: `scheduler_type` mới, mọi study state trong cây khởi tạo lại,
-  `scheduler_generation` **không đổi** (chưa có gì để reset).
+  `scheduler_generation` **không đổi** (chưa có gì để reset), `first_answered_at`
+  vẫn NULL, và không còn phiên `in_progress` nào của cây (BR-164).
 - Sau xoá: không còn deck con, card, study state, history hay session mồ côi.
 
-**Business rules:** BR-01, BR-03, BR-04, BR-06, BR-12, BR-13, BR-14, BR-67, BR-68
+**Business rules:** BR-01, BR-03, BR-04, BR-06, BR-12, BR-13, BR-14, BR-67, BR-68, BR-164
 **UI states:** loaded · submitting · error
 
 ---
@@ -356,7 +364,10 @@ do người dùng chọn và cập nhật lịch. Chúng không bao giờ trộn
   generation.
 - Mỗi lượt đánh giá có đúng một dòng `study_answers` mang `kind`,
   `scheduler_type` và `scheduler_generation` tại thời điểm đó.
-- `first_answered_at` của root khác NULL sau lượt `scheduled` đầu tiên.
+- `first_answered_at` của root khác NULL sau khi **thẻ đầu tiên hoàn tất chuỗi
+  học mới** (bước 10–11, BR-13, BR-144) — **không** phải sau lượt `scheduled`
+  đầu tiên. Một phiên `reviewing` chỉ chạy được trên thẻ đã có `learned_at`,
+  nên tới lúc đó cột này đã được đặt rồi.
 - `study_sessions.status` và `end_reason` phản ánh đúng cách phiên kết thúc, theo
   ma trận ở `data-model.md`.
 - Nếu E4 xảy ra, **không** có dòng history nào được ghi cho lượt đó.

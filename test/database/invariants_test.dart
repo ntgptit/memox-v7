@@ -84,14 +84,19 @@ void main() {
     });
   }
 
-  test('all fifteen invariants are present', () {
-    // The list itself is a claim. Losing one would leave fourteen green tests
-    // and no sign that the fifteenth ever existed.
-    expect(invariantQueries.keys, hasLength(15));
+  test('every invariant this suite claims to run is present', () {
+    // The list itself is a claim. Losing one would leave the rest green and no
+    // sign that the missing one ever existed.
+    //
+    // `Q30` is spelled out rather than folded into the range: the keys are
+    // `data-model.md`'s ids, and 16…29 are specified there without an
+    // executable fixture here yet.
+    expect(invariantQueries.keys, hasLength(16));
     expect(
       invariantQueries.keys,
       containsAll(<String>[for (var i = 1; i <= 15; i++) 'Q$i']),
     );
+    expect(invariantQueries.keys, contains('Q30'));
   });
 
   invariant(
@@ -207,6 +212,52 @@ void main() {
     ),
     expectOffenders: <String>['root'],
   );
+
+  invariant(
+    'Q30',
+    'the tree has learned cards but the scheduler is not locked (BR-13)',
+    // The seed's card has no schedule, so it never finished the chain and the
+    // root is legitimately unlocked. Giving it one without stamping the root is
+    // exactly the state `completeLearning` writes both halves of in a single
+    // transaction to make unreachable.
+    breakIt: (db) => db.customStatement(
+      "UPDATE card_study_states SET learned_at = '2026-01-01T00:00:00.000Z', "
+      "due_at = '2026-01-02T00:00:00.000Z' WHERE card_id = 'card-1'",
+    ),
+    expectOffenders: <String>['root'],
+  );
+
+  group('Q30 — the other direction is not a violation', () {
+    test('a locked root with nothing learned left is valid', () async {
+      // Learn the tree, then delete the card. The lock records that this tree
+      // *was* learned; deleting content does not un-learn it, and only Reset
+      // clears the stamp (BR-44). An invariant firing here would call a
+      // perfectly ordinary sequence corrupt.
+      final db = openTestDatabase();
+      await seedValid(db);
+      await db.customStatement(
+        "UPDATE decks SET first_answered_at = '2026-01-01T00:00:00.000Z' "
+        "WHERE id = 'root'",
+      );
+
+      expect(await check(db, 'Q30'), isEmpty);
+    });
+
+    test('a learned card under a locked root is valid', () async {
+      final db = openTestDatabase();
+      await seedValid(db);
+      await db.customStatement(
+        "UPDATE card_study_states SET learned_at = '2026-01-01T00:00:00.000Z', "
+        "due_at = '2026-01-02T00:00:00.000Z' WHERE card_id = 'card-1'",
+      );
+      await db.customStatement(
+        "UPDATE decks SET first_answered_at = '2026-01-01T00:00:00.000Z' "
+        "WHERE id = 'root'",
+      );
+
+      expect(await check(db, 'Q30'), isEmpty);
+    });
+  });
 
   invariant(
     'Q12',

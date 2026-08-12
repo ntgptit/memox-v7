@@ -21,6 +21,8 @@ import 'package:memox/features/study/domain/models/study_session_summary_model.d
 import 'package:memox/features/study/domain/models/study_session_status_model.dart';
 import 'package:memox/features/study/domain/repositories/study_repository.dart';
 
+part 'fake_study_lifecycle.dart';
+
 /// A `StudyRepository` a use-case test drives by hand, which **records
 /// arguments rather than simulating a queue.** The queue engine is
 /// tested against a real database in `test/features/study/data/`; repeating it
@@ -29,7 +31,9 @@ import 'package:memox/features/study/domain/repositories/study_repository.dart';
 /// Not `final`: controller tests subclass it — one fails every write, one defers
 /// its first read — and the alternative is a constructor flag for each, which
 /// spreads test-only branching through the double.
-base class FakeStudyRepository implements StudyRepository {
+base class FakeStudyRepository
+    with _FakeStudyLifecycleStubs
+    implements StudyRepository {
   FakeStudyRepository({
     this.schedulerType = SchedulerType.eightBox,
     this.cardLimit = 20,
@@ -82,10 +86,7 @@ base class FakeStudyRepository implements StudyRepository {
       <({String cardId, DateTime learnedAt, DateTime dueAt, int? box})>[];
 
   final List<StudyMode> advancedTo = <StudyMode>[];
-  final List<({StudySessionStatus status, StudySessionEndReason? reason})>
-  ended = <({StudySessionStatus status, StudySessionEndReason? reason})>[];
 
-  DateTime? abandonedBefore;
   StudySessionEntity? openSession_;
 
   @override
@@ -229,34 +230,6 @@ base class FakeStudyRepository implements StudyRepository {
   Completer<void>? nextTurnGate;
 
   @override
-  Future<void> endSession({
-    required String sessionId,
-    required StudySessionStatus status,
-    required StudySessionEndReason? reason,
-    required DateTime endedAt,
-  }) async {
-    final gate = endSessionGate;
-    if (gate != null) await gate.future;
-    if (endSessionFails) throw StateError('the session could not be ended');
-
-    ended.add((status: status, reason: reason));
-  }
-
-  /// Holds every `endSession` open: the window between pressing ✕ and the
-  /// session ending, where the screen used to take another answer.
-  Completer<void>? endSessionGate;
-
-  /// Makes ending fail — a session that could not end is still running.
-  bool endSessionFails = false;
-
-  @override
-  Future<int> abandonStaleSessions({required DateTime dayStart}) async {
-    abandonedBefore = dayStart;
-
-    return 0;
-  }
-
-  @override
   Future<StudySessionEntity?> openSessionFor(String deckId) async =>
       openSession_;
 
@@ -367,12 +340,6 @@ base class FakeStudyRepository implements StudyRepository {
     remainingMs: remainingMs,
     isRevealed: isRevealed,
   ));
-
-  @override
-  Future<int> invalidateSessionsForRoot({
-    required String rootDeckId,
-    required DateTime endedAt,
-  }) async => 0;
 
   final List<String> browsed = <String>[];
 

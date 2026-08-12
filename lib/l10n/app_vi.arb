@@ -1636,6 +1636,42 @@
   "@deckConflictResetSchedulerUnknown": {
     "description": "Refusal shown when a reset would write a scheduler this build does not recognise. Reachable only from data written by a newer version."
   },
+  "deckConflictSchedulerNeedsRoot": "Chế độ ôn tập được đặt ở deck cấp cao nhất.",
+  "@deckConflictSchedulerNeedsRoot": {
+    "description": "Refusal shown when a study-mode change is attempted below the root. The scheduler lives on the root and a sub-deck's columns stay NULL (BR-05, BR-06)."
+  },
+  "deckConflictSchedulerLocked": "Bạn đã học deck này rồi nên chế độ ôn tập bị khoá. Đặt lại tiến độ học để đổi.",
+  "@deckConflictSchedulerLocked": {
+    "description": "Refusal shown when a study-mode change lands after a card has finished the learning chain (BR-13). Reset learning progress is the only way through (BR-44)."
+  },
+  "deckSchedulerChangeAction": "Đổi chế độ ôn tập",
+  "@deckSchedulerChangeAction": {
+    "description": "Opens the study-mode picker on a root deck (UC-03). Present whether or not the mode is locked — hiding it makes users think the feature does not exist (UC-03 A1)."
+  },
+  "deckSchedulerChangeTitle": "Chế độ ôn tập",
+  "@deckSchedulerChangeTitle": {
+    "description": "Title of the sheet that changes a root deck's study mode (UC-03)."
+  },
+  "deckSchedulerChangeBody": "Mọi thẻ trong deck này và các deck con sẽ bắt đầu lại lịch học theo chế độ bạn chọn. Không có nội dung nào bị đụng tới — thẻ, tag và ghi chú đều giữ nguyên.",
+  "@deckSchedulerChangeBody": {
+    "description": "Explains what an unlocked study-mode change does (BR-14). Deliberately not the destructive language of Reset learning progress: no history and no generation is being discarded (UC-03)."
+  },
+  "deckSchedulerChangeSessionNotice": "Phiên học đang mở của bạn sẽ được đóng lại.",
+  "@deckSchedulerChangeSessionNotice": {
+    "description": "Shown in the study-mode change sheet. The open session's queue was dealt for the old algorithm, so it is invalidated inside the same transaction rather than left to fail later (BR-83)."
+  },
+  "deckSchedulerChangeConfirm": "Đổi chế độ ôn tập",
+  "@deckSchedulerChangeConfirm": {
+    "description": "Confirms an unlocked study-mode change (UC-03). A primary action, not a destructive one."
+  },
+  "deckSchedulerLockedTitle": "Chế độ ôn tập đang khoá",
+  "@deckSchedulerLockedTitle": {
+    "description": "Title of the study-mode sheet on a root deck that has been studied (BR-13, UC-03 A1)."
+  },
+  "deckSchedulerLockedBody": "Deck này đã có thẻ bạn học xong nên chế độ ôn tập được cố định. Đặt lại tiến độ học sẽ mở khoá và cho mọi thẻ bắt đầu lại.",
+  "@deckSchedulerLockedBody": {
+    "description": "Explains the lock and points at the only way through it (BR-13, BR-44, UC-03 A1)."
+  },
   "deckResetProgressAction": "Đặt lại tiến độ học",
   "@deckResetProgressAction": {
     "description": "The action on a root deck that clears every card's schedule so the tree can be learned again - and the only way to change a study mode after the first card has been learned (BR-13, BR-44, UC-07)."

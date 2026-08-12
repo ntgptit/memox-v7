@@ -7,8 +7,8 @@
 | **Scope** | Đồ thị chuyển tiếp giữa UC-01…UC-09, tách theo đối tượng nghiệp vụ. Ngoài phạm vi: nội dung của từng UC, mọi luật nghiệp vụ, và mọi chi tiết màn hình |
 | **Source of truth for** | Đồ thị chuyển tiếp giữa các UC · điểm vào của từng luồng · ánh xạ UC → milestone xây nó |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md`, `use-cases.md` |
-| **Updated by task** | M5.0o (recursive review lượt hai) |
-| **Last updated** | 2026-08-07 |
+| **Updated by task** | Nhánh `I` tách rõ đổi scheduler chưa khoá khỏi Reset, và nói ai đặt khoá (BR-12, BR-13, BR-164) |
+| **Last updated** | 2026-08-11 |
 
 ---
 
@@ -113,7 +113,7 @@ flowchart TD
     H -->|"Rỗng"| H2["Xác nhận rồi đặt unset · UC-03 A3"]
 
     B -->|"Đổi chế độ ôn tập · chỉ root"| I{"first_answered_at"}
-    I -->|"NULL"| I1["Mở khoá: cảnh báo rồi khởi tạo lại study state toàn cây · UC-03, BR-14"]
+    I -->|"NULL"| I1["Mở khoá: cảnh báo rồi khởi tạo lại study state toàn cây, generation giữ nguyên, session đang mở → invalidated · UC-03, BR-12, BR-14, BR-164"]
     I -->|"Đã có"| I2["Khoá, hiện kèm lối đi sang Reset learning progress · UC-03 A1, BR-13"]
     I2 --> I3["UC-07 · mục 5"]
 ```
@@ -121,6 +121,16 @@ flowchart TD
 **Nhánh `I` là chỗ hai đối tượng gặp nhau.** Chế độ ôn tập là thuộc tính của deck
 nhưng bị khoá bởi một sự kiện của review, nên đường thoát duy nhất khi đã khoá
 nằm ở mục 5. Ẩn nó đi thay vì hiện trạng thái khoá là điều BR-13 cấm.
+
+**`I1` và `I3` là hai thao tác, không phải một thao tác với hai cách gọi.** Cả hai
+ghi scheduler và khởi tạo lại toàn cây; chỉ `I3` tiêu một generation, vì chỉ nó
+vứt đi một chu kỳ học. Cho `I1` chạy qua Reset sẽ đánh số lịch sử rỗng thành "đã
+bị thay thế" và bắt người dùng xác nhận một cảnh báo phá huỷ về thứ không tồn tại
+(BR-12, UC-03).
+
+**Ai đặt khoá ở `I`:** chính lần một thẻ hoàn tất chuỗi học mới, trong cùng
+transaction với lần hoàn tất đó (mục 5, bước 10–11 của UC-05; BR-13, BR-144).
+Không thao tác nào của deck ghi cột này.
 
 ---
 

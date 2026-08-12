@@ -1,4 +1,11 @@
-/// The 15 invariant queries, copied verbatim from `data-model.md`.
+/// The 16 invariant queries this suite executes, copied verbatim from
+/// `data-model.md`.
+///
+/// **A subset of the document's, and its numbering, not a fresh sequence.**
+/// `data-model.md` specifies thirty; the ones here are the ones with an
+/// executable fixture. The keys keep the document's ids so a failure names the
+/// rule rather than a position in this map — which is also why `Q30` follows
+/// `Q11` with nothing in between.
 ///
 /// Frozen source. Nothing here may be reworded to make a test pass — the
 /// document is the specification, and a query edited to suit a fixture stops
@@ -75,6 +82,18 @@ const Map<String, String> invariantQueries = <String, String>{
   'Q11': // Root deck is missing its scheduler (BR-11)
       'SELECT d.id FROM decks d WHERE d.parent_deck_id IS NULL '
       'AND (d.scheduler_type IS NULL OR d.scheduler_generation IS NULL)',
+
+  // 30 rather than 16, and the gap is deliberate: the numbers here are
+  // `data-model.md`'s, not this file's, and 29 belongs to the `content_type`
+  // normalisation landing in parallel. An id is permanent (§7 of
+  // `document-conventions.md`), so a hole costs less than a collision.
+  'Q30': // A tree has learned cards but its scheduler is not locked (BR-13)
+      'SELECT root.id FROM decks root WHERE root.parent_deck_id IS NULL '
+      'AND root.first_answered_at IS NULL '
+      'AND EXISTS (SELECT 1 FROM card_study_states s '
+      'JOIN cards c ON c.id = s.card_id '
+      'JOIN decks d ON d.id = c.deck_id '
+      'WHERE d.root_deck_id = root.id AND s.learned_at IS NOT NULL)',
 
   // ---- Session ------------------------------------------------------------
   'Q12': // Invalid status × end_reason (BR-79…BR-85)

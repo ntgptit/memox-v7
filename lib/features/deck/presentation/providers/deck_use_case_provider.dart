@@ -8,6 +8,7 @@ import '../../domain/usecases/get_deck_deletion_impact_use_case.dart';
 import '../../domain/usecases/move_deck_use_case.dart';
 import '../../domain/usecases/rename_deck_use_case.dart';
 import '../../domain/usecases/reset_deck_content_type_use_case.dart';
+import '../../domain/usecases/change_unlocked_scheduler_use_case.dart';
 import '../../domain/usecases/reset_learning_progress_use_case.dart';
 import '../../domain/usecases/search_decks_use_case.dart';
 import '../../domain/usecases/watch_deck_move_targets_use_case.dart';
@@ -64,6 +65,10 @@ ResetDeckContentTypeUseCase resetDeckContentTypeUseCase(Ref ref) =>
 @riverpod
 ResetLearningProgressUseCase resetLearningProgressUseCase(Ref ref) =>
     ResetLearningProgressUseCase(ref.watch(deckRepositoryProvider));
+
+@riverpod
+ChangeUnlockedSchedulerUseCase changeUnlockedSchedulerUseCase(Ref ref) =>
+    ChangeUnlockedSchedulerUseCase(ref.watch(deckRepositoryProvider));
 
 @riverpod
 MoveDeckUseCase moveDeckUseCase(Ref ref) =>

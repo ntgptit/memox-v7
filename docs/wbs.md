@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.8 (Nhãn tab Decks → Thư viện/Library) |
+| **Updated by task** | M99.15 (Scheduler lifecycle — khoá tự động và đổi chế độ khi chưa khoá) |
 | **Last updated** | 2026-08-11 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -8662,6 +8662,56 @@ thế không đổi bố cục.
   streak), `deck_summary_overdue_test` (viết lại, 12),
   `deck_summary_new_test`, `deck_list_screen_test`, golden 6 file.
 
+### M99.15 · Scheduler lifecycle — khoá tự động, và đổi chế độ khi chưa khoá
+
+- **Status:** **done** — targeted tests xanh (invariants 36, study lock 7, deck
+  scheduler change 13, sheet 9, deck actions 13), `flutter analyze` sạch,
+  `check_docs` sạch, guard sạch, không chạy emulator/golden.
+- **Goal:** Hai nửa của vòng đời scheduler đều chưa có code. BR-13 nói thẻ đầu
+  hoàn tất chuỗi học thì khoá scheduler — **không thao tác nào trong app ghi
+  `first_answered_at`**, chỉ Reset xoá nó, nên cột NULL vĩnh viễn và BR-12 đọc
+  mọi deck là còn mở khoá. BR-12 nói được đổi trực tiếp khi chưa khoá — không có
+  operation nào làm việc đó, nên người dùng bị đẩy qua Reset learning progress và
+  mất một generation cho một deck chưa học gì.
+- **Scope:** `completeLearning` đặt `first_answered_at` của root trong **cùng**
+  transaction, có điều kiện `IS NULL` nên thẻ sau không ghi đè và `updated_at`
+  của deck không bị chạm; `changeUnlockedScheduler` trên `DeckRepository` + use
+  case + controller + provider; sheet `deck_scheduler_change_widget.dart` cho cả
+  hai trạng thái khoá/mở; hai `DeckConflictReason` mới; `invalidateSessionsForRoot`
+  nhận `reason` tường minh; bất biến 30; BR-164 mới; BR-12/BR-13 nói rõ ai ghi
+  khoá; UC-03, UC-05 postcondition, master-flow nhánh `I`.
+- **Out of scope:** migration v6 và chuẩn hoá `content_type` (đang chạy ở một
+  session khác — xem nợ kỹ thuật); thuật toán 8-box/SM-2; thiết kế Study Mode;
+  UI deck tile ngoài phần scheduler.
+- **Editable documents:** `docs/wbs.md`, `docs/business-rules.md`,
+  `docs/data-model.md`, `docs/use-cases.md`, `docs/master-flow.md`
+- **Output:** `deck_scheduler_repository_impl.dart`,
+  `change_unlocked_scheduler_use_case.dart`, `deck_scheduler_change_widget.dart`,
+  `lockRootSchedulerIfUnlocked` trong `queries/study.drift`.
+- **Acceptance criteria:**
+  - [x] Root chưa khoá đổi scheduler, `scheduler_generation` **không** tăng và
+        `first_answered_at` vẫn NULL.
+  - [x] Toàn cây được seed lại đúng shape scheduler mới; không cây nào giữ hai
+        thuật toán (bất biến 9).
+  - [x] Root đã khoá, deck con, và `SchedulerType.unknown` đều bị từ chối mà
+        không đổi dữ liệu; điều kiện khoá đọc lại **bên trong** transaction.
+  - [x] Session đang mở → `invalidated` trong cùng transaction (BR-164); thao tác
+        bị từ chối thì session vẫn `in_progress`.
+  - [x] Thẻ đầu hoàn tất chuỗi đặt `first_answered_at` bằng đúng `learnedAt`
+        được truyền vào; thẻ thứ hai không ghi đè; `decks.updated_at` không đổi.
+  - [x] Sau completion, `changeUnlockedScheduler` bị từ chối và Reset vẫn mở khoá
+        lại (generation +1, timestamp NULL).
+  - [x] Bất biến 30 nằm trong suite chạy được, hai chiều, và chiều ngược (root đã
+        khoá mà hết thẻ học) **không** bị coi là vi phạm.
+  - [x] Sheet: picker mở đúng chế độ hiện tại chứ không phải null; root khoá hiện
+        lý do + lối sang Reset; deck con không có mục này; không dùng giọng phá
+        huỷ của UC-07.
+- **Dependencies:** none trong file này. Hai thứ nó dựng lên — Reset learning
+  progress và lifecycle phiên học — đều `done` và sống ở `wbs-study.md`.
+- **Tests required:** repository trên SQLite thật cho cả hai operation, bất biến
+  hai chiều, widget test ba trạng thái (mở khoá / khoá / deck con)
+- **Checklist phases:** 11, 14.2, 14.4
+
 ## Blocker
 
 | Blocker | Ảnh hưởng | Cách gỡ |
@@ -8732,6 +8782,8 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 | ~~`study_session_controller.dart` vượt trần 400 dòng của guard~~ | M5.23 | 408/400, và **warning cũng làm đỏ gate**. Class giữ toàn bộ command của phiên học, cộng summary và failure policy | **Đã trả trong cùng PR.** Tách `_loadSummary` + `StudySessionState.summary` thành `studySessionSummaryProvider` — một **query**, không phải command, nên nó chưa bao giờ thuộc về controller. Controller còn 380 dòng. Lợi ích thật chứ không chỉ số dòng: read cũ có ba call site (hết stage, leave, failure path) nên summary chỉ đúng bằng người cuối cùng nhớ đủ cả ba, và field thì sống lâu hơn phiên — quên một call site là hiện số của phiên trước dưới tiêu đề phiên mới |
 | ~~`dart format .` trong `dod_check.sh` crash trên worktree~~ | M2.2b | Bước `format` đỏ ở **mọi** lần chạy local nhiều tuần liền: `.` đi vào `.claude/worktrees/`, nơi Gradle xoá thư mục ngay giữa lúc formatter đang liệt kê → `PathNotFoundException`. Vì là lỗi môi trường chứ không phải lỗi format, mỗi lần lại được *báo cáo và đi vòng* thay vì sửa — và một gate đỏ mà ai cũng biết là đỏ thì không còn là gate | **Đã trả.** `dart_roots()` lấy tập thư mục từ `git ls-files '*.dart'` cắt tới segment đầu. Đúng câu hỏi cần hỏi — *cây làm việc **này** track những file Dart nào* — nên build output không tracked không lọt vào, worktree bị `.git/info/exclude` loại sẵn, và một thư mục top-level mới tự động được nhận. **Lỗi thứ hai nghiêm trọng hơn cái crash:** `.` đưa cho formatter source của **nhánh khác**, nên một worktree có format cũ làm gate đỏ vì code không nằm trong cây làm việc |
 | ~~`study_session_controller.dart` vượt trần 400 dòng của guard~~ | M5.24 | 423/400. Warning cũng làm đỏ gate. Class giữ toàn bộ command của phiên học | **Đã trả ở M5.25.** Không tách được bằng cơ chế ngôn ngữ — Dart không có partial class, base class Riverpod sinh ra là private, và extension trong `part` cũng không dùng được `state` (`invalid_use_of_protected_member`, đã thử và revert). Nên tách bằng **trách nhiệm**: offset nhìn lại của `browse` là view state, không phải command của phiên, và nay là `StudyBrowseTrailController`. Controller còn 387 dòng |
+| `end_reason = scheduler_reset` phải mang cả BR-164 | M99.15 | Đổi scheduler khi chưa khoá ghi cùng giá trị với Reset, nên đọc riêng cột đó thì hai sự kiện khác nhau trông giống nhau. Không mất thông tin — `study_sessions.scheduler_generation` bằng generation của root sau một lần đổi và nhỏ hơn sau một lần reset — nhưng nó bắt người đọc phải biết mẹo đó | Tên đúng là `scheduler_changed`. `study_sessions.end_reason` có `CHECK` liệt kê giá trị nên thêm một giá trị là **đổi schema**, và bump version đang thuộc về task chuẩn hoá `content_type` chạy song song (v6). Nới `CHECK` cùng lần bump schema tiếp theo, rồi đổi `deck_scheduler_repository_impl.dart` sang giá trị mới |
+| Bất biến 29 để trống có chủ đích | M99.15 | Dãy số bất biến có một lỗ | 29 thuộc về task chuẩn hoá `content_type` đang chạy ở session khác; M99.15 lấy 30 vì ID là định danh vĩnh viễn và một lần trùng số đắt hơn một khoảng trống. Đóng khi task kia merge |
 | Nội dung starter là fixture, không phải nội dung production | T1.3 | Không phát hành được với nội dung này | Tìm nguồn nội dung có bản quyền rõ ràng trước M8 (BR-87) |
 | `sqlite3.wasm` và `drift_worker.js` là binary vendored trong `web/` | M4.2 | Không có bước build nào sinh ra chúng và không có bước build nào báo khi chúng cũ: app compile, load, rồi **không mở được database**. Nâng `drift` mà quên tải lại worker không có triệu chứng nào cho tới khi ai đó mở trình duyệt | `test/database/web_assets_test.dart` so version trong `pubspec.lock` với version đã pin, kèm `web/WEB_ASSETS.md` ghi URL tải. Đã kiểm tiêm lỗi: đổi `drift` thành 2.99.0 làm test đỏ |
 | Server phát web chưa gửi COOP/COEP | M4.2 | `crossOriginIsolated` là `false`, nên drift chọn backend lưu trữ kém hơn OPFS. Không có lỗi nào — chỉ là hiệu năng và độ bền khác đi, âm thầm | Thêm `Cross-Origin-Opener-Policy: same-origin` và `Cross-Origin-Embedder-Policy: require-corp` vào server phát web ở M7, và kiểm lại `crossOriginIsolated` trong E2E |

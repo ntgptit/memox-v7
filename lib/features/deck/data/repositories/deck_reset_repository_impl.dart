@@ -77,6 +77,7 @@ mixin _ResetLearningProgressOperation implements DeckRepository {
       await _study.invalidateSessionsForRoot(
         rootDeckId: rootDeckId,
         endedAt: now,
+        reason: StudySessionEndReason.schedulerReset,
       );
     }),
   );

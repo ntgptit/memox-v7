@@ -221,6 +221,43 @@ class ResetLearningProgressController
   void reset() => state = const DeckSubmitState();
 }
 
+/// Changes a root deck's study mode while it is still unlocked (UC-03, BR-12).
+///
+/// Separate from [ResetLearningProgressController] for the same reason the use
+/// cases are separate: these two can be in flight independently, and only one of
+/// them is destructive. Sharing a controller would mean one submitting flag for
+/// two confirmations that say opposite things about what the user is about to
+/// lose.
+@riverpod
+class ChangeUnlockedSchedulerController
+    extends _$ChangeUnlockedSchedulerController {
+  @override
+  DeckSubmitState build(String rootDeckId) => const DeckSubmitState();
+
+  Future<void> submit({required SchedulerType schedulerType}) async {
+    if (!state.canSubmit) return;
+
+    state = const DeckSubmitState(isSubmitting: true);
+    try {
+      await ref.read(changeUnlockedSchedulerUseCaseProvider)(
+        rootDeckId: rootDeckId,
+        schedulerType: schedulerType,
+      );
+      if (!ref.mounted) return;
+      state = const DeckSubmitState(outcome: SubmitOutcome.savedAndClose);
+    } on Failure catch (failure) {
+      // The lock landing between the sheet opening and this submit is a normal
+      // outcome, not a bug: the repository re-reads it inside the transaction
+      // (BR-13). It arrives here as a `ConflictFailure` and the sheet renders
+      // the reason.
+      if (!ref.mounted) return;
+      state = DeckSubmitState(failure: failure);
+    }
+  }
+
+  void reset() => state = const DeckSubmitState();
+}
+
 /// Moves a deck and its whole subtree under another parent (UC-09).
 ///
 /// The picker disables targets it can already tell are illegal, but this still
