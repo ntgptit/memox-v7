@@ -41,14 +41,9 @@ const double _kPillHeight = 32;
 /// won. `MaterialTapTargetSize.padded` keeps the pill's drawn height at 32 and
 /// gives the hit area the floor.
 class DeckStudyButtonWidget extends StatelessWidget {
-  const DeckStudyButtonWidget({
-    required this.deckId,
-    required this.dueCardCount,
-    super.key,
-  });
+  const DeckStudyButtonWidget({required this.deckId, super.key});
 
   final String deckId;
-  final int dueCardCount;
 
   @override
   Widget build(BuildContext context) {

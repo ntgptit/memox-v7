@@ -7,10 +7,9 @@ import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../../../shared/widgets/mx_icon_button.dart';
 import '../../../../../shared/widgets/mx_progress_bar.dart';
-import '../../../domain/models/deck_content_type_model.dart';
 import '../../../domain/models/deck_summary_model.dart';
-import 'deck_due_state_widget.dart';
-import 'deck_icon_area_widget.dart';
+import 'deck_status_icon_widget.dart';
+import 'deck_workload_line_widget.dart';
 import 'deck_study_button_widget.dart';
 import '../support/deck_labels_widget.dart';
 
@@ -33,20 +32,30 @@ import '../support/deck_labels_widget.dart';
 /// twenty decks can be read by shape rather than by reading each row.
 ///
 /// The due state is carried by an icon, by words **and** by colour, never by
-/// colour alone (UC-06 step 3). "Nothing due" is `success` rather than neutral:
-/// finishing your reviews is good news, and BR-29 forbids dressing it as a
-/// problem — but it is still a state worth seeing at a glance.
+/// colour alone (UC-06 step 3). "Nothing due" is neutral — the resting state
+/// of the schedule, not an achievement (BR-29). `success` belongs to one
+/// moment only: the gauge and its figure at 100% learned (BR-88).
 class DeckTileWidget extends StatelessWidget {
   const DeckTileWidget({
     required this.summary,
     required this.onTap,
     required this.onActions,
+    required this.shouldShowScheduler,
     super.key,
   });
 
   final DeckSummary summary;
   final VoidCallback onTap;
   final VoidCallback onActions;
+
+  /// Whether the metadata line names the review algorithm.
+  ///
+  /// True at the root list, where decks genuinely differ; false inside a
+  /// deck, where every descendant inherits the root's scheduler (BR-06) and
+  /// repeating `8 boxes` on every child row is a column of non-information.
+  /// The *screen* passes this from its snapshot — a tile guessing the level
+  /// from its entity would be a second copy of `isRootLevel`.
+  final bool shouldShowScheduler;
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +78,11 @@ class DeckTileWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          _DeckHeadRegion(summary: summary, onActions: onActions),
+          _DeckHeadRegion(
+            summary: summary,
+            onActions: onActions,
+            shouldShowScheduler: shouldShowScheduler,
+          ),
           _DeckStateRegion(summary: summary),
         ],
       ),
@@ -89,41 +102,29 @@ class DeckTileWidget extends StatelessWidget {
 /// That is most of what took the card from 168 to about 110 — on a 393x852 screen
 /// the difference is 2.3 visible decks against 3.5.
 class _DeckHeadRegion extends StatelessWidget {
-  const _DeckHeadRegion({required this.summary, required this.onActions});
+  const _DeckHeadRegion({
+    required this.summary,
+    required this.onActions,
+    required this.shouldShowScheduler,
+  });
 
   final DeckSummary summary;
   final VoidCallback onActions;
+  final bool shouldShowScheduler;
 
   @override
   Widget build(BuildContext context) {
-    // A deck fixed to cards holds no sub-decks (BR-63), so it is the one row
-    // that opens onto something other than a list -- and the one that gets the
-    // card glyph rather than the folder. A completed deck outranks both: at
-    // 100% learned, what the row is *made of* matters less than that it is done.
-    //
-    // **The chevron that used to sit beside the menu is gone.** It said "this
-    // opens onto another level", which the whole card now says by being the
-    // target; standing next to a real control it read as a second one that did
-    // nothing. What the row is made of is still carried, by this glyph and by
-    // the sub-deck count on the meta line.
-    final isComplete = summary.isFullyLearned;
-    final holdsCards = summary.deck.contentType == DeckContentType.card;
-
     return Padding(
-      // **`xs` on the right, and the arithmetic is the point.** The overflow
-      // button is a 48 box around a 24 glyph, so it carries 12 of its own inset;
-      // `sm` here made the optical right gutter 20 against the left's 16, which
-      // is visible as a card whose contents sit slightly left of centre. 4 + 12
-      // is the 16 every other element on the screen starts from.
-      // `md` on top since the density pass: the concept's list shows five rows
-      // where this screen showed two and a half, and most of the difference was
-      // resting padding. 12 over the well still clears the card edge; the
-      // title's own line-height does the rest.
+      // **`xs` on the right:** the overflow button is a 48 box around a 24
+      // glyph, so 4 + its own 12 inset lands on the 16 gutter every other
+      // element uses. `md` on top since the density pass. **Zero at the
+      // bottom, deliberately:** the head owns every line break inside the
+      // block, and the action row below owns its own seam.
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
         AppSpacing.md,
         AppSpacing.xs,
-        AppSpacing.xs,
+        0,
       ),
       child: Row(
         // Top, not centre. Once the name wraps -- a long deck title, or any
@@ -131,28 +132,10 @@ class _DeckHeadRegion extends StatelessWidget {
         // card with nothing beside it, and the row stops reading left to right.
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          DeckIconArea(
-            icon: isComplete
-                ? Icons.check_circle
-                : holdsCards
-                ? Icons.style_outlined
-                : Icons.folder_outlined,
-            // Semantics only on the state-carrying glyph. Folder and card are
-            // decoration -- the meta line under them says the same thing in
-            // words -- and announcing "folder" on every row is noise a
-            // screen-reader user has to sit through.
-            semanticLabel: isComplete
-                ? context.l10n.deckFullyLearnedSemanticLabel
-                : null,
-            tint: isComplete
-                ? context.semanticColors.success
-                : context.colors.onPrimaryContainer,
-            // A finished deck steps off the brand container onto the neutral
-            // one. The design does the same, and the reason shows in a list:
-            // every well is indigo, so a green tick inside an indigo square
-            // still reads as "one of the indigo ones" until you look at it. On
-            // the muted surface it reads as done from across the column.
-            wellColor: isComplete ? context.semanticColors.surfaceMuted : null,
+          DeckStatusIconWidget(
+            status: summary.scheduleStatus,
+            dueCardCount: summary.dueCardCount,
+            overdueDayCount: summary.overdueDayCount,
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
@@ -167,7 +150,12 @@ class _DeckHeadRegion extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: AppSpacing.xs),
-                _DeckMetaLine(summary: summary),
+                _DeckMetaLine(
+                  summary: summary,
+                  shouldShowScheduler: shouldShowScheduler,
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                DeckWorkloadLineWidget(summary: summary),
               ],
             ),
           ),
@@ -182,25 +170,15 @@ class _DeckHeadRegion extends StatelessWidget {
   }
 }
 
-/// The height a progress track occupies, reserved on decks that have none.
+/// The card's lower bands: what is waiting, then how far through it is and
+/// what to do about it.
 ///
-/// **Read from the component, not copied.** It was a literal 4, and the moment
-/// `MxProgressBarSize.sm` went to 6 the decks with no cards were two pixels
-/// shorter than the rest — a rhythm that had been fixed on purpose, broken by a
-/// number that had stopped being the same number.
-
-/// The card's lower bands: what you can do about the deck, then how far through
-/// it is.
-///
-/// **The verbs get a row of their own.** The kit's card ends in a foot holding
-/// the due state, a Study pill and the row menu; folding the bar and the chip
-/// onto one line left the second verb nowhere to go. The menu moved up to sit
-/// with the deck's identity, so this row carries only what a user *does*.
-///
-/// **The track sits on the card's bottom edge, not between the counts and the
-/// verbs.** In the middle it cut the card in two; on the edge it is a base the
-/// card stands on. It is the one element that ignores the side padding, and it
-/// is drawn `flush` so the card's corner is the only rounding.
+/// **Anatomy, fixed:** header (identity + menu) · workload line (`7 Due ·
+/// 14 New`) · action row (gauge, percentage, Study). The workload comes first
+/// because it is the decision input — a reader scans *what is pending* before
+/// choosing to act. The track lives inside the surface, inset to the content
+/// padding: flush on the card's bottom edge it read as a decorated border
+/// rather than a measurement.
 class _DeckStateRegion extends StatelessWidget {
   const _DeckStateRegion({required this.summary});
 
@@ -208,56 +186,74 @@ class _DeckStateRegion extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisSize: MainAxisSize.min,
+    // A deck with no cards has no denominator, so there is no gauge to draw
+    // and no verb to offer — the metadata block already says "No cards", and
+    // the card simply ends after it.
+    if (summary.totalCardCount == 0) {
+      return const SizedBox(height: AppSpacing.md);
+    }
+
+    return Padding(
+      // `sm` on top: the seam between the metadata block and the action row is
+      // a *section* boundary — information above, verbs below — so it gets one
+      // step more than the line breaks inside the block.
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.sm,
+        AppSpacing.lg,
+        AppSpacing.md,
+      ),
+      child: _DeckActionRow(summary: summary),
+    );
+  }
+}
+
+/// The gauge, its figure, and — when there is anything to study — the verb.
+///
+/// **The touch floor belongs to the button, not to the row.** With a Study
+/// pill the row stands 48 tall because the pill's hit area does — a minimum,
+/// so text scale 2.0 still grows past it. Without one there is nothing whose
+/// target the height would protect, so the row takes its natural height and a
+/// completed card is honestly shorter than a studyable one.
+class _DeckActionRow extends StatelessWidget {
+  const _DeckActionRow({required this.summary});
+
+  final DeckSummary summary;
+
+  @override
+  Widget build(BuildContext context) {
+    final percent = (summary.learnedFraction * 100).round();
+    final hasStudy = summary.hasStudyableCards;
+
+    final row = Row(
       children: <Widget>[
-        Padding(
-          // `lg` under the row: the track below it is 4px of colour on the very
-          // edge, so it adds no breathing room of its own the way a margin
-          // would.
-          // **`sm` below, against `lg` above the card's first row — and that is
-          // what makes them look equal.** The row is the 48 touch-target floor
-          // but the Study pill paints 32, so it already sits 8 clear of the row's
-          // bottom edge; `lg` here put 24 of visible space under it against 16
-          // over the well at the top. 8 + 8 is the 16 the top has. The chip and
-          // the figure are shorter than the pill and end up with a little more,
-          // which is what a small mark needs to sit level with a filled one.
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.lg,
-            0,
-            AppSpacing.lg,
-            AppSpacing.sm,
-          ),
-          // **Fixed to the touch-target floor.** The Study pill paints 32 but its
-          // hit area is 48, so a card with something due grew 24px taller than
-          // one without and the column stepped. The row is the floor's height on
-          // every card, whatever is standing in it.
-          child: SizedBox(
-            height: AppSpacing.minimumTouchTarget,
-            child: Row(
-              children: <Widget>[
-                Expanded(child: DeckDueStateWidget(summary: summary)),
-                // **The slot Study will take, and what stands in it until then.**
-                // A deck with nothing waiting has no verb to offer and the row
-                // read as a card missing a piece; the figure is what is true
-                // instead. Not a *disabled* Study button — BR-29 makes "nothing
-                // due" good news, and a greyed control says you cannot do the
-                // thing when the truth is there is nothing to do.
-                // **New counts too** (BR-150, BR-142). `hasDueCards` alone hid
-                // the button on a deck of twenty unlearned cards — a learner's
-                // first deck, which is the one deck that must offer Study.
-                if (summary.hasStudyableCards)
-                  DeckStudyButtonWidget(
-                    deckId: summary.deck.id,
-                    dueCardCount: summary.dueCardCount,
-                  )
-                else if (summary.totalCardCount > 0)
-                  Text(
-                    context.l10n.deckLearnedPercentLabel(
-                      (summary.learnedFraction * 100).round(),
+        Expanded(
+          // One semantics node for the pair: the gauge and its figure are
+          // one fact, and a reader should hear "82 of 180 learned,
+          // 46 percent learned" once, not a bar and then a stray number.
+          child: Semantics(
+            label: context.l10n.deckLearnedProgressLabel(
+              summary.learnedCardCount,
+              summary.totalCardCount,
+            ),
+            value: context.l10n.deckLearnedPercentLabel(percent),
+            child: ExcludeSemantics(
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: MxProgressBar(
+                      size: MxProgressBarSize.sm,
+                      value: summary.learnedFraction,
                     ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Text(
+                    context.l10n.deckLearnedPercentLabel(percent),
                     style: context.texts.labelMedium?.copyWith(
+                      // Success is earned at 100% and only there — the same
+                      // moment the gauge's own fill turns (BR-88). Anything
+                      // less is the neutral figure, whatever today's due
+                      // count happens to be.
                       color: summary.isFullyLearned
                           ? context.semanticColors.success
                           : context.colors.onSurfaceVariant,
@@ -265,106 +261,98 @@ class _DeckStateRegion extends StatelessWidget {
                     ),
                     maxLines: 1,
                   ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
-        // A deck with no cards has no progress to draw — an empty track would be
-        // a measurement of nothing — but it still reserves the height, so a list
-        // mixing filled and empty decks keeps one rhythm. Reserving space claims
-        // nothing; drawing a 0% track would.
-        if (summary.totalCardCount == 0)
-          // Not `const`: an enum field is not a constant expression, and reading
-          // the real height beats a literal that can fall out of step.
-          SizedBox(height: MxProgressBarSize.sm.trackHeight)
-        else
-          // No clip here: `MxCard` clips its own content, and a `ClipRRect`
-          // around the bar would clamp the card's 16 radius down to the bar's
-          // own height and cut the wrong shape — the bug this replaced.
-          Semantics(
-            label: context.l10n.deckLearnedProgressLabel(
-              summary.learnedCardCount,
-              summary.totalCardCount,
-            ),
-            value: context.l10n.deckLearnedPercentLabel(
-              (summary.learnedFraction * 100).round(),
-            ),
-            child: MxProgressBar(
-              size: MxProgressBarSize.sm,
-              shape: MxProgressBarShape.flush,
-              value: summary.learnedFraction,
-            ),
-          ),
+        // **New counts too** (BR-150, BR-142): `hasDueCards` alone hid the
+        // button on a deck of twenty unlearned cards. Absent — not disabled —
+        // when both sets are empty: BR-29 makes "nothing pending" good news,
+        // and a greyed verb says you cannot do the thing when the truth is
+        // there is nothing to do.
+        if (hasStudy) ...<Widget>[
+          const SizedBox(width: AppSpacing.md),
+          DeckStudyButtonWidget(deckId: summary.deck.id),
+        ],
       ],
+    );
+
+    if (!hasStudy) return row;
+
+    return Container(
+      constraints: const BoxConstraints(
+        minHeight: AppSpacing.minimumTouchTarget,
+      ),
+      alignment: AlignmentDirectional.centerStart,
+      child: row,
     );
   }
 }
 
-/// Card total and due state on one line, with only the state in colour.
+/// The structural facts: `4 sub-decks · 570 cards · 8 boxes` (UC-06).
 ///
-/// `Text.rich` rather than a `Row` of chips: the whole line has to wrap and
-/// ellipsise as one piece of text at `textScaler` 2.0 on a 320-wide screen. A row
-/// of chips would either overflow or push the trailing action off the card, which
-/// is the failure M4.8b already paid for once.
+/// **Plain text groups, back by measurement.** The icon-per-metric pass gave
+/// every fact its own glyph and the golden showed the cost: five anchors on a
+/// three-line block, metadata wrapping at ordinary widths, taller cards. The
+/// facts are quiet context, and quiet context reads best as words.
 ///
-/// **The scheduler came back into this line at M4.10e, and the card went from
-/// three lines to two.** It was moved out at M4.12 because
-/// `46 cards · 5 cards due · Eight boxes` wrapped on every card at 390 wide. The
-/// fix then was a third line; the fix now is shorter copy — `46 cards · 5 due ·
-/// 8 boxes` fits, so the line that was added to solve a wrap is gone and the card
-/// has one title and one summary instead of three competing rows.
-///
-/// **Only the due state carries colour, and only when it is due.** "Nothing due"
-/// was `success` green at `w600`, which put the loudest thing on the card on the
-/// one fact that asks for no action — a list of finished decks read as a list of
-/// alerts. It is now the same quiet grey as the counts beside it. Colour and
-/// weight are spent on the state that wants a tap, and nowhere else.
-///
-/// This does not weaken the "never colour alone" rule (UC-06 step 3): the due
-/// state is still carried by an icon, by words *and* by colour. What changed is
-/// that the *absence* of that state stopped being decorated.
+/// A `Wrap` of atomic groups rather than one rich text: each `·` is glued to
+/// the fact it introduces, so a narrow screen breaks between facts and never
+/// strands a separator. The scheduler appears only where it distinguishes —
+/// see [DeckTileWidget.shouldShowScheduler] — and reads `summary.schedulerType`,
+/// the resolved value, because a sub-deck's own column is null by rule
+/// (BR-06).
 class _DeckMetaLine extends StatelessWidget {
-  const _DeckMetaLine({required this.summary});
+  const _DeckMetaLine({
+    required this.summary,
+    required this.shouldShowScheduler,
+  });
 
   final DeckSummary summary;
+  final bool shouldShowScheduler;
 
   @override
   Widget build(BuildContext context) {
+    final facts = <String>[
+      // Only when there are any: a group that reads "0 sub-decks" spends
+      // itself saying nothing happened.
+      if (summary.subDeckCount > 0)
+        context.l10n.deckSubDeckCountLabel(summary.subDeckCount),
+      context.l10n.deckCardCountLabel(summary.totalCardCount),
+      if (shouldShowScheduler)
+        context.schedulerShortLabel(summary.schedulerType),
+    ];
     final quiet = context.texts.bodySmall?.copyWith(
       color: context.colors.onSurfaceVariant,
     );
 
-    return Text.rich(
-      TextSpan(
-        style: quiet,
-        children: <InlineSpan>[
-          // Only when there are any. A row that reads "0 sub-decks · 12 cards"
-          // spends its first fact saying nothing happened.
-          if (summary.subDeckCount > 0) ...<InlineSpan>[
-            TextSpan(
-              text: context.l10n.deckSubDeckCountLabel(summary.subDeckCount),
-            ),
-            const TextSpan(text: ' · '),
-          ],
-          TextSpan(
-            text: context.l10n.deckCardCountLabel(summary.totalCardCount),
-          ),
-          // **The due count left this line at M4.10s.** It now has its own chip
-          // in the card's foot, where it can be a filled pill rather than a
-          // coloured run of text inside a quiet sentence. Keeping it here as
-          // well would state the same fact twice on one card.
-          const TextSpan(text: ' · '),
-          TextSpan(
-            // `summary.schedulerType`, not `summary.deck.schedulerType`. Only a
-            // root carries the column (BR-06), so the entity's own field is null
-            // on every deck below the first level — the query resolves it through
-            // `root_deck_id` and the summary carries the answer.
-            text: context.schedulerShortLabel(summary.schedulerType),
-          ),
-        ],
-      ),
-      maxLines: 2,
-      overflow: TextOverflow.ellipsis,
+    return Wrap(
+      spacing: AppSpacing.sm,
+      runSpacing: AppSpacing.xs,
+      children: <Widget>[
+        for (final (index, fact) in facts.indexed)
+          index == 0
+              ? Text(
+                  fact,
+                  style: quiet,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                )
+              : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Text('·', style: quiet),
+                    const SizedBox(width: AppSpacing.xs),
+                    Text(
+                      fact,
+                      style: quiet,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+      ],
     );
   }
 }

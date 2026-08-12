@@ -62,7 +62,7 @@ class CardFilterBarWidget extends ConsumerWidget {
             active,
             count: due,
             // The deck row's due state already means "when" with this clock
-            // (`deck_due_state_widget.dart`); a second glyph for the same idea
+            // (`deck_workload_line_widget.dart`); a second glyph for the same idea
             // would be a second vocabulary to learn.
             icon: Icons.schedule,
           ),

@@ -37,6 +37,7 @@ void main() {
         parent: deck,
         decks: children,
         nextDueAt: null,
+        nextOverdueTickAt: null,
       ),
     ),
     allDecks: () =>

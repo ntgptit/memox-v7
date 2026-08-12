@@ -87,8 +87,11 @@ void main() {
     updates: <TableInfo<Table, dynamic>>{db.decks},
   );
 
-  Stream<DeckListSnapshot> levelOf(String deckId) =>
-      repository.watchDeckList(parentDeckId: deckId, now: testNow);
+  Stream<DeckListSnapshot> levelOf(String deckId) => repository.watchDeckList(
+    parentDeckId: deckId,
+    now: testNow,
+    utcOffset: Duration.zero,
+  );
 
   /// Subscribes and returns the list every emission lands in.
   List<DeckListSnapshot> watch(String deckId) {

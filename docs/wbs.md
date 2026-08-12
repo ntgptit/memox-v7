@@ -8435,6 +8435,231 @@ thế không đổi bố cục.
 - **Không có `docs/business/navigation/navigation-flow.md` trong repo** — route
   Starter ghi ở README của feature và bảng route của `app_router.dart`.
 
+### M99.10 · Deck tile anatomy — workload line, gauge vào surface, summary metric-first
+
+- **Status:** **done** — deck tests xanh, golden dựng lại và soát bằng mắt,
+  guard + audit sạch, không chạy emulator.
+- **Goal:** Chốt anatomy ba băng của tile theo concept: identity → workload →
+  action; và color-role đúng semantic cho từng phần.
+- **Scope:** `deck_workload_line_widget.dart` (mới, thay
+  `deck_due_state_widget.dart`), `_DeckStateRegion`/`_DeckActionRow` của tile,
+  summary metric-first, hai key l10n `deckDueMetricWord`/`deckNewMetricWord`
+  (8 key câu văn cũ gỡ bỏ), test role/contrast mới.
+- **Out of scope:** query New/Due, Study routing, breadcrumb, search,
+  filter/sort, Starter flow, theme palette.
+- **Editable documents:** `docs/wbs.md`, `docs/reviews/design-parity-checklist.md`
+- **Output:** tile ba băng; `7 Due · 14 New` luôn đủ hai số kể cả 0; gauge
+  inset cùng hàng `%` + Study; summary mở bằng hai metric thay câu văn.
+- **Acceptance criteria:**
+  - [x] Due/New nằm trên hàng progress + Study; không còn micro-label `NEW`.
+  - [x] Due = streakContainer (không danger); New = ink `info` đạt ≥4.5:1 hai
+        theme (đo 5.23/7.84, `deck_workload_role_test.dart`); zero lùi neutral.
+  - [x] Study tonal `secondaryContainer`; ẩn (không disable) khi 0/0.
+  - [x] Gauge dùng progress token, success chỉ ở 100%; inset theo padding card;
+        không còn track flush đáy.
+  - [x] Completed không tô xanh card; cùng chiều cao card kề bên (floor 48
+        trên action row, minimum chứ không fixed).
+  - [x] Empty deck: `No cards`, không gauge, không hiện `0 Due · 0 New`.
+  - [x] 320px @ textScale 2.0 không overflow; light/dark role mapping có test.
+- **Dependencies:** M99.9
+- **Tests required:** state matrix widget test (mixed/new-only/due-only/idle/
+  completed/empty/compact), role + contrast per theme, golden root+level 2 theme
+- **Checklist phases:** 14.2, 14.4
+- **Tests:** `deck_tile_counts_test.dart` (11), `deck_workload_role_test.dart`
+  (3 — role mapping light/dark + đo WCAG), `deck_summary_new_test.dart` (3),
+  cập nhật `deck_list_screen_test` / `deck_list_level_test` /
+  `deck_list_summary_test`. Golden root/level/empty/new-only × light+dark, đã
+  xem lại bằng mắt.
+
+### M99.11 · Deck tile: ba trạng thái lịch, badge quá hạn, và rollback icon-per-metric
+
+- **Status:** **done** — deck/core/app tests xanh, golden dựng lại và soát mắt,
+  docs guard sạch, không chạy emulator.
+- **Goal:** BR-161 — icon lớn của deck nói *khi nào* (notDue/dueToday/overdue
+  + badge số ngày), metadata/workload trở lại text sạch, và badge tự tăng qua
+  nửa đêm địa phương không cần write.
+- **Scope:** `MIN(due_at)` trong hai named query; `LocalDayModel` (core/time,
+  Study delegate); `DeckSummary.overdueDayCount` + `scheduleStatus`;
+  `DeckListSnapshot.nextOverdueTickAt` + timer min(hai boundary);
+  `DeckStatusIconWidget` + badge; `showScheduler` theo level; l10n badge +
+  semantics; rollback icon-per-metric.
+- **Out of scope:** Study session/queue/scheduler, schema, progress, routing.
+- **Editable documents:** `docs/wbs.md`, `docs/business-rules.md` (BR-161),
+  `docs/use-cases.md` (UC-06 bước 3), `docs/reviews/design-parity-checklist.md`,
+  `lib/features/deck/README.md`
+- **Output:** ba trạng thái icon; badge `+Nd`/`99+` với semantics nguyên câu;
+  metadata `4 sub-decks · 570 cards · 8 boxes` (scheduler chỉ ở root);
+  workload `12 Due · 46 New` text thuần.
+- **Acceptance criteria:**
+  - [x] `oldestDueAt` cùng grouped subquery với `dueCardCount`, một statement,
+        parity root/child (`deck_overdue_aggregate_test`).
+  - [x] Ngày quá hạn = ranh giới ngày địa phương hoàn tất (`LocalDayModel`,
+        test hai phía offset + sát 00:00), không chia giờ/24; widget không đọc
+        đồng hồ.
+  - [x] `nextDueAt == null` nhưng còn Due vẫn arm midnight tick; boundary sớm
+        hơn thắng; một timer; qua mốc badge tăng không cần write.
+  - [x] 100% + due → vẫn due; 100% + overdue → vẫn overdue; completed không
+        còn check icon — gauge success đảm nhiệm.
+  - [x] Overdue không dùng danger/error; badge `inverse-surface`; semantics
+        đọc "N cards due; oldest card is D days overdue". *(Superseded cùng
+        ngày theo quyết định chủ dự án: overdue chuyển sang cặp error, badge
+        `error`/`on-error` — BR-161 bản hiện hành, thực thi ở M99.12.)*
+  - [x] Scheduler ẩn ở child level; không icon nhỏ trên metadata/workload;
+        320px @ 2.0 không vỡ.
+- **Dependencies:** M99.10
+- **Tests required:** local-day matrix, status matrix + mapper invariant,
+  SQLite aggregate + parity, midnight boundary, icon-state widget matrix,
+  badge compact/cap/semantics, golden root+child hai theme
+- **Checklist phases:** 14.2, 14.4
+- **Tests:** `local_day_model_test` (9), `deck_schedule_status_test` (7),
+  `deck_overdue_aggregate_test` (4), `deck_list_due_boundary_test` (+2),
+  `deck_workload_role_test` (11 sau viết lại), `deck_tile_counts_test`,
+  golden 6 file.
+
+### M99.12 · Level summary mang trạng thái quá hạn; nextDueAt scope theo level
+
+- **Status:** **done** — deck suite 452+ test xanh, golden 6 file dựng lại và
+  soát mắt, các gate python + analyze sạch, không chạy emulator.
+- **Goal:** hai vấn đề độc lập: (1) đi sâu vào một deck, summary panel phải
+  tiếp tục biểu diễn trạng thái quá hạn của chính subtree đang xem (BR-161);
+  (2) `childDeckLevel.nextDueAt` không được lấy card của tree không liên quan
+  — hết refresh và query thừa.
+- **Scope:** `deckScheduleStatusOf` (một hàm phân loại, `DeckSummary` +
+  level fold cùng delegate); `DeckListSnapshot.levelDueCardCount/levelNewCardCount/
+  levelOverdueDayCount/levelScheduleStatus`; `DeckStatusIconWidget` nhận
+  `status`/counts thay vì summary; `DeckOverdueBadgeWidget` tách dùng chung;
+  `_SummaryMetric.due` ba trạng thái + badge inline + semantics;
+  `childDeckLevel.nextDueAt` đọc qua `branch` CTE; dọn drift (comment enum/tile,
+  `DeckStudyButtonWidget` bỏ `dueCardCount` chết, description `deckStudyAction`
+  en+vi, 4 `unnecessary_import`).
+- **Out of scope:** global refresh coordinator, DST/timezone database, root
+  query (giữ global đúng scope của root screen), scheduler/session.
+- **Editable documents:** `docs/wbs.md`, `docs/business-rules.md` (BR-161),
+  `docs/reviews/design-parity-checklist.md`
+- **Output:** panel trong A hiện `7 Due` + `+7d` khi C quá hạn 7 ngày dù C
+  không còn là hàng trên list; root panel cũng mang badge của level; boundary
+  của level B không nhúc nhích vì card tương lai của tree X.
+- **Acceptance criteria:**
+  - [x] `deckScheduleStatusOf` là nơi duy nhất phát biểu ma trận trạng thái;
+        `DeckSummary.scheduleStatus` và `levelScheduleStatus` cùng delegate.
+  - [x] Level fold: Due/New = tổng child rời nhau; overdue days = max trên
+        child có Due; không query mới — arithmetic trên snapshot sẵn có.
+  - [x] Panel: notDue neutral không mark; dueToday clock không badge; overdue
+        missed-calendar đỏ + `+Nd` inline, cap `99+`, semantics nguyên câu;
+        anatomy/chiều cao/ProgressBar/nút đóng giữ nguyên; 320px @ 2.0 không vỡ.
+  - [x] Qua nửa đêm địa phương `+7d` → `+8d` trên cả panel lẫn tile, không có
+        DB write (test driven-clock end-to-end trên màn hình).
+  - [x] `childDeckLevel.nextDueAt` = MIN(due_at > :now) qua `branch` — cùng
+        statement, cùng `:now`, không N+1; card due đúng `now` thuộc count,
+        không thuộc boundary; level không còn future card → null kể cả khi
+        tree khác có; đọc lại tại boundary làm count của level tăng; root vẫn
+        global (đúng scope của màn root).
+  - [x] Parity: root row, child row và level fold cùng một số ngày quá hạn
+        trên cùng subtree (SQLite thật).
+- **Dependencies:** M99.11
+- **Tests required:** status-function matrix + level-fold matrix, SQLite
+  aggregate parity + boundary scope (5 case mới), summary-overdue widget
+  matrix (9 case + midnight end-to-end), golden root+level hai theme
+- **Checklist phases:** 14.2, 14.4
+- **Tests:** `deck_schedule_status_test` (14), `deck_overdue_aggregate_test`
+  (5), `deck_level_parity_test` (boundary group viết lại, 5 case),
+  `deck_summary_overdue_test` (mới, 10), `deck_workload_role_test` (scope
+  finder theo tile), golden 6 file.
+
+### M99.13 · Level summary thành status-first hero
+
+- **Status:** **done** — deck presentation 215 test xanh, golden 6 file dựng
+  lại và soát mắt hai theme, analyze + widgetbook analyze sạch, không chạy
+  emulator.
+- **Goal:** panel summary có một focal point: scan theo *hôm nay → Due → New →
+  tiến độ*, hết tình trạng hai metric ngang visual weight.
+- **Scope:** presentation-only — `deck_level_summary_widget.dart` (MxCard
+  surface, eyebrow `deckSummaryTodayLabel`, `_DueSummaryMetric`/
+  `_NewSummaryMetric` với icon anchor đồng bộ, emphasis theo trạng thái,
+  badge inline + semantics); l10n en+vi (key mới + sửa description
+  `deckDueMetricWord` còn nói "never danger"); tests; goldens; widgetbook
+  scenario `overdue`/`newOnly` + mixed; parity checklist.
+- **Out of scope:** repository, database, query, domain model, scheduler,
+  Study session, routing; không nút Study trong hero (chưa có contract
+  aggregate study action).
+- **Editable documents:** `docs/wbs.md`,
+  `docs/reviews/design-parity-checklist.md`
+- **Output:** hero `Today / [event_busy] 15 Due +7d · [auto_awesome] 46 New /
+  353 of 868 learned ── 41%`; new-only promote New; caught-up hai số nghỉ
+  cùng cỡ.
+- **Acceptance criteria:**
+  - [x] BR-150 giữ nguyên: hai số riêng, thứ tự Due→New cố định, zero vẫn
+        hiện; chỉ emphasis di chuyển (headlineMedium/titleLarge theo trạng
+        thái, test đọc từ style role).
+  - [x] BR-161 giữ nguyên: ba trạng thái qua `deckScheduleStatusOf`, badge
+        `+Nd`/`99+` inline sát Due, semantics một câu duy nhất, midnight tick
+        không đổi (test driven-clock còn nguyên).
+  - [x] Cả hai metric có icon anchor cùng geometry; không chip fill lớn;
+        không gradient/glass/shadow tự chế; toàn bộ từ token + MxCard.
+  - [x] 320px @ 2.0 wrap hai hàng không overflow, không ellipsis số; nút đóng
+        48px giữ semantic label; auto/dismiss/restore không regression.
+  - [x] Widgetbook quan sát được mixed / overdue / new-only / caught-up.
+- **Dependencies:** M99.12
+- **Tests required:** hierarchy per state (mixed/new-only/caught-up), overdue
+  matrix + eyebrow + anchors, responsive 320@2.0, visibility round-trip,
+  golden root+level+new-only hai theme
+- **Checklist phases:** 14.2, 14.4
+- **Tests:** `deck_summary_new_test` (viết lại hierarchy), 
+  `deck_summary_overdue_test` (11), `deck_list_summary_test`,
+  `deck_list_spacing_test`, golden 6 file.
+
+### M99.14 · Thống nhất màu Due; hero ba tập Overdue/Due today/New
+
+- **Status:** **done** — deck data+domain+presentation xanh (238+84+216),
+  golden 6 file dựng lại và soát mắt hai theme, analyze + widgetbook sạch,
+  không chạy emulator.
+- **Goal:** BR-162 — (1) một trạng thái một màu: tile `dueToday` đổi từ
+  `primaryContainer` sang streak pair, khớp hero và workload words; (2) hero
+  hiển thị ba tập rời nhau `Overdue`/`Due today`/`New`, tổng Reviewing
+  không đổi nghĩa.
+- **Scope:** aggregate projection (`overdueCount` trong cùng grouped due
+  subquery của `rootDeckSummaries` + `childDeckLevel`, tham số
+  `:startOfToday` từ `LocalDayModel`); DAO/repository truyền boundary; mapper
+  + invariant `overdueCountOf`; `DeckSummary.overdueCardCount` +
+  `dueTodayCardCount`; level sums; color grammar icon; hero ba metric +
+  emphasis; l10n hero keys en+vi; tests; goldens; widgetbook; BR-162, UC-06,
+  parity checklist, README.
+- **Out of scope:** scheduler, Study queue/selection, database schema, routes,
+  deck tile density (tile vẫn total Due + New).
+- **Editable documents:** `docs/business-rules.md` (BR-162, tham chiếu
+  BR-161), `docs/use-cases.md` (UC-06 bước 3), `docs/wbs.md`,
+  `docs/reviews/design-parity-checklist.md`, `lib/features/deck/README.md`
+- **Output:** hero root `8 Overdue (+7d) · 7 Due today / 46 New · 807 Scheduled`
+  (lưới 2×2 — metric thứ tư `Scheduled` = total − New − Due, chọn qua popup,
+  luôn neutral và không bao giờ primary; grid 2 cột cell nửa bề rộng,
+  hero bỏ badge chip — tuổi ghi trong ngoặc vào chữ metric); nested `4 Overdue (+1d) · 8 Due today /
+  14 New · 154 Scheduled`; tile IELTS đến-hạn-hôm-nay well vàng thay vì tím.
+- **Acceptance criteria:**
+  - [x] `dueCardCount = overdueCardCount + dueTodayCardCount` ở mọi cấp
+        (summary, level fold, SQLite thật); Study/BR-142 giữ total.
+  - [x] Partition trong cùng một statement/grouped pass — không query thứ
+        hai, không N+1, không cột mới; `:startOfToday` từ `LocalDayModel`,
+        SQL không tự tính midnight.
+  - [x] Qua nửa đêm địa phương: Due today → Overdue ở lần đọc kế, không
+        DB write (test hai lần đọc cùng dữ liệu).
+  - [x] Tile `dueToday` = streak pair (test đảo pin `primaryContainer`);
+        overdue vẫn đỏ + badge; notDue neutral.
+  - [x] Hero: ba metric rời nhau, thứ tự cố định, emphasis theo tập khẩn
+        cấp nhất; badge = tuổi, nằm cạnh Overdue; ba câu semantics đọc
+        đúng một lần; 320@2.0 wrap không overflow; all-zero mở tay thấy ba
+        số 0.
+  - [x] Widgetbook: mixed / overdue-only / due-today-only / new-only /
+        caught-up.
+- **Dependencies:** M99.13
+- **Tests required:** partition matrix trên SQLite (today/overdue/mixed/
+  future/new/midnight/nested), domain sums + invariant, tile role matrix,
+  hero matrix + semantics + responsive, golden 6 file hai theme
+- **Checklist phases:** 14.2, 14.4
+- **Tests:** `deck_overdue_aggregate_test` (+7 partition), 
+  `deck_schedule_status_test` (+7), `deck_workload_role_test` (dueToday
+  streak), `deck_summary_overdue_test` (viết lại, 12),
+  `deck_summary_new_test`, `deck_list_screen_test`, golden 6 file.
+
 ## Blocker
 
 | Blocker | Ảnh hưởng | Cách gỡ |

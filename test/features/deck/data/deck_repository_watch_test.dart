@@ -187,7 +187,11 @@ void main() {
     test('a missing deck surfaces as NotFoundFailure', () async {
       await expectLater(
         h.deckRepository
-            .watchDeckList(parentDeckId: 'nope', now: testNow)
+            .watchDeckList(
+              parentDeckId: 'nope',
+              now: testNow,
+              utcOffset: Duration.zero,
+            )
             .first,
         throwsA(isA<NotFoundFailure>()),
       );

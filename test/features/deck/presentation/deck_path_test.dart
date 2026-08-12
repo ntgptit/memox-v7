@@ -42,6 +42,7 @@ void main() {
         parent: deck,
         decks: children,
         nextDueAt: null,
+        nextOverdueTickAt: null,
       ),
     ),
     allDecks: () =>
@@ -207,6 +208,7 @@ void main() {
             ancestors: const <DeckPathSegment>[],
             decks: const <DeckSummary>[],
             nextDueAt: null,
+            nextOverdueTickAt: null,
           ),
         ),
       );
@@ -246,6 +248,7 @@ void main() {
             ancestors: fakePath(<String>['Japanese N5']),
             decks: const <DeckSummary>[],
             nextDueAt: null,
+            nextOverdueTickAt: null,
           ),
         ),
       );

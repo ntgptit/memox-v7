@@ -27,7 +27,7 @@ It owns the **deck tree** and nothing else. Card content belongs to
 | Contract | `DeckRepository` (`domain/repositories/deck_repository.dart`) |
 | Entity | `DeckEntity` |
 | Value object | `DeckName` — the only way to construct a valid deck name (BR-01) |
-| Read models | the files in `domain/models/` |
+| Read models | the files in `domain/models/` — `DeckSummary` carries `overdueDayCount`, `scheduleStatus` (BR-161) and the due partition `overdueCardCount`/`dueTodayCardCount` (BR-162), normalised by the mapper from the aggregate's `oldestDueAt` and `overdueCount`; widgets never touch time |
 | Enums | the files in `domain/models/` and `domain/failures/` |
 
 **The last two rows point at folders rather than listing names, and that is a

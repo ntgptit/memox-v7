@@ -24,6 +24,15 @@ import '../../../../../core/theme/theme_context_extension.dart';
 /// and nothing promises it is legible *on* another surface. The audit is what
 /// caught it, on a screen that had already been looked at.
 class DeckIconArea extends StatelessWidget {
+  /// The well's square edge — [AppSpacing.minimumTouchTarget], for the optical
+  /// reason above.
+  ///
+  /// Public because the tile aligns other rows to the column this square
+  /// creates: the workload line starts at `dimension + AppSpacing.md`, exactly
+  /// where the title does. A copy of the number in the tile would drift the
+  /// first time this well is resized.
+  static const double dimension = AppSpacing.minimumTouchTarget;
+
   const DeckIconArea({
     required this.icon,
     required this.tint,
@@ -48,7 +57,7 @@ class DeckIconArea extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadius.md),
       ),
       child: SizedBox.square(
-        dimension: AppSpacing.minimumTouchTarget,
+        dimension: dimension,
         child: Center(
           child: Icon(
             icon,

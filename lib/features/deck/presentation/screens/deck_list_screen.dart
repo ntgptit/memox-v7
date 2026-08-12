@@ -236,6 +236,10 @@ class _DeckLevel extends StatelessWidget {
           ),
         ),
         DeckListSliverWidget(
+          // The scheduler distinguishes decks only at the root: below it every
+          // descendant inherits the root's algorithm (BR-06), and a column of
+          // identical "8 boxes" is non-information.
+          shouldShowScheduler: snapshot.isRootLevel,
           summaries: applyDeckListView(
             snapshot.decks,
             filter: filter,

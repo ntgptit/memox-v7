@@ -26,7 +26,7 @@ void main() {
   final now = testNow;
 
   Future<DeckListSnapshot> levelUnder(String deckId) => harness.deckRepository
-      .watchDeckList(parentDeckId: deckId, now: now)
+      .watchDeckList(parentDeckId: deckId, now: now, utcOffset: Duration.zero)
       .first;
 
   Future<List<String>> pathNamesUnder(String deckId) async => (await levelUnder(

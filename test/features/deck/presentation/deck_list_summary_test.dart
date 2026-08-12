@@ -110,14 +110,13 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(DeckLevelSummaryWidget), findsOneWidget);
-      // Scoped to the panel, and `textContaining` with rich text: the figure
-      // and its sentence are one `Text.rich` since the compact pass, and the
-      // filter pill's "All decks" would otherwise match the same word.
+      // Metric-first since the anatomy pass: a caught-up level states its two
+      // zeroes rather than a sentence (BR-150's no-absence rule).
       expect(
         find.descendant(
           of: find.byType(DeckLevelSummaryWidget),
           matching: find.textContaining(
-            english.deckSummaryCaughtUpFigure,
+            '0 ${english.deckHeroDueTodayMetricWord}',
             findRichText: true,
           ),
         ),

@@ -1,37 +1,44 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_card.dart';
 import '../../../../../shared/widgets/mx_icon_button.dart';
 import '../../../../../shared/widgets/mx_progress_bar.dart';
 import '../../../domain/models/deck_list_snapshot_model.dart';
 import '../../../domain/models/deck_summary_model.dart';
 import '../../states/deck_list_view_state.dart';
+import 'deck_summary_metrics_widget.dart';
 
-/// What this level amounts to, above the list of what is in it.
+/// The level's study status, as the screen's one hero (BR-150, BR-161).
 ///
 /// At the root it answers "what is waiting today"; inside a deck it answers the
 /// same question about that deck. They are the same question at different
 /// scopes, so they are one block rather than a home screen and a header.
 ///
-/// **Support, not hero.** The list is the screen's content and this panel is a
-/// figure and a bar above it — one line of headline, one line of context, one
-/// track. It was taller, and the cost was measured in decks: every extra line
-/// here is a row of the list pushed under the fold.
+/// **Status-first, in scan order.** The panel reads top to bottom the way the
+/// question is actually asked: the time scope (`Today`), then the four
+/// disjoint sets of BR-162 most-urgent-first — the backlog that missed its day
+/// (Overdue), the reviews that belong to today (Due today), the cards still
+/// waiting to be learned (New), the cards resting until a later review
+/// (Scheduled) — then how far the level has come. Together the four partition
+/// every card the level holds, so the grid also reads as a whole. One focal
+/// point — the most urgent non-empty set leads with the larger numeral —
+/// because figures at equal weight is what made the old panel scan as a table
+/// row instead of an answer. The tile keeps the undivided `Due` total; the
+/// hero is where the breakdown lives.
 ///
 /// **Every number here is arithmetic over the snapshot the screen already has.**
 /// A child's counts are its whole subtree, and sibling subtrees are disjoint, so
-/// summing the children is the level's total — no second read, and therefore no
-/// chance of the panel and the list disagreeing about the same instant (AD-13).
-/// A deck holds one kind of thing (BR-63), so a level whose children are decks
-/// has no cards of its own to leave out of the sum.
+/// the level folds on [DeckListSnapshot] are the level's totals — no second
+/// read, and therefore no chance of the panel and the list disagreeing about
+/// the same instant (AD-13). A deck holds one kind of thing (BR-63), so a level
+/// whose children are decks has no cards of its own to leave out of the sum.
 ///
-/// **"Caught up" requires both sets empty** (BR-150, BR-142). The headline used
-/// to follow the due count alone, so a library of twenty unlearned cards was
-/// greeted with "All caught up" — true of reviews, false of the day: the new
-/// set is work too, it merely does not expire.
+/// **The surface is [MxCard], not a hand-rolled box.** Radius, border,
+/// elevation and interaction states all come from the one shared surface; the
+/// panel itself is not tappable — the close button is its only control.
 class DeckLevelSummaryWidget extends StatelessWidget {
   const DeckLevelSummaryWidget({
     required this.snapshot,
@@ -72,144 +79,65 @@ class DeckLevelSummaryWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final decks = snapshot.decks;
-    final newCount = decks.fold<int>(0, (sum, d) => sum + d.newCardCount);
-    final dueCount = decks.fold<int>(0, (sum, d) => sum + d.dueCardCount);
     final cardCount = decks.fold<int>(0, (sum, d) => sum + d.totalCardCount);
     final learnedCount = decks.fold<int>(
       0,
       (sum, d) => sum + d.learnedCardCount,
     );
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: context.colors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: context.semanticColors.borderSubtle),
-      ),
-      child: Padding(
-        // `md`, one step down from the card gutter: a support panel that pads
-        // itself like a hero reads as one.
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Expanded(
-                  child: _SummaryHeadline(
-                    newCount: newCount,
-                    dueCount: dueCount,
-                    isRoot: snapshot.parent == null,
+    return MxCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Row(
+            // Centred against the close button's 48 floor: the eyebrow is one
+            // short label, and the button's surplus splits evenly around it
+            // instead of pooling underneath.
+            children: <Widget>[
+              Expanded(
+                child: Text(
+                  // The scope, not a narration: every figure below is "as of
+                  // today", and saying it once up here is what lets the
+                  // metrics be bare numbers.
+                  context.l10n.deckSummaryTodayLabel,
+                  style: context.texts.labelMedium?.copyWith(
+                    color: context.colors.onSurfaceVariant,
                   ),
-                ),
-                // Top-aligned against the figure rather than centred on the
-                // block: the panel grows a progress bar under it, and a close
-                // button that drifted downwards as it did would stop reading as
-                // belonging to the panel's own corner.
-                MxIconButton(
-                  icon: Icons.close,
-                  semanticLabel: context.l10n.deckSummaryHideLabel,
-                  onPressed: onDismiss,
-                ),
-              ],
-            ),
-            if (cardCount > 0) ...<Widget>[
-              const SizedBox(height: AppSpacing.sm),
-              MxProgressBar(
-                size: MxProgressBarSize.sm,
-                value: cardCount == 0 ? 0 : learnedCount / cardCount,
-                label: context.l10n.deckLearnedProgressLabel(
-                  learnedCount,
-                  cardCount,
-                ),
-                valueLabel: context.l10n.deckLearnedPercentLabel(
-                  (learnedCount / cardCount * 100).round(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// The figure and the sentence that continues it — both sets, always.
-class _SummaryHeadline extends StatelessWidget {
-  const _SummaryHeadline({
-    required this.newCount,
-    required this.dueCount,
-    required this.isRoot,
-  });
-
-  final int newCount;
-  final int dueCount;
-  final bool isRoot;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    // **The word, not a zero — and only when both sets are empty.** A `0` set
-    // large is the loudest thing on the screen saying nothing happened; BR-29
-    // makes "nothing due" a normal state. But the word is earned by having
-    // nothing to do at all: with new cards waiting, the level is not caught up,
-    // it just has no deadline yet (BR-150).
-    final isCaughtUp = dueCount == 0 && newCount == 0;
-
-    // Due leads when it exists — it expires, new does not. New takes the
-    // headline only when it is the only work there is.
-    final figure = isCaughtUp
-        ? l10n.deckSummaryCaughtUpFigure
-        : dueCount > 0
-        ? '$dueCount'
-        : '$newCount';
-    final dueSentence = isRoot
-        ? l10n.deckSummaryDueAcrossLibrary(dueCount)
-        : l10n.deckSummaryDueInDeck(dueCount);
-    final sentence = isCaughtUp
-        ? l10n.deckSummaryCaughtUp
-        : dueCount > 0
-        // Both numbers on one line when both sets are non-empty, never merged
-        // into one figure (BR-150).
-        ? (newCount > 0
-              ? '$dueSentence, ${l10n.deckSummaryNewBesideDue(newCount)}'
-              : dueSentence)
-        : l10n.deckSummaryNewToLearn(newCount);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        // One line holding the figure and its sentence: the stacked version
-        // cost a text row and read as a banner. `titleLarge` rather than a
-        // display face for the same reason — the list is the hero.
-        Text.rich(
-          TextSpan(
-            children: <InlineSpan>[
-              TextSpan(
-                text: figure,
-                style: context.texts.titleLarge?.copyWith(
-                  // Green only when it is good news. Left in the default ink
-                  // the word "All" reads as a label; in `success` it reads as
-                  // a result.
-                  color: isCaughtUp ? context.semanticColors.success : null,
-                ),
-              ),
-              const TextSpan(text: ' '),
-              TextSpan(
-                text: sentence,
-                style: context.texts.bodySmall?.copyWith(
-                  color: context.colors.onSurfaceVariant,
-                ),
+              MxIconButton(
+                icon: Icons.close,
+                semanticLabel: context.l10n.deckSummaryHideLabel,
+                onPressed: onDismiss,
               ),
             ],
           ),
-          maxLines: 3,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
+          const SizedBox(height: AppSpacing.xs),
+          DeckSummaryMetricsWidget(snapshot: snapshot),
+          if (cardCount > 0) ...<Widget>[
+            // `lg`: the seam between "what is waiting" and "how far you are"
+            // is the panel's one section break, one step wider than the line
+            // breaks inside each band.
+            const SizedBox(height: AppSpacing.lg),
+            // The learned line and the bar come as one component, and use
+            // the same progress tokens as every tile: track, fill, and
+            // success only at 100%.
+            MxProgressBar(
+              size: MxProgressBarSize.sm,
+              value: learnedCount / cardCount,
+              label: context.l10n.deckLearnedProgressLabel(
+                learnedCount,
+                cardCount,
+              ),
+              valueLabel: context.l10n.deckLearnedPercentLabel(
+                (learnedCount / cardCount * 100).round(),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }

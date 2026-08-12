@@ -98,6 +98,12 @@ const Set<String> _privateAndTransparent = <String>{
   '_RenderLayoutSurrogateProxyBox',
   'RenderCustomSingleChildLayoutBox',
   'RenderCustomMultiChildLayoutBox',
+  // `LayoutBuilder`. A `RenderConstrainedLayoutBuilder` proxy that rebuilds
+  // its child from the incoming constraints and then paints exactly that
+  // child — `paint` is inherited from `RenderProxyBox` and adds nothing.
+  // Reached the audits with the hero's metric grid (M99.14), whose cells are
+  // half the band's measured width.
+  '_RenderLayoutBuilder',
 };
 
 /// Types whose *own* paint is not a colour, but whose children are read

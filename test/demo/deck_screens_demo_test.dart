@@ -38,6 +38,11 @@ void main() {
       totalCardCount: 570,
       newCardCount: 46,
       dueCardCount: 12,
+      // A week behind on eight of the twelve: the hero splits the total into
+      // 8 Overdue + 4 Due today (BR-162), and the day badge is the age of
+      // the oldest card (BR-161).
+      overdueCardCount: 8,
+      overdueDayCount: 7,
       learnedCardCount: 120,
       subDeckCount: 4,
     ),
@@ -108,6 +113,8 @@ void main() {
             totalCardCount: 60,
             newCardCount: 14,
             dueCardCount: 7,
+            overdueCardCount: 4,
+            overdueDayCount: 1,
             learnedCardCount: 22,
           ),
           fakeChildSummary(

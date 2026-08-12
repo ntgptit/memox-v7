@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/state/retry_policy.dart';
 import '../../../../core/time/clock_provider.dart';
+import '../../../../core/time/time_zone_provider.dart';
 import '../../domain/models/deck_list_snapshot_model.dart';
 import '../providers/deck_use_case_provider.dart';
 import 'deck_list_now_controller.dart';
@@ -76,6 +77,10 @@ class DeckList extends _$DeckList {
     return ref.watch(watchDeckListUseCaseProvider)(
       parentDeckId: parentDeckId,
       now: ref.watch(deckListNowProvider),
+      // Resolved per build, so a device that changed zones re-reads with the
+      // new offset the next time anything moves `deckListNowProvider` — the
+      // resume hook already does exactly that.
+      utcOffset: ref.watch(utcOffsetProvider)(),
     );
   }
 
@@ -89,13 +94,19 @@ class DeckList extends _$DeckList {
     // last scheduled card leaves a wake-up behind for a card that is gone.
     _cancelBoundary();
 
-    final DateTime? nextDueAt = next.value?.nextDueAt;
-    if (nextDueAt == null) {
+    // Two clocks expire a snapshot: the next card to *become* due, and the
+    // local midnight at which every overdue badge gains a day (BR-161). The
+    // earlier one wins; the other is re-derived from the emission that
+    // refresh produces. `nextDueAt` alone left a hole this timer existed to
+    // close — with every scheduled card already due it goes null, which is
+    // precisely when the badge still has to move overnight.
+    final DateTime? boundary = _earliestBoundary(next.value);
+    if (boundary == null) {
       _immediateRefreshBoundary = null;
       return;
     }
 
-    final Duration delay = nextDueAt.difference(ref.read(clockProvider)());
+    final Duration delay = boundary.difference(ref.read(clockProvider)());
 
     if (delay > Duration.zero) {
       // The boundary is still ahead: one one-shot at that instant, capped for the
@@ -117,12 +128,23 @@ class DeckList extends _$DeckList {
     // boundary already chased. A healthy repository answers the re-opened query
     // (`due_at > now`) with a later boundary or none, so this fires at most once
     // per real crossing.
-    if (_immediateRefreshBoundary == nextDueAt) return;
-    _immediateRefreshBoundary = nextDueAt;
+    if (_immediateRefreshBoundary == boundary) return;
+    _immediateRefreshBoundary = boundary;
     _boundaryTimer = Timer(
       Duration.zero,
       ref.read(deckListNowProvider.notifier).refresh,
     );
+  }
+
+  /// The earlier of the snapshot's two expiry instants, or null when it
+  /// carries neither.
+  static DateTime? _earliestBoundary(DeckListSnapshot? snapshot) {
+    final DateTime? dueAt = snapshot?.nextDueAt;
+    final DateTime? tickAt = snapshot?.nextOverdueTickAt;
+    if (dueAt == null) return tickAt;
+    if (tickAt == null) return dueAt;
+
+    return dueAt.isBefore(tickAt) ? dueAt : tickAt;
   }
 
   void _cancelBoundary() {

@@ -31,7 +31,6 @@ void main() {
     allowances: const <AuditSkipAllowance>[
       _coloredBox,
       ..._fieldsCreate,
-      _layoutBuilder,
       _inkLayersCreate,
       _shapesCreate,
       _selectionAnchorAllowance,
@@ -50,7 +49,6 @@ void main() {
     allowances: const <AuditSkipAllowance>[
       _coloredBox,
       ..._fieldsEdit,
-      _layoutBuilder,
       _inkLayersEdit,
       _shapesEdit,
     ],
@@ -135,8 +133,9 @@ const AuditSkipAllowance _shapesEdit = AuditSkipAllowance(
       'goldens.',
 );
 
-/// The route backdrop and the field LayoutBuilder — constant across modes, so
-/// they carry no count.
+/// The route backdrop — constant across modes, so it carries no count. The
+/// field LayoutBuilder is classified globally in render_classification.dart
+/// since the hero grid made it a common sight (M99.14).
 const AuditSkipAllowance _coloredBox = AuditSkipAllowance(
   itemId: 'screen',
   reason: SkipReason.rasterOnly,
@@ -144,15 +143,6 @@ const AuditSkipAllowance _coloredBox = AuditSkipAllowance(
   rationale:
       'The route backdrop MaterialApp paints around an opaque page; the surface '
       'value is asserted in app_theme_test.dart.',
-);
-
-const AuditSkipAllowance _layoutBuilder = AuditSkipAllowance(
-  itemId: 'shell',
-  reason: SkipReason.unknownRenderType,
-  detailContains: '_RenderLayoutBuilder',
-  rationale:
-      'A LayoutBuilder inside each field decoration sizes its child and paints '
-      'no colour.',
 );
 
 /// The per-field raster nodes, counted per mode: create has two fields (front,

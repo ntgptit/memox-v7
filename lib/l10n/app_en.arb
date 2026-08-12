@@ -6,7 +6,7 @@
   },
   "navigationDecksLabel": "Library",
   "@navigationDecksLabel": {
-    "description": "Bottom navigation label for the Decks branch. \"Library\" rather than \"Decks\": the tab is the whole content library — the deck tree, the cards inside it, and the starter-library flow — while \"Decks\" named only its top level. The screen title (decksTitle) deliberately stays \"Decks\": the tab names the destination, the app bar names the list on it."
+    "description": "Bottom navigation label for the Decks branch. \"Library\" rather than \"Decks\": the tab is the whole content library — the deck tree, the cards inside it, and the starter-library flow — while \"Decks\" named only its top level. The screen title (decksTitle) says the same word, synced by owner decision 2026-08-12 — the tab and its screen must read as one place."
   },
   "navigationStudyLabel": "Study",
   "@navigationStudyLabel": {
@@ -40,9 +40,9 @@
   "@settingsPlaceholderTitle": {
     "description": "Heading of the Settings placeholder (AD-19). The whole message — there is no reassurance to add because no user preference exists yet to be kept or lost."
   },
-  "decksTitle": "Decks",
+  "decksTitle": "Library",
   "@decksTitle": {
-    "description": "App bar title of the home screen, which lists the user's root decks. A deck is a folder of flashcards."
+    "description": "App bar title of the home screen, synced with navigationDecksLabel (owner decision, 2026-08-12): the tab and the screen it lands on say the same word, because a tab called Library opening a screen called Decks read as two places."
   },
   "decksLoadingLabel": "Loading decks",
   "@decksLoadingLabel": {
@@ -111,9 +111,9 @@
     },
     "description": "The figure at the right-hand end of a deck's progress bar. Whole percent -- a decimal on a 4px bar is precision nobody can act on."
   },
-  "deckFullyLearnedSemanticLabel": "Fully learned",
-  "@deckFullyLearnedSemanticLabel": {
-    "description": "Announced on the glyph of a deck whose every card is learned (BR-88). The only state this glyph carries in words as well as in colour."
+  "deckSummaryTodayLabel": "Today",
+  "@deckSummaryTodayLabel": {
+    "description": "Eyebrow of the level summary hero: the time scope the two workload figures describe. One word on purpose — it scopes, it does not narrate."
   },
   "deckSummaryHideLabel": "Hide summary",
   "@deckSummaryHideLabel": {
@@ -122,32 +122,6 @@
   "deckSummaryShowAction": "Show today's summary",
   "@deckSummaryShowAction": {
     "description": "Brings the panel back after it has been dismissed. Named so it is obvious what returns."
-  },
-  "deckSummaryCaughtUpFigure": "All",
-  "@deckSummaryCaughtUpFigure": {
-    "description": "Replaces the due figure when nothing is waiting. A zero in a large display face reads as a failure; the word does not."
-  },
-  "deckSummaryCaughtUp": "caught up — nothing due here today",
-  "@deckSummaryCaughtUp": {
-    "description": "Sits under the All figure. Lower case because it continues the figure above it as one sentence."
-  },
-  "deckSummaryDueAcrossLibrary": "{count, plural, other{cards due across your library today}}",
-  "@deckSummaryDueAcrossLibrary": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    },
-    "description": "Sits under the due figure at the root level. The count is the figure itself, so the sentence does not repeat it."
-  },
-  "deckSummaryDueInDeck": "{count, plural, other{cards due in this deck today}}",
-  "@deckSummaryDueInDeck": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    },
-    "description": "The same sentence inside a deck, where the scope is that deck rather than the whole library."
   },
   "decksSectionLabelRoot": "Your decks",
   "@decksSectionLabelRoot": {
@@ -217,60 +191,88 @@
     },
     "description": "Says what was searched, so the user can tell an empty result from a search that looked in the wrong place."
   },
-  "deckNewCountLabel": "{count, plural, other{{count} new}}",
-  "@deckNewCountLabel": {"description": "Chip on a deck tile: cards still on the learning chain (learned_at IS NULL, BR-90). Shown beside the due chip, never merged with it (BR-150).", "placeholders": {"count": {"type": "int"}}},
-  "deckSummaryNewToLearn": "{count, plural, =1{new card to learn} other{new cards to learn}}",
-  "@deckSummaryNewToLearn": {"description": "Summary sentence when nothing is due but new cards remain. The level is NOT caught up in this state (BR-150).", "placeholders": {"count": {"type": "int"}}},
-  "deckSummaryNewBesideDue": "{newCount, plural, other{and {newCount} new to learn}}",
-  "@deckSummaryNewBesideDue": {"description": "Second line of the summary when both sets are non-empty.", "placeholders": {"newCount": {"type": "int"}}},
   "deckStarterLibraryAction": "Browse starter library",
-  "@deckStarterLibraryAction": {"description": "Empty-root CTA that opens the starter template catalog (UC-01)."},
+  "@deckStarterLibraryAction": {
+    "description": "Empty-root CTA that opens the starter template catalog (UC-01)."
+  },
   "starterLibraryTitle": "Starter library",
-  "@starterLibraryTitle": {"description": "Title of the starter template catalog screen."},
+  "@starterLibraryTitle": {
+    "description": "Title of the starter template catalog screen."
+  },
   "starterLibraryFixtureNotice": "These decks are practice fixtures written for development and testing, not published course content.",
-  "@starterLibraryFixtureNotice": {"description": "BR-87: current starter content must be described as fixture, never presented as production content."},
+  "@starterLibraryFixtureNotice": {
+    "description": "BR-87: current starter content must be described as fixture, never presented as production content."
+  },
   "starterLibraryCardCount": "{count, plural, =1{1 card} other{{count} cards}}",
-  "@starterLibraryCardCount": {"description": "Card total on a starter template row.", "placeholders": {"count": {"type": "int"}}},
-  "starterLibrarySource": "Source: {source}",
-  "@starterLibrarySource": {"description": "Content source line on a starter template row (BR-87).", "placeholders": {"source": {"type": "String"}}},
-  "starterLibraryInstallAction": "Add to library",
-  "@starterLibraryInstallAction": {"description": "Copies the template into the user's decks (BR-33)."},
-  "starterLibraryInstalledLabel": "Added",
-  "@starterLibraryInstalledLabel": {"description": "Shown on a template that is already in the library (BR-37)."},
-  "starterLibraryAlreadyInstalledTitle": "Already in your library",
-  "@starterLibraryAlreadyInstalledTitle": {"description": "Dialog title when installing a template that was installed before."},
-  "starterLibraryAlreadyInstalledMessage": "This starter deck was added earlier. Adding it again copies nothing \u2014 your existing copy and its progress stay as they are (BR-37).",
-  "@starterLibraryAlreadyInstalledMessage": {"description": "Confirm body for a deliberate re-add (BR-38): the user must be told a copy exists before a second one is made. Cancel copies nothing."},
-  "starterLibraryAddAgainAction": "Add a second copy",
-  "@starterLibraryAddAgainAction": {"description": "Confirm action of the BR-38 dialog: proceeds to the scheduler sheet and installs a deliberate duplicate."},
-  "starterLibrarySchedulerPrompt": "Review schedule",
-  "@starterLibrarySchedulerPrompt": {"description": "Label above the scheduler picker in the install sheet. The template only suggests a default (BR-34)."},
-  "starterLibraryInstallFailed": "Could not add this deck. Nothing was copied.",
-  "@starterLibraryInstallFailed": {"description": "Install failure line; the transaction rolled back (BR-39). Shown with a retry."},
-  "starterLibraryEmpty": "No starter decks are published in this build.",
-  "@starterLibraryEmpty": {"description": "Catalog screen with an empty manifest."},
-  "starterLibraryLocaleLabel": "Language: {locale}",
-  "@starterLibraryLocaleLabel": {"description": "Locale line on a starter template row.", "placeholders": {"locale": {"type": "String"}}},
-  "deckSearchOpenLabel": "Search decks",
-  "@deckSearchOpenLabel": {"description": "Opens the search field in the Library subheader. The field is collapsed to this control at rest."},
-  "deckSearchCloseLabel": "Close search",
-  "@deckSearchCloseLabel": {"description": "Collapses the search field; if a query is running it is cleared first, so no result set survives its own input."},
-  "deckDueNowLabel": "{count, plural, other{{count} due now}}",
-  "@deckDueNowLabel": {
+  "@starterLibraryCardCount": {
     "placeholders": {
       "count": {
         "type": "int"
       }
     },
-    "description": "The filled chip on a deck card. \"now\" because it sits beside a Nothing due state and the difference is about this moment, not about the deck."
+    "description": "Card total on a starter template row."
+  },
+  "starterLibrarySource": "Source: {source}",
+  "@starterLibrarySource": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    },
+    "description": "Content source line on a starter template row (BR-87)."
+  },
+  "starterLibraryInstallAction": "Add to library",
+  "@starterLibraryInstallAction": {
+    "description": "Copies the template into the user's decks (BR-33)."
+  },
+  "starterLibraryInstalledLabel": "Added",
+  "@starterLibraryInstalledLabel": {
+    "description": "Shown on a template that is already in the library (BR-37)."
+  },
+  "starterLibraryAlreadyInstalledTitle": "Already in your library",
+  "@starterLibraryAlreadyInstalledTitle": {
+    "description": "Dialog title when installing a template that was installed before."
+  },
+  "starterLibraryAlreadyInstalledMessage": "This starter deck was added earlier. Adding it again copies nothing — your existing copy and its progress stay as they are (BR-37).",
+  "@starterLibraryAlreadyInstalledMessage": {
+    "description": "Confirm body for a deliberate re-add (BR-38): the user must be told a copy exists before a second one is made. Cancel copies nothing."
+  },
+  "starterLibraryAddAgainAction": "Add a second copy",
+  "@starterLibraryAddAgainAction": {
+    "description": "Confirm action of the BR-38 dialog: proceeds to the scheduler sheet and installs a deliberate duplicate."
+  },
+  "starterLibrarySchedulerPrompt": "Review schedule",
+  "@starterLibrarySchedulerPrompt": {
+    "description": "Label above the scheduler picker in the install sheet. The template only suggests a default (BR-34)."
+  },
+  "starterLibraryInstallFailed": "Could not add this deck. Nothing was copied.",
+  "@starterLibraryInstallFailed": {
+    "description": "Install failure line; the transaction rolled back (BR-39). Shown with a retry."
+  },
+  "starterLibraryEmpty": "No starter decks are published in this build.",
+  "@starterLibraryEmpty": {
+    "description": "Catalog screen with an empty manifest."
+  },
+  "starterLibraryLocaleLabel": "Language: {locale}",
+  "@starterLibraryLocaleLabel": {
+    "placeholders": {
+      "locale": {
+        "type": "String"
+      }
+    },
+    "description": "Locale line on a starter template row."
+  },
+  "deckSearchOpenLabel": "Search decks",
+  "@deckSearchOpenLabel": {
+    "description": "Opens the search field in the Library subheader. The field is collapsed to this control at rest."
+  },
+  "deckSearchCloseLabel": "Close search",
+  "@deckSearchCloseLabel": {
+    "description": "Collapses the search field; if a query is running it is cleared first, so no result set survives its own input."
   },
   "deckNoCardsLabel": "No cards yet",
   "@deckNoCardsLabel": {
     "description": "Shown on a deck card that holds no cards at all -- distinct from Nothing due, which means there are cards and none is waiting."
-  },
-  "deckNoDueLabel": "Nothing due",
-  "@deckNoDueLabel": {
-    "description": "Shown on a deck row when no card is due. Neutral wording on purpose — having nothing due is a normal state, not a problem (BR-29)."
   },
   "deckPathSemanticLabel": "Deck path",
   "@deckPathSemanticLabel": {
@@ -479,7 +481,7 @@
   },
   "deckStudyAction": "Study",
   "@deckStudyAction": {
-    "description": "Label of the button on a deck card that starts a study session for the cards due in that deck. Shown only when at least one card is due — a deck that is finished for today has nothing to start."
+    "description": "Label of the button on a deck card that starts a study session for that deck. Shown when the deck has due or new cards (BR-150) — hidden only when both sets are empty, because then there is nothing to start."
   },
   "deckActionsSemanticLabel": "Deck actions",
   "@deckActionsSemanticLabel": {
@@ -1669,5 +1671,106 @@
   "deckResetProgressConfirm": "Reset",
   "@deckResetProgressConfirm": {
     "description": "Confirms the reset. Destructive, so it carries the danger styling."
+  },
+  "deckDueMetricWord": "Due",
+  "@deckDueMetricWord": {
+    "description": "The word half of the due metric; the tile and the summary compose '<count> Due'. Due-today keeps the streakContainer time-pressure role; overdue wears the error pair per BR-161 (BR-150, BR-29)."
+  },
+  "deckNewMetricWord": "New",
+  "@deckNewMetricWord": {
+    "description": "The word half of the new metric; composed as '<count> New'. Foreground is semantic info on the neutral surface — never a filled container, never success (BR-90, BR-150)."
+  },
+  "deckHeroOverdueMetricWord": "Overdue",
+  "@deckHeroOverdueMetricWord": {
+    "description": "Word half of the hero's first metric (BR-162): due cards that came due before today began. Error semantic role when non-zero; the deck tile keeps deckDueMetricWord for the undivided total."
+  },
+  "deckHeroDueTodayMetricWord": "Due today",
+  "@deckHeroDueTodayMetricWord": {
+    "description": "Word half of the hero's second metric (BR-162): due cards whose due_at belongs to today's local day. Streak time-pressure role when non-zero."
+  },
+  "deckHeroNewMetricWord": "New",
+  "@deckHeroNewMetricWord": {
+    "description": "Word half of the hero's third metric (BR-150): cards still on the learning chain. Info role when non-zero."
+  },
+  "deckHeroOverdueAgedMetricWord": "Overdue (+{days}d)",
+  "@deckHeroOverdueAgedMetricWord": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    },
+    "description": "Word half of the hero's overdue metric while a backlog exists (BR-162): the set name with the oldest card's age in parentheses. Text, not a chip — a chip beside one cell of the metric grid breaks the column alignment."
+  },
+  "deckHeroOverdueAgedCapMetricWord": "Overdue (99+d)",
+  "@deckHeroOverdueAgedCapMetricWord": {
+    "description": "The aged overdue word past the badge cap: the exact figure stops being information at this size, matching deckOverdueBadgeCapLabel."
+  },
+  "deckHeroOverdueSemanticLabel": "{count} overdue cards; oldest is {days} days overdue",
+  "@deckHeroOverdueSemanticLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "days": {
+        "type": "int"
+      }
+    },
+    "description": "Screen-reader sentence for the hero's overdue metric (BR-162). The count is cards overdue; the days are the age of the oldest backlog card — two different units, both named. Replaces the +Nd shorthand, which is excluded from semantics."
+  },
+  "deckHeroDueTodaySemanticLabel": "{count} cards due today",
+  "@deckHeroDueTodaySemanticLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Screen-reader sentence for the hero's due-today metric (BR-162)."
+  },
+  "deckHeroNewSemanticLabel": "{count} new cards",
+  "@deckHeroNewSemanticLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Screen-reader sentence for the hero's new metric (BR-150)."
+  },
+  "deckHeroScheduledMetricWord": "Scheduled",
+  "@deckHeroScheduledMetricWord": {
+    "description": "Word half of the hero's fourth metric (BR-162): learned cards resting until a future review. Always the neutral role — this is the set with nothing to do."
+  },
+  "deckHeroScheduledSemanticLabel": "{count} cards scheduled for later",
+  "@deckHeroScheduledSemanticLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Screen-reader sentence for the hero's scheduled metric (BR-162)."
+  },
+  "deckOverdueBadgeLabel": "+{days}d",
+  "@deckOverdueBadgeLabel": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    },
+    "description": "Compact overdue badge on the deck status icon (BR-161): completed local days since the subtree's oldest due card. Kept terse on purpose; the full sentence lives in deckOverdueSemanticLabel."
+  },
+  "deckOverdueBadgeCapLabel": "99+",
+  "@deckOverdueBadgeCapLabel": {
+    "description": "The badge past 99 days: an exact count of a hundred-day backlog is noise at this size."
+  },
+  "deckOverdueSemanticLabel": "{count} cards due; oldest card is {days} days overdue",
+  "@deckOverdueSemanticLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "days": {
+        "type": "int"
+      }
+    },
+    "description": "What a screen reader hears for an overdue deck's status icon, instead of the visual '+7d'. Counts and days are plain numbers so the sentence stays translatable."
   }
 }

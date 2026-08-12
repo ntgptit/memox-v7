@@ -48,6 +48,7 @@ void main() {
         parent: deck,
         decks: children,
         nextDueAt: null,
+        nextOverdueTickAt: null,
       ),
     ),
     allDecks: () =>
@@ -249,14 +250,19 @@ void main() {
         reason: 'the card count',
       );
       expect(
-        find.textContaining(english.deckDueCountLabel(7)),
+        find.descendant(
+          of: find.byType(DeckTileWidget),
+          matching: find.textContaining('7 ${english.deckDueMetricWord}'),
+        ),
         findsOneWidget,
         reason: 'the due count',
       );
+      // Absent below the root on purpose: every descendant inherits the
+      // root's algorithm (BR-06), so each child row naming it says nothing.
       expect(
         find.textContaining(english.schedulerEightBoxShortLabel),
-        findsOneWidget,
-        reason: 'the resolved scheduler',
+        findsNothing,
+        reason: 'child rows do not repeat the inherited scheduler',
       );
       // **The fourth fact, added with BR-88.** Asserted by its formatted label
       // rather than by looking for the digits: `find.textContaining('42')` used
@@ -304,6 +310,7 @@ void main() {
           parent: deck,
           decks: const <DeckSummary>[],
           nextDueAt: null,
+          nextOverdueTickAt: null,
         ),
       );
       await tester.pump();
@@ -317,6 +324,7 @@ void main() {
             fakeChildSummary(id: 'c1', name: 'Hiragana', parentId: 'deck-1'),
           ],
           nextDueAt: null,
+          nextOverdueTickAt: null,
         ),
       );
       await tester.pump();
