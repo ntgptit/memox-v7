@@ -733,7 +733,7 @@ Preview.
 | Tìm kiếm card (S1) | Should-have, chưa tới lượt |
 | Thống kê / streak (S2) | Should-have — `study_answers` với `kind` đã đủ dữ liệu |
 | Đảo chiều card (S3) | Should-have |
-| Import/export (N1) | **Planned sau MVP; hướng quản lý hàng loạt chính.** Tạo card thủ công vẫn dành cho lượng nhỏ và chỉnh ngoại lệ. Khi triển khai MUST đặc tả preview, mapping, validation, kết quả batch, lỗi/rollback và quyền riêng tư trước khi viết code; không suy các contract đó từ dòng backlog này. |
+| Export (nửa còn lại của N1) | Import đã đặc tả và triển khai (UC-10, BR-168…BR-173, AD-20); export vẫn nice-to-have. Khi triển khai MUST đặc tả selection, encoder, save/share và quyền riêng tư trước khi viết code — nền canonical schema và strategy boundary đã sẵn ở AD-20. |
 | Nhắc nhở hằng ngày (N2) | Nice-to-have, cần quyền notification |
 | Media và tag trong card | Ngoài MVP; quy tắc reset (BR-41) và lưu trữ (AD-08) đã đặt sẵn |
 | Đăng nhập, đồng bộ | Ngoài MVP (AD-03) |

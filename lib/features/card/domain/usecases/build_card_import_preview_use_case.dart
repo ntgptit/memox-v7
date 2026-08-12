@@ -51,7 +51,7 @@ CardImportPreview classifyImportRows({
   required CardTransferSheet sheet,
   required CardTransferMapping mapping,
   required bool hasHeaderRow,
-  required Set<String> existingKeys,
+  required Set<CardImportDuplicateKey> existingKeys,
 }) {
   final dataRows = hasHeaderRow && sheet.rows.isNotEmpty
       ? sheet.rows.sublist(1)
@@ -59,7 +59,7 @@ CardImportPreview classifyImportRows({
 
   final rows = <CardImportRowPreview>[];
   final records = <CardTransferRecord>[];
-  final seenInFile = <String>{};
+  final seenInFile = <CardImportDuplicateKey>{};
   var ready = 0, duplicates = 0, invalid = 0, blank = 0;
 
   String cellOf(CardTransferRow row, CardTransferField field) {

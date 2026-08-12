@@ -74,6 +74,30 @@ void main() {
       expect(find.text('words.csv'), findsOneWidget);
     });
 
+    testWidgets('a failed file read shows the typed recovery copy and keeps '
+        'the previous file (H)', (tester) async {
+      h.picker.fileToPick = CardTransferFileSource(
+        name: 'words.csv',
+        bytes: Uint8List.fromList(utf8.encode('front,back')),
+        format: CardTransferFormat.csv,
+      );
+      await h.pump(tester);
+      await tester.tap(find.text(english.cardImportChooseFileAction));
+      await tester.pumpAndSettle();
+
+      // The next replace dies in the platform layer; the repository has
+      // already mapped it to unreadableFile before the controller sees it.
+      h.picker.nextPickFailure = const ValidationFailure(
+        message: 'read failed',
+        problems: <Enum>{CardTransferProblem.unreadableFile},
+      );
+      await tester.tap(find.text(english.cardImportReplaceFileAction));
+      await tester.pumpAndSettle();
+
+      expect(find.text(english.cardImportErrorUnreadableFile), findsOneWidget);
+      expect(find.text('words.csv'), findsOneWidget);
+    });
+
     testWidgets('typing into the paste box enables Preview without parsing', (
       tester,
     ) async {
@@ -88,6 +112,71 @@ void main() {
         h.button(english.cardImportPreviewAction),
       );
       expect(action.onPressed, isNotNull);
+    });
+  });
+
+  group('compact width and large type (I)', () {
+    const compact = Size(320, 852);
+
+    Finder stepSemantics(int step, String label) => find.bySemanticsLabel(
+      english.cardImportStepNamedSemantics(
+        english.cardImportStepSemantics(step),
+        label,
+      ),
+    );
+
+    testWidgets('the source step renders at 320dp and 2.0x with every step '
+        'still announced', (tester) async {
+      await h.pump(tester, surface: compact, textScale: 2);
+
+      expect(tester.takeException(), isNull);
+      // The compact stepper keeps all three steps in semantics and the
+      // current one's full label on screen — never an ellipsis stump.
+      expect(
+        stepSemantics(1, english.cardImportStepSourceLabel),
+        findsOneWidget,
+      );
+      expect(
+        stepSemantics(2, english.cardImportStepPreviewLabel),
+        findsOneWidget,
+      );
+      expect(
+        stepSemantics(3, english.cardImportStepImportLabel),
+        findsOneWidget,
+      );
+      expect(find.text(english.cardImportStepSourceLabel), findsOneWidget);
+    });
+
+    testWidgets('preview, confirm and result survive 320dp at 2.0x', (
+      tester,
+    ) async {
+      await h.pump(tester, surface: compact, textScale: 2);
+      await h.pasteAndPreview(tester, 'front,back\n\uc0ac\uacfc,apple\n');
+      expect(tester.takeException(), isNull);
+      expect(find.text(english.cardImportStepPreviewLabel), findsOneWidget);
+
+      await tester.ensureVisible(find.text(english.cardImportContinueAction));
+      await tester.tap(find.text(english.cardImportContinueAction));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      await tester.tap(find.text(english.cardImportSubmitAction(1)));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.text(english.cardImportResultHeading), findsOneWidget);
+    });
+
+    testWidgets('Vietnamese labels make the same honest layout choice', (
+      tester,
+    ) async {
+      await h.pump(
+        tester,
+        surface: compact,
+        textScale: 2,
+        locale: const Locale('vi'),
+      );
+
+      expect(tester.takeException(), isNull);
     });
   });
 
@@ -134,7 +223,7 @@ void main() {
 
     testWidgets('an all-duplicate source disables Continue until Include '
         'duplicates', (tester) async {
-      h.importer.existingKeys = <String>{
+      h.importer.existingKeys = <CardImportDuplicateKey>{
         cardImportDuplicateKey(frontFolded: '사과', backFolded: 'apple'),
       };
       await h.pump(tester);

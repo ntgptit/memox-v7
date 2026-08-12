@@ -284,6 +284,44 @@ void main() {
         expect(await h.countAll('card_tags'), 4);
       },
     );
+
+    test('more distinct tags than one lookup chunk still reuse and link '
+        'correctly (C)', () async {
+      // 45 cards x 10 tags = 450 distinct folded names — more than
+      // CardImportDao.tagLookupChunkSize, so the reuse read must chunk. One
+      // of them is seeded beforehand to prove reuse survives the chunking.
+      final tree = await h.seedTree();
+      final seedCard = await h.cardRepository.createCard(
+        deckId: tree.leaf.id,
+        front: cardText('먼저'),
+        back: cardText('first', side: CardSide.back),
+      );
+      await h.cardRepository.addCardTag(
+        cardId: seedCard.id,
+        name: TagName.parse('tag000').name!,
+      );
+
+      final result = await repository().commitImport(
+        deckId: tree.leaf.id,
+        plan: plan(<CardTransferRecord>[
+          for (var card = 0; card < 45; card++)
+            entry(
+              'front $card',
+              'back $card',
+              tags: <String>[
+                for (var t = 0; t < 10; t++)
+                  'tag${(card * 10 + t).toString().padLeft(3, '0')}',
+              ],
+            ),
+        ]),
+      );
+
+      expect(result.imported, 45);
+      // 450 distinct names, one of which already existed: 449 minted.
+      expect(await h.countAll('tags'), 450);
+      // The seed card's link plus 45 x 10 imported links.
+      expect(await h.countAll('card_tags'), 451);
+    });
   });
 
   group('atomicity under fault (BR-171)', () {

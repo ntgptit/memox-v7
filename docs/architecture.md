@@ -1389,7 +1389,15 @@ là một rule có nhiều chủ. Đồng thời Export là hướng đã địn
 kiến trúc Import không được khoá schema/parser/model theo hướng import-only
 khiến Export phải viết lại.
 
-**Consequences.** Ba contract hẹp thay vì một: `CardImportSourceRepository`
+**Consequences.** Duplicate identity của import là một **record có kiểu**
+(`CardImportDuplicateKey = ({frontFolded, backFolded})`), không phải chuỗi ghép:
+mọi separator scheme đều đứng trên bất biến ngầm "separator không xuất hiện
+trong text" mà không type nào bảo vệ — equality cấu trúc thì không có separator
+để đụng. Wizard import mount trên **root navigator** (`parentNavigatorKey`):
+một full-screen task che shell và bottom bar thay vì render trong branch; URL
+giữ nguyên hình lồng `/decks/:id/cards/import`, entry point `push` để Cancel
+`pop` về đúng nơi mở — deck `unset` về deck detail, card list về card list.
+Ba contract hẹp thay vì một: `CardImportSourceRepository`
 (picker — seam platform duy nhất), `CardTransferRepository` (decode, thuần
 bytes-to-rows, chạy off-thread), `CardImportRepository` (commit, thuần
 database, nói bằng canonical record). Widget test chỉ fake nửa nó gọi; impl

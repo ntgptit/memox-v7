@@ -50,10 +50,19 @@ Future<void> showCreateChildForm(
     return;
   }
 
+  if (kind == _ChildKind.importCards) {
+    // Pushed: the wizard covers the shell, and Cancel pops back to this deck
+    // — an unset deck must land on its own detail again, not on a card list
+    // it never chose (UC-10, M4.12 W5).
+    await context.pushNamed(
+      RouteNames.cardImport,
+      pathParameters: <String, String>{RoutePathParams.deckId: parent.id},
+    );
+    return;
+  }
+
   context.goNamed(
-    kind == _ChildKind.importCards
-        ? RouteNames.cardImport
-        : RouteNames.cardEditor,
+    RouteNames.cardEditor,
     pathParameters: <String, String>{RoutePathParams.deckId: parent.id},
   );
 }

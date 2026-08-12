@@ -1,13 +1,13 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
   "scannedFiles": 386,
-  "totalSites": 403,
+  "totalSites": 404,
   "byElementKind": {
     "other": 290,
     "background": 14,
     "shadow": 1,
     "border": 13,
-    "text": 62,
+    "text": 63,
     "icon": 23
   },
   "bySourceKind": {
@@ -16,7 +16,7 @@
     "Colors-material": 5,
     "hardcoded-literal": 97,
     "opacity-modified-token": 11,
-    "theme-token": 143
+    "theme-token": 144
   },
   "sites": [
     {
@@ -2903,7 +2903,7 @@
     },
     {
       "file": "lib/features/card/presentation/screens/card_list_screen.dart",
-      "line": 173,
+      "line": 176,
       "widget_context": "CardListScreen",
       "element_kind": "icon",
       "source_kind": "theme-token",
@@ -3211,7 +3211,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_import_stepper_widget.dart",
-      "line": 36,
+      "line": 60,
       "widget_context": "CardImportStepperWidget",
       "element_kind": "border",
       "source_kind": "theme-token",
@@ -3222,7 +3222,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_import_stepper_widget.dart",
-      "line": 37,
+      "line": 61,
       "widget_context": "CardImportStepperWidget",
       "element_kind": "border",
       "source_kind": "theme-token",
@@ -3230,6 +3230,17 @@
       "token": "colorScheme.outlineVariant",
       "resolved_value_light": "#D2D2DD",
       "resolved_value_dark": "#4C487A"
+    },
+    {
+      "file": "lib/features/card/presentation/widgets/sections/card_import_stepper_widget.dart",
+      "line": 90,
+      "widget_context": "CardImportStepperWidget",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurface",
+      "token": "colorScheme.onSurface",
+      "resolved_value_light": "#16182B",
+      "resolved_value_dark": "#EDEDF6"
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_list_body_widget.dart",

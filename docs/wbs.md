@@ -8904,9 +8904,10 @@ thế không đổi bố cục.
   qua app restart; `dio`/auth/sync abstraction. **Không giới hạn kích thước file
   theo concept (5 MB)** — chưa có measurement nào đòi hỏi; nếu sau này cần
   defensive limit thì thêm bằng named constant + boundary test + lý do ghi ở đây.
-- **Editable documents:** `docs/product.md`, `docs/business-rules.md`,
-  `docs/use-cases.md`, `docs/wbs.md`, `docs/wireframes/m4-12-card-import.md`
-  (mới), `docs/it-scenarios/*`, `lib/features/card/README.md`
+- **Editable documents:** `docs/product.md`, `docs/architecture.md` (AD-20),
+  `docs/business-rules.md`, `docs/use-cases.md`, `docs/wbs.md`,
+  `docs/wireframes/m4-12-card-import.md` (mới), `docs/it-scenarios/*`,
+  `lib/features/card/README.md`
 - **Output:** AD-20; domain `card_transfer_*` canonical models
   (format/field/source/document/mapping/record) + `card_import_preview/result`
   + failures; ba contract `CardTransferRepository` /
@@ -8945,8 +8946,9 @@ thế không đổi bố cục.
   - [x] Không overflow ở 320px/textScale 2.0; keyboard không che ô paste hoặc
         primary action; selected source có semantics; stepper có step
         semantics (W7).
-  - [x] ARB EN/VI đầy đủ; docs/BR/UC/decision table/IT scenarios cập nhật;
-        goldens + Widgetbook đăng ký.
+  - [x] ARB EN/VI đầy đủ; docs/BR/UC/IT scenarios cập nhật (bảng quyết định
+        nằm trong `business-rules.md` — repo không có cây decision-table
+        riêng); goldens + Widgetbook đăng ký.
   - [x] `dod_check.sh` full xanh. Device integration suite: chạy một lần ở
         final gate nếu có emulator, không thì báo rõ "not run".
 - **Dependencies:** M99.18 (bulk primitives và taxonomy notifier là nền)
@@ -8955,6 +8957,67 @@ thế không đổi bố cục.
   repository trên SQLite thật kèm fault-injection chứng minh rollback; widget
   cho wizard đủ state; router cho route mới; demo goldens.
 - **Checklist phases:** 9.3, 10.2, 12.2, 14.2
+
+### M99.20 · Card Import findings — parser, identity, navigation, responsive
+
+- **Status:** **done** — targeted host suites + analyzer xanh, và full
+  `dod_check.sh` chạy lại sau toàn bộ sửa đổi: 2.364 test pass, guard sạch,
+  `check_docs` sạch. Emulator không chạy cho task này (đúng yêu cầu).
+- **Goal:** Import v1 đã có transaction và kiến trúc transfer đúng nhưng còn
+  sáu finding: decoder có thể diễn giải chuỗi dạng số; duplicate key ghép chuỗi
+  bằng NUL — bất biến ngầm không type nào giữ; lookup tag chưa chunk theo bind
+  limit; wizard render trong shell branch nên vẫn còn bottom bar; Cancel và
+  View cards dùng chung một đường về; responsive 320dp/2.0× được tick mà chưa
+  có test render thật.
+- **Scope:** decoder giữ nguyên text (pin bằng regression test "001"/"1e3"/
+  "+84…"); `CardImportDuplicateKey` là record có kiểu xuyên contract → preview
+  → recheck; `CardImportDao.tagLookupChunkSize` = 400, gom + dedupe theo folded
+  name trong cùng transaction; route import lên root navigator, entry point
+  `push`, Cancel `pop` về đúng ngữ cảnh với fallback deck detail cho deep link,
+  View cards chỉ sau success; khoá Close/Back/submit/reset khi commit đang
+  chạy; Import another file xoá cả `TextEditingController`; lỗi picker/đọc file
+  map thành `unreadableFile` không lộ path; stepper hai presentation đo bằng
+  TextPainter, test thật 320×852 @ 2.0× EN+VI.
+- **Out of scope:** Export; emulator/device suite; đổi BR-168…BR-173 (docs
+  thắng code — code sửa theo docs, không ngược lại).
+- **Editable documents:** `docs/product.md`, `docs/architecture.md` (AD-20
+  Consequences), `docs/use-cases.md` (bảng "cố ý không đặc tả"), `docs/wbs.md`,
+  `docs/it-scenarios/01-navigation-and-continuity.md`, `docs/it-scenarios/*`
+  (catalog/coverage), `lib/features/card/README.md`
+- **Output:** sửa trong `card_delimited_transfer_data_source.dart`,
+  `card_import_preview_model.dart`, `card_import_repository.dart` + impl,
+  `card_import_dao.dart`, `app_router.dart`, `card_import_screen.dart`,
+  `card_import_action_bar_widget.dart`,
+  `card_import_source_repository_impl.dart`,
+  `card_import_stepper_widget.dart`; test mới
+  `card_import_source_repository_test.dart`, nhóm F/G/I trong hai file wizard
+  test, ba router test mới.
+- **Acceptance criteria:**
+  - [x] "001"/"1e3"/"+84 912 345 678" sống nguyên qua CSV, TSV và paste.
+  - [x] `("a","b\u0000c")` ≠ `("a\u0000b","c")` — có test; policy trùng lặp
+        giữ nguyên (scoped deck đích, existing thắng in-file, mặc định skip,
+        include ghi mới, recheck trong transaction).
+  - [x] 450 distinct tag qua một import: reuse + link đúng, không partial,
+        không N+1, không vượt bind limit.
+  - [x] Wizard không có `MxNavigationBar`; URL giữ
+        `/decks/:deckId/cards/import`; deep link vẫn mở.
+  - [x] Cancel từ card list về card list, từ deck `unset` về deck detail và
+        deck vẫn `unset` với đủ lựa chọn tạo; deep link không history có
+        fallback; View cards chỉ từ result.
+  - [x] Trong lúc submit: Close khoá, system Back trơ, không submit lần hai,
+        không reset; commit xong thì navigation sống lại (test bằng
+        `Completer`).
+  - [x] Import another file: paste box trống, Preview disabled tới khi có
+        nguồn mới.
+  - [x] Lỗi picker/đọc file → `unreadableFile`, không path/exception thô; file
+        đã chọn trước đó giữ nguyên.
+  - [x] 320×852 @ 2.0×, EN và VI: không overflow ở source/preview/confirm/
+        result; ba bước vẫn có semantics "Step n of 3 · tên bước".
+  - [x] Full `dod_check.sh` chạy lại sau các sửa đổi và xanh (2.364 test).
+- **Dependencies:** M99.19
+- **Tests required:** như Output; regression parser, identity, chunking,
+  router, submit-lock, reset, responsive
+- **Checklist phases:** 9.3, 14.2
 
 ## Blocker
 

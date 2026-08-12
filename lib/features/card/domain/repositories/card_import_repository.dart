@@ -1,3 +1,4 @@
+import '../models/card_import_preview_model.dart';
 import '../models/card_import_result_model.dart';
 import '../models/card_transfer_record_model.dart';
 
@@ -19,10 +20,10 @@ final class CardImportPlan {
 /// formats, pickers or parsing — those live behind their own contracts, and
 /// this implementation never imports a codec.
 abstract interface class CardImportRepository {
-  /// The duplicate identities already in [deckId], as
-  /// `cardImportDuplicateKey` strings — one read for the whole preview
+  /// The duplicate identities already in [deckId], as typed
+  /// [CardImportDuplicateKey] pairs — one read for the whole preview
   /// (BR-170), never a per-row query.
-  Future<Set<String>> readExistingDuplicateKeys(String deckId);
+  Future<Set<CardImportDuplicateKey>> readExistingDuplicateKeys(String deckId);
 
   /// Writes the whole plan atomically (BR-171): target checks
   /// (BR-168), duplicate recheck under the plan's policy (BR-170), the

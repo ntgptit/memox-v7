@@ -89,8 +89,11 @@ class CardListScreen extends ConsumerWidget {
   }
 
   /// The bulk entry (UC-10): manual create stays the small-volume path (D4),
-  /// import is where a whole file goes.
-  void _openImport(BuildContext context) => context.goNamed(
+  /// import is where a whole file goes. Pushed, not gone-to: the wizard sits
+  /// on the root navigator above this screen, and Cancel must return here by
+  /// popping — a `go` would rebuild the stack from the URL and forget where
+  /// the user came from.
+  void _openImport(BuildContext context) => context.pushNamed(
     RouteNames.cardImport,
     pathParameters: <String, String>{RoutePathParams.deckId: deckId},
   );

@@ -2347,5 +2347,17 @@
           }
       },
       "description": "File size in megabytes, rounded up."
+  },
+  "cardImportStepNamedSemantics": "{step} · {label}",
+  "@cardImportStepNamedSemantics": {
+      "placeholders": {
+          "step": {
+              "type": "String"
+          },
+          "label": {
+              "type": "String"
+          }
+      },
+      "description": "Screen-reader label of one stepper node: its position sentence plus the step's name."
   }
 }

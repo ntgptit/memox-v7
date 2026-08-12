@@ -104,7 +104,7 @@ void main() {
   testWidgets('preview — mixed ready, invalid and duplicates', (tester) async {
     // One row already lives in the deck, one repeats inside the paste, one
     // is missing its back — the full status vocabulary on one screen.
-    importer.existingKeys = <String>{
+    importer.existingKeys = <CardImportDuplicateKey>{
       cardImportDuplicateKey(frontFolded: '사과', backFolded: 'apple'),
     };
     await pumpReview(tester, scope(Brightness.light));

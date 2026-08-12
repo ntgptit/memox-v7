@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:excel/excel.dart' as xlsx;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/card/data/datasources/card_transfer_resolver_data_source.dart';
+import 'package:memox/features/card/domain/models/card_import_preview_model.dart';
 import 'package:memox/features/card/domain/models/card_transfer_field_model.dart';
 import 'package:memox/features/card/domain/models/card_transfer_format_model.dart';
 import 'package:memox/features/card/domain/models/card_transfer_mapping_model.dart';
@@ -115,7 +116,7 @@ void main() {
           sheet: sheet,
           mapping: mapping,
           hasHeaderRow: true,
-          existingKeys: const <String>{},
+          existingKeys: const <CardImportDuplicateKey>{},
         );
 
         final record = preview.records.single;

@@ -112,6 +112,43 @@ void main() {
     });
   });
 
+  group('textual values survive decoding (A)', () {
+    test('leading zeros, exponent shapes and plus signs stay strings', () {
+      // The decoder is a transport, not an interpreter: "001" is a word
+      // somebody typed, not the number 1.
+      final doc = decodeCardTransferSource(
+        file('a.csv', utf8.encode('front,back\n001,1e3\n+84 912 345 678,007')),
+      );
+
+      expect(cellsOf(doc)[1], <String>['001', '1e3']);
+      expect(cellsOf(doc)[2], <String>['+84 912 345 678', '007']);
+    });
+
+    test('CSV, TSV and pasted text agree on the same numeric-looking data', () {
+      final expected = <String>['001', '1e3'];
+      final csvDoc = decodeCardTransferSource(
+        file('a.csv', utf8.encode('001,1e3')),
+      );
+      final tsvDoc = decodeCardTransferSource(
+        file(
+          'a.tsv',
+          utf8.encode(
+            '001'
+            '	'
+            '1e3',
+          ),
+        ),
+      );
+      final pasteDoc = decodeCardTransferSource(
+        const CardTransferTextSource(text: '001,1e3'),
+      );
+
+      expect(cellsOf(csvDoc).single, expected);
+      expect(cellsOf(tsvDoc).single, expected);
+      expect(cellsOf(pasteDoc).single, expected);
+    });
+  });
+
   group('TSV', () {
     test('tab-delimited, and commas stay inside cells', () {
       final doc = decodeCardTransferSource(

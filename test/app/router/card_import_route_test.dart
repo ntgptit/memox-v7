@@ -14,6 +14,11 @@ import 'package:memox/features/card/domain/models/deck_context_model.dart';
 import 'package:memox/features/card/presentation/screens/card_import_screen.dart';
 import 'package:memox/features/card/presentation/screens/card_list_screen.dart';
 import 'package:memox/features/deck/di/deck_repository_provider.dart';
+import 'package:memox/features/deck/domain/models/deck_list_snapshot_model.dart';
+import 'package:memox/features/deck/domain/models/deck_path_segment_model.dart';
+import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
+import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
+import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 
 import '../../features/card/presentation/support/fake_card_repository.dart';
@@ -44,10 +49,25 @@ void main() {
     return repository;
   }
 
+  /// A deck repository serving one unset sub-deck as its level, for the
+  /// create-sheet entry (UC-10, W6).
+  FakeDeckRepository servingUnsetDeck() => FakeDeckRepository(
+    deckList: (_) => Stream<DeckListSnapshot>.value(
+      DeckListSnapshot(
+        ancestors: const <DeckPathSegment>[],
+        parent: fakeSubDeck(id: 'deck-1', name: 'Unset deck', parentId: 'root'),
+        decks: const <DeckSummary>[],
+        nextDueAt: null,
+        nextOverdueTickAt: null,
+      ),
+    ),
+  );
+
   Future<GoRouter> pumpApp(
     WidgetTester tester, {
     required FakeCardRepository cards,
     String initialLocation = '/decks/deck-1/cards',
+    FakeDeckRepository? decks,
   }) async {
     final router = createAppRouter(initialLocation: initialLocation);
     addTearDown(router.dispose);
@@ -57,7 +77,9 @@ void main() {
       ProviderScope(
         overrides: [
           envConfigProvider.overrideWithValue(EnvConfig.development),
-          deckRepositoryProvider.overrideWithValue(FakeDeckRepository()),
+          deckRepositoryProvider.overrideWithValue(
+            decks ?? FakeDeckRepository(),
+          ),
           cardRepositoryProvider.overrideWithValue(cards),
           cardTransferRepositoryProvider.overrideWithValue(
             FakeCardTransferRepository(),
@@ -146,6 +168,88 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text(english.cardImportEntryAction), findsNothing);
+  });
+
+  testWidgets('the wizard covers the shell: no bottom navigation bar '
+      'inside it (D)', (tester) async {
+    final router = await pumpApp(tester, cards: cardRepo());
+    expect(find.byType(MxNavigationBar), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.more_vert));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(english.cardImportEntryAction).last);
+    await tester.pumpAndSettle();
+
+    // A full-screen task on the root navigator (M4.12 I1): the shell and its
+    // bar are underneath, not composed around the wizard. The URL keeps its
+    // nested shape.
+    expect(find.byType(CardImportScreen), findsOneWidget);
+    expect(find.byType(MxNavigationBar), findsNothing);
+    // Pushed routes keep the base URI in `uri`; the pushed match itself
+    // carries the wizard's canonical location.
+    expect(
+      router.routerDelegate.currentConfiguration.last.matchedLocation,
+      '/decks/deck-1/cards/import',
+    );
+
+    await tester.tap(find.byIcon(Icons.close));
+    await tester.pumpAndSettle();
+    expect(find.byType(MxNavigationBar), findsOneWidget);
+  });
+
+  testWidgets('cancel from an unset deck returns to that deck, which still '
+      'offers both create choices (E)', (tester) async {
+    final router = await pumpApp(
+      tester,
+      cards: cardRepo()..holdsCards = false,
+      decks: servingUnsetDeck(),
+      initialLocation: '/decks/deck-1',
+    );
+    expect(find.byType(DeckListScreen), findsOneWidget);
+
+    await tester.tap(find.text(english.deckCreateChildAction).last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(english.cardImportEntryAction).last);
+    await tester.pumpAndSettle();
+    expect(find.byType(CardImportScreen), findsOneWidget);
+
+    // Cancel pops back to the deck detail — never onto a card list the user
+    // never chose (W5). No commit ran, so the deck is untouched: still
+    // unset, still offering both kinds plus import.
+    await tester.tap(find.byIcon(Icons.close));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(DeckListScreen), findsOneWidget);
+    expect(find.byType(CardImportScreen), findsNothing);
+    expect(
+      router.routerDelegate.currentConfiguration.uri.path,
+      '/decks/deck-1',
+      reason: 'the URL is the deck again, not the cards list',
+    );
+
+    await tester.tap(find.text(english.deckCreateChildAction).last);
+    await tester.pumpAndSettle();
+    expect(find.text(english.deckCreateSubDeckAction), findsOneWidget);
+    expect(find.text(english.deckCreateCardAction), findsOneWidget);
+  });
+
+  testWidgets('a deep link with no history falls back to a canonical route '
+      'on cancel (E)', (tester) async {
+    await pumpApp(
+      tester,
+      cards: cardRepo(),
+      initialLocation: '/decks/deck-1/cards/import',
+    );
+    expect(find.byType(CardImportScreen), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.close));
+    await tester.pumpAndSettle();
+
+    // No pushed history: leaving lands on the deck's canonical surface — a
+    // card-type deck's is its card list — rather than crashing.
+    expect(find.byType(CardImportScreen), findsNothing);
+    expect(find.byType(CardListScreen), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('a missing deck id segment renders the 404 screen, not a '

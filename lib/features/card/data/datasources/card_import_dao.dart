@@ -25,12 +25,38 @@ final class CardImportDao {
   Future<List<CardKeysInDeckResult>> cardKeysInDeck(String deckId) =>
       _db.cardKeysInDeck(deckId).get();
 
-  /// The tags an import would reuse, by folded identity (BR-93) — one
-  /// array-bound statement for the batch's whole distinct-tag set.
-  Future<List<Tag>> tagsByFoldedNames(List<String> foldedNames) =>
-      foldedNames.isEmpty
-      ? Future<List<Tag>>.value(const <Tag>[])
-      : _db.tagsByFoldedNames(foldedNames).get();
+  /// How many folded names one `IN` clause binds. SQLite's default
+  /// bind-variable ceiling is 999; 400 leaves room for whatever else a
+  /// statement carries, the same margin `CardDao.idChunkSize` chose.
+  static const int tagLookupChunkSize = 400;
+
+  /// The tags an import would reuse, by folded identity (BR-93) — chunked
+  /// array-bound statements, never one unbounded `IN` and never one query
+  /// per tag. Callers run inside the commit transaction, so every chunk
+  /// reads the same snapshot; results are deduplicated by folded name in
+  /// case a caller's input repeats across chunk borders.
+  Future<List<Tag>> tagsByFoldedNames(List<String> foldedNames) async {
+    if (foldedNames.isEmpty) return const <Tag>[];
+
+    final byFolded = <String, Tag>{};
+    for (
+      var start = 0;
+      start < foldedNames.length;
+      start += tagLookupChunkSize
+    ) {
+      final chunk = foldedNames.sublist(
+        start,
+        start + tagLookupChunkSize > foldedNames.length
+            ? foldedNames.length
+            : start + tagLookupChunkSize,
+      );
+      for (final tag in await _db.tagsByFoldedNames(chunk).get()) {
+        byFolded[tag.nameFolded] = tag;
+      }
+    }
+
+    return byFolded.values.toList(growable: false);
+  }
 
   /// Every insert of one commit, as a single Drift batch inside the caller's
   /// transaction: each row binds its own statement, so a thousand-card import

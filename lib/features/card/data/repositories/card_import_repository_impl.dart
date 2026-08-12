@@ -45,8 +45,9 @@ final class CardImportRepositoryImpl implements CardImportRepository {
   final DateTime Function() _clock;
 
   @override
-  Future<Set<String>> readExistingDuplicateKeys(String deckId) =>
-      _guard(() => _readDuplicateKeys(deckId));
+  Future<Set<CardImportDuplicateKey>> readExistingDuplicateKeys(
+    String deckId,
+  ) => _guard(() => _readDuplicateKeys(deckId));
 
   @override
   Future<CardImportResult> commitImport({
@@ -75,7 +76,7 @@ final class CardImportRepositoryImpl implements CardImportRepository {
       // free to have changed since the preview, and the policy the user chose
       // is applied to what is true now.
       final existingKeys = await _readDuplicateKeys(deckId);
-      final seenInBatch = <String>{};
+      final seenInBatch = <CardImportDuplicateKey>{};
       final toWrite = <CardTransferRecord>[];
       var duplicatesSkipped = 0;
       for (final entry in plan.records) {
@@ -210,10 +211,10 @@ final class CardImportRepositoryImpl implements CardImportRepository {
           for (final TagName tag in entry.tags) tag.folded,
       }.toList(growable: false);
 
-  Future<Set<String>> _readDuplicateKeys(String deckId) async {
+  Future<Set<CardImportDuplicateKey>> _readDuplicateKeys(String deckId) async {
     final rows = await _importDao.cardKeysInDeck(deckId);
 
-    return <String>{
+    return <CardImportDuplicateKey>{
       for (final row in rows)
         cardImportDuplicateKey(
           frontFolded: row.frontFolded,
