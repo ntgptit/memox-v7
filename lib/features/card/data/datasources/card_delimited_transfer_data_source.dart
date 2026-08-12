@@ -42,6 +42,12 @@ final class CardDelimitedTransferDataSource implements CardTransferDecoder {
     // Empty lines are kept as rows so `sourceRowNumber` stays the number the
     // user's own editor shows — the blank-row skip is BR-169's, counted
     // where the user can see it, not the parser's, silent.
+    // Text stays text: `dynamicTyping` (csv 8's name for the csv<=6
+    // `shouldParseNumbers` contract) is left at its false default and is
+    // pinned by the textual-values regression tests — "001" is a word
+    // somebody typed, "1e3" is a front, "+84" starts a phone number, and a
+    // decoder that parses them into numbers hands back "1000.0"-shaped
+    // strings the user never wrote.
     final decoder = CsvDecoder(
       fieldDelimiter: _fieldDelimiter,
       skipEmptyLines: false,

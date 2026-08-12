@@ -46,7 +46,9 @@ Future<void> _submitImport(
 /// `Import another file` (UC-10 step 8): every draft value back to its
 /// default, the commit back to idle, the target deck kept — the providers
 /// are all keyed by [deckId], so this list is the reset story in one place.
-void _resetImportDraft(WidgetRef ref, String deckId) {
+/// Public: the screen composes it with clearing its own paste controller —
+/// the providers reset here, the `TextEditingController` is the screen's (G).
+void resetCardImportDraft(WidgetRef ref, String deckId) {
   ref
     ..invalidate(cardImportSourceChoiceProvider(deckId))
     ..invalidate(cardImportFilePickChoiceProvider(deckId))
@@ -77,7 +79,8 @@ class CardImportActionBarWidget extends ConsumerWidget {
     required this.step,
     required this.submit,
     required this.pasteController,
-    required this.onLeave,
+    required this.onReset,
+    required this.onViewCards,
     super.key,
   });
 
@@ -85,7 +88,12 @@ class CardImportActionBarWidget extends ConsumerWidget {
   final CardImportStep step;
   final CardImportSubmitState submit;
   final TextEditingController pasteController;
-  final VoidCallback onLeave;
+
+  /// `Import another file`: the full draft reset, paste box included (G).
+  final VoidCallback onReset;
+
+  /// `View cards`, reachable only from the success result (E).
+  final VoidCallback onViewCards;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -159,14 +167,14 @@ class CardImportActionBarWidget extends ConsumerWidget {
               child: MxActionButton(
                 label: l10n.cardImportAnotherAction,
                 variant: MxActionButtonVariant.secondary,
-                onPressed: () => _resetImportDraft(ref, deckId),
+                onPressed: onReset,
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: MxActionButton(
                 label: l10n.cardImportViewCardsAction,
-                onPressed: onLeave,
+                onPressed: onViewCards,
               ),
             ),
           ];

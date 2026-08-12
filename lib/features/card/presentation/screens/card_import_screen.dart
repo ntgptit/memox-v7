@@ -62,21 +62,32 @@ class _CardImportScreenState extends ConsumerState<CardImportScreen> {
       ref.read(cardImportFilePickChoiceProvider(widget.deckId)).file != null ||
       _pasteController.text.trim().isNotEmpty;
 
-  /// Close (app bar): out of the wizard, asking first when a draft would be
-  /// lost (W5). A committed result is not a draft — leaving is free.
-  Future<void> _close() async {
-    final isDone = ref.read(commitCardImportProvider(widget.deckId)).isDone;
-    if (isDone || !_isDirty) {
-      _leave();
+  /// Cancel (Close, and system Back from the Source step): back to wherever
+  /// the wizard was opened from, by popping — a card list stays a card list,
+  /// an unset deck stays its own detail (W5). A deep link has no history to
+  /// pop to; the deck's detail route is the canonical fallback, and its own
+  /// redirect forwards card-type decks on to their list.
+  ///
+  /// Never mid-commit: the transaction is atomic and cannot honestly be
+  /// cancelled, so leaving is locked until it resolves either way (F).
+  Future<void> _cancel() async {
+    if (ref.read(commitCardImportProvider(widget.deckId)).isSubmitting) {
       return;
     }
-    final discard = await showCardImportDiscardConfirm(context);
-    if (!mounted || !discard) return;
-    _leave();
+    final isDone = ref.read(commitCardImportProvider(widget.deckId)).isDone;
+    if (!isDone && _isDirty) {
+      final discard = await showCardImportDiscardConfirm(context);
+      if (!mounted || !discard) return;
+    }
+    _popOrFallback();
   }
 
-  /// Android Back: a step back first (W5); the Source step behaves as Close.
+  /// Android Back: a step back first (W5); the Source step behaves as
+  /// Cancel. Inert while the commit is in flight (F).
   Future<void> _handleSystemBack() async {
+    if (ref.read(commitCardImportProvider(widget.deckId)).isSubmitting) {
+      return;
+    }
     final step = ref.read(cardImportStepChoiceProvider(widget.deckId));
     final isDone = ref.read(commitCardImportProvider(widget.deckId)).isDone;
     if (!isDone && step != CardImportStep.source) {
@@ -87,15 +98,39 @@ class _CardImportScreenState extends ConsumerState<CardImportScreen> {
       );
       return;
     }
-    await _close();
+    await _cancel();
   }
 
-  void _leave() {
+  void _popOrFallback() {
+    if (!mounted) return;
+    if (context.canPop()) {
+      context.pop();
+      return;
+    }
+    context.goNamed(
+      RouteNames.deckDetail,
+      pathParameters: <String, String>{RoutePathParams.deckId: widget.deckId},
+    );
+  }
+
+  /// View cards, after a successful commit only: the target deck's list,
+  /// whose Drift stream already shows what was imported — declarative `go`,
+  /// no reload and no per-card re-read.
+  void _viewCards() {
     if (!mounted) return;
     context.goNamed(
       RouteNames.cardList,
       pathParameters: <String, String>{RoutePathParams.deckId: widget.deckId},
     );
+  }
+
+  /// `Import another file` (G): the providers reset through the bar's free
+  /// function; the paste controller is this state object's and only this
+  /// method can clear it — leaving it out kept the old text alive under an
+  /// empty provider.
+  void _resetDraft() {
+    _pasteController.clear();
+    resetCardImportDraft(ref, widget.deckId);
   }
 
   @override
@@ -129,7 +164,9 @@ class _CardImportScreenState extends ConsumerState<CardImportScreen> {
             icon: Icons.close,
             semanticLabel: context.l10n.cardImportTitle,
             tooltip: context.l10n.commonCancelAction,
-            onPressed: _close,
+            // Locked while the one transaction runs (F): it cannot honestly
+            // be cancelled, so the exit does not pretend otherwise.
+            onPressed: submit.isSubmitting ? null : _cancel,
           ),
           title: Text(context.l10n.cardImportTitle),
         ),
@@ -177,7 +214,8 @@ class _CardImportScreenState extends ConsumerState<CardImportScreen> {
                 step: step,
                 submit: submit,
                 pasteController: _pasteController,
-                onLeave: _leave,
+                onReset: _resetDraft,
+                onViewCards: _viewCards,
               ),
             ],
           ),

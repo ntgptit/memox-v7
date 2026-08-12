@@ -20,20 +20,27 @@ enum CardImportRowStatus {
   blank,
 }
 
-/// The duplicate identity BR-170 measures: folded front and back, joined with
-/// a separator no card text can contain (both sides are trimmed, and a NUL
-/// survives no text field). One function so the preview, the commit recheck
-/// and every test agree byte-for-byte on what "the same card" means.
-String cardImportDuplicateKey({
+/// The duplicate identity BR-170 measures: the folded pair, as a record.
+///
+/// A record, not a joined string: any separator scheme rests on the unstated
+/// invariant that the separator never occurs in text, and nothing enforces
+/// that — `("a", "b\u0000c")` and `("a\u0000b", "c")` join identically under
+/// a NUL. Structural equality has no separator to collide on, and the type
+/// makes "what is a key" a compiler question rather than a convention.
+typedef CardImportDuplicateKey = ({String frontFolded, String backFolded});
+
+/// One construction point, so the preview, the commit recheck and every test
+/// agree on what "the same card" means.
+CardImportDuplicateKey cardImportDuplicateKey({
   required String frontFolded,
   required String backFolded,
-}) => '$frontFolded\u0000$backFolded';
+}) => (frontFolded: frontFolded, backFolded: backFolded);
 
 /// Import's reading of a canonical record: its duplicate identity. An
 /// extension rather than a member because the key is BR-170's — import
 /// policy — while the record itself is direction-neutral content.
 extension CardImportRecordIdentity on CardTransferRecord {
-  String get duplicateKey => cardImportDuplicateKey(
+  CardImportDuplicateKey get duplicateKey => cardImportDuplicateKey(
     frontFolded: front.folded,
     backFolded: back.folded,
   );

@@ -49,7 +49,13 @@ final GoRouter appRouter = createAppRouter();
 /// presentation-only placeholder route, so the deep-link contract and the tab
 /// order are settled before the content is.
 GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
+  // Declared so the import wizard can mount on the root navigator, above
+  // the shell. Created per call: a shared GlobalKey across two routers (as
+  // tests build them) would be one key in two trees.
+  final rootNavigatorKey = GlobalKey<NavigatorState>();
+
   return GoRouter(
+    navigatorKey: rootNavigatorKey,
     initialLocation: initialLocation,
     redirect: appRedirect,
     errorBuilder: (context, state) => const RouteNotFoundScreen(),
@@ -136,6 +142,11 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
                           GoRoute(
                             path: RoutePaths.cardImportRelative,
                             name: RouteNames.cardImport,
+                            // On the root navigator (M4.12 I1): the wizard is
+                            // a full-screen task, so it covers the shell and
+                            // its bottom bar instead of rendering inside a
+                            // branch. The URL keeps its nested shape.
+                            parentNavigatorKey: rootNavigatorKey,
                             builder: (context, state) => CardImportScreen(
                               deckId:
                                   state.pathParameters[RoutePathParams.deckId]!,
