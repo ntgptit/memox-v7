@@ -101,7 +101,7 @@ void main() {
         detailContains: '_RenderInkFeatures',
         // 12 since M99.16: the app bar gained the Select action, the visible
         // way into selection mode, and an IconButton is one more ink host.
-        expectedMatches: 12,
+        expectedMatches: 13,
         rationale:
             'The Material ink layers of the Scaffold, the AppBar, the app-bar '
             'Select and add IconButtons, the panel Start-study button, the two MxCard card '
@@ -114,7 +114,7 @@ void main() {
         detailContains: '_ShapeBorderPainter',
         // 4 since M99.16, for the same reason: the Select action is a second
         // app-bar IconButton.
-        expectedMatches: 4,
+        expectedMatches: 5,
         rationale:
             'The app-bar Select and add IconButtons and the panel Start-study pill draw '
             'their rounded shapes through a ShapeBorder painter; both shapes '

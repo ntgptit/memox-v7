@@ -99,6 +99,10 @@ void main() {
 
         expect(find.text(english.deckCreateSubDeckAction), findsOneWidget);
         expect(find.text(english.deckCreateCardAction), findsOneWidget);
+        // The bulk way in rides the same sheet (UC-10, M4.12 W6): an unset
+        // deck can be filled from a file, and the first written card settles
+        // the type inside the import transaction (BR-172).
+        expect(find.text(english.cardImportEntryAction), findsOneWidget);
       },
     );
 
