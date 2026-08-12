@@ -45,7 +45,8 @@ Nó cũng không phải design reference để đo pixel. Acceptance criteria c�
 | D6 | Editor có **thanh hành động ghim đáy**, và `Save & add another` sống ở đó | Ảnh tham chiếu có `Cancel` + `Save card` ở đáy nhưng **không** có add-another, trong khi UC-04 A4 (frozen) đòi giữ form mở. `Cancel` bỏ đi vì `✕` ở app bar đã làm đúng việc đó; chỗ trống thành add-another. | 2026-08-02 |
 | D7 | Ba trường phụ nằm trong một **disclosure đóng mặc định** | BR-95 cho cả ba là tuỳ chọn. Mở sẵn biến form hai ô thành form năm ô cho việc thường gặp nhất. | 2026-08-02 |
 | D8 | Deck hiện **read-only**, không phải picker | Đổi deck đích nghĩa là thẻ có thể sang root khác scheduler hoặc khác generation — đúng thứ BR-73/BR-74 đang chặn. Deck là ngữ cảnh màn đang mở. | 2026-08-02 |
-| D10 | Xoá thẻ có **hai lối**: long-press ở danh sách, và danger zone trong editor | Ảnh tham chiếu đặt danger zone trong editor. Giữ cả hai vì chúng phục vụ hai việc khác nhau — dọn hàng loạt, và bỏ một thẻ đang đọc. Cùng một dialog xác nhận, nên không có hai đường xử lý. | 2026-08-02 |
+| D10 | Xoá thẻ có **hai lối**: chọn nhiều ở danh sách, và danger zone trong editor | Ảnh tham chiếu đặt danger zone trong editor. Giữ cả hai vì chúng phục vụ hai việc khác nhau — dọn hàng loạt, và bỏ một thẻ đang đọc. **Sửa ở M99.16:** lối danh sách không còn là action sheet một-thẻ mà là chế độ chọn nhiều (D13); action sheet đó chưa bao giờ tồn tại trong production. | 2026-08-02, sửa 2026-08-12 |
+| D13 | Long-press ở danh sách **vào chế độ chọn**, không mở action sheet | Đây là cử chỉ Android chuẩn cho selection, và nó là thứ đang thiếu để quản lý hàng loạt (BR-167). Vì cử chỉ không có affordance, app bar có thêm action **Select** nhìn thấy được. Thanh hành động ngữ cảnh là một **băng phía trên danh sách** chứ không phải app bar bị thay: ở 320px với `textScaler` 2.0, số đã chọn cộng năm hành động không nằm vừa một hàng 56pt, và `AppBar` xử lý việc đó bằng cách tràn chứ không xuống dòng. | 2026-08-12 |
 | D11 | `OPTIONAL DETAILS` **đóng khi rỗng, mở khi đã có nội dung** | Ảnh tạo cho thấy disclosure đóng, ảnh sửa cho thấy ba ô mở sẵn — không mâu thuẫn, mà là cùng một quy tắc ở hai trạng thái. Đóng một ô đang có chữ là giấu nội dung của chính người dùng. | 2026-08-02 |
 | D9 | **Không** có nút micro nhập giọng nói | Ảnh tham chiếu có. Nó cần plugin, quyền hệ điều hành và một luồng lỗi riêng; không nằm trong scope M4.11 và gần với media, vốn đã hoãn. | 2026-08-02 |
 | D5 | Hàng card là **bốn phần**: dot trạng thái · front · back · nhãn trạng thái, cộng badge hạn bên phải | Từ ảnh tham chiếu. Thay chip đơn của bản đầu. Ba tín hiệu trạng thái trả lời ba câu khác nhau — xem bảng ở §4.3 — và gộp lại thành một chip là mất hai trong ba. | 2026-08-02 |
@@ -234,7 +235,7 @@ Một control **sort** thì đổi `ORDER BY`, và đó chính là thứ M4.10ar
 
 Chạm vào hàng mở editor chế độ sửa. `⋮` trên hàng bị bỏ so với bản trước: ảnh
 tham chiếu không có nó, và badge bên phải đã chiếm chỗ đó. Hành động của một
-card đi qua long-press → action sheet (W7).
+card đi qua chế độ chọn ở danh sách (W9) hoặc danger zone trong editor (W6b).
 
 **Ba phần của trạng thái, và chúng trả lời ba câu khác nhau:**
 
@@ -584,7 +585,7 @@ phải nút bấm. Chúng chỉ trang trí nhãn, nên không kéo theo gì.
 
 | Lối | Ở đâu | Dùng khi |
 |---|---|---|
-| Long-press hàng → action sheet (W7) | danh sách | Dọn nhiều thẻ liên tiếp mà không mở từng cái |
+| Long-press hàng → chế độ chọn (W9) | danh sách | Dọn nhiều thẻ cùng lúc, kể cả toàn bộ tập đã lọc |
 | Danger zone | editor | Đang đọc nội dung thẻ và quyết định bỏ nó |
 
 Cả hai đi qua **cùng một dialog xác nhận** ở W7. Hai lối vào một hành động phá
@@ -603,7 +604,7 @@ dung và quay về chưa định loại (BR-163).
 
 ```
         ┌──────────────────────────────┐
-        │  Card actions                │   MxActionSheet (long-press)
+        │  Card actions                │   (không còn: long-press vào chế độ chọn)
         │                              │
         │  ✎  Edit                     │
         │  🗑  Delete                   │   destructive
@@ -629,9 +630,10 @@ Câu xác nhận nói rõ history cũng mất — hậu quả người dùng kh�
 editor (W6b) — xem bảng ở W6b về việc mỗi lối phục vụ ai. Cả hai kết thúc ở
 đúng dialog trên.
 
-Long-press không có affordance nhìn thấy được, và đó là cái giá đã biết: `⋮`
-trên hàng bị bỏ vì góc phải đã là badge hạn và cờ ⚑. Danger zone trong editor
-là thứ bù lại — người không đoán ra long-press vẫn tìm được nút xoá bằng cách
+Long-press không có affordance nhìn thấy được, và M99.16 trả lời điều đó bằng
+action **Select** trên app bar chứ không bằng `⋮` trên hàng — góc phải hàng đã
+là badge hạn và cờ ⚑. Danger zone trong editor vẫn là lối thứ hai — người đang
+đọc nội dung một thẻ tìm được nút xoá bằng cách
 mở thẻ, là điều họ sẽ làm để xem nội dung trước khi xoá.
 
 **Xoá card cuối cùng** không dừng ở list nữa. Deck trở về `unset` trong cùng

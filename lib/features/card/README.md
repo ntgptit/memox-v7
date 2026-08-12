@@ -37,12 +37,12 @@ Counted from the code, not remembered.
 |---|---|---|---|
 | `domain/repositories/` | 2 | **1** | Deck needs a second contract because starter templates are a separate source with a separate lifetime. One contract per *source of data*, not per feature. |
 | `domain/entities/` | 2 | **6** | Card owns three entity types (card, review state, tag) against Deck's one. Entity count follows the domain, not a quota. |
-| `domain/usecases/` | 11 | **15** | One per interaction, as AD-12 requires — and Card simply has more interactions. Neither number is a target. |
-| `data/mappers/` | 2 | **7** | More row shapes crossing the boundary. A mapper per shape, not per feature. |
-| `data/repositories/` | 3 | **1** | Deck splits its impl; Card did not need to. Splitting is a size response, not a rule. |
-| `widgets/items/` | 4 | **1** | Deck's tile has a chip, a pill and a glyph as separate parts. Card's row does not. |
-| `widgets/overlays/` | 5 | **1** | Deck is full of sheets, forms, confirm dialogs and a move picker; Card has one. |
-| `widgets/support/` | 1 | **3** | Reversed. Card has more cross-bucket display mapping. |
+| `domain/usecases/` | 14 | **21** | One per interaction, as AD-12 requires — and Card simply has more interactions. Neither number is a target. |
+| `data/mappers/` | 3 | **7** | More row shapes crossing the boundary. A mapper per shape, not per feature. |
+| `data/repositories/` | 4 | **2** | Deck splits its impl four ways; Card split once, when bulk management pushed the single file past the size guard. Splitting is a size response, not a rule. |
+| `widgets/items/` | 7 | **1** | Deck's tile has a chip, a pill and a glyph as separate parts. Card's row does not. |
+| `widgets/overlays/` | 8 | **2** | Deck is full of sheets, forms, confirm dialogs and a move picker; Card has the editor's danger zone and the bulk overlays. |
+| `widgets/support/` | 1 | **4** | Reversed. Card has more cross-bucket display mapping. |
 | dynamic SQL placeholders | **0** | 4 | Card's list statement composes filter + search + sort in one query; Deck's does not compose anything. |
 
 **The bucket rows are the most useful ones.** `items/` 4→1, `overlays/` 5→1,
@@ -62,8 +62,11 @@ Deck's most distinctive machinery is absent here and nothing suffered:
   hold next.
 - **No scheduler columns.** Those live on the root deck (BR-06) and reach a card
   through `card_review_states`, which this feature reads and does not own.
-- **No move.** A card belongs to the deck that holds it; relocating one is not a
-  modelled interaction.
+- **No tree-shaped move.** A card *can* be moved now (BR-165), but the operation
+  is a single `deck_id` write with two content-type consequences — not Deck's
+  subtree relocation with its depth recount, root repointing and scheduler
+  compatibility check. Same verb, an order of magnitude apart, and the second one
+  was not copied over on the strength of the name.
 - **`data/models/` empty**, same as Deck and for the same reason — the Drift row
   class is the data model, and AD-05 has no wire format yet.
 
@@ -90,7 +93,9 @@ habit:
   refusal is encoded in a message string.
 - **Rules needing data *at the moment of writing* stay in the transaction.** The
   first-child lock that sets a deck's `content_type` when the first card is
-  created runs inside `runInTransaction`, not in a use case above it.
+  created runs inside `runInTransaction`, not in a use case above it — and so
+  does every rule in BR-165, which is why `MoveCards` validates nothing before
+  calling the use case.
 
 ---
 
@@ -99,7 +104,9 @@ habit:
 Content and validation: BR-07, BR-08 (front and back), BR-95 (the three optional
 detail fields). Flag and tags: BR-92, BR-93, BR-94. Card states derived at read
 time: BR-89…BR-91. Creation with its review state in one transaction: BR-09.
-Editing never touching the schedule: BR-10.
+Editing never touching the schedule: BR-10. Moving a card within its own tree:
+BR-165. Bulk writes are all-or-nothing and a selection is taken over the filtered
+result: BR-166, BR-167.
 
 `content_type` interactions — a card being the first child of an `unset` deck —
 are BR-60…BR-66 and BR-163, and they belong to Deck; Card participates in that transaction but

@@ -607,7 +607,8 @@ Controller chỉ giữ phần thực sự là presentation: double-submit guard,
 submitting, kiểm `ref.mounted` sau await, và map `Failure` sang state per-field.
 
 **KHÔNG vào use case: luật cần cây tại thời điểm ghi.** BR-55 (độ sâu), BR-62
-(content lock của con đầu), BR-68 (điều kiện rỗng) và bộ rule move UC-09 đều chạy
+(content lock của con đầu), BR-163 (auto-unset khi con cuối cùng biến mất) và bộ
+rule move UC-09 đều chạy
 trong `runInTransaction`. Đặt chúng lên use case là đẩy phần kiểm ra **ngoài**
 transaction — tạo race giữa lúc kiểm và lúc ghi. Luật sẽ nằm ở chỗ gọn hơn và
 **sai**. Use case là điểm vào; luật hình cây thuộc về nơi có transaction.
@@ -705,7 +706,7 @@ database im lặng thì hai snapshot cho cùng câu trả lời.
 
 - **Deck screen** watch `childDecks` rồi await `getDeckById` mỗi lần emit, kèm một
   comment khẳng định hai dữ kiện "arrive together". Không đúng. Action set tính từ
-  `content_type` **và** từ việc children rỗng (BR-68), nên một rename hoặc một
+  `content_type` **và** từ việc children rỗng (BR-163), nên một rename hoặc một
   create rơi vào giữa hai lần đọc tạo ra màn hình ghép từ hai thời điểm. Nay:
   `watchDeckDetail` — một `LEFT JOIN`, một contract method, `DeckDetail` nằm ở
   `domain/models/` vì repository trả về nó. Không có row nào nghĩa là deck đã mất

@@ -7,8 +7,8 @@
 | **Scope** | Toàn bộ kịch bản IT hiện có trong `docs/it-scenarios`; không lặp lại các bước thao tác |
 | **Source of truth for** | Mức sẵn sàng, hồ sơ thực thi, chuẩn bị, dọn dẹp và truy vết theo từng ID kịch bản IT |
 | **Depends on** | `README.md`, `00-agent-execution-guide.md`, mười một tệp kịch bản theo nhóm chức năng |
-| **Updated by task** | M99.7 (Bottom navigation IA scaffold — IT-NAV-011) |
-| **Last updated** | 2026-08-11 |
+| **Updated by task** | M99.18 (Card bulk management — IT-CARD-012/013, IT-ORG-013/014) |
+| **Last updated** | 2026-08-12 |
 
 Agent MUST tìm ID ở danh mục này trước khi chạy. **Cột `Profile` quyết định lệnh chạy**: `HOST-FLOW` và `HOST-WIDGET` chạy bằng `flutter test`, chỉ `DEVICE-E2E` cần emulator hoặc thiết bị. Bảng ánh xạ hồ sơ cũ sang mới và lý do từng dòng nằm ở [`12-testing-pyramid-audit.md`](12-testing-pyramid-audit.md). Cột tệp chỉ tới tài liệu chứa
 các bước gốc. Ý nghĩa mức sẵn sàng, hồ sơ thực thi, chuẩn bị và dọn dẹp nằm trong
@@ -90,6 +90,8 @@ các bước gốc. Ý nghĩa mức sẵn sàng, hồ sơ thực thi, chuẩn b�
 | IT-CARD-009 | `05-card-lifecycle.md` | READY | `HOST-FLOW` | — | S-PROGRESS | CLEAN-RESET | UC-04 A1, BR-10, BR-92 |
 | IT-CARD-010 | `05-card-lifecycle.md` | READY | `HOST-WIDGET` + `HOST-FLOW` | IT-CARD-010F | SETUP-CARD-BASIC | CLEAN-RESET | UC-04 A2 |
 | IT-CARD-011 | `05-card-lifecycle.md` | READY | `HOST-FLOW` | — | SETUP-CARD-SINGLE | CLEAN-RESET | UC-04 A2, BR-163 |
+| IT-CARD-012 | `05-card-lifecycle.md` | READY | `HOST-FLOW` | — | SETUP-CARD-SINGLE | CLEAN-RESET | UC-04 A5, BR-163, BR-165 |
+| IT-CARD-013 | `05-card-lifecycle.md` | READY | `HOST-FLOW` | — | SETUP-TREE-CARD | CLEAN-RESET | UC-04 E5, BR-165 |
 
 ## Khám phá và tổ chức thẻ
 
@@ -107,6 +109,8 @@ các bước gốc. Ý nghĩa mức sẵn sàng, hồ sơ thực thi, chuẩn b�
 | IT-ORG-010 | `06-card-discovery-and-organization.md` | READY | `HOST-WIDGET` + `HOST-FLOW` | IT-ORG-010F | S-PROGRESS | CLEAN-RESET | BR-89, BR-90, BR-91 |
 | IT-ORG-011 | `06-card-discovery-and-organization.md` | READY | `HOST-WIDGET` | — | SETUP-TREE-CARD | CLEAN-RESET | UC-04, UC-06 |
 | IT-ORG-012 | `06-card-discovery-and-organization.md` | READY | `HOST-WIDGET` | — | S-LARGE | CLEAN-RESET | M4.11 W1b |
+| IT-ORG-013 | `06-card-discovery-and-organization.md` | READY | `HOST-WIDGET` | — | S-LARGE | CLEAN-RESET | UC-04 A6, BR-167 |
+| IT-ORG-014 | `06-card-discovery-and-organization.md` | READY | `HOST-WIDGET` + `HOST-FLOW` | — | SETUP-CARD-BASIC | CLEAN-RESET | UC-04 A6, UC-04 E6, BR-166 |
 
 ## Điểm vào chức năng học và tùy chọn
 

@@ -158,3 +158,32 @@
 | 2 | Cuộn cuối danh sách | Có hành động tải thêm, không báo đã hiển thị tất cả |
 | 3 | Chạm tải thêm | Danh sách tăng và cuối cùng hiện đủ 65/65, không trùng hoặc mất row |
 | 4 | Mở một card rồi Back | Card list vẫn sử dụng được và dữ liệu đã tải không bị sai |
+
+## IT-ORG-013 — Chọn nhiều card và Select all trên tập đã lọc
+
+- **Ưu tiên:** P0
+- **Tiền điều kiện:** Deck có nhiều card hơn một cửa sổ tải, và một filter khớp một tập con quan sát được.
+- **Liên kết:** UC-04 A6, BR-167.
+
+| Bước | Thao tác người dùng | Kết quả mong đợi |
+|---|---|---|
+| 1 | Nhấn giữ một card | Vào selection mode với đúng card đó; thanh hành động hiện số lượng |
+| 2 | Chạm card khác | Số lượng tăng; chạm lại thì giảm |
+| 3 | Bỏ chọn card cuối cùng | Rời selection mode |
+| 4 | Vào lại mode rồi chọn Select all | Số lượng bằng **toàn bộ tập đã lọc**, không phải số dòng đang hiển thị |
+| 5 | Đổi filter | Selection bị xoá, không mang theo sang tập khác |
+| 6 | Bấm Back khi đang chọn | Rời selection trước, vẫn ở lại card list |
+
+## IT-ORG-014 — Bulk action là tất-cả-hoặc-không
+
+- **Ưu tiên:** P0
+- **Tiền điều kiện:** Có `IT-ORG-013`; một selection từ hai card trở lên.
+- **Liên kết:** UC-04 A6, UC-04 E6, BR-166.
+
+| Bước | Thao tác người dùng | Kết quả mong đợi |
+|---|---|---|
+| 1 | Chọn Delete từ thanh hành động | Hộp xác nhận nêu **số lượng** và hậu quả mất lịch sử học; Huỷ là mặc định |
+| 2 | Chọn Huỷ | Không card nào bị xoá; selection còn nguyên |
+| 3 | Xác nhận xoá | Cả lô biến mất cùng lúc; selection được xoá; thông báo nêu số lượng |
+| 4 | Chạy một bulk action mà một phần tử bị từ chối | **Không** phần tử nào được ghi; selection giữ nguyên để thử lại |
+| 5 | Restart app | Kết quả bước 3 vẫn còn, kết quả bước 4 vẫn chưa từng xảy ra |

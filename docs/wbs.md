@@ -8801,6 +8801,75 @@ thế không đổi bố cục.
 - **Tests required:** `.claude/skills/flutter-workflow/scripts/dod_check.sh`
 - **Checklist phases:** 1.4, 14.1
 
+### M99.18 · Card bulk management — move card, multi-select, bulk action
+
+- **Status:** **done** — `flutter analyze` sạch, host suite xanh
+  (card + app 311, card data 90, visual audit card 6), demo golden dựng lại và
+  đã xem, `check_docs` sạch, guard sạch. **Device integration suite: not run**
+  (không chạy emulator theo yêu cầu của task), nên đây **không** phải full DoD.
+- **Goal:** Card List trước task này chỉ sửa được từng thẻ một, và không có
+  đường nào để chuyển một thẻ sang deck khác — người dùng phải xoá rồi gõ lại,
+  mất luôn lịch sử học. Bên cạnh đó, `docs` vẫn còn mô tả long-press mở
+  action-sheet một-thẻ và còn trích BR-67/BR-68 sau khi BR-163 thay thế chúng
+  ở M99.15, nên tài liệu và code nói hai chuyện khác nhau về cùng một hành vi.
+- **Scope:** BR-165 (move card cùng root, đích `unset` hoặc `card`, giữ nguyên
+  mọi thứ trừ `deck_id`/`updated_at`, hai đầu đổi `content_type` trong **một**
+  transaction), BR-166 (bulk là all-or-nothing), BR-167 (selection tính trên tập
+  đã lọc, và tự xoá khi filter/search/sort đổi); UC-04 A5/A6, E5/E6; bulk
+  primitive `moveCards`/`deleteCards`/`setCardsFlag`/`addTagToCards`/
+  `readCardIdsMatching` với chunking biến bind của SQLite, API một-thẻ ủy quyền
+  xuống chúng; selection mode + thanh hành động theo ngữ cảnh (long-press, action
+  `Select` hiện rõ, Back rời selection trước, Select all trên tập đã lọc); sheet
+  chọn deck đích; dialog xoá hàng loạt nêu số lượng và hậu quả.
+- **Out of scope:** trash/undo (bản này xoá là mất, dialog nói thẳng thế),
+  import/export, sửa nội dung ngay trên hàng, media, move sang root khác, và mọi
+  nút mock. **Không thêm cột, không bump schema** — task chạy trọn trên schema
+  hiện có.
+- **Editable documents:** `docs/business-rules.md`, `docs/use-cases.md`,
+  `docs/architecture.md`, `docs/wireframes/m4-11-card-management.md`,
+  `docs/it-scenarios/*`, `docs/wbs.md`
+- **Output:** `card_bulk_repository_impl.dart`, `card_move_target_model.dart`,
+  sáu use case mới, `card_selection_controller.dart`,
+  `card_bulk_controller.dart`, `card_move_target_controller.dart`,
+  `card_selection_bar_widget.dart`, `card_bulk_overlays_widget.dart`,
+  `card_failure_labels_widget.dart`, `card_list_body_widget.dart`,
+  `cardMoveTargets` trong `queries/deck.drift`, bảy query bulk trong
+  `queries/card.drift`.
+- **Acceptance criteria:**
+  - [x] Move chỉ nhận đích cùng root và `content_type` `unset`/`card`; root,
+        deck-type và cross-root bị từ chối **kể cả** khi hai root cùng scheduler
+        và cùng generation.
+  - [x] Move giữ nguyên id, hai mặt, chi tiết, review state, history, flag và
+        tag; chỉ `deck_id` và `updated_at` đổi.
+  - [x] `content_type` hai đầu đổi trong cùng transaction với lần ghi: nguồn hết
+        card thì về `unset`, đích `unset` thành `card` (BR-163, BR-165).
+  - [x] Một thẻ bị từ chối thì **cả lô** không ghi gì (BR-166); thẻ không tồn tại
+        trả `NotFoundFailure` chứ không im lặng bỏ qua.
+  - [x] Danh sách id dài hơn giới hạn biến bind của SQLite vẫn chạy: DAO chia lô
+        500, và lô vẫn nằm trong một transaction.
+  - [x] Long-press vào selection mode với đúng thẻ đó; action `Select` ở app bar
+        vào mode với tập rỗng; Back rời selection trước khi rời màn.
+  - [x] Select all lấy **tập đã lọc** (142) chứ không phải cửa sổ đã tải (7), và
+        đọc bằng đúng predicate mà list và pill đếm dùng.
+  - [x] Đổi filter/search/sort xoá selection; hàng được chọn có
+        `Semantics(selected:)` và đổi glyph, không chỉ đổi màu.
+  - [x] Thanh hành động không tràn ở 320px với textScale 2.0, và không làm hàng
+        đổi chiều cao khi vào/ra mode.
+  - [x] Ghi thành công xoá selection; ghi bị từ chối **giữ** selection và nói lý
+        do bằng nhãn có type, không phải chuỗi lỗi thô.
+  - [x] Dialog xoá nêu số lượng và hậu quả (mất luôn lịch sử học, không có
+        Trash); Cancel là mặc định; chưa xác nhận thì không xoá gì.
+  - [x] Không còn tài liệu nào trích BR-67/BR-68 như luật đang sống, và wireframe
+        không còn mô tả long-press mở action-sheet một-thẻ.
+- **Dependencies:** M99.15 (BR-163 và auto-unset là nền của move)
+- **Tests required:** repository trên SQLite thật cho move và ba mutation còn
+  lại, widget test cho selection mode, demo golden cho selection/picker/dialog
+- **Tests:** `card_move_repository_test` (mới), `card_bulk_mutation_test` (mới),
+  `card_selection_test` (mới, 11), `card_screens_demo_test` (+6 render),
+  `notifier_kinds_test` (tách khỏi `command_query_separation_test`, thêm loại
+  notifier thứ năm)
+- **Checklist phases:** 9.3, 10.2, 12.2, 14.2
+
 ## Blocker
 
 | Blocker | Ảnh hưởng | Cách gỡ |
