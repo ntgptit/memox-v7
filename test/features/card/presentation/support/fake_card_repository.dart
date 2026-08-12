@@ -13,6 +13,7 @@ import 'package:memox/features/card/domain/models/tag_name_model.dart';
 import 'package:memox/features/card/domain/repositories/card_repository.dart';
 
 import 'card_fixtures.dart';
+import 'fake_card_bulk_repository.dart';
 
 /// A `CardRepository` a presentation test drives by hand.
 ///
@@ -21,7 +22,9 @@ import 'card_fixtures.dart';
 /// records its arguments and either returns or throws, so a controller test can
 /// check the double-submit guard and the keep-input-on-failure path without a
 /// database.
-final class FakeCardRepository with CardFixtures implements CardRepository {
+final class FakeCardRepository extends FakeCardBulkRepository
+    with CardFixtures
+    implements CardRepository {
   FakeCardRepository();
 
   /// A repository whose list and count are already loaded, for a visual audit

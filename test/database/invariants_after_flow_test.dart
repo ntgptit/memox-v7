@@ -83,7 +83,7 @@ void main() {
     await h.cardRepository.setCardFlag(cardId: card.id, isFlagged: true);
     await expectEveryInvariantClean('after flagging a card');
 
-    // ---- delete the card, then the whole tree (BR-03, BR-67) ---------------
+    // ---- delete the card, then the whole tree (BR-03, BR-163) ---------------
     await h.cardRepository.deleteCard(card.id);
     await expectEveryInvariantClean('after deleting the card');
 

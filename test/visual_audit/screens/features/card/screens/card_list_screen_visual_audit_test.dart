@@ -99,10 +99,12 @@ void main() {
         itemId: 'shell',
         reason: SkipReason.rasterOnly,
         detailContains: '_RenderInkFeatures',
-        expectedMatches: 11,
+        // 12 since M99.16: the app bar gained the Select action, the visible
+        // way into selection mode, and an IconButton is one more ink host.
+        expectedMatches: 12,
         rationale:
             'The Material ink layers of the Scaffold, the AppBar, the app-bar '
-            'add IconButton, the panel Start-study button, the two MxCard card '
+            'Select and add IconButtons, the panel Start-study button, the two MxCard card '
             'rows and the four filter chips. Splash and highlight paint into '
             'these layers; the overlay colours are asserted in app_theme_test.dart.',
       ),
@@ -110,9 +112,11 @@ void main() {
         itemId: 'shell',
         reason: SkipReason.customPainter,
         detailContains: '_ShapeBorderPainter',
-        expectedMatches: 3,
+        // 4 since M99.16, for the same reason: the Select action is a second
+        // app-bar IconButton.
+        expectedMatches: 4,
         rationale:
-            'The app-bar add IconButton and the panel Start-study pill draw '
+            'The app-bar Select and add IconButtons and the panel Start-study pill draw '
             'their rounded shapes through a ShapeBorder painter; both shapes '
             'come from the component themes and are pinned by the mx_components '
             'goldens.',
