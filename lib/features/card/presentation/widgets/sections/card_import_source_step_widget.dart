@@ -10,6 +10,7 @@ import '../../../../../shared/widgets/mx_text_field.dart';
 import '../../controllers/card_import_draft_controller.dart';
 import '../../states/card_import_state.dart';
 import '../support/card_import_labels_widget.dart';
+import 'card_import_source_summary_widget.dart';
 
 /// Free functions for the same reason the screen's are: a `ref.read`
 /// written inline in `build()` is indistinguishable from the unsubscribed
@@ -22,6 +23,14 @@ void _chooseSourceKind(
 
 Future<void> _pickImportFile(WidgetRef ref, String deckId) =>
     ref.read(cardImportFilePickChoiceProvider(deckId).notifier).pick();
+
+/// Removing the picked file (state 1's trailing X): invalidation puts the
+/// pick notifier back to its built default — file gone, any pick failure
+/// gone with it — and the derived document and preview fall out of existence
+/// on their own, exactly the way `resetCardImportDraft` clears the whole
+/// draft. No widget mutates provider state by hand.
+void _removePickedFile(WidgetRef ref, String deckId) =>
+    ref.invalidate(cardImportFilePickChoiceProvider(deckId));
 
 /// Step 1 — choose a source (wireframe M4.12 W2).
 ///
@@ -185,57 +194,65 @@ class _UploadPanel extends ConsumerWidget {
     final file = pick.file;
     final failure = pick.failure;
 
-    return MxCard(
-      child: Column(
+    if (file != null) {
+      return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          if (file == null) ...<Widget>[
-            Icon(
-              Icons.note_add_outlined,
-              size: AppSpacing.xxl,
-              color: context.colors.onSurfaceVariant,
+          // The compact summary replaces the whole upload panel once a file
+          // exists (state 1): name, format, size and readiness in one card —
+          // tap to replace, X to remove. The Source step reads as done.
+          CardImportSourceSummaryWidget(
+            title: file.name,
+            subtitle: context.l10n.cardImportSourceStatusLine(
+              context.l10n.cardImportFileMetaLabel(
+                file.format.name.toUpperCase(),
+                context.cardImportFileSizeLabel(file.bytes.length),
+              ),
+              context.l10n.cardImportFileReadyStatus,
             ),
+            onReplace: () => _pickImportFile(ref, deckId),
+            onRemove: () => _removePickedFile(ref, deckId),
+          ),
+          if (failure != null) ...<Widget>[
             const SizedBox(height: AppSpacing.sm),
-            Text(
-              context.l10n.cardImportChoosePrompt,
-              style: context.texts.bodyMedium,
-              textAlign: TextAlign.center,
-            ),
-          ] else
             Row(
               children: <Widget>[
                 Icon(
-                  Icons.description_outlined,
-                  color: context.colors.onSurfaceVariant,
+                  Icons.error_outline,
+                  size: AppSpacing.lg,
+                  color: context.colors.error,
                 ),
-                const SizedBox(width: AppSpacing.sm),
+                const SizedBox(width: AppSpacing.xs),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        file.name,
-                        style: context.texts.bodyMedium,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      // Extension and size, as the wireframe asks (W2): the
-                      // name alone does not say how big a paste of somebody's
-                      // whole vocabulary is about to be.
-                      Text(
-                        context.l10n.cardImportFileMetaLabel(
-                          file.format.name.toUpperCase(),
-                          _formatByteSize(context, file.bytes.length),
-                        ),
-                        style: context.texts.bodySmall?.copyWith(
-                          color: context.colors.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    context.cardImportFailureLabel(failure),
+                    style: context.texts.bodySmall?.copyWith(
+                      color: context.colors.error,
+                    ),
                   ),
                 ),
               ],
             ),
+          ],
+        ],
+      );
+    }
+
+    return MxCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Icon(
+            Icons.note_add_outlined,
+            size: AppSpacing.xxl,
+            color: context.colors.onSurfaceVariant,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            context.l10n.cardImportChoosePrompt,
+            style: context.texts.bodyMedium,
+            textAlign: TextAlign.center,
+          ),
           if (failure != null) ...<Widget>[
             const SizedBox(height: AppSpacing.sm),
             Row(
@@ -259,12 +276,10 @@ class _UploadPanel extends ConsumerWidget {
           ],
           const SizedBox(height: AppSpacing.md),
           // Filled, like the concept: inside this panel the pick *is* the
-          // primary move — the sticky bar's single-primary rule is about the
-          // wizard's step actions, not this panel's.
+          // primary move — the sticky bar's single-primary rule is about
+          // the wizard's step actions, not this panel's.
           MxActionButton(
-            label: file == null
-                ? context.l10n.cardImportChooseFileAction
-                : context.l10n.cardImportReplaceFileAction,
+            label: context.l10n.cardImportChooseFileAction,
             icon: Icons.folder_open_outlined,
             onPressed: () => _pickImportFile(ref, deckId),
           ),
@@ -312,22 +327,14 @@ class _InfoPanel extends StatelessWidget {
               color: colors.onSurfaceVariant,
             ),
           ),
+          Text(
+            context.l10n.cardImportInfoTagsHint,
+            style: context.texts.bodySmall?.copyWith(
+              color: colors.onSurfaceVariant,
+            ),
+          ),
         ],
       ),
     );
   }
-}
-
-/// KB below a megabyte, MB above — the two units a spreadsheet plausibly
-/// arrives in. Rounded up so nothing reads as "0 KB".
-String _formatByteSize(BuildContext context, int bytes) {
-  const int kilobyte = 1024;
-  const int megabyte = kilobyte * kilobyte;
-  if (bytes >= megabyte) {
-    return context.l10n.cardImportFileSizeMegabytes((bytes / megabyte).ceil());
-  }
-
-  return context.l10n.cardImportFileSizeKilobytes(
-    bytes < kilobyte ? 1 : (bytes / kilobyte).ceil(),
-  );
 }

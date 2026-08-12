@@ -53,6 +53,11 @@ def _warn(rule: str, loc: str, detail: str) -> None:
 
 _GENERATED = (".g.dart", ".freezed.dart", ".mocks.dart")
 
+# Whole directories of generated code that do not carry a generated suffix.
+# flutter gen-l10n writes plain .dart names here; the files are regenerated
+# on every build and are not committed, so no rule below can act on them.
+_GENERATED_DIRS = ("lib/l10n/generated/",)
+
 
 def _dart_files(lib: Path, repo_root: Path) -> list[tuple[str, list[str]]]:
     """Every source `.dart` under lib/, read once, keyed by its **repo-relative
@@ -71,6 +76,8 @@ def _dart_files(lib: Path, repo_root: Path) -> list[tuple[str, list[str]]]:
         except OSError:
             continue
         rel = path.relative_to(repo_root).as_posix()
+        if any(fragment in rel for fragment in _GENERATED_DIRS):
+            continue
         out.append((rel, lines))
     return out
 
@@ -210,7 +217,12 @@ _SUFFIX_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("/domain/entities/", ("_entity.dart",)),
     ("/domain/repositories/", ("_repository.dart",)),
     ("/domain/usecases/", ("_use_case.dart",)),
-    ("/domain/models/", ("_model.dart",)),
+    # CLAUDE.md's domain suffix table also admits _scheduler and _mode, and
+    # Study keeps its Strategy files (study_mode.dart, sm2_scheduler.dart, …)
+    # under models/ — recorded in wbs.md M-task outputs and the AD-18
+    # dispatch table. architecture.md:1301 says `domain/modes/`; that drift
+    # is documented, not enforced here, until a task moves the files.
+    ("/domain/models/", ("_model.dart", "_mode.dart", "_scheduler.dart")),
     ("/domain/failures/", ("_failure.dart",)),
     ("/domain/modes/", ("_mode.dart",)),
     ("/data/mappers/", ("_mapper.dart",)),

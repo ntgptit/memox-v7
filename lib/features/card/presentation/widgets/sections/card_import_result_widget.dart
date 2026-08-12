@@ -1,0 +1,272 @@
+import 'package:flutter/material.dart';
+
+import '../../../../../core/error/failure.dart';
+import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/theme_context_extension.dart';
+import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_card.dart';
+import '../../../domain/models/card_import_result_model.dart';
+import '../../states/card_import_state.dart';
+import '../support/card_import_labels_widget.dart';
+
+/// The wizard's outcome face (M4.12 states 6–8): a hero that says what
+/// happened, summary rows that say how much, and — only when it helps — a
+/// hint that says what to do about it. Rendered in place of the wizard
+/// chrome, in the same route: an outcome is a mode of the import, not a
+/// destination of its own.
+///
+/// **Two count sources, kept apart on purpose.** Imported and
+/// duplicates-skipped come from the transaction's own result — the recheck
+/// inside it is the only honest witness (BR-170). Invalid and blank come
+/// from the preview, because the commit never saw those rows at all.
+class CardImportResultWidget extends StatelessWidget {
+  const CardImportResultWidget({
+    required this.phase,
+    required this.deckName,
+    required this.result,
+    required this.invalidCount,
+    required this.blankCount,
+    this.failure,
+    super.key,
+  });
+
+  final CardImportPhase phase;
+  final String deckName;
+
+  /// Null exactly when [phase] is [CardImportPhase.commitFailure].
+  final CardImportResult? result;
+
+  final int invalidCount;
+  final int blankCount;
+  final Failure? failure;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colors = context.colors;
+
+    final commit = result;
+    // The hint follows the cause (state 7): invalid rows are the user's to
+    // fix in the source; duplicates were skipped *by their own setting* and
+    // are never framed as a broken file. Blank-only gets no hint - blank
+    // rows are skipped by design (BR-169).
+    final String? helperCopy = phase == CardImportPhase.completed
+        ? null
+        : invalidCount > 0
+        ? l10n.cardImportFixInvalidHint
+        : (commit?.duplicatesSkipped ?? 0) > 0
+        ? l10n.cardImportDuplicatesHint
+        : null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        _HeroCard(phase: phase, deckName: deckName, result: commit),
+        if (phase == CardImportPhase.commitFailure &&
+            failure != null) ...<Widget>[
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            context.cardImportFailureLabel(failure!),
+            style: context.texts.bodySmall?.copyWith(
+              color: colors.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+        if (commit != null) ...<Widget>[
+          const SizedBox(height: AppSpacing.md),
+          _SummaryCard(
+            result: commit,
+            invalidCount: invalidCount,
+            blankCount: blankCount,
+          ),
+          if (helperCopy != null) ...<Widget>[
+            const SizedBox(height: AppSpacing.md),
+            MxCard(
+              color: colors.surfaceContainerHigh,
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Icon(
+                    Icons.info_outline,
+                    size: AppSpacing.lg,
+                    color: colors.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Text(helperCopy, style: context.texts.bodySmall),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ],
+    );
+  }
+}
+
+/// The hero (states 6–8): one icon, one title, one sentence — which face is
+/// on screen is the phase's whole story.
+class _HeroCard extends StatelessWidget {
+  const _HeroCard({
+    required this.phase,
+    required this.deckName,
+    required this.result,
+  });
+
+  final CardImportPhase phase;
+  final String deckName;
+  final CardImportResult? result;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colors = context.colors;
+    final (
+      IconData heroIcon,
+      Color heroColor,
+      String title,
+      String body,
+    ) = switch (phase) {
+      CardImportPhase.completed => (
+        Icons.check_circle_outline,
+        colors.secondary,
+        l10n.cardImportSuccessTitle,
+        l10n.cardImportSuccessBody(result!.imported, deckName),
+      ),
+      CardImportPhase.completedWithSkips => (
+        Icons.warning_amber_outlined,
+        colors.tertiary,
+        l10n.cardImportSkipsTitle,
+        l10n.cardImportSkipsBody(result!.imported),
+      ),
+      CardImportPhase.noCardsAdded => (
+        Icons.info_outline,
+        colors.tertiary,
+        l10n.cardImportZeroTitle,
+        l10n.cardImportZeroBody,
+      ),
+      _ => (
+        Icons.error_outline,
+        colors.error,
+        l10n.cardImportFailureTitle,
+        l10n.cardImportFailureBody,
+      ),
+    };
+
+    return MxCard(
+      child: Column(
+        children: <Widget>[
+          const SizedBox(height: AppSpacing.md),
+          Icon(heroIcon, size: AppSpacing.xxl, color: heroColor),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            title,
+            style: context.texts.titleLarge,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            body,
+            style: context.texts.bodyMedium?.copyWith(
+              color: colors.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppSpacing.md),
+        ],
+      ),
+    );
+  }
+}
+
+/// The counts card: Added always, each skip cause only when it happened.
+class _SummaryCard extends StatelessWidget {
+  const _SummaryCard({
+    required this.result,
+    required this.invalidCount,
+    required this.blankCount,
+  });
+
+  final CardImportResult result;
+  final int invalidCount;
+  final int blankCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colors = context.colors;
+
+    return MxCard(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.xs,
+      ),
+      child: Column(
+        children: <Widget>[
+          _SummaryRow(
+            icon: Icons.check,
+            iconColor: colors.secondary,
+            label: l10n.cardImportAddedRowLabel,
+            count: result.imported,
+          ),
+          if (invalidCount > 0)
+            _SummaryRow(
+              icon: Icons.error_outline,
+              iconColor: colors.error,
+              label: l10n.cardImportInvalidSkippedRowLabel,
+              count: invalidCount,
+            ),
+          if (result.duplicatesSkipped > 0)
+            _SummaryRow(
+              icon: Icons.copy_outlined,
+              iconColor: colors.tertiary,
+              label: l10n.cardImportDuplicatesSkippedRowLabel,
+              count: result.duplicatesSkipped,
+            ),
+          if (blankCount > 0)
+            _SummaryRow(
+              icon: Icons.remove,
+              iconColor: colors.onSurfaceVariant,
+              label: l10n.cardImportBlankIgnoredRowLabel,
+              count: blankCount,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SummaryRow extends StatelessWidget {
+  const _SummaryRow({
+    required this.icon,
+    required this.iconColor,
+    required this.label,
+    required this.count,
+  });
+
+  final IconData icon;
+  final Color iconColor;
+  final String label;
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    // A bare number, not copy — nothing for the ARB to translate.
+    final countLabel = '$count';
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+      child: Row(
+        children: <Widget>[
+          Icon(icon, size: AppSpacing.lg, color: iconColor),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(child: Text(label, style: context.texts.bodyMedium)),
+          Text(countLabel, style: context.texts.titleSmall),
+        ],
+      ),
+    );
+  }
+}

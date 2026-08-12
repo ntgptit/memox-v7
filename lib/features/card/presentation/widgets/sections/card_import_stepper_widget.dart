@@ -5,6 +5,14 @@ import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../states/card_import_state.dart';
 
+/// One stepper node's progress state — three visuals, not two. A completed
+/// step swaps its number for a check; the current one keeps its number on
+/// the primary pair; a future one keeps its number on the quiet container.
+/// "Every index <= current" is deliberately *not* the rule: the Source step
+/// is complete once a source exists, and Preview only once the mapping and
+/// the importable count say so — completion is earned, not positional.
+enum _NodeState { completed, current, future }
+
 /// The three-step indicator (wireframe M4.12 W1).
 ///
 /// Display only, deliberately: steps advance through the sticky actions, so a
@@ -19,12 +27,23 @@ import '../../states/card_import_state.dart';
 /// under the live text scale; when they cannot fit, the labels leave the row
 /// and only the current step's label renders on its own line — full-size,
 /// never shrunk through a FittedBox into an unreadable thumbnail. Semantics
-/// carry "Step n of 3" plus each step's name in both presentations, so what
-/// a screen reader hears never depends on what happened to fit.
+/// carry "Step n of 3", the step's name and its progress state in both
+/// presentations, so what a screen reader hears never depends on what
+/// happened to fit.
 class CardImportStepperWidget extends StatelessWidget {
-  const CardImportStepperWidget({required this.current, super.key});
+  const CardImportStepperWidget({
+    required this.current,
+    this.completed = const <CardImportStep>{},
+    super.key,
+  });
 
   final CardImportStep current;
+
+  /// The steps that have *earned* their check (M4.12 stepper contract):
+  /// Source once a source exists, Preview once the mapping is complete and
+  /// something is importable. The screen computes this — the stepper only
+  /// draws it.
+  final Set<CardImportStep> completed;
 
   /// The row's non-label spend per step: the numbered circle and its label
   /// gap, plus a connector's minimum readable length. Used only to decide
@@ -39,6 +58,14 @@ class CardImportStepperWidget extends StatelessWidget {
       context.l10n.cardImportStepPreviewLabel,
       context.l10n.cardImportStepImportLabel,
     ];
+
+    _NodeState stateOf(int step) {
+      if (completed.contains(CardImportStep.values[step])) {
+        return _NodeState.completed;
+      }
+
+      return step == current.index ? _NodeState.current : _NodeState.future;
+    }
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -56,7 +83,9 @@ class CardImportStepperWidget extends StatelessWidget {
                       horizontal: AppSpacing.xs,
                     ),
                     child: Divider(
-                      color: step <= current.index
+                      // The connector fills once the step *before* it is
+                      // done — it reports progress earned, like the nodes.
+                      color: stateOf(step - 1) == _NodeState.completed
                           ? context.colors.primary
                           : context.colors.outlineVariant,
                     ),
@@ -65,8 +94,7 @@ class CardImportStepperWidget extends StatelessWidget {
               _StepNode(
                 index: step,
                 label: labels[step],
-                isCurrent: step == current.index,
-                isReached: step <= current.index,
+                state: stateOf(step),
                 shouldShowLabel: !isCompact,
               ),
             ],
@@ -122,33 +150,39 @@ class _StepNode extends StatelessWidget {
   const _StepNode({
     required this.index,
     required this.label,
-    required this.isCurrent,
-    required this.isReached,
+    required this.state,
     required this.shouldShowLabel,
   });
 
   final int index;
   final String label;
-  final bool isCurrent;
-  final bool isReached;
+  final _NodeState state;
   final bool shouldShowLabel;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    // Reached steps carry the primary pair; unreached stay on the quiet
-    // container. Emphasis is doubled by weight, so colour is never the only
-    // signal (W7).
+    // Completed and current share the primary pair; the *glyph* tells them
+    // apart — a check is a fact, a number is an address — so the distinction
+    // survives any palette and colour is never the only signal (W7).
+    final isReached = state != _NodeState.future;
     final background = isReached ? colors.primary : colors.surfaceContainerHigh;
     final foreground = isReached ? colors.onPrimary : colors.onSurfaceVariant;
+    final stateLabel = switch (state) {
+      _NodeState.completed => context.l10n.cardImportStepStateCompleted,
+      _NodeState.current => context.l10n.cardImportStepStateCurrent,
+      _NodeState.future => context.l10n.cardImportStepStateUpcoming,
+    };
 
     return Semantics(
-      selected: isCurrent,
-      // The name rides the semantics in both presentations, so hiding the
-      // visual label never hides the step from a screen reader (W7).
-      label: context.l10n.cardImportStepNamedSemantics(
+      selected: state == _NodeState.current,
+      // Position, name and progress ride the semantics in both
+      // presentations, so neither a hidden label nor a swapped glyph ever
+      // hides the step from a screen reader (W7).
+      label: context.l10n.cardImportStepStateSemantics(
         context.l10n.cardImportStepSemantics(index + 1),
         label,
+        stateLabel,
       ),
       excludeSemantics: true,
       child: Row(
@@ -165,16 +199,20 @@ class _StepNode extends StatelessWidget {
               color: background,
               shape: BoxShape.circle,
             ),
-            child: Text(
-              '${index + 1}',
-              style: context.texts.labelMedium?.copyWith(color: foreground),
-            ),
+            child: state == _NodeState.completed
+                ? Icon(Icons.check, size: AppSpacing.lg, color: foreground)
+                : Text(
+                    '${index + 1}',
+                    style: context.texts.labelMedium?.copyWith(
+                      color: foreground,
+                    ),
+                  ),
           ),
           if (shouldShowLabel) ...<Widget>[
             const SizedBox(width: AppSpacing.xs),
             Text(
               label,
-              style: isCurrent
+              style: state == _NodeState.current
                   ? context.texts.labelLarge?.copyWith(color: colors.onSurface)
                   : context.texts.labelMedium?.copyWith(
                       color: colors.onSurfaceVariant,

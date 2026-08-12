@@ -82,6 +82,22 @@ extension CardImportLabels on BuildContext {
   /// The stable no-header column name (UC-10 A3): A, B, …, Z, AA, AB, …
   String cardImportColumnLabel(int column) =>
       l10n.cardImportColumnFallbackLabel(_columnLetters(column));
+
+  /// KB below a megabyte, MB above — the two units a spreadsheet plausibly
+  /// arrives in. Rounded up so nothing reads as "0 KB". Shared because the
+  /// same file line renders on the Source step and again as Preview's
+  /// context (M4.12 states 1–2).
+  String cardImportFileSizeLabel(int bytes) {
+    const int kilobyte = 1024;
+    const int megabyte = kilobyte * kilobyte;
+    if (bytes >= megabyte) {
+      return l10n.cardImportFileSizeMegabytes((bytes / megabyte).ceil());
+    }
+
+    return l10n.cardImportFileSizeKilobytes(
+      bytes < kilobyte ? 1 : (bytes / kilobyte).ceil(),
+    );
+  }
 }
 
 String _columnLetters(int column) {

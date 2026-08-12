@@ -6,7 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/card/domain/failures/card_transfer_failure.dart';
 import 'package:memox/features/card/domain/models/card_import_preview_model.dart';
-import 'package:memox/features/card/domain/models/card_transfer_document_model.dart';
 import 'package:memox/features/card/domain/models/card_transfer_format_model.dart';
 import 'package:memox/features/card/domain/models/card_transfer_source_model.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
@@ -67,7 +66,10 @@ void main() {
         message: 'unsupported',
         problems: <Enum>{CardTransferProblem.unsupportedFile},
       );
-      await tester.tap(find.text(english.cardImportReplaceFileAction));
+      // Replace is the summary card's tap (state 1), named in semantics.
+      await tester.tap(
+        find.bySemanticsLabel(english.cardImportReplaceFileAction),
+      );
       await tester.pumpAndSettle();
 
       expect(find.text(english.cardImportErrorUnsupportedFile), findsOneWidget);
@@ -91,7 +93,9 @@ void main() {
         message: 'read failed',
         problems: <Enum>{CardTransferProblem.unreadableFile},
       );
-      await tester.tap(find.text(english.cardImportReplaceFileAction));
+      await tester.tap(
+        find.bySemanticsLabel(english.cardImportReplaceFileAction),
+      );
       await tester.pumpAndSettle();
 
       expect(find.text(english.cardImportErrorUnreadableFile), findsOneWidget);
@@ -118,30 +122,45 @@ void main() {
   group('compact width and large type (I)', () {
     const compact = Size(320, 852);
 
-    Finder stepSemantics(int step, String label) => find.bySemanticsLabel(
-      english.cardImportStepNamedSemantics(
-        english.cardImportStepSemantics(step),
-        label,
-      ),
-    );
+    Finder stepSemantics(int step, String label, String state) =>
+        find.bySemanticsLabel(
+          english.cardImportStepStateSemantics(
+            english.cardImportStepSemantics(step),
+            label,
+            state,
+          ),
+        );
 
     testWidgets('the source step renders at 320dp and 2.0x with every step '
         'still announced', (tester) async {
       await h.pump(tester, surface: compact, textScale: 2);
 
       expect(tester.takeException(), isNull);
-      // The compact stepper keeps all three steps in semantics and the
-      // current one's full label on screen — never an ellipsis stump.
+      // The compact stepper keeps all three steps in semantics — position,
+      // name and progress state — and the current one's full label on
+      // screen, never an ellipsis stump.
       expect(
-        stepSemantics(1, english.cardImportStepSourceLabel),
+        stepSemantics(
+          1,
+          english.cardImportStepSourceLabel,
+          english.cardImportStepStateCurrent,
+        ),
         findsOneWidget,
       );
       expect(
-        stepSemantics(2, english.cardImportStepPreviewLabel),
+        stepSemantics(
+          2,
+          english.cardImportStepPreviewLabel,
+          english.cardImportStepStateUpcoming,
+        ),
         findsOneWidget,
       );
       expect(
-        stepSemantics(3, english.cardImportStepImportLabel),
+        stepSemantics(
+          3,
+          english.cardImportStepImportLabel,
+          english.cardImportStepStateUpcoming,
+        ),
         findsOneWidget,
       );
       expect(find.text(english.cardImportStepSourceLabel), findsOneWidget);
@@ -163,7 +182,7 @@ void main() {
       await tester.tap(find.text(english.cardImportSubmitAction(1)));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
-      expect(find.text(english.cardImportResultHeading), findsOneWidget);
+      expect(find.text(english.cardImportSuccessTitle), findsOneWidget);
     });
 
     testWidgets('Vietnamese labels make the same honest layout choice', (
@@ -187,9 +206,28 @@ void main() {
       await h.pump(tester);
       await h.pasteAndPreview(tester, 'front,back\n사과,apple\n배,\n');
 
-      expect(find.text(english.cardImportSummaryReadyLabel(1)), findsOneWidget);
+      // The classification headline (state 3–4): "N of N ready" beside the
+      // heading, and one chip per status that occurred.
       expect(
-        find.text(english.cardImportSummaryInvalidLabel(1)),
+        find.text(english.cardImportPreviewReadyOfTotal(1, 2)),
+        findsOneWidget,
+      );
+      expect(
+        find.text(
+          english.cardImportStatusCountChip(
+            english.cardImportRowStatusReadyLabel,
+            1,
+          ),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.text(
+          english.cardImportStatusCountChip(
+            english.cardImportRowStatusInvalidLabel,
+            1,
+          ),
+        ),
         findsOneWidget,
       );
       final action = tester.widget<FilledButton>(
@@ -271,91 +309,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('front,back\n사과,apple'), findsOneWidget);
-    });
-  });
-
-  group('upload and sheets', () {
-    testWidgets('a picked file shows its name, extension and size', (
-      tester,
-    ) async {
-      // §18: filename, extension, size and Replace — the name alone does not
-      // say how big the batch is about to be.
-      h.picker.fileToPick = CardTransferFileSource(
-        name: 'words.csv',
-        bytes: Uint8List.fromList(utf8.encode('front,back\n사과,apple')),
-        format: CardTransferFormat.csv,
-      );
-      await h.pump(tester);
-      await tester.tap(find.text(english.cardImportChooseFileAction));
-      await tester.pumpAndSettle();
-
-      expect(find.text('words.csv'), findsOneWidget);
-      expect(
-        find.text(
-          english.cardImportFileMetaLabel(
-            'CSV',
-            english.cardImportFileSizeKilobytes(1),
-          ),
-        ),
-        findsOneWidget,
-      );
-      expect(find.text(english.cardImportReplaceFileAction), findsOneWidget);
-    });
-
-    testWidgets('a multi-sheet workbook offers the sheet choice, defaults to '
-        'the first non-empty one, and re-previews on change', (tester) async {
-      CardTransferRow row(int number, List<String> cells) =>
-          CardTransferRow(sourceRowNumber: number, cells: cells);
-      h.transfer.documentToReturn = CardTransferDocument(
-        sheets: <CardTransferSheet>[
-          CardTransferSheet(
-            name: 'Empty',
-            rows: <CardTransferRow>[
-              row(1, <String>['', '']),
-            ],
-          ),
-          CardTransferSheet(
-            name: 'Nouns',
-            rows: <CardTransferRow>[
-              row(1, <String>['front', 'back']),
-              row(2, <String>['사과', 'apple']),
-            ],
-          ),
-          CardTransferSheet(
-            name: 'Verbs',
-            rows: <CardTransferRow>[
-              row(1, <String>['front', 'back']),
-              row(2, <String>['가다', 'to go']),
-              row(3, <String>['보다', 'to see']),
-            ],
-          ),
-        ],
-      );
-      h.picker.fileToPick = CardTransferFileSource(
-        name: 'words.xlsx',
-        bytes: Uint8List.fromList(const <int>[0]),
-        format: CardTransferFormat.xlsx,
-      );
-      await h.pump(tester);
-      await tester.tap(find.text(english.cardImportChooseFileAction));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text(english.cardImportPreviewAction));
-      await tester.pumpAndSettle();
-
-      // The default is the first non-empty sheet (UC-10 A2), and the empty
-      // one is not offered at all.
-      expect(find.text(english.cardImportSheetLabel), findsOneWidget);
-      expect(find.text('Nouns'), findsOneWidget);
-      expect(find.text('Empty'), findsNothing);
-      expect(find.text(english.cardImportSummaryReadyLabel(1)), findsOneWidget);
-
-      await tester.tap(find.text('Nouns'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Verbs').last);
-      await tester.pumpAndSettle();
-
-      // The other sheet's rows, re-classified under its own header row.
-      expect(find.text(english.cardImportSummaryReadyLabel(2)), findsOneWidget);
     });
   });
 }

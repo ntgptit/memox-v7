@@ -1955,6 +1955,7 @@
   "cardImportRowStatusInvalidLabel": "Không hợp lệ",
   "cardImportRowStatusDuplicateExistingLabel": "Đã có trong bộ thẻ",
   "cardImportRowStatusDuplicateInFileLabel": "Trùng trong tệp",
+  "cardImportStatusDuplicateChipLabel": "Trùng lặp",
   "cardImportRowStatusBlankLabel": "Dòng trống",
   "cardImportRowNumberLabel": "Dòng {number}",
   "cardImportContinueAction": "Tiếp tục",
@@ -2167,6 +2168,9 @@
   "@cardImportRowStatusDuplicateInFileLabel": {
       "description": "Row status chip: repeats an earlier row (BR-170)."
   },
+  "@cardImportStatusDuplicateChipLabel": {
+      "description": "Preview summary chip word covering both duplicate kinds; rows spell out existing vs in-file (M4.12 state 4)."
+  },
   "@cardImportRowStatusBlankLabel": {
       "description": "Row status chip: skipped empty row."
   },
@@ -2359,5 +2363,211 @@
           }
       },
       "description": "Screen-reader label of one stepper node: its position sentence plus the step's name."
+  },
+  "cardImportResultsTitle": "Kết quả nhập",
+  "@cardImportResultsTitle": {
+      "description": "App bar title once the wizard is showing an outcome (M4.12 states 6-8)."
+  },
+  "cardImportFileReadyStatus": "Sẵn sàng xem trước",
+  "@cardImportFileReadyStatus": {
+      "description": "Status line on the picked-file summary before parsing (state 1)."
+  },
+  "cardImportFileParsingStatus": "Đang phân tích…",
+  "@cardImportFileParsingStatus": {
+      "description": "Status line on the source summary while the decode runs (state 2)."
+  },
+  "cardImportFileRowsDetected": "Đã nhận {count} dòng",
+  "@cardImportFileRowsDetected": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      },
+      "description": "Status line on the source summary once the document loaded."
+  },
+  "cardImportRemoveFileLabel": "Bỏ tệp",
+  "@cardImportRemoveFileLabel": {
+      "description": "Semantic label and tooltip of the X that clears the picked file."
+  },
+  "cardImportPastedSourceLabel": "Văn bản đã dán",
+  "@cardImportPastedSourceLabel": {
+      "description": "Stands in for a filename when the source is the paste box — the content itself is private and never echoed (BR-173)."
+  },
+  "cardImportParsingFileTitle": "Đang đọc tệp của bạn…",
+  "@cardImportParsingFileTitle": {
+      "description": "Loading panel title while a picked file decodes (state 2)."
+  },
+  "cardImportParsingPasteTitle": "Đang đọc các dòng đã dán…",
+  "@cardImportParsingPasteTitle": {
+      "description": "Loading panel title while pasted rows decode."
+  },
+  "cardImportParsingReassurance": "Chưa có thẻ nào được thêm cho tới khi bạn xác nhận Nhập.",
+  "@cardImportParsingReassurance": {
+      "description": "Reassurance under the parsing loader: preview never writes (BR-171)."
+  },
+  "cardImportParsingAction": "Đang phân tích…",
+  "@cardImportParsingAction": {
+      "description": "Disabled primary-action label while the decode runs (state 2)."
+  },
+  "cardImportPreviewHeading": "2 · Xem trước",
+  "@cardImportPreviewHeading": {
+      "description": "Section heading over the preview block, numbered like the source heading."
+  },
+  "cardImportPreviewReadyOfTotal": "{ready}/{total} sẵn sàng",
+  "@cardImportPreviewReadyOfTotal": {
+      "placeholders": {
+          "ready": {
+              "type": "int"
+          },
+          "total": {
+              "type": "int"
+          }
+      },
+      "description": "Right-aligned readiness line beside the preview heading (state 3)."
+  },
+  "cardImportStatusCountChip": "{label} · {count}",
+  "@cardImportStatusCountChip": {
+      "placeholders": {
+          "label": {
+              "type": "String"
+          },
+          "count": {
+              "type": "int"
+          }
+      },
+      "description": "One status chip: a row-status label and how many rows carry it."
+  },
+  "cardImportEmptyCellLabel": "(trống)",
+  "@cardImportEmptyCellLabel": {
+      "description": "Placeholder for a required cell the row did not fill (state 4)."
+  },
+  "cardImportInfoTagsHint": "Tag nằm chung một ô, phân tách bằng dấu ;",
+  "@cardImportInfoTagsHint": {
+      "description": "Info-panel line stating the tags separator contract (BR-169)."
+  },
+  "cardImportSubmittingTitle": "Đang nhập {count} thẻ…",
+  "@cardImportSubmittingTitle": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      },
+      "description": "Submit panel title while the one transaction runs (state 5)."
+  },
+  "cardImportSubmittingBody": "Đang lưu tất cả thẻ cùng lúc. Đừng đóng ứng dụng.",
+  "@cardImportSubmittingBody": {
+      "description": "Submit panel body: the write is atomic, so it is one save, not a count-up."
+  },
+  "cardImportSuccessTitle": "Nhập hoàn tất",
+  "@cardImportSuccessTitle": {
+      "description": "Success hero title (state 6)."
+  },
+  "cardImportSuccessBody": "Đã thêm {count} thẻ vào {deckName}. Các thẻ đã sẵn sàng để học.",
+  "@cardImportSuccessBody": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          },
+          "deckName": {
+              "type": "String"
+          }
+      },
+      "description": "Success hero body."
+  },
+  "cardImportSkipsTitle": "Đã nhập nhưng có dòng bị bỏ qua",
+  "@cardImportSkipsTitle": {
+      "description": "Warning hero title when rows were left out (state 7)."
+  },
+  "cardImportSkipsBody": "Đã thêm {count} thẻ. Một số dòng đã bị bỏ qua.",
+  "@cardImportSkipsBody": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      },
+      "description": "Warning hero body — never claims every skip was a validation issue."
+  },
+  "cardImportZeroTitle": "Không có thẻ mới được thêm",
+  "@cardImportZeroTitle": {
+      "description": "Outcome title when the transaction succeeded but wrote nothing — not a failure."
+  },
+  "cardImportZeroBody": "Mọi dòng đều trùng với thẻ đã có trong bộ thẻ nên đã bị bỏ qua.",
+  "@cardImportZeroBody": {
+      "description": "Zero-added body: the recheck inside the transaction found only duplicates (BR-170)."
+  },
+  "cardImportFailureTitle": "Không thể hoàn tất nhập",
+  "@cardImportFailureTitle": {
+      "description": "Failure hero title (state 8)."
+  },
+  "cardImportFailureBody": "Không có thẻ nào được thêm. Nguồn của bạn không thay đổi và bộ thẻ không bị ảnh hưởng.",
+  "@cardImportFailureBody": {
+      "description": "Failure hero body — says source, not file, because the source may be pasted rows."
+  },
+  "cardImportAddedRowLabel": "Đã thêm",
+  "@cardImportAddedRowLabel": {
+      "description": "Result summary row: cards the transaction wrote (CardImportResult.imported)."
+  },
+  "cardImportInvalidSkippedRowLabel": "Dòng không hợp lệ đã bỏ qua",
+  "@cardImportInvalidSkippedRowLabel": {
+      "description": "Result summary row, shown only when the preview counted invalid rows."
+  },
+  "cardImportDuplicatesSkippedRowLabel": "Thẻ trùng đã bỏ qua",
+  "@cardImportDuplicatesSkippedRowLabel": {
+      "description": "Result summary row, from the transaction's own recheck (BR-170)."
+  },
+  "cardImportBlankIgnoredRowLabel": "Dòng trống đã bỏ qua",
+  "@cardImportBlankIgnoredRowLabel": {
+      "description": "Neutral result summary row — blank rows are skipped by design (BR-169)."
+  },
+  "cardImportFixInvalidHint": "Sửa các dòng không hợp lệ trong nguồn rồi nhập lại để thêm chúng.",
+  "@cardImportFixInvalidHint": {
+      "description": "Helper under a with-skips result when invalid rows exist."
+  },
+  "cardImportDuplicatesHint": "Thẻ trùng đã bị bỏ qua theo thiết lập nhập.",
+  "@cardImportDuplicatesHint": {
+      "description": "Helper when only duplicates were skipped — duplicates are a setting, not a broken file."
+  },
+  "cardImportBackToPreviewAction": "Quay lại xem trước",
+  "@cardImportBackToPreviewAction": {
+      "description": "Secondary action on a commit failure: back to the intact draft (state 8)."
+  },
+  "cardImportStepStateSemantics": "{step} · {label} · {state}",
+  "@cardImportStepStateSemantics": {
+      "placeholders": {
+          "step": {
+              "type": "String"
+          },
+          "label": {
+              "type": "String"
+          },
+          "state": {
+              "type": "String"
+          }
+      },
+      "description": "Screen-reader label of one stepper node: position, name and progress state."
+  },
+  "cardImportStepStateCompleted": "đã hoàn thành",
+  "@cardImportStepStateCompleted": {
+      "description": "Stepper node state read to a screen reader."
+  },
+  "cardImportStepStateCurrent": "hiện tại",
+  "@cardImportStepStateCurrent": {
+      "description": "Stepper node state read to a screen reader."
+  },
+  "cardImportStepStateUpcoming": "sắp tới",
+  "@cardImportStepStateUpcoming": {
+      "description": "Stepper node state read to a screen reader."
+  },
+  "cardImportSourceStatusLine": "{meta} · {status}",
+  "@cardImportSourceStatusLine": {
+      "placeholders": {
+          "meta": {
+              "type": "String"
+          },
+          "status": {
+              "type": "String"
+          }
+      },
+      "description": "Source summary status line: the extension-and-size pair plus the phase status (ready / parsing / rows detected)."
   }
 }

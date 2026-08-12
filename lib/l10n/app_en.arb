@@ -2139,6 +2139,10 @@
   "@cardImportRowStatusBlankLabel": {
       "description": "Row status chip: skipped empty row."
   },
+  "cardImportStatusDuplicateChipLabel": "Duplicate",
+  "@cardImportStatusDuplicateChipLabel": {
+      "description": "Preview summary chip word covering both duplicate kinds; rows spell out existing vs in-file (M4.12 state 4)."
+  },
   "cardImportRowNumberLabel": "Row {number}",
   "@cardImportRowNumberLabel": {
       "placeholders": {
@@ -2359,5 +2363,211 @@
           }
       },
       "description": "Screen-reader label of one stepper node: its position sentence plus the step's name."
+  },
+  "cardImportResultsTitle": "Import results",
+  "@cardImportResultsTitle": {
+      "description": "App bar title once the wizard is showing an outcome (M4.12 states 6-8)."
+  },
+  "cardImportFileReadyStatus": "Ready to preview",
+  "@cardImportFileReadyStatus": {
+      "description": "Status line on the picked-file summary before parsing (state 1)."
+  },
+  "cardImportFileParsingStatus": "Parsing…",
+  "@cardImportFileParsingStatus": {
+      "description": "Status line on the source summary while the decode runs (state 2)."
+  },
+  "cardImportFileRowsDetected": "{count} rows detected",
+  "@cardImportFileRowsDetected": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      },
+      "description": "Status line on the source summary once the document loaded."
+  },
+  "cardImportRemoveFileLabel": "Remove file",
+  "@cardImportRemoveFileLabel": {
+      "description": "Semantic label and tooltip of the X that clears the picked file."
+  },
+  "cardImportPastedSourceLabel": "Pasted text",
+  "@cardImportPastedSourceLabel": {
+      "description": "Stands in for a filename when the source is the paste box — the content itself is private and never echoed (BR-173)."
+  },
+  "cardImportParsingFileTitle": "Reading your file…",
+  "@cardImportParsingFileTitle": {
+      "description": "Loading panel title while a picked file decodes (state 2)."
+  },
+  "cardImportParsingPasteTitle": "Reading your rows…",
+  "@cardImportParsingPasteTitle": {
+      "description": "Loading panel title while pasted rows decode."
+  },
+  "cardImportParsingReassurance": "No cards will be added until you confirm Import.",
+  "@cardImportParsingReassurance": {
+      "description": "Reassurance under the parsing loader: preview never writes (BR-171)."
+  },
+  "cardImportParsingAction": "Parsing…",
+  "@cardImportParsingAction": {
+      "description": "Disabled primary-action label while the decode runs (state 2)."
+  },
+  "cardImportPreviewHeading": "2 · Preview",
+  "@cardImportPreviewHeading": {
+      "description": "Section heading over the preview block, numbered like the source heading."
+  },
+  "cardImportPreviewReadyOfTotal": "{ready} of {total} ready",
+  "@cardImportPreviewReadyOfTotal": {
+      "placeholders": {
+          "ready": {
+              "type": "int"
+          },
+          "total": {
+              "type": "int"
+          }
+      },
+      "description": "Right-aligned readiness line beside the preview heading (state 3)."
+  },
+  "cardImportStatusCountChip": "{label} · {count}",
+  "@cardImportStatusCountChip": {
+      "placeholders": {
+          "label": {
+              "type": "String"
+          },
+          "count": {
+              "type": "int"
+          }
+      },
+      "description": "One status chip: a row-status label and how many rows carry it."
+  },
+  "cardImportEmptyCellLabel": "(empty)",
+  "@cardImportEmptyCellLabel": {
+      "description": "Placeholder for a required cell the row did not fill (state 4)."
+  },
+  "cardImportInfoTagsHint": "Tags share one cell, separated by ;",
+  "@cardImportInfoTagsHint": {
+      "description": "Info-panel line stating the tags separator contract (BR-169)."
+  },
+  "cardImportSubmittingTitle": "Importing {count} cards…",
+  "@cardImportSubmittingTitle": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      },
+      "description": "Submit panel title while the one transaction runs (state 5)."
+  },
+  "cardImportSubmittingBody": "Saving all cards together. Don't close the app.",
+  "@cardImportSubmittingBody": {
+      "description": "Submit panel body: the write is atomic, so it is one save, not a count-up."
+  },
+  "cardImportSuccessTitle": "Import complete",
+  "@cardImportSuccessTitle": {
+      "description": "Success hero title (state 6)."
+  },
+  "cardImportSuccessBody": "Added {count} cards to {deckName}. They are ready to study.",
+  "@cardImportSuccessBody": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          },
+          "deckName": {
+              "type": "String"
+          }
+      },
+      "description": "Success hero body."
+  },
+  "cardImportSkipsTitle": "Imported with skips",
+  "@cardImportSkipsTitle": {
+      "description": "Warning hero title when rows were left out (state 7)."
+  },
+  "cardImportSkipsBody": "Added {count} cards. Some rows were skipped.",
+  "@cardImportSkipsBody": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      },
+      "description": "Warning hero body — never claims every skip was a validation issue."
+  },
+  "cardImportZeroTitle": "No new cards added",
+  "@cardImportZeroTitle": {
+      "description": "Outcome title when the transaction succeeded but wrote nothing — not a failure."
+  },
+  "cardImportZeroBody": "All rows matched cards already in the deck and were skipped.",
+  "@cardImportZeroBody": {
+      "description": "Zero-added body: the recheck inside the transaction found only duplicates (BR-170)."
+  },
+  "cardImportFailureTitle": "Import didn't finish",
+  "@cardImportFailureTitle": {
+      "description": "Failure hero title (state 8)."
+  },
+  "cardImportFailureBody": "No cards were added. Your source is unchanged and your deck is untouched.",
+  "@cardImportFailureBody": {
+      "description": "Failure hero body — says source, not file, because the source may be pasted rows."
+  },
+  "cardImportAddedRowLabel": "Added",
+  "@cardImportAddedRowLabel": {
+      "description": "Result summary row: cards the transaction wrote (CardImportResult.imported)."
+  },
+  "cardImportInvalidSkippedRowLabel": "Invalid rows skipped",
+  "@cardImportInvalidSkippedRowLabel": {
+      "description": "Result summary row, shown only when the preview counted invalid rows."
+  },
+  "cardImportDuplicatesSkippedRowLabel": "Duplicates skipped",
+  "@cardImportDuplicatesSkippedRowLabel": {
+      "description": "Result summary row, from the transaction's own recheck (BR-170)."
+  },
+  "cardImportBlankIgnoredRowLabel": "Blank rows ignored",
+  "@cardImportBlankIgnoredRowLabel": {
+      "description": "Neutral result summary row — blank rows are skipped by design (BR-169)."
+  },
+  "cardImportFixInvalidHint": "Fix the invalid rows in your source and import again to add them.",
+  "@cardImportFixInvalidHint": {
+      "description": "Helper under a with-skips result when invalid rows exist."
+  },
+  "cardImportDuplicatesHint": "Duplicates were skipped by your import settings.",
+  "@cardImportDuplicatesHint": {
+      "description": "Helper when only duplicates were skipped — duplicates are a setting, not a broken file."
+  },
+  "cardImportBackToPreviewAction": "Back to preview",
+  "@cardImportBackToPreviewAction": {
+      "description": "Secondary action on a commit failure: back to the intact draft (state 8)."
+  },
+  "cardImportStepStateSemantics": "{step} · {label} · {state}",
+  "@cardImportStepStateSemantics": {
+      "placeholders": {
+          "step": {
+              "type": "String"
+          },
+          "label": {
+              "type": "String"
+          },
+          "state": {
+              "type": "String"
+          }
+      },
+      "description": "Screen-reader label of one stepper node: position, name and progress state."
+  },
+  "cardImportStepStateCompleted": "completed",
+  "@cardImportStepStateCompleted": {
+      "description": "Stepper node state read to a screen reader."
+  },
+  "cardImportStepStateCurrent": "current",
+  "@cardImportStepStateCurrent": {
+      "description": "Stepper node state read to a screen reader."
+  },
+  "cardImportStepStateUpcoming": "upcoming",
+  "@cardImportStepStateUpcoming": {
+      "description": "Stepper node state read to a screen reader."
+  },
+  "cardImportSourceStatusLine": "{meta} · {status}",
+  "@cardImportSourceStatusLine": {
+      "placeholders": {
+          "meta": {
+              "type": "String"
+          },
+          "status": {
+              "type": "String"
+          }
+      },
+      "description": "Source summary status line: the extension-and-size pair plus the phase status (ready / parsing / rows detected)."
   }
 }

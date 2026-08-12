@@ -7,8 +7,8 @@
 | **Scope** | Màn import: ba bước, entry point, back/close, error/result states. Ngoài phạm vi: luật nghiệp vụ (BR-168…BR-173), luồng (UC-10), export |
 | **Source of truth for** | Anatomy màn import · copy các panel · hành vi Back/Close/draft · responsive/a11y contract của wizard |
 | **Depends on** | `../use-cases.md` (UC-10), `../business-rules.md` (BR-168…BR-173), `m4-11-card-management.md` |
-| **Updated by task** | M99.19 |
-| **Last updated** | 2026-08-12 |
+| **Updated by task** | M99.19 · M99.19a |
+| **Last updated** | 2026-08-13 |
 
 Concept tham chiếu là một mockup mobile (dark) với app bar, breadcrumb, stepper
 ba bước, chip deck đích, hai lựa chọn nguồn, panel thông tin và sticky action.
@@ -53,41 +53,60 @@ token hiện có. Ba điểm concept bị sửa có chủ đích:
   (CSV or TSV rows). Hai cột khi đủ rộng; wrap thành một cột khi hẹp/textScale
   lớn. Selected: viền primary + glyph + `Semantics(selected: true)` — không chỉ
   màu, không fill đậm.
-- Upload: copy `Choose a file to preview` + nút `Choose file`; khi có file:
-  tên, đuôi, kích thước (nếu có) và action Replace.
+- Upload: copy `Choose a file to preview` + nút `Choose file`. Khi có file,
+  cả panel chọn được thay bằng **một card tóm tắt gọn** (state 1): icon file ·
+  tên (tối đa 2 dòng, ellipsis) · `CSV · 1 KB · Ready to preview`; tap card =
+  Replace (semantics nói rõ), X ở đuôi = Remove — Remove là một mutation của
+  draft qua controller, không phải ẩn UI. Picker hủy giữ nguyên file cũ (I5).
 - Paste: ô nhập nhiều dòng, placeholder CSV/TSV ngắn (dữ liệu mẫu, không phải
   dữ liệu người dùng).
 - Panel thông tin: title `Each row creates one card`; body `Front and Back are
   required. You will choose the matching columns in the next step.` kèm một
-  dòng nghiệp vụ `Front stores the Korean term. Back stores its meaning.`
-- Primary: `Preview import`, disabled khi chưa có nguồn.
+  dòng nghiệp vụ `Front stores the Korean term. Back stores its meaning.` và
+  một dòng tags `Tags share one cell, separated by ;`. Không ghi cứng
+  "Column 1 = front".
+- Primary: `Preview import`, disabled khi chưa có nguồn — một primary duy nhất.
 
 ### W3 — Bước Preview
 
-- Tóm tắt nguồn; selector sheet (chỉ XLSX nhiều sheet, mặc định sheet không
-  rỗng đầu tiên); toggle `First row contains headers` (mặc định bật; tắt thì
-  cột hiện `Column A/B/C…`).
+- Tóm tắt nguồn là **một dòng context gọn** ở đầu bước (cùng component với
+  card tóm tắt của W2, không có Replace/Remove): tên file hoặc `Pasted text` ·
+  meta · trạng thái decode (`Parsing…` → `N rows detected`). Không lặp lại cả
+  bộ chọn nguồn, không echo nội dung paste (BR-173).
+- Selector sheet (chỉ XLSX nhiều sheet, mặc định sheet không rỗng đầu tiên);
+  toggle `First row contains headers` (mặc định bật; tắt thì cột hiện
+  `Column A/B/C…`).
 - Mapping list: mỗi cột nguồn một hàng → dropdown đích (Front/Back/Example/
   Hint/Pronunciation/Tags/Ignore); một đích không nhận hai cột; Front và Back
   bắt buộc.
-- Summary counts: Total rows · Ready · Duplicates · Invalid · Blank skipped.
+- Kết quả phân loại: heading `2 · Preview` với `N of N ready` bên phải, dưới
+  là **chip theo trạng thái** (icon + chữ + số, không chỉ màu): `Ready` luôn
+  hiện, `Invalid`/`Duplicate`/`Blank` chỉ khi > 0. Hai loại duplicate chung
+  một chip; hàng chi tiết mới phân biệt `Already in deck` / `Duplicate in
+  file`.
 - Toggle `Include duplicates`, mặc định tắt.
-- Preview 10–20 hàng đầu theo số hàng nguồn, mỗi hàng: trạng thái (valid /
-  invalid / duplicate existing / duplicate in file / blank) + lý do có kiểu khi
-  invalid; nội dung dài hiển thị tóm tắt, không phải editor.
+- Preview 10–20 hàng đầu theo số hàng nguồn, mỗi hàng: số hàng nguồn · Front ·
+  Back (hai cột, stack ở 320dp/textScale lớn) · glyph trạng thái; hàng invalid
+  ghi **lý do có kiểu** từ validation hiện có (`Back can't be empty`…), không
+  bao giờ chỉ "Missing term/meaning"; ô trống hiện `(empty)` nghiêng. Nội dung
+  dài ellipsis — đây là checkpoint, không phải editor.
 - Primary: `Continue`, disabled khi Front/Back chưa map, mapping trùng đích,
   hoặc số sẽ ghi bằng 0. Secondary: `Back`.
 
 ### W4 — Bước Import
 
-- Confirm summary: deck đích · số sẽ ghi · số trùng bỏ/ghi · số invalid loại ·
-  số hàng trống bỏ qua.
-- Primary: `Import N cards`; khi đang ghi: mọi action gây submit lần hai bị
-  khoá, hiện tiến trình; không hiện fake per-row progress — commit là atomic.
-- Lỗi commit: giữ nguyên preview/mapping/nguồn, hiện `Try again`; không lộ
-  exception/SQL/path.
-- Thành công: Imported · Duplicates skipped · Invalid rows skipped · tên deck;
-  actions `View cards` và `Import another file` (I7).
+- Confirm summary (giữ nguyên, không bỏ bước xác nhận): deck đích · số sẽ ghi
+  · số trùng bỏ/ghi · số invalid loại · số hàng trống bỏ qua.
+- Primary: `Import N cards`; khi đang ghi, panel confirm được thay bằng
+  **panel submit** (state 5): một loader indeterminate duy nhất ·
+  `Importing N cards…` · `Saving all cards together. Don't close the app.`
+  Không bao giờ hiện `29 of 47`, phần trăm hay progress bar determinate —
+  commit là một transaction atomic, không có tiến trình per-row trung thực.
+  Primary đổi nhãn `Importing…` và disabled, **không** mang spinner thứ hai.
+- Khi đang ghi: Close, Android Back, Back và submit lần hai đều bị khoá cho
+  tới khi transaction kết thúc (thành công hay thất bại).
+- Mọi kết cục (thành công / skips / zero-added / lỗi commit) là **outcome
+  mode** của cùng route — xem W8, không phải state của riêng bước 3.
 
 ### W5 — Back, Close, draft
 
@@ -113,3 +132,51 @@ Kiểm ở 320/360/412, textScale 1.0/2.0, light/dark, keyboard mở ở Paste,
 tiếng Việt dài, tên file dài, header cột dài, tên deck dài. Không overflow;
 icon-only có semantic label; lỗi không chỉ biểu thị bằng màu; sticky bar không
 che nội dung; scroll tới được mọi hàng mapping.
+
+### W8 — Tám trạng thái trình bày (M99.19a)
+
+Màn import có một **phase trình bày dẫn xuất** (enum, tính từ step + trạng
+thái parse + trạng thái commit, không bao giờ persist): `source → parsing →
+preview → confirm → submitting → completed / completedWithSkips /
+noCardsAdded / commitFailure`. Body, stepper và sticky bar cùng đọc một phase
+— ba nơi không bao giờ lệch nhau.
+
+**Progressive disclosure.** Mỗi trạng thái chỉ thay phần thay đổi: nguồn đã
+chọn co lại thành một dòng context (không lặp bộ chọn), panel parsing giữ
+nguyên khung khi rows tới, panel submit thay panel confirm tại chỗ.
+
+1. **Source ready** — card tóm tắt file (W2), step Source mang check.
+2. **Parsing** — panel loading `Reading your file…` / `Reading your rows…` +
+   `No cards will be added until you confirm Import.`; primary disabled
+   `Parsing…`; chưa có gì được ghi.
+3. **Preview all-valid** — heading + `N of N ready` + chip `Ready · N`
+   (W3); Back + Continue — **không có** import trực tiếp từ Preview.
+4. **Preview mixed** — thêm chip Invalid/Duplicate/Blank; hàng lỗi mang lý do
+   có kiểu; luật disable Continue giữ nguyên (W3).
+5. **Submitting** — panel submit + khoá điều hướng (W4).
+6. **Complete** — outcome mode: app bar đổi title `Import results`;
+   breadcrumb, chip ngữ cảnh và stepper **ẩn**; hero `Import complete` +
+   `Added N cards to {deck}. They are ready to study.`; card tóm tắt hàng
+   `Added N` (từ kết quả transaction); actions `Import another file`
+   (secondary) + `View cards` (primary).
+7. **Complete with skips** — khi preview có invalid > 0 **hoặc** transaction
+   báo duplicates skipped > 0 (hàng blank **không** kích hoạt mặt cảnh báo —
+   bỏ blank là by design, BR-169). Hero `Imported with skips`; hàng tóm tắt
+   theo nguyên nhân, chỉ hiện khi > 0; hint theo nguyên nhân (fix invalid /
+   duplicates theo setting). Imported + duplicates-skipped lấy từ transaction,
+   invalid + blank lấy từ preview — hai nguồn số liệu không trộn.
+   - Edge: transaction thành công nhưng imported = 0 → mặt `No new cards
+     added` (info, không phải lỗi).
+8. **Commit failure** — outcome layout: hero `Import didn't finish` + `No
+   cards were added. Your source is unchanged and your deck is untouched.`
+   ("source", không phải "file" — áp cho cả paste) + chi tiết an toàn có
+   kiểu; actions `Back to preview` (secondary, xoá trạng thái commit, giữ
+   nguyên toàn bộ draft) + `Try again` (primary, submit lại đúng plan đã giữ —
+   không re-pick, không re-parse, không transaction chồng nhau).
+
+**Stepper contract.** Ba mặt phân biệt: completed (check) / current (số, cặp
+primary) / future (số, container nhạt). Check là **earned**: Source khi đã có
+nguồn; Preview chỉ khi document đã load + mapping đủ + importable > 0.
+Connector tô khi bước trước nó completed. Outcome mode ẩn cả stepper.
+Semantics đọc `bước · tên · trạng thái` ở mọi presentation; không tap-jump
+(I2 giữ nguyên).
