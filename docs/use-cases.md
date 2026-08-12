@@ -7,8 +7,8 @@
 | **Scope** | Must-have của MVP. Ngoài phạm vi: should/nice-to-have, và mọi thứ ở mục "Điều đã cố ý không đặc tả" |
 | **Source of truth for** | UC-xx · main/alternative/error flow · UI state matrix của từng màn |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md` |
-| **Updated by task** | BR-163 — `content_type` do hệ thống tự duy trì: UC-03/UC-04/UC-08/UC-09 bỏ reset thủ công, phần tử con cuối rời đi thì sub-deck tự về `unset` |
-| **Last updated** | 2026-08-11 |
+| **Updated by task** | UC-03 A4 — xác nhận đúng chế độ đang chạy là no-op (BR-12) |
+| **Last updated** | 2026-08-12 |
 
 Chỉ đặc tả must-have. Should-have và nice-to-have viết khi tới lượt — đặc tả
 trước những thứ có thể bị cắt là lãng phí.
@@ -170,6 +170,10 @@ chọn: Create deck (BR-59). Việc tạo phần tử con nằm ở UC-08.
   khiến người dùng tưởng tính năng không tồn tại (BR-13).
 - **A2 — Sửa deck con:** không có phần chọn chế độ (BR-06).
 - **A3 — Huỷ xác nhận xoá:** không xảy ra gì.
+- **A4 — Xác nhận đúng chế độ deck đang chạy:** thao tác được chấp nhận và không
+  làm gì người dùng thấy được (BR-12). Không seed lại cây, không đóng phiên đang
+  mở — mất một phiên đang học cho một thay đổi bằng không là cái giá không ai
+  đồng ý trả.
 
 **Error flows:**
 - **E1 — Deck đã bị xoá ở nơi khác:** thao tác không thành, quay về danh sách với

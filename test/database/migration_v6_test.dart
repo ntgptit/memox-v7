@@ -200,7 +200,7 @@ void main() {
     },
   );
 
-  test('a v1 database upgraded end to end lands on v6', () async {
+  test('a v1 database upgraded end to end still gets the v6 step', () async {
     final verifier = SchemaVerifier(GeneratedHelper());
     final schema = await verifier.schemaAt(1);
     schema.rawDatabase.execute(
@@ -218,7 +218,10 @@ void main() {
     addTearDown(db.close);
     await verifier.migrateAndValidate(db, db.schemaVersion);
 
-    expect(db.schemaVersion, 6);
+    // Not pinned to a number: this test is about the content-type normalise
+    // surviving every later step, and asserting the head version here would
+    // make the next migration fail in a file that has nothing to do with it.
+    expect(db.schemaVersion, GeneratedHelper.versions.last);
     expect(await contentTypeOf(db, 'legacy'), 'deck');
     expect(
       await contentTypeOf(db, 'legacy-child'),

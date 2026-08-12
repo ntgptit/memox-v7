@@ -31,7 +31,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.open() : super(openAppDatabaseConnection());
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -136,6 +136,20 @@ class AppDatabase extends _$AppDatabase {
       // Last, so it runs on top of whatever the v1…v5 steps just produced.
       if (from < 6) {
         await _upgradeToV6();
+      }
+
+      // v6 -> v7 (M99.16): data only again — the backfill for BR-13's lock.
+      //
+      // Nothing before this release ever wrote `decks.first_answered_at`, so
+      // every root reads as unlocked no matter how much of it has been learned.
+      // Now that `completeLearning` stamps it, only *future* first completions
+      // would lock a tree: a library learned last month would stay changeable
+      // for good, and invariant 30 would fire on it. Both are fixed here rather
+      // than lived with.
+      //
+      // Last, so it runs on top of whatever the v1…v6 steps just produced.
+      if (from < 7) {
+        await _upgradeToV7();
       }
     },
 

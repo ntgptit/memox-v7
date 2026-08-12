@@ -138,6 +138,9 @@ void main() {
     expect(root['scheduler_type'], 'eight_box');
     expect(root['scheduler_generation'], 1);
     expect(root['first_answered_at'], isNull);
+    // Not even `updated_at`: the operation returns before the write, so this
+    // deck does not jump to the top of the Recent sort for a change of nothing.
+    expect(root['updated_at'], 0);
     expect((await stateOf('c1'))['scheduler_type'], 'eight_box');
   });
 
@@ -298,6 +301,25 @@ void main() {
       expect(session['status'], 'invalidated');
       expect(session['end_reason'], 'scheduler_reset');
       expect(session['ended_at'], isNotNull);
+    });
+
+    test('a no-op change leaves the session open', () async {
+      // Confirming the row that was already selected is not a change, and it
+      // must not cost the user the session they are in the middle of. Without
+      // the short-circuit this re-seeds the tree and kills the session for a
+      // difference of nothing.
+      await unlockedTree();
+      final sessionId = await openSession();
+
+      await h.deckRepository.changeUnlockedScheduler(
+        rootDeckId: 'root',
+        schedulerType: SchedulerType.eightBox,
+      );
+
+      final session = await rowOf(
+        "SELECT * FROM study_sessions WHERE id = '$sessionId'",
+      );
+      expect(session['status'], 'in_progress');
     });
 
     test('a refused change leaves the session open', () async {

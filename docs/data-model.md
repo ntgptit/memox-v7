@@ -7,8 +7,8 @@
 | **Scope** | Bảng, cột, index, quan hệ, query bất biến. Ngoài phạm vi: SQL runtime (`lib/core/database/`, chưa tồn tại) |
 | **Source of truth for** | Schema · cột và kiểu · index · query bất biến · thứ tự migration |
 | **Depends on** | `document-conventions.md`, `architecture.md`, `business-rules.md` |
-| **Updated by task** | Bất biến 30 (khoá scheduler theo BR-13) và ai ghi `first_answered_at`; ma trận `end_reason` nhận thêm BR-164 |
-| **Last updated** | 2026-08-11 |
+| **Updated by task** | Bất biến 30 (khoá scheduler theo BR-13) và ai ghi `first_answered_at` — kể cả backfill v7; ma trận `end_reason` nhận thêm BR-164 |
+| **Last updated** | 2026-08-12 |
 
 Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; SQL thật nằm ở
 `lib/core/database/tables/`, hiện ở **schema v4**.
@@ -108,7 +108,7 @@ deck_templates (asset JSON ở MVP)
 | `scheduler_config` | TEXT NULL | JSON tham số ghi đè của thuật toán. Cùng quy tắc NULL |
 | `study_config` | TEXT NULL | JSON tùy chọn học ghi đè mặc định toàn app (BR-147). NULL = theo mặc định. Chỉ trên root |
 | `scheduler_generation` | INTEGER NULL | bắt đầu từ 1, +1 mỗi lần reset (BR-40). Chỉ trên root |
-| `first_answered_at` | DATETIME NULL | NULL = chưa thẻ nào hoàn tất chuỗi học mới ở generation hiện tại → scheduler mở khoá (BR-12). Được đặt bởi chính lần hoàn tất đầu tiên, cùng transaction (BR-13, BR-144); chỉ Reset đưa về NULL (BR-44) |
+| `first_answered_at` | DATETIME NULL | NULL = chưa thẻ nào hoàn tất chuỗi học mới ở generation hiện tại → scheduler mở khoá (BR-12). Được đặt bởi chính lần hoàn tất đầu tiên, cùng transaction (BR-13, BR-144); chỉ Reset đưa về NULL (BR-44). Cột có từ v1 nhưng không bản nào ghi nó cho tới khi BR-13 có code, nên migration v7 điền lại bằng `MIN(learned_at)` của cây cho root đã học xong ít nhất một thẻ |
 | `source_template_id` | TEXT NULL | NULL = deck tự tạo (BR-34) |
 | `source_template_version` | INTEGER NULL | version tại thời điểm sao chép |
 | `created_at` | DATETIME NOT NULL | UTC |

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/deck/domain/entities/deck_entity.dart';
+import 'package:memox/features/deck/domain/failures/deck_conflict_failure.dart';
 import 'package:memox/features/deck/domain/models/deck_content_type_model.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 import 'package:memox/features/deck/presentation/widgets/overlays/deck_scheduler_change_widget.dart';
@@ -127,6 +129,44 @@ void main() {
       await pumpSheet(tester);
 
       expect(find.textContaining('will be closed'), findsOneWidget);
+    });
+
+    testWidgets('a lock landing mid-sheet routes to Reset (UC-03 E4)', (
+      tester,
+    ) async {
+      // The race: the sheet was drawn against an unlocked deck and a card
+      // finished the chain before the user confirmed. Retrying can only fail
+      // the same way, so the confirm gives way to the one action that still
+      // works — an error line on its own would make this the only state with no
+      // way forward.
+      final repository = await pumpSheet(tester);
+      repository.writeFailure = const ConflictFailure(
+        message: 'locked',
+        reason: DeckConflictReason.schedulerLocked,
+      );
+
+      await tester.tap(find.text('Change study mode').last);
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('already studied this deck'), findsOneWidget);
+      expect(find.text('Reset learning progress'), findsOneWidget);
+      expect(find.text('Change study mode'), findsNothing);
+    });
+
+    testWidgets('another refusal keeps the confirm, so a retry is possible', (
+      tester,
+    ) async {
+      // Only the lock is a dead end. A database error is worth trying again,
+      // and swapping the button for Reset there would offer a destructive
+      // operation as the answer to a transient one.
+      final repository = await pumpSheet(tester);
+      repository.writeFailure = const DatabaseFailure(message: 'disk');
+
+      await tester.tap(find.text('Change study mode').last);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Reset learning progress'), findsNothing);
+      expect(find.text('Change study mode'), findsOneWidget);
     });
 
     testWidgets('cancelling writes nothing', (tester) async {

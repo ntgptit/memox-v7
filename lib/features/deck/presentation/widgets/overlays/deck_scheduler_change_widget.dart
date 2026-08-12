@@ -3,11 +3,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/error/failure.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../domain/entities/deck_entity.dart';
+import '../../../domain/failures/deck_conflict_failure.dart';
 import '../../../domain/models/scheduler_type_model.dart';
 import '../../controllers/deck_write_controller.dart';
 import '../../states/deck_submit_state.dart';
@@ -97,22 +99,7 @@ class _SchedulerSheetState extends ConsumerState<_SchedulerSheet> {
         onChanged: (_) {},
       ),
       const SizedBox(height: AppSpacing.xl),
-      MxActionButton(
-        label: l10n.deckResetProgressAction,
-        variant: MxActionButtonVariant.secondary,
-        onPressed: () {
-          widget.onClose();
-          unawaited(
-            showDeckResetProgressConfirm(
-              context,
-              deck: widget.deck,
-              // Locked means a card finished the chain, so there is something
-              // to lose and BR-50's second list is the true one.
-              hasLearnedCards: true,
-            ),
-          );
-        },
-      ),
+      _resetAction(context),
       const SizedBox(height: AppSpacing.sm),
       MxActionButton(
         label: l10n.commonCancelAction,
@@ -121,6 +108,35 @@ class _SchedulerSheetState extends ConsumerState<_SchedulerSheet> {
       ),
     ];
   }
+
+  /// The way through a lock: Reset learning progress (BR-44).
+  ///
+  /// Shared by the locked panel and by the refusal below it, because the two are
+  /// the same dead end reached a moment apart — one drawn from a deck that was
+  /// already locked, the other from a deck that locked while the sheet was open.
+  /// Offering the route in the first case and only an error line in the second
+  /// would make the race the one state with no way forward.
+  Widget _resetAction(BuildContext context) => MxActionButton(
+    label: context.l10n.deckResetProgressAction,
+    variant: MxActionButtonVariant.secondary,
+    onPressed: () {
+      widget.onClose();
+      unawaited(
+        showDeckResetProgressConfirm(
+          context,
+          deck: widget.deck,
+          // Locked means a card finished the chain, so there is something to
+          // lose and BR-50's second list is the true one.
+          hasLearnedCards: true,
+        ),
+      );
+    },
+  );
+
+  /// Whether the last refusal was the lock landing mid-sheet (UC-03 E4).
+  bool _isLockedRefusal(Failure? failure) =>
+      failure is ConflictFailure &&
+      failure.reason == DeckConflictReason.schedulerLocked;
 
   List<Widget> _unlocked(BuildContext context) {
     final l10n = context.l10n;
@@ -164,14 +180,21 @@ class _SchedulerSheetState extends ConsumerState<_SchedulerSheet> {
         ),
       ],
       const SizedBox(height: AppSpacing.xl),
-      MxActionButton(
-        label: l10n.deckSchedulerChangeConfirm,
-        isLoading: submit.isSubmitting,
-        onPressed: submit.isSubmitting
-            ? null
-            : () =>
-                  ref.read(provider.notifier).submit(schedulerType: _scheduler),
-      ),
+      // UC-03 E4: the deck locked between drawing this sheet and confirming it.
+      // Retrying can only fail the same way, so the primary action becomes the
+      // one that still works rather than a button that is now a trap.
+      if (_isLockedRefusal(submit.failure))
+        _resetAction(context)
+      else
+        MxActionButton(
+          label: l10n.deckSchedulerChangeConfirm,
+          isLoading: submit.isSubmitting,
+          onPressed: submit.isSubmitting
+              ? null
+              : () => ref
+                    .read(provider.notifier)
+                    .submit(schedulerType: _scheduler),
+        ),
       const SizedBox(height: AppSpacing.sm),
       MxActionButton(
         label: l10n.commonCancelAction,

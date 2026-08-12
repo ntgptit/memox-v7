@@ -125,6 +125,16 @@ mixin _SchedulerWriteOperations implements DeckRepository {
         );
       }
 
+      // **Choosing the mode the deck already runs is a no-op, and has to be
+      // one.** Everything below re-seeds the tree and kills every open session;
+      // doing that because the user confirmed the row that was already selected
+      // would destroy a session for no change at all. The comparison is on the
+      // stored string rather than the parsed enum so that an unknown stored
+      // value can never equal a known choice.
+      if (deck.schedulerType == schedulerType.dbValue) {
+        return;
+      }
+
       final generation =
           deck.schedulerGeneration ?? _initialSchedulerGeneration;
 

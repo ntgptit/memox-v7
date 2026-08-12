@@ -86,6 +86,46 @@ extension _AppDatabaseMigrations on AppDatabase {
     );
   }
 
+  /// The v6 → v7 upgrade: data only, no DDL (BR-13).
+  ///
+  /// `decks.first_answered_at` has existed since v1 and nothing ever wrote it,
+  /// so the lock BR-13 describes had no stored form. Roots whose cards finished
+  /// the learning chain long before this release therefore read as unlocked,
+  /// which both offers a scheduler change the rule forbids and makes invariant
+  /// 30 fire on a database the user cannot repair.
+  ///
+  /// **The earliest `learned_at` in the tree, not the moment of the upgrade.**
+  /// The column records *when* the tree was first answered, and it is read by
+  /// nothing but the null check today — but a truthful value costs one
+  /// aggregate, and stamping every legacy root with the same migration
+  /// timestamp would be a fact this database cannot later tell apart from a
+  /// real one.
+  ///
+  /// **Only roots with nothing stamped and something learned.** A root already
+  /// carrying a value keeps it, and a root whose tree has never completed a card
+  /// stays unlocked — which is the state BR-12 says is still changeable.
+  ///
+  /// `updated_at` is left alone for the same reason as [_upgradeToV6]: a
+  /// migration is not a user edit.
+  Future<void> _upgradeToV7() async {
+    await customStatement(
+      'UPDATE decks SET first_answered_at = ('
+      '  SELECT MIN(s.learned_at) FROM card_study_states s'
+      '  JOIN cards c ON c.id = s.card_id'
+      '  JOIN decks d ON d.id = c.deck_id'
+      '  WHERE d.root_deck_id = decks.id AND s.learned_at IS NOT NULL'
+      ') '
+      'WHERE parent_deck_id IS NULL '
+      '  AND first_answered_at IS NULL '
+      '  AND EXISTS ('
+      '    SELECT 1 FROM card_study_states s'
+      '    JOIN cards c ON c.id = s.card_id'
+      '    JOIN decks d ON d.id = c.deck_id'
+      '    WHERE d.root_deck_id = decks.id AND s.learned_at IS NOT NULL'
+      '  )',
+    );
+  }
+
   /// The v4 → v5 upgrade.
   ///
   /// Two of these steps CANNOT be an `ALTER TABLE`: SQLite has no way to change
