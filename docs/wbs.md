@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.16 (Scheduler lifecycle — khoá tự động và đổi chế độ khi chưa khoá) |
+| **Updated by task** | M99.17 (Card management: manual entry nhỏ, import/export là hướng bulk-management sau MVP) |
 | **Last updated** | 2026-08-12 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -33,7 +33,7 @@ AD / UC (xem `business-rules.md`).
 | M7 · CI/CD (Phase 19) | todo | Bắt đầu được ngay sau M2. Job Android + Web, chưa có iOS (AD-04) |
 | M8 · Release Android (Phase 16–18, 20–22) | todo | |
 | M9 · Backend Spring Boot + auth + sync (Phase 10) | todo | Sau khi M8 ổn định |
-| M99 · Adhoc | — | Task chủ dự án giao trực tiếp, ngoài chuỗi phụ thuộc. M99.1 **done** — `master-flow.md`. M99.2 **done** — Deck và Card thành bản tham chiếu (AD-17). M99.3 **done** — refactor toàn bộ IT theo Testing Pyramid: 133/133 kịch bản có coverage host, `integration_test/` còn 8 kịch bản `DEVICE-E2E`, và CI lần đầu có cổng tự động cho tính đúng đắn nghiệp vụ. M99.5 **done** — golden harness chưa bao giờ nạp `NotoSansKR`, nên mọi chữ Hàn trong mọi golden là ô `NO GLYPH`; đã nạp đủ ba face CJK, bổ sung Nhật/Trung, và fixture demo trở lại tiếng Hàn. M99.7 **done** — bottom navigation lên bốn branch (AD-19); Progress/Settings là placeholder presentation-only, hai feature này **chưa** hoàn thành. M99.8 **done** — nhãn tab đầu đổi Decks/Bộ thẻ → Library/Thư viện; branch nội bộ và title màn hình vẫn là Decks |
+| M99 · Adhoc | — | Task chủ dự án giao trực tiếp, ngoài chuỗi phụ thuộc. M99.1 **done** — `master-flow.md`. M99.2 **done** — Deck và Card thành bản tham chiếu (AD-17). M99.3 **done** — refactor toàn bộ IT theo Testing Pyramid: 133/133 kịch bản có coverage host, `integration_test/` còn 8 kịch bản `DEVICE-E2E`, và CI lần đầu có cổng tự động cho tính đúng đắn nghiệp vụ. M99.5 **done** — golden harness chưa bao giờ nạp `NotoSansKR`, nên mọi chữ Hàn trong mọi golden là ô `NO GLYPH`; đã nạp đủ ba face CJK, bổ sung Nhật/Trung, và fixture demo trở lại tiếng Hàn. M99.7 **done** — bottom navigation lên bốn branch (AD-19); Progress/Settings là placeholder presentation-only, hai feature này **chưa** hoàn thành. M99.8 **done** — nhãn tab đầu đổi Decks/Bộ thẻ → Library/Thư viện; branch nội bộ và title màn hình vẫn là Decks. M99.17 **done** — đồng bộ Card Management với manual entry khối lượng nhỏ và chốt import/export là hướng bulk-management sau MVP. |
 
 ---
 
@@ -8774,6 +8774,32 @@ thế không đổi bố cục.
 - **Tests required:** repository trên SQLite thật cho cả hai operation, bất biến
   hai chiều, widget test ba trạng thái (mở khoá / khoá / deck con)
 - **Checklist phases:** 11, 14.2, 14.4
+
+### M99.17 · Card management theo đường manual nhỏ và bulk import/export
+
+- **Status:** **done** — docs-only; `dod_check.sh` xanh; không chạy emulator.
+- **Goal:** Đồng bộ tài liệu với Card List đã triển khai và định hướng sản phẩm:
+  manual create là luồng khối lượng nhỏ; import/export là đường quản lý hàng loạt
+  chính sau MVP.
+- **Scope:** App-bar `+` thay extended FAB; Back một dòng là summary và tap tile
+  mở editor để xem đủ; search/filter/sort giữ vai trò tìm card; N1 được nâng từ
+  Nice-to-have thành planned post-MVP bulk-management.
+- **Out of scope:** code/UI hiện tại; format Excel/CSV; column mapping;
+  validation, duplicate policy, atomicity/partial import, rollback, batch-result
+  UX và export schema — các contract này chỉ được chốt khi đặc tả UC của N1.
+- **Editable documents:** `docs/wireframes/m4-11-card-management.md`,
+  `docs/use-cases.md`, `docs/wbs.md`
+- **Output:** docs không còn yêu cầu extended FAB hoặc coi import/export là
+  Nice-to-have; không dựng control chết trước khi N1 có UC.
+- **Acceptance criteria:**
+  - [x] D3/D4 phản ánh search/filter/sort thật và app-bar `+` hiện tại.
+  - [x] D12 chốt Back một dòng + editor là detail/edit surface.
+  - [x] N1 ghi đúng vai trò bulk-management sau MVP nhưng không phát minh contract.
+  - [x] Chỉ ba tài liệu trong scope thay đổi; attachment không được stage.
+  - [x] Doc verification xanh.
+- **Dependencies:** none
+- **Tests required:** `.claude/skills/flutter-workflow/scripts/dod_check.sh`
+- **Checklist phases:** 1.4, 14.1
 
 ## Blocker
 
