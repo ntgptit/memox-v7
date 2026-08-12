@@ -2,8 +2,17 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/database/app_database_provider.dart';
 import '../../core/time/clock_provider.dart';
+import '../../features/card/data/datasources/card_import_file_data_source.dart';
+import '../../features/card/data/repositories/card_import_repository_impl.dart';
+import '../../features/card/data/repositories/card_import_source_repository_impl.dart';
+import '../../features/card/data/repositories/card_transfer_repository_impl.dart';
 import '../../features/card/data/repositories/card_repository_impl.dart';
+import '../../features/card/di/card_import_repository_provider.dart';
+import '../../features/card/di/card_transfer_repository_provider.dart';
 import '../../features/card/di/card_repository_provider.dart';
+import '../../features/card/domain/repositories/card_import_repository.dart';
+import '../../features/card/domain/repositories/card_import_source_repository.dart';
+import '../../features/card/domain/repositories/card_transfer_repository.dart';
 import '../../features/card/domain/repositories/card_repository.dart';
 import '../../features/deck/di/deck_repository_provider.dart';
 import '../../features/deck/di/deck_template_provider.dart';
@@ -68,6 +77,22 @@ CardRepository cardRepositoryBinding(Ref ref) => CardRepositoryImpl(
   clock: ref.watch(clockProvider),
 );
 
+/// Card transfer's three seams, bound apart on purpose (M99.19): the picker
+/// is the one platform dialog, the decoder is pure bytes-to-rows, and the
+/// commit is pure database — so no test ever fakes a half it does not call,
+/// and the commit implementation can prove it never sees a byte of CSV.
+CardImportRepository cardImportRepositoryBinding(Ref ref) =>
+    CardImportRepositoryImpl(
+      ref.watch(appDatabaseProvider),
+      clock: ref.watch(clockProvider),
+    );
+
+CardTransferRepository cardTransferRepositoryBinding(Ref ref) =>
+    const CardTransferRepositoryImpl();
+
+CardImportSourceRepository cardImportSourceRepositoryBinding(Ref ref) =>
+    const CardImportSourceRepositoryImpl(picker: CardImportFileDataSource());
+
 /// The template-copy path (AD-07). Its own DAO, for the reason stated on
 /// `DeckTemplateDao`: it writes decks, cards and study states in one
 /// transaction, which is a different job from the reads a deck list rebuild
@@ -113,6 +138,11 @@ Future<List<DeckTemplate>> deckTemplateCatalogBinding(Ref ref) =>
 List<Override> repositoryBindingOverrides() => <Override>[
   deckRepositoryProvider.overrideWith(deckRepositoryBinding),
   cardRepositoryProvider.overrideWith(cardRepositoryBinding),
+  cardImportRepositoryProvider.overrideWith(cardImportRepositoryBinding),
+  cardTransferRepositoryProvider.overrideWith(cardTransferRepositoryBinding),
+  cardImportSourceRepositoryProvider.overrideWith(
+    cardImportSourceRepositoryBinding,
+  ),
   deckTemplateRepositoryProvider.overrideWith(deckTemplateRepositoryBinding),
   deckTemplateCatalogProvider.overrideWith(deckTemplateCatalogBinding),
   studyRepositoryProvider.overrideWith(studyRepositoryBinding),

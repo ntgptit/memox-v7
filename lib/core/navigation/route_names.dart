@@ -63,6 +63,11 @@ abstract final class RouteNames {
   /// GoRouter requires each route name to be unique, and create and edit are two
   /// routes (`new` and `:cardId/edit`) under the same parent (M4.11).
   static const String cardEditorEdit = 'cardEditorEdit';
+
+  /// The card import wizard (UC-10). A child of [cardList], so it stays in
+  /// the Decks branch and leaving it lands back on the list whose stream
+  /// already shows what was imported (M4.12).
+  static const String cardImport = 'cardImport';
 }
 
 /// Names of the path parameters routes carry.

@@ -8,8 +8,10 @@ import '../../../domain/entities/deck_entity.dart';
 import '../../../domain/models/deck_content_type_model.dart';
 import 'deck_actions_widget.dart';
 
-/// What an `unset` deck can be asked to create.
-enum _ChildKind { subDeck, card }
+/// What an `unset` deck can be asked to create — or to be filled from.
+/// Import is a third door, not a third child kind: it leads to the card
+/// wizard, and the first written card settles the type there (BR-172).
+enum _ChildKind { subDeck, card, importCards }
 
 /// Opens the right create flow for [parent], asking first when the deck could
 /// still become either kind (BR-61).
@@ -49,7 +51,9 @@ Future<void> showCreateChildForm(
   }
 
   context.goNamed(
-    RouteNames.cardEditor,
+    kind == _ChildKind.importCards
+        ? RouteNames.cardImport
+        : RouteNames.cardEditor,
     pathParameters: <String, String>{RoutePathParams.deckId: parent.id},
   );
 }
@@ -69,6 +73,16 @@ Future<_ChildKind?> _askChildKind(BuildContext context) =>
             label: sheetContext.l10n.deckCreateCardAction,
             icon: Icons.style_outlined,
             onPressed: () => Navigator.of(sheetContext).pop(_ChildKind.card),
+          ),
+          // Import as the bulk way in (UC-10, M4.12 W6). Only the `unset`
+          // sheet offers it here: a `card` deck redirects to its card list,
+          // whose overflow menu owns the action, and a `deck` deck can never
+          // hold cards (BR-64).
+          MxActionSheetAction(
+            label: sheetContext.l10n.cardImportEntryAction,
+            icon: Icons.upload_file_outlined,
+            onPressed: () =>
+                Navigator.of(sheetContext).pop(_ChildKind.importCards),
           ),
         ],
       ),

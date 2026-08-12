@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/navigation/route_names.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/theme_context_extension.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
@@ -87,6 +88,13 @@ class CardListScreen extends ConsumerWidget {
     );
   }
 
+  /// The bulk entry (UC-10): manual create stays the small-volume path (D4),
+  /// import is where a whole file goes.
+  void _openImport(BuildContext context) => context.goNamed(
+    RouteNames.cardImport,
+    pathParameters: <String, String>{RoutePathParams.deckId: deckId},
+  );
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cards = ref.watch(cardListProvider(deckId));
@@ -146,6 +154,33 @@ class CardListScreen extends ConsumerWidget {
             semanticLabel: context.l10n.cardListNewAction,
             tooltip: context.l10n.cardListNewAction,
             onPressed: () => _openEditor(context),
+          ),
+        // Import lives in the overflow, not as a third icon (M4.12 W6): the
+        // bar already carries Select and Add at 320px, and bulk input is an
+        // occasional action. Hidden during selection for the same reason Add
+        // is — it leaves the screen.
+        if (!selection.isSelecting)
+          PopupMenuButton<void>(
+            icon: const Icon(Icons.more_vert),
+            tooltip: context.l10n.cardSelectionMoreLabel,
+            itemBuilder: (menuContext) => <PopupMenuEntry<void>>[
+              PopupMenuItem<void>(
+                onTap: () => _openImport(context),
+                child: Row(
+                  children: <Widget>[
+                    Icon(
+                      Icons.upload_file_outlined,
+                      color: menuContext.colors.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Text(
+                      menuContext.l10n.cardImportEntryAction,
+                      style: menuContext.texts.bodyMedium,
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
       ],
       // Back leaves selection first (UC-04 A6): a user who selected twenty
@@ -249,26 +284,35 @@ class CardListScreen extends ConsumerWidget {
     if (search.trim().isNotEmpty) return _NoSearchMatch(query: search.trim());
     if (filter != CardListFilter.all) return const _NoMatch();
 
-    return _Empty(onAdd: () => _openEditor(context));
+    return _Empty(
+      onAdd: () => _openEditor(context),
+      onImport: () => _openImport(context),
+    );
   }
 }
 
 class _Empty extends StatelessWidget {
-  const _Empty({required this.onAdd});
+  const _Empty({required this.onAdd, required this.onImport});
 
   final VoidCallback onAdd;
+  final VoidCallback onImport;
 
   @override
   Widget build(BuildContext context) {
     // The empty state carries its own "add first card" CTA; the app-bar add
     // action stays too, so there is one consistent place to add whatever the
-    // body shows — the same pairing the deck list's empty level uses.
+    // body shows — the same pairing the deck list's empty level uses. Import
+    // rides along as the secondary way in (M4.12 W6): a deep link or a stale
+    // route can land here, and a whole file should not have to start from a
+    // hand-typed first card.
     return MxEmptyState(
       icon: Icons.style_outlined,
       title: context.l10n.cardListEmptyTitle,
       message: context.l10n.cardListEmptyMessage,
       actionLabel: context.l10n.cardListEmptyAction,
       onAction: onAdd,
+      secondaryActionLabel: context.l10n.cardImportEntryAction,
+      onSecondaryAction: onImport,
     );
   }
 }
