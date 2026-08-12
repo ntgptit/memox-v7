@@ -79,7 +79,10 @@ def fresh():
 
 def good(c):
     c.executescript("""
-    INSERT INTO decks VALUES('r','Root',NULL,'r','deck',NULL,'eight_box',1,NULL,1,NULL,NULL,NULL,NULL,'t','t');
+    -- `first_answered_at` set, because `c1` below carries a `learned_at`.
+    -- A learned card under an unlocked root is invariant 30's violation
+    -- (BR-13), so the fixture that claims to be valid has to be locked.
+    INSERT INTO decks VALUES('r','Root',NULL,'r','deck',NULL,'eight_box',1,NULL,1,NULL,'t',NULL,NULL,'t','t');
     INSERT INTO decks VALUES('a','A','r','r','deck',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'t','t');
     INSERT INTO decks VALUES('b','B','a','r','card',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'t','t');
     INSERT INTO cards VALUES('c1','b','f','k','t','t');
@@ -98,6 +101,7 @@ BAD = {
  3: "INSERT INTO decks VALUES('z','Z','b','r','deck',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'t','t');",
  4: "INSERT INTO cards VALUES('ca','a','f','k','t','t');",
  5: "UPDATE decks SET content_type='card' WHERE id='r';",
+ 30: "UPDATE decks SET first_answered_at=NULL WHERE id='r';",
  6: "UPDATE decks SET root_deck_id='wrong' WHERE id='b';",
  7: "UPDATE decks SET root_deck_id='nope' WHERE id='r';",
  8: "UPDATE decks SET parent_deck_id='b' WHERE id='a';",

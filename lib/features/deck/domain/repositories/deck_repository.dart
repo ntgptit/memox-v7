@@ -126,6 +126,43 @@ abstract interface class DeckRepository {
     required SchedulerType schedulerType,
   });
 
+  /// Changes a root deck's scheduler while it is still unlocked (BR-12, UC-03).
+  ///
+  /// **Deliberately not folded into [resetLearningProgress], and the difference
+  /// is a generation.** Both rewrite the scheduler and reinitialise every study
+  /// state in the tree. Only reset bumps `scheduler_generation` — because only
+  /// reset is throwing a generation of learning away. A deck nobody has finished
+  /// a card in has nothing to throw away, so BR-12 lets the choice change
+  /// outright and UC-03's postcondition says the generation must **not** move.
+  /// Routing this through reset would spend a generation on nothing, mark the
+  /// old (empty) history as belonging to a superseded cycle, and make the user
+  /// confirm a destructive warning about progress that does not exist.
+  ///
+  /// All of it inside a single BR-47 transaction, and every check is re-read
+  /// there rather than trusted from the caller:
+  ///
+  /// * refused for anything but a root — the scheduler lives on the root
+  ///   (BR-05, BR-06);
+  /// * refused once `first_answered_at` is set — that is BR-13's lock, and
+  ///   Reset is the only way past it (BR-44);
+  /// * refused for `SchedulerType.unknown`, which has no `dbValue` to write;
+  /// * every card in the tree is reinitialised onto the new scheduler at the
+  ///   **current** generation (BR-14);
+  /// * every open session of the tree ends `invalidated` — its queue was dealt
+  ///   against the old algorithm and cannot be finished under the new one.
+  ///
+  /// Choosing the scheduler the deck already runs is accepted and does nothing
+  /// the user can observe. It is still one transaction: re-seeding the tree onto
+  /// the same algorithm is a no-op in content, and refusing would make the UI
+  /// responsible for comparing before submitting.
+  ///
+  /// Content, tags, media and `study_answers` are untouched — the same list
+  /// reset keeps (BR-41, BR-43).
+  Future<void> changeUnlockedScheduler({
+    required String rootDeckId,
+    required SchedulerType schedulerType,
+  });
+
   /// Moves [deckId] and its whole subtree under [targetParentDeckId]
   /// (UC-09, BR-69…BR-74), rewriting `root_deck_id` for every node
   /// atomically — BR-71. Refused when the deepest resulting level would

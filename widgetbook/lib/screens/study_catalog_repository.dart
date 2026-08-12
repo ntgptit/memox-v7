@@ -232,6 +232,7 @@ class StudyCatalogRepository implements StudyRepository {
   Future<int> invalidateSessionsForRoot({
     required String rootDeckId,
     required DateTime endedAt,
+    required StudySessionEndReason reason,
   }) async => 0;
 
   // --- Writes: no-ops, so a control can be pressed without a database. ---

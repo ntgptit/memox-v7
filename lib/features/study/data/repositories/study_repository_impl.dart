@@ -222,40 +222,6 @@ final class StudyRepositoryImpl
   }
 
   @override
-  Future<void> completeLearning({
-    required String cardId,
-    required DateTime learnedAt,
-    required DateTime dueAt,
-    int? box,
-    int? intervalDays,
-  }) => _dao.runInTransaction(() async {
-    final state = await _dao.studyStateOf(cardId);
-    if (state == null) {
-      throw const NotFoundFailure(message: 'Card has no study state');
-    }
-
-    // Both columns in one statement. A card holding `learned_at` without a
-    // schedule, or a schedule without `learned_at`, is exactly what invariants
-    // 24 and 28 exist to catch — and writing them separately is the only way to
-    // produce one.
-    final isEightBox =
-        SchedulerType.fromDbValue(state.schedulerType) ==
-        SchedulerType.eightBox;
-
-    await _dao.updateStudyState(
-      cardId,
-      CardStudyStatesCompanion(
-        learnedAt: Value<DateTime?>(learnedAt),
-        dueAt: Value<DateTime?>(dueAt),
-        currentBox: Value<int?>(isEightBox ? (box ?? kInitialBox) : null),
-        intervalDays: Value<int?>(
-          isEightBox ? null : (intervalDays ?? kInitialIntervalDays),
-        ),
-      ),
-    );
-  });
-
-  @override
   Future<void> advanceStage({
     required String sessionId,
     required StudyMode mode,
@@ -328,6 +294,7 @@ final class StudyRepositoryImpl
   Future<int> invalidateSessionsForRoot({
     required String rootDeckId,
     required DateTime endedAt,
+    required StudySessionEndReason reason,
   }) => _dao.runInTransaction(() async {
     final open = await _dao.openSessionsForRoot(rootDeckId);
 
@@ -336,13 +303,11 @@ final class StudyRepositoryImpl
         session.id,
         StudySessionsCompanion(
           status: Value<String>(StudySessionStatus.invalidated.dbValue),
-          // `scheduler_reset`, not `stale_generation`: the difference is who
-          // noticed. This is the reset closing its own sessions; the other is a
-          // session discovering afterwards that it had been outrun (BR-83,
-          // BR-84).
-          endReason: Value<String?>(
-            StudySessionEndReason.schedulerReset.dbValue,
-          ),
+          // Never `stale_generation`: the difference is who noticed. This is
+          // the deck operation closing its own sessions; the other is a session
+          // discovering afterwards that it had been outrun (BR-83, BR-84). Which
+          // deck operation it was comes from the caller — see the contract.
+          endReason: Value<String?>(reason.dbValue),
           endedAt: Value<DateTime?>(endedAt),
         ),
       );

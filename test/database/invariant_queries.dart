@@ -1,4 +1,11 @@
-/// The 16 invariant queries, copied verbatim from `data-model.md`.
+/// The 17 invariant queries this suite executes, copied verbatim from
+/// `data-model.md`.
+///
+/// **A subset of the document's, and its numbering, not a fresh sequence.**
+/// The document specifies thirty; the ones here are the ones with an executable
+/// fixture. The keys keep the document's ids so a failure names the rule rather
+/// than a position in this map — which is why `Q29` sits next to `Q2` and `Q30`
+/// next to `Q11`, each beside the rule it is about rather than at the end.
 ///
 /// Frozen source. Nothing here may be reworded to make a test pass — the
 /// document is the specification, and a query edited to suit a fixture stops
@@ -83,6 +90,14 @@ const Map<String, String> invariantQueries = <String, String>{
   'Q11': // Root deck is missing its scheduler (BR-11)
       'SELECT d.id FROM decks d WHERE d.parent_deck_id IS NULL '
       'AND (d.scheduler_type IS NULL OR d.scheduler_generation IS NULL)',
+
+  'Q30': // A tree has learned cards but its scheduler is not locked (BR-13)
+      'SELECT root.id FROM decks root WHERE root.parent_deck_id IS NULL '
+      'AND root.first_answered_at IS NULL '
+      'AND EXISTS (SELECT 1 FROM card_study_states s '
+      'JOIN cards c ON c.id = s.card_id '
+      'JOIN decks d ON d.id = c.deck_id '
+      'WHERE d.root_deck_id = root.id AND s.learned_at IS NOT NULL)',
 
   // ---- Session ------------------------------------------------------------
   'Q12': // Invalid status × end_reason (BR-79…BR-85)

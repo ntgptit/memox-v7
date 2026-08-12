@@ -168,6 +168,14 @@ abstract interface class StudyRepository {
   /// stage that skipped it for missing data does not count (BR-114). Deriving
   /// this from "reached the last stage in the sequence" instead is what would
   /// have frozen every card without an `example` forever.
+  ///
+  /// **It also locks the root deck's scheduler** (BR-13), in the same
+  /// transaction and with [learnedAt] as the timestamp. The first card to finish
+  /// the chain is the event BR-13 names, and no other operation in the app was
+  /// writing `first_answered_at` — so the column stayed NULL forever and BR-12
+  /// read every deck as still free to change algorithm. Later cards change
+  /// nothing: the write is conditional on the column still being NULL, so the
+  /// stamp records when the tree was *first* learned rather than most recently.
   Future<void> completeLearning({
     required String cardId,
     required DateTime learnedAt,
@@ -243,10 +251,18 @@ abstract interface class StudyRepository {
   /// those sessions here rather than leaving them to fail on the next answer is
   /// what stops the app offering to continue something that cannot continue.
   ///
+  /// **[reason] is the caller's to state, never this method's to infer.** Two
+  /// operations close sessions this way — Reset, and the unlocked scheduler
+  /// change of BR-12 — and only the caller knows which event happened. The same
+  /// rule BR-76 and BR-131 apply to `kind` and `outcome_reason`: a label that
+  /// is derived can be derived wrongly, and history written under the wrong one
+  /// cannot be recomputed later.
+  ///
   /// Returns how many were closed.
   Future<int> invalidateSessionsForRoot({
     required String rootDeckId,
     required DateTime endedAt,
+    required StudySessionEndReason reason,
   });
 
   /// Closes a session with a [status] and [reason] the matrix allows.

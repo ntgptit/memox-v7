@@ -7,8 +7,8 @@
 | **Scope** | Luật nghiệp vụ, validation rule, state machine, edge case của phạm vi MVP. Ngoài phạm vi: quyết định kiến trúc (`architecture.md`), hình dạng dữ liệu (`data-model.md`), luồng người dùng (`use-cases.md`) |
 | **Source of truth for** | BR-xx · validation rule · entity state machine · edge case |
 | **Depends on** | `document-conventions.md`, `product.md`, `architecture.md` |
-| **Updated by task** | BR-162 — hero tách bốn tập rời nhau Overdue/Due today/New/Scheduled (lưới 2×2, cộng đúng bằng tổng thẻ); BR-161 thêm tham chiếu |
-| **Last updated** | 2026-08-11 |
+| **Updated by task** | BR-164 mới — đổi scheduler khi chưa khoá phải đóng session đang mở; BR-12 và BR-13 nói rõ ai ghi khoá, khi nào, và rằng chọn lại đúng chế độ cũ là no-op |
+| **Last updated** | 2026-08-12 |
 
 Format tuân theo `document-conventions.md` §6.2. Từ khoá MUST / SHOULD / MAY
 theo §3. Prose **không** chứa từ khoá là giải thích, không phải rule (§9).
@@ -131,8 +131,8 @@ Giá trị khởi tạo của study state theo scheduler:
 | ID | Status | Rule | Enforced by | Related |
 |---|---|---|---|---|
 | BR-11 | active | Root deck MUST chọn một scheduler khi tạo: `eight_box` hoặc `sm2`. MUST NOT có mặc định ngầm bỏ qua bước chọn. | domain + invariant Q11 | AD-06, UC-02 |
-| BR-12 | active | Scheduler, version và config MAY đổi trực tiếp chừng nào root deck chưa có lượt học nào ở generation hiện tại (`first_answered_at IS NULL`). | domain | AD-06, UC-03 |
-| BR-13 | active | Sau khi thẻ đầu tiên **hoàn tất chuỗi học mới** (BR-144), scheduler, version và config MUST bị khoá. Đổi MUST đi qua Reset learning progress (BR-44). | domain | AD-06, UC-03, BR-144 |
+| BR-12 | active | Scheduler, version và config MAY đổi trực tiếp chừng nào root deck chưa có lượt học nào ở generation hiện tại (`first_answered_at IS NULL`). Đây là thao tác **riêng**, MUST NOT đi qua Reset: `scheduler_generation` MUST giữ nguyên (UC-03). Điều kiện mở khoá MUST được đọc lại bên trong transaction ghi, không tin trạng thái màn hình. Chọn đúng scheduler deck đang chạy MUST là no-op: MUST NOT seed lại cây (BR-14) và MUST NOT đóng session đang mở (BR-164). | repository | AD-06, UC-03, BR-14, BR-164 |
+| BR-13 | active | Sau khi thẻ đầu tiên **hoàn tất chuỗi học mới** (BR-144), scheduler, version và config MUST bị khoá. Việc khoá — đặt `first_answered_at` trên root — MUST xảy ra trong **cùng transaction** với chính lần hoàn tất đó, và MUST NOT ghi đè dấu của thẻ hoàn tất đầu tiên. Đổi MUST đi qua Reset learning progress (BR-44). | repository + invariant Q30 | AD-06, UC-03, UC-05, BR-144 |
 | BR-14 | active | Đổi scheduler khi chưa khoá MUST khởi tạo lại study state của toàn bộ card trong cây theo scheduler mới, trong một transaction. | repository | UC-03 |
 | BR-73 | active | MUST NOT tự động chuyển đổi study state giữa hai scheduler. | domain | AD-06, UC-09 |
 | BR-74 | active | Di chuyển subtree sang root có scheduler hoặc generation không tương thích MUST bị chặn, hoặc MUST yêu cầu người dùng reset tường minh. | domain | AD-06, UC-09 |
@@ -339,6 +339,7 @@ phải lặp mấy lần mới nhớ — thứ cần để đánh giá chất l�
 | BR-81 | active | Hoàn thành toàn bộ queue MUST cho `completed`, `end_reason` NULL. | repository | UC-05 |
 | BR-82 | active | Người dùng chủ động thoát MUST cho `abandoned`, `end_reason = user_exit`. | repository | UC-05 |
 | BR-83 | active | Reset xảy ra khi session đang mở MUST cho `invalidated`, `end_reason = scheduler_reset`. | repository | UC-07 |
+| BR-164 | active | Đổi scheduler khi chưa khoá (BR-12) xảy ra lúc session đang mở MUST cho session đó `invalidated`, trong **cùng** transaction đổi scheduler. MUST NOT dùng `user_exit` — người dùng không thoát phiên — và MUST NOT để phiên cũ chạy tiếp: hàng đợi của nó được chia theo thuật toán cũ, còn generation không đổi nên chốt chặn BR-84 sẽ cho mọi lượt của nó đi qua. MUST NOT bắt người dùng chạy thêm một Reset thủ công để dọn. | repository | BR-12, BR-14, BR-83, UC-03 |
 | BR-84 | active | Session thuộc generation cũ cố ghi lượt học MUST bị từ chối ghi, và MUST chuyển `invalidated`, `end_reason = stale_generation`. | repository | AD-09, UC-05 |
 | BR-85 | active | Lỗi không thể tiếp tục MUST cho `failed`, `end_reason = persistence_error`. | repository | UC-05 |
 | BR-86 | active | Các lượt học đã ghi thành công trước khi session kết thúc bất thường MUST được giữ, ở mọi trạng thái kết thúc. | repository | UC-05 |

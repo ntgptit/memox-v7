@@ -273,3 +273,28 @@ INNER JOIN card_study_states s ON s.card_id = c.id
 WHERE s.learned_at IS NOT NULL AND s.due_at <= :now
 GROUP BY d.root_deck_id
 ORDER BY d.root_deck_id ASC;
+
+-- Locks the root's scheduler the first time a card in its tree finishes the
+-- learning chain (BR-13, BR-144).
+--
+-- **One statement, and every clause in it is load-bearing.**
+--
+-- `first_answered_at IS NULL` in the WHERE is what makes this idempotent and
+-- what stops the second card overwriting the first card's timestamp. Reading
+-- the column and then deciding in Dart would be the same race with two round
+-- trips: two cards finishing in one session would both read NULL.
+--
+-- The root is resolved through `root_deck_id`. The coalesce-the-parent shortcut
+-- BR-57 bans returns the level-2 deck from the third level down.
+--
+-- `updated_at` is deliberately untouched. Learning a card is not an edit to the
+-- deck, and bumping it would jump the deck to the top of Recent for something
+-- the user did inside it rather than to it.
+lockRootSchedulerIfUnlocked:
+UPDATE decks SET first_answered_at = :firstAnsweredAt
+WHERE id = (
+    SELECT d.root_deck_id FROM cards c
+    INNER JOIN decks d ON d.id = c.deck_id
+    WHERE c.id = :cardId
+  )
+  AND first_answered_at IS NULL;

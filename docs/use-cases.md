@@ -7,8 +7,8 @@
 | **Scope** | Must-have của MVP. Ngoài phạm vi: should/nice-to-have, và mọi thứ ở mục "Điều đã cố ý không đặc tả" |
 | **Source of truth for** | UC-xx · main/alternative/error flow · UI state matrix của từng màn |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md` |
-| **Updated by task** | BR-163 — `content_type` do hệ thống tự duy trì: UC-03/UC-04/UC-08/UC-09 bỏ reset thủ công, phần tử con cuối rời đi thì sub-deck tự về `unset` |
-| **Last updated** | 2026-08-11 |
+| **Updated by task** | UC-03 A4 — xác nhận đúng chế độ đang chạy là no-op (BR-12) |
+| **Last updated** | 2026-08-12 |
 
 Chỉ đặc tả must-have. Should-have và nice-to-have viết khi tới lượt — đặc tả
 trước những thứ có thể bị cắt là lãng phí.
@@ -151,10 +151,12 @@ chọn: Create deck (BR-59). Việc tạo phần tử con nằm ở UC-08.
    (`first_answered_at IS NULL`, BR-12).
 2. Người dùng chọn chế độ khác.
 3. Hệ thống cảnh báo study state của **toàn bộ card trong cây** sẽ được khởi tạo
-   lại theo chế độ mới (BR-14).
+   lại theo chế độ mới (BR-14), và phiên học đang mở sẽ bị đóng (BR-164). Đây
+   **không** phải Reset learning progress: không có generation nào bị tiêu, không
+   có lịch sử nào bị bỏ, nên cảnh báo này MUST NOT dùng giọng phá huỷ của UC-07.
 4. Người dùng xác nhận.
-5. Hệ thống đổi scheduler **và** khởi tạo lại study state toàn cây — trong một
-   transaction.
+5. Hệ thống đổi scheduler, khởi tạo lại study state toàn cây, **và** đóng mọi
+   phiên đang mở của cây — trong một transaction (BR-14, BR-164).
 
 **Main flow (xoá):**
 1. Hệ thống hỏi xác nhận, nêu rõ số deck con và số card sẽ mất (BR-04).
@@ -168,6 +170,10 @@ chọn: Create deck (BR-59). Việc tạo phần tử con nằm ở UC-08.
   khiến người dùng tưởng tính năng không tồn tại (BR-13).
 - **A2 — Sửa deck con:** không có phần chọn chế độ (BR-06).
 - **A3 — Huỷ xác nhận xoá:** không xảy ra gì.
+- **A4 — Xác nhận đúng chế độ deck đang chạy:** thao tác được chấp nhận và không
+  làm gì người dùng thấy được (BR-12). Không seed lại cây, không đóng phiên đang
+  mở — mất một phiên đang học cho một thay đổi bằng không là cái giá không ai
+  đồng ý trả.
 
 **Error flows:**
 - **E1 — Deck đã bị xoá ở nơi khác:** thao tác không thành, quay về danh sách với
@@ -176,16 +182,22 @@ chọn: Create deck (BR-59). Việc tạo phần tử con nằm ở UC-08.
   scheduler cũ và study state cũ.
 - **E3 — Xoá thất bại:** hiện lỗi; deck còn nguyên vẹn, và `content_type` của
   deck cha cũng không đổi — cả hai nằm trong một transaction (BR-163).
+- **E4 — Scheduler bị khoá trong lúc bảng chọn đang mở:** người dùng học xong một
+  thẻ ở màn khác giữa lúc bảng chọn mở. Repository đọc lại `first_answered_at`
+  **bên trong** transaction (BR-13) và từ chối; màn hình hiện lý do và lối đi tới
+  Reset. Trạng thái vẽ trên màn hình MUST NOT là thứ quyết định thao tác có hợp lệ
+  hay không.
 
 **Postconditions:**
 - Sau đổi chế độ: `scheduler_type` mới, mọi study state trong cây khởi tạo lại,
-  `scheduler_generation` **không đổi** (chưa có gì để reset).
+  `scheduler_generation` **không đổi** (chưa có gì để reset), `first_answered_at`
+  vẫn NULL, và không còn phiên `in_progress` nào của cây (BR-164).
 - Sau xoá: không còn deck con, card, study state, history hay session mồ côi.
 - Sau xoá một deck con: nếu deck cha là **sub-deck** và vừa mất phần tử con cuối
   cùng, `content_type` của nó tự về `unset` trong cùng transaction (BR-163). Deck
   cha là root thì giữ `deck` (BR-58).
 
-**Business rules:** BR-01, BR-03, BR-04, BR-06, BR-12, BR-13, BR-14, BR-163
+**Business rules:** BR-01, BR-03, BR-04, BR-06, BR-12, BR-13, BR-14, BR-163, BR-164
 **UI states:** loaded · submitting · error
 
 ---
@@ -359,7 +371,10 @@ do người dùng chọn và cập nhật lịch. Chúng không bao giờ trộn
   generation.
 - Mỗi lượt đánh giá có đúng một dòng `study_answers` mang `kind`,
   `scheduler_type` và `scheduler_generation` tại thời điểm đó.
-- `first_answered_at` của root khác NULL sau lượt `scheduled` đầu tiên.
+- `first_answered_at` của root khác NULL sau khi **thẻ đầu tiên hoàn tất chuỗi
+  học mới** (bước 10–11, BR-13, BR-144) — **không** phải sau lượt `scheduled`
+  đầu tiên. Một phiên `reviewing` chỉ chạy được trên thẻ đã có `learned_at`,
+  nên tới lúc đó cột này đã được đặt rồi.
 - `study_sessions.status` và `end_reason` phản ánh đúng cách phiên kết thúc, theo
   ma trận ở `data-model.md`.
 - Nếu E4 xảy ra, **không** có dòng history nào được ghi cho lượt đó.

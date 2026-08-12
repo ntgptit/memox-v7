@@ -131,6 +131,7 @@ WHERE (status IN ('in_progress', 'completed') AND end_reason IS NOT NULL)
       final closed = await h.repository.invalidateSessionsForRoot(
         rootDeckId: 'd1',
         endedAt: StudyHarness.now,
+        reason: StudySessionEndReason.schedulerReset,
       );
 
       final outcome = await outcomeOf(sessionId);

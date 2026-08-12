@@ -11,7 +11,8 @@ derived from this feature and is the authority when the two disagree.
 
 ## 1 · What business problem it owns
 
-Deck management: UC-06 through UC-09. Creating a root deck with its scheduler,
+Deck management: UC-03 and UC-06 through UC-09. Creating a root deck with its
+scheduler, changing that scheduler while it is still unlocked (BR-12),
 creating sub-decks, renaming, deleting with an impact confirmation, resetting a
 deck's content type, and moving a subtree.
 
@@ -56,8 +57,18 @@ SQLite → watch() Stream → mapper → entity → AsyncValue → MxAsyncView �
 Reads are `Stream` (`watch`), writes are `Future`. Nothing refreshes manually: a
 write lands in SQLite, the stream re-emits, every screen watching it rebuilds.
 
-Ten use cases in `domain/usecases/`, one per interaction (AD-12). Each takes the
-repository **contract**, never an implementation.
+Eleven use cases in `domain/usecases/`, one per interaction (AD-12). Each takes
+the repository **contract**, never an implementation.
+
+**Two of them change the scheduler, and keeping them apart is the point.**
+`ChangeUnlockedSchedulerUseCase` (BR-12) runs while `first_answered_at` is still
+NULL: it rewrites the algorithm, re-seeds every study state in the tree, and
+leaves `scheduler_generation` alone, because a deck where no card has finished
+the learning chain has no cycle to throw away. `ResetLearningProgressUseCase`
+(UC-07) is the one that spends a generation, and it is the only way past the lock
+once BR-13 has closed it. Folding them into one call with a flag would make every
+caller decide which warning to show, and the first one to get it wrong would show
+a destruction warning for a deck with nothing to destroy.
 
 Three of the six write use cases hold input validation, and that is why they are
 not indirection. (The other three — delete, reset and move — validate nothing:
@@ -135,7 +146,8 @@ What a controller keeps is presentation only: steps 2, 3, 8. **It does not
 validate, and it does not read a repository.**
 
 What deliberately stays in the repository: BR-55 depth, BR-62's first-child content
-lock, BR-163's emptiness checks and UC-09's move rules. Each needs the tree as it
+lock, BR-163's emptiness checks, BR-13's scheduler lock and UC-09's move rules.
+Each needs the tree as it
 stands at the moment of writing and runs inside `runInTransaction`; a use case
 above the repository would put the check outside the transaction, which is a race
 between the check and the write.
@@ -193,9 +205,10 @@ signature.
 
 `createRootDeckController` · `createSubDeckController` ·
 `renameDeckController(deckId)` · `deleteDeckController(deckId)` ·
-`moveDeckController(deckId)`
+`moveDeckController(deckId)` · `resetLearningProgressController(rootDeckId)` ·
+`changeUnlockedSchedulerController(rootDeckId)`
 
-Six providers rather than one `DeckController` with six methods. A single
+Separate providers rather than one `DeckController` with a method each. A single
 notifier would need one `isSubmitting` and one `failure` for six operations, so a
 failed rename would light up the delete button's error — and the file would grow
 a method per use case forever.

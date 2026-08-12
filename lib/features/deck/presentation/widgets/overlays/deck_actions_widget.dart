@@ -9,6 +9,7 @@ import '../../../domain/failures/deck_validation_failure.dart';
 import '../../../domain/entities/deck_entity.dart';
 import 'deck_confirm_widget.dart';
 import 'deck_reset_progress_widget.dart';
+import 'deck_scheduler_change_widget.dart';
 import 'deck_form_widget.dart';
 import '../../controllers/deck_write_controller.dart';
 import 'move_deck_sheet_widget.dart';
@@ -63,6 +64,18 @@ Future<void> showDeckActions(
             icon: Icons.drive_file_move_outlined,
             onPressed: () => Navigator.of(sheetContext).pop(_DeckAction.move),
           ),
+        // A root deck only, and offered whether or not the mode is locked:
+        // UC-03 A1 keeps the section visible on a studied deck so the lock can
+        // explain itself and point at Reset. Hiding it is what makes a user
+        // believe the app cannot change study mode at all. A sub-deck has no
+        // scheduler columns to write (BR-06), so it has no such action.
+        if (deck.isRoot)
+          MxActionSheetAction(
+            label: sheetContext.l10n.deckSchedulerChangeAction,
+            icon: Icons.tune,
+            onPressed: () =>
+                Navigator.of(sheetContext).pop(_DeckAction.scheduler),
+          ),
         // A root deck only: the scheduler and the generation belong to the root
         // (BR-05), so there is no such operation one level down (UC-07 A4).
         if (deck.isRoot && hasLearnedCards != null)
@@ -89,6 +102,8 @@ Future<void> showDeckActions(
       await showDeckRenameForm(context, deck: deck);
     case _DeckAction.move:
       await showDeckMoveSheet(context, deckId: deck.id);
+    case _DeckAction.scheduler:
+      await showDeckSchedulerSheet(context, deck: deck);
     case _DeckAction.resetProgress:
       await showDeckResetProgressConfirm(
         context,
@@ -100,10 +115,12 @@ Future<void> showDeckActions(
   }
 }
 
-/// `resetProgress` is UC-07 — Reset learning progress, a scheduler operation.
-/// It kept its long name after the content-type reset was removed (BR-163),
-/// because "reset" alone was never enough to tell the two apart.
-enum _DeckAction { rename, move, resetProgress, delete }
+/// `scheduler` is BR-12's unlocked change (and, on a locked deck, the
+/// explanation of why it is not available). `resetProgress` is UC-07 — Reset
+/// learning progress, which is the only way past the lock. Both kept long names
+/// after the content-type reset was removed (BR-163), because "reset" alone was
+/// never enough to tell any two of them apart.
+enum _DeckAction { rename, move, scheduler, resetProgress, delete }
 
 /// The rename form (UC-03).
 Future<void> showDeckRenameForm(

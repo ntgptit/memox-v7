@@ -26,10 +26,22 @@ enum DeckConflictReason {
   /// level down would either do nothing or quietly reset a sibling's tree.
   resetNeedsRootDeck,
 
-  /// Resetting onto a study mode this build does not know. It has no `dbValue`,
-  /// so the write is impossible rather than merely refused — the check exists
-  /// to make that an answer instead of a crash.
+  /// Choosing a study mode this build does not know, on a reset or on an
+  /// unlocked change alike. It has no `dbValue`, so the write is impossible
+  /// rather than merely refused — the check exists to make that an answer
+  /// instead of a crash.
   resetSchedulerUnknown,
+
+  /// Changing the study mode on something that is not a root. The scheduler
+  /// lives on the root and a sub-deck's columns must stay NULL (BR-05, BR-06),
+  /// so there is nothing one level down for this operation to write.
+  schedulerNeedsRootDeck,
+
+  /// Changing the study mode after a card has finished the learning chain
+  /// (BR-13). Past that point the choice is locked and Reset learning progress
+  /// is the only way through (BR-44) — a different operation, with a warning
+  /// about what it destroys, rather than this one with a flag.
+  schedulerLocked,
 
   /// The stored `content_type` is a value this build does not know — the deck
   /// was written by a newer version. Refused rather than guessed at, because

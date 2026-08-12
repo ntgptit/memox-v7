@@ -104,6 +104,9 @@ extension DeckLabels on BuildContext {
     DeckConflictReason.resetNeedsRootDeck => l10n.deckConflictResetNeedsRoot,
     DeckConflictReason.resetSchedulerUnknown =>
       l10n.deckConflictResetSchedulerUnknown,
+    DeckConflictReason.schedulerNeedsRootDeck =>
+      l10n.deckConflictSchedulerNeedsRoot,
+    DeckConflictReason.schedulerLocked => l10n.deckConflictSchedulerLocked,
     DeckConflictReason.unknownContentType =>
       l10n.deckConflictUnknownContentType,
     DeckConflictReason.deckDepthUnknowable => l10n.deckConflictDepthUnknowable,

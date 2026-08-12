@@ -216,6 +216,21 @@ final class StudyDao {
     DecksCompanion(studyConfig: Value<String?>(studyConfig)),
   );
 
+  /// Stamps the root's `first_answered_at` the first time a card in its tree
+  /// finishes the learning chain (BR-13), and does nothing on every later card.
+  ///
+  /// The `.drift` query carries the reasoning: the `IS NULL` guard is inside the
+  /// statement rather than in Dart, so two cards finishing in the same session
+  /// cannot both read NULL and both write.
+  ///
+  /// Returns how many rows it changed — 1 the first time, 0 afterwards — which
+  /// is what lets a caller tell "locked just now" from "was already locked"
+  /// without a second read.
+  Future<int> lockRootSchedulerIfUnlocked({
+    required String cardId,
+    required DateTime firstAnsweredAt,
+  }) => _db.lockRootSchedulerIfUnlocked(firstAnsweredAt, cardId);
+
   // ---- writes ------------------------------------------------------------
 
   Future<void> insertSession(StudySessionsCompanion session) =>

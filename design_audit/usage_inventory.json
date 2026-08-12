@@ -1,13 +1,13 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 326,
-  "totalSites": 374,
+  "scannedFiles": 328,
+  "totalSites": 376,
   "byElementKind": {
     "other": 288,
     "background": 12,
     "shadow": 1,
     "border": 11,
-    "text": 50,
+    "text": 52,
     "icon": 12
   },
   "bySourceKind": {
@@ -16,7 +16,7 @@
     "Colors-material": 5,
     "hardcoded-literal": 97,
     "opacity-modified-token": 11,
-    "theme-token": 114
+    "theme-token": 116
   },
   "sites": [
     {
@@ -3367,6 +3367,28 @@
       "file": "lib/features/deck/presentation/widgets/overlays/deck_reset_progress_widget.dart",
       "line": 126,
       "widget_context": "_ResetProgressSheetState",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.semanticColors.danger",
+      "token": "semantic.danger",
+      "resolved_value_light": "#C02B3A",
+      "resolved_value_dark": "#F2808F"
+    },
+    {
+      "file": "lib/features/deck/presentation/widgets/overlays/deck_scheduler_change_widget.dart",
+      "line": 162,
+      "widget_context": "_SchedulerSheetState",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/deck/presentation/widgets/overlays/deck_scheduler_change_widget.dart",
+      "line": 178,
+      "widget_context": "_SchedulerSheetState",
       "element_kind": "text",
       "source_kind": "theme-token",
       "expression": "context.semanticColors.danger",

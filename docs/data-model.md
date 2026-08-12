@@ -7,8 +7,8 @@
 | **Scope** | Bảng, cột, index, quan hệ, query bất biến. Ngoài phạm vi: SQL runtime (`lib/core/database/`, chưa tồn tại) |
 | **Source of truth for** | Schema · cột và kiểu · index · query bất biến · thứ tự migration |
 | **Depends on** | `document-conventions.md`, `architecture.md`, `business-rules.md` |
-| **Updated by task** | M5.0r (tồn đọng + review lượt năm) |
-| **Last updated** | 2026-08-07 |
+| **Updated by task** | Bất biến 30 (khoá scheduler theo BR-13) và ai ghi `first_answered_at` — kể cả backfill v7; ma trận `end_reason` nhận thêm BR-164 |
+| **Last updated** | 2026-08-12 |
 
 Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; SQL thật nằm ở
 `lib/core/database/tables/`, hiện ở **schema v4**.
@@ -108,7 +108,7 @@ deck_templates (asset JSON ở MVP)
 | `scheduler_config` | TEXT NULL | JSON tham số ghi đè của thuật toán. Cùng quy tắc NULL |
 | `study_config` | TEXT NULL | JSON tùy chọn học ghi đè mặc định toàn app (BR-147). NULL = theo mặc định. Chỉ trên root |
 | `scheduler_generation` | INTEGER NULL | bắt đầu từ 1, +1 mỗi lần reset (BR-40). Chỉ trên root |
-| `first_answered_at` | DATETIME NULL | NULL = chưa có lượt `scheduled` ở generation hiện tại → scheduler mở khoá |
+| `first_answered_at` | DATETIME NULL | NULL = chưa thẻ nào hoàn tất chuỗi học mới ở generation hiện tại → scheduler mở khoá (BR-12). Được đặt bởi chính lần hoàn tất đầu tiên, cùng transaction (BR-13, BR-144); chỉ Reset đưa về NULL (BR-44). Cột có từ v1 nhưng không bản nào ghi nó cho tới khi BR-13 có code, nên migration v7 điền lại bằng `MIN(learned_at)` của cây cho root đã học xong ít nhất một thẻ |
 | `source_template_id` | TEXT NULL | NULL = deck tự tạo (BR-34) |
 | `source_template_version` | INTEGER NULL | version tại thời điểm sao chép |
 | `created_at` | DATETIME NOT NULL | UTC |
@@ -373,7 +373,7 @@ Ma trận `status` × `end_reason` hợp lệ:
 | `completed` | NULL | hết queue (BR-81) |
 | `abandoned` | `user_exit` | người dùng thoát (BR-82) |
 | `abandoned` | `interrupted` | phiên của ngày học trước còn `in_progress` khi mở app (BR-103) |
-| `invalidated` | `scheduler_reset` | reset khi phiên đang mở (BR-83) |
+| `invalidated` | `scheduler_reset` | scheduler của root bị ghi lại dưới chân phiên: reset khi phiên đang mở (BR-83), hoặc đổi scheduler khi chưa khoá (BR-164) |
 | `invalidated` | `stale_generation` | phiên generation cũ cố ghi lượt học (BR-84) |
 | `failed` | `persistence_error` | lỗi không thể tiếp tục (BR-85) |
 
@@ -386,6 +386,18 @@ generation của session với generation hiện tại của root và **từ ch�
 
 Các lượt học đã ghi thành công trước khi phiên kết thúc bất thường **vẫn được giữ**
 (BR-86) — chuyển `status` không kéo theo xoá `study_answers`.
+
+**Một giá trị, hai sự kiện — và cái phân biệt chúng đã được lưu sẵn.** BR-83 và
+BR-164 cùng ghi `scheduler_reset` vì cột này trả lời "vì sao phiên này hết hiệu
+lực", và câu trả lời của cả hai giống hệt nhau: scheduler của root bị ghi lại và
+toàn cây được khởi tạo lại dưới chân phiên. Chỗ khác nhau là generation, và nó
+nằm ở `study_sessions.scheduler_generation`: sau reset con số của phiên **nhỏ
+hơn** của root, sau một lần đổi chưa khoá thì **bằng**. Đọc cặp (`end_reason`,
+`scheduler_generation`) là không nhập nhằng.
+
+Điều này là một **nhượng bộ có ghi nợ**, không phải thiết kế mong muốn. Tên đúng
+là `scheduler_changed`, nhưng `end_reason` có `CHECK` liệt kê giá trị nên thêm
+một giá trị là đổi schema — xem nợ kỹ thuật trong `wbs.md`.
 
 `interrupted` tách khỏi `user_exit` vì cùng lý do BR-76 lưu `kind` tường minh:
 "người dùng bấm thoát" và "hệ điều hành thu hồi app" là hai sự kiện khác nhau, và
@@ -600,7 +612,25 @@ WHERE d.parent_deck_id IS NOT NULL
 SELECT d.id FROM decks d
 WHERE d.parent_deck_id IS NULL
   AND (d.scheduler_type IS NULL OR d.scheduler_generation IS NULL);
+
+-- 30. Cây đã có thẻ học xong nhưng scheduler chưa khoá (BR-13, BR-144)
+SELECT root.id FROM decks root
+WHERE root.parent_deck_id IS NULL
+  AND root.first_answered_at IS NULL
+  AND EXISTS (
+    SELECT 1 FROM card_study_states s
+    JOIN cards c ON c.id = s.card_id
+    JOIN decks d ON d.id = c.deck_id
+    WHERE d.root_deck_id = root.id AND s.learned_at IS NOT NULL
+  );
 ```
+
+Query 30 **chỉ chạy một chiều**, và điều đó là cố ý. Có thẻ `learned_at` mà root
+chưa khoá là dữ liệu sai: BR-13 nói thẻ đầu hoàn tất chuỗi thì scheduler khoá, và
+`completeLearning` ghi cả hai trong cùng transaction. Chiều ngược lại — root đã
+khoá mà không còn thẻ nào `learned_at` — là **hợp lệ**: người dùng học xong rồi
+xoá thẻ cuối, và dấu "cây này đã từng được học" không mất đi vì nội dung bị xoá.
+Chỉ Reset mới gỡ khoá (BR-44).
 
 Chú ý query 9 dùng `d.root_deck_id`, **không** dùng `COALESCE(d.parent_deck_id,
 d.id)`. Phiên bản cũ của tài liệu này dùng `COALESCE` và sẽ trả về sai root ngay

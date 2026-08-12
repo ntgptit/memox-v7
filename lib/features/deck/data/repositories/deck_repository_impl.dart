@@ -14,12 +14,13 @@ import '../../domain/models/deck_name_model.dart';
 import '../../domain/repositories/deck_repository.dart';
 import '../../domain/models/deck_list_snapshot_model.dart';
 import '../../domain/models/scheduler_type_model.dart';
+import '../../../study/domain/models/study_session_status_model.dart';
 import '../../../study/domain/repositories/study_repository.dart';
 import '../mappers/deck_mapper.dart';
 import '../datasources/deck_dao.dart';
 
 part 'move_deck_repository_impl.dart';
-part 'deck_reset_repository_impl.dart';
+part 'deck_scheduler_repository_impl.dart';
 
 /// A fresh root deck starts at scheduler version 1, generation 1 (BR-40).
 const int _initialSchedulerVersion = 1;
@@ -39,7 +40,7 @@ const int _initialSchedulerGeneration = 1;
 /// the part file as a private mixin, purely to keep each source file
 /// readable; it is one class and one library.
 final class DeckRepositoryImpl
-    with _MoveDeckOperation, _ResetLearningProgressOperation
+    with _MoveDeckOperation, _SchedulerWriteOperations
     implements DeckRepository {
   DeckRepositoryImpl(
     this._dao, {

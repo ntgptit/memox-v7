@@ -266,6 +266,26 @@ class FakeDeckRepository implements DeckRepository {
     if (failure != null) throw failure;
   }
 
+  /// Every unlocked study-mode change this fake was asked for (UC-03, BR-12).
+  ///
+  /// A separate list from [progressResets] on purpose: a test that cannot tell
+  /// the two apart cannot catch the widget wiring the destructive one.
+  final List<({String rootDeckId, SchedulerType schedulerType})>
+  schedulerChanges = <({String rootDeckId, SchedulerType schedulerType})>[];
+
+  @override
+  Future<void> changeUnlockedScheduler({
+    required String rootDeckId,
+    required SchedulerType schedulerType,
+  }) async {
+    schedulerChanges.add((
+      rootDeckId: rootDeckId,
+      schedulerType: schedulerType,
+    ));
+    final failure = writeFailure;
+    if (failure != null) throw failure;
+  }
+
   @override
   Future<void> moveDeck({
     required String deckId,

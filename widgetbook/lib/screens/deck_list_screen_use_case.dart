@@ -481,6 +481,12 @@ class _CatalogDeckRepository implements DeckRepository {
   }) async {}
 
   @override
+  Future<void> changeUnlockedScheduler({
+    required String rootDeckId,
+    required SchedulerType schedulerType,
+  }) async {}
+
+  @override
   Future<void> moveDeck({
     required String deckId,
     required String targetParentDeckId,

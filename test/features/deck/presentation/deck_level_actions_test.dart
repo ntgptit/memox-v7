@@ -84,6 +84,32 @@ void main() {
       expect(find.text(english.deckRenameAction), findsOneWidget);
       expect(find.text(english.deckDeleteAction), findsOneWidget);
       expect(find.text(english.deckMoveAction), findsNothing);
+      // The scheduler lives on the root, so this is where its entry belongs
+      // (BR-05, UC-03).
+      expect(find.text(english.deckSchedulerChangeAction), findsOneWidget);
+    });
+
+    testWidgets('a sub-deck offers no study mode at all (BR-06)', (
+      tester,
+    ) async {
+      // A sub-deck's scheduler columns stay NULL, so there is nothing one level
+      // down for the operation to write — and an entry that always refuses is
+      // worse than no entry.
+      await pumpDetail(
+        tester,
+        serving(
+          fakeSubDeck(
+            id: 'deck-1',
+            name: 'Chapter 1',
+            parentId: 'root',
+            contentType: DeckContentType.deck,
+          ),
+        ),
+      );
+
+      await openActions(tester);
+
+      expect(find.text(english.deckSchedulerChangeAction), findsNothing);
     });
 
     testWidgets('an empty typed sub-deck offers no content-type action '
