@@ -2881,7 +2881,7 @@
     },
     {
       "file": "lib/features/card/presentation/screens/card_editor_screen.dart",
-      "line": 287,
+      "line": 318,
       "widget_context": "_CardEditorScreenState",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -2892,18 +2892,7 @@
     },
     {
       "file": "lib/features/card/presentation/screens/card_editor_screen.dart",
-      "line": 344,
-      "widget_context": "_CardEditorScreenState",
-      "element_kind": "text",
-      "source_kind": "theme-token",
-      "expression": "Theme.of(context).colorScheme.error",
-      "token": "colorScheme.error",
-      "resolved_value_light": "#C02B3A",
-      "resolved_value_dark": "#F2808F"
-    },
-    {
-      "file": "lib/features/card/presentation/screens/card_editor_screen.dart",
-      "line": 375,
+      "line": 349,
       "widget_context": "_CardEditorScreenState",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -2999,6 +2988,17 @@
       "token": "colorScheme.onSurfaceVariant",
       "resolved_value_light": "#565C72",
       "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/card/presentation/widgets/sections/card_danger_zone_widget.dart",
+      "line": 50,
+      "widget_context": "CardDangerZoneWidget",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "Theme.of(context).colorScheme.error",
+      "token": "colorScheme.error",
+      "resolved_value_light": "#C02B3A",
+      "resolved_value_dark": "#F2808F"
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_details_section_widget.dart",

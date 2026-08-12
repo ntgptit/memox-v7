@@ -71,15 +71,15 @@ bản muốn. Vì vậy cột trạng thái đọc là:
 | IT-TREE-003 | `HOST-WIDGET + HOST-FLOW` | UC-08, BR-62, BR-63 | `test/features/deck/data/deck_repository_impl_test.dart` |
 | IT-TREE-004 | `HOST-WIDGET + HOST-FLOW` | UC-08, BR-62, BR-64 | `test/features/deck/data/deck_repository_impl_test.dart` |
 | IT-TREE-005 | `HOST-FLOW` | UC-08, BR-62 | `test/features/deck/data/deck_repository_impl_test.dart` |
-| IT-TREE-006 | `HOST-FLOW` | UC-08, BR-67 | `test/features/deck/data/deck_repository_impl_test.dart` |
-| IT-TREE-007 | `HOST-WIDGET + HOST-FLOW` | UC-03, BR-68 | `test/app/router/deck_route_test.dart` |
-| IT-TREE-008 | `HOST-FLOW` | UC-03, BR-68 | `test/app/router/deck_route_test.dart` |
+| IT-TREE-006 | `HOST-FLOW` | UC-08, BR-163 | `test/features/deck/data/deck_repository_tree_test.dart` |
+| IT-TREE-007 | `HOST-FLOW` | UC-09, BR-163 | `test/features/deck/data/deck_repository_tree_test.dart` |
+| IT-TREE-008 | `HOST-FLOW` | UC-08 A3, BR-163 | `test/features/deck/data/deck_repository_tree_test.dart` |
 | IT-TREE-009 | `HOST-WIDGET + HOST-FLOW` | UC-09, BR-71 | `test/features/deck/data/deck_repository_move_test.dart` |
 | IT-TREE-010 | `HOST-FLOW` | UC-09, BR-69, BR-70 | `test/features/deck/data/deck_repository_move_test.dart` |
 | IT-TREE-011 | `HOST-FLOW` | UC-09, BR-64 | `test/features/deck/data/deck_repository_move_test.dart` |
 | IT-TREE-012 | `HOST-FLOW` | UC-09, BR-73, BR-74 | `test/features/deck/data/deck_repository_move_test.dart` |
 | IT-TREE-013 | `HOST-FLOW` | UC-08, UC-09, BR-55 | `test/features/deck/data/deck_repository_impl_test.dart` |
-| IT-TREE-014 | `HOST-FLOW` | UC-03, BR-67, BR-68 | `test/app/router/deck_route_test.dart` |
+| IT-TREE-014 | `HOST-FLOW` | UC-04, BR-163 | `test/features/card/data/card_repository_test.dart` |
 | IT-DISC-001 | `HOST-WIDGET + HOST-FLOW` | UC-06, BR-142, BR-150 | `test/features/deck/data/deck_level_read_test.dart` · BR-150: `test/features/deck/presentation/deck_tile_counts_test.dart`, `test/features/deck/data/deck_new_count_test.dart` |
 | IT-DISC-002 | `HOST-WIDGET` | UC-06, BR-29 | `test/features/deck/data/deck_level_read_test.dart` |
 | IT-DISC-003 | `HOST-WIDGET + HOST-FLOW` | UC-06, BR-142, BR-150 | `test/features/deck/data/deck_level_read_test.dart` · BR-150: `test/features/deck/presentation/deck_tile_counts_test.dart` |
@@ -98,7 +98,7 @@ bản muốn. Vì vậy cột trạng thái đọc là:
 | IT-CARD-008 | `HOST-WIDGET + HOST-FLOW` | UC-04, BR-10 | `test/features/card/data/card_filter_repository_test.dart` |
 | IT-CARD-009 | `HOST-FLOW` | UC-04, BR-10, BR-92 | `test/features/card/data/card_filter_repository_test.dart` |
 | IT-CARD-010 | `HOST-WIDGET + HOST-FLOW` | UC-04 | `test/features/card/data/card_filter_repository_test.dart` |
-| IT-CARD-011 | `HOST-FLOW` | UC-04, BR-67 | `test/features/card/data/card_filter_repository_test.dart` |
+| IT-CARD-011 | `HOST-FLOW` | UC-04, BR-163 | `test/features/card/data/card_repository_test.dart` |
 | IT-ORG-001 | `HOST-WIDGET + HOST-FLOW` | UC-04 | `test/features/card/data/card_filter_repository_test.dart` |
 | IT-ORG-002 | `HOST-WIDGET` | UC-04 | `test/features/card/data/card_filter_repository_test.dart` |
 | IT-ORG-003 | `HOST-FLOW` | UC-04, BR-142, BR-151 | `test/features/card/data/card_filter_repository_test.dart` |

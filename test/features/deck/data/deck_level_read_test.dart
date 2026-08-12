@@ -12,6 +12,7 @@ import 'package:memox/features/study/data/datasources/study_dao.dart';
 import 'package:memox/features/study/data/repositories/study_repository_impl.dart';
 import 'package:memox/features/deck/domain/entities/deck_entity.dart';
 import 'package:memox/features/deck/domain/models/deck_list_snapshot_model.dart';
+import 'package:memox/features/deck/domain/models/deck_content_type_model.dart';
 import 'package:memox/features/deck/domain/models/deck_name_model.dart';
 import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
@@ -331,27 +332,36 @@ void main() {
       expect(namesOf(emissions.last), <String>['Other']);
     });
 
-    test('mayOfferReset follows the children in the same emission', () async {
-      // The reason the two facts must share a snapshot at all: this getter reads
-      // both. A deck whose type came from before a create and whose children came
-      // from after it would offer an action the repository then refuses.
+    test('the level re-emits when a child delete unsets its parent', () async {
+      // The read half of BR-163: nothing reloads the app, the watch simply
+      // sees the row the delete transaction wrote. Before M99.15 this asserted
+      // `mayOfferReset`, the flag that told the screen to offer a manual
+      // reset; the reset is gone and what matters now is that the type itself
+      // arrives on the stream.
       final root = await seedRoot('Japanese');
       final branch = await repository.createSubDeck(
         name: DeckName.parse('Branch').name!,
         parentDeckId: root.id,
       );
-
-      final emissions = watch(branch.id);
-      await pumpEventQueue();
-      expect(emissions.last.mayOfferReset, isTrue);
-
-      await repository.createSubDeck(
+      final leaf = await repository.createSubDeck(
         name: DeckName.parse('Leaf').name!,
         parentDeckId: branch.id,
       );
+
+      final emissions = watch(root.id);
+      await pumpEventQueue();
+      expect(
+        emissions.last.decks.single.deck.contentType,
+        DeckContentType.deck,
+      );
+
+      await repository.deleteDeck(leaf.id);
       await pumpEventQueue();
 
-      expect(emissions.last.mayOfferReset, isFalse);
+      expect(
+        emissions.last.decks.single.deck.contentType,
+        DeckContentType.unset,
+      );
     });
   });
 

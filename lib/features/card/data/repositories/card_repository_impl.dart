@@ -224,12 +224,37 @@ final class CardRepositoryImpl implements CardRepository {
     return cardEntityFromRow(await _requireCardRow(cardId));
   });
 
+  /// Deletes a card and, when it was the deck's last one, gives the deck its
+  /// content type back (BR-163).
+  ///
+  /// **One transaction, opened before the first read.** The emptiness count
+  /// must be taken after the delete and before anything else may write:
+  /// outside a transaction those are two snapshots, and a card created between
+  /// them leaves a deck marked `unset` while holding one — invariant Q2 broken
+  /// by a race nothing reports. The deck row is written through the Card-side
+  /// adapter, same `AppDatabase` and so the same transaction, exactly as
+  /// `createCard` locks an `unset` deck to `card`.
   @override
-  Future<void> deleteCard(String cardId) => _guard(() async {
-    await _requireCardRow(cardId);
-    // State and history cascade; content_type is left alone (BR-67).
-    await _cardDao.deleteCardById(cardId);
-  });
+  Future<void> deleteCard(String cardId) => _guard(
+    () => _cardDao.runInTransaction(() async {
+      final card = await _requireCardRow(cardId);
+      // State and history cascade from this one delete.
+      await _cardDao.deleteCardById(cardId);
+
+      if (await _deckContextDao.directCardCount(card.deckId) > 0) return;
+
+      // The last direct card is gone, so the deck holds nothing and its type
+      // is no longer describing anything. A root never reaches this line: it
+      // cannot hold cards at all (BR-58).
+      await _deckContextDao.updateDeckById(
+        card.deckId,
+        DecksCompanion(
+          contentType: Value<String>(DeckContentType.unset.dbValue),
+          updatedAt: Value<DateTime>(_clock()),
+        ),
+      );
+    }),
+  );
 
   @override
   Stream<List<TagEntity>> watchCardTags(String cardId) => _cardDao

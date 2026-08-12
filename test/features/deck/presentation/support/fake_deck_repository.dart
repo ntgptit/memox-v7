@@ -252,13 +252,6 @@ class FakeDeckRepository implements DeckRepository {
     if (failure != null) throw failure;
   }
 
-  @override
-  Future<void> resetContentType(String deckId) async {
-    resets.add(deckId);
-    final failure = writeFailure;
-    if (failure != null) throw failure;
-  }
-
   /// Every reset of learning progress this fake was asked for (UC-07).
   final List<({String rootDeckId, SchedulerType schedulerType})>
   progressResets = <({String rootDeckId, SchedulerType schedulerType})>[];

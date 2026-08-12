@@ -1,11 +1,11 @@
-/// The 16 invariant queries this suite executes, copied verbatim from
+/// The 17 invariant queries this suite executes, copied verbatim from
 /// `data-model.md`.
 ///
 /// **A subset of the document's, and its numbering, not a fresh sequence.**
-/// `data-model.md` specifies thirty; the ones here are the ones with an
-/// executable fixture. The keys keep the document's ids so a failure names the
-/// rule rather than a position in this map — which is also why `Q30` follows
-/// `Q11` with nothing in between.
+/// The document specifies thirty; the ones here are the ones with an executable
+/// fixture. The keys keep the document's ids so a failure names the rule rather
+/// than a position in this map — which is why `Q29` sits next to `Q2` and `Q30`
+/// next to `Q11`, each beside the rule it is about rather than at the end.
 ///
 /// Frozen source. Nothing here may be reworded to make a test pass — the
 /// document is the specification, and a query edited to suit a fixture stops
@@ -29,6 +29,14 @@ const Map<String, String> invariantQueries = <String, String>{
       "SELECT d.id FROM decks d WHERE d.content_type = 'unset' "
       'AND (EXISTS (SELECT 1 FROM cards c WHERE c.deck_id = d.id) '
       'OR EXISTS (SELECT 1 FROM decks s WHERE s.parent_deck_id = d.id))',
+
+  'Q29': // A sub-deck kept its type after everything left it (BR-163)
+      'SELECT d.id FROM decks d '
+      'WHERE d.parent_deck_id IS NOT NULL '
+      "AND d.content_type IN ('card', 'deck') "
+      'AND NOT EXISTS (SELECT 1 FROM cards c WHERE c.deck_id = d.id) '
+      'AND NOT EXISTS '
+      '(SELECT 1 FROM decks child WHERE child.parent_deck_id = d.id)',
 
   'Q3': // content_type = 'card' but has sub-decks (BR-63)
       "SELECT d.id FROM decks d WHERE d.content_type = 'card' "
@@ -83,10 +91,6 @@ const Map<String, String> invariantQueries = <String, String>{
       'SELECT d.id FROM decks d WHERE d.parent_deck_id IS NULL '
       'AND (d.scheduler_type IS NULL OR d.scheduler_generation IS NULL)',
 
-  // 30 rather than 16, and the gap is deliberate: the numbers here are
-  // `data-model.md`'s, not this file's, and 29 belongs to the `content_type`
-  // normalisation landing in parallel. An id is permanent (§7 of
-  // `document-conventions.md`), so a hole costs less than a collision.
   'Q30': // A tree has learned cards but its scheduler is not locked (BR-13)
       'SELECT root.id FROM decks root WHERE root.parent_deck_id IS NULL '
       'AND root.first_answered_at IS NULL '

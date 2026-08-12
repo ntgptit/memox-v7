@@ -98,7 +98,7 @@ correct because a quiet database gives two snapshots the same answer.
 - **The deck screen** watched `childDecks` and then awaited `getDeckById` per
   emission, with a comment claiming the two facts "arrive together". They did not.
   The action set is computed from `content_type` *and* from the children being
-  empty (BR-68), so a rename or a create landing between the reads produced a
+  empty (BR-163), so a rename or a create landing between the reads produced a
   screen assembled from two instants. There is now one statement behind
   `watchDeckList`, one contract method, and the snapshot it returns lives in
   `domain/models/` because the repository returns it.
@@ -132,7 +132,7 @@ cloning, because five of the nine are the parts people put in the wrong layer.
    `SchedulerType`. Nothing re-checks BR-01 below this line.
 7. **Repository** runs inside `_guard`, and inside `runInTransaction` when the
    write is multi-step. This is where the rules that need the tree *at write time*
-   live — BR-55 depth, BR-62's content lock, BR-68's emptiness, UC-09's move rules
+   live — BR-55 depth, BR-62's content lock, BR-163's emptiness, UC-09's move rules
    — and where any Drift or SQLite exception becomes a domain `Failure`.
 8. **Controller** checks `ref.mounted` after the await, then sets either
    `outcome: disposition.outcome` or `deckSubmitFailure(failure)` — which splits a
@@ -146,7 +146,8 @@ What a controller keeps is presentation only: steps 2, 3, 8. **It does not
 validate, and it does not read a repository.**
 
 What deliberately stays in the repository: BR-55 depth, BR-62's first-child content
-lock, BR-68's emptiness checks, BR-13's scheduler lock and UC-09's move rules. Each needs the tree as it
+lock, BR-163's emptiness checks, BR-13's scheduler lock and UC-09's move rules.
+Each needs the tree as it
 stands at the moment of writing and runs inside `runInTransaction`; a use case
 above the repository would put the check outside the transaction, which is a race
 between the check and the write.
@@ -204,8 +205,7 @@ signature.
 
 `createRootDeckController` · `createSubDeckController` ·
 `renameDeckController(deckId)` · `deleteDeckController(deckId)` ·
-`resetContentTypeController(deckId)` · `moveDeckController(deckId)` ·
-`resetLearningProgressController(rootDeckId)` ·
+`moveDeckController(deckId)` · `resetLearningProgressController(rootDeckId)` ·
 `changeUnlockedSchedulerController(rootDeckId)`
 
 Separate providers rather than one `DeckController` with a method each. A single

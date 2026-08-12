@@ -21,9 +21,9 @@ part 'deck_list_snapshot_model.freezed.dart';
 ///
 /// Every field comes from **one** statement (AD-13). The parent and its children
 /// have to agree: the action set on screen is computed from the parent's
-/// `content_type` and from whether the children are empty (BR-68) at the same
-/// time, so two reads would let the screen render an action matrix from a deck
-/// captured at one instant and a list captured at another.
+/// `content_type` and from whether the children are empty at the same time, so
+/// two reads would let the screen render an action matrix from a deck captured
+/// at one instant and a list captured at another.
 @freezed
 abstract class DeckListSnapshot with _$DeckListSnapshot {
   const factory DeckListSnapshot({
@@ -126,18 +126,4 @@ abstract class DeckListSnapshot with _$DeckListSnapshot {
     dueCardCount: levelDueCardCount,
     overdueDayCount: levelOverdueDayCount,
   );
-
-  /// Whether the content type can be put back to `unset` (BR-68).
-  ///
-  /// Direct children only, and only for a sub-deck: a root's content type is
-  /// invariant (BR-58), and the root *level* has no deck to reset at all. Cards
-  /// are **not** counted here — this screen can only say "no child decks", and the
-  /// repository is what refuses a reset on a deck that still holds cards. That is
-  /// the right split: the UI offers, the repository decides.
-  bool get mayOfferReset {
-    final deck = parent;
-    if (deck == null) return false;
-
-    return !deck.isRoot && decks.isEmpty;
-  }
 }

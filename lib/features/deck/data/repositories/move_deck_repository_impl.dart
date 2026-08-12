@@ -11,6 +11,7 @@ mixin _MoveDeckOperation implements DeckRepository {
   DeckContentType _knownContentType(Deck deck);
   Future<int> _requireDeckDepth(String deckId);
   Future<int> _requireSubtreeHeight(String deckId);
+  Future<void> _unsetParentIfEmptied(String parentDeckId);
 
   @override
   Future<void> moveDeck({
@@ -31,6 +32,10 @@ mixin _MoveDeckOperation implements DeckRepository {
       // because a message is not something the UI may render.
       final source = await _requireDeckRow(deckId);
       final target = await _requireDeckRow(targetParentDeckId);
+      // Read before the pointer moves: after the update this deck no longer
+      // names its old parent, and the old parent may be the one that just
+      // lost its last child (BR-163).
+      final oldParentDeckId = source.parentDeckId;
       final sourceEntity = deckEntityFromRow(source);
       final targetEntity = deckEntityFromRow(target);
       final subtreeIds = await _dao.subtreeDeckIds(source.id);
@@ -89,6 +94,20 @@ mixin _MoveDeckOperation implements DeckRepository {
         newRootDeckId: targetRoot.id,
         updatedAt: now,
       );
+
+      // The other end of the move: a non-root parent that just lost its last
+      // child goes back to `unset` (BR-163), in this same transaction — so a
+      // failure between the pointer rewrite and here takes both back.
+      //
+      // `oldParentDeckId != target.id` is the case that would otherwise undo
+      // the line above: moving a deck between two positions under the same
+      // parent leaves that parent holding the deck it never lost, and the
+      // helper's own count would see it. Guarding here says why rather than
+      // relying on the count to be accidentally right. A source that was a
+      // root has no old parent at all.
+      if (oldParentDeckId != null && oldParentDeckId != target.id) {
+        await _unsetParentIfEmptied(oldParentDeckId);
+      }
     }),
   );
 }

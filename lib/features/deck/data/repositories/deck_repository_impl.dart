@@ -20,7 +20,6 @@ import '../mappers/deck_mapper.dart';
 import '../datasources/deck_dao.dart';
 
 part 'move_deck_repository_impl.dart';
-part 'deck_reset_repository_impl.dart';
 part 'deck_scheduler_repository_impl.dart';
 
 /// A fresh root deck starts at scheduler version 1, generation 1 (BR-40).
@@ -41,10 +40,7 @@ const int _initialSchedulerGeneration = 1;
 /// the part file as a private mixin, purely to keep each source file
 /// readable; it is one class and one library.
 final class DeckRepositoryImpl
-    with
-        _MoveDeckOperation,
-        _ResetLearningProgressOperation,
-        _ChangeUnlockedSchedulerOperation
+    with _MoveDeckOperation, _SchedulerWriteOperations
     implements DeckRepository {
   DeckRepositoryImpl(
     this._dao, {
@@ -255,46 +251,53 @@ final class DeckRepositoryImpl
       });
 
   @override
-  Future<void> deleteDeck(String deckId) => _guard(() async {
-    await _requireDeckRow(deckId);
-    // Descendants, cards, study states, history and sessions cascade from
-    // this one delete (BR-03) — enforced by the schema's foreign keys.
-    await _dao.deleteDeckById(deckId);
-  });
-
-  @override
-  Future<void> resetContentType(String deckId) => _guard(
+  /// Deletes a deck and its whole subtree, then hands the parent its content
+  /// type back if that was its last child (BR-163).
+  ///
+  /// **The parent is read before the delete and counted after, both inside one
+  /// transaction.** Before, because the row that names the parent is about to
+  /// disappear; after, because the count has to describe the tree the delete
+  /// leaves behind. Split across two transactions they describe two different
+  /// databases.
+  Future<void> deleteDeck(String deckId) => _guard(
     () => _dao.runInTransaction(() async {
       final deck = await _requireDeckRow(deckId);
-      if (deck.parentDeckId == null) {
-        // A root is 'deck' forever — that is what makes BR-58 checkable.
-        throw const ConflictFailure(
-          message: 'Refused: the content type of a root deck is invariant.',
-          reason: DeckConflictReason.rootContentTypeFixed,
-        );
-      }
-      if (await _dao.directCardCount(deckId) > 0) {
-        throw const ConflictFailure(
-          message: 'Refused: the deck still holds cards.',
-          reason: DeckConflictReason.deckStillHasCards,
-        );
-      }
-      if (await _dao.directChildDeckCount(deckId) > 0) {
-        throw const ConflictFailure(
-          message: 'Refused: the deck still holds sub-decks.',
-          reason: DeckConflictReason.deckStillHasSubDecks,
-        );
-      }
+      final parentDeckId = deck.parentDeckId;
+      // Descendants, cards, study states, history and sessions cascade from
+      // this one delete (BR-03) — enforced by the schema's foreign keys.
+      await _dao.deleteDeckById(deckId);
 
-      await _dao.updateDeckById(
-        deckId,
-        DecksCompanion(
-          contentType: Value<String>(DeckContentType.unset.dbValue),
-          updatedAt: Value<DateTime>(_clock()),
-        ),
-      );
+      if (parentDeckId == null) return;
+      await _unsetParentIfEmptied(parentDeckId);
     }),
   );
+
+  /// Puts a **non-root** parent back to `unset` when nothing is left in it
+  /// (BR-163). Shared by delete and move because they leave the same hole.
+  ///
+  /// Root is skipped rather than special-cased at the call sites: a root is
+  /// `deck` forever, which is what makes BR-58 checkable by the same query as
+  /// every other deck. An empty root is an ordinary state, not a violation.
+  ///
+  /// Both counts are read here, inside the caller's transaction. `updated_at`
+  /// moves only when the type actually changes — a delete that leaves siblings
+  /// behind must not reorder the parent in a Recent list.
+  @override
+  Future<void> _unsetParentIfEmptied(String parentDeckId) async {
+    final parent = await _dao.deckById(parentDeckId);
+    if (parent == null || parent.parentDeckId == null) return;
+    if (_knownContentType(parent) == DeckContentType.unset) return;
+    if (await _dao.directChildDeckCount(parentDeckId) > 0) return;
+    if (await _dao.directCardCount(parentDeckId) > 0) return;
+
+    await _dao.updateDeckById(
+      parentDeckId,
+      DecksCompanion(
+        contentType: Value<String>(DeckContentType.unset.dbValue),
+        updatedAt: Value<DateTime>(_clock()),
+      ),
+    );
+  }
 
   // ---- helpers -----------------------------------------------------------
 

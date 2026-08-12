@@ -101,7 +101,7 @@ deck_templates (asset JSON ở MVP)
 | `name` | TEXT NOT NULL | BR-01 |
 | `parent_deck_id` | TEXT NULL | NULL = root deck. → `decks(id)` ON DELETE CASCADE |
 | `root_deck_id` | TEXT NOT NULL | root có `root_deck_id = id`; descendant mang id của root (BR-56) |
-| `content_type` | TEXT NOT NULL | `'unset'` \| `'card'` \| `'deck'` (BR-60…BR-68) |
+| `content_type` | TEXT NOT NULL | `'unset'` \| `'card'` \| `'deck'` (BR-60…BR-66, BR-163) |
 | `owner_id` | TEXT NULL | NULL = local profile (AD-03) |
 | `scheduler_type` | TEXT NULL | `'eight_box'` \| `'sm2'`. **NOT NULL trên root, NULL trên deck con** |
 | `scheduler_version` | INTEGER NULL | cùng quy tắc NULL |
@@ -153,6 +153,10 @@ hỏng im lặng, vì query vẫn chạy và chỉ trả về kết quả thiế
 
 ### `content_type` — bao gồm cả root
 
+**Sub-deck đang `card` hoặc `deck` mà không còn direct card lẫn direct child
+deck là dữ liệu không hợp lệ** (BR-163) — invariant 29 bắt nó. Trước M99.15
+trạng thái đó hợp lệ theo BR-67, nên migration v6 normalize dữ liệu cũ về `unset`.
+
 `content_type` là NOT NULL cho **mọi** deck. Root deck được tạo thẳng với
 `content_type = 'deck'` và giá trị đó bất biến — đó là cách BR-58 ("root chỉ chứa
 deck con") trở thành một ràng buộc kiểm tra được bằng cùng một câu query như các
@@ -161,7 +165,7 @@ deck khác, thay vì một luật riêng phải nhớ.
 | Deck | `content_type` khi tạo | Đổi được không |
 |---|---|---|
 | root | `'deck'` | không |
-| deck con | `'unset'` | `unset` → `card`/`deck` ở phần tử con đầu tiên (BR-62); về `unset` chỉ qua thao tác reset tường minh khi rỗng (BR-68) |
+| deck con | `'unset'` | hệ thống tự duy trì theo direct children (BR-163): `unset` → `card`/`deck` ở phần tử con đầu tiên (BR-62); `card`/`deck` → `unset` khi direct child cuối bị xoá hoặc chuyển đi, trong cùng transaction |
 
 ### Cột scheduler chỉ trên root
 
@@ -521,6 +525,21 @@ WHERE d.content_type = 'unset'
   AND (EXISTS (SELECT 1 FROM cards c WHERE c.deck_id = d.id)
     OR EXISTS (SELECT 1 FROM decks s WHERE s.parent_deck_id = d.id));
 
+-- 29. Sub-deck đã rỗng nhưng vẫn mang type (BR-163)
+--     Chiều ngược của invariant 2: 2 bắt `unset` còn nội dung, 29 bắt type còn
+--     lại sau khi nội dung đã đi hết. Root không tham gia — root luôn `deck`
+--     (BR-58), và một root rỗng là trạng thái bình thường.
+SELECT d.id
+FROM decks d
+WHERE d.parent_deck_id IS NOT NULL
+  AND d.content_type IN ('card', 'deck')
+  AND NOT EXISTS (
+    SELECT 1 FROM cards c WHERE c.deck_id = d.id
+  )
+  AND NOT EXISTS (
+    SELECT 1 FROM decks child WHERE child.parent_deck_id = d.id
+  );
+
 -- 3. content_type = 'card' nhưng có deck con (BR-63)
 SELECT d.id FROM decks d
 WHERE d.content_type = 'card'
@@ -612,10 +631,6 @@ chưa khoá là dữ liệu sai: BR-13 nói thẻ đầu hoàn tất chuỗi th�
 khoá mà không còn thẻ nào `learned_at` — là **hợp lệ**: người dùng học xong rồi
 xoá thẻ cuối, và dấu "cây này đã từng được học" không mất đi vì nội dung bị xoá.
 Chỉ Reset mới gỡ khoá (BR-44).
-
-Số 30, không phải 29: 29 thuộc về task chuẩn hoá `content_type` đang chạy song
-song. ID là định danh vĩnh viễn (§7 của `document-conventions.md`), nên một
-khoảng trống rẻ hơn một lần trùng số.
 
 Chú ý query 9 dùng `d.root_deck_id`, **không** dùng `COALESCE(d.parent_deck_id,
 d.id)`. Phiên bản cũ của tài liệu này dùng `COALESCE` và sẽ trả về sai root ngay

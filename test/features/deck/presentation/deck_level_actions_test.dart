@@ -84,8 +84,6 @@ void main() {
       expect(find.text(english.deckRenameAction), findsOneWidget);
       expect(find.text(english.deckDeleteAction), findsOneWidget);
       expect(find.text(english.deckMoveAction), findsNothing);
-      // A root's content type is invariant (BR-58).
-      expect(find.text(english.deckResetContentTypeAction), findsNothing);
       // The scheduler lives on the root, so this is where its entry belongs
       // (BR-05, UC-03).
       expect(find.text(english.deckSchedulerChangeAction), findsOneWidget);
@@ -114,7 +112,12 @@ void main() {
       expect(find.text(english.deckSchedulerChangeAction), findsNothing);
     });
 
-    testWidgets('an empty typed sub-deck offers reset (BR-68)', (tester) async {
+    testWidgets('an empty typed sub-deck offers no content-type action '
+        '(BR-163)', (tester) async {
+      // The action is gone, not conditional. `content_type` is system state
+      // that the delete and move transactions maintain, so there is nothing
+      // here for the user to reset — and no empty typed sub-deck to reset it
+      // on, since the transitions never leave one.
       await pumpDetail(
         tester,
         serving(
@@ -129,31 +132,10 @@ void main() {
 
       await openActions(tester);
 
-      expect(find.text(english.deckResetContentTypeAction), findsOneWidget);
+      expect(find.text(english.deckRenameAction), findsOneWidget);
       expect(find.text(english.deckMoveAction), findsOneWidget);
-    });
-
-    testWidgets('a sub-deck with children does not offer reset', (
-      tester,
-    ) async {
-      await pumpDetail(
-        tester,
-        serving(
-          fakeSubDeck(
-            id: 'deck-1',
-            name: 'Has children',
-            parentId: 'root',
-            contentType: DeckContentType.deck,
-          ),
-          children: <DeckSummary>[
-            fakeChildSummary(id: 'c1', name: 'Child', parentId: 'deck-1'),
-          ],
-        ),
-      );
-
-      await openActions(tester);
-
-      expect(find.text(english.deckResetContentTypeAction), findsNothing);
+      expect(find.text(english.deckDeleteAction), findsOneWidget);
+      expect(find.byIcon(Icons.restart_alt), findsNothing);
     });
 
     testWidgets('rename sends the new name and closes', (tester) async {
@@ -289,53 +271,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(repository.deletes, isEmpty);
-    });
-
-    testWidgets('reset asks first and then sends it (BR-68)', (tester) async {
-      final repository = serving(
-        fakeSubDeck(
-          id: 'deck-1',
-          name: 'Empty',
-          parentId: 'root',
-          contentType: DeckContentType.deck,
-        ),
-      );
-      await pumpDetail(tester, repository);
-
-      await openActions(tester);
-      await tester.tap(find.text(english.deckResetContentTypeAction));
-      await tester.pumpAndSettle();
-      expect(find.text(english.deckResetContentTypeMessage), findsOneWidget);
-
-      await tester.tap(find.text(english.deckResetContentTypeConfirmAction));
-      await tester.pumpAndSettle();
-
-      expect(repository.resets, <String>['deck-1']);
-    });
-
-    testWidgets('a reset refused by the repository shows a conflict', (
-      tester,
-    ) async {
-      // The tree can change between the dialog opening and the confirm landing,
-      // so the repository decides and this is how its refusal reads.
-      final repository = serving(
-        fakeSubDeck(
-          id: 'deck-1',
-          name: 'Not really empty',
-          parentId: 'root',
-          contentType: DeckContentType.deck,
-        ),
-        writeFailure: const ConflictFailure(message: 'still has cards'),
-      );
-      await pumpDetail(tester, repository);
-
-      await openActions(tester);
-      await tester.tap(find.text(english.deckResetContentTypeAction));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text(english.deckResetContentTypeConfirmAction));
-      await tester.pumpAndSettle();
-
-      expect(find.text(english.deckConflictMessage), findsOneWidget);
     });
   });
 }

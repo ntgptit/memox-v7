@@ -105,11 +105,6 @@ abstract interface class DeckRepository {
   /// go with it by cascade (BR-03).
   Future<void> deleteDeck(String deckId);
 
-  /// Puts an empty sub-deck back to `unset` (BR-68). Blocked with a
-  /// `ConflictFailure` when the deck still has cards or child decks, and for
-  /// root decks, whose content type is invariant.
-  Future<void> resetContentType(String deckId);
-
   /// Resets a root deck's learning progress, optionally onto a new scheduler
   /// (UC-07).
   ///

@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.15 (Scheduler lifecycle — khoá tự động và đổi chế độ khi chưa khoá) |
+| **Updated by task** | M99.16 (Scheduler lifecycle — khoá tự động và đổi chế độ khi chưa khoá) |
 | **Last updated** | 2026-08-11 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -8662,7 +8662,61 @@ thế không đổi bố cục.
   streak), `deck_summary_overdue_test` (viết lại, 12),
   `deck_summary_new_test`, `deck_list_screen_test`, golden 6 file.
 
-### M99.15 · Scheduler lifecycle — khoá tự động, và đổi chế độ khi chưa khoá
+### M99.15 · `content_type` là trạng thái hệ thống, không phải lựa chọn người dùng
+
+- **Status:** **done** — `dod_check.sh` xanh (format, analyze, 2170 test,
+  generated, architecture, guard, docs); không chạy emulator.
+- **Goal:** BR-163 — mọi mutation direct children cập nhật `content_type` trong
+  cùng transaction; sub-deck mất phần tử con cuối tự về `unset`; bỏ hoàn toàn
+  reset thủ công. Root vẫn bất biến `deck` (BR-58).
+- **Scope:** BR-67/BR-68 → superseded, BR-163 active; AD-10 lifecycle hai
+  chiều; invariant Q29; `deleteCard`/`deleteDeck`/`moveDeck` cập nhật type
+  atomically; migration data-only v6 normalize empty typed sub-deck; xoá
+  `resetContentType` khỏi domain/data/presentation/l10n; điều hướng sau khi
+  xoá card đi qua `RouteNames.deckDetail`.
+- **Out of scope:** scheduler, SM-2/Eight Box, StudyMode, Reset learning
+  progress (BR-42/BR-44 — nghiệp vụ khác hoàn toàn), layout/theme/token,
+  `moveCard` (chưa tồn tại — không tạo API giả).
+- **Editable documents:** `docs/wbs.md`, `docs/business-rules.md`,
+  `docs/architecture.md` (AD-10), `docs/data-model.md`, `docs/use-cases.md`
+  (UC-03, UC-04, UC-08, UC-09), `docs/master-flow.md`,
+  `docs/wireframes/m4-11-card-management.md`, `docs/it-scenarios/*`,
+  `CLAUDE.md`, `lib/features/deck/README.md`, `lib/features/card/README.md`
+- **Output:** xoá card cuối → deck `unset`; xoá/di chuyển child deck cuối →
+  parent non-root `unset`; target `unset` nhận child đầu → `deck`; dữ liệu v5
+  cũ được normalize; UI không còn hành động reset content type.
+- **Acceptance criteria:**
+  - [x] BR-67/BR-68 `superseded by BR-163`; BR-163 active, enforced by
+        repository + invariant Q29.
+  - [x] Ba mutation (delete card, delete deck, move deck) cập nhật
+        `content_type` **trong cùng transaction**; lỗi giữa chừng rollback cả
+        mutation lẫn type.
+  - [x] Root luôn `deck`; deck còn nội dung giữ nguyên type.
+  - [x] Migration v6 data-only normalize empty typed non-root deck về `unset`,
+        không đụng root, không đụng deck còn nội dung, không đổi `updated_at`,
+        không mất card/state/history/session.
+  - [x] Q29 có trong `data-model.md`, `verify_invariants.py`,
+        `invariant_queries.dart`, `invariants_test.dart`; đỏ đúng khi có empty
+        typed non-root deck.
+  - [x] Không còn reference production tới `resetContentType`,
+        `ResetDeckContentType`, `mayOfferReset`, `deckResetContentType`, ba
+        failure reason chỉ phục vụ reset.
+  - [x] Sau khi xoá card, điều hướng đi qua `RouteNames.deckDetail`: còn card
+        thì redirect về CardList, hết card thì ở lại DeckDetail với hai lựa
+        chọn tạo.
+  - [x] `dod_check.sh` xanh; không chạy emulator.
+- **Dependencies:** M99.14
+- **Tests required:** repository transitions + rollback, migration v5→v6 và
+  old→latest, invariant Q29 hai chiều, presentation/router sau delete
+- **Checklist phases:** 9.3, 10.2, 14.2
+- **Tests:** `migration_v6_test` (mới, 10), `invariants_test` (+Q29 hai chiều,
+  +root rỗng), `deck_repository_tree_test` (nhóm BR-163 viết lại, 7),
+  `card_repository_test` (xoá card cuối/không cuối), `deck_level_read_test`
+  (stream phản ánh unset), `card_editor_edit_test` (harness router lồng),
+  `deck_level_actions_test`/`deck_edit_controller_test`/`submit_disposition_test`
+  (bỏ manual reset), `migration_test`/`query_test` (schemaVersion 6).
+
+### M99.16 · Scheduler lifecycle — khoá tự động, và đổi chế độ khi chưa khoá
 
 - **Status:** **done** — targeted tests xanh (invariants 36, study lock 7, deck
   scheduler change 13, sheet 9, deck actions 13), `flutter analyze` sạch,
@@ -8680,8 +8734,8 @@ thế không đổi bố cục.
   hai trạng thái khoá/mở; hai `DeckConflictReason` mới; `invalidateSessionsForRoot`
   nhận `reason` tường minh; bất biến 30; BR-164 mới; BR-12/BR-13 nói rõ ai ghi
   khoá; UC-03, UC-05 postcondition, master-flow nhánh `I`.
-- **Out of scope:** migration v6 và chuẩn hoá `content_type` (đang chạy ở một
-  session khác — xem nợ kỹ thuật); thuật toán 8-box/SM-2; thiết kế Study Mode;
+- **Out of scope:** migration v6 và chuẩn hoá `content_type` (M99.15, đã merge
+  trước task này); thuật toán 8-box/SM-2; thiết kế Study Mode;
   UI deck tile ngoài phần scheduler.
 - **Editable documents:** `docs/wbs.md`, `docs/business-rules.md`,
   `docs/data-model.md`, `docs/use-cases.md`, `docs/master-flow.md`
@@ -8782,8 +8836,7 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 | ~~`study_session_controller.dart` vượt trần 400 dòng của guard~~ | M5.23 | 408/400, và **warning cũng làm đỏ gate**. Class giữ toàn bộ command của phiên học, cộng summary và failure policy | **Đã trả trong cùng PR.** Tách `_loadSummary` + `StudySessionState.summary` thành `studySessionSummaryProvider` — một **query**, không phải command, nên nó chưa bao giờ thuộc về controller. Controller còn 380 dòng. Lợi ích thật chứ không chỉ số dòng: read cũ có ba call site (hết stage, leave, failure path) nên summary chỉ đúng bằng người cuối cùng nhớ đủ cả ba, và field thì sống lâu hơn phiên — quên một call site là hiện số của phiên trước dưới tiêu đề phiên mới |
 | ~~`dart format .` trong `dod_check.sh` crash trên worktree~~ | M2.2b | Bước `format` đỏ ở **mọi** lần chạy local nhiều tuần liền: `.` đi vào `.claude/worktrees/`, nơi Gradle xoá thư mục ngay giữa lúc formatter đang liệt kê → `PathNotFoundException`. Vì là lỗi môi trường chứ không phải lỗi format, mỗi lần lại được *báo cáo và đi vòng* thay vì sửa — và một gate đỏ mà ai cũng biết là đỏ thì không còn là gate | **Đã trả.** `dart_roots()` lấy tập thư mục từ `git ls-files '*.dart'` cắt tới segment đầu. Đúng câu hỏi cần hỏi — *cây làm việc **này** track những file Dart nào* — nên build output không tracked không lọt vào, worktree bị `.git/info/exclude` loại sẵn, và một thư mục top-level mới tự động được nhận. **Lỗi thứ hai nghiêm trọng hơn cái crash:** `.` đưa cho formatter source của **nhánh khác**, nên một worktree có format cũ làm gate đỏ vì code không nằm trong cây làm việc |
 | ~~`study_session_controller.dart` vượt trần 400 dòng của guard~~ | M5.24 | 423/400. Warning cũng làm đỏ gate. Class giữ toàn bộ command của phiên học | **Đã trả ở M5.25.** Không tách được bằng cơ chế ngôn ngữ — Dart không có partial class, base class Riverpod sinh ra là private, và extension trong `part` cũng không dùng được `state` (`invalid_use_of_protected_member`, đã thử và revert). Nên tách bằng **trách nhiệm**: offset nhìn lại của `browse` là view state, không phải command của phiên, và nay là `StudyBrowseTrailController`. Controller còn 387 dòng |
-| `end_reason = scheduler_reset` phải mang cả BR-164 | M99.15 | Đổi scheduler khi chưa khoá ghi cùng giá trị với Reset, nên đọc riêng cột đó thì hai sự kiện khác nhau trông giống nhau. Không mất thông tin — `study_sessions.scheduler_generation` bằng generation của root sau một lần đổi và nhỏ hơn sau một lần reset — nhưng nó bắt người đọc phải biết mẹo đó | Tên đúng là `scheduler_changed`. `study_sessions.end_reason` có `CHECK` liệt kê giá trị nên thêm một giá trị là **đổi schema**, và bump version đang thuộc về task chuẩn hoá `content_type` chạy song song (v6). Nới `CHECK` cùng lần bump schema tiếp theo, rồi đổi `deck_scheduler_repository_impl.dart` sang giá trị mới |
-| Bất biến 29 để trống có chủ đích | M99.15 | Dãy số bất biến có một lỗ | 29 thuộc về task chuẩn hoá `content_type` đang chạy ở session khác; M99.15 lấy 30 vì ID là định danh vĩnh viễn và một lần trùng số đắt hơn một khoảng trống. Đóng khi task kia merge |
+| `end_reason = scheduler_reset` phải mang cả BR-164 | M99.16 | Đổi scheduler khi chưa khoá ghi cùng giá trị với Reset, nên đọc riêng cột đó thì hai sự kiện khác nhau trông giống nhau. Không mất thông tin — `study_sessions.scheduler_generation` bằng generation của root sau một lần đổi và nhỏ hơn sau một lần reset — nhưng nó bắt người đọc phải biết mẹo đó | Tên đúng là `scheduler_changed`. `study_sessions.end_reason` có `CHECK` liệt kê giá trị nên thêm một giá trị là **đổi schema**, và bump version đang thuộc về task chuẩn hoá `content_type` chạy song song (v6). Nới `CHECK` cùng lần bump schema tiếp theo — v6 của BR-163 đã đi rồi, nên là v7 — rồi đổi `deck_scheduler_repository_impl.dart` sang giá trị mới |
 | Nội dung starter là fixture, không phải nội dung production | T1.3 | Không phát hành được với nội dung này | Tìm nguồn nội dung có bản quyền rõ ràng trước M8 (BR-87) |
 | `sqlite3.wasm` và `drift_worker.js` là binary vendored trong `web/` | M4.2 | Không có bước build nào sinh ra chúng và không có bước build nào báo khi chúng cũ: app compile, load, rồi **không mở được database**. Nâng `drift` mà quên tải lại worker không có triệu chứng nào cho tới khi ai đó mở trình duyệt | `test/database/web_assets_test.dart` so version trong `pubspec.lock` với version đã pin, kèm `web/WEB_ASSETS.md` ghi URL tải. Đã kiểm tiêm lỗi: đổi `drift` thành 2.99.0 làm test đỏ |
 | Server phát web chưa gửi COOP/COEP | M4.2 | `crossOriginIsolated` là `false`, nên drift chọn backend lưu trữ kém hơn OPFS. Không có lỗi nào — chỉ là hiệu năng và độ bền khác đi, âm thầm | Thêm `Cross-Origin-Opener-Policy: same-origin` và `Cross-Origin-Embedder-Policy: require-corp` vào server phát web ở M7, và kiểm lại `crossOriginIsolated` trong E2E |

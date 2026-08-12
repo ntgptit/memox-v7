@@ -101,11 +101,6 @@ extension DeckLabels on BuildContext {
     DeckConflictReason.parentAtMaxDepth => l10n.deckConflictParentAtMaxDepth(
       DeckEntity.maxTreeDepth,
     ),
-    DeckConflictReason.rootContentTypeFixed =>
-      l10n.deckConflictRootContentTypeFixed,
-    DeckConflictReason.deckStillHasCards => l10n.deckConflictStillHasCards,
-    DeckConflictReason.deckStillHasSubDecks =>
-      l10n.deckConflictStillHasSubDecks,
     DeckConflictReason.resetNeedsRootDeck => l10n.deckConflictResetNeedsRoot,
     DeckConflictReason.resetSchedulerUnknown =>
       l10n.deckConflictResetSchedulerUnknown,

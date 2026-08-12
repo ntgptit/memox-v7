@@ -1,27 +1,89 @@
 part of 'deck_repository_impl.dart';
 
-/// Change the study mode while the scheduler is still unlocked (UC-03, BR-12).
+/// The two operations that rewrite a root deck's scheduler.
 ///
-/// **It reads like a reset with one line removed, and that line is the whole
-/// point.** `resetLearningProgress` bumps `scheduler_generation`; this does not
-/// (UC-03 postcondition). A generation marks "everything before this belongs to
-/// a cycle the user threw away" — and a deck where no card has finished the
-/// learning chain has no such cycle. Spending a generation here would file an
-/// empty history under a superseded number and make the next reset the *second*
-/// one, for a user who has reset nothing.
+/// **Together because they are the same write with one line different.** Both
+/// set `scheduler_type` and re-seed every study state in the tree, in one
+/// transaction (BR-47, BR-14, BR-42). Only `resetLearningProgress` bumps
+/// `scheduler_generation` — because only reset is throwing a generation of
+/// learning away. Reading them side by side is what makes that single
+/// difference visible; in two files it looked like two unrelated operations that
+/// happened to resemble each other, and the temptation was always to route the
+/// cheap one through the expensive one.
 ///
-/// The rest is identical because BR-14 asks for the same thing BR-42 does: every
-/// card in the tree reinitialised onto the new algorithm, in one transaction
-/// (BR-47). A tree holding `eight_box` boxes under an `sm2` root is what
-/// invariant 9 exists to catch, and doing this in two statements is the only way
-/// to produce it.
-mixin _ChangeUnlockedSchedulerOperation implements DeckRepository {
+/// **They reach Study through Study's domain contract**, which is what the
+/// architecture guard's own message recommends where it forbids reaching into
+/// another feature's `data/`. `invalidateSessionsForRoot` opens a transaction of
+/// its own; Drift joins it to the one already running, so BR-83 and BR-164 are
+/// closed inside BR-47 rather than beside it.
+mixin _SchedulerWriteOperations implements DeckRepository {
   DeckDao get _dao;
   DateTime Function() get _clock;
   StudyRepository get _study;
 
   Future<T> _guard<T>(Future<T> Function() action);
   Future<Deck> _requireDeckRow(String deckId);
+
+  @override
+  Future<void> resetLearningProgress({
+    required String rootDeckId,
+    required SchedulerType schedulerType,
+  }) => _guard(
+    () => _dao.runInTransaction(() async {
+      final deck = await _requireDeckRow(rootDeckId);
+
+      // A4: there is no such operation one level down. The scheduler and the
+      // generation belong to the root (BR-05), so a reset on a branch would
+      // either do nothing or quietly reset somebody else's tree.
+      if (deck.parentDeckId != null) {
+        throw const ConflictFailure(
+          message: 'Refused: learning progress is reset on a root deck.',
+          reason: DeckConflictReason.resetNeedsRootDeck,
+        );
+      }
+
+      // A scheduler this build does not know cannot be written back — the enum
+      // has no `dbValue` for it — so the refusal is here rather than at the
+      // write, where it would surface as a crash instead of an answer.
+      if (schedulerType == SchedulerType.unknown) {
+        throw const ConflictFailure(
+          message: 'Refused: that study mode is unknown to this version.',
+          reason: DeckConflictReason.resetSchedulerUnknown,
+        );
+      }
+
+      final now = _clock();
+      final generation =
+          (deck.schedulerGeneration ?? _initialSchedulerGeneration) + 1;
+
+      await _dao.updateDeckById(
+        rootDeckId,
+        DecksCompanion(
+          schedulerType: Value<String?>(schedulerType.dbValue),
+          schedulerGeneration: Value<int?>(generation),
+          // BR-44: the scheduler is unlocked again, and this is the only
+          // mechanism that does it (BR-13).
+          firstAnsweredAt: const Value<DateTime?>(null),
+          updatedAt: Value<DateTime>(now),
+        ),
+      );
+
+      await _dao.resetTreeStudyStates(
+        rootDeckId: rootDeckId,
+        schedulerType: schedulerType,
+        generation: generation,
+      );
+
+      // BR-83. `scheduler_reset`, not `stale_generation`: this is the reset
+      // closing its own sessions, not a session discovering afterwards that it
+      // had been outrun.
+      await _study.invalidateSessionsForRoot(
+        rootDeckId: rootDeckId,
+        endedAt: now,
+        reason: StudySessionEndReason.schedulerReset,
+      );
+    }),
+  );
 
   @override
   Future<void> changeUnlockedScheduler({
