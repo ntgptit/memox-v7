@@ -7,8 +7,8 @@
 | **Scope** | Quyết định ràng buộc nhiều tài liệu hoặc nhiều layer. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), hình dạng dữ liệu (`data-model.md`) |
 | **Source of truth for** | AD-xx · đánh đổi kiến trúc · phương án đã bị loại · lý do pin toolchain |
 | **Depends on** | `document-conventions.md`, `product.md` |
-| **Updated by task** | M99.7 (Bottom navigation IA scaffold — AD-19) |
-| **Last updated** | 2026-08-11 |
+| **Updated by task** | M99.19 (AD-20 · Card Transfer foundation) |
+| **Last updated** | 2026-08-12 |
 
 Format theo `document-conventions.md` §6.1. AD xếp theo số; ID vĩnh viễn (§7).
 
@@ -1361,3 +1361,55 @@ nghiệp vụ đứng sau. Toast "đang phát triển" thay cho branch thật �
 link được, không giữ stack, và toast không phải một destination. Đưa Starter
 Library hoặc Profile thành tab top-level — starter là child flow của Decks
 (AD-07), còn Profile chưa có domain nào đứng sau (AD-03).
+
+
+## AD-20 · Card Transfer: canonical schema dùng chung, Strategy theo format, Import và Export là hai pipeline
+
+| | |
+|---|---|
+| **Status** | accepted |
+| **Affected documents** | `business-rules.md` (BR-168…BR-173), `use-cases.md` (UC-10), `wireframes/m4-12-card-import.md` |
+
+**Decision.** Card transfer có một **canonical schema** duy nhất — sáu field
+`front · back · example · hint · pronunciation · tags`, header lowercase
+English không bao giờ localize, tag nối bằng `;` — sống ở
+`card_transfer_field_model.dart` và là bản gốc cho cả hai chiều. Mỗi file
+format là một **decoder Strategy** cùng emit một raw document model; một
+**resolver/registry** duy nhất (`cardTransferDecoderFor`) quyết định format
+nào dùng decoder nào, và không nơi nào khác được switch theo format. Pipeline
+đi qua ba stage model tách bạch: raw document (decode xong) → mapped record
+(sau column mapping) → canonical validated record (qua `CardText` /
+`CardDetailText` / `TagName`). Import và Export là **hai pipeline riêng**
+chung schema và chung decoder/encoder boundary; MVP chỉ triển khai Import, và
+không có API encode nào tồn tại trước caller đầu tiên của nó.
+
+**Context.** Import v1 nhận CSV, TSV, XLSX và paste text. Nghiệp vụ card
+không được phụ thuộc format biểu diễn — một rule chạy khác nhau tuỳ đuôi file
+là một rule có nhiều chủ. Đồng thời Export là hướng đã định (M99.17 N1):
+kiến trúc Import không được khoá schema/parser/model theo hướng import-only
+khiến Export phải viết lại.
+
+**Consequences.** Ba contract hẹp thay vì một: `CardImportSourceRepository`
+(picker — seam platform duy nhất), `CardTransferRepository` (decode, thuần
+bytes-to-rows, chạy off-thread), `CardImportRepository` (commit, thuần
+database, nói bằng canonical record). Widget test chỉ fake nửa nó gọi; impl
+commit chứng minh được là không thấy một byte CSV nào —
+`card_transfer_boundary_test.dart` ghim cả bốn ranh giới bằng source scan
+(presentation không thấy codec/picker, decoder không thấy database, commit
+không thấy codec, dispatch chỉ ở resolver). Thêm một format là một decoder
+mới cộng một nhánh switch trong resolver — exhaustive, nên thiếu nhánh là lỗi
+compile. Export sau này thêm encoder strategy + encoder resolver + export
+repository bên cạnh các contract này mà không sửa Preview hay transaction
+Import. Round-trip kỳ vọng: export rồi import lại giữ nội dung và tag, sinh
+id và study state mới — đây là **content transfer, không phải backup**, nên
+canonical record không mang id, timestamp, scheduler, box, interval, due hay
+history.
+
+**Rejected alternatives.** Một `ImportExportFactory` gom parse, validate, DB
+và picker — God Object với bốn lý do đổi khác nhau, và là đúng cái AD-18 đã
+loại ở trục StudyMode. Decode thẳng file thành `CardEntity` — trói entity vào
+từng format và buộc validation chạy trong parser, vi phạm BR-169 "một bộ
+validation". Tái sử dụng Study Mode factory cho transfer — hai trục mở rộng
+khác nhau; chung factory là chung lý do đổi. Chuẩn bị sẵn `encode()` rỗng
+"cho tương lai" — API chết không có test thật, và cái giá của thêm-sau đã
+được trả trước bằng ranh giới, không cần trả bằng code chết.

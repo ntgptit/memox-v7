@@ -172,3 +172,30 @@
 | 1 | Mở picker Move từ một selection | Danh sách chỉ có deck cùng root, không có root, không có deck đang chứa deck con, không có chính deck nguồn |
 | 2 | Gọi move tới một deck ở root khác | Bị từ chối kèm lý do; **không** tự đổi scheduler dù hai root trùng chế độ |
 | 3 | Quan sát dữ liệu sau lần từ chối | `deck_id`, `content_type` hai đầu và `updated_at` đều không đổi |
+
+## IT-CARD-014 — Import CSV/paste tạo card với study state mới
+
+- **Ưu tiên:** P0
+- **Tiền điều kiện:** Một sub-deck `unset` hoặc `card` trong root eight_box.
+- **Liên kết:** UC-10, BR-169, BR-171, BR-172.
+
+| Bước | Thao tác người dùng | Kết quả mong đợi |
+|---|---|---|
+| 1 | Mở Import cards, dán các dòng `front,back,tags` rồi bấm Preview | Cột tự map theo header; summary đếm đúng ready/invalid/blank |
+| 2 | Continue rồi Import N cards | Kết quả nêu số đã nhập; quay về Card List thấy card mới qua stream, không reload |
+| 3 | Kiểm tra một card vừa nhập | Có đúng một study state mới theo scheduler root; tag gắn đúng; không có due date |
+| 4 | Deck `unset` trước import | Sau import thành `card`; import 0 dòng thì giữ nguyên |
+| 5 | Restart app | Card và tag vẫn còn |
+
+## IT-CARD-015 — Import là tất-cả-hoặc-không, và đích không hợp lệ bị từ chối
+
+- **Ưu tiên:** P0
+- **Tiền điều kiện:** Có `IT-CARD-014`.
+- **Liên kết:** UC-10 E4/E5, BR-168, BR-170, BR-171.
+
+| Bước | Thao tác người dùng | Kết quả mong đợi |
+|---|---|---|
+| 1 | Import trùng nội dung card đã có, mặc định | Bị bỏ qua; bật Include duplicates thì ghi như card mới |
+| 2 | Card trùng xuất hiện *sau* Preview (tạo tay ở màn khác) | Commit vẫn bỏ qua theo policy — recheck trong transaction |
+| 3 | Gọi import tới root deck hoặc deck đang giữ deck con | Từ chối bằng lý do có kiểu; không ghi gì |
+| 4 | Một write giữa batch thất bại | Rollback toàn bộ card/state/tag/content type; màn giữ nguyên draft với Try again |

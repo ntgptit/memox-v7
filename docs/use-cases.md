@@ -7,7 +7,7 @@
 | **Scope** | Must-have của MVP. Ngoài phạm vi: should/nice-to-have, và mọi thứ ở mục "Điều đã cố ý không đặc tả" |
 | **Source of truth for** | UC-xx · main/alternative/error flow · UI state matrix của từng màn |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md` |
-| **Updated by task** | BR-165…BR-167 — UC-04 thêm A5 (di chuyển thẻ), A6 (chọn nhiều), E5, E6 |
+| **Updated by task** | M99.19 — UC-10: import card hàng loạt (Source → Preview → Import) |
 | **Last updated** | 2026-08-12 |
 
 Chỉ đặc tả must-have. Should-have và nice-to-have viết khi tới lượt — đặc tả
@@ -17,7 +17,7 @@ Luồng viết bằng ngôn ngữ người dùng, không nói theo màn hình ha
 hình sẽ đổi; luồng thì không.
 
 **ID use case là định danh vĩnh viễn**, cùng chính sách với BR (xem
-`business-rules.md`). UC mới append; không đánh số lại. Hiện tại: UC-01…UC-09.
+`business-rules.md`). UC mới append; không đánh số lại. Hiện tại: UC-01…UC-10.
 
 **Các UC nối vào nhau thế nào thì xem [`master-flow.md`](master-flow.md).** Tài
 liệu này đặc tả từng UC riêng lẻ và cố ý không vẽ đồ thị giữa chúng — mỗi UC mô
@@ -652,6 +652,78 @@ Create có ba hành vi khác nhau tuỳ trạng thái deck.
 **UI states:** loaded · submitting · error
 
 ---
+
+## UC-10 · Import card hàng loạt vào một deck
+
+| | |
+|---|---|
+| **Status** | active |
+
+**Actor:** Người dùng
+**Trigger:** Chọn "Import cards" từ card list của một deck loại card, từ empty
+state của card list, hoặc từ lựa chọn tạo phần tử con của một deck `unset`
+**Preconditions:** Deck đích tồn tại và là sub-deck `unset` hoặc `card` (BR-168)
+
+**Main flow:**
+1. Người dùng mở màn import; hệ thống hiển thị deck đích, số card hiện có và
+   ba bước Source → Preview → Import.
+2. Người dùng chọn nguồn: một file CSV/TSV/XLSX, hoặc dán văn bản CSV/TSV.
+3. Người dùng bấm Preview; hệ thống parse nguồn trong bộ nhớ (BR-173) — không
+   ghi gì vào database.
+4. Hệ thống mặc định coi hàng đầu là header và tự map các cột trùng tên
+   (front, back, example, hint, pronunciation, tags — không phân biệt hoa
+   thường); người dùng chỉnh mapping nếu cần. `front` và `back` bắt buộc phải
+   được map; một cột nguồn không map vào hai đích (BR-169).
+5. Hệ thống validate toàn bộ hàng bằng đúng các rule của card (BR-169), đánh
+   dấu trùng lặp theo BR-170, và hiển thị: tổng số hàng, số sẵn sàng, số trùng,
+   số invalid kèm lý do, số hàng trống đã bỏ qua, cùng các hàng đầu tiên.
+6. Người dùng bấm Continue rồi xác nhận ở bước Import — màn xác nhận nêu deck
+   đích, số card sẽ ghi, số trùng bị bỏ/ghi, số invalid bị loại.
+7. Hệ thống ghi toàn bộ trong một transaction (BR-171): card, study state mới
+   cho từng card, tag, và `content_type` nếu deck đang `unset` (BR-172).
+8. Hệ thống hiện kết quả — số đã ghi, số trùng bỏ qua, số invalid bị loại — với
+   hai lối ra: View cards về card list (danh sách tự cập nhật qua stream),
+   hoặc Import another file giữ deck đích và làm lại từ bước Source.
+
+**Alternative flows:**
+- **A1 — Dán văn bản:** ở bước Source người dùng dán các hàng CSV/TSV vào ô
+  nhập; parse chỉ chạy khi bấm Preview, và văn bản giữ nguyên khi parse lỗi.
+- **A2 — XLSX nhiều sheet:** hệ thống mặc định chọn sheet không rỗng đầu tiên
+  và cho người dùng đổi sheet; đổi sheet chạy lại bước 4–5.
+- **A3 — Không có header:** người dùng tắt "First row contains headers"; các
+  cột hiển thị tên vị trí ổn định (Column A, Column B, …) và hàng đầu được
+  validate như dữ liệu.
+- **A4 — Bao gồm trùng lặp:** người dùng bật "Include duplicates"; số sẵn sàng
+  gồm cả các hàng trùng, và commit ghi chúng như card mới (BR-170).
+- **A5 — Đổi file:** người dùng thay file đã chọn; hủy hộp chọn file không
+  phải lỗi và không xoá lựa chọn trước đó.
+
+**Error flows:**
+- **E1 — File không đọc được:** file hỏng, có mật khẩu, đuôi không hỗ trợ hoặc
+  encoding không phải UTF-8/UTF-8 BOM (BR-173) → lỗi có kiểu kèm hướng dẫn
+  (export lại UTF-8); nguồn đã chọn trước đó giữ nguyên.
+- **E2 — Nguồn rỗng:** file/sheet/văn bản không có hàng dữ liệu nào → thông báo
+  rõ ở bước Preview; không đi tiếp được.
+- **E3 — Không còn hàng hợp lệ:** sau validate và policy trùng lặp, số sẽ ghi
+  bằng 0 → Continue bị khoá; không có mutation nào (BR-171).
+- **E4 — Deck đích không còn hợp lệ lúc ghi:** deck biến mất, thành root-level
+  hoặc đã giữ deck con → transaction từ chối bằng lý do có kiểu (BR-168), không
+  ghi gì; preview và mapping giữ nguyên.
+- **E5 — Commit thất bại giữa chừng:** một write lỗi → rollback toàn bộ
+  (BR-171); màn import giữ nguyên nguồn, mapping và preview, hiện Try again.
+
+**Postconditions:** Mọi card được ghi có đúng một study state mới theo scheduler
+của root (BR-171); card, tiến độ và history đã có từ trước không bị sửa;
+`content_type` của deck đích phản ánh đúng nội dung sau import (BR-172).
+
+**Business rules:** BR-07, BR-08, BR-09, BR-58, BR-62, BR-64, BR-93, BR-94,
+BR-95, BR-168, BR-169, BR-170, BR-171, BR-172, BR-173
+
+**UI states:** initial (Source trống) · source đã chọn · parsing · parse error ·
+preview loaded (đủ valid/invalid/duplicate/blank) · preview empty (E2/E3) ·
+confirm · submitting · commit error · result. Không có state "refreshing" —
+nguồn chỉ parse lại khi người dùng đổi nguồn, sheet, header hoặc bấm lại
+Preview.
 
 ## Điều đã cố ý không đặc tả
 

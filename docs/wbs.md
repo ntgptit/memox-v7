@@ -8870,6 +8870,92 @@ thế không đổi bố cục.
   notifier thứ năm)
 - **Checklist phases:** 9.3, 10.2, 12.2, 14.2
 
+### M99.19 · Card Transfer foundation + Card Import v1
+
+- **Status:** **done** — host gate xanh (`dod_check.sh` full): analyze sạch,
+  toàn bộ test pass, guard sạch, `check_docs` sạch, visual audit
+  `card_import_screen` PASS light+dark, demo goldens dựng và đã xem,
+  Widgetbook đăng ký `CardImportScreen`. **Device integration suite: not
+  run** (không có emulator trong môi trường phiên này) — chưa kiểm chứng
+  system file picker, đọc file thật trên Android, Android Back/keyboard/safe
+  area và điều hướng sau import trên thiết bị; **không** claim full DoD.
+- **Goal:** Hai phần. (1) Nền tảng Card Transfer tái sử dụng được khi làm
+  Export: canonical schema sáu field, decoder Strategy theo format với một
+  resolver duy nhất, ba stage model raw → mapped → canonical (AD-20). (2)
+  Import v1: manual create qua app-bar `+` là luồng khối lượng nhỏ (M99.17
+  D4); một bộ thẻ thật nằm trong một file nghìn dòng. Import đưa file đó vào
+  một deck qua ba bước Source → Preview → Import: parse và validate trước,
+  ghi một lần atomic sau. Export KHÔNG triển khai trong task này, nhưng
+  kiến trúc không khoá theo hướng import-only.
+- **Scope:** BR-168…BR-173 và UC-10; wizard ba bước một route
+  (`/decks/:deckId/cards/import`, wireframe M4.12); nguồn CSV/TSV/XLSX (UTF-8 /
+  UTF-8 BOM) và paste text; chọn sheet XLSX; toggle header; column mapping với
+  auto-map theo tên; validation tái sử dụng `CardText`/`CardDetailText`/`TagName`;
+  duplicate theo `front_folded + back_folded` (deck đích + trong file), mặc định
+  skip, có Include duplicates; commit một Drift transaction — batch insert cards,
+  đúng một study state mỗi card theo scheduler root, tag tạo/tái sử dụng,
+  `content_type` tự cập nhật; result summary; entry point từ Card List overflow,
+  empty state và deck `unset`; EN/VI ARB; light/dark, 320–412px, textScale 2.0.
+  Package mới: `file_selector` ^1.1.0, `csv` ^8.0.0, `excel` ^4.0.6.
+- **Out of scope:** export; backup/restore; Google Drive/Account/sync; Anki
+  `.apkg`; media; import lịch học/schedule/due/box/SM-2 state; tạo deck tree từ
+  file; update/merge card hiện có; cloud upload; broad storage permission;
+  drag-and-drop như capability chính; inline editing trong preview; draft sống
+  qua app restart; `dio`/auth/sync abstraction. **Không giới hạn kích thước file
+  theo concept (5 MB)** — chưa có measurement nào đòi hỏi; nếu sau này cần
+  defensive limit thì thêm bằng named constant + boundary test + lý do ghi ở đây.
+- **Editable documents:** `docs/product.md`, `docs/business-rules.md`,
+  `docs/use-cases.md`, `docs/wbs.md`, `docs/wireframes/m4-12-card-import.md`
+  (mới), `docs/it-scenarios/*`, `lib/features/card/README.md`
+- **Output:** AD-20; domain `card_transfer_*` canonical models
+  (format/field/source/document/mapping/record) + `card_import_preview/result`
+  + failures; ba contract `CardTransferRepository` /
+  `CardImportSourceRepository` / `CardImportRepository` + ba impl; data
+  `card_delimited_transfer_data_source.dart`,
+  `card_xlsx_transfer_data_source.dart`,
+  `card_transfer_resolver_data_source.dart`, `card_import_file_data_source.dart`,
+  `card_import_dao.dart`; route `cardImport`; screen `card_import_screen.dart`
+  + controllers + widgets bốn bucket; bindings ở
+  `app/di/repository_bindings.dart`; ARB EN/VI;
+  `card_transfer_boundary_test.dart`; goldens + Widgetbook.
+- **Acceptance criteria:**
+  - [x] Canonical schema ổn định: header lowercase English không localize,
+        thứ tự field cố định, tag nối `;`; record không mang id/lịch/tiến độ
+        (AD-20). Ba format decode cùng dữ liệu ra record tương đương.
+  - [x] Resolver là nơi duy nhất dispatch format; CSV và TSV dùng chung
+        delimited strategy; không có `ImportExportFactory`, không có dead
+        Export API — `card_transfer_boundary_test.dart` ghim bằng source scan.
+  - [x] Source → Preview → Import chạy đủ với upload CSV/TSV/XLSX và paste
+        CSV/TSV; không hỗ trợ và không quảng cáo `.apkg`.
+  - [x] Front/Back bắt buộc phải map; một cột nguồn không map hai đích; cột
+        còn lại Ignore được (BR-169).
+  - [x] Preview hiển thị đủ valid / invalid (kèm lý do có kiểu) / duplicate
+        existing / duplicate in file / blank skipped, và summary counts đúng.
+  - [x] Duplicate mặc định skip, Include duplicates ghi như card mới, và
+        policy được recheck bên trong transaction (BR-170).
+  - [x] Commit đúng một transaction: mỗi card đúng một study state mới theo
+        scheduler/generation của root, tag tạo/tái sử dụng theo folded name,
+        `content_type` unset→card khi có card ghi; một write lỗi rollback toàn
+        bộ, zero-row không mutation (BR-171, BR-172); không gọi `createCard` N
+        lần; card/tiến độ/history có sẵn không bị sửa.
+  - [x] Root deck và deck giữ deck con bị từ chối trong transaction (BR-168)
+        và không có entry point import (W6).
+  - [x] Không log nội dung card, pasted text, tên file hay hàng thô (BR-173).
+  - [x] Card List cập nhật qua Drift stream sau import — không reload route.
+  - [x] Không overflow ở 320px/textScale 2.0; keyboard không che ô paste hoặc
+        primary action; selected source có semantics; stepper có step
+        semantics (W7).
+  - [x] ARB EN/VI đầy đủ; docs/BR/UC/decision table/IT scenarios cập nhật;
+        goldens + Widgetbook đăng ký.
+  - [x] `dod_check.sh` full xanh. Device integration suite: chạy một lần ở
+        final gate nếu có emulator, không thì báo rõ "not run".
+- **Dependencies:** M99.18 (bulk primitives và taxonomy notifier là nền)
+- **Tests required:** unit cho mapping/validation/duplicate/tags; parser
+  fixtures CSV/TSV/XLSX (encoding, BOM, quote, newline-in-cell, sheet, corrupt);
+  repository trên SQLite thật kèm fault-injection chứng minh rollback; widget
+  cho wizard đủ state; router cho route mới; demo goldens.
+- **Checklist phases:** 9.3, 10.2, 12.2, 14.2
+
 ## Blocker
 
 | Blocker | Ảnh hưởng | Cách gỡ |
