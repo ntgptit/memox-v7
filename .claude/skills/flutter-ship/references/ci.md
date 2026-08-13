@@ -3,14 +3,31 @@
 ## GitHub Actions
 
 > **The block below is a reference template, not the live workflow.** The real
-> pipeline is a *pair*: `.github/workflows/ci.yml` (per-PR: codegen +
-> freshness, doc-integrity via `check_docs.sh`, guard-version check, format,
-> `flutter analyze --no-fatal-infos`, guard **without** `--profile ci`,
-> subset test run `--exclude-tags golden` plus targeted suites, widgetbook
-> smoke test, a font-symlink workaround) and `.github/workflows/ci-full.yml`
-> (the full suite including goldens, Windows-bound). When they disagree with
-> this template, **the workflow files win** — update this file when the
-> pipeline changes rather than the other way round.
+> pipeline is a *pair*: `.github/workflows/ci.yml` (per PR, one stable `CI gate`
+> result) and `.github/workflows/ci-full.yml` (manual milestone/release gate).
+> When they disagree with this template, **the workflow files win** — update
+> this file when the pipeline changes rather than the other way round.
+
+The live PR workflow classifies paths before installing Flutter:
+
+- A pull request whose changed files are all under `docs/prompt/**` runs the
+  Python tooling tests and `check_prompt_contract.py` only. Missing review files,
+  malformed seven-field headers and incomplete implementation/review phase
+  contracts fail here. Empty and mixed changes fail safe to the code path.
+- The code path runs static verification, three shards covering the complete
+  non-golden host suite, and the Widgetbook smoke test as parallel jobs. Each
+  shard generates ignored code locally and uses `--reporter failures-only` to
+  avoid printing thousands of successful test events.
+- The final `CI gate` job inspects every selected job result. It is the stable
+  check a repository ruleset should require; conditional jobs are implementation
+  details and may legitimately show as skipped.
+- The workflow does not run again on `push` to `main`. A pull request already
+  verified its exact head, so the former post-merge duplicate spent another
+  full runner window without increasing coverage.
+
+`ci-full.yml` remains deliberately serial/from-cold where that is the evidence
+being sought: codegen reproducibility, monolithic suite + count floor, Windows
+goldens and the web build. It is not a substitute for the per-PR aggregate gate.
 
 Reference template:
 

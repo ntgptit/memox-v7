@@ -5,8 +5,9 @@ name: CI (full)
 # that before merging a milestone, and always before a release.
 #
 # What lives here (and why it is not on every PR):
-#   * the full test suite + its count floor — slow, and the light gate already
-#     runs the Deck + guard tests that protect the template;
+#   * a from-cold rerun of the full test suite + its count floor — PR CI already
+#     covers the same non-golden tests in parallel shards, while this job proves
+#     the suite can still run monolithically and has not silently shrunk;
 #   * goldens + the golden count floor — windows-bound pixel comparisons;
 #   * the web build (E2E channel) — a full dart2js compile;
 #   * clean-rebuild reproducibility — a second, from-nothing build_runner pass.
@@ -67,23 +68,7 @@ jobs:
         run: bash .claude/skills/flutter-workflow/scripts/check_docs.sh
 
       - name: precache and verify the SDK artifacts tests render with
-        run: |
-          flutter precache --force --universal
-          FONTS="$FLUTTER_ROOT/bin/cache/artifacts/material_fonts"
-          cd "$FONTS"
-          for file in *; do
-            lower="$(printf '%s' "$file" | tr '[:upper:]' '[:lower:]')"
-            [ "$file" = "$lower" ] && continue
-            [ -e "$lower" ] && continue
-            ln -s "$file" "$lower"
-          done
-          cd - > /dev/null
-          if [ ! -f "$FONTS/roboto-regular.ttf" ]; then
-            echo "::error::material fonts unreachable after precache — the toolchain is incomplete, not the project"
-            ls -la "$FONTS" || true
-            exit 1
-          fi
-          echo "material fonts reachable at $FONTS/roboto-regular.ttf"
+        run: bash .claude/skills/flutter-workflow/scripts/prepare_test_fonts.sh
 
       - name: flutter test (full, excluding goldens)
         run: |

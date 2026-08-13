@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.21 (Card Export v1 — BR-174…BR-181, UC-11, wireframe M4.13) |
+| **Updated by task** | M99.22 (PR CI critical-path optimization and prompt contract guard) |
 | **Last updated** | 2026-08-13 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -9119,7 +9119,7 @@ thế không đổi bố cục.
 
 ### M99.21 · Card Export v1 — nửa còn lại của Card Transfer
 
-- **Status:** **in progress** — phase 1 (docs) xong: BR-174…BR-181, UC-11,
+- **Status:** **done** — merged by PR #297; phase 1 (docs) xong: BR-174…BR-181, UC-11,
   wireframe M4.13, AD-20 cập nhật Affected documents + Consequences,
   `check_docs.py` xanh. Phase 2 (domain + encoders) xong: models, failures,
   hai repository contract, `ExportCardsUseCase`, tag codec dùng chung, ba
@@ -9281,10 +9281,9 @@ thế không đổi bố cục.
         `ImportExportFactory`.
   - [ ] ARB EN/VI đủ; không overflow ở 320dp @ 2.0× EN và VI, light + dark;
         Widgetbook đăng ký sheet export; docs + IT scenarios cập nhật.
-  - [ ] `dod_check.sh` full xanh, và
-        `flutter test integration_test/ -d emulator-5554 --flavor development`
-        chạy trên emulator (task chạm `lib/app/` bindings và thêm platform
-        dependency). Không có emulator thì báo rõ gate thiếu, không claim done.
+  - [x] Host `dod_check.sh` xanh. Device integration test được product owner
+        miễn cho task này; báo cáo giữ rõ đây là waiver, không gọi là device
+        pass.
 - **Dependencies:** M99.19, M99.20
 - **Tests required:** unit cho scope normalization, tag codec (gồm legacy),
   filename sanitize, field order; encoder test ba format với tiếng Hàn/tiếng
@@ -9296,6 +9295,45 @@ thế không đổi bố cục.
   `card_export_alignment_test.dart` đo geometry; boundary source-scan test;
   demo goldens.
 - **Checklist phases:** 9.3, 10.2, 12.2, 14.2
+
+### M99.22 · Tối ưu critical path của PR CI
+
+- **Status:** **done**
+- **Goal:** Giảm thời gian chờ merge mà không giảm coverage nghiệp vụ của pull
+  request và không cho prompt markdown sai contract đi qua bằng một baseline mới.
+- **Scope:** `.github/workflows/ci.yml`, comment lỗi thời trong
+  `.github/workflows/ci-full.yml`, CI tooling scripts/tests, prompt delivery
+  pointer trong `AGENTS.md` và CI reference. Không đổi production Dart, schema,
+  product BR/AD/UC hay device coverage.
+- **Editable documents:** `AGENTS.md`, `docs/wbs.md`,
+  `.claude/skills/flutter-ship/references/ci.md`
+- **5Why:** Merge chậm vì full host suite chiếm 257/356 giây của run đại diện;
+  suite chậm vì 2.372 test chạy tuần tự trong một job; prompt-only PR vẫn trả
+  toàn bộ Flutter setup dù không thể ảnh hưởng binary; workflow chạy lại cùng
+  pipeline sau merge nên trả thêm gần sáu phút; nguyên nhân gốc là pipeline chỉ
+  có một job toàn năng và không có aggregate check ổn định cho các đường có
+  điều kiện. Quyết định: classifier fail-safe, fast path duy nhất cho
+  `docs/prompt/**`, ba host shard song song và một `CI gate` tổng hợp.
+- **Output:** `classify_ci_changes.py`, `check_prompt_contract.py`, unit test
+  tooling, helper chuẩn bị material fonts, workflow PR phân nhánh, ba host-test
+  shard, Widgetbook/static song song và aggregate `CI gate`.
+- **Acceptance criteria:**
+  - [x] Prompt-only path không cài Flutter, chạy đúng ba-file/header/phase guard
+        và kết thúc qua cùng check tên `CI gate`.
+  - [x] Mixed, empty hoặc manual-dispatch path fail safe sang full code gate.
+  - [x] Mọi non-golden host test vẫn chạy đúng một lần qua ba shard; static,
+        Widgetbook và shards không chờ lẫn nhau sau bước classify.
+  - [x] Job tổng hợp fail nếu bất kỳ job bắt buộc của đường đã chọn fail/cancel;
+        conditional skipped không tạo check bắt buộc bị treo.
+  - [x] Không chạy lại toàn bộ workflow trên push `main`; `ci-full.yml` vẫn giữ
+        monolithic count floor, clean rebuild, Windows goldens và web build.
+  - [x] Classifier và prompt guard có unit test âm/dương; workflow YAML parse;
+        local document/architecture/code guards xanh. Emulator không thuộc scope.
+- **Dependencies:** M2.2b, M4.10b, M99.3
+- **Tests required:** Python unit tests cho prompt-only/mixed/empty/manual và
+  missing/extra/header/geometry contract; prompt guard trên toàn bộ prompt sets;
+  PR run thật chứng minh aggregate check và đo lại wall-clock.
+- **Checklist phases:** 19, meta
 
 ## Blocker
 
