@@ -1,22 +1,18 @@
 name: CI
 
-# The lightweight gate that runs on every change, kept deliberately cheap for the
-# develop phase. It catches the mistakes that would be copied out of Deck into the
-# next feature — a controller reaching the wrong layer, duplicated validation, a
-# guard that scans nothing, stale generated code — without paying for a full test
-# matrix, goldens, or a web build on every commit.
+# Pull requests always expose one stable aggregate check (`CI gate`). A change
+# made exclusively under docs/prompt/ takes the Python-only prompt-contract
+# path. Every mixed, empty or unknown change set fails safe to the complete code
+# path: static verification, the whole non-golden host suite split across three
+# parallel shards, and the Widgetbook smoke test.
 #
-# The heavy jobs (full test suite, goldens + count floor, web build, clean-rebuild
-# reproducibility) live in `ci-full.yml` and run on demand — open Actions and press
-# "Run workflow", or before merging a milestone. This split is a develop-phase
-# choice, not a permanent one: the heavy gates are still one click away and must be
-# run before a release.
+# Goldens, clean codegen reproducibility and web build remain in ci-full.yml.
+# The PR pipeline is intentionally not repeated on push to main: the required
+# aggregate check has already verified the exact PR head, and rerunning it after
+# merge consumed another ~6 minutes without adding coverage.
 on:
   pull_request:
     branches: [main]
-  push:
-    branches: [main]
-  # So the light gate can also be run against any branch without a PR.
   workflow_dispatch:
 
 concurrency:
@@ -27,14 +23,69 @@ permissions:
   contents: read
 
 jobs:
-  verify:
-    name: format · analyze · guards · deck tests
+  classify:
+    name: classify change set
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 3
+    outputs:
+      changed_count: ${{ steps.changes.outputs.changed_count }}
+      has_prompt_changes: ${{ steps.changes.outputs.has_prompt_changes }}
+      prompt_only: ${{ steps.changes.outputs.prompt_only }}
+      code_required: ${{ steps.changes.outputs.code_required }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: classify changed paths
+        id: changes
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            git diff --name-only --diff-filter=ACMRD -z "$BASE_SHA" "$HEAD_SHA" \
+              | python .claude/skills/flutter-workflow/scripts/classify_ci_changes.py \
+                  --nul --github-output "$GITHUB_OUTPUT"
+          else
+            printf '' \
+              | python .claude/skills/flutter-workflow/scripts/classify_ci_changes.py \
+                  --force-code --github-output "$GITHUB_OUTPUT"
+          fi
+
+  prompt_contract:
+    name: prompt contract
+    needs: classify
+    if: needs.classify.outputs.has_prompt_changes == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
     steps:
       - uses: actions/checkout@v4
 
-      # Python for the verification guard and the doc-integrity checks.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: CI tooling unit tests
+        run: python -m unittest discover -s .claude/skills/flutter-workflow/scripts/tests -p 'test_*.py'
+
+      - name: prompt delivery contract
+        run: python .claude/skills/flutter-workflow/scripts/check_prompt_contract.py
+
+  static:
+    name: format · analyze · guards · docs
+    needs: classify
+    if: needs.classify.outputs.code_required == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -48,61 +99,35 @@ jobs:
         with:
           flutter-version-file: .fvmrc
           cache: true
-          # One SDK + pub cache shared by every ubuntu job across both
-          # workflows — they resolve the same lockfile, so four separate caches
-          # (flutter-verify-, -full-, -web-) were three redundant downloads.
           cache-key: 'flutter-:os:-:channel:-:version:-:arch:'
 
-      # build_runner's own incremental cache. Without it every run regenerates
-      # from cold — drift_dev + riverpod_generator + freezed from scratch, ~30s.
-      # Keyed on the lockfile (which changes when a generator version does) plus
-      # the sha, so the newest run restores the most recent graph and build_runner
-      # rebuilds only what a source edit touched. The reproducibility gate in
-      # ci-full still builds cold, so a subtly-stale incremental output cannot
-      # pass unnoticed.
       - name: cache build_runner
         uses: actions/cache@v4
         with:
           path: .dart_tool/build
-          key: build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}-${{ github.sha }}
+          key: build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}-${{ github.sha }}-static
           restore-keys: |
             build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}-
 
       - name: pub get
         run: flutter pub get
 
-      # The Widgetbook catalog is a nested package (widgetbook/). The root
-      # `flutter analyze` run creates an analysis context for it too, so its
-      # dependencies must be resolved here or every import in the catalog
-      # reports uri_does_not_exist — 100+ errors that have nothing to do with
-      # the change under review.
       - name: pub get (widgetbook catalog)
         run: flutter pub get
         working-directory: widgetbook
 
-      # Generated code is gitignored, so this is what makes a fresh clone equal to a
-      # developer's tree; analyze and the tests below would report hundreds of
-      # unrelated errors without it.
       - name: generate
         run: dart run build_runner build --delete-conflicting-outputs
 
-      # Freshness only (`--skip-rebuild`): nothing generated is committed, every
-      # declared part is present. The absolute clean-rebuild-reproducibility check
-      # is slow and lives in ci-full.yml.
       - name: generated code freshness
         run: bash .claude/skills/flutter-workflow/scripts/check_generated.sh --skip-rebuild
 
-      # The same script the local gate runs, so the two cannot disagree about
-      # which files are in scope. `.` worked here — a fresh clone has no
-      # worktrees — but it was a second definition of one check.
       - name: dart format
         run: bash .claude/skills/flutter-workflow/scripts/check_format.sh
 
       - name: flutter analyze
         run: flutter analyze --no-fatal-infos
 
-      # Architecture guards — the cheap ones that stop a boundary or ownership
-      # mistake from being copied out of Deck.
       - name: architecture boundaries
         run: bash .claude/skills/flutter-architecture/scripts/check_architecture.sh
 
@@ -116,48 +141,120 @@ jobs:
       - name: document integrity
         run: bash .claude/skills/flutter-workflow/scripts/check_docs.sh
 
-      # Widget tests below render with the material fonts; the SDK ships them under
-      # a CamelCase name that `flutter_test` asks for in lowercase, and Linux is
-      # case-sensitive. Symlink both spellings, then fail loudly if still unreachable.
-      - name: precache and verify the SDK artifacts tests render with
+      - name: CI tooling unit tests
+        run: python -m unittest discover -s .claude/skills/flutter-workflow/scripts/tests -p 'test_*.py'
+
+  host_tests:
+    name: host tests · shard ${{ matrix.label }}/3
+    needs: classify
+    if: needs.classify.outputs.code_required == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - shard: 0
+            label: 1
+          - shard: 1
+            label: 2
+          - shard: 2
+            label: 3
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: .fvmrc
+          cache: true
+          cache-key: 'flutter-:os:-:channel:-:version:-:arch:'
+
+      - name: cache build_runner
+        uses: actions/cache@v4
+        with:
+          path: .dart_tool/build
+          key: build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}-${{ github.sha }}-host-${{ matrix.shard }}
+          restore-keys: |
+            build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}-
+
+      - name: pub get
+        run: flutter pub get
+
+      - name: generate
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: prepare material fonts
+        run: bash .claude/skills/flutter-workflow/scripts/prepare_test_fonts.sh
+
+      - name: host test suite (non-golden)
         run: |
-          flutter precache --force --universal
-          FONTS="$FLUTTER_ROOT/bin/cache/artifacts/material_fonts"
-          cd "$FONTS"
-          for file in *; do
-            lower="$(printf '%s' "$file" | tr '[:upper:]' '[:lower:]')"
-            [ "$file" = "$lower" ] && continue
-            [ -e "$lower" ] && continue
-            ln -s "$file" "$lower"
-          done
-          cd - > /dev/null
-          if [ ! -f "$FONTS/roboto-regular.ttf" ]; then
-            echo "::error::material fonts unreachable after precache — the toolchain is incomplete, not the project"
-            ls -la "$FONTS" || true
-            exit 1
-          fi
-          echo "material fonts reachable at $FONTS/roboto-regular.ttf"
+          mapfile -d '' test_files < <(
+            python .claude/skills/flutter-workflow/scripts/select_test_shard.py \
+              --total-shards 3 --shard-index ${{ matrix.shard }} --nul
+          )
+          flutter test --exclude-tags golden --reporter failures-only "${test_files[@]}"
 
-      # **The whole host suite, not a slice of it.** This step used to run
-      # `test/app` and `test/features/deck` only, which meant the study
-      # scheduler, every repository, the database queries and the migrations
-      # were not checked by any pull request — they waited for `ci-full.yml`,
-      # which is manual. Between that and `integration_test/` never running in
-      # CI at all, the project had no automatic gate on business correctness.
-      #
-      # That is the whole point of the testing-pyramid refactor: every
-      # `HOST-FLOW` and `HOST-WIDGET` scenario runs here, on a plain runner,
-      # with a real in-memory SQLite and no emulator. See
-      # `docs/it-scenarios/12-testing-pyramid-audit.md`.
-      #
-      # `--exclude-tags golden` because goldens are rasterised on Windows and
-      # run in `ci-full.yml`; they check pixels, not behaviour.
-      - name: host test suite (unit · database · HOST-FLOW · HOST-WIDGET · guards)
-        run: flutter test --exclude-tags golden
+  widgetbook:
+    name: Widgetbook smoke test
+    needs: classify
+    if: needs.classify.outputs.code_required == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
 
-      # One smoke test: every registered use-case must construct and the shell
-      # must build. A catalog nobody runs in CI is a catalog that rots the
-      # first week nobody opens it.
-      - name: widgetbook catalog smoke test
-        run: flutter test
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: .fvmrc
+          cache: true
+          cache-key: 'flutter-:os:-:channel:-:version:-:arch:'
+
+      - name: cache build_runner
+        uses: actions/cache@v4
+        with:
+          path: .dart_tool/build
+          key: build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}-${{ github.sha }}-widgetbook
+          restore-keys: |
+            build-runner-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}-
+
+      - name: pub get
+        run: flutter pub get
+
+      - name: pub get (widgetbook catalog)
+        run: flutter pub get
         working-directory: widgetbook
+
+      - name: generate
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: prepare material fonts
+        run: bash .claude/skills/flutter-workflow/scripts/prepare_test_fonts.sh
+
+      - name: widgetbook catalog smoke test
+        run: flutter test --reporter failures-only
+        working-directory: widgetbook
+
+  gate:
+    name: CI gate
+    if: always()
+    needs: [classify, prompt_contract, static, host_tests, widgetbook]
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: require the selected path to pass
+        run: |
+          python .claude/skills/flutter-workflow/scripts/check_ci_gate.py \
+            --classify-result '${{ needs.classify.result }}' \
+            --prompt-result '${{ needs.prompt_contract.result }}' \
+            --static-result '${{ needs.static.result }}' \
+            --host-result '${{ needs.host_tests.result }}' \
+            --widgetbook-result '${{ needs.widgetbook.result }}' \
+            --has-prompt-changes '${{ needs.classify.outputs.has_prompt_changes }}' \
+            --prompt-only '${{ needs.classify.outputs.prompt_only }}' \
+            --code-required '${{ needs.classify.outputs.code_required }}'

@@ -113,6 +113,11 @@ explicitly opts out of one of them:
    concept; accepting it requires a state-by-state comparison with the concept
    and an explicit list of approved differences.
 
+This file-set, seven-field header and phase contract are mechanically checked by
+`.claude/skills/flutter-workflow/scripts/check_prompt_contract.py`. A pull
+request that changes only `docs/prompt/**` runs that Python guard without
+booting the Flutter toolchain; mixed changes still run the complete code gate.
+
 The two review prompts MUST remain separate: architecture correctness is not
 evidence of visual completion, and visual similarity is not evidence of correct
 business behavior. Each prompt MUST be executable in a fresh agent session and
