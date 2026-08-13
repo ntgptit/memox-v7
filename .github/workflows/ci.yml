@@ -187,10 +187,12 @@ jobs:
         run: bash .claude/skills/flutter-workflow/scripts/prepare_test_fonts.sh
 
       - name: host test suite (non-golden)
-        run: >-
-          flutter test --exclude-tags golden
-          --total-shards 3 --shard-index ${{ matrix.shard }}
-          --reporter failures-only
+        run: |
+          mapfile -d '' test_files < <(
+            python .claude/skills/flutter-workflow/scripts/select_test_shard.py \
+              --total-shards 3 --shard-index ${{ matrix.shard }} --nul
+          )
+          flutter test --exclude-tags golden --reporter failures-only "${test_files[@]}"
 
   widgetbook:
     name: Widgetbook smoke test

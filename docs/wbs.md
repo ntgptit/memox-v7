@@ -9315,13 +9315,15 @@ thế không đổi bố cục.
   điều kiện. Quyết định: classifier fail-safe, fast path duy nhất cho
   `docs/prompt/**`, ba host shard song song và một `CI gate` tổng hợp.
 - **Output:** `classify_ci_changes.py`, `check_prompt_contract.py`, unit test
-  tooling, helper chuẩn bị material fonts, workflow PR phân nhánh, ba host-test
-  shard, Widgetbook/static song song và aggregate `CI gate`.
+  tooling, file-level shard selector, helper chuẩn bị material fonts, workflow
+  PR phân nhánh, ba host-test shard, Widgetbook/static song song và aggregate
+  `CI gate`.
 - **Acceptance criteria:**
   - [x] Prompt-only path không cài Flutter, chạy đúng ba-file/header/phase guard
         và kết thúc qua cùng check tên `CI gate`.
   - [x] Mixed, empty hoặc manual-dispatch path fail safe sang full code gate.
-  - [x] Mọi non-golden host test vẫn chạy đúng một lần qua ba shard; static,
+  - [x] Mọi non-golden host test vẫn chạy đúng một lần qua ba shard **theo
+        file**; test trong cùng suite không bị tách khỏi setup; static,
         Widgetbook và shards không chờ lẫn nhau sau bước classify.
   - [x] Job tổng hợp fail nếu bất kỳ job bắt buộc của đường đã chọn fail/cancel;
         conditional skipped không tạo check bắt buộc bị treo.
@@ -9330,9 +9332,10 @@ thế không đổi bố cục.
   - [x] Classifier và prompt guard có unit test âm/dương; workflow YAML parse;
         local document/architecture/code guards xanh. Emulator không thuộc scope.
 - **Dependencies:** M2.2b, M4.10b, M99.3
-- **Tests required:** Python unit tests cho prompt-only/mixed/empty/manual và
-  missing/extra/header/geometry contract; prompt guard trên toàn bộ prompt sets;
-  PR run thật chứng minh aggregate check và đo lại wall-clock.
+- **Tests required:** Python unit tests cho prompt-only/mixed/empty/manual,
+  missing/extra/header/geometry contract và file-shard disjoint/complete/
+  deterministic; prompt guard trên toàn bộ prompt sets; PR run thật chứng minh
+  aggregate check và đo lại wall-clock.
 - **Checklist phases:** 19, meta
 
 ## Blocker

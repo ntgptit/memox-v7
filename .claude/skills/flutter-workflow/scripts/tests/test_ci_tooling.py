@@ -97,6 +97,35 @@ class AggregateGateTest(unittest.TestCase):
         self.assertTrue(any("host-test shards" in problem for problem in problems))
 
 
+class FileShardSelectionTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.module = _load("select_test_shard")
+
+    def test_files_are_atomic_disjoint_and_complete(self) -> None:
+        files = [
+            self.module.WeightedTestFile("a_test.dart", 10),
+            self.module.WeightedTestFile("b_test.dart", 8),
+            self.module.WeightedTestFile("c_test.dart", 6),
+            self.module.WeightedTestFile("d_test.dart", 4),
+        ]
+        shards = self.module.partition(files, total_shards=2)
+        flattened = [item.path for shard in shards for item in shard]
+        self.assertCountEqual([item.path for item in files], flattened)
+        self.assertEqual(len(flattened), len(set(flattened)))
+        self.assertEqual([14, 14], [sum(item.weight for item in shard) for shard in shards])
+
+    def test_partition_is_deterministic_for_input_order(self) -> None:
+        files = [
+            self.module.WeightedTestFile("c_test.dart", 1),
+            self.module.WeightedTestFile("a_test.dart", 1),
+            self.module.WeightedTestFile("b_test.dart", 1),
+        ]
+        forward = self.module.partition(files, total_shards=2)
+        backward = self.module.partition(list(reversed(files)), total_shards=2)
+        self.assertEqual(forward, backward)
+
+
 HEADER = """# {title}
 
 | | |
