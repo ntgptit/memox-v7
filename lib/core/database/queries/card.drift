@@ -263,3 +263,103 @@ SELECT front_folded, back_folded FROM cards WHERE deck_id = :deckId;
 -- an import with thirty distinct tags is one statement, not thirty.
 tagsByFoldedNames:
 SELECT * FROM tags WHERE name_folded IN :foldedNames;
+
+-- ---- export (BR-174, BR-177) ----------------------------------------------
+
+-- The deck's own name, for the exported file's name (BR-180).
+--
+-- Read inside the same transaction as the rows below, never beside them: the
+-- name and the cards are one snapshot (BR-177), and a file whose name came
+-- from before a rename while its rows came from after it is a file nobody can
+-- explain. `deckContextById` would answer this too and costs a recursive
+-- ancestry walk for a breadcrumb no export renders — and it returns no row for
+-- a deck that is gone, which is exactly the signal `deckMissing` needs.
+exportDeckName:
+SELECT name FROM decks WHERE id = :deckId;
+
+-- Every card held **directly** by one deck, with its tags, for scope `all`
+-- (BR-174).
+--
+-- **`ASC`, and the direction is the export contract rather than the list's.**
+-- `cardsByDeck` is newest-first because a management list is read from the top;
+-- an export is read as a document, and BR-177 fixes `created_at ASC` with an
+-- `id ASC` tie-break so the same deck always produces the same bytes. The
+-- composite index `(deck_id, created_at, id)` supplies this order directly, so
+-- there is no temp B-tree either way.
+--
+-- **No `LIMIT`, no filter, no descendants.** The user asked for the deck, not
+-- for the view of it they happened to be looking at, and `deck_id = :deckId`
+-- is a direct-children test — a descendant deck's cards carry that deck's id.
+--
+-- **The tags ride along as a `GROUP_CONCAT`, not a read per card (BR-177).**
+-- The same correlated subquery `cardListItems` uses, with the same `char(31)`
+-- unit separator — which `TagName.parse` now refuses outright, so the split on
+-- the other side is safe by construction rather than by assumption. NULL for a
+-- card with no tags.
+--
+-- **No `ORDER BY` inside the aggregate, deliberately.** One sat here as a
+-- "courtesy" and was a no-op: the subquery returns a single row, so the clause
+-- sorted a one-row result and promised nothing about the order the names were
+-- concatenated in — which SQLite does not define. Leaving it in read as a
+-- guarantee that did not exist. The repository sorts the split-apart names by
+-- folded name, which is where BR-177 puts the guarantee and the only place it
+-- actually holds.
+--
+-- `id` and `created_at` are selected although no exported field carries them
+-- (BR-175): the id is what tells the repository which requested id did not come
+-- back, and `created_at` is what re-establishes the total order across the
+-- chunks of the query below. Both stop at the repository.
+exportCardsInDeck AS ExportCardRow:
+SELECT
+  c.id AS cardId,
+  c.created_at AS createdAt,
+  c.front AS front,
+  c.back AS back,
+  c.example AS example,
+  c.hint AS hint,
+  c.pronunciation AS pronunciation,
+  (
+    SELECT GROUP_CONCAT(t.name, char(31))
+    FROM card_tags ct
+    INNER JOIN tags t ON t.id = ct.tag_id
+    WHERE ct.card_id = c.id
+  ) AS tagNames
+FROM cards c
+WHERE c.deck_id = :deckId
+ORDER BY c.created_at ASC, c.id ASC;
+
+-- The same row, narrowed to an exact id set, for scope `selected` (BR-174).
+--
+-- **`AS ExportCardRow` on both, so drift generates one result class**: the two
+-- scopes differ in which cards they name and in nothing else, and a second row
+-- class would let one of them grow a column the other does not have.
+--
+-- **`deck_id = :deckId` as well as the id list, and that pair is the rule.** An
+-- id that was deleted and an id that moved to another deck both simply fail to
+-- come back, so one statement answers both halves of BR-174 — the repository
+-- subtracts what returned from what it asked for and refuses the whole request
+-- if anything is missing. Counting rows could not do that: the scope already
+-- normalized duplicates away, so a short result and a stale id are
+-- indistinguishable by count alone.
+--
+-- Array-bound, and the caller chunks the list — see `CardExportDao.idChunkSize`
+-- for SQLite's bind-variable ceiling. Chunking is why the repository re-sorts:
+-- each statement is ordered, the concatenation of several is not.
+exportCardsByIds AS ExportCardRow:
+SELECT
+  c.id AS cardId,
+  c.created_at AS createdAt,
+  c.front AS front,
+  c.back AS back,
+  c.example AS example,
+  c.hint AS hint,
+  c.pronunciation AS pronunciation,
+  (
+    SELECT GROUP_CONCAT(t.name, char(31))
+    FROM card_tags ct
+    INNER JOIN tags t ON t.id = ct.tag_id
+    WHERE ct.card_id = c.id
+  ) AS tagNames
+FROM cards c
+WHERE c.deck_id = :deckId AND c.id IN :cardIds
+ORDER BY c.created_at ASC, c.id ASC;

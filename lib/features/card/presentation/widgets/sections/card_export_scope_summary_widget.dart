@@ -1,0 +1,56 @@
+import 'package:flutter/material.dart';
+
+import '../../../../../core/theme/app_icon_size.dart';
+import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/theme_context_extension.dart';
+import '../../../domain/models/card_export_scope_model.dart';
+import '../support/card_export_labels_widget.dart';
+
+/// The read-only scope line of the export sheet (M4.13 W2 item 3, E2).
+///
+/// **A statement, not a control.** The scope is decided by the entry point
+/// (BR-174), so there is nothing to change here — a selector would let someone
+/// who opened from `Export selected` export the whole deck by accident, which
+/// is nobody's intent and a silent way to discard the selection they just
+/// built. It stays in the semantics tree all the same: a screen-reader user
+/// needs to hear what the export covers before pressing the primary.
+class CardExportScopeSummaryWidget extends StatelessWidget {
+  const CardExportScopeSummaryWidget({
+    required this.scope,
+    required this.deckCardCount,
+    super.key,
+  });
+
+  final CardExportScope scope;
+
+  /// The deck's own total, used only by the whole-deck scope.
+  final int deckCardCount;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: <Widget>[
+        Icon(
+          switch (scope) {
+            CardExportWholeDeckScope() => Icons.style_outlined,
+            CardExportSelectionScope() => Icons.checklist,
+          },
+          size: AppIconSize.mdCompact,
+          color: context.colors.onSurfaceVariant,
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Text(
+            context.cardExportScopeLabel(scope, deckCardCount),
+            // Two lines rather than an ellipsis: the count is the one thing on
+            // this line the user is here to verify, and at double scale the
+            // sentence does not fit one line at 320dp.
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: context.texts.bodyMedium,
+          ),
+        ),
+      ],
+    );
+  }
+}

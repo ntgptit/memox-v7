@@ -22,6 +22,7 @@ import '../controllers/card_selection_controller.dart';
 import '../controllers/deck_context_controller.dart';
 import '../widgets/sections/card_breadcrumb_widget.dart';
 import '../widgets/overlays/card_bulk_overlays_widget.dart';
+import '../widgets/overlays/card_export_sheet_widget.dart';
 import '../widgets/sections/card_filter_bar_widget.dart';
 import '../widgets/sections/card_list_body_widget.dart';
 import '../widgets/sections/card_selection_bar_widget.dart';
@@ -169,20 +170,27 @@ class CardListScreen extends ConsumerWidget {
             itemBuilder: (menuContext) => <PopupMenuEntry<void>>[
               PopupMenuItem<void>(
                 onTap: () => _openImport(context),
-                child: Row(
-                  children: <Widget>[
-                    Icon(
-                      Icons.upload_file_outlined,
-                      color: menuContext.colors.onSurfaceVariant,
-                    ),
-                    const SizedBox(width: AppSpacing.md),
-                    Text(
-                      menuContext.l10n.cardImportEntryAction,
-                      style: menuContext.texts.bodyMedium,
-                    ),
-                  ],
+                child: _MenuRow(
+                  icon: Icons.upload_file_outlined,
+                  label: menuContext.l10n.cardImportEntryAction,
                 ),
               ),
+              // Export is offered only when there is something to export
+              // (M4.13 W1): an empty deck has no export path at all, not a
+              // greyed one — and a `deck`-type or root deck never reaches this
+              // screen, because neither holds cards directly.
+              if (deckTotal > 0)
+                PopupMenuItem<void>(
+                  onTap: () => exportDeckCards(
+                    context,
+                    deckId: deckId,
+                    deckCardCount: deckTotal,
+                  ),
+                  child: _MenuRow(
+                    icon: Icons.ios_share,
+                    label: menuContext.l10n.cardExportEntryAction,
+                  ),
+                ),
             ],
           ),
       ],
@@ -205,6 +213,10 @@ class CardListScreen extends ConsumerWidget {
                 onFlag: () => bulkFlag(context, ref, deckId, isFlagged: true),
                 onUnflag: () =>
                     bulkFlag(context, ref, deckId, isFlagged: false),
+                // Read-only, so it is not routed through `runBulk`: that
+                // helper clears the selection on success, which is exactly
+                // what an export must not do (BR-178).
+                onExport: () => exportSelectedCards(context, ref, deckId),
                 onDelete: () => bulkDelete(context, ref, deckId),
               ),
             Expanded(
@@ -290,6 +302,28 @@ class CardListScreen extends ConsumerWidget {
     return _Empty(
       onAdd: () => _openEditor(context),
       onImport: () => _openImport(context),
+    );
+  }
+}
+
+/// One overflow-menu row: a muted glyph and the action's words.
+///
+/// Extracted when Export joined Import — two hand-built `Row`s were already
+/// one copy apart, and the third would have been the one that drifted.
+class _MenuRow extends StatelessWidget {
+  const _MenuRow({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: <Widget>[
+        Icon(icon, color: context.colors.onSurfaceVariant),
+        const SizedBox(width: AppSpacing.md),
+        Text(label, style: context.texts.bodyMedium),
+      ],
     );
   }
 }

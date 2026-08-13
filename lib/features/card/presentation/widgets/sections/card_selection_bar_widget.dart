@@ -50,6 +50,7 @@ class CardSelectionBarWidget extends ConsumerWidget {
     required this.onAddTag,
     required this.onFlag,
     required this.onUnflag,
+    required this.onExport,
     required this.onDelete,
     super.key,
   });
@@ -65,6 +66,11 @@ class CardSelectionBarWidget extends ConsumerWidget {
   final VoidCallback onAddTag;
   final VoidCallback onFlag;
   final VoidCallback onUnflag;
+
+  /// The one read-only action on this bar (UC-11, BR-178): it opens the export
+  /// sheet over the selection and leaves the selection exactly as it found it.
+  final VoidCallback onExport;
+
   final VoidCallback onDelete;
 
   @override
@@ -97,6 +103,12 @@ class CardSelectionBarWidget extends ConsumerWidget {
         icon: Icons.outlined_flag,
         isDestructive: false,
         onPressed: onUnflag,
+      ),
+      (
+        label: l10n.cardExportSelectionAction,
+        icon: Icons.ios_share,
+        isDestructive: false,
+        onPressed: onExport,
       ),
       (
         label: l10n.cardSelectionDeleteAction,

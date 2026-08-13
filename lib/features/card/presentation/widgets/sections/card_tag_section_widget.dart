@@ -43,6 +43,8 @@ class _CardTagSectionWidgetState extends ConsumerState<CardTagSectionWidget> {
     TagValidationProblem.nameEmpty => context.l10n.cardTagEmptyError,
     TagValidationProblem.nameTooLong => context.l10n.cardTagTooLongError,
     TagValidationProblem.tooManyTags => context.l10n.cardTagTooManyError,
+    TagValidationProblem.nameHasControlCharacter =>
+      context.l10n.cardTagControlCharacterError,
     // `nameTaken` is never raised on the add path — reuse is silent (BR-93).
     _ => null,
   };

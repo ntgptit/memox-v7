@@ -18,6 +18,8 @@ export interface MxActionButtonProps {
   variant?: 'primary' | 'secondary' | 'destructive';
   /** Disabled, spinner shown, size unchanged. */
   isLoading?: boolean;
+  /** While loading, keep the label painted with the spinner beside it. Costs the fixed width, so use it with isBlock or inside a flex row — and use it wherever the wait has a name the user must read. */
+  shouldKeepLabelWhileLoading?: boolean;
   /** Material Icons ligature name for a leading glyph, rendered at --icon-sm. */
   icon?: string;
   isDisabled?: boolean;

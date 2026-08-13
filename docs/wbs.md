@@ -7,8 +7,8 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.17 (Card management: manual entry nhỏ, import/export là hướng bulk-management sau MVP) |
-| **Last updated** | 2026-08-12 |
+| **Updated by task** | M99.21 (Card Export v1 — BR-174…BR-181, UC-11, wireframe M4.13) |
+| **Last updated** | 2026-08-13 |
 
 Single source of truth for project progress. Update it in the same commit as the
 work it describes. A task is `done` only when it meets the Definition of Done in
@@ -9116,6 +9116,186 @@ thế không đổi bố cục.
 - **Tests required:** như Output; ba file wizard test + demo goldens + visual
   audit
 - **Checklist phases:** 9.3, 14.2
+
+### M99.21 · Card Export v1 — nửa còn lại của Card Transfer
+
+- **Status:** **in progress** — phase 1 (docs) xong: BR-174…BR-181, UC-11,
+  wireframe M4.13, AD-20 cập nhật Affected documents + Consequences,
+  `check_docs.py` xanh. Phase 2 (domain + encoders) xong: models, failures,
+  hai repository contract, `ExportCardsUseCase`, tag codec dùng chung, ba
+  encoder + encoder resolver. Phase 3 (data + DI) xong: SQL export trong
+  `queries/card.drift`, `CardExportDao`, `CardExportRepositoryImpl`, adapter
+  `share_plus` (13.3.0), ba provider trong `card/di/` + binding trong
+  `app/di/repository_bindings.dart` và shared binding list. Phase 4
+  (presentation) xong: `CardExportSubmitState` + `CardExportPhase` dẫn xuất,
+  `ExportCards` controller (latch double-submit), modal bottom sheet trong
+  `widgets/overlays/` + bốn section band, labels extension exhaustive trên bảy
+  `CardExportProblem`, hai entry point (overflow card list ẩn khi deck rỗng,
+  selection bar giữ nguyên selection), 25 key ARB EN/VI, `card_export_sheet_test`
+  + `card_export_states_test` + `card_export_alignment_test` (đo `tester.getRect`
+  cho W5), 5 demo golden, Widgetbook `CardExportSheet`. Phase 5 (recursive
+  architecture/logic review) xong — tám finding đóng: (P0) detection delimiter
+  nay đọc header row trước, vì ô `tags` mười tag làm `;` thắng `,` và file CSV
+  do chính app xuất không import lại được (BR-176); (P1) `Cancel`/Back/kéo
+  xuống khi đang generating nay huỷ thật, use case kiểm cancellation trước khi
+  bàn giao (W4); (P1) BR-175/BR-177 làm rõ determinism là **logic** chứ không
+  phải byte — zip entry timestamp của XLSX nằm ngoài phạm vi; (P2) export đọc
+  verbatim sáu field qua `fromStored`, không fail cả deck vì một row viết trước
+  khi BR-08 siết giới hạn; (P2) `TagName.parse` từ chối control character nên
+  bất biến `char(31)` của hai tag query được type bảo vệ thay vì chỉ ghi trong
+  comment; (P3) test N+1 nay đếm statement qua `QueryLogInterceptor`; (P3) cắt
+  tên file không còn xẻ đôi surrogate pair; (P3) controller không còn kẹt
+  `isSubmitting` khi lỗi không phải `Failure`; (P3) xoá `ORDER BY` chết trong
+  subquery `GROUP_CONCAT`; (P3) ba chuỗi đếm của export chuyển sang ICU plural.
+  Còn lại:
+  `flutter test integration_test/ -d emulator-5554 --flavor development` chưa
+  chạy (cần emulator).
+  Phase 6 (recursive UI/UX review) xong — bảy finding đóng, tất cả trên sheet
+  export: (P1) viền option "đang chọn" dùng `primary`, đo được **2.90:1** trên
+  `surface` ở dark (WCAG 1.4.11 đòi 3:1) và chỉ **1.42:1** so với hairline của
+  hai option bên cạnh — đổi sang `secondary` (8.77:1 dark / 7.33:1 light), đúng
+  token `card_tile_widget.dart` đã dùng cho "mục đang chọn"; option ở trạng
+  thái nghỉ đổi từ `borderSubtle` sang `borderControl` vì fill của nó **bằng
+  đúng** nền sheet (1.00:1) nên viền là toàn bộ component — đúng ca mà
+  `AppSemanticColors.borderControl` được đo và viết ra. Cố ý **không** thêm fill
+  `secondaryContainer` như card tile: badge `Recommended` là pill cùng vai màu
+  nên card được tô sẽ nuốt mất badge. (P1) `Exporting…` trước đây nằm ở
+  `Opacity(0)` — trả lời screen reader và không trả lời ai khác, trái W6 và
+  trái chính description của `@cardExportSubmittingLabel`;
+  `MxActionButton.shouldKeepLabelWhileLoading` là opt-in mới (default off, mọi
+  caller cũ giữ nguyên) và **đã đưa cùng lượt vào kit web** (JSX + `mx.css`
+  `.mx-btn--loading-labelled` + `.d.ts` + prompt), hàng C1 của
+  `design-parity-checklist.md` cập nhật. Render mặt generating lần đầu tiên lộ
+  thêm hai lỗi mà chỉ ảnh mới thấy: nút loading mặc `disabledSurface` nên nhãn
+  in ra ở **2.29:1**, và spinner lấy `primary` — vô hình trên nền `primary`;
+  cả hai sửa trong phạm vi opt-in. (P2) dải lỗi thiếu `liveRegion` nên hỏng
+  export không được đọc lên. (P2) badge `Recommended` xuống dòng cố định làm
+  card CSV cao hơn hai card kia ở mọi phone — đổi sang `Wrap` (cạnh title ở
+  1.0×, xuống dòng ở 2.0×). (P2) dòng info của E4 nhạt hơn dòng nội dung — đảo
+  lại hierarchy và thêm glyph `info_outline` theo đúng idiom Import;
+  `CardExportContentLinesWidget` mới để W5 đo được band thay vì đo `Text` đã bị
+  icon đẩy vào. (P3) nhịp section phẳng (mọi khe đều `lg`) — `xl` giữa ba
+  nhóm. (P3) card option và dải lỗi mang `AppElevation.card` bên trong sheet —
+  về `none` như mọi card lồng trong bề mặt khác. (P3) format option vẫn nhận
+  chạm ở mặt `invalidScope`. Wireframe M4.13 sửa: **E7a thu hẹp E7** về đúng
+  panel action (bản đầu mâu thuẫn với chính W3 mặt 5–7, vốn bắt buộc chèn dải
+  lỗi vào trong sheet), W2 mục 5/7 và W3 mặt 7 và W6 ghi rõ các ràng buộc đo
+  được ở trên. Test: sáu assertion mới, mỗi cái đã được **mutation-test** để
+  chắc nó fail khi thiếu fix; test 320/2.0 cũ đo `CardExportActionBarWidget` —
+  đúng cái hộp vô hình W5 cấm đo — nay đo theo cột của title; thêm ca
+  **320×568 @2.0** (chiều cao, không chỉ chiều rộng). Golden: 9 file, thêm
+  generating / VI / error-dark / 320×568@2.0, `ReviewApp` nhận `locale` và
+  `textScale`. Test export tách làm ba file theo guard 400 dòng.
+- **Known gap (harness, không đóng ở task này):** sheet export **không** có
+  visual audit. `MX-VIS-001` phát hiện subject qua `*_screen.dart` và
+  `orphanedAuditFiles` fail mọi companion không ứng với một screen, nên một
+  file `card_export_sheet_visual_audit_test.dart` sẽ **làm hỏng** suite coverage
+  chứ không thêm gì. Đã thử phương án đúng đắn hơn — audit sheet như một state
+  thứ hai của `card_list_screen_visual_audit_test.dart` — và harness chưa đọc
+  được: raster cross-check so màu khai báo của từng render object với pixel
+  trong rect của nó, mà modal barrier phủ scrim lên toàn bộ màn phía sau, nên
+  **17 element** báo `declaredRasterMismatch` dù khai báo đều đúng. Cho phép
+  từng cái một là cho phép mất luôn coverage màu của cả màn hình. Fix thật là
+  giới hạn traversal về route trên cùng — một thay đổi harness làm dịch
+  allowance count của mọi companion đang có, nên nó là task riêng. Trong lúc
+  chờ: geometry của sheet do `card_export_alignment_test.dart` chứng minh, token
+  màu do `card_export_sheet_test.dart` chứng minh.
+- **Known gap (không thuộc task này):** các chuỗi đếm của **Import** vẫn là
+  placeholder trần, nên `cardImportSubmitAction` render "Import 1 cards", và
+  `cardImportSubmittingTitle` / `cardImportSuccessBody` / `cardImportSkipsBody`
+  / `cardImportResult*Label` / `cardImportMoreRowsLabel` / `cardImportFileRowsDetected`
+  cùng lỗi. Cố ý để nguyên ở M99.21: sửa chúng làm hỏng golden và test của
+  Import, một blast radius khác thuộc thay đổi riêng của Import.
+- **Goal:** Đưa nội dung của một deck ra file CSV/TSV/XLSX để mang sang máy
+  khác, sang deck khác hoặc sang công cụ khác — dùng lại canonical schema và
+  ranh giới Strategy mà AD-20 đã dựng cho Import, thêm encoder + export
+  repository + platform destination bên cạnh chứ không sửa pipeline Import.
+  Đây là **content transfer, không phải backup**: file không mang id, lịch học
+  hay history, nên import lại sinh thẻ mới (BR-175).
+- **Scope:** BR-174…BR-181 và UC-11; hai scope `all` / `selected` (BR-174); ba
+  format qua một encoder resolver exhaustive, CSV và TSV chung delimited
+  encoder, XLSX riêng; tag codec dùng chung Import↔Export và **chuyển Import
+  sang codec đó** (BR-176); ordering và snapshot xác định (BR-177); artifact
+  domain chỉ mang bytes/filename/MIME, bàn giao qua `share_plus` sau một
+  platform destination contract (BR-181); modal bottom sheet theo wireframe
+  M4.13 với hai entry point (overflow `Export cards`, selection bar
+  `Export selected`); controller/state riêng của export, không dùng chung
+  `isLoading` của Card List; ARB EN/VI; light/dark, 320–412dp, textScale 2.0.
+  Package mới: `share_plus` (chọn version tương thích Flutter/Dart/AGP hiện
+  tại, cập nhật lockfile).
+- **Out of scope:** scope `current filtered results` (BR-174 chốt hai scope);
+  export cả subtree; database backup/restore; Google Drive/sync/account;
+  `.apkg`; media; đặt tên file thủ công; save-location picker (Android không
+  có qua `file_selector`); broad storage permission; export lịch học/tiến độ
+  (BR-175); đổi BR-168…BR-173 hay pipeline Import — Import chỉ đổi đúng chỗ
+  gọi tag codec.
+- **Editable documents:** `docs/product.md` (dòng N1), `docs/architecture.md`
+  (AD-20 Affected documents + Consequences), `docs/business-rules.md`,
+  `docs/use-cases.md`, `docs/wbs.md`,
+  `docs/wireframes/m4-13-card-export.md` (mới), `docs/it-scenarios/*`,
+  `lib/features/card/README.md`
+- **Output:** BR-174…BR-181; UC-11; wireframe M4.13; domain
+  `card_export_scope` / `card_export_request` / `card_export_artifact` /
+  `card_export_result` models + `CardTransferTagCodec` + failures,
+  `CardExportRepository` + platform destination contract,
+  `ExportCardsUseCase`; data — SQL trong `.drift`, export DAO/read adapter,
+  repository impl, delimited encoder, XLSX encoder, encoder resolver,
+  `share_plus` adapter; DI provider + binding ở `app/di/repository_bindings.dart`
+  và shared binding list của test harness; presentation — export controller +
+  state, overlay trong `widgets/overlays/`, hai entry point ở Card List và
+  selection bar, ARB EN/VI; test theo mục dưới; goldens + Widgetbook.
+- **Acceptance criteria:**
+  - [ ] Hai scope đúng BR-174: `all` bỏ qua filter/search/sort/pagination và
+        không lấy descendant; `selected` normalize id trùng; id mất hoặc sai
+        deck làm cả request fail có kiểu, không có file một phần.
+  - [ ] File chỉ có sáu field canonical (BR-175) — test chứng minh không có
+        id, timestamp, cờ, scheduler/generation, box/ease/interval/due,
+        `learned_at`, history hay session lọt vào bất kỳ format nào.
+  - [ ] Một tag codec duy nhất phục vụ cả hai chiều (BR-176); Import đã chuyển
+        sang nó; `\;`, `\\`, backslash lẻ và backslash cuối chuỗi round-trip
+        đúng, gồm cả nguồn legacy chưa escape.
+  - [ ] Cùng dữ liệu ra cùng bytes: card theo `created_at ASC, id ASC` ở cả
+        hai scope, tag theo folded name, một snapshot, không N+1 (BR-177).
+  - [ ] Test trên SQLite thật chứng minh export **không** đổi content,
+        timestamp, `content_type`, study state, history hay selection (BR-178).
+  - [ ] Sáu header đúng thứ tự và không localize; ô rỗng cho field trống; BOM
+        cho CSV/TSV; XLSX ghi text nên `=`/`+`/`-`/`@` không thành formula và
+        `001`/`1e3`/`+84…` giữ nguyên (BR-179).
+  - [ ] Filename sanitize + ngày từ `clockProvider` + đuôi theo format,
+        fallback `cards`; không `DateTime.now()` trong `lib/features/`; không
+        log tên file, đường dẫn hay nội dung (BR-180, BR-181).
+  - [ ] Round-trip qua **encoder production → decoder production → mapping
+        production**: sáu field và tập tag giữ nguyên. Oracle MUST NOT là một
+        helper dùng lại chính encoder.
+  - [ ] Share: dismiss là cancel không báo lỗi; share unavailable và platform
+        exception là hai failure phân biệt được; không xin broad storage
+        permission; không ghi shared storage trước hành động tường minh; UI
+        không nói `Saved` (BR-181).
+  - [ ] Double-submit không tạo request thứ hai; lỗi giữ scope + format cho
+        Retry; selection nguyên vẹn (UC-11 A4, A5, E8 của wireframe).
+  - [ ] Geometry đo bằng `tester.getRect`: mọi band của sheet chung một cột,
+        format option lấp trọn cột hoặc stack full-width — không intrinsic
+        width (wireframe M4.13 W5). Golden chỉ là baseline regression.
+  - [ ] Boundary test: presentation không thấy codec/plugin/DB; encoder không
+        thấy DB/UI/share; chỉ resolver dispatch theo format; không có
+        `ImportExportFactory`.
+  - [ ] ARB EN/VI đủ; không overflow ở 320dp @ 2.0× EN và VI, light + dark;
+        Widgetbook đăng ký sheet export; docs + IT scenarios cập nhật.
+  - [ ] `dod_check.sh` full xanh, và
+        `flutter test integration_test/ -d emulator-5554 --flavor development`
+        chạy trên emulator (task chạm `lib/app/` bindings và thêm platform
+        dependency). Không có emulator thì báo rõ gate thiếu, không claim done.
+- **Dependencies:** M99.19, M99.20
+- **Tests required:** unit cho scope normalization, tag codec (gồm legacy),
+  filename sanitize, field order; encoder test ba format với tiếng Hàn/tiếng
+  Việt, delimiter/quote/newline nhúng, chuỗi dạng số, ô trông như formula;
+  round-trip encoder→decoder production; repository trên SQLite thật cho hai
+  scope, ordering, id cũ/sai deck, deck rỗng và no-mutation; use case +
+  destination cho success/dismissed/unavailable/exception/read-fail/
+  encode-fail/double-submit; widget cho hai entry point và mọi state;
+  `card_export_alignment_test.dart` đo geometry; boundary source-scan test;
+  demo goldens.
+- **Checklist phases:** 9.3, 10.2, 12.2, 14.2
 
 ## Blocker
 

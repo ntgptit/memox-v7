@@ -195,4 +195,19 @@ void main() {
       ),
     ],
   );
+
+  // **The export sheet is deliberately not a second state here.** It was tried
+  // (M99.21 phase 6) and the harness cannot read it yet, for a reason that is
+  // about modal routes rather than about this sheet: the raster cross-check
+  // compares each render object's declared colour against the pixels inside its
+  // own rect, and a modal barrier paints a scrim over everything behind it. With
+  // the sheet open, seventeen elements of the screen underneath report
+  // `declaredRasterMismatch` — every one a correct declaration read through a
+  // scrim. Allowing them individually would allow away the whole screen's colour
+  // coverage; restricting traversal to the topmost route is the real fix, and it
+  // is a harness change that moves every existing companion's allowance counts.
+  // Recorded as a gap in `docs/wbs.md` under M99.21, with the two findings that
+  // argue for doing it. Until then the sheet's geometry is proven in
+  // `card_export_alignment_test.dart` and its colour tokens in
+  // `card_export_sheet_test.dart`.
 }

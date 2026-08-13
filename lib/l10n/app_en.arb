@@ -1041,6 +1041,10 @@
   "@cardTagTooManyError": {
     "description": "Inline error when the card already has the maximum tags (BR-94)."
   },
+  "cardTagControlCharacterError": "Tag contains a character that can't be used",
+  "@cardTagControlCharacterError": {
+    "description": "Inline error when a pasted tag name carries a control character (BR-93). Not typeable from a keyboard; it arrives by paste."
+  },
   "cardEditorDetailsToggle": "Add details",
   "@cardEditorDetailsToggle": {
     "description": "Toggle that expands the optional detail fields in the card editor (W4/W5, BR-95)."
@@ -2252,6 +2256,10 @@
   "@cardImportRowIssueTooManyTags": {
       "description": "Row reason: over the BR-94 cap."
   },
+  "cardImportRowIssueTagCharacter": "A tag contains a character that can't be used",
+  "@cardImportRowIssueTagCharacter": {
+      "description": "Row reason: a tag name carries a control character (BR-93), which the tag queries' char(31) join cannot survive."
+  },
   "cardImportMoreRowsLabel": "…and {count} more rows",
   "@cardImportMoreRowsLabel": {
       "placeholders": {
@@ -2508,5 +2516,120 @@
           }
       },
       "description": "Source summary status line: the extension-and-size pair plus the phase status (ready / parsing / rows detected)."
+  },
+  "cardExportEntryAction": "Export cards",
+  "@cardExportEntryAction": {
+      "description": "The export entry point in the card list overflow menu, and the title of the export sheet it opens (M4.13 W1, W2)."
+  },
+  "cardExportSelectionAction": "Export selected",
+  "@cardExportSelectionAction": {
+      "description": "The export entry point on the multi-select action bar; opens the sheet scoped to the selected ids (M4.13 W1, BR-174)."
+  },
+  "cardExportScopeAllLabel": "{count, plural, =1{All 1 card in this deck} other{All {count} cards in this deck}}",
+  "@cardExportScopeAllLabel": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      },
+      "description": "Read-only scope summary for the whole-deck scope. The number is the deck's direct card count, not the rows currently listed (BR-174)."
+  },
+  "cardExportScopeSelectedLabel": "{count, plural, =1{1 selected card} other{{count} selected cards}}",
+  "@cardExportScopeSelectedLabel": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      },
+      "description": "Read-only scope summary for the selection scope: how many distinct ids the export covers (BR-174)."
+  },
+  "cardExportFormatHeading": "Format",
+  "@cardExportFormatHeading": {
+      "description": "Group label above the three format options in the export sheet."
+  },
+  "cardExportRecommendedBadge": "Recommended",
+  "@cardExportRecommendedBadge": {
+      "description": "Badge on the CSV option. Readable text, never a coloured dot alone (M4.13 E3, W6)."
+  },
+  "cardExportCsvSubtitle": "Opens in any spreadsheet or text editor.",
+  "@cardExportCsvSubtitle": {
+      "description": "One-line hint under the CSV format option saying what can open the file."
+  },
+  "cardExportTsvSubtitle": "Tab-separated, for tools that expect tabs.",
+  "@cardExportTsvSubtitle": {
+      "description": "One-line hint under the TSV format option saying what can open the file."
+  },
+  "cardExportXlsxSubtitle": "A workbook for Excel or Google Sheets.",
+  "@cardExportXlsxSubtitle": {
+      "description": "One-line hint under the XLSX format option saying what can open the file."
+  },
+  "cardExportIncludesLine": "Includes front, back, example, hint, pronunciation and tags.",
+  "@cardExportIncludesLine": {
+      "description": "States what the file carries — the six canonical fields, in AD-20's order (BR-175). The field names in the file itself are never localized (BR-179)."
+  },
+  "cardExportExcludesLine": "Study progress and review history aren't in the file.",
+  "@cardExportExcludesLine": {
+      "description": "Info line, not a warning: export is content transfer, not a backup, so re-importing starts every card new (BR-175, M4.13 E4)."
+  },
+  "cardExportSubmitAction": "{count, plural, =1{Export 1 card} other{Export {count} cards}}",
+  "@cardExportSubmitAction": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      },
+      "description": "Primary action of the export sheet. The number is the scope's card count."
+  },
+  "cardExportSubmittingLabel": "Exporting…",
+  "@cardExportSubmittingLabel": {
+      "description": "Label the primary action takes while the file is being built and handed over. Real text, not a silent spinner (M4.13 W6)."
+  },
+  "cardExportSharedMessage": "Your cards were handed to the system to share.",
+  "@cardExportSharedMessage": {
+      "description": "Confirmation after the share sheet accepted the file. It must never claim the file was saved, or name a folder — the OS does not tell the app where it went (BR-181, M4.13 E9)."
+  },
+  "cardExportErrorTitle": "Export didn't finish",
+  "@cardExportErrorTitle": {
+      "description": "Title of the in-sheet error band for the reasons a retry can fix (M4.13 W3 states 5–6)."
+  },
+  "cardExportScopeChangedTitle": "These cards have changed",
+  "@cardExportScopeChangedTitle": {
+      "description": "Title of the in-sheet error band when the scope itself is no longer valid, so there is nothing to retry (M4.13 W3 state 7)."
+  },
+  "cardExportErrorEmptyScope": "There are no cards left to export in this deck.",
+  "@cardExportErrorEmptyScope": {
+      "description": "Typed error: the scope holds no cards (UC-11 E5, BR-174)."
+  },
+  "cardExportErrorStaleSelection": "Some of the cards you picked are no longer in this deck. Select again and export.",
+  "@cardExportErrorStaleSelection": {
+      "description": "Typed error: a selected id was deleted or moved, so the whole request failed rather than exporting part of it (UC-11 E6, BR-174)."
+  },
+  "cardExportErrorDeckMissing": "This deck no longer exists.",
+  "@cardExportErrorDeckMissing": {
+      "description": "Typed error: the deck itself is gone (UC-11 E3). Distinct from an empty deck, which can be refilled."
+  },
+  "cardExportErrorReadFailed": "The cards could not be read. Nothing was changed.",
+  "@cardExportErrorReadFailed": {
+      "description": "Typed error: the snapshot read failed (UC-11 E3). Export is read-only, so there is nothing to undo (BR-178)."
+  },
+  "cardExportErrorEncodeFailed": "The file could not be built from these cards.",
+  "@cardExportErrorEncodeFailed": {
+      "description": "Typed error: encoding failed (UC-11 E4). Deliberately distinct from a read failure, and no partial file is handed on."
+  },
+  "cardExportErrorShareUnavailable": "This device has no way to share a file.",
+  "@cardExportErrorShareUnavailable": {
+      "description": "Typed error: the platform has no share sheet (UC-11 E1). Names no path and no file name (BR-181)."
+  },
+  "cardExportErrorSharePlatformError": "Your device could not take the file. Nothing was saved.",
+  "@cardExportErrorSharePlatformError": {
+      "description": "Typed error: the platform channel threw while sharing (UC-11 E2). Names no path and no file name (BR-180, BR-181)."
+  },
+  "cardExportRetryAction": "Try again",
+  "@cardExportRetryAction": {
+      "description": "Recovery action in the export error band; re-submits the same scope and format (M4.13 E8)."
+  },
+  "cardExportCloseAction": "Close",
+  "@cardExportCloseAction": {
+      "description": "The only action left when the scope is no longer valid — there is nothing to retry until the user selects again (M4.13 W3 state 7)."
   }
 }

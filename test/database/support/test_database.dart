@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/database/app_database.dart';
+import 'package:memox/core/database/query_log_interceptor.dart';
 
 /// A real SQLite database, in memory, one per test.
 ///
@@ -13,8 +14,20 @@ import 'package:memox/core/database/app_database.dart';
 ///
 /// In memory, and torn down per test, so nothing can leak between them and no
 /// file survives the run.
-AppDatabase openTestDatabase() {
-  final db = AppDatabase(NativeDatabase.memory());
+/// [log], when given, receives one line per statement — the production
+/// [QueryLogInterceptor], used here for what it can prove rather than for what
+/// it prints. "This read does not scale with the number of rows" is a claim
+/// about how many statements ran, and it is invisible to any assertion on the
+/// *result*: a repository that issued one query per card returns exactly the
+/// same records as one that issued a single query, so a test written against
+/// the records alone passes either way and pins nothing.
+AppDatabase openTestDatabase({QueryLogSink? log}) {
+  final executor = NativeDatabase.memory();
+  final db = AppDatabase(
+    log == null
+        ? executor
+        : executor.interceptWith(QueryLogInterceptor(sink: log)),
+  );
   addTearDown(db.close);
 
   return db;

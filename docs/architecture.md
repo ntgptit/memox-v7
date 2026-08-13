@@ -7,8 +7,8 @@
 | **Scope** | Quyết định ràng buộc nhiều tài liệu hoặc nhiều layer. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), hình dạng dữ liệu (`data-model.md`) |
 | **Source of truth for** | AD-xx · đánh đổi kiến trúc · phương án đã bị loại · lý do pin toolchain |
 | **Depends on** | `document-conventions.md`, `product.md` |
-| **Updated by task** | M99.19 (AD-20 · Card Transfer foundation) |
-| **Last updated** | 2026-08-12 |
+| **Updated by task** | M99.21 (AD-20 · nửa encode của Card Transfer) |
+| **Last updated** | 2026-08-13 |
 
 Format theo `document-conventions.md` §6.1. AD xếp theo số; ID vĩnh viễn (§7).
 
@@ -1368,11 +1368,12 @@ Library hoặc Profile thành tab top-level — starter là child flow của Dec
 | | |
 |---|---|
 | **Status** | accepted |
-| **Affected documents** | `business-rules.md` (BR-168…BR-173), `use-cases.md` (UC-10), `wireframes/m4-12-card-import.md` |
+| **Affected documents** | `business-rules.md` (BR-168…BR-173 import, BR-174…BR-181 export), `use-cases.md` (UC-10, UC-11), `wireframes/m4-12-card-import.md`, `wireframes/m4-13-card-export.md` |
 
 **Decision.** Card transfer có một **canonical schema** duy nhất — sáu field
 `front · back · example · hint · pronunciation · tags`, header lowercase
-English không bao giờ localize, tag nối bằng `;` — sống ở
+English không bao giờ localize, tag nối bằng `;` qua **một codec dùng chung cho
+cả hai chiều** (BR-176) — sống ở
 `card_transfer_field_model.dart` và là bản gốc cho cả hai chiều. Mỗi file
 format là một **decoder Strategy** cùng emit một raw document model; một
 **resolver/registry** duy nhất (`cardTransferDecoderFor`) quyết định format
@@ -1412,6 +1413,24 @@ Import. Round-trip kỳ vọng: export rồi import lại giữ nội dung và t
 id và study state mới — đây là **content transfer, không phải backup**, nên
 canonical record không mang id, timestamp, scheduler, box, interval, due hay
 history.
+
+**Nửa encode tới ở M99.21, và nó không sửa gì của Import.** Caller đầu tiên của
+`encode()` xuất hiện đúng lúc quyết định này dự đoán: một `CardTransferEncoder`
+đối xứng với decoder, một encoder resolver exhaustive thứ hai theo cùng
+`CardTransferFormat`, và `CardExportRepository` cộng một platform destination
+contract bên cạnh ba contract Import — Preview, mapping và transaction commit
+không đổi một dòng. Hai chỗ chiều export **thay đổi** hợp đồng chung, và cả hai
+đều là sửa đúng chỗ chứ không phải thêm nhánh: (1) ô `tags` nay đi qua một codec
+có escape (BR-176) và **Import chuyển sang dùng chính codec đó**, vì `;` trần
+không round-trip được một tag có chứa `;`, và một tag mất chỗ tách khi export là
+mất dữ liệu chứ không phải mất định dạng; (2) canonical record vốn không có khái
+niệm thứ tự, còn export thì cần — nên thứ tự là hợp đồng của **repository**
+(BR-177), không phải của schema hay của encoder, và encoder vẫn chỉ nhận một
+danh sách record đã sắp. Ranh giới platform mở rộng thêm một seam thứ hai đối
+xứng với picker: destination (share sheet) là chỗ duy nhất chiều export chạm hệ
+điều hành, nên `card_transfer_boundary_test.dart` mở rộng cùng kiểu source scan —
+encoder không thấy database, UI hay share; presentation không thấy codec hay
+plugin; dispatch format vẫn chỉ ở resolver.
 
 **Rejected alternatives.** Một `ImportExportFactory` gom parse, validate, DB
 và picker — God Object với bốn lý do đổi khác nhau, và là đúng cái AD-18 đã

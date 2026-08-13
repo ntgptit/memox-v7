@@ -1041,6 +1041,10 @@
   "@cardTagTooManyError": {
     "description": "Inline error when the card already has the maximum tags (BR-94)."
   },
+  "cardTagControlCharacterError": "Nhãn chứa ký tự không dùng được",
+  "@cardTagControlCharacterError": {
+    "description": "Inline error when a pasted tag name carries a control character (BR-93). Not typeable from a keyboard; it arrives by paste."
+  },
   "cardEditorDetailsToggle": "Thêm chi tiết",
   "@cardEditorDetailsToggle": {
     "description": "Toggle that expands the optional detail fields (W4/W5, BR-95)."
@@ -1983,6 +1987,7 @@
   "cardImportParseErrorTitle": "Không đọc được nguồn",
   "cardImportRowIssueTagTooLong": "Có thẻ phân loại dài quá 50 ký tự",
   "cardImportRowIssueTooManyTags": "Quá 10 thẻ phân loại",
+  "cardImportRowIssueTagCharacter": "Có thẻ phân loại chứa ký tự không dùng được",
   "cardImportMoreRowsLabel": "…và {count} dòng nữa",
   "@cardImportTitle": {
       "description": "App bar title of the import wizard (UC-10)."
@@ -2253,6 +2258,9 @@
   "@cardImportRowIssueTooManyTags": {
       "description": "Row reason: over the BR-94 cap."
   },
+  "@cardImportRowIssueTagCharacter": {
+      "description": "Row reason: a tag name carries a control character (BR-93), which the tag queries' char(31) join cannot survive."
+  },
   "@cardImportMoreRowsLabel": {
       "placeholders": {
           "count": {
@@ -2508,5 +2516,120 @@
           }
       },
       "description": "Source summary status line: the extension-and-size pair plus the phase status (ready / parsing / rows detected)."
+  },
+  "cardExportEntryAction": "Xuất thẻ",
+  "@cardExportEntryAction": {
+      "description": "The export entry point in the card list overflow menu, and the title of the export sheet it opens (M4.13 W1, W2)."
+  },
+  "cardExportSelectionAction": "Xuất thẻ đã chọn",
+  "@cardExportSelectionAction": {
+      "description": "The export entry point on the multi-select action bar; opens the sheet scoped to the selected ids (M4.13 W1, BR-174)."
+  },
+  "cardExportScopeAllLabel": "{count, plural, other{Toàn bộ {count} thẻ trong bộ thẻ này}}",
+  "@cardExportScopeAllLabel": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      },
+      "description": "Read-only scope summary for the whole-deck scope. The number is the deck's direct card count, not the rows currently listed (BR-174)."
+  },
+  "cardExportScopeSelectedLabel": "{count, plural, other{{count} thẻ đã chọn}}",
+  "@cardExportScopeSelectedLabel": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      },
+      "description": "Read-only scope summary for the selection scope: how many distinct ids the export covers (BR-174)."
+  },
+  "cardExportFormatHeading": "Định dạng",
+  "@cardExportFormatHeading": {
+      "description": "Group label above the three format options in the export sheet."
+  },
+  "cardExportRecommendedBadge": "Nên dùng",
+  "@cardExportRecommendedBadge": {
+      "description": "Badge on the CSV option. Readable text, never a coloured dot alone (M4.13 E3, W6)."
+  },
+  "cardExportCsvSubtitle": "Mở được bằng mọi phần mềm bảng tính hoặc trình soạn thảo.",
+  "@cardExportCsvSubtitle": {
+      "description": "One-line hint under the CSV format option saying what can open the file."
+  },
+  "cardExportTsvSubtitle": "Ngăn cách bằng tab, cho công cụ cần tab.",
+  "@cardExportTsvSubtitle": {
+      "description": "One-line hint under the TSV format option saying what can open the file."
+  },
+  "cardExportXlsxSubtitle": "Bảng tính cho Excel hoặc Google Sheets.",
+  "@cardExportXlsxSubtitle": {
+      "description": "One-line hint under the XLSX format option saying what can open the file."
+  },
+  "cardExportIncludesLine": "Gồm mặt trước, mặt sau, ví dụ, gợi ý, phát âm và thẻ phân loại.",
+  "@cardExportIncludesLine": {
+      "description": "States what the file carries — the six canonical fields, in AD-20's order (BR-175). The field names in the file itself are never localized (BR-179)."
+  },
+  "cardExportExcludesLine": "Tiến độ học và lịch sử ôn tập không nằm trong tệp.",
+  "@cardExportExcludesLine": {
+      "description": "Info line, not a warning: export is content transfer, not a backup, so re-importing starts every card new (BR-175, M4.13 E4)."
+  },
+  "cardExportSubmitAction": "{count, plural, other{Xuất {count} thẻ}}",
+  "@cardExportSubmitAction": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      },
+      "description": "Primary action of the export sheet. The number is the scope's card count."
+  },
+  "cardExportSubmittingLabel": "Đang xuất…",
+  "@cardExportSubmittingLabel": {
+      "description": "Label the primary action takes while the file is being built and handed over. Real text, not a silent spinner (M4.13 W6)."
+  },
+  "cardExportSharedMessage": "Đã bàn giao thẻ của bạn cho hệ thống để chia sẻ.",
+  "@cardExportSharedMessage": {
+      "description": "Confirmation after the share sheet accepted the file. It must never claim the file was saved, or name a folder — the OS does not tell the app where it went (BR-181, M4.13 E9)."
+  },
+  "cardExportErrorTitle": "Chưa xuất xong",
+  "@cardExportErrorTitle": {
+      "description": "Title of the in-sheet error band for the reasons a retry can fix (M4.13 W3 states 5–6)."
+  },
+  "cardExportScopeChangedTitle": "Danh sách thẻ đã thay đổi",
+  "@cardExportScopeChangedTitle": {
+      "description": "Title of the in-sheet error band when the scope itself is no longer valid, so there is nothing to retry (M4.13 W3 state 7)."
+  },
+  "cardExportErrorEmptyScope": "Bộ thẻ này không còn thẻ nào để xuất.",
+  "@cardExportErrorEmptyScope": {
+      "description": "Typed error: the scope holds no cards (UC-11 E5, BR-174)."
+  },
+  "cardExportErrorStaleSelection": "Một số thẻ bạn chọn không còn trong bộ thẻ này. Hãy chọn lại rồi xuất.",
+  "@cardExportErrorStaleSelection": {
+      "description": "Typed error: a selected id was deleted or moved, so the whole request failed rather than exporting part of it (UC-11 E6, BR-174)."
+  },
+  "cardExportErrorDeckMissing": "Bộ thẻ này không còn tồn tại.",
+  "@cardExportErrorDeckMissing": {
+      "description": "Typed error: the deck itself is gone (UC-11 E3). Distinct from an empty deck, which can be refilled."
+  },
+  "cardExportErrorReadFailed": "Không đọc được thẻ. Không có gì bị thay đổi.",
+  "@cardExportErrorReadFailed": {
+      "description": "Typed error: the snapshot read failed (UC-11 E3). Export is read-only, so there is nothing to undo (BR-178)."
+  },
+  "cardExportErrorEncodeFailed": "Không tạo được tệp từ những thẻ này.",
+  "@cardExportErrorEncodeFailed": {
+      "description": "Typed error: encoding failed (UC-11 E4). Deliberately distinct from a read failure, and no partial file is handed on."
+  },
+  "cardExportErrorShareUnavailable": "Thiết bị này không có cách nào để chia sẻ tệp.",
+  "@cardExportErrorShareUnavailable": {
+      "description": "Typed error: the platform has no share sheet (UC-11 E1). Names no path and no file name (BR-181)."
+  },
+  "cardExportErrorSharePlatformError": "Thiết bị không nhận được tệp. Không có gì được lưu.",
+  "@cardExportErrorSharePlatformError": {
+      "description": "Typed error: the platform channel threw while sharing (UC-11 E2). Names no path and no file name (BR-180, BR-181)."
+  },
+  "cardExportRetryAction": "Thử lại",
+  "@cardExportRetryAction": {
+      "description": "Recovery action in the export error band; re-submits the same scope and format (M4.13 E8)."
+  },
+  "cardExportCloseAction": "Đóng",
+  "@cardExportCloseAction": {
+      "description": "The only action left when the scope is no longer valid — there is nothing to retry until the user selects again (M4.13 W3 state 7)."
   }
 }

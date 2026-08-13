@@ -73,6 +73,40 @@ final class CardText {
     return (text: CardText._(trimmed, trimmed.toLowerCase()), problem: null);
   }
 
+  /// Reads text that is **already stored** for [side], without BR-08's length
+  /// limit.
+  ///
+  /// **Only a read path may call this, and only for text the database already
+  /// holds** — `card_transfer_boundary_test.dart` pins that to the export
+  /// repository. Every write still goes through [parse]; this is not a way to
+  /// get a longer card in.
+  ///
+  /// The limit exists to stop a user typing more than a card can show. It says
+  /// nothing about a row written when the limit was a different number — BR-08
+  /// went from 2000 to 60/240 at M4.10at and no migration truncated anything,
+  /// so a database can legitimately hold a front the current rule would refuse.
+  /// Running such a row through [parse] made the whole export fail
+  /// (`readFailed`), which took the app's only way of getting data *out* and
+  /// pointed it at a card the user cannot even find, let alone shorten. BR-175
+  /// asks for the six content fields as they stand; refusing a deck over a
+  /// limit tightened after the fact is data loss dressed as validation.
+  ///
+  /// **Emptiness is still refused**, and the asymmetry is the point: a length
+  /// cap is a policy that changed, while "a card has two sides" (BR-07) never
+  /// did, and BR-169 makes a row with a blank side unimportable — so an empty
+  /// side is a genuinely unrepresentable record rather than an old one.
+  static ({CardText? text, CardValidationProblem? problem}) fromStored(
+    String raw, {
+    required CardSide side,
+  }) {
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) {
+      return (text: null, problem: side.emptyProblem);
+    }
+
+    return (text: CardText._(trimmed, trimmed.toLowerCase()), problem: null);
+  }
+
   /// Folds a search term the same way a stored side is folded.
   ///
   /// Exists so the two sides of the comparison cannot drift apart: a query that
@@ -116,6 +150,19 @@ final class CardDetailText {
     }
 
     return (text: CardDetailText._(trimmed), problem: null);
+  }
+
+  /// Reads an optional detail that is **already stored**, without BR-95's
+  /// length limit — [CardText.fromStored]'s reasoning, applied to the three
+  /// optional fields.
+  ///
+  /// No problem is possible here: an empty detail is a detail with no value,
+  /// which is what null means, so the only two outcomes are a value and none.
+  static CardDetailText? fromStored(String raw) {
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) return null;
+
+    return CardDetailText._(trimmed);
   }
 
   @override

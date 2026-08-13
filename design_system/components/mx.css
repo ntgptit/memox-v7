@@ -24,6 +24,11 @@
 .mx-btn--secondary:disabled{background:transparent}
 .mx-btn--loading .mx-btn__label{opacity:0}
 .mx-btn__spinner{position:absolute;width:var(--icon-sm);height:var(--icon-sm);border-radius:50%;border:2px solid currentColor;border-top-color:transparent;animation:mx-spin 900ms linear infinite}
+/* Opt-in: the label stays readable and the spinner takes the leading slot
+   instead of the centre. Costs the fixed width, so it is for --block or a flex
+   row only. See MxActionButton.jsx / mx_action_button.dart. */
+.mx-btn--loading-labelled .mx-btn__label{opacity:1}
+.mx-btn--loading-labelled .mx-btn__spinner{position:static;flex:none}
 @keyframes mx-spin{to{transform:rotate(360deg)}}
 .mx-btn--block{width:100%}
 
