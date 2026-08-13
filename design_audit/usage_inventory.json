@@ -3079,7 +3079,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_import_preview_step_widget.dart",
-      "line": 154,
+      "line": 162,
       "widget_context": "_ParsingPanel",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3090,7 +3090,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_import_preview_step_widget.dart",
-      "line": 210,
+      "line": 218,
       "widget_context": "_LoadedPreview",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3101,7 +3101,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_import_preview_step_widget.dart",
-      "line": 227,
+      "line": 235,
       "widget_context": "_LoadedPreview",
       "element_kind": "text",
       "source_kind": "theme-token",

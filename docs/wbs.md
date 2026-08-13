@@ -9024,7 +9024,17 @@ thế không đổi bố cục.
 - **Status:** **done** — targeted suites + analyzer + visual audit xanh; 12
   golden demo (8 trạng thái ổn định + biến thể) render lại và soát bằng mắt;
   full `dod_check.sh` xanh sau toàn bộ sửa đổi. Emulator không chạy cho task
-  này (UI-only, không chạm `lib/app/`, binding hay schema).
+  này (UI-only, không chạm `lib/app/`, binding hay schema). Vòng recursive
+  review sau merge (#293) đóng thêm ba finding: Android Back trên mặt commit
+  failure hỏi discard thay vì bước lùi ngầm dưới UI đứng yên (W8); "N rows
+  detected" đếm data rows để khớp "x of y ready" cùng màn; semantic label
+  của nút Close là "Cancel" thay vì tên màn — kèm test tái phát, test
+  picker-cancel-giữ-file-cũ, neo count Duplicates-skipped theo transaction ở
+  kịch bản imported = 0, và VI 320dp@2.0 đi hết tới result. Đóng luôn docs
+  drift của AD-18: `architecture.md` mục Ranh giới ghi `domain/modes/` trong
+  khi code, bảng dispatch AD-18 và Output của task scheduler đều là
+  `domain/models/` — sửa docs về `domain/models/`, checker bỏ pairing
+  `/domain/modes/` không còn ứng với folder nào.
 - **Goal:** Wizard import đúng luồng nhưng UI chưa kể chuyện theo trạng thái:
   file đã chọn vẫn hiện cả bộ chọn, parsing chỉ là spinner trần, preview đếm
   bằng năm dòng text, submit và kết quả chen trong bước 3, stepper không phân

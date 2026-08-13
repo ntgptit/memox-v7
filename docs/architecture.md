@@ -1298,7 +1298,7 @@ biến mất trong khi database vẫn giữ nó mở.
 
 ### Ranh giới
 
-- `domain/modes/*_mode.dart` là Dart thuần: không repository, không `DateTime.now()`,
+- `domain/models/*_mode.dart` là Dart thuần: không repository, không `DateTime.now()`,
   không random. Đếm giờ của Recall vào bằng `didTimeout` trong input (AD-13, AD-16);
   thứ tự xáo cố định trong phiên nên chỉ chạy một lần lúc nạp hàng đợi (BR-102).
 - Handler không gọi handler khác. Chuyển mode do luồng chung quyết định.
