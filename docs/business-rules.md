@@ -7,8 +7,8 @@
 | **Scope** | Luật nghiệp vụ, validation rule, state machine, edge case của phạm vi MVP. Ngoài phạm vi: quyết định kiến trúc (`architecture.md`), hình dạng dữ liệu (`data-model.md`), luồng người dùng (`use-cases.md`) |
 | **Source of truth for** | BR-xx · validation rule · entity state machine · edge case |
 | **Depends on** | `document-conventions.md`, `product.md`, `architecture.md` |
-| **Updated by task** | M99.19 — BR-168…BR-173: import card hàng loạt (đích, hàng hợp lệ, trùng lặp, batch atomic, content type, riêng tư) |
-| **Last updated** | 2026-08-12 |
+| **Updated by task** | M99.21 — BR-174…BR-181: export card ra file (scope, content-only, tag codec, determinism, read-only, file shape, tên file, riêng tư/platform) |
+| **Last updated** | 2026-08-13 |
 
 Format tuân theo `document-conventions.md` §6.2. Từ khoá MUST / SHOULD / MAY
 theo §3. Prose **không** chứa từ khoá là giải thích, không phải rule (§9).
@@ -445,6 +445,23 @@ BR-94 là một giới hạn của **giao diện** được nâng thành rule, v
 điều đó: hàng thẻ vẽ tag thành một dãy chip, và một dãy không giới hạn sẽ tràn ở
 320 với `textScaler` 2.0. Mười là con số đủ rộng để không ai gặp phải trong thực
 tế và đủ hẹp để hàng thẻ có chiều cao đoán được.
+
+## Export card ra file
+
+Nửa còn lại của Card Transfer (AD-20). Các rule dưới đây **không** phát biểu lại
+validation nội dung (BR-07, BR-08, BR-95), luật tag (BR-93, BR-94) hay luật
+riêng tư chung (BR-51…BR-54) — chúng chỉ nói phần mà chiều export thêm vào.
+
+| ID | Status | Rule | Enforced by | Related |
+|---|---|---|---|---|
+| BR-174 | active | Export MUST hỗ trợ đúng hai scope và MUST NOT có scope thứ ba ở v1. `all`: toàn bộ card **trực tiếp** của deck đang mở, độc lập với filter, search term, sort và pagination đang bật, MUST NOT gồm card của deck descendant. `selected`: đúng tập id đã materialize từ chế độ chọn (BR-167), id trùng MUST được normalize về một lần và MUST NOT nhân bản hàng trong file. Một id không còn tồn tại, hoặc không còn thuộc chính deck đó tại thời điểm đọc snapshot, MUST làm **cả request** thất bại bằng lý do có kiểu — MUST NOT export một phần im lặng. Scope rỗng (deck không còn card, hoặc tập chọn rỗng) MUST bị từ chối ở domain/repository kể cả khi UI đã ẩn action. | domain + repository | UC-11, AD-20, BR-167 |
+| BR-175 | active | Artifact export MUST chỉ mang sáu field nội dung canonical của AD-20 — `front · back · example · hint · pronunciation · tags` — và MUST NOT mang bất cứ thứ gì khác: id card hay deck, timestamp, cờ (BR-92), scheduler type/version/generation, box, ease factor, interval, due date, `learned_at`, review history hay dữ liệu session. Đây là **content transfer, không phải backup**: import lại chính file này MUST sinh id và study state mới (BR-171). Rule này chi phối **dữ liệu thẻ và dữ liệu học ghi vào các ô của file**. Metadata do chính định dạng container sinh ra — cụ thể là timestamp của từng entry trong file zip mà XLSX là — nằm ngoài phạm vi: nó không dẫn xuất từ bất kỳ thẻ nào, không mô tả thẻ nào, và MUST NOT được đọc ngược thành dữ liệu. Hệ quả là hai lần export cùng một dữ liệu ra XLSX MAY khác nhau ở mức byte; điều phải giống nhau là nội dung logic, và đó là BR-177. | domain | UC-11, AD-20, BR-171, BR-177 |
+| BR-176 | active | Ô `tags` MUST đi qua đúng **một** codec dùng chung cho cả Import và Export; MUST NOT có bản thứ hai trong encoder, decoder hay preview. Encode: các tag nối bằng `;` (BR-169); `;` bên trong một tag MUST escape thành `\;` và `\` MUST escape thành `\\`. Decode: backslash MUST chỉ được coi là escape khi đứng ngay trước `;` hoặc `\`; backslash trước ký tự khác và backslash ở cuối ô MUST giữ nguyên verbatim, vì nguồn legacy chưa từng escape. Round-trip export → import MUST giữ nguyên cả spelling lẫn tập tag. | domain | UC-11, UC-10, BR-93, BR-169 |
+| BR-177 | active | Cùng một dữ liệu MUST cho ra cùng một artifact **về mặt nội dung logic**: cùng tập record, cùng thứ tự record, cùng thứ tự tag trong mỗi record, và cùng giá trị từng ô. Determinism này MUST NOT được hiểu là byte-identical — container của XLSX ghi timestamp riêng của nó vào từng zip entry (BR-175), nên hai file byte khác nhau vẫn thoả rule khi giải mã ra cùng nội dung. Card MUST sắp theo `created_at ASC` với tie-break `id ASC`, **áp cho cả hai scope**; scope `selected` MUST NOT theo thứ tự người dùng chạm. Tag của mỗi card MUST sắp theo tên đã fold (BR-93) với tie-break ổn định. Tên deck, nội dung card và tag MUST đến từ **một snapshot nhất quán**, MUST NOT ghép từ nhiều lần đọc rời nhau và MUST NOT đọc tag theo kiểu N+1. | repository | UC-11, BR-93 |
+| BR-178 | active | Export MUST là thao tác chỉ-đọc: MUST NOT ghi hay chạm tới nội dung card, `updated_at` hay bất kỳ timestamp nào, `content_type` của deck (BR-163), study state, review history, session, cờ hay quan hệ tag. Export thành công MUST NOT xoá selection hiện tại — BR-167 chỉ bắt xoá selection sau một **mutation** thành công, và export không phải mutation. | repository + UI | UC-11, BR-163, BR-167 |
+| BR-179 | active | Mọi file export MUST mở đầu bằng đúng sáu header canonical theo thứ tự của AD-20, chữ thường tiếng Anh, và MUST NOT localize theo ngôn ngữ app. Field tuỳ chọn không có giá trị MUST là ô rỗng, MUST NOT là `null`, `-` hay chuỗi placeholder. CSV và TSV MUST ghi kèm UTF-8 BOM — đối xứng với encoding mà Import chấp nhận (BR-173). XLSX MUST ghi mọi ô dưới dạng **text**, nên nội dung bắt đầu bằng `=`, `+`, `-` hoặc `@` MUST NOT trở thành formula, và chuỗi trông như số (`001`, `1e3`, `+84…`) MUST giữ nguyên nguyên văn. | data | UC-11, AD-20, BR-173 |
+| BR-180 | active | Tên file export MUST dẫn xuất từ tên deck đã sanitize — loại ký tự phân cách đường dẫn, ký tự điều khiển và ký tự không hợp lệ của hệ tệp, gộp khoảng trắng liên tiếp thành một, trim hai đầu — cộng một ngày lấy từ `clockProvider` và phần mở rộng theo format đã chọn. Sanitize ra chuỗi rỗng thì phần tên MUST fallback về `cards`. MUST NOT gọi `DateTime.now()` ở bất kỳ layer nào, và tên file MUST NOT xuất hiện trong log ở bất kỳ level nào (BR-173). | domain | UC-11, BR-173 |
+| BR-181 | active | File export là dữ liệu riêng tư cùng mức nội dung card (BR-51, BR-52) và MUST chỉ được tạo khi người dùng chủ động yêu cầu (BR-54). Ứng dụng MUST NOT xin quyền truy cập bộ nhớ diện rộng, và MUST NOT ghi artifact vào thư mục dùng chung trước một hành động tường minh của người dùng; bản tạm MUST nằm trong vùng riêng của ứng dụng và là transient. Bàn giao file MUST đi qua share sheet của hệ điều hành. Người dùng đóng share sheet MUST được hiểu là **cancel**, MUST NOT báo lỗi. UI MUST NOT nói file đã được lưu khi hệ điều hành không xác nhận điều đó — copy trung thực nói "đã bàn giao cho hệ thống", không nói "đã lưu". | data + UI | UC-11, BR-51, BR-52, BR-54, BR-173 |
 
 ## StudyMode
 
@@ -894,6 +911,13 @@ Trạng thái kết thúc là terminal — không có đường quay lại `in_p
 | Hai hàng trong file cùng `front`+`back` sau fold | Hàng sau đánh dấu trùng-trong-file; mặc định bỏ qua (BR-170) |
 | Card cùng nội dung đã có sẵn trong deck đích | Đánh dấu trùng-với-deck; bật Include duplicates thì vẫn ghi (BR-170) |
 | Một write giữa batch thất bại | Rollback toàn bộ — không partial card/state/tag (BR-171) |
+| Export scope `all` khi danh sách đang bật filter/search | File vẫn chứa toàn bộ card trực tiếp của deck, không phải tập đã lọc (BR-174) |
+| Export scope `selected` có id lặp lại | Normalize còn một hàng; số card trong file khớp số id phân biệt (BR-174) |
+| Một card trong tập chọn bị xoá hoặc chuyển deck trước lúc đọc | Cả request thất bại có kiểu; không sinh file một phần (BR-174) |
+| Tag chứa `;` hoặc `\` | Escape khi ghi, khôi phục nguyên văn khi import lại (BR-176) |
+| Ô nội dung bắt đầu bằng `=` hoặc `+` | Ghi như text trong XLSX; mở bằng spreadsheet không thành formula (BR-179) |
+| Tên deck chỉ gồm ký tự bị loại khi sanitize | Tên file dùng `cards` + ngày + đuôi format (BR-180) |
+| Người dùng đóng share sheet | Coi là cancel; không toast lỗi, không nói đã lưu (BR-181) |
 | Muốn đổi deck rỗng từ `card` sang chứa deck con | Rỗng là đã `unset`; tạo deck con luôn được (BR-163) |
 | Kéo deck vào descendant của chính nó | Chặn, lỗi rõ ràng (BR-70) |
 | Di chuyển subtree sang root khác scheduler | Chặn, đề nghị reset (BR-74) |

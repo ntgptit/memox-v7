@@ -27,6 +27,19 @@ enum TagValidationProblem {
 
   /// The card already carries [kMaxTagsPerCard] tags (BR-94).
   tooManyTags,
+
+  /// Holds an ASCII control character (BR-93 — a tag name is text a chip
+  /// renders, and a control character is not text).
+  ///
+  /// **A rule the database was already relying on.** Both the card list and the
+  /// export read concatenate a card's tag names with `char(31)` and split them
+  /// apart in Dart, on the stated grounds that a tag can never contain one.
+  /// Nothing enforced that: `parse` trimmed and measured length, and Dart's
+  /// `trim` does not touch U+001F — so a name carrying one arrived through
+  /// import, and the split then turned one tag into two or into an unreadable
+  /// empty one. Enforcing it here makes the invariant a property of the type,
+  /// which is the only place a `SELECT` can safely assume it.
+  nameHasControlCharacter,
 }
 
 /// BR-93's limit, measured after trimming.

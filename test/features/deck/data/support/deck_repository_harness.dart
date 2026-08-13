@@ -26,6 +26,25 @@ final class DeckRepositoryHarness {
   int idCounter = 0;
   DateTime currentInstant = testNow;
 
+  /// Every statement the database has run, newest last — the production query
+  /// interceptor, kept for what it can prove rather than for what it prints.
+  ///
+  /// Use it for claims about *how many* reads an operation costs. A repository
+  /// that reads a card's tags one card at a time returns exactly the records a
+  /// single grouped read returns, so no assertion on the result can tell the
+  /// two apart; only the statement count can.
+  final List<String> statements = <String>[];
+
+  /// [statements] since the last [clearStatements], counting only the ones
+  /// whose text contains [fragment] — so a test names the read it means rather
+  /// than the transaction boundaries and pragmas around it.
+  int countStatements(String fragment) =>
+      statements.where((String line) => line.contains(fragment)).length;
+
+  /// Drops everything recorded so far, so a count covers the operation under
+  /// test and not the seeding before it.
+  void clearStatements() => statements.clear();
+
   Future<QueryRow?> rawDeck(String id) => db
       .customSelect(
         'SELECT * FROM decks WHERE id = ?',
@@ -111,7 +130,8 @@ final class DeckRepositoryHarness {
 DeckRepositoryHarness installDeckRepositoryHarness() {
   final harness = DeckRepositoryHarness();
   setUp(() {
-    harness.db = openTestDatabase();
+    harness.statements.clear();
+    harness.db = openTestDatabase(log: harness.statements.add);
     harness.idCounter = 0;
     harness.currentInstant = testNow;
     String nextId() => 'gen-${++harness.idCounter}';

@@ -128,9 +128,29 @@ tag nối `;`), decoder Strategy theo format với registry duy nhất
 record. Ba contract hẹp — `CardImportSourceRepository` (picker),
 `CardTransferRepository` (decode), `CardImportRepository` (commit) — để mỗi
 test chỉ fake nửa nó gọi; `card_transfer_boundary_test.dart` ghim các ranh
-giới bằng source scan. Export chưa tồn tại và không có API chết chờ nó; khi
-tới lượt, encoder strategy + resolver + export repository đứng cạnh các
-contract này mà không sửa Import.
+giới bằng source scan.
+
+Export (M99.21, BR-174…BR-181 · UC-11) đã lấp nửa còn lại **đúng như dự đoán
+đó**: encoder strategy + `cardTransferEncoderFor` + `CardExportRepository` +
+`CardExportDestinationRepository` đứng cạnh ba contract Import, không sửa
+Import một dòng nào. Hai điều đáng ghi vì chúng khác Import:
+
+- **Contract của encoder nằm ở `domain/models/`, implementation ở
+  `data/datasources/`** — ngược với decoder, nơi cả hai ở `data/`. Lý do là
+  caller: `ExportCardsUseCase` gọi encoder, nên nếu contract ở `data/` thì
+  use case phải import `data/` và AD-12 gãy. Decoder không có vấn đề này vì
+  chỉ repository gọi nó.
+- **Tag cell có codec dùng chung hai chiều** (`CardTransferTagCodec`,
+  BR-176). `;` trần không round-trip nổi một tag chứa `;`, và hai
+  implementation sẽ khớp nhau ở happy path rồi lệch đúng ở `;` và `\` —
+  nên Import đã được chuyển sang codec này trong cùng change, không hẹn lại.
+
+Overlay chứ không phải screen: `showCardExportSheet` là hình dạng
+presentation đầu tiên của feature không phải một `_screen.dart`. Hệ quả thật
+là visual-audit harness không nhận nó — `screen_audit_coverage.dart` khám phá
+subject theo `_screen.dart`, nên một companion audit cho overlay sẽ *làm gãy*
+suite coverage. Geometry của sheet vì thế được ghim bằng
+`card_export_alignment_test.dart` đo `getRect`, không bằng audit.
 
 ---
 

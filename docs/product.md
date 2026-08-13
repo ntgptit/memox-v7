@@ -7,8 +7,8 @@
 | **Scope** | Vấn đề, người dùng, quyết định nền tảng, phạm vi MVP, luồng nghiệp vụ chính. Ngoài phạm vi: cách triển khai |
 | **Source of truth for** | Phạm vi MVP · phân loại must/should/nice/out · quyết định platform, data posture, auth, dữ liệu nhạy cảm |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.19 (Import card: N1 nửa import thành task đang triển khai) |
-| **Last updated** | 2026-08-12 |
+| **Updated by task** | M99.21 (Export card: N1 nửa export thành task đang triển khai) |
+| **Last updated** | 2026-08-13 |
 
 ## Problem
 
@@ -144,7 +144,7 @@ chọn mode chỉ xuất hiện khi có mode thứ hai.
 
 | # | Feature | Notes |
 |---|---|---|
-| N1 | Import/export | Import CSV/TSV/XLSX **đã triển khai** (M99.19, UC-10, AD-20). Export vẫn nice-to-have |
+| N1 | Import/export | Import CSV/TSV/XLSX **đã triển khai** (M99.19, UC-10, AD-20). Export **đang triển khai** (M99.21, UC-11, BR-174…BR-181) — export nội dung, không phải backup |
 | N2 | Nhắc nhở ôn tập hằng ngày | Cần notification permission |
 | N3 | Tag/phân loại card | |
 
@@ -237,4 +237,7 @@ người dùng thấy đầu tiên và nó định hình toàn bộ trải nghi�
 Nửa import của N1 đã triển khai ở M99.19 (UC-10, AD-20): thư
 viện starter giải quyết "app trống lúc mới cài", nhưng không giải quyết "bộ thẻ
 của tôi đang nằm trong một file" — và nhập tay từng card không phải câu trả lời
-cho một file nghìn dòng. Export vẫn ở nice-to-have.
+cho một file nghìn dòng. Nửa export đang triển khai ở M99.21 (UC-11): mang bộ
+thẻ ra khỏi app là điều kiện để "dữ liệu của tôi" không bị khoá trong một cài
+đặt duy nhất — nhưng nó là export **nội dung**, không phải backup, nên không
+thay thế được sync (AD-03).

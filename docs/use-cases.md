@@ -7,8 +7,8 @@
 | **Scope** | Must-have của MVP. Ngoài phạm vi: should/nice-to-have, và mọi thứ ở mục "Điều đã cố ý không đặc tả" |
 | **Source of truth for** | UC-xx · main/alternative/error flow · UI state matrix của từng màn |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md` |
-| **Updated by task** | M99.19 — UC-10: import card hàng loạt (Source → Preview → Import) |
-| **Last updated** | 2026-08-12 |
+| **Updated by task** | M99.21 — UC-11: export card của một deck ra file (scope → format → share) |
+| **Last updated** | 2026-08-13 |
 
 Chỉ đặc tả must-have. Should-have và nice-to-have viết khi tới lượt — đặc tả
 trước những thứ có thể bị cắt là lãng phí.
@@ -17,7 +17,7 @@ Luồng viết bằng ngôn ngữ người dùng, không nói theo màn hình ha
 hình sẽ đổi; luồng thì không.
 
 **ID use case là định danh vĩnh viễn**, cùng chính sách với BR (xem
-`business-rules.md`). UC mới append; không đánh số lại. Hiện tại: UC-01…UC-10.
+`business-rules.md`). UC mới append; không đánh số lại. Hiện tại: UC-01…UC-11.
 
 **Các UC nối vào nhau thế nào thì xem [`master-flow.md`](master-flow.md).** Tài
 liệu này đặc tả từng UC riêng lẻ và cố ý không vẽ đồ thị giữa chúng — mỗi UC mô
@@ -725,6 +725,86 @@ confirm · submitting · commit error · result. Không có state "refreshing" �
 nguồn chỉ parse lại khi người dùng đổi nguồn, sheet, header hoặc bấm lại
 Preview.
 
+## UC-11 · Export card của một deck ra file
+
+| | |
+|---|---|
+| **Status** | active |
+
+**Actor:** Người dùng
+**Trigger:** Chọn `Export cards` trong overflow menu của card list, hoặc
+`Export selected` trên thanh hành động của chế độ chọn (UC-04 A6)
+**Preconditions:** Deck đang mở là sub-deck loại `card` và có ít nhất một card;
+với lối chọn nhiều thì tập chọn không rỗng (BR-174)
+
+**Main flow:**
+1. Người dùng mở export từ một trong hai entry point; hệ thống mở một sheet và
+   hiển thị **scope đã cố định, chỉ đọc**: `All N cards in this deck` hoặc
+   `N selected cards`. Sheet không cho đổi scope — scope là hệ quả của lối vào
+   (BR-174).
+2. Hệ thống hiển thị ba format — CSV (mặc định, gắn nhãn Recommended), TSV,
+   XLSX — cùng một dòng nói file chứa nội dung và tag, và một dòng nói tiến độ
+   học và lịch sử **không** nằm trong file (BR-175).
+3. Người dùng chọn format nếu muốn khác mặc định, rồi bấm `Export N cards`.
+4. Hệ thống đọc một snapshot nhất quán gồm tên deck, nội dung sáu field và tag
+   theo thứ tự xác định (BR-177), không ghi gì vào database (BR-178).
+5. Hệ thống encode snapshot thành artifact theo format đã chọn — sáu header
+   canonical, ô rỗng cho field trống, BOM cho CSV/TSV, ô text cho XLSX
+   (BR-179) — và đặt tên file từ tên deck đã sanitize cộng ngày (BR-180).
+6. Hệ thống ghi artifact vào vùng riêng tạm thời của ứng dụng rồi bàn giao cho
+   share sheet của hệ điều hành (BR-181).
+7. Người dùng chọn đích ở share sheet. Hệ thống đóng sheet export và báo đã bàn
+   giao file cho hệ thống — **không** khẳng định đã lưu ở đâu (BR-181).
+
+**Alternative flows:**
+- **A1 — Scope là tập đã chọn:** vào từ thanh hành động chọn nhiều; file chứa
+  đúng tập id đã materialize, id trùng chỉ xuất hiện một lần, và thứ tự vẫn là
+  `created_at ASC` chứ không phải thứ tự chạm (BR-174, BR-177). Selection giữ
+  nguyên sau khi export xong (BR-178).
+- **A2 — Đổi format:** chọn TSV hoặc XLSX; canonical schema, thứ tự card và ô
+  tags không đổi, chỉ lớp mã hoá đổi (BR-179).
+- **A3 — Đóng share sheet:** người dùng thoát share sheet mà không chọn đích.
+  Đây là **cancel**: không báo lỗi, sheet export trở lại trạng thái ban đầu với
+  scope và format đang chọn, và không có tuyên bố nào về việc đã lưu (BR-181).
+- **A4 — Bấm export lần thứ hai khi đang tạo file:** hệ thống MUST bỏ qua lần
+  bấm sau; primary action bị khoá cho tới khi lần đầu kết thúc, và không có hai
+  artifact nào được tạo cho một lần mở sheet.
+- **A5 — Huỷ trước khi submit:** `Cancel`, chạm ra ngoài sheet hoặc Android Back
+  đóng sheet, không tạo file, không đụng selection.
+
+**Error flows:**
+- **E1 — Nền tảng không có share sheet:** hệ thống báo rằng chia sẻ không khả
+  dụng trên thiết bị này, giữ sheet mở với scope và format đang chọn, và không
+  để lại artifact nào.
+- **E2 — Lỗi từ nền tảng khi chia sẻ:** exception của platform channel map
+  thành lý do có kiểu; thông báo MUST NOT lộ đường dẫn, tên file hay nội dung
+  card (BR-180, BR-181); Retry giữ nguyên scope và format.
+- **E3 — Đọc dữ liệu thất bại:** repository lỗi khi lấy snapshot → lý do có
+  kiểu, không có file, không có mutation (BR-178); Retry chạy lại từ bước 4.
+- **E4 — Encode thất bại:** encoder lỗi → lý do có kiểu phân biệt được với lỗi
+  đọc, không có artifact một phần nào được bàn giao.
+- **E5 — Không có gì để export:** deck rỗng hoặc tập chọn rỗng → domain từ chối
+  bằng lý do có kiểu (BR-174). Entry point không hiện khi deck rỗng, nên đây là
+  chặn tầng dưới cho deep link và cho cây đổi sau khi sheet đã mở.
+- **E6 — Id đã chọn không còn hợp lệ:** một id trong tập chọn đã bị xoá hoặc đã
+  chuyển sang deck khác → **cả request** thất bại có kiểu, không sinh file một
+  phần (BR-174); thông báo mời người dùng chọn lại.
+
+**Postconditions:** Database không đổi — nội dung, timestamp, `content_type`,
+study state, history, cờ và tag đều nguyên vẹn (BR-178). Artifact chỉ chứa sáu
+field nội dung (BR-175) và chỉ tồn tại ở vùng riêng tạm thời cho tới khi người
+dùng chọn đích ở share sheet (BR-181).
+
+**Business rules:** BR-51, BR-52, BR-54, BR-93, BR-94, BR-163, BR-167, BR-174,
+BR-175, BR-176, BR-177, BR-178, BR-179, BR-180, BR-181
+
+**UI states:** initial (scope + format, primary bật) · generating (primary khoá,
+Cancel còn dùng được) · share requested · dismissed (về initial, không lỗi) ·
+unavailable/platform error · repository error · encoder error · invalid scope
+(rỗng hoặc id đã cũ). Không có state `loading` khi mở sheet — scope và số card
+đã có sẵn từ màn gọi; và không có state `empty`, vì scope rỗng là lỗi (E5) chứ
+không phải một màn hình trống.
+
 ## Điều đã cố ý không đặc tả
 
 | Thứ | Vì sao |
@@ -733,7 +813,7 @@ Preview.
 | Tìm kiếm card (S1) | Should-have, chưa tới lượt |
 | Thống kê / streak (S2) | Should-have — `study_answers` với `kind` đã đủ dữ liệu |
 | Đảo chiều card (S3) | Should-have |
-| Export (nửa còn lại của N1) | Import đã đặc tả và triển khai (UC-10, BR-168…BR-173, AD-20); export vẫn nice-to-have. Khi triển khai MUST đặc tả selection, encoder, save/share và quyền riêng tư trước khi viết code — nền canonical schema và strategy boundary đã sẵn ở AD-20. |
+| ~~Export (nửa còn lại của N1)~~ | **Đã đặc tả ở M99.21** — UC-11 và BR-174…BR-181 chốt scope, encoder, filename, share và quyền riêng tư trước khi viết code, đúng điều kiện mà mục này đặt ra. Còn nice-to-have ngoài phạm vi export nội dung: backup/restore, sync và `.apkg`. |
 | Nhắc nhở hằng ngày (N2) | Nice-to-have, cần quyền notification |
 | Media và tag trong card | Ngoài MVP; quy tắc reset (BR-41) và lưu trữ (AD-08) đã đặt sẵn |
 | Đăng nhập, đồng bộ | Ngoài MVP (AD-03) |

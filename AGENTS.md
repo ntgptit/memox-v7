@@ -79,19 +79,26 @@ the way it is, and do not treat a code example in a document as a spec.
 
 ## Prompt delivery contract
 
-When the user asks for an implementation prompt, the response MUST provide
-three standalone prompts as one bundle, unless the user explicitly opts out of
-one of them:
+When the user asks for an implementation prompt, the agent MUST write a prompt
+set under `docs/prompt/<feature-name>/`, using a stable kebab-case feature name.
+If that directory already exists, update its stable files in place instead of
+creating timestamped or numbered copies unless the user explicitly asks to
+preserve versions. Prompt artifacts are execution aids, not sources of truth
+for product behaviour: they MUST cite the applicable BR/AD/UC/wireframe
+documents and MUST NOT silently define rules that are absent from them.
 
-1. **Implementation prompt** — the decision-complete task: scope, source of
+The directory MUST contain these three standalone prompt files unless the user
+explicitly opts out of one of them:
+
+1. **`implementation.md`** — the decision-complete task: scope, source of
    truth, files or layers affected, required behavior, tests, verification and
    Definition of Done.
-2. **Recursive architecture and logic review prompt** — an independent audit of
+2. **`recursive-architecture-logic-review.md`** — an independent audit of
    business-rule parity, state transitions, dependency boundaries, persistence,
    failure handling and tests. It MUST reproduce concrete failures, auto-fix
    in-scope findings, rerun verification and repeat until its stated clean-stop
    condition is met; a report-only review is insufficient.
-3. **Recursive UI/UX review prompt** — an independent audit of layout,
+3. **`recursive-ui-ux-review.md`** — an independent audit of layout,
    hierarchy, interaction, accessibility, responsiveness and visual fidelity.
    It MUST declare the approved divergences from any supplied concept, render
    the real production states, inspect the resulting screenshots or goldens,
@@ -111,3 +118,22 @@ evidence of visual completion, and visual similarity is not evidence of correct
 business behavior. Each prompt MUST be executable in a fresh agent session and
 therefore MUST carry its own scope, source-of-truth reading list, worktree-safety
 rules, verification commands or repository gate, and explicit stop criteria.
+
+After writing the three prompt files, the chat response MUST stay short and MUST
+include one copy-pasteable trigger prompt for a fresh AI-agent session. That
+trigger names the three repository-relative files and orders the agent to use
+this workflow: implementation completes first; two independent subagents then
+run their architecture/logic and UI/UX **audit-only passes in parallel**; fixes
+are applied sequentially, architecture/logic first and UI/UX second after it
+re-reads the latest worktree; the coordinator runs the final gate last. Parallel
+review agents MUST NOT edit the shared worktree at the same time. If subagents
+are unavailable, run the same phases sequentially with a fresh re-read before
+each review. The trigger MUST stop on a real blocker or failed required gate and
+MUST NOT collapse the phase reports into an unsupported blanket `pass`.
+
+The chat response SHOULD also link to the feature prompt directory, but MUST NOT
+repeat the three full prompt bodies unless the user explicitly asks for inline
+content or the files could not be written. Every prompt file under `docs/` MUST
+follow `docs/document-conventions.md`, including the seven-field header. Do not
+store the short trigger as a fourth `run.md`; it exists in chat specifically so
+the user can paste it into the fresh session that must execute the three files.

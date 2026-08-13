@@ -6,9 +6,28 @@
 /// format vocabulary. The value is *representation only* — nothing about
 /// cards, decks or scheduling may depend on which of these carried the rows.
 enum CardTransferFormat {
-  csv,
-  tsv,
-  xlsx;
+  csv('csv', 'text/csv'),
+  tsv('tsv', 'text/tab-separated-values'),
+  xlsx(
+    'xlsx',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  );
+
+  const CardTransferFormat(this.fileExtension, this.mimeType);
+
+  /// The extension an export writes (BR-180), without the dot.
+  ///
+  /// **A member, not a switch somewhere else.** Format dispatch belongs to the
+  /// decoder and encoder resolvers alone (AD-20); a filename builder that
+  /// switched on format to pick `.csv` would be a third registry, free to
+  /// disagree with them. `.tab` is accepted on the way *in* by [fromFileName]
+  /// and is deliberately never written on the way out — one spelling per
+  /// format keeps exported files predictable.
+  final String fileExtension;
+
+  /// What the artifact declares itself to be when it is handed to the OS
+  /// (BR-181). Here for the same reason as [fileExtension].
+  final String mimeType;
 
   /// The format [fileName]'s extension claims, or null when it is none of the
   /// three. Case-insensitive, because pickers return whatever the provider

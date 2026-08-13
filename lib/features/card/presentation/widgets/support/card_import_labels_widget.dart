@@ -74,6 +74,11 @@ extension CardImportLabels on BuildContext {
     return switch (row.tagProblems.firstOrNull) {
       TagValidationProblem.nameTooLong ||
       TagValidationProblem.nameEmpty => l10n.cardImportRowIssueTagTooLong,
+      // Its own sentence rather than the `tooManyTags` catch-all: the row is
+      // refused for what a name *contains*, and "More than 10 tags" would send
+      // the user to count tags that are already within the cap (BR-93).
+      TagValidationProblem.nameHasControlCharacter =>
+        l10n.cardImportRowIssueTagCharacter,
       TagValidationProblem.tooManyTags ||
       _ => l10n.cardImportRowIssueTooManyTags,
     };

@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:excel/excel.dart' as xlsx;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/error/failure.dart';
+import 'package:memox/features/card/data/datasources/card_delimited_transfer_data_source.dart';
 import 'package:memox/features/card/data/datasources/card_transfer_resolver_data_source.dart';
 import 'package:memox/features/card/data/datasources/card_xlsx_transfer_data_source.dart';
 import 'package:memox/features/card/domain/failures/card_transfer_failure.dart';
@@ -109,6 +110,60 @@ void main() {
 
       expect(cellsOf(doc)[1], <String>['only-one']);
       expect(cellsOf(doc)[2], <String>['x', 'y']);
+    });
+  });
+
+  group('delimiter detection reads the header first (BR-176)', () {
+    String detect(String body) =>
+        CardDelimitedTransferDataSource.detectDelimiter(body);
+
+    test('a header row outvotes a tags cell full of semicolons', () {
+      // The regression this rule was added for: BR-94 allows ten tags, so the
+      // last cell can hold nine `;` against the five `,` that hold the six
+      // columns apart. Counting characters picked `;` and the app could not
+      // read the CSV it had just written.
+      const body =
+          'front,back,example,hint,pronunciation,tags\r\n'
+          'a,b,,,,t1;t2;t3;t4;t5;t6;t7;t8;t9;t10\r\n'
+          'c,d,,,,t1;t2;t3;t4;t5;t6;t7;t8;t9;t10';
+
+      expect(detect(body), ',');
+    });
+
+    test('a genuinely semicolon-delimited file still wins', () {
+      // A European Excel writes this, and pinning `.csv` to a comma would have
+      // broken it. Under `;` the first row resolves six fields; under `,` it
+      // resolves one — the header is evidence about the delimiter, not a vote.
+      const body =
+          'front;back;example;hint;pronunciation;tags\r\n'
+          'a;b;;;;t1,t2';
+
+      expect(detect(body), ';');
+    });
+
+    test('aliases count too, so a non-canonical header is still a header', () {
+      const body = 'term;meaning;sentence\r\na;b;c';
+
+      expect(detect(body), ';');
+    });
+
+    test('a headerless file falls through to frequency, unchanged', () {
+      // Nothing on the first row names a field, so every candidate scores zero
+      // on the header probe and the original count decides — which is what
+      // keeps pasted data without a header behaving exactly as it did.
+      const body = 'a\tb\tc\r\nd\te\tf\r\ng\th\ti';
+
+      expect(detect(body), '\t');
+    });
+
+    test('a body with no candidate delimiter at all is a comma', () {
+      expect(detect('front'), ',');
+    });
+
+    test('a quoted header row is still recognised', () {
+      const body = '"front","back"\r\n"a","b"';
+
+      expect(detect(body), ',');
     });
   });
 

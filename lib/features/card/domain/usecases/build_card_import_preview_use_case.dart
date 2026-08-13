@@ -5,6 +5,7 @@ import '../models/card_transfer_document_model.dart';
 import '../models/card_transfer_field_model.dart';
 import '../models/card_transfer_mapping_model.dart';
 import '../models/card_transfer_record_model.dart';
+import '../models/card_transfer_tag_codec_model.dart';
 import '../models/card_text_model.dart';
 import '../models/tag_name_model.dart';
 import '../repositories/card_import_repository.dart';
@@ -175,9 +176,15 @@ CardImportPreview classifyImportRows({
   );
 }
 
-/// One tags cell → names, split on `;` (BR-169 — never a comma, CSV owns
-/// commas), deduplicated by folded identity (BR-93), capped at
-/// [kMaxTagsPerCard] (BR-94).
+/// One tags cell → names, split by the shared codec (BR-176), deduplicated by
+/// folded identity (BR-93), capped at [kMaxTagsPerCard] (BR-94).
+///
+/// **The split is the codec's, not this file's** (M99.21). It used to be a
+/// bare split on the separator, which cannot round-trip a tag containing one
+/// — export escapes it, so import has to be the same implementation in
+/// reverse rather than a second one that agrees only on easy input. Legacy
+/// cells are unaffected: they escaped nothing, and the codec leaves a
+/// backslash that introduces nothing verbatim.
 ({List<TagName> names, Set<TagValidationProblem> problems}) _parseTagsCell(
   String cell,
 ) {
@@ -185,7 +192,7 @@ CardImportPreview classifyImportRows({
   final problems = <TagValidationProblem>{};
   final seen = <String>{};
 
-  for (final piece in cell.split(kCardTransferTagsSeparator)) {
+  for (final piece in CardTransferTagCodec.decode(cell)) {
     // A blank piece — a trailing `;` or a double `;;` — is spacing, not an
     // empty-name error the way an empty tag *form* is.
     if (piece.trim().isEmpty) continue;

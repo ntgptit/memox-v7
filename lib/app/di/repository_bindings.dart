@@ -3,13 +3,20 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../core/database/app_database_provider.dart';
 import '../../core/time/clock_provider.dart';
 import '../../features/card/data/datasources/card_import_file_data_source.dart';
+import '../../features/card/data/datasources/card_transfer_encoder_resolver_data_source.dart';
+import '../../features/card/data/repositories/card_export_destination_repository_impl.dart';
+import '../../features/card/data/repositories/card_export_repository_impl.dart';
 import '../../features/card/data/repositories/card_import_repository_impl.dart';
 import '../../features/card/data/repositories/card_import_source_repository_impl.dart';
 import '../../features/card/data/repositories/card_transfer_repository_impl.dart';
 import '../../features/card/data/repositories/card_repository_impl.dart';
+import '../../features/card/di/card_export_repository_provider.dart';
 import '../../features/card/di/card_import_repository_provider.dart';
 import '../../features/card/di/card_transfer_repository_provider.dart';
 import '../../features/card/di/card_repository_provider.dart';
+import '../../features/card/domain/models/card_transfer_encoder_model.dart';
+import '../../features/card/domain/repositories/card_export_destination_repository.dart';
+import '../../features/card/domain/repositories/card_export_repository.dart';
 import '../../features/card/domain/repositories/card_import_repository.dart';
 import '../../features/card/domain/repositories/card_import_source_repository.dart';
 import '../../features/card/domain/repositories/card_transfer_repository.dart';
@@ -93,6 +100,32 @@ CardTransferRepository cardTransferRepositoryBinding(Ref ref) =>
 CardImportSourceRepository cardImportSourceRepositoryBinding(Ref ref) =>
     const CardImportSourceRepositoryImpl(picker: CardImportFileDataSource());
 
+/// Card export's three seams, bound apart for the same reason import's are
+/// (M99.21, AD-20): the read is pure database, the encoder resolver is pure
+/// bytes, and the destination is the one place the app talks to the OS.
+///
+/// **The database itself, not a DAO** — the same difference `cardRepositoryBinding`
+/// explains: the deck name and the card rows must come from one transaction,
+/// and a ready-made adapter would let this root hand the repository a snapshot
+/// from a second database.
+///
+/// No clock: an export writes nothing and stamps nothing (BR-178). "Now" enters
+/// this flow once, at the use case, to date the file name (BR-180).
+CardExportRepository cardExportRepositoryBinding(Ref ref) =>
+    CardExportRepositoryImpl(ref.watch(appDatabaseProvider));
+
+/// The share sheet. Constructed with no argument so the plugin's own singleton
+/// is used; the injectable seam on the implementation exists for host tests,
+/// not for this root to choose between platforms.
+CardExportDestinationRepository cardExportDestinationRepositoryBinding(
+  Ref ref,
+) => const CardExportDestinationRepositoryImpl();
+
+/// The encode registry, bound as the domain typedef so nothing above `data/`
+/// has to import the file holding the `switch` (AD-20).
+CardTransferEncoderResolver cardTransferEncoderResolverBinding(Ref ref) =>
+    cardTransferEncoderFor;
+
 /// The template-copy path (AD-07). Its own DAO, for the reason stated on
 /// `DeckTemplateDao`: it writes decks, cards and study states in one
 /// transaction, which is a different job from the reads a deck list rebuild
@@ -142,6 +175,13 @@ List<Override> repositoryBindingOverrides() => <Override>[
   cardTransferRepositoryProvider.overrideWith(cardTransferRepositoryBinding),
   cardImportSourceRepositoryProvider.overrideWith(
     cardImportSourceRepositoryBinding,
+  ),
+  cardExportRepositoryProvider.overrideWith(cardExportRepositoryBinding),
+  cardExportDestinationRepositoryProvider.overrideWith(
+    cardExportDestinationRepositoryBinding,
+  ),
+  cardTransferEncoderResolverProvider.overrideWith(
+    cardTransferEncoderResolverBinding,
   ),
   deckTemplateRepositoryProvider.overrideWith(deckTemplateRepositoryBinding),
   deckTemplateCatalogProvider.overrideWith(deckTemplateCatalogBinding),

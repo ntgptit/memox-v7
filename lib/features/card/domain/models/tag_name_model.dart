@@ -1,5 +1,15 @@
 import '../failures/tag_validation_failure.dart';
 
+/// C0, DEL and C1 — every character that carries no glyph.
+///
+/// Interior only in effect: [TagName.parse] trims first, so a name padded with
+/// tabs or newlines is cleaned rather than refused, and what reaches this is a
+/// control character sitting *inside* the name. `char(31)` is the one that made
+/// this a bug, but the whole range is the rule: none of them is text a chip can
+/// render, and a delimiter the queries pick tomorrow is safe by construction
+/// rather than by having checked.
+final RegExp _controlCharacters = RegExp(r'[\x00-\x1F\x7F-\x9F]');
+
 /// A tag name that has been through BR-93.
 ///
 /// **The point of the type is that it cannot be constructed from an invalid
@@ -40,6 +50,36 @@ final class TagName {
     }
     if (trimmed.length > maxLength) {
       return (name: null, problem: TagValidationProblem.nameTooLong);
+    }
+    if (_controlCharacters.hasMatch(trimmed)) {
+      return (
+        name: null,
+        problem: TagValidationProblem.nameHasControlCharacter,
+      );
+    }
+
+    return (name: TagName._(trimmed, trimmed.toLowerCase()), problem: null);
+  }
+
+  /// Reads a name that is **already stored**, without BR-93's length limit —
+  /// [CardText.fromStored]'s reasoning, applied to the sixth canonical field.
+  ///
+  /// Only the length relaxes. Empty and control characters stay refused: the
+  /// first cannot be written to a cell at all (the tags codec drops empty
+  /// pieces), and the second is the invariant the `char(31)` join depends on,
+  /// so admitting it here would re-open exactly what enforcing it closed.
+  static ({TagName? name, TagValidationProblem? problem}) fromStored(
+    String raw,
+  ) {
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) {
+      return (name: null, problem: TagValidationProblem.nameEmpty);
+    }
+    if (_controlCharacters.hasMatch(trimmed)) {
+      return (
+        name: null,
+        problem: TagValidationProblem.nameHasControlCharacter,
+      );
     }
 
     return (name: TagName._(trimmed, trimmed.toLowerCase()), problem: null);

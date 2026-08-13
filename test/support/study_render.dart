@@ -53,16 +53,33 @@ class ReviewApp extends StatelessWidget {
   const ReviewApp({
     required this.home,
     this.brightness = Brightness.light,
+    this.locale,
+    this.textScale = 1,
     super.key,
   });
 
   final Widget home;
   final Brightness brightness;
 
+  /// Null follows the platform, which in a test is English. Pass `Locale('vi')`
+  /// to render the translation — a review render is where a long translation
+  /// stops being a hypothetical.
+  final Locale? locale;
+
+  /// The text scale the whole app renders at, including anything pushed onto
+  /// the navigator.
+  ///
+  /// **Applied through `builder`, not around `home`.** A `MediaQuery` inside
+  /// `home` sits *below* the navigator, so a route pushed over it — a bottom
+  /// sheet, a dialog — would render at 1.0 while the screen behind it scaled,
+  /// which is exactly the combination a 2.0 render exists to inspect.
+  final double textScale;
+
   @override
   Widget build(BuildContext context) => MaterialApp(
     debugShowCheckedModeBanner: false,
     theme: brightness == Brightness.dark ? buildDarkTheme() : buildLightTheme(),
+    locale: locale,
     localizationsDelegates: const <LocalizationsDelegate<Object>>[
       AppLocalizations.delegate,
       GlobalMaterialLocalizations.delegate,
@@ -70,6 +87,14 @@ class ReviewApp extends StatelessWidget {
       GlobalCupertinoLocalizations.delegate,
     ],
     supportedLocales: AppLocalizations.supportedLocales,
+    builder: textScale == 1
+        ? null
+        : (context, child) => MediaQuery(
+            data: MediaQuery.of(
+              context,
+            ).copyWith(textScaler: TextScaler.linear(textScale)),
+            child: child!,
+          ),
     home: home,
   );
 }

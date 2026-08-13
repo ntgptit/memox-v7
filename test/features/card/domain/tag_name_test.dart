@@ -23,6 +23,37 @@ void main() {
       }
     });
 
+    test('an interior control character is refused (BR-93)', () {
+      // **The invariant the tag queries already depended on.** `cardListItems`
+      // and `exportCardsInDeck` both concatenate a card's tag names with
+      // `char(31)` and split them apart in Dart, on the stated grounds that a
+      // name can never hold one. Nothing enforced it: `trim` does not touch
+      // U+001F, so a name carrying one used to parse cleanly, reach the
+      // database, and come back out as two tags — or, when it sat at the end,
+      // as an empty piece that failed the export whole.
+      for (final raw in <String>[
+        'a\u{1F}b', // the unit separator both tag queries join with
+        'a\u{0}b',
+        'a\u{7F}b',
+        'a\u{A}b', // interior, so trim never reaches it
+      ]) {
+        expect(
+          TagName.parse(raw).problem,
+          TagValidationProblem.nameHasControlCharacter,
+          reason: 'input ${raw.codeUnits}',
+        );
+      }
+    });
+
+    test('a name padded with control whitespace is cleaned, not refused', () {
+      // Trim runs first, so the rule above bites on interior characters only —
+      // a tag pasted with a trailing newline is still an ordinary tag.
+      final parsed = TagName.parse('\t noun \n');
+
+      expect(parsed.problem, isNull);
+      expect(parsed.name?.value, 'noun');
+    });
+
     test('exactly the limit passes, one over is refused', () {
       final atLimit = 'x' * TagName.maxLength;
 

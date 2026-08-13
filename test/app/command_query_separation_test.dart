@@ -60,13 +60,25 @@ void main() {
 
   test('a command controller exposes only build, submit and reset', () {
     // `build` is the Riverpod hook, `submit` is the command, `reset` clears the
-    // last attempt. Anything else — a second command, a selection, a loader — is
-    // the growth this check exists to stop.
+    // last attempt, `cancel` abandons the one in flight. Anything else — a
+    // second command, a selection, a loader — is the growth this check exists
+    // to stop.
+    //
+    // **`cancel` is the same command, not another one**, which is why it is
+    // listed rather than exempted. The three the rule already allowed are the
+    // lifecycle of a single submit — start it, clear it — and abandoning it is
+    // the fourth verb of that same lifecycle: it runs no use case, touches no
+    // repository, and sets no state, so it cannot have a spinner of its own and
+    // cannot put one on the wrong action, which is the failure the reason below
+    // describes. `ExportCards` needs it because the export sheet's `Cancel`
+    // stays live while a file is being built (M4.13 W4) and the promise is that
+    // no file is handed over; relying on the provider's disposal alone would
+    // make that promise depend on which of two schedulers wins.
     //
     // A command controller is identified by what its state *is*: `build` returns a
     // submit state. That is the honest test, because a notifier holding a plain
     // value is not a command however it is filed.
-    const allowed = <String>{'build', 'submit', 'reset'};
+    const allowed = <String>{'build', 'submit', 'reset', 'cancel'};
     final controllers = classesUnder('/controllers/');
     scanned['controllers'] = controllers.length;
     var commandCount = 0;

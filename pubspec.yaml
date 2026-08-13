@@ -71,6 +71,22 @@ dependencies:
   file_selector: ^1.1.0
   csv: ^8.0.0
   excel: ^4.0.6
+  # The export direction's one platform seam (BR-181, AD-20) — the symmetric
+  # counterpart of `file_selector` on the import side, and reached from exactly
+  # one file (`card_share_destination_data_source.dart`).
+  #
+  # Pinned to the major the adapter is written against: 13.x is where
+  # `SharePlus.instance.share(ShareParams(...))` and `ShareResultStatus`
+  # replaced the old top-level `Share.shareXFiles`, so a resolver free to pick
+  # the next major would silently change what "dismissed" means — and dismissal
+  # being a cancel rather than an error is a business rule, not a detail.
+  #
+  # The adapter shares `XFile.fromData` rather than a path it wrote itself:
+  # the plugin puts the transient copy in the app's own cache area and clears
+  # it on the next share, so no `dart:io` and no broad storage permission enter
+  # the app, and the web build keeps compiling (share_plus ships a web
+  # implementation).
+  share_plus: ^13.3.0
 
 dev_dependencies:
   flutter_test:
@@ -100,6 +116,12 @@ dev_dependencies:
   freezed: ^3.2.5
   json_serializable: ^6.14.0
   mocktail: ^1.0.5
+  # Direct because card_export_destination_repository_test.dart extends
+  # `SharePlatform` to fake the share sheet at the plugin's own boundary, and
+  # `share_plus` deliberately does not re-export that class. Declared rather
+  # than reached transitively for the reason `analyzer` above states: a
+  # transitive dependency can disappear in a patch release of its parent.
+  share_plus_platform_interface: ^7.2.0
   drift_dev: ^2.34.0
   # Same reason as `riverpod_annotation` above: it emits the code the app is
   # compiled from, so a major bump here rewrites every provider in the tree.
