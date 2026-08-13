@@ -172,7 +172,10 @@ nguyên khung khi rows tới, panel submit thay panel confirm tại chỗ.
    ("source", không phải "file" — áp cho cả paste) + chi tiết an toàn có
    kiểu; actions `Back to preview` (secondary, xoá trạng thái commit, giữ
    nguyên toàn bộ draft) + `Try again` (primary, submit lại đúng plan đã giữ —
-   không re-pick, không re-parse, không transaction chồng nhau).
+   không re-pick, không re-parse, không transaction chồng nhau). Close và
+   Android Back trên mặt failure hỏi discard draft ngay — không bước lùi
+   ngầm, vì phase dẫn xuất từ commit trước step nên lùi step không đổi gì
+   trên màn; trên các mặt thành công Close/Back rời màn không hỏi.
 
 **Stepper contract.** Ba mặt phân biệt: completed (check) / current (số, cặp
 primary) / future (số, container nhạt). Check là **earned**: Source khi đã có

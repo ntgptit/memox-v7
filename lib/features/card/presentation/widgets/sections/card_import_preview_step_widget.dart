@@ -86,14 +86,22 @@ class _SourceContext extends ConsumerWidget {
     final kind = ref.watch(cardImportSourceChoiceProvider(deckId));
     final file = ref.watch(cardImportFilePickChoiceProvider(deckId)).file;
     final sheetName = ref.watch(cardImportSheetChoiceProvider(deckId));
+    final hasHeader = ref.watch(cardImportHeaderChoiceProvider(deckId));
 
     final sheet = document.value?.sheetNamed(sheetName);
+    // Detected rows are *data* rows — the header row is a label, not a card,
+    // and this number must agree with the "N of N ready" total two sections
+    // below (concept states 3-4 count the same way).
+    final rawRowCount = sheet?.rows.length ?? 0;
+    final dataRowCount = hasHeader && rawRowCount > 0
+        ? rawRowCount - 1
+        : rawRowCount;
     // No status on a failed parse: the error panel below already says what
     // happened, and "0 rows detected" would contradict it.
     final String? status = document.isLoading
         ? l10n.cardImportFileParsingStatus
         : sheet != null
-        ? l10n.cardImportFileRowsDetected(sheet.rows.length)
+        ? l10n.cardImportFileRowsDetected(dataRowCount)
         : null;
 
     if (kind == CardImportSourceKind.upload && file != null) {

@@ -9,6 +9,7 @@ import 'package:memox/features/card/domain/models/card_import_preview_model.dart
 import 'package:memox/features/card/domain/models/card_transfer_format_model.dart';
 import 'package:memox/features/card/domain/models/card_transfer_source_model.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
+import 'package:memox/l10n/generated/app_localizations_vi.dart';
 
 import 'support/card_import_wizard_harness.dart';
 
@@ -185,17 +186,36 @@ void main() {
       expect(find.text(english.cardImportSuccessTitle), findsOneWidget);
     });
 
-    testWidgets('Vietnamese labels make the same honest layout choice', (
-      tester,
-    ) async {
+    testWidgets('Vietnamese labels make the same honest layout choice, all '
+        'the way to the result', (tester) async {
+      final vi = AppLocalizationsVi();
       await h.pump(
         tester,
         surface: compact,
         textScale: 2,
         locale: const Locale('vi'),
       );
-
       expect(tester.takeException(), isNull);
+
+      // The longer Vietnamese copy walks the same road: preview, confirm,
+      // result — each face must fit 320dp at 2.0x without overflowing.
+      await tester.tap(find.text(vi.cardImportPasteOptionTitle));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'front,back\n사과,apple\n');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(vi.cardImportPreviewAction));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      await tester.ensureVisible(find.text(vi.cardImportContinueAction));
+      await tester.tap(find.text(vi.cardImportContinueAction));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      await tester.tap(find.text(vi.cardImportSubmitAction(1)));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.text(vi.cardImportSuccessTitle), findsOneWidget);
     });
   });
 

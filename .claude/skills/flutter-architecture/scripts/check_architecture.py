@@ -219,12 +219,10 @@ _SUFFIX_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("/domain/usecases/", ("_use_case.dart",)),
     # CLAUDE.md's domain suffix table also admits _scheduler and _mode, and
     # Study keeps its Strategy files (study_mode.dart, sm2_scheduler.dart, …)
-    # under models/ — recorded in wbs.md M-task outputs and the AD-18
-    # dispatch table. architecture.md:1301 says `domain/modes/`; that drift
-    # is documented, not enforced here, until a task moves the files.
+    # under models/ — recorded in wbs.md M-task outputs, the AD-18 dispatch
+    # table, and AD-18's boundary section, which all name `domain/models/`.
     ("/domain/models/", ("_model.dart", "_mode.dart", "_scheduler.dart")),
     ("/domain/failures/", ("_failure.dart",)),
-    ("/domain/modes/", ("_mode.dart",)),
     ("/data/mappers/", ("_mapper.dart",)),
     ("/data/repositories/", ("_repository_impl.dart",)),
     ("/data/datasources/", ("_dao.dart", "_data_source.dart")),

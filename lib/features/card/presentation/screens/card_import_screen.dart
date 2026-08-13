@@ -85,13 +85,17 @@ class _CardImportScreenState extends ConsumerState<CardImportScreen> {
 
   /// Android Back: a step back first (W5); the Source step behaves as
   /// Cancel. Inert while the commit is in flight (F).
+  ///
+  /// On any outcome face the step-back is skipped: the phase is derived from
+  /// the commit before the step, so walking the step under a failure face
+  /// would change nothing on screen — Back must mean what Close means there
+  /// (W8): leave after the discard confirm, or leave freely after success.
   Future<void> _handleSystemBack() async {
-    if (ref.read(commitCardImportProvider(widget.deckId)).isSubmitting) {
-      return;
-    }
+    final submit = ref.read(commitCardImportProvider(widget.deckId));
+    if (submit.isSubmitting) return;
     final step = ref.read(cardImportStepChoiceProvider(widget.deckId));
-    final isDone = ref.read(commitCardImportProvider(widget.deckId)).isDone;
-    if (!isDone && step != CardImportStep.source) {
+    final isOutcome = submit.result != null || submit.failure != null;
+    if (!isOutcome && step != CardImportStep.source) {
       goToCardImportStep(
         ref,
         widget.deckId,
@@ -250,7 +254,9 @@ class _CardImportScreenState extends ConsumerState<CardImportScreen> {
     return AppBar(
       leading: MxIconButton(
         icon: Icons.close,
-        semanticLabel: context.l10n.cardImportTitle,
+        // The action's name, not the screen's: a screen reader lands on
+        // "Cancel", the same word the tooltip shows.
+        semanticLabel: context.l10n.commonCancelAction,
         tooltip: context.l10n.commonCancelAction,
         // Locked while the one commit runs (F): it cannot honestly be
         // cancelled, so the exit does not pretend otherwise.

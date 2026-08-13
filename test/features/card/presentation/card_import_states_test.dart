@@ -1,165 +1,22 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/card/domain/models/card_import_preview_model.dart';
-import 'package:memox/features/card/domain/models/card_transfer_document_model.dart';
-import 'package:memox/features/card/domain/models/card_transfer_format_model.dart';
-import 'package:memox/features/card/domain/models/card_transfer_source_model.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 
 import 'support/card_import_wizard_harness.dart';
 
-/// The wizard's presentation state matrix (wireframe M4.12 states 1–8): the
-/// upload summary, the parsing face, the stepper's earned checks, and the
-/// four outcome faces. Source/preview interactions live in
+/// The wizard's presentation state matrix (wireframe M4.12 states 2–8):
+/// the parsing face, the stepper's earned checks, and the four outcome
+/// faces. Source/preview interactions live in
 /// `card_import_wizard_test.dart`, the commit lock and reset in
-/// `card_import_commit_flow_test.dart` — the three split at the 400-line
-/// guard.
+/// `card_import_commit_flow_test.dart`, the upload summary and sheets in
+/// `card_import_upload_test.dart` — the four split at the 400-line guard.
 void main() {
   final h = installCardImportWizardHarness();
   final AppLocalizationsEn english = h.english;
-
-  group('upload and sheets', () {
-    testWidgets('a picked file shows its name, extension and size', (
-      tester,
-    ) async {
-      // §18: filename, extension, size and Replace — the name alone does not
-      // say how big the batch is about to be.
-      h.picker.fileToPick = CardTransferFileSource(
-        name: 'words.csv',
-        bytes: Uint8List.fromList(utf8.encode('front,back\n사과,apple')),
-        format: CardTransferFormat.csv,
-      );
-      await h.pump(tester);
-      await tester.tap(find.text(english.cardImportChooseFileAction));
-      await tester.pumpAndSettle();
-
-      expect(find.text('words.csv'), findsOneWidget);
-      // Meta and readiness in one status line (state 1)…
-      expect(
-        find.text(
-          english.cardImportSourceStatusLine(
-            english.cardImportFileMetaLabel(
-              'CSV',
-              english.cardImportFileSizeKilobytes(1),
-            ),
-            english.cardImportFileReadyStatus,
-          ),
-        ),
-        findsOneWidget,
-      );
-      // …with Replace as the card's tap and Remove as the trailing X.
-      expect(
-        find.bySemanticsLabel(english.cardImportReplaceFileAction),
-        findsOneWidget,
-      );
-      expect(find.byTooltip(english.cardImportRemoveFileLabel), findsOneWidget);
-    });
-
-    testWidgets('removing the picked file returns to the empty chooser', (
-      tester,
-    ) async {
-      h.picker.fileToPick = CardTransferFileSource(
-        name: 'words.csv',
-        bytes: Uint8List.fromList(utf8.encode('front,back\n사과,apple')),
-        format: CardTransferFormat.csv,
-      );
-      await h.pump(tester);
-      await tester.tap(find.text(english.cardImportChooseFileAction));
-      await tester.pumpAndSettle();
-      expect(find.text('words.csv'), findsOneWidget);
-
-      await tester.tap(find.byTooltip(english.cardImportRemoveFileLabel));
-      await tester.pumpAndSettle();
-
-      // The chooser is back, the file is gone, and the primary is disabled
-      // again — the X is a real draft mutation, not a visual dismiss.
-      expect(find.text('words.csv'), findsNothing);
-      expect(find.text(english.cardImportChoosePrompt), findsOneWidget);
-      expect(
-        tester
-            .widget<FilledButton>(h.button(english.cardImportPreviewAction))
-            .onPressed,
-        isNull,
-      );
-    });
-
-    testWidgets('a multi-sheet workbook offers the sheet choice, defaults to '
-        'the first non-empty one, and re-previews on change', (tester) async {
-      CardTransferRow row(int number, List<String> cells) =>
-          CardTransferRow(sourceRowNumber: number, cells: cells);
-      h.transfer.documentToReturn = CardTransferDocument(
-        sheets: <CardTransferSheet>[
-          CardTransferSheet(
-            name: 'Empty',
-            rows: <CardTransferRow>[
-              row(1, <String>['', '']),
-            ],
-          ),
-          CardTransferSheet(
-            name: 'Nouns',
-            rows: <CardTransferRow>[
-              row(1, <String>['front', 'back']),
-              row(2, <String>['사과', 'apple']),
-            ],
-          ),
-          CardTransferSheet(
-            name: 'Verbs',
-            rows: <CardTransferRow>[
-              row(1, <String>['front', 'back']),
-              row(2, <String>['가다', 'to go']),
-              row(3, <String>['보다', 'to see']),
-            ],
-          ),
-        ],
-      );
-      h.picker.fileToPick = CardTransferFileSource(
-        name: 'words.xlsx',
-        bytes: Uint8List.fromList(const <int>[0]),
-        format: CardTransferFormat.xlsx,
-      );
-      await h.pump(tester);
-      await tester.tap(find.text(english.cardImportChooseFileAction));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text(english.cardImportPreviewAction));
-      await tester.pumpAndSettle();
-
-      // The default is the first non-empty sheet (UC-10 A2), and the empty
-      // one is not offered at all.
-      expect(find.text(english.cardImportSheetLabel), findsOneWidget);
-      expect(find.text('Nouns'), findsOneWidget);
-      expect(find.text('Empty'), findsNothing);
-      expect(
-        find.text(
-          english.cardImportStatusCountChip(
-            english.cardImportRowStatusReadyLabel,
-            1,
-          ),
-        ),
-        findsOneWidget,
-      );
-
-      await tester.tap(find.text('Nouns'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Verbs').last);
-      await tester.pumpAndSettle();
-
-      // The other sheet's rows, re-classified under its own header row.
-      expect(
-        find.text(
-          english.cardImportStatusCountChip(
-            english.cardImportRowStatusReadyLabel,
-            2,
-          ),
-        ),
-        findsOneWidget,
-      );
-    });
-  });
 
   group('parsing (state 2)', () {
     testWidgets('the decode in flight shows the one loading panel and a '
@@ -201,8 +58,10 @@ void main() {
       await tester.pumpAndSettle();
 
       // Rows arrived: the classification headline replaces the panel with
-      // no step change and no layout reset.
+      // no step change and no layout reset. The context line counts *data*
+      // rows — one, not two — so it agrees with the headline's total.
       expect(find.text(english.cardImportParsingPasteTitle), findsNothing);
+      expect(find.text(english.cardImportFileRowsDetected(1)), findsOneWidget);
       expect(
         find.text(english.cardImportPreviewReadyOfTotal(1, 1)),
         findsOneWidget,
@@ -333,6 +192,13 @@ void main() {
       expect(find.text(english.cardImportZeroTitle), findsOneWidget);
       expect(find.text(english.cardImportZeroBody), findsOneWidget);
       expect(find.text(english.cardImportFailureTitle), findsNothing);
+      // The skipped count comes from the transaction's own recheck — the
+      // preview classified this row Ready, so only the commit source can
+      // put this row on screen (BR-170).
+      expect(
+        find.text(english.cardImportDuplicatesSkippedRowLabel),
+        findsOneWidget,
+      );
       // Success-shaped ways out — not retry.
       expect(find.text(english.cardImportAnotherAction), findsOneWidget);
       expect(find.text(english.cardImportViewCardsAction), findsOneWidget);
@@ -356,6 +222,31 @@ void main() {
       gate.complete();
       await tester.pumpAndSettle();
       expect(find.byType(CircularProgressIndicator), findsNothing);
+    });
+
+    testWidgets('system Back on the failure face asks to discard — never a '
+        'silent step walk under an unchanged screen', (tester) async {
+      h.importer.nextCommitFailure = const DatabaseFailure(message: 'disk');
+      await h.pump(tester);
+      await submitFromPaste(tester, 'front,back\n사과,apple\n');
+      expect(find.text(english.cardImportFailureTitle), findsOneWidget);
+
+      // Android Back. Stepping the wizard back here would change nothing on
+      // screen (the phase is derived from the failure before the step), so
+      // Back must mean what Close means: the discard question (W8).
+      final dynamic widgetsAppState = tester.state(find.byType(WidgetsApp));
+      // ignore: avoid_dynamic_calls
+      await widgetsAppState.didPopRoute();
+      await tester.pumpAndSettle();
+
+      expect(find.text(english.cardImportDiscardTitle), findsOneWidget);
+
+      // Declining keeps the failure face and the retained plan untouched.
+      await tester.tap(find.text(english.commonCancelAction).last);
+      await tester.pumpAndSettle();
+      expect(find.text(english.cardImportFailureTitle), findsOneWidget);
+      expect(find.text(english.cardImportTryAgainAction), findsOneWidget);
+      expect(h.importer.commits, hasLength(1));
     });
 
     testWidgets('Back to preview after a failed commit keeps the whole plan '
