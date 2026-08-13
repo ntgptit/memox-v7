@@ -76,3 +76,31 @@ bug. This has already happened more than once.
 **Prose without a MUST/SHOULD/MAY keyword is explanation, not a rule.** Do not
 derive a new constraint from a paragraph that was describing why something is
 the way it is, and do not treat a code example in a document as a spec.
+
+## Prompt delivery contract
+
+When the user asks for an implementation prompt, the response MUST provide
+three standalone prompts as one bundle, unless the user explicitly opts out of
+one of them:
+
+1. **Implementation prompt** — the decision-complete task: scope, source of
+   truth, files or layers affected, required behavior, tests, verification and
+   Definition of Done.
+2. **Recursive architecture and logic review prompt** — an independent audit of
+   business-rule parity, state transitions, dependency boundaries, persistence,
+   failure handling and tests. It MUST reproduce concrete failures, auto-fix
+   in-scope findings, rerun verification and repeat until its stated clean-stop
+   condition is met; a report-only review is insufficient.
+3. **Recursive UI/UX review prompt** — an independent audit of layout,
+   hierarchy, interaction, accessibility, responsiveness and visual fidelity.
+   It MUST declare the approved divergences from any supplied concept, render
+   the real production states, inspect the resulting screenshots or goldens,
+   auto-fix unapproved differences and repeat until its stated visual clean-stop
+   condition is met. When no concept image exists, it MUST compare against the
+   repository's wireframes, design tokens and user-facing behavior contract.
+
+The two review prompts MUST remain separate: architecture correctness is not
+evidence of visual completion, and visual similarity is not evidence of correct
+business behavior. Each prompt MUST be executable in a fresh agent session and
+therefore MUST carry its own scope, source-of-truth reading list, worktree-safety
+rules, verification commands or repository gate, and explicit stop criteria.
