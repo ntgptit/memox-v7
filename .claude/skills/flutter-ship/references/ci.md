@@ -14,7 +14,7 @@ The live PR workflow classifies paths before installing Flutter:
   Python tooling tests and `check_prompt_contract.py` only. Missing review files,
   malformed seven-field headers and incomplete implementation/review phase
   contracts fail here. Empty and mixed changes fail safe to the code path.
-- The code path runs static verification, three shards covering the complete
+- The code path runs static verification, five shards covering the complete
   non-golden host suite, and the Widgetbook smoke test as parallel jobs. Each
   shard generates ignored code locally and uses `--reporter failures-only` to
   avoid printing thousands of successful test events.

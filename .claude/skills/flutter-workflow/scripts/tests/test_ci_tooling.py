@@ -125,6 +125,20 @@ class FileShardSelectionTest(unittest.TestCase):
         backward = self.module.partition(list(reversed(files)), total_shards=2)
         self.assertEqual(forward, backward)
 
+    def test_five_shards_are_non_empty_disjoint_complete_and_balanced(self) -> None:
+        files = [
+            self.module.WeightedTestFile(f"{weight}_test.dart", weight)
+            for weight in range(1, 11)
+        ]
+        shards = self.module.partition(files, total_shards=5)
+        flattened = [item.path for shard in shards for item in shard]
+        shard_weights = [sum(item.weight for item in shard) for shard in shards]
+
+        self.assertTrue(all(shards))
+        self.assertCountEqual([item.path for item in files], flattened)
+        self.assertEqual(len(flattened), len(set(flattened)))
+        self.assertEqual([11, 11, 11, 11, 11], shard_weights)
+
 
 HEADER = """# {title}
 

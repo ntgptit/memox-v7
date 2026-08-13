@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.22 (PR CI critical-path optimization and prompt contract guard) |
+| **Updated by task** | M99.22 (five-way PR host-test sharding follow-up) |
 | **Last updated** | 2026-08-13 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -9312,17 +9312,20 @@ thế không đổi bố cục.
   toàn bộ Flutter setup dù không thể ảnh hưởng binary; workflow chạy lại cùng
   pipeline sau merge nên trả thêm gần sáu phút; nguyên nhân gốc là pipeline chỉ
   có một job toàn năng và không có aggregate check ổn định cho các đường có
-  điều kiện. Quyết định: classifier fail-safe, fast path duy nhất cho
-  `docs/prompt/**`, ba host shard song song và một `CI gate` tổng hợp.
+  điều kiện. Ba shard đầu tiên cân bằng ở 2m34–2m48 nhưng vẫn giữ critical path
+  gần ba phút; selector file-level đã bảo toàn suite atomic nên có thể tăng
+  concurrency mà không đổi coverage. Quyết định: classifier fail-safe, fast path
+  duy nhất cho `docs/prompt/**`, năm host shard song song và một `CI gate` tổng
+  hợp.
 - **Output:** `classify_ci_changes.py`, `check_prompt_contract.py`, unit test
   tooling, file-level shard selector, helper chuẩn bị material fonts, workflow
-  PR phân nhánh, ba host-test shard, Widgetbook/static song song và aggregate
+  PR phân nhánh, năm host-test shard, Widgetbook/static song song và aggregate
   `CI gate`.
 - **Acceptance criteria:**
   - [x] Prompt-only path không cài Flutter, chạy đúng ba-file/header/phase guard
         và kết thúc qua cùng check tên `CI gate`.
   - [x] Mixed, empty hoặc manual-dispatch path fail safe sang full code gate.
-  - [x] Mọi non-golden host test vẫn chạy đúng một lần qua ba shard **theo
+  - [x] Mọi non-golden host test vẫn chạy đúng một lần qua năm shard **theo
         file**; test trong cùng suite không bị tách khỏi setup; static,
         Widgetbook và shards không chờ lẫn nhau sau bước classify.
   - [x] Job tổng hợp fail nếu bất kỳ job bắt buộc của đường đã chọn fail/cancel;

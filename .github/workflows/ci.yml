@@ -3,7 +3,7 @@ name: CI
 # Pull requests always expose one stable aggregate check (`CI gate`). A change
 # made exclusively under docs/prompt/ takes the Python-only prompt-contract
 # path. Every mixed, empty or unknown change set fails safe to the complete code
-# path: static verification, the whole non-golden host suite split across three
+# path: static verification, the whole non-golden host suite split across five
 # parallel shards, and the Widgetbook smoke test.
 #
 # Goldens, clean codegen reproducibility and web build remain in ci-full.yml.
@@ -145,7 +145,7 @@ jobs:
         run: python -m unittest discover -s .claude/skills/flutter-workflow/scripts/tests -p 'test_*.py'
 
   host_tests:
-    name: host tests · shard ${{ matrix.label }}/3
+    name: host tests · shard ${{ matrix.label }}/5
     needs: classify
     if: needs.classify.outputs.code_required == 'true'
     strategy:
@@ -158,6 +158,10 @@ jobs:
             label: 2
           - shard: 2
             label: 3
+          - shard: 3
+            label: 4
+          - shard: 4
+            label: 5
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -190,7 +194,7 @@ jobs:
         run: |
           mapfile -d '' test_files < <(
             python .claude/skills/flutter-workflow/scripts/select_test_shard.py \
-              --total-shards 3 --shard-index ${{ matrix.shard }} --nul
+              --total-shards 5 --shard-index ${{ matrix.shard }} --nul
           )
           flutter test --exclude-tags golden --reporter failures-only "${test_files[@]}"
 
