@@ -112,6 +112,7 @@ Future<ScreenAudit> auditScreen(
   List<AuditAnchor> anchors = const <AuditAnchor>[],
   List<PaintExtractor> extractors = defaultExtractors,
   double pixelRatio = 1,
+  Finder? surfaceFinder,
 }) async {
   validateAnchors(anchors);
 
@@ -226,10 +227,31 @@ Future<ScreenAudit> auditScreen(
     viewport: tester.view.physicalSize / tester.view.devicePixelRatio,
     items: List<AuditItem>.unmodifiable(items),
     skips: List<AuditSkip>.unmodifiable(skips),
+    surfaces: _collectSurfaces(surfaceFinder, captureRect),
     hiddenNodes: hiddenNodes,
     outsideCaptureNodes: outsideCaptureNodes,
     clippedNodes: clippedNodes,
   );
+}
+
+/// The screen's surfaces, clipped to what the capture actually contains.
+///
+/// Laid-out boxes only — a surface scrolled out of view or pruned by a clip is
+/// not evidence about the visible column, and including it would let an
+/// off-screen card decide where the column's edges are.
+List<Rect> _collectSurfaces(Finder? finder, Rect captureRect) {
+  if (finder == null) return const <Rect>[];
+
+  final rects = <Rect>[];
+  for (final element in finder.evaluate()) {
+    final node = element.renderObject;
+    if (node is! RenderBox || !node.hasSize || isHidden(node)) continue;
+    final visible = globalRect(node).intersect(captureRect);
+    if (visible.isEmpty) continue;
+    rects.add(visible);
+  }
+
+  return List<Rect>.unmodifiable(rects);
 }
 
 /// What the anchors resolved to, including what they failed to resolve to.

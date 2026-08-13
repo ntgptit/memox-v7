@@ -280,13 +280,9 @@ class _CardImportScreenState extends ConsumerState<CardImportScreen> {
         AppSpacing.lg,
         AppSpacing.sm,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          CardImportContextWidget(deckId: widget.deckId),
-          const SizedBox(height: AppSpacing.sm),
-          CardImportStepperWidget(current: step, completed: completed),
-        ],
+      child: CardImportContextWidget(
+        deckId: widget.deckId,
+        stepper: CardImportStepperWidget(current: step, completed: completed),
       ),
     );
   }

@@ -1,13 +1,13 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
   "scannedFiles": 390,
-  "totalSites": 405,
+  "totalSites": 408,
   "byElementKind": {
     "other": 290,
     "background": 14,
     "shadow": 1,
-    "border": 13,
-    "text": 66,
+    "border": 14,
+    "text": 68,
     "icon": 21
   },
   "bySourceKind": {
@@ -16,7 +16,7 @@
     "Colors-material": 5,
     "hardcoded-literal": 97,
     "opacity-modified-token": 11,
-    "theme-token": 145
+    "theme-token": 148
   },
   "sites": [
     {
@@ -3056,8 +3056,19 @@
       "resolved_value_dark": "#E0B064"
     },
     {
+      "file": "lib/features/card/presentation/widgets/sections/card_import_action_bar_widget.dart",
+      "line": 143,
+      "widget_context": "CardImportActionBarWidget",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
+    },
+    {
       "file": "lib/features/card/presentation/widgets/sections/card_import_context_widget.dart",
-      "line": 49,
+      "line": 60,
       "widget_context": "CardImportContextWidget",
       "element_kind": "background",
       "source_kind": "theme-token",
@@ -3068,7 +3079,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_import_context_widget.dart",
-      "line": 63,
+      "line": 74,
       "widget_context": "CardImportContextWidget",
       "element_kind": "icon",
       "source_kind": "theme-token",
@@ -3079,7 +3090,18 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_import_preview_step_widget.dart",
-      "line": 162,
+      "line": 68,
+      "widget_context": "CardImportPreviewStepWidget",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/card/presentation/widgets/sections/card_import_preview_step_widget.dart",
+      "line": 177,
       "widget_context": "_ParsingPanel",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3090,7 +3112,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_import_preview_step_widget.dart",
-      "line": 218,
+      "line": 233,
       "widget_context": "_LoadedPreview",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3101,7 +3123,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_import_preview_step_widget.dart",
-      "line": 235,
+      "line": 250,
       "widget_context": "_LoadedPreview",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3112,7 +3134,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_import_preview_summary_widget.dart",
-      "line": 65,
+      "line": 66,
       "widget_context": "CardImportPreviewSummaryWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3123,7 +3145,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_import_preview_summary_widget.dart",
-      "line": 72,
+      "line": 73,
       "widget_context": "CardImportPreviewSummaryWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3134,7 +3156,18 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_import_preview_summary_widget.dart",
-      "line": 123,
+      "line": 132,
+      "widget_context": "CardImportPreviewSummaryWidget",
+      "element_kind": "border",
+      "source_kind": "theme-token",
+      "expression": "context.colors.outlineVariant",
+      "token": "colorScheme.outlineVariant",
+      "resolved_value_light": "#D2D2DD",
+      "resolved_value_dark": "#4C487A"
+    },
+    {
+      "file": "lib/features/card/presentation/widgets/sections/card_import_preview_summary_widget.dart",
+      "line": 145,
       "widget_context": "CardImportPreviewSummaryWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3156,7 +3189,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_import_source_step_widget.dart",
-      "line": 223,
+      "line": 273,
       "widget_context": "_UploadPanel",
       "element_kind": "icon",
       "source_kind": "theme-token",
@@ -3167,7 +3200,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_import_source_step_widget.dart",
-      "line": 230,
+      "line": 280,
       "widget_context": "_UploadPanel",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3178,7 +3211,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_import_source_step_widget.dart",
-      "line": 248,
+      "line": 298,
       "widget_context": "_UploadPanel",
       "element_kind": "icon",
       "source_kind": "theme-token",
@@ -3189,7 +3222,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_import_source_step_widget.dart",
-      "line": 263,
+      "line": 313,
       "widget_context": "_UploadPanel",
       "element_kind": "icon",
       "source_kind": "theme-token",
@@ -3200,7 +3233,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_import_source_step_widget.dart",
-      "line": 270,
+      "line": 320,
       "widget_context": "_UploadPanel",
       "element_kind": "text",
       "source_kind": "theme-token",

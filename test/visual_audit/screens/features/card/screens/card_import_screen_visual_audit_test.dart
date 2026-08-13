@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/card/domain/models/deck_context_model.dart';
 import 'package:memox/features/card/presentation/screens/card_import_screen.dart';
+import 'package:memox/shared/widgets/mx_card.dart';
 
 import '../../../../audit_allowance.dart';
 import '../../../../audit_model.dart';
+import '../../../../audit_rules.dart';
 import '../../../../card_audit_harness.dart';
 import '../../../../memox_audit.dart';
 import '../../../../screen_auditor.dart';
@@ -35,6 +37,11 @@ void main() {
       const CardImportScreen(deckId: 'deck-1'),
     ),
     anchors: <AuditAnchor>[AuditAnchor.type('wizard', Scaffold)],
+    // W2 declares one content column. This is deliberately opt-in: another
+    // screen may have nested or asymmetric card groups, and the harness must
+    // not infer a global layout contract merely because it sees `MxCard`.
+    surfaceFinder: find.byType(MxCard),
+    additionalRules: const <AuditRule>[SurfaceColumnRule()],
     allowances: const <AuditSkipAllowance>[
       AuditSkipAllowance(
         itemId: 'screen',

@@ -52,6 +52,7 @@ Future<ScreenAudit> auditMemoxScreen(
   String state = 'idle',
   Size viewport = const Size(420, 1040),
   List<AuditAnchor> anchors = const <AuditAnchor>[],
+  Finder? surfaceFinder,
   Future<void> Function(WidgetTester tester)? drive,
 }) async {
   tester.view.physicalSize = viewport;
@@ -93,6 +94,7 @@ Future<ScreenAudit> auditMemoxScreen(
     theme: isDark ? 'dark' : 'light',
     state: state,
     anchors: anchors,
+    surfaceFinder: surfaceFinder,
   );
 }
 
@@ -109,6 +111,8 @@ void memoxAuditTest(
   String state = 'idle',
   List<AuditAnchor> anchors = const <AuditAnchor>[],
   List<AuditSkipAllowance> allowances = const <AuditSkipAllowance>[],
+  List<AuditRule> additionalRules = const <AuditRule>[],
+  Finder? surfaceFinder,
   AuditExpectation expectation = AuditExpectation.noViolations,
   Future<void> Function(WidgetTester tester)? drive,
 }) {
@@ -123,12 +127,13 @@ void memoxAuditTest(
         screen: build(),
         state: state,
         anchors: anchors,
+        surfaceFinder: surfaceFinder,
         drive: drive,
       );
 
       expectAudit(
         audit,
-        memoxAuditRules(isDark: isDark),
+        <AuditRule>[...memoxAuditRules(isDark: isDark), ...additionalRules],
         expectation: expectation,
         allowances: allowances,
       );
@@ -152,6 +157,8 @@ void memoxProductionScreenAuditTest(
   String state = 'idle',
   List<AuditAnchor> anchors = const <AuditAnchor>[],
   List<AuditSkipAllowance> allowances = const <AuditSkipAllowance>[],
+  List<AuditRule> additionalRules = const <AuditRule>[],
+  Finder? surfaceFinder,
   Future<void> Function(WidgetTester tester)? drive,
 }) {
   memoxAuditTest(
@@ -160,6 +167,8 @@ void memoxProductionScreenAuditTest(
     state: state,
     anchors: anchors,
     allowances: allowances,
+    additionalRules: additionalRules,
+    surfaceFinder: surfaceFinder,
     expectation: AuditExpectation.complete,
     drive: drive,
   );

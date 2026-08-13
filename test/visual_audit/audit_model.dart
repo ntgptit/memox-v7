@@ -274,6 +274,7 @@ class ScreenAudit {
     required this.viewport,
     required this.items,
     required this.skips,
+    this.surfaces = const <Rect>[],
     this.hiddenNodes = 0,
     this.outsideCaptureNodes = 0,
     this.clippedNodes = 0,
@@ -289,6 +290,17 @@ class ScreenAudit {
   final Size viewport;
   final List<AuditItem> items;
   final List<AuditSkip> skips;
+
+  /// Where the screen's own surfaces landed, in capture coordinates.
+  ///
+  /// Geometry, not paint — the one thing the rest of this model deliberately
+  /// does not carry. It exists because a layout defect is invisible to every
+  /// other gate the project has: the analyzer and the guard read source text
+  /// and cannot see a laid-out rectangle, and a golden only ever compares a
+  /// screen with yesterday's copy of itself, so an edge that is wrong but
+  /// *stable* passes forever. Which widgets count as surfaces is the caller's
+  /// choice, so the core stays app-agnostic.
+  final List<Rect> surfaces;
 
   /// Subtrees the walk pruned because they paint nothing at all.
   final int hiddenNodes;

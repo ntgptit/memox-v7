@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../domain/models/card_import_preview_model.dart';
@@ -111,6 +112,17 @@ class CardImportActionBarWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // The concept's reassurance line rides under the actions on the wizard
+    // phases (states 1-4): what the primary will and will not do. Outcomes
+    // and the submit panel carry their own copy, so no line competes there.
+    final String? hint = switch (phase) {
+      CardImportPhase.source => context.l10n.cardImportBarSourceHint,
+      CardImportPhase.parsing => context.l10n.cardImportBarParsingHint,
+      CardImportPhase.preview ||
+      CardImportPhase.confirm => context.l10n.cardImportBarImportHint,
+      _ => null,
+    };
+
     return Padding(
       padding: EdgeInsets.fromLTRB(
         AppSpacing.lg,
@@ -118,7 +130,23 @@ class CardImportActionBarWidget extends ConsumerWidget {
         AppSpacing.lg,
         AppSpacing.sm + MediaQuery.viewInsetsOf(context).bottom,
       ),
-      child: Row(children: _actions(context, ref)),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Row(children: _actions(context, ref)),
+          if (hint != null)
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.xs),
+              child: Text(
+                hint,
+                style: context.texts.bodySmall?.copyWith(
+                  color: context.colors.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+        ],
+      ),
     );
   }
 

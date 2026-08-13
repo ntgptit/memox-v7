@@ -8,17 +8,26 @@ import '../../../../../shared/widgets/mx_breadcrumb.dart';
 import '../../controllers/card_list_filter_controller.dart';
 import '../../controllers/deck_context_controller.dart';
 
-/// The wizard's place in the tree, and its target (wireframe W1): the deck
-/// path with a non-tappable `Import` tail, and a chip naming the deck with
-/// its current card count.
+/// The wizard's header band (wireframe W1): the deck path with a
+/// non-tappable `Import` tail, then the stepper, then the chip naming the
+/// target deck with its current card count — the concept's order, where the
+/// stepper sits directly under the path and the chip introduces the content.
 ///
 /// The same one-read seam the card list header uses — `deckContextProvider` —
 /// so a rename mid-import lands here on the next frame, and the deck
 /// feature's Dart is never imported (AD-13).
 class CardImportContextWidget extends ConsumerWidget {
-  const CardImportContextWidget({required this.deckId, super.key});
+  const CardImportContextWidget({
+    required this.deckId,
+    required this.stepper,
+    super.key,
+  });
 
   final String deckId;
+
+  /// The three-step indicator, slotted between breadcrumb and chip so the
+  /// screen keeps owning which steps are completed.
+  final Widget stepper;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -44,6 +53,8 @@ class CardImportContextWidget extends ConsumerWidget {
           ],
         ),
         const SizedBox(height: AppSpacing.xs),
+        stepper,
+        const SizedBox(height: AppSpacing.sm),
         DecoratedBox(
           decoration: BoxDecoration(
             color: context.colors.surfaceContainerHigh,

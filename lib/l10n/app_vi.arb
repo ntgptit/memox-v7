@@ -1945,11 +1945,6 @@
   "cardImportFieldPronunciationLabel": "Phát âm",
   "cardImportFieldTagsLabel": "Thẻ phân loại",
   "cardImportMappingRequiredNote": "Mặt trước và mặt sau đều phải có một cột.",
-  "cardImportSummaryTotalLabel": "Tổng số dòng: {count}",
-  "cardImportSummaryReadyLabel": "Sẵn sàng: {count}",
-  "cardImportSummaryDuplicateLabel": "Trùng lặp: {count}",
-  "cardImportSummaryInvalidLabel": "Không hợp lệ: {count}",
-  "cardImportSummaryBlankLabel": "Dòng trống bỏ qua: {count}",
   "cardImportIncludeDuplicatesLabel": "Bao gồm thẻ trùng",
   "cardImportRowStatusReadyLabel": "Sẵn sàng",
   "cardImportRowStatusInvalidLabel": "Không hợp lệ",
@@ -1961,11 +1956,12 @@
   "cardImportContinueAction": "Tiếp tục",
   "cardImportBackAction": "Quay lại",
   "cardImportConfirmHeading": "Sẵn sàng nhập",
+  "cardImportConfirmImportRowLabel": "Thẻ sẽ nhập",
+  "cardImportConfirmDuplicatesIncludedRowLabel": "Thẻ trùng vẫn nhập",
+  "cardImportBarSourceHint": "Bước kế tiếp sẽ xem trước từng dòng trước khi nhập bất kỳ thẻ nào.",
+  "cardImportBarParsingHint": "Đang đọc nguồn — chưa có gì được lưu.",
+  "cardImportBarImportHint": "Chưa thẻ nào được thêm cho tới khi bạn bấm Nhập.",
   "cardImportConfirmTargetLabel": "Vào {deckName}",
-  "cardImportConfirmWriteLabel": "{count} thẻ sẽ được nhập",
-  "cardImportConfirmDuplicateSkipLabel": "{count} thẻ trùng sẽ được bỏ qua",
-  "cardImportConfirmDuplicateIncludeLabel": "{count} thẻ trùng cũng sẽ được nhập",
-  "cardImportConfirmInvalidLabel": "{count} dòng không hợp lệ bị loại",
   "cardImportSubmitAction": "Nhập {count} thẻ",
   "cardImportSubmittingLabel": "Đang nhập…",
   "cardImportTryAgainAction": "Thử lại",
@@ -2113,46 +2109,6 @@
   "@cardImportMappingRequiredNote": {
       "description": "Inline note when the required mapping is incomplete (BR-169)."
   },
-  "@cardImportSummaryTotalLabel": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Preview summary line."
-  },
-  "@cardImportSummaryReadyLabel": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Preview summary line."
-  },
-  "@cardImportSummaryDuplicateLabel": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Preview summary line (BR-170)."
-  },
-  "@cardImportSummaryInvalidLabel": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Preview summary line."
-  },
-  "@cardImportSummaryBlankLabel": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Preview summary line (BR-169)."
-  },
   "@cardImportIncludeDuplicatesLabel": {
       "description": "Toggle writing duplicates as new cards (BR-170)."
   },
@@ -2191,6 +2147,21 @@
   "@cardImportConfirmHeading": {
       "description": "Heading of the confirm view on step 3."
   },
+  "@cardImportConfirmImportRowLabel": {
+      "description": "Confirm summary row: how many cards the one transaction will write (UC-10 step 6)."
+  },
+  "@cardImportConfirmDuplicatesIncludedRowLabel": {
+      "description": "Confirm summary row when Include duplicates is on: duplicates counted into the batch (BR-170)."
+  },
+  "@cardImportBarSourceHint": {
+      "description": "Reassurance line under the sticky bar on the Source step (M4.12 state 1)."
+  },
+  "@cardImportBarParsingHint": {
+      "description": "Reassurance line under the sticky bar while the decode runs (M4.12 state 2)."
+  },
+  "@cardImportBarImportHint": {
+      "description": "Reassurance line under the sticky bar on Preview and Confirm (M4.12 states 3-4)."
+  },
   "@cardImportConfirmTargetLabel": {
       "placeholders": {
           "deckName": {
@@ -2198,38 +2169,6 @@
           }
       },
       "description": "Confirm line naming the target deck."
-  },
-  "@cardImportConfirmWriteLabel": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Confirm line: what will be written."
-  },
-  "@cardImportConfirmDuplicateSkipLabel": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Confirm line when duplicates are excluded."
-  },
-  "@cardImportConfirmDuplicateIncludeLabel": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Confirm line when duplicates are included."
-  },
-  "@cardImportConfirmInvalidLabel": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Confirm line: invalid rows never import."
   },
   "@cardImportSubmitAction": {
       "placeholders": {

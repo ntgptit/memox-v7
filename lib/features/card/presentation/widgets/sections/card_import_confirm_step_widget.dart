@@ -46,46 +46,102 @@ class CardImportConfirmStepWidget extends ConsumerWidget {
       return CardImportSubmitProgressWidget(count: willWrite);
     }
 
+    final colors = context.colors;
+
+    // The same summary-row language the result faces speak (states 6-7):
+    // one grouped card, an icon-led row per fact, the count on the trailing
+    // edge — so Confirm, Result and Preview read as one family, not three
+    // designs. Zero counts stay visible on purpose: this is the contract
+    // being agreed to, and "Blank rows ignored 0" is part of it.
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         Text(l10n.cardImportConfirmHeading, style: context.texts.titleMedium),
         const SizedBox(height: AppSpacing.sm),
         MxCard(
-          padding: const EdgeInsets.all(AppSpacing.md),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
+          ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              Text(
-                l10n.cardImportConfirmTargetLabel(deckName),
-                style: context.texts.bodyMedium,
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+                child: Text(
+                  l10n.cardImportConfirmTargetLabel(deckName),
+                  style: context.texts.titleSmall,
+                ),
               ),
-              Text(
-                l10n.cardImportConfirmWriteLabel(willWrite),
-                style: context.texts.bodyMedium,
+              _ConfirmRow(
+                icon: Icons.check,
+                color: colors.secondary,
+                label: l10n.cardImportConfirmImportRowLabel,
+                count: willWrite,
               ),
-              Text(
-                shouldIncludeDuplicates
-                    ? l10n.cardImportConfirmDuplicateIncludeLabel(
-                        preview.duplicateCount,
-                      )
-                    : l10n.cardImportConfirmDuplicateSkipLabel(
-                        preview.duplicateCount,
-                      ),
-                style: context.texts.bodyMedium,
+              _ConfirmRow(
+                icon: Icons.copy_outlined,
+                color: colors.tertiary,
+                label: shouldIncludeDuplicates
+                    ? l10n.cardImportConfirmDuplicatesIncludedRowLabel
+                    : l10n.cardImportDuplicatesSkippedRowLabel,
+                count: preview.duplicateCount,
               ),
-              Text(
-                l10n.cardImportConfirmInvalidLabel(preview.invalidCount),
-                style: context.texts.bodyMedium,
+              _ConfirmRow(
+                icon: Icons.error_outline,
+                color: colors.error,
+                label: l10n.cardImportInvalidSkippedRowLabel,
+                count: preview.invalidCount,
               ),
-              Text(
-                l10n.cardImportSummaryBlankLabel(preview.blankCount),
-                style: context.texts.bodyMedium,
+              _ConfirmRow(
+                icon: Icons.remove,
+                color: colors.onSurfaceVariant,
+                label: l10n.cardImportBlankIgnoredRowLabel,
+                count: preview.blankCount,
               ),
             ],
           ),
         ),
       ],
+    );
+  }
+}
+
+/// One fact of the plan: icon, label, and the count on the trailing edge —
+/// the result faces' `_SummaryRow` geometry, restated here because the two
+/// widgets deliberately share a *language*, not a class: Confirm's rows are
+/// the plan, Result's are the transaction's answer, and coupling them would
+/// let one screen's edit silently restyle the other.
+class _ConfirmRow extends StatelessWidget {
+  const _ConfirmRow({
+    required this.icon,
+    required this.color,
+    required this.label,
+    required this.count,
+  });
+
+  final IconData icon;
+  final Color color;
+  final String label;
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    final countLabel = '$count';
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+      child: Row(
+        children: <Widget>[
+          Icon(icon, size: AppSpacing.lg, color: color),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(child: Text(label, style: context.texts.bodyMedium)),
+          Text(
+            countLabel,
+            style: context.texts.titleSmall?.copyWith(color: color),
+          ),
+        ],
+      ),
     );
   }
 }
