@@ -254,7 +254,9 @@ class _SummaryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // A bare number, not copy — nothing for the ARB to translate.
+    // A bare number, not copy — nothing for the ARB to translate. It wears
+    // the row's own colour (concept states 6-7): the count is the row's
+    // verdict, and the trailing edge is where the eye compares them.
     final countLabel = '$count';
 
     return Padding(
@@ -264,7 +266,10 @@ class _SummaryRow extends StatelessWidget {
           Icon(icon, size: AppSpacing.lg, color: iconColor),
           const SizedBox(width: AppSpacing.md),
           Expanded(child: Text(label, style: context.texts.bodyMedium)),
-          Text(countLabel, style: context.texts.titleSmall),
+          Text(
+            countLabel,
+            style: context.texts.titleSmall?.copyWith(color: iconColor),
+          ),
         ],
       ),
     );

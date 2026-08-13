@@ -62,30 +62,7 @@ class CardImportSourceStepWidget extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
-        // Two options side by side where they fit; Wrap stacks them into one
-        // column at 320px or double text scale instead of overflowing (W7).
-        Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.sm,
-          children: <Widget>[
-            _SourceOption(
-              title: context.l10n.cardImportUploadOptionTitle,
-              subtitle: context.l10n.cardImportUploadOptionSubtitle,
-              icon: Icons.upload_file_outlined,
-              isSelected: kind == CardImportSourceKind.upload,
-              onTap: () =>
-                  _chooseSourceKind(ref, deckId, CardImportSourceKind.upload),
-            ),
-            _SourceOption(
-              title: context.l10n.cardImportPasteOptionTitle,
-              subtitle: context.l10n.cardImportPasteOptionSubtitle,
-              icon: Icons.content_paste_outlined,
-              isSelected: kind == CardImportSourceKind.paste,
-              onTap: () =>
-                  _chooseSourceKind(ref, deckId, CardImportSourceKind.paste),
-            ),
-          ],
-        ),
+        _SourceOptions(deckId: deckId, kind: kind),
         const SizedBox(height: AppSpacing.lg),
         if (kind == CardImportSourceKind.upload)
           _UploadPanel(deckId: deckId, pick: pick)
@@ -101,6 +78,79 @@ class CardImportSourceStepWidget extends ConsumerWidget {
         const SizedBox(height: AppSpacing.lg),
         const _InfoPanel(),
       ],
+    );
+  }
+}
+
+/// The two source cards as one band.
+///
+/// **They fill the content column or they stack — they never sit inboard of
+/// it.** A `Wrap` was the first shape here, and a Wrap sizes its children to
+/// their *intrinsic* width: two 164dp cards left ~25dp of dead space at the
+/// right of a 361dp column, so the row read as indented against every other
+/// band while every gate stayed green (M99.19a review finding V9). Equal
+/// halves are also what makes the pair read as a pair.
+///
+/// The choice is measured, like the stepper's: two columns need twice the
+/// card's minimum plus the gap, under the live text scaler. Below that the
+/// cards stack full-width rather than shrink into unreadable slivers (W7).
+class _SourceOptions extends ConsumerWidget {
+  const _SourceOptions({required this.deckId, required this.kind});
+
+  final String deckId;
+  final CardImportSourceKind kind;
+
+  /// The narrowest a source card stays readable at 1.0× type: the glyph pair,
+  /// the title, and a subtitle that must not wrap to three lines.
+  static const double _minCardWidth = 164;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final upload = _SourceOption(
+      title: context.l10n.cardImportUploadOptionTitle,
+      subtitle: context.l10n.cardImportUploadOptionSubtitle,
+      icon: Icons.upload_file_outlined,
+      isSelected: kind == CardImportSourceKind.upload,
+      onTap: () => _chooseSourceKind(ref, deckId, CardImportSourceKind.upload),
+    );
+    final paste = _SourceOption(
+      title: context.l10n.cardImportPasteOptionTitle,
+      subtitle: context.l10n.cardImportPasteOptionSubtitle,
+      icon: Icons.content_paste_outlined,
+      isSelected: kind == CardImportSourceKind.paste,
+      onTap: () => _chooseSourceKind(ref, deckId, CardImportSourceKind.paste),
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final scale = MediaQuery.textScalerOf(context).scale(1);
+        final fitsSideBySide =
+            constraints.maxWidth >= _minCardWidth * scale * 2 + AppSpacing.sm;
+        if (!fitsSideBySide) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              upload,
+              const SizedBox(height: AppSpacing.sm),
+              paste,
+            ],
+          );
+        }
+
+        // `IntrinsicHeight` gives `stretch` a height to stretch to: the two
+        // cards stay equal when one subtitle wraps and the other does not,
+        // which is the difference between a pair and two loose boxes.
+        return IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Expanded(child: upload),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(child: paste),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -136,44 +186,44 @@ class _SourceOption extends StatelessWidget {
         // audit's palette closure is the design system's whole point.
         borderColor: isSelected ? colors.primary : null,
         padding: const EdgeInsets.all(AppSpacing.md),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minWidth: 140),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Icon(
-                    icon,
-                    // Secondary, not primary: the same selected-mark token the
-                    // card tile's check uses — dark primary fails contrast as
-                    // a glyph on dark surfaces.
-                    color: isSelected
-                        ? colors.secondary
-                        : colors.onSurfaceVariant,
-                  ),
-                  if (isSelected) ...<Widget>[
-                    const SizedBox(width: AppSpacing.xs),
-                    Icon(
-                      Icons.check_circle,
-                      size: AppSpacing.lg,
-                      color: colors.secondary,
-                    ),
-                  ],
-                ],
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(title, style: context.texts.titleSmall),
-              Text(
-                subtitle,
-                style: context.texts.bodySmall?.copyWith(
-                  color: colors.onSurfaceVariant,
+        // No width constraint of its own: the band above decides whether this
+        // card is half a row or a full one, and a minWidth here is what made
+        // the pair size to their text instead of to the column.
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Icon(
+                  icon,
+                  // Secondary, not primary: the same selected-mark token the
+                  // card tile's check uses — dark primary fails contrast as a
+                  // glyph on dark surfaces.
+                  color: isSelected
+                      ? colors.secondary
+                      : colors.onSurfaceVariant,
                 ),
+                if (isSelected) ...<Widget>[
+                  const SizedBox(width: AppSpacing.xs),
+                  Icon(
+                    Icons.check_circle,
+                    size: AppSpacing.lg,
+                    color: colors.secondary,
+                  ),
+                ],
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(title, style: context.texts.titleSmall),
+            Text(
+              subtitle,
+              style: context.texts.bodySmall?.copyWith(
+                color: colors.onSurfaceVariant,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

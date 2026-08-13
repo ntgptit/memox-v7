@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../support/color_math.dart';
 import 'audit_model.dart';
 
+export 'audit_geometry_rules.dart';
+
 /// One thing an audit noticed.
 ///
 /// [isBlocking] separates "this screen is wrong" from "this screen could not be

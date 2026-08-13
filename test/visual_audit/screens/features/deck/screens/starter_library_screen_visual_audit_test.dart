@@ -17,10 +17,12 @@ import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 import 'package:memox/features/deck/domain/repositories/deck_template_repository.dart';
 import 'package:memox/features/deck/presentation/screens/starter_library_screen.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
+import 'package:memox/shared/widgets/mx_card.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../../audit_allowance.dart';
 import '../../../../audit_model.dart';
+import '../../../../audit_rules.dart';
 import '../../../../memox_audit.dart';
 import '../../../../screen_auditor.dart';
 import '../../../../../features/deck/presentation/support/fake_deck_repository.dart';
@@ -82,6 +84,12 @@ void main() {
         child: Router.withConfig(config: router),
       );
     },
+    // This screen declares one surface column (M99.19a): every row of
+    // cards spans it, or stacks. Opted in explicitly, because a layout
+    // rule is a screen's own declaration — not something the harness
+    // infers from seeing `MxCard`.
+    surfaceFinder: find.byType(MxCard),
+    additionalRules: const <AuditRule>[SurfaceColumnRule()],
     anchors: <AuditAnchor>[
       AuditAnchor.type('starter_screen', StarterLibraryScreen),
       AuditAnchor.type('navigation_bar', MxNavigationBar),

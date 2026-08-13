@@ -7,10 +7,12 @@ import 'package:memox/features/card/domain/models/card_state_distribution_model.
 import 'package:memox/features/card/domain/models/card_state_model.dart';
 import 'package:memox/features/card/presentation/screens/card_list_screen.dart';
 import 'package:memox/shared/widgets/mx_content_shell.dart';
+import 'package:memox/shared/widgets/mx_card.dart';
 
 import '../../../../audit_allowance.dart';
 import '../../../../audit_model.dart';
 import '../../../../card_audit_harness.dart';
+import '../../../../audit_rules.dart';
 import '../../../../memox_audit.dart';
 import '../../../../screen_auditor.dart';
 import '../../../../../features/card/presentation/support/fake_card_repository.dart';
@@ -78,6 +80,12 @@ void main() {
   memoxProductionScreenAuditTest(
     'card_list_screen',
     () => cardScreenWith(loaded(), const CardListScreen(deckId: 'deck-1')),
+    // This screen declares one surface column (M99.19a): every row of
+    // cards spans it, or stacks. Opted in explicitly, because a layout
+    // rule is a screen's own declaration — not something the harness
+    // infers from seeing `MxCard`.
+    surfaceFinder: find.byType(MxCard),
+    additionalRules: const <AuditRule>[SurfaceColumnRule()],
     anchors: <AuditAnchor>[AuditAnchor.type('shell', MxContentShell)],
     // The distribution stream lands a frame after the list, so give the panel a
     // second settle before capture — otherwise it is still SizedBox.shrink.

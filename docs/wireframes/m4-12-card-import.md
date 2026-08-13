@@ -12,8 +12,9 @@
 
 Concept tham chiếu là một mockup mobile (dark) với app bar, breadcrumb, stepper
 ba bước, chip deck đích, hai lựa chọn nguồn, panel thông tin và sticky action.
-Concept chỉ quyết **hierarchy**; mọi màu, chữ, spacing, radius lấy từ design
-token hiện có. Ba điểm concept bị sửa có chủ đích:
+Concept quyết **hierarchy và các quan hệ layout** (gutter chung, tỉ lệ, grouping,
+thứ tự); màu, typography, giá trị spacing và radius cụ thể lấy từ design token
+hiện có. Ba điểm concept bị sửa có chủ đích:
 
 - Concept ghi "CSV, TSV, Anki" và "up to 5 MB" — v1 **không** hỗ trợ `.apkg`
   (out of scope M99.19) và không đặt trần 5 MB chỉ vì concept ghi vậy.
@@ -39,20 +40,26 @@ token hiện có. Ba điểm concept bị sửa có chủ đích:
 ### W1 — Khung màn (mọi bước)
 
 - App bar: Close (trái) · title `Import cards`. Không có nút Help.
-- Breadcrumb (component hiện có): đường dẫn deck, segment cuối `Import` không
-  bấm được.
-- Chip ngữ cảnh: icon deck · tên deck đích · số card hiện có.
-- Stepper: `1 Source — 2 Preview — 3 Import`, semantics "Step n of 3", giữ
-  nguyên cấu trúc khi loading/error.
+- Header theo thứ tự concept: breadcrumb (segment cuối `Import` không bấm
+  được) → stepper `1 Source — 2 Preview — 3 Import` (semantics "Step n of 3",
+  giữ nguyên cấu trúc khi loading/error) → chip ngữ cảnh (icon deck · tên
+  deck đích · số card hiện có).
 - Sticky bottom bar: một primary action theo bước; tránh keyboard/IME; không
-  che nội dung cuối (nội dung scroll có padding đáy).
+  che nội dung cuối (nội dung scroll có padding đáy). Dưới hàng action là một
+  dòng reassurance theo phase (states 1–4): Source `Next you'll preview every
+  row…`, Parsing `Reading your source — nothing is saved yet.`,
+  Preview/Confirm `No cards are added until you tap Import.` Outcome và panel
+  submit không có dòng này — copy của chúng đã tự nói.
 
 ### W2 — Bước Source
 
 - Hai lựa chọn nguồn dạng card: `Upload file` (CSV, TSV, XLSX) và `Paste text`
-  (CSV or TSV rows). Hai cột khi đủ rộng; wrap thành một cột khi hẹp/textScale
-  lớn. Selected: viền primary + glyph + `Semantics(selected: true)` — không chỉ
-  màu, không fill đậm.
+  (CSV or TSV rows). Hai card **chia đôi cột nội dung** — card trái bắt đầu ở
+  mép trái, card phải kết thúc ở mép phải, bằng chiều rộng và bằng chiều cao;
+  khi không đủ chỗ (hẹp/textScale lớn) thì stack, mỗi card full-width. Không
+  bao giờ co về intrinsic width để hàng hụt so với các band khác. Selected:
+  viền primary + glyph + `Semantics(selected: true)` — không chỉ màu, không
+  fill đậm.
 - Upload: copy `Choose a file to preview` + nút `Choose file`. Khi có file,
   cả panel chọn được thay bằng **một card tóm tắt gọn** (state 1): icon file ·
   tên (tối đa 2 dòng, ellipsis) · `CSV · 1 KB · Ready to preview`; tap card =
@@ -95,8 +102,11 @@ token hiện có. Ba điểm concept bị sửa có chủ đích:
 
 ### W4 — Bước Import
 
-- Confirm summary (giữ nguyên, không bỏ bước xác nhận): deck đích · số sẽ ghi
-  · số trùng bỏ/ghi · số invalid loại · số hàng trống bỏ qua.
+- Confirm summary (giữ nguyên, không bỏ bước xác nhận) nói cùng ngôn ngữ
+  summary-row với Result: một card, dòng đầu `Into {deck}`, rồi mỗi fact một
+  hàng icon + label + count ở mép phải (Cards to import · Duplicates
+  skipped/included · Invalid rows skipped · Blank rows ignored). Count 0 vẫn
+  hiện — đây là bản hợp đồng trước khi ghi.
 - Primary: `Import N cards`; khi đang ghi, panel confirm được thay bằng
   **panel submit** (state 5): một loader indeterminate duy nhất ·
   `Importing N cards…` · `Saving all cards together. Don't close the app.`

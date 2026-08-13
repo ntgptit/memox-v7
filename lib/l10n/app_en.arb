@@ -2070,51 +2070,6 @@
   "@cardImportMappingRequiredNote": {
       "description": "Inline note when the required mapping is incomplete (BR-169)."
   },
-  "cardImportSummaryTotalLabel": "Total rows: {count}",
-  "@cardImportSummaryTotalLabel": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Preview summary line."
-  },
-  "cardImportSummaryReadyLabel": "Ready: {count}",
-  "@cardImportSummaryReadyLabel": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Preview summary line."
-  },
-  "cardImportSummaryDuplicateLabel": "Duplicates: {count}",
-  "@cardImportSummaryDuplicateLabel": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Preview summary line (BR-170)."
-  },
-  "cardImportSummaryInvalidLabel": "Invalid: {count}",
-  "@cardImportSummaryInvalidLabel": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Preview summary line."
-  },
-  "cardImportSummaryBlankLabel": "Blank rows skipped: {count}",
-  "@cardImportSummaryBlankLabel": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Preview summary line (BR-169)."
-  },
   "cardImportIncludeDuplicatesLabel": "Include duplicates",
   "@cardImportIncludeDuplicatesLabel": {
       "description": "Toggle writing duplicates as new cards (BR-170)."
@@ -2164,6 +2119,26 @@
   "@cardImportConfirmHeading": {
       "description": "Heading of the confirm view on step 3."
   },
+  "cardImportConfirmImportRowLabel": "Cards to import",
+  "@cardImportConfirmImportRowLabel": {
+      "description": "Confirm summary row: how many cards the one transaction will write (UC-10 step 6)."
+  },
+  "cardImportConfirmDuplicatesIncludedRowLabel": "Duplicates included",
+  "@cardImportConfirmDuplicatesIncludedRowLabel": {
+      "description": "Confirm summary row when Include duplicates is on: duplicates counted into the batch (BR-170)."
+  },
+  "cardImportBarSourceHint": "Next you'll preview every row before anything is imported.",
+  "@cardImportBarSourceHint": {
+      "description": "Reassurance line under the sticky bar on the Source step (M4.12 state 1)."
+  },
+  "cardImportBarParsingHint": "Reading your source \u2014 nothing is saved yet.",
+  "@cardImportBarParsingHint": {
+      "description": "Reassurance line under the sticky bar while the decode runs (M4.12 state 2)."
+  },
+  "cardImportBarImportHint": "No cards are added until you tap Import.",
+  "@cardImportBarImportHint": {
+      "description": "Reassurance line under the sticky bar on Preview and Confirm (M4.12 states 3-4)."
+  },
   "cardImportConfirmTargetLabel": "Into {deckName}",
   "@cardImportConfirmTargetLabel": {
       "placeholders": {
@@ -2172,42 +2147,6 @@
           }
       },
       "description": "Confirm line naming the target deck."
-  },
-  "cardImportConfirmWriteLabel": "{count} cards will be imported",
-  "@cardImportConfirmWriteLabel": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Confirm line: what will be written."
-  },
-  "cardImportConfirmDuplicateSkipLabel": "{count} duplicates will be skipped",
-  "@cardImportConfirmDuplicateSkipLabel": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Confirm line when duplicates are excluded."
-  },
-  "cardImportConfirmDuplicateIncludeLabel": "{count} duplicates will be imported too",
-  "@cardImportConfirmDuplicateIncludeLabel": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Confirm line when duplicates are included."
-  },
-  "cardImportConfirmInvalidLabel": "{count} invalid rows are left out",
-  "@cardImportConfirmInvalidLabel": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Confirm line: invalid rows never import."
   },
   "cardImportSubmitAction": "Import {count} cards",
   "@cardImportSubmitAction": {

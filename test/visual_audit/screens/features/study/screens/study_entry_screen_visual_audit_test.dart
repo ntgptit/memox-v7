@@ -4,9 +4,11 @@ library;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/study/presentation/screens/study_entry_screen.dart';
 import 'package:memox/shared/widgets/mx_content_shell.dart';
+import 'package:memox/shared/widgets/mx_card.dart';
 
 import '../../../../audit_allowance.dart';
 import '../../../../audit_model.dart';
+import '../../../../audit_rules.dart';
 import '../../../../memox_audit.dart';
 import '../../../../screen_auditor.dart';
 import '../../../../study_audit_harness.dart';
@@ -28,6 +30,12 @@ void main() {
       FakeStudyRepository(),
       const StudyEntryScreen(deckId: 'deck-1'),
     ),
+    // This screen declares one surface column (M99.19a): every row of
+    // cards spans it, or stacks. Opted in explicitly, because a layout
+    // rule is a screen's own declaration — not something the harness
+    // infers from seeing `MxCard`.
+    surfaceFinder: find.byType(MxCard),
+    additionalRules: const <AuditRule>[SurfaceColumnRule()],
     anchors: <AuditAnchor>[AuditAnchor.type('shell', MxContentShell)],
     drive: (tester) => tester.pumpAndSettle(),
     allowances: const <AuditSkipAllowance>[

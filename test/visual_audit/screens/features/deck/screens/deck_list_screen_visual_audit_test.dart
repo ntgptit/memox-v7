@@ -9,12 +9,14 @@ import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
+import 'package:memox/shared/widgets/mx_card.dart';
 
 import '../../../../../features/deck/presentation/support/fake_deck_repository.dart';
 import '../../../../audit_allowance.dart';
 import '../../../../audit_model.dart';
 import '../../../../deck_audit_allowances.dart';
 import '../../../../deck_audit_harness.dart';
+import '../../../../audit_rules.dart';
 import '../../../../memox_audit.dart';
 import '../../../../screen_auditor.dart';
 
@@ -54,6 +56,12 @@ void main() {
     'deck_list_screen',
     () => deckShellWith(FakeDeckRepository()),
     state: 'root_empty',
+    // This screen declares one surface column (M99.19a): every row of
+    // cards spans it, or stacks. Opted in explicitly, because a layout
+    // rule is a screen's own declaration — not something the harness
+    // infers from seeing `MxCard`.
+    surfaceFinder: find.byType(MxCard),
+    additionalRules: const <AuditRule>[SurfaceColumnRule()],
     anchors: deckAnchorsWithEmpty,
     allowances: <AuditSkipAllowance>[
       ...deckShellAllowances(
@@ -88,6 +96,12 @@ void main() {
       ]),
     ),
     state: 'root_loaded',
+    // This screen declares one surface column (M99.19a): every row of
+    // cards spans it, or stacks. Opted in explicitly, because a layout
+    // rule is a screen's own declaration — not something the harness
+    // infers from seeing `MxCard`.
+    surfaceFinder: find.byType(MxCard),
+    additionalRules: const <AuditRule>[SurfaceColumnRule()],
     anchors: deckPlainAnchors,
     allowances: <AuditSkipAllowance>[
       ...deckShellAllowances(
@@ -133,6 +147,12 @@ void main() {
       FakeDeckRepository.failing(const DatabaseFailure(message: 'read failed')),
     ),
     state: 'root_error',
+    // This screen declares one surface column (M99.19a): every row of
+    // cards spans it, or stacks. Opted in explicitly, because a layout
+    // rule is a screen's own declaration — not something the harness
+    // infers from seeing `MxCard`.
+    surfaceFinder: find.byType(MxCard),
+    additionalRules: const <AuditRule>[SurfaceColumnRule()],
     anchors: <AuditAnchor>[
       AuditAnchor.type('deck_screen', DeckListScreen),
       AuditAnchor.type('error_state', MxErrorState),
@@ -166,6 +186,12 @@ void main() {
     ),
     state: 'level_unset',
     drive: settleDeckScreen,
+    // This screen declares one surface column (M99.19a): every row of
+    // cards spans it, or stacks. Opted in explicitly, because a layout
+    // rule is a screen's own declaration — not something the harness
+    // infers from seeing `MxCard`.
+    surfaceFinder: find.byType(MxCard),
+    additionalRules: const <AuditRule>[SurfaceColumnRule()],
     anchors: deckAnchorsWithEmpty,
     allowances: <AuditSkipAllowance>[
       // Two declared icon buttons — create and the action menu — plus the back
@@ -198,6 +224,12 @@ void main() {
     ),
     state: 'level_empty_deck',
     drive: settleDeckScreen,
+    // This screen declares one surface column (M99.19a): every row of
+    // cards spans it, or stacks. Opted in explicitly, because a layout
+    // rule is a screen's own declaration — not something the harness
+    // infers from seeing `MxCard`.
+    surfaceFinder: find.byType(MxCard),
+    additionalRules: const <AuditRule>[SurfaceColumnRule()],
     anchors: deckAnchorsWithEmpty,
     allowances: <AuditSkipAllowance>[
       ...deckShellAllowances(
@@ -245,6 +277,12 @@ void main() {
     ),
     state: 'level_loaded',
     drive: settleDeckScreen,
+    // This screen declares one surface column (M99.19a): every row of
+    // cards spans it, or stacks. Opted in explicitly, because a layout
+    // rule is a screen's own declaration — not something the harness
+    // infers from seeing `MxCard`.
+    surfaceFinder: find.byType(MxCard),
+    additionalRules: const <AuditRule>[SurfaceColumnRule()],
     anchors: deckPlainAnchors,
     allowances: <AuditSkipAllowance>[
       // The action menu and one per child row — plus the AppBar's back button.
@@ -297,6 +335,12 @@ void main() {
     ),
     state: 'level_card_handoff',
     drive: settleDeckScreen,
+    // This screen declares one surface column (M99.19a): every row of
+    // cards spans it, or stacks. Opted in explicitly, because a layout
+    // rule is a screen's own declaration — not something the harness
+    // infers from seeing `MxCard`.
+    surfaceFinder: find.byType(MxCard),
+    additionalRules: const <AuditRule>[SurfaceColumnRule()],
     anchors: deckAnchorsWithEmpty,
     allowances: <AuditSkipAllowance>[
       ...deckShellAllowances(
@@ -319,6 +363,12 @@ void main() {
     () => deckLevelWith(FakeDeckRepository.missingDeck()),
     state: 'level_not_found',
     drive: settleDeckScreen,
+    // This screen declares one surface column (M99.19a): every row of
+    // cards spans it, or stacks. Opted in explicitly, because a layout
+    // rule is a screen's own declaration — not something the harness
+    // infers from seeing `MxCard`.
+    surfaceFinder: find.byType(MxCard),
+    additionalRules: const <AuditRule>[SurfaceColumnRule()],
     anchors: <AuditAnchor>[
       AuditAnchor.type('deck_screen', DeckListScreen),
       AuditAnchor.type('error_state', MxErrorState),

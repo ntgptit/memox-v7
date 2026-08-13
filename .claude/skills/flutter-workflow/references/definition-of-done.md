@@ -36,6 +36,23 @@ without re-checking.
 - [ ] Loading, empty, error and success states all render correctly. An
       unhandled empty state is the single most common gap here.
 - [ ] Icon-only controls have semantic labels; touch targets are at least 48dp.
+- [ ] The screen's geometry contract identifies its content gutters, alignment
+      groups, relative widths/heights and important baselines. Every material
+      relationship is asserted by a widget test that measures the production
+      tree with `getRect` — not by looking at a golden. A container can be
+      full-width while its children are not (`Wrap` and bare `Row` size children
+      to their intrinsic width), and that defect is invisible to the analyzer,
+      the guard, the colour audit and to a golden that was first recorded while
+      wrong. See the Responsive section of `flutter-design-system` and
+      `test/features/card/presentation/card_import_alignment_test.dart`.
+      A screen MAY additionally opt its declared surface group into
+      `SurfaceColumnRule`; this is never global because nested and asymmetric
+      card groups can be intentional. The widget test remains the authority for
+      headings, fields, exact gutters, gaps and baselines.
+- [ ] A new or updated golden was compared state-by-state with the actual
+      concept or canonical reference. The review records approved differences;
+      regenerating a baseline and reviewing it in isolation is not visual
+      parity evidence.
 - [ ] No user-visible string outside the ARB files.
 - [ ] Registered in the Widgetbook catalog (`widgetbook/`): a new shared
       component gets a knob-driven playground; a new screen gets a use-case

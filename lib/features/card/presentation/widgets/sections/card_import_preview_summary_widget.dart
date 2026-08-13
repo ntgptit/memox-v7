@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_card.dart';
 import '../../../domain/models/card_import_preview_model.dart';
 import '../../controllers/card_import_draft_controller.dart';
 import '../items/card_import_row_preview_widget.dart';
@@ -113,17 +114,41 @@ class CardImportPreviewSummaryWidget extends ConsumerWidget {
           onChanged: (value) =>
               _updateDuplicateChoice(ref, deckId, value: value),
         ),
-        for (final row in shown) CardImportRowPreviewWidget(row: row),
-        if (hiddenCount > 0)
-          Padding(
-            padding: const EdgeInsets.only(top: AppSpacing.xs),
-            child: Text(
-              l10n.cardImportMoreRowsLabel(hiddenCount),
-              style: context.texts.bodySmall?.copyWith(
-                color: context.colors.onSurfaceVariant,
-              ),
-            ),
+        // The rows live on one grouped surface (concept states 3-4): a list
+        // the eye reads as a single table, not loose lines on the page. The
+        // hairline dividers keep the row rhythm without alternating tints.
+        MxCard(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.xs,
           ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              for (var index = 0; index < shown.length; index++) ...<Widget>[
+                if (index > 0)
+                  Divider(
+                    height: AppSpacing.xs,
+                    color: context.colors.outlineVariant,
+                  ),
+                CardImportRowPreviewWidget(row: shown[index]),
+              ],
+              if (hiddenCount > 0)
+                Padding(
+                  padding: const EdgeInsets.only(
+                    top: AppSpacing.xs,
+                    bottom: AppSpacing.xs,
+                  ),
+                  child: Text(
+                    l10n.cardImportMoreRowsLabel(hiddenCount),
+                    style: context.texts.bodySmall?.copyWith(
+                      color: context.colors.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
       ],
     );
   }

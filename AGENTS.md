@@ -98,6 +98,13 @@ one of them:
    auto-fix unapproved differences and repeat until its stated visual clean-stop
    condition is met. When no concept image exists, it MUST compare against the
    repository's wireframes, design tokens and user-facing behavior contract.
+   For every supplied concept it MUST also extract a geometry contract — content
+   gutters, shared edges, relative widths/heights, grid gaps and baselines at the
+   relevant viewports — and pin material relationships with `getRect` widget
+   assertions against the production tree. A newly generated or updated golden
+   is a regression baseline, not evidence that the implementation matches the
+   concept; accepting it requires a state-by-state comparison with the concept
+   and an explicit list of approved differences.
 
 The two review prompts MUST remain separate: architecture correctness is not
 evidence of visual completion, and visual similarity is not evidence of correct

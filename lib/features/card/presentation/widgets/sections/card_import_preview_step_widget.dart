@@ -56,7 +56,22 @@ class CardImportPreviewStepWidget extends ConsumerWidget {
         _SourceContext(deckId: deckId, document: document),
         const SizedBox(height: AppSpacing.lg),
         document.when(
-          loading: () => _ParsingPanel(deckId: deckId),
+          // The step's heading stays on screen while the decode runs
+          // (concept state 2): the loading panel is Preview's content, not a
+          // replacement for knowing which step this is.
+          loading: () => Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Text(
+                context.l10n.cardImportPreviewHeading,
+                style: context.texts.labelLarge?.copyWith(
+                  color: context.colors.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              _ParsingPanel(deckId: deckId),
+            ],
+          ),
           error: (error, _) => MxErrorState(
             title: context.l10n.cardImportParseErrorTitle,
             message: error is Failure

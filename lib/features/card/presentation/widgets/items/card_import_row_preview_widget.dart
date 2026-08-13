@@ -50,9 +50,9 @@ class CardImportRowPreviewWidget extends StatelessWidget {
       ),
       _ => null,
     };
-    final reasonColor = row.status == CardImportRowStatus.invalid
-        ? colors.error
-        : colors.tertiary;
+    final isInvalid = row.status == CardImportRowStatus.invalid;
+    final reasonColor = isInvalid ? colors.error : colors.tertiary;
+    final reasonIcon = isInvalid ? Icons.error_outline : Icons.copy_outlined;
 
     final frontText = _CellText(value: row.front, isSecondary: false);
     final backText = _CellText(value: row.back, isSecondary: true);
@@ -99,11 +99,23 @@ class CardImportRowPreviewWidget extends StatelessWidget {
                 if (reason != null)
                   Padding(
                     padding: const EdgeInsets.only(top: AppSpacing.xs),
-                    child: Text(
-                      reason,
-                      style: context.texts.bodySmall?.copyWith(
-                        color: reasonColor,
-                      ),
+                    child: Row(
+                      children: <Widget>[
+                        Icon(
+                          reasonIcon,
+                          size: AppSpacing.md,
+                          color: reasonColor,
+                        ),
+                        const SizedBox(width: AppSpacing.xs),
+                        Expanded(
+                          child: Text(
+                            reason,
+                            style: context.texts.bodySmall?.copyWith(
+                              color: reasonColor,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
               ],
@@ -148,9 +160,11 @@ class _CellText extends StatelessWidget {
 
     return Text(
       value,
+      // The term carries the row (concept states 3-4): the front reads at
+      // title weight, the meaning at body weight on the quieter colour.
       style: isSecondary
           ? context.texts.bodyMedium?.copyWith(color: colors.onSurfaceVariant)
-          : context.texts.bodyMedium,
+          : context.texts.titleSmall,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
     );

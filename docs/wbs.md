@@ -9034,7 +9034,31 @@ thế không đổi bố cục.
   drift của AD-18: `architecture.md` mục Ranh giới ghi `domain/modes/` trong
   khi code, bảng dispatch AD-18 và Output của task scheduler đều là
   `domain/models/` — sửa docs về `domain/models/`, checker bỏ pairing
-  `/domain/modes/` không còn ứng với folder nào.
+  `/domain/modes/` không còn ứng với folder nào. Vòng visual-parity với 8
+  concept đóng thêm: header đúng thứ tự concept (breadcrumb → stepper →
+  chip); preview list lên một grouped surface với divider mảnh, Front mang
+  title weight; heading `2 · Preview` giữ nguyên khi parsing; dòng
+  reassurance dưới sticky bar theo phase (3 key ARB EN+VI); Confirm nói cùng
+  ngôn ngữ summary-row với Result (icon + label + count màu theo role, 2 key
+  ARB mới, 9 key câu cũ/mồ côi bị xoá); count của result row mang màu
+  semantic; reason line có icon theo status. 11 golden render lại, soát bằng
+  mắt từng ảnh. Vòng cuối (do người dùng phát hiện trên máy thật) đóng nốt
+  finding V9: hai source card nằm trong `Wrap` nên co về intrinsic width, hụt
+  ~25dp so với mép phải của cột — sửa thành hai nửa `Expanded` trong
+  `IntrinsicHeight`, stack full-width khi không đủ chỗ theo ngưỡng đo bằng
+  `LayoutBuilder` + text scaler. **Trước finding này không gate nào bắt được**,
+  nên bổ sung `card_import_alignment_test.dart` (đo `getRect` từng band ở
+  Source/Preview/Confirm/Result + 320dp@2.0), thêm rule "bands share one
+  column" vào skill `flutter-design-system` và một dòng bắt buộc trong
+  Definition of Done. Và vì rule theo màn vẫn phụ thuộc vào việc ai đó nhớ
+  viết test, bổ sung **`SurfaceColumnRule` vào visual audit** — với màn hình đã
+  khai báo một surface column và opt-in finder cụ thể, rule gom các surface
+  thành hàng theo overlap dọc rồi fail khi union của một hàng hụt so với cột
+  do các surface khác dựng nên. Không chạy global trên mọi `MxCard`, vì một
+  màn khác có thể chủ đích dùng card lồng hoặc cột bất đối xứng. Card Import đã
+  đăng ký rule; 3 synthetic test ghim row đúng, đúng geometry của `Wrap` cũ bị
+  chặn, và giới hạn "mọi surface cùng hẹp"; `getRect` trên production tree vẫn
+  là oracle chính cho geometry contract của màn.
 - **Goal:** Wizard import đúng luồng nhưng UI chưa kể chuyện theo trạng thái:
   file đã chọn vẫn hiện cả bộ chọn, parsing chỉ là spinner trần, preview đếm
   bằng năm dòng text, submit và kết quả chen trong bước 3, stepper không phân

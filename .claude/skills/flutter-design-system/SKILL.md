@@ -106,6 +106,65 @@ The four checks that catch nearly everything:
 Also: nothing important within reach of the bottom navigation or the home
 indicator, and no action flush against a screen edge.
 
+### Declare the horizontal layout contract, then prove it by measuring
+
+A **band** is anything the reader sees as a full-width step down the page: a
+section heading, a card, a panel, a row of cards. Bands declared to share one
+content column start and end on the same two x-coordinates. A screen MAY have
+an intentionally nested or asymmetric column, but that is a second declared
+alignment group, not an accidental inset. A widget that is narrower *on
+purpose* — a chip hugging its text, a button inside a card, a heading sharing
+its row with a counter — is not a band and is not held to this.
+
+**The trap is a container that is full-width while its children are not.**
+`Wrap` sizes its children to their intrinsic width; `Row` without `Expanded`
+does the same. Two cards meant to be halves of a row then sit inboard of the
+column with dead space at the right, and the band above them measures
+perfectly because *the Wrap* is full-width — only the cards are not. This
+shipped in Card Import (M99.19a finding V9) and no gate saw it.
+
+So when a band is a row of cards, give each child an `Expanded` (with
+`IntrinsicHeight` if they must be equal height) and pick the one-column
+fallback with a measured `LayoutBuilder` threshold, not a device guess.
+
+**Extract the geometry contract before implementation.** For a concept-driven
+screen, record the content gutters, alignment groups, relative widths/heights,
+grid gaps and important baselines in its wireframe or UI contract. Calling a
+concept "hierarchy only" MUST NOT discard these layout relationships; theme
+tokens own the exact spacing values, while the concept still owns which edges
+and proportions relate.
+
+**The visual audit can enforce a declared row-of-surfaces contract.**
+For screens whose wireframe declares one surface column, opt that screen into
+`SurfaceColumnRule` and provide the production-surface finder explicitly. The
+rule groups those surfaces into rows by vertical overlap and fails when a
+row's union stops short of the column the other surfaces establish. It is not
+global: another screen may intentionally contain nested or asymmetric card
+groups, and the harness must not invent a layout contract merely because it
+sees an `MxCard`. Its synthetic unit tests pin what it catches, while the
+screen's `getRect` tests remain the primary proof of the declared geometry.
+
+**Assert the rest in a widget test, because nothing else can.** The audit
+knows about surfaces, not about headings, text fields or the gap between a
+title and its metadata. `flutter analyze` and the guard read source text and
+cannot see a laid-out rectangle. A golden compares a screen with yesterday's
+copy of itself, so an edge that is wrong but stable passes forever — and the
+eye misses a few logical pixels on a scaled-down PNG.
+An updated golden is therefore a regression baseline only; compare it with the
+concept separately and list approved divergences before accepting it.
+
+```dart
+final heading = tester.getRect(find.text(l10n.someSectionHeading));
+final card = tester.getRect(find.byType(SomeCard));
+expect(card.left, moreOrLessEquals(heading.left, epsilon: 0.5));
+expect(card.right, moreOrLessEquals(heading.right, epsilon: 0.5));
+```
+
+`test/features/card/presentation/card_import_alignment_test.dart` is the
+worked example: one helper, every band of every state, plus the stacked case
+at 320dp. Measure the widgets a reader sees — a card, a panel — never the
+invisible box that holds them, which is what hid the original defect.
+
 ## Localization
 
 Every user-visible string comes from ARB. No exceptions — a "temporary"

@@ -33,7 +33,9 @@ void main() {
       await tester.tap(find.text(english.cardImportPreviewAction));
       await tester.pump();
 
-      // The panel: what is being read, and the no-writes reassurance.
+      // The panel: what is being read, and the no-writes reassurance — under
+      // the step's own heading, which never leaves while the decode runs.
+      expect(find.text(english.cardImportPreviewHeading), findsOneWidget);
       expect(find.text(english.cardImportParsingPasteTitle), findsOneWidget);
       expect(find.text(english.cardImportParsingReassurance), findsOneWidget);
       // The source is one compact context line, not the chooser repeated —

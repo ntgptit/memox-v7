@@ -5,7 +5,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/settings/presentation/screens/settings_placeholder_screen.dart';
 import 'package:memox/shared/widgets/mx_content_shell.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
+import 'package:memox/shared/widgets/mx_card.dart';
 
+import '../../../../audit_rules.dart';
 import '../../../../memox_audit.dart';
 import '../../../../audit_allowance.dart';
 import '../../../../audit_model.dart';
@@ -23,6 +25,12 @@ void main() {
   memoxProductionScreenAuditTest(
     'settings_placeholder_screen',
     () => const SettingsPlaceholderScreen(),
+    // This screen declares one surface column (M99.19a): every row of
+    // cards spans it, or stacks. Opted in explicitly, because a layout
+    // rule is a screen's own declaration — not something the harness
+    // infers from seeing `MxCard`.
+    surfaceFinder: find.byType(MxCard),
+    additionalRules: const <AuditRule>[SurfaceColumnRule()],
     anchors: <AuditAnchor>[
       AuditAnchor.type('shell', MxContentShell),
       AuditAnchor.type('empty_state', MxEmptyState),

@@ -32,7 +32,13 @@ void main() {
         find.text(english.cardImportConfirmTargetLabel('TOPIK I')),
         findsOneWidget,
       );
-      expect(find.text(english.cardImportConfirmWriteLabel(2)), findsOneWidget);
+      // The plan as summary rows: the will-write count on the trailing edge
+      // of its own labelled row, the same language the result faces speak.
+      expect(
+        find.text(english.cardImportConfirmImportRowLabel),
+        findsOneWidget,
+      );
+      expect(find.text('2'), findsOneWidget);
     });
 
     testWidgets('a successful commit is one batch and shows the result', (
