@@ -474,6 +474,12 @@ class _CatalogDeckRepository implements DeckRepository {
   @override
   Future<void> deleteDeck(String deckId) async {}
 
+  /// The catalog writes nothing, so the batch id it hands back is a label
+  /// rather than a record — enough for the Undo snackbar to have something to
+  /// hold (BR-182, BR-189).
+  @override
+  Future<String> deleteDeckForUndo(String deckId) async => 'catalog-$deckId';
+
   @override
   Future<void> resetLearningProgress({
     required String rootDeckId,

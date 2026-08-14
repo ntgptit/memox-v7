@@ -69,7 +69,7 @@ class _TrashDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ProviderScope(
-    overrides: <Override>[
+    overrides: [
       clockProvider.overrideWithValue(() => _now),
       trashRepositoryProvider.overrideWithValue(
         _CatalogTrashRepository(scenario: scenario, now: _now),
