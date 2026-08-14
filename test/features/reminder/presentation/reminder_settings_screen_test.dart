@@ -15,6 +15,7 @@ import 'package:memox/features/reminder/presentation/screens/reminder_settings_s
 import 'package:memox/l10n/generated/app_localizations.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
+import 'package:memox/shared/widgets/mx_list_tile.dart';
 
 import '../support/fake_reminder_platform.dart';
 
@@ -150,14 +151,20 @@ void main() {
   });
 
   group('unsupported platform (UC-12 E2, BR-193)', () {
-    testWidgets('the toggle is disabled and there is no retry', (tester) async {
+    testWidgets('the toggle is disabled and the screen says why', (
+      tester,
+    ) async {
       platform.capability = ReminderCapability.unsupported;
       await pumpScreen(tester);
 
       expect(toggleOf(tester).onChanged, isNull);
-      // No banner until something is attempted; the disabled control is the
-      // statement. What must never appear is a retry for a state that cannot
-      // change.
+      // The banner is derived from the capability, not from a command: no
+      // command can run here, so waiting for one to fail would leave this
+      // state permanently unreachable and the user with a grey switch and no
+      // explanation.
+      expect(find.text(english.reminderUnavailableTitle), findsOneWidget);
+      expect(find.text(english.reminderUnavailableMessage), findsOneWidget);
+      // What must never appear is a retry for a state that cannot change.
       expect(find.text(english.reminderRetryAction), findsNothing);
     });
   });
@@ -189,6 +196,41 @@ void main() {
       expect(settings.current.time.minuteOfDay, 7 * 60 + 30);
     });
 
+    testWidgets('a failed cancel says the reminder is off, not that nothing '
+        'was turned on (UC-12 A2)', (tester) async {
+      platform.shouldFailCancel = true;
+      await pumpScreen(tester);
+
+      await tester.tap(find.byType(Switch));
+      await tester.pumpAndSettle();
+
+      // The setting really did go off, so copy claiming nothing was turned on
+      // would describe the opposite of what happened.
+      expect(settings.current.isEnabled, isFalse);
+      expect(find.text(english.reminderCancelErrorTitle), findsOneWidget);
+      expect(find.text(english.reminderScheduleErrorTitle), findsNothing);
+    });
+
+    testWidgets('retrying a failed cancel retries the cancel, not the enable', (
+      tester,
+    ) async {
+      platform.shouldFailCancel = true;
+      await pumpScreen(tester);
+      await tester.tap(find.byType(Switch));
+      await tester.pumpAndSettle();
+
+      // A single hardwired retry turned "turning it off failed" into "turn it
+      // back on" — the button undoing what the user just asked for.
+      platform.shouldFailCancel = false;
+      await tester.tap(find.text(english.reminderRetryAction));
+      await tester.pumpAndSettle();
+
+      expect(settings.current.isEnabled, isFalse);
+      expect(toggleOf(tester).value, isFalse);
+      expect(platform.cancelCount, 1);
+      expect(platform.permissionRequests, 0);
+    });
+
     testWidgets('turning it off cancels and keeps the time', (tester) async {
       await pumpScreen(tester);
 
@@ -207,6 +249,53 @@ void main() {
       // the English form to a Vietnamese user with nothing failing.
       expect(find.text('7:30 AM'), findsNothing);
       expect(find.textContaining('7:30'), findsOneWidget);
+    });
+  });
+
+  group('accessibility (M6 A3, A4)', () {
+    testWidgets('the toggle is spoken with its own name and value', (
+      tester,
+    ) async {
+      // Disposed at the end of the body rather than through `addTearDown`:
+      // the framework verifies no handle is live *before* tear-downs run.
+      final handle = tester.ensureSemantics();
+      await pumpScreen(tester);
+
+      // Read off the control itself, not by label: the screen title is the
+      // same words, so a label search would find two nodes and prove nothing
+      // about which one carries the switch.
+      final node = tester.getSemantics(find.byType(Switch));
+
+      // The label lives on the control, not only on the Text beside it: a
+      // reader that focuses the switch would otherwise hear "Off" with no idea
+      // what is off (WCAG 4.1.2).
+      expect(node.label, english.reminderToggleLabel);
+      // The value is what carries the state in words. The toggled *flag* is
+      // Material's own and is asserted by the framework's Switch tests; what
+      // this screen owns, and what M6 R7 is about, is that the state is also
+      // readable without seeing the colour.
+      expect(node.value, english.reminderStatusOff);
+
+      handle.dispose();
+    });
+
+    testWidgets('the time row announces the time once, as its value', (
+      tester,
+    ) async {
+      // Disposed at the end of the body rather than through `addTearDown`:
+      // the framework verifies no handle is live *before* tear-downs run.
+      final handle = tester.ensureSemantics();
+      await pumpScreen(tester);
+
+      final node = tester.getSemantics(find.byType(MxListTile));
+
+      // The value is spoken once, as a value. Before the trailing Text was
+      // excluded it also landed inside the merged label, so a reader heard
+      // "Reminder time 8:00 PM, 8:00 PM".
+      expect(node.value, '8:00 PM');
+      expect(node.label, isNot(contains('8:00 PM')));
+
+      handle.dispose();
     });
   });
 

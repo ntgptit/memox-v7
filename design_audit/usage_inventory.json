@@ -1,6 +1,6 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 464,
+  "scannedFiles": 465,
   "totalSites": 417,
   "byElementKind": {
     "other": 292,
@@ -4113,7 +4113,7 @@
     },
     {
       "file": "lib/features/reminder/presentation/widgets/sections/reminder_settings_section_widget.dart",
-      "line": 98,
+      "line": 108,
       "widget_context": "ReminderSettingsSectionWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4124,7 +4124,7 @@
     },
     {
       "file": "lib/features/reminder/presentation/widgets/sections/reminder_settings_section_widget.dart",
-      "line": 105,
+      "line": 115,
       "widget_context": "ReminderSettingsSectionWidget",
       "element_kind": "text",
       "source_kind": "theme-token",

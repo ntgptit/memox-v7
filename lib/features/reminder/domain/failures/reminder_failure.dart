@@ -21,6 +21,16 @@ enum ReminderSetupRejection {
   /// The OS accepted the request but the work could not be enqueued (BR-190).
   scheduleFailed,
 
+  /// The reminder was turned off, but the pending run could not be cancelled
+  /// (BR-190).
+  ///
+  /// **Separate from [scheduleFailed] because the user is in a different
+  /// place.** The setting is already off and the toggle already shows it, so
+  /// copy saying "nothing was turned on" would describe the opposite of what
+  /// just happened. The stale run is harmless — delivery re-reads the settings
+  /// row and skips (BR-184) — but the user is owed the truth about it.
+  cancelFailed,
+
   /// The choice could not be written to the database.
   ///
   /// Distinct from [scheduleFailed] because the recoveries differ: a retry here

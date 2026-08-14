@@ -91,9 +91,15 @@ final class AndroidReminderPlatformRepositoryImpl
 
   @override
   Future<void> showSummary(ReminderSummaryModel summary) async {
-    final message = ReminderMessageMapper.toMessage(summary, _localizations());
+    final l10n = _localizations();
+    final message = ReminderMessageMapper.toMessage(summary, l10n);
 
     await _notifier.initialize();
-    await _notifier.show(title: message.title, body: message.body);
+    await _notifier.show(
+      title: message.title,
+      body: message.body,
+      channelName: l10n.reminderChannelName,
+      channelDescription: l10n.reminderChannelDescription,
+    );
   }
 }

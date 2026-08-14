@@ -2642,7 +2642,7 @@
   },
   "reminderStatusOff": "Tắt",
   "@reminderStatusOff": {
-      "description": "Giá trị accessibility của toggle khi tắt, để trạng thái không chỉ nằm ở màu (M6 R7)."
+      "description": "Giá trị accessibility của toggle khi tắt, để trạng thái không chỉ nằm ở màu (M6 R7, A3). Hàng ở Settings cố ý không hiện giá trị — xem M6 W1."
   },
   "reminderStatusOn": "Bật",
   "@reminderStatusOn": {
@@ -2707,5 +2707,21 @@
   "reminderNotificationBodyManyDecks": "{others, plural, other{{count} thẻ đến hạn trong {deck} và {others} deck khác}}",
   "@reminderNotificationBodyManyDecks": {
       "description": "Thân notification khi nhiều hơn một deck còn nợ (M6 N3, BR-186). Deck được nêu tên là deck cấp bách nhất theo thứ tự BR-187; phần còn lại là một con số, không bao giờ là danh sách."
+  },
+  "reminderCancelErrorTitle": "Đã tắt nhắc, nhưng lịch cũ có thể còn",
+  "@reminderCancelErrorTitle": {
+      "description": "Tiêu đề banner khi cài đặt đã tắt nhưng lượt chạy nền đang chờ không huỷ được (BR-190). Cố ý không dùng copy của lỗi đặt lịch: người dùng vừa TẮT, mà bảo họ chưa BẬT gì cả là nói ngược điều vừa xảy ra."
+  },
+  "reminderCancelErrorMessage": "Nhắc học hằng ngày đã tắt. Nếu hôm nay vẫn có một thông báo, mở app một lần là hết.",
+  "@reminderCancelErrorMessage": {
+      "description": "Thân banner lỗi huỷ lịch. Nói kết quả người dùng quan tâm — nhắc đã tắt — và phần còn sót, không hứa quá điều BR-184 cho: lượt cũ đọc lại settings lúc fire và không hiện gì."
+  },
+  "reminderChannelName": "Nhắc học hằng ngày",
+  "@reminderChannelName": {
+      "description": "Tên kênh notification của Android, người dùng thấy trong cài đặt hệ thống của app. Là chuỗi người dùng nhìn thấy nên phải bản địa hoá, không hardcode ở call site."
+  },
+  "reminderChannelDescription": "Tóm tắt mỗi ngày một lần về số thẻ đang đến hạn.",
+  "@reminderChannelDescription": {
+      "description": "Mô tả kênh notification, hiện dưới tên kênh trong cài đặt hệ thống. Nói kênh mang gì, không nói về bất kỳ deck hay thẻ cụ thể nào (BR-186)."
   }
 }

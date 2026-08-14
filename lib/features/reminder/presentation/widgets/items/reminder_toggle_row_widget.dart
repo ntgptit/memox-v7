@@ -41,14 +41,22 @@ class ReminderToggleRowWidget extends StatelessWidget {
       ),
       child: Row(
         children: <Widget>[
+          // Excluded, and the label moves onto the switch below: the visible
+          // text and the control are two nodes, so a reader focusing the
+          // control would otherwise hear "Off, switch" with no idea what is
+          // off (M6 A3, WCAG 4.1.2). Without the exclusion the same words are
+          // announced twice.
           Expanded(
-            child: Text(
-              context.l10n.reminderToggleLabel,
-              style: context.texts.bodyLarge,
+            child: ExcludeSemantics(
+              child: Text(
+                context.l10n.reminderToggleLabel,
+                style: context.texts.bodyLarge,
+              ),
             ),
           ),
           const SizedBox(width: AppSpacing.md),
           Semantics(
+            label: context.l10n.reminderToggleLabel,
             value: context.reminderToggleValue(isEnabled: isEnabled),
             child: Switch(
               value: isEnabled,

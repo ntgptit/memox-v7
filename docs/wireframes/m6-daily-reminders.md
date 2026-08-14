@@ -7,8 +7,8 @@
 | **Scope** | Màn nhắc học trong nhánh Settings: entry point, anatomy, mọi trạng thái, dialog chọn giờ, hợp đồng geometry, responsive/a11y, và hình dạng notification. Ngoài phạm vi: luật nghiệp vụ (BR-182…BR-193), luồng (UC-12), quyết định kiến trúc (AD-21), màn Settings đầy đủ (chưa có) |
 | **Source of truth for** | Anatomy màn nhắc học · copy các trạng thái nhắc học · hợp đồng geometry của màn nhắc học · responsive/a11y contract của màn nhắc học |
 | **Depends on** | `../use-cases.md` (UC-12), `../business-rules.md` (BR-182…BR-193), `../architecture.md` (AD-21) |
-| **Updated by task** | M99.23 (phase 6 — recursive UI/UX review) |
-| **Last updated** | 2026-08-13 |
+| **Updated by task** | M99.23 (phase 6 — recursive UI/UX review, vòng 2) |
+| **Last updated** | 2026-08-14 |
 
 Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham chiếu bằng ID theo
 `document-conventions.md` §5; chỗ nào wireframe và BR có vẻ mâu thuẫn thì BR
@@ -75,22 +75,23 @@ Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham c
 | W2 | Shell của màn nhắc học | Cùng `MxContentShell` với mọi màn khác; Back trả về nhánh Settings |
 | W3 | Hàng toggle | Nhãn bên trái, `Switch` bên phải. Khoá khi `enabling` và khi nền tảng không hỗ trợ |
 | W4 | Hàng giờ | Chạm mở dialog (R6). Vô hiệu khi toggle tắt (R3) |
-| W5 | Banner lỗi | Chỉ tồn tại ở ba trạng thái lỗi. Mang đúng một CTA khôi phục |
+| W5 | Banner lỗi | Tồn tại ở S6…S10, và ở S7 nó được suy ra từ **capability** chứ không từ một lệnh đã chạy — trên nền tảng không hỗ trợ thì không lệnh nào chạy được, nên chờ một lệnh hỏng sẽ khiến S7 không bao giờ tới được. Mang đúng một CTA khôi phục, và CTA đó **chạy lại đúng lệnh đã hỏng** — không phải một lệnh cố định |
 | W6 | Supporting copy | Hai câu, luôn hiển thị, không đổi theo trạng thái |
 
 ## S-trạng thái
 
 | # | Trạng thái | W3 | W4 | W5 | Ghi chú |
 |---|---|---|---|---|---|
-| S1 | loading | khoá | khoá | — | Đang đọc settings; không nhấp nháy sang `off` trước |
+| S1 | loading | **không có** | **không có** | — | `MxAsyncView` render loading state của shell thay vì hai hàng bị khoá. Chấp nhận có chủ đích: điều S1 phải tránh là **nhấp nháy sang `off` rồi bật lại**, và không render gì thì không thể nhấp nháy. Hai hàng bị khoá cần một bản sao thứ hai của card chỉ để sống 100ms |
 | S2 | off | tắt, bật được | vô hiệu, hiện 8:00 PM | — | Trạng thái mặc định (BR-182) |
-| S3 | enabling | khoá ở vị trí đang chuyển | khoá | — | Đang xin quyền/đặt lịch; **không** đổi chiều cao (R3) |
+| S3 | enabling | khoá **ở vị trí cũ**, xám đi | khoá | — | Đang xin quyền/đặt lịch. Switch không tự chuyển trước khi biết kết quả: BR-192 nói bước bật có thể hỏng, và một switch đã trượt sang rồi trượt về là lời hứa bị rút lại. Chiều cao card **không** đổi (R3, G5) |
 | S4 | on | bật | hoạt động, hiện giờ | — | |
 | S5 | time picker mở | khoá | — | — | Dialog nền tảng phủ lên |
 | S6 | permission denied | tắt, bật được | vô hiệu | `Notifications are turned off` + `Try again` | Settings vẫn tắt (BR-192) |
 | S7 | platform unavailable | tắt, **vô hiệu** | vô hiệu | `Reminders aren't available on this device` — không CTA | Không có đường khôi phục nên không có nút giả (BR-193) |
 | S8 | schedule error | tắt, bật được | vô hiệu | `The reminder couldn't be scheduled` + `Try again` | Không có trạng thái bật giả |
 | S9 | settings error | về giá trị đang lưu | theo giá trị đang lưu | `Your change wasn't saved` + `Try again` | |
+| S10 | cancel error | tắt, bật được | vô hiệu | `The reminder is off, but a pending alert may remain` + `Try again` | Tắt **đã ghi**, chỉ lịch cũ không huỷ được. Copy của S8 sẽ nói ngược sự thật ở đây (BR-190) |
 
 Không có state `empty`: màn này luôn có nội dung, kể cả khi thư viện rỗng.
 
@@ -114,8 +115,8 @@ Không có state `empty`: màn này luôn có nội dung, kể cả khi thư vi�
 |---|---|
 | A1 | Không tràn ở 320dp@2.0, 390dp, 412dp; kiểm cả EN và VI |
 | A2 | Không tràn ở text scale 2.0 tại 320×568 — nhãn và giá trị xuống dòng thay vì cắt |
-| A3 | Toggle mang `Semantics` với label là nhãn hàng và value là bật/tắt; TalkBack đọc được trạng thái mà không cần nhìn màu (R7) |
-| A4 | Hàng giờ mang role button và value là giờ đã bản địa hoá theo locale đang chạy |
+| A3 | `Semantics` **nằm trên chính `Switch`**, mang cả label lẫn value; `Text` nhãn bên trái bị `ExcludeSemantics`. Label ở node anh em thì reader focus vào switch chỉ nghe "Off" — có value mà không có name (WCAG 4.1.2) |
+| A4 | Hàng giờ mang role button và value là giờ đã bản địa hoá theo locale đang chạy. `Text` giá trị bị `ExcludeSemantics`: `MxListTile` gộp con thành một node, nên không loại trừ thì giờ được đọc hai lần |
 | A5 | Banner lỗi mang `Semantics` live region; CTA của nó là một nút thật, không phải text chạm được |
 | A6 | Mọi copy đến từ ARB (EN/VI); không có chuỗi người dùng thấy được nằm trong code |
 

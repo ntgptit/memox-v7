@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:workmanager/workmanager.dart';
 
 import '../../core/time/clock_provider.dart';
+import '../../core/time/local_day_model.dart';
 import '../../core/time/time_zone_provider.dart';
 import '../../features/reminder/data/datasources/reminder_scheduler_data_source.dart';
 import '../../features/reminder/domain/models/reminder_delivery_model.dart';
@@ -36,10 +37,21 @@ void reminderCallbackDispatcher() {
 
 /// One fire-time run: deliver if anything is owed, then queue tomorrow's.
 ///
-/// **It returns `true` even when it delivered nothing.** WorkManager retries a
-/// task that reports failure, and "nothing was due" is a correct outcome
-/// (BR-184) — reporting it as a failure would make the OS wake the app again to
-/// re-discover the same emptiness.
+/// **It returns `true` for every outcome, including the two skips.** A `false`
+/// return is `Result.retry()` to WorkManager, and both skips are correct
+/// outcomes (BR-184): re-waking the app to re-discover the same emptiness buys
+/// nothing, and on the `skippedDisabled` path the reconcile below has just
+/// *cancelled* this work — asking the OS to retry work we cancelled is a
+/// contradiction, whichever of the two happens to win.
+///
+/// **A posted run schedules into the next local day, not the next occurrence
+/// after `now`** (BR-185). WorkManager is inexact by construction, so a run for
+/// 20:00 can land at 01:00 the following morning; reconciling from `now` would
+/// then queue 20:00 *that same local day* and alert the user twice in one day.
+/// Anchoring on the start of the day after the one that was served makes "at
+/// most one summary per local day" hold however far the wake-up slipped — at
+/// the price of skipping a reminder on a day that already had one, which is
+/// what BR-185 asks for.
 ///
 /// **The reschedule runs in a `finally`.** If the delivery throws — a database
 /// that will not open, a plugin that will not answer — the chain must not stop
@@ -56,6 +68,9 @@ void reminderCallbackDispatcher() {
 Future<bool> runDailyReminderTask() async {
   WidgetsFlutterBinding.ensureInitialized();
   final container = ProviderContainer(overrides: repositoryBindingOverrides());
+  // Read by the `finally` below, which has to know whether this local day has
+  // already been served before it picks the next fire instant.
+  var delivered = false;
 
   try {
     final now = container.read(clockProvider)();
@@ -67,11 +82,16 @@ Future<bool> runDailyReminderTask() async {
         utcOffset: utcOffset,
       );
       _log('reminder delivery: ${outcome.name}');
+      delivered = outcome == ReminderDelivery.posted;
 
-      return outcome != ReminderDelivery.skippedDisabled;
+      return true;
     } finally {
       await container.read(reconcileReminderScheduleUseCaseProvider)(
-        now: now,
+        now: reminderRescheduleAnchor(
+          now: now,
+          utcOffset: utcOffset,
+          didDeliver: delivered,
+        ),
         utcOffset: utcOffset,
       );
     }
@@ -88,6 +108,25 @@ Future<bool> runDailyReminderTask() async {
     container.dispose();
   }
 }
+
+/// The instant the next run is measured from (BR-185).
+///
+/// **A function of its own so the rule can be tested.** Everything else in this
+/// file needs a real database and a real background isolate; this is the one
+/// decision that decides whether a user can be alerted twice in a day, and it
+/// is pure.
+///
+/// After a delivery the anchor is the start of the **next** local day, so a
+/// wake-up that slipped past midnight cannot queue another run inside the day
+/// it just served. After a skip nothing was shown, so `now` is the honest
+/// anchor and the ordinary next occurrence follows.
+DateTime reminderRescheduleAnchor({
+  required DateTime now,
+  required Duration utcOffset,
+  required bool didDeliver,
+}) => didDeliver
+    ? LocalDayModel(now: now, utcOffset: utcOffset).startOfTomorrow
+    : now;
 
 /// Diagnostics for the one code path with no screen behind it.
 ///

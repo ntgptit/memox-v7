@@ -32,15 +32,16 @@ class ReminderTimeRowWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final value = context.reminderTimeText(time);
 
-    // `Semantics(value:)` around the tile rather than a label on the `Text`:
-    // `MxListTile` merges its children into one node, so the time would
-    // otherwise be spoken as part of the title instead of as the row's value
+    // `Semantics(value:)` around the tile, and the trailing `Text` excluded:
+    // `MxListTile` merges its children into one node, so without the value the
+    // time is announced as part of the title, and without the exclusion it is
+    // announced twice — once inside the merged label and once as the value
     // (M6 A4).
     return Semantics(
       value: value,
       child: MxListTile(
         title: context.l10n.reminderTimeLabel,
-        trailing: Text(value),
+        trailing: ExcludeSemantics(child: Text(value)),
         isEnabled: isChangeable,
         onTap: onTap,
       ),

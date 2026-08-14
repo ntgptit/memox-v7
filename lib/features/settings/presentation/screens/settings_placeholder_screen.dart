@@ -17,9 +17,9 @@ import '../../../../shared/widgets/mx_list_tile.dart';
 /// file free of a second feature's presentation layer — a section embedded here
 /// would be the cross-feature import the boundary check rejects.
 ///
-/// **The row shows no value, and that is the same boundary.** The wireframe
-/// wanted `Off` / `8:00 PM` in the trailing slot; reading it would mean watching
-/// the reminder feature's own state from here. The value is one tap away on a
+/// **The row shows no value, and that is the same boundary** (M6 W1). Putting
+/// `Off` or the chosen time in the trailing slot would mean watching the
+/// reminder feature's own state from here. The value is one tap away on a
 /// screen that states it plainly, which is the cheaper half of that trade.
 ///
 /// The placeholder message stays: one link is not app settings, and removing

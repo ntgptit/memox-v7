@@ -2642,7 +2642,7 @@
   },
   "reminderStatusOff": "Off",
   "@reminderStatusOff": {
-    "description": "Trailing value of the Settings row when the reminder is off, so the state is readable without opening the screen (M6 W1). Also the accessibility value of the toggle when off, so the state is not carried by colour alone (M6 R7)."
+    "description": "Accessibility value of the toggle when the reminder is off, so the state is not carried by colour alone (M6 R7, A3). The Settings row deliberately shows no value — see M6 W1."
   },
   "reminderStatusOn": "On",
   "@reminderStatusOn": {
@@ -2726,5 +2726,21 @@
       }
     },
     "description": "Notification body when more than one deck owes something (M6 N3, BR-186). The named deck is the most urgent one by BR-187's ordering; the rest are a count, never a list. The plural is on the number of other decks - the card count is always above one here, because two decks owe at least one card each."
+  },
+  "reminderCancelErrorTitle": "The reminder is off, but a pending alert may remain",
+  "@reminderCancelErrorTitle": {
+    "description": "Banner title when the setting was turned off but the pending background run could not be cancelled (BR-190). Deliberately not the schedule-failure copy: the user just turned something OFF, and being told nothing was turned ON describes the opposite of what happened."
+  },
+  "reminderCancelErrorMessage": "Daily reminders are off. If one still arrives today, opening the app clears it.",
+  "@reminderCancelErrorMessage": {
+    "description": "Body of the cancel-failure banner. States the outcome the user cares about — the setting is off — and what the residue is, without promising more than BR-184 gives: a stale run re-reads the setting at fire time and posts nothing."
+  },
+  "reminderChannelName": "Daily reminder",
+  "@reminderChannelName": {
+    "description": "Name of the Android notification channel, shown to the user in system settings under the app. User-visible, so it is localized rather than hardcoded at the call site."
+  },
+  "reminderChannelDescription": "A once-a-day summary of the cards you owe.",
+  "@reminderChannelDescription": {
+    "description": "Description of the Android notification channel, shown under its name in system settings. Says what the channel carries and nothing about any particular deck or card (BR-186)."
   }
 }

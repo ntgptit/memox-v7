@@ -13,6 +13,7 @@ import '../controllers/reminder_disable_controller.dart';
 import '../controllers/reminder_enable_controller.dart';
 import '../controllers/reminder_overview_controller.dart';
 import '../controllers/reminder_time_controller.dart';
+import '../controllers/reminder_time_draft_controller.dart';
 import '../states/reminder_submit_state.dart';
 import '../widgets/overlays/reminder_time_picker_widget.dart';
 import '../widgets/sections/reminder_settings_section_widget.dart';
@@ -30,9 +31,9 @@ import '../widgets/sections/reminder_settings_section_widget.dart';
 /// **Three command controllers, one screen.** Each command owns its own submit
 /// state so a spinner cannot land on the control the user did not touch; this
 /// screen is where the three are read together, because one card and one banner
-/// is what the user sees.
-///
-/// Inside the Settings branch, so the bottom bar stays and Back returns to it.
+/// is what the user sees. The banner's retry is dispatched back to the command
+/// that produced it — a single hardwired retry turned "turning it off failed"
+/// into "turn it on again", which is the opposite of what the user asked for.
 class ReminderSettingsScreen extends ConsumerWidget {
   const ReminderSettingsScreen({super.key});
 
@@ -60,10 +61,9 @@ class ReminderSettingsScreen extends ConsumerWidget {
         ),
         data: (overview) => ReminderSettingsSectionWidget(
           overview: overview,
-          // A command is running if any of the three is, and the banner shows
-          // whichever one failed. They are mutually exclusive in practice — one
-          // card, one control at a time — so "first non-null" is a total answer
-          // rather than a choice between two live errors.
+          // A command is running if any of the three is. They are mutually
+          // exclusive in practice — one card, one control at a time — and each
+          // submit clears the other two, so at most one rejection is ever live.
           isBusy:
               enable.isSubmitting || disable.isSubmitting || time.isSubmitting,
           rejection: enable.rejection ?? disable.rejection ?? time.rejection,
@@ -71,31 +71,41 @@ class ReminderSettingsScreen extends ConsumerWidget {
               _setEnabled(ref, overview, isEnabled: isEnabled),
           onTimePressed: (current) =>
               unawaited(_pickTime(context, ref, current)),
-          onRetry: () => _setEnabled(ref, overview, isEnabled: true),
+          onRetry: () => _retry(ref, overview),
         ),
       ),
     );
   }
 
-  /// The toggle, and the banner's retry — which is the same command.
+  /// The toggle.
   ///
   /// Enabling carries the currently stored time, so the value the user was
-  /// looking at is the one that gets scheduled. Both banners are cleared first:
-  /// a failure from turning it off has nothing to say about turning it on.
+  /// looking at is the one that gets scheduled.
   void _setEnabled(
     WidgetRef ref,
     ReminderOverviewModel overview, {
     required bool isEnabled,
   }) {
+    // Clear the *other* commands' banners, never this one's: `reset()` on the
+    // controller about to run would also clear `isSubmitting`, which is the
+    // double-submit guard, and two concurrent enables mean two permission
+    // prompts and two interleaved compensating writes (BR-191, BR-192).
+    ref.read(reminderTimeControllerProvider.notifier).reset();
+
+    if (!isEnabled) {
+      ref.read(reminderEnableControllerProvider.notifier).reset();
+
+      return unawaited(
+        ref.read(reminderDisableControllerProvider.notifier).submit(),
+      );
+    }
+
     ref.read(reminderDisableControllerProvider.notifier).reset();
-    ref.read(reminderEnableControllerProvider.notifier).reset();
 
     unawaited(
-      isEnabled
-          ? ref
-                .read(reminderEnableControllerProvider.notifier)
-                .submit(overview.settings.time)
-          : ref.read(reminderDisableControllerProvider.notifier).submit(),
+      ref
+          .read(reminderEnableControllerProvider.notifier)
+          .submit(overview.settings.time),
     );
   }
 
@@ -104,6 +114,10 @@ class ReminderSettingsScreen extends ConsumerWidget {
   /// `async` rather than fire-and-forget because the dialog's result is the
   /// input to the command; the `context.mounted` guard is what stops the second
   /// half running against a screen the user left while the dialog was open.
+  ///
+  /// The picked value is remembered before it is submitted, so a failed
+  /// reschedule — which rolls the stored time back — still has the user's
+  /// choice to retry with.
   Future<void> _pickTime(
     BuildContext context,
     WidgetRef ref,
@@ -112,9 +126,36 @@ class ReminderSettingsScreen extends ConsumerWidget {
     final picked = await showReminderTimePicker(context, current);
     if (picked == null || !context.mounted) return;
 
-    final controller = ref.read(reminderTimeControllerProvider.notifier);
-    controller.reset();
+    ref.read(reminderTimeDraftControllerProvider.notifier).remember(picked);
+    ref.read(reminderEnableControllerProvider.notifier).reset();
+    ref.read(reminderDisableControllerProvider.notifier).reset();
 
-    await controller.submit(picked);
+    await ref.read(reminderTimeControllerProvider.notifier).submit(picked);
+  }
+
+  /// The banner's recovery: re-run **the command that failed**, not a fixed one.
+  ///
+  /// Three commands can produce a retryable rejection, and hardwiring the retry
+  /// to enable meant a failed cancel offered the user a button that turned the
+  /// reminder back on. Reading which controller holds the rejection is the only
+  /// thing that makes "Try again" mean what the copy says it means (UC-12 E3).
+  void _retry(WidgetRef ref, ReminderOverviewModel overview) {
+    if (ref.read(reminderDisableControllerProvider).rejection != null) {
+      return _setEnabled(ref, overview, isEnabled: false);
+    }
+
+    if (ref.read(reminderTimeControllerProvider).rejection != null) {
+      final draft = ref.read(reminderTimeDraftControllerProvider);
+      ref.read(reminderEnableControllerProvider.notifier).reset();
+      ref.read(reminderDisableControllerProvider.notifier).reset();
+
+      return unawaited(
+        ref
+            .read(reminderTimeControllerProvider.notifier)
+            .submit(draft ?? overview.settings.time),
+      );
+    }
+
+    _setEnabled(ref, overview, isEnabled: true);
   }
 }

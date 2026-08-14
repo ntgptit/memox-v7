@@ -31,7 +31,7 @@ enum ReminderCatalogScenario {
   on('On at 7:30 AM'),
 
   /// A platform with no reminder delivery (BR-193): the toggle is disabled and
-  /// the screen says why rather than flipping and doing nothing.
+  /// the banner says so, rather than a control that flips and does nothing.
   unavailable('Platform unavailable');
 
   const ReminderCatalogScenario(this.label);

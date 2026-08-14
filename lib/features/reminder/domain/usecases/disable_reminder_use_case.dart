@@ -37,7 +37,7 @@ class DisableReminderUseCase {
       throw ConflictFailure(
         message: 'The pending reminder could not be cancelled',
         cause: error,
-        reason: ReminderSetupRejection.scheduleFailed,
+        reason: ReminderSetupRejection.cancelFailed,
       );
     }
   }

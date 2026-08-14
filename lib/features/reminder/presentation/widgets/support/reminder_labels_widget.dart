@@ -68,6 +68,11 @@ extension ReminderLabels on BuildContext {
           message: l10n.reminderScheduleErrorMessage,
           isRetryable: true,
         ),
+        ReminderSetupRejection.cancelFailed => ReminderBanner(
+          title: l10n.reminderCancelErrorTitle,
+          message: l10n.reminderCancelErrorMessage,
+          isRetryable: true,
+        ),
         ReminderSetupRejection.settingsWriteFailed => ReminderBanner(
           title: l10n.reminderSaveErrorTitle,
           message: l10n.reminderSaveErrorMessage,

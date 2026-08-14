@@ -9396,7 +9396,12 @@ thế không đổi bố cục.
         không tự xin lại (BR-192).
   - [x] Web/iOS: adapter báo capability không hỗ trợ, không crash; domain và
         presentation không import kiểu plugin, không kiểm tra nền tảng, không
-        chạm platform IO (BR-193).
+        chạm platform IO (BR-193). Màn **render** trạng thái đó (M6 S7) — suy từ
+        capability chứ không chờ một lệnh hỏng, vì trên nền tảng này không lệnh
+        nào chạy được.
+  - [x] CTA khôi phục chạy lại **đúng lệnh đã hỏng**, không phải một lệnh cố
+        định; huỷ lịch hỏng có rejection và copy riêng (`cancelFailed`) vì
+        settings **đã** tắt.
   - [x] Host gate xanh: format, analyze, architecture, guard, docs, toàn bộ host
         suite.
   - [ ] **Smoke notification trên emulator/thiết bị — chưa chạy, hoãn có chủ
@@ -9406,6 +9411,18 @@ thế không đổi bố cục.
         thời điểm fire dưới Doze **chỉ kiểm chứng được trên máy thật**. Việc này
         thuộc integration worktree và là điều kiện phát hành, không phải điều
         kiện merge của PR này.
+- **Recursive review, vòng 1:** hai audit AUDIT_ONLY chạy song song
+  (architecture/logic và UI/UX) trên commit đầu. Kết quả: 2 P0, 6 P1, 8 P2 —
+  trùng lặp đáng kể giữa hai bên. Đã sửa hết trong vòng 2. Bốn defect đáng ghi
+  vì chúng là *lớp lỗi*, không phải typo: (1) một CTA "Try again" cố định chạy
+  `enable` bất kể lệnh nào hỏng, nên retry sau khi **tắt** hỏng sẽ bật lại thứ
+  người dùng vừa tắt; (2) `reset()` gọi trên chính controller sắp `submit()` xoá
+  luôn `isSubmitting`, tức xoá double-submit guard — hai enable song song nghĩa
+  là hai prompt quyền và hai chuỗi ghi-đền-bù đan vào nhau; (3) trạng thái
+  platform-unavailable chỉ sinh ra từ một lệnh, mà trên nền tảng đó không lệnh
+  nào chạy được, nên nó **không bao giờ render** và hai ARB key thành code chết;
+  (4) một lượt nhắc bị Doze đẩy qua nửa đêm sẽ đặt tiếp lượt của **chính ngày
+  vừa phục vụ**, phá BR-185. Tất cả đều có test hồi quy.
 - **Dependencies:** M4.2 (database), M5.0s (`app_settings`, `learned_at`),
   M99.15/M99.19a (bucket widget), AD-19 (nhánh Settings)
 - **Tests required:** domain — dựng summary, đếm, thứ tự cấp bách, ranh giới
@@ -9415,7 +9432,9 @@ thế không đổi bố cục.
   idempotency, failure có kiểu, fallback Web; widget/router — luồng permission,
   dialog chọn giờ, deep link khi chạm, semantics, 320/390/412 và text scale;
   manifest/flavor — không có quyền exact alarm. **Không** gửi notification thật
-  trong host suite.
+  trong host suite. Sau vòng review: thêm test cho retry-đúng-lệnh, banner
+  capability, semantics name/value của toggle và hàng giờ, và
+  `reminderRescheduleAnchor` (BR-185 qua mốc nửa đêm).
 - **Checklist phases:** 9, 10, 11, 12, 13, 14, 15
 
 ## Blocker

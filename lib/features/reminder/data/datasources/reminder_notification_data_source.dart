@@ -82,12 +82,20 @@ final class ReminderNotificationDataSource {
     }
   }
 
-  /// Asks for the Android 13+ notification permission (BR-192).
+  /// Asks for the Android 13+ notification permission, then checks whether the
+  /// app may actually post (BR-192, BR-193).
   ///
-  /// `null` from the plugin means the platform had no answer — an older Android
-  /// that needs no runtime permission returns it, and so does a resolution
-  /// failure. Treated as granted, because on those versions posting is allowed;
-  /// a refusal is only ever an explicit `false`.
+  /// **Two questions, because a granted permission is not the same as an
+  /// enabled channel.** `requestNotificationsPermission` has nothing to refuse
+  /// on Android 12 and below, and on 13+ it keeps answering `true` for a user
+  /// who granted it once and later switched notifications off in system
+  /// settings. Either way the app would store `enabled = true`, schedule work,
+  /// and post into a channel nobody can see — a toggle that reads On and
+  /// delivers nothing, which is exactly the phantom state BR-193 forbids.
+  ///
+  /// `null` from either call means the platform had no answer, which on those
+  /// versions means posting is allowed; a refusal is only ever an explicit
+  /// `false`.
   Future<ReminderPermission> requestPermission() async {
     final android = _plugin
         .resolvePlatformSpecificImplementation<
@@ -96,34 +104,46 @@ final class ReminderNotificationDataSource {
     if (android == null) return ReminderPermission.notRequested;
 
     final granted = await android.requestNotificationsPermission();
+    if (granted == false) return ReminderPermission.denied;
 
-    return granted == false
+    final enabled = await android.areNotificationsEnabled();
+
+    return enabled == false
         ? ReminderPermission.denied
         : ReminderPermission.granted;
   }
 
   /// Posts the summary (BR-185, BR-186).
   ///
-  /// Takes the two finished strings: the copy is built where the locale lives,
-  /// and this method has no access to a card, a tag or a history row to leak.
-  Future<void> show({required String title, required String body}) =>
-      _plugin.show(
-        id: kReminderNotificationId,
-        title: title,
-        body: body,
-        payload: kReminderTapPayload,
-        notificationDetails: const NotificationDetails(
-          android: AndroidNotificationDetails(
-            kReminderChannelId,
-            'Daily reminder',
-            channelDescription: 'A once-a-day summary of the cards you owe.',
-            // Importance and priority are left at the plugin defaults on
-            // purpose: a study reminder is not urgent, and stating the default
-            // trips `avoid_redundant_argument_values`, a lint this project
-            // promoted to an error.
-          ),
-        ),
-      );
+  /// Takes finished strings: the copy is built where the locale lives, and this
+  /// method has no access to a card, a tag or a history row to leak.
+  ///
+  /// **The channel name and description are localized too**, and that is not
+  /// decoration: Android shows them in system settings under the app, so a
+  /// hardcoded English pair is a user-visible string outside the ARB files for
+  /// every Vietnamese user who goes looking for the switch.
+  Future<void> show({
+    required String title,
+    required String body,
+    required String channelName,
+    required String channelDescription,
+  }) => _plugin.show(
+    id: kReminderNotificationId,
+    title: title,
+    body: body,
+    payload: kReminderTapPayload,
+    notificationDetails: NotificationDetails(
+      android: AndroidNotificationDetails(
+        kReminderChannelId,
+        channelName,
+        channelDescription: channelDescription,
+        // Importance and priority are left at the plugin defaults on purpose:
+        // a study reminder is not urgent, and stating the default trips
+        // `avoid_redundant_argument_values`, a lint this project promoted to
+        // an error.
+      ),
+    ),
+  );
 
   /// Removes the reminder from the shade, if it is there.
   Future<void> cancel() => _plugin.cancel(id: kReminderNotificationId);

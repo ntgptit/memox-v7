@@ -53,7 +53,17 @@ class ReminderSettingsSectionWidget extends StatelessWidget {
     // nothing is a control with no effect (M6 R3, S2).
     final canToggle = overview.isChangeable && !isBusy;
     final canPickTime = canToggle && settings.isEnabled;
-    final banner = rejection;
+    // **An unsupported platform states itself, without waiting to be poked**
+    // (M6 S7, BR-193). The rejection only ever arrives from a command, and on
+    // this platform no command can run — the toggle is disabled — so deriving
+    // the banner from the capability is the only way the state is reachable at
+    // all. A live rejection still wins: it is the more recent thing to have
+    // happened.
+    final banner =
+        rejection ??
+        (overview.isChangeable
+            ? null
+            : ReminderSetupRejection.platformUnavailable);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
