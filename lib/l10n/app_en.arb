@@ -24,13 +24,129 @@
   "@progressTitle": {
     "description": "App bar title of the Progress branch. Kept separate from navigationProgressLabel for the same reason as decksTitle: a tab label competes for width, a title does not."
   },
-  "progressPlaceholderTitle": "Progress is being developed",
-  "@progressPlaceholderTitle": {
-    "description": "Heading of the Progress placeholder (AD-19). States plainly that the feature is not in this build rather than showing controls that do nothing."
+  "progressLoadingLabel": "Loading your progress",
+  "@progressLoadingLabel": {
+    "description": "Screen-reader label announced while the Progress screen is loading. A bare spinner announces nothing at all."
   },
-  "progressPlaceholderMessage": "Your current study activity is still saved for use when the feature is ready.",
-  "@progressPlaceholderMessage": {
-    "description": "Body of the Progress placeholder. Carries the one fact a learner needs while waiting: study history is already recorded (review_history is append-only), so nothing is lost before the feature ships."
+  "progressStreakSectionLabel": "Current streak",
+  "@progressStreakSectionLabel": {
+    "description": "Heading of the hero section (W2). Deliberately 'current', not 'longest': longest streak has no business rule behind it and is out of scope for v1 (BR-191)."
+  },
+  "progressStreakDaysLabel": "{count, plural, =0{0 days} =1{1 day} other{{count} days}}",
+  "@progressStreakDaysLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "The hero headline: how many consecutive local days have activity (BR-187). The unit is always spelled out -- a bare numeral at display size reads as a count of something the user has to guess at."
+  },
+  "progressStreakTodayLine": "{count, plural, =0{No cards today} =1{1 card today} other{{count} cards today}}",
+  "@progressStreakTodayLine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "The line under the hero headline when the streak includes today. 'Cards' is the unit on purpose: the count is distinct cards touched today, not answers given (BR-182)."
+  },
+  "progressStreakHeldLine": "No cards today — your streak is held from yesterday",
+  "@progressStreakHeldLine": {
+    "description": "The hero's supporting line when today has no activity but yesterday does (BR-187, A1). Without it a headline of '7 days' beside a Today section of zero reads as a contradiction."
+  },
+  "progressStreakZeroLine": "Study today to start a streak",
+  "@progressStreakZeroLine": {
+    "description": "The hero's supporting line when the streak is zero (P6). An invitation, never a reproach: the person reading it has just come back."
+  },
+  "progressStreakSemantics": "{streak, plural, =0{No current streak} =1{Current streak, 1 day} other{Current streak, {streak} days}}. {today, plural, =0{No cards today} =1{1 card today} other{{today} cards today}}",
+  "@progressStreakSemantics": {
+    "placeholders": {
+      "streak": {
+        "type": "int"
+      },
+      "today": {
+        "type": "int"
+      }
+    },
+    "description": "What a screen reader announces for the hero as one clause (W6.4). Read as separate nodes, the number and its unit arrive apart and the figure loses its meaning."
+  },
+  "progressTodaySectionLabel": "Today",
+  "@progressTodaySectionLabel": {
+    "description": "Heading of the Today section (W3)."
+  },
+  "progressTodayCardsLabel": "{count, plural, =0{No cards} =1{1 card} other{{count} cards}}",
+  "@progressTodayCardsLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "The Today total. The unit is mandatory: the count is distinct cards, and a user shown a bare number would reasonably read it as turns taken (BR-182)."
+  },
+  "progressTodayLearningLabel": "Learning",
+  "@progressTodayLearningLabel": {
+    "description": "Half of the Today breakdown: cards with at least one learning answer today (BR-185). Same word the learning session uses, so the two agree."
+  },
+  "progressTodayReviewingLabel": "Reviewing",
+  "@progressTodayReviewingLabel": {
+    "description": "The other half: cards whose answers today were scheduled or relearning only (BR-185)."
+  },
+  "progressTodayPartitionNote": "Learning and Reviewing add up to today's total — a card counts once, whichever way you met it.",
+  "@progressTodayPartitionNote": {
+    "description": "One line explaining that the two halves are a partition (BR-185). Not decoration: without it a user who answered the same card in both modes expects the halves to sum to more than the total."
+  },
+  "progressWeekSectionLabel": "Last 7 days",
+  "@progressWeekSectionLabel": {
+    "description": "Heading of the activity section (W4). Seven days including today (BR-186)."
+  },
+  "progressWeekTodayLabel": "Today",
+  "@progressWeekTodayLabel": {
+    "description": "Row label of the last row of the chart. 'Today' rather than the weekday name, so the row that matters most is not something the reader has to work out from the date."
+  },
+  "progressWeekdayShortLabel": "{weekday, select, 1{Mon} 2{Tue} 3{Wed} 4{Thu} 5{Fri} 6{Sat} 7{Sun} other{}}",
+  "@progressWeekdayShortLabel": {
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      }
+    },
+    "description": "Row labels of the chart, keyed by Dart's DateTime.weekday (1 = Monday). Spelled out in ARB rather than taken from intl's DateFormat.E, which needs locale data initialised at startup for anything but English -- a bootstrap step and a test-flakiness source bought for seven words."
+  },
+  "progressWeekDaySemantics": "{day}: {count, plural, =0{no cards} =1{1 card} other{{count} cards}}",
+  "@progressWeekDaySemantics": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "What a screen reader announces for one row of the chart (W6.4). The bar and its track are decoration and are excluded from semantics, so this sentence is the whole of the row for a reader."
+  },
+  "progressEmptyTitle": "No study activity yet",
+  "@progressEmptyTitle": {
+    "description": "Heading of the lifetime-empty face (A2, P7). It replaces the whole screen rather than showing three sections of zeros, which read as a failed load."
+  },
+  "progressEmptyMessage": "Answer your first card and your streak starts today.",
+  "@progressEmptyMessage": {
+    "description": "Body of the lifetime-empty face. Says what will make the screen fill up, rather than restating that it is empty."
+  },
+  "progressEmptyAction": "Start studying",
+  "@progressEmptyAction": {
+    "description": "The call to action on the lifetime-empty face. It navigates to the Study branch for real (P7) -- a button that only says 'not yet' is a button that lies."
+  },
+  "progressErrorTitle": "Couldn't load your progress",
+  "@progressErrorTitle": {
+    "description": "Heading of the error face (E1). Names what failed, so it is not confused with a study session failing."
+  },
+  "progressErrorMessage": "Your study history is safe. Try again in a moment.",
+  "@progressErrorMessage": {
+    "description": "Body of the error face. Carries the fact the user actually worries about -- history is append-only and a failed read changes nothing -- and never the failure's own message, which can name a table (BR-52)."
+  },
+  "progressErrorRetryAction": "Try again",
+  "@progressErrorRetryAction": {
+    "description": "Retry on the error face. Re-opens the read; it never writes (BR-190)."
   },
   "settingsTitle": "Settings",
   "@settingsTitle": {

@@ -24,13 +24,129 @@
   "@progressTitle": {
     "description": "App bar title of the Progress branch."
   },
-  "progressPlaceholderTitle": "Tính năng Tiến độ đang được phát triển",
-  "@progressPlaceholderTitle": {
-    "description": "Heading of the Progress placeholder (AD-19)."
+  "progressLoadingLabel": "Đang tải tiến độ của bạn",
+  "@progressLoadingLabel": {
+    "description": "Screen-reader label announced while the Progress screen is loading."
   },
-  "progressPlaceholderMessage": "Các lượt học hiện tại vẫn được lưu để sử dụng khi tính năng hoàn tất.",
-  "@progressPlaceholderMessage": {
-    "description": "Body of the Progress placeholder: study history is already recorded, nothing is lost while waiting."
+  "progressStreakSectionLabel": "Chuỗi hiện tại",
+  "@progressStreakSectionLabel": {
+    "description": "Heading of the hero section (W2)."
+  },
+  "progressStreakDaysLabel": "{count, plural, other{{count} ngày}}",
+  "@progressStreakDaysLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "The hero headline (BR-187). Vietnamese has one plural form, so `other` covers every count."
+  },
+  "progressStreakTodayLine": "{count, plural, =0{Chưa có thẻ nào hôm nay} other{{count} thẻ hôm nay}}",
+  "@progressStreakTodayLine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "The line under the hero headline when the streak includes today (BR-182)."
+  },
+  "progressStreakHeldLine": "Chưa có thẻ nào hôm nay — chuỗi đang được giữ từ hôm qua",
+  "@progressStreakHeldLine": {
+    "description": "The hero's supporting line when today has no activity but yesterday does (BR-187, A1)."
+  },
+  "progressStreakZeroLine": "Học hôm nay để bắt đầu một chuỗi",
+  "@progressStreakZeroLine": {
+    "description": "The hero's supporting line when the streak is zero (P6)."
+  },
+  "progressStreakSemantics": "{streak, plural, =0{Chưa có chuỗi nào} other{Chuỗi hiện tại, {streak} ngày}}. {today, plural, =0{Chưa có thẻ nào hôm nay} other{{today} thẻ hôm nay}}",
+  "@progressStreakSemantics": {
+    "placeholders": {
+      "streak": {
+        "type": "int"
+      },
+      "today": {
+        "type": "int"
+      }
+    },
+    "description": "What a screen reader announces for the hero as one clause (W6.4)."
+  },
+  "progressTodaySectionLabel": "Hôm nay",
+  "@progressTodaySectionLabel": {
+    "description": "Heading of the Today section (W3)."
+  },
+  "progressTodayCardsLabel": "{count, plural, =0{Chưa có thẻ nào} other{{count} thẻ}}",
+  "@progressTodayCardsLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "The Today total; the unit is mandatory because the count is distinct cards (BR-182)."
+  },
+  "progressTodayLearningLabel": "Đang học",
+  "@progressTodayLearningLabel": {
+    "description": "Half of the Today breakdown (BR-185)."
+  },
+  "progressTodayReviewingLabel": "Đang ôn",
+  "@progressTodayReviewingLabel": {
+    "description": "The other half of the Today breakdown (BR-185)."
+  },
+  "progressTodayPartitionNote": "Đang học và Đang ôn cộng lại bằng tổng hôm nay — mỗi thẻ chỉ tính một lần, dù bạn gặp nó theo cách nào.",
+  "@progressTodayPartitionNote": {
+    "description": "One line explaining that the two halves are a partition (BR-185)."
+  },
+  "progressWeekSectionLabel": "7 ngày gần nhất",
+  "@progressWeekSectionLabel": {
+    "description": "Heading of the activity section (W4)."
+  },
+  "progressWeekTodayLabel": "Hôm nay",
+  "@progressWeekTodayLabel": {
+    "description": "Row label of the last row of the chart."
+  },
+  "progressWeekdayShortLabel": "{weekday, select, 1{T2} 2{T3} 3{T4} 4{T5} 5{T6} 6{T7} 7{CN} other{}}",
+  "@progressWeekdayShortLabel": {
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      }
+    },
+    "description": "Row labels of the chart, keyed by Dart's DateTime.weekday (1 = Monday). Vietnamese numbers its weekdays from Sunday, so Monday is T2 and Sunday is CN."
+  },
+  "progressWeekDaySemantics": "{day}: {count, plural, =0{chưa có thẻ nào} other{{count} thẻ}}",
+  "@progressWeekDaySemantics": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "What a screen reader announces for one row of the chart (W6.4)."
+  },
+  "progressEmptyTitle": "Chưa có hoạt động học nào",
+  "@progressEmptyTitle": {
+    "description": "Heading of the lifetime-empty face (A2, P7)."
+  },
+  "progressEmptyMessage": "Trả lời thẻ đầu tiên và chuỗi của bạn bắt đầu từ hôm nay.",
+  "@progressEmptyMessage": {
+    "description": "Body of the lifetime-empty face."
+  },
+  "progressEmptyAction": "Bắt đầu học",
+  "@progressEmptyAction": {
+    "description": "The call to action on the lifetime-empty face; it navigates to the Study branch for real (P7)."
+  },
+  "progressErrorTitle": "Không tải được tiến độ",
+  "@progressErrorTitle": {
+    "description": "Heading of the error face (E1)."
+  },
+  "progressErrorMessage": "Lịch sử học của bạn vẫn an toàn. Hãy thử lại sau giây lát.",
+  "@progressErrorMessage": {
+    "description": "Body of the error face; never carries the failure's own message (BR-52)."
+  },
+  "progressErrorRetryAction": "Thử lại",
+  "@progressErrorRetryAction": {
+    "description": "Retry on the error face; it re-opens the read and never writes (BR-190)."
   },
   "settingsTitle": "Cài đặt",
   "@settingsTitle": {

@@ -8,7 +8,7 @@ import '../../features/card/presentation/screens/card_import_screen.dart';
 import '../../features/card/presentation/screens/card_list_screen.dart';
 import '../../features/deck/presentation/screens/deck_list_screen.dart';
 import '../../features/deck/presentation/screens/starter_library_screen.dart';
-import '../../features/progress/presentation/screens/progress_placeholder_screen.dart';
+import '../../features/progress/presentation/screens/progress_screen.dart';
 import '../../features/settings/presentation/screens/settings_placeholder_screen.dart';
 import '../../features/study/presentation/screens/study_entry_screen.dart';
 import '../fallback/route_not_found_screen.dart';
@@ -182,18 +182,24 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
               ),
             ],
           ),
-          // The two scaffolded branches (AD-19). One route each, and the
-          // screens are presentation-only: entering, leaving or switching to
-          // them must read no repository, open no session and write nothing.
+          // Progress carries the real screen since M99.23, and the branch
+          // around it did not move: same path, same name, same index. That is
+          // what AD-19 scaffolded the branch early to buy, and the replacement
+          // cost exactly this one line. The screen still writes nothing —
+          // read-only is now a business rule (BR-190) rather than a property of
+          // being a placeholder.
           StatefulShellBranch(
             routes: <RouteBase>[
               GoRoute(
                 path: RoutePaths.progress,
                 name: RouteNames.progress,
-                builder: (context, state) => const ProgressPlaceholderScreen(),
+                builder: (context, state) => const ProgressScreen(),
               ),
             ],
           ),
+          // Settings is still a scaffolded branch (AD-19): one route, and a
+          // presentation-only screen that must read no repository, open no
+          // session and write nothing.
           StatefulShellBranch(
             routes: <RouteBase>[
               GoRoute(

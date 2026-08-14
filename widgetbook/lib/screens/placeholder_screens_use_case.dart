@@ -1,25 +1,20 @@
-import 'package:memox/features/progress/presentation/screens/progress_placeholder_screen.dart';
 import 'package:memox/features/settings/presentation/screens/settings_placeholder_screen.dart';
 import 'package:widgetbook/widgetbook.dart';
 
-/// The two scaffolded-branch placeholders (AD-19).
+/// The one scaffolded-branch placeholder left (AD-19).
 ///
-/// No `ProviderScope`, no fake repository and no scenario dropdown, because the
-/// screens are presentation-only: they read nothing, so there is no state to
-/// select. One use-case each — what the catalog is for here is the light/dark,
-/// text-scale and 320-viewport addons, which are exactly the axes a static
-/// screen can still get wrong.
+/// It was two until M99.23, when Progress got its real screen and moved to
+/// `progress_screen_use_case.dart` — which needs a `ProviderScope` and a fake
+/// repository, and so could not stay in a file whose whole premise is that
+/// there is nothing to wire.
+///
+/// No `ProviderScope`, no fake repository and no scenario dropdown, because this
+/// screen is presentation-only: it reads nothing, so there is no state to
+/// select. What the catalog is for here is the light/dark, text-scale and
+/// 320-viewport addons, which are exactly the axes a static screen can still get
+/// wrong.
 List<WidgetbookComponent> placeholderScreenComponents() =>
     <WidgetbookComponent>[
-      WidgetbookComponent(
-        name: 'ProgressPlaceholderScreen',
-        useCases: <WidgetbookUseCase>[
-          WidgetbookUseCase(
-            name: 'Playground',
-            builder: (context) => const ProgressPlaceholderScreen(),
-          ),
-        ],
-      ),
       WidgetbookComponent(
         name: 'SettingsPlaceholderScreen',
         useCases: <WidgetbookUseCase>[

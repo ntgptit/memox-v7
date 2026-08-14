@@ -7,7 +7,7 @@
 | **Scope** | Luật nghiệp vụ, validation rule, state machine, edge case của phạm vi MVP. Ngoài phạm vi: quyết định kiến trúc (`architecture.md`), hình dạng dữ liệu (`data-model.md`), luồng người dùng (`use-cases.md`) |
 | **Source of truth for** | BR-xx · validation rule · entity state machine · edge case |
 | **Depends on** | `document-conventions.md`, `product.md`, `architecture.md` |
-| **Updated by task** | M99.21 — BR-174…BR-181: export card ra file (scope, content-only, tag codec, determinism, read-only, file shape, tên file, riêng tư/platform) |
+| **Updated by task** | M99.23 — BR-182…BR-191: Progress overview v1 (đơn vị card-day, browse, cửa sổ hôm nay, partition, bảy ngày, streak, reset/xoá, live refresh, read-only, phạm vi v1) |
 | **Last updated** | 2026-08-13 |
 
 Format tuân theo `document-conventions.md` §6.2. Từ khoá MUST / SHOULD / MAY
@@ -779,6 +779,28 @@ gì để chọn giữa.
 M5.0m: trần thẻ là `card_limit` áp cho cả hai loại phiên và là trần **mỗi lần
 lấy** (BR-24); và phiên không cho chọn scope hẹp hơn deck đang đứng — người dùng
 chọn **loại phiên**, không chọn phạm vi.
+
+---
+
+## Progress overview
+
+Progress đọc `study_answers` (BR-77) và **không** ghi gì. Các rule dưới đây chỉ
+nói phần mà việc *đọc lại lịch sử* thêm vào; chúng không phát biểu lại luật ghi
+lượt (BR-76, BR-77, BR-111), luật reset (BR-41…BR-47) hay luật ngày học
+(BR-105).
+
+| ID | Status | Rule | Enforced by | Related |
+|---|---|---|---|---|
+| BR-182 | active | Đơn vị hoạt động của Progress là một cặp **distinct `(localDay, cardId)`**, gọi là một *card-day*. Nhiều answer, nhiều stage, nhiều round hay nhiều session của **cùng một card trong cùng một local day** MUST đếm đúng **một**. Progress MUST NOT đếm số hàng `study_answers`, số session hay số lượt. Một card được trả lời trong hai local day khác nhau MUST đếm hai. | repository (SQL) | UC-12, BR-77, BR-105 |
+| BR-183 | active | Stage `browse` không ghi hàng `study_answers` nào (BR-111), nên nó MUST NOT tạo card-day, MUST NOT làm một ngày trở thành active và MUST NOT giữ streak. Mở một phiên rồi chỉ lướt `browse` và thoát MUST để Progress y nguyên. | repository (SQL) | UC-12, BR-111 |
+| BR-184 | active | "Hôm nay" của Progress là nửa khoảng `[startOfToday, startOfTomorrow)` theo `LocalDayModel` (BR-105), dựng từ **một** snapshot của `clockProvider` và `utcOffsetProvider`. Mọi con số của một lần hiển thị — Today, Last 7 days, streak — MUST đến từ cùng snapshot đó; MUST NOT có hai lần đọc đồng hồ trong một emission, và SQL MUST NOT tự dẫn xuất local midnight. | use case + repository | UC-12, BR-105, AD-16 |
+| BR-185 | active | Phân rã của một ngày là một **partition loại trừ nhau**: một card-day là **Learning** khi có ít nhất một answer `kind = 'learning'` trong ngày đó; nếu không, và chỉ khi đó, nó là **Reviewing** khi có answer `scheduled` hoặc `relearning`. `learning + reviewing = total` MUST luôn đúng cho mọi ngày. Một card vừa `learning` vừa `scheduled` trong cùng ngày MUST đếm là Learning và MUST NOT đếm hai lần. | repository (SQL) | UC-12, BR-76, BR-182 |
+| BR-186 | active | "Last 7 days" gồm **hôm nay và sáu ngày trước đó**, đúng bảy phần tử, thứ tự **cũ → mới**. Ngày không có card-day nào MUST xuất hiện với giá trị 0 (zero-fill), MUST NOT bị bỏ khỏi dãy và MUST NOT làm dãy ngắn lại. Dãy MUST đúng khi cửa sổ bắc qua ranh giới tháng, ranh giới năm và ở mọi UTC offset. | repository + use case | UC-12, BR-182, BR-184 |
+| BR-187 | active | Current streak là số local day liên tiếp có hoạt động, tính lùi từ **anchor**: nếu hôm nay active thì anchor là hôm nay; nếu hôm nay chưa active nhưng hôm qua active thì anchor là hôm qua và chuỗi MUST được giữ nguyên (không reset về 0 chỉ vì hôm nay chưa học); nếu cả hai đều không active thì streak là 0. Streak MUST NOT có trần và MUST NOT bị cắt bởi cửa sổ bảy ngày của BR-186. | repository + use case | UC-12, BR-182, BR-184 |
+| BR-188 | active | Reset learning progress giữ `review_history`/`study_answers` (BR-43), nên nó MUST NOT làm thay đổi bất kỳ con số nào của Progress. Ngược lại, card đã bị xoá cứng — trực tiếp, hay theo cascade từ deck bị xoá — MUST NOT còn xuất hiện trong Progress, kể cả trong các ngày quá khứ, vì hàng `study_answers` của nó bị cascade xoá theo. v1 MUST NOT tạo tombstone, bảng bóng hay bản sao analytics để giữ lại hoạt động của card đã xoá. | repository (schema cascade) | UC-12, BR-41, BR-43 |
+| BR-189 | active | Màn Progress MUST tự cập nhật khi lịch sử đổi (một answer mới ghi vào, một card hay deck bị xoá) và tại **local midnight**, không cần thao tác của người dùng. Bộ hẹn giờ midnight MUST là one-shot đặt theo `startOfTomorrow` của emission hiện tại, MUST bị huỷ khi controller dispose hoặc rebuild, MUST NOT lặp vô hạn khi ranh giới đã ở quá khứ tại lúc emission tới, và MUST đo lại khi UTC offset đổi. | controller | UC-12, BR-184, AD-16 |
+| BR-190 | active | Progress MUST là read-only tuyệt đối: mở màn, đóng màn, Retry, đổi tab hay quay lại MUST NOT ghi hay sửa bất kỳ hàng nào — không `study_sessions`, không `card_study_states`, không `study_answers`, không `app_settings` — và MUST NOT mở, tiếp tục hay đóng session nào. | repository + UI | UC-12, BR-178 |
+| BR-191 | active | v1 của Progress MUST NOT hiển thị: accuracy hay correct rate, longest streak, mục tiêu/goal, XP hay điểm, heatmap, bộ lọc theo deck, chia sẻ, và hiệu ứng ăn mừng. Các chỉ số này cần định nghĩa nghiệp vụ riêng chưa được chốt; hiển thị một con số chưa có BR đứng sau là viết spec ở tầng sai. | UI | UC-12, AD-19 |
 
 ---
 
