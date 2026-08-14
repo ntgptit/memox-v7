@@ -51,6 +51,11 @@ final class ReminderWorkloadModel {
       other.overdueDayCount == overdueDayCount;
 
   @override
-  int get hashCode =>
-      Object.hash(deckId, deckName, overdueCount, dueTodayCount, overdueDayCount);
+  int get hashCode => Object.hash(
+    deckId,
+    deckName,
+    overdueCount,
+    dueTodayCount,
+    overdueDayCount,
+  );
 }

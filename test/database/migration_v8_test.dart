@@ -49,6 +49,21 @@ void main() {
     expect(row.data['reminder_minute_of_day'], 1200);
   });
 
+  test('v9 adds the delivery stamp, and it starts empty', () async {
+    // NULL is the truth for a database that predates the column: nothing has
+    // been delivered. A default would make the first launch after the upgrade
+    // treat a day as already served and stay silent for it (BR-185).
+    final db = await upgradedFromV7();
+
+    final row = await db
+        .customSelect(
+          'SELECT reminder_last_delivered_at FROM app_settings WHERE id = 1',
+        )
+        .getSingle();
+
+    expect(row.data['reminder_last_delivered_at'], isNull);
+  });
+
   test('the study columns are carried over untouched', () async {
     final db = await upgradedFromV7();
 

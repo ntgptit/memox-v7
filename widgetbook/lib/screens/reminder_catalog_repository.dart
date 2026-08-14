@@ -31,6 +31,9 @@ class ReminderCatalogSettings implements ReminderSettingsRepository {
   }) async {
     _settings = ReminderSettingsModel(isEnabled: isEnabled, time: time);
   }
+
+  @override
+  Future<void> markDelivered(DateTime deliveredAt) async {}
 }
 
 /// A platform that answers with one capability and does nothing else.

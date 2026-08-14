@@ -93,8 +93,7 @@ void main() {
         itemId: 'shell',
         reason: SkipReason.customPainter,
         detailContains: 'no painter',
-        rationale:
-            'A clip with no painter of its own, behind the time row.',
+        rationale: 'A clip with no painter of its own, behind the time row.',
       ),
       AuditSkipAllowance(
         itemId: 'screen',

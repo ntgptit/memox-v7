@@ -46,6 +46,11 @@ class DeliverDailyReminderUseCase {
     if (summary == null) return ReminderDelivery.skippedNothingDue;
 
     await _platform.showSummary(summary);
+    // **Recorded before the reschedule that follows this call.** BR-185's day
+    // skip is derived from this timestamp, and it has to outlive the isolate
+    // that posted the notification — the app reconciles on every launch, and
+    // without a stored trace that reconcile would put the served day back.
+    await _settings.markDelivered(now);
 
     return ReminderDelivery.posted;
   }

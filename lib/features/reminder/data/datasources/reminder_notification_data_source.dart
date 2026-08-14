@@ -45,15 +45,14 @@ final class ReminderNotificationDataSource {
   /// The icon is the launcher icon under its Android resource name — the app
   /// ships no dedicated notification asset, and naming one that does not exist
   /// makes Android drop the notification silently.
-  Future<void> initialize({
-    void Function(String? payload)? onTap,
-  }) => _plugin.initialize(
-    settings: const InitializationSettings(
-      android: AndroidInitializationSettings('@mipmap/ic_launcher'),
-    ),
-    onDidReceiveNotificationResponse: (response) =>
-        onTap?.call(response.payload),
-  );
+  Future<void> initialize({void Function(String? payload)? onTap}) =>
+      _plugin.initialize(
+        settings: const InitializationSettings(
+          android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+        ),
+        onDidReceiveNotificationResponse: (response) =>
+            onTap?.call(response.payload),
+      );
 
   /// Whether this device will answer the plugin at all (BR-193).
   ///

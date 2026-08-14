@@ -24,4 +24,13 @@ abstract interface class ReminderSettingsRepository {
     required bool isEnabled,
     required ReminderTime time,
   });
+
+  /// Records that a summary was posted at [deliveredAt] (BR-185).
+  ///
+  /// **Separate from [saveSettings] because it is a different author.** That
+  /// one writes what the user chose; this one writes what the system did, from
+  /// a background isolate, possibly while the user is changing a setting in the
+  /// foreground. One statement each, one column each, so neither can overwrite
+  /// the other's work.
+  Future<void> markDelivered(DateTime deliveredAt);
 }

@@ -165,6 +165,7 @@ void main() {
         'new_card_order',
         'reminder_enabled',
         'reminder_minute_of_day',
+        'reminder_last_delivered_at',
         'updated_at',
       ],
     };

@@ -68,14 +68,18 @@ final class AndroidReminderPlatformRepositoryImpl
     // accepts the work, so measuring it from anything later than the wall clock
     // fires the reminder early by exactly that gap — and the gap repeats every
     // night, so the reminder walks backwards through the day.
-    final fireAt = time.nextOccurrenceAfter(notBefore ?? now, utcOffset);
-    final delay = fireAt.difference(now);
+    //
+    // A `notBefore` already behind us is clamped to `now` rather than left to
+    // produce a negative delay: clamping the *delay* instead would turn a stale
+    // anchor into "fire immediately", and an unscheduled notification is itself
+    // a way to break BR-185.
+    final earliest = notBefore == null || notBefore.isBefore(now)
+        ? now
+        : notBefore;
+    final fireAt = time.nextOccurrenceAfter(earliest, utcOffset);
 
     try {
-      // Clamped: a caller that supplied a `notBefore` in the past would
-      // otherwise ask the OS for a negative delay, which is a schedule nobody
-      // can reason about. Zero means "as soon as the OS is willing".
-      await _scheduler.scheduleIn(delay.isNegative ? Duration.zero : delay);
+      await _scheduler.scheduleIn(fireAt.difference(now));
     } on Object catch (error) {
       throw ConflictFailure(
         message: 'The system refused the reminder work',

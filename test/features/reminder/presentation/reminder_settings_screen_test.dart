@@ -14,11 +14,15 @@ import 'package:memox/features/reminder/domain/models/reminder_time_model.dart';
 import 'package:memox/features/reminder/presentation/screens/reminder_settings_screen.dart';
 import 'package:memox/l10n/generated/app_localizations.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
-import 'package:memox/shared/widgets/mx_card.dart';
 
 import '../support/fake_reminder_platform.dart';
 
-/// The reminder screen's states, against fakes at the domain boundary.
+/// The reminder screen's behaviour: what each state does, and what each
+/// command and recovery actually runs.
+///
+/// Geometry and accessibility live in `reminder_settings_layout_test.dart` —
+/// split when this file crossed the 400-line guard, along the seam it already
+/// had: one file asks *what happens*, the other *what it looks like*.
 ///
 /// **No plugin is reached and no notification is posted.** The three contracts
 /// are overridden, which is also what lets the permission-denied and
@@ -280,119 +284,6 @@ void main() {
       // the English form to a Vietnamese user with nothing failing.
       expect(find.text('7:30 AM'), findsNothing);
       expect(find.textContaining('7:30'), findsOneWidget);
-    });
-  });
-
-  group('accessibility (M6 A3, A4)', () {
-    testWidgets('the toggle is spoken with its own name and value', (
-      tester,
-    ) async {
-      // Disposed at the end of the body rather than through `addTearDown`:
-      // the framework verifies no handle is live *before* tear-downs run.
-      final handle = tester.ensureSemantics();
-      await pumpScreen(tester);
-
-      // Read off the control itself, not by label: the screen title is the
-      // same words, so a label search would find two nodes and prove nothing
-      // about which one carries the switch.
-      final node = tester.getSemantics(find.byType(Switch));
-
-      // The label lives on the control, not only on the Text beside it: a
-      // reader that focuses the switch would otherwise hear "Off" with no idea
-      // what is off (WCAG 4.1.2).
-      expect(node.label, english.reminderToggleLabel);
-      // The value is what carries the state in words. The toggled *flag* is
-      // Material's own and is asserted by the framework's Switch tests; what
-      // this screen owns, and what M6 R7 is about, is that the state is also
-      // readable without seeing the colour.
-      expect(node.value, english.reminderStatusOff);
-
-      handle.dispose();
-    });
-
-    testWidgets('the time row announces the time once, as its value', (
-      tester,
-    ) async {
-      // Disposed at the end of the body rather than through `addTearDown`:
-      // the framework verifies no handle is live *before* tear-downs run.
-      final handle = tester.ensureSemantics();
-      await pumpScreen(tester);
-
-      // Read from the text rather than from the widget type: the merged node
-      // belongs to the tile's ancestor, and `byType` lands on an element whose
-      // own node is empty.
-      final node = tester.getSemantics(find.text(english.reminderTimeLabel));
-
-      // One node carries both, and the time appears exactly once. It used to be
-      // in the merged label *and* in a `Semantics(value:)` wrapper, so a reader
-      // heard "Reminder time 8:00 PM, 8:00 PM".
-      expect(node.label, contains(english.reminderTimeLabel));
-      expect(node.label, contains('8:00 PM'));
-      expect('${node.label}${node.value}'.split('8:00 PM').length - 1, 1);
-
-      handle.dispose();
-    });
-  });
-
-  group('layout', () {
-    testWidgets('card and banner share both edges (M6 G1)', (tester) async {
-      platform.permission = ReminderPermission.denied;
-      await pumpScreen(tester);
-      await tester.tap(find.byType(Switch));
-      await tester.pumpAndSettle();
-
-      final cards = tester.widgetList<MxCard>(find.byType(MxCard)).toList();
-      expect(cards, hasLength(2));
-      final settingsCard = tester.getRect(find.byType(MxCard).first);
-      final banner = tester.getRect(find.byType(MxCard).last);
-
-      expect(banner.left, settingsCard.left);
-      expect(banner.right, settingsCard.right);
-      // The banner sits below the card and does not overlap it (M6 G7).
-      expect(banner.top, greaterThan(settingsCard.bottom));
-    });
-
-    testWidgets('both rows clear the 48dp touch target (M6 G4)', (
-      tester,
-    ) async {
-      await pumpScreen(tester);
-
-      expect(tester.getRect(find.byType(Switch)).height, greaterThan(0));
-      expect(
-        tester.getRect(find.text(english.reminderTimeLabel)).height,
-        greaterThan(0),
-      );
-      final row = tester.getRect(
-        find.ancestor(
-          of: find.text(english.reminderTimeLabel),
-          matching: find.byType(InkWell),
-        ).first,
-      );
-      expect(row.height, greaterThanOrEqualTo(48));
-    });
-
-    testWidgets('no overflow at 320x568, EN and VI', (tester) async {
-      await pumpScreen(tester, surface: const Size(320, 568));
-      expect(tester.takeException(), isNull);
-
-      await pumpScreen(
-        tester,
-        surface: const Size(320, 568),
-        locale: const Locale('vi'),
-      );
-      expect(tester.takeException(), isNull);
-    });
-
-    testWidgets('no overflow at 320x568 with textScaler 2.0', (tester) async {
-      await pumpScreen(tester, surface: const Size(320, 568), textScale: 2);
-
-      expect(tester.takeException(), isNull);
-    });
-
-    testWidgets('no overflow at 412 wide', (tester) async {
-      await pumpScreen(tester, surface: const Size(412, 892));
-
-      expect(tester.takeException(), isNull);
     });
   });
 }

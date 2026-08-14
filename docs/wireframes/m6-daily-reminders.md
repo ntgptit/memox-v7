@@ -117,7 +117,7 @@ Không có state `empty`: màn này luôn có nội dung, kể cả khi thư vi�
 | A1 | Không tràn ở 320dp@2.0, 390dp, 412dp; kiểm cả EN và VI |
 | A2 | Không tràn ở text scale 2.0 tại 320×568, và **không nhãn nào bị ellipsis**. Đo bằng `didExceedMaxLines` chứ không bằng `takeException`: một nhãn bị cắt không ném exception nào |
 | A3 | `Semantics` **nằm trên chính `Switch`**, mang cả label lẫn value; `Text` nhãn bên trái bị `ExcludeSemantics`. Label ở node anh em thì reader focus vào switch chỉ nghe "Off" — có value mà không có name (WCAG 4.1.2) |
-| A4 | Hàng giờ mang role button, và giờ đã bản địa hoá nằm **trong chính nhãn gộp** của node — đọc đúng một lần. `MxListTile` gộp title + subtitle thành một node, nên thêm một `Semantics(value:)` ở ngoài sẽ khiến reader đọc giờ hai lần |
+| A4 | Giờ đã bản địa hoá nằm **trong chính nhãn gộp** của node — đọc đúng một lần. `MxListTile` gộp title + subtitle thành một node, nên thêm một `Semantics(value:)` ở ngoài sẽ khiến reader đọc giờ hai lần. Role `button` chỉ có **khi hàng hoạt động**; lúc vô hiệu node giữ `hasEnabledState` với `isEnabled=false` và rời khỏi focus order — hành vi của `ListTile(enabled: false)`, và TalkBack vẫn xướng "disabled" |
 | A5 | Banner lỗi mang `Semantics` live region; CTA của nó là một nút thật, không phải text chạm được |
 | A6 | Mọi copy đến từ ARB (EN/VI); không có chuỗi người dùng thấy được nằm trong code |
 

@@ -1,3 +1,4 @@
+import '../../../../core/time/local_day_model.dart';
 import '../repositories/reminder_platform_repository.dart';
 import '../repositories/reminder_settings_repository.dart';
 
@@ -19,17 +20,19 @@ class ReconcileReminderScheduleUseCase {
   final ReminderSettingsRepository _settings;
   final ReminderPlatformRepository _platform;
 
-  /// [notBefore] moves the *choice* of the next occurrence forward without
-  /// moving the wall clock the delay is measured from.
+  /// **The day already served is read from the row, not passed in** (BR-185).
   ///
-  /// Only the fire-time worker passes one, and only after it has posted: a run
-  /// that slipped past local midnight has already served the day it landed in,
-  /// so the next occurrence must be chosen from the day after that (BR-185).
-  /// Every other caller leaves it null and gets the ordinary next occurrence.
+  /// It used to be an argument, and only the fire-time worker supplied it — so
+  /// the skip lived exactly as long as that one background run. The next time
+  /// the app launched, its own reconcile recomputed from `now`, put the skipped
+  /// day back, and `ExistingWorkPolicy.replace` made that the schedule: two
+  /// summaries in one local day, which is the rule the anchor exists to keep.
+  ///
+  /// Deriving it here instead means all four callers — launch, enable, time
+  /// change, worker — reach the same answer without any of them having to know.
   Future<void> call({
     required DateTime now,
     required Duration utcOffset,
-    DateTime? notBefore,
   }) async {
     final settings = await _settings.readSettings();
     if (!settings.isEnabled) return _platform.cancel();
@@ -38,7 +41,24 @@ class ReconcileReminderScheduleUseCase {
       time: settings.time,
       now: now,
       utcOffset: utcOffset,
-      notBefore: notBefore,
+      notBefore: _notBefore(settings.lastDeliveredAt, utcOffset),
     );
   }
+
+  /// The earliest instant the next occurrence may be chosen from.
+  ///
+  /// A local day that has had its summary is finished: the next one belongs to
+  /// the day after it. `null` — nothing delivered yet — means the ordinary next
+  /// occurrence.
+  ///
+  /// **Measured against the delivery, not against `now`.** The two differ
+  /// exactly when it matters: a run deferred past local midnight delivered on a
+  /// day the clock has since left.
+  DateTime? _notBefore(DateTime? lastDeliveredAt, Duration utcOffset) =>
+      lastDeliveredAt == null
+      ? null
+      : LocalDayModel(
+          now: lastDeliveredAt,
+          utcOffset: utcOffset,
+        ).startOfTomorrow;
 }

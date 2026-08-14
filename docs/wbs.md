@@ -9436,6 +9436,20 @@ thế không đổi bố cục.
   mock Workmanager. P1: `ReminderTimeDraftController` là autoDispose và không ai
   `watch`, nên nó bị huỷ ngay frame sau khi ghi — retry luôn đọc `null` và
   re-submit giờ cũ, mà use case coi là no-op, nên retry báo thành công giả.
+- **Recursive review, vòng 3:** audit architecture xác nhận cả ba fix của vòng 2
+  đã thật sự vá, và tìm ra rằng **cơ chế bỏ-ngày của BR-185 chỉ sống trong đúng
+  một lượt worker**: anchor là tham số chỉ worker truyền, nên lần hoà giải lịch
+  kế tiếp lúc khởi động tính lại từ `now`, đặt lại ngày vừa bỏ, và
+  `ExistingWorkPolicy.replace` biến đó thành lịch thật — hai notification trong
+  một ngày địa phương, đúng thứ anchor sinh ra để chặn. Sửa bằng cách làm cho
+  dấu vết **bền**: schema v9 thêm `app_settings.reminder_last_delivered_at`,
+  `DeliverDailyReminderUseCase` ghi nó khi post, và
+  `ReconcileReminderScheduleUseCase` tự dẫn xuất `notBefore` từ nó — nên cả bốn
+  đường gọi (launch, enable, đổi giờ, worker) cùng một câu trả lời mà không
+  đường nào phải biết. Cùng vòng: clamp chuyển từ *delay* sang *anchor* (clamp
+  delay biến một anchor cũ thành "bắn ngay"), `watchSettings` map lỗi như
+  `readSettings`, và M6 A2 nay được đo bằng `didExceedMaxLines` thay vì chỉ
+  `takeException` — một nhãn bị cắt không ném exception nào.
 - **Dependencies:** M4.2 (database), M5.0s (`app_settings`, `learned_at`),
   M99.15/M99.19a (bucket widget), AD-19 (nhánh Settings)
 - **Tests required:** domain — dựng summary, đếm, thứ tự cấp bách, ranh giới

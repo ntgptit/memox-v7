@@ -82,20 +82,23 @@ void main() {
       expect(time.nextOccurrenceAfter(now, offset), now);
     });
 
-    test('the same wall-clock time in a different zone is a different instant', () {
-      // The whole reason BR-183 stores a local minute rather than a UTC one: a
-      // device that moves keeps 20:00 and changes which instant that is.
-      final now = DateTime.utc(2026, 7, 29, 3);
+    test(
+      'the same wall-clock time in a different zone is a different instant',
+      () {
+        // The whole reason BR-183 stores a local minute rather than a UTC one: a
+        // device that moves keeps 20:00 and changes which instant that is.
+        final now = DateTime.utc(2026, 7, 29, 3);
 
-      expect(
-        time.nextOccurrenceAfter(now, const Duration(hours: 2)),
-        DateTime.utc(2026, 7, 29, 18),
-      );
-      expect(
-        time.nextOccurrenceAfter(now, const Duration(hours: -5)),
-        DateTime.utc(2026, 7, 30, 1),
-      );
-    });
+        expect(
+          time.nextOccurrenceAfter(now, const Duration(hours: 2)),
+          DateTime.utc(2026, 7, 29, 18),
+        );
+        expect(
+          time.nextOccurrenceAfter(now, const Duration(hours: -5)),
+          DateTime.utc(2026, 7, 30, 1),
+        );
+      },
+    );
 
     test('a local midnight reminder resolves on the local calendar day', () {
       final midnight = ReminderTime.parse(0).time!;

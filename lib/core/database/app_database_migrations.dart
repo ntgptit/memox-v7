@@ -338,6 +338,25 @@ extension _AppDatabaseMigrations on AppDatabase {
   /// Raw SQL with literal names, for the reason the whole file states: the
   /// generated symbols describe the *latest* schema, so naming them here breaks
   /// the day a later version renames one.
+  /// The v8 → v9 upgrade: one nullable column (BR-185, M99.23).
+  ///
+  /// **Nullable and undefaulted on purpose.** "No summary has been delivered
+  /// yet" is true of every database that predates this column, and it is what
+  /// NULL means here. A default of `now` would make the first launch after the
+  /// upgrade treat today as already served and stay silent for a day.
+  ///
+  /// Raw SQL naming only what v8 has, for the reason the whole file states.
+  Future<void> _upgradeToV9() async {
+    await customStatement(
+      // `INTEGER`, not `DATETIME`: drift stores a DATETIME as unix seconds, so
+      // that is the type `createAll()` gives a fresh install — and a migration
+      // declaring `DATETIME` produces a column the schema verifier reports as a
+      // different type from the one the same schema builds from scratch.
+      'ALTER TABLE app_settings ADD COLUMN reminder_last_delivered_at '
+      'INTEGER NULL',
+    );
+  }
+
   Future<void> _upgradeToV8() async {
     const List<String> statements = <String>[
       'ALTER TABLE app_settings ADD COLUMN reminder_enabled INTEGER NOT NULL '

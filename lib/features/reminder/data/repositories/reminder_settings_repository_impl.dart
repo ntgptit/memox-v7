@@ -19,15 +19,22 @@ import '../mappers/reminder_settings_mapper.dart';
 /// [ReminderSetupRejection.settingsWriteFailed], so the screen can tell "your
 /// choice was not saved" apart from "the OS would not take the schedule" —
 /// two failures with two different retries.
-final class ReminderSettingsRepositoryImpl implements ReminderSettingsRepository {
+final class ReminderSettingsRepositoryImpl
+    implements ReminderSettingsRepository {
   ReminderSettingsRepositoryImpl(this._dao, {required this.clock});
 
   final ReminderDao _dao;
   final DateTime Function() clock;
 
+  /// **Errors are mapped here too, not left raw** (AD-01). A one-row table can
+  /// still throw — `watchSingle` on no rows, or a file that will not open — and
+  /// a `StateError` arriving in the UI as "some error" is the boundary leaking,
+  /// even where the screen happens to render the same copy either way.
   @override
-  Stream<ReminderSettingsModel> watchSettings() =>
-      _dao.watchSettingsRow().map(ReminderSettingsMapper.toModel);
+  Stream<ReminderSettingsModel> watchSettings() => _dao
+      .watchSettingsRow()
+      .map(ReminderSettingsMapper.toModel)
+      .handleError((Object error) => throw _asFailure(error));
 
   /// **Wrapped, like the write.** `getSingle()` throws a raw `StateError` when
   /// the one-row table somehow holds none, and a Drift exception when the file
@@ -40,15 +47,25 @@ final class ReminderSettingsRepositoryImpl implements ReminderSettingsRepository
     try {
       return ReminderSettingsMapper.toModel(await _dao.readSettingsRow());
     } on Object catch (error) {
-      final mapped = mapDatabaseError(error);
-
-      throw DatabaseFailure(
-        message: mapped.message,
-        cause: error,
-        reason: ReminderSetupRejection.settingsWriteFailed,
-      );
+      throw _asFailure(error);
     }
   }
+
+  @override
+  Future<void> markDelivered(DateTime deliveredAt) async {
+    try {
+      await _dao.writeDelivered(deliveredAt);
+    } on Object catch (error) {
+      throw _asFailure(error);
+    }
+  }
+
+  /// One mapping for every path out of this repository.
+  Failure _asFailure(Object error) => DatabaseFailure(
+    message: mapDatabaseError(error).message,
+    cause: error,
+    reason: ReminderSetupRejection.settingsWriteFailed,
+  );
 
   @override
   Future<void> saveSettings({
@@ -62,13 +79,7 @@ final class ReminderSettingsRepositoryImpl implements ReminderSettingsRepository
         updatedAt: clock(),
       );
     } on Object catch (error) {
-      final mapped = mapDatabaseError(error);
-
-      throw DatabaseFailure(
-        message: mapped.message,
-        cause: error,
-        reason: ReminderSetupRejection.settingsWriteFailed,
-      );
+      throw _asFailure(error);
     }
   }
 }

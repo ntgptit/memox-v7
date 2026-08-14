@@ -61,3 +61,16 @@ SET reminder_enabled = :enabled,
     reminder_minute_of_day = :minuteOfDay,
     updated_at = :updatedAt
 WHERE id = 1;
+
+-- Records that a summary was posted (BR-185).
+--
+-- **Its own statement, touching one column.** `saveReminderSettings` is the
+-- user's choice; this is the system's bookkeeping, and they are written by
+-- different callers at different moments — folding them together would make a
+-- background run able to overwrite a setting the user changed while it was
+-- awake.
+--
+-- `updated_at` is deliberately untouched: posting a notification is not an edit
+-- to the user's settings.
+markReminderDelivered:
+UPDATE app_settings SET reminder_last_delivered_at = :deliveredAt WHERE id = 1;

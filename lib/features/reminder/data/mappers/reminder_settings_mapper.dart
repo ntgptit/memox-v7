@@ -16,5 +16,6 @@ abstract final class ReminderSettingsMapper {
   static ReminderSettingsModel toModel(AppSetting row) => ReminderSettingsModel(
     isEnabled: row.reminderEnabled == 1,
     time: ReminderTime.fromStored(row.reminderMinuteOfDay),
+    lastDeliveredAt: row.reminderLastDeliveredAt,
   );
 }

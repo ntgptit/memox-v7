@@ -44,10 +44,11 @@ EnableReminderUseCase enableReminderUseCase(Ref ref) => EnableReminderUseCase(
 );
 
 @riverpod
-DisableReminderUseCase disableReminderUseCase(Ref ref) => DisableReminderUseCase(
-  ref.watch(reminderSettingsRepositoryProvider),
-  ref.watch(reconcileReminderScheduleUseCaseProvider),
-);
+DisableReminderUseCase disableReminderUseCase(Ref ref) =>
+    DisableReminderUseCase(
+      ref.watch(reminderSettingsRepositoryProvider),
+      ref.watch(reconcileReminderScheduleUseCaseProvider),
+    );
 
 @riverpod
 ChangeReminderTimeUseCase changeReminderTimeUseCase(Ref ref) =>

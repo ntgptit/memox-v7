@@ -16,7 +16,8 @@ import '../mappers/reminder_workload_mapper.dart';
 /// splits overdue from due-today — and how many day boundaries the oldest
 /// overdue card is behind. Building two would let the split and the age disagree
 /// across a midnight that fell between them.
-final class ReminderWorkloadRepositoryImpl implements ReminderWorkloadRepository {
+final class ReminderWorkloadRepositoryImpl
+    implements ReminderWorkloadRepository {
   ReminderWorkloadRepositoryImpl(this._dao);
 
   final ReminderDao _dao;

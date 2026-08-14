@@ -105,10 +105,7 @@ class ReminderSettingsSectionWidget extends StatelessWidget {
         ),
         if (banner != null) ...<Widget>[
           const SizedBox(height: AppSpacing.lg),
-          ReminderBannerSectionWidget(
-            rejection: banner,
-            onRetry: onRetry,
-          ),
+          ReminderBannerSectionWidget(rejection: banner, onRetry: onRetry),
         ],
         const SizedBox(height: AppSpacing.lg),
         Text(

@@ -33,6 +33,10 @@ final class ReminderDao {
     required DateTime updatedAt,
   }) => _db.saveReminderSettings(isEnabled ? 1 : 0, minuteOfDay, updatedAt);
 
+  /// Records when the last summary was posted (BR-185).
+  Future<void> writeDelivered(DateTime deliveredAt) =>
+      _db.markReminderDelivered(deliveredAt);
+
   /// The due workload per root deck, between [dayStart] and [now] (BR-188).
   Future<List<ReminderWorkloadPerRootDeckResult>> readWorkloadRows({
     required DateTime dayStart,

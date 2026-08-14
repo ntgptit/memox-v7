@@ -49,42 +49,48 @@ void main() {
       expect(platform.scheduled.single, nine);
     });
 
-    test('a refused permission leaves the setting off and nothing scheduled', () async {
-      platform.permission = ReminderPermission.denied;
+    test(
+      'a refused permission leaves the setting off and nothing scheduled',
+      () async {
+        platform.permission = ReminderPermission.denied;
 
-      await expectLater(
-        enable()(time: nine, now: now, utcOffset: offset),
-        throwsA(
-          isA<Failure>().having(
-            (failure) => failure.reason,
-            'reason',
-            ReminderSetupRejection.permissionDenied,
+        await expectLater(
+          enable()(time: nine, now: now, utcOffset: offset),
+          throwsA(
+            isA<Failure>().having(
+              (failure) => failure.reason,
+              'reason',
+              ReminderSetupRejection.permissionDenied,
+            ),
           ),
-        ),
-      );
+        );
 
-      expect(settings.current.isEnabled, isFalse);
-      expect(platform.scheduled, isEmpty);
-      expect(settings.writes, isEmpty);
-    });
+        expect(settings.current.isEnabled, isFalse);
+        expect(platform.scheduled, isEmpty);
+        expect(settings.writes, isEmpty);
+      },
+    );
 
-    test('an unsupported platform refuses before the prompt (BR-193)', () async {
-      platform.capability = ReminderCapability.unsupported;
+    test(
+      'an unsupported platform refuses before the prompt (BR-193)',
+      () async {
+        platform.capability = ReminderCapability.unsupported;
 
-      await expectLater(
-        enable()(time: nine, now: now, utcOffset: offset),
-        throwsA(
-          isA<Failure>().having(
-            (failure) => failure.reason,
-            'reason',
-            ReminderSetupRejection.platformUnavailable,
+        await expectLater(
+          enable()(time: nine, now: now, utcOffset: offset),
+          throwsA(
+            isA<Failure>().having(
+              (failure) => failure.reason,
+              'reason',
+              ReminderSetupRejection.platformUnavailable,
+            ),
           ),
-        ),
-      );
+        );
 
-      expect(platform.permissionRequests, 0);
-      expect(settings.current.isEnabled, isFalse);
-    });
+        expect(platform.permissionRequests, 0);
+        expect(settings.current.isEnabled, isFalse);
+      },
+    );
 
     test('a failed schedule is undone, so the setting never lies', () async {
       platform.shouldFailSchedule = true;
@@ -123,19 +129,25 @@ void main() {
       expect(platform.scheduled, isEmpty);
     });
 
-    test('a failed cancel is reported and the setting still goes off', () async {
-      await enable()(time: nine, now: now, utcOffset: offset);
-      platform.shouldFailCancel = true;
+    test(
+      'a failed cancel is reported and the setting still goes off',
+      () async {
+        await enable()(time: nine, now: now, utcOffset: offset);
+        platform.shouldFailCancel = true;
 
-      await expectLater(
-        DisableReminderUseCase(settings, reconcile)(now: now, utcOffset: offset),
-        throwsA(isA<Failure>()),
-      );
+        await expectLater(
+          DisableReminderUseCase(settings, reconcile)(
+            now: now,
+            utcOffset: offset,
+          ),
+          throwsA(isA<Failure>()),
+        );
 
-      // Reverting to "on" would put the toggle back under a user who just
-      // turned it off; the stale run is harmless because delivery re-checks.
-      expect(settings.current.isEnabled, isFalse);
-    });
+        // Reverting to "on" would put the toggle back under a user who just
+        // turned it off; the stale run is harmless because delivery re-checks.
+        expect(settings.current.isEnabled, isFalse);
+      },
+    );
   });
 
   group('changeTime (UC-12 A1, BR-183)', () {
@@ -183,18 +195,21 @@ void main() {
       expect(settings.current.isEnabled, isTrue);
     });
 
-    test('picking the time already stored writes and schedules nothing', () async {
-      await enable()(time: nine, now: now, utcOffset: offset);
-      final writesBefore = settings.writes.length;
+    test(
+      'picking the time already stored writes and schedules nothing',
+      () async {
+        await enable()(time: nine, now: now, utcOffset: offset);
+        final writesBefore = settings.writes.length;
 
-      await ChangeReminderTimeUseCase(settings, reconcile)(
-        time: nine,
-        now: now,
-        utcOffset: offset,
-      );
+        await ChangeReminderTimeUseCase(settings, reconcile)(
+          time: nine,
+          now: now,
+          utcOffset: offset,
+        );
 
-      expect(settings.writes.length, writesBefore);
-    });
+        expect(settings.writes.length, writesBefore);
+      },
+    );
   });
 
   group('reconcile (BR-190, BR-191)', () {
@@ -226,17 +241,29 @@ void main() {
       expect(settings.writes.length, writesBefore);
     });
 
-    test('notBefore reaches the platform, and defaults to absent', () async {
+    test('nothing delivered yet means no anchor at all', () async {
       await enable()(time: nine, now: now, utcOffset: offset);
+
       expect(platform.lastNotBefore, isNull);
+    });
 
-      final anchor = now.add(const Duration(hours: 11));
-      await reconcile(now: now, utcOffset: offset, notBefore: anchor);
+    test('a delivered day is skipped, by every caller (BR-185)', () async {
+      await enable()(time: nine, now: now, utcOffset: offset);
+      // 01:00 local on the 30th: a run for the 29th that Doze pushed past
+      // midnight, so the 30th has had its summary.
+      final deliveredAt = DateTime.utc(2026, 7, 29, 18);
+      await settings.markDelivered(deliveredAt);
 
-      // The worker pushes the *choice* of the next occurrence past the local
-      // day it has already served (BR-185); the delay itself is still measured
-      // from `now`, which is asserted where it is computed.
-      expect(platform.lastNotBefore, anchor);
+      // The launch reconcile, which knows nothing about that run.
+      await reconcile(
+        now: deliveredAt.add(const Duration(minutes: 5)),
+        utcOffset: offset,
+      );
+
+      // Midnight local on the 31st — the 30th is finished. While this was a
+      // parameter only the worker passed, this reconcile put the 30th back and
+      // the user was alerted twice in one local day.
+      expect(platform.lastNotBefore, DateTime.utc(2026, 7, 30, 17));
     });
 
     test('a changed offset reschedules against the new one', () async {
@@ -272,6 +299,9 @@ void main() {
       expect(outcome, ReminderDelivery.posted);
       expect(platform.shown.single.totalDueCount, 3);
       expect(platform.shown.single.leadDeckName, 'Kanji');
+      // Recorded, so the day it served survives the isolate that served it
+      // (BR-185).
+      expect(settings.deliveries, <DateTime>[now]);
     });
 
     test('an empty workload at fire time posts nothing (BR-184)', () async {
@@ -279,6 +309,8 @@ void main() {
 
       expect(outcome, ReminderDelivery.skippedNothingDue);
       expect(platform.shown, isEmpty);
+      // A day with nothing owed has not been served, so it must not be marked.
+      expect(settings.deliveries, isEmpty);
     });
 
     test('a reminder turned off since scheduling posts nothing', () async {

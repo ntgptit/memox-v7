@@ -264,13 +264,17 @@ void main() {
       await makeLearned(db, fixture.cardIds, dueAt: dayStart);
 
       final before = await db
-          .customSelect('SELECT card_id, due_at, learned_at FROM card_study_states')
+          .customSelect(
+            'SELECT card_id, due_at, learned_at FROM card_study_states',
+          )
           .get();
 
       await repository().readWorkload(now: now, utcOffset: offset);
 
       final after = await db
-          .customSelect('SELECT card_id, due_at, learned_at FROM card_study_states')
+          .customSelect(
+            'SELECT card_id, due_at, learned_at FROM card_study_states',
+          )
           .get();
       expect(
         after.map((row) => row.data.toString()),

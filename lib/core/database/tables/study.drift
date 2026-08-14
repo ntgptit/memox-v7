@@ -224,5 +224,20 @@ CREATE TABLE app_settings (
     reminder_minute_of_day INTEGER NOT NULL DEFAULT 1200
         CHECK (reminder_minute_of_day BETWEEN 0 AND 1439),
 
+    -- When the last summary was actually posted (BR-185). NULL until one has
+    -- been.
+    --
+    -- **The day-skip has to outlive the run that decided it.** A wake-up
+    -- deferred past local midnight serves the day it lands in, so the next run
+    -- belongs to the day after that — but the app reconciles its schedule on
+    -- every launch, and a reconcile that could not see this column recomputed
+    -- from `now` and put the skipped day back. Two alerts in one local day, and
+    -- the only trace of the decision was a local variable in an isolate that
+    -- had already exited.
+    --
+    -- UTC, like every other instant here; the local day it belongs to is
+    -- resolved by whoever reads it, against the offset in force then.
+    reminder_last_delivered_at DATETIME NULL,
+
     updated_at DATETIME NOT NULL
 );

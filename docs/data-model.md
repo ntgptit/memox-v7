@@ -7,8 +7,8 @@
 | **Scope** | Bảng, cột, index, quan hệ, query bất biến. Ngoài phạm vi: SQL runtime (`lib/core/database/`, chưa tồn tại) |
 | **Source of truth for** | Schema · cột và kiểu · index · query bất biến · thứ tự migration |
 | **Depends on** | `document-conventions.md`, `architecture.md`, `business-rules.md` |
-| **Updated by task** | M99.23 — hai cột nhắc học trên `app_settings` và migration v8; bảng thứ tự migration bổ sung v6, v7 |
-| **Last updated** | 2026-08-13 |
+| **Updated by task** | M99.23 — ba cột nhắc học trên `app_settings`, migration v8 và v9; bảng thứ tự migration bổ sung v6, v7 |
+| **Last updated** | 2026-08-14 |
 
 Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; SQL thật nằm ở
 `lib/core/database/tables/`, hiện ở **schema v4**.
@@ -468,9 +468,17 @@ Một dòng, cho local profile. Mặc định toàn app của tùy chọn học 
 | `new_card_order` | TEXT NOT NULL DEFAULT 'created' | `created` \| `random` (BR-148) |
 | `reminder_enabled` | INTEGER NOT NULL DEFAULT 0 | `0` \| `1`; mặc định tắt (BR-182). `CHECK (reminder_enabled IN (0, 1))` |
 | `reminder_minute_of_day` | INTEGER NOT NULL DEFAULT 1200 | phút trong ngày **theo giờ địa phương**, `1200` = 20:00 (BR-183). `CHECK (reminder_minute_of_day BETWEEN 0 AND 1439)` |
+| `reminder_last_delivered_at` | DATETIME NULL | lúc notification tóm tắt gần nhất được hiện; NULL nghĩa là chưa lần nào (BR-185). UTC |
 | `updated_at` | DATETIME NOT NULL | UTC |
 
-**Hai cột nhắc học là cột thật, không phải JSON trong `study_config`.** Chúng
+**`reminder_last_delivered_at` là bookkeeping của hệ thống, không phải lựa chọn
+của người dùng, và nó nằm cùng bảng vì lần hoà giải lịch cần đọc nó **cùng lúc**
+với giờ và cờ bật — hỏi riêng là hai snapshot của một dòng (AD-13). Nó được ghi
+bằng một `UPDATE` riêng chạm đúng một cột, vì người ghi nó là background isolate
+còn người ghi hai cột kia là người dùng đang mở app; gộp lại thì một lượt chạy
+nền có thể ghi đè lựa chọn vừa đổi.
+
+**Ba cột nhắc học là cột thật, không phải JSON trong `study_config`.** Chúng
 không phải tuỳ chọn học của một deck — không có ghi đè theo root, và không deck
 nào mang giá trị riêng — nên chúng thuộc đúng bảng một-dòng này. Đọc chúng ra
 kiểu đúng lúc build là điều một ô JSON không cho.
@@ -816,6 +824,7 @@ và cờ — xem `docs/wireframes/m4-11-card-management.md`.
 | 6 | Chuẩn hoá dữ liệu, không đổi schema: sub-deck rỗng về `content_type = 'unset'` (BR-163, M99.15) |
 | 7 | Chuẩn hoá dữ liệu, không đổi schema: backfill `decks.first_answered_at` từ `MIN(learned_at)` của cây (BR-13) |
 | 8 | Cột `app_settings.reminder_enabled`, `reminder_minute_of_day` — hai `ALTER TABLE … ADD COLUMN`, không đụng dòng nào (BR-182, BR-183, M99.23) |
+| 9 | Cột `app_settings.reminder_last_delivered_at` — nullable, không default. Ngày đã được nhắc phải sống lâu hơn lượt worker quyết định nó, nếu không lần hoà giải lúc khởi động kế tiếp sẽ đặt lại ngày vừa bỏ (BR-185, M99.23) |
 | _sau_ | Bảng `card_media` |
 | _sau_ | Cột sync (`is_pending_sync`, `version`) khi có backend (AD-03) |
 | _sau_ | `deck_templates` thành bảng runtime nếu tải template từ server |

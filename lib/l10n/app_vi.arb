@@ -2636,9 +2636,9 @@
   "@reminderTitle": {
       "description": "Tiêu đề màn nhắc học và nhãn hàng mở nó từ Settings. Cùng một chữ ở hai chỗ là cố ý: một hàng và màn nó mở ra phải đọc như một nơi (UC-12, M6 R1). Ngắn hơn nhãn toggle vì tiêu đề app bar không xuống dòng: bản dài hơn bị ellipsis ngay ở 390dp (M6 A1)."
   },
-  "reminderToggleLabel": "Nhắc học hằng ngày",
+  "reminderToggleLabel": "Nhắc hằng ngày",
   "@reminderToggleLabel": {
-      "description": "Nhãn hàng bật/tắt. Lặp lại tiêu đề màn vì hàng này là control chính của màn; một danh từ thứ hai cho cùng một thứ đọc thành một cài đặt thứ hai (M6 W3)."
+      "description": "Nhãn hàng bật/tắt. Lặp lại **nguyên văn** tiêu đề màn vì hàng này là control chính của màn; một danh từ thứ hai cho cùng một thứ đọc thành một cài đặt thứ hai (M6 W3). Rút ngắn cùng lúc với reminderTitle: hai chuỗi khác nhau cách nhau 12dp trên cùng một màn là đúng thứ mô tả này cấm."
   },
   "reminderStatusOff": "Tắt",
   "@reminderStatusOff": {

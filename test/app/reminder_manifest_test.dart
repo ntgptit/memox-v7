@@ -71,7 +71,9 @@ void main() {
 
         final xml = entity.readAsStringSync();
         for (final permission in forbidden) {
-          if (xml.contains(permission)) offenders.add('${entity.path}: $permission');
+          if (!xml.contains(permission)) continue;
+
+          offenders.add('${entity.path}: $permission');
         }
       }
     }

@@ -102,6 +102,10 @@ class FakeReminderSettings implements ReminderSettingsRepository {
   FakeReminderSettings([this._current = ReminderSettingsModel.initial]);
 
   ReminderSettingsModel _current;
+
+  /// Every delivery ever recorded, so BR-185's day skip is asserted on what was
+  /// written rather than on a flag somebody has to reset.
+  final List<DateTime> deliveries = <DateTime>[];
   final StreamController<ReminderSettingsModel> _changes =
       StreamController<ReminderSettingsModel>.broadcast();
   final List<ReminderSettingsModel> writes = <ReminderSettingsModel>[];
@@ -129,8 +133,21 @@ class FakeReminderSettings implements ReminderSettingsRepository {
         reason: ReminderSetupRejection.settingsWriteFailed,
       );
     }
-    _current = ReminderSettingsModel(isEnabled: isEnabled, time: time);
+    _current = ReminderSettingsModel(
+      isEnabled: isEnabled,
+      time: time,
+      // Preserved, the way one `UPDATE` of two columns preserves the third: a
+      // fake that dropped it would hide a repository that does not.
+      lastDeliveredAt: _current.lastDeliveredAt,
+    );
     writes.add(_current);
+    _changes.add(_current);
+  }
+
+  @override
+  Future<void> markDelivered(DateTime deliveredAt) async {
+    deliveries.add(deliveredAt);
+    _current = _current.copyWith(lastDeliveredAt: deliveredAt);
     _changes.add(_current);
   }
 }

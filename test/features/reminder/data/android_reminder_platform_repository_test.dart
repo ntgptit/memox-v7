@@ -61,16 +61,19 @@ void main() {
           ).captured.single
           as Duration;
 
-  test('without a notBefore the delay is the time to the next occurrence', () async {
-    // 10:00 local; 20:00 local the same day is ten hours away.
-    await repository.schedule(
-      time: eightPm,
-      now: DateTime.utc(2026, 7, 29, 3),
-      utcOffset: offset,
-    );
+  test(
+    'without a notBefore the delay is the time to the next occurrence',
+    () async {
+      // 10:00 local; 20:00 local the same day is ten hours away.
+      await repository.schedule(
+        time: eightPm,
+        now: DateTime.utc(2026, 7, 29, 3),
+        utcOffset: offset,
+      );
 
-    expect(capturedDelay(), const Duration(hours: 10));
-  });
+      expect(capturedDelay(), const Duration(hours: 10));
+    },
+  );
 
   test('a notBefore moves the occurrence without shortening the delay', () async {
     // The scenario the split exists for: the run fired at 20:00 local on day N,
@@ -105,15 +108,21 @@ void main() {
     expect(capturedDelay(), const Duration(hours: 43));
   });
 
-  test('a notBefore in the past clamps to zero rather than going negative', () async {
+  test('a notBefore already behind us falls back to the ordinary next '
+      'occurrence', () async {
+    // Clamping the *delay* to zero instead would turn a stale anchor into
+    // "fire immediately" — an unscheduled notification, which is itself a way
+    // to break BR-185. Clamping the anchor gives the ordinary answer.
+    // 10:00 local, so the ordinary answer is the ten hours the first test
+    // measures without an anchor at all.
     await repository.schedule(
       time: eightPm,
-      now: DateTime.utc(2026, 7, 29, 13),
+      now: DateTime.utc(2026, 7, 29, 3),
       utcOffset: offset,
       notBefore: DateTime.utc(2026, 7, 20),
     );
 
-    expect(capturedDelay(), Duration.zero);
+    expect(capturedDelay(), const Duration(hours: 10));
   });
 
   test('the work is replaced, never stacked (BR-191)', () async {

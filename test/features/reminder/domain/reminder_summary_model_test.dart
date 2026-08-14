@@ -23,7 +23,10 @@ void main() {
     test('nothing owed produces no summary at all (BR-184)', () {
       // `null` rather than a zeroed summary: there must be no object a caller
       // could show by accident.
-      expect(ReminderSummaryModel.build(const <ReminderWorkloadModel>[]), isNull);
+      expect(
+        ReminderSummaryModel.build(const <ReminderWorkloadModel>[]),
+        isNull,
+      );
       expect(
         ReminderSummaryModel.build(<ReminderWorkloadModel>[deck('a')]),
         isNull,

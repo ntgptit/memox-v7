@@ -5,10 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:workmanager/workmanager.dart';
 
 import '../../core/time/clock_provider.dart';
-import '../../core/time/local_day_model.dart';
 import '../../core/time/time_zone_provider.dart';
 import '../../features/reminder/data/datasources/reminder_scheduler_data_source.dart';
-import '../../features/reminder/domain/models/reminder_delivery_model.dart';
 import '../../features/reminder/presentation/providers/reminder_use_case_provider.dart';
 import '../di/repository_bindings.dart';
 
@@ -44,15 +42,6 @@ void reminderCallbackDispatcher() {
 /// *cancelled* this work — asking the OS to retry work we cancelled is a
 /// contradiction, whichever of the two happens to win.
 ///
-/// **A posted run schedules into the next local day, not the next occurrence
-/// after `now`** (BR-185). WorkManager is inexact by construction, so a run for
-/// 20:00 can land at 01:00 the following morning; reconciling from `now` would
-/// then queue 20:00 *that same local day* and alert the user twice in one day.
-/// Anchoring on the start of the day after the one that was served makes "at
-/// most one summary per local day" hold however far the wake-up slipped — at
-/// the price of skipping a reminder on a day that already had one, which is
-/// what BR-185 asks for.
-///
 /// **The reschedule runs in a `finally`.** If the delivery throws — a database
 /// that will not open, a plugin that will not answer — the chain must not stop
 /// there: a reminder that silently ends after one bad night is worse than a
@@ -68,9 +57,6 @@ void reminderCallbackDispatcher() {
 Future<bool> runDailyReminderTask() async {
   WidgetsFlutterBinding.ensureInitialized();
   final container = ProviderContainer(overrides: repositoryBindingOverrides());
-  // Read by the `finally` below, which has to know whether this local day has
-  // already been served before it picks the next fire instant.
-  var delivered = false;
 
   try {
     final now = container.read(clockProvider)();
@@ -82,20 +68,16 @@ Future<bool> runDailyReminderTask() async {
         utcOffset: utcOffset,
       );
       _log('reminder delivery: ${outcome.name}');
-      delivered = outcome == ReminderDelivery.posted;
 
       return true;
     } finally {
+      // **No anchor is passed here.** BR-185's day skip is derived inside the
+      // reconcile from the delivery this run just recorded, so the launch
+      // reconcile and this one reach the same answer — which they did not while
+      // the anchor was a parameter only the worker supplied.
       await container.read(reconcileReminderScheduleUseCaseProvider)(
-        // `now` stays the wall clock — the delay handed to the OS is measured
-        // from it. The anchor only moves which occurrence is chosen.
         now: now,
         utcOffset: utcOffset,
-        notBefore: reminderRescheduleAnchor(
-          now: now,
-          utcOffset: utcOffset,
-          didDeliver: delivered,
-        ),
       );
     }
   } on Object catch (error, stackTrace) {
@@ -111,29 +93,6 @@ Future<bool> runDailyReminderTask() async {
     container.dispose();
   }
 }
-
-/// The earliest instant the next occurrence may be chosen from (BR-185).
-///
-/// **Not the instant the delay is measured from** — that is always the wall
-/// clock, and conflating the two is what makes a reminder drift earlier every
-/// night. See `ReminderPlatformRepository.schedule`.
-///
-/// **A function of its own so the rule can be tested.** Everything else in this
-/// file needs a real database and a real background isolate; this is the one
-/// decision that decides whether a user can be alerted twice in a day, and it
-/// is pure.
-///
-/// After a delivery the anchor is the start of the **next** local day, so a
-/// wake-up that slipped past midnight cannot queue another run inside the day
-/// it just served. After a skip nothing was shown, so `now` is the honest
-/// anchor and the ordinary next occurrence follows.
-DateTime reminderRescheduleAnchor({
-  required DateTime now,
-  required Duration utcOffset,
-  required bool didDeliver,
-}) => didDeliver
-    ? LocalDayModel(now: now, utcOffset: utcOffset).startOfTomorrow
-    : now;
 
 /// Diagnostics for the one code path with no screen behind it.
 ///

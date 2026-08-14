@@ -32,7 +32,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.open() : super(openAppDatabaseConnection());
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -163,6 +163,17 @@ class AppDatabase extends _$AppDatabase {
       // itself — that is BR-182, expressed as a default.
       if (from < 8) {
         await _upgradeToV8();
+      }
+
+      // v8 -> v9 (M99.23, review round 3): one nullable column recording when
+      // the last reminder was posted (BR-185).
+      //
+      // Nullable with no default, which is the truth for every existing
+      // install: nothing has been delivered yet, and inventing a timestamp
+      // would make the first launch after the upgrade skip a day it never
+      // served.
+      if (from < 9) {
+        await _upgradeToV9();
       }
     },
 
