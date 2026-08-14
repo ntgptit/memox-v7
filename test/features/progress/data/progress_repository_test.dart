@@ -156,10 +156,26 @@ void main() {
 
   group('what does not create activity', () {
     test('browse writes no answer, so it changes nothing (BR-183)', () async {
-      // There is nothing to insert, and that is the assertion: `browse` is
-      // absent from `study_answers.mode`'s CHECK entirely (BR-111), so a
-      // session that only browsed leaves the table — and Progress — untouched.
+      // Asserted by **trying to insert one**, not by inserting nothing and
+      // finding nothing. The version of this test that seeded a card and then
+      // checked the counts were zero could not fail: it exercised no code path
+      // at all, and would have stayed green if `browse` were quietly added to
+      // the CHECK tomorrow.
+      //
+      // What holds the rule is `study_answers.mode`'s CHECK (BR-111), and the
+      // way to see it hold is to have SQLite refuse the row.
       await seedCard('c1');
+
+      await expectLater(
+        db.customStatement(
+          "INSERT INTO study_answers "
+          '(id, session_id, card_id, kind, mode, action, answered_at, '
+          'scheduler_generation) '
+          "VALUES ('a1', 's1', 'c1', 'learning', 'browse', 'remembered', "
+          "strftime('%s','now'), 1)",
+        ),
+        throwsA(isA<Exception>()),
+      );
 
       final overview = await read();
 

@@ -184,11 +184,11 @@ void main() {
     expect(study.ended, isEmpty);
   });
 
-  testWidgets('switching through the placeholders keeps the deck branch '
+  testWidgets('switching through Progress and Settings keeps the deck branch '
       'state', (tester) async {
     // Same measurement as the two-branch round trip in `app_router_test.dart`:
     // one subscription for the whole tour means the deck screen stayed
-    // mounted while the placeholders were on top.
+    // mounted while the other two branches were on top.
     final repository = FakeDeckRepository();
     await pumpApp(tester, repository: repository);
 

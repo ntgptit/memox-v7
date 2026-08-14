@@ -67,6 +67,18 @@
     },
     "description": "The first clause of the hero's announcement (W6.4). Read as separate nodes, the number and its unit arrive apart and the figure loses its meaning — so the headline is one clause. The second clause is the hero's visible supporting line, appended at the call site rather than duplicated here: a label built from counts alone drops the held-from-yesterday sentence that W2.5 exists to say."
   },
+  "progressStreakSemantics": "{headline}. {support}",
+  "@progressStreakSemantics": {
+    "placeholders": {
+      "headline": {
+        "type": "String"
+      },
+      "support": {
+        "type": "String"
+      }
+    },
+    "description": "The hero announcement, one clause then the sentence the screen shows. Separate from the two halves because the separator is punctuation a screen reader pauses on, and punctuation is not the same in every language."
+  },
   "progressTodaySectionLabel": "Today",
   "@progressTodaySectionLabel": {
     "description": "Heading of the Today section (W3)."
@@ -2030,719 +2042,719 @@
   },
   "cardImportTitle": "Import cards",
   "@cardImportTitle": {
-      "description": "App bar title of the import wizard (UC-10)."
+    "description": "App bar title of the import wizard (UC-10)."
   },
   "cardImportBreadcrumbLabel": "Import",
   "@cardImportBreadcrumbLabel": {
-      "description": "The wizard's own, non-tappable breadcrumb segment."
+    "description": "The wizard's own, non-tappable breadcrumb segment."
   },
   "cardImportDeckContextLabel": "{deckName} · {count} cards",
   "@cardImportDeckContextLabel": {
-      "placeholders": {
-          "deckName": {
-              "type": "String"
-          },
-          "count": {
-              "type": "int"
-          }
+    "placeholders": {
+      "deckName": {
+        "type": "String"
       },
-      "description": "Context chip under the breadcrumb: target deck and its current card count."
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Context chip under the breadcrumb: target deck and its current card count."
   },
   "cardImportStepSemantics": "Step {step} of 3",
   "@cardImportStepSemantics": {
-      "placeholders": {
-          "step": {
-              "type": "int"
-          }
-      },
-      "description": "Screen-reader label of one stepper node."
+    "placeholders": {
+      "step": {
+        "type": "int"
+      }
+    },
+    "description": "Screen-reader label of one stepper node."
   },
   "cardImportStepSourceLabel": "Source",
   "@cardImportStepSourceLabel": {
-      "description": "Stepper label of step 1."
+    "description": "Stepper label of step 1."
   },
   "cardImportStepPreviewLabel": "Preview",
   "@cardImportStepPreviewLabel": {
-      "description": "Stepper label of step 2."
+    "description": "Stepper label of step 2."
   },
   "cardImportStepImportLabel": "Import",
   "@cardImportStepImportLabel": {
-      "description": "Stepper label of step 3."
+    "description": "Stepper label of step 3."
   },
   "cardImportChooseSourceHeading": "1 · Choose a source",
   "@cardImportChooseSourceHeading": {
-      "description": "Heading over the two source options."
+    "description": "Heading over the two source options."
   },
   "cardImportUploadOptionTitle": "Upload file",
   "@cardImportUploadOptionTitle": {
-      "description": "Title of the upload source card."
+    "description": "Title of the upload source card."
   },
   "cardImportUploadOptionSubtitle": "CSV, TSV, XLSX",
   "@cardImportUploadOptionSubtitle": {
-      "description": "Formats the upload card names. Never mentions .apkg — out of scope."
+    "description": "Formats the upload card names. Never mentions .apkg — out of scope."
   },
   "cardImportPasteOptionTitle": "Paste text",
   "@cardImportPasteOptionTitle": {
-      "description": "Title of the paste source card."
+    "description": "Title of the paste source card."
   },
   "cardImportPasteOptionSubtitle": "CSV or TSV rows",
   "@cardImportPasteOptionSubtitle": {
-      "description": "What the paste card accepts."
+    "description": "What the paste card accepts."
   },
   "cardImportChoosePrompt": "Choose a file to preview",
   "@cardImportChoosePrompt": {
-      "description": "Prompt in the upload panel. No drag-and-drop copy: not a primary capability on Android."
+    "description": "Prompt in the upload panel. No drag-and-drop copy: not a primary capability on Android."
   },
   "cardImportChooseFileAction": "Choose file",
   "@cardImportChooseFileAction": {
-      "description": "Button opening the system file picker."
+    "description": "Button opening the system file picker."
   },
   "cardImportReplaceFileAction": "Replace",
   "@cardImportReplaceFileAction": {
-      "description": "Button replacing the already-picked file."
+    "description": "Button replacing the already-picked file."
   },
   "cardImportPastePlaceholder": "front,back,tags{newline}사과,apple,fruit",
   "@cardImportPastePlaceholder": {
-      "placeholders": {
-          "newline": {
-              "type": "String"
-          }
-      },
-      "description": "Placeholder of the paste box — sample shape, not user data."
+    "placeholders": {
+      "newline": {
+        "type": "String"
+      }
+    },
+    "description": "Placeholder of the paste box — sample shape, not user data."
   },
   "cardImportPasteLabel": "Rows to import",
   "@cardImportPasteLabel": {
-      "description": "Label of the paste text box."
+    "description": "Label of the paste text box."
   },
   "cardImportInfoTitle": "Each row creates one card",
   "@cardImportInfoTitle": {
-      "description": "Title of the info panel on the Source step."
+    "description": "Title of the info panel on the Source step."
   },
   "cardImportInfoBody": "Front and Back are required. You will choose the matching columns in the next step.",
   "@cardImportInfoBody": {
-      "description": "Body of the info panel. Never hardcodes a column order — mapping decides."
+    "description": "Body of the info panel. Never hardcodes a column order — mapping decides."
   },
   "cardImportInfoBusinessHint": "Front stores the Korean term. Back stores its meaning.",
   "@cardImportInfoBusinessHint": {
-      "description": "One-line content guidance under the info body."
+    "description": "One-line content guidance under the info body."
   },
   "cardImportPreviewAction": "Preview import",
   "@cardImportPreviewAction": {
-      "description": "Primary action of the Source step."
+    "description": "Primary action of the Source step."
   },
   "cardImportParsingLabel": "Reading rows…",
   "@cardImportParsingLabel": {
-      "description": "Loading label while the source parses."
+    "description": "Loading label while the source parses."
   },
   "cardImportSheetLabel": "Sheet",
   "@cardImportSheetLabel": {
-      "description": "Label of the XLSX sheet selector."
+    "description": "Label of the XLSX sheet selector."
   },
   "cardImportHeaderToggleLabel": "First row contains headers",
   "@cardImportHeaderToggleLabel": {
-      "description": "Toggle deciding whether row 1 is data (UC-10 A3)."
+    "description": "Toggle deciding whether row 1 is data (UC-10 A3)."
   },
   "cardImportColumnFallbackLabel": "Column {letter}",
   "@cardImportColumnFallbackLabel": {
-      "placeholders": {
-          "letter": {
-              "type": "String"
-          }
-      },
-      "description": "Stable name of an unmapped column when there is no header."
+    "placeholders": {
+      "letter": {
+        "type": "String"
+      }
+    },
+    "description": "Stable name of an unmapped column when there is no header."
   },
   "cardImportMappingHeading": "Match columns",
   "@cardImportMappingHeading": {
-      "description": "Heading over the mapping list."
+    "description": "Heading over the mapping list."
   },
   "cardImportIgnoreColumnLabel": "Ignore",
   "@cardImportIgnoreColumnLabel": {
-      "description": "Mapping choice that drops a source column."
+    "description": "Mapping choice that drops a source column."
   },
   "cardImportFieldFrontLabel": "Front",
   "@cardImportFieldFrontLabel": {
-      "description": "Mapping destination: the card's front."
+    "description": "Mapping destination: the card's front."
   },
   "cardImportFieldBackLabel": "Back",
   "@cardImportFieldBackLabel": {
-      "description": "Mapping destination: the card's back."
+    "description": "Mapping destination: the card's back."
   },
   "cardImportFieldExampleLabel": "Example",
   "@cardImportFieldExampleLabel": {
-      "description": "Mapping destination: the example detail."
+    "description": "Mapping destination: the example detail."
   },
   "cardImportFieldHintLabel": "Hint",
   "@cardImportFieldHintLabel": {
-      "description": "Mapping destination: the hint detail."
+    "description": "Mapping destination: the hint detail."
   },
   "cardImportFieldPronunciationLabel": "Pronunciation",
   "@cardImportFieldPronunciationLabel": {
-      "description": "Mapping destination: the pronunciation detail."
+    "description": "Mapping destination: the pronunciation detail."
   },
   "cardImportFieldTagsLabel": "Tags",
   "@cardImportFieldTagsLabel": {
-      "description": "Mapping destination: the semicolon-separated tags cell."
+    "description": "Mapping destination: the semicolon-separated tags cell."
   },
   "cardImportMappingRequiredNote": "Front and Back must each have a column.",
   "@cardImportMappingRequiredNote": {
-      "description": "Inline note when the required mapping is incomplete (BR-169)."
+    "description": "Inline note when the required mapping is incomplete (BR-169)."
   },
   "cardImportIncludeDuplicatesLabel": "Include duplicates",
   "@cardImportIncludeDuplicatesLabel": {
-      "description": "Toggle writing duplicates as new cards (BR-170)."
+    "description": "Toggle writing duplicates as new cards (BR-170)."
   },
   "cardImportRowStatusReadyLabel": "Ready",
   "@cardImportRowStatusReadyLabel": {
-      "description": "Row status chip."
+    "description": "Row status chip."
   },
   "cardImportRowStatusInvalidLabel": "Invalid",
   "@cardImportRowStatusInvalidLabel": {
-      "description": "Row status chip."
+    "description": "Row status chip."
   },
   "cardImportRowStatusDuplicateExistingLabel": "Already in deck",
   "@cardImportRowStatusDuplicateExistingLabel": {
-      "description": "Row status chip: duplicate of an existing card (BR-170)."
+    "description": "Row status chip: duplicate of an existing card (BR-170)."
   },
   "cardImportRowStatusDuplicateInFileLabel": "Duplicate in file",
   "@cardImportRowStatusDuplicateInFileLabel": {
-      "description": "Row status chip: repeats an earlier row (BR-170)."
+    "description": "Row status chip: repeats an earlier row (BR-170)."
   },
   "cardImportRowStatusBlankLabel": "Blank",
   "@cardImportRowStatusBlankLabel": {
-      "description": "Row status chip: skipped empty row."
+    "description": "Row status chip: skipped empty row."
   },
   "cardImportStatusDuplicateChipLabel": "Duplicate",
   "@cardImportStatusDuplicateChipLabel": {
-      "description": "Preview summary chip word covering both duplicate kinds; rows spell out existing vs in-file (M4.12 state 4)."
+    "description": "Preview summary chip word covering both duplicate kinds; rows spell out existing vs in-file (M4.12 state 4)."
   },
   "cardImportRowNumberLabel": "Row {number}",
   "@cardImportRowNumberLabel": {
-      "placeholders": {
-          "number": {
-              "type": "int"
-          }
-      },
-      "description": "Source row number on one preview row."
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    },
+    "description": "Source row number on one preview row."
   },
   "cardImportContinueAction": "Continue",
   "@cardImportContinueAction": {
-      "description": "Primary action of the Preview step."
+    "description": "Primary action of the Preview step."
   },
   "cardImportBackAction": "Back",
   "@cardImportBackAction": {
-      "description": "Secondary action returning to the previous step."
+    "description": "Secondary action returning to the previous step."
   },
   "cardImportConfirmHeading": "Ready to import",
   "@cardImportConfirmHeading": {
-      "description": "Heading of the confirm view on step 3."
+    "description": "Heading of the confirm view on step 3."
   },
   "cardImportConfirmImportRowLabel": "Cards to import",
   "@cardImportConfirmImportRowLabel": {
-      "description": "Confirm summary row: how many cards the one transaction will write (UC-10 step 6)."
+    "description": "Confirm summary row: how many cards the one transaction will write (UC-10 step 6)."
   },
   "cardImportConfirmDuplicatesIncludedRowLabel": "Duplicates included",
   "@cardImportConfirmDuplicatesIncludedRowLabel": {
-      "description": "Confirm summary row when Include duplicates is on: duplicates counted into the batch (BR-170)."
+    "description": "Confirm summary row when Include duplicates is on: duplicates counted into the batch (BR-170)."
   },
   "cardImportBarSourceHint": "Next you'll preview every row before anything is imported.",
   "@cardImportBarSourceHint": {
-      "description": "Reassurance line under the sticky bar on the Source step (M4.12 state 1)."
+    "description": "Reassurance line under the sticky bar on the Source step (M4.12 state 1)."
   },
-  "cardImportBarParsingHint": "Reading your source \u2014 nothing is saved yet.",
+  "cardImportBarParsingHint": "Reading your source — nothing is saved yet.",
   "@cardImportBarParsingHint": {
-      "description": "Reassurance line under the sticky bar while the decode runs (M4.12 state 2)."
+    "description": "Reassurance line under the sticky bar while the decode runs (M4.12 state 2)."
   },
   "cardImportBarImportHint": "No cards are added until you tap Import.",
   "@cardImportBarImportHint": {
-      "description": "Reassurance line under the sticky bar on Preview and Confirm (M4.12 states 3-4)."
+    "description": "Reassurance line under the sticky bar on Preview and Confirm (M4.12 states 3-4)."
   },
   "cardImportConfirmTargetLabel": "Into {deckName}",
   "@cardImportConfirmTargetLabel": {
-      "placeholders": {
-          "deckName": {
-              "type": "String"
-          }
-      },
-      "description": "Confirm line naming the target deck."
+    "placeholders": {
+      "deckName": {
+        "type": "String"
+      }
+    },
+    "description": "Confirm line naming the target deck."
   },
   "cardImportSubmitAction": "Import {count} cards",
   "@cardImportSubmitAction": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Primary action committing the batch (BR-171)."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Primary action committing the batch (BR-171)."
   },
   "cardImportSubmittingLabel": "Importing…",
   "@cardImportSubmittingLabel": {
-      "description": "Progress label while the one transaction runs."
+    "description": "Progress label while the one transaction runs."
   },
   "cardImportTryAgainAction": "Try again",
   "@cardImportTryAgainAction": {
-      "description": "Recovery action after a failed commit (UC-10 E5)."
+    "description": "Recovery action after a failed commit (UC-10 E5)."
   },
   "cardImportResultHeading": "Import finished",
   "@cardImportResultHeading": {
-      "description": "Heading of the result view."
+    "description": "Heading of the result view."
   },
   "cardImportResultImportedLabel": "Imported: {count}",
   "@cardImportResultImportedLabel": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Result line."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Result line."
   },
   "cardImportResultDuplicatesLabel": "Duplicates skipped: {count}",
   "@cardImportResultDuplicatesLabel": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Result line."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Result line."
   },
   "cardImportResultInvalidLabel": "Invalid rows skipped: {count}",
   "@cardImportResultInvalidLabel": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Result line."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Result line."
   },
   "cardImportViewCardsAction": "View cards",
   "@cardImportViewCardsAction": {
-      "description": "Result action returning to the card list."
+    "description": "Result action returning to the card list."
   },
   "cardImportAnotherAction": "Import another file",
   "@cardImportAnotherAction": {
-      "description": "Result action resetting the draft, keeping the deck."
+    "description": "Result action resetting the draft, keeping the deck."
   },
   "cardImportDiscardTitle": "Discard import?",
   "@cardImportDiscardTitle": {
-      "description": "Title of the dirty-draft confirm on Close/Back."
+    "description": "Title of the dirty-draft confirm on Close/Back."
   },
   "cardImportDiscardMessage": "Your chosen source and column choices will be lost.",
   "@cardImportDiscardMessage": {
-      "description": "Body of the dirty-draft confirm."
+    "description": "Body of the dirty-draft confirm."
   },
   "cardImportDiscardConfirmAction": "Discard",
   "@cardImportDiscardConfirmAction": {
-      "description": "Confirming button of the dirty-draft dialog."
+    "description": "Confirming button of the dirty-draft dialog."
   },
   "cardImportEntryAction": "Import cards",
   "@cardImportEntryAction": {
-      "description": "The entry point label in the card list menu, empty state and unset-deck sheet."
+    "description": "The entry point label in the card list menu, empty state and unset-deck sheet."
   },
   "cardImportErrorUnsupportedFile": "That file type is not supported. Choose a CSV, TSV or XLSX file.",
   "@cardImportErrorUnsupportedFile": {
-      "description": "Typed error: unsupported extension."
+    "description": "Typed error: unsupported extension."
   },
   "cardImportErrorInvalidEncoding": "The file is not UTF-8. Export it again as UTF-8 and retry.",
   "@cardImportErrorInvalidEncoding": {
-      "description": "Typed error: wrong encoding (BR-173)."
+    "description": "Typed error: wrong encoding (BR-173)."
   },
   "cardImportErrorEmptySource": "There are no rows to import in this source.",
   "@cardImportErrorEmptySource": {
-      "description": "Typed error: empty file or pasted text."
+    "description": "Typed error: empty file or pasted text."
   },
   "cardImportErrorEmptySheet": "This sheet has no rows. Pick another sheet.",
   "@cardImportErrorEmptySheet": {
-      "description": "Typed error: empty XLSX sheet."
+    "description": "Typed error: empty XLSX sheet."
   },
   "cardImportErrorUnreadableFile": "The file could not be read. Export a fresh copy and try again.",
   "@cardImportErrorUnreadableFile": {
-      "description": "Typed error: corrupt or protected file."
+    "description": "Typed error: corrupt or protected file."
   },
   "cardImportParseErrorTitle": "Could not read the source",
   "@cardImportParseErrorTitle": {
-      "description": "Title over a typed parse error on the Preview step."
+    "description": "Title over a typed parse error on the Preview step."
   },
   "cardImportRowIssueTagTooLong": "A tag is longer than 50 characters",
   "@cardImportRowIssueTagTooLong": {
-      "description": "Row reason: tag name over the BR-93 limit."
+    "description": "Row reason: tag name over the BR-93 limit."
   },
   "cardImportRowIssueTooManyTags": "More than 10 tags",
   "@cardImportRowIssueTooManyTags": {
-      "description": "Row reason: over the BR-94 cap."
+    "description": "Row reason: over the BR-94 cap."
   },
   "cardImportRowIssueTagCharacter": "A tag contains a character that can't be used",
   "@cardImportRowIssueTagCharacter": {
-      "description": "Row reason: a tag name carries a control character (BR-93), which the tag queries' char(31) join cannot survive."
+    "description": "Row reason: a tag name carries a control character (BR-93), which the tag queries' char(31) join cannot survive."
   },
   "cardImportMoreRowsLabel": "…and {count} more rows",
   "@cardImportMoreRowsLabel": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Footer under the truncated preview list."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Footer under the truncated preview list."
   },
   "cardImportFileMetaLabel": "{extension} · {size}",
   "@cardImportFileMetaLabel": {
-      "placeholders": {
-          "extension": {
-              "type": "String"
-          },
-          "size": {
-              "type": "String"
-          }
+    "placeholders": {
+      "extension": {
+        "type": "String"
       },
-      "description": "Extension and size line under the picked file's name (M4.12 W2)."
+      "size": {
+        "type": "String"
+      }
+    },
+    "description": "Extension and size line under the picked file's name (M4.12 W2)."
   },
   "cardImportFileSizeKilobytes": "{count} KB",
   "@cardImportFileSizeKilobytes": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "File size in kilobytes, rounded up so nothing reads as zero."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "File size in kilobytes, rounded up so nothing reads as zero."
   },
   "cardImportFileSizeMegabytes": "{count} MB",
   "@cardImportFileSizeMegabytes": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "File size in megabytes, rounded up."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "File size in megabytes, rounded up."
   },
   "cardImportStepNamedSemantics": "{step} · {label}",
   "@cardImportStepNamedSemantics": {
-      "placeholders": {
-          "step": {
-              "type": "String"
-          },
-          "label": {
-              "type": "String"
-          }
+    "placeholders": {
+      "step": {
+        "type": "String"
       },
-      "description": "Screen-reader label of one stepper node: its position sentence plus the step's name."
+      "label": {
+        "type": "String"
+      }
+    },
+    "description": "Screen-reader label of one stepper node: its position sentence plus the step's name."
   },
   "cardImportResultsTitle": "Import results",
   "@cardImportResultsTitle": {
-      "description": "App bar title once the wizard is showing an outcome (M4.12 states 6-8)."
+    "description": "App bar title once the wizard is showing an outcome (M4.12 states 6-8)."
   },
   "cardImportFileReadyStatus": "Ready to preview",
   "@cardImportFileReadyStatus": {
-      "description": "Status line on the picked-file summary before parsing (state 1)."
+    "description": "Status line on the picked-file summary before parsing (state 1)."
   },
   "cardImportFileParsingStatus": "Parsing…",
   "@cardImportFileParsingStatus": {
-      "description": "Status line on the source summary while the decode runs (state 2)."
+    "description": "Status line on the source summary while the decode runs (state 2)."
   },
   "cardImportFileRowsDetected": "{count} rows detected",
   "@cardImportFileRowsDetected": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Status line on the source summary once the document loaded."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Status line on the source summary once the document loaded."
   },
   "cardImportRemoveFileLabel": "Remove file",
   "@cardImportRemoveFileLabel": {
-      "description": "Semantic label and tooltip of the X that clears the picked file."
+    "description": "Semantic label and tooltip of the X that clears the picked file."
   },
   "cardImportPastedSourceLabel": "Pasted text",
   "@cardImportPastedSourceLabel": {
-      "description": "Stands in for a filename when the source is the paste box — the content itself is private and never echoed (BR-173)."
+    "description": "Stands in for a filename when the source is the paste box — the content itself is private and never echoed (BR-173)."
   },
   "cardImportParsingFileTitle": "Reading your file…",
   "@cardImportParsingFileTitle": {
-      "description": "Loading panel title while a picked file decodes (state 2)."
+    "description": "Loading panel title while a picked file decodes (state 2)."
   },
   "cardImportParsingPasteTitle": "Reading your rows…",
   "@cardImportParsingPasteTitle": {
-      "description": "Loading panel title while pasted rows decode."
+    "description": "Loading panel title while pasted rows decode."
   },
   "cardImportParsingReassurance": "No cards will be added until you confirm Import.",
   "@cardImportParsingReassurance": {
-      "description": "Reassurance under the parsing loader: preview never writes (BR-171)."
+    "description": "Reassurance under the parsing loader: preview never writes (BR-171)."
   },
   "cardImportParsingAction": "Parsing…",
   "@cardImportParsingAction": {
-      "description": "Disabled primary-action label while the decode runs (state 2)."
+    "description": "Disabled primary-action label while the decode runs (state 2)."
   },
   "cardImportPreviewHeading": "2 · Preview",
   "@cardImportPreviewHeading": {
-      "description": "Section heading over the preview block, numbered like the source heading."
+    "description": "Section heading over the preview block, numbered like the source heading."
   },
   "cardImportPreviewReadyOfTotal": "{ready} of {total} ready",
   "@cardImportPreviewReadyOfTotal": {
-      "placeholders": {
-          "ready": {
-              "type": "int"
-          },
-          "total": {
-              "type": "int"
-          }
+    "placeholders": {
+      "ready": {
+        "type": "int"
       },
-      "description": "Right-aligned readiness line beside the preview heading (state 3)."
+      "total": {
+        "type": "int"
+      }
+    },
+    "description": "Right-aligned readiness line beside the preview heading (state 3)."
   },
   "cardImportStatusCountChip": "{label} · {count}",
   "@cardImportStatusCountChip": {
-      "placeholders": {
-          "label": {
-              "type": "String"
-          },
-          "count": {
-              "type": "int"
-          }
+    "placeholders": {
+      "label": {
+        "type": "String"
       },
-      "description": "One status chip: a row-status label and how many rows carry it."
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "One status chip: a row-status label and how many rows carry it."
   },
   "cardImportEmptyCellLabel": "(empty)",
   "@cardImportEmptyCellLabel": {
-      "description": "Placeholder for a required cell the row did not fill (state 4)."
+    "description": "Placeholder for a required cell the row did not fill (state 4)."
   },
   "cardImportInfoTagsHint": "Tags share one cell, separated by ;",
   "@cardImportInfoTagsHint": {
-      "description": "Info-panel line stating the tags separator contract (BR-169)."
+    "description": "Info-panel line stating the tags separator contract (BR-169)."
   },
   "cardImportSubmittingTitle": "Importing {count} cards…",
   "@cardImportSubmittingTitle": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Submit panel title while the one transaction runs (state 5)."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Submit panel title while the one transaction runs (state 5)."
   },
   "cardImportSubmittingBody": "Saving all cards together. Don't close the app.",
   "@cardImportSubmittingBody": {
-      "description": "Submit panel body: the write is atomic, so it is one save, not a count-up."
+    "description": "Submit panel body: the write is atomic, so it is one save, not a count-up."
   },
   "cardImportSuccessTitle": "Import complete",
   "@cardImportSuccessTitle": {
-      "description": "Success hero title (state 6)."
+    "description": "Success hero title (state 6)."
   },
   "cardImportSuccessBody": "Added {count} cards to {deckName}. They are ready to study.",
   "@cardImportSuccessBody": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          },
-          "deckName": {
-              "type": "String"
-          }
+    "placeholders": {
+      "count": {
+        "type": "int"
       },
-      "description": "Success hero body."
+      "deckName": {
+        "type": "String"
+      }
+    },
+    "description": "Success hero body."
   },
   "cardImportSkipsTitle": "Imported with skips",
   "@cardImportSkipsTitle": {
-      "description": "Warning hero title when rows were left out (state 7)."
+    "description": "Warning hero title when rows were left out (state 7)."
   },
   "cardImportSkipsBody": "Added {count} cards. Some rows were skipped.",
   "@cardImportSkipsBody": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Warning hero body — never claims every skip was a validation issue."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Warning hero body — never claims every skip was a validation issue."
   },
   "cardImportZeroTitle": "No new cards added",
   "@cardImportZeroTitle": {
-      "description": "Outcome title when the transaction succeeded but wrote nothing — not a failure."
+    "description": "Outcome title when the transaction succeeded but wrote nothing — not a failure."
   },
   "cardImportZeroBody": "All rows matched cards already in the deck and were skipped.",
   "@cardImportZeroBody": {
-      "description": "Zero-added body: the recheck inside the transaction found only duplicates (BR-170)."
+    "description": "Zero-added body: the recheck inside the transaction found only duplicates (BR-170)."
   },
   "cardImportFailureTitle": "Import didn't finish",
   "@cardImportFailureTitle": {
-      "description": "Failure hero title (state 8)."
+    "description": "Failure hero title (state 8)."
   },
   "cardImportFailureBody": "No cards were added. Your source is unchanged and your deck is untouched.",
   "@cardImportFailureBody": {
-      "description": "Failure hero body — says source, not file, because the source may be pasted rows."
+    "description": "Failure hero body — says source, not file, because the source may be pasted rows."
   },
   "cardImportAddedRowLabel": "Added",
   "@cardImportAddedRowLabel": {
-      "description": "Result summary row: cards the transaction wrote (CardImportResult.imported)."
+    "description": "Result summary row: cards the transaction wrote (CardImportResult.imported)."
   },
   "cardImportInvalidSkippedRowLabel": "Invalid rows skipped",
   "@cardImportInvalidSkippedRowLabel": {
-      "description": "Result summary row, shown only when the preview counted invalid rows."
+    "description": "Result summary row, shown only when the preview counted invalid rows."
   },
   "cardImportDuplicatesSkippedRowLabel": "Duplicates skipped",
   "@cardImportDuplicatesSkippedRowLabel": {
-      "description": "Result summary row, from the transaction's own recheck (BR-170)."
+    "description": "Result summary row, from the transaction's own recheck (BR-170)."
   },
   "cardImportBlankIgnoredRowLabel": "Blank rows ignored",
   "@cardImportBlankIgnoredRowLabel": {
-      "description": "Neutral result summary row — blank rows are skipped by design (BR-169)."
+    "description": "Neutral result summary row — blank rows are skipped by design (BR-169)."
   },
   "cardImportFixInvalidHint": "Fix the invalid rows in your source and import again to add them.",
   "@cardImportFixInvalidHint": {
-      "description": "Helper under a with-skips result when invalid rows exist."
+    "description": "Helper under a with-skips result when invalid rows exist."
   },
   "cardImportDuplicatesHint": "Duplicates were skipped by your import settings.",
   "@cardImportDuplicatesHint": {
-      "description": "Helper when only duplicates were skipped — duplicates are a setting, not a broken file."
+    "description": "Helper when only duplicates were skipped — duplicates are a setting, not a broken file."
   },
   "cardImportBackToPreviewAction": "Back to preview",
   "@cardImportBackToPreviewAction": {
-      "description": "Secondary action on a commit failure: back to the intact draft (state 8)."
+    "description": "Secondary action on a commit failure: back to the intact draft (state 8)."
   },
   "cardImportStepStateSemantics": "{step} · {label} · {state}",
   "@cardImportStepStateSemantics": {
-      "placeholders": {
-          "step": {
-              "type": "String"
-          },
-          "label": {
-              "type": "String"
-          },
-          "state": {
-              "type": "String"
-          }
+    "placeholders": {
+      "step": {
+        "type": "String"
       },
-      "description": "Screen-reader label of one stepper node: position, name and progress state."
+      "label": {
+        "type": "String"
+      },
+      "state": {
+        "type": "String"
+      }
+    },
+    "description": "Screen-reader label of one stepper node: position, name and progress state."
   },
   "cardImportStepStateCompleted": "completed",
   "@cardImportStepStateCompleted": {
-      "description": "Stepper node state read to a screen reader."
+    "description": "Stepper node state read to a screen reader."
   },
   "cardImportStepStateCurrent": "current",
   "@cardImportStepStateCurrent": {
-      "description": "Stepper node state read to a screen reader."
+    "description": "Stepper node state read to a screen reader."
   },
   "cardImportStepStateUpcoming": "upcoming",
   "@cardImportStepStateUpcoming": {
-      "description": "Stepper node state read to a screen reader."
+    "description": "Stepper node state read to a screen reader."
   },
   "cardImportSourceStatusLine": "{meta} · {status}",
   "@cardImportSourceStatusLine": {
-      "placeholders": {
-          "meta": {
-              "type": "String"
-          },
-          "status": {
-              "type": "String"
-          }
+    "placeholders": {
+      "meta": {
+        "type": "String"
       },
-      "description": "Source summary status line: the extension-and-size pair plus the phase status (ready / parsing / rows detected)."
+      "status": {
+        "type": "String"
+      }
+    },
+    "description": "Source summary status line: the extension-and-size pair plus the phase status (ready / parsing / rows detected)."
   },
   "cardExportEntryAction": "Export cards",
   "@cardExportEntryAction": {
-      "description": "The export entry point in the card list overflow menu, and the title of the export sheet it opens (M4.13 W1, W2)."
+    "description": "The export entry point in the card list overflow menu, and the title of the export sheet it opens (M4.13 W1, W2)."
   },
   "cardExportSelectionAction": "Export selected",
   "@cardExportSelectionAction": {
-      "description": "The export entry point on the multi-select action bar; opens the sheet scoped to the selected ids (M4.13 W1, BR-174)."
+    "description": "The export entry point on the multi-select action bar; opens the sheet scoped to the selected ids (M4.13 W1, BR-174)."
   },
   "cardExportScopeAllLabel": "{count, plural, =1{All 1 card in this deck} other{All {count} cards in this deck}}",
   "@cardExportScopeAllLabel": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Read-only scope summary for the whole-deck scope. The number is the deck's direct card count, not the rows currently listed (BR-174)."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Read-only scope summary for the whole-deck scope. The number is the deck's direct card count, not the rows currently listed (BR-174)."
   },
   "cardExportScopeSelectedLabel": "{count, plural, =1{1 selected card} other{{count} selected cards}}",
   "@cardExportScopeSelectedLabel": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Read-only scope summary for the selection scope: how many distinct ids the export covers (BR-174)."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Read-only scope summary for the selection scope: how many distinct ids the export covers (BR-174)."
   },
   "cardExportFormatHeading": "Format",
   "@cardExportFormatHeading": {
-      "description": "Group label above the three format options in the export sheet."
+    "description": "Group label above the three format options in the export sheet."
   },
   "cardExportRecommendedBadge": "Recommended",
   "@cardExportRecommendedBadge": {
-      "description": "Badge on the CSV option. Readable text, never a coloured dot alone (M4.13 E3, W6)."
+    "description": "Badge on the CSV option. Readable text, never a coloured dot alone (M4.13 E3, W6)."
   },
   "cardExportCsvSubtitle": "Opens in any spreadsheet or text editor.",
   "@cardExportCsvSubtitle": {
-      "description": "One-line hint under the CSV format option saying what can open the file."
+    "description": "One-line hint under the CSV format option saying what can open the file."
   },
   "cardExportTsvSubtitle": "Tab-separated, for tools that expect tabs.",
   "@cardExportTsvSubtitle": {
-      "description": "One-line hint under the TSV format option saying what can open the file."
+    "description": "One-line hint under the TSV format option saying what can open the file."
   },
   "cardExportXlsxSubtitle": "A workbook for Excel or Google Sheets.",
   "@cardExportXlsxSubtitle": {
-      "description": "One-line hint under the XLSX format option saying what can open the file."
+    "description": "One-line hint under the XLSX format option saying what can open the file."
   },
   "cardExportIncludesLine": "Includes front, back, example, hint, pronunciation and tags.",
   "@cardExportIncludesLine": {
-      "description": "States what the file carries — the six canonical fields, in AD-20's order (BR-175). The field names in the file itself are never localized (BR-179)."
+    "description": "States what the file carries — the six canonical fields, in AD-20's order (BR-175). The field names in the file itself are never localized (BR-179)."
   },
   "cardExportExcludesLine": "Study progress and review history aren't in the file.",
   "@cardExportExcludesLine": {
-      "description": "Info line, not a warning: export is content transfer, not a backup, so re-importing starts every card new (BR-175, M4.13 E4)."
+    "description": "Info line, not a warning: export is content transfer, not a backup, so re-importing starts every card new (BR-175, M4.13 E4)."
   },
   "cardExportSubmitAction": "{count, plural, =1{Export 1 card} other{Export {count} cards}}",
   "@cardExportSubmitAction": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
-      },
-      "description": "Primary action of the export sheet. The number is the scope's card count."
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Primary action of the export sheet. The number is the scope's card count."
   },
   "cardExportSubmittingLabel": "Exporting…",
   "@cardExportSubmittingLabel": {
-      "description": "Label the primary action takes while the file is being built and handed over. Real text, not a silent spinner (M4.13 W6)."
+    "description": "Label the primary action takes while the file is being built and handed over. Real text, not a silent spinner (M4.13 W6)."
   },
   "cardExportSharedMessage": "Your cards were handed to the system to share.",
   "@cardExportSharedMessage": {
-      "description": "Confirmation after the share sheet accepted the file. It must never claim the file was saved, or name a folder — the OS does not tell the app where it went (BR-181, M4.13 E9)."
+    "description": "Confirmation after the share sheet accepted the file. It must never claim the file was saved, or name a folder — the OS does not tell the app where it went (BR-181, M4.13 E9)."
   },
   "cardExportErrorTitle": "Export didn't finish",
   "@cardExportErrorTitle": {
-      "description": "Title of the in-sheet error band for the reasons a retry can fix (M4.13 W3 states 5–6)."
+    "description": "Title of the in-sheet error band for the reasons a retry can fix (M4.13 W3 states 5–6)."
   },
   "cardExportScopeChangedTitle": "These cards have changed",
   "@cardExportScopeChangedTitle": {
-      "description": "Title of the in-sheet error band when the scope itself is no longer valid, so there is nothing to retry (M4.13 W3 state 7)."
+    "description": "Title of the in-sheet error band when the scope itself is no longer valid, so there is nothing to retry (M4.13 W3 state 7)."
   },
   "cardExportErrorEmptyScope": "There are no cards left to export in this deck.",
   "@cardExportErrorEmptyScope": {
-      "description": "Typed error: the scope holds no cards (UC-11 E5, BR-174)."
+    "description": "Typed error: the scope holds no cards (UC-11 E5, BR-174)."
   },
   "cardExportErrorStaleSelection": "Some of the cards you picked are no longer in this deck. Select again and export.",
   "@cardExportErrorStaleSelection": {
-      "description": "Typed error: a selected id was deleted or moved, so the whole request failed rather than exporting part of it (UC-11 E6, BR-174)."
+    "description": "Typed error: a selected id was deleted or moved, so the whole request failed rather than exporting part of it (UC-11 E6, BR-174)."
   },
   "cardExportErrorDeckMissing": "This deck no longer exists.",
   "@cardExportErrorDeckMissing": {
-      "description": "Typed error: the deck itself is gone (UC-11 E3). Distinct from an empty deck, which can be refilled."
+    "description": "Typed error: the deck itself is gone (UC-11 E3). Distinct from an empty deck, which can be refilled."
   },
   "cardExportErrorReadFailed": "The cards could not be read. Nothing was changed.",
   "@cardExportErrorReadFailed": {
-      "description": "Typed error: the snapshot read failed (UC-11 E3). Export is read-only, so there is nothing to undo (BR-178)."
+    "description": "Typed error: the snapshot read failed (UC-11 E3). Export is read-only, so there is nothing to undo (BR-178)."
   },
   "cardExportErrorEncodeFailed": "The file could not be built from these cards.",
   "@cardExportErrorEncodeFailed": {
-      "description": "Typed error: encoding failed (UC-11 E4). Deliberately distinct from a read failure, and no partial file is handed on."
+    "description": "Typed error: encoding failed (UC-11 E4). Deliberately distinct from a read failure, and no partial file is handed on."
   },
   "cardExportErrorShareUnavailable": "This device has no way to share a file.",
   "@cardExportErrorShareUnavailable": {
-      "description": "Typed error: the platform has no share sheet (UC-11 E1). Names no path and no file name (BR-181)."
+    "description": "Typed error: the platform has no share sheet (UC-11 E1). Names no path and no file name (BR-181)."
   },
   "cardExportErrorSharePlatformError": "Your device could not take the file. Nothing was saved.",
   "@cardExportErrorSharePlatformError": {
-      "description": "Typed error: the platform channel threw while sharing (UC-11 E2). Names no path and no file name (BR-180, BR-181)."
+    "description": "Typed error: the platform channel threw while sharing (UC-11 E2). Names no path and no file name (BR-180, BR-181)."
   },
   "cardExportRetryAction": "Try again",
   "@cardExportRetryAction": {
-      "description": "Recovery action in the export error band; re-submits the same scope and format (M4.13 E8)."
+    "description": "Recovery action in the export error band; re-submits the same scope and format (M4.13 E8)."
   },
   "cardExportCloseAction": "Close",
   "@cardExportCloseAction": {
-      "description": "The only action left when the scope is no longer valid — there is nothing to retry until the user selects again (M4.13 W3 state 7)."
+    "description": "The only action left when the scope is no longer valid — there is nothing to retry until the user selects again (M4.13 W3 state 7)."
   }
 }

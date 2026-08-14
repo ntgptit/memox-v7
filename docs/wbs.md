@@ -7,8 +7,8 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.22 (five-way PR host-test sharding follow-up) |
-| **Last updated** | 2026-08-13 |
+| **Updated by task** | M99.23 (Progress overview v1, stage 1 của batch tích hợp #301–#310) |
+| **Last updated** | 2026-08-14 |
 
 Single source of truth for project progress. Update it in the same commit as the
 work it describes. A task is `done` only when it meets the Definition of Done in
@@ -9361,7 +9361,7 @@ thế không đổi bố cục.
   `ProgressScreen` bảy scenario, companion visual audit ở đường dẫn gương.
   Phase 5 (tests) xong: 84 test Progress — domain thuần, SQLite thật,
   controller trên fake clock, widget/geometry/semantics — cộng ba file test cũ
-  cập nhật theo tên screen mới. Toàn bộ suite **2648 pass**; `dart format`,
+  cập nhật theo tên screen mới. Toàn bộ suite của feature worktree **2648 pass**; `dart format`,
   `flutter analyze`, `check_architecture.py`, code-verification-guard,
   `check_docs.py` và check generated đều xanh.
   **Hai lỗi bị bắt trong lúc dựng, cả hai chỉ lộ ra khi chạy thật:** drift
@@ -9373,8 +9373,9 @@ thế không đổi bố cục.
   đổi, nên bản test đầu tiên của cascade **xanh trong khi màn hình vẫn giữ
   lịch sử của card đã xoá** — stream cache trả lại giá trị cũ; test nay xoá
   qua API của drift đúng như production.
-  Phase 6 (recursive architecture/logic review) xong — **APPROVE, không P0/P1/P2
-  nào về logic hay kiến trúc**; finding duy nhất là chính dòng Status này tụt
+  Phase 6 (recursive architecture/logic review **trong feature worktree**, tức
+  trước khi hợp với chín PR còn lại) — **APPROVE, không P0/P1/P2 nào về logic
+  hay kiến trúc** ở phạm vi đó; finding duy nhất là chính dòng Status này tụt
   lại sau code, đã đóng ở đây.
   Phase 7 (recursive UI/UX review) xong — **REQUEST CHANGES, không defect nào
   đang render sai; toàn bộ finding là assertion còn thiếu**, đúng loại lỗi mà
@@ -9499,9 +9500,20 @@ thế không đổi bố cục.
   - [x] `dart format`, `flutter analyze`, guard kiến trúc, guard code, guard
         docs và host test xanh.
   - [ ] Emulator IT: deferred to integration worktree — not run.
-- **Deferred debt:** bốn mục dưới đây được mở ở stage 1 của batch tích hợp
+- **Deferred debt:** sáu mục dưới đây được mở ở stage 1 của batch tích hợp
   #301–#310 bởi hai recursive audit; mỗi mục có lý do vì sao **không** đóng
   được ở đây và ai đóng nó.
+  0. **Không có trigger tức thời khi thiết bị đổi múi giờ trong lúc màn hình
+     đang mở** — owner: M99.23. BR-189 bản đầu viết "MUST đo lại khi UTC offset
+     đổi"; Flutter không publish callback nào cho việc đó (`WidgetsBindingObserver`
+     có `didChangeLocales` chứ không có `didChangeTimeZone`), nên một MUST như
+     vậy không có gì cưỡng chế được và cột `Enforced by` của nó nói dối. Đã thu
+     hẹp BR-189 xuống đúng cái cưỡng chế được — resolve lại offset ở mỗi lần đọc
+     lại — và giữ lại nợ: một trigger thật cần platform channel nghe
+     `ACTION_TIMEZONE_CHANGED` trên Android, và nó thuộc về phase có backend
+     hoặc một task riêng chứ không phải phần tích hợp này. Hệ quả trong lúc
+     chờ: một thiết bị đổi zone khi màn hình đang mở giữ biên cũ cho tới lần
+     resume, midnight hoặc Retry kế tiếp.
   1. **Loại trừ card/deck trong Trash khỏi `queries/progress.drift`** — owner:
      coordinator batch, đóng ở stage 10 (#310). Không đóng được ở stage 1 vì
      schema hiện chưa có cột tombstone nào, nên không có gì để lọc và không có

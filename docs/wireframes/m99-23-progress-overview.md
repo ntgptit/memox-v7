@@ -7,8 +7,8 @@
 | **Scope** | Màn `/progress`: ba section, mọi state, hợp đồng geometry, responsive/a11y. Ngoài phạm vi: luật nghiệp vụ (BR-182…BR-191), luồng (UC-12), quyết định branch (AD-19) |
 | **Source of truth for** | Anatomy màn Progress · copy ba section · hợp đồng geometry của màn Progress · responsive/a11y contract của màn Progress |
 | **Depends on** | `../use-cases.md` (UC-12), `../business-rules.md` (BR-182…BR-191), `../architecture.md` (AD-19), `m4-11-card-management.md` |
-| **Updated by task** | M99.23 (phase 7 — recursive UI/UX review) |
-| **Last updated** | 2026-08-13 |
+| **Updated by task** | M99.23 (stage 1 của batch tích hợp #301–#310 — recursive UI/UX review vòng 1 và 2) |
+| **Last updated** | 2026-08-14 |
 
 Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc nghiệp vụ tham chiếu
 bằng ID theo `document-conventions.md` §5; chỗ nào wireframe và BR có vẻ mâu
@@ -29,7 +29,7 @@ vừa rồi ra sao"** (Last 7 days). Không có câu thứ tư trong v1 (BR-191)
 | P5 | Ý nghĩa MUST NOT chỉ nằm ở màu: Learning/Reviewing luôn có **nhãn chữ + số**, không chỉ hai chấm màu | WCAG 1.4.1. Hai vai màu của app phân biệt tốt ở cả hai theme, nhưng đó không phải lý do để bỏ nhãn | 2026-08-13 |
 | P6 | Streak 0 dùng **lời mời trung tính**, MUST NOT dùng lời trách hay hình ảnh "chuỗi đã đứt" | Người mở Progress sau một ngày nghỉ không cần bị chấm điểm. Trung tính cũng là điều kiện để mặt này dùng lại được cho người chưa từng học | 2026-08-13 |
 | P7 | Mặt **lifetime empty** thay **cả màn**, không phải ba section toàn số 0, và mang một CTA thật sang branch Study | Ba khối số 0 trông như lỗi đọc dữ liệu. CTA phải là điều hướng thật — một nút không đi đâu là một nút nói dối | 2026-08-13 |
-| P8 | Live refresh và midnight rollover MUST NOT hạ màn về loading khi trên màn đã có dữ liệu | `MxAsyncView` đã đặt `skipLoadingOnRefresh: true`; đây là phát biểu ràng buộc đó thành thứ đo được (BR-189) | 2026-08-13 |
+| P8 | Live refresh và midnight rollover MUST NOT hạ màn về loading khi trên màn đã có dữ liệu | Cờ đúng ở đây là **`skipLoadingOnReload`**, không phải `skipLoadingOnRefresh`. Cả hai đường đều tới qua một **reload**: chúng đổi `progressNowProvider`, mà đó là dependency của controller — và đường thứ ba đổi nó là **mọi lần app resume**, thường xuyên hơn hẳn hai đường kia. `MxAsyncView` mặc định `skipLoadingOnReload: false` (đúng cho những màn mà dependency đổi nghĩa là câu hỏi đã đổi), nên `ProgressScreen` MUST opt-in `true`. Ghim ở `progress_screen_reload_test.dart`, và nó cần một repository phát emission **bất đồng bộ**: fake dùng chung yield seed đồng bộ nên assertion "không có spinner" xanh bất kể cờ nào (BR-189) | 2026-08-14 |
 | P9 | Không kéo-để-làm-mới | Stream đã là nguồn sự thật và midnight đã có timer; một cử chỉ refresh cho dữ liệu tự cập nhật là affordance nói sai về cơ chế | 2026-08-13 |
 
 ## W-cấu trúc
@@ -178,9 +178,15 @@ Last 7 days
 `S-f` và `S-g` được kiểm **từng frame**, không chỉ ở trạng thái nghỉ: một spinner
 chỉ hiện một frame vẫn là một cái nháy người dùng thấy, và assertion đặt ở cuối
 sẽ bỏ sót đúng ca đó. `S-g` đáng chú ý hơn `S-f` vì nó là *reload* — dependency
-`progressNow` đổi — mà `MxAsyncView` đặt `skipLoadingOnReload: false`; test dựng
-lại đúng đường đó và không có frame loading nào. Điều test **chưa** phủ được là
-một lần đọc SQLite thật chậm hơn một frame; nguồn trong test trả lời đồng bộ.
+`progressNow` đổi — nên nó phụ thuộc vào `skipLoadingOnReload`, và cùng đường đó
+được đi lại ở **mọi lần app resume**.
+
+Cái lỗ mà bản đầu của mục này tự ghi ra — "test chưa phủ được một lần đọc SQLite
+thật chậm hơn một frame; nguồn trong test trả lời đồng bộ" — chính là chỗ defect
+nằm: với nguồn đồng bộ, assertion "không có frame loading" xanh dù cờ đặt thế
+nào. `progress_screen_reload_test.dart` đóng nó bằng một repository phát emission
+sau một vòng event loop, đúng hình dạng của `watch()` thật; bỏ opt-in
+`skipLoadingOnReload` ra thì test resume ở đó đỏ.
 
 Không có state `refreshing` riêng: không có thao tác refresh nào của người dùng
 để hiển thị (P9).

@@ -67,11 +67,17 @@ void main() {
     testWidgets('crossing local midnight re-reads without flashing the '
         'spinner', (tester) async {
       // **Asserted at the screen, not only at the controller.** A rollover is a
-      // *dependency* change — `progressNowProvider` moves — and `MxAsyncView`
-      // sets `skipLoadingOnReload: false`, so this is the one path where the
-      // screen could legitimately drop back to a spinner over data it already
-      // has. P8 forbids that, and only a widget-level test can see it: the
-      // controller test measures re-subscription, which happens either way.
+      // *dependency* change — `progressNowProvider` moves — so it is the path
+      // where the screen could drop back to a spinner over data it already has.
+      // P8 forbids that, and only a widget-level test can see it: the controller
+      // test measures re-subscription, which happens either way.
+      //
+      // This fake answers synchronously, so it cannot tell whether the screen is
+      // holding the previous value or simply already has the next one. The
+      // policy itself is pinned in `progress_screen_reload_test.dart` with a
+      // repository that answers a turn of the event loop later, the way drift
+      // does; what this test holds is the rest of the rollover — the window
+      // moves, Today resets, the streak copy switches.
       DateTime now = DateTime.utc(2026, 8, 12, 23, 59);
       final repository = FakeProgressRepository(
         initial: progressOverviewFixture(
@@ -131,8 +137,10 @@ void main() {
 
       expect(
         find.bySemanticsLabel(
-          '${english.progressStreakSemanticsHeadline(7)}. '
-          '${english.progressStreakTodayLine(6)}',
+          english.progressStreakSemantics(
+            english.progressStreakSemanticsHeadline(7),
+            english.progressStreakTodayLine(6),
+          ),
         ),
         findsOneWidget,
       );
@@ -170,8 +178,10 @@ void main() {
 
         expect(
           find.bySemanticsLabel(
-            '${language.l10n.progressStreakSemanticsHeadline(4)}. '
-            '${language.l10n.progressStreakHeldLine}',
+            language.l10n.progressStreakSemantics(
+              language.l10n.progressStreakSemanticsHeadline(4),
+              language.l10n.progressStreakHeldLine,
+            ),
           ),
           findsOneWidget,
         );
@@ -192,8 +202,10 @@ void main() {
 
         expect(
           find.bySemanticsLabel(
-            '${language.l10n.progressStreakSemanticsHeadline(0)}. '
-            '${language.l10n.progressStreakZeroLine}',
+            language.l10n.progressStreakSemantics(
+              language.l10n.progressStreakSemanticsHeadline(0),
+              language.l10n.progressStreakZeroLine,
+            ),
           ),
           findsOneWidget,
         );

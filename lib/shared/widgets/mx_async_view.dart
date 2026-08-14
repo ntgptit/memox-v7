@@ -39,6 +39,7 @@ class MxAsyncView<T> extends StatelessWidget {
     required this.data,
     required this.error,
     this.loadingFrame,
+    this.skipLoadingOnReload = false,
     super.key,
   });
 
@@ -68,6 +69,30 @@ class MxAsyncView<T> extends StatelessWidget {
   /// already sits inside a shell.
   final Widget Function(Widget loading)? loadingFrame;
 
+  /// Keep the previous value on screen while a **reload** runs, not only a
+  /// refresh.
+  ///
+  /// Riverpod calls it a reload when a *dependency* changed rather than when
+  /// something asked for a re-read, and the default here is `false` because for
+  /// most screens those two are the same event: the deck list's dependency is
+  /// the deck you are looking at, so a change means the previous value answers a
+  /// question nobody is asking any more, and showing it would be showing the
+  /// wrong deck's contents.
+  ///
+  /// Progress is the first screen where they come apart. Its dependency is
+  /// `progressNowProvider` — the instant the windows are measured against — and
+  /// that instant moves on **every app resume** and at local midnight. The
+  /// question ("how am I doing?") has not changed at all; only the measurement
+  /// point has. With this `false`, every resume replaced three populated
+  /// sections with a full-screen spinner for as long as a full scan of
+  /// `study_answers` takes, which UC-12's UI states and the wireframe's P8 both
+  /// forbid in as many words.
+  ///
+  /// Opt-in rather than a changed default: the reasoning above is a property of
+  /// one screen's dependency, and flipping it globally would let a genuinely
+  /// stale value stay on screen everywhere else.
+  final bool skipLoadingOnReload;
+
   @override
   Widget build(BuildContext context) {
     return value.when(
@@ -78,9 +103,10 @@ class MxAsyncView<T> extends StatelessWidget {
       // populated list with a spinner every time the app resumes would be motion
       // in place of information.
       skipLoadingOnRefresh: true,
-      // Do not keep it across a reload. A dependency changing means the previous
-      // value answers a question nobody is asking any more.
-      skipLoadingOnReload: false,
+      // A reload is a dependency change, which usually means the previous value
+      // answers a question nobody is asking any more — so `false` by default,
+      // and the field's doc explains the one screen that is not like that.
+      skipLoadingOnReload: skipLoadingOnReload,
       loading: _buildLoading,
       data: data,
       error: error,

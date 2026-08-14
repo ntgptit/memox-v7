@@ -35,9 +35,12 @@ class ProgressStreakHeroWidget extends StatelessWidget {
 
     return Semantics(
       container: true,
-      label:
-          '${context.l10n.progressStreakSemanticsHeadline(overview.currentStreakDays)}. '
-          '${context.progressStreakSupportLine(overview)}',
+      label: context.l10n.progressStreakSemantics(
+        context.l10n.progressStreakSemanticsHeadline(
+          overview.currentStreakDays,
+        ),
+        context.progressStreakSupportLine(overview),
+      ),
       child: ExcludeSemantics(
         child: MxCard(
           child: Column(

@@ -44,6 +44,17 @@ class ProgressScreen extends ConsumerWidget {
       body: MxAsyncView<ProgressOverview>(
         value: ref.watch(progressOverviewControllerProvider),
         loadingLabel: context.l10n.progressLoadingLabel,
+        // UC-12 UI states and P8: a live refresh and a midnight rollover are
+        // transitions between two loaded states, and neither may drop the screen
+        // to a spinner over data it already has.
+        //
+        // Both of them arrive here as Riverpod *reloads* rather than refreshes,
+        // because both move `progressNowProvider` — and so does every app
+        // resume, which is by far the most frequent of the three. Without this
+        // flag the whole screen was replaced by a spinner for the length of a
+        // full scan of `study_answers`, so the longer somebody's history, the
+        // longer the flash.
+        skipLoadingOnReload: true,
         data: (overview) => overview.hasLifetimeActivity
             ? _ProgressSections(overview: overview)
             : const _ProgressEmptyView(),

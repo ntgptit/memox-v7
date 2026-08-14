@@ -67,9 +67,12 @@ import '../tables/study.drift';
 -- SQLite coerces the text back, which is not a thing to rely on. Bitwise OR is
 -- an integer operator in SQLite, `x | 0` is the identity on integers, and it is
 -- the one spelling that makes drift emit `int`. `progress_repository_test.dart`
--- asserts the parameter type — the group `the day bucket comes back as an
--- integer` — because this is exactly the kind of line a later cleanup would
--- delete as noise, and somebody who goes looking for the guard has to find it.
+-- has the test `the day bucket comes back as an integer`, which asserts the
+-- column drift hands back. The *parameter* type is held by the call site's
+-- signature — `db.progressActivityDays(offset.inSeconds)` will not accept a
+-- `double` — so the two together are the guard. Named because this is exactly
+-- the kind of line a later cleanup deletes as noise, and somebody who goes
+-- looking has to find what is protecting it.
 --
 -- The day bucket is `localSeconds - (localSeconds % 86400)` rather than a
 -- division, for the same reason: `/` is what forced the real typing in the first
