@@ -8,6 +8,7 @@ import '../models/card_move_target_model.dart';
 import '../models/card_state_distribution_model.dart';
 import '../models/card_text_model.dart';
 import '../models/deck_context_model.dart';
+import '../models/tag_filter_model.dart';
 import '../models/tag_name_model.dart';
 
 /// Contract for card management inside a deck (UC-04, UC-08).
@@ -51,6 +52,12 @@ abstract interface class CardRepository {
   /// window contract hold across all four (C1, C2). [now] is only read by
   /// [CardListFilter.due]; the caller passes the composition-root clock so no
   /// widget touches the wall clock.
+  ///
+  /// [tags] narrows further, by OR **within** the selected tags and AND with
+  /// everything above (BR-183). [TagFilter.none] applies no tag predicate at
+  /// all, so this read is unchanged for every caller that does not filter by
+  /// tag. A card carrying three of the selected tags still occupies exactly one
+  /// row of the window — the predicate is an existence test, not a join.
   Stream<List<CardListItemModel>> watchCardListItems(
     String deckId, {
     required int limit,
@@ -58,15 +65,21 @@ abstract interface class CardRepository {
     CardListSort sort = CardListSort.newest,
     String? searchTerm,
     DateTime? now,
+    TagFilter tags = TagFilter.none,
   });
 
   /// How many cards a [filter] would show — the "showing N of M" denominator and
   /// the pill counts (D3). Its own statement per filter, like the reads.
+  ///
+  /// Takes [tags] for the same reason it takes [searchTerm]: the count and the
+  /// list must be the same predicate, or the header says "Showing 12 of 3"
+  /// (BR-183).
   Stream<int> watchFilteredCardCount(
     String deckId, {
     CardListFilter filter = CardListFilter.all,
     String? searchTerm,
     DateTime? now,
+    TagFilter tags = TagFilter.none,
   });
 
   /// The deck's four-state distribution, for the progress panel (D5, BR-88…91).
@@ -214,6 +227,7 @@ abstract interface class CardRepository {
     CardListFilter filter = CardListFilter.all,
     String? searchTerm,
     DateTime? now,
+    TagFilter tags = TagFilter.none,
   });
 
   /// Sets the user's flag on a card (BR-92).

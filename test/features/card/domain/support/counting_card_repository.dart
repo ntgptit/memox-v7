@@ -7,6 +7,7 @@ import 'package:memox/features/card/domain/models/card_move_target_model.dart';
 import 'package:memox/features/card/domain/models/card_state_distribution_model.dart';
 import 'package:memox/features/card/domain/models/card_text_model.dart';
 import 'package:memox/features/card/domain/models/deck_context_model.dart';
+import 'package:memox/features/card/domain/models/tag_filter_model.dart';
 import 'package:memox/features/card/domain/models/tag_name_model.dart';
 import 'package:memox/features/card/domain/repositories/card_repository.dart';
 
@@ -133,6 +134,7 @@ final class CountingCardRepository implements CardRepository {
     CardListSort sort = CardListSort.newest,
     String? searchTerm,
     DateTime? now,
+    TagFilter tags = TagFilter.none,
   }) {
     watchCalls.add(deckId);
     watchLimits.add(limit);
@@ -146,6 +148,7 @@ final class CountingCardRepository implements CardRepository {
     CardListFilter filter = CardListFilter.all,
     String? searchTerm,
     DateTime? now,
+    TagFilter tags = TagFilter.none,
   }) {
     countCalls.add(deckId);
 
@@ -213,6 +216,7 @@ final class CountingCardRepository implements CardRepository {
     CardListFilter filter = CardListFilter.all,
     String? searchTerm,
     DateTime? now,
+    TagFilter tags = TagFilter.none,
   }) async {
     idsMatchingCalls.add((
       deckId: deckId,

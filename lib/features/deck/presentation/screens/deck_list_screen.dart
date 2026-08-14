@@ -131,6 +131,22 @@ class _DeckLevel extends StatelessWidget {
       // The level names itself: the app at the root, the deck below it.
       title: parent?.name ?? context.l10n.decksTitle,
       actions: <Widget>[
+        // The tag catalog (UC-12, M4.14 T2). **Only at the root level**, which
+        // is the Library: a tag belongs to no deck (BR-93), so offering it
+        // inside one would suggest a scope that does not exist — and the deck
+        // level's bar already carries create plus the deck's own overflow.
+        //
+        // Always visible, even with no decks and no tags: a catalog that is
+        // empty is an answer, and hiding the door would leave a user who
+        // wondered "which tags do I have?" with nowhere to look. By route name,
+        // so the deck feature never imports the card feature's screen (AD-13).
+        if (parent == null)
+          MxIconButton(
+            icon: Icons.sell_outlined,
+            semanticLabel: context.l10n.tagCatalogEntryAction,
+            tooltip: context.l10n.tagCatalogEntryAction,
+            onPressed: () => context.goNamed(RouteNames.tagCatalog),
+          ),
         // **Create is an app-bar action, not a floating one.** A button hovering
         // over the bottom-right of a scrolling list covers whatever row is
         // there, and on a deck card that is its overflow menu — an inset only

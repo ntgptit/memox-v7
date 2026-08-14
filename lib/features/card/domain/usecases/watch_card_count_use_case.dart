@@ -1,4 +1,5 @@
 import '../models/card_list_filter_model.dart';
+import '../models/tag_filter_model.dart';
 import '../repositories/card_repository.dart';
 
 /// How many cards a [filter] would show — the "showing N of M" denominator and
@@ -17,10 +18,12 @@ class WatchCardCountUseCase {
     CardListFilter filter = CardListFilter.all,
     String? searchTerm,
     DateTime? now,
+    TagFilter tags = TagFilter.none,
   }) => _repository.watchFilteredCardCount(
     deckId,
     filter: filter,
     searchTerm: searchTerm,
     now: now,
+    tags: tags,
   );
 }

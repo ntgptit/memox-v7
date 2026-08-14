@@ -68,6 +68,16 @@ abstract final class RouteNames {
   /// the Decks branch and leaving it lands back on the list whose stream
   /// already shows what was imported (M4.12).
   static const String cardImport = 'cardImport';
+
+  /// The tag catalog (UC-12). A child of [decks] rather than of a deck,
+  /// because a tag belongs to no deck (BR-93, BR-182) — nesting it under
+  /// `/decks/<id>` would say the opposite in the URL.
+  ///
+  /// **A name is what makes the two entry points possible without an import.**
+  /// The deck list and the card list both open it, and they live in two
+  /// features that may not see each other's `presentation/`; a shared route
+  /// name in `core/` is the whole of what they need (AD-13).
+  static const String tagCatalog = 'tagCatalog';
 }
 
 /// Names of the path parameters routes carry.

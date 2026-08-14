@@ -48,6 +48,109 @@ ORDER BY t.name ASC, t.id ASC;
 tagCountForCard:
 SELECT COUNT(*) FROM card_tags WHERE card_id = :cardId;
 
+-- ---- catalog (BR-182, BR-185, BR-186, BR-187) -----------------------------
+
+-- Every tag the owner has, with how many cards carry it — one row per tag, for
+-- the management catalog (BR-182).
+--
+-- **The count is a correlated scalar subquery, not a `LEFT JOIN … GROUP BY`.**
+-- Two reasons, and only the second is about speed. First, it keeps a tag with
+-- no cards in the result **without** the outer join that would otherwise be
+-- required — and BR-182 says that row must be there, because a tag nothing
+-- points at is precisely what the catalog exists to let a user delete. Second,
+-- each count is answered from `idx_card_tags_tag`, whose leading column is
+-- exactly `tag_id`.
+--
+-- **What this does NOT buy is an indexed scan of `tags` itself.**
+-- `idx_tags_owner_folded` is built on `COALESCE(owner_id, '')`, an *expression*,
+-- and this statement's `WHERE t.owner_id IS ?` does not contain that
+-- expression — so SQLite uses neither the lookup nor the ordering, and the
+-- catalog is a table scan plus a temp B-tree sort. That is acceptable at any
+-- plausible tag count and is written down rather than assumed away: a comment
+-- claiming a plan the engine will not produce is worse than no comment.
+--
+-- **`name_folded ASC, id ASC`, and the folded column is load-bearing (BR-182).**
+-- Ordering by `name` would sort by the spelling, which puts `Verb` before
+-- `adjective` in any byte-ordered collation and reads as random to a user who
+-- typed both. `name_folded` is the same value BR-93's uniqueness is measured
+-- in, so the catalog's order and the catalog's identity agree by construction.
+--
+-- **The search term is folded in Dart and compared with `instr`** — the exact
+-- pair `searchPredicate` in `card_list_query_mapper.dart` documents. `LIKE`
+-- would read `%` in a tag name as a wildcard, and SQLite's own `lower()` folds
+-- ASCII only, so `Động từ` would not match `động từ`. An empty term is the
+-- resting state and matches everything, which is why the guard is `= ''`
+-- rather than a second statement.
+--
+-- **This one's subquery tables *do* reach the generated stream dependencies**,
+-- unlike `cardListItems` — drift emits `readsFrom: {tags, cardTags}` here, so
+-- the count re-reads when a card gains or loses the tag without the manual
+-- `tableUpdates` merge that read needs. The difference is that `cardListItems`
+-- also carries a `$predicate` placeholder; this is a plain statement, and
+-- drift's analyzer walks its subquery. Not a fact to trust from a comment:
+-- `tag_catalog_dao_test.dart` adds a link to a live catalog stream and requires
+-- the next emission to carry the new count.
+tagCatalog:
+SELECT
+  t.id AS id,
+  t.name AS name,
+  (SELECT COUNT(*) FROM card_tags ct WHERE ct.tag_id = t.id) AS cardCount
+FROM tags t
+WHERE t.owner_id IS :ownerId
+  AND (:searchFolded = '' OR instr(t.name_folded, :searchFolded) > 0)
+ORDER BY t.name_folded ASC, t.id ASC;
+
+-- One tag by id, read **inside** the rename/delete transaction so the row the
+-- operation acts on is the row that exists at the moment of the write.
+tagById:
+SELECT * FROM tags WHERE id = :tagId;
+
+-- How many cards would lose this tag — the number BR-187's confirmation has to
+-- say out loud before anything is deleted.
+tagCardCount:
+SELECT COUNT(*) FROM card_tags WHERE tag_id = :tagId;
+
+-- BR-185's rename: only the two name columns, on the tag's own row.
+--
+-- **The id is never rewritten and `card_tags` is never touched**, which is the
+-- whole point of the no-collision path: every card keeps the tag it had, and
+-- the rename is invisible to every other table. A rename implemented as
+-- delete-and-recreate would drop the links and silently un-tag every card.
+renameTagById:
+UPDATE tags SET name = :name, name_folded = :nameFolded WHERE id = :tagId;
+
+-- BR-186's merge, first half: give the target tag every card the source tag
+-- has and the target does not.
+--
+-- **`INSERT OR IGNORE … SELECT`, one statement.** The pair `(card_id, tag_id)`
+-- is the primary key, so a card that already carries both tags collides and is
+-- skipped — which is exactly the dedupe the rule asks for, done by the table's
+-- own identity rather than by a read-then-decide in Dart that would need a
+-- second round trip per card and could still race.
+--
+-- A merge therefore never increases any card's tag count (BR-94): a card that
+-- had the source and not the target trades one for one, and a card that had
+-- both ends up with one fewer once the source links are removed below.
+linkCardsOfTagTo:
+INSERT OR IGNORE INTO card_tags (card_id, tag_id)
+SELECT ct.card_id, :targetTagId FROM card_tags ct WHERE ct.tag_id = :sourceTagId;
+
+-- BR-187's delete, and the second half of BR-186's merge: every link this tag
+-- has, gone.
+--
+-- **Explicit, not left to the `ON DELETE CASCADE` on `card_tags.tag_id`.** The
+-- cascade would do the same thing while foreign keys are on, and that is the
+-- problem: whether the rows disappear would depend on a pragma set in
+-- `beforeOpen`, which a migration path turns off. A rule that says "unlink
+-- every card" should be a statement that unlinks every card.
+unlinkAllCardsFromTag:
+DELETE FROM card_tags WHERE tag_id = :tagId;
+
+-- The tag row itself. Runs after the statement above, inside the same
+-- transaction (BR-186, BR-187).
+deleteTagById:
+DELETE FROM tags WHERE id = :tagId;
+
 -- Tags nothing points at any more.
 --
 -- Deleting a card cascades its links away but leaves the tag itself, which is

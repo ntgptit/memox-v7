@@ -65,11 +65,14 @@ void main() {
     anchors: deckAnchorsWithEmpty,
     allowances: <AuditSkipAllowance>[
       ...deckShellAllowances(
-        // One: create, which came back to the app bar when the floating action
-        // was dropped. The root level has no deck of its own to act on, the
-        // empty state's own button belongs to the `empty_state` item below, and
-        // there is no toolbar — with no decks there is nothing to filter.
-        screenIconButtons: 1,
+        // Two: create, which came back to the app bar when the floating action
+        // was dropped, and the tag catalog (M99.23, M4.14 T2) — the Library is
+        // where a library-level catalog belongs, and it is offered even with no
+        // decks, because an empty catalog is an answer. The root level has no
+        // deck of its own to act on, the empty state's own button belongs to
+        // the `empty_state` item below, and there is no toolbar — with no decks
+        // there is nothing to filter.
+        screenIconButtons: 2,
         screenItemId: 'deck_screen',
       ),
       // Two ways forward since UC-01: the starter catalog and the blank deck.
@@ -106,8 +109,9 @@ void main() {
     allowances: <AuditSkipAllowance>[
       ...deckShellAllowances(
         // One action per row for three decks, plus the summary panel's close
-        // button, plus the app bar's create action.
-        screenIconButtons: 5,
+        // button, plus the app bar's create action, plus the tag catalog
+        // action (M99.23).
+        screenIconButtons: 6,
         screenItemId: 'deck_screen',
         // Every row is a tappable card now rather than a ListTile.
         tappableCards: 3,

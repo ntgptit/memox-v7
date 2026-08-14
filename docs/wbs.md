@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.22 (five-way PR host-test sharding follow-up) |
+| **Updated by task** | M99.23 (Tag Management v1) |
 | **Last updated** | 2026-08-13 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -9340,6 +9340,181 @@ thế không đổi bố cục.
   deterministic; prompt guard trên toàn bộ prompt sets; PR run thật chứng minh
   aggregate check và đo lại wall-clock.
 - **Checklist phases:** 19, meta
+
+### M99.23 · Tag Management v1 — catalog, lọc nhiều tag, rename/gộp, xoá
+
+- **Status:** **done** — phase 1 (docs) xong: BR-182…BR-190, UC-12, wireframe
+  M4.14, `master-flow.md` §6, `check_docs.py` xanh. `data-model.md` **không**
+  đổi và đó là kết luận chứ không phải bỏ sót: catalog không thêm bảng, cột hay
+  index nào — nó đọc `idx_card_tags_tag` đang có. Phase 2 (domain) xong:
+  `TagFilter` value object giữ luật identity của BR-183, `TagCatalogEntry`,
+  `TagRenameOutcome`/`TagCatalogProblem`, contract + 3 use case, `TagName.fold`.
+  Phase 3 (data) xong: bảy câu lệnh trong `queries/tag.drift`, `TagCatalogDao`
+  (không có một câu lệnh nào chạm `cards` — BR-188 thành tính chất của bề mặt),
+  `TagCatalogRepositoryImpl`, vị từ `EXISTS` dùng chung cho ba câu lệnh của card
+  list. Phase 4 (DI + route) xong: provider + binding + `/tags` trong nhánh
+  Library. Phase 5 (presentation) xong: catalog screen, ba overlay, pill `Tags`,
+  hai entry point, 32 key ARB EN/VI, Widgetbook. Phase 6 (tests) xong: +129
+  test, 9 golden demo, visual audit companion, route test.
+  Phase 7 (recursive architecture/logic review) xong — audit trả về **0 P0,
+  0 P1, 2 P2, 6 P3**, tất cả đã đóng:
+  (P2) `goNamed` từ overflow card list dựng lại stack từ URL nên Back rơi về
+  deck list gốc và toàn bộ state autoDispose của card list — tag filter đang áp,
+  selection, cửa sổ đã mở — chết theo; nay `pushNamed`, và
+  `test/app/router/tag_catalog_route_test.dart` là test route đầu tiên của
+  `/tags`, đã **mutation-test**: đổi lại `goNamed` làm nó đỏ ở cả ba width.
+  (P2) UC-12 A7 hứa một lối `Clear` trên mặt không-kết-quả mà code không có, và
+  W7 lại nói ngược — giải bằng cách cho mặt `no match` đang có một action khi
+  **vị từ tag** là thứ làm rỗng nó, rồi sửa W7 nói rõ thêm action vào một mặt
+  không phải là thêm một mặt.
+  (P3) comment trong `tag.drift` khẳng định một query plan SQLite **không** sinh
+  ra — `idx_tags_owner_folded` dựng trên `COALESCE(owner_id,'')` nên `WHERE
+  owner_id IS ?` không dùng được nó; nay ghi đúng là table scan + temp B-tree.
+  (P3) `_withTagTableUpdates` là bù trừ cho một khiếm khuyết drift **đã được
+  sửa**: drift 2.34 khai `readsFrom: {tags, cardTags, …}` cho `cardListItems` và
+  lấy `cardTags` qua `generatedpredicate.watchedTables` cho count/select-all —
+  đã gỡ và kiểm chứng bằng chính hai test invalidation, vốn ghim *hành vi* chứ
+  không ghim cơ chế. (P3) `showTagDeleteConfirm` thiếu bước `reset`. (P3)
+  snackbar gộp dùng context của hàng vừa biến mất khỏi catalog — nay dùng
+  context của list. (P3) thiếu đúng ca BR-94 mà lập luận "gộp không bao giờ làm
+  tăng số tag" gánh: thẻ đủ mười tag mang nguồn mà **không** mang đích. (P3) sai
+  sót mô tả trong Output và một nhánh plural VI là câu trần thuật trên nút.
+  Phase 8 (recursive UI/UX review) xong — audit trả về **3 P1, 2 P2** và một
+  danh sách P3, tất cả đã đóng:
+  (P1) pill `Tags` nằm trong `SingleChildScrollView` cùng bốn pill trạng thái,
+  vốn đã chiếm 341dp của viewport 361dp ở 393dp, nên **66% pill bị đẩy ra ngoài
+  mép phải ở mọi bề rộng hỗ trợ** — không một pixel nào của chữ "Tags" được vẽ,
+  tức lối vào duy nhất của multi-tag filter không khám phá được và con số của T4
+  không bao giờ đọc được. Nay ghim ngoài vùng cuộn (T3a), ghim bằng contract mới
+  G10 và **mutation-test** ở cả 320/390/412.
+  (P1) hàng action của sheet lọc và sheet rename là `Row`; một `MxActionButton`
+  là con non-flex nên nhãn không xuống dòng được, và ở textScale 2.0 hai nút cần
+  383dp / 346dp — tràn thật, không phải chật. Nay `OverflowBar`, đúng control mà
+  `MxConfirmDialog` đã dùng và đã ghi lý do.
+  (P1) trùng với P2 navigation của phase 7.
+  (P2) `mx_form_sheet.dart` chỉ trừ `viewInsets`, nên khi bàn phím đóng thì
+  thanh hệ thống của Android edge-to-edge (API 35+) đè lên hàng action — đo được
+  14dp từ đáy. Nay trừ `max(viewInsets, viewPadding)`; đây là shared component
+  nên nó sửa cho mọi form sheet.
+  (P2) không có coverage 320@2.0 cho hai overlay — chính là lý do P1 thứ hai
+  lọt; nay có, cộng test focus return.
+  Phase 9 (UI/UX review vòng hai, đọc lại cây sau khi đã sửa) xong — xác nhận
+  sáu fix của vòng một đều đứng và tìm thêm **2 P2**, cả hai đã đóng:
+  (P2) khe 8dp giữa nhóm pill cuộn và pill `Tags` ghim **không bao giờ được
+  vẽ** — nó đặt ở `SingleChildScrollView.padding`, vốn pad *nội dung* nên thuộc
+  phần cuộn, và thanh này tràn ở mọi bề rộng; đo được 0.33dp, hai pill dán nhau
+  đọc như một control hỏng. Nay khe thuộc `Row.spacing`, và G10 có thêm một
+  assert đo đúng khe đó — assert cũ (`pill.right <= bar.right`) pass với lỗi
+  đang hiện diện.
+  (P2) nút `Clear` trên mặt không-kết-quả dùng lại key của sheet, nhưng ở đây
+  sheet đã đóng và không có gì đang được chọn — một động từ không tân ngữ, và
+  bản VI "Bỏ chọn" tệ hơn EN. Nay có key riêng `tagFilterClearAllAction`
+  ("Clear tag filter" / "Bỏ lọc theo nhãn"), nên sửa nút trong sheet không còn
+  âm thầm sửa nút này.
+  Cộng bốn P3: nhánh plural `=0` của VI mất khi vòng một sửa nó nên "Hiện 0
+  thẻ" lệch với EN; mặt lỗi của dialog xoá **thay** body nên câu "The cards
+  themselves stay" biến mất đúng lúc nút phá huỷ vẫn còn (nay nối thêm, không
+  hoán đổi); W2 nói tên tag một dòng trong khi G5 cho phép xuống dòng và
+  `MxListTile` dựng hai — sửa W2; cảnh báo hit-test trong demo suite.
+  **Một khuyến nghị của reviewer đã thử rồi bỏ:** `Scrollable.ensureVisible`
+  cho pill đang chọn, để chống ca "pill sáng nằm ngoài viewport ở 320dp". Đo
+  lại thì tiền đề không tái hiện — ở 320dp `Flagged` kết thúc ở 337.6dp so với
+  mép bar 308.0dp, tức bị cắt một phần chứ không nằm hoàn toàn ngoài, và fill
+  của nó vẫn đọc được. Không giữ một hành vi không được yêu cầu mà lại không
+  test được xác định; con số đo được ghi vào T3a.
+  Còn lại: `flutter test integration_test/ -d emulator-5554 --flavor development`
+  **chưa chạy** (cần emulator) — xem mục dưới.
+- **Emulator IT: deferred.** Task này thêm code vào `lib/features/` nên theo
+  `CLAUDE.md` nó chưa "done" cho tới khi suite integration chạy xanh trên máy
+  thật. Không có emulator trong phiên này, nên gate đó **chưa chạy** và được ghi
+  nợ ở đây thay vì được ngầm bỏ qua. Baseline phải đối chiếu là **8 passing, 0
+  failing** trên `origin/main`. Rủi ro cụ thể mà chỉ suite đó thấy: `/tags` là
+  route mới trong nhánh Library và `repository_bindings.dart` có thêm một
+  binding — đúng hai loại thay đổi đã làm hỏng 66 scenario một lần trước đây.
+- **Goal:** Cho người dùng nhìn thấy toàn bộ tag của mình, lọc thẻ theo nhiều
+  tag, sửa một tên viết sai và xoá một tag không dùng nữa — trên đúng dữ liệu
+  `tags`/`card_tags` đang có, không thêm bảng, không thêm cột, không biến tag
+  thành hệ thống deck thứ hai.
+- **Scope:** BR-182…BR-190, UC-12, wireframe M4.14; catalog domain/data
+  (`queries/tag.drift`, DAO, repository, use case), vị từ tag trong ba câu lệnh
+  của card list (danh sách, count, select-all), catalog screen + overlay
+  rename/xoá + overlay lọc, ARB EN/VI, test host. **Ngoài phạm vi:** tag phân
+  cấp, màu tag, taxonomy chia sẻ, Trash (BR-189 chỉ ghi ràng buộc tương thích,
+  không hiện thực), và mọi thay đổi schema.
+- **Editable documents:** `docs/business-rules.md`, `docs/use-cases.md`,
+  `docs/wireframes/m4-14-tag-management.md`, `docs/wbs.md`,
+  `lib/features/card/README.md`
+- **5Why:**
+  1. **Vì sao cần một catalog?** Tag hiện chỉ tồn tại như chip trên thẻ, nên
+     một tag viết sai chỉ sửa được bằng cách mở từng thẻ mang nó. Không có màn
+     nào trả lời "tôi đang có những tag nào" — và câu đó phải trả lời được
+     trước khi rename hay delete có nghĩa. Catalog là library-level vì `tags`
+     không thuộc deck nào (BR-93, `tables/tags.drift`); một catalog theo deck
+     sẽ hiển thị một tập con và làm người dùng tin rằng đổi tên ở đây chỉ ảnh
+     hưởng deck này.
+  2. **Vì sao nhiều tag là OR chứ không phải AND?** Người dùng chọn hai tag để
+     mở rộng tập kết quả — "cho tôi xem động từ **hoặc** tính từ". AND của hai
+     tag hầu như luôn ra rỗng ở dữ liệu thật vì trần mười tag mỗi thẻ khiến
+     giao nhau hiếm; một bộ lọc mà mọi lần chạm thứ hai đều làm danh sách trống
+     đọc như hỏng. AND vẫn còn nguyên ở chiều khác: vị từ tag AND với
+     All/Due/New/Flagged và AND với search, nên "động từ hoặc tính từ, đang đến
+     hạn, chứa 'ăn'" vẫn nói được.
+  3. **Vì sao gộp phải nguyên tử?** Gộp là bốn write — nối liên kết thiếu,
+     dedupe liên kết trùng, gỡ liên kết còn lại, xoá tag nguồn. Dừng giữa chừng
+     để lại hai tag cùng tồn tại với liên kết đã dời một phần, và không có màn
+     nào trong app cho thấy trạng thái đó, nên người dùng sẽ không biết để sửa.
+     Đây đúng là hình dạng BR-166 đã dựng cho bulk write; một transaction là
+     câu trả lời đã có sẵn.
+  4. **Vì sao xoá tag không được xoá thẻ?** Tag là **nội dung của thẻ**
+     (BR-93), không phải vật chứa thẻ. Một thẻ chỉ mang duy nhất tag bị xoá vẫn
+     là một thẻ đầy đủ với hai mặt, lịch học và lịch sử. Nhầm lẫn này chỉ xảy
+     ra một lần nhưng không hoàn tác được, nên nó phải bị chặn ở hai chỗ: câu
+     xác nhận nói thẳng số thẻ bị **gỡ tag**, và repository chỉ ghi hai bảng
+     `tags`/`card_tags` (BR-187, BR-188).
+  5. **Vì sao tag phẳng?** Cây đã có rồi và nó là deck (BR-55, mười tầng). Cho
+     tag một cây thứ hai nghĩa là hai hệ phân cấp cùng phân loại một thẻ, và
+     mọi câu hỏi của deck — thừa kế, di chuyển subtree, ràng buộc độ sâu — sẽ
+     phải trả lời lại lần thứ hai với một tập luật khác. Tag phẳng giữ đúng
+     giá trị của nó: một trục phân loại **cắt ngang** cây deck.
+- **Output:** `TagCatalogEntry` + `TagFilter` model, `TagRenameOutcome` và
+  `TagCatalogProblem` enum, `TagCatalogRepository` + **3** use case
+  (watch/rename/delete), `tagCatalog`/`tagById`/`tagCardCount`/`renameTagById`/
+  `linkCardsOfTagTo`/`unlinkAllCardsFromTag`/`deleteTagById` trong
+  `queries/tag.drift`, `TagCatalogDao`, `TagCatalogRepositoryImpl`, provider +
+  binding, `TagName.fold`, vị từ `EXISTS` trong `card_list_query_mapper.dart`,
+  `TagCatalogScreen`, overlay rename/xoá/lọc, `CardListMenuWidget` tách khỏi
+  card list screen, pill `Tags` ghim trên thanh filter, 31 key ARB EN/VI, route
+  `/tags`, test domain/data/controller/widget/geometry/route và 9 golden demo.
+- **Acceptance criteria:**
+  - [x] Catalog đọc mọi tag của owner kèm số thẻ, sắp `name_folded` rồi `id`,
+        tìm kiếm dùng đúng phép fold của BR-93 (BR-182).
+  - [x] Vị từ tag là OR trong tập chọn, AND với filter trạng thái và search;
+        tập rỗng là phần tử đơn vị; một thẻ mang ba tag đã chọn xuất hiện đúng
+        một lần trong danh sách, count và select-all (BR-183).
+  - [x] Đổi tập tag reset cửa sổ và xoá selection (BR-184).
+  - [x] Rename không trùng giữ nguyên `id` và mọi liên kết; rename chỉ đổi hoa
+        thường được chấp nhận (BR-185).
+  - [x] Rename trùng gộp nguyên tử, dedupe, xoá tag nguồn, không thẻ nào vượt
+        trần 10 tag, rollback trả lại đúng đồ thị ban đầu (BR-186).
+  - [x] Xoá tag chỉ gỡ liên kết rồi xoá tag; không thẻ nào bị xoá; copy xác
+        nhận nêu số thẻ và nói thẻ vẫn còn (BR-187).
+  - [x] Không thao tác catalog nào ghi nội dung thẻ, `updated_at`, cờ,
+        `content_type`, study state hay history (BR-188).
+  - [x] Import vẫn tạo tag hiện trong catalog; round-trip export → import không
+        đổi; không có bản thứ hai của codec hay hàm fold (BR-190).
+  - [x] Mọi mặt của W3/W4/W5/W6 có test; geometry G1…G10 đo bằng `getRect`,
+        gồm cả hai overlay ở 320@2.0; EN/VI, light/dark, 320@2.0 · 390 · 412.
+  - [x] `dart format`, `flutter analyze`, guard, `check_docs.py` và
+        `flutter test` xanh.
+- **Dependencies:** M4.10at, M4.11, M99.19, M99.21
+- **Tests required:** domain — OR/AND composition, tập rỗng là identity,
+  normalization dùng chung, kết quả gộp. SQLite thật — count catalog, phân
+  trang với thẻ nhiều tag, rename giữ liên kết, gộp có va chạm + dedupe, bất
+  biến 10 tag, xoá chỉ gỡ liên kết, tag do import tạo, rollback, stream sống,
+  không mutation study state. Controller/widget — reset cửa sổ, search, mọi
+  mặt/hành động/lỗi, cùng tồn tại với selection, locale/theme/viewport/
+  semantics và geometry.
+- **Checklist phases:** 14, 15
 
 ## Blocker
 

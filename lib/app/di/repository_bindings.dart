@@ -10,6 +10,9 @@ import '../../features/card/data/repositories/card_import_repository_impl.dart';
 import '../../features/card/data/repositories/card_import_source_repository_impl.dart';
 import '../../features/card/data/repositories/card_transfer_repository_impl.dart';
 import '../../features/card/data/repositories/card_repository_impl.dart';
+import '../../features/card/data/repositories/tag_catalog_repository_impl.dart';
+import '../../features/card/di/tag_catalog_repository_provider.dart';
+import '../../features/card/domain/repositories/tag_catalog_repository.dart';
 import '../../features/card/di/card_export_repository_provider.dart';
 import '../../features/card/di/card_import_repository_provider.dart';
 import '../../features/card/di/card_transfer_repository_provider.dart';
@@ -83,6 +86,17 @@ CardRepository cardRepositoryBinding(Ref ref) => CardRepositoryImpl(
   ref.watch(appDatabaseProvider),
   clock: ref.watch(clockProvider),
 );
+
+/// The tag catalog (M99.23, UC-12).
+///
+/// **The database itself, and no clock.** One transaction has to cover the
+/// collision test and the rename-or-merge that follows it (BR-186), which is
+/// the same reason `cardRepositoryBinding` takes the database. No clock,
+/// because a catalog operation stamps nothing: it writes `tags.name` /
+/// `tags.name_folded` and rows of `card_tags`, none of which carry a timestamp,
+/// and BR-188 forbids it from touching one that does.
+TagCatalogRepository tagCatalogRepositoryBinding(Ref ref) =>
+    TagCatalogRepositoryImpl(ref.watch(appDatabaseProvider));
 
 /// Card transfer's three seams, bound apart on purpose (M99.19): the picker
 /// is the one platform dialog, the decoder is pure bytes-to-rows, and the
@@ -171,6 +185,7 @@ Future<List<DeckTemplate>> deckTemplateCatalogBinding(Ref ref) =>
 List<Override> repositoryBindingOverrides() => <Override>[
   deckRepositoryProvider.overrideWith(deckRepositoryBinding),
   cardRepositoryProvider.overrideWith(cardRepositoryBinding),
+  tagCatalogRepositoryProvider.overrideWith(tagCatalogRepositoryBinding),
   cardImportRepositoryProvider.overrideWith(cardImportRepositoryBinding),
   cardTransferRepositoryProvider.overrideWith(cardTransferRepositoryBinding),
   cardImportSourceRepositoryProvider.overrideWith(

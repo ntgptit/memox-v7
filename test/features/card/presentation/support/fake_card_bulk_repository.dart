@@ -1,6 +1,7 @@
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/card/domain/models/card_list_filter_model.dart';
 import 'package:memox/features/card/domain/models/card_move_target_model.dart';
+import 'package:memox/features/card/domain/models/tag_filter_model.dart';
 import 'package:memox/features/card/domain/models/tag_name_model.dart';
 
 /// The bulk half of the card fake (BR-165, BR-166, BR-167).
@@ -34,9 +35,18 @@ abstract class FakeCardBulkRepository {
 
   /// Every `readCardIdsMatching` call — Select all's proof that it used the
   /// live filter and search rather than the loaded rows.
-  final List<({String deckId, CardListFilter filter, String? searchTerm})>
+  final List<
+    ({String deckId, CardListFilter filter, String? searchTerm, TagFilter tags})
+  >
   idsMatchingCalls =
-      <({String deckId, CardListFilter filter, String? searchTerm})>[];
+      <
+        ({
+          String deckId,
+          CardListFilter filter,
+          String? searchTerm,
+          TagFilter tags,
+        })
+      >[];
 
   void _failBulkIfAsked() {
     final failure = nextBulkFailure;
@@ -77,11 +87,13 @@ abstract class FakeCardBulkRepository {
     CardListFilter filter = CardListFilter.all,
     String? searchTerm,
     DateTime? now,
+    TagFilter tags = TagFilter.none,
   }) async {
     idsMatchingCalls.add((
       deckId: deckId,
       filter: filter,
       searchTerm: searchTerm,
+      tags: tags,
     ));
 
     return idsMatching;

@@ -6,6 +6,7 @@ import '../../domain/models/card_list_item_model.dart';
 import '../providers/card_use_case_provider.dart';
 import 'card_list_filter_controller.dart';
 import 'card_list_now_controller.dart';
+import 'card_list_tag_filter_controller.dart';
 import 'card_list_window_controller.dart';
 
 part 'card_list_controller.g.dart';
@@ -44,6 +45,9 @@ class CardList extends _$CardList {
       sort: sort,
       searchTerm: search,
       now: now,
+      // The applied tag selection, not the overlay's draft: the list follows
+      // `Apply`, so a half-built selection never re-reads it (BR-184, M4.14 T5).
+      tags: ref.watch(cardListTagFilterProvider(deckId)),
     );
   }
 }
@@ -71,6 +75,9 @@ class CardCount extends _$CardCount {
       filter: filter,
       searchTerm: search,
       now: now,
+      // The denominator has to be the list's own predicate, tag filter
+      // included, or the header reads "Showing 12 of 3" (BR-183).
+      tags: ref.watch(cardListTagFilterProvider(deckId)),
     );
   }
 }

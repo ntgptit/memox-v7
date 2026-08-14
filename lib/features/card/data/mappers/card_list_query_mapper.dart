@@ -28,6 +28,7 @@ import '../../../../core/database/app_database.dart';
 import '../../domain/models/card_list_filter_model.dart';
 import '../../domain/models/card_list_sort_model.dart';
 import '../../domain/models/card_text_model.dart';
+import '../../domain/models/tag_filter_model.dart';
 
 /// BR-22: what a session would hand over — no scheduled date yet, or that date
 /// has passed. The same set `study.drift` reads, named here so the Due pill can
@@ -102,19 +103,67 @@ Expression<bool> _contains(GeneratedColumn<String> column, String foldedTerm) =>
       Variable<String>(foldedTerm),
     ]).isBiggerThanValue(0);
 
+/// BR-183: the card carries **at least one** of the selected tags.
+///
+/// **`EXISTS`, and the alternative was measurably wrong rather than merely
+/// slower.** The obvious form — join `card_tags` and write `tag_id IN (…)` —
+/// selects the right set of cards and then emits one row *per matching tag*, so
+/// a card carrying three of the selected tags occupies three rows. `LIMIT 50`
+/// then returns fewer than fifty cards, `COUNT(*)` reports more cards than
+/// exist, and the two disagree with each other as well as with the truth.
+/// `SELECT DISTINCT` repairs the count and costs the thing the window is for:
+/// SQLite has to materialise and de-duplicate the whole match before it can
+/// stop early, which is exactly the early stop `(deck_id, created_at, id)` was
+/// measured to buy.
+///
+/// `EXISTS` has neither problem. It is a boolean per card — SQLite stops
+/// scanning the subquery at the first hit, `idx_card_tags_tag` serves the `IN`
+/// list by its leading column, and the outer query still returns one row per
+/// card in index order.
+///
+/// **OR between the selected tags is the `IN` list**, and that is the whole of
+/// BR-183's inner semantics: there is no second form to keep in step, because
+/// the alternative reading (AND — a card carrying *every* selected tag) would
+/// need one correlated subquery per tag and looks nothing like this.
+Expression<bool> tagFilterPredicate(
+  AppDatabase db,
+  Cards c,
+  Set<String> tagIds,
+) {
+  final links = db.selectOnly(db.cardTags)
+    ..addColumns(<Expression<Object>>[db.cardTags.cardId])
+    ..where(
+      db.cardTags.cardId.equalsExp(c.id) & db.cardTags.tagId.isIn(tagIds),
+    );
+
+  return existsQuery(links);
+}
+
 /// The whole `WHERE` for one list read: always the deck, plus the active filter,
-/// plus the search term when there is one.
+/// plus the search term when there is one, plus the tag predicate when any tag
+/// is selected.
 ///
 /// [now] is required only by [CardListFilter.due] — the caller passes the
 /// composition-root clock, and passing none for that filter is a programming
 /// error the read surfaces rather than silently answering with the wrong "now".
+///
+/// [db] is here only so the tag predicate can build its subquery; nothing else
+/// in this function touches it, and no statement is executed — `selectOnly`
+/// composes SQL, it does not run it.
+///
+/// **[tags] being empty produces the identical expression this function
+/// produced before tag filtering existed** (BR-183). That is the identity
+/// clause, and it is structural rather than remembered: [TagFilter.isActive] is
+/// the one test, and it is written once, here.
 Expression<bool> cardListPredicate({
+  required AppDatabase db,
   required Cards c,
   required CardStudyStates s,
   required String deckId,
   required CardListFilter filter,
   String? searchTerm,
   DateTime? now,
+  TagFilter tags = TagFilter.none,
 }) {
   var predicate = c.deckId.equals(deckId);
 
@@ -124,6 +173,12 @@ Expression<bool> cardListPredicate({
     CardListFilter.isNew => predicate & isNewPredicate(s),
     CardListFilter.flagged => predicate & isFlaggedPredicate(c),
   };
+
+  // ANDed with the state filter above and with the search below, so the three
+  // narrowings compose in one direction and only the tags OR among themselves.
+  if (tags.isActive) {
+    predicate = predicate & tagFilterPredicate(db, c, tags.tagIds);
+  }
 
   // Folded through the same function the stored columns went through, so the
   // needle and the haystack cannot be folded by two different rules.

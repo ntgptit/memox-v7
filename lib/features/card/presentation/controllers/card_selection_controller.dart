@@ -4,6 +4,7 @@ import '../providers/card_use_case_provider.dart';
 import '../states/card_selection_state.dart';
 import 'card_list_filter_controller.dart';
 import 'card_list_now_controller.dart';
+import 'card_list_tag_filter_controller.dart';
 
 part 'card_selection_controller.g.dart';
 
@@ -30,7 +31,11 @@ class CardSelection extends _$CardSelection {
     ref
       ..watch(cardListFilterSelectionProvider(deckId))
       ..watch(cardListSearchQueryProvider(deckId))
-      ..watch(cardListSortSelectionProvider(deckId));
+      ..watch(cardListSortSelectionProvider(deckId))
+      // The tag filter is a fourth narrowing and belongs in the same list
+      // (BR-184): a selection built while two tags were on, then acted on with
+      // them off, deletes rows the user never saw.
+      ..watch(cardListTagFilterProvider(deckId));
 
     return const CardSelectionState();
   }
@@ -72,6 +77,7 @@ class CardSelection extends _$CardSelection {
       filter: ref.read(cardListFilterSelectionProvider(deckId)),
       searchTerm: ref.read(cardListSearchQueryProvider(deckId)),
       now: ref.read(cardListNowProvider),
+      tags: ref.read(cardListTagFilterProvider(deckId)),
     );
     if (!ref.mounted) return;
 

@@ -109,11 +109,12 @@ void main() {
         detailContains: '_RenderInkFeatures',
         // 12 since M99.16: the app bar gained the Select action, the visible
         // way into selection mode, and an IconButton is one more ink host.
-        expectedMatches: 13,
+        // 14 since M99.23: the filter bar gained the Tags pill (BR-183).
+        expectedMatches: 14,
         rationale:
             'The Material ink layers of the Scaffold, the AppBar, the app-bar '
             'Select and add IconButtons, the panel Start-study button, the two MxCard card '
-            'rows and the four filter chips. Splash and highlight paint into '
+            'rows and the five filter chips. Splash and highlight paint into '
             'these layers; the overlay colours are asserted in app_theme_test.dart.',
       ),
       AuditSkipAllowance(
@@ -136,9 +137,10 @@ void main() {
         itemId: 'shell',
         reason: SkipReason.unknownRenderType,
         detailContains: '_RenderChip',
-        expectedMatches: 4,
+        // 5 since M99.23: All, Due, New, Flagged and Tags (BR-183, M4.14 T3).
+        expectedMatches: 5,
         rationale:
-            'The four filter pills, now MxPillButton over ChoiceChip; their '
+            'The five filter pills, MxPillButton over ChoiceChip; their '
             'colours come from ChipThemeData, pinned by the mx_components chip '
             'goldens.',
       ),
@@ -155,9 +157,9 @@ void main() {
         itemId: 'shell',
         reason: SkipReason.customPainter,
         detailContains: 'no painter',
-        expectedMatches: 7,
+        expectedMatches: 8,
         rationale:
-            'A clip with no painter: the four filter chips, the two MxCard card '
+            'A clip with no painter: the five filter chips, the two MxCard card '
             'rows and the search pill each clip through a CustomPaint with no '
             'painter of its own.',
       ),

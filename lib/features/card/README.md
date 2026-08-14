@@ -154,9 +154,70 @@ suite coverage. Geometry của sheet vì thế được ghim bằng
 
 ---
 
-## 7 · Known gaps
+## 7 · Tag Management v1 (M99.23, UC-12, BR-182…BR-190)
 
-- **Partially in the Widgetbook catalog.** `CardImportScreen` is registered
-  (M99.19); `CardListScreen` and `CardEditorScreen` are still absent, against
-  the Definition of Done in `CLAUDE.md`. Those two are covered by the strict
-  visual audit and by review renders in `test/demo/`, but not by the catalog.
+**Nó nằm ở `features/card/` chứ không phải một feature thứ ba, và đó là một
+quyết định chứ không phải sự tiện tay.** BR-93 nói tag **là nội dung của thẻ**,
+và §2 của chính file này đã ghi tag vào phần Card sở hữu. `TagName`,
+`TagEntity`, `tag.drift` và mọi write của `card_tags` đã ở đây từ M4.10at; tách
+catalog ra một feature riêng sẽ tạo đúng thứ AD-13 cấm — hoặc một vòng phụ thuộc
+domain hai chiều (catalog cần `TagName` của Card, overlay lọc của Card cần use
+case của catalog), hoặc một lần di dời `TagName` ra khỏi Card, tức là một
+refactor nằm ngoài scope đã nêu. Tính từ "library-level" trong BR-182 mô tả
+**phạm vi dữ liệu** — mọi deck — chứ không phải thư mục.
+
+Ba điều Tag Management làm khác phần còn lại của Card, và mỗi điều có lý do
+riêng:
+
+- **Contract thứ hai trong cùng một feature.** `TagCatalogRepository` đứng cạnh
+  `CardRepository` với đúng ba method. Ranh giới thật: mọi method tag của
+  `CardRepository` đều nhận `card_id` — nó nhìn tag *qua một thẻ*; không method
+  nào ở đây nhận, vì catalog nhìn bảng tag đứng một mình và write của nó chạm
+  mọi thẻ cùng lúc. Hệ quả đo được: `TagCatalogDao` **không có một câu lệnh nào
+  chạm `cards`**, nên BR-188 là tính chất của bề mặt chứ không phải một lời hứa
+  trong prose.
+- **Vị từ lọc là `EXISTS`, không phải join.** `INNER JOIN card_tags` cho đúng
+  tập thẻ và **sai số hàng**: một thẻ mang ba tag đã chọn chiếm ba chỗ trong
+  `LIMIT` và được đếm ba lần. `DISTINCT` chữa count nhưng huỷ điểm dừng sớm mà
+  index `(deck_id, created_at, id)` mua được. `card_list_tag_filter_test.dart`
+  ghim cả hai bằng SQLite thật, vì không fake nào phân biệt được hai hình dạng
+  SQL này.
+- **Gộp là hệ quả của rename, không có action riêng** (BR-186). Ba câu lệnh
+  trong một transaction, dedupe bằng chính primary key của `card_tags` qua
+  `INSERT OR IGNORE`. Điều đáng ghi: **gộp không bao giờ làm một thẻ vượt trần
+  mười tag** — mỗi thẻ đổi nguồn lấy đích chứ không cộng thêm — nên BR-94 không
+  cần một check ở đây, và đó là phát biểu mạnh hơn việc có check.
+
+**`TagFilter` là chỗ luật "không chọn tag nào thì không áp vị từ nào" sống, một
+lần.** Bốn caller — list read, count read, select-all, và pill trên thanh filter
+— nếu tự viết `if (tagIds.isNotEmpty)` thì có bốn cơ hội để một trong số đó viết
+sai, và lỗi im lặng: count lọc còn list thì không, màn hình đọc "Showing 12 of
+3".
+
+## 8 · Known gaps
+
+- **Partially in the Widgetbook catalog.** `CardImportScreen` (M99.19) and
+  `TagCatalogScreen` (M99.23) are registered; `CardListScreen` and
+  `CardEditorScreen` are still absent, against the Definition of Done in
+  `CLAUDE.md`. Those two are covered by the strict visual audit and by review
+  renders in `test/demo/`, but not by the catalog.
+- **The tag filter sheet and the rename/delete overlays have no visual audit**,
+  the same gap the export sheet records in §6 and for the identical reason: the
+  audit harness discovers subjects by `_screen.dart` and its raster cross-check
+  cannot read through a modal barrier. Their geometry is pinned by
+  `tag_catalog_alignment_test.dart` (M4.14 G1…G9) and their copy by
+  `tag_delete_test.dart` / `tag_rename_test.dart` instead.
+- **The row's card count does not read as a secondary line**, although W2 asks
+  for one. `app_theme.dart` sets `listTileTheme.textColor`, and Flutter derives
+  a ListTile's subtitle colour from it — so title and subtitle come out the
+  same value (`#16182B` light, `#EDEDF6` dark) in **every** `MxListTile` in the
+  app, not just here. Left out of M99.23 on purpose: the fix is one theme
+  property and a golden regeneration across the deck list, the card list and
+  the design audit, which is a change to every screen and belongs to its own
+  task rather than to a tag PR.
+- **A tag filter left on a deleted tag heals only on the next `Apply`.** Until
+  then the list is empty and the pill still counts the tag that is gone; the
+  recovery is one tap (open the sheet, `Apply`), and the sheet drops the missing
+  id for you. Healing it eagerly would mean the filter notifier watching the
+  catalog, which rebuilds it — and therefore resets the window and clears the
+  selection — every time any tag's count changes anywhere.

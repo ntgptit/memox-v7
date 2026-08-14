@@ -151,12 +151,14 @@ mixin _CardBulkOperations implements CardRepository {
     CardListFilter filter = CardListFilter.all,
     String? searchTerm,
     DateTime? now,
+    TagFilter tags = TagFilter.none,
   }) => _guard(
     () => _cardDao.cardIdsMatching(
       deckId: deckId,
       filter: filter,
       searchTerm: searchTerm,
       now: now,
+      tags: tags,
     ),
   );
 

@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/deck/domain/models/deck_name_model.dart';
 import 'package:memox/core/database/app_database.dart';
 import 'package:memox/features/card/data/repositories/card_repository_impl.dart';
+import 'package:memox/features/card/data/repositories/tag_catalog_repository_impl.dart';
 import 'package:memox/features/deck/data/repositories/deck_repository_impl.dart';
 import 'package:memox/features/study/data/datasources/study_dao.dart';
 import 'package:memox/features/study/data/repositories/study_repository_impl.dart';
@@ -23,6 +24,13 @@ final class DeckRepositoryHarness {
   late AppDatabase db;
   late DeckRepositoryImpl deckRepository;
   late CardRepositoryImpl cardRepository;
+
+  /// The tag catalog, over the **same** database (M99.23, UC-12).
+  ///
+  /// Built here rather than in each catalog test so that a rename or a delete
+  /// is provably acting on the rows the card repository just wrote — two
+  /// databases would let a merge test pass against tags nothing was linked to.
+  late TagCatalogRepositoryImpl tagCatalogRepository;
   int idCounter = 0;
   DateTime currentInstant = testNow;
 
@@ -147,6 +155,9 @@ DeckRepositoryHarness installDeckRepositoryHarness() {
       idGenerator: nextId,
       clock: clock,
     );
+    // No clock and no id generator: a catalog operation mints nothing and
+    // stamps nothing (BR-188).
+    harness.tagCatalogRepository = TagCatalogRepositoryImpl(harness.db);
   });
 
   return harness;
