@@ -73,6 +73,14 @@ class ProgressWeekBarWidget extends StatelessWidget {
               widthFactor: fraction.clamp(0.0, 1.0),
               heightFactor: 1,
               child: DecoratedBox(
+                // `progressFill` at every fraction, including 1.0 — which is
+                // the third and largest reason this is not `MxProgressBar`
+                // (X5). That component turns the fill `success` at 100%,
+                // because for a deck's progress 100% means finished. Here the
+                // scale is the busiest day of the week, so **some** day is at
+                // 1.0 in every week anybody has ever studied: borrowing the
+                // component would paint one green "done" bar per week on a
+                // chart where finishing is not a thing that happens.
                 decoration: BoxDecoration(color: semantic.progressFill),
               ),
             ),

@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/features/progress/presentation/widgets/items/progress_week_bar_widget.dart';
 
 import '../../../support/color_math.dart';
+import 'support/fake_progress_repository.dart';
+import 'support/progress_screen_harness.dart';
 
 /// The activity chart's bar is a **graphic**, and WCAG 1.4.11 asks 3:1 of it.
 ///
@@ -72,4 +75,62 @@ void main() {
       lessThan(graphicFloor),
     );
   });
+
+  /// The busiest day stays `progressFill`, and never becomes `success` (X5).
+  ///
+  /// **This is the difference the shared component would have introduced.**
+  /// `MxProgressBar` turns its fill `success` at `fraction >= 1`, which is right
+  /// where 100% means finished — a deck's progress. Here the scale is the
+  /// busiest day of the week, so every week anybody has ever studied has a day
+  /// at exactly 1.0, and borrowing the component would paint one green "done"
+  /// bar per week on a chart where finishing is not a thing that happens.
+  ///
+  /// Rendered rather than reasoned about, because the two colours are both valid
+  /// tokens: the strict visual audit accepts either, and a token-only assertion
+  /// would agree with whichever one the widget picked.
+  for (final ({String name, bool isDark}) theme
+      in const <({String name, bool isDark})>[
+        (name: 'light', isDark: false),
+        (name: 'dark', isDark: true),
+      ]) {
+    testWidgets('the busiest day is a progress fill, not a success fill '
+        '(${theme.name})', (tester) async {
+      await pumpProgressScreen(
+        tester,
+        repository: FakeProgressRepository(
+          initial: progressOverviewFixture(
+            totals: const <int>[0, 1, 2, 3, 4, 5, 10],
+            streakDays: 5,
+            today: DateTime.utc(2026, 8, 12),
+          ),
+        ),
+        isDark: theme.isDark,
+      );
+
+      final AppSemanticColors semantic =
+          (theme.isDark ? buildDarkTheme() : buildLightTheme())
+              .extension<AppSemanticColors>()!;
+      final fills = find
+          .descendant(
+            of: find.byType(ProgressWeekBarWidget),
+            matching: find.descendant(
+              of: find.byType(FractionallySizedBox),
+              matching: find.byType(DecoratedBox),
+            ),
+          )
+          .evaluate()
+          .map(
+            (element) =>
+                ((element.widget as DecoratedBox).decoration as BoxDecoration)
+                    .color,
+          )
+          .toList();
+
+      expect(fills, hasLength(7));
+      for (final Color? fill in fills) {
+        expect(fill, semantic.progressFill);
+        expect(fill, isNot(semantic.success));
+      }
+    });
+  }
 }

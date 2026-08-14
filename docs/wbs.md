@@ -9500,8 +9500,15 @@ thế không đổi bố cục.
         đếm ghi trên SQLite thật.
   - [x] `/progress`, `RouteNames.progress` và branch index 2 không đổi; deep
         link và branch preservation vẫn xanh.
-  - [x] Bảy state của wireframe render ở EN/VI, light/dark, 320dp@2.0, 390dp,
-        412dp; rect assertion pin G2/G3/G4/G6/G8/G9/G10; không overflow.
+  - [x] `S-b` render ở năm ô viewport×locale (`320@2.0·en`, `320@2.0·vi`,
+        `390·en`, `390·vi`, `412·en`) và cả hai theme; rect assertion pin
+        G1–G12; không overflow, và không từ nào bị ngắt giữa chừng ở
+        `320/360/390/412 @ 2.0` × {en, vi}. `S-c`/`S-d`/`S-e` render ở screen
+        test cộng strict visual audit (4 state × 2 theme), và `S-d`/`S-e` thêm
+        `320@2.0` cả hai locale. `S-a`/`S-f`/`S-g` là assertion hành vi chứ
+        không phải ô ma trận. **Cố ý không phủ, có trace:** `412·vi` (X2 — trục
+        viewport thuộc geometry suite, trục locale-dài đã có ở 320) và `S-a`
+        trong strict audit (X3).
   - [x] `dart format`, `flutter analyze`, guard kiến trúc, guard code, guard
         docs và host test xanh.
   - [ ] Emulator IT: deferred to the integration worktree — not run. Owner:
@@ -9513,6 +9520,14 @@ thế không đổi bố cục.
 - **Deferred debt:** tám mục dưới đây được mở ở stage 1 của batch tích hợp
   #301–#310 bởi hai recursive audit; mỗi mục có lý do vì sao **không** đóng
   được ở đây và ai đóng nó.
+  0b. **Ngày quá khứ được phân bucket lại khi offset đổi** — owner: M99.23.
+     `queries/progress.drift` áp offset của lần đọc hiện tại cho mọi hàng, nên
+     một answer ghi lúc 02:00 ở UTC+7 rơi sang ngày hôm trước khi đọc ở UTC−5,
+     và một chuỗi có thể dài ra hoặc đứt mà không có write nào. Đóng được bằng
+     cách lưu offset theo hàng trong `study_answers` — một schema change, tức
+     một migration, tức không thuộc phần tích hợp này. Hành vi đã được
+     canonicalize ở BR-182 và ghim ở `progress_repository_test.dart` để nó là
+     điều đã biết chứ không phải bug sẽ được phát hiện lại.
   0. **Không có trigger tức thời khi thiết bị đổi múi giờ trong lúc màn hình
      đang mở** — owner: M99.23. BR-189 bản đầu viết "MUST đo lại khi UTC offset
      đổi"; Flutter không publish callback nào cho việc đó (`WidgetsBindingObserver`
@@ -9564,13 +9579,9 @@ thế không đổi bố cục.
      cột giá trị hoặc rút gọn số (`1.2k`), cả hai đều là quyết định copy/thiết
      kế nên không thuộc phần tích hợp này.
   6. **Retry không tạo phản hồi hiển thị nào trong lúc đọc lại** — owner: chủ
-     sở hữu `MxAsyncView` (M4.10). `ref.invalidate` là một *refresh*, và
-     `skipLoadingOnRefresh: true` bỏ qua nhánh loading rồi rơi vào `hasError`,
-     nên màn vẽ lại đúng mặt lỗi cũ: người dùng chạm và **không một pixel nào
-     đổi** cho tới khi read xong — trên chính màn mà read là full scan. Hành vi
-     kế thừa từ shared component chứ không do #301 tạo ra, và wireframe S-e
-     không yêu cầu busy state, nên để lại; đóng bằng một pending state ở nút
-     hoặc bằng cách không bỏ qua loading khi giá trị trước đó là error.
+     sở hữu `MxAsyncView` (M4.10). Số đo, cơ chế và lý do chấp nhận nằm ở
+     **X7** của `docs/wireframes/m99-23-progress-overview.md`, vì đó là nơi
+     tiêu chí clean-stop đọc bảng divergence; dòng này chỉ giữ owner.
   7. **Không có gate nào đối chiếu `Affected documents` của một AD với
      `Editable documents` của task sửa nó** — owner: M99.9 (chủ sở hữu
      `check_docs.py`). Chính lỗ này để IT-NAV-011 mô tả Progress là placeholder

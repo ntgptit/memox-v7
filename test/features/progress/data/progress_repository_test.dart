@@ -154,6 +154,35 @@ void main() {
     });
   });
 
+  test('a past day is re-bucketed when the offset changes (BR-182)', () async {
+    // The consequence of holding no per-row offset, pinned so it is a known
+    // property rather than a bug somebody rediscovers.
+    //
+    // 02:00 local at UTC+7 on 11 August is 19:00Z on the 10th. Read back at
+    // UTC-5 the same row lands on the 10th — the day it belongs to moves under
+    // it, and a streak can lengthen or break with no write anywhere.
+    await seedCard('c1');
+    await answer('c1', at: DateTime.utc(2026, 8, 10, 19));
+
+    final atPlusSeven = await read(offset: const Duration(hours: 7));
+    final atMinusFive = await read(offset: const Duration(hours: -5));
+
+    // `now` is midday on the 12th, so the window's last entry is the 12th at
+    // +7 and the 11th at -5; index 5 and 6 are the two days before it.
+    expect(
+      atPlusSeven.lastSevenDays
+          .firstWhere((day) => day.localDate == DateTime.utc(2026, 8, 11))
+          .totalCards,
+      1,
+    );
+    expect(
+      atMinusFive.lastSevenDays
+          .firstWhere((day) => day.localDate == DateTime.utc(2026, 8, 10))
+          .totalCards,
+      1,
+    );
+  });
+
   group('what does not create activity', () {
     test('browse writes no answer, so it changes nothing (BR-183)', () async {
       // Asserted by **trying to insert one**, not by inserting nothing and
