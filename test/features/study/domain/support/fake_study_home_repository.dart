@@ -21,14 +21,25 @@ import 'package:memox/features/study/domain/repositories/study_home_repository.d
 /// It records every [StudyDayModel] it is asked for, so a test can prove the
 /// screen re-read at the instant it claimed to.
 final class FakeStudyHomeRepository implements StudyHomeRepository {
-  FakeStudyHomeRepository({StudyHomeModel? initial, this.failure})
-    : _controller = StreamController<StudyHomeModel>.broadcast() {
+  FakeStudyHomeRepository({
+    StudyHomeModel? initial,
+    this.failure,
+    this.isPending = false,
+  }) : _controller = StreamController<StudyHomeModel>.broadcast() {
     _latest = initial ?? fakeStudyHome();
   }
 
   /// Makes the stream fail the way a database error does, so the error state
   /// and its retry can be exercised.
   final Object? failure;
+
+  /// Makes the read never land, which is the only way to hold the loading state
+  /// still long enough to assert on it.
+  ///
+  /// A controller that is never fed, not `Stream.empty()`: an empty stream
+  /// closes at once, and a closed stream with no value is a state Riverpod is
+  /// entitled to treat differently from one still in flight.
+  final bool isPending;
 
   final StreamController<StudyHomeModel> _controller;
   late StudyHomeModel _latest;
@@ -43,6 +54,7 @@ final class FakeStudyHomeRepository implements StudyHomeRepository {
   @override
   Stream<StudyHomeModel> watchStudyHome(StudyDayModel day) {
     readDays.add(day);
+    if (isPending) return StreamController<StudyHomeModel>().stream;
     if (failure != null) return Stream<StudyHomeModel>.error(failure!);
 
     return _controller.stream.startWithLatest(_latest);

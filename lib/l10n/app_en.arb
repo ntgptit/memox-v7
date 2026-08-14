@@ -2654,11 +2654,11 @@
   },
   "studyHomeResumeSubtitle": "{kind} · {mode}",
   "@studyHomeResumeSubtitle": {
-      "description": "The open session's own kind and stage, both stored on the session and never inferred (BR-76, BR-98).",
       "placeholders": {
           "kind": { "type": "String" },
           "mode": { "type": "String" }
-      }
+      },
+      "description": "The open session's own kind and stage, both stored on the session and never inferred (BR-76, BR-98)."
   },
   "studyHomeResumeAction": "Resume",
   "@studyHomeResumeAction": {
@@ -2666,10 +2666,10 @@
   },
   "studyHomeResumeSemanticLabel": "Resume {deck}",
   "@studyHomeResumeSemanticLabel": {
-      "description": "Screen-reader name for the Resume action, which names the deck because several rows below carry a similar verb.",
       "placeholders": {
           "deck": { "type": "String" }
-      }
+      },
+      "description": "Screen-reader name for the Resume action, which names the deck because several rows below carry a similar verb."
   },
   "studyHomeNextTitle": "Study next",
   "@studyHomeNextTitle": {
@@ -2681,33 +2681,33 @@
   },
   "studyHomeOverdueLabel": "{count} overdue",
   "@studyHomeOverdueLabel": {
-      "description": "Due cards whose day has already passed (BR-162). A count, never an age.",
       "placeholders": {
           "count": { "type": "int" }
-      }
+      },
+      "description": "Due cards whose day has already passed (BR-162). A count, never an age."
   },
   "studyHomeDueTodayLabel": "{count} due today",
   "@studyHomeDueTodayLabel": {
-      "description": "Due cards still inside today's local day (BR-162).",
       "placeholders": {
           "count": { "type": "int" }
-      }
+      },
+      "description": "Due cards still inside today's local day (BR-162)."
   },
   "studyHomeNewLabel": "{count} new",
   "@studyHomeNewLabel": {
-      "description": "Cards that have not finished the learning chain (BR-90, BR-142).",
       "placeholders": {
           "count": { "type": "int" }
-      }
+      },
+      "description": "Cards that have not finished the learning chain (BR-90, BR-142)."
   },
   "studyHomeWorkloadSemanticLabel": "{overdue} overdue, {dueToday} due today, {newCount} new",
   "@studyHomeWorkloadSemanticLabel": {
-      "description": "The three counts as one screen-reader phrase, so a row is heard as one fact instead of three stray numbers.",
       "placeholders": {
           "overdue": { "type": "int" },
           "dueToday": { "type": "int" },
           "newCount": { "type": "int" }
-      }
+      },
+      "description": "The three counts as one screen-reader phrase, so a row is heard as one fact instead of three stray numbers."
   },
   "studyHomeStudyAction": "Study",
   "@studyHomeStudyAction": {
@@ -2715,10 +2715,10 @@
   },
   "studyHomeStudySemanticLabel": "Study {deck}",
   "@studyHomeStudySemanticLabel": {
-      "description": "Screen-reader name for a row's Study action. Every row carries the same word, so the deck name is what tells them apart.",
       "placeholders": {
           "deck": { "type": "String" }
-      }
+      },
+      "description": "Screen-reader name for a row's Study action. Every row carries the same word, so the deck name is what tells them apart."
   },
   "studyHomeEmptyLibraryTitle": "Nothing to study yet",
   "@studyHomeEmptyLibraryTitle": {

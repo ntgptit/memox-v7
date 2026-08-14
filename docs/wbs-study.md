@@ -881,12 +881,22 @@ phán quyết trước khi người dùng trả lời.
 - **Dependencies:** M5.7, M5.9, M5.15
 - **Tests required:** có
 - **Checklist phases:** 14.4, 15.3, 15.4
-- **Tests:** `study_home_test.dart` (30, SQLite thật),
-  `study_home_order_test.dart` (13), `study_home_widget_test.dart` (19),
-  `study_home_geometry_test.dart` (21),
-  `study_home_accessibility_test.dart` (5),
-  `study_home_screen_visual_audit_test.dart` (2), cộng sáu ca mới trong
-  `study_resume_paths_test.dart` cho việc resume theo id và theo ngày học
+- **Tests:** trên SQLite thật — `study_home_test.dart` (workload + ranking),
+  `study_home_resume_test.dart`, `study_home_stream_test.dart`, chung
+  `support/study_home_db_harness.dart`. Trên cây production —
+  `study_home_widget_test.dart` (bảy trạng thái), `study_home_actions_test.dart`,
+  `study_home_geometry_test.dart`, `study_home_card_geometry_test.dart`,
+  `study_home_responsive_test.dart`, `study_home_accessibility_test.dart`, chung
+  `support/study_home_harness.dart`. Cộng `study_home_order_test.dart` (13 ca
+  comparator thuần Dart), `study_home_screen_visual_audit_test.dart` (2) và sáu
+  ca mới trong `study_resume_paths_test.dart` cho resume theo id và theo ngày
+  học.
+- **Mỗi file test được tách theo group chứ không cắt theo số dòng.** Guard chặn
+  ở 400 dòng và ba file đầu tiên lần lượt là 751, 559 và 555 — cái đó là một
+  gate CI mà lượt đầu **không chạy local**, nên nó đỏ trên PR chứ không đỏ trên
+  máy. Đường nối là hai harness dùng chung: một database thật cho `data/`, một
+  `pump` qua router thật cho `presentation/`. Chia sẻ chúng cũng là thứ giữ cho
+  chín file không trôi thành chín màn hình hơi khác nhau.
 
 ## Nợ kỹ thuật của Study
 
