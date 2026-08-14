@@ -5,6 +5,7 @@ import 'package:memox/core/database/app_database.dart';
 import 'package:memox/features/study/data/datasources/study_dao.dart';
 import 'package:memox/features/study/data/repositories/study_repository_impl.dart';
 import 'package:memox/features/study/domain/models/new_card_order_model.dart';
+import 'package:memox/features/study/domain/models/study_direction_model.dart';
 import 'package:memox/features/study/domain/models/study_mode.dart';
 import 'package:memox/features/study/domain/models/study_session_kind_model.dart';
 
@@ -89,11 +90,20 @@ final class StudyHarness {
   );
 
   /// Opens a review session of [cardCount] due cards, running one [mode].
+  ///
+  /// [schedulerType] and [direction] exist for BR-182: the feature is reachable
+  /// only from an `sm2` deck, so a test of it has to be able to seed one — and a
+  /// test of its *unreachability* has to be able to seed the other.
   Future<String> openReview({
     required int cardCount,
     StudyMode mode = StudyMode.selfAssess,
+    String schedulerType = 'eight_box',
+    StudySessionDirection? direction,
   }) async {
-    final ids = await seedDeck(cardCount: cardCount);
+    final ids = await seedDeck(
+      cardCount: cardCount,
+      schedulerType: schedulerType,
+    );
     for (final id in ids) {
       await makeDue(id);
     }
@@ -105,6 +115,7 @@ final class StudyHarness {
       cardLimit: 20,
       newCardOrder: NewCardOrder.created,
       now: now,
+      direction: direction,
     );
 
     return session.id;

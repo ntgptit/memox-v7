@@ -7,6 +7,7 @@ import '../../../../core/time/time_zone_provider.dart';
 import '../../di/study_repository_provider.dart';
 import '../../domain/models/study_answer_commit_model.dart';
 import '../../domain/models/study_action_model.dart';
+import '../../domain/models/study_direction_model.dart';
 import '../../domain/models/study_mode.dart';
 import '../../domain/models/study_outcome_reason_model.dart';
 import '../../domain/models/study_session_kind_model.dart';
@@ -45,6 +46,10 @@ class StudySessionController extends _$StudySessionController {
   Future<void> start({
     required StudySessionKind kind,
     StudyMode? reviewMode,
+
+    /// The recall direction chosen at the entry point (BR-182). Null for every
+    /// session the rule does not cover, and ignored on a resume (BR-186).
+    StudySessionDirection? direction,
     bool shouldResume = false,
   }) async {
     state = state.copyWith(isOpening: true, error: null);
@@ -55,6 +60,7 @@ class StudySessionController extends _$StudySessionController {
             deckId: deckId,
             kind: kind,
             reviewMode: reviewMode,
+            direction: direction,
             shouldResume: shouldResume,
             now: ref.read(clockProvider)(),
             utcOffset: ref.read(utcOffsetProvider)(),

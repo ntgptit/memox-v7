@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memox/core/time/clock_provider.dart';
@@ -8,6 +10,7 @@ import 'package:memox/features/study/domain/models/study_session_kind_model.dart
 import 'package:memox/features/study/presentation/screens/study_entry_screen.dart';
 import 'package:memox/features/study/presentation/screens/study_options_screen.dart';
 import 'package:memox/features/study/presentation/screens/study_session_screen.dart';
+import 'package:memox/features/study/presentation/widgets/overlays/study_direction_chooser_widget.dart';
 import 'package:widgetbook/widgetbook.dart';
 
 import 'study_catalog_repository.dart';
@@ -37,13 +40,43 @@ List<WidgetbookComponent> studyScreenComponents() => <WidgetbookComponent>[
           ? StudySessionKind.reviewing
           : StudySessionKind.learning,
       reviewMode: scenario.isReview ? StudyMode.selfAssess : null,
+      direction: scenario.direction,
     ),
   ),
   _screen(
     'StudyOptionsScreen',
     (scenario) => const StudyOptionsScreen(deckId: 'catalog-deck'),
   ),
+
+  // **The one overlay in this list, and it earns the exception.** The other
+  // Study sheets are a fixed list of choices; this one has three states of its
+  // own — initial, submitting, and a refusal that keeps the selection — and the
+  // middle two are unreachable from the screen entries above, because the
+  // catalog's repository never fails. The dropdown drives them directly.
+  _screen('StudyDirectionChooser', (scenario) => const _DirectionChooserDemo()),
 ];
+
+/// The direction sheet on its own, with its three states on the scenario knob.
+///
+/// Mounted flat rather than inside a real `showModalBottomSheet`: a catalog page
+/// is not a route, and the sheet's own `SafeArea` + scroll behaviour is what a
+/// reviewer needs to look at.
+class _DirectionChooserDemo extends StatelessWidget {
+  const _DirectionChooserDemo();
+
+  @override
+  Widget build(BuildContext context) => Align(
+    alignment: Alignment.bottomCenter,
+    child: Material(
+      color: Theme.of(context).colorScheme.surfaceContainerLow,
+      child: StudyDirectionChooserWidget(
+        // Never resolves, so the sheet stays in its submitting state for as long
+        // as somebody wants to look at it.
+        onSubmit: (_) => Completer<Object?>().future,
+      ),
+    ),
+  );
+}
 
 /// One screen, with the scenario dropdown every Study use-case shares.
 WidgetbookComponent _screen(

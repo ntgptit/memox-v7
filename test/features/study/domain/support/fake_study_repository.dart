@@ -7,6 +7,7 @@ import 'package:memox/features/study/domain/failures/study_refusal_failure.dart'
 import 'package:memox/features/study/domain/models/new_card_order_model.dart';
 import 'package:memox/features/study/domain/models/study_action_model.dart';
 import 'package:memox/features/study/domain/models/study_deck_context_model.dart';
+import 'package:memox/features/study/domain/models/study_direction_model.dart';
 import 'package:memox/features/study/domain/models/study_entry_summary_model.dart';
 import 'package:memox/features/study/domain/models/study_answer_commit_model.dart';
 import 'package:memox/features/study/domain/models/study_queue_item_status_model.dart';
@@ -54,8 +55,28 @@ base class FakeStudyRepository
   /// Makes [openSession] refuse the way the real one does when nothing is due.
   final bool openSessionFails;
 
-  final List<({StudySessionKind kind, List<StudyMode> stages, int limit})>
-  opened = <({StudySessionKind kind, List<StudyMode> stages, int limit})>[];
+  /// Every [openSession] call, with what it was asked to open.
+  ///
+  /// `direction` is recorded because BR-187's refusals are the interesting half:
+  /// a test proving `eight_box` cannot reach the feature has to be able to say
+  /// what the repository was — or was not — handed.
+  final List<
+    ({
+      StudySessionKind kind,
+      List<StudyMode> stages,
+      int limit,
+      StudySessionDirection? direction,
+    })
+  >
+  opened =
+      <
+        ({
+          StudySessionKind kind,
+          List<StudyMode> stages,
+          int limit,
+          StudySessionDirection? direction,
+        })
+      >[];
 
   final List<
     ({
@@ -123,6 +144,7 @@ base class FakeStudyRepository
     required int cardLimit,
     required NewCardOrder newCardOrder,
     required DateTime now,
+    StudySessionDirection? direction,
   }) async {
     if (openSessionFails) {
       throw const ConflictFailure(
@@ -131,7 +153,12 @@ base class FakeStudyRepository
       );
     }
 
-    opened.add((kind: kind, stages: stageSequence, limit: cardLimit));
+    opened.add((
+      kind: kind,
+      stages: stageSequence,
+      limit: cardLimit,
+      direction: direction,
+    ));
 
     return StudySessionEntity(
       id: 'session-1',
@@ -146,6 +173,7 @@ base class FakeStudyRepository
       cardLimit: cardLimit,
       startedAt: now,
       endedAt: null,
+      direction: direction,
     );
   }
 

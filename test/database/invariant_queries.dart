@@ -1,8 +1,8 @@
-/// The 17 invariant queries this suite executes, copied verbatim from
+/// The 19 invariant queries this suite executes, copied verbatim from
 /// `data-model.md`.
 ///
 /// **A subset of the document's, and its numbering, not a fresh sequence.**
-/// The document specifies thirty; the ones here are the ones with an executable
+/// The document specifies thirty-two; the ones here are the ones with an executable
 /// fixture. The keys keep the document's ids so a failure names the rule rather
 /// than a position in this map — which is why `Q29` sits next to `Q2` and `Q30`
 /// next to `Q11`, each beside the rule it is about rather than at the end.
@@ -113,7 +113,27 @@ const Map<String, String> invariantQueries = <String, String>{
       'SELECT id FROM study_sessions '
       "WHERE status <> 'in_progress' AND ended_at IS NULL",
 
+  'Q31': // A recall direction outside where BR-182 allows one
+      'SELECT s.id FROM study_sessions s '
+      'WHERE (s.direction IS NOT NULL '
+      "AND (s.session_kind <> 'reviewing' OR s.current_mode <> 'self_assess')) "
+      'OR EXISTS (SELECT 1 FROM study_queue_items q '
+      'WHERE q.session_id = s.id '
+      "AND ((q.direction IS NOT NULL AND q.mode <> 'self_assess') "
+      'OR (q.direction IS NOT NULL AND s.direction IS NULL) '
+      "OR (s.direction IS NOT NULL AND q.mode = 'self_assess' "
+      'AND q.direction IS NULL)))',
+
   // ---- Review history -----------------------------------------------------
+  'Q32': // A turn's direction disagrees with the queue rows it came from (BR-185)
+      'SELECT a.id FROM study_answers a '
+      'WHERE EXISTS (SELECT 1 FROM study_queue_items q '
+      'WHERE q.session_id = a.session_id AND q.card_id = a.card_id '
+      'AND q.mode = a.mode) '
+      'AND NOT EXISTS (SELECT 1 FROM study_queue_items q '
+      'WHERE q.session_id = a.session_id AND q.card_id = a.card_id '
+      'AND q.mode = a.mode AND q.direction IS a.direction)',
+
   'Q14': // A relearning review changed the schedule (BR-78)
       'SELECT id FROM study_answers '
       "WHERE kind = 'relearning' "

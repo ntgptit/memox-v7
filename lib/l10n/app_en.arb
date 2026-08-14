@@ -1451,6 +1451,59 @@
   "@studyChooseModeTitle": {
     "description": "Title of the review mode chooser (BR-146)."
   },
+  "studyDirectionTitle": "Which way should cards be asked?",
+  "@studyDirectionTitle": {
+    "description": "Title of the recall-direction chooser, shown before a self-assess review of an SM-2 deck (BR-182). It asks about the exercise rather than about the card's columns: a learner has no reason to know which side a card stores where."
+  },
+  "studyDirectionBody": "You can't change this once the session starts.",
+  "@studyDirectionBody": {
+    "description": "Supporting line under the direction chooser title. States the lock (BR-186) before the choice rather than after it — a choice that turns out to be irreversible only once it has been made is one the user was not really offered."
+  },
+  "studyDirectionKoreanFirst": "Korean first",
+  "@studyDirectionKoreanFirst": {
+    "description": "Name of the Korean-to-meaning direction (BR-183). Recognition: the exercise every review did before BR-182."
+  },
+  "studyDirectionKoreanFirstBody": "See the Korean, recall what it means.",
+  "@studyDirectionKoreanFirstBody": {
+    "description": "One line describing the Korean-to-meaning direction. Says what the learner will see and what they have to produce, in that order, because that is the order the card puts them in."
+  },
+  "studyDirectionMeaningFirst": "Meaning first",
+  "@studyDirectionMeaningFirst": {
+    "description": "Name of the meaning-to-Korean direction (BR-183). Production, which is the harder half of knowing a word."
+  },
+  "studyDirectionMeaningFirstBody": "See the meaning, recall the Korean.",
+  "@studyDirectionMeaningFirstBody": {
+    "description": "One line describing the meaning-to-Korean direction."
+  },
+  "studyDirectionMixed": "Mixed",
+  "@studyDirectionMixed": {
+    "description": "Name of the mixed direction (BR-184)."
+  },
+  "studyDirectionMixedBody": "Each card is asked one way or the other, split evenly.",
+  "@studyDirectionMixedBody": {
+    "description": "One line describing the mixed direction. 'Split evenly' is a promise the assignment keeps to within one card (BR-184) — it deliberately does not say 'at random', which would let a 14-of-20 session pass as working as described."
+  },
+  "studyDirectionRecommendedOption": "{line} — Recommended",
+  "@studyDirectionRecommendedOption": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    },
+    "description": "Marks the Korean-first option by extending its own subtitle, so all three options share one text column. NOT a trailing badge: `ListTile` gives its text whatever the trailing widget leaves, so a badge on one row narrows that row alone — at 320dp the recommended option had 115dp of text against its neighbours’ 216dp and was the only one clipped, which is the opposite of recommending it. The placeholder carries the sentence so each language orders the two parts itself."
+  },
+  "studyDirectionNothingDue": "Nothing is due to review any more.",
+  "@studyDirectionNothingDue": {
+    "description": "Shown in the direction chooser when the last due card went while the sheet was open (UC-12 E2, BR-145). Distinct from studyDirectionFailed because this one cannot be retried — cards come due with time, not with another tap, and telling the user to try again would be advice that cannot work."
+  },
+  "studyDirectionStart": "Start review",
+  "@studyDirectionStart": {
+    "description": "Confirms the chosen direction and starts the session. The list selects and this starts — tapping an option cannot start a session that is then locked to it (BR-186)."
+  },
+  "studyDirectionFailed": "Could not start the review. Try again.",
+  "@studyDirectionFailed": {
+    "description": "Shown in the direction chooser when starting was refused — usually because the deck changed while the sheet was open (BR-13, BR-83). The chosen option is kept, because losing it would charge the user for an error that was not theirs."
+  },
   "studyModeBrowse": "Browse",
   "@studyModeBrowse": {
     "description": "Mode name: both sides at once, no grading (BR-111, BR-112)."

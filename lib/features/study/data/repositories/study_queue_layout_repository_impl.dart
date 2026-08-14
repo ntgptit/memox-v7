@@ -58,10 +58,16 @@ mixin _StudyQueueLayoutOperations {
   ///
   /// Two independent shuffles per stage keep BR-117 true: sharing one order
   /// across stages would make the second stage a re-run of the first.
+  ///
+  /// [direction] is the session's choice (BR-182), and this is where BR-184
+  /// happens: a `mixed` session hands each row its own direction, once, from the
+  /// injected generator. A fixed choice gives every row the same one, and a null
+  /// choice leaves the column alone.
   List<StudyQueueItemsCompanion> _roundOne({
     required String sessionId,
     required StudyMode mode,
     required List<StudyCardModel> cards,
+    StudySessionDirection? direction,
   }) {
     final handler = studyModeHandler(mode);
 
@@ -79,6 +85,12 @@ mixin _StudyQueueLayoutOperations {
         if (handler!.canTake(card)) card,
     ]..shuffle(_random);
 
+    final directions = _directionsFor(
+      mode: mode,
+      direction: direction,
+      count: usable.length,
+    );
+
     return <StudyQueueItemsCompanion>[
       for (final (index, card) in usable.indexed)
         StudyQueueItemsCompanion.insert(
@@ -87,7 +99,48 @@ mixin _StudyQueueLayoutOperations {
           cardId: card.id,
           position: index,
           status: 'pending',
+          direction: Value<String?>(directions?[index].dbValue),
         ),
     ];
+  }
+
+  /// One direction per row of this stage, or null when the stage has none.
+  ///
+  /// **The `self_assess` gate is here rather than only at the caller**, and it is
+  /// structural rather than defensive: BR-182 makes the direction a property of
+  /// *how a card is asked*, and only `self_assess` asks that way. A stage that
+  /// shows both faces at once (BR-112) could not honour a direction if it wanted
+  /// to.
+  ///
+  /// **An exhaustive `switch`, not `fixedDirection` plus a null check.** Reading
+  /// null as "mixed" makes [StudySessionDirection.unknown] deal a mixed hand
+  /// silently — a value nothing owns, quietly given a behaviour. Naming all four
+  /// makes a fifth a compile error, which is the check the null test cannot make.
+  List<StudyRecallDirection>? _directionsFor({
+    required StudyMode mode,
+    required StudySessionDirection? direction,
+    required int count,
+  }) {
+    if (direction == null || mode != StudyMode.selfAssess) return null;
+
+    // BR-184: `mixed` is assigned once, here, from the injected generator — the
+    // same one that shuffled the round above, and the reason a test can pin both.
+    return switch (direction) {
+      StudySessionDirection.koreanToMeaning =>
+        List<StudyRecallDirection>.filled(
+          count,
+          StudyRecallDirection.koreanToMeaning,
+        ),
+      StudySessionDirection.meaningToKorean =>
+        List<StudyRecallDirection>.filled(
+          count,
+          StudyRecallDirection.meaningToKorean,
+        ),
+      StudySessionDirection.mixed => assignMixedDirections(
+        count: count,
+        random: _random,
+      ),
+      StudySessionDirection.unknown => null,
+    };
   }
 }

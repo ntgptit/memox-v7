@@ -71,7 +71,17 @@ void main() {
     );
 
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 5);
+
+    // **`db.schemaVersion`, not a literal 5, and the literal was a fiction.**
+    // `onUpgrade` branches on `from` alone — deliberately, because in production
+    // `to` is always the newest version and a `to >= n` guard would add a branch
+    // no device ever takes (see `migration_test.dart`). A v4 database therefore
+    // cannot be stopped at v5: it runs every step. Naming 5 here worked only for
+    // as long as every later step happened to be data-only, and v8's three
+    // columns are what ended that. What these tests assert is unchanged — that a
+    // v4 row survives the rebuild — and the path it survives is the whole one a
+    // real device takes.
+    await verifier.migrateAndValidate(db, db.schemaVersion);
     return db;
   }
 

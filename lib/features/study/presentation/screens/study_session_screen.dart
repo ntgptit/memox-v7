@@ -8,6 +8,7 @@ import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_empty_state.dart';
 import '../../../../shared/widgets/mx_error_state.dart';
 import '../../../../shared/widgets/mx_loading_state.dart';
+import '../../domain/models/study_direction_model.dart';
 import '../../domain/models/study_mode.dart';
 import '../../domain/models/study_session_kind_model.dart';
 import '../../domain/models/study_turn_model.dart';
@@ -34,12 +35,19 @@ class StudySessionScreen extends ConsumerStatefulWidget {
     required this.deckId,
     required this.kind,
     this.reviewMode,
+    this.direction,
     this.shouldResume = false,
     super.key,
   });
 
   final String deckId;
   final StudySessionKind kind;
+
+  /// The recall direction chosen at the entry point (BR-182).
+  ///
+  /// Null for every session outside the rule, and for a resume — which reads the
+  /// direction the session already carries rather than being told one (BR-186).
+  final StudySessionDirection? direction;
 
   /// Continue the session already open for this deck, rather than opening a new
   /// one (BR-103). [kind] and [reviewMode] are then the resumed session's own,
@@ -84,6 +92,7 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
             .start(
               kind: widget.kind,
               reviewMode: widget.reviewMode,
+              direction: widget.direction,
               shouldResume: widget.shouldResume,
             ),
       );

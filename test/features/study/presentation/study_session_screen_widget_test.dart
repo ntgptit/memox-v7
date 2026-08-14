@@ -11,6 +11,7 @@ import 'package:memox/core/time/time_zone_provider.dart';
 import 'package:memox/features/study/di/study_repository_provider.dart';
 import 'package:memox/features/study/domain/entities/study_queue_item_entity.dart';
 import 'package:memox/features/study/domain/models/study_action_model.dart';
+import 'package:memox/features/study/domain/models/study_direction_model.dart';
 import 'package:memox/features/study/domain/models/study_mode.dart';
 import 'package:memox/features/study/domain/models/study_queue_item_status_model.dart';
 import 'package:memox/features/study/domain/models/study_session_kind_model.dart';
@@ -50,6 +51,7 @@ void main() {
           answersInSession: 0,
           remainingMs: null,
           isRevealed: false,
+          direction: null,
         ),
         progress: StudyStageProgressModel(
           round: 1,
@@ -75,6 +77,17 @@ void main() {
     required StudySessionKind kind,
     SchedulerType schedulerType = SchedulerType.sm2,
   }) async {
+    // BR-187: an `sm2` self-assess review is refused without a recall direction,
+    // so the screen would render its error state rather than a session. Korean
+    // first is what every review did before BR-182, which keeps every assertion
+    // below about the chrome rather than about the direction.
+    final direction =
+        schedulerType == SchedulerType.sm2 &&
+            kind == StudySessionKind.reviewing &&
+            mode == StudyMode.selfAssess
+        ? StudySessionDirection.koreanToMeaning
+        : null;
+
     // `sm2`, so `self_assess` is a review mode the algorithm actually offers
     // (BR-146). Asking an `eight_box` deck for it is refused, and the screen
     // would then be its error state rather than a session.
@@ -103,6 +116,7 @@ void main() {
             deckId: 'deck-1',
             kind: kind,
             reviewMode: kind == StudySessionKind.reviewing ? mode : null,
+            direction: direction,
           ),
         ),
       ),

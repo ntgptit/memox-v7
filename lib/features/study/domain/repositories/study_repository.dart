@@ -4,6 +4,7 @@ import '../models/new_card_order_model.dart';
 import '../models/study_action_model.dart';
 import '../models/study_card_limit_model.dart';
 import '../models/study_deck_context_model.dart';
+import '../models/study_direction_model.dart';
 import '../models/study_entry_summary_model.dart';
 import '../models/study_schedule_model.dart';
 import '../models/study_mode.dart';
@@ -98,6 +99,13 @@ abstract interface class StudyRepository {
   ///
   /// Throws a refusal when the set is empty — for a review session that is
   /// BR-145, and it must leave no session row behind (BR-101).
+  ///
+  /// [direction] is the recall direction chosen before the session started
+  /// (BR-182), and null for every session the rule does not cover. Whether it
+  /// *may* be non-null is the caller's check — eligibility needs the root deck's
+  /// algorithm, which the use case has already read (BR-187). What happens here
+  /// is BR-184: a [StudySessionDirection.mixed] session assigns each queue row its
+  /// own direction, once, inside the same transaction that writes the row.
   Future<StudySessionEntity> openSession({
     required String deckId,
     required StudySessionKind kind,
@@ -105,6 +113,7 @@ abstract interface class StudyRepository {
     required int cardLimit,
     required NewCardOrder newCardOrder,
     required DateTime now,
+    StudySessionDirection? direction,
   });
 
   /// The next card to serve, or null when the current stage has nothing left to
@@ -133,6 +142,12 @@ abstract interface class StudyRepository {
   /// Refuses, without writing anything, when the session's generation no longer
   /// matches the root's (BR-84) — and marks the session `invalidated` when it
   /// does not.
+  ///
+  /// **The turn's direction is not a parameter** (BR-185). It is copied off the
+  /// queue row this call already reads, inside the same transaction, so the
+  /// history row cannot disagree with the row that decided how the card was
+  /// asked. A direction supplied from above would be one more thing a screen
+  /// could get wrong, and BR-76 has already paid for the general form of that.
   Future<StudyAnswerCommitModel> submitAnswer({
     required String sessionId,
     required String cardId,

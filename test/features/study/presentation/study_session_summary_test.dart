@@ -5,6 +5,7 @@ import 'package:memox/core/time/time_zone_provider.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 import 'package:memox/features/study/di/study_repository_provider.dart';
 import 'package:memox/features/study/domain/models/study_action_model.dart';
+import 'package:memox/features/study/domain/models/study_direction_model.dart';
 import 'package:memox/features/study/domain/models/study_mode.dart';
 import 'package:memox/features/study/domain/models/study_session_kind_model.dart';
 import 'package:memox/features/study/presentation/controllers/study_session_controller.dart';
@@ -46,9 +47,18 @@ void main() {
   Future<void> openAndFinish(
     ProviderContainer container, {
     required StudyMode reviewMode,
+
+    /// BR-187: an `sm2` self-assess review is refused without one, so the
+    /// summary would never be reached. Every other combination must be given
+    /// none, which is what makes this a parameter rather than a default.
+    StudySessionDirection? direction,
   }) => container
       .read(studySessionControllerProvider('deck-1').notifier)
-      .start(kind: StudySessionKind.reviewing, reviewMode: reviewMode);
+      .start(
+        kind: StudySessionKind.reviewing,
+        reviewMode: reviewMode,
+        direction: direction,
+      );
 
   test('is read once, not once per number (AD-13)', () async {
     final repository = FakeStudyRepository(
@@ -103,7 +113,11 @@ void main() {
     );
     final container = containerWith(repository);
 
-    await openAndFinish(container, reviewMode: StudyMode.selfAssess);
+    await openAndFinish(
+      container,
+      reviewMode: StudyMode.selfAssess,
+      direction: StudySessionDirection.koreanToMeaning,
+    );
     await container.read(studySessionSummaryProvider('deck-1').future);
 
     expect(repository.summaryWrongActions, <StudyAction>[StudyAction.again]);

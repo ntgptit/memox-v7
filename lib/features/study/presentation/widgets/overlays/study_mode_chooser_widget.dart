@@ -41,20 +41,30 @@ class StudyModeChooserWidget extends StatelessWidget {
   int _capacity(StudyMode mode) =>
       studyModeHandler(mode)?.capacityFrom(summary) ?? 0;
 
+  /// **Scrollable, and the bottom inset is the sheet's own.**
+  ///
+  /// A modal sheet is capped at a fraction of the screen; four modes, each with
+  /// a count or a reason under it, pass that cap on a short screen and well
+  /// before a large text scale. The overflow was found by the direction
+  /// chooser's entry test (BR-182) rather than by anything about the modes —
+  /// same shape, same fix, and neither changes the layout when it fits.
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.all(AppSpacing.lg),
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        Text(
-          context.l10n.studyChooseModeTitle,
-          style: context.texts.titleMedium,
-        ),
-        const SizedBox(height: AppSpacing.md),
-        for (final mode in modes) _tile(context, mode),
-      ],
+  Widget build(BuildContext context) => SafeArea(
+    top: false,
+    child: SingleChildScrollView(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Text(
+            context.l10n.studyChooseModeTitle,
+            style: context.texts.titleMedium,
+          ),
+          const SizedBox(height: AppSpacing.md),
+          for (final mode in modes) _tile(context, mode),
+        ],
+      ),
     ),
   );
 

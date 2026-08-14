@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.22 (five-way PR host-test sharding follow-up) |
+| **Updated by task** | M99.23 (Reverse Self-assess v1 — chiều hỏi cho phiên self-assess) |
 | **Last updated** | 2026-08-13 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -9341,6 +9341,107 @@ thế không đổi bố cục.
   aggregate check và đo lại wall-clock.
 - **Checklist phases:** 19, meta
 
+### M99.23 · Reverse Self-assess v1 — chiều hỏi cho phiên self-assess
+
+- **Status:** **done**
+- **Goal:** Cho người học chọn hỏi Korean→Meaning, Meaning→Korean hay Mixed
+  trong phiên ôn `self_assess` của deck `sm2`, mà không đụng nội dung thẻ, không
+  đụng lịch SRS và không mở một bề mặt nào cho `eight_box`.
+- **Scope:** Study slice — domain direction model, contract session/queue/answer,
+  schema v8 + migration + backfill, use case mở phiên, sheet chọn chiều ở Study
+  Entry, thẻ self-assess, l10n EN/VI, Widgetbook, tests. Ngoài phạm vi:
+  `eight_box`, chuỗi học mới, `match`/`guess`/`recall`/`fill`, đảo nội dung thẻ.
+- **Editable documents:** `docs/business-rules.md`, `docs/use-cases.md`,
+  `docs/data-model.md`, `docs/wireframes/m5-study-modes.md`, `docs/wbs.md`
+- **5Why:** Ứng dụng chỉ đo được **nhận ra**, không đo được **tạo ra**, vì
+  `self_assess` luôn hiện `front` trước; hướng hiển thị là thuộc tính của *cách
+  hỏi* chứ không của thẻ, nên đảo nó không được phép ghi lại `front`/`back`
+  (BR-08 đã chốt front giữ term); chỉ `self_assess` đảo được vì bốn mode còn lại
+  chấm dựa trên một mặt cố định (BR-123, BR-134), và `eight_box` không chạy
+  `self_assess` trong phiên ôn (BR-110); `mixed` phải **lưu** chứ không gieo, vì
+  BR-26 đưa thẻ quên quay lại trong chính dòng cũ và BR-103 mang cả phiên trở lại
+  sau restart — seed sống sót rebuild nhưng không sống sót một lần đổi công thức
+  seed; nguyên nhân gốc là chiều hỏi chưa có chỗ lưu nào, nên mọi cách "suy ra
+  lúc render" đều là một câu hỏi khác ở mỗi lần rebuild.
+- **Output:** `study_direction_model.dart` (hai enum tách biệt, predicate
+  eligibility, hàm chia đều), `study_review_options_model.dart` +
+  `get_review_options_use_case.dart` + `study_review_options_controller.dart`
+  (đổi tên từ review modes — một read trả cả mode lẫn scheduler, AD-13),
+  `study_direction_chooser_widget.dart`, ba cột `direction` ở schema v8 +
+  `_upgradeToV8` + `drift_schema_v8.json`, bất biến 31/32, 15 key l10n EN/VI, ba
+  scenario Widgetbook.
+- **Acceptance criteria:**
+  - [x] Sheet chọn chiều chỉ xuất hiện với `reviewing` × `sm2` × `self_assess`;
+        `eight_box` đi qua màn chọn mode và không có đường nào tới nó.
+  - [x] `front`/`back`, cột folded và `cards.updated_at` không đổi sau một phiên
+        ở bất kỳ chiều nào.
+  - [x] `mixed` gán một lần lúc materialize hàng đợi, lệch tối đa một thẻ, và
+        giữ nguyên qua comeback BR-26, Resume và restart tiến trình.
+  - [x] Chiều của phiên/hàng đợi/lượt lưu tường minh; lượt chép chiều từ dòng
+        hàng đợi trong cùng transaction, không nhận từ UI.
+  - [x] DB v1…v7 nâng cấp sạch lên v8; lượt `self_assess` của phiên `reviewing`
+        trên cây `sm2` backfill `korean_to_meaning`, mọi dòng khác giữ NULL.
+  - [x] Cùng thẻ + cùng action cho ra `due_at`/`ease_factor`/`interval_days`/
+        `current_box` y hệt ở cả ba lựa chọn.
+  - [x] Generation cũ và mọi refusal không để lại chiều nửa vời.
+  - [x] Chọn/submitting/failure của sheet; ba chiều × reveal × resume của thẻ;
+        EN/VI, light/dark, 320dp và 390dp; `getRect` ghim card/divider/action row
+        bằng nhau ở hai chiều; 48dp cho mọi target.
+  - [x] `dart format`, `flutter analyze`, guard, `check_docs.py` và full host
+        suite xanh.
+  - [ ] **Emulator integration suite hoãn** — xem *Deferred* bên dưới.
+- **Dependencies:** M99.16 (schema v7 và backfill khoá scheduler). Study slice
+  M5.7…M5.25 nằm ở `docs/wbs-study.md` và không trích được ở đây bằng ID.
+- **Tests required:** domain (eligibility exhaustive trên `StudyMode` ×
+  `SchedulerType` × kind, ánh xạ đề/đáp án, hợp đồng `|a-b| <= 1` cho mọi cỡ,
+  round-trip và degrade của giá trị lưu), use case (hai refusal của BR-187,
+  resume bỏ qua chiều), SQLite thật (fixed/mixed, comeback, restart bằng
+  repository thứ hai, lượt chép chiều, `eight_box` không chạm gì, học mới chỉ
+  đóng dấu `self_assess`, lịch không đổi, ba refusal không để lại dòng),
+  migration v8 (backfill đúng/không đụng, CHECK từ chối `mixed` trên dòng, mọi
+  snapshot còn nâng cấp), widget (sheet ba trạng thái, double tap, giữ lựa chọn
+  sau lỗi, glyph chứ không chỉ màu, geometry `getRect`), screen (chooser
+  visibility hai chiều).
+- **Checklist phases:** 5, 9, 10, 11, 12, 13, 14, 15
+
+**Đã sửa kèm, ngoài scope ban đầu:** sheet chọn mode của BR-146 tràn trên máy
+thấp — bốn mode kèm dòng lý do vượt trần chiều cao của một modal sheet, và tràn
+thì không còn cách nào chọn. Tìm ra bởi chính screen test của sheet chiều, sửa
+bằng cùng một `SingleChildScrollView` + `SafeArea(top: false)`.
+
+**Hai vòng review (architecture/logic và UI/UX, cả hai AUDIT_ONLY) đổi bảy thứ,
+và bốn trong số đó là lỗi thật:**
+
+| Mức | Lỗi | Sửa |
+|---|---|---|
+| P1 | Backfill v8 hỏi "cây này có chạy `sm2` không" bằng **hai** nguồn: `study_answers.scheduler_type` (lịch sử) cho một bảng, `decks.scheduler_type` (hiện tại) cho hai bảng kia. Cây từng ôn dưới `sm2` rồi Reset sang `eight_box` được đóng dấu ở answer mà không ở queue — **chính là vi phạm bất biến 32, do migration tự sinh ra** | Một predicate: đóng dấu `study_sessions` trước từ **một trong hai** nguồn, hai bảng kia dẫn xuất từ dấu đó. Fixture "cây đã Reset" trong `migration_v8_test.dart` |
+| P1 (UI) | Badge `Recommended` ở `trailing` bóp hẹp **đúng dòng nó gắn vào**: 115dp chữ so với 216dp, nên dòng được khuyến nghị là dòng duy nhất bị cắt mô tả. Test mang tên "shared width" chỉ đo rect của tile — thứ luôn bằng nhau vì `stretch` — nên **không thể fail** | Nhãn vào chính dòng mô tả qua ARB placeholder; assertion đo `RenderParagraph.constraints.maxWidth` ở 320/390 × scale 1.0/2.0 × EN/VI. Đã kiểm bằng cách dựng lại badge: assertion đỏ với `Set:[115.39, 216.0]` |
+| P2 | `openSession` ghi `study_sessions.direction` cho cả phiên **không** đủ điều kiện — chỉ hàng queue được gate | Guard tại chỗ ghi; hai test đổi từ "lọc" sang "từ chối", và bất biến 31 nhận thêm mệnh đề bắt đúng dòng session mồ côi đó |
+| P2 | UC-12 E2 mô tả hành vi code không có: sheet pop **trước** khi `openSession` chạy, nên BR-145 hiện ra là error state toàn màn, mất lựa chọn | `_startWithDirection` đọc lại cả due count và trả `ConflictFailure` về sheet trước khi pop; hai screen test cho E1 và E2 |
+| P2 | Dòng lỗi của sheet không được screen reader đọc | `Semantics(liveRegion: true)`, kèm assertion |
+| P2 | Sheet biết chính xác lý do rồi in một câu **sai lời khuyên**: "Try again" cho trạng thái không thể thử lại (hết thẻ đến hạn) | Key ARB thứ hai, chọn theo `StudyRefusalReason` |
+| P3 | `StudySessionDirection.unknown` âm thầm được chia bài như `mixed`; bất biến 32 join thiếu `round`; ba assertion không thể fail; test "long content" dùng fixture 44 ký tự | `switch` exhaustive; bất biến 32 so với **tập** dòng của thẻ trong stage; divider đo bằng đúng `card.width - 2*lg` và tâm sai số 1dp; fixture dùng đúng trần 60/240 của BR-08 ở cả ba viewport × scale 2.0 |
+
+Bất biến 31 cũng mất mệnh đề `sm2`: `study_sessions` không mang `scheduler_type`,
+nên đọc thuật toán *hiện tại* của cây là sai với đúng cây đã Reset — cùng lý do
+BR-21 đặt cột đó lên `study_answers`. Điều kiện `sm2` thuộc write path (BR-187),
+không thuộc một câu SQL đọc sau.
+
+Ba file vượt trần 400 dòng của guard được tách theo seam thật, không phải cắt cho
+đủ số: `app_database_migrations_v5.dart` (rebuild bảng vs. mọi bước additive),
+`study_card_face_pieces_widget.dart` (theo tiền lệ `*_pieces_widget.dart` có sẵn),
+và ba cặp test tách theo câu hỏi chúng trả lời — kèm hai support fixture dùng
+chung (`invariant_fixture.dart`, `migration_v8_fixture.dart`).
+
+**Deferred — emulator integration suite.** `integration_test/` chưa chạy trên
+emulator trong task này. CLAUDE.md bắt buộc nó cho **mọi thay đổi dưới
+`lib/features/`**, nên đây là một khoản nợ tường minh chứ không phải một mục bị
+quên: baseline là 8 passing / 0 failing, và task tiếp theo chạm Study MUST chạy
+`flutter test integration_test/ -d emulator-5554 --flavor development` trước khi
+đóng. Ba thứ trong PR này nằm đúng vùng suite đó tồn tại để bắt: schema đổi (v8),
+binding của Study không đổi nhưng contract `openSession` thì có, và một sheet mới
+ở đường vào phiên.
+
 ## Blocker
 
 | Blocker | Ảnh hưởng | Cách gỡ |
@@ -9411,7 +9512,7 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 | ~~`study_session_controller.dart` vượt trần 400 dòng của guard~~ | M5.23 | 408/400, và **warning cũng làm đỏ gate**. Class giữ toàn bộ command của phiên học, cộng summary và failure policy | **Đã trả trong cùng PR.** Tách `_loadSummary` + `StudySessionState.summary` thành `studySessionSummaryProvider` — một **query**, không phải command, nên nó chưa bao giờ thuộc về controller. Controller còn 380 dòng. Lợi ích thật chứ không chỉ số dòng: read cũ có ba call site (hết stage, leave, failure path) nên summary chỉ đúng bằng người cuối cùng nhớ đủ cả ba, và field thì sống lâu hơn phiên — quên một call site là hiện số của phiên trước dưới tiêu đề phiên mới |
 | ~~`dart format .` trong `dod_check.sh` crash trên worktree~~ | M2.2b | Bước `format` đỏ ở **mọi** lần chạy local nhiều tuần liền: `.` đi vào `.claude/worktrees/`, nơi Gradle xoá thư mục ngay giữa lúc formatter đang liệt kê → `PathNotFoundException`. Vì là lỗi môi trường chứ không phải lỗi format, mỗi lần lại được *báo cáo và đi vòng* thay vì sửa — và một gate đỏ mà ai cũng biết là đỏ thì không còn là gate | **Đã trả.** `dart_roots()` lấy tập thư mục từ `git ls-files '*.dart'` cắt tới segment đầu. Đúng câu hỏi cần hỏi — *cây làm việc **này** track những file Dart nào* — nên build output không tracked không lọt vào, worktree bị `.git/info/exclude` loại sẵn, và một thư mục top-level mới tự động được nhận. **Lỗi thứ hai nghiêm trọng hơn cái crash:** `.` đưa cho formatter source của **nhánh khác**, nên một worktree có format cũ làm gate đỏ vì code không nằm trong cây làm việc |
 | ~~`study_session_controller.dart` vượt trần 400 dòng của guard~~ | M5.24 | 423/400. Warning cũng làm đỏ gate. Class giữ toàn bộ command của phiên học | **Đã trả ở M5.25.** Không tách được bằng cơ chế ngôn ngữ — Dart không có partial class, base class Riverpod sinh ra là private, và extension trong `part` cũng không dùng được `state` (`invalid_use_of_protected_member`, đã thử và revert). Nên tách bằng **trách nhiệm**: offset nhìn lại của `browse` là view state, không phải command của phiên, và nay là `StudyBrowseTrailController`. Controller còn 387 dòng |
-| `end_reason = scheduler_reset` phải mang cả BR-164 | M99.16 | Đổi scheduler khi chưa khoá ghi cùng giá trị với Reset, nên đọc riêng cột đó thì hai sự kiện khác nhau trông giống nhau. Không mất thông tin — `study_sessions.scheduler_generation` bằng generation của root sau một lần đổi và nhỏ hơn sau một lần reset — nhưng nó bắt người đọc phải biết mẹo đó | Tên đúng là `scheduler_changed`. `study_sessions.end_reason` có `CHECK` liệt kê giá trị nên thêm một giá trị là **đổi schema**, và bump version đang thuộc về task chuẩn hoá `content_type` chạy song song (v6). Nới `CHECK` cùng lần bump schema tiếp theo — v6 của BR-163 và v7 của chính task này đều đã đi, nên là v8 — rồi đổi `deck_scheduler_repository_impl.dart` sang giá trị mới. Nới `CHECK` là rebuild bảng, không phải `ALTER`, nên nó xứng đáng một bump riêng chứ không ghép vào backfill data-only của v7 |
+| `end_reason = scheduler_reset` phải mang cả BR-164 | M99.16 | Đổi scheduler khi chưa khoá ghi cùng giá trị với Reset, nên đọc riêng cột đó thì hai sự kiện khác nhau trông giống nhau. Không mất thông tin — `study_sessions.scheduler_generation` bằng generation của root sau một lần đổi và nhỏ hơn sau một lần reset — nhưng nó bắt người đọc phải biết mẹo đó | Tên đúng là `scheduler_changed`. `study_sessions.end_reason` có `CHECK` liệt kê giá trị nên thêm một giá trị là **đổi schema**, và bump version đang thuộc về task chuẩn hoá `content_type` chạy song song (v6). Nới `CHECK` cùng lần bump schema tiếp theo, rồi đổi `deck_scheduler_repository_impl.dart` sang giá trị mới. Nới `CHECK` là **rebuild bảng**, không phải `ALTER`, nên nó xứng đáng một bump riêng. **v8 đã đi cho BR-182** — ba cột `direction` thêm bằng `ALTER TABLE ADD COLUMN`, không rebuild gì, nên không ghép được — nên đích bây giờ là **v9** |
 | Nội dung starter là fixture, không phải nội dung production | T1.3 | Không phát hành được với nội dung này | Tìm nguồn nội dung có bản quyền rõ ràng trước M8 (BR-87) |
 | `sqlite3.wasm` và `drift_worker.js` là binary vendored trong `web/` | M4.2 | Không có bước build nào sinh ra chúng và không có bước build nào báo khi chúng cũ: app compile, load, rồi **không mở được database**. Nâng `drift` mà quên tải lại worker không có triệu chứng nào cho tới khi ai đó mở trình duyệt | `test/database/web_assets_test.dart` so version trong `pubspec.lock` với version đã pin, kèm `web/WEB_ASSETS.md` ghi URL tải. Đã kiểm tiêm lỗi: đổi `drift` thành 2.99.0 làm test đỏ |
 | Server phát web chưa gửi COOP/COEP | M4.2 | `crossOriginIsolated` là `false`, nên drift chọn backend lưu trữ kém hơn OPFS. Không có lỗi nào — chỉ là hiệu năng và độ bền khác đi, âm thầm | Thêm `Cross-Origin-Opener-Policy: same-origin` và `Cross-Origin-Embedder-Policy: require-corp` vào server phát web ở M7, và kiểm lại `crossOriginIsolated` trong E2E |

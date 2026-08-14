@@ -7,7 +7,7 @@
 | **Scope** | Must-have của MVP. Ngoài phạm vi: should/nice-to-have, và mọi thứ ở mục "Điều đã cố ý không đặc tả" |
 | **Source of truth for** | UC-xx · main/alternative/error flow · UI state matrix của từng màn |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md` |
-| **Updated by task** | M99.21 — UC-11: export card của một deck ra file (scope → format → share) |
+| **Updated by task** | M99.23 — UC-12: chọn chiều hỏi cho một phiên self-assess (eligible → chọn → khoá) |
 | **Last updated** | 2026-08-13 |
 
 Chỉ đặc tả must-have. Should-have và nice-to-have viết khi tới lượt — đặc tả
@@ -17,7 +17,7 @@ Luồng viết bằng ngôn ngữ người dùng, không nói theo màn hình ha
 hình sẽ đổi; luồng thì không.
 
 **ID use case là định danh vĩnh viễn**, cùng chính sách với BR (xem
-`business-rules.md`). UC mới append; không đánh số lại. Hiện tại: UC-01…UC-11.
+`business-rules.md`). UC mới append; không đánh số lại. Hiện tại: UC-01…UC-12.
 
 **Các UC nối vào nhau thế nào thì xem [`master-flow.md`](master-flow.md).** Tài
 liệu này đặc tả từng UC riêng lẻ và cố ý không vẽ đồ thị giữa chúng — mỗi UC mô
@@ -805,6 +805,73 @@ unavailable/platform error · repository error · encoder error · invalid scope
 đã có sẵn từ màn gọi; và không có state `empty`, vì scope rỗng là lỗi (E5) chứ
 không phải một màn hình trống.
 
+## UC-12 · Chọn chiều hỏi cho một phiên self-assess
+
+| | |
+|---|---|
+| **Status** | active |
+
+**Actor:** Người dùng
+**Trigger:** Bấm `Review` ở Study Entry của một deck chạy `sm2`
+**Preconditions:** Root deck của deck đang mở dùng scheduler `sm2` (BR-06), có ít
+nhất một thẻ đến hạn (BR-145), và mode ôn duy nhất thuật toán này offer là
+`self_assess` (BR-146) — ba điều kiện của BR-182
+
+**Main flow:**
+1. Người dùng bấm `Review`. Vì `sm2` chỉ offer một mode, hệ thống bỏ qua màn chọn
+   mode (BR-146) và mở sheet chọn **chiều hỏi**.
+2. Hệ thống hiển thị ba lựa chọn — `Korean first` (gắn nhãn Recommended),
+   `Meaning first`, `Mixed` — mỗi lựa chọn kèm một dòng mô tả bằng lời của bài
+   tập, và một dòng nói lựa chọn không đổi được sau khi phiên bắt đầu (BR-186).
+3. Người dùng chạm một lựa chọn. Chạm chỉ **chọn**, không mở phiên: lựa chọn bị
+   khoá suốt phiên nên một cú chạm nhầm không được phép tiêu mất một phiên
+   (BR-186).
+4. Người dùng bấm `Start review`. Hệ thống khoá sheet trong lúc mở phiên — cú
+   chạm thứ hai không sinh phiên thứ hai (BR-25).
+5. Hệ thống mở phiên với chiều đã chọn, materialize hàng đợi trong cùng
+   transaction, và gán chiều cho từng dòng: một chiều duy nhất với hai lựa chọn
+   cố định, hoặc chia gần đều một lần cho `mixed` (BR-184).
+6. Màn phiên học mở ra. Mỗi thẻ hiện đề ở nửa trên theo chiều của dòng nó, và
+   đáp án ở nửa dưới sau khi lật (BR-183). Tập action vẫn là bốn action của `sm2`
+   (BR-30) và lịch chạy y như trước (BR-188).
+
+**Alternative flows:**
+- **A1 — Đóng sheet:** người dùng vuốt xuống hoặc chạm ra ngoài. Chưa có gì được
+  ghi, nên không có session nào để dọn (BR-101, BR-186); màn Study Entry giữ
+  nguyên.
+- **A2 — Deck chạy `eight_box`:** sheet này không xuất hiện. Lối vào là màn chọn
+  mode của BR-146, và không đường nào từ đó dẫn tới chiều hỏi (BR-182).
+- **A3 — Còn phiên bỏ dở:** sheet ba lối của BR-103 hiện trước. Chọn `Continue`
+  đọc chiều đã lưu và **không** hỏi lại (BR-186); chọn `Review` kết thúc phiên cũ
+  rồi đi vào bước 1.
+- **A4 — Phiên `mixed` đang chạy:** hai thẻ liên tiếp có thể hỏi hai chiều khác
+  nhau. Đó là đúng bài tập người dùng chọn; chiều của mỗi thẻ đã cố định từ bước
+  5 và không đổi khi thẻ quay lại (BR-26, BR-184).
+
+**Error flows:**
+- **E1 — Deck đổi scheduler hoặc bị reset trong lúc sheet đang mở:** hệ thống đọc
+  lại trước khi mở phiên; nếu `self_assess` không còn được offer thì sheet hiện
+  một dòng lỗi và **giữ nguyên lựa chọn**, để người dùng thử lại mà không phải
+  chọn lại (BR-13, BR-83).
+- **E2 — Không còn thẻ đến hạn tại thời điểm bấm Start:** phiên bị từ chối và
+  không ghi dòng nào (BR-101, BR-145); sheet báo lỗi như E1.
+- **E3 — Yêu cầu thiếu chiều:** không thể tạo từ UI này; use case vẫn từ chối là
+  validation và không ghi session (BR-187).
+
+**Postconditions:** `study_sessions.direction` giữ lựa chọn của phiên,
+`study_queue_items.direction` giữ chiều thật của từng thẻ, và mỗi lượt ghi vào
+`study_answers.direction` chiều chép từ dòng hàng đợi (BR-185). Nội dung thẻ,
+`cards.updated_at` và toàn bộ lịch SRS không đổi (BR-188).
+
+**Business rules:** BR-25, BR-30, BR-101, BR-103, BR-142, BR-145, BR-146,
+BR-182, BR-183, BR-184, BR-185, BR-186, BR-187, BR-188
+
+**UI states:** initial (ba lựa chọn, Korean first đã chọn sẵn) · submitting
+(Start hiện spinner, ba lựa chọn khoá) · failure (dòng lỗi, lựa chọn giữ nguyên,
+Start dùng lại được). Không có state `loading` khi mở sheet — điều kiện khả dụng
+đã được đọc trước khi sheet mở; không có state `empty`, vì ba lựa chọn là hằng
+số.
+
 ## Điều đã cố ý không đặc tả
 
 | Thứ | Vì sao |
@@ -812,7 +879,7 @@ không phải một màn hình trống.
 | Đưa deck con lên thành root deck | Cần quyết định scheduler mới; là tính năng riêng, không phải phép di chuyển (UC-09 A2) |
 | Tìm kiếm card (S1) | Should-have, chưa tới lượt |
 | Thống kê / streak (S2) | Should-have — `study_answers` với `kind` đã đủ dữ liệu |
-| Đảo chiều card (S3) | Should-have |
+| Đảo chiều card (S3) | Should-have — **một nửa đã đóng ở M99.23**: UC-12 và BR-182…BR-188 cho phép hỏi ngược mà **không** ghi lại thẻ, nên phần còn mở là đảo chính nội dung `front`/`back`, thứ mà BR-08 cố tình không cho phép. |
 | ~~Export (nửa còn lại của N1)~~ | **Đã đặc tả ở M99.21** — UC-11 và BR-174…BR-181 chốt scope, encoder, filename, share và quyền riêng tư trước khi viết code, đúng điều kiện mà mục này đặt ra. Còn nice-to-have ngoài phạm vi export nội dung: backup/restore, sync và `.apkg`. |
 | Nhắc nhở hằng ngày (N2) | Nice-to-have, cần quyền notification |
 | Media và tag trong card | Ngoài MVP; quy tắc reset (BR-41) và lưu trữ (AD-08) đã đặt sẵn |

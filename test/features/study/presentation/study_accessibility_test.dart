@@ -34,6 +34,7 @@ void main() {
       answersInSession: 0,
       remainingMs: null,
       isRevealed: false,
+      direction: null,
     ),
     card: StudyCardModel(
       id: 'c1',

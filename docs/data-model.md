@@ -11,7 +11,7 @@
 | **Last updated** | 2026-08-12 |
 
 Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; SQL thật nằm ở
-`lib/core/database/tables/`, hiện ở **schema v4**.
+`lib/core/database/tables/`, hiện ở **schema v8**.
 
 **`review` vẫn còn nghĩa thứ hai trong repo, và nó không đổi.** Ở `docs/reviews/`,
 "vòng review UI/UX", "code review" — đó là *rà soát*, không phải *ôn tập*. Đợt đổi
@@ -34,6 +34,9 @@ tra ngược được từ cột về luật nếu không có bảng này. Ngư�
 | `study_queue_items.available_at` | BR-26 |
 | `study_queue_items.answers_in_session` | BR-77 (lượt đầu), BR-104 (trần 3) |
 | `study_queue_items.remaining_ms` · `is_revealed` | BR-133 |
+| `study_sessions.direction` | BR-182 (điều kiện), BR-184 (`mixed`), BR-186 (khoá) |
+| `study_queue_items.direction` | BR-184 — gán một lần, sống qua comeback và restart |
+| `study_answers.direction` | BR-185 — chép từ dòng hàng đợi, không suy luận |
 | `study_answers.mode` | BR-98 |
 | `study_answers.outcome_reason` | BR-131 |
 | `study_answers.comparison_version` | BR-135 |
@@ -324,6 +327,7 @@ xoá (cascade).
 | `outcome_reason` | TEXT NULL | `timeout` khi hết giờ ở `recall` (BR-131); NULL khi người dùng tự trả lời |
 | `comparison_version` | INTEGER NULL | chỉ `fill`: phiên bản chính sách so khớp đã dùng (BR-135) |
 | `used_hint` | INTEGER NULL | chỉ `fill`: 0 \| 1. Ghi nhận, không đổi `action` (BR-136) |
+| `direction` | TEXT NULL | `korean_to_meaning` \| `meaning_to_korean` (BR-185). NULL ở mọi lượt ngoài BR-182. **Không bao giờ `mixed`** — phiên trộn, lượt thì không (BR-184) |
 | `action` | TEXT NOT NULL | `forgotten`/`remembered` hoặc `again`/`hard`/`good`/`easy` |
 | `answered_at` | DATETIME NOT NULL | UTC |
 | `next_due_at` | DATETIME NULL | hạn sau khi đánh giá |
@@ -362,6 +366,7 @@ bảng đầu tiên cần nhìn khi bàn về kích thước DB.
 | `end_reason` | TEXT NULL | `user_exit` \| `scheduler_reset` \| `stale_generation` \| `persistence_error` \| `interrupted` (BR-80). NULL khi `in_progress` hoặc `completed` |
 | `cursor` | INTEGER NOT NULL DEFAULT 0 | số lượt đã phục vụ trong phiên; nền của BR-26 |
 | `card_limit` | INTEGER NOT NULL | số thẻ tối đa của phiên, chốt lúc mở (BR-24, BR-139). Mặc định 20 |
+| `direction` | TEXT NULL | `korean_to_meaning` \| `meaning_to_korean` \| `mixed` (BR-182, BR-184). Chốt lúc mở và khoá suốt phiên (BR-186). NULL ở mọi phiên ngoài BR-182 |
 | `started_at` | DATETIME NOT NULL | UTC |
 | `ended_at` | DATETIME NULL | NULL khi `in_progress` |
 
@@ -419,6 +424,7 @@ Hàng đợi của một phiên (BR-102). Một dòng cho mỗi thẻ được n
 | `answers_in_session` | INTEGER NOT NULL DEFAULT 0 | số lượt đã đánh giá; `0` ⇒ lượt tới là `scheduled` (BR-77) |
 | `remaining_ms` | INTEGER NULL | chỉ `recall`: thời gian còn lại của lượt đang dở (BR-133). NULL ở mọi stage khác |
 | `is_revealed` | INTEGER NOT NULL DEFAULT 0 | chỉ `recall`: đáp án đã lật chưa, để Resume không che lại (BR-133) |
+| `direction` | TEXT NULL | `korean_to_meaning` \| `meaning_to_korean` — chiều thật của **thẻ này**, gán một lần lúc dựng round (BR-184). NULL ở mọi stage ngoài `self_assess` của một phiên đủ điều kiện (BR-182) |
 
 PK là `(session_id, mode, round, card_id)` — một thẻ xuất hiện đúng một lần **trong
 mỗi round của mỗi stage**, và mọi round có thứ tự độc lập (BR-113, BR-117).
@@ -712,6 +718,40 @@ SELECT id FROM study_answers
 WHERE outcome_reason IS NOT NULL
   AND (outcome_reason <> 'timeout' OR mode <> 'recall');
 
+-- 31. Chiều hỏi nằm ngoài chỗ nó được phép (BR-182, BR-184)
+--     Bốn cách sai: một phiên mang chiều mà không phải `reviewing`/`self_assess`;
+--     một dòng hàng đợi mang chiều ở stage khác `self_assess`; một dòng mang
+--     chiều mà phiên của nó không mang; và một phiên có chiều mà dòng
+--     `self_assess` của nó lại trống — `mixed` gán cho **mọi** thẻ.
+--
+--     **Không có mệnh đề `sm2`, và đó là chủ ý.** `study_sessions` không mang
+--     `scheduler_type`; đọc thuật toán *hiện tại* của cây thì sai với đúng cây
+--     đã Reset sang thuật toán khác — nó vẫn từng chạy `sm2`, và BR-21 đặt cột
+--     ấy lên `study_answers` chính vì lý do này. Điều kiện `sm2` vì thế thuộc
+--     write path (BR-187), không thuộc một câu SQL đọc sau.
+SELECT s.id FROM study_sessions s
+WHERE (s.direction IS NOT NULL
+       AND (s.session_kind <> 'reviewing' OR s.current_mode <> 'self_assess'))
+   OR EXISTS (SELECT 1 FROM study_queue_items q
+              WHERE q.session_id = s.id
+                AND ((q.direction IS NOT NULL AND q.mode <> 'self_assess')
+                  OR (q.direction IS NOT NULL AND s.direction IS NULL)
+                  OR (s.direction IS NOT NULL AND q.mode = 'self_assess'
+                      AND q.direction IS NULL)));
+
+-- 32. Lượt lịch sử mang chiều mà dòng hàng đợi của nó không mang (BR-185)
+--     Chiều của lượt MUST là bản chép của dòng nó được trả lời trên. So với
+--     **tập** dòng của thẻ đó trong stage đó chứ không với một dòng: `study_answers`
+--     không mang `round`, nên "dòng nào" là câu hỏi bảng này không trả lời được —
+--     và một mode có nhiều round sẽ làm phép so một-một sai ngay khi nó eligible.
+SELECT a.id FROM study_answers a
+WHERE EXISTS (SELECT 1 FROM study_queue_items q
+              WHERE q.session_id = a.session_id AND q.card_id = a.card_id
+                AND q.mode = a.mode)
+  AND NOT EXISTS (SELECT 1 FROM study_queue_items q
+                  WHERE q.session_id = a.session_id AND q.card_id = a.card_id
+                    AND q.mode = a.mode AND q.direction IS a.direction);
+
 -- 19. Round nhảy số: stage có round N nhưng thiếu round N-1 (BR-115)
 SELECT q.session_id FROM study_queue_items q
 WHERE q.round > 1
@@ -795,6 +835,9 @@ và cờ — xem `docs/wireframes/m4-11-card-management.md`.
 | 3 | Cột `cards.front_folded`, `back_folded` + backfill bằng Dart — sửa search không khớp chữ hoa non-ASCII |
 | 4 | Đổi tên `card_review_states`→`card_study_states`, `review_history`→`study_answers` và sáu cột (M5.0l). Không thêm, không xoá, không đụng dòng nào |
 | 5 | Toàn bộ schema Study sau brainstorm: `learned_at`, `session_kind`, `current_mode`, `cursor`, `card_limit`, `mode`, `outcome_reason`, `comparison_version`, `used_hint`, `study_config`; bảng `study_queue_items`, `app_settings`; giá trị `learning` cho `kind` và `interrupted` cho `end_reason` (M5.0s) |
+| 6 | Chỉ dữ liệu, không DDL: đưa deck con rỗng còn mang `content_type` về `'unset'` (BR-163, invariant 29) (M99.15) |
+| 7 | Chỉ dữ liệu, không DDL: backfill `decks.first_answered_at` từ `MIN(learned_at)` của cây, để khoá scheduler của BR-13 có giá trị lưu trữ (invariant 30) (M99.16) |
+| 8 | Ba cột `direction` nullable trên `study_sessions`, `study_queue_items`, `study_answers` (BR-182…BR-185), cộng backfill `korean_to_meaning` cho đúng các dòng `self_assess` của phiên `reviewing` trên cây `sm2` — chiều mà mọi bản trước đã chạy (M99.23) |
 | _sau_ | Bảng `card_media` |
 | _sau_ | Cột sync (`is_pending_sync`, `version`) khi có backend (AD-03) |
 | _sau_ | `deck_templates` thành bảng runtime nếu tải template từ server |

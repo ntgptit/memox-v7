@@ -5,6 +5,7 @@ import 'package:memox/features/study/domain/models/new_card_order_model.dart';
 import 'package:memox/features/study/domain/models/study_action_model.dart';
 import 'package:memox/features/study/domain/models/study_card_limit_model.dart';
 import 'package:memox/features/study/domain/models/study_deck_context_model.dart';
+import 'package:memox/features/study/domain/models/study_direction_model.dart';
 import 'package:memox/features/study/domain/models/study_entry_summary_model.dart';
 import 'package:memox/features/study/domain/models/study_answer_commit_model.dart';
 import 'package:memox/features/study/domain/models/study_mode.dart';
@@ -25,7 +26,12 @@ enum StudyCatalogScenario {
   learningGuess('learning · guess', StudyMode.guess),
   learningRecall('learning · recall', StudyMode.recall),
   learningFill('learning · fill', StudyMode.fill),
-  reviewSelfAssess('review · self-assess (sm2)', StudyMode.selfAssess),
+  reviewSelfAssess('review · self-assess · Korean first', StudyMode.selfAssess),
+  reviewMeaningFirst(
+    'review · self-assess · Meaning first',
+    StudyMode.selfAssess,
+  ),
+  reviewMixed('review · self-assess · Mixed', StudyMode.selfAssess),
   nothingDue('entry · nothing due', StudyMode.browse),
   nothingLeft('entry · everything learned', StudyMode.browse),
   longContent('long Vietnamese content', StudyMode.browse);
@@ -35,19 +41,43 @@ enum StudyCatalogScenario {
   final String label;
   final StudyMode mode;
 
-  bool get isReview => this == StudyCatalogScenario.reviewSelfAssess;
+  bool get isReview => direction != null;
+
+  /// The recall direction this scenario reviews in (BR-182).
+  ///
+  /// Null is what makes a scenario a *learning* one here: only an `sm2` review
+  /// of `self_assess` may carry a direction at all, so the two questions have one
+  /// answer and keeping them as two fields would let them disagree.
+  StudySessionDirection? get direction => switch (this) {
+    StudyCatalogScenario.reviewSelfAssess =>
+      StudySessionDirection.koreanToMeaning,
+    StudyCatalogScenario.reviewMeaningFirst =>
+      StudySessionDirection.meaningToKorean,
+    StudyCatalogScenario.reviewMixed => StudySessionDirection.mixed,
+    _ => null,
+  };
+
+  /// The direction the one catalog card is asked in.
+  ///
+  /// A `mixed` session assigns per card (BR-184); the catalog shows one card, so
+  /// it shows one of the two — the reversed one, because that is the half a
+  /// reviewer has not already seen in the two fixed scenarios.
+  StudyRecallDirection? get cardDirection =>
+      direction == StudySessionDirection.mixed
+      ? StudyRecallDirection.meaningToKorean
+      : direction?.fixedDirection;
 
   SchedulerType get scheduler =>
       isReview ? SchedulerType.sm2 : SchedulerType.eightBox;
 
   int get newCount => switch (this) {
     StudyCatalogScenario.nothingLeft => 0,
-    StudyCatalogScenario.reviewSelfAssess => 0,
+    _ when isReview => 0,
     _ => 5,
   };
 
   int get dueCount => switch (this) {
-    StudyCatalogScenario.reviewSelfAssess => 7,
+    _ when isReview => 7,
     StudyCatalogScenario.nothingLeft => 3,
     _ => 0,
   };
@@ -126,6 +156,7 @@ class StudyCatalogRepository implements StudyRepository {
     cardLimit: 20,
     startedAt: _t0,
     endedAt: null,
+    direction: scenario.direction,
   );
 
   @override
@@ -159,6 +190,7 @@ class StudyCatalogRepository implements StudyRepository {
     required int cardLimit,
     required NewCardOrder newCardOrder,
     required DateTime now,
+    StudySessionDirection? direction,
   }) async => _session;
 
   @override
@@ -174,6 +206,7 @@ class StudyCatalogRepository implements StudyRepository {
       answersInSession: 0,
       remainingMs: null,
       isRevealed: false,
+      direction: scenario.cardDirection,
     ),
     card: _cards.first,
     progress: const StudyStageProgressModel(

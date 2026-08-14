@@ -6,6 +6,7 @@ import '../../../domain/models/guess_mode.dart';
 import '../../../domain/models/match_mode.dart';
 import '../../../domain/models/study_action_model.dart';
 import '../../../domain/models/study_answer_commit_model.dart';
+import '../../../domain/models/study_direction_model.dart';
 import '../../../domain/models/study_mode.dart';
 import '../../../domain/models/study_scheduler.dart';
 import '../../../domain/models/study_outcome_reason_model.dart';
@@ -178,6 +179,11 @@ Widget? studyModeView({
       onAction: onAnswer.call,
       onFeedbackShown: onFeedbackShown,
       onContinue: onContinue,
+      // **From the queue row, never from the session** (BR-184). A `mixed`
+      // session has no single direction to read, and taking the session's would
+      // draw every card of it one way. The row is also what survives a Resume,
+      // which is the property the whole column exists for.
+      direction: turn.item.direction ?? StudyRecallDirection.koreanToMeaning,
       isLocked: state.isBusy,
     ),
     // The board belongs to the round, so its seed does not include the card —

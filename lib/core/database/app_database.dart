@@ -4,6 +4,7 @@ import 'connection.dart';
 
 part 'app_database.g.dart';
 part 'app_database_migrations.dart';
+part 'app_database_migrations_v5.dart';
 
 /// The app's database.
 ///
@@ -31,7 +32,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.open() : super(openAppDatabaseConnection());
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -150,6 +151,19 @@ class AppDatabase extends _$AppDatabase {
       // Last, so it runs on top of whatever the v1…v6 steps just produced.
       if (from < 7) {
         await _upgradeToV7();
+      }
+
+      // v7 -> v8 (M99.23): the recall direction of BR-182.
+      //
+      // Three nullable columns and a backfill. Additive, so a v7 row upgrades
+      // without a value being invented for it — except for the one set of rows
+      // where NULL would be a lie: every `self_assess` review already served was
+      // asked from the Korean term, and leaving those unmarked would make
+      // "recognition" and "before the feature existed" the same stored value.
+      //
+      // Last, so it runs on top of whatever the v1…v7 steps just produced.
+      if (from < 8) {
+        await _upgradeToV8();
       }
     },
 

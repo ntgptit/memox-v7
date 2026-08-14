@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../models/study_direction_model.dart';
 import '../models/study_mode.dart';
 import '../models/study_queue_item_status_model.dart';
 
@@ -62,5 +63,18 @@ abstract class StudyQueueItemEntity with _$StudyQueueItemEntity {
     /// `recall` only: whether the answer has already been revealed (BR-133), so
     /// Resume does not hide it again.
     required bool isRevealed,
+
+    /// The way **this card** is asked, decided once when the round was written
+    /// (BR-184).
+    ///
+    /// **Stored rather than drawn, and this is the row that makes Mixed stable.**
+    /// `self_assess` brings a forgotten card back in the same row after three
+    /// others (BR-26), and BR-103 brings the whole session back after the OS has
+    /// taken the app away — a direction re-decided at either moment is a card
+    /// that changed the question between two attempts at it.
+    ///
+    /// Null when the session has no direction at all, which is every session
+    /// outside BR-182's eligibility.
+    required StudyRecallDirection? direction,
   }) = _StudyQueueItemEntity;
 }

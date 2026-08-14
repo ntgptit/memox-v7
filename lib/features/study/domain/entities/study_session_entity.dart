@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../models/study_direction_model.dart';
 import '../models/study_mode.dart';
 import '../models/study_session_kind_model.dart';
 import '../models/study_session_status_model.dart';
@@ -53,6 +54,14 @@ abstract class StudySessionEntity with _$StudySessionEntity {
     /// Changing the setting afterwards must not move a running session, which is
     /// why the number lives here and not on the deck.
     required int cardLimit,
+
+    /// Which way this session asks, chosen before the first turn (BR-182).
+    ///
+    /// **Null is the feature not being in play**, not a missing value: only a
+    /// `reviewing` session of an `sm2` deck running `self_assess` is eligible, and
+    /// every other session has no direction to have chosen. Fixed here for the
+    /// same reason [cardLimit] is — Resume reads it and asks nothing (BR-186).
+    required StudySessionDirection? direction,
 
     required DateTime startedAt,
     required DateTime? endedAt,
