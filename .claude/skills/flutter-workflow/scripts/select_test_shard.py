@@ -11,6 +11,7 @@ balances the shards by the number of declared tests in each file.
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import subprocess
 import sys
@@ -43,7 +44,9 @@ def partition(
     return bins
 
 
-def discover(root: Path) -> list[WeightedTestFile]:
+def discover(
+    root: Path, *, include_paths: set[str] | None = None
+) -> list[WeightedTestFile]:
     completed = subprocess.run(
         ["git", "-C", str(root), "ls-files", "-z", "--", "test"],
         check=True,
@@ -54,6 +57,15 @@ def discover(root: Path) -> list[WeightedTestFile]:
         for raw in completed.stdout.split(b"\0")
         if raw and raw.decode("utf-8").endswith("_test.dart")
     ]
+    if include_paths is not None:
+        tracked = set(paths)
+        unknown = sorted(include_paths - tracked)
+        if unknown:
+            raise ValueError(
+                "verification plan selected missing or untracked tests: "
+                + ", ".join(unknown)
+            )
+        paths = [path for path in paths if path in include_paths]
     files: list[WeightedTestFile] = []
     for relative_path in paths:
         text = (root / relative_path).read_text(encoding="utf-8")
@@ -71,12 +83,29 @@ def main() -> int:
     parser.add_argument("--root", type=Path, default=Path.cwd())
     parser.add_argument("--total-shards", type=int, required=True)
     parser.add_argument("--shard-index", type=int, required=True)
+    parser.add_argument(
+        "--test-files-json",
+        help="JSON array from the sealed verification plan; omit for all tests.",
+    )
     parser.add_argument("--nul", action="store_true")
     args = parser.parse_args()
 
     if not 0 <= args.shard_index < args.total_shards:
         parser.error("shard-index must be in [0, total-shards)")
-    shards = partition(discover(args.root.resolve()), total_shards=args.total_shards)
+    include_paths = None
+    if args.test_files_json is not None:
+        decoded = json.loads(args.test_files_json)
+        if not isinstance(decoded, list) or not all(
+            isinstance(item, str) for item in decoded
+        ):
+            parser.error("test-files-json must be a JSON array of strings")
+        include_paths = set(decoded)
+    try:
+        discovered = discover(args.root.resolve(), include_paths=include_paths)
+    except ValueError as error:
+        print(str(error), file=sys.stderr)
+        return 1
+    shards = partition(discovered, total_shards=args.total_shards)
     selected = shards[args.shard_index]
     if not selected:
         print("selected test shard is empty", file=sys.stderr)

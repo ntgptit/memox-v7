@@ -7,8 +7,8 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.22 (five-way PR host-test sharding follow-up) |
-| **Last updated** | 2026-08-13 |
+| **Updated by task** | M99.23 (impact-aware verification plan builder) |
+| **Last updated** | 2026-08-14 |
 
 Single source of truth for project progress. Update it in the same commit as the
 work it describes. A task is `done` only when it meets the Definition of Done in
@@ -9339,6 +9339,61 @@ thế không đổi bố cục.
   missing/extra/header/geometry contract và file-shard disjoint/complete/
   deterministic; prompt guard trên toàn bộ prompt sets; PR run thật chứng minh
   aggregate check và đo lại wall-clock.
+- **Checklist phases:** 19, meta
+
+### M99.23 · Verification plan theo feature × layer × risk
+
+- **Status:** **done**
+- **Goal:** Giảm tiếp test workload của PR thay đổi cục bộ mà không biến path
+  filter thành lỗ hổng coverage hoặc tạo thêm chi phí bootstrap từ micro-job.
+- **Scope:** immutable verification-plan builder, impact map, downstream
+  closure, dynamic host-test selection và shard count `1/2/5`, aggregate gate,
+  local `dod_check.sh --changed`, CI tooling tests và CI documentation. Không
+  thay đổi production Dart, schema, product BR/AD/UC, golden policy hoặc device
+  coverage.
+- **Editable documents:** `CLAUDE.md`, `docs/wbs.md`,
+  `.claude/skills/flutter-ship/references/ci.md`
+- **5Why:** M99.22 giảm critical path bằng năm shard nhưng vẫn chạy 100% host
+  suite cho mọi thay đổi Dart; path theo feature một mình không phân biệt được
+  blast radius của domain/data/presentation; contract công khai có thể lan sang
+  consumer trong khi implementation private thì không; tách thành nhiều job
+  nhỏ lại lặp Flutter setup/codegen; targeted gate có false-negative nếu path
+  mới không được nhận diện. Quyết định: một builder chỉ được phép cộng scope,
+  mở rộng theo dependency closure, cân test file theo trọng lượng thật, và tự
+  nâng schema/shared/router/native/tooling/empty/unknown lên full.
+- **Output:** `build_verification_plan.py`, declarative impact map, filtered
+  file-level sharder, dynamic PR workflow, aggregate gate mới, changed-scope
+  local gate và unit/structural tests cho fail-safe contract.
+- **Acceptance criteria:**
+  - [x] Docs/prompt path không cài Flutter; code path luôn chạy static global.
+  - [x] Data và presentation leaf change bắt đầu từ layer suite tương ứng;
+        import closure phải cộng mọi app/integration/cross-feature test consumer
+        trực tiếp hoặc gián tiếp; public domain contract còn mở rộng transitively
+        sang feature phụ thuộc.
+  - [x] Drift query change cộng database/integration contract suites bằng map
+        khai báo vì generated DAO bị ignore và không thể xuất hiện trong Dart
+        source import closure.
+  - [x] Shard matrix chỉ có `1`, `2` hoặc `5`, mọi test file đã chọn chạy đúng
+        một lần và không shard nào rỗng.
+  - [x] Schema/migration, shared/theme, router/DI, native/dependency, tooling,
+        empty, type-change và unknown path đều fail safe sang full host suite.
+  - [x] Aggregate gate từ chối job bắt buộc fail/cancel và cả job không được
+        chọn nhưng lại chạy; local changed plan đồng nhất với PR planner, chạy
+        test mới chưa track và fail closed nếu thiếu tool/guard bắt buộc.
+  - [x] Golden-only test change không thể tạo host shard chạy `0` test: planner
+        loại file bị `--exclude-tags golden` khỏi host universe, chọn surrogate
+        non-golden + Widgetbook, còn pixel comparison thuộc Windows full CI.
+  - [x] Tooling unit tests, targeted gate, full mechanical gate và recursive
+        architecture/workflow review đều sạch trước merge. Emulator không thuộc
+        scope vì không đổi `lib/features/`, `lib/app/` hay native behavior.
+- **Dependencies:** M99.22
+- **Tests required:** unit cho normalization (kể cả `.github` và BOM/CRLF),
+  docs/prompt/data/domain/presentation/test-only/widgetbook/full/unknown paths,
+  downstream cycle, import-derived consumer closure, golden zero-test và
+  untracked-test regression, immutable/deterministic plan, `1/2/5` thresholds,
+  filtered shard completeness, fail-closed tools, aggregate expected/skipped
+  contract và workflow wiring; chạy changed gate cùng full `dod_check.sh` trên
+  branch thật.
 - **Checklist phases:** 19, meta
 
 ## Blocker

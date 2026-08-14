@@ -9,47 +9,28 @@ import argparse
 def evaluate(
     *,
     classify_result: str,
-    prompt_result: str,
+    contracts_result: str,
     static_result: str,
     host_result: str,
     widgetbook_result: str,
-    has_prompt_changes: bool,
-    prompt_only: bool,
-    code_required: bool,
+    needs_contracts: bool,
+    needs_static: bool,
+    needs_host_tests: bool,
+    needs_widgetbook: bool,
 ) -> list[str]:
     problems: list[str] = []
     if classify_result != "success":
         return [f"change classification did not succeed ({classify_result})"]
 
-    if prompt_only:
-        if prompt_result != "success":
-            problems.append(f"prompt-only path did not pass prompt contract ({prompt_result})")
-        for label, result in (
-            ("static job", static_result),
-            ("host tests", host_result),
-            ("Widgetbook", widgetbook_result),
-        ):
-            if result != "skipped":
-                problems.append(f"{label} unexpectedly ran on prompt-only change ({result})")
-        return problems
-
-    if not code_required:
-        return ["classifier selected neither the prompt nor code path"]
-
-    for label, result in (
-        ("static verification", static_result),
-        ("host-test shards", host_result),
-        ("Widgetbook smoke test", widgetbook_result),
+    for label, result, required in (
+        ("contract verification", contracts_result, needs_contracts),
+        ("static verification", static_result, needs_static),
+        ("host-test shards", host_result, needs_host_tests),
+        ("Widgetbook smoke test", widgetbook_result, needs_widgetbook),
     ):
-        if result != "success":
-            problems.append(f"{label} did not succeed ({result})")
-
-    expected_prompt = "success" if has_prompt_changes else "skipped"
-    if prompt_result != expected_prompt:
-        problems.append(
-            "prompt contract result was "
-            f"{prompt_result}; expected {expected_prompt} for this change set"
-        )
+        expected = "success" if required else "skipped"
+        if result != expected:
+            problems.append(f"{label} result was {result}; expected {expected}")
     return problems
 
 
@@ -63,25 +44,31 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     for name in (
         "classify-result",
-        "prompt-result",
+        "contracts-result",
         "static-result",
         "host-result",
         "widgetbook-result",
     ):
         parser.add_argument(f"--{name}", required=True)
-    for name in ("has-prompt-changes", "prompt-only", "code-required"):
+    for name in (
+        "needs-contracts",
+        "needs-static",
+        "needs-host-tests",
+        "needs-widgetbook",
+    ):
         parser.add_argument(f"--{name}", type=_parse_bool, required=True)
     args = parser.parse_args()
 
     problems = evaluate(
         classify_result=args.classify_result,
-        prompt_result=args.prompt_result,
+        contracts_result=args.contracts_result,
         static_result=args.static_result,
         host_result=args.host_result,
         widgetbook_result=args.widgetbook_result,
-        has_prompt_changes=args.has_prompt_changes,
-        prompt_only=args.prompt_only,
-        code_required=args.code_required,
+        needs_contracts=args.needs_contracts,
+        needs_static=args.needs_static,
+        needs_host_tests=args.needs_host_tests,
+        needs_widgetbook=args.needs_widgetbook,
     )
     if problems:
         for problem in problems:

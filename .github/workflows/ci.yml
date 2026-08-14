@@ -1,10 +1,13 @@
 name: CI
 
 # Pull requests always expose one stable aggregate check (`CI gate`). A change
-# made exclusively under docs/prompt/ takes the Python-only prompt-contract
-# path. Every mixed, empty or unknown change set fails safe to the complete code
-# path: static verification, the whole non-golden host suite split across five
-# parallel shards, and the Widgetbook smoke test.
+# receives an immutable verification plan built from feature, layer, contract
+# impact and risk. The plan only grows: public contracts expand through declared
+# downstream dependencies and reverse imports add transitive test consumers,
+# while schema/shared/router/native/unknown paths fail safe to the complete code
+# path. Golden-only files use runnable surrogates because Windows full CI owns
+# pixels. The selected host suite is balanced across one, two or five file-level
+# shards; UI work additionally runs Widgetbook.
 #
 # Goldens, clean codegen reproducibility and web build remain in ci-full.yml.
 # The PR pipeline is intentionally not repeated on push to main: the required
@@ -31,7 +34,17 @@ jobs:
       changed_count: ${{ steps.changes.outputs.changed_count }}
       has_prompt_changes: ${{ steps.changes.outputs.has_prompt_changes }}
       prompt_only: ${{ steps.changes.outputs.prompt_only }}
+      docs_only: ${{ steps.changes.outputs.docs_only }}
       code_required: ${{ steps.changes.outputs.code_required }}
+      needs_contracts: ${{ steps.changes.outputs.needs_contracts }}
+      needs_static: ${{ steps.changes.outputs.needs_static }}
+      needs_host_tests: ${{ steps.changes.outputs.needs_host_tests }}
+      needs_widgetbook: ${{ steps.changes.outputs.needs_widgetbook }}
+      full_suite: ${{ steps.changes.outputs.full_suite }}
+      risk: ${{ steps.changes.outputs.risk }}
+      shard_count: ${{ steps.changes.outputs.shard_count }}
+      shard_matrix: ${{ steps.changes.outputs.shard_matrix }}
+      test_files_json: ${{ steps.changes.outputs.test_files_json }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -49,19 +62,19 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           if [ "$EVENT_NAME" = "pull_request" ]; then
-            git diff --name-only --diff-filter=ACMRD -z "$BASE_SHA" "$HEAD_SHA" \
-              | python .claude/skills/flutter-workflow/scripts/classify_ci_changes.py \
+            git diff --name-only --diff-filter=ACMRTD -z "$BASE_SHA" "$HEAD_SHA" \
+              | python .claude/skills/flutter-workflow/scripts/build_verification_plan.py \
                   --nul --github-output "$GITHUB_OUTPUT"
           else
             printf '' \
-              | python .claude/skills/flutter-workflow/scripts/classify_ci_changes.py \
-                  --force-code --github-output "$GITHUB_OUTPUT"
+              | python .claude/skills/flutter-workflow/scripts/build_verification_plan.py \
+                  --force-full --github-output "$GITHUB_OUTPUT"
           fi
 
-  prompt_contract:
-    name: prompt contract
+  contracts:
+    name: tooling · docs · prompt contracts
     needs: classify
-    if: needs.classify.outputs.has_prompt_changes == 'true'
+    if: needs.classify.outputs.needs_contracts == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
@@ -74,13 +87,17 @@ jobs:
       - name: CI tooling unit tests
         run: python -m unittest discover -s .claude/skills/flutter-workflow/scripts/tests -p 'test_*.py'
 
+      - name: document integrity
+        run: python .claude/skills/flutter-workflow/scripts/check_docs.py --quiet
+
       - name: prompt delivery contract
+        if: needs.classify.outputs.has_prompt_changes == 'true'
         run: python .claude/skills/flutter-workflow/scripts/check_prompt_contract.py
 
   static:
     name: format · analyze · guards · docs
     needs: classify
-    if: needs.classify.outputs.code_required == 'true'
+    if: needs.classify.outputs.needs_static == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -112,10 +129,6 @@ jobs:
       - name: pub get
         run: flutter pub get
 
-      - name: pub get (widgetbook catalog)
-        run: flutter pub get
-        working-directory: widgetbook
-
       - name: generate
         run: dart run build_runner build --delete-conflicting-outputs
 
@@ -138,30 +151,13 @@ jobs:
       - name: code verification guard
         run: python code-verification-guard-v2/guard/run.py check --project . --ruleset memox-v7
 
-      - name: document integrity
-        run: bash .claude/skills/flutter-workflow/scripts/check_docs.sh
-
-      - name: CI tooling unit tests
-        run: python -m unittest discover -s .claude/skills/flutter-workflow/scripts/tests -p 'test_*.py'
-
   host_tests:
-    name: host tests · shard ${{ matrix.label }}/5
+    name: host tests · shard ${{ matrix.label }}/${{ matrix.total }}
     needs: classify
-    if: needs.classify.outputs.code_required == 'true'
+    if: needs.classify.outputs.needs_host_tests == 'true'
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - shard: 0
-            label: 1
-          - shard: 1
-            label: 2
-          - shard: 2
-            label: 3
-          - shard: 3
-            label: 4
-          - shard: 4
-            label: 5
+      matrix: ${{ fromJSON(needs.classify.outputs.shard_matrix) }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -191,17 +187,22 @@ jobs:
         run: bash .claude/skills/flutter-workflow/scripts/prepare_test_fonts.sh
 
       - name: host test suite (non-golden)
+        env:
+          TEST_FILES_JSON: ${{ needs.classify.outputs.test_files_json }}
         run: |
           mapfile -d '' test_files < <(
             python .claude/skills/flutter-workflow/scripts/select_test_shard.py \
-              --total-shards 5 --shard-index ${{ matrix.shard }} --nul
+              --total-shards ${{ matrix.total }} \
+              --shard-index ${{ matrix.shard }} \
+              --test-files-json "$TEST_FILES_JSON" \
+              --nul
           )
           flutter test --exclude-tags golden --reporter failures-only "${test_files[@]}"
 
   widgetbook:
     name: Widgetbook smoke test
     needs: classify
-    if: needs.classify.outputs.code_required == 'true'
+    if: needs.classify.outputs.needs_widgetbook == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
@@ -241,7 +242,7 @@ jobs:
   gate:
     name: CI gate
     if: always()
-    needs: [classify, prompt_contract, static, host_tests, widgetbook]
+    needs: [classify, contracts, static, host_tests, widgetbook]
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
@@ -255,10 +256,11 @@ jobs:
         run: |
           python .claude/skills/flutter-workflow/scripts/check_ci_gate.py \
             --classify-result '${{ needs.classify.result }}' \
-            --prompt-result '${{ needs.prompt_contract.result }}' \
+            --contracts-result '${{ needs.contracts.result }}' \
             --static-result '${{ needs.static.result }}' \
             --host-result '${{ needs.host_tests.result }}' \
             --widgetbook-result '${{ needs.widgetbook.result }}' \
-            --has-prompt-changes '${{ needs.classify.outputs.has_prompt_changes }}' \
-            --prompt-only '${{ needs.classify.outputs.prompt_only }}' \
-            --code-required '${{ needs.classify.outputs.code_required }}'
+            --needs-contracts '${{ needs.classify.outputs.needs_contracts }}' \
+            --needs-static '${{ needs.classify.outputs.needs_static }}' \
+            --needs-host-tests '${{ needs.classify.outputs.needs_host_tests }}' \
+            --needs-widgetbook '${{ needs.classify.outputs.needs_widgetbook }}'

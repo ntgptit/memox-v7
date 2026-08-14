@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "feature_dependencies": {
+    "deck": ["card", "study", "search", "progress", "trash"],
+    "card": ["study", "tag", "search", "progress", "trash"],
+    "study": ["progress", "reminder", "settings", "trash"],
+    "tag": ["card", "search"],
+    "settings": ["study", "reminder"],
+    "trash": ["deck", "card", "tag", "search", "progress"]
+  },
+  "database_query_features": {
+    "card": ["card"],
+    "deck": ["deck"],
+    "study": ["study"],
+    "tag": ["card", "tag"],
+    "progress": ["progress"],
+    "settings": ["settings"],
+    "trash": ["trash"]
+  },
+  "full_scope_prefixes": [
+    ".github/",
+    ".claude/skills/flutter-workflow/scripts/",
+    "code-verification-guard-v2/",
+    "lib/app/",
+    "lib/core/theme/",
+    "lib/l10n/",
+    "lib/presentation/shared/",
+    "integration_test/",
+    "e2e/",
+    "android/",
+    "ios/",
+    "linux/",
+    "macos/",
+    "web/",
+    "windows/"
+  ],
+  "full_scope_files": [
+    ".fvmrc",
+    "analysis_options.yaml",
+    "build.yaml",
+    "dart_test.yaml",
+    "pubspec.lock",
+    "pubspec.yaml"
+  ],
+  "shard_weight_thresholds": {
+    "one": 240,
+    "two": 800
+  }
+}
