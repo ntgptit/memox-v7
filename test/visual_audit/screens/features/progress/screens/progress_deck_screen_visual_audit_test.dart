@@ -5,6 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/progress/domain/models/deck_activity_model.dart';
 import 'package:memox/features/progress/presentation/screens/progress_deck_screen.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
+import 'package:memox/shared/widgets/mx_empty_state.dart';
+import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 
 import '../../../../../features/progress/presentation/support/fake_progress_repository.dart';
 import '../../../../audit_allowance.dart';
@@ -44,6 +46,24 @@ import '../../../../screen_auditor.dart';
 /// describes **the app's chrome** — mount any branch inside `AppNavigationShell`
 /// and the same unreadable nodes appear — and a second copy of that promise is
 /// the one that would stop being true.
+/// The two things a state with a list has to name.
+///
+/// **Here rather than in the harness**, because MX-VIS-001 requires this file to
+/// import the screen it audits — and an import the file never uses is an
+/// analyzer warning. The anchor list is the one place the screen type is
+/// genuinely named, so it is what makes the required import a real one.
+final List<AuditAnchor> _plainAnchors = <AuditAnchor>[
+  AuditAnchor.type('progress_screen', ProgressDeckScreen),
+  AuditAnchor.type('navigation_bar', MxNavigationBar),
+];
+
+/// The same, plus the empty state a level with nothing to list renders.
+final List<AuditAnchor> _anchorsWithEmpty = <AuditAnchor>[
+  AuditAnchor.type('progress_screen', ProgressDeckScreen),
+  AuditAnchor.type('empty_state', MxEmptyState),
+  AuditAnchor.type('navigation_bar', MxNavigationBar),
+];
+
 void main() {
   memoxProductionScreenAuditTest(
     'progress_deck_screen',
@@ -78,7 +98,7 @@ void main() {
     // declaration — not something the harness infers from seeing `MxCard`.
     surfaceFinder: find.byType(MxCard),
     additionalRules: const <AuditRule>[SurfaceColumnRule()],
-    anchors: progressPlainAnchors,
+    anchors: _plainAnchors,
     allowances: <AuditSkipAllowance>[
       ...deckShellAllowances(
         // No app-bar action: this screen reads and offers nothing to press up
@@ -121,7 +141,7 @@ void main() {
     state: 'library_all_zero',
     surfaceFinder: find.byType(MxCard),
     additionalRules: const <AuditRule>[SurfaceColumnRule()],
-    anchors: progressPlainAnchors,
+    anchors: _plainAnchors,
     allowances: <AuditSkipAllowance>[
       ...deckShellAllowances(
         screenIconButtons: 0,
@@ -146,7 +166,7 @@ void main() {
     state: 'library_empty',
     surfaceFinder: find.byType(MxCard),
     additionalRules: const <AuditRule>[SurfaceColumnRule()],
-    anchors: progressAnchorsWithEmpty,
+    anchors: _anchorsWithEmpty,
     allowances: <AuditSkipAllowance>[
       ...deckShellAllowances(
         screenIconButtons: 0,

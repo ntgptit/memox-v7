@@ -9,11 +9,6 @@ import 'package:memox/core/time/clock_provider.dart';
 import 'package:memox/core/time/time_zone_provider.dart';
 import 'package:memox/features/progress/di/progress_repository_provider.dart';
 import 'package:memox/features/progress/domain/repositories/progress_repository.dart';
-import 'package:memox/features/progress/presentation/screens/progress_deck_screen.dart';
-import 'package:memox/shared/widgets/mx_empty_state.dart';
-import 'package:memox/shared/widgets/mx_navigation_bar.dart';
-
-import 'screen_auditor.dart';
 
 // What every Progress audit scenario needs to stand a screen up.
 //
@@ -49,16 +44,3 @@ Widget progressShellWith(
     child: Router.withConfig(config: router),
   );
 }
-
-/// The two things a state with a list has to name.
-final List<AuditAnchor> progressPlainAnchors = <AuditAnchor>[
-  AuditAnchor.type('progress_screen', ProgressDeckScreen),
-  AuditAnchor.type('navigation_bar', MxNavigationBar),
-];
-
-/// The same, plus the empty state a level with nothing to list renders.
-final List<AuditAnchor> progressAnchorsWithEmpty = <AuditAnchor>[
-  AuditAnchor.type('progress_screen', ProgressDeckScreen),
-  AuditAnchor.type('empty_state', MxEmptyState),
-  AuditAnchor.type('navigation_bar', MxNavigationBar),
-];
