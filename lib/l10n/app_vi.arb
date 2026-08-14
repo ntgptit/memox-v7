@@ -24,14 +24,6 @@
   "@progressTitle": {
     "description": "App bar title of the Progress branch."
   },
-  "progressPlaceholderTitle": "Tính năng Tiến độ đang được phát triển",
-  "@progressPlaceholderTitle": {
-    "description": "Heading of the Progress placeholder (AD-19)."
-  },
-  "progressPlaceholderMessage": "Các lượt học hiện tại vẫn được lưu để sử dụng khi tính năng hoàn tất.",
-  "@progressPlaceholderMessage": {
-    "description": "Body of the Progress placeholder: study history is already recorded, nothing is lost while waiting."
-  },
   "settingsTitle": "Cài đặt",
   "@settingsTitle": {
     "description": "App bar title of the Settings branch."
@@ -2631,5 +2623,172 @@
   "cardExportCloseAction": "Đóng",
   "@cardExportCloseAction": {
       "description": "The only action left when the scope is no longer valid — there is nothing to retry until the user selects again (M4.13 W3 state 7)."
+  },
+  "progressRange7Label": "7 ngày",
+  "@progressRange7Label": {
+    "description": "Range selector pill for the 7-day window (BR-184)."
+  },
+  "progressRange30Label": "30 ngày",
+  "@progressRange30Label": {
+      "description": "Range selector pill for the 30-day window (BR-184)."
+  },
+  "progressRange7SemanticLabel": "7 ngày gần nhất",
+  "@progressRange7SemanticLabel": {
+      "description": "Screen-reader expansion of progressRange7Label."
+  },
+  "progressRange30SemanticLabel": "30 ngày gần nhất",
+  "@progressRange30SemanticLabel": {
+      "description": "Screen-reader expansion of progressRange30Label."
+  },
+  "progressRangeSelectorSemanticLabel": "Khoảng thời gian thống kê",
+  "@progressRangeSelectorSemanticLabel": {
+      "description": "Group label for the two range pills."
+  },
+  "progressSummaryLast7DaysTitle": "7 ngày gần nhất",
+  "@progressSummaryLast7DaysTitle": {
+      "description": "Heading of the summary panel while the 7-day window is selected."
+  },
+  "progressSummaryLast30DaysTitle": "30 ngày gần nhất",
+  "@progressSummaryLast30DaysTitle": {
+      "description": "Heading of the summary panel while the 30-day window is selected."
+  },
+  "progressActiveCardsMetricWord": "thẻ đã học",
+  "@progressActiveCardsMetricWord": {
+      "description": "Word beside the distinct-card count (BR-183)."
+  },
+  "progressActiveDaysMetricWord": "ngày có học",
+  "@progressActiveDaysMetricWord": {
+      "description": "Word beside the distinct local-day count (BR-183)."
+  },
+  "progressLearningMetricWord": "học mới",
+  "@progressLearningMetricWord": {
+      "description": "Word beside the learning half of the card-day partition (BR-186). Short on purpose: it has to survive a 320dp cell at text scale 2.0. The unit is stated once by progressCardDayUnitNote."
+  },
+  "progressReviewingMetricWord": "ôn tập",
+  "@progressReviewingMetricWord": {
+      "description": "Word beside the reviewing half of the card-day partition (BR-186). Short for the same reason as progressLearningMetricWord."
+  },
+  "progressCardDayUnitNote": "Học mới và ôn tập đếm theo thẻ-ngày — một thẻ trong một ngày.",
+  "@progressCardDayUnitNote": {
+    "description": "Caption under the summary panel's metric grid, naming the unit the bottom row counts."
+  },
+  "progressActiveCardsSemanticLabel": "{count, plural, =0{Chưa học thẻ nào} other{Đã học {count} thẻ}}",
+  "@progressActiveCardsSemanticLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Screen-reader sentence for the distinct-card metric."
+  },
+  "progressActiveDaysSemanticLabel": "{count, plural, =0{Không có ngày nào có học} other{{count} ngày có học}}",
+  "@progressActiveDaysSemanticLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Screen-reader sentence for the active-day metric."
+  },
+  "progressLearningSemanticLabel": "{count, plural, =0{Không có thẻ-ngày học mới} other{{count} thẻ-ngày học mới}}",
+  "@progressLearningSemanticLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Screen-reader sentence for the learning half of the partition (BR-186)."
+  },
+  "progressReviewingSemanticLabel": "{count, plural, =0{Không có thẻ-ngày ôn tập} other{{count} thẻ-ngày ôn tập}}",
+  "@progressReviewingSemanticLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Screen-reader sentence for the reviewing half of the partition (BR-186)."
+  },
+  "progressDeckRowSemanticLabel": "{name}, trong {path}, {range}",
+  "@progressDeckRowSemanticLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "range": {
+        "type": "String"
+      },
+      "path": {
+        "type": "String"
+      }
+    },
+    "description": "Screen-reader sentence naming a deck row, where it sits and which window its figures cover."
+  },
+  "progressDeckRootRowSemanticLabel": "{name}, {range}",
+  "@progressDeckRootRowSemanticLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "range": {
+        "type": "String"
+      }
+    },
+    "description": "Screen-reader sentence for a deck row with no ancestors; still carries the window."
+  },
+  "progressPathSeparator": " › ",
+  "@progressPathSeparator": {
+      "description": "Glyph between two steps of a deck path on a progress row."
+  },
+  "progressLoadingLabel": "Đang tải tiến độ",
+  "@progressLoadingLabel": {
+      "description": "Screen-reader label for the loading spinner."
+  },
+  "progressEmptyDecksTitle": "Chưa có bộ thẻ nào",
+  "@progressEmptyDecksTitle": {
+      "description": "Top level with no decks at all."
+  },
+  "progressEmptyDecksMessage": "Tạo một bộ thẻ trong thư viện, lượt học của bạn sẽ hiện ở đây.",
+  "@progressEmptyDecksMessage": {
+      "description": "Body of the no-decks state."
+  },
+  "progressEmptySubDecksTitle": "Không có bộ thẻ con",
+  "@progressEmptySubDecksTitle": {
+      "description": "A deck level whose deck holds cards rather than sub-decks."
+  },
+  "progressEmptySubDecksMessage": "Bộ thẻ này chứa thẻ, nên số liệu tổng ở trên đã là toàn bộ.",
+  "@progressEmptySubDecksMessage": {
+      "description": "Body of the no-sub-decks state."
+  },
+  "progressNoActivityTitle": "Chưa học gì trong khoảng này",
+  "@progressNoActivityTitle": {
+      "description": "Decks exist but none was answered inside the selected window (BR-184)."
+  },
+  "progressNoActivityMessage": "Chuyển sang khoảng dài hơn, hoặc học một bộ thẻ để bắt đầu ghi nhận.",
+  "@progressNoActivityMessage": {
+      "description": "Body of the all-zero state."
+  },
+  "progressErrorTitle": "Không tải được tiến độ",
+  "@progressErrorTitle": {
+      "description": "Heading when the read fails."
+  },
+  "progressErrorMessage": "Lịch sử học của bạn vẫn an toàn. Hãy thử lại.",
+  "@progressErrorMessage": {
+      "description": "Body of the read-failure state (BR-188)."
+  },
+  "progressErrorRetryAction": "Thử lại",
+  "@progressErrorRetryAction": {
+      "description": "Re-opens the read from scratch after a failure."
+  },
+  "progressDeckMissingTitle": "Bộ thẻ này không còn tồn tại",
+  "@progressDeckMissingTitle": {
+      "description": "The deck named by /progress/:deckId is gone."
+  },
+  "progressDeckMissingMessage": "Có thể nó đã bị xoá. Quay lại để xem những bộ thẻ còn lại.",
+  "@progressDeckMissingMessage": {
+      "description": "Body of the deck-missing state."
+  },
+  "progressDeckMissingBackAction": "Về trang tiến độ",
+  "@progressDeckMissingBackAction": {
+      "description": "Returns to the library level of Progress by Deck."
   }
 }

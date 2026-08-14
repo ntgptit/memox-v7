@@ -1,0 +1,153 @@
+# Wireframe · Progress by Deck v1
+
+| | |
+|---|---|
+| **Status** | active |
+| **Purpose** | Chốt bố cục, hình học và ma trận trạng thái của drill-down tiến độ theo deck trước khi UI review chạy |
+| **Scope** | Bộ chọn khoảng, bảng tổng, hàng deck và mọi trạng thái của hai cấp. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md` BR-182…BR-189), luồng (`use-cases.md` UC-12), giá trị token (`lib/core/theme/`) |
+| **Source of truth for** | Bố cục màn hình tiến độ · hình học được pin bằng test · danh sách divergence đã duyệt |
+| **Depends on** | `document-conventions.md`, `business-rules.md` (BR-182…BR-189), `use-cases.md` (UC-12), `wbs.md` (M99.23) |
+| **Updated by task** | M99.23 · rà soát UI/UX vòng một (bộ chọn ghim, gutter theo breakpoint, lưới gập, rung chữ số, chú thích đơn vị, AppBar ở mọi cấp) |
+| **Last updated** | 2026-08-14 |
+
+---
+
+Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham chiếu bằng ID.
+
+**Không có ảnh nguồn cho màn hình này.** Progress by Deck không đến từ một mockup
+do chủ dự án cung cấp; nó được dựng lại từ **ngữ pháp thị giác đã có** của deck
+list — cùng card, cùng lưới metric 2×2, cùng thang chữ. Đó là lựa chọn có chủ ý:
+hai màn hình đọc cùng một cây dữ liệu, và một màn hình thống kê tự phát minh
+kiểu trình bày riêng là cách nhanh nhất để người dùng thấy hai nơi khác nhau
+đang nói về hai app khác nhau. Nơi nào cần một quyết định mới, §5 ghi nó ra.
+
+## 1. Bố cục hai cấp
+
+Cùng **một** màn hình ở mọi độ sâu — `deckId` null là cấp thư viện, id khác là
+cấp của deck đó (UC-12). Từ trên xuống:
+
+```
+┌─────────────────────────────────────────┐
+│ AppBar · "Tiến độ"  hoặc  tên deck      │
+│  [✓ 7 ngày] [ 30 ngày ]                 │  ← bộ chọn: subheader, GHIM
+├═════════════════════════════════════════┤  ← từ đây trở xuống là vùng cuộn
+│ ┌─────────────────────────────────────┐ │
+│ │ 7 ngày gần nhất                     │ │  ← bảng tổng (MxCard)
+│ │ ▣ 45 thẻ đã học   ▣ 6 ngày có học   │ │
+│ │ ▣ 12 học mới      ▣ 60 ôn tập       │ │
+│ │ Học mới và ôn tập đếm theo thẻ-ngày │ │  ← đơn vị, nói đúng một lần
+│ └─────────────────────────────────────┘ │
+│                                         │  ← xl: ngắt giữa hai section
+│ ┌─────────────────────────────────────┐ │
+│ │ Spanish                          ›  │ │  ← hàng deck (MxCard, tappable)
+│ │ Thư viện › Ngữ pháp                 │ │  ← đường dẫn, wrap chứ không cắt
+│ │ ▣ 42 thẻ đã học   ▣ 6 ngày có học   │ │
+│ │ ▣ 12 học mới      ▣ 60 ôn tập       │ │
+│ └─────────────────────────────────────┘ │
+│                 md                      │
+│ ┌─────────────────────────────────────┐ │
+│ │ Idle deck                        ›  │ │
+│ │ ▣ 0 thẻ đã học    ▣ 0 ngày có học   │ │
+│ │ ▣ 0 học mới       ▣ 0 ôn tập        │ │
+│ └─────────────────────────────────────┘ │
+├─────────────────────────────────────────┤
+│  Thư viện   Học   [Tiến độ]   Cài đặt   │
+└─────────────────────────────────────────┘
+```
+
+**Bộ chọn khoảng được ghim, không cuộn theo.** BR-187 nói thẳng tới trường hợp
+năm mươi deck; cuộn hai màn thì một bộ chọn đã trôi mất sẽ để lại một danh sách
+số không nói nó thuộc tuần hay tháng. `MxContentShell` có sẵn slot `subheader`
+đúng cho việc đó, và slot ấy lấy gutter từ chính shell thay vì tự suy lại.
+
+**Không có breadcrumb.** Đường dẫn sống trên từng hàng thay vì thành một dải
+riêng phía trên. Lý do là hàng cũng chính là thứ TalkBack đọc: `Verbs, trong
+Spanish › Ngữ pháp` là một câu trả lời đủ, còn `Verbs` thì không — và một dải
+breadcrumb chỉ trả lời câu đó **một lần cho cả màn**, trong khi mỗi hàng lại
+cần nó.
+
+## 2. Hình học được pin
+
+Mọi số dưới đây được đo bằng `getRect` sau layout trong
+`test/features/progress/presentation/progress_deck_geometry_test.dart`. Chúng
+được pin vì lỗi nằm ở **tổng** của hai file cùng padding đúng — không guard nào
+quét literal thấy được.
+
+| Đại lượng | Giá trị | Vì sao |
+|---|---|---|
+| Content gutter | `mxScreenGutter(context)` — 16, và 12 dưới 360 | Gutter chuẩn **phụ thuộc bề rộng**; viết cứng `AppSpacing.lg` làm màn này thụt sâu hơn Thư viện và Học 4px mỗi bên ở 320dp, đúng 8px mà ô metric đang thiếu |
+| Cạnh trái/phải của bộ chọn · bảng tổng · hàng | **bằng nhau** | Hai file sở hữu hai gutter; lệch 4px đọc như danh sách bị thụt vào so với bảng ở trên |
+| Bảng tổng → hàng đầu | `AppSpacing.xl` (24) | Ngắt giữa hai **section**; dùng `lg` sẽ làm bảng đọc như hàng đầu của danh sách |
+| Hàng → hàng | `AppSpacing.md` (12) | Khoảng cách trong một danh sách |
+| Padding trong card | `AppSpacing.lg` (mặc định của `MxCard`) | Không ghi đè |
+| Tên → đường dẫn | `AppSpacing.xs` (4) | Hai dòng của cùng một khối |
+| Khối tiêu đề → lưới metric | `AppSpacing.md` (12) | Hai khối trong một card |
+| Cột metric | hai nửa `Expanded`, cách nhau `AppSpacing.lg` | Cột phải giữ nguyên cạnh trái xuống cả hai hàng; intrinsic sizing để chữ dài kéo lệch |
+| Ngưỡng gập lưới | `ProgressMetricGridWidget.minimumCellWidth` (90) **nhân theo `textScaler`** | Một dãy chữ số **không có điểm ngắt dòng**: ô hẹp hơn nhu cầu thì số bị **cắt**, không wrap — và một con số bị cắt là một con số khác. Ở 320dp scale 2.0 lưới gập xuống một cột thay vì cắt `1234` thành `123` |
+| Rung chữ số | panel `titleMedium`, hàng `titleSmall` | Cùng họ chữ (Inter) và cách nhau đúng một rung — `titleLarge` là rung của họ *display*, nên hai bậc lệch nhau cả typeface. Hàng ở `titleSmall` cũng để tên deck (`titleMedium`) thắng bốn con số cạnh nó |
+| Baseline hàng metric | `CrossAxisAlignment.baseline` | Ở text scale lớn hai ô cao khác nhau; căn top làm chữ số nhấp nhô |
+| Tap target hàng | ≥ `AppSpacing.minimumTouchTarget` (48) | Sàn chạm |
+| Đường dẫn dài | wrap, **không** ellipsis | Cắt giữa đường dẫn là mất đúng thứ nó tồn tại để nói |
+| Khoảng thở đáy | `AppSpacing.xxl` dưới hàng cuối | **Không phải** clearance cho bottom bar: `Scaffold` đã trừ chiều cao thanh bar khỏi `MediaQuery` của body, nên không hàng nào nấp được sau nó và một test khẳng định điều đó thì không bao giờ đỏ. Cái đáng pin là chính khoảng inset — danh sách kết thúc sát thanh bar đọc như bị cắt ngang |
+
+## 3. Ma trận trạng thái
+
+| Trạng thái | Bộ chọn | Bảng tổng | Thân |
+|---|---|---|---|
+| loading | — | — | spinner có nhãn; AppBar giữ chữ "Tiến độ" ở **mọi** cấp (§5) |
+| mixed activity | có | có | mọi deck, kể cả deck 0 |
+| all-zero | có | có + dòng giải thích | mọi deck với số 0 (BR-187) |
+| no decks (cấp thư viện) | **không** | **không** | empty state, không nút |
+| no sub-decks (cấp deck) | có | có | empty state nói tổng ở trên đã là toàn bộ |
+| read error | — | — | `MxErrorState` + `Try again`, dưới AppBar còn nguyên |
+| deck missing | — | — | `MxEmptyState` + đường quay lại, **không** retry |
+
+Hai dòng đáng chú ý:
+
+- **all-zero không phải empty.** Bản dựng đầu thay danh sách bằng một empty
+  state và đó là sai: một cấp chưa học gì vẫn có deck, và "mình đã bỏ bê deck
+  nào" chính là câu hỏi người ta hỏi ở trạng thái đó.
+- **no decks bỏ cả bộ chọn lẫn bảng tổng.** Không có deck thì không có khoảng
+  nào để có gì xảy ra trong đó; giữ lại cả hai là ba cách nói cùng một sự trống.
+
+## 4. Màu và tín hiệu
+
+- **Số 0 trung tính, không bao giờ mang sắc thái lỗi.** Ô metric rỗng rơi về
+  `onSurfaceVariant` trên `surfaceMuted`, giữ nguyên glyph. Một tuần yên ắng là
+  một lần đọc bình thường.
+- **Màu không bao giờ là tín hiệu duy nhất.** Mỗi ô nói số và chữ; màu chỉ tách
+  "có gì đó" khỏi "không có gì", điều mà chính con số đã nói.
+- **Pill được chọn mang thêm dấu tick.** `chipTheme` tắt checkmark của Material
+  cho pill lọc của card list, nên ở đây pill được chọn tự mang `Icons.check`:
+  nền, viền và glyph cùng nói một điều, và ảnh chụp greyscale vẫn đọc được.
+- Vai trò màu: thẻ đã học và học mới dùng `info`; ngày có học dùng cặp
+  `streakContainer/onStreakContainer` — từ vựng sẵn có của app cho "thời gian
+  giữ được"; ôn tập trung tính vì ôn là trạng thái bình thường của một lịch
+  đang chạy.
+- **Hai đơn vị trong một lưới, và chỉ một dòng nói ra.** Hàng trên đếm *thẻ* và
+  *ngày*; hàng dưới đếm *thẻ-ngày* (BR-183, BR-186). Không có dòng chú thích thì
+  `12` và `60` cạnh `45` đọc như một phép cộng không khớp. Chú thích nằm ở bảng
+  tổng chứ không nhét vào bốn từ, vì một từ đủ dài để mang đơn vị sẽ bị cắt
+  trong ô 320dp ở scale 2.0 — xem §2.
+
+## 5. Divergence đã duyệt
+
+Những chỗ màn hình này cố ý khác deck list, và vì sao:
+
+| Divergence | Lý do |
+|---|---|
+| Không breadcrumb; đường dẫn nằm trên hàng | §1 |
+| Lưới metric 2×2 thay vì hero 2×2 + workload line | Bốn số ở đây không có thứ tự khẩn cấp; không số nào "dẫn" |
+| Không filter, không sort control | Thứ tự là một rule (BR-187), không phải lựa chọn xem |
+| Không nút hành động ở hai empty state "không có gì để liệt kê" | Bước tiếp theo nằm ở tab khác; nút nhảy tab đọc như đường vòng. **Không** áp cho state deck-missing: nó có đường quay lại, vì đó là lối ra duy nhất còn đúng (§3, UC-12 E2) |
+| Bộ chọn khoảng là chrome ghim, không cuộn | §1 |
+| Đơn vị thẻ-ngày nói bằng một dòng chú thích, không nhét vào tên metric | §4 — chiều rộng ô ở 320dp scale 2.0 |
+| Lưới metric gập một cột khi ô quá hẹp | §2 — số bị cắt là số sai |
+| AppBar giữ chữ "Tiến độ" ở mọi cấp khi dữ liệu chưa về | Tiêu đề null làm `MxContentShell` bỏ luôn AppBar, mất cả nút back — chịu được lúc vào lần đầu, không chịu được ở mỗi lần reload (nửa đêm, resume) |
+| Hàng không có nút Study | Màn hình này chỉ đọc (BR-188) |
+
+## 6. Điều cố ý không dựng ở v1
+
+Biểu đồ theo ngày, heatmap, so sánh hai khoảng, accuracy và streak — tất cả
+thuộc BR-182 và cần định nghĩa riêng trước khi có hình. Một khung biểu đồ dựng
+sẵn "để sau này điền" là cách chốt bố cục cho dữ liệu chưa ai định nghĩa.

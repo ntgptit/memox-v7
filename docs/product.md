@@ -7,8 +7,8 @@
 | **Scope** | Vấn đề, người dùng, quyết định nền tảng, phạm vi MVP, luồng nghiệp vụ chính. Ngoài phạm vi: cách triển khai |
 | **Source of truth for** | Phạm vi MVP · phân loại must/should/nice/out · quyết định platform, data posture, auth, dữ liệu nhạy cảm |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.21 (Export card: N1 nửa export thành task đang triển khai) |
-| **Last updated** | 2026-08-13 |
+| **Updated by task** | M99.23 (Progress tốt nghiệp khỏi scaffold; phần còn lại của S2 vẫn should-have) |
+| **Last updated** | 2026-08-14 |
 
 ## Problem
 
@@ -168,9 +168,11 @@ trong khi branch nội bộ và màn hình gốc của nó vẫn là Decks.
 Quyết định, ràng buộc placeholder và các phương án bị loại nằm ở AD-19.
 
 - Cold start mở Decks (UC-06).
-- Progress và Settings hiện chỉ là scaffold/placeholder: có tab và route
-  **không** có nghĩa hai feature này đã hoàn thành. Thống kê vẫn là
-  should-have (S2); tùy chọn ứng dụng chưa có nghiệp vụ nào được chốt.
+- Settings hiện chỉ là scaffold/placeholder: có tab và route **không** có nghĩa
+  feature đã hoàn thành — tùy chọn ứng dụng chưa có nghiệp vụ nào được chốt.
+  Progress **đã** tốt nghiệp ở M99.23: nó đọc dữ liệu học thật và cho đi sâu
+  theo cây deck (UC-12). Phần còn lại của thống kê (S2) — accuracy, streak, dự
+  báo due, so sánh khoảng — vẫn là should-have và cố ý nằm ngoài v1 (BR-182).
 - Thư viện starter (M6) là child flow bên trong tab Thư viện (branch Decks), không phải tab riêng.
 - Không có tab Profile chừng nào chưa có auth/profile domain — nhất quán với
   "Đăng nhập / tài khoản" ở Explicitly out of MVP.

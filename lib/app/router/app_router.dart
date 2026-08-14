@@ -8,7 +8,7 @@ import '../../features/card/presentation/screens/card_import_screen.dart';
 import '../../features/card/presentation/screens/card_list_screen.dart';
 import '../../features/deck/presentation/screens/deck_list_screen.dart';
 import '../../features/deck/presentation/screens/starter_library_screen.dart';
-import '../../features/progress/presentation/screens/progress_placeholder_screen.dart';
+import '../../features/progress/presentation/screens/progress_deck_screen.dart';
 import '../../features/settings/presentation/screens/settings_placeholder_screen.dart';
 import '../../features/study/presentation/screens/study_entry_screen.dart';
 import '../fallback/route_not_found_screen.dart';
@@ -45,9 +45,9 @@ final GoRouter appRouter = createAppRouter();
 /// scroll position while another is on screen. A plain set of top-level
 /// routes would rebuild the destination from scratch on every tab switch, which
 /// is the "why did my place in the list disappear" bug. Progress and Settings
-/// are branches ahead of their features (AD-19): each holds a single
-/// presentation-only placeholder route, so the deep-link contract and the tab
-/// order are settled before the content is.
+/// were both branches ahead of their features (AD-19), which is what settled the
+/// deep-link contract and the tab order before the content existed; Progress has
+/// since been filled in by UC-12 and Settings is still a placeholder.
 GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
   // Declared so the import wizard can mount on the root navigator, above
   // the shell. Created per call: a shared GlobalKey across two routers (as
@@ -182,18 +182,36 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
               ),
             ],
           ),
-          // The two scaffolded branches (AD-19). One route each, and the
-          // screens are presentation-only: entering, leaving or switching to
-          // them must read no repository, open no session and write nothing.
+          // Progress by Deck (UC-12). Two routes onto one screen, the same way
+          // the Library branch mounts one deck list at every depth: `/progress`
+          // is the library level and `/progress/:deckId` is one deck's level,
+          // nested so it pushes onto this branch.
           StatefulShellBranch(
             routes: <RouteBase>[
               GoRoute(
                 path: RoutePaths.progress,
                 name: RouteNames.progress,
-                builder: (context, state) => const ProgressPlaceholderScreen(),
+                // No `deckId`: the library level.
+                builder: (context, state) => const ProgressDeckScreen(),
+                routes: <RouteBase>[
+                  GoRoute(
+                    path: RoutePaths.progressDeckRelative,
+                    name: RouteNames.progressDeck,
+                    // `pathParameters` is non-nullable in go_router and the
+                    // segment is required by the pattern, so a match cannot
+                    // occur without it. No fallback: inventing a deck id would
+                    // open somebody else's deck rather than fail.
+                    builder: (context, state) => ProgressDeckScreen(
+                      deckId: state.pathParameters[RoutePathParams.deckId],
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
+          // The one branch still scaffolded ahead of its feature (AD-19). Its
+          // screen is presentation-only: entering, leaving or switching to it
+          // must read no repository and write nothing.
           StatefulShellBranch(
             routes: <RouteBase>[
               GoRoute(

@@ -21,6 +21,7 @@ part 'app_database_migrations.dart';
     'queries/deck.drift',
     'queries/card.drift',
     'queries/tag.drift',
+    'queries/progress.drift',
   },
 )
 class AppDatabase extends _$AppDatabase {

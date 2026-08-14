@@ -7,8 +7,8 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.22 (five-way PR host-test sharding follow-up) |
-| **Last updated** | 2026-08-13 |
+| **Updated by task** | M99.23 (Progress by Deck v1) |
+| **Last updated** | 2026-08-14 |
 
 Single source of truth for project progress. Update it in the same commit as the
 work it describes. A task is `done` only when it meets the Definition of Done in
@@ -9341,6 +9341,90 @@ thế không đổi bố cục.
   aggregate check và đo lại wall-clock.
 - **Checklist phases:** 19, meta
 
+### M99.23 · Progress by Deck v1 — drill-down hoạt động học theo cây deck
+
+- **Status:** **done**
+- **Goal:** Thay placeholder của branch Progress bằng một vertical slice đọc dữ
+  liệu học thật: hoạt động theo deck trên hai khoảng 7/30 ngày, đi sâu theo cây
+  thật, không giả dữ liệu và không mở rộng sang accuracy hay dự báo.
+- **Scope:** `docs/business-rules.md` (BR-182…BR-189), `docs/use-cases.md`
+  (UC-12), `docs/wireframes/m99-progress-by-deck.md`, `docs/wbs.md`,
+  `lib/core/database/queries/progress.drift` + include trong `app_database.dart`,
+  `lib/features/progress/**`, binding trong `lib/app/di/repository_bindings.dart`,
+  route `/progress/:deckId` trong `route_names.dart`/`route_paths.dart`/
+  `app_router.dart`, ARB en+vi, Widgetbook, và test ở cả bốn tầng. **Không** đổi
+  schema, **không** thêm cột deck lịch sử vào `study_answers`, **không** thêm
+  bảng analytics, **không** đụng Deck/Card/Study production code.
+- **Editable documents:** `docs/business-rules.md`, `docs/use-cases.md`,
+  `docs/wireframes/m99-progress-by-deck.md`, `docs/wbs.md`,
+  `docs/architecture.md` (AD-19), `docs/product.md`,
+  `docs/it-scenarios/01-navigation-and-continuity.md` — ba file cuối vì Progress
+  **tốt nghiệp khỏi scaffold**: AD-19 viết tên hai branch vào một câu MUST, nên
+  code hợp lệ lại vi phạm một AD đang `accepted` cho tới khi rule được gắn lại
+  vào *tình trạng* của branch. `check_docs.py` không thấy điều đó — nó kiểm ID
+  và citation, không kiểm ngữ nghĩa.
+- **5Why:** Người dùng cần biết *deck nào* đang được học chứ không chỉ tổng của
+  cả app, vì hành động sửa được — học deck nào tiếp — thuộc về deck; muốn trả
+  lời theo deck thì attribution phải chốt trước, vì "lượt này thuộc deck nào"
+  có hai câu trả lời khác nhau (nơi đã trả lời, và nơi thẻ đang nằm) và không
+  chọn thì mỗi query chọn một kiểu; chọn **vị trí hiện tại** vì snapshot lịch sử
+  đòi một cột deck trên mỗi answer, phải backfill và phải giữ đồng bộ với mọi
+  lần move — trong khi câu hỏi người dùng thực sự hỏi là "deck này đang thế nào"
+  chứ không phải "tháng Ba deck này trông thế nào"; chỉ ship activity metrics vì
+  accuracy, streak và dự báo mỗi thứ cần một định nghĩa riêng và năm số
+  nửa-đồng-thuận thì không số nào đáng tin; aggregate phải nằm ở DB vì đếm
+  card-day phân biệt trên một subtree 10 cấp bằng Dart là N+1 theo số deck và
+  kéo mọi answer qua ranh giới isolate.
+- **Output:** `queries/progress.drift` (hai statement: root và cấp con, mỗi
+  statement một CTE `card_days` + một aggregate theo branch + một aggregate theo
+  scope), `ProgressDao`, `ProgressRepositoryImpl`, `progress_mapper.dart`, sáu
+  domain model + contract + use case, ba controller, một screen và bảy widget,
+  route lồng `/progress/:deckId`, 32 khoá ARB × 2 locale, một use case
+  Widgetbook, và 102 test host mới dưới `test/features/progress/` cộng 6 visual
+  audit.
+- **Acceptance criteria:**
+  - [x] Card-day là đơn vị đếm; trả lời trùng trong ngày gộp về một (BR-183).
+  - [x] Hai khoảng đến từ một lần đọc; đổi khoảng không mở lại query, không
+        loading (BR-184); biên 23:59:59 và nửa đêm được chứng minh trên SQLite
+        thật ở cả hai đầu của cả hai cửa sổ.
+  - [x] Attribution theo vị trí hiện tại: move card và move subtree chuyển toàn
+        bộ lịch sử; xoá deck làm activity biến mất qua cascade (BR-185).
+  - [x] Hierarchy thật ở 10 cấp; mọi cấp trung gian cộng đúng; không
+        `COALESCE(parent_deck_id, id)`.
+  - [x] Learning/Reviewing là phân hoạch loại trừ, ưu tiên Learning (BR-186).
+  - [x] Sort theo khoảng đang chọn, tie-break tên đã fold Unicode rồi id; deck 0
+        vẫn hiện, đứng cuối (BR-187).
+  - [x] Read-only: không statement ghi nào chạy, không hàng nào đổi (BR-188).
+  - [x] Live update trên answer/move/delete và một hẹn giờ duy nhất cho nửa đêm,
+        có guard chống lặp (BR-189).
+  - [x] Một statement mỗi lần emit, không N+1 theo số deck.
+  - [x] Mọi state render ở EN/VI, light/dark, 320/390/412dp và text scale 2.0;
+        hình học pin bằng `getRect`; visual audit strict xanh ở cả hai theme.
+  - [x] Không con số nào bị cắt: lưới metric gập một cột khi ô hẹp hơn nhu cầu
+        đã nhân theo `textScaler`, pin bằng `getMinIntrinsicWidth` ở 320dp
+        scale 2.0 — `getRect` không thấy được lỗi này vì `RenderParagraph` tự
+        clamp về constraint.
+  - [x] AppBar và nút back còn nguyên ở cấp deck trong lúc loading và khi read
+        lỗi — nếu không thì mỗi lần nửa đêm hoặc resume sẽ lấy mất lối ra.
+  - [x] Bộ chọn khoảng là chrome ghim, không cuộn mất sau 50 deck (BR-187).
+- **Dependencies:** M4.9, M4.10, M5.x (study answers), M99.7 (branch scaffold)
+- **Tests required:** 35 test data trên SQLite thật (card-day, biên cửa sổ, phân
+  hoạch, 10 cấp, đường dẫn ở cấp sâu nhất, cây cha vòng lặp, move card/subtree,
+  cascade, reset, đếm statement, no-mutation, stream invalidation), 19 test
+  domain (cửa sổ, phân hoạch, thứ tự) và 48 test presentation — state matrix,
+  hai empty state và hai đường lỗi, hàng deck (path/semantics/locale/theme/
+  viewport), controller (clock/offset, family, no-retry, hẹn giờ nửa đêm), hình
+  học `getRect` (gutter ở hai breakpoint, bộ chọn ghim, lưới, chữ số không bị
+  cắt ở 320dp scale 2.0, khoảng thở đáy đo sau khi cuộn thật) và navigation qua
+  router thật — cộng 6 visual audit (mixed · all-zero · no-decks × light/dark).
+
+  **Trash/restore/purge không test được trên base này** và cố ý không có test
+  giả: repo chưa có cơ chế Trash, nên nửa *đã* enforce — xoá cứng → cascade →
+  activity biến mất — được test thật (`countRows('study_answers') == 0`), còn
+  nửa còn lại là nghĩa vụ tương lai mà BR-185 phát biểu có điều kiện. Emulator
+  integration test **deferred to integration worktree — not run**.
+- **Checklist phases:** 14, 15
+
 ## Blocker
 
 | Blocker | Ảnh hưởng | Cách gỡ |
@@ -9412,6 +9496,8 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 | ~~`dart format .` trong `dod_check.sh` crash trên worktree~~ | M2.2b | Bước `format` đỏ ở **mọi** lần chạy local nhiều tuần liền: `.` đi vào `.claude/worktrees/`, nơi Gradle xoá thư mục ngay giữa lúc formatter đang liệt kê → `PathNotFoundException`. Vì là lỗi môi trường chứ không phải lỗi format, mỗi lần lại được *báo cáo và đi vòng* thay vì sửa — và một gate đỏ mà ai cũng biết là đỏ thì không còn là gate | **Đã trả.** `dart_roots()` lấy tập thư mục từ `git ls-files '*.dart'` cắt tới segment đầu. Đúng câu hỏi cần hỏi — *cây làm việc **này** track những file Dart nào* — nên build output không tracked không lọt vào, worktree bị `.git/info/exclude` loại sẵn, và một thư mục top-level mới tự động được nhận. **Lỗi thứ hai nghiêm trọng hơn cái crash:** `.` đưa cho formatter source của **nhánh khác**, nên một worktree có format cũ làm gate đỏ vì code không nằm trong cây làm việc |
 | ~~`study_session_controller.dart` vượt trần 400 dòng của guard~~ | M5.24 | 423/400. Warning cũng làm đỏ gate. Class giữ toàn bộ command của phiên học | **Đã trả ở M5.25.** Không tách được bằng cơ chế ngôn ngữ — Dart không có partial class, base class Riverpod sinh ra là private, và extension trong `part` cũng không dùng được `state` (`invalid_use_of_protected_member`, đã thử và revert). Nên tách bằng **trách nhiệm**: offset nhìn lại của `browse` là view state, không phải command của phiên, và nay là `StudyBrowseTrailController`. Controller còn 387 dòng |
 | `end_reason = scheduler_reset` phải mang cả BR-164 | M99.16 | Đổi scheduler khi chưa khoá ghi cùng giá trị với Reset, nên đọc riêng cột đó thì hai sự kiện khác nhau trông giống nhau. Không mất thông tin — `study_sessions.scheduler_generation` bằng generation của root sau một lần đổi và nhỏ hơn sau một lần reset — nhưng nó bắt người đọc phải biết mẹo đó | Tên đúng là `scheduler_changed`. `study_sessions.end_reason` có `CHECK` liệt kê giá trị nên thêm một giá trị là **đổi schema**, và bump version đang thuộc về task chuẩn hoá `content_type` chạy song song (v6). Nới `CHECK` cùng lần bump schema tiếp theo — v6 của BR-163 và v7 của chính task này đều đã đi, nên là v8 — rồi đổi `deck_scheduler_repository_impl.dart` sang giá trị mới. Nới `CHECK` là rebuild bảng, không phải `ALTER`, nên nó xứng đáng một bump riêng chứ không ghép vào backfill data-only của v7 |
+| `study_answers` chưa có index cho khoảng thời gian | M99.23 | Progress lọc `answered_at >= ? AND answered_at < ?`; index duy nhất chạm cột này là `(card_id, answered_at)`, mà cột dẫn đầu không nằm trong predicate — nên mỗi lần emit là một full scan `study_answers`, và stream re-emit theo **mỗi lượt trả lời** khi màn hình đang mở (ở độ sâu 3 là ba scan mỗi lượt). Output có chặn, scan thì không | Thêm index `(answered_at)` — nhưng đó là **đổi schema**, tức bump version + snapshot + migration test, và M99.23 cố ý không đụng schema. Trả cùng lần bump schema tiếp theo, và theo đúng rule index của repo: đo bằng `EXPLAIN QUERY PLAN` trên dữ liệu thật trước rồi mới thêm |
+| `ancestry` CTE trong `deck.drift` không có bound | M99.23 | Cùng khiếm khuyết đã sửa ở `progress.drift`: walk mang `distance` tăng mỗi vòng nên `UNION` không dedup được, và trên cây cha vòng lặp thì statement không bao giờ trả về — nó giữ database isolate, nên mọi query khác của app chặn theo. Comment ở `deck.drift` còn khẳng định ngược lại | Áp đúng cách đã dùng ở `progress.drift`: `:maxWalk` cho `ancestry`, giữ `UNION` cho các walk không mang counter. Không gộp vào M99.23 vì nó nằm ngoài scope đã tuyên bố (không đụng Deck production code) |
 | Nội dung starter là fixture, không phải nội dung production | T1.3 | Không phát hành được với nội dung này | Tìm nguồn nội dung có bản quyền rõ ràng trước M8 (BR-87) |
 | `sqlite3.wasm` và `drift_worker.js` là binary vendored trong `web/` | M4.2 | Không có bước build nào sinh ra chúng và không có bước build nào báo khi chúng cũ: app compile, load, rồi **không mở được database**. Nâng `drift` mà quên tải lại worker không có triệu chứng nào cho tới khi ai đó mở trình duyệt | `test/database/web_assets_test.dart` so version trong `pubspec.lock` với version đã pin, kèm `web/WEB_ASSETS.md` ghi URL tải. Đã kiểm tiêm lỗi: đổi `drift` thành 2.99.0 làm test đỏ |
 | Server phát web chưa gửi COOP/COEP | M4.2 | `crossOriginIsolated` là `false`, nên drift chọn backend lưu trữ kém hơn OPFS. Không có lỗi nào — chỉ là hiệu năng và độ bền khác đi, âm thầm | Thêm `Cross-Origin-Opener-Policy: same-origin` và `Cross-Origin-Embedder-Policy: require-corp` vào server phát web ở M7, và kiểm lại `crossOriginIsolated` trong E2E |

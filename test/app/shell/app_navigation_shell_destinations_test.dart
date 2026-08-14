@@ -7,6 +7,7 @@ import 'package:memox/app/config/env_config_provider.dart';
 import 'package:memox/app/router/app_router.dart';
 import 'package:memox/app/router/route_paths.dart';
 import 'package:memox/features/deck/di/deck_repository_provider.dart';
+import 'package:memox/features/progress/di/progress_repository_provider.dart';
 import 'package:memox/features/study/di/study_repository_provider.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/l10n/generated/app_localizations_vi.dart';
@@ -14,6 +15,7 @@ import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 
 import '../../features/deck/presentation/support/fake_deck_repository.dart';
+import '../../features/progress/presentation/support/fake_progress_repository.dart';
 import '../../features/study/domain/support/fake_study_repository.dart';
 
 /// The destination row of the shell, after AD-19 made it four wide.
@@ -45,6 +47,9 @@ void main() {
           envConfigProvider.overrideWithValue(EnvConfig.development),
           deckRepositoryProvider.overrideWithValue(repository),
           studyRepositoryProvider.overrideWithValue(FakeStudyRepository()),
+          progressRepositoryProvider.overrideWithValue(
+            FakeProgressRepository(),
+          ),
         ],
         child: MediaQuery(
           data: MediaQueryData(textScaler: TextScaler.linear(textScale)),
@@ -56,8 +61,8 @@ void main() {
     await tester.pump();
   }
 
-  group('the bar on the scaffolded branches', () {
-    testWidgets('the progress branch shows its placeholder under the bar', (
+  group('the bar on the branches with no list of their own', () {
+    testWidgets('the progress branch shows its empty state under the bar', (
       tester,
     ) async {
       await pumpShell(
@@ -66,7 +71,7 @@ void main() {
         initialLocation: RoutePaths.progress,
       );
 
-      expect(find.text(english.progressPlaceholderTitle), findsOneWidget);
+      expect(find.text(english.progressEmptyDecksTitle), findsOneWidget);
       expect(find.byType(MxNavigationBar), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
@@ -85,7 +90,7 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('the progress placeholder clears the bar at 320 with '
+    testWidgets('the progress empty state clears the bar at 320 with '
         'textScaler 2.0', (tester) async {
       // The same overflow shape as the deck empty state, on the branch that is
       // nothing but a centred column — and with four destinations the bar is

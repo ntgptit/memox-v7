@@ -7,8 +7,8 @@
 | **Scope** | Luật nghiệp vụ, validation rule, state machine, edge case của phạm vi MVP. Ngoài phạm vi: quyết định kiến trúc (`architecture.md`), hình dạng dữ liệu (`data-model.md`), luồng người dùng (`use-cases.md`) |
 | **Source of truth for** | BR-xx · validation rule · entity state machine · edge case |
 | **Depends on** | `document-conventions.md`, `product.md`, `architecture.md` |
-| **Updated by task** | M99.21 — BR-174…BR-181: export card ra file (scope, content-only, tag codec, determinism, read-only, file shape, tên file, riêng tư/platform) |
-| **Last updated** | 2026-08-13 |
+| **Updated by task** | M99.23 — BR-182…BR-189: tiến độ theo deck (phạm vi metric, card-day, hai khoảng, quy-về-vị-trí-hiện-tại, phân hoạch Learning/Reviewing, thứ tự, chỉ-đọc, cập nhật trực tiếp) |
+| **Last updated** | 2026-08-14 |
 
 Format tuân theo `document-conventions.md` §6.2. Từ khoá MUST / SHOULD / MAY
 theo §3. Prose **không** chứa từ khoá là giải thích, không phải rule (§9).
@@ -462,6 +462,24 @@ riêng tư chung (BR-51…BR-54) — chúng chỉ nói phần mà chiều export
 | BR-179 | active | Mọi file export MUST mở đầu bằng đúng sáu header canonical theo thứ tự của AD-20, chữ thường tiếng Anh, và MUST NOT localize theo ngôn ngữ app. Field tuỳ chọn không có giá trị MUST là ô rỗng, MUST NOT là `null`, `-` hay chuỗi placeholder. CSV và TSV MUST ghi kèm UTF-8 BOM — đối xứng với encoding mà Import chấp nhận (BR-173). XLSX MUST ghi mọi ô dưới dạng **text**, nên nội dung bắt đầu bằng `=`, `+`, `-` hoặc `@` MUST NOT trở thành formula, và chuỗi trông như số (`001`, `1e3`, `+84…`) MUST giữ nguyên nguyên văn. | data | UC-11, AD-20, BR-173 |
 | BR-180 | active | Tên file export MUST dẫn xuất từ tên deck đã sanitize — loại ký tự phân cách đường dẫn, ký tự điều khiển và ký tự không hợp lệ của hệ tệp, gộp khoảng trắng liên tiếp thành một, trim hai đầu — cộng một ngày lấy từ `clockProvider` và phần mở rộng theo format đã chọn. Sanitize ra chuỗi rỗng thì phần tên MUST fallback về `cards`. MUST NOT gọi `DateTime.now()` ở bất kỳ layer nào, và tên file MUST NOT xuất hiện trong log ở bất kỳ level nào (BR-173). | domain | UC-11, BR-173 |
 | BR-181 | active | File export là dữ liệu riêng tư cùng mức nội dung card (BR-51, BR-52) và MUST chỉ được tạo khi người dùng chủ động yêu cầu (BR-54). Ứng dụng MUST NOT xin quyền truy cập bộ nhớ diện rộng, và MUST NOT ghi artifact vào thư mục dùng chung trước một hành động tường minh của người dùng; bản tạm MUST nằm trong vùng riêng của ứng dụng và là transient. Bàn giao file MUST đi qua share sheet của hệ điều hành. Người dùng đóng share sheet MUST được hiểu là **cancel**, MUST NOT báo lỗi. UI MUST NOT nói file đã được lưu khi hệ điều hành không xác nhận điều đó — copy trung thực nói "đã bàn giao cho hệ thống", không nói "đã lưu". | data + UI | UC-11, BR-51, BR-52, BR-54, BR-173 |
+
+## Tiến độ theo deck
+
+Drill-down hoạt động học theo cây deck (UC-12). Các rule dưới đây **không** phát
+biểu lại định nghĩa ngày địa phương (BR-105), quan hệ cha–con và `root_deck_id`
+(BR-55…BR-57), tính append-only của `study_answers` (BR-43) hay luật riêng tư
+chung (BR-51…BR-54) — chúng chỉ nói phần mà chiều đọc tiến độ thêm vào.
+
+| ID | Status | Rule | Enforced by | Related |
+|---|---|---|---|---|
+| BR-182 | active | Progress by Deck v1 MUST chỉ báo cáo đúng bốn số cho mỗi phạm vi: **unique active cards**, **active days**, **Learning card-days** và **Reviewing card-days** (BR-183, BR-186). v1 MUST NOT báo cáo accuracy, điểm số, streak dài nhất, dự báo due, so sánh giữa hai khoảng, hay bất kỳ số dẫn xuất nào khác — mỗi số đó cần một định nghĩa riêng phải chốt trước, và một màn hình chứa năm số nửa-đồng-thuận thì không số nào đáng tin. Màn hình MUST là read-only (BR-188). | domain | UC-12, BR-183, BR-186, BR-188 |
+| BR-183 | active | Đơn vị đếm MUST là **card-day**: một cặp phân biệt `(card, ngày địa phương)` theo đúng định nghĩa ngày của BR-105, MUST NOT là số lượt trả lời. Trả lời cùng một thẻ sáu lần trong một buổi tối MUST đếm là **một** card-day. `unique active cards` MUST là số card phân biệt có ít nhất một lượt trong khoảng; `active days` MUST là số ngày địa phương phân biệt có ít nhất một lượt trong khoảng. Hai số này đo hai thứ khác nhau và MUST NOT cộng vào nhau. `active days` MUST NOT được tính bằng cách cộng các deck con: cùng một ngày xuất hiện ở hai deck vẫn là một ngày học, nên mọi tổng MUST đọc trực tiếp từ cùng một câu lệnh chứ không fold từ các hàng. | domain + repository | UC-12, BR-105 |
+| BR-184 | active | v1 MUST có đúng hai khoảng — **7 ngày** và **30 ngày** — và MUST NOT có khoảng thứ ba hay date picker tự do. Mỗi khoảng MUST gồm trọn các ngày địa phương **kết thúc bằng hôm nay**: 7 ngày là hôm nay cộng sáu ngày trước đó. Biên MUST dẫn xuất từ `clockProvider` và offset múi giờ do composition root cấp (AD-16), MUST NOT đọc đồng hồ hay múi giờ trong SQL hay trong `domain/`. Hai khoảng MUST đến từ **một** lần đọc, nên đổi khoảng trên màn hình MUST NOT mở lại query và MUST NOT hiện trạng thái loading. Snapshot MUST mang theo thời điểm nó hết hạn — nửa đêm địa phương kế tiếp — vì mọi số của nó đổi tại đó mà không có write nào trong database. | domain + repository | UC-12, BR-105, AD-16 |
+| BR-185 | active | Lịch sử MUST được quy cho **vị trí hiện tại của thẻ**: đường đi `study_answers → cards → decks`. Chuyển một thẻ hoặc một subtree sang deck khác MUST làm **toàn bộ** lịch sử của thẻ xuất hiện dưới deck và root mới, không chỉ các lượt sau khi chuyển. `study_answers` MUST NOT nhận thêm cột deck lịch sử và hệ thống MUST NOT thêm bảng analytics riêng để né rule này; hệ quả được chấp nhận là "tháng Ba deck này trông thế nào" không trả lời được và không thuộc v1. Tổng của một deck MUST gồm thẻ trực tiếp của nó và mọi descendant theo cây thật — root resolve qua `root_deck_id`, cấp trung gian resolve bằng recursive walk, MUST NOT dùng `COALESCE(parent_deck_id, id)` (BR-57). Deck đã xoá MUST biến mất khỏi mọi số, và điều đó MUST đến từ cascade của schema chứ không từ một predicate lọc; khi một cơ chế Trash tồn tại thì deck trong Trash và mọi descendant của nó MUST bị loại theo cùng cách, restore MUST làm activity xuất hiện lại theo vị trí hiện tại của thẻ, và purge vĩnh viễn MUST loại nó vĩnh viễn. | repository | UC-12, BR-55, BR-56, BR-57, BR-71 |
+| BR-186 | active | Learning và Reviewing MUST là một phân hoạch **loại trừ và vét cạn** của card-days: mỗi card-day MUST thuộc đúng một nửa, nên `Learning + Reviewing` MUST bằng tổng card-days. Ưu tiên thuộc về Learning: một ngày có ít nhất một lượt `kind = 'learning'` MUST là Learning day dù ngày đó còn lượt nào khác; mọi ngày còn lại — `scheduled` và `relearning` — MUST là Reviewing day. Phân loại MUST đọc cột `kind` đã lưu (BR-76), MUST NOT suy ra bằng cách so sánh trạng thái trước/sau. | domain + repository | UC-12, BR-76, BR-142 |
+| BR-187 | active | Danh sách deck MUST sắp theo `unique active cards` **giảm dần của khoảng đang chọn**, tie-break bằng tên đã fold rồi tới id, để thứ tự ổn định qua mọi lần đọc. Fold MUST làm trong Dart bằng `toLowerCase()` Unicode, MUST NOT dùng `lower()` của SQLite (chỉ fold ASCII, nên `Động` và `động` tách nhau trong khi `Verbs` và `verbs` gộp). Deck không có hoạt động MUST vẫn hiển thị và MUST đứng cuối — ẩn chúng đi là trả lời câu hỏi "mình đã bỏ bê deck nào" bằng cách xoá chính câu trả lời. | domain | UC-12, BR-93 |
+| BR-188 | active | Đọc tiến độ MUST là thao tác chỉ-đọc: mở, rời hay đổi khoảng trên màn hình MUST NOT ghi hay chạm tới nội dung card, timestamp, `content_type`, study state, review history, session hay quan hệ tag; MUST NOT mở hay đóng session nào. Một lần đọc thất bại vì thế MUST NOT làm hỏng dữ liệu, và copy lỗi MUST NOT gợi ý ngược lại. | repository + UI | UC-12, BR-178 |
+| BR-189 | active | Màn hình MUST cập nhật trực tiếp: ghi một lượt trả lời, chuyển thẻ hoặc subtree, xoá deck, và nửa đêm địa phương đi qua MUST đều làm số trên màn hình đổi mà người dùng không phải thao tác gì. Ba sự kiện đầu MUST đến từ stream invalidation của các bảng liên quan; sự kiện thứ tư không có write nào trong database nên MUST đến từ một lần hẹn giờ duy nhất, đặt theo thời điểm hết hạn mà chính snapshot mang theo (BR-184). | repository + presentation | UC-12, BR-184 |
 
 ## StudyMode
 
@@ -943,3 +961,11 @@ Trạng thái kết thúc là terminal — không có đường quay lại `in_p
 | Cập nhật app nâng version template | Không đụng vào bản sao đã có (BR-36) |
 | Nội dung card rất dài (2000 ký tự) | Cuộn được trong vùng card, không tràn, không cắt mất |
 | Bộ nhớ đầy khi sao chép starter deck | Transaction rollback (BR-39); không để lại deck nửa vời |
+| Trả lời cùng một thẻ sáu lần trong một buổi tối | Một card-day, một active day (BR-183) |
+| Học hai deck khác nhau trong cùng một ngày | Mỗi deck một active day; tổng của cấp trên vẫn là một (BR-183) |
+| Chuyển thẻ sang root khác sau khi đã học | Toàn bộ lịch sử của thẻ chuyển theo; deck cũ về 0 (BR-185) |
+| Xoá deck đang có hoạt động | Cascade xoá card rồi answers; số về 0, không phải bị lọc (BR-185) |
+| Reset learning progress rồi học tiếp | Cả hai generation đều được đếm — reset không làm việc đã học biến mất (BR-43, BR-183) |
+| Mở màn hình tiến độ lúc 23:59 rồi để yên | Nửa đêm địa phương, cửa sổ trượt một ngày và màn hình tự đọc lại (BR-184, BR-189) |
+| Một ngày có cả lượt `learning` và lượt `scheduled` trên cùng thẻ | Là Learning day (BR-186) |
+| Năm mươi deck cùng 0 hoạt động | Vẫn hiện, đứng cuối, thứ tự không đổi giữa hai lần đọc (BR-187) |

@@ -31,6 +31,10 @@ import '../../features/deck/data/repositories/deck_template_repository_impl.dart
 import '../../features/deck/domain/repositories/deck_repository.dart';
 import '../../features/deck/domain/models/deck_template_model.dart';
 import '../../features/deck/domain/repositories/deck_template_repository.dart';
+import '../../features/progress/data/datasources/progress_dao.dart';
+import '../../features/progress/data/repositories/progress_repository_impl.dart';
+import '../../features/progress/di/progress_repository_provider.dart';
+import '../../features/progress/domain/repositories/progress_repository.dart';
 import '../../features/study/data/datasources/study_dao.dart';
 import '../../features/study/di/study_repository_provider.dart';
 import '../../features/study/data/repositories/study_repository_impl.dart';
@@ -144,6 +148,17 @@ DeckTemplateRepository deckTemplateRepositoryBinding(Ref ref) =>
 /// It does take a random source, which is deliberately not injected here: the
 /// default is a real one, and only a test replaces it. A seeded shuffle in
 /// production would make every session lay its cards out in the same order.
+/// Progress reads what studying produced and writes nothing (BR-188), so it
+/// takes neither a clock nor an id generator: every instant it needs arrives as
+/// an argument from `clockProvider` and `utcOffsetProvider` at the controller,
+/// and there is nothing for it to stamp.
+///
+/// Its own DAO rather than the database, unlike the card bindings: there is no
+/// multi-step write whose steps have to share a transaction, so the narrower
+/// seam is the honest one.
+ProgressRepository progressRepositoryBinding(Ref ref) =>
+    ProgressRepositoryImpl(ProgressDao(ref.watch(appDatabaseProvider)));
+
 StudyRepository studyRepositoryBinding(Ref ref) =>
     StudyRepositoryImpl(StudyDao(ref.watch(appDatabaseProvider)));
 
@@ -186,4 +201,5 @@ List<Override> repositoryBindingOverrides() => <Override>[
   deckTemplateRepositoryProvider.overrideWith(deckTemplateRepositoryBinding),
   deckTemplateCatalogProvider.overrideWith(deckTemplateCatalogBinding),
   studyRepositoryProvider.overrideWith(studyRepositoryBinding),
+  progressRepositoryProvider.overrideWith(progressRepositoryBinding),
 ];

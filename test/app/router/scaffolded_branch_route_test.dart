@@ -9,13 +9,15 @@ import 'package:memox/app/router/route_paths.dart';
 import 'package:memox/core/navigation/route_names.dart';
 import 'package:memox/features/deck/di/deck_repository_provider.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
-import 'package:memox/features/progress/presentation/screens/progress_placeholder_screen.dart';
+import 'package:memox/features/progress/di/progress_repository_provider.dart';
+import 'package:memox/features/progress/presentation/screens/progress_deck_screen.dart';
 import 'package:memox/features/settings/presentation/screens/settings_placeholder_screen.dart';
 import 'package:memox/features/study/di/study_repository_provider.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 
 import '../../features/deck/presentation/support/fake_deck_repository.dart';
+import '../../features/progress/presentation/support/fake_progress_repository.dart';
 import '../../features/study/domain/support/fake_study_repository.dart';
 
 /// The two scaffolded branches (AD-19), exercised through the real app root.
@@ -48,6 +50,7 @@ void main() {
     String? initialLocation,
     FakeDeckRepository? repository,
     FakeStudyRepository? studyRepository,
+    FakeProgressRepository? progressRepository,
   }) async {
     final router = initialLocation == null
         ? createAppRouter()
@@ -63,6 +66,9 @@ void main() {
           ),
           deckRepositoryProvider.overrideWithValue(
             repository ?? FakeDeckRepository(),
+          ),
+          progressRepositoryProvider.overrideWithValue(
+            progressRepository ?? FakeProgressRepository(),
           ),
         ],
         child: MemoxApp(router: router),
@@ -81,7 +87,7 @@ void main() {
     await tester.tap(tab(english.navigationProgressLabel));
     await tester.pumpAndSettle();
 
-    expect(find.byType(ProgressPlaceholderScreen), findsOneWidget);
+    expect(find.byType(ProgressDeckScreen), findsOneWidget);
     expect(selectedTab(tester), 2);
     expect(tester.takeException(), isNull);
   });
@@ -107,7 +113,7 @@ void main() {
     // button would land somewhere the user never chose to be.
     await pumpApp(tester, initialLocation: RoutePaths.progress);
 
-    expect(find.byType(ProgressPlaceholderScreen), findsOneWidget);
+    expect(find.byType(ProgressDeckScreen), findsOneWidget);
     expect(find.byType(DeckListScreen), findsNothing);
     expect(selectedTab(tester), 2);
   });
@@ -131,7 +137,7 @@ void main() {
 
     router.goNamed(RouteNames.progress);
     await tester.pumpAndSettle();
-    expect(find.byType(ProgressPlaceholderScreen), findsOneWidget);
+    expect(find.byType(ProgressDeckScreen), findsOneWidget);
     expect(selectedTab(tester), 2);
 
     router.goNamed(RouteNames.settings);
@@ -198,7 +204,7 @@ void main() {
       router.routerDelegate.currentConfiguration.uri.path,
       RoutePaths.progress,
     );
-    expect(find.byType(ProgressPlaceholderScreen), findsOneWidget);
+    expect(find.byType(ProgressDeckScreen), findsOneWidget);
     expect(selectedTab(tester), 2);
     expect(tester.takeException(), isNull);
   });
