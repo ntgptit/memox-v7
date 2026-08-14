@@ -65,7 +65,7 @@
         "type": "int"
       }
     },
-    "description": "The first clause of the hero's announcement (W6.4). Read as separate nodes, the number and its unit arrive apart and the figure loses its meaning — so the headline is one clause. The second clause is the hero's visible supporting line, appended at the call site rather than duplicated here: a label built from counts alone drops the held-from-yesterday sentence that W2.5 exists to say."
+    "description": "The first clause of the hero's announcement (W6.4). Read as separate nodes, the number and its unit arrive apart and the figure loses its meaning — so the headline is one clause. The second clause is the hero's visible supporting line, joined on by `progressStreakSemantics`, which owns the punctuation: a label built from counts alone drops the held-from-yesterday sentence that W2.5 exists to say."
   },
   "progressStreakSemantics": "{headline}. {support}",
   "@progressStreakSemantics": {

@@ -9404,9 +9404,14 @@ thế không đổi bố cục.
   còn dùng cho lỗi đến **cùng** route chứ không phải trong lúc người dùng đang
   đứng đó); và S-g nay được khẳng định ở mức screen chứ không chỉ ở controller.
   **S-g đáng chú ý vì nó là *reload* chứ không phải *refresh*** — dependency
-  `progressNow` đổi, mà `MxAsyncView` đặt `skipLoadingOnReload: false` — nên nó
-  là đường duy nhất màn có thể tụt về spinner khi đã có dữ liệu; test dựng đúng
-  đường đó và kiểm **từng frame**, không frame nào có spinner.
+  `progressNow` đổi. Bản viết ở phase 7 dừng ở đó và coi test S-g là bằng chứng;
+  **stage 1 của batch tích hợp chứng minh nó không phải.** `MxAsyncView` mặc
+  định `shouldSkipLoadingOnReload: false`, nên màn **thật sự** tụt về spinner ở
+  mọi lần app resume và mọi lần qua nửa đêm; test S-g không thể đỏ vì
+  `FakeProgressRepository` yield seed **đồng bộ**, nên frame kế tiếp đã có dữ
+  liệu bất kể widget làm gì. `ProgressScreen` nay opt-in `true`, và pin thật là
+  `progress_screen_reload_test.dart` với một repository phát emission sau một
+  vòng event loop.
   Một divergence **cố ý giữ**: track của biểu đồ đo được **1.27:1** trên mặt
   card ở light và **1.35:1** ở dark — rất nhạt. Giữ vì track là trang trí
   (`ExcludeSemantics`, mỗi hàng đã nói giá trị bằng chữ số), và vì
@@ -9500,7 +9505,7 @@ thế không đổi bố cục.
   - [x] `dart format`, `flutter analyze`, guard kiến trúc, guard code, guard
         docs và host test xanh.
   - [ ] Emulator IT: deferred to integration worktree — not run.
-- **Deferred debt:** sáu mục dưới đây được mở ở stage 1 của batch tích hợp
+- **Deferred debt:** tám mục dưới đây được mở ở stage 1 của batch tích hợp
   #301–#310 bởi hai recursive audit; mỗi mục có lý do vì sao **không** đóng
   được ở đây và ai đóng nó.
   0. **Không có trigger tức thời khi thiết bị đổi múi giờ trong lúc màn hình
@@ -9546,7 +9551,22 @@ thế không đổi bố cục.
      `platformDispatcher`. Chỉ **G12** đi qua shell thật, và nó là hàng duy
      nhất mà sự khác biệt đó thay đổi kết quả. Ô cần chạy lại qua shell khi
      đóng: G2/G3/G4/G6/G11 ở `320 @ 2.0 · vi`.
-  5. **Không có gate nào đối chiếu `Affected documents` của một AD với
+  5. **Cột bar tụt dưới sàn `content/4` khi một ngày có hơn ~999 card** —
+     owner: M99.23. Đo ở `320 @ 2.0 · vi`: busiest 143 → 81.1dp, 1234 → 63.8dp,
+     12345 → 46.9dp, so với ngưỡng 66.0dp. Không overflow và không exception —
+     `IntrinsicColumnWidth` của cột giá trị chỉ lặng lẽ ăn dần cột flex. v1
+     **không** bảo đảm sàn cho ngày > 999 card; đóng bằng cách giới hạn bề rộng
+     cột giá trị hoặc rút gọn số (`1.2k`), cả hai đều là quyết định copy/thiết
+     kế nên không thuộc phần tích hợp này.
+  6. **Retry không tạo phản hồi hiển thị nào trong lúc đọc lại** — owner: chủ
+     sở hữu `MxAsyncView` (M4.10). `ref.invalidate` là một *refresh*, và
+     `skipLoadingOnRefresh: true` bỏ qua nhánh loading rồi rơi vào `hasError`,
+     nên màn vẽ lại đúng mặt lỗi cũ: người dùng chạm và **không một pixel nào
+     đổi** cho tới khi read xong — trên chính màn mà read là full scan. Hành vi
+     kế thừa từ shared component chứ không do #301 tạo ra, và wireframe S-e
+     không yêu cầu busy state, nên để lại; đóng bằng một pending state ở nút
+     hoặc bằng cách không bỏ qua loading khi giá trị trước đó là error.
+  7. **Không có gate nào đối chiếu `Affected documents` của một AD với
      `Editable documents` của task sửa nó** — owner: M99.9 (chủ sở hữu
      `check_docs.py`). Chính lỗ này để IT-NAV-011 mô tả Progress là placeholder
      suốt một PR đã thay placeholder; đã sửa tài liệu ở đây, nhưng chưa có gì

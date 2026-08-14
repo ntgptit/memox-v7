@@ -868,8 +868,8 @@ BR-186, BR-187, BR-188, BR-189, BR-190, BR-191
 **UI states:** loading · loaded-normal (có hoạt động trong cửa sổ) ·
 loaded-today-zero-streak-retained (A1) · empty-lifetime + CTA sang Study (A2) ·
 error + Retry (E1/E2). Live refresh (A3) và midnight rollover (A4) là **chuyển
-tiếp giữa hai loaded**, không phải state thứ sáu: chúng MUST NOT hạ màn về
-loading khi đã có dữ liệu trên màn.
+tiếp giữa hai loaded**, không phải state thứ sáu; luật cấm hạ màn về loading khi
+đã có dữ liệu nằm ở BR-189.
 
 ## Điều đã cố ý không đặc tả
 

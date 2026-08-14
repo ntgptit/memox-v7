@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_breakpoints.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -69,15 +70,26 @@ class ProgressStreakHeroWidget extends StatelessWidget {
                 // half — W6.1 forbids clipping and this is worse, because it
                 // looks deliberate.
                 //
-                // 1.75 is the largest cap that fits both locales (234.6dp EN,
-                // 240.5dp VI), measured rather than picked, and it changes
-                // nothing below it: every viewport at a scale ≤ 1.75 renders
-                // exactly as before. Applied to this `Text` alone — the two
-                // other lines in the card, and every other section, keep the
-                // user's full setting.
-                textScaler: MediaQuery.textScalerOf(
-                  context,
-                ).clamp(maxScaleFactor: 1.75),
+                // **Only where the column is too narrow**, which is the
+                // compact tier. The constraint is the content width, not the
+                // type role: at 360dp the column is 296dp and the Vietnamese
+                // unit word needs 274.9dp, so from there up there is nothing to
+                // avoid and taking 12.5% off the size the user chose would be a
+                // loss with no gain. The first version of this clamp was
+                // unconditional and did exactly that at 360, 390 and 412.
+                //
+                // 1.75 rather than the arithmetic limit. Linearly the headline
+                // would still fit at `264 / 274.9 × 2.0 ≈ 1.92`, so 1.75 is a
+                // deliberate margin, not the measured edge: the numbers above
+                // are one font and one string each, and a plural form or a
+                // font-fallback in another future locale eats a few dp without
+                // warning.
+                textScaler:
+                    AppBreakpoints.isCompact(MediaQuery.sizeOf(context).width)
+                    ? MediaQuery.textScalerOf(
+                        context,
+                      ).clamp(maxScaleFactor: 1.75)
+                    : MediaQuery.textScalerOf(context),
                 style: texts.displayLarge?.copyWith(color: colors.onSurface),
               ),
               const SizedBox(height: AppSpacing.xs),

@@ -166,21 +166,60 @@ void main() {
       // way to see it hold is to have SQLite refuse the row.
       await seedCard('c1');
 
+      // **With a positive control**, because the first attempt at this
+      // assertion had none and was refused for two other reasons entirely:
+      // `scheduler_type` is `NOT NULL` with no default and was missing from the
+      // column list, and the `session_id` it named did not exist while
+      // `PRAGMA foreign_keys` is on. `throwsA(isA<Exception>())` cannot tell
+      // those apart from the CHECK, so the test would have stayed green the day
+      // somebody added `browse` to it — the exact failure it exists to prevent.
+      //
+      // Same helper, same row, one field different: the control proves the row
+      // is otherwise insertable, and the matcher names the constraint.
       await expectLater(
-        db.customStatement(
-          "INSERT INTO study_answers "
-          '(id, session_id, card_id, kind, mode, action, answered_at, '
-          'scheduler_generation) '
-          "VALUES ('a1', 's1', 'c1', 'learning', 'browse', 'remembered', "
-          "strftime('%s','now'), 1)",
+        insertHistory(
+          db,
+          id: 'browse-attempt',
+          cardId: 'c1',
+          sessionId: 'session',
+          mode: 'browse',
         ),
-        throwsA(isA<Exception>()),
+        throwsA(
+          isA<Exception>().having(
+            (Exception error) => error.toString(),
+            'message',
+            contains('CHECK constraint failed'),
+          ),
+        ),
       );
 
-      final overview = await read();
+      final refused = await read();
+      expect(refused.hasLifetimeActivity, isFalse);
+      expect(refused.currentStreakDays, 0);
 
-      expect(overview.hasLifetimeActivity, isFalse);
-      expect(overview.currentStreakDays, 0);
+      // The control: the same row with the only offending field changed is
+      // accepted. Without this half, "nothing was written" would be consistent
+      // with a row rejected for any reason at all — which is precisely how the
+      // first attempt passed.
+      //
+      // Read back from the table rather than through the repository:
+      // `insertHistory` writes with `customInsert` and tells drift no table
+      // changed, so a second read through the stream would be answered from
+      // drift's cache. That trap is real and is documented on `ProgressDao`;
+      // here it is simply not the thing under test.
+      await insertHistory(
+        db,
+        id: 'control',
+        cardId: 'c1',
+        sessionId: 'session',
+      );
+
+      final rows = await db
+          .customSelect('SELECT id, mode FROM study_answers')
+          .get();
+      expect(rows, hasLength(1));
+      expect(rows.single.read<String>('id'), 'control');
+      expect(rows.single.read<String>('mode'), 'self_assess');
     });
 
     test('a card deleted after the fact disappears from past days too '
@@ -205,6 +244,11 @@ void main() {
     test('deleting the deck cascades all the way to history', () async {
       await seedCard('c1');
       await answer('c1', at: now);
+      final rows = await db
+          .customSelect('SELECT id, mode, answered_at FROM study_answers')
+          .get();
+      // ignore: avoid_print
+      print('DEBUG rows=${rows.map((r) => r.data).toList()}');
       expect((await read()).hasLifetimeActivity, isTrue);
 
       await (db.delete(db.decks)..where((t) => t.id.equals('root'))).go();

@@ -65,7 +65,7 @@
         "type": "int"
       }
     },
-    "description": "The first clause of the hero's announcement (W6.4). The second clause is the visible supporting line, appended at the call site."
+    "description": "The first clause of the hero's announcement (W6.4). The second clause is the visible supporting line, joined on by `progressStreakSemantics`."
   },
   "progressStreakSemantics": "{headline}. {support}",
   "@progressStreakSemantics": {

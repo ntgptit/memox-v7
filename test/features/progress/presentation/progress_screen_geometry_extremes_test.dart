@@ -44,9 +44,10 @@ void main() {
       tester,
     ) async {
       // The hero's headline is `displayLarge`; at 320dp with a 2.0 text scale
-      // "999 days" cannot fit on one line, and W6 forbids buying the line back
-      // by shrinking the type. What must hold is that it *wraps* — the card
-      // grows taller and its left and right edges do not move.
+      // "999 days" cannot fit on one line even under X6's 1.75 cap, and W6
+      // forbids buying the line back by shrinking further. What must hold is
+      // that it *wraps* — the card grows taller and its left and right edges do
+      // not move.
       await pumpProgressScreen(
         tester,
         repository: seeded(streakDays: 999),
@@ -133,6 +134,112 @@ void main() {
           }
         });
       }
+    }
+
+    /// The clamp of X6 fires **only** where the column is too narrow.
+    ///
+    /// The first version was unconditional, so it also took 12.5% off the size
+    /// the user chose at 360, 390 and 412 — viewports where the Vietnamese unit
+    /// word has 21 to 73dp to spare and there is nothing to avoid. Reducing type
+    /// where it fits is the thing W6 forbids, so the scope needs an assertion of
+    /// its own; the no-mid-word-break loop above cannot see it, because a
+    /// too-small headline breaks no words either.
+    for (final ({double width, bool isClamped}) cell
+        in const <({double width, bool isClamped})>[
+          (width: 320, isClamped: true),
+          (width: 360, isClamped: false),
+          (width: 390, isClamped: false),
+          (width: 412, isClamped: false),
+        ]) {
+      for (final Locale locale in const <Locale>[Locale('en'), Locale('vi')]) {
+        testWidgets('the headline keeps the user text scale at '
+            '${cell.width.toInt()}dp · ${locale.languageCode}', (tester) async {
+          await pumpProgressScreen(
+            tester,
+            repository: seeded(),
+            surface: Size(cell.width, 900),
+            textScale: 2,
+            locale: locale,
+          );
+
+          // The headline is the second of the hero's three paragraphs: section
+          // label, headline, supporting line.
+          final headline =
+              find
+                      .descendant(
+                        of: find.byType(ProgressStreakHeroWidget),
+                        matching: find.byType(RichText),
+                      )
+                      .evaluate()
+                      .elementAt(1)
+                      .renderObject!
+                  as RenderParagraph;
+
+          expect(
+            headline.textScaler.scale(57),
+            cell.isClamped ? 57 * 1.75 : 57 * 2.0,
+            reason: cell.isClamped
+                ? 'the compact tier caps at 1.75'
+                : 'nothing to avoid here, so the setting is honoured',
+          );
+        });
+      }
+    }
+
+    /// The same property on the two faces that replace the sections.
+    ///
+    /// X6 claims it for "every paragraph on the screen", and the loop above only
+    /// ever renders the loaded one. The error face is the tighter of the two —
+    /// two Vietnamese sentences and a button at twice the type size — and it is
+    /// the face rendered right below this by a test that only asks
+    /// `takeException()`, which is exactly the assertion that missed the
+    /// headline.
+    for (final ({String name, bool isError}) face
+        in const <({String name, bool isError})>[
+          (name: 'error', isError: true),
+          (name: 'lifetime-empty', isError: false),
+        ]) {
+      testWidgets('no word is broken in half on the ${face.name} face at '
+          '320 @ 2.0 · vi', (tester) async {
+        final repository = face.isError
+            ? FakeProgressRepository()
+            : FakeProgressRepository(
+                initial: progressOverviewFixture(
+                  totals: const <int>[0, 0, 0, 0, 0, 0, 0],
+                  streakDays: 0,
+                  today: DateTime.utc(2026, 8, 12),
+                  hasLifetimeActivity: false,
+                ),
+              );
+        await pumpProgressScreen(
+          tester,
+          repository: repository,
+          surface: const Size(320, 720),
+          textScale: 2,
+          locale: const Locale('vi'),
+        );
+        if (face.isError) {
+          repository.fail(const DatabaseFailure(message: 'read failed'));
+          await tester.pump();
+        }
+
+        final paragraphs = find
+            .byType(RichText)
+            .evaluate()
+            .map((element) => element.renderObject! as RenderParagraph)
+            .toList();
+        expect(paragraphs, isNotEmpty);
+
+        for (final paragraph in paragraphs) {
+          expect(
+            paragraph.getMinIntrinsicWidth(double.infinity),
+            lessThanOrEqualTo(paragraph.size.width),
+            reason:
+                'unbreakable run wider than its box in '
+                '"${paragraph.text.toPlainText()}"',
+          );
+        }
+      });
     }
 
     testWidgets('the error face survives Vietnamese at 320 @ 2.0', (
