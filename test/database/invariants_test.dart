@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/database/app_database.dart';
 
 import 'invariant_queries.dart';
+import 'support/invariant_harness.dart';
 import 'support/test_database.dart';
 
 /// The 22 data invariants, run against a real database.
@@ -14,76 +14,10 @@ import 'support/test_database.dart';
 ///
 /// The violating fixture introduces exactly one defect, so a query that fires is
 /// firing on its own subject rather than on collateral damage from the seed.
+///
+/// The five Trash cases live in `invariants_trash_test.dart`; the fixture and
+/// the both-ways helper they share are in `support/invariant_harness.dart`.
 void main() {
-  /// A valid three-level tree: root → branch → leaf, with a card, a state, a
-  /// session and one history row.
-  ///
-  /// Three levels because BR-55 says the tree nests, and a one-level fixture
-  /// would let Q6 and Q9 pass with the `COALESCE` root-finding BR-57 forbids.
-  Future<void> seedValid(AppDatabase db) async {
-    await insertRootDeck(db, id: 'root');
-    await insertSubDeck(
-      db,
-      id: 'branch',
-      parentId: 'root',
-      rootDeckId: 'root',
-      contentType: 'deck',
-    );
-    await insertSubDeck(
-      db,
-      id: 'leaf',
-      parentId: 'branch',
-      rootDeckId: 'root',
-      contentType: 'card',
-    );
-    await insertCard(db, id: 'card-1', deckId: 'leaf');
-    await insertReviewState(db, cardId: 'card-1');
-    await insertSession(
-      db,
-      id: 'session-1',
-      deckId: 'root',
-      rootDeckId: 'root',
-    );
-    await insertHistory(
-      db,
-      id: 'history-1',
-      cardId: 'card-1',
-      sessionId: 'session-1',
-    );
-  }
-
-  /// Runs one invariant and returns the offending ids.
-  Future<List<String>> check(AppDatabase db, String id) =>
-      violations(db, invariantQueries[id]!);
-
-  /// Asserts the pair: silent on the valid tree, and firing once [breakIt] has
-  /// introduced this invariant's own defect.
-  void invariant(
-    String id,
-    String description, {
-    required Future<void> Function(AppDatabase db) breakIt,
-    required List<String> expectOffenders,
-  }) {
-    group('$id — $description', () {
-      test('clean on a valid three-level tree', () async {
-        final db = openTestDatabase();
-        await seedValid(db);
-
-        expect(await check(db, id), isEmpty);
-      });
-
-      test('fires on its own violation', () async {
-        final db = openTestDatabase();
-        await seedValid(db);
-        await breakIt(db);
-
-        // Unordered: the invariant queries specify no ORDER BY, and Q8's
-        // recursive walk returns rows in whatever order the CTE produced.
-        expect(await check(db, id), unorderedEquals(expectOffenders));
-      });
-    });
-  }
-
   test('every invariant this suite claims to run is present', () {
     // The list itself is a claim. Losing one would leave the rest green and no
     // sign that the missing one ever existed.
@@ -347,125 +281,6 @@ void main() {
 
     expect(await check(db, 'Q29'), isEmpty);
   });
-
-  // ---- Trash (BR-182…BR-193, AD-21) ---------------------------------------
-
-  invariant(
-    'Q31',
-    'an active card sits inside a deleted deck (BR-182, BR-184)',
-    breakIt: (db) async {
-      // The deck goes to Trash and its card is left behind — the one shape
-      // that would make `delete_batch_id IS NULL` stop meaning "visible".
-      await insertDeleteBatch(
-        db,
-        id: 'batch-leaf',
-        itemType: 'deck',
-        rootItemId: 'leaf',
-      );
-      await markDecksDeleted(
-        db,
-        batchId: 'batch-leaf',
-        deckIds: <String>['leaf'],
-      );
-    },
-    expectOffenders: <String>['card-1'],
-  );
-
-  invariant(
-    'Q32',
-    'an active deck sits under a deleted deck (BR-182, BR-184)',
-    breakIt: (db) async {
-      await insertDeleteBatch(
-        db,
-        id: 'batch-branch',
-        itemType: 'deck',
-        rootItemId: 'branch',
-      );
-      await markDecksDeleted(
-        db,
-        batchId: 'batch-branch',
-        deckIds: <String>['branch'],
-      );
-    },
-    expectOffenders: <String>['leaf'],
-  );
-
-  invariant(
-    'Q33',
-    'a batch owns no rows at all (BR-191)',
-    breakIt: (db) => insertDeleteBatch(
-      db,
-      id: 'batch-empty',
-      itemType: 'deck',
-      rootItemId: 'leaf',
-    ),
-    expectOffenders: <String>['batch-empty'],
-  );
-
-  invariant(
-    'Q34',
-    'a tombstone was deleted after its already-deleted ancestor (BR-184)',
-    breakIt: (db) async {
-      // `branch` went first, `leaf` a day later — the order BR-191's "eligible
-      // ancestor implies eligible descendant" argument forbids.
-      await insertDeleteBatch(
-        db,
-        id: 'batch-older',
-        itemType: 'deck',
-        rootItemId: 'branch',
-        deletedAt: testNow,
-      );
-      await insertDeleteBatch(
-        db,
-        id: 'batch-newer',
-        itemType: 'deck',
-        rootItemId: 'leaf',
-        deletedAt: testNow.add(const Duration(days: 1)),
-      );
-      await markDecksDeleted(
-        db,
-        batchId: 'batch-older',
-        deckIds: <String>['branch'],
-      );
-      await markDecksDeleted(
-        db,
-        batchId: 'batch-newer',
-        deckIds: <String>['leaf'],
-      );
-      await markCardsDeleted(
-        db,
-        batchId: 'batch-newer',
-        cardIds: <String>['card-1'],
-      );
-    },
-    expectOffenders: <String>['leaf'],
-  );
-
-  invariant(
-    'Q35',
-    'a batch names an item root that does not carry it (BR-182)',
-    breakIt: (db) async {
-      await insertDeleteBatch(
-        db,
-        id: 'batch-mislabelled',
-        itemType: 'deck',
-        rootItemId: 'branch',
-      );
-      // Rows exist for the batch — so Q33 stays silent — but not the row the
-      // batch claims as its root.
-      await markDecksDeleted(
-        db,
-        batchId: 'batch-mislabelled',
-        deckIds: <String>['leaf'],
-      );
-      await markCardsDeleted(
-        db,
-        batchId: 'batch-mislabelled',
-        cardIds: <String>['card-1'],
-      );
-    },
-    expectOffenders: <String>['batch-mislabelled'],
-  );
 
   test('one defect trips only the invariants that genuinely cover it', () async {
     // Guards the pairs above from passing for the wrong reason: if every

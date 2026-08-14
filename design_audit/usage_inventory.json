@@ -1,6 +1,6 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 455,
+  "scannedFiles": 457,
   "totalSites": 421,
   "byElementKind": {
     "other": 291,
@@ -4245,7 +4245,7 @@
     },
     {
       "file": "lib/features/trash/presentation/screens/trash_screen.dart",
-      "line": 325,
+      "line": 336,
       "widget_context": "_RetentionNotice",
       "element_kind": "text",
       "source_kind": "theme-token",

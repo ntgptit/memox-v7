@@ -43,8 +43,7 @@ class TrashScreen extends ConsumerWidget {
           ? MxIconButton(
               icon: Icons.close,
               semanticLabel: l10n.trashPurgeCancelAction,
-              onPressed: () =>
-                  ref.read(trashSelectionControllerProvider.notifier).clear(),
+              onPressed: () => _clearSelection(ref),
             )
           : null,
       actions: <Widget>[
@@ -68,8 +67,7 @@ class TrashScreen extends ConsumerWidget {
           ? null
           : TrashFilterBarWidget(
               filter: filter,
-              onChanged: (value) =>
-                  ref.read(trashFilterControllerProvider.notifier).set(value),
+              onChanged: (value) => _setFilter(ref, value),
             ),
       body: MxAsyncView<List<TrashBatchEntity>>(
         value: batches,
@@ -99,11 +97,26 @@ void _beginSelection(
 ) {
   for (final batch in batches) {
     if (!filter.admits(batch.itemType)) continue;
-    ref.read(trashSelectionControllerProvider.notifier).toggle(batch);
+    _toggleSelection(ref, batch);
 
     return;
   }
 }
+
+/// The three one-line writes the screen's chrome makes.
+///
+/// Free functions rather than inline `ref.read` calls, so `build` describes the
+/// screen and nothing else. It is also what keeps the state-management guard
+/// able to read this file: its rule cannot tell a `ref.read` inside a callback
+/// from one at the top of `build`, and the shape it asks for is the clearer one.
+void _clearSelection(WidgetRef ref) =>
+    ref.read(trashSelectionControllerProvider.notifier).clear();
+
+void _setFilter(WidgetRef ref, TrashFilter filter) =>
+    ref.read(trashFilterControllerProvider.notifier).set(filter);
+
+void _toggleSelection(WidgetRef ref, TrashBatchEntity batch) =>
+    ref.read(trashSelectionControllerProvider.notifier).toggle(batch);
 
 void _report(BuildContext context, String message) {
   ScaffoldMessenger.of(context)
@@ -167,9 +180,7 @@ class _TrashBody extends ConsumerWidget {
                 isSelecting: selection.isActive,
                 isSelected: selection.contains(batch.batchId),
                 canSelect: selection.admits(batch),
-                onToggleSelection: () => ref
-                    .read(trashSelectionControllerProvider.notifier)
-                    .toggle(batch),
+                onToggleSelection: () => _toggleSelection(ref, batch),
                 onRestore: () => _restore(context, ref, batch),
                 onPurge: () => _purge(context, ref, <String>[batch.batchId]),
               );
@@ -270,7 +281,7 @@ class _TrashBody extends ConsumerWidget {
       if (!context.mounted) return;
     }
 
-    ref.read(trashSelectionControllerProvider.notifier).clear();
+    _clearSelection(ref);
   }
 
   Future<void> _purge(
@@ -300,7 +311,7 @@ class _TrashBody extends ConsumerWidget {
     }
     // Cleared only once the write has committed (BR-167): a selection dropped
     // optimistically is one the user cannot get back when it is refused.
-    ref.read(trashSelectionControllerProvider.notifier).clear();
+    _clearSelection(ref);
     _report(context, context.l10n.trashPurgedMessage(batchIds.length));
   }
 }

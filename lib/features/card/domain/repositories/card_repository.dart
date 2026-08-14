@@ -173,7 +173,7 @@ abstract interface class CardRepository {
     required String targetDeckId,
   });
 
-  /// Moves [cardIds] to Trash — one transaction (BR-166, BR-182). A deck left
+  /// Moves [cardIds] to Trash in one atomic write — BR-166, BR-182. A deck left
   /// with no active cards goes back to `unset` (BR-186).
   Future<void> deleteCards(List<String> cardIds);
 

@@ -27,7 +27,7 @@ abstract interface class TrashRepository {
   /// so the picker has nothing to disable.
   Stream<List<TrashRestoreTarget>> watchRestoreTargets(String batchId);
 
-  /// Restores [batchId] into [target], in one transaction (BR-187, BR-188).
+  /// Restores [batchId] into [target], atomically — BR-187, BR-188.
   ///
   /// Revives exactly the rows carrying this batch — a descendant tombstoned by
   /// an older batch stays where it is (BR-184) — re-parents the item root,
@@ -51,7 +51,7 @@ abstract interface class TrashRepository {
 
   /// Hard-deletes [batchIds] (BR-191).
   ///
-  /// One transaction for the whole set: a purge that succeeded for three of
+  /// One atomic write for the whole set: a purge that succeeded for three of
   /// five would leave the user with a confirmation that named five. A batch
   /// whose cascade would reach rows outside the eligible set refuses the
   /// operation rather than being skipped quietly — the user chose these.

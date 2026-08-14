@@ -2678,21 +2678,21 @@
   },
   "trashDeletedDaysAgo": "{days, plural, =0{Đã xoá hôm nay} =1{Đã xoá 1 ngày trước} other{Đã xoá {days} ngày trước}}",
   "@trashDeletedDaysAgo": {
-    "description": "When an item was deleted, on the Trash row (wireframe T4).",
     "placeholders": {
       "days": {
         "type": "int"
       }
-    }
+    },
+    "description": "When an item was deleted, on the Trash row (wireframe T4)."
   },
   "trashDaysLeft": "{days, plural, =0{Bị xoá vĩnh viễn hôm nay} =1{Còn 1 ngày} other{Còn {days} ngày}}",
   "@trashDaysLeft": {
-    "description": "How long until the batch is purged (BR-190). The only urgent number on the row (wireframe T4).",
     "placeholders": {
       "days": {
         "type": "int"
       }
-    }
+    },
+    "description": "How long until the batch is purged (BR-190). The only urgent number on the row (wireframe T4)."
   },
   "trashOriginLabel": "Từ",
   "@trashOriginLabel": {
@@ -2704,7 +2704,6 @@
   },
   "trashBatchContents": "{deckCount, plural, =0{} =1{1 deck, } other{{deckCount} deck, }}{cardCount, plural, =0{không có thẻ} =1{1 thẻ} other{{cardCount} thẻ}}",
   "@trashBatchContents": {
-    "description": "What a deck batch would bring back. Excludes anything already in Trash under an older batch (BR-184, BR-188).",
     "placeholders": {
       "deckCount": {
         "type": "int"
@@ -2712,7 +2711,8 @@
       "cardCount": {
         "type": "int"
       }
-    }
+    },
+    "description": "What a deck batch would bring back. Excludes anything already in Trash under an older batch (BR-184, BR-188)."
   },
   "trashRestoreAction": "Khôi phục",
   "@trashRestoreAction": {
@@ -2728,12 +2728,12 @@
   },
   "trashSelectionCount": "{count, plural, other{Đã chọn {count}}}",
   "@trashSelectionCount": {
-    "description": "Title of the Trash app bar while selecting.",
     "placeholders": {
       "count": {
         "type": "int"
       }
-    }
+    },
+    "description": "Title of the Trash app bar while selecting."
   },
   "trashSelectionCardsOnly": "Thẻ và deck được khôi phục riêng, nên lựa chọn này chỉ gồm thẻ.",
   "@trashSelectionCardsOnly": {
@@ -2765,12 +2765,12 @@
   },
   "trashPurgeConfirmTitle": "{count, plural, =1{Xoá vĩnh viễn 1 mục?} other{Xoá vĩnh viễn {count} mục?}}",
   "@trashPurgeConfirmTitle": {
-    "description": "Title of the permanent-delete confirmation, naming the exact count (BR-192).",
     "placeholders": {
       "count": {
         "type": "int"
       }
-    }
+    },
+    "description": "Title of the permanent-delete confirmation, naming the exact count (BR-192)."
   },
   "trashPurgeConfirmMessage": "Không thể hoàn tác. Lịch sử học của những mục này bị xoá theo.",
   "@trashPurgeConfirmMessage": {
@@ -2786,12 +2786,12 @@
   },
   "trashPurgedMessage": "{count, plural, =1{Đã xoá vĩnh viễn 1 mục} other{Đã xoá vĩnh viễn {count} mục}}",
   "@trashPurgedMessage": {
-    "description": "Result message after a purge commits.",
     "placeholders": {
       "count": {
         "type": "int"
       }
-    }
+    },
+    "description": "Result message after a purge commits."
   },
   "trashLoadFailed": "Không mở được Trash. Thử lại.",
   "@trashLoadFailed": {

@@ -5,9 +5,8 @@ import '../../../../../core/error/failure.dart';
 import '../../../../../l10n/generated/app_localizations.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_undo_snack_bar.dart';
-import '../../../../trash/di/trash_repository_provider.dart';
 import '../../../../trash/domain/failures/trash_conflict_failure.dart';
-import '../../../../trash/domain/usecases/undo_delete_use_case.dart';
+import '../../providers/deck_undo_provider.dart';
 
 /// Reports that a deck went to Trash, and offers to take it back (BR-182,
 /// BR-189).
@@ -36,7 +35,7 @@ void showDeckMovedToTrash(
     undoLabel: l10n.trashUndoAction,
     onUndo: () async {
       try {
-        await UndoDeleteUseCase(ref.read(trashRepositoryProvider))(batchId);
+        await ref.read(deckUndoUseCaseProvider)(batchId);
 
         return null;
       } on Object catch (error) {

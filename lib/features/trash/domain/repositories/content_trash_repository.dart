@@ -2,8 +2,8 @@
 ///
 /// **Why this is a separate contract from `TrashRepository`.** Deleting a deck
 /// is a Deck operation and deleting a card is a Card operation; both have to
-/// keep their own rules in the same transaction (BR-186's content-type reset
-/// sits in the Deck repository and reads counts the Deck feature owns). So the
+/// keep their own rules in the same atomic write — BR-186's content-type reset
+/// sits in the Deck repository and reads counts the Deck feature owns. So the
 /// delete paths stay where they are and reach for the batch mechanics here,
 /// rather than the Trash feature growing a second copy of the emptied-parent
 /// rule.

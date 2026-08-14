@@ -107,7 +107,7 @@ abstract interface class DeckRepository {
   /// stay, so cards keep their ids, study states, history and tags until the
   /// batch is purged (BR-185). Every active surface loses the subtree in the
   /// same instant (BR-183), and a non-root parent left empty goes back to
-  /// `unset` in the same transaction (BR-186).
+  /// `unset` in the same atomic write — BR-186.
   Future<void> deleteDeck(String deckId);
 
   /// The same deletion, returning the batch id so the caller can offer Undo

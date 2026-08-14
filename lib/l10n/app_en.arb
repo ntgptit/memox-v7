@@ -2678,21 +2678,21 @@
   },
   "trashDeletedDaysAgo": "{days, plural, =0{Deleted today} =1{Deleted 1 day ago} other{Deleted {days} days ago}}",
   "@trashDeletedDaysAgo": {
-    "description": "When an item was deleted, on the Trash row (wireframe T4).",
     "placeholders": {
       "days": {
         "type": "int"
       }
-    }
+    },
+    "description": "When an item was deleted, on the Trash row (wireframe T4)."
   },
   "trashDaysLeft": "{days, plural, =0{Deleted forever today} =1{1 day left} other{{days} days left}}",
   "@trashDaysLeft": {
-    "description": "How long until the batch is purged (BR-190). The only urgent number on the row (wireframe T4).",
     "placeholders": {
       "days": {
         "type": "int"
       }
-    }
+    },
+    "description": "How long until the batch is purged (BR-190). The only urgent number on the row (wireframe T4)."
   },
   "trashOriginLabel": "From",
   "@trashOriginLabel": {
@@ -2704,7 +2704,6 @@
   },
   "trashBatchContents": "{deckCount, plural, =0{} =1{1 deck, } other{{deckCount} decks, }}{cardCount, plural, =0{no cards} =1{1 card} other{{cardCount} cards}}",
   "@trashBatchContents": {
-    "description": "What a deck batch would bring back. Excludes anything already in Trash under an older batch (BR-184, BR-188).",
     "placeholders": {
       "deckCount": {
         "type": "int"
@@ -2712,7 +2711,8 @@
       "cardCount": {
         "type": "int"
       }
-    }
+    },
+    "description": "What a deck batch would bring back. Excludes anything already in Trash under an older batch (BR-184, BR-188)."
   },
   "trashRestoreAction": "Restore",
   "@trashRestoreAction": {
@@ -2728,12 +2728,12 @@
   },
   "trashSelectionCount": "{count, plural, other{{count} selected}}",
   "@trashSelectionCount": {
-    "description": "Title of the Trash app bar while selecting.",
     "placeholders": {
       "count": {
         "type": "int"
       }
-    }
+    },
+    "description": "Title of the Trash app bar while selecting."
   },
   "trashSelectionCardsOnly": "Cards and decks are restored separately, so this selection holds cards only.",
   "@trashSelectionCardsOnly": {
@@ -2765,12 +2765,12 @@
   },
   "trashPurgeConfirmTitle": "{count, plural, =1{Delete 1 item permanently?} other{Delete {count} items permanently?}}",
   "@trashPurgeConfirmTitle": {
-    "description": "Title of the permanent-delete confirmation, naming the exact count (BR-192).",
     "placeholders": {
       "count": {
         "type": "int"
       }
-    }
+    },
+    "description": "Title of the permanent-delete confirmation, naming the exact count (BR-192)."
   },
   "trashPurgeConfirmMessage": "This cannot be undone. The study history of these items is deleted with them.",
   "@trashPurgeConfirmMessage": {
@@ -2786,12 +2786,12 @@
   },
   "trashPurgedMessage": "{count, plural, =1{1 item deleted permanently} other{{count} items deleted permanently}}",
   "@trashPurgedMessage": {
-    "description": "Result message after a purge commits.",
     "placeholders": {
       "count": {
         "type": "int"
       }
-    }
+    },
+    "description": "Result message after a purge commits."
   },
   "trashLoadFailed": "Trash couldn’t be opened. Try again.",
   "@trashLoadFailed": {
