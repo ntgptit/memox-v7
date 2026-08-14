@@ -187,11 +187,11 @@ void main() {
         //
         // A quarter of the card's content, not `> 0`: a 0.5dp bar passes
         // "greater than zero" and communicates nothing, and the point of the
-        // floor is that the bar still reads as a measure. The tightest real cell
-        // measured is `320 @ 2.0 · vi` with a three-digit value, where the
-        // column is 81.1dp against a content width of 264 — comfortably clear,
-        // which is what makes a quarter a floor rather than a ceiling in
-        // disguise.
+        // floor is that the bar still reads as a measure. This suite's fixture
+        // has a busiest day of 143, which measures 81.1dp against a content
+        // width of 264 at `320 @ 2.0 · vi`. That is not a guarantee for every
+        // input: the floor stops holding somewhere past 999 cards in a day, and
+        // X7 records where, with the measurement and an assertion of its own.
         final double content =
             rectOf(tester, ProgressWeekWidget).width - 2 * AppSpacing.lg;
         for (final rect in rects) {

@@ -167,8 +167,10 @@ void main() {
     final atPlusSeven = await read(offset: const Duration(hours: 7));
     final atMinusFive = await read(offset: const Duration(hours: -5));
 
-    // `now` is midday on the 12th, so the window's last entry is the 12th at
-    // +7 and the 11th at -5; index 5 and 6 are the two days before it.
+    // `now` is midday UTC on the 12th, so both offsets stay inside the same UTC
+    // day and the window ends on the 12th either way — the only thing that moves
+    // is which day the row belongs to. Looked up by date rather than by index,
+    // because the point is the label, not the position.
     expect(
       atPlusSeven.lastSevenDays
           .firstWhere((day) => day.localDate == DateTime.utc(2026, 8, 11))
@@ -181,6 +183,9 @@ void main() {
           .totalCards,
       1,
     );
+    // The window itself does not move; only the row does.
+    expect(atPlusSeven.lastSevenDays.last.localDate, DateTime.utc(2026, 8, 12));
+    expect(atMinusFive.lastSevenDays.last.localDate, DateTime.utc(2026, 8, 12));
   });
 
   group('what does not create activity', () {

@@ -5,6 +5,8 @@ import 'package:memox/features/progress/presentation/widgets/sections/progress_s
 import 'package:memox/features/progress/presentation/widgets/sections/progress_today_widget.dart';
 import 'package:memox/features/progress/presentation/widgets/sections/progress_week_widget.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
+import 'package:flutter/material.dart';
+import 'package:memox/shared/widgets/mx_action_button.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
 import 'package:memox/shared/widgets/mx_loading_state.dart';
@@ -289,14 +291,22 @@ void main() {
 
       expect(repository.subscriptionCount, 2);
 
-      // X7, pinned so it cannot change by accident. `ref.invalidate` is a
-      // *refresh*, and `MxAsyncView` skips the loading branch on one for every
-      // screen, so the error face is simply repainted: the user taps and
-      // nothing moves until the read lands. That is an accepted divergence
-      // owned by M4.10, not a property of this screen — and the day it is
-      // fixed, this assertion should fail and be deleted on purpose.
+      // The face stays — this is a re-read, not a new screen — but the control
+      // now says the tap was received. `MxAsyncView` skips the loading branch on
+      // a refresh for every screen, so without the button's own busy state a
+      // person pressed Retry and nothing moved at all for as long as the read
+      // took. The label stays painted beside the spinner, so the button does not
+      // resize under the finger that just pressed it.
       expect(find.byType(MxLoadingState), findsNothing);
       expect(find.byType(MxErrorState), findsOneWidget);
+      expect(find.text(english.progressErrorRetryAction), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(MxActionButton),
+          matching: find.byType(CircularProgressIndicator),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('a Retry that fails again stays on the error face and opens '

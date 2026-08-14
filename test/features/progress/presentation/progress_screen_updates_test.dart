@@ -230,6 +230,13 @@ void main() {
       );
       // A zero day still announces itself; colour and bar length are decoration
       // and are excluded, so this sentence is the whole row for a reader.
+      //
+      // **The eye and the reader deliberately differ here, and only here.** The
+      // value column paints the digit `0` (P4) while the announcement is a
+      // sentence — "no cards" — because seven rows are heard one after another
+      // and "Fri: 0 cards" reads as a measurement where "no cards" reads as a
+      // fact. W4.4 records it as the single exception to W2.4's rule that the
+      // two must match. Asserted side by side so the difference stays a choice.
       expect(
         find.bySemanticsLabel(
           english.progressWeekDaySemantics(
@@ -238,6 +245,13 @@ void main() {
           ),
         ),
         findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byType(ProgressWeekWidget),
+          matching: find.text('0'),
+        ),
+        findsWidgets,
       );
       handle.dispose();
     });

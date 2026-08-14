@@ -18,6 +18,7 @@ class MxErrorState extends StatelessWidget {
     required this.message,
     this.retryLabel,
     this.onRetry,
+    this.isRetrying = false,
     super.key,
   }) : assert(
          (retryLabel == null) == (onRetry == null),
@@ -31,6 +32,20 @@ class MxErrorState extends StatelessWidget {
   final String message;
   final String? retryLabel;
   final VoidCallback? onRetry;
+
+  /// Whether the retry the user asked for is still running.
+  ///
+  /// **Without this the control was a lie.** `ref.invalidate` produces a
+  /// *refresh*, and `MxAsyncView` keeps the previous value through a refresh for
+  /// every screen — which on a failure means the same error face is painted
+  /// again, unchanged. Six frames were measured after a tap and not one pixel
+  /// moved: the person pressed a button and got no evidence the app had noticed,
+  /// on a screen whose read is a full scan.
+  ///
+  /// `MxActionButton` already knows how to say this — it keeps the label painted
+  /// and puts the spinner beside it, so the button does not resize under the
+  /// finger that just pressed it. All that was missing was passing it through.
+  final bool isRetrying;
 
   @override
   Widget build(BuildContext context) {
@@ -64,6 +79,7 @@ class MxErrorState extends StatelessWidget {
               MxActionButton(
                 label: retryLabel!,
                 onPressed: onRetry,
+                isLoading: isRetrying,
                 // Primary, not secondary. An error state has exactly one
                 // thing to do and nothing to weigh it against — an outlined
                 // button there is a quiet control on an otherwise empty screen,

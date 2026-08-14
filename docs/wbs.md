@@ -9578,10 +9578,16 @@ thế không đổi bố cục.
      **không** bảo đảm sàn cho ngày > 999 card; đóng bằng cách giới hạn bề rộng
      cột giá trị hoặc rút gọn số (`1.2k`), cả hai đều là quyết định copy/thiết
      kế nên không thuộc phần tích hợp này.
-  6. **Retry không tạo phản hồi hiển thị nào trong lúc đọc lại** — owner: chủ
-     sở hữu `MxAsyncView` (M4.10). Số đo, cơ chế và lý do chấp nhận nằm ở
-     **X7** của `docs/wireframes/m99-23-progress-overview.md`, vì đó là nơi
-     tiêu chí clean-stop đọc bảng divergence; dòng này chỉ giữ owner.
+  6. **~~Retry không tạo phản hồi hiển thị nào~~ — đã đóng ở stage 1, không
+     còn là nợ.** Ghi lại vì nó là bài học về quy trình chứ không phải về code:
+     mục này đi qua **ba vòng** audit bằng cách được đổi nhãn — từ P3, sang
+     "deferred debt", sang một hàng trong bảng divergence — mà không một dòng
+     production nào đổi, và đó chính là "hạ severity" mà hợp đồng review cấm.
+     Lý do hoãn ("cờ nằm trong shared component, đổi nó là quyết định toàn
+     app") đúng về `MxAsyncView` nhưng sai về bài toán: `MxActionButton` đã có
+     sẵn `isLoading` giữ label được vẽ và đặt spinner bên cạnh, còn
+     `MxErrorState` thì không forward nó. Bản sửa là hai dòng forward cộng một
+     `isRetrying` ở call site.
   7. **Không có gate nào đối chiếu `Affected documents` của một AD với
      `Editable documents` của task sửa nó** — owner: M99.9 (chủ sở hữu
      `check_docs.py`). Chính lỗ này để IT-NAV-011 mô tả Progress là placeholder

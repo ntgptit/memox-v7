@@ -286,6 +286,36 @@ void main() {
     });
   });
 
+  testWidgets('a four-digit day pushes the bar column below its floor (X7)', (
+    tester,
+  ) async {
+    // The accepted limit, made into something that runs. The floor assertion in
+    // the viewport suite declares itself the guard against "the chart has
+    // quietly stopped being a chart", and its fixture stops at 143 — so the one
+    // input where the floor is genuinely breached was never rendered, and a
+    // regression that shrank the bars at four digits would have been green
+    // everywhere.
+    //
+    // This does not assert the floor. It asserts the number X7 records, so the
+    // day somebody caps the value column or shortens the label to `1.2k`, this
+    // fails and the divergence is closed on purpose rather than by drift.
+    await pumpProgressScreen(
+      tester,
+      repository: seeded(totals: const <int>[0, 0, 0, 0, 0, 0, 1234]),
+      surface: const Size(320, 720),
+      textScale: 2,
+      locale: const Locale('vi'),
+    );
+
+    final Rect bar = tester.getRect(find.byType(ProgressWeekBarWidget).first);
+    final double content =
+        rectOf(tester, ProgressWeekWidget).width - 2 * AppSpacing.lg;
+
+    expect(bar.width, closeTo(63.8, 1));
+    expect(bar.width, lessThan(content / 4));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('the busiest day fills the track and a zero day fills none', (
     tester,
   ) async {

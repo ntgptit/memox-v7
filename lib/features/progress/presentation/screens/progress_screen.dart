@@ -74,6 +74,12 @@ class ProgressScreen extends ConsumerWidget {
             title: context.l10n.progressErrorTitle,
             message: context.l10n.progressErrorMessage,
             retryLabel: context.l10n.progressErrorRetryAction,
+            // The read the user just asked for is still running. Riverpod calls
+            // a re-read of the same dependency a *refresh*, so nothing else on
+            // this face changes while it runs.
+            isRetrying: ref
+                .watch(progressOverviewControllerProvider)
+                .isRefreshing,
             // Re-opens the read. `invalidate` rebuilds the stream provider with
             // the same `now`; the clock only moves when the day does, which is
             // `progressNowProvider`'s job.
