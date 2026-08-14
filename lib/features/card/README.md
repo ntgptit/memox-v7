@@ -154,7 +154,43 @@ suite coverage. Geometry của sheet vì thế được ghim bằng
 
 ---
 
-## 7 · Known gaps
+## 7 · Card Detail (M99.23, UC-12)
+
+The feature's **second repository contract**, and the row in §2 that said "one
+contract per *source of data*, not per feature" is what decided it. Card Detail
+reads `study_answers` — a table the management surface never touches — and it is
+a read-only surface by rule (BR-182). `CardDetailRepository` therefore has two
+methods against `CardRepository`'s twenty-six, and the split pays for itself
+twice: a detail widget test fakes two methods instead of stubbing twenty-four
+the screen is forbidden to call, and "this surface cannot mutate" is visible in
+the type rather than asserted in prose. Its DAO has no `insert`, `update`,
+`delete` or `transaction` on it at all.
+
+Three things here are worth carrying to a third feature, and one is worth not
+carrying:
+
+- **Paging strategy follows what can arrive mid-read, not fashion.** The card
+  list grows a `LIMIT` and re-reads the whole window on a `watch()`; the history
+  appends pages and new rows always arrive at the *top*, so an `OFFSET` would
+  push one already-shown row into the next page. Same feature, two correct
+  answers — see the 5Why in `docs/wbs.md` under M99.23.
+- **A `Load more` and a `Try again` are one command.** They both mean "read the
+  page after the last row I have"; two methods would have been two places to
+  state the resume rule, which is how a retry ends up re-reading page one.
+  `notifier_kinds_test.dart` is what forced the question, and the merge was the
+  right answer rather than a way around the check.
+- **A comment about a generated workaround is not evidence.** `cardListItems`
+  carries a hand-merged `tableUpdates` because drift once omitted the tag tables
+  from its `readsFrom`. The generated code for `cardDetailById` lists all four,
+  so copying the workaround would have emitted two frames per tag edit. The
+  generated file was read; the note above it was not trusted.
+- **Not carried:** the request-ticket guard for stale responses. It was written,
+  and then removed — the in-flight latch makes two requests impossible through
+  the public API, so the ticket was an unreachable guard, which reads as
+  protection somebody is relying on. `ref.mounted` covers what can actually
+  arrive late.
+
+## 8 · Known gaps
 
 - **Partially in the Widgetbook catalog.** `CardImportScreen` is registered
   (M99.19); `CardListScreen` and `CardEditorScreen` are still absent, against

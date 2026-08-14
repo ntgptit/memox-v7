@@ -68,6 +68,12 @@ abstract final class RouteNames {
   /// the Decks branch and leaving it lands back on the list whose stream
   /// already shows what was imported (M4.12).
   static const String cardImport = 'cardImport';
+
+  /// One card, read-only, with its study history (UC-12). A child of
+  /// [cardList], so it pushes onto the Decks branch: the bottom bar stays and
+  /// Back returns to the list with its filter, window and selection intact
+  /// (BR-189, M4.14).
+  static const String cardDetail = 'cardDetail';
 }
 
 /// Names of the path parameters routes carry.

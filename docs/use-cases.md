@@ -7,7 +7,7 @@
 | **Scope** | Must-have của MVP. Ngoài phạm vi: should/nice-to-have, và mọi thứ ở mục "Điều đã cố ý không đặc tả" |
 | **Source of truth for** | UC-xx · main/alternative/error flow · UI state matrix của từng màn |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md` |
-| **Updated by task** | M99.21 — UC-11: export card của một deck ra file (scope → format → share) |
+| **Updated by task** | M99.23 — UC-12: xem chi tiết một card và lịch sử học của nó (chỉ đọc → phân trang keyset → Edit là action riêng) |
 | **Last updated** | 2026-08-13 |
 
 Chỉ đặc tả must-have. Should-have và nice-to-have viết khi tới lượt — đặc tả
@@ -17,7 +17,7 @@ Luồng viết bằng ngôn ngữ người dùng, không nói theo màn hình ha
 hình sẽ đổi; luồng thì không.
 
 **ID use case là định danh vĩnh viễn**, cùng chính sách với BR (xem
-`business-rules.md`). UC mới append; không đánh số lại. Hiện tại: UC-01…UC-11.
+`business-rules.md`). UC mới append; không đánh số lại. Hiện tại: UC-01…UC-12.
 
 **Các UC nối vào nhau thế nào thì xem [`master-flow.md`](master-flow.md).** Tài
 liệu này đặc tả từng UC riêng lẻ và cố ý không vẽ đồ thị giữa chúng — mỗi UC mô
@@ -804,6 +804,87 @@ unavailable/platform error · repository error · encoder error · invalid scope
 (rỗng hoặc id đã cũ). Không có state `loading` khi mở sheet — scope và số card
 đã có sẵn từ màn gọi; và không có state `empty`, vì scope rỗng là lỗi (E5) chứ
 không phải một màn hình trống.
+
+## UC-12 · Xem chi tiết một card và lịch sử học của nó
+
+| | |
+|---|---|
+| **Status** | active |
+
+**Actor:** Người dùng
+**Trigger:** Chạm vào một hàng card trong danh sách card khi **không** ở chế độ
+chọn nhiều (BR-189)
+**Preconditions:** Deck đang mở là sub-deck loại `card`; thẻ được chạm còn tồn
+tại
+
+**Main flow:**
+1. Người dùng chạm một hàng card. Hệ thống mở màn chi tiết **chỉ đọc** của đúng
+   thẻ đó, đẩy chồng lên danh sách chứ không thay thế nó (BR-189).
+2. Hệ thống hiển thị toàn bộ nội dung thẻ: mặt trước đầy đủ, mặt sau đầy đủ, và
+   ba field tuỳ chọn `example`, `hint`, `pronunciation` — mỗi field chỉ hiện khi
+   có giá trị (BR-183).
+3. Hệ thống hiển thị phần siêu dữ liệu và trạng thái học **hiện tại**: tag, cờ,
+   trạng thái hiển thị của thẻ, ngày tới hạn, lần trả lời gần nhất, số lượt đã
+   trả lời, số lần quên, và các field riêng của scheduler đang gắn với thẻ
+   (BR-183).
+4. Hệ thống tải trang lịch sử đầu tiên — 50 event gần nhất, mới nhất trước
+   (BR-184) — và hiển thị chúng thành một dòng thời gian, nhóm theo generation
+   của scheduler (BR-186).
+5. Mỗi event nói: thời điểm, chế độ học, loại lượt, hành động đã ghi, lý do kết
+   thúc và việc dùng gợi ý khi có, cùng thay đổi lịch trước→sau đúng theo
+   scheduler đã ghi trên chính hàng đó (BR-185).
+6. Người dùng cuộn tới cuối danh sách lịch sử và chọn tải thêm; hệ thống nối
+   thêm 50 event kế tiếp bằng con trỏ keyset và không lặp lại event nào đã hiện
+   (BR-184).
+7. Người dùng quay lại. Hệ thống trả về danh sách card **đúng như lúc rời đi** —
+   filter, search term, sort, cửa sổ đã tải và selection đều nguyên vẹn
+   (BR-189).
+
+**Alternative flows:**
+- **A1 — Sửa thẻ:** người dùng chọn hành động `Edit` tường minh trên màn chi
+  tiết; hệ thống mở editor sẵn có cho đúng thẻ đó (UC-04 A1). Sửa nội dung
+  không đụng tới trạng thái lịch hay lịch sử (BR-10, BR-187); quay lại từ
+  editor thì chi tiết hiện nội dung mới và lịch sử không đổi.
+- **A2 — Thẻ chưa có lịch sử:** phần dòng thời gian hiện trạng thái rỗng có nội
+  dung giải thích, không phải lỗi, và phần nội dung cùng trạng thái hiện tại vẫn
+  hiển thị đầy đủ (BR-187).
+- **A3 — Lịch sử trải nhiều generation:** sau một lần Reset (UC-07), các event
+  cũ vẫn còn và nằm dưới tiêu đề nhóm của generation của chúng; event của
+  generation hiện tại nằm trên cùng (BR-186).
+- **A4 — Chạm khi đang ở chế độ chọn nhiều:** chạm giữ nguyên nghĩa chọn/bỏ
+  chọn; hệ thống **không** điều hướng (BR-189).
+- **A5 — Đã tải hết lịch sử:** hệ thống nói rõ đã hết thay vì để một nút tải
+  thêm không còn gì để tải.
+
+**Error flows:**
+- **E1 — Thẻ không tồn tại khi mở:** deep link hoặc route cũ trỏ tới một id đã
+  bị xoá → hệ thống hiện mặt not-found có kiểu kèm lối quay lại danh sách; không
+  màn trắng, không lộ id hay chi tiết kỹ thuật (BR-188, BR-53).
+- **E2 — Thẻ bị xoá từ màn khác khi chi tiết đang mở:** stream nội dung chuyển
+  sang mặt not-found tương tự E1; không có mutation nào được thực hiện từ đây
+  (BR-182, BR-188).
+- **E3 — Đọc nội dung/trạng thái thất bại:** lỗi database map thành lý do có
+  kiểu; màn hiện mặt lỗi cấp cao nhất có `Retry`, và `Retry` chạy lại đúng lần
+  đọc đó.
+- **E4 — Tải một trang lịch sử thất bại:** các event đã hiện **giữ nguyên**;
+  chỉ phần đuôi danh sách hiện dải lỗi có `Try again`, và thử lại tiếp tục từ
+  đúng con trỏ trước đó chứ không tải lại từ đầu (BR-184).
+- **E5 — Kết quả trang tới muộn sau khi người dùng đã rời hoặc đã thử lại:** hệ
+  thống bỏ qua kết quả cũ; danh sách MUST NOT bị nối thêm hai lần cùng một tập
+  event (BR-184).
+
+**Postconditions:** Database không đổi — nội dung, `updated_at`, study state,
+`learned_at`, review history, cờ và tag đều nguyên vẹn (BR-182). Ngữ cảnh của
+danh sách card được giữ nguyên khi quay lại (BR-189).
+
+**UI states:** loading (đọc nội dung + trạng thái) · loaded không có lịch sử ·
+loaded có lịch sử một trang · loaded nhiều trang · loading-more · page error
+(có `Try again`, giữ nguyên phần đã tải) · end-of-history · error cấp cao nhất ·
+not-found.
+
+**Business rules:** BR-10, BR-53, BR-75, BR-76, BR-89, BR-90, BR-91, BR-92,
+BR-93, BR-95, BR-98, BR-131, BR-132, BR-136, BR-144, BR-163, BR-167, BR-182,
+BR-183, BR-184, BR-185, BR-186, BR-187, BR-188, BR-189
 
 ## Điều đã cố ý không đặc tả
 

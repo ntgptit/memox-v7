@@ -89,6 +89,20 @@ class CardListScreen extends ConsumerWidget {
     );
   }
 
+  /// What a tap on a row means outside selection mode (BR-189).
+  ///
+  /// **It used to be [_openEditor].** A tap is the most-used gesture in the
+  /// list, so it has to lead to the reading surface rather than into a form
+  /// over real content; editing is one explicit action away, on the detail
+  /// screen's app bar.
+  void _openDetail(BuildContext context, String cardId) => context.goNamed(
+    RouteNames.cardDetail,
+    pathParameters: <String, String>{
+      RoutePathParams.deckId: deckId,
+      RoutePathParams.cardId: cardId,
+    },
+  );
+
   /// The bulk entry (UC-10): manual create stays the small-volume path (D4),
   /// import is where a whole file goes. Pushed, not gone-to: the wizard sits
   /// on the root navigator above this screen, and Cancel must return here by
@@ -242,8 +256,7 @@ class CardListScreen extends ConsumerWidget {
                         // until its first value arrives the window length is the
                         // honest floor.
                         total: count.value ?? list.length,
-                        onOpen: (item) =>
-                            _openEditor(context, cardId: item.card.id),
+                        onOpen: (item) => _openDetail(context, item.card.id),
                       ),
               ),
             ),

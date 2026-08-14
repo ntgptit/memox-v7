@@ -34,6 +34,12 @@ List<AuditRule> memoxAuditRules({required bool isDark}) {
       semantic.warning,
       semantic.danger,
       semantic.info,
+      // `borderControl` joined the list with the card-detail timeline (M99.23):
+      // its connector is a hairline that carries the band's structure, so it is
+      // a non-text mark holding meaning — exactly what this rule is for. The
+      // omission is why the connector shipped its first draft at 1.38:1 on the
+      // page ground and the audit reported PASS.
+      semantic.borderControl,
     ]),
     PaletteClosureRule(isDark ? darkPaletteTokens : lightPaletteTokens),
   ];

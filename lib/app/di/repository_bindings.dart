@@ -9,12 +9,15 @@ import '../../features/card/data/repositories/card_export_repository_impl.dart';
 import '../../features/card/data/repositories/card_import_repository_impl.dart';
 import '../../features/card/data/repositories/card_import_source_repository_impl.dart';
 import '../../features/card/data/repositories/card_transfer_repository_impl.dart';
+import '../../features/card/data/repositories/card_detail_repository_impl.dart';
 import '../../features/card/data/repositories/card_repository_impl.dart';
+import '../../features/card/di/card_detail_repository_provider.dart';
 import '../../features/card/di/card_export_repository_provider.dart';
 import '../../features/card/di/card_import_repository_provider.dart';
 import '../../features/card/di/card_transfer_repository_provider.dart';
 import '../../features/card/di/card_repository_provider.dart';
 import '../../features/card/domain/models/card_transfer_encoder_model.dart';
+import '../../features/card/domain/repositories/card_detail_repository.dart';
 import '../../features/card/domain/repositories/card_export_destination_repository.dart';
 import '../../features/card/domain/repositories/card_export_repository.dart';
 import '../../features/card/domain/repositories/card_import_repository.dart';
@@ -83,6 +86,12 @@ CardRepository cardRepositoryBinding(Ref ref) => CardRepositoryImpl(
   ref.watch(appDatabaseProvider),
   clock: ref.watch(clockProvider),
 );
+
+/// The card detail read (UC-12). **No clock and no write path**: BR-182 makes
+/// this surface read-only, and the binding is where that shows — an
+/// implementation handed a clock would be one that could stamp something.
+CardDetailRepository cardDetailRepositoryBinding(Ref ref) =>
+    CardDetailRepositoryImpl(ref.watch(appDatabaseProvider));
 
 /// Card transfer's three seams, bound apart on purpose (M99.19): the picker
 /// is the one platform dialog, the decoder is pure bytes-to-rows, and the
@@ -171,6 +180,7 @@ Future<List<DeckTemplate>> deckTemplateCatalogBinding(Ref ref) =>
 List<Override> repositoryBindingOverrides() => <Override>[
   deckRepositoryProvider.overrideWith(deckRepositoryBinding),
   cardRepositoryProvider.overrideWith(cardRepositoryBinding),
+  cardDetailRepositoryProvider.overrideWith(cardDetailRepositoryBinding),
   cardImportRepositoryProvider.overrideWith(cardImportRepositoryBinding),
   cardTransferRepositoryProvider.overrideWith(cardTransferRepositoryBinding),
   cardImportSourceRepositoryProvider.overrideWith(

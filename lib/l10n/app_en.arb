@@ -2631,5 +2631,305 @@
   "cardExportCloseAction": "Close",
   "@cardExportCloseAction": {
       "description": "The only action left when the scope is no longer valid — there is nothing to retry until the user selects again (M4.13 W3 state 7)."
+  },
+  "cardDetailTitle": "Card",
+  "@cardDetailTitle": {
+    "description": "App-bar title of the read-only card detail screen (UC-12, M4.14 W2). Deliberately a generic label, not the card's front: the front is content and content is never truncated (BR-183), while an app-bar title must be."
+  },
+  "cardDetailEditAction": "Edit card",
+  "@cardDetailEditAction": {
+    "description": "The one action on the detail app bar; opens the existing editor (BR-189, M4.14 V3). Visible, but not the default meaning of a tap."
+  },
+  "cardDetailLoadingLabel": "Loading card",
+  "@cardDetailLoadingLabel": {
+    "description": "Semantic label while the content and state read is in flight (M4.14 W3 face 1)."
+  },
+  "cardDetailErrorMessage": "This card could not be read.",
+  "@cardDetailErrorMessage": {
+    "description": "Top-level error face (UC-12 E3). Names no id, path or SQL (BR-53)."
+  },
+  "cardDetailNotFoundTitle": "Card not found",
+  "@cardDetailNotFoundTitle": {
+    "description": "Not-found face when the card never existed or was deleted while open (UC-12 E1/E2, BR-188)."
+  },
+  "cardDetailNotFoundMessage": "This card no longer exists. It may have been deleted from another screen.",
+  "@cardDetailNotFoundMessage": {
+    "description": "Explains the not-found face without naming the id (BR-53, BR-188)."
+  },
+  "cardDetailBackToListAction": "Back to cards",
+  "@cardDetailBackToListAction": {
+    "description": "The way out of the not-found face — the deck's card list is where the user can act again (UC-12 E1)."
+  },
+  "cardDetailExampleLabel": "Example",
+  "@cardDetailExampleLabel": {
+    "description": "Label of the optional example field; the row is absent entirely when the field is empty (BR-95, BR-183)."
+  },
+  "cardDetailHintLabel": "Hint",
+  "@cardDetailHintLabel": {
+    "description": "Label of the optional hint field (BR-95, BR-183)."
+  },
+  "cardDetailPronunciationLabel": "Pronunciation",
+  "@cardDetailPronunciationLabel": {
+    "description": "Label of the optional pronunciation field (BR-95, BR-183)."
+  },
+  "cardDetailTagsLabel": "Tags",
+  "@cardDetailTagsLabel": {
+    "description": "Label above the read-only tag chips on the detail screen (BR-93)."
+  },
+  "cardDetailFlaggedLabel": "Flagged",
+  "@cardDetailFlaggedLabel": {
+    "description": "Shown only when the user has flagged the card; the detail screen never toggles it (BR-92, BR-182)."
+  },
+  "cardDetailStateSectionTitle": "Current state",
+  "@cardDetailStateSectionTitle": {
+    "description": "Heading of the schedule band — what is true now, as opposed to the history below it (BR-183, BR-187)."
+  },
+  "cardDetailDueLabel": "Due",
+  "@cardDetailDueLabel": {
+    "description": "When the card next comes due (BR-183)."
+  },
+  "cardDetailLearnedLabel": "Learned",
+  "@cardDetailLearnedLabel": {
+    "description": "When the card finished the learning chain; empty until it does (BR-144, BR-183)."
+  },
+  "cardDetailLastAnsweredLabel": "Last answered",
+  "@cardDetailLastAnsweredLabel": {
+    "description": "The last scheduled or relearning answer (BR-20, BR-183)."
+  },
+  "cardDetailReviewsLabel": "Reviews",
+  "@cardDetailReviewsLabel": {
+    "description": "Count of scheduled reviews (BR-20, BR-183). Not a score — BR-186 forbids derived numbers here."
+  },
+  "cardDetailLapsesLabel": "Lapses",
+  "@cardDetailLapsesLabel": {
+    "description": "Count of lapses (BR-20, BR-183)."
+  },
+  "cardDetailBoxLabel": "Box",
+  "@cardDetailBoxLabel": {
+    "description": "eight_box only; the sm2 fields are absent for such a card and vice versa (AD-08, BR-183)."
+  },
+  "cardDetailEaseLabel": "Ease",
+  "@cardDetailEaseLabel": {
+    "description": "sm2 only (AD-08, BR-183)."
+  },
+  "cardDetailIntervalLabel": "Interval",
+  "@cardDetailIntervalLabel": {
+    "description": "sm2 only (AD-08, BR-183)."
+  },
+  "cardDetailRepetitionsLabel": "Repetitions",
+  "@cardDetailRepetitionsLabel": {
+    "description": "sm2 only (AD-08, BR-183)."
+  },
+  "cardDetailNotScheduledValue": "Not scheduled yet",
+  "@cardDetailNotScheduledValue": {
+    "description": "Value for a card that has not finished the learning chain, where due and learned are both null and travel together (BR-149, BR-183)."
+  },
+  "cardDetailDayCount": "{count, plural, =1{1 day} other{{count} days}}",
+  "@cardDetailDayCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "The sm2 interval, in days (BR-183)."
+  },
+  "cardHistoryTitle": "Study history",
+  "@cardHistoryTitle": {
+    "description": "Heading of the timeline band (M4.14 W2)."
+  },
+  "cardHistoryEmptyTitle": "No reviews yet",
+  "@cardHistoryEmptyTitle": {
+    "description": "Empty history, which is a valid state and never an error (BR-187, UC-12 A2)."
+  },
+  "cardHistoryEmptyMessage": "Reviews appear here after this card has been studied.",
+  "@cardHistoryEmptyMessage": {
+    "description": "Explains the empty timeline without implying something went wrong (BR-187)."
+  },
+  "cardHistoryGenerationLabel": "Learning cycle {generation}",
+  "@cardHistoryGenerationLabel": {
+    "placeholders": {
+      "generation": {
+        "type": "int"
+      }
+    },
+    "description": "Group heading for one scheduler generation; text rather than colour, so the grouping is readable without it (BR-186, M4.14 V6)."
+  },
+  "cardHistoryCurrentGenerationLabel": "Current learning cycle",
+  "@cardHistoryCurrentGenerationLabel": {
+    "description": "Group heading for the generation the card is on now — the one that keeps growing (BR-186)."
+  },
+  "cardHistoryLoadMoreAction": "Load more",
+  "@cardHistoryLoadMoreAction": {
+    "description": "Tail action that appends the next keyset page (BR-184, M4.14 V5)."
+  },
+  "cardHistoryLoadingMoreLabel": "Loading more reviews",
+  "@cardHistoryLoadingMoreLabel": {
+    "description": "Semantic label while a further page is in flight; the rows already shown stay put (M4.14 W3 face 5)."
+  },
+  "cardHistoryPageErrorMessage": "The next page could not be loaded.",
+  "@cardHistoryPageErrorMessage": {
+    "description": "Tail error band; everything already shown stays on screen (UC-12 E4)."
+  },
+  "cardHistoryRetryAction": "Try again",
+  "@cardHistoryRetryAction": {
+    "description": "Resumes from the same cursor, never from the first page (UC-12 E4, BR-184)."
+  },
+  "cardHistoryLoadingLabel": "Loading study history",
+  "@cardHistoryLoadingLabel": {
+    "description": "Semantic label while the first page is in flight (M4.14 W3 face 1)."
+  },
+  "cardHistoryScheduleUnchanged": "Schedule unchanged",
+  "@cardHistoryScheduleUnchanged": {
+    "description": "A turn of the learning chain records history and moves no schedule; said explicitly so it does not read as missing data (BR-144, BR-185)."
+  },
+  "cardHistoryTimedOutLabel": "Timed out",
+  "@cardHistoryTimedOutLabel": {
+    "description": "The stored outcome reason, shown only when present — owning up to a blank and running out of time produce the same action (BR-131, BR-185)."
+  },
+  "cardHistoryHintUsedLabel": "Hint used",
+  "@cardHistoryHintUsedLabel": {
+    "description": "The stored fill-mode hint flag, recorded and deliberately without effect on the action (BR-136, BR-185)."
+  },
+  "cardHistoryNextDueLabel": "Next due {date}",
+  "@cardHistoryNextDueLabel": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    },
+    "description": "The schedule this turn produced, when it produced one (BR-185)."
+  },
+  "cardHistoryBoxChange": "Box {from} → {to}",
+  "@cardHistoryBoxChange": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    },
+    "description": "eight_box before-and-after, from the stored columns of that row — never diffed from state (BR-76, BR-185). The arrow carries the direction without colour."
+  },
+  "cardHistoryEaseChange": "Ease {from} → {to}",
+  "@cardHistoryEaseChange": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    },
+    "description": "sm2 ease factor before and after, from the stored columns of that row (BR-185)."
+  },
+  "cardHistoryIntervalChange": "Interval {from} → {to}",
+  "@cardHistoryIntervalChange": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    },
+    "description": "sm2 interval before and after, from the stored columns of that row (BR-185)."
+  },
+  "cardHistoryKindLearning": "Learning",
+  "@cardHistoryKindLearning": {
+    "description": "The stored answer kind; never derived from the schedule delta (BR-75, BR-76)."
+  },
+  "cardHistoryKindScheduled": "Scheduled",
+  "@cardHistoryKindScheduled": {
+    "description": "The stored answer kind (BR-75, BR-76)."
+  },
+  "cardHistoryKindRelearning": "Relearning",
+  "@cardHistoryKindRelearning": {
+    "description": "The stored answer kind (BR-75, BR-76)."
+  },
+  "cardHistoryEventTime": "{date} · {time}",
+  "@cardHistoryEventTime": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    },
+    "description": "Joins the locale-formatted date and time of one event; the parts come from MaterialLocalizations so neither is assembled by hand (M4.14 W6)."
+  },
+  "cardHistoryEventSemantics": "{time}. {mode}, {kind}, {action}. {schedule}",
+  "@cardHistoryEventSemantics": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "mode": {
+        "type": "String"
+      },
+      "kind": {
+        "type": "String"
+      },
+      "action": {
+        "type": "String"
+      },
+      "schedule": {
+        "type": "String"
+      }
+    },
+    "description": "One event read as a single sentence, so TalkBack announces the meaning of the turn instead of five loose labels (M4.14 W6)."
+  },
+  "cardDetailNeverAnsweredValue": "Never answered",
+  "@cardDetailNeverAnsweredValue": {
+    "description": "Value for `Last answered` on a card no turn has ever been recorded against. Distinct from cardDetailNotScheduledValue, which is about the schedule: a card can be unscheduled and answered, and saying \"not scheduled yet\" under \"Last answered\" answered a different question (BR-183)."
+  },
+  "cardHistoryAllShownLabel": "All reviews shown",
+  "@cardHistoryAllShownLabel": {
+    "description": "Tail line once every page of the history has been read, so the user is not offered a button with nothing behind it (UC-12 A5). Deliberately countless: BR-186 forbids any aggregate derived from history, and a count here would contradict the Reviews row above it, which counts only scheduled turns (BR-20)."
+  },
+  "cardHistoryBoxChangeSemantics": "Box from {from} to {to}",
+  "@cardHistoryBoxChangeSemantics": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    },
+    "description": "Spoken form of cardHistoryBoxChange, used only inside the event's semantics label. The visible line keeps the arrow, which reads in every language; a screen reader speaks it as \"right arrow\" or not at all, so the relation is spelled out here (M4.14 W6)."
+  },
+  "cardHistoryEaseChangeSemantics": "Ease from {from} to {to}",
+  "@cardHistoryEaseChangeSemantics": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    },
+    "description": "Spoken form of cardHistoryEaseChange — see cardHistoryBoxChangeSemantics for why the arrow does not travel into the semantics label."
+  },
+  "cardHistoryIntervalChangeSemantics": "Interval from {from} to {to}",
+  "@cardHistoryIntervalChangeSemantics": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    },
+    "description": "Spoken form of cardHistoryIntervalChange — see cardHistoryBoxChangeSemantics."
+  },
+  "cardHistoryAbsentValueSemantics": "not recorded",
+  "@cardHistoryAbsentValueSemantics": {
+    "description": "Spoken stand-in for a before-or-after column the row left null. The visible line shows an en dash, which most screen readers say nothing about at all (M4.14 W6, BR-185)."
+  },
+  "cardHistoryModeUnknownSemantics": "Unknown mode",
+  "@cardHistoryModeUnknownSemantics": {
+    "description": "Spoken stand-in for a stored mode this build does not recognise (StudyMode.unknown). The visible line shows the same en dash placeholder an unrecorded column uses; a silent gap in a spoken sentence reads as data that failed to load."
   }
 }
