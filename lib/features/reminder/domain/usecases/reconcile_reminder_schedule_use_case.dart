@@ -41,7 +41,7 @@ class ReconcileReminderScheduleUseCase {
       time: settings.time,
       now: now,
       utcOffset: utcOffset,
-      notBefore: _notBefore(settings.lastDeliveredAt, utcOffset),
+      notBefore: _notBefore(settings.lastDeliveredAt, now, utcOffset),
     );
   }
 
@@ -54,8 +54,16 @@ class ReconcileReminderScheduleUseCase {
   /// **Measured against the delivery, not against `now`.** The two differ
   /// exactly when it matters: a run deferred past local midnight delivered on a
   /// day the clock has since left.
-  DateTime? _notBefore(DateTime? lastDeliveredAt, Duration utcOffset) =>
-      lastDeliveredAt == null
+  ///
+  /// **A stamp in the future is ignored**, for the reason
+  /// `DeliverDailyReminderUseCase` gives: a clock that ran fast and was then
+  /// corrected would push the anchor days ahead, and nothing in the app can
+  /// rewrite the column to undo it — not even turning the reminder off and on.
+  DateTime? _notBefore(
+    DateTime? lastDeliveredAt,
+    DateTime now,
+    Duration utcOffset,
+  ) => lastDeliveredAt == null || lastDeliveredAt.isAfter(now)
       ? null
       : LocalDayModel(
           now: lastDeliveredAt,

@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import '../../../../core/time/local_day_model.dart';
 import '../models/reminder_delivery_model.dart';
 import '../models/reminder_summary_model.dart';
@@ -50,13 +52,38 @@ class DeliverDailyReminderUseCase {
     if (summary == null) return ReminderDelivery.skippedNothingDue;
 
     await _platform.showSummary(summary);
-    // **Recorded before the reschedule that follows this call.** BR-185's day
-    // skip is derived from this timestamp, and it has to outlive the isolate
-    // that posted the notification — the app reconciles on every launch, and
-    // without a stored trace that reconcile would put the served day back.
-    await _settings.markDelivered(now);
+    await _record(now);
 
     return ReminderDelivery.posted;
+  }
+
+  /// Records the delivery, and **never lets that failure escape**.
+  ///
+  /// **The notification has already been posted by the time this runs**, so the
+  /// run succeeded from the user's point of view. Letting a failed write
+  /// propagate makes the worker report failure, which makes WorkManager retry,
+  /// which posts a *second* notification for the same day — the write failing
+  /// would cause exactly the harm it was added to prevent.
+  ///
+  /// What is lost is the trace: the next reconcile derives its anchor from the
+  /// previous delivery instead. That is safe rather than merely tolerable —
+  /// the anchor is clamped to `now`, so the next run lands tomorrow either way;
+  /// only the extra day-skip of a run that slipped past midnight is forfeited.
+  ///
+  /// `on Object` because any thrown type has the same answer here, and the log
+  /// carries no count, no deck name and no copy (BR-186).
+  Future<void> _record(DateTime now) async {
+    try {
+      await _settings.markDelivered(now);
+    } on Object catch (error, stackTrace) {
+      developer.log(
+        'reminder delivery was not recorded',
+        name: 'memox.reminder',
+        error: error,
+        stackTrace: stackTrace,
+        level: 900,
+      );
+    }
   }
 
   /// Whether the local day [now] falls in has already had its summary (BR-185).
@@ -75,6 +102,11 @@ class DeliverDailyReminderUseCase {
     Duration utcOffset,
   ) {
     if (lastDeliveredAt == null) return false;
+    // **A stamp in the future is not a fact about today.** A clock that ran
+    // fast when the delivery was recorded and was then corrected would
+    // otherwise make every day read as already served, with no way back: no
+    // screen shows this column and no command rewrites it.
+    if (lastDeliveredAt.isAfter(now)) return false;
 
     final startOfToday = LocalDayModel(
       now: now,

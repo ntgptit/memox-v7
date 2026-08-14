@@ -27,7 +27,12 @@ enum ReminderDelivery {
   /// **The schedule is not the only thing that can post twice.** A run that
   /// delivered and then failed on its way out reports failure to the OS, and
   /// WorkManager retries it — with the same settings and the same unstudied
-  /// cards, so the second attempt would post again. So does a process killed
-  /// between the notification and the write that records it.
+  /// cards, so the second attempt would post again.
+  ///
+  /// It cannot cover a process killed between the notification and the write
+  /// that records it: what this reads does not exist yet at that instant. That
+  /// window is narrowed instead of closed — the delivery no longer reports
+  /// failure when only the *recording* failed, so the ordinary case stops
+  /// asking for the retry that would post again.
   skippedAlreadyServed,
 }

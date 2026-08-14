@@ -104,6 +104,51 @@ void main() {
       },
     );
 
+    test(
+      'a failed record still reports success, so the OS does not retry',
+      () async {
+        // The retry is what posts a second notification for the same day. The
+        // user has already been alerted, so reporting failure because the
+        // *bookkeeping* failed causes exactly the harm the bookkeeping prevents.
+        workload.workloads = <ReminderWorkloadModel>[
+          const ReminderWorkloadModel(
+            deckId: 'a',
+            deckName: 'Kanji',
+            overdueCount: 1,
+            dueTodayCount: 0,
+            overdueDayCount: 1,
+          ),
+        ];
+        settings.shouldFailWrite = true;
+
+        final outcome = await deliver()(now: now, utcOffset: offset);
+
+        expect(outcome, ReminderDelivery.posted);
+        expect(platform.shown, hasLength(1));
+        expect(settings.deliveries, isEmpty);
+      },
+    );
+
+    test('a delivery stamped in the future is ignored, not obeyed', () async {
+      // A clock that ran fast when the delivery was recorded and was then
+      // corrected would otherwise silence the reminder for good: no screen
+      // shows this column and no command rewrites it.
+      workload.workloads = <ReminderWorkloadModel>[
+        const ReminderWorkloadModel(
+          deckId: 'a',
+          deckName: 'Kanji',
+          overdueCount: 1,
+          dueTodayCount: 0,
+          overdueDayCount: 1,
+        ),
+      ];
+      await settings.markDelivered(now.add(const Duration(days: 30)));
+
+      final outcome = await deliver()(now: now, utcOffset: offset);
+
+      expect(outcome, ReminderDelivery.posted);
+    });
+
     test('a delivery on an earlier local day blocks nothing', () async {
       workload.workloads = <ReminderWorkloadModel>[
         const ReminderWorkloadModel(

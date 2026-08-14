@@ -267,6 +267,17 @@ void main() {
       expect(platform.lastNotBefore, DateTime.utc(2026, 7, 30, 17));
     });
 
+    test('a delivery stamped in the future anchors nothing', () async {
+      // Same reason the delivery guard ignores it: the anchor would otherwise
+      // sit days ahead with nothing in the app able to rewrite the column.
+      await enable()(time: nine, now: now, utcOffset: offset);
+      await settings.markDelivered(now.add(const Duration(days: 30)));
+
+      await reconcile(now: now, utcOffset: offset);
+
+      expect(platform.lastNotBefore, isNull);
+    });
+
     test('a changed offset reschedules against the new one', () async {
       await enable()(time: nine, now: now, utcOffset: offset);
 

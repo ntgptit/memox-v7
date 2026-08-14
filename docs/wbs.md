@@ -9450,6 +9450,20 @@ thế không đổi bố cục.
   delay biến một anchor cũ thành "bắn ngay"), `watchSettings` map lỗi như
   `readSettings`, và M6 A2 nay được đo bằng `didExceedMaxLines` thay vì chỉ
   `takeException` — một nhãn bị cắt không ném exception nào.
+- **Recursive review, vòng 4 và 5:** vòng 4 xác nhận cả năm finding vòng 3 đã
+  vá và tìm ra rằng lịch vẫn là **thứ duy nhất** chặn lượt post thứ hai — dấu
+  vết v9 chỉ được đọc theo chiều đặt lịch, nên một lượt đã gửi rồi ném trên
+  đường ra sẽ bị WorkManager retry và post lại. Thêm khoá thứ hai ngay ở
+  `DeliverDailyReminderUseCase`. Vòng 5 là vòng **đầu tiên trong năm vòng mà bản
+  sửa trước không đẻ ra defect mới**, và auditor kết luận thiết kế đã hội tụ: các
+  vòng 1–3 sửa vào *đường dây* (tham số anchor, chỗ clamp, ai sở hữu `now`) nên
+  mỗi lần lại vỡ chỗ khác; bản sửa vòng 4 là *cộng thêm* — một guard thuần đọc
+  từ đúng snapshot đã có. Hai việc còn lại đã làm nốt: ghi dấu vết hỏng **không**
+  được biến thành retry (retry chính là thứ post lần hai, nên báo lỗi vì
+  bookkeeping hỏng gây đúng cái hại mà bookkeeping ngăn), và một dấu vết mang
+  timestamp ở tương lai bị coi là không dùng được ở **cả** guard lẫn `notBefore`
+  — không màn nào hiện cột đó và không lệnh nào ghi lại nó, nên một đồng hồ chạy
+  nhanh rồi được chỉnh lại sẽ tắt hẳn nhắc học vĩnh viễn.
 - **Dependencies:** M4.2 (database), M5.0s (`app_settings`, `learned_at`),
   M99.15/M99.19a (bucket widget), AD-19 (nhánh Settings)
 - **Tests required:** domain — dựng summary, đếm, thứ tự cấp bách, ranh giới
