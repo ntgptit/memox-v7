@@ -146,6 +146,15 @@ class FakeReminderSettings implements ReminderSettingsRepository {
 
   @override
   Future<void> markDelivered(DateTime deliveredAt) async {
+    // Honours the same switch as `saveSettings`: the interesting case is a
+    // notification that was posted and then failed to be recorded, and a fake
+    // that could not fail there would make that branch untestable.
+    if (shouldFailWrite) {
+      throw const DatabaseFailure(
+        message: 'write refused',
+        reason: ReminderSetupRejection.settingsWriteFailed,
+      );
+    }
     deliveries.add(deliveredAt);
     _current = _current.copyWith(lastDeliveredAt: deliveredAt);
     _changes.add(_current);

@@ -1,3 +1,4 @@
+import '../../../../core/time/local_day_model.dart';
 import '../models/reminder_delivery_model.dart';
 import '../models/reminder_summary_model.dart';
 import '../repositories/reminder_platform_repository.dart';
@@ -37,6 +38,9 @@ class DeliverDailyReminderUseCase {
   }) async {
     final settings = await _settings.readSettings();
     if (!settings.isEnabled) return ReminderDelivery.skippedDisabled;
+    if (_isAlreadyServed(settings.lastDeliveredAt, now, utcOffset)) {
+      return ReminderDelivery.skippedAlreadyServed;
+    }
 
     final workloads = await _workload.readWorkload(
       now: now,
@@ -53,5 +57,30 @@ class DeliverDailyReminderUseCase {
     await _settings.markDelivered(now);
 
     return ReminderDelivery.posted;
+  }
+
+  /// Whether the local day [now] falls in has already had its summary (BR-185).
+  ///
+  /// **The second lock on "one per day", and it is not redundant.** The first
+  /// is the schedule, and a schedule can be re-run: WorkManager retries a task
+  /// that reports failure, and this one reports failure if anything after the
+  /// notification throws. Without this the retry finds the same settings and
+  /// the same unstudied cards and alerts the user again, minutes later.
+  ///
+  /// A delivery from an earlier local day does not block anything — 01:00 on
+  /// day D does not stop 20:00 on day D+1.
+  bool _isAlreadyServed(
+    DateTime? lastDeliveredAt,
+    DateTime now,
+    Duration utcOffset,
+  ) {
+    if (lastDeliveredAt == null) return false;
+
+    final startOfToday = LocalDayModel(
+      now: now,
+      utcOffset: utcOffset,
+    ).startOfToday;
+
+    return !lastDeliveredAt.isBefore(startOfToday);
   }
 }

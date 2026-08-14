@@ -96,6 +96,44 @@ void main() {
       await expectLater(repo.readSettings(), throwsA(isA<Failure>()));
     });
 
+    test('markDelivered round-trips, and touches nothing else', () async {
+      // The one writer the fakes could otherwise vouch for on their own. Both
+      // claims it carries are asserted here: the value comes back, and the
+      // columns the user owns — including `updated_at`, which is the timestamp
+      // of *their* choice — are left alone.
+      final before = await dao.readSettingsRow();
+      final deliveredAt = DateTime.utc(2026, 7, 29, 13);
+
+      await repository().markDelivered(deliveredAt);
+
+      final after = await dao.readSettingsRow();
+      expect(
+        after.reminderLastDeliveredAt!.isAtSameMomentAs(deliveredAt),
+        isTrue,
+      );
+      expect(after.updatedAt, before.updatedAt);
+      expect(after.cardLimit, before.cardLimit);
+      expect(after.reminderEnabled, before.reminderEnabled);
+      expect(after.reminderMinuteOfDay, before.reminderMinuteOfDay);
+    });
+
+    test('a settings write leaves the delivery stamp alone', () async {
+      // The other direction of the same pair: a background run and a foreground
+      // edit write one row from two isolates, and neither may clobber the
+      // other's column.
+      final deliveredAt = DateTime.utc(2026, 7, 29, 13);
+      await repository().markDelivered(deliveredAt);
+
+      await repository().saveSettings(
+        isEnabled: true,
+        time: ReminderTime.suggested,
+      );
+
+      final settings = await repository().readSettings();
+      expect(settings.lastDeliveredAt!.isAtSameMomentAs(deliveredAt), isTrue);
+      expect(settings.isEnabled, isTrue);
+    });
+
     test('the study columns are untouched by a reminder write', () async {
       // One table, two features. A reminder write that moved `card_limit`
       // would change how sessions are built, silently.

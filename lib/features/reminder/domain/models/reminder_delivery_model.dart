@@ -21,4 +21,13 @@ enum ReminderDelivery {
 
   /// Nothing is due any more (BR-184). The ordinary skip.
   skippedNothingDue,
+
+  /// This local day has already had its summary (BR-185).
+  ///
+  /// **The schedule is not the only thing that can post twice.** A run that
+  /// delivered and then failed on its way out reports failure to the OS, and
+  /// WorkManager retries it — with the same settings and the same unstudied
+  /// cards, so the second attempt would post again. So does a process killed
+  /// between the notification and the write that records it.
+  skippedAlreadyServed,
 }

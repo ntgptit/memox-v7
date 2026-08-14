@@ -7,8 +7,8 @@
 | **Scope** | Quyết định ràng buộc nhiều tài liệu hoặc nhiều layer. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), hình dạng dữ liệu (`data-model.md`) |
 | **Source of truth for** | AD-xx · đánh đổi kiến trúc · phương án đã bị loại · lý do pin toolchain |
 | **Depends on** | `document-conventions.md`, `product.md` |
-| **Updated by task** | M99.23 (AD-21 · nhắc học chạy trong background worker) |
-| **Last updated** | 2026-08-13 |
+| **Updated by task** | M99.23 (AD-21 · nhắc học chạy trong background worker; v9 sau vòng review thứ ba) |
+| **Last updated** | 2026-08-14 |
 
 Format theo `document-conventions.md` §6.1. AD xếp theo số; ID vĩnh viễn (§7).
 
@@ -1446,7 +1446,7 @@ khác nhau; chung factory là chung lý do đổi. Chuẩn bị sẵn `encode()`
 | | |
 |---|---|
 | **Status** | accepted |
-| **Affected documents** | `business-rules.md` (BR-182…BR-193), `use-cases.md` (UC-12), `data-model.md` (`app_settings`, migration v8), `wireframes/m6-daily-reminders.md` |
+| **Affected documents** | `business-rules.md` (BR-182…BR-193), `use-cases.md` (UC-12), `data-model.md` (`app_settings`, migration v8 và v9), `wireframes/m6-daily-reminders.md` |
 
 **Decision.** Nhắc học hằng ngày tách làm hai vai và mỗi vai một plugin:
 **WorkManager** giữ *thời điểm*, `flutter_local_notifications` giữ *hiển thị

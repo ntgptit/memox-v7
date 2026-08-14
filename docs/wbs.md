@@ -9461,9 +9461,13 @@ thế không đổi bố cục.
   manifest/flavor — không có quyền exact alarm. **Không** gửi notification thật
   trong host suite. Sau vòng review: thêm test cho retry-đúng-lệnh, banner
   capability, semantics name/value của toggle và hàng giờ, và
-  `reminderRescheduleAnchor` (BR-185 qua mốc nửa đêm). Sau vòng 2: adapter test
-  đo `initialDelay` thật, retry giữ đúng giờ người dùng chọn, read hỏng map
-  thành `Failure`, và `notBefore` đi xuyên reconcile → platform.
+  "một lượt mỗi ngày địa phương" qua mốc nửa đêm. Sau vòng 2: adapter test đo
+  `initialDelay` thật, retry giữ đúng giờ người dùng chọn, read hỏng map thành
+  `Failure`. Sau vòng 3: BR-185 được ghim bằng `reminder_use_cases_test.dart`
+  (group reconcile — ngày đã giao thì mọi caller đều bỏ) và
+  `migration_v8_test.dart` (case v9), thay cho hàm anchor đã bị xoá; M6 A2 đo
+  bằng `didExceedMaxLines`. Sau vòng 4: round-trip `markDelivered` qua SQL thật,
+  và lượt giao thứ hai trong cùng ngày bị chặn ở use case.
 - **Checklist phases:** 9, 10, 11, 12, 13, 14, 15
 
 ## Blocker

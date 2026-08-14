@@ -2,12 +2,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/reminder/domain/failures/reminder_failure.dart';
 import 'package:memox/features/reminder/domain/models/reminder_capability_model.dart';
-import 'package:memox/features/reminder/domain/models/reminder_delivery_model.dart';
 import 'package:memox/features/reminder/domain/models/reminder_settings_model.dart';
 import 'package:memox/features/reminder/domain/models/reminder_time_model.dart';
-import 'package:memox/features/reminder/domain/models/reminder_workload_model.dart';
 import 'package:memox/features/reminder/domain/usecases/change_reminder_time_use_case.dart';
-import 'package:memox/features/reminder/domain/usecases/deliver_daily_reminder_use_case.dart';
 import 'package:memox/features/reminder/domain/usecases/disable_reminder_use_case.dart';
 import 'package:memox/features/reminder/domain/usecases/enable_reminder_use_case.dart';
 import 'package:memox/features/reminder/domain/usecases/reconcile_reminder_schedule_use_case.dart';
@@ -15,6 +12,12 @@ import 'package:memox/features/reminder/domain/usecases/watch_reminder_overview_
 
 import '../support/fake_reminder_platform.dart';
 
+/// Enable, disable, change-time, reconcile and the overview read.
+///
+/// Delivery has its own file — `reminder_delivery_use_case_test.dart` — split
+/// when this one crossed the 400-line guard, along the seam it already had:
+/// what the user's commands do, and what the fire-time run does.
+///
 /// Fixed inputs, because a reminder is entirely about *when* and a test that
 /// read the wall clock would prove something different every hour.
 final DateTime now = DateTime.utc(2026, 7, 29, 3);
@@ -24,13 +27,11 @@ final ReminderTime nine = ReminderTime.parse(9 * 60).time!;
 void main() {
   late FakeReminderSettings settings;
   late FakeReminderPlatform platform;
-  late FakeReminderWorkload workload;
   late ReconcileReminderScheduleUseCase reconcile;
 
   setUp(() {
     settings = FakeReminderSettings();
     platform = FakeReminderPlatform();
-    workload = FakeReminderWorkload();
     reconcile = ReconcileReminderScheduleUseCase(settings, platform);
   });
 
@@ -272,70 +273,6 @@ void main() {
       await reconcile(now: now, utcOffset: const Duration(hours: -5));
 
       expect(platform.scheduled, hasLength(1));
-    });
-  });
-
-  group('deliver (BR-184, BR-185, BR-186)', () {
-    DeliverDailyReminderUseCase deliver() =>
-        DeliverDailyReminderUseCase(settings, workload, platform);
-
-    setUp(() async {
-      await enable()(time: nine, now: now, utcOffset: offset);
-    });
-
-    test('posts one summary when something is owed', () async {
-      workload.workloads = <ReminderWorkloadModel>[
-        const ReminderWorkloadModel(
-          deckId: 'a',
-          deckName: 'Kanji',
-          overdueCount: 2,
-          dueTodayCount: 1,
-          overdueDayCount: 4,
-        ),
-      ];
-
-      final outcome = await deliver()(now: now, utcOffset: offset);
-
-      expect(outcome, ReminderDelivery.posted);
-      expect(platform.shown.single.totalDueCount, 3);
-      expect(platform.shown.single.leadDeckName, 'Kanji');
-      // Recorded, so the day it served survives the isolate that served it
-      // (BR-185).
-      expect(settings.deliveries, <DateTime>[now]);
-    });
-
-    test('an empty workload at fire time posts nothing (BR-184)', () async {
-      final outcome = await deliver()(now: now, utcOffset: offset);
-
-      expect(outcome, ReminderDelivery.skippedNothingDue);
-      expect(platform.shown, isEmpty);
-      // A day with nothing owed has not been served, so it must not be marked.
-      expect(settings.deliveries, isEmpty);
-    });
-
-    test('a reminder turned off since scheduling posts nothing', () async {
-      // A cancel that did not take is the one thing a background run cannot
-      // prevent, so the run re-reads rather than trusting it.
-      await DisableReminderUseCase(settings, reconcile)(
-        now: now,
-        utcOffset: offset,
-      );
-      workload.workloads = <ReminderWorkloadModel>[
-        const ReminderWorkloadModel(
-          deckId: 'a',
-          deckName: 'Kanji',
-          overdueCount: 5,
-          dueTodayCount: 0,
-          overdueDayCount: 1,
-        ),
-      ];
-
-      final outcome = await deliver()(now: now, utcOffset: offset);
-
-      expect(outcome, ReminderDelivery.skippedDisabled);
-      expect(platform.shown, isEmpty);
-      // It stops before reading the workload at all.
-      expect(workload.reads, 0);
     });
   });
 
