@@ -31,6 +31,9 @@ import '../../features/deck/data/repositories/deck_template_repository_impl.dart
 import '../../features/deck/domain/repositories/deck_repository.dart';
 import '../../features/deck/domain/models/deck_template_model.dart';
 import '../../features/deck/domain/repositories/deck_template_repository.dart';
+import '../../features/search/data/repositories/library_search_repository_impl.dart';
+import '../../features/search/di/library_search_repository_provider.dart';
+import '../../features/search/domain/repositories/library_search_repository.dart';
 import '../../features/study/data/datasources/study_dao.dart';
 import '../../features/study/di/study_repository_provider.dart';
 import '../../features/study/data/repositories/study_repository_impl.dart';
@@ -136,6 +139,17 @@ DeckTemplateRepository deckTemplateRepositoryBinding(Ref ref) =>
       clock: ref.watch(clockProvider),
     );
 
+/// Global Library Search (UC-12).
+///
+/// **The database itself, not a DAO** — the same difference `cardRepositoryBinding`
+/// explains: the deck set and the card page must come from one transaction, and a
+/// ready-made adapter would let this root hand the repository a snapshot from a
+/// second database.
+///
+/// No clock: a search reads and stamps nothing.
+LibrarySearchRepository librarySearchRepositoryBinding(Ref ref) =>
+    LibrarySearchRepositoryImpl(ref.watch(appDatabaseProvider));
+
 /// Study needs no clock: every one of its operations takes `now` as an argument,
 /// because a session's whole behaviour turns on which instant it is measured
 /// against and a repository that read the clock itself could not be tested at
@@ -186,4 +200,5 @@ List<Override> repositoryBindingOverrides() => <Override>[
   deckTemplateRepositoryProvider.overrideWith(deckTemplateRepositoryBinding),
   deckTemplateCatalogProvider.overrideWith(deckTemplateCatalogBinding),
   studyRepositoryProvider.overrideWith(studyRepositoryBinding),
+  librarySearchRepositoryProvider.overrideWith(librarySearchRepositoryBinding),
 ];

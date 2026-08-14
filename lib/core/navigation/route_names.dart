@@ -41,6 +41,14 @@ abstract final class RouteNames {
   /// placeholder until app settings exist (AD-19).
   static const String settings = 'settings';
 
+  /// Global Library Search (UC-12). A child of [decks], so the bottom bar stays
+  /// and Back returns to the level the user searched from.
+  ///
+  /// **The one name two features speak.** The Library header pushes it and the
+  /// search feature owns the screen; neither may import the other's widgets
+  /// (AD-13), so the route name in `core/` is the whole of the coupling.
+  static const String librarySearch = 'librarySearch';
+
   /// The starter template catalog. A child of [decks], so it stays inside the
   /// Library branch and Back returns to the (possibly empty) list that offered
   /// it (UC-01).

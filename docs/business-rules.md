@@ -7,8 +7,8 @@
 | **Scope** | Luật nghiệp vụ, validation rule, state machine, edge case của phạm vi MVP. Ngoài phạm vi: quyết định kiến trúc (`architecture.md`), hình dạng dữ liệu (`data-model.md`), luồng người dùng (`use-cases.md`) |
 | **Source of truth for** | BR-xx · validation rule · entity state machine · edge case |
 | **Depends on** | `document-conventions.md`, `product.md`, `architecture.md` |
-| **Updated by task** | M99.21 — BR-174…BR-181: export card ra file (scope, content-only, tag codec, determinism, read-only, file shape, tên file, riêng tư/platform) |
-| **Last updated** | 2026-08-13 |
+| **Updated by task** | M99.23 — BR-182…BR-190: tìm kiếm toàn thư viện (phạm vi trường, chuẩn hoá dùng chung, debounce/zero-I/O, xếp hạng, nhóm, gộp trùng, keyset, chỉ-đọc và ranh giới điều hướng, cấm index không đo) |
+| **Last updated** | 2026-08-14 |
 
 Format tuân theo `document-conventions.md` §6.2. Từ khoá MUST / SHOULD / MAY
 theo §3. Prose **không** chứa từ khoá là giải thích, không phải rule (§9).
@@ -27,7 +27,7 @@ khi ai đó đọc và làm theo.
 
 Rule bị thay thế MUST đánh `superseded by BR-yy` ở cột Status và giữ nguyên ID.
 
-Trạng thái hiện tại: **BR-01…BR-154**, không trùng, không thiếu.
+Trạng thái hiện tại: **BR-01…BR-190**, không trùng, không thiếu.
 
 ---
 
@@ -462,6 +462,24 @@ riêng tư chung (BR-51…BR-54) — chúng chỉ nói phần mà chiều export
 | BR-179 | active | Mọi file export MUST mở đầu bằng đúng sáu header canonical theo thứ tự của AD-20, chữ thường tiếng Anh, và MUST NOT localize theo ngôn ngữ app. Field tuỳ chọn không có giá trị MUST là ô rỗng, MUST NOT là `null`, `-` hay chuỗi placeholder. CSV và TSV MUST ghi kèm UTF-8 BOM — đối xứng với encoding mà Import chấp nhận (BR-173). XLSX MUST ghi mọi ô dưới dạng **text**, nên nội dung bắt đầu bằng `=`, `+`, `-` hoặc `@` MUST NOT trở thành formula, và chuỗi trông như số (`001`, `1e3`, `+84…`) MUST giữ nguyên nguyên văn. | data | UC-11, AD-20, BR-173 |
 | BR-180 | active | Tên file export MUST dẫn xuất từ tên deck đã sanitize — loại ký tự phân cách đường dẫn, ký tự điều khiển và ký tự không hợp lệ của hệ tệp, gộp khoảng trắng liên tiếp thành một, trim hai đầu — cộng một ngày lấy từ `clockProvider` và phần mở rộng theo format đã chọn. Sanitize ra chuỗi rỗng thì phần tên MUST fallback về `cards`. MUST NOT gọi `DateTime.now()` ở bất kỳ layer nào, và tên file MUST NOT xuất hiện trong log ở bất kỳ level nào (BR-173). | domain | UC-11, BR-173 |
 | BR-181 | active | File export là dữ liệu riêng tư cùng mức nội dung card (BR-51, BR-52) và MUST chỉ được tạo khi người dùng chủ động yêu cầu (BR-54). Ứng dụng MUST NOT xin quyền truy cập bộ nhớ diện rộng, và MUST NOT ghi artifact vào thư mục dùng chung trước một hành động tường minh của người dùng; bản tạm MUST nằm trong vùng riêng của ứng dụng và là transient. Bàn giao file MUST đi qua share sheet của hệ điều hành. Người dùng đóng share sheet MUST được hiểu là **cancel**, MUST NOT báo lỗi. UI MUST NOT nói file đã được lưu khi hệ điều hành không xác nhận điều đó — copy trung thực nói "đã bàn giao cho hệ thống", không nói "đã lưu". | data + UI | UC-11, BR-51, BR-52, BR-54, BR-173 |
+
+## Tìm kiếm toàn thư viện
+
+Global Library Search (UC-12). Các rule dưới đây **không** phát biểu lại luật
+nội dung card (BR-07, BR-08, BR-95), luật tag (BR-93) hay luật riêng tư chung
+(BR-51…BR-54) — chúng chỉ nói phần mà việc tìm kiếm thêm vào.
+
+| ID | Status | Rule | Enforced by | Related |
+|---|---|---|---|---|
+| BR-182 | active | Tìm kiếm MUST bao phủ đúng bốn trường: tên deck, mặt trước card, mặt sau card và tên tag. MUST NOT tìm trong `example`, `hint`, `pronunciation`, dữ liệu scheduler, study state hay review history. Deck và card đã bị xoá MUST NOT xuất hiện; khi Trash tồn tại (feature riêng), nội dung soft-deleted MUST bị loại bằng cùng một predicate đặt ở một chỗ duy nhất. | domain + data | UC-12, BR-93 |
+| BR-183 | active | Cả câu truy vấn lẫn dữ liệu được so sánh MUST đi qua **một** hàm chuẩn hoá dùng chung — trim rồi hạ chữ theo Unicode của Dart. SQL MUST NOT dùng `lower()` hay `COLLATE NOCASE` để thay thế: chúng chỉ fold ASCII, nên `CÔNG NGHỆ` sẽ không tìm được bằng `công nghệ`. Chuẩn hoá MUST là case-only; MUST NOT bỏ dấu. | domain + data | UC-12, BR-93 |
+| BR-184 | active | Câu truy vấn chuẩn hoá thành rỗng MUST trả về trạng thái ban đầu và MUST NOT phát sinh bất kỳ statement nào tới database. Truy vấn có nội dung MUST được debounce **250ms** ở seam provider/controller, MUST NOT debounce bên trong widget nhập liệu. Xoá trắng ô tìm kiếm MUST có hiệu lực ngay, không chờ hết cửa sổ debounce. Mỗi lần đọc MUST có định danh riêng; kết quả hoặc lỗi đến sau khi truy vấn đã đổi MUST bị bỏ. Rời màn hình MUST huỷ cửa sổ đang chờ. | controller | UC-12, AD-11 |
+| BR-185 | active | Trong mỗi nhóm, kết quả MUST xếp theo ba bậc khớp: khớp đúng toàn bộ, khớp tiền tố, rồi khớp chứa. Bậc của một card MUST là bậc **tốt nhất** trong các trường nó khớp (front, back, tag). MUST NOT dùng điểm số suy đoán: thứ tự phải giải thích được và phải ổn định giữa hai lần đọc. | domain + data | UC-12 |
+| BR-186 | active | Kết quả MUST được chia hai nhóm và trình bày theo thứ tự **Deck trước, Card sau**. Một trang MUST lấp đầy bằng deck trước; card MUST NOT xuất hiện khi nhóm deck chưa hết. Hai nhóm MUST NOT đan xen nhau ở bất kỳ trang nào. | domain + UI | UC-12 |
+| BR-187 | active | Một card khớp nhiều trường hoặc nhiều tag MUST chỉ sinh **một** kết quả. Việc gộp MUST xảy ra ở tầng truy vấn bằng phép gộp tương quan, MUST NOT dựa vào `DISTINCT` sau một phép JOIN nhân bản hàng. | data | UC-12, BR-93 |
+| BR-188 | active | Phân trang MUST là keyset. Khoá phân trang MUST gồm đúng bốn thành phần theo đúng thứ tự sắp xếp: bậc khớp, văn bản đã fold dùng để sắp, `created_at`, rồi `id` — nên thứ tự là toàn phần và không hai hàng nào bằng nhau. MUST NOT dùng `OFFSET`. Một lần ghi xen giữa hai trang MUST NOT làm lặp hàng hay bỏ sót hàng. | data | UC-12 |
+| BR-189 | active | Kết quả MUST là chỉ-đọc: MUST NOT ghi bất cứ gì và MUST NOT mở phiên học. Đổi tên deck tổ tiên, di chuyển card hoặc deck, đổi tên tag và xoá MUST cập nhật kết quả cùng đường dẫn đang hiển thị mà không cần thao tác thủ công. Mở một kết quả deck MUST đi tới màn deck tương ứng; mở một kết quả card MUST đi tới màn chi tiết card ở chế độ đọc và MUST NOT đi tới màn sửa card. Khi route chi tiết card chưa tồn tại, hệ thống MUST khai báo đích đến bằng một kiểu dữ liệu và nói rõ là chưa mở được, MUST NOT dựng màn chi tiết thứ hai và MUST NOT âm thầm thay bằng màn khác. | repository + UI | UC-12, BR-63 |
+| BR-190 | active | MUST NOT thêm bảng FTS hay index mới cho tìm kiếm khi chưa có `EXPLAIN QUERY PLAN` và số đo trên dữ liệu ở quy mô thực chứng minh là cần. Việc đọc MUST NOT theo kiểu N+1: đường dẫn của mọi kết quả trên một trang MUST dẫn xuất từ một lần đọc cây deck duy nhất, và tag của mọi card trên trang MUST đến từ chính statement đã lấy card. | data | UC-12, AD-02 |
 
 ## StudyMode
 

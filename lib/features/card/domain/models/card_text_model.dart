@@ -1,3 +1,4 @@
+import '../../../../core/text/search_fold.dart';
 import '../failures/card_validation_failure.dart';
 
 /// One side of a card that has been through BR-07 and BR-08.
@@ -70,7 +71,7 @@ final class CardText {
       return (text: null, problem: side.tooLongProblem);
     }
 
-    return (text: CardText._(trimmed, trimmed.toLowerCase()), problem: null);
+    return (text: CardText._(trimmed, foldForSearch(trimmed)), problem: null);
   }
 
   /// Reads text that is **already stored** for [side], without BR-08's length
@@ -104,7 +105,7 @@ final class CardText {
       return (text: null, problem: side.emptyProblem);
     }
 
-    return (text: CardText._(trimmed, trimmed.toLowerCase()), problem: null);
+    return (text: CardText._(trimmed, foldForSearch(trimmed)), problem: null);
   }
 
   /// Folds a search term the same way a stored side is folded.
@@ -112,7 +113,12 @@ final class CardText {
   /// Exists so the two sides of the comparison cannot drift apart: a query that
   /// folds its term by hand is one `toLowerCase()` away from being asymmetric
   /// again, which is the bug this column pair was added to fix.
-  static String fold(String raw) => raw.trim().toLowerCase();
+  ///
+  /// **The rule itself moved to `core/text/search_fold.dart`** when Global
+  /// Library Search became the fourth implementer of it (M99.23). This stays as
+  /// the card-side name for it — `card_list_query_mapper.dart` and the export
+  /// path both read it — but it no longer *decides* anything.
+  static String fold(String raw) => foldForSearch(raw);
 
   @override
   bool operator ==(Object other) => other is CardText && other.value == value;

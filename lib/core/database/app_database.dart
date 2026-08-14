@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../text/search_fold.dart';
 import 'connection.dart';
 
 part 'app_database.g.dart';
@@ -21,6 +22,7 @@ part 'app_database_migrations.dart';
     'queries/deck.drift',
     'queries/card.drift',
     'queries/tag.drift',
+    'queries/search.drift',
   },
 )
 class AppDatabase extends _$AppDatabase {
@@ -178,11 +180,14 @@ class AppDatabase extends _$AppDatabase {
   ///
   /// A loop rather than a batch: this runs once per device, inside the
   /// migration's transaction, and `customStatement` is the API that is certain
-  /// to be there. Folding is `CardText.fold`'s rule — trim, then Dart's
-  /// Unicode-aware `toLowerCase()` — restated here rather than imported, because
-  /// `core/` must not depend on a feature (AD-13). The pair is pinned by
-  /// `migration_test.dart`, which upgrades a v2 card holding `CÔNG NGHỆ` and
-  /// requires the folded column to read `công nghệ`.
+  /// to be there. Folding goes through [foldForSearch] — trim, then Dart's
+  /// Unicode-aware `toLowerCase()`. It used to be *restated* here, because the
+  /// rule lived in `CardText` and `core/` must not depend on a feature (AD-13);
+  /// M99.23 moved the rule itself into `core/text/`, so the backfill and the
+  /// column's writer now share one implementation instead of two copies that
+  /// agreed by inspection. The pair is pinned by `migration_test.dart`, which
+  /// upgrades a v2 card holding `CÔNG NGHỆ` and requires the folded column to
+  /// read `công nghệ`.
   Future<void> _backfillFoldedSides() async {
     final rows = await customSelect(
       'SELECT id, front, back FROM cards',
@@ -193,8 +198,8 @@ class AppDatabase extends _$AppDatabase {
       await customUpdate(
         'UPDATE cards SET front_folded = ?, back_folded = ? WHERE id = ?',
         variables: <Variable<Object>>[
-          Variable<String>(row.read<String>('front').trim().toLowerCase()),
-          Variable<String>(row.read<String>('back').trim().toLowerCase()),
+          Variable<String>(foldForSearch(row.read<String>('front'))),
+          Variable<String>(foldForSearch(row.read<String>('back'))),
           Variable<String>(row.read<String>('id')),
         ],
         // Stated even though nothing is listening mid-upgrade: `customUpdate`

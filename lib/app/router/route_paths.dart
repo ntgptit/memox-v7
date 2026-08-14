@@ -27,6 +27,11 @@ abstract final class RoutePaths {
   /// so the URL says what it points at.
   static const String deckDetailRelative = 'decks/:deckId';
 
+  /// Global Library Search, **relative** to [decks] so the full location is
+  /// `/search` inside the Library branch — the bottom bar stays, and Back
+  /// returns to the level the search was opened from (UC-12).
+  static const String librarySearchRelative = 'search';
+
   /// The starter catalog, **relative** to [decks] so the full location is
   /// `/starter` inside the Library branch — the bottom bar stays, and Back
   /// returns to the list that offered it.

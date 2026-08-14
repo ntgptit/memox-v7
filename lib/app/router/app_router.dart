@@ -9,6 +9,7 @@ import '../../features/card/presentation/screens/card_list_screen.dart';
 import '../../features/deck/presentation/screens/deck_list_screen.dart';
 import '../../features/deck/presentation/screens/starter_library_screen.dart';
 import '../../features/progress/presentation/screens/progress_placeholder_screen.dart';
+import '../../features/search/presentation/screens/library_search_screen.dart';
 import '../../features/settings/presentation/screens/settings_placeholder_screen.dart';
 import '../../features/study/presentation/screens/study_entry_screen.dart';
 import '../fallback/route_not_found_screen.dart';
@@ -74,6 +75,16 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
                 // depth is an argument rather than a different widget.
                 builder: (context, state) => const DeckListScreen(),
                 routes: <RouteBase>[
+                  // Global Library Search (UC-12), a sibling of the deck
+                  // detail: the results span decks and cards, so the surface
+                  // belongs to neither feature's screen, and a child route
+                  // keeps the bottom bar and sends Back to the level the
+                  // search was opened from.
+                  GoRoute(
+                    path: RoutePaths.librarySearchRelative,
+                    name: RouteNames.librarySearch,
+                    builder: (context, state) => const LibrarySearchScreen(),
+                  ),
                   // The starter catalog, a sibling of the deck detail so an
                   // empty library can offer content without leaving the
                   // branch (UC-01).

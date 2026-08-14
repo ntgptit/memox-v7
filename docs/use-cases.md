@@ -7,8 +7,8 @@
 | **Scope** | Must-have của MVP. Ngoài phạm vi: should/nice-to-have, và mọi thứ ở mục "Điều đã cố ý không đặc tả" |
 | **Source of truth for** | UC-xx · main/alternative/error flow · UI state matrix của từng màn |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md` |
-| **Updated by task** | M99.21 — UC-11: export card của một deck ra file (scope → format → share) |
-| **Last updated** | 2026-08-13 |
+| **Updated by task** | M99.23 — UC-12: tìm kiếm toàn thư viện (deck, hai mặt card, tag) |
+| **Last updated** | 2026-08-14 |
 
 Chỉ đặc tả must-have. Should-have và nice-to-have viết khi tới lượt — đặc tả
 trước những thứ có thể bị cắt là lãng phí.
@@ -805,12 +805,69 @@ unavailable/platform error · repository error · encoder error · invalid scope
 đã có sẵn từ màn gọi; và không có state `empty`, vì scope rỗng là lỗi (E5) chứ
 không phải một màn hình trống.
 
+## UC-12 · Tìm kiếm toàn thư viện
+
+| | |
+|---|---|
+| **Status** | active |
+
+**Actor:** Người dùng
+**Trigger:** Bấm biểu tượng tìm kiếm ở header của Library, ở bất kỳ cấp nào
+**Preconditions:** Không có. Thư viện rỗng vẫn mở được màn tìm kiếm.
+
+**Main flow:**
+1. Hệ thống mở màn tìm kiếm như một route con của nhánh Library — thanh dưới còn
+   nguyên, Back trả về đúng cấp vừa rời — và đưa con trỏ vào ô nhập ngay.
+2. Trước khi gõ, màn hình nói rõ tìm được những gì: tên deck, mặt trước và mặt
+   sau của card, tên tag. Chưa có statement nào chạy (BR-184).
+3. Người dùng gõ. Sau 250ms im lặng, hệ thống chuẩn hoá câu truy vấn bằng đúng
+   hàm fold mà các cột đã lưu dùng (BR-183) và đọc **một trang** kết quả.
+4. Kết quả hiện thành hai mục — Deck trước, Card sau (BR-186). Mỗi mục xếp theo
+   khớp đúng → khớp tiền tố → khớp chứa, phần bằng nhau phá hoà bằng tên đã fold,
+   `created_at` rồi `id` (BR-185, BR-188).
+5. Một dòng deck hiển thị đường dẫn tổ tiên phía trên tên. Một dòng card hiển thị
+   đường dẫn deck chứa nó, mặt trước, một dòng tóm tắt mặt sau, và tên tag đã làm
+   nó khớp khi card khớp **chỉ** qua tag (BR-187).
+6. Mở một kết quả deck đi tới deck đó. Mở một kết quả card đi tới chi tiết card ở
+   chế độ đọc (BR-189).
+
+**Alternative flows:**
+- **A1 — Còn kết quả phía sau:** cuối danh sách có hành động tải thêm; trang kế
+  tiếp nối bằng keyset nên không lặp và không sót hàng (BR-188).
+- **A2 — Chỉ có deck, hoặc chỉ có card:** mục không có kết quả không được vẽ tiêu
+  đề rỗng.
+- **A3 — Dữ liệu đổi ở màn khác:** đổi tên, di chuyển, xoá hoặc đổi tên tag cập
+  nhật ngay kết quả và đường dẫn đang hiển thị (BR-189).
+- **A4 — Xoá trắng ô nhập:** về trạng thái ban đầu ngay lập tức, không chờ
+  debounce và không đọc gì (BR-184).
+
+**Error flows:**
+- **E1 — Trang đầu đọc lỗi:** màn hình lỗi có nút thử lại; danh sách để trống, vì
+  kết quả của truy vấn cũ nằm dưới một thông báo lỗi là lời nói dối.
+- **E2 — Trang sau đọc lỗi:** giữ nguyên những gì đã tìm được, chỉ dải cuối danh
+  sách đổi thành thông báo và nút thử lại.
+- **E3 — Chi tiết card chưa có route:** nói rõ là chưa mở được. MUST NOT mở màn
+  sửa card thay thế (BR-189).
+
+**Postconditions:** Không đổi gì — use case chỉ đọc, và không mở phiên học nào
+(BR-189).
+
+**Business rules:** BR-182, BR-183, BR-184, BR-185, BR-186, BR-187, BR-188,
+BR-189, BR-190. Ngoài ra BR-55…BR-57 cho đường dẫn, BR-63 cho việc mở một deck
+chứa card, và BR-93 cho danh tính tag.
+
+**UI states:** initial (chưa gõ) · debouncing · loading trang đầu · mixed ·
+decks-only · cards-only · no results · loading trang sau · lỗi trang sau · lỗi
+trang đầu
+
+---
+
 ## Điều đã cố ý không đặc tả
 
 | Thứ | Vì sao |
 |---|---|
 | Đưa deck con lên thành root deck | Cần quyết định scheduler mới; là tính năng riêng, không phải phép di chuyển (UC-09 A2) |
-| Tìm kiếm card (S1) | Should-have, chưa tới lượt |
+| ~~Tìm kiếm card (S1)~~ | **Đã vào MVP ở M99.23** — UC-12 và BR-182…BR-190 phủ tên deck, hai mặt card và tên tag. Ngoài phạm vi v1: fuzzy/semantic search, bỏ dấu, và tìm trong `example`/`hint`/`pronunciation` |
 | Thống kê / streak (S2) | Should-have — `study_answers` với `kind` đã đủ dữ liệu |
 | Đảo chiều card (S3) | Should-have |
 | ~~Export (nửa còn lại của N1)~~ | **Đã đặc tả ở M99.21** — UC-11 và BR-174…BR-181 chốt scope, encoder, filename, share và quyền riêng tư trước khi viết code, đúng điều kiện mà mục này đặt ra. Còn nice-to-have ngoài phạm vi export nội dung: backup/restore, sync và `.apkg`. |

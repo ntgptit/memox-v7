@@ -1,13 +1,13 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 418,
-  "totalSites": 412,
+  "scannedFiles": 439,
+  "totalSites": 414,
   "byElementKind": {
     "other": 291,
-    "background": 15,
+    "background": 14,
     "shadow": 1,
-    "border": 14,
-    "text": 69,
+    "border": 13,
+    "text": 73,
     "icon": 22
   },
   "bySourceKind": {
@@ -16,7 +16,7 @@
     "Colors-material": 5,
     "hardcoded-literal": 97,
     "opacity-modified-token": 11,
-    "theme-token": 152
+    "theme-token": 154
   },
   "sites": [
     {
@@ -3881,72 +3881,6 @@
       "resolved_value_dark": "#A8A7C4"
     },
     {
-      "file": "lib/features/deck/presentation/widgets/sections/deck_search_results_widget.dart",
-      "line": 58,
-      "widget_context": "DeckSearchResultsWidget",
-      "element_kind": "text",
-      "source_kind": "theme-token",
-      "expression": "context.colors.onSurfaceVariant",
-      "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#565C72",
-      "resolved_value_dark": "#A8A7C4"
-    },
-    {
-      "file": "lib/features/deck/presentation/widgets/sections/deck_search_results_widget.dart",
-      "line": 91,
-      "widget_context": "_DeckSearchRow",
-      "element_kind": "background",
-      "source_kind": "theme-token",
-      "expression": "context.colors.surface",
-      "token": "colorScheme.surface",
-      "resolved_value_light": "#FBFBFE",
-      "resolved_value_dark": "#1A1838"
-    },
-    {
-      "file": "lib/features/deck/presentation/widgets/sections/deck_search_results_widget.dart",
-      "line": 93,
-      "widget_context": "_DeckSearchRow",
-      "element_kind": "border",
-      "source_kind": "theme-token",
-      "expression": "context.semanticColors.borderSubtle",
-      "token": "semantic.borderSubtle",
-      "resolved_value_light": "#D2D2DD",
-      "resolved_value_dark": "#4C487A"
-    },
-    {
-      "file": "lib/features/deck/presentation/widgets/sections/deck_search_results_widget.dart",
-      "line": 106,
-      "widget_context": "_DeckSearchRow",
-      "element_kind": "icon",
-      "source_kind": "theme-token",
-      "expression": "context.colors.onSurfaceVariant",
-      "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#565C72",
-      "resolved_value_dark": "#A8A7C4"
-    },
-    {
-      "file": "lib/features/deck/presentation/widgets/sections/deck_search_results_widget.dart",
-      "line": 120,
-      "widget_context": "_DeckSearchRow",
-      "element_kind": "text",
-      "source_kind": "theme-token",
-      "expression": "context.colors.onSurfaceVariant",
-      "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#565C72",
-      "resolved_value_dark": "#A8A7C4"
-    },
-    {
-      "file": "lib/features/deck/presentation/widgets/sections/deck_search_results_widget.dart",
-      "line": 139,
-      "widget_context": "_DeckSearchRow",
-      "element_kind": "icon",
-      "source_kind": "theme-token",
-      "expression": "context.colors.onSurfaceVariant",
-      "token": "colorScheme.onSurfaceVariant",
-      "resolved_value_light": "#565C72",
-      "resolved_value_dark": "#A8A7C4"
-    },
-    {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
       "line": 95,
       "widget_context": "<top-level>",
@@ -4077,6 +4011,94 @@
       "token": "colorScheme.onSurfaceVariant",
       "resolved_value_light": "#565C72",
       "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/search/presentation/widgets/items/card_result_tile_widget.dart",
+      "line": 71,
+      "widget_context": "CardResultTileWidget",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/search/presentation/widgets/items/card_result_tile_widget.dart",
+      "line": 85,
+      "widget_context": "CardResultTileWidget",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/search/presentation/widgets/items/card_result_tile_widget.dart",
+      "line": 96,
+      "widget_context": "CardResultTileWidget",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/search/presentation/widgets/items/deck_result_tile_widget.dart",
+      "line": 44,
+      "widget_context": "DeckResultTileWidget",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/search/presentation/widgets/items/search_result_shell_widget.dart",
+      "line": 75,
+      "widget_context": "SearchResultShellWidget",
+      "element_kind": "icon",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/search/presentation/widgets/items/search_result_shell_widget.dart",
+      "line": 83,
+      "widget_context": "SearchResultShellWidget",
+      "element_kind": "icon",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/search/presentation/widgets/sections/search_group_header_widget.dart",
+      "line": 38,
+      "widget_context": "SearchGroupHeaderWidget",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/search/presentation/widgets/sections/search_page_footer_widget.dart",
+      "line": 70,
+      "widget_context": "SearchPageFooterWidget",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.error",
+      "token": "colorScheme.error",
+      "resolved_value_light": "#C02B3A",
+      "resolved_value_dark": "#F2808F"
     },
     {
       "file": "lib/features/study/presentation/widgets/items/match_tile_widget.dart",
