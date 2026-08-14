@@ -4,6 +4,14 @@ import '../tables/study.drift';
 
 -- Business queries for a study session.
 --
+-- **Every statement reading `cards` or `decks` here reads the ACTIVE tree**
+-- (BR-183): a card in Trash is not new, not due, and not part of any count the
+-- study entry shows. The queue statements read `study_queue_items` alone and
+-- are allowlisted in `query_inventory_test.dart` — BR-185 closes a session the
+-- moment its material is deleted, so a queue row can only belong to a session
+-- that is already `invalidated`. `nextQueueItem` is the exception it explains
+-- for itself.
+--
 -- **Two card sets, never mixed** (BR-142). `learning` takes cards that have not
 -- finished the chain; `reviewing` takes cards that finished it and have come
 -- due. The old single "study queue" of BR-22 is gone, and with it the padding
@@ -41,6 +49,7 @@ INNER JOIN decks d ON d.id = c.deck_id
 INNER JOIN card_study_states s ON s.card_id = c.id
 WHERE d.root_deck_id = :rootDeckId
   AND s.learned_at IS NULL
+  AND c.delete_batch_id IS NULL AND d.delete_batch_id IS NULL
 ORDER BY c.created_at ASC, c.id ASC
 LIMIT :limit;
 
@@ -61,6 +70,7 @@ INNER JOIN decks d ON d.id = c.deck_id
 INNER JOIN card_study_states s ON s.card_id = c.id
 WHERE d.root_deck_id = :rootDeckId
   AND s.learned_at IS NULL
+  AND c.delete_batch_id IS NULL AND d.delete_batch_id IS NULL
 ORDER BY c.created_at ASC, c.id ASC;
 
 -- Cards that finished the chain and have come due, for a `reviewing` session.
@@ -75,6 +85,7 @@ INNER JOIN card_study_states s ON s.card_id = c.id
 WHERE d.root_deck_id = :rootDeckId
   AND s.learned_at IS NOT NULL
   AND s.due_at <= :now
+  AND c.delete_batch_id IS NULL AND d.delete_batch_id IS NULL
 ORDER BY s.due_at ASC, c.id ASC
 LIMIT :limit;
 
@@ -109,7 +120,8 @@ SELECT
 FROM cards c
 INNER JOIN decks d ON d.id = c.deck_id
 INNER JOIN card_study_states s ON s.card_id = c.id
-WHERE d.root_deck_id = (SELECT root_deck_id FROM decks WHERE id = :deckId);
+WHERE d.root_deck_id = (SELECT root_deck_id FROM decks WHERE id = :deckId)
+  AND c.delete_batch_id IS NULL AND d.delete_batch_id IS NULL;
 
 -- The next card to serve (BR-23, BR-26).
 --
@@ -125,14 +137,24 @@ WHERE d.root_deck_id = (SELECT root_deck_id FROM decks WHERE id = :deckId);
 -- An empty result with rows still `pending` means every remaining card is
 -- waiting out that gap, which is not the same as the stage being finished. That
 -- is why `pendingInStage` exists separately.
+--
+-- **The card is checked for a tombstone here and nowhere else in the queue.**
+-- BR-185 closes any session touching a deleted card in the same transaction as
+-- the delete, so this can only fire if that closing failed — and BR-185 also
+-- says outright that the queue must never serve a hidden card. Serving is the
+-- one place worth paying for the second check; the other queue statements
+-- count and inspect rows of a session that has already been invalidated, and a
+-- join on each of them would be a weaker copy of the real mechanism.
 nextQueueItem:
-SELECT *
-FROM study_queue_items
-WHERE session_id = :sessionId
-  AND mode = :mode
-  AND status = 'pending'
-  AND available_at <= :cursor
-ORDER BY round ASC, position ASC, card_id ASC
+SELECT q.*
+FROM study_queue_items q
+INNER JOIN cards c ON c.id = q.card_id
+WHERE q.session_id = :sessionId
+  AND q.mode = :mode
+  AND q.status = 'pending'
+  AND q.available_at <= :cursor
+  AND c.delete_batch_id IS NULL
+ORDER BY q.round ASC, q.position ASC, q.card_id ASC
 LIMIT 1;
 
 -- How many rows of this stage are still pending, at any round.
@@ -229,6 +251,27 @@ SELECT DISTINCT card_id AS cardId
 FROM study_queue_items
 WHERE session_id = :sessionId;
 
+-- Open sessions a deletion invalidates (BR-185).
+--
+-- Two statements rather than one union, because the two reasons are genuinely
+-- different: a session opened *on* a deck that is going away, and a session
+-- whose queue holds a card that is going away. The second is what catches a
+-- review of a root deck when a sub-deck three levels down is deleted — the
+-- session's `deck_id` is the root there, and the root is not in the batch.
+--
+-- Neither reads `cards`/`decks`, so neither needs the tombstone predicate: they
+-- take the id sets the deletion has already decided on, and they run *before*
+-- the marking so the ids still describe live rows.
+openSessionIdsForDecks:
+SELECT id FROM study_sessions
+WHERE status = 'in_progress' AND deck_id IN :deckIds;
+
+openSessionIdsForCards:
+SELECT DISTINCT q.session_id AS sessionId
+FROM study_queue_items q
+INNER JOIN study_sessions s ON s.id = q.session_id
+WHERE s.status = 'in_progress' AND q.card_id IN :cardIds;
+
 -- Sessions left open by an earlier study day (BR-103).
 staleOpenSessions:
 SELECT *
@@ -263,6 +306,7 @@ INNER JOIN card_study_states s ON s.card_id = c.id
 WHERE d.root_deck_id = :rootDeckId
   AND s.learned_at IS NOT NULL
   AND s.due_at <= :now
+  AND c.delete_batch_id IS NULL AND d.delete_batch_id IS NULL
 ORDER BY s.due_at ASC, c.id ASC;
 
 dueCountPerRootDeck:
@@ -271,6 +315,7 @@ FROM cards c
 INNER JOIN decks d ON d.id = c.deck_id
 INNER JOIN card_study_states s ON s.card_id = c.id
 WHERE s.learned_at IS NOT NULL AND s.due_at <= :now
+  AND c.delete_batch_id IS NULL AND d.delete_batch_id IS NULL
 GROUP BY d.root_deck_id
 ORDER BY d.root_deck_id ASC;
 
@@ -295,6 +340,6 @@ UPDATE decks SET first_answered_at = :firstAnsweredAt
 WHERE id = (
     SELECT d.root_deck_id FROM cards c
     INNER JOIN decks d ON d.id = c.deck_id
-    WHERE c.id = :cardId
+    WHERE c.id = :cardId AND c.delete_batch_id IS NULL
   )
   AND first_answered_at IS NULL;

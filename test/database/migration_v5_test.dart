@@ -71,7 +71,11 @@ void main() {
     );
 
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 5);
+    // The target is the app's CURRENT schema, not a literal 5. A later
+    // version changing a table this test seeds is exactly what has to fail
+    // here, and pinning the literal made v8's `end_reason` widening compare
+    // against a shape the app no longer builds.
+    await verifier.migrateAndValidate(db, db.schemaVersion);
     return db;
   }
 

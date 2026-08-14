@@ -16,6 +16,7 @@ import 'config/env_config.dart';
 import 'config/env_config_provider.dart';
 import 'error_screen_widget.dart';
 import 'startup/fixture_seeder_widget.dart';
+import 'startup/trash_sweeper_widget.dart';
 
 /// Restores the error handlers that were installed before
 /// [installErrorHandlers] replaced them.
@@ -142,9 +143,15 @@ Widget buildRootWidget(
   // `MemoxApp.router` documents: a `GoRouter` carries navigation history, so
   // one shared instance lets a route entered by one test decide where the next
   // one starts. Production passes nothing and gets the single `appRouter`.
-  child: shouldSeedFixtures
-      ? FixtureSeederWidget(child: MemoxApp(router: router))
-      : MemoxApp(router: router),
+  //
+  // The retention sweep wraps the app on **every** build, unlike the fixture
+  // seed: BR-190 is a rule about the user's own data, not a development
+  // convenience, and it has to run in production first of all.
+  child: TrashSweeperWidget(
+    child: shouldSeedFixtures
+        ? FixtureSeederWidget(child: MemoxApp(router: router))
+        : MemoxApp(router: router),
+  ),
 );
 
 /// Installs the three error boundaries and returns a callback that puts the

@@ -1,3 +1,5 @@
+import 'trash.drift';
+
 -- The deck tree.
 --
 -- Schema lives in SQL, not in Dart table classes (AD-02): drift_dev type-checks
@@ -61,6 +63,20 @@ CREATE TABLE decks (
     source_template_id TEXT NULL,
     source_template_version INTEGER NULL,
 
+    -- NULL is a live deck; anything else is a tombstone belonging to that
+    -- deletion (BR-182, BR-184, AD-21).
+    --
+    -- **One column, and it is the whole exclusion strategy.** Every active read
+    -- says `delete_batch_id IS NULL`; `query_inventory_test.dart` fails a
+    -- statement that reads this table without saying it or without an
+    -- allowlisted reason. Deriving "deleted" from an ancestor instead would put
+    -- a recursive walk inside the app's hottest query.
+    --
+    -- The cascade is what makes purge one statement: deleting the batch row
+    -- takes the deck rows with it, and the deck's own cascades take the rest
+    -- (BR-191).
+    delete_batch_id TEXT NULL REFERENCES delete_batches (id) ON DELETE CASCADE,
+
     -- UTC. A due_at compared in the wrong zone makes a card due a day early or
     -- late, and only for users who cross a time zone — almost never caught in
     -- development.
@@ -79,3 +95,7 @@ CREATE TABLE decks (
 CREATE INDEX idx_decks_parent_created ON decks (parent_deck_id, created_at, id);
 
 CREATE INDEX idx_decks_root_created ON decks (root_deck_id, created_at, id);
+
+-- Restore and purge both select "every row of this batch", and that is the only
+-- read this index serves; the active path never looks a batch up by id.
+CREATE INDEX idx_decks_delete_batch ON decks (delete_batch_id);

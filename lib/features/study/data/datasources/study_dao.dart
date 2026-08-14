@@ -273,6 +273,25 @@ final class StudyDao {
           ))
           .get();
 
+  /// Open sessions a deletion is about to invalidate (BR-185).
+  ///
+  /// Two reads rather than one, and both are array-bound so a subtree of two
+  /// hundred decks is one statement per side rather than two hundred.
+  Future<Set<String>> openSessionIdsTouching({
+    required List<String> deckIds,
+    required List<String> cardIds,
+  }) async {
+    final ids = <String>{};
+    if (deckIds.isNotEmpty) {
+      ids.addAll(await _db.openSessionIdsForDecks(deckIds).get());
+    }
+    if (cardIds.isNotEmpty) {
+      ids.addAll(await _db.openSessionIdsForCards(cardIds).get());
+    }
+
+    return ids;
+  }
+
   Future<void> insertAnswer(StudyAnswersCompanion answer) =>
       _db.into(_db.studyAnswers).insert(answer);
 

@@ -47,6 +47,11 @@ abstract final class RoutePaths {
   /// is `/decks/<id>/cards/import` (UC-10, wireframe M4.12).
   static const String cardImportRelative = 'import';
 
+  /// Trash, **relative** to [decks] so the full location is `/trash` inside the
+  /// Library branch — the bottom bar stays and Back returns to the deck list
+  /// (UC-12, AD-21).
+  static const String trashRelative = 'trash';
+
   /// The study branch. A real path rather than a sub-path of `/` so that a
   /// deep link can open the app directly on the Study tab.
   static const String study = '/study';

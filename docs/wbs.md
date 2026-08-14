@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.22 (five-way PR host-test sharding follow-up) |
+| **Updated by task** | M99.23 (Trash và restore v1 — soft-delete, batch, retention 30 ngày) |
 | **Last updated** | 2026-08-13 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -9340,6 +9340,106 @@ thế không đổi bố cục.
   deterministic; prompt guard trên toàn bộ prompt sets; PR run thật chứng minh
   aggregate check và đo lại wall-clock.
 - **Checklist phases:** 19, meta
+
+### M99.23 · Trash và restore v1 — soft-delete thay cho delete cứng
+
+- **Status:** **in review** — phase 1 (docs) xong: BR-182…BR-193, UC-12, AD-21,
+  `delete_batches` + hai cột tombstone + bất biến 31…35 + viết lại bất biến
+  1…5/15/29, wireframe M99.23, 5Why. Phase 2 (schema) xong: v8 với
+  `drift_schema_v8.json`, `_upgradeToV8` (bảng + hai cột + ba index + rebuild
+  `study_sessions` cho `content_deleted`), `migration_v8_test`. Phase 3 (query)
+  xong: loại trừ tombstone trong toàn bộ `queries/*.drift`, `queries/trash.drift`,
+  `query_inventory_test` với allowlist hai statement có lý do và một pass
+  alias-level ghi lại trong chính test. Phase 4 (data) xong: soft-delete một
+  transaction trong Deck/Card, `ContentTrashRepository`, restore/undo/purge,
+  `invalidateSessionsForDeletedContent`. Phase 5 (presentation) xong: slice
+  `lib/features/trash/`, route `/trash` trong branch Library + entry trên app
+  bar, Undo snackbar cho xoá một item, 43 key ARB EN/VI, Widgetbook
+  `TrashScreen` 5 scenario. Phase 6 (review) một nửa: UI/UX audit đã chạy và
+  các finding P0/P1 đã sửa; **architecture/logic audit agent chết giữa chừng vì
+  session limit**, nên pass đó do coordinator tự làm, hẹp hơn — xem Known gap.
+- **Goal:** Thay delete cứng của card/deck bằng soft-delete giữ nguyên nội dung,
+  study state và history tới khi purge, cộng một màn Trash cho khôi phục có
+  target và xoá vĩnh viễn an toàn.
+- **Scope:** BR-182…BR-193, UC-12, AD-21; schema v8 (`delete_batches`,
+  `decks.delete_batch_id`, `cards.delete_batch_id`, `end_reason =
+  content_deleted`); loại trừ tombstone trong mọi query active của
+  deck/card/study/tag cộng một guard inventory; transaction soft-delete /
+  undo / restore / purge; feature slice `lib/features/trash/`; route `/trash`
+  trong branch Library và entry trên app bar danh sách root; l10n EN/VI.
+- **Out of scope:** cloud backup và export toàn database; Trash cho tag; khôi
+  phục theo từng hàng bên trong một batch; đổi `scheduler_reset` thành
+  `scheduler_changed` (nợ kỹ thuật riêng, cùng chạm `CHECK` của `end_reason`
+  nhưng là quyết định của task khác).
+- **Editable documents:** `docs/business-rules.md`, `docs/use-cases.md`,
+  `docs/architecture.md`, `docs/data-model.md`, `docs/wbs.md`,
+  `docs/wireframes/m99-23-trash-restore.md`,
+  `docs/reviews/trash-restore-v1-5why.md`
+- **5Why:** ghi đầy đủ ở `docs/reviews/trash-restore-v1-5why.md` — năm chuỗi cho
+  accidental loss, soft-delete lifecycle, explicit restore target,
+  retention/purge và subtree consistency.
+- **Output:** BR-182…BR-193; UC-12; AD-21; bảng `delete_batches` + hai cột
+  tombstone + bất biến 31…35 và bản viết lại của 1…5/15/29; migration v8 với
+  snapshot `drift_schema_v8.json`; `queries/trash.drift`; feature slice Trash
+  đủ domain/data/di/presentation; test SQLite bảng quyết định, migration,
+  controller/widget/router và cross-feature leak.
+- **Acceptance criteria:**
+  - [x] Xoá card/deck là một transaction soft-delete; không hàng nào bị xoá cứng
+        và mọi descendant đang active mang cùng batch, cùng `deleted_at`.
+  - [x] Descendant đã ở Trash từ batch trước giữ tombstone cũ; restore batch cha
+        không hồi sinh chúng.
+  - [x] Không query active nào rò tombstone: guard inventory quét `.drift` và
+        allowlist có lý do là thứ duy nhất được miễn; `trash_leak_test` chứng
+        minh nửa ngữ nghĩa trên repository thật.
+  - [x] Phiên `in_progress` chạm item vừa xoá bị đóng cùng transaction với
+        `end_reason = content_deleted`.
+  - [x] `content_type` của parent non-root tự về `unset` khi direct child active
+        cuối cùng biến mất; root giữ `deck`.
+  - [x] Restore hỏi target và dùng lại đúng eligibility của move; target `unset`
+        được set trong cùng transaction; restore sai bị từ chối có kiểu.
+  - [x] Undo đưa batch vừa xoá về đúng chỗ cũ, và bị từ chối có lý do khi chỗ cũ
+        hết hợp lệ — cả `ConflictFailure` lẫn `NotFoundFailure` của vị trí cũ.
+  - [x] Biên đúng 30 ngày là eligible; auto-purge idempotent ở startup, resume
+        và mở Trash, với clock được inject.
+  - [x] Purge xoá cứng batch và cascade, không chạm batch khác, rollback toàn bộ
+        khi lỗi.
+  - [x] Multi-select tách theo loại item; purge vĩnh viễn có xác nhận mạnh nêu
+        đúng số lượng.
+  - [x] Bất biến trả về 0 dòng trên database thật; migration v6/v7/v8 xanh;
+        host gate xanh.
+  - [ ] Hợp đồng geometry G1…G8 và responsive R1…R6 có assertion `getRect` /
+        `meetsGuideline` riêng — **chưa có**, xem Known gap.
+- **Dependencies:** M99.15 (BR-163), M99.16 (v7), M4.9a, M4.11
+- **Tests required:** SQLite thật cho bảng quyết định soft-delete/restore/purge
+  gồm depth 10, batch trộn, biên 30 ngày và rollback; migration v7 → v8 với dữ
+  liệu cũ mặc định active; invariant 31…35 hai chiều; controller/widget/router
+  cho mọi state của UC-12; cross-feature chứng minh Progress/Search/Study/Export
+  không rò Trash. **Emulator IT hoãn** — không chạy trong task này.
+- **Known gap (không đóng ở task này):** ba mục, tất cả đến từ UI/UX audit và
+  được ghi lại thay vì sửa vội.
+  - **Không có test geometry/semantics nào cho Trash.** Wireframe chốt G1…G8 và
+    R1…R6, và hiện không có `getRect`, không golden, không `meetsGuideline`,
+    không test 320dp@2.0 hay VI/dark cho màn này. Hai lỗi tràn thật (thanh chọn
+    ở 360dp@2.0, hàng ở ngày cuối) đã sửa bằng `Wrap` nhưng **không có test
+    khoá lại**, nên chúng có thể quay lại im lặng.
+  - **Sheet target không có state `restoring` / `validation conflict`.** Sheet
+    đóng trước khi lệnh chạy, nên W3-8 và W3-12 không tồn tại: từ chối được báo
+    bằng snackbar trên màn Trash và lựa chọn target đã mất, thay vì một dải lỗi
+    trong sheet với `Try again` (UC-12 E2). G6 cũng không đo được vì state 8
+    không tồn tại trong sheet.
+  - **Lối vào Trash biến mất khi Library đang tải hoặc lỗi** — action nằm trong
+    nhánh `data` của `deck_list_screen.dart`, còn T2 nói entry luôn hiện. Đúng
+    lúc Library đọc lỗi là lúc bề mặt cứu dữ liệu không với tới được.
+- **Known gap (review, không phải code):** **architecture/logic audit agent
+  dừng giữa chừng vì session limit và không trả finding nào.** Coordinator đã
+  tự chạy phần đo được: guard inventory statement-level, một pass alias-level
+  thủ công trên toàn bộ `queries/` (ghi lại trong `query_inventory_test.dart` —
+  bốn alias không mang vị từ đều an toàn theo bất biến 31/32), bất biến 22 câu
+  trên database thật sau delete/restore/purge/sweep, và migration v7 → v8. Cái
+  **chưa** có là một cặp mắt độc lập trên đúng những chỗ prompt gọi là rủi ro
+  cao: chuỗi lifecycle trông-như-đồng-thời, và độ sâu 10 với batch trộn ngoài
+  các case đã viết. Nên chạy lại review đó trước khi coi phase 6 là xong.
+- **Checklist phases:** 10, 11, 14, 15
 
 ## Blocker
 

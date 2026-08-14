@@ -7,8 +7,8 @@
 | **Scope** | Bảng, cột, index, quan hệ, query bất biến. Ngoài phạm vi: SQL runtime (`lib/core/database/`, chưa tồn tại) |
 | **Source of truth for** | Schema · cột và kiểu · index · query bất biến · thứ tự migration |
 | **Depends on** | `document-conventions.md`, `architecture.md`, `business-rules.md` |
-| **Updated by task** | Bất biến 30 (khoá scheduler theo BR-13) và ai ghi `first_answered_at` — kể cả backfill v7; ma trận `end_reason` nhận thêm BR-164 |
-| **Last updated** | 2026-08-12 |
+| **Updated by task** | M99.23 — Trash: bảng `delete_batches`, cột `delete_batch_id` trên `decks`/`cards`, `end_reason = content_deleted`, bất biến 31…35, và bất biến 1…5/15/29 đo trên hàng đang active |
+| **Last updated** | 2026-08-13 |
 
 Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; SQL thật nằm ở
 `lib/core/database/tables/`, hiện ở **schema v4**.
@@ -111,6 +111,7 @@ deck_templates (asset JSON ở MVP)
 | `first_answered_at` | DATETIME NULL | NULL = chưa thẻ nào hoàn tất chuỗi học mới ở generation hiện tại → scheduler mở khoá (BR-12). Được đặt bởi chính lần hoàn tất đầu tiên, cùng transaction (BR-13, BR-144); chỉ Reset đưa về NULL (BR-44). Cột có từ v1 nhưng không bản nào ghi nó cho tới khi BR-13 có code, nên migration v7 điền lại bằng `MIN(learned_at)` của cây cho root đã học xong ít nhất một thẻ |
 | `source_template_id` | TEXT NULL | NULL = deck tự tạo (BR-34) |
 | `source_template_version` | INTEGER NULL | version tại thời điểm sao chép |
+| `delete_batch_id` | TEXT NULL | NULL = deck đang active. Khác NULL = tombstone thuộc batch đó (BR-182, BR-184). → `delete_batches(id)` ON DELETE CASCADE |
 | `created_at` | DATETIME NOT NULL | UTC |
 | `updated_at` | DATETIME NOT NULL | UTC |
 
@@ -200,6 +201,7 @@ trả lời được mọi lookup cũ, giữ cả hai chỉ khiến mỗi insert
 | `example` | TEXT NULL | Tuỳ chọn (BR-95) |
 | `hint` | TEXT NULL | Tuỳ chọn (BR-95) |
 | `pronunciation` | TEXT NULL | Tuỳ chọn (BR-95) |
+| `delete_batch_id` | TEXT NULL | NULL = card đang active. Khác NULL = tombstone thuộc batch đó (BR-182, BR-184). → `delete_batches(id)` ON DELETE CASCADE |
 | `created_at` | DATETIME NOT NULL | UTC |
 | `updated_at` | DATETIME NOT NULL | UTC |
 
@@ -359,7 +361,7 @@ bảng đầu tiên cần nhìn khi bàn về kích thước DB.
 | `session_kind` | TEXT NOT NULL | `learning` \| `reviewing` (BR-142) |
 | `current_mode` | TEXT NOT NULL | stage đang chạy: `browse` \| `self_assess` \| `match` \| `guess` \| `recall` \| `fill` (BR-108, BR-98). Phiên `reviewing` chỉ có một giá trị suốt phiên |
 | `status` | TEXT NOT NULL | `in_progress` \| `completed` \| `abandoned` \| `invalidated` \| `failed` (BR-79) |
-| `end_reason` | TEXT NULL | `user_exit` \| `scheduler_reset` \| `stale_generation` \| `persistence_error` \| `interrupted` (BR-80). NULL khi `in_progress` hoặc `completed` |
+| `end_reason` | TEXT NULL | `user_exit` \| `scheduler_reset` \| `stale_generation` \| `persistence_error` \| `interrupted` \| `content_deleted` (BR-80, BR-185). NULL khi `in_progress` hoặc `completed` |
 | `cursor` | INTEGER NOT NULL DEFAULT 0 | số lượt đã phục vụ trong phiên; nền của BR-26 |
 | `card_limit` | INTEGER NOT NULL | số thẻ tối đa của phiên, chốt lúc mở (BR-24, BR-139). Mặc định 20 |
 | `started_at` | DATETIME NOT NULL | UTC |
@@ -375,6 +377,7 @@ Ma trận `status` × `end_reason` hợp lệ:
 | `abandoned` | `interrupted` | phiên của ngày học trước còn `in_progress` khi mở app (BR-103) |
 | `invalidated` | `scheduler_reset` | scheduler của root bị ghi lại dưới chân phiên: reset khi phiên đang mở (BR-83), hoặc đổi scheduler khi chưa khoá (BR-164) |
 | `invalidated` | `stale_generation` | phiên generation cũ cố ghi lượt học (BR-84) |
+| `invalidated` | `content_deleted` | deck hoặc card mà phiên đang chạy trên đó bị chuyển vào Trash (BR-185) |
 | `failed` | `persistence_error` | lỗi không thể tiếp tục (BR-85) |
 
 Mọi tổ hợp khác là dữ liệu sai.
@@ -506,6 +509,36 @@ listing, hay tài liệu.
 
 ---
 
+## `delete_batches`
+
+Một hàng cho mỗi **lần xoá** của người dùng (BR-182). Hàng của `decks`/`cards`
+không bị chép đi đâu cả — chúng chỉ nhận `delete_batch_id`.
+
+| Cột | Kiểu | Ghi chú |
+|---|---|---|
+| `id` | TEXT PK | UUID sinh phía client (AD-03) |
+| `item_type` | TEXT NOT NULL | `'card'` \| `'deck'` — loại của **item root**, tức thứ người dùng đã chạm (BR-192) |
+| `root_item_id` | TEXT NOT NULL | id của card hoặc deck đó. Không phải FK: hai bảng đích, và cascade đã đi theo chiều ngược lại |
+| `deleted_at` | DATETIME NOT NULL | UTC. Mốc duy nhất của retention 30 ngày (BR-190) |
+| `owner_id` | TEXT NULL | NULL = local profile (AD-03) |
+
+```sql
+CREATE INDEX idx_delete_batches_deleted ON delete_batches (deleted_at, id);
+CREATE INDEX idx_decks_delete_batch ON decks (delete_batch_id);
+CREATE INDEX idx_cards_delete_batch ON cards (delete_batch_id);
+```
+
+**`deleted_at` sống ở đây và chỉ ở đây.** Đặt nó lên hàng nữa là hai nguồn sự
+thật cho một sự kiện, và không gì bắt chúng bằng nhau; `delete_batch_id IS NULL`
+đã trả lời trọn vẹn câu hỏi mà mọi query active cần hỏi.
+
+**Purge là `DELETE FROM delete_batches`,** và FK `ON DELETE CASCADE` từ
+`decks.delete_batch_id`/`cards.delete_batch_id` xoá hàng của batch; cascade sẵn
+có của `cards.deck_id`, `card_study_states`, `study_answers`, `study_queue_items`
+và `card_tags` lo phần còn lại (BR-191). Điều kiện tiên quyết của BR-191 —
+không descendant nào thuộc batch chưa eligible — phải được kiểm **trước** khi
+xoá, vì cascade theo `parent_deck_id` không biết batch là gì.
+
 ## Bất biến — phải kiểm tra được bằng query
 
 Mỗi query dưới đây **phải luôn trả về 0 dòng**. Chúng là đặc tả cho phần kiểm tra
@@ -513,42 +546,54 @@ dữ liệu ở Phase 11, và là nguồn của các trường hợp trong valid
 
 ### Cây deck
 
+**Từ v8, sáu câu đầu và câu 15 đo `delete_batch_id IS NULL`.** Chúng nói về cây
+người dùng đang nhìn thấy, và một tombstone không phải nội dung: không lọc thì
+invariant 2 báo vi phạm cho mọi deck vừa được dọn rỗng đúng BR-186, và invariant
+29 im lặng cho đúng những deck lẽ ra phải `unset`.
+
 ```sql
 -- 1. Root deck có card trực tiếp (BR-58)
 SELECT c.id FROM cards c
 JOIN decks d ON d.id = c.deck_id
-WHERE d.parent_deck_id IS NULL;
+WHERE d.parent_deck_id IS NULL AND c.delete_batch_id IS NULL;
 
 -- 2. content_type = 'unset' nhưng đã có nội dung (BR-60, BR-62)
 SELECT d.id FROM decks d
-WHERE d.content_type = 'unset'
-  AND (EXISTS (SELECT 1 FROM cards c WHERE c.deck_id = d.id)
-    OR EXISTS (SELECT 1 FROM decks s WHERE s.parent_deck_id = d.id));
+WHERE d.content_type = 'unset' AND d.delete_batch_id IS NULL
+  AND (EXISTS (SELECT 1 FROM cards c
+               WHERE c.deck_id = d.id AND c.delete_batch_id IS NULL)
+    OR EXISTS (SELECT 1 FROM decks s
+               WHERE s.parent_deck_id = d.id AND s.delete_batch_id IS NULL));
 
--- 29. Sub-deck đã rỗng nhưng vẫn mang type (BR-163)
+-- 29. Sub-deck đã rỗng nhưng vẫn mang type (BR-163, BR-186)
 --     Chiều ngược của invariant 2: 2 bắt `unset` còn nội dung, 29 bắt type còn
 --     lại sau khi nội dung đã đi hết. Root không tham gia — root luôn `deck`
 --     (BR-58), và một root rỗng là trạng thái bình thường.
 SELECT d.id
 FROM decks d
 WHERE d.parent_deck_id IS NOT NULL
+  AND d.delete_batch_id IS NULL
   AND d.content_type IN ('card', 'deck')
   AND NOT EXISTS (
-    SELECT 1 FROM cards c WHERE c.deck_id = d.id
+    SELECT 1 FROM cards c
+    WHERE c.deck_id = d.id AND c.delete_batch_id IS NULL
   )
   AND NOT EXISTS (
-    SELECT 1 FROM decks child WHERE child.parent_deck_id = d.id
+    SELECT 1 FROM decks child
+    WHERE child.parent_deck_id = d.id AND child.delete_batch_id IS NULL
   );
 
 -- 3. content_type = 'card' nhưng có deck con (BR-63)
 SELECT d.id FROM decks d
-WHERE d.content_type = 'card'
-  AND EXISTS (SELECT 1 FROM decks s WHERE s.parent_deck_id = d.id);
+WHERE d.content_type = 'card' AND d.delete_batch_id IS NULL
+  AND EXISTS (SELECT 1 FROM decks s
+              WHERE s.parent_deck_id = d.id AND s.delete_batch_id IS NULL);
 
 -- 4. content_type = 'deck' nhưng có card trực tiếp (BR-64)
 SELECT d.id FROM decks d
-WHERE d.content_type = 'deck'
-  AND EXISTS (SELECT 1 FROM cards c WHERE c.deck_id = d.id);
+WHERE d.content_type = 'deck' AND d.delete_batch_id IS NULL
+  AND EXISTS (SELECT 1 FROM cards c
+              WHERE c.deck_id = d.id AND c.delete_batch_id IS NULL);
 
 -- 5. Root deck không mang content_type = 'deck'
 SELECT d.id FROM decks d
@@ -576,15 +621,61 @@ WITH RECURSIVE up(start_id, node_id, depth) AS (
 SELECT DISTINCT start_id FROM up WHERE node_id = start_id;
 
 -- 15. Deck sâu hơn 10 cấp (BR-55)
---     Đi xuống từ mỗi root, root là cấp 1.
+--     Đi xuống từ mỗi root, root là cấp 1. Chỉ hàng đang active: một subtree
+--     đã nằm trong Trash không được tính vào giới hạn của cây đang sống, và
+--     restore mới là nơi độ sâu của nó được thẩm định lại (BR-187).
 WITH RECURSIVE levels(id, depth) AS (
-  SELECT id, 1 FROM decks WHERE parent_deck_id IS NULL
+  SELECT id, 1 FROM decks
+  WHERE parent_deck_id IS NULL AND delete_batch_id IS NULL
   UNION ALL
   SELECT d.id, l.depth + 1
   FROM decks d JOIN levels l ON d.parent_deck_id = l.id
-  WHERE l.depth < 64
+  WHERE l.depth < 64 AND d.delete_batch_id IS NULL
 )
 SELECT id FROM levels WHERE depth > 10;
+
+-- 31. Card đang active nằm trong một deck đã xoá (BR-182, BR-184)
+--     Xoá một deck đánh dấu mọi descendant đang active, và restore luôn gắn
+--     item vào một target đang active — nên không đường ghi nào tạo ra được
+--     hàng này. Đây là bất biến mà toàn bộ chiến lược loại trừ một cột đứng
+--     trên: nếu nó vỡ, "hàng còn sống ⇔ delete_batch_id IS NULL" không còn đúng
+--     và mọi query active bắt đầu nói dối.
+SELECT c.id FROM cards c
+JOIN decks d ON d.id = c.deck_id
+WHERE c.delete_batch_id IS NULL AND d.delete_batch_id IS NOT NULL;
+
+-- 32. Deck đang active nằm dưới một deck đã xoá (BR-182, BR-184)
+SELECT d.id FROM decks d
+JOIN decks p ON p.id = d.parent_deck_id
+WHERE d.delete_batch_id IS NULL AND p.delete_batch_id IS NOT NULL;
+
+-- 33. Batch không còn hàng nào (BR-191)
+--     Purge xoá batch và để cascade dọn hàng, nên chiều ngược lại — hàng biến
+--     mất mà batch còn — chỉ xảy ra khi một cascade theo parent_deck_id đã đi
+--     xuyên qua một batch mà điều kiện tiên quyết của BR-191 lẽ ra phải chặn.
+SELECT b.id FROM delete_batches b
+WHERE NOT EXISTS (SELECT 1 FROM decks d WHERE d.delete_batch_id = b.id)
+  AND NOT EXISTS (SELECT 1 FROM cards c WHERE c.delete_batch_id = b.id);
+
+-- 34. Tombstone bị xoá SAU tổ tiên đã xoá của nó (BR-184)
+--     Descendant luôn bị đánh dấu trước hoặc cùng lúc với tổ tiên, vì không
+--     thao tác nào chạm tới được thứ đã bị ẩn. Thứ tự đó là cái làm cho
+--     "batch eligible thì mọi descendant của nó cũng eligible" đúng, và BR-191
+--     dựa vào điều đó.
+SELECT d.id FROM decks d
+JOIN decks p ON p.id = d.parent_deck_id
+JOIN delete_batches db ON db.id = d.delete_batch_id
+JOIN delete_batches pb ON pb.id = p.delete_batch_id
+WHERE db.deleted_at > pb.deleted_at;
+
+-- 35. Batch không trỏ về một item root mang chính batch đó (BR-182)
+SELECT b.id FROM delete_batches b
+WHERE (b.item_type = 'deck' AND NOT EXISTS (
+         SELECT 1 FROM decks d
+         WHERE d.id = b.root_item_id AND d.delete_batch_id = b.id))
+   OR (b.item_type = 'card' AND NOT EXISTS (
+         SELECT 1 FROM cards c
+         WHERE c.id = b.root_item_id AND c.delete_batch_id = b.id));
 ```
 
 Query 8 và 15 giới hạn `depth < 64` để bản thân chúng không thành vòng lặp vô
@@ -645,7 +736,8 @@ WHERE NOT (
      (status = 'in_progress' AND end_reason IS NULL)
   OR (status = 'completed'   AND end_reason IS NULL)
   OR (status = 'abandoned'   AND end_reason IN ('user_exit','interrupted'))
-  OR (status = 'invalidated' AND end_reason IN ('scheduler_reset','stale_generation'))
+  OR (status = 'invalidated'
+      AND end_reason IN ('scheduler_reset','stale_generation','content_deleted'))
   OR (status = 'failed'      AND end_reason = 'persistence_error')
 );
 
@@ -795,6 +887,9 @@ và cờ — xem `docs/wireframes/m4-11-card-management.md`.
 | 3 | Cột `cards.front_folded`, `back_folded` + backfill bằng Dart — sửa search không khớp chữ hoa non-ASCII |
 | 4 | Đổi tên `card_review_states`→`card_study_states`, `review_history`→`study_answers` và sáu cột (M5.0l). Không thêm, không xoá, không đụng dòng nào |
 | 5 | Toàn bộ schema Study sau brainstorm: `learned_at`, `session_kind`, `current_mode`, `cursor`, `card_limit`, `mode`, `outcome_reason`, `comparison_version`, `used_hint`, `study_config`; bảng `study_queue_items`, `app_settings`; giá trị `learning` cho `kind` và `interrupted` cho `end_reason` (M5.0s) |
+| 6 | Data-only: sub-deck rỗng nhưng còn mang type về `'unset'` — chính vị từ của bất biến 29 dùng làm `UPDATE` (M99.15, BR-163) |
+| 7 | Data-only: điền `decks.first_answered_at` bằng `MIN(learned_at)` của cây cho root đã học xong ít nhất một thẻ (M99.16, BR-13) |
+| 8 | Trash: bảng `delete_batches`; cột `decks.delete_batch_id`, `cards.delete_batch_id` + ba index; nới `CHECK` của `study_sessions.end_reason` để nhận `content_deleted` (M99.23, BR-182…BR-193) |
 | _sau_ | Bảng `card_media` |
 | _sau_ | Cột sync (`is_pending_sync`, `version`) khi có backend (AD-03) |
 | _sau_ | `deck_templates` thành bảng runtime nếu tải template từ server |

@@ -248,6 +248,26 @@ final class FakeCardRepository extends FakeCardBulkRepository
     if (failure != null) throw failure;
   }
 
+  /// Batch ids handed back by the Undo-aware delete, one per card (BR-182).
+  /// Derived from the id so a test can assert which card a batch belongs to
+  /// without the fake keeping a second map in step with `deletes`.
+  @override
+  Future<String> deleteCardForUndo(String cardId) async {
+    await deleteCard(cardId);
+
+    return 'batch-$cardId';
+  }
+
+  @override
+  Future<List<String>> deleteCardsForUndo(List<String> cardIds) async {
+    final batchIds = <String>[];
+    for (final cardId in cardIds) {
+      batchIds.add(await deleteCardForUndo(cardId));
+    }
+
+    return batchIds;
+  }
+
   /// Recorded flag writes: (cardId, isFlagged).
   final List<({String id, bool isFlagged})> flagWrites =
       <({String id, bool isFlagged})>[];

@@ -40,7 +40,7 @@ void main() {
     expect(rows.single['foreign_keys'], 1);
   });
 
-  test('exactly the seven tables data-model.md specifies', () async {
+  test('exactly the ten tables data-model.md specifies', () async {
     final db = openTestDatabase();
     final rows = await pragma(
       db,
@@ -54,6 +54,7 @@ void main() {
       'card_tags',
       'cards',
       'decks',
+      'delete_batches',
       'study_answers',
       'study_queue_items',
       'study_sessions',
@@ -78,6 +79,7 @@ void main() {
         'study_config',
         'source_template_id',
         'source_template_version',
+        'delete_batch_id',
         'created_at',
         'updated_at',
       ],
@@ -92,6 +94,7 @@ void main() {
         'example',
         'hint',
         'pronunciation',
+        'delete_batch_id',
         'created_at',
         'updated_at',
       ],
@@ -238,9 +241,13 @@ void main() {
 
     expect(await keysOf('decks'), <String>{
       'parent_deck_id->decks.id ON DELETE CASCADE',
+      // Purge is `DELETE FROM delete_batches`; this cascade is what turns that
+      // one statement into the removal of every row of the batch (BR-191).
+      'delete_batch_id->delete_batches.id ON DELETE CASCADE',
     });
     expect(await keysOf('cards'), <String>{
       'deck_id->decks.id ON DELETE CASCADE',
+      'delete_batch_id->delete_batches.id ON DELETE CASCADE',
     });
     expect(await keysOf('card_study_states'), <String>{
       'card_id->cards.id ON DELETE CASCADE',
@@ -276,8 +283,11 @@ void main() {
       'idx_card_study_states_due',
       'idx_card_tags_tag',
       'idx_cards_deck_created',
+      'idx_cards_delete_batch',
+      'idx_decks_delete_batch',
       'idx_decks_parent_created',
       'idx_decks_root_created',
+      'idx_delete_batches_deleted',
       'idx_study_answers_card',
       'idx_study_answers_session',
       'idx_study_queue_serving',

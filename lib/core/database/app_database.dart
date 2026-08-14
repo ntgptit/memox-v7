@@ -4,6 +4,7 @@ import 'connection.dart';
 
 part 'app_database.g.dart';
 part 'app_database_migrations.dart';
+part 'app_database_migrations_v8.dart';
 
 /// The app's database.
 ///
@@ -13,6 +14,7 @@ part 'app_database_migrations.dart';
 /// putting them in SQL would make changing them a migration.
 @DriftDatabase(
   include: <String>{
+    'tables/trash.drift',
     'tables/decks.drift',
     'tables/cards.drift',
     'tables/tags.drift',
@@ -21,6 +23,7 @@ part 'app_database_migrations.dart';
     'queries/deck.drift',
     'queries/card.drift',
     'queries/tag.drift',
+    'queries/trash.drift',
   },
 )
 class AppDatabase extends _$AppDatabase {
@@ -31,7 +34,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.open() : super(openAppDatabaseConnection());
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -150,6 +153,19 @@ class AppDatabase extends _$AppDatabase {
       // Last, so it runs on top of whatever the v1…v6 steps just produced.
       if (from < 7) {
         await _upgradeToV7();
+      }
+
+      // v7 -> v8 (M99.23): Trash. The one migration in this file that both
+      // adds structure and rebuilds a table.
+      //
+      // **The rebuild is not optional.** `study_sessions.end_reason` gains
+      // `content_deleted` (BR-185) and SQLite cannot alter a CHECK, so the
+      // table is created-copied-dropped-renamed exactly as v5 did for the same
+      // reason. Everything else here is additive, and every existing row stays
+      // active because `delete_batch_id` arrives NULL — which is what "old
+      // rows are active by default" means in practice.
+      if (from < 8) {
+        await _upgradeToV8();
       }
     },
 

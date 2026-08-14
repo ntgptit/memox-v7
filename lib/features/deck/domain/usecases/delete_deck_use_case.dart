@@ -12,3 +12,17 @@ class DeleteDeckUseCase {
 
   Future<void> call(String deckId) => _repository.deleteDeck(deckId);
 }
+
+/// The same deletion, returning the batch so the caller can offer Undo
+/// (BR-182, BR-189).
+///
+/// A second use case rather than a flag, because the two have different
+/// contracts: this one hands back something the caller must use within the life
+/// of one snackbar, and every other delete caller must not be handed it at all.
+class DeleteDeckForUndoUseCase {
+  const DeleteDeckForUndoUseCase(this._repository);
+
+  final DeckRepository _repository;
+
+  Future<String> call(String deckId) => _repository.deleteDeckForUndo(deckId);
+}

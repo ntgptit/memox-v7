@@ -90,6 +90,13 @@ final class CountingCardRepository implements CardRepository {
   Future<void> deleteCard(String cardId) async => deleteCalls.add(cardId);
 
   @override
+  Future<String> deleteCardForUndo(String cardId) async {
+    deleteCalls.add(cardId);
+
+    return 'batch-$cardId';
+  }
+
+  @override
   Future<void> setCardFlag({
     required String cardId,
     required bool isFlagged,
@@ -194,6 +201,13 @@ final class CountingCardRepository implements CardRepository {
   @override
   Future<void> deleteCards(List<String> cardIds) async =>
       bulkDeleteCalls.add(cardIds);
+
+  @override
+  Future<List<String>> deleteCardsForUndo(List<String> cardIds) async {
+    bulkDeleteCalls.add(cardIds);
+
+    return <String>[for (final cardId in cardIds) 'batch-$cardId'];
+  }
 
   @override
   Future<void> setCardsFlag({

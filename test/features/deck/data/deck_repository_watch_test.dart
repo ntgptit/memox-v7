@@ -14,6 +14,7 @@ import '../../card/data/support/card_text_fixture.dart';
 import '../../../database/invariant_queries.dart';
 import '../../../database/support/test_database.dart';
 import 'support/deck_repository_harness.dart';
+import '../../../support/trash_wiring.dart';
 
 /// Stream and failure-boundary integration tests, plus the invariant sweep
 /// over repository-written data. Part of the suite rooted in
@@ -166,6 +167,7 @@ void main() {
       // The same client id twice: a real PRIMARY KEY violation.
       final fixedIdRepository = DeckRepositoryImpl(
         DeckDao(h.db),
+        trash: contentTrashForTest(h.db, clock: () => h.currentInstant),
         study: StudyRepositoryImpl(StudyDao(h.db)),
         idGenerator: () => 'duplicate-id',
         clock: () => h.currentInstant,

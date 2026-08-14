@@ -123,7 +123,7 @@ void main() {
           .map((specimen) => specimen.name.split(' ').first)
           .toSet();
 
-      // Three exclusions, and each is excluded for the same reason: it has no
+      // Four exclusions, and each is excluded for the same reason: it has no
       // layout of its own, so a stress specimen would be measuring whatever the
       // caller passed rather than the component.
       //
@@ -138,10 +138,16 @@ void main() {
       //   `Failure` → copy mapping, and `_widget` stays in the file name for
       //   the same reason `deck_labels_widget.dart` keeps it — the suffix is
       //   what puts the file in scope for the rules meant to cover it.
+      // * `MxUndoSnackBar` contains no widget either: it is one function that
+      //   configures Material's own `SnackBar` and hands it to the
+      //   `ScaffoldMessenger`. There is nothing to lay out at 320dp — what it
+      //   owns is the duration and the single-tap guarantee, which
+      //   `deck_undo_widget` and `card_undo_widget` exercise through it.
       expect(files.difference(covered), <String>{
         'MxAsyncView',
         'MxFailureLabelsWidget',
         'MxFormSheet',
+        'MxUndoSnackBar',
       });
     });
   });

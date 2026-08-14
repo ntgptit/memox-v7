@@ -259,3 +259,66 @@ Future<List<String>> violations(AppDatabase db, String sql) async {
 
   return rows.map((row) => row.data.values.first.toString()).toList();
 }
+
+/// Inserts a deletion batch (BR-182). [deletedAt] defaults to [testNow] so a
+/// fixture that does not care about retention need not name a moment.
+///
+/// Marking rows is left to the caller: a batch that names an item root without
+/// the row carrying it back is invariant 35's own violation, and a helper that
+/// did both would make that violation unconstructible.
+Future<String> insertDeleteBatch(
+  AppDatabase db, {
+  required String id,
+  required String itemType,
+  required String rootItemId,
+  DateTime? deletedAt,
+}) async {
+  await db.customInsert(
+    'INSERT INTO delete_batches (id, item_type, root_item_id, deleted_at, '
+    'owner_id) VALUES (?, ?, ?, ?, NULL)',
+    variables: <Variable<Object>>[
+      Variable<String>(id),
+      Variable<String>(itemType),
+      Variable<String>(rootItemId),
+      Variable<DateTime>(deletedAt ?? testNow),
+    ],
+  );
+
+  return id;
+}
+
+/// Stamps [deckIds] with [batchId] — the tombstone half of a soft delete.
+Future<void> markDecksDeleted(
+  AppDatabase db, {
+  required String batchId,
+  required List<String> deckIds,
+}) async {
+  for (final deckId in deckIds) {
+    await db.customUpdate(
+      'UPDATE decks SET delete_batch_id = ? WHERE id = ?',
+      variables: <Variable<Object>>[
+        Variable<String>(batchId),
+        Variable<String>(deckId),
+      ],
+      updates: <TableInfo<Table, Object?>>{db.decks},
+    );
+  }
+}
+
+/// Stamps [cardIds] with [batchId].
+Future<void> markCardsDeleted(
+  AppDatabase db, {
+  required String batchId,
+  required List<String> cardIds,
+}) async {
+  for (final cardId in cardIds) {
+    await db.customUpdate(
+      'UPDATE cards SET delete_batch_id = ? WHERE id = ?',
+      variables: <Variable<Object>>[
+        Variable<String>(batchId),
+        Variable<String>(cardId),
+      ],
+      updates: <TableInfo<Table, Object?>>{db.cards},
+    );
+  }
+}

@@ -58,7 +58,7 @@ void main() {
       },
     );
 
-    test('deleting a root cascades the entire tree (BR-03)', () async {
+    test('deleting a root hides the entire tree (BR-03, BR-182)', () async {
       final tree = await h.seedTree();
       await h.cardRepository.createCard(
         deckId: tree.leaf.id,
@@ -74,10 +74,25 @@ void main() {
 
       await h.deckRepository.deleteDeck(tree.root.id);
 
-      expect(await h.countAll('decks'), 0);
-      expect(await h.countAll('cards'), 0);
-      expect(await h.countAll('card_study_states'), 0);
-      expect(await h.countAll('study_sessions'), 0);
+      // **Nothing is destroyed any more.** BR-03's "the whole tree goes with
+      // it" is now marking rather than deleting (BR-182), so this asserts the
+      // two halves that replaced the old row counts: every deck and card is
+      // invisible, and every row a restore needs is still there (BR-185).
+      expect(await h.activeDeckCount(), 0);
+      expect(await h.activeCardCount(tree.leaf.id), 0);
+      expect(await h.countAll('decks'), 3);
+      expect(await h.countAll('cards'), 1);
+      expect(await h.countAll('card_study_states'), 1);
+      // The session the tree was being studied in is closed, not removed
+      // (BR-185, BR-86): its turns stay in history.
+      expect(await h.countAll('study_sessions'), 1);
+      final session = await h.db
+          .customSelect(
+            "SELECT status, end_reason FROM study_sessions WHERE id = 'session-1'",
+          )
+          .getSingle();
+      expect(session.read<String>('status'), 'invalidated');
+      expect(session.read<String>('end_reason'), 'content_deleted');
     });
 
     test('deleting a branch keeps the rest of the tree', () async {
@@ -90,10 +105,13 @@ void main() {
 
       await h.deckRepository.deleteDeck(tree.branch.id);
 
-      expect(await h.rawDeck(tree.root.id), isNotNull);
-      expect(await h.rawDeck(tree.branch.id), isNull);
-      expect(await h.rawDeck(tree.leaf.id), isNull);
-      expect(await h.countAll('cards'), 0);
+      // The root is untouched; the branch and its leaf are tombstones in one
+      // batch (BR-184), and the card under them went with it.
+      expect(await h.deleteBatchOfDeck(tree.root.id), isNull);
+      final batchId = await h.deleteBatchOfDeck(tree.branch.id);
+      expect(batchId, isNotNull);
+      expect(await h.deleteBatchOfDeck(tree.leaf.id), batchId);
+      expect(await h.activeCardCount(tree.leaf.id), 0);
     });
   });
 

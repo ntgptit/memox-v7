@@ -300,7 +300,9 @@ void main() {
     expect(find.text('Delete this card?'), findsOneWidget);
     expect(repository.deletes, isEmpty);
 
-    await tester.tap(find.text('Delete'));
+    // "Move to Trash", not "Delete": the confirm button says where the card
+    // goes, because it goes somewhere it can come back from (BR-182).
+    await tester.tap(find.text('Move to Trash'));
     await tester.pumpAndSettle();
 
     expect(repository.deletes.single, 'card-1');

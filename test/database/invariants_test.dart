@@ -4,7 +4,7 @@ import 'package:memox/core/database/app_database.dart';
 import 'invariant_queries.dart';
 import 'support/test_database.dart';
 
-/// The 15 data invariants, run against a real database.
+/// The 22 data invariants, run against a real database.
 ///
 /// Each is checked **both ways**. Clean on valid data proves the query does not
 /// cry wolf; firing on its own violation proves it is connected to anything at
@@ -92,12 +92,15 @@ void main() {
     // becoming Q16 and Q17: the host set is a subset of the document's
     // numbering, and renumbering to close the gap would make every citation of
     // an invariant ambiguous about which document version it meant.
-    expect(invariantQueries.keys, hasLength(17));
+    expect(invariantQueries.keys, hasLength(22));
     expect(
       invariantQueries.keys,
       containsAll(<String>[for (var i = 1; i <= 15; i++) 'Q$i']),
     );
-    expect(invariantQueries.keys, containsAll(<String>['Q29', 'Q30']));
+    expect(
+      invariantQueries.keys,
+      containsAll(<String>['Q29', 'Q30', 'Q31', 'Q32', 'Q33', 'Q34', 'Q35']),
+    );
   });
 
   invariant(
@@ -344,6 +347,125 @@ void main() {
 
     expect(await check(db, 'Q29'), isEmpty);
   });
+
+  // ---- Trash (BR-182…BR-193, AD-21) ---------------------------------------
+
+  invariant(
+    'Q31',
+    'an active card sits inside a deleted deck (BR-182, BR-184)',
+    breakIt: (db) async {
+      // The deck goes to Trash and its card is left behind — the one shape
+      // that would make `delete_batch_id IS NULL` stop meaning "visible".
+      await insertDeleteBatch(
+        db,
+        id: 'batch-leaf',
+        itemType: 'deck',
+        rootItemId: 'leaf',
+      );
+      await markDecksDeleted(
+        db,
+        batchId: 'batch-leaf',
+        deckIds: <String>['leaf'],
+      );
+    },
+    expectOffenders: <String>['card-1'],
+  );
+
+  invariant(
+    'Q32',
+    'an active deck sits under a deleted deck (BR-182, BR-184)',
+    breakIt: (db) async {
+      await insertDeleteBatch(
+        db,
+        id: 'batch-branch',
+        itemType: 'deck',
+        rootItemId: 'branch',
+      );
+      await markDecksDeleted(
+        db,
+        batchId: 'batch-branch',
+        deckIds: <String>['branch'],
+      );
+    },
+    expectOffenders: <String>['leaf'],
+  );
+
+  invariant(
+    'Q33',
+    'a batch owns no rows at all (BR-191)',
+    breakIt: (db) => insertDeleteBatch(
+      db,
+      id: 'batch-empty',
+      itemType: 'deck',
+      rootItemId: 'leaf',
+    ),
+    expectOffenders: <String>['batch-empty'],
+  );
+
+  invariant(
+    'Q34',
+    'a tombstone was deleted after its already-deleted ancestor (BR-184)',
+    breakIt: (db) async {
+      // `branch` went first, `leaf` a day later — the order BR-191's "eligible
+      // ancestor implies eligible descendant" argument forbids.
+      await insertDeleteBatch(
+        db,
+        id: 'batch-older',
+        itemType: 'deck',
+        rootItemId: 'branch',
+        deletedAt: testNow,
+      );
+      await insertDeleteBatch(
+        db,
+        id: 'batch-newer',
+        itemType: 'deck',
+        rootItemId: 'leaf',
+        deletedAt: testNow.add(const Duration(days: 1)),
+      );
+      await markDecksDeleted(
+        db,
+        batchId: 'batch-older',
+        deckIds: <String>['branch'],
+      );
+      await markDecksDeleted(
+        db,
+        batchId: 'batch-newer',
+        deckIds: <String>['leaf'],
+      );
+      await markCardsDeleted(
+        db,
+        batchId: 'batch-newer',
+        cardIds: <String>['card-1'],
+      );
+    },
+    expectOffenders: <String>['leaf'],
+  );
+
+  invariant(
+    'Q35',
+    'a batch names an item root that does not carry it (BR-182)',
+    breakIt: (db) async {
+      await insertDeleteBatch(
+        db,
+        id: 'batch-mislabelled',
+        itemType: 'deck',
+        rootItemId: 'branch',
+      );
+      // Rows exist for the batch — so Q33 stays silent — but not the row the
+      // batch claims as its root.
+      await markDecksDeleted(
+        db,
+        batchId: 'batch-mislabelled',
+        deckIds: <String>['leaf'],
+      );
+      await markCardsDeleted(
+        db,
+        batchId: 'batch-mislabelled',
+        cardIds: <String>['card-1'],
+      );
+    },
+    expectOffenders: <String>['batch-mislabelled'],
+  );
 
   test('one defect trips only the invariants that genuinely cover it', () async {
     // Guards the pairs above from passing for the wrong reason: if every

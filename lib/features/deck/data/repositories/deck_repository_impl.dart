@@ -16,9 +16,11 @@ import '../../domain/models/deck_list_snapshot_model.dart';
 import '../../domain/models/scheduler_type_model.dart';
 import '../../../study/domain/models/study_session_status_model.dart';
 import '../../../study/domain/repositories/study_repository.dart';
+import '../../../trash/domain/repositories/content_trash_repository.dart';
 import '../mappers/deck_mapper.dart';
 import '../datasources/deck_dao.dart';
 
+part 'delete_deck_repository_impl.dart';
 part 'move_deck_repository_impl.dart';
 part 'deck_scheduler_repository_impl.dart';
 
@@ -40,7 +42,7 @@ const int _initialSchedulerGeneration = 1;
 /// the part file as a private mixin, purely to keep each source file
 /// readable; it is one class and one library.
 final class DeckRepositoryImpl
-    with _MoveDeckOperation, _SchedulerWriteOperations
+    with _DeleteDeckOperation, _MoveDeckOperation, _SchedulerWriteOperations
     implements DeckRepository {
   DeckRepositoryImpl(
     this._dao, {
@@ -51,8 +53,16 @@ final class DeckRepositoryImpl
     /// the architecture guard forbids reaching into another feature's `data/`
     /// and its own message points here instead.
     required StudyRepository study,
+
+    /// Trash's own contract, for the one thing Delete owes it: turning a
+    /// destructive delete into a batch (BR-182). The **domain** contract, like
+    /// `study` above — the architecture guard forbids reaching into another
+    /// feature's `data/`, and its own message points here instead.
+    required ContentTrashRepository trash,
     String Function()? idGenerator,
   }) : _idGenerator = idGenerator ?? const Uuid().v4,
+       // ignore: prefer_initializing_formals
+       _trash = trash,
        // Same reason as `clock` below: the field is private because the reset
        // operation is a `part of` this library and reads it, and Dart forbids a
        // named parameter starting with an underscore.
@@ -70,6 +80,9 @@ final class DeckRepositoryImpl
 
   @override
   final StudyRepository _study;
+
+  @override
+  final ContentTrashRepository _trash;
 
   /// Client-generated UUIDs (AD-03); injectable so tests are deterministic.
   final String Function() _idGenerator;
@@ -249,28 +262,6 @@ final class DeckRepositoryImpl
           cardCount: cardCount,
         );
       });
-
-  @override
-  /// Deletes a deck and its whole subtree, then hands the parent its content
-  /// type back if that was its last child (BR-163).
-  ///
-  /// **The parent is read before the delete and counted after, both inside one
-  /// transaction.** Before, because the row that names the parent is about to
-  /// disappear; after, because the count has to describe the tree the delete
-  /// leaves behind. Split across two transactions they describe two different
-  /// databases.
-  Future<void> deleteDeck(String deckId) => _guard(
-    () => _dao.runInTransaction(() async {
-      final deck = await _requireDeckRow(deckId);
-      final parentDeckId = deck.parentDeckId;
-      // Descendants, cards, study states, history and sessions cascade from
-      // this one delete (BR-03) — enforced by the schema's foreign keys.
-      await _dao.deleteDeckById(deckId);
-
-      if (parentDeckId == null) return;
-      await _unsetParentIfEmptied(parentDeckId);
-    }),
-  );
 
   /// Puts a **non-root** parent back to `unset` when nothing is left in it
   /// (BR-163). Shared by delete and move because they leave the same hole.

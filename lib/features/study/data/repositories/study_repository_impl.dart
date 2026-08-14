@@ -316,6 +316,42 @@ final class StudyRepositoryImpl
     return open.length;
   });
 
+  @override
+  Future<int> invalidateSessionsForDeletedContent({
+    required List<String> deckIds,
+    required List<String> cardIds,
+    required DateTime endedAt,
+  }) async {
+    // **No transaction of its own.** This is called from inside the deletion's
+    // transaction (BR-185), and opening a second one here would only be a
+    // savepoint that can commit while the deletion around it rolls back — the
+    // one outcome the rule forbids: a session closed for a deletion that never
+    // happened.
+    final ids = await _dao.openSessionIdsTouching(
+      deckIds: deckIds,
+      cardIds: cardIds,
+    );
+
+    for (final id in ids) {
+      await _dao.updateSession(
+        id,
+        StudySessionsCompanion(
+          status: Value<String>(StudySessionStatus.invalidated.dbValue),
+          // Stored, never inferred (BR-185, AD-11). `scheduler_reset` would be
+          // the nearest existing value and it would be a lie: nothing about the
+          // scheduler changed, the material went to Trash — and only one of
+          // those two is undone by pressing Undo.
+          endReason: Value<String?>(
+            StudySessionEndReason.contentDeleted.dbValue,
+          ),
+          endedAt: Value<DateTime?>(endedAt),
+        ),
+      );
+    }
+
+    return ids.length;
+  }
+
   /// Refuses a write the session cannot accept (BR-79, BR-84).
   ///
   /// **This commits, and is called before the write transaction opens.** A

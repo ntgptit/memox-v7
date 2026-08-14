@@ -14,6 +14,7 @@ import 'package:memox/features/deck/domain/entities/deck_entity.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 
 import '../../../card/data/support/card_text_fixture.dart';
+import '../../../../support/trash_wiring.dart';
 
 /// The web runtime proof M4.2 left open: the production web connection —
 /// `sqlite3.wasm` plus the drift worker, opened by `AppDatabase.open()` —
@@ -44,12 +45,14 @@ void main() {
     DateTime clock() => fixedInstant;
     final repository = DeckRepositoryImpl(
       DeckDao(db),
+      trash: contentTrashForTest(db, clock: clock),
       study: StudyRepositoryImpl(StudyDao(db)),
       idGenerator: nextId,
       clock: clock,
     );
     final cardRepository = CardRepositoryImpl(
       db,
+      trash: contentTrashForTest(db, clock: clock),
       idGenerator: nextId,
       clock: clock,
     );

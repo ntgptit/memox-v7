@@ -16,3 +16,17 @@ class DeleteCardUseCase {
 
   Future<void> call(String cardId) => _repository.deleteCard(cardId);
 }
+
+/// The same deletion, returning the batch so the caller can offer Undo
+/// (BR-182, BR-189).
+///
+/// A second use case rather than a flag, for the reason
+/// `DeleteDeckForUndoUseCase` gives: the batch id is useful for the life of one
+/// snackbar, and every other caller must not be handed it at all.
+class DeleteCardForUndoUseCase {
+  const DeleteCardForUndoUseCase(this._repository);
+
+  final CardRepository _repository;
+
+  Future<String> call(String cardId) => _repository.deleteCardForUndo(cardId);
+}

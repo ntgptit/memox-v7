@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../core/navigation/route_names.dart';
@@ -9,6 +10,7 @@ import '../../../../../shared/widgets/mx_empty_state.dart';
 import '../../../domain/models/deck_summary_model.dart';
 import '../items/deck_tile_widget.dart';
 import '../overlays/deck_actions_widget.dart';
+import '../support/deck_undo_widget.dart';
 
 /// Space under the last card. It was 112 while a floating action hovered.
 const double _kListBottomInset = AppSpacing.lg;
@@ -24,7 +26,7 @@ const double _kListBottomInset = AppSpacing.lg;
 /// filter matched none of them. The "nothing here at all" cases never reach this
 /// widget — `_DeckLevel` answers them before the toolbar is even built, because
 /// they need different words and different actions.
-class DeckListSliverWidget extends StatelessWidget {
+class DeckListSliverWidget extends ConsumerWidget {
   const DeckListSliverWidget({
     required this.shouldShowScheduler,
     required this.summaries,
@@ -39,7 +41,7 @@ class DeckListSliverWidget extends StatelessWidget {
   final VoidCallback onClearFilter;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     if (summaries.isEmpty) {
       // `hasScrollBody: false` so the state is sized to its content and centred
       // in what is left, rather than stretched down a viewport it does not fill.
@@ -98,8 +100,10 @@ class DeckListSliverWidget extends StatelessWidget {
               // Reset learning progress is offered from (UC-07).
               hasLearnedCards: summary.learnedCardCount > 0,
               // Deleting from a list leaves the user on that list; there is
-              // nowhere to navigate back from.
-              onDeleted: () {},
+              // nowhere to navigate back from — so the only thing left to do
+              // is say where the deck went and offer it back (BR-182, BR-189).
+              onDeleted: (batchId) =>
+                  showDeckMovedToTrash(context, ref, batchId: batchId),
             ),
           );
         },

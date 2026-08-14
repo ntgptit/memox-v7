@@ -28,11 +28,16 @@ CREATE TABLE study_sessions (
     -- `kind` rather than deriving it: "the user pressed exit" and "the OS
     -- reclaimed the app" are different events, and merging them makes the
     -- history say somebody gave up when they did not (BR-103).
+    --
+    -- `content_deleted` is the same argument again (BR-185): a session ended
+    -- because its material went to Trash is not a session ended by a reset, and
+    -- a label that is derived later can be derived wrongly. Adding it is what
+    -- made v8 a table rebuild — SQLite cannot alter a CHECK.
     end_reason TEXT NULL CHECK (
         end_reason IS NULL
         OR end_reason IN (
             'user_exit', 'scheduler_reset', 'stale_generation',
-            'persistence_error', 'interrupted'
+            'persistence_error', 'interrupted', 'content_deleted'
         )
     ),
 

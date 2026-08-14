@@ -11,6 +11,7 @@ import 'package:memox/features/deck/domain/entities/deck_entity.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 
 import '../../../../database/support/test_database.dart';
+import '../../../../support/trash_wiring.dart';
 
 /// Shared harness for the repository integration tests.
 ///
@@ -77,6 +78,38 @@ final class DeckRepositoryHarness {
   Future<String> contentTypeOf(String deckId) async =>
       (await rawDeck(deckId))!.read<String>('content_type');
 
+  /// Cards a deck still shows (BR-183). Since v8 a deleted card keeps its row,
+  /// so `countAll('cards')` and "cards the user can see" are two questions.
+  Future<int> activeCardCount(String deckId) async {
+    final row = await db
+        .customSelect(
+          'SELECT COUNT(*) AS c FROM cards '
+          'WHERE deck_id = ? AND delete_batch_id IS NULL',
+          variables: <Variable<Object>>[Variable<String>(deckId)],
+        )
+        .getSingle();
+
+    return row.read<int>('c');
+  }
+
+  /// Decks the tree still shows (BR-183).
+  Future<int> activeDeckCount() async {
+    final row = await db
+        .customSelect(
+          'SELECT COUNT(*) AS c FROM decks WHERE delete_batch_id IS NULL',
+        )
+        .getSingle();
+
+    return row.read<int>('c');
+  }
+
+  /// The batch a row was marked with, or null while it is active.
+  Future<String?> deleteBatchOfCard(String cardId) async =>
+      (await rawCard(cardId))?.read<String?>('delete_batch_id');
+
+  Future<String?> deleteBatchOfDeck(String deckId) async =>
+      (await rawDeck(deckId))?.read<String?>('delete_batch_id');
+
   /// root → branch → leaf, three levels (BR-55). The leaf stays `unset` so
   /// individual tests decide what it becomes.
   Future<({DeckEntity root, DeckEntity branch, DeckEntity leaf})> seedTree({
@@ -136,14 +169,21 @@ DeckRepositoryHarness installDeckRepositoryHarness() {
     harness.currentInstant = testNow;
     String nextId() => 'gen-${++harness.idCounter}';
     DateTime clock() => harness.currentInstant;
+    final trash = contentTrashForTest(
+      harness.db,
+      clock: clock,
+      idGenerator: nextId,
+    );
     harness.deckRepository = DeckRepositoryImpl(
       DeckDao(harness.db),
       study: StudyRepositoryImpl(StudyDao(harness.db)),
+      trash: trash,
       idGenerator: nextId,
       clock: clock,
     );
     harness.cardRepository = CardRepositoryImpl(
       harness.db,
+      trash: trash,
       idGenerator: nextId,
       clock: clock,
     );

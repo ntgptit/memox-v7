@@ -35,6 +35,12 @@ import '../../features/study/data/datasources/study_dao.dart';
 import '../../features/study/di/study_repository_provider.dart';
 import '../../features/study/data/repositories/study_repository_impl.dart';
 import '../../features/study/domain/repositories/study_repository.dart';
+import '../../features/trash/data/datasources/trash_dao.dart';
+import '../../features/trash/data/repositories/content_trash_repository_impl.dart';
+import '../../features/trash/data/repositories/trash_repository_impl.dart';
+import '../../features/trash/di/trash_repository_provider.dart';
+import '../../features/trash/domain/repositories/content_trash_repository.dart';
+import '../../features/trash/domain/repositories/trash_repository.dart';
 
 /// Where each repository contract is bound to its implementation.
 ///
@@ -68,6 +74,11 @@ DeckRepository deckRepositoryBinding(Ref ref) => DeckRepositoryImpl(
   // *domain* contract. The root is what decides which implementation satisfies
   // it — which is the whole reason this file exists.
   study: ref.watch(studyRepositoryProvider),
+  // The second cross-feature wire, and it exists for the same reason as the
+  // first: deleting a deck has to create a deletion batch (BR-182) without
+  // leaving the single transaction, so Deck's repository takes Trash's *domain*
+  // contract and the root decides what satisfies it.
+  trash: ref.watch(contentTrashRepositoryProvider),
 );
 
 /// **The database itself, not a DAO — and the difference is the point of this
@@ -81,6 +92,29 @@ DeckRepository deckRepositoryBinding(Ref ref) => DeckRepositoryImpl(
 /// differently.
 CardRepository cardRepositoryBinding(Ref ref) => CardRepositoryImpl(
   ref.watch(appDatabaseProvider),
+  clock: ref.watch(clockProvider),
+  trash: ref.watch(contentTrashRepositoryProvider),
+);
+
+/// Trash's two contracts.
+///
+/// **The batch half takes Study's contract, not Trash's own screen.** Closing
+/// the sessions a deletion invalidates is BR-185, it has to happen inside the
+/// delete transaction, and the session status × end_reason pair belongs to
+/// `StudySessionStatus.isValidWith` — so Trash asks Study rather than writing
+/// that table behind the enum's back.
+ContentTrashRepository contentTrashRepositoryBinding(Ref ref) =>
+    ContentTrashRepositoryImpl(
+      TrashDao(ref.watch(appDatabaseProvider)),
+      clock: ref.watch(clockProvider),
+      study: ref.watch(studyRepositoryProvider),
+    );
+
+/// The list-and-restore half. No Study dependency: a restore closes nothing —
+/// the sessions a deletion invalidated stay invalidated (BR-86), because
+/// history is not rewritten by undoing the thing that ended it.
+TrashRepository trashRepositoryBinding(Ref ref) => TrashRepositoryImpl(
+  TrashDao(ref.watch(appDatabaseProvider)),
   clock: ref.watch(clockProvider),
 );
 
@@ -186,4 +220,6 @@ List<Override> repositoryBindingOverrides() => <Override>[
   deckTemplateRepositoryProvider.overrideWith(deckTemplateRepositoryBinding),
   deckTemplateCatalogProvider.overrideWith(deckTemplateCatalogBinding),
   studyRepositoryProvider.overrideWith(studyRepositoryBinding),
+  contentTrashRepositoryProvider.overrideWith(contentTrashRepositoryBinding),
+  trashRepositoryProvider.overrideWith(trashRepositoryBinding),
 ];

@@ -14,6 +14,17 @@ enum MxConfirmDialogVariant {
   /// Deletes or discards. Styled as destructive, and — more importantly — not
   /// the initially focused control.
   destructive,
+
+  /// Serious but reversible: it moves something out of sight rather than
+  /// destroying it, and the user has a stated window to change their mind.
+  ///
+  /// **The two halves of `destructive` pulled apart** (BR-192). A soft delete
+  /// must not wear the destructive colour — the colour has to keep meaning
+  /// something at the one dialog that really is permanent — but it still wants
+  /// the safe default focus, because a stray Enter should not move a deck the
+  /// user was only reading about. Folding this into `normal` would have taken
+  /// the focus rule with it, silently.
+  cautious,
 }
 
 /// Asks the user to confirm one action.
@@ -59,6 +70,10 @@ class MxConfirmDialog extends StatelessWidget {
 
   bool get _isDestructive => variant == MxConfirmDialogVariant.destructive;
 
+  /// Whether Cancel starts focused. True for both serious variants.
+  bool get _shouldFocusCancel =>
+      _isDestructive || variant == MxConfirmDialogVariant.cautious;
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -78,11 +93,12 @@ class MxConfirmDialog extends StatelessWidget {
           label: cancelLabel,
           onPressed: isSubmitting ? null : onCancel,
           variant: MxActionButtonVariant.secondary,
-          // Focus starts on cancel for a destructive dialog, so a stray Enter
-          // does not delete anything. On a normal dialog neither action is
-          // autofocused: pre-selecting "confirm" makes the keyboard path skip
-          // the question the dialog exists to ask.
-          shouldAutofocus: _isDestructive,
+          // Focus starts on cancel for anything serious — destructive *or*
+          // cautious — so a stray Enter neither deletes nor hides anything. On
+          // a normal dialog neither action is autofocused: pre-selecting
+          // "confirm" makes the keyboard path skip the question the dialog
+          // exists to ask.
+          shouldAutofocus: _shouldFocusCancel,
         ),
         MxActionButton(
           label: confirmLabel,

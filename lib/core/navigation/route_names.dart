@@ -68,6 +68,15 @@ abstract final class RouteNames {
   /// the Decks branch and leaving it lands back on the list whose stream
   /// already shows what was imported (M4.12).
   static const String cardImport = 'cardImport';
+
+  /// Trash (UC-12). A child of [decks], so it stays in the Library branch and
+  /// Back returns to the list a restored deck reappears in.
+  ///
+  /// **Library, not Settings** (AD-21). Trash holds Library content, and
+  /// Settings is a placeholder branch (AD-19) — putting a data-recovery entry
+  /// two taps deep in an unrelated branch is how a user learns it exists only
+  /// after they needed it.
+  static const String trash = 'trash';
 }
 
 /// Names of the path parameters routes carry.

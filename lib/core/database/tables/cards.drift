@@ -1,4 +1,5 @@
 import 'decks.drift';
+import 'trash.drift';
 
 -- Card content, and the schedule that is kept apart from it.
 --
@@ -47,6 +48,17 @@ CREATE TABLE cards (
     hint TEXT NULL,
     pronunciation TEXT NULL,
 
+    -- NULL is a live card; anything else is a tombstone belonging to that
+    -- deletion (BR-182, BR-184). Same contract as `decks.delete_batch_id` —
+    -- see the long comment there for why exclusion is a column rather than an
+    -- ancestor walk.
+    --
+    -- The card row surviving is the point: `card_study_states`,
+    -- `study_answers` and `card_tags` all hang off `cards.id`, so leaving the
+    -- row alone is what makes BR-188's "same ids, same history" true by
+    -- construction rather than by a reconstruction that can be wrong.
+    delete_batch_id TEXT NULL REFERENCES delete_batches (id) ON DELETE CASCADE,
+
     created_at DATETIME NOT NULL,
     updated_at DATETIME NOT NULL
 );
@@ -69,6 +81,10 @@ CREATE TABLE cards (
 -- same leading column answers every lookup the single-column one did, and
 -- keeping both would make every insert maintain two B-trees for no gain.
 CREATE INDEX idx_cards_deck_created ON cards (deck_id, created_at, id);
+
+-- Same single reader as `idx_decks_delete_batch`: restore and purge selecting
+-- one batch's rows.
+CREATE INDEX idx_cards_delete_batch ON cards (delete_batch_id);
 
 -- One row per card, created with the card (BR-09); dropped and recreated on
 -- reset (BR-41).

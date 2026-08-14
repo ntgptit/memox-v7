@@ -508,7 +508,7 @@
     },
     "description": "Title of the delete confirmation. Names the deck so the user can tell which one they are about to lose (BR-04)."
   },
-  "deckDeleteImpactMessage": "{deckCount, plural, =0{} =1{1 sub-deck and } other{{deckCount} sub-decks and }}{cardCount, plural, =0{no cards} =1{1 card} other{{cardCount} cards}} will be deleted too. This cannot be undone.",
+  "deckDeleteImpactMessage": "{deckCount, plural, =0{} =1{1 sub-deck and } other{{deckCount} sub-decks and }}{cardCount, plural, =0{no cards} =1{1 card} other{{cardCount} cards}} go to Trash with it. You can restore them for 30 days.",
   "@deckDeleteImpactMessage": {
     "placeholders": {
       "deckCount": {
@@ -518,11 +518,11 @@
         "type": "int"
       }
     },
-    "description": "Body of the delete confirmation, stating exactly how many sub-decks and cards go with the deck (BR-04)."
+    "description": "Body of the delete confirmation, stating exactly how many sub-decks and cards go with the deck (BR-04) and that the deletion is recoverable (BR-182)."
   },
-  "deckDeleteConfirmAction": "Delete",
+  "deckDeleteConfirmAction": "Move to Trash",
   "@deckDeleteConfirmAction": {
-    "description": "Destructive confirm button of the delete-deck dialog."
+    "description": "Confirm button of the delete-deck dialog. Names where the deck goes rather than implying it is destroyed (BR-182)."
   },
   "deckMoveAction": "Move",
   "@deckMoveAction": {
@@ -1148,22 +1148,22 @@
     },
     "description": "Title of the bulk delete confirmation. Names the number rather than asking a generic 'are you sure' (UC-04 A6)."
   },
-  "cardBulkDeleteMessage": "Their study history is deleted too. This can't be undone.",
+  "cardBulkDeleteMessage": "Their study history goes with them and comes back if you restore them. Trash keeps them for 30 days.",
   "@cardBulkDeleteMessage": {
-    "description": "Body of the bulk delete confirmation: what is lost beyond the cards themselves."
+    "description": "Body of the bulk delete confirmation: what happens to the history, and for how long it can be undone (BR-182, BR-185)."
   },
-  "cardBulkDeleteConfirmAction": "Delete cards",
+  "cardBulkDeleteConfirmAction": "Move to Trash",
   "@cardBulkDeleteConfirmAction": {
-    "description": "Destructive confirm button of the bulk delete dialog."
+    "description": "Confirm button of the bulk delete dialog (BR-182)."
   },
-  "cardBulkDeletedMessage": "{count} cards deleted",
+  "cardBulkDeletedMessage": "{count, plural, =1{1 card moved to Trash} other{{count} cards moved to Trash}}",
   "@cardBulkDeletedMessage": {
     "placeholders": {
       "count": {
         "type": "int"
       }
     },
-    "description": "Result message after a bulk delete commits. A statement of what happened, deliberately not an Undo: this build cannot restore the study history it cascaded."
+    "description": "Result message after a bulk delete commits. It reports where the cards went, because they are recoverable from there (BR-182); Undo is offered for a single deletion only (BR-189)."
   },
   "cardBulkMovedMessage": "{count} cards moved",
   "@cardBulkMovedMessage": {
@@ -1223,13 +1223,13 @@
   "@cardDeleteConfirmTitle": {
     "description": "Title of the card delete confirmation dialog (UC-04 A5)."
   },
-  "cardDeleteConfirmMessage": "The card and its study history are removed. This can't be undone.",
+  "cardDeleteConfirmMessage": "The card and its study history go to Trash. You can restore them for 30 days.",
   "@cardDeleteConfirmMessage": {
-    "description": "Body of the card delete confirmation, stating what is lost. Deleting the last card also returns the deck to unset (BR-163)."
+    "description": "Body of the card delete confirmation. Deleting the last active card also returns the deck to unset (BR-186)."
   },
-  "cardDeleteConfirmAction": "Delete",
+  "cardDeleteConfirmAction": "Move to Trash",
   "@cardDeleteConfirmAction": {
-    "description": "Confirm button on the card delete dialog."
+    "description": "Confirm button on the card delete dialog (BR-182)."
   },
   "cardDeleteFailed": "This card couldn't be deleted. Try again.",
   "@cardDeleteFailed": {
@@ -2631,5 +2631,210 @@
   "cardExportCloseAction": "Close",
   "@cardExportCloseAction": {
       "description": "The only action left when the scope is no longer valid — there is nothing to retry until the user selects again (M4.13 W3 state 7)."
+  },
+  "studySummaryStoppedByDeletion": "The deck or card you were studying was moved to Trash.",
+  "@studySummaryStoppedByDeletion": {
+    "description": "Explains a session invalidated because its material was deleted (BR-185)."
+  },
+  "trashTitle": "Trash",
+  "@trashTitle": {
+    "description": "Title of the Trash screen (UC-12)."
+  },
+  "trashEntryLabel": "Trash",
+  "@trashEntryLabel": {
+    "description": "App-bar action on the root deck list that opens Trash. Always visible, even when Trash is empty (wireframe T2)."
+  },
+  "trashRetentionNotice": "Items here are deleted forever after 30 days.",
+  "@trashRetentionNotice": {
+    "description": "One-line explanation above the Trash list (BR-190)."
+  },
+  "trashFilterAll": "All",
+  "@trashFilterAll": {
+    "description": "Trash filter chip: both kinds (wireframe T3)."
+  },
+  "trashFilterCards": "Cards",
+  "@trashFilterCards": {
+    "description": "Trash filter chip: cards only."
+  },
+  "trashFilterDecks": "Decks",
+  "@trashFilterDecks": {
+    "description": "Trash filter chip: decks only."
+  },
+  "trashEmptyTitle": "Nothing in Trash",
+  "@trashEmptyTitle": {
+    "description": "Empty state title of the Trash screen (UC-12 A6)."
+  },
+  "trashEmptyMessage": "Deleted decks and cards stay here for 30 days, so you can bring them back.",
+  "@trashEmptyMessage": {
+    "description": "Empty state body of the Trash screen (BR-190)."
+  },
+  "trashEmptyCardsMessage": "No cards in Trash.",
+  "@trashEmptyCardsMessage": {
+    "description": "Empty state when the Cards filter is on but only decks are in Trash."
+  },
+  "trashEmptyDecksMessage": "No decks in Trash.",
+  "@trashEmptyDecksMessage": {
+    "description": "Empty state when the Decks filter is on but only cards are in Trash."
+  },
+  "trashDeletedDaysAgo": "{days, plural, =0{Deleted today} =1{Deleted 1 day ago} other{Deleted {days} days ago}}",
+  "@trashDeletedDaysAgo": {
+    "description": "When an item was deleted, on the Trash row (wireframe T4).",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "trashDaysLeft": "{days, plural, =0{Deleted forever today} =1{1 day left} other{{days} days left}}",
+  "@trashDaysLeft": {
+    "description": "How long until the batch is purged (BR-190). The only urgent number on the row (wireframe T4).",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "trashOriginLabel": "From",
+  "@trashOriginLabel": {
+    "description": "Prefix of the original path on a Trash row. Context only, never a promise about where a restore goes (BR-193)."
+  },
+  "trashOriginTopLevel": "Top level",
+  "@trashOriginTopLevel": {
+    "description": "Origin shown for a deleted top-level deck, which has no parent (BR-56)."
+  },
+  "trashBatchContents": "{deckCount, plural, =0{} =1{1 deck, } other{{deckCount} decks, }}{cardCount, plural, =0{no cards} =1{1 card} other{{cardCount} cards}}",
+  "@trashBatchContents": {
+    "description": "What a deck batch would bring back. Excludes anything already in Trash under an older batch (BR-184, BR-188).",
+    "placeholders": {
+      "deckCount": {
+        "type": "int"
+      },
+      "cardCount": {
+        "type": "int"
+      }
+    }
+  },
+  "trashRestoreAction": "Restore",
+  "@trashRestoreAction": {
+    "description": "Row action that opens the restore target picker (BR-187)."
+  },
+  "trashPurgeAction": "Delete permanently",
+  "@trashPurgeAction": {
+    "description": "The only destructive action in Trash (BR-192)."
+  },
+  "trashSelectAction": "Select",
+  "@trashSelectAction": {
+    "description": "Overflow action that turns on multi-select in Trash (BR-192)."
+  },
+  "trashSelectionCount": "{count, plural, other{{count} selected}}",
+  "@trashSelectionCount": {
+    "description": "Title of the Trash app bar while selecting.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "trashSelectionCardsOnly": "Cards and decks are restored separately, so this selection holds cards only.",
+  "@trashSelectionCardsOnly": {
+    "description": "Explains why deck rows stopped responding once a card was selected (BR-192)."
+  },
+  "trashSelectionDecksOnly": "Cards and decks are restored separately, so this selection holds decks only.",
+  "@trashSelectionDecksOnly": {
+    "description": "Explains why card rows stopped responding once a deck was selected (BR-192)."
+  },
+  "trashRestoreTargetTitle": "Restore to",
+  "@trashRestoreTargetTitle": {
+    "description": "Title of the restore target picker (BR-187)."
+  },
+  "trashRestoreTargetTopLevel": "Top level",
+  "@trashRestoreTargetTopLevel": {
+    "description": "The single target a deleted top-level deck has (BR-187)."
+  },
+  "trashRestoreTargetEmpty": "There is nowhere this can go back to right now.",
+  "@trashRestoreTargetEmpty": {
+    "description": "Shown when no target qualifies (UC-12 E1). The picker never draws a disabled row (wireframe T8)."
+  },
+  "trashRestoreConfirmAction": "Restore here",
+  "@trashRestoreConfirmAction": {
+    "description": "Primary action of the restore target picker. The user confirms even when a target was preselected (BR-188)."
+  },
+  "trashRestoredMessage": "Restored",
+  "@trashRestoredMessage": {
+    "description": "Result message after a restore commits."
+  },
+  "trashPurgeConfirmTitle": "{count, plural, =1{Delete 1 item permanently?} other{Delete {count} items permanently?}}",
+  "@trashPurgeConfirmTitle": {
+    "description": "Title of the permanent-delete confirmation, naming the exact count (BR-192).",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "trashPurgeConfirmMessage": "This cannot be undone. The study history of these items is deleted with them.",
+  "@trashPurgeConfirmMessage": {
+    "description": "Body of the permanent-delete confirmation (BR-192)."
+  },
+  "trashPurgeConfirmAction": "Delete permanently",
+  "@trashPurgeConfirmAction": {
+    "description": "Destructive confirm button. The dialog opens with focus on Cancel (wireframe T11)."
+  },
+  "trashPurgeCancelAction": "Cancel",
+  "@trashPurgeCancelAction": {
+    "description": "Safe default action of the permanent-delete confirmation (BR-192)."
+  },
+  "trashPurgedMessage": "{count, plural, =1{1 item deleted permanently} other{{count} items deleted permanently}}",
+  "@trashPurgedMessage": {
+    "description": "Result message after a purge commits.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "trashLoadFailed": "Trash couldn’t be opened. Try again.",
+  "@trashLoadFailed": {
+    "description": "Error state of the Trash list (UC-12 E5)."
+  },
+  "trashRetryAction": "Try again",
+  "@trashRetryAction": {
+    "description": "Retry action on the Trash error state."
+  },
+  "trashConflictTargetNoLongerValid": "That deck can no longer take this item. Pick another one.",
+  "@trashConflictTargetNoLongerValid": {
+    "description": "Copy for TrashConflictReason.targetNoLongerValid (UC-12 E2)."
+  },
+  "trashConflictTargetLevelMismatch": "This item cannot go there.",
+  "@trashConflictTargetLevelMismatch": {
+    "description": "Copy for TrashConflictReason.targetLevelMismatch (BR-187)."
+  },
+  "trashConflictUndoOriginUnavailable": "It can’t go back where it was. Restore it from Trash instead.",
+  "@trashConflictUndoOriginUnavailable": {
+    "description": "Copy for TrashConflictReason.undoOriginUnavailable (BR-189, UC-12 E3)."
+  },
+  "trashConflictPurgeWouldTakeAnotherBatch": "Something else in Trash is still inside this one, so it can’t be deleted yet.",
+  "@trashConflictPurgeWouldTakeAnotherBatch": {
+    "description": "Copy for TrashConflictReason.purgeWouldTakeAnotherBatch (BR-191, UC-12 E4)."
+  },
+  "trashConflictUnknownItemType": "This item was deleted by a newer version of the app.",
+  "@trashConflictUnknownItemType": {
+    "description": "Copy for TrashConflictReason.unknownItemType."
+  },
+  "trashConflictBatchHeightUnknowable": "This deck’s structure could not be read, so it can’t be restored.",
+  "@trashConflictBatchHeightUnknowable": {
+    "description": "Copy for TrashConflictReason.batchHeightUnknowable."
+  },
+  "trashMovedMessage": "Moved to Trash",
+  "@trashMovedMessage": {
+    "description": "Snackbar shown after deleting one item, beside Undo (BR-182, wireframe T13)."
+  },
+  "trashUndoAction": "Undo",
+  "@trashUndoAction": {
+    "description": "Snackbar action that reverses the deletion just made (BR-189)."
+  },
+  "trashUndoFailed": "That couldn’t be undone.",
+  "@trashUndoFailed": {
+    "description": "Shown when Undo is refused (UC-12 E3)."
   }
 }

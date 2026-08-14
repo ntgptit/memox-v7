@@ -101,9 +101,22 @@ abstract interface class DeckRepository {
   /// What deleting [deckId] would remove — shown before the delete (BR-04).
   Future<DeckDeletionImpact> getDeletionImpact(String deckId);
 
-  /// Deletes a deck; descendants, cards, study states, history and sessions
-  /// go with it by cascade (BR-03).
+  /// Moves a deck and its whole active subtree to Trash (BR-182, BR-184).
+  ///
+  /// **Nothing is destroyed.** Since v8 this marks one deletion batch: rows
+  /// stay, so cards keep their ids, study states, history and tags until the
+  /// batch is purged (BR-185). Every active surface loses the subtree in the
+  /// same instant (BR-183), and a non-root parent left empty goes back to
+  /// `unset` in the same transaction (BR-186).
   Future<void> deleteDeck(String deckId);
+
+  /// The same deletion, returning the batch id so the caller can offer Undo
+  /// (BR-182, BR-189).
+  ///
+  /// A separate method rather than a return value on [deleteDeck], because
+  /// almost every caller has no Undo to offer and a batch id it must not hold
+  /// on to — a stale one names a batch that has since been restored or purged.
+  Future<String> deleteDeckForUndo(String deckId);
 
   /// Resets a root deck's learning progress, optionally onto a new scheduler
   /// (UC-07).

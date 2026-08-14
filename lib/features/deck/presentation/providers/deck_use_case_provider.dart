@@ -57,6 +57,11 @@ RenameDeckUseCase renameDeckUseCase(Ref ref) =>
 DeleteDeckUseCase deleteDeckUseCase(Ref ref) =>
     DeleteDeckUseCase(ref.watch(deckRepositoryProvider));
 
+/// The delete that reports its batch, for the one caller that offers Undo.
+@riverpod
+DeleteDeckForUndoUseCase deleteDeckForUndoUseCase(Ref ref) =>
+    DeleteDeckForUndoUseCase(ref.watch(deckRepositoryProvider));
+
 @riverpod
 ResetLearningProgressUseCase resetLearningProgressUseCase(Ref ref) =>
     ResetLearningProgressUseCase(ref.watch(deckRepositoryProvider));

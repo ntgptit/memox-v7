@@ -5,6 +5,7 @@ import 'package:memox/features/card/data/repositories/card_repository_impl.dart'
 import 'package:memox/features/card/domain/failures/card_validation_failure.dart';
 import 'package:memox/features/card/domain/models/card_text_model.dart';
 import 'package:memox/features/card/domain/models/tag_name_model.dart';
+import '../../../support/trash_wiring.dart';
 
 /// The boundary IT-ORG-007/008 stopped at: after a tag write, does the card
 /// list stream re-emit with the new tag names?
@@ -22,6 +23,10 @@ void main() {
       addTearDown(db.close);
       final repository = CardRepositoryImpl(
         db,
+        trash: contentTrashForTest(
+          db,
+          clock: () => DateTime.utc(2026, 8, 5, 9),
+        ),
         clock: () => DateTime.utc(2026, 8, 5, 9),
         idGenerator: _ids(),
       );

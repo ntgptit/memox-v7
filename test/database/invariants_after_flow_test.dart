@@ -90,13 +90,22 @@ void main() {
     await h.deckRepository.deleteDeck(root.id);
     await expectEveryInvariantClean('after deleting the root deck');
 
-    // Nothing survives the cascade, which is itself an invariant of the flow:
-    // a delete that left a card behind would satisfy every query above simply
-    // by having no deck left to contradict.
+    // **Nothing is visible, and everything is still there** — the whole of the
+    // v8 change in two numbers (BR-182, BR-185). This used to assert that the
+    // cascade left no card row at all; it now asserts the two halves that
+    // replaced it, because a delete that left an *active* card behind would
+    // satisfy every query above simply by having no deck left to contradict.
+    final visible = await h.db
+        .customSelect(
+          'SELECT COUNT(*) AS c FROM cards WHERE delete_batch_id IS NULL',
+        )
+        .getSingle();
+    expect(visible.read<int>('c'), 0);
+
     final remaining = await h.db
         .customSelect('SELECT COUNT(*) AS c FROM cards')
         .getSingle();
-    expect(remaining.read<int>('c'), 0);
+    expect(remaining.read<int>('c'), 1);
   });
 
   test('every invariant holds after a seed and the flow on top of it', () async {
