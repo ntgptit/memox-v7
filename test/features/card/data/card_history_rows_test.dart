@@ -191,15 +191,15 @@ void main() {
       // which rules they belonged to — a deck knows only its current
       // generation, so this is the only place that fact lives.
       expect(
-        page.events.skip(1).map(
-          (CardHistoryEventModel event) => event.schedulerGeneration,
-        ),
+        page.events
+            .skip(1)
+            .map((CardHistoryEventModel event) => event.schedulerGeneration),
         everyElement(1),
       );
       expect(
-        page.events.skip(1).map(
-          (CardHistoryEventModel event) => event.schedulerType,
-        ),
+        page.events
+            .skip(1)
+            .map((CardHistoryEventModel event) => event.schedulerType),
         everyElement(SchedulerType.eightBox),
       );
     });
@@ -228,7 +228,10 @@ void main() {
       expect(h.countStatements('UPDATE'), 0);
       expect(h.countStatements('DELETE'), 0);
       expect((await h.rawCard(seed.card.id))!.data, before!.data);
-      expect((await h.rawStates(seed.card.id)).single.data, stateBefore.single.data);
+      expect(
+        (await h.rawStates(seed.card.id)).single.data,
+        stateBefore.single.data,
+      );
       expect(await h.countAll('study_answers'), 60);
     });
 

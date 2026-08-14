@@ -65,9 +65,7 @@ Future<GoRouter> pumpCardDetail(
 
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [
-        cardDetailRepositoryProvider.overrideWithValue(repository),
-      ],
+      overrides: [cardDetailRepositoryProvider.overrideWithValue(repository)],
       child: MaterialApp.router(
         theme: theme ?? buildLightTheme(),
         locale: locale,

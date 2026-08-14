@@ -173,11 +173,7 @@ void main() {
       final repository = FakeCardDetailRepository()
         ..seededDetail = fakeCardDetail()
         ..pages.add(fakeHistoryPage(count: 1));
-      await pumpCardDetail(
-        tester,
-        repository,
-        locale: const Locale('vi'),
-      );
+      await pumpCardDetail(tester, repository, locale: const Locale('vi'));
       await tester.pumpAndSettle();
 
       // The Vietnamese labels prove the whole band went through the locale, and
@@ -291,10 +287,12 @@ void main() {
       await tester.ensureVisible(find.text('Load more'));
       await tester.pumpAndSettle();
       final loadMore = tester.getSize(
-        find.ancestor(
-          of: find.text('Load more'),
-          matching: find.byType(InkWell),
-        ).first,
+        find
+            .ancestor(
+              of: find.text('Load more'),
+              matching: find.byType(InkWell),
+            )
+            .first,
       );
       expect(
         loadMore.height,
@@ -319,10 +317,12 @@ void main() {
       await tester.pumpAndSettle();
 
       final band = tester.getSemantics(
-        find.ancestor(
-          of: find.text('The next page could not be loaded.'),
-          matching: find.byType(Semantics),
-        ).first,
+        find
+            .ancestor(
+              of: find.text('The next page could not be loaded.'),
+              matching: find.byType(Semantics),
+            )
+            .first,
       );
       // A band that appears silently is a band a screen-reader user never
       // learns about.
@@ -330,7 +330,6 @@ void main() {
       handle.dispose();
     });
   });
-
 }
 
 /// The minimum touch target the design system states (`AppSpacing`).

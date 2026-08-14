@@ -78,9 +78,7 @@ final class CardDetailRepositoryImpl implements CardDetailRepository {
   CardHistoryPageModel _toPage(List<StudyAnswer> rows) {
     final hasMore = rows.length > kCardHistoryPageSize;
     final page = hasMore ? rows.sublist(0, kCardHistoryPageSize) : rows;
-    final events = page
-        .map(cardHistoryEventFromRow)
-        .toList(growable: false);
+    final events = page.map(cardHistoryEventFromRow).toList(growable: false);
 
     return CardHistoryPageModel(
       events: events,

@@ -157,11 +157,7 @@ void main() {
   testWidgets('the schedule grid stays two columns where they fit', (
     tester,
   ) async {
-    await pumpCardDetail(
-      tester,
-      loaded(),
-      surfaceSize: const Size(390, 844),
-    );
+    await pumpCardDetail(tester, loaded(), surfaceSize: const Size(390, 844));
     await tester.pumpAndSettle();
 
     final reviewsLabel = tester.getRect(find.text('Reviews'));
@@ -177,11 +173,7 @@ void main() {
   testWidgets('the screen narrows to the compact gutter below 360dp', (
     tester,
   ) async {
-    await pumpCardDetail(
-      tester,
-      loaded(),
-      surfaceSize: const Size(320, 640),
-    );
+    await pumpCardDetail(tester, loaded(), surfaceSize: const Size(320, 640));
     await tester.pumpAndSettle();
 
     // `mxScreenGutter`, the same helper every other screen takes its gutter

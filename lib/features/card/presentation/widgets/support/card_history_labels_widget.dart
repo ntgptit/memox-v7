@@ -101,9 +101,8 @@ extension CardHistoryLabels on BuildContext {
   /// produce which line is a BR-185 question and must be stated once; only the
   /// phrasing differs, so the spoken form is a flag rather than a second
   /// function that could drift from this one the first time a field is added.
-  List<String> cardHistoryScheduleLinesSemantics(
-    CardHistoryEventModel event,
-  ) => _scheduleLines(event, spoken: true);
+  List<String> cardHistoryScheduleLinesSemantics(CardHistoryEventModel event) =>
+      _scheduleLines(event, spoken: true);
 
   /// The stage name, spoken.
   ///
@@ -132,10 +131,7 @@ extension CardHistoryLabels on BuildContext {
 
     final lines = <String>[
       if (event.previousBox != null || event.nextBox != null)
-        box(
-          _number(event.previousBox, absent),
-          _number(event.nextBox, absent),
-        ),
+        box(_number(event.previousBox, absent), _number(event.nextBox, absent)),
       if (event.previousEaseFactor != null || event.nextEaseFactor != null)
         ease(
           _ease(event.previousEaseFactor, absent),

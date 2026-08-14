@@ -38,9 +38,7 @@ void main() {
       front: cardText(front),
       back: cardText(back, side: CardSide.back),
       example: example == null ? null : cardDetail(example),
-      hint: hint == null
-          ? null
-          : cardDetail(hint, field: CardDetailField.hint),
+      hint: hint == null ? null : cardDetail(hint, field: CardDetailField.hint),
       pronunciation: pronunciation == null
           ? null
           : cardDetail(pronunciation, field: CardDetailField.pronunciation),

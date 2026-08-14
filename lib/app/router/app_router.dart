@@ -178,8 +178,7 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
                               deckId:
                                   state.pathParameters[RoutePathParams.deckId]!,
                               cardId:
-                                  state.pathParameters[RoutePathParams
-                                      .cardId]!,
+                                  state.pathParameters[RoutePathParams.cardId]!,
                             ),
                           ),
                         ],

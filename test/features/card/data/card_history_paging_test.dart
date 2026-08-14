@@ -158,7 +158,8 @@ void main() {
       expect(second.hasMore, isFalse);
       // Still one descending run across the boundary — a cursor that included
       // its own row, or skipped one, would show up here and nowhere else.
-      final sorted = <String>[...all]..sort((String a, String b) => b.compareTo(a));
+      final sorted = <String>[...all]
+        ..sort((String a, String b) => b.compareTo(a));
       expect(all, sorted);
     });
 
@@ -233,59 +234,61 @@ void main() {
       expect(h.countStatements('FROM study_answers'), 1);
     });
 
-    test('both page statements seek instead of sorting the whole history', () async {
-      final seed = await seedCard();
-      await fixture.seedRun(
-        cardId: seed.card.id,
-        sessionId: seed.session,
-        count: 120,
-      );
-
-      // **The statement drift actually ran, not one copied into the test.** A
-      // hand-written SQL string here would keep passing after the `.drift`
-      // query was changed, which is precisely the regression a plan assertion
-      // exists to catch. The interceptor already records every statement, so
-      // the plan is taken from the text that reached SQLite.
-      h.clearStatements();
-      final first = await repository().loadCardHistoryPage(seed.card.id);
-      final firstSql = h.statements.firstWhere(
-        (String line) => line.contains('FROM study_answers'),
-      );
-
-      h.clearStatements();
-      await repository().loadCardHistoryPage(
-        seed.card.id,
-        after: first.nextCursor,
-      );
-      final afterSql = h.statements.firstWhere(
-        (String line) => line.contains('FROM study_answers'),
-      );
-
-      for (final sql in <String>[firstSql, afterSql]) {
-        final plan = await h.db
-            .customSelect('EXPLAIN QUERY PLAN ${_statementOf(sql)}')
-            .get();
-        final detail = plan
-            .map((row) => row.read<String>('detail'))
-            .join(' | ');
-
-        // The index supplies `card_id` and the leading sort term. SQLite may
-        // still block-sort within each equal-`answered_at` group — that is the
-        // "RIGHT PART OF ORDER BY" plan and it keeps the early stop — but a
-        // plain "USE TEMP B-TREE FOR ORDER BY" would mean the whole history is
-        // sorted before the LIMIT is applied, which is the cost keyset paging
-        // exists to avoid. The second statement is checked too: its `OR` chain
-        // is the one shape that could quietly lose the index.
-        expect(detail, contains('idx_study_answers_card'), reason: sql);
-        expect(
-          detail,
-          isNot(contains('USE TEMP B-TREE FOR ORDER BY')),
-          reason: sql,
+    test(
+      'both page statements seek instead of sorting the whole history',
+      () async {
+        final seed = await seedCard();
+        await fixture.seedRun(
+          cardId: seed.card.id,
+          sessionId: seed.session,
+          count: 120,
         );
-      }
-    });
-  });
 
+        // **The statement drift actually ran, not one copied into the test.** A
+        // hand-written SQL string here would keep passing after the `.drift`
+        // query was changed, which is precisely the regression a plan assertion
+        // exists to catch. The interceptor already records every statement, so
+        // the plan is taken from the text that reached SQLite.
+        h.clearStatements();
+        final first = await repository().loadCardHistoryPage(seed.card.id);
+        final firstSql = h.statements.firstWhere(
+          (String line) => line.contains('FROM study_answers'),
+        );
+
+        h.clearStatements();
+        await repository().loadCardHistoryPage(
+          seed.card.id,
+          after: first.nextCursor,
+        );
+        final afterSql = h.statements.firstWhere(
+          (String line) => line.contains('FROM study_answers'),
+        );
+
+        for (final sql in <String>[firstSql, afterSql]) {
+          final plan = await h.db
+              .customSelect('EXPLAIN QUERY PLAN ${_statementOf(sql)}')
+              .get();
+          final detail = plan
+              .map((row) => row.read<String>('detail'))
+              .join(' | ');
+
+          // The index supplies `card_id` and the leading sort term. SQLite may
+          // still block-sort within each equal-`answered_at` group — that is the
+          // "RIGHT PART OF ORDER BY" plan and it keeps the early stop — but a
+          // plain "USE TEMP B-TREE FOR ORDER BY" would mean the whole history is
+          // sorted before the LIMIT is applied, which is the cost keyset paging
+          // exists to avoid. The second statement is checked too: its `OR` chain
+          // is the one shape that could quietly lose the index.
+          expect(detail, contains('idx_study_answers_card'), reason: sql);
+          expect(
+            detail,
+            isNot(contains('USE TEMP B-TREE FOR ORDER BY')),
+            reason: sql,
+          );
+        }
+      },
+    );
+  });
 }
 
 /// The SQL out of one interceptor line, with its bound variables inlined.

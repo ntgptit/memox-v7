@@ -182,9 +182,7 @@ final class _CatalogDetailRepository implements CardDetailRepository {
       answeredAt: _now.subtract(Duration(days: index + (isSecond ? 30 : 1))),
       schedulerType: isSm2 ? SchedulerType.sm2 : SchedulerType.eightBox,
       schedulerGeneration: generation,
-      kind: isLearning
-          ? StudyAnswerKind.learning
-          : StudyAnswerKind.scheduled,
+      kind: isLearning ? StudyAnswerKind.learning : StudyAnswerKind.scheduled,
       mode: isLearning ? StudyMode.fill : StudyMode.selfAssess,
       action: index.isEven ? StudyAction.remembered : StudyAction.forgotten,
       outcomeReason: index == 1 && !isLearning

@@ -62,8 +62,7 @@ class CardHistoryState {
   /// predicate that only holds where somebody remembered to patch it is the
   /// shape that turns a read failure into "this card has no reviews", which is
   /// exactly what BR-187 separates.
-  bool get isEmpty =>
-      events.isEmpty && status == CardHistoryStatus.loaded;
+  bool get isEmpty => events.isEmpty && status == CardHistoryStatus.loaded;
 
   /// Every page has been read (UC-12 A5) — the tail says so instead of offering
   /// a button with nothing behind it.

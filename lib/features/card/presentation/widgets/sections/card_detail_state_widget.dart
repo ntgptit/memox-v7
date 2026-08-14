@@ -37,10 +37,7 @@ class CardDetailStateWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        Text(
-          l10n.cardDetailStateSectionTitle,
-          style: context.texts.titleSmall,
-        ),
+        Text(l10n.cardDetailStateSectionTitle, style: context.texts.titleSmall),
         const SizedBox(height: AppSpacing.md),
         // Flag, then tags, then the display state, then the schedule — the
         // order W2 band 2 lists, so the wireframe and the screen can be read
@@ -92,10 +89,7 @@ class CardDetailStateWidget extends StatelessWidget {
       ),
       (
         l10n.cardDetailLastAnsweredLabel,
-        date(
-          state.lastAnsweredAt,
-          whenNull: l10n.cardDetailNeverAnsweredValue,
-        ),
+        date(state.lastAnsweredAt, whenNull: l10n.cardDetailNeverAnsweredValue),
       ),
       (l10n.cardDetailReviewsLabel, '${state.answerCount}'),
       (l10n.cardDetailLapsesLabel, '${state.lapseCount}'),

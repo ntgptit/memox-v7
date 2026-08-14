@@ -132,8 +132,7 @@ class CardDetailScreen extends ConsumerWidget {
   /// for a human and matching on it would break the first time it is reworded.
   Widget _failureFace(BuildContext context, WidgetRef ref, Object error) {
     final isGone =
-        error is NotFoundFailure &&
-        error.reason == CardNotFoundReason.cardGone;
+        error is NotFoundFailure && error.reason == CardNotFoundReason.cardGone;
     if (isGone) {
       return MxEmptyState(
         icon: Icons.search_off,

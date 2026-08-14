@@ -202,10 +202,7 @@ class _GenerationHeading extends StatelessWidget {
 /// **All four occupy the same slot** (M4.14 G6), so moving between them never
 /// shifts the event above.
 class _Tail extends StatelessWidget {
-  const _Tail({
-    required this.state,
-    required this.onLoadMore,
-  });
+  const _Tail({required this.state, required this.onLoadMore});
 
   final CardHistoryState state;
 

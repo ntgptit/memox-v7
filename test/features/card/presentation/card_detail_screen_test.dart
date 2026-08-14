@@ -201,9 +201,7 @@ void main() {
     ) async {
       final repository = FakeCardDetailRepository();
       await pumpCardDetail(tester, repository);
-      repository.emitDetailError(
-        const DatabaseFailure(message: 'read failed'),
-      );
+      repository.emitDetailError(const DatabaseFailure(message: 'read failed'));
       await tester.pumpAndSettle();
 
       expect(find.text('This card could not be read.'), findsOneWidget);
