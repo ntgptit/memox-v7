@@ -65,10 +65,20 @@ class DeliverDailyReminderUseCase {
   /// which posts a *second* notification for the same day — the write failing
   /// would cause exactly the harm it was added to prevent.
   ///
-  /// What is lost is the trace: the next reconcile derives its anchor from the
-  /// previous delivery instead. That is safe rather than merely tolerable —
-  /// the anchor is clamped to `now`, so the next run lands tomorrow either way;
-  /// only the extra day-skip of a run that slipped past midnight is forfeited.
+  /// What is lost is the trace, and the honest account of that is narrower than
+  /// "safe". The next reconcile derives its anchor from the *previous*
+  /// delivery, which is behind us, so it clamps to `now` and the next run lands
+  /// tomorrow — **except** for a run that had already slipped past local
+  /// midnight. That one served today, and with no trace the next run is chosen
+  /// for tonight: two summaries in one local day, which BR-185 forbids.
+  ///
+  /// So this narrows the window rather than closing it, and it is still the
+  /// right trade: before it, *every* failed write took that path within
+  /// minutes, because the failure asked the OS to retry immediately. Closing it
+  /// completely means recording the delivery *before* posting and rolling back
+  /// when the post fails — rewiring the order of two side effects, which is the
+  /// shape of change that broke something else three reviews running. It is a
+  /// follow-up, not a fix to make under the same commit.
   ///
   /// `on Object` because any thrown type has the same answer here, and the log
   /// carries no count, no deck name and no copy (BR-186).
@@ -106,6 +116,14 @@ class DeliverDailyReminderUseCase {
     // fast when the delivery was recorded and was then corrected would
     // otherwise make every day read as already served, with no way back: no
     // screen shows this column and no command rewrites it.
+    //
+    // The comparison is strict and has no tolerance, which costs something in
+    // the opposite direction: a clock moved *backwards* by Δ leaves this guard
+    // blind for Δ, and a run inside that window posts a second time. Accepted
+    // deliberately — a silent reminder that no user action can repair is far
+    // worse than a rare duplicate, and WorkManager measures its deadline
+    // against the same wall clock, so a backward step pushes the next run
+    // further away rather than nearer.
     if (lastDeliveredAt.isAfter(now)) return false;
 
     final startOfToday = LocalDayModel(

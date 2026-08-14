@@ -9404,6 +9404,16 @@ thế không đổi bố cục.
         settings **đã** tắt.
   - [x] Host gate xanh: format, analyze, architecture, guard, docs, toàn bộ host
         suite.
+  - [ ] **Gate `integration_test/` của `CLAUDE.md` — chưa chạy.** Đây là gate
+        *khác* với smoke notification bên dưới, và nó áp cho branch này vì hai
+        lý do: có thêm thứ dưới `lib/features/`, **và** `lib/app/bootstrap.dart`
+        (bọc `ReminderReconcilerWidget` quanh toàn bộ cây),
+        `lib/app/di/repository_bindings.dart` và router đều bị sửa — đúng ba
+        loại thay đổi mà `CLAUDE.md` nói host suite không nhìn thấy được, và
+        đúng loại đã làm hỏng suite trong bảy mươi PR. Cần
+        `flutter test integration_test/ -d emulator-5554 --flavor development`
+        với baseline 8/8 trước khi merge; môi trường thực thi của task này không
+        có emulator, và chỉ thị của task là hoãn phần thiết bị.
   - [ ] **Smoke notification trên emulator/thiết bị — chưa chạy, hoãn có chủ
         đích.** Host test dùng fake platform adapter và không gửi notification
         thật; hai plugin native (`workmanager`, `flutter_local_notifications`),
