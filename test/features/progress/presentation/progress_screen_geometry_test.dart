@@ -178,17 +178,30 @@ void main() {
 
         final rects = barRects(tester);
         expect(rects, hasLength(7));
+        // The floor the equalities below cannot express. Column 1 is a
+        // `FlexColumnWidth` between two `IntrinsicColumnWidth`s, so if the label
+        // and the value ever eat the card the bars shrink — all seven equally,
+        // so every assertion here still holds while the chart has quietly
+        // stopped being a chart. `RenderTable` reports no overflow for it and
+        // `MxCard` clips, so nothing else would say a word.
+        //
+        // A quarter of the card's content, not `> 0`: a 0.5dp bar passes
+        // "greater than zero" and communicates nothing, and the point of the
+        // floor is that the bar still reads as a measure. The tightest real cell
+        // measured is `320 @ 2.0 · vi` with a three-digit value, where the
+        // column is 81.1dp against a content width of 264 — comfortably clear,
+        // which is what makes a quarter a floor rather than a ceiling in
+        // disguise.
+        final double content =
+            rectOf(tester, ProgressWeekWidget).width - 2 * AppSpacing.lg;
         for (final rect in rects) {
           expect(rect.left, rects.first.left, reason: 'shared baseline');
           expect(rect.width, rects.first.width, reason: 'shared bar width');
-          // The floor the equality above cannot express. Column 1 is a
-          // `FlexColumnWidth` between two `IntrinsicColumnWidth`s, so if the
-          // label and the value ever eat the whole card the bars collapse to
-          // zero — all seven equally, so every assertion above still holds
-          // while the chart has silently stopped being a chart. `RenderTable`
-          // reports no overflow for it and `MxCard` clips, so nothing else
-          // would say a word.
-          expect(rect.width, greaterThan(0), reason: 'bar column not squeezed');
+          expect(
+            rect.width,
+            greaterThan(content / 4),
+            reason: 'bar column squeezed below a quarter of the card',
+          );
           // G10a. Read off the token rather than compared to 6: the point of
           // `ProgressWeekBarWidget.trackHeight` borrowing the enum is that the
           // two cannot drift, and an assertion against a literal would be the
@@ -297,6 +310,57 @@ void main() {
 
       expect(headline.top - label.bottom, AppSpacing.sm);
       expect(support.top - headline.bottom, AppSpacing.xs);
+    });
+
+    testWidgets('Today steps label → total by sm and its breakdown rows by xs '
+        '(G7)', (tester) async {
+      // The other two thirds of G7. The hero test above covers `label → content
+      // = sm` once and `xs` once, and both of those are the hero's own
+      // `SizedBox`es; the row that G7 actually names — "giữa các dòng phân rã"
+      // — is the Learning/Reviewing pair in this section, and nothing measured
+      // it. Two sections repeating one number is exactly the shape that drifts
+      // when somebody edits one of them.
+      await pumpProgressScreen(
+        tester,
+        repository: seeded(totals: const <int>[1, 1, 1, 1, 1, 1, 4]),
+      );
+
+      final label = tester.getRect(
+        find.descendant(
+          of: find.byType(ProgressTodayWidget),
+          matching: find.text(english.progressTodaySectionLabel),
+        ),
+      );
+      final total = tester.getRect(
+        find.text(english.progressTodayCardsLabel(4)),
+      );
+      // The **rows**, not the labels inside them. A row is a `Row` of a wrapping
+      // label and a `titleMedium` figure, so the taller of the two sets its
+      // height and the label sits centred inside it — measuring label-to-label
+      // reads 8 where the gap is 4, and half of that is the figure's line box.
+      // `MergeSemantics` is the row's own widget and the only handle on it from
+      // out here, the class being private.
+      final rows = find
+          .descendant(
+            of: find.byType(ProgressTodayWidget),
+            matching: find.byType(MergeSemantics),
+          )
+          .evaluate()
+          .map((element) => tester.getRect(find.byWidget(element.widget)))
+          .toList();
+      expect(rows, hasLength(2));
+
+      expect(total.top - label.bottom, AppSpacing.sm);
+      expect(rows[1].top - rows[0].bottom, AppSpacing.xs);
+    });
+
+    testWidgets('the chart steps label → first row by sm (G7)', (tester) async {
+      await pumpProgressScreen(tester, repository: seeded());
+
+      final label = tester.getRect(find.text(english.progressWeekSectionLabel));
+      final firstRow = dayLabelRects(tester).first;
+
+      expect(firstRow.top - label.bottom, AppSpacing.sm);
     });
   });
 }

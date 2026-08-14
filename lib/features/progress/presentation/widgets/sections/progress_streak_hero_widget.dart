@@ -57,9 +57,27 @@ class ProgressStreakHeroWidget extends StatelessWidget {
                 context.l10n.progressStreakDaysLabel(
                   overview.currentStreakDays,
                 ),
-                // `displayLarge` wraps rather than shrinks: at 320dp with a text
-                // scale of 2.0 "14 days" needs two lines, and W6 forbids buying
-                // one line back by reducing the type.
+                // **The one place in this app that caps the text scaler, and it
+                // is not to buy back a line** (X6).
+                //
+                // `displayLarge` is 57px, so at a 2.0 scale the *unit word on
+                // its own* measures 268.1dp in English and 274.9dp in Vietnamese
+                // against a content column of `320 − 2×12 − 2×16 = 264dp`.
+                // Wrapping cannot help: there is no break opportunity inside
+                // "days", so the engine breaks mid-word and renders `5` / `day`
+                // / `s`. That is not one line too many, it is a word cut in
+                // half — W6.1 forbids clipping and this is worse, because it
+                // looks deliberate.
+                //
+                // 1.75 is the largest cap that fits both locales (234.6dp EN,
+                // 240.5dp VI), measured rather than picked, and it changes
+                // nothing below it: every viewport at a scale ≤ 1.75 renders
+                // exactly as before. Applied to this `Text` alone — the two
+                // other lines in the card, and every other section, keep the
+                // user's full setting.
+                textScaler: MediaQuery.textScalerOf(
+                  context,
+                ).clamp(maxScaleFactor: 1.75),
                 style: texts.displayLarge?.copyWith(color: colors.onSurface),
               ),
               const SizedBox(height: AppSpacing.xs),

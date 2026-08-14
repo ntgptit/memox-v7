@@ -58,7 +58,7 @@
   "@progressStreakZeroLine": {
     "description": "The hero's supporting line when the streak is zero (P6)."
   },
-  "progressStreakSemanticsHeadline": "{streak, plural, =0{Chưa có chuỗi nào} other{Chuỗi hiện tại, {streak} ngày}}",
+  "progressStreakSemanticsHeadline": "{streak, plural, other{Chuỗi hiện tại, {streak} ngày}}",
   "@progressStreakSemanticsHeadline": {
     "placeholders": {
       "streak": {

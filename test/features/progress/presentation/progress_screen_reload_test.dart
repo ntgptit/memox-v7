@@ -20,7 +20,7 @@ import 'support/progress_screen_harness.dart';
 /// no frame anybody can observe, and an assertion that no spinner appears passes
 /// whatever the widget's reload policy is. A real drift `watch()` needs a turn of
 /// the event loop before its first row arrives; the repository below models that.
-/// With `skipLoadingOnReload` left at its default the resume test fails: the
+/// With `shouldSkipLoadingOnReload` left at its default the resume test fails: the
 /// frame after a resume renders `MxLoadingState` over three populated sections,
 /// for as long as a full scan of `study_answers` takes. **That test is the
 /// policy pin**; the midnight one says in its own doc what it does and does not
@@ -94,7 +94,7 @@ void main() {
   /// The midnight path, for coverage rather than as the policy pin.
   ///
   /// Said plainly because the point of this file is that a green test is not
-  /// evidence: with `skipLoadingOnReload` removed, the resume test above fails
+  /// evidence: with `shouldSkipLoadingOnReload` removed, the resume test above fails
   /// and **this one still passes**. The wake-up fires inside a timer and the
   /// tree it produces settles differently from a lifecycle event, so what this
   /// asserts is that the read really re-opens at the new local day and the

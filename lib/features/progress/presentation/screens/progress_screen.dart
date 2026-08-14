@@ -54,7 +54,7 @@ class ProgressScreen extends ConsumerWidget {
         // flag the whole screen was replaced by a spinner for the length of a
         // full scan of `study_answers`, so the longer somebody's history, the
         // longer the flash.
-        skipLoadingOnReload: true,
+        shouldSkipLoadingOnReload: true,
         data: (overview) => overview.hasLifetimeActivity
             ? _ProgressSections(overview: overview)
             : const _ProgressEmptyView(),

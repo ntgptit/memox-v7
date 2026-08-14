@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/core/theme/app_spacing.dart';
@@ -84,6 +85,55 @@ void main() {
       expect(week.right, hero.right);
       expect(tester.takeException(), isNull);
     });
+
+    /// Nothing on the screen breaks a word in half at the tightest cell.
+    ///
+    /// **The assertion the rest of this file was missing.** Two tests already
+    /// rendered `320 @ 2.0` in both locales and both were green while the hero
+    /// drew `5` / `day` / `s`: they measured the card's edges, which do not
+    /// move, and asked `takeException()`, which a mid-word break does not
+    /// throw. Overflow is loud; breaking inside a word is silent.
+    ///
+    /// `getMinIntrinsicWidth` is the width of the widest run the engine cannot
+    /// break, so comparing it with the box is exactly the question "did this
+    /// have to break a word to fit". Asserted over every paragraph rather than
+    /// the headline alone: the headline is where it happened, but the property
+    /// is one the whole screen has to hold.
+    for (final ({String name, Locale locale}) language
+        in const <({String name, Locale locale})>[
+          (name: 'en', locale: Locale('en')),
+          (name: 'vi', locale: Locale('vi')),
+        ]) {
+      for (final int streak in const <int>[0, 1, 5, 14, 999]) {
+        testWidgets('no word is broken in half at 320 @ 2.0 · '
+            '${language.name} · streak $streak', (tester) async {
+          await pumpProgressScreen(
+            tester,
+            repository: seeded(streakDays: streak),
+            surface: const Size(320, 720),
+            textScale: 2,
+            locale: language.locale,
+          );
+
+          final paragraphs = find
+              .byType(RichText)
+              .evaluate()
+              .map((element) => element.renderObject! as RenderParagraph)
+              .toList();
+          expect(paragraphs, isNotEmpty);
+
+          for (final paragraph in paragraphs) {
+            expect(
+              paragraph.getMinIntrinsicWidth(double.infinity),
+              lessThanOrEqualTo(paragraph.size.width),
+              reason:
+                  'unbreakable run wider than its box in '
+                  '"${paragraph.text.toPlainText()}"',
+            );
+          }
+        });
+      }
+    }
 
     testWidgets('the error face survives Vietnamese at 320 @ 2.0', (
       tester,

@@ -58,7 +58,7 @@
   "@progressStreakZeroLine": {
     "description": "The hero's supporting line when the streak is zero (P6). An invitation, never a reproach: the person reading it has just come back."
   },
-  "progressStreakSemanticsHeadline": "{streak, plural, =0{No current streak} =1{Current streak, 1 day} other{Current streak, {streak} days}}",
+  "progressStreakSemanticsHeadline": "{streak, plural, =0{Current streak, 0 days} =1{Current streak, 1 day} other{Current streak, {streak} days}}",
   "@progressStreakSemanticsHeadline": {
     "placeholders": {
       "streak": {

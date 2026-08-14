@@ -39,7 +39,7 @@ class MxAsyncView<T> extends StatelessWidget {
     required this.data,
     required this.error,
     this.loadingFrame,
-    this.skipLoadingOnReload = false,
+    this.shouldSkipLoadingOnReload = false,
     super.key,
   });
 
@@ -91,7 +91,7 @@ class MxAsyncView<T> extends StatelessWidget {
   /// Opt-in rather than a changed default: the reasoning above is a property of
   /// one screen's dependency, and flipping it globally would let a genuinely
   /// stale value stay on screen everywhere else.
-  final bool skipLoadingOnReload;
+  final bool shouldSkipLoadingOnReload;
 
   @override
   Widget build(BuildContext context) {
@@ -106,7 +106,7 @@ class MxAsyncView<T> extends StatelessWidget {
       // A reload is a dependency change, which usually means the previous value
       // answers a question nobody is asking any more — so `false` by default,
       // and the field's doc explains the one screen that is not like that.
-      skipLoadingOnReload: skipLoadingOnReload,
+      skipLoadingOnReload: shouldSkipLoadingOnReload,
       loading: _buildLoading,
       data: data,
       error: error,

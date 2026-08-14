@@ -29,7 +29,7 @@ vừa rồi ra sao"** (Last 7 days). Không có câu thứ tư trong v1 (BR-191)
 | P5 | Ý nghĩa MUST NOT chỉ nằm ở màu: Learning/Reviewing luôn có **nhãn chữ + số**, không chỉ hai chấm màu | WCAG 1.4.1. Hai vai màu của app phân biệt tốt ở cả hai theme, nhưng đó không phải lý do để bỏ nhãn | 2026-08-13 |
 | P6 | Streak 0 dùng **lời mời trung tính**, MUST NOT dùng lời trách hay hình ảnh "chuỗi đã đứt" | Người mở Progress sau một ngày nghỉ không cần bị chấm điểm. Trung tính cũng là điều kiện để mặt này dùng lại được cho người chưa từng học | 2026-08-13 |
 | P7 | Mặt **lifetime empty** thay **cả màn**, không phải ba section toàn số 0, và mang một CTA thật sang branch Study | Ba khối số 0 trông như lỗi đọc dữ liệu. CTA phải là điều hướng thật — một nút không đi đâu là một nút nói dối | 2026-08-13 |
-| P8 | Live refresh và midnight rollover MUST NOT hạ màn về loading khi trên màn đã có dữ liệu | Cờ đúng ở đây là **`skipLoadingOnReload`**, không phải `skipLoadingOnRefresh`. Cả hai đường đều tới qua một **reload**: chúng đổi `progressNowProvider`, mà đó là dependency của controller — và đường thứ ba đổi nó là **mọi lần app resume**, thường xuyên hơn hẳn hai đường kia. `MxAsyncView` mặc định `skipLoadingOnReload: false` (đúng cho những màn mà dependency đổi nghĩa là câu hỏi đã đổi), nên `ProgressScreen` MUST opt-in `true`. Ghim ở `progress_screen_reload_test.dart`, và nó cần một repository phát emission **bất đồng bộ**: fake dùng chung yield seed đồng bộ nên assertion "không có spinner" xanh bất kể cờ nào (BR-189) | 2026-08-14 |
+| P8 | Live refresh và midnight rollover MUST NOT hạ màn về loading khi trên màn đã có dữ liệu | Cờ đúng ở đây là **`shouldSkipLoadingOnReload`**, không phải `skipLoadingOnRefresh`. Cả hai đường đều tới qua một **reload**: chúng đổi `progressNowProvider`, mà đó là dependency của controller — và đường thứ ba đổi nó là **mọi lần app resume**, thường xuyên hơn hẳn hai đường kia. `MxAsyncView` mặc định `skipLoadingOnReload: false` (đúng cho những màn mà dependency đổi nghĩa là câu hỏi đã đổi), nên `ProgressScreen` MUST opt-in `true`. Ghim ở `progress_screen_reload_test.dart`, và nó cần một repository phát emission **bất đồng bộ**: fake dùng chung yield seed đồng bộ nên assertion "không có spinner" xanh bất kể cờ nào (BR-189) | 2026-08-14 |
 | P9 | Không kéo-để-làm-mới | Stream đã là nguồn sự thật và midnight đã có timer; một cử chỉ refresh cho dữ liệu tự cập nhật là affordance nói sai về cơ chế | 2026-08-13 |
 
 ## W-cấu trúc
@@ -64,7 +64,10 @@ Shell dùng `isScrollable: true`: ở 320dp @ 2.0 ba section cao hơn màn.
    (`7 days` / `7 ngày`, dạng ICU plural).
 3. Dòng phụ: số card **hôm nay** — `12 cards today` / `12 thẻ hôm nay`. Đây là
    cầu nối sang S2 và là lý do headline không cần tự giải thích.
-4. Streak = 0: headline vẫn là số `0` với đơn vị, dòng phụ đổi thành lời mời
+4. Streak = 0: headline vẫn là số `0` với đơn vị — và nhãn screen reader nói đúng
+   câu đó (`Current streak, 0 days` / `Chuỗi hiện tại, 0 ngày`), không rút gọn
+   thành `No current streak`: mắt và trình đọc màn hình phải nghe cùng một thứ.
+   Dòng phụ đổi thành lời mời
    trung tính — `Study today to start a streak` / `Học hôm nay để bắt đầu một
    chuỗi` (P6).
 5. Streak giữ từ hôm qua (hôm nay chưa học, BR-187): headline giữ số ngày, dòng
@@ -160,8 +163,9 @@ Last 7 days
 | X1 | Track của biểu đồ rất nhạt so với mặt card | **1.27:1** light (`progressTrack` trên `surface`), **1.35:1** dark | Track là trang trí: mỗi hàng đã nói giá trị bằng chữ số và tên ngày, còn bar mang `ExcludeSemantics` (P5). WCAG 1.4.11 áp cho graphic **cần thiết để hiểu nội dung**, và cái này không phải. Quan trọng hơn: `progressTrack` là track dùng chung của cả app (`MxProgressBar`), nên nâng nó là quyết định thiết kế cho mọi thanh cùng lúc — sửa riêng ở đây tạo hai loại track trông khác nhau. Con số nằm trong `progress_chart_contrast_test.dart` để lần đổi sau là một sửa đổi có chủ đích |
 | X2 | Strict visual audit chạy ở một viewport cố định của harness, không phải ba viewport của W6.1 | — | Hai nửa của W6 do hai suite khác nhau nhìn: audit đọc **paint graph** (màu, surface column) ở bốn state × hai theme; `progress_screen_geometry_test.dart` đọc **rect** ở ba viewport × hai locale. `memoxProductionScreenAuditTest` không nhận viewport, nên gộp lại sẽ là một thay đổi harness chạm mọi companion đang có |
 | X3 | State `loading` không có mặt trong audit | — | Nó là `MxLoadingState` một mình trong cùng shell; danh tính và nhãn screen reader được `progress_screen_test.dart` khẳng định, và màu của nó thuộc component đó chứ không thuộc màn này |
-| X4 | Node semantics của một hàng biểu đồ chỉ rộng bằng **cột nhãn**, không phủ track và con số | rect node ≈ bề rộng cột 0 (30–100dp tuỳ locale và text scale), không phải bề rộng card | `Table` không cho bọc một `TableRow`, nên chỉ có hai lựa chọn: một node neo ở nhãn, hoặc ba mảnh rời trong đó con số đã mất tên ngày của nó (W6.4). Bỏ `Table` để lấy rect rộng hơn thì mất chính lý do `Table` được chọn — G8/G10, bảy bar trên **một** baseline ở mọi text scale. Hệ quả đã đo và chấp nhận: explore-by-touch chạm vào bar hoặc vào con số không đọc gì; đọc tuần tự và swipe qua từng node thì đủ câu, và đó là cách đọc một biểu đồ bảy hàng |
-| X5 | Bar không dùng `MxProgressBar`, mà dựng `ClipRRect` + hai `DecoratedBox` | render giống hệt: `AppRadius.sm` (8) bị `ClipRRect` kẹp về 3 trên hộp cao 6dp, tức bằng pill; chiều cao vẫn đọc từ `MxProgressBarSize.sm.trackHeight` | Hai lý do đều là hành vi, không phải hình: `MxProgressBar` mang `TweenAnimationBuilder`, nên bảy bar sẽ chạy animation mỗi lần stream emit — mà stream này emit sau **mọi** lượt trả lời (BR-189); và nó mang `Semantics` riêng, trong khi W6.4 yêu cầu đúng một node cho cả hàng, neo ở nhãn. Token thì vẫn dùng chung: chiều cao lấy thẳng từ enum, hai màu là `progressTrack`/`progressFill` và được strict audit đọc từ paint graph |
+| X4 | Node semantics của một hàng biểu đồ chỉ rộng bằng **cột nhãn**, không phủ track và con số | Đo tại HEAD: **41.7dp** ở `390 · en`, **82.1dp** ở `320 @ 2.0 · en`, **119.3dp** ở `320 @ 2.0 · vi` — tức dải thật là ≈41–120dp, không phải bề rộng card | `Table` không cho bọc một `TableRow`, nên chỉ có hai lựa chọn: một node neo ở nhãn, hoặc ba mảnh rời trong đó con số đã mất tên ngày của nó (W6.4). Bỏ `Table` để lấy rect rộng hơn thì mất chính lý do `Table` được chọn — G8/G10, bảy bar trên **một** baseline ở mọi text scale. Hệ quả đã đo và chấp nhận: explore-by-touch chạm vào bar hoặc vào con số không đọc gì; đọc tuần tự và swipe qua từng node thì đủ câu, và đó là cách đọc một biểu đồ bảy hàng |
+| X5 | Bar không dùng `MxProgressBar`, mà dựng `ClipRRect` + hai `DecoratedBox` | Hình dạng giống hệt component dùng chung: cùng `AppRadius.pill`, chiều cao đọc thẳng từ `MxProgressBarSize.sm.trackHeight` | Hai lý do đều là hành vi, không phải hình: `MxProgressBar` mang `TweenAnimationBuilder`, nên bảy bar sẽ chạy animation mỗi lần stream emit — mà stream này emit sau **mọi** lượt trả lời (BR-189); và nó mang `Semantics` riêng, trong khi W6.4 yêu cầu đúng một node cho cả hàng, neo ở nhãn. Token thì vẫn dùng chung: chiều cao lấy thẳng từ enum, hai màu là `progressTrack`/`progressFill` và được strict audit đọc từ paint graph |
+| X6 | Headline của S1 **kẹp text scaler ở 1.75**, là chỗ duy nhất trong app làm việc đó | Ở scale 2.0, riêng từ đơn vị đã rộng hơn cột nội dung: `days` = **268.1dp**, `ngày` = **274.9dp** so với `320 − 2×12 − 2×16 = 264dp`. Không có chỗ ngắt nào bên trong một từ, nên engine ngắt **giữa từ** — EN vẽ `5`/`day`/`s`, VI vẽ `999`/`ngà`/`y`, và headline cao 384dp. W6 cấm thu font để né tràn, nhưng cái đang xảy ra không phải thừa một dòng mà là một từ bị cắt đôi, và nó trông như cố ý. 1.75 là mức cao nhất còn vừa cả hai locale (**234.6dp** EN, **240.5dp** VI), đo chứ không chọn, và **không đổi gì ở scale ≤ 1.75**. Chỉ áp cho đúng `Text` headline; hai dòng còn lại trong card và mọi section khác giữ nguyên setting của người dùng. Ghim bằng `getMinIntrinsicWidth ≤ size.width` trên **mọi** paragraph của màn ở `320 @ 2.0` × {en, vi} × streak {0,1,5,14,999} |
 
 ## S-ma trận trạng thái
 
@@ -178,7 +182,7 @@ Last 7 days
 `S-f` và `S-g` được kiểm **từng frame**, không chỉ ở trạng thái nghỉ: một spinner
 chỉ hiện một frame vẫn là một cái nháy người dùng thấy, và assertion đặt ở cuối
 sẽ bỏ sót đúng ca đó. `S-g` đáng chú ý hơn `S-f` vì nó là *reload* — dependency
-`progressNow` đổi — nên nó phụ thuộc vào `skipLoadingOnReload`, và cùng đường đó
+`progressNow` đổi — nên nó phụ thuộc vào `shouldSkipLoadingOnReload`, và cùng đường đó
 được đi lại ở **mọi lần app resume**.
 
 Cái lỗ mà bản đầu của mục này tự ghi ra — "test chưa phủ được một lần đọc SQLite
@@ -186,7 +190,7 @@ thật chậm hơn một frame; nguồn trong test trả lời đồng bộ" —
 nằm: với nguồn đồng bộ, assertion "không có frame loading" xanh dù cờ đặt thế
 nào. `progress_screen_reload_test.dart` đóng nó bằng một repository phát emission
 sau một vòng event loop, đúng hình dạng của `watch()` thật; bỏ opt-in
-`skipLoadingOnReload` ra thì test resume ở đó đỏ.
+`shouldSkipLoadingOnReload` ra thì test resume ở đó đỏ.
 
 Không có state `refreshing` riêng: không có thao tác refresh nào của người dùng
 để hiển thị (P9).
