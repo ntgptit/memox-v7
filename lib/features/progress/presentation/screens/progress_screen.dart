@@ -36,13 +36,22 @@ class ProgressScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // **One read, one snapshot** (AD-13). The `error:` builder runs after this
+    // method has returned, so watching in there would register a dependency
+    // outside the build that owns it — safe today only because it happens to be
+    // the same provider. Two watches of one provider are also two answers to one
+    // question, which is the thing AD-13 names.
+    final AsyncValue<ProgressOverview> overview = ref.watch(
+      progressOverviewControllerProvider,
+    );
+
     return MxContentShell(
       title: context.l10n.progressTitle,
       // The three sections are taller than a small screen at a large text
       // scale, and W6 forbids buying the height back by shrinking anything.
       isScrollable: true,
       body: MxAsyncView<ProgressOverview>(
-        value: ref.watch(progressOverviewControllerProvider),
+        value: overview,
         loadingLabel: context.l10n.progressLoadingLabel,
         // UC-12 UI states and P8: a live refresh and a midnight rollover are
         // transitions between two loaded states, and neither may drop the screen
@@ -77,9 +86,7 @@ class ProgressScreen extends ConsumerWidget {
             // The read the user just asked for is still running. Riverpod calls
             // a re-read of the same dependency a *refresh*, so nothing else on
             // this face changes while it runs.
-            isRetrying: ref
-                .watch(progressOverviewControllerProvider)
-                .isRefreshing,
+            isRetrying: overview.isRefreshing,
             // Re-opens the read. `invalidate` rebuilds the stream provider with
             // the same `now`; the clock only moves when the day does, which is
             // `progressNowProvider`'s job.

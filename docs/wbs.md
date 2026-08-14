@@ -9356,7 +9356,7 @@ thế không đổi bố cục.
   trong `app/di/repository_bindings.dart` và shared binding list. **Không bump
   schema version, không bảng mới, không index mới.** Phase 4 (presentation)
   xong: `ProgressNow` + `ProgressOverviewController` (timer midnight one-shot,
-  loop guard), `ProgressScreen`, ba section + một item + một support widget, 21
+  loop guard), `ProgressScreen`, ba section + một item + một support widget, 23
   key ARB EN/VI, một dòng `builder` trong `app_router.dart`, Widgetbook
   `ProgressScreen` bảy scenario, companion visual audit ở đường dẫn gương.
   Phase 5 (tests) xong: 84 test Progress — domain thuần, SQLite thật,
@@ -9400,9 +9400,10 @@ thế không đổi bố cục.
   Ba mục sửa ngoài phần đo: copy dòng "streak held" trong wireframe lệch bản
   đang chạy — **wireframe sửa theo code** vì bản đầu lặp lại đúng con số `0` mà
   S2 vừa nói và nối hai mệnh đề khác loại bằng `·`; mặt lỗi thêm
-  `Semantics(liveRegion: true)` đặt ở call site (không sửa `MxErrorState`, vốn
-  còn dùng cho lỗi đến **cùng** route chứ không phải trong lúc người dùng đang
-  đứng đó); và S-g nay được khẳng định ở mức screen chứ không chỉ ở controller.
+  `Semantics(liveRegion: true)` đặt ở call site — **đúng ở phase 7**, vì lúc đó
+  `MxErrorState` còn dùng cho cả lỗi đến cùng route; stage 1 vòng 6 của batch
+  tích hợp thì **có** sửa nó, thêm `isRetrying` với default `false`, và lý do
+  nằm ở `S-e′` của wireframe; và S-g nay được khẳng định ở mức screen chứ không chỉ ở controller.
   **S-g đáng chú ý vì nó là *reload* chứ không phải *refresh*** — dependency
   `progressNow` đổi. Bản viết ở phase 7 dừng ở đó và coi test S-g là bằng chứng;
   **stage 1 của batch tích hợp chứng minh nó không phải.** `MxAsyncView` mặc
@@ -9422,7 +9423,11 @@ thế không đổi bố cục.
 - **Goal:** Thay placeholder của branch Progress bằng một vertical slice
   read-only đọc `study_answers` thật, trả lời ba câu — chuỗi hiện tại, hôm nay,
   bảy ngày gần nhất — mà không thêm bảng, không thêm route và không ghi gì.
-- **Scope:** `docs/business-rules.md` (BR-182…BR-191), `docs/use-cases.md`
+- **Scope:** hai shared component (`lib/shared/widgets/mx_async_view.dart` —
+  `shouldSkipLoadingOnReload`; `lib/shared/widgets/mx_error_state.dart` —
+  `isRetrying`), cả hai additive với default giữ nguyên hành vi mọi call site
+  cũ, thêm ở stage 1 của batch tích hợp; `docs/business-rules.md`
+  (BR-182…BR-191), `docs/use-cases.md`
   (UC-12), `docs/architecture.md` (AD-19), `docs/product.md` (S2 + mục điều
   hướng), wireframe mới, `lib/core/database/queries/progress.drift`,
   `lib/features/progress/**`, một dòng `builder` trong `app/router/app_router.dart`,
@@ -9432,7 +9437,10 @@ thế không đổi bố cục.
 - **Editable documents:** `docs/business-rules.md`, `docs/use-cases.md`,
   `docs/architecture.md`, `docs/product.md`, `docs/wbs.md`,
   `docs/wireframes/m99-23-progress-overview.md`,
-  `docs/it-scenarios/01-navigation-and-continuity.md`
+  `docs/it-scenarios/01-navigation-and-continuity.md`,
+  `docs/it-scenarios/14-host-coverage-map.md`,
+  `docs/it-scenarios/scenario-catalog.md`,
+  `docs/reviews/design-parity-checklist.md`
 - **5Why:**
   1. **Vì sao Progress phải dùng history thật, không phải số dựng sẵn?** Vì
      AD-19 dựng branch trước feature với đúng một điều kiện: placeholder MUST
@@ -9517,9 +9525,10 @@ thế không đổi bố cục.
         mới trong `repository_bindings.dart`), tức đúng hai chỗ mà CLAUDE.md nói
         chỉ device suite mới nhìn thấy; chạy riêng cho một stage là mười lần
         30–45 phút cho cùng một câu trả lời.
-- **Deferred debt:** tám mục dưới đây được mở ở stage 1 của batch tích hợp
-  #301–#310 bởi hai recursive audit; mỗi mục có lý do vì sao **không** đóng
-  được ở đây và ai đóng nó.
+- **Deferred debt:** chín mục dưới đây được mở ở stage 1 của batch tích hợp
+  #301–#310 bởi hai recursive audit. Tám mục có lý do vì sao **không** đóng
+  được ở đây và ai đóng nó; mục 6 đã đóng ngay tại stage này và được giữ lại vì
+  nó là bài học về quy trình.
   0b. **Ngày quá khứ được phân bucket lại khi offset đổi** — owner: M99.23.
      `queries/progress.drift` áp offset của lần đọc hiện tại cho mọi hàng, nên
      một answer ghi lúc 02:00 ở UTC+7 rơi sang ngày hôm trước khi đọc ở UTC−5,
@@ -9585,8 +9594,9 @@ thế không đổi bố cục.
      production nào đổi, và đó chính là "hạ severity" mà hợp đồng review cấm.
      Lý do hoãn ("cờ nằm trong shared component, đổi nó là quyết định toàn
      app") đúng về `MxAsyncView` nhưng sai về bài toán: `MxActionButton` đã có
-     sẵn `isLoading` giữ label được vẽ và đặt spinner bên cạnh, còn
-     `MxErrorState` thì không forward nó. Bản sửa là hai dòng forward cộng một
+     sẵn `isLoading` — label giữ đúng ô layout ở `opacity 0`, spinner đè lên
+     giữa, nên rect của nút không đổi — còn `MxErrorState` thì không forward
+     nó. Bản sửa là hai dòng forward cộng một
      `isRetrying` ở call site.
   7. **Không có gate nào đối chiếu `Affected documents` của một AD với
      `Editable documents` của task sửa nó** — owner: M99.9 (chủ sở hữu

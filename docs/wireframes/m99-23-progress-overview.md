@@ -185,6 +185,7 @@ Last 7 days
 | S-d | empty-lifetime | Chưa từng có card-day nào | Mặt empty cả màn + CTA sang Study (P7) |
 | S-e | error | Stream lỗi | `MxErrorState` + `Retry`, không ghi gì (BR-190) |
 | S-f | live refresh | Answer mới trong lúc màn mở | Ở lại S-b/S-c, số đổi tại chỗ, MUST NOT về S-a (P8) |
+| S-e′ | error-retrying | Vừa chạm `Retry`, lần đọc lại chưa xong | Vẫn là mặt lỗi; nút chuyển disabled, label giữ **đúng ô layout** ở `opacity 0` và spinner `16×16` đè lên giữa — rect của nút không đổi một pixel (đo: `175.0×64.0` ở `320@2.0·en`, `112.0×48.0` ở `390·en`, delta `0.00` ở cả sáu ô). Tên nút vẫn đọc được cho screen reader qua `alwaysIncludeSemantics`; `role` chuyển `loadingSpinner`. Tương phản spinner trên nền nút busy **5.82:1** light / **3.97:1** dark. Sau lần hỏng thứ hai, spinner tắt và nút bấm lại được — MUST NOT kẹt busy |
 | S-g | midnight rollover | Qua local midnight khi màn mở | Cửa sổ trượt một ngày, Today về 0, streak theo BR-187; MUST NOT về S-a |
 
 `S-f` và `S-g` được kiểm **từng frame**, không chỉ ở trạng thái nghỉ: một spinner
@@ -200,5 +201,6 @@ nào. `progress_screen_reload_test.dart` đóng nó bằng một repository phá
 sau một vòng event loop, đúng hình dạng của `watch()` thật; bỏ opt-in
 `shouldSkipLoadingOnReload` ra thì test resume ở đó đỏ.
 
-Không có state `refreshing` riêng: không có thao tác refresh nào của người dùng
-để hiển thị (P9).
+Không có **pull-to-refresh**, nên không có state cho cử chỉ đó (P9). `Retry`
+thì có: nó là thao tác duy nhất của người dùng mở lại một lần đọc, và từ M99.23
+nó **được hiển thị** — xem `S-e′`.

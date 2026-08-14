@@ -286,6 +286,8 @@ void main() {
       await tester.pump();
       expect(repository.subscriptionCount, 1);
 
+      final Rect idleButton = tester.getRect(find.byType(MxActionButton));
+
       await tester.tap(find.text(english.progressErrorRetryAction));
       await tester.pump();
 
@@ -295,11 +297,9 @@ void main() {
       // now says the tap was received. `MxAsyncView` skips the loading branch on
       // a refresh for every screen, so without the button's own busy state a
       // person pressed Retry and nothing moved at all for as long as the read
-      // took. The label stays painted beside the spinner, so the button does not
-      // resize under the finger that just pressed it.
+      // took.
       expect(find.byType(MxLoadingState), findsNothing);
       expect(find.byType(MxErrorState), findsOneWidget);
-      expect(find.text(english.progressErrorRetryAction), findsOneWidget);
       expect(
         find.descendant(
           of: find.byType(MxActionButton),
@@ -307,6 +307,35 @@ void main() {
         ),
         findsOneWidget,
       );
+
+      // **`findsOneWidget` on the label is not enough, and that is the point.**
+      // `MxActionButton` keeps the label in the tree either way: at
+      // `opacity 0` under the spinner by default, or beside it when
+      // `shouldKeepLabelWhileLoading` is on. The first version of this
+      // assertion could not tell those apart, so a change to the second shape —
+      // which widens the button by `AppIconSize.sm + AppSpacing.sm` under the
+      // finger that just pressed it — would have been invisible to the suite.
+      //
+      // The default is the right trade here: the rect must not move. Both halves
+      // are asserted, because only together do they say which shape is on screen.
+      expect(find.text(english.progressErrorRetryAction), findsOneWidget);
+      expect(
+        tester
+            .widget<Opacity>(
+              find
+                  .ancestor(
+                    of: find.text(english.progressErrorRetryAction),
+                    matching: find.byType(Opacity),
+                  )
+                  .first,
+            )
+            .opacity,
+        0,
+        reason:
+            'the label holds its slot rather than being laid out beside '
+            'the spinner',
+      );
+      expect(tester.getRect(find.byType(MxActionButton)), idleButton);
     });
 
     testWidgets('a Retry that fails again stays on the error face and opens '
@@ -334,6 +363,24 @@ void main() {
       await tester.pump(const Duration(seconds: 5));
       expect(repository.subscriptionCount, 2);
       expect(find.byType(MxErrorState), findsOneWidget);
+
+      // **And the way out is still there.** The busy state disables the button,
+      // which is right while a read is in flight and would be a trap if it
+      // outlived one: an error face whose only control is inert is an error face
+      // with no exit. A second failure must give the button back, and it must
+      // work — asserted by pressing it, not by reading a flag, because a flag
+      // can be right while the tap goes nowhere.
+      expect(
+        find.descendant(
+          of: find.byType(MxActionButton),
+          matching: find.byType(CircularProgressIndicator),
+        ),
+        findsNothing,
+      );
+
+      await tester.tap(find.text(english.progressErrorRetryAction));
+      await tester.pump();
+      expect(repository.subscriptionCount, 3);
     });
   });
 }

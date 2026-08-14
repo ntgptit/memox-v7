@@ -21,6 +21,12 @@ class MxErrorState extends StatelessWidget {
     this.isRetrying = false,
     super.key,
   }) : assert(
+         !isRetrying || onRetry != null,
+         'isRetrying without a retry is a spinner on a button that is not '
+         'there. Same failure as the pair below: a state the widget cannot '
+         'render, accepted silently.',
+       ),
+       assert(
          (retryLabel == null) == (onRetry == null),
          'Retry needs both a label and a callback. Half of the pair is dropped '
          'silently by the build below, which leaves an error the user can read '
@@ -42,9 +48,15 @@ class MxErrorState extends StatelessWidget {
   /// moved: the person pressed a button and got no evidence the app had noticed,
   /// on a screen whose read is a full scan.
   ///
-  /// `MxActionButton` already knows how to say this — it keeps the label painted
-  /// and puts the spinner beside it, so the button does not resize under the
-  /// finger that just pressed it. All that was missing was passing it through.
+  /// `MxActionButton` already knows how to say this, and the default shape is
+  /// the right one here: the label keeps its **layout slot** at `opacity 0` with
+  /// the spinner centred over it, so the button's rect does not move by a pixel
+  /// under the finger that just pressed it. `shouldKeepLabelWhileLoading` is the
+  /// other trade — label and spinner side by side — and it widens the button by
+  /// `AppIconSize.sm + AppSpacing.sm`, which is exactly the jump this is
+  /// avoiding. The name survives for a screen reader through the button's own
+  /// `alwaysIncludeSemantics`. All that was missing was passing the flag
+  /// through.
   final bool isRetrying;
 
   @override

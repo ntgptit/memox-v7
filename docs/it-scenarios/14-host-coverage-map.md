@@ -64,7 +64,7 @@ bản muốn. Vì vậy cột trạng thái đọc là:
 | IT-NAV-008 | `HOST-WIDGET` | UC-05, BR-101 | `test/features/study/data/study_flow_test.dart` |
 | IT-NAV-009 | `HOST-WIDGET` | UC-05, BR-101, BR-146 | `test/features/study/data/study_flow_test.dart` |
 | IT-NAV-010 | `HOST-WIDGET` | UC-05, BR-82 | `test/features/study/data/study_flow_test.dart` |
-| IT-NAV-011 | `HOST-WIDGET` | AD-19 | `test/integration/widgets/navigation_widget_test.dart` |
+| IT-NAV-011 | `HOST-WIDGET` | AD-19, UC-12, BR-190 | `test/integration/widgets/navigation_widget_test.dart` |
 | IT-DECK-001 | `HOST-WIDGET + HOST-FLOW` | UC-02, BR-11 | `test/features/deck/data/deck_repository_impl_test.dart` |
 | IT-DECK-002 | `HOST-WIDGET` | UC-02, BR-02 | `test/features/deck/data/deck_repository_impl_test.dart` |
 | IT-DECK-003 | `HOST-WIDGET` | UC-02, BR-01, BR-11 | `test/features/deck/data/deck_repository_impl_test.dart` |
