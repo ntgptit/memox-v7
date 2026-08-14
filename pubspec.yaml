@@ -88,6 +88,32 @@ dependencies:
   # implementation).
   share_plus: ^13.3.0
 
+  # The daily reminder's two halves (AD-21), and they are two packages because
+  # they answer two different questions.
+  #
+  # `workmanager` owns WHEN. It is inexact by construction — WorkManager batches
+  # work against Doze and battery saver — so it needs no alarm permission at
+  # all, and BR-190 forbids one. It also survives reboot and app update without
+  # any code of ours, and it runs Dart in a background isolate, which is what
+  # makes BR-184's "re-read the workload at fire time" possible in the first
+  # place. `android_alarm_manager_plus` was the alternative and carries
+  # SCHEDULE_EXACT_ALARM in its own manifest.
+  #
+  # `flutter_local_notifications` owns WHAT IS SHOWN and the Android 13+
+  # permission. Pinned to the major the adapter is written against: 22.x is
+  # where `AndroidFlutterLocalNotificationsPlugin.requestNotificationsPermission`
+  # and the `onDidReceiveNotificationResponse` callback have their current
+  # shapes, and the permission result is a business state (BR-192) rather than
+  # a detail — a resolver free to take the next major could change what
+  # "denied" means with no code change and no review.
+  #
+  # Both ship a web implementation, so the web build keeps compiling (AD-04).
+  # Neither is *used* on web: the platform adapter reports the capability as
+  # unsupported there (BR-193), which is a product decision rather than a
+  # compilation one.
+  workmanager: ^0.10.7
+  flutter_local_notifications: ^22.3.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

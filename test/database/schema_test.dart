@@ -163,6 +163,8 @@ void main() {
         'id',
         'card_limit',
         'new_card_order',
+        'reminder_enabled',
+        'reminder_minute_of_day',
         'updated_at',
       ],
     };

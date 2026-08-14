@@ -316,4 +316,39 @@ extension _AppDatabaseMigrations on AppDatabase {
       'CREATE INDEX idx_study_answers_session ON study_answers (session_id)',
     );
   }
+
+  /// The v7 → v8 upgrade: two columns on `app_settings` (BR-182, BR-183).
+  ///
+  /// **Two `ADD COLUMN` statements and nothing else.** No row is read, rewritten
+  /// or deleted, and no table is rebuilt — which is what keeps this step apart
+  /// from the `end_reason` CHECK widening that `wbs.md` still has queued: that
+  /// one is a table rebuild, and mixing a rebuild into an additive step makes
+  /// one failure mode out of two.
+  ///
+  /// **The defaults are the specified defaults, not filler.** `0` is BR-182's
+  /// "off until the user asks", and `1200` is BR-183's 20:00 local — so an
+  /// upgraded install lands in exactly the state a fresh install starts in, and
+  /// the upgrade itself asks for no permission and schedules nothing.
+  ///
+  /// The `CHECK`s ride along on the column definitions. SQLite accepts a column
+  /// constraint in `ADD COLUMN` as long as the default is constant, and both
+  /// are; the alternative — enforcing the ranges in Dart only — would leave the
+  /// database able to hold a minute-of-day of 5000.
+  ///
+  /// Raw SQL with literal names, for the reason the whole file states: the
+  /// generated symbols describe the *latest* schema, so naming them here breaks
+  /// the day a later version renames one.
+  Future<void> _upgradeToV8() async {
+    const List<String> statements = <String>[
+      'ALTER TABLE app_settings ADD COLUMN reminder_enabled INTEGER NOT NULL '
+          'DEFAULT 0 CHECK (reminder_enabled IN (0, 1))',
+      'ALTER TABLE app_settings ADD COLUMN reminder_minute_of_day INTEGER '
+          'NOT NULL DEFAULT 1200 '
+          'CHECK (reminder_minute_of_day BETWEEN 0 AND 1439)',
+    ];
+
+    for (final statement in statements) {
+      await customStatement(statement);
+    }
+  }
 }

@@ -9,6 +9,7 @@ import '../../features/card/presentation/screens/card_list_screen.dart';
 import '../../features/deck/presentation/screens/deck_list_screen.dart';
 import '../../features/deck/presentation/screens/starter_library_screen.dart';
 import '../../features/progress/presentation/screens/progress_placeholder_screen.dart';
+import '../../features/reminder/presentation/screens/reminder_settings_screen.dart';
 import '../../features/settings/presentation/screens/settings_placeholder_screen.dart';
 import '../../features/study/presentation/screens/study_entry_screen.dart';
 import '../fallback/route_not_found_screen.dart';
@@ -200,6 +201,17 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
                 path: RoutePaths.settings,
                 name: RouteNames.settings,
                 builder: (context, state) => const SettingsPlaceholderScreen(),
+                routes: <RouteBase>[
+                  // The daily reminder, nested so its URL is
+                  // `/settings/reminders` and it stays inside the Settings
+                  // branch. The reminder feature owns the screen and the
+                  // settings feature never imports it (AD-13, M6 R1).
+                  GoRoute(
+                    path: RoutePaths.reminderSettingsRelative,
+                    name: RouteNames.reminderSettings,
+                    builder: (context, state) => const ReminderSettingsScreen(),
+                  ),
+                ],
               ),
             ],
           ),

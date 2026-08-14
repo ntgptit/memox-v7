@@ -1,7 +1,21 @@
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/database/app_database_provider.dart';
 import '../../core/time/clock_provider.dart';
+import '../../features/reminder/data/datasources/reminder_dao.dart';
+import '../../features/reminder/data/datasources/reminder_notification_data_source.dart';
+import '../../features/reminder/data/datasources/reminder_scheduler_data_source.dart';
+import '../../features/reminder/data/repositories/android_reminder_platform_repository_impl.dart';
+import '../../features/reminder/data/repositories/reminder_settings_repository_impl.dart';
+import '../../features/reminder/data/repositories/reminder_workload_repository_impl.dart';
+import '../../features/reminder/data/repositories/unsupported_reminder_platform_repository_impl.dart';
+import '../../features/reminder/di/reminder_platform_repository_provider.dart';
+import '../../features/reminder/di/reminder_settings_repository_provider.dart';
+import '../../features/reminder/di/reminder_workload_repository_provider.dart';
+import '../../features/reminder/domain/repositories/reminder_platform_repository.dart';
+import '../../features/reminder/domain/repositories/reminder_settings_repository.dart';
+import '../../features/reminder/domain/repositories/reminder_workload_repository.dart';
 import '../../features/card/data/datasources/card_import_file_data_source.dart';
 import '../../features/card/data/datasources/card_transfer_encoder_resolver_data_source.dart';
 import '../../features/card/data/repositories/card_export_destination_repository_impl.dart';
@@ -155,6 +169,46 @@ StudyRepository studyRepositoryBinding(Ref ref) =>
 Future<List<DeckTemplate>> deckTemplateCatalogBinding(Ref ref) =>
     const DeckTemplateDataSource().loadAll();
 
+/// The reminder's stored choice. Its own DAO for the reason `DeckTemplateDao`
+/// has one: `app_settings` is shared with Study, but the two features read
+/// disjoint columns, and one DAO would make every reminder write invalidate the
+/// study options stream.
+///
+/// It takes the clock because `app_settings.updated_at` is a real fact about
+/// the row; the workload repository does not, because every one of its
+/// operations is measured against a `now` the caller supplies (AD-06, AD-16).
+ReminderSettingsRepository reminderSettingsRepositoryBinding(Ref ref) =>
+    ReminderSettingsRepositoryImpl(
+      ReminderDao(ref.watch(appDatabaseProvider)),
+      clock: ref.watch(clockProvider),
+    );
+
+ReminderWorkloadRepository reminderWorkloadRepositoryBinding(Ref ref) =>
+    ReminderWorkloadRepositoryImpl(ReminderDao(ref.watch(appDatabaseProvider)));
+
+/// **The one binding that chooses a platform, and the only place that may**
+/// (BR-193, AD-21). Android gets the real adapter; Web and iOS get one that
+/// reports the capability as unsupported and refuses to pretend otherwise.
+///
+/// `kIsWeb` first, because `defaultTargetPlatform` on the web reports the
+/// *browser's* host OS — an Android phone running Chrome answers
+/// `TargetPlatform.android`, and without the first check the web build would be
+/// handed an adapter for plugins it has no business calling.
+///
+/// The Android adapter still probes at runtime (`readCapability`), so a device
+/// or a test binding where the plugin is not registered reports `unsupported`
+/// rather than throwing at the first toggle.
+ReminderPlatformRepository reminderPlatformRepositoryBinding(Ref ref) {
+  if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) {
+    return const UnsupportedReminderPlatformRepositoryImpl();
+  }
+
+  return AndroidReminderPlatformRepositoryImpl(
+    notifier: ReminderNotificationDataSource(),
+    scheduler: ReminderSchedulerDataSource(),
+  );
+}
+
 /// Every contract the app binds, as one list.
 ///
 /// **It exists because a hand-written subset of it broke sixty-six end-to-end
@@ -186,4 +240,13 @@ List<Override> repositoryBindingOverrides() => <Override>[
   deckTemplateRepositoryProvider.overrideWith(deckTemplateRepositoryBinding),
   deckTemplateCatalogProvider.overrideWith(deckTemplateCatalogBinding),
   studyRepositoryProvider.overrideWith(studyRepositoryBinding),
+  reminderSettingsRepositoryProvider.overrideWith(
+    reminderSettingsRepositoryBinding,
+  ),
+  reminderWorkloadRepositoryProvider.overrideWith(
+    reminderWorkloadRepositoryBinding,
+  ),
+  reminderPlatformRepositoryProvider.overrideWith(
+    reminderPlatformRepositoryBinding,
+  ),
 ];

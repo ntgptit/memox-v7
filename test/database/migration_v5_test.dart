@@ -71,7 +71,11 @@ void main() {
     );
 
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 5);
+    // The **current** schema, not a literal 5. Opening `AppDatabase` runs every
+    // step from 4 upwards, so validating against v5 only worked while v6 and v7
+    // were data-only; v8 adds two columns and the comparison would then fail on
+    // a migration that is behaving correctly.
+    await verifier.migrateAndValidate(db, db.schemaVersion);
     return db;
   }
 

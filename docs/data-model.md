@@ -7,8 +7,8 @@
 | **Scope** | Bảng, cột, index, quan hệ, query bất biến. Ngoài phạm vi: SQL runtime (`lib/core/database/`, chưa tồn tại) |
 | **Source of truth for** | Schema · cột và kiểu · index · query bất biến · thứ tự migration |
 | **Depends on** | `document-conventions.md`, `architecture.md`, `business-rules.md` |
-| **Updated by task** | Bất biến 30 (khoá scheduler theo BR-13) và ai ghi `first_answered_at` — kể cả backfill v7; ma trận `end_reason` nhận thêm BR-164 |
-| **Last updated** | 2026-08-12 |
+| **Updated by task** | M99.23 — hai cột nhắc học trên `app_settings` và migration v8; bảng thứ tự migration bổ sung v6, v7 |
+| **Last updated** | 2026-08-13 |
 
 Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; SQL thật nằm ở
 `lib/core/database/tables/`, hiện ở **schema v4**.
@@ -466,7 +466,25 @@ Một dòng, cho local profile. Mặc định toàn app của tùy chọn học 
 | `id` | INTEGER PK | luôn `1`; `CHECK (id = 1)` giữ bảng ở đúng một dòng |
 | `card_limit` | INTEGER NOT NULL DEFAULT 20 | trần thẻ **mỗi phiên**, không phải mỗi ngày (BR-24) |
 | `new_card_order` | TEXT NOT NULL DEFAULT 'created' | `created` \| `random` (BR-148) |
+| `reminder_enabled` | INTEGER NOT NULL DEFAULT 0 | `0` \| `1`; mặc định tắt (BR-182). `CHECK (reminder_enabled IN (0, 1))` |
+| `reminder_minute_of_day` | INTEGER NOT NULL DEFAULT 1200 | phút trong ngày **theo giờ địa phương**, `1200` = 20:00 (BR-183). `CHECK (reminder_minute_of_day BETWEEN 0 AND 1439)` |
 | `updated_at` | DATETIME NOT NULL | UTC |
+
+**Hai cột nhắc học là cột thật, không phải JSON trong `study_config`.** Chúng
+không phải tuỳ chọn học của một deck — không có ghi đè theo root, và không deck
+nào mang giá trị riêng — nên chúng thuộc đúng bảng một-dòng này. Đọc chúng ra
+kiểu đúng lúc build là điều một ô JSON không cho.
+
+**`reminder_minute_of_day` là giờ địa phương, và cố ý không quy đổi UTC.** Mọi
+cột `DATETIME` khác ở đây lưu UTC vì chúng là *thời điểm*; đây là một *giờ trong
+ngày*, và quy đổi nó sang UTC lúc lưu làm giờ nhắc trôi đúng bằng lượng offset
+đổi khi người dùng đi qua múi giờ khác — người dùng đặt 20:00 và nhận lúc 23:00
+mà không có gì nói cho họ biết tại sao (BR-183).
+
+Hai cột này chỉ có `CHECK`, không có bất biến trong mục `## Bất biến`. Lý do
+giống điều bất biến 12 nói ngược lại: một `CHECK` đã khiến giá trị ngoài miền
+không ghi được, nên một bất biến phủ chính miền đó là một test không dựng nổi
+vi phạm của chính nó.
 
 **Một bảng một dòng thay vì key-value.** Key-value đọc linh hoạt hơn nhưng mọi
 giá trị thành `TEXT` và mọi lần đọc thành một phép ép kiểu không ai kiểm; một
@@ -795,6 +813,9 @@ và cờ — xem `docs/wireframes/m4-11-card-management.md`.
 | 3 | Cột `cards.front_folded`, `back_folded` + backfill bằng Dart — sửa search không khớp chữ hoa non-ASCII |
 | 4 | Đổi tên `card_review_states`→`card_study_states`, `review_history`→`study_answers` và sáu cột (M5.0l). Không thêm, không xoá, không đụng dòng nào |
 | 5 | Toàn bộ schema Study sau brainstorm: `learned_at`, `session_kind`, `current_mode`, `cursor`, `card_limit`, `mode`, `outcome_reason`, `comparison_version`, `used_hint`, `study_config`; bảng `study_queue_items`, `app_settings`; giá trị `learning` cho `kind` và `interrupted` cho `end_reason` (M5.0s) |
+| 6 | Chuẩn hoá dữ liệu, không đổi schema: sub-deck rỗng về `content_type = 'unset'` (BR-163, M99.15) |
+| 7 | Chuẩn hoá dữ liệu, không đổi schema: backfill `decks.first_answered_at` từ `MIN(learned_at)` của cây (BR-13) |
+| 8 | Cột `app_settings.reminder_enabled`, `reminder_minute_of_day` — hai `ALTER TABLE … ADD COLUMN`, không đụng dòng nào (BR-182, BR-183, M99.23) |
 | _sau_ | Bảng `card_media` |
 | _sau_ | Cột sync (`is_pending_sync`, `version`) khi có backend (AD-03) |
 | _sau_ | `deck_templates` thành bảng runtime nếu tải template từ server |

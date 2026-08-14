@@ -209,5 +209,20 @@ CREATE TABLE app_settings (
     new_card_order TEXT NOT NULL DEFAULT 'created'
         CHECK (new_card_order IN ('created', 'random')),
 
+    -- The daily reminder (BR-182). Off until the user turns it on, which is
+    -- also what keeps the app from asking for the notification permission
+    -- before there is anything to ask for.
+    reminder_enabled INTEGER NOT NULL DEFAULT 0
+        CHECK (reminder_enabled IN (0, 1)),
+
+    -- Minute of the day in LOCAL time, 0..1439; 1200 is 20:00 (BR-183).
+    --
+    -- **Deliberately not stored as UTC**, unlike every DATETIME in this schema.
+    -- Those are instants; this is a time of day. Converting it on write makes
+    -- the reminder drift by exactly the offset change when the user crosses a
+    -- timezone — they set 20:00 and get 23:00, with nothing to explain why.
+    reminder_minute_of_day INTEGER NOT NULL DEFAULT 1200
+        CHECK (reminder_minute_of_day BETWEEN 0 AND 1439),
+
     updated_at DATETIME NOT NULL
 );

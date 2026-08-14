@@ -2631,5 +2631,81 @@
   "cardExportCloseAction": "Đóng",
   "@cardExportCloseAction": {
       "description": "The only action left when the scope is no longer valid — there is nothing to retry until the user selects again (M4.13 W3 state 7)."
+  },
+  "reminderTitle": "Nhắc học hằng ngày",
+  "@reminderTitle": {
+      "description": "Tiêu đề màn nhắc học và nhãn hàng mở nó từ Settings. Cùng một chữ ở hai chỗ là cố ý: một hàng và màn nó mở ra phải đọc như một nơi (UC-12, M6 R1)."
+  },
+  "reminderToggleLabel": "Nhắc học hằng ngày",
+  "@reminderToggleLabel": {
+      "description": "Nhãn hàng bật/tắt. Lặp lại tiêu đề màn vì hàng này là control chính của màn; một danh từ thứ hai cho cùng một thứ đọc thành một cài đặt thứ hai (M6 W3)."
+  },
+  "reminderStatusOff": "Tắt",
+  "@reminderStatusOff": {
+      "description": "Giá trị accessibility của toggle khi tắt, để trạng thái không chỉ nằm ở màu (M6 R7)."
+  },
+  "reminderStatusOn": "Bật",
+  "@reminderStatusOn": {
+      "description": "Giá trị accessibility của toggle khi bật (M6 R7, A3)."
+  },
+  "reminderTimeLabel": "Giờ nhắc",
+  "@reminderTimeLabel": {
+      "description": "Nhãn hàng mở dialog chọn giờ, và cũng là tiêu đề của chính dialog đó (M6 W4, R6)."
+  },
+  "reminderDueOnlyNote": "Chỉ nhắc khi còn thẻ đến hạn.",
+  "@reminderDueOnlyNote": {
+      "description": "Dòng supporting thứ nhất. Phát biểu BR-184 theo ngôn ngữ người dùng: ngày không nợ gì thì không nhắc, và thẻ mới không bao giờ làm phát notification. Cố ý không doạ — đây là lời hứa về sự im lặng, không phải cảnh báo."
+  },
+  "reminderPrivacyNote": "Thông báo có thể hiện tên deck và số thẻ đến hạn, kể cả trên màn hình khoá.",
+  "@reminderPrivacyNote": {
+      "description": "Dòng supporting thứ hai. Công bố về màn hình khoá mà BR-186 yêu cầu, nói trước khi người dùng bật chứ không để họ tự phát hiện. Nêu đúng cái có thể xuất hiện — tên deck và một con số."
+  },
+  "reminderPermissionDeniedTitle": "Thông báo đang bị tắt",
+  "@reminderPermissionDeniedTitle": {
+      "description": "Tiêu đề banner khi hệ điều hành từ chối quyền notification (UC-12 E1, BR-192). Gọi tên trạng thái hệ thống, không đổ lỗi người dùng."
+  },
+  "reminderPermissionDeniedMessage": "Bật thông báo cho MemoX trong cài đặt thiết bị, rồi thử lại.",
+  "@reminderPermissionDeniedMessage": {
+      "description": "Đường khôi phục khi quyền bị từ chối. Android chỉ cho hỏi một lần nên lối về là cài đặt hệ thống; app không được tự hỏi lại (BR-192)."
+  },
+  "reminderUnavailableTitle": "Thiết bị này chưa dùng được nhắc học",
+  "@reminderUnavailableTitle": {
+      "description": "Tiêu đề banner khi nền tảng không có nhắc học trong bản build này (UC-12 E2, BR-193). Không kèm hành động, vì không có đường khôi phục và một nút không chạy được còn tệ hơn không nút."
+  },
+  "reminderUnavailableMessage": "Chưa có gì được bật và chưa có lịch nào.",
+  "@reminderUnavailableMessage": {
+      "description": "Thân banner không khả dụng. Nói điều người dùng cần biết nhất: không có trạng thái bật nửa vời nào bị bỏ lại (BR-193)."
+  },
+  "reminderScheduleErrorTitle": "Chưa đặt được lịch nhắc",
+  "@reminderScheduleErrorTitle": {
+      "description": "Tiêu đề banner khi quyền đã được cấp nhưng hệ điều hành từ chối công việc nền (UC-12 E3). Không nêu chi tiết kỹ thuật, vì Failure.message không bao giờ được render."
+  },
+  "reminderScheduleErrorMessage": "Chưa bật gì cả. Thử lại sau một lát.",
+  "@reminderScheduleErrorMessage": {
+      "description": "Thân banner lỗi đặt lịch. Xác nhận rằng cài đặt vẫn tắt — điều BR-192 bảo đảm và người dùng không tự nhìn ra được."
+  },
+  "reminderSaveErrorTitle": "Chưa lưu được thay đổi",
+  "@reminderSaveErrorTitle": {
+      "description": "Tiêu đề banner khi ghi settings thất bại (UC-12 E4). Khác lỗi đặt lịch vì lần thử lại chạy lại một bước khác."
+  },
+  "reminderSaveErrorMessage": "Nhắc học vẫn giữ nguyên như trước.",
+  "@reminderSaveErrorMessage": {
+      "description": "Thân banner lỗi lưu. Nói rõ người dùng đang ở trạng thái nào, vì màn vừa quay ngược lại dưới tay họ."
+  },
+  "reminderRetryAction": "Thử lại",
+  "@reminderRetryAction": {
+      "description": "Hành động khôi phục trong các banner lỗi của nhắc học. Chạy lại đúng bước đã hỏng, không đổi gì khác."
+  },
+  "reminderNotificationTitle": "Đến giờ học rồi",
+  "@reminderNotificationTitle": {
+      "description": "Tiêu đề notification (M6 N1). Không mang số đếm và không mang tên deck — chúng nằm ở thân, nên một tiêu đề bị cắt vẫn không lộ gì riêng tư."
+  },
+  "reminderNotificationBodyOneDeck": "{count, plural, other{{count} thẻ đến hạn trong {deck}}}",
+  "@reminderNotificationBodyOneDeck": {
+      "description": "Thân notification khi đúng một deck còn nợ (M6 N2, BR-186). Tên deck và số đếm là toàn bộ dữ liệu được phép ở đây. Tiếng Việt không chia số nhiều nên chỉ có nhánh other."
+  },
+  "reminderNotificationBodyManyDecks": "{others, plural, other{{count} thẻ đến hạn trong {deck} và {others} deck khác}}",
+  "@reminderNotificationBodyManyDecks": {
+      "description": "Thân notification khi nhiều hơn một deck còn nợ (M6 N3, BR-186). Deck được nêu tên là deck cấp bách nhất theo thứ tự BR-187; phần còn lại là một con số, không bao giờ là danh sách."
   }
 }

@@ -21,6 +21,7 @@ part 'app_database_migrations.dart';
     'queries/deck.drift',
     'queries/card.drift',
     'queries/tag.drift',
+    'queries/reminder.drift',
   },
 )
 class AppDatabase extends _$AppDatabase {
@@ -31,7 +32,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.open() : super(openAppDatabaseConnection());
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -150,6 +151,18 @@ class AppDatabase extends _$AppDatabase {
       // Last, so it runs on top of whatever the v1…v6 steps just produced.
       if (from < 7) {
         await _upgradeToV7();
+      }
+
+      // v7 -> v8 (M99.23): two columns on `app_settings` for the daily
+      // reminder (BR-182, BR-183).
+      //
+      // Additive, and the defaults are the specified defaults rather than
+      // filler: an existing install upgrades to "reminder off, suggested time
+      // 20:00", which is exactly the state a fresh install starts in. Nothing
+      // is asked of the user and no permission is requested by the upgrade
+      // itself — that is BR-182, expressed as a default.
+      if (from < 8) {
+        await _upgradeToV8();
       }
     },
 

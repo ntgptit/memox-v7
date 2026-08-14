@@ -13,6 +13,7 @@ import 'screens/card_export_sheet_use_case.dart';
 import 'screens/card_import_screen_use_case.dart';
 import 'screens/deck_list_screen_use_case.dart';
 import 'screens/placeholder_screens_use_case.dart';
+import 'screens/reminder_screen_use_case.dart';
 import 'screens/study_screens_use_case.dart';
 import 'support/catalog_page.dart';
 import 'tokens/color_sections.dart';
@@ -121,6 +122,7 @@ class MemoxWidgetbook extends StatelessWidget {
             cardExportSheetComponent(),
             cardImportScreenComponent(),
             deckListScreenComponent(),
+            reminderSettingsScreenComponent(),
             ...studyScreenComponents(),
             ...placeholderScreenComponents(),
           ],

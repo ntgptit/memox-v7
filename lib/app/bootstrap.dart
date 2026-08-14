@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 
 import '../core/database/app_database.dart';
 import '../core/database/app_database_provider.dart';
+import '../core/navigation/route_names.dart';
 import '../core/state/provider_observer.dart';
 import '../core/time/clock_provider.dart';
 import 'di/repository_bindings.dart';
@@ -15,7 +16,9 @@ import 'app.dart';
 import 'config/env_config.dart';
 import 'config/env_config_provider.dart';
 import 'error_screen_widget.dart';
+import 'router/app_router.dart';
 import 'startup/fixture_seeder_widget.dart';
+import 'startup/reminder_reconciler_widget.dart';
 
 /// Restores the error handlers that were installed before
 /// [installErrorHandlers] replaced them.
@@ -142,9 +145,20 @@ Widget buildRootWidget(
   // `MemoxApp.router` documents: a `GoRouter` carries navigation history, so
   // one shared instance lets a route entered by one test decide where the next
   // one starts. Production passes nothing and gets the single `appRouter`.
-  child: shouldSeedFixtures
-      ? FixtureSeederWidget(child: MemoxApp(router: router))
-      : MemoxApp(router: router),
+  // The reminder reconciler wraps the seeder rather than the other way round:
+  // it is the outermost startup concern and the only one that must run in every
+  // flavor, while the seed is development-only. Both sit inside the scope so
+  // they read the bindings above.
+  //
+  // `router ?? appRouter` is evaluated **inside** the closure so a test that
+  // supplies its own router never constructs the global one — and so a tapped
+  // reminder navigates the router the app is actually running (BR-189).
+  child: ReminderReconcilerWidget(
+    onOpenStudy: () => (router ?? appRouter).goNamed(RouteNames.study),
+    child: shouldSeedFixtures
+        ? FixtureSeederWidget(child: MemoxApp(router: router))
+        : MemoxApp(router: router),
+  ),
 );
 
 /// Installs the three error boundaries and returns a callback that puts the

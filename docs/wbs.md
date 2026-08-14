@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.22 (five-way PR host-test sharding follow-up) |
+| **Updated by task** | M99.23 (Daily Reminders v1) |
 | **Last updated** | 2026-08-13 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -9341,6 +9341,83 @@ thế không đổi bố cục.
   aggregate check và đo lại wall-clock.
 - **Checklist phases:** 19, meta
 
+### M99.23 · Daily Reminders v1
+
+- **Status:** done
+- **Goal:** Một lời nhắc học hằng ngày, tuỳ chọn và mặc định tắt, dựng từ
+  workload đến hạn thật tại thời điểm hiện — không phải từ một payload nạp sẵn
+  hôm trước.
+- **Scope:** BR-182…BR-193, UC-12, AD-21, hai cột `app_settings` + migration v8,
+  query workload theo root deck, feature slice `lib/features/reminder/`
+  (domain/data/di/presentation), route `/settings/reminders` và một hàng vào ở
+  nhánh Settings, entry point worker ở `lib/app/reminder/`, hoà giải lịch lúc
+  bootstrap, deep link khi chạm notification, ARB EN/VI, và host test cho từng
+  lớp.
+- **Out of scope:** Màn Settings đầy đủ (nhánh vẫn là placeholder, AD-19), nhắc
+  theo thẻ mới, nhiều lượt nhắc trong ngày, nhắc theo từng deck, quyền exact
+  alarm, iOS, và nhắc học trên Web (adapter báo không hỗ trợ). Smoke thật trên
+  emulator/thiết bị **hoãn sang integration worktree** — xem Acceptance criteria.
+- **Editable documents:** `docs/business-rules.md`, `docs/use-cases.md`,
+  `docs/architecture.md`, `docs/data-model.md`, `docs/wbs.md`,
+  `docs/wireframes/m6-daily-reminders.md`
+- **5Why:** Vì sao mặc định tắt? Vì một notification không ai yêu cầu là spam,
+  và xin quyền trước khi người dùng muốn là cách nhanh nhất để bị từ chối vĩnh
+  viễn — Android chỉ cho hỏi một lần. Vì sao chỉ đếm thẻ đến hạn? Vì thẻ chưa
+  học là *có thể học*, không phải *phải học*: nhắc về chúng làm lời nhắc kêu mỗi
+  ngày kể cả khi người dùng không nợ gì, và một lời nhắc luôn kêu là một lời
+  nhắc bị tắt. Vì sao một tóm tắt thay vì một notification mỗi deck? Vì số
+  notification tỉ lệ với số deck, còn quyết định của người dùng thì không — họ
+  chỉ quyết định có mở app hay không. Vì sao inexact thay vì exact alarm? Vì
+  exact alarm là quyền đặc quyền Android 12+ soi rất kỹ, và không có yêu cầu sản
+  phẩm nào nói lời nhắc phải đúng đến từng phút. Vì sao worker chứ không phải
+  notification đặt sẵn? Vì BR-186 cho phép hiện số thẻ và tên deck, và những con
+  số đó chỉ đúng nếu có Dart chạy lúc fire — nguyên nhân gốc là *nội dung phụ
+  thuộc trạng thái tại thời điểm hiện*, không phải tại thời điểm đặt lịch
+  (AD-21).
+- **Output:** `lib/core/database/queries/reminder.drift`, hai cột trên
+  `app_settings` + `_upgradeToV8`, `drift_schemas/drift_schema_v8.json`,
+  `lib/features/reminder/**`, `lib/app/reminder/reminder_worker_entry.dart`,
+  `lib/app/startup/reminder_reconciler_widget.dart`, route
+  `/settings/reminders`, ARB EN/VI, và bộ test host tương ứng.
+- **Acceptance criteria:**
+  - [x] Mặc định tắt và 20:00; không xin quyền, không đặt lịch, không hiện
+        notification trước khi người dùng bật (BR-182, BR-183).
+  - [x] Chỉ overdue + due-today mới sinh notification; thẻ chưa học không tính;
+        đến giờ mà tổng bằng 0 thì bỏ lượt (BR-184).
+  - [x] Một notification mỗi ngày, id cố định; thứ tự cấp bách tất định và không
+        đếm trùng thẻ qua ancestor/descendant (BR-185, BR-187, BR-188).
+  - [x] Copy notification không mang nội dung thẻ, tag hay history; không log
+        nội dung ở bất kỳ level nào (BR-186).
+  - [x] Chạm mở Study Home, không auto-start; dismiss không mutation (BR-189).
+  - [x] Không có `SCHEDULE_EXACT_ALARM` / `USE_EXACT_ALARM` trong bất kỳ manifest
+        hay flavor nào — có test đọc manifest chứng minh (BR-190).
+  - [x] Hoà giải lịch idempotent với clock/offset tiêm vào (BR-191).
+  - [x] Từ chối quyền là trạng thái có kiểu, settings vẫn tắt, có đường thử lại,
+        không tự xin lại (BR-192).
+  - [x] Web/iOS: adapter báo capability không hỗ trợ, không crash; domain và
+        presentation không import kiểu plugin, không kiểm tra nền tảng, không
+        chạm platform IO (BR-193).
+  - [x] Host gate xanh: format, analyze, architecture, guard, docs, toàn bộ host
+        suite.
+  - [ ] **Smoke notification trên emulator/thiết bị — chưa chạy, hoãn có chủ
+        đích.** Host test dùng fake platform adapter và không gửi notification
+        thật; hai plugin native (`workmanager`, `flutter_local_notifications`),
+        việc worker mở connection SQLite thứ hai trong background isolate, và
+        thời điểm fire dưới Doze **chỉ kiểm chứng được trên máy thật**. Việc này
+        thuộc integration worktree và là điều kiện phát hành, không phải điều
+        kiện merge của PR này.
+- **Dependencies:** M4.2 (database), M5.0s (`app_settings`, `learned_at`),
+  M99.15/M99.19a (bucket widget), AD-19 (nhánh Settings)
+- **Tests required:** domain — dựng summary, đếm, thứ tự cấp bách, ranh giới
+  due/overdue, "không có thẻ mới", copy input; SQLite thật — gộp workload theo
+  root, không đếm trùng, không mutation; adapter/service — enable/disable/đổi
+  giờ/đổi timezone/reboot hook, nhánh permission, due đã cũ lúc fire,
+  idempotency, failure có kiểu, fallback Web; widget/router — luồng permission,
+  dialog chọn giờ, deep link khi chạm, semantics, 320/390/412 và text scale;
+  manifest/flavor — không có quyền exact alarm. **Không** gửi notification thật
+  trong host suite.
+- **Checklist phases:** 9, 10, 11, 12, 13, 14, 15
+
 ## Blocker
 
 | Blocker | Ảnh hưởng | Cách gỡ |
@@ -9411,7 +9488,7 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 | ~~`study_session_controller.dart` vượt trần 400 dòng của guard~~ | M5.23 | 408/400, và **warning cũng làm đỏ gate**. Class giữ toàn bộ command của phiên học, cộng summary và failure policy | **Đã trả trong cùng PR.** Tách `_loadSummary` + `StudySessionState.summary` thành `studySessionSummaryProvider` — một **query**, không phải command, nên nó chưa bao giờ thuộc về controller. Controller còn 380 dòng. Lợi ích thật chứ không chỉ số dòng: read cũ có ba call site (hết stage, leave, failure path) nên summary chỉ đúng bằng người cuối cùng nhớ đủ cả ba, và field thì sống lâu hơn phiên — quên một call site là hiện số của phiên trước dưới tiêu đề phiên mới |
 | ~~`dart format .` trong `dod_check.sh` crash trên worktree~~ | M2.2b | Bước `format` đỏ ở **mọi** lần chạy local nhiều tuần liền: `.` đi vào `.claude/worktrees/`, nơi Gradle xoá thư mục ngay giữa lúc formatter đang liệt kê → `PathNotFoundException`. Vì là lỗi môi trường chứ không phải lỗi format, mỗi lần lại được *báo cáo và đi vòng* thay vì sửa — và một gate đỏ mà ai cũng biết là đỏ thì không còn là gate | **Đã trả.** `dart_roots()` lấy tập thư mục từ `git ls-files '*.dart'` cắt tới segment đầu. Đúng câu hỏi cần hỏi — *cây làm việc **này** track những file Dart nào* — nên build output không tracked không lọt vào, worktree bị `.git/info/exclude` loại sẵn, và một thư mục top-level mới tự động được nhận. **Lỗi thứ hai nghiêm trọng hơn cái crash:** `.` đưa cho formatter source của **nhánh khác**, nên một worktree có format cũ làm gate đỏ vì code không nằm trong cây làm việc |
 | ~~`study_session_controller.dart` vượt trần 400 dòng của guard~~ | M5.24 | 423/400. Warning cũng làm đỏ gate. Class giữ toàn bộ command của phiên học | **Đã trả ở M5.25.** Không tách được bằng cơ chế ngôn ngữ — Dart không có partial class, base class Riverpod sinh ra là private, và extension trong `part` cũng không dùng được `state` (`invalid_use_of_protected_member`, đã thử và revert). Nên tách bằng **trách nhiệm**: offset nhìn lại của `browse` là view state, không phải command của phiên, và nay là `StudyBrowseTrailController`. Controller còn 387 dòng |
-| `end_reason = scheduler_reset` phải mang cả BR-164 | M99.16 | Đổi scheduler khi chưa khoá ghi cùng giá trị với Reset, nên đọc riêng cột đó thì hai sự kiện khác nhau trông giống nhau. Không mất thông tin — `study_sessions.scheduler_generation` bằng generation của root sau một lần đổi và nhỏ hơn sau một lần reset — nhưng nó bắt người đọc phải biết mẹo đó | Tên đúng là `scheduler_changed`. `study_sessions.end_reason` có `CHECK` liệt kê giá trị nên thêm một giá trị là **đổi schema**, và bump version đang thuộc về task chuẩn hoá `content_type` chạy song song (v6). Nới `CHECK` cùng lần bump schema tiếp theo — v6 của BR-163 và v7 của chính task này đều đã đi, nên là v8 — rồi đổi `deck_scheduler_repository_impl.dart` sang giá trị mới. Nới `CHECK` là rebuild bảng, không phải `ALTER`, nên nó xứng đáng một bump riêng chứ không ghép vào backfill data-only của v7 |
+| `end_reason = scheduler_reset` phải mang cả BR-164 | M99.16 | Đổi scheduler khi chưa khoá ghi cùng giá trị với Reset, nên đọc riêng cột đó thì hai sự kiện khác nhau trông giống nhau. Không mất thông tin — `study_sessions.scheduler_generation` bằng generation của root sau một lần đổi và nhỏ hơn sau một lần reset — nhưng nó bắt người đọc phải biết mẹo đó | Tên đúng là `scheduler_changed`. `study_sessions.end_reason` có `CHECK` liệt kê giá trị nên thêm một giá trị là **đổi schema**, và bump version đang thuộc về task chuẩn hoá `content_type` chạy song song (v6). Nới `CHECK` cùng lần bump schema tiếp theo, rồi đổi `deck_scheduler_repository_impl.dart` sang giá trị mới. Nới `CHECK` là rebuild bảng, không phải `ALTER`, nên nó xứng đáng một bump riêng chứ không ghép vào một migration khác. **v8 đã bị M99.23 lấy** cho hai cột nhắc học — đó là hai `ADD COLUMN` thuần, không rebuild bảng nào, nên ghép vào sẽ trộn hai loại migration khác hẳn nhau trong một bước. Mục tiêu nay là **v9** |
 | Nội dung starter là fixture, không phải nội dung production | T1.3 | Không phát hành được với nội dung này | Tìm nguồn nội dung có bản quyền rõ ràng trước M8 (BR-87) |
 | `sqlite3.wasm` và `drift_worker.js` là binary vendored trong `web/` | M4.2 | Không có bước build nào sinh ra chúng và không có bước build nào báo khi chúng cũ: app compile, load, rồi **không mở được database**. Nâng `drift` mà quên tải lại worker không có triệu chứng nào cho tới khi ai đó mở trình duyệt | `test/database/web_assets_test.dart` so version trong `pubspec.lock` với version đã pin, kèm `web/WEB_ASSETS.md` ghi URL tải. Đã kiểm tiêm lỗi: đổi `drift` thành 2.99.0 làm test đỏ |
 | Server phát web chưa gửi COOP/COEP | M4.2 | `crossOriginIsolated` là `false`, nên drift chọn backend lưu trữ kém hơn OPFS. Không có lỗi nào — chỉ là hiệu năng và độ bền khác đi, âm thầm | Thêm `Cross-Origin-Opener-Policy: same-origin` và `Cross-Origin-Embedder-Policy: require-corp` vào server phát web ở M7, và kiểm lại `crossOriginIsolated` trong E2E |

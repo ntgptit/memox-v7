@@ -20,7 +20,9 @@ import '../../../../screen_auditor.dart';
 /// at the mirrored path.
 ///
 /// Presentation-only (AD-19), so it audits in isolation with nothing
-/// overridden — see the Progress companion for the shape.
+/// overridden — see the Progress companion for the shape. It is still
+/// presentation-only after M99.23: the daily-reminder row is a link, and the
+/// screen it opens belongs to another feature.
 void main() {
   memoxProductionScreenAuditTest(
     'settings_placeholder_screen',
@@ -51,12 +53,21 @@ void main() {
         itemId: 'shell',
         reason: SkipReason.rasterOnly,
         detailContains: '_RenderInkFeatures',
-        // Two, not one: the shell mounts an AppBar for its title, and AppBar
-        // brings a second Material with its own ink layer.
-        expectedMatches: 2,
+        // Three now: the Scaffold, the AppBar, and the transparent Material
+        // inside the daily-reminder card — `ListTile` paints its ink onto the
+        // nearest Material ancestor, and `MxCard` is a DecoratedBox, so the row
+        // brings its own (M99.23).
+        expectedMatches: 3,
         rationale:
             'The Scaffold and AppBar Material ink layers. Splash and highlight '
             'are painted onto Material, so no render object carries them.',
+      ),
+      AuditSkipAllowance(
+        itemId: 'shell',
+        reason: SkipReason.customPainter,
+        detailContains: 'no painter',
+        rationale:
+            'A clip with no painter of its own, behind the daily-reminder row.',
       ),
     ],
   );
