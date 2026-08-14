@@ -21,6 +21,10 @@ part 'app_database_migrations.dart';
     'queries/deck.drift',
     'queries/card.drift',
     'queries/tag.drift',
+    // A read-only summary of `study_answers` (UC-12). It adds a statement and
+    // no table: `schemaVersion` is deliberately untouched by this file, because
+    // a named query is not a schema change.
+    'queries/progress.drift',
   },
 )
 class AppDatabase extends _$AppDatabase {

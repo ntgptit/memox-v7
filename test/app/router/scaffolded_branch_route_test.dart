@@ -9,16 +9,18 @@ import 'package:memox/app/router/route_paths.dart';
 import 'package:memox/core/navigation/route_names.dart';
 import 'package:memox/features/deck/di/deck_repository_provider.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
-import 'package:memox/features/progress/presentation/screens/progress_placeholder_screen.dart';
+import 'package:memox/features/progress/di/progress_repository_provider.dart';
+import 'package:memox/features/progress/presentation/screens/progress_screen.dart';
 import 'package:memox/features/settings/presentation/screens/settings_placeholder_screen.dart';
 import 'package:memox/features/study/di/study_repository_provider.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 
 import '../../features/deck/presentation/support/fake_deck_repository.dart';
+import '../../features/progress/presentation/support/fake_progress_repository.dart';
 import '../../features/study/domain/support/fake_study_repository.dart';
 
-/// The two scaffolded branches (AD-19), exercised through the real app root.
+/// The two branches AD-19 scaffolded, exercised through the real app root.
 ///
 /// A separate file from `app_router_test.dart` for the same reason
 /// `deck_route_test.dart` is: one file per routing concern, each with its own
@@ -26,9 +28,14 @@ import '../../features/study/domain/support/fake_study_repository.dart';
 ///
 /// What AD-19 promises and these tests hold it to: Progress and Settings are
 /// real `StatefulShellBranch`es — deep-linkable, tab-selecting, stack-keeping —
-/// while their screens stay presentation-only: no study session is opened and
-/// no write-shaped repository call is made by entering, leaving or switching
-/// between them.
+/// and the branch contract survived Progress gaining a real screen at M99.23.
+/// That is the point of keeping these tests rather than rewriting them: the
+/// path, the route name and the branch index are asserted here, and every one
+/// of those assertions passed unchanged across the replacement.
+///
+/// Settings is still presentation-only. Progress no longer is, but it is still
+/// forbidden to write (BR-190): entering, leaving or switching between the two
+/// opens no study session and makes no write-shaped repository call.
 void main() {
   final english = AppLocalizationsEn();
 
@@ -48,6 +55,7 @@ void main() {
     String? initialLocation,
     FakeDeckRepository? repository,
     FakeStudyRepository? studyRepository,
+    FakeProgressRepository? progressRepository,
   }) async {
     final router = initialLocation == null
         ? createAppRouter()
@@ -64,6 +72,20 @@ void main() {
           deckRepositoryProvider.overrideWithValue(
             repository ?? FakeDeckRepository(),
           ),
+          // Progress reads a repository now (M99.23), so the branch cannot be
+          // exercised with nothing bound. The fake is seeded rather than empty:
+          // an unseeded stream leaves the screen in its loading state, and a
+          // spinner would satisfy `findsOneWidget` on the screen type while
+          // proving nothing about the branch having content.
+          progressRepositoryProvider.overrideWithValue(
+            progressRepository ??
+                FakeProgressRepository(
+                  initial: progressOverviewFixture(
+                    totals: const <int>[1, 0, 2, 0, 3, 0, 4],
+                    streakDays: 1,
+                  ),
+                ),
+          ),
         ],
         child: MemoxApp(router: router),
       ),
@@ -73,7 +95,7 @@ void main() {
     return router;
   }
 
-  testWidgets('tapping Progress opens the placeholder on its own tab', (
+  testWidgets('tapping Progress opens the screen on its own tab', (
     tester,
   ) async {
     await pumpApp(tester);
@@ -81,7 +103,7 @@ void main() {
     await tester.tap(tab(english.navigationProgressLabel));
     await tester.pumpAndSettle();
 
-    expect(find.byType(ProgressPlaceholderScreen), findsOneWidget);
+    expect(find.byType(ProgressScreen), findsOneWidget);
     expect(selectedTab(tester), 2);
     expect(tester.takeException(), isNull);
   });
@@ -107,7 +129,7 @@ void main() {
     // button would land somewhere the user never chose to be.
     await pumpApp(tester, initialLocation: RoutePaths.progress);
 
-    expect(find.byType(ProgressPlaceholderScreen), findsOneWidget);
+    expect(find.byType(ProgressScreen), findsOneWidget);
     expect(find.byType(DeckListScreen), findsNothing);
     expect(selectedTab(tester), 2);
   });
@@ -122,7 +144,7 @@ void main() {
     expect(selectedTab(tester), 3);
   });
 
-  testWidgets('goNamed reaches both placeholder routes and moves the tab', (
+  testWidgets('goNamed reaches both branch routes and moves the tab', (
     tester,
   ) async {
     // Proves the names are actually registered — a path-based test would
@@ -131,7 +153,7 @@ void main() {
 
     router.goNamed(RouteNames.progress);
     await tester.pumpAndSettle();
-    expect(find.byType(ProgressPlaceholderScreen), findsOneWidget);
+    expect(find.byType(ProgressScreen), findsOneWidget);
     expect(selectedTab(tester), 2);
 
     router.goNamed(RouteNames.settings);
@@ -140,13 +162,13 @@ void main() {
     expect(selectedTab(tester), 3);
   });
 
-  testWidgets('visiting the placeholders opens no study session and writes '
-      'nothing', (tester) async {
-    // AD-19's hard boundary: a placeholder is presentation-only. The fake
-    // records every write-shaped call the contract has, so all of them
-    // staying empty is what "no session, no write" means at this level. The
-    // host-database half of the same claim lives in
-    // `test/integration/widgets/navigation_widget_test.dart`.
+  testWidgets('visiting Progress and Settings opens no study session and '
+      'writes nothing', (tester) async {
+    // AD-19's boundary for Settings, and BR-190's for Progress — the same
+    // observable claim from two rules. The fake records every write-shaped call
+    // the study contract has, so all of them staying empty is what "no session,
+    // no write" means at this level. The host-database half of the same claim
+    // lives in `test/integration/widgets/navigation_widget_test.dart`.
     final study = FakeStudyRepository();
     await pumpApp(tester, studyRepository: study);
 
@@ -198,7 +220,7 @@ void main() {
       router.routerDelegate.currentConfiguration.uri.path,
       RoutePaths.progress,
     );
-    expect(find.byType(ProgressPlaceholderScreen), findsOneWidget);
+    expect(find.byType(ProgressScreen), findsOneWidget);
     expect(selectedTab(tester), 2);
     expect(tester.takeException(), isNull);
   });

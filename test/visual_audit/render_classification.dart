@@ -23,6 +23,18 @@ bool renderPaintsNothing(RenderObject node) {
       node is RenderLimitedBox ||
       node is RenderPositionedBox ||
       node is RenderSizedOverflowBox ||
+      // `FractionallySizedBox`. The sibling of `RenderSizedOverflowBox` above,
+      // in the same file and with the same shape: it re-sizes its child and
+      // inherits `RenderShiftedBox.paint`, which paints the child and nothing
+      // else. Reached the audits with the Progress chart, whose fill is a
+      // fraction of its track.
+      node is RenderFractionallySizedOverflowBox ||
+      // `Table`, **only when it draws no border**. A `RenderTable` with a
+      // border, or with a decorated `TableRow`, paints those itself — so this
+      // is guarded rather than blanket, and a table that grows a border starts
+      // being reported again instead of quietly losing its colour check. The
+      // Progress chart's table has neither.
+      (node is RenderTable && node.border == null) ||
       node is RenderFittedBox ||
       node is RenderAspectRatio ||
       node is RenderBaseline ||

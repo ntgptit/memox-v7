@@ -7,7 +7,7 @@
 | **Scope** | Vấn đề, người dùng, quyết định nền tảng, phạm vi MVP, luồng nghiệp vụ chính. Ngoài phạm vi: cách triển khai |
 | **Source of truth for** | Phạm vi MVP · phân loại must/should/nice/out · quyết định platform, data posture, auth, dữ liệu nhạy cảm |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.21 (Export card: N1 nửa export thành task đang triển khai) |
+| **Updated by task** | M99.23 (Progress overview: S2 thành đã triển khai; Progress hết là placeholder) |
 | **Last updated** | 2026-08-13 |
 
 ## Problem
@@ -137,7 +137,7 @@ chọn mode chỉ xuất hiện khi có mode thứ hai.
 | # | Feature | Done when |
 |---|---|---|
 | S1 | Tìm kiếm card trong deck | Tìm theo nội dung mặt trước/sau |
-| S2 | Thống kê ôn tập cơ bản | Số card đã ôn, streak theo ngày |
+| S2 | Thống kê ôn tập cơ bản | **Đã triển khai ở v1** (M99.23, UC-12, BR-182…BR-191): số card đã học hôm nay tách Learning/Reviewing, streak theo ngày, và hoạt động bảy ngày gần nhất. Phạm vi cố ý dừng ở đó — accuracy, longest streak, goal, XP, heatmap và lọc theo deck nằm ngoài v1 (BR-191) |
 | S3 | Đảo chiều card (nghĩa → từ) | Ôn được cả hai chiều |
 
 ## Nice-to-have
@@ -168,9 +168,10 @@ trong khi branch nội bộ và màn hình gốc của nó vẫn là Decks.
 Quyết định, ràng buộc placeholder và các phương án bị loại nằm ở AD-19.
 
 - Cold start mở Decks (UC-06).
-- Progress và Settings hiện chỉ là scaffold/placeholder: có tab và route
-  **không** có nghĩa hai feature này đã hoàn thành. Thống kê vẫn là
-  should-have (S2); tùy chọn ứng dụng chưa có nghiệp vụ nào được chốt.
+- **Progress đã có màn hình thật** từ M99.23 (UC-12): streak, hôm nay và bảy
+  ngày gần nhất, đọc từ lịch sử học thật. **Settings vẫn chỉ là
+  scaffold/placeholder** — có tab và route **không** có nghĩa feature đã hoàn
+  thành, và tùy chọn ứng dụng chưa có nghiệp vụ nào được chốt (AD-19).
 - Thư viện starter (M6) là child flow bên trong tab Thư viện (branch Decks), không phải tab riêng.
 - Không có tab Profile chừng nào chưa có auth/profile domain — nhất quán với
   "Đăng nhập / tài khoản" ở Explicitly out of MVP.

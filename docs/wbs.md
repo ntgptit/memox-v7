@@ -9341,6 +9341,172 @@ thế không đổi bố cục.
   aggregate check và đo lại wall-clock.
 - **Checklist phases:** 19, meta
 
+### M99.23 · Progress overview v1 — branch Progress đọc lịch sử học thật
+
+- **Status:** **in progress** — phase 1 (docs) xong: BR-182…BR-191, UC-12,
+  AD-19 và `product.md` cập nhật, wireframe `m99-23-progress-overview.md`,
+  `check_docs.py` xanh. Phase 2 (domain) xong: `ProgressActivityDay`,
+  `ProgressOverview` với `fromActivity` giữ cửa sổ bảy ngày + streak,
+  `ProgressRepository`, `WatchProgressOverviewUseCase`. Phase 3 (data + DI)
+  xong: `queries/progress.drift` một statement hai tầng `GROUP BY`,
+  `ProgressDao` (cộng subscription `tableUpdates` thứ hai cho cascade),
+  mapper, `ProgressRepositoryImpl`, provider trong `progress/di/` + binding
+  trong `app/di/repository_bindings.dart` và shared binding list. **Không bump
+  schema version, không bảng mới, không index mới.** Phase 4 (presentation)
+  xong: `ProgressNow` + `ProgressOverviewController` (timer midnight one-shot,
+  loop guard), `ProgressScreen`, ba section + một item + một support widget, 21
+  key ARB EN/VI, một dòng `builder` trong `app_router.dart`, Widgetbook
+  `ProgressScreen` bảy scenario, companion visual audit ở đường dẫn gương.
+  Phase 5 (tests) xong: 84 test Progress — domain thuần, SQLite thật,
+  controller trên fake clock, widget/geometry/semantics — cộng ba file test cũ
+  cập nhật theo tên screen mới. Toàn bộ suite **2648 pass**; `dart format`,
+  `flutter analyze`, `check_architecture.py`, code-verification-guard,
+  `check_docs.py` và check generated đều xanh.
+  **Hai lỗi bị bắt trong lúc dựng, cả hai chỉ lộ ra khi chạy thật:** drift
+  đánh kiểu `/` là real division và truyền ngược lên biến, nên bản đầu sinh
+  `Variable<double>` cho offset — SQLite làm phép chia dấu phẩy động và
+  `dayIndex` trả về số thực không còn tên một ngày nào; đã ghim bằng
+  `(:utcOffsetSeconds | 0)` và bucket bằng `%` thay cho `/`, có test khoá lại
+  kiểu tham số. Thứ hai, `customStatement` không báo cho drift biết bảng nào
+  đổi, nên bản test đầu tiên của cascade **xanh trong khi màn hình vẫn giữ
+  lịch sử của card đã xoá** — stream cache trả lại giá trị cũ; test nay xoá
+  qua API của drift đúng như production.
+  Phase 6 (recursive architecture/logic review) xong — **APPROVE, không P0/P1/P2
+  nào về logic hay kiến trúc**; finding duy nhất là chính dòng Status này tụt
+  lại sau code, đã đóng ở đây.
+  Phase 7 (recursive UI/UX review) xong — **REQUEST CHANGES, không defect nào
+  đang render sai; toàn bộ finding là assertion còn thiếu**, đúng loại lỗi mà
+  charter của review đó coi là finding. Bảy mục đã đóng: (P1) không ô nào của
+  ma trận W6.1 ghép **VI với 320dp@2.0** — VI mang chuỗi dài nhất màn (dòng chú
+  thích partition 106 ký tự so với 79 của EN), nên ô dễ wrap khác nhất lại là ô
+  chưa từng render; geometry test nay có trục locale, năm ô viewport × locale.
+  (P1) strict visual audit chỉ chạy **một trong bảy state**; nay bốn state
+  (loaded, streak-held, empty, error) × hai theme, và W6 được chia rõ: audit đọc
+  paint graph, geometry test đọc rect ở ba viewport — ghi thành divergence X2/X3
+  trong wireframe thay vì để ngầm. (P1) G5, G7, G11 chưa có `getRect` nào — nay
+  có, vì chúng đang đúng chỉ nhờ padding mặc định của `MxCard` và mấy `SizedBox`
+  đặt tay. (P1) nghĩa vụ WCAG 1.4.11 của bar **không thứ gì phủ**:
+  `NonTextContrastRule` chỉ soi paint vai `border` còn track/fill là background,
+  nên fill-so-với-track (**3.34:1** light, **4.08:1** dark) nay có test riêng
+  ghim ngưỡng 3:1. (P1) target chạm của `Retry` chưa được kiểm trong khi CTA của
+  mặt empty thì có — đã cân lại. (P1) chưa có ca streak ba chữ số ở 320@2.0,
+  đúng thứ mà chính doc comment của hero khẳng định là phải wrap — nay có, cả EN
+  lẫn VI. (P2) `trackHeight = 6` chép lại `MxProgressBarSize.sm` bằng literal
+  kèm comment trỏ về đó — nay đọc thẳng từ enum (`final` chứ không `const`, vì
+  Dart không coi field của enum value là hằng).
+  Ba mục sửa ngoài phần đo: copy dòng "streak held" trong wireframe lệch bản
+  đang chạy — **wireframe sửa theo code** vì bản đầu lặp lại đúng con số `0` mà
+  S2 vừa nói và nối hai mệnh đề khác loại bằng `·`; mặt lỗi thêm
+  `Semantics(liveRegion: true)` đặt ở call site (không sửa `MxErrorState`, vốn
+  còn dùng cho lỗi đến **cùng** route chứ không phải trong lúc người dùng đang
+  đứng đó); và S-g nay được khẳng định ở mức screen chứ không chỉ ở controller.
+  **S-g đáng chú ý vì nó là *reload* chứ không phải *refresh*** — dependency
+  `progressNow` đổi, mà `MxAsyncView` đặt `skipLoadingOnReload: false` — nên nó
+  là đường duy nhất màn có thể tụt về spinner khi đã có dữ liệu; test dựng đúng
+  đường đó và kiểm **từng frame**, không frame nào có spinner.
+  Một divergence **cố ý giữ**: track của biểu đồ đo được **1.27:1** trên mặt
+  card ở light và **1.35:1** ở dark — rất nhạt. Giữ vì track là trang trí
+  (`ExcludeSemantics`, mỗi hàng đã nói giá trị bằng chữ số), và vì
+  `progressTrack` là track dùng chung của cả app: nâng nó là quyết định thiết kế
+  cho mọi thanh cùng lúc, không phải cho riêng màn này. Con số đã nằm trong
+  `progress_chart_contrast_test.dart` để lần đổi sau là sửa đổi có chủ đích, và
+  trong bảng divergence X1 của wireframe.
+- **Goal:** Thay placeholder của branch Progress bằng một vertical slice
+  read-only đọc `study_answers` thật, trả lời ba câu — chuỗi hiện tại, hôm nay,
+  bảy ngày gần nhất — mà không thêm bảng, không thêm route và không ghi gì.
+- **Scope:** `docs/business-rules.md` (BR-182…BR-191), `docs/use-cases.md`
+  (UC-12), `docs/architecture.md` (AD-19), `docs/product.md` (S2 + mục điều
+  hướng), wireframe mới, `lib/core/database/queries/progress.drift`,
+  `lib/features/progress/**`, một dòng `builder` trong `app/router/app_router.dart`,
+  một binding trong `app/di/repository_bindings.dart`, ARB EN/VI, test và
+  Widgetbook. **Không** đổi schema version, **không** đổi bảng, **không** đụng
+  Study write path, **không** đụng branch Settings.
+- **Editable documents:** `docs/business-rules.md`, `docs/use-cases.md`,
+  `docs/architecture.md`, `docs/product.md`, `docs/wbs.md`,
+  `docs/wireframes/m99-23-progress-overview.md`
+- **5Why:**
+  1. **Vì sao Progress phải dùng history thật, không phải số dựng sẵn?** Vì
+     AD-19 dựng branch trước feature với đúng một điều kiện: placeholder MUST
+     NOT bịa dữ liệu, vì "một thống kê bịa ra sẽ được người dùng lẫn phiên làm
+     việc sau tin là thật". Ràng buộc: dữ liệu chỉ được đến từ `study_answers`,
+     bảng append-only duy nhất ghi lại một lượt (BR-77). Trade-off: mọi con số
+     bị giới hạn bởi những gì bảng đó đã lưu — nên accuracy và longest streak
+     *có thể* tính được nhưng chưa có định nghĩa nghiệp vụ, và v1 không hiển thị
+     chúng. Mở khoá: được phép xoá placeholder và ràng buộc "chỉ placeholder"
+     của AD-19 hết hiệu lực cho riêng Progress.
+  2. **Vì sao đơn vị đếm phải chốt trước UI?** Vì cùng một dữ liệu cho ba con số
+     khác nhau tuỳ đơn vị: số hàng `study_answers`, số lượt-theo-stage, hay số
+     card riêng biệt. Một phiên `learning` sáu stage ghi sáu hàng cho **một**
+     thẻ, nên đếm hàng làm "hôm nay bạn học 6 thẻ" trong khi người dùng học một.
+     Ràng buộc: đơn vị là distinct `(localDay, cardId)` (BR-182). Trade-off:
+     người học chăm chỉ một thẻ cả ngày vẫn chỉ được tính một — chấp nhận, vì
+     con số này đo *phạm vi đã chạm*, không đo công sức. Mở khoá: SQL biết phải
+     `GROUP BY` hai lần, và UI biết phải viết chữ "thẻ" cạnh mọi con số.
+  3. **Vì sao không tạo bảng aggregate?** Vì một bảng tổng hợp là bản sao thứ hai
+     của sự thật, và nó phải được cập nhật đúng ở **năm** chỗ đã tồn tại: ghi
+     answer, reset, xoá card, xoá deck, và migration. Ràng buộc: nguồn duy nhất
+     vẫn là `study_answers`, gộp tại thời điểm đọc. Trade-off: mỗi lần đọc phải
+     quét lịch sử thay vì đọc một hàng đã tính sẵn — trả bằng việc gộp **trong
+     SQLite** thành hàng active-day chứ không kéo answer thô lên Dart. Mở khoá:
+     không đổi schema version, nên không có migration, không có snapshot test
+     mới, và PR này rebase được cạnh chín PR feature khác.
+  4. **Vì sao local-day phải dùng clock/offset injected?** Vì "hôm nay" là một
+     khoảng UTC được xác định bởi múi giờ, và `DateTime.now()` trong feature làm
+     "bây giờ" thành hai thứ — một provider cả cây override được, và một static
+     không gì với tới được (CLAUDE.md, AD-16). Ràng buộc: `clockProvider` +
+     `utcOffsetProvider` chụp **một** snapshot cho cả emission (BR-184), và SQL
+     nhận ranh giới do `LocalDayModel` tính chứ không tự dẫn xuất local midnight.
+     Trade-off: query phải nhận thêm tham số offset thay vì gọi hàm ngày của
+     SQLite — đổi lại ranh giới 23:59 và mọi UTC offset test được trên máy bất
+     kỳ. Mở khoá: midnight rollover trở thành một timer one-shot đặt theo
+     `startOfTomorrow` của chính emission, không phải một vòng polling.
+  5. **Vì sao accuracy/XP/goal bị loại khỏi v1?** Vì mỗi cái cần một BR chưa
+     tồn tại: "đúng" nghĩa là gì khác nhau giữa `eight_box` (`remembered`) và
+     `sm2` (`hard|good|easy` — chưa chốt cái nào tính là nhớ), goal cần một nơi
+     lưu và một luật đổi, XP cần một hàm điểm. Ràng buộc: BR-191 cấm hiển thị
+     chúng ở v1. Trade-off: màn hình mỏng hơn ảnh tham chiếu của các app khác —
+     chấp nhận, vì một con số không có BR đứng sau là spec viết ở tầng sai, đúng
+     lỗi mà AD-19 đã đặt tên. Mở khoá: phạm vi v1 đóng lại được, và ba section
+     là toàn bộ thứ phải xây.
+- **Output:** BR-182…BR-191, UC-12, AD-19 cập nhật, `product.md` cập nhật,
+  `docs/wireframes/m99-23-progress-overview.md`; `queries/progress.drift`;
+  domain model/repository contract/use case; DAO/mapper/repository impl;
+  provider `di/` + binding composition root; controller + screen + widgets bốn
+  bucket; ARB EN/VI; test domain/SQLite/controller/widget/geometry/visual audit;
+  entry Widgetbook.
+- **Acceptance criteria:**
+  - [x] Query gộp ở SQLite thành hàng card-day rồi active-day; không answer thô
+        lên Dart, không query từng ngày, không N+1, không bảng aggregate.
+  - [x] `learning + reviewing = total` đúng cho mọi ngày, ưu tiên Learning
+        (BR-185); một card trả lời nhiều lần trong ngày đếm một (BR-182).
+  - [x] Streak đúng cả ba nhánh của BR-187, không trần, không bị cửa sổ bảy ngày
+        cắt; bảy ngày zero-fill đúng thứ tự qua ranh giới tháng/năm và mọi UTC
+        offset (BR-186).
+  - [x] `browse` không tạo hoạt động; reset giữ nguyên mọi con số; card/deck bị
+        xoá biến khỏi mọi ngày (BR-183, BR-188).
+  - [x] Màn tự cập nhật khi có answer mới, khi card/deck bị xoá và tại local
+        midnight; timer one-shot, dispose-safe, không loop khi ranh giới đã ở
+        quá khứ, đo lại khi offset đổi (BR-189).
+  - [x] Mở/đóng/Retry/đổi tab không ghi hàng nào (BR-190), chứng minh bằng test
+        đếm ghi trên SQLite thật.
+  - [x] `/progress`, `RouteNames.progress` và branch index 2 không đổi; deep
+        link và branch preservation vẫn xanh.
+  - [x] Bảy state của wireframe render ở EN/VI, light/dark, 320dp@2.0, 390dp,
+        412dp; rect assertion pin G2/G3/G4/G6/G8/G9/G10; không overflow.
+  - [x] `dart format`, `flutter analyze`, guard kiến trúc, guard code, guard
+        docs và host test xanh.
+  - [ ] Emulator IT: deferred to integration worktree — not run.
+- **Dependencies:** M99.7, M5.0s, M5.2
+- **Tests required:** domain (distinct card-day, partition loại trừ, ba nhánh
+  streak, gap, ranh giới tháng/năm, UTC offset, zero-fill); SQLite thật (mixed
+  kind, answer trùng, emission của stream, reset giữ history, cascade xoá
+  card/deck, không mutation, đếm statement và `EXPLAIN QUERY PLAN`); controller
+  (loading/loaded/empty/error/retry, midnight tương lai/bằng/quá khứ, đổi
+  offset, dispose không loop, live update không nháy); widget/router/visual
+  (mọi state, CTA bằng tap thật, deep link, branch preservation, semantics,
+  locale/theme/viewport, `tester.getRect`); golden làm baseline regression.
+- **Checklist phases:** 14, 15
+
 ## Blocker
 
 | Blocker | Ảnh hưởng | Cách gỡ |

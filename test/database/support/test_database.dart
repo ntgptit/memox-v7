@@ -227,6 +227,12 @@ Future<void> insertHistory(
   String mode = 'self_assess',
   int? previousBox = 1,
   int? nextBox = 2,
+
+  /// When the turn was graded. Defaults to [testNow] so the callers that only
+  /// need *a* history row stay unchanged; Progress is the first reader for
+  /// which the instant is the whole subject, because a card-day is defined by
+  /// which local day this lands in (BR-182).
+  DateTime? answeredAt,
 }) async {
   await db.customInsert(
     'INSERT INTO study_answers (id, card_id, session_id, scheduler_type, '
@@ -240,7 +246,7 @@ Future<void> insertHistory(
       Variable<String>(kind),
       Variable<String>(mode),
       const Variable<String>('remembered'),
-      Variable<DateTime>(testNow),
+      Variable<DateTime>(answeredAt ?? testNow),
       if (previousBox == null)
         const Variable<int>(null)
       else

@@ -7,6 +7,7 @@ import 'package:memox/app/config/env_config_provider.dart';
 import 'package:memox/app/router/app_router.dart';
 import 'package:memox/app/router/route_paths.dart';
 import 'package:memox/features/deck/di/deck_repository_provider.dart';
+import 'package:memox/features/progress/di/progress_repository_provider.dart';
 import 'package:memox/features/study/di/study_repository_provider.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/l10n/generated/app_localizations_vi.dart';
@@ -14,6 +15,7 @@ import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 
 import '../../features/deck/presentation/support/fake_deck_repository.dart';
+import '../../features/progress/presentation/support/fake_progress_repository.dart';
 import '../../features/study/domain/support/fake_study_repository.dart';
 
 /// The destination row of the shell, after AD-19 made it four wide.
@@ -21,7 +23,13 @@ import '../../features/study/domain/support/fake_study_repository.dart';
 /// Split out of `app_navigation_shell_test.dart` when the four-branch scaffold
 /// pushed that file past the source-size ceiling; same harness, one concern —
 /// which destinations the bar carries, in which order, in which language, and
-/// how the two placeholder branches behave inside the shell's frame.
+/// how the two branches AD-19 scaffolded behave inside the shell's frame.
+///
+/// Progress stopped being a placeholder at M99.23, so the branch is pumped with
+/// a fake repository here. The 320 × 2.0 clearance claim below still measures an
+/// `MxEmptyState`, and deliberately: Progress's lifetime-empty face (UC-12 A2)
+/// is the same centred column the placeholder was, which keeps the tightest-fit
+/// measurement pointing at the same shape it was written for.
 void main() {
   final english = AppLocalizationsEn();
 
@@ -31,6 +39,7 @@ void main() {
     String initialLocation = RoutePaths.decks,
     Size surface = const Size(393, 852),
     double textScale = 1,
+    bool hasProgressActivity = true,
   }) async {
     tester.view.physicalSize = surface;
     tester.view.devicePixelRatio = 1;
@@ -45,6 +54,16 @@ void main() {
           envConfigProvider.overrideWithValue(EnvConfig.development),
           deckRepositoryProvider.overrideWithValue(repository),
           studyRepositoryProvider.overrideWithValue(FakeStudyRepository()),
+          progressRepositoryProvider.overrideWithValue(
+            FakeProgressRepository(
+              initial: progressOverviewFixture(
+                totals: hasProgressActivity
+                    ? const <int>[2, 0, 4, 1, 0, 3, 5]
+                    : const <int>[0, 0, 0, 0, 0, 0, 0],
+                streakDays: hasProgressActivity ? 1 : 0,
+              ),
+            ),
+          ),
         ],
         child: MediaQuery(
           data: MediaQueryData(textScaler: TextScaler.linear(textScale)),
@@ -57,7 +76,7 @@ void main() {
   }
 
   group('the bar on the scaffolded branches', () {
-    testWidgets('the progress branch shows its placeholder under the bar', (
+    testWidgets('the progress branch shows its content under the bar', (
       tester,
     ) async {
       await pumpShell(
@@ -66,7 +85,7 @@ void main() {
         initialLocation: RoutePaths.progress,
       );
 
-      expect(find.text(english.progressPlaceholderTitle), findsOneWidget);
+      expect(find.text(english.progressStreakSectionLabel), findsOneWidget);
       expect(find.byType(MxNavigationBar), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
@@ -85,9 +104,9 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('the progress placeholder clears the bar at 320 with '
+    testWidgets('the progress empty face clears the bar at 320 with '
         'textScaler 2.0', (tester) async {
-      // The same overflow shape as the deck empty state, on the branch that is
+      // The same overflow shape as the deck empty state, on a branch that is
       // nothing but a centred column — and with four destinations the bar is
       // at its widest, so this is the tightest fit the shell has. 320, the
       // narrowest supported surface, not the 360 the sibling file's `compact`
@@ -98,12 +117,24 @@ void main() {
         initialLocation: RoutePaths.progress,
         surface: const Size(320, 568),
         textScale: 2,
+        hasProgressActivity: false,
       );
 
-      final empty = tester.getRect(find.byType(MxEmptyState));
+      // At this size the empty face is taller than the viewport, so it
+      // scrolls — which is the correct outcome, not a defect: W6 forbids
+      // buying the height back by shrinking the type or clipping the copy.
+      // What must hold is that the action stays **reachable** and, once
+      // reached, sits clear of the bar. Measuring the unscrolled rect would
+      // assert the opposite of the design, and asserting nothing here would
+      // leave a CTA that can sit permanently under the bar undetected.
+      await tester.ensureVisible(find.text(english.progressEmptyAction));
+      await tester.pumpAndSettle();
+
+      final action = tester.getRect(find.text(english.progressEmptyAction));
       final bar = tester.getRect(find.byType(MxNavigationBar));
 
-      expect(empty.bottom, lessThanOrEqualTo(bar.top));
+      expect(find.byType(MxEmptyState), findsOneWidget);
+      expect(action.bottom, lessThanOrEqualTo(bar.top));
       expect(tester.takeException(), isNull);
     });
 

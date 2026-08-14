@@ -7,7 +7,7 @@
 | **Scope** | Must-have của MVP. Ngoài phạm vi: should/nice-to-have, và mọi thứ ở mục "Điều đã cố ý không đặc tả" |
 | **Source of truth for** | UC-xx · main/alternative/error flow · UI state matrix của từng màn |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md` |
-| **Updated by task** | M99.21 — UC-11: export card của một deck ra file (scope → format → share) |
+| **Updated by task** | M99.23 — UC-12: xem tiến độ học (streak, hôm nay, bảy ngày) |
 | **Last updated** | 2026-08-13 |
 
 Chỉ đặc tả must-have. Should-have và nice-to-have viết khi tới lượt — đặc tả
@@ -805,13 +805,79 @@ unavailable/platform error · repository error · encoder error · invalid scope
 đã có sẵn từ màn gọi; và không có state `empty`, vì scope rỗng là lỗi (E5) chứ
 không phải một màn hình trống.
 
+## UC-12 · Xem tiến độ học
+
+| | |
+|---|---|
+| **Status** | active |
+
+**Actor:** Người dùng
+**Trigger:** Chạm tab **Tiến độ / Progress** ở bottom navigation, hoặc mở deep
+link `/progress`
+**Preconditions:** Không có. Màn hình mở được kể cả khi chưa từng học một lượt
+nào — trạng thái "chưa có gì" là một mặt hợp lệ, không phải lỗi.
+
+**Main flow:**
+1. Người dùng mở tab Progress. Hệ thống chụp **một** snapshot của
+   `clockProvider` và `utcOffsetProvider` rồi dựng ranh giới ngày theo BR-184.
+2. Hệ thống mở **một** stream đọc lịch sử học, gộp ngay trong SQLite thành các
+   hàng *card-day* rồi thành các hàng *active-day* (BR-182); không tải hàng
+   `study_answers` thô lên tầng trên và không đọc từng ngày một.
+3. Trong lúc chờ emission đầu tiên, màn hình hiện trạng thái loading có nhãn
+   cho screen reader.
+4. Emission tới. Hệ thống hiển thị ba khối, cùng một snapshot:
+   **Current streak** (BR-187), **Today** với tổng số card cùng phân rã
+   Learning/Reviewing (BR-185), và **Last 7 days** đúng bảy cột theo thứ tự
+   cũ → mới, ngày trống là 0 (BR-186).
+5. Người dùng đọc xong và rời tab. Hệ thống không ghi gì trong toàn bộ luồng
+   (BR-190).
+
+**Alternative flows:**
+- **A1 — Hôm nay chưa học nhưng hôm qua có:** Today hiện 0, và streak **vẫn
+  giữ** chuỗi kết thúc ở hôm qua (BR-187). Copy nói rõ đây là chuỗi đang giữ,
+  không phải chuỗi đã mất.
+- **A2 — Chưa từng học lượt nào:** cả ba khối rỗng. Hệ thống hiện một mặt
+  empty của cả màn với CTA thật dẫn sang branch Study, không phải một màn ba
+  khối toàn số 0.
+- **A3 — Có một lượt mới ghi trong lúc màn đang mở:** người dùng học ở tab khác
+  rồi quay lại, hoặc một answer được ghi khi màn còn sống — các con số tự cập
+  nhật, không cần Retry và không nháy toàn trang (BR-189).
+- **A4 — Local midnight trôi qua trong lúc màn đang mở:** cửa sổ bảy ngày trượt
+  một ngày, Today về 0, và streak chuyển sang nhánh "hôm qua active" của
+  BR-187 — tất cả không cần thao tác nào (BR-189).
+- **A5 — Reset learning progress ở màn khác rồi quay lại:** mọi con số giữ
+  nguyên, vì reset không đụng lịch sử (BR-188).
+- **A6 — Xoá một card hoặc một deck ở màn khác rồi quay lại:** hoạt động của
+  các card đã xoá biến mất khỏi mọi ngày, kể cả ngày quá khứ (BR-188).
+- **A7 — Chỉ lướt `browse` rồi thoát:** không có gì đổi — `browse` không ghi
+  answer nên không tạo hoạt động (BR-183).
+
+**Error flows:**
+- **E1 — Đọc lịch sử thất bại:** repository map exception thành `Failure`; màn
+  hình hiện mặt lỗi kèm `Retry`. Thông báo MUST NOT lộ SQL, tên bảng hay nội
+  dung card (BR-52).
+- **E2 — Retry vẫn lỗi:** màn hình ở lại mặt lỗi; MUST NOT tự thử lại vòng lặp
+  và MUST NOT ghi gì (BR-190).
+
+**Postconditions:** Database không đổi ở mọi nhánh, kể cả nhánh lỗi và nhánh
+Retry (BR-190). Không session nào được mở, tiếp tục hay đóng.
+
+**Business rules:** BR-52, BR-105, BR-111, BR-182, BR-183, BR-184, BR-185,
+BR-186, BR-187, BR-188, BR-189, BR-190, BR-191
+
+**UI states:** loading · loaded-normal (có hoạt động trong cửa sổ) ·
+loaded-today-zero-streak-retained (A1) · empty-lifetime + CTA sang Study (A2) ·
+error + Retry (E1/E2). Live refresh (A3) và midnight rollover (A4) là **chuyển
+tiếp giữa hai loaded**, không phải state thứ sáu: chúng MUST NOT hạ màn về
+loading khi đã có dữ liệu trên màn.
+
 ## Điều đã cố ý không đặc tả
 
 | Thứ | Vì sao |
 |---|---|
 | Đưa deck con lên thành root deck | Cần quyết định scheduler mới; là tính năng riêng, không phải phép di chuyển (UC-09 A2) |
 | Tìm kiếm card (S1) | Should-have, chưa tới lượt |
-| Thống kê / streak (S2) | Should-have — `study_answers` với `kind` đã đủ dữ liệu |
+| ~~Thống kê / streak (S2)~~ | **Đã đặc tả ở M99.23** — UC-12 và BR-182…BR-191 chốt đơn vị đếm, partition, streak và phạm vi v1 trước khi viết code. Còn ngoài phạm vi v1 và vẫn chưa có BR: accuracy, longest streak, goal, XP, heatmap, lọc theo deck (BR-191) |
 | Đảo chiều card (S3) | Should-have |
 | ~~Export (nửa còn lại của N1)~~ | **Đã đặc tả ở M99.21** — UC-11 và BR-174…BR-181 chốt scope, encoder, filename, share và quyền riêng tư trước khi viết code, đúng điều kiện mà mục này đặt ra. Còn nice-to-have ngoài phạm vi export nội dung: backup/restore, sync và `.apkg`. |
 | Nhắc nhở hằng ngày (N2) | Nice-to-have, cần quyền notification |

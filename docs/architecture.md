@@ -7,7 +7,7 @@
 | **Scope** | Quyết định ràng buộc nhiều tài liệu hoặc nhiều layer. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), hình dạng dữ liệu (`data-model.md`) |
 | **Source of truth for** | AD-xx · đánh đổi kiến trúc · phương án đã bị loại · lý do pin toolchain |
 | **Depends on** | `document-conventions.md`, `product.md` |
-| **Updated by task** | M99.21 (AD-20 · nửa encode của Card Transfer) |
+| **Updated by task** | M99.23 (AD-19 · Progress hết hạn placeholder, Settings thì chưa) |
 | **Last updated** | 2026-08-13 |
 
 Format theo `document-conventions.md` §6.1. AD xếp theo số; ID vĩnh viễn (§7).
@@ -1325,17 +1325,26 @@ cả hai đều chạy được:
 | | |
 |---|---|
 | **Status** | accepted |
-| **Affected documents** | `product.md` · `it-scenarios/01-navigation-and-continuity.md` · `wbs.md` (M99.7) |
+| **Affected documents** | `product.md` · `it-scenarios/01-navigation-and-continuity.md` · `wbs.md` (M99.7, M99.23) · `wireframes/m99-23-progress-overview.md` |
 
 **Decision.** Navigation shell khai báo đúng bốn `StatefulShellBranch`, theo thứ
 tự cố định: **Decks (0) · Study (1) · Progress (2) · Settings (3)**. Decks vẫn
-là cold-start branch (UC-06). Progress và Settings MUST chỉ có
+là cold-start branch (UC-06). Một branch chưa có nghiệp vụ canonical MUST chỉ có
 presentation-only placeholder screen: placeholder MUST NOT tạo domain entity,
 repository, provider, DAO, bảng, dữ liệu mẫu hay persistence nào — không đọc
 provider, không mở session, không ghi database khi vào, thoát hoặc chuyển tab.
 Mỗi branch có path thật (`/progress`, `/settings`) để deep link mở đúng tab.
 Thư viện starter thuộc branch Decks; MUST NOT có tab Profile chừng nào chưa có
 auth/profile domain (AD-03).
+
+**Ràng buộc placeholder hết hiệu lực đúng lúc nghiệp vụ được chốt, không sớm
+hơn.** Từ M99.23, branch **Progress** mang màn hình thật: nghiệp vụ của nó đã
+canonical ở UC-12 và BR-182…BR-191, nên điều kiện mà AD này đặt ra đã được đáp
+ứng và ràng buộc "chỉ placeholder" MUST NOT còn áp cho Progress. Việc thay là
+**một screen đổi một screen**: path `/progress`, `RouteNames.progress` và
+branch index 2 MUST giữ nguyên — đó chính là tài sản mà AD này mua trước.
+**Settings vẫn là placeholder** và vẫn chịu toàn bộ ràng buộc trên, vì chưa có
+BR nào đứng sau nó.
 
 **Context.** Sản phẩm cần IA ổn định cho năm study mode và các capability sắp
 tới (thống kê S2, tùy chọn ứng dụng), trong khi Progress và Settings chưa có
@@ -1350,7 +1359,13 @@ thay một screen trong một branch có sẵn, không đụng router hay shell.
 dùng thấy rõ tính năng đang phát triển thay vì một tab đột nhiên xuất hiện.
 Giá phải trả: hai placeholder và test route của chúng phải được duy trì, và tab
 scaffold dễ bị đọc nhầm là feature đã xong — WBS và `product.md` phải nói rõ
-điều ngược lại. Một hệ quả đã đo được: bốn destination vượt trần
+điều ngược lại. **Hệ quả đó đã được kiểm chứng ở M99.23:** thay placeholder
+Progress bằng vertical slice thật chạm đúng một dòng `builder` trong
+`app_router.dart`; shell, thứ tự branch, URL contract và test điều hướng không
+đổi dòng nào, đúng như AD này dự đoán. Cái *có* phải đổi là hai file test đi
+theo tên screen — companion visual audit ở đường dẫn gương (MX-VIS-001) và
+widget test của screen — nên "một screen đổi một screen" là đúng cho production
+tree và không đúng cho test tree. Một hệ quả đã đo được: bốn destination vượt trần
 `4 × 120dp` của `MxNavigationBar` trên màn 393dp, nên cap bề rộng phải nhường
 cho bề rộng màn hình (M99.7) — đúng hành vi Material thiết kế cho even split.
 

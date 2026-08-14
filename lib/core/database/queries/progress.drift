@@ -1,0 +1,105 @@
+import '../tables/cards.drift';
+import '../tables/study.drift';
+
+-- Reading the learner's own activity back out of history (UC-12).
+--
+-- **One statement, one pass, and no new table.** An aggregate table would be a
+-- second copy of the truth that five existing write paths — answer, reset, card
+-- delete, deck delete, migration — would each have to maintain correctly, and
+-- the one that forgets produces a number nothing can check. `study_answers` is
+-- append-only (BR-77), so summing it at read time cannot drift from it.
+--
+-- **Aggregated here, not in Dart.** Two levels of GROUP BY collapse potentially
+-- hundreds of thousands of answer rows into one row per local day the user
+-- studied. Pulling raw answers up and grouping them in a controller would move
+-- the same work into the UI isolate and make the transferred volume grow with
+-- history rather than with days.
+--
+-- **`:utcOffsetSeconds` is a parameter, never a SQLite date function.** Local
+-- midnight belongs to `LocalDayModel` and to `utcOffsetProvider` (BR-105,
+-- AD-16); a query that derived it from the host would answer differently on the
+-- machine that runs the test than on the device, which is the whole reason
+-- `:now` is a parameter everywhere else in this project too.
+--
+-- **Deleted cards need no clause here.** `study_answers.card_id` cascades
+-- (`ON DELETE CASCADE`), so a hard-deleted card — directly, or through its deck
+-- — takes its history with it and disappears from every day, past ones
+-- included (BR-188). Reset is the opposite case and also needs no clause: it
+-- never touches `study_answers` (BR-43), so every number here survives it.
+--
+-- `browse` cannot appear: that stage writes no row at all (BR-111), so it can
+-- neither create a card-day nor hold a streak (BR-183).
+
+-- One row per local day that has activity, oldest first. Days with nothing on
+-- them are absent, not zero rows — zero-filling the seven-day window is the
+-- domain's job (BR-186), and it is the only layer that knows how wide the
+-- window is.
+--
+-- `localDayStart` is the local calendar date expressed as seconds: the instant
+-- of that day's local midnight, already shifted by the offset. Read back as
+-- `DateTime.fromMillisecondsSinceEpoch(localDayStart * 1000, isUtc: true)` it is
+-- `DateTime.utc(y, m, d)` of the local date — byte-for-byte the shape
+-- `ProgressActivityDay.localDate` is documented to hold, so the mapper does no
+-- calendar arithmetic of its own and cannot disagree with this query about which
+-- day a row belongs to.
+--
+-- **Two GROUP BYs, and both are load-bearing.** The inner one reduces every
+-- answer of one card on one day to a single card-day (BR-182); the outer one
+-- counts those. Collapsing them into one `COUNT(DISTINCT card_id)` would count
+-- the cards correctly and lose the Learning/Reviewing split, because "did this
+-- card have a learning answer today" is a property of the card-day, not of any
+-- single row.
+--
+-- `MAX(...)` over the 0/1 flag is a boolean OR: the card-day is Learning if
+-- **any** of its answers was `learning`, which is the priority BR-185 states.
+-- Reviewing is then the remainder, computed by the domain, so
+-- `learning + reviewing = total` holds by construction rather than by two SQL
+-- expressions agreeing.
+--
+-- **`(:utcOffsetSeconds | 0)` is a type pin, and removing it silently breaks
+-- the query.** Drift types every arithmetic operator as *real* and propagates
+-- that backwards onto the variables in the expression, so the obvious spelling
+-- generated `Variable<double>`: SQLite then binds a REAL, the day arithmetic
+-- becomes floating-point, and the bucket column comes back as a REAL that
+-- `row.read<int>` cannot read. Three other spellings were tried and each was
+-- wrong in its own way — `+ 0` still gave `double`; `CAST(:v AS INT)` and
+-- `CAST(:v AS INTEGER)` both gave `Variable<String>`, correct only because
+-- SQLite coerces the text back, which is not a thing to rely on. Bitwise OR is
+-- an integer operator in SQLite, `x | 0` is the identity on integers, and it is
+-- the one spelling that makes drift emit `int`. `progress_dao_test.dart` asserts
+-- the parameter type, because this is exactly the kind of line a later cleanup
+-- would delete as noise.
+--
+-- The day bucket is `localSeconds - (localSeconds % 86400)` rather than a
+-- division, for the same reason: `/` is what forced the real typing in the first
+-- place. `%` truncates toward zero in SQLite, which would floor the wrong way
+-- for a negative operand — impossible here, because `localSeconds` is a unix
+-- timestamp shifted by at most fourteen hours and every one of them is far past
+-- 1970. Local days are exactly 86400 seconds apart in this app's model, which is
+-- what makes the arithmetic agree with `LocalDayModel` exactly: it builds its
+-- own boundaries with `DateTime.utc(y, m, d).add(Duration(days: n))`.
+--
+-- The casts stay out of every WHERE clause, so no index is ever defeated by one.
+progressActivityDays:
+WITH shifted (localSeconds, cardId, kind) AS (
+    SELECT
+        CAST(a.answered_at AS INT) + (:utcOffsetSeconds | 0),
+        a.card_id,
+        a.kind
+    FROM study_answers a
+),
+card_days (localDayStart, cardId, hasLearning) AS (
+    SELECT
+        s.localSeconds - (s.localSeconds % 86400),
+        s.cardId,
+        MAX(CASE WHEN s.kind = 'learning' THEN 1 ELSE 0 END)
+    FROM shifted s
+    GROUP BY 1, 2
+)
+SELECT
+    cd.localDayStart AS localDayStart,
+    COUNT(*) AS totalCards,
+    COALESCE(SUM(cd.hasLearning), 0) AS learningCards
+FROM card_days cd
+GROUP BY cd.localDayStart
+ORDER BY cd.localDayStart ASC;

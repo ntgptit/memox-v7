@@ -31,6 +31,10 @@ import '../../features/deck/data/repositories/deck_template_repository_impl.dart
 import '../../features/deck/domain/repositories/deck_repository.dart';
 import '../../features/deck/domain/models/deck_template_model.dart';
 import '../../features/deck/domain/repositories/deck_template_repository.dart';
+import '../../features/progress/data/datasources/progress_dao.dart';
+import '../../features/progress/data/repositories/progress_repository_impl.dart';
+import '../../features/progress/di/progress_repository_provider.dart';
+import '../../features/progress/domain/repositories/progress_repository.dart';
 import '../../features/study/data/datasources/study_dao.dart';
 import '../../features/study/di/study_repository_provider.dart';
 import '../../features/study/data/repositories/study_repository_impl.dart';
@@ -147,6 +151,14 @@ DeckTemplateRepository deckTemplateRepositoryBinding(Ref ref) =>
 StudyRepository studyRepositoryBinding(Ref ref) =>
     StudyRepositoryImpl(StudyDao(ref.watch(appDatabaseProvider)));
 
+/// Reading study history back as progress (UC-12).
+///
+/// One DAO, one database, no clock: every instant Progress needs is a parameter
+/// its use case passes down (BR-184), so unlike `deckRepositoryBinding` there is
+/// nothing here to inject but the connection.
+ProgressRepository progressRepositoryBinding(Ref ref) =>
+    ProgressRepositoryImpl(ProgressDao(ref.watch(appDatabaseProvider)));
+
 /// The starter catalog: the shipped assets, decoded once (UC-01).
 ///
 /// A `Future` binding rather than a repository: there is no database and no
@@ -186,4 +198,5 @@ List<Override> repositoryBindingOverrides() => <Override>[
   deckTemplateRepositoryProvider.overrideWith(deckTemplateRepositoryBinding),
   deckTemplateCatalogProvider.overrideWith(deckTemplateCatalogBinding),
   studyRepositoryProvider.overrideWith(studyRepositoryBinding),
+  progressRepositoryProvider.overrideWith(progressRepositoryBinding),
 ];
