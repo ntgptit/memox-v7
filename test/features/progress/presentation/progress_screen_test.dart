@@ -289,5 +289,32 @@ void main() {
 
       expect(repository.subscriptionCount, 2);
     });
+
+    testWidgets('a Retry that fails again stays on the error face and opens '
+        'nothing more (UC-12 E2)', (tester) async {
+      // E2 is the half of the retry contract that a passing retry cannot show.
+      // The screen must come back to the same face and then **stop** — a
+      // controller that re-subscribed on its own would turn a database that is
+      // down into a loop against it, and the person would see a spinner that
+      // never resolves instead of the Retry they just pressed.
+      final repository = FakeProgressRepository();
+      await pumpProgressScreen(tester, repository: repository);
+      repository.fail(const DatabaseFailure(message: 'read failed'));
+      await tester.pump();
+
+      await tester.tap(find.text(english.progressErrorRetryAction));
+      await tester.pump();
+      repository.fail(const DatabaseFailure(message: 'read failed again'));
+      await tester.pump();
+
+      expect(find.byType(MxErrorState), findsOneWidget);
+      expect(find.text(english.progressErrorRetryAction), findsOneWidget);
+
+      // Five seconds of nothing happening: the subscription count is still the
+      // two the user asked for, not a third nobody did.
+      await tester.pump(const Duration(seconds: 5));
+      expect(repository.subscriptionCount, 2);
+      expect(find.byType(MxErrorState), findsOneWidget);
+    });
   });
 }

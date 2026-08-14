@@ -15,6 +15,14 @@ import '../support/progress_labels_widget.dart';
 /// visible text; an explicit label lets the announcement say "Current streak, 7
 /// days" without putting that phrasing on screen, where the section heading
 /// already says it.
+///
+/// **The second clause is the visible supporting line, not a rebuild of it from
+/// counts.** The line has three shapes and only one of them is "n cards today";
+/// a label built from `(streak, todayTotal)` therefore announced a bare "No
+/// cards today" under a headline of "6 days" — the contradiction W2.5 exists to
+/// remove — and dropped P6's invitation entirely at streak zero. Reusing
+/// [ProgressLabelsX.progressStreakSupportLine] is what keeps the two in step:
+/// there is one sentence, and the eye and the screen reader get the same one.
 class ProgressStreakHeroWidget extends StatelessWidget {
   const ProgressStreakHeroWidget({required this.overview, super.key});
 
@@ -27,10 +35,9 @@ class ProgressStreakHeroWidget extends StatelessWidget {
 
     return Semantics(
       container: true,
-      label: context.l10n.progressStreakSemantics(
-        overview.currentStreakDays,
-        overview.today.totalCards,
-      ),
+      label:
+          '${context.l10n.progressStreakSemanticsHeadline(overview.currentStreakDays)}. '
+          '${context.progressStreakSupportLine(overview)}',
       child: ExcludeSemantics(
         child: MxCard(
           child: Column(

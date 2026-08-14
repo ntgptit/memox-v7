@@ -9525,7 +9525,16 @@ thế không đổi bố cục.
      `test/visual_audit/screens/.../progress_screen_visual_audit_test.dart`
      đọc từ paint graph (4 state × 2 theme), nên đây là lỗ của *báo cáo*, không
      phải của gate. 24 file khác trong `lib/` dùng cùng idiom.
-  4. **Không có gate nào đối chiếu `Affected documents` của một AD với
+  4. **G1–G11 đo ngoài production shell** — owner: M99.23, hoãn tới khi
+     `pumpProgressApp` nhận `textScale`/`locale`/`isDark`. `pumpProgressScreen`
+     gắn `ProgressScreen` thẳng vào `MaterialApp.home`, nên hai thứ khác
+     production: `Scaffold.bottomNavigationBar` chưa trừ chiều cao thanh khỏi
+     `MediaQuery` của body (nên scroll extent và G11 đo trên một chiều cao
+     khác), và text scale đến từ một `MediaQuery` bên trong `home` thay vì
+     `platformDispatcher`. Chỉ **G12** đi qua shell thật, và nó là hàng duy
+     nhất mà sự khác biệt đó thay đổi kết quả. Ô cần chạy lại qua shell khi
+     đóng: G2/G3/G4/G6/G11 ở `320 @ 2.0 · vi`.
+  5. **Không có gate nào đối chiếu `Affected documents` của một AD với
      `Editable documents` của task sửa nó** — owner: M99.9 (chủ sở hữu
      `check_docs.py`). Chính lỗ này để IT-NAV-011 mô tả Progress là placeholder
      suốt một PR đã thay placeholder; đã sửa tài liệu ở đây, nhưng chưa có gì

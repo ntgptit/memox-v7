@@ -6,6 +6,7 @@ import 'package:memox/features/progress/presentation/widgets/sections/progress_s
 import 'package:memox/features/progress/presentation/widgets/sections/progress_today_widget.dart';
 import 'package:memox/features/progress/presentation/widgets/sections/progress_week_widget.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
+import 'package:memox/shared/widgets/mx_progress_bar.dart';
 
 import 'support/fake_progress_repository.dart';
 import 'support/progress_screen_harness.dart';
@@ -62,6 +63,34 @@ void main() {
       .evaluate()
       .map((element) => tester.getRect(find.byWidget(element.widget)))
       .toList();
+
+  /// The seven weekday labels, in chart order.
+  ///
+  /// The chart's `Table` lays its cells out row by row and the bar cell holds no
+  /// `Text`, so the section's texts are `[section label, day 0 label, day 0
+  /// value, day 1 label, …]` — the labels are the odd indices from 1. The length
+  /// is asserted rather than assumed: if the section grows an eighth text this
+  /// picks the wrong widgets and would keep measuring something, which is the
+  /// one way a geometry test fails without failing.
+  List<Rect> dayLabelRects(WidgetTester tester) {
+    final texts = find
+        .descendant(
+          of: find.byType(ProgressWeekWidget),
+          matching: find.byType(Text),
+        )
+        .evaluate()
+        .toList();
+    expect(
+      texts,
+      hasLength(15),
+      reason: '1 section label + 7 × (label, value)',
+    );
+
+    return <Rect>[
+      for (int index = 1; index < texts.length; index += 2)
+        tester.getRect(find.byWidget(texts[index].widget)),
+    ];
+  }
 
   for (final viewport in viewports) {
     group('at ${viewport.label}', () {
@@ -152,14 +181,48 @@ void main() {
         for (final rect in rects) {
           expect(rect.left, rects.first.left, reason: 'shared baseline');
           expect(rect.width, rects.first.width, reason: 'shared bar width');
+          // The floor the equality above cannot express. Column 1 is a
+          // `FlexColumnWidth` between two `IntrinsicColumnWidth`s, so if the
+          // label and the value ever eat the whole card the bars collapse to
+          // zero — all seven equally, so every assertion above still holds
+          // while the chart has silently stopped being a chart. `RenderTable`
+          // reports no overflow for it and `MxCard` clips, so nothing else
+          // would say a word.
+          expect(rect.width, greaterThan(0), reason: 'bar column not squeezed');
+          // G10a. Read off the token rather than compared to 6: the point of
+          // `ProgressWeekBarWidget.trackHeight` borrowing the enum is that the
+          // two cannot drift, and an assertion against a literal would be the
+          // third copy of the number.
+          expect(
+            rect.height,
+            MxProgressBarSize.sm.trackHeight,
+            reason: 'G10a · bar height comes from MxProgressBarSize.sm',
+          );
         }
       });
 
-      testWidgets('the gap between chart rows is even, at all six seams (G9)', (
-        tester,
-      ) async {
+      testWidgets('the gap between chart rows is one sm, at all six seams '
+          '(G9)', (tester) async {
         await pump(tester);
 
+        // **Measured on the label column, not on the bars.** The row gap is a
+        // `bottom` padding on every cell, and `TableCellVerticalAlignment.middle`
+        // centres each cell in a row whose height is set by the tallest one —
+        // the label. So the bars are 6dp objects floating in a ~20dp row and the
+        // distance between two of them is not `sm` and was never meant to be;
+        // the distance between two rows is, and the label cell is where that is
+        // visible. Asserting it on the bars would have pinned an accident.
+        final labels = dayLabelRects(tester);
+        for (int index = 1; index < labels.length; index++) {
+          expect(
+            labels[index].top - labels[index - 1].bottom,
+            AppSpacing.sm,
+            reason: 'seam $index carries exactly one sm',
+          );
+        }
+
+        // Kept alongside: equal pitch is the property that survives a change of
+        // text scale, and it is what a reader sees as "even".
         final rects = barRects(tester);
         for (int index = 1; index < rects.length; index++) {
           expect(
@@ -235,116 +298,5 @@ void main() {
       expect(headline.top - label.bottom, AppSpacing.sm);
       expect(support.top - headline.bottom, AppSpacing.xs);
     });
-  });
-
-  group('the extremes the copy has to survive', () {
-    testWidgets('a three-digit streak wraps without moving the shared edges', (
-      tester,
-    ) async {
-      // The hero's headline is `displayLarge`; at 320dp with a 2.0 text scale
-      // "999 days" cannot fit on one line, and W6 forbids buying the line back
-      // by shrinking the type. What must hold is that it *wraps* — the card
-      // grows taller and its left and right edges do not move.
-      await pumpProgressScreen(
-        tester,
-        repository: seeded(streakDays: 999),
-        surface: const Size(320, 720),
-        textScale: 2,
-      );
-
-      final hero = rectOf(tester, ProgressStreakHeroWidget);
-      final today = rectOf(tester, ProgressTodayWidget);
-      final week = rectOf(tester, ProgressWeekWidget);
-
-      expect(hero.left, AppSpacing.md);
-      expect(today.left, hero.left);
-      expect(week.left, hero.left);
-      expect(today.right, hero.right);
-      expect(week.right, hero.right);
-      expect(find.text(english.progressStreakDaysLabel(999)), findsOneWidget);
-      expect(tester.takeException(), isNull);
-    });
-
-    testWidgets('a three-digit streak survives Vietnamese at 320 @ 2.0', (
-      tester,
-    ) async {
-      await pumpProgressScreen(
-        tester,
-        repository: seeded(streakDays: 999),
-        surface: const Size(320, 720),
-        textScale: 2,
-        locale: const Locale('vi'),
-      );
-
-      final hero = rectOf(tester, ProgressStreakHeroWidget);
-      final week = rectOf(tester, ProgressWeekWidget);
-
-      expect(week.left, hero.left);
-      expect(week.right, hero.right);
-      expect(tester.takeException(), isNull);
-    });
-  });
-
-  testWidgets('the busiest day fills the track and a zero day fills none', (
-    tester,
-  ) async {
-    await pumpProgressScreen(
-      tester,
-      repository: seeded(totals: const <int>[0, 1, 2, 3, 4, 5, 10]),
-    );
-
-    final bars = tester
-        .widgetList<ProgressWeekBarWidget>(find.byType(ProgressWeekBarWidget))
-        .toList();
-
-    expect(bars.first.fraction, 0);
-    expect(bars.last.fraction, 1);
-  });
-
-  testWidgets('a week with no activity divides by nothing', (tester) async {
-    // The busiest day is zero here — a real state for somebody with older
-    // history and a quiet fortnight. Every bar is empty and none of them is
-    // `NaN`, which is what an unguarded `total / busiest` would produce and
-    // what would then throw inside the layout rather than in the arithmetic.
-    await pumpProgressScreen(
-      tester,
-      repository: FakeProgressRepository(
-        initial: progressOverviewFixture(
-          totals: const <int>[0, 0, 0, 0, 0, 0, 0],
-          streakDays: 0,
-          today: DateTime.utc(2026, 8, 12),
-          hasLifetimeActivity: true,
-        ),
-      ),
-    );
-
-    final bars = tester
-        .widgetList<ProgressWeekBarWidget>(find.byType(ProgressWeekBarWidget))
-        .toList();
-
-    expect(bars, hasLength(7));
-    expect(bars.every((bar) => bar.fraction == 0), isTrue);
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('the last section clears the bottom navigation bar (G12)', (
-    tester,
-  ) async {
-    // Mounted through the real shell, because the claim is about the shell: a
-    // `Scaffold` with a `bottomNavigationBar` removes the bar's height from its
-    // body's `MediaQuery`, so no manual inset is needed — and adding one would
-    // reserve the space twice.
-    await pumpProgressApp(tester, repository: seeded());
-    await tester.dragUntilVisible(
-      find.byType(ProgressWeekWidget),
-      find.byType(SingleChildScrollView),
-      const Offset(0, -80),
-    );
-    await tester.pumpAndSettle();
-
-    final week = tester.getRect(find.byType(ProgressWeekWidget));
-    final bar = tester.getRect(find.byType(NavigationBar));
-
-    expect(week.bottom, lessThanOrEqualTo(bar.top));
   });
 }

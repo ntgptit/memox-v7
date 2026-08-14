@@ -58,17 +58,14 @@
   "@progressStreakZeroLine": {
     "description": "The hero's supporting line when the streak is zero (P6). An invitation, never a reproach: the person reading it has just come back."
   },
-  "progressStreakSemantics": "{streak, plural, =0{No current streak} =1{Current streak, 1 day} other{Current streak, {streak} days}}. {today, plural, =0{No cards today} =1{1 card today} other{{today} cards today}}",
-  "@progressStreakSemantics": {
+  "progressStreakSemanticsHeadline": "{streak, plural, =0{No current streak} =1{Current streak, 1 day} other{Current streak, {streak} days}}",
+  "@progressStreakSemanticsHeadline": {
     "placeholders": {
       "streak": {
         "type": "int"
-      },
-      "today": {
-        "type": "int"
       }
     },
-    "description": "What a screen reader announces for the hero as one clause (W6.4). Read as separate nodes, the number and its unit arrive apart and the figure loses its meaning."
+    "description": "The first clause of the hero's announcement (W6.4). Read as separate nodes, the number and its unit arrive apart and the figure loses its meaning — so the headline is one clause. The second clause is the hero's visible supporting line, appended at the call site rather than duplicated here: a label built from counts alone drops the held-from-yesterday sentence that W2.5 exists to say."
   },
   "progressTodaySectionLabel": "Today",
   "@progressTodaySectionLabel": {

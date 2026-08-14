@@ -58,17 +58,14 @@
   "@progressStreakZeroLine": {
     "description": "The hero's supporting line when the streak is zero (P6)."
   },
-  "progressStreakSemantics": "{streak, plural, =0{Chưa có chuỗi nào} other{Chuỗi hiện tại, {streak} ngày}}. {today, plural, =0{Chưa có thẻ nào hôm nay} other{{today} thẻ hôm nay}}",
-  "@progressStreakSemantics": {
+  "progressStreakSemanticsHeadline": "{streak, plural, =0{Chưa có chuỗi nào} other{Chuỗi hiện tại, {streak} ngày}}",
+  "@progressStreakSemanticsHeadline": {
     "placeholders": {
       "streak": {
         "type": "int"
-      },
-      "today": {
-        "type": "int"
       }
     },
-    "description": "What a screen reader announces for the hero as one clause (W6.4)."
+    "description": "The first clause of the hero's announcement (W6.4). The second clause is the visible supporting line, appended at the call site."
   },
   "progressTodaySectionLabel": "Hôm nay",
   "@progressTodaySectionLabel": {

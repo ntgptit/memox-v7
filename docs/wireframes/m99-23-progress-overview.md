@@ -125,7 +125,7 @@ Last 7 days
 | G6 | Vertical rhythm giữa các section | `AppSpacing.xl` (24), đo giữa `bottom` của section trên và `top` của section dưới |
 | G7 | Nhịp trong một section | Nhãn → nội dung chính `AppSpacing.sm` (8); giữa các dòng phân rã `AppSpacing.xs` (4) |
 | G8 | Chart baseline | `left` của **mọi** track trong S3 bằng nhau — đây là baseline của biểu đồ |
-| G9 | Chart bar gap | Khoảng cách dọc giữa hai hàng ngày liền nhau `AppSpacing.sm` (8), bằng nhau ở cả sáu khe |
+| G9 | Chart row gap | Khoảng cách dọc giữa hai hàng ngày liền nhau `AppSpacing.sm` (8), bằng nhau ở cả sáu khe. **Đo ở cột nhãn**, không đo ở track: `TableCellVerticalAlignment.middle` căn giữa mỗi cell trong một hàng cao bằng cell cao nhất — là nhãn — nên hai track cao 6dp trôi trong hàng ~20dp và khoảng cách giữa chúng không phải `sm`, cũng chưa bao giờ định là `sm`. Ngoài ra pitch giữa các track MUST bằng nhau ở cả sáu khe, vì đó mới là thứ người đọc thấy là "đều" |
 | G10 | Chart bar width | `right` của mọi track bằng nhau; bề rộng track bằng nhau ở cả bảy hàng |
 | G10a | Chart bar height | `MxProgressBarSize.sm.trackHeight` (6), lấy từ chính token đó chứ không viết lại số |
 | G11 | Safe area | Nội dung nằm trong `SafeArea` của `MxContentShell`; `top` của S1 ≥ `bottom` của AppBar |
@@ -160,6 +160,8 @@ Last 7 days
 | X1 | Track của biểu đồ rất nhạt so với mặt card | **1.27:1** light (`progressTrack` trên `surface`), **1.35:1** dark | Track là trang trí: mỗi hàng đã nói giá trị bằng chữ số và tên ngày, còn bar mang `ExcludeSemantics` (P5). WCAG 1.4.11 áp cho graphic **cần thiết để hiểu nội dung**, và cái này không phải. Quan trọng hơn: `progressTrack` là track dùng chung của cả app (`MxProgressBar`), nên nâng nó là quyết định thiết kế cho mọi thanh cùng lúc — sửa riêng ở đây tạo hai loại track trông khác nhau. Con số nằm trong `progress_chart_contrast_test.dart` để lần đổi sau là một sửa đổi có chủ đích |
 | X2 | Strict visual audit chạy ở một viewport cố định của harness, không phải ba viewport của W6.1 | — | Hai nửa của W6 do hai suite khác nhau nhìn: audit đọc **paint graph** (màu, surface column) ở bốn state × hai theme; `progress_screen_geometry_test.dart` đọc **rect** ở ba viewport × hai locale. `memoxProductionScreenAuditTest` không nhận viewport, nên gộp lại sẽ là một thay đổi harness chạm mọi companion đang có |
 | X3 | State `loading` không có mặt trong audit | — | Nó là `MxLoadingState` một mình trong cùng shell; danh tính và nhãn screen reader được `progress_screen_test.dart` khẳng định, và màu của nó thuộc component đó chứ không thuộc màn này |
+| X4 | Node semantics của một hàng biểu đồ chỉ rộng bằng **cột nhãn**, không phủ track và con số | rect node ≈ bề rộng cột 0 (30–100dp tuỳ locale và text scale), không phải bề rộng card | `Table` không cho bọc một `TableRow`, nên chỉ có hai lựa chọn: một node neo ở nhãn, hoặc ba mảnh rời trong đó con số đã mất tên ngày của nó (W6.4). Bỏ `Table` để lấy rect rộng hơn thì mất chính lý do `Table` được chọn — G8/G10, bảy bar trên **một** baseline ở mọi text scale. Hệ quả đã đo và chấp nhận: explore-by-touch chạm vào bar hoặc vào con số không đọc gì; đọc tuần tự và swipe qua từng node thì đủ câu, và đó là cách đọc một biểu đồ bảy hàng |
+| X5 | Bar không dùng `MxProgressBar`, mà dựng `ClipRRect` + hai `DecoratedBox` | render giống hệt: `AppRadius.sm` (8) bị `ClipRRect` kẹp về 3 trên hộp cao 6dp, tức bằng pill; chiều cao vẫn đọc từ `MxProgressBarSize.sm.trackHeight` | Hai lý do đều là hành vi, không phải hình: `MxProgressBar` mang `TweenAnimationBuilder`, nên bảy bar sẽ chạy animation mỗi lần stream emit — mà stream này emit sau **mọi** lượt trả lời (BR-189); và nó mang `Semantics` riêng, trong khi W6.4 yêu cầu đúng một node cho cả hàng, neo ở nhãn. Token thì vẫn dùng chung: chiều cao lấy thẳng từ enum, hai màu là `progressTrack`/`progressFill` và được strict audit đọc từ paint graph |
 
 ## S-ma trận trạng thái
 
@@ -167,7 +169,7 @@ Last 7 days
 |---|---|---|---|
 | S-a | loading | Chưa có emission nào | `MxLoadingState` trong shell, có nhãn screen reader |
 | S-b | loaded-normal | Có hoạt động trong cửa sổ bảy ngày | Ba section W2/W3/W4 |
-| S-c | loaded-today-zero-streak-retained | Hôm nay 0, hôm qua active (BR-187) | Ba section; S1 dùng biến thể W2.5, S2 hiện 0/0/0 |
+| S-c | loaded-today-zero-streak-retained | Hôm nay 0, hôm qua active (BR-187) | Ba section; S1 dùng biến thể W2.5; S2 hiện nhánh `=0` của `progressTodayCardsLabel` — "No cards" / "Chưa có thẻ nào" — rồi `Learning 0` và `Reviewing 0`. Không phải chữ số `0`: cùng một plural resource phát ra "1 card" và "12 cards", nên `=0` phải là một câu, không phải một chữ số trần |
 | S-d | empty-lifetime | Chưa từng có card-day nào | Mặt empty cả màn + CTA sang Study (P7) |
 | S-e | error | Stream lỗi | `MxErrorState` + `Retry`, không ghi gì (BR-190) |
 | S-f | live refresh | Answer mới trong lúc màn mở | Ở lại S-b/S-c, số đổi tại chỗ, MUST NOT về S-a (P8) |

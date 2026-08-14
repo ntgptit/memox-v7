@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/progress/presentation/widgets/sections/progress_streak_hero_widget.dart';
 import 'package:memox/features/progress/presentation/widgets/sections/progress_today_widget.dart';
 import 'package:memox/features/progress/presentation/widgets/sections/progress_week_widget.dart';
+import 'package:memox/l10n/generated/app_localizations.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/l10n/generated/app_localizations_vi.dart';
 import 'package:memox/shared/widgets/mx_loading_state.dart';
@@ -129,11 +130,76 @@ void main() {
       );
 
       expect(
-        find.bySemanticsLabel(english.progressStreakSemantics(7, 6)),
+        find.bySemanticsLabel(
+          '${english.progressStreakSemanticsHeadline(7)}. '
+          '${english.progressStreakTodayLine(6)}',
+        ),
         findsOneWidget,
       );
       handle.dispose();
     });
+
+    /// The announcement carries the **visible** supporting line, in every shape
+    /// it has.
+    ///
+    /// This is the assertion the first version of the screen could not have
+    /// failed: the label was built from `(streak, todayTotal)`, so the two
+    /// shapes below — the two where the visible sentence is *not* a card count
+    /// — were replaced by "no cards today". A reader using the screen with
+    /// their eyes was told the streak is held from yesterday; a reader using it
+    /// with TalkBack was told the bare zero that W2.5 exists to prevent.
+    ///
+    /// Asserted against the shared line rather than a hand-spelled string, so it
+    /// cannot pass by agreeing with a copy of itself.
+    for (final ({String name, Locale locale, AppLocalizations l10n}) language
+        in <({String name, Locale locale, AppLocalizations l10n})>[
+          (name: 'en', locale: const Locale('en'), l10n: english),
+          (name: 'vi', locale: const Locale('vi'), l10n: vietnamese),
+        ]) {
+      testWidgets('the hero announces the held-from-yesterday sentence '
+          '(${language.name})', (tester) async {
+        final handle = tester.ensureSemantics();
+        await pumpProgressScreen(
+          tester,
+          repository: seeded(
+            totals: const <int>[2, 2, 2, 2, 2, 2, 0],
+            streak: 4,
+          ),
+          locale: language.locale,
+        );
+
+        expect(
+          find.bySemanticsLabel(
+            '${language.l10n.progressStreakSemanticsHeadline(4)}. '
+            '${language.l10n.progressStreakHeldLine}',
+          ),
+          findsOneWidget,
+        );
+        handle.dispose();
+      });
+
+      testWidgets('the hero announces the invitation at streak zero '
+          '(${language.name})', (tester) async {
+        final handle = tester.ensureSemantics();
+        await pumpProgressScreen(
+          tester,
+          repository: seeded(
+            totals: const <int>[4, 0, 0, 0, 0, 0, 0],
+            streak: 0,
+          ),
+          locale: language.locale,
+        );
+
+        expect(
+          find.bySemanticsLabel(
+            '${language.l10n.progressStreakSemanticsHeadline(0)}. '
+            '${language.l10n.progressStreakZeroLine}',
+          ),
+          findsOneWidget,
+        );
+        handle.dispose();
+      });
+    }
 
     testWidgets('each chart row is one node naming its day and count', (
       tester,
