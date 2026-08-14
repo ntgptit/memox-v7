@@ -51,8 +51,6 @@ class ReminderSettingsSectionWidget extends StatelessWidget {
     // supported platform whenever no command is running; the time row also
     // needs the reminder to be on, because changing a time that schedules
     // nothing is a control with no effect (M6 R3, S2).
-    final canToggle = overview.isChangeable && !isBusy;
-    final canPickTime = canToggle && settings.isEnabled;
     // **An unsupported platform states itself, without waiting to be poked**
     // (M6 S7, BR-193). The rejection only ever arrives from a command, and on
     // this platform no command can run — the toggle is disabled — so deriving
@@ -64,6 +62,17 @@ class ReminderSettingsSectionWidget extends StatelessWidget {
         (overview.isChangeable
             ? null
             : ReminderSetupRejection.platformUnavailable);
+    // **The banner decides the toggle, not just the capability snapshot.** The
+    // capability is resolved once, when the screen opens; `EnableReminderUseCase`
+    // reads it again at the moment of the tap, so a platform that stopped
+    // answering in between refuses the command while the snapshot still says
+    // supported. Without this the screen said "not available on this device"
+    // beside a switch the user could still flip (M6 S7).
+    final canToggle =
+        overview.isChangeable &&
+        !isBusy &&
+        banner != ReminderSetupRejection.platformUnavailable;
+    final canPickTime = canToggle && settings.isEnabled;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

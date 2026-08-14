@@ -226,6 +226,19 @@ void main() {
       expect(settings.writes.length, writesBefore);
     });
 
+    test('notBefore reaches the platform, and defaults to absent', () async {
+      await enable()(time: nine, now: now, utcOffset: offset);
+      expect(platform.lastNotBefore, isNull);
+
+      final anchor = now.add(const Duration(hours: 11));
+      await reconcile(now: now, utcOffset: offset, notBefore: anchor);
+
+      // The worker pushes the *choice* of the next occurrence past the local
+      // day it has already served (BR-185); the delay itself is still measured
+      // from `now`, which is asserted where it is computed.
+      expect(platform.lastNotBefore, anchor);
+    });
+
     test('a changed offset reschedules against the new one', () async {
       await enable()(time: nine, now: now, utcOffset: offset);
 

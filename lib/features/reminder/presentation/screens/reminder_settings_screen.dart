@@ -42,6 +42,13 @@ class ReminderSettingsScreen extends ConsumerWidget {
     final enable = ref.watch(reminderEnableControllerProvider);
     final disable = ref.watch(reminderDisableControllerProvider);
     final time = ref.watch(reminderTimeControllerProvider);
+    // Watched rather than only read, and the value is deliberately unused here:
+    // the draft is auto-dispose, and a provider nothing subscribes to is
+    // disposed the frame after `_pickTime` writes it — so the retry read `null`
+    // every time and silently re-submitted the stored time. The subscription is
+    // what gives it the screen's lifetime, and popping the route still clears
+    // it.
+    ref.watch(reminderTimeDraftControllerProvider);
 
     return MxContentShell(
       title: context.l10n.reminderTitle,

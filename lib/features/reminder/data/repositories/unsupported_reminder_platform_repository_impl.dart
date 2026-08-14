@@ -46,6 +46,7 @@ final class UnsupportedReminderPlatformRepositoryImpl
     required ReminderTime time,
     required DateTime now,
     required Duration utcOffset,
+    DateTime? notBefore,
   }) async => throw _refusal;
 
   @override

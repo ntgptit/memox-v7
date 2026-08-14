@@ -49,7 +49,8 @@ Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham c
 │  ┌─────────────────────────────────────────┐  │
 │  │ Daily reminder                    [ o]  │  │  ← W3 toggle row
 │  │ ─────────────────────────────────────── │  │
-│  │ Reminder time              8:00 PM   ›  │  │  ← W4 time row
+│  │ Reminder time                           │  │  ← W4 time row
+│  │ 8:00 PM                                 │  │
 │  └─────────────────────────────────────────┘  │
 │                                               │
 │  ┌─────────────────────────────────────────┐  │
@@ -74,7 +75,7 @@ Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham c
 | W1 | Hàng vào ở nhánh Settings | Chỉ nhãn + chevron, **không** hiện trạng thái. Hiện `Off`/giờ ở đây buộc `features/settings/presentation/` phải theo dõi state của `features/reminder/` — đúng cross-feature import mà `check_architecture` chặn (R1). Trạng thái nằm cách một lần chạm, trên màn nói thẳng ra |
 | W2 | Shell của màn nhắc học | Cùng `MxContentShell` với mọi màn khác; Back trả về nhánh Settings |
 | W3 | Hàng toggle | Nhãn bên trái, `Switch` bên phải. Khoá khi `enabling` và khi nền tảng không hỗ trợ |
-| W4 | Hàng giờ | Chạm mở dialog (R6). Vô hiệu khi toggle tắt (R3) |
+| W4 | Hàng giờ | Nhãn trên, **giờ ở dòng dưới** — không phải trailing. Cạnh nhãn, giờ chiếm 157dp trong ~264dp bề rộng hàng ở 320dp scale 2.0, để lại 90dp cho một nhãn có intrinsic 422dp; `MxListTile` trần hai dòng rồi ellipsis, nên nhãn bị **cắt**, đúng thứ A2 cấm. Chạm mở dialog (R6). Vô hiệu khi toggle tắt (R3) |
 | W5 | Banner lỗi | Tồn tại ở S6…S10, và ở S7 nó được suy ra từ **capability** chứ không từ một lệnh đã chạy — trên nền tảng không hỗ trợ thì không lệnh nào chạy được, nên chờ một lệnh hỏng sẽ khiến S7 không bao giờ tới được. Mang đúng một CTA khôi phục, và CTA đó **chạy lại đúng lệnh đã hỏng** — không phải một lệnh cố định |
 | W6 | Supporting copy | Hai câu, luôn hiển thị, không đổi theo trạng thái |
 
@@ -88,7 +89,7 @@ Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham c
 | S4 | on | bật | hoạt động, hiện giờ | — | |
 | S5 | time picker mở | khoá | — | — | Dialog nền tảng phủ lên |
 | S6 | permission denied | tắt, bật được | vô hiệu | `Notifications are turned off` + `Try again` | Settings vẫn tắt (BR-192) |
-| S7 | platform unavailable | tắt, **vô hiệu** | vô hiệu | `Reminders aren't available on this device` — không CTA | Không có đường khôi phục nên không có nút giả (BR-193) |
+| S7 | platform unavailable | tắt, **vô hiệu** | vô hiệu | `Reminders aren't available on this device` — không CTA | Không có đường khôi phục nên không có nút giả (BR-193). Banner suy từ capability **và** khoá toggle: capability được giải một lần lúc mở màn, còn `EnableReminderUseCase` đọc lại lúc chạm, nên nếu chỉ nhìn snapshot thì banner nói "không dùng được" cạnh một switch vẫn gạt được |
 | S8 | schedule error | tắt, bật được | vô hiệu | `The reminder couldn't be scheduled` + `Try again` | Không có trạng thái bật giả |
 | S9 | settings error | về giá trị đang lưu | theo giá trị đang lưu | `Your change wasn't saved` + `Try again` | |
 | S10 | cancel error | tắt, bật được | vô hiệu | `The reminder is off, but a pending alert may remain` + `Try again` | Tắt **đã ghi**, chỉ lịch cũ không huỷ được. Copy của S8 sẽ nói ngược sự thật ở đây (BR-190) |
@@ -103,7 +104,7 @@ Không có state `empty`: màn này luôn có nội dung, kể cả khi thư vi�
 |---|---|
 | G1 | Card (W3+W4) và banner (W5) **chung mép trái và mép phải** — cùng một surface column; sai lệch 0 |
 | G2 | Mép của card và của supporting copy trùng nhau; gutter đến từ `MxContentShell`, không từ padding tự đặt |
-| G3 | Toggle và nhãn của W3 **cùng đường tâm dọc**; nhãn và giá trị của W4 cũng vậy |
+| G3 | Toggle và nhãn của W3 **cùng đường tâm dọc**. W4 xếp dọc (W4), nên hai dòng của nó **cùng mép trái**, không cùng đường tâm |
 | G4 | Vùng chạm của W3 và W4 mỗi cái cao ≥ 48dp ở mọi viewport và mọi text scale |
 | G5 | Chuyển S2 → S3 → S4 **không đổi chiều cao của card**; đây là điều R3 mua |
 | G6 | Đáy nội dung cách bottom navigation ≥ khoảng gutter của shell; không có phần tử nào bị bottom nav che ở 320×568 |
@@ -114,9 +115,9 @@ Không có state `empty`: màn này luôn có nội dung, kể cả khi thư vi�
 | # | Ràng buộc |
 |---|---|
 | A1 | Không tràn ở 320dp@2.0, 390dp, 412dp; kiểm cả EN và VI |
-| A2 | Không tràn ở text scale 2.0 tại 320×568 — nhãn và giá trị xuống dòng thay vì cắt |
+| A2 | Không tràn ở text scale 2.0 tại 320×568, và **không nhãn nào bị ellipsis**. Đo bằng `didExceedMaxLines` chứ không bằng `takeException`: một nhãn bị cắt không ném exception nào |
 | A3 | `Semantics` **nằm trên chính `Switch`**, mang cả label lẫn value; `Text` nhãn bên trái bị `ExcludeSemantics`. Label ở node anh em thì reader focus vào switch chỉ nghe "Off" — có value mà không có name (WCAG 4.1.2) |
-| A4 | Hàng giờ mang role button và value là giờ đã bản địa hoá theo locale đang chạy. `Text` giá trị bị `ExcludeSemantics`: `MxListTile` gộp con thành một node, nên không loại trừ thì giờ được đọc hai lần |
+| A4 | Hàng giờ mang role button, và giờ đã bản địa hoá nằm **trong chính nhãn gộp** của node — đọc đúng một lần. `MxListTile` gộp title + subtitle thành một node, nên thêm một `Semantics(value:)` ở ngoài sẽ khiến reader đọc giờ hai lần |
 | A5 | Banner lỗi mang `Semantics` live region; CTA của nó là một nút thật, không phải text chạm được |
 | A6 | Mọi copy đến từ ARB (EN/VI); không có chuỗi người dùng thấy được nằm trong code |
 

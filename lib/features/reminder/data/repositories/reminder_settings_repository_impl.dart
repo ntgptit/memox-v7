@@ -29,9 +29,26 @@ final class ReminderSettingsRepositoryImpl implements ReminderSettingsRepository
   Stream<ReminderSettingsModel> watchSettings() =>
       _dao.watchSettingsRow().map(ReminderSettingsMapper.toModel);
 
+  /// **Wrapped, like the write.** `getSingle()` throws a raw `StateError` when
+  /// the one-row table somehow holds none, and a Drift exception when the file
+  /// will not open. Both use cases call this *before* their own `try`, and the
+  /// controllers catch `on Failure` — so an unmapped throw escaped through
+  /// `unawaited`, left the command at `isSubmitting: true` for good, and locked
+  /// the toggle with no banner to explain it (AD-01).
   @override
-  Future<ReminderSettingsModel> readSettings() async =>
-      ReminderSettingsMapper.toModel(await _dao.readSettingsRow());
+  Future<ReminderSettingsModel> readSettings() async {
+    try {
+      return ReminderSettingsMapper.toModel(await _dao.readSettingsRow());
+    } on Object catch (error) {
+      final mapped = mapDatabaseError(error);
+
+      throw DatabaseFailure(
+        message: mapped.message,
+        cause: error,
+        reason: ReminderSetupRejection.settingsWriteFailed,
+      );
+    }
+  }
 
   @override
   Future<void> saveSettings({

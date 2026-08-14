@@ -4113,7 +4113,7 @@
     },
     {
       "file": "lib/features/reminder/presentation/widgets/sections/reminder_settings_section_widget.dart",
-      "line": 108,
+      "line": 117,
       "widget_context": "ReminderSettingsSectionWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4124,7 +4124,7 @@
     },
     {
       "file": "lib/features/reminder/presentation/widgets/sections/reminder_settings_section_widget.dart",
-      "line": 115,
+      "line": 124,
       "widget_context": "ReminderSettingsSectionWidget",
       "element_kind": "text",
       "source_kind": "theme-token",

@@ -5,9 +5,11 @@
 /// these and picks ARB copy, so a new reason fails to compile until it has a
 /// sentence of its own (see `Failure.reason`).
 ///
-/// Each value is a different screen: [platformUnavailable] has no recovery and
-/// must not offer one, [permissionDenied] recovers through system settings,
-/// and the two failures recover through a retry that changes nothing else.
+/// Each value is a different screen. [platformUnavailable] has no recovery and
+/// must not offer one; [permissionDenied] recovers through system settings; the
+/// remaining three recover through a retry, and the retry re-runs **the command
+/// that failed** rather than a fixed one — a single hardwired retry turned
+/// "turning it off failed" into "turn it back on".
 enum ReminderSetupRejection {
   /// This build cannot deliver reminders here at all (BR-193).
   platformUnavailable,

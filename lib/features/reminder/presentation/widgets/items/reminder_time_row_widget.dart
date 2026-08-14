@@ -32,19 +32,21 @@ class ReminderTimeRowWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final value = context.reminderTimeText(time);
 
-    // `Semantics(value:)` around the tile, and the trailing `Text` excluded:
-    // `MxListTile` merges its children into one node, so without the value the
-    // time is announced as part of the title, and without the exclusion it is
-    // announced twice — once inside the merged label and once as the value
-    // (M6 A4).
-    return Semantics(
-      value: value,
-      child: MxListTile(
-        title: context.l10n.reminderTimeLabel,
-        trailing: ExcludeSemantics(child: Text(value)),
-        isEnabled: isChangeable,
-        onTap: onTap,
-      ),
+    // **The time is a subtitle, not a trailing widget** (M6 W4, A2). Beside the
+    // label it took 157 of the row's ~264dp at 320dp and text scale 2, leaving
+    // the label 90dp for 422dp of intrinsic width — `MxListTile` caps at two
+    // lines and then ellipsises, so the label was *cut*, which A2 forbids.
+    // Under the label it has the whole row and no scale can truncate it.
+    //
+    // **No `Semantics(value:)` wrapper** (M6 A4). `MxListTile` merges its title
+    // and subtitle into one node, so the time is already inside the announced
+    // label; adding it again as a value made a screen reader say it twice.
+    // One node, one button, the time spoken once.
+    return MxListTile(
+      title: context.l10n.reminderTimeLabel,
+      subtitle: value,
+      isEnabled: isChangeable,
+      onTap: onTap,
     );
   }
 }

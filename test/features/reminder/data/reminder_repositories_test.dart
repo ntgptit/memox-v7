@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/database/app_database.dart';
+import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/reminder/data/datasources/reminder_dao.dart';
 import 'package:memox/features/reminder/data/repositories/reminder_settings_repository_impl.dart';
 import 'package:memox/features/reminder/data/repositories/reminder_workload_repository_impl.dart';
@@ -81,6 +82,18 @@ void main() {
       await pumpEventQueue();
 
       expect(seen, <bool>[false, true]);
+    });
+
+    test('a read that cannot reach the database is a typed failure', () async {
+      // The controllers catch `on Failure`. An unmapped throw from the read
+      // escaped through `unawaited`, left the command at `isSubmitting: true`
+      // for good, and locked the screen with no banner to explain it (AD-01).
+      final repo = repository();
+      // The one-row table with no row: `getSingle()` throws a raw `StateError`,
+      // which is exactly the shape that used to escape unmapped.
+      await db.customStatement('DELETE FROM app_settings');
+
+      await expectLater(repo.readSettings(), throwsA(isA<Failure>()));
     });
 
     test('the study columns are untouched by a reminder write', () async {

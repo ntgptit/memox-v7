@@ -61,11 +61,21 @@ final class AndroidReminderPlatformRepositoryImpl
     required ReminderTime time,
     required DateTime now,
     required Duration utcOffset,
+    DateTime? notBefore,
   }) async {
-    final fireAt = time.nextOccurrenceAfter(now, utcOffset);
+    // The occurrence is chosen from `notBefore`; the delay is measured from
+    // `now`. WorkManager counts `initialDelay` forward from the moment it
+    // accepts the work, so measuring it from anything later than the wall clock
+    // fires the reminder early by exactly that gap — and the gap repeats every
+    // night, so the reminder walks backwards through the day.
+    final fireAt = time.nextOccurrenceAfter(notBefore ?? now, utcOffset);
+    final delay = fireAt.difference(now);
 
     try {
-      await _scheduler.scheduleIn(fireAt.difference(now));
+      // Clamped: a caller that supplied a `notBefore` in the past would
+      // otherwise ask the OS for a negative delay, which is a schedule nobody
+      // can reason about. Zero means "as soon as the OS is willing".
+      await _scheduler.scheduleIn(delay.isNegative ? Duration.zero : delay);
     } on Object catch (error) {
       throw ConflictFailure(
         message: 'The system refused the reminder work',

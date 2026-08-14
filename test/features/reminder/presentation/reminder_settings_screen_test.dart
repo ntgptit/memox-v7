@@ -15,7 +15,6 @@ import 'package:memox/features/reminder/presentation/screens/reminder_settings_s
 import 'package:memox/l10n/generated/app_localizations.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
-import 'package:memox/shared/widgets/mx_list_tile.dart';
 
 import '../support/fake_reminder_platform.dart';
 
@@ -242,6 +241,38 @@ void main() {
       expect(platform.cancelCount, 1);
     });
 
+    testWidgets('retrying a failed time change re-submits the picked time', (
+      tester,
+    ) async {
+      platform.shouldFailSchedule = true;
+      await pumpScreen(tester);
+
+      await tester.tap(find.text(english.reminderTimeLabel));
+      await tester.pumpAndSettle();
+      // The picker opens at 7:30 AM; move it to 9:00 AM through the dial's
+      // text entry, which is the only deterministic way to set a time here.
+      await tester.tap(find.byIcon(Icons.keyboard_outlined));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField).first, '9');
+      await tester.enterText(find.byType(TextField).last, '00');
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+
+      // The reschedule failed, so the stored time rolled back to 7:30.
+      expect(find.text(english.reminderScheduleErrorTitle), findsOneWidget);
+      expect(settings.current.time.minuteOfDay, 7 * 60 + 30);
+
+      platform.shouldFailSchedule = false;
+      await tester.tap(find.text(english.reminderRetryAction));
+      await tester.pumpAndSettle();
+
+      // The retry must carry the value the user chose. Reading it back from
+      // the rolled-back row would re-submit 7:30, which the use case treats as
+      // a no-op — a retry that reports success and changes nothing.
+      expect(settings.current.time.minuteOfDay, 9 * 60);
+      expect(platform.scheduled.single.minuteOfDay, 9 * 60);
+    });
+
     testWidgets('the time is localized, not formatted by hand', (tester) async {
       await pumpScreen(tester, locale: const Locale('vi'));
 
@@ -287,13 +318,17 @@ void main() {
       final handle = tester.ensureSemantics();
       await pumpScreen(tester);
 
-      final node = tester.getSemantics(find.byType(MxListTile));
+      // Read from the text rather than from the widget type: the merged node
+      // belongs to the tile's ancestor, and `byType` lands on an element whose
+      // own node is empty.
+      final node = tester.getSemantics(find.text(english.reminderTimeLabel));
 
-      // The value is spoken once, as a value. Before the trailing Text was
-      // excluded it also landed inside the merged label, so a reader heard
-      // "Reminder time 8:00 PM, 8:00 PM".
-      expect(node.value, '8:00 PM');
-      expect(node.label, isNot(contains('8:00 PM')));
+      // One node carries both, and the time appears exactly once. It used to be
+      // in the merged label *and* in a `Semantics(value:)` wrapper, so a reader
+      // heard "Reminder time 8:00 PM, 8:00 PM".
+      expect(node.label, contains(english.reminderTimeLabel));
+      expect(node.label, contains('8:00 PM'));
+      expect('${node.label}${node.value}'.split('8:00 PM').length - 1, 1);
 
       handle.dispose();
     });

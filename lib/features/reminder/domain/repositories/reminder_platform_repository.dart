@@ -38,9 +38,19 @@ abstract interface class ReminderPlatformRepository {
   /// without stacking runs — which is what BR-191 asks for and what makes the
   /// reconcile safe to call from anywhere.
   ///
-  /// `now` and [utcOffset] are arguments for the reason they are everywhere
-  /// else in this feature (AD-16): the local fire instant is computed from
-  /// them, and a scheduler that read the clock itself could not be tested
+  /// **`now` and [notBefore] are two different instants and the difference is
+  /// load-bearing.** `now` is the wall clock, and the delay handed to the OS is
+  /// measured from it — an inexact scheduler counts forward from the moment the
+  /// work is enqueued, not from anything else. [notBefore] is the earliest
+  /// instant the next occurrence may be chosen from, which BR-185 sometimes
+  /// pushes past `now`: a run that slipped past local midnight has already
+  /// served that day. Collapsing the two shortens the delay by exactly their
+  /// gap, and the reminder then walks backwards through the day, a little
+  /// further every night.
+  ///
+  /// [notBefore] defaults to `now` for every ordinary caller. Both are
+  /// arguments for the reason they are everywhere else in this feature
+  /// (AD-16): a scheduler that read the clock itself could not be tested
   /// across a timezone change.
   ///
   /// Throws a `Failure` carrying `ReminderSetupRejection.scheduleFailed` when
@@ -49,6 +59,7 @@ abstract interface class ReminderPlatformRepository {
     required ReminderTime time,
     required DateTime now,
     required Duration utcOffset,
+    DateTime? notBefore,
   });
 
   /// Removes any pending run and any reminder still on the shade (BR-190).

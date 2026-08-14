@@ -34,6 +34,11 @@ class FakeReminderPlatform implements ReminderPlatformRepository {
   /// Every schedule ever asked for, so idempotency is asserted on the count
   /// rather than on a boolean somebody has to reset.
   final List<ReminderTime> scheduled = <ReminderTime>[];
+
+  /// The `notBefore` of the last schedule, which is the half of BR-185 a
+  /// contract fake can observe: the delay itself belongs to the adapter and is
+  /// asserted there.
+  DateTime? lastNotBefore;
   final List<ReminderSummaryModel> shown = <ReminderSummaryModel>[];
   int cancelCount = 0;
   int permissionRequests = 0;
@@ -53,7 +58,9 @@ class FakeReminderPlatform implements ReminderPlatformRepository {
     required ReminderTime time,
     required DateTime now,
     required Duration utcOffset,
+    DateTime? notBefore,
   }) async {
+    lastNotBefore = notBefore;
     if (shouldFailSchedule) {
       throw const ConflictFailure(
         message: 'refused',

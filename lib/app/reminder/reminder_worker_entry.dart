@@ -87,12 +87,15 @@ Future<bool> runDailyReminderTask() async {
       return true;
     } finally {
       await container.read(reconcileReminderScheduleUseCaseProvider)(
-        now: reminderRescheduleAnchor(
+        // `now` stays the wall clock — the delay handed to the OS is measured
+        // from it. The anchor only moves which occurrence is chosen.
+        now: now,
+        utcOffset: utcOffset,
+        notBefore: reminderRescheduleAnchor(
           now: now,
           utcOffset: utcOffset,
           didDeliver: delivered,
         ),
-        utcOffset: utcOffset,
       );
     }
   } on Object catch (error, stackTrace) {
@@ -109,7 +112,11 @@ Future<bool> runDailyReminderTask() async {
   }
 }
 
-/// The instant the next run is measured from (BR-185).
+/// The earliest instant the next occurrence may be chosen from (BR-185).
+///
+/// **Not the instant the delay is measured from** — that is always the wall
+/// clock, and conflating the two is what makes a reminder drift earlier every
+/// night. See `ReminderPlatformRepository.schedule`.
 ///
 /// **A function of its own so the rule can be tested.** Everything else in this
 /// file needs a real database and a real background isolate; this is the one

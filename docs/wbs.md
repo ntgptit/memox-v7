@@ -9423,6 +9423,19 @@ thế không đổi bố cục.
   nào chạy được, nên nó **không bao giờ render** và hai ARB key thành code chết;
   (4) một lượt nhắc bị Doze đẩy qua nửa đêm sẽ đặt tiếp lượt của **chính ngày
   vừa phục vụ**, phá BR-185. Tất cả đều có test hồi quy.
+- **Recursive review, vòng 2:** hai audit chạy lại trên bản đã sửa. Kết quả: 1 P0
+  + 1 P1 + 5 P2, và **P0 là do chính vòng 1 gây ra** — đúng lý do vòng thứ hai
+  tồn tại. `schedule()` dùng một tham số `now` cho hai việc: chọn lượt kế tiếp
+  **và** đo `initialDelay`. Khi worker truyền anchor (đầu ngày kế tiếp) vào,
+  delay hụt đúng bằng khoảng cách anchor − giờ thật, nên lượt nhắc trôi sớm 4
+  tiếng **mỗi đêm** cho tới khi hai lượt rơi vào cùng một ngày — tức phá đúng
+  BR-185 mà bản sửa tuyên bố đã vá. Hàm thuần `reminderRescheduleAnchor` đúng;
+  chỗ nối dây sai, và test hàm thuần không chạm tới được. Nay contract tách
+  `now` (đo delay) khỏi `notBefore` (chọn lượt), và
+  `android_reminder_platform_repository_test.dart` đo thẳng `initialDelay` bằng
+  mock Workmanager. P1: `ReminderTimeDraftController` là autoDispose và không ai
+  `watch`, nên nó bị huỷ ngay frame sau khi ghi — retry luôn đọc `null` và
+  re-submit giờ cũ, mà use case coi là no-op, nên retry báo thành công giả.
 - **Dependencies:** M4.2 (database), M5.0s (`app_settings`, `learned_at`),
   M99.15/M99.19a (bucket widget), AD-19 (nhánh Settings)
 - **Tests required:** domain — dựng summary, đếm, thứ tự cấp bách, ranh giới
@@ -9434,7 +9447,9 @@ thế không đổi bố cục.
   manifest/flavor — không có quyền exact alarm. **Không** gửi notification thật
   trong host suite. Sau vòng review: thêm test cho retry-đúng-lệnh, banner
   capability, semantics name/value của toggle và hàng giờ, và
-  `reminderRescheduleAnchor` (BR-185 qua mốc nửa đêm).
+  `reminderRescheduleAnchor` (BR-185 qua mốc nửa đêm). Sau vòng 2: adapter test
+  đo `initialDelay` thật, retry giữ đúng giờ người dùng chọn, read hỏng map
+  thành `Failure`, và `notBefore` đi xuyên reconcile → platform.
 - **Checklist phases:** 9, 10, 11, 12, 13, 14, 15
 
 ## Blocker

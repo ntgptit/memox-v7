@@ -2632,9 +2632,9 @@
   "@cardExportCloseAction": {
       "description": "The only action left when the scope is no longer valid — there is nothing to retry until the user selects again (M4.13 W3 state 7)."
   },
-  "reminderTitle": "Nhắc học hằng ngày",
+  "reminderTitle": "Nhắc hằng ngày",
   "@reminderTitle": {
-      "description": "Tiêu đề màn nhắc học và nhãn hàng mở nó từ Settings. Cùng một chữ ở hai chỗ là cố ý: một hàng và màn nó mở ra phải đọc như một nơi (UC-12, M6 R1)."
+      "description": "Tiêu đề màn nhắc học và nhãn hàng mở nó từ Settings. Cùng một chữ ở hai chỗ là cố ý: một hàng và màn nó mở ra phải đọc như một nơi (UC-12, M6 R1). Ngắn hơn nhãn toggle vì tiêu đề app bar không xuống dòng: bản dài hơn bị ellipsis ngay ở 390dp (M6 A1)."
   },
   "reminderToggleLabel": "Nhắc học hằng ngày",
   "@reminderToggleLabel": {

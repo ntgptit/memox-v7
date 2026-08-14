@@ -55,6 +55,7 @@ class ReminderCatalogPlatform implements ReminderPlatformRepository {
     required ReminderTime time,
     required DateTime now,
     required Duration utcOffset,
+    DateTime? notBefore,
   }) async {}
 
   @override

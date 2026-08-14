@@ -19,9 +19,17 @@ class ReconcileReminderScheduleUseCase {
   final ReminderSettingsRepository _settings;
   final ReminderPlatformRepository _platform;
 
+  /// [notBefore] moves the *choice* of the next occurrence forward without
+  /// moving the wall clock the delay is measured from.
+  ///
+  /// Only the fire-time worker passes one, and only after it has posted: a run
+  /// that slipped past local midnight has already served the day it landed in,
+  /// so the next occurrence must be chosen from the day after that (BR-185).
+  /// Every other caller leaves it null and gets the ordinary next occurrence.
   Future<void> call({
     required DateTime now,
     required Duration utcOffset,
+    DateTime? notBefore,
   }) async {
     final settings = await _settings.readSettings();
     if (!settings.isEnabled) return _platform.cancel();
@@ -30,6 +38,7 @@ class ReconcileReminderScheduleUseCase {
       time: settings.time,
       now: now,
       utcOffset: utcOffset,
+      notBefore: notBefore,
     );
   }
 }
