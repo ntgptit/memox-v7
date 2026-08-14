@@ -7,8 +7,8 @@
 | **Scope** | Bảng, cột, index, quan hệ, query bất biến. Ngoài phạm vi: SQL runtime (`lib/core/database/`, chưa tồn tại) |
 | **Source of truth for** | Schema · cột và kiểu · index · query bất biến · thứ tự migration |
 | **Depends on** | `document-conventions.md`, `architecture.md`, `business-rules.md` |
-| **Updated by task** | Bất biến 30 (khoá scheduler theo BR-13) và ai ghi `first_answered_at` — kể cả backfill v7; ma trận `end_reason` nhận thêm BR-164 |
-| **Last updated** | 2026-08-12 |
+| **Updated by task** | M99.23 — `app_settings.theme_mode` và `app_settings.language` (BR-186, BR-187), migration v8, và bảng thứ tự migration bổ sung v6/v7 vốn bị bỏ sót |
+| **Last updated** | 2026-08-13 |
 
 Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; SQL thật nằm ở
 `lib/core/database/tables/`, hiện ở **schema v4**.
@@ -459,23 +459,41 @@ nào, bỏ dở bao nhiêu" — thứ hiện không tồn tại ở bất kỳ �
 
 ## `app_settings`
 
-Một dòng, cho local profile. Mặc định toàn app của tùy chọn học (BR-147).
+Một dòng, cho local profile. Mặc định toàn app của tùy chọn học (BR-147) và hai
+tuỳ chọn trình bày (BR-186, BR-187).
 
 | Cột | Kiểu | Ghi chú |
 |---|---|---|
-| `id` | INTEGER PK | luôn `1`; `CHECK (id = 1)` giữ bảng ở đúng một dòng |
+| `id` | INTEGER PK | luôn `1`; `CHECK (id = 1)` giữ bảng ở đúng một dòng (BR-182) |
 | `card_limit` | INTEGER NOT NULL DEFAULT 20 | trần thẻ **mỗi phiên**, không phải mỗi ngày (BR-24) |
 | `new_card_order` | TEXT NOT NULL DEFAULT 'created' | `created` \| `random` (BR-148) |
+| `theme_mode` | TEXT NOT NULL DEFAULT 'system' | `system` \| `light` \| `dark` (BR-186). Thêm ở v8 |
+| `language` | TEXT NOT NULL DEFAULT 'system' | `system` \| `en` \| `vi` (BR-187). Thêm ở v8 |
 | `updated_at` | DATETIME NOT NULL | UTC |
 
 **Một bảng một dòng thay vì key-value.** Key-value đọc linh hoạt hơn nhưng mọi
 giá trị thành `TEXT` và mọi lần đọc thành một phép ép kiểu không ai kiểm; một
 dòng có cột thật thì `drift_dev` type-check ngay lúc build, và thêm một tùy chọn
-là một migration — đúng mức nghiêm túc cần có cho thứ đổi hành vi học.
+là một migration — đúng mức nghiêm túc cần có cho thứ đổi hành vi học. BR-182
+nâng điều đó lên thành rule, nên `SharedPreferences` cho theme và ngôn ngữ là
+lựa chọn đã bị loại: nó tách một nửa tuỳ chọn của app sang một store thứ hai,
+không có transaction chung với nửa còn lại và không watch được cùng một stream.
+
+**`theme_mode` và `language` giữ lựa chọn, không giữ kết quả đã giải.** `'system'`
+là một lựa chọn thật, khác hẳn với việc lưu `'light'` vì hôm nay platform đang
+sáng: giá trị đã giải hết đúng ngay khi người dùng đổi cài đặt hệ điều hành, và
+không có cách nào phân biệt được nó với một lựa chọn tường minh (AD-11).
+
+**`language` chứ không phải `locale`.** Cột giữ đúng ba giá trị của BR-187, không
+phải một BCP-47 tag đầy đủ — chưa có variant, script hay region nào trong
+`supportedLocales`, và một cột hứa hẹn nhiều hơn thứ nó nhận là một cột sẽ được
+ai đó ghi `vi-VN` vào.
 
 **Ghi đè nằm ở `decks.study_config`, không ở đây.** Deck root MAY mang JSON ghi
 đè; deck con MUST NOT (BR-147), cùng quy tắc cột scheduler đã theo từ BR-06. Giá
-trị hiệu lực = giá trị của root nếu có, ngược lại giá trị bảng này.
+trị hiệu lực = giá trị của root nếu có, ngược lại giá trị bảng này. Đổi bảng này
+MUST NOT ghi `study_config`, và xoá `study_config` MUST NOT ghi bảng này
+(BR-184).
 
 ## `deck_templates`
 
@@ -795,6 +813,9 @@ và cờ — xem `docs/wireframes/m4-11-card-management.md`.
 | 3 | Cột `cards.front_folded`, `back_folded` + backfill bằng Dart — sửa search không khớp chữ hoa non-ASCII |
 | 4 | Đổi tên `card_review_states`→`card_study_states`, `review_history`→`study_answers` và sáu cột (M5.0l). Không thêm, không xoá, không đụng dòng nào |
 | 5 | Toàn bộ schema Study sau brainstorm: `learned_at`, `session_kind`, `current_mode`, `cursor`, `card_limit`, `mode`, `outcome_reason`, `comparison_version`, `used_hint`, `study_config`; bảng `study_queue_items`, `app_settings`; giá trị `learning` cho `kind` và `interrupted` cho `end_reason` (M5.0s) |
+| 6 | Không đổi DDL — normalize `decks.content_type` của sub-deck rỗng về `unset` theo BR-163 (M99.15) |
+| 7 | Không đổi DDL — backfill `decks.first_answered_at` bằng `MIN(learned_at)` của cây cho root đã học xong ít nhất một thẻ, theo BR-13 (M99.16) |
+| 8 | Cột `app_settings.theme_mode`, `app_settings.language` — hai `ALTER TABLE ADD COLUMN` có `DEFAULT 'system'`, không đụng dòng nào (M99.23) |
 | _sau_ | Bảng `card_media` |
 | _sau_ | Cột sync (`is_pending_sync`, `version`) khi có backend (AD-03) |
 | _sau_ | `deck_templates` thành bảng runtime nếu tải template từ server |

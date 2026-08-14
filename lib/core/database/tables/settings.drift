@@ -1,0 +1,46 @@
+-- Application-wide options, for the one local profile (BR-182).
+--
+-- **Its own file since v8, and it was never a study table.** `app_settings`
+-- arrived inside `tables/study.drift` because study defaults were the only
+-- thing in it. v8 adds theme and language, and a table holding the app's
+-- appearance inside the study feature's schema file is a place nobody would
+-- look for it.
+
+-- Exactly one row (BR-147, BR-182).
+--
+-- A one-row table with real columns rather than key-value: key-value reads more
+-- flexibly and turns every value into TEXT and every read into an unchecked
+-- cast, while this shape lets `drift_dev` type-check at build time and makes
+-- adding an option a migration -- the right level of ceremony for something
+-- that changes how people study.
+CREATE TABLE app_settings (
+    -- The CHECK is what keeps the table at one row. Without it, "the settings"
+    -- becomes "whichever row the query happened to read first".
+    id INTEGER NOT NULL PRIMARY KEY CHECK (id = 1),
+
+    -- A ceiling PER SESSION, not per day (BR-24). The number of sessions in a
+    -- day is deliberately unlimited.
+    card_limit INTEGER NOT NULL DEFAULT 20,
+
+    new_card_order TEXT NOT NULL DEFAULT 'created'
+        CHECK (new_card_order IN ('created', 'random')),
+
+    -- The user's CHOICE, not the resolved brightness (BR-186, AD-11).
+    --
+    -- Storing `'light'` because the platform happens to be light today makes an
+    -- explicit choice indistinguishable from following the system, and it stops
+    -- being true the moment the OS setting changes.
+    theme_mode TEXT NOT NULL DEFAULT 'system'
+        CHECK (theme_mode IN ('system', 'light', 'dark')),
+
+    -- The same shape, for the locale (BR-187).
+    --
+    -- `language`, not `locale`: the column holds BR-187's three values, not a
+    -- BCP-47 tag. There is no script, variant or region in `supportedLocales`,
+    -- and a column that promises more than it accepts is one somebody writes
+    -- `vi-VN` into.
+    language TEXT NOT NULL DEFAULT 'system'
+        CHECK (language IN ('system', 'en', 'vi')),
+
+    updated_at DATETIME NOT NULL
+);

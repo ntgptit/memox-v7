@@ -36,9 +36,85 @@
   "@settingsTitle": {
     "description": "App bar title of the Settings branch."
   },
-  "settingsPlaceholderTitle": "Các tùy chọn ứng dụng đang được phát triển",
-  "@settingsPlaceholderTitle": {
-    "description": "Heading of the Settings placeholder (AD-19)."
+  "settingsLoadingLabel": "Đang tải cài đặt",
+  "@settingsLoadingLabel": {
+    "description": "Screen-reader label announced while the settings row is read."
+  },
+  "settingsLoadErrorTitle": "Không tải được cài đặt",
+  "@settingsLoadErrorTitle": {
+    "description": "Whole-screen error when the settings stream fails (UC-12 E3)."
+  },
+  "settingsSaveErrorTitle": "Chưa lưu được",
+  "@settingsSaveErrorTitle": {
+    "description": "Title of the in-section error band when a settings write fails (UC-12 E2, BR-188)."
+  },
+  "settingsStudyDefaultsSection": "Mặc định học",
+  "@settingsStudyDefaultsSection": {
+    "description": "Heading of the group holding the app-wide card limit and new-card order (BR-183)."
+  },
+  "settingsStudyDefaultsNote": "Áp dụng cho phiên bạn bắt đầu sau khi lưu. Phiên đang chạy giữ nguyên trần của nó.",
+  "@settingsStudyDefaultsNote": {
+    "description": "States BR-185 on the global screen. Longer than studyOptionsNextSessionNote for the reason given in the English ARB."
+  },
+  "settingsAppearanceSection": "Giao diện",
+  "@settingsAppearanceSection": {
+    "description": "Heading of the theme group (BR-186)."
+  },
+  "settingsThemeSystem": "Theo hệ thống",
+  "@settingsThemeSystem": {
+    "description": "Theme choice: follow the platform's brightness (BR-186)."
+  },
+  "settingsThemeLight": "Sáng",
+  "@settingsThemeLight": {
+    "description": "Theme choice: always light (BR-186)."
+  },
+  "settingsThemeDark": "Tối",
+  "@settingsThemeDark": {
+    "description": "Theme choice: always dark (BR-186)."
+  },
+  "settingsLanguageSection": "Ngôn ngữ",
+  "@settingsLanguageSection": {
+    "description": "Heading of the language group (BR-187)."
+  },
+  "settingsLanguageSystem": "Theo hệ thống",
+  "@settingsLanguageSystem": {
+    "description": "Language choice: resolve from the platform's preferred locales (BR-187)."
+  },
+  "settingsLanguageEnglish": "English",
+  "@settingsLanguageEnglish": {
+    "description": "Language choice. An endonym, deliberately untranslated."
+  },
+  "settingsLanguageVietnamese": "Tiếng Việt",
+  "@settingsLanguageVietnamese": {
+    "description": "Language choice. An endonym, deliberately untranslated."
+  },
+  "settingsResetAction": "Khôi phục mặc định",
+  "@settingsResetAction": {
+    "description": "Puts every app option back to its default (BR-189). Worded away from Reset learning progress (BR-42)."
+  },
+  "settingsResetDescription": "Đưa các tuỳ chọn ứng dụng về mặc định. Deck và tiến độ học của bạn không bị ảnh hưởng.",
+  "@settingsResetDescription": {
+    "description": "Shown under the reset action at rest, not only inside the confirmation (BR-189)."
+  },
+  "settingsResetConfirmTitle": "Khôi phục tuỳ chọn ứng dụng?",
+  "@settingsResetConfirmTitle": {
+    "description": "Title of the reset confirmation sheet (UC-12 A3)."
+  },
+  "settingsResetConfirmAction": "Khôi phục",
+  "@settingsResetConfirmAction": {
+    "description": "Confirms the reset."
+  },
+  "settingsSavingLabel": "Đang lưu",
+  "@settingsSavingLabel": {
+    "description": "Announced while a settings group is being written (BR-188)."
+  },
+  "studyOptionsUseAppDefaults": "Dùng mặc định của ứng dụng",
+  "@studyOptionsUseAppDefaults": {
+    "description": "Clears this root deck's study-options override (BR-184)."
+  },
+  "studyOptionsOverrideNote": "Deck này đang dùng giá trị riêng thay cho mặc định của ứng dụng.",
+  "@studyOptionsOverrideNote": {
+    "description": "Shown on a deck whose root carries an override (BR-184)."
   },
   "decksTitle": "Thư viện",
   "@decksTitle": {

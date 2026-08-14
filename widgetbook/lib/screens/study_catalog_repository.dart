@@ -245,6 +245,9 @@ class StudyCatalogRepository implements StudyRepository {
   }) async {}
 
   @override
+  Future<void> clearStudyOptionsOverride(String deckId) async {}
+
+  @override
   Future<StudyAnswerCommitModel> submitAnswer({
     required String sessionId,
     required String cardId,

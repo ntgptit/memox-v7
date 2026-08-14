@@ -1,13 +1,13 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 418,
-  "totalSites": 412,
+  "scannedFiles": 443,
+  "totalSites": 415,
   "byElementKind": {
     "other": 291,
     "background": 15,
     "shadow": 1,
     "border": 14,
-    "text": 69,
+    "text": 72,
     "icon": 22
   },
   "bySourceKind": {
@@ -16,7 +16,7 @@
     "Colors-material": 5,
     "hardcoded-literal": 97,
     "opacity-modified-token": 11,
-    "theme-token": 152
+    "theme-token": 155
   },
   "sites": [
     {
@@ -4079,6 +4079,28 @@
       "resolved_value_dark": "#A8A7C4"
     },
     {
+      "file": "lib/features/settings/presentation/widgets/sections/settings_reset_section_widget.dart",
+      "line": 61,
+      "widget_context": "SettingsResetSectionWidget",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/settings/presentation/widgets/sections/settings_study_defaults_section_widget.dart",
+      "line": 142,
+      "widget_context": "_SettingsStudyDefaultsSectionWidgetState",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
+    },
+    {
       "file": "lib/features/study/presentation/widgets/items/match_tile_widget.dart",
       "line": 255,
       "widget_context": "_TileSkin",
@@ -4192,6 +4214,17 @@
       "file": "lib/features/study/presentation/widgets/sections/study_card_face_section_widget.dart",
       "line": 379,
       "widget_context": "_CardHalf",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/study/presentation/widgets/sections/study_options_section_widget.dart",
+      "line": 127,
+      "widget_context": "_StudyOptionsSectionWidgetState",
       "element_kind": "text",
       "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",

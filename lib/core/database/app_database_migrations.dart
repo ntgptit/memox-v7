@@ -126,6 +126,33 @@ extension _AppDatabaseMigrations on AppDatabase {
     );
   }
 
+  /// The v7 → v8 upgrade: the two appearance columns (BR-186, BR-187).
+  ///
+  /// **Additive, and it has to be.** Widening a `CHECK` means rebuilding a
+  /// table in SQLite (see [_upgradeToV5]); adding a column with its own `CHECK`
+  /// does not, because the constraint arrives with the column rather than
+  /// replacing one. Nothing here rewrites a row.
+  ///
+  /// **`DEFAULT 'system'` is what makes the existing row correct without an
+  /// `UPDATE`.** Every build before v8 followed the platform for both theme and
+  /// language because it had no stored choice, so `'system'` is not a
+  /// placeholder — it is the truthful record of what the app was already doing.
+  ///
+  /// The literals describe v8's schema, not today's, for the reason every other
+  /// method in this file states.
+  Future<void> _upgradeToV8() async {
+    const List<String> statements = <String>[
+      "ALTER TABLE app_settings ADD COLUMN theme_mode TEXT NOT NULL "
+          "DEFAULT 'system' CHECK (theme_mode IN ('system', 'light', 'dark'))",
+      "ALTER TABLE app_settings ADD COLUMN language TEXT NOT NULL "
+          "DEFAULT 'system' CHECK (language IN ('system', 'en', 'vi'))",
+    ];
+
+    for (final statement in statements) {
+      await customStatement(statement);
+    }
+  }
+
   /// The v4 → v5 upgrade.
   ///
   /// Two of these steps CANNOT be an `ALTER TABLE`: SQLite has no way to change

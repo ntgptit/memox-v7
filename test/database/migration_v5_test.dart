@@ -71,7 +71,13 @@ void main() {
     );
 
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 5);
+    // **`db.schemaVersion`, not a literal 5.** `onUpgrade` branches on `from`
+    // alone, so a v4 database always ends at the newest schema — validating
+    // against 5 asserted the *shape* of a database this build cannot produce,
+    // and it broke the moment v8 added a column. What this file is about is
+    // still v5: every assertion below reads rows the later, data-only steps do
+    // not touch.
+    await verifier.migrateAndValidate(db, db.schemaVersion);
     return db;
   }
 

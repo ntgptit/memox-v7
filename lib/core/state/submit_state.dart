@@ -85,3 +85,27 @@ abstract class SubmitState<P extends Enum> with _$SubmitState<P> {
   P? firstProblemOf(Set<P> candidates) =>
       problems.firstWhereOrNull(candidates.contains);
 }
+
+/// Turns a [Failure] into the state a form should show.
+///
+/// **Read out of the failure, never re-derived from the input.** Re-parsing the
+/// submitted value here to decide what to mark would put the rule in a second
+/// place, and the two would be free to disagree about the same number.
+///
+/// A `ValidationFailure` carrying no problem of type [P] is a real case, not a
+/// defensive branch: the domain can reject input for a reason this form has no
+/// field for. It keeps the failure so the screen still says something, rather
+/// than reporting a clean state after a rejected write.
+///
+/// Generic and shared for the same reason [SubmitState] is: the mapping is one
+/// policy, and a per-feature copy is a policy that can differ per feature.
+SubmitState<P> submitStateFromFailure<P extends Enum>(Failure failure) {
+  if (failure is! ValidationFailure) return SubmitState<P>(failure: failure);
+
+  final problems = failure.problems.whereType<P>().toSet();
+
+  return SubmitState<P>(
+    problems: problems,
+    failure: problems.isEmpty ? failure : null,
+  );
+}

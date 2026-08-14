@@ -10,13 +10,15 @@ import 'package:memox/core/navigation/route_names.dart';
 import 'package:memox/features/deck/di/deck_repository_provider.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
 import 'package:memox/features/progress/presentation/screens/progress_placeholder_screen.dart';
-import 'package:memox/features/settings/presentation/screens/settings_placeholder_screen.dart';
+import 'package:memox/features/settings/presentation/screens/settings_screen.dart';
 import 'package:memox/features/study/di/study_repository_provider.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
+import 'package:memox/features/settings/di/app_settings_repository_provider.dart';
 
 import '../../features/deck/presentation/support/fake_deck_repository.dart';
 import '../../features/study/domain/support/fake_study_repository.dart';
+import '../../features/settings/domain/support/fake_app_settings_repository.dart';
 
 /// The two scaffolded branches (AD-19), exercised through the real app root.
 ///
@@ -25,10 +27,13 @@ import '../../features/study/domain/support/fake_study_repository.dart';
 /// router so navigation performed in one test cannot arrive in the next.
 ///
 /// What AD-19 promises and these tests hold it to: Progress and Settings are
-/// real `StatefulShellBranch`es — deep-linkable, tab-selecting, stack-keeping —
-/// while their screens stay presentation-only: no study session is opened and
-/// no write-shaped repository call is made by entering, leaving or switching
-/// between them.
+/// real `StatefulShellBranch`es — deep-linkable, tab-selecting, stack-keeping.
+///
+/// **Settings stopped being presentation-only at M99.23** (UC-12): it reads and
+/// writes `app_settings`. The presentation-only claim below is now Progress's
+/// alone, and the Settings half of it has been narrowed to what still holds and
+/// still matters — visiting the branch opens no study session and writes
+/// nothing through the **deck or study** contracts.
 void main() {
   final english = AppLocalizationsEn();
 
@@ -57,6 +62,9 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          appSettingsRepositoryProvider.overrideWithValue(
+            FakeAppSettingsRepository(),
+          ),
           envConfigProvider.overrideWithValue(EnvConfig.development),
           studyRepositoryProvider.overrideWithValue(
             studyRepository ?? FakeStudyRepository(),
@@ -86,7 +94,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('tapping Settings opens the placeholder on its own tab', (
+  testWidgets('tapping Settings opens the settings screen on its own tab', (
     tester,
   ) async {
     await pumpApp(tester);
@@ -94,7 +102,7 @@ void main() {
     await tester.tap(tab(english.navigationSettingsLabel));
     await tester.pumpAndSettle();
 
-    expect(find.byType(SettingsPlaceholderScreen), findsOneWidget);
+    expect(find.byType(SettingsScreen), findsOneWidget);
     expect(selectedTab(tester), 3);
     expect(tester.takeException(), isNull);
   });
@@ -117,7 +125,7 @@ void main() {
   ) async {
     await pumpApp(tester, initialLocation: RoutePaths.settings);
 
-    expect(find.byType(SettingsPlaceholderScreen), findsOneWidget);
+    expect(find.byType(SettingsScreen), findsOneWidget);
     expect(find.byType(DeckListScreen), findsNothing);
     expect(selectedTab(tester), 3);
   });
@@ -136,7 +144,7 @@ void main() {
 
     router.goNamed(RouteNames.settings);
     await tester.pumpAndSettle();
-    expect(find.byType(SettingsPlaceholderScreen), findsOneWidget);
+    expect(find.byType(SettingsScreen), findsOneWidget);
     expect(selectedTab(tester), 3);
   });
 

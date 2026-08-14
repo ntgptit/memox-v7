@@ -7,7 +7,7 @@
 | **Scope** | Quyết định ràng buộc nhiều tài liệu hoặc nhiều layer. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), hình dạng dữ liệu (`data-model.md`) |
 | **Source of truth for** | AD-xx · đánh đổi kiến trúc · phương án đã bị loại · lý do pin toolchain |
 | **Depends on** | `document-conventions.md`, `product.md` |
-| **Updated by task** | M99.21 (AD-20 · nửa encode của Card Transfer) |
+| **Updated by task** | M99.23 (AD-19 · Settings rời trạng thái placeholder) |
 | **Last updated** | 2026-08-13 |
 
 Format theo `document-conventions.md` §6.1. AD xếp theo số; ID vĩnh viễn (§7).
@@ -1325,17 +1325,25 @@ cả hai đều chạy được:
 | | |
 |---|---|
 | **Status** | accepted |
-| **Affected documents** | `product.md` · `it-scenarios/01-navigation-and-continuity.md` · `wbs.md` (M99.7) |
+| **Affected documents** | `product.md` · `it-scenarios/01-navigation-and-continuity.md` · `wbs.md` (M99.7, M99.23) · `use-cases.md` (UC-12) · `business-rules.md` (BR-182…BR-189) |
 
 **Decision.** Navigation shell khai báo đúng bốn `StatefulShellBranch`, theo thứ
 tự cố định: **Decks (0) · Study (1) · Progress (2) · Settings (3)**. Decks vẫn
-là cold-start branch (UC-06). Progress và Settings MUST chỉ có
-presentation-only placeholder screen: placeholder MUST NOT tạo domain entity,
-repository, provider, DAO, bảng, dữ liệu mẫu hay persistence nào — không đọc
-provider, không mở session, không ghi database khi vào, thoát hoặc chuyển tab.
-Mỗi branch có path thật (`/progress`, `/settings`) để deep link mở đúng tab.
-Thư viện starter thuộc branch Decks; MUST NOT có tab Profile chừng nào chưa có
-auth/profile domain (AD-03).
+là cold-start branch (UC-06). Mỗi branch có path thật (`/progress`,
+`/settings`) để deep link mở đúng tab. Thư viện starter thuộc branch Decks;
+MUST NOT có tab Profile chừng nào chưa có auth/profile domain (AD-03).
+
+Một branch chưa có nghiệp vụ canonical MUST chỉ có presentation-only
+placeholder screen: placeholder MUST NOT tạo domain entity, repository,
+provider, DAO, bảng, dữ liệu mẫu hay persistence nào — không đọc provider,
+không mở session, không ghi database khi vào, thoát hoặc chuyển tab. Điều kiện
+để rời trạng thái đó là **nghiệp vụ được chốt trong `docs/` trước**, không phải
+màn hình được dựng trước.
+
+**Settings đã rời trạng thái placeholder ở M99.23** (BR-182…BR-189, UC-12): nó
+là feature slice đầy đủ, đọc và ghi `app_settings` qua repository contract như
+mọi feature khác. Progress MUST vẫn là placeholder — chưa có BR nào định nghĩa
+một con số thống kê nào.
 
 **Context.** Sản phẩm cần IA ổn định cho năm study mode và các capability sắp
 tới (thống kê S2, tùy chọn ứng dụng), trong khi Progress và Settings chưa có
@@ -1353,6 +1361,15 @@ scaffold dễ bị đọc nhầm là feature đã xong — WBS và `product.md` 
 điều ngược lại. Một hệ quả đã đo được: bốn destination vượt trần
 `4 × 120dp` của `MxNavigationBar` trên màn 393dp, nên cap bề rộng phải nhường
 cho bề rộng màn hình (M99.7) — đúng hành vi Material thiết kế cho even split.
+
+**M99.23 đã trả lời được câu hỏi mà quyết định này đặt cược vào.** Thay
+`SettingsPlaceholderScreen` bằng feature thật không đụng `app_router.dart`,
+không đụng `AppNavigationShell`, không đổi path và không đổi thứ tự tab — đúng
+điều AD này hứa. Cái nó **có** đụng là hai thứ AD này không dự đoán: theme và
+ngôn ngữ sống ở `MaterialApp`, tức ở `app/`, chứ không ở trong branch — nên một
+feature trong `features/` phải điều khiển được root widget mà vẫn không được
+import `app/` (AD-13). Seam là một provider domain mà `app/` đọc; hướng phụ
+thuộc vẫn chỉ đi một chiều.
 
 **Rejected alternatives.** Giữ hai tab cho tới khi mọi feature xong — trả chi
 phí sửa shell/contract/test lần nữa vào lúc đắt nhất. Fake statistics/settings

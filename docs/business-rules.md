@@ -7,7 +7,7 @@
 | **Scope** | Luật nghiệp vụ, validation rule, state machine, edge case của phạm vi MVP. Ngoài phạm vi: quyết định kiến trúc (`architecture.md`), hình dạng dữ liệu (`data-model.md`), luồng người dùng (`use-cases.md`) |
 | **Source of truth for** | BR-xx · validation rule · entity state machine · edge case |
 | **Depends on** | `document-conventions.md`, `product.md`, `architecture.md` |
-| **Updated by task** | M99.21 — BR-174…BR-181: export card ra file (scope, content-only, tag codec, determinism, read-only, file shape, tên file, riêng tư/platform) |
+| **Updated by task** | M99.23 — BR-182…BR-189: tùy chọn ứng dụng (one-row typed persistence, mặc định học, root override, future-session semantics, theme, ngôn ngữ, atomic submit, reset) |
 | **Last updated** | 2026-08-13 |
 
 Format tuân theo `document-conventions.md` §6.2. Từ khoá MUST / SHOULD / MAY
@@ -463,6 +463,27 @@ riêng tư chung (BR-51…BR-54) — chúng chỉ nói phần mà chiều export
 | BR-180 | active | Tên file export MUST dẫn xuất từ tên deck đã sanitize — loại ký tự phân cách đường dẫn, ký tự điều khiển và ký tự không hợp lệ của hệ tệp, gộp khoảng trắng liên tiếp thành một, trim hai đầu — cộng một ngày lấy từ `clockProvider` và phần mở rộng theo format đã chọn. Sanitize ra chuỗi rỗng thì phần tên MUST fallback về `cards`. MUST NOT gọi `DateTime.now()` ở bất kỳ layer nào, và tên file MUST NOT xuất hiện trong log ở bất kỳ level nào (BR-173). | domain | UC-11, BR-173 |
 | BR-181 | active | File export là dữ liệu riêng tư cùng mức nội dung card (BR-51, BR-52) và MUST chỉ được tạo khi người dùng chủ động yêu cầu (BR-54). Ứng dụng MUST NOT xin quyền truy cập bộ nhớ diện rộng, và MUST NOT ghi artifact vào thư mục dùng chung trước một hành động tường minh của người dùng; bản tạm MUST nằm trong vùng riêng của ứng dụng và là transient. Bàn giao file MUST đi qua share sheet của hệ điều hành. Người dùng đóng share sheet MUST được hiểu là **cancel**, MUST NOT báo lỗi. UI MUST NOT nói file đã được lưu khi hệ điều hành không xác nhận điều đó — copy trung thực nói "đã bàn giao cho hệ thống", không nói "đã lưu". | data + UI | UC-11, BR-51, BR-52, BR-54, BR-173 |
 
+## Tùy chọn ứng dụng
+
+Mặc định toàn app và hai tuỳ chọn trình bày. Các rule dưới đây **không** phát
+biểu lại bound của `card_limit` (BR-24), enum `new_card_order` (BR-148), hai
+tầng của tùy chọn học (BR-147) hay tính bất biến của phiên đang chạy (BR-139) —
+chúng nói phần mà một màn hình Settings toàn app thêm vào.
+
+Nhắc nhở, notification, account/sync, import-export-backup và tham số nâng cao
+của SM-2 **không** thuộc nhóm này và chưa có rule nào.
+
+| ID | Status | Rule | Enforced by | Related |
+|---|---|---|---|---|
+| BR-182 | active | `app_settings` MUST là nơi duy nhất giữ mặc định toàn app, MUST ở đúng một dòng (`id = 1`) và MUST là **cột có kiểu** — MUST NOT là key-value, JSON blob hay chuỗi phải ép kiểu lúc đọc. Mọi surface MUST đọc qua cùng một stream của dòng đó, nên một lần ghi MUST làm mọi surface đang mở cập nhật mà không cần điều hướng lại. MUST NOT có bản thứ hai của các giá trị này sống trong bộ nhớ của provider, và trạng thái hiển thị MUST NOT là nguồn sự thật. Đọc mà không có dòng nào là defect, MUST NOT được xử lý như một trạng thái hợp lệ bằng cách bịa giá trị mặc định tại chỗ. | db + repository | BR-147, AD-19 |
+| BR-183 | active | Mặc định học toàn app MUST gồm đúng hai giá trị: `card_limit` và `new_card_order`. Chúng MUST dùng lại đúng validation và enum production của BR-24 và BR-148 — MUST NOT có bản sao thứ hai của bound, của giá trị mặc định hay của tên enum. Ghi mặc định toàn app MUST NOT ghi vào `decks.study_config` của bất kỳ deck nào. | domain | BR-24, BR-147, BR-148 |
+| BR-184 | active | Root deck đang có `study_config` MUST tiếp tục dùng override đó sau khi mặc định toàn app đổi; root không override MUST đọc mặc định mới ngay ở lần giải kế tiếp. Hành động `Use app defaults` MUST xoá override của **root** trong một transaction và MUST NOT đụng `card_study_states`, `study_answers`, `study_sessions`, `scheduler_*` hay `first_answered_at`. Hành động này MUST sống ở surface tuỳ chọn của deck, MUST NOT nằm trên màn hình Settings toàn app, và deck con MUST NOT sở hữu override để mà xoá. | repository + UI | BR-147, BR-06 |
+| BR-185 | active | Đổi bất kỳ mặc định học nào MUST chỉ có hiệu lực với phiên **được tạo sau đó**. Phiên đang chạy MUST giữ nguyên `study_sessions.card_limit` đã chốt lúc mở (BR-139), MUST NOT dựng lại hàng đợi, MUST NOT đổi thứ tự đã sinh và MUST NOT đổi round đang chạy. UI MUST nói rõ điều đó tại chỗ đổi. | repository + UI | BR-139, BR-113, BR-148 |
+| BR-186 | active | Theme MUST là một trong ba giá trị lưu được: `system`, `light`, `dark`; mặc định `system`. `system` MUST giải theo brightness của platform tại thời điểm hiện tại và MUST đổi theo khi platform đổi mà người dùng không thao tác gì. Lựa chọn tường minh MUST bền qua restart và MUST thắng brightness của platform. Đổi theme MUST áp ngay trong cùng phiên chạy: MUST NOT cần restart, MUST NOT dựng lại router và MUST NOT làm mất navigation stack hay vị trí cuộn. | db + UI | BR-182, AD-19 |
+| BR-187 | active | Ngôn ngữ MUST là một trong ba giá trị lưu được: `system`, `en`, `vi`; mặc định `system`. `system` MUST đi qua resolution của platform trên `supportedLocales` và MUST fallback về `en` khi không khớp. Lựa chọn tường minh MUST bền qua restart. Đổi ngôn ngữ MUST áp ngay trong cùng phiên chạy với đúng các ràng buộc của BR-186, và MUST NOT đổi bất kỳ giá trị canonical nào được lưu — nhãn hiển thị MUST NOT trở thành dữ liệu (BR-132). | db + UI | BR-132, BR-182, BR-186 |
+| BR-188 | active | Mỗi lần lưu một tuỳ chọn MUST là **một** transaction và MUST là một submit độc lập: hỏng khi lưu theme MUST NOT ghi ngôn ngữ hay mặc định học. Lỗi MUST đi ra ngoài dưới dạng `Failure` có kiểu, MUST NOT là exception của tầng dữ liệu và MUST NOT lộ SQL, đường dẫn hay stack trace. Lần gửi thứ hai khi lần đầu chưa xong MUST bị bỏ qua. Lưu thất bại MUST giữ nguyên draft người dùng đang nhập và MUST tiếp tục hiển thị **giá trị đã persisted** cho các control còn lại; MUST NOT vẽ một giá trị chưa lưu như thể đã lưu. | repository + UI | BR-182, AD-12 |
+| BR-189 | active | `Reset to defaults` MUST là hành động tường minh có xác nhận, MUST đưa toàn bộ giá trị của `app_settings` về mặc định trong một transaction, và MUST NOT đụng `decks.study_config`, tiến độ học, `card_study_states`, `study_answers`, session, scheduler hay nội dung card. Copy MUST nói rõ phạm vi đó trước khi thực hiện — MUST NOT dùng từ ngữ khiến hành động này bị hiểu là Reset learning progress (BR-42). | repository + UI | BR-42, BR-182, BR-184 |
+
 ## StudyMode
 
 | ID | Status | Rule | Enforced by | Related |
@@ -813,6 +834,9 @@ chọn **loại phiên**, không chọn phạm vi.
 | Tag.name | ≤ 50 ký tự (BR-93) | "Tên tag tối đa 50 ký tự" | domain |
 | Tag.name | không trùng, không phân biệt hoa thường (BR-93) | "Tag này đã tồn tại" | domain + db |
 | Card.tags | ≤ 10 tag mỗi thẻ (BR-94) | "Mỗi thẻ tối đa 10 tag" | domain |
+| AppSettings.cardLimit | cùng bound với tùy chọn của deck (BR-24, BR-183) | như tùy chọn của deck — không có message riêng | domain |
+| AppSettings.themeMode | thuộc `system` \| `light` \| `dark` (BR-186) | không có — control chỉ đưa ra ba lựa chọn hợp lệ | domain + db |
+| AppSettings.language | thuộc `system` \| `en` \| `vi` (BR-187) | không có — control chỉ đưa ra ba lựa chọn hợp lệ | domain + db |
 
 Toàn bộ enforce ở domain vì chưa có server. Khi có backend, server validate lại —
 client validation là trải nghiệm, không phải bảo mật.
@@ -918,6 +942,14 @@ Trạng thái kết thúc là terminal — không có đường quay lại `in_p
 | Ô nội dung bắt đầu bằng `=` hoặc `+` | Ghi như text trong XLSX; mở bằng spreadsheet không thành formula (BR-179) |
 | Tên deck chỉ gồm ký tự bị loại khi sanitize | Tên file dùng `cards` + ngày + đuôi format (BR-180) |
 | Người dùng đóng share sheet | Coi là cancel; không toast lỗi, không nói đã lưu (BR-181) |
+| Đổi card limit toàn app khi đang có phiên chạy dở | Phiên giữ nguyên trần đã chốt; phiên sau mới nhận số mới (BR-185) |
+| Đổi card limit toàn app khi root deck đang có override | Deck đó không đổi gì; override vẫn thắng (BR-184) |
+| Bấm `Use app defaults` trên deck không có override | Không có gì để xoá — action không hiện (BR-184) |
+| Đổi theme của hệ điều hành khi app đang để `System` | Theme app đổi theo ngay, không cần thao tác và không mất stack (BR-186) |
+| Đổi theme của hệ điều hành khi app đang để `Dark` | Không đổi gì — lựa chọn tường minh thắng platform (BR-186) |
+| Platform để một ngôn ngữ app không hỗ trợ, app để `System` | Rơi về `en` (BR-187) |
+| Lưu tuỳ chọn thất bại | Draft giữ nguyên, control còn lại vẫn hiện giá trị đã lưu, có Retry (BR-188) |
+| `Reset to defaults` trên app đã học nhiều tháng | Chỉ bốn giá trị của `app_settings` về mặc định; tiến độ, scheduler và lịch sử không đụng (BR-189) |
 | Muốn đổi deck rỗng từ `card` sang chứa deck con | Rỗng là đã `unset`; tạo deck con luôn được (BR-163) |
 | Kéo deck vào descendant của chính nó | Chặn, lỗi rõ ràng (BR-70) |
 | Di chuyển subtree sang root khác scheduler | Chặn, đề nghị reset (BR-74) |

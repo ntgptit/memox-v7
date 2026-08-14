@@ -99,9 +99,17 @@ base class FakeStudyRepository
         schedulerGeneration: 1,
       );
 
+  /// Whether [effectiveOptions] reports the values as a root override
+  /// (BR-184). Drives whether `Use app defaults` is offered at all.
+  bool isRootOverride = false;
+
   @override
   Future<StudyOptionsModel> effectiveOptions(String rootDeckId) async =>
-      StudyOptionsModel(cardLimit: cardLimit, newCardOrder: newCardOrder);
+      StudyOptionsModel(
+        cardLimit: cardLimit,
+        newCardOrder: newCardOrder,
+        isRootOverride: isRootOverride,
+      );
 
   @override
   Future<StudyScheduleModel?> scheduleOf(String cardId) async => schedule;
@@ -251,6 +259,13 @@ base class FakeStudyRepository
     cardLimit: cardLimit.value,
     order: newCardOrder,
   ));
+
+  /// Every deck whose override was cleared (BR-184), in call order.
+  final List<String> clearedOverrides = <String>[];
+
+  @override
+  Future<void> clearStudyOptionsOverride(String deckId) async =>
+      clearedOverrides.add(deckId);
 
   /// What the summary read returns, and what it was asked.
   ///
