@@ -230,6 +230,12 @@ void main() {
         overview.lastSevenDays.every((day) => day.totalCards == 0),
         isTrue,
       );
+      // `today` is `lastSevenDays.last`, so an empty window would not read as
+      // "no cards today" — it would throw a `StateError` from a getter nobody
+      // suspects. The zero-fill is what stops that, and this is the input where
+      // it has the least to work with.
+      expect(overview.lastSevenDays, hasLength(kProgressWindowDays));
+      expect(overview.today.totalCards, 0);
     });
   });
 

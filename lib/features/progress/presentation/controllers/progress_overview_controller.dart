@@ -85,9 +85,17 @@ class ProgressOverviewController extends _$ProgressOverviewController {
     AsyncValue<ProgressOverview>? _,
     AsyncValue<ProgressOverview> next,
   ) {
-    // Cancel first, unconditionally. An error emission must also clear the timer
-    // armed for the previous value — otherwise a failed read leaves a wake-up
-    // behind for a window nothing is showing.
+    // Cancel first, unconditionally: exactly one timer may be outstanding, and
+    // re-arming without cancelling is how two of them end up racing.
+    //
+    // What happens next depends on whether there is still a snapshot to wake up
+    // for. Riverpod builds an `AsyncError` with `copyWithPrevious`, so an error
+    // that lands *after* a value keeps that value — `boundary` is then the old
+    // snapshot's midnight, and the timer is re-armed from it. That is correct
+    // rather than an oversight: local midnight is a property of the clock, not
+    // of the read that failed, and the screen showing stale numbers over an
+    // error is exactly the screen that must re-read when the day rolls over. An
+    // error with no previous value has no boundary, and arms nothing.
     _cancelMidnight();
 
     final DateTime? boundary = next.value?.nextLocalMidnight;

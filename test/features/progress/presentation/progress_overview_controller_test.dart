@@ -209,6 +209,35 @@ void main() {
       fixture.container.dispose();
     });
 
+    testWidgets('an error after a value keeps the wake-up armed', (
+      tester,
+    ) async {
+      // The failure path the other error test cannot see: it starts with no
+      // initial snapshot, so `AsyncError.value` is null and `_armMidnight`
+      // returns on the null-boundary branch either way. Riverpod builds an
+      // error with `copyWithPrevious`, so an error that lands *after* a value
+      // keeps that value — and the timer must stay armed against its midnight,
+      // because a failed read does not stop the day from rolling over.
+      final repository = FakeProgressRepository(initial: snapshot());
+      final fixture = driven(repository, start: noon);
+      await tester.pump();
+      expect(repository.subscriptionCount, 1);
+
+      repository.fail(const DatabaseFailure(message: 'read failed'));
+      await tester.pump();
+      expect(
+        fixture.container.read(progressOverviewControllerProvider).hasError,
+        isTrue,
+      );
+
+      fixture.setNow(midnight);
+      await tester.pump(const Duration(hours: 13));
+
+      expect(repository.subscriptionCount, 2);
+      expect(repository.reads.last.now, midnight);
+      fixture.container.dispose();
+    });
+
     testWidgets('disposing the controller cancels the pending wake-up', (
       tester,
     ) async {

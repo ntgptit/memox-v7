@@ -84,8 +84,8 @@ void main() {
     });
   });
 
-  testWidgets('IT-NAV-011 · the scaffolded branches render their placeholders '
-      'without a session or a database write', (tester) async {
+  testWidgets('IT-NAV-011 · the Progress screen and the Settings placeholder '
+      'render without a session or a database write', (tester) async {
     // The strong half of AD-19's boundary, against the **real** wiring: the
     // fake-repository test in `test/app/router/` proves the two branches call
     // nothing on the study contract, but only a real database can prove no

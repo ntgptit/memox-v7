@@ -9343,7 +9343,9 @@ thế không đổi bố cục.
 
 ### M99.23 · Progress overview v1 — branch Progress đọc lịch sử học thật
 
-- **Status:** **in progress** — phase 1 (docs) xong: BR-182…BR-191, UC-12,
+- **Status:** **done** — merged by PR #301 (stage 1 của batch tích hợp
+  #301–#310, merge commit trên `codex/integrate-prs-301-310`). Phase 1 (docs)
+  xong: BR-182…BR-191, UC-12,
   AD-19 và `product.md` cập nhật, wireframe `m99-23-progress-overview.md`,
   `check_docs.py` xanh. Phase 2 (domain) xong: `ProgressActivityDay`,
   `ProgressOverview` với `fromActivity` giữ cửa sổ bảy ngày + streak,
@@ -9423,7 +9425,8 @@ thế không đổi bố cục.
   Study write path, **không** đụng branch Settings.
 - **Editable documents:** `docs/business-rules.md`, `docs/use-cases.md`,
   `docs/architecture.md`, `docs/product.md`, `docs/wbs.md`,
-  `docs/wireframes/m99-23-progress-overview.md`
+  `docs/wireframes/m99-23-progress-overview.md`,
+  `docs/it-scenarios/01-navigation-and-continuity.md`
 - **5Why:**
   1. **Vì sao Progress phải dùng history thật, không phải số dựng sẵn?** Vì
      AD-19 dựng branch trước feature với đúng một điều kiện: placeholder MUST
@@ -9496,6 +9499,37 @@ thế không đổi bố cục.
   - [x] `dart format`, `flutter analyze`, guard kiến trúc, guard code, guard
         docs và host test xanh.
   - [ ] Emulator IT: deferred to integration worktree — not run.
+- **Deferred debt:** bốn mục dưới đây được mở ở stage 1 của batch tích hợp
+  #301–#310 bởi hai recursive audit; mỗi mục có lý do vì sao **không** đóng
+  được ở đây và ai đóng nó.
+  1. **Loại trừ card/deck trong Trash khỏi `queries/progress.drift`** — owner:
+     coordinator batch, đóng ở stage 10 (#310). Không đóng được ở stage 1 vì
+     schema hiện chưa có cột tombstone nào, nên không có gì để lọc và không có
+     test nào có thể đỏ. `docs/prompt/progress-v1/implementation.md` đã quyết
+     định "card đã ở Trash không xuất hiện trong Progress" nhưng BR-188 chỉ
+     canonicalize được nửa xoá cứng. Khi #310 thêm soft-delete, BR-188 MUST
+     được mở rộng cùng lúc và `progressActivityDays` MUST loại tombstone —
+     ghim bằng một test SQLite thật: card có `study_answers` → đưa vào Trash →
+     `0` card-day và `hasLifetimeActivity == false`.
+  2. **Benchmark 100.000 `study_answers`** — owner: M99.23, hoãn tới khi có một
+     harness benchmark dùng chung. `progress_stream_test.dart` mới đo ở 240
+     hàng; `progressActivityDays` là full scan không predicate và được re-run
+     bởi mọi write vào `study_answers`/`cards`/`decks` khi branch Progress còn
+     sống trong `IndexedStack`. Quyết định "không thêm index" vẫn đúng, nhưng
+     chưa có số ở scale mà prompt yêu cầu để lần sau có cái mà so.
+  3. **`design_audit` scanner không thấy token viết qua biến local** — owner:
+     M99.14 (chủ sở hữu bộ audit màu). `color_usage_scan.dart` chỉ ghi dạng
+     `context.colors.*` viết thẳng, nên bốn widget Progress hoist
+     `final colors = context.colors;` đóng góp **0 colour site**; báo cáo vì
+     thế đọc như thể màn mới đã được quét. Kỷ luật token của màn này vẫn được
+     `test/visual_audit/screens/.../progress_screen_visual_audit_test.dart`
+     đọc từ paint graph (4 state × 2 theme), nên đây là lỗ của *báo cáo*, không
+     phải của gate. 24 file khác trong `lib/` dùng cùng idiom.
+  4. **Không có gate nào đối chiếu `Affected documents` của một AD với
+     `Editable documents` của task sửa nó** — owner: M99.9 (chủ sở hữu
+     `check_docs.py`). Chính lỗ này để IT-NAV-011 mô tả Progress là placeholder
+     suốt một PR đã thay placeholder; đã sửa tài liệu ở đây, nhưng chưa có gì
+     ngăn nó tái diễn ở chín stage còn lại của batch.
 - **Dependencies:** M99.7, M5.0s, M5.2
 - **Tests required:** domain (distinct card-day, partition loại trừ, ba nhánh
   streak, gap, ranh giới tháng/năm, UTC offset, zero-fill); SQLite thật (mixed

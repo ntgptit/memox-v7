@@ -29,12 +29,18 @@ bool renderPaintsNothing(RenderObject node) {
       // else. Reached the audits with the Progress chart, whose fill is a
       // fraction of its track.
       node is RenderFractionallySizedOverflowBox ||
-      // `Table`, **only when it draws no border**. A `RenderTable` with a
-      // border, or with a decorated `TableRow`, paints those itself — so this
-      // is guarded rather than blanket, and a table that grows a border starts
-      // being reported again instead of quietly losing its colour check. The
-      // Progress chart's table has neither.
-      (node is RenderTable && node.border == null) ||
+      // `Table`, **only when it draws neither a border nor a row decoration**.
+      // `RenderTable.paint` draws both itself, and it draws them independently:
+      // the row-decoration loop runs whether or not `border` is set. Guarding
+      // on `border` alone therefore vouched for a table whose `TableRow` carries
+      // a `BoxDecoration`, and that row colour would have been read by nobody —
+      // not reported, and not in the skip list either, because the early return
+      // happens before the sink is told. Both clauses are needed so a table that
+      // grows either one starts being reported again. The Progress chart's table
+      // has neither.
+      (node is RenderTable &&
+          node.border == null &&
+          node.rowDecorations.every((Decoration? d) => d == null)) ||
       node is RenderFittedBox ||
       node is RenderAspectRatio ||
       node is RenderBaseline ||
