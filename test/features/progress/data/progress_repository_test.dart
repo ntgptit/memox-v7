@@ -244,11 +244,6 @@ void main() {
     test('deleting the deck cascades all the way to history', () async {
       await seedCard('c1');
       await answer('c1', at: now);
-      final rows = await db
-          .customSelect('SELECT id, mode, answered_at FROM study_answers')
-          .get();
-      // ignore: avoid_print
-      print('DEBUG rows=${rows.map((r) => r.data).toList()}');
       expect((await read()).hasLifetimeActivity, isTrue);
 
       await (db.delete(db.decks)..where((t) => t.id.equals('root'))).go();

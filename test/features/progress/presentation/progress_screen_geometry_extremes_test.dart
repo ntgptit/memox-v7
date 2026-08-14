@@ -182,6 +182,18 @@ void main() {
                 ? 'the compact tier caps at 1.75'
                 : 'nothing to avoid here, so the setting is honoured',
           );
+
+          // And the property the scaler exists to protect, at the same cells.
+          // Asserting the scaler alone measures the *mechanism*: it says the
+          // clamp is off at 360, not that the headline survives being unclamped
+          // there. `360 · vi` is now the tightest cell on the screen — 21.1dp of
+          // slack against 274.9dp of unbreakable word — so it is precisely the
+          // one that must be measured rather than reasoned about.
+          expect(
+            headline.getMinIntrinsicWidth(double.infinity),
+            lessThanOrEqualTo(headline.size.width),
+            reason: 'unbreakable run wider than its box',
+          );
         });
       }
     }
@@ -199,47 +211,49 @@ void main() {
           (name: 'error', isError: true),
           (name: 'lifetime-empty', isError: false),
         ]) {
-      testWidgets('no word is broken in half on the ${face.name} face at '
-          '320 @ 2.0 · vi', (tester) async {
-        final repository = face.isError
-            ? FakeProgressRepository()
-            : FakeProgressRepository(
-                initial: progressOverviewFixture(
-                  totals: const <int>[0, 0, 0, 0, 0, 0, 0],
-                  streakDays: 0,
-                  today: DateTime.utc(2026, 8, 12),
-                  hasLifetimeActivity: false,
-                ),
-              );
-        await pumpProgressScreen(
-          tester,
-          repository: repository,
-          surface: const Size(320, 720),
-          textScale: 2,
-          locale: const Locale('vi'),
-        );
-        if (face.isError) {
-          repository.fail(const DatabaseFailure(message: 'read failed'));
-          await tester.pump();
-        }
-
-        final paragraphs = find
-            .byType(RichText)
-            .evaluate()
-            .map((element) => element.renderObject! as RenderParagraph)
-            .toList();
-        expect(paragraphs, isNotEmpty);
-
-        for (final paragraph in paragraphs) {
-          expect(
-            paragraph.getMinIntrinsicWidth(double.infinity),
-            lessThanOrEqualTo(paragraph.size.width),
-            reason:
-                'unbreakable run wider than its box in '
-                '"${paragraph.text.toPlainText()}"',
+      for (final Locale locale in const <Locale>[Locale('en'), Locale('vi')]) {
+        testWidgets('no word is broken in half on the ${face.name} face at '
+            '320 @ 2.0 · ${locale.languageCode}', (tester) async {
+          final repository = face.isError
+              ? FakeProgressRepository()
+              : FakeProgressRepository(
+                  initial: progressOverviewFixture(
+                    totals: const <int>[0, 0, 0, 0, 0, 0, 0],
+                    streakDays: 0,
+                    today: DateTime.utc(2026, 8, 12),
+                    hasLifetimeActivity: false,
+                  ),
+                );
+          await pumpProgressScreen(
+            tester,
+            repository: repository,
+            surface: const Size(320, 720),
+            textScale: 2,
+            locale: locale,
           );
-        }
-      });
+          if (face.isError) {
+            repository.fail(const DatabaseFailure(message: 'read failed'));
+            await tester.pump();
+          }
+
+          final paragraphs = find
+              .byType(RichText)
+              .evaluate()
+              .map((element) => element.renderObject! as RenderParagraph)
+              .toList();
+          expect(paragraphs, isNotEmpty);
+
+          for (final paragraph in paragraphs) {
+            expect(
+              paragraph.getMinIntrinsicWidth(double.infinity),
+              lessThanOrEqualTo(paragraph.size.width),
+              reason:
+                  'unbreakable run wider than its box in '
+                  '"${paragraph.text.toPlainText()}"',
+            );
+          }
+        });
+      }
     }
 
     testWidgets('the error face survives Vietnamese at 320 @ 2.0', (

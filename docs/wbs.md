@@ -9504,7 +9504,12 @@ thế không đổi bố cục.
         412dp; rect assertion pin G2/G3/G4/G6/G8/G9/G10; không overflow.
   - [x] `dart format`, `flutter analyze`, guard kiến trúc, guard code, guard
         docs và host test xanh.
-  - [ ] Emulator IT: deferred to integration worktree — not run.
+  - [ ] Emulator IT: deferred to the integration worktree — not run. Owner:
+        coordinator của batch #301–#310, đóng ở final stage cùng lượt với chín
+        PR còn lại. PR này chạm cả `lib/features/` lẫn `lib/app/` (một binding
+        mới trong `repository_bindings.dart`), tức đúng hai chỗ mà CLAUDE.md nói
+        chỉ device suite mới nhìn thấy; chạy riêng cho một stage là mười lần
+        30–45 phút cho cùng một câu trả lời.
 - **Deferred debt:** tám mục dưới đây được mở ở stage 1 của batch tích hợp
   #301–#310 bởi hai recursive audit; mỗi mục có lý do vì sao **không** đóng
   được ở đây và ai đóng nó.

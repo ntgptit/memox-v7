@@ -288,6 +288,15 @@ void main() {
       await tester.pump();
 
       expect(repository.subscriptionCount, 2);
+
+      // X7, pinned so it cannot change by accident. `ref.invalidate` is a
+      // *refresh*, and `MxAsyncView` skips the loading branch on one for every
+      // screen, so the error face is simply repainted: the user taps and
+      // nothing moves until the read lands. That is an accepted divergence
+      // owned by M4.10, not a property of this screen — and the day it is
+      // fixed, this assertion should fail and be deleted on purpose.
+      expect(find.byType(MxLoadingState), findsNothing);
+      expect(find.byType(MxErrorState), findsOneWidget);
     });
 
     testWidgets('a Retry that fails again stays on the error face and opens '
