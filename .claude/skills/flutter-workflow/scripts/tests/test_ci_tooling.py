@@ -439,6 +439,7 @@ class WorkflowContractTest(unittest.TestCase):
         self.assertIn("matrix: ${{ fromJSON(needs.classify.outputs.shard_matrix) }}", workflow)
         self.assertIn("--test-files-json \"$TEST_FILES_JSON\"", workflow)
         self.assertIn("--needs-widgetbook", workflow)
+        self.assertIn("pub get (widgetbook catalog for root analyze)", workflow)
         self.assertNotIn("classify_ci_changes.py", workflow)
 
     def test_local_gate_fails_closed_when_required_tools_are_missing(self) -> None:

@@ -129,6 +129,12 @@ jobs:
       - name: pub get
         run: flutter pub get
 
+      # Root analysis_options includes the Widgetbook package. A cold runner
+      # needs its package config even though Widgetbook tests run separately.
+      - name: pub get (widgetbook catalog for root analyze)
+        run: flutter pub get
+        working-directory: widgetbook
+
       - name: generate
         run: dart run build_runner build --delete-conflicting-outputs
 
