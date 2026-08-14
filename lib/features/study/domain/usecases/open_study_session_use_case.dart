@@ -15,6 +15,10 @@ import 'start_study_session_use_case.dart';
 /// [shouldResume] is the caller's intent, taken from the route: Resume was
 /// offered because a session was open, and this is what acts on it. The other
 /// parameters describe the session that would be started if it were not.
+///
+/// [resumeSessionId] names *which* open session, when the caller offered a
+/// particular one. Null means "whichever is open for this deck", which is right
+/// only for a caller that never named one — see [ResumeStudySessionUseCase].
 final class OpenStudySessionUseCase {
   const OpenStudySessionUseCase(this._repository);
 
@@ -27,8 +31,16 @@ final class OpenStudySessionUseCase {
     required Duration utcOffset,
     StudyMode? reviewMode,
     bool shouldResume = false,
+    String? resumeSessionId,
   }) => shouldResume
-      ? ResumeStudySessionUseCase(_repository).call(deckId)
+      ? ResumeStudySessionUseCase(_repository).call(
+          deckId,
+          sessionId: resumeSessionId,
+          // Passed through so the resume can re-check BR-103's study day at the
+          // moment of the tap, not only at the moment the list was drawn.
+          now: now,
+          utcOffset: utcOffset,
+        )
       : StartStudySessionUseCase(_repository).call(
           deckId: deckId,
           kind: kind,

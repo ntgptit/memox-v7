@@ -39,6 +39,7 @@ class MxAsyncView<T> extends StatelessWidget {
     required this.data,
     required this.error,
     this.loadingFrame,
+    this.shouldSkipLoadingOnReload = false,
     super.key,
   });
 
@@ -68,6 +69,26 @@ class MxAsyncView<T> extends StatelessWidget {
   /// already sits inside a shell.
   final Widget Function(Widget loading)? loadingFrame;
 
+  /// Whether to keep the previous value on screen across a **reload** too.
+  ///
+  /// **Off by default, and the default is the honest one for most screens:** a
+  /// reload means a dependency changed, so the previous value usually answers a
+  /// question nobody is asking any more — a different deck, a different filter.
+  ///
+  /// The exception, and the reason this is a parameter, is a screen whose only
+  /// dependency is the *instant* it measures against. Study Home watches a
+  /// clock notifier so its counts expire at the right moment; every foreground
+  /// resume and every due boundary therefore reloads it with the same question
+  /// one moment later. With the default, the whole tab flashed to a spinner and
+  /// the list lost its scroll position — motion in place of information, which
+  /// is precisely what `skipLoadingOnRefresh` exists to prevent one case
+  /// earlier.
+  ///
+  /// Opt in only when the reload genuinely re-asks the same question. If the
+  /// dependency changes *what* is being asked, leave this off: stale data
+  /// presented as fresh is worse than a spinner.
+  final bool shouldSkipLoadingOnReload;
+
   @override
   Widget build(BuildContext context) {
     return value.when(
@@ -78,9 +99,7 @@ class MxAsyncView<T> extends StatelessWidget {
       // populated list with a spinner every time the app resumes would be motion
       // in place of information.
       skipLoadingOnRefresh: true,
-      // Do not keep it across a reload. A dependency changing means the previous
-      // value answers a question nobody is asking any more.
-      skipLoadingOnReload: false,
+      skipLoadingOnReload: shouldSkipLoadingOnReload,
       loading: _buildLoading,
       data: data,
       error: error,

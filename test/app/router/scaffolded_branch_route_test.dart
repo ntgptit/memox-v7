@@ -11,11 +11,13 @@ import 'package:memox/features/deck/di/deck_repository_provider.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
 import 'package:memox/features/progress/presentation/screens/progress_placeholder_screen.dart';
 import 'package:memox/features/settings/presentation/screens/settings_placeholder_screen.dart';
+import 'package:memox/features/study/di/study_home_repository_provider.dart';
 import 'package:memox/features/study/di/study_repository_provider.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 
 import '../../features/deck/presentation/support/fake_deck_repository.dart';
+import '../../features/study/domain/support/fake_study_home_repository.dart';
 import '../../features/study/domain/support/fake_study_repository.dart';
 
 /// The two scaffolded branches (AD-19), exercised through the real app root.
@@ -58,6 +60,11 @@ void main() {
       ProviderScope(
         overrides: [
           envConfigProvider.overrideWithValue(EnvConfig.development),
+          // The Study branch is Study Home since UC-12, which reads its own
+          // contract — a screen with no method that could open a session.
+          studyHomeRepositoryProvider.overrideWithValue(
+            FakeStudyHomeRepository(),
+          ),
           studyRepositoryProvider.overrideWithValue(
             studyRepository ?? FakeStudyRepository(),
           ),

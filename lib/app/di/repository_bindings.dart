@@ -32,8 +32,12 @@ import '../../features/deck/domain/repositories/deck_repository.dart';
 import '../../features/deck/domain/models/deck_template_model.dart';
 import '../../features/deck/domain/repositories/deck_template_repository.dart';
 import '../../features/study/data/datasources/study_dao.dart';
+import '../../features/study/data/datasources/study_home_dao.dart';
+import '../../features/study/di/study_home_repository_provider.dart';
 import '../../features/study/di/study_repository_provider.dart';
+import '../../features/study/data/repositories/study_home_repository_impl.dart';
 import '../../features/study/data/repositories/study_repository_impl.dart';
+import '../../features/study/domain/repositories/study_home_repository.dart';
 import '../../features/study/domain/repositories/study_repository.dart';
 
 /// Where each repository contract is bound to its implementation.
@@ -147,6 +151,19 @@ DeckTemplateRepository deckTemplateRepositoryBinding(Ref ref) =>
 StudyRepository studyRepositoryBinding(Ref ref) =>
     StudyRepositoryImpl(StudyDao(ref.watch(appDatabaseProvider)));
 
+/// The Study tab's read, bound apart from the session repository above (BR-182).
+///
+/// **Two contracts over one database, on purpose.** They are wired identically
+/// and could have been one; splitting them is what makes the Home screen unable
+/// to open a session, because the only object it can reach has no method that
+/// writes. Import and export are split the same way and for the same reason.
+///
+/// No clock, for the reason `studyRepositoryBinding` gives: `now` and the local
+/// day arrive as arguments, so the read is testable at the `due_at == now` and
+/// the local-midnight boundaries (AD-06, AD-16).
+StudyHomeRepository studyHomeRepositoryBinding(Ref ref) =>
+    StudyHomeRepositoryImpl(StudyHomeDao(ref.watch(appDatabaseProvider)));
+
 /// The starter catalog: the shipped assets, decoded once (UC-01).
 ///
 /// A `Future` binding rather than a repository: there is no database and no
@@ -186,4 +203,5 @@ List<Override> repositoryBindingOverrides() => <Override>[
   deckTemplateRepositoryProvider.overrideWith(deckTemplateRepositoryBinding),
   deckTemplateCatalogProvider.overrideWith(deckTemplateCatalogBinding),
   studyRepositoryProvider.overrideWith(studyRepositoryBinding),
+  studyHomeRepositoryProvider.overrideWith(studyHomeRepositoryBinding),
 ];

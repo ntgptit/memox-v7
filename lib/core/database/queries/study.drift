@@ -298,3 +298,128 @@ WHERE id = (
     WHERE c.id = :cardId
   )
   AND first_answered_at IS NULL;
+
+-- The Study tab's own workload read: every root deck, with the three counts the
+-- Home list orders by (BR-182, BR-183).
+--
+-- **A statement of its own, and not `rootDeckSummaries` borrowed.** The two
+-- carry the same predicates on purpose and `query_test.dart` holds them to one
+-- answer on the same data and the same `:now` — the same contract every other
+-- pair of "count it" / "list it" queries in this file lives under. What they do
+-- **not** share is a reason to exist: the deck list needs a whole deck row, a
+-- learned gauge and a direct-child count, and Study Home needs none of those.
+-- Reusing the other statement would make a filter added for one screen a change
+-- in the behaviour of the other, which is the coupling AD-13 keeps out of reads.
+--
+-- **The due set is split at the local-day boundary, in the same grouped pass**
+-- (BR-162). `:startOfToday` is computed by the caller from `LocalDayModel`
+-- (BR-105); SQL never derives a local midnight, for the same reason `:now` is a
+-- parameter and not a clock function. The two halves partition the Reviewing set
+-- of BR-142 — no third session kind, no change to what a session serves.
+--
+-- **`new` is `learned_at IS NULL`**, character-for-character `newCardsInTree`'s
+-- predicate, so the number on the row and the session it opens count one set.
+--
+-- Bounded: one row per root deck, three grouped subqueries evaluated once each.
+-- The obvious Dart loop asking per deck is the N+1 this shape exists to refuse.
+--
+-- Roots with no cards are still returned. Filtering them out here would make
+-- "the library has decks but none of them holds a card" indistinguishable from
+-- "the library is empty", and those are two different screens (BR-184).
+--
+-- Ordering is `created_at` — a stable read order, **not** the order the list is
+-- drawn in. BR-183 ranks by workload and breaks ties on the case-folded name,
+-- and SQLite's `lower()` folds ASCII only: it leaves `Ô`, `Ê` and `Đ` alone, so
+-- a Vietnamese deck name would sort by whether it happened to start with a
+-- diacritic. The fold is Dart's, the same decision `CardText.folded` records.
+studyHomeRootWorkload:
+SELECT
+  d.id AS deckId,
+  d.name AS deckName,
+  d.scheduler_type AS schedulerType,
+  COALESCE(total.cardCount, 0) AS totalCardCount,
+  COALESCE(new.newCount, 0) AS newCount,
+  COALESCE(due.overdueCount, 0) AS overdueCount,
+  COALESCE(due.dueTodayCount, 0) AS dueTodayCount,
+  (
+    SELECT MIN(next.due_at) FROM card_study_states next
+    WHERE next.due_at > :now
+  ) AS nextDueAt
+FROM decks d
+LEFT JOIN (
+    SELECT cd.root_deck_id AS rootDeckId, COUNT(*) AS cardCount
+    FROM cards c
+    INNER JOIN decks cd ON cd.id = c.deck_id
+    GROUP BY cd.root_deck_id
+) total ON total.rootDeckId = d.id
+LEFT JOIN (
+    SELECT cd.root_deck_id AS rootDeckId, COUNT(*) AS newCount
+    FROM cards c
+    INNER JOIN decks cd ON cd.id = c.deck_id
+    INNER JOIN card_study_states s ON s.card_id = c.id
+    WHERE s.learned_at IS NULL
+    GROUP BY cd.root_deck_id
+) new ON new.rootDeckId = d.id
+LEFT JOIN (
+    SELECT cd.root_deck_id AS rootDeckId,
+           SUM(CASE WHEN s.due_at < :startOfToday THEN 1 ELSE 0 END)
+               AS overdueCount,
+           SUM(CASE WHEN s.due_at >= :startOfToday THEN 1 ELSE 0 END)
+               AS dueTodayCount
+    FROM cards c
+    INNER JOIN decks cd ON cd.id = c.deck_id
+    INNER JOIN card_study_states s ON s.card_id = c.id
+    WHERE s.learned_at IS NOT NULL AND s.due_at <= :now
+    GROUP BY cd.root_deck_id
+) due ON due.rootDeckId = d.id
+WHERE d.parent_deck_id IS NULL
+ORDER BY d.created_at ASC, d.id ASC;
+
+-- The one session Study Home may offer to continue (BR-182).
+--
+-- **Every disqualification is a clause here, and none of them is a write.**
+-- Home renders; it does not repair. BR-103's repair — closing a session an
+-- earlier study day left open as `abandoned`/`interrupted` — still belongs to
+-- `abandonStaleSessions`, which runs when the user actually enters the flow. A
+-- Home screen that closed sessions would write to the database for scrolling
+-- past a card, and would do it on every rebuild.
+--
+-- So the four ways a session stops being resumable are read as filters:
+--
+-- * `status = 'in_progress'` — a session that ended is not offered back.
+-- * `started_at >= :dayStart` — a session from an earlier study day is over
+--   whether or not anybody has closed it yet (BR-103). Advertising it would
+--   promise a Resume that the next `abandonStaleSessions` cancels.
+-- * `root.scheduler_generation = s.scheduler_generation` — a session opened
+--   before a Reset can no longer write anything (BR-84), so offering to
+--   continue it offers a session that fails on its first answer. The INNER JOIN
+--   is the other half: a root that is gone matches nothing, and `deck_id`'s
+--   own cascade has already taken the session with a deleted deck.
+-- * `EXISTS (…queue…)` — the session holds no queue row at all. That is what
+--   "every card of the session was deleted" looks like from here, because
+--   `study_queue_items.card_id` cascades. Deliberately *not* narrowed to
+--   `status = 'pending'`: BR-182 says "the session's queue still holds at least
+--   one row", and a stricter clause would be a second, quieter rule. A session
+--   whose rows are all `completed` is closed in the same transaction that
+--   completes the last one, so it never reaches this query as `in_progress`.
+--
+-- Newest first: two open sessions on different decks is a state BR-101 does not
+-- forbid, and the one the user was last in is the one they mean.
+studyHomeResumeCandidate:
+SELECT
+  s.id AS sessionId,
+  s.deck_id AS deckId,
+  d.name AS deckName,
+  s.session_kind AS sessionKind,
+  s.current_mode AS currentMode
+FROM study_sessions s
+INNER JOIN decks d ON d.id = s.deck_id
+INNER JOIN decks root ON root.id = s.root_deck_id
+WHERE s.status = 'in_progress'
+  AND s.started_at >= :dayStart
+  AND root.scheduler_generation = s.scheduler_generation
+  AND EXISTS (
+    SELECT 1 FROM study_queue_items q WHERE q.session_id = s.id
+  )
+ORDER BY s.started_at DESC, s.id ASC
+LIMIT 1;

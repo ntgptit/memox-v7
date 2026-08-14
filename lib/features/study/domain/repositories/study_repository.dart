@@ -284,4 +284,19 @@ abstract interface class StudyRepository {
 
   /// The session currently open for [deckId], if any.
   Future<StudySessionEntity?> openSessionFor(String deckId);
+
+  /// One session by its own id, whatever its status.
+  ///
+  /// **The read a Resume needs, and [openSessionFor] is not it.** That one asks
+  /// "which session is open for this deck" and answers with the newest — which
+  /// is a different question from "the session the user was just offered". A
+  /// screen that listed a session and then resumed by deck id can hand the user
+  /// a *different* session: one opened later on the same deck, or one an earlier
+  /// study day left behind (BR-103). Both were reachable, and neither is what
+  /// the tap meant.
+  ///
+  /// Null when the row is gone. The status is returned as-is rather than
+  /// filtered here, so the caller can tell "no such session" from "that session
+  /// has ended" and say so.
+  Future<StudySessionEntity?> sessionById(String sessionId);
 }

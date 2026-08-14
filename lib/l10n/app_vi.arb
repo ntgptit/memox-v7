@@ -2631,5 +2631,125 @@
   "cardExportCloseAction": "Đóng",
   "@cardExportCloseAction": {
       "description": "The only action left when the scope is no longer valid — there is nothing to retry until the user selects again (M4.13 W3 state 7)."
+  },
+  "studyHomeTitle": "Học",
+  "@studyHomeTitle": {
+      "description": "App-bar title of the Study tab's home screen (UC-12)."
+  },
+  "studyHomeSupportingCopy": "Chọn một bộ thẻ, hoặc học tiếp phiên đang dở.",
+  "@studyHomeSupportingCopy": {
+      "description": "One line under the title saying what the screen is for. Read-only: nothing on this screen opens a session by itself (BR-182)."
+  },
+  "studyHomeSupportingCopyNoResume": "Chọn một bộ thẻ để bắt đầu.",
+  "@studyHomeSupportingCopyNoResume": {
+      "description": "The same line when no session is open. The other half of the pair promises somewhere to carry on from; with nothing to resume that half is a lie, and BR-182 makes \"nothing open\" the common case because it needs four conditions at once."
+  },
+  "studyHomeLoadingLabel": "Đang tải bộ thẻ",
+  "@studyHomeLoadingLabel": {
+      "description": "Screen-reader label for the Study home spinner. A bare spinner announces nothing at all."
+  },
+  "studyHomeResumeTitle": "Đang học dở",
+  "@studyHomeResumeTitle": {
+      "description": "Heading of the Resume card, shown only when a session of today's study day is still open (BR-182, BR-103)."
+  },
+  "studyHomeResumeSubtitle": "{kind} · {mode}",
+  "@studyHomeResumeSubtitle": {
+      "description": "The open session's own kind and stage, both stored on the session and never inferred (BR-76, BR-98).",
+      "placeholders": {
+          "kind": { "type": "String" },
+          "mode": { "type": "String" }
+      }
+  },
+  "studyHomeResumeAction": "Tiếp tục",
+  "@studyHomeResumeAction": {
+      "description": "Opens the session that is already there. It never creates a second one (BR-101)."
+  },
+  "studyHomeResumeSemanticLabel": "Tiếp tục {deck}",
+  "@studyHomeResumeSemanticLabel": {
+      "description": "Screen-reader name for the Resume action, which names the deck because several rows below carry a similar verb.",
+      "placeholders": {
+          "deck": { "type": "String" }
+      }
+  },
+  "studyHomeNextTitle": "Học tiếp theo",
+  "@studyHomeNextTitle": {
+      "description": "Heading of the root-deck list, ordered by workload (BR-183)."
+  },
+  "studyHomeNothingDueMessage": "Hiện chưa có thẻ nào tới hạn. Bạn vẫn có thể mở bất kỳ bộ thẻ nào để học trước.",
+  "@studyHomeNothingDueMessage": {
+      "description": "Supporting line when every listed deck has an empty workload. Not an error and not an achievement — BR-29 makes a quiet schedule the product working."
+  },
+  "studyHomeOverdueLabel": "{count} quá hạn",
+  "@studyHomeOverdueLabel": {
+      "description": "Due cards whose day has already passed (BR-162). A count, never an age.",
+      "placeholders": {
+          "count": { "type": "int" }
+      }
+  },
+  "studyHomeDueTodayLabel": "{count} tới hạn hôm nay",
+  "@studyHomeDueTodayLabel": {
+      "description": "Due cards still inside today's local day (BR-162).",
+      "placeholders": {
+          "count": { "type": "int" }
+      }
+  },
+  "studyHomeNewLabel": "{count} thẻ mới",
+  "@studyHomeNewLabel": {
+      "description": "Cards that have not finished the learning chain (BR-90, BR-142).",
+      "placeholders": {
+          "count": { "type": "int" }
+      }
+  },
+  "studyHomeWorkloadSemanticLabel": "{overdue} quá hạn, {dueToday} tới hạn hôm nay, {newCount} thẻ mới",
+  "@studyHomeWorkloadSemanticLabel": {
+      "description": "The three counts as one screen-reader phrase, so a row is heard as one fact instead of three stray numbers.",
+      "placeholders": {
+          "overdue": { "type": "int" },
+          "dueToday": { "type": "int" },
+          "newCount": { "type": "int" }
+      }
+  },
+  "studyHomeStudyAction": "Học",
+  "@studyHomeStudyAction": {
+      "description": "Opens one root deck's study entry. The tap is the only thing on this screen that may lead to a write (BR-182)."
+  },
+  "studyHomeStudySemanticLabel": "Học {deck}",
+  "@studyHomeStudySemanticLabel": {
+      "description": "Screen-reader name for a row's Study action. Every row carries the same word, so the deck name is what tells them apart.",
+      "placeholders": {
+          "deck": { "type": "String" }
+      }
+  },
+  "studyHomeEmptyLibraryTitle": "Chưa có gì để học",
+  "@studyHomeEmptyLibraryTitle": {
+      "description": "The library holds no deck at all — the first-run state (BR-184, UC-01)."
+  },
+  "studyHomeEmptyLibraryMessage": "Thêm một bộ thẻ dựng sẵn là có ngay những thẻ đầu tiên.",
+  "@studyHomeEmptyLibraryMessage": {
+      "description": "Copy of the empty-library state. Names the next step rather than the absence."
+  },
+  "studyHomeStarterAction": "Xem bộ thẻ dựng sẵn",
+  "@studyHomeStarterAction": {
+      "description": "Opens the starter catalog from the Study tab (UC-01). A real route, not a placeholder."
+  },
+  "studyHomeNoCardsTitle": "Bộ thẻ của bạn đang trống",
+  "@studyHomeNoCardsTitle": {
+      "description": "There are decks but not a card anywhere in them — a different state from an empty library, with a different next step (BR-184)."
+  },
+  "studyHomeNoCardsMessage": "Thêm thẻ trong thư viện, chúng sẽ xuất hiện ở đây.",
+  "@studyHomeNoCardsMessage": {
+      "description": "Copy of the no-cards state. It must not invent a due count for a deck that holds nothing."
+  },
+  "studyHomeOpenLibraryAction": "Mở thư viện",
+  "@studyHomeOpenLibraryAction": {
+      "description": "Takes the user to the deck tree, where cards are added."
+  },
+  "studyHomeErrorTitle": "Không tải được bộ thẻ",
+  "@studyHomeErrorTitle": {
+      "description": "Failure state of the Study tab. Names no table, no query and no path (AD-04)."
+  },
+  "studyHomeErrorMessage": "Không có gì bị thay đổi. Hãy thử lại sau giây lát.",
+  "@studyHomeErrorMessage": {
+      "description": "Says the read failed and that it wrote nothing — true by construction, because this screen has no write path (BR-182)."
   }
 }

@@ -7,7 +7,7 @@
 | **Scope** | Must-have của MVP. Ngoài phạm vi: should/nice-to-have, và mọi thứ ở mục "Điều đã cố ý không đặc tả" |
 | **Source of truth for** | UC-xx · main/alternative/error flow · UI state matrix của từng màn |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md` |
-| **Updated by task** | M99.21 — UC-11: export card của một deck ra file (scope → format → share) |
+| **Updated by task** | M5.26 (Study Home v1) — UC-12: mở tab Study và chọn việc để học (resume → danh sách root deck theo workload) |
 | **Last updated** | 2026-08-13 |
 
 Chỉ đặc tả must-have. Should-have và nice-to-have viết khi tới lượt — đặc tả
@@ -804,6 +804,60 @@ unavailable/platform error · repository error · encoder error · invalid scope
 (rỗng hoặc id đã cũ). Không có state `loading` khi mở sheet — scope và số card
 đã có sẵn từ màn gọi; và không có state `empty`, vì scope rỗng là lỗi (E5) chứ
 không phải một màn hình trống.
+
+## UC-12 · Mở tab Study và chọn việc để học
+
+| | |
+|---|---|
+| **Status** | active |
+
+**Actor:** Người dùng
+**Trigger:** Chạm tab Study, deep link `/study`, hoặc quay về sau khi kết thúc một phiên
+**Preconditions:** Không có
+
+**Main flow:**
+1. Hệ thống đọc **một snapshot** gồm session có thể học tiếp và toàn bộ root deck
+   kèm workload — cùng một transaction, không phải hai lần đọc rời (AD-13). Màn
+   hình là **chỉ-đọc**: vào tab, cuộn hay đổi tab không ghi gì (BR-182).
+2. Nếu có đúng một session hợp lệ đang mở, Resume card đứng đầu màn hình và nói
+   deck nào, loại phiên gì, đang ở chặng nào — cả hai giá trị lấy từ chính hàng
+   session, không suy ra (BR-76, BR-98).
+3. Dưới Resume là danh sách root deck, mỗi hàng có tên deck, nhãn scheduler khi
+   biết, ba con số Overdue/Due today/New và **một** hành động Study. Thứ tự giảm
+   dần theo ba khoá đó, tie-break theo tên đã fold rồi `id` (BR-183).
+4. Chạm Resume mở đúng session và đúng lượt đã lưu (BR-133), không tạo session
+   thứ hai. Chạm Study trên một deck mở study entry của deck đó (UC-05), nơi lựa
+   chọn giữa học mới và ôn tập mới được đưa ra.
+5. Kết thúc, bỏ dở hoặc invalidate một phiên rồi quay lại: danh sách tự cập nhật
+   qua stream, không reload cả route và không giữ con số cũ.
+
+**Alternative flows:**
+- **A1 — Không có session nào đang mở:** không có Resume card — không phải một
+  thẻ rỗng, cũng không phải nút bị vô hiệu hoá.
+- **A2 — Session của ngày học cũ, generation đã đổi, deck hoặc card đã bị xoá:**
+  không quảng cáo Resume. Việc đóng session cũ vẫn thuộc BR-103 và xảy ra khi
+  người dùng thực sự vào luồng, không phải khi màn hình này rần.
+- **A3 — Mọi deck đều không còn gì đến hạn:** danh sách vẫn hiển thị, kèm một dòng
+  nói hiện chưa có thẻ nào tới hạn; deck vẫn mở được để học trước (BR-29).
+- **A4 — Thư viện chưa có deck nào:** empty state dẫn tới Starter Library (UC-01),
+  lối thứ hai là về Library.
+- **A5 — Có deck nhưng chưa có card nào:** zero state riêng, dẫn về Library để thêm
+  thẻ — không phải CTA starter, và không bịa số Due (BR-184).
+
+**Error flows:**
+- **E1 — Đọc thất bại:** trạng thái lỗi có nút thử lại, không nêu tên bảng, câu truy
+  vấn hay đường dẫn. Copy nói rõ không có gì bị thay đổi — đúng theo cấu trúc, vì
+  màn hình này không có đường ghi nào.
+
+**Postconditions:** Không đổi gì — use case chỉ đọc. Mọi write phát sinh sau đó đều
+thuộc UC-05, bắt đầu từ một lần chạm tường minh.
+
+**Business rules:** BR-182, BR-183, BR-184. Ngoài ra BR-29, BR-84, BR-101, BR-103,
+BR-105, BR-133, BR-142, BR-162.
+**UI states:** loading · loaded (resume + danh sách) · loaded (không resume) ·
+loaded (mọi workload bằng 0) · empty (không deck) · empty (không card) · error
+
+---
 
 ## Điều đã cố ý không đặc tả
 

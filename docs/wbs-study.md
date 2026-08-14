@@ -7,8 +7,8 @@
 | **Scope** | Task còn lại của Study từ M5.7 trở đi · nợ kỹ thuật của Study · việc bị chặn |
 | **Source of truth for** | Trạng thái task Study từ M5.7 · nợ kỹ thuật của Study |
 | **Depends on** | `document-conventions.md` · `wbs.md` · `business-rules.md` · `use-cases.md` |
-| **Updated by task** | `fill` — thẻ dưới là input surface, bỏ ô viền lồng trong thẻ, đề đổi sang `back` và chấm bằng `front_folded` (BR-134) · `recall` tách lật khỏi chấm — lật mở tự đánh giá, hết giờ ghi sai rồi chờ `Next` |
-| **Last updated** | 2026-08-11 |
+| **Updated by task** | M5.26 — Study Home v1: tab Study đọc thư viện thật, bỏ fixture `kStudyBranchDeckId` |
+| **Last updated** | 2026-08-13 |
 
 `docs/wbs.md` giữ M5.0…M5.6 đã hoàn thành và không nhắc lại ở đây. File này giữ
 **những gì còn lại**, đánh số tiếp từ M5.7 để không ID nào trùng và mọi tham chiếu
@@ -56,6 +56,7 @@ M5.19 (`browse` và `match`)  ✔ done
 M5.20 (`guess`, `recall`, `fill`)  ✔ done
 M5.14 (đóng cùng UC-07)  ✔ done
 M5.16 (thị giác + tiếp cận)  ✔ done
+M5.26 (Study Home v1 — bỏ fixture của branch Study)  ✔ done
 ```
 
 ### M5.7 · Màn hình phiên học và lối vào
@@ -747,6 +748,146 @@ phán quyết trước khi người dùng trả lời.
   `match_board_widget_test.dart` ở guard 400 dòng),
   `recall_fill_widget_test.dart` nhóm *the second states* (3)
 
+### M5.26 · Study Home v1 — tab Study đọc thư viện thật (UC-12)
+
+- **Status:** **host gate done, chưa đủ Definition of Done** — analyze sạch
+  (0 error, 0 warning, 0 info), host suite xanh, visual audit `study_home_screen`
+  xanh cả light lẫn dark, architecture guard sạch, `check_docs.py` sạch. Emulator
+  IT `deferred to integration worktree — not run`, và **CLAUDE.md nói thẳng đây
+  là điều kiện cần**: thay đổi này đụng `lib/features/study/**`, `app_router.dart`
+  và `repository_bindings.dart` — đúng hai chỗ đã làm suite chết im lặng suốt bảy
+  mươi PR, và `studyHomeRepositoryProvider` là contract mới đầu tiên kể từ đó.
+  Task **không** được coi là done cho tới khi `flutter test integration_test/ -d
+  emulator-5554 --flavor development` xanh 8/0 và kết quả được ghi vào đây.
+- **Goal:** Bỏ phụ thuộc production vào fixture `kStudyBranchDeckId` và cho tab
+  Study một màn hình đọc đúng thư viện của người dùng.
+- **Scope:** read model + repository + use case riêng cho Study Home; hai named
+  query trong `study.drift`; `StudyHomeScreen` và các widget của nó; route
+  `/study/:deckId` lồng dưới branch Study; ARB EN/VI; test domain/data/widget/
+  geometry/visual; BR-182…BR-184, UC-12, wireframe `m5-study-home.md`.
+- **Out of scope:** dashboard thống kê (thuộc Progress, AD-19); tự mở phiên;
+  đổi bất kỳ luật scheduler nào; tách cơ chế hẹn giờ due-boundary xuống
+  `core/` (xem bảng nợ).
+- **Editable documents:** `docs/business-rules.md`, `docs/use-cases.md`,
+  `docs/wireframes/m5-study-home.md`, `docs/wbs-study.md`
+- **Output:** `lib/features/study/{domain,data,di,presentation}/**` (Study Home),
+  `lib/core/database/queries/study.drift`, `lib/core/navigation/route_names.dart`,
+  `lib/app/router/{app_router.dart,route_paths.dart}`,
+  `lib/app/di/repository_bindings.dart`, `lib/l10n/app_{en,vi}.arb`,
+  `widgetbook/lib/screens/study_*.dart`, và hai mở rộng nhỏ ở shared kit —
+  `MxAsyncView.shouldSkipLoadingOnReload` và `MxActionButton.semanticLabel`,
+  cả hai opt-in, mặc định giữ nguyên hành vi cũ cho mọi caller hiện có
+- **Acceptance criteria:**
+  - [x] `kStudyBranchDeckId` không còn trong `lib/`, và không có fixture nào thay
+        vào chỗ nó.
+  - [x] Resume chỉ hiện cho session `in_progress` của ngày học hiện tại, cùng
+        generation với root, còn deck và còn hàng đợi — bốn điều kiện là bốn
+        mệnh đề trong SQL, không phải bốn lần đọc.
+  - [x] Chạm Resume mở đúng session đã lưu, không tạo session thứ hai.
+  - [x] Workload tổng hợp toàn subtree qua `root_deck_id`, phân hoạch đúng tại
+        mốc đầu ngày địa phương, có test ở cả ba biên.
+  - [x] Thứ tự overdue → due today → new, tie-break tên fold Unicode rồi `id`.
+  - [x] Render/cuộn không ghi database — chứng minh bằng log statement, không
+        chỉ bằng đếm hàng.
+  - [x] Một snapshot tốn đúng hai câu SELECT dù thư viện có bao nhiêu deck.
+  - [x] Stream refresh sau khi session kết thúc, sau khi thuộc một thẻ, và sau
+        khi thêm deck — không reload route, không spinner toàn màn.
+  - [x] Hai empty state phân biệt được, mỗi cái trỏ tới một route có thật.
+  - [x] Mọi ràng buộc geometry của wireframe có assertion `getRect` trên cây
+        production.
+- **Ba câu hỏi đã phải trả lời trước khi viết dòng code nào.**
+  - *Tại sao không dùng lại `rootDeckSummaries`?* Nó trả cả hàng deck, gauge
+    learned và số con trực tiếp — những thứ Study Home không dùng — và nó thuộc
+    màn Library. Dùng lại thì một filter thêm cho Library đổi hành vi của Study.
+    Hai câu truy vấn mang **cùng vị từ** và `query_test.dart` giữ chúng cùng một
+    câu trả lời — đúng hợp đồng mà mọi cặp count/list trong file này đang sống.
+  - *Tại sao `StudyHomeRepository` tách khỏi `StudyRepository`?* Vì đó là cách
+    duy nhất để "vào tab không ghi gì" trở thành một tính chất kiểm được thay vì
+    một lời hứa trong comment: màn hình cầm hợp đồng này **không có** phương
+    thức nào để mở session.
+  - *Tại sao tie-break fold bằng Dart chứ không `ORDER BY`?* `lower()` của SQLite
+    chỉ fold ASCII, nên `Đà Nẵng` sẽ đứng trước `apple`. Đây là chính kết luận
+    `CardText.folded` và `TagName.folded` đã ghi (BR-93), áp cho tên deck.
+- **Một lỗi thật bị bắt trong lúc viết test geometry.** Bản đầu của
+  `study_home_geometry_test.dart` bọc cây trong `MediaQuery(data: MediaQueryData(
+  textScaler: …))`. Một `MediaQueryData` mới mang `Size.zero`, nên mọi
+  breakpoint đọc ra là compact và test đo được gutter 12 trên màn 393dp — một
+  con số đúng về một màn hình app không bao giờ vẽ. Nay dùng
+  `MediaQueryData.fromView(tester.view).copyWith(…)`.
+  `app_navigation_shell_test.dart` cũng bọc kiểu cũ nhưng không khẳng định gì về
+  gutter nên không bị ảnh hưởng.
+- **Paired review tìm ra sáu lỗi thật, ba trong số đó vô hình với mọi test đã
+  có.** Ghi lại vì cả sáu đều nằm ở chỗ khó thấy nhất — ranh giới stream, ranh
+  giới nửa đêm, và khoảng cách giữa cái được **đọc** với cái được **chạm**.
+  - **Stream đánh rơi mọi update xảy ra trước khi lần đọc đầu xong.** Viết
+    `async* { yield null; yield* tableUpdates; }` trông tương đương và không
+    phải: `tableUpdates` chỉ gắn vào update bus khi có listener, còn generator
+    `async*` treo ở `yield` đầu tiên cho tới khi consumer xin tiếp — mà consumer
+    là `asyncMap`, đang pause để await lần đọc. Nên dòng `yield*` chỉ chạy **sau
+    khi lần đọc đầu kết thúc**, và mọi write commit trong cửa sổ đó biến mất
+    vĩnh viễn. Nay subscription mở trong `onListen`, trước sự kiện đầu tiên.
+    Test `a change raised while the first read is in flight is not lost` đã được
+    kiểm là **đỏ với bản cũ**.
+  - **Chạm Resume phân giải theo `deckId`, không theo `sessionId` vừa đọc.**
+    Home lọc bốn điều kiện của BR-182 rồi quảng cáo một session cụ thể; cú chạm
+    thì gọi `openSessionForDeck`, câu hỏi lỏng hơn hẳn, và trả về session **mới
+    nhất** của deck đó. Dấu hiệu ngay trong code: `StudyHomeResumeModel.sessionId`
+    được map ra mà không ai đọc. Nay có `StudyRepository.sessionById`, và
+    `ResumeStudySessionUseCase` kiểm lại `isOpen` cùng `deckId` — vì một danh
+    sách là một snapshot, và giữa lúc vẽ thẻ với lúc ngón tay chạm xuống thì
+    session có thể đã kết thúc.
+  - **Không có timer nửa đêm khi không có gì tới hạn, nên Resume card sống qua
+    ngày học.** Thẻ chưa học không có `due_at`, nên `nextDueAt` là null; tick chỉ
+    được arm khi có thẻ due, nên cũng null. Một thư viện toàn thẻ mới với một
+    phiên `learning` đang mở, để tab qua 00:00, không có gì đọc lại — và BR-182
+    cấm quảng cáo đúng cái đang nằm đó. Ranh giới của Resume card cũng là nửa
+    đêm, nên nay nó là lý do thứ hai để arm tick.
+  - **Năm ràng buộc geometry trong wireframe trỏ vào một golden không tồn tại.**
+    `memoxProductionScreenAuditTest` là paint-token inspector: nó đọc màu từ
+    paint record, không đo hình học. G6…G10 và R2 vì thế là hợp đồng rỗng. Nay
+    mỗi dòng có một phép đo `getRect` thật, và số đo đúng bằng token.
+  - **G12 là assertion không thể fail.** `last.bottom ≤ bar.top` đúng kể cả khi
+    xoá sạch padding, vì `Scaffold` đã trừ chiều cao bar khỏi constraint của
+    body. Nay đo khoảng hở so với viewport, và **nhảy** tới `maxScrollExtent`
+    thay vì kéo — một cú kéo bị physics chặn lại và đo vị trí không ai chọn.
+  - **`Semantics(label:, onTap:, excludeSemantics: true)` bọc quanh button làm
+    mất chính cái nó định đặt.** Không có `container: true` nó không tạo node
+    nào: `find.bySemanticsLabel` không thấy gì, và control bị đọc như chữ trong
+    thẻ chứ không phải một nút. Nay nhãn thuộc về `MxActionButton`
+    (`semanticLabel`), khai lại đủ role, enabled state và tap action — và
+    `study_home_accessibility_test.dart` là chỗ chứng minh, thay cho việc trích
+    dẫn chính widget đáng lẽ phải thoả rule.
+- **Một fix của chính vòng review đã tự sinh ra một P2, và không gate nào bắt
+  được nó.** Chuyển tiếp `onDone: controller.close` từ `tableUpdates` khoá chặt
+  với `await controller.close()` trong `onCancel`: `close()` tạo một done-future
+  đang chờ, chạy `_cancel()`, `_cancel()` chạy `onCancel`, `onCancel` await
+  đúng cái future ấy — mà nó chỉ complete sau khi `onCancel` xong. `cancel()`
+  treo vĩnh viễn, và `_sendDone` không bao giờ chạy, nên `done` vẫn **không**
+  tới consumer: fix không đạt mục tiêu của chính nó và trả giá bằng một
+  deadlock. Suite vẫn xanh vì mọi test đều cancel **trước** khi `db.close()`
+  chạy, tức đi nhánh mà `close()` chưa từng được gọi. Nay có guard
+  `if (!controller.isClosed)` và một ca đi đúng đường đó — đóng database khi
+  subscription còn sống — đã kiểm là **đỏ (TimeoutException)** khi gỡ guard.
+- **Hai bài học về test, không phải về code.**
+  - `MediaQuery(data: MediaQueryData(textScaler: …))` mang `Size.zero`, nên mọi
+    breakpoint đọc ra là compact: bản đầu của geometry test đo được gutter 12
+    trên màn 393dp — một con số đúng về một màn hình app không bao giờ vẽ. Nay
+    dùng `MediaQueryData.fromView(tester.view).copyWith(…)`.
+  - Một test reload viết trên `clockProvider` bị pin là tautology: `refresh()`
+    gán lại đúng giá trị đang có, Riverpod không thấy thay đổi, không có reload
+    nào xảy ra và test xanh bất kể màn hình làm gì. Clock trong
+    `study_home_widget_test.dart` nay dịch chuyển được, và test đã được kiểm là
+    đỏ khi bỏ `shouldSkipLoadingOnReload`.
+- **Dependencies:** M5.7, M5.9, M5.15
+- **Tests required:** có
+- **Checklist phases:** 14.4, 15.3, 15.4
+- **Tests:** `study_home_test.dart` (30, SQLite thật),
+  `study_home_order_test.dart` (13), `study_home_widget_test.dart` (19),
+  `study_home_geometry_test.dart` (21),
+  `study_home_accessibility_test.dart` (5),
+  `study_home_screen_visual_audit_test.dart` (2), cộng sáu ca mới trong
+  `study_resume_paths_test.dart` cho việc resume theo id và theo ngày học
+
 ## Nợ kỹ thuật của Study
 
 | Nợ | Vì sao còn | Đóng ở |
@@ -757,6 +898,8 @@ phán quyết trước khi người dùng trả lời.
 | ~~BR-83 chưa có caller~~ | UC-07 dựng ở M5.21; Deck gọi `invalidateSessionsForRoot` trong chính transaction của reset | xong ở M5.14 |
 | ~~`remaining_ms` chưa được nối vào UI resume~~ | `RecallTimerSectionWidget` nhận `initialRemaining` từ queue item; test BR-133 ở `recall_fill_widget_test.dart` | xong ở M5.9 |
 | Widget mode chưa ai dựng trong `lib/` | chưa có màn ghép | M5.7 |
+| Hẹn giờ due-boundary có hai bản | `kMaxDueBoundaryDelay` và vòng arm/cancel nằm trong `deck_list_controller.dart`, mà `features/deck/presentation/` là thứ feature khác không được import; Study Home vì vậy có bản riêng | chưa xếp — tách xuống `core/time/` khi có caller thứ ba |
+| Study Home giữ subscription khi một phiên đang che nó | Mỗi lượt chấm thẻ ghi `card_study_states`, nên Home nhận một signal và trả **1 `BEGIN` + 2 `SELECT`** (đo trong `study_home_test.dart`, ca `one signal costs one transaction and two statements`). Đã cân nhắc và **chấp nhận**: chi phí thật nằm ở ba lượt quét `cards` chứ không ở transaction, nên dispose chỉ dời nó sang lúc quay lại — mà dispose lại mở đúng cửa sổ cold-start vừa vá ở lượt review này, và `_resume` đang dựa vào việc stream sống suốt để không phải refresh thủ công | đo lại khi một thư viện vượt ~5k thẻ |
 | ~~Ảnh wireframe chưa có trong repo~~ | chủ dự án đã thả vào `wireframes/assets/m5-study-modes/` | xong |
 | ~~`match` xoá ô đã ghép khỏi bàn~~ | ô đã ghép nay ở lại bàn với ✓ và độ mờ | xong ở M5.19 |
 | ~~Hai state thứ hai của `recall`/`fill` chưa có ảnh~~ | vẽ theo BR và ghi vào wireframe §6.1 là agent đề xuất | xong ở M5.20 |

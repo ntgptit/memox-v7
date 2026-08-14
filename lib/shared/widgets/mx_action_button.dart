@@ -41,11 +41,30 @@ class MxActionButton extends StatelessWidget {
     this.shouldKeepLabelWhileLoading = false,
     this.icon,
     this.shouldAutofocus = false,
+    this.semanticLabel,
     super.key,
   });
 
   /// Already-localized. The screen owns the copy; the button never reads ARB.
   final String label;
+
+  /// What a screen reader announces instead of [label], when the painted words
+  /// are not enough to tell two buttons apart.
+  ///
+  /// **For a list where every row carries the same verb.** Study Home has a
+  /// `Study` on every deck; heard on its own, three of them are three identical
+  /// controls, and the deck name is the only thing that distinguishes them.
+  ///
+  /// **A parameter here rather than a `Semantics` wrapper at the call site**,
+  /// which is how this was first written and was wrong: `Semantics(label:,
+  /// onTap:, excludeSemantics: true)` around a button drops the button's own
+  /// node — losing its enabled state, its ink and the tap feedback `InkWell`
+  /// gives — and, without `container: true`, does not reliably put a node back.
+  /// The label belongs to the button, so the button takes it.
+  ///
+  /// Null leaves the painted label as the accessible name, which is right
+  /// everywhere the words already say which button this is.
+  final String? semanticLabel;
 
   /// `null` disables the button.
   final VoidCallback? onPressed;
@@ -90,6 +109,41 @@ class MxActionButton extends StatelessWidget {
     final child = _buildChild(context);
     final busyStyle = _busyStyle(context);
 
+    final button = _buildButton(context, effectiveOnPressed, child, busyStyle);
+    final name = semanticLabel;
+    if (name == null) return button;
+
+    // **One node, and it has to carry everything the button's node did.**
+    // `Semantics(label:) + ExcludeSemantics` alone was the first attempt: it
+    // drops the button's node and — without `container` — does not reliably
+    // create one, so `find.bySemanticsLabel` found nothing and the control was
+    // announced as part of the card's text rather than as a button. Role,
+    // enabled state and tap action are therefore restated here.
+    //
+    // Hit testing is untouched, so a sighted tap still runs through the
+    // `InkWell` and keeps its splash and its haptic; only TalkBack's activation
+    // takes the shortcut, which is what the action is for.
+    return Semantics(
+      container: true,
+      button: true,
+      enabled: effectiveOnPressed != null,
+      // Focusable follows enabled, because the `Focus` under here does: the
+      // widget stays keyboard-reachable, and a node that omitted the flag
+      // described a control the tree could not explain.
+      focusable: effectiveOnPressed != null,
+      label: name,
+      onTap: effectiveOnPressed,
+      excludeSemantics: true,
+      child: button,
+    );
+  }
+
+  Widget _buildButton(
+    BuildContext context,
+    VoidCallback? effectiveOnPressed,
+    Widget child,
+    ButtonStyle? busyStyle,
+  ) {
     return switch (variant) {
       MxActionButtonVariant.primary => FilledButton(
         onPressed: effectiveOnPressed,

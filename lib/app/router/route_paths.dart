@@ -51,6 +51,17 @@ abstract final class RoutePaths {
   /// deep link can open the app directly on the Study tab.
   static const String study = '/study';
 
+  /// One deck's study entry inside the Study branch, **relative** to [study]:
+  /// the full location is `/study/<id>`.
+  ///
+  /// Relative on purpose, for the reason [deckDetailRelative] gives — a leading
+  /// slash would make it a top-level route and the entry would then open with no
+  /// bottom bar and no branch to go back into.
+  ///
+  /// The deck is addressed by id and nothing else, because the Study tab has no
+  /// tree to place it in: it lists roots, and a root's id is the whole address.
+  static const String studyDeckRelative = ':deckId';
+
   /// One deck's study entry, relative to `/decks/:deckId`.
   static const String deckStudyRelative = 'study';
 

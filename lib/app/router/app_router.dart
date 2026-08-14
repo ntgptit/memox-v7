@@ -11,6 +11,7 @@ import '../../features/deck/presentation/screens/starter_library_screen.dart';
 import '../../features/progress/presentation/screens/progress_placeholder_screen.dart';
 import '../../features/settings/presentation/screens/settings_placeholder_screen.dart';
 import '../../features/study/presentation/screens/study_entry_screen.dart';
+import '../../features/study/presentation/screens/study_home_screen.dart';
 import '../fallback/route_not_found_screen.dart';
 import '../shell/app_navigation_shell.dart';
 import '../../core/navigation/route_names.dart';
@@ -175,10 +176,28 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
               GoRoute(
                 path: RoutePaths.study,
                 name: RouteNames.study,
-                // The fixture deck until a deck picker feeds this branch a
-                // real id (M5.9). The screen itself takes any deck.
-                builder: (context, state) =>
-                    const StudyEntryScreen(deckId: kStudyBranchDeckId),
+                // The tab's own screen at last (UC-12). It stood on a fixture
+                // deck id since M5.7 — a constant naming a row the seeder
+                // happened to write — so the Study tab showed one hard-coded
+                // deck in production and nothing at all in a database that
+                // never had it. Study Home reads the real library.
+                builder: (context, state) => const StudyHomeScreen(),
+                routes: <RouteBase>[
+                  // The deck the user picked, pushed onto the Study branch so
+                  // Back returns to the list that offered it and the bottom bar
+                  // stays. The same screen `deckStudy` builds — a study entry is
+                  // a study entry, and only the branch differs.
+                  GoRoute(
+                    path: RoutePaths.studyDeckRelative,
+                    name: RouteNames.studyDeck,
+                    // `pathParameters` is non-nullable in go_router and the
+                    // segment is required by the pattern, so a match cannot
+                    // occur without it.
+                    builder: (context, state) => StudyEntryScreen(
+                      deckId: state.pathParameters[RoutePathParams.deckId]!,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -270,11 +289,3 @@ Future<bool> _deckHoldsCards(ProviderContainer container, String deckId) async {
     return false;
   }
 }
-
-/// The deck the Study tab opens.
-///
-/// **A constant, and deliberately visible.** The Study branch of the navigation
-/// shell has no deck to point at yet — choosing one is the resume screen's job
-/// (M5.9). Naming it here rather than hiding a literal in the builder is what
-/// makes the gap something a reader trips over instead of inherits.
-const String kStudyBranchDeckId = 'fixture-root-a';

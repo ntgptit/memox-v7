@@ -7,6 +7,7 @@ import 'package:memox/app/config/env_config_provider.dart';
 import 'package:memox/app/router/app_router.dart';
 import 'package:memox/app/router/route_paths.dart';
 import 'package:memox/features/deck/di/deck_repository_provider.dart';
+import 'package:memox/features/study/di/study_home_repository_provider.dart';
 import 'package:memox/features/study/di/study_repository_provider.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/l10n/generated/app_localizations_vi.dart';
@@ -14,6 +15,7 @@ import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 
 import '../../features/deck/presentation/support/fake_deck_repository.dart';
+import '../../features/study/domain/support/fake_study_home_repository.dart';
 import '../../features/study/domain/support/fake_study_repository.dart';
 
 /// The destination row of the shell, after AD-19 made it four wide.
@@ -44,6 +46,11 @@ void main() {
         overrides: [
           envConfigProvider.overrideWithValue(EnvConfig.development),
           deckRepositoryProvider.overrideWithValue(repository),
+          // The Study branch is Study Home since UC-12, which reads its own
+          // contract — a screen with no method that could open a session.
+          studyHomeRepositoryProvider.overrideWithValue(
+            FakeStudyHomeRepository(),
+          ),
           studyRepositoryProvider.overrideWithValue(FakeStudyRepository()),
         ],
         child: MediaQuery(

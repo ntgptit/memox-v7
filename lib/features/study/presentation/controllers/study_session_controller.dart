@@ -46,6 +46,7 @@ class StudySessionController extends _$StudySessionController {
     required StudySessionKind kind,
     StudyMode? reviewMode,
     bool shouldResume = false,
+    String? resumeSessionId,
   }) async {
     state = state.copyWith(isOpening: true, error: null);
 
@@ -56,6 +57,7 @@ class StudySessionController extends _$StudySessionController {
             kind: kind,
             reviewMode: reviewMode,
             shouldResume: shouldResume,
+            resumeSessionId: resumeSessionId,
             now: ref.read(clockProvider)(),
             utcOffset: ref.read(utcOffsetProvider)(),
           );
