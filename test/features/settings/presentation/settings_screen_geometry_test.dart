@@ -6,6 +6,7 @@ import 'package:memox/features/study/domain/models/new_card_order_model.dart';
 import 'package:memox/features/settings/presentation/screens/settings_screen.dart';
 import 'package:memox/features/settings/presentation/widgets/sections/settings_section_widget.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
+import 'package:memox/shared/widgets/mx_text_field.dart';
 import 'package:memox/l10n/generated/app_localizations_vi.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
 
@@ -106,9 +107,12 @@ void main() {
       // left edge of the label inside the Study defaults card.
       await pumpSettings(tester, FakeAppSettingsRepository());
 
-      final labelLeft = tester
-          .getRect(find.text(english.studyOptionsCardLimitLabel).first)
-          .left;
+      // **The field, not its label.** The label used to be a standalone `Text`
+      // at the card's content edge; it is now `InputDecoration.labelText`,
+      // which floats inside the field's own inset. The field's left edge is
+      // what "the card's own content edge" means, and it is what the radio
+      // rows below have to agree with.
+      final labelLeft = tester.getRect(find.byType(MxTextField).first).left;
       // Typed on `AppThemeMode`, because `System` is the label of a theme row
       // *and* of a language row — the same ambiguity a screen-reader user hears
       // and the reason W6 requires the group heading in the semantics tree.
@@ -127,9 +131,12 @@ void main() {
       // opposite direction.
       await pumpSettings(tester, FakeAppSettingsRepository());
 
-      final labelLeft = tester
-          .getRect(find.text(english.studyOptionsCardLimitLabel).first)
-          .left;
+      // **The field, not its label.** The label used to be a standalone `Text`
+      // at the card's content edge; it is now `InputDecoration.labelText`,
+      // which floats inside the field's own inset. The field's left edge is
+      // what "the card's own content edge" means, and it is what the radio
+      // rows below have to agree with.
+      final labelLeft = tester.getRect(find.byType(MxTextField).first).left;
       final orderRowLeft = tester
           .getRect(find.byType(RadioListTile<NewCardOrder>).first)
           .left;

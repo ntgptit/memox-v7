@@ -53,7 +53,12 @@ enum _SettingsScenario {
   defaults('At defaults'),
   customised('Non-default values'),
   writeFails('Every save fails'),
-  readFails('Read fails');
+  readFails('Read fails'),
+  // The two faces the catalogue could not reach: the read never hung and no
+  // save ever stayed in flight, so W3's loading and submitting states — the
+  // ones S7 exists to protect — were unobservable here.
+  loading('Read never lands'),
+  submitting('Every save stays in flight');
 
   const _SettingsScenario(this.label);
 
@@ -88,6 +93,13 @@ final class _SettingsCatalogRepository implements AppSettingsRepository {
   @override
   Stream<AppSettingsModel> watch() async* {
     if (_scenario == _SettingsScenario.readFails) throw _failure;
+    // A stream that never answers, so the spinner holds still. Not
+    // `Stream.empty()`: an empty stream closes at once, and a closed stream
+    // with no value is a state Riverpod may render differently.
+    if (_scenario == _SettingsScenario.loading) {
+      yield* StreamController<AppSettingsModel>().stream;
+      return;
+    }
     yield _current;
     yield* _controller.stream;
   }
@@ -109,10 +121,18 @@ final class _SettingsCatalogRepository implements AppSettingsRepository {
       _write(_current.copyWith(language: language));
 
   @override
-  Future<void> resetToDefaults() async => _write(AppSettingsModel.defaults);
+  Future<void> resetToDefaults() => _write(AppSettingsModel.defaults);
 
-  void _write(AppSettingsModel next) {
+  /// **Async, so a save can be caught mid-flight.** Every write used to
+  /// resolve on the same microtask, which made the submitting face — the
+  /// group locked, its label saying so, the other two groups still usable —
+  /// impossible to see in the catalogue.
+  Future<void> _write(AppSettingsModel next) async {
     if (_scenario == _SettingsScenario.writeFails) throw _failure;
+    if (_scenario == _SettingsScenario.submitting) {
+      await Completer<void>().future;
+      return;
+    }
     _current = next;
     _controller.add(next);
   }

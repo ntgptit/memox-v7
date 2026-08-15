@@ -77,8 +77,6 @@ class _StudyOptionsSectionWidgetState extends State<StudyOptionsSectionWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        Text(l10n.studyOptionsCardLimitLabel, style: context.texts.titleSmall),
-        const SizedBox(height: AppSpacing.xs),
         MxTextField(
           controller: _cardLimit,
           label: l10n.studyOptionsCardLimitLabel,

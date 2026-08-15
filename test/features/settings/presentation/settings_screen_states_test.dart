@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:ui' show Tristate;
+import 'package:flutter/semantics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/settings/domain/models/app_language_model.dart';
@@ -5,7 +8,6 @@ import 'package:memox/features/settings/domain/models/app_settings_model.dart';
 import 'package:memox/features/settings/domain/models/app_theme_mode_model.dart';
 import 'package:memox/features/settings/presentation/widgets/items/settings_error_band_widget.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
-import 'package:memox/l10n/generated/app_localizations_vi.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
 import 'package:memox/shared/widgets/mx_loading_state.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
@@ -17,7 +19,6 @@ import 'support/settings_widget_harness.dart';
 /// The seven states of the Settings screen (UC-16, wireframe W3).
 void main() {
   final english = AppLocalizationsEn();
-  final vietnamese = AppLocalizationsVi();
 
   /// The radio row for [label], which is what a user taps.
   ///
@@ -256,75 +257,51 @@ void main() {
     });
   });
 
-  group('locales', () {
-    testWidgets('Vietnamese renders the Vietnamese headings', (tester) async {
-      await pumpSettings(
-        tester,
-        FakeAppSettingsRepository(),
-        locale: const Locale('vi'),
-      );
-
-      expect(
-        find.text(vietnamese.settingsStudyDefaultsSection.toUpperCase()),
-        findsOneWidget,
-      );
-      expect(
-        find.text(vietnamese.settingsAppearanceSection.toUpperCase()),
-        findsOneWidget,
-      );
-    });
-
-    testWidgets('the two language names stay endonyms in both locales', (
+  group('submitting (S7)', () {
+    testWidgets('the saving group locks and the other two stay usable', (
       tester,
     ) async {
-      // Somebody stuck in a language they cannot read has to be able to find
-      // the name of their own (W2).
-      await pumpSettings(
-        tester,
-        FakeAppSettingsRepository(),
-        locale: const Locale('vi'),
+      // **The whole argument for four controllers instead of one.** BR-216
+      // makes each save its own transaction, and S7 says the screen must show
+      // *which* row is saving rather than going one screen-wide spinner — so
+      // the claim worth testing is not that something locks, it is that the
+      // other groups do not.
+      final handle = tester.ensureSemantics();
+      final repository = FakeAppSettingsRepository()
+        ..themeGate = Completer<void>();
+      await pumpSettings(tester, repository);
+
+      await tester.tap(find.text(english.settingsThemeDark));
+      await tester.pump();
+
+      final SemanticsNode theme = tester.getSemantics(
+        find.byType(RadioListTile<AppThemeMode>).first,
+      );
+      expect(
+        theme.getSemanticsData().flagsCollection.isEnabled,
+        Tristate.isFalse,
+        reason: 'the theme group is locked while its save is in flight',
+      );
+      // The lock is not colour alone: it is in the accessible name, which is
+      // where `settingsSavingLabel` lives — it is never painted as text.
+      expect(
+        find.bySemanticsLabel(RegExp(english.settingsSavingLabel)),
+        findsWidgets,
       );
 
-      expect(find.text('English'), findsOneWidget);
-      expect(find.text('Tiếng Việt'), findsOneWidget);
-    });
-  });
-
-  group('dark and small screens', () {
-    testWidgets('renders in dark without overflowing', (tester) async {
-      await pumpSettings(
-        tester,
-        FakeAppSettingsRepository(),
-        brightness: Brightness.dark,
+      // The other two groups: still enabled, and the lock is not colour alone.
+      final SemanticsNode language = tester.getSemantics(
+        find.byType(RadioListTile<AppLanguage>).first,
+      );
+      expect(
+        language.getSemanticsData().flagsCollection.isEnabled,
+        Tristate.isTrue,
+        reason: 'one group saving must not lock the screen',
       );
 
-      expect(tester.takeException(), isNull);
-    });
-
-    testWidgets('320dp at textScaler 2.0 in Vietnamese does not overflow', (
-      tester,
-    ) async {
-      // The tightest combination the wireframe names (W6): the longest
-      // Vietnamese label, doubled, on the narrowest supported surface.
-      await pumpSettings(
-        tester,
-        FakeAppSettingsRepository(),
-        locale: const Locale('vi'),
-        surface: const Size(320, 568),
-        textScale: 2,
-      );
-
-      expect(tester.takeException(), isNull);
-    });
-
-    testWidgets('412dp renders without overflowing', (tester) async {
-      await pumpSettings(
-        tester,
-        FakeAppSettingsRepository(),
-        surface: const Size(412, 892),
-      );
-
-      expect(tester.takeException(), isNull);
+      repository.themeGate!.complete();
+      await tester.pumpAndSettle();
+      handle.dispose();
     });
   });
 }

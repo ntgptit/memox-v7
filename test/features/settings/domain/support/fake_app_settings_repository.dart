@@ -56,9 +56,20 @@ base class FakeAppSettingsRepository implements AppSettingsRepository {
     _current.copyWith(cardLimit: cardLimit.value, newCardOrder: newCardOrder),
   );
 
+  /// Held open by a test that wants the submitting face to stand still.
+  ///
+  /// Only the theme save takes it, deliberately: S7's claim is that one group
+  /// locking leaves the other two usable, and a gate on every write could not
+  /// tell that apart from a screen-wide lock.
+  Completer<void>? themeGate;
+
   @override
-  Future<void> saveThemeMode(AppThemeMode themeMode) async =>
-      _emit(_current.copyWith(themeMode: themeMode));
+  Future<void> saveThemeMode(AppThemeMode themeMode) async {
+    final gate = themeGate;
+    if (gate != null) await gate.future;
+
+    return _emit(_current.copyWith(themeMode: themeMode));
+  }
 
   @override
   Future<void> saveLanguage(AppLanguage language) async =>

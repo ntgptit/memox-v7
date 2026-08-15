@@ -4256,7 +4256,7 @@
     },
     {
       "file": "lib/features/settings/presentation/widgets/sections/settings_study_defaults_section_widget.dart",
-      "line": 147,
+      "line": 149,
       "widget_context": "_SettingsStudyDefaultsSectionWidgetState",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4553,7 +4553,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_options_section_widget.dart",
-      "line": 127,
+      "line": 125,
       "widget_context": "_StudyOptionsSectionWidgetState",
       "element_kind": "text",
       "source_kind": "theme-token",

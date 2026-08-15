@@ -107,11 +107,13 @@ class _SettingsStudyDefaultsSectionWidgetState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Text(
-              l10n.studyOptionsCardLimitLabel,
-              style: context.texts.titleSmall,
-            ),
-            const SizedBox(height: AppSpacing.xs),
+            // **The field owns its label; there is no `Text` above it.**
+            // `MxTextField` passes `label` to `InputDecoration.labelText` and
+            // the theme leaves `floatingLabelBehavior` at `auto`, so a field
+            // that always has a value always floats its label — the same
+            // string then rendered twice, 4dp apart, and TalkBack read it
+            // twice. The order group below keeps its `Text` because a radio
+            // group has no decoration to carry one.
             MxTextField(
               controller: _cardLimit,
               label: l10n.studyOptionsCardLimitLabel,
