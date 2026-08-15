@@ -28,6 +28,7 @@ part 'app_database_migrations_v5.dart';
     // no table: `schemaVersion` is deliberately untouched by this file, because
     // a named query is not a schema change.
     'queries/progress.drift',
+    'queries/reminder.drift',
   },
 )
 class AppDatabase extends _$AppDatabase {
@@ -38,7 +39,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.open() : super(openAppDatabaseConnection());
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -199,6 +200,18 @@ class AppDatabase extends _$AppDatabase {
       // would only agree with itself.
       if (from < 9) {
         await _upgradeToV9();
+      }
+
+      // v9 -> v10 (M99.29): the three reminder columns on `app_settings`
+      // (BR-218, BR-219, BR-221).
+      //
+      // Additive, so a v9 row upgrades in place. The source branch spread these
+      // over two versions; both of those numbers are taken here, and the
+      // intermediate state they described has never existed on this line.
+      //
+      // Last, so it runs on top of whatever the v1…v9 steps just produced.
+      if (from < 10) {
+        await _upgradeToV10();
       }
     },
 

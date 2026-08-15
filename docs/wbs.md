@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) |
+| **Updated by task** | M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) |
 | **Last updated** | 2026-08-15 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -33,7 +33,7 @@ AD / UC (xem `business-rules.md`).
 | M7 · CI/CD (Phase 19) | todo | Bắt đầu được ngay sau M2. Job Android + Web, chưa có iOS (AD-04) |
 | M8 · Release Android (Phase 16–18, 20–22) | todo | |
 | M9 · Backend Spring Boot + auth + sync (Phase 10) | todo | Sau khi M8 ổn định |
-| M99 · Adhoc | — | Task chủ dự án giao trực tiếp, ngoài chuỗi phụ thuộc. M99.1 **done** — `master-flow.md`. M99.2 **done** — Deck và Card thành bản tham chiếu (AD-17). M99.3 **done** — refactor toàn bộ IT theo Testing Pyramid: 133/133 kịch bản có coverage host, `integration_test/` còn 8 kịch bản `DEVICE-E2E`, và CI lần đầu có cổng tự động cho tính đúng đắn nghiệp vụ. M99.5 **done** — golden harness chưa bao giờ nạp `NotoSansKR`, nên mọi chữ Hàn trong mọi golden là ô `NO GLYPH`; đã nạp đủ ba face CJK, bổ sung Nhật/Trung, và fixture demo trở lại tiếng Hàn. M99.7 **done** — bottom navigation lên bốn branch (AD-19); Progress/Settings là placeholder presentation-only, hai feature này **chưa** hoàn thành. M99.8 **done** — nhãn tab đầu đổi Decks/Bộ thẻ → Library/Thư viện; branch nội bộ và title màn hình vẫn là Decks. M99.17 **done** — đồng bộ Card Management với manual entry khối lượng nhỏ và chốt import/export là hướng bulk-management sau MVP. M99.27 **done** — Reverse self-assess v1: chiều hỏi cho phiên `self_assess` của deck `sm2`; schema v8. M99.28 **in-progress** — Settings v1: mặc định học toàn cục, theme và ngôn ngữ; schema v9; không branch nào còn là placeholder. Còn nợ emulator IT (gate cuối của đợt tích hợp #301–#310). |
+| M99 · Adhoc | — | Task chủ dự án giao trực tiếp, ngoài chuỗi phụ thuộc. M99.1 **done** — `master-flow.md`. M99.2 **done** — Deck và Card thành bản tham chiếu (AD-17). M99.3 **done** — refactor toàn bộ IT theo Testing Pyramid: 133/133 kịch bản có coverage host, `integration_test/` còn 8 kịch bản `DEVICE-E2E`, và CI lần đầu có cổng tự động cho tính đúng đắn nghiệp vụ. M99.5 **done** — golden harness chưa bao giờ nạp `NotoSansKR`, nên mọi chữ Hàn trong mọi golden là ô `NO GLYPH`; đã nạp đủ ba face CJK, bổ sung Nhật/Trung, và fixture demo trở lại tiếng Hàn. M99.7 **done** — bottom navigation lên bốn branch (AD-19); Progress/Settings là placeholder presentation-only, hai feature này **chưa** hoàn thành. M99.8 **done** — nhãn tab đầu đổi Decks/Bộ thẻ → Library/Thư viện; branch nội bộ và title màn hình vẫn là Decks. M99.17 **done** — đồng bộ Card Management với manual entry khối lượng nhỏ và chốt import/export là hướng bulk-management sau MVP. M99.27 **done** — Reverse self-assess v1: chiều hỏi cho phiên `self_assess` của deck `sm2`; schema v8. M99.28 **in-progress** — Settings v1: mặc định học toàn cục, theme và ngôn ngữ; schema v9; không branch nào còn là placeholder. M99.29 **in-progress** — Daily Reminders v1: một notification tóm tắt mỗi ngày, mặc định tắt, dựng từ workload đến hạn tại thời điểm hiện; schema v10. Cả ba còn nợ emulator IT (gate cuối của đợt tích hợp #301–#310). |
 
 ---
 
@@ -9958,6 +9958,161 @@ nên nó **phải** được chạy trước khi ai đó coi Settings v1 là đ�
 8 pass / 0 fail. Bù lại trên host: `test/app/app_settings_wiring_test.dart` mount
 `MemoxApp` thật với router thật và binding thật, và toàn bộ 2.663 host test xanh.
 
+### M99.29 · Daily Reminders v1
+
+- **Status:** **in-progress** — phase 1–9 xong (gồm cả các vòng review đệ quy), chờ emulator IT và CI.
+- **Goal:** Một lời nhắc học hằng ngày, tuỳ chọn và mặc định tắt, dựng từ
+  workload đến hạn thật tại thời điểm hiện — không phải từ một payload nạp sẵn
+  hôm trước.
+- **Scope:** BR-218…BR-229, UC-17, AD-21, ba cột `app_settings` + migration v10 (nhánh nguồn chia làm hai bước
+  v8 và v9; cả hai số đó đã thuộc feature khác trên nhánh tích hợp, nên ba cột
+  vào cùng một bước),
+  query workload theo root deck, feature slice `lib/features/reminder/`
+  (domain/data/di/presentation), route `/settings/reminders` và một hàng vào ở
+  nhánh Settings, entry point worker ở `lib/app/reminder/`, hoà giải lịch lúc
+  bootstrap, deep link khi chạm notification, ARB EN/VI, và host test cho từng
+  lớp.
+- **Out of scope:** nhắc
+  theo thẻ mới, nhiều lượt nhắc trong ngày, nhắc theo từng deck, quyền exact
+  alarm, iOS, và nhắc học trên Web (adapter báo không hỗ trợ). Smoke thật trên
+  emulator/thiết bị **hoãn sang integration worktree** — xem Acceptance criteria.
+- **Editable documents:** `docs/business-rules.md`, `docs/use-cases.md`,
+  `docs/architecture.md`, `docs/data-model.md`, `docs/wbs.md`,
+  `docs/wireframes/m6-daily-reminders.md`
+- **5Why:** Vì sao mặc định tắt? Vì một notification không ai yêu cầu là spam,
+  và xin quyền trước khi người dùng muốn là cách nhanh nhất để bị từ chối vĩnh
+  viễn — Android chỉ cho hỏi một lần. Vì sao chỉ đếm thẻ đến hạn? Vì thẻ chưa
+  học là *có thể học*, không phải *phải học*: nhắc về chúng làm lời nhắc kêu mỗi
+  ngày kể cả khi người dùng không nợ gì, và một lời nhắc luôn kêu là một lời
+  nhắc bị tắt. Vì sao một tóm tắt thay vì một notification mỗi deck? Vì số
+  notification tỉ lệ với số deck, còn quyết định của người dùng thì không — họ
+  chỉ quyết định có mở app hay không. Vì sao inexact thay vì exact alarm? Vì
+  exact alarm là quyền đặc quyền Android 12+ soi rất kỹ, và không có yêu cầu sản
+  phẩm nào nói lời nhắc phải đúng đến từng phút. Vì sao worker chứ không phải
+  notification đặt sẵn? Vì BR-222 cho phép hiện số thẻ và tên deck, và những con
+  số đó chỉ đúng nếu có Dart chạy lúc fire — nguyên nhân gốc là *nội dung phụ
+  thuộc trạng thái tại thời điểm hiện*, không phải tại thời điểm đặt lịch
+  (AD-21).
+- **Output:** `lib/core/database/queries/reminder.drift`, ba cột trên
+  `app_settings` + `_upgradeToV10`, `drift_schemas/drift_schema_v10.json`,
+  `lib/features/reminder/**`, `lib/app/reminder/reminder_worker_entry.dart`,
+  `lib/app/startup/reminder_reconciler_widget.dart`, route
+  `/settings/reminders`, ARB EN/VI, và bộ test host tương ứng.
+- **Acceptance criteria:**
+  - [x] Mặc định tắt và 20:00; không xin quyền, không đặt lịch, không hiện
+        notification trước khi người dùng bật (BR-218, BR-219).
+  - [x] Chỉ overdue + due-today mới sinh notification; thẻ chưa học không tính;
+        đến giờ mà tổng bằng 0 thì bỏ lượt (BR-220).
+  - [x] Một notification mỗi ngày, id cố định; thứ tự cấp bách tất định và không
+        đếm trùng thẻ qua ancestor/descendant (BR-221, BR-223, BR-224).
+  - [x] Copy notification không mang nội dung thẻ, tag hay history; không log
+        nội dung ở bất kỳ level nào (BR-222).
+  - [x] Chạm mở Study Home, không auto-start; dismiss không mutation (BR-225).
+  - [x] Không có `SCHEDULE_EXACT_ALARM` / `USE_EXACT_ALARM` trong bất kỳ manifest
+        hay flavor nào — có test đọc manifest chứng minh (BR-226).
+  - [x] Hoà giải lịch idempotent với clock/offset tiêm vào (BR-227).
+  - [x] Từ chối quyền là trạng thái có kiểu, settings vẫn tắt, có đường thử lại,
+        không tự xin lại (BR-228).
+  - [x] Web/iOS: adapter báo capability không hỗ trợ, không crash; domain và
+        presentation không import kiểu plugin, không kiểm tra nền tảng, không
+        chạm platform IO (BR-229). Màn **render** trạng thái đó (M6 S7) — suy từ
+        capability chứ không chờ một lệnh hỏng, vì trên nền tảng này không lệnh
+        nào chạy được.
+  - [x] CTA khôi phục chạy lại **đúng lệnh đã hỏng**, không phải một lệnh cố
+        định; huỷ lịch hỏng có rejection và copy riêng (`cancelFailed`) vì
+        settings **đã** tắt.
+  - [x] Host gate xanh: format, analyze, architecture, guard, docs, toàn bộ host
+        suite.
+  - [ ] **Gate `integration_test/` của `CLAUDE.md` — chưa chạy.** Đây là gate
+        *khác* với smoke notification bên dưới, và nó áp cho branch này vì hai
+        lý do: có thêm thứ dưới `lib/features/`, **và** `lib/app/bootstrap.dart`
+        (bọc `ReminderReconcilerWidget` quanh toàn bộ cây),
+        `lib/app/di/repository_bindings.dart` và router đều bị sửa — đúng ba
+        loại thay đổi mà `CLAUDE.md` nói host suite không nhìn thấy được, và
+        đúng loại đã làm hỏng suite trong bảy mươi PR. Cần
+        `flutter test integration_test/ -d emulator-5554 --flavor development`
+        với baseline 8/8 trước khi merge; môi trường thực thi của task này không
+        có emulator, và chỉ thị của task là hoãn phần thiết bị.
+  - [ ] **Smoke notification trên emulator/thiết bị — chưa chạy, hoãn có chủ
+        đích.** Host test dùng fake platform adapter và không gửi notification
+        thật; hai plugin native (`workmanager`, `flutter_local_notifications`),
+        việc worker mở connection SQLite thứ hai trong background isolate, và
+        thời điểm fire dưới Doze **chỉ kiểm chứng được trên máy thật**. Việc này
+        thuộc integration worktree và là điều kiện phát hành, không phải điều
+        kiện merge của PR này.
+- **Recursive review, vòng 1:** hai audit AUDIT_ONLY chạy song song
+  (architecture/logic và UI/UX) trên commit đầu. Kết quả: 2 P0, 6 P1, 8 P2 —
+  trùng lặp đáng kể giữa hai bên. Đã sửa hết trong vòng 2. Bốn defect đáng ghi
+  vì chúng là *lớp lỗi*, không phải typo: (1) một CTA "Try again" cố định chạy
+  `enable` bất kể lệnh nào hỏng, nên retry sau khi **tắt** hỏng sẽ bật lại thứ
+  người dùng vừa tắt; (2) `reset()` gọi trên chính controller sắp `submit()` xoá
+  luôn `isSubmitting`, tức xoá double-submit guard — hai enable song song nghĩa
+  là hai prompt quyền và hai chuỗi ghi-đền-bù đan vào nhau; (3) trạng thái
+  platform-unavailable chỉ sinh ra từ một lệnh, mà trên nền tảng đó không lệnh
+  nào chạy được, nên nó **không bao giờ render** và hai ARB key thành code chết;
+  (4) một lượt nhắc bị Doze đẩy qua nửa đêm sẽ đặt tiếp lượt của **chính ngày
+  vừa phục vụ**, phá BR-221. Tất cả đều có test hồi quy.
+- **Recursive review, vòng 2:** hai audit chạy lại trên bản đã sửa. Kết quả: 1 P0
+  + 1 P1 + 5 P2, và **P0 là do chính vòng 1 gây ra** — đúng lý do vòng thứ hai
+  tồn tại. `schedule()` dùng một tham số `now` cho hai việc: chọn lượt kế tiếp
+  **và** đo `initialDelay`. Khi worker truyền anchor (đầu ngày kế tiếp) vào,
+  delay hụt đúng bằng khoảng cách anchor − giờ thật, nên lượt nhắc trôi sớm 4
+  tiếng **mỗi đêm** cho tới khi hai lượt rơi vào cùng một ngày — tức phá đúng
+  BR-221 mà bản sửa tuyên bố đã vá. Hàm thuần `reminderRescheduleAnchor` đúng;
+  chỗ nối dây sai, và test hàm thuần không chạm tới được. Nay contract tách
+  `now` (đo delay) khỏi `notBefore` (chọn lượt), và
+  `android_reminder_platform_repository_test.dart` đo thẳng `initialDelay` bằng
+  mock Workmanager. P1: `ReminderTimeDraftController` là autoDispose và không ai
+  `watch`, nên nó bị huỷ ngay frame sau khi ghi — retry luôn đọc `null` và
+  re-submit giờ cũ, mà use case coi là no-op, nên retry báo thành công giả.
+- **Recursive review, vòng 3:** audit architecture xác nhận cả ba fix của vòng 2
+  đã thật sự vá, và tìm ra rằng **cơ chế bỏ-ngày của BR-221 chỉ sống trong đúng
+  một lượt worker**: anchor là tham số chỉ worker truyền, nên lần hoà giải lịch
+  kế tiếp lúc khởi động tính lại từ `now`, đặt lại ngày vừa bỏ, và
+  `ExistingWorkPolicy.replace` biến đó thành lịch thật — hai notification trong
+  một ngày địa phương, đúng thứ anchor sinh ra để chặn. Sửa bằng cách làm cho
+  dấu vết **bền**: schema v9 thêm `app_settings.reminder_last_delivered_at`,
+  `DeliverDailyReminderUseCase` ghi nó khi post, và
+  `ReconcileReminderScheduleUseCase` tự dẫn xuất `notBefore` từ nó — nên cả bốn
+  đường gọi (launch, enable, đổi giờ, worker) cùng một câu trả lời mà không
+  đường nào phải biết. Cùng vòng: clamp chuyển từ *delay* sang *anchor* (clamp
+  delay biến một anchor cũ thành "bắn ngay"), `watchSettings` map lỗi như
+  `readSettings`, và M6 A2 nay được đo bằng `didExceedMaxLines` thay vì chỉ
+  `takeException` — một nhãn bị cắt không ném exception nào.
+- **Recursive review, vòng 4 và 5:** vòng 4 xác nhận cả năm finding vòng 3 đã
+  vá và tìm ra rằng lịch vẫn là **thứ duy nhất** chặn lượt post thứ hai — dấu
+  vết v9 chỉ được đọc theo chiều đặt lịch, nên một lượt đã gửi rồi ném trên
+  đường ra sẽ bị WorkManager retry và post lại. Thêm khoá thứ hai ngay ở
+  `DeliverDailyReminderUseCase`. Vòng 5 là vòng **đầu tiên trong năm vòng mà bản
+  sửa trước không đẻ ra defect mới**, và auditor kết luận thiết kế đã hội tụ: các
+  vòng 1–3 sửa vào *đường dây* (tham số anchor, chỗ clamp, ai sở hữu `now`) nên
+  mỗi lần lại vỡ chỗ khác; bản sửa vòng 4 là *cộng thêm* — một guard thuần đọc
+  từ đúng snapshot đã có. Hai việc còn lại đã làm nốt: ghi dấu vết hỏng **không**
+  được biến thành retry (retry chính là thứ post lần hai, nên báo lỗi vì
+  bookkeeping hỏng gây đúng cái hại mà bookkeeping ngăn), và một dấu vết mang
+  timestamp ở tương lai bị coi là không dùng được ở **cả** guard lẫn `notBefore`
+  — không màn nào hiện cột đó và không lệnh nào ghi lại nó, nên một đồng hồ chạy
+  nhanh rồi được chỉnh lại sẽ tắt hẳn nhắc học vĩnh viễn.
+- **Dependencies:** M4.2 (database), M5.0s (`app_settings`, `learned_at`),
+  M99.15/M99.19a (bucket widget), AD-19 (nhánh Settings)
+- **Tests required:** domain — dựng summary, đếm, thứ tự cấp bách, ranh giới
+  due/overdue, "không có thẻ mới", copy input; SQLite thật — gộp workload theo
+  root, không đếm trùng, không mutation; adapter/service — enable/disable/đổi
+  giờ/đổi timezone/reboot hook, nhánh permission, due đã cũ lúc fire,
+  idempotency, failure có kiểu, fallback Web; widget/router — luồng permission,
+  dialog chọn giờ, deep link khi chạm, semantics, 320/390/412 và text scale;
+  manifest/flavor — không có quyền exact alarm. **Không** gửi notification thật
+  trong host suite. Sau vòng review: thêm test cho retry-đúng-lệnh, banner
+  capability, semantics name/value của toggle và hàng giờ, và
+  "một lượt mỗi ngày địa phương" qua mốc nửa đêm. Sau vòng 2: adapter test đo
+  `initialDelay` thật, retry giữ đúng giờ người dùng chọn, read hỏng map thành
+  `Failure`. Sau vòng 3: BR-221 được ghim bằng `reminder_use_cases_test.dart`
+  (group reconcile — ngày đã giao thì mọi caller đều bỏ) và
+  `migration_v8_test.dart` (case v9), thay cho hàm anchor đã bị xoá; M6 A2 đo
+  bằng `didExceedMaxLines`. Sau vòng 4: round-trip `markDelivered` qua SQL thật,
+  và lượt giao thứ hai trong cùng ngày bị chặn ở use case.
+- **Checklist phases:** 9, 10, 11, 12, 13, 14, 15
+
 ## Blocker
 
 | Blocker | Ảnh hưởng | Cách gỡ |
@@ -10032,6 +10187,7 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 | `ancestry` CTE trong `deck.drift` không có bound | M99.28 | Cùng khiếm khuyết đã sửa ở `progress.drift`: walk mang `distance` tăng mỗi vòng nên `UNION` không dedup được, và trên cây cha vòng lặp thì statement không bao giờ trả về — nó giữ database isolate, nên mọi query khác của app chặn theo. Comment ở `deck.drift` còn khẳng định ngược lại | Áp đúng cách đã dùng ở `progress.drift`: `:maxWalk` cho `ancestry`, giữ `UNION` cho các walk không mang counter. Không gộp vào M99.28 vì nó nằm ngoài scope đã tuyên bố (không đụng Deck production code) |
 | `end_reason = scheduler_reset` phải mang cả BR-164 | M99.16 | Đổi scheduler khi chưa khoá ghi cùng giá trị với Reset, nên đọc riêng cột đó thì hai sự kiện khác nhau trông giống nhau. Không mất thông tin — `study_sessions.scheduler_generation` bằng generation của root sau một lần đổi và nhỏ hơn sau một lần reset — nhưng nó bắt người đọc phải biết mẹo đó | Tên đúng là `scheduler_changed`. `study_sessions.end_reason` có `CHECK` liệt kê giá trị nên thêm một giá trị là **đổi schema**, và bump version đang thuộc về task chuẩn hoá `content_type` chạy song song (v6). Nới `CHECK` cùng lần bump schema tiếp theo, rồi đổi `deck_scheduler_repository_impl.dart` sang giá trị mới. Nới `CHECK` là **rebuild bảng**, không phải `ALTER`, nên nó xứng đáng một bump riêng. **v8 đã đi cho BR-203** — ba cột `direction` thêm bằng `ALTER TABLE ADD COLUMN`, không rebuild gì, nên không ghép được — nên đích bây giờ là **v9** |
 | `end_reason = scheduler_reset` phải mang cả BR-164 | M99.16 | Đổi scheduler khi chưa khoá ghi cùng giá trị với Reset, nên đọc riêng cột đó thì hai sự kiện khác nhau trông giống nhau. Không mất thông tin — `study_sessions.scheduler_generation` bằng generation của root sau một lần đổi và nhỏ hơn sau một lần reset — nhưng nó bắt người đọc phải biết mẹo đó | Tên đúng là `scheduler_changed`. `study_sessions.end_reason` có `CHECK` liệt kê giá trị nên thêm một giá trị là **đổi schema**, và bump version đang thuộc về task chuẩn hoá `content_type` chạy song song (v6). Nới `CHECK` cùng lần bump schema tiếp theo **dành riêng cho nó** — rồi đổi `deck_scheduler_repository_impl.dart` sang giá trị mới. Nới `CHECK` là rebuild bảng, không phải `ALTER`, nên nó xứng đáng một bump riêng: v8 (M99.28) là hai `ALTER TABLE ADD COLUMN` thuần additive và ghép một rebuild vào đó là trộn hai rủi ro khác hẳn nhau. Mục tiêu hiện tại là **v9** |
+| `end_reason = scheduler_reset` phải mang cả BR-164 | M99.16 | Đổi scheduler khi chưa khoá ghi cùng giá trị với Reset, nên đọc riêng cột đó thì hai sự kiện khác nhau trông giống nhau. Không mất thông tin — `study_sessions.scheduler_generation` bằng generation của root sau một lần đổi và nhỏ hơn sau một lần reset — nhưng nó bắt người đọc phải biết mẹo đó | Tên đúng là `scheduler_changed`. `study_sessions.end_reason` có `CHECK` liệt kê giá trị nên thêm một giá trị là **đổi schema**, và bump version đang thuộc về task chuẩn hoá `content_type` chạy song song (v6). Nới `CHECK` cùng lần bump schema tiếp theo, rồi đổi `deck_scheduler_repository_impl.dart` sang giá trị mới. Nới `CHECK` là rebuild bảng, không phải `ALTER`, nên nó xứng đáng một bump riêng chứ không ghép vào một migration khác. **v8 đã bị M99.29 lấy** cho hai cột nhắc học — đó là hai `ADD COLUMN` thuần, không rebuild bảng nào, nên ghép vào sẽ trộn hai loại migration khác hẳn nhau trong một bước. Mục tiêu nay là **v9** |
 | Nội dung starter là fixture, không phải nội dung production | T1.3 | Không phát hành được với nội dung này | Tìm nguồn nội dung có bản quyền rõ ràng trước M8 (BR-87) |
 | `sqlite3.wasm` và `drift_worker.js` là binary vendored trong `web/` | M4.2 | Không có bước build nào sinh ra chúng và không có bước build nào báo khi chúng cũ: app compile, load, rồi **không mở được database**. Nâng `drift` mà quên tải lại worker không có triệu chứng nào cho tới khi ai đó mở trình duyệt | `test/database/web_assets_test.dart` so version trong `pubspec.lock` với version đã pin, kèm `web/WEB_ASSETS.md` ghi URL tải. Đã kiểm tiêm lỗi: đổi `drift` thành 2.99.0 làm test đỏ |
 | Server phát web chưa gửi COOP/COEP | M4.2 | `crossOriginIsolated` là `false`, nên drift chọn backend lưu trữ kém hơn OPFS. Không có lỗi nào — chỉ là hiệu năng và độ bền khác đi, âm thầm | Thêm `Cross-Origin-Opener-Policy: same-origin` và `Cross-Origin-Embedder-Policy: require-corp` vào server phát web ở M7, và kiểm lại `crossOriginIsolated` trong E2E |

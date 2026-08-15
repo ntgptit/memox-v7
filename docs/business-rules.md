@@ -7,7 +7,7 @@
 | **Scope** | Luật nghiệp vụ, validation rule, state machine, edge case của phạm vi MVP. Ngoài phạm vi: quyết định kiến trúc (`architecture.md`), hình dạng dữ liệu (`data-model.md`), luồng người dùng (`use-cases.md`) |
 | **Source of truth for** | BR-xx · validation rule · entity state machine · edge case |
 | **Depends on** | `document-conventions.md`, `product.md`, `architecture.md` |
-| **Updated by task** | M99.28 — BR-210…BR-217: Settings v1 (mặc định học toàn cục, theme, ngôn ngữ); M99.27 — BR-203…BR-209: chiều hỏi của self-assess; M99.25 — BR-200…BR-202: Study Home (đọc thư viện thật, workload toàn subtree, ba trạng thái đã tải); M99.24 — BR-182…BR-189: tiến độ theo deck (phạm vi metric, card-day, hai khoảng, quy-về-vị-trí-hiện-tại, phân hoạch Learning/Reviewing, thứ tự, chỉ-đọc, cập nhật trực tiếp); trước đó M99.23 — BR-190…BR-199: Progress overview v1 (hai khối đã đổi chỗ khi #301 và #302 gộp — số ở bảng dưới là số đúng) |
+| **Updated by task** | M99.28 — BR-210…BR-217: Settings v1 (mặc định học toàn cục, theme, ngôn ngữ); M99.27 — BR-203…BR-209: chiều hỏi của self-assess; M99.25 — BR-200…BR-202: Study Home (đọc thư viện thật, workload toàn subtree, ba trạng thái đã tải); M99.24 — BR-182…BR-189: tiến độ theo deck (phạm vi metric, card-day, hai khoảng, quy-về-vị-trí-hiện-tại, phân hoạch Learning/Reviewing, thứ tự, chỉ-đọc, cập nhật trực tiếp); trước đó M99.23 — BR-190…BR-199: Progress overview v1 (hai khối đã đổi chỗ khi #301 và #302 gộp — số ở bảng dưới là số đúng) · M99.29 — BR-218…BR-229: nhắc học hằng ngày (opt-in, giờ địa phương, due-only, một tóm tắt, riêng tư, thứ tự cấp bách, inexact + idempotent scheduling, permission, capability) |
 | **Last updated** | 2026-08-15 |
 
 Format tuân theo `document-conventions.md` §6.2. Từ khoá MUST / SHOULD / MAY
@@ -480,6 +480,33 @@ chung (BR-51…BR-54) — chúng chỉ nói phần mà chiều đọc tiến đ�
 | BR-187 | active | Danh sách deck MUST sắp theo `unique active cards` **giảm dần của khoảng đang chọn**, tie-break bằng tên đã fold rồi tới id, để thứ tự ổn định qua mọi lần đọc. Fold MUST làm trong Dart bằng `toLowerCase()` Unicode, MUST NOT dùng `lower()` của SQLite (chỉ fold ASCII, nên `Động` và `động` tách nhau trong khi `Verbs` và `verbs` gộp). Deck không có hoạt động MUST vẫn hiển thị và MUST đứng cuối — ẩn chúng đi là trả lời câu hỏi "mình đã bỏ bê deck nào" bằng cách xoá chính câu trả lời. | domain | UC-13, BR-93 |
 | BR-188 | active | Đọc tiến độ MUST là thao tác chỉ-đọc: mở, rời hay đổi khoảng trên màn hình MUST NOT ghi hay chạm tới nội dung card, timestamp, `content_type`, study state, review history, session hay quan hệ tag; MUST NOT mở hay đóng session nào. Một lần đọc thất bại vì thế MUST NOT làm hỏng dữ liệu, và copy lỗi MUST NOT gợi ý ngược lại. | repository + UI | UC-13, BR-178 |
 | BR-189 | active | Màn hình MUST cập nhật trực tiếp: ghi một lượt trả lời, chuyển thẻ hoặc subtree, xoá deck, và nửa đêm địa phương đi qua MUST đều làm số trên màn hình đổi mà người dùng không phải thao tác gì. Ba sự kiện đầu MUST đến từ stream invalidation của các bảng liên quan; sự kiện thứ tư không có write nào trong database nên MUST đến từ một lần hẹn giờ duy nhất, đặt theo thời điểm hết hạn mà chính snapshot mang theo (BR-184). | repository + presentation | UC-13, BR-184 |
+
+## Nhắc học hằng ngày
+
+Một notification tóm tắt mỗi ngày, dựng từ workload đến hạn thật (AD-21). Các
+rule dưới đây **không** phát biểu lại định nghĩa "đến hạn" (BR-22), cách tra root
+(BR-56, BR-57), hay luật riêng tư chung (BR-51…BR-54) — chúng chỉ nói phần mà
+chiều nhắc học thêm vào.
+
+| ID | Status | Rule | Enforced by | Related |
+|---|---|---|---|---|
+| BR-218 | active | Nhắc học MUST mặc định **tắt**. Ứng dụng MUST NOT xin quyền notification, MUST NOT đăng ký lịch nền và MUST NOT hiện notification nào cho tới khi người dùng chủ động bật. Bật là một hành động tường minh của người dùng, MUST NOT suy ra từ việc mở app, học xong một phiên hay cài lại app. | domain + UI | UC-17, AD-21, BR-54 |
+| BR-219 | active | Giờ nhắc MUST lưu dưới dạng **phút trong ngày theo giờ địa phương**, miền hợp lệ `0…1439`, mặc định gợi ý `1200` (20:00). Giá trị ngoài miền MUST bị từ chối ở domain bằng lý do có kiểu trước khi chạm database. Giờ nhắc MUST được diễn giải theo offset địa phương **tại thời điểm tính lịch**, MUST NOT quy đổi sang UTC rồi lưu — quy đổi lúc lưu làm giờ nhắc trôi đúng bằng lượng offset đổi khi người dùng qua múi giờ khác. | domain + db | UC-17, AD-21, BR-105 |
+| BR-220 | active | Notification MUST chỉ được hiện khi tổng `overdue + due-today` > 0 **đo lại tại thời điểm fire**, không phải tại thời điểm đặt lịch. Thẻ chưa học xong chuỗi learning (`learned_at IS NULL`) MUST NOT được tính và MUST NOT tự mình làm phát notification. Đến giờ mà tổng bằng 0 thì MUST bỏ hẳn lượt nhắc đó và MUST NOT hiện notification rỗng hay notification "không có gì để học". | domain | UC-17, BR-22, BR-142 |
+| BR-221 | active | MUST có nhiều nhất **một** notification tóm tắt cho mỗi ngày địa phương, và nó MUST thay thế notification của ngày trước nếu vẫn còn trên shade — dùng một notification id cố định. MUST NOT có notification riêng cho mỗi deck. | data | UC-17, AD-21 |
+| BR-222 | active | Nội dung notification MAY nêu **tên root deck cấp bách nhất**, **tổng số thẻ đến hạn** và **số deck còn lại**. Nội dung MUST NOT chứa mặt trước/sau của thẻ, ví dụ, gợi ý, phiên âm, tag, lịch sử ôn hay bất kỳ dữ liệu học nào của từng thẻ, kể cả trên lock screen. Log ở mọi level MUST NOT chứa nội dung thẻ, tên deck hay bản thân chuỗi copy; diagnostic chỉ MAY ghi lý do có kiểu và số đếm. | data + UI | UC-17, BR-32, BR-51, BR-52 |
+| BR-223 | active | "Cấp bách nhất" MUST là một thứ tự **toàn phần và tất định**: số thẻ overdue giảm dần, rồi tuổi overdue lớn nhất (số ranh giới ngày địa phương đã qua, BR-161) giảm dần, rồi số thẻ due-today giảm dần, rồi tên deck tăng dần, rồi `deck.id` tăng dần. Không được có tie chưa phân giải: hai deck cùng mọi số liệu MUST xếp theo tên rồi id, không theo thứ tự database trả về. | domain | UC-17, BR-161 |
+| BR-224 | active | Tổng số thẻ đến hạn MUST gộp theo **root deck** qua `decks.root_deck_id` (BR-57) và MUST đếm mỗi thẻ **đúng một lần**: một thẻ MUST NOT bị cộng thêm vì tổ tiên và hậu duệ của deck chứa nó cùng có mặt trong danh sách. `COALESCE(parent_deck_id, id)` MUST NOT được dùng để tra root. | db + domain | UC-17, BR-56, BR-57, BR-220 |
+| BR-225 | active | Chạm notification MUST mở Study Home theo đúng route contract của app và MUST NOT tự mở phiên học, tự chọn deck hay tự ghi gì. Vuốt bỏ notification MUST NOT thay đổi study state, không đánh dấu đã học, không dời lịch thẻ và không ghi history. | UI + domain | UC-17, BR-25 |
+| BR-226 | active | Đặt lịch MUST dùng cơ chế **không chính xác** (inexact) của hệ điều hành; ứng dụng MUST NOT khai báo hay xin quyền exact alarm. Lịch MUST được đặt lại khi: bật nhắc, đổi giờ nhắc, offset địa phương đổi, và — nếu nền tảng yêu cầu — sau reboot hoặc app update. Tắt nhắc MUST huỷ lịch đang có. | data | UC-17, AD-21 |
+| BR-227 | active | Đặt lịch MUST **idempotent**: chạy lại việc hoà giải lịch với cùng settings và cùng giờ địa phương MUST cho đúng một lịch đang chờ, MUST NOT xếp chồng thêm lượt và MUST NOT nhân đôi notification. | data | UC-17, AD-21 |
+| BR-228 | active | Trên nền tảng cần quyền notification (Android 13+), quyền MUST chỉ được xin **sau** khi người dùng chạm bật. Bị từ chối MUST là một trạng thái **có kiểu và khôi phục được**: settings MUST giữ nguyên **tắt**, lịch MUST NOT được đặt, UI MUST nói cách bật lại ở cài đặt hệ thống và MUST cho thử lại. Ứng dụng MUST NOT tự động xin lại quyền, MUST NOT lưu trạng thái "đã bật" khi bước bật chưa hoàn tất. | domain + UI | UC-17, AD-21 |
+| BR-229 | active | Nền tảng không hỗ trợ nhắc học MUST báo capability bằng một giá trị có kiểu và MUST NOT crash, MUST NOT im lặng coi như đã bật. UI MUST hiện trạng thái không khả dụng thay vì một toggle bật được nhưng không có tác dụng. Domain và presentation MUST NOT import kiểu của plugin notification, MUST NOT kiểm tra nền tảng và MUST NOT chạm platform IO. | domain + data + UI | UC-17, AD-21, AD-13 |
+
+BR-220 nói "đo lại tại thời điểm fire" chứ không phải "đo lúc đặt lịch", và đó là
+lý do AD-21 chọn background worker: một notification đã nạp sẵn nội dung từ hôm
+qua vẫn hiện đúng giờ ngay cả khi người dùng đã học hết, và nó hiện **số của hôm
+qua**.
 
 ## StudyMode
 
@@ -1051,3 +1078,12 @@ Trạng thái kết thúc là terminal — không có đường quay lại `in_p
 | Mở màn hình tiến độ lúc 23:59 rồi để yên | Nửa đêm địa phương, cửa sổ trượt một ngày và màn hình tự đọc lại (BR-194, BR-199) |
 | Một ngày có cả lượt `learning` và lượt `scheduled` trên cùng thẻ | Là Learning day (BR-186) |
 | Năm mươi deck cùng 0 hoạt động | Vẫn hiện, đứng cuối, thứ tự không đổi giữa hai lần đọc (BR-187) |
+| Đến giờ nhắc nhưng người dùng vừa học hết | Bỏ lượt nhắc, không hiện notification nào (BR-220) |
+| Chỉ còn thẻ chưa học, không có thẻ đến hạn | Không nhắc — thẻ mới không làm phát notification (BR-220) |
+| Bật nhắc rồi từ chối quyền Android 13+ | Settings vẫn tắt, không đặt lịch, UI chỉ đường bật lại và cho thử lại (BR-228) |
+| Đổi múi giờ sau khi đã bật nhắc | Đặt lại lịch theo giờ địa phương mới; giờ nhắc hiển thị không đổi (BR-219, BR-226) |
+| Mở app nhiều lần trong ngày khi đang bật nhắc | Hoà giải lịch idempotent — vẫn đúng một lượt chờ (BR-227) |
+| Hai deck có số overdue và tuổi overdue bằng nhau | Xếp theo tên rồi `id`, không theo thứ tự database (BR-223) |
+| Chạm notification | Mở Study Home, không tự mở phiên (BR-225) |
+| Vuốt bỏ notification | Không đụng study state, không ghi history (BR-225) |
+| Chạy trên Web | Capability báo không hỗ trợ; không có toggle bật được mà vô tác dụng (BR-229) |

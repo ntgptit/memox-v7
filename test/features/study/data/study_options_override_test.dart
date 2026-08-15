@@ -11,7 +11,7 @@ import 'package:memox/features/study/domain/usecases/clear_study_options_overrid
 
 import '../../../database/support/test_database.dart';
 
-/// The root deck's override and the action that clears it (BR-184), against a
+/// The root deck's override and the action that clears it (BR-212), against a
 /// real database.
 ///
 /// **Its own file rather than another group in `study_options_flow_test.dart`.**
@@ -35,7 +35,7 @@ void main() {
 
   /// A root deck on `eight_box` with one sub-deck and one learned card.
   ///
-  /// The learned card is not scenery: BR-184 says clearing an override must
+  /// The learned card is not scenery: BR-212 says clearing an override must
   /// leave learning progress alone, and a fixture without any progress cannot
   /// tell a correct implementation from one that wiped it.
   Future<void> seed() async {
@@ -156,7 +156,7 @@ void main() {
     });
 
     test('it is not Reset learning progress', () async {
-      // BR-184, and the negative half is the point: the two actions are one
+      // BR-212, and the negative half is the point: the two actions are one
       // word apart in English and nothing else in this app is.
       await seed();
       await repository.saveStudyOptions(

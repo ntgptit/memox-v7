@@ -7,7 +7,7 @@
 | **Scope** | Must-have của MVP. Ngoài phạm vi: should/nice-to-have, và mọi thứ ở mục "Điều đã cố ý không đặc tả" |
 | **Source of truth for** | UC-xx · main/alternative/error flow · UI state matrix của từng màn |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md` |
-| **Updated by task** | M99.24 — UC-13: xem tiến độ theo deck (cấp thư viện → cấp deck, hai khoảng); trước đó M99.23 — UC-12: xem tiến độ học (streak, hôm nay, bảy ngày) |
+| **Updated by task** | M99.24 — UC-13: xem tiến độ theo deck (cấp thư viện → cấp deck, hai khoảng); trước đó M99.23 — UC-12: xem tiến độ học (streak, hôm nay, bảy ngày) · M99.29 — UC-17: bật nhắc học hằng ngày (opt-in → quyền → lịch → notification → Study Home) |
 | **Last updated** | 2026-08-15 |
 
 Chỉ đặc tả must-have. Should-have và nice-to-have viết khi tới lượt — đặc tả
@@ -1151,6 +1151,77 @@ dùng được) · validation error trên trần thẻ · persistence error + re
 confirm · System resolution theo platform (light/dark, en/vi). Không có state
 `empty`: một màn tuỳ chọn luôn có đủ ba nhóm.
 
+## UC-17 · Bật nhắc học hằng ngày
+
+| | |
+|---|---|
+| **Status** | active |
+
+**Actor:** Người dùng
+**Trigger:** Mở `Settings → Daily reminder`
+**Preconditions:** Không có. Nhắc học mặc định tắt và không phụ thuộc dữ liệu
+nào (BR-218); màn hình mở được cả khi thư viện rỗng
+
+**Main flow:**
+1. Người dùng mở màn nhắc học từ Settings. Hệ thống hiển thị toggle **tắt**, giờ
+   gợi ý 20:00 hiển thị ở trạng thái không hoạt động, và hai dòng nói rõ: nhắc
+   chỉ hiện khi còn thẻ đến hạn, và notification có thể nêu tên deck cùng số thẻ
+   trên màn khoá (BR-218, BR-219, BR-222).
+2. Người dùng bật toggle. Hệ thống chuyển sang trạng thái `enabling` và **chỉ
+   lúc này** mới xin quyền notification của hệ điều hành (BR-228).
+3. Người dùng cấp quyền. Hệ thống lưu `enabled = true` cùng giờ đang chọn, đặt
+   một lượt nhắc không chính xác cho lần 20:00 địa phương kế tiếp (BR-226), và
+   hiển thị trạng thái bật kèm giờ.
+4. Đến giờ, hệ thống đọc lại workload đến hạn. Còn `overdue + due-today > 0` thì
+   hiện đúng một notification tóm tắt: tên root deck cấp bách nhất theo thứ tự
+   BR-223, tổng số thẻ và số deck còn lại (BR-221, BR-222). Sau đó nó đặt lịch
+   cho ngày kế tiếp.
+5. Người dùng chạm notification. Hệ thống mở Study Home, không mở phiên nào
+   (BR-225).
+
+**Alternative flows:**
+- **A1 — Đổi giờ nhắc:** chạm hàng giờ → dialog chọn giờ; xác nhận thì lưu giờ
+  mới và đặt lại lịch trong cùng một thao tác (BR-226). Huỷ dialog thì không đổi
+  gì.
+- **A2 — Tắt nhắc:** tắt toggle → lịch bị huỷ và mọi notification đang chờ bị
+  gỡ; không xin quyền, không hỏi xác nhận (BR-226).
+- **A3 — Đến giờ nhưng không còn thẻ đến hạn:** bỏ lượt nhắc, không hiện gì, vẫn
+  đặt lịch cho ngày kế tiếp (BR-220).
+- **A4 — Chỉ còn thẻ chưa học:** như A3 — thẻ mới không làm phát notification
+  (BR-220).
+- **A5 — Đổi múi giờ hoặc mở lại app:** hệ thống hoà giải lịch lúc khởi động;
+  chạy nhiều lần vẫn đúng một lượt chờ (BR-227).
+- **A6 — Vuốt bỏ notification:** không có mutation nào; lượt nhắc hôm sau không
+  đổi (BR-225).
+
+**Error flows:**
+- **E1 — Từ chối quyền (Android 13+):** settings giữ nguyên **tắt**, không đặt
+  lịch, màn hiện lý do có kiểu cùng hướng dẫn bật lại ở cài đặt hệ thống và một
+  hành động thử lại. Hệ thống không tự xin lại quyền (BR-228).
+- **E2 — Nền tảng không hỗ trợ:** toggle bị vô hiệu và màn nói rõ nhắc học chưa
+  có trên nền tảng này; không có trạng thái bật giả (BR-229).
+- **E3 — Đặt lịch thất bại:** lỗi của nền tảng map thành lý do có kiểu; settings
+  **không** ở trạng thái bật, màn cho thử lại, và thông báo MUST NOT lộ chi tiết
+  kỹ thuật.
+- **E4 — Lưu settings thất bại:** không đặt lịch, trạng thái UI quay về giá trị
+  đang lưu trong database, kèm lý do có kiểu và hành động thử lại.
+- **E5 — Đọc workload thất bại lúc fire:** bỏ lượt nhắc thay vì hiện notification
+  đoán mò, vẫn đặt lịch cho ngày kế tiếp (BR-220).
+
+**Postconditions:** `app_settings` mang đúng trạng thái bật/tắt và giờ nhắc mà
+người dùng nhìn thấy; đúng một lượt nhắc đang chờ khi bật và không lượt nào khi
+tắt (BR-227); không thao tác nào ở đây đụng tới study state hay history.
+
+**Business rules:** BR-22, BR-51, BR-52, BR-54, BR-57, BR-105, BR-142, BR-161,
+BR-218, BR-219, BR-220, BR-221, BR-222, BR-223, BR-224, BR-225, BR-226, BR-227,
+BR-228, BR-229
+
+**UI states:** loading (đọc settings) · off · enabling (đang xin quyền/đặt lịch,
+toggle khoá) · on (giờ hiển thị, hàng giờ chạm được) · time picker mở ·
+permission denied (khôi phục được) · platform unavailable · schedule error
+(thử lại được) · settings error (thử lại được). Không có state `empty`: màn này
+luôn có nội dung, kể cả khi thư viện rỗng.
+
 ## Điều đã cố ý không đặc tả
 
 | Thứ | Vì sao |
@@ -1160,7 +1231,7 @@ confirm · System resolution theo platform (light/dark, en/vi). Không có state
 | Thống kê / streak (S2) | Should-have — `study_answers` với `kind` đã đủ dữ liệu |
 | Đảo chiều card (S3) | Should-have |
 | ~~Export (nửa còn lại của N1)~~ | **Đã đặc tả ở M99.21** — UC-11 và BR-174…BR-181 chốt scope, encoder, filename, share và quyền riêng tư trước khi viết code, đúng điều kiện mà mục này đặt ra. Còn nice-to-have ngoài phạm vi export nội dung: backup/restore, sync và `.apkg`. |
-| Nhắc nhở hằng ngày (N2) | Nice-to-have, cần quyền notification |
+| ~~Nhắc nhở hằng ngày (N2)~~ | **Đã đặc tả ở M99.23** — UC-12 và BR-182…BR-193 chốt opt-in, phạm vi due-only, riêng tư của copy, thứ tự cấp bách và vòng đời lịch trước khi viết code. Còn ngoài phạm vi: nhắc theo thẻ mới, nhiều lượt nhắc trong ngày, và nhắc theo từng deck. |
 | Media và tag trong card | Ngoài MVP; quy tắc reset (BR-41) và lưu trữ (AD-08) đã đặt sẵn |
 | Đăng nhập, đồng bộ | Ngoài MVP (AD-03) |
 | Scheduler thứ ba | Abstraction đã sẵn sàng; thêm khi có nhu cầu thật |

@@ -1,0 +1,79 @@
+import '../tables/decks.drift';
+import '../tables/cards.drift';
+import '../tables/study.drift';
+-- `app_settings` moved out of `study.drift` at v9 (BR-210); the reminder
+-- columns live with it.
+import '../tables/settings.drift';
+
+-- The workload a daily reminder is allowed to talk about (BR-220, BR-224).
+--
+-- **One row per root deck, and a card belongs to exactly one of them.** The
+-- grouping goes through `decks.root_deck_id` (BR-57), so a card is counted once
+-- no matter how deep it sits and no matter how many of its ancestors are also
+-- "decks with due cards". Grouping by the card's own deck would count the same
+-- card again for every level a caller then rolled up, which is the double count
+-- BR-224 forbids. Coalescing the parent column with the id is banned for the
+-- same reason it is banned everywhere else (BR-57): it returns the level-2 deck
+-- from level 3 down.
+--
+-- **`learned_at IS NOT NULL` is the whole of "no new cards".** A card that has
+-- not finished the learning chain is *available* to study, not *owed* — and a
+-- reminder that fires every day whether or not anything is owed is a reminder
+-- people turn off (BR-220, BR-142).
+--
+-- **Two parameters, both instants, both supplied by the caller.** `:dayStart`
+-- is the start of the current local day resolved from `clockProvider` and
+-- `utcOffsetProvider` (BR-105); `:now` is the moment the reminder is being
+-- evaluated. Nothing here reads the SQL clock — "due exactly at now" is a
+-- boundary that has to be testable, and a query that reads its own clock cannot
+-- be tested at one.
+--
+-- **The ordering here is stability, not urgency.** BR-223's ranking needs the
+-- overdue *age* in local day boundaries, which is calendar arithmetic this
+-- schema has no business doing; the domain sorts. `root.id ASC` only makes the
+-- input order reproducible so the sort has a deterministic starting point.
+reminderWorkloadPerRootDeck:
+SELECT
+  root.id AS rootDeckId,
+  root.name AS rootDeckName,
+  SUM(CASE WHEN s.due_at < :dayStart THEN 1 ELSE 0 END) AS overdueCount,
+  SUM(CASE WHEN s.due_at >= :dayStart THEN 1 ELSE 0 END) AS dueTodayCount,
+  MIN(CASE WHEN s.due_at < :dayStart THEN s.due_at END)
+    AS oldestOverdueAt
+FROM cards c
+INNER JOIN decks d ON d.id = c.deck_id
+INNER JOIN decks root ON root.id = d.root_deck_id
+INNER JOIN card_study_states s ON s.card_id = c.id
+WHERE s.learned_at IS NOT NULL
+  AND s.due_at <= :now
+GROUP BY root.id, root.name
+ORDER BY root.id ASC;
+
+-- The user's reminder choice, written as one statement (BR-218, BR-219).
+--
+-- **Both columns together.** "On" and "at this time" are one decision, and two
+-- statements let a failure land between the halves — a reminder that is on at a
+-- time nobody picked.
+--
+-- `WHERE id = 1` rather than an unfiltered UPDATE: `app_settings` holds exactly
+-- one row by construction, and naming it is what keeps this statement correct if
+-- that ever stops being true.
+saveReminderSettings:
+UPDATE app_settings
+SET reminder_enabled = :enabled,
+    reminder_minute_of_day = :minuteOfDay,
+    updated_at = :updatedAt
+WHERE id = 1;
+
+-- Records that a summary was posted (BR-221).
+--
+-- **Its own statement, touching one column.** `saveReminderSettings` is the
+-- user's choice; this is the system's bookkeeping, and they are written by
+-- different callers at different moments — folding them together would make a
+-- background run able to overwrite a setting the user changed while it was
+-- awake.
+--
+-- `updated_at` is deliberately untouched: posting a notification is not an edit
+-- to the user's settings.
+markReminderDelivered:
+UPDATE app_settings SET reminder_last_delivered_at = :deliveredAt WHERE id = 1;

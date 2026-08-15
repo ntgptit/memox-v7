@@ -19,7 +19,7 @@ extension StudyOptionsSubmitProblems on StudyOptionsSubmitState {
 ///
 /// **The mapping itself is `core/state/submit_state.dart`'s**, and was moved
 /// there when Settings needed the identical function for the identical enum
-/// (M99.23). This name stays because it reads better at the call sites than the
+/// (M99.28). This name stays because it reads better at the call sites than the
 /// generic one and because the type argument is the only thing specific to this
 /// form.
 StudyOptionsSubmitState studyOptionsSubmitFailure(Failure failure) =>

@@ -216,7 +216,7 @@ final class StudyDao {
     DecksCompanion(studyConfig: Value<String?>(studyConfig)),
   );
 
-  /// Puts the root back on the app-wide defaults (BR-184).
+  /// Puts the root back on the app-wide defaults (BR-212).
   ///
   /// A separate method rather than `updateDeckStudyConfig` taking a nullable
   /// string: `Value<String?>(null)` and "leave this column alone" are one

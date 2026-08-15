@@ -53,7 +53,7 @@ class StudyOptionsWriteController extends _$StudyOptionsWriteController {
 }
 
 /// Drops the root deck's override so it follows the app defaults again
-/// (BR-184).
+/// (BR-212).
 ///
 /// **Its own controller, not a method on the one above.** The two are different
 /// operations with different outcomes — a save closes the screen, a clear

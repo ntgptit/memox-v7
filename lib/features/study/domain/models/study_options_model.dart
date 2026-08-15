@@ -26,7 +26,7 @@ abstract class StudyOptionsModel with _$StudyOptionsModel {
     required NewCardOrder newCardOrder,
 
     /// Whether the values above came from the **root deck's own override**
-    /// rather than from the app-wide defaults (BR-184).
+    /// rather than from the app-wide defaults (BR-212).
     ///
     /// **Part of this read rather than a second one.** The options screen has to
     /// offer `Use app defaults` only when there is something to clear, and a

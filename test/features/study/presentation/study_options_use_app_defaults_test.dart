@@ -7,7 +7,7 @@ import 'package:memox/l10n/generated/app_localizations_en.dart';
 import '../domain/support/fake_study_repository.dart';
 import 'support/study_widget_harness.dart';
 
-/// `Use app defaults` on the deck's own options surface (BR-184, wireframe S6).
+/// `Use app defaults` on the deck's own options surface (BR-212, wireframe S6).
 ///
 /// **On this screen and not on the app-wide Settings page.** The action affects
 /// one deck, and a global page offering it would need a deck picker — a second

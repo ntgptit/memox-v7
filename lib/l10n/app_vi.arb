@@ -48,7 +48,7 @@
         "type": "int"
       }
     },
-    "description": "The line under the hero headline when the streak includes today (BR-192)."
+    "description": "The line under the hero headline when the streak includes today (BR-228)."
   },
   "progressStreakHeldLine": "Chưa có thẻ nào hôm nay — chuỗi đang được giữ từ hôm qua",
   "@progressStreakHeldLine": {
@@ -90,7 +90,7 @@
         "type": "int"
       }
     },
-    "description": "The Today total; the unit is mandatory because the count is distinct cards (BR-192)."
+    "description": "The Today total; the unit is mandatory because the count is distinct cards (BR-228)."
   },
   "progressTodayLearningLabel": "Đang học",
   "@progressTodayLearningLabel": {
@@ -155,7 +155,7 @@
   },
   "progressErrorRetryAction": "Thử lại",
   "@progressErrorRetryAction": {
-    "description": "Retry on the error face; it re-opens the read and never writes (BR-190)."
+    "description": "Retry on the error face; it re-opens the read and never writes (BR-226)."
   },
   "settingsTitle": "Cài đặt",
   "@settingsTitle": {
@@ -167,23 +167,23 @@
   },
   "settingsLoadErrorTitle": "Không tải được cài đặt",
   "@settingsLoadErrorTitle": {
-    "description": "Whole-screen error when the settings stream fails (UC-12 E3)."
+    "description": "Whole-screen error when the settings stream fails (UC-17 E3)."
   },
   "settingsSaveErrorTitle": "Chưa lưu được",
   "@settingsSaveErrorTitle": {
-    "description": "Title of the in-section error band when a settings write fails (UC-12 E2, BR-188)."
+    "description": "Title of the in-section error band when a settings write fails (UC-17 E2, BR-224)."
   },
   "settingsStudyDefaultsSection": "Mặc định học",
   "@settingsStudyDefaultsSection": {
-    "description": "Heading of the group holding the app-wide card limit and new-card order (BR-183)."
+    "description": "Heading of the group holding the app-wide card limit and new-card order (BR-219)."
   },
   "settingsStudyDefaultsNote": "Áp dụng cho phiên bạn bắt đầu sau khi lưu. Phiên đang chạy giữ nguyên trần của nó.",
   "@settingsStudyDefaultsNote": {
-    "description": "States BR-185 on the global screen. Longer than studyOptionsNextSessionNote for the reason given in the English ARB."
+    "description": "States BR-221 on the global screen. Longer than studyOptionsNextSessionNote for the reason given in the English ARB."
   },
   "settingsAppearanceSection": "Giao diện",
   "@settingsAppearanceSection": {
-    "description": "Heading of the theme group (BR-186)."
+    "description": "Heading of the theme group (BR-222)."
   },
   "settingsThemeSystem": "Theo hệ thống",
   "@settingsThemeSystem": {
@@ -199,7 +199,7 @@
   },
   "settingsLanguageSection": "Ngôn ngữ",
   "@settingsLanguageSection": {
-    "description": "Heading of the language group (BR-187)."
+    "description": "Heading of the language group (BR-223)."
   },
   "settingsLanguageSystem": "Theo hệ thống",
   "@settingsLanguageSystem": {
@@ -215,15 +215,15 @@
   },
   "settingsResetAction": "Khôi phục mặc định",
   "@settingsResetAction": {
-    "description": "Puts every app option back to its default (BR-189). Worded away from Reset learning progress (BR-42)."
+    "description": "Puts every app option back to its default (BR-225). Worded away from Reset learning progress (BR-42)."
   },
   "settingsResetDescription": "Đưa các tuỳ chọn ứng dụng về mặc định. Deck và tiến độ học của bạn không bị ảnh hưởng.",
   "@settingsResetDescription": {
-    "description": "Shown under the reset action at rest, not only inside the confirmation (BR-189)."
+    "description": "Shown under the reset action at rest, not only inside the confirmation (BR-225)."
   },
   "settingsResetConfirmTitle": "Khôi phục tuỳ chọn ứng dụng?",
   "@settingsResetConfirmTitle": {
-    "description": "Title of the reset confirmation sheet (UC-12 A3)."
+    "description": "Title of the reset confirmation sheet (UC-17 A3)."
   },
   "settingsResetConfirmAction": "Khôi phục",
   "@settingsResetConfirmAction": {
@@ -231,15 +231,15 @@
   },
   "settingsSavingLabel": "Đang lưu",
   "@settingsSavingLabel": {
-    "description": "Announced while a settings group is being written (BR-188)."
+    "description": "Announced while a settings group is being written (BR-224)."
   },
   "studyOptionsUseAppDefaults": "Dùng mặc định của ứng dụng",
   "@studyOptionsUseAppDefaults": {
-    "description": "Clears this root deck's study-options override (BR-184)."
+    "description": "Clears this root deck's study-options override (BR-220)."
   },
   "studyOptionsOverrideNote": "Deck này đang dùng giá trị riêng thay cho mặc định của ứng dụng.",
   "@studyOptionsOverrideNote": {
-    "description": "Shown on a deck whose root carries an override (BR-184)."
+    "description": "Shown on a deck whose root carries an override (BR-220)."
   },
   "decksTitle": "Thư viện",
   "@decksTitle": {
@@ -2888,11 +2888,11 @@
   },
   "progressRange7Label": "7 ngày",
   "@progressRange7Label": {
-    "description": "Range selector pill for the 7-day window (BR-184)."
+    "description": "Range selector pill for the 7-day window (BR-220)."
   },
   "progressRange30Label": "30 ngày",
   "@progressRange30Label": {
-    "description": "Range selector pill for the 30-day window (BR-184)."
+    "description": "Range selector pill for the 30-day window (BR-220)."
   },
   "progressRange7SemanticLabel": "7 ngày gần nhất",
   "@progressRange7SemanticLabel": {
@@ -2916,19 +2916,19 @@
   },
   "progressActiveCardsMetricWord": "thẻ đã học",
   "@progressActiveCardsMetricWord": {
-    "description": "Word beside the distinct-card count (BR-183)."
+    "description": "Word beside the distinct-card count (BR-219)."
   },
   "progressActiveDaysMetricWord": "ngày có học",
   "@progressActiveDaysMetricWord": {
-    "description": "Word beside the distinct local-day count (BR-183)."
+    "description": "Word beside the distinct local-day count (BR-219)."
   },
   "progressLearningMetricWord": "học mới",
   "@progressLearningMetricWord": {
-    "description": "Word beside the learning half of the card-day partition (BR-186). Short on purpose: it has to survive a 320dp cell at text scale 2.0. The unit is stated once by progressCardDayUnitNote."
+    "description": "Word beside the learning half of the card-day partition (BR-222). Short on purpose: it has to survive a 320dp cell at text scale 2.0. The unit is stated once by progressCardDayUnitNote."
   },
   "progressReviewingMetricWord": "ôn tập",
   "@progressReviewingMetricWord": {
-    "description": "Word beside the reviewing half of the card-day partition (BR-186). Short for the same reason as progressLearningMetricWord."
+    "description": "Word beside the reviewing half of the card-day partition (BR-222). Short for the same reason as progressLearningMetricWord."
   },
   "progressCardDayUnitNote": "Học mới và ôn tập đếm theo thẻ-ngày — một thẻ trong một ngày.",
   "@progressCardDayUnitNote": {
@@ -2959,7 +2959,7 @@
         "type": "int"
       }
     },
-    "description": "Screen-reader sentence for the learning half of the partition (BR-186)."
+    "description": "Screen-reader sentence for the learning half of the partition (BR-222)."
   },
   "progressReviewingSemanticLabel": "{count, plural, =0{Không có thẻ-ngày ôn tập} other{{count} thẻ-ngày ôn tập}}",
   "@progressReviewingSemanticLabel": {
@@ -2968,7 +2968,7 @@
         "type": "int"
       }
     },
-    "description": "Screen-reader sentence for the reviewing half of the partition (BR-186)."
+    "description": "Screen-reader sentence for the reviewing half of the partition (BR-222)."
   },
   "progressDeckRowSemanticLabel": "{name}, trong {path}, {range}",
   "@progressDeckRowSemanticLabel": {
@@ -3019,7 +3019,7 @@
   },
   "progressNoActivityTitle": "Chưa học gì trong khoảng này",
   "@progressNoActivityTitle": {
-    "description": "Decks exist but none was answered inside the selected window (BR-184)."
+    "description": "Decks exist but none was answered inside the selected window (BR-220)."
   },
   "progressNoActivityMessage": "Chuyển sang khoảng dài hơn, hoặc học một bộ thẻ để bắt đầu ghi nhận.",
   "@progressNoActivityMessage": {
@@ -3196,5 +3196,97 @@
   "studyHomeNewWord": "thẻ mới",
   "@studyHomeNewWord": {
     "description": "The word half of a workload metric, rendered beside the numeral so the two can carry different ink — the numeral stays neutral and only the word takes the metric tint, which is the grammar the deck summary and Progress already use. What a screen reader hears is neither half but studyHomeWorkloadSemanticLabel, nested inside the row sentence."
+  },
+  "reminderTitle": "Nhắc hằng ngày",
+  "@reminderTitle": {
+    "description": "Tiêu đề màn nhắc học và nhãn hàng mở nó từ Settings. Cùng một chữ ở hai chỗ là cố ý: một hàng và màn nó mở ra phải đọc như một nơi (UC-17, M6 R1). Ngắn hơn nhãn toggle vì tiêu đề app bar không xuống dòng: bản dài hơn bị ellipsis ngay ở 390dp (M6 A1)."
+  },
+  "reminderToggleLabel": "Nhắc hằng ngày",
+  "@reminderToggleLabel": {
+    "description": "Nhãn hàng bật/tắt. Lặp lại **nguyên văn** tiêu đề màn vì hàng này là control chính của màn; một danh từ thứ hai cho cùng một thứ đọc thành một cài đặt thứ hai (M6 W3). Rút ngắn cùng lúc với reminderTitle: hai chuỗi khác nhau cách nhau 12dp trên cùng một màn là đúng thứ mô tả này cấm."
+  },
+  "reminderStatusOff": "Tắt",
+  "@reminderStatusOff": {
+    "description": "Giá trị accessibility của toggle khi tắt, để trạng thái không chỉ nằm ở màu (M6 R7, A3). Hàng ở Settings cố ý không hiện giá trị — xem M6 W1."
+  },
+  "reminderStatusOn": "Bật",
+  "@reminderStatusOn": {
+    "description": "Giá trị accessibility của toggle khi bật (M6 R7, A3)."
+  },
+  "reminderTimeLabel": "Giờ nhắc",
+  "@reminderTimeLabel": {
+    "description": "Nhãn hàng mở dialog chọn giờ, và cũng là tiêu đề của chính dialog đó (M6 W4, R6)."
+  },
+  "reminderDueOnlyNote": "Chỉ nhắc khi còn thẻ đến hạn.",
+  "@reminderDueOnlyNote": {
+    "description": "Dòng supporting thứ nhất. Phát biểu BR-220 theo ngôn ngữ người dùng: ngày không nợ gì thì không nhắc, và thẻ mới không bao giờ làm phát notification. Cố ý không doạ — đây là lời hứa về sự im lặng, không phải cảnh báo."
+  },
+  "reminderPrivacyNote": "Thông báo có thể hiện tên deck và số thẻ đến hạn, kể cả trên màn hình khoá.",
+  "@reminderPrivacyNote": {
+    "description": "Dòng supporting thứ hai. Công bố về màn hình khoá mà BR-222 yêu cầu, nói trước khi người dùng bật chứ không để họ tự phát hiện. Nêu đúng cái có thể xuất hiện — tên deck và một con số."
+  },
+  "reminderPermissionDeniedTitle": "Thông báo đang bị tắt",
+  "@reminderPermissionDeniedTitle": {
+    "description": "Tiêu đề banner khi hệ điều hành từ chối quyền notification (UC-17 E1, BR-228). Gọi tên trạng thái hệ thống, không đổ lỗi người dùng."
+  },
+  "reminderPermissionDeniedMessage": "Bật thông báo cho MemoX trong cài đặt thiết bị, rồi thử lại.",
+  "@reminderPermissionDeniedMessage": {
+    "description": "Đường khôi phục khi quyền bị từ chối. Android chỉ cho hỏi một lần nên lối về là cài đặt hệ thống; app không được tự hỏi lại (BR-228)."
+  },
+  "reminderUnavailableTitle": "Thiết bị này chưa dùng được nhắc học",
+  "@reminderUnavailableTitle": {
+    "description": "Tiêu đề banner khi nền tảng không có nhắc học trong bản build này (UC-17 E2, BR-229). Không kèm hành động, vì không có đường khôi phục và một nút không chạy được còn tệ hơn không nút."
+  },
+  "reminderUnavailableMessage": "Chưa có gì được bật và chưa có lịch nào.",
+  "@reminderUnavailableMessage": {
+    "description": "Thân banner không khả dụng. Nói điều người dùng cần biết nhất: không có trạng thái bật nửa vời nào bị bỏ lại (BR-229)."
+  },
+  "reminderScheduleErrorTitle": "Chưa đặt được lịch nhắc",
+  "@reminderScheduleErrorTitle": {
+    "description": "Tiêu đề banner khi quyền đã được cấp nhưng hệ điều hành từ chối công việc nền (UC-17 E3). Không nêu chi tiết kỹ thuật, vì Failure.message không bao giờ được render."
+  },
+  "reminderScheduleErrorMessage": "Chưa bật gì cả. Thử lại sau một lát.",
+  "@reminderScheduleErrorMessage": {
+    "description": "Thân banner lỗi đặt lịch. Xác nhận rằng cài đặt vẫn tắt — điều BR-228 bảo đảm và người dùng không tự nhìn ra được."
+  },
+  "reminderSaveErrorTitle": "Chưa lưu được thay đổi",
+  "@reminderSaveErrorTitle": {
+    "description": "Tiêu đề banner khi ghi settings thất bại (UC-17 E4). Khác lỗi đặt lịch vì lần thử lại chạy lại một bước khác."
+  },
+  "reminderSaveErrorMessage": "Nhắc học vẫn giữ nguyên như trước.",
+  "@reminderSaveErrorMessage": {
+    "description": "Thân banner lỗi lưu. Nói rõ người dùng đang ở trạng thái nào, vì màn vừa quay ngược lại dưới tay họ."
+  },
+  "reminderRetryAction": "Thử lại",
+  "@reminderRetryAction": {
+    "description": "Hành động khôi phục trong các banner lỗi của nhắc học. Chạy lại đúng bước đã hỏng, không đổi gì khác."
+  },
+  "reminderNotificationTitle": "Đến giờ học rồi",
+  "@reminderNotificationTitle": {
+    "description": "Tiêu đề notification (M6 N1). Không mang số đếm và không mang tên deck — chúng nằm ở thân, nên một tiêu đề bị cắt vẫn không lộ gì riêng tư."
+  },
+  "reminderNotificationBodyOneDeck": "{count, plural, other{{count} thẻ đến hạn trong {deck}}}",
+  "@reminderNotificationBodyOneDeck": {
+    "description": "Thân notification khi đúng một deck còn nợ (M6 N2, BR-222). Tên deck và số đếm là toàn bộ dữ liệu được phép ở đây. Tiếng Việt không chia số nhiều nên chỉ có nhánh other."
+  },
+  "reminderNotificationBodyManyDecks": "{others, plural, other{{count} thẻ đến hạn trong {deck} và {others} deck khác}}",
+  "@reminderNotificationBodyManyDecks": {
+    "description": "Thân notification khi nhiều hơn một deck còn nợ (M6 N3, BR-222). Deck được nêu tên là deck cấp bách nhất theo thứ tự BR-223; phần còn lại là một con số, không bao giờ là danh sách."
+  },
+  "reminderCancelErrorTitle": "Đã tắt nhắc, nhưng lịch cũ có thể còn",
+  "@reminderCancelErrorTitle": {
+    "description": "Tiêu đề banner khi cài đặt đã tắt nhưng lượt chạy nền đang chờ không huỷ được (BR-226). Cố ý không dùng copy của lỗi đặt lịch: người dùng vừa TẮT, mà bảo họ chưa BẬT gì cả là nói ngược điều vừa xảy ra."
+  },
+  "reminderCancelErrorMessage": "Nhắc học hằng ngày đã tắt. Nếu hôm nay vẫn có một thông báo, mở app một lần là hết.",
+  "@reminderCancelErrorMessage": {
+    "description": "Thân banner lỗi huỷ lịch. Nói kết quả người dùng quan tâm — nhắc đã tắt — và phần còn sót, không hứa quá điều BR-220 cho: lượt cũ đọc lại settings lúc fire và không hiện gì."
+  },
+  "reminderChannelName": "Nhắc học hằng ngày",
+  "@reminderChannelName": {
+    "description": "Tên kênh notification của Android, người dùng thấy trong cài đặt hệ thống của app. Là chuỗi người dùng nhìn thấy nên phải bản địa hoá, không hardcode ở call site."
+  },
+  "reminderChannelDescription": "Tóm tắt mỗi ngày một lần về số thẻ đang đến hạn.",
+  "@reminderChannelDescription": {
+    "description": "Mô tả kênh notification, hiện dưới tên kênh trong cài đặt hệ thống. Nói kênh mang gì, không nói về bất kỳ deck hay thẻ cụ thể nào (BR-222)."
   }
 }

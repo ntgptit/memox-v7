@@ -7,7 +7,7 @@
 | **Scope** | Quyết định ràng buộc nhiều tài liệu hoặc nhiều layer. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), hình dạng dữ liệu (`data-model.md`) |
 | **Source of truth for** | AD-xx · đánh đổi kiến trúc · phương án đã bị loại · lý do pin toolchain |
 | **Depends on** | `document-conventions.md`, `product.md` |
-| **Updated by task** | M99.24 (AD-19 · rule placeholder gắn với tình trạng branch; Progress đã tốt nghiệp) · M99.28 (AD-19 · Settings rời trạng thái placeholder — không còn branch nào là placeholder) |
+| **Updated by task** | M99.24 (AD-19 · rule placeholder gắn với tình trạng branch; Progress đã tốt nghiệp) · M99.28 (AD-19 · Settings rời trạng thái placeholder — không còn branch nào là placeholder) · M99.29 (AD-21 · nhắc học chạy trong background worker) |
 | **Last updated** | 2026-08-15 |
 
 Format theo `document-conventions.md` §6.1. AD xếp theo số; ID vĩnh viễn (§7).
@@ -1472,3 +1472,66 @@ validation". Tái sử dụng Study Mode factory cho transfer — hai trục m�
 khác nhau; chung factory là chung lý do đổi. Chuẩn bị sẵn `encode()` rỗng
 "cho tương lai" — API chết không có test thật, và cái giá của thêm-sau đã
 được trả trước bằng ranh giới, không cần trả bằng code chết.
+
+## AD-21 · Nhắc học chạy trong background worker, không phải notification đặt sẵn
+
+| | |
+|---|---|
+| **Status** | accepted |
+| **Affected documents** | `business-rules.md` (BR-182…BR-193), `use-cases.md` (UC-12), `data-model.md` (`app_settings`, migration v8 và v9), `wireframes/m6-daily-reminders.md` |
+
+**Decision.** Nhắc học hằng ngày tách làm hai vai và mỗi vai một plugin:
+**WorkManager** giữ *thời điểm*, `flutter_local_notifications` giữ *hiển thị
+và quyền*. Đến giờ, một background worker chạy Dart thật: nó mở database, đọc
+lại workload đến hạn, và chỉ khi tổng còn > 0 mới dựng nội dung rồi hiện đúng
+một notification (BR-184, BR-185) — sau đó tự đặt lượt cho ngày kế tiếp. App
+**không** dùng `zonedSchedule` để nạp sẵn một notification lặp lại, và **không**
+khai báo quyền exact alarm ở bất kỳ flavor nào (BR-190).
+
+Ranh giới layer đi kèm quyết định này: `domain/` khai báo ba contract —
+settings, workload, và một `ReminderPlatformRepository` gộp capability, quyền,
+đặt lịch và hiển thị — còn `data/` giữ **toàn bộ** kiểu của plugin. Một adapter
+Android thật và một adapter `unsupported` cho mọi nền tảng còn lại thoả cùng
+contract đó, nên `domain/` và `presentation/` không có một dòng kiểm tra nền
+tảng nào (BR-193, AD-12, AD-13).
+
+**Context.** BR-186 cho phép notification nêu tên deck cấp bách nhất và tổng số
+thẻ. Ba con số đó **chỉ đúng tại thời điểm hiện**: người dùng học một phiên tối
+nay thì tổng đổi, và một notification đã nạp nội dung lúc đặt lịch vẫn hiện
+đúng giờ với số của hôm qua. `zonedSchedule` của
+`flutter_local_notifications` không chạy Dart lúc fire — hệ điều hành hiện một
+payload cố định — nên nó không thể thoả BR-184 lẫn BR-186 cùng lúc. Cái chạy
+được Dart đúng lúc fire là một worker.
+
+WorkManager là nguyên thuỷ đúng cho vế còn lại: nó **vốn dĩ** không chính xác,
+nên không cần và không có đường xin exact alarm; nó tự sống sót qua reboot và
+app update; và nó chạy trong một background isolate nên không cần app đang mở.
+Alarm chính xác thì ngược lại — Android 12+ bắt khai báo `SCHEDULE_EXACT_ALARM`
+hoặc `USE_EXACT_ALARM`, và một lời nhắc học không có lý do sản phẩm nào để đòi
+mức đặc quyền đó.
+
+**Consequences.** Được: nội dung notification luôn là số thật của lúc hiện
+(BR-184, BR-186); "không còn gì đến hạn" trở thành một nhánh **chạy được ở host
+test** thay vì một hành vi chỉ quan sát được trên máy thật; reboot và app update
+không cần code riêng.
+
+Phải trả: worker chạy trong isolate khác, nên nó mở **một connection thứ hai**
+tới cùng file SQLite và không thấy `ProviderScope` của app — composition root vì
+thế có một entry point riêng ở `lib/app/reminder/`, và mọi thứ nó cần phải dựng
+được mà không có widget tree, kể cả localization. Thời điểm fire là *xấp xỉ*:
+Doze và battery saver có thể đẩy lượt nhắc muộn vài phút tới hàng giờ, và đó là
+đánh đổi đã chấp nhận cho một lời nhắc học. Hai plugin native mới không kiểm
+chứng được ở host — host test dùng fake adapter, còn smoke thật trên
+emulator/thiết bị **hoãn sang integration worktree và được báo là chưa chạy**.
+
+**Rejected alternatives.** `zonedSchedule` lặp hằng ngày với
+`AndroidScheduleMode.inexactAllowWhileIdle` — rẻ nhất, và không thoả được
+BR-184 lẫn BR-186 vì không có Dart nào chạy lúc fire.
+`android_alarm_manager_plus` — chạy Dart được, nhưng manifest của nó mang theo
+quyền exact alarm, đúng thứ BR-190 cấm. Tự viết method channel và
+`NotificationManager` bằng Kotlin — thêm một bề mặt native phải tự bảo trì cho
+đúng cái mà hai plugin đã làm, và bề mặt đó là thứ ít kiểm chứng được nhất ở
+đây. Đặt lịch dựa trên "workload dự phóng tại thời điểm fire" tính sẵn lúc đặt
+lịch — đúng trong đa số trường hợp vì workload chỉ đổi khi app chạy, nhưng nó
+đổi *đảm bảo* của BR-184 thành một lập luận, và lập luận đó vỡ ngay lần đầu app
+bị kill giữa lúc ghi.

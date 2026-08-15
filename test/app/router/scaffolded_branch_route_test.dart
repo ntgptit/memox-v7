@@ -32,7 +32,7 @@ import '../../features/settings/domain/support/fake_app_settings_repository.dart
 ///
 /// What AD-19 promises and these tests hold it to: Progress and Settings are
 ///
-/// **Settings stopped being presentation-only at M99.23** (UC-12): it reads and
+/// **Settings stopped being presentation-only at M99.28** (UC-16): it reads and
 /// Settings is still presentation-only. Progress no longer is, but it is still
 /// That is the point of keeping these tests rather than rewriting them: the
 /// alone, and the Settings half of it has been narrowed to what still holds and

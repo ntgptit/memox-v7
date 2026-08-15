@@ -81,4 +81,13 @@ abstract final class RoutePaths {
   /// The settings branch. Same contract as [progress]: a real, deep-linkable
   /// branch whose screen is a placeholder until app settings exist (AD-19).
   static const String settings = '/settings';
+
+  /// The daily-reminder screen, **relative** to [settings] so the full location
+  /// is `/settings/reminders` and it nests inside the Settings branch — the
+  /// bottom bar stays and Back returns to the branch root (UC-17, M6 R1).
+  ///
+  /// The screen belongs to the reminder feature, not to Settings: the real
+  /// Settings screen does not exist yet, and a section embedded in the
+  /// placeholder would make one feature import another's presentation layer.
+  static const String reminderSettingsRelative = 'reminders';
 }

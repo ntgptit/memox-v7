@@ -91,7 +91,7 @@ class StudyOptionsScreen extends ConsumerWidget {
             .submit(rawCardLimit: rawCardLimit, newCardOrder: newCardOrder),
       );
 
-  /// Clears the root's override (BR-184). The screen stays open on the app
+  /// Clears the root's override (BR-212). The screen stays open on the app
   /// defaults it has just adopted, which is the confirmation.
   void _useAppDefaults(WidgetRef ref) => unawaited(
     ref.read(studyOptionsClearControllerProvider(deckId).notifier).submit(),

@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/navigation/route_names.dart';
 import '../../features/card/presentation/providers/card_use_case_provider.dart';
 import '../../features/card/presentation/screens/card_editor_screen.dart';
 import '../../features/card/presentation/screens/card_import_screen.dart';
@@ -10,12 +11,12 @@ import '../../features/deck/presentation/screens/deck_list_screen.dart';
 import '../../features/deck/presentation/screens/starter_library_screen.dart';
 import '../../features/progress/presentation/screens/progress_deck_screen.dart';
 import '../../features/progress/presentation/screens/progress_screen.dart';
+import '../../features/reminder/presentation/screens/reminder_settings_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/study/presentation/screens/study_entry_screen.dart';
 import '../../features/study/presentation/screens/study_home_screen.dart';
 import '../fallback/route_not_found_screen.dart';
 import '../shell/app_navigation_shell.dart';
-import '../../core/navigation/route_names.dart';
 import 'route_paths.dart';
 
 /// Composition of the route table, and nothing else.
@@ -46,7 +47,7 @@ final GoRouter appRouter = createAppRouter();
 /// separate `Navigator` per branch, so each tab keeps its own stack and its own
 /// scroll position while another is on screen. A plain set of top-level
 /// routes would rebuild the destination from scratch on every tab switch, which
-/// before the content is. Settings was one until M99.23, and swapping its
+/// before the content is. Settings was one until M99.28, and swapping its
 /// branch ahead of its feature (AD-19): it holds a single presentation-only
 /// deep-link contract and the tab order before the content existed; Progress has
 /// is the "why did my place in the list disappear" bug. Progress and Settings
@@ -248,7 +249,7 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
               ),
             ],
           ),
-          // Settings left that state at M99.23 (UC-12). The path, the name and
+          // Settings left that state at M99.28 (UC-16). The path, the name and
           // The one branch still scaffolded ahead of its feature (AD-19). Its
           // must read no repository and write nothing.
           // of it, which is what AD-19 was betting on.
@@ -260,6 +261,17 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
                 path: RoutePaths.settings,
                 name: RouteNames.settings,
                 builder: (context, state) => const SettingsScreen(),
+                routes: <RouteBase>[
+                  // The daily reminder, nested so its URL is
+                  // `/settings/reminders` and it stays inside the Settings
+                  // branch. The reminder feature owns the screen and the
+                  // settings feature never imports it (AD-13, M6 R1).
+                  GoRoute(
+                    path: RoutePaths.reminderSettingsRelative,
+                    name: RouteNames.reminderSettings,
+                    builder: (context, state) => const ReminderSettingsScreen(),
+                  ),
+                ],
               ),
             ],
           ),

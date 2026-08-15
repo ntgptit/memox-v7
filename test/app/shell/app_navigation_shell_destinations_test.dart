@@ -156,7 +156,7 @@ void main() {
     testWidgets('the settings screen scrolls its last row clear of the bar', (
       tester,
     ) async {
-      // **The bottom-nav clearance of the M99.23 wireframe (W5), measured
+      // **The bottom-nav clearance of the M99.28 wireframe (W5), measured
       // against the real bar.** The feature's own geometry suite cannot make
       // this claim: it mounts the screen without the shell, so it can prove the
       // last row is reachable and nothing about what it is reachable *under*.

@@ -33,7 +33,7 @@ mixin _StudyOptionsOperations {
           override.newCardOrder ??
           NewCardOrder.fromDbValue(settings.newCardOrder),
       // **Read from the parsed override, not from `root?.studyConfig != null`**
-      // (BR-184). A column holding malformed JSON parses to "no override" and
+      // (BR-212). A column holding malformed JSON parses to "no override" and
       // the values above then come from the app defaults; reporting an override
       // anyway would offer a `Use app defaults` that changes nothing visible.
       isRootOverride: override != kNoStudyOptionsOverride,
@@ -41,7 +41,7 @@ mixin _StudyOptionsOperations {
   }
 
   /// Drops the root's override so the tree follows the app-wide defaults again
-  /// (BR-184).
+  /// (BR-212).
   ///
   /// **[deckId] may be any deck in the tree; the write lands on its root** —
   /// the same resolution `saveStudyOptions` does, and for the same reason: a

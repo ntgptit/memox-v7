@@ -134,7 +134,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Study Home, not a deck's entry screen. The branch pointed at a fixture
-      // deck id until UC-12, so this used to assert the screen of one hard-coded
+      // deck id until UC-14, so this used to assert the screen of one hard-coded
       // deck — which is exactly the production dependency that had to go.
       expect(find.byType(StudyHomeScreen), findsOneWidget);
       expect(find.byType(StudyEntryScreen), findsNothing);

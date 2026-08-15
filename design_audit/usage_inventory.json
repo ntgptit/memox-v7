@@ -1,13 +1,13 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 499,
-  "totalSites": 445,
+  "scannedFiles": 546,
+  "totalSites": 450,
   "byElementKind": {
-    "other": 303,
+    "other": 304,
     "background": 15,
     "shadow": 1,
     "border": 14,
-    "text": 88,
+    "text": 92,
     "icon": 24
   },
   "bySourceKind": {
@@ -16,7 +16,7 @@
     "Colors-material": 5,
     "hardcoded-literal": 97,
     "opacity-modified-token": 11,
-    "theme-token": 185
+    "theme-token": 190
   },
   "sites": [
     {
@@ -4214,6 +4214,61 @@
       "file": "lib/features/progress/presentation/widgets/sections/progress_summary_widget.dart",
       "line": 114,
       "widget_context": "_NoActivityNote",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/reminder/presentation/widgets/sections/reminder_banner_section_widget.dart",
+      "line": 42,
+      "widget_context": "ReminderBannerSectionWidget",
+      "element_kind": "other",
+      "source_kind": "theme-token",
+      "expression": "context.colors.errorContainer",
+      "token": "colorScheme.errorContainer",
+      "resolved_value_light": "#F8DDE1",
+      "resolved_value_dark": "#5E2831"
+    },
+    {
+      "file": "lib/features/reminder/presentation/widgets/sections/reminder_banner_section_widget.dart",
+      "line": 49,
+      "widget_context": "ReminderBannerSectionWidget",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onErrorContainer",
+      "token": "colorScheme.onErrorContainer",
+      "resolved_value_light": "#641421",
+      "resolved_value_dark": "#F5D3D8"
+    },
+    {
+      "file": "lib/features/reminder/presentation/widgets/sections/reminder_banner_section_widget.dart",
+      "line": 56,
+      "widget_context": "ReminderBannerSectionWidget",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onErrorContainer",
+      "token": "colorScheme.onErrorContainer",
+      "resolved_value_light": "#641421",
+      "resolved_value_dark": "#F5D3D8"
+    },
+    {
+      "file": "lib/features/reminder/presentation/widgets/sections/reminder_settings_section_widget.dart",
+      "line": 114,
+      "widget_context": "ReminderSettingsSectionWidget",
+      "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onSurfaceVariant",
+      "token": "colorScheme.onSurfaceVariant",
+      "resolved_value_light": "#565C72",
+      "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/reminder/presentation/widgets/sections/reminder_settings_section_widget.dart",
+      "line": 121,
+      "widget_context": "ReminderSettingsSectionWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
       "expression": "context.colors.onSurfaceVariant",

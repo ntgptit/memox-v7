@@ -78,8 +78,9 @@ void main() {
     // no device ever takes (see `migration_test.dart`). A v4 database therefore
     // cannot be stopped at v5: it runs every step. Naming 5 here worked only for
     // as long as every later step happened to be data-only, and v8's three
-    // columns are what ended that, with v9's two right behind them. What these tests assert is unchanged — that a
-    // v4 row survives the rebuild — and the path it survives is the whole one a
+    // columns are what ended that, with v9's two and v10's three right
+    // behind them. What these tests assert is unchanged — that a v4 row
+    // survives the rebuild — and the path it survives is the whole one a
     // real device takes.
     await verifier.migrateAndValidate(db, db.schemaVersion);
     return db;

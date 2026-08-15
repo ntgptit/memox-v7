@@ -1,6 +1,6 @@
 import '../repositories/study_repository.dart';
 
-/// Puts a root deck back on the app-wide study defaults (BR-184).
+/// Puts a root deck back on the app-wide study defaults (BR-212).
 ///
 /// **The counterpart of `SaveStudyOptionsUseCase`, not a variant of it.** A save
 /// writes two values; this removes the whole override, so the deck starts

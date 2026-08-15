@@ -30,7 +30,7 @@
   },
   "progressStreakSectionLabel": "Current streak",
   "@progressStreakSectionLabel": {
-    "description": "Heading of the hero section (W2). Deliberately 'current', not 'longest': longest streak has no business rule behind it and is out of scope for v1 (BR-191)."
+    "description": "Heading of the hero section (W2). Deliberately 'current', not 'longest': longest streak has no business rule behind it and is out of scope for v1 (BR-227)."
   },
   "progressStreakDaysLabel": "{count, plural, =0{0 days} =1{1 day} other{{count} days}}",
   "@progressStreakDaysLabel": {
@@ -48,7 +48,7 @@
         "type": "int"
       }
     },
-    "description": "The line under the hero headline when the streak includes today. 'Cards' is the unit on purpose: the count is distinct cards touched today, not answers given (BR-192)."
+    "description": "The line under the hero headline when the streak includes today. 'Cards' is the unit on purpose: the count is distinct cards touched today, not answers given (BR-228)."
   },
   "progressStreakHeldLine": "No cards today — your streak is held from yesterday",
   "@progressStreakHeldLine": {
@@ -90,7 +90,7 @@
         "type": "int"
       }
     },
-    "description": "The Today total. The unit is mandatory: the count is distinct cards, and a user shown a bare number would reasonably read it as turns taken (BR-192)."
+    "description": "The Today total. The unit is mandatory: the count is distinct cards, and a user shown a bare number would reasonably read it as turns taken (BR-228)."
   },
   "progressTodayLearningLabel": "Learning",
   "@progressTodayLearningLabel": {
@@ -155,7 +155,7 @@
   },
   "progressErrorRetryAction": "Try again",
   "@progressErrorRetryAction": {
-    "description": "Retry on the error face. Re-opens the read; it never writes (BR-190)."
+    "description": "Retry on the error face. Re-opens the read; it never writes (BR-226)."
   },
   "settingsTitle": "Settings",
   "@settingsTitle": {
@@ -167,23 +167,23 @@
   },
   "settingsLoadErrorTitle": "Couldn't load your settings",
   "@settingsLoadErrorTitle": {
-    "description": "Whole-screen error when the settings stream fails (UC-12 E3). No control renders a value in this state — an invented default would be indistinguishable from a stored one."
+    "description": "Whole-screen error when the settings stream fails (UC-17 E3). No control renders a value in this state — an invented default would be indistinguishable from a stored one."
   },
   "settingsSaveErrorTitle": "Couldn't save",
   "@settingsSaveErrorTitle": {
-    "description": "Title of the in-section error band when a settings write fails (UC-12 E2, BR-188). The body comes from the failure type through mxWriteFailure."
+    "description": "Title of the in-section error band when a settings write fails (UC-17 E2, BR-224). The body comes from the failure type through mxWriteFailure."
   },
   "settingsStudyDefaultsSection": "Study defaults",
   "@settingsStudyDefaultsSection": {
-    "description": "Heading of the group holding the app-wide card limit and new-card order (BR-183). Plural 'defaults' on purpose: these are what a deck uses when it has chosen nothing of its own."
+    "description": "Heading of the group holding the app-wide card limit and new-card order (BR-219). Plural 'defaults' on purpose: these are what a deck uses when it has chosen nothing of its own."
   },
   "settingsStudyDefaultsNote": "Applies to sessions you start after saving. A session already running keeps its own limit.",
   "@settingsStudyDefaultsNote": {
-    "description": "States BR-185 on the global screen. Longer than studyOptionsNextSessionNote, which sits on a deck's own options screen: there the user is one tap from the session, here they may have one running in another tab."
+    "description": "States BR-221 on the global screen. Longer than studyOptionsNextSessionNote, which sits on a deck's own options screen: there the user is one tap from the session, here they may have one running in another tab."
   },
   "settingsAppearanceSection": "Appearance",
   "@settingsAppearanceSection": {
-    "description": "Heading of the theme group (BR-186)."
+    "description": "Heading of the theme group (BR-222)."
   },
   "settingsThemeSystem": "System",
   "@settingsThemeSystem": {
@@ -199,7 +199,7 @@
   },
   "settingsLanguageSection": "Language",
   "@settingsLanguageSection": {
-    "description": "Heading of the language group (BR-187)."
+    "description": "Heading of the language group (BR-223)."
   },
   "settingsLanguageSystem": "System",
   "@settingsLanguageSystem": {
@@ -215,15 +215,15 @@
   },
   "settingsResetAction": "Reset to defaults",
   "@settingsResetAction": {
-    "description": "Puts every app option back to its default (BR-189). Deliberately worded away from 'Reset learning progress' (BR-42), which is a different action with different consequences."
+    "description": "Puts every app option back to its default (BR-225). Deliberately worded away from 'Reset learning progress' (BR-42), which is a different action with different consequences."
   },
   "settingsResetDescription": "Puts app options back to their defaults. Your decks and learning progress are not affected.",
   "@settingsResetDescription": {
-    "description": "Shown under the reset action at rest, not only inside the confirmation. Two actions in this app start with 'Reset', and the scope is the only thing that tells them apart (BR-189)."
+    "description": "Shown under the reset action at rest, not only inside the confirmation. Two actions in this app start with 'Reset', and the scope is the only thing that tells them apart (BR-225)."
   },
   "settingsResetConfirmTitle": "Reset app options?",
   "@settingsResetConfirmTitle": {
-    "description": "Title of the reset confirmation sheet (UC-12 A3)."
+    "description": "Title of the reset confirmation sheet (UC-17 A3)."
   },
   "settingsResetConfirmAction": "Reset",
   "@settingsResetConfirmAction": {
@@ -231,15 +231,15 @@
   },
   "settingsSavingLabel": "Saving",
   "@settingsSavingLabel": {
-    "description": "Announced while a settings group is being written (BR-188, wireframe W6). A group that only greys out reports its state by colour alone."
+    "description": "Announced while a settings group is being written (BR-224, wireframe W6). A group that only greys out reports its state by colour alone."
   },
   "studyOptionsUseAppDefaults": "Use app defaults",
   "@studyOptionsUseAppDefaults": {
-    "description": "Clears this root deck's study-options override so it follows the app-wide defaults again (BR-184). Only shown when an override exists — there is nothing to clear otherwise."
+    "description": "Clears this root deck's study-options override so it follows the app-wide defaults again (BR-220). Only shown when an override exists — there is nothing to clear otherwise."
   },
   "studyOptionsOverrideNote": "This deck uses its own values instead of the app defaults.",
   "@studyOptionsOverrideNote": {
-    "description": "Shown on a deck whose root carries an override (BR-184), so the user knows why changing the app defaults did not change this deck."
+    "description": "Shown on a deck whose root carries an override (BR-220), so the user knows why changing the app defaults did not change this deck."
   },
   "decksTitle": "Library",
   "@decksTitle": {
@@ -2888,11 +2888,11 @@
   },
   "progressRange7Label": "7 days",
   "@progressRange7Label": {
-    "description": "Range selector pill for the 7-day window (BR-184). Short because two pills share a row on a 320dp screen; progressRange7SemanticLabel carries the full phrase for a screen reader."
+    "description": "Range selector pill for the 7-day window (BR-220). Short because two pills share a row on a 320dp screen; progressRange7SemanticLabel carries the full phrase for a screen reader."
   },
   "progressRange30Label": "30 days",
   "@progressRange30Label": {
-    "description": "Range selector pill for the 30-day window (BR-184)."
+    "description": "Range selector pill for the 30-day window (BR-220)."
   },
   "progressRange7SemanticLabel": "Last 7 days",
   "@progressRange7SemanticLabel": {
@@ -2916,19 +2916,19 @@
   },
   "progressActiveCardsMetricWord": "cards studied",
   "@progressActiveCardsMetricWord": {
-    "description": "Word beside the distinct-card count (BR-183). \"Studied\" rather than \"reviewed\": the count includes learning turns, which are not reviews."
+    "description": "Word beside the distinct-card count (BR-219). \"Studied\" rather than \"reviewed\": the count includes learning turns, which are not reviews."
   },
   "progressActiveDaysMetricWord": "active days",
   "@progressActiveDaysMetricWord": {
-    "description": "Word beside the distinct local-day count (BR-183). Days on which at least one card was answered."
+    "description": "Word beside the distinct local-day count (BR-219). Days on which at least one card was answered."
   },
   "progressLearningMetricWord": "learning",
   "@progressLearningMetricWord": {
-    "description": "Word beside the learning half of the card-day partition (BR-186). Short on purpose: the word has to survive a 320dp cell at text scale 2.0, where a longer one is clipped rather than wrapped. The unit it counts is stated once by progressCardDayUnitNote."
+    "description": "Word beside the learning half of the card-day partition (BR-222). Short on purpose: the word has to survive a 320dp cell at text scale 2.0, where a longer one is clipped rather than wrapped. The unit it counts is stated once by progressCardDayUnitNote."
   },
   "progressReviewingMetricWord": "reviewing",
   "@progressReviewingMetricWord": {
-    "description": "Word beside the reviewing half of the card-day partition (BR-186). Short for the same reason as progressLearningMetricWord."
+    "description": "Word beside the reviewing half of the card-day partition (BR-222). Short for the same reason as progressLearningMetricWord."
   },
   "progressCardDayUnitNote": "Learning and reviewing count card-days — one card on one day.",
   "@progressCardDayUnitNote": {
@@ -2959,7 +2959,7 @@
         "type": "int"
       }
     },
-    "description": "Screen-reader sentence for the learning half of the partition (BR-186). Says card-days, because the figure counts a card once per day and not once per answer."
+    "description": "Screen-reader sentence for the learning half of the partition (BR-222). Says card-days, because the figure counts a card once per day and not once per answer."
   },
   "progressReviewingSemanticLabel": "{count, plural, =0{No reviewing card-days} =1{1 reviewing card-day} other{{count} reviewing card-days}}",
   "@progressReviewingSemanticLabel": {
@@ -2968,7 +2968,7 @@
         "type": "int"
       }
     },
-    "description": "Screen-reader sentence for the reviewing half of the partition (BR-186)."
+    "description": "Screen-reader sentence for the reviewing half of the partition (BR-222)."
   },
   "progressDeckRowSemanticLabel": "{name}, in {path}, {range}",
   "@progressDeckRowSemanticLabel": {
@@ -3019,7 +3019,7 @@
   },
   "progressNoActivityTitle": "Nothing studied in this window",
   "@progressNoActivityTitle": {
-    "description": "Decks exist but none was answered inside the selected window (BR-184). Deliberately not an error and not a scold - zero is a normal reading."
+    "description": "Decks exist but none was answered inside the selected window (BR-220). Deliberately not an error and not a scold - zero is a normal reading."
   },
   "progressNoActivityMessage": "Switch to a longer window, or study a deck to start filling this in.",
   "@progressNoActivityMessage": {
@@ -3196,5 +3196,116 @@
   "studyHomeNewWord": "new",
   "@studyHomeNewWord": {
     "description": "The word half of a workload metric, rendered beside the numeral so the two can carry different ink — the numeral stays neutral and only the word takes the metric tint, which is the grammar the deck summary and Progress already use. What a screen reader hears is neither half but studyHomeWorkloadSemanticLabel, nested inside the row sentence."
+  },
+  "reminderTitle": "Daily reminder",
+  "@reminderTitle": {
+    "description": "Title of the daily-reminder screen and label of the row that opens it from Settings. The same words in both places on purpose: a row and the screen it opens have to read as one place (UC-17, M6 R1)."
+  },
+  "reminderToggleLabel": "Daily reminder",
+  "@reminderToggleLabel": {
+    "description": "Label of the on/off row. Repeats the screen title because the row is the screen's primary control, and a second noun for the same thing reads as a second setting (M6 W3)."
+  },
+  "reminderStatusOff": "Off",
+  "@reminderStatusOff": {
+    "description": "Accessibility value of the toggle when the reminder is off, so the state is not carried by colour alone (M6 R7, A3). The Settings row deliberately shows no value — see M6 W1."
+  },
+  "reminderStatusOn": "On",
+  "@reminderStatusOn": {
+    "description": "Accessibility value of the toggle when the reminder is on (M6 R7, A3). The visible trailing value in Settings is the time itself, which says more."
+  },
+  "reminderTimeLabel": "Reminder time",
+  "@reminderTimeLabel": {
+    "description": "Label of the row that opens the time picker, and the picker dialog's own heading (M6 W4, R6)."
+  },
+  "reminderDueOnlyNote": "You'll only be reminded when cards are due.",
+  "@reminderDueOnlyNote": {
+    "description": "First supporting line under the card. States BR-220 in the user's terms: no reminder on a day with nothing owed, and new cards never trigger one. Deliberately not alarmist - it is a promise about silence, not a warning."
+  },
+  "reminderPrivacyNote": "The reminder can show a deck name and how many cards are due, including on your lock screen.",
+  "@reminderPrivacyNote": {
+    "description": "Second supporting line. The lock-screen disclosure BR-222 requires, said before the user opts in rather than discovered afterwards. It names exactly what can appear - a deck name and a count - so the absence of card content is stated by omission of any wider claim."
+  },
+  "reminderPermissionDeniedTitle": "Notifications are turned off",
+  "@reminderPermissionDeniedTitle": {
+    "description": "Error banner title after the OS refused the notification permission (UC-17 E1, BR-228). Names the system state, not a failure of the user."
+  },
+  "reminderPermissionDeniedMessage": "Turn them on for MemoX in your device settings, then try again.",
+  "@reminderPermissionDeniedMessage": {
+    "description": "Recovery for a refused permission. Android grants one prompt per app, so the route back is system settings; the app must not ask again on its own (BR-228)."
+  },
+  "reminderUnavailableTitle": "Reminders aren't available on this device",
+  "@reminderUnavailableTitle": {
+    "description": "Banner title when the platform has no reminder delivery in this build (UC-17 E2, BR-229). Carries no action, because there is no recovery and a button that cannot work is worse than none."
+  },
+  "reminderUnavailableMessage": "Nothing has been turned on, and nothing is scheduled.",
+  "@reminderUnavailableMessage": {
+    "description": "Body of the unavailable banner. Says what the user most needs to know - that no silent half-enabled state was left behind (BR-229)."
+  },
+  "reminderScheduleErrorTitle": "The reminder couldn't be scheduled",
+  "@reminderScheduleErrorTitle": {
+    "description": "Banner title when the OS accepted the permission but refused the background work (UC-17 E3). Names no technical detail, because Failure.message is never rendered."
+  },
+  "reminderScheduleErrorMessage": "Nothing was turned on. Try again in a moment.",
+  "@reminderScheduleErrorMessage": {
+    "description": "Body of the schedule-failure banner. Confirms the setting stayed off, which is what BR-228 guarantees and what the user cannot otherwise tell."
+  },
+  "reminderSaveErrorTitle": "Your change wasn't saved",
+  "@reminderSaveErrorTitle": {
+    "description": "Banner title when the settings write failed (UC-17 E4). Distinct from a schedule failure because the retry re-runs a different step."
+  },
+  "reminderSaveErrorMessage": "The reminder is still set the way it was.",
+  "@reminderSaveErrorMessage": {
+    "description": "Body of the save-failure banner. Tells the user which state they are in, since the screen has just reverted under them."
+  },
+  "reminderRetryAction": "Try again",
+  "@reminderRetryAction": {
+    "description": "Recovery action in the reminder error banners. Re-runs the step that failed and changes nothing else."
+  },
+  "reminderNotificationTitle": "Time to study",
+  "@reminderNotificationTitle": {
+    "description": "Notification title (M6 N1). Carries no count and no deck name - those are in the body, so a truncated title still says nothing private."
+  },
+  "reminderNotificationBodyOneDeck": "{count, plural, =1{1 card is due in {deck}} other{{count} cards are due in {deck}}}",
+  "@reminderNotificationBodyOneDeck": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "deck": {
+        "type": "String"
+      }
+    },
+    "description": "Notification body when exactly one deck owes something (M6 N2, BR-222). The deck name and the count are the only data allowed here."
+  },
+  "reminderNotificationBodyManyDecks": "{others, plural, =1{{count} cards are due in {deck} and 1 more deck} other{{count} cards are due in {deck} and {others} more decks}}",
+  "@reminderNotificationBodyManyDecks": {
+    "placeholders": {
+      "others": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      },
+      "deck": {
+        "type": "String"
+      }
+    },
+    "description": "Notification body when more than one deck owes something (M6 N3, BR-222). The named deck is the most urgent one by BR-223's ordering; the rest are a count, never a list. The plural is on the number of other decks - the card count is always above one here, because two decks owe at least one card each."
+  },
+  "reminderCancelErrorTitle": "The reminder is off, but a pending alert may remain",
+  "@reminderCancelErrorTitle": {
+    "description": "Banner title when the setting was turned off but the pending background run could not be cancelled (BR-226). Deliberately not the schedule-failure copy: the user just turned something OFF, and being told nothing was turned ON describes the opposite of what happened."
+  },
+  "reminderCancelErrorMessage": "Daily reminders are off. If one still arrives today, opening the app clears it.",
+  "@reminderCancelErrorMessage": {
+    "description": "Body of the cancel-failure banner. States the outcome the user cares about — the setting is off — and what the residue is, without promising more than BR-220 gives: a stale run re-reads the setting at fire time and posts nothing."
+  },
+  "reminderChannelName": "Daily reminder",
+  "@reminderChannelName": {
+    "description": "Name of the Android notification channel, shown to the user in system settings under the app. User-visible, so it is localized rather than hardcoded at the call site."
+  },
+  "reminderChannelDescription": "A once-a-day summary of the cards you owe.",
+  "@reminderChannelDescription": {
+    "description": "Description of the Android notification channel, shown under its name in system settings. Says what the channel carries and nothing about any particular deck or card (BR-222)."
   }
 }

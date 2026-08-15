@@ -60,6 +60,10 @@ abstract final class RouteNames {
   /// placeholder until app settings exist (AD-19).
   static const String settings = 'settings';
 
+  /// The daily-reminder screen. A child of [settings], so it stays in the
+  /// Settings branch and Back returns to it (UC-17).
+  static const String reminderSettings = 'reminderSettings';
+
   /// The starter template catalog. A child of [decks], so it stays inside the
   /// Library branch and Back returns to the (possibly empty) list that offered
   /// it (UC-01).

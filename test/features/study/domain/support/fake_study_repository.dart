@@ -104,7 +104,7 @@ base class FakeStudyRepository
       );
 
   /// Whether [effectiveOptions] reports the values as a root override
-  /// (BR-184). Drives whether `Use app defaults` is offered at all.
+  /// (BR-212). Drives whether `Use app defaults` is offered at all.
   bool isRootOverride = false;
 
   @override
@@ -239,7 +239,7 @@ base class FakeStudyRepository
     order: newCardOrder,
   ));
 
-  /// Every deck whose override was cleared (BR-184), in call order.
+  /// Every deck whose override was cleared (BR-212), in call order.
   final List<String> clearedOverrides = <String>[];
 
   @override

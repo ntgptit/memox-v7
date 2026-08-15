@@ -254,4 +254,54 @@ extension _AppDatabaseMigrations on AppDatabase {
       '  )',
     );
   }
+
+  /// The v9 → v10 upgrade: the three reminder columns on `app_settings`
+  /// (BR-218, BR-219, BR-221).
+  ///
+  /// **One step, not the two the source branch had.** That branch added the
+  /// first two columns at its own v8 and the third at its v9, because its
+  /// review found the delivery timestamp a round later. Both of those version
+  /// numbers are taken here by other features, and replaying the split would
+  /// also declare an intermediate schema — reminder configured, delivery never
+  /// recorded — that no database on this line has ever held. A migration step
+  /// describes a state some install is actually in; inventing one gives the
+  /// verifier a version to check that nothing can produce.
+  ///
+  /// **The defaults are the specified defaults, not filler.** `0` is BR-218's
+  /// "off until the user asks" and `1200` is BR-219's 20:00 local, so an
+  /// upgraded install lands in exactly the state a fresh install starts in:
+  /// the upgrade asks for no permission and schedules nothing.
+  ///
+  /// **The delivery column is nullable and undefaulted**, which is the truth
+  /// for every database that predates it — nothing has been delivered yet. A
+  /// default of `now` would make the first launch after the upgrade treat
+  /// today as already served and stay silent for a day.
+  ///
+  /// The `CHECK`s ride along on the column definitions. SQLite accepts a
+  /// column constraint in `ADD COLUMN` as long as the default is constant,
+  /// and both are; enforcing the ranges in Dart only would leave the database
+  /// able to hold a minute-of-day of 5000.
+  ///
+  /// Raw SQL with literal names, for the reason the whole file states: the
+  /// generated symbols describe the *latest* schema, so naming them here
+  /// breaks the day a later version renames one.
+  Future<void> _upgradeToV10() async {
+    const List<String> statements = <String>[
+      'ALTER TABLE app_settings ADD COLUMN reminder_enabled INTEGER NOT NULL '
+          'DEFAULT 0 CHECK (reminder_enabled IN (0, 1))',
+      'ALTER TABLE app_settings ADD COLUMN reminder_minute_of_day INTEGER '
+          'NOT NULL DEFAULT 1200 '
+          'CHECK (reminder_minute_of_day BETWEEN 0 AND 1439)',
+      // `INTEGER`, not `DATETIME`: drift stores a DATETIME as unix seconds, so
+      // that is the type `createAll()` gives a fresh install — and a migration
+      // declaring `DATETIME` produces a column the schema verifier reports as
+      // a different type from the one the same schema builds from scratch.
+      'ALTER TABLE app_settings ADD COLUMN reminder_last_delivered_at '
+          'INTEGER NULL',
+    ];
+
+    for (final statement in statements) {
+      await customStatement(statement);
+    }
+  }
 }

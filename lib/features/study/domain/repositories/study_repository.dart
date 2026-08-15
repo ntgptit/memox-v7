@@ -86,7 +86,7 @@ abstract interface class StudyRepository {
   });
 
   /// Drops the root deck's override so the tree follows the app-wide defaults
-  /// again (BR-184).
+  /// again (BR-212).
   ///
   /// **[deckId] may be any deck in the tree; the write lands on its root**, the
   /// same resolution [saveStudyOptions] does.

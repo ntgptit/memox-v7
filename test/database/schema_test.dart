@@ -172,6 +172,11 @@ void main() {
         // about which came first.
         'theme_mode',
         'language',
+        // Added at v10 (BR-218, BR-219, BR-221), after the two above and in
+        // the order `_upgradeToV10` appends them.
+        'reminder_enabled',
+        'reminder_minute_of_day',
+        'reminder_last_delivered_at',
         'updated_at',
       ],
     };

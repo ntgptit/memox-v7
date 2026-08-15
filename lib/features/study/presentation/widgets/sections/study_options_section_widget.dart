@@ -40,7 +40,7 @@ class StudyOptionsSectionWidget extends StatefulWidget {
   final StudyCardLimitProblem? cardLimitProblem;
 
   /// Whether these values come from this root's own override rather than from
-  /// the app defaults (BR-184).
+  /// the app defaults (BR-212).
   ///
   /// It decides whether the deck says so and whether `Use app defaults` is
   /// offered at all — an action that would clear nothing is an action that
@@ -110,7 +110,7 @@ class _StudyOptionsSectionWidgetState extends State<StudyOptionsSectionWidget> {
           isLoading: widget.isSubmitting,
           onPressed: () => widget.onSave(_cardLimit.text, _order),
         ),
-        // BR-184's affordance, and it lives here rather than on the global
+        // BR-212's affordance, and it lives here rather than on the global
         // Settings screen: it acts on **one** deck, and a global page offering
         // it would need a deck picker — a second screen inside the first.
         //
