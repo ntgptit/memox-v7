@@ -228,7 +228,7 @@ CREATE TABLE study_queue_items (
 CREATE INDEX idx_study_queue_serving
     ON study_queue_items (session_id, mode, round, status, available_at, position);
 
--- `app_settings` moved to `tables/settings.drift` at v8, when it gained theme
+-- `app_settings` moved to `tables/settings.drift` at v9, when it gained theme
 -- and language and stopped being a study table. Study still reads it through
 -- `queries/settings.drift`, which is why this note stays: the table is not
 -- gone, and grepping this file for it should say where it went.

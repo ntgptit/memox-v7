@@ -17,7 +17,7 @@ void main() {
     test('an unreadable stored value falls back to system', () {
       // Tolerant on purpose, like `NewCardOrder`: an unreadable appearance
       // preference is not a reason to refuse to open the app, and the fallback
-      // is what every build before v8 did.
+      // is what every build before v9 did.
       expect(AppThemeMode.fromDbValue('sepia'), AppThemeMode.system);
       expect(AppThemeMode.fromDbValue(''), AppThemeMode.system);
     });

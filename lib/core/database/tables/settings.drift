@@ -1,8 +1,8 @@
 -- Application-wide options, for the one local profile (BR-210).
 --
--- **Its own file since v8, and it was never a study table.** `app_settings`
+-- **Its own file since v9, and it was never a study table.** `app_settings`
 -- arrived inside `tables/study.drift` because study defaults were the only
--- thing in it. v8 adds theme and language, and a table holding the app's
+-- thing in it. v9 adds theme and language, and a table holding the app's
 -- appearance inside the study feature's schema file is a place nobody would
 -- look for it.
 
