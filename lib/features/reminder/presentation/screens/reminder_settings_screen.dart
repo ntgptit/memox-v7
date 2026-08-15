@@ -63,7 +63,7 @@ class ReminderSettingsScreen extends ConsumerWidget {
         error: (_, _) => MxErrorState(
           title: context.l10n.reminderSaveErrorTitle,
           message: context.l10n.reminderSaveErrorMessage,
-          retryLabel: context.l10n.reminderRetryAction,
+          retryLabel: context.l10n.retryAction,
           onRetry: () => ref.invalidate(reminderOverviewProvider),
         ),
         data: (overview) => ReminderSettingsSectionWidget(

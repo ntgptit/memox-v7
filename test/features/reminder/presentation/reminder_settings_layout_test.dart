@@ -269,6 +269,58 @@ void main() {
       }
     });
 
+    testWidgets('the banner speaks the same grammar as the Settings band', (
+      tester,
+    ) async {
+      // **Every property here was claimed unified once and was not.** Three of
+      // four replacements silently matched nothing, and no test noticed —
+      // `reminder_settings_layout_test` pinned the card edges, the overflow,
+      // the ellipsis and the retry ink, and none of those move when the
+      // message style, the gap or the alignment does. So they are pinned here,
+      // each against the value the sibling band uses, not against a literal.
+      platform = FakeReminderPlatform(permission: ReminderPermission.denied);
+      await pumpScreen(tester);
+      await tester.tap(find.byType(Switch));
+      await tester.pumpAndSettle();
+
+      final BuildContext bannerContext = tester.element(
+        find.byType(ReminderBannerSectionWidget),
+      );
+
+      // `.at(1)`, not `.last`: the band holds title, message and the retry
+      // button's own label, and `.last` picked the button — `labelLarge` at 14,
+      // which made this test agree with itself whatever the message did.
+      final Text message = tester.widget<Text>(
+        find
+            .descendant(
+              of: find.byType(ReminderBannerSectionWidget),
+              matching: find.byType(Text),
+            )
+            .at(1),
+      );
+      expect(
+        message.style?.fontSize,
+        Theme.of(bannerContext).textTheme.bodySmall?.fontSize,
+      );
+
+      // Left, not right. Measured against the card rather than the screen: the
+      // band is inset, so a button "on the left of the screen" would pass on a
+      // band that had drifted right inside it.
+      final Rect banner = tester.getRect(find.byType(MxCard).last);
+      final Rect retry = tester.getRect(
+        find.descendant(
+          of: find.byType(ReminderBannerSectionWidget),
+          matching: find.byType(TextButton),
+        ),
+      );
+      expect(
+        retry.left - banner.left,
+        lessThan(banner.right - retry.right),
+        reason:
+            'Retry sits at the leading edge, as it does on the Settings band',
+      );
+    });
+
     testWidgets('the banner Retry reads its ink from the surface it sits on', (
       tester,
     ) async {

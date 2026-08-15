@@ -3257,10 +3257,6 @@
   "@reminderSaveErrorMessage": {
     "description": "Body of the save-failure banner. Tells the user which state they are in, since the screen has just reverted under them."
   },
-  "reminderRetryAction": "Try again",
-  "@reminderRetryAction": {
-    "description": "Recovery action in the reminder error banners. Re-runs the step that failed and changes nothing else."
-  },
   "reminderNotificationTitle": "Time to study",
   "@reminderNotificationTitle": {
     "description": "Notification title (M6 N1). Carries no count and no deck name - those are in the body, so a truncated title still says nothing private."

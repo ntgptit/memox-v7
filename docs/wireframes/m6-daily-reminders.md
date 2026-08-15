@@ -7,8 +7,8 @@
 | **Scope** | Màn nhắc học trong nhánh Settings: entry point, anatomy, mọi trạng thái, dialog chọn giờ, hợp đồng geometry, responsive/a11y, và hình dạng notification. Ngoài phạm vi: luật nghiệp vụ (BR-218…BR-229), luồng (UC-17), quyết định kiến trúc (AD-21), màn Settings đầy đủ (chưa có) |
 | **Source of truth for** | Anatomy màn nhắc học · copy các trạng thái nhắc học · hợp đồng geometry của màn nhắc học · responsive/a11y contract của màn nhắc học |
 | **Depends on** | `../use-cases.md` (UC-17), `../business-rules.md` (BR-218…BR-229), `../architecture.md` (AD-21) |
-| **Updated by task** | M99.29 (phase 6 — recursive UI/UX review, vòng 2) |
-| **Last updated** | 2026-08-14 |
+| **Updated by task** | M99.29 (phase 6 — recursive UI/UX review, vòng 2; vòng 5 — R9 và bản vẽ W5 theo quyết định thống nhất hai dải lỗi) |
+| **Last updated** | 2026-08-15 |
 
 Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham chiếu bằng ID theo
 `document-conventions.md` §5; chỗ nào wireframe và BR có vẻ mâu thuẫn thì BR
@@ -26,7 +26,7 @@ Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham c
 | R6 | Chọn giờ dùng **dialog** của nền tảng, mở từ hàng giờ | Một dialog chọn giờ là thứ người dùng Android đã biết, và giờ là giá trị duy nhất nó thu. Một màn riêng cho một giá trị là màn hình đi tìm nội dung để lấp | 2026-08-13 |
 | R7 | Toggle **không** dùng màu làm tín hiệu duy nhất: giá trị được nói bằng chữ ở hàng giờ và bằng `Semantics` value của chính toggle | Một switch xanh/xám là tín hiệu chỉ-màu. Hàng giờ hiện `8:00 PM` khi bật và bị vô hiệu khi tắt, nên trạng thái đọc được cả khi không phân biệt được màu | 2026-08-13 |
 | R8 | Notification là **một** dòng tiêu đề + một dòng thân, không có action button, không có big-text expand | Mọi hành động khả dĩ là "mở app học" — đúng cái chạm vào notification đã làm (BR-225). Một nút "Study now" trùng lặp với thân notification và mời gọi một luồng auto-start mà BR-225 cấm | 2026-08-13 |
-| R9 | Dải lỗi in-flow nói **cùng một ngữ pháp** với dải của Settings: icon `error_outline`, padding `md`, message `bodySmall`, khoảng `xs` trước nút, và `Try again` **căn trái** | Bản vẽ W5 ở trên trước đây vẽ nút bên phải, và nó là bản duy nhất trong repo quy định vị trí — dải của Settings không có wireframe nào đứng sau. Hai dải cách nhau một cú chạm mà đổi bên là hai câu trả lời cho một câu hỏi. Chọn theo dải đã có review và golden riêng, nên lần thống nhất này dời màn mới chứ không dời màn đã ổn định (quyết định chủ dự án) | 2026-08-15 |
+| R9 | Dải lỗi in-flow nói **cùng một ngữ pháp** với dải của Settings: icon `error_outline`, padding `md`, message `bodySmall`, khoảng `xs` trước nút, và nhãn `Retry` **căn trái** | Bản vẽ W5 ở trên trước đây vẽ nút bên phải, và nó là bản duy nhất trong repo quy định vị trí — dải của Settings không có wireframe nào đứng sau. Hai dải cách nhau một cú chạm mà đổi bên là hai câu trả lời cho một câu hỏi. Chọn theo dải đã có review và golden riêng, nên lần thống nhất này dời màn mới chứ không dời màn đã ổn định (quyết định chủ dự án) | 2026-08-15 |
 
 ## W-cấu trúc
 
@@ -58,7 +58,7 @@ Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham c
 │  │ ⚠ Notifications are turned off          │  │  ← W5 banner (chỉ khi lỗi)
 │  │   Turn them on for MemoX in your        │  │
 │  │   device settings, then try again.      │  │
-│  │   [Try again]                           │  │
+│  │   [Retry]                               │  │
 │  └─────────────────────────────────────────┘  │
 │                                               │
 │  You'll only be reminded when cards are due.  │  ← W6 supporting copy

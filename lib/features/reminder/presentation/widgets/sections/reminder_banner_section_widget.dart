@@ -72,6 +72,7 @@ class ReminderBannerSectionWidget extends StatelessWidget {
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   Text(
                     banner.title,
@@ -82,14 +83,14 @@ class ReminderBannerSectionWidget extends StatelessWidget {
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     banner.message,
-                    style: context.texts.bodyMedium?.copyWith(
+                    style: context.texts.bodySmall?.copyWith(
                       color: context.colors.onErrorContainer,
                     ),
                   ),
                   if (banner.isRetryable) ...<Widget>[
-                    const SizedBox(height: AppSpacing.sm),
+                    const SizedBox(height: AppSpacing.xs),
                     Align(
-                      alignment: AlignmentDirectional.centerEnd,
+                      alignment: AlignmentDirectional.centerStart,
                       // **`onErrorContainer`, because this button sits on
                       // `errorContainer`.** The default `primaryAccent` is right on
                       // a page and measures 3.72:1 here in dark — under the 4.5 its
@@ -97,7 +98,7 @@ class ReminderBannerSectionWidget extends StatelessWidget {
                       // ink. The sibling band found this first; this one did not get
                       // the fix because it arrived from a branch that predated it.
                       child: MxTextButton(
-                        label: context.l10n.reminderRetryAction,
+                        label: context.l10n.retryAction,
                         onPressed: onRetry,
                         accent: context.colors.onErrorContainer,
                       ),

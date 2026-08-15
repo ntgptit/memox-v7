@@ -136,7 +136,7 @@ void main() {
       expect(settings.current.isEnabled, isFalse);
       expect(find.text(english.reminderPermissionDeniedTitle), findsOneWidget);
       // The recovery is offered, so the flow does not dead-end.
-      expect(find.text(english.reminderRetryAction), findsOneWidget);
+      expect(find.text(english.retryAction), findsOneWidget);
     });
 
     testWidgets('a schedule failure says nothing was turned on (UC-17 E3)', (
@@ -168,7 +168,7 @@ void main() {
       expect(find.text(english.reminderUnavailableTitle), findsOneWidget);
       expect(find.text(english.reminderUnavailableMessage), findsOneWidget);
       // What must never appear is a retry for a state that cannot change.
-      expect(find.text(english.reminderRetryAction), findsNothing);
+      expect(find.text(english.retryAction), findsNothing);
     });
   });
 
@@ -225,7 +225,7 @@ void main() {
       // A single hardwired retry turned "turning it off failed" into "turn it
       // back on" — the button undoing what the user just asked for.
       platform.shouldFailCancel = false;
-      await tester.tap(find.text(english.reminderRetryAction));
+      await tester.tap(find.text(english.retryAction));
       await tester.pumpAndSettle();
 
       expect(settings.current.isEnabled, isFalse);
@@ -267,7 +267,7 @@ void main() {
       expect(settings.current.time.minuteOfDay, 7 * 60 + 30);
 
       platform.shouldFailSchedule = false;
-      await tester.tap(find.text(english.reminderRetryAction));
+      await tester.tap(find.text(english.retryAction));
       await tester.pumpAndSettle();
 
       // The retry must carry the value the user chose. Reading it back from

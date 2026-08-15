@@ -3257,10 +3257,6 @@
   "@reminderSaveErrorMessage": {
     "description": "Thân banner lỗi lưu. Nói rõ người dùng đang ở trạng thái nào, vì màn vừa quay ngược lại dưới tay họ."
   },
-  "reminderRetryAction": "Thử lại",
-  "@reminderRetryAction": {
-    "description": "Hành động khôi phục trong các banner lỗi của nhắc học. Chạy lại đúng bước đã hỏng, không đổi gì khác."
-  },
   "reminderNotificationTitle": "Đến giờ học rồi",
   "@reminderNotificationTitle": {
     "description": "Tiêu đề notification (M6 N1). Không mang số đếm và không mang tên deck — chúng nằm ở thân, nên một tiêu đề bị cắt vẫn không lộ gì riêng tư."
