@@ -24,12 +24,23 @@ class FakeReminderPlatform implements ReminderPlatformRepository {
     this.permission = ReminderPermission.granted,
     this.shouldFailSchedule = false,
     this.shouldFailCancel = false,
+    this.permissionGate,
   });
 
   ReminderCapability capability;
   ReminderPermission permission;
   bool shouldFailSchedule;
   bool shouldFailCancel;
+
+  /// Held open, the permission request never answers — which is the only way a
+  /// widget test can stop on the submitting frame and measure it.
+  ///
+  /// Without this every command here resolves on the same microtask as the tap,
+  /// so the first `pump()` after a tap already shows the settled state and a
+  /// test claiming to measure "while submitting" measures "after it finished"
+  /// three times. That is how the M6 G5 height check passed against a card
+  /// deliberately grown by 120dp mid-write.
+  final Completer<ReminderPermission>? permissionGate;
 
   /// Every schedule ever asked for, so idempotency is asserted on the count
   /// rather than on a boolean somebody has to reset.
@@ -49,6 +60,8 @@ class FakeReminderPlatform implements ReminderPlatformRepository {
   @override
   Future<ReminderPermission> requestPermission() async {
     permissionRequests++;
+    final gate = permissionGate;
+    if (gate != null) return gate.future;
 
     return permission;
   }

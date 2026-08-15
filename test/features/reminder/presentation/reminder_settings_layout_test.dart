@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -144,6 +145,41 @@ void main() {
       expect(banner.right, settingsCard.right);
       // The banner sits below the card and does not overlap it (M6 G7).
       expect(banner.top, greaterThan(settingsCard.bottom));
+    });
+
+    testWidgets('the card keeps its height across S2, S3 and S4 (M6 G5)', (
+      tester,
+    ) async {
+      // **Measured, not reasoned about.** G5 holds today because nothing inside
+      // the card renders or hides on `isBusy` — but that is a property of the
+      // current widget tree, not of the contract, and the first spinner someone
+      // puts beside a locked control makes the card grow by however tall it is.
+      // A card that changes height mid-write drags the banner and everything
+      // under it, which is the jump G5 exists to forbid.
+      // The permission request is held open, because otherwise every command
+      // this fake serves resolves on the same microtask as the tap: the first
+      // `pump()` would already show the settled state, and all three
+      // measurements would be the same frame. Mutation-checked — a card grown
+      // by 120dp while `isBusy` leaves this red.
+      final gate = Completer<ReminderPermission>();
+      platform = FakeReminderPlatform(permissionGate: gate);
+      platform.shouldFailSchedule = true;
+      await pumpScreen(tester);
+
+      double cardHeight() => tester.getRect(find.byType(MxCard).first).height;
+
+      final atRest = cardHeight();
+
+      await tester.tap(find.byType(Switch));
+      await tester.pump();
+      final whileSubmitting = cardHeight();
+
+      gate.complete(ReminderPermission.granted);
+      await tester.pumpAndSettle();
+      final afterRejection = cardHeight();
+
+      expect(whileSubmitting, closeTo(atRest, 0.5));
+      expect(afterRejection, closeTo(atRest, 0.5));
     });
 
     testWidgets('both rows clear the 48dp touch target (M6 G4)', (

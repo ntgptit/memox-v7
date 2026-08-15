@@ -954,6 +954,47 @@ _ID_RANGE_RE = re.compile(
 )
 
 
+def _check_duplicate_headings() -> None:
+    """One heading, once, per document.
+
+    **A second copy of a section does not read as a duplicate — it reads as the
+    section.** `use-cases.md` carried two `## Điều đã cố ý không đặc tả` tables
+    for several releases; each stage updated whichever copy it happened to open,
+    so one knew Progress had shipped and the other knew the daily reminder had,
+    and neither was wrong on its own. Three audit rounds looked straight past it
+    because every row in view was accurate.
+
+    Only `##`, which is the level a document's own sections live at; a document
+    made of like-shaped entries legitimately repeats a sub-heading under each.
+
+    **Scoped to the contract documents, and `docs/reviews/` is deliberately
+    outside it.** A review report is written a round at a time and repeats
+    `## Verification` once per round, which is the shape of the thing rather
+    than a defect — three copies there mean three rounds, while two copies of
+    a section in `use-cases.md` mean two answers to one question.
+    """
+    dupes: list[str] = []
+    for path in _docs_md():
+        try:
+            text = (_REPO / path).read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
+            continue
+        seen: dict[str, int] = {}
+        for i, line in enumerate(text.splitlines(), start=1):
+            if not line.startswith("## ") or line.startswith("###"):
+                continue
+            title = line[3:].strip()
+            if title in seen:
+                dupes.append(f"{path}:{i}: '{title}' already opened at line {seen[title]}")
+                continue
+            seen[title] = i
+    if dupes:
+        for d in dupes:
+            _fail("a section heading appears twice in one document", d)
+    else:
+        _ok("no document opens the same section twice")
+
+
 def _check_id_ranges() -> None:
     """A cited range must count upwards.
 
@@ -1040,6 +1081,7 @@ def main() -> int:
 
     _check_document_integrity()
     _check_id_ranges()
+    _check_duplicate_headings()
     _check_document_contract()
     _check_invariant_coverage()
     _check_invariant_self_test()
