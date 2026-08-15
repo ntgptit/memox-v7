@@ -26,11 +26,11 @@ guess.
 
 | kind | sites |
 |---|---|
-| other | 302 |
+| other | 303 |
 | background | 15 |
 | shadow | 1 |
 | border | 14 |
-| text | 89 |
+| text | 88 |
 | icon | 24 |
 
 **By source kind**

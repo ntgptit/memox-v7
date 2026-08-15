@@ -33,7 +33,13 @@ AD / UC (xem `business-rules.md`).
 | M7 · CI/CD (Phase 19) | todo | Bắt đầu được ngay sau M2. Job Android + Web, chưa có iOS (AD-04) |
 | M8 · Release Android (Phase 16–18, 20–22) | todo | |
 | M9 · Backend Spring Boot + auth + sync (Phase 10) | todo | Sau khi M8 ổn định |
-| M99 · Adhoc | — | Task chủ dự án giao trực tiếp, ngoài chuỗi phụ thuộc. M99.1 **done** — `master-flow.md`. M99.2 **done** — Deck và Card thành bản tham chiếu (AD-17). M99.3 **done** — refactor toàn bộ IT theo Testing Pyramid: 133/133 kịch bản có coverage host, `integration_test/` còn 8 kịch bản `DEVICE-E2E`, và CI lần đầu có cổng tự động cho tính đúng đắn nghiệp vụ. M99.5 **done** — golden harness chưa bao giờ nạp `NotoSansKR`, nên mọi chữ Hàn trong mọi golden là ô `NO GLYPH`; đã nạp đủ ba face CJK, bổ sung Nhật/Trung, và fixture demo trở lại tiếng Hàn. M99.7 **done** — bottom navigation lên bốn branch (AD-19); Progress/Settings là placeholder presentation-only, hai feature này **chưa** hoàn thành. M99.8 **done** — nhãn tab đầu đổi Decks/Bộ thẻ → Library/Thư viện; branch nội bộ và title màn hình vẫn là Decks. M99.17 **done** — đồng bộ Card Management với manual entry khối lượng nhỏ và chốt import/export là hướng bulk-management sau MVP.1 · Skill harness for the 22-phase checklist
+| M99 · Adhoc | — | Task chủ dự án giao trực tiếp, ngoài chuỗi phụ thuộc. M99.1 **done** — `master-flow.md`. M99.2 **done** — Deck và Card thành bản tham chiếu (AD-17). M99.3 **done** — refactor toàn bộ IT theo Testing Pyramid: 133/133 kịch bản có coverage host, `integration_test/` còn 8 kịch bản `DEVICE-E2E`, và CI lần đầu có cổng tự động cho tính đúng đắn nghiệp vụ. M99.5 **done** — golden harness chưa bao giờ nạp `NotoSansKR`, nên mọi chữ Hàn trong mọi golden là ô `NO GLYPH`; đã nạp đủ ba face CJK, bổ sung Nhật/Trung, và fixture demo trở lại tiếng Hàn. M99.7 **done** — bottom navigation lên bốn branch (AD-19); Progress/Settings là placeholder presentation-only, hai feature này **chưa** hoàn thành. M99.8 **done** — nhãn tab đầu đổi Decks/Bộ thẻ → Library/Thư viện; branch nội bộ và title màn hình vẫn là Decks. M99.17 **done** — đồng bộ Card Management với manual entry khối lượng nhỏ và chốt import/export là hướng bulk-management sau MVP. M99.27 **done** — Reverse self-assess v1: chiều hỏi cho phiên `self_assess` của deck `sm2`; schema v8. M99.28 **done** — Settings v1: mặc định học toàn cục, theme và ngôn ngữ; schema v9; không branch nào còn là placeholder. |
+
+---
+
+## M0 · Development harness
+
+### T0.1 · Skill harness for the 22-phase checklist
 
 - **Status:** done
 - **Goal:** Encode `docs/checklist.md` as invocable skills so each phase has one
@@ -9798,7 +9804,7 @@ binding của Study không đổi nhưng contract `openSession` thì có, và m�
   học toàn app, theme, ngôn ngữ và reset, tất cả trên một dòng `app_settings`
   có kiểu, watchable và local-first.
 - **Scope:** BR-210…BR-217, UC-16, AD-19, `docs/data-model.md`
-  (`app_settings`), wireframe `m99-settings.md`, schema v8, feature
+  (`app_settings`), wireframe `m99-settings.md`, schema v9, feature
   `lib/features/settings/`, binding ở composition root, seam theme/locale trên
   `MaterialApp`, và `Use app defaults` trên surface tuỳ chọn của deck. **Ngoài
   phạm vi:** nhắc nhở/notification, account/sync, import-export-backup, tham số
@@ -9823,11 +9829,11 @@ binding của Study không đổi nhưng contract `openSession` thì có, và m�
     data model nhận hai cột và bảng thứ tự migration bổ sung v6/v7 vốn bị bỏ
     sót; AD-19 ghi Settings đã rời trạng thái placeholder, Progress thì chưa;
     wireframe `m99-settings.md` (S1…S9, W1…W6).
-  - **Phase 2 (schema v8):** `app_settings` chuyển sang `tables/settings.drift`
+  - **Phase 2 (schema v9):** `app_settings` chuyển sang `tables/settings.drift`
     — nó chưa bao giờ là bảng của Study — cộng `queries/settings.drift`; hai
     cột `theme_mode` và `language`, mỗi cột một `CHECK` và `DEFAULT 'system'`;
-    `_upgradeToV8` là hai `ALTER TABLE ADD COLUMN`, không ghi lại dòng nào;
-    snapshot `drift_schema_v8.json` + `schema_v8.dart`.
+    `_upgradeToV9` là hai `ALTER TABLE ADD COLUMN`, không ghi lại dòng nào;
+    snapshot `drift_schema_v9.json` + `schema_v9.dart`.
   - **Phase 3 (domain):** `AppThemeMode`, `AppLanguage` (giữ **lựa chọn**, không
     giữ kết quả đã giải — AD-11), `AppSettingsModel` với `defaults` dùng
     `kDefaultCardLimit` của Study, contract bốn write một watch, năm use case.
@@ -9887,7 +9893,7 @@ binding của Study không đổi nhưng contract `openSession` thì có, và m�
         cùng một database, không phải bằng một provider giữ giá trị.
   - [x] `System` giải theo platform; lựa chọn tường minh thắng platform; đổi
         trong cùng phiên chạy không dựng lại router.
-  - [x] Migration v7→v8 có test: validate schema, giữ nguyên hai giá trị cũ,
+  - [x] Migration v8→v9 có test: validate schema, giữ nguyên hai giá trị cũ,
         hai `CHECK` còn sống, không đụng bảng nào khác.
   - [x] Geometry đo bằng `getRect`: ba card chung hai mép x, nhãn nhóm cùng cột,
         nhịp `xs`/`xl`, hàng radio ≥ 48dp, 320×568 @2.0 tiếng Việt không
@@ -9902,7 +9908,7 @@ binding của Study không đổi nhưng contract `openSession` thì có, và m�
 - **Dependencies:** M4.1 (router), M5.0s (`app_settings`), M99.7 (AD-19)
 - **Tests required:** domain enum + defaults; repository trên SQLite thật
   (singleton row, stream re-emit, bốn write độc lập, reset, clock injected, lỗi
-  thành `Failure`); migration v8; bốn write controller; states/geometry/a11y/
+  thành `Failure`); migration v9; bốn write controller; states/geometry/a11y/
   reset của màn hình; wiring theme+locale qua `MemoxApp` thật; override
   `isRootOverride` + clear trên database thật + `Use app defaults` trên màn.
 - **Checklist phases:** 7, 9, 10, 11, 12, 13, 14, 15

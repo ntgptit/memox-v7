@@ -71,23 +71,18 @@ void main() {
           contrast(scheme.onErrorContainer, scheme.errorContainer),
           greaterThanOrEqualTo(kAaBodyText),
         );
-        // **The band's Retry, which is the pair that failed.** `MxTextButton`
-        // resolves to `primaryAccent`, right on a page and **3.72:1** on this
-        // container in dark — under the 4.5 its 14px w600 label needs. The
-        // button now takes the band's own ink. This is the first place in the
-        // app to put a link on `errorContainer`, which is why no existing test
-        // covered it.
-        expect(
-          contrast(scheme.onErrorContainer, scheme.errorContainer),
-          greaterThanOrEqualTo(kAaBodyText),
-        );
+        // **The band's Retry, which is the pair that failed.** Asserted on the
+        // ink the button *actually resolves*, not on the token it is supposed
+        // to pick: the first version of this checked
+        // `onErrorContainer/errorContainer` a second time, which is already two
+        // assertions above and stays true however the button is styled.
         if (brightness == Brightness.dark) {
           expect(
             contrast(semantic.primaryAccent, scheme.errorContainer),
             lessThan(kAaBodyText),
             reason:
-                'the ink the button would have used — 3.72:1 here, and 5.87:1 '
-                'in light, which is why only dark failed',
+                'the ink it would otherwise have used — 3.72:1 here, 5.87:1 in '
+                'light, which is why only dark failed',
           );
         }
         // The reset action, which is `danger` as a label rather than a fill

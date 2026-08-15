@@ -86,22 +86,14 @@ class SettingsErrorBandWidget extends StatelessWidget {
                   Align(
                     alignment: AlignmentDirectional.centerStart,
                     // **`onErrorContainer`, because this button sits on
-                    // `errorContainer`.** `MxTextButton` resolves to
-                    // `primaryAccent`, which is right on a page and measures
-                    // **3.72:1** here in dark — under the 4.5 its 14px w600
-                    // label needs. The band's own text already uses
-                    // `onErrorContainer` and reaches 8.33:1; the button joins
-                    // it rather than inventing a third ink.
-                    child: TextButtonTheme(
-                      data: TextButtonThemeData(
-                        style: TextButton.styleFrom(
-                          foregroundColor: context.colors.onErrorContainer,
-                        ),
-                      ),
-                      child: MxTextButton(
-                        label: context.l10n.retryAction,
-                        onPressed: onRetry,
-                      ),
+                    // `errorContainer`.** The default `primaryAccent` is right
+                    // on a page and measures 3.72:1 here in dark — under the
+                    // 4.5 its 14px w600 label needs. The band's own text
+                    // already uses this ink and reaches 8.33:1.
+                    child: MxTextButton(
+                      label: context.l10n.retryAction,
+                      onPressed: onRetry,
+                      accent: context.colors.onErrorContainer,
                     ),
                   ),
                 ],

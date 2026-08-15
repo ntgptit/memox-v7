@@ -903,9 +903,9 @@ lượt (BR-76, BR-77, BR-111), luật reset (BR-41…BR-47) hay luật ngày h�
 | Tag.name | ≤ 50 ký tự (BR-93) | "Tên tag tối đa 50 ký tự" | domain |
 | Tag.name | không trùng, không phân biệt hoa thường (BR-93) | "Tag này đã tồn tại" | domain + db |
 | Card.tags | ≤ 10 tag mỗi thẻ (BR-94) | "Mỗi thẻ tối đa 10 tag" | domain |
-| AppSettings.cardLimit | cùng bound với tùy chọn của deck (BR-24, BR-183) | như tùy chọn của deck — không có message riêng | domain |
-| AppSettings.themeMode | thuộc `system` \| `light` \| `dark` (BR-186) | không có — control chỉ đưa ra ba lựa chọn hợp lệ | domain + db |
-| AppSettings.language | thuộc `system` \| `en` \| `vi` (BR-187) | không có — control chỉ đưa ra ba lựa chọn hợp lệ | domain + db |
+| AppSettings.cardLimit | cùng bound với tùy chọn của deck (BR-24, BR-211) | như tùy chọn của deck — không có message riêng | domain |
+| AppSettings.themeMode | thuộc `system` \| `light` \| `dark` (BR-214) | không có — control chỉ đưa ra ba lựa chọn hợp lệ | domain + db |
+| AppSettings.language | thuộc `system` \| `en` \| `vi` (BR-215) | không có — control chỉ đưa ra ba lựa chọn hợp lệ | domain + db |
 
 Toàn bộ enforce ở domain vì chưa có server. Khi có backend, server validate lại —
 client validation là trải nghiệm, không phải bảo mật.

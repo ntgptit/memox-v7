@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/settings/domain/models/app_settings_model.dart';
 import 'package:memox/features/settings/domain/models/app_theme_mode_model.dart';
@@ -94,5 +95,26 @@ void main() {
     expect(find.byType(MxConfirmDialog), findsNothing);
     expect(find.byType(SettingsErrorBandWidget), findsOneWidget);
     expect(find.text(english.retryAction), findsOneWidget);
+
+    // **The Retry takes the band's ink, read off the widget.** `MxTextButton`
+    // defaults to `primaryAccent`, which is right on a page and measures
+    // 3.72:1 on `errorContainer` in dark. Asserting the token pair instead
+    // would stay green if the accent were dropped, because the band's *text*
+    // uses that pair either way.
+    final BuildContext bandContext = tester.element(
+      find.byType(SettingsErrorBandWidget),
+    );
+    final ButtonStyle? style = tester
+        .widget<TextButton>(
+          find.descendant(
+            of: find.byType(SettingsErrorBandWidget),
+            matching: find.byType(TextButton),
+          ),
+        )
+        .style;
+    expect(
+      style?.foregroundColor?.resolve(<WidgetState>{}),
+      Theme.of(bandContext).colorScheme.onErrorContainer,
+    );
   });
 }

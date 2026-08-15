@@ -48,7 +48,7 @@ không back (nó là gốc của branch).
 │  Settings                           │  ← AppBar, MxContentShell
 ├─────────────────────────────────────┤
 │                                     │
-│  STUDY DEFAULTS                     │  ← nhãn nhóm, labelLarge
+│  STUDY DEFAULTS                     │  ← nhãn nhóm: labelMedium + sectionLabelTracking, onSurfaceVariant, VIẾT HOA (D18)
 │  ┌───────────────────────────────┐  │
 │  │ Cards per session             │  │
 │  │ [ 20                        ] │  │  ← MxTextField, number

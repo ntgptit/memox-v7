@@ -3,11 +3,11 @@
   "scannedFiles": 499,
   "totalSites": 445,
   "byElementKind": {
-    "other": 302,
+    "other": 303,
     "background": 15,
     "shadow": 1,
     "border": 14,
-    "text": 89,
+    "text": 88,
     "icon": 24
   },
   "bySourceKind": {
@@ -4223,9 +4223,9 @@
     },
     {
       "file": "lib/features/settings/presentation/widgets/items/settings_error_band_widget.dart",
-      "line": 98,
+      "line": 96,
       "widget_context": "SettingsErrorBandWidget",
-      "element_kind": "text",
+      "element_kind": "other",
       "source_kind": "theme-token",
       "expression": "context.colors.onErrorContainer",
       "token": "colorScheme.onErrorContainer",
@@ -4894,7 +4894,7 @@
     },
     {
       "file": "lib/shared/widgets/mx_text_button.dart",
-      "line": 79,
+      "line": 90,
       "widget_context": "_MxTextButtonState",
       "element_kind": "other",
       "source_kind": "theme-token",

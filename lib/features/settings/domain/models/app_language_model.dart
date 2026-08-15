@@ -32,7 +32,7 @@ enum AppLanguage {
   /// the absence maps straight through instead of needing a branch at the root.
   final String? languageCode;
 
-  /// BR-215's default, and the value a database written before v8 upgrades to.
+  /// BR-215's default, and the value a database written before v9 upgrades to.
   static const AppLanguage fallback = AppLanguage.system;
 
   /// Maps a stored value to the enum, falling back to [fallback].

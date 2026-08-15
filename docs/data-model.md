@@ -7,11 +7,11 @@
 | **Scope** | Bảng, cột, index, quan hệ, query bất biến. Ngoài phạm vi: SQL runtime (`lib/core/database/`, chưa tồn tại) |
 | **Source of truth for** | Schema · cột và kiểu · index · query bất biến · thứ tự migration |
 | **Depends on** | `document-conventions.md`, `architecture.md`, `business-rules.md` |
-| **Updated by task** | M99.28 — `app_settings.theme_mode` và `app_settings.language` (BR-214, BR-215), migration v8, và bảng thứ tự migration bổ sung v6/v7 vốn bị bỏ sót |
+| **Updated by task** | M99.28 — `app_settings.theme_mode` và `app_settings.language` (BR-214, BR-215), migration v9, và bảng thứ tự migration bổ sung v6/v7 vốn bị bỏ sót |
 | **Last updated** | 2026-08-13 |
 
 Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; SQL thật nằm ở
-`lib/core/database/tables/`, hiện ở **schema v8**.
+`lib/core/database/tables/`, hiện ở **schema v9**.
 
 **`review` vẫn còn nghĩa thứ hai trong repo, và nó không đổi.** Ở `docs/reviews/`,
 "vòng review UI/UX", "code review" — đó là *rà soát*, không phải *ôn tập*. Đợt đổi
@@ -470,11 +470,11 @@ tuỳ chọn trình bày (BR-214, BR-215).
 
 | Cột | Kiểu | Ghi chú |
 |---|---|---|
-| `id` | INTEGER PK | luôn `1`; `CHECK (id = 1)` giữ bảng ở đúng một dòng (BR-182) |
+| `id` | INTEGER PK | luôn `1`; `CHECK (id = 1)` giữ bảng ở đúng một dòng (BR-210) |
 | `card_limit` | INTEGER NOT NULL DEFAULT 20 | trần thẻ **mỗi phiên**, không phải mỗi ngày (BR-24) |
 | `new_card_order` | TEXT NOT NULL DEFAULT 'created' | `created` \| `random` (BR-148) |
-| `theme_mode` | TEXT NOT NULL DEFAULT 'system' | `system` \| `light` \| `dark` (BR-186). Thêm ở v8 |
-| `language` | TEXT NOT NULL DEFAULT 'system' | `system` \| `en` \| `vi` (BR-187). Thêm ở v8 |
+| `theme_mode` | TEXT NOT NULL DEFAULT 'system' | `system` \| `light` \| `dark` (BR-214). Thêm ở v9 |
+| `language` | TEXT NOT NULL DEFAULT 'system' | `system` \| `en` \| `vi` (BR-215). Thêm ở v9 |
 | `updated_at` | DATETIME NOT NULL | UTC |
 
 **Một bảng một dòng thay vì key-value.** Key-value đọc linh hoạt hơn nhưng mọi
@@ -490,7 +490,7 @@ là một lựa chọn thật, khác hẳn với việc lưu `'light'` vì hôm 
 sáng: giá trị đã giải hết đúng ngay khi người dùng đổi cài đặt hệ điều hành, và
 không có cách nào phân biệt được nó với một lựa chọn tường minh (AD-11).
 
-**`language` chứ không phải `locale`.** Cột giữ đúng ba giá trị của BR-187, không
+**`language` chứ không phải `locale`.** Cột giữ đúng ba giá trị của BR-215, không
 phải một BCP-47 tag đầy đủ — chưa có variant, script hay region nào trong
 `supportedLocales`, và một cột hứa hẹn nhiều hơn thứ nó nhận là một cột sẽ được
 ai đó ghi `vi-VN` vào.

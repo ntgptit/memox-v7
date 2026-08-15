@@ -21,7 +21,7 @@ enum AppThemeMode {
   /// The value stored in `app_settings.theme_mode`.
   final String dbValue;
 
-  /// BR-214's default, and the value a database written before v8 upgrades to.
+  /// BR-214's default, and the value a database written before v9 upgrades to.
   static const AppThemeMode fallback = AppThemeMode.system;
 
   /// Maps a stored value to the enum, falling back to [fallback].
