@@ -3438,6 +3438,10 @@
   "@tagMissingError": {
     "description": "Typed failure: the tag was deleted or merged away between opening an overlay and submitting it (UC-18 E3)."
   },
+  "tagWriteErrorTitle": "Couldn’t save",
+  "@tagWriteErrorTitle": {
+    "description": "Title of the error band inside the tag rename/merge and delete sheets. Same wording as deckWriteErrorTitle — the situation is the same one, and a second phrasing for it would be a second answer to one question."
+  },
   "tagFilterTitle": "Filter by tags",
   "@tagFilterTitle": {
     "description": "Title of the multi-tag filter sheet on the card list (M4.14 W6)."

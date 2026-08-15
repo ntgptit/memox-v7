@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../shared/widgets/mx_card.dart';
+import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
@@ -155,7 +157,12 @@ class _RenameFormState extends ConsumerState<_RenameForm> {
             MxActionButton(
               // The label is the last thing read before the action happens, so
               // it says which of the two will happen (M4.14 W4 item 4).
-              label: target == null
+              // Relabelled while a failure is showing: the only way to retry
+              // was to notice the button was still enabled and press the same
+              // word again, which reads as "it did not register my tap".
+              label: failure != null
+                  ? context.l10n.retryAction
+                  : target == null
                   ? context.l10n.tagRenameAction
                   : context.l10n.tagMergeAction,
               isLoading: rename.submit.isSubmitting,
@@ -213,6 +220,19 @@ class _MergeNotice extends StatelessWidget {
 
 /// A write that failed, in the sheet — the form keeps what was typed (M4.14 W4
 /// item 6).
+///
+/// **A band, not a red line of text.** W4 item 6 says "dải lỗi … có Try again",
+/// and this app has settled on one grammar for an in-flow failure: an
+/// `errorContainer` card, flat, `md` padding, a warning glyph, a title and a
+/// message, with the recovery as a control rather than a sentence. Three
+/// widgets already speak it — `card_export_error_band_widget.dart` in this very
+/// feature, plus the Settings and reminder bands unified at D24. A fourth
+/// dialect one sheet away is the seam that pass was about.
+///
+/// The recovery here is the sheet's own primary, which relabels itself to
+/// `Retry` while a failure is showing — the same move
+/// `card_export_action_bar_widget.dart` makes, and the reason this band carries
+/// no button of its own.
 class _FailureBand extends StatelessWidget {
   const _FailureBand({required this.message});
 
@@ -220,11 +240,47 @@ class _FailureBand extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return Semantics(
+      container: true,
       liveRegion: true,
-      child: Text(
-        message,
-        style: context.texts.bodySmall?.copyWith(color: context.colors.error),
+      child: MxCard(
+        color: colors.errorContainer,
+        elevation: AppElevation.none,
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Icon(
+              Icons.error_outline,
+              size: AppIconSize.mdCompact,
+              color: colors.onErrorContainer,
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text(
+                    context.l10n.tagWriteErrorTitle,
+                    style: context.texts.titleSmall?.copyWith(
+                      color: colors.onErrorContainer,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    message,
+                    style: context.texts.bodySmall?.copyWith(
+                      color: colors.onErrorContainer,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

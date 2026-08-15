@@ -1,13 +1,13 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
   "scannedFiles": 570,
-  "totalSites": 458,
+  "totalSites": 457,
   "byElementKind": {
     "other": 305,
     "background": 15,
     "shadow": 1,
     "border": 14,
-    "text": 95,
+    "text": 94,
     "icon": 28
   },
   "bySourceKind": {
@@ -16,7 +16,7 @@
     "Colors-material": 5,
     "hardcoded-literal": 97,
     "opacity-modified-token": 11,
-    "theme-token": 198
+    "theme-token": 197
   },
   "sites": [
     {
@@ -3046,7 +3046,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/overlays/tag_rename_widget.dart",
-      "line": 198,
+      "line": 205,
       "widget_context": "_MergeNotice",
       "element_kind": "icon",
       "source_kind": "theme-token",
@@ -3057,7 +3057,7 @@
     },
     {
       "file": "lib/features/card/presentation/widgets/overlays/tag_rename_widget.dart",
-      "line": 204,
+      "line": 211,
       "widget_context": "_MergeNotice",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -3065,17 +3065,6 @@
       "token": "colorScheme.onSurfaceVariant",
       "resolved_value_light": "#565C72",
       "resolved_value_dark": "#A8A7C4"
-    },
-    {
-      "file": "lib/features/card/presentation/widgets/overlays/tag_rename_widget.dart",
-      "line": 227,
-      "widget_context": "_FailureBand",
-      "element_kind": "text",
-      "source_kind": "theme-token",
-      "expression": "context.colors.error",
-      "token": "colorScheme.error",
-      "resolved_value_light": "#C02B3A",
-      "resolved_value_dark": "#F2808F"
     },
     {
       "file": "lib/features/card/presentation/widgets/sections/card_danger_zone_widget.dart",

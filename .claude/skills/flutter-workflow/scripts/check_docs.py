@@ -965,6 +965,52 @@ _ID_RANGE_RE = re.compile(
 )
 
 
+def _check_superseded_rows() -> None:
+    """A row marked superseded, with the row it superseded still beside it.
+
+    **The "deliberately not specified" table has produced this three times.**
+    A branch cut before a feature shipped carries the old row; the branch that
+    shipped it strikes the row through and adds the new one; the merge keeps
+    both, and the table then says a thing is out of scope and specified at the
+    same time. Neither row is wrong on its own, which is why five stages and
+    several audit rounds read past it.
+
+    Narrow on purpose. "The same subject twice in one table" was tried first and
+    reports twenty-one rows that are all legitimate — validation tables repeat a
+    field name once per rule, state tables repeat a value once per transition.
+    Striking a row through, though, means exactly one thing, and no table in
+    this repository does it for any other reason.
+    """
+    bad: list[str] = []
+    for path in _docs_md():
+        try:
+            text = (_REPO / path).read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
+            continue
+        struck: dict[str, int] = {}
+        plain: dict[str, int] = {}
+        for i, line in enumerate(text.splitlines(), start=1):
+            if not line.startswith("|") or line.count("|") < 3:
+                continue
+            cell = line.split("|")[1].strip()
+            key = re.sub(r"[~*`]", "", cell).strip().lower()
+            if not key:
+                continue
+            (struck if cell.startswith("~~") else plain)[key] = i
+        for key, line_no in struck.items():
+            if key in plain:
+                bad.append(
+                    f"{path}:{line_no}: '{key}' is struck through here and still "
+                    f"listed plain at line {plain[key]}"
+                )
+    if bad:
+        for b in bad:
+            _fail("a superseded table row survives beside its replacement", b)
+    else:
+        _ok("no table lists a subject as both superseded and current")
+
+
+
 def _check_duplicate_headings() -> None:
     """One heading, once, per document.
 
@@ -1094,6 +1140,7 @@ def main() -> int:
     _check_document_integrity()
     _check_id_ranges()
     _check_duplicate_headings()
+    _check_superseded_rows()
     _check_document_contract()
     _check_invariant_coverage()
     _check_invariant_self_test()

@@ -1315,8 +1315,6 @@ không chọn gì · filter overlay chọn một · filter overlay chọn nhiề
 | Đảo chiều card (S3) | Should-have — **một nửa đã đóng ở M99.27**: UC-15 và BR-203…BR-209 cho phép hỏi ngược trong một phiên `self_assess` của deck `sm2` mà **không** ghi lại thẻ, nên phần còn mở là đảo chiều ở các mode khác |
 | ~~Export (nửa còn lại của N1)~~ | **Đã đặc tả ở M99.21** — UC-11 và BR-174…BR-181 chốt scope, encoder, filename, share và quyền riêng tư trước khi viết code, đúng điều kiện mà mục này đặt ra. Còn nice-to-have ngoài phạm vi export nội dung: backup/restore, sync và `.apkg`. |
 | ~~Nhắc nhở hằng ngày (N2)~~ | **Đã đặc tả ở M99.29** — UC-17 và BR-218…BR-229 chốt opt-in, phạm vi due-only, riêng tư của copy, thứ tự cấp bách và vòng đời lịch trước khi viết code. Còn ngoài phạm vi: nhắc theo thẻ mới, nhiều lượt nhắc trong ngày, và nhắc theo từng deck. |
-| Media và tag trong card | Ngoài MVP; quy tắc reset (BR-41) và lưu trữ (AD-08) đã đặt sẵn |
-| Nhắc nhở hằng ngày (N2) | Nice-to-have, cần quyền notification |
 | Media trong card | Ngoài MVP; quy tắc reset (BR-41) và lưu trữ (AD-08) đã đặt sẵn. Tag đã rời khỏi hàng này: nó được đặc tả ở BR-93/BR-94 (M4.10at) và ở UC-18/BR-230…BR-238 (M99.30) |
 | Tag phân cấp, màu tag, taxonomy chia sẻ | Ngoài phạm vi Tag Management v1 — UC-18 chốt tag là nhãn phẳng, là định danh văn bản, không phải hệ thống deck thứ hai |
 | Đăng nhập, đồng bộ | Ngoài MVP (AD-03) |

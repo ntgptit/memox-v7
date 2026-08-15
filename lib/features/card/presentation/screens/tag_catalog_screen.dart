@@ -107,9 +107,17 @@ class _CatalogList extends StatelessWidget {
     // deactivated moments later — and `ScaffoldMessenger.of` on a deactivated
     // context asserts. The list outlives every row it renders.
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.sm,
+      // **`lg` at the foot, not `sm`** (D21). Progress, Study Home and the deck
+      // level all end a scrolling list a full gutter above the navigation bar,
+      // for the reason that pass recorded: a shorter inset reads as the list
+      // being cut off rather than ended. This was 8dp, which is the one place
+      // in the app a user crossing from any of those three would see the
+      // difference.
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.sm,
+        AppSpacing.lg,
+        AppSpacing.lg,
       ),
       itemCount: tags.length,
       itemBuilder: (_, index) {

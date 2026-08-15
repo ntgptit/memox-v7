@@ -320,4 +320,26 @@ void main() {
       expect(before?.context?.mounted ?? true, isTrue);
     });
   });
+  testWidgets('the last row ends a full gutter above the foot (D21)', (
+    tester,
+  ) async {
+    // **Nothing pinned this, and it was 8dp.** Progress, Study Home and the
+    // deck level all leave `AppSpacing.lg` under the last row — M99.26 settled
+    // that so a list reads as ended rather than cut off — and the catalog was
+    // the one screen a user could cross into and see the difference.
+    await pumpCatalog(tester);
+
+    // The scroller's own resolved padding, not the gap to the last row: the
+    // fixture is short enough that the list does not overflow, so a measured
+    // gap here would be the empty viewport rather than the inset. Progress can
+    // measure the gap because it seeds fifty decks; this asserts the same
+    // number one level closer to the source.
+    final padding = tester.widget<ListView>(find.byType(ListView)).padding;
+
+    expect(
+      (padding! as EdgeInsets).bottom,
+      AppSpacing.lg,
+      reason: 'D21: every scrolling list ends a full gutter above the foot',
+    );
+  });
 }

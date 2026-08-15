@@ -41,13 +41,22 @@ WidgetbookComponent tagCatalogScreenComponent() {
 }
 
 /// The states worth staging: a populated library, one with no tags at all
-/// (M4.14 W3 face 3), and a read that fails (face 5). The search-empty face is
-/// reachable by typing, and the rename and delete overlays by using the row
-/// menus, so none of those needs a scenario of its own.
+/// (M4.14 W3 face 3), a read that fails (face 5), and the two write failures
+/// UC-18 names. The search-empty face is reachable by typing, and the rename
+/// and delete overlays by using the row menus, so none of those needs a
+/// scenario of its own.
+///
+/// **The write failures do.** They were implemented, and unit-tested, and
+/// unreachable here — so the error band inside the rename sheet spent a whole
+/// stage as a bare red line instead of the band the wireframe specifies, and no
+/// design review could have seen it. Reached by opening a row's menu and
+/// committing the action.
 enum TagCatalogScenario {
   populated('a library with tags'),
   empty('no tags yet'),
-  readFails('the catalog read fails');
+  readFails('the catalog read fails'),
+  renameFails('rename fails (use a row menu)'),
+  deleteFails('delete fails (use a row menu)');
 
   const TagCatalogScenario(this.label);
 
@@ -83,7 +92,10 @@ class _TagCatalogDemoState extends State<_TagCatalogDemo> {
 /// disclosure is a label with nothing behind it.
 final class _CatalogFake implements TagCatalogRepository {
   _CatalogFake(this.scenario) {
-    if (scenario == TagCatalogScenario.populated) _tags.addAll(_seed);
+    // Seeded for every scenario that needs something to act on — the two
+    // write failures are reached from a row menu, so an empty catalog
+    // would leave them as unreachable as they were before.
+    if (scenario != TagCatalogScenario.empty) _tags.addAll(_seed);
   }
 
   final TagCatalogScenario scenario;
@@ -129,6 +141,12 @@ final class _CatalogFake implements TagCatalogRepository {
     required String tagId,
     required TagName name,
   }) async {
+    if (scenario == TagCatalogScenario.renameFails) {
+      // No typed reason: a plain database refusal is what the repository
+      // maps every unclassified write error to, and the sheet renders it
+      // through the generic branch of `tagCatalogWriteFailure`.
+      throw const DatabaseFailure(message: 'catalog: rename refused');
+    }
     final index = _tags.indexWhere((TagCatalogEntry tag) => tag.id == tagId);
     if (index < 0) {
       throw const NotFoundFailure(
@@ -167,6 +185,9 @@ final class _CatalogFake implements TagCatalogRepository {
 
   @override
   Future<void> deleteTag(String tagId) async {
+    if (scenario == TagCatalogScenario.deleteFails) {
+      throw const DatabaseFailure(message: 'catalog: delete refused');
+    }
     _tags.removeWhere((TagCatalogEntry tag) => tag.id == tagId);
     _changes.add(null);
   }

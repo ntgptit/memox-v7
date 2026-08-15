@@ -153,5 +153,32 @@ void main() {
 
       expect(find.text('That tag no longer exists.'), findsOneWidget);
     });
+
+    testWidgets('the failure is a band, and the primary offers the retry', (
+      tester,
+    ) async {
+      // **Both halves were missing and nothing was red.** W4 item 6 asks for a
+      // band with `Try again`; the sheet rendered a red line of text and left
+      // the primary saying `Rename`, so the only way to retry was to notice the
+      // button was still enabled and press the same word again. The test that
+      // covered this state asserted only the message, which both versions show.
+      final catalog = FakeTagCatalogRepository.seeded(tags)
+        ..nextFailure = const NotFoundFailure(
+          message: 'gone',
+          reason: TagCatalogProblem.tagMissing,
+        );
+      await openRename(tester, catalog);
+
+      await tester.enterText(find.byType(TextField).last, 'substantives');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Rename'));
+      await tester.pumpAndSettle();
+
+      // The band's own title, which only the band renders.
+      expect(find.text('Couldn’t save'), findsOneWidget);
+      // And the recovery, named, where the action was.
+      expect(find.text('Retry'), findsOneWidget);
+      expect(find.text('Rename'), findsNothing);
+    });
   });
 }
