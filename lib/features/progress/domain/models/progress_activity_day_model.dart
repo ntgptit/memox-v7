@@ -2,7 +2,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'progress_activity_day_model.freezed.dart';
 
-/// One local day on which the user answered at least one card (BR-182).
+/// One local day on which the user answered at least one card (BR-192).
 ///
 /// **The unit is a card-day, not an answer.** A `learning` session walks five
 /// stages over the same card and writes a row per turn (BR-98, BR-113), so
@@ -13,7 +13,7 @@ part 'progress_activity_day_model.freezed.dart';
 ///
 /// **Only days with activity exist as instances.** A day with nothing on it is
 /// not a `ProgressActivityDay` carrying zeros — it is a day the repository never
-/// produced. `ProgressOverview` zero-fills the seven-day window (BR-186), and it
+/// produced. `ProgressOverview` zero-fills the seven-day window (BR-196), and it
 /// is the only place allowed to: an empty day invented here would also be
 /// indistinguishable from a real day of zeros, which cannot exist.
 @freezed
@@ -29,10 +29,10 @@ abstract class ProgressActivityDay with _$ProgressActivityDay {
     /// same reasoning `LocalDayModel` states for its own arithmetic.
     required DateTime localDate,
 
-    /// Distinct cards answered on [localDate] (BR-182).
+    /// Distinct cards answered on [localDate] (BR-192).
     required int totalCards,
 
-    /// Of those, how many had at least one `learning` answer (BR-185).
+    /// Of those, how many had at least one `learning` answer (BR-195).
     ///
     /// Learning wins the tie by rule: a card that was both finished off the
     /// learning chain and reviewed on the same day counts once, as Learning.
@@ -45,10 +45,10 @@ abstract class ProgressActivityDay with _$ProgressActivityDay {
   const ProgressActivityDay._();
 
   /// Distinct cards whose only answers that day were `scheduled` or
-  /// `relearning` (BR-185).
+  /// `relearning` (BR-195).
   int get reviewingCards => totalCards - learningCards;
 
-  /// Whether this day counts towards a streak (BR-187).
+  /// Whether this day counts towards a streak (BR-197).
   ///
   /// Always true for an instance the repository produced — a day with no card
   /// is not emitted at all. It exists for the zero-filled days

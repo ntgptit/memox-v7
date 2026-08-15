@@ -7,7 +7,7 @@ import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../domain/models/progress_activity_day_model.dart';
 
-/// Today's total and its two halves (W3, BR-185).
+/// Today's total and its two halves (W3, BR-195).
 ///
 /// **Both halves are always on screen, zero included.** Hiding a zero would make
 /// the panel change shape between a learning day and a reviewing day, and would

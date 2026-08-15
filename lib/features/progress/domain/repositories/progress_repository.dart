@@ -22,7 +22,7 @@ import '../models/progress_overview_model.dart';
 /// boundary every number here is defined against.
 abstract interface class ProgressRepository {
   /// One consistent snapshot per emission, re-emitted whenever the history it
-  /// summarises changes (BR-189).
+  /// summarises changes (BR-199).
   ///
   /// [now] and [utcOffset] are one snapshot of `clockProvider` and
   /// `utcOffsetProvider`, taken by the caller. Crossing local midnight is a new
@@ -41,7 +41,7 @@ abstract interface class ProgressRepository {
   ///
   /// The stream re-emits whenever an answer, a card or a deck changes, so a
   /// review graded elsewhere, a card moved into this deck and a deck deleted all
-  /// land without the screen asking (BR-199).
+  /// land without the screen asking (BR-189).
   ///
   /// Emits a `NotFoundFailure` when [deckId] names a deck that does not exist —
   /// a deleted deck's link must fail, not render an empty level.

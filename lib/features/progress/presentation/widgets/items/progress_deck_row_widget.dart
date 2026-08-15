@@ -27,7 +27,7 @@ import 'progress_metric_widget.dart';
 ///
 /// **Zero activity still renders.** A deck nobody touched is exactly what
 /// somebody scrolling this list is looking for, and hiding it would answer
-/// "which decks have I neglected" by removing the answer (BR-197).
+/// "which decks have I neglected" by removing the answer (BR-187).
 class ProgressDeckRowWidget extends StatelessWidget {
   const ProgressDeckRowWidget({
     required this.activity,

@@ -20,8 +20,8 @@ enum ProgressMetricScale {
   row,
 }
 
-/// The four figures of one window, as a 2×2 baseline-aligned grid (BR-193,
-/// BR-196).
+/// The four figures of one window, as a 2×2 baseline-aligned grid (BR-183,
+/// BR-186).
 ///
 /// **A real two-column grid, not a `Wrap`.** `Expanded` halves mean the second
 /// column shares a left edge down the whole grid whatever the first column's
@@ -206,7 +206,7 @@ class _Metric extends StatelessWidget {
   }
 }
 
-/// Distinct cards answered in the window (BR-193) — how much of the library was
+/// Distinct cards answered in the window (BR-183) — how much of the library was
 /// touched.
 class _ActiveCardsMetric extends StatelessWidget {
   const _ActiveCardsMetric({required this.count, required this.scale});
@@ -236,7 +236,7 @@ class _ActiveCardsMetric extends StatelessWidget {
   }
 }
 
-/// Distinct local days with at least one answer (BR-193) — how often the person
+/// Distinct local days with at least one answer (BR-183) — how often the person
 /// showed up. It wears the streak pair, which is the app's existing vocabulary
 /// for time kept rather than work owed.
 class _ActiveDaysMetric extends StatelessWidget {
@@ -269,7 +269,7 @@ class _ActiveDaysMetric extends StatelessWidget {
   }
 }
 
-/// Card-days spent on the learning chain (BR-196). The same glyph the deck
+/// Card-days spent on the learning chain (BR-186). The same glyph the deck
 /// hero's New metric uses, because it counts work on the same set of cards.
 class _LearningMetric extends StatelessWidget {
   const _LearningMetric({required this.count, required this.scale});
@@ -301,7 +301,7 @@ class _LearningMetric extends StatelessWidget {
   }
 }
 
-/// Card-days spent reviewing — `scheduled` and `relearning` alike (BR-196).
+/// Card-days spent reviewing — `scheduled` and `relearning` alike (BR-186).
 ///
 /// Neutral by design: review is the ordinary state of a working schedule, and a
 /// colour here would make the everyday half of the partition compete with the

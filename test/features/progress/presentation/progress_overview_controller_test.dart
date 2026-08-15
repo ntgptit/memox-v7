@@ -12,7 +12,7 @@ import 'package:memox/features/progress/presentation/controllers/progress_overvi
 import 'support/fake_progress_repository.dart';
 
 /// The midnight wake-up and the read states of the Progress controller
-/// (BR-189, UC-12).
+/// (BR-199, UC-12).
 ///
 /// **The bug these cover.** A screen left open across local midnight keeps
 /// yesterday on it: Today still shows the count from a day that ended, the

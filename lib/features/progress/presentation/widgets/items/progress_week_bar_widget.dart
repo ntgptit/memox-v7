@@ -7,7 +7,7 @@ import '../../../../../shared/widgets/mx_progress_bar.dart';
 /// One day's bar in the activity chart (W4.3).
 ///
 /// **The track is always drawn, at full width.** A day with nothing on it is
-/// data, not absence (BR-186, P4): drawing nothing there would make the row look
+/// data, not absence (BR-196, P4): drawing nothing there would make the row look
 /// like a rendering fault, and would take away the baseline every other bar is
 /// read against.
 ///

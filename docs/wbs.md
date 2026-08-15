@@ -9345,7 +9345,7 @@ thế không đổi bố cục.
 
 - **Status:** **done** — merged by PR #301 (stage 1 của batch tích hợp
   #301–#310, merge commit trên `codex/integrate-prs-301-310`). Phase 1 (docs)
-  xong: BR-182…BR-191, UC-12,
+  xong: BR-192…BR-191, UC-12,
   AD-19 và `product.md` cập nhật, wireframe `m99-23-progress-overview.md`,
   `check_docs.py` xanh. Phase 2 (domain) xong: `ProgressActivityDay`,
   `ProgressOverview` với `fromActivity` giữ cửa sổ bảy ngày + streak,
@@ -9427,7 +9427,7 @@ thế không đổi bố cục.
   `shouldSkipLoadingOnReload`; `lib/shared/widgets/mx_error_state.dart` —
   `isRetrying`), cả hai additive với default giữ nguyên hành vi mọi call site
   cũ, thêm ở stage 1 của batch tích hợp; `docs/business-rules.md`
-  (BR-182…BR-191), `docs/use-cases.md`
+  (BR-192…BR-191), `docs/use-cases.md`
   (UC-12), `docs/architecture.md` (AD-19), `docs/product.md` (S2 + mục điều
   hướng), wireframe mới, `lib/core/database/queries/progress.drift`,
   `lib/features/progress/**`, một dòng `builder` trong `app/router/app_router.dart`,
@@ -9455,7 +9455,7 @@ thế không đổi bố cục.
      khác nhau tuỳ đơn vị: số hàng `study_answers`, số lượt-theo-stage, hay số
      card riêng biệt. Một phiên `learning` sáu stage ghi sáu hàng cho **một**
      thẻ, nên đếm hàng làm "hôm nay bạn học 6 thẻ" trong khi người dùng học một.
-     Ràng buộc: đơn vị là distinct `(localDay, cardId)` (BR-182). Trade-off:
+     Ràng buộc: đơn vị là distinct `(localDay, cardId)` (BR-192). Trade-off:
      người học chăm chỉ một thẻ cả ngày vẫn chỉ được tính một — chấp nhận, vì
      con số này đo *phạm vi đã chạm*, không đo công sức. Mở khoá: SQL biết phải
      `GROUP BY` hai lần, và UI biết phải viết chữ "thẻ" cạnh mọi con số.
@@ -9471,7 +9471,7 @@ thế không đổi bố cục.
      khoảng UTC được xác định bởi múi giờ, và `DateTime.now()` trong feature làm
      "bây giờ" thành hai thứ — một provider cả cây override được, và một static
      không gì với tới được (CLAUDE.md, AD-16). Ràng buộc: `clockProvider` +
-     `utcOffsetProvider` chụp **một** snapshot cho cả emission (BR-184), và SQL
+     `utcOffsetProvider` chụp **một** snapshot cho cả emission (BR-194), và SQL
      nhận ranh giới do `LocalDayModel` tính chứ không tự dẫn xuất local midnight.
      Trade-off: query phải nhận thêm tham số offset thay vì gọi hàm ngày của
      SQLite — đổi lại ranh giới 23:59 và mọi UTC offset test được trên máy bất
@@ -9485,7 +9485,7 @@ thế không đổi bố cục.
      chấp nhận, vì một con số không có BR đứng sau là spec viết ở tầng sai, đúng
      lỗi mà AD-19 đã đặt tên. Mở khoá: phạm vi v1 đóng lại được, và ba section
      là toàn bộ thứ phải xây.
-- **Output:** BR-182…BR-191, UC-12, AD-19 cập nhật, `product.md` cập nhật,
+- **Output:** BR-192…BR-191, UC-12, AD-19 cập nhật, `product.md` cập nhật,
   `docs/wireframes/m99-23-progress-overview.md`; `queries/progress.drift`;
   domain model/repository contract/use case; DAO/mapper/repository impl;
   provider `di/` + binding composition root; controller + screen + widgets bốn
@@ -9495,15 +9495,15 @@ thế không đổi bố cục.
   - [x] Query gộp ở SQLite thành hàng card-day rồi active-day; không answer thô
         lên Dart, không query từng ngày, không N+1, không bảng aggregate.
   - [x] `learning + reviewing = total` đúng cho mọi ngày, ưu tiên Learning
-        (BR-185); một card trả lời nhiều lần trong ngày đếm một (BR-182).
-  - [x] Streak đúng cả ba nhánh của BR-187, không trần, không bị cửa sổ bảy ngày
+        (BR-195); một card trả lời nhiều lần trong ngày đếm một (BR-192).
+  - [x] Streak đúng cả ba nhánh của BR-197, không trần, không bị cửa sổ bảy ngày
         cắt; bảy ngày zero-fill đúng thứ tự qua ranh giới tháng/năm và mọi UTC
-        offset (BR-186).
+        offset (BR-196).
   - [x] `browse` không tạo hoạt động; reset giữ nguyên mọi con số; card/deck bị
-        xoá biến khỏi mọi ngày (BR-183, BR-188).
+        xoá biến khỏi mọi ngày (BR-193, BR-198).
   - [x] Màn tự cập nhật khi có answer mới, khi card/deck bị xoá và tại local
         midnight; timer one-shot, dispose-safe, không loop khi ranh giới đã ở
-        quá khứ, đo lại khi offset đổi (BR-189).
+        quá khứ, đo lại khi offset đổi (BR-199).
   - [x] Mở/đóng/Retry/đổi tab không ghi hàng nào (BR-190), chứng minh bằng test
         đếm ghi trên SQLite thật.
   - [x] `/progress`, `RouteNames.progress` và branch index 2 không đổi; deep
@@ -9535,14 +9535,14 @@ thế không đổi bố cục.
      và một chuỗi có thể dài ra hoặc đứt mà không có write nào. Đóng được bằng
      cách lưu offset theo hàng trong `study_answers` — một schema change, tức
      một migration, tức không thuộc phần tích hợp này. Hành vi đã được
-     canonicalize ở BR-182 và ghim ở `progress_repository_test.dart` để nó là
+     canonicalize ở BR-192 và ghim ở `progress_repository_test.dart` để nó là
      điều đã biết chứ không phải bug sẽ được phát hiện lại.
   0. **Không có trigger tức thời khi thiết bị đổi múi giờ trong lúc màn hình
-     đang mở** — owner: M99.23. BR-189 bản đầu viết "MUST đo lại khi UTC offset
+     đang mở** — owner: M99.23. BR-199 bản đầu viết "MUST đo lại khi UTC offset
      đổi"; Flutter không publish callback nào cho việc đó (`WidgetsBindingObserver`
      có `didChangeLocales` chứ không có `didChangeTimeZone`), nên một MUST như
      vậy không có gì cưỡng chế được và cột `Enforced by` của nó nói dối. Đã thu
-     hẹp BR-189 xuống đúng cái cưỡng chế được — resolve lại offset ở mỗi lần đọc
+     hẹp BR-199 xuống đúng cái cưỡng chế được — resolve lại offset ở mỗi lần đọc
      lại — và giữ lại nợ: một trigger thật cần platform channel nghe
      `ACTION_TIMEZONE_CHANGED` trên Android, và nó thuộc về phase có backend
      hoặc một task riêng chứ không phải phần tích hợp này. Hệ quả trong lúc
@@ -9552,8 +9552,8 @@ thế không đổi bố cục.
      coordinator batch, đóng ở stage 10 (#310). Không đóng được ở stage 1 vì
      schema hiện chưa có cột tombstone nào, nên không có gì để lọc và không có
      test nào có thể đỏ. `docs/prompt/progress-v1/implementation.md` đã quyết
-     định "card đã ở Trash không xuất hiện trong Progress" nhưng BR-188 chỉ
-     canonicalize được nửa xoá cứng. Khi #310 thêm soft-delete, BR-188 MUST
+     định "card đã ở Trash không xuất hiện trong Progress" nhưng BR-198 chỉ
+     canonicalize được nửa xoá cứng. Khi #310 thêm soft-delete, BR-198 MUST
      được mở rộng cùng lúc và `progressActivityDays` MUST loại tombstone —
      ghim bằng một test SQLite thật: card có `study_answers` → đưa vào Trash →
      `0` card-day và `hasLifetimeActivity == false`.
@@ -9620,7 +9620,7 @@ thế không đổi bố cục.
 - **Goal:** Thay placeholder của branch Progress bằng một vertical slice đọc dữ
   liệu học thật: hoạt động theo deck trên hai khoảng 7/30 ngày, đi sâu theo cây
   thật, không giả dữ liệu và không mở rộng sang accuracy hay dự báo.
-- **Scope:** `docs/business-rules.md` (BR-192…BR-199), `docs/use-cases.md`
+- **Scope:** `docs/business-rules.md` (BR-182…BR-189), `docs/use-cases.md`
   (UC-13), `docs/wireframes/m99-progress-by-deck.md`, `docs/wbs.md`,
   `lib/core/database/queries/progress.drift` + include trong `app_database.dart`,
   `lib/features/progress/**`, binding trong `lib/app/di/repository_bindings.dart`,
@@ -9656,20 +9656,20 @@ thế không đổi bố cục.
   Widgetbook, và 102 test host mới dưới `test/features/progress/` cộng 6 visual
   audit.
 - **Acceptance criteria:**
-  - [x] Card-day là đơn vị đếm; trả lời trùng trong ngày gộp về một (BR-193).
+  - [x] Card-day là đơn vị đếm; trả lời trùng trong ngày gộp về một (BR-183).
   - [x] Hai khoảng đến từ một lần đọc; đổi khoảng không mở lại query, không
-        loading (BR-194); biên 23:59:59 và nửa đêm được chứng minh trên SQLite
+        loading (BR-184); biên 23:59:59 và nửa đêm được chứng minh trên SQLite
         thật ở cả hai đầu của cả hai cửa sổ.
   - [x] Attribution theo vị trí hiện tại: move card và move subtree chuyển toàn
-        bộ lịch sử; xoá deck làm activity biến mất qua cascade (BR-195).
+        bộ lịch sử; xoá deck làm activity biến mất qua cascade (BR-185).
   - [x] Hierarchy thật ở 10 cấp; mọi cấp trung gian cộng đúng; không
         `COALESCE(parent_deck_id, id)`.
-  - [x] Learning/Reviewing là phân hoạch loại trừ, ưu tiên Learning (BR-196).
+  - [x] Learning/Reviewing là phân hoạch loại trừ, ưu tiên Learning (BR-186).
   - [x] Sort theo khoảng đang chọn, tie-break tên đã fold Unicode rồi id; deck 0
-        vẫn hiện, đứng cuối (BR-197).
-  - [x] Read-only: không statement ghi nào chạy, không hàng nào đổi (BR-198).
+        vẫn hiện, đứng cuối (BR-187).
+  - [x] Read-only: không statement ghi nào chạy, không hàng nào đổi (BR-188).
   - [x] Live update trên answer/move/delete và một hẹn giờ duy nhất cho nửa đêm,
-        có guard chống lặp (BR-199).
+        có guard chống lặp (BR-189).
   - [x] Một statement mỗi lần emit, không N+1 theo số deck.
   - [x] Mọi state render ở EN/VI, light/dark, 320/390/412dp và text scale 2.0;
         hình học pin bằng `getRect`; visual audit strict xanh ở cả hai theme.
@@ -9679,7 +9679,7 @@ thế không đổi bố cục.
         clamp về constraint.
   - [x] AppBar và nút back còn nguyên ở cấp deck trong lúc loading và khi read
         lỗi — nếu không thì mỗi lần nửa đêm hoặc resume sẽ lấy mất lối ra.
-  - [x] Bộ chọn khoảng là chrome ghim, không cuộn mất sau 50 deck (BR-197).
+  - [x] Bộ chọn khoảng là chrome ghim, không cuộn mất sau 50 deck (BR-187).
 - **Dependencies:** M4.9, M4.10, M5.x (study answers), M99.7 (branch scaffold)
 - **Tests required:** 35 test data trên SQLite thật (card-day, biên cửa sổ, phân
   hoạch, 10 cấp, đường dẫn ở cấp sâu nhất, cây cha vòng lặp, move card/subtree,
@@ -9694,7 +9694,7 @@ thế không đổi bố cục.
   **Trash/restore/purge không test được trên base này** và cố ý không có test
   giả: repo chưa có cơ chế Trash, nên nửa *đã* enforce — xoá cứng → cascade →
   activity biến mất — được test thật (`countRows('study_answers') == 0`), còn
-  nửa còn lại là nghĩa vụ tương lai mà BR-195 phát biểu có điều kiện. Emulator
+  nửa còn lại là nghĩa vụ tương lai mà BR-185 phát biểu có điều kiện. Emulator
   integration test **deferred to integration worktree — not run**.
 - **Checklist phases:** 14, 15
 ### M99.27 · Reverse Self-assess v1 — chiều hỏi cho phiên self-assess

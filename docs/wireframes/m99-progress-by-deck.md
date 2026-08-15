@@ -4,9 +4,9 @@
 |---|---|
 | **Status** | active |
 | **Purpose** | Chốt bố cục, hình học và ma trận trạng thái của drill-down tiến độ theo deck trước khi UI review chạy |
-| **Scope** | Bộ chọn khoảng, bảng tổng, hàng deck và mọi trạng thái của hai cấp. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md` BR-192…BR-199), luồng (`use-cases.md` UC-13), giá trị token (`lib/core/theme/`) |
+| **Scope** | Bộ chọn khoảng, bảng tổng, hàng deck và mọi trạng thái của hai cấp. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md` BR-182…BR-189), luồng (`use-cases.md` UC-13), giá trị token (`lib/core/theme/`) |
 | **Source of truth for** | Bố cục màn hình tiến độ · hình học được pin bằng test · danh sách divergence đã duyệt |
-| **Depends on** | `document-conventions.md`, `business-rules.md` (BR-192…BR-199), `use-cases.md` (UC-13), `wbs.md` (M99.24) |
+| **Depends on** | `document-conventions.md`, `business-rules.md` (BR-182…BR-189), `use-cases.md` (UC-13), `wbs.md` (M99.24) |
 | **Updated by task** | M99.24 · rà soát UI/UX vòng một (bộ chọn ghim, gutter theo breakpoint, lưới gập, rung chữ số, chú thích đơn vị, AppBar ở mọi cấp) · hợp nhất `/progress` thành một màn (phần đầu tổng quan ở cấp thư viện) |
 | **Last updated** | 2026-08-15 |
 
@@ -79,13 +79,13 @@ Ba khối đó **không được mô tả lại ở đây**. Nội dung, copy v�
 là của `m99-23-progress-overview.md`; tài liệu này chỉ chốt rằng chúng đứng ở
 đâu trong thứ tự cuộn. Một fact ở đúng một chỗ (`document-conventions.md`).
 
-**Bộ chọn khoảng được ghim — nhưng ghim từ bên trong vùng cuộn.** BR-197 nói
+**Bộ chọn khoảng được ghim — nhưng ghim từ bên trong vùng cuộn.** BR-187 nói
 thẳng tới trường hợp năm mươi deck; cuộn hai màn thì một bộ chọn đã trôi mất sẽ
 để lại một danh sách số không nói nó thuộc tuần hay tháng. Bản đầu dùng slot
 `subheader` của `MxContentShell`, và slot đó nằm **trên** thân màn — nghĩa là
 sau khi hợp nhất, bộ chọn đứng trên cả ba section tổng quan mà nó không điều
 khiển: bấm `30 ngày` thì 24dp ngay dưới nó không đổi gì (X10). `PinnedHeaderSliver`
-đặt **sau** phần đầu giữ đúng điều BR-197 cần — bộ chọn không rời màn khi danh
+đặt **sau** phần đầu giữ đúng điều BR-187 cần — bộ chọn không rời màn khi danh
 sách cuộn — mà bỏ được cách đọc sai.
 
 `PinnedHeaderSliver` chứ không phải `SliverPersistentHeader`: dải này không có
@@ -137,7 +137,7 @@ quét literal thấy được.
 |---|---|---|---|
 | loading | — | — | spinner có nhãn; AppBar giữ chữ "Tiến độ" ở **mọi** cấp (§5). Ở cấp thư viện, ba section tổng quan **vẫn ở trên** spinner — chúng đã trả lời rồi, và `/progress` chỉ dựng màn này sau khi chúng trả lời |
 | mixed activity | có | có | mọi deck, kể cả deck 0 |
-| all-zero | có | có + dòng giải thích | mọi deck với số 0 (BR-197) |
+| all-zero | có | có + dòng giải thích | mọi deck với số 0 (BR-187) |
 | no decks (cấp thư viện) | **không** | **không** | empty state, không nút |
 | no sub-decks (cấp deck) | có | có | empty state nói tổng ở trên đã là toàn bộ |
 | read error | — | — | `MxErrorState` + `Try again`, dưới AppBar còn nguyên; ở cấp thư viện ba section tổng quan vẫn ở trên nó, và khối lỗi mang `liveRegion` vì nó không còn chiếm cả màn nên có thể nằm dưới fold |
@@ -166,7 +166,7 @@ Hai dòng đáng chú ý:
   giữ được"; ôn tập trung tính vì ôn là trạng thái bình thường của một lịch
   đang chạy.
 - **Hai đơn vị trong một lưới, và chỉ một dòng nói ra.** Hàng trên đếm *thẻ* và
-  *ngày*; hàng dưới đếm *thẻ-ngày* (BR-193, BR-196). Không có dòng chú thích thì
+  *ngày*; hàng dưới đếm *thẻ-ngày* (BR-183, BR-186). Không có dòng chú thích thì
   `12` và `60` cạnh `45` đọc như một phép cộng không khớp. Chú thích nằm ở bảng
   tổng chứ không nhét vào bốn từ, vì một từ đủ dài để mang đơn vị sẽ bị cắt
   trong ô 320dp ở scale 2.0 — xem §2.
@@ -179,16 +179,16 @@ Những chỗ màn hình này cố ý khác deck list, và vì sao:
 |---|---|
 | Không breadcrumb; đường dẫn nằm trên hàng | §1 |
 | Lưới metric 2×2 thay vì hero 2×2 + workload line | Bốn số ở đây không có thứ tự khẩn cấp; không số nào "dẫn" |
-| Không filter, không sort control | Thứ tự là một rule (BR-197), không phải lựa chọn xem |
+| Không filter, không sort control | Thứ tự là một rule (BR-187), không phải lựa chọn xem |
 | Không nút hành động ở hai empty state "không có gì để liệt kê" | Bước tiếp theo nằm ở tab khác; nút nhảy tab đọc như đường vòng. **Không** áp cho state deck-missing: nó có đường quay lại, vì đó là lối ra duy nhất còn đúng (§3, UC-13 E2) |
 | Bộ chọn khoảng là chrome ghim, không cuộn | §1 |
 | Đơn vị thẻ-ngày nói bằng một dòng chú thích, không nhét vào tên metric | §4 — chiều rộng ô ở 320dp scale 2.0 |
 | Lưới metric gập một cột khi ô quá hẹp | §2 — số bị cắt là số sai |
 | AppBar giữ chữ "Tiến độ" ở mọi cấp khi dữ liệu chưa về | Tiêu đề null làm `MxContentShell` bỏ luôn AppBar, mất cả nút back — chịu được lúc vào lần đầu, không chịu được ở mỗi lần reload (nửa đêm, resume) |
-| Hàng không có nút Study | Màn hình này chỉ đọc (BR-198) |
+| Hàng không có nút Study | Màn hình này chỉ đọc (BR-188) |
 
 ## 6. Điều cố ý không dựng ở v1
 
 Biểu đồ theo ngày, heatmap, so sánh hai khoảng, accuracy và streak — tất cả
-thuộc BR-192 và cần định nghĩa riêng trước khi có hình. Một khung biểu đồ dựng
+thuộc BR-182 và cần định nghĩa riêng trước khi có hình. Một khung biểu đồ dựng
 sẵn "để sau này điền" là cách chốt bố cục cho dữ liệu chưa ai định nghĩa.

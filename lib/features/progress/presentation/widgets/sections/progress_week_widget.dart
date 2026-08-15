@@ -31,7 +31,7 @@ import '../support/progress_labels_widget.dart';
 class ProgressWeekWidget extends StatelessWidget {
   const ProgressWeekWidget({required this.days, super.key});
 
-  /// Exactly seven entries, oldest first, the last being today (BR-186).
+  /// Exactly seven entries, oldest first, the last being today (BR-196).
   final List<ProgressActivityDay> days;
 
   @override

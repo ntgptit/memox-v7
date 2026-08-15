@@ -39,7 +39,7 @@
         "type": "int"
       }
     },
-    "description": "The hero headline: how many consecutive local days have activity (BR-187). The unit is always spelled out -- a bare numeral at display size reads as a count of something the user has to guess at."
+    "description": "The hero headline: how many consecutive local days have activity (BR-197). The unit is always spelled out -- a bare numeral at display size reads as a count of something the user has to guess at."
   },
   "progressStreakTodayLine": "{count, plural, =0{No cards today} =1{1 card today} other{{count} cards today}}",
   "@progressStreakTodayLine": {
@@ -48,11 +48,11 @@
         "type": "int"
       }
     },
-    "description": "The line under the hero headline when the streak includes today. 'Cards' is the unit on purpose: the count is distinct cards touched today, not answers given (BR-182)."
+    "description": "The line under the hero headline when the streak includes today. 'Cards' is the unit on purpose: the count is distinct cards touched today, not answers given (BR-192)."
   },
   "progressStreakHeldLine": "No cards today — your streak is held from yesterday",
   "@progressStreakHeldLine": {
-    "description": "The hero's supporting line when today has no activity but yesterday does (BR-187, A1). Without it a headline of '7 days' beside a Today section of zero reads as a contradiction."
+    "description": "The hero's supporting line when today has no activity but yesterday does (BR-197, A1). Without it a headline of '7 days' beside a Today section of zero reads as a contradiction."
   },
   "progressStreakZeroLine": "Study today to start a streak",
   "@progressStreakZeroLine": {
@@ -90,23 +90,23 @@
         "type": "int"
       }
     },
-    "description": "The Today total. The unit is mandatory: the count is distinct cards, and a user shown a bare number would reasonably read it as turns taken (BR-182)."
+    "description": "The Today total. The unit is mandatory: the count is distinct cards, and a user shown a bare number would reasonably read it as turns taken (BR-192)."
   },
   "progressTodayLearningLabel": "Learning",
   "@progressTodayLearningLabel": {
-    "description": "Half of the Today breakdown: cards with at least one learning answer today (BR-185). Same word the learning session uses, so the two agree."
+    "description": "Half of the Today breakdown: cards with at least one learning answer today (BR-195). Same word the learning session uses, so the two agree."
   },
   "progressTodayReviewingLabel": "Reviewing",
   "@progressTodayReviewingLabel": {
-    "description": "The other half: cards whose answers today were scheduled or relearning only (BR-185)."
+    "description": "The other half: cards whose answers today were scheduled or relearning only (BR-195)."
   },
   "progressTodayPartitionNote": "Learning and Reviewing add up to today's total — a card counts once, whichever way you met it.",
   "@progressTodayPartitionNote": {
-    "description": "One line explaining that the two halves are a partition (BR-185). Not decoration: without it a user who answered the same card in both modes expects the halves to sum to more than the total."
+    "description": "One line explaining that the two halves are a partition (BR-195). Not decoration: without it a user who answered the same card in both modes expects the halves to sum to more than the total."
   },
   "progressWeekSectionLabel": "Daily activity",
   "@progressWeekSectionLabel": {
-    "description": "Heading of the activity chart (W4). Names what the chart is rather than its window: the chart is always seven days including today (BR-186) while the range selector below it switches 7/30, and both headings reading 'Last 7 days' contradicted each other the moment 30 was picked (X9)."
+    "description": "Heading of the activity chart (W4). Names what the chart is rather than its window: the chart is always seven days including today (BR-196) while the range selector below it switches 7/30, and both headings reading 'Last 7 days' contradicted each other the moment 30 was picked (X9)."
   },
   "progressWeekTodayLabel": "Today",
   "@progressWeekTodayLabel": {
@@ -2812,11 +2812,11 @@
   },
   "progressRange7Label": "7 days",
   "@progressRange7Label": {
-    "description": "Range selector pill for the 7-day window (BR-194). Short because two pills share a row on a 320dp screen; progressRange7SemanticLabel carries the full phrase for a screen reader."
+    "description": "Range selector pill for the 7-day window (BR-184). Short because two pills share a row on a 320dp screen; progressRange7SemanticLabel carries the full phrase for a screen reader."
   },
   "progressRange30Label": "30 days",
   "@progressRange30Label": {
-    "description": "Range selector pill for the 30-day window (BR-194)."
+    "description": "Range selector pill for the 30-day window (BR-184)."
   },
   "progressRange7SemanticLabel": "Last 7 days",
   "@progressRange7SemanticLabel": {
@@ -2840,19 +2840,19 @@
   },
   "progressActiveCardsMetricWord": "cards studied",
   "@progressActiveCardsMetricWord": {
-    "description": "Word beside the distinct-card count (BR-193). \"Studied\" rather than \"reviewed\": the count includes learning turns, which are not reviews."
+    "description": "Word beside the distinct-card count (BR-183). \"Studied\" rather than \"reviewed\": the count includes learning turns, which are not reviews."
   },
   "progressActiveDaysMetricWord": "active days",
   "@progressActiveDaysMetricWord": {
-    "description": "Word beside the distinct local-day count (BR-193). Days on which at least one card was answered."
+    "description": "Word beside the distinct local-day count (BR-183). Days on which at least one card was answered."
   },
   "progressLearningMetricWord": "learning",
   "@progressLearningMetricWord": {
-    "description": "Word beside the learning half of the card-day partition (BR-196). Short on purpose: the word has to survive a 320dp cell at text scale 2.0, where a longer one is clipped rather than wrapped. The unit it counts is stated once by progressCardDayUnitNote."
+    "description": "Word beside the learning half of the card-day partition (BR-186). Short on purpose: the word has to survive a 320dp cell at text scale 2.0, where a longer one is clipped rather than wrapped. The unit it counts is stated once by progressCardDayUnitNote."
   },
   "progressReviewingMetricWord": "reviewing",
   "@progressReviewingMetricWord": {
-    "description": "Word beside the reviewing half of the card-day partition (BR-196). Short for the same reason as progressLearningMetricWord."
+    "description": "Word beside the reviewing half of the card-day partition (BR-186). Short for the same reason as progressLearningMetricWord."
   },
   "progressCardDayUnitNote": "Learning and reviewing count card-days — one card on one day.",
   "@progressCardDayUnitNote": {
@@ -2883,7 +2883,7 @@
         "type": "int"
       }
     },
-    "description": "Screen-reader sentence for the learning half of the partition (BR-196). Says card-days, because the figure counts a card once per day and not once per answer."
+    "description": "Screen-reader sentence for the learning half of the partition (BR-186). Says card-days, because the figure counts a card once per day and not once per answer."
   },
   "progressReviewingSemanticLabel": "{count, plural, =0{No reviewing card-days} =1{1 reviewing card-day} other{{count} reviewing card-days}}",
   "@progressReviewingSemanticLabel": {
@@ -2892,7 +2892,7 @@
         "type": "int"
       }
     },
-    "description": "Screen-reader sentence for the reviewing half of the partition (BR-196)."
+    "description": "Screen-reader sentence for the reviewing half of the partition (BR-186)."
   },
   "progressDeckRowSemanticLabel": "{name}, in {path}, {range}",
   "@progressDeckRowSemanticLabel": {
@@ -2943,7 +2943,7 @@
   },
   "progressNoActivityTitle": "Nothing studied in this window",
   "@progressNoActivityTitle": {
-    "description": "Decks exist but none was answered inside the selected window (BR-194). Deliberately not an error and not a scold - zero is a normal reading."
+    "description": "Decks exist but none was answered inside the selected window (BR-184). Deliberately not an error and not a scold - zero is a normal reading."
   },
   "progressNoActivityMessage": "Switch to a longer window, or study a deck to start filling this in.",
   "@progressNoActivityMessage": {

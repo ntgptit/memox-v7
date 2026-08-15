@@ -101,7 +101,7 @@ void main() {
     });
   });
 
-  group('the day-boundary wake-up (BR-194)', () {
+  group('the day-boundary wake-up (BR-184)', () {
     testWidgets('re-measures at the next local midnight and not before', (
       tester,
     ) async {
@@ -195,7 +195,7 @@ void main() {
       );
       // Both windows ride on one snapshot, so choosing one must not re-open the
       // read — that is what makes the switch instant and the two windows one
-      // snapshot (BR-194).
+      // snapshot (BR-184).
       expect(repository.levelReadCount, 1);
     });
   });

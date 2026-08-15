@@ -167,7 +167,7 @@ class _ProgressLevel extends StatelessWidget {
       // **Pinned, but from inside the scroll view — see `_level`.** The shell's
       // `subheader` slot sits above the body, which put the selector above the
       // three overview sections it does not govern: pressing `30 days` changed
-      // nothing in the 24dp directly under it. BR-197's requirement is that the
+      // nothing in the 24dp directly under it. BR-187's requirement is that the
       // selector stays on screen while fifty decks scroll, not that it sits
       // under the app bar, and a `PinnedHeaderSliver` after the overview band
       // satisfies it without the misread.
@@ -262,7 +262,7 @@ class _ProgressLevel extends StatelessWidget {
         else
           ProgressDeckListWidget(
             // Ordered here rather than in the repository, because the order
-            // depends on which window is selected (BR-197) and the window is a
+            // depends on which window is selected (BR-187) and the window is a
             // view choice that must not re-open the read.
             decks: sortDeckActivity(snapshot.decks, range: range),
             range: range,

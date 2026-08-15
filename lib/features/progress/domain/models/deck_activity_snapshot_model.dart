@@ -18,7 +18,7 @@ part 'deck_activity_snapshot_model.freezed.dart';
 /// **The totals are read, not summed from [decks].** Active cards and card-days
 /// would sum correctly, because sibling subtrees are disjoint; active *days*
 /// would not, because the same Tuesday can be active in two decks and is still
-/// one day of study (BR-193). Reading all four the same way keeps the rule in one
+/// one day of study (BR-183). Reading all four the same way keeps the rule in one
 /// place instead of half in SQL and half in a fold nobody re-checks.
 @freezed
 abstract class DeckActivitySnapshot with _$DeckActivitySnapshot {
@@ -45,7 +45,7 @@ abstract class DeckActivitySnapshot with _$DeckActivitySnapshot {
     required DeckActivityMetrics scopeLast30Days,
 
     /// The next local midnight: the instant every window shifts by one day with
-    /// no write behind it (BR-194).
+    /// no write behind it (BR-184).
     ///
     /// A read taken at 23:59 is wrong one minute later — yesterday's answers
     /// leave the 7-day window and today becomes a day with nothing in it yet —

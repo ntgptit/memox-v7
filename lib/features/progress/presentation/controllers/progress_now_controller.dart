@@ -5,7 +5,7 @@ import '../../../../core/time/clock_provider.dart';
 
 part 'progress_now_controller.g.dart';
 
-/// The instant the Progress numbers are measured against (BR-184).
+/// The instant the Progress numbers are measured against (BR-184, BR-194).
 ///
 /// Held as state rather than read inline for the reason `DeckListNow` records: a
 /// `DateTime.now()` inside the stream provider would be re-evaluated on every
@@ -18,8 +18,8 @@ part 'progress_now_controller.g.dart';
 ///   may have changed while nothing was watching;
 /// * **local midnight passing with the screen open** — `ProgressOverview`
 ///   schedules that from the `nextLocalMidnight` its own emission carried
-///   (BR-189), and `DeckActivityLevel` does the same from the boundary its own
-///   snapshot carries (BR-194). One notifier, two readers: the instant is a
+///   (BR-199), and `DeckActivityLevel` does the same from the boundary its own
+///   snapshot carries (BR-184). One notifier, two readers: the instant is a
 ///   property of the screen's clock, not of either query.
 ///
 /// **Its own file, beside the query controller that watches it**, for the same

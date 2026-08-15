@@ -29,7 +29,7 @@ const Duration kMaxProgressMidnightDelay = Duration(hours: 25);
 ///
 /// **The timer, and why it is one timer and not a schedule.** Each emission
 /// carries `nextLocalMidnight` — the instant its own window stops being today —
-/// from the same snapshot as the counts (BR-184). A single one-shot timer is
+/// from the same snapshot as the counts (BR-194). A single one-shot timer is
 /// armed for that instant; when it fires it moves [progressNowProvider], the
 /// stream re-opens at the new local day, and the next emission arms the next
 /// timer. So the wake-up follows the data instead of a fixed interval, and there
@@ -43,7 +43,7 @@ const Duration kMaxProgressMidnightDelay = Duration(hours: 25);
 /// `autoDispose`, so leaving the tab cancels its timer with it.
 ///
 /// **Answers arriving while the screen is open need no timer at all.** The
-/// repository's stream re-emits on its own when history changes (BR-189), and
+/// repository's stream re-emits on its own when history changes (BR-199), and
 /// `MxAsyncView` keeps the previous value on screen during a refresh, so a new
 /// answer updates the numbers in place rather than flashing a spinner.
 ///

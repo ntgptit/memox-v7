@@ -6,7 +6,7 @@ import '../../../../../shared/widgets/mx_pill_button.dart';
 import '../../../domain/models/progress_range_model.dart';
 import '../support/progress_labels_widget.dart';
 
-/// The 7 / 30 day switch (BR-194).
+/// The 7 / 30 day switch (BR-184).
 ///
 /// **Selection is never colour alone.** `chipTheme` turns Material's checkmark
 /// off, because the card list's filter pills carry counts and a tick beside a

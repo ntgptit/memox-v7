@@ -12,7 +12,7 @@ import '../items/progress_deck_row_widget.dart';
 /// slice of the screen — the arrangement the deck list had to be repaired into
 /// once its chrome grew.
 ///
-/// The rows arrive already ordered (BR-197); nothing here sorts, filters or
+/// The rows arrive already ordered (BR-187); nothing here sorts, filters or
 /// hides. A zero-activity deck renders exactly like a busy one, with zeroes in
 /// it.
 class ProgressDeckListWidget extends StatelessWidget {

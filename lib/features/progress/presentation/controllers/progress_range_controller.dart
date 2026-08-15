@@ -4,7 +4,7 @@ import '../../domain/models/progress_range_model.dart';
 
 part 'progress_range_controller.g.dart';
 
-/// Which window the screen is currently reading (BR-194).
+/// Which window the screen is currently reading (BR-184).
 ///
 /// **A view choice that costs no query.** Both windows ride on every row of one
 /// read, so switching is a field access — no reload, no spinner, and no way for

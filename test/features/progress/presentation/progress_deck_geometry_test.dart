@@ -100,7 +100,7 @@ void main() {
     });
 
     testWidgets('the range selector does not scroll away', (tester) async {
-      // BR-197 puts fifty decks on this list. Two screens down, a selector that
+      // BR-187 puts fifty decks on this list. Two screens down, a selector that
       // had scrolled off would leave nothing on screen saying whether the
       // figures are the week or the month.
       await pumpProgressScreen(

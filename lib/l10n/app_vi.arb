@@ -39,7 +39,7 @@
         "type": "int"
       }
     },
-    "description": "The hero headline (BR-187). Vietnamese has one plural form, so `other` covers every count."
+    "description": "The hero headline (BR-197). Vietnamese has one plural form, so `other` covers every count."
   },
   "progressStreakTodayLine": "{count, plural, =0{Chưa có thẻ nào hôm nay} other{{count} thẻ hôm nay}}",
   "@progressStreakTodayLine": {
@@ -48,11 +48,11 @@
         "type": "int"
       }
     },
-    "description": "The line under the hero headline when the streak includes today (BR-182)."
+    "description": "The line under the hero headline when the streak includes today (BR-192)."
   },
   "progressStreakHeldLine": "Chưa có thẻ nào hôm nay — chuỗi đang được giữ từ hôm qua",
   "@progressStreakHeldLine": {
-    "description": "The hero's supporting line when today has no activity but yesterday does (BR-187, A1)."
+    "description": "The hero's supporting line when today has no activity but yesterday does (BR-197, A1)."
   },
   "progressStreakZeroLine": "Học hôm nay để bắt đầu một chuỗi",
   "@progressStreakZeroLine": {
@@ -90,19 +90,19 @@
         "type": "int"
       }
     },
-    "description": "The Today total; the unit is mandatory because the count is distinct cards (BR-182)."
+    "description": "The Today total; the unit is mandatory because the count is distinct cards (BR-192)."
   },
   "progressTodayLearningLabel": "Đang học",
   "@progressTodayLearningLabel": {
-    "description": "Half of the Today breakdown (BR-185)."
+    "description": "Half of the Today breakdown (BR-195)."
   },
   "progressTodayReviewingLabel": "Đang ôn",
   "@progressTodayReviewingLabel": {
-    "description": "The other half of the Today breakdown (BR-185)."
+    "description": "The other half of the Today breakdown (BR-195)."
   },
   "progressTodayPartitionNote": "Đang học và Đang ôn cộng lại bằng tổng hôm nay — mỗi thẻ chỉ tính một lần, dù bạn gặp nó theo cách nào.",
   "@progressTodayPartitionNote": {
-    "description": "One line explaining that the two halves are a partition (BR-185)."
+    "description": "One line explaining that the two halves are a partition (BR-195)."
   },
   "progressWeekSectionLabel": "Hoạt động hằng ngày",
   "@progressWeekSectionLabel": {
@@ -2812,11 +2812,11 @@
   },
   "progressRange7Label": "7 ngày",
   "@progressRange7Label": {
-    "description": "Range selector pill for the 7-day window (BR-194)."
+    "description": "Range selector pill for the 7-day window (BR-184)."
   },
   "progressRange30Label": "30 ngày",
   "@progressRange30Label": {
-    "description": "Range selector pill for the 30-day window (BR-194)."
+    "description": "Range selector pill for the 30-day window (BR-184)."
   },
   "progressRange7SemanticLabel": "7 ngày gần nhất",
   "@progressRange7SemanticLabel": {
@@ -2840,19 +2840,19 @@
   },
   "progressActiveCardsMetricWord": "thẻ đã học",
   "@progressActiveCardsMetricWord": {
-    "description": "Word beside the distinct-card count (BR-193)."
+    "description": "Word beside the distinct-card count (BR-183)."
   },
   "progressActiveDaysMetricWord": "ngày có học",
   "@progressActiveDaysMetricWord": {
-    "description": "Word beside the distinct local-day count (BR-193)."
+    "description": "Word beside the distinct local-day count (BR-183)."
   },
   "progressLearningMetricWord": "học mới",
   "@progressLearningMetricWord": {
-    "description": "Word beside the learning half of the card-day partition (BR-196). Short on purpose: it has to survive a 320dp cell at text scale 2.0. The unit is stated once by progressCardDayUnitNote."
+    "description": "Word beside the learning half of the card-day partition (BR-186). Short on purpose: it has to survive a 320dp cell at text scale 2.0. The unit is stated once by progressCardDayUnitNote."
   },
   "progressReviewingMetricWord": "ôn tập",
   "@progressReviewingMetricWord": {
-    "description": "Word beside the reviewing half of the card-day partition (BR-196). Short for the same reason as progressLearningMetricWord."
+    "description": "Word beside the reviewing half of the card-day partition (BR-186). Short for the same reason as progressLearningMetricWord."
   },
   "progressCardDayUnitNote": "Học mới và ôn tập đếm theo thẻ-ngày — một thẻ trong một ngày.",
   "@progressCardDayUnitNote": {
@@ -2883,7 +2883,7 @@
         "type": "int"
       }
     },
-    "description": "Screen-reader sentence for the learning half of the partition (BR-196)."
+    "description": "Screen-reader sentence for the learning half of the partition (BR-186)."
   },
   "progressReviewingSemanticLabel": "{count, plural, =0{Không có thẻ-ngày ôn tập} other{{count} thẻ-ngày ôn tập}}",
   "@progressReviewingSemanticLabel": {
@@ -2892,7 +2892,7 @@
         "type": "int"
       }
     },
-    "description": "Screen-reader sentence for the reviewing half of the partition (BR-196)."
+    "description": "Screen-reader sentence for the reviewing half of the partition (BR-186)."
   },
   "progressDeckRowSemanticLabel": "{name}, trong {path}, {range}",
   "@progressDeckRowSemanticLabel": {
@@ -2943,7 +2943,7 @@
   },
   "progressNoActivityTitle": "Chưa học gì trong khoảng này",
   "@progressNoActivityTitle": {
-    "description": "Decks exist but none was answered inside the selected window (BR-194)."
+    "description": "Decks exist but none was answered inside the selected window (BR-184)."
   },
   "progressNoActivityMessage": "Chuyển sang khoảng dài hơn, hoặc học một bộ thẻ để bắt đầu ghi nhận.",
   "@progressNoActivityMessage": {

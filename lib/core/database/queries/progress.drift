@@ -25,15 +25,15 @@ import '../tables/study.drift';
 -- **Deleted cards need no clause here.** `study_answers.card_id` cascades
 -- (`ON DELETE CASCADE`), so a hard-deleted card — directly, or through its deck
 -- — takes its history with it and disappears from every day, past ones
--- included (BR-188). Reset is the opposite case and also needs no clause: it
+-- included (BR-198). Reset is the opposite case and also needs no clause: it
 -- never touches `study_answers` (BR-43), so every number here survives it.
 --
 -- `browse` cannot appear: that stage writes no row at all (BR-111), so it can
--- neither create a card-day nor hold a streak (BR-183).
+-- neither create a card-day nor hold a streak (BR-193).
 
 -- One row per local day that has activity, oldest first. Days with nothing on
 -- them are absent, not zero rows — zero-filling the seven-day window is the
--- domain's job (BR-186), and it is the only layer that knows how wide the
+-- domain's job (BR-196), and it is the only layer that knows how wide the
 -- window is.
 --
 -- `localDayStart` is the local calendar date expressed as seconds: the instant
@@ -45,14 +45,14 @@ import '../tables/study.drift';
 -- day a row belongs to.
 --
 -- **Two GROUP BYs, and both are load-bearing.** The inner one reduces every
--- answer of one card on one day to a single card-day (BR-182); the outer one
+-- answer of one card on one day to a single card-day (BR-192); the outer one
 -- counts those. Collapsing them into one `COUNT(DISTINCT card_id)` would count
 -- the cards correctly and lose the Learning/Reviewing split, because "did this
 -- card have a learning answer today" is a property of the card-day, not of any
 -- single row.
 --
 -- `MAX(...)` over the 0/1 flag is a boolean OR: the card-day is Learning if
--- **any** of its answers was `learning`, which is the priority BR-185 states.
+-- **any** of its answers was `learning`, which is the priority BR-195 states.
 -- Reviewing is then the remainder, computed by the domain, so
 -- `learning + reviewing = total` holds by construction rather than by two SQL
 -- expressions agreeing.
@@ -109,7 +109,7 @@ FROM card_days cd
 GROUP BY cd.localDayStart
 ORDER BY cd.localDayStart ASC;
 
--- Typed queries for Progress by Deck (M99.23, UC-12).
+-- Typed queries for Progress by Deck (M99.24, UC-13).
 --
 -- **The unit of counting is a card-day, not an answer** (BR-183). Answering the
 -- same card six times in one evening is one day of work on one card, and a

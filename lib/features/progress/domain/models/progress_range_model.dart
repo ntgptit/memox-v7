@@ -1,4 +1,4 @@
-/// The two windows Progress by Deck reports over (BR-194).
+/// The two windows Progress by Deck reports over (BR-184).
 ///
 /// **Two, and fixed.** A free date picker turns every figure into "compared to
 /// what?" and needs a second control before the first one has taught anybody
@@ -6,7 +6,7 @@
 /// habit. Anything between them says the same thing more slowly, and anything
 /// longer needs a chart rather than a number.
 ///
-/// The window is **whole local days ending with today** (BR-194): `last7Days`
+/// The window is **whole local days ending with today** (BR-184): `last7Days`
 /// covers today and the six days before it, so a person who studied this morning
 /// sees today's work immediately rather than at the next midnight.
 enum ProgressRange {
@@ -26,7 +26,7 @@ enum ProgressRange {
   /// "the last eight", and it should be wrong in one place at most.
   int get daysBeforeToday => dayCount - 1;
 
-  /// The window shown first (BR-194). The shorter one: it answers "am I keeping
+  /// The window shown first (BR-184). The shorter one: it answers "am I keeping
   /// up" which is the question somebody opening a progress screen is asking.
   static const ProgressRange initial = last7Days;
 }

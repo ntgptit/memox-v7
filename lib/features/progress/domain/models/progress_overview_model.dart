@@ -5,7 +5,7 @@ import 'progress_activity_day_model.dart';
 
 part 'progress_overview_model.freezed.dart';
 
-/// How many days the activity chart shows, including today (BR-186).
+/// How many days the activity chart shows, including today (BR-196).
 const int kProgressWindowDays = 7;
 
 /// Everything the Progress screen shows, from one read at one instant (UC-12).
@@ -20,11 +20,11 @@ const int kProgressWindowDays = 7;
 abstract class ProgressOverview with _$ProgressOverview {
   const factory ProgressOverview({
     /// Exactly [kProgressWindowDays] entries, oldest first, ending on today
-    /// (BR-186). Days with no activity are present with zeros — they are data,
+    /// (BR-196). Days with no activity are present with zeros — they are data,
     /// not gaps.
     required List<ProgressActivityDay> lastSevenDays,
 
-    /// Consecutive local days of activity ending at the anchor (BR-187).
+    /// Consecutive local days of activity ending at the anchor (BR-197).
     ///
     /// The anchor is today when today is active, and yesterday when it is not
     /// but yesterday is. Zero when neither is. Deliberately uncapped: a streak
@@ -43,7 +43,7 @@ abstract class ProgressOverview with _$ProgressOverview {
     required bool hasLifetimeActivity,
 
     /// Local midnight ahead of the read's `now` — the instant this whole
-    /// snapshot expires (BR-189).
+    /// snapshot expires (BR-199).
     ///
     /// Carried on the snapshot rather than recomputed by the controller for the
     /// AD-13 reason above: the boundary the timer waits for has to be the one
@@ -54,11 +54,11 @@ abstract class ProgressOverview with _$ProgressOverview {
 
   const ProgressOverview._();
 
-  /// Today, which is always the last entry of the window (BR-186).
+  /// Today, which is always the last entry of the window (BR-196).
   ProgressActivityDay get today => lastSevenDays.last;
 
   /// True when the streak is being held by yesterday rather than by today
-  /// (BR-187) — the state that needs its own sentence on screen, because a
+  /// (BR-197) — the state that needs its own sentence on screen, because a
   /// user who sees "7 days" beside "0 cards today" would otherwise read the
   /// two as contradicting each other.
   bool get isStreakHeldFromYesterday =>
@@ -70,11 +70,11 @@ abstract class ProgressOverview with _$ProgressOverview {
   /// ascending, one entry per day and none of them empty — which is exactly
   /// what the SQL aggregate produces. Nothing here re-reads a clock: [day]
   /// carries the single `now`/offset snapshot the whole emission is measured
-  /// against (BR-184).
+  /// against (BR-194).
   ///
   /// **The full history is the input, not the window.** The streak has no cap
-  /// (BR-187), so it cannot be computed from seven days; and "has ever studied"
-  /// (BR-186's empty case) cannot either. Passing the window and asking for
+  /// (BR-197), so it cannot be computed from seven days; and "has ever studied"
+  /// (BR-196's empty case) cannot either. Passing the window and asking for
   /// both was the first shape of this function, and it answered "1 day" for a
   /// user on day 300 of a streak.
   static ProgressOverview fromActivity({
@@ -101,7 +101,7 @@ abstract class ProgressOverview with _$ProgressOverview {
     );
   }
 
-  /// Seven entries, oldest first, zero-filled (BR-186).
+  /// Seven entries, oldest first, zero-filled (BR-196).
   ///
   /// Built by subtracting whole days from a UTC-flagged date, so a window that
   /// spans the end of a month, the end of a year or a leap day is ordinary
@@ -118,7 +118,7 @@ abstract class ProgressOverview with _$ProgressOverview {
         ProgressActivityDay(localDate: date, totalCards: 0, learningCards: 0);
   }, growable: false);
 
-  /// Consecutive active days ending at today, or at yesterday (BR-187).
+  /// Consecutive active days ending at today, or at yesterday (BR-197).
   static int _streak(
     Map<DateTime, ProgressActivityDay> byDate,
     DateTime todayDate,

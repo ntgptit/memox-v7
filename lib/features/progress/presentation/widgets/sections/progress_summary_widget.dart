@@ -17,7 +17,7 @@ import '../support/progress_labels_widget.dart';
 /// *days* would not: the same Tuesday can be active in two decks and is one day
 /// of study, so a fold would print a number nobody had. All four come from the
 /// same statement as the rows, so this panel and the list below it can never
-/// disagree (AD-13, BR-193).
+/// disagree (AD-13, BR-183).
 ///
 /// The heading states the window in words. The pills above already say it, but a
 /// screenshot of the panel alone, and a screen reader that has moved past the
@@ -89,7 +89,7 @@ class ProgressSummaryWidget extends StatelessWidget {
 /// an empty state was the first shape and it was wrong: a level with nothing
 /// studied still has decks, and "which decks did I neglect" is exactly the
 /// question a person asks in that state — so the rows stay, each showing its own
-/// zeroes (BR-197), and the explanation sits with the total it explains.
+/// zeroes (BR-187), and the explanation sits with the total it explains.
 ///
 /// **Neutral, never a warning.** A quiet week is a normal reading, not a fault,
 /// so this uses the same `onSurfaceVariant` as any other supporting line: no

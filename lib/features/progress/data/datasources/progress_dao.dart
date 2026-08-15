@@ -20,7 +20,7 @@ import '../../../../core/database/app_database.dart';
 /// split `DeckDao` keeps between `watchRootDeckSummaries` and
 /// `watchChildDeckLevel`.
 ///
-/// **No write method exists, and that is the contract** (BR-190, BR-198).
+/// **No write method exists, and that is the contract** (BR-190, BR-188).
 /// Progress reads what studying produced; it never adds to it, which is how the
 /// read-only guarantee is kept structurally rather than by review.
 ///
@@ -42,7 +42,7 @@ final class ProgressDao {
 
   final AppDatabase _db;
 
-  /// Local days with activity, oldest first (BR-182).
+  /// Local days with activity, oldest first (BR-196).
   ///
   /// **Two update sources, and the second one is not optional.** The generated
   /// query declares `readsFrom: {studyAnswers}`, so drift re-runs it whenever a
@@ -51,7 +51,7 @@ final class ProgressDao {
   /// inside SQLite, which drift never sees: the write it is told about is on
   /// `cards` or `decks`. Without the second subscription the screen keeps
   /// showing a deleted card's history until something else happens to touch an
-  /// answer, which BR-188 forbids and which no unit test on the query alone can
+  /// answer, which BR-199 forbids and which no unit test on the query alone can
   /// catch.
   ///
   /// The shape is `CardDao.watchCardList`'s, for the same reason it exists

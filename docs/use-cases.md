@@ -826,9 +826,9 @@ nào — trạng thái "chưa có gì" là một mặt hợp lệ, không phải
 3. Trong lúc chờ emission đầu tiên, màn hình hiện trạng thái loading có nhãn
    cho screen reader.
 4. Emission tới. Hệ thống hiển thị ba khối, cùng một snapshot:
-   **Current streak** (BR-187), **Today** với tổng số card cùng phân rã
-   Learning/Reviewing (BR-185), và **Last 7 days** đúng bảy cột theo thứ tự
-   cũ → mới, ngày trống là 0 (BR-186).
+   **Current streak** (BR-197), **Today** với tổng số card cùng phân rã
+   Learning/Reviewing (BR-195), và **Last 7 days** đúng bảy cột theo thứ tự
+   cũ → mới, ngày trống là 0 (BR-196).
    Ba khối này **không chiếm cả màn**: `/progress` là một màn duy nhất, và
    chúng là phần đầu của cấp thư viện trong UC-13 — cùng một vùng cuộn, dưới
    chúng là bộ chọn khoảng, bảng tổng và danh sách deck. Bố cục là việc của
@@ -839,21 +839,21 @@ nào — trạng thái "chưa có gì" là một mặt hợp lệ, không phải
 
 **Alternative flows:**
 - **A1 — Hôm nay chưa học nhưng hôm qua có:** Today hiện 0, và streak **vẫn
-  giữ** chuỗi kết thúc ở hôm qua (BR-187). Copy nói rõ đây là chuỗi đang giữ,
+  giữ** chuỗi kết thúc ở hôm qua (BR-197). Copy nói rõ đây là chuỗi đang giữ,
   không phải chuỗi đã mất.
 - **A2 — Chưa từng học lượt nào:** cả ba khối rỗng. Hệ thống hiện một mặt
   empty của cả màn với CTA thật dẫn sang branch Study, không phải một màn ba
   khối toàn số 0.
 - **A3 — Có một lượt mới ghi trong lúc màn đang mở:** người dùng học ở tab khác
   rồi quay lại, hoặc một answer được ghi khi màn còn sống — các con số tự cập
-  nhật, không cần Retry và không nháy toàn trang (BR-189).
+  nhật, không cần Retry và không nháy toàn trang (BR-199).
 - **A4 — Local midnight trôi qua trong lúc màn đang mở:** cửa sổ bảy ngày trượt
   một ngày, Today về 0, và streak chuyển sang nhánh "hôm qua active" của
-  BR-187 — tất cả không cần thao tác nào (BR-189).
+  BR-197 — tất cả không cần thao tác nào (BR-199).
 - **A5 — Reset learning progress ở màn khác rồi quay lại:** mọi con số giữ
-  nguyên, vì reset không đụng lịch sử (BR-188).
+  nguyên, vì reset không đụng lịch sử (BR-198).
 - **A6 — Xoá một card hoặc một deck ở màn khác rồi quay lại:** hoạt động của
-  các card đã xoá biến mất khỏi mọi ngày, kể cả ngày quá khứ (BR-188).
+  các card đã xoá biến mất khỏi mọi ngày, kể cả ngày quá khứ (BR-198).
 - **A7 — Chỉ lướt `browse` rồi thoát:** không có gì đổi — `browse` không ghi
   answer nên không tạo hoạt động (BR-201).
 
@@ -867,14 +867,14 @@ nào — trạng thái "chưa có gì" là một mặt hợp lệ, không phải
 **Postconditions:** Database không đổi ở mọi nhánh, kể cả nhánh lỗi và nhánh
 Retry (BR-190). Không session nào được mở, tiếp tục hay đóng.
 
-**Business rules:** BR-52, BR-105, BR-111, BR-200, BR-201, BR-202, BR-185,
-BR-186, BR-187, BR-188, BR-189, BR-190, BR-191
+**Business rules:** BR-52, BR-105, BR-111, BR-195,
+BR-196, BR-197, BR-198, BR-199, BR-190, BR-191
 
 **UI states:** loading · loaded-normal (có hoạt động trong cửa sổ) ·
 loaded-today-zero-streak-retained (A1) · empty-lifetime + CTA sang Study (A2) ·
 error + Retry (E1/E2). Live refresh (A3) và midnight rollover (A4) là **chuyển
 tiếp giữa hai loaded**, không phải state thứ sáu; luật cấm hạ màn về loading khi
-đã có dữ liệu nằm ở BR-189.
+đã có dữ liệu nằm ở BR-199.
 
 ## UC-13 · Xem tiến độ theo deck
 
@@ -891,22 +891,22 @@ trạng thái hợp lệ và có màn hình riêng.
 1. Người dùng mở tab Progress. Hệ thống hiển thị **cấp thư viện** ngay dưới
    ba khối tổng quan của UC-12 — cùng một màn `/progress`, một vùng cuộn: bộ
    chọn khoảng 7/30 ngày, một bảng tổng cho toàn bộ dữ liệu, và một hàng cho
-   mỗi root deck (BR-194). Chỉ cấp thư viện có phần đầu đó; `/progress/:deckId`
+   mỗi root deck (BR-184). Chỉ cấp thư viện có phần đầu đó; `/progress/:deckId`
    là cấp của một deck và mở thẳng vào bộ chọn.
 2. Mỗi hàng mang tên deck, đường dẫn của nó khi có, và bốn số của khoảng đang
    chọn: số thẻ đã học, số ngày có học, số card-day học mới và số card-day ôn
-   tập (BR-192, BR-193, BR-196). Số của một hàng phủ **toàn bộ subtree** của
-   deck đó (BR-195).
+   tập (BR-182, BR-183, BR-186). Số của một hàng phủ **toàn bộ subtree** của
+   deck đó (BR-185).
 3. Danh sách sắp theo số thẻ đã học giảm dần, tie-break bằng tên đã fold rồi
-   id; deck chưa học gì vẫn hiện và đứng cuối (BR-197).
+   id; deck chưa học gì vẫn hiện và đứng cuối (BR-187).
 4. Người dùng chạm `30 ngày`. Mọi số trên màn hình và thứ tự danh sách đổi ngay
    sang khoảng dài hơn — không có lần đọc thứ hai và không có trạng thái loading
-   (BR-194, BR-197).
+   (BR-184, BR-187).
 5. Người dùng chạm một hàng. Hệ thống mở **cấp của deck đó**: cùng bố cục, tổng
    của riêng subtree đó, và một hàng cho mỗi deck con trực tiếp. Back trả về
    đúng cấp vừa rời, ở mọi độ sâu.
 6. Trong lúc màn hình mở, một lượt học được ghi ở nơi khác — hoặc một thẻ được
-   chuyển deck, hoặc một deck bị xoá — thì các số tự cập nhật (BR-199).
+   chuyển deck, hoặc một deck bị xoá — thì các số tự cập nhật (BR-189).
 
 **Alternative flows:**
 - **A1 — Deck chứa thẻ chứ không chứa deck con:** cấp đó không có hàng nào để
@@ -919,16 +919,16 @@ trạng thái hợp lệ và có màn hình riêng.
   và một nút nhảy tab từ màn hình tiến độ đọc như một đường vòng.
 - **A3 — Có deck nhưng khoảng đang chọn không có hoạt động nào:** danh sách
   **vẫn liệt kê đủ mọi deck** với các số 0, và bảng tổng mang thêm một dòng
-  giải thích cùng gợi ý đổi sang khoảng dài hơn (BR-197). Trạng thái này trung
+  giải thích cùng gợi ý đổi sang khoảng dài hơn (BR-187). Trạng thái này trung
   tính: không dùng màu lỗi, không trách móc.
 - **A4 — Nửa đêm địa phương đi qua khi màn hình đang mở:** cửa sổ trượt một
-  ngày và hệ thống tự đọc lại, dù không có write nào trong database (BR-194,
-  BR-199).
+  ngày và hệ thống tự đọc lại, dù không có write nào trong database (BR-184,
+  BR-189).
 
 **Error flows:**
 - **E1 — Đọc dữ liệu thất bại:** hệ thống hiện lý do đã localize theo **kiểu**
   failure — không bao giờ là `Failure.message` — cùng `Try again`, và nói rõ
-  lịch sử học không bị ảnh hưởng vì đọc tiến độ không ghi gì (BR-198). Retry mở
+  lịch sử học không bị ảnh hưởng vì đọc tiến độ không ghi gì (BR-188). Retry mở
   lại lần đọc từ đầu.
 - **E2 — Deck của deep link không còn tồn tại:** đây **không** phải lỗi. Hệ
   thống hiện một empty state riêng và chỉ đề nghị đường quay lại cấp thư viện;
@@ -936,10 +936,10 @@ trạng thái hợp lệ và có màn hình riêng.
 
 **Postconditions:** Database không đổi — nội dung, timestamp, `content_type`,
 study state, history, cờ và tag đều nguyên vẹn, và không session nào được mở
-hay đóng (BR-198).
+hay đóng (BR-188).
 
-**Business rules:** BR-43, BR-51, BR-55, BR-56, BR-57, BR-76, BR-105, BR-192,
-BR-193, BR-194, BR-195, BR-196, BR-197, BR-198, BR-199
+**Business rules:** BR-43, BR-51, BR-55, BR-56, BR-57, BR-76, BR-105, BR-182,
+BR-183, BR-184, BR-185, BR-186, BR-187, BR-188, BR-189
 
 **UI states:** loading · mixed activity (một số deck có, một số không) ·
 all-zero (có deck, khoảng rỗng) · no decks (cấp thư viện) · no sub-decks (cấp
@@ -952,7 +952,7 @@ state "empty selection": bộ chọn luôn có đúng một khoảng được ch
 |---|---|
 | Đưa deck con lên thành root deck | Cần quyết định scheduler mới; là tính năng riêng, không phải phép di chuyển (UC-09 A2) |
 | Tìm kiếm card (S1) | Should-have, chưa tới lượt |
-| ~~Thống kê / streak (S2)~~ | **Đã đặc tả ở M99.23, M99.24 và M99.25** — UC-12 với BR-182…BR-191 chốt đơn vị đếm, partition, streak và phạm vi v1; UC-13 với BR-192…BR-199 chốt tiến độ theo deck; UC-14 với BR-200…BR-202 chốt tab Study đọc thư viện thật |
+| ~~Thống kê / streak (S2)~~ | **Đã đặc tả ở M99.23, M99.24 và M99.25** — UC-12 với BR-182…BR-191 chốt đơn vị đếm, partition, streak và phạm vi v1; UC-13 với BR-182…BR-189 chốt tiến độ theo deck; UC-14 với BR-200…BR-202 chốt tab Study đọc thư viện thật |
 | Đảo chiều card (S3) | Should-have — **một nửa đã đóng ở M99.27**: UC-15 và BR-203…BR-209 cho phép hỏi ngược trong một phiên `self_assess` của deck `sm2` mà **không** ghi lại thẻ, nên phần còn mở là đảo chiều ở các mode khác |
 | ~~Export (nửa còn lại của N1)~~ | **Đã đặc tả ở M99.21** — UC-11 và BR-174…BR-181 chốt scope, encoder, filename, share và quyền riêng tư trước khi viết code |
 | Nhắc nhở hằng ngày (N2) | Nice-to-have, cần quyền notification |

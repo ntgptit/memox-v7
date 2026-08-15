@@ -9,12 +9,12 @@ part 'deck_activity_model.freezed.dart';
 /// One deck's row on the Progress by Deck list: where it sits, and what it
 /// amounts to in each of the two windows.
 ///
-/// **Both windows ride on every row** (BR-194). They come from one statement, so
+/// **Both windows ride on every row** (BR-184). They come from one statement, so
 /// switching the range on screen is a field access rather than a re-read — which
 /// is what makes it impossible for the 7-day figure and the 30-day figure to
 /// describe two different snapshots of the tree.
 ///
-/// The metrics cover the deck's **whole subtree** (BR-195): its own cards and
+/// The metrics cover the deck's **whole subtree** (BR-185): its own cards and
 /// every descendant's. Sibling subtrees are disjoint, so the rows of one level
 /// never double-count a card between them.
 @freezed

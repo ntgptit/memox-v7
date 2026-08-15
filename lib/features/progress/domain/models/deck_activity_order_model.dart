@@ -1,7 +1,7 @@
 import 'deck_activity_model.dart';
 import 'progress_range_model.dart';
 
-/// The order the deck list is read in (BR-197): busiest first, then a tie-break
+/// The order the deck list is read in (BR-187): busiest first, then a tie-break
 /// that never moves.
 ///
 /// **Most active first, because the list is an answer and not an index.** A
@@ -22,7 +22,7 @@ import 'progress_range_model.dart';
 /// behaving differently from another is not a tie-break, it is a bug with a
 /// locale attached.
 ///
-/// **Zero-activity decks stay in the list** (BR-197). They sort last, which is
+/// **Zero-activity decks stay in the list** (BR-187). They sort last, which is
 /// where they belong, but hiding them would answer "which decks did I neglect"
 /// by removing the decks that answer it.
 ///
@@ -54,7 +54,7 @@ int _compare(DeckActivity a, DeckActivity b, ProgressRange range) {
 /// The comparison form of a deck name: trimmed and case-folded with Dart's
 /// Unicode-aware `toLowerCase`.
 ///
-/// Public because the tests that pin BR-197 have to fold the same way the sort
+/// Public because the tests that pin BR-187 have to fold the same way the sort
 /// does; a test that folded by hand would be asserting against its own copy of
 /// the rule.
 String foldDeckName(String raw) => raw.trim().toLowerCase();

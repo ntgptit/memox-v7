@@ -4,7 +4,7 @@ import 'package:memox/features/progress/domain/models/progress_activity_day_mode
 import 'package:memox/features/progress/domain/models/progress_overview_model.dart';
 
 /// `ProgressOverview.fromActivity` — the window, the zero-fill and the streak
-/// (BR-186, BR-187), with no database and no clock anywhere near it.
+/// (BR-196, BR-197), with no database and no clock anywhere near it.
 ///
 /// These are the rules that would be hardest to see going wrong in production:
 /// a streak that silently caps at seven, a window that loses a day at the end of
@@ -260,7 +260,7 @@ void main() {
 
   group('the Learning / Reviewing partition', () {
     test('reviewing is the remainder, so the halves always sum to the total', () {
-      // Derived rather than stored, which is what makes BR-185's identity true
+      // Derived rather than stored, which is what makes BR-195's identity true
       // by construction: two independently counted columns can disagree, and a
       // card answered both ways in one day is exactly where they would.
       final day = activity(date(2026, 8, 12), total: 9, learning: 4);

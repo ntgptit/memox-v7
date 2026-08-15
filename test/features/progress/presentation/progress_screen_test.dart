@@ -112,7 +112,7 @@ void main() {
       tester,
     ) async {
       // The unit is the point: the count is distinct cards, not turns taken
-      // (BR-182), and a bare figure would be read as the latter.
+      // (BR-192), and a bare figure would be read as the latter.
       await pumpProgressScreen(
         tester,
         repository: seeded(
@@ -131,7 +131,7 @@ void main() {
     testWidgets('the chart shows seven rows, zeros included, today last', (
       tester,
     ) async {
-      // A zero day is data (BR-186, P4). Dropping it would make the chart a
+      // A zero day is data (BR-196, P4). Dropping it would make the chart a
       // five-day week that reads as quiet rather than as broken.
       await pumpProgressScreen(
         tester,
