@@ -85,7 +85,7 @@ void main() {
     expect(
       find.descendant(
         of: find.byType(StudyHomeWorkloadItemWidget).first,
-        matching: find.bySemanticsLabel(english.studyHomeOverdueLabel(2)),
+        matching: find.bySemanticsLabel('2 ${english.studyHomeOverdueWord}'),
       ),
       findsNothing,
     );
@@ -177,9 +177,9 @@ void main() {
       );
     }
     for (final label in <String>[
-      english.studyHomeOverdueLabel(2),
-      english.studyHomeDueTodayLabel(5),
-      english.studyHomeNewLabel(12),
+      '2 ${english.studyHomeOverdueWord}',
+      '5 ${english.studyHomeDueTodayWord}',
+      '12 ${english.studyHomeNewWord}',
     ]) {
       expect(
         find.descendant(of: row, matching: find.text(label)),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:memox/core/theme/theme_context_extension.dart';
+import 'package:memox/core/theme/app_spacing.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
+import 'package:memox/shared/widgets/mx_metric_well.dart';
 import 'package:memox/shared/widgets/mx_list_tile.dart';
 import 'package:memox/shared/widgets/mx_text_field.dart';
 import 'package:widgetbook/widgetbook.dart';
@@ -137,6 +139,50 @@ WidgetbookComponent cardComponent() {
                 _ => null,
               },
               child: Text(content, style: context.texts.bodyMedium),
+            ),
+          );
+        },
+      ),
+    ],
+  );
+}
+
+WidgetbookComponent metricWellComponent() {
+  return WidgetbookComponent(
+    name: 'MxMetricWell',
+    useCases: <WidgetbookUseCase>[
+      WidgetbookUseCase(
+        name: 'Playground',
+        builder: (BuildContext context) {
+          // The two states every caller has: a metric with something in it, and
+          // one at rest. What the catalogue is for here is that the *shape*
+          // does not move between them — the deck summary, Study Home and
+          // Progress all anchor on this, and a well that changed size with its
+          // state would break three grids at once.
+          final isActive = context.knobs.boolean(
+            label: 'has something waiting',
+            initialValue: true,
+          );
+
+          return CatalogCenterPage(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                MxMetricWell(
+                  icon: isActive ? Icons.event_busy : Icons.event_busy_outlined,
+                  tint: isActive
+                      ? context.colors.onErrorContainer
+                      : context.colors.onSurfaceVariant,
+                  wellColor: isActive
+                      ? context.colors.errorContainer
+                      : context.semanticColors.surfaceMuted,
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                Text(
+                  isActive ? '12 overdue' : '0 overdue',
+                  style: context.texts.bodySmall,
+                ),
+              ],
             ),
           );
         },

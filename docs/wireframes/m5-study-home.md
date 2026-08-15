@@ -7,8 +7,8 @@
 | **Scope** | Màn hình `/study`: anatomy, Resume card, danh sách root deck, mọi trạng thái, hợp đồng geometry, responsive/a11y. Ngoài phạm vi: luật nghiệp vụ (BR-200…BR-202), luồng (UC-14), study entry của một deck (UC-05), phiên học (`m5-study-modes.md`) |
 | **Source of truth for** | Anatomy Study Home · copy các trạng thái của Study Home · hợp đồng geometry của Study Home · responsive/a11y contract của Study Home |
 | **Depends on** | `../use-cases.md` (UC-14), `../business-rules.md` (BR-200…BR-202, BR-161, BR-162), `../architecture.md` (AD-13, AD-15, AD-16), `m5-study-modes.md` |
-| **Updated by task** | M5.26 (Study Home v1) |
-| **Last updated** | 2026-08-14 |
+| **Updated by task** | M5.26 (Study Home v1) · M99.26 (một ngữ pháp cho Library / Study / Progress — W1, G9, G12) |
+| **Last updated** | 2026-08-15 |
 
 Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham chiếu bằng ID theo
 `document-conventions.md` §5; chỗ nào wireframe và BR có vẻ mâu thuẫn thì BR
@@ -56,7 +56,7 @@ supporting copy         (bodyMedium, onSurfaceVariant)
 │ [▶ Resume]                         │
 └────────────────────────────────────┘
 
-Study next                (titleMedium)
+STUDY NEXT                (labelMedium + sectionLabelTracking,
 [dòng "chưa có gì tới hạn" — chỉ khi mọi workload = 0]
 
 ┌────────────────────────────────────┐
@@ -122,10 +122,10 @@ rỗng. Chúng nay có phép đo thật, và tên test là cột cuối.
 | G6 | Padding bốn phía trong thẻ, cả Resume card lẫn deck row | `AppSpacing.lg` = 16, mặc định của `MxCard` | `the card pads its content by one step on every side` · `the resume card pads its content the same way` |
 | G7 | Trong thẻ: tên → meta, meta → workload | `AppSpacing.xs` = 4, `AppSpacing.sm` = 8 | `the identity block breaks at xs, then sm before the counts` |
 | G8 | Trong thẻ: workload → hàng hành động | `AppSpacing.md` = 12 | `the verb sits a section step below the counts` |
-| G9 | Icon workload cùng dải với nhãn `bodySmall`, cách nhãn `xs` — **ở `textScaler` 1.0** | `AppIconSize.sm` = 16, gap `AppSpacing.xs` = 4 | `a workload glyph rides the body baseline, one xs from its word` |
+| G9 | Neo workload là **`MxMetricWell`**: glyph `sm` trong well bo tròn, cách chữ `xs` tính **từ mép well** — ở `textScaler` 1.0 | well = `AppIconSize.sm` 16 + `AppSpacing.xs` 4 mỗi bên = **24**; gap well→chữ `AppSpacing.xs` = 4; well và chữ lệch tâm dọc **3,6dp** (hàng canh theo alphabetic baseline, mà well không có baseline chữ) | `a workload glyph rides the body baseline, one xs from its word` |
 | G10 | Khoảng cách giữa ba chỉ số workload | `AppSpacing.md` = 12 | `the three counts are one step apart` |
 | G11 | Vùng chạm mọi hành động | ≥ `AppSpacing.minimumTouchTarget` = 48 | `every action clears the 48dp floor` |
-| G12 | Ở **cuối** scroll, hàng cuối cách mép dưới viewport đúng một gutter | `mxScreenGutter` = 16 (12 khi < 360dp) | `the last row clears the bottom bar at the end of the scroll` |
+| G12 | Ở **cuối** scroll, hàng cuối cách mép dưới viewport `lg` ở **mọi** bề rộng — hai bên vẫn theo gutter | `AppSpacing.lg` = 16 cố định; hai bên `mxScreenGutter` = 16 (12 khi < 360dp), nên ở 320dp là 12 hai bên và 16 dưới (M99.26 / D21) | `the last row clears the bottom bar at the end of the scroll` |
 | G13 | Tên deck dài wrap tối đa 2 dòng rồi ellipsis, hàng vẫn giữ nút | `maxLines: 2` | `a long deck name wraps to two lines and stops` |
 | G14 | Error state và empty state cùng một khung, không cái nào inset thêm | trùng `MxContentShell` cả `left` lẫn `width` | `the error state is inset like the empty states, not more` · `an empty library is inset the same way` |
 

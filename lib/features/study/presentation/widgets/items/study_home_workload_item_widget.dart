@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
-import '../../../domain/models/study_home_deck_model.dart';
 import '../../../../../shared/widgets/mx_metric_well.dart';
+import '../../../domain/models/study_home_deck_model.dart';
 
 /// What is waiting in one deck: `2 overdue` `5 due today` `12 new` (BR-201).
 ///
@@ -27,6 +27,13 @@ import '../../../../../shared/widgets/mx_metric_well.dart';
 /// **One semantics node, not three.** A screen reader should hear the row's
 /// workload as one phrase; three separate numbers with no relation between them
 /// is what a badge soup sounds like.
+///
+/// **In its one production call site that node is swallowed, on purpose.**
+/// `StudyHomeDeckItemWidget` wraps the name, the algorithm and this row in a
+/// single container whose sentence names the deck — because a workload phrase
+/// that says whose it is not is the same problem one level out. The annotation
+/// below is what this widget says when it stands alone, and it is kept so that
+/// standing alone is not a silent regression.
 class StudyHomeWorkloadItemWidget extends StatelessWidget {
   const StudyHomeWorkloadItemWidget({required this.deck, super.key});
 

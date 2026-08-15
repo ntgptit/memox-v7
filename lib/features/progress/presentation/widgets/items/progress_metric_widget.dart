@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
-import '../../../domain/models/deck_activity_metrics_model.dart';
 import '../../../../../shared/widgets/mx_metric_well.dart';
+import '../../../domain/models/deck_activity_metrics_model.dart';
 
 /// How large the numerals in a metric grid read.
 ///
@@ -289,7 +289,9 @@ class _LearningMetric extends StatelessWidget {
         child: _Metric(
           count: count,
           word: context.l10n.progressLearningMetricWord,
-          icon: Icons.auto_awesome_outlined,
+          // E5: filled once the count is non-zero, outlined at rest — the same
+          // pair the deck hero and Study Home use for this fact.
+          icon: count > 0 ? Icons.auto_awesome : Icons.auto_awesome_outlined,
           tint: tint,
           wellColor: semantic.surfaceMuted,
           scale: scale,

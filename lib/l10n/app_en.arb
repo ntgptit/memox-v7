@@ -2969,33 +2969,6 @@
   "@studyHomeNothingDueMessage": {
     "description": "Supporting line when every listed deck has an empty workload. Not an error and not an achievement — BR-29 makes a quiet schedule the product working."
   },
-  "studyHomeOverdueLabel": "{count} overdue",
-  "@studyHomeOverdueLabel": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    },
-    "description": "Due cards whose day has already passed (BR-162). A count, never an age."
-  },
-  "studyHomeDueTodayLabel": "{count} due today",
-  "@studyHomeDueTodayLabel": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    },
-    "description": "Due cards still inside today's local day (BR-162)."
-  },
-  "studyHomeNewLabel": "{count} new",
-  "@studyHomeNewLabel": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    },
-    "description": "Cards that have not finished the learning chain (BR-90, BR-142)."
-  },
   "studyHomeWorkloadSemanticLabel": "{overdue} overdue, {dueToday} due today, {newCount} new",
   "@studyHomeWorkloadSemanticLabel": {
     "placeholders": {
@@ -3085,14 +3058,14 @@
   },
   "studyHomeOverdueWord": "overdue",
   "@studyHomeOverdueWord": {
-    "description": "The word half of a workload metric, rendered beside the numeral so the two can carry different ink — the numeral stays neutral and only the word takes the metric tint, which is the grammar the deck summary and Progress already use. The joined form (studyHome*Label) is still what a screen reader hears."
+    "description": "The word half of a workload metric, rendered beside the numeral so the two can carry different ink — the numeral stays neutral and only the word takes the metric tint, which is the grammar the deck summary and Progress already use. What a screen reader hears is neither half but studyHomeWorkloadSemanticLabel, nested inside the row sentence."
   },
   "studyHomeDueTodayWord": "due today",
   "@studyHomeDueTodayWord": {
-    "description": "The word half of a workload metric, rendered beside the numeral so the two can carry different ink — the numeral stays neutral and only the word takes the metric tint, which is the grammar the deck summary and Progress already use. The joined form (studyHome*Label) is still what a screen reader hears."
+    "description": "The word half of a workload metric, rendered beside the numeral so the two can carry different ink — the numeral stays neutral and only the word takes the metric tint, which is the grammar the deck summary and Progress already use. What a screen reader hears is neither half but studyHomeWorkloadSemanticLabel, nested inside the row sentence."
   },
   "studyHomeNewWord": "new",
   "@studyHomeNewWord": {
-    "description": "The word half of a workload metric, rendered beside the numeral so the two can carry different ink — the numeral stays neutral and only the word takes the metric tint, which is the grammar the deck summary and Progress already use. The joined form (studyHome*Label) is still what a screen reader hears."
+    "description": "The word half of a workload metric, rendered beside the numeral so the two can carry different ink — the numeral stays neutral and only the word takes the metric tint, which is the grammar the deck summary and Progress already use. What a screen reader hears is neither half but studyHomeWorkloadSemanticLabel, nested inside the row sentence."
   }
 }

@@ -88,9 +88,9 @@ void main() {
 
       // An absent metric is ambiguous in exactly the way the line exists to
       // prevent — "no overdue count" could mean none, or could mean untracked.
-      expect(find.text(english.studyHomeOverdueLabel(0)), findsOneWidget);
-      expect(find.text(english.studyHomeDueTodayLabel(0)), findsOneWidget);
-      expect(find.text(english.studyHomeNewLabel(0)), findsOneWidget);
+      expect(find.text('0 ${english.studyHomeOverdueWord}'), findsOneWidget);
+      expect(find.text('0 ${english.studyHomeDueTodayWord}'), findsOneWidget);
+      expect(find.text('0 ${english.studyHomeNewWord}'), findsOneWidget);
       // And the row keeps its way in: BR-29 makes nothing due the schedule
       // working rather than a locked door. Scoped to the row, because the tab
       // label and the screen title are the same word — an unscoped finder would
@@ -141,10 +141,10 @@ void main() {
         tester.getSemantics(
           find.text(english.studyHomeNextTitle.toUpperCase()),
         ),
-        matchesSemantics(
-          label: english.studyHomeNextTitle.toUpperCase(),
-          isHeader: true,
-        ),
+        // The **written** sentence, not the painted one: the uppercase is a
+        // typographic treatment, and some TTS engines spell an all-caps run out
+        // letter by letter.
+        matchesSemantics(label: english.studyHomeNextTitle, isHeader: true),
       );
       handle.dispose();
     });

@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_metric_well.dart';
 import '../../../domain/models/deck_list_snapshot_model.dart';
 import '../items/deck_overdue_badge_widget.dart';
-import '../../../../../shared/widgets/mx_metric_well.dart';
 
 /// The hero's metric band: the four disjoint sets of BR-162, most-urgent
 /// first, as an explicit 2×2 grid — two rows of two `Expanded` cells, each
@@ -198,7 +198,10 @@ class _OverdueSummaryMetric extends StatelessWidget {
         child: _HeroMetric(
           count: count,
           word: word,
-          icon: Icons.event_busy,
+          // E5: outlined at rest, filled when there is a backlog. It was filled
+          // unconditionally, so a deck with nothing overdue still wore the
+          // solid crossed-out calendar.
+          icon: hasBacklog ? Icons.event_busy : Icons.event_busy_outlined,
           tint: hasBacklog
               ? context.colors.onErrorContainer
               : context.colors.onSurfaceVariant,
@@ -308,7 +311,10 @@ class _NewSummaryMetric extends StatelessWidget {
         child: _HeroMetric(
           count: count,
           word: context.l10n.deckHeroNewMetricWord,
-          icon: Icons.auto_awesome_outlined,
+          // E5 again, the other way round: outlined at rest **and** when there
+          // is work, so new cards never got the filled glyph the other two
+          // metrics use to say "something is here".
+          icon: count > 0 ? Icons.auto_awesome : Icons.auto_awesome_outlined,
           tint: ink,
           wellColor: semantic.surfaceMuted,
           wordInk: ink,

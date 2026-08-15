@@ -142,6 +142,12 @@ class _StudyHomeList extends StatelessWidget {
         // and cannot jump by heading at all.
         Semantics(
           header: true,
+          // **The name is the sentence, not the shouting.** The uppercase is a
+          // typographic treatment; some TTS engines spell an all-caps run out
+          // letter by letter, so the label states the heading as written and
+          // the painted text is excluded.
+          label: l10n.studyHomeNextTitle,
+          excludeSemantics: true,
           child: Text(
             // **The app's one section-label treatment** (M99.26): `labelMedium`,
             // `onSurfaceVariant`, and the tracking `AppTypography` keeps for

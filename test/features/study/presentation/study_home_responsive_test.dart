@@ -68,9 +68,14 @@ void main() {
           fakeStudyHomeDeck(
             deckId: 'long',
             deckName: 'Từ vựng chuyên ngành công nghệ thông tin',
-            overdueCount: 128,
-            dueTodayCount: 64,
-            newCount: 256,
+            // **Four digits, because the comment says four digits.** The
+            // fixture said "four-digit counts" and carried 256; a subtree
+            // aggregate reaches four for anyone who has been away a while, and
+            // `1024 overdue` clipped to `10…` reads as ten rather than as a
+            // truncation.
+            overdueCount: 1024,
+            dueTodayCount: 2048,
+            newCount: 4096,
           ),
         ],
       );
@@ -78,9 +83,9 @@ void main() {
       expect(tester.takeException(), isNull);
 
       // **Overflow throws; ellipsis does not.** Every metric label is
-      // `maxLines: 1, overflow: ellipsis`, so truncation is the widget's own
-      // quiet default — a test that only watched for an exception would call a
-      // cut-off count a pass. Asked directly instead.
+      // `maxLines: 2` with the widget's own quiet ellipsis beyond that, so a
+      // truncated count would not raise — a test that only watched for an
+      // exception would call a cut-off count a pass. Asked directly instead.
       final truncated = tester
           .renderObjectList<RenderParagraph>(
             find.descendant(
@@ -140,9 +145,14 @@ void main() {
             deckName:
                 'Từ vựng chuyên ngành công nghệ thông tin và truyền thông '
                 'dành cho kỳ thi cuối khoá',
-            overdueCount: 128,
-            dueTodayCount: 64,
-            newCount: 256,
+            // **Four digits, because the comment says four digits.** The
+            // fixture said "four-digit counts" and carried 256; a subtree
+            // aggregate reaches four for anyone who has been away a while, and
+            // `1024 overdue` clipped to `10…` reads as ten rather than as a
+            // truncation.
+            overdueCount: 1024,
+            dueTodayCount: 2048,
+            newCount: 4096,
           ),
         ],
       );
@@ -176,9 +186,14 @@ void main() {
           fakeStudyHomeDeck(
             deckId: 'long',
             deckName: 'Từ vựng chuyên ngành công nghệ thông tin',
-            overdueCount: 128,
-            dueTodayCount: 64,
-            newCount: 256,
+            // **Four digits, because the comment says four digits.** The
+            // fixture said "four-digit counts" and carried 256; a subtree
+            // aggregate reaches four for anyone who has been away a while, and
+            // `1024 overdue` clipped to `10…` reads as ten rather than as a
+            // truncation.
+            overdueCount: 1024,
+            dueTodayCount: 2048,
+            newCount: 4096,
           ),
         ],
       );

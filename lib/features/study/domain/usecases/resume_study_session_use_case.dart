@@ -54,6 +54,13 @@ class ResumeStudySessionUseCase {
     // arrives with the deck context, and reading it twice would be two reads of
     // one fact (AD-13).
     if (session.schedulerGeneration != context.schedulerGeneration) {
+      // `NotFoundFailure`, not the `ConflictFailure(staleGeneration)` the write
+      // path raises for the same condition (`study_repository_impl`). The two
+      // moments are different questions: a write that arrives stale is a
+      // conflict the user caused mid-session, while here the session simply is
+      // not offerable any more — the same answer as an id that never existed,
+      // which is what the three checks in `_resolve` already give. One honest
+      // "nothing to resume" beats two failures the UI renders identically.
       throw const NotFoundFailure(message: 'No session to resume');
     }
 

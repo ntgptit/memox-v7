@@ -3959,7 +3959,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 203,
+      "line": 206,
       "widget_context": "_OverdueSummaryMetric",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3970,7 +3970,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 204,
+      "line": 207,
       "widget_context": "_OverdueSummaryMetric",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3981,7 +3981,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 206,
+      "line": 209,
       "widget_context": "_OverdueSummaryMetric",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -3992,7 +3992,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 209,
+      "line": 212,
       "widget_context": "_OverdueSummaryMetric",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -4003,7 +4003,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 210,
+      "line": 213,
       "widget_context": "_OverdueSummaryMetric",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -4014,7 +4014,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 242,
+      "line": 245,
       "widget_context": "_DueTodaySummaryMetric",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -4025,7 +4025,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 246,
+      "line": 249,
       "widget_context": "_DueTodaySummaryMetric",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -4036,7 +4036,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 277,
+      "line": 280,
       "widget_context": "_ScheduledSummaryMetric",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -4047,7 +4047,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 278,
+      "line": 281,
       "widget_context": "_ScheduledSummaryMetric",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -4058,7 +4058,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 279,
+      "line": 282,
       "widget_context": "_ScheduledSummaryMetric",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -4069,7 +4069,7 @@
     },
     {
       "file": "lib/features/deck/presentation/widgets/sections/deck_summary_metrics_widget.dart",
-      "line": 302,
+      "line": 305,
       "widget_context": "_NewSummaryMetric",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -4157,7 +4157,7 @@
     },
     {
       "file": "lib/features/progress/presentation/widgets/items/progress_metric_widget.dart",
-      "line": 323,
+      "line": 325,
       "widget_context": "_ReviewingMetric",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -4168,7 +4168,7 @@
     },
     {
       "file": "lib/features/progress/presentation/widgets/items/progress_metric_widget.dart",
-      "line": 324,
+      "line": 326,
       "widget_context": "_ReviewingMetric",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -4245,7 +4245,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/items/study_home_workload_item_widget.dart",
-      "line": 39,
+      "line": 46,
       "widget_context": "StudyHomeWorkloadItemWidget",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -4256,7 +4256,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/items/study_home_workload_item_widget.dart",
-      "line": 77,
+      "line": 84,
       "widget_context": "StudyHomeWorkloadItemWidget",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -4267,7 +4267,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/items/study_home_workload_item_widget.dart",
-      "line": 80,
+      "line": 87,
       "widget_context": "StudyHomeWorkloadItemWidget",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -4278,7 +4278,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/items/study_home_workload_item_widget.dart",
-      "line": 168,
+      "line": 175,
       "widget_context": "_Metric",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -4410,7 +4410,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_home_body_section_widget.dart",
-      "line": 154,
+      "line": 160,
       "widget_context": "_StudyHomeList",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4421,7 +4421,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_home_body_section_widget.dart",
-      "line": 164,
+      "line": 170,
       "widget_context": "_StudyHomeList",
       "element_kind": "text",
       "source_kind": "theme-token",
