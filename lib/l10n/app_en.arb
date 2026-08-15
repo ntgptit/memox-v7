@@ -267,7 +267,7 @@
   },
   "retryAction": "Retry",
   "@retryAction": {
-    "description": "Button that re-runs a failed read. On the deck list it re-subscribes to the database stream."
+    "description": "The app-wide retry label, on every surface that offers recovery from a failed operation — a read that did not land, a write that was refused, a platform call that was rejected. Deliberately generic: three surfaces now share it (the deck list re-subscribes to a stream, the Settings error band re-sends a write, the daily-reminder band re-runs whichever of enable, disable or change-time failed), and a label naming one of them would be wrong on the other two. Its previous description named only the read."
   },
   "deckCreateRootAction": "New deck",
   "@deckCreateRootAction": {

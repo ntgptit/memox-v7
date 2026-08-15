@@ -9747,7 +9747,6 @@ thế không đổi bố cục.
         và cùng lượt chạy với M99.28 và M99.29.
 - **Checklist phases:** 6, 10
 
-
 ### M99.27 · Reverse Self-assess v1 — chiều hỏi cho phiên self-assess
 
 - **Status:** **done**

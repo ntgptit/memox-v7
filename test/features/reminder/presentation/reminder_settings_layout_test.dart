@@ -1,139 +1,32 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memox/core/theme/app_theme.dart';
-import 'package:memox/core/time/clock_provider.dart';
-import 'package:memox/core/time/time_zone_provider.dart';
-import 'package:memox/features/reminder/di/reminder_platform_repository_provider.dart';
-import 'package:memox/features/reminder/di/reminder_settings_repository_provider.dart';
-import 'package:memox/features/reminder/di/reminder_workload_repository_provider.dart';
 import 'package:memox/features/reminder/domain/models/reminder_capability_model.dart';
-import 'package:memox/features/reminder/presentation/screens/reminder_settings_screen.dart';
-import 'package:memox/features/reminder/presentation/widgets/sections/reminder_banner_section_widget.dart';
-import 'package:memox/l10n/generated/app_localizations.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
-import 'package:memox/shared/widgets/mx_card.dart';
 
 import '../support/fake_reminder_platform.dart';
+import '../support/reminder_screen_harness.dart';
+import 'package:flutter/rendering.dart';
+import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/features/reminder/presentation/widgets/sections/reminder_banner_section_widget.dart';
+import 'package:memox/shared/widgets/mx_card.dart';
 
-/// What the reminder screen looks like, and how it is announced.
+/// The M6 geometry contract (G1, G4, G5, G7), measured with `getRect` and
+/// `didExceedMaxLines` rather than asserted by eye.
 ///
-/// The behavioural half is `reminder_settings_screen_test.dart`; this one holds
-/// the M6 geometry contract (G1, G4, G7) and the A-items, which are measured
-/// with `getRect`, `didExceedMaxLines` and the semantics tree rather than
-/// asserted by eye.
+/// The behavioural half is `reminder_settings_screen_test.dart`; how the screen
+/// is announced is `reminder_settings_a11y_test.dart`.
 void main() {
   final english = AppLocalizationsEn();
-  final now = DateTime.utc(2026, 7, 29, 3);
-  const offset = Duration(hours: 7);
 
-  late FakeReminderSettings settings;
-  late FakeReminderPlatform platform;
+  late ReminderScreenHarness harness;
 
-  setUp(() {
-    settings = FakeReminderSettings();
-    platform = FakeReminderPlatform();
-  });
-
-  Future<void> pumpScreen(
-    WidgetTester tester, {
-    Size surface = const Size(393, 852),
-    double textScale = 1,
-    Locale locale = const Locale('en'),
-  }) async {
-    tester.view.physicalSize = surface;
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
-
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          reminderSettingsRepositoryProvider.overrideWithValue(settings),
-          reminderPlatformRepositoryProvider.overrideWithValue(platform),
-          reminderWorkloadRepositoryProvider.overrideWithValue(
-            FakeReminderWorkload(),
-          ),
-          clockProvider.overrideWithValue(() => now),
-          utcOffsetProvider.overrideWithValue(() => offset),
-        ],
-        child: MaterialApp(
-          theme: buildLightTheme(),
-          locale: locale,
-          localizationsDelegates: const <LocalizationsDelegate<Object>>[
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: MediaQuery(
-            data: MediaQueryData(textScaler: TextScaler.linear(textScale)),
-            child: const ReminderSettingsScreen(),
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-  }
-
-  group('accessibility (M6 A3, A4)', () {
-    testWidgets('the toggle is spoken with its own name and value', (
-      tester,
-    ) async {
-      // Disposed at the end of the body rather than through `addTearDown`:
-      // the framework verifies no handle is live *before* tear-downs run.
-      final handle = tester.ensureSemantics();
-      await pumpScreen(tester);
-
-      // Read off the control itself, not by label: the screen title is the
-      // same words, so a label search would find two nodes and prove nothing
-      // about which one carries the switch.
-      final node = tester.getSemantics(find.byType(Switch));
-
-      // The label lives on the control, not only on the Text beside it: a
-      // reader that focuses the switch would otherwise hear "Off" with no idea
-      // what is off (WCAG 4.1.2).
-      expect(node.label, english.reminderToggleLabel);
-      // The value is what carries the state in words. The toggled *flag* is
-      // Material's own and is asserted by the framework's Switch tests; what
-      // this screen owns, and what M6 R7 is about, is that the state is also
-      // readable without seeing the colour.
-      expect(node.value, english.reminderStatusOff);
-
-      handle.dispose();
-    });
-
-    testWidgets('the time row announces the time once, as its value', (
-      tester,
-    ) async {
-      // Disposed at the end of the body rather than through `addTearDown`:
-      // the framework verifies no handle is live *before* tear-downs run.
-      final handle = tester.ensureSemantics();
-      await pumpScreen(tester);
-
-      // Read from the text rather than from the widget type: the merged node
-      // belongs to the tile's ancestor, and `byType` lands on an element whose
-      // own node is empty.
-      final node = tester.getSemantics(find.text(english.reminderTimeLabel));
-
-      // One node carries both, and the time appears exactly once. It used to be
-      // in the merged label *and* in a `Semantics(value:)` wrapper, so a reader
-      // heard "Reminder time 8:00 PM, 8:00 PM".
-      expect(node.label, contains(english.reminderTimeLabel));
-      expect(node.label, contains('8:00 PM'));
-      expect('${node.label}${node.value}'.split('8:00 PM').length - 1, 1);
-
-      handle.dispose();
-    });
-  });
+  setUp(() => harness = ReminderScreenHarness());
 
   group('layout', () {
     testWidgets('card and banner share both edges (M6 G1)', (tester) async {
-      platform.permission = ReminderPermission.denied;
-      await pumpScreen(tester);
+      harness.platform.permission = ReminderPermission.denied;
+      await harness.pump(tester);
       await tester.tap(find.byType(Switch));
       await tester.pumpAndSettle();
 
@@ -166,9 +59,9 @@ void main() {
       required bool shouldFailSchedule,
     }) async {
       final gate = Completer<ReminderPermission>();
-      platform = FakeReminderPlatform(permissionGate: gate)
+      harness.platform = FakeReminderPlatform(permissionGate: gate)
         ..shouldFailSchedule = shouldFailSchedule;
-      await pumpScreen(tester);
+      await harness.pump(tester);
 
       double cardHeight() => tester.getRect(find.byType(MxCard).first).height;
 
@@ -209,7 +102,7 @@ void main() {
     testWidgets('both rows clear the 48dp touch target (M6 G4)', (
       tester,
     ) async {
-      await pumpScreen(tester);
+      await harness.pump(tester);
 
       expect(tester.getRect(find.byType(Switch)).height, greaterThan(0));
       expect(
@@ -228,10 +121,10 @@ void main() {
     });
 
     testWidgets('no overflow at 320x568, EN and VI', (tester) async {
-      await pumpScreen(tester, surface: const Size(320, 568));
+      await harness.pump(tester, surface: const Size(320, 568));
       expect(tester.takeException(), isNull);
 
-      await pumpScreen(
+      await harness.pump(
         tester,
         surface: const Size(320, 568),
         locale: const Locale('vi'),
@@ -240,7 +133,7 @@ void main() {
     });
 
     testWidgets('no overflow at 320x568 with textScaler 2.0', (tester) async {
-      await pumpScreen(tester, surface: const Size(320, 568), textScale: 2);
+      await harness.pump(tester, surface: const Size(320, 568), textScale: 2);
 
       expect(tester.takeException(), isNull);
     });
@@ -248,14 +141,16 @@ void main() {
     testWidgets('the banner fits too, at 320x568 with textScaler 2.0, EN and '
         'VI', (tester) async {
       // **G7 and A2 are each tested, and were never tested together.** The
-      // overflow checks above all run against a platform that grants and
+      // overflow checks above all run against a harness.platform that grants and
       // schedules, so the banner is never on screen for them; the banner test
       // runs at 393x852 and scale 1. Card plus banner plus two paragraphs at
       // the narrowest width and the largest scale is the one combination most
       // likely to overflow, and it was the one nothing rendered.
       for (final locale in <Locale>[const Locale('en'), const Locale('vi')]) {
-        platform = FakeReminderPlatform(permission: ReminderPermission.denied);
-        await pumpScreen(
+        harness.platform = FakeReminderPlatform(
+          permission: ReminderPermission.denied,
+        );
+        await harness.pump(
           tester,
           surface: const Size(320, 568),
           textScale: 2,
@@ -278,8 +173,10 @@ void main() {
       // the ellipsis and the retry ink, and none of those move when the
       // message style, the gap or the alignment does. So they are pinned here,
       // each against the value the sibling band uses, not against a literal.
-      platform = FakeReminderPlatform(permission: ReminderPermission.denied);
-      await pumpScreen(tester);
+      harness.platform = FakeReminderPlatform(
+        permission: ReminderPermission.denied,
+      );
+      await harness.pump(tester);
       await tester.tap(find.byType(Switch));
       await tester.pumpAndSettle();
 
@@ -319,6 +216,28 @@ void main() {
         reason:
             'Retry sits at the leading edge, as it does on the Settings band',
       );
+
+      // The gap, measured rather than assumed. The commit that added this test
+      // said it held the gap and it did not, which is the same shape of claim
+      // the test itself exists to stop.
+      //
+      // The button's *box* top against the message bottom: `MxTextButton`
+      // carries a 48dp height floor with its own vertical padding, so the
+      // distance to the painted label is not the spacer — the box moves one for
+      // one with it and by nothing else.
+      final Rect messageRect = tester.getRect(
+        find
+            .descendant(
+              of: find.byType(ReminderBannerSectionWidget),
+              matching: find.byType(Text),
+            )
+            .at(1),
+      );
+      expect(
+        retry.top - messageRect.bottom,
+        closeTo(AppSpacing.xs, 0.5),
+        reason: 'the Settings band puts xs here, not sm',
+      );
     });
 
     testWidgets('the banner Retry reads its ink from the surface it sits on', (
@@ -330,8 +249,10 @@ void main() {
       // the default `primaryAccent` measures 3.72:1 here in dark, under the 4.5
       // its 14px w600 label needs. The golden harness renders only the resting
       // state, so nothing else on this screen would have caught it.
-      platform = FakeReminderPlatform(permission: ReminderPermission.denied);
-      await pumpScreen(tester);
+      harness.platform = FakeReminderPlatform(
+        permission: ReminderPermission.denied,
+      );
+      await harness.pump(tester);
       await tester.tap(find.byType(Switch));
       await tester.pumpAndSettle();
 
@@ -362,7 +283,7 @@ void main() {
       // "Reminder…". That is exactly what happened while the time sat in the
       // trailing slot: 90dp of box for 422dp of intrinsic width.
       for (final locale in <Locale>[const Locale('en'), const Locale('vi')]) {
-        await pumpScreen(
+        await harness.pump(
           tester,
           surface: const Size(320, 568),
           textScale: 2,
@@ -380,7 +301,7 @@ void main() {
     });
 
     testWidgets('no overflow at 412 wide', (tester) async {
-      await pumpScreen(tester, surface: const Size(412, 892));
+      await harness.pump(tester, surface: const Size(412, 892));
 
       expect(tester.takeException(), isNull);
     });
