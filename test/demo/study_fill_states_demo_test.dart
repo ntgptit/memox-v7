@@ -101,6 +101,7 @@ void main() {
       answersInSession: 0,
       remainingMs: null,
       isRevealed: false,
+      direction: null,
     ),
     progress: StudyStageProgressModel(
       round: 1,

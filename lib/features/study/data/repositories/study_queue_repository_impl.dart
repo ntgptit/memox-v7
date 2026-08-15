@@ -174,6 +174,11 @@ mixin _StudyQueueOperations on _StudyQueueLayoutOperations {
           kind: kind.dbValue,
           mode: mode.dbValue,
           action: action.dbValue,
+
+          // BR-206, read off `item` rather than taken from the caller: a
+          // history row that disagrees with the queue row it was answered on
+          // cannot be repaired afterwards (BR-76).
+          direction: Value<String?>(item.direction),
           answeredAt: now,
           outcomeReason: Value<String?>(outcomeReason?.dbValue),
           comparisonVersion: Value<int?>(comparisonVersion),
@@ -336,6 +341,12 @@ mixin _StudyQueueOperations on _StudyQueueLayoutOperations {
         cardId: item.cardId,
         position: _random.nextInt(1 << 30),
         status: 'pending',
+
+        // The direction travels with the card, not with the round (BR-205).
+        // Null on every path that reaches here today — no round-based mode is
+        // eligible — and written anyway, because the alternative is a silent
+        // drop the day one becomes eligible.
+        direction: Value<String?>(item.direction),
       ),
     );
 

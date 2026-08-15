@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../domain/models/match_mode.dart';
 import '../../../domain/models/study_action_model.dart';
+import '../../../domain/models/study_direction_model.dart';
 import '../../../domain/models/study_mode.dart';
 import '../../../domain/models/study_session_kind_model.dart';
 import '../../../domain/models/study_turn_model.dart';
@@ -128,6 +129,52 @@ extension StudyLabels on BuildContext {
       boards,
       left < 0 ? 0 : left,
     );
+  }
+
+  /// The name of a recall direction, for the chooser (BR-203).
+  ///
+  /// **The copy describes the exercise, not the schema.** "Korean first" tells a
+  /// learner what they will see; "front first" tells them about a column, which
+  /// is a word this app's UI has no business using — and which is wrong the day
+  /// a deck is built the other way round. A map for the same reason
+  /// [studyMode] is one: AD-18 spends the exhaustive dispatch elsewhere.
+  ///
+  /// A value with no entry falls back to its enum name, which is a string nobody
+  /// wants to see and therefore an obvious sign the map is missing one.
+  String studyDirection(StudySessionDirection direction) =>
+      <StudySessionDirection, String>{
+        StudySessionDirection.koreanToMeaning: l10n.studyDirectionKoreanFirst,
+        StudySessionDirection.meaningToKorean: l10n.studyDirectionMeaningFirst,
+        StudySessionDirection.mixed: l10n.studyDirectionMixed,
+      }[direction] ??
+      direction.name;
+
+  /// The one line under a direction's name that says what it will feel like,
+  /// carrying the Recommended marker on the option that has one.
+  ///
+  /// **The marker is part of this line and not a trailing badge**, and that is a
+  /// layout decision rather than a copy one. `ListTile` gives its text column
+  /// whatever the trailing widget leaves, so a badge on one row narrows *that*
+  /// row: at 320dp the recommended option had 112dp of text against its
+  /// neighbours' 200dp, and it became the only one whose description was clipped
+  /// — the opposite of recommending it. Here all three share one column
+  /// (wireframe §9.1).
+  String studyDirectionDescription(StudySessionDirection direction) {
+    final description =
+        <StudySessionDirection, String>{
+          StudySessionDirection.koreanToMeaning:
+              l10n.studyDirectionKoreanFirstBody,
+          StudySessionDirection.meaningToKorean:
+              l10n.studyDirectionMeaningFirstBody,
+          StudySessionDirection.mixed: l10n.studyDirectionMixedBody,
+        }[direction] ??
+        '';
+
+    // A placeholder rather than concatenation, so each language decides where
+    // the marker goes relative to the sentence it marks.
+    return direction == kStudyRecommendedDirection
+        ? l10n.studyDirectionRecommendedOption(description)
+        : description;
   }
 
   /// Which of the two card sets this session is working through (BR-142).

@@ -32,6 +32,7 @@ void main() {
     cardLimit: 20,
     startedAt: now,
     endedAt: null,
+    direction: null,
   );
 
   group('starting something new', () {
@@ -163,6 +164,9 @@ void main() {
       deckId: deckId,
       rootDeckId: 'root',
       schedulerGeneration: 1,
+      // A learning session, so no direction: BR-203 makes the choice reachable
+      // only from an `sm2` `self_assess` review.
+      direction: null,
       kind: StudySessionKind.learning,
       currentMode: StudyMode.recall,
       status: status,

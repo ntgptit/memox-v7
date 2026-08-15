@@ -1576,6 +1576,59 @@
   "@studyChooseModeTitle": {
     "description": "Title of the review mode chooser (BR-146)."
   },
+  "studyDirectionTitle": "Hỏi thẻ theo chiều nào?",
+  "@studyDirectionTitle": {
+    "description": "Title of the recall-direction chooser, shown before a self-assess review of an SM-2 deck (BR-182)."
+  },
+  "studyDirectionBody": "Phiên đã bắt đầu thì không đổi được nữa.",
+  "@studyDirectionBody": {
+    "description": "Supporting line under the direction chooser title. States the lock (BR-186) before the choice rather than after it."
+  },
+  "studyDirectionKoreanFirst": "Tiếng Hàn trước",
+  "@studyDirectionKoreanFirst": {
+    "description": "Name of the Korean-to-meaning direction (BR-183)."
+  },
+  "studyDirectionKoreanFirstBody": "Nhìn tiếng Hàn, nhớ lại nghĩa.",
+  "@studyDirectionKoreanFirstBody": {
+    "description": "One line describing the Korean-to-meaning direction."
+  },
+  "studyDirectionMeaningFirst": "Nghĩa trước",
+  "@studyDirectionMeaningFirst": {
+    "description": "Name of the meaning-to-Korean direction (BR-183)."
+  },
+  "studyDirectionMeaningFirstBody": "Nhìn nghĩa, nhớ lại từ tiếng Hàn.",
+  "@studyDirectionMeaningFirstBody": {
+    "description": "One line describing the meaning-to-Korean direction."
+  },
+  "studyDirectionMixed": "Trộn hai chiều",
+  "@studyDirectionMixed": {
+    "description": "Name of the mixed direction (BR-184)."
+  },
+  "studyDirectionMixedBody": "Mỗi thẻ hỏi một chiều, chia đều hai bên.",
+  "@studyDirectionMixedBody": {
+    "description": "One line describing the mixed direction. 'Chia đều' is a promise the assignment keeps to within one card (BR-184)."
+  },
+  "studyDirectionRecommendedOption": "{line} — nên chọn",
+  "@studyDirectionRecommendedOption": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    },
+    "description": "Marks the Korean-first option by extending its own subtitle, so all three options share one text column. See the English ARB for why it is not a trailing badge."
+  },
+  "studyDirectionNothingDue": "Không còn thẻ nào đến hạn để ôn.",
+  "@studyDirectionNothingDue": {
+    "description": "Shown in the direction chooser when the last due card went while the sheet was open (UC-12 E2, BR-145). Distinct from studyDirectionFailed because this one cannot be retried — cards come due with time, not with another tap, and telling the user to try again would be advice that cannot work."
+  },
+  "studyDirectionStart": "Bắt đầu ôn",
+  "@studyDirectionStart": {
+    "description": "Confirms the chosen direction and starts the session (BR-186)."
+  },
+  "studyDirectionFailed": "Chưa mở được phiên ôn. Thử lại nhé.",
+  "@studyDirectionFailed": {
+    "description": "Shown in the direction chooser when starting was refused — usually because the deck changed while the sheet was open (BR-13, BR-83). The chosen option is kept."
+  },
   "studyModeBrowse": "Xem lại",
   "@studyModeBrowse": {
     "description": "Mode name: both sides at once, no grading (BR-111, BR-112)."

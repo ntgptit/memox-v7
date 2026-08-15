@@ -28,6 +28,7 @@ StudyTurnModel recallTurn(
     answersInSession: 0,
     remainingMs: remainingMs,
     isRevealed: isRevealed,
+    direction: null,
   ),
   progress: StudyStageProgressModel(
     round: round,

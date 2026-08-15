@@ -7,7 +7,7 @@
 | **Scope** | Luật nghiệp vụ, validation rule, state machine, edge case của phạm vi MVP. Ngoài phạm vi: quyết định kiến trúc (`architecture.md`), hình dạng dữ liệu (`data-model.md`), luồng người dùng (`use-cases.md`) |
 | **Source of truth for** | BR-xx · validation rule · entity state machine · edge case |
 | **Depends on** | `document-conventions.md`, `product.md`, `architecture.md` |
-| **Updated by task** | M99.25 — BR-200…BR-202: Study Home (đọc thư viện thật, workload toàn subtree, ba trạng thái đã tải); M99.24 — BR-192…BR-199: tiến độ theo deck (phạm vi metric, card-day, hai khoảng, quy-về-vị-trí-hiện-tại, phân hoạch Learning/Reviewing, thứ tự, chỉ-đọc, cập nhật trực tiếp); trước đó M99.23 — BR-182…BR-191: Progress overview v1 |
+| **Updated by task** | M99.27 — BR-203…BR-209: chiều hỏi của self-assess; M99.25 — BR-200…BR-202: Study Home (đọc thư viện thật, workload toàn subtree, ba trạng thái đã tải); M99.24 — BR-192…BR-199: tiến độ theo deck (phạm vi metric, card-day, hai khoảng, quy-về-vị-trí-hiện-tại, phân hoạch Learning/Reviewing, thứ tự, chỉ-đọc, cập nhật trực tiếp); trước đó M99.23 — BR-182…BR-191: Progress overview v1 |
 | **Last updated** | 2026-08-15 |
 
 Format tuân theo `document-conventions.md` §6.2. Từ khoá MUST / SHOULD / MAY
@@ -548,6 +548,38 @@ vì một question mượn bốn thẻ khác để dựng.
 
 ---
 
+## Chiều hỏi của `self_assess` — reverse recall
+
+| ID | Status | Rule | Enforced by | Related |
+|---|---|---|---|---|
+
+**Vì sao chỉ `sm2` × `reviewing` × `self_assess`.** `self_assess` là mode duy
+nhất mà đổi chiều chỉ đổi **mặt nào là đề** và không đổi thứ được chấm. Bốn mode
+còn lại dựng nội dung từ một mặt cố định: `fill` chấm bằng `front_folded`
+(BR-134), `guess` phân biệt nghĩa bằng `back_folded` (BR-123), `match` ghép hai
+mặt với nhau. Đảo chúng là đổi **cái được chấm**, không phải đổi cách hỏi.
+`eight_box` không chạy `self_assess` trong phiên ôn (BR-110, BR-146) nên không có
+bề mặt nào để đảo. Phiên học mới đi theo chuỗi stage cố định người dùng không
+chọn (BR-109), và bắt người học tạo ra một từ họ chưa từng thấy không phải là câu
+hỏi khó hơn — nó là câu hỏi không trả lời được.
+
+**Vì sao `mixed` lưu chứ không gieo.** Một chiều quyết định lúc render là một câu
+hỏi khác ở mỗi lần rebuild — khoá nút trong lúc ghi cũng đủ để rebuild — nên thẻ
+sẽ đổi từ "tạo ra" sang "nhận ra" ngay dưới mắt người học. BR-127 đã chốt đúng
+hình dạng này cho thứ tự option của `guess` và bàn của `match`: **thế bài quyết
+định khi hàng đợi được ghi, không phải khi nó được vẽ.** Chỉ khác một điểm, và
+điểm đó là lý do phải là *cột* chứ không phải *seed*: `self_assess` đưa thẻ quên
+quay lại trong **chính dòng cũ** sau ba thẻ khác (BR-26), và BR-103 mang cả phiên
+trở lại sau khi hệ điều hành thu hồi app. Một seed sống sót qua rebuild nhưng
+không sống sót qua một lần đổi công thức seed; một cột sống sót cả hai.
+
+**Vì sao chia đều chứ không tung đồng xu từng thẻ.** Hai mươi lần tung độc lập
+cho ra 14–6 hoặc tệ hơn khoảng một lần trong mười sáu. Người học chọn "trộn" mà
+nhận mười bốn thẻ cùng một chiều đã nhận một thứ khác. Hợp đồng `|a − b| ≤ 1` là
+thứ test khẳng định được mà không cần ghim seed; một phân phối thì không.
+
+---
+
 ## Phiên học — cách mở, cách giữ, cách đóng
 
 | ID | Status | Rule | Enforced by | Related |
@@ -820,6 +852,13 @@ lượt (BR-76, BR-77, BR-111), luật reset (BR-41…BR-47) hay luật ngày h�
 | BR-200 | active | Tab Study MUST đọc thư viện thật và MUST NOT phụ thuộc vào bất kỳ deck id cố định nào trong production. Vào tab, cuộn, đổi tab và stream tự refresh MUST NOT ghi database: MUST NOT tạo session, MUST NOT khoá scheduler (BR-13), MUST NOT materialize hàng đợi. Chỉ thao tác chạm tường minh của người dùng mới được dẫn tới write. Resume card MUST chỉ hiện khi tồn tại một session thoả **đồng thời** bốn điều kiện, tất cả kiểm bằng đọc: `status = in_progress`; `started_at` thuộc ngày học hiện tại theo mốc BR-105; generation của root khớp generation của session (BR-84); và hàng đợi của session còn ít nhất một hàng. Session không thoả MUST NOT được quảng cáo; việc **đóng** session của ngày cũ vẫn thuộc `abandonStaleSessions` (BR-103) và MUST NOT chuyển vào màn hình này. Chạm Resume MUST mở đúng session và đúng lượt đã lưu (BR-133), MUST NOT tạo session thứ hai. Nhiều session cùng mở thì MUST chọn session mới nhất theo `started_at`. Chạm hai lần liên tiếp MUST chỉ dẫn tới một lần mở. | repository + UI | UC-14, BR-84, BR-101, BR-103, BR-133 |
 | BR-201 | active | Danh sách Study Home MUST chỉ liệt kê root deck, mỗi root một hàng, workload tổng hợp **toàn subtree** qua `root_deck_id` (BR-56, BR-57) và MUST NOT dùng shortcut coalesce parent. Thứ tự MUST giảm dần theo ba khoá xếp hạng, đúng thứ tự đó: số Overdue, rồi số Due today, rồi số New — MUST NOT xếp theo tổng. Bằng nhau cả ba thì tie-break theo tên deck đã fold chữ hoa/thường theo Unicode (cùng quy ước BR-93), rồi theo `id`; tie-break MUST NOT dựa vào `lower()` của SQL vì hàm đó chỉ fold ASCII. Deck không còn workload MUST vẫn nằm trong danh sách, đứng cuối theo chính thứ tự trên, và MUST giữ hành động mở nếu subtree còn ít nhất một card (BR-29). Deck không còn card nào MUST NOT được trao hành động mở. Ba con số MUST luôn hiển thị kể cả khi bằng 0, mỗi con số MUST có icon và nhãn chữ riêng, và màu MUST NOT là tín hiệu duy nhất. | repository + UI | UC-14, BR-29, BR-56, BR-57, BR-93, BR-162 |
 | BR-202 | active | Study Home MUST phân biệt ba trạng thái đã tải, mỗi trạng thái có một bước tiếp theo riêng. Thư viện **không có root deck nào**: MUST hiển thị CTA tới Starter Library (UC-01) và MUST NOT hiện danh sách rỗng. Có root deck nhưng **không root nào có card**: MUST hiển thị zero state có đường về Library, MUST NOT hiện CTA starter và MUST NOT bịa số Due cho deck rỗng. Có card: MUST hiện danh sách theo BR-201, kể cả khi mọi workload bằng 0 — trường hợp đó là lịch đang chạy đúng (BR-29), MUST NOT trình bày như lỗi hay như thành tích. Mọi hành động trên màn hình MUST trỏ tới route có thật; MUST NOT có control bật mà không dẫn đi đâu. Lỗi đọc MUST hiện trạng thái lỗi có retry, MUST NOT nêu tên bảng, câu truy vấn hay đường dẫn. | UI | UC-14, UC-01, BR-29, BR-201 |
+| BR-203 | active | Việc chọn **chiều hỏi** MUST chỉ khả dụng khi cả ba điều kiện cùng đúng: phiên `reviewing` (BR-142), scheduler của root deck là `sm2` (BR-06), và mode là `self_assess` (BR-146). Mọi tổ hợp khác — `eight_box` ở bất kỳ mode nào, chuỗi học mới (BR-109), `match`/`guess`/`recall`/`fill` — MUST NOT nhận chiều hỏi: MUST NOT hiện UI chọn chiều, MUST NOT nhận giá trị chiều ở use case, và MUST NOT ghi chiều xuống bất kỳ bảng nào. Điều kiện này MUST là **một predicate duy nhất trong `domain/`**, MUST NOT viết lại ở controller hay widget. | domain + UI | BR-106, BR-109, BR-110, BR-142, BR-146, UC-15 |
+| BR-204 | active | Chiều của **một lượt** MUST là một trong hai: `korean_to_meaning` hiển thị `front` làm đề và `back` làm đáp án; `meaning_to_korean` hiển thị `back` làm đề và `front` làm đáp án. Đề MUST luôn nằm ở nửa trên của thẻ và đáp án ở nửa dưới (BR-112) — chiều đổi **nội dung** của hai nửa, MUST NOT đổi vị trí, thứ tự đọc, hay hình học của thẻ. Nhãn của mỗi nửa MUST đi theo nội dung nửa đó. Chiều MUST NOT là dấu hiệu chỉ bằng màu. | domain + UI | BR-08, BR-112, BR-203 |
+| BR-205 | active | Lựa chọn ở mức **phiên** MUST là một trong ba: `korean_to_meaning`, `meaning_to_korean`, `mixed`. Với `mixed`, chiều thật của từng thẻ MUST được gán **đúng một lần**, tại thời điểm materialize hàng đợi, bằng nguồn ngẫu nhiên **được tiêm** (AD-06 áp cho randomness), và MUST lưu trên từng dòng `study_queue_items`. Số thẻ hai chiều MUST lệch nhau **không quá một**. Chiều đã gán MUST giữ nguyên qua comeback (BR-26), retry, Resume (BR-103) và restart tiến trình; MUST NOT gieo lại từ seed hay tính lại lúc render. Giá trị `mixed` MUST NOT xuất hiện trên một dòng hàng đợi hay một dòng lịch sử. | db + domain | BR-26, BR-102, BR-103, BR-127, BR-203 |
+| BR-206 | active | Chiều của phiên, chiều thật của từng dòng hàng đợi và chiều của từng lượt trong `study_answers` MUST được lưu **tường minh**. MUST NOT suy luận từ nội dung thẻ, từ thứ tự widget, hay từ lựa chọn của phiên. Chiều ghi vào lịch sử MUST **chép từ dòng hàng đợi** trong cùng transaction ghi lượt, MUST NOT nhận từ tham số do UI truyền xuống. | db | BR-76, BR-98, BR-131, BR-205 |
+| BR-207 | active | Chiều MUST được chốt trước lượt đầu tiên và **khoá** trong suốt phiên: MUST NOT đổi sau khi phiên đã mở. Resume MUST đọc chiều đã lưu và MUST NOT hỏi lại. Thoát trước khi hàng đợi được tạo MUST NOT ghi session (BR-101), nên MUST NOT để lại chiều nào. | domain + UI | BR-45, BR-101, BR-103, BR-139 |
+| BR-208 | active | Yêu cầu mở phiên **đủ điều kiện** mà thiếu chiều MUST bị từ chối là lỗi validation, và MUST NOT ghi session. Yêu cầu **không đủ điều kiện** mà kèm chiều MUST bị từ chối là conflict, và MUST NOT ghi session. Cả hai kiểm tra MUST chạy trước mọi ghi. | domain | BR-101, BR-145, BR-203 |
+| BR-209 | active | Chiều hỏi MUST NOT đổi tập action của scheduler (BR-30), ánh xạ chất lượng (BR-17), `ease_factor`, `interval_days`, `repetitions`, `due_at`, hay `current_box`. Cùng một thẻ với cùng một action MUST cho ra cùng một lịch bất kể chiều. Chiều MUST NOT ghi hay sửa nội dung thẻ (`front`, `back`, cột folded) và MUST NOT chạm `cards.updated_at`. | domain + repository | BR-17, BR-18, BR-19, BR-30, BR-41 |
 | BR-190 | active | Progress MUST là read-only tuyệt đối: mở màn, đóng màn, Retry, đổi tab hay quay lại MUST NOT ghi hay sửa bất kỳ hàng nào — không `study_sessions`, không `card_study_states`, không `study_answers`, không `app_settings` — và MUST NOT mở, tiếp tục hay đóng session nào. | repository + UI | UC-12, BR-178 |
 | BR-191 | active | v1 của Progress MUST NOT hiển thị: accuracy hay correct rate, longest streak, mục tiêu/goal, XP hay điểm, heatmap, bộ lọc theo deck, chia sẻ, và hiệu ứng ăn mừng. Các chỉ số này cần định nghĩa nghiệp vụ riêng chưa được chốt; hiển thị một con số chưa có BR đứng sau là viết spec ở tầng sai. | UI | UC-12, AD-19 |
 
@@ -961,6 +1000,13 @@ Trạng thái kết thúc là terminal — không có đường quay lại `in_p
 | Ô nội dung bắt đầu bằng `=` hoặc `+` | Ghi như text trong XLSX; mở bằng spreadsheet không thành formula (BR-179) |
 | Tên deck chỉ gồm ký tự bị loại khi sanitize | Tên file dùng `cards` + ngày + đuôi format (BR-180) |
 | Người dùng đóng share sheet | Coi là cancel; không toast lỗi, không nói đã lưu (BR-181) |
+| Mở phiên `self_assess` trên deck `sm2` nhưng chưa chọn chiều | Từ chối là validation, không ghi session (BR-187) |
+| Deck `eight_box` nhận yêu cầu kèm chiều hỏi | Từ chối là conflict; không có UI nào tạo được yêu cầu đó (BR-182, BR-187) |
+| Phiên `mixed` có số thẻ lẻ | Lệch tối đa một thẻ; bên nhận thẻ lẻ rút ngẫu nhiên (BR-184) |
+| Thẻ trả lời sai trong phiên `mixed`, quay lại sau ba thẻ | Vẫn hỏi đúng chiều cũ — chiều nằm trên chính dòng hàng đợi (BR-26, BR-184) |
+| App bị thu hồi giữa phiên `mixed`, mở lại | Resume đọc chiều đã lưu, không hỏi lại và không gieo lại (BR-103, BR-186) |
+| DB cũ có lượt `self_assess` của deck `sm2` | Backfill `korean_to_meaning` — đó là chiều mà mọi bản trước đã chạy (BR-185) |
+| Đọc dòng có chiều do bản mới hơn ghi | Đọc được, vẽ như `korean_to_meaning`, MUST NOT ghi lại giá trị đó (BR-183) |
 | Muốn đổi deck rỗng từ `card` sang chứa deck con | Rỗng là đã `unset`; tạo deck con luôn được (BR-163) |
 | Kéo deck vào descendant của chính nó | Chặn, lỗi rõ ràng (BR-70) |
 | Di chuyển subtree sang root khác scheduler | Chặn, đề nghị reset (BR-74) |

@@ -43,6 +43,7 @@ void main() {
           answersInSession: 0,
           remainingMs: null,
           isRevealed: false,
+          direction: null,
         ),
         card: forCard,
         progress: const StudyStageProgressModel(
@@ -205,6 +206,7 @@ void main() {
             cardLimit: 20,
             startedAt: DateTime.utc(2026, 8, 7),
             endedAt: null,
+            direction: null,
           ),
           turn: turnOf(mode, pool.first),
           sessionCards: pool,

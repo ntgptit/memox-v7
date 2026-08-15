@@ -1,6 +1,8 @@
 import '../../../../core/error/failure.dart';
+import '../../../deck/domain/models/scheduler_type_model.dart';
 import '../models/study_session_start_model.dart';
 import '../failures/study_refusal_failure.dart';
+import '../models/study_direction_model.dart';
 import '../models/study_mode.dart';
 import '../models/study_scheduler.dart';
 import '../models/study_day_model.dart';
@@ -33,6 +35,12 @@ class StartStudySessionUseCase {
 
     /// Required for a review session, ignored for a learning one.
     StudyMode? reviewMode,
+
+    /// The recall direction the user chose (BR-203).
+    ///
+    /// Required when — and legal **only** when — the session is eligible. See
+    /// [_directionFor].
+    StudySessionDirection? direction,
   }) async {
     final context = await _repository.deckContext(deckId);
     final scheduler = schedulerFor(context.schedulerType);
@@ -51,6 +59,15 @@ class StartStudySessionUseCase {
       scheduler: scheduler,
       kind: kind,
       reviewMode: reviewMode,
+    );
+
+    // Before any write, and before the stale sweep below: a refused session must
+    // leave nothing behind (BR-101), and the sweep already closes rows.
+    final sessionDirection = _directionFor(
+      schedulerType: context.schedulerType,
+      kind: kind,
+      stageSequence: stageSequence,
+      direction: direction,
     );
 
     // Read once, here, and frozen onto the session (BR-139). Changing the
@@ -86,6 +103,7 @@ class StartStudySessionUseCase {
       cardLimit: options.cardLimit,
       newCardOrder: options.newCardOrder,
       now: now,
+      direction: sessionDirection,
     );
 
     // The card set comes back with the session rather than in a second call:
@@ -124,5 +142,52 @@ class StartStudySessionUseCase {
     }
 
     return <StudyMode>[reviewMode];
+  }
+
+  /// The direction this session may carry, refusing everything else (BR-208).
+  ///
+  /// **Two refusals, and the second one is the load-bearing half.** Missing a
+  /// direction on an eligible session is an incomplete request. Supplying one on
+  /// an *ineligible* session is the case that would quietly give `eight_box` — or
+  /// a learning chain, or `fill` — a feature no rule grants it, and it would
+  /// never surface: the column takes the value, the queue stamps it, and only a
+  /// reader months later would find a `match` turn claiming to have been asked
+  /// from the meaning.
+  ///
+  /// It is asked here rather than in the repository because eligibility needs the
+  /// root deck's algorithm and the chosen stage together, and both are already in
+  /// hand — while the repository is handed a stage sequence and deliberately
+  /// knows nothing about which algorithm produced it.
+  StudySessionDirection? _directionFor({
+    required SchedulerType schedulerType,
+    required StudySessionKind kind,
+    required List<StudyMode> stageSequence,
+    required StudySessionDirection? direction,
+  }) {
+    final isEligible =
+        stageSequence.length == 1 &&
+        isReverseDirectionEligible(
+          kind: kind,
+          schedulerType: schedulerType,
+          mode: stageSequence.single,
+        );
+
+    if (!isEligible) {
+      if (direction == null) return null;
+
+      throw const ConflictFailure(
+        message: 'This session cannot choose a recall direction',
+        reason: StudyRefusalReason.modeNotSupportedByScheduler,
+      );
+    }
+
+    if (direction == null) {
+      throw const ValidationFailure(
+        message: 'A self-assess review needs a recall direction',
+        reason: StudyRefusalReason.modeNotSupportedByScheduler,
+      );
+    }
+
+    return direction;
   }
 }

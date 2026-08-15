@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import '../../../../core/database/app_database.dart';
 import '../../domain/entities/study_queue_item_entity.dart';
 import '../../domain/entities/study_session_entity.dart';
+import '../../domain/models/study_direction_model.dart';
 import '../../domain/models/study_mode.dart';
 import '../../domain/models/study_queue_item_status_model.dart';
 import '../../domain/models/study_session_kind_model.dart';
@@ -19,23 +20,31 @@ import '../../domain/models/study_turn_model.dart';
 /// decides whether an unrecognised value degrades or throws. Repeating that
 /// decision here would give the same value two behaviours depending on which
 /// path read it.
-StudySessionEntity studySessionEntityFromRow(StudySession row) =>
-    StudySessionEntity(
-      id: row.id,
-      deckId: row.deckId,
-      rootDeckId: row.rootDeckId,
-      schedulerGeneration: row.schedulerGeneration,
-      kind: StudySessionKind.fromDbValue(row.sessionKind),
-      currentMode: StudyMode.fromDbValue(row.currentMode),
-      status: StudySessionStatus.fromDbValue(row.status),
-      endReason: row.endReason == null
-          ? null
-          : StudySessionEndReason.fromDbValue(row.endReason!),
-      cursor: row.cursor,
-      cardLimit: row.cardLimit,
-      startedAt: row.startedAt.toUtc(),
-      endedAt: row.endedAt?.toUtc(),
-    );
+StudySessionEntity studySessionEntityFromRow(
+  StudySession row,
+) => StudySessionEntity(
+  id: row.id,
+  deckId: row.deckId,
+  rootDeckId: row.rootDeckId,
+  schedulerGeneration: row.schedulerGeneration,
+  kind: StudySessionKind.fromDbValue(row.sessionKind),
+  currentMode: StudyMode.fromDbValue(row.currentMode),
+  status: StudySessionStatus.fromDbValue(row.status),
+  endReason: row.endReason == null
+      ? null
+      : StudySessionEndReason.fromDbValue(row.endReason!),
+  cursor: row.cursor,
+  cardLimit: row.cardLimit,
+
+  // Null stays null: a session outside BR-203's eligibility has no direction
+  // to have chosen, and mapping it to a default would put a decision in the
+  // entity that nobody made.
+  direction: row.direction == null
+      ? null
+      : StudySessionDirection.fromDbValue(row.direction!),
+  startedAt: row.startedAt.toUtc(),
+  endedAt: row.endedAt?.toUtc(),
+);
 
 StudyQueueItemEntity studyQueueItemEntityFromRow(
   StudyQueueItem row,
@@ -53,6 +62,10 @@ StudyQueueItemEntity studyQueueItemEntityFromRow(
   // Stored as INTEGER, because SQLite has no boolean. Converting here rather
   // than letting `0`/`1` reach the domain is the point of the mapper.
   isRevealed: row.isRevealed != 0,
+
+  direction: row.direction == null
+      ? null
+      : StudyRecallDirection.fromDbValue(row.direction!),
 );
 
 StudyCardModel studyCardModelFromRow(Card row) => StudyCardModel(

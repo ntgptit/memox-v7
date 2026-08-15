@@ -7,12 +7,17 @@
 | **Scope** | Task còn lại của Study từ M5.7 trở đi · nợ kỹ thuật của Study · việc bị chặn |
 | **Source of truth for** | Trạng thái task Study từ M5.7 · nợ kỹ thuật của Study |
 | **Depends on** | `document-conventions.md` · `wbs.md` · `business-rules.md` · `use-cases.md` |
-| **Updated by task** | M5.26 — Study Home v1: tab Study đọc thư viện thật, bỏ fixture `kStudyBranchDeckId` |
-| **Last updated** | 2026-08-13 |
+| **Updated by task** | M5.26 — Study Home v1: tab Study đọc thư viện thật, bỏ fixture `kStudyBranchDeckId` · `fill` — thẻ dưới là input surface, bỏ ô viền lồng trong thẻ, đề đổi sang `back` và chấm bằng `front_folded` (BR-134) · `recall` tách lật khỏi chấm — lật mở tự đánh giá, hết giờ ghi sai rồi chờ `Next` |
+| **Last updated** | 2026-08-15 |
 
 `docs/wbs.md` giữ M5.0…M5.6 đã hoàn thành và không nhắc lại ở đây. File này giữ
 **những gì còn lại**, đánh số tiếp từ M5.7 để không ID nào trùng và mọi tham chiếu
 cũ vẫn đúng.
+
+**Việc Study làm sau khi dãy M5 đóng nằm ở `wbs.md` dưới dãy M99**, cùng chỗ với
+mọi task cross-cutting khác — hiện có **M99.23** (chiều hỏi của `self_assess`,
+BR-203…BR-209). Không chép trạng thái của nó về đây: hai sổ cho một task là hai
+sổ sẽ lệch nhau.
 
 ## Vì sao cần một file riêng
 

@@ -132,6 +132,7 @@ void main() {
         'next_ease_factor',
         'previous_interval_days',
         'next_interval_days',
+        'direction',
       ],
       'study_sessions': <String>[
         'id',
@@ -146,6 +147,7 @@ void main() {
         'card_limit',
         'started_at',
         'ended_at',
+        'direction',
       ],
       'study_queue_items': <String>[
         'session_id',
@@ -158,6 +160,7 @@ void main() {
         'answers_in_session',
         'remaining_ms',
         'is_revealed',
+        'direction',
       ],
       'app_settings': <String>[
         'id',

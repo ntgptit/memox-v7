@@ -1,3 +1,4 @@
+import '../models/study_direction_model.dart';
 import '../models/study_mode.dart';
 import '../models/study_session_kind_model.dart';
 import '../models/study_session_start_model.dart';
@@ -30,6 +31,14 @@ final class OpenStudySessionUseCase {
     required DateTime now,
     required Duration utcOffset,
     StudyMode? reviewMode,
+
+    /// The recall direction chosen before a new session (BR-203).
+    ///
+    /// **Ignored when resuming, and that is BR-207.** A session already carries
+    /// its direction on every row of its queue; asking again would offer a choice
+    /// that could not be applied, and applying it would change the question a
+    /// half-answered card had already been asked.
+    StudySessionDirection? direction,
     bool shouldResume = false,
     String? resumeSessionId,
   }) => shouldResume
@@ -45,6 +54,7 @@ final class OpenStudySessionUseCase {
           deckId: deckId,
           kind: kind,
           reviewMode: reviewMode,
+          direction: direction,
           now: now,
           utcOffset: utcOffset,
         );

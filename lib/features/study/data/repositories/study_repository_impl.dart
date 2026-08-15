@@ -17,6 +17,7 @@ import '../../domain/models/study_action_model.dart';
 import '../../domain/models/study_card_limit_model.dart';
 import '../../domain/models/study_answer_kind_model.dart';
 import '../../domain/models/study_deck_context_model.dart';
+import '../../domain/models/study_direction_model.dart';
 import '../../domain/models/study_entry_summary_model.dart';
 import '../../domain/models/study_schedule_model.dart';
 import '../../domain/models/study_scheduler.dart';
@@ -158,10 +159,34 @@ final class StudyRepositoryImpl
     required int cardLimit,
     required NewCardOrder newCardOrder,
     required DateTime now,
+    StudySessionDirection? direction,
   }) async {
     if (stageSequence.isEmpty) {
       throw const ConflictFailure(
         message: 'A session needs at least one stage',
+      );
+    }
+
+    // **The shape a direction is allowed to arrive in, checked here and not only
+    // in the use case.** The use case owns eligibility because it has the root
+    // deck's algorithm (BR-208); what this layer can still see is the other two
+    // thirds of BR-203 — the kind and the single stage — and without this check
+    // the *session* row took a direction even when only the queue rows were
+    // gated. Invariant 31 calls that row invalid, so the guard belongs where the
+    // row is written.
+    //
+    // `unknown` is refused for a different reason: a value this build cannot
+    // name would read back as a decision somebody made. Refused here rather than
+    // left to `dbValue`'s `StateError`, so the caller gets a domain failure.
+    final isDirectionAllowed =
+        kind == StudySessionKind.reviewing &&
+        stageSequence.length == 1 &&
+        stageSequence.single == StudyMode.selfAssess;
+    if (direction != null &&
+        (direction == StudySessionDirection.unknown || !isDirectionAllowed)) {
+      throw const ConflictFailure(
+        message: 'This session cannot carry a recall direction',
+        reason: StudyRefusalReason.modeNotSupportedByScheduler,
       );
     }
 
@@ -204,6 +229,7 @@ final class StudyRepositoryImpl
           status: StudySessionStatus.inProgress.dbValue,
           cardLimit: cardLimit,
           startedAt: now,
+          direction: Value<String?>(direction?.dbValue),
         ),
       );
 
@@ -212,7 +238,12 @@ final class StudyRepositoryImpl
       // the first, which is the opposite of what five stages are for.
       for (final mode in stageSequence) {
         await _dao.insertQueueItems(
-          _roundOne(sessionId: sessionId, mode: mode, cards: cards),
+          _roundOne(
+            sessionId: sessionId,
+            mode: mode,
+            cards: cards,
+            direction: direction,
+          ),
         );
       }
 

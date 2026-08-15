@@ -38,6 +38,7 @@ void main() {
     cardLimit: 20,
     startedAt: now,
     endedAt: null,
+    direction: null,
   );
 
   group('submitting an answer', () {

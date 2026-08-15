@@ -56,7 +56,20 @@ CREATE TABLE study_sessions (
     card_limit INTEGER NOT NULL,
 
     started_at DATETIME NOT NULL,
-    ended_at DATETIME NULL
+    ended_at DATETIME NULL,
+
+    -- Which way this session asks, chosen before the first turn (BR-203).
+    --
+    -- NULL is the feature not applying, not a value nobody filled in: only a
+    -- `reviewing` session of an `sm2` deck running `self_assess` is eligible, and
+    -- every other session has no direction to have chosen. Enumerated here so a
+    -- row can never carry a fourth word; that it is only ever written for an
+    -- eligible session is the repository's guard, because the column cannot see
+    -- `session_kind` and the deck's algorithm at once.
+    direction TEXT NULL CHECK (
+        direction IS NULL
+        OR direction IN ('korean_to_meaning', 'meaning_to_korean', 'mixed')
+    )
 );
 
 -- The status × end_reason PAIR is deliberately not a CHECK constraint.
@@ -129,7 +142,18 @@ CREATE TABLE study_answers (
     previous_ease_factor REAL NULL,
     next_ease_factor REAL NULL,
     previous_interval_days INTEGER NULL,
-    next_interval_days INTEGER NULL
+    next_interval_days INTEGER NULL,
+
+    -- Which way the card was asked on this turn (BR-206).
+    --
+    -- **`mixed` cannot appear here**, and the enumeration is what says so: a
+    -- session may be mixed, a turn never is. Copied from the queue row inside the
+    -- write transaction rather than passed down from the screen — the same reason
+    -- `kind` and `outcome_reason` are stored rather than derived (BR-76, BR-131).
+    direction TEXT NULL CHECK (
+        direction IS NULL
+        OR direction IN ('korean_to_meaning', 'meaning_to_korean')
+    )
 );
 
 CREATE INDEX idx_study_answers_card ON study_answers (card_id, answered_at);
@@ -180,6 +204,20 @@ CREATE TABLE study_queue_items (
     -- and inside 0..20000.
     remaining_ms INTEGER NULL,
     is_revealed INTEGER NOT NULL DEFAULT 0,
+
+    -- The way THIS card is asked, decided once when the round was written
+    -- (BR-205).
+    --
+    -- This row is what makes Mixed stable. `self_assess` brings a forgotten card
+    -- back in the same row after three others (BR-26), and BR-103 brings the whole
+    -- session back after the OS has taken the app away; a direction re-drawn at
+    -- either moment is a card that changed the question between two attempts at
+    -- it. A seed would survive a rebuild and not a change of seed recipe — a
+    -- column survives both.
+    direction TEXT NULL CHECK (
+        direction IS NULL
+        OR direction IN ('korean_to_meaning', 'meaning_to_korean')
+    ),
 
     -- A card appears exactly once per round per stage (BR-113, BR-117).
     PRIMARY KEY (session_id, mode, round, card_id)

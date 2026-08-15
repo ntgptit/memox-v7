@@ -9,13 +9,18 @@ import '../../../../shared/widgets/mx_async_view.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../shared/widgets/mx_error_state.dart';
 import '../../../../shared/widgets/mx_icon_button.dart';
+import '../../../../core/error/failure.dart';
 import '../../domain/entities/study_session_entity.dart';
+import '../../domain/failures/study_refusal_failure.dart';
+import '../../domain/models/study_direction_model.dart';
 import '../../domain/models/study_entry_summary_model.dart';
 import '../../domain/models/study_mode.dart';
+import '../../domain/models/study_review_options_model.dart';
 import '../../domain/models/study_session_kind_model.dart';
 import '../controllers/study_entry_controller.dart';
 import '../controllers/study_resume_controller.dart';
-import '../controllers/study_review_modes_controller.dart';
+import '../controllers/study_review_options_controller.dart';
+import '../widgets/overlays/study_direction_chooser_widget.dart';
 import '../widgets/overlays/study_mode_chooser_widget.dart';
 import '../widgets/overlays/study_resume_widget.dart';
 import '../widgets/sections/study_entry_section_widget.dart';
@@ -139,20 +144,19 @@ class _StudyEntryScreenState extends ConsumerState<StudyEntryScreen> {
   /// Opens the chooser, or goes straight in when there is only one mode.
   ///
   /// BR-146: with a single available mode the chooser is a question with one
-  /// answer, so `sm2` decks skip it entirely.
+  /// answer, so `sm2` decks skip it entirely — and land instead on the direction
+  /// question, which for those decks is the one real choice a review has
+  /// (BR-203).
   Future<void> _chooseMode(
     BuildContext context,
     WidgetRef ref,
     StudyEntrySummaryModel summary,
   ) async {
-    final modes = await ref.read(studyReviewModesProvider(deckId).future);
+    final options = await ref.read(studyReviewOptionsProvider(deckId).future);
+    final modes = options.modes;
     if (modes.isEmpty || !context.mounted) return;
     if (modes.length == 1) {
-      return _open(
-        context,
-        kind: StudySessionKind.reviewing,
-        reviewMode: modes.single,
-      );
+      return _startReview(context, options: options, mode: modes.single);
     }
 
     final chosen = await showModalBottomSheet<StudyMode>(
@@ -166,7 +170,97 @@ class _StudyEntryScreenState extends ConsumerState<StudyEntryScreen> {
 
     if (chosen == null || !context.mounted) return;
 
-    return _open(context, kind: StudySessionKind.reviewing, reviewMode: chosen);
+    return _startReview(context, options: options, mode: chosen);
+  }
+
+  /// Starts a review in [mode], asking for a direction first when the deck's
+  /// algorithm and the mode make that a real question (BR-203).
+  ///
+  /// **The eligibility question is the model's, not this screen's.** A widget
+  /// spelling out "reviewing and sm2 and self_assess" is the copy that forgets a
+  /// term, and the term it forgets is the one that puts a chooser in front of an
+  /// `eight_box` deck.
+  Future<void> _startReview(
+    BuildContext context, {
+    required StudyReviewOptionsModel options,
+    required StudyMode mode,
+  }) {
+    if (!options.isDirectionChoiceRequiredFor(mode)) {
+      return _open(context, kind: StudySessionKind.reviewing, reviewMode: mode);
+    }
+
+    return showModalBottomSheet<void>(
+      context: context,
+      // The choice is locked for the session (BR-207), so it is confirmed rather
+      // than taken on a tap — and a sheet that dismisses on a background tap
+      // would still be dismissible, which is the correct way out of a question
+      // the user has decided not to answer.
+      builder: (sheetContext) => StudyDirectionChooserWidget(
+        onSubmit: (direction) =>
+            _startWithDirection(sheetContext, mode: mode, direction: direction),
+      ),
+    );
+  }
+
+  /// Confirms the review is still open to be started, then opens it.
+  ///
+  /// **The re-read is not ceremony, and it checks two things because UC-15 has
+  /// two error flows.** The sheet has been on screen, and in that time a
+  /// scheduler change or a Reset elsewhere can have taken `self_assess` away
+  /// (E1, BR-13, BR-83) — or the last due card can have been answered, which
+  /// BR-145 refuses (E2). Both used to reach the user the same wrong way: the
+  /// sheet popped first, so the refusal surfaced as a full-screen error on the
+  /// session screen, with the choice lost and no way back to it.
+  ///
+  /// The authoritative refusal still happens inside `openSession`'s transaction —
+  /// this is the user-facing one, and it is what UC-15 promises.
+  ///
+  /// Returns null when the session was opened, and the failure otherwise — the
+  /// chooser renders it and keeps the selection.
+  Future<Object?> _startWithDirection(
+    BuildContext sheetContext, {
+    required StudyMode mode,
+    required StudySessionDirection direction,
+  }) async {
+    try {
+      ref
+        ..invalidate(studyReviewOptionsProvider(deckId))
+        ..invalidate(studyEntryProvider(deckId));
+
+      final options = await ref.read(studyReviewOptionsProvider(deckId).future);
+      if (!options.isDirectionChoiceRequiredFor(mode)) {
+        return const ConflictFailure(
+          message: 'This deck no longer offers that review',
+          reason: StudyRefusalReason.modeNotSupportedByScheduler,
+        );
+      }
+
+      final summary = await ref.read(studyEntryProvider(deckId).future);
+      if (summary.dueCount <= 0) {
+        return const ConflictFailure(
+          message: 'Nothing to review',
+          reason: StudyRefusalReason.nothingDueToReview,
+        );
+      }
+    } on Object catch (error) {
+      return error;
+    }
+
+    // The sheet outliving this await is the ordinary case; it going away is the
+    // user having dismissed it, and there is then nothing to report to.
+    if (!mounted || !sheetContext.mounted) return null;
+
+    Navigator.of(sheetContext).pop();
+    if (!mounted) return null;
+
+    await _open(
+      context,
+      kind: StudySessionKind.reviewing,
+      reviewMode: mode,
+      direction: direction,
+    );
+
+    return null;
   }
 
   /// Opens a session, and refreshes this screen on both sides of it.
@@ -184,6 +278,10 @@ class _StudyEntryScreenState extends ConsumerState<StudyEntryScreen> {
     BuildContext context, {
     required StudySessionKind kind,
     StudyMode? reviewMode,
+
+    /// The recall direction chosen for this session (BR-203). Null for every
+    /// path the rule does not cover, and for a resume (BR-207).
+    StudySessionDirection? direction,
     bool shouldResume = false,
   }) async {
     _refresh();
@@ -200,6 +298,7 @@ class _StudyEntryScreenState extends ConsumerState<StudyEntryScreen> {
           deckId: deckId,
           kind: kind,
           reviewMode: reviewMode,
+          direction: direction,
           shouldResume: shouldResume,
         ),
       ),
