@@ -981,7 +981,8 @@ def _check_duplicate_headings() -> None:
             continue
         seen: dict[str, int] = {}
         for i, line in enumerate(text.splitlines(), start=1):
-            if not line.startswith("## ") or line.startswith("###"):
+            # `## ` with the trailing space already excludes `###`.
+            if not line.startswith("## "):
                 continue
             title = line[3:].strip()
             if title in seen:

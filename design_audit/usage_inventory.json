@@ -1,14 +1,14 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
   "scannedFiles": 547,
-  "totalSites": 451,
+  "totalSites": 453,
   "byElementKind": {
-    "other": 304,
+    "other": 305,
     "background": 15,
     "shadow": 1,
     "border": 14,
     "text": 92,
-    "icon": 25
+    "icon": 26
   },
   "bySourceKind": {
     "shared-constant": 143,
@@ -16,7 +16,7 @@
     "Colors-material": 5,
     "hardcoded-literal": 97,
     "opacity-modified-token": 11,
-    "theme-token": 191
+    "theme-token": 193
   },
   "sites": [
     {
@@ -4223,7 +4223,7 @@
     },
     {
       "file": "lib/features/reminder/presentation/widgets/sections/reminder_banner_section_widget.dart",
-      "line": 43,
+      "line": 44,
       "widget_context": "ReminderBannerSectionWidget",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -4234,7 +4234,18 @@
     },
     {
       "file": "lib/features/reminder/presentation/widgets/sections/reminder_banner_section_widget.dart",
-      "line": 53,
+      "line": 59,
+      "widget_context": "ReminderBannerSectionWidget",
+      "element_kind": "icon",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onErrorContainer",
+      "token": "colorScheme.onErrorContainer",
+      "resolved_value_light": "#641421",
+      "resolved_value_dark": "#F5D3D8"
+    },
+    {
+      "file": "lib/features/reminder/presentation/widgets/sections/reminder_banner_section_widget.dart",
+      "line": 69,
       "widget_context": "ReminderBannerSectionWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4245,9 +4256,20 @@
     },
     {
       "file": "lib/features/reminder/presentation/widgets/sections/reminder_banner_section_widget.dart",
-      "line": 60,
+      "line": 76,
       "widget_context": "ReminderBannerSectionWidget",
       "element_kind": "text",
+      "source_kind": "theme-token",
+      "expression": "context.colors.onErrorContainer",
+      "token": "colorScheme.onErrorContainer",
+      "resolved_value_light": "#641421",
+      "resolved_value_dark": "#F5D3D8"
+    },
+    {
+      "file": "lib/features/reminder/presentation/widgets/sections/reminder_banner_section_widget.dart",
+      "line": 92,
+      "widget_context": "ReminderBannerSectionWidget",
+      "element_kind": "other",
       "source_kind": "theme-token",
       "expression": "context.colors.onErrorContainer",
       "token": "colorScheme.onErrorContainer",

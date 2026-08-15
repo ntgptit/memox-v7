@@ -12,6 +12,7 @@ import 'package:memox/features/reminder/di/reminder_settings_repository_provider
 import 'package:memox/features/reminder/di/reminder_workload_repository_provider.dart';
 import 'package:memox/features/reminder/domain/models/reminder_capability_model.dart';
 import 'package:memox/features/reminder/presentation/screens/reminder_settings_screen.dart';
+import 'package:memox/features/reminder/presentation/widgets/sections/reminder_banner_section_widget.dart';
 import 'package:memox/l10n/generated/app_localizations.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_card.dart';
@@ -147,23 +148,26 @@ void main() {
       expect(banner.top, greaterThan(settingsCard.bottom));
     });
 
-    testWidgets('the card keeps its height across S2, S3 and S4 (M6 G5)', (
-      tester,
-    ) async {
-      // **Measured, not reasoned about.** G5 holds today because nothing inside
-      // the card renders or hides on `isBusy` — but that is a property of the
-      // current widget tree, not of the contract, and the first spinner someone
-      // puts beside a locked control makes the card grow by however tall it is.
-      // A card that changes height mid-write drags the banner and everything
-      // under it, which is the jump G5 exists to forbid.
-      // The permission request is held open, because otherwise every command
-      // this fake serves resolves on the same microtask as the tap: the first
-      // `pump()` would already show the settled state, and all three
-      // measurements would be the same frame. Mutation-checked — a card grown
-      // by 120dp while `isBusy` leaves this red.
+    /// The card's height across a write, measured rather than reasoned about.
+    ///
+    /// G5 holds today because nothing inside the card renders or hides on
+    /// `isBusy` — but that is a property of the current widget tree, not of the
+    /// contract, and the first spinner someone puts beside a locked control
+    /// makes the card grow by however tall it is. A card that changes height
+    /// mid-write drags the banner and everything under it.
+    ///
+    /// **The permission request is held open.** Otherwise every command this
+    /// fake serves resolves on the same microtask as the tap: the first
+    /// `pump()` already shows the settled state, all three measurements are one
+    /// frame, and the test passes against a card deliberately grown by 120dp.
+    /// Both cases below are mutation-checked against exactly that.
+    Future<void> expectStableHeight(
+      WidgetTester tester, {
+      required bool shouldFailSchedule,
+    }) async {
       final gate = Completer<ReminderPermission>();
-      platform = FakeReminderPlatform(permissionGate: gate);
-      platform.shouldFailSchedule = true;
+      platform = FakeReminderPlatform(permissionGate: gate)
+        ..shouldFailSchedule = shouldFailSchedule;
       await pumpScreen(tester);
 
       double cardHeight() => tester.getRect(find.byType(MxCard).first).height;
@@ -176,10 +180,30 @@ void main() {
 
       gate.complete(ReminderPermission.granted);
       await tester.pumpAndSettle();
-      final afterRejection = cardHeight();
+      final afterSettling = cardHeight();
 
       expect(whileSubmitting, closeTo(atRest, 0.5));
-      expect(afterRejection, closeTo(atRest, 0.5));
+      expect(afterSettling, closeTo(atRest, 0.5));
+    }
+
+    testWidgets('the card keeps its height from S2 through S3 to S4 (M6 G5)', (
+      tester,
+    ) async {
+      // The success path: off, enabling, on. Named for the states it reaches —
+      // an earlier version of this test claimed S4 and drove the schedule to
+      // failure instead, so the one transition a user takes every time was the
+      // one it never measured.
+      await expectStableHeight(tester, shouldFailSchedule: false);
+      expect(find.byType(MxCard), findsOneWidget, reason: 'S4 shows no banner');
+    });
+
+    testWidgets('the card keeps its height from S2 through S3 to S8 (M6 G5)', (
+      tester,
+    ) async {
+      // The failure path: the banner appears *below* the card, and G7 says it
+      // pushes what follows down rather than resizing what precedes it.
+      await expectStableHeight(tester, shouldFailSchedule: true);
+      expect(find.byType(MxCard), findsNWidgets(2), reason: 'S8 adds a banner');
     });
 
     testWidgets('both rows clear the 48dp touch target (M6 G4)', (
@@ -219,6 +243,62 @@ void main() {
       await pumpScreen(tester, surface: const Size(320, 568), textScale: 2);
 
       expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('the banner fits too, at 320x568 with textScaler 2.0, EN and '
+        'VI', (tester) async {
+      // **G7 and A2 are each tested, and were never tested together.** The
+      // overflow checks above all run against a platform that grants and
+      // schedules, so the banner is never on screen for them; the banner test
+      // runs at 393x852 and scale 1. Card plus banner plus two paragraphs at
+      // the narrowest width and the largest scale is the one combination most
+      // likely to overflow, and it was the one nothing rendered.
+      for (final locale in <Locale>[const Locale('en'), const Locale('vi')]) {
+        platform = FakeReminderPlatform(permission: ReminderPermission.denied);
+        await pumpScreen(
+          tester,
+          surface: const Size(320, 568),
+          textScale: 2,
+          locale: locale,
+        );
+        await tester.tap(find.byType(Switch));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(MxCard), findsNWidgets(2));
+        expect(tester.takeException(), isNull);
+      }
+    });
+
+    testWidgets('the banner Retry reads its ink from the surface it sits on', (
+      tester,
+    ) async {
+      // **The resolved foreground, not the token pair.** Asserting
+      // `onErrorContainer` against `errorContainer` stays green if the accent
+      // is dropped, because the band's *text* uses that pair either way — and
+      // the default `primaryAccent` measures 3.72:1 here in dark, under the 4.5
+      // its 14px w600 label needs. The golden harness renders only the resting
+      // state, so nothing else on this screen would have caught it.
+      platform = FakeReminderPlatform(permission: ReminderPermission.denied);
+      await pumpScreen(tester);
+      await tester.tap(find.byType(Switch));
+      await tester.pumpAndSettle();
+
+      final BuildContext bannerContext = tester.element(
+        find.byType(ReminderBannerSectionWidget),
+      );
+      final ButtonStyle? style = tester
+          .widget<TextButton>(
+            find.descendant(
+              of: find.byType(ReminderBannerSectionWidget),
+              matching: find.byType(TextButton),
+            ),
+          )
+          .style;
+
+      expect(
+        style?.foregroundColor?.resolve(<WidgetState>{}),
+        Theme.of(bannerContext).colorScheme.onErrorContainer,
+      );
     });
 
     testWidgets('no label is ellipsized at 320x568 with textScaler 2.0', (

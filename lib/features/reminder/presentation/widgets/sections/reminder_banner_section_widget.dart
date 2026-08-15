@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_elevation.dart';
+import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -44,32 +45,57 @@ class ReminderBannerSectionWidget extends StatelessWidget {
         // A shadow stacked on a shadow is a rendering fault rather than
         // depth: this banner sits inside a scrolling body of flat cards (D20).
         elevation: AppElevation.none,
-        child: Column(
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(
-              banner.title,
-              style: context.texts.titleSmall?.copyWith(
-                color: context.colors.onErrorContainer,
+            // The wireframe's own W5 box opens with a warning glyph, and the
+            // other in-flow error band in this batch
+            // (`settings_error_band_widget.dart`) does the same. Two error
+            // bands one tap apart that look different are two answers to
+            // "what does a problem look like here".
+            Icon(
+              Icons.error_outline,
+              size: AppIconSize.mdCompact,
+              color: context.colors.onErrorContainer,
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    banner.title,
+                    style: context.texts.titleSmall?.copyWith(
+                      color: context.colors.onErrorContainer,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    banner.message,
+                    style: context.texts.bodyMedium?.copyWith(
+                      color: context.colors.onErrorContainer,
+                    ),
+                  ),
+                  if (banner.isRetryable) ...<Widget>[
+                    const SizedBox(height: AppSpacing.sm),
+                    Align(
+                      alignment: AlignmentDirectional.centerEnd,
+                      // **`onErrorContainer`, because this button sits on
+                      // `errorContainer`.** The default `primaryAccent` is right on
+                      // a page and measures 3.72:1 here in dark — under the 4.5 its
+                      // 14px w600 label needs. The band's own text already uses this
+                      // ink. The sibling band found this first; this one did not get
+                      // the fix because it arrived from a branch that predated it.
+                      child: MxTextButton(
+                        label: context.l10n.reminderRetryAction,
+                        onPressed: onRetry,
+                        accent: context.colors.onErrorContainer,
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              banner.message,
-              style: context.texts.bodyMedium?.copyWith(
-                color: context.colors.onErrorContainer,
-              ),
-            ),
-            if (banner.isRetryable) ...<Widget>[
-              const SizedBox(height: AppSpacing.sm),
-              Align(
-                alignment: AlignmentDirectional.centerEnd,
-                child: MxTextButton(
-                  label: context.l10n.reminderRetryAction,
-                  onPressed: onRetry,
-                ),
-              ),
-            ],
           ],
         ),
       ),

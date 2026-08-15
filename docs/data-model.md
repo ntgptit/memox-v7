@@ -11,7 +11,7 @@
 | **Last updated** | 2026-08-13 |
 
 Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; SQL thật nằm ở
-`lib/core/database/tables/`, hiện ở **schema v9**.
+`lib/core/database/tables/`, hiện ở **schema v10**.
 
 **`review` vẫn còn nghĩa thứ hai trong repo, và nó không đổi.** Ở `docs/reviews/`,
 "vòng review UI/UX", "code review" — đó là *rà soát*, không phải *ôn tập*. Đợt đổi
