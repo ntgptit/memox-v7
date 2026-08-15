@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_content_shell.dart';
@@ -105,7 +106,14 @@ class _StudyHomeList extends StatelessWidget {
       // edge to edge — content passes under the app-bar hairline instead of
       // stopping short of it — and so the last card keeps clearance above the
       // bottom bar at the *end* of the scroll.
-      padding: EdgeInsets.all(mxScreenGutter(context)),
+      // Sides take the screen gutter; the step under the last row is `lg`
+      // at every width, the same as the deck list and Progress (M99.26).
+      padding: EdgeInsets.fromLTRB(
+        mxScreenGutter(context),
+        mxScreenGutter(context),
+        mxScreenGutter(context),
+        AppSpacing.lg,
+      ),
       children: <Widget>[
         Text(
           // **Two lines, chosen by whether there is anything to carry on
@@ -135,8 +143,17 @@ class _StudyHomeList extends StatelessWidget {
         Semantics(
           header: true,
           child: Text(
-            l10n.studyHomeNextTitle,
-            style: context.texts.titleMedium,
+            // **The app's one section-label treatment** (M99.26): `labelMedium`,
+            // `onSurfaceVariant`, and the tracking `AppTypography` keeps for
+            // exactly this role. It was `titleMedium` at full-strength
+            // `onSurface`, which made this heading louder than every other list
+            // heading in the app while saying the same kind of thing. The deck
+            // list's toolbar is the treatment this now matches.
+            l10n.studyHomeNextTitle.toUpperCase(),
+            style: context.texts.labelMedium?.copyWith(
+              color: context.colors.onSurfaceVariant,
+              letterSpacing: AppTypography.sectionLabelTracking,
+            ),
           ),
         ),
         if (!hasWork) ...<Widget>[

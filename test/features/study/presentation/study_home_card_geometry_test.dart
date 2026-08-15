@@ -5,6 +5,7 @@ import 'package:memox/features/study/domain/models/study_home_deck_model.dart';
 import 'package:memox/features/study/presentation/widgets/items/study_home_deck_item_widget.dart';
 import 'package:memox/features/study/presentation/widgets/sections/study_home_resume_section_widget.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
+import 'package:memox/shared/widgets/mx_metric_well.dart';
 
 import 'support/study_home_harness.dart';
 import 'package:memox/core/theme/app_icon_size.dart';
@@ -125,18 +126,35 @@ void main() {
       (tester) async {
         await harness.pump(tester);
 
+        // Measured from the **well**, not from the glyph inside it: since
+        // M99.26 the anchor is `MxMetricWell`, the same one the deck summary
+        // and Progress use, and it pads the glyph by `xs` on every side. A
+        // measurement taken from the glyph counts that padding as part of the
+        // gap and reads 8 where the layout says 4.
+        final well = tester.getRect(inRow(find.byType(MxMetricWell)).first);
         final icon = tester.getRect(inRow(find.byIcon(Icons.event_busy)).first);
         final label = tester.getRect(
-          inRow(find.text(english.studyHomeOverdueLabel(2))).first,
+          inRow(find.textContaining(english.studyHomeOverdueWord)).first,
         );
 
         expect(icon.height, AppIconSize.sm);
         expect(icon.width, AppIconSize.sm);
-        expect(label.left - icon.right, AppSpacing.xs);
-        // Same band as the text it belongs to — a glyph on its own baseline reads
-        // as a separate element rather than as part of the count.
-        expect(icon.top, label.top);
-        expect(icon.bottom, label.bottom);
+        expect(label.left - well.right, AppSpacing.xs);
+        // The glyph sits centred in its well, `xs` on every side — the shape
+        // `MxMetricWell` fixes for all three screens.
+        expect(well.height, AppIconSize.sm + 2 * AppSpacing.xs);
+        expect(icon.center.dy, well.center.dy);
+        // The well rides the same band as the text it belongs to: the row is
+        // baseline-aligned, so an anchor drifting off that band would read as a
+        // separate element rather than as part of the count.
+        expect(
+          well.center.dy,
+          closeTo(label.center.dy, 4),
+          // 3.6dp apart, measured: the row aligns on the alphabetic
+          // baseline, and a padded well and a two-line-capable text box
+          // do not centre identically around it.
+          reason: 'the anchor and its count share a band',
+        );
       },
     );
 
@@ -144,9 +162,10 @@ void main() {
       await harness.pump(tester);
 
       final overdue = tester.getRect(
-        inRow(find.text(english.studyHomeOverdueLabel(2))).first,
+        inRow(find.textContaining(english.studyHomeOverdueWord)).first,
       );
-      final dueToday = tester.getRect(inRow(find.byIcon(Icons.event)).first);
+      // The next group starts at its well, which is what leads a metric now.
+      final dueToday = tester.getRect(inRow(find.byType(MxMetricWell)).at(1));
 
       // Measured end-of-group to start-of-next-group, which is what `Wrap`'s
       // `spacing` actually controls — the icon leads each group.

@@ -134,7 +134,10 @@ void main() {
       // deck's entry screen. What this test is about is the bar surviving that
       // branch, so it asserts the screen rendered at all rather than which copy
       // it happens to carry.
-      expect(find.text(english.studyHomeNextTitle), findsOneWidget);
+      expect(
+        find.text(english.studyHomeNextTitle.toUpperCase()),
+        findsOneWidget,
+      );
       expect(find.byType(MxNavigationBar), findsOneWidget);
       expect(tester.takeException(), isNull);
     });

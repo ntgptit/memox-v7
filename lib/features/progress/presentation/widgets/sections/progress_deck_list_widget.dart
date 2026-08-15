@@ -48,7 +48,12 @@ class ProgressDeckListWidget extends StatelessWidget {
       padding: EdgeInsets.only(
         left: gutter,
         right: gutter,
-        bottom: AppSpacing.xxl,
+        // `lg`, the same step under the last row as the deck list and
+        // Study Home (M99.26). It was `xxl` on the reasoning that a list
+        // ending flush against the navigation bar reads as cut off — true,
+        // and the deck list answers the same problem with `lg` after
+        // M4.10ag measured it. One number, not three.
+        bottom: AppSpacing.lg,
       ),
       sliver: SliverList.separated(
         itemCount: decks.length,

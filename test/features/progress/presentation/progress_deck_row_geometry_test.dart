@@ -126,7 +126,10 @@ void main() {
       final viewport = tester.getRect(find.byType(CustomScrollView));
       final bar = tester.getRect(find.byType(MxNavigationBar));
 
-      expect(viewport.bottom - lastRow.bottom, AppSpacing.xxl);
+      // `lg`, the one step every list in the app now leaves under its last row
+      // (M99.26). It was `xxl` here and `lg` on the deck list and Study Home,
+      // for the same reason on all three.
+      expect(viewport.bottom - lastRow.bottom, AppSpacing.lg);
       expect(lastRow.bottom, lessThanOrEqualTo(bar.top));
     });
   });

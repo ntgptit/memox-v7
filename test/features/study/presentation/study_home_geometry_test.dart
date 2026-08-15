@@ -94,7 +94,9 @@ void main() {
       await harness.pump(tester);
 
       final resume = tester.getRect(find.byType(StudyHomeResumeSectionWidget));
-      final heading = tester.getRect(find.text(english.studyHomeNextTitle));
+      final heading = tester.getRect(
+        find.text(english.studyHomeNextTitle.toUpperCase()),
+      );
 
       // `xl`, not `md`: the seam between "what you were doing" and "what you
       // could do next" is a section boundary, and a break the size of the gap
@@ -112,7 +114,9 @@ void main() {
       // which is the situation a gate exists for.
       await harness.pump(tester);
 
-      final heading = tester.getRect(find.text(english.studyHomeNextTitle));
+      final heading = tester.getRect(
+        find.text(english.studyHomeNextTitle.toUpperCase()),
+      );
       final first = tester.getRect(find.byType(StudyHomeDeckItemWidget).first);
 
       expect(first.top - heading.bottom, AppSpacing.md);

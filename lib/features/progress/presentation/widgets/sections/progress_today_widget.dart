@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -27,7 +28,12 @@ class ProgressTodayWidget extends StatelessWidget {
     final texts = context.texts;
     final colors = context.colors;
 
+    // Flat, like every other card in a scrolling column (M99.26): two
+    // competing depths in one column is what makes a list read as busy,
+    // which is the reason the deck tile and the Study Home row already
+    // gave. Progress was the only surface still taking the default.
     return MxCard(
+      elevation: AppElevation.none,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[

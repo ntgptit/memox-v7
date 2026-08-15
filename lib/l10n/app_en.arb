@@ -3082,5 +3082,17 @@
       }
     },
     "description": "The row sentence for a deck whose algorithm has no label to show. A sentence with an empty clause reads worse than the short form."
+  },
+  "studyHomeOverdueWord": "overdue",
+  "@studyHomeOverdueWord": {
+    "description": "The word half of a workload metric, rendered beside the numeral so the two can carry different ink — the numeral stays neutral and only the word takes the metric tint, which is the grammar the deck summary and Progress already use. The joined form (studyHome*Label) is still what a screen reader hears."
+  },
+  "studyHomeDueTodayWord": "due today",
+  "@studyHomeDueTodayWord": {
+    "description": "The word half of a workload metric, rendered beside the numeral so the two can carry different ink — the numeral stays neutral and only the word takes the metric tint, which is the grammar the deck summary and Progress already use. The joined form (studyHome*Label) is still what a screen reader hears."
+  },
+  "studyHomeNewWord": "new",
+  "@studyHomeNewWord": {
+    "description": "The word half of a workload metric, rendered beside the numeral so the two can carry different ink — the numeral stays neutral and only the word takes the metric tint, which is the grammar the deck summary and Progress already use. The joined form (studyHome*Label) is still what a screen reader hears."
   }
 }

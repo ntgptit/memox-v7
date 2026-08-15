@@ -55,7 +55,10 @@ void main() {
 
       expect(find.byType(StudyHomeResumeSectionWidget), findsOneWidget);
       expect(find.byType(StudyHomeDeckItemWidget), findsNWidgets(2));
-      expect(find.text(english.studyHomeNextTitle), findsOneWidget);
+      expect(
+        find.text(english.studyHomeNextTitle.toUpperCase()),
+        findsOneWidget,
+      );
     });
 
     testWidgets('no open session means no resume card at all', (tester) async {
@@ -135,8 +138,13 @@ void main() {
       // break is invisible to TalkBack, which hears the resume card run
       // straight into the first deck and cannot jump by heading.
       expect(
-        tester.getSemantics(find.text(english.studyHomeNextTitle)),
-        matchesSemantics(label: english.studyHomeNextTitle, isHeader: true),
+        tester.getSemantics(
+          find.text(english.studyHomeNextTitle.toUpperCase()),
+        ),
+        matchesSemantics(
+          label: english.studyHomeNextTitle.toUpperCase(),
+          isHeader: true,
+        ),
       );
       handle.dispose();
     });

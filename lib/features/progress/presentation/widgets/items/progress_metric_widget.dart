@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/app_icon_size.dart';
-import '../../../../../core/theme/app_radius.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../domain/models/deck_activity_metrics_model.dart';
+import '../../../../../shared/widgets/mx_metric_well.dart';
 
 /// How large the numerals in a metric grid read.
 ///
@@ -140,35 +139,6 @@ TextStyle? _numeralStyle(BuildContext context, ProgressMetricScale scale) =>
             : context.texts.titleSmall)
         ?.copyWith(color: context.colors.onSurface);
 
-/// The small icon well every metric anchors on — same size, same radius, same
-/// padding, so the four read as four entries of one grammar and only the glyph
-/// and the tint differ.
-class _MetricIconWell extends StatelessWidget {
-  const _MetricIconWell({
-    required this.icon,
-    required this.tint,
-    required this.wellColor,
-  });
-
-  final IconData icon;
-  final Color tint;
-  final Color wellColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: wellColor,
-        borderRadius: BorderRadius.circular(AppRadius.pill),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xs),
-        child: Icon(icon, size: AppIconSize.sm, color: tint),
-      ),
-    );
-  }
-}
-
 /// One metric: anchor, numeral, word — one shape for all four.
 ///
 /// **Zero is quiet, never wrong.** A window with nothing in it is a normal
@@ -210,7 +180,7 @@ class _Metric extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.baseline,
       textBaseline: TextBaseline.alphabetic,
       children: <Widget>[
-        _MetricIconWell(icon: icon, tint: tint, wellColor: wellColor),
+        MxMetricWell(icon: icon, tint: tint, wellColor: wellColor),
         const SizedBox(width: AppSpacing.xs),
         // Flexible so the text owns the rest of its fixed-width grid cell: a
         // long word at double scale wraps onto a second line inside the cell
