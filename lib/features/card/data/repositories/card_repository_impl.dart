@@ -18,6 +18,7 @@ import '../../domain/models/card_move_target_model.dart';
 import '../../domain/models/card_state_distribution_model.dart';
 import '../../domain/models/card_text_model.dart';
 import '../../domain/models/deck_context_model.dart';
+import '../../domain/models/tag_filter_model.dart';
 import '../../domain/models/tag_name_model.dart';
 import '../../domain/repositories/card_repository.dart';
 import '../datasources/card_list_read_data_source.dart';
@@ -92,6 +93,7 @@ final class CardRepositoryImpl
     CardListSort sort = CardListSort.newest,
     String? searchTerm,
     DateTime? now,
+    TagFilter tags = TagFilter.none,
   }) => _reads.watchCardListItems(
     deckId,
     limit: limit,
@@ -99,6 +101,7 @@ final class CardRepositoryImpl
     sort: sort,
     searchTerm: searchTerm,
     now: now,
+    tags: tags,
   );
 
   @override
@@ -107,11 +110,13 @@ final class CardRepositoryImpl
     CardListFilter filter = CardListFilter.all,
     String? searchTerm,
     DateTime? now,
+    TagFilter tags = TagFilter.none,
   }) => _reads.watchFilteredCardCount(
     deckId,
     filter: filter,
     searchTerm: searchTerm,
     now: now,
+    tags: tags,
   );
 
   @override

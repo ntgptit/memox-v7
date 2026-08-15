@@ -7,6 +7,7 @@ import '../../features/card/presentation/providers/card_use_case_provider.dart';
 import '../../features/card/presentation/screens/card_editor_screen.dart';
 import '../../features/card/presentation/screens/card_import_screen.dart';
 import '../../features/card/presentation/screens/card_list_screen.dart';
+import '../../features/card/presentation/screens/tag_catalog_screen.dart';
 import '../../features/deck/presentation/screens/deck_list_screen.dart';
 import '../../features/deck/presentation/screens/starter_library_screen.dart';
 import '../../features/progress/presentation/screens/progress_deck_screen.dart';
@@ -89,6 +90,16 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
                     path: RoutePaths.starterLibraryRelative,
                     name: RouteNames.starterLibrary,
                     builder: (context, state) => const StarterLibraryScreen(),
+                  ),
+                  // The tag catalog, a second sibling of the deck detail. A tag
+                  // belongs to no deck (BR-93, BR-230), so it sits beside the
+                  // tree rather than inside it — and staying in this branch is
+                  // what lets Back return to the card list a user opened it
+                  // from (UC-18).
+                  GoRoute(
+                    path: RoutePaths.tagCatalogRelative,
+                    name: RouteNames.tagCatalog,
+                    builder: (context, state) => const TagCatalogScreen(),
                   ),
                   // A child route, so a deck screen pushes onto the Decks
                   // branch: the bottom bar stays, Back returns to the list, and

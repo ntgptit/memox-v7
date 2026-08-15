@@ -3288,5 +3288,186 @@
   "reminderChannelDescription": "Tóm tắt mỗi ngày một lần về số thẻ đang đến hạn.",
   "@reminderChannelDescription": {
     "description": "Mô tả kênh notification, hiện dưới tên kênh trong cài đặt hệ thống. Nói kênh mang gì, không nói về bất kỳ deck hay thẻ cụ thể nào (BR-222)."
+  },
+  "tagCatalogTitle": "Nhãn",
+  "@tagCatalogTitle": {
+    "description": "App bar title of the tag catalog screen (UC-18, M4.14 W2)."
+  },
+  "tagCatalogEntryAction": "Quản lý nhãn",
+  "@tagCatalogEntryAction": {
+    "description": "Opens the tag catalog. Used by the Library app bar icon and by the card list overflow menu (M4.14 T2)."
+  },
+  "tagCatalogLoadingLabel": "Đang tải nhãn",
+  "@tagCatalogLoadingLabel": {
+    "description": "Screen-reader label while the tag catalog is loading (M4.14 W3 face 1)."
+  },
+  "tagCatalogError": "Không tải được danh sách nhãn.",
+  "@tagCatalogError": {
+    "description": "Body of the catalog error state. Names no table and no query."
+  },
+  "tagCatalogEmptyTitle": "Chưa có nhãn nào",
+  "@tagCatalogEmptyTitle": {
+    "description": "Title when the catalog holds no tags at all (M4.14 W3 face 3)."
+  },
+  "tagCatalogEmptyMessage": "Nhãn xuất hiện ở đây sau khi bạn gắn nhãn cho một thẻ.",
+  "@tagCatalogEmptyMessage": {
+    "description": "Says where tags come from, because nothing on this screen can create one (M4.14 W2 item 1)."
+  },
+  "tagSearchHint": "Tìm nhãn",
+  "@tagSearchHint": {
+    "description": "Placeholder of the catalog search field (BR-230)."
+  },
+  "tagSearchClearLabel": "Xoá từ khoá tìm nhãn",
+  "@tagSearchClearLabel": {
+    "description": "Screen-reader label of the clear button inside the catalog search field."
+  },
+  "tagSearchEmptyTitle": "Không có nhãn nào khớp “{query}”",
+  "@tagSearchEmptyTitle": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    },
+    "description": "Title when a catalog search matches nothing. Quotes the term verbatim so the user sees what was searched for (M4.14 W3 face 4)."
+  },
+  "tagSearchEmptyMessage": "Thử từ ngắn hơn, hoặc kiểm tra lại chính tả.",
+  "@tagSearchEmptyMessage": {
+    "description": "Body of the catalog search-empty state."
+  },
+  "tagCardCount": "{count, plural, =0{Không có thẻ nào} other{{count} thẻ}}",
+  "@tagCardCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "How many cards carry a tag. Shown under the name on a catalog row and on a filter row (BR-230, M4.14 W2)."
+  },
+  "tagRowMenuSemantics": "Hành động cho nhãn {name}",
+  "@tagRowMenuSemantics": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    },
+    "description": "Tooltip and screen-reader label of a catalog row's overflow menu, named so a reader can tell rows apart (M4.14 W2)."
+  },
+  "tagRenameAction": "Đổi tên",
+  "@tagRenameAction": {
+    "description": "Catalog row menu item, and the rename sheet's primary action when the new name is free (BR-233)."
+  },
+  "tagDeleteAction": "Xoá nhãn",
+  "@tagDeleteAction": {
+    "description": "Catalog row menu item and the destructive confirm action. Carries the noun on purpose: a bare Delete reads as deleting cards (M4.14 T8, BR-235)."
+  },
+  "tagRenameTitle": "Đổi tên nhãn",
+  "@tagRenameTitle": {
+    "description": "Title of the rename sheet (M4.14 W4)."
+  },
+  "tagRenameFieldLabel": "Tên nhãn",
+  "@tagRenameFieldLabel": {
+    "description": "Label of the rename sheet's single input."
+  },
+  "tagMergeAction": "Gộp nhãn",
+  "@tagMergeAction": {
+    "description": "The rename sheet's primary action once the typed name collides with another tag. The label is the last thing read before the merge happens (BR-234, M4.14 W4 item 4)."
+  },
+  "tagMergeNotice": "“{target}” đã tồn tại. Thẻ của nhãn đó và thẻ của nhãn này sẽ cùng dùng “{target}”, và nhãn hiện tại sẽ biến mất.",
+  "@tagMergeNotice": {
+    "placeholders": {
+      "target": {
+        "type": "String"
+      }
+    },
+    "description": "The merge disclosure, shown while typing and before confirming. Names the target, because saying a merge will happen without saying into what is not a disclosure (BR-234, M4.14 W4 item 3)."
+  },
+  "tagMergedConfirmation": "Đã gộp “{name}”.",
+  "@tagMergedConfirmation": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    },
+    "description": "Confirms after the fact that a rename turned out to be a merge. Chosen from the outcome the transaction returned, not from what the form predicted (BR-234)."
+  },
+  "tagDeleteConfirmTitle": "Xoá nhãn?",
+  "@tagDeleteConfirmTitle": {
+    "description": "Title of the tag delete confirmation (M4.14 W5)."
+  },
+  "tagDeleteConfirmMessage": "{count, plural, other{“{name}” sẽ được gỡ khỏi {count} thẻ. Các thẻ đó vẫn còn nguyên.}}",
+  "@tagDeleteConfirmMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Body of the delete confirmation. States the count and says outright that the cards survive; must never imply cards are deleted (BR-235, M4.14 T8)."
+  },
+  "tagDeleteConfirmMessageUnused": "“{name}” không nằm trên thẻ nào. Xoá nó không làm đổi thẻ nào.",
+  "@tagDeleteConfirmMessageUnused": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    },
+    "description": "Body of the delete confirmation for a tag with no cards. A separate sentence rather than a zero count, which would be a sentence about nothing (M4.14 W5)."
+  },
+  "tagMissingError": "Nhãn này không còn tồn tại.",
+  "@tagMissingError": {
+    "description": "Typed failure: the tag was deleted or merged away between opening an overlay and submitting it (UC-18 E3)."
+  },
+  "tagFilterTitle": "Lọc theo nhãn",
+  "@tagFilterTitle": {
+    "description": "Title of the multi-tag filter sheet on the card list (M4.14 W6)."
+  },
+  "tagFilterSubtitle": "Hiện thẻ mang bất kỳ nhãn nào đang chọn.",
+  "@tagFilterSubtitle": {
+    "description": "States the OR semantics in words. The only place a user learns that selecting a second tag widens the result rather than narrowing it (BR-231, M4.14 W6 item 2)."
+  },
+  "tagFilterClearAction": "Bỏ chọn",
+  "@tagFilterClearAction": {
+    "description": "Empties the filter sheet's draft selection (M4.14 W6 item 4, UC-18 A4)."
+  },
+  "tagFilterClearAllAction": "Bỏ lọc theo nhãn",
+  "@tagFilterClearAllAction": {
+    "description": "The action on the card list's no-result face when a tag selection is what emptied it (UC-18 A7). A separate key from the sheet's Clear on purpose: here the sheet is shut and nothing is visibly selected, so a bare verb has no object — and one key serving two surfaces means editing the sheet's button silently edits this one."
+  },
+  "tagFilterApplyAction": "Áp dụng",
+  "@tagFilterApplyAction": {
+    "description": "The filter sheet's primary action before the match count has arrived — the bare verb rather than a flickering zero (M4.14 T6)."
+  },
+  "tagFilterApplyActionCount": "{count, plural, =0{Không hiện thẻ nào} other{Hiện {count} thẻ}}",
+  "@tagFilterApplyActionCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "The filter sheet's primary action with the number of cards the draft matches, so the user can tell whether it is worth applying before closing the sheet (M4.14 T6)."
+  },
+  "tagFilterPillLabel": "Nhãn",
+  "@tagFilterPillLabel": {
+    "description": "The card list filter bar's tag pill when no tag is selected (M4.14 T3)."
+  },
+  "tagFilterPillCount": "Nhãn · {count}",
+  "@tagFilterPillCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "The tag pill when tags are selected. The number is the only thing on the bar that distinguishes no tag filter from a filter by three tags (M4.14 T4)."
+  },
+  "tagFilterPillSemantics": "{count, plural, other{Nhãn, đang chọn {count}}}",
+  "@tagFilterPillSemantics": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Screen-reader label of the tag pill while a filter is applied — the selected state must not be colour-only (M4.14 R)."
   }
 }

@@ -7,8 +7,8 @@
 | **Scope** | Must-have của MVP. Ngoài phạm vi: should/nice-to-have, và mọi thứ ở mục "Điều đã cố ý không đặc tả" |
 | **Source of truth for** | UC-xx · main/alternative/error flow · UI state matrix của từng màn |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md` |
-| **Updated by task** | M99.24 — UC-13: xem tiến độ theo deck (cấp thư viện → cấp deck, hai khoảng); trước đó M99.23 — UC-12: xem tiến độ học (streak, hôm nay, bảy ngày) · M99.29 — UC-17: bật nhắc học hằng ngày (opt-in → quyền → lịch → notification → Study Home) |
-| **Last updated** | 2026-08-15 |
+| **Updated by task** | M99.24 — UC-13: xem tiến độ theo deck (cấp thư viện → cấp deck, hai khoảng); trước đó M99.23 — UC-12: xem tiến độ học (streak, hôm nay, bảy ngày) · M99.29 — UC-17: bật nhắc học hằng ngày (opt-in → quyền → lịch → notification → Study Home) · M99.30 — UC-18: quản lý tag (catalog, rename/gộp, xoá) và lọc thẻ theo nhiều tag |
+| **Last updated** | 2026-08-16 |
 
 Chỉ đặc tả must-have. Should-have và nice-to-have viết khi tới lượt — đặc tả
 trước những thứ có thể bị cắt là lãng phí.
@@ -1219,6 +1219,92 @@ permission denied (khôi phục được) · platform unavailable · schedule er
 lượt chờ còn sót) · read error (E7 — lỗi toàn màn, không vẽ hàng nào). Không có
 state `empty`: màn này luôn có nội dung, kể cả khi thư viện rỗng.
 
+## UC-18 · Quản lý tag và lọc thẻ theo tag
+
+| | |
+|---|---|
+| **Status** | active |
+
+**Actor:** Người dùng
+**Trigger:** Chạm hành động `Tags` trên app bar của Library, hoặc `Manage tags`
+trong overflow menu của card list; lọc theo tag thì chạm pill `Tags` trên thanh
+filter của card list
+**Preconditions:** Không có. Catalog mở được cả khi chưa có tag nào — trạng thái
+rỗng là câu trả lời hợp lệ, không phải lỗi
+
+**Main flow:**
+1. Người dùng mở tag catalog. Hệ thống đọc mọi tag của owner hiện tại kèm số thẻ
+   đang mang mỗi tag, sắp theo tên đã fold rồi `id` (BR-230).
+2. Hệ thống hiển thị mỗi tag thành một hàng: tên canonical, số thẻ, và một menu
+   hành động có `Rename` và `Delete`.
+3. Người dùng gõ vào ô tìm kiếm để thu hẹp catalog. Hệ thống lọc theo cùng phép
+   fold mà BR-93 dùng, nên `Dong tu` và `động từ` tìm thấy nhau đúng như lúc tạo
+   tag (BR-230).
+4. Người dùng chọn `Rename` trên một hàng. Hệ thống mở form với tên hiện tại đã
+   điền sẵn.
+5. Người dùng sửa tên rồi xác nhận. Hệ thống validate theo BR-93 và, vì tên đã
+   fold chưa thuộc về tag nào khác, ghi `name` và `name_folded` mới lên **chính
+   hàng tag đó** — `id` và mọi liên kết thẻ giữ nguyên (BR-233).
+6. Người dùng quay lại card list và chạm pill `Tags`. Hệ thống mở overlay lọc
+   với mọi tag và số thẻ của chúng, cùng tập tag đang chọn.
+7. Người dùng chọn nhiều tag rồi bấm `Apply`. Hệ thống áp vị từ **OR giữa các
+   tag đã chọn**, **AND** với filter trạng thái và search term đang bật, reset
+   cửa sổ phân trang và xoá selection (BR-231, BR-232).
+8. Card list hiển thị đúng tập thẻ khớp, mỗi thẻ đúng một lần, với count khớp
+   danh sách (BR-231).
+
+**Alternative flows:**
+- **A1 — Đổi tên gây trùng (gộp):** tên mới fold trùng một tag khác đang tồn
+  tại. Form nói rõ **trước khi xác nhận** rằng hành động sẽ gộp vào tag đích,
+  và nêu tên đích. Xác nhận thì hệ thống nối mọi thẻ của tag nguồn sang tag
+  đích, dedupe liên kết trùng, gỡ liên kết còn lại của nguồn và xoá hàng tag
+  nguồn — tất cả trong một transaction (BR-234). Không thẻ nào vượt trần 10 tag,
+  vì mỗi thẻ đổi nguồn lấy đích chứ không cộng thêm (BR-94).
+- **A2 — Đổi tên chỉ đổi cách viết hoa:** `noun` → `Noun`. Tên đã fold không
+  đổi, nên đây là đổi cách viết chứ không phải gộp: `id` và liên kết giữ nguyên
+  (BR-233).
+- **A3 — Xoá tag:** người dùng chọn `Delete`. Hệ thống hỏi xác nhận, nêu rõ số
+  thẻ sẽ bị gỡ tag và nói thẳng rằng thẻ **không** bị xoá. Xác nhận thì hệ thống
+  gỡ mọi hàng `card_tags` rồi xoá hàng `tags` trong một transaction (BR-235).
+- **A4 — Bỏ chọn hết tag trong overlay lọc:** `Clear` đưa tập chọn về rỗng. Tập
+  rỗng là phần tử đơn vị — không có vị từ tag nào được áp và danh sách trở lại
+  đúng như trước khi lọc (BR-231).
+- **A5 — Huỷ overlay lọc:** đóng overlay mà không `Apply` giữ nguyên tập tag
+  đang áp; bản nháp bị bỏ.
+- **A6 — Tìm kiếm trong catalog không khớp gì:** catalog hiển thị trạng thái
+  "không có tag nào khớp" kèm chuỗi đã gõ, khác với trạng thái "chưa có tag
+  nào" (BR-230).
+- **A7 — Lọc theo tag không còn thẻ nào khớp:** card list hiển thị trạng thái
+  không có kết quả cho bộ lọc, kèm lối `Clear` để bỏ vị từ tag.
+
+**Error flows:**
+- **E1 — Đọc catalog thất bại:** repository lỗi → trạng thái lỗi có Retry; chưa
+  có mutation nào xảy ra.
+- **E2 — Đổi tên với tên không hợp lệ:** rỗng sau trim, quá 50 ký tự, hoặc chứa
+  ký tự điều khiển → lỗi có kiểu gắn dưới ô nhập, form giữ nguyên chữ đã gõ
+  (BR-93, BR-233).
+- **E3 — Tag đã biến mất:** tag bị xoá ở nơi khác giữa lúc mở form và lúc ghi →
+  lý do có kiểu `không còn tồn tại`, catalog tự cập nhật, không có mutation.
+- **E4 — Ghi thất bại giữa lúc gộp:** transaction rollback toàn bộ; cả hai tag
+  và mọi liên kết trở lại đúng như trước, và UI nêu lỗi thay vì báo thành công
+  (BR-234).
+- **E5 — Xoá thất bại:** transaction rollback; tag và mọi liên kết còn nguyên,
+  không thẻ nào bị đụng tới (BR-235, BR-236).
+
+**Postconditions:** Chỉ hàng `tags` và hàng `card_tags` thay đổi. Nội dung thẻ,
+`updated_at` của thẻ, cờ, `content_type` của deck, study state, review history và
+session đều nguyên vẹn (BR-236). Số thẻ trong catalog và kết quả lọc phản ánh
+cùng một tập liên kết (BR-230, BR-231).
+
+**Business rules:** BR-93, BR-94, BR-163, BR-167, BR-176, BR-230, BR-231,
+BR-232, BR-233, BR-234, BR-235, BR-236, BR-237, BR-238
+
+**UI states:** catalog loading · catalog populated · catalog empty (chưa có tag
+nào) · catalog search empty · rename normal · rename collision (có tiết lộ gộp)
+· submitting · rename failure · delete confirm · delete failure · filter overlay
+không chọn gì · filter overlay chọn một · filter overlay chọn nhiều · card list
+đang lọc theo tag · card list lọc theo tag không có kết quả.
+
 ## Điều đã cố ý không đặc tả
 
 | Thứ | Vì sao |
@@ -1230,5 +1316,8 @@ state `empty`: màn này luôn có nội dung, kể cả khi thư viện rỗng.
 | ~~Export (nửa còn lại của N1)~~ | **Đã đặc tả ở M99.21** — UC-11 và BR-174…BR-181 chốt scope, encoder, filename, share và quyền riêng tư trước khi viết code, đúng điều kiện mà mục này đặt ra. Còn nice-to-have ngoài phạm vi export nội dung: backup/restore, sync và `.apkg`. |
 | ~~Nhắc nhở hằng ngày (N2)~~ | **Đã đặc tả ở M99.29** — UC-17 và BR-218…BR-229 chốt opt-in, phạm vi due-only, riêng tư của copy, thứ tự cấp bách và vòng đời lịch trước khi viết code. Còn ngoài phạm vi: nhắc theo thẻ mới, nhiều lượt nhắc trong ngày, và nhắc theo từng deck. |
 | Media và tag trong card | Ngoài MVP; quy tắc reset (BR-41) và lưu trữ (AD-08) đã đặt sẵn |
+| Nhắc nhở hằng ngày (N2) | Nice-to-have, cần quyền notification |
+| Media trong card | Ngoài MVP; quy tắc reset (BR-41) và lưu trữ (AD-08) đã đặt sẵn. Tag đã rời khỏi hàng này: nó được đặc tả ở BR-93/BR-94 (M4.10at) và ở UC-18/BR-230…BR-238 (M99.30) |
+| Tag phân cấp, màu tag, taxonomy chia sẻ | Ngoài phạm vi Tag Management v1 — UC-18 chốt tag là nhãn phẳng, là định danh văn bản, không phải hệ thống deck thứ hai |
 | Đăng nhập, đồng bộ | Ngoài MVP (AD-03) |
 | Scheduler thứ ba | Abstraction đã sẵn sàng; thêm khi có nhu cầu thật |

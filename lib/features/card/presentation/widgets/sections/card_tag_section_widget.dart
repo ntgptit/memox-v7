@@ -11,6 +11,7 @@ import '../../../domain/failures/tag_validation_failure.dart';
 import '../../../domain/models/tag_name_model.dart';
 import '../../controllers/card_tag_controller.dart';
 import '../../states/card_tag_state.dart';
+import '../support/tag_labels_widget.dart';
 
 /// The editor's tag strip: the card's tags as removable chips, and a field that
 /// adds one (UC-04 W5, BR-93, BR-94).
@@ -39,15 +40,13 @@ class _CardTagSectionWidgetState extends ConsumerState<CardTagSectionWidget> {
     super.dispose();
   }
 
-  String? _error(TagValidationProblem? problem) => switch (problem) {
-    TagValidationProblem.nameEmpty => context.l10n.cardTagEmptyError,
-    TagValidationProblem.nameTooLong => context.l10n.cardTagTooLongError,
-    TagValidationProblem.tooManyTags => context.l10n.cardTagTooManyError,
-    TagValidationProblem.nameHasControlCharacter =>
-      context.l10n.cardTagControlCharacterError,
-    // `nameTaken` is never raised on the add path — reuse is silent (BR-93).
-    _ => null,
-  };
+  /// The field error, from the mapping the rename sheet also uses.
+  ///
+  /// It was a `switch` here until the catalog needed the same five answers
+  /// (M99.30); `TagLabels.tagProblemLabel` is now the one copy, and it carries
+  /// the note about why `nameTaken` has no message.
+  String? _error(TagValidationProblem? problem) =>
+      context.tagProblemLabel(problem);
 
   Widget _writeFailure(Failure failure) => Semantics(
     liveRegion: true,

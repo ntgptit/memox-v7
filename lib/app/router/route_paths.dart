@@ -47,6 +47,16 @@ abstract final class RoutePaths {
   /// is `/decks/<id>/cards/import` (UC-10, wireframe M4.12).
   static const String cardImportRelative = 'import';
 
+  /// The tag catalog, **relative** to [decks] so the full location is `/tags`
+  /// inside the Library branch — the bottom bar stays and Back returns to
+  /// whatever offered it (UC-18, wireframe M4.14).
+  ///
+  /// Top-level rather than under a deck, and the URL is the argument: a tag
+  /// belongs to no deck (BR-93), so `/decks/<id>/tags` would name a scope that
+  /// does not exist. It cannot collide with [deckDetailRelative] either —
+  /// that pattern starts with the literal `decks/`.
+  static const String tagCatalogRelative = 'tags';
+
   /// The study branch. A real path rather than a sub-path of `/` so that a
   /// deep link can open the app directly on the Study tab.
   static const String study = '/study';

@@ -1,4 +1,5 @@
 import '../models/card_list_filter_model.dart';
+import '../models/tag_filter_model.dart';
 import '../repositories/card_repository.dart';
 
 /// The ids a deck's list currently matches — what Select all selects (BR-167).
@@ -19,10 +20,12 @@ class ReadCardIdsMatchingUseCase {
     CardListFilter filter = CardListFilter.all,
     String? searchTerm,
     DateTime? now,
+    TagFilter tags = TagFilter.none,
   }) => _repository.readCardIdsMatching(
     deckId,
     filter: filter,
     searchTerm: searchTerm,
     now: now,
+    tags: tags,
   );
 }
