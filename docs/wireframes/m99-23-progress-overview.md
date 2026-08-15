@@ -4,11 +4,11 @@
 |---|---|
 | **Status** | active |
 | **Purpose** | Chốt cấu trúc UI, copy, geometry và ma trận trạng thái của màn Progress để M99.23 xây mà không phải đoán |
-| **Scope** | Màn `/progress`: ba section, mọi state, hợp đồng geometry, responsive/a11y. Ngoài phạm vi: luật nghiệp vụ (BR-182…BR-191), luồng (UC-12), quyết định branch (AD-19) |
-| **Source of truth for** | Anatomy màn Progress · copy ba section · hợp đồng geometry của màn Progress · responsive/a11y contract của màn Progress |
+| **Scope** | **Phần đầu tổng quan** của `/progress`: ba section, mọi state, hợp đồng geometry, responsive/a11y. Ngoài phạm vi: thứ tự cuộn của cả màn và phần by-deck (`m99-progress-by-deck.md` §1), luật nghiệp vụ (BR-182…BR-191), luồng (UC-12), quyết định branch (AD-19) |
+| **Source of truth for** | Anatomy **ba section tổng quan** · copy ba section · hợp đồng geometry của ba section · responsive/a11y contract của ba section |
 | **Depends on** | `../use-cases.md` (UC-12), `../business-rules.md` (BR-182…BR-191), `../architecture.md` (AD-19), `m4-11-card-management.md` |
-| **Updated by task** | M99.23 (stage 1 của batch tích hợp #301–#310 — recursive UI/UX review vòng 1 và 2) |
-| **Last updated** | 2026-08-14 |
+| **Updated by task** | M99.23 (stage 1 của batch tích hợp #301–#310 — recursive UI/UX review vòng 1 và 2) · M99.24 (thu phạm vi về phần đầu sau khi `/progress` hợp nhất) |
+| **Last updated** | 2026-08-15 |
 
 Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc nghiệp vụ tham chiếu
 bằng ID theo `document-conventions.md` §5; chỗ nào wireframe và BR có vẻ mâu
@@ -34,11 +34,16 @@ vừa rồi ra sao"** (Last 7 days). Không có câu thứ tư trong v1 (BR-191)
 
 ## W-cấu trúc
 
-### W1 — Khung màn
+### W1 — Khung của ba section
+
+**Đây là phần đầu, không phải cả màn.** Từ M99.24 `/progress` là một màn duy
+nhất: ba section dưới đây đứng trên cấp thư viện của by-deck, trong **cùng một
+vùng cuộn**, và bên trên chúng còn một bộ chọn khoảng được ghim. Thứ tự cuộn
+đầy đủ là của `m99-progress-by-deck.md` §1 — khung dưới đây chỉ chốt ba section
+và khoảng cách giữa chúng. Ở `/progress/:deckId` phần đầu này không tồn tại.
 
 ```
-┌─ MxContentShell (title: Progress) ───────────────┐
-│  AppBar · title                                  │
+┌─ phần đầu, bên trong vùng cuộn của cấp thư viện ─┐
 ├──────────────────────────────────────────────────┤
 │ ←gutter→ ┌────────────────────────────┐ ←gutter→ │
 │          │  S1  Current streak (hero) │          │
@@ -52,10 +57,12 @@ vừa rồi ra sao"** (Last 7 days). Không có câu thứ tư trong v1 (BR-191)
 │          │  S3  Last 7 days           │          │
 │          └────────────────────────────┘          │
 └──────────────────────────────────────────────────┘
+        ↕ xl  → bảng tổng và danh sách deck (by-deck §1)
         (bottom navigation của AppNavigationShell)
 ```
 
-Shell dùng `isScrollable: true`: ở 320dp @ 2.0 ba section cao hơn màn.
+Vùng cuộn là của cấp thư viện: ở 320dp @ 2.0 riêng ba section đã cao hơn màn,
+và dưới chúng còn cả danh sách deck.
 
 ### W2 — S1 · Current streak (hero)
 
@@ -174,7 +181,11 @@ Last 7 days
 | X5 | Bar không dùng `MxProgressBar`, mà dựng `ClipRRect` + hai `DecoratedBox` | Hình dạng giống hệt component dùng chung: cùng `AppRadius.pill`, chiều cao đọc thẳng từ `MxProgressBarSize.sm.trackHeight`. **Màu thì không giống, và đó mới là lý do lớn nhất:** `MxProgressBar` đổi fill sang `semantic.success` khi `fraction >= 1`, đúng cho tiến độ một deck vì 100% nghĩa là xong. Ở đây thang đo là ngày bận nhất trong tuần, nên **mọi** tuần đều có một ngày ở `1.0` — mượn component sẽ vẽ một cột xanh "đã xong" mỗi tuần trên một biểu đồ mà việc xong không tồn tại. Ghim ở `progress_chart_contrast_test.dart`: bar `fraction == 1` phải đọc `progressFill`, không phải `success`, ở cả hai theme | Hai lý do đều là hành vi, không phải hình: `MxProgressBar` mang `TweenAnimationBuilder`, nên bảy bar sẽ chạy animation mỗi lần stream emit — mà stream này emit sau **mọi** lượt trả lời (BR-189); và nó mang `Semantics` riêng, trong khi W6.4 yêu cầu đúng một node cho cả hàng, neo ở nhãn. Token thì vẫn dùng chung: chiều cao lấy thẳng từ enum, hai màu là `progressTrack`/`progressFill` và được strict audit đọc từ paint graph |
 | X6 | Headline của S1 **kẹp text scaler ở 1.75 khi viewport ở compact tier** (`< 360dp`), là chỗ duy nhất trong app làm việc đó | Ở scale 2.0, riêng từ đơn vị đã rộng hơn cột nội dung: `days` = **268.1dp**, `ngày` = **274.9dp** so với `320 − 2×12 − 2×16 = 264dp`. Không có chỗ ngắt nào bên trong một từ, nên engine ngắt **giữa từ** — EN vẽ `5`/`day`/`s`, VI vẽ `999`/`ngà`/`y`, và headline cao 384dp. W6 cấm thu font để né tràn, nhưng cái đang xảy ra không phải thừa một dòng mà là một từ bị cắt đôi, và nó trông như cố ý. Giới hạn tuyến tính thật là `264 / 274.9 × 2.0 ≈ **1.92**`; chọn **1.75** là biên an toàn có chủ ý chứ không phải mép đo được — hai con số trên là một font và một chuỗi, một dạng plural hoặc một font fallback ở locale sau ăn mất vài dp mà không báo. Ở 1.75 còn **234.6dp** EN / **240.5dp** VI, và **không đổi gì ở scale ≤ 1.75**. **Phạm vi là compact tier**: từ 360dp trở lên cột nội dung đã ≥ 296dp nên không có gì để né, và thu chữ ở đó mới đúng là thứ W6 cấm — bản clamp đầu tiên vô điều kiện và đã làm đúng thế ở 360/390/412. Residual đã biết: điều kiện là **tier** (`< 360dp`) chứ không phải bề rộng cột đo được, và cột đủ chỗ cho tiếng Việt từ `331dp`, nên trong dải `[331, 359]dp` clamp vẫn bắn khi không cần. Giữ ranh giới tier vì đó là cùng predicate `mxScreenGutter` dùng, và vì keying theo bề rộng cột đo được sẽ đẩy một quyết định layout vào widget. Dải này **có** thể xảy ra — split-screen và freeform trên Android cấp bề rộng tuỳ ý — và hệ quả đã đo là có giới hạn: headline nhỏ hơn 12.5% so với setting, **không** clip và **không** ngắt giữa từ ở bất kỳ bề rộng nào trong dải. Chỉ áp cho đúng `Text` headline; hai dòng còn lại trong card và mọi section khác giữ nguyên setting của người dùng. Ghim hai chiều: `getMinIntrinsicWidth ≤ size.width` trên **mọi** paragraph của ba mặt (loaded/error/empty) ở `320 @ 2.0` × {en, vi}, **và** `textScaler.scale(57)` bằng `114.0` ở 360/390/412 nhưng `99.75` ở 320 |
 | X7 | Cột bar tụt dưới sàn tự khai `content / 4` khi một ngày vượt ~1000 card | Đo ở `320 @ 2.0 · vi`: busiest 143 → **81.1dp**, 999 → **75.8dp**, 1234 → **63.8dp**, 12345 → **46.9dp**, so với sàn **66.0dp**. Không overflow, không exception — `IntrinsicColumnWidth` của cột giá trị chỉ lặng lẽ ăn dần cột flex | v1 **không** bảo đảm sàn cho ngày > 999 card. Sửa thật là một quyết định copy/thiết kế — giới hạn bề rộng cột giá trị, hoặc rút gọn số thành `1.2k` — nên nó không thuộc phần tích hợp này; owner ở `docs/wbs.md` M99.23 deferred debt 5. Ghim ở `progress_screen_geometry_extremes_test.dart` — không phải ghim cái sàn, mà ghim **con số đã chấp nhận** ở 1234 card, để ngày sàn được sửa thật thì test đỏ có chủ đích |
-| X8 | Chuỗi **"7 days"** xuất hiện hai lần trên cùng màn sau khi gộp: headline streak của S1 và pill 7 ngày của bộ chọn khoảng ngay bên dưới | Đo ở `390 · en`: `find.text('7 days')` trả **2** widget khi streak bằng 7 — một trong `ProgressStreakHeroWidget`, một trong `ProgressRangeSelectorWidget` | **Chưa chấp nhận, chưa sửa — cần owner.** Hai nghĩa khác hẳn nhau: một là độ dài chuỗi ngày, một là cửa sổ báo cáo. Nhưng sửa là đổi copy người dùng thấy, và cả hai bên đều có lý do: W2.2 bắt headline phải có đơn vị đọc được, còn #302 chọn dạng ngắn vì hai pill phải nằm chung một hàng ở 320dp (nhãn screen reader đã là `Last 7 days`). Lối ra rẻ nhất là cho pill hiển thị `Last 7 days` khi có chỗ. Trong lúc chờ, test ghim bằng finder có scope để nó nói đúng ý mình thay vì đọc thành lỗi render trùng |
+| X8 | Chuỗi **"7 days"** xuất hiện hai lần trên cùng màn sau khi gộp: headline streak của S1 và pill 7 ngày của bộ chọn khoảng ngay bên **trên** (bộ chọn được ghim ở đỉnh vùng cuộn, không nằm dưới ba section) | Đo ở `390 · en`: `find.text('7 days')` trả **2** widget khi streak bằng 7 — một trong `ProgressStreakHeroWidget`, một trong `ProgressRangeSelectorWidget` | **Chưa chấp nhận, chưa sửa — cần owner.** Hai nghĩa khác hẳn nhau: một là độ dài chuỗi ngày, một là cửa sổ báo cáo. Nhưng sửa là đổi copy người dùng thấy, và cả hai bên đều có lý do: W2.2 bắt headline phải có đơn vị đọc được, còn #302 chọn dạng ngắn vì hai pill phải nằm chung một hàng ở 320dp (nhãn screen reader đã là `Last 7 days`). Lối ra rẻ nhất là cho pill hiển thị `Last 7 days` khi có chỗ. Trong lúc chờ, test ghim bằng finder có scope để nó nói đúng ý mình thay vì đọc thành lỗi render trùng |
+| X9 | **`Last 7 days` là tiêu đề của hai card liền nhau** sau khi gộp: card biểu đồ của S3 (`progressWeekSectionLabel`) và bảng tổng của by-deck (`progressSummaryLast7DaysTitle`), cách nhau `xl` | Đo bằng chính suite: khi fake trả cấp thư viện thật, `find.text('7 ngày gần nhất')` trả **2** và hai test đang xanh hoá đỏ (`progress_screen_updates_test` W6.1-vi, `progress_screen_geometry_test` G7) | **Chưa chấp nhận, chưa sửa — cần owner.** Nặng hơn X8: đây là hai *tiêu đề card*, và khi chọn `30 ngày` thì bảng tổng đổi thành `Last 30 days` còn biểu đồ ngay trên vẫn `Last 7 days` — hai heading mâu thuẫn cách nhau 24dp. Hai lối ra: đổi tiêu đề biểu đồ sang tên nói về *hoạt động hằng ngày* (nó không phụ thuộc khoảng), hoặc đổi tiêu đề bảng tổng sang dạng có chữ "Tổng". Trong lúc chờ, hai finder được scope vào đúng widget của mình |
+| X10 | **Bộ chọn khoảng được ghim ở trên cả ba section tổng quan**, nên nó trông như điều khiển cả màn trong khi ba section đó không phụ thuộc khoảng | Thứ tự dựng: `MxContentShell` đặt `subheader` ngoài vùng cuộn (`progress_deck_screen.dart`), phần đầu là sliver đầu tiên *bên trong* vùng cuộn | **Chưa chấp nhận, chưa sửa — cần owner.** Bấm `30 ngày` thì ba khối ngay dưới hai pill không đổi gì. Ba lối ra: (a) cho bộ chọn cuộn cùng nội dung và đứng ngay trên bảng tổng — mất affordance ghim mà BR-197 dựa vào khi có năm mươi deck; (b) giữ ghim nhưng chuyển thành `SliverPersistentHeader` đặt **sau** phần đầu, để nó chỉ dính khi người dùng đã cuộn tới phần by-deck; (c) giữ nguyên và ghi nhận. (b) giữ được cả hai luật nhưng là thay đổi bố cục thật, nên vẫn là quyết định của owner |
+| X11 | Hai dòng chú thích dùng **cùng hai danh từ** cho hai đơn vị khác nhau trong một lần cuộn: `progressTodayPartitionNote` nói Learning/Reviewing cộng lại bằng tổng **thẻ** hôm nay, `progressCardDayUnitNote` nói Learning/Reviewing đếm bằng **thẻ-ngày** | Hai câu cách nhau đúng hai card trên màn hợp nhất | **Chấp nhận, chưa sửa.** Mỗi câu đúng trong phạm vi của nó và mỗi câu đều đang gánh một lý do riêng (W2.4 và by-deck §2). Ghi lại vì đọc liền nhau thì hai đơn vị va nhau; sửa đúng là đặt phạm vi vào chính câu chữ, và đó là đổi copy — gộp vào cùng quyết định với X9 |
+| X12 | Danh sách deck — toàn bộ nội dung của #302 — **nằm dưới fold** ở 393×852: hàng đầu tiên chưa được `SliverList` dựng cho tới khi cuộn | Đo bằng suite: `progress_composition_test` phải kéo 600dp mới thấy hàng đầu; audit báo `66 off-surface` | **Chấp nhận — hệ quả trực tiếp của quyết định "một màn" (M99.24).** Ghi lại vì nó là cái giá của quyết định đó, không phải một lỗi dựng hình: người mở tab Tiến độ thấy streak/hôm nay/bảy ngày trước, deck sau. Nếu X10 chọn lối (b) thì bộ chọn dính lại khi cuộn tới phần by-deck, giảm bớt phần "không biết còn gì bên dưới" |
 
 ## S-ma trận trạng thái
 

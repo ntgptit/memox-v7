@@ -357,7 +357,16 @@ void main() {
     testWidgets('the chart steps label → first row by sm (G7)', (tester) async {
       await pumpProgressScreen(tester, repository: seeded());
 
-      final label = tester.getRect(find.text(english.progressWeekSectionLabel));
+      // Scoped to the chart card: the totals panel below carries the **same**
+      // string as its own title (X9), so an unscoped finder returns two and
+      // fails as if the chart rendered twice. The duplicate is a real defect
+      // and is the owner's to resolve; it is not this test's subject.
+      final label = tester.getRect(
+        find.descendant(
+          of: find.byType(ProgressWeekWidget),
+          matching: find.text(english.progressWeekSectionLabel),
+        ),
+      );
       final firstRow = dayLabelRects(tester).first;
 
       expect(firstRow.top - label.bottom, AppSpacing.sm);

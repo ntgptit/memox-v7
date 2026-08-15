@@ -5,6 +5,7 @@ import '../../../../../shared/widgets/mx_content_shell.dart';
 import '../../../../../shared/widgets/mx_empty_state.dart';
 import '../../../../../shared/widgets/mx_error_state.dart';
 import '../support/progress_labels_widget.dart';
+import 'progress_level_header_widget.dart';
 
 /// The two ways a level can fail to render, told apart.
 ///
@@ -25,6 +26,8 @@ class ProgressLevelErrorWidget extends StatelessWidget {
     required this.title,
     required this.onRetry,
     required this.onLeave,
+    this.header,
+    this.isRetrying = false,
     super.key,
   });
 
@@ -41,26 +44,42 @@ class ProgressLevelErrorWidget extends StatelessWidget {
   /// Progress, which is where the deck used to be listed.
   final VoidCallback onLeave;
 
+  /// The whole-library overview, kept above the failure at the library level.
+  ///
+  /// A read that failed says nothing about the streak, and the user is not
+  /// helped by losing three sections that loaded. Null inside a deck.
+  final Widget? header;
+
+  /// True while the retry this widget started is still running, so the button
+  /// says so. Without it the control is a lie: the tap does nothing visible
+  /// until the answer lands, which reads as a dead button and earns a second
+  /// tap.
+  final bool isRetrying;
+
   @override
   Widget build(BuildContext context) {
     final copy = progressErrorCopyOf(context, error);
 
     return MxContentShell(
       title: title,
-      body: copy.isDeckMissing
-          ? MxEmptyState(
-              icon: Icons.folder_off_outlined,
-              title: copy.title,
-              message: copy.message,
-              actionLabel: context.l10n.progressDeckMissingBackAction,
-              onAction: onLeave,
-            )
-          : MxErrorState(
-              title: copy.title,
-              message: copy.message,
-              retryLabel: context.l10n.progressErrorRetryAction,
-              onRetry: onRetry,
-            ),
+      body: ProgressHeaderedBody(
+        header: header,
+        body: copy.isDeckMissing
+            ? MxEmptyState(
+                icon: Icons.folder_off_outlined,
+                title: copy.title,
+                message: copy.message,
+                actionLabel: context.l10n.progressDeckMissingBackAction,
+                onAction: onLeave,
+              )
+            : MxErrorState(
+                title: copy.title,
+                message: copy.message,
+                retryLabel: context.l10n.progressErrorRetryAction,
+                onRetry: onRetry,
+                isRetrying: isRetrying,
+              ),
+      ),
     );
   }
 }

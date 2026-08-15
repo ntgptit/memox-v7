@@ -16,6 +16,7 @@ import '../controllers/deck_activity_controller.dart';
 import '../controllers/progress_range_controller.dart';
 import '../widgets/sections/progress_deck_list_widget.dart';
 import '../widgets/sections/progress_level_error_widget.dart';
+import '../widgets/sections/progress_level_header_widget.dart';
 import '../widgets/sections/progress_range_selector_widget.dart';
 import '../widgets/sections/progress_summary_widget.dart';
 
@@ -64,41 +65,58 @@ class ProgressDeckScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer(
-      builder: (BuildContext context, WidgetRef ref, Widget? child) =>
-          MxAsyncView<DeckActivitySnapshot>(
-            value: ref.watch(deckActivityLevelProvider(deckId)),
-            loadingLabel: context.l10n.progressLoadingLabel,
-            // Same reason the overview opts in, and the merge is what made it
-            // necessary here too: this level's dependency is
-            // `progressNowProvider` — the instant its windows are measured
-            // against — which moves on every app resume and at local midnight
-            // without the user's question changing. `/progress` now stacks two
-            // `MxAsyncView`s, so opting only the overview in left the deck list
-            // flashing a spinner under a header that held, which UC-12's UI
-            // states and P8 forbid for exactly the same reason.
-            shouldSkipLoadingOnReload: true,
-            // The shell is inside each branch rather than around them, because
-            // the title is only knowable in some of them — see
-            // [_titleBeforeData].
-            loadingFrame: (Widget loading) =>
-                MxContentShell(title: _titleBeforeData(context), body: loading),
-            data: (DeckActivitySnapshot snapshot) => _ProgressLevel(
-              snapshot: snapshot,
-              range: ref.watch(progressRangeChoiceProvider),
-              onRangeChanged: _selectRange(ref),
-              header: header,
-            ),
-            error: (Object error, StackTrace stackTrace) =>
-                ProgressLevelErrorWidget(
-                  error: error,
-                  title: _titleBeforeData(context),
-                  // `invalidate`, not `refresh`: the retry wants a read from
-                  // scratch and nothing here needs the new value as a return.
-                  onRetry: () =>
-                      ref.invalidate(deckActivityLevelProvider(deckId)),
-                  onLeave: () => context.goNamed(RouteNames.progress),
-                ),
+      builder: (BuildContext context, WidgetRef ref, Widget? child) {
+        // Read once and held: the error face needs the same `AsyncValue` the
+        // view is rendering, to say whether the retry it started is still in
+        // flight. Watching twice would be two reads of one fact.
+        final AsyncValue<DeckActivitySnapshot> level = ref.watch(
+          deckActivityLevelProvider(deckId),
+        );
+
+        return MxAsyncView<DeckActivitySnapshot>(
+          value: level,
+          loadingLabel: context.l10n.progressLoadingLabel,
+          // Same reason the overview opts in, and the merge is what made it
+          // necessary here too: this level's dependency is
+          // `progressNowProvider` — the instant its windows are measured
+          // against — which moves on every app resume and at local midnight
+          // without the user's question changing. `/progress` now stacks two
+          // `MxAsyncView`s, so opting only the overview in left the deck list
+          // flashing a spinner under a header that held, which UC-12's UI
+          // states and P8 forbid for exactly the same reason.
+          shouldSkipLoadingOnReload: true,
+          // The shell is inside each branch rather than around them, because
+          // the title is only knowable in some of them — see
+          // [_titleBeforeData].
+          // The band survives the first read as well as a reload. Reaching
+          // this frame means the overview has already answered — `/progress`
+          // builds this screen only once it has — so a bare spinner here
+          // hides three sections that are on hand, which is the same thing
+          // P8 forbids on a reload.
+          loadingFrame: (Widget loading) => MxContentShell(
+            title: _titleBeforeData(context),
+            body: ProgressHeaderedBody(header: header, body: loading),
           ),
+          data: (DeckActivitySnapshot snapshot) => _ProgressLevel(
+            snapshot: snapshot,
+            range: ref.watch(progressRangeChoiceProvider),
+            onRangeChanged: _selectRange(ref),
+            header: header,
+          ),
+          error: (Object error, StackTrace stackTrace) =>
+              ProgressLevelErrorWidget(
+                error: error,
+                title: _titleBeforeData(context),
+                // `invalidate`, not `refresh`: the retry wants a read from
+                // scratch and nothing here needs the new value as a return.
+                onRetry: () =>
+                    ref.invalidate(deckActivityLevelProvider(deckId)),
+                onLeave: () => context.goNamed(RouteNames.progress),
+                header: header,
+                isRetrying: level.isRefreshing,
+              ),
+        );
+      },
     );
   }
 
@@ -178,20 +196,10 @@ class _ProgressLevel extends StatelessWidget {
 
     return CustomScrollView(
       slivers: <Widget>[
-        if (header != null)
-          SliverToBoxAdapter(
-            child: Padding(
-              // `xl` below, the same section break the panel uses: the overview
-              // and the level are two sections, not two rows of one.
-              padding: EdgeInsets.fromLTRB(
-                gutter,
-                AppSpacing.md,
-                gutter,
-                AppSpacing.xl,
-              ),
-              child: header,
-            ),
-          ),
+        // `xl` below the band, the same section break the panel uses: the
+        // overview and the level are two sections, not two rows of one.
+        if (header case final Widget band)
+          SliverToBoxAdapter(child: ProgressLevelHeaderWidget(child: band)),
         SliverToBoxAdapter(
           child: Padding(
             padding: EdgeInsets.fromLTRB(
@@ -238,14 +246,6 @@ class _ProgressLevel extends StatelessWidget {
     );
   }
 
-  /// Nothing to list, which means two different things at two levels.
-  ///
-  /// At the top there are no decks at all — nothing has been measured because
-  /// there is nothing to measure. Inside a deck it means the deck holds cards
-  /// rather than sub-decks, so its own totals above *are* the whole story and
-  /// there is nothing further to drill into. Neither is a failure and neither
-  /// offers an action: the next step in both cases lives on the Library tab, and
-  /// a button that switched tabs from here would read as a detour.
   /// The empty level, with the header still above it when there is one.
   ///
   /// **The header must survive this branch.** It is the whole-library overview,
@@ -257,30 +257,17 @@ class _ProgressLevel extends StatelessWidget {
   /// honest failure; the quiet one would have been a user seeing an empty state
   /// where their streak was.
   Widget _emptyLevelWithHeader(BuildContext context) {
-    final Widget empty = _emptyLevel(context);
-    if (header == null) return empty;
-
-    final gutter = mxScreenGutter(context);
-
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Padding(
-            padding: EdgeInsets.fromLTRB(
-              gutter,
-              AppSpacing.md,
-              gutter,
-              AppSpacing.xl,
-            ),
-            child: header,
-          ),
-          empty,
-        ],
-      ),
-    );
+    return ProgressHeaderedBody(header: header, body: _emptyLevel(context));
   }
 
+  /// Nothing to list, which means two different things at two levels.
+  ///
+  /// At the top there are no decks at all — nothing has been measured because
+  /// there is nothing to measure. Inside a deck it means the deck holds cards
+  /// rather than sub-decks, so its own totals above *are* the whole story and
+  /// there is nothing further to drill into. Neither is a failure and neither
+  /// offers an action: the next step in both cases lives on the Library tab, and
+  /// a button that switched tabs from here would read as a detour.
   Widget _emptyLevel(BuildContext context) => MxEmptyState(
     icon: Icons.folder_outlined,
     title: snapshot.isTopLevel

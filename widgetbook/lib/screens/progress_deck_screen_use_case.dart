@@ -10,6 +10,7 @@ import 'package:memox/features/progress/domain/models/deck_activity_snapshot_mod
 import 'package:memox/features/progress/domain/models/progress_path_segment_model.dart';
 import 'package:memox/features/progress/domain/repositories/progress_repository.dart';
 import 'package:memox/features/progress/presentation/screens/progress_deck_screen.dart';
+import 'package:memox/features/progress/presentation/screens/progress_screen.dart';
 import 'package:widgetbook/widgetbook.dart';
 import 'package:memox/features/progress/domain/models/progress_overview_model.dart';
 
@@ -76,12 +77,22 @@ class _ProgressDemoState extends State<_ProgressDemo> {
   /// — a router created in `build` would reset its stack on every rebuild the
   /// knobs panel triggers.
   late final GoRouter _router = GoRouter(
+    // The **drill-down** is what this use case catalogues, so it opens there.
+    //
+    // Since the two Progress features were merged, `/progress` is the composed
+    // screen — the overview's three sections above this level — and it has its
+    // own use case. Opening this one at the root showed a library level with no
+    // header, which is a surface the app no longer has; `/progress/:deckId` is
+    // the one this screen renders alone, and it had no catalogue entry at all.
+    initialLocation: '/r1',
     routes: <RouteBase>[
       GoRoute(
         path: '/',
         name: RouteNames.progress,
+        // The real composed screen, so Back from the drill-down lands where it
+        // lands in the app rather than on a surface built for the catalogue.
         builder: (BuildContext context, GoRouterState state) =>
-            const ProgressDeckScreen(),
+            const ProgressScreen(),
         routes: <RouteBase>[
           GoRoute(
             path: ':deckId',

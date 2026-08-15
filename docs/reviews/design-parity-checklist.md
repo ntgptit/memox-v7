@@ -163,6 +163,8 @@ Dart widget: props, defaults, states, radius, spacing, semantics.
 | D13 | `ReviewScreen.jsx` | `review_screen_preview_test.dart` harness | [x] | **blocked** — `VerdictAction` ground fixed M4.10p. The rest is a preview harness, not a screen: the review slice is M5 |
 | D14 | `ProfileScreen.jsx` | `settings_preview_test.dart` harness | [x] | **blocked** — preview harness only: settings is not a built screen, so there is nothing to bring to the design yet |
 | D15 | — | `deck_labels_widget.dart`, `deck_level_error_widget.dart`, `move_deck_sheet_widget.dart` | [x] | **n/a** — no design counterpart, and none needed — deck labels, level error and the move sheet are this app's own |
+| D16 | — | `progress_screen.dart`, `progress_deck_screen.dart` | [x] | **n/a** — the kit has no Progress screen at all, so there is nothing to compare. Recorded rather than left out: the two screens landed with M99.23/M99.24 (stages 1–2 of the #301–#310 integration) and an absent row reads the same as an unreviewed one. What they reuse is already in scope elsewhere — `MxCard`, `MxContentShell`, `MxPillButton`, `MxAsyncView` (C12), `MxErrorState` (C10) |
+| D17 | — | `progress_summary_widget.dart`, `progress_week_widget.dart` | [x] | **divergence** — the two card titles use different type roles for the same job: the overview's three section headings are `labelLarge`, the totals panel's is `titleSmall`. Measured from `app_typography.dart`: both are Inter w600 14/20, tracking 0.1 — **identical today**, so there is no visible seam. It is a divergence rather than a match because the two roles are free to move apart, and the day one of them does, two adjacent card headings change together in the design and separately here |
 
 ---
 

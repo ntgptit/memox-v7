@@ -829,6 +829,11 @@ nào — trạng thái "chưa có gì" là một mặt hợp lệ, không phải
    **Current streak** (BR-187), **Today** với tổng số card cùng phân rã
    Learning/Reviewing (BR-185), và **Last 7 days** đúng bảy cột theo thứ tự
    cũ → mới, ngày trống là 0 (BR-186).
+   Ba khối này **không chiếm cả màn**: `/progress` là một màn duy nhất, và
+   chúng là phần đầu của cấp thư viện trong UC-13 — cùng một vùng cuộn, dưới
+   chúng là bộ chọn khoảng, bảng tổng và danh sách deck. Bố cục là việc của
+   `wireframes/m99-progress-by-deck.md` §1; ở đây chỉ ghi rằng hai use case
+   dùng chung một màn, vì đọc riêng UC-12 sẽ hiểu nhầm thành một tab ba khối.
 5. Người dùng đọc xong và rời tab. Hệ thống không ghi gì trong toàn bộ luồng
    (BR-190).
 
@@ -883,9 +888,11 @@ tiếp giữa hai loaded**, không phải state thứ sáu; luật cấm hạ m�
 trạng thái hợp lệ và có màn hình riêng.
 
 **Main flow:**
-1. Người dùng mở tab Progress. Hệ thống hiển thị **cấp thư viện**: bộ chọn
-   khoảng 7/30 ngày, một bảng tổng cho toàn bộ dữ liệu, và một hàng cho mỗi
-   root deck (BR-194).
+1. Người dùng mở tab Progress. Hệ thống hiển thị **cấp thư viện** ngay dưới
+   ba khối tổng quan của UC-12 — cùng một màn `/progress`, một vùng cuộn: bộ
+   chọn khoảng 7/30 ngày, một bảng tổng cho toàn bộ dữ liệu, và một hàng cho
+   mỗi root deck (BR-194). Chỉ cấp thư viện có phần đầu đó; `/progress/:deckId`
+   là cấp của một deck và mở thẳng vào bộ chọn.
 2. Mỗi hàng mang tên deck, đường dẫn của nó khi có, và bốn số của khoảng đang
    chọn: số thẻ đã học, số ngày có học, số card-day học mới và số card-day ôn
    tập (BR-192, BR-193, BR-196). Số của một hàng phủ **toàn bộ subtree** của

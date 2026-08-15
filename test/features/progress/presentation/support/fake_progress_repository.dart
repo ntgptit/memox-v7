@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:memox/features/progress/domain/models/deck_activity_model.dart';
 import 'package:memox/features/progress/domain/models/deck_activity_snapshot_model.dart';
 import 'package:memox/features/progress/domain/models/progress_activity_day_model.dart';
 import 'package:memox/features/progress/domain/models/progress_overview_model.dart';
@@ -40,7 +41,7 @@ base class FakeProgressRepository implements ProgressRepository {
   FakeProgressRepository({
     ProgressOverview? initial,
     Stream<DeckActivitySnapshot> Function(String? deckId)? activity,
-  }) : _activity = activity ?? _emptyLevel {
+  }) : _activity = activity ?? _defaultLevel {
     if (initial != null) _pending = initial;
   }
 
@@ -141,8 +142,40 @@ base class FakeProgressRepository implements ProgressRepository {
 
   Future<void> dispose() => _controller.close();
 
-  static Stream<DeckActivitySnapshot> _emptyLevel(String? deckId) =>
-      Stream<DeckActivitySnapshot>.value(emptyActivitySnapshot());
+  /// The level every test gets unless it says otherwise: the **composed**
+  /// library level, one deck row under a real summary panel.
+  ///
+  /// **Not an empty level, and the difference is the whole screen.** An empty
+  /// top level takes `_hasNothingToMeasure`, which drops the pinned range
+  /// selector, the totals panel and the list — so a suite that defaulted to it
+  /// pinned geometry, overflow sweeps and the visual audit against a face
+  /// `progress_screen_test.dart` itself calls unreachable ("a library with
+  /// study history and no decks is not a state a user can reach"). Every
+  /// default-fake test now measures the screen a user opens. A test whose
+  /// subject *is* the empty level passes `emptyActivitySnapshot()` explicitly.
+  static Stream<DeckActivitySnapshot> _defaultLevel(String? deckId) =>
+      Stream<DeckActivitySnapshot>.value(
+        activitySnapshot(
+          scopeLast7Days: activityMetrics(
+            activeCards: 12,
+            activeDays: 4,
+            learning: 3,
+            reviewing: 9,
+          ),
+          decks: <DeckActivity>[
+            deckActivity(
+              deckId: 'deck-default',
+              name: 'Spanish',
+              last7Days: activityMetrics(
+                activeCards: 12,
+                activeDays: 4,
+                learning: 3,
+                reviewing: 9,
+              ),
+            ),
+          ],
+        ),
+      );
 }
 
 /// A snapshot built from seven day totals, so a test states the week it means

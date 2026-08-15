@@ -133,10 +133,13 @@ class _CatalogProgressRepository implements ProgressRepository {
 
   /// The level below the overview header.
   ///
-  /// An empty level on purpose: this use case exists to show the three overview
-  /// sections across themes and text scales, and a catalogued deck list would
-  /// put a second, unrelated set of figures under them. The deck level has its
-  /// own use case with its own scenarios.
+  /// **Populated, because `/progress` is one screen.** This started as an empty
+  /// level on the argument that the use case is about the three overview
+  /// sections — and the result was a catalogue entry for a surface the app does
+  /// not have: an empty top level drops the pinned range selector, the totals
+  /// panel and the list, so the one place a reviewer could look at the composed
+  /// screen showed three cards and an empty state. The deck level keeps its own
+  /// use case for its own scenarios; this one shows what the tab opens on.
   @override
   Stream<DeckActivitySnapshot> watchDeckActivity({
     required String? deckId,
@@ -147,12 +150,58 @@ class _CatalogProgressRepository implements ProgressRepository {
       scopeDeckId: deckId,
       scopeName: null,
       scopePath: const <ProgressPathSegment>[],
-      decks: const <DeckActivity>[],
-      scopeLast7Days: DeckActivityMetrics.zero,
-      scopeLast30Days: DeckActivityMetrics.zero,
+      decks: scenario == ProgressScenario.emptyLifetime
+          ? const <DeckActivity>[]
+          : _catalogDecks,
+      scopeLast7Days: scenario == ProgressScenario.emptyLifetime
+          ? DeckActivityMetrics.zero
+          : const DeckActivityMetrics(
+              activeCardCount: 45,
+              activeDayCount: 6,
+              learningCardDayCount: 12,
+              reviewingCardDayCount: 60,
+            ),
+      scopeLast30Days: scenario == ProgressScenario.emptyLifetime
+          ? DeckActivityMetrics.zero
+          : const DeckActivityMetrics(
+              activeCardCount: 128,
+              activeDayCount: 21,
+              learningCardDayCount: 40,
+              reviewingCardDayCount: 210,
+            ),
       nextDayBoundaryAt: _today.add(const Duration(days: 1)),
     ),
   );
+
+  /// Two rows: one that has been studied and one that has not, which is the
+  /// pair BR-197 orders and the only pair worth catalogueing here — the deck
+  /// level's own use case carries the long-name and all-zero scenarios.
+  static const List<DeckActivity> _catalogDecks = <DeckActivity>[
+    DeckActivity(
+      deckId: 'r1',
+      name: 'Spanish',
+      path: <ProgressPathSegment>[],
+      last7Days: DeckActivityMetrics(
+        activeCardCount: 42,
+        activeDayCount: 6,
+        learningCardDayCount: 12,
+        reviewingCardDayCount: 60,
+      ),
+      last30Days: DeckActivityMetrics(
+        activeCardCount: 120,
+        activeDayCount: 21,
+        learningCardDayCount: 40,
+        reviewingCardDayCount: 210,
+      ),
+    ),
+    DeckActivity(
+      deckId: 'r2',
+      name: 'Idle deck',
+      path: <ProgressPathSegment>[],
+      last7Days: DeckActivityMetrics.zero,
+      last30Days: DeckActivityMetrics.zero,
+    ),
+  ];
 
   @override
   Stream<ProgressOverview> watchProgressOverview({

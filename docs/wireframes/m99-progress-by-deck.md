@@ -7,8 +7,8 @@
 | **Scope** | Bộ chọn khoảng, bảng tổng, hàng deck và mọi trạng thái của hai cấp. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md` BR-192…BR-199), luồng (`use-cases.md` UC-13), giá trị token (`lib/core/theme/`) |
 | **Source of truth for** | Bố cục màn hình tiến độ · hình học được pin bằng test · danh sách divergence đã duyệt |
 | **Depends on** | `document-conventions.md`, `business-rules.md` (BR-192…BR-199), `use-cases.md` (UC-13), `wbs.md` (M99.24) |
-| **Updated by task** | M99.24 · rà soát UI/UX vòng một (bộ chọn ghim, gutter theo breakpoint, lưới gập, rung chữ số, chú thích đơn vị, AppBar ở mọi cấp) |
-| **Last updated** | 2026-08-14 |
+| **Updated by task** | M99.24 · rà soát UI/UX vòng một (bộ chọn ghim, gutter theo breakpoint, lưới gập, rung chữ số, chú thích đơn vị, AppBar ở mọi cấp) · hợp nhất `/progress` thành một màn (phần đầu tổng quan ở cấp thư viện) |
+| **Last updated** | 2026-08-15 |
 
 ---
 
@@ -31,6 +31,12 @@ cấp của deck đó (UC-13). Từ trên xuống:
 │ AppBar · "Tiến độ"  hoặc  tên deck      │
 │  [✓ 7 ngày] [ 30 ngày ]                 │  ← bộ chọn: subheader, GHIM
 ├═════════════════════════════════════════┤  ← từ đây trở xuống là vùng cuộn
+│ ╭─ CHỈ Ở CẤP THƯ VIỆN ─────────────────╮│
+│ │ Streak · Today · Last 7 days         ││  ← ba khối tổng quan (UC-12);
+│ │ nội dung do m99-23-progress-overview ││    nguồn sự thật của chúng là
+│ │ chốt, không lặp lại ở đây            ││    wireframe kia, không phải đây
+│ ╰──────────────────────────────────────╯│
+│                 xl                      │  ← ngắt section, không phải md
 │ ┌─────────────────────────────────────┐ │
 │ │ 7 ngày gần nhất                     │ │  ← bảng tổng (MxCard)
 │ │ ▣ 45 thẻ đã học   ▣ 6 ngày có học   │ │
@@ -54,6 +60,20 @@ cấp của deck đó (UC-13). Từ trên xuống:
 │  Thư viện   Học   [Tiến độ]   Cài đặt   │
 └─────────────────────────────────────────┘
 ```
+
+**Phần đầu tổng quan chỉ tồn tại ở cấp thư viện, và nó thuộc vùng cuộn.**
+`/progress` là một màn: `ProgressScreen` đọc tổng quan rồi trao ba khối cho màn
+này qua tham số `header`, kể cả trên nhánh không có deck nào — nên một thư viện
+rỗng vẫn thấy streak của mình. `/progress/:deckId` truyền `header` null và mở
+thẳng vào bảng tổng. Hệ quả về hình học: khoảng cách trên của bảng tổng là `md`
+khi nó đứng đầu và `0` khi có phần đầu ở trên, vì `xl` dưới phần đầu đã là ngắt
+section rồi. G-series của tài liệu này đo cấp deck (`header` null); hợp đồng
+geometry của ba section phần đầu là của `m99-23-progress-overview.md`, và suite
+đo nó mount `ProgressScreen`, tức **có** phần đầu.
+
+Ba khối đó **không được mô tả lại ở đây**. Nội dung, copy và hình học của chúng
+là của `m99-23-progress-overview.md`; tài liệu này chỉ chốt rằng chúng đứng ở
+đâu trong thứ tự cuộn. Một fact ở đúng một chỗ (`document-conventions.md`).
 
 **Bộ chọn khoảng được ghim, không cuộn theo.** BR-197 nói thẳng tới trường hợp
 năm mươi deck; cuộn hai màn thì một bộ chọn đã trôi mất sẽ để lại một danh sách

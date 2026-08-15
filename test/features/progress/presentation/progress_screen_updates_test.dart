@@ -296,7 +296,16 @@ void main() {
         ),
         findsOneWidget,
       );
-      expect(find.text(vietnamese.progressWeekSectionLabel), findsOneWidget);
+      // Scoped for the same reason as the Today heading two lines up, and now
+      // for a second one: the totals panel's own title is the same string
+      // (X9), so this section label appears twice on the composed screen.
+      expect(
+        find.descendant(
+          of: find.byType(ProgressWeekWidget),
+          matching: find.text(vietnamese.progressWeekSectionLabel),
+        ),
+        findsOneWidget,
+      );
       expect(tester.takeException(), isNull);
     });
 

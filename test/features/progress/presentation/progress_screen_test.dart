@@ -92,7 +92,8 @@ void main() {
 
       // **Scoped to the hero, because the composed screen renders "7 days"
       // twice.** The streak headline says it, and so does the range selector's
-      // 7-day pill directly below — two different meanings, one string. An
+      // 7-day pill — which is pinned *above* the three sections, not below
+      // them: two different meanings, one string, 24dp apart. An
       // unscoped finder reports two and reads as a duplicate-render bug, which
       // is not what is wrong. What *is* wrong is on screen for the user and is
       // recorded as a divergence rather than fixed here: changing either piece

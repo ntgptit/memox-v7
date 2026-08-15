@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/progress/domain/models/deck_activity_model.dart';
+import 'package:memox/features/progress/domain/models/deck_activity_snapshot_model.dart';
 import 'package:memox/features/progress/presentation/screens/progress_deck_screen.dart';
 import 'package:memox/features/progress/presentation/widgets/sections/progress_range_selector_widget.dart';
 import 'package:memox/features/progress/presentation/widgets/sections/progress_summary_widget.dart';
@@ -51,7 +52,13 @@ void main() {
     ) async {
       await pumpProgressScreen(
         tester,
-        repository: FakeProgressRepository(),
+        // Stated, not inherited: the fake's default level is the composed one
+        // with a deck in it, because that is the screen a user opens. A test
+        // whose whole subject is the no-decks face has to ask for it.
+        repository: FakeProgressRepository(
+          activity: (String? deckId) =>
+              Stream<DeckActivitySnapshot>.value(emptyActivitySnapshot()),
+        ),
         screen: const ProgressDeckScreen(),
       );
 

@@ -54,7 +54,15 @@ class ProgressDeckRowWidget extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 child: Semantics(
-                  container: true,
+                  // **No `container`, so this sentence names the card's own
+                  // button node** rather than hanging beside it. With one, the
+                  // tappable node had `isButton` and no label at all — a reader
+                  // focusing the row heard "button" and nothing else, and the
+                  // name arrived on a separate node they had to swipe to.
+                  // `labelledTapTargetGuideline` on the composed screen is what
+                  // caught it; the row's own tests could not, because they
+                  // asserted the label exists somewhere, which it did.
+                  //
                   // **The window rides on the row, and only on the row.** The
                   // summary panel states it in words, but a reader swiping into
                   // the middle of fifty decks never passes the panel — and

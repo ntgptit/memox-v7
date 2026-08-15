@@ -1,6 +1,6 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 450,
+  "scannedFiles": 451,
   "totalSites": 425,
   "byElementKind": {
     "other": 297,
@@ -4080,7 +4080,7 @@
     },
     {
       "file": "lib/features/progress/presentation/widgets/items/progress_deck_row_widget.dart",
-      "line": 83,
+      "line": 91,
       "widget_context": "ProgressDeckRowWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4091,7 +4091,7 @@
     },
     {
       "file": "lib/features/progress/presentation/widgets/items/progress_deck_row_widget.dart",
-      "line": 94,
+      "line": 102,
       "widget_context": "ProgressDeckRowWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4102,7 +4102,7 @@
     },
     {
       "file": "lib/features/progress/presentation/widgets/items/progress_deck_row_widget.dart",
-      "line": 111,
+      "line": 119,
       "widget_context": "ProgressDeckRowWidget",
       "element_kind": "icon",
       "source_kind": "theme-token",

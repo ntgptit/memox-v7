@@ -62,11 +62,53 @@ void main() {
         itemId: 'shell',
         reason: SkipReason.rasterOnly,
         detailContains: '_RenderInkFeatures',
-        // Two: the Scaffold's Material, and the AppBar's own.
+        // Five, and each one is named: the Scaffold's Material, the AppBar's
+        // own, one per range pill, and one for the tappable deck row. Since
+        // M99.24 this state is the **composed** screen — the three overview
+        // sections above the library level — so the two the overview alone
+        // contributed are no longer the whole story.
+        expectedMatches: 5,
+        rationale:
+            'The Scaffold and AppBar Material ink layers, plus one per InkWell '
+            'host: the two range pills and the tappable deck row. Splash and '
+            'highlight are painted onto Material, so no render object carries '
+            'them; the pill surfaces are asserted in mx_pill_button_test.dart '
+            'and the card surface in app_theme_test.dart.',
+      ),
+      AuditSkipAllowance(
+        itemId: 'shell',
+        reason: SkipReason.customPainter,
+        detailContains: 'CustomPaint (no painter)',
+        // The InkWell clip, one per host that has one: two pills, one card.
+        expectedMatches: 3,
+        rationale:
+            'The rounded clip an InkWell paints for its ripple, one per '
+            'MxPillButton and per tappable MxCard. It has no painter to '
+            'interrogate because the shape is the ripple boundary rather than a '
+            'drawn stroke — the visible border is the DecoratedBox behind it, '
+            'which the audit does read.',
+      ),
+      AuditSkipAllowance(
+        itemId: 'shell',
+        reason: SkipReason.unknownRenderType,
+        detailContains: '_RenderChip',
         expectedMatches: 2,
         rationale:
-            'The Scaffold and AppBar Material ink layers. Splash and highlight '
-            'are painted onto Material, so no render object carries them.',
+            'ChoiceChip lays out and paints through a private _RenderChip, so '
+            'neither its fill nor its border is reachable from the render tree. '
+            'Both come from chipTheme in app_theme.dart and the selected and '
+            'unselected fills are asserted to differ, in both themes, in '
+            'mx_pill_button_test.dart.',
+      ),
+      AuditSkipAllowance(
+        itemId: 'shell',
+        reason: SkipReason.rasterNotFlat,
+        detailContains: 'covers only 0%',
+        rationale:
+            'The unselected range pill declares a surface tint that its resting '
+            'state does not fill, and _RenderChip paints what it does fill '
+            'through a private render object. Same case the deck level records '
+            'for the same two pills.',
       ),
     ],
   );
@@ -94,10 +136,50 @@ void main() {
         itemId: 'shell',
         reason: SkipReason.rasterOnly,
         detailContains: '_RenderInkFeatures',
+        // Same five as the loaded state above: this face differs only in what
+        // the hero says.
+        expectedMatches: 5,
+        rationale:
+            'The Scaffold and AppBar Material ink layers, plus one per InkWell '
+            'host: the two range pills and the tappable deck row. Splash and '
+            'highlight are painted onto Material, so no render object carries '
+            'them; the pill surfaces are asserted in mx_pill_button_test.dart '
+            'and the card surface in app_theme_test.dart.',
+      ),
+      AuditSkipAllowance(
+        itemId: 'shell',
+        reason: SkipReason.customPainter,
+        detailContains: 'CustomPaint (no painter)',
+        // The InkWell clip, one per host that has one: two pills, one card.
+        expectedMatches: 3,
+        rationale:
+            'The rounded clip an InkWell paints for its ripple, one per '
+            'MxPillButton and per tappable MxCard. It has no painter to '
+            'interrogate because the shape is the ripple boundary rather than a '
+            'drawn stroke — the visible border is the DecoratedBox behind it, '
+            'which the audit does read.',
+      ),
+      AuditSkipAllowance(
+        itemId: 'shell',
+        reason: SkipReason.unknownRenderType,
+        detailContains: '_RenderChip',
         expectedMatches: 2,
         rationale:
-            'The Scaffold and AppBar Material ink layers. Splash and highlight '
-            'are painted onto Material, so no render object carries them.',
+            'ChoiceChip lays out and paints through a private _RenderChip, so '
+            'neither its fill nor its border is reachable from the render tree. '
+            'Both come from chipTheme in app_theme.dart and the selected and '
+            'unselected fills are asserted to differ, in both themes, in '
+            'mx_pill_button_test.dart.',
+      ),
+      AuditSkipAllowance(
+        itemId: 'shell',
+        reason: SkipReason.rasterNotFlat,
+        detailContains: 'covers only 0%',
+        rationale:
+            'The unselected range pill declares a surface tint that its resting '
+            'state does not fill, and _RenderChip paints what it does fill '
+            'through a private render object. Same case the deck level records '
+            'for the same two pills.',
       ),
     ],
   );
