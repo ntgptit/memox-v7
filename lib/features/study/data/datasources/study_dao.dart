@@ -216,6 +216,17 @@ final class StudyDao {
     DecksCompanion(studyConfig: Value<String?>(studyConfig)),
   );
 
+  /// Puts the root back on the app-wide defaults (BR-184).
+  ///
+  /// A separate method rather than `updateDeckStudyConfig` taking a nullable
+  /// string: `Value<String?>(null)` and "leave this column alone" are one
+  /// keystroke apart in drift's companion API, and only one of them is a clear.
+  /// One column, and no other write can be smuggled in beside it.
+  Future<void> clearDeckStudyConfig(String deckId) =>
+      (_db.update(_db.decks)..where((d) => d.id.equals(deckId))).write(
+        const DecksCompanion(studyConfig: Value<String?>(null)),
+      );
+
   /// Stamps the root's `first_answered_at` the first time a card in its tree
   /// finishes the learning chain (BR-13), and does nothing on every later card.
   ///

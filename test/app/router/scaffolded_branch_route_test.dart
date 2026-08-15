@@ -11,16 +11,18 @@ import 'package:memox/features/deck/di/deck_repository_provider.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
 import 'package:memox/features/progress/di/progress_repository_provider.dart';
 import 'package:memox/features/progress/presentation/screens/progress_screen.dart';
-import 'package:memox/features/settings/presentation/screens/settings_placeholder_screen.dart';
+import 'package:memox/features/settings/presentation/screens/settings_screen.dart';
 import 'package:memox/features/study/di/study_home_repository_provider.dart';
 import 'package:memox/features/study/di/study_repository_provider.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
+import 'package:memox/features/settings/di/app_settings_repository_provider.dart';
 
 import '../../features/deck/presentation/support/fake_deck_repository.dart';
 import '../../features/progress/presentation/support/fake_progress_repository.dart';
 import '../../features/study/domain/support/fake_study_home_repository.dart';
 import '../../features/study/domain/support/fake_study_repository.dart';
+import '../../features/settings/domain/support/fake_app_settings_repository.dart';
 
 /// The two branches AD-19 scaffolded, exercised through the real app root.
 ///
@@ -29,15 +31,21 @@ import '../../features/study/domain/support/fake_study_repository.dart';
 /// router so navigation performed in one test cannot arrive in the next.
 ///
 /// What AD-19 promises and these tests hold it to: Progress and Settings are
-/// real `StatefulShellBranch`es — deep-linkable, tab-selecting, stack-keeping —
-/// and the branch contract survived Progress gaining a real screen at M99.23.
-/// That is the point of keeping these tests rather than rewriting them: the
-/// path, the route name and the branch index are asserted here, and every one
-/// of those assertions passed unchanged across the replacement.
 ///
+/// **Settings stopped being presentation-only at M99.23** (UC-12): it reads and
 /// Settings is still presentation-only. Progress no longer is, but it is still
+/// That is the point of keeping these tests rather than rewriting them: the
+/// alone, and the Settings half of it has been narrowed to what still holds and
+/// and the branch contract survived Progress gaining a real screen at M99.23.
 /// forbidden to write (BR-190): entering, leaving or switching between the two
+/// nothing through the **deck or study** contracts.
+/// of those assertions passed unchanged across the replacement.
 /// opens no study session and makes no write-shaped repository call.
+/// path, the route name and the branch index are asserted here, and every one
+/// real `StatefulShellBranch`es — deep-linkable, tab-selecting, stack-keeping —
+/// real `StatefulShellBranch`es — deep-linkable, tab-selecting, stack-keeping.
+/// still matters — visiting the branch opens no study session and writes
+/// writes `app_settings`. The presentation-only claim below is now Progress's
 void main() {
   final english = AppLocalizationsEn();
 
@@ -67,6 +75,9 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          appSettingsRepositoryProvider.overrideWithValue(
+            FakeAppSettingsRepository(),
+          ),
           envConfigProvider.overrideWithValue(EnvConfig.development),
           // The Study branch is Study Home since UC-14, which reads its own
           // contract — a screen with no method that could open a session.
@@ -115,7 +126,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('tapping Settings opens the placeholder on its own tab', (
+  testWidgets('tapping Settings opens the settings screen on its own tab', (
     tester,
   ) async {
     await pumpApp(tester);
@@ -123,7 +134,7 @@ void main() {
     await tester.tap(tab(english.navigationSettingsLabel));
     await tester.pumpAndSettle();
 
-    expect(find.byType(SettingsPlaceholderScreen), findsOneWidget);
+    expect(find.byType(SettingsScreen), findsOneWidget);
     expect(selectedTab(tester), 3);
     expect(tester.takeException(), isNull);
   });
@@ -146,7 +157,7 @@ void main() {
   ) async {
     await pumpApp(tester, initialLocation: RoutePaths.settings);
 
-    expect(find.byType(SettingsPlaceholderScreen), findsOneWidget);
+    expect(find.byType(SettingsScreen), findsOneWidget);
     expect(find.byType(DeckListScreen), findsNothing);
     expect(selectedTab(tester), 3);
   });
@@ -165,7 +176,7 @@ void main() {
 
     router.goNamed(RouteNames.settings);
     await tester.pumpAndSettle();
-    expect(find.byType(SettingsPlaceholderScreen), findsOneWidget);
+    expect(find.byType(SettingsScreen), findsOneWidget);
     expect(selectedTab(tester), 3);
   });
 

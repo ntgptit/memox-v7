@@ -228,24 +228,7 @@ CREATE TABLE study_queue_items (
 CREATE INDEX idx_study_queue_serving
     ON study_queue_items (session_id, mode, round, status, available_at, position);
 
--- Exactly one row, for the local profile (BR-147).
---
--- A one-row table with real columns rather than key-value: key-value reads more
--- flexibly and turns every value into TEXT and every read into an unchecked
--- cast, while this shape lets `drift_dev` type-check at build time and makes
--- adding an option a migration -- the right level of ceremony for something
--- that changes how people study.
-CREATE TABLE app_settings (
-    -- The CHECK is what keeps the table at one row. Without it, "the settings"
-    -- becomes "whichever row the query happened to read first".
-    id INTEGER NOT NULL PRIMARY KEY CHECK (id = 1),
-
-    -- A ceiling PER SESSION, not per day (BR-24). The number of sessions in a
-    -- day is deliberately unlimited.
-    card_limit INTEGER NOT NULL DEFAULT 20,
-
-    new_card_order TEXT NOT NULL DEFAULT 'created'
-        CHECK (new_card_order IN ('created', 'random')),
-
-    updated_at DATETIME NOT NULL
-);
+-- `app_settings` moved to `tables/settings.drift` at v8, when it gained theme
+-- and language and stopped being a study table. Study still reads it through
+-- `queries/settings.drift`, which is why this note stays: the table is not
+-- gone, and grepping this file for it should say where it went.

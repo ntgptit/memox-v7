@@ -13,9 +13,11 @@ import 'package:memox/features/deck/domain/models/deck_list_snapshot_model.dart'
 import 'package:memox/features/deck/domain/models/deck_path_segment_model.dart';
 import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
+import 'package:memox/features/settings/di/app_settings_repository_provider.dart';
 
 import '../../features/card/presentation/support/fake_card_repository.dart';
 import '../../features/deck/presentation/support/fake_deck_repository.dart';
+import '../../features/settings/domain/support/fake_app_settings_repository.dart';
 
 /// The auto-forward: a `card`-type deck's detail route redirects into its card
 /// list (BR-63, W1), and a `deck`-type one does not.
@@ -67,6 +69,9 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          appSettingsRepositoryProvider.overrideWithValue(
+            FakeAppSettingsRepository(),
+          ),
           envConfigProvider.overrideWithValue(EnvConfig.development),
           deckRepositoryProvider.overrideWithValue(servingDeck()),
           cardRepositoryProvider.overrideWithValue(cards),

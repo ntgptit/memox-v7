@@ -35,6 +35,9 @@ import '../../features/progress/data/datasources/progress_dao.dart';
 import '../../features/progress/data/repositories/progress_repository_impl.dart';
 import '../../features/progress/di/progress_repository_provider.dart';
 import '../../features/progress/domain/repositories/progress_repository.dart';
+import '../../features/settings/data/repositories/app_settings_repository_impl.dart';
+import '../../features/settings/di/app_settings_repository_provider.dart';
+import '../../features/settings/domain/repositories/app_settings_repository.dart';
 import '../../features/study/data/datasources/study_dao.dart';
 import '../../features/study/data/datasources/study_home_dao.dart';
 import '../../features/study/di/study_home_repository_provider.dart';
@@ -181,6 +184,17 @@ StudyRepository studyRepositoryBinding(Ref ref) =>
 StudyHomeRepository studyHomeRepositoryBinding(Ref ref) =>
     StudyHomeRepositoryImpl(StudyHomeDao(ref.watch(appDatabaseProvider)));
 
+/// The app's one global options row (BR-182).
+///
+/// **The database itself, not a DAO** — the same difference `cardRepositoryBinding`
+/// explains. It takes the clock because every write stamps `updated_at` and
+/// nothing under `lib/features/` may read the wall clock (AD-16).
+AppSettingsRepository appSettingsRepositoryBinding(Ref ref) =>
+    AppSettingsRepositoryImpl(
+      ref.watch(appDatabaseProvider),
+      clock: ref.watch(clockProvider),
+    );
+
 /// The starter catalog: the shipped assets, decoded once (UC-01).
 ///
 /// A `Future` binding rather than a repository: there is no database and no
@@ -220,6 +234,7 @@ List<Override> repositoryBindingOverrides() => <Override>[
   deckTemplateRepositoryProvider.overrideWith(deckTemplateRepositoryBinding),
   deckTemplateCatalogProvider.overrideWith(deckTemplateCatalogBinding),
   studyRepositoryProvider.overrideWith(studyRepositoryBinding),
+  appSettingsRepositoryProvider.overrideWith(appSettingsRepositoryBinding),
   progressRepositoryProvider.overrideWith(progressRepositoryBinding),
   studyHomeRepositoryProvider.overrideWith(studyHomeRepositoryBinding),
 ];

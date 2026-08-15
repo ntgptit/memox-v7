@@ -160,10 +160,10 @@ void main() {
     expect(due.map((row) => row.c.id), isNot(contains('a-stateless')));
   });
 
-  test('the schema version is 8', () async {
+  test('the schema version is 9', () async {
     final db = openTestDatabase();
 
-    expect(db.schemaVersion, 8);
+    expect(db.schemaVersion, 9);
   });
 
   test('the only scheduler numbers in SQL are BR-88s two thresholds', () {

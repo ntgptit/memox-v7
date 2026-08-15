@@ -17,18 +17,10 @@ extension StudyOptionsSubmitProblems on StudyOptionsSubmitState {
 
 /// Maps a failure onto the form.
 ///
-/// **Read out of the failure, never re-derived from the input.** Re-parsing the
-/// text here to decide what to show would put the bounds in a second place, and
-/// the two would be free to disagree about the same number.
-StudyOptionsSubmitState studyOptionsSubmitFailure(Failure failure) {
-  if (failure is! ValidationFailure) {
-    return StudyOptionsSubmitState(failure: failure);
-  }
-
-  final problems = failure.problems.whereType<StudyCardLimitProblem>().toSet();
-
-  return StudyOptionsSubmitState(
-    problems: problems,
-    failure: problems.isEmpty ? failure : null,
-  );
-}
+/// **The mapping itself is `core/state/submit_state.dart`'s**, and was moved
+/// there when Settings needed the identical function for the identical enum
+/// (M99.23). This name stays because it reads better at the call sites than the
+/// generic one and because the type argument is the only thing specific to this
+/// form.
+StudyOptionsSubmitState studyOptionsSubmitFailure(Failure failure) =>
+    submitStateFromFailure<StudyCardLimitProblem>(failure);

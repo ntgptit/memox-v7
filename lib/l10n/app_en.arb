@@ -161,9 +161,85 @@
   "@settingsTitle": {
     "description": "App bar title of the Settings branch. Kept separate from navigationSettingsLabel for the same reason as decksTitle: a tab label competes for width, a title does not."
   },
-  "settingsPlaceholderTitle": "App settings are being developed",
-  "@settingsPlaceholderTitle": {
-    "description": "Heading of the Settings placeholder (AD-19). The whole message — there is no reassurance to add because no user preference exists yet to be kept or lost."
+  "settingsLoadingLabel": "Loading settings",
+  "@settingsLoadingLabel": {
+    "description": "Screen-reader label announced while the settings row is read. A bare spinner announces neither that something is happening nor when it stops."
+  },
+  "settingsLoadErrorTitle": "Couldn't load your settings",
+  "@settingsLoadErrorTitle": {
+    "description": "Whole-screen error when the settings stream fails (UC-12 E3). No control renders a value in this state — an invented default would be indistinguishable from a stored one."
+  },
+  "settingsSaveErrorTitle": "Couldn't save",
+  "@settingsSaveErrorTitle": {
+    "description": "Title of the in-section error band when a settings write fails (UC-12 E2, BR-188). The body comes from the failure type through mxWriteFailure."
+  },
+  "settingsStudyDefaultsSection": "Study defaults",
+  "@settingsStudyDefaultsSection": {
+    "description": "Heading of the group holding the app-wide card limit and new-card order (BR-183). Plural 'defaults' on purpose: these are what a deck uses when it has chosen nothing of its own."
+  },
+  "settingsStudyDefaultsNote": "Applies to sessions you start after saving. A session already running keeps its own limit.",
+  "@settingsStudyDefaultsNote": {
+    "description": "States BR-185 on the global screen. Longer than studyOptionsNextSessionNote, which sits on a deck's own options screen: there the user is one tap from the session, here they may have one running in another tab."
+  },
+  "settingsAppearanceSection": "Appearance",
+  "@settingsAppearanceSection": {
+    "description": "Heading of the theme group (BR-186)."
+  },
+  "settingsThemeSystem": "System",
+  "@settingsThemeSystem": {
+    "description": "Theme choice: follow the platform's brightness and keep following it (BR-214). Separate from settingsLanguageSystem even though English spells them the same — a translator may need different words for a theme and a language."
+  },
+  "settingsThemeLight": "Light",
+  "@settingsThemeLight": {
+    "description": "Theme choice: always light, whatever the platform says (BR-214)."
+  },
+  "settingsThemeDark": "Dark",
+  "@settingsThemeDark": {
+    "description": "Theme choice: always dark, whatever the platform says (BR-214)."
+  },
+  "settingsLanguageSection": "Language",
+  "@settingsLanguageSection": {
+    "description": "Heading of the language group (BR-187)."
+  },
+  "settingsLanguageSystem": "System",
+  "@settingsLanguageSystem": {
+    "description": "Language choice: resolve from the platform's preferred locales, falling back to English (BR-215)."
+  },
+  "settingsLanguageEnglish": "English",
+  "@settingsLanguageEnglish": {
+    "description": "Language choice. An endonym, and it stays 'English' in every translation: somebody stuck in a language they cannot read has to be able to find the name of their own."
+  },
+  "settingsLanguageVietnamese": "Tiếng Việt",
+  "@settingsLanguageVietnamese": {
+    "description": "Language choice. An endonym, unchanged in every translation for the same reason as settingsLanguageEnglish."
+  },
+  "settingsResetAction": "Reset to defaults",
+  "@settingsResetAction": {
+    "description": "Puts every app option back to its default (BR-189). Deliberately worded away from 'Reset learning progress' (BR-42), which is a different action with different consequences."
+  },
+  "settingsResetDescription": "Puts app options back to their defaults. Your decks and learning progress are not affected.",
+  "@settingsResetDescription": {
+    "description": "Shown under the reset action at rest, not only inside the confirmation. Two actions in this app start with 'Reset', and the scope is the only thing that tells them apart (BR-189)."
+  },
+  "settingsResetConfirmTitle": "Reset app options?",
+  "@settingsResetConfirmTitle": {
+    "description": "Title of the reset confirmation sheet (UC-12 A3)."
+  },
+  "settingsResetConfirmAction": "Reset",
+  "@settingsResetConfirmAction": {
+    "description": "Confirms the reset. Short because the sheet's title and body already carry the scope."
+  },
+  "settingsSavingLabel": "Saving",
+  "@settingsSavingLabel": {
+    "description": "Announced while a settings group is being written (BR-188, wireframe W6). A group that only greys out reports its state by colour alone."
+  },
+  "studyOptionsUseAppDefaults": "Use app defaults",
+  "@studyOptionsUseAppDefaults": {
+    "description": "Clears this root deck's study-options override so it follows the app-wide defaults again (BR-184). Only shown when an override exists — there is nothing to clear otherwise."
+  },
+  "studyOptionsOverrideNote": "This deck uses its own values instead of the app defaults.",
+  "@studyOptionsOverrideNote": {
+    "description": "Shown on a deck whose root carries an override (BR-184), so the user knows why changing the app defaults did not change this deck."
   },
   "decksTitle": "Library",
   "@decksTitle": {

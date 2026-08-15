@@ -1,0 +1,50 @@
+import '../tables/settings.drift';
+
+-- Reads and writes of the single settings row (BR-210).
+--
+-- **One row, addressed by its literal id everywhere.** `WHERE id = 1` rather
+-- than `LIMIT 1`: the CHECK guarantees there is only ever one row, and naming
+-- the id makes a write that somehow targeted a second row impossible rather
+-- than merely unlikely.
+
+-- The whole row. `.watchSingle()` on this is what every surface subscribes to,
+-- so one write updates all of them (BR-210).
+appSettingsRow:
+SELECT * FROM app_settings WHERE id = 1;
+
+-- The two study defaults (BR-211).
+--
+-- Separate statements per group rather than one wide UPDATE, because each group
+-- is its own submit and its own transaction (BR-216): a single statement taking
+-- every column would make saving a theme also rewrite the card limit with
+-- whatever the caller happened to pass.
+updateStudyDefaults:
+UPDATE app_settings
+SET card_limit = :cardLimit,
+    new_card_order = :newCardOrder,
+    updated_at = :updatedAt
+WHERE id = 1;
+
+updateThemeMode:
+UPDATE app_settings
+SET theme_mode = :themeMode, updated_at = :updatedAt
+WHERE id = 1;
+
+updateLanguage:
+UPDATE app_settings
+SET language = :language, updated_at = :updatedAt
+WHERE id = 1;
+
+-- Back to every default in one statement (BR-217).
+--
+-- The literals are the schema's own defaults, restated. They cannot be read out
+-- of the declaration at runtime, and a reset that wrote "whatever the row held
+-- before" would not be a reset.
+resetAppSettings:
+UPDATE app_settings
+SET card_limit = 20,
+    new_card_order = 'created',
+    theme_mode = 'system',
+    language = 'system',
+    updated_at = :updatedAt
+WHERE id = 1;

@@ -14,11 +14,13 @@ import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/l10n/generated/app_localizations_vi.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
+import 'package:memox/features/settings/di/app_settings_repository_provider.dart';
 
 import '../../features/deck/presentation/support/fake_deck_repository.dart';
 import '../../features/progress/presentation/support/fake_progress_repository.dart';
 import '../../features/study/domain/support/fake_study_home_repository.dart';
 import '../../features/study/domain/support/fake_study_repository.dart';
+import '../../features/settings/domain/support/fake_app_settings_repository.dart';
 
 /// The destination row of the shell, after AD-19 made it four wide.
 ///
@@ -53,6 +55,9 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          appSettingsRepositoryProvider.overrideWithValue(
+            FakeAppSettingsRepository(),
+          ),
           envConfigProvider.overrideWithValue(EnvConfig.development),
           deckRepositoryProvider.overrideWithValue(repository),
           // The Study branch is Study Home since UC-14, which reads its own
@@ -97,7 +102,7 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('the settings branch shows its placeholder under the bar', (
+    testWidgets('the settings branch shows its screen under the bar', (
       tester,
     ) async {
       await pumpShell(
@@ -106,12 +111,75 @@ void main() {
         initialLocation: RoutePaths.settings,
       );
 
-      expect(find.text(english.settingsPlaceholderTitle), findsOneWidget);
+      expect(find.text(english.settingsStudyDefaultsSection), findsOneWidget);
       expect(find.byType(MxNavigationBar), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
     testWidgets('the progress empty face clears the bar at 320 with '
+        'textScaler 2.0', (tester) async {
+      // The same overflow shape as the deck empty state, on a branch that is
+      // nothing but a centred column — and with four destinations the bar is
+      // at its widest, so this is the tightest fit the shell has. 320, the
+      // narrowest supported surface, not the 360 the sibling file's `compact`
+      // constant uses: the claim being tested is M99.7's, and it says 320.
+      await pumpShell(
+        tester,
+        FakeDeckRepository(),
+        initialLocation: RoutePaths.progress,
+        surface: const Size(320, 568),
+        textScale: 2,
+        hasProgressActivity: false,
+      );
+
+      // At this size the empty face is taller than the viewport, so it
+      // scrolls — which is the correct outcome, not a defect: W6 forbids
+      // buying the height back by shrinking the type or clipping the copy.
+      // What must hold is that the action stays **reachable** and, once
+      // reached, sits clear of the bar. Measuring the unscrolled rect would
+      // assert the opposite of the design, and asserting nothing here would
+      // leave a CTA that can sit permanently under the bar undetected.
+      await tester.ensureVisible(find.text(english.progressEmptyAction));
+      await tester.pumpAndSettle();
+
+      final action = tester.getRect(find.text(english.progressEmptyAction));
+      final bar = tester.getRect(find.byType(MxNavigationBar));
+
+      expect(find.byType(MxEmptyState), findsOneWidget);
+      expect(action.bottom, lessThanOrEqualTo(bar.top));
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('the settings screen scrolls its last row clear of the bar', (
+      tester,
+    ) async {
+      // **The bottom-nav clearance of the M99.23 wireframe (W5), measured
+      // against the real bar.** The feature's own geometry suite cannot make
+      // this claim: it mounts the screen without the shell, so it can prove the
+      // last row is reachable and nothing about what it is reachable *under*.
+      // Scrolling to the end and finding the row still overlapping the bar is
+      // exactly the failure W5 names, and only this harness can see it.
+      await pumpShell(
+        tester,
+        FakeDeckRepository(),
+        initialLocation: RoutePaths.settings,
+      );
+
+      // `ensureVisible`, not `scrollUntilVisible`: the shell keeps a
+      // `Navigator` per branch alive inside an `IndexedStack`, so there is more
+      // than one `Scrollable` in the tree and `scrollUntilVisible` throws
+      // "Too many elements" before it scrolls anything.
+      final lastRow = find.text(english.settingsResetDescription);
+      await tester.ensureVisible(lastRow);
+      await tester.pumpAndSettle();
+
+      final rowBottom = tester.getRect(lastRow).bottom;
+      final barTop = tester.getRect(find.byType(MxNavigationBar)).top;
+
+      expect(rowBottom, lessThanOrEqualTo(barTop));
+    });
+
+    testWidgets('the progress placeholder clears the bar at 320 with '
         'textScaler 2.0', (tester) async {
       // The same overflow shape as the deck empty state, on a branch that is
       // nothing but a centred column — and with four destinations the bar is

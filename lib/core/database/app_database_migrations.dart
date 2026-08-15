@@ -126,7 +126,40 @@ extension _AppDatabaseMigrations on AppDatabase {
     );
   }
 
+  /// The v8 → v9 upgrade: the two appearance columns (BR-214, BR-215).
+  ///
+  /// **v9 rather than the v8 it was written as.** Settings and the recall
+  /// direction were built against the same base and both claimed v8; the
+  /// direction's landed first. The two are independent — different tables, both
+  /// additive — so this one simply runs after it.
+  ///
+  /// **Additive, and it has to be.** Widening a `CHECK` means rebuilding a
+  /// table in SQLite (see [_upgradeToV5]); adding a column with its own `CHECK`
+  /// does not, because the constraint arrives with the column rather than
+  /// replacing one. Nothing here rewrites a row.
+  ///
+  /// **`DEFAULT 'system'` is what makes the existing row correct without an
+  /// `UPDATE`.** Every build before v9 followed the platform for both theme and
+  /// language because it had no stored choice, so `'system'` is not a
+  /// placeholder — it is the truthful record of what the app was already doing.
+  ///
+  /// The literals describe v9's schema, not today's, for the reason every other
+  /// method in this file states.
+  Future<void> _upgradeToV9() async {
+    const List<String> statements = <String>[
+      "ALTER TABLE app_settings ADD COLUMN theme_mode TEXT NOT NULL "
+          "DEFAULT 'system' CHECK (theme_mode IN ('system', 'light', 'dark'))",
+      "ALTER TABLE app_settings ADD COLUMN language TEXT NOT NULL "
+          "DEFAULT 'system' CHECK (language IN ('system', 'en', 'vi'))",
+    ];
+
+    for (final statement in statements) {
+      await customStatement(statement);
+    }
+  }
+
   /// The v7 → v8 upgrade: three nullable columns and one backfill (BR-203).
+  /// The v4 → v5 upgrade.
   ///
   /// **`ALTER TABLE … ADD COLUMN`, not a rebuild.** The three tables gain a
   /// constraint rather than change one, and SQLite allows a `CHECK` on an added

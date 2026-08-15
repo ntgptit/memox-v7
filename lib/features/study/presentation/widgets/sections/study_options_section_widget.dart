@@ -5,6 +5,7 @@ import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../../../shared/widgets/mx_pill_button.dart';
+import '../../../../../shared/widgets/mx_text_button.dart';
 import '../../../../../shared/widgets/mx_text_field.dart';
 import '../../../domain/models/new_card_order_model.dart';
 import '../../../domain/models/study_card_limit_model.dart';
@@ -26,6 +27,9 @@ class StudyOptionsSectionWidget extends StatefulWidget {
     required this.onSave,
     required this.isSubmitting,
     this.cardLimitProblem,
+    this.isRootOverride = false,
+    this.isClearing = false,
+    this.onUseAppDefaults,
     super.key,
   });
 
@@ -34,6 +38,20 @@ class StudyOptionsSectionWidget extends StatefulWidget {
   final void Function(String rawCardLimit, NewCardOrder newCardOrder) onSave;
   final bool isSubmitting;
   final StudyCardLimitProblem? cardLimitProblem;
+
+  /// Whether these values come from this root's own override rather than from
+  /// the app defaults (BR-184).
+  ///
+  /// It decides whether the deck says so and whether `Use app defaults` is
+  /// offered at all — an action that would clear nothing is an action that
+  /// teaches the user it does nothing.
+  final bool isRootOverride;
+
+  /// Whether the clear is in flight. Separate from [isSubmitting] because they
+  /// are two operations, and one flag would spin the wrong control.
+  final bool isClearing;
+
+  final VoidCallback? onUseAppDefaults;
 
   @override
   State<StudyOptionsSectionWidget> createState() =>
@@ -94,6 +112,30 @@ class _StudyOptionsSectionWidgetState extends State<StudyOptionsSectionWidget> {
           isLoading: widget.isSubmitting,
           onPressed: () => widget.onSave(_cardLimit.text, _order),
         ),
+        // BR-184's affordance, and it lives here rather than on the global
+        // Settings screen: it acts on **one** deck, and a global page offering
+        // it would need a deck picker — a second screen inside the first.
+        //
+        // Shown only when there is an override to clear. The note above it is
+        // what answers the question a user actually arrives with: why did
+        // changing the app defaults not change this deck?
+        if (widget.isRootOverride) ...<Widget>[
+          const SizedBox(height: AppSpacing.lg),
+          Text(
+            l10n.studyOptionsOverrideNote,
+            style: context.texts.bodySmall?.copyWith(
+              color: context.colors.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: MxTextButton(
+              label: l10n.studyOptionsUseAppDefaults,
+              onPressed: widget.isClearing ? null : widget.onUseAppDefaults,
+            ),
+          ),
+        ],
       ],
     );
   }

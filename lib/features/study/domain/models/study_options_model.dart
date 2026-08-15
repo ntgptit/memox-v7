@@ -24,5 +24,21 @@ abstract class StudyOptionsModel with _$StudyOptionsModel {
 
     /// How new cards are ordered in a `learning` session (BR-148).
     required NewCardOrder newCardOrder,
+
+    /// Whether the values above came from the **root deck's own override**
+    /// rather than from the app-wide defaults (BR-184).
+    ///
+    /// **Part of this read rather than a second one.** The options screen has to
+    /// offer `Use app defaults` only when there is something to clear, and a
+    /// separate "does this deck override?" query would be a second snapshot —
+    /// the screen could then show a value from one moment and an affordance
+    /// from another (AD-13). It is resolved in the same pass that merges the
+    /// tiers, so it cannot disagree with them.
+    ///
+    /// Defaulted rather than required because the session opener, which
+    /// constructs nothing and reads only `cardLimit`, has no business knowing
+    /// where the number came from — and every fake that predates this field
+    /// means exactly what `false` says: no override.
+    @Default(false) bool isRootOverride,
   }) = _StudyOptionsModel;
 }

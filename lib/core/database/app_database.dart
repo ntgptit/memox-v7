@@ -18,7 +18,9 @@ part 'app_database_migrations_v5.dart';
     'tables/cards.drift',
     'tables/tags.drift',
     'tables/study.drift',
+    'tables/settings.drift',
     'queries/study.drift',
+    'queries/settings.drift',
     'queries/deck.drift',
     'queries/card.drift',
     'queries/tag.drift',
@@ -36,7 +38,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.open() : super(openAppDatabaseConnection());
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -52,9 +54,15 @@ class AppDatabase extends _$AppDatabase {
       // Duplicated with `_upgradeToV5` on purpose: the two paths are genuinely
       // different, and a helper shared between them would have to name a schema
       // that means different things at each call site.
+      //
+      // Every column is named, including the two v8 added. They carry a
+      // `DEFAULT`, so omitting them would work — and would stop working the day
+      // an option arrives without one, silently, on fresh installs only.
       await customStatement(
-        'INSERT INTO app_settings (id, card_limit, new_card_order, updated_at) '
-        "VALUES (1, 20, 'created', CAST(strftime('%s', 'now') AS INTEGER))",
+        'INSERT INTO app_settings '
+        '(id, card_limit, new_card_order, theme_mode, language, updated_at) '
+        "VALUES (1, 20, 'created', 'system', 'system', "
+        "        CAST(strftime('%s', 'now') AS INTEGER))",
       );
     },
 
@@ -168,6 +176,29 @@ class AppDatabase extends _$AppDatabase {
       // Last, so it runs on top of whatever the v1…v7 steps just produced.
       if (from < 8) {
         await _upgradeToV8();
+      }
+
+      // v8 -> v9 (M99.28): the two appearance columns of BR-214 and BR-215.
+      //
+      // Two `ALTER TABLE ADD COLUMN`, and nothing else. Both are NOT NULL with
+      // a `DEFAULT 'system'`, so the one existing row upgrades to exactly the
+      // state a fresh install has — "follow the platform", which is what every
+      // build before this one did because it had no choice.
+      //
+      // **v9 rather than the v8 this arrived as.** Settings and the recall
+      // direction were written against the same base and both claimed v8; the
+      // direction's landed first, so this one runs on top of it. The two do not
+      // interact — different tables, both additive — but the order is now fixed
+      // and `migration_v9_test` upgrades from a v8 database, not a v7 one.
+      //
+      // **The `CHECK` on each column does not survive the `ALTER`, and that is
+      // accepted here rather than worked around.** SQLite applies a column
+      // constraint declared in `ADD COLUMN`, and `migrateAndValidate` compares
+      // the upgraded database against the declaration, so `migration_v9_test`
+      // is what proves the pair actually agree — asserting against this file
+      // would only agree with itself.
+      if (from < 9) {
+        await _upgradeToV9();
       }
     },
 

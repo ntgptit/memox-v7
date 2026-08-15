@@ -85,6 +85,18 @@ abstract interface class StudyRepository {
     required NewCardOrder newCardOrder,
   });
 
+  /// Drops the root deck's override so the tree follows the app-wide defaults
+  /// again (BR-184).
+  ///
+  /// **[deckId] may be any deck in the tree; the write lands on its root**, the
+  /// same resolution [saveStudyOptions] does.
+  ///
+  /// It writes one column of `decks`. It MUST NOT touch learning progress,
+  /// history, sessions or the scheduler — this is the opposite end of the app
+  /// from Reset learning progress (BR-42), and the two are one word apart in
+  /// English.
+  Future<void> clearStudyOptionsOverride(String deckId);
+
   /// Opens a session and builds every stage's queue in one transaction.
   ///
   /// [stageSequence] comes from the algorithm (BR-97): the whole sequence for a

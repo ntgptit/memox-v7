@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1 — chiều hỏi cho phiên self-assess, stage 4) |
+| **Updated by task** | M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) |
 | **Last updated** | 2026-08-15 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -33,7 +33,7 @@ AD / UC (xem `business-rules.md`).
 | M7 · CI/CD (Phase 19) | todo | Bắt đầu được ngay sau M2. Job Android + Web, chưa có iOS (AD-04) |
 | M8 · Release Android (Phase 16–18, 20–22) | todo | |
 | M9 · Backend Spring Boot + auth + sync (Phase 10) | todo | Sau khi M8 ổn định |
-| M99 · Adhoc | — | Task chủ dự án giao trực tiếp, ngoài chuỗi phụ thuộc. M99.1 **done** — `master-flow.md`. M99.2 **done** — Deck và Card thành bản tham chiếu (AD-17). M99.3 **done** — refactor toàn bộ IT theo Testing Pyramid: 133/133 kịch bản có coverage host, `integration_test/` còn 8 kịch bản `DEVICE-E2E`, và CI lần đầu có cổng tự động cho tính đúng đắn nghiệp vụ. M99.5 **done** — golden harness chưa bao giờ nạp `NotoSansKR`, nên mọi chữ Hàn trong mọi golden là ô `NO GLYPH`; đã nạp đủ ba face CJK, bổ sung Nhật/Trung, và fixture demo trở lại tiếng Hàn. M99.7 **done** — bottom navigation lên bốn branch (AD-19); Progress/Settings là placeholder presentation-only, hai feature này **chưa** hoàn thành. M99.8 **done** — nhãn tab đầu đổi Decks/Bộ thẻ → Library/Thư viện; branch nội bộ và title màn hình vẫn là Decks. M99.17 **done** — đồng bộ Card Management với manual entry khối lượng nhỏ và chốt import/export là hướng bulk-management sau MVP. |
+| M99 · Adhoc | — | Task chủ dự án giao trực tiếp, ngoài chuỗi phụ thuộc. M99.1 **done** — `master-flow.md`. M99.2 **done** — Deck và Card thành bản tham chiếu (AD-17). M99.3 **done** — refactor toàn bộ IT theo Testing Pyramid: 133/133 kịch bản có coverage host, `integration_test/` còn 8 kịch bản `DEVICE-E2E`, và CI lần đầu có cổng tự động cho tính đúng đắn nghiệp vụ. M99.5 **done** — golden harness chưa bao giờ nạp `NotoSansKR`, nên mọi chữ Hàn trong mọi golden là ô `NO GLYPH`; đã nạp đủ ba face CJK, bổ sung Nhật/Trung, và fixture demo trở lại tiếng Hàn. M99.7 **done** — bottom navigation lên bốn branch (AD-19); Progress/Settings là placeholder presentation-only, hai feature này **chưa** hoàn thành. M99.8 **done** — nhãn tab đầu đổi Decks/Bộ thẻ → Library/Thư viện; branch nội bộ và title màn hình vẫn là Decks. M99.17 **done** — đồng bộ Card Management với manual entry khối lượng nhỏ và chốt import/export là hướng bulk-management sau MVP. M99.23 **in-progress** — Settings v1: branch Settings rời trạng thái placeholder (BR-182…BR-189, UC-12, schema v8); Progress **vẫn** là placeholder. |
 
 ---
 
@@ -9797,6 +9797,166 @@ quên: baseline là 8 passing / 0 failing, và task tiếp theo chạm Study MUS
 đóng. Ba thứ trong PR này nằm đúng vùng suite đó tồn tại để bắt: schema đổi (v8),
 binding của Study không đổi nhưng contract `openSession` thì có, và một sheet mới
 ở đường vào phiên.
+### M99.28 · Settings v1 — global study defaults, theme và ngôn ngữ
+
+- **Status:** **in-progress** — phase 1–9 xong (gồm cả hai review đệ quy), chờ emulator IT và CI.
+- **Goal:** Thay `SettingsPlaceholderScreen` bằng feature slice thật: mặc định
+  học toàn app, theme, ngôn ngữ và reset, tất cả trên một dòng `app_settings`
+  có kiểu, watchable và local-first.
+- **Scope:** BR-210…BR-217, UC-16, AD-19, `docs/data-model.md`
+  (`app_settings`), wireframe `m99-settings.md`, schema v8, feature
+  `lib/features/settings/`, binding ở composition root, seam theme/locale trên
+  `MaterialApp`, và `Use app defaults` trên surface tuỳ chọn của deck. **Ngoài
+  phạm vi:** nhắc nhở/notification, account/sync, import-export-backup, tham số
+  nâng cao của SM-2.
+- **Editable documents:** `docs/business-rules.md`, `docs/use-cases.md`,
+  `docs/data-model.md`, `docs/architecture.md` (AD-19),
+  `docs/wireframes/m99-settings.md`, `docs/wbs.md`
+- **5Why:** Settings là placeholder vì AD-19 dựng IA trước nghiệp vụ; nghiệp vụ
+  chưa có vì chưa ai chốt tuỳ chọn nào là toàn app và tuỳ chọn nào thuộc deck;
+  câu hỏi đó chưa trả lời được vì BR-147 mới chỉ nói *có* hai tầng chứ không nói
+  ai sửa tầng trên; không ai sửa được tầng trên vì `app_settings` chỉ được đọc,
+  không có đường ghi; và không có đường ghi vì màn hình duy nhất chạm tới tùy
+  chọn học là màn của một deck. Gốc rễ: **tầng mặc định tồn tại trong schema
+  nhưng không tồn tại trong sản phẩm.** Theme và ngôn ngữ vào cùng lượt vì
+  chúng là hai tuỳ chọn duy nhất người dùng hỏi đến mà không cần một feature
+  mới nào đứng sau — và vì đặt chúng ở `SharedPreferences` sẽ tách một nửa tuỳ
+  chọn của app sang store thứ hai, không transaction chung và không watch chung
+  (BR-210).
+- **Output:**
+  - **Phase 1 (docs):** BR-210…BR-217 trong mục mới `Tùy chọn ứng dụng`, ba
+    hàng validation, tám hàng edge case; UC-16 đủ chín mục; `app_settings` trong
+    data model nhận hai cột và bảng thứ tự migration bổ sung v6/v7 vốn bị bỏ
+    sót; AD-19 ghi Settings đã rời trạng thái placeholder, Progress thì chưa;
+    wireframe `m99-settings.md` (S1…S9, W1…W6).
+  - **Phase 2 (schema v8):** `app_settings` chuyển sang `tables/settings.drift`
+    — nó chưa bao giờ là bảng của Study — cộng `queries/settings.drift`; hai
+    cột `theme_mode` và `language`, mỗi cột một `CHECK` và `DEFAULT 'system'`;
+    `_upgradeToV8` là hai `ALTER TABLE ADD COLUMN`, không ghi lại dòng nào;
+    snapshot `drift_schema_v8.json` + `schema_v8.dart`.
+  - **Phase 3 (domain):** `AppThemeMode`, `AppLanguage` (giữ **lựa chọn**, không
+    giữ kết quả đã giải — AD-11), `AppSettingsModel` với `defaults` dùng
+    `kDefaultCardLimit` của Study, contract bốn write một watch, năm use case.
+  - **Phase 4 (data):** DAO, mapper tolerant từng cột, repository map lỗi ở
+    biên — kể cả trên stream, nơi lỗi đến như một **event** chứ không phải một
+    throw.
+  - **Phase 5 (DI + app):** binding trong `repository_bindings.dart`;
+    `MemoxApp` thành `ConsumerWidget` đọc `appSettingsProvider` và truyền
+    `themeMode` + `locale`; `themeAnimationDuration: Duration.zero` để không
+    render theme thứ ba giữa chừng.
+  - **Phase 6 (presentation):** `SettingsScreen` thay placeholder (router,
+    path và thứ tự tab không đổi — đúng điều AD-19 đặt cược), bốn write
+    controller, ba section, error band dùng chung, dialog reset, 20 key ARB
+    EN/VI, Widgetbook `SettingsScreen` bốn scenario, visual audit companion.
+  - **Phase 7 (root override):** `StudyOptionsModel.isRootOverride` giải trong
+    cùng một lần đọc, `clearStudyOptionsOverride` một cột một `UPDATE`,
+    `Use app defaults` + câu giải thích trên `StudyOptionsScreen`.
+  - **Phase 8 (recursive architecture/logic review):** không P0/P1/P2. Ba mục
+    P3, hai cái đã đóng: `AppSettingsModel.isAtDefaults` là dead code — không
+    surface nào đọc nó vì W3 state 2 bắt hành động reset **luôn** hiện, nên nó
+    bị xoá và thay bằng một comment nói tại sao không có; và `watch()` chưa có
+    test nào đi qua nhánh `handleError` của chính nó, nay có một test xoá dòng
+    bằng generated delete (raw `customStatement` không báo cho drift biết bảng
+    nào đổi, nên stream im lặng và test sẽ xanh trên một repository **không**
+    map lỗi gì cả). Mục thứ ba là emulator IT, xem dưới.
+  - **Phase 9 (recursive UI/UX review):** không P0. Một P1 và hai P2 đã đóng.
+    **P1 — `New card order` phân biệt chọn/chưa chọn chỉ bằng màu.** Nó dùng
+    `MxPillButton`, và `buildChipTheme` đặt `showCheckmark: false` cùng `side`
+    chỉ resolve theo `disabled`/`focused` — nên pill đang chọn khác pill chưa
+    chọn duy nhất ở nền và màu chữ, đúng thứ W6 cấm và đúng lý do S9 dùng để
+    loại segmented button. Sửa: cả ba lựa chọn rời rạc trên màn dùng chung
+    `SettingsChoiceRowsWidget` (radio), khớp luôn với hình W1 vốn đã vẽ radio.
+    **P2 — W1 vẽ radio còn W5 bắt "giống hệt `StudyOptionsSectionWidget`"**
+    (vốn dùng pill): mâu thuẫn nội bộ tài liệu, đã sửa bằng S9a. **P2 — W6 đếm
+    sai**: chỉ **hai** nhóm có nhãn `System`, không phải ba. Bốn khoảng trống
+    P3 về đo đạc cũng đã đóng bằng assertion thật: mép x của hành động reset
+    (đo ở **button**, không ở nhãn — nút mang glyph `restart_alt` nên chữ thụt
+    vào một icon), nhịp `xl` cho **cả hai** cặp card→heading và cho
+    card-cuối→reset, mép trái hàng radio của `New card order`, và bottom-nav
+    clearance đo bằng `getRect` so đáy hàng cuối với đỉnh `MxNavigationBar`
+    **trong shell thật** — suite geometry của feature không dựng shell nên nó
+    chỉ chứng minh được "cuộn tới được", không chứng minh được "không nằm dưới
+    thanh nào".
+- **Acceptance criteria:**
+  - [x] Placeholder bị thay; `/settings`, `RouteNames.settings` và shell index 3
+        không đổi.
+  - [x] `app_settings` một dòng, cột có kiểu; mọi surface đọc **một** stream;
+        không có bản thứ hai trong bộ nhớ provider.
+  - [x] Mỗi nhóm là một submit độc lập, có typed failure, chặn double submit,
+        giữ draft khi lỗi và tiếp tục hiển thị giá trị đã persisted.
+  - [x] Root có override giữ override khi mặc định toàn app đổi;
+        `Use app defaults` xoá override và **không** đụng tiến độ học, scheduler
+        hay lịch sử — có negative test đọc lại nguyên hàng `card_study_states`.
+  - [x] Đổi mặc định không chạm phiên đang chạy (BR-213 đã có test từ M5 và vẫn
+        xanh).
+  - [x] Theme/ngôn ngữ bền qua restart — chứng minh bằng hai repository trên
+        cùng một database, không phải bằng một provider giữ giá trị.
+  - [x] `System` giải theo platform; lựa chọn tường minh thắng platform; đổi
+        trong cùng phiên chạy không dựng lại router.
+  - [x] Migration v7→v8 có test: validate schema, giữ nguyên hai giá trị cũ,
+        hai `CHECK` còn sống, không đụng bảng nào khác.
+  - [x] Geometry đo bằng `getRect`: ba card chung hai mép x, nhãn nhóm cùng cột,
+        nhịp `xs`/`xl`, hàng radio ≥ 48dp, 320×568 @2.0 tiếng Việt không
+        overflow.
+  - [x] A11y: role/value radio đọc được, nhãn nhóm trong cây semantics, error
+        band là `liveRegion`, contrast đo **từ token** (xem ghi chú dưới), và
+        không trạng thái chọn nào chỉ dựa vào màu.
+  - [x] Hai review đệ quy chạy ở chế độ AUDIT_ONLY, clean stop: không còn
+        P0/P1/P2 sau khi đóng một P1 và hai P2 của review UI/UX.
+  - [ ] `flutter test integration_test/ -d emulator-5554 --flavor development` —
+        **deferred**, xem mục dưới.
+- **Dependencies:** M4.1 (router), M5.0s (`app_settings`), M99.7 (AD-19)
+- **Tests required:** domain enum + defaults; repository trên SQLite thật
+  (singleton row, stream re-emit, bốn write độc lập, reset, clock injected, lỗi
+  thành `Failure`); migration v8; bốn write controller; states/geometry/a11y/
+  reset của màn hình; wiring theme+locale qua `MemoxApp` thật; override
+  `isRootOverride` + clear trên database thật + `Use app defaults` trên màn.
+- **Checklist phases:** 7, 9, 10, 11, 12, 13, 14, 15
+
+**Ghi chú đã đo, không phải ý kiến.**
+
+- **`textContrastGuideline` không dùng được, và đây là lần thứ hai.** Nó báo
+  1.35:1 (light) và 2.15:1 (dark) cho cặp `onSurfaceVariant`/`surface` vốn đo
+  được **7.0:1** — cùng loại sai lệch `study_accessibility_test.dart` đã ghi
+  cho một dòng 14px. Trên dòng 12px phần lớn pixel của glyph chỉ được phủ một
+  phần, nên guideline lấy trúng pixel khử răng cưa. Suite này đo từ token, như
+  Study đã làm.
+- **`RadioListTile` trong `MxCard` mất ripple, và framework tự nói ra.** Card là
+  một `DecoratedBox` đục; `ListTile` vẽ splash lên `Material` gần nhất, vốn nằm
+  **sau** card. Sửa bằng một `Material(type: transparency)` bên trong card —
+  phát hiện bởi assertion của framework trong visual audit, không phải bởi mắt.
+- **Known gap, cố ý không sửa ở task này: `MxPillButton` mang trạng thái chọn
+  chỉ bằng màu.** `app_chip_theme.dart` đặt `showCheckmark: false` và chỉ
+  resolve `side` theo `disabled`/`focused`, nên một pill đang chọn khác pill
+  chưa chọn duy nhất ở nền và màu chữ. Đây **không** phải lỗi task này tạo ra:
+  nó có sẵn và đang được năm call site dùng — `card_filter_bar_widget.dart`,
+  `deck_list_toolbar_widget.dart` (×2), `study_entry_section_widget.dart`,
+  `study_options_section_widget.dart`. Settings né bằng cách dùng radio (S9),
+  nhưng `StudyOptionsScreen` thì vẫn còn. Sửa đúng chỗ là ở chip theme, và theo
+  quy ước parity thì phải đi cùng kit web trong cùng một PR, cộng toàn bộ golden
+  của chip — tức một task riêng, không phải một dòng nhét vào Settings v1.
+- **Frame đầu tiên sau cold start dùng mặc định `system`.** Đọc `app_settings`
+  là async, nên một người đã chọn Dark thấy một hai frame sáng trước khi giá trị
+  về. Phương án chặn frame đầu để đọc database đã bị loại: nó đổi một lần đổi
+  theme trong hai frame lấy một cửa sổ trắng, đúng đánh đổi mà
+  `FixtureSeederWidget` đã từ chối cho deck list. `themeAnimationDuration: zero`
+  làm nó đọc như "app khởi động ở dark" thay vì một lần fade phải nhìn.
+- **`migrateAndValidate(db, 5)` trong `migration_v5_test.dart` đã sai từ trước
+  và v8 mới làm nó lộ ra.** `onUpgrade` chỉ rẽ theo `from`, nên một database v4
+  luôn kết thúc ở schema mới nhất; validate với literal `5` là khẳng định hình
+  dạng của một database build này không tạo ra được. Đổi sang `db.schemaVersion`.
+- **Nợ `end_reason = scheduler_changed` giờ nhắm v9.** Mục Known technical debt
+  viết nó vào "lần bump schema tiếp theo", và lần đó là v8 của task này. Nới một
+  `CHECK` là rebuild bảng, không phải `ALTER`, nên ghép vào một migration
+  additive là trộn hai rủi ro khác hẳn nhau.
+
+**Emulator IT deferred.** `flutter test integration_test/ -d emulator-5554
+--flavor development` **chưa chạy** trong task này: không có emulator trong môi
+trường thực thi. Task này chạm `lib/app/` (root widget, router, binding), tức
+đúng vùng mà CLAUDE.md nói đã hai lần làm hỏng device suite mà không ai biết —
+nên nó **phải** được chạy trước khi ai đó coi Settings v1 là đóng. Baseline
+8 pass / 0 fail. Bù lại trên host: `test/app/app_settings_wiring_test.dart` mount
+`MemoxApp` thật với router thật và binding thật, và toàn bộ 2.663 host test xanh.
 
 ## Blocker
 
@@ -9868,9 +10028,10 @@ dưới đây, và từ giờ **không có gì** bắt chúng:
 | ~~`study_session_controller.dart` vượt trần 400 dòng của guard~~ | M5.23 | 408/400, và **warning cũng làm đỏ gate**. Class giữ toàn bộ command của phiên học, cộng summary và failure policy | **Đã trả trong cùng PR.** Tách `_loadSummary` + `StudySessionState.summary` thành `studySessionSummaryProvider` — một **query**, không phải command, nên nó chưa bao giờ thuộc về controller. Controller còn 380 dòng. Lợi ích thật chứ không chỉ số dòng: read cũ có ba call site (hết stage, leave, failure path) nên summary chỉ đúng bằng người cuối cùng nhớ đủ cả ba, và field thì sống lâu hơn phiên — quên một call site là hiện số của phiên trước dưới tiêu đề phiên mới |
 | ~~`dart format .` trong `dod_check.sh` crash trên worktree~~ | M2.2b | Bước `format` đỏ ở **mọi** lần chạy local nhiều tuần liền: `.` đi vào `.claude/worktrees/`, nơi Gradle xoá thư mục ngay giữa lúc formatter đang liệt kê → `PathNotFoundException`. Vì là lỗi môi trường chứ không phải lỗi format, mỗi lần lại được *báo cáo và đi vòng* thay vì sửa — và một gate đỏ mà ai cũng biết là đỏ thì không còn là gate | **Đã trả.** `dart_roots()` lấy tập thư mục từ `git ls-files '*.dart'` cắt tới segment đầu. Đúng câu hỏi cần hỏi — *cây làm việc **này** track những file Dart nào* — nên build output không tracked không lọt vào, worktree bị `.git/info/exclude` loại sẵn, và một thư mục top-level mới tự động được nhận. **Lỗi thứ hai nghiêm trọng hơn cái crash:** `.` đưa cho formatter source của **nhánh khác**, nên một worktree có format cũ làm gate đỏ vì code không nằm trong cây làm việc |
 | ~~`study_session_controller.dart` vượt trần 400 dòng của guard~~ | M5.24 | 423/400. Warning cũng làm đỏ gate. Class giữ toàn bộ command của phiên học | **Đã trả ở M5.25.** Không tách được bằng cơ chế ngôn ngữ — Dart không có partial class, base class Riverpod sinh ra là private, và extension trong `part` cũng không dùng được `state` (`invalid_use_of_protected_member`, đã thử và revert). Nên tách bằng **trách nhiệm**: offset nhìn lại của `browse` là view state, không phải command của phiên, và nay là `StudyBrowseTrailController`. Controller còn 387 dòng |
-| `study_answers` chưa có index cho khoảng thời gian | M99.23 | Progress lọc `answered_at >= ? AND answered_at < ?`; index duy nhất chạm cột này là `(card_id, answered_at)`, mà cột dẫn đầu không nằm trong predicate — nên mỗi lần emit là một full scan `study_answers`, và stream re-emit theo **mỗi lượt trả lời** khi màn hình đang mở (ở độ sâu 3 là ba scan mỗi lượt). Output có chặn, scan thì không | Thêm index `(answered_at)` — nhưng đó là **đổi schema**, tức bump version + snapshot + migration test, và M99.23 cố ý không đụng schema. Trả cùng lần bump schema tiếp theo, và theo đúng rule index của repo: đo bằng `EXPLAIN QUERY PLAN` trên dữ liệu thật trước rồi mới thêm |
-| `ancestry` CTE trong `deck.drift` không có bound | M99.23 | Cùng khiếm khuyết đã sửa ở `progress.drift`: walk mang `distance` tăng mỗi vòng nên `UNION` không dedup được, và trên cây cha vòng lặp thì statement không bao giờ trả về — nó giữ database isolate, nên mọi query khác của app chặn theo. Comment ở `deck.drift` còn khẳng định ngược lại | Áp đúng cách đã dùng ở `progress.drift`: `:maxWalk` cho `ancestry`, giữ `UNION` cho các walk không mang counter. Không gộp vào M99.23 vì nó nằm ngoài scope đã tuyên bố (không đụng Deck production code) |
+| `study_answers` chưa có index cho khoảng thời gian | M99.28 | Progress lọc `answered_at >= ? AND answered_at < ?`; index duy nhất chạm cột này là `(card_id, answered_at)`, mà cột dẫn đầu không nằm trong predicate — nên mỗi lần emit là một full scan `study_answers`, và stream re-emit theo **mỗi lượt trả lời** khi màn hình đang mở (ở độ sâu 3 là ba scan mỗi lượt). Output có chặn, scan thì không | Thêm index `(answered_at)` — nhưng đó là **đổi schema**, tức bump version + snapshot + migration test, và M99.28 cố ý không đụng schema. Trả cùng lần bump schema tiếp theo, và theo đúng rule index của repo: đo bằng `EXPLAIN QUERY PLAN` trên dữ liệu thật trước rồi mới thêm |
+| `ancestry` CTE trong `deck.drift` không có bound | M99.28 | Cùng khiếm khuyết đã sửa ở `progress.drift`: walk mang `distance` tăng mỗi vòng nên `UNION` không dedup được, và trên cây cha vòng lặp thì statement không bao giờ trả về — nó giữ database isolate, nên mọi query khác của app chặn theo. Comment ở `deck.drift` còn khẳng định ngược lại | Áp đúng cách đã dùng ở `progress.drift`: `:maxWalk` cho `ancestry`, giữ `UNION` cho các walk không mang counter. Không gộp vào M99.28 vì nó nằm ngoài scope đã tuyên bố (không đụng Deck production code) |
 | `end_reason = scheduler_reset` phải mang cả BR-164 | M99.16 | Đổi scheduler khi chưa khoá ghi cùng giá trị với Reset, nên đọc riêng cột đó thì hai sự kiện khác nhau trông giống nhau. Không mất thông tin — `study_sessions.scheduler_generation` bằng generation của root sau một lần đổi và nhỏ hơn sau một lần reset — nhưng nó bắt người đọc phải biết mẹo đó | Tên đúng là `scheduler_changed`. `study_sessions.end_reason` có `CHECK` liệt kê giá trị nên thêm một giá trị là **đổi schema**, và bump version đang thuộc về task chuẩn hoá `content_type` chạy song song (v6). Nới `CHECK` cùng lần bump schema tiếp theo, rồi đổi `deck_scheduler_repository_impl.dart` sang giá trị mới. Nới `CHECK` là **rebuild bảng**, không phải `ALTER`, nên nó xứng đáng một bump riêng. **v8 đã đi cho BR-203** — ba cột `direction` thêm bằng `ALTER TABLE ADD COLUMN`, không rebuild gì, nên không ghép được — nên đích bây giờ là **v9** |
+| `end_reason = scheduler_reset` phải mang cả BR-164 | M99.16 | Đổi scheduler khi chưa khoá ghi cùng giá trị với Reset, nên đọc riêng cột đó thì hai sự kiện khác nhau trông giống nhau. Không mất thông tin — `study_sessions.scheduler_generation` bằng generation của root sau một lần đổi và nhỏ hơn sau một lần reset — nhưng nó bắt người đọc phải biết mẹo đó | Tên đúng là `scheduler_changed`. `study_sessions.end_reason` có `CHECK` liệt kê giá trị nên thêm một giá trị là **đổi schema**, và bump version đang thuộc về task chuẩn hoá `content_type` chạy song song (v6). Nới `CHECK` cùng lần bump schema tiếp theo **dành riêng cho nó** — rồi đổi `deck_scheduler_repository_impl.dart` sang giá trị mới. Nới `CHECK` là rebuild bảng, không phải `ALTER`, nên nó xứng đáng một bump riêng: v8 (M99.28) là hai `ALTER TABLE ADD COLUMN` thuần additive và ghép một rebuild vào đó là trộn hai rủi ro khác hẳn nhau. Mục tiêu hiện tại là **v9** |
 | Nội dung starter là fixture, không phải nội dung production | T1.3 | Không phát hành được với nội dung này | Tìm nguồn nội dung có bản quyền rõ ràng trước M8 (BR-87) |
 | `sqlite3.wasm` và `drift_worker.js` là binary vendored trong `web/` | M4.2 | Không có bước build nào sinh ra chúng và không có bước build nào báo khi chúng cũ: app compile, load, rồi **không mở được database**. Nâng `drift` mà quên tải lại worker không có triệu chứng nào cho tới khi ai đó mở trình duyệt | `test/database/web_assets_test.dart` so version trong `pubspec.lock` với version đã pin, kèm `web/WEB_ASSETS.md` ghi URL tải. Đã kiểm tiêm lỗi: đổi `drift` thành 2.99.0 làm test đỏ |
 | Server phát web chưa gửi COOP/COEP | M4.2 | `crossOriginIsolated` là `false`, nên drift chọn backend lưu trữ kém hơn OPFS. Không có lỗi nào — chỉ là hiệu năng và độ bền khác đi, âm thầm | Thêm `Cross-Origin-Opener-Policy: same-origin` và `Cross-Origin-Embedder-Policy: require-corp` vào server phát web ở M7, và kiểm lại `crossOriginIsolated` trong E2E |

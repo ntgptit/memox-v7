@@ -166,6 +166,12 @@ void main() {
         'id',
         'card_limit',
         'new_card_order',
+        // Added at v8 (BR-186, BR-187). Order matters here because `ALTER TABLE
+        // ADD COLUMN` appends, so a column list that matched in any order would
+        // pass on a database where the migration and the declaration disagree
+        // about which came first.
+        'theme_mode',
+        'language',
         'updated_at',
       ],
     };

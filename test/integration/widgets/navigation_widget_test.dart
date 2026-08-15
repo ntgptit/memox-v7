@@ -5,7 +5,7 @@ import 'package:memox/app/fallback/route_not_found_screen.dart';
 import 'package:memox/app/router/route_paths.dart';
 import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
 import 'package:memox/features/progress/presentation/screens/progress_screen.dart';
-import 'package:memox/features/settings/presentation/screens/settings_placeholder_screen.dart';
+import 'package:memox/features/settings/presentation/screens/settings_screen.dart';
 
 import '../../helpers/app_harness/host_widget_app.dart';
 import '../../helpers/fixtures/study_fixtures.dart';
@@ -116,7 +116,7 @@ void main() {
       app.router.go(RoutePaths.settings);
       await settleHostApp(tester);
       expect(app.router.state.uri.toString(), RoutePaths.settings);
-      expect(find.byType(SettingsPlaceholderScreen), findsOneWidget);
+      expect(find.byType(SettingsScreen), findsOneWidget);
 
       app.router.go(RoutePaths.decks);
       await settleHostApp(tester);

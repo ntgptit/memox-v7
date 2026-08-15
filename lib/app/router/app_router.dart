@@ -10,7 +10,7 @@ import '../../features/deck/presentation/screens/deck_list_screen.dart';
 import '../../features/deck/presentation/screens/starter_library_screen.dart';
 import '../../features/progress/presentation/screens/progress_deck_screen.dart';
 import '../../features/progress/presentation/screens/progress_screen.dart';
-import '../../features/settings/presentation/screens/settings_placeholder_screen.dart';
+import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/study/presentation/screens/study_entry_screen.dart';
 import '../../features/study/presentation/screens/study_home_screen.dart';
 import '../fallback/route_not_found_screen.dart';
@@ -46,10 +46,15 @@ final GoRouter appRouter = createAppRouter();
 /// separate `Navigator` per branch, so each tab keeps its own stack and its own
 /// scroll position while another is on screen. A plain set of top-level
 /// routes would rebuild the destination from scratch on every tab switch, which
-/// is the "why did my place in the list disappear" bug. Progress and Settings
-/// were both branches ahead of their features (AD-19), which is what settled the
+/// before the content is. Settings was one until M99.23, and swapping its
+/// branch ahead of its feature (AD-19): it holds a single presentation-only
 /// deep-link contract and the tab order before the content existed; Progress has
+/// is the "why did my place in the list disappear" bug. Progress and Settings
+/// is the "why did my place in the list disappear" bug. Progress is still a
+/// placeholder route, so the deep-link contract and the tab order are settled
+/// screen for the real one touched nothing in this file but the widget name.
 /// since been filled in by UC-12 and Settings is still a placeholder.
+/// were both branches ahead of their features (AD-19), which is what settled the
 GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
   // Declared so the import wizard can mount on the root navigator, above
   // the shell. Created per call: a shared GlobalKey across two routers (as
@@ -202,16 +207,19 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
               ),
             ],
           ),
-          // Progress, at two levels (UC-12, UC-13). `/progress` is the one
-          // screen the owner settled on: the overview's three sections as a
-          // header, then the range selector, the totals and the deck rows.
-          // `/progress/:deckId` is one deck's level, nested so drilling in
-          // pushes onto this branch — the bottom bar stays, Back returns to the
-          // level above, and switching tabs and back finds the deck still open.
           //
+          // Progress is still scaffolded (AD-19): one route, and the screen is
+          // Progress, at two levels (UC-12, UC-13). `/progress` is the one
           // The branch around it did not move: same path, same name, same
-          // index. That is what AD-19 scaffolded the branch early to buy, and
+          // `/progress/:deckId` is one deck's level, nested so drilling in
           // both features together cost this one `builder` plus one child route.
+          // header, then the range selector, the totals and the deck rows.
+          // index. That is what AD-19 scaffolded the branch early to buy, and
+          // level above, and switching tabs and back finds the deck still open.
+          // no repository, open no session and write nothing.
+          // presentation-only — entering, leaving or switching to it must read
+          // pushes onto this branch — the bottom bar stays, Back returns to the
+          // screen the owner settled on: the overview's three sections as a
           StatefulShellBranch(
             routes: <RouteBase>[
               GoRoute(
@@ -240,15 +248,18 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
               ),
             ],
           ),
+          // Settings left that state at M99.23 (UC-12). The path, the name and
           // The one branch still scaffolded ahead of its feature (AD-19). Its
-          // screen is presentation-only: entering, leaving or switching to it
           // must read no repository and write nothing.
+          // of it, which is what AD-19 was betting on.
+          // screen is presentation-only: entering, leaving or switching to it
+          // the branch order are unchanged — replacing the screen was the whole
           StatefulShellBranch(
             routes: <RouteBase>[
               GoRoute(
                 path: RoutePaths.settings,
                 name: RouteNames.settings,
-                builder: (context, state) => const SettingsPlaceholderScreen(),
+                builder: (context, state) => const SettingsScreen(),
               ),
             ],
           ),

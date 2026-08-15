@@ -22,11 +22,13 @@ import 'package:memox/features/deck/presentation/screens/deck_list_screen.dart';
 import 'package:memox/features/deck/presentation/widgets/items/deck_tile_widget.dart';
 import 'package:memox/shared/widgets/mx_loading_state.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
+import 'package:memox/features/settings/di/app_settings_repository_provider.dart';
 
 import '../../features/deck/presentation/support/fake_deck_repository.dart';
 
 import '../../features/study/domain/support/fake_study_home_repository.dart';
 import '../../features/study/domain/support/fake_study_repository.dart';
+import '../../features/settings/domain/support/fake_app_settings_repository.dart';
 
 /// The chrome, exercised through the real router.
 ///
@@ -55,6 +57,9 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          appSettingsRepositoryProvider.overrideWithValue(
+            FakeAppSettingsRepository(),
+          ),
           envConfigProvider.overrideWithValue(EnvConfig.development),
           deckRepositoryProvider.overrideWithValue(repository),
           // The Study branch reads real data since M5.7, so the shell needs a
