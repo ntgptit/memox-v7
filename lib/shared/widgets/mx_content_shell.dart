@@ -98,7 +98,7 @@ class _MxContentShellState extends State<MxContentShell> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             if (widget.subheader != null)
-              _MxSubheader(
+              MxSubheaderBand(
                 gutter: _defaultPadding(context).left,
                 child: widget.subheader!,
               ),
@@ -168,8 +168,16 @@ class _MxContentShellState extends State<MxContentShell> {
 /// user's text scale, so a declared number is a guess that overflows the moment
 /// the guess is low. Above an `Expanded` body it takes the height it needs and
 /// stays just as pinned: nothing above the `Expanded` scrolls.
-class _MxSubheader extends StatelessWidget {
-  const _MxSubheader({required this.gutter, required this.child});
+/// The subheader strip's own padding, as a widget.
+///
+/// **Public because one screen pins this band from inside its scroll view.**
+/// `/progress` composes the overview above the deck level, so the range
+/// selector must scroll with the overview and only then stick — which is a
+/// `PinnedHeaderSliver`, not [MxContentShell.subheader]. It is the same band
+/// either way, and the compact-tier padding rule below is the reason it is a
+/// widget and not four numbers copied to the second site.
+class MxSubheaderBand extends StatelessWidget {
+  const MxSubheaderBand({required this.gutter, required this.child, super.key});
 
   final double gutter;
   final Widget child;

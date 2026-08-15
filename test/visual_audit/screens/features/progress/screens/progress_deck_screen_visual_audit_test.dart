@@ -123,6 +123,13 @@ void main() {
       ),
       const AuditSkipAllowance(
         itemId: 'progress_screen',
+        reason: SkipReason.unknownRenderType,
+        detailContains: '_RenderPinnedHeaderSliver',
+        rationale:
+            'PinnedHeaderSliver lays its child out and paints nothing of its own — it has no colour, no border and no shape. The strip it pins is an MxSubheaderBand over a DecoratedBox whose surface colour the audit reads directly, one node below this one.',
+      ),
+      const AuditSkipAllowance(
+        itemId: 'progress_screen',
         reason: SkipReason.rasterNotFlat,
         detailContains: 'covers only 0%',
         rationale:
@@ -164,6 +171,13 @@ void main() {
         // so no tappable card is on the surface being read.
         pills: 2,
         hasSearchField: false,
+      ),
+      const AuditSkipAllowance(
+        itemId: 'progress_screen',
+        reason: SkipReason.unknownRenderType,
+        detailContains: '_RenderPinnedHeaderSliver',
+        rationale:
+            'PinnedHeaderSliver lays its child out and paints nothing of its own — it has no colour, no border and no shape. The strip it pins is an MxSubheaderBand over a DecoratedBox whose surface colour the audit reads directly, one node below this one.',
       ),
       const AuditSkipAllowance(
         itemId: 'progress_screen',

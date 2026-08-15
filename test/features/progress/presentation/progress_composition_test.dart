@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/progress/domain/models/deck_activity_model.dart';
 import 'package:memox/features/progress/domain/models/deck_activity_snapshot_model.dart';
+import 'package:memox/features/progress/presentation/widgets/sections/progress_range_selector_widget.dart';
 import 'package:memox/features/progress/presentation/widgets/sections/progress_streak_hero_widget.dart';
 import 'package:memox/features/progress/presentation/widgets/sections/progress_summary_widget.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
@@ -142,6 +143,43 @@ void main() {
     // would miss: a level rebuilt from scratch scrolls back to the top and the
     // rows are still on screen either way.
     expect(positionOf(tester).pixels, before);
+  });
+
+  testWidgets('the range selector travels with the overview, then sticks', (
+    tester,
+  ) async {
+    // X10: pinned to the top of the *body* put the selector above the three
+    // overview sections it does not govern — pressing `30 days` changed nothing
+    // in the 24dp under it. Pinned from inside the scroll view, it starts below
+    // the overview and only then sticks, which is what BR-197 actually needs.
+    final parts = composed(levelWith(activeCards: 42));
+    await pumpProgressScreen(tester, repository: parts.repository);
+
+    final Rect hero = tester.getRect(find.byType(ProgressStreakHeroWidget));
+    final Rect atRest = tester.getRect(
+      find.byType(ProgressRangeSelectorWidget),
+    );
+    expect(
+      atRest.top,
+      greaterThan(hero.bottom),
+      reason: 'at rest it sits below the overview, not above it',
+    );
+
+    await scrollToRows(tester);
+    final Rect pinned = tester.getRect(
+      find.byType(ProgressRangeSelectorWidget),
+    );
+    expect(
+      pinned.top,
+      lessThan(atRest.top),
+      reason: 'it moved up with the scroll',
+    );
+    // Still on screen after the scroll that took the overview off it — the
+    // whole point of pinning, and what a plain sliver would fail.
+    expect(pinned.bottom, lessThanOrEqualTo(852.0));
+    expect(find.byType(ProgressRangeSelectorWidget), findsOneWidget);
+    // And the rows scroll *under* it rather than beside it.
+    expect(pinned.top, lessThan(tester.getRect(find.text('Spanish')).top));
   });
 
   group('the band survives every face of the level', () {

@@ -104,9 +104,9 @@
   "@progressTodayPartitionNote": {
     "description": "One line explaining that the two halves are a partition (BR-185). Not decoration: without it a user who answered the same card in both modes expects the halves to sum to more than the total."
   },
-  "progressWeekSectionLabel": "Last 7 days",
+  "progressWeekSectionLabel": "Daily activity",
   "@progressWeekSectionLabel": {
-    "description": "Heading of the activity section (W4). Seven days including today (BR-186)."
+    "description": "Heading of the activity chart (W4). Names what the chart is rather than its window: the chart is always seven days including today (BR-186) while the range selector below it switches 7/30, and both headings reading 'Last 7 days' contradicted each other the moment 30 was picked (X9)."
   },
   "progressWeekTodayLabel": "Today",
   "@progressWeekTodayLabel": {

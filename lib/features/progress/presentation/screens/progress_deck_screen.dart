@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/navigation/route_names.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/theme_context_extension.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
@@ -158,17 +159,13 @@ class _ProgressLevel extends StatelessWidget {
       // its gutters, so nothing here has a height budget that growing chrome
       // could overflow.
       padding: EdgeInsets.zero,
-      // **Pinned, not scrolled.** BR-197 puts fifty decks on this list; two
-      // screens down, a selector that scrolled away would leave nothing on
-      // screen saying whether the figures are the week or the month. The shell's
-      // subheader slot exists for exactly that, and it takes the screen gutter
-      // from the shell rather than re-deriving it.
-      subheader: _hasNothingToMeasure
-          ? null
-          : ProgressRangeSelectorWidget(
-              range: range,
-              onRangeChanged: onRangeChanged,
-            ),
+      // **Pinned, but from inside the scroll view — see `_level`.** The shell's
+      // `subheader` slot sits above the body, which put the selector above the
+      // three overview sections it does not govern: pressing `30 days` changed
+      // nothing in the 24dp directly under it. BR-197's requirement is that the
+      // selector stays on screen while fifty decks scroll, not that it sits
+      // under the app bar, and a `PinnedHeaderSliver` after the overview band
+      // satisfies it without the misread.
       body: _hasNothingToMeasure
           ? _emptyLevelWithHeader(context)
           : _level(context),
@@ -200,13 +197,37 @@ class _ProgressLevel extends StatelessWidget {
         // overview and the level are two sections, not two rows of one.
         if (header case final Widget band)
           SliverToBoxAdapter(child: ProgressLevelHeaderWidget(child: band)),
+        // Sticks once the overview has scrolled past, and travels with it until
+        // then. `PinnedHeaderSliver` rather than `SliverPersistentHeader`
+        // because the strip has no fixed height: it is 48 up to text scale 1.3
+        // and 58 at 2.0, measured, so a delegate declaring an extent would clip
+        // it for exactly the readers who need the larger type.
+        PinnedHeaderSliver(
+          // Opaque, because the deck rows now scroll *under* it rather than
+          // beside it. `DecoratedBox` rather than `ColoredBox`: the visual
+          // audit reads a decoration's colour off the render object and cannot
+          // read a `ColoredBox`, so the cheaper widget would have cost an
+          // allowance saying "trust me, it is surface".
+          child: DecoratedBox(
+            decoration: BoxDecoration(color: context.colors.surface),
+            child: MxSubheaderBand(
+              gutter: gutter,
+              child: ProgressRangeSelectorWidget(
+                range: range,
+                onRangeChanged: onRangeChanged,
+              ),
+            ),
+          ),
+        ),
         SliverToBoxAdapter(
           child: Padding(
             padding: EdgeInsets.fromLTRB(
               gutter,
-              // The panel takes the top gap only when it is first; with the
-              // overview above it, that gap is already the header's `xl`.
-              header == null ? AppSpacing.md : 0,
+              // The range strip is directly above at every level and carries
+              // its own bottom padding, so the panel adds none of its own —
+              // this used to depend on whether the overview band was there,
+              // back when the strip lived outside the scroll view.
+              0,
               gutter,
               // `xl` below the panel, not `lg`: this is the gap between two
               // *sections* — the total and the decks that make it up — and a

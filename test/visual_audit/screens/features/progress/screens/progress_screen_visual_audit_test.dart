@@ -102,6 +102,13 @@ void main() {
       ),
       AuditSkipAllowance(
         itemId: 'shell',
+        reason: SkipReason.unknownRenderType,
+        detailContains: '_RenderPinnedHeaderSliver',
+        rationale:
+            'PinnedHeaderSliver lays its child out and paints nothing of its own — it has no colour, no border and no shape. The strip it pins is an MxSubheaderBand over a DecoratedBox whose surface colour the audit reads directly, one node below this one.',
+      ),
+      AuditSkipAllowance(
+        itemId: 'shell',
         reason: SkipReason.rasterNotFlat,
         detailContains: 'covers only 0%',
         rationale:
@@ -170,6 +177,13 @@ void main() {
             'Both come from chipTheme in app_theme.dart and the selected and '
             'unselected fills are asserted to differ, in both themes, in '
             'mx_pill_button_test.dart.',
+      ),
+      AuditSkipAllowance(
+        itemId: 'shell',
+        reason: SkipReason.unknownRenderType,
+        detailContains: '_RenderPinnedHeaderSliver',
+        rationale:
+            'PinnedHeaderSliver lays its child out and paints nothing of its own — it has no colour, no border and no shape. The strip it pins is an MxSubheaderBand over a DecoratedBox whose surface colour the audit reads directly, one node below this one.',
       ),
       AuditSkipAllowance(
         itemId: 'shell',

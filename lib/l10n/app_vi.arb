@@ -104,9 +104,9 @@
   "@progressTodayPartitionNote": {
     "description": "One line explaining that the two halves are a partition (BR-185)."
   },
-  "progressWeekSectionLabel": "7 ngày gần nhất",
+  "progressWeekSectionLabel": "Hoạt động hằng ngày",
   "@progressWeekSectionLabel": {
-    "description": "Heading of the activity section (W4)."
+    "description": "Heading of the activity chart (W4). Names what the chart is rather than its window — see the English entry (X9)."
   },
   "progressWeekTodayLabel": "Hôm nay",
   "@progressWeekTodayLabel": {

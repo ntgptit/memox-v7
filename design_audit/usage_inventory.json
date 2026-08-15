@@ -1,10 +1,10 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
   "scannedFiles": 451,
-  "totalSites": 425,
+  "totalSites": 426,
   "byElementKind": {
     "other": 297,
-    "background": 15,
+    "background": 16,
     "shadow": 1,
     "border": 14,
     "text": 75,
@@ -16,7 +16,7 @@
     "Colors-material": 5,
     "hardcoded-literal": 97,
     "opacity-modified-token": 11,
-    "theme-token": 165
+    "theme-token": 166
   },
   "sites": [
     {
@@ -4077,6 +4077,17 @@
       "token": "colorScheme.onSurfaceVariant",
       "resolved_value_light": "#565C72",
       "resolved_value_dark": "#A8A7C4"
+    },
+    {
+      "file": "lib/features/progress/presentation/screens/progress_deck_screen.dart",
+      "line": 212,
+      "widget_context": "_ProgressLevel",
+      "element_kind": "background",
+      "source_kind": "theme-token",
+      "expression": "context.colors.surface",
+      "token": "colorScheme.surface",
+      "resolved_value_light": "#FBFBFE",
+      "resolved_value_dark": "#1A1838"
     },
     {
       "file": "lib/features/progress/presentation/widgets/items/progress_deck_row_widget.dart",

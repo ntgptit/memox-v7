@@ -29,14 +29,15 @@ cấp của deck đó (UC-13). Từ trên xuống:
 ```
 ┌─────────────────────────────────────────┐
 │ AppBar · "Tiến độ"  hoặc  tên deck      │
-│  [✓ 7 ngày] [ 30 ngày ]                 │  ← bộ chọn: subheader, GHIM
 ├═════════════════════════════════════════┤  ← từ đây trở xuống là vùng cuộn
 │ ╭─ CHỈ Ở CẤP THƯ VIỆN ─────────────────╮│
-│ │ Streak · Today · Last 7 days         ││  ← ba khối tổng quan (UC-12);
+│ │ Streak · Hôm nay · Hoạt động hằng ngày││ ← ba khối tổng quan (UC-12);
 │ │ nội dung do m99-23-progress-overview ││    nguồn sự thật của chúng là
 │ │ chốt, không lặp lại ở đây            ││    wireframe kia, không phải đây
 │ ╰──────────────────────────────────────╯│
 │                 xl                      │  ← ngắt section, không phải md
+│  [✓ 7 ngày] [ 30 ngày ]                 │  ← bộ chọn: sliver GHIM, cuộn cùng
+│                                         │    phần đầu rồi mới dính lên đỉnh
 │ ┌─────────────────────────────────────┐ │
 │ │ 7 ngày gần nhất                     │ │  ← bảng tổng (MxCard)
 │ │ ▣ 45 thẻ đã học   ▣ 6 ngày có học   │ │
@@ -75,10 +76,21 @@ Ba khối đó **không được mô tả lại ở đây**. Nội dung, copy v�
 là của `m99-23-progress-overview.md`; tài liệu này chỉ chốt rằng chúng đứng ở
 đâu trong thứ tự cuộn. Một fact ở đúng một chỗ (`document-conventions.md`).
 
-**Bộ chọn khoảng được ghim, không cuộn theo.** BR-197 nói thẳng tới trường hợp
-năm mươi deck; cuộn hai màn thì một bộ chọn đã trôi mất sẽ để lại một danh sách
-số không nói nó thuộc tuần hay tháng. `MxContentShell` có sẵn slot `subheader`
-đúng cho việc đó, và slot ấy lấy gutter từ chính shell thay vì tự suy lại.
+**Bộ chọn khoảng được ghim — nhưng ghim từ bên trong vùng cuộn.** BR-197 nói
+thẳng tới trường hợp năm mươi deck; cuộn hai màn thì một bộ chọn đã trôi mất sẽ
+để lại một danh sách số không nói nó thuộc tuần hay tháng. Bản đầu dùng slot
+`subheader` của `MxContentShell`, và slot đó nằm **trên** thân màn — nghĩa là
+sau khi hợp nhất, bộ chọn đứng trên cả ba section tổng quan mà nó không điều
+khiển: bấm `30 ngày` thì 24dp ngay dưới nó không đổi gì (X10). `PinnedHeaderSliver`
+đặt **sau** phần đầu giữ đúng điều BR-197 cần — bộ chọn không rời màn khi danh
+sách cuộn — mà bỏ được cách đọc sai.
+
+`PinnedHeaderSliver` chứ không phải `SliverPersistentHeader`: dải này không có
+chiều cao cố định. Đo được **48dp tới text scale 1.3 và 58dp ở 2.0**, nên một
+delegate khai `extent` sẽ cắt mất dải đúng với người đang cần cỡ chữ lớn. Dải
+dùng lại `MxSubheaderBand` — chính widget mà slot `subheader` dùng — nên luật
+padding theo breakpoint chỉ tồn tại ở một chỗ, và nền của nó là `DecoratedBox`
+màu `surface` để hàng deck cuộn **dưới** nó.
 
 **Không có breadcrumb.** Đường dẫn sống trên từng hàng thay vì thành một dải
 riêng phía trên. Lý do là hàng cũng chính là thứ TalkBack đọc: `Verbs, trong
