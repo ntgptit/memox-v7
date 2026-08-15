@@ -95,10 +95,15 @@ final class AndroidReminderPlatformRepositoryImpl
       await _scheduler.cancel();
       await _notifier.cancel();
     } on Object catch (error) {
+      // `cancelFailed`, not `scheduleFailed`. Nothing user-facing reads this
+      // today — `DisableReminderUseCase` catches and re-wraps with the right
+      // reason before the screen sees it — but a data layer that labels its
+      // own failure as a different one is a trap for whoever next reads this
+      // without also reading the use case above it.
       throw ConflictFailure(
         message: 'The pending reminder work could not be cancelled',
         cause: error,
-        reason: ReminderSetupRejection.scheduleFailed,
+        reason: ReminderSetupRejection.cancelFailed,
       );
     }
   }

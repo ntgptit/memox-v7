@@ -3296,7 +3296,7 @@
   "@reminderCancelErrorTitle": {
     "description": "Banner title when the setting was turned off but the pending background run could not be cancelled (BR-226). Deliberately not the schedule-failure copy: the user just turned something OFF, and being told nothing was turned ON describes the opposite of what happened."
   },
-  "reminderCancelErrorMessage": "Daily reminders are off. If one still arrives today, opening the app clears it.",
+  "reminderCancelErrorMessage": "Daily reminders are off. One from earlier may still be showing; opening the app clears it.",
   "@reminderCancelErrorMessage": {
     "description": "Body of the cancel-failure banner. States the outcome the user cares about — the setting is off — and what the residue is, without promising more than BR-220 gives: a stale run re-reads the setting at fire time and posts nothing."
   },

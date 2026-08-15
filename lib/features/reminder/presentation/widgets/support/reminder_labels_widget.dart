@@ -50,7 +50,7 @@ extension ReminderLabels on BuildContext {
   String reminderToggleValue({required bool isEnabled}) =>
       isEnabled ? l10n.reminderStatusOn : l10n.reminderStatusOff;
 
-  /// The banner for a rejection (UC-17 E1…E4).
+  /// The banner for a rejection (UC-17 E1…E4, E6).
   ReminderBanner reminderBanner(ReminderSetupRejection rejection) =>
       switch (rejection) {
         ReminderSetupRejection.platformUnavailable => ReminderBanner(

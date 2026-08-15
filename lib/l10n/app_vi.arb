@@ -3277,7 +3277,7 @@
   "@reminderCancelErrorTitle": {
     "description": "Tiêu đề banner khi cài đặt đã tắt nhưng lượt chạy nền đang chờ không huỷ được (BR-226). Cố ý không dùng copy của lỗi đặt lịch: người dùng vừa TẮT, mà bảo họ chưa BẬT gì cả là nói ngược điều vừa xảy ra."
   },
-  "reminderCancelErrorMessage": "Nhắc học hằng ngày đã tắt. Nếu hôm nay vẫn có một thông báo, mở app một lần là hết.",
+  "reminderCancelErrorMessage": "Nhắc học hằng ngày đã tắt. Thông báo từ trước đó có thể vẫn còn hiện; mở app một lần là hết.",
   "@reminderCancelErrorMessage": {
     "description": "Thân banner lỗi huỷ lịch. Nói kết quả người dùng quan tâm — nhắc đã tắt — và phần còn sót, không hứa quá điều BR-220 cho: lượt cũ đọc lại settings lúc fire và không hiện gì."
   },
