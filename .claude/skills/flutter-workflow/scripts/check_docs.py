@@ -943,6 +943,51 @@ def _check_deck_flow_drift() -> None:
 # --- main -----------------------------------------------------------------
 
 
+
+_ID_RANGE_RE = re.compile(r"\b(BR|UC|AD)-([0-9]{2,3})\s*(?:…|\.\.\.)\s*(?:BR|UC|AD)-([0-9]{2,3})\b")
+
+
+def _check_id_ranges() -> None:
+    """A cited range must count upwards.
+
+    **This exists because a renumbering wrote one that did not.** Shifting
+    `BR-182…BR-191` by its first endpoint alone produced `BR-192…BR-191`, which
+    names no rules at all — and it survived in five documents, because every id
+    in it resolves and nothing else looks at the pair. The check costs one regex
+    and catches the whole class.
+    """
+    bad: list[str] = []
+    for path in _tracked_text_files():
+        try:
+            text = (_REPO / path).read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
+            continue
+        for i, line in enumerate(text.splitlines(), start=1):
+            for m in _ID_RANGE_RE.finditer(line):
+                lo, hi = int(m.group(2)), int(m.group(3))
+                if lo >= hi:
+                    bad.append(f"{path}:{i}: {m.group(0)} does not count upwards")
+    if bad:
+        for b in bad:
+            _fail("cited range is backwards or empty", b)
+    else:
+        _ok("every cited ID range counts upwards")
+
+
+def _tracked_text_files() -> list[str]:
+    try:
+        out = subprocess.run(
+            ["git", "ls-files", "docs", "lib", "test", "widgetbook", "integration_test"],
+            capture_output=True, text=True, check=True, cwd=_REPO,
+        ).stdout.split()
+    except (OSError, subprocess.CalledProcessError):
+        return []
+    return [
+        f for f in out
+        if f.endswith((".md", ".dart", ".drift", ".arb"))
+        and not f.endswith((".g.dart", ".freezed.dart"))
+    ]
+
 def main() -> int:
     global _quiet, _REPO
     parser = argparse.ArgumentParser(add_help=False)
@@ -972,6 +1017,7 @@ def main() -> int:
         return 1
 
     _check_document_integrity()
+    _check_id_ranges()
     _check_document_contract()
     _check_invariant_coverage()
     _check_invariant_self_test()
