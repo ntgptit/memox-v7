@@ -36,8 +36,12 @@ import '../../features/progress/data/repositories/progress_repository_impl.dart'
 import '../../features/progress/di/progress_repository_provider.dart';
 import '../../features/progress/domain/repositories/progress_repository.dart';
 import '../../features/study/data/datasources/study_dao.dart';
+import '../../features/study/data/datasources/study_home_dao.dart';
+import '../../features/study/di/study_home_repository_provider.dart';
 import '../../features/study/di/study_repository_provider.dart';
+import '../../features/study/data/repositories/study_home_repository_impl.dart';
 import '../../features/study/data/repositories/study_repository_impl.dart';
+import '../../features/study/domain/repositories/study_home_repository.dart';
 import '../../features/study/domain/repositories/study_repository.dart';
 
 /// Where each repository contract is bound to its implementation.
@@ -152,7 +156,7 @@ DeckTemplateRepository deckTemplateRepositoryBinding(Ref ref) =>
 /// so it
 /// takes neither a clock nor an id generator: every instant it needs arrives as
 /// an argument from `clockProvider` and `utcOffsetProvider` at the controller
-/// (BR-184, BR-194),
+/// (BR-202, BR-194),
 /// and there is nothing for it to stamp.
 ///
 /// Its own DAO rather than the database, unlike the card bindings: there is no
@@ -163,6 +167,19 @@ ProgressRepository progressRepositoryBinding(Ref ref) =>
 
 StudyRepository studyRepositoryBinding(Ref ref) =>
     StudyRepositoryImpl(StudyDao(ref.watch(appDatabaseProvider)));
+
+/// The Study tab's read, bound apart from the session repository above (BR-200).
+///
+/// **Two contracts over one database, on purpose.** They are wired identically
+/// and could have been one; splitting them is what makes the Home screen unable
+/// to open a session, because the only object it can reach has no method that
+/// writes. Import and export are split the same way and for the same reason.
+///
+/// No clock, for the reason `studyRepositoryBinding` gives: `now` and the local
+/// day arrive as arguments, so the read is testable at the `due_at == now` and
+/// the local-midnight boundaries (AD-06, AD-16).
+StudyHomeRepository studyHomeRepositoryBinding(Ref ref) =>
+    StudyHomeRepositoryImpl(StudyHomeDao(ref.watch(appDatabaseProvider)));
 
 /// The starter catalog: the shipped assets, decoded once (UC-01).
 ///
@@ -204,4 +221,5 @@ List<Override> repositoryBindingOverrides() => <Override>[
   deckTemplateCatalogProvider.overrideWith(deckTemplateCatalogBinding),
   studyRepositoryProvider.overrideWith(studyRepositoryBinding),
   progressRepositoryProvider.overrideWith(progressRepositoryBinding),
+  studyHomeRepositoryProvider.overrideWith(studyHomeRepositoryBinding),
 ];

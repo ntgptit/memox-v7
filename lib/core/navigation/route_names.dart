@@ -30,11 +30,26 @@ abstract final class RouteNames {
   /// branch and the bottom bar remains visible.
   static const String deckDetail = 'deckDetail';
 
-  /// The study surface. Branch 1 of the shell.
+  /// The study surface. Branch 1 of the shell, and the tab's own home: the
+  /// resume card and the root decks ranked by what is waiting in them (UC-12).
   static const String study = 'study';
+
+  /// One root deck's study entry, reached **from the Study tab**. A child of
+  /// [study], so it pushes onto the Study branch: the bottom bar stays and Back
+  /// returns to the list that offered the deck.
+  ///
+  /// **A second name onto the same screen, and not a duplicate of [deckStudy].**
+  /// They differ in the only thing a route decides — which branch the push lands
+  /// in, and therefore where Back goes. Reusing [deckStudy] here would move the
+  /// user to the Library tab for tapping Study on the Study tab, and Back would
+  /// then land on a deck list they never opened.
+  static const String studyDeck = 'studyDeck';
 
   /// The progress surface. Branch 2 of the shell — Progress by Deck at the
   /// library level, every root deck (UC-12).
+  ///
+  /// No longer the placeholder AD-19 describes: M99.23 and M99.24 built the
+  /// screen it stood in for.
   static const String progress = 'progress';
 
   /// One deck's progress level. A child of [progress], so drilling in stays

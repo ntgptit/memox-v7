@@ -7,6 +7,7 @@ import 'package:memox/app/app.dart';
 import 'package:memox/app/config/env_config.dart';
 import 'package:memox/app/config/env_config_provider.dart';
 import 'package:memox/features/deck/di/deck_repository_provider.dart';
+import 'package:memox/features/study/di/study_home_repository_provider.dart';
 import 'package:memox/features/study/di/study_repository_provider.dart';
 import 'package:memox/app/router/app_router.dart';
 import 'package:memox/app/router/route_paths.dart';
@@ -24,6 +25,7 @@ import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 
 import '../../features/deck/presentation/support/fake_deck_repository.dart';
 
+import '../../features/study/domain/support/fake_study_home_repository.dart';
 import '../../features/study/domain/support/fake_study_repository.dart';
 
 /// The chrome, exercised through the real router.
@@ -58,6 +60,11 @@ void main() {
           // The Study branch reads real data since M5.7, so the shell needs a
           // study repository too. The bar is what this test is about, and it
           // has to survive that branch rendering as well as the deck one.
+          // The Study branch is Study Home since UC-12, which reads its own
+          // contract — a screen with no method that could open a session.
+          studyHomeRepositoryProvider.overrideWithValue(
+            FakeStudyHomeRepository(),
+          ),
           studyRepositoryProvider.overrideWithValue(FakeStudyRepository()),
         ],
         child: MediaQuery(
@@ -116,17 +123,18 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('and on the review branch', (tester) async {
+    testWidgets('and on the study branch', (tester) async {
       await pumpShell(
         tester,
         FakeDeckRepository(),
         initialLocation: RoutePaths.study,
       );
 
-      // The branch shows the real entry screen since M5.7. What this test is
-      // about is the bar surviving that branch, so it asserts the screen
-      // rendered at all rather than which copy it happens to carry.
-      expect(find.text(english.studyNewCount(3)), findsOneWidget);
+      // The branch shows Study Home since UC-12 — the library, not a fixture
+      // deck's entry screen. What this test is about is the bar surviving that
+      // branch, so it asserts the screen rendered at all rather than which copy
+      // it happens to carry.
+      expect(find.text(english.studyHomeNextTitle), findsOneWidget);
       expect(find.byType(MxNavigationBar), findsOneWidget);
       expect(tester.takeException(), isNull);
     });

@@ -35,6 +35,7 @@ class StudySessionScreen extends ConsumerStatefulWidget {
     required this.kind,
     this.reviewMode,
     this.shouldResume = false,
+    this.resumeSessionId,
     super.key,
   });
 
@@ -45,6 +46,15 @@ class StudySessionScreen extends ConsumerStatefulWidget {
   /// one (BR-103). [kind] and [reviewMode] are then the resumed session's own,
   /// passed for the title before the load returns.
   final bool shouldResume;
+
+  /// Which open session to continue, when the caller offered a particular one.
+  ///
+  /// Study Home lists a session and hands its id back, so the tap continues the
+  /// session that was on screen rather than "whatever is open for this deck" —
+  /// two different questions once a deck can have a newer session or one an
+  /// earlier study day left behind (BR-200, BR-103). Null from the per-deck
+  /// entry screen, which named no session to begin with.
+  final String? resumeSessionId;
 
   /// The mode the user chose, for a review session (BR-109). Null for a
   /// learning session, which walks the algorithm's whole sequence.
@@ -85,6 +95,7 @@ class _StudySessionScreenState extends ConsumerState<StudySessionScreen> {
               kind: widget.kind,
               reviewMode: widget.reviewMode,
               shouldResume: widget.shouldResume,
+              resumeSessionId: widget.resumeSessionId,
             ),
       );
     });

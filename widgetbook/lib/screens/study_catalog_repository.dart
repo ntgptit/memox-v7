@@ -16,6 +16,11 @@ import 'package:memox/features/study/domain/models/study_session_kind_model.dart
 import 'package:memox/features/study/domain/models/study_session_status_model.dart';
 import 'package:memox/features/study/domain/models/study_session_summary_model.dart';
 import 'package:memox/features/study/domain/models/study_turn_model.dart';
+import 'package:memox/features/study/domain/models/study_day_model.dart';
+import 'package:memox/features/study/domain/models/study_home_deck_model.dart';
+import 'package:memox/features/study/domain/models/study_home_model.dart';
+import 'package:memox/features/study/domain/models/study_home_resume_model.dart';
+import 'package:memox/features/study/domain/repositories/study_home_repository.dart';
 import 'package:memox/features/study/domain/repositories/study_repository.dart';
 
 /// The states of the Study screens worth putting in front of somebody.
@@ -214,6 +219,11 @@ class StudyCatalogRepository implements StudyRepository {
   @override
   Future<StudySessionEntity?> openSessionFor(String deckId) async => null;
 
+  /// Null for the same reason [openSessionFor] is: the catalog never resumes,
+  /// it opens a fresh scenario every time the dropdown changes.
+  @override
+  Future<StudySessionEntity?> sessionById(String sessionId) async => null;
+
   @override
   Future<StudyScheduleModel?> scheduleOf(String cardId) async =>
       const StudyScheduleModel(box: 3);
@@ -305,3 +315,97 @@ class StudyCatalogRepository implements StudyRepository {
     required DateTime endedAt,
   }) async {}
 }
+
+/// Enough of [StudyHomeRepository] to show the Study tab's own screen (UC-14).
+///
+/// **The read-only contract, separate from the one above** — that split is what
+/// makes Study Home unable to open a session (BR-200), and a catalog double that
+/// merged the two would show a screen with a wider surface than production has.
+///
+/// Deterministic per scenario, like everything else here. The ordering is *not*
+/// re-implemented: the rows are handed over unsorted and `compareStudyHomeDecks`
+/// — the production comparator — puts them in order, so the catalog shows the
+/// ranking the app actually applies rather than one written twice.
+class StudyHomeCatalogRepository implements StudyHomeRepository {
+  StudyHomeCatalogRepository(this.scenario);
+
+  final StudyCatalogScenario scenario;
+
+  @override
+  Stream<StudyHomeModel> watchStudyHome(StudyDayModel day) {
+    final decks = scenario.homeDecks..sort(compareStudyHomeDecks);
+
+    return Stream<StudyHomeModel>.value(
+      StudyHomeModel(
+        resume: scenario.homeResume,
+        decks: decks,
+        nextDueAt: null,
+        nextOverdueTickAt: null,
+      ),
+    );
+  }
+}
+
+/// The library each Study Home scenario shows.
+extension StudyHomeCatalogScenario on StudyCatalogScenario {
+  /// The session offered back, when the scenario has one open.
+  ///
+  /// Only the review scenario does. A Resume card on every state would make the
+  /// screen's most conditional element look unconditional.
+  StudyHomeResumeModel? get homeResume =>
+      this != StudyCatalogScenario.reviewSelfAssess
+      ? null
+      : const StudyHomeResumeModel(
+          sessionId: 'catalog-session',
+          deckId: 'catalog-deck',
+          deckName: 'Tiếng Hàn giao tiếp',
+          kind: StudySessionKind.reviewing,
+          currentMode: StudyMode.selfAssess,
+        );
+
+  List<StudyHomeDeckModel> get homeDecks => switch (this) {
+    // The first-run screen: no deck at all, so the catalog can show the starter
+    // call to action rather than only the populated list.
+    StudyCatalogScenario.nothingDue => <StudyHomeDeckModel>[],
+    StudyCatalogScenario.longContent => <StudyHomeDeckModel>[
+      _homeDeck(
+        id: 'catalog-long',
+        name: 'Từ vựng chuyên ngành công nghệ thông tin và truyền thông',
+        overdue: 128,
+        dueToday: 64,
+        newCount: 256,
+      ),
+    ],
+    _ => <StudyHomeDeckModel>[
+      _homeDeck(id: 'catalog-deck', name: 'Tiếng Hàn giao tiếp', dueToday: 7),
+      _homeDeck(
+        id: 'catalog-kanji',
+        name: 'Kanji cơ bản',
+        scheduler: SchedulerType.sm2,
+        overdue: 3,
+        newCount: 12,
+      ),
+      _homeDeck(id: 'catalog-idioms', name: 'Thành ngữ'),
+    ],
+  };
+}
+
+StudyHomeDeckModel _homeDeck({
+  required String id,
+  required String name,
+  SchedulerType scheduler = SchedulerType.eightBox,
+  int overdue = 0,
+  int dueToday = 0,
+  int newCount = 0,
+}) => StudyHomeDeckModel(
+  deckId: id,
+  deckName: name,
+  schedulerType: scheduler,
+  // Enough cards to hold the workload and then some, so a deck with nothing
+  // waiting still renders as a studiable deck rather than as the empty-library
+  // state (BR-202).
+  totalCardCount: overdue + dueToday + newCount + 20,
+  overdueCount: overdue,
+  dueTodayCount: dueToday,
+  newCount: newCount,
+);

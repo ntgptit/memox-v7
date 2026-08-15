@@ -233,6 +233,20 @@ base class FakeStudyRepository
   Future<StudySessionEntity?> openSessionFor(String deckId) async =>
       openSession_;
 
+  /// Sessions this double can be asked for **by id**.
+  ///
+  /// Separate from [openSession_] on purpose: the whole point of resolving a
+  /// resume by id rather than by deck is that the two can disagree (BR-200), and
+  /// a double that answered both questions from one field could not express the
+  /// case the rule exists for.
+  final Map<String, StudySessionEntity> sessionsById =
+      <String, StudySessionEntity>{};
+
+  @override
+  Future<StudySessionEntity?> sessionById(String sessionId) async =>
+      sessionsById[sessionId] ??
+      (openSession_?.id == sessionId ? openSession_ : null);
+
   /// What was saved, and against which deck.
   ///
   /// The deck is recorded because BR-147 is about *where* the write lands: the

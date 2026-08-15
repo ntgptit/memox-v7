@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memox/core/time/clock_provider.dart';
 import 'package:memox/core/time/time_zone_provider.dart';
+import 'package:memox/features/study/di/study_home_repository_provider.dart';
 import 'package:memox/features/study/di/study_repository_provider.dart';
 import 'package:memox/features/study/domain/models/study_mode.dart';
 import 'package:memox/features/study/domain/models/study_session_kind_model.dart';
 import 'package:memox/features/study/presentation/screens/study_entry_screen.dart';
+import 'package:memox/features/study/presentation/screens/study_home_screen.dart';
 import 'package:memox/features/study/presentation/screens/study_options_screen.dart';
 import 'package:memox/features/study/presentation/screens/study_session_screen.dart';
 import 'package:widgetbook/widgetbook.dart';
@@ -25,6 +27,9 @@ import 'study_catalog_repository.dart';
 final DateTime _catalogNow = DateTime.utc(2026, 8, 8, 2);
 
 List<WidgetbookComponent> studyScreenComponents() => <WidgetbookComponent>[
+  // First, because it is the tab's own screen: the Study branch opens here and
+  // every other Study screen is reached through it (UC-14).
+  _screen('StudyHomeScreen', (scenario) => const StudyHomeScreen()),
   _screen(
     'StudyEntryScreen',
     (scenario) => const StudyEntryScreen(deckId: 'catalog-deck'),
@@ -85,6 +90,9 @@ class _StudyDemo extends StatelessWidget {
     overrides: [
       studyRepositoryProvider.overrideWithValue(
         StudyCatalogRepository(scenario),
+      ),
+      studyHomeRepositoryProvider.overrideWithValue(
+        StudyHomeCatalogRepository(scenario),
       ),
       clockProvider.overrideWithValue(() => _catalogNow),
       utcOffsetProvider.overrideWithValue(() => const Duration(hours: 7)),

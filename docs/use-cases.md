@@ -819,9 +819,9 @@ nào — trạng thái "chưa có gì" là một mặt hợp lệ, không phải
 
 **Main flow:**
 1. Người dùng mở tab Progress. Hệ thống chụp **một** snapshot của
-   `clockProvider` và `utcOffsetProvider` rồi dựng ranh giới ngày theo BR-184.
+   `clockProvider` và `utcOffsetProvider` rồi dựng ranh giới ngày theo BR-202.
 2. Hệ thống mở **một** stream đọc lịch sử học, gộp ngay trong SQLite thành các
-   hàng *card-day* rồi thành các hàng *active-day* (BR-182); không tải hàng
+   hàng *card-day* rồi thành các hàng *active-day* (BR-200); không tải hàng
    `study_answers` thô lên tầng trên và không đọc từng ngày một.
 3. Trong lúc chờ emission đầu tiên, màn hình hiện trạng thái loading có nhãn
    cho screen reader.
@@ -855,7 +855,7 @@ nào — trạng thái "chưa có gì" là một mặt hợp lệ, không phải
 - **A6 — Xoá một card hoặc một deck ở màn khác rồi quay lại:** hoạt động của
   các card đã xoá biến mất khỏi mọi ngày, kể cả ngày quá khứ (BR-188).
 - **A7 — Chỉ lướt `browse` rồi thoát:** không có gì đổi — `browse` không ghi
-  answer nên không tạo hoạt động (BR-183).
+  answer nên không tạo hoạt động (BR-201).
 
 **Error flows:**
 - **E1 — Đọc lịch sử thất bại:** repository map exception thành `Failure`; màn
@@ -867,7 +867,7 @@ nào — trạng thái "chưa có gì" là một mặt hợp lệ, không phải
 **Postconditions:** Database không đổi ở mọi nhánh, kể cả nhánh lỗi và nhánh
 Retry (BR-190). Không session nào được mở, tiếp tục hay đóng.
 
-**Business rules:** BR-52, BR-105, BR-111, BR-182, BR-183, BR-184, BR-185,
+**Business rules:** BR-52, BR-105, BR-111, BR-200, BR-201, BR-202, BR-185,
 BR-186, BR-187, BR-188, BR-189, BR-190, BR-191
 
 **UI states:** loading · loaded-normal (có hoạt động trong cửa sổ) ·
@@ -952,7 +952,75 @@ state "empty selection": bộ chọn luôn có đúng một khoảng được ch
 |---|---|
 | Đưa deck con lên thành root deck | Cần quyết định scheduler mới; là tính năng riêng, không phải phép di chuyển (UC-09 A2) |
 | Tìm kiếm card (S1) | Should-have, chưa tới lượt |
-| ~~Thống kê / streak (S2)~~ | **Đã đặc tả ở M99.23 và M99.24** — UC-12 với BR-182…BR-191 chốt đơn vị đếm, partition, streak và phạm vi v1; UC-13 với BR-192…BR-199 chốt drill-down theo deck trên hai khoảng. Còn ngoài phạm vi v1 và vẫn chưa có BR: accuracy, longest streak, goal, XP, heatmap, lọc theo deck, dự báo due và so sánh giữa hai khoảng (BR-191, BR-192) |
+| ~~Thống kê / streak (S2)~~ | **Đã đặc tả ở M99.23 và M99.24** — UC-12 với BR-200…BR-191 chốt đơn vị đếm, partition, streak và phạm vi v1; UC-13 với BR-192…BR-199 chốt drill-down theo deck trên hai khoảng. Còn ngoài phạm vi v1 và vẫn chưa có BR: accuracy, longest streak, goal, XP, heatmap, lọc theo deck, dự báo due và so sánh giữa hai khoảng (BR-191, BR-192) |
+| Đảo chiều card (S3) | Should-have |
+| ~~Export (nửa còn lại của N1)~~ | **Đã đặc tả ở M99.21** — UC-11 và BR-174…BR-181 chốt scope, encoder, filename, share và quyền riêng tư trước khi viết code, đúng điều kiện mà mục này đặt ra. Còn nice-to-have ngoài phạm vi export nội dung: backup/restore, sync và `.apkg`. |
+| Nhắc nhở hằng ngày (N2) | Nice-to-have, cần quyền notification |
+| Media và tag trong card | Ngoài MVP; quy tắc reset (BR-41) và lưu trữ (AD-08) đã đặt sẵn |
+| Đăng nhập, đồng bộ | Ngoài MVP (AD-03) |
+| Scheduler thứ ba | Abstraction đã sẵn sàng; thêm khi có nhu cầu thật |
+
+## UC-14 · Mở tab Study và chọn việc để học
+
+| | |
+|---|---|
+| **Status** | active |
+
+**Actor:** Người dùng
+**Trigger:** Chạm tab Study, deep link `/study`, hoặc quay về sau khi kết thúc một phiên
+**Preconditions:** Không có
+
+**Main flow:**
+1. Hệ thống đọc **một snapshot** gồm session có thể học tiếp và toàn bộ root deck
+   kèm workload — cùng một transaction, không phải hai lần đọc rời (AD-13). Màn
+   hình là **chỉ-đọc**: vào tab, cuộn hay đổi tab không ghi gì (BR-182).
+2. Nếu có đúng một session hợp lệ đang mở, Resume card đứng đầu màn hình và nói
+   deck nào, loại phiên gì, đang ở chặng nào — cả hai giá trị lấy từ chính hàng
+   session, không suy ra (BR-76, BR-98).
+3. Dưới Resume là danh sách root deck, mỗi hàng có tên deck, nhãn scheduler khi
+   biết, ba con số Overdue/Due today/New và **một** hành động Study. Thứ tự giảm
+   dần theo ba khoá đó, tie-break theo tên đã fold rồi `id` (BR-183).
+4. Chạm Resume mở đúng session và đúng lượt đã lưu (BR-133), không tạo session
+   thứ hai. Chạm Study trên một deck mở study entry của deck đó (UC-05), nơi lựa
+   chọn giữa học mới và ôn tập mới được đưa ra.
+5. Kết thúc, bỏ dở hoặc invalidate một phiên rồi quay lại: danh sách tự cập nhật
+   qua stream, không reload cả route và không giữ con số cũ.
+
+**Alternative flows:**
+- **A1 — Không có session nào đang mở:** không có Resume card — không phải một
+  thẻ rỗng, cũng không phải nút bị vô hiệu hoá.
+- **A2 — Session của ngày học cũ, generation đã đổi, deck hoặc card đã bị xoá:**
+  không quảng cáo Resume. Việc đóng session cũ vẫn thuộc BR-103 và xảy ra khi
+  người dùng thực sự vào luồng, không phải khi màn hình này rần.
+- **A3 — Mọi deck đều không còn gì đến hạn:** danh sách vẫn hiển thị, kèm một dòng
+  nói hiện chưa có thẻ nào tới hạn; deck vẫn mở được để học trước (BR-29).
+- **A4 — Thư viện chưa có deck nào:** empty state dẫn tới Starter Library (UC-01),
+  lối thứ hai là về Library.
+- **A5 — Có deck nhưng chưa có card nào:** zero state riêng, dẫn về Library để thêm
+  thẻ — không phải CTA starter, và không bịa số Due (BR-184).
+
+**Error flows:**
+- **E1 — Đọc thất bại:** trạng thái lỗi có nút thử lại, không nêu tên bảng, câu truy
+  vấn hay đường dẫn. Copy nói rõ không có gì bị thay đổi — đúng theo cấu trúc, vì
+  màn hình này không có đường ghi nào.
+
+**Postconditions:** Không đổi gì — use case chỉ đọc. Mọi write phát sinh sau đó đều
+thuộc UC-05, bắt đầu từ một lần chạm tường minh.
+
+**Business rules:** BR-182, BR-183, BR-184. Ngoài ra BR-29, BR-84, BR-101, BR-103,
+BR-105, BR-133, BR-142, BR-162.
+**UI states:** loading · loaded (resume + danh sách) · loaded (không resume) ·
+loaded (mọi workload bằng 0) · empty (không deck) · empty (không card) · error
+
+---
+
+## Điều đã cố ý không đặc tả
+
+| Thứ | Vì sao |
+|---|---|
+| Đưa deck con lên thành root deck | Cần quyết định scheduler mới; là tính năng riêng, không phải phép di chuyển (UC-09 A2) |
+| Tìm kiếm card (S1) | Should-have, chưa tới lượt |
+| Thống kê / streak (S2) | Should-have — `study_answers` với `kind` đã đủ dữ liệu |
 | Đảo chiều card (S3) | Should-have |
 | ~~Export (nửa còn lại của N1)~~ | **Đã đặc tả ở M99.21** — UC-11 và BR-174…BR-181 chốt scope, encoder, filename, share và quyền riêng tư trước khi viết code, đúng điều kiện mà mục này đặt ra. Còn nice-to-have ngoài phạm vi export nội dung: backup/restore, sync và `.apkg`. |
 | Nhắc nhở hằng ngày (N2) | Nice-to-have, cần quyền notification |

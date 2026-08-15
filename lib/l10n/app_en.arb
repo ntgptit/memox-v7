@@ -2907,5 +2907,153 @@
   "progressDeckMissingBackAction": "Back to progress",
   "@progressDeckMissingBackAction": {
     "description": "Returns to the library level of Progress by Deck from a level whose deck is gone."
+  },
+  "progressPlaceholderTitle": "Progress is being developed",
+  "@progressPlaceholderTitle": {
+    "description": "Heading of the Progress placeholder (AD-19). States plainly that the feature is not in this build rather than showing controls that do nothing."
+  },
+  "progressPlaceholderMessage": "Your current study activity is still saved for use when the feature is ready.",
+  "@progressPlaceholderMessage": {
+    "description": "Body of the Progress placeholder. Carries the one fact a learner needs while waiting: study history is already recorded (review_history is append-only), so nothing is lost before the feature ships."
+  },
+  "studyHomeTitle": "Study",
+  "@studyHomeTitle": {
+    "description": "App-bar title of the Study tab's home screen (UC-12)."
+  },
+  "studyHomeSupportingCopy": "Pick a deck, or carry on where you stopped.",
+  "@studyHomeSupportingCopy": {
+    "description": "One line under the title saying what the screen is for. Read-only: nothing on this screen opens a session by itself (BR-200)."
+  },
+  "studyHomeSupportingCopyNoResume": "Pick a deck to get started.",
+  "@studyHomeSupportingCopyNoResume": {
+    "description": "The same line when no session is open. The other half of the pair promises somewhere to carry on from; with nothing to resume that half is a lie, and BR-200 makes \"nothing open\" the common case because it needs four conditions at once."
+  },
+  "studyHomeLoadingLabel": "Loading your decks",
+  "@studyHomeLoadingLabel": {
+    "description": "Screen-reader label for the Study home spinner. A bare spinner announces nothing at all."
+  },
+  "studyHomeResumeTitle": "Carry on",
+  "@studyHomeResumeTitle": {
+    "description": "Heading of the Resume card, shown only when a session of today's study day is still open (BR-200, BR-103)."
+  },
+  "studyHomeResumeSubtitle": "{kind} · {mode}",
+  "@studyHomeResumeSubtitle": {
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      },
+      "mode": {
+        "type": "String"
+      }
+    },
+    "description": "The open session's own kind and stage, both stored on the session and never inferred (BR-76, BR-98)."
+  },
+  "studyHomeResumeAction": "Resume",
+  "@studyHomeResumeAction": {
+    "description": "Opens the session that is already there. It never creates a second one (BR-101)."
+  },
+  "studyHomeResumeSemanticLabel": "Resume {deck}",
+  "@studyHomeResumeSemanticLabel": {
+    "placeholders": {
+      "deck": {
+        "type": "String"
+      }
+    },
+    "description": "Screen-reader name for the Resume action, which names the deck because several rows below carry a similar verb."
+  },
+  "studyHomeNextTitle": "Study next",
+  "@studyHomeNextTitle": {
+    "description": "Heading of the root-deck list, ordered by workload (BR-201)."
+  },
+  "studyHomeNothingDueMessage": "Nothing is due right now. Any deck is still open if you want to get ahead.",
+  "@studyHomeNothingDueMessage": {
+    "description": "Supporting line when every listed deck has an empty workload. Not an error and not an achievement — BR-29 makes a quiet schedule the product working."
+  },
+  "studyHomeOverdueLabel": "{count} overdue",
+  "@studyHomeOverdueLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Due cards whose day has already passed (BR-162). A count, never an age."
+  },
+  "studyHomeDueTodayLabel": "{count} due today",
+  "@studyHomeDueTodayLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Due cards still inside today's local day (BR-162)."
+  },
+  "studyHomeNewLabel": "{count} new",
+  "@studyHomeNewLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Cards that have not finished the learning chain (BR-90, BR-142)."
+  },
+  "studyHomeWorkloadSemanticLabel": "{overdue} overdue, {dueToday} due today, {newCount} new",
+  "@studyHomeWorkloadSemanticLabel": {
+    "placeholders": {
+      "overdue": {
+        "type": "int"
+      },
+      "dueToday": {
+        "type": "int"
+      },
+      "newCount": {
+        "type": "int"
+      }
+    },
+    "description": "The three counts as one screen-reader phrase, so a row is heard as one fact instead of three stray numbers."
+  },
+  "studyHomeStudyAction": "Study",
+  "@studyHomeStudyAction": {
+    "description": "Opens one root deck's study entry. The tap is the only thing on this screen that may lead to a write (BR-200)."
+  },
+  "studyHomeStudySemanticLabel": "Study {deck}",
+  "@studyHomeStudySemanticLabel": {
+    "placeholders": {
+      "deck": {
+        "type": "String"
+      }
+    },
+    "description": "Screen-reader name for a row's Study action. Every row carries the same word, so the deck name is what tells them apart."
+  },
+  "studyHomeEmptyLibraryTitle": "Nothing to study yet",
+  "@studyHomeEmptyLibraryTitle": {
+    "description": "The library holds no deck at all — the first-run state (BR-202, UC-01)."
+  },
+  "studyHomeEmptyLibraryMessage": "Add a ready-made deck and the first cards are waiting for you.",
+  "@studyHomeEmptyLibraryMessage": {
+    "description": "Copy of the empty-library state. Names the next step rather than the absence."
+  },
+  "studyHomeStarterAction": "Browse ready-made decks",
+  "@studyHomeStarterAction": {
+    "description": "Opens the starter catalog from the Study tab (UC-01). A real route, not a placeholder."
+  },
+  "studyHomeNoCardsTitle": "Your decks are empty",
+  "@studyHomeNoCardsTitle": {
+    "description": "There are decks but not a card anywhere in them — a different state from an empty library, with a different next step (BR-202)."
+  },
+  "studyHomeNoCardsMessage": "Add cards in your library and they will show up here.",
+  "@studyHomeNoCardsMessage": {
+    "description": "Copy of the no-cards state. It must not invent a due count for a deck that holds nothing."
+  },
+  "studyHomeOpenLibraryAction": "Open library",
+  "@studyHomeOpenLibraryAction": {
+    "description": "Takes the user to the deck tree, where cards are added."
+  },
+  "studyHomeErrorTitle": "Could not load your decks",
+  "@studyHomeErrorTitle": {
+    "description": "Failure state of the Study tab. Names no table, no query and no path (AD-04)."
+  },
+  "studyHomeErrorMessage": "Nothing was changed. Try again in a moment.",
+  "@studyHomeErrorMessage": {
+    "description": "Says the read failed and that it wrote nothing — true by construction, because this screen has no write path (BR-200)."
   }
 }
