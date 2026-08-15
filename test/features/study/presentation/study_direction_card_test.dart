@@ -109,6 +109,33 @@ void main() {
       expect(find.text('BACK'), findsNothing);
     });
 
+    testWidgets('the meaning takes the smaller role in whichever half it '
+        'lands', (tester) async {
+      // **The role follows the face, not the half.** The prompt half was
+      // `headlineMedium` unconditionally, which was right while the prompt was
+      // always the ≤60-character front (BR-08); reversing the direction put a
+      // 240-character meaning there at 30dp and dropped the Korean term to 24 —
+      // the exact inversion the supporting half's own comment argues against.
+      for (final (StudyRecallDirection direction, double koreanSize)
+          in <(StudyRecallDirection, double)>[
+            (StudyRecallDirection.koreanToMeaning, 30),
+            (StudyRecallDirection.meaningToKorean, 30),
+          ]) {
+        await pumpCard(tester, direction: direction, isRevealed: true);
+
+        expect(
+          tester.widget<Text>(find.text(korean)).style?.fontSize,
+          koreanSize,
+          reason: 'the term keeps the larger role under $direction',
+        );
+        expect(
+          tester.widget<Text>(find.text(meaning)).style?.fontSize,
+          24,
+          reason: 'the meaning keeps the smaller one under $direction',
+        );
+      }
+    });
+
     testWidgets('Meaning→Korean prompts with the meaning', (tester) async {
       await pumpCard(tester, direction: StudyRecallDirection.meaningToKorean);
 

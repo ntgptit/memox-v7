@@ -15,7 +15,7 @@
 cũ vẫn đúng.
 
 **Việc Study làm sau khi dãy M5 đóng nằm ở `wbs.md` dưới dãy M99**, cùng chỗ với
-mọi task cross-cutting khác — hiện có **M99.23** (chiều hỏi của `self_assess`,
+mọi task cross-cutting khác — hiện có **M99.27** (chiều hỏi của `self_assess`,
 BR-203…BR-209). Không chép trạng thái của nó về đây: hai sổ cho một task là hai
 sổ sẽ lệch nhau.
 

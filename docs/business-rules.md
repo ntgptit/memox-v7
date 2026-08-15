@@ -1000,13 +1000,13 @@ Trạng thái kết thúc là terminal — không có đường quay lại `in_p
 | Ô nội dung bắt đầu bằng `=` hoặc `+` | Ghi như text trong XLSX; mở bằng spreadsheet không thành formula (BR-179) |
 | Tên deck chỉ gồm ký tự bị loại khi sanitize | Tên file dùng `cards` + ngày + đuôi format (BR-180) |
 | Người dùng đóng share sheet | Coi là cancel; không toast lỗi, không nói đã lưu (BR-181) |
-| Mở phiên `self_assess` trên deck `sm2` nhưng chưa chọn chiều | Từ chối là validation, không ghi session (BR-187) |
-| Deck `eight_box` nhận yêu cầu kèm chiều hỏi | Từ chối là conflict; không có UI nào tạo được yêu cầu đó (BR-182, BR-187) |
-| Phiên `mixed` có số thẻ lẻ | Lệch tối đa một thẻ; bên nhận thẻ lẻ rút ngẫu nhiên (BR-184) |
-| Thẻ trả lời sai trong phiên `mixed`, quay lại sau ba thẻ | Vẫn hỏi đúng chiều cũ — chiều nằm trên chính dòng hàng đợi (BR-26, BR-184) |
-| App bị thu hồi giữa phiên `mixed`, mở lại | Resume đọc chiều đã lưu, không hỏi lại và không gieo lại (BR-103, BR-186) |
-| DB cũ có lượt `self_assess` của deck `sm2` | Backfill `korean_to_meaning` — đó là chiều mà mọi bản trước đã chạy (BR-185) |
-| Đọc dòng có chiều do bản mới hơn ghi | Đọc được, vẽ như `korean_to_meaning`, MUST NOT ghi lại giá trị đó (BR-183) |
+| Mở phiên `self_assess` trên deck `sm2` nhưng chưa chọn chiều | Từ chối là validation, không ghi session (BR-208) |
+| Deck `eight_box` nhận yêu cầu kèm chiều hỏi | Từ chối là conflict; không có UI nào tạo được yêu cầu đó (BR-203, BR-208) |
+| Phiên `mixed` có số thẻ lẻ | Lệch tối đa một thẻ; bên nhận thẻ lẻ rút ngẫu nhiên (BR-205) |
+| Thẻ trả lời sai trong phiên `mixed`, quay lại sau ba thẻ | Vẫn hỏi đúng chiều cũ — chiều nằm trên chính dòng hàng đợi (BR-26, BR-205) |
+| App bị thu hồi giữa phiên `mixed`, mở lại | Resume đọc chiều đã lưu, không hỏi lại và không gieo lại (BR-103, BR-207) |
+| DB cũ có lượt `self_assess` của deck `sm2` | Backfill `korean_to_meaning` — đó là chiều mà mọi bản trước đã chạy (BR-206) |
+| Đọc dòng có chiều do bản mới hơn ghi | Đọc được, vẽ như `korean_to_meaning`, MUST NOT ghi lại giá trị đó (BR-204) |
 | Muốn đổi deck rỗng từ `card` sang chứa deck con | Rỗng là đã `unset`; tạo deck con luôn được (BR-163) |
 | Kéo deck vào descendant của chính nó | Chặn, lỗi rõ ràng (BR-70) |
 | Di chuyển subtree sang root khác scheduler | Chặn, đề nghị reset (BR-74) |

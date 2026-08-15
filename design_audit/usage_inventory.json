@@ -4311,14 +4311,14 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/overlays/study_direction_chooser_widget.dart",
-      "line": 188,
+      "line": 211,
       "widget_context": "_StudyDirectionChooserState",
       "element_kind": "icon",
       "source_kind": "theme-token",
-      "expression": "context.colors.primary",
-      "token": "colorScheme.primary",
-      "resolved_value_light": "#4646B4",
-      "resolved_value_dark": "#5656C9"
+      "expression": "context.semanticColors.primaryAccent",
+      "token": "semantic.primaryAccent",
+      "resolved_value_light": "unresolvable: semantic.primaryAccent not in the dumped theme",
+      "resolved_value_dark": "unresolvable: semantic.primaryAccent not in the dumped theme"
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/fill_answer_pieces_widget.dart",
@@ -4421,7 +4421,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/sections/study_card_face_section_widget.dart",
-      "line": 309,
+      "line": 324,
       "widget_context": "_StudyCardFaceViewState",
       "element_kind": "border",
       "source_kind": "theme-token",

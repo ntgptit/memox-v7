@@ -191,6 +191,12 @@ class _StudyEntryScreenState extends ConsumerState<StudyEntryScreen> {
 
     return showModalBottomSheet<void>(
       context: context,
+      // **Scroll-controlled, or the button that answers the question is off
+      // screen.** Flutter caps an ordinary sheet at 9/16 of the display; at
+      // 320dp with textScaler 2.0 this sheet's content is roughly 916dp against
+      // that cap of 319, so `Start review` sat far below the fold with nothing
+      // on Android saying there was more to scroll to.
+      isScrollControlled: true,
       // The choice is locked for the session (BR-207), so it is confirmed rather
       // than taken on a tap — and a sheet that dismisses on a background tap
       // would still be dismissible, which is the correct way out of a question

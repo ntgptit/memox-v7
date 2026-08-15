@@ -227,6 +227,15 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
   /// direction out four times is four chances to spell one of them backwards —
   /// which renders a card whose two halves are the same text and looks like a
   /// data problem.
+  /// The type role a `self_assess` half takes, chosen by the **face** it shows.
+  ///
+  /// The front is a term of at most 60 characters and the back a meaning of up
+  /// to 240 (BR-08), so the roles follow the content rather than the position:
+  /// reversing the direction swaps which half is which, and a rule written in
+  /// terms of "upper" and "lower" swaps the sizes with it.
+  TextStyle? _selfAssessRole(TextTheme texts, StudyCardFace face) =>
+      face == StudyCardFace.front ? texts.headlineMedium : texts.headlineSmall;
+
   String _textOf(StudyCardFace face) =>
       face == StudyCardFace.front ? _card.front : _card.back;
 
@@ -279,15 +288,21 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
                     text: _textOf(promptFace),
                     // The focal face — the term (BR-08) — at the title role and
                     // one step down in weight so it leads without shouting.
-                    // `self_assess` keeps the larger prompt role, because there
-                    // the front is the question and nothing shares the card.
+                    //
+                    // **`self_assess` sizes by which face this is, not by which
+                    // half.** The prompt half used to be `headlineMedium`
+                    // unconditionally, which was right while the prompt was
+                    // always the front (≤60 characters, BR-08). Reversing the
+                    // direction put a 240-character meaning there at 30dp — the
+                    // very thing the supporting half below says a heading role
+                    // is not for — and dropped the short Korean term to 24dp.
                     style:
                         widget.emphasis == StudyFaceEmphasis.backSupportingFront
                         ? AppTypography.withWeight(
                             texts.titleLarge!,
                             FontWeight.w500,
                           )
-                        : texts.headlineMedium,
+                        : _selfAssessRole(texts, promptFace),
                     // **The tight end is the one facing the rule, so it is only
                     // tight when there is a rule to face.** Before the flip
                     // `self_assess` is a single half filling the card, and the
@@ -318,7 +333,7 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
                           widget.emphasis ==
                               StudyFaceEmphasis.backSupportingFront
                           ? texts.bodyLarge
-                          : texts.headlineSmall,
+                          : _selfAssessRole(texts, revealFace),
                       padding: const EdgeInsets.only(
                         top: AppSpacing.sm,
                         bottom: AppSpacing.lg,

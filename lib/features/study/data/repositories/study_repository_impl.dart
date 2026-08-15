@@ -178,6 +178,10 @@ final class StudyRepositoryImpl
     // `unknown` is refused for a different reason: a value this build cannot
     // name would read back as a decision somebody made. Refused here rather than
     // left to `dbValue`'s `StateError`, so the caller gets a domain failure.
+    // **Two of BR-203's three conditions, not a second copy of the predicate.**
+    // `isReverseDirectionEligible` holds the full conjunction; the third
+    // condition — the root's scheduler — needs a read this method has not made
+    // yet. `study_direction_guard_test.dart` notices if the two drift.
     final isDirectionAllowed =
         kind == StudySessionKind.reviewing &&
         stageSequence.length == 1 &&

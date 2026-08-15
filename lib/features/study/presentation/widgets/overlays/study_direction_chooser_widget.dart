@@ -149,7 +149,12 @@ class _StudyDirectionChooserState extends State<StudyDirectionChooserWidget> {
               label: l10n.studyDirectionStart,
               isLoading: _isBusy,
               shouldKeepLabelWhileLoading: true,
-              onPressed: _submit,
+              // **Dead once there is nothing due.** That refusal is not a
+              // transient failure: the copy above deliberately does not say
+              // "try again", because re-reading finds the same empty queue. A
+              // primary button that stays live under a message telling the user
+              // to stop says the opposite of the message.
+              onPressed: _isNothingDue(context) ? null : _submit,
             ),
           ],
         ),
@@ -170,6 +175,17 @@ class _StudyDirectionChooserState extends State<StudyDirectionChooserWidget> {
   /// Anything else keeps the generic line: an unrecognised failure is one this
   /// screen cannot describe, and inventing a cause for it would be worse than
   /// saying only that it did not work.
+  /// Whether the last attempt failed because the queue is empty.
+  ///
+  /// A different question from "did it fail": every other refusal is worth a
+  /// second press, and this one never is.
+  bool _isNothingDue(BuildContext context) {
+    final failure = _failure;
+
+    return failure is Failure &&
+        failure.reason == StudyRefusalReason.nothingDueToReview;
+  }
+
   String _messageFor(BuildContext context, Object failure) =>
       failure is Failure &&
           failure.reason == StudyRefusalReason.nothingDueToReview
@@ -185,7 +201,14 @@ class _StudyDirectionChooserState extends State<StudyDirectionChooserWidget> {
       // The glyph carries the state; the tint only reinforces it.
       leading: Icon(
         isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-        color: isSelected ? context.colors.primary : null,
+        // `primaryAccent`, not `primary`. The glyph is the selection *signal*
+        // here — the tile tint is only reinforcement — and `primary` on the
+        // selected tile measures **2.45:1** in dark, under the 3:1 WCAG 1.4.11
+        // asks of a non-text control. `primaryAccent` reaches 4.66:1. The same
+        // decision is already recorded three times: `app_radio_theme.dart`
+        // (2.90:1), `match_tile_widget.dart`, `card_details_section_widget.dart`
+        // (3.29:1) — this is the fourth call site to reach it.
+        color: isSelected ? context.semanticColors.primaryAccent : null,
       ),
       isSelected: isSelected,
       // Locked while a start is in flight, so the choice cannot change under a
