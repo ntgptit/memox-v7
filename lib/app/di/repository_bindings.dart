@@ -148,16 +148,21 @@ DeckTemplateRepository deckTemplateRepositoryBinding(Ref ref) =>
 /// It does take a random source, which is deliberately not injected here: the
 /// default is a real one, and only a test replaces it. A seeded shuffle in
 /// production would make every session lay its cards out in the same order.
-StudyRepository studyRepositoryBinding(Ref ref) =>
-    StudyRepositoryImpl(StudyDao(ref.watch(appDatabaseProvider)));
-
-/// Reading study history back as progress (UC-12).
+/// Progress reads what studying produced and writes nothing (BR-190, BR-198),
+/// so it
+/// takes neither a clock nor an id generator: every instant it needs arrives as
+/// an argument from `clockProvider` and `utcOffsetProvider` at the controller
+/// (BR-184, BR-194),
+/// and there is nothing for it to stamp.
 ///
-/// One DAO, one database, no clock: every instant Progress needs is a parameter
-/// its use case passes down (BR-184), so unlike `deckRepositoryBinding` there is
-/// nothing here to inject but the connection.
+/// Its own DAO rather than the database, unlike the card bindings: there is no
+/// multi-step write whose steps have to share a transaction, so the narrower
+/// seam is the honest one.
 ProgressRepository progressRepositoryBinding(Ref ref) =>
     ProgressRepositoryImpl(ProgressDao(ref.watch(appDatabaseProvider)));
+
+StudyRepository studyRepositoryBinding(Ref ref) =>
+    StudyRepositoryImpl(StudyDao(ref.watch(appDatabaseProvider)));
 
 /// The starter catalog: the shipped assets, decoded once (UC-01).
 ///

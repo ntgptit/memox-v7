@@ -11,6 +11,10 @@ import 'package:memox/features/progress/domain/models/progress_overview_model.da
 import 'package:memox/features/progress/domain/repositories/progress_repository.dart';
 import 'package:memox/features/progress/presentation/screens/progress_screen.dart';
 import 'package:widgetbook/widgetbook.dart';
+import 'package:memox/features/progress/domain/models/deck_activity_metrics_model.dart';
+import 'package:memox/features/progress/domain/models/deck_activity_model.dart';
+import 'package:memox/features/progress/domain/models/deck_activity_snapshot_model.dart';
+import 'package:memox/features/progress/domain/models/progress_path_segment_model.dart';
 
 /// `ProgressScreen` mounted whole, with the repository contract faked.
 ///
@@ -126,6 +130,29 @@ class _CatalogProgressRepository implements ProgressRepository {
   static final DateTime now = DateTime.utc(2026, 8, 12, 9, 30);
 
   static final DateTime _today = DateTime.utc(2026, 8, 12);
+
+  /// The level below the overview header.
+  ///
+  /// An empty level on purpose: this use case exists to show the three overview
+  /// sections across themes and text scales, and a catalogued deck list would
+  /// put a second, unrelated set of figures under them. The deck level has its
+  /// own use case with its own scenarios.
+  @override
+  Stream<DeckActivitySnapshot> watchDeckActivity({
+    required String? deckId,
+    required DateTime now,
+    required Duration utcOffset,
+  }) => Stream<DeckActivitySnapshot>.value(
+    DeckActivitySnapshot(
+      scopeDeckId: deckId,
+      scopeName: null,
+      scopePath: const <ProgressPathSegment>[],
+      decks: const <DeckActivity>[],
+      scopeLast7Days: DeckActivityMetrics.zero,
+      scopeLast30Days: DeckActivityMetrics.zero,
+      nextDayBoundaryAt: _today.add(const Duration(days: 1)),
+    ),
+  );
 
   @override
   Stream<ProgressOverview> watchProgressOverview({

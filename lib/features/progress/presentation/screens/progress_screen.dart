@@ -11,11 +11,20 @@ import '../../../../shared/widgets/mx_empty_state.dart';
 import '../../../../shared/widgets/mx_error_state.dart';
 import '../../domain/models/progress_overview_model.dart';
 import '../controllers/progress_overview_controller.dart';
+import 'progress_deck_screen.dart';
 import '../widgets/sections/progress_streak_hero_widget.dart';
 import '../widgets/sections/progress_today_widget.dart';
 import '../widgets/sections/progress_week_widget.dart';
 
-/// The Progress branch (UC-12).
+/// The Progress branch — one screen at two levels of detail (UC-12, UC-13).
+///
+/// **Two features settled into one screen.** Progress overview and Progress by
+/// Deck arrived in parallel and each specified `/progress` as its own root; the
+/// owner settled it as a single surface — the three overview sections as a
+/// header, then the range selector, the totals and the deck rows. This class is
+/// where the two meet: it owns the overview read and hands the sections to
+/// [ProgressDeckScreen] as a header, so the level below still knows nothing
+/// about the overview and `/progress/:deckId` keeps showing the level alone.
 ///
 /// **It replaced a placeholder, and nothing around it moved.** `/progress`, its
 /// route name and its branch index are the same as they were: that stability is
@@ -28,9 +37,13 @@ import '../widgets/sections/progress_week_widget.dart';
 /// nothing at all.
 ///
 /// **The lifetime-empty face replaces the whole screen**, rather than showing
-/// three sections of zeros (P7). Three zeros read as a failed load, and the one
-/// thing a first-time user needs is not a chart of nothing — it is the way into
-/// a study session.
+/// three sections of zeros (P7) — and after the merge that means the deck level
+/// too, not only the header. The argument is the one P7 already makes: three
+/// zeros read as a failed load, and a list of every deck at zero underneath them
+/// says the same nothing a third time. A first-time user needs the way into a
+/// study session, not a chart of it. That is different from a *range* with no
+/// activity, where the level does still list every deck at zero (BR-197),
+/// because there the history exists and the window is the question.
 class ProgressScreen extends ConsumerWidget {
   const ProgressScreen({super.key});
 
@@ -45,38 +58,48 @@ class ProgressScreen extends ConsumerWidget {
       progressOverviewControllerProvider,
     );
 
-    return MxContentShell(
+    // **The shell is not here for the loaded case.** With history to show, this
+    // screen is `ProgressDeckScreen` with a header, and that screen owns its own
+    // `MxContentShell` — the level's title comes from its snapshot. Wrapping
+    // again here would give the branch two app bars. The other three faces have
+    // no level to defer to, so they carry their own shell.
+    Widget shell(Widget body) => MxContentShell(
       title: context.l10n.progressTitle,
-      // The three sections are taller than a small screen at a large text
-      // scale, and W6 forbids buying the height back by shrinking anything.
+      // Taller than a small screen at a large text scale, and W6 forbids buying
+      // the height back by shrinking anything.
       isScrollable: true,
-      body: MxAsyncView<ProgressOverview>(
-        value: overview,
-        loadingLabel: context.l10n.progressLoadingLabel,
-        // UC-12 UI states and P8: a live refresh and a midnight rollover are
-        // transitions between two loaded states, and neither may drop the screen
-        // to a spinner over data it already has.
-        //
-        // Both of them arrive here as Riverpod *reloads* rather than refreshes,
-        // because both move `progressNowProvider` — and so does every app
-        // resume, which is by far the most frequent of the three. Without this
-        // flag the whole screen was replaced by a spinner for the length of a
-        // full scan of `study_answers`, so the longer somebody's history, the
-        // longer the flash.
-        shouldSkipLoadingOnReload: true,
-        data: (overview) => overview.hasLifetimeActivity
-            ? _ProgressSections(overview: overview)
-            : const _ProgressEmptyView(),
-        // The failure never reaches the user. A Drift message names tables and
-        // can carry card content (BR-52); what the reader needs to know is that
-        // history is append-only and a failed read cost them nothing.
-        // `liveRegion`, because the failure arrives *while the user is already
-        // here*: the spinner is replaced in place, and without this a screen
-        // reader says nothing at all — the person is left waiting on a screen
-        // that has already given up. It is set at the call site rather than
-        // inside `MxErrorState`, which is also used for errors that arrive with
-        // a route rather than during one.
-        error: (error, stackTrace) => Semantics(
+      body: body,
+    );
+
+    return MxAsyncView<ProgressOverview>(
+      value: overview,
+      loadingFrame: shell,
+      loadingLabel: context.l10n.progressLoadingLabel,
+      // UC-12 UI states and P8: a live refresh and a midnight rollover are
+      // transitions between two loaded states, and neither may drop the screen
+      // to a spinner over data it already has.
+      //
+      // Both of them arrive here as Riverpod *reloads* rather than refreshes,
+      // because both move `progressNowProvider` — and so does every app
+      // resume, which is by far the most frequent of the three. Without this
+      // flag the whole screen was replaced by a spinner for the length of a
+      // full scan of `study_answers`, so the longer somebody's history, the
+      // longer the flash.
+      shouldSkipLoadingOnReload: true,
+      data: (overview) => overview.hasLifetimeActivity
+          ? ProgressDeckScreen(header: _ProgressSections(overview: overview))
+          : shell(const _ProgressEmptyView()),
+      // The failure never reaches the user. A Drift message names tables and
+      // can carry card content (BR-52); what the reader needs to know is that
+      // history is append-only and a failed read cost them nothing.
+      // `liveRegion`, because the failure arrives *while the user is already
+      // here*: the spinner is replaced in place, and without this a screen
+      // reader says nothing at all — the person is left waiting on a screen
+      // that has already given up. It is set at the call site rather than
+      // inside `MxErrorState`, which is also used for errors that arrive with
+      // a route rather than during one.
+      error: (error, stackTrace) => shell(
+        Semantics(
           liveRegion: true,
           container: true,
           child: MxErrorState(

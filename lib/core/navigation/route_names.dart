@@ -33,9 +33,13 @@ abstract final class RouteNames {
   /// The study surface. Branch 1 of the shell.
   static const String study = 'study';
 
-  /// The progress surface. Branch 2 of the shell — a presentation-only
-  /// placeholder until the statistics feature exists (AD-19).
+  /// The progress surface. Branch 2 of the shell — Progress by Deck at the
+  /// library level, every root deck (UC-12).
   static const String progress = 'progress';
+
+  /// One deck's progress level. A child of [progress], so drilling in stays
+  /// inside the Progress branch and Back returns to the level above (UC-12).
+  static const String progressDeck = 'progressDeck';
 
   /// The settings surface. Branch 3 of the shell — a presentation-only
   /// placeholder until app settings exist (AD-19).

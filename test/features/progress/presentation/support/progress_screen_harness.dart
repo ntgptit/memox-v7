@@ -26,6 +26,15 @@ import '../../../deck/presentation/support/fake_deck_repository.dart';
 /// would assert different words depending on the day it ran.
 final DateTime progressTestNow = DateTime.utc(2026, 8, 12, 12);
 
+/// A **non-zero** offset, for the tests whose subject is that the offset is
+/// threaded at all.
+///
+/// The screen harness below defaults to zero so a fixture's calendar dates and
+/// the dates the screen renders are the same by construction; that is the right
+/// default for reading a rendered week, and useless for proving the value moved.
+/// Anything asserting the offset reached the repository uses this instead.
+const Duration progressTestOffset = Duration(hours: 7);
+
 /// Pumps `ProgressScreen` on its own, for the state matrix.
 ///
 /// No router: the screen has no route of its own to push and nothing to
@@ -34,6 +43,18 @@ final DateTime progressTestNow = DateTime.utc(2026, 8, 12, 12);
 Future<void> pumpProgressScreen(
   WidgetTester tester, {
   required ProgressRepository repository,
+
+  /// Which Progress surface to mount.
+  ///
+  /// Defaults to the composed `/progress` screen. A level test passes
+  /// `ProgressDeckScreen(deckId: ...)` instead — the two arrived as separate
+  /// features with a harness each, and one harness with a parameter is what
+  /// stops them drifting into two ways of standing the same providers up.
+  Widget screen = const ProgressScreen(),
+
+  /// Zero unless a test's subject is the offset itself — see
+  /// [progressTestOffset].
+  Duration utcOffset = Duration.zero,
   Size surface = const Size(393, 852),
   double textScale = 1,
   bool isDark = false,
@@ -58,7 +79,7 @@ Future<void> pumpProgressScreen(
         // Zero, so a fixture day and the day the screen renders it in are the
         // same by construction. The offset arithmetic itself is tested where it
         // belongs — against the domain and against real SQLite.
-        utcOffsetProvider.overrideWithValue(() => Duration.zero),
+        utcOffsetProvider.overrideWithValue(() => utcOffset),
       ],
       child: MaterialApp(
         locale: locale,
@@ -80,7 +101,7 @@ Future<void> pumpProgressScreen(
             data: MediaQuery.of(
               context,
             ).copyWith(textScaler: TextScaler.linear(textScale)),
-            child: const ProgressScreen(),
+            child: screen,
           ),
         ),
       ),
@@ -99,6 +120,10 @@ Future<void> pumpProgressScreen(
 Future<GoRouter> pumpProgressApp(
   WidgetTester tester, {
   required ProgressRepository repository,
+
+  /// Where the app opens. A drill-down test needs `/progress/:deckId`, and
+  /// asserting on a level means arriving at it the way the user does.
+  String initialLocation = RoutePaths.progress,
   Size surface = const Size(393, 852),
   double textScale = 1,
   bool isDark = false,
@@ -118,7 +143,7 @@ Future<GoRouter> pumpProgressApp(
   addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
   addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
 
-  final router = createAppRouter(initialLocation: RoutePaths.progress);
+  final router = createAppRouter(initialLocation: initialLocation);
   addTearDown(router.dispose);
 
   await tester.pumpWidget(

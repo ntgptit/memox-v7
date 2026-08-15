@@ -1,4 +1,5 @@
 import '../tables/cards.drift';
+import '../tables/decks.drift';
 import '../tables/study.drift';
 
 -- Reading the learner's own activity back out of history (UC-12).
@@ -107,3 +108,308 @@ SELECT
 FROM card_days cd
 GROUP BY cd.localDayStart
 ORDER BY cd.localDayStart ASC;
+
+-- Typed queries for Progress by Deck (M99.23, UC-12).
+--
+-- **The unit of counting is a card-day, not an answer** (BR-183). Answering the
+-- same card six times in one evening is one day of work on one card, and a
+-- metric that counted six would say a person who drilled one card harder than
+-- anyone studied more broadly than a person who saw thirty. Every figure below
+-- is built from the `card_days` CTE, which collapses each `(card, local day)`
+-- to exactly one row before anything is counted.
+--
+-- **History is attributed to the card's CURRENT deck** (BR-185). `study_answers`
+-- carries no deck column and deliberately gains none: the join walks
+-- `answers -> cards -> decks`, so moving a card moves its whole history with it
+-- in the same read, with no backfill and no snapshot column to keep in step.
+-- The cost is stated rather than hidden — "what did this deck look like in
+-- March" is not answerable and is not in v1.
+--
+-- **A deleted deck disappears by cascade, not by a predicate.** `decks` cascades
+-- to `cards` and `cards` cascades to `study_answers`, so the rows are simply not
+-- there to count — which is why no `WHERE deck IS NOT NULL` appears anywhere.
+-- Every aggregate still joins `decks` rather than leaning on that: the foreign
+-- key is what makes an orphaned card impossible, and an aggregate that skipped
+-- the join would be correct only for as long as the pragma holds.
+--
+-- **SQL never derives a local midnight.** `:windowFrom` is the first local
+-- midnight of the 30-day window, computed in Dart by `LocalDayModel`, and it is
+-- the bucket origin as well as the lower bound: the day index is
+-- `(answered_at - :windowFrom) / 86400`, arithmetic relative to a boundary the
+-- caller owns. Same reason `:now` is a parameter in `deck.drift` and not
+-- `strftime('now')` — a query that reads the clock or the zone itself cannot be
+-- tested at the boundary, and the boundary is the whole point.
+--
+-- **One parameter for the bound and the origin, and that is load-bearing.** Used
+-- only in the subtraction, `drift_dev` infers it as a REAL and SQLite then does
+-- the division in floating point — where an instant exactly on a local midnight
+-- can land a hair below the integer and truncate into the previous day. The
+-- comparison against `answered_at` types it as a datetime, which binds as an
+-- integer, which makes `/ 86400` exact integer division. They also have to be
+-- the same instant for the arithmetic to mean anything, so sharing one parameter
+-- states that rather than trusting two callers to agree.
+--
+-- **The bucket assumes every local day is 86400 seconds**, which is the same
+-- trade-off `LocalDayModel` already records: daylight saving is not modelled,
+-- because modelling it needs a timezone database the app does not ship. There
+-- the cost is one boundary; here the origin is up to 29 days back, so a
+-- transition inside the window would shift every bucket after it by an hour and
+-- misfile answers within an hour of local midnight. Stated rather than hidden.
+-- It costs nothing today — one local profile, and Vietnam has no DST — and the
+-- fix when it does cost something is to bucket by calendar day rather than by
+-- fixed-width division.
+--
+-- **Both windows come out of one statement** (BR-184). The 7-day figures are the
+-- 30-day ones with `is_recent` applied, so switching the range on screen re-reads
+-- nothing and the two windows can never describe two different snapshots.
+--
+-- Root resolution goes through `root_deck_id` for the root level and through a
+-- recursive walk for any level below it — never by coalescing the parent column
+-- with the id, which means "my parent, or me if I have none" and returns the
+-- wrong deck from the third level down (BR-57).
+
+-- Every root deck's whole-subtree activity, plus the totals across every deck
+-- there is.
+--
+-- A root's subtree is free: every descendant already carries its `root_deck_id`
+-- (BR-56), so the per-branch aggregate is a flat GROUP BY and no recursion is
+-- needed at this level.
+--
+-- `total` has no GROUP BY, so it yields exactly one row and `ON 1 = 1` joins it
+-- to every deck row without repeating the work. It is read rather than summed
+-- from the branches on purpose: active *days* do not add up — the same Tuesday
+-- can be active in two different roots and is still one day of study.
+--
+-- With no root decks at all the statement returns no rows, which is the honest
+-- answer: there is no deck to show and nothing to total.
+rootDeckActivity:
+WITH
+answer_days (deckId, cardId, day, isLearningAnswer, isRecentAnswer) AS (
+    SELECT
+        c.deck_id,
+        ans.card_id,
+        CAST((ans.answered_at - :windowFrom) / 86400 AS INTEGER),
+        CASE WHEN ans.kind = 'learning' THEN 1 ELSE 0 END,
+        CASE WHEN ans.answered_at >= :recentFrom THEN 1 ELSE 0 END
+    FROM study_answers ans
+    INNER JOIN cards c ON c.id = ans.card_id
+    WHERE ans.answered_at >= :windowFrom AND ans.answered_at < :windowUntil
+),
+-- One row per (card, local day). `isLearning` is the exclusive partition's
+-- decision (BR-186): a day on which a card took at least one `learning` turn is
+-- a Learning day, whatever else happened to it; everything else is Reviewing.
+-- Learning wins because it is the rarer, more specific event — a card leaves the
+-- learning chain once, and a day that contained that event is not honestly
+-- described as review.
+card_days (deckId, cardId, day, isLearning, isRecent) AS (
+    SELECT deckId, cardId, day,
+           MAX(isLearningAnswer), MAX(isRecentAnswer)
+    FROM answer_days
+    GROUP BY deckId, cardId, day
+)
+SELECT
+    d.id AS deckId,
+    d.name AS deckName,
+    COALESCE(branch.activeCards30, 0) AS activeCards30,
+    COALESCE(branch.activeCards7, 0) AS activeCards7,
+    COALESCE(branch.activeDays30, 0) AS activeDays30,
+    COALESCE(branch.activeDays7, 0) AS activeDays7,
+    COALESCE(branch.learningCardDays30, 0) AS learningCardDays30,
+    COALESCE(branch.learningCardDays7, 0) AS learningCardDays7,
+    COALESCE(branch.reviewingCardDays30, 0) AS reviewingCardDays30,
+    COALESCE(branch.reviewingCardDays7, 0) AS reviewingCardDays7,
+    COALESCE(total.activeCards30, 0) AS scopeActiveCards30,
+    COALESCE(total.activeCards7, 0) AS scopeActiveCards7,
+    COALESCE(total.activeDays30, 0) AS scopeActiveDays30,
+    COALESCE(total.activeDays7, 0) AS scopeActiveDays7,
+    COALESCE(total.learningCardDays30, 0) AS scopeLearningCardDays30,
+    COALESCE(total.learningCardDays7, 0) AS scopeLearningCardDays7,
+    COALESCE(total.reviewingCardDays30, 0) AS scopeReviewingCardDays30,
+    COALESCE(total.reviewingCardDays7, 0) AS scopeReviewingCardDays7
+FROM decks d
+LEFT JOIN (
+    SELECT
+        dk.root_deck_id AS branchId,
+        COUNT(DISTINCT cd.cardId) AS activeCards30,
+        COUNT(DISTINCT CASE WHEN cd.isRecent = 1 THEN cd.cardId END)
+            AS activeCards7,
+        COUNT(DISTINCT cd.day) AS activeDays30,
+        COUNT(DISTINCT CASE WHEN cd.isRecent = 1 THEN cd.day END)
+            AS activeDays7,
+        SUM(cd.isLearning) AS learningCardDays30,
+        SUM(CASE WHEN cd.isRecent = 1 THEN cd.isLearning ELSE 0 END)
+            AS learningCardDays7,
+        SUM(1 - cd.isLearning) AS reviewingCardDays30,
+        SUM(CASE WHEN cd.isRecent = 1 THEN 1 - cd.isLearning ELSE 0 END)
+            AS reviewingCardDays7
+    FROM card_days cd
+    INNER JOIN decks dk ON dk.id = cd.deckId
+    GROUP BY dk.root_deck_id
+) branch ON branch.branchId = d.id
+LEFT JOIN (
+    SELECT
+        COUNT(DISTINCT cd.cardId) AS activeCards30,
+        COUNT(DISTINCT CASE WHEN cd.isRecent = 1 THEN cd.cardId END)
+            AS activeCards7,
+        COUNT(DISTINCT cd.day) AS activeDays30,
+        COUNT(DISTINCT CASE WHEN cd.isRecent = 1 THEN cd.day END)
+            AS activeDays7,
+        SUM(cd.isLearning) AS learningCardDays30,
+        SUM(CASE WHEN cd.isRecent = 1 THEN cd.isLearning ELSE 0 END)
+            AS learningCardDays7,
+        SUM(1 - cd.isLearning) AS reviewingCardDays30,
+        SUM(CASE WHEN cd.isRecent = 1 THEN 1 - cd.isLearning ELSE 0 END)
+            AS reviewingCardDays7
+    FROM card_days cd
+    -- The same join `branch` above makes, and for symmetry rather than for
+    -- effect: `PRAGMA foreign_keys = ON` means a card whose deck is gone cannot
+    -- exist. Without it the two aggregates would answer differently about such
+    -- a row — the panel counting it and no deck row doing so — which is a
+    -- summary that disagrees with the list underneath it for a reason nobody
+    -- could see.
+    INNER JOIN decks dk ON dk.id = cd.deckId
+) total ON 1 = 1
+WHERE d.parent_deck_id IS NULL
+ORDER BY d.created_at ASC, d.id ASC;
+
+-- One deck's own activity and that of each of its direct children.
+--
+-- **Why this needs a recursive walk where the root query does not.** No column
+-- identifies an intermediate ancestor, so the subtree of a deck at level 3 has
+-- to be walked. `branch` does it once for the whole level: it maps every
+-- descendant to the direct child of `:parentId` it belongs under, and the
+-- aggregate then groups on that. `scope` is the same set plus the deck itself,
+-- built from `branch` rather than by a second walk.
+--
+-- UNION, not UNION ALL, for the reason every walk in `deck.drift` states: a
+-- cyclic tree from corrupt data terminates with the complete reachable set
+-- instead of hanging.
+--
+-- **That argument covers `branch` and `scope`, and NOT `ancestry`** — which is
+-- why `ancestry` carries a bound and they do not. `branch` emits
+-- `(branchId, deckId)` pairs drawn from a finite set, so `UNION` deduplicates
+-- and the walk terminates. `ancestry` carries `distance`, which increases every
+-- lap, so on a cyclic parent chain every lap produces a *new* distinct row and
+-- `UNION` never dedups: the statement never returns, and because it holds the
+-- database isolate every other query in the app blocks behind it while the UI
+-- sits on a spinner with no error and no timeout. `:maxWalk` is what makes that
+-- impossible. Truncating is acceptable **here specifically** because the result
+-- is a path, which the mapper already treats as chrome — a level with a short
+-- path is a far better outcome than a level that never loads — and every real
+-- chain is at most 10 long by BR-55.
+--
+-- A `LEFT JOIN` onto `child`, so a childless deck still yields exactly one row
+-- with `childDeckId` null — which is how "this deck has no sub-decks" stays
+-- distinguishable from "this deck does not exist" (no rows at all).
+--
+-- `ancestryJson` is the path back up, from this same statement and for the same
+-- reason `childDeckLevel` carries one: a rename must land on the title and on
+-- every row's path in one frame, and a second read is a second snapshot (AD-13).
+childDeckActivity:
+WITH RECURSIVE
+answer_days (deckId, cardId, day, isLearningAnswer, isRecentAnswer) AS (
+    SELECT
+        c.deck_id,
+        ans.card_id,
+        CAST((ans.answered_at - :windowFrom) / 86400 AS INTEGER),
+        CASE WHEN ans.kind = 'learning' THEN 1 ELSE 0 END,
+        CASE WHEN ans.answered_at >= :recentFrom THEN 1 ELSE 0 END
+    FROM study_answers ans
+    INNER JOIN cards c ON c.id = ans.card_id
+    WHERE ans.answered_at >= :windowFrom AND ans.answered_at < :windowUntil
+),
+card_days (deckId, cardId, day, isLearning, isRecent) AS (
+    SELECT deckId, cardId, day,
+           MAX(isLearningAnswer), MAX(isRecentAnswer)
+    FROM answer_days
+    GROUP BY deckId, cardId, day
+),
+branch (branchId, deckId) AS (
+    SELECT id, id FROM decks WHERE parent_deck_id = :parentId
+    UNION
+    SELECT b.branchId, d.id
+    FROM decks d
+    INNER JOIN branch b ON d.parent_deck_id = b.deckId
+),
+scope (deckId) AS (
+    SELECT id FROM decks WHERE id = :parentId
+    UNION
+    SELECT deckId FROM branch
+),
+ancestry (deckId, distance) AS (
+    SELECT parent_deck_id, 1 FROM decks
+    WHERE id = :parentId AND parent_deck_id IS NOT NULL
+    UNION
+    SELECT d.parent_deck_id, a.distance + 1
+    FROM decks d
+    INNER JOIN ancestry a ON d.id = a.deckId
+    WHERE d.parent_deck_id IS NOT NULL AND a.distance < :maxWalk
+)
+SELECT
+    parent.id AS scopeDeckId,
+    parent.name AS scopeDeckName,
+    child.id AS childDeckId,
+    child.name AS childDeckName,
+    COALESCE(branchAgg.activeCards30, 0) AS activeCards30,
+    COALESCE(branchAgg.activeCards7, 0) AS activeCards7,
+    COALESCE(branchAgg.activeDays30, 0) AS activeDays30,
+    COALESCE(branchAgg.activeDays7, 0) AS activeDays7,
+    COALESCE(branchAgg.learningCardDays30, 0) AS learningCardDays30,
+    COALESCE(branchAgg.learningCardDays7, 0) AS learningCardDays7,
+    COALESCE(branchAgg.reviewingCardDays30, 0) AS reviewingCardDays30,
+    COALESCE(branchAgg.reviewingCardDays7, 0) AS reviewingCardDays7,
+    COALESCE(scopeAgg.activeCards30, 0) AS scopeActiveCards30,
+    COALESCE(scopeAgg.activeCards7, 0) AS scopeActiveCards7,
+    COALESCE(scopeAgg.activeDays30, 0) AS scopeActiveDays30,
+    COALESCE(scopeAgg.activeDays7, 0) AS scopeActiveDays7,
+    COALESCE(scopeAgg.learningCardDays30, 0) AS scopeLearningCardDays30,
+    COALESCE(scopeAgg.learningCardDays7, 0) AS scopeLearningCardDays7,
+    COALESCE(scopeAgg.reviewingCardDays30, 0) AS scopeReviewingCardDays30,
+    COALESCE(scopeAgg.reviewingCardDays7, 0) AS scopeReviewingCardDays7,
+    (
+        SELECT json_group_array(
+            json_object('id', a.deckId, 'name', d.name, 'distance', a.distance)
+        )
+        FROM ancestry a
+        INNER JOIN decks d ON d.id = a.deckId
+    ) AS ancestryJson
+FROM decks AS parent
+LEFT JOIN decks AS child ON child.parent_deck_id = parent.id
+LEFT JOIN (
+    SELECT
+        b.branchId AS branchId,
+        COUNT(DISTINCT cd.cardId) AS activeCards30,
+        COUNT(DISTINCT CASE WHEN cd.isRecent = 1 THEN cd.cardId END)
+            AS activeCards7,
+        COUNT(DISTINCT cd.day) AS activeDays30,
+        COUNT(DISTINCT CASE WHEN cd.isRecent = 1 THEN cd.day END)
+            AS activeDays7,
+        SUM(cd.isLearning) AS learningCardDays30,
+        SUM(CASE WHEN cd.isRecent = 1 THEN cd.isLearning ELSE 0 END)
+            AS learningCardDays7,
+        SUM(1 - cd.isLearning) AS reviewingCardDays30,
+        SUM(CASE WHEN cd.isRecent = 1 THEN 1 - cd.isLearning ELSE 0 END)
+            AS reviewingCardDays7
+    FROM card_days cd
+    INNER JOIN branch b ON b.deckId = cd.deckId
+    GROUP BY b.branchId
+) branchAgg ON branchAgg.branchId = child.id
+LEFT JOIN (
+    SELECT
+        COUNT(DISTINCT cd.cardId) AS activeCards30,
+        COUNT(DISTINCT CASE WHEN cd.isRecent = 1 THEN cd.cardId END)
+            AS activeCards7,
+        COUNT(DISTINCT cd.day) AS activeDays30,
+        COUNT(DISTINCT CASE WHEN cd.isRecent = 1 THEN cd.day END)
+            AS activeDays7,
+        SUM(cd.isLearning) AS learningCardDays30,
+        SUM(CASE WHEN cd.isRecent = 1 THEN cd.isLearning ELSE 0 END)
+            AS learningCardDays7,
+        SUM(1 - cd.isLearning) AS reviewingCardDays30,
+        SUM(CASE WHEN cd.isRecent = 1 THEN 1 - cd.isLearning ELSE 0 END)
+            AS reviewingCardDays7
+    FROM card_days cd
+    INNER JOIN scope s ON s.deckId = cd.deckId
+) scopeAgg ON 1 = 1
+WHERE parent.id = :parentId
+ORDER BY child.created_at ASC, child.id ASC;

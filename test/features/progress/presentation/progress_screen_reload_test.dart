@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/features/progress/domain/models/deck_activity_snapshot_model.dart';
 import 'package:memox/features/progress/domain/models/progress_overview_model.dart';
 import 'package:memox/features/progress/domain/repositories/progress_repository.dart';
 import 'package:memox/features/progress/presentation/widgets/sections/progress_streak_hero_widget.dart';
@@ -52,6 +53,17 @@ class _DeferredProgressRepository implements ProgressRepository {
       Future<ProgressOverview>.delayed(readDuration, () => _snapshot),
     );
   }
+
+  /// The level read is not the subject here, so it answers at once with an
+  /// empty level: what this file measures is the frame after the *overview*
+  /// re-opens, and a level that also took a turn of the event loop would put a
+  /// second reason on screen for the same frame.
+  @override
+  Stream<DeckActivitySnapshot> watchDeckActivity({
+    required String? deckId,
+    required DateTime now,
+    required Duration utcOffset,
+  }) => Stream<DeckActivitySnapshot>.value(emptyActivitySnapshot());
 }
 
 void main() {

@@ -55,9 +55,17 @@ abstract final class RoutePaths {
   static const String deckStudyRelative = 'study';
 
   /// The progress branch. A real path for the same reason as [study]: a deep
-  /// link must open the app directly on the Progress tab. The screen behind it
-  /// is a placeholder — the branch is scaffolded ahead of the feature (AD-19).
+  /// link must open the app directly on the Progress tab. It shows Progress by
+  /// Deck at the library level — every root deck (UC-12).
   static const String progress = '/progress';
+
+  /// One deck's progress level, relative to [progress].
+  ///
+  /// A child route rather than a sibling, so drilling in pushes onto the
+  /// Progress branch: the bottom bar stays, Back returns to the level above, and
+  /// switching to another tab and back finds the deck still open. Same shape and
+  /// same reasoning as [deckDetailRelative] inside the Library branch.
+  static const String progressDeckRelative = ':deckId';
 
   /// The settings branch. Same contract as [progress]: a real, deep-linkable
   /// branch whose screen is a placeholder until app settings exist (AD-19).

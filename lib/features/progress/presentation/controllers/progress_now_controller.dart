@@ -18,7 +18,9 @@ part 'progress_now_controller.g.dart';
 ///   may have changed while nothing was watching;
 /// * **local midnight passing with the screen open** — `ProgressOverview`
 ///   schedules that from the `nextLocalMidnight` its own emission carried
-///   (BR-189).
+///   (BR-189), and `DeckActivityLevel` does the same from the boundary its own
+///   snapshot carries (BR-194). One notifier, two readers: the instant is a
+///   property of the screen's clock, not of either query.
 ///
 /// **Its own file, beside the query controller that watches it**, for the same
 /// reason `deck_list_now_controller.dart` is separate: this is an input-state

@@ -2756,5 +2756,156 @@
   "cardExportCloseAction": "Close",
   "@cardExportCloseAction": {
     "description": "The only action left when the scope is no longer valid — there is nothing to retry until the user selects again (M4.13 W3 state 7)."
+  },
+  "progressRange7Label": "7 days",
+  "@progressRange7Label": {
+    "description": "Range selector pill for the 7-day window (BR-194). Short because two pills share a row on a 320dp screen; progressRange7SemanticLabel carries the full phrase for a screen reader."
+  },
+  "progressRange30Label": "30 days",
+  "@progressRange30Label": {
+    "description": "Range selector pill for the 30-day window (BR-194)."
+  },
+  "progressRange7SemanticLabel": "Last 7 days",
+  "@progressRange7SemanticLabel": {
+    "description": "Screen-reader expansion of progressRange7Label. \"7 days\" alone does not say the window ends today."
+  },
+  "progressRange30SemanticLabel": "Last 30 days",
+  "@progressRange30SemanticLabel": {
+    "description": "Screen-reader expansion of progressRange30Label."
+  },
+  "progressRangeSelectorSemanticLabel": "Reporting window",
+  "@progressRangeSelectorSemanticLabel": {
+    "description": "Group label for the two range pills, so a screen reader announces what the choice is about before reading the options."
+  },
+  "progressSummaryLast7DaysTitle": "Last 7 days",
+  "@progressSummaryLast7DaysTitle": {
+    "description": "Heading of the summary panel while the 7-day window is selected. Repeats the window in words so a screenshot or a screen reader is unambiguous about which figures are shown."
+  },
+  "progressSummaryLast30DaysTitle": "Last 30 days",
+  "@progressSummaryLast30DaysTitle": {
+    "description": "Heading of the summary panel while the 30-day window is selected."
+  },
+  "progressActiveCardsMetricWord": "cards studied",
+  "@progressActiveCardsMetricWord": {
+    "description": "Word beside the distinct-card count (BR-193). \"Studied\" rather than \"reviewed\": the count includes learning turns, which are not reviews."
+  },
+  "progressActiveDaysMetricWord": "active days",
+  "@progressActiveDaysMetricWord": {
+    "description": "Word beside the distinct local-day count (BR-193). Days on which at least one card was answered."
+  },
+  "progressLearningMetricWord": "learning",
+  "@progressLearningMetricWord": {
+    "description": "Word beside the learning half of the card-day partition (BR-196). Short on purpose: the word has to survive a 320dp cell at text scale 2.0, where a longer one is clipped rather than wrapped. The unit it counts is stated once by progressCardDayUnitNote."
+  },
+  "progressReviewingMetricWord": "reviewing",
+  "@progressReviewingMetricWord": {
+    "description": "Word beside the reviewing half of the card-day partition (BR-196). Short for the same reason as progressLearningMetricWord."
+  },
+  "progressCardDayUnitNote": "Learning and reviewing count card-days — one card on one day.",
+  "@progressCardDayUnitNote": {
+    "description": "Caption under the summary panel's metric grid. Two units sit in that grid: cards and days on the top row, card-days on the bottom, and without this line 12 + 60 beside 45 reads as arithmetic that does not add up. It is a caption rather than four longer words because a word long enough to carry the unit is clipped in a 320dp cell at text scale 2.0."
+  },
+  "progressActiveCardsSemanticLabel": "{count, plural, =0{No cards studied} =1{1 card studied} other{{count} cards studied}}",
+  "@progressActiveCardsSemanticLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Screen-reader sentence for the distinct-card metric. A whole sentence rather than a number beside a word, because a reader announces the two separately and \"12\" then \"cards studied\" is heard as two facts."
+  },
+  "progressActiveDaysSemanticLabel": "{count, plural, =0{No active days} =1{1 active day} other{{count} active days}}",
+  "@progressActiveDaysSemanticLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Screen-reader sentence for the active-day metric."
+  },
+  "progressLearningSemanticLabel": "{count, plural, =0{No learning card-days} =1{1 learning card-day} other{{count} learning card-days}}",
+  "@progressLearningSemanticLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Screen-reader sentence for the learning half of the partition (BR-196). Says card-days, because the figure counts a card once per day and not once per answer."
+  },
+  "progressReviewingSemanticLabel": "{count, plural, =0{No reviewing card-days} =1{1 reviewing card-day} other{{count} reviewing card-days}}",
+  "@progressReviewingSemanticLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Screen-reader sentence for the reviewing half of the partition (BR-196)."
+  },
+  "progressDeckRowSemanticLabel": "{name}, in {path}, {range}",
+  "@progressDeckRowSemanticLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "range": {
+        "type": "String"
+      },
+      "path": {
+        "type": "String"
+      }
+    },
+    "description": "Screen-reader sentence naming a deck row, where it sits and which window its figures cover, read before the four metrics. Only used when the deck has ancestors; a root deck uses progressDeckRootRowSemanticLabel."
+  },
+  "progressDeckRootRowSemanticLabel": "{name}, {range}",
+  "@progressDeckRootRowSemanticLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "range": {
+        "type": "String"
+      }
+    },
+    "description": "Screen-reader sentence for a deck row with no ancestors. A root deck has no path, and a sentence with an empty clause reads worse than the name alone — but it still has to carry the window, because a reader swiping into the middle of a long list has no other way to know which one is on screen."
+  },
+  "progressPathSeparator": " › ",
+  "@progressPathSeparator": {
+    "description": "Glyph between two steps of a deck path on a progress row. Localizable because the mark that reads as \"contains\" is not the same in every script; the spaces around it are part of the value so the path can wrap at them."
+  },
+  "progressEmptyDecksTitle": "No decks yet",
+  "@progressEmptyDecksTitle": {
+    "description": "Top level with no decks at all. Distinct from progressNoActivityTitle: there is nothing to measure, not nothing measured."
+  },
+  "progressEmptyDecksMessage": "Create a deck in your library and your study activity will show up here.",
+  "@progressEmptyDecksMessage": {
+    "description": "Body of the no-decks state. Names the next step without offering a button, because the step is on another tab and a control that switches tabs from a progress screen reads as a detour."
+  },
+  "progressEmptySubDecksTitle": "No sub-decks here",
+  "@progressEmptySubDecksTitle": {
+    "description": "A deck level whose deck holds cards rather than sub-decks. Its own figures are still shown above; this states that there is nothing further to drill into."
+  },
+  "progressEmptySubDecksMessage": "This deck holds cards, so its own totals above are the whole story.",
+  "@progressEmptySubDecksMessage": {
+    "description": "Body of the no-sub-decks state. Points back at the summary rather than presenting the level as empty, because it is not: the deck has figures."
+  },
+  "progressNoActivityTitle": "Nothing studied in this window",
+  "@progressNoActivityTitle": {
+    "description": "Decks exist but none was answered inside the selected window (BR-194). Deliberately not an error and not a scold - zero is a normal reading."
+  },
+  "progressNoActivityMessage": "Switch to a longer window, or study a deck to start filling this in.",
+  "@progressNoActivityMessage": {
+    "description": "Body of the all-zero state. Offers the one action that can change the reading without leaving the screen - the other window - before suggesting studying."
+  },
+  "progressDeckMissingTitle": "This deck no longer exists",
+  "@progressDeckMissingTitle": {
+    "description": "The deck named by /progress/:deckId is gone - deleted while the screen was open, or a stale link. Distinct from an error: nothing failed."
+  },
+  "progressDeckMissingMessage": "It may have been deleted. Go back to see the decks you still have.",
+  "@progressDeckMissingMessage": {
+    "description": "Body of the deck-missing state. Retry is deliberately absent - re-reading will fail the same way - so the only offer is the way back."
+  },
+  "progressDeckMissingBackAction": "Back to progress",
+  "@progressDeckMissingBackAction": {
+    "description": "Returns to the library level of Progress by Deck from a level whose deck is gone."
   }
 }

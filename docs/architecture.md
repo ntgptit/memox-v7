@@ -7,8 +7,8 @@
 | **Scope** | Quyết định ràng buộc nhiều tài liệu hoặc nhiều layer. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), hình dạng dữ liệu (`data-model.md`) |
 | **Source of truth for** | AD-xx · đánh đổi kiến trúc · phương án đã bị loại · lý do pin toolchain |
 | **Depends on** | `document-conventions.md`, `product.md` |
-| **Updated by task** | M99.23 (AD-19 · Progress hết hạn placeholder, Settings thì chưa) |
-| **Last updated** | 2026-08-13 |
+| **Updated by task** | M99.24 (AD-19 · rule placeholder gắn với tình trạng branch; Progress đã tốt nghiệp và có thêm cấp deck) |
+| **Last updated** | 2026-08-15 |
 
 Format theo `document-conventions.md` §6.1. AD xếp theo số; ID vĩnh viễn (§7).
 
@@ -1325,15 +1325,22 @@ cả hai đều chạy được:
 | | |
 |---|---|
 | **Status** | accepted |
-| **Affected documents** | `product.md` · `it-scenarios/01-navigation-and-continuity.md` · `wbs.md` (M99.7, M99.23) · `wireframes/m99-23-progress-overview.md` |
+| **Affected documents** | `product.md` · `it-scenarios/01-navigation-and-continuity.md` · `wbs.md` (M99.7, M99.23, M99.24) · `wireframes/m99-23-progress-overview.md` · `wireframes/m99-progress-by-deck.md` |
 
 **Decision.** Navigation shell khai báo đúng bốn `StatefulShellBranch`, theo thứ
 tự cố định: **Decks (0) · Study (1) · Progress (2) · Settings (3)**. Decks vẫn
-là cold-start branch (UC-06). Một branch chưa có nghiệp vụ canonical MUST chỉ có
-presentation-only placeholder screen: placeholder MUST NOT tạo domain entity,
-repository, provider, DAO, bảng, dữ liệu mẫu hay persistence nào — không đọc
-provider, không mở session, không ghi database khi vào, thoát hoặc chuyển tab.
-Mỗi branch có path thật (`/progress`, `/settings`) để deep link mở đúng tab.
+là cold-start branch (UC-06). Một branch **chưa có nghiệp vụ canonical**
+MUST chỉ có presentation-only placeholder screen: placeholder MUST NOT tạo
+domain entity, repository, provider, DAO, bảng, dữ liệu mẫu hay persistence nào
+— không đọc provider, không mở session, không ghi database khi vào, thoát hoặc
+chuyển tab. Ràng buộc này gắn với **tình trạng của branch**, không phải với tên
+của nó: nó áp cho mọi branch còn là scaffold, và **chấm dứt cho một branch ngay
+khi nghiệp vụ của branch đó được chốt trong `business-rules.md` và
+`use-cases.md`**. Tại thời điểm AD-19 được viết, hai branch còn scaffold là
+Progress và Settings; **Progress đã tốt nghiệp ở M99.23** (BR-182…BR-191,
+UC-12) và có thêm cấp deck ở M99.24 (BR-192…BR-199, UC-13), nên placeholder
+rule không còn áp cho nó. Settings vẫn là scaffold. Mỗi branch có path thật
+(`/progress`, `/settings`) để deep link mở đúng tab.
 Thư viện starter thuộc branch Decks; MUST NOT có tab Profile chừng nào chưa có
 auth/profile domain (AD-03).
 
@@ -1357,7 +1364,7 @@ người dùng lẫn phiên làm việc sau tin là thật.
 **Consequences.** IA và deep-link contract đóng băng sớm: feature thật sau này
 thay một screen trong một branch có sẵn, không đụng router hay shell. Người
 dùng thấy rõ tính năng đang phát triển thay vì một tab đột nhiên xuất hiện.
-Giá phải trả: hai placeholder và test route của chúng phải được duy trì, và tab
+Giá phải trả: mỗi placeholder và test route của nó phải được duy trì, và tab
 scaffold dễ bị đọc nhầm là feature đã xong — WBS và `product.md` phải nói rõ
 điều ngược lại. **Hệ quả đó đã được kiểm chứng ở M99.23:** thay placeholder
 Progress bằng vertical slice thật chạm đúng một dòng `builder` trong
@@ -1366,6 +1373,12 @@ Progress bằng vertical slice thật chạm đúng một dòng `builder` trong
 theo tên screen — companion visual audit ở đường dẫn gương (MX-VIS-001) và
 widget test của screen — nên "một screen đổi một screen" là đúng cho production
 tree và không đúng cho test tree. Một hệ quả đã đo được: bốn destination vượt trần
+
+điều ngược lại. **Một giá thứ hai đã hiện ra ở M99.23:** rule ban đầu viết tên
+hai branch vào một câu MUST, nên khi Progress có nghiệp vụ thật thì code hợp lệ
+lại vi phạm một AD đang `accepted`, và `check_docs.py` không thấy — nó kiểm ID
+và citation, không kiểm ngữ nghĩa. Vì thế rule nay gắn với *tình trạng* của
+branch: branch tiếp theo tốt nghiệp không cần sửa lại AD này nữa. Một hệ quả đã đo được: bốn destination vượt trần
 `4 × 120dp` của `MxNavigationBar` trên màn 393dp, nên cap bề rộng phải nhường
 cho bề rộng màn hình (M99.7) — đúng hành vi Material thiết kế cho even split.
 

@@ -154,18 +154,7 @@
 | Bước | Thao tác người dùng | Kết quả mong đợi |
 |---|---|---|
 | 1 | Mở app và quan sát bottom navigation | Đúng bốn destination theo thứ tự Thư viện · Học · Tiến độ · Cài đặt; tab Thư viện đang được chọn |
-| 2 | Chạm tab Tiến độ | Màn Tiến độ hiện chuỗi ngày hiện tại, tổng hôm nay tách Learning/Reviewing và bảy ngày gần nhất, đọc từ lịch sử học thật (UC-12); không tạo phiên Study; không có ghi database nào (BR-190) |
-| 3 | Chạm tab Cài đặt | Placeholder Cài đặt hiện icon, tiêu đề và mô tả "đang được phát triển"; không có tùy chọn giả nào bật/tắt được; không tạo phiên; không ghi database |
-| 4 | Khởi động app với location `/progress` (in-process, xem Phạm vi deep link) | App mở thẳng màn Tiến độ và tab Tiến độ được chọn, không đi qua Decks |
-| 5 | Khởi động app với location `/settings` (in-process, xem Phạm vi deep link) | App mở thẳng placeholder Cài đặt và tab Cài đặt được chọn, không đi qua Decks |
-| 6 | Từ một bộ thẻ con đang mở, chạm Tiến độ rồi quay lại Thư viện | Quay đúng bộ thẻ con đang mở — chuyển sang branch Tiến độ không làm mất ngăn xếp của branch khác |
-| 7 | Chạm lại tab đang được chọn | Branch quay về màn gốc của nó theo đúng hành vi reselect hiện có, không lỗi |
-| 8 | Xem bốn nhãn ở màn 320dp và text scale 2.0 | Nhãn Thư viện/Học/Tiến độ/Cài đặt vẫn đọc được, không tràn; nội dung của Tiến độ và của placeholder Cài đặt cuộn được thay vì tràn |
-
-Phần host của kịch bản này chạy ở `test/integration/widgets/navigation_widget_test.dart`
-(đếm số dòng của mọi bảng trước và sau khi thăm branch Tiến độ và placeholder
-Cài đặt) và `test/app/router/app_router_test.dart` (deep link, thứ tự tab, giữ
-ngăn xếp).
+| 2 | Chạm tab Tiến độ | Màn Tiến độ mở: chuỗi ngày hiện tại, tổng hôm nay tách Learning/Reviewing và bảy ngày gần nhất (UC-12), rồi bên dưới là bộ chọn 7/30 ngày, bảng tổng và một hàng cho mỗi root deck (UC-13) — hoặc mặt lifetime-empty khi chưa từng học. Không tạo phiên Study; không có ghi database nào (BR-190, BR-198) |
 
 ## IT-NAV-012 — Import wizard là full-screen task phía trên shell
 

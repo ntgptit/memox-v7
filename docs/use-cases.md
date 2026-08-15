@@ -7,8 +7,8 @@
 | **Scope** | Must-have của MVP. Ngoài phạm vi: should/nice-to-have, và mọi thứ ở mục "Điều đã cố ý không đặc tả" |
 | **Source of truth for** | UC-xx · main/alternative/error flow · UI state matrix của từng màn |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md` |
-| **Updated by task** | M99.23 — UC-12: xem tiến độ học (streak, hôm nay, bảy ngày) |
-| **Last updated** | 2026-08-13 |
+| **Updated by task** | M99.24 — UC-13: xem tiến độ theo deck (cấp thư viện → cấp deck, hai khoảng); trước đó M99.23 — UC-12: xem tiến độ học (streak, hôm nay, bảy ngày) |
+| **Last updated** | 2026-08-15 |
 
 Chỉ đặc tả must-have. Should-have và nice-to-have viết khi tới lượt — đặc tả
 trước những thứ có thể bị cắt là lãng phí.
@@ -871,13 +871,81 @@ error + Retry (E1/E2). Live refresh (A3) và midnight rollover (A4) là **chuy�
 tiếp giữa hai loaded**, không phải state thứ sáu; luật cấm hạ màn về loading khi
 đã có dữ liệu nằm ở BR-189.
 
+## UC-13 · Xem tiến độ theo deck
+
+| | |
+|---|---|
+| **Status** | active |
+
+**Actor:** Người dùng
+**Trigger:** Mở tab Progress, hoặc chạm một hàng deck trên màn hình tiến độ
+**Preconditions:** Không có. Thư viện rỗng và thư viện chưa học lần nào đều là
+trạng thái hợp lệ và có màn hình riêng.
+
+**Main flow:**
+1. Người dùng mở tab Progress. Hệ thống hiển thị **cấp thư viện**: bộ chọn
+   khoảng 7/30 ngày, một bảng tổng cho toàn bộ dữ liệu, và một hàng cho mỗi
+   root deck (BR-194).
+2. Mỗi hàng mang tên deck, đường dẫn của nó khi có, và bốn số của khoảng đang
+   chọn: số thẻ đã học, số ngày có học, số card-day học mới và số card-day ôn
+   tập (BR-192, BR-193, BR-196). Số của một hàng phủ **toàn bộ subtree** của
+   deck đó (BR-195).
+3. Danh sách sắp theo số thẻ đã học giảm dần, tie-break bằng tên đã fold rồi
+   id; deck chưa học gì vẫn hiện và đứng cuối (BR-197).
+4. Người dùng chạm `30 ngày`. Mọi số trên màn hình và thứ tự danh sách đổi ngay
+   sang khoảng dài hơn — không có lần đọc thứ hai và không có trạng thái loading
+   (BR-194, BR-197).
+5. Người dùng chạm một hàng. Hệ thống mở **cấp của deck đó**: cùng bố cục, tổng
+   của riêng subtree đó, và một hàng cho mỗi deck con trực tiếp. Back trả về
+   đúng cấp vừa rời, ở mọi độ sâu.
+6. Trong lúc màn hình mở, một lượt học được ghi ở nơi khác — hoặc một thẻ được
+   chuyển deck, hoặc một deck bị xoá — thì các số tự cập nhật (BR-199).
+
+**Alternative flows:**
+- **A1 — Deck chứa thẻ chứ không chứa deck con:** cấp đó không có hàng nào để
+  liệt kê. Hệ thống vẫn hiện bộ chọn và bảng tổng của chính deck đó, kèm một
+  dòng nói rằng tổng ở trên đã là toàn bộ — vì cấp này **không** rỗng, nó chỉ
+  không có gì để đi sâu thêm.
+- **A2 — Thư viện chưa có deck nào:** hệ thống chỉ hiện empty state và **không**
+  hiện bộ chọn hay bảng tổng: không có deck thì không có khoảng nào để có gì
+  xảy ra trong đó. Không có nút hành động — bước tiếp theo nằm ở tab Thư viện,
+  và một nút nhảy tab từ màn hình tiến độ đọc như một đường vòng.
+- **A3 — Có deck nhưng khoảng đang chọn không có hoạt động nào:** danh sách
+  **vẫn liệt kê đủ mọi deck** với các số 0, và bảng tổng mang thêm một dòng
+  giải thích cùng gợi ý đổi sang khoảng dài hơn (BR-197). Trạng thái này trung
+  tính: không dùng màu lỗi, không trách móc.
+- **A4 — Nửa đêm địa phương đi qua khi màn hình đang mở:** cửa sổ trượt một
+  ngày và hệ thống tự đọc lại, dù không có write nào trong database (BR-194,
+  BR-199).
+
+**Error flows:**
+- **E1 — Đọc dữ liệu thất bại:** hệ thống hiện lý do đã localize theo **kiểu**
+  failure — không bao giờ là `Failure.message` — cùng `Try again`, và nói rõ
+  lịch sử học không bị ảnh hưởng vì đọc tiến độ không ghi gì (BR-198). Retry mở
+  lại lần đọc từ đầu.
+- **E2 — Deck của deep link không còn tồn tại:** đây **không** phải lỗi. Hệ
+  thống hiện một empty state riêng và chỉ đề nghị đường quay lại cấp thư viện;
+  `Try again` cố ý vắng mặt vì đọc lại sẽ thất bại y hệt.
+
+**Postconditions:** Database không đổi — nội dung, timestamp, `content_type`,
+study state, history, cờ và tag đều nguyên vẹn, và không session nào được mở
+hay đóng (BR-198).
+
+**Business rules:** BR-43, BR-51, BR-55, BR-56, BR-57, BR-76, BR-105, BR-192,
+BR-193, BR-194, BR-195, BR-196, BR-197, BR-198, BR-199
+
+**UI states:** loading · mixed activity (một số deck có, một số không) ·
+all-zero (có deck, khoảng rỗng) · no decks (cấp thư viện) · no sub-decks (cấp
+deck chứa thẻ) · read error + retry · deck missing + đường quay lại. Không có
+state "empty selection": bộ chọn luôn có đúng một khoảng được chọn.
+
 ## Điều đã cố ý không đặc tả
 
 | Thứ | Vì sao |
 |---|---|
 | Đưa deck con lên thành root deck | Cần quyết định scheduler mới; là tính năng riêng, không phải phép di chuyển (UC-09 A2) |
 | Tìm kiếm card (S1) | Should-have, chưa tới lượt |
-| ~~Thống kê / streak (S2)~~ | **Đã đặc tả ở M99.23** — UC-12 và BR-182…BR-191 chốt đơn vị đếm, partition, streak và phạm vi v1 trước khi viết code. Còn ngoài phạm vi v1 và vẫn chưa có BR: accuracy, longest streak, goal, XP, heatmap, lọc theo deck (BR-191) |
+| ~~Thống kê / streak (S2)~~ | **Đã đặc tả ở M99.23 và M99.24** — UC-12 với BR-182…BR-191 chốt đơn vị đếm, partition, streak và phạm vi v1; UC-13 với BR-192…BR-199 chốt drill-down theo deck trên hai khoảng. Còn ngoài phạm vi v1 và vẫn chưa có BR: accuracy, longest streak, goal, XP, heatmap, lọc theo deck, dự báo due và so sánh giữa hai khoảng (BR-191, BR-192) |
 | Đảo chiều card (S3) | Should-have |
 | ~~Export (nửa còn lại của N1)~~ | **Đã đặc tả ở M99.21** — UC-11 và BR-174…BR-181 chốt scope, encoder, filename, share và quyền riêng tư trước khi viết code, đúng điều kiện mà mục này đặt ra. Còn nice-to-have ngoài phạm vi export nội dung: backup/restore, sync và `.apkg`. |
 | Nhắc nhở hằng ngày (N2) | Nice-to-have, cần quyền notification |

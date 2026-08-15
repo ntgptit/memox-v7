@@ -3,10 +3,10 @@ import 'package:widgetbook/widgetbook.dart';
 
 /// The one scaffolded-branch placeholder left (AD-19).
 ///
-/// It was two until M99.23, when Progress got its real screen and moved to
-/// `progress_screen_use_case.dart` — which needs a `ProviderScope` and a fake
-/// repository, and so could not stay in a file whose whole premise is that
-/// there is nothing to wire.
+/// It was two until M99.23/M99.24, when Progress got its real screens and moved
+/// to `progress_screen_use_case.dart` and `progress_deck_screen_use_case.dart`
+/// — both of which need a `ProviderScope` and a fake repository, and so could
+/// not stay in a file whose whole premise is that there is nothing to wire.
 ///
 /// No `ProviderScope`, no fake repository and no scenario dropdown, because this
 /// screen is presentation-only: it reads nothing, so there is no state to
