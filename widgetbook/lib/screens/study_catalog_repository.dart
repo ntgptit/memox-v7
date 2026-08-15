@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 import 'package:memox/features/study/domain/entities/study_queue_item_entity.dart';
 import 'package:memox/features/study/domain/entities/study_session_entity.dart';
@@ -31,9 +34,18 @@ enum StudyCatalogScenario {
   learningRecall('learning · recall', StudyMode.recall),
   learningFill('learning · fill', StudyMode.fill),
   reviewSelfAssess('review · self-assess (sm2)', StudyMode.selfAssess),
-  nothingDue('entry · nothing due', StudyMode.browse),
+  nothingDue('entry · deck has nothing due', StudyMode.browse),
   nothingLeft('entry · everything learned', StudyMode.browse),
-  longContent('long Vietnamese content', StudyMode.browse);
+  longContent('long Vietnamese content', StudyMode.browse),
+  // Study Home's own states. The four below had no scenario at all, so
+  // more than half of what that screen renders was outside the catalogue —
+  // and `nothingDue`, whose caption promised one of them, renders the
+  // empty library instead.
+  homeEmptyLibrary('home · no decks yet', StudyMode.browse),
+  homeNoCards('home · decks, no cards', StudyMode.browse),
+  homeAllClear('home · nothing waiting', StudyMode.browse),
+  homeLoading('home · loading', StudyMode.browse),
+  homeError('home · read failed', StudyMode.browse);
 
   const StudyCatalogScenario(this.label, this.mode);
 
@@ -333,6 +345,18 @@ class StudyHomeCatalogRepository implements StudyHomeRepository {
 
   @override
   Stream<StudyHomeModel> watchStudyHome(StudyDayModel day) {
+    // A stream that never answers, so the catalogue can hold the spinner still.
+    // `Stream.empty()` would not do it: an empty stream closes at once, and a
+    // closed stream with no value is a state Riverpod may render differently.
+    if (scenario == StudyCatalogScenario.homeLoading) {
+      return StreamController<StudyHomeModel>().stream;
+    }
+    if (scenario == StudyCatalogScenario.homeError) {
+      return Stream<StudyHomeModel>.error(
+        const DatabaseFailure(message: 'catalog: read failed'),
+      );
+    }
+
     final decks = scenario.homeDecks..sort(compareStudyHomeDecks);
 
     return Stream<StudyHomeModel>.value(
@@ -366,7 +390,29 @@ extension StudyHomeCatalogScenario on StudyCatalogScenario {
   List<StudyHomeDeckModel> get homeDecks => switch (this) {
     // The first-run screen: no deck at all, so the catalog can show the starter
     // call to action rather than only the populated list.
-    StudyCatalogScenario.nothingDue => <StudyHomeDeckModel>[],
+    StudyCatalogScenario.nothingDue ||
+    StudyCatalogScenario.homeEmptyLibrary => <StudyHomeDeckModel>[],
+    // Decks that exist and hold nothing — a different screen from the one
+    // above, and the one BR-202 distinguishes it from.
+    StudyCatalogScenario.homeNoCards => <StudyHomeDeckModel>[
+      _homeDeck(id: 'catalog-empty', name: 'Bộ thẻ mới', totalCards: 0),
+      _homeDeck(
+        id: 'catalog-empty-2',
+        name: 'Ngữ pháp',
+        scheduler: SchedulerType.sm2,
+        totalCards: 0,
+      ),
+    ],
+    // Decks with cards and nothing waiting today: the "you are all caught up"
+    // line, which is neither empty nor a list with work in it.
+    StudyCatalogScenario.homeAllClear => <StudyHomeDeckModel>[
+      _homeDeck(id: 'catalog-clear', name: 'Tiếng Hàn giao tiếp'),
+      _homeDeck(
+        id: 'catalog-clear-2',
+        name: 'Kanji cơ bản',
+        scheduler: SchedulerType.sm2,
+      ),
+    ],
     StudyCatalogScenario.longContent => <StudyHomeDeckModel>[
       _homeDeck(
         id: 'catalog-long',
@@ -397,6 +443,12 @@ StudyHomeDeckModel _homeDeck({
   int overdue = 0,
   int dueToday = 0,
   int newCount = 0,
+
+  /// Stated only by the decks-with-no-cards scenario. The default below is
+  /// deliberately generous, and it used to be unconditional — which made
+  /// `hasNoCards` unreachable and took one of Study Home's seven states out of
+  /// the catalogue entirely.
+  int? totalCards,
 }) => StudyHomeDeckModel(
   deckId: id,
   deckName: name,
@@ -404,7 +456,7 @@ StudyHomeDeckModel _homeDeck({
   // Enough cards to hold the workload and then some, so a deck with nothing
   // waiting still renders as a studiable deck rather than as the empty-library
   // state (BR-202).
-  totalCardCount: overdue + dueToday + newCount + 20,
+  totalCardCount: totalCards ?? (overdue + dueToday + newCount + 20),
   overdueCount: overdue,
   dueTodayCount: dueToday,
   newCount: newCount,

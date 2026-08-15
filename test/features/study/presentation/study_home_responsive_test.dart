@@ -96,6 +96,36 @@ void main() {
         reason: 'a workload count was cut off rather than wrapped',
       );
     });
+
+    testWidgets('the resume card is not clipped either', (tester) async {
+      // **The same pump, a widget nobody asked.** The sweep above queries only
+      // paragraphs inside the workload row, and the resume card's deck name and
+      // its `maxLines: 2` subtitle render in the same 320dp / 2.0× / Vietnamese
+      // frame. Ellipsis is silent, so a clipped "Đang ôn tập · Tự đánh giá"
+      // would have passed.
+      await harness.pump(
+        tester,
+        surface: const Size(320, 568),
+        textScale: 2,
+        locale: const Locale('vi'),
+      );
+
+      final clipped = tester
+          .renderObjectList<RenderParagraph>(
+            find.descendant(
+              of: find.byType(StudyHomeResumeSectionWidget),
+              matching: find.byType(RichText),
+            ),
+          )
+          .where((paragraph) => paragraph.didExceedMaxLines)
+          .toList();
+
+      expect(
+        clipped,
+        isEmpty,
+        reason: 'the resume card cut a line off rather than wrapping it',
+      );
+    });
   });
 
   group('long content', () {
