@@ -42,6 +42,7 @@ class ReminderScreenHarness {
     Size surface = const Size(393, 852),
     double textScale = 1,
     Locale locale = const Locale('en'),
+    Brightness brightness = Brightness.light,
   }) async {
     tester.view.physicalSize = surface;
     tester.view.devicePixelRatio = 1;
@@ -59,7 +60,9 @@ class ReminderScreenHarness {
           utcOffsetProvider.overrideWithValue(() => offset),
         ],
         child: MaterialApp(
-          theme: buildLightTheme(),
+          theme: brightness == Brightness.dark
+              ? buildDarkTheme()
+              : buildLightTheme(),
           locale: locale,
           localizationsDelegates: const <LocalizationsDelegate<Object>>[
             AppLocalizations.delegate,

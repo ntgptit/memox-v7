@@ -274,6 +274,42 @@ void main() {
       );
     });
 
+    testWidgets('the hardest configuration the wireframe names, in dark', (
+      tester,
+    ) async {
+      // 320dp, scale 2.0, Vietnamese, dark — the combination M6 A1/A2 name and
+      // that no test ran end to end. Brightness changes colour tokens and not
+      // text metrics, so a light-theme geometry pass *should* hold here; the
+      // point is that "should" was the only thing holding it, and the banner is
+      // present, which none of the other scale-2 cases arrange.
+      harness.platform = FakeReminderPlatform(
+        permission: ReminderPermission.denied,
+      );
+      await harness.pump(
+        tester,
+        surface: const Size(320, 568),
+        textScale: 2,
+        locale: const Locale('vi'),
+        brightness: Brightness.dark,
+      );
+      await tester.tap(find.byType(Switch));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(MxCard), findsNWidgets(2));
+      expect(tester.takeException(), isNull);
+
+      // The same `didExceedMaxLines` sweep the light-theme case uses, and for
+      // the same reason: a label that runs out of room is cut silently, with
+      // no overflow stripe and no exception for `takeException` to catch.
+      final truncated = tester
+          .renderObjectList<RenderParagraph>(find.byType(RichText))
+          .where((paragraph) => paragraph.didExceedMaxLines)
+          .map((paragraph) => paragraph.text.toPlainText())
+          .toList();
+
+      expect(truncated, isEmpty, reason: 'ellipsized in vi/dark at 320@2.0');
+    });
+
     testWidgets('no label is ellipsized at 320x568 with textScaler 2.0', (
       tester,
     ) async {
