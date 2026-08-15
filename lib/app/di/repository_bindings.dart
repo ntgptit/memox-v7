@@ -184,7 +184,7 @@ StudyRepository studyRepositoryBinding(Ref ref) =>
 StudyHomeRepository studyHomeRepositoryBinding(Ref ref) =>
     StudyHomeRepositoryImpl(StudyHomeDao(ref.watch(appDatabaseProvider)));
 
-/// The app's one global options row (BR-182).
+/// The app's one global options row (BR-210).
 ///
 /// **The database itself, not a DAO** — the same difference `cardRepositoryBinding`
 /// explains. It takes the clock because every write stamps `updated_at` and

@@ -44,7 +44,16 @@ class _SettingsResetDialog extends ConsumerWidget {
       previous,
       next,
     ) {
-      if (next.outcome == null || previous?.outcome != null) return;
+      // **Close on a failure too.** The first version returned early whenever
+      // `outcome` was null, and `submitStateFromFailure` produces exactly that
+      // — a state carrying a `failure` and no outcome. So a failed reset left
+      // the dialog standing, unchanged and silent, while the error band and its
+      // retry rendered on the section *behind* the scrim. The band is where W4
+      // says the failure belongs, and it can only be read once this is gone.
+      final bool hasSettled = next.outcome != null || next.failure != null;
+      final bool hasSettledAlready =
+          previous?.outcome != null || previous?.failure != null;
+      if (!hasSettled || hasSettledAlready) return;
       onClose();
     });
 

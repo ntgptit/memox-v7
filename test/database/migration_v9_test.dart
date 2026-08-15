@@ -6,7 +6,7 @@ import 'package:sqlite3/common.dart';
 import '../drift/generated/schema.dart';
 
 /// The v8 → v9 upgrade: `app_settings.theme_mode` and `app_settings.language`
-/// (BR-186, BR-187).
+/// (BR-214, BR-215).
 ///
 /// **Additive, and the tests are here to prove it stayed that way.** Two
 /// `ALTER TABLE ADD COLUMN` with `DEFAULT 'system'`; no row is rewritten, and
@@ -23,7 +23,7 @@ void main() {
   /// compares the upgraded database against the current declaration, so a
   /// `CHECK` or a type that the `ALTER` spelled differently from
   /// `tables/settings.drift` fails here rather than on a user's device.
-  Future<AppDatabase> upgradedFromV7(
+  Future<AppDatabase> upgradedFromV8(
     void Function(CommonDatabase raw) seed,
   ) async {
     final verifier = SchemaVerifier(GeneratedHelper());
@@ -66,7 +66,7 @@ void main() {
     test(
       'a v8 database upgrades and validates against the v9 declaration',
       () async {
-        final db = await upgradedFromV7(
+        final db = await upgradedFromV8(
           (raw) => seedSettings(raw, cardLimit: 20, newCardOrder: 'created'),
         );
 
@@ -78,7 +78,7 @@ void main() {
       // Not a placeholder: every build before v9 followed the platform for
       // both, because it had no stored choice to follow instead. `'system'` is
       // the truthful record of that, so no `UPDATE` is needed anywhere.
-      final db = await upgradedFromV7(
+      final db = await upgradedFromV8(
         (raw) => seedSettings(raw, cardLimit: 20, newCardOrder: 'created'),
       );
 
@@ -92,7 +92,7 @@ void main() {
       // The failure this catches is a migration that rebuilt the table instead
       // of altering it and re-seeded the defaults on the way — which would
       // silently reset a card limit the user chose.
-      final db = await upgradedFromV7(
+      final db = await upgradedFromV8(
         (raw) => seedSettings(raw, cardLimit: 35, newCardOrder: 'random'),
       );
 
@@ -103,7 +103,7 @@ void main() {
     });
 
     test('the table still holds exactly one row', () async {
-      final db = await upgradedFromV7(
+      final db = await upgradedFromV8(
         (raw) => seedSettings(raw, cardLimit: 20, newCardOrder: 'created'),
       );
 
@@ -118,7 +118,7 @@ void main() {
       // SQLite applies a column constraint declared in `ADD COLUMN`, but it is
       // the kind of thing that is easy to write and easy to lose — and losing
       // it is invisible until a value nothing can read is already stored.
-      final db = await upgradedFromV7(
+      final db = await upgradedFromV8(
         (raw) => seedSettings(raw, cardLimit: 20, newCardOrder: 'created'),
       );
 
@@ -131,7 +131,7 @@ void main() {
     });
 
     test('the CHECK on language survived the ALTER', () async {
-      final db = await upgradedFromV7(
+      final db = await upgradedFromV8(
         (raw) => seedSettings(raw, cardLimit: 20, newCardOrder: 'created'),
       );
 
@@ -148,7 +148,7 @@ void main() {
       // future edit adding a second statement to `_upgradeToV9` without saying
       // so — decks, cards and study state are what a settings migration has no
       // business reaching.
-      final db = await upgradedFromV7((raw) {
+      final db = await upgradedFromV8((raw) {
         seedSettings(raw, cardLimit: 20, newCardOrder: 'created');
         raw
           ..execute(
@@ -176,7 +176,7 @@ void main() {
           .getSingle();
       final cards = await db.customSelect('SELECT * FROM cards').get();
 
-      // The deck override in particular: BR-184 says changing the app-wide
+      // The deck override in particular: BR-212 says changing the app-wide
       // options must never touch it, and a migration is the one place that
       // could do it to every deck at once.
       expect(deck.data['study_config'], contains('"card_limit":30'));

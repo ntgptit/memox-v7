@@ -7,7 +7,7 @@
 | **Scope** | Bảng, cột, index, quan hệ, query bất biến. Ngoài phạm vi: SQL runtime (`lib/core/database/`, chưa tồn tại) |
 | **Source of truth for** | Schema · cột và kiểu · index · query bất biến · thứ tự migration |
 | **Depends on** | `document-conventions.md`, `architecture.md`, `business-rules.md` |
-| **Updated by task** | M99.23 — `app_settings.theme_mode` và `app_settings.language` (BR-186, BR-187), migration v8, và bảng thứ tự migration bổ sung v6/v7 vốn bị bỏ sót |
+| **Updated by task** | M99.28 — `app_settings.theme_mode` và `app_settings.language` (BR-214, BR-215), migration v8, và bảng thứ tự migration bổ sung v6/v7 vốn bị bỏ sót |
 | **Last updated** | 2026-08-13 |
 
 Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; SQL thật nằm ở
@@ -466,7 +466,7 @@ nào, bỏ dở bao nhiêu" — thứ hiện không tồn tại ở bất kỳ �
 ## `app_settings`
 
 Một dòng, cho local profile. Mặc định toàn app của tùy chọn học (BR-147) và hai
-tuỳ chọn trình bày (BR-186, BR-187).
+tuỳ chọn trình bày (BR-214, BR-215).
 
 | Cột | Kiểu | Ghi chú |
 |---|---|---|
@@ -856,7 +856,7 @@ và cờ — xem `docs/wireframes/m4-11-card-management.md`.
 | 6 | Chỉ dữ liệu, không DDL: đưa deck con rỗng còn mang `content_type` về `'unset'` (BR-163, invariant 29) (M99.15) |
 | 7 | Chỉ dữ liệu, không DDL: backfill `decks.first_answered_at` từ `MIN(learned_at)` của cây, để khoá scheduler của BR-13 có giá trị lưu trữ (invariant 30) (M99.16) |
 | 8 | Ba cột `direction` nullable trên `study_sessions`, `study_queue_items`, `study_answers` (BR-203…BR-206), cộng backfill `korean_to_meaning` cho đúng các dòng `self_assess` của phiên `reviewing` trên cây `sm2` — chiều mà mọi bản trước đã chạy (M99.27) |
-| 9 | Cột `app_settings.theme_mode`, `app_settings.language` — hai `ALTER TABLE ADD COLUMN` có `DEFAULT 'system'`, không đụng dòng nào (M99.23) |
+| 9 | Cột `app_settings.theme_mode`, `app_settings.language` — hai `ALTER TABLE ADD COLUMN` có `DEFAULT 'system'`, không đụng dòng nào (M99.28) |
 | _sau_ | Bảng `card_media` |
 | _sau_ | Cột sync (`is_pending_sync`, `version`) khi có backend (AD-03) |
 | _sau_ | `deck_templates` thành bảng runtime nếu tải template từ server |

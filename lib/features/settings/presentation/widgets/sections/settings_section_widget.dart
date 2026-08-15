@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
+import '../../../../../core/theme/app_typography.dart';
 
 /// One labelled group of the settings screen: a heading, then a card.
 ///
@@ -38,7 +39,27 @@ class SettingsSectionWidget extends StatelessWidget {
     children: <Widget>[
       Align(
         alignment: AlignmentDirectional.centerStart,
-        child: Text(label, style: context.texts.labelLarge),
+        // **The app's one section-heading treatment** (D18). It was
+        // `labelLarge`, which resolves to the same Inter w600 14/20 as
+        // `titleSmall` — the role the field labels *inside* the card use — so a
+        // group heading and the field under it rendered identically and the
+        // heading carried no hierarchy at all. This screen's own design preview
+        // already had it right.
+        // The **written** sentence is the accessible name; the uppercase is a
+        // typographic treatment. Some TTS engines spell an all-caps run out
+        // letter by letter, and these headings are what tell three rows all
+        // labelled "System" apart.
+        child: Semantics(
+          label: label,
+          excludeSemantics: true,
+          child: Text(
+            label.toUpperCase(),
+            style: context.texts.labelMedium?.copyWith(
+              color: context.colors.onSurfaceVariant,
+              letterSpacing: AppTypography.sectionLabelTracking,
+            ),
+          ),
+        ),
       ),
       const SizedBox(height: headingGap),
       child,

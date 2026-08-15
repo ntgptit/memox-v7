@@ -87,6 +87,11 @@ void main() {
     await tester.tap(find.text(english.settingsResetConfirmAction));
     await tester.pumpAndSettle();
 
+    // **The dialog is gone, asserted first.** `DialogRoute` is not opaque, so
+    // the route beneath it stays on stage — the band and its retry are findable
+    // whether or not the dialog closed, and this test passed against a build
+    // where it never did. That is exactly the failure its name describes.
+    expect(find.byType(MxConfirmDialog), findsNothing);
     expect(find.byType(SettingsErrorBandWidget), findsOneWidget);
     expect(find.text(english.retryAction), findsOneWidget);
   });

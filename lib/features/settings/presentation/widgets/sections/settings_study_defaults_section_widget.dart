@@ -13,6 +13,7 @@ import '../items/settings_choice_rows_widget.dart';
 import '../items/settings_error_band_widget.dart';
 import '../support/settings_labels_widget.dart';
 import 'settings_section_widget.dart';
+import '../../../../../core/theme/app_elevation.dart';
 
 /// The app-wide study defaults, and the one group with a Save button
 /// (BR-211, wireframe S2, S3).
@@ -99,6 +100,10 @@ class _SettingsStudyDefaultsSectionWidgetState
     return SettingsSectionWidget(
       label: l10n.settingsStudyDefaultsSection,
       child: MxCard(
+        // Flat, like every other card in a scrolling column (D20). This
+        // screen was the last one still taking `AppElevation.card`, and
+        // its own error band already passes `none` for the same reason.
+        elevation: AppElevation.none,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[

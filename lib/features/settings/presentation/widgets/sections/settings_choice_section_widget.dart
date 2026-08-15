@@ -6,6 +6,7 @@ import '../../../../../shared/widgets/mx_card.dart';
 import '../items/settings_choice_rows_widget.dart';
 import '../items/settings_error_band_widget.dart';
 import 'settings_section_widget.dart';
+import '../../../../../core/theme/app_elevation.dart';
 
 /// A settings group that is one closed choice — Appearance and Language
 /// (wireframe S9).
@@ -84,6 +85,10 @@ class _SettingsChoiceSectionWidgetState<T extends Enum>
     return SettingsSectionWidget(
       label: widget.sectionLabel,
       child: MxCard(
+        // Flat, like every other card in a scrolling column (D20). This
+        // screen was the last one still taking `AppElevation.card`, and
+        // its own error band already passes `none` for the same reason.
+        elevation: AppElevation.none,
         // Vertical only: each row's touch target and ink span the full card
         // width, and every row carries the horizontal gutter itself so its
         // content still lines up with the other cards (W5).

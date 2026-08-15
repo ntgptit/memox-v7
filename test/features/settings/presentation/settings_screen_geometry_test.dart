@@ -30,8 +30,11 @@ void main() {
       .map((card) => tester.getRect(find.byWidget(card)))
       .toList();
 
+  /// The heading's painted rect. The label is uppercased on screen (D18) while
+  /// its accessible name stays as written, so the finder has to ask for the
+  /// painted form.
   Rect sectionHeading(WidgetTester tester, String label) =>
-      tester.getRect(find.text(label));
+      tester.getRect(find.text(label.toUpperCase()));
 
   group('one column', () {
     testWidgets('the three group cards share both x edges', (tester) async {

@@ -22,7 +22,7 @@ import 'router/app_router.dart';
 ///
 /// * theme and design tokens — M3.4, M3.5
 /// * routing via `MaterialApp.router` — M4.1
-/// * theme mode and locale from stored settings — M99.23
+/// * theme mode and locale from stored settings — M99.28
 ///
 /// **The settings seam runs one way** (AD-13, AD-19). Theme and locale live on
 /// `MaterialApp`, which is `app/`, while the values that decide them belong to
@@ -50,8 +50,8 @@ class MemoxApp extends ConsumerWidget {
     // `AsyncValue.value`, and the fallback is `AppSettingsModel.defaults` rather
     // than an invented pair. Before the first emission — and if the read fails
     // — the app follows the platform for both, which is exactly what "System"
-    // means and what every build before M99.23 did unconditionally (BR-186,
-    // BR-187). A spinner in place of the app while a local SQLite row is read
+    // means and what every build before M99.28 did unconditionally (BR-214,
+    // BR-215). A spinner in place of the app while a local SQLite row is read
     // would be a blank window instead of a one-frame resolution, which is the
     // trade `FixtureSeederWidget` already refused for the deck list.
     //
@@ -81,16 +81,16 @@ class MemoxApp extends ConsumerWidget {
       // The stored choice, resolved to Flutter's own enum here and nowhere
       // else. `AppThemeMode.system` becomes `ThemeMode.system`, which is what
       // makes the app keep following the platform rather than freezing at
-      // whatever it was on the frame this was read (BR-186).
+      // whatever it was on the frame this was read (BR-214).
       themeMode: _themeModeOf(settings.themeMode),
       // Instant, not a cross-fade. Material's 200ms theme animation renders
       // intermediate colours — literally a third theme on the way between two
-      // — which BR-186 and the M99.23 wireframe both rule out. It is also what
+      // — which BR-214 and the M99.28 wireframe both rule out. It is also what
       // makes the cold-start resolution above read as "the app started dark"
       // rather than as a fade somebody has to watch.
       themeAnimationDuration: Duration.zero,
       // Null for `system`, which is how `MaterialApp` is told to resolve from
-      // the platform's preferred locales over `supportedLocales` (BR-187).
+      // the platform's preferred locales over `supportedLocales` (BR-215).
       locale: _localeOf(settings.language),
       // No `localeResolutionCallback` on purpose. Flutter's default resolution
       // already falls back to `supportedLocales.first` — which is `en`, the

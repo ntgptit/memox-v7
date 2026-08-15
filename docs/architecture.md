@@ -1337,41 +1337,17 @@ chuyển tab. Ràng buộc này gắn với **tình trạng của branch**, khô
 của nó: nó áp cho mọi branch còn là scaffold, và **chấm dứt cho một branch ngay
 khi nghiệp vụ của branch đó được chốt trong `business-rules.md` và
 `use-cases.md`**. Tại thời điểm AD-19 được viết, hai branch còn scaffold là
-Progress và Settings; **Progress đã tốt nghiệp ở M99.23** (BR-190…BR-199,
-UC-12) và có thêm cấp deck ở M99.24 (BR-182…BR-189, UC-13), nên placeholder
-rule không còn áp cho nó. Settings vẫn là scaffold. Mỗi branch có path thật
-(`/progress`, `/settings`) để deep link mở đúng tab.
+Progress và Settings. **Cả hai đã tốt nghiệp:** Progress ở M99.23
+(BR-190…BR-199, UC-12) với cấp deck thêm ở M99.24 (BR-182…BR-189, UC-13), và
+Settings ở M99.28 (BR-210…BR-217, UC-16). **Không branch nào còn là
+placeholder**, nên ràng buộc "chỉ placeholder" hiện không áp cho branch nào —
+nó vẫn đứng đây vì nó là điều kiện cho branch thứ năm, nếu có.
+
+Việc thay là **một screen đổi một screen**: path, `RouteNames` và branch index
+MUST giữ nguyên qua lần tốt nghiệp — đó chính là tài sản mà AD này mua trước.
+Mỗi branch có path thật (`/progress`, `/settings`) để deep link mở đúng tab.
 Thư viện starter thuộc branch Decks; MUST NOT có tab Profile chừng nào chưa có
 auth/profile domain (AD-03).
-| **Affected documents** | `product.md` · `it-scenarios/01-navigation-and-continuity.md` · `wbs.md` (M99.7, M99.23) · `use-cases.md` (UC-12) · `business-rules.md` (BR-182…BR-189) |
-
-**Decision.** Navigation shell khai báo đúng bốn `StatefulShellBranch`, theo thứ
-tự cố định: **Decks (0) · Study (1) · Progress (2) · Settings (3)**. Decks vẫn
-là cold-start branch (UC-06). Mỗi branch có path thật (`/progress`,
-`/settings`) để deep link mở đúng tab. Thư viện starter thuộc branch Decks;
-MUST NOT có tab Profile chừng nào chưa có auth/profile domain (AD-03).
-
-Một branch chưa có nghiệp vụ canonical MUST chỉ có presentation-only
-placeholder screen: placeholder MUST NOT tạo domain entity, repository,
-provider, DAO, bảng, dữ liệu mẫu hay persistence nào — không đọc provider,
-không mở session, không ghi database khi vào, thoát hoặc chuyển tab. Điều kiện
-để rời trạng thái đó là **nghiệp vụ được chốt trong `docs/` trước**, không phải
-màn hình được dựng trước.
-
-**Settings đã rời trạng thái placeholder ở M99.23** (BR-182…BR-189, UC-12): nó
-là feature slice đầy đủ, đọc và ghi `app_settings` qua repository contract như
-mọi feature khác. Progress MUST vẫn là placeholder — chưa có BR nào định nghĩa
-một con số thống kê nào.
-
-**Ràng buộc placeholder hết hiệu lực đúng lúc nghiệp vụ được chốt, không sớm
-hơn.** Từ M99.23, branch **Progress** mang màn hình thật: nghiệp vụ của nó đã
-canonical ở UC-12 và BR-190…BR-199, nên điều kiện mà AD này đặt ra đã được đáp
-ứng và ràng buộc "chỉ placeholder" MUST NOT còn áp cho Progress. Việc thay là
-**một screen đổi một screen**: path `/progress`, `RouteNames.progress` và
-branch index 2 MUST giữ nguyên — đó chính là tài sản mà AD này mua trước.
-**Settings vẫn là placeholder** và vẫn chịu toàn bộ ràng buộc trên, vì chưa có
-BR nào đứng sau nó.
-
 **Context.** Sản phẩm cần IA ổn định cho năm study mode và các capability sắp
 tới (thống kê S2, tùy chọn ứng dụng), trong khi Progress và Settings chưa có
 nghiệp vụ canonical nào. Hai con đường đều xấu: chờ feature xong mới thêm tab

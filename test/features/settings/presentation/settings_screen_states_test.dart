@@ -58,9 +58,18 @@ void main() {
         ),
       );
 
-      expect(find.text(english.settingsStudyDefaultsSection), findsOneWidget);
-      expect(find.text(english.settingsAppearanceSection), findsOneWidget);
-      expect(find.text(english.settingsLanguageSection), findsOneWidget);
+      expect(
+        find.text(english.settingsStudyDefaultsSection.toUpperCase()),
+        findsOneWidget,
+      );
+      expect(
+        find.text(english.settingsAppearanceSection.toUpperCase()),
+        findsOneWidget,
+      );
+      expect(
+        find.text(english.settingsLanguageSection.toUpperCase()),
+        findsOneWidget,
+      );
       // The field opens on the stored number, not a placeholder: a placeholder
       // would be a value the user has to guess at (W3 state 3).
       expect(
@@ -108,7 +117,10 @@ void main() {
       );
 
       expect(find.byType(MxLoadingState), findsOneWidget);
-      expect(find.text(english.settingsAppearanceSection), findsNothing);
+      expect(
+        find.text(english.settingsAppearanceSection.toUpperCase()),
+        findsNothing,
+      );
     });
 
     testWidgets('a failed read is a whole-screen error with a retry', (
@@ -118,7 +130,10 @@ void main() {
 
       expect(find.byType(MxErrorState), findsOneWidget);
       expect(find.text(english.settingsLoadErrorTitle), findsOneWidget);
-      expect(find.text(english.settingsAppearanceSection), findsNothing);
+      expect(
+        find.text(english.settingsAppearanceSection.toUpperCase()),
+        findsNothing,
+      );
     });
   });
 
@@ -250,10 +265,13 @@ void main() {
       );
 
       expect(
-        find.text(vietnamese.settingsStudyDefaultsSection),
+        find.text(vietnamese.settingsStudyDefaultsSection.toUpperCase()),
         findsOneWidget,
       );
-      expect(find.text(vietnamese.settingsAppearanceSection), findsOneWidget);
+      expect(
+        find.text(vietnamese.settingsAppearanceSection.toUpperCase()),
+        findsOneWidget,
+      );
     });
 
     testWidgets('the two language names stay endonyms in both locales', (

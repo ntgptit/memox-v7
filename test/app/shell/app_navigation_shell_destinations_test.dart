@@ -111,7 +111,10 @@ void main() {
         initialLocation: RoutePaths.settings,
       );
 
-      expect(find.text(english.settingsStudyDefaultsSection), findsOneWidget);
+      expect(
+        find.text(english.settingsStudyDefaultsSection.toUpperCase()),
+        findsOneWidget,
+      );
       expect(find.byType(MxNavigationBar), findsOneWidget);
       expect(tester.takeException(), isNull);
     });

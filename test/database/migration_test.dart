@@ -21,7 +21,7 @@ void main() {
     expect(db.schemaVersion, 9);
   });
 
-  test('onCreate builds the whole of v8 from an empty database', () async {
+  test('onCreate builds the whole of v9 from an empty database', () async {
     final db = AppDatabase(NativeDatabase.memory());
     addTearDown(db.close);
 

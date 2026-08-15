@@ -49,7 +49,8 @@ void main() {
         );
 
         final element = tester.element(find.byType(SettingsScreen));
-        final scheme = Theme.of(element).colorScheme;
+        final theme = Theme.of(element);
+        final scheme = theme.colorScheme;
         final semantic = Theme.of(element).extension<AppSemanticColors>()!;
 
         // The two supporting lines: the BR-213 note and the reset scope
@@ -70,10 +71,30 @@ void main() {
           contrast(scheme.onErrorContainer, scheme.errorContainer),
           greaterThanOrEqualTo(kAaBodyText),
         );
-        // The reset action, which is `danger` as a label rather than a fill
-        // (S5) — so it is held to the text floor, not to 3:1.
+        // **The band's Retry, which is the pair that failed.** `MxTextButton`
+        // resolves to `primaryAccent`, right on a page and **3.72:1** on this
+        // container in dark — under the 4.5 its 14px w600 label needs. The
+        // button now takes the band's own ink. This is the first place in the
+        // app to put a link on `errorContainer`, which is why no existing test
+        // covered it.
         expect(
-          contrast(semantic.danger, scheme.surface),
+          contrast(scheme.onErrorContainer, scheme.errorContainer),
+          greaterThanOrEqualTo(kAaBodyText),
+        );
+        if (brightness == Brightness.dark) {
+          expect(
+            contrast(semantic.primaryAccent, scheme.errorContainer),
+            lessThan(kAaBodyText),
+            reason:
+                'the ink the button would have used — 3.72:1 here, and 5.87:1 '
+                'in light, which is why only dark failed',
+          );
+        }
+        // The reset action, which is `danger` as a label rather than a fill
+        // (S5) — so it is held to the text floor, not to 3:1. Measured against
+        // the **page**, which is where it sits; it is not on a card.
+        expect(
+          contrast(semantic.danger, theme.scaffoldBackgroundColor),
           greaterThanOrEqualTo(kAaBodyText),
         );
       });
