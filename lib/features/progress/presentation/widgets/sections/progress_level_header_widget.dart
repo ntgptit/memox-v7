@@ -34,7 +34,12 @@ class ProgressLevelHeaderWidget extends StatelessWidget {
 
 /// [body] with the overview band above it, or [body] alone when there is none.
 ///
-/// **Every face of the level gets this, not just the loaded one.** The header is
+/// For the three faces that are a single box — loading, empty, error. The
+/// loaded face is a `CustomScrollView` and places [ProgressLevelHeaderWidget]
+/// itself, because the pinned range strip has to sit *between* the band and the
+/// rest; the two share the band widget, not this wrapper.
+///
+/// **Every face keeps the header, not just the loaded one.** The header is
 /// the whole-library overview: it is true while the level loads, it is still
 /// true when the level's read fails, and it is true when there are no decks to
 /// list. A face that dropped it took three sections of real data off the screen

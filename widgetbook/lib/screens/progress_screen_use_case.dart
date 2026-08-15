@@ -9,6 +9,7 @@ import 'package:memox/features/progress/di/progress_repository_provider.dart';
 import 'package:memox/features/progress/domain/models/progress_activity_day_model.dart';
 import 'package:memox/features/progress/domain/models/progress_overview_model.dart';
 import 'package:memox/features/progress/domain/repositories/progress_repository.dart';
+import 'package:memox/features/progress/presentation/screens/progress_deck_screen.dart';
 import 'package:memox/features/progress/presentation/screens/progress_screen.dart';
 import 'package:widgetbook/widgetbook.dart';
 import 'package:memox/features/progress/domain/models/deck_activity_metrics_model.dart';
@@ -84,6 +85,19 @@ class _ProgressDemoState extends State<_ProgressDemo> {
         path: '/',
         name: RouteNames.progress,
         builder: (context, state) => const ProgressScreen(),
+        routes: <RouteBase>[
+          // The drill-down a deck row pushes. It only became reachable when
+          // this use case started catalogueing the composed screen: with an
+          // empty level there was no row to press, and without this route the
+          // first press threw `GoError: no routes for location`.
+          GoRoute(
+            path: ':deckId',
+            name: RouteNames.progressDeck,
+            builder: (context, state) => ProgressDeckScreen(
+              deckId: state.pathParameters[RoutePathParams.deckId],
+            ),
+          ),
+        ],
       ),
       GoRoute(
         path: '/study',
@@ -150,25 +164,23 @@ class _CatalogProgressRepository implements ProgressRepository {
       scopeDeckId: deckId,
       scopeName: null,
       scopePath: const <ProgressPathSegment>[],
-      decks: scenario == ProgressScenario.emptyLifetime
-          ? const <DeckActivity>[]
-          : _catalogDecks,
-      scopeLast7Days: scenario == ProgressScenario.emptyLifetime
-          ? DeckActivityMetrics.zero
-          : const DeckActivityMetrics(
-              activeCardCount: 45,
-              activeDayCount: 6,
-              learningCardDayCount: 12,
-              reviewingCardDayCount: 60,
-            ),
-      scopeLast30Days: scenario == ProgressScenario.emptyLifetime
-          ? DeckActivityMetrics.zero
-          : const DeckActivityMetrics(
-              activeCardCount: 128,
-              activeDayCount: 21,
-              learningCardDayCount: 40,
-              reviewingCardDayCount: 210,
-            ),
+      // No `emptyLifetime` branch: that scenario never reaches this read at
+      // all, because `ProgressScreen` renders the whole-screen empty face
+      // instead of building the level. A branch for it would be a case nobody
+      // can see, which is worse than none.
+      decks: _catalogDecks,
+      scopeLast7Days: const DeckActivityMetrics(
+        activeCardCount: 45,
+        activeDayCount: 6,
+        learningCardDayCount: 12,
+        reviewingCardDayCount: 60,
+      ),
+      scopeLast30Days: const DeckActivityMetrics(
+        activeCardCount: 128,
+        activeDayCount: 21,
+        learningCardDayCount: 40,
+        reviewingCardDayCount: 210,
+      ),
       nextDayBoundaryAt: _today.add(const Duration(days: 1)),
     ),
   );

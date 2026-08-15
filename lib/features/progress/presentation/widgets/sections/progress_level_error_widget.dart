@@ -62,6 +62,11 @@ class ProgressLevelErrorWidget extends StatelessWidget {
 
     return MxContentShell(
       title: title,
+      // Zero for the same reason the loading and loaded faces use it: the band
+      // carries the gutter and `MxEmptyState`/`MxErrorState` pad themselves, so
+      // the shell's own padding was a second inset — 32dp a side instead of 16,
+      // and a visible snap when the read succeeded.
+      padding: EdgeInsets.zero,
       body: ProgressHeaderedBody(
         header: header,
         body: copy.isDeckMissing
@@ -72,12 +77,21 @@ class ProgressLevelErrorWidget extends StatelessWidget {
                 actionLabel: context.l10n.progressDeckMissingBackAction,
                 onAction: onLeave,
               )
-            : MxErrorState(
-                title: copy.title,
-                message: copy.message,
-                retryLabel: context.l10n.progressErrorRetryAction,
-                onRetry: onRetry,
-                isRetrying: isRetrying,
+            : Semantics(
+                // **Announced, because it is no longer unmissable.** This face
+                // used to replace the whole screen; under the overview band it
+                // starts below the fold, so a reader who is not looking at the
+                // bottom of the screen gets no signal that the read failed at
+                // all. The overview's own error face has carried this since
+                // stage 1 — the two are one screen and should behave alike.
+                liveRegion: true,
+                child: MxErrorState(
+                  title: copy.title,
+                  message: copy.message,
+                  retryLabel: context.l10n.progressErrorRetryAction,
+                  onRetry: onRetry,
+                  isRetrying: isRetrying,
+                ),
               ),
       ),
     );

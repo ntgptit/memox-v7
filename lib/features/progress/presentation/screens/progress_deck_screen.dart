@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/navigation/route_names.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/theme_context_extension.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
 import '../../../../shared/widgets/mx_content_shell.dart';
@@ -95,6 +94,12 @@ class ProgressDeckScreen extends StatelessWidget {
           // hides three sections that are on hand, which is the same thing
           // P8 forbids on a reload.
           loadingFrame: (Widget loading) => MxContentShell(
+            // Zero, exactly as the loaded face does: the band brings its own
+            // gutter and `MxLoadingState` centres itself, so the shell's
+            // padding was a second inset on top of the first. It cost 16dp a
+            // side, so the overview rendered 32dp narrower here and snapped
+            // wider the moment the level answered.
+            padding: EdgeInsets.zero,
             title: _titleBeforeData(context),
             body: ProgressHeaderedBody(header: header, body: loading),
           ),
@@ -199,17 +204,30 @@ class _ProgressLevel extends StatelessWidget {
           SliverToBoxAdapter(child: ProgressLevelHeaderWidget(child: band)),
         // Sticks once the overview has scrolled past, and travels with it until
         // then. `PinnedHeaderSliver` rather than `SliverPersistentHeader`
-        // because the strip has no fixed height: it is 48 up to text scale 1.3
-        // and 58 at 2.0, measured, so a delegate declaring an extent would clip
-        // it for exactly the readers who need the larger type.
+        // because the strip has no fixed height: the pill row alone measures 48
+        // up to text scale 1.3 and 58 at 2.0, and the band adds `sm` above and
+        // `xs` below (`0` above below the compact breakpoint) — so the sliver is
+        // 60 at rest on a regular width and 52 at 320. A delegate declaring an
+        // extent has to pick one of those and clips the rest, for exactly the
+        // readers who need the larger type.
         PinnedHeaderSliver(
           // Opaque, because the deck rows now scroll *under* it rather than
-          // beside it. `DecoratedBox` rather than `ColoredBox`: the visual
-          // audit reads a decoration's colour off the render object and cannot
-          // read a `ColoredBox`, so the cheaper widget would have cost an
-          // allowance saying "trust me, it is surface".
+          // beside it — and opaque in the **page's** colour, not the card's.
+          // `scheme.surface` was the first choice and it is what `MxCard`
+          // paints: measured against `scaffoldBackgroundColor` it is ΔL* 2.17
+          // in light and 6.38 in dark, so the strip read as a square-cornered
+          // card at rest, and a deck row scrolling under it dissolved into it
+          // rather than passing behind it. The strip is chrome; chrome is the
+          // page.
+          //
+          // `DecoratedBox` rather than `ColoredBox`: the visual audit reads a
+          // decoration's colour off the render object and cannot read a
+          // `ColoredBox`, so the cheaper widget would have cost an allowance
+          // asserting the colour instead of checking it.
           child: DecoratedBox(
-            decoration: BoxDecoration(color: context.colors.surface),
+            decoration: BoxDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor,
+            ),
             child: MxSubheaderBand(
               gutter: gutter,
               child: ProgressRangeSelectorWidget(
@@ -223,11 +241,12 @@ class _ProgressLevel extends StatelessWidget {
           child: Padding(
             padding: EdgeInsets.fromLTRB(
               gutter,
-              // The range strip is directly above at every level and carries
-              // its own bottom padding, so the panel adds none of its own —
-              // this used to depend on whether the overview band was there,
-              // back when the strip lived outside the scroll view.
-              0,
+              // `md`, unconditionally: the range strip is directly above at
+              // every level now, and its own bottom padding is `xs`. Together
+              // that is the 16 the strip and the panel had between them before
+              // the strip moved into the scroll view — dropping this to zero
+              // left 4, which read as the pills sitting on the card.
+              AppSpacing.md,
               gutter,
               // `xl` below the panel, not `lg`: this is the gap between two
               // *sections* — the total and the decks that make it up — and a

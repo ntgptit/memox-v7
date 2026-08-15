@@ -66,11 +66,14 @@ cấp của deck đó (UC-13). Từ trên xuống:
 `/progress` là một màn: `ProgressScreen` đọc tổng quan rồi trao ba khối cho màn
 này qua tham số `header`, kể cả trên nhánh không có deck nào — nên một thư viện
 rỗng vẫn thấy streak của mình. `/progress/:deckId` truyền `header` null và mở
-thẳng vào bảng tổng. Hệ quả về hình học: khoảng cách trên của bảng tổng là `md`
-khi nó đứng đầu và `0` khi có phần đầu ở trên, vì `xl` dưới phần đầu đã là ngắt
-section rồi. G-series của tài liệu này đo cấp deck (`header` null); hợp đồng
-geometry của ba section phần đầu là của `m99-23-progress-overview.md`, và suite
-đo nó mount `ProgressScreen`, tức **có** phần đầu.
+thẳng vào bảng tổng. Hệ quả về hình học: khoảng cách trên của bảng tổng là `md` ở **mọi** cấp — dải
+bộ chọn luôn đứng ngay trên nó và tự mang `xs` bên dưới, tổng 16 đúng như trước
+khi dải chuyển vào vùng cuộn. (Bản đầu của lần chuyển này đặt `0` với lý do
+`xl` dưới phần đầu đã là ngắt section, nhưng giữa hai thứ đó còn dải bộ chọn,
+nên kết quả chỉ còn 4 và hai pill đọc như đang ngồi lên card.) G-series của tài
+liệu này đo cấp deck (`header` null); hợp đồng geometry của ba section phần đầu
+là của `m99-23-progress-overview.md`, và suite đo nó mount `ProgressScreen`,
+tức **có** phần đầu.
 
 Ba khối đó **không được mô tả lại ở đây**. Nội dung, copy và hình học của chúng
 là của `m99-23-progress-overview.md`; tài liệu này chỉ chốt rằng chúng đứng ở
@@ -86,8 +89,11 @@ khiển: bấm `30 ngày` thì 24dp ngay dưới nó không đổi gì (X10). `P
 sách cuộn — mà bỏ được cách đọc sai.
 
 `PinnedHeaderSliver` chứ không phải `SliverPersistentHeader`: dải này không có
-chiều cao cố định. Đo được **48dp tới text scale 1.3 và 58dp ở 2.0**, nên một
-delegate khai `extent` sẽ cắt mất dải đúng với người đang cần cỡ chữ lớn. Dải
+chiều cao cố định. Riêng hàng pill đo được **48dp tới text scale 1.3 và 58dp ở
+2.0**; cộng padding của `MxSubheaderBand` (`sm` trên, `xs` dưới; trên là `0`
+dưới breakpoint compact) thì sliver là **60dp** ở bề rộng thường và **52dp** ở
+320dp. Một delegate khai `extent` phải chọn một con số trong số đó và cắt phần
+còn lại, đúng với người đang cần cỡ chữ lớn. Dải
 dùng lại `MxSubheaderBand` — chính widget mà slot `subheader` dùng — nên luật
 padding theo breakpoint chỉ tồn tại ở một chỗ, và nền của nó là `DecoratedBox`
 màu `surface` để hàng deck cuộn **dưới** nó.
@@ -126,13 +132,13 @@ quét literal thấy được.
 
 | Trạng thái | Bộ chọn | Bảng tổng | Thân |
 |---|---|---|---|
-| loading | — | — | spinner có nhãn; AppBar giữ chữ "Tiến độ" ở **mọi** cấp (§5) |
+| loading | — | — | spinner có nhãn; AppBar giữ chữ "Tiến độ" ở **mọi** cấp (§5). Ở cấp thư viện, ba section tổng quan **vẫn ở trên** spinner — chúng đã trả lời rồi, và `/progress` chỉ dựng màn này sau khi chúng trả lời |
 | mixed activity | có | có | mọi deck, kể cả deck 0 |
 | all-zero | có | có + dòng giải thích | mọi deck với số 0 (BR-197) |
 | no decks (cấp thư viện) | **không** | **không** | empty state, không nút |
 | no sub-decks (cấp deck) | có | có | empty state nói tổng ở trên đã là toàn bộ |
-| read error | — | — | `MxErrorState` + `Try again`, dưới AppBar còn nguyên |
-| deck missing | — | — | `MxEmptyState` + đường quay lại, **không** retry |
+| read error | — | — | `MxErrorState` + `Try again`, dưới AppBar còn nguyên; ở cấp thư viện ba section tổng quan vẫn ở trên nó, và khối lỗi mang `liveRegion` vì nó không còn chiếm cả màn nên có thể nằm dưới fold |
+| deck missing | — | — | `MxEmptyState` + đường quay lại, **không** retry. Chỉ xảy ra ở `/progress/:deckId`, nơi không có phần đầu |
 
 Hai dòng đáng chú ý:
 

@@ -12,6 +12,7 @@ import 'package:memox/features/progress/domain/repositories/progress_repository.
 import 'package:memox/features/progress/presentation/screens/progress_deck_screen.dart';
 import 'package:memox/features/progress/presentation/screens/progress_screen.dart';
 import 'package:widgetbook/widgetbook.dart';
+import 'package:memox/features/progress/domain/models/progress_activity_day_model.dart';
 import 'package:memox/features/progress/domain/models/progress_overview_model.dart';
 
 /// `ProgressDeckScreen` mounted whole, with the repository contract faked.
@@ -84,7 +85,11 @@ class _ProgressDemoState extends State<_ProgressDemo> {
     // own use case. Opening this one at the root showed a library level with no
     // header, which is a surface the app no longer has; `/progress/:deckId` is
     // the one this screen renders alone, and it had no catalogue entry at all.
-    initialLocation: '/r1',
+    //
+    // `noDecks` is the exception: at a deck level "no decks" is the
+    // holds-cards-not-sub-decks face, and the library-level empty state — the
+    // one that scenario is named for — only exists at the root.
+    initialLocation: widget.scenario == ProgressScenario.noDecks ? '/' : '/r1',
     routes: <RouteBase>[
       GoRoute(
         path: '/',
@@ -135,14 +140,40 @@ class _CatalogProgressRepository implements ProgressRepository {
 
   final ProgressScenario scenario;
 
-  /// Never read by this use case, which mounts the level screen directly.
-  /// Present because the contract has two methods and a double that implements
-  /// half of one is a compile error rather than a decision.
+  /// Read on every Back out of the drill-down, since the root of this use
+  /// case is the real composed screen.
+  ///
+  /// **It used to return an empty stream on the grounds that nothing read it.**
+  /// That stopped being true the moment the root became `ProgressScreen`, and
+  /// an empty stream never emits — so Back landed on a spinner that never
+  /// resolved. A catalogue entry that hangs is worse than no entry.
   @override
   Stream<ProgressOverview> watchProgressOverview({
     required DateTime now,
     required Duration utcOffset,
-  }) => const Stream<ProgressOverview>.empty();
+  }) => Stream<ProgressOverview>.value(
+    ProgressOverview(
+      lastSevenDays: <ProgressActivityDay>[
+        for (final (int index, int total) in const <int>[
+          12,
+          0,
+          6,
+          14,
+          3,
+          9,
+          8,
+        ].indexed)
+          ProgressActivityDay(
+            localDate: DateTime.utc(2026, 8, 6).add(Duration(days: index)),
+            totalCards: total,
+            learningCards: index.isEven ? 1 : 0,
+          ),
+      ],
+      currentStreakDays: 5,
+      hasLifetimeActivity: true,
+      nextLocalMidnight: DateTime.utc(2026, 8, 13),
+    ),
+  );
 
   @override
   Stream<DeckActivitySnapshot> watchDeckActivity({

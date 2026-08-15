@@ -9,6 +9,8 @@ import 'package:memox/features/progress/presentation/widgets/sections/progress_s
 import 'package:memox/features/progress/presentation/widgets/sections/progress_summary_widget.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/core/error/failure.dart';
+import 'package:memox/core/theme/app_spacing.dart';
+import 'package:memox/shared/widgets/mx_content_shell.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
 import 'package:memox/shared/widgets/mx_loading_state.dart';
 
@@ -246,6 +248,90 @@ void main() {
     await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
     await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
     handle.dispose();
+  });
+
+  group('the band is inset the same on every face', () {
+    // **Measured, because two of the four faces were not.** The loading and
+    // error faces let `MxContentShell` pad their body while the band padded
+    // itself, so the overview rendered 32dp a side there and 16 on the loaded
+    // face — it snapped wider the moment the level answered, and narrower again
+    // whenever a read failed. Nothing measured either face: the geometry suite
+    // only ever pumps the loaded one.
+    Future<void> expectBandGutter(WidgetTester tester) async {
+      expect(
+        tester.getRect(find.byType(ProgressStreakHeroWidget)).left,
+        AppSpacing.lg,
+      );
+    }
+
+    testWidgets('loaded', (tester) async {
+      await pumpProgressScreen(
+        tester,
+        repository: composed(levelWith(activeCards: 42)).repository,
+      );
+      await expectBandGutter(tester);
+    });
+
+    testWidgets('loading', (tester) async {
+      final never = StreamController<DeckActivitySnapshot>.broadcast();
+      addTearDown(never.close);
+      await pumpProgressScreen(
+        tester,
+        repository: FakeProgressRepository(
+          initial: progressOverviewFixture(
+            totals: const <int>[1, 1, 1, 1, 1, 1, 2],
+            streakDays: 3,
+          ),
+          activity: (String? deckId) => never.stream,
+        ),
+      );
+      await tester.pump();
+      await expectBandGutter(tester);
+    });
+
+    testWidgets('error', (tester) async {
+      await pumpProgressScreen(
+        tester,
+        repository: FakeProgressRepository.failing(
+          const DatabaseFailure(message: 'level read failed'),
+        ),
+      );
+      await expectBandGutter(tester);
+    });
+  });
+
+  testWidgets('the pinned strip is painted in the page colour, not the card '
+      'colour', (tester) async {
+    // `ColorScheme.surface` is what `MxCard` paints, and it was the first
+    // choice here — measured against `scaffoldBackgroundColor` that is ΔL* 2.17
+    // light and 6.38 dark, so the strip read as a square-cornered card and a
+    // deck row scrolling under it dissolved into it instead of passing behind.
+    await pumpProgressScreen(
+      tester,
+      repository: composed(levelWith(activeCards: 42)).repository,
+    );
+
+    final BuildContext context = tester.element(
+      find.byType(ProgressRangeSelectorWidget),
+    );
+    final DecoratedBox box = tester.widget<DecoratedBox>(
+      find
+          .ancestor(
+            of: find.byType(MxSubheaderBand),
+            matching: find.byType(DecoratedBox),
+          )
+          .first,
+    );
+
+    expect(
+      (box.decoration as BoxDecoration).color,
+      Theme.of(context).scaffoldBackgroundColor,
+    );
+    expect(
+      (box.decoration as BoxDecoration).color,
+      isNot(Theme.of(context).colorScheme.surface),
+      reason: 'the two differ, which is the whole point',
+    );
   });
 
   testWidgets('a level emission leaves the overview alone', (tester) async {

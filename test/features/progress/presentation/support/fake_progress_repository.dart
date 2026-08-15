@@ -148,10 +148,12 @@ base class FakeProgressRepository implements ProgressRepository {
   /// **Not an empty level, and the difference is the whole screen.** An empty
   /// top level takes `_hasNothingToMeasure`, which drops the pinned range
   /// selector, the totals panel and the list — so a suite that defaulted to it
-  /// pinned geometry, overflow sweeps and the visual audit against a face
-  /// `progress_screen_test.dart` itself calls unreachable ("a library with
-  /// study history and no decks is not a state a user can reach"). Every
-  /// default-fake test now measures the screen a user opens. A test whose
+  /// pinned geometry, overflow sweeps and the visual audit against a face the
+  /// user cannot reach. **Cannot, by rule rather than by assertion:** deleting
+  /// a deck cascades its cards, and a card's `study_answers` rows go with it
+  /// (BR-03, BR-198), so a library with no decks has no lifetime activity —
+  /// and `/progress` then takes the whole-screen empty face, never the level's.
+  /// Every default-fake test now measures the screen a user opens. A test whose
   /// subject *is* the empty level passes `emptyActivitySnapshot()` explicitly.
   static Stream<DeckActivitySnapshot> _defaultLevel(String? deckId) =>
       Stream<DeckActivitySnapshot>.value(

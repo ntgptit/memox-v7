@@ -159,23 +159,26 @@ class _MxContentShellState extends State<MxContentShell> {
   }
 }
 
-/// The pinned strip under the bar.
+/// A subheader strip: the screen's horizontal gutter plus the vertical rhythm
+/// the strip is entitled to.
 ///
-/// Carries the screen's horizontal gutter so its contents line up with the body
-/// below.
-/// **The top of the body, not `AppBar.bottom`.** It was the latter, which forces
-/// a height to be declared up front — and the height of this strip depends on the
-/// user's text scale, so a declared number is a guess that overflows the moment
-/// the guess is low. Above an `Expanded` body it takes the height it needs and
-/// stays just as pinned: nothing above the `Expanded` scrolls.
-/// The subheader strip's own padding, as a widget.
+/// **It carries no height of its own, and that is the point.** As
+/// [MxContentShell.subheader] it sits at the top of the body rather than in
+/// `AppBar.bottom`, because the latter forces a height to be declared up front
+/// — and this strip's height depends on the user's text scale, so a declared
+/// number is a guess that overflows the moment the guess is low. Above an
+/// `Expanded` body it takes the height it needs and is just as pinned: nothing
+/// above the `Expanded` scrolls.
 ///
-/// **Public because one screen pins this band from inside its scroll view.**
+/// **Public because one screen pins the band from inside its own scroll view.**
 /// `/progress` composes the overview above the deck level, so the range
-/// selector must scroll with the overview and only then stick — which is a
-/// `PinnedHeaderSliver`, not [MxContentShell.subheader]. It is the same band
-/// either way, and the compact-tier padding rule below is the reason it is a
-/// widget and not four numbers copied to the second site.
+/// selector has to travel with the overview and only then stick — that is a
+/// `PinnedHeaderSliver`, and [MxContentShell.subheader] cannot express it,
+/// being above the body rather than in it. Same band, same padding rule; the
+/// widget exists so the compact-tier rule below is not four numbers copied to
+/// a second site. A caller pinning it itself supplies its own background —
+/// inside the body this widget is transparent, and content would scroll
+/// through it.
 class MxSubheaderBand extends StatelessWidget {
   const MxSubheaderBand({required this.gutter, required this.child, super.key});
 
