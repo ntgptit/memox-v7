@@ -1193,6 +1193,16 @@ nào (BR-218); màn hình mở được cả khi thư viện rỗng
   đang lưu trong database, kèm lý do có kiểu và hành động thử lại.
 - **E5 — Đọc workload thất bại lúc fire:** bỏ lượt nhắc thay vì hiện notification
   đoán mò, vẫn đặt lịch cho ngày kế tiếp (BR-220).
+- **E6 — Huỷ lịch thất bại khi tắt:** settings **đã** ở trạng thái tắt — ghi đã
+  thành công, chỉ lượt đang chờ là không huỷ được. Copy MUST NOT dùng lại câu của
+  E3 ("chưa bật được gì"), vì ở đây điều ngược lại vừa xảy ra; màn nói rõ có thể
+  còn một lượt nhắc cũ và cho thử lại. Lượt cũ đó vô hại: khi fire, delivery đọc
+  lại settings và bỏ qua (BR-220, BR-226).
+- **E7 — Đọc settings thất bại khi mở màn:** không vẽ hàng nào — không toggle,
+  không hàng giờ, không dải lỗi trong luồng — mà thay cả thân màn bằng trạng thái
+  lỗi toàn màn kèm hành động thử lại. Copy MUST nói về **một lần đọc**, không
+  dùng lại câu của E4: người dùng chưa đổi gì cả, nên "chưa lưu được thay đổi"
+  mô tả một việc chưa xảy ra.
 
 **Postconditions:** `app_settings` mang đúng trạng thái bật/tắt và giờ nhắc mà
 người dùng nhìn thấy; đúng một lượt nhắc đang chờ khi bật và không lượt nào khi
@@ -1205,8 +1215,9 @@ BR-228, BR-229
 **UI states:** loading (đọc settings) · off · enabling (đang xin quyền/đặt lịch,
 toggle khoá) · on (giờ hiển thị, hàng giờ chạm được) · time picker mở ·
 permission denied (khôi phục được) · platform unavailable · schedule error
-(thử lại được) · settings error (thử lại được). Không có state `empty`: màn này
-luôn có nội dung, kể cả khi thư viện rỗng.
+(thử lại được) · settings error (thử lại được) · cancel error (E6 — đã tắt, chỉ
+lượt chờ còn sót) · read error (E7 — lỗi toàn màn, không vẽ hàng nào). Không có
+state `empty`: màn này luôn có nội dung, kể cả khi thư viện rỗng.
 
 ## Điều đã cố ý không đặc tả
 

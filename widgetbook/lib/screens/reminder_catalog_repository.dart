@@ -28,6 +28,7 @@ class ReminderCatalogSettings implements ReminderSettingsRepository {
     this._settings, {
     this.isRead = true,
     this.doesWriteFail = false,
+    this.doesReadFail = false,
   });
 
   ReminderSettingsModel _settings;
@@ -38,12 +39,29 @@ class ReminderCatalogSettings implements ReminderSettingsRepository {
   /// `true` rejects every save with [ReminderSetupRejection.settingsWriteFailed].
   final bool doesWriteFail;
 
+  /// `true` makes the read fail, which is the only way into the screen's
+  /// whole-screen error face (M6 S11, UC-17 E7).
+  ///
+  /// **It was the one state the catalogue could not reach**, and the comment
+  /// above this class says why that matters: the states nobody can see are
+  /// exactly the ones nobody reviews. S11 exists *because* that face went out
+  /// showing the save copy for a read failure and no one read it.
+  final bool doesReadFail;
+
   @override
   Stream<ReminderSettingsModel> watchSettings() {
     // Not `Stream.empty()`: an empty stream closes at once, and a closed stream
     // with no value is a state Riverpod may render differently from one still
     // waiting.
     if (!isRead) return StreamController<ReminderSettingsModel>().stream;
+    if (doesReadFail) {
+      return Stream<ReminderSettingsModel>.error(
+        const DatabaseFailure(
+          message: 'catalog: read refused',
+          reason: ReminderSetupRejection.settingsWriteFailed,
+        ),
+      );
+    }
 
     return Stream<ReminderSettingsModel>.value(_settings);
   }

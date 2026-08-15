@@ -55,7 +55,11 @@ enum ReminderCatalogScenario {
   cancelFailed('Cancel failed (on, then off)'),
 
   /// The choice will not write. Turn the toggle on to reach it.
-  settingsWriteFailed('Settings write failed (turn it on)');
+  settingsWriteFailed('Settings write failed (turn it on)'),
+
+  /// The read fails, so the whole body is the error face (M6 S11). No
+  /// interaction needed — it is what the screen opens as.
+  readFailed('Read failed (whole-screen error)');
 
   const ReminderCatalogScenario(this.label);
 
@@ -109,6 +113,7 @@ class _ReminderDemo extends StatelessWidget {
   ReminderCatalogSettings get _settingsRepository => ReminderCatalogSettings(
     _settings,
     isRead: scenario != ReminderCatalogScenario.loading,
+    doesReadFail: scenario == ReminderCatalogScenario.readFailed,
     doesWriteFail: scenario == ReminderCatalogScenario.settingsWriteFailed,
   );
 

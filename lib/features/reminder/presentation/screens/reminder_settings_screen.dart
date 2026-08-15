@@ -150,7 +150,7 @@ class ReminderSettingsScreen extends ConsumerWidget {
   /// Three commands can produce a retryable rejection, and hardwiring the retry
   /// to enable meant a failed cancel offered the user a button that turned the
   /// reminder back on. Reading which controller holds the rejection is the only
-  /// thing that makes "Try again" mean what the copy says it means (UC-17 E3).
+  /// thing that makes `Retry` mean what the copy says it means (UC-17 E3).
   void _retry(WidgetRef ref, ReminderOverviewModel overview) {
     if (ref.read(reminderDisableControllerProvider).rejection != null) {
       return _setEnabled(ref, overview, isEnabled: false);

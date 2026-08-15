@@ -33,12 +33,16 @@ Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham c
 ```
 ┌─ Settings (nhánh 4 của shell) ────────────────┐
 │  Settings                                     │  ← MxContentShell title
+│                                               │  (màn thật từ M99.28; bản vẽ
+│                                               │   này chỉ đủ để đặt W1 vào chỗ)
+│                                               │
+│  Study defaults · Appearance · Language       │  ← ba nhóm của UC-16 (M99.28)
 │                                               │
 │  ┌─────────────────────────────────────────┐  │
 │  │ 🔔  Daily reminder                   ›  │  │  ← W1 hàng vào, MxListTile
 │  └─────────────────────────────────────────┘  │
 │                                               │
-│      App settings are being developed         │  ← placeholder cũ, giữ nguyên
+│  Reset to defaults                            │  ← hành động phá huỷ, luôn cuối
 │                                               │
 ├───────────────────────────────────────────────┤
 │  [Library] [Study] [Progress] [Settings]      │  ← bottom nav, luôn hiển thị
