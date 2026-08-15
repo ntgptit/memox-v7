@@ -116,10 +116,13 @@ class StudyCardFaceSectionWidget extends StatelessWidget {
   /// Which face is the prompt and which is the reveal (BR-204).
   ///
   /// **It swaps the two halves' content, and nothing else.** The card's own
-  /// columns are untouched (BR-209), the emphasis stays a property of *position* —
-  /// the upper half leads whichever face it holds — and the corner labels move
-  /// with their text, which is what tells the two directions apart without
-  /// relying on colour.
+  /// columns are untouched (BR-209), and the corner labels move with their
+  /// text, which is what tells the two directions apart without relying on
+  /// colour.
+  ///
+  /// **The type role travels with the face, not with the half** — see
+  /// `_selfAssessRole`. Position was right while the prompt was always the
+  /// ≤60-character front; reversed, it sized a 240-character meaning as one.
   ///
   /// Defaults to the direction every build before BR-203 used, so `browse` and
   /// the learning chain draw exactly as they did.
@@ -220,6 +223,14 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
   /// back along the trail (BR-155).
   StudyCardModel get _card => widget.viewedCard ?? widget.turn.card;
 
+  /// The type role a `self_assess` half takes, chosen by the **face** it shows.
+  ///
+  /// The front is at most 60 characters and the back up to 240 (BR-08), so the
+  /// role follows the content: a rule written as "upper" and "lower" swaps the
+  /// sizes when the direction does.
+  TextStyle? _selfAssessRole(TextTheme texts, StudyCardFace face) =>
+      face == StudyCardFace.front ? texts.headlineMedium : texts.headlineSmall;
+
   /// The text of one face of [_card].
   ///
   /// **A lookup, not an `if` at each of the four call sites.** The prompt half
@@ -227,15 +238,6 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
   /// direction out four times is four chances to spell one of them backwards —
   /// which renders a card whose two halves are the same text and looks like a
   /// data problem.
-  /// The type role a `self_assess` half takes, chosen by the **face** it shows.
-  ///
-  /// The front is a term of at most 60 characters and the back a meaning of up
-  /// to 240 (BR-08), so the roles follow the content rather than the position:
-  /// reversing the direction swaps which half is which, and a rule written in
-  /// terms of "upper" and "lower" swaps the sizes with it.
-  TextStyle? _selfAssessRole(TextTheme texts, StudyCardFace face) =>
-      face == StudyCardFace.front ? texts.headlineMedium : texts.headlineSmall;
-
   String _textOf(StudyCardFace face) =>
       face == StudyCardFace.front ? _card.front : _card.back;
 
@@ -327,8 +329,10 @@ class _StudyCardFaceViewState extends State<_StudyCardFaceView> {
                     child: _CardHalf(
                       label: _labelOf(context, revealFace),
                       text: _textOf(revealFace),
-                      // The supporting face: a meaning runs to 240 characters
-                      // (BR-08), which is a body role's job, not a heading's.
+                      // The supporting face. Under the graded modes it is
+                      // always the meaning — 240 characters (BR-08), a body
+                      // role's job. Under `self_assess` it is whichever face
+                      // the prompt is not, so `_selfAssessRole` decides.
                       style:
                           widget.emphasis ==
                               StudyFaceEmphasis.backSupportingFront

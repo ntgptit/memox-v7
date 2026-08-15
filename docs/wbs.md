@@ -9750,7 +9750,7 @@ thế không đổi bố cục.
   M5.7…M5.25 nằm ở `docs/wbs-study.md` và không trích được ở đây bằng ID.
 - **Tests required:** domain (eligibility exhaustive trên `StudyMode` ×
   `SchedulerType` × kind, ánh xạ đề/đáp án, hợp đồng `|a-b| <= 1` cho mọi cỡ,
-  round-trip và degrade của giá trị lưu), use case (hai refusal của BR-187,
+  round-trip và degrade của giá trị lưu), use case (hai refusal của BR-208,
   resume bỏ qua chiều), SQLite thật (fixed/mixed, comeback, restart bằng
   repository thứ hai, lượt chép chiều, `eight_box` không chạm gì, học mới chỉ
   đóng dấu `self_assess`, lịch không đổi, ba refusal không để lại dòng),
@@ -9773,14 +9773,14 @@ và bốn trong số đó là lỗi thật:**
 | P1 | Backfill v8 hỏi "cây này có chạy `sm2` không" bằng **hai** nguồn: `study_answers.scheduler_type` (lịch sử) cho một bảng, `decks.scheduler_type` (hiện tại) cho hai bảng kia. Cây từng ôn dưới `sm2` rồi Reset sang `eight_box` được đóng dấu ở answer mà không ở queue — **chính là vi phạm bất biến 32, do migration tự sinh ra** | Một predicate: đóng dấu `study_sessions` trước từ **một trong hai** nguồn, hai bảng kia dẫn xuất từ dấu đó. Fixture "cây đã Reset" trong `migration_v8_test.dart` |
 | P1 (UI) | Badge `Recommended` ở `trailing` bóp hẹp **đúng dòng nó gắn vào**: 115dp chữ so với 216dp, nên dòng được khuyến nghị là dòng duy nhất bị cắt mô tả. Test mang tên "shared width" chỉ đo rect của tile — thứ luôn bằng nhau vì `stretch` — nên **không thể fail** | Nhãn vào chính dòng mô tả qua ARB placeholder; assertion đo `RenderParagraph.constraints.maxWidth` ở 320/390 × scale 1.0/2.0 × EN/VI. Đã kiểm bằng cách dựng lại badge: assertion đỏ với `Set:[115.39, 216.0]` |
 | P2 | `openSession` ghi `study_sessions.direction` cho cả phiên **không** đủ điều kiện — chỉ hàng queue được gate | Guard tại chỗ ghi; hai test đổi từ "lọc" sang "từ chối", và bất biến 31 nhận thêm mệnh đề bắt đúng dòng session mồ côi đó |
-| P2 | UC-12 E2 mô tả hành vi code không có: sheet pop **trước** khi `openSession` chạy, nên BR-145 hiện ra là error state toàn màn, mất lựa chọn | `_startWithDirection` đọc lại cả due count và trả `ConflictFailure` về sheet trước khi pop; hai screen test cho E1 và E2 |
+| P2 | UC-15 E2 mô tả hành vi code không có: sheet pop **trước** khi `openSession` chạy, nên BR-145 hiện ra là error state toàn màn, mất lựa chọn | `_startWithDirection` đọc lại cả due count và trả `ConflictFailure` về sheet trước khi pop; hai screen test cho E1 và E2 |
 | P2 | Dòng lỗi của sheet không được screen reader đọc | `Semantics(liveRegion: true)`, kèm assertion |
 | P2 | Sheet biết chính xác lý do rồi in một câu **sai lời khuyên**: "Try again" cho trạng thái không thể thử lại (hết thẻ đến hạn) | Key ARB thứ hai, chọn theo `StudyRefusalReason` |
 | P3 | `StudySessionDirection.unknown` âm thầm được chia bài như `mixed`; bất biến 32 join thiếu `round`; ba assertion không thể fail; test "long content" dùng fixture 44 ký tự | `switch` exhaustive; bất biến 32 so với **tập** dòng của thẻ trong stage; divider đo bằng đúng `card.width - 2*lg` và tâm sai số 1dp; fixture dùng đúng trần 60/240 của BR-08 ở cả ba viewport × scale 2.0 |
 
 Bất biến 31 cũng mất mệnh đề `sm2`: `study_sessions` không mang `scheduler_type`,
 nên đọc thuật toán *hiện tại* của cây là sai với đúng cây đã Reset — cùng lý do
-BR-21 đặt cột đó lên `study_answers`. Điều kiện `sm2` thuộc write path (BR-187),
+BR-21 đặt cột đó lên `study_answers`. Điều kiện `sm2` thuộc write path (BR-208),
 không thuộc một câu SQL đọc sau.
 
 Ba file vượt trần 400 dòng của guard được tách theo seam thật, không phải cắt cho

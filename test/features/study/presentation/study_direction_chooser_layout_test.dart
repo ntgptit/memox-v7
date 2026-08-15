@@ -1,3 +1,4 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -110,10 +111,15 @@ void main() {
     testWidgets('every control is labelled and reachable, in both themes', (
       tester,
     ) async {
-      // **The sweep this sheet did not have, which is why a 2.45:1 glyph got
-      // in.** `labeledTapTargetGuideline` is what says a control has a name;
-      // the tap-target guidelines are what say it can be hit. Run in dark as
-      // well as light, because the ink that failed only failed there.
+      // **The sweep this sheet did not have.** `labeledTapTargetGuideline` is
+      // what says a control has a name; the tap-target guidelines are what say
+      // it can be hit. Run in dark as well as light, because that is where this
+      // sheet's ink problems have been.
+      //
+      // It would **not** have caught the 2.45:1 radio glyph, and it is worth
+      // saying so: no guideline in `flutter_test` measures an icon's contrast —
+      // `textContrastGuideline` measures text. That one is still only caught by
+      // reading the tokens, which is what the audit did.
       for (final brightness in <Brightness>[
         Brightness.light,
         Brightness.dark,
@@ -138,8 +144,15 @@ void main() {
       // needs about three.** So something is cut — the question is what. With
       // the marker trailing it was the marker, and the option the app
       // recommends carried no sign of it, which is the outcome choosing a
-      // marker over a trailing badge was meant to avoid. Leading it, the words
-      // that survive are the ones that matter.
+      // marker over a trailing badge was meant to avoid.
+      //
+      // **Measured on the laid-out paragraph, not on the span.** A
+      // `find.textContaining` matches `RichText.text.toPlainText()`, which is
+      // the string *before* layout — the ellipsis is applied by
+      // `RenderParagraph` and never touches the span, so a finder-based
+      // assertion passes with the marker trailing too and proves nothing. The
+      // question "is this run of characters painted?" is a geometry question,
+      // and `getBoxesForSelection` is what answers it.
       for (final locale in <Locale?>[null, const Locale('vi')]) {
         tester.view.physicalSize = const Size(320, 800);
         tester.view.devicePixelRatio = 1;
@@ -155,19 +168,40 @@ void main() {
         final AppLocalizations l10n = locale?.languageCode == 'vi'
             ? AppLocalizationsVi()
             : AppLocalizationsEn();
-        // The marker as its own word, not the whole sentence: the sentence is
-        // what gets cut.
         final String marker = l10n
             .studyDirectionRecommendedOption('')
             .split('—')
             .first
             .trim();
 
+        final RenderParagraph paragraph = tester
+            .renderObjectList<RenderParagraph>(
+              find.descendant(
+                of: find.byType(MxListTile).first,
+                matching: find.byType(RichText),
+              ),
+            )
+            .last;
+
+        // The line really is cut — otherwise this test would be measuring a
+        // case that cannot go wrong.
         expect(
-          find.textContaining(marker, findRichText: true),
-          findsWidgets,
-          reason: 'the marker is still on screen at $locale',
+          paragraph.didExceedMaxLines,
+          isTrue,
+          reason: 'the subtitle is truncated at $locale, which is the premise',
         );
+
+        final List<ui.TextBox> boxes = paragraph.getBoxesForSelection(
+          TextSelection(baseOffset: 0, extentOffset: marker.length),
+        );
+        expect(boxes, isNotEmpty, reason: 'the marker has a box at $locale');
+        for (final ui.TextBox box in boxes) {
+          expect(
+            box.bottom,
+            lessThanOrEqualTo(paragraph.size.height + 0.5),
+            reason: 'the marker is inside the painted area at $locale',
+          );
+        }
       }
     });
 

@@ -154,12 +154,23 @@ class _StudyDirectionChooserState extends State<StudyDirectionChooserWidget> {
               // "try again", because re-reading finds the same empty queue. A
               // primary button that stays live under a message telling the user
               // to stop says the opposite of the message.
-              onPressed: _isNothingDue(context) ? null : _submit,
+              onPressed: _isNothingDue ? null : _submit,
             ),
           ],
         ),
       ),
     );
+  }
+
+  /// Whether the last attempt failed because the queue is empty.
+  ///
+  /// A different question from "did it fail": every other refusal is worth a
+  /// second press, and this one never is.
+  bool get _isNothingDue {
+    final failure = _failure;
+
+    return failure is Failure &&
+        failure.reason == StudyRefusalReason.nothingDueToReview;
   }
 
   /// What a refusal says, which is not one sentence for both of them.
@@ -175,17 +186,6 @@ class _StudyDirectionChooserState extends State<StudyDirectionChooserWidget> {
   /// Anything else keeps the generic line: an unrecognised failure is one this
   /// screen cannot describe, and inventing a cause for it would be worse than
   /// saying only that it did not work.
-  /// Whether the last attempt failed because the queue is empty.
-  ///
-  /// A different question from "did it fail": every other refusal is worth a
-  /// second press, and this one never is.
-  bool _isNothingDue(BuildContext context) {
-    final failure = _failure;
-
-    return failure is Failure &&
-        failure.reason == StudyRefusalReason.nothingDueToReview;
-  }
-
   String _messageFor(BuildContext context, Object failure) =>
       failure is Failure &&
           failure.reason == StudyRefusalReason.nothingDueToReview

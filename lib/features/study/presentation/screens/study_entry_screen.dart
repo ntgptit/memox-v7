@@ -197,6 +197,13 @@ class _StudyEntryScreenState extends ConsumerState<StudyEntryScreen> {
       // that cap of 319, so `Start review` sat far below the fold with nothing
       // on Android saying there was more to scroll to.
       isScrollControlled: true,
+      // **And a safe area, because the cap is gone.** The sheet's own
+      // `SafeArea(top: false)` was written for a sheet Flutter stopped at
+      // 9/16 of the display, which could never reach the top. Scroll-
+      // controlled it can, and at 320dp × 2.0 it does — its 16dp top
+      // padding is less than a modern cutout, so the title lost glyphs to
+      // the status bar.
+      useSafeArea: true,
       // The choice is locked for the session (BR-207), so it is confirmed rather
       // than taken on a tap — and a sheet that dismisses on a background tap
       // would still be dismissible, which is the correct way out of a question

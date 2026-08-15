@@ -22,7 +22,7 @@ part 'app_database_migrations_v5.dart';
     'queries/deck.drift',
     'queries/card.drift',
     'queries/tag.drift',
-    // A read-only summary of `study_answers` (UC-15). It adds a statement and
+    // A read-only summary of `study_answers` (UC-12). It adds a statement and
     // no table: `schemaVersion` is deliberately untouched by this file, because
     // a named query is not a schema change.
     'queries/progress.drift',
@@ -157,7 +157,7 @@ class AppDatabase extends _$AppDatabase {
         await _upgradeToV7();
       }
 
-      // v7 -> v8 (M99.23): the recall direction of BR-203.
+      // v7 -> v8 (M99.27): the recall direction of BR-203.
       //
       // Three nullable columns and a backfill. Additive, so a v7 row upgrades
       // without a value being invented for it — except for the one set of rows

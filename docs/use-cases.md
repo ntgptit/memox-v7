@@ -952,9 +952,9 @@ state "empty selection": bộ chọn luôn có đúng một khoảng được ch
 |---|---|
 | Đưa deck con lên thành root deck | Cần quyết định scheduler mới; là tính năng riêng, không phải phép di chuyển (UC-09 A2) |
 | Tìm kiếm card (S1) | Should-have, chưa tới lượt |
-| ~~Thống kê / streak (S2)~~ | **Đã đặc tả ở M99.23 và M99.24** — UC-12 với BR-200…BR-191 chốt đơn vị đếm, partition, streak và phạm vi v1; UC-13 với BR-192…BR-199 chốt drill-down theo deck trên hai khoảng. Còn ngoài phạm vi v1 và vẫn chưa có BR: accuracy, longest streak, goal, XP, heatmap, lọc theo deck, dự báo due và so sánh giữa hai khoảng (BR-191, BR-192) |
-| Đảo chiều card (S3) | Should-have |
-| ~~Export (nửa còn lại của N1)~~ | **Đã đặc tả ở M99.21** — UC-11 và BR-174…BR-181 chốt scope, encoder, filename, share và quyền riêng tư trước khi viết code, đúng điều kiện mà mục này đặt ra. Còn nice-to-have ngoài phạm vi export nội dung: backup/restore, sync và `.apkg`. |
+| ~~Thống kê / streak (S2)~~ | **Đã đặc tả ở M99.23, M99.24 và M99.25** — UC-12 với BR-182…BR-191 chốt đơn vị đếm, partition, streak và phạm vi v1; UC-13 với BR-192…BR-199 chốt tiến độ theo deck; UC-14 với BR-200…BR-202 chốt tab Study đọc thư viện thật |
+| Đảo chiều card (S3) | Should-have — **một nửa đã đóng ở M99.27**: UC-15 và BR-203…BR-209 cho phép hỏi ngược trong một phiên `self_assess` của deck `sm2` mà **không** ghi lại thẻ, nên phần còn mở là đảo chiều ở các mode khác |
+| ~~Export (nửa còn lại của N1)~~ | **Đã đặc tả ở M99.21** — UC-11 và BR-174…BR-181 chốt scope, encoder, filename, share và quyền riêng tư trước khi viết code |
 | Nhắc nhở hằng ngày (N2) | Nice-to-have, cần quyền notification |
 | Media và tag trong card | Ngoài MVP; quy tắc reset (BR-41) và lưu trữ (AD-08) đã đặt sẵn |
 | Đăng nhập, đồng bộ | Ngoài MVP (AD-03) |
@@ -1013,20 +1013,6 @@ BR-105, BR-133, BR-142, BR-162.
 loaded (mọi workload bằng 0) · empty (không deck) · empty (không card) · error
 
 ---
-
-## Điều đã cố ý không đặc tả
-
-| Thứ | Vì sao |
-|---|---|
-| Đưa deck con lên thành root deck | Cần quyết định scheduler mới; là tính năng riêng, không phải phép di chuyển (UC-09 A2) |
-| Tìm kiếm card (S1) | Should-have, chưa tới lượt |
-| Thống kê / streak (S2) | Should-have — `study_answers` với `kind` đã đủ dữ liệu |
-| Đảo chiều card (S3) | Should-have — **một nửa đã đóng ở M99.23**: UC-12 và BR-182…BR-188 cho phép hỏi ngược mà **không** ghi lại thẻ, nên phần còn mở là đảo chính nội dung `front`/`back`, thứ mà BR-08 cố tình không cho phép. |
-| ~~Export (nửa còn lại của N1)~~ | **Đã đặc tả ở M99.21** — UC-11 và BR-174…BR-181 chốt scope, encoder, filename, share và quyền riêng tư trước khi viết code, đúng điều kiện mà mục này đặt ra. Còn nice-to-have ngoài phạm vi export nội dung: backup/restore, sync và `.apkg`. |
-| Nhắc nhở hằng ngày (N2) | Nice-to-have, cần quyền notification |
-| Media và tag trong card | Ngoài MVP; quy tắc reset (BR-41) và lưu trữ (AD-08) đã đặt sẵn |
-| Đăng nhập, đồng bộ | Ngoài MVP (AD-03) |
-| Scheduler thứ ba | Abstraction đã sẵn sàng; thêm khi có nhu cầu thật |
 
 ## UC-15 · Chọn chiều hỏi cho một phiên self-assess
 
@@ -1094,17 +1080,3 @@ BR-203, BR-204, BR-205, BR-206, BR-207, BR-208, BR-209
 Start dùng lại được). Không có state `loading` khi mở sheet — điều kiện khả dụng
 đã được đọc trước khi sheet mở; không có state `empty`, vì ba lựa chọn là hằng
 số.
-
-## Điều đã cố ý không đặc tả
-
-| Thứ | Vì sao |
-|---|---|
-| Đưa deck con lên thành root deck | Cần quyết định scheduler mới; là tính năng riêng, không phải phép di chuyển (UC-09 A2) |
-| Tìm kiếm card (S1) | Should-have, chưa tới lượt |
-| Thống kê / streak (S2) | Should-have — `study_answers` với `kind` đã đủ dữ liệu |
-| Đảo chiều card (S3) | Should-have — **một nửa đã đóng ở M99.23**: UC-15 và BR-203…BR-209 cho phép hỏi ngược mà **không** ghi lại thẻ, nên phần còn mở là đảo chính nội dung `front`/`back`, thứ mà BR-08 cố tình không cho phép. |
-| ~~Export (nửa còn lại của N1)~~ | **Đã đặc tả ở M99.21** — UC-11 và BR-174…BR-181 chốt scope, encoder, filename, share và quyền riêng tư trước khi viết code, đúng điều kiện mà mục này đặt ra. Còn nice-to-have ngoài phạm vi export nội dung: backup/restore, sync và `.apkg`. |
-| Nhắc nhở hằng ngày (N2) | Nice-to-have, cần quyền notification |
-| Media và tag trong card | Ngoài MVP; quy tắc reset (BR-41) và lưu trữ (AD-08) đã đặt sẵn |
-| Đăng nhập, đồng bộ | Ngoài MVP (AD-03) |
-| Scheduler thứ ba | Abstraction đã sẵn sàng; thêm khi có nhu cầu thật |

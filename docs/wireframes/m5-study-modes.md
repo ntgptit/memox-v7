@@ -7,7 +7,7 @@
 | **Scope** | Khung phiên học, năm màn `browse` · `match` · `guess` · `recall` · `fill`, và sheet chọn chiều hỏi của `self_assess` (§9). Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), luồng (`use-cases.md`), giá trị token (`design_system/tokens/`) |
 | **Source of truth for** | Bố cục màn học · phán quyết cho tám điểm design lệch với BR · bố cục sheet chọn chiều và thẻ khi chiều bị đảo |
 | **Depends on** | `document-conventions.md`, `business-rules.md` (BR-108…BR-154), `wbs-study.md` (M5.7…M5.20) |
-| **Updated by task** | M99.23 — §9: sheet chọn chiều hỏi (ba dòng chung mép, glyph chứ không chỉ màu, chạm chỉ chọn, sheet cuộn được) và thẻ khi chiều bị đảo (nhãn đi theo nội dung, ba phép đo ghim bằng `getRect`) · `fill` làm lại vùng đáp án lần hai — thẻ dưới **là** input surface, bỏ ô viền lồng trong thẻ, đề đổi sang `back` và chấm bằng `front_folded` (BR-134), phán quyết mặc lên viền thẻ, hàng CTA giữ đủ hai chỗ (§6, §8.10) · `recall` tách lật khỏi chấm — lật mở tự đánh giá, hết giờ ghi sai rồi chờ `Next` (§6.1, §8.12) · `guess` bỏ nền phán quyết — đúng/sai chỉ còn viền + chữ + icon, ba hàng còn lại lùi về 0.7 thay vì 0.36, reset theo lượt thay vì `cardId`, ngân sách đọc 800/1800ms (§5, §8.9, §8.12) · Rà soát UI 5 stage — `match` nhận cả hai chiều chọn và giữ trạng thái đủ lâu để đọc (§4, §8.8), chuyển feedback sang viền + chữ thay vì nền đặc (§4), đổi meaning sang trái, hạ thang chữ và nâng sàn hàng lên 112 (§4, §8.6), `guess` bỏ huy hiệu A–E (§5), `fill` làm lại vùng đáp án (§6), `browse` cân bằng hai mặt và đổi nhãn (§3) |
+| **Updated by task** | M99.27 — §9: sheet chọn chiều hỏi (ba dòng chung mép, glyph chứ không chỉ màu, chạm chỉ chọn, sheet cuộn được) và thẻ khi chiều bị đảo (nhãn đi theo nội dung, ba phép đo ghim bằng `getRect`) · `fill` làm lại vùng đáp án lần hai — thẻ dưới **là** input surface, bỏ ô viền lồng trong thẻ, đề đổi sang `back` và chấm bằng `front_folded` (BR-134), phán quyết mặc lên viền thẻ, hàng CTA giữ đủ hai chỗ (§6, §8.10) · `recall` tách lật khỏi chấm — lật mở tự đánh giá, hết giờ ghi sai rồi chờ `Next` (§6.1, §8.12) · `guess` bỏ nền phán quyết — đúng/sai chỉ còn viền + chữ + icon, ba hàng còn lại lùi về 0.7 thay vì 0.36, reset theo lượt thay vì `cardId`, ngân sách đọc 800/1800ms (§5, §8.9, §8.12) · Rà soát UI 5 stage — `match` nhận cả hai chiều chọn và giữ trạng thái đủ lâu để đọc (§4, §8.8), chuyển feedback sang viền + chữ thay vì nền đặc (§4), đổi meaning sang trái, hạ thang chữ và nâng sàn hàng lên 112 (§4, §8.6), `guess` bỏ huy hiệu A–E (§5), `fill` làm lại vùng đáp án (§6), `browse` cân bằng hai mặt và đổi nhãn (§3) |
 | **Last updated** | 2026-08-13 |
 
 Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham chiếu bằng ID.
@@ -1062,8 +1062,8 @@ có màn chọn mode ở giữa vì thuật toán chỉ offer một mode (BR-146
 │  You can't change this once the ses…   body  │
 │                                              │
 │  ◉  Korean first                             │
-│     See the Korean, recall what it means.    │
-│     — Recommended                            │
+│     Recommended — See the Korean, recall     │
+│     what it means.                           │
 │  ○  Meaning first                            │
 │     See the meaning, recall the Korean.      │
 │  ○  Mixed                                    │
@@ -1103,7 +1103,7 @@ cũ.
 **Sheet cuộn được và tôn trọng safe area dưới.** Một modal sheet bị chặn ở một
 phần chiều cao màn hình; ba dòng hai dòng chữ vượt ngưỡng đó trên máy thấp, và
 tràn thì nút `Start review` — thứ duy nhất kết thúc được câu hỏi — biến mất.
-`SingleChildScrollView` + `SafeArea(top: false)`. **Sheet chọn mode của BR-146
+`SingleChildScrollView` + `isScrollControlled` + `useSafeArea`. **Sheet chọn mode của BR-146
 nhận cùng cách sửa** trong cùng task: bốn mode kèm dòng lý do cũng vượt ngưỡng
 đó, và lỗi được tìm ra bởi chính test của sheet này.
 

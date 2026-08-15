@@ -116,23 +116,33 @@ void main() {
       // always the ≤60-character front (BR-08); reversing the direction put a
       // 240-character meaning there at 30dp and dropped the Korean term to 24 —
       // the exact inversion the supporting half's own comment argues against.
-      for (final (StudyRecallDirection direction, double koreanSize)
-          in <(StudyRecallDirection, double)>[
-            (StudyRecallDirection.koreanToMeaning, 30),
-            (StudyRecallDirection.meaningToKorean, 30),
+      // Both directions, and both before and after the flip: the unflipped
+      // `meaning_to_korean` card is a single half filling the card, and it is
+      // the one combination whose size actually moved — 24dp where the old
+      // position-based rule gave 30.
+      for (final (StudyRecallDirection direction, bool isRevealed)
+          in <(StudyRecallDirection, bool)>[
+            (StudyRecallDirection.koreanToMeaning, true),
+            (StudyRecallDirection.meaningToKorean, true),
+            (StudyRecallDirection.koreanToMeaning, false),
+            (StudyRecallDirection.meaningToKorean, false),
           ]) {
-        await pumpCard(tester, direction: direction, isRevealed: true);
+        await pumpCard(tester, direction: direction, isRevealed: isRevealed);
 
-        expect(
-          tester.widget<Text>(find.text(korean)).style?.fontSize,
-          koreanSize,
-          reason: 'the term keeps the larger role under $direction',
-        );
-        expect(
-          tester.widget<Text>(find.text(meaning)).style?.fontSize,
-          24,
-          reason: 'the meaning keeps the smaller one under $direction',
-        );
+        if (find.text(korean).evaluate().isNotEmpty) {
+          expect(
+            tester.widget<Text>(find.text(korean)).style?.fontSize,
+            30,
+            reason: 'the term keeps the larger role, $direction/$isRevealed',
+          );
+        }
+        if (find.text(meaning).evaluate().isNotEmpty) {
+          expect(
+            tester.widget<Text>(find.text(meaning)).style?.fontSize,
+            24,
+            reason: 'the meaning keeps the smaller one, $direction/$isRevealed',
+          );
+        }
       }
     });
 

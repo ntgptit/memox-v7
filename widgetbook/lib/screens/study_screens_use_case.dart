@@ -72,9 +72,15 @@ List<WidgetbookComponent> studyScreenComponents() => <WidgetbookComponent>[
 /// Mounted flat rather than inside a real `showModalBottomSheet`: a catalog page
 /// is not a route, and the sheet's own `SafeArea` + scroll behaviour is what a
 /// reviewer needs to look at. **The chrome is the theme's, not a stand-in** —
-/// `bottomSheetTheme` gives the real sheet `surface`, its top radius and a drag
-/// handle, and the demo used `surfaceContainerLow`, which is a different colour
-/// in dark and happens to be the one the selected radio glyph sits on.
+/// `bottomSheetTheme` gives the real sheet `surface` and its top radius, and the
+/// demo used `surfaceContainerLow` — a different colour in dark, and the one the
+/// selected radio glyph happens to sit on, so the catalogue was showing the
+/// wrong ground under the exact pixel that turned out to be 2.45:1.
+///
+/// The drag handle is **not** here: `showDragHandle: true` is a `BottomSheet`
+/// property rather than a `BottomSheetThemeData` one, so a flat mount cannot
+/// inherit it. The ~24dp strip it occupies is missing from the top of this
+/// page, which is worth knowing if you came to look at the sheet's top spacing.
 class _DirectionChooserDemo extends StatelessWidget {
   const _DirectionChooserDemo({required this.scenario});
 
@@ -87,6 +93,15 @@ class _DirectionChooserDemo extends StatelessWidget {
   Future<Object?> _submit(
     StudySessionDirection direction,
   ) => switch (scenario) {
+    // The other refusal: one a retry can genuinely fix, so the CTA stays live
+    // under it. Reachable on the long-content scenario for no reason except
+    // that a scenario had to carry it.
+    StudyCatalogScenario.longContent => Future<Object?>.value(
+      const ConflictFailure(
+        message: 'catalog: this deck no longer uses sm2',
+        reason: StudyRefusalReason.modeNotSupportedByScheduler,
+      ),
+    ),
     // Nothing due: the refusal that keeps the selection and disables the CTA.
     StudyCatalogScenario.nothingDue ||
     StudyCatalogScenario.nothingLeft => Future<Object?>.value(
