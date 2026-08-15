@@ -944,7 +944,14 @@ def _check_deck_flow_drift() -> None:
 
 
 
-_ID_RANGE_RE = re.compile(r"\b(BR|UC|AD)-([0-9]{2,3})\s*(?:…|\.\.\.)\s*(?:BR|UC|AD)-([0-9]{2,3})\b")
+# Every separator a range gets written with here — an ellipsis, three dots,
+# an en or em dash, or a tilde. The first version knew only the first two, so
+# a backwards range spelled any other way was invisible to a check whose whole
+# job is to see it.
+_ID_RANGE_RE = re.compile(
+    r"\b(BR|UC|AD)-([0-9]{2,3})\s*(?:\u2026|\.\.\.|\u2013|\u2014|~)\s*"
+    r"(BR|UC|AD)-([0-9]{2,3})\b"
+)
 
 
 def _check_id_ranges() -> None:
@@ -964,8 +971,10 @@ def _check_id_ranges() -> None:
             continue
         for i, line in enumerate(text.splitlines(), start=1):
             for m in _ID_RANGE_RE.finditer(line):
-                lo, hi = int(m.group(2)), int(m.group(3))
-                if lo >= hi:
+                lo, hi = int(m.group(2)), int(m.group(4))
+                if m.group(1) != m.group(3):
+                    bad.append(f"{path}:{i}: {m.group(0)} spans two ID kinds")
+                elif lo >= hi:
                     bad.append(f"{path}:{i}: {m.group(0)} does not count upwards")
     if bad:
         for b in bad:
@@ -982,11 +991,24 @@ def _tracked_text_files() -> list[str]:
         ).stdout.split()
     except (OSError, subprocess.CalledProcessError):
         return []
-    return [
+    files = [
         f for f in out
         if f.endswith((".md", ".dart", ".drift", ".arb"))
         and not f.endswith((".g.dart", ".freezed.dart"))
     ]
+    # The same extra scope `_ref_files` takes: the root contract and every skill
+    # document. A range written there is as wrong as one written under `docs/`,
+    # and the first version of this check could see neither.
+    try:
+        extra = subprocess.run(
+            ["git", "ls-files", "CLAUDE.md", "AGENTS.md", ".claude/skills"],
+            capture_output=True, text=True, check=True, cwd=_REPO,
+        ).stdout.split()
+    except (OSError, subprocess.CalledProcessError):
+        extra = []
+    files.extend(f for f in extra if f.endswith(".md"))
+
+    return files
 
 def main() -> int:
     global _quiet, _REPO
