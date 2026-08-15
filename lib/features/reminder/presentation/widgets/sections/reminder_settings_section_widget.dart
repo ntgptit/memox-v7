@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -79,6 +80,10 @@ class ReminderSettingsSectionWidget extends StatelessWidget {
       children: <Widget>[
         MxCard(
           padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+          // Flat, like every card in a scrolling body (D20): the hairline
+          // carries the edge, and a shadow here would be the only one on a
+          // screen the user reaches from three flat ones.
+          elevation: AppElevation.none,
           // `Material` inside the card, and it is not decoration: `MxCard`
           // paints its surface with a `DecoratedBox`, and `ListTile` paints its
           // background and ink onto the nearest `Material` ancestor — which

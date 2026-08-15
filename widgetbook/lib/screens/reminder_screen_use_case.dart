@@ -12,7 +12,7 @@ import 'package:widgetbook/widgetbook.dart';
 
 import 'reminder_catalog_repository.dart';
 
-/// The daily-reminder screen (UC-17, M6), in its three resting states.
+/// The daily-reminder screen (UC-17, M6), in every state it owns.
 ///
 /// The clock and the timezone are pinned for the reason the Study screens pin
 /// theirs: `domain/` takes both as inputs (AD-06, AD-16), so a catalog that
@@ -32,7 +32,30 @@ enum ReminderCatalogScenario {
 
   /// A platform with no reminder delivery (BR-229): the toggle is disabled and
   /// the banner says so, rather than a control that flips and does nothing.
-  unavailable('Platform unavailable');
+  unavailable('Platform unavailable'),
+
+  /// The read never lands, so the spinner holds.
+  loading('Loading (read never lands)'),
+
+  /// The permission request stays in flight, so the busy face holds. Turn the
+  /// toggle on to reach it.
+  submitting('Submitting (turn it on)'),
+
+  /// The OS refuses the prompt (BR-228). Turn the toggle on to reach it: the
+  /// setting stays off, and the recovery is system settings, not another ask.
+  permissionDenied('Permission denied (turn it on)'),
+
+  /// The prompt is granted but the work will not enqueue (BR-226). Turn the
+  /// toggle on to reach it.
+  scheduleFailed('Schedule failed (turn it on)'),
+
+  /// The pending run will not cancel. Turn the toggle on, then off — the copy
+  /// here is deliberately not the schedule copy, because the setting *is*
+  /// already off.
+  cancelFailed('Cancel failed (on, then off)'),
+
+  /// The choice will not write. Turn the toggle on to reach it.
+  settingsWriteFailed('Settings write failed (turn it on)');
 
   const ReminderCatalogScenario(this.label);
 
@@ -73,8 +96,9 @@ class _ReminderDemo extends StatelessWidget {
       isEnabled: true,
       time: ReminderTime.parse(7 * 60 + 30).time!,
     ),
-    ReminderCatalogScenario.off ||
-    ReminderCatalogScenario.unavailable => ReminderSettingsModel.initial,
+    // Every failure scenario opens **off**, because that is where a user
+    // stands when they reach for the toggle that then rejects them.
+    _ => ReminderSettingsModel.initial,
   };
 
   ReminderCapability get _capability =>
@@ -82,16 +106,30 @@ class _ReminderDemo extends StatelessWidget {
       ? ReminderCapability.unsupported
       : ReminderCapability.supported;
 
+  ReminderCatalogSettings get _settingsRepository => ReminderCatalogSettings(
+    _settings,
+    isRead: scenario != ReminderCatalogScenario.loading,
+    doesWriteFail: scenario == ReminderCatalogScenario.settingsWriteFailed,
+  );
+
+  ReminderCatalogPlatform get _platform => ReminderCatalogPlatform(
+    _capability,
+    permission: scenario == ReminderCatalogScenario.permissionDenied
+        ? ReminderPermission.denied
+        : ReminderPermission.granted,
+    doesScheduleFail: scenario == ReminderCatalogScenario.scheduleFailed,
+    doesCancelFail: scenario == ReminderCatalogScenario.cancelFailed,
+    doesPermissionStall: scenario == ReminderCatalogScenario.submitting,
+  );
+
   @override
   Widget build(BuildContext context) {
     return ProviderScope(
       overrides: [
         reminderSettingsRepositoryProvider.overrideWithValue(
-          ReminderCatalogSettings(_settings),
+          _settingsRepository,
         ),
-        reminderPlatformRepositoryProvider.overrideWithValue(
-          ReminderCatalogPlatform(_capability),
-        ),
+        reminderPlatformRepositoryProvider.overrideWithValue(_platform),
         clockProvider.overrideWithValue(() => _catalogNow),
         utcOffsetProvider.overrideWithValue(() => const Duration(hours: 7)),
       ],

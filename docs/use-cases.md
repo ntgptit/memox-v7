@@ -17,7 +17,7 @@ Luồng viết bằng ngôn ngữ người dùng, không nói theo màn hình ha
 hình sẽ đổi; luồng thì không.
 
 **ID use case là định danh vĩnh viễn**, cùng chính sách với BR (xem
-`business-rules.md`). UC mới append; không đánh số lại. Hiện tại: UC-01…UC-12.
+`business-rules.md`). UC mới append; không đánh số lại. Hiện tại: UC-01…UC-15.
 
 **Các UC nối vào nhau thế nào thì xem [`master-flow.md`](master-flow.md).** Tài
 liệu này đặc tả từng UC riêng lẻ và cố ý không vẽ đồ thị giữa chúng — mỗi UC mô
@@ -939,7 +939,7 @@ study state, history, cờ và tag đều nguyên vẹn, và không session nào
 hay đóng (BR-188).
 
 **Business rules:** BR-43, BR-51, BR-55, BR-56, BR-57, BR-76, BR-105, BR-182,
-BR-183, BR-184, BR-185, BR-186, BR-187, BR-188, BR-189
+BR-211, BR-212, BR-213, BR-214, BR-215, BR-216, BR-217
 
 **UI states:** loading · mixed activity (một số deck có, một số không) ·
 all-zero (có deck, khoảng rỗng) · no decks (cấp thư viện) · no sub-decks (cấp
@@ -1231,7 +1231,7 @@ luôn có nội dung, kể cả khi thư viện rỗng.
 | Thống kê / streak (S2) | Should-have — `study_answers` với `kind` đã đủ dữ liệu |
 | Đảo chiều card (S3) | Should-have |
 | ~~Export (nửa còn lại của N1)~~ | **Đã đặc tả ở M99.21** — UC-11 và BR-174…BR-181 chốt scope, encoder, filename, share và quyền riêng tư trước khi viết code, đúng điều kiện mà mục này đặt ra. Còn nice-to-have ngoài phạm vi export nội dung: backup/restore, sync và `.apkg`. |
-| ~~Nhắc nhở hằng ngày (N2)~~ | **Đã đặc tả ở M99.23** — UC-12 và BR-182…BR-193 chốt opt-in, phạm vi due-only, riêng tư của copy, thứ tự cấp bách và vòng đời lịch trước khi viết code. Còn ngoài phạm vi: nhắc theo thẻ mới, nhiều lượt nhắc trong ngày, và nhắc theo từng deck. |
+| ~~Nhắc nhở hằng ngày (N2)~~ | **Đã đặc tả ở M99.29** — UC-17 và BR-218…BR-229 chốt opt-in, phạm vi due-only, riêng tư của copy, thứ tự cấp bách và vòng đời lịch trước khi viết code. Còn ngoài phạm vi: nhắc theo thẻ mới, nhiều lượt nhắc trong ngày, và nhắc theo từng deck. |
 | Media và tag trong card | Ngoài MVP; quy tắc reset (BR-41) và lưu trữ (AD-08) đã đặt sẵn |
 | Đăng nhập, đồng bộ | Ngoài MVP (AD-03) |
 | Scheduler thứ ba | Abstraction đã sẵn sàng; thêm khi có nhu cầu thật |

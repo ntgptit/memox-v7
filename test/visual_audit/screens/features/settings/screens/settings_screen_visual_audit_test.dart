@@ -52,10 +52,13 @@ void main() {
         itemId: 'shell',
         reason: SkipReason.rasterOnly,
         detailContains: '_RenderInkFeatures',
-        // Seven: the Scaffold, the AppBar, the save button, the reset link,
-        // and the transparent Material each of the three radio groups puts
-        // inside its card so its rows' ripples are not painted behind it.
-        expectedMatches: 7,
+        // Eight: the Scaffold, the AppBar, the save button, the reset link,
+        // the transparent Material each of the three radio groups puts inside
+        // its card so its rows' ripples are not painted behind it, and the
+        // eighth for the same reason on the daily-reminder row (M99.29) — a
+        // `ListTile` inside an `MxCard` has no Material of its own, and
+        // without one Flutter paints its ink behind the card and asserts.
+        expectedMatches: 8,
         rationale:
             'Material ink layers. Splash and highlight are painted onto '
             'Material, so no render object carries them; the overlay colours '
@@ -104,10 +107,11 @@ void main() {
         itemId: 'shell',
         reason: SkipReason.customPainter,
         detailContains: 'no painter',
-        expectedMatches: 4,
+        expectedMatches: 5,
         rationale:
-            'A clip with no painter: the card-limit field and the three radio '
-            'groups each clip through a CustomPaint with no painter of its own.',
+            'A clip with no painter: the card-limit field, the three radio '
+            'groups and the daily-reminder row each clip through a CustomPaint '
+            'with no painter of its own.',
       ),
       AuditSkipAllowance(
         itemId: 'shell',

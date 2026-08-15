@@ -1377,7 +1377,7 @@ branch: branch tiếp theo tốt nghiệp không cần sửa lại AD này nữa
 `4 × 120dp` của `MxNavigationBar` trên màn 393dp, nên cap bề rộng phải nhường
 cho bề rộng màn hình (M99.7) — đúng hành vi Material thiết kế cho even split.
 
-**M99.23 đã trả lời được câu hỏi mà quyết định này đặt cược vào.** Thay
+**M99.28 đã trả lời được câu hỏi mà quyết định này đặt cược vào.** Thay
 `SettingsPlaceholderScreen` bằng feature thật không đụng `app_router.dart`,
 không đụng `AppNavigationShell`, không đổi path và không đổi thứ tự tab — đúng
 điều AD này hứa. Cái nó **có** đụng là hai thứ AD này không dự đoán: theme và
@@ -1478,29 +1478,29 @@ khác nhau; chung factory là chung lý do đổi. Chuẩn bị sẵn `encode()`
 | | |
 |---|---|
 | **Status** | accepted |
-| **Affected documents** | `business-rules.md` (BR-182…BR-193), `use-cases.md` (UC-12), `data-model.md` (`app_settings`, migration v8 và v9), `wireframes/m6-daily-reminders.md` |
+| **Affected documents** | `business-rules.md` (BR-218…BR-229), `use-cases.md` (UC-17), `data-model.md` (`app_settings`, migration v10), `wireframes/m6-daily-reminders.md` |
 
 **Decision.** Nhắc học hằng ngày tách làm hai vai và mỗi vai một plugin:
 **WorkManager** giữ *thời điểm*, `flutter_local_notifications` giữ *hiển thị
 và quyền*. Đến giờ, một background worker chạy Dart thật: nó mở database, đọc
 lại workload đến hạn, và chỉ khi tổng còn > 0 mới dựng nội dung rồi hiện đúng
-một notification (BR-184, BR-185) — sau đó tự đặt lượt cho ngày kế tiếp. App
+một notification (BR-220, BR-221) — sau đó tự đặt lượt cho ngày kế tiếp. App
 **không** dùng `zonedSchedule` để nạp sẵn một notification lặp lại, và **không**
-khai báo quyền exact alarm ở bất kỳ flavor nào (BR-190).
+khai báo quyền exact alarm ở bất kỳ flavor nào (BR-226).
 
 Ranh giới layer đi kèm quyết định này: `domain/` khai báo ba contract —
 settings, workload, và một `ReminderPlatformRepository` gộp capability, quyền,
 đặt lịch và hiển thị — còn `data/` giữ **toàn bộ** kiểu của plugin. Một adapter
 Android thật và một adapter `unsupported` cho mọi nền tảng còn lại thoả cùng
 contract đó, nên `domain/` và `presentation/` không có một dòng kiểm tra nền
-tảng nào (BR-193, AD-12, AD-13).
+tảng nào (BR-229, AD-12, AD-13).
 
-**Context.** BR-186 cho phép notification nêu tên deck cấp bách nhất và tổng số
+**Context.** BR-222 cho phép notification nêu tên deck cấp bách nhất và tổng số
 thẻ. Ba con số đó **chỉ đúng tại thời điểm hiện**: người dùng học một phiên tối
 nay thì tổng đổi, và một notification đã nạp nội dung lúc đặt lịch vẫn hiện
 đúng giờ với số của hôm qua. `zonedSchedule` của
 `flutter_local_notifications` không chạy Dart lúc fire — hệ điều hành hiện một
-payload cố định — nên nó không thể thoả BR-184 lẫn BR-186 cùng lúc. Cái chạy
+payload cố định — nên nó không thể thoả BR-220 lẫn BR-222 cùng lúc. Cái chạy
 được Dart đúng lúc fire là một worker.
 
 WorkManager là nguyên thuỷ đúng cho vế còn lại: nó **vốn dĩ** không chính xác,
@@ -1511,7 +1511,7 @@ hoặc `USE_EXACT_ALARM`, và một lời nhắc học không có lý do sản p
 mức đặc quyền đó.
 
 **Consequences.** Được: nội dung notification luôn là số thật của lúc hiện
-(BR-184, BR-186); "không còn gì đến hạn" trở thành một nhánh **chạy được ở host
+(BR-220, BR-222); "không còn gì đến hạn" trở thành một nhánh **chạy được ở host
 test** thay vì một hành vi chỉ quan sát được trên máy thật; reboot và app update
 không cần code riêng.
 
@@ -1526,12 +1526,12 @@ emulator/thiết bị **hoãn sang integration worktree và được báo là ch
 
 **Rejected alternatives.** `zonedSchedule` lặp hằng ngày với
 `AndroidScheduleMode.inexactAllowWhileIdle` — rẻ nhất, và không thoả được
-BR-184 lẫn BR-186 vì không có Dart nào chạy lúc fire.
+BR-220 lẫn BR-222 vì không có Dart nào chạy lúc fire.
 `android_alarm_manager_plus` — chạy Dart được, nhưng manifest của nó mang theo
-quyền exact alarm, đúng thứ BR-190 cấm. Tự viết method channel và
+quyền exact alarm, đúng thứ BR-226 cấm. Tự viết method channel và
 `NotificationManager` bằng Kotlin — thêm một bề mặt native phải tự bảo trì cho
 đúng cái mà hai plugin đã làm, và bề mặt đó là thứ ít kiểm chứng được nhất ở
 đây. Đặt lịch dựa trên "workload dự phóng tại thời điểm fire" tính sẵn lúc đặt
 lịch — đúng trong đa số trường hợp vì workload chỉ đổi khi app chạy, nhưng nó
-đổi *đảm bảo* của BR-184 thành một lập luận, và lập luận đó vỡ ngay lần đầu app
+đổi *đảm bảo* của BR-220 thành một lập luận, và lập luận đó vỡ ngay lần đầu app
 bị kill giữa lúc ghi.

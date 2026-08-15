@@ -120,6 +120,24 @@ void main() {
       );
     });
 
+    test('a negative minute is refused too', () async {
+      // The upper bound alone does not pin the range: a migration shipping
+      // `CHECK (reminder_minute_of_day <= 1439)` — the `>= 0` half dropped, or
+      // the whole range reversed — passes every other case in this file and
+      // still lets a negative minute-of-day land, which BR-219's `0…1439`
+      // domain forbids.
+      final db = AppDatabase(NativeDatabase.memory());
+      addTearDown(db.close);
+
+      await expectLater(
+        db.customUpdate(
+          'UPDATE app_settings SET reminder_minute_of_day = ? WHERE id = 1',
+          variables: const <Variable<Object>>[Variable<int>(-1)],
+        ),
+        throwsA(anything),
+      );
+    });
+
     test('a non-boolean enabled flag is refused', () async {
       final db = AppDatabase(NativeDatabase.memory());
       addTearDown(db.close);

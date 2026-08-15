@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
@@ -40,6 +41,9 @@ class ReminderBannerSectionWidget extends StatelessWidget {
       liveRegion: true,
       child: MxCard(
         color: context.colors.errorContainer,
+        // A shadow stacked on a shadow is a rendering fault rather than
+        // depth: this banner sits inside a scrolling body of flat cards (D20).
+        elevation: AppElevation.none,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[

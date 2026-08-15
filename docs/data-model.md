@@ -7,7 +7,7 @@
 | **Scope** | Bảng, cột, index, quan hệ, query bất biến. Ngoài phạm vi: SQL runtime (`lib/core/database/`, chưa tồn tại) |
 | **Source of truth for** | Schema · cột và kiểu · index · query bất biến · thứ tự migration |
 | **Depends on** | `document-conventions.md`, `architecture.md`, `business-rules.md` |
-| **Updated by task** | M99.28 — `app_settings.theme_mode` và `app_settings.language` (BR-214, BR-215), migration v9, và bảng thứ tự migration bổ sung v6/v7 vốn bị bỏ sót · M99.29 — ba cột nhắc học trên `app_settings`, migration v8 và v9; bảng thứ tự migration bổ sung v6, v7 |
+| **Updated by task** | M99.28 — `app_settings.theme_mode` và `app_settings.language` (BR-214, BR-215), migration v9, và bảng thứ tự migration bổ sung v6/v7 vốn bị bỏ sót · M99.29 — ba cột nhắc học trên `app_settings`, migration v10 (nhánh nguồn chia làm hai bước v8 và v9; cả hai số đó đã thuộc feature khác) |
 | **Last updated** | 2026-08-13 |
 
 Schema viết trong file `.drift` (AD-02). Đây là tài liệu thiết kế; SQL thật nằm ở
@@ -496,7 +496,7 @@ kiểu đúng lúc build là điều một ô JSON không cho.
 cột `DATETIME` khác ở đây lưu UTC vì chúng là *thời điểm*; đây là một *giờ trong
 ngày*, và quy đổi nó sang UTC lúc lưu làm giờ nhắc trôi đúng bằng lượng offset
 đổi khi người dùng đi qua múi giờ khác — người dùng đặt 20:00 và nhận lúc 23:00
-mà không có gì nói cho họ biết tại sao (BR-183).
+mà không có gì nói cho họ biết tại sao (BR-219).
 
 Hai cột này chỉ có `CHECK`, không có bất biến trong mục `## Bất biến`. Lý do
 giống điều bất biến 12 nói ngược lại: một `CHECK` đã khiến giá trị ngoài miền
@@ -506,7 +506,7 @@ vi phạm của chính nó.
 **Một bảng một dòng thay vì key-value.** Key-value đọc linh hoạt hơn nhưng mọi
 giá trị thành `TEXT` và mọi lần đọc thành một phép ép kiểu không ai kiểm; một
 dòng có cột thật thì `drift_dev` type-check ngay lúc build, và thêm một tùy chọn
-là một migration — đúng mức nghiêm túc cần có cho thứ đổi hành vi học. BR-182
+là một migration — đúng mức nghiêm túc cần có cho thứ đổi hành vi học. BR-210
 nâng điều đó lên thành rule, nên `SharedPreferences` cho theme và ngôn ngữ là
 lựa chọn đã bị loại: nó tách một nửa tuỳ chọn của app sang một store thứ hai,
 không có transaction chung với nửa còn lại và không watch được cùng một stream.
@@ -525,7 +525,7 @@ ai đó ghi `vi-VN` vào.
 đè; deck con MUST NOT (BR-147), cùng quy tắc cột scheduler đã theo từ BR-06. Giá
 trị hiệu lực = giá trị của root nếu có, ngược lại giá trị bảng này. Đổi bảng này
 MUST NOT ghi `study_config`, và xoá `study_config` MUST NOT ghi bảng này
-(BR-184).
+(BR-212).
 
 ## `deck_templates`
 
@@ -883,10 +883,7 @@ và cờ — xem `docs/wireframes/m4-11-card-management.md`.
 | 7 | Chỉ dữ liệu, không DDL: backfill `decks.first_answered_at` từ `MIN(learned_at)` của cây, để khoá scheduler của BR-13 có giá trị lưu trữ (invariant 30) (M99.16) |
 | 8 | Ba cột `direction` nullable trên `study_sessions`, `study_queue_items`, `study_answers` (BR-203…BR-206), cộng backfill `korean_to_meaning` cho đúng các dòng `self_assess` của phiên `reviewing` trên cây `sm2` — chiều mà mọi bản trước đã chạy (M99.27) |
 | 9 | Cột `app_settings.theme_mode`, `app_settings.language` — hai `ALTER TABLE ADD COLUMN` có `DEFAULT 'system'`, không đụng dòng nào (M99.28) |
-| 6 | Chuẩn hoá dữ liệu, không đổi schema: sub-deck rỗng về `content_type = 'unset'` (BR-163, M99.15) |
-| 7 | Chuẩn hoá dữ liệu, không đổi schema: backfill `decks.first_answered_at` từ `MIN(learned_at)` của cây (BR-13) |
-| 8 | Cột `app_settings.reminder_enabled`, `reminder_minute_of_day` — hai `ALTER TABLE … ADD COLUMN`, không đụng dòng nào (BR-218, BR-219, M99.29) |
-| 9 | Cột `app_settings.reminder_last_delivered_at` — nullable, không default. Ngày đã được nhắc phải sống lâu hơn lượt worker quyết định nó, nếu không lần hoà giải lúc khởi động kế tiếp sẽ đặt lại ngày vừa bỏ (BR-221, M99.29) |
+| 10 | Ba cột `app_settings.reminder_enabled`, `reminder_minute_of_day`, `reminder_last_delivered_at` — ba `ALTER TABLE … ADD COLUMN`, không đụng dòng nào. Nhánh nguồn chia làm hai bước v8 và v9; cả hai số đó đã thuộc feature khác trên nhánh tích hợp, và trạng thái trung gian mà chúng mô tả — đã cấu hình nhắc, chưa từng ghi lần gửi — chưa từng tồn tại ở đây (BR-218, BR-219, BR-221, M99.29) |
 | _sau_ | Bảng `card_media` |
 | _sau_ | Cột sync (`is_pending_sync`, `version`) khi có backend (AD-03) |
 | _sau_ | `deck_templates` thành bảng runtime nếu tải template từ server |

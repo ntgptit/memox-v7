@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/navigation/route_names.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../l10n/l10n_extension.dart';
 import '../../../../shared/widgets/mx_async_view.dart';
@@ -17,6 +19,7 @@ import '../controllers/settings_write_controller.dart';
 import '../states/settings_submit_state.dart';
 import '../widgets/overlays/settings_reset_confirm_widget.dart';
 import '../widgets/sections/settings_choice_section_widget.dart';
+import '../widgets/sections/settings_reminder_entry_section_widget.dart';
 import '../widgets/sections/settings_reset_section_widget.dart';
 import '../widgets/sections/settings_study_defaults_section_widget.dart';
 import '../widgets/support/settings_labels_widget.dart';
@@ -114,6 +117,10 @@ class _Body extends ConsumerWidget {
           isSubmitting: language.isSubmitting,
           failure: language.failure,
           onChanged: (value) => _saveLanguage(ref, value),
+        ),
+        const SizedBox(height: SettingsScreen.sectionGap),
+        SettingsReminderEntrySectionWidget(
+          onOpen: () => context.goNamed(RouteNames.reminderSettings),
         ),
         const SizedBox(height: SettingsScreen.sectionGap),
         SettingsResetSectionWidget(

@@ -1,6 +1,6 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 546,
+  "scannedFiles": 547,
   "totalSites": 450,
   "byElementKind": {
     "other": 304,
@@ -4223,7 +4223,7 @@
     },
     {
       "file": "lib/features/reminder/presentation/widgets/sections/reminder_banner_section_widget.dart",
-      "line": 42,
+      "line": 43,
       "widget_context": "ReminderBannerSectionWidget",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -4234,7 +4234,7 @@
     },
     {
       "file": "lib/features/reminder/presentation/widgets/sections/reminder_banner_section_widget.dart",
-      "line": 49,
+      "line": 53,
       "widget_context": "ReminderBannerSectionWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4245,7 +4245,7 @@
     },
     {
       "file": "lib/features/reminder/presentation/widgets/sections/reminder_banner_section_widget.dart",
-      "line": 56,
+      "line": 60,
       "widget_context": "ReminderBannerSectionWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4256,7 +4256,7 @@
     },
     {
       "file": "lib/features/reminder/presentation/widgets/sections/reminder_settings_section_widget.dart",
-      "line": 114,
+      "line": 119,
       "widget_context": "ReminderSettingsSectionWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4267,7 +4267,7 @@
     },
     {
       "file": "lib/features/reminder/presentation/widgets/sections/reminder_settings_section_widget.dart",
-      "line": 121,
+      "line": 126,
       "widget_context": "ReminderSettingsSectionWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
