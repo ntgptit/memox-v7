@@ -86,6 +86,33 @@ void main() {
       handle.dispose();
     });
 
+    testWidgets('the level error announces itself too, from under the '
+        'overview', (tester) async {
+      // **The level's failure is the easier one to miss, not the harder.** The
+      // overview's error face replaces the screen; this one sits under three
+      // sections that loaded, so a reader who is not at the bottom of the
+      // screen gets nothing — and at text scale 2.0 the Retry is below the fold
+      // as well. The overview face has carried `liveRegion` since stage 1; the
+      // two are one screen and behave alike.
+      final handle = tester.ensureSemantics();
+      await pumpProgressScreen(
+        tester,
+        repository: FakeProgressRepository.failing(
+          const DatabaseFailure(message: 'level read failed'),
+        ),
+      );
+
+      expect(
+        tester
+            .getSemantics(find.byType(MxErrorState))
+            .getSemanticsData()
+            .flagsCollection
+            .isLiveRegion,
+        isTrue,
+      );
+      handle.dispose();
+    });
+
     testWidgets('Retry re-opens the read', (tester) async {
       final repository = FakeProgressRepository();
       await pumpProgressScreen(tester, repository: repository);

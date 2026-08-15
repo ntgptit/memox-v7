@@ -95,8 +95,11 @@ dưới breakpoint compact) thì sliver là **60dp** ở bề rộng thường v
 320dp. Một delegate khai `extent` phải chọn một con số trong số đó và cắt phần
 còn lại, đúng với người đang cần cỡ chữ lớn. Dải
 dùng lại `MxSubheaderBand` — chính widget mà slot `subheader` dùng — nên luật
-padding theo breakpoint chỉ tồn tại ở một chỗ, và nền của nó là `DecoratedBox`
-màu `surface` để hàng deck cuộn **dưới** nó.
+padding theo breakpoint chỉ tồn tại ở một chỗ. Nền của nó là `DecoratedBox` tô
+`scaffoldBackgroundColor` — **màu trang, không phải `surface`** — để hàng deck
+cuộn **dưới** nó mà không tan vào nó: `surface` chính là màu `MxCard` tô, chênh
+với màu trang ΔL* 2.17 ở light và 6.38 ở dark, nên dải sẽ đọc như một card vuông
+góc và hàng deck chui vào chỉ còn hairline 1px phân biệt.
 
 **Không có breadcrumb.** Đường dẫn sống trên từng hàng thay vì thành một dải
 riêng phía trên. Lý do là hàng cũng chính là thứ TalkBack đọc: `Verbs, trong

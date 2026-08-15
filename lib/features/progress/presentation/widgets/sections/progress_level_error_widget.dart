@@ -66,6 +66,13 @@ class ProgressLevelErrorWidget extends StatelessWidget {
       // carries the gutter and `MxEmptyState`/`MxErrorState` pad themselves, so
       // the shell's own padding was a second inset — 32dp a side instead of 16,
       // and a visible snap when the read succeeded.
+      //
+      // **It moves a number inside a deck as well, where there is no band.**
+      // Both faces there go from 40dp a side to 24 at 390, and 36 to 24 at 320
+      // — the shell gutter drops and `MxEmptyState`/`MxErrorState`'s own `xl`
+      // is what remains. That is the inset `_emptyLevel` already uses on the
+      // same screen, so the change makes one screen agree with itself; it is
+      // recorded because it was not the reason for the edit.
       padding: EdgeInsets.zero,
       body: ProgressHeaderedBody(
         header: header,

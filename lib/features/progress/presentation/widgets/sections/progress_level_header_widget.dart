@@ -7,10 +7,16 @@ import '../../../../../shared/widgets/mx_content_shell.dart';
 ///
 /// A widget rather than a `Padding` written out at each site: the band appears
 /// in four places — the loaded level, the empty level, the loading face and the
-/// error face — and the gap below it is a *section* break the level's own
-/// top-padding is calculated against (`AppSpacing.xl` here, so the panel takes
-/// `0` above). Four copies of that pair is how the four faces end up inset
-/// differently from one another.
+/// error face — and four copies of its numbers is how the four faces end up
+/// inset differently from one another, which is exactly what happened before it
+/// existed.
+///
+/// The gap below is `AppSpacing.xl`, a *section* break. **It is not subtracted
+/// from what follows.** An earlier version said it was, and the totals panel
+/// took `0` above on that reasoning — but on the loaded face the pinned range
+/// strip sits between the two, so the panel's neighbour is the strip and not
+/// this band. The panel takes `md` at every level; the strip's own `xs` below
+/// completes the 16 the two have between them.
 class ProgressLevelHeaderWidget extends StatelessWidget {
   const ProgressLevelHeaderWidget({required this.child, super.key});
 

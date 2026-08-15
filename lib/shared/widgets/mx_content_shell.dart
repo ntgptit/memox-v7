@@ -55,10 +55,6 @@ class MxContentShell extends StatefulWidget {
   /// field, or both.
   final Widget? subheader;
 
-  /// How tall the subheader is. `AppBar.bottom` needs the number up front, so a
-  /// caller stacking two rows in there — a path and a search field — has to say
-  /// so, and has to scale it with the text: at `textScaler` 2.0 a row that fit
-
   /// Screen padding. `null` resolves to the scale for the current width:
   /// [AppSpacing.lg], or [AppSpacing.md] below [AppBreakpoints.compact].
   final EdgeInsetsGeometry? padding;

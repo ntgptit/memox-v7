@@ -86,10 +86,14 @@ class _ProgressDemoState extends State<_ProgressDemo> {
     // header, which is a surface the app no longer has; `/progress/:deckId` is
     // the one this screen renders alone, and it had no catalogue entry at all.
     //
-    // `noDecks` is the exception: at a deck level "no decks" is the
-    // holds-cards-not-sub-decks face, and the library-level empty state — the
-    // one that scenario is named for — only exists at the root.
-    initialLocation: widget.scenario == ProgressScenario.noDecks ? '/' : '/r1',
+    // **Every scenario, including `noDecks`.** Sending that one to the root was
+    // an attempt to catalogue the library-level empty state, and it catalogued
+    // a state the rules forbid instead: deleting a deck cascades its cards and
+    // their `study_answers` (BR-03, BR-198), so a library with no decks has no
+    // lifetime activity and `/progress` renders the whole-screen empty face,
+    // never the level's. It also lost the face this scenario really does show —
+    // a deck that holds cards rather than sub-decks.
+    initialLocation: '/r1',
     routes: <RouteBase>[
       GoRoute(
         path: '/',
