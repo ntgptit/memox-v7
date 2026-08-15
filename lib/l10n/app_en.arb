@@ -267,7 +267,7 @@
   },
   "retryAction": "Retry",
   "@retryAction": {
-    "description": "The app-wide retry label, on every surface that offers recovery from a failed operation — a read that did not land, a write that was refused, a platform call that was rejected. Deliberately generic: three surfaces now share it (the deck list re-subscribes to a stream, the Settings error band re-sends a write, the daily-reminder band re-runs whichever of enable, disable or change-time failed), and a label naming one of them would be wrong on the other two. Its previous description named only the read."
+    "description": "The app-wide retry label, on every surface that offers recovery from a failed operation — a read that did not land, a write that was refused, a platform call that was rejected. Deliberately generic and shared across the app rather than owned by any one screen: some callers retry a stream subscription, others re-send a write, and the daily-reminder band re-runs whichever of enable, disable or change-time failed. A label naming one of those would be wrong on the rest, which is why this description names no count and no list — an earlier version said \"three surfaces\" while there were nine, and a wrong count is an invitation to specialise the label after checking only some of them."
   },
   "deckCreateRootAction": "New deck",
   "@deckCreateRootAction": {
