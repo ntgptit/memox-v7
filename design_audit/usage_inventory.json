@@ -4223,7 +4223,7 @@
     },
     {
       "file": "lib/features/reminder/presentation/widgets/sections/reminder_banner_section_widget.dart",
-      "line": 44,
+      "line": 47,
       "widget_context": "ReminderBannerSectionWidget",
       "element_kind": "other",
       "source_kind": "theme-token",
@@ -4234,7 +4234,7 @@
     },
     {
       "file": "lib/features/reminder/presentation/widgets/sections/reminder_banner_section_widget.dart",
-      "line": 59,
+      "line": 69,
       "widget_context": "ReminderBannerSectionWidget",
       "element_kind": "icon",
       "source_kind": "theme-token",
@@ -4245,7 +4245,7 @@
     },
     {
       "file": "lib/features/reminder/presentation/widgets/sections/reminder_banner_section_widget.dart",
-      "line": 69,
+      "line": 79,
       "widget_context": "ReminderBannerSectionWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4256,7 +4256,7 @@
     },
     {
       "file": "lib/features/reminder/presentation/widgets/sections/reminder_banner_section_widget.dart",
-      "line": 76,
+      "line": 86,
       "widget_context": "ReminderBannerSectionWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4267,7 +4267,7 @@
     },
     {
       "file": "lib/features/reminder/presentation/widgets/sections/reminder_banner_section_widget.dart",
-      "line": 92,
+      "line": 102,
       "widget_context": "ReminderBannerSectionWidget",
       "element_kind": "other",
       "source_kind": "theme-token",

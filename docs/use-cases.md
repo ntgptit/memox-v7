@@ -1214,7 +1214,7 @@ luôn có nội dung, kể cả khi thư viện rỗng.
 |---|---|
 | Đưa deck con lên thành root deck | Cần quyết định scheduler mới; là tính năng riêng, không phải phép di chuyển (UC-09 A2) |
 | Tìm kiếm card (S1) | Should-have, chưa tới lượt |
-| ~~Thống kê / streak (S2)~~ | **Đã đặc tả ở M99.23, M99.24 và M99.25** — UC-12 với BR-190…BR-199 chốt đơn vị đếm, partition, streak và phạm vi v1; UC-13 với BR-182…BR-189 chốt tiến độ theo deck; UC-14 với BR-200…BR-202 chốt tab Study đọc thư viện thật |
+| ~~Thống kê / streak (S2)~~ | **Đã đặc tả ở M99.23, M99.24 và M5.26** — UC-12 với BR-190…BR-199 chốt đơn vị đếm, partition, streak và phạm vi v1; UC-13 với BR-182…BR-189 chốt tiến độ theo deck; UC-14 với BR-200…BR-202 chốt tab Study đọc thư viện thật |
 | Đảo chiều card (S3) | Should-have — **một nửa đã đóng ở M99.27**: UC-15 và BR-203…BR-209 cho phép hỏi ngược trong một phiên `self_assess` của deck `sm2` mà **không** ghi lại thẻ, nên phần còn mở là đảo chiều ở các mode khác |
 | ~~Export (nửa còn lại của N1)~~ | **Đã đặc tả ở M99.21** — UC-11 và BR-174…BR-181 chốt scope, encoder, filename, share và quyền riêng tư trước khi viết code, đúng điều kiện mà mục này đặt ra. Còn nice-to-have ngoài phạm vi export nội dung: backup/restore, sync và `.apkg`. |
 | ~~Nhắc nhở hằng ngày (N2)~~ | **Đã đặc tả ở M99.29** — UC-17 và BR-218…BR-229 chốt opt-in, phạm vi due-only, riêng tư của copy, thứ tự cấp bách và vòng đời lịch trước khi viết code. Còn ngoài phạm vi: nhắc theo thẻ mới, nhiều lượt nhắc trong ngày, và nhắc theo từng deck. |

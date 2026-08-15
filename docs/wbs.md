@@ -33,7 +33,7 @@ AD / UC (xem `business-rules.md`).
 | M7 · CI/CD (Phase 19) | todo | Bắt đầu được ngay sau M2. Job Android + Web, chưa có iOS (AD-04) |
 | M8 · Release Android (Phase 16–18, 20–22) | todo | |
 | M9 · Backend Spring Boot + auth + sync (Phase 10) | todo | Sau khi M8 ổn định |
-| M99 · Adhoc | — | Task chủ dự án giao trực tiếp, ngoài chuỗi phụ thuộc. M99.1 **done** — `master-flow.md`. M99.2 **done** — Deck và Card thành bản tham chiếu (AD-17). M99.3 **done** — refactor toàn bộ IT theo Testing Pyramid: 133/133 kịch bản có coverage host, `integration_test/` còn 8 kịch bản `DEVICE-E2E`, và CI lần đầu có cổng tự động cho tính đúng đắn nghiệp vụ. M99.5 **done** — golden harness chưa bao giờ nạp `NotoSansKR`, nên mọi chữ Hàn trong mọi golden là ô `NO GLYPH`; đã nạp đủ ba face CJK, bổ sung Nhật/Trung, và fixture demo trở lại tiếng Hàn. M99.7 **done** — bottom navigation lên bốn branch (AD-19); Progress/Settings là placeholder presentation-only, hai feature này **chưa** hoàn thành. M99.8 **done** — nhãn tab đầu đổi Decks/Bộ thẻ → Library/Thư viện; branch nội bộ và title màn hình vẫn là Decks. M99.17 **done** — đồng bộ Card Management với manual entry khối lượng nhỏ và chốt import/export là hướng bulk-management sau MVP. M99.27 **done** — Reverse self-assess v1: chiều hỏi cho phiên `self_assess` của deck `sm2`; schema v8. M99.28 **in-progress** — Settings v1: mặc định học toàn cục, theme và ngôn ngữ; schema v9; không branch nào còn là placeholder. M99.29 **in-progress** — Daily Reminders v1: một notification tóm tắt mỗi ngày, mặc định tắt, dựng từ workload đến hạn tại thời điểm hiện; schema v10. Cả ba còn nợ emulator IT (gate cuối của đợt tích hợp #301–#310). |
+| M99 · Adhoc | — | Task chủ dự án giao trực tiếp, ngoài chuỗi phụ thuộc. M99.1 **done** — `master-flow.md`. M99.2 **done** — Deck và Card thành bản tham chiếu (AD-17). M99.3 **done** — refactor toàn bộ IT theo Testing Pyramid: 133/133 kịch bản có coverage host, `integration_test/` còn 8 kịch bản `DEVICE-E2E`, và CI lần đầu có cổng tự động cho tính đúng đắn nghiệp vụ. M99.5 **done** — golden harness chưa bao giờ nạp `NotoSansKR`, nên mọi chữ Hàn trong mọi golden là ô `NO GLYPH`; đã nạp đủ ba face CJK, bổ sung Nhật/Trung, và fixture demo trở lại tiếng Hàn. M99.7 **done** — bottom navigation lên bốn branch (AD-19); Progress/Settings là placeholder presentation-only, hai feature này **chưa** hoàn thành. M99.8 **done** — nhãn tab đầu đổi Decks/Bộ thẻ → Library/Thư viện; branch nội bộ và title màn hình vẫn là Decks. M99.17 **done** — đồng bộ Card Management với manual entry khối lượng nhỏ và chốt import/export là hướng bulk-management sau MVP. M99.27 **done** — Reverse self-assess v1: chiều hỏi cho phiên `self_assess` của deck `sm2`; schema v8. M99.26 **in-progress** — một ngữ pháp cho Library/Study/Progress: bốn quyết định D18…D21, không đổi hành vi. M99.28 **in-progress** — Settings v1: mặc định học toàn cục, theme và ngôn ngữ; schema v9; không branch nào còn là placeholder. M99.29 **in-progress** — Daily Reminders v1: một notification tóm tắt mỗi ngày, mặc định tắt, dựng từ workload đến hạn tại thời điểm hiện; schema v10. Cả bốn còn nợ emulator IT (gate cuối của đợt tích hợp #301–#310). |
 
 ---
 
@@ -9697,6 +9697,57 @@ thế không đổi bố cục.
   nửa còn lại là nghĩa vụ tương lai mà BR-185 phát biểu có điều kiện. Emulator
   integration test **deferred to integration worktree — not run**.
 - **Checklist phases:** 14, 15
+### M99.26 · Một ngữ pháp cho Library, Study và Progress
+
+- **Status:** **in-progress** — code và docs xong, chờ emulator IT và CI (gate cuối của đợt tích hợp #301–#310).
+- **Goal:** Ba tab đọc như ba màn của cùng một app. Sau khi Progress và Study
+  Home tốt nghiệp trong cùng một đợt, mỗi tab tự trả lời bốn câu hỏi giao diện
+  theo cách riêng của nó, và người dùng chuyển tab là người duy nhất nhìn thấy
+  cả ba câu trả lời cùng lúc.
+- **Scope:** bốn quyết định trong `docs/reviews/design-parity-checklist.md`
+  (D18…D21), và chỉ bốn — mỗi cái là một chỗ ba tab đã nói ba giọng:
+  treatment tiêu đề danh sách (D18), ô metric well (D19), độ nổi của card
+  trong cột cuộn (D20), khoảng dưới hàng cuối (D21). Nâng
+  `MxMetricWell` lên `lib/shared/widgets/` là hệ quả của D19, không phải mục
+  tiêu riêng.
+- **Out of scope:** mọi thay đổi hành vi. Không BR mới, không UC mới, không
+  query mới, không cột mới. Một pass thống nhất giao diện mà đổi một luật là
+  một pass không ai review được, vì diff không còn nói lên nó định làm gì.
+- **Editable documents:** `docs/reviews/design-parity-checklist.md`,
+  `docs/wireframes/m5-study-home.md`, `docs/wbs.md`
+- **Dependencies:** M99.23, M99.24, M5.26 — không thể thống nhất ba tab trước
+  khi cả ba tồn tại; đó chính là lý do việc này không làm được sớm hơn.
+- **Tests required:** geometry test cho từng quyết định, đo bằng `getRect` chứ
+  không so ảnh: khoảng dưới hàng cuối ở cả ba danh sách (D21), độ nổi và
+  hairline của card trong cột cuộn ở cả light lẫn dark (D20), hình dạng
+  `MxMetricWell` giống nhau ở mọi call site (D19), và style tiêu đề danh sách
+  (D18). Không golden mới — một pass thống nhất mà chỉ có golden thì mọi lần
+  đổi token về sau đều đọc như một regression.
+- **5Why:** Vì sao thống nhất ngay thay vì để sau? Vì chi phí tăng theo số màn
+  hình chứ không theo thời gian: đợt này thêm ba màn cùng lúc, và màn thứ tư
+  sẽ sao chép bản nó tình cờ mở. Vì sao `MxMetricWell` là widget chung chứ
+  không phải copy thứ ba? Vì hai bản private đã **byte-identical**, nghĩa là
+  bản thứ ba sẽ chỉ giống chúng cho tới lần sửa đầu tiên. Vì sao `wellColor`
+  là tham số mà hình dạng thì không? Vì deck đổi màu theo trạng thái lịch
+  (BR-161) còn hình dạng thì không màn nào có lý do đổi — một tham số cho thứ
+  không ai cần đổi là một cách mời người sau làm nó khác đi.
+- **Output:** `lib/shared/widgets/mx_metric_well.dart` (mới),
+  `lib/features/progress/presentation/widgets/**`,
+  `lib/features/study/presentation/widgets/sections/study_home_body_section_widget.dart`,
+  `lib/features/deck/presentation/widgets/**`, và các test geometry tương ứng.
+- **Acceptance criteria:**
+  - [x] D18: một treatment duy nhất cho tiêu đề danh sách ở cả ba tab.
+  - [x] D19: `MxMetricWell` là bản dùng chung; không còn bản sao private nào.
+  - [x] D20: mọi card trong cột cuộn dùng `AppElevation.none`.
+  - [x] D21: khoảng dưới hàng cuối là `AppSpacing.lg` ở cả ba danh sách, và
+        chi phí hairline 1.38:1 được đo và ghi lại chứ không đoán.
+  - [x] Host gate xanh: format, analyze, architecture, guard, docs, toàn bộ
+        host suite.
+  - [ ] **Gate `integration_test/` của `CLAUDE.md` — chưa chạy**, cùng lý do
+        và cùng lượt chạy với M99.28 và M99.29.
+- **Checklist phases:** 6, 10
+
+
 ### M99.27 · Reverse Self-assess v1 — chiều hỏi cho phiên self-assess
 
 - **Status:** **done**

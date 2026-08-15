@@ -94,6 +94,7 @@ BR_FILE = "docs/business-rules.md"
 AD_FILE = "docs/architecture.md"
 UC_FILE = "docs/use-cases.md"
 WBS_FILE = "docs/wbs.md"
+STUDY_WBS_FILE = "docs/wbs-study.md"
 README_FILE = "docs/README.md"
 DM_FILE = "docs/data-model.md"
 
@@ -214,7 +215,16 @@ def _check_wbs_tasks() -> None:
         _ok(f"no duplicate WBS task IDs ({len(task_ids)} tasks)")
 
     # dependencies resolve
-    task_set = set(task_ids)
+    #
+    # **Against both ledgers, not just this one.** The Study feature keeps its
+    # own `### M5.x` sections in `docs/wbs-study.md`, so a task here that
+    # genuinely waits on one of them had no way to say so: naming it failed the
+    # check, and moving it into prose hid a real edge from the graph.
+    task_set = set(task_ids) | {
+        m.group(1)
+        for line in _lines(STUDY_WBS_FILE)
+        if (m := _TASK_HEAD_RE.match(line))
+    }
     edges: list[tuple[str, str]] = []
     cur = ""
     for line in _lines(WBS_FILE):
@@ -233,7 +243,8 @@ def _check_wbs_tasks() -> None:
         if dep not in task_set:
             _fail(
                 "WBS dependency points at a task that does not exist",
-                f"{task} depends on {dep}, which is not defined in {WBS_FILE}",
+                f"{task} depends on {dep}, defined in neither {WBS_FILE} nor "
+                f"{STUDY_WBS_FILE}",
             )
     if _problems == before:
         _ok(f"every WBS dependency resolves to a defined task ({len(edges)} edges)")
