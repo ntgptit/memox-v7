@@ -9345,7 +9345,7 @@ thế không đổi bố cục.
 
 - **Status:** **done** — merged by PR #301 (stage 1 của batch tích hợp
   #301–#310, merge commit trên `codex/integrate-prs-301-310`). Phase 1 (docs)
-  xong: BR-192…BR-191, UC-12,
+  xong: BR-190…BR-199, UC-12,
   AD-19 và `product.md` cập nhật, wireframe `m99-23-progress-overview.md`,
   `check_docs.py` xanh. Phase 2 (domain) xong: `ProgressActivityDay`,
   `ProgressOverview` với `fromActivity` giữ cửa sổ bảy ngày + streak,
@@ -9427,7 +9427,7 @@ thế không đổi bố cục.
   `shouldSkipLoadingOnReload`; `lib/shared/widgets/mx_error_state.dart` —
   `isRetrying`), cả hai additive với default giữ nguyên hành vi mọi call site
   cũ, thêm ở stage 1 của batch tích hợp; `docs/business-rules.md`
-  (BR-192…BR-191), `docs/use-cases.md`
+  (BR-190…BR-199), `docs/use-cases.md`
   (UC-12), `docs/architecture.md` (AD-19), `docs/product.md` (S2 + mục điều
   hướng), wireframe mới, `lib/core/database/queries/progress.drift`,
   `lib/features/progress/**`, một dòng `builder` trong `app/router/app_router.dart`,
@@ -9485,7 +9485,7 @@ thế không đổi bố cục.
      chấp nhận, vì một con số không có BR đứng sau là spec viết ở tầng sai, đúng
      lỗi mà AD-19 đã đặt tên. Mở khoá: phạm vi v1 đóng lại được, và ba section
      là toàn bộ thứ phải xây.
-- **Output:** BR-192…BR-191, UC-12, AD-19 cập nhật, `product.md` cập nhật,
+- **Output:** BR-190…BR-199, UC-12, AD-19 cập nhật, `product.md` cập nhật,
   `docs/wireframes/m99-23-progress-overview.md`; `queries/progress.drift`;
   domain model/repository contract/use case; DAO/mapper/repository impl;
   provider `di/` + binding composition root; controller + screen + widgets bốn

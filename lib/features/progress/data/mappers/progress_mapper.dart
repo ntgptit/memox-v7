@@ -37,7 +37,7 @@ ProgressActivityDay activityDayFromRow(
 /// One emission of the Progress screen (UC-12).
 ///
 /// [day] carries the single `now`/offset snapshot the whole emission is measured
-/// against (BR-184) — the same one whose `utcOffset` produced these rows.
+/// against (BR-194) — the same one whose `utcOffset` produced these rows.
 ProgressOverview overviewFromRows(
   List<ProgressActivityDaysResult> rows, {
   required LocalDayModel day,

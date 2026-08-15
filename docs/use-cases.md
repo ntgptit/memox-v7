@@ -819,9 +819,9 @@ nào — trạng thái "chưa có gì" là một mặt hợp lệ, không phải
 
 **Main flow:**
 1. Người dùng mở tab Progress. Hệ thống chụp **một** snapshot của
-   `clockProvider` và `utcOffsetProvider` rồi dựng ranh giới ngày theo BR-202.
+   `clockProvider` và `utcOffsetProvider` rồi dựng ranh giới ngày theo BR-194.
 2. Hệ thống mở **một** stream đọc lịch sử học, gộp ngay trong SQLite thành các
-   hàng *card-day* rồi thành các hàng *active-day* (BR-200); không tải hàng
+   hàng *card-day* rồi thành các hàng *active-day* (BR-192); không tải hàng
    `study_answers` thô lên tầng trên và không đọc từng ngày một.
 3. Trong lúc chờ emission đầu tiên, màn hình hiện trạng thái loading có nhãn
    cho screen reader.
@@ -855,7 +855,7 @@ nào — trạng thái "chưa có gì" là một mặt hợp lệ, không phải
 - **A6 — Xoá một card hoặc một deck ở màn khác rồi quay lại:** hoạt động của
   các card đã xoá biến mất khỏi mọi ngày, kể cả ngày quá khứ (BR-198).
 - **A7 — Chỉ lướt `browse` rồi thoát:** không có gì đổi — `browse` không ghi
-  answer nên không tạo hoạt động (BR-201).
+  answer nên không tạo hoạt động (BR-193).
 
 **Error flows:**
 - **E1 — Đọc lịch sử thất bại:** repository map exception thành `Failure`; màn
@@ -952,7 +952,7 @@ state "empty selection": bộ chọn luôn có đúng một khoảng được ch
 |---|---|
 | Đưa deck con lên thành root deck | Cần quyết định scheduler mới; là tính năng riêng, không phải phép di chuyển (UC-09 A2) |
 | Tìm kiếm card (S1) | Should-have, chưa tới lượt |
-| ~~Thống kê / streak (S2)~~ | **Đã đặc tả ở M99.23, M99.24 và M99.25** — UC-12 với BR-182…BR-191 chốt đơn vị đếm, partition, streak và phạm vi v1; UC-13 với BR-182…BR-189 chốt tiến độ theo deck; UC-14 với BR-200…BR-202 chốt tab Study đọc thư viện thật |
+| ~~Thống kê / streak (S2)~~ | **Đã đặc tả ở M99.23, M99.24 và M99.25** — UC-12 với BR-190…BR-199 chốt đơn vị đếm, partition, streak và phạm vi v1; UC-13 với BR-182…BR-189 chốt tiến độ theo deck; UC-14 với BR-200…BR-202 chốt tab Study đọc thư viện thật |
 | Đảo chiều card (S3) | Should-have — **một nửa đã đóng ở M99.27**: UC-15 và BR-203…BR-209 cho phép hỏi ngược trong một phiên `self_assess` của deck `sm2` mà **không** ghi lại thẻ, nên phần còn mở là đảo chiều ở các mode khác |
 | ~~Export (nửa còn lại của N1)~~ | **Đã đặc tả ở M99.21** — UC-11 và BR-174…BR-181 chốt scope, encoder, filename, share và quyền riêng tư trước khi viết code |
 | Nhắc nhở hằng ngày (N2) | Nice-to-have, cần quyền notification |
@@ -973,7 +973,7 @@ state "empty selection": bộ chọn luôn có đúng một khoảng được ch
 **Main flow:**
 1. Hệ thống đọc **một snapshot** gồm session có thể học tiếp và toàn bộ root deck
    kèm workload — cùng một transaction, không phải hai lần đọc rời (AD-13). Màn
-   hình là **chỉ-đọc**: vào tab, cuộn hay đổi tab không ghi gì (BR-200).
+   hình là **chỉ-đọc**: vào tab, cuộn hay đổi tab không ghi gì (BR-192).
 2. Nếu có đúng một session hợp lệ đang mở, Resume card đứng đầu màn hình và nói
    deck nào, loại phiên gì, đang ở chặng nào — cả hai giá trị lấy từ chính hàng
    session, không suy ra (BR-76, BR-98).

@@ -186,7 +186,7 @@ class _CatalogProgressRepository implements ProgressRepository {
   );
 
   /// Two rows: one that has been studied and one that has not, which is the
-  /// pair BR-197 orders and the only pair worth catalogueing here — the deck
+  /// pair BR-187 orders and the only pair worth catalogueing here — the deck
   /// level's own use case carries the long-name and all-zero scenarios.
   static const List<DeckActivity> _catalogDecks = <DeckActivity>[
     DeckActivity(
@@ -247,7 +247,7 @@ class _CatalogProgressRepository implements ProgressRepository {
     _ => 0,
   };
 
-  /// Seven days, oldest first, today last — the shape BR-186 fixes and the
+  /// Seven days, oldest first, today last — the shape BR-196 fixes and the
   /// screen relies on.
   List<ProgressActivityDay> _window() {
     final List<int> totals = switch (scenario) {

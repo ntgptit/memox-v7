@@ -7,7 +7,7 @@ import 'package:memox/features/progress/domain/models/progress_overview_model.da
 
 import '../../../database/support/test_database.dart';
 
-/// Progress against real SQLite (UC-12, BR-182…BR-190).
+/// Progress against real SQLite (UC-12, BR-192…BR-190).
 ///
 /// **Not a mock, for the usual reason and one extra.** The usual reason is that
 /// every rule under test is behaviour of SQLite — two levels of `GROUP BY`, the
@@ -105,7 +105,7 @@ void main() {
     });
   });
 
-  group('the Learning / Reviewing partition (BR-185)', () {
+  group('the Learning / Reviewing partition (BR-195)', () {
     test('a card with any learning answer is Learning, not both', () async {
       // The card that decides the rule: finished off the learning chain in the
       // morning, reviewed in the evening. Counting it on both sides would make
@@ -154,7 +154,7 @@ void main() {
     });
   });
 
-  test('a past day is re-bucketed when the offset changes (BR-182)', () async {
+  test('a past day is re-bucketed when the offset changes (BR-192)', () async {
     // The consequence of holding no per-row offset, pinned so it is a known
     // property rather than a bug somebody rediscovers.
     //
@@ -189,7 +189,7 @@ void main() {
   });
 
   group('what does not create activity', () {
-    test('browse writes no answer, so it changes nothing (BR-183)', () async {
+    test('browse writes no answer, so it changes nothing (BR-193)', () async {
       // Asserted by **trying to insert one**, not by inserting nothing and
       // finding nothing. The version of this test that seeded a card and then
       // checked the counts were zero could not fail: it exercised no code path
@@ -257,7 +257,7 @@ void main() {
     });
 
     test('a card deleted after the fact disappears from past days too '
-        '(BR-188)', () async {
+        '(BR-198)', () async {
       await seedCard('c1');
       await seedCard('c2');
       await answer('c1', at: now.subtract(const Duration(days: 3)));
@@ -286,7 +286,7 @@ void main() {
     });
   });
 
-  test('reset keeps history, so it keeps every number (BR-188)', () async {
+  test('reset keeps history, so it keeps every number (BR-198)', () async {
     // Reset drops and recreates `card_study_states` and bumps the generation.
     // `study_answers` is append-only and is deliberately not touched (BR-43),
     // so a user who resets a deck must not lose the streak they earned on it.
@@ -333,7 +333,7 @@ void main() {
 
         // The window ends at today, so an answer that has crossed into tomorrow
         // is in no visible day — which is right, and is what makes the interval
-        // half-open (BR-184) rather than a matter of rounding.
+        // half-open (BR-194) rather than a matter of rounding.
         final overview = await read(offset: const Duration(hours: 7));
 
         expect(overview.today.totalCards, 0);

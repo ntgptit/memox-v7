@@ -31,7 +31,7 @@ final class ProgressRepositoryImpl implements ProgressRepository {
     required Duration utcOffset,
   }) {
     // Built once, outside the `map`, so every emission of this subscription is
-    // measured against the same instant (BR-184). Constructing it per emission
+    // measured against the same instant (BR-194). Constructing it per emission
     // would make a live refresh silently re-anchor the window to a newer clock
     // reading, and the screen would then roll over at an arbitrary answer rather
     // than at midnight — which is a rollover nobody scheduled and no test would

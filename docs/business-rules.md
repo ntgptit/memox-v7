@@ -7,7 +7,7 @@
 | **Scope** | Luật nghiệp vụ, validation rule, state machine, edge case của phạm vi MVP. Ngoài phạm vi: quyết định kiến trúc (`architecture.md`), hình dạng dữ liệu (`data-model.md`), luồng người dùng (`use-cases.md`) |
 | **Source of truth for** | BR-xx · validation rule · entity state machine · edge case |
 | **Depends on** | `document-conventions.md`, `product.md`, `architecture.md` |
-| **Updated by task** | M99.27 — BR-203…BR-209: chiều hỏi của self-assess; M99.25 — BR-200…BR-202: Study Home (đọc thư viện thật, workload toàn subtree, ba trạng thái đã tải); M99.24 — BR-192…BR-199: tiến độ theo deck (phạm vi metric, card-day, hai khoảng, quy-về-vị-trí-hiện-tại, phân hoạch Learning/Reviewing, thứ tự, chỉ-đọc, cập nhật trực tiếp); trước đó M99.23 — BR-182…BR-191: Progress overview v1 |
+| **Updated by task** | M99.27 — BR-203…BR-209: chiều hỏi của self-assess; M99.25 — BR-200…BR-202: Study Home (đọc thư viện thật, workload toàn subtree, ba trạng thái đã tải); M99.24 — BR-182…BR-189: tiến độ theo deck (phạm vi metric, card-day, hai khoảng, quy-về-vị-trí-hiện-tại, phân hoạch Learning/Reviewing, thứ tự, chỉ-đọc, cập nhật trực tiếp); trước đó M99.23 — BR-190…BR-199: Progress overview v1 (hai khối đã đổi chỗ khi #301 và #302 gộp — số ở bảng dưới là số đúng) |
 | **Last updated** | 2026-08-15 |
 
 Format tuân theo `document-conventions.md` §6.2. Từ khoá MUST / SHOULD / MAY
@@ -465,7 +465,7 @@ riêng tư chung (BR-51…BR-54) — chúng chỉ nói phần mà chiều export
 
 ## Tiến độ theo deck
 
-Drill-down hoạt động học theo cây deck (UC-12). Các rule dưới đây **không** phát
+Drill-down hoạt động học theo cây deck (UC-13). Các rule dưới đây **không** phát
 biểu lại định nghĩa ngày địa phương (BR-105), quan hệ cha–con và `root_deck_id`
 (BR-55…BR-57), tính append-only của `study_answers` (BR-43) hay luật riêng tư
 chung (BR-51…BR-54) — chúng chỉ nói phần mà chiều đọc tiến độ thêm vào.

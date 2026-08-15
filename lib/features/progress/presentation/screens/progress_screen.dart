@@ -42,7 +42,7 @@ import '../widgets/sections/progress_week_widget.dart';
 /// zeros read as a failed load, and a list of every deck at zero underneath them
 /// says the same nothing a third time. A first-time user needs the way into a
 /// study session, not a chart of it. That is different from a *range* with no
-/// activity, where the level does still list every deck at zero (BR-197),
+/// activity, where the level does still list every deck at zero (BR-187),
 /// because there the history exists and the window is the question.
 class ProgressScreen extends ConsumerWidget {
   const ProgressScreen({super.key});

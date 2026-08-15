@@ -183,7 +183,7 @@ base class FakeProgressRepository implements ProgressRepository {
 /// A snapshot built from seven day totals, so a test states the week it means
 /// rather than seven constructor calls.
 ///
-/// [totals] is oldest first, today last — the order BR-186 fixes. [learning] is
+/// [totals] is oldest first, today last — the order BR-196 fixes. [learning] is
 /// per day and defaults to zero, which makes every card-day a Reviewing one.
 ProgressOverview progressOverviewFixture({
   required List<int> totals,

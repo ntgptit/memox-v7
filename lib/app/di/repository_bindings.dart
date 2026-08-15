@@ -156,7 +156,7 @@ DeckTemplateRepository deckTemplateRepositoryBinding(Ref ref) =>
 /// so it
 /// takes neither a clock nor an id generator: every instant it needs arrives as
 /// an argument from `clockProvider` and `utcOffsetProvider` at the controller
-/// (BR-202, BR-194),
+/// (BR-184, BR-194),
 /// and there is nothing for it to stamp.
 ///
 /// Its own DAO rather than the database, unlike the card bindings: there is no

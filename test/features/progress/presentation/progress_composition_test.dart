@@ -154,7 +154,7 @@ void main() {
     // X10: pinned to the top of the *body* put the selector above the three
     // overview sections it does not govern — pressing `30 days` changed nothing
     // in the 24dp under it. Pinned from inside the scroll view, it starts below
-    // the overview and only then sticks, which is what BR-197 actually needs.
+    // the overview and only then sticks, which is what BR-187 actually needs.
     final parts = composed(levelWith(activeCards: 42));
     await pumpProgressScreen(tester, repository: parts.repository);
 

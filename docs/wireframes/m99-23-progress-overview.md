@@ -4,9 +4,9 @@
 |---|---|
 | **Status** | active |
 | **Purpose** | Chốt cấu trúc UI, copy, geometry và ma trận trạng thái của màn Progress để M99.23 xây mà không phải đoán |
-| **Scope** | **Phần đầu tổng quan** của `/progress`: ba section, mọi state, hợp đồng geometry, responsive/a11y. Ngoài phạm vi: thứ tự cuộn của cả màn và phần by-deck (`m99-progress-by-deck.md` §1), luật nghiệp vụ (BR-192…BR-191), luồng (UC-12), quyết định branch (AD-19) |
+| **Scope** | **Phần đầu tổng quan** của `/progress`: ba section, mọi state, hợp đồng geometry, responsive/a11y. Ngoài phạm vi: thứ tự cuộn của cả màn và phần by-deck (`m99-progress-by-deck.md` §1), luật nghiệp vụ (BR-190…BR-199), luồng (UC-12), quyết định branch (AD-19) |
 | **Source of truth for** | Anatomy **ba section tổng quan** · copy ba section · hợp đồng geometry của ba section · responsive/a11y contract của ba section |
-| **Depends on** | `../use-cases.md` (UC-12), `../business-rules.md` (BR-192…BR-191), `../architecture.md` (AD-19), `m4-11-card-management.md` |
+| **Depends on** | `../use-cases.md` (UC-12), `../business-rules.md` (BR-190…BR-199), `../architecture.md` (AD-19), `m4-11-card-management.md` |
 | **Updated by task** | M99.23 (stage 1 của batch tích hợp #301–#310 — recursive UI/UX review vòng 1 và 2) · M99.24 (thu phạm vi về phần đầu sau khi `/progress` hợp nhất) |
 | **Last updated** | 2026-08-15 |
 
