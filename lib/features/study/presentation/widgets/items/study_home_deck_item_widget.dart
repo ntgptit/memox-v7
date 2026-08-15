@@ -40,6 +40,12 @@ class StudyHomeDeckItemWidget extends StatelessWidget {
     final l10n = context.l10n;
     final scheduler = context.studyHomeSchedulerLabel(deck.schedulerType);
 
+    final workload = l10n.studyHomeWorkloadSemanticLabel(
+      deck.overdueCount,
+      deck.dueTodayCount,
+      deck.newCount,
+    );
+
     // Flat with a hairline, like the deck card: two competing depths in one
     // scrolling column is what makes a list read as busy.
     return MxCard(
@@ -48,28 +54,60 @@ class StudyHomeDeckItemWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Text(
-            deck.deckName,
-            style: context.texts.titleMedium,
-            // Two lines, then ellipsis. A deck named by a sentence must not push
-            // the workload line off the bottom of the card, and a name that
-            // wraps forever turns a scannable list into a wall.
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          if (scheduler != null) ...<Widget>[
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              scheduler,
-              style: context.texts.bodySmall?.copyWith(
-                color: context.colors.onSurfaceVariant,
+          // **What the row says is one sentence, and it names its deck.**
+          // The card has no `onTap` (S4), so nothing here owns a node on its
+          // own: the name, the algorithm and the three counts each became a
+          // node of their own, and a reader walking three decks heard "8 boxes"
+          // and "2 overdue, 5 due today, 12 new" with nothing saying whose they
+          // were. That is R6's argument — "Resume alone cannot tell which
+          // session it means" — applied to the buttons and not to the counts,
+          // which carry more information than the buttons do.
+          //
+          // `container: true` because there is no node to merge into; the
+          // button below stays outside it and keeps its own role and label.
+          Semantics(
+            container: true,
+            label: scheduler == null
+                ? l10n.studyHomeDeckRowPlainSemanticLabel(
+                    deck.deckName,
+                    workload,
+                  )
+                : l10n.studyHomeDeckRowSemanticLabel(
+                    deck.deckName,
+                    scheduler,
+                    workload,
+                  ),
+            child: ExcludeSemantics(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text(
+                    deck.deckName,
+                    style: context.texts.titleMedium,
+                    // Two lines, then ellipsis. A deck named by a sentence must not push
+                    // the workload line off the bottom of the card, and a name that
+                    // wraps forever turns a scannable list into a wall.
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (scheduler != null) ...<Widget>[
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      scheduler,
+                      style: context.texts.bodySmall?.copyWith(
+                        color: context.colors.onSurfaceVariant,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                  const SizedBox(height: AppSpacing.sm),
+                  StudyHomeWorkloadItemWidget(deck: deck),
+                ],
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
-          ],
-          const SizedBox(height: AppSpacing.sm),
-          StudyHomeWorkloadItemWidget(deck: deck),
+          ),
           // `md` above the verb: the seam between what the deck says and what
           // can be done about it is a section boundary inside the card, so it
           // gets one step more than the line breaks above it.

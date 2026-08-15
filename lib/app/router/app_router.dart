@@ -177,7 +177,7 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
               GoRoute(
                 path: RoutePaths.study,
                 name: RouteNames.study,
-                // The tab's own screen at last (UC-12). It stood on a fixture
+                // The tab's own screen at last (UC-14). It stood on a fixture
                 // deck id since M5.7 — a constant naming a row the seeder
                 // happened to write — so the Study tab showed one hard-coded
                 // deck in production and nothing at all in a database that

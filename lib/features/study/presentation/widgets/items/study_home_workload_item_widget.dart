@@ -54,17 +54,28 @@ class StudyHomeWorkloadItemWidget extends StatelessWidget {
           runSpacing: AppSpacing.xs,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: <Widget>[
+            // **The app's own glyph for each fact, filled only when the count
+            // is non-zero.** The first version picked three fresh icons —
+            // `history`, `today`, `auto_awesome` — each of which appeared
+            // exactly once in `lib/`, while the deck list and Progress already
+            // had a glyph for the same three facts. One tab across, "new" was
+            // an outlined sparkle and here a filled one; "overdue" was a
+            // crossed-out calendar there and a clock here. Parity item E5 says
+            // outlined at rest and filled when active, and a glyph filled at
+            // zero breaks it silently — the gate reads the checklist's verdict
+            // word, not the code.
             _Metric(
-              // A card from a day that has already passed. Not `error_outline`:
-              // that glyph belongs to a screen that failed, and a backlog is a
-              // schedule the user has fallen behind rather than a fault.
-              icon: Icons.history,
+              // A day that has already passed, not a fault: `event_busy` is what
+              // `deck_status_icon_widget.dart` uses for the same backlog.
+              icon: deck.overdueCount > 0
+                  ? Icons.event_busy
+                  : Icons.event_busy_outlined,
               label: l10n.studyHomeOverdueLabel(deck.overdueCount),
               color: deck.overdueCount > 0 ? semantic.danger : quiet,
               isActive: deck.overdueCount > 0,
             ),
             _Metric(
-              icon: Icons.today,
+              icon: deck.dueTodayCount > 0 ? Icons.event : Icons.event_outlined,
               label: l10n.studyHomeDueTodayLabel(deck.dueTodayCount),
               color: deck.dueTodayCount > 0
                   ? semantic.onStreakContainer
@@ -72,7 +83,9 @@ class StudyHomeWorkloadItemWidget extends StatelessWidget {
               isActive: deck.dueTodayCount > 0,
             ),
             _Metric(
-              icon: Icons.auto_awesome,
+              icon: deck.newCount > 0
+                  ? Icons.auto_awesome
+                  : Icons.auto_awesome_outlined,
               label: l10n.studyHomeNewLabel(deck.newCount),
               color: deck.newCount > 0 ? semantic.info : quiet,
               isActive: deck.newCount > 0,

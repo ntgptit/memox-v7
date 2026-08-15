@@ -162,6 +162,29 @@ void main() {
       expect(find.text(english.retryAction), findsOneWidget);
     });
 
+    testWidgets('an error arriving in place announces itself', (tester) async {
+      // The same transition as above, read the way a screen reader reads it.
+      // Nothing that a sighted user notices — a list becoming an error card —
+      // is audible unless it is a live region, and this is the *only* way this
+      // face appears without a navigation: on entry the tab shows a spinner
+      // first.
+      final handle = tester.ensureSemantics();
+      await harness.pump(tester);
+
+      harness.home.emitError(StateError('update bus failed'));
+      await tester.pumpAndSettle();
+
+      expect(
+        tester
+            .getSemantics(find.byType(MxErrorState))
+            .getSemanticsData()
+            .flagsCollection
+            .isLiveRegion,
+        isTrue,
+      );
+      handle.dispose();
+    });
+
     testWidgets('re-measuring the clock does not blank the tab', (
       tester,
     ) async {

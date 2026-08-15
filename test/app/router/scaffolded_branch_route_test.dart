@@ -68,7 +68,7 @@ void main() {
       ProviderScope(
         overrides: [
           envConfigProvider.overrideWithValue(EnvConfig.development),
-          // The Study branch is Study Home since UC-12, which reads its own
+          // The Study branch is Study Home since UC-14, which reads its own
           // contract — a screen with no method that could open a session.
           studyHomeRepositoryProvider.overrideWithValue(
             FakeStudyHomeRepository(),

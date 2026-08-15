@@ -31,7 +31,7 @@ abstract final class RouteNames {
   static const String deckDetail = 'deckDetail';
 
   /// The study surface. Branch 1 of the shell, and the tab's own home: the
-  /// resume card and the root decks ranked by what is waiting in them (UC-12).
+  /// resume card and the root decks ranked by what is waiting in them (UC-14).
   static const String study = 'study';
 
   /// One root deck's study entry, reached **from the Study tab**. A child of

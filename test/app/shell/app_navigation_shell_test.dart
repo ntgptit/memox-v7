@@ -60,7 +60,7 @@ void main() {
           // The Study branch reads real data since M5.7, so the shell needs a
           // study repository too. The bar is what this test is about, and it
           // has to survive that branch rendering as well as the deck one.
-          // The Study branch is Study Home since UC-12, which reads its own
+          // The Study branch is Study Home since UC-14, which reads its own
           // contract — a screen with no method that could open a session.
           studyHomeRepositoryProvider.overrideWithValue(
             FakeStudyHomeRepository(),
@@ -130,7 +130,7 @@ void main() {
         initialLocation: RoutePaths.study,
       );
 
-      // The branch shows Study Home since UC-12 — the library, not a fixture
+      // The branch shows Study Home since UC-14 — the library, not a fixture
       // deck's entry screen. What this test is about is the bar surviving that
       // branch, so it asserts the screen rendered at all rather than which copy
       // it happens to carry.

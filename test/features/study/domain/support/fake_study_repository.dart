@@ -89,6 +89,11 @@ base class FakeStudyRepository
 
   StudySessionEntity? openSession_;
 
+  /// The root's **current** generation, which a test moves to simulate a Reset
+  /// landing between the read that offered a session and the tap that resumes
+  /// it. Sessions built by this fake freeze generation 1.
+  int schedulerGeneration = 1;
+
   @override
   Future<StudyDeckContextModel> deckContext(String deckId) async =>
       StudyDeckContextModel(
@@ -96,7 +101,7 @@ base class FakeStudyRepository
         deckName: 'Korean',
         rootDeckId: 'root',
         schedulerType: schedulerType,
-        schedulerGeneration: 1,
+        schedulerGeneration: schedulerGeneration,
       );
 
   @override

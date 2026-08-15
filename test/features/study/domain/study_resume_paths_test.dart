@@ -115,6 +115,26 @@ void main() {
       expect(resumed.schedulerType, repository.schedulerType);
     });
 
+    test('a session from before a reset is refused, not resumed (BR-84, '
+        'BR-200)', () async {
+      // **A reset between the card being drawn and the finger landing on it.**
+      // The session froze generation 1 when it opened (BR-45); Reset learning
+      // progress increments the root's to 2. Resuming would hand back a working
+      // screen whose every write BR-84 rejects — the failure would arrive on the
+      // first answer, after the user had already started. "Nothing to resume" is
+      // the same honest answer the other three staleness checks give.
+      final repository = FakeStudyRepository()
+        ..openSession_ = openSession()
+        ..schedulerGeneration = 2;
+
+      expect(
+        () => ResumeStudySessionUseCase(
+          repository,
+        ).call('deck-1', sessionId: 'session-open'),
+        throwsA(isA<NotFoundFailure>()),
+      );
+    });
+
     test('with nothing open it refuses rather than opening one', () async {
       final repository = FakeStudyRepository();
 

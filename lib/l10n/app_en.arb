@@ -2918,7 +2918,7 @@
   },
   "studyHomeTitle": "Study",
   "@studyHomeTitle": {
-    "description": "App-bar title of the Study tab's home screen (UC-12)."
+    "description": "App-bar title of the Study tab's home screen (UC-14)."
   },
   "studyHomeSupportingCopy": "Pick a deck, or carry on where you stopped.",
   "@studyHomeSupportingCopy": {
@@ -3055,5 +3055,32 @@
   "studyHomeErrorMessage": "Nothing was changed. Try again in a moment.",
   "@studyHomeErrorMessage": {
     "description": "Says the read failed and that it wrote nothing — true by construction, because this screen has no write path (BR-200)."
+  },
+  "studyHomeDeckRowSemanticLabel": "{deckName}, {scheduler}, {workload}",
+  "@studyHomeDeckRowSemanticLabel": {
+    "placeholders": {
+      "deckName": {
+        "type": "String"
+      },
+      "scheduler": {
+        "type": "String"
+      },
+      "workload": {
+        "type": "String"
+      }
+    },
+    "description": "The whole deck row as one sentence for a screen reader: the deck, its algorithm and its workload. Without it the row is four unowned nodes and the counts name no deck — the same problem the Study button solves by carrying the deck name."
+  },
+  "studyHomeDeckRowPlainSemanticLabel": "{deckName}, {workload}",
+  "@studyHomeDeckRowPlainSemanticLabel": {
+    "placeholders": {
+      "deckName": {
+        "type": "String"
+      },
+      "workload": {
+        "type": "String"
+      }
+    },
+    "description": "The row sentence for a deck whose algorithm has no label to show. A sentence with an empty clause reads worse than the short form."
   }
 }

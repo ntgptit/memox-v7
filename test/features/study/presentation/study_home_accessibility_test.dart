@@ -57,9 +57,13 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('the three counts are heard as one phrase, not three numbers', (
-    tester,
-  ) async {
+  testWidgets('the row is one phrase that names its own deck', (tester) async {
+    // **The counts and the deck they belong to are one sentence.** They used to
+    // be separate nodes: the name, the algorithm and the three counts each had
+    // their own, and a reader walking three decks heard "8 boxes" and "2
+    // overdue, 5 due today, 12 new" with nothing saying whose. The workload
+    // phrase itself was already one node — this is the same argument one level
+    // out, and the same one R6 makes for the buttons.
     final handle = tester.ensureSemantics();
     await pumpHome(tester);
 
@@ -67,7 +71,14 @@ void main() {
       find.byType(StudyHomeWorkloadItemWidget).first,
     );
 
-    expect(node.label, english.studyHomeWorkloadSemanticLabel(2, 5, 12));
+    expect(
+      node.label,
+      english.studyHomeDeckRowSemanticLabel(
+        'Everyday Korean',
+        english.schedulerEightBoxShortLabel,
+        english.studyHomeWorkloadSemanticLabel(2, 5, 12),
+      ),
+    );
     // The individual labels are excluded rather than merged: three sibling
     // nodes reading "2 overdue", "5 due today", "12 new" is what a badge soup
     // sounds like, and nothing in it says the three belong to one deck.
@@ -151,10 +162,13 @@ void main() {
 
     // Each metric carries a glyph and a word as well as its ink, so the three
     // read apart in greyscale and to anyone who does not perceive the hues
-    // (BR-201). The words are the counts themselves; the glyphs are these.
+    // (BR-201). The words are the counts themselves; the glyphs are these — the
+    // app's own glyph for each fact, in its **filled** variant because this
+    // fixture's three counts are all non-zero. The outlined variants are
+    // asserted at zero below (parity item E5).
     for (final icon in <IconData>[
-      Icons.history,
-      Icons.today,
+      Icons.event_busy,
+      Icons.event,
       Icons.auto_awesome,
     ]) {
       expect(
@@ -172,6 +186,36 @@ void main() {
         findsOneWidget,
       );
     }
+  });
+
+  testWidgets('a glyph is outlined at zero and filled when there is work '
+      '(parity E5)', (tester) async {
+    // **The count is the only thing that decides the variant.** The first
+    // version used one filled glyph per fact whatever the number was, which
+    // reads as three active facts on a deck that has nothing waiting — and
+    // quietly falsified parity item E5, which the gate cannot check because it
+    // parses the checklist's verdict word rather than the code.
+    //
+    // The second fixture deck is the case: 3 new, nothing overdue, nothing due.
+    await pumpHome(tester);
+
+    final row = find.byType(StudyHomeDeckItemWidget).at(1);
+
+    for (final icon in <IconData>[
+      Icons.event_busy_outlined,
+      Icons.event_outlined,
+    ]) {
+      expect(
+        find.descendant(of: row, matching: find.byIcon(icon)),
+        findsOneWidget,
+        reason: 'zero counts rest in outline',
+      );
+    }
+    expect(
+      find.descendant(of: row, matching: find.byIcon(Icons.auto_awesome)),
+      findsOneWidget,
+      reason: 'the one non-zero count is filled',
+    );
   });
 
   testWidgets('every action clears the tap-target guideline', (tester) async {

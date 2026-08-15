@@ -125,7 +125,7 @@ void main() {
       (tester) async {
         await harness.pump(tester);
 
-        final icon = tester.getRect(inRow(find.byIcon(Icons.history)).first);
+        final icon = tester.getRect(inRow(find.byIcon(Icons.event_busy)).first);
         final label = tester.getRect(
           inRow(find.text(english.studyHomeOverdueLabel(2))).first,
         );
@@ -146,7 +146,7 @@ void main() {
       final overdue = tester.getRect(
         inRow(find.text(english.studyHomeOverdueLabel(2))).first,
       );
-      final dueToday = tester.getRect(inRow(find.byIcon(Icons.today)).first);
+      final dueToday = tester.getRect(inRow(find.byIcon(Icons.event)).first);
 
       // Measured end-of-group to start-of-next-group, which is what `Wrap`'s
       // `spacing` actually controls — the icon leads each group.

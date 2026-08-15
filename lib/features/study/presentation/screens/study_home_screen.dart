@@ -60,13 +60,15 @@ class _StudyHomeScreenState extends ConsumerState<StudyHomeScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
+    final home = ref.watch(studyHomeProvider);
+
     return MxContentShell(
       title: l10n.studyHomeTitle,
       // The body owns its gutters: the list is one scroll view and must run
       // edge to edge under the app-bar hairline.
       padding: EdgeInsets.zero,
       body: MxAsyncView<StudyHomeModel>(
-        value: ref.watch(studyHomeProvider),
+        value: home,
         loadingLabel: l10n.studyHomeLoadingLabel,
         // **Both flags, because two different things re-open this read.** A new
         // emission from the same stream — a session ending, a card answered —
@@ -84,14 +86,28 @@ class _StudyHomeScreenState extends ConsumerState<StudyHomeScreen> {
         // well inset it to 40 against the empty states' 24, which at 320dp with
         // large text cost the error copy 24dp of width for nothing. Every other
         // `MxErrorState` call site in `lib/features/` passes it bare.
-        error: (_, _) => MxErrorState(
-          title: l10n.studyHomeErrorTitle,
-          message: l10n.studyHomeErrorMessage,
-          retryLabel: l10n.retryAction,
-          // `invalidate`, not `refresh`: the retry wants a read from scratch and
-          // nothing here needs the value as a return — the rebuild reads it
-          // anyway.
-          onRetry: () => ref.invalidate(studyHomeProvider),
+        error: (_, _) => Semantics(
+          // **Announced, because it can arrive in place.** A read that fails
+          // while the tab is already open replaces a populated list with this
+          // face and moves nothing the eye is drawn to; without a live region a
+          // screen reader user is told nothing and waits on a screen that has
+          // already given up. Both Progress error faces carry this.
+          liveRegion: true,
+          container: true,
+          child: MxErrorState(
+            title: l10n.studyHomeErrorTitle,
+            message: l10n.studyHomeErrorMessage,
+            retryLabel: l10n.retryAction,
+            // `invalidate`, not `refresh`: the retry wants a read from scratch
+            // and nothing here needs the value as a return — the rebuild reads
+            // it anyway.
+            onRetry: () => ref.invalidate(studyHomeProvider),
+            // Without this the tap produces nothing on screen: `invalidate` is
+            // a refresh, and `MxAsyncView` holds the previous value through a
+            // refresh, so the error face simply repaints itself. Every Progress
+            // call site passes it; this was the one that did not.
+            isRetrying: home.isRefreshing,
+          ),
         ),
         data: (home) => StudyHomeBodySectionWidget(
           home: home,

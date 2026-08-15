@@ -973,13 +973,13 @@ state "empty selection": bộ chọn luôn có đúng một khoảng được ch
 **Main flow:**
 1. Hệ thống đọc **một snapshot** gồm session có thể học tiếp và toàn bộ root deck
    kèm workload — cùng một transaction, không phải hai lần đọc rời (AD-13). Màn
-   hình là **chỉ-đọc**: vào tab, cuộn hay đổi tab không ghi gì (BR-182).
+   hình là **chỉ-đọc**: vào tab, cuộn hay đổi tab không ghi gì (BR-200).
 2. Nếu có đúng một session hợp lệ đang mở, Resume card đứng đầu màn hình và nói
    deck nào, loại phiên gì, đang ở chặng nào — cả hai giá trị lấy từ chính hàng
    session, không suy ra (BR-76, BR-98).
 3. Dưới Resume là danh sách root deck, mỗi hàng có tên deck, nhãn scheduler khi
    biết, ba con số Overdue/Due today/New và **một** hành động Study. Thứ tự giảm
-   dần theo ba khoá đó, tie-break theo tên đã fold rồi `id` (BR-183).
+   dần theo ba khoá đó, tie-break theo tên đã fold rồi `id` (BR-201).
 4. Chạm Resume mở đúng session và đúng lượt đã lưu (BR-133), không tạo session
    thứ hai. Chạm Study trên một deck mở study entry của deck đó (UC-05), nơi lựa
    chọn giữa học mới và ôn tập mới được đưa ra.
@@ -997,7 +997,7 @@ state "empty selection": bộ chọn luôn có đúng một khoảng được ch
 - **A4 — Thư viện chưa có deck nào:** empty state dẫn tới Starter Library (UC-01),
   lối thứ hai là về Library.
 - **A5 — Có deck nhưng chưa có card nào:** zero state riêng, dẫn về Library để thêm
-  thẻ — không phải CTA starter, và không bịa số Due (BR-184).
+  thẻ — không phải CTA starter, và không bịa số Due (BR-202).
 
 **Error flows:**
 - **E1 — Đọc thất bại:** trạng thái lỗi có nút thử lại, không nêu tên bảng, câu truy
@@ -1007,7 +1007,7 @@ state "empty selection": bộ chọn luôn có đúng một khoảng được ch
 **Postconditions:** Không đổi gì — use case chỉ đọc. Mọi write phát sinh sau đó đều
 thuộc UC-05, bắt đầu từ một lần chạm tường minh.
 
-**Business rules:** BR-182, BR-183, BR-184. Ngoài ra BR-29, BR-84, BR-101, BR-103,
+**Business rules:** BR-200, BR-201, BR-202. Ngoài ra BR-29, BR-84, BR-101, BR-103,
 BR-105, BR-133, BR-142, BR-162.
 **UI states:** loading · loaded (resume + danh sách) · loaded (không resume) ·
 loaded (mọi workload bằng 0) · empty (không deck) · empty (không card) · error

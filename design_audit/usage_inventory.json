@@ -4234,7 +4234,7 @@
     },
     {
       "file": "lib/features/study/presentation/widgets/items/study_home_deck_item_widget.dart",
-      "line": 65,
+      "line": 99,
       "widget_context": "StudyHomeDeckItemWidget",
       "element_kind": "text",
       "source_kind": "theme-token",
