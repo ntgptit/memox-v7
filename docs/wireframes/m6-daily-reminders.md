@@ -89,12 +89,12 @@ Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham c
 | S3 | enabling | khoá **ở vị trí cũ**, xám đi | khoá | — | Đang xin quyền/đặt lịch. Switch không tự chuyển trước khi biết kết quả: BR-228 nói bước bật có thể hỏng, và một switch đã trượt sang rồi trượt về là lời hứa bị rút lại. Chiều cao card **không** đổi (R3, G5) |
 | S4 | on | bật | hoạt động, hiện giờ | — | |
 | S5 | time picker mở | khoá | — | — | Dialog nền tảng phủ lên |
-| S6 | permission denied | tắt, bật được | vô hiệu | `Notifications are turned off` + `Try again` | Settings vẫn tắt (BR-228) |
+| S6 | permission denied | tắt, bật được | vô hiệu | `Notifications are turned off` + `Retry` | Settings vẫn tắt (BR-228) |
 | S7 | platform unavailable | tắt, **vô hiệu** | vô hiệu | `Reminders aren't available on this device` — không CTA | Không có đường khôi phục nên không có nút giả (BR-229). Banner suy từ capability **và** khoá toggle: capability được giải một lần lúc mở màn, còn `EnableReminderUseCase` đọc lại lúc chạm, nên nếu chỉ nhìn snapshot thì banner nói "không dùng được" cạnh một switch vẫn gạt được |
-| S8 | schedule error | tắt, bật được | vô hiệu | `The reminder couldn't be scheduled` + `Try again` | Không có trạng thái bật giả |
-| S9 | settings error | về giá trị đang lưu | theo giá trị đang lưu | `Your change wasn't saved` + `Try again` | |
-| S10 | cancel error | tắt, bật được | vô hiệu | `The reminder is off, but a pending alert may remain` + `Try again` | Tắt **đã ghi**, chỉ lịch cũ không huỷ được. Copy của S8 sẽ nói ngược sự thật ở đây (BR-226) |
-| S11 | read error | **không vẽ** | **không vẽ** | `Couldn't load your reminder` + `Retry` | Đọc hỏng trước khi có gì để vẽ. Copy **không** dùng lại câu của S9: "chưa lưu được thay đổi" mô tả một việc chưa xảy ra — người dùng chưa đổi gì cả. Đối ứng của `settingsLoadErrorTitle` một màn phía trên |
+| S8 | schedule error | tắt, bật được | vô hiệu | `The reminder couldn't be scheduled` + `Retry` | Không có trạng thái bật giả |
+| S9 | settings error | về giá trị đang lưu | theo giá trị đang lưu | `Your change wasn't saved` + `Retry` | |
+| S10 | cancel error | tắt, bật được | vô hiệu | `The reminder is off, but a pending alert may remain` + `Retry` | Tắt **đã ghi**, chỉ lịch cũ không huỷ được. Copy của S8 sẽ nói ngược sự thật ở đây (BR-226) |
+| S11 | read error | **không vẽ** | **không vẽ** | `Couldn't load your reminder` + `Retry` | Đọc hỏng trước khi có gì để vẽ. Copy **không** dùng lại câu của S9: "chưa lưu được thay đổi" mô tả một việc chưa xảy ra — người dùng chưa đổi gì cả. Đối ứng của `settingsLoadErrorTitle` một màn phía trên. **Ô này không phải một thể hiện của W5**: W5 là dải trong luồng, chỉ tồn tại ở S6…S10 và mang hợp đồng G7 (đẩy W6 xuống, không phủ, không đổi kích thước card). Đây là `MxErrorState` thay cả thân màn hình, nên không có card để đẩy |
 
 Không có state `empty`: màn này luôn có nội dung, kể cả khi thư viện rỗng.
 

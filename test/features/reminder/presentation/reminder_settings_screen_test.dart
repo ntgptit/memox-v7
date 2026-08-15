@@ -209,6 +209,7 @@ void main() {
       await pumpScreen(tester);
 
       expect(find.text(english.reminderLoadErrorTitle), findsOneWidget);
+      expect(find.text(english.writeErrorMessage), findsOneWidget);
       expect(find.text(english.reminderSaveErrorTitle), findsNothing);
       expect(find.text(english.retryAction), findsOneWidget);
       expect(find.byType(Switch), findsNothing);
