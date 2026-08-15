@@ -142,6 +142,10 @@ void main() {
         reason:
             'a launch must not ask for a permission the user never opted into',
       );
+      // The one observable that says the disabled branch *ran*, rather than
+      // nothing having happened: both assertions above are equally true of a
+      // reconcile that never fired.
+      expect(platform.cancelCount, 1);
     });
   });
 }

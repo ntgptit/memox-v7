@@ -124,10 +124,21 @@ class FakeReminderSettings implements ReminderSettingsRepository {
   final List<ReminderSettingsModel> writes = <ReminderSettingsModel>[];
   bool shouldFailWrite = false;
 
+  /// `true` makes the stream fail instead of emitting, which is the only way to
+  /// reach the screen's whole-screen error face — the one that used to show the
+  /// *save* copy for a failure that was a read.
+  bool shouldFailRead = false;
+
   ReminderSettingsModel get current => _current;
 
   @override
   Stream<ReminderSettingsModel> watchSettings() async* {
+    if (shouldFailRead) {
+      throw const DatabaseFailure(
+        message: 'read refused',
+        reason: ReminderSetupRejection.settingsWriteFailed,
+      );
+    }
     yield _current;
     yield* _changes.stream;
   }

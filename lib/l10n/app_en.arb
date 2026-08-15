@@ -3253,6 +3253,10 @@
   "@reminderSaveErrorTitle": {
     "description": "Banner title when the settings write failed (UC-17 E4). Distinct from a schedule failure because the retry re-runs a different step."
   },
+  "reminderLoadErrorTitle": "Couldn't load your reminder",
+  "@reminderLoadErrorTitle": {
+    "description": "Title of the whole-screen error state when the daily-reminder settings could not be READ. Deliberately not the save copy: nothing has been changed at this point, so \"Your change wasn't saved\" would describe an event that did not happen. Mirrors settingsLoadErrorTitle, which is the same situation one screen up."
+  },
   "reminderSaveErrorMessage": "The reminder is still set the way it was.",
   "@reminderSaveErrorMessage": {
     "description": "Body of the save-failure banner. Tells the user which state they are in, since the screen has just reverted under them."

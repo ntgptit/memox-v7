@@ -153,6 +153,68 @@ void main() {
     });
   });
 
+  group('the write itself fails (UC-17 E4, M6 S9)', () {
+    testWidgets('the choice is not claimed, and the copy says so', (
+      tester,
+    ) async {
+      // **The one named state with no test, and the fake for it was already
+      // there.** Every failure case above refuses at the *platform* — the
+      // schedule, the cancel, the permission. This one refuses at the
+      // database, which is a different sentence and a different recovery: the
+      // schedule never ran, so nothing has to be undone, and the retry re-runs
+      // a local write rather than re-entering the OS.
+      settings.shouldFailWrite = true;
+      await pumpScreen(tester);
+
+      await tester.tap(find.byType(Switch));
+      await tester.pumpAndSettle();
+
+      // Off, because off is what is stored. A toggle that stayed on would be
+      // showing a choice the database refused.
+      expect(toggleOf(tester).value, isFalse);
+      expect(find.text(english.reminderSaveErrorTitle), findsOneWidget);
+      expect(find.text(english.reminderSaveErrorMessage), findsOneWidget);
+      expect(find.text(english.retryAction), findsOneWidget);
+    });
+
+    testWidgets('the retry re-runs the write, and lands once it is allowed', (
+      tester,
+    ) async {
+      settings.shouldFailWrite = true;
+      await pumpScreen(tester);
+      await tester.tap(find.byType(Switch));
+      await tester.pumpAndSettle();
+
+      // The database recovers between the two attempts, which is what makes
+      // this a retry rather than a second first attempt.
+      settings.shouldFailWrite = false;
+      await tester.tap(find.text(english.retryAction));
+      await tester.pumpAndSettle();
+
+      expect(toggleOf(tester).value, isTrue);
+      expect(find.text(english.reminderSaveErrorTitle), findsNothing);
+      expect(settings.current.isEnabled, isTrue);
+    });
+  });
+
+  group('the read fails before anything is on screen', () {
+    testWidgets('the copy describes a read, not a change nobody made', (
+      tester,
+    ) async {
+      // This face was reachable and untested, and it showed "Your change
+      // wasn't saved" — a sentence about an event that has not happened. A
+      // user who opens the screen on a database that will not answer has
+      // changed nothing.
+      settings.shouldFailRead = true;
+      await pumpScreen(tester);
+
+      expect(find.text(english.reminderLoadErrorTitle), findsOneWidget);
+      expect(find.text(english.reminderSaveErrorTitle), findsNothing);
+      expect(find.text(english.retryAction), findsOneWidget);
+      expect(find.byType(Switch), findsNothing);
+    });
+  });
+
   group('unsupported platform (UC-17 E2, BR-229)', () {
     testWidgets('the toggle is disabled and the screen says why', (
       tester,

@@ -94,6 +94,7 @@ Tài liệu này **không** phát biểu lại luật. Mọi ràng buộc tham c
 | S8 | schedule error | tắt, bật được | vô hiệu | `The reminder couldn't be scheduled` + `Try again` | Không có trạng thái bật giả |
 | S9 | settings error | về giá trị đang lưu | theo giá trị đang lưu | `Your change wasn't saved` + `Try again` | |
 | S10 | cancel error | tắt, bật được | vô hiệu | `The reminder is off, but a pending alert may remain` + `Try again` | Tắt **đã ghi**, chỉ lịch cũ không huỷ được. Copy của S8 sẽ nói ngược sự thật ở đây (BR-226) |
+| S11 | read error | **không vẽ** | **không vẽ** | `Couldn't load your reminder` + `Retry` | Đọc hỏng trước khi có gì để vẽ. Copy **không** dùng lại câu của S9: "chưa lưu được thay đổi" mô tả một việc chưa xảy ra — người dùng chưa đổi gì cả. Đối ứng của `settingsLoadErrorTitle` một màn phía trên |
 
 Không có state `empty`: màn này luôn có nội dung, kể cả khi thư viện rỗng.
 

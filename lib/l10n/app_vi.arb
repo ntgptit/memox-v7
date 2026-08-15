@@ -3253,6 +3253,10 @@
   "@reminderSaveErrorTitle": {
     "description": "Tiêu đề banner khi ghi settings thất bại (UC-17 E4). Khác lỗi đặt lịch vì lần thử lại chạy lại một bước khác."
   },
+  "reminderLoadErrorTitle": "Không tải được nhắc học",
+  "@reminderLoadErrorTitle": {
+    "description": "Title of the whole-screen error state when the daily-reminder settings could not be READ. Deliberately not the save copy: nothing has been changed at this point, so \"Your change wasn't saved\" would describe an event that did not happen. Mirrors settingsLoadErrorTitle, which is the same situation one screen up."
+  },
   "reminderSaveErrorMessage": "Nhắc học vẫn giữ nguyên như trước.",
   "@reminderSaveErrorMessage": {
     "description": "Thân banner lỗi lưu. Nói rõ người dùng đang ở trạng thái nào, vì màn vừa quay ngược lại dưới tay họ."

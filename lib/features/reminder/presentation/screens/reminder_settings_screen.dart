@@ -60,9 +60,14 @@ class ReminderSettingsScreen extends ConsumerWidget {
       body: MxAsyncView<ReminderOverviewModel>(
         value: ref.watch(reminderOverviewProvider),
         loadingLabel: context.l10n.reminderTitle,
+        // **The read failed, so the save copy is the wrong sentence.** "Your
+        // change wasn't saved" describes an event that has not happened: the
+        // user has changed nothing, the screen simply could not be filled in.
+        // `settingsLoadErrorTitle` says the same thing one screen up, and this
+        // is its counterpart.
         error: (_, _) => MxErrorState(
-          title: context.l10n.reminderSaveErrorTitle,
-          message: context.l10n.reminderSaveErrorMessage,
+          title: context.l10n.reminderLoadErrorTitle,
+          message: context.l10n.writeErrorMessage,
           retryLabel: context.l10n.retryAction,
           onRetry: () => ref.invalidate(reminderOverviewProvider),
         ),
