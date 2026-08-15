@@ -17,7 +17,7 @@ Luồng viết bằng ngôn ngữ người dùng, không nói theo màn hình ha
 hình sẽ đổi; luồng thì không.
 
 **ID use case là định danh vĩnh viễn**, cùng chính sách với BR (xem
-`business-rules.md`). UC mới append; không đánh số lại. Hiện tại: UC-01…UC-15.
+`business-rules.md`). UC mới append; không đánh số lại. Hiện tại: UC-01…UC-17.
 
 **Các UC nối vào nhau thế nào thì xem [`master-flow.md`](master-flow.md).** Tài
 liệu này đặc tả từng UC riêng lẻ và cố ý không vẽ đồ thị giữa chúng — mỗi UC mô
@@ -867,8 +867,8 @@ nào — trạng thái "chưa có gì" là một mặt hợp lệ, không phải
 **Postconditions:** Database không đổi ở mọi nhánh, kể cả nhánh lỗi và nhánh
 Retry (BR-190). Không session nào được mở, tiếp tục hay đóng.
 
-**Business rules:** BR-52, BR-105, BR-111, BR-195,
-BR-196, BR-197, BR-198, BR-199, BR-190, BR-191
+**Business rules:** BR-52, BR-105, BR-111, BR-190, BR-191, BR-192, BR-193,
+BR-194, BR-195, BR-196, BR-197, BR-198, BR-199
 
 **UI states:** loading · loaded-normal (có hoạt động trong cửa sổ) ·
 loaded-today-zero-streak-retained (A1) · empty-lifetime + CTA sang Study (A2) ·
@@ -939,7 +939,7 @@ study state, history, cờ và tag đều nguyên vẹn, và không session nào
 hay đóng (BR-188).
 
 **Business rules:** BR-43, BR-51, BR-55, BR-56, BR-57, BR-76, BR-105, BR-182,
-BR-211, BR-212, BR-213, BR-214, BR-215, BR-216, BR-217
+BR-183, BR-184, BR-185, BR-186, BR-187, BR-188, BR-189
 
 **UI states:** loading · mixed activity (một số deck có, một số không) ·
 all-zero (có deck, khoảng rỗng) · no decks (cấp thư viện) · no sub-decks (cấp

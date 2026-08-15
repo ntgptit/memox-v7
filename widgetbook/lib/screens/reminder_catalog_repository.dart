@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:memox/core/error/failure.dart';
+import 'package:memox/features/reminder/domain/failures/reminder_failure.dart';
 import 'package:memox/features/reminder/domain/models/reminder_capability_model.dart';
 import 'package:memox/features/reminder/domain/models/reminder_settings_model.dart';
 import 'package:memox/features/reminder/domain/models/reminder_summary_model.dart';
@@ -54,7 +56,19 @@ class ReminderCatalogSettings implements ReminderSettingsRepository {
     required bool isEnabled,
     required ReminderTime time,
   }) async {
-    if (doesWriteFail) throw StateError('catalog: settings write refused');
+    // A typed `Failure`, not a `StateError`. The controllers catch `on
+    // Failure` and nothing else, and `EnableReminderUseCase` writes the
+    // settings *before* its own `try` — so a bare throw here escaped as an
+    // unhandled async error, `isSubmitting` never cleared, and the scenario
+    // rendered as an indefinite lock indistinguishable from `submitting`
+    // rather than as the banner it is labelled for. The real repository always
+    // wraps; a double that does not is not standing in for it.
+    if (doesWriteFail) {
+      throw const DatabaseFailure(
+        message: 'catalog: settings write refused',
+        reason: ReminderSetupRejection.settingsWriteFailed,
+      );
+    }
     _settings = ReminderSettingsModel(isEnabled: isEnabled, time: time);
   }
 
@@ -106,12 +120,22 @@ class ReminderCatalogPlatform implements ReminderPlatformRepository {
     required Duration utcOffset,
     DateTime? notBefore,
   }) async {
-    if (doesScheduleFail) throw StateError('catalog: schedule refused');
+    if (doesScheduleFail) {
+      throw const ConflictFailure(
+        message: 'catalog: schedule refused',
+        reason: ReminderSetupRejection.scheduleFailed,
+      );
+    }
   }
 
   @override
   Future<void> cancel() async {
-    if (doesCancelFail) throw StateError('catalog: cancel refused');
+    if (doesCancelFail) {
+      throw const ConflictFailure(
+        message: 'catalog: cancel refused',
+        reason: ReminderSetupRejection.cancelFailed,
+      );
+    }
   }
 
   @override

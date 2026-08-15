@@ -185,6 +185,14 @@ void main() {
             cards[1].bottom,
         closeTo(SettingsScreen.sectionGap, 0.5),
       );
+      // The third pair has no heading to anchor on — the daily-reminder row is
+      // the one card here whose label is its own heading — so it is measured
+      // card to card. Left out, the one `SizedBox` nothing else covers would
+      // be free to change.
+      expect(
+        cards[3].top - cards[2].bottom,
+        closeTo(SettingsScreen.sectionGap, 0.5),
+      );
     });
 
     testWidgets('the last card sits a section gap above the reset action', (

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_elevation.dart';
+import '../../../../../core/theme/app_icon_size.dart';
+import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_card.dart';
 import '../../../../../shared/widgets/mx_list_tile.dart';
@@ -38,7 +40,18 @@ class SettingsReminderEntrySectionWidget extends StatelessWidget {
         child: MxListTile(
           title: context.l10n.reminderTitle,
           leading: const Icon(Icons.notifications_outlined),
-          trailing: const Icon(Icons.chevron_right),
+          // Sized and coloured explicitly, and excluded from semantics, like
+          // the app's other navigation chevron: a screen reader announcing
+          // "chevron right" after the row's own label adds nothing, and the
+          // `ListTile` defaults it happens to agree with today are not a
+          // contract.
+          trailing: ExcludeSemantics(
+            child: Icon(
+              Icons.chevron_right,
+              size: AppIconSize.md,
+              color: context.colors.onSurfaceVariant,
+            ),
+          ),
           onTap: onOpen,
         ),
       ),
