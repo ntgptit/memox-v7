@@ -7,7 +7,7 @@ import 'package:memox/features/progress/domain/models/progress_overview_model.da
 
 import '../../../database/support/test_database.dart';
 
-/// What makes the Progress stream re-emit, and how much it costs (BR-189).
+/// What makes the Progress stream re-emit, and how much it costs (BR-199).
 ///
 /// A separate file from `progress_repository_test.dart` because it opens its own
 /// databases: some of these need a query log, and one needs a history large

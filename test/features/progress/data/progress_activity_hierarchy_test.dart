@@ -12,7 +12,7 @@ import 'support/progress_read_harness.dart';
 void main() {
   final harness = installProgressReadHarness();
 
-  group('hierarchy is resolved for real (BR-195)', () {
+  group('hierarchy is resolved for real (BR-185)', () {
     /// A root with a strictly linear chain below it, ten decks tall counting
     /// the root as level 1 (BR-55), and one card at the deepest level.
     Future<List<String>> seedTenLevels() async {

@@ -13,7 +13,7 @@ import '../support/progress_fixtures.dart';
 /// `test/features/progress/data/` against real SQLite. What is here needs no
 /// database, and putting it here is what keeps those tests about queries.
 void main() {
-  group('the two windows (BR-194)', () {
+  group('the two windows (BR-184)', () {
     test('each spans whole days including today', () {
       expect(ProgressRange.last7Days.dayCount, 7);
       expect(ProgressRange.last30Days.dayCount, 30);
@@ -36,7 +36,7 @@ void main() {
     });
   });
 
-  group('the metrics (BR-193, BR-196)', () {
+  group('the metrics (BR-183, BR-186)', () {
     test('the card-day total is the two halves of the partition', () {
       final metrics = activityMetrics(learning: 4, reviewing: 9);
 
@@ -108,7 +108,7 @@ void main() {
     });
   });
 
-  group('the order the list is read in (BR-197)', () {
+  group('the order the list is read in (BR-187)', () {
     List<String> namesOf(List<DeckActivity> decks, ProgressRange range) =>
         sortDeckActivity(
           decks,

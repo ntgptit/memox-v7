@@ -137,7 +137,7 @@ chọn mode chỉ xuất hiện khi có mode thứ hai.
 | # | Feature | Done when |
 |---|---|---|
 | S1 | Tìm kiếm card trong deck | Tìm theo nội dung mặt trước/sau |
-| S2 | Thống kê ôn tập cơ bản | **Đã triển khai ở v1** (M99.23, UC-12, BR-182…BR-191): số card đã học hôm nay tách Learning/Reviewing, streak theo ngày, và hoạt động bảy ngày gần nhất. Phạm vi cố ý dừng ở đó — accuracy, longest streak, goal, XP, heatmap và lọc theo deck nằm ngoài v1 (BR-191) |
+| S2 | Thống kê ôn tập cơ bản | **Đã triển khai ở v1** (M99.23, UC-12, BR-190…BR-199): số card đã học hôm nay tách Learning/Reviewing, streak theo ngày, và hoạt động bảy ngày gần nhất. Phạm vi cố ý dừng ở đó — accuracy, longest streak, goal, XP, heatmap và lọc theo deck nằm ngoài v1 (BR-191) |
 | S3 | Đảo chiều card (nghĩa → từ) | Ôn được cả hai chiều |
 
 ## Nice-to-have

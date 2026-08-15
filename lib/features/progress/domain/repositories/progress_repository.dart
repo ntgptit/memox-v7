@@ -4,7 +4,7 @@ import '../models/progress_overview_model.dart';
 /// Reading the learner's own activity back out of history (UC-12, UC-13).
 ///
 /// **Read-only, and the contract says so by having nothing else on it**
-/// (BR-190, BR-198). Opening a progress screen must not touch a schedule, close
+/// (BR-190, BR-188). Opening a progress screen must not touch a schedule, close
 /// a session or stamp a row: a person looking at what they did is not doing
 /// anything. A contract with nothing but `watch` methods cannot break that by
 /// accident, and adding a write would be a visible decision in this file rather

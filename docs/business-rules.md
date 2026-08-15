@@ -1039,4 +1039,4 @@ Trạng thái kết thúc là terminal — không có đường quay lại `in_p
 | Reset learning progress rồi học tiếp | Cả hai generation đều được đếm — reset không làm việc đã học biến mất (BR-43, BR-193) |
 | Mở màn hình tiến độ lúc 23:59 rồi để yên | Nửa đêm địa phương, cửa sổ trượt một ngày và màn hình tự đọc lại (BR-194, BR-199) |
 | Một ngày có cả lượt `learning` và lượt `scheduled` trên cùng thẻ | Là Learning day (BR-196) |
-| Năm mươi deck cùng 0 hoạt động | Vẫn hiện, đứng cuối, thứ tự không đổi giữa hai lần đọc (BR-197) |
+| Năm mươi deck cùng 0 hoạt động | Vẫn hiện, đứng cuối, thứ tự không đổi giữa hai lần đọc (BR-187) |

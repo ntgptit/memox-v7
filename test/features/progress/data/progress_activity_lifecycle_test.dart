@@ -13,7 +13,7 @@ import 'support/progress_read_harness.dart';
 void main() {
   final harness = installProgressReadHarness();
 
-  group('history follows the card, not where it was answered (BR-195)', () {
+  group('history follows the card, not where it was answered (BR-185)', () {
     test('moving a card moves its whole history to the new deck', () async {
       await harness.root('root-a', name: 'Alpha');
       await harness.root('root-b', name: 'Beta');
@@ -43,7 +43,7 @@ void main() {
       final after = await harness.watch().first;
 
       // The whole history, not just the turns graded after the move — there is
-      // no per-answer deck to split it by, and that is the design (BR-195).
+      // no per-answer deck to split it by, and that is the design (BR-185).
       expect(rowFor(after, 'root-a').last7Days.cardDayCount, 0);
       expect(rowFor(after, 'root-b').last7Days.cardDayCount, 2);
     });
@@ -211,7 +211,7 @@ void main() {
     });
   });
 
-  group('the stream follows the data (BR-199)', () {
+  group('the stream follows the data (BR-189)', () {
     test('a new answer re-emits with the new figures', () async {
       await seedSingleDeck(harness);
 

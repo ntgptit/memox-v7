@@ -1337,8 +1337,8 @@ chuyển tab. Ràng buộc này gắn với **tình trạng của branch**, khô
 của nó: nó áp cho mọi branch còn là scaffold, và **chấm dứt cho một branch ngay
 khi nghiệp vụ của branch đó được chốt trong `business-rules.md` và
 `use-cases.md`**. Tại thời điểm AD-19 được viết, hai branch còn scaffold là
-Progress và Settings; **Progress đã tốt nghiệp ở M99.23** (BR-182…BR-191,
-UC-12) và có thêm cấp deck ở M99.24 (BR-192…BR-199, UC-13), nên placeholder
+Progress và Settings; **Progress đã tốt nghiệp ở M99.23** (BR-190…BR-199,
+UC-12) và có thêm cấp deck ở M99.24 (BR-182…BR-189, UC-13), nên placeholder
 rule không còn áp cho nó. Settings vẫn là scaffold. Mỗi branch có path thật
 (`/progress`, `/settings`) để deep link mở đúng tab.
 Thư viện starter thuộc branch Decks; MUST NOT có tab Profile chừng nào chưa có
@@ -1346,7 +1346,7 @@ auth/profile domain (AD-03).
 
 **Ràng buộc placeholder hết hiệu lực đúng lúc nghiệp vụ được chốt, không sớm
 hơn.** Từ M99.23, branch **Progress** mang màn hình thật: nghiệp vụ của nó đã
-canonical ở UC-12 và BR-182…BR-191, nên điều kiện mà AD này đặt ra đã được đáp
+canonical ở UC-12 và BR-190…BR-199, nên điều kiện mà AD này đặt ra đã được đáp
 ứng và ràng buộc "chỉ placeholder" MUST NOT còn áp cho Progress. Việc thay là
 **một screen đổi một screen**: path `/progress`, `RouteNames.progress` và
 branch index 2 MUST giữ nguyên — đó chính là tài sản mà AD này mua trước.

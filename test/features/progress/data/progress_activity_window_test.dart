@@ -14,7 +14,7 @@ import 'support/progress_read_harness.dart';
 void main() {
   final harness = installProgressReadHarness();
 
-  group('the card-day is the unit (BR-193)', () {
+  group('the card-day is the unit (BR-183)', () {
     test('six answers to one card on one day count as one card-day', () async {
       await seedSingleDeck(harness);
       for (var i = 0; i < 6; i++) {
@@ -65,7 +65,7 @@ void main() {
     });
   });
 
-  group('the window is whole local days ending today (BR-194)', () {
+  group('the window is whole local days ending today (BR-184)', () {
     /// One answer per boundary instant, each on its own card so the card counts
     /// stay separable.
     Future<DeckActivity> seedAt(DateTime instant) async {
@@ -144,7 +144,7 @@ void main() {
     });
   });
 
-  group('Learning and Reviewing partition the card-days (BR-196)', () {
+  group('Learning and Reviewing partition the card-days (BR-186)', () {
     test('a day with any learning turn is a Learning day', () async {
       await seedSingleDeck(harness);
       // Stated rather than defaulted: the point of the case is that a

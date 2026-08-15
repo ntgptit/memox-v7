@@ -152,7 +152,7 @@ DeckTemplateRepository deckTemplateRepositoryBinding(Ref ref) =>
 /// It does take a random source, which is deliberately not injected here: the
 /// default is a real one, and only a test replaces it. A seeded shuffle in
 /// production would make every session lay its cards out in the same order.
-/// Progress reads what studying produced and writes nothing (BR-190, BR-198),
+/// Progress reads what studying produced and writes nothing (BR-190, BR-188),
 /// so it
 /// takes neither a clock nor an id generator: every instant it needs arrives as
 /// an argument from `clockProvider` and `utcOffsetProvider` at the controller
