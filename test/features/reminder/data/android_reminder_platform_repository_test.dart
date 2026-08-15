@@ -1,3 +1,5 @@
+import 'package:memox/features/reminder/domain/failures/reminder_failure.dart';
+import 'package:memox/core/error/failure.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/reminder/data/datasources/reminder_notification_data_source.dart';
 import 'package:memox/features/reminder/data/datasources/reminder_scheduler_data_source.dart';
@@ -140,5 +142,31 @@ void main() {
         existingWorkPolicy: ExistingWorkPolicy.replace,
       ),
     ).called(1);
+  });
+  group('cancel', () {
+    test(
+      'a refused cancel is reported as a cancel failure, not a schedule one',
+      () async {
+        // **Nothing user-facing reads this reason today** — `DisableReminderUseCase`
+        // catches and re-wraps before the screen sees it — which is exactly why
+        // the label sat wrong for the whole stage without anything going red. The
+        // assertion is here so the next person to read this file is not told one
+        // failure is another.
+        when(
+          () => workmanager.cancelByUniqueName(any()),
+        ).thenThrow(Exception('the platform refused'));
+
+        await expectLater(
+          repository.cancel(),
+          throwsA(
+            isA<Failure>().having(
+              (failure) => failure.reason,
+              'reason',
+              ReminderSetupRejection.cancelFailed,
+            ),
+          ),
+        );
+      },
+    );
   });
 }

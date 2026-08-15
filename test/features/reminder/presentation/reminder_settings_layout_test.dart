@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/reminder/domain/models/reminder_capability_model.dart';
+import 'package:memox/features/reminder/domain/models/reminder_time_model.dart';
+import 'package:memox/features/reminder/domain/models/reminder_settings_model.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 
 import '../support/fake_reminder_platform.dart';
@@ -238,6 +240,46 @@ void main() {
         closeTo(AppSpacing.xs, 0.5),
         reason: 'the Settings band puts xs here, not sm',
       );
+    });
+
+    testWidgets('the longest banner body fits at 320x568 with textScaler 2.0', (
+      tester,
+    ) async {
+      // **The cancel-error body is the longest of the five** — 90 characters in
+      // English, 92 in Vietnamese, against 63 for the permission-denied one that
+      // every other narrow-screen test happens to render. So the widest string
+      // the banner can hold had never been laid out at the narrowest size, and
+      // the passing tests were evidence about a shorter sentence.
+      for (final locale in <Locale>[const Locale('en'), const Locale('vi')]) {
+        harness.platform = FakeReminderPlatform()..shouldFailCancel = true;
+        harness.settings = FakeReminderSettings(
+          ReminderSettingsModel(
+            isEnabled: true,
+            time: ReminderTime.parse(20 * 60).time!,
+          ),
+        );
+        await harness.pump(
+          tester,
+          surface: const Size(320, 568),
+          textScale: 2,
+          locale: locale,
+        );
+
+        await tester.tap(find.byType(Switch));
+        await tester.pumpAndSettle();
+
+        expect(
+          find.byType(MxCard),
+          findsNWidgets(2),
+          reason: 'banner in $locale',
+        );
+        final truncated = tester
+            .renderObjectList<RenderParagraph>(find.byType(RichText))
+            .where((paragraph) => paragraph.didExceedMaxLines)
+            .map((paragraph) => paragraph.text.toPlainText())
+            .toList();
+        expect(truncated, isEmpty, reason: 'ellipsized in $locale');
+      }
     });
 
     testWidgets('the banner Retry reads its ink from the surface it sits on', (
