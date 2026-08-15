@@ -1608,14 +1608,14 @@
   "@studyDirectionMixedBody": {
     "description": "One line describing the mixed direction. 'Chia đều' is a promise the assignment keeps to within one card (BR-205)."
   },
-  "studyDirectionRecommendedOption": "{line} — nên chọn",
+  "studyDirectionRecommendedOption": "Nên chọn — {line}",
   "@studyDirectionRecommendedOption": {
     "placeholders": {
       "line": {
         "type": "String"
       }
     },
-    "description": "Marks the Korean-first option by extending its own subtitle, so all three options share one text column. See the English ARB for why it is not a trailing badge."
+    "description": "The recommended option's supporting line. **The marker leads.** It used to trail — `{line} — Recommended` — and `MxListTile` caps a subtitle at two lines, so at textScaler 2.0 on a 320dp screen the line needs about three and the marker is the first thing the ellipsis takes. The option the app recommends then carried no sign that it was recommended, which is exactly what choosing a marker over a trailing badge was meant to avoid. Each locale places its own marker via the placeholder."
   },
   "studyDirectionNothingDue": "Không còn thẻ nào đến hạn để ôn.",
   "@studyDirectionNothingDue": {

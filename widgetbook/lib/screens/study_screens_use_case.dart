@@ -16,6 +16,9 @@ import 'package:memox/features/study/presentation/widgets/overlays/study_directi
 import 'package:widgetbook/widgetbook.dart';
 
 import 'study_catalog_repository.dart';
+import 'package:memox/core/error/failure.dart';
+import 'package:memox/features/study/domain/failures/study_refusal_failure.dart';
+import 'package:memox/features/study/domain/models/study_direction_model.dart';
 
 /// The Study screens, mounted whole against the catalog's own repository.
 ///
@@ -58,29 +61,58 @@ List<WidgetbookComponent> studyScreenComponents() => <WidgetbookComponent>[
   // own — initial, submitting, and a refusal that keeps the selection — and the
   // middle two are unreachable from the screen entries above, because the
   // catalog's repository never fails. The dropdown drives them directly.
-  _screen('StudyDirectionChooser', (scenario) => const _DirectionChooserDemo()),
+  _screen(
+    'StudyDirectionChooser',
+    (scenario) => _DirectionChooserDemo(scenario: scenario),
+  ),
 ];
 
 /// The direction sheet on its own, with its three states on the scenario knob.
 ///
 /// Mounted flat rather than inside a real `showModalBottomSheet`: a catalog page
 /// is not a route, and the sheet's own `SafeArea` + scroll behaviour is what a
-/// reviewer needs to look at.
+/// reviewer needs to look at. **The chrome is the theme's, not a stand-in** —
+/// `bottomSheetTheme` gives the real sheet `surface`, its top radius and a drag
+/// handle, and the demo used `surfaceContainerLow`, which is a different colour
+/// in dark and happens to be the one the selected radio glyph sits on.
 class _DirectionChooserDemo extends StatelessWidget {
-  const _DirectionChooserDemo();
+  const _DirectionChooserDemo({required this.scenario});
 
-  @override
-  Widget build(BuildContext context) => Align(
-    alignment: Alignment.bottomCenter,
-    child: Material(
-      color: Theme.of(context).colorScheme.surfaceContainerLow,
-      child: StudyDirectionChooserWidget(
-        // Never resolves, so the sheet stays in its submitting state for as long
-        // as somebody wants to look at it.
-        onSubmit: (_) => Completer<Object?>().future,
+  /// **Read, since the knob is there.** The first version took the parameter
+  /// and ignored it, and hard-coded a future that never resolves — so the
+  /// refusal state this entry exists to show could not be reached at all,
+  /// while the doc above said the dropdown drove it.
+  final StudyCatalogScenario scenario;
+
+  Future<Object?> _submit(
+    StudySessionDirection direction,
+  ) => switch (scenario) {
+    // Nothing due: the refusal that keeps the selection and disables the CTA.
+    StudyCatalogScenario.nothingDue ||
+    StudyCatalogScenario.nothingLeft => Future<Object?>.value(
+      const ConflictFailure(
+        message: 'catalog: nothing due to review',
+        reason: StudyRefusalReason.nothingDueToReview,
       ),
     ),
-  );
+    // Anything else: a submit that never lands, so the busy state holds still
+    // for as long as somebody wants to look at it.
+    _ => Completer<Object?>().future,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final BottomSheetThemeData sheet = Theme.of(context).bottomSheetTheme;
+
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: Material(
+        color: sheet.backgroundColor ?? Theme.of(context).colorScheme.surface,
+        shape: sheet.shape,
+        child: StudyDirectionChooserWidget(onSubmit: _submit),
+      ),
+    );
+  }
 }
 
 /// One screen, with the scenario dropdown every Study use-case shares.

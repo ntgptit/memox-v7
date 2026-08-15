@@ -49,10 +49,20 @@ class _CardHalf extends StatelessWidget {
         ),
         Expanded(
           child: Center(
-            child: SingleChildScrollView(
-              // The half is a fixed share of the card, so at a large text scale
-              // a long meaning has to be able to move rather than overflow.
-              child: Text(text, style: style, textAlign: TextAlign.center),
+            // **A scrollbar, because this half scrolls in the ordinary case now.**
+            // A meaning runs to 240 characters (BR-08) and reversing the
+            // direction puts it in the prompt half, where at a large text scale
+            // it needs more room than the half has. Android draws no scrollbar
+            // for a bare `SingleChildScrollView`, so nothing said there was more
+            // to read — which on a card whose whole job is to be read is the
+            // difference between a hard question and a wrong one.
+            child: Scrollbar(
+              child: SingleChildScrollView(
+                // The half is a fixed share of the card, so at a large text
+                // scale a long meaning has to be able to move rather than
+                // overflow.
+                child: Text(text, style: style, textAlign: TextAlign.center),
+              ),
             ),
           ),
         ),

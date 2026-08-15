@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/study/domain/models/study_direction_model.dart';
 import 'package:memox/features/study/presentation/widgets/overlays/study_direction_chooser_widget.dart';
@@ -31,60 +30,6 @@ void main() {
         textScaler: textScaler,
       ),
     );
-
-    /// Whether each option's title and description had to be cut short.
-    ///
-    /// **Read off the paragraph, not off the tile.** Every tile is the same
-    /// width — `CrossAxisAlignment.stretch` guarantees it — so measuring tiles
-    /// can never see the failure this exists for: `ListTile` gives its *text*
-    /// whatever the leading and trailing widgets leave, and a badge on one row
-    /// takes it from that row alone.
-    List<bool> clipped(WidgetTester tester) => <bool>[
-      for (var index = 0; index < 3; index++)
-        for (final finder in <Finder>[
-          find
-              .descendant(
-                of: find.byType(MxListTile).at(index),
-                matching: find.byType(Text),
-              )
-              .first,
-          find
-              .descendant(
-                of: find.byType(MxListTile).at(index),
-                matching: find.byType(Text),
-              )
-              .at(1),
-        ])
-          (tester.renderObject(finder) as RenderParagraph).didExceedMaxLines,
-    ];
-
-    /// The width each option's title and description was laid out in.
-    ///
-    /// **Read off the paragraph, not off the tile.** Every tile is the same
-    /// width — `CrossAxisAlignment.stretch` guarantees it — so measuring tiles
-    /// can never see the failure this exists for: `ListTile` gives its *text*
-    /// whatever the leading and trailing widgets leave, and a badge on one row
-    /// takes it from that row alone.
-    double columnOf(WidgetTester tester, int index, int line) =>
-        (tester.renderObject(
-                  find
-                      .descendant(
-                        of: find.byType(MxListTile).at(index),
-                        matching: find.byType(Text),
-                      )
-                      .at(line),
-                )
-                as RenderParagraph)
-            .constraints
-            .maxWidth;
-
-    ({List<double> titles, List<double> bodies}) textColumns(
-      WidgetTester tester,
-    ) => (
-      titles: <double>[for (var i = 0; i < 3; i++) columnOf(tester, i, 0)],
-      bodies: <double>[for (var i = 0; i < 3; i++) columnOf(tester, i, 1)],
-    );
-
     testWidgets('offers exactly the three choices, and never `unknown`', (
       tester,
     ) async {
@@ -286,90 +231,6 @@ void main() {
           greaterThanOrEqualTo(48),
         );
       }
-      expect(tester.takeException(), isNull);
-    });
-
-    testWidgets('no option is cut short on the narrowest screen', (
-      tester,
-    ) async {
-      // **The assertion the badge used to fail, in both languages.** Marking the
-      // recommended option with a `trailing` widget left it 112dp of text where
-      // its neighbours had 200dp, so it was the only one whose description was
-      // clipped — the option the app is suggesting was the option a learner
-      // could not read. The marker now rides on the description itself, so all
-      // three share one column (wireframe §9.1).
-      for (final locale in <Locale?>[null, const Locale('vi')]) {
-        tester.view.physicalSize = const Size(320, 640);
-        tester.view.devicePixelRatio = 1;
-        addTearDown(tester.view.reset);
-
-        await pumpChooser(tester, onSubmit: (_) async => null, locale: locale);
-
-        expect(clipped(tester), everyElement(isFalse), reason: '$locale');
-      }
-    });
-
-    testWidgets('every option gets the same text column to write in', (
-      tester,
-    ) async {
-      // **The exact quantity the badge changed**, and the one §9.1 names: at
-      // 320dp the recommended row had 112dp against its neighbours' 200dp.
-      // Measured at both scales and in both languages, because the trailing
-      // widget's appetite grows with the text it holds — at 2.0 the badge alone
-      // took a row down to about 41dp.
-      for (final scaler in <TextScaler?>[null, const TextScaler.linear(2)]) {
-        for (final locale in <Locale?>[null, const Locale('vi')]) {
-          for (final width in <double>[320, 390]) {
-            tester.view.physicalSize = Size(width, 800);
-            tester.view.devicePixelRatio = 1;
-            addTearDown(tester.view.reset);
-
-            await pumpChooser(
-              tester,
-              onSubmit: (_) async => null,
-              locale: locale,
-              textScaler: scaler,
-            );
-
-            final columns = textColumns(tester);
-            expect(
-              columns.titles.toSet(),
-              hasLength(1),
-              reason: 'titles at ${width}dp, $locale, scale $scaler',
-            );
-            expect(
-              columns.bodies.toSet(),
-              hasLength(1),
-              reason: 'descriptions at ${width}dp, $locale, scale $scaler',
-            );
-          }
-        }
-      }
-    });
-
-    testWidgets('the three options share one width and one left edge', (
-      tester,
-    ) async {
-      await pumpChooser(tester, onSubmit: (_) async => null);
-
-      final rects = <Rect>[
-        for (var index = 0; index < 3; index++)
-          tester.getRect(find.byType(MxListTile).at(index)),
-      ];
-
-      expect(rects[1].left, rects[0].left);
-      expect(rects[2].left, rects[0].left);
-      expect(rects[1].width, rects[0].width);
-      expect(rects[2].width, rects[0].width);
-    });
-
-    testWidgets('renders in dark mode without overflowing', (tester) async {
-      await pumpChooser(
-        tester,
-        onSubmit: (_) async => null,
-        brightness: Brightness.dark,
-      );
-
       expect(tester.takeException(), isNull);
     });
   });

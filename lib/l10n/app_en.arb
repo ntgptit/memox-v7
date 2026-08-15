@@ -1608,14 +1608,14 @@
   "@studyDirectionMixedBody": {
     "description": "One line describing the mixed direction. 'Split evenly' is a promise the assignment keeps to within one card (BR-205) — it deliberately does not say 'at random', which would let a 14-of-20 session pass as working as described."
   },
-  "studyDirectionRecommendedOption": "{line} — Recommended",
+  "studyDirectionRecommendedOption": "Recommended — {line}",
   "@studyDirectionRecommendedOption": {
     "placeholders": {
       "line": {
         "type": "String"
       }
     },
-    "description": "Marks the Korean-first option by extending its own subtitle, so all three options share one text column. NOT a trailing badge: `ListTile` gives its text whatever the trailing widget leaves, so a badge on one row narrows that row alone — at 320dp the recommended option had 115dp of text against its neighbours’ 216dp and was the only one clipped, which is the opposite of recommending it. The placeholder carries the sentence so each language orders the two parts itself."
+    "description": "The recommended option's supporting line. **The marker leads.** It used to trail — `{line} — Recommended` — and `MxListTile` caps a subtitle at two lines, so at textScaler 2.0 on a 320dp screen the line needs about three and the marker is the first thing the ellipsis takes. The option the app recommends then carried no sign that it was recommended, which is exactly what choosing a marker over a trailing badge was meant to avoid. Each locale places its own marker via the placeholder."
   },
   "studyDirectionNothingDue": "Nothing is due to review any more.",
   "@studyDirectionNothingDue": {
