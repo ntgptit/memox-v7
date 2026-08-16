@@ -959,11 +959,64 @@ def _check_deck_flow_drift() -> None:
 # an en or em dash, or a tilde. The first version knew only the first two, so
 # a backwards range spelled any other way was invisible to a check whose whole
 # job is to see it.
+_TABLE_ID_RE = re.compile(r"^(BR|UC|AD|M\d+|[SWGVTRNED])[-.]?\d+[a-z]?$")
 _ID_RANGE_RE = re.compile(
     r"\b(BR|UC|AD)-([0-9]{2,3})\s*(?:\u2026|\.\.\.|\u2013|\u2014|~)\s*"
     r"(BR|UC|AD)-([0-9]{2,3})\b"
 )
 
+
+def _check_duplicate_table_ids() -> None:
+    """The same declared id twice in one table.
+
+    **A branch cut before a fact changed carries the old row, and the merge
+    keeps both.** `master-flow.md` ended a stage with two `UC-10` rows — one
+    saying the import wizard has three steps, one saying four — because #306 was
+    cut before the wizard lost a step. Neither row is malformed and every id in
+    them resolves, so nothing else in this file complains.
+
+    Narrower than "the same subject twice", which was tried first and reported
+    twenty-one rows that are all legitimate: validation tables repeat a field
+    name once per rule, state tables repeat a value once per transition. An
+    **id** in a first column is a unique key by definition, so a repeat is a
+    duplicated row and never a table shape.
+
+    Scoped per table rather than per file — a document may list `W1` in its
+    anatomy table and again in its geometry table, and those are two keys.
+    """
+    bad: list[str] = []
+    for path in _docs_md() + sorted(
+        p.relative_to(_REPO).as_posix()
+        for p in (_REPO / "docs" / "wireframes").glob("*.md")
+    ):
+        try:
+            text = (_REPO / path).read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
+            continue
+        seen: dict[str, int] = {}
+        in_table = False
+        for i, line in enumerate(text.splitlines(), start=1):
+            if not line.startswith("|"):
+                in_table = False
+                seen = {}
+                continue
+            if re.match(r"^\|[\s:-]+\|", line):
+                in_table = True
+                seen = {}
+                continue
+            if not in_table:
+                continue
+            cell = re.sub(r"[~*`]", "", line.split("|")[1]).strip()
+            if not _TABLE_ID_RE.match(cell):
+                continue
+            if cell in seen:
+                bad.append(f"{path}:{i}: {cell} is already a row at line {seen[cell]}")
+            seen[cell] = i
+    if bad:
+        for b in bad:
+            _fail("a table lists the same id twice", b)
+    else:
+        _ok("no table lists the same id twice")
 
 def _check_superseded_rows() -> None:
     """A row marked superseded, with the row it superseded still beside it.
@@ -1141,6 +1194,7 @@ def main() -> int:
     _check_id_ranges()
     _check_duplicate_headings()
     _check_superseded_rows()
+    _check_duplicate_table_ids()
     _check_document_contract()
     _check_invariant_coverage()
     _check_invariant_self_test()

@@ -7,7 +7,7 @@ import '../../../../../l10n/l10n_extension.dart';
 import '../../../domain/models/card_history_event_model.dart';
 import '../support/card_history_labels_widget.dart';
 
-/// One recorded turn on the timeline (BR-242, M4.14 W4).
+/// One recorded turn on the timeline (BR-242, M4.15 W4).
 ///
 /// **Every line is a stored value of that row.** Nothing on this widget compares
 /// a before with an after to decide what to call the turn: BR-76 stores `kind`
@@ -18,10 +18,10 @@ import '../support/card_history_labels_widget.dart';
 /// **One semantics node, not six.** TalkBack should announce "14 Aug, 09:41.
 /// Self-assess, Scheduled, Remembered. Box 2 → 3" as a sentence about a review;
 /// six separate labels make the reader assemble the meaning themselves
-/// (M4.14 W6).
+/// (M4.15 W6).
 ///
 /// The marker sits on the **first line's** band rather than the middle of the
-/// row (M4.14 G3): rows differ in height with how many schedule lines they
+/// row (M4.15 G3): rows differ in height with how many schedule lines they
 /// carry, and a centred dot would wander down the connector as they do.
 class CardHistoryEventWidget extends StatelessWidget {
   const CardHistoryEventWidget({

@@ -242,8 +242,6 @@ lại ở đây; cột cuối chỉ nói cái gì đã có trong `lib/` hôm nay
 | UC-10 | card | M4.12 / M99.19 | Đủ — wizard import ba bước |
 | UC-11 | card | M99.21 | Đủ — sheet export ba format |
 | UC-18 | card | M99.30 | Đủ — catalog tag ở `/tags`, lọc nhiều tag trên card list, rename/gộp và xoá |
-| UC-10 | card | M99.19 | Đủ — wizard import bốn bước |
-| UC-11 | card | M99.21 | Đủ — sheet export ba format |
 | UC-19 | card | M99.31 | Đủ — chi tiết chỉ đọc cộng lịch sử phân trang keyset |
 
 ### Ba chỗ tài liệu và code đã lệch

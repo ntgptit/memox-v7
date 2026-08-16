@@ -55,7 +55,12 @@ enum CardDetailScenario {
   sm2('sm2 card, ease and interval'),
   longContent('very long Vietnamese meaning'),
   notFound('card deleted from another screen'),
-  readError('the read failed');
+  readError('the read failed'),
+
+  /// The band at the foot of the timeline, with events already above it
+  /// (UC-19 E4). Scroll to the end to reach it — the first page lands, the
+  /// second refuses.
+  pageFails('a history page fails to load (scroll down)');
 
   const CardDetailScenario(this.label);
 
@@ -112,6 +117,13 @@ final class _CatalogDetailRepository implements CardDetailRepository {
   }) async {
     if (scenario == CardDetailScenario.newCard) {
       return CardHistoryPageModel.empty;
+    }
+    // **The second page refuses, not the first.** The band this opens sits at
+    // the foot of a timeline with events already above it (UC-19 E4), and a
+    // first-page failure would show the screen's whole-body error face
+    // instead — a different state, already staged.
+    if (scenario == CardDetailScenario.pageFails && after != null) {
+      throw const DatabaseFailure(message: 'catalog: page refused');
     }
     // A first page that says there is more, then a shorter second page — so
     // the catalog shows the load-more tail and the completion line in turn.

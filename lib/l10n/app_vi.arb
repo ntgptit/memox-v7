@@ -3612,9 +3612,9 @@
   "@cardHistoryPageErrorMessage": {
     "description": "Tail error band; everything already shown stays on screen (UC-19 E4)."
   },
-  "cardHistoryRetryAction": "Thử lại",
-  "@cardHistoryRetryAction": {
-    "description": "Resumes from the same cursor, never from the first page (UC-19 E4, BR-241)."
+  "cardHistoryPageErrorTitle": "Chưa tải thêm được",
+  "@cardHistoryPageErrorTitle": {
+    "description": "Title of the error band at the foot of the study-history timeline when a page fails to load (UC-19 E4). Everything already read stays above it; the band names what did not arrive rather than what was lost."
   },
   "cardHistoryLoadingLabel": "Đang tải lịch sử học",
   "@cardHistoryLoadingLabel": {

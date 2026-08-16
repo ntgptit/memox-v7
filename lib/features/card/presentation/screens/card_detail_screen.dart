@@ -135,7 +135,12 @@ class CardDetailScreen extends ConsumerWidget {
         error is NotFoundFailure && error.reason == CardNotFoundReason.cardGone;
     if (isGone) {
       return MxEmptyState(
-        icon: Icons.search_off,
+        // **Not `search_off`.** Four screens use that glyph for "nothing
+        // matched your search" — the card list, the tag catalog, deck search
+        // — so a user who has met it there reads this face as "your filter
+        // found nothing" rather than "this card is gone". `delete_outline`
+        // says what actually happened.
+        icon: Icons.delete_outline,
         title: context.l10n.cardDetailNotFoundTitle,
         message: context.l10n.cardDetailNotFoundMessage,
         actionLabel: context.l10n.cardDetailBackToListAction,
@@ -173,11 +178,15 @@ class _Body extends ConsumerWidget {
     final gutter = mxScreenGutter(context);
 
     return SingleChildScrollView(
+      // **`lg` at the foot** (D21). This screen pushes onto the Decks branch,
+      // so the bottom bar stays — and Progress, Progress-by-deck and Study Home
+      // all end a scroll a single gutter above it. `xxl` was double, on the one
+      // screen a user reaches from those three.
       padding: EdgeInsets.fromLTRB(
         gutter,
         AppSpacing.xl,
         gutter,
-        AppSpacing.xxl,
+        AppSpacing.lg,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -10396,7 +10396,7 @@ nên nó **phải** được chạy trước khi ai đó coi Settings v1 là đ�
   đọc, nên không có migration nào trong task.
 - **Editable documents:** `docs/business-rules.md` (append BR-239…BR-246),
   `docs/use-cases.md` (append UC-19), `docs/master-flow.md`, `docs/wbs.md`,
-  `docs/wireframes/m4-14-card-detail.md` (mới),
+  `docs/wireframes/m4-15-card-detail.md` (mới),
   `lib/features/card/README.md`.
 - **Output:** `card_detail_model.dart`, `card_history_event_model.dart`,
   `card_history_page_model.dart`, `card_history_cursor_model.dart`,

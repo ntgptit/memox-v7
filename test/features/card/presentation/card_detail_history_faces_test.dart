@@ -33,7 +33,7 @@ void main() {
       // W3 face 2 asks for a glyph beside the words.
       expect(find.byIcon(Icons.history), findsOneWidget);
       expect(find.text('Load more'), findsNothing);
-      expect(find.text('Try again'), findsNothing);
+      expect(find.text('Retry'), findsNothing);
     });
 
     testWidgets('an event says the stored mode, kind and action and the '
@@ -155,15 +155,15 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('The next page could not be loaded.'), findsOneWidget);
-      expect(find.text('Try again'), findsOneWidget);
+      expect(find.text('Retry'), findsOneWidget);
       expect(find.textContaining('Self-assess'), findsNWidgets(3));
 
-      await tester.ensureVisible(find.text('Try again'));
+      await tester.ensureVisible(find.text('Retry'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Try again'));
+      await tester.tap(find.text('Retry'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Try again'), findsNothing);
+      expect(find.text('Retry'), findsNothing);
       expect(find.textContaining('Self-assess'), findsNWidgets(5));
     });
 

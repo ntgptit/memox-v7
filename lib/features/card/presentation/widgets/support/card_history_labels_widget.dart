@@ -17,7 +17,7 @@ import '../../../domain/models/card_history_event_model.dart';
 /// `study_labels_widget.dart` lives in the half Card may not reach into.
 ///
 /// Dates and times go through [MaterialLocalizations], which already formats for
-/// the active locale — so nothing here concatenates a date by hand (M4.14 W6).
+/// the active locale — so nothing here concatenates a date by hand (M4.15 W6).
 /// The separator between them is an ARB string for the same reason.
 extension CardHistoryLabels on BuildContext {
   /// The name of the stage a turn came from (BR-98).
@@ -95,7 +95,7 @@ extension CardHistoryLabels on BuildContext {
   List<String> cardHistoryScheduleLines(CardHistoryEventModel event) =>
       _scheduleLines(event, spoken: false);
 
-  /// The same lines, in words a screen reader can say (M4.14 W6).
+  /// The same lines, in words a screen reader can say (M4.15 W6).
   ///
   /// **One builder, two renderings, and that is the point.** Which columns
   /// produce which line is a BR-242 question and must be stated once; only the

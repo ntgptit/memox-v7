@@ -1,31 +1,33 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_elevation.dart';
 import '../../../../../core/theme/app_icon_size.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
+import '../../../../../shared/widgets/mx_card.dart';
 import '../../../../../shared/widgets/mx_loading_state.dart';
 import '../../../../../shared/widgets/mx_text_button.dart';
 import '../../states/card_history_state.dart';
 import '../items/card_history_event_widget.dart';
 
-/// The review timeline (BR-241…BR-244, M4.14 W2 band 3).
+/// The review timeline (BR-241…BR-244, M4.15 W2 band 3).
 ///
 /// **Grouped by the generation stored on each row, with a text heading**
-/// (BR-243, M4.14 V6). A Reset keeps the history but cuts its meaning in two: a
+/// (BR-243, M4.15 V6). A Reset keeps the history but cuts its meaning in two: a
 /// `Box 2 → 3` from before a reset and one from after it are not steps of the
 /// same progression, and laid out purely by time they look like it. The heading
 /// is words rather than a colour band because the grouping has to survive being
 /// read without colour.
 ///
-/// **Headings are not sticky, deliberately** (M4.14 V7). The number of groups
+/// **Headings are not sticky, deliberately** (M4.15 V7). The number of groups
 /// is the number of resets, which is one for almost every card; a sliver per
 /// group would buy scroll behaviour nobody reaches for and cost the whole band
 /// its simple layout.
 ///
 /// **Not scrollable itself.** It is a band of the screen's single scroll view,
 /// so the reader scrolls one surface rather than fighting a list nested inside
-/// a page (M4.14 V4).
+/// a page (M4.15 V4).
 class CardHistorySectionWidget extends StatelessWidget {
   const CardHistorySectionWidget({
     required this.state,
@@ -170,7 +172,7 @@ class _GenerationHeading extends StatelessWidget {
 
   /// Whether it opens the band — the first heading needs no gap above it, the
   /// later ones need a clear one so a group boundary reads as wider than the
-  /// space between two events (M4.14 G5).
+  /// space between two events (M4.15 G5).
   final bool isFirst;
 
   @override
@@ -199,7 +201,7 @@ class _GenerationHeading extends StatelessWidget {
 /// The bottom of the timeline: `Load more`, the error band, the completion
 /// line, or nothing.
 ///
-/// **All four occupy the same slot** (M4.14 G6), so moving between them never
+/// **All four occupy the same slot** (M4.15 G6), so moving between them never
 /// shifts the event above.
 class _Tail extends StatelessWidget {
   const _Tail({required this.state, required this.onLoadMore});
@@ -270,8 +272,18 @@ class _Tail extends StatelessWidget {
   }
 }
 
-/// The failed-page band: one line and a retry, with everything already read
-/// still above it (UC-19 E4).
+/// The failed-page band: everything already read stays above it (UC-19 E4).
+///
+/// **The app's one in-flow failure grammar** (D24, D25): an `errorContainer`
+/// card, flat, `md` padding, a warning glyph, a title and a message, with the
+/// recovery as a leading-aligned control. Settings, the daily reminder and the
+/// tag rename sheet all speak it, and this screen arrived from a branch that
+/// had seen none of them — a user who met that band on any of the three would
+/// have found a fourth, unrelated-looking face here.
+///
+/// **A taller band does not violate G6.** That rule says the tail must not
+/// shift the events above it; this is the last element in the column, so it
+/// grows downwards into space nothing else occupies.
 class _PageError extends StatelessWidget {
   const _PageError({required this.onRetry});
 
@@ -279,25 +291,58 @@ class _PageError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.sm),
       child: Semantics(
+        container: true,
         liveRegion: true,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Text(
-              context.l10n.cardHistoryPageErrorMessage,
-              style: context.texts.bodySmall?.copyWith(
-                color: context.colors.error,
+        child: MxCard(
+          color: colors.errorContainer,
+          elevation: AppElevation.none,
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Icon(
+                Icons.error_outline,
+                size: AppIconSize.mdCompact,
+                color: colors.onErrorContainer,
               ),
-            ),
-            MxTextButton(
-              label: context.l10n.cardHistoryRetryAction,
-              onPressed: onRetry,
-            ),
-          ],
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Text(
+                      context.l10n.cardHistoryPageErrorTitle,
+                      style: context.texts.titleSmall?.copyWith(
+                        color: colors.onErrorContainer,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      context.l10n.cardHistoryPageErrorMessage,
+                      style: context.texts.bodySmall?.copyWith(
+                        color: colors.onErrorContainer,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: MxTextButton(
+                        label: context.l10n.retryAction,
+                        onPressed: onRetry,
+                        accent: colors.onErrorContainer,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
