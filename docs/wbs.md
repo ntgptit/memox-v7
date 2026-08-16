@@ -10336,6 +10336,7 @@ nên nó **phải** được chạy trước khi ai đó coi Settings v1 là đ�
   không mutation study state. Controller/widget — reset cửa sổ, search, mọi
   mặt/hành động/lỗi, cùng tồn tại với selection, locale/theme/viewport/
   semantics và geometry.
+- **Nợ đã ghi, không sửa ở stage này:** số trên pill `Tags` đọc thẳng từ `TagFilter` đang áp và chỉ được đối chiếu lại với catalog khi người dùng bấm `Apply` lần sau. Xoá hoặc gộp một tag **trong khi** bộ lọc đang áp vì thế để lại con số cũ trên pill cho tới lần mở lại sheet. Chỉ sai ở con số: truy vấn vẫn trả đúng tập thẻ, vì một tag id không còn tồn tại đơn giản không đóng góp gì vào mệnh đề OR (BR-231), và nếu kết quả rỗng thì mặt "không khớp, có Clear" (UC-18 A7) đã cho đường thoát một chạm. Chỗ sửa tự nhiên là để consumer của `cardListTagFilterProvider` đối chiếu với `allTagsProvider` theo stream thay vì chỉ lúc `Apply` — thuộc pass sau, không thuộc stage tích hợp.
 - **Checklist phases:** 14, 15
 ## Blocker
 
