@@ -3440,7 +3440,7 @@
   },
   "tagWriteErrorTitle": "Couldn’t save",
   "@tagWriteErrorTitle": {
-    "description": "Title of the error band inside the tag rename/merge and delete sheets. Same wording as deckWriteErrorTitle — the situation is the same one, and a second phrasing for it would be a second answer to one question."
+    "description": "Title of the error band inside the tag rename/merge sheet. Shares its wording with deckWriteErrorTitle and settingsSaveErrorTitle: one situation, one sentence. The Vietnamese was two sentences until M99.30 — \"Không lưu được\" on deck and tag, \"Chưa lưu được\" on settings — and the owner settled on \"Chưa\", which says the write is recoverable, matching every place the title appears beside a retry."
   },
   "tagFilterTitle": "Filter by tags",
   "@tagFilterTitle": {

@@ -773,7 +773,7 @@
   "@deckMoveRejectTooDeep": {
     "description": "Reason a move target is unavailable: the move would push the tree past the maximum depth (BR-55)."
   },
-  "deckWriteErrorTitle": "Không lưu được",
+  "deckWriteErrorTitle": "Chưa lưu được",
   "@deckWriteErrorTitle": {
     "description": "Heading shown when a deck write fails for a reason the user cannot fix inline."
   },
@@ -3419,7 +3419,7 @@
   "@tagMissingError": {
     "description": "Typed failure: the tag was deleted or merged away between opening an overlay and submitting it (UC-18 E3)."
   },
-  "tagWriteErrorTitle": "Không lưu được",
+  "tagWriteErrorTitle": "Chưa lưu được",
   "@tagWriteErrorTitle": {
     "description": "Title of the error band inside the tag rename/merge and delete sheets. Same wording as deckWriteErrorTitle — the situation is the same one, and a second phrasing for it would be a second answer to one question."
   },

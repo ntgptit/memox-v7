@@ -10176,7 +10176,7 @@ nên nó **phải** được chạy trước khi ai đó coi Settings v1 là đ�
   `TagCatalogRepositoryImpl`, vị từ `EXISTS` dùng chung cho ba câu lệnh của card
   list. Phase 4 (DI + route) xong: provider + binding + `/tags` trong nhánh
   Library. Phase 5 (presentation) xong: catalog screen, ba overlay, pill `Tags`,
-  hai entry point, 32 key ARB EN/VI, Widgetbook. Phase 6 (tests) xong: +129
+  hai entry point, 33 key ARB EN/VI, Widgetbook. Phase 6 (tests) xong: +129
   test, 9 golden demo, visual audit companion, route test.
   Phase 7 (recursive architecture/logic review) xong — audit trả về **0 P0,
   0 P1, 2 P2, 6 P3**, tất cả đã đóng:
@@ -10305,7 +10305,7 @@ nên nó **phải** được chạy trước khi ai đó coi Settings v1 là đ�
   `queries/tag.drift`, `TagCatalogDao`, `TagCatalogRepositoryImpl`, provider +
   binding, `TagName.fold`, vị từ `EXISTS` trong `card_list_query_mapper.dart`,
   `TagCatalogScreen`, overlay rename/xoá/lọc, `CardListMenuWidget` tách khỏi
-  card list screen, pill `Tags` ghim trên thanh filter, 31 key ARB EN/VI, route
+  card list screen, pill `Tags` ghim trên thanh filter, 33 key ARB EN/VI, route
   `/tags`, test domain/data/controller/widget/geometry/route và 9 golden demo.
 - **Acceptance criteria:**
   - [x] Catalog đọc mọi tag của owner kèm số thẻ, sắp `name_folded` rồi `id`,

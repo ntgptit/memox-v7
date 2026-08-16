@@ -7,8 +7,8 @@
 | **Scope** | Vấn đề, người dùng, quyết định nền tảng, phạm vi MVP, luồng nghiệp vụ chính. Ngoài phạm vi: cách triển khai |
 | **Source of truth for** | Phạm vi MVP · phân loại must/should/nice/out · quyết định platform, data posture, auth, dữ liệu nhạy cảm |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.24 (Progress tốt nghiệp khỏi scaffold ở M99.23 và có thêm cấp deck ở M99.24; phần còn lại của S2 vẫn should-have) |
-| **Last updated** | 2026-08-15 |
+| **Updated by task** | M99.24 (Progress tốt nghiệp khỏi scaffold ở M99.23 và có thêm cấp deck ở M99.24; phần còn lại của S2 vẫn should-have) · M99.29 và M99.30 (N2 và N3 rời khỏi bảng nice-to-have chưa làm) |
+| **Last updated** | 2026-08-16 |
 
 ## Problem
 
@@ -145,8 +145,8 @@ chọn mode chỉ xuất hiện khi có mode thứ hai.
 | # | Feature | Notes |
 |---|---|---|
 | N1 | Import/export | Import CSV/TSV/XLSX **đã triển khai** (M99.19, UC-10, AD-20). Export **đang triển khai** (M99.21, UC-11, BR-174…BR-181) — export nội dung, không phải backup |
-| N2 | Nhắc nhở ôn tập hằng ngày | Cần notification permission |
-| N3 | Tag/phân loại card | |
+| N2 | Nhắc nhở ôn tập hằng ngày | **Đã triển khai ở M99.29** (UC-17, BR-218…BR-229): opt-in, mặc định tắt, một tóm tắt mỗi ngày dựng từ workload đến hạn tại thời điểm hiện. Quyền notification chỉ được xin **sau** khi người dùng bật (BR-228) |
+| N3 | Tag/phân loại card | **Đã triển khai ở M99.30** (UC-18, BR-230…BR-238): catalog phạm vi library, lọc nhiều tag theo OR, đổi tên có gộp, và xoá. Ngoài phạm vi v1: tag phân cấp, màu tag, taxonomy chia sẻ |
 
 ## Explicitly out of MVP
 
