@@ -233,11 +233,12 @@ carrying:
 
 ## 9 · Known gaps
 
-- **Partially in the Widgetbook catalog.** `CardImportScreen` (M99.19) and. `CardDetailScreen` joined them at M99.31; `CardListScreen` and `CardEditorScreen` are still absent.
-  `TagCatalogScreen` (M99.30) are registered; `CardListScreen` and
-  `CardEditorScreen` are still absent, against the Definition of Done in
-  `CLAUDE.md`. Those two are covered by the strict visual audit and by review
-  renders in `test/demo/`, but not by the catalog.
+- **Partially in the Widgetbook catalog.** `CardImportScreen` (M99.19),
+  `TagCatalogScreen` (M99.30) and `CardDetailScreen` (M99.31) are
+  registered; `CardListScreen` and `CardEditorScreen` are still absent,
+  against the Definition of Done in `CLAUDE.md`. Those two are covered by
+  the strict visual audit and by review renders in `test/demo/`, but not by
+  the catalog.
 - **The tag filter sheet and the rename/delete overlays have no visual audit**,
   the same gap the export sheet records in §6 and for the identical reason: the
   audit harness discovers subjects by `_screen.dart` and its raster cross-check

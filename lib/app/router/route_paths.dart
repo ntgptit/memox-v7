@@ -64,7 +64,7 @@ abstract final class RoutePaths {
   /// list's children. go_router takes the first pattern that matches, and this
   /// one would swallow `new` and `import` if it were declared above them —
   /// tapping Add would open a detail screen for a card called "new". The order
-  /// is asserted in `app_router_test.dart` rather than left to whoever edits
+  /// is asserted in `card_detail_route_test.dart` rather than left to whoever edits
   /// the route table next.
   static const String cardDetailRelative = ':cardId';
 

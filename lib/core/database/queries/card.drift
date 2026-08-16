@@ -211,7 +211,7 @@ WHERE c.id = :cardId;
 -- equality and the leading sort term, scanned backwards. SQLite's block sort
 -- then orders only within each equal-`answered_at` group, so the `LIMIT` still
 -- stops early instead of sorting the card's whole history and putting a lid on
--- it — `card_history_repository_test.dart` pins that by reading the query plan.
+-- it — `card_history_paging_test.dart` pins that by reading the query plan.
 --
 -- The caller asks for one row more than the page size and reports what it
 -- found: "is there another page" answered by the read rather than guessed from

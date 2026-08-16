@@ -12,6 +12,7 @@ import 'package:memox/features/study/domain/models/study_answer_kind_model.dart'
 import 'package:memox/features/study/domain/models/study_action_model.dart';
 import 'package:memox/features/card/domain/models/card_history_event_model.dart';
 import 'package:memox/features/card/presentation/screens/card_detail_screen.dart';
+import 'package:memox/features/card/presentation/widgets/sections/card_detail_state_widget.dart';
 
 import '../features/card/presentation/support/fake_card_detail_repository.dart';
 import '../support/study_render.dart';
@@ -128,11 +129,24 @@ void main() {
       surface: const Size(320, 568),
     );
 
-    final scroller = tester
-        .state<ScrollableState>(find.byType(Scrollable).first)
-        .position;
-    scroller.jumpTo(scroller.maxScrollExtent);
+    // **`ensureVisible`, not `maxScrollExtent`.** The screen's order is content
+    // → state band → history, so scrolling to the end lands past the band and
+    // in the timeline's tail — which is what the first version of this render
+    // captured while its comment said otherwise.
+    await tester.ensureVisible(find.byType(CardDetailStateWidget));
     await tester.pumpAndSettle();
+
+    // **Asserted, because the last version of this render was wrong and its
+    // dimensions were right.** A PNG of the correct size showing the wrong part
+    // of the screen looks exactly like a PNG of the correct size showing the
+    // right part; only the frame's own contents distinguish them.
+    final band = tester.getRect(find.byType(CardDetailStateWidget));
+    final viewport = tester.getRect(find.byType(ReviewApp));
+    expect(
+      band.top < viewport.bottom && band.bottom > viewport.top,
+      isTrue,
+      reason: 'the state band is not inside the frame this render captures',
+    );
 
     await matchesReviewGolden('goldens/card_detail_320_x2_vi_scrolled.png');
   });
