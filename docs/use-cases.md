@@ -1114,10 +1114,10 @@ số.
 - **E1 — Trần thẻ không hợp lệ:** không phải số, nhỏ hơn tối thiểu hoặc lớn hơn
   tối đa → lý do có kiểu hiện ngay dưới trường, không ghi gì, draft giữ nguyên
   (BR-211, BR-216).
-- **E2 — Ghi thất bại:** repository lỗi → thông báo có kiểu và `Try again`. Draft
+- **E2 — Ghi thất bại:** repository lỗi → thông báo có kiểu và `Retry`. Draft
   giữ nguyên, các control còn lại vẫn hiển thị giá trị **đã persisted**; thông
   báo MUST NOT lộ SQL hay stack trace (BR-216).
-- **E3 — Đọc thất bại:** stream lỗi → trạng thái lỗi của cả màn với `Try again`;
+- **E3 — Đọc thất bại:** stream lỗi → trạng thái lỗi của cả màn với `Retry`;
   không control nào hiển thị giá trị bịa (BR-210).
 - **E4 — Xoá override của deck thất bại:** override giữ nguyên, lý do có kiểu,
   không có thay đổi một phần nào (BR-212).
@@ -1367,7 +1367,7 @@ tại
   kiểu; màn hiện mặt lỗi cấp cao nhất có `Retry`, và `Retry` chạy lại đúng lần
   đọc đó.
 - **E4 — Tải một trang lịch sử thất bại:** các event đã hiện **giữ nguyên**;
-  chỉ phần đuôi danh sách hiện dải lỗi có `Try again`, và thử lại tiếp tục từ
+  chỉ phần đuôi danh sách hiện dải lỗi có `Retry`, và thử lại tiếp tục từ
   đúng con trỏ trước đó chứ không tải lại từ đầu (BR-241).
 - **E5 — Kết quả trang tới muộn sau khi người dùng đã rời hoặc đã thử lại:** hệ
   thống bỏ qua kết quả cũ; danh sách MUST NOT bị nối thêm hai lần cùng một tập

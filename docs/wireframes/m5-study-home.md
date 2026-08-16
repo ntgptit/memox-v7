@@ -95,7 +95,7 @@ dòng đó chứ không đoán (BR-201).
 | 4 | loaded · mọi workload = 0 | có deck còn card, ba số đều 0 ở mọi deck | danh sách vẫn hiện, thêm dòng "chưa có gì tới hạn"; nút Study vẫn còn (S6) |
 | 5 | empty · không deck | `decks` rỗng | `MxEmptyState` icon folder, CTA Starter Library, lối phụ về Library |
 | 6 | empty · không card | có deck, mọi deck 0 card | `MxEmptyState` icon style, CTA Open library, **không** CTA starter |
-| 7 | error | đọc lỗi | `MxErrorState` + `Try again`; copy nói không có gì bị thay đổi, không nêu bảng/truy vấn/đường dẫn |
+| 7 | error | đọc lỗi | `MxErrorState` + `Retry`; copy nói không có gì bị thay đổi, không nêu bảng/truy vấn/đường dẫn |
 
 Refresh sau khi một phiên kết thúc đi từ 2 → 3 **không qua 1** (S10).
 

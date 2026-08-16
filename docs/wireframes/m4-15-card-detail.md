@@ -87,7 +87,7 @@ Body là một cột cuộn, từ trên xuống:
 | 3 | loaded · một trang | Band 3 có tối đa 50 event, đuôi là dòng "đã hết" |
 | 4 | loaded · còn trang sau | Đuôi là `Load more` |
 | 5 | loading-more | `Load more` đổi thành chỉ báo đang tải **tại chỗ**: hàng đuôi MUST giữ nguyên chiều cao, các event đã hiện MUST không dịch chuyển |
-| 6 | page error | Các event đã hiện **giữ nguyên**; đuôi là dải lỗi một dòng + `Try again` (UC-19 E4) |
+| 6 | page error | Các event đã hiện **giữ nguyên**; đuôi là dải lỗi một dòng + `Retry` (UC-19 E4) |
 | 7 | error cấp cao nhất | Toàn body là mặt lỗi có `Retry`; app bar giữ `Edit`? **Không** — không có gì để sửa khi chưa đọc được thẻ, nên action ẩn |
 | 8 | not-found | Toàn body là mặt not-found có lối về danh sách; app bar không có `Edit` (BR-245) |
 
@@ -121,8 +121,8 @@ Body là một cột cuộn, từ trên xuống:
 | G4 | Mép trái phần chữ của mọi event MUST bằng nhau, độc lập với số dòng của event |
 | G5 | Khoảng cách giữa hai event trong cùng nhóm MUST nhỏ hơn khoảng cách giữa nhóm cuối của một generation và tiêu đề nhóm kế tiếp |
 | G6 | `Load more`, spinner loading-more, dải lỗi trang và dòng "đã hết" MUST chiếm cùng một vị trí đuôi — cùng mép trái (mép band, theo V11) và `Load more` → loading-more MUST giữ nguyên chiều cao — và MUST NOT làm event cuối dịch chuyển khi đổi giữa các mặt đó |
-| G8 | Lưới nhãn–giá trị của band trạng thái MUST chuyển sang xếp chồng (nhãn trên, giá trị dưới) khi cột nhãn đã co giãn chiếm quá 45% bề rộng khả dụng. Ở 320dp với `textScaler` 2.0, cột nhãn là 232/288 và chừa 44dp — hẹp hơn một từ ở cỡ đó, và không có overflow nào bắn ra: giá trị chỉ đơn giản tràn khỏi cột. Canh cột (G2) là thứ hy sinh được; đọc được giá trị thì không |
 | G7 | Đáy của vùng cuộn MUST chừa safe area dưới; event cuối MUST không bị bottom bar che |
+| G8 | Lưới nhãn–giá trị của band trạng thái MUST chuyển sang xếp chồng (nhãn trên, giá trị dưới) khi cột nhãn đã co giãn chiếm quá 45% bề rộng khả dụng. Ở 320dp với `textScaler` 2.0, cột nhãn là 232/288 và chừa 44dp — hẹp hơn một từ ở cỡ đó, và không có overflow nào bắn ra: giá trị chỉ đơn giản tràn khỏi cột. Canh cột (G2) là thứ hy sinh được; đọc được giá trị thì không |
 
 ### W6 — Responsive và a11y
 
@@ -134,6 +134,6 @@ Body là một cột cuộn, từ trên xuống:
   thành "right arrow" hoặc không đọc gì, và `–` gần như luôn im lặng — nên
   `Box 2 → 3` trên màn tương ứng với `Box from 2 to 3` khi đọc, và một cột
   không được ghi thành `not recorded` chứ không phải một khoảng lặng.
-- `Edit`, `Load more` và `Try again` MUST có vùng chạm tối thiểu 48dp và MUST có
+- `Edit`, `Load more` và `Retry` MUST có vùng chạm tối thiểu 48dp và MUST có
   nhãn semantics riêng.
 - Nội dung thẻ MUST NOT xuất hiện trong log ở bất kỳ level nào (BR-51, BR-52).

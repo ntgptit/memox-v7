@@ -10493,6 +10493,7 @@ nên nó **phải** được chạy trước khi ai đó coi Settings v1 là đ�
     ở bất kỳ theme nào — đúng như với mọi màn khác, vì `memoxAuditTest` cố
     định viewport và locale. Geometry của các mặt đó được ghim bằng
     `card_detail_alignment_test.dart` và `card_detail_history_faces_test.dart`.
+
 ## Blocker
 
 | Blocker | Ảnh hưởng | Cách gỡ |

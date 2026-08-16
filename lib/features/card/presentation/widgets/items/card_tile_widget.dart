@@ -55,7 +55,7 @@ class CardTileWidget extends StatelessWidget {
   final VoidCallback? onLongPress;
 
   /// Whether the list is selecting. The row changes what a tap *means*, so it
-  /// has to know: outside the mode a tap opens the editor, inside it toggles.
+  /// has to know: outside the mode a tap opens the read-only detail screen (M99.31, UC-19), inside it toggles.
   final bool isSelectionMode;
   final bool isSelected;
 

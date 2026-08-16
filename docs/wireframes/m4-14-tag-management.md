@@ -97,7 +97,7 @@ Từ trên xuống:
 5. Lỗi validation (BR-93) gắn **dưới ô nhập**, không phải một dải riêng: nó nói
    về chữ vừa gõ.
 6. Lỗi thao tác (E3, E4 của UC-18) hiện thành **dải lỗi trong sheet**, giữ
-   nguyên chữ đã gõ, có `Try again`.
+   nguyên chữ đã gõ, có `Retry`.
 
 ### W5 — Dialog xoá
 

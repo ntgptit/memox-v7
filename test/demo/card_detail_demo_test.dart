@@ -108,6 +108,35 @@ void main() {
     await matchesReviewGolden('goldens/card_detail_320_x2_vi.png');
   });
 
+  testWidgets('detail — the schedule grid at 320dp and textScaler 2.0, VI', (
+    tester,
+  ) async {
+    // **The frame above stops before the thing its own comment is about.** At
+    // 320dp and scale 2.0 the reading column fills the viewport with the card's
+    // two faces, so the state band — the part G8's stacking rule governs — is
+    // below the fold and no render showed it. Scrolled to it here, because a
+    // geometry assertion pins the numbers and a picture is what a reviewer
+    // judges.
+    await pumpReview(
+      tester,
+      scope(
+        loaded(),
+        Brightness.light,
+        locale: const Locale('vi'),
+        textScale: 2,
+      ),
+      surface: const Size(320, 568),
+    );
+
+    final scroller = tester
+        .state<ScrollableState>(find.byType(Scrollable).first)
+        .position;
+    scroller.jumpTo(scroller.maxScrollExtent);
+    await tester.pumpAndSettle();
+
+    await matchesReviewGolden('goldens/card_detail_320_x2_vi_scrolled.png');
+  });
+
   testWidgets('detail — a history page that failed to load, light', (
     tester,
   ) async {
