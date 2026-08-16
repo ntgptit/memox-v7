@@ -88,7 +88,7 @@ SELECT COUNT(*) FROM card_tags WHERE card_id = :cardId;
 -- `tableUpdates` merge that read needs. The difference is that `cardListItems`
 -- also carries a `$predicate` placeholder; this is a plain statement, and
 -- drift's analyzer walks its subquery. Not a fact to trust from a comment:
--- `tag_catalog_dao_test.dart` adds a link to a live catalog stream and requires
+-- `tag_catalog_read_test.dart` adds a link to a live catalog stream and requires
 -- the next emission to carry the new count.
 tagCatalog:
 SELECT

@@ -140,6 +140,11 @@ void main() {
     // dimensions were right.** A PNG of the correct size showing the wrong part
     // of the screen looks exactly like a PNG of the correct size showing the
     // right part; only the frame's own contents distinguish them.
+    //
+    // It proves **overlap, not containment**, and that is the strongest claim
+    // available: at 320dp and scale 2.0 the band is taller than the viewport,
+    // so no frame can hold all of it. What this rules out is the failure that
+    // happened — a frame scrolled past the band entirely.
     final band = tester.getRect(find.byType(CardDetailStateWidget));
     final viewport = tester.getRect(find.byType(ReviewApp));
     expect(
@@ -181,6 +186,31 @@ void main() {
     await tester.pumpAndSettle();
 
     await matchesReviewGolden('goldens/card_detail_not_found_light.png');
+  });
+
+  testWidgets('detail — the whole schedule grid, VI at textScaler 2.0', (
+    tester,
+  ) async {
+    // **A taller surface, because the grid does not fit a phone at this
+    // scale.** The 320×568 frame reaches `Reviews` and stops; `Lapses` and the
+    // scheduler-specific `Box` row have never appeared in any render. Widening
+    // would change the stacking G8 governs, so the height is what gives — the
+    // column is still 320dp wide and the text still doubled.
+    await pumpReview(
+      tester,
+      scope(
+        loaded(),
+        Brightness.light,
+        locale: const Locale('vi'),
+        textScale: 2,
+      ),
+      surface: const Size(320, 1400),
+    );
+
+    await tester.ensureVisible(find.byType(CardDetailStateWidget));
+    await tester.pumpAndSettle();
+
+    await matchesReviewGolden('goldens/card_detail_state_grid_vi_x2.png');
   });
 
   testWidgets('detail — a card with no history yet, light', (tester) async {

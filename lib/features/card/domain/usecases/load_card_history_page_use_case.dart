@@ -13,7 +13,7 @@ import '../repositories/card_detail_repository.dart';
 /// [after] is forwarded rather than defaulted: a dropped optional parameter
 /// compiles and analyzes clean, and the card list has already paid for that
 /// once (see `watch_card_list_items_use_case.dart`), so
-/// `load_card_history_page_use_case_test.dart` asserts the cursor arrives.
+/// `card_detail_use_cases_test.dart` asserts the cursor arrives.
 class LoadCardHistoryPageUseCase {
   const LoadCardHistoryPageUseCase(this._repository);
 

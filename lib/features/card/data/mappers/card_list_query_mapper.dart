@@ -18,7 +18,7 @@
 /// **Each rule is a named function, not an inline expression.** "Due" is BR-22
 /// and "new" is BR-90; naming them is what lets the list and the count share one
 /// definition rather than two copies that can drift apart — which is exactly what
-/// the four-statement version risked, and what `card_query_predicate_test.dart`
+/// the four-statement version risked, and what `card_filter_repository_test.dart`
 /// now pins.
 library;
 
