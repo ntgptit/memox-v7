@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/core/state/submit_outcome.dart';
 import 'package:memox/core/state/submit_state.dart';
+import 'package:memox/core/theme/app_spacing.dart';
 import 'package:memox/core/theme/app_theme.dart';
 import 'package:memox/shared/widgets/mx_form_sheet.dart';
 
@@ -222,6 +223,81 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(events, <String>['reset']);
+    });
+  });
+  group('the sheet also clears the system bar', () {
+    testWidgets('with the keyboard down, the padding follows the view padding', (
+      tester,
+    ) async {
+      // **The branch nothing exercised.** `_bottomObstruction` takes the larger
+      // of the keyboard inset and the system-bar padding; every existing test
+      // sets only the keyboard, so the sheet could have gone back to reading
+      // `viewInsets` alone and stayed green — with the action row sitting under
+      // the gesture bar on every edge-to-edge device, keyboard closed.
+      const systemBar = 24.0;
+      late double insetSeen;
+
+      tester.view.devicePixelRatio = 1;
+      tester.view.viewInsets = FakeViewPadding.zero;
+      tester.view.viewPadding = const FakeViewPadding(bottom: systemBar);
+      tester.view.padding = const FakeViewPadding(bottom: systemBar);
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            theme: buildLightTheme(),
+            home: Scaffold(
+              body: Builder(
+                builder: (inner) => TextButton(
+                  onPressed: () => showMxFormSheet(
+                    inner,
+                    reset: (_) {},
+                    builder: (sheetContext, ref, close) {
+                      insetSeen = MediaQuery.viewInsetsOf(sheetContext).bottom;
+
+                      return const Text('submit');
+                    },
+                  ),
+                  child: const Text('open'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      expect(insetSeen, 0, reason: 'the keyboard is down in this case');
+
+      // **The padding the sheet applies, not the numbers it was handed.** The
+      // first version of this test read `MediaQuery` back out and passed
+      // against a `_bottomObstruction` mutated to ignore the system bar
+      // entirely — it was measuring the input to the thing under test.
+      // Selected by its own left gutter rather than by position in the ancestor
+      // chain: `showModalBottomSheet` wraps the builder in several `Padding`s
+      // of its own, and which index the sheet's own is depends on Material's
+      // internals — `.last` picked one of theirs and read zero.
+      final applied = tester
+          .widgetList<Padding>(
+            find.ancestor(
+              of: find.text('submit'),
+              matching: find.byType(Padding),
+            ),
+          )
+          .map((padding) => padding.padding)
+          .whereType<EdgeInsets>()
+          .firstWhere((insets) => insets.left == AppSpacing.lg);
+
+      expect(
+        applied.bottom,
+        AppSpacing.lg + systemBar,
+        reason:
+            'the sheet did not pad above the system bar, so the action row '
+            'sits under the gesture bar with the keyboard down',
+      );
     });
   });
 }

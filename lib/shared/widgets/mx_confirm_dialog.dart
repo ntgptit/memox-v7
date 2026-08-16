@@ -70,12 +70,15 @@ class MxConfirmDialog extends StatelessWidget {
       scrollable: true,
       title: Text(title),
       // **A live region, because the message is where a failure lands.** Both
-      // callers that can fail — the tag delete and the deck delete — append the
-      // reason to this text and leave the dialog open, so a screen-reader user
-      // is otherwise told nothing at all: focus never moves, the title does not
-      // change, and only the body they have already heard is different. The
-      // banded failures elsewhere in the app mark themselves the same way
-      // (D24, D25); this closes the third shape, recorded as debt in D26.
+      // callers that can fail leave the dialog open and change only this text —
+      // the tag delete appends the reason to the question, the deck delete
+      // replaces the question with it (a deliberate three-way divergence, D26).
+      // Either way focus never moves and the title never changes, so without
+      // this a screen-reader user is told nothing at all.
+      //
+      // The difference in *what* is announced is D26's business and stays; what
+      // this fixes is that neither was announced. The banded failures elsewhere
+      // mark themselves the same way (D24, D25).
       content: Semantics(liveRegion: true, child: Text(message)),
       // `OverflowBar` stacks the actions vertically when they no longer fit
       // side by side, which is what happens on a 320-wide screen at
