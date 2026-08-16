@@ -7,7 +7,7 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) |
+| **Updated by task** | M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
 | **Last updated** | 2026-08-16 |
 
 Single source of truth for project progress. Update it in the same commit as the
@@ -33,7 +33,7 @@ AD / UC (xem `business-rules.md`).
 | M7 · CI/CD (Phase 19) | todo | Bắt đầu được ngay sau M2. Job Android + Web, chưa có iOS (AD-04) |
 | M8 · Release Android (Phase 16–18, 20–22) | todo | |
 | M9 · Backend Spring Boot + auth + sync (Phase 10) | todo | Sau khi M8 ổn định |
-| M99 · Adhoc | — | Task chủ dự án giao trực tiếp, ngoài chuỗi phụ thuộc. M99.1 **done** — `master-flow.md`. M99.2 **done** — Deck và Card thành bản tham chiếu (AD-17). M99.3 **done** — refactor toàn bộ IT theo Testing Pyramid: 133/133 kịch bản có coverage host, `integration_test/` còn 8 kịch bản `DEVICE-E2E`, và CI lần đầu có cổng tự động cho tính đúng đắn nghiệp vụ. M99.5 **done** — golden harness chưa bao giờ nạp `NotoSansKR`, nên mọi chữ Hàn trong mọi golden là ô `NO GLYPH`; đã nạp đủ ba face CJK, bổ sung Nhật/Trung, và fixture demo trở lại tiếng Hàn. M99.7 **done** — bottom navigation lên bốn branch (AD-19); Progress/Settings là placeholder presentation-only, hai feature này **chưa** hoàn thành. M99.8 **done** — nhãn tab đầu đổi Decks/Bộ thẻ → Library/Thư viện; branch nội bộ và title màn hình vẫn là Decks. M99.17 **done** — đồng bộ Card Management với manual entry khối lượng nhỏ và chốt import/export là hướng bulk-management sau MVP. M99.27 **done** — Reverse self-assess v1: chiều hỏi cho phiên `self_assess` của deck `sm2`; schema v8. M99.26 **in-progress** — một ngữ pháp cho Library/Study/Progress: bốn quyết định D18…D21, không đổi hành vi. M99.28 **in-progress** — Settings v1: mặc định học toàn cục, theme và ngôn ngữ; schema v9; không branch nào còn là placeholder. M99.29 **in-progress** — Daily Reminders v1: một notification tóm tắt mỗi ngày, mặc định tắt, dựng từ workload đến hạn tại thời điểm hiện tại; schema v10. M99.30 **in-progress** — Tag Management v1: catalog phạm vi library, lọc nhiều tag theo OR, rename/gộp và xoá; không đổi schema. Cả năm còn nợ emulator IT (gate cuối của đợt tích hợp #301–#310). |
+| M99 · Adhoc | — | Task chủ dự án giao trực tiếp, ngoài chuỗi phụ thuộc. M99.1 **done** — `master-flow.md`. M99.2 **done** — Deck và Card thành bản tham chiếu (AD-17). M99.3 **done** — refactor toàn bộ IT theo Testing Pyramid: 133/133 kịch bản có coverage host, `integration_test/` còn 8 kịch bản `DEVICE-E2E`, và CI lần đầu có cổng tự động cho tính đúng đắn nghiệp vụ. M99.5 **done** — golden harness chưa bao giờ nạp `NotoSansKR`, nên mọi chữ Hàn trong mọi golden là ô `NO GLYPH`; đã nạp đủ ba face CJK, bổ sung Nhật/Trung, và fixture demo trở lại tiếng Hàn. M99.7 **done** — bottom navigation lên bốn branch (AD-19); Progress/Settings là placeholder presentation-only, hai feature này **chưa** hoàn thành. M99.8 **done** — nhãn tab đầu đổi Decks/Bộ thẻ → Library/Thư viện; branch nội bộ và title màn hình vẫn là Decks. M99.17 **done** — đồng bộ Card Management với manual entry khối lượng nhỏ và chốt import/export là hướng bulk-management sau MVP. M99.27 **done** — Reverse self-assess v1: chiều hỏi cho phiên `self_assess` của deck `sm2`; schema v8. M99.26 **in-progress** — một ngữ pháp cho Library/Study/Progress: bốn quyết định D18…D21, không đổi hành vi. M99.28 **in-progress** — Settings v1: mặc định học toàn cục, theme và ngôn ngữ; schema v9; không branch nào còn là placeholder. M99.29 **in-progress** — Daily Reminders v1: một notification tóm tắt mỗi ngày, mặc định tắt, dựng từ workload đến hạn tại thời điểm hiện tại; schema v10. M99.30 **in-progress** — Tag Management v1: catalog phạm vi library, lọc nhiều tag theo OR, rename/gộp và xoá; không đổi schema. M99.31 **in-progress** — Card Detail v1: mặt đọc của một thẻ kèm dòng thời gian lịch sử học, phân trang theo cursor; không đổi schema. Cả sáu còn nợ emulator IT (gate cuối của đợt tích hợp #301–#310). |
 
 ---
 
@@ -10338,6 +10338,161 @@ nên nó **phải** được chạy trước khi ai đó coi Settings v1 là đ�
   semantics và geometry.
 - **Nợ đã ghi, không sửa ở stage này:** số trên pill `Tags` đọc thẳng từ `TagFilter` đang áp và chỉ được đối chiếu lại với catalog khi người dùng bấm `Apply` lần sau. Xoá hoặc gộp một tag **trong khi** bộ lọc đang áp vì thế để lại con số cũ trên pill cho tới lần mở lại sheet. Chỉ sai ở con số: truy vấn vẫn trả đúng tập thẻ, vì một tag id không còn tồn tại đơn giản không đóng góp gì vào mệnh đề OR (BR-231), và nếu kết quả rỗng thì mặt "không khớp, có Clear" (UC-18 A7) đã cho đường thoát một chạm. Chỗ sửa tự nhiên là để consumer của `cardListTagFilterProvider` đối chiếu với `allTagsProvider` theo stream thay vì chỉ lúc `Apply` — thuộc pass sau, không thuộc stage tích hợp.
 - **Checklist phases:** 14, 15
+
+### M99.31 · Card Detail và lịch sử học v1 — mặt đọc của một thẻ
+
+- **Status:** in-progress — phase 1 (docs) xong: BR-239…BR-246, UC-19, wireframe
+  M4.15, `master-flow.md` nhánh `J` + bảng §6, `check_docs.py` xanh. Phase 2–4
+  (domain → data → presentation) xong. Phase 5 (recursive architecture/logic
+  review, `AUDIT_ONLY` + coordinator) xong — tám finding đóng: (P1) `Edit` gated
+  bằng `detail.hasValue`, mà riverpod giữ `value` cũ trên `AsyncError`, nên
+  action vẫn nằm trên mặt not-found và trỏ vào một thẻ đã bị xoá — nay là
+  `is AsyncData`; (P1) `goNamed` tới editor gỡ detail khỏi stack vì
+  `:cardId/edit` là **anh em** chứ không phải con của `:cardId`, nên Back từ
+  editor rơi về card list và UC-19 A1 không bao giờ xảy ra — nay là `pushNamed`;
+  (P2) `isEmpty` trả true cho một trang đầu **lỗi**, và widget phải vá bằng
+  `&& !hasPageError` ở call site — predicate nay tự đứng vững
+  (`status == loaded`); (P3) `cardHistoryMode` là `Map` có fallback `mode.name`,
+  tức identifier enum cách UI một bước — nay là `switch` exhaustive kể cả
+  `StudyMode.unknown`; (P3) `outcomeReason` từng được suy từ null-check thay vì
+  giá trị đã lưu; (P3) `Last answered` mượn chuỗi "Not scheduled yet", nay có
+  `cardDetailNeverAnsweredValue` riêng; (P3) test EXPLAIN QUERY PLAN chạy trên
+  SQL chép tay và chỉ phủ trang đầu — nay lấy statement từ interceptor log và
+  phủ cả `cardHistoryAfter`, cái có `OR` chain; (P3) tên file trong Output của
+  chính entry này sai. Phase 6 (recursive UI/UX review) xong — mười ba finding
+  đóng: (P0) cột nhãn của lưới trạng thái co giãn theo `textScaler` nên ở
+  320dp@2.0 nó chiếm 232/288 và chừa **44dp** cho giá trị — không overflow nào
+  bắn ra, giá trị chỉ tràn khỏi cột; nay xếp chồng khi cột nhãn vượt 45% bề
+  rộng (G8); (P1) đuôi danh sách in "N reviews in total", vi phạm BR-243 **và**
+  mâu thuẫn sẵn với hàng `Reviews` vì `answer_count` chỉ đếm `scheduled`
+  (BR-20) — nay là `All reviews shown`, không đếm; (P1) mặt `loading-more` dùng
+  `MxLoadingState` nên đuôi cao thêm 36dp và nhảy vào giữa màn, trái W3 mặt 5 —
+  nay là spinner cỡ glyph canh trái trong hộp 48dp, và mặt này lần đầu có test;
+  (P2) marker của timeline có offset hằng số 4dp nên ở 2.0 chấm trôi lên trên
+  dòng đầu (G3) — nay tính từ chiều cao dòng đã scale; (P2) câu semantics dùng
+  lại chuỗi đã vẽ, nên `→` được đọc là "right arrow" hoặc không đọc gì và `–`
+  im lặng — nay có năm key dạng nói dùng riêng cho semantics; (P2) đường nối
+  timeline vẽ bằng `borderSubtle`, đo được **1.38:1** trên nền trang sáng
+  (token đó được chỉnh cho nền *card*) — nay là `borderControl` (3.02:1 sáng /
+  3.41:1 tối), và `borderControl` được thêm vào `NonTextContrastRule` vì rule
+  không nhìn thấy nó mới là lý do audit báo PASS; (P2) mặt lịch sử rỗng thiếu
+  icon mà W3 mặt 2 yêu cầu; (P2) ba chỗ `letterSpacing: 0.6` — `labelSmall` đã
+  mang `tracking: 0.5` từ scale, nên override bị xoá hẳn thay vì đúc token thứ
+  hai; (P3) màn hardcode gutter 16 thay vì `mxScreenGutter`, nên ở 320dp nó
+  rộng hơn card list 4dp; (P3) thứ tự band trạng thái lệch W2; (P3) đường nối
+  đứt 4dp ở mỗi ranh giới event; (P3) doc của class nói ngược lại code sau khi
+  `Map` thành `switch`; (P3) đuôi canh trái khác card list — ghi thành V11 thay
+  vì sửa card list ngoài phạm vi. Còn lại: emulator IT.
+- **Goal:** Chạm một hàng card ở chế độ thường mở màn **chỉ đọc** hiện đủ
+  nội dung, tag/cờ, trạng thái lịch hiện tại, và lịch sử học thô phân trang
+  keyset nhóm theo generation. Sửa trở thành một action tường minh.
+- **Scope:** BR-239…BR-246, UC-19, wireframe M4.15, `docs/master-flow.md` §4/§6;
+  domain read model + contract + hai use case; hai named query trong
+  `queries/card.drift` + DAO + mapper + repository impl + DI; route
+  `cardDetail` lồng dưới `cardList`; controller/state/screen/widgets + ARB
+  EN/VI; test host đầy đủ. **Ngoài phạm vi:** Trash (chưa tồn tại — BR-245 chỉ
+  đặt sẵn ràng buộc cho lúc nó tới), thống kê/accuracy (BR-243, AD-19), sửa nội
+  dung ngay trên màn này, và `study_answers` **không** đổi schema — màn này chỉ
+  đọc, nên không có migration nào trong task.
+- **Editable documents:** `docs/business-rules.md` (append BR-239…BR-246),
+  `docs/use-cases.md` (append UC-19), `docs/master-flow.md`, `docs/wbs.md`,
+  `docs/wireframes/m4-14-card-detail.md` (mới),
+  `lib/features/card/README.md`.
+- **Output:** `card_detail_model.dart`, `card_history_event_model.dart`,
+  `card_history_page_model.dart`, `card_history_cursor_model.dart`,
+  `card_detail_repository.dart`, `watch_card_detail_use_case.dart`,
+  `load_card_history_page_use_case.dart`; `cardDetailById` +
+  `cardHistoryFirstPage` + `cardHistoryAfter` trong `queries/card.drift`,
+  `card_detail_dao.dart`, `card_detail_mapper.dart`,
+  `card_history_mapper.dart`, `card_detail_repository_impl.dart`,
+  `card_detail_repository_provider.dart` + binding;
+  `RouteNames.cardDetail` + `RoutePaths.cardDetailRelative`;
+  `card_detail_controller.dart`, `card_history_controller.dart`,
+  `card_history_state.dart`, `card_detail_screen.dart` cùng các widget theo
+  bucket; ARB EN/VI; test host và visual audit companion.
+
+#### 5Why — năm câu hỏi phải trả lời trước khi viết dòng code đầu tiên
+
+1. **Vì sao hàng danh sách chỉ tóm tắt một dòng?** Vì danh sách trả lời "thẻ
+   nào", và câu trả lời đó phải quét được bằng mắt ở tốc độ cuộn. Một hàng hiện
+   đủ nội dung sẽ cao 6–10 dòng, và 50 hàng như thế không còn là danh sách. Hệ
+   quả: chỗ để đọc đầy đủ phải là một mặt khác, không phải một hàng cao hơn.
+2. **Vì sao chi tiết tách khỏi editor?** Vì đọc và sửa có rủi ro khác nhau.
+   Trước M99.31 một lần chạm nhầm mở thẳng form sửa nội dung thật; và một form
+   không phải chỗ để đọc — mọi thứ trong nó là `TextField`, nên nội dung dài bị
+   nhốt trong một ô cuộn riêng và lịch sử thì không có chỗ nào để đặt. Hệ quả:
+   chạm → đọc, `Edit` → sửa (BR-246).
+3. **Vì sao lịch sử là bản ghi thô, không phải điểm số?** Vì `study_answers` đã
+   lưu `kind`, `mode`, `action`, `outcome_reason` và cặp trước→sau chính xác
+   (BR-76, AD-11), và giá trị của nó nằm ở chỗ trả lời được "lượt đó đã xảy ra
+   thế nào" — điều một con số tổng hợp xoá mất. Một tỉ lệ đúng ở đây còn là
+   định nghĩa thứ hai cạnh phần thống kê thật (AD-19) và sẽ lệch đúng lúc không
+   ai để ý. Hệ quả: BR-243 cấm mọi giá trị tổng hợp trên màn này.
+4. **Vì sao keyset chứ không phải cửa sổ lớn dần như card list?** Vì hai read
+   khác nhau ở chỗ *cái gì chen vào*. Card list mở rộng `LIMIT` và đọc lại cả
+   cửa sổ trên một `watch()`, nên một insert phía trên chỉ làm cửa sổ đọc lại —
+   không trùng, không hụt. Lịch sử thì được **nối thêm** vào phần đã hiện chứ
+   không đọc lại, và hàng mới luôn chen vào **đầu** (mới nhất trước), nên một
+   `OFFSET` sẽ đẩy đúng một hàng đã hiện xuống trang sau và hiện nó hai lần.
+   Con trỏ là giá trị của hàng cuối, nên nó miễn nhiễm với việc có bao nhiêu
+   hàng chen lên trên. Hệ quả: BR-241 chốt `(answered_at, id)` và cấm `OFFSET`.
+5. **Vì sao nhóm theo generation chứ không chỉ xếp theo thời gian?** Vì Reset
+   giữ lại lịch sử (BR-43) nhưng cắt đứt ý nghĩa của nó: một `Box 2 → 3` trước
+   reset và một `Box 2 → 3` sau reset không nằm trên cùng một tiến trình, và
+   xếp liền nhau theo thời gian thì chúng trông như vậy. Generation là thứ duy
+   nhất trên hàng nói được điều đó, và nó đã có sẵn ở đó. Hệ quả: BR-243 nhóm
+   theo `scheduler_generation` và đòi nhóm đọc được không cần màu.
+
+- **Acceptance criteria:**
+  - [x] Chạm hàng ở chế độ thường mở chi tiết; ở chế độ chọn thì chỉ toggle
+        (BR-246), và Back giữ nguyên filter/search/sort/cửa sổ/selection.
+  - [x] Chi tiết hiện đủ hai mặt, ba field tuỳ chọn khi có, tag, cờ và toàn bộ
+        trạng thái lịch của đúng scheduler đang gắn (BR-240).
+  - [x] Lịch sử newest-first `answered_at DESC, id DESC`, trang 50, keyset;
+        insert xen giữa hai trang không tạo trùng hay hụt (BR-241).
+  - [x] Event hiện giá trị đã lưu, không suy diễn; cả hai scheduler map đúng
+        (BR-242).
+  - [x] Nhóm theo generation; sau reset generation cũ vẫn xem được; không có
+        con số tổng hợp nào (BR-243) — kể cả ở dòng cuối danh sách.
+  - [x] Lịch sử rỗng là mặt hợp lệ; sửa nội dung không đổi state/history
+        (BR-244).
+  - [x] Thẻ đã xoá → not-found có kiểu, không lộ id/SQL (BR-245).
+  - [x] Mở/cuộn/tải thêm không ghi gì vào database (BR-239).
+  - [x] Tám mặt của W3 render được; EN/VI, light/dark, 320dp@2.0.
+  - [ ] `flutter test integration_test/ -d emulator-5554 --flavor development`
+        — **hoãn, chưa chạy**: cần emulator, và CI cố ý không chạy suite này.
+        Đây là món nợ thật của task, không phải một mục đã miễn: `lib/app/`
+        đổi (route table, binding), và CLAUDE.md nói rõ chính hai chỗ đó là nơi
+        hai trong ba lần suite gãy im lặng bắt nguồn. Baseline phải đối chiếu
+        là 8 passing / 0 failing.
+- **Dependencies:** M99.18 (chế độ chọn nhiều quyết định nghĩa của một lần
+  chạm), M5 (`study_answers` đã có `kind`/`mode`/`action`/generation)
+- **Tests required:** SQLite thật cho thứ tự và tie-break, trang 50, không
+  trùng/hụt khi có insert xen giữa, nhóm generation, giữ lịch sử sau reset,
+  cascade khi xoá thẻ, chỉ-đọc và số statement không tăng theo số hàng; domain
+  test cho cursor và cả hai scheduler; controller test cho trang đầu, tải thêm,
+  kết quả tới muộn, lỗi trang và hết trang; widget/router test cho chạm-vs-chọn,
+  Edit/Back, tám mặt, nội dung dài, ngày theo locale, semantics và geometry;
+  visual audit companion cho màn mới.
+- **Checklist phases:** 14, 15
+- **Known gaps (ghi lại, không đóng ở task này):**
+  - **`card_tile_widget.dart` giữ `letterSpacing: 0.6` và `_flagIconSize = 18`
+    dạng literal.** Cả hai có trước task này; 0.6 nằm trên một nhãn
+    `.toUpperCase()`, tức đúng ca mà `AppTypography.sectionLabelTracking` (1.1)
+    được viết ra để phục vụ, nên chuyển nó là **đổi hình ảnh** của card list và
+    thuộc một lượt design-system chứ không phải một drive-by trong PR này. Màn
+    detail dùng token (`AppIconSize.sm`) và không có override tracking nào, nên
+    hai màn hiện lệch nhau ở kích thước glyph cờ (16 vs 18).
+  - **Đuôi `Load more` của card list canh giữa, của detail canh trái.** Ghi
+    thành V11 của wireframe kèm lý do. Thống nhất hai màn cần đổi
+    `card_list_body_widget.dart`, nằm ngoài phạm vi task.
+  - **`card_list_body_widget.dart:84` mang `letterSpacing: 1.1` trần** — bản
+    sao inline của `AppTypography.sectionLabelTracking`. Cùng lý do trên.
+  - **Visual audit chỉ phủ mặt loaded, EN, 1.0×, 420×1040.** Các mặt loading,
+    loading-more, page-error, empty và not-found không có coverage màu tự động
+    ở bất kỳ theme nào — đúng như với mọi màn khác, vì `memoxAuditTest` cố
+    định viewport và locale. Geometry của các mặt đó được ghim bằng
+    `card_detail_alignment_test.dart` và `card_detail_history_faces_test.dart`.
 ## Blocker
 
 | Blocker | Ảnh hưởng | Cách gỡ |

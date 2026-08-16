@@ -101,6 +101,12 @@ abstract final class RouteNames {
   /// features that may not see each other's `presentation/`; a shared route
   /// name in `core/` is the whole of what they need (AD-13).
   static const String tagCatalog = 'tagCatalog';
+
+  /// One card, read-only, with its study history (UC-19). A child of
+  /// [cardList], so it pushes onto the Decks branch: the bottom bar stays and
+  /// Back returns to the list with its filter, window and selection intact
+  /// (BR-246, M4.15).
+  static const String cardDetail = 'cardDetail';
 }
 
 /// Names of the path parameters routes carry.

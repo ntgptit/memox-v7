@@ -7,7 +7,7 @@
 | **Scope** | Luật nghiệp vụ, validation rule, state machine, edge case của phạm vi MVP. Ngoài phạm vi: quyết định kiến trúc (`architecture.md`), hình dạng dữ liệu (`data-model.md`), luồng người dùng (`use-cases.md`) |
 | **Source of truth for** | BR-xx · validation rule · entity state machine · edge case |
 | **Depends on** | `document-conventions.md`, `product.md`, `architecture.md` |
-| **Updated by task** | M99.28 — BR-210…BR-217: Settings v1 (mặc định học toàn cục, theme, ngôn ngữ); M99.27 — BR-203…BR-209: chiều hỏi của self-assess; M5.26 — BR-200…BR-202: Study Home (đọc thư viện thật, workload toàn subtree, ba trạng thái đã tải); M99.24 — BR-182…BR-189: tiến độ theo deck (phạm vi metric, card-day, hai khoảng, quy-về-vị-trí-hiện-tại, phân hoạch Learning/Reviewing, thứ tự, chỉ-đọc, cập nhật trực tiếp); trước đó M99.23 — BR-190…BR-199: Progress overview v1 (hai khối đã đổi chỗ khi #301 và #302 gộp — số ở bảng dưới là số đúng) · M99.29 — BR-218…BR-229: nhắc học hằng ngày (opt-in, giờ địa phương, due-only, một tóm tắt, riêng tư, thứ tự cấp bách, inexact + idempotent scheduling, permission, capability) · M99.30 — BR-230…BR-238: quản lý tag và lọc theo nhiều tag |
+| **Updated by task** | M99.28 — BR-210…BR-217: Settings v1 (mặc định học toàn cục, theme, ngôn ngữ); M99.27 — BR-203…BR-209: chiều hỏi của self-assess; M5.26 — BR-200…BR-202: Study Home (đọc thư viện thật, workload toàn subtree, ba trạng thái đã tải); M99.24 — BR-182…BR-189: tiến độ theo deck (phạm vi metric, card-day, hai khoảng, quy-về-vị-trí-hiện-tại, phân hoạch Learning/Reviewing, thứ tự, chỉ-đọc, cập nhật trực tiếp); trước đó M99.23 — BR-190…BR-199: Progress overview v1 (hai khối đã đổi chỗ khi #301 và #302 gộp — số ở bảng dưới là số đúng) · M99.29 — BR-218…BR-229: nhắc học hằng ngày (opt-in, giờ địa phương, due-only, một tóm tắt, riêng tư, thứ tự cấp bách, inexact + idempotent scheduling, permission, capability) · M99.30 — BR-230…BR-238: quản lý tag và lọc theo nhiều tag · M99.31 — BR-239…BR-246: mặt đọc của một thẻ và lịch sử học |
 | **Last updated** | 2026-08-16 |
 
 Format tuân theo `document-conventions.md` §6.2. Từ khoá MUST / SHOULD / MAY
@@ -540,6 +540,24 @@ BR-220 nói "đo lại tại thời điểm fire" chứ không phải "đo lúc 
 lý do AD-21 chọn background worker: một notification đã nạp sẵn nội dung từ hôm
 qua vẫn hiện đúng giờ ngay cả khi người dùng đã học hết, và nó hiện **số của hôm
 qua**.
+
+## Chi tiết card và lịch sử học
+
+Mặt đọc của thẻ. Các rule dưới đây **không** phát biểu lại nội dung
+(BR-07, BR-08, BR-95), cờ và tag (BR-92…BR-94), trạng thái hiển thị
+(BR-89…BR-91) hay tính bất biến của `study_answers` (BR-43, BR-76) — chúng chỉ
+nói phần mà một màn **chỉ đọc** thêm vào.
+
+| ID | Status | Rule | Enforced by | Related |
+|---|---|---|---|---|
+| BR-239 | active | Mở chi tiết card, cuộn nó và tải thêm trang lịch sử MUST là thao tác chỉ-đọc: MUST NOT ghi hay chạm tới nội dung card, `updated_at`, `content_type` của deck (BR-163), study state, review history, session, cờ hay quan hệ tag; MUST NOT đánh dấu thẻ đã học (`learned_at`) và MUST NOT tính là một lượt ôn. Xem một thẻ **không** phải là học nó. | repository + UI | UC-19, BR-163, BR-178 |
+| BR-240 | active | Màn chi tiết MUST hiển thị **đầy đủ** `front` và `back` cùng ba field tuỳ chọn `example`, `hint`, `pronunciation` khi chúng có giá trị (BR-95), tag (BR-93) và cờ (BR-92), cộng **trạng thái lịch hiện tại** của thẻ đọc từ `card_study_states`: trạng thái hiển thị (BR-89…BR-91), `due_at`, `learned_at`, `last_answered_at`, `answer_count`, `lapse_count` và các field riêng của scheduler đang gắn — `current_box` cho `eight_box`, `ease_factor`/`interval_days`/`repetitions` cho `sm2` (AD-08). Nội dung dài MUST xuống dòng hoặc cuộn được và MUST NOT bị cắt bằng ellipsis tuỳ tiện; field tuỳ chọn không có giá trị MUST vắng mặt, MUST NOT hiện nhãn rỗng hay placeholder. Field của scheduler **không** gắn với thẻ MUST NOT hiện. | domain + UI | UC-19, BR-89, BR-90, BR-91, BR-92, BR-93, BR-95, AD-08 |
+| BR-241 | active | Lịch sử học của một thẻ MUST đọc từ `study_answers` của **đúng** `card_id` đó, sắp mới nhất trước theo `answered_at DESC` với tie-break `id DESC`, và MUST phân trang bằng **keyset** trên đúng cặp khoá đó với kích thước trang 50. MUST NOT dùng `OFFSET`, MUST NOT đọc toàn bộ lịch sử rồi cắt trong Dart, và MUST NOT đọc thêm một statement cho mỗi hàng (N+1). Một hàng mới được ghi trong lúc người dùng đang phân trang MUST NOT làm một hàng đã hiện xuất hiện lần thứ hai và MUST NOT làm mất một hàng chưa hiện — đó là hệ quả trực tiếp của việc cursor là giá trị của hàng cuối chứ không phải số thứ tự. | repository | UC-19, BR-43, AD-13 |
+| BR-242 | active | Mỗi event trong lịch sử MUST hiển thị các giá trị **đã lưu** của chính hàng đó: thời điểm `answered_at`, `mode` (BR-98), `kind` (BR-75, BR-76), `action` (BR-132), `outcome_reason` khi có (BR-131) và `used_hint` khi có (BR-136), cộng thay đổi lịch trước→sau đúng theo `scheduler_type` của hàng — `previous_box`→`next_box` cho `eight_box`; `previous_ease_factor`→`next_ease_factor` và `previous_interval_days`→`next_interval_days` cho `sm2` — và `next_due_at` khi có. MUST NOT suy ra `kind` hay `action` từ chênh lệch giữa trạng thái trước và sau, và MUST NOT hiển thị field trước→sau của scheduler khác với `scheduler_type` của hàng. Một lượt không dời lịch (`learning`, BR-144) MUST hiện là không đổi lịch, MUST NOT hiện là lỗi hay thiếu dữ liệu. | domain + UI | UC-19, BR-75, BR-76, BR-98, BR-131, BR-132, BR-136, BR-144, AD-11 |
+| BR-243 | active | Hàng lịch sử MUST được nhóm theo `scheduler_generation` đã lưu trên chính hàng đó, và nhóm MUST đọc được mà không cần màu — mỗi nhóm có tiêu đề dạng chữ. Reset (BR-41…BR-43) MUST NOT xoá hàng nào, nên generation cũ MUST vẫn xem được sau reset, kể cả khi scheduler của root đã đổi. Màn này MUST NOT tính accuracy, điểm số, streak hay bất kỳ giá trị tổng hợp nào từ lịch sử: đây là bản ghi thô, và một con số tổng hợp ở đây sẽ là định nghĩa thứ hai cạnh phần thống kê thật (AD-19). | domain + UI | UC-19, BR-41, BR-42, BR-43, AD-09, AD-19 |
+| BR-244 | active | Lịch sử rỗng MUST là trạng thái hợp lệ, MUST NOT là lỗi: một thẻ mới tạo chưa có hàng nào, và một thẻ đã đi hết chuỗi learning cũng có thể chưa có hàng `scheduled` nào (BR-144). Nội dung và lịch sử có vòng đời riêng: sửa nội dung (BR-10) MUST NOT làm đổi trạng thái lịch hay thêm/bớt hàng lịch sử, và MUST NOT làm màn chi tiết hiện lịch sử khác đi ngoài phần nội dung. | domain + UI | UC-19, BR-10, BR-144 |
+| BR-245 | active | Thẻ không tồn tại — chưa bao giờ có, hoặc bị xoá từ màn khác trong lúc màn chi tiết đang mở — MUST surface bằng một lý do **có kiểu** — cùng lý do mà editor đã dùng khi thẻ biến mất, không phải một lý do thứ hai — MUST NOT là màn trắng, MUST NOT là thông báo kỹ thuật và MUST NOT lộ id, đường dẫn hay SQL (BR-53). Route chi tiết của thẻ **đang hoạt động** MUST NOT hiển thị thẻ đã nằm trong Trash nếu tính năng đó tồn tại; Trash MAY dùng lại cùng read model qua một capability tường minh và MUST NOT nhân bản màn hình. | repository + UI | UC-19, BR-53, BR-166 |
+| BR-246 | active | Chạm vào một hàng card trong danh sách đang ở chế độ thường MUST mở chi tiết chỉ-đọc của thẻ đó. Trong chế độ chọn nhiều (UC-04 A6), chạm MUST giữ nguyên nghĩa chọn/bỏ chọn và MUST NOT điều hướng. Sửa MUST là một action riêng, tường minh, dẫn tới editor sẵn có; nó MUST NOT là hành động mặc định của một lần chạm và MUST NOT nổi bật hơn phần nội dung đang đọc. Quay lại từ chi tiết MUST giữ nguyên ngữ cảnh của danh sách — filter, search term, sort, cửa sổ đã tải và selection. | UI | UC-19, UC-04, BR-167 |
 
 ## StudyMode
 
@@ -1095,6 +1113,12 @@ Trạng thái kết thúc là terminal — không có đường quay lại `in_p
 | App bị thu hồi giữa phiên `mixed`, mở lại | Resume đọc chiều đã lưu, không hỏi lại và không gieo lại (BR-103, BR-207) |
 | DB cũ có lượt `self_assess` của deck `sm2` | Backfill `korean_to_meaning` — đó là chiều mà mọi bản trước đã chạy (BR-206) |
 | Đọc dòng có chiều do bản mới hơn ghi | Đọc được, vẽ như `korean_to_meaning`, MUST NOT ghi lại giá trị đó (BR-204) |
+| Chạm hàng card khi đang ở chế độ chọn nhiều | Toggle chọn; không mở chi tiết (BR-246) |
+| Mở chi tiết một thẻ chưa từng được ôn | Lịch sử rỗng là trạng thái hợp lệ, không phải lỗi (BR-244) |
+| Ghi thêm một lượt ôn giữa hai lần tải trang lịch sử | Không hàng nào hiện hai lần, không hàng nào bị bỏ qua (BR-241) |
+| Thẻ bị xoá từ màn khác khi chi tiết đang mở | Not-found có kiểu, không màn trắng, không lộ id (BR-245) |
+| Reset tiến độ rồi mở lại chi tiết | Hàng của generation cũ vẫn xem được, có tiêu đề nhóm riêng (BR-243) |
+| Thẻ `sm2` có hàng lịch sử ghi dưới `eight_box` | Hàng đó hiện box trước→sau; hàng mới hiện ease/interval (BR-242) |
 | Muốn đổi deck rỗng từ `card` sang chứa deck con | Rỗng là đã `unset`; tạo deck con luôn được (BR-163) |
 | Kéo deck vào descendant của chính nó | Chặn, lỗi rõ ràng (BR-70) |
 | Di chuyển subtree sang root khác scheduler | Chặn, đề nghị reset (BR-74) |

@@ -1,5 +1,6 @@
 import '../tables/cards.drift';
 import '../tables/tags.drift';
+import '../tables/study.drift';
 
 -- Typed queries for the Card side of the Deck/Card vertical (M4.9a).
 --
@@ -152,6 +153,98 @@ WHERE ct.card_id IN :cardIds AND ct.tag_id = :tagId;
 
 cardById:
 SELECT * FROM cards WHERE id = :cardId;
+
+-- ---- card detail and history (BR-239…BR-245) -------------------------------
+
+-- One card's content, its current schedule and its tag names, for the detail
+-- screen (BR-240).
+--
+-- **`cardListItems` narrowed to one id, and deliberately the same shape.** The
+-- two nested stars map to `Card` and `CardStudyState`, which the existing two
+-- mappers already turn into entities, and the tags ride along as the same
+-- `char(31)`-joined `GROUP_CONCAT` — so detail and the row it was opened from
+-- cannot disagree about a card's state or its chips.
+--
+-- **`INNER JOIN`, total for the same reason:** BR-09 creates the study state in
+-- the same transaction as the card, so no card can be missing one. A card id
+-- that matches nothing therefore means the card is gone, which is exactly the
+-- signal BR-245 needs — and it is why this returns no row rather than a row
+-- with nulls.
+--
+-- **The tag subquery's tables DO reach this statement's generated
+-- `readsFrom`**, so this watch needs no hand-merged `tableUpdates`. Checked in
+-- the generated code rather than inherited from the note on `cardListItems`
+-- above, which was written against an earlier drift and no longer describes
+-- what that statement generates either. Copying the workaround on the strength
+-- of the comment would have subscribed to the tag tables twice and emitted two
+-- frames for one tag edit. What is pinned is the behaviour, not the mechanism:
+-- `card_detail_repository_test.dart` asserts that adding a tag re-emits, so the
+-- day drift changes its mind the test is what says so.
+cardDetailById:
+SELECT
+  c.**,
+  s.**,
+  (
+    SELECT GROUP_CONCAT(t.name, char(31))
+    FROM card_tags ct
+    INNER JOIN tags t ON t.id = ct.tag_id
+    WHERE ct.card_id = c.id
+  ) AS tag_names
+FROM cards c
+INNER JOIN card_study_states s ON s.card_id = c.id
+WHERE c.id = :cardId;
+
+-- The newest page of one card's review history (BR-241).
+--
+-- **`SELECT *`, so drift maps the row to `StudyAnswer` and one mapper turns it
+-- into the read model.** A hand-listed projection would be a second place the
+-- sixteen stored columns are named, and BR-242's whole point is that the screen
+-- shows what the row stored — a column dropped from a projection is a fact that
+-- silently stops being displayed.
+--
+-- **`answered_at DESC, id DESC`, and the tie-break is load-bearing.** Two turns
+-- of one session can share a millisecond; without `id` the order is not total,
+-- and a page boundary that falls inside a group of equal timestamps loses rows
+-- or repeats them no matter how the cursor is built.
+--
+-- `idx_study_answers_card (card_id, answered_at)` supplies the `card_id`
+-- equality and the leading sort term, scanned backwards. SQLite's block sort
+-- then orders only within each equal-`answered_at` group, so the `LIMIT` still
+-- stops early instead of sorting the card's whole history and putting a lid on
+-- it — `card_history_repository_test.dart` pins that by reading the query plan.
+--
+-- The caller asks for one row more than the page size and reports what it
+-- found: "is there another page" answered by the read rather than guessed from
+-- a short result.
+cardHistoryFirstPage:
+SELECT * FROM study_answers
+WHERE card_id = :cardId
+ORDER BY answered_at DESC, id DESC
+LIMIT :limit;
+
+-- The same page, resumed after a keyset cursor (BR-241).
+--
+-- **A second statement rather than a nullable cursor on the one above**, the
+-- same choice `flaggedCardsByDeck` makes and for the same reason: an
+-- `(:hasCursor = 0 OR …)` chain is a predicate SQLite cannot use the index to
+-- stop early through, which would undo exactly what the index is for.
+--
+-- The pair `(answered_at, id)` is compared long-hand rather than as an SQLite
+-- row value: drift's analyzer does not parse row-value comparison, and a
+-- statement that fails to type-check at build time is worse than three lines of
+-- explicit boolean algebra.
+--
+-- **Strictly after, never `<=`.** The cursor is the last row of the previous
+-- page; including it again is the duplicate BR-241 forbids.
+cardHistoryAfter:
+SELECT * FROM study_answers
+WHERE card_id = :cardId
+  AND (
+    answered_at < :answeredAt
+    OR (answered_at = :answeredAt AND id < :id)
+  )
+ORDER BY answered_at DESC, id DESC
+LIMIT :limit;
 
 studyStateByCard:
 SELECT * FROM card_study_states WHERE card_id = :cardId;

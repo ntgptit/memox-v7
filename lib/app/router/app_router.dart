@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/navigation/route_names.dart';
 import '../../features/card/presentation/providers/card_use_case_provider.dart';
+import '../../features/card/presentation/screens/card_detail_screen.dart';
 import '../../features/card/presentation/screens/card_editor_screen.dart';
 import '../../features/card/presentation/screens/card_import_screen.dart';
 import '../../features/card/presentation/screens/card_list_screen.dart';
@@ -179,6 +180,24 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
                                   state.pathParameters[RoutePathParams.deckId]!,
                               cardId:
                                   state.pathParameters[RoutePathParams.cardId],
+                            ),
+                          ),
+                          // One card, read-only (UC-19). **Declared last on
+                          // purpose:** its path is a bare `:cardId`, and
+                          // go_router takes the first pattern that matches, so
+                          // above `new` or `import` it would swallow both and
+                          // the Add action would open a detail screen for a
+                          // card named "new". Nested under the list, so Back
+                          // returns to it with its filter, window and
+                          // selection intact (BR-246).
+                          GoRoute(
+                            path: RoutePaths.cardDetailRelative,
+                            name: RouteNames.cardDetail,
+                            builder: (context, state) => CardDetailScreen(
+                              deckId:
+                                  state.pathParameters[RoutePathParams.deckId]!,
+                              cardId:
+                                  state.pathParameters[RoutePathParams.cardId]!,
                             ),
                           ),
                         ],

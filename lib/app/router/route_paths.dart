@@ -57,6 +57,17 @@ abstract final class RoutePaths {
   /// that pattern starts with the literal `decks/`.
   static const String tagCatalogRelative = 'tags';
 
+  /// One card's read-only detail, **relative** to [cardListRelative]: the full
+  /// location is `/decks/<id>/cards/<cardId>` (UC-19, wireframe M4.15).
+  ///
+  /// **A bare parameter segment, so it must be registered last** among the card
+  /// list's children. go_router takes the first pattern that matches, and this
+  /// one would swallow `new` and `import` if it were declared above them —
+  /// tapping Add would open a detail screen for a card called "new". The order
+  /// is asserted in `app_router_test.dart` rather than left to whoever edits
+  /// the route table next.
+  static const String cardDetailRelative = ':cardId';
+
   /// The study branch. A real path rather than a sub-path of `/` so that a
   /// deep link can open the app directly on the Study tab.
   static const String study = '/study';
