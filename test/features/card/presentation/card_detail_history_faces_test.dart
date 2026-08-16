@@ -261,6 +261,32 @@ void main() {
       handle.dispose();
     });
 
+    testWidgets('the failed-page Retry clears it too', (tester) async {
+      // The third control on this screen, and the one the band's rebuild
+      // introduced. It inherits the shared button theme's 48dp floor, but
+      // "inherits" is an argument about code the test does not run — and the
+      // band it sits in was rewritten this round.
+      final repository = FakeCardDetailRepository()
+        ..seededDetail = fakeCardDetail()
+        ..nextHistoryFailure = const DatabaseFailure(message: 'refused');
+      await pumpCardDetail(tester, repository);
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.text('Retry'));
+      await tester.pumpAndSettle();
+
+      final retry = tester.getSize(
+        find
+            .ancestor(of: find.text('Retry'), matching: find.byType(InkWell))
+            .first,
+      );
+
+      expect(
+        retry.height,
+        greaterThanOrEqualTo(_minimumTouchTarget - _touchTargetTolerance),
+      );
+    });
+
     testWidgets('Edit and Load more clear the 48dp touch target', (
       tester,
     ) async {

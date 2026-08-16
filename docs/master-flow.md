@@ -8,7 +8,7 @@
 | **Source of truth for** | Đồ thị chuyển tiếp giữa các UC · điểm vào của từng luồng · ánh xạ UC → milestone xây nó |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md`, `use-cases.md` |
 | **Updated by task** | M99.31 — nhánh `J`: chạm một hàng card mở chi tiết chỉ đọc (UC-19), Edit thành action tường minh; bảng §6 bổ sung UC-10…UC-19 |
-| **Last updated** | 2026-08-13 |
+| **Last updated** | 2026-08-16 |
 
 ---
 

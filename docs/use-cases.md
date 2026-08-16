@@ -1377,14 +1377,15 @@ tại
 `learned_at`, review history, cờ và tag đều nguyên vẹn (BR-239). Ngữ cảnh của
 danh sách card được giữ nguyên khi quay lại (BR-246).
 
-**UI states:** loading (đọc nội dung + trạng thái) · loaded không có lịch sử ·
-loaded có lịch sử một trang · loaded nhiều trang · loading-more · page error
-(có `Try again`, giữ nguyên phần đã tải) · end-of-history · error cấp cao nhất ·
-not-found.
-
 **Business rules:** BR-10, BR-53, BR-75, BR-76, BR-89, BR-90, BR-91, BR-92,
 BR-93, BR-95, BR-98, BR-131, BR-132, BR-136, BR-144, BR-163, BR-167, BR-239,
 BR-240, BR-241, BR-242, BR-243, BR-244, BR-245, BR-246
+
+**UI states:** loading (đọc nội dung + trạng thái) · loaded không có lịch sử ·
+loaded có lịch sử một trang · loaded nhiều trang · loading-more · page error
+(có `Retry`, giữ nguyên phần đã tải) · end-of-history · error cấp cao nhất ·
+not-found.
+
 ## Điều đã cố ý không đặc tả
 
 | Thứ | Vì sao |

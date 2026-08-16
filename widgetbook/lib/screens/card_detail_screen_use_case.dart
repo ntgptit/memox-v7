@@ -60,7 +60,7 @@ enum CardDetailScenario {
   /// The band at the foot of the timeline, with events already above it
   /// (UC-19 E4). Scroll to the end to reach it — the first page lands, the
   /// second refuses.
-  pageFails('a history page fails to load (scroll down)');
+  pageFails('a history page fails to load (scroll down, then Load more)');
 
   const CardDetailScenario(this.label);
 
