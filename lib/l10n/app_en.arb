@@ -169,7 +169,7 @@
   "@settingsLoadErrorTitle": {
     "description": "Whole-screen error when the settings stream fails (UC-17 E3). No control renders a value in this state — an invented default would be indistinguishable from a stored one."
   },
-  "settingsSaveErrorTitle": "Couldn't save",
+  "settingsSaveErrorTitle": "Couldn’t save",
   "@settingsSaveErrorTitle": {
     "description": "Title of the in-section error band when a settings write fails (UC-17 E2, BR-224). The body comes from the failure type through mxWriteFailure."
   },

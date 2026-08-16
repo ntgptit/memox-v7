@@ -145,7 +145,7 @@ chọn mode chỉ xuất hiện khi có mode thứ hai.
 | # | Feature | Notes |
 |---|---|---|
 | N1 | Import/export | Import CSV/TSV/XLSX **đã triển khai** (M99.19, UC-10, AD-20). Export **đang triển khai** (M99.21, UC-11, BR-174…BR-181) — export nội dung, không phải backup |
-| N2 | Nhắc nhở ôn tập hằng ngày | **Đã triển khai ở M99.29** (UC-17, BR-218…BR-229): opt-in, mặc định tắt, một tóm tắt mỗi ngày dựng từ workload đến hạn tại thời điểm hiện. Quyền notification chỉ được xin **sau** khi người dùng bật (BR-228) |
+| N2 | Nhắc nhở ôn tập hằng ngày | **Đã triển khai ở M99.29** (UC-17, BR-218…BR-229): opt-in, mặc định tắt, một tóm tắt mỗi ngày dựng từ workload đến hạn tại thời điểm hiện tại. Quyền notification chỉ được xin **sau** khi người dùng bật (BR-228) |
 | N3 | Tag/phân loại card | **Đã triển khai ở M99.30** (UC-18, BR-230…BR-238): catalog phạm vi library, lọc nhiều tag theo OR, đổi tên có gộp, và xoá. Ngoài phạm vi v1: tag phân cấp, màu tag, taxonomy chia sẻ |
 
 ## Explicitly out of MVP

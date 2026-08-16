@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/card/domain/failures/tag_catalog_failure.dart';
@@ -144,5 +145,39 @@ void main() {
     // there to press — the sentence a user needs most right after a failure.
     expect(find.textContaining('The cards themselves stay.'), findsOneWidget);
     expect(find.textContaining('That tag no longer exists.'), findsOneWidget);
+  });
+  testWidgets('the appended failure is announced, not just shown', (
+    tester,
+  ) async {
+    // **The dialog stays open and only its body changes** (D26), so nothing
+    // moves focus and nothing else tells a screen-reader user the delete
+    // failed — they would hear the same sentence they already heard. The
+    // banded failures elsewhere mark themselves this way; this is the third
+    // shape, and it was the one still silent.
+    final handle = tester.ensureSemantics();
+    final catalog = FakeTagCatalogRepository.seeded(tags)
+      ..nextFailure = const NotFoundFailure(
+        message: 'gone',
+        reason: TagCatalogProblem.tagMissing,
+      );
+    await openDelete(tester, catalog, row: 'noun');
+
+    await tester.tap(find.widgetWithText(MxActionButton, 'Delete tag').last);
+    await tester.pumpAndSettle();
+
+    // `.at(1)`, the content `Text` the failure was appended to — not the
+    // title, which never changes.
+    expect(
+      tester.getSemantics(
+        find
+            .descendant(
+              of: find.byType(AlertDialog),
+              matching: find.byType(Text),
+            )
+            .at(1),
+      ),
+      isSemantics(isLiveRegion: true),
+    );
+    handle.dispose();
   });
 }

@@ -921,11 +921,9 @@ lượt (BR-76, BR-77, BR-111), luật reset (BR-41…BR-47) hay luật ngày h�
 
 ---
 
----
-
 ## Tab Study — đọc thư viện thật
 
-Study Home đọc đúng thư viện của người dùng thay vì một fixture (UC-14). Các rule dưới đây **không** phát biểu lại luật mở phiên (BR-25), luật đến hạn (BR-22) hay luật ngày học (BR-105).
+Study Home đọc đúng thư viện của người dùng thay vì một fixture (UC-14). Các rule dưới đây **không** phát biểu lại luật mở phiên (BR-25), luật đến hạn (BR-142) hay luật ngày học (BR-105).
 
 | ID | Status | Rule | Enforced by | Related |
 |---|---|---|---|---|

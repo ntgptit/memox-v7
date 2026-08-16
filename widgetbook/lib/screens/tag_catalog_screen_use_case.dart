@@ -73,7 +73,7 @@ class _TagCatalogDemo extends StatefulWidget {
 }
 
 class _TagCatalogDemoState extends State<_TagCatalogDemo> {
-  late final _CatalogFake _catalog = _CatalogFake(widget.scenario);
+  late final TagCatalogFake _catalog = TagCatalogFake(widget.scenario);
 
   @override
   Widget build(BuildContext context) {
@@ -86,12 +86,16 @@ class _TagCatalogDemoState extends State<_TagCatalogDemo> {
 
 /// An in-memory catalog that actually renames, merges and deletes.
 ///
+/// Public because the tag filter sheet's entry needs the same thing, and a
+/// second fake for one contract is two places for the rules to drift apart —
+/// which is the defect this feature's own BR-238 exists to forbid in the app.
+///
 /// **It re-implements the rules rather than stubbing them**, because the point
 /// of the entry is that a designer can drive the real flow: renaming `nouns`
 /// onto `Noun` has to actually collapse two rows into one, or the merge
 /// disclosure is a label with nothing behind it.
-final class _CatalogFake implements TagCatalogRepository {
-  _CatalogFake(this.scenario) {
+final class TagCatalogFake implements TagCatalogRepository {
+  TagCatalogFake(this.scenario) {
     // Seeded for every scenario that needs something to act on — the two
     // write failures are reached from a row menu, so an empty catalog
     // would leave them as unreachable as they were before.

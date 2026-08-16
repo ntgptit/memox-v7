@@ -1496,7 +1496,7 @@ contract đó, nên `domain/` và `presentation/` không có một dòng kiểm 
 tảng nào (BR-229, AD-12, AD-13).
 
 **Context.** BR-222 cho phép notification nêu tên deck cấp bách nhất và tổng số
-thẻ. Ba con số đó **chỉ đúng tại thời điểm hiện**: người dùng học một phiên tối
+thẻ. Ba con số đó **chỉ đúng tại thời điểm hiện tại**: người dùng học một phiên tối
 nay thì tổng đổi, và một notification đã nạp nội dung lúc đặt lịch vẫn hiện
 đúng giờ với số của hôm qua. `zonedSchedule` của
 `flutter_local_notifications` không chạy Dart lúc fire — hệ điều hành hiện một

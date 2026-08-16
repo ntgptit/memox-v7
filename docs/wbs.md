@@ -10012,7 +10012,7 @@ nên nó **phải** được chạy trước khi ai đó coi Settings v1 là đ�
 
 - **Status:** **in-progress** — phase 1–9 xong (gồm cả các vòng review đệ quy), chờ emulator IT và CI.
 - **Goal:** Một lời nhắc học hằng ngày, tuỳ chọn và mặc định tắt, dựng từ
-  workload đến hạn thật tại thời điểm hiện — không phải từ một payload nạp sẵn
+  workload đến hạn thật tại thời điểm hiện tại — không phải từ một payload nạp sẵn
   hôm trước.
 - **Scope:** BR-218…BR-229, UC-17, AD-21, ba cột `app_settings` + migration v10 (nhánh nguồn chia làm hai bước
   v8 và v9; cả hai số đó đã thuộc feature khác trên nhánh tích hợp, nên ba cột
@@ -10041,7 +10041,7 @@ nên nó **phải** được chạy trước khi ai đó coi Settings v1 là đ�
   phẩm nào nói lời nhắc phải đúng đến từng phút. Vì sao worker chứ không phải
   notification đặt sẵn? Vì BR-222 cho phép hiện số thẻ và tên deck, và những con
   số đó chỉ đúng nếu có Dart chạy lúc fire — nguyên nhân gốc là *nội dung phụ
-  thuộc trạng thái tại thời điểm hiện*, không phải tại thời điểm đặt lịch
+  thuộc trạng thái tại thời điểm hiện tại*, không phải tại thời điểm đặt lịch
   (AD-21).
 - **Output:** `lib/core/database/queries/reminder.drift`, ba cột trên
   `app_settings` + `_upgradeToV10`, `drift_schemas/drift_schema_v10.json`,
