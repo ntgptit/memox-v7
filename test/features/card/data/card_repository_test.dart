@@ -200,7 +200,7 @@ void main() {
       expect(after, before);
     });
 
-    test('deleting a card cascades its state and history', () async {
+    test('deleting a card keeps its state and history (BR-259)', () async {
       final seeded = await seedCard();
       await insertSession(
         h.db,
@@ -217,9 +217,18 @@ void main() {
 
       await h.cardRepository.deleteCard(seeded.card.id);
 
-      expect(await h.rawCard(seeded.card.id), isNull);
-      expect(await h.countAll('card_study_states'), 0);
-      expect(await h.countAll('study_answers'), 0);
+      // **The row stays, and that is the whole of BR-259.** It used to be
+      // deleted, and its state and history cascaded away with it — which is
+      // exactly what made a mis-tap unrecoverable. What changes now is
+      // visibility: the card leaves every active read (BR-257) while the three
+      // rows that make a restore possible are still there.
+      expect(await h.rawCard(seeded.card.id), isNotNull);
+      expect(await h.countAll('card_study_states'), 1);
+      expect(await h.countAll('study_answers'), 1);
+      expect(
+        await h.cardRepository.readDeckHoldsCards(seeded.leaf.id),
+        isFalse,
+      );
     });
 
     test(
@@ -248,7 +257,11 @@ void main() {
       await h.cardRepository.deleteCard(seeded.card.id);
 
       expect(await h.contentTypeOf(seeded.leaf.id), 'card');
-      expect(await h.countAll('cards'), 1);
+      // Two rows, one visible. `countAll` reads the table, so it counts the
+      // tombstone too — the number that matters to BR-260 is the active one,
+      // and the deck keeping its type is what proves it was measured.
+      expect(await h.countAll('cards'), 2);
+      expect(await h.activeCardCount(seeded.leaf.id), 1);
     });
 
     // "A refused write leaves the card untouched (BR-07)" used to be asserted

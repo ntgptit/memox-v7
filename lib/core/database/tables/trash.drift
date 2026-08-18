@@ -1,0 +1,37 @@
+-- One row per deletion the user performed (BR-256).
+--
+-- Nothing is copied here. `decks` and `cards` keep their rows and gain a single
+-- `delete_batch_id`; this table owns the identity of the deletion and the one
+-- timestamp retention is measured from (AD-22).
+--
+-- **`deleted_at` lives here and only here.** Putting it on the row as well
+-- would be two sources of truth for one event with nothing holding them equal,
+-- and `delete_batch_id IS NULL` already answers the only question every active
+-- query asks.
+
+CREATE TABLE delete_batches (
+    -- Client-generated UUID, same rule as every other id (AD-03).
+    id TEXT NOT NULL PRIMARY KEY,
+
+    -- The kind of the **item root** — what the user actually touched. A deck
+    -- batch carries descendants of both kinds; this says which one is the
+    -- thing Trash lists and which one Restore asks a target for (BR-266).
+    item_type TEXT NOT NULL CHECK (item_type IN ('card', 'deck')),
+
+    -- The card or deck the user deleted. Deliberately NOT a foreign key: it
+    -- points at one of two tables, and the cascade already runs the other way
+    -- — purging this row is what removes the items (BR-265).
+    root_item_id TEXT NOT NULL,
+
+    -- UTC. Retention is 30×24h from here (BR-264), and the ordering between
+    -- two batches is what invariant 34 checks.
+    deleted_at DATETIME NOT NULL,
+
+    -- NULL is the local profile. No auth yet, auth-ready (AD-03).
+    owner_id TEXT NULL
+) AS DeleteBatch;
+
+-- Trash lists newest first and auto-purge sweeps oldest first; both read this
+-- order, and the id tie-break keeps two batches written in the same millisecond
+-- from swapping places between reads.
+CREATE INDEX idx_delete_batches_deleted ON delete_batches (deleted_at, id);

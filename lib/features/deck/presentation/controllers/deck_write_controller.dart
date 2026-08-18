@@ -143,17 +143,28 @@ class DeleteDeckController extends _$DeleteDeckController {
   @override
   DeckSubmitState build(String deckId) => const DeckSubmitState();
 
-  Future<void> submit() async {
-    if (!state.canSubmit) return;
+  /// Deletes, and **returns the batch id** so the caller can offer Undo
+  /// (BR-256, BR-263).
+  ///
+  /// The id is a return value rather than a field on the state, and that is
+  /// deliberate: it is useful for one frame — the snackbar that follows the
+  /// dialog closing — and a stale one names a batch that has since been
+  /// restored or purged. Keeping it in state would make it look durable.
+  Future<String?> submit() async {
+    if (!state.canSubmit) return null;
 
     state = const DeckSubmitState(isSubmitting: true);
     try {
-      await ref.read(deleteDeckUseCaseProvider)(deckId);
-      if (!ref.mounted) return;
+      final batchId = await ref.read(deleteDeckForUndoUseCaseProvider)(deckId);
+      if (!ref.mounted) return batchId;
       state = const DeckSubmitState(outcome: SubmitOutcome.savedAndClose);
+
+      return batchId;
     } on Failure catch (failure) {
-      if (!ref.mounted) return;
+      if (!ref.mounted) return null;
       state = DeckSubmitState(failure: failure);
+
+      return null;
     }
   }
 

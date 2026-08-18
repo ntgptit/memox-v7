@@ -192,7 +192,10 @@ answer_days (deckId, cardId, day, isLearningAnswer, isRecentAnswer) AS (
         CASE WHEN ans.kind = 'learning' THEN 1 ELSE 0 END,
         CASE WHEN ans.answered_at >= :recentFrom THEN 1 ELSE 0 END
     FROM study_answers ans
-    INNER JOIN cards c ON c.id = ans.card_id
+    -- A card in Trash takes its whole history out of every number, the same
+    -- way the hard-delete cascade used to (BR-250, BR-257); restore brings it
+    -- back at the card's current position.
+    INNER JOIN cards c ON c.id = ans.card_id AND c.delete_batch_id IS NULL
     WHERE ans.answered_at >= :windowFrom AND ans.answered_at < :windowUntil
 ),
 -- One row per (card, local day). `isLearning` is the exclusive partition's
@@ -269,7 +272,7 @@ LEFT JOIN (
     -- could see.
     INNER JOIN decks dk ON dk.id = cd.deckId
 ) total ON 1 = 1
-WHERE d.parent_deck_id IS NULL
+WHERE d.parent_deck_id IS NULL AND d.delete_batch_id IS NULL
 ORDER BY d.created_at ASC, d.id ASC;
 
 -- One deck's own activity and that of each of its direct children.
@@ -315,7 +318,10 @@ answer_days (deckId, cardId, day, isLearningAnswer, isRecentAnswer) AS (
         CASE WHEN ans.kind = 'learning' THEN 1 ELSE 0 END,
         CASE WHEN ans.answered_at >= :recentFrom THEN 1 ELSE 0 END
     FROM study_answers ans
-    INNER JOIN cards c ON c.id = ans.card_id
+    -- A card in Trash takes its whole history out of every number, the same
+    -- way the hard-delete cascade used to (BR-250, BR-257); restore brings it
+    -- back at the card's current position.
+    INNER JOIN cards c ON c.id = ans.card_id AND c.delete_batch_id IS NULL
     WHERE ans.answered_at >= :windowFrom AND ans.answered_at < :windowUntil
 ),
 card_days (deckId, cardId, day, isLearning, isRecent) AS (
@@ -325,7 +331,8 @@ card_days (deckId, cardId, day, isLearning, isRecent) AS (
     GROUP BY deckId, cardId, day
 ),
 branch (branchId, deckId) AS (
-    SELECT id, id FROM decks WHERE parent_deck_id = :parentId
+    SELECT id, id FROM decks
+    WHERE parent_deck_id = :parentId AND delete_batch_id IS NULL
     UNION
     SELECT b.branchId, d.id
     FROM decks d

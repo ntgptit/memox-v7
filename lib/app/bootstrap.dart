@@ -19,6 +19,7 @@ import 'error_screen_widget.dart';
 import 'router/app_router.dart';
 import 'startup/fixture_seeder_widget.dart';
 import 'startup/reminder_reconciler_widget.dart';
+import 'startup/trash_sweeper_widget.dart';
 
 /// Restores the error handlers that were installed before
 /// [installErrorHandlers] replaced them.
@@ -155,9 +156,15 @@ Widget buildRootWidget(
   // reminder navigates the router the app is actually running (BR-225).
   child: ReminderReconcilerWidget(
     onOpenStudy: () => (router ?? appRouter).goNamed(RouteNames.study),
-    child: shouldSeedFixtures
-        ? FixtureSeederWidget(child: MemoxApp(router: router))
-        : MemoxApp(router: router),
+    // The retention sweep sits inside the reconciler and wraps the app on
+    // **every** build, unlike the fixture seed: BR-264 is a rule about the
+    // user's own data, not a development convenience, and it has to run in
+    // production first of all.
+    child: TrashSweeperWidget(
+      child: shouldSeedFixtures
+          ? FixtureSeederWidget(child: MemoxApp(router: router))
+          : MemoxApp(router: router),
+    ),
   ),
 );
 

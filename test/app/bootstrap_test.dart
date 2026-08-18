@@ -152,11 +152,23 @@ void main() {
         ProviderScope(
           overrides: [
             deckRepositoryProvider.overrideWithValue(FakeDeckRepository()),
+            // The root now also mounts the retention sweep (BR-264), which
+            // reads Trash one frame after mount. The inner scope
+            // `buildRootWidget` creates binds the real implementation, so the
+            // *database* is what has to be substituted here — an override of
+            // the repository would be shadowed by that inner binding, and the
+            // sweep would open the on-device database and leave a pending
+            // timer behind.
+            appDatabaseProvider.overrideWithValue(
+              AppDatabase(NativeDatabase.memory()),
+            ),
           ],
           child: buildRootWidget(EnvConfig.staging),
         ),
       );
-      await tester.pump();
+      // Settle rather than pump once: the retention sweep runs one frame after
+      // mount and its read must finish before the tree is torn down.
+      await tester.pumpAndSettle();
 
       // Read through the real element tree: this proves the override reached
       // the scope, not merely that a container can be built.
@@ -187,11 +199,21 @@ void main() {
         ProviderScope(
           overrides: [
             deckRepositoryProvider.overrideWithValue(FakeDeckRepository()),
+            // The root now also mounts the retention sweep (BR-264), which
+            // reads Trash one frame after mount. The inner scope
+            // `buildRootWidget` creates binds the real implementation, so the
+            // *database* is what has to be substituted here — an override of
+            // the repository would be shadowed by that inner binding, and the
+            // sweep would open the on-device database and leave a pending
+            // timer behind.
+            appDatabaseProvider.overrideWithValue(
+              AppDatabase(NativeDatabase.memory()),
+            ),
           ],
           child: buildRootWidget(EnvConfig.staging, shouldSeedFixtures: false),
         ),
       );
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       expect(find.byType(FixtureSeederWidget), findsNothing);
       expect(find.byType(MemoxApp), findsOneWidget);
@@ -200,11 +222,21 @@ void main() {
         ProviderScope(
           overrides: [
             deckRepositoryProvider.overrideWithValue(FakeDeckRepository()),
+            // The root now also mounts the retention sweep (BR-264), which
+            // reads Trash one frame after mount. The inner scope
+            // `buildRootWidget` creates binds the real implementation, so the
+            // *database* is what has to be substituted here — an override of
+            // the repository would be shadowed by that inner binding, and the
+            // sweep would open the on-device database and leave a pending
+            // timer behind.
+            appDatabaseProvider.overrideWithValue(
+              AppDatabase(NativeDatabase.memory()),
+            ),
           ],
           child: buildRootWidget(EnvConfig.staging),
         ),
       );
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       expect(find.byType(FixtureSeederWidget), findsOneWidget);
     });

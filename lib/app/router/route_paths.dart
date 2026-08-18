@@ -73,6 +73,11 @@ abstract final class RoutePaths {
   /// the route table next.
   static const String cardDetailRelative = ':cardId';
 
+  /// Trash, **relative** to [decks] so the full location is `/trash` inside the
+  /// Library branch — the bottom bar stays and Back returns to the deck list
+  /// (UC-21, AD-22).
+  static const String trashRelative = 'trash';
+
   /// The study branch. A real path rather than a sub-path of `/` so that a
   /// deep link can open the app directly on the Study tab.
   static const String study = '/study';

@@ -44,8 +44,11 @@ FROM cards c
 INNER JOIN decks d ON d.id = c.deck_id
 INNER JOIN decks root ON root.id = d.root_deck_id
 INNER JOIN card_study_states s ON s.card_id = c.id
+-- A card in Trash is not due anywhere (BR-257): nagging a user about
+-- material they deleted is the reminder crying wolf.
 WHERE s.learned_at IS NOT NULL
   AND s.due_at <= :now
+  AND c.delete_batch_id IS NULL
 GROUP BY root.id, root.name
 ORDER BY root.id ASC;
 

@@ -21,6 +21,7 @@ import 'screens/library_search_screen_use_case.dart';
 import 'screens/study_screens_use_case.dart';
 import 'screens/tag_catalog_screen_use_case.dart';
 import 'screens/tag_filter_sheet_use_case.dart';
+import 'screens/trash_screen_use_case.dart';
 import 'support/catalog_page.dart';
 import 'tokens/color_sections.dart';
 import 'tokens/scale_sections.dart';
@@ -137,6 +138,7 @@ class MemoxWidgetbook extends StatelessWidget {
             librarySearchScreenComponent(),
             ...studyScreenComponents(),
             progressDeckScreenComponent(),
+            trashScreenComponent(),
           ],
         ),
         WidgetbookCategory(

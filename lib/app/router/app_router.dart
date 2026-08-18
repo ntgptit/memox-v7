@@ -21,6 +21,7 @@ import '../../features/study/presentation/screens/study_home_screen.dart';
 import '../fallback/route_not_found_screen.dart';
 import '../shell/app_navigation_shell.dart';
 import 'route_paths.dart';
+import '../../features/trash/presentation/screens/trash_screen.dart';
 
 /// Composition of the route table, and nothing else.
 ///
@@ -109,6 +110,15 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
                     path: RoutePaths.tagCatalogRelative,
                     name: RouteNames.tagCatalog,
                     builder: (context, state) => const TagCatalogScreen(),
+                  ),
+                  // Trash, in the Library branch (AD-22). A sibling of the
+                  // starter catalog rather than a child of a deck: it lists
+                  // items from anywhere in the library, including decks that no
+                  // longer have a parent to hang off.
+                  GoRoute(
+                    path: RoutePaths.trashRelative,
+                    name: RouteNames.trash,
+                    builder: (context, state) => const TrashScreen(),
                   ),
                   // A child route, so a deck screen pushes onto the Decks
                   // branch: the bottom bar stays, Back returns to the list, and

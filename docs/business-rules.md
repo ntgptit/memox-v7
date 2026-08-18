@@ -7,7 +7,7 @@
 | **Scope** | Luật nghiệp vụ, validation rule, state machine, edge case của phạm vi MVP. Ngoài phạm vi: quyết định kiến trúc (`architecture.md`), hình dạng dữ liệu (`data-model.md`), luồng người dùng (`use-cases.md`) |
 | **Source of truth for** | BR-xx · validation rule · entity state machine · edge case |
 | **Depends on** | `document-conventions.md`, `product.md`, `architecture.md` |
-| **Updated by task** | M99.32 — BR-247…BR-255: tìm kiếm toàn thư viện (phạm vi trường, chuẩn hoá dùng chung, debounce/zero-I/O, xếp hạng, nhóm, gộp trùng, keyset, chỉ-đọc và ranh giới điều hướng, cấm index không đo); M99.28 — BR-210…BR-217: Settings v1 (mặc định học toàn cục, theme, ngôn ngữ); M99.27 — BR-203…BR-209: chiều hỏi của self-assess; M5.26 — BR-200…BR-202: Study Home (đọc thư viện thật, workload toàn subtree, ba trạng thái đã tải); M99.24 — BR-182…BR-189: tiến độ theo deck (phạm vi metric, card-day, hai khoảng, quy-về-vị-trí-hiện-tại, phân hoạch Learning/Reviewing, thứ tự, chỉ-đọc, cập nhật trực tiếp); trước đó M99.23 — BR-190…BR-199: Progress overview v1 (hai khối đã đổi chỗ khi #301 và #302 gộp — số ở bảng dưới là số đúng) · M99.29 — BR-218…BR-229: nhắc học hằng ngày (opt-in, giờ địa phương, due-only, một tóm tắt, riêng tư, thứ tự cấp bách, inexact + idempotent scheduling, permission, capability) · M99.30 — BR-230…BR-238: quản lý tag và lọc theo nhiều tag · M99.31 — BR-239…BR-246: mặt đọc của một thẻ và lịch sử học |
+| **Updated by task** | M99.33 — BR-256…BR-267: Trash và restore (soft-delete một transaction, loại khỏi bề mặt active, tombstone batch, restore hỏi target, undo một batch, retention 30×24h, purge cứng theo batch, chọn nhiều tách theo loại, riêng tư trong Trash); M99.32 — BR-247…BR-255: tìm kiếm toàn thư viện (phạm vi trường, chuẩn hoá dùng chung, debounce/zero-I/O, xếp hạng, nhóm, gộp trùng, keyset, chỉ-đọc và ranh giới điều hướng, cấm index không đo); M99.28 — BR-210…BR-217: Settings v1 (mặc định học toàn cục, theme, ngôn ngữ); M99.27 — BR-203…BR-209: chiều hỏi của self-assess; M5.26 — BR-200…BR-202: Study Home (đọc thư viện thật, workload toàn subtree, ba trạng thái đã tải); M99.24 — BR-182…BR-189: tiến độ theo deck (phạm vi metric, card-day, hai khoảng, quy-về-vị-trí-hiện-tại, phân hoạch Learning/Reviewing, thứ tự, chỉ-đọc, cập nhật trực tiếp); trước đó M99.23 — BR-190…BR-199: Progress overview v1 (hai khối đã đổi chỗ khi #301 và #302 gộp — số ở bảng dưới là số đúng) · M99.29 — BR-218…BR-229: nhắc học hằng ngày (opt-in, giờ địa phương, due-only, một tóm tắt, riêng tư, thứ tự cấp bách, inexact + idempotent scheduling, permission, capability) · M99.30 — BR-230…BR-238: quản lý tag và lọc theo nhiều tag · M99.31 — BR-239…BR-246: mặt đọc của một thẻ và lịch sử học |
 | **Last updated** | 2026-08-19 |
 
 Format tuân theo `document-conventions.md` §6.2. Từ khoá MUST / SHOULD / MAY
@@ -27,7 +27,7 @@ khi ai đó đọc và làm theo.
 
 Rule bị thay thế MUST đánh `superseded by BR-yy` ở cột Status và giữ nguyên ID.
 
-Trạng thái hiện tại: **BR-01…BR-255**, không trùng, không thiếu.
+Trạng thái hiện tại: **BR-01…BR-267**, không trùng, không thiếu.
 
 ---
 
@@ -576,6 +576,42 @@ nội dung card (BR-07, BR-08, BR-95), luật tag (BR-93) hay luật riêng tư 
 | BR-253 | active | Phân trang MUST là keyset. Khoá phân trang MUST gồm đúng bốn thành phần theo đúng thứ tự sắp xếp: bậc khớp, văn bản đã fold dùng để sắp, `created_at`, rồi `id` — nên thứ tự là toàn phần và không hai hàng nào bằng nhau. MUST NOT dùng `OFFSET`. Một lần ghi xen giữa hai trang MUST NOT làm lặp hàng hay bỏ sót hàng. | data | UC-20 |
 | BR-254 | active | Kết quả MUST là chỉ-đọc: MUST NOT ghi bất cứ gì và MUST NOT mở phiên học. Đổi tên deck tổ tiên, di chuyển card hoặc deck, đổi tên tag và xoá MUST cập nhật kết quả cùng đường dẫn đang hiển thị mà không cần thao tác thủ công. Mở một kết quả deck MUST đi tới màn deck tương ứng; mở một kết quả card MUST đi tới màn chi tiết card ở chế độ đọc và MUST NOT đi tới màn sửa card. Khi route chi tiết card chưa tồn tại, hệ thống MUST khai báo đích đến bằng một kiểu dữ liệu và nói rõ là chưa mở được, MUST NOT dựng màn chi tiết thứ hai và MUST NOT âm thầm thay bằng màn khác. | repository + UI | UC-20, BR-63 |
 | BR-255 | active | MUST NOT thêm bảng FTS hay index mới cho tìm kiếm khi chưa có `EXPLAIN QUERY PLAN` và số đo trên dữ liệu ở quy mô thực chứng minh là cần. Việc đọc MUST NOT theo kiểu N+1: đường dẫn của mọi kết quả trên một trang MUST dẫn xuất từ một lần đọc cây deck duy nhất, và tag của mọi card trên trang MUST đến từ chính statement đã lấy card. | data | UC-20, AD-02 |
+
+## Trash và restore
+
+Soft-delete thay thế delete cứng cho **card và deck**. Các rule dưới đây **không**
+phát biểu lại BR-03/BR-04 (xoá deck kéo theo cả cây) hay BR-163 (`content_type`
+tự về `unset`) — chúng nói phần mà tombstone thêm vào, và chúng **chi phối**
+BR-03 ở chỗ "kéo theo cả cây" nay là *đánh dấu* cả cây chứ không *xoá* cả cây.
+
+Từ vựng: **batch** là một lần xoá của người dùng, mang một id riêng; **item root**
+là chính card/deck người dùng đã chạm; **tombstone** là hàng còn nguyên trong
+`cards`/`decks` nhưng mang `delete_batch_id`; **purge** là xoá cứng vĩnh viễn.
+
+| ID | Status | Rule | Enforced by | Related |
+|---|---|---|---|---|
+| BR-256 | active | Xoá card hoặc deck MUST là soft-delete trong **một** transaction và MUST NOT xoá cứng bất cứ hàng nào, kể cả descendant. Thao tác MUST tạo đúng một batch mang `deleted_at` và một item root. UI MUST nói item đã được chuyển vào Trash, MUST NOT nói đã xoá vĩnh viễn, và với thao tác xoá **một** item MUST cung cấp Undo ngay tại chỗ. Xoá nhiều item cùng lúc MUST tạo một batch cho mỗi item root, MUST NOT gộp thành một batch chung — mỗi item root là một thứ người dùng khôi phục được riêng. | repository + UI | UC-21, BR-03, BR-04, AD-22 |
+| BR-257 | active | Card/deck/subtree đã soft-delete MUST bị loại khỏi mọi bề mặt active: Library và deck level, Card List, search, mọi đếm (card count, new/due/overdue/learned, sub-deck count), study eligibility và hàng đợi phiên, Progress, đếm card của tag, move target, import duplicate check và export. MUST NOT có màn hình nào tự vá điều này bằng lọc riêng: loại trừ MUST nằm trong chính query, và mọi query đọc `cards`/`decks` MUST hoặc mang điều kiện loại trừ tombstone hoặc nằm trong allowlist có lý do kiểm tra được (AD-22). | data | UC-21, AD-22, BR-165, BR-170, BR-174 |
+| BR-258 | active | Xoá một deck MUST đánh dấu deck đó cùng **mọi descendant đang active** — deck lẫn card — bằng **cùng một** batch và cùng một `deleted_at`. Descendant đã ở Trash từ một batch trước MUST giữ nguyên tombstone cũ và MUST NOT được gộp vào batch mới; restore batch mới MUST NOT hồi sinh chúng. Quan hệ batch MUST được lưu trên hàng, MUST NOT suy ra từ parent hiện tại. | repository | UC-21, BR-03, AD-22 |
+| BR-259 | active | Soft-delete MUST giữ nguyên nội dung card, `card_study_states`, `study_answers`, quan hệ tag và id của mọi hàng cho tới khi purge. Phiên `in_progress` chạm tới item vừa bị xoá — phiên của chính deck đó hoặc phiên có card đó trong hàng đợi — MUST bị đóng **trong cùng transaction** với `status = invalidated` và `end_reason = content_deleted`; lý do MUST được lưu, MUST NOT suy ra sau. Hàng đợi MUST NOT phục vụ một card đã bị ẩn. | repository | UC-21, BR-79, BR-80, BR-84, AD-11 |
+| BR-260 | active | Khi soft-delete lấy đi direct child **đang active** cuối cùng của một deck non-root, deck đó MUST tự về `content_type = unset` trong cùng transaction. Root MUST giữ `deck` (BR-58). MUST NOT có thao tác reset thủ công. Tombstone còn nằm trong deck MUST NOT được tính là nội dung khi đo điều kiện này. | repository | UC-21, BR-163, BR-58 |
+| BR-261 | active | Restore MUST hỏi target và MUST NOT ghi gì trước khi người dùng xác nhận. Target của một card MUST là deck đang active, non-root, `content_type` là `card` hoặc `unset`, và cùng root với card đó (BR-165). Target của một **sub-deck** MUST thoả **đúng** bộ luật của move (BR-55 độ sâu, BR-63/BR-64 loại nội dung, BR-70/BR-74 scheduler và generation của root) — MUST NOT có bộ luật thứ hai dành riêng cho restore. Item root là một **root deck** MUST chỉ có đúng một target hợp lệ là **top level**, vì root không có cha (BR-56) và move không áp dụng cho root; target đó vẫn MUST được người dùng xác nhận, và MUST NOT được chấp nhận cho bất kỳ item nào khác. Target `unset` MUST được set sang loại tương ứng trong chính transaction restore. Restore vi phạm bất kỳ điều kiện nào MUST bị từ chối bằng lý do có kiểu và MUST NOT ghi một phần. | domain + repository | UC-21, BR-55, BR-56, BR-63, BR-64, BR-70, BR-74, BR-165 |
+| BR-262 | active | Restore một batch MUST hồi sinh **đúng** những hàng mang batch đó và MUST NOT chạm hàng của batch khác. Id, nội dung, study state, history và tag MUST giữ nguyên. Vị trí cũ MUST NOT được chọn tự động; UI MAY preselect một target hợp lệ nhưng người dùng MUST xác nhận. Restore một deck MUST viết lại `root_deck_id` cho **toàn bộ** subtree của nó, gồm cả tombstone nằm bên trong, để cây không có hàng nào trỏ sai root. | repository | UC-21, BR-71, BR-72, AD-22 |
+| BR-263 | active | Undo là thao tác đảo ngược **một** batch vừa được tạo và MUST đưa mọi hàng của batch đó về đúng vị trí cũ, không hỏi target. Undo MUST áp dụng lại đầy đủ các điều kiện của BR-261 lên vị trí cũ và MUST bị từ chối bằng lý do có kiểu khi vị trí cũ không còn hợp lệ — MUST NOT im lặng đặt vào chỗ khác. Undo MUST NOT khả dụng cho thao tác xoá nhiều item. | repository + UI | UC-21, BR-256, BR-261 |
+| BR-264 | active | Retention là **30 × 24 giờ** tính từ `deleted_at`. Một batch eligible để purge khi `now - deleted_at >= 30 ngày`; đúng biên 30 ngày MUST là eligible. Auto-purge MUST chạy khi app khởi động, khi resume và khi mở Trash, MUST idempotent, và MUST NOT phụ thuộc vào việc người dùng có mở Trash hay không. Thời điểm MUST đến từ clock được inject; mọi layer MUST NOT gọi `DateTime.now()`. | repository | UC-21, AD-06, AD-22 |
+| BR-265 | active | Purge MUST xoá cứng đúng các hàng của batch eligible và cascade sang study state, history, hàng đợi phiên và quan hệ tag của chúng. Purge MUST NOT chạy nếu bất kỳ descendant nào của hàng bị purge thuộc một batch **chưa** eligible hoặc còn đang active — batch đó MUST bị bỏ qua, MUST NOT bị purge một phần. Lỗi ở bất kỳ bước nào MUST rollback toàn bộ transaction và MUST để lại đồ thị deck ở trạng thái nhất quán. | repository | UC-21, BR-264, AD-22 |
+| BR-266 | active | Chọn nhiều trong Trash MUST tách theo loại item: một thao tác Restore hoặc Purge MUST NOT trộn card và deck. Purge vĩnh viễn MUST đi qua xác nhận mạnh nêu **đúng số lượng** item và nói rõ lịch sử học không khôi phục được. Vai trò màu destructive MUST chỉ dành cho purge vĩnh viễn; MUST NOT dùng cho soft-delete hay cho Restore. Focus mặc định của hộp thoại purge MUST là hành động an toàn. | UI | UC-21, BR-167 |
+| BR-267 | active | Nội dung trong Trash là dữ liệu riêng tư cùng mức nội dung card (BR-51, BR-52): MUST NOT log nội dung card ở bất kỳ level nào, kể cả trong đường xoá, restore và purge. Trash MUST hiển thị đường dẫn gốc của item **chỉ như thông tin**, MUST NOT trình bày nó như nơi item sẽ được khôi phục về. | data + UI | UC-21, BR-51, BR-52 |
+
+BR-258 nói "MUST NOT suy ra từ parent hiện tại" vì hai batch chồng nhau trong
+cùng một subtree là trạng thái hợp lệ và bình thường: xoá một card hôm nay, xoá
+deck chứa nó tuần sau. Parent trả lời *nó ở đâu*, không trả lời *nó đi cùng ai*.
+
+BR-257 là rule duy nhất trong tài liệu này bắt một *hình dạng thực thi* chứ không
+chỉ một kết quả. Lý do là kinh nghiệm: một luật "đừng hiển thị X" trải trên sáu
+mươi query sẽ đúng ở năm mươi chín chỗ, và chỗ thứ sáu mươi là chỗ không ai nhìn.
+
+---
 
 ## StudyMode
 

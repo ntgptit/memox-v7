@@ -33,7 +33,9 @@ import 'move_deck_sheet_widget.dart';
 Future<void> showDeckActions(
   BuildContext context, {
   required DeckEntity deck,
-  required VoidCallback onDeleted,
+
+  /// Called with the deletion's batch id, for the Undo affordance (BR-263).
+  required ValueChanged<String?> onDeleted,
 
   /// Whether Reset learning progress is offered, and whether it has anything to
   /// take away (UC-07, A2).

@@ -293,6 +293,14 @@ class StudyCatalogRepository implements StudyRepository {
     required StudySessionEndReason reason,
   }) async => 0;
 
+  /// Nothing to close: the catalog has no sessions and no deletions (BR-259).
+  @override
+  Future<int> invalidateSessionsForDeletedContent({
+    required List<String> deckIds,
+    required List<String> cardIds,
+    required DateTime endedAt,
+  }) async => 0;
+
   // --- Writes: no-ops, so a control can be pressed without a database. ---
 
   @override

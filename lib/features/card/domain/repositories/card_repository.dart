@@ -157,10 +157,15 @@ abstract interface class CardRepository {
     CardDetailText? pronunciation,
   });
 
-  /// Deletes a card; its study state and history cascade. Deleting the last
-  /// card returns the deck to `unset` in the same write — BR-163 makes the type
-  /// system state, not a setting.
+  /// Moves a card to Trash (BR-256). Its study state, history and tags stay
+  /// with it until the batch is purged (BR-259). Removing the deck's last
+  /// active card returns it to `unset` in the same write — BR-260 makes the
+  /// type system state, not a setting.
   Future<void> deleteCard(String cardId);
+
+  /// The same deletion, returning the one batch id so the caller can offer Undo
+  /// (BR-256, BR-263).
+  Future<String> deleteCardForUndo(String cardId);
 
   /// Moves [cardIds] into [targetDeckId] — one transaction, all or nothing
   /// (BR-165, BR-166).
@@ -181,9 +186,16 @@ abstract interface class CardRepository {
     required String targetDeckId,
   });
 
-  /// Deletes [cardIds] with their study state and history — one transaction
-  /// (BR-166). A deck left empty goes back to `unset` (BR-163).
+  /// Moves [cardIds] to Trash in one atomic write — BR-166, BR-256. A deck left
+  /// with no active cards goes back to `unset` (BR-260).
   Future<void> deleteCards(List<String> cardIds);
+
+  /// The same deletion, returning **one batch per card**, in the order given
+  /// (BR-256).
+  ///
+  /// One batch each rather than one for the selection: the item root is
+  /// singular, and a user who deletes fifty cards may want three of them back.
+  Future<List<String>> deleteCardsForUndo(List<String> cardIds);
 
   /// Sets the flag on [cardIds] to [isFlagged] (BR-92, BR-166).
   ///

@@ -105,6 +105,9 @@ WITH matched (
       LIMIT 1
     )
   FROM cards c
+  -- A card in Trash is not findable (BR-257): search reads the active
+  -- library, and a hit the user cannot open is a broken promise.
+  WHERE c.delete_batch_id IS NULL
 )
 SELECT
   card_id AS cardId,

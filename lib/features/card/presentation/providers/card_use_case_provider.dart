@@ -57,6 +57,11 @@ UpdateCardUseCase updateCardUseCase(Ref ref) =>
 DeleteCardUseCase deleteCardUseCase(Ref ref) =>
     DeleteCardUseCase(ref.watch(cardRepositoryProvider));
 
+/// The delete that reports its batch, for the one caller that offers Undo.
+@riverpod
+DeleteCardForUndoUseCase deleteCardForUndoUseCase(Ref ref) =>
+    DeleteCardForUndoUseCase(ref.watch(cardRepositoryProvider));
+
 @riverpod
 SetCardFlagUseCase setCardFlagUseCase(Ref ref) =>
     SetCardFlagUseCase(ref.watch(cardRepositoryProvider));

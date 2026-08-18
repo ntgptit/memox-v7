@@ -6,6 +6,7 @@ import 'connection.dart';
 part 'app_database.g.dart';
 part 'app_database_migrations.dart';
 part 'app_database_migrations_v5.dart';
+part 'app_database_migrations_v11.dart';
 
 /// The app's database.
 ///
@@ -15,6 +16,7 @@ part 'app_database_migrations_v5.dart';
 /// putting them in SQL would make changing them a migration.
 @DriftDatabase(
   include: <String>{
+    'tables/trash.drift',
     'tables/decks.drift',
     'tables/cards.drift',
     'tables/tags.drift',
@@ -31,6 +33,7 @@ part 'app_database_migrations_v5.dart';
     'queries/progress.drift',
     'queries/reminder.drift',
     'queries/search.drift',
+    'queries/trash.drift',
   },
 )
 class AppDatabase extends _$AppDatabase {
@@ -41,7 +44,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.open() : super(openAppDatabaseConnection());
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -214,6 +217,25 @@ class AppDatabase extends _$AppDatabase {
       // Last, so it runs on top of whatever the v1…v9 steps just produced.
       if (from < 10) {
         await _upgradeToV10();
+      }
+
+      // v10 -> v11 (M99.33): Trash. The one migration in this file that both
+      // adds structure and rebuilds a table.
+      //
+      // **The rebuild is not optional.** `study_sessions.end_reason` gains
+      // `content_deleted` (BR-259) and SQLite cannot alter a CHECK, so the
+      // table is created-copied-dropped-renamed exactly as v5 did for the same
+      // reason. Everything else here is additive, and every existing row stays
+      // active because `delete_batch_id` arrives NULL — which is what "old
+      // rows are active by default" means in practice.
+      //
+      // **v11 rather than the v8 this arrived as.** Trash was written against
+      // the same base as the recall direction (v8), Settings (v9) and the
+      // reminder (v10) and claimed the first free number it saw; it landed
+      // last, so it runs on top of all three. `migration_v11_test` upgrades
+      // from a v10 database, not a v7 one.
+      if (from < 11) {
+        await _upgradeToV11();
       }
     },
 

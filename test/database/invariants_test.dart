@@ -3,7 +3,7 @@ import 'invariant_queries.dart';
 import 'support/invariant_fixture.dart';
 import 'support/test_database.dart';
 
-/// The 15 data invariants, run against a real database.
+/// The 22 data invariants, run against a real database.
 ///
 /// Each is checked **both ways**. Clean on valid data proves the query does not
 /// cry wolf; firing on its own violation proves it is connected to anything at
@@ -13,6 +13,9 @@ import 'support/test_database.dart';
 ///
 /// The violating fixture introduces exactly one defect, so a query that fires is
 /// firing on its own subject rather than on collateral damage from the seed.
+///
+/// The five Trash cases live in `invariants_trash_test.dart`; the fixture and
+/// the both-ways helper they share are in `support/invariant_harness.dart`.
 void main() {
   test('every invariant this suite claims to run is present', () {
     // The list itself is a claim. Losing one would leave the rest green and no
@@ -22,14 +25,24 @@ void main() {
     // becoming Q16 and Q17: the host set is a subset of the document's
     // numbering, and renumbering to close the gap would make every citation of
     // an invariant ambiguous about which document version it meant.
-    expect(invariantQueries.keys, hasLength(19));
+    expect(invariantQueries.keys, hasLength(24));
     expect(
       invariantQueries.keys,
       containsAll(<String>[for (var i = 1; i <= 15; i++) 'Q$i']),
     );
     expect(
       invariantQueries.keys,
-      containsAll(<String>['Q29', 'Q30', 'Q31', 'Q32']),
+      containsAll(<String>[
+        'Q29',
+        'Q30',
+        'Q31',
+        'Q32',
+        'Q33',
+        'Q34',
+        'Q35',
+        'Q36',
+        'Q37',
+      ]),
     );
   });
 

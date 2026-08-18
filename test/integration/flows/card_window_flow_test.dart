@@ -4,6 +4,7 @@ import 'package:memox/core/database/app_database.dart';
 import 'package:memox/features/card/data/repositories/card_repository_impl.dart';
 import 'package:memox/features/card/domain/failures/card_validation_failure.dart';
 import 'package:memox/features/card/domain/models/card_text_model.dart';
+import '../../support/trash_wiring.dart';
 
 /// `HOST-FLOW` for IT-ORG-012 — the half of the windowed list that a widget
 /// test cannot reach.
@@ -35,6 +36,7 @@ void main() {
     var next = 0;
     repository = CardRepositoryImpl(
       db,
+      trash: contentTrashForTest(db, clock: () => DateTime.utc(2026, 8, 5, 9)),
       clock: () => DateTime.utc(2026, 8, 5, 9),
       idGenerator: () => 'card-${(next++).toString().padLeft(3, '0')}',
     );

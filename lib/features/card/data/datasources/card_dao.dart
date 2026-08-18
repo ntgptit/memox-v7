@@ -279,12 +279,6 @@ final class CardDao {
     }
   }
 
-  Future<void> deleteCardsByIds(List<String> cardIds) async {
-    for (final chunk in _chunks(cardIds)) {
-      await _db.deleteCardsByIds(chunk);
-    }
-  }
-
   Future<void> setCardsFlagByIds({
     required List<String> cardIds,
     required bool isFlagged,

@@ -292,6 +292,30 @@ abstract interface class StudyRepository {
     required StudySessionEndReason reason,
   });
 
+  /// Closes every open session that a deletion has just taken the material
+  /// out from under (BR-259).
+  ///
+  /// **Two id sets, because there are two ways a session can be affected and
+  /// only one of them is visible from the deck side.** A session opened *on* a
+  /// deck in [deckIds] is obvious; a session reviewing a whole tree whose queue
+  /// happens to hold a card in [cardIds] is not — its `deck_id` is the root,
+  /// which the deletion never touched.
+  ///
+  /// **Called from inside the deletion's transaction, before the rows are
+  /// marked.** Before, because the ids have to still describe live rows; inside,
+  /// because BR-259 requires the closing and the marking to be one atomic step
+  /// — a session left `in_progress` over deleted material is one that will
+  /// serve a card the user cannot see.
+  ///
+  /// The reason is not a parameter: unlike [invalidateSessionsForRoot], which
+  /// serves two different deck operations, there is exactly one event here and
+  /// it is `content_deleted`. Returns how many were closed.
+  Future<int> invalidateSessionsForDeletedContent({
+    required List<String> deckIds,
+    required List<String> cardIds,
+    required DateTime endedAt,
+  });
+
   /// Closes a session with a [status] and [reason] the matrix allows.
   ///
   /// Turns already written stay written, in every ending (BR-86): changing the

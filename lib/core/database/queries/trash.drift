@@ -1,0 +1,244 @@
+import '../tables/trash.drift';
+import '../tables/decks.drift';
+import '../tables/cards.drift';
+
+-- Typed queries for Trash (M99.33, BR-256…BR-267, AD-22).
+--
+-- **This is the one file whose statements deliberately read tombstones.** Every
+-- other query in the app carries `delete_batch_id IS NULL`; the inventory guard
+-- allowlists this file by name, because a Trash that could not see deleted rows
+-- would have nothing to show.
+--
+-- Batch ids are never derived. A row belongs to the deletion whose id it
+-- carries, and that is the only thing that decides what a restore revives
+-- (BR-258) — the current parent answers *where it is*, not *who it went with*.
+
+-- ---- reads ----------------------------------------------------------------
+
+-- One row per deletion, newest first — the whole Trash list in one statement.
+--
+-- **The two `LEFT JOIN`s are exclusive by `item_type`**, so exactly one of them
+-- matches and `COALESCE` picks the side that exists. A batch whose item root is
+-- gone matches neither and yields NULL names; that is invariant 35's violation
+-- and the repository drops such a row rather than drawing a ghost.
+--
+-- `deckCount`/`cardCount` count the batch, not the subtree: what a restore
+-- would bring back (BR-262). A descendant that was already in Trash under an
+-- older batch carries that older id and is therefore absent from both — which
+-- is exactly the number the confirm dialog must show.
+--
+-- **`originPathJson` is one recursive walk for the whole list, not one per
+-- row.** The CTE maps every deck to its ancestor chain once; the scalar then
+-- reads the chain of this row's origin deck. Per-row recursion would be the
+-- N+1 that `childDeckLevel` names by name. It is a JSON scalar for the same
+-- reason `childDeckLevel.ancestryJson` is — the typed alternatives multiply the
+-- result set by depth, and drift does not expand `table.**` inside a compound
+-- select. `distance` rides inside each object because SQLite promises nothing
+-- about the order an aggregate consumes its input; the mapper sorts.
+--
+-- The walk crosses tombstones on purpose: the origin deck of a card deleted
+-- last week may itself be in Trash today, and the path is still the honest
+-- answer to "where was this" (BR-267). It is information, never a restore
+-- target.
+trashBatchRows:
+WITH RECURSIVE ancestry (deck_id, node_id, distance) AS (
+    SELECT id, parent_deck_id, 1 FROM decks WHERE parent_deck_id IS NOT NULL
+    UNION
+    SELECT a.deck_id, d.parent_deck_id, a.distance + 1
+    FROM decks d
+    INNER JOIN ancestry a ON d.id = a.node_id
+    WHERE d.parent_deck_id IS NOT NULL
+)
+SELECT
+    b.id AS batchId,
+    b.item_type AS itemType,
+    b.deleted_at AS deletedAt,
+    COALESCE(d.name, c.front) AS itemName,
+    -- **A `CASE` on `item_type`, not a `COALESCE` over `parent_deck_id`.**
+    -- The two are equivalent here — the joins below are exclusive — but the
+    -- COALESCE spelling is the exact shape BR-57 bans for root resolution, and
+    -- a reader (or a guard) cannot tell at a glance that this one is picking an
+    -- *origin* rather than a root. Saying which branch is which removes the
+    -- question.
+    CASE WHEN b.item_type = 'deck' THEN d.parent_deck_id ELSE c.deck_id END
+        AS originDeckId,
+    (SELECT COUNT(*) FROM decks bd WHERE bd.delete_batch_id = b.id)
+        AS batchDeckCount,
+    (SELECT COUNT(*) FROM cards bc WHERE bc.delete_batch_id = b.id)
+        AS batchCardCount,
+    (
+        SELECT json_group_array(
+            json_object('id', a.node_id, 'name', ad.name,
+                        'distance', a.distance)
+        )
+        FROM ancestry a
+        INNER JOIN decks ad ON ad.id = a.node_id
+        WHERE a.deck_id =
+            CASE WHEN b.item_type = 'deck' THEN d.parent_deck_id
+                 ELSE c.deck_id END
+    ) AS originPathJson,
+    (
+        SELECT name FROM decks od
+        WHERE od.id =
+            CASE WHEN b.item_type = 'deck' THEN d.parent_deck_id
+                 ELSE c.deck_id END
+    ) AS originDeckName
+FROM delete_batches b
+LEFT JOIN decks d ON b.item_type = 'deck' AND d.id = b.root_item_id
+LEFT JOIN cards c ON b.item_type = 'card' AND c.id = b.root_item_id
+ORDER BY b.deleted_at DESC, b.id DESC;
+
+batchById:
+SELECT * FROM delete_batches WHERE id = :batchId;
+
+-- Batches whose retention has run out, oldest first (BR-264).
+--
+-- `<=`, so a batch at exactly 30 days is eligible; the caller computes
+-- `:cutoff` as `now - 30 days` from the injected clock, never SQL's own.
+--
+-- Oldest first because a purge cascade walks *down* the deck tree, and an
+-- ancestor is always deleted no earlier than its descendants (invariant 34) —
+-- so sweeping in this order means a descendant's own batch is already gone by
+-- the time its ancestor's turn arrives.
+eligibleBatches:
+SELECT * FROM delete_batches
+WHERE deleted_at <= :cutoff
+ORDER BY deleted_at ASC, id ASC;
+
+batchDeckIds:
+SELECT id FROM decks WHERE delete_batch_id = :batchId;
+
+batchCardIds:
+SELECT id FROM cards WHERE delete_batch_id = :batchId;
+
+-- The active descendants a deck deletion is about to take with it (BR-258).
+--
+-- Cycle-safe `UNION`, no depth cap, exactly like `subtreeDeckIds` — a cap turns
+-- corrupt data into a silently short answer, and here that would mean a subtree
+-- half marked. `delete_batch_id IS NULL` on the recursive step is what keeps a
+-- pre-existing tombstone and everything under it out of the new batch.
+activeSubtreeDeckIds:
+WITH RECURSIVE subtree (id) AS (
+    SELECT id FROM decks
+    WHERE id = :deckId AND delete_batch_id IS NULL
+    UNION
+    SELECT d.id
+    FROM decks d
+    INNER JOIN subtree s ON d.parent_deck_id = s.id
+    WHERE d.delete_batch_id IS NULL
+)
+SELECT id FROM subtree;
+
+activeCardIdsInDecks:
+SELECT id FROM cards
+WHERE deck_id IN :deckIds AND delete_batch_id IS NULL;
+
+-- How tall the batch's own subtree is, the item root counting as 1 (BR-261).
+--
+-- Bounded like every other probe in this codebase: a height at `:maxWalk` means
+-- "at least this tall", which the caller must refuse rather than round down.
+--
+-- **It walks only rows carrying this batch.** A descendant already in Trash
+-- under an older batch is not coming back with this restore, so it does not
+-- constrain where this subtree may land; its own depth is checked when it is
+-- restored (invariant 15 counts active rows only).
+batchSubtreeHeightProbe:
+WITH RECURSIVE walk (id, height) AS (
+    SELECT id, 1 FROM decks
+    WHERE id = :deckId AND delete_batch_id = :batchId
+    UNION ALL
+    SELECT d.id, w.height + 1
+    FROM decks d
+    INNER JOIN walk w ON d.parent_deck_id = w.id
+    WHERE d.delete_batch_id = :batchId AND w.height < :maxWalk
+)
+SELECT MAX(height) AS height FROM walk;
+
+-- BR-265's precondition, as one number.
+--
+-- Purging a batch deletes its deck rows, and `decks.parent_deck_id ON DELETE
+-- CASCADE` then takes *everything* under them — it has never heard of a batch.
+-- So before any of that runs, this counts the rows the cascade would reach that
+-- are not part of what the caller is allowed to remove: still active, or
+-- tombstoned under a batch outside `:allowedBatchIds`. Anything above zero and
+-- the batch is left alone, whole.
+--
+-- **The allowed set is a parameter, not a retention cutoff**, because the two
+-- callers mean different things by "allowed": the sweep passes every batch past
+-- retention (BR-264), and a user-requested purge passes exactly what the
+-- confirmation named (BR-266). One statement, two policies, and neither can
+-- reach a row the other would have protected.
+--
+-- A card batch marks no decks, so the subtree is empty and the answer is 0 —
+-- purging one card can reach nothing but itself.
+purgeBlockerCount:
+WITH RECURSIVE subtree (id) AS (
+    SELECT id FROM decks WHERE delete_batch_id = :batchId
+    UNION
+    SELECT d.id
+    FROM decks d
+    INNER JOIN subtree s ON d.parent_deck_id = s.id
+)
+SELECT (
+    SELECT COUNT(*) FROM decks d
+    WHERE d.id IN (SELECT id FROM subtree)
+      AND (d.delete_batch_id IS NULL
+           OR d.delete_batch_id NOT IN :allowedBatchIds)
+) + (
+    SELECT COUNT(*) FROM cards c
+    WHERE c.deck_id IN (SELECT id FROM subtree)
+      AND (c.delete_batch_id IS NULL
+           OR c.delete_batch_id NOT IN :allowedBatchIds)
+) AS blockerCount;
+
+-- The tombstone rows themselves, read without the active filter every other
+-- statement carries. Restore and Undo need the row's stored parent — its origin
+-- — and `deckById`/`cardById` deliberately cannot see it (BR-257).
+--
+-- Both are scoped to a batch as well as an id, so a stale batch id cannot read
+-- a row that has since been restored: the pair either matches or the operation
+-- is a not-found (UC-21 E6).
+tombstoneDeckInBatch:
+SELECT * FROM decks WHERE id = :deckId AND delete_batch_id = :batchId;
+
+tombstoneCardInBatch:
+SELECT * FROM cards WHERE id = :cardId AND delete_batch_id = :batchId;
+
+-- Any deck row, tombstone or not — used for exactly one thing: reading the
+-- scheduler of the root a restored subtree is coming *from*. That root may
+-- itself be in Trash (a sub-deck deleted before its root), and BR-261 still has
+-- to compare schedulers across the move.
+anyDeckById:
+SELECT * FROM decks WHERE id = :deckId;
+
+-- Session invalidation (BR-259) is **not** here. The two lookups and the
+-- write live in `queries/study.drift`, because the session status × end_reason
+-- pair belongs to `StudySessionStatus.isValidWith` and Trash may not write it
+-- behind that enum's back; it asks `StudyRepository` instead.
+
+-- ---- writes ---------------------------------------------------------------
+
+-- Marking, restoring and purging are each one statement over a set, so a batch
+-- is one atomic step rather than N of them (BR-256, BR-262, BR-265).
+
+markDecksDeleted:
+UPDATE decks SET delete_batch_id = :batchId, updated_at = :updatedAt
+WHERE id IN :deckIds AND delete_batch_id IS NULL;
+
+markCardsDeleted:
+UPDATE cards SET delete_batch_id = :batchId, updated_at = :updatedAt
+WHERE id IN :cardIds AND delete_batch_id IS NULL;
+
+restoreDecksInBatch:
+UPDATE decks SET delete_batch_id = NULL, updated_at = :updatedAt
+WHERE delete_batch_id = :batchId;
+
+restoreCardsInBatch:
+UPDATE cards SET delete_batch_id = NULL, updated_at = :updatedAt
+WHERE delete_batch_id = :batchId;
+
+-- Purge. The FK from both tombstone columns is `ON DELETE CASCADE`, so removing
+-- the batch removes its rows, and their own cascades remove study states,
+-- answers, queue rows and tag links (BR-265).
+purgeBatch:
+DELETE FROM delete_batches WHERE id = :batchId;

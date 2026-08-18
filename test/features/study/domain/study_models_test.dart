@@ -112,6 +112,10 @@ void main() {
       (StudySessionStatus.abandoned, StudySessionEndReason.interrupted),
       (StudySessionStatus.invalidated, StudySessionEndReason.schedulerReset),
       (StudySessionStatus.invalidated, StudySessionEndReason.staleGeneration),
+      // BR-259: the deck or card the session was running on went to Trash. Its
+      // own value rather than `scheduler_reset`, because nothing about the
+      // scheduler changed and only one of the two is undone by pressing Undo.
+      (StudySessionStatus.invalidated, StudySessionEndReason.contentDeleted),
       (StudySessionStatus.failed, StudySessionEndReason.persistenceError),
     ];
 

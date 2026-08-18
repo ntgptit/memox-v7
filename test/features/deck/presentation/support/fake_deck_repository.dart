@@ -252,6 +252,15 @@ class FakeDeckRepository implements DeckRepository {
     if (failure != null) throw failure;
   }
 
+  /// The batch id an Undo affordance would hold on to (BR-256, BR-263).
+  /// Derived from the deck id so a test can tell which deletion a batch names.
+  @override
+  Future<String> deleteDeckForUndo(String deckId) async {
+    await deleteDeck(deckId);
+
+    return 'batch-$deckId';
+  }
+
   /// Every reset of learning progress this fake was asked for (UC-07).
   final List<({String rootDeckId, SchedulerType schedulerType})>
   progressResets = <({String rootDeckId, SchedulerType schedulerType})>[];

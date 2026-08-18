@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/core/error/failure.dart';
 import 'package:memox/features/card/data/repositories/card_detail_repository_impl.dart';
 import 'package:memox/features/card/domain/entities/card_entity.dart';
 import 'package:memox/features/card/domain/failures/card_validation_failure.dart';
@@ -235,8 +236,13 @@ void main() {
       expect(await h.countAll('study_answers'), 60);
     });
 
-    test('history of a deleted card is empty, and its rows cascaded '
-        'away', () async {
+    test('history of a deleted card survives the soft delete; the detail '
+        'read refuses first (BR-259, BR-257)', () async {
+      // Before Trash (M99.33) a delete cascaded the rows away. Now the delete
+      // is a tombstone: the learning history stays in the database — restore
+      // must bring it back whole (BR-259) — while every active surface,
+      // including the detail read this repository serves, refuses the card
+      // (BR-257). The rows leave for good only when the batch is purged.
       final seed = await seedCard();
       await fixture.seedRun(
         cardId: seed.card.id,
@@ -246,10 +252,15 @@ void main() {
 
       await h.cardRepository.deleteCard(seed.card.id);
 
-      expect(await h.countAll('study_answers'), 0);
-      final page = await repository().loadCardHistoryPage(seed.card.id);
-      expect(page.events, isEmpty);
-      expect(page.hasMore, isFalse);
+      expect(
+        await h.countAll('study_answers'),
+        3,
+        reason: 'a soft delete keeps the history for restore (BR-259)',
+      );
+      await expectLater(
+        repository().watchCardDetail(seed.card.id).first,
+        throwsA(isA<NotFoundFailure>()),
+      );
     });
 
     test('a card with no reviews is an empty page, not a failure '

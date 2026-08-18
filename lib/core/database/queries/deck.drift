@@ -3,6 +3,12 @@ import '../tables/cards.drift';
 
 -- Typed queries for the Deck management vertical (M4.9, M4.9a).
 --
+-- **Every statement here reads the ACTIVE tree.** From v8 a row carrying
+-- `delete_batch_id` is in Trash and must not appear in a list, a count, a
+-- target picker or a probe (BR-257). Two statements are deliberately exempt and
+-- say so where they stand; `query_inventory_test.dart` holds the rest to it and
+-- knows those two by name.
+--
 -- Tree reads resolve through `root_deck_id`, never by coalescing the parent
 -- column with the id (BR-57): that expression means "my parent, or me if I
 -- have none" and returns the wrong deck from the third level down.
@@ -27,7 +33,7 @@ import '../tables/cards.drift';
 -- Root decks for the list screen (UC-06 reads it; M4.9 provides it).
 rootDecks:
 SELECT * FROM decks
-WHERE parent_deck_id IS NULL
+WHERE parent_deck_id IS NULL AND delete_batch_id IS NULL
 ORDER BY created_at ASC, id ASC;
 
 -- Root decks with their aggregate progress — the whole of UC-06 step 1 in ONE
@@ -85,8 +91,13 @@ SELECT
     COALESCE(learned.learnedCount, 0) AS learnedCardCount,
     COALESCE(sub.subCount, 0) AS subDeckCount,
     (
+        -- Joined back to `cards` for one reason only: a state whose card is in
+        -- Trash must not set the moment this screen wakes up at (BR-257). The
+        -- state row survives a soft delete by design, so without the join this
+        -- scalar would schedule a re-measure for a card no count includes.
         SELECT MIN(next.due_at) FROM card_study_states next
-        WHERE next.due_at > :now
+        INNER JOIN cards nc ON nc.id = next.card_id
+        WHERE next.due_at > :now AND nc.delete_batch_id IS NULL
     ) AS nextDueAt
 FROM decks d
 -- BR-90, BR-150. The badge's other number: cards that have not finished the
@@ -101,12 +112,14 @@ LEFT JOIN (
     INNER JOIN decks cd ON cd.id = c.deck_id
     INNER JOIN card_study_states s ON s.card_id = c.id
     WHERE s.learned_at IS NULL
+      AND c.delete_batch_id IS NULL AND cd.delete_batch_id IS NULL
     GROUP BY cd.root_deck_id
 ) new ON new.rootDeckId = d.id
 LEFT JOIN (
     SELECT cd.root_deck_id AS rootDeckId, COUNT(*) AS cardCount
     FROM cards c
     INNER JOIN decks cd ON cd.id = c.deck_id
+    WHERE c.delete_batch_id IS NULL AND cd.delete_batch_id IS NULL
     GROUP BY cd.root_deck_id
 ) total ON total.rootDeckId = d.id
 -- `oldestDueAt` rides the same grouped subquery as the count (BR-161): it is
@@ -131,6 +144,7 @@ LEFT JOIN (
     INNER JOIN decks cd ON cd.id = c.deck_id
     INNER JOIN card_study_states s ON s.card_id = c.id
     WHERE s.learned_at IS NOT NULL AND s.due_at <= :now
+      AND c.delete_batch_id IS NULL AND cd.delete_batch_id IS NULL
     GROUP BY cd.root_deck_id
 ) due ON due.rootDeckId = d.id
 -- BR-88. `card_study_states` carries `scheduler_type` denormalised, so the
@@ -141,8 +155,9 @@ LEFT JOIN (
     FROM cards c
     INNER JOIN decks cd ON cd.id = c.deck_id
     INNER JOIN card_study_states s ON s.card_id = c.id
-    WHERE (s.scheduler_type = 'eight_box' AND s.current_box = 8)
-       OR (s.scheduler_type = 'sm2' AND s.interval_days >= 128)
+    WHERE ((s.scheduler_type = 'eight_box' AND s.current_box = 8)
+       OR (s.scheduler_type = 'sm2' AND s.interval_days >= 128))
+      AND c.delete_batch_id IS NULL AND cd.delete_batch_id IS NULL
     GROUP BY cd.root_deck_id
 ) learned ON learned.rootDeckId = d.id
 -- Direct children only, not the subtree: the row says "3 sub-decks", and a
@@ -150,10 +165,10 @@ LEFT JOIN (
 LEFT JOIN (
     SELECT parent_deck_id AS parentId, COUNT(*) AS subCount
     FROM decks
-    WHERE parent_deck_id IS NOT NULL
+    WHERE parent_deck_id IS NOT NULL AND delete_batch_id IS NULL
     GROUP BY parent_deck_id
 ) sub ON sub.parentId = d.id
-WHERE d.parent_deck_id IS NULL
+WHERE d.parent_deck_id IS NULL AND d.delete_batch_id IS NULL
 ORDER BY d.created_at ASC, d.id ASC;
 
 -- Every deck in the database, ordered so a tree can be rebuilt from it.
@@ -169,16 +184,21 @@ ORDER BY d.created_at ASC, d.id ASC;
 -- is decided by `moveDeck` (BR-55, BR-64, BR-70, BR-74).
 allDecks:
 SELECT * FROM decks
+WHERE delete_batch_id IS NULL
 ORDER BY root_deck_id ASC, created_at ASC, id ASC;
 
+-- **The active deck, or no row at all.** Every write path in the Deck and Card
+-- features reads through this, and each turns a missing row into
+-- `NotFoundFailure` — which is exactly what a deck in Trash must look like to
+-- them (BR-257). Trash reads its own rows through `queries/trash.drift`.
 deckById:
-SELECT * FROM decks WHERE id = :deckId;
+SELECT * FROM decks WHERE id = :deckId AND delete_batch_id IS NULL;
 
 -- One root's whole tree, root included, at any allowed depth. No recursion
 -- needed: every descendant already carries the root's id (BR-56).
 decksInTree:
 SELECT * FROM decks
-WHERE root_deck_id = :rootDeckId
+WHERE root_deck_id = :rootDeckId AND delete_batch_id IS NULL
 ORDER BY created_at ASC, id ASC;
 
 -- One deck and its direct children, each child carrying the aggregate of its
@@ -245,11 +265,13 @@ ORDER BY created_at ASC, id ASC;
 childDeckLevel:
 WITH RECURSIVE
 branch (branch_id, deck_id) AS (
-    SELECT id, id FROM decks WHERE parent_deck_id = :parentId
+    SELECT id, id FROM decks
+    WHERE parent_deck_id = :parentId AND delete_batch_id IS NULL
     UNION
     SELECT b.branch_id, d.id
     FROM decks d
     INNER JOIN branch b ON d.parent_deck_id = b.deck_id
+    WHERE d.delete_batch_id IS NULL
 ),
 ancestry (deck_id, distance) AS (
     SELECT parent_deck_id, 1 FROM decks
@@ -276,7 +298,7 @@ SELECT
         FROM branch fb
         INNER JOIN cards fc ON fc.deck_id = fb.deck_id
         INNER JOIN card_study_states next ON next.card_id = fc.id
-        WHERE next.due_at > :now
+        WHERE next.due_at > :now AND fc.delete_batch_id IS NULL
     ) AS nextDueAt,
     (
         SELECT json_group_array(
@@ -286,12 +308,14 @@ SELECT
         INNER JOIN decks d ON d.id = a.deck_id
     ) AS ancestryJson
 FROM decks AS parent
-LEFT JOIN decks AS child ON child.parent_deck_id = parent.id
+LEFT JOIN decks AS child
+    ON child.parent_deck_id = parent.id AND child.delete_batch_id IS NULL
 LEFT JOIN decks AS root ON root.id = child.root_deck_id
 LEFT JOIN (
     SELECT b.branch_id AS branchId, COUNT(*) AS cardCount
     FROM branch b
     INNER JOIN cards c ON c.deck_id = b.deck_id
+    WHERE c.delete_batch_id IS NULL
     GROUP BY b.branch_id
 ) total ON total.branchId = child.id
 -- BR-90, BR-150, per branch. Same predicate as the root query above, repeated
@@ -302,7 +326,7 @@ LEFT JOIN (
     FROM branch b
     INNER JOIN cards c ON c.deck_id = b.deck_id
     INNER JOIN card_study_states s ON s.card_id = c.id
-    WHERE s.learned_at IS NULL
+    WHERE s.learned_at IS NULL AND c.delete_batch_id IS NULL
     GROUP BY b.branch_id
 ) new ON new.branchId = child.id
 -- BR-161, per branch: the oldest due card of each child's subtree, same
@@ -318,6 +342,7 @@ LEFT JOIN (
     INNER JOIN cards c ON c.deck_id = b.deck_id
     INNER JOIN card_study_states s ON s.card_id = c.id
     WHERE s.learned_at IS NOT NULL AND s.due_at <= :now
+      AND c.delete_batch_id IS NULL
     GROUP BY b.branch_id
 ) due ON due.branchId = child.id
 -- BR-88, per branch. Same predicate as the root query above; it is repeated
@@ -328,18 +353,19 @@ LEFT JOIN (
     FROM branch b
     INNER JOIN cards c ON c.deck_id = b.deck_id
     INNER JOIN card_study_states s ON s.card_id = c.id
-    WHERE (s.scheduler_type = 'eight_box' AND s.current_box = 8)
-       OR (s.scheduler_type = 'sm2' AND s.interval_days >= 128)
+    WHERE ((s.scheduler_type = 'eight_box' AND s.current_box = 8)
+       OR (s.scheduler_type = 'sm2' AND s.interval_days >= 128))
+      AND c.delete_batch_id IS NULL
     GROUP BY b.branch_id
 ) learned ON learned.branchId = child.id
 -- Direct children of each child, same reason as the root query.
 LEFT JOIN (
     SELECT parent_deck_id AS parentId, COUNT(*) AS subCount
     FROM decks
-    WHERE parent_deck_id IS NOT NULL
+    WHERE parent_deck_id IS NOT NULL AND delete_batch_id IS NULL
     GROUP BY parent_deck_id
 ) sub ON sub.parentId = child.id
-WHERE parent.id = :parentId
+WHERE parent.id = :parentId AND parent.delete_batch_id IS NULL
 ORDER BY child.created_at ASC, child.id ASC;
 
 -- Where a card may move to (BR-165).
@@ -362,17 +388,23 @@ LEFT JOIN decks p ON p.id = d.parent_deck_id
 WHERE d.root_deck_id = :rootDeckId
   AND d.parent_deck_id IS NOT NULL
   AND d.id != :sourceDeckId
+  AND d.delete_batch_id IS NULL
   AND (d.content_type = 'unset' OR d.content_type = 'card')
 ORDER BY d.name ASC, d.id ASC;
 
--- An arbitrary deck's subtree — itself plus every descendant.
+-- An arbitrary deck's subtree — itself plus every ACTIVE descendant.
+--
+-- A tombstoned branch is not part of the tree this deck presents: it does not
+-- count towards a deletion impact, it cannot make a move target "inside the
+-- subtree", and it must not be swept into a second batch (BR-258).
 subtreeDeckIds:
 WITH RECURSIVE subtree (id) AS (
-    SELECT id FROM decks WHERE id = :deckId
+    SELECT id FROM decks WHERE id = :deckId AND delete_batch_id IS NULL
     UNION
     SELECT d.id
     FROM decks d
     INNER JOIN subtree s ON d.parent_deck_id = s.id
+    WHERE d.delete_batch_id IS NULL
 )
 SELECT id FROM subtree;
 
@@ -384,12 +416,13 @@ SELECT id FROM subtree;
 -- caller must refuse, not guess.
 deckDepthProbe:
 WITH RECURSIVE ancestry (node_id, parent_id, depth) AS (
-    SELECT id, parent_deck_id, 1 FROM decks WHERE id = :deckId
+    SELECT id, parent_deck_id, 1 FROM decks
+    WHERE id = :deckId AND delete_batch_id IS NULL
     UNION ALL
     SELECT d.id, d.parent_deck_id, a.depth + 1
     FROM decks d
     INNER JOIN ancestry a ON d.id = a.parent_id
-    WHERE a.depth < :maxWalk
+    WHERE a.depth < :maxWalk AND d.delete_batch_id IS NULL
 )
 SELECT depth AS depth, parent_id IS NULL AS reachedRoot
 FROM ancestry
@@ -399,40 +432,60 @@ LIMIT 1;
 -- How tall a subtree is, with the deck itself as height 1. A result equal to
 -- :maxWalk means "at least this tall" — taller than any tree the caller
 -- permits, or cyclic — and the caller must refuse.
+--
+-- **Active rows only, and that direction is the opposite of
+-- `updateSubtreeRootDeck`'s.** A branch sitting in Trash must not make a legal
+-- move illegal — it is not coming back unless someone restores it, and restore
+-- re-checks the depth then (BR-261). The batch's own height is
+-- `batchSubtreeHeightProbe` in `queries/trash.drift`.
 subtreeHeightProbe:
 WITH RECURSIVE walk (id, height) AS (
-    SELECT id, 1 FROM decks WHERE id = :deckId
+    SELECT id, 1 FROM decks WHERE id = :deckId AND delete_batch_id IS NULL
     UNION ALL
     SELECT d.id, w.height + 1
     FROM decks d
     INNER JOIN walk w ON d.parent_deck_id = w.id
-    WHERE w.height < :maxWalk
+    WHERE w.height < :maxWalk AND d.delete_batch_id IS NULL
 )
 SELECT MAX(height) AS height FROM walk;
 
 -- Direct children only — the emptiness check the auto-unset runs on
 -- (BR-163) and the one the move rules read.
+-- Active children only, and that is the whole of BR-260: a soft delete takes
+-- the last visible child away, and the parent has to notice.
 directChildDeckCount:
-SELECT COUNT(*) AS childCount FROM decks WHERE parent_deck_id = :deckId;
+SELECT COUNT(*) AS childCount FROM decks
+WHERE parent_deck_id = :deckId AND delete_batch_id IS NULL;
 
 directCardCount:
-SELECT COUNT(*) AS cardCount FROM cards WHERE deck_id = :deckId;
+SELECT COUNT(*) AS cardCount FROM cards
+WHERE deck_id = :deckId AND delete_batch_id IS NULL;
 
 -- Cards in a whole subtree, for the deletion confirm (BR-04).
 subtreeCardCount:
 WITH RECURSIVE subtree (id) AS (
-    SELECT id FROM decks WHERE id = :deckId
+    SELECT id FROM decks WHERE id = :deckId AND delete_batch_id IS NULL
     UNION
     SELECT d.id
     FROM decks d
     INNER JOIN subtree s ON d.parent_deck_id = s.id
+    WHERE d.delete_batch_id IS NULL
 )
 SELECT COUNT(*) AS cardCount
 FROM cards c
-WHERE c.deck_id IN (SELECT id FROM subtree);
+WHERE c.deck_id IN (SELECT id FROM subtree) AND c.delete_batch_id IS NULL;
 
 -- Rewrites the root pointer for a whole subtree in one statement (BR-71).
 -- Runs inside the move transaction; a failure anywhere rolls the lot back.
+--
+-- **Deliberately NOT filtered by `delete_batch_id`, and the exemption is the
+-- point** (AD-22). A tombstone inside the moved subtree still has to point at
+-- the tree it now sits in: invariant 6 compares every row's `root_deck_id` with
+-- its parent's, tombstone or not, and a restore later would otherwise bring
+-- back a branch naming a root it no longer belongs to.
+-- `query_inventory_test.dart` allowlists this statement by name with this
+-- reason; it is the exact opposite of `subtreeHeightProbe` above, which is why
+-- both say so out loud.
 updateSubtreeRootDeck:
 UPDATE decks
 SET root_deck_id = :newRootDeckId, updated_at = :updatedAt
@@ -461,6 +514,14 @@ WHERE id IN (
 --
 -- `study_answers` is untouched. The old history stays, carrying the old
 -- generation (BR-43).
+--
+-- **Deliberately NOT filtered by `delete_batch_id`** (AD-22). A card in Trash
+-- is still part of this tree — its deck's `root_deck_id` says so — and
+-- invariant 9 compares every state's generation with its root's. Skipping
+-- tombstones would leave them behind at the old generation, and a restore would
+-- then hand back a card that fails an invariant nobody can repair. Restoring
+-- into a tree with a different generation is what BR-261 refuses, so this is
+-- the only path by which such a state legitimately changes generation.
 resetTreeStudyStates:
 UPDATE card_study_states
 SET scheduler_type = :schedulerType,

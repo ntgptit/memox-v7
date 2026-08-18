@@ -1,4 +1,4 @@
-/// The 19 invariant queries this suite executes, copied verbatim from
+/// The 24 invariant queries this suite executes, copied verbatim from
 /// `data-model.md`.
 ///
 /// **A subset of the document's, and its numbering, not a fresh sequence.**
@@ -20,31 +20,44 @@ library;
 /// Invariant id → the query `data-model.md` specifies for it.
 const Map<String, String> invariantQueries = <String, String>{
   // ---- Deck tree ----------------------------------------------------------
+  // Six of the deck-tree queries below say `delete_batch_id IS NULL` from v8.
+  // They describe the tree the user can see, and a tombstone is not content: a
+  // deck emptied by BR-186 still holds deleted rows, so an unfiltered
+  // invariant 2 would fire on it and an unfiltered 29 would stay silent for it.
   'Q1': // Root deck holds cards directly (BR-58)
       'SELECT c.id FROM cards c '
       'JOIN decks d ON d.id = c.deck_id '
-      'WHERE d.parent_deck_id IS NULL',
+      'WHERE d.parent_deck_id IS NULL AND c.delete_batch_id IS NULL',
 
   'Q2': // content_type = 'unset' but already has content (BR-60, BR-62)
       "SELECT d.id FROM decks d WHERE d.content_type = 'unset' "
-      'AND (EXISTS (SELECT 1 FROM cards c WHERE c.deck_id = d.id) '
-      'OR EXISTS (SELECT 1 FROM decks s WHERE s.parent_deck_id = d.id))',
+      'AND d.delete_batch_id IS NULL '
+      'AND (EXISTS (SELECT 1 FROM cards c '
+      'WHERE c.deck_id = d.id AND c.delete_batch_id IS NULL) '
+      'OR EXISTS (SELECT 1 FROM decks s '
+      'WHERE s.parent_deck_id = d.id AND s.delete_batch_id IS NULL))',
 
-  'Q29': // A sub-deck kept its type after everything left it (BR-163)
+  'Q29': // A sub-deck kept its type after everything left it (BR-163, BR-186)
       'SELECT d.id FROM decks d '
       'WHERE d.parent_deck_id IS NOT NULL '
+      'AND d.delete_batch_id IS NULL '
       "AND d.content_type IN ('card', 'deck') "
-      'AND NOT EXISTS (SELECT 1 FROM cards c WHERE c.deck_id = d.id) '
-      'AND NOT EXISTS '
-      '(SELECT 1 FROM decks child WHERE child.parent_deck_id = d.id)',
+      'AND NOT EXISTS (SELECT 1 FROM cards c '
+      'WHERE c.deck_id = d.id AND c.delete_batch_id IS NULL) '
+      'AND NOT EXISTS (SELECT 1 FROM decks child '
+      'WHERE child.parent_deck_id = d.id AND child.delete_batch_id IS NULL)',
 
   'Q3': // content_type = 'card' but has sub-decks (BR-63)
       "SELECT d.id FROM decks d WHERE d.content_type = 'card' "
-      'AND EXISTS (SELECT 1 FROM decks s WHERE s.parent_deck_id = d.id)',
+      'AND d.delete_batch_id IS NULL '
+      'AND EXISTS (SELECT 1 FROM decks s '
+      'WHERE s.parent_deck_id = d.id AND s.delete_batch_id IS NULL)',
 
   'Q4': // content_type = 'deck' but has direct cards (BR-64)
       "SELECT d.id FROM decks d WHERE d.content_type = 'deck' "
-      'AND EXISTS (SELECT 1 FROM cards c WHERE c.deck_id = d.id)',
+      'AND d.delete_batch_id IS NULL '
+      'AND EXISTS (SELECT 1 FROM cards c '
+      'WHERE c.deck_id = d.id AND c.delete_batch_id IS NULL)',
 
   'Q5': // Root deck does not carry content_type = 'deck'
       'SELECT d.id FROM decks d '
@@ -105,8 +118,8 @@ const Map<String, String> invariantQueries = <String, String>{
       "(status = 'in_progress' AND end_reason IS NULL) "
       "OR (status = 'completed' AND end_reason IS NULL) "
       "OR (status = 'abandoned' AND end_reason = 'user_exit') "
-      "OR (status = 'invalidated' "
-      "AND end_reason IN ('scheduler_reset','stale_generation')) "
+      "OR (status = 'invalidated' AND end_reason IN "
+      "('scheduler_reset','stale_generation','content_deleted')) "
       "OR (status = 'failed' AND end_reason = 'persistence_error'))",
 
   'Q13': // Session ended but has no ended_at
@@ -144,10 +157,48 @@ const Map<String, String> invariantQueries = <String, String>{
   // ---- Deck tree, depth ---------------------------------------------------
   'Q15': // A deck deeper than 10 levels, root as level 1 (BR-55)
       'WITH RECURSIVE levels(id, depth) AS ('
-      'SELECT id, 1 FROM decks WHERE parent_deck_id IS NULL '
+      'SELECT id, 1 FROM decks '
+      'WHERE parent_deck_id IS NULL AND delete_batch_id IS NULL '
       'UNION ALL '
       'SELECT d.id, l.depth + 1 '
       'FROM decks d JOIN levels l ON d.parent_deck_id = l.id '
-      'WHERE l.depth < 64) '
+      'WHERE l.depth < 64 AND d.delete_batch_id IS NULL) '
       'SELECT id FROM levels WHERE depth > 10',
+
+  // ---- Trash (BR-182…BR-193, AD-21) ---------------------------------------
+  // Q31 and Q32 are the pair the whole one-column exclusion strategy rests on.
+  // If either fires, `delete_batch_id IS NULL` has stopped meaning "visible"
+  // and every active query in the app is quietly lying.
+  'Q33': // Active card inside a deleted deck (BR-256, BR-258)
+      'SELECT c.id FROM cards c '
+      'JOIN decks d ON d.id = c.deck_id '
+      'WHERE c.delete_batch_id IS NULL AND d.delete_batch_id IS NOT NULL',
+
+  'Q34': // Active deck under a deleted deck (BR-256, BR-258)
+      'SELECT d.id FROM decks d '
+      'JOIN decks p ON p.id = d.parent_deck_id '
+      'WHERE d.delete_batch_id IS NULL AND p.delete_batch_id IS NOT NULL',
+
+  'Q35': // A batch that owns no rows at all (BR-265)
+      'SELECT b.id FROM delete_batches b '
+      'WHERE NOT EXISTS '
+      '(SELECT 1 FROM decks d WHERE d.delete_batch_id = b.id) '
+      'AND NOT EXISTS '
+      '(SELECT 1 FROM cards c WHERE c.delete_batch_id = b.id)',
+
+  'Q36': // A tombstone deleted AFTER its already-deleted ancestor (BR-258)
+      'SELECT d.id FROM decks d '
+      'JOIN decks p ON p.id = d.parent_deck_id '
+      'JOIN delete_batches db ON db.id = d.delete_batch_id '
+      'JOIN delete_batches pb ON pb.id = p.delete_batch_id '
+      'WHERE db.deleted_at > pb.deleted_at',
+
+  'Q37': // A batch not pointing at an item root carrying it (BR-256)
+      'SELECT b.id FROM delete_batches b '
+      "WHERE (b.item_type = 'deck' AND NOT EXISTS "
+      '(SELECT 1 FROM decks d '
+      'WHERE d.id = b.root_item_id AND d.delete_batch_id = b.id)) '
+      "OR (b.item_type = 'card' AND NOT EXISTS "
+      '(SELECT 1 FROM cards c '
+      'WHERE c.id = b.root_item_id AND c.delete_batch_id = b.id))',
 };

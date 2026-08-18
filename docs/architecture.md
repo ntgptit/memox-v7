@@ -7,8 +7,8 @@
 | **Scope** | Quyết định ràng buộc nhiều tài liệu hoặc nhiều layer. Ngoài phạm vi: luật nghiệp vụ (`business-rules.md`), hình dạng dữ liệu (`data-model.md`) |
 | **Source of truth for** | AD-xx · đánh đổi kiến trúc · phương án đã bị loại · lý do pin toolchain |
 | **Depends on** | `document-conventions.md`, `product.md` |
-| **Updated by task** | M99.24 (AD-19 · rule placeholder gắn với tình trạng branch; Progress đã tốt nghiệp) · M99.28 (AD-19 · Settings rời trạng thái placeholder — không còn branch nào là placeholder) · M99.29 (AD-21 · nhắc học chạy trong background worker) |
-| **Last updated** | 2026-08-15 |
+| **Updated by task** | M99.33 (AD-22 · mô hình tombstone/batch của Trash, retention 30 ngày, purge an toàn); M99.24 (AD-19 · rule placeholder gắn với tình trạng branch; Progress đã tốt nghiệp) · M99.28 (AD-19 · Settings rời trạng thái placeholder — không còn branch nào là placeholder) · M99.29 (AD-21 · nhắc học chạy trong background worker) |
+| **Last updated** | 2026-08-19 |
 
 Format theo `document-conventions.md` §6.1. AD xếp theo số; ID vĩnh viễn (§7).
 
@@ -1535,3 +1535,61 @@ quyền exact alarm, đúng thứ BR-226 cấm. Tự viết method channel và
 lịch — đúng trong đa số trường hợp vì workload chỉ đổi khi app chạy, nhưng nó
 đổi *đảm bảo* của BR-220 thành một lập luận, và lập luận đó vỡ ngay lần đầu app
 bị kill giữa lúc ghi.
+
+---
+
+## AD-22 · Trash: tombstone một cột trên hàng, batch là bảng riêng, loại trừ là hợp đồng của query
+
+| | |
+|---|---|
+| **Status** | accepted |
+| **Affected documents** | `business-rules.md` (BR-256…BR-267), `use-cases.md` (UC-21), `data-model.md` (`delete_batches`, `decks.delete_batch_id`, `cards.delete_batch_id`, bất biến 31…35, schema v8), `wireframes/m99-33-trash-restore.md` |
+
+**Decision.** Soft-delete đánh dấu **tại chỗ**: `decks` và `cards` mỗi bảng thêm
+đúng **một** cột `delete_batch_id TEXT NULL REFERENCES delete_batches (id) ON
+DELETE CASCADE`. Không có bảng `trash` chứa bản sao, không có `deleted_at` trên
+hàng. Một lần xoá là một hàng trong `delete_batches` mang `item_type`,
+`root_item_id`, `deleted_at` và `owner_id`; mọi hàng thuộc lần xoá đó trỏ về nó.
+Hàng còn sống ⇔ `delete_batch_id IS NULL`, và **mọi** query đọc `cards`/`decks`
+hoặc mang điều kiện đó hoặc nằm trong một allowlist có lý do, do một test
+inventory quét `.drift` cưỡng chế. Purge là `DELETE FROM delete_batches`, để FK
+cascade làm phần còn lại. Route của Trash thuộc **branch Library**
+(`/trash`, `RouteNames.trash`) với entry là một action cố định trên app bar của
+danh sách root — không phải Settings, và không phải một mục ẩn trong overflow.
+
+**Context.** Trước v8, `deleteDeck` là `DELETE` thật và `ON DELETE CASCADE` kéo
+theo descendant deck, card, study state, `study_answers` và session của cả cây.
+Nội dung gõ lại được; lịch sử học thì không, và app là local-first nên không có
+backup nào để khôi phục từ đó (AD-03, AD-05).
+
+**Consequences.** Restore **là** move: nó gọi đúng `deckMoveRejection` mà UC-09
+dùng, nên độ sâu (BR-55), loại nội dung (BR-63/BR-64) và scheduler/generation
+(BR-70/BR-74) không có bản thứ hai để lệch. Ngược lại, mọi probe *đi xuống* —
+`subtreeHeightProbe`, `subtreeDeckIds` — phải lọc tombstone, vì một subtree đã
+xoá không được phép chặn một move hợp lệ trên cây đang sống; còn
+`updateSubtreeRootDeck` **cố ý không lọc**, vì một tombstone nằm trong subtree
+vẫn phải trỏ đúng root sau khi cha nó di chuyển (bất biến 6). Hai chiều ngược
+nhau trên cùng một cây là chỗ dễ sai nhất của thiết kế này, và là lý do bất biến
+31…35 tồn tại. `study_sessions.end_reason` phải nới `CHECK` để nhận
+`content_deleted`, tức là rebuild bảng — đó là phần đắt nhất của migration v8 và
+là lý do v8 không thể là data-only như v6/v7. Bất biến 1…5, 15 và 29 đổi nghĩa:
+chúng đo **hàng đang active**, nên mỗi câu thêm điều kiện lọc; không sửa chúng
+thì invariant 2 báo vi phạm cho mọi deck vừa được dọn rỗng đúng luật và invariant
+29 im lặng cho mọi deck lẽ ra phải `unset`.
+
+**Rejected alternatives.** *Bảng `trash` chứa bản sao hàng* — restore trở thành
+phép tái tạo, và `card_study_states`, `study_answers`, `card_tags` đều trỏ về
+`cards.id` bằng FK, nên phải nhân bản bốn quan hệ rồi ghép lại; BR-262 đòi giữ
+nguyên id/state/history, mà cách chắc chắn giữ nguyên là không động vào chúng.
+*`deleted_at` trên hàng cộng `delete_batch_id`* — hai nguồn sự thật cho một sự
+kiện trên cùng một hàng, và không gì bắt chúng bằng nhau. *Suy ra "đã xoá" từ
+tổ tiên* — mọi query active phải đi ngược cây, tức một recursive walk trong
+query nóng nhất của app; đánh dấu cả subtree lúc xoá đổi một lần ghi lấy vĩnh
+viễn một phép so sánh cột. *Bảng `deleted_items (item_type, item_id)` riêng* —
+giữ `cards`/`decks` không đổi, nhưng biến mọi loại trừ thành `NOT EXISTS` và bỏ
+mất cascade của FK khi purge. *Suy batch từ parent hiện tại* — hai batch chồng
+nhau trong một subtree là trạng thái hợp lệ và bình thường (xoá card hôm nay,
+xoá deck chứa nó tuần sau); parent trả lời *nó ở đâu*, không trả lời *nó đi cùng
+ai*. *Trash trong Settings* — Settings là placeholder (AD-19) và Trash chứa nội
+dung Library; đặt ở đó thì entry point của một tính năng khôi phục dữ liệu nằm
+sau hai lần chạm ở một branch không liên quan.

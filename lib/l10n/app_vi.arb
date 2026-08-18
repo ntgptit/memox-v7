@@ -650,7 +650,7 @@
     },
     "description": "Title of the delete confirmation. Names the deck so the user can tell which one they are about to lose (BR-04)."
   },
-  "deckDeleteImpactMessage": "{deckCount, plural, =0{} other{{deckCount} bộ thẻ con và }}{cardCount, plural, =0{không có thẻ nào} other{{cardCount} thẻ}} sẽ bị xoá theo. Không thể hoàn tác.",
+  "deckDeleteImpactMessage": "{deckCount, plural, =0{} other{{deckCount} bộ thẻ con và }}{cardCount, plural, =0{không có thẻ nào} other{{cardCount} thẻ}} vào Trash cùng nó. Bạn khôi phục được trong 30 ngày.",
   "@deckDeleteImpactMessage": {
     "placeholders": {
       "deckCount": {
@@ -660,11 +660,11 @@
         "type": "int"
       }
     },
-    "description": "Body of the delete confirmation, stating exactly how many sub-decks and cards go with the deck (BR-04)."
+    "description": "Body of the delete confirmation, stating exactly how many sub-decks and cards go with the deck (BR-04) and that the deletion is recoverable (BR-256)."
   },
-  "deckDeleteConfirmAction": "Xoá",
+  "deckDeleteConfirmAction": "Chuyển vào Trash",
   "@deckDeleteConfirmAction": {
-    "description": "Destructive confirm button of the delete-deck dialog."
+    "description": "Confirm button of the delete-deck dialog. Names where the deck goes rather than implying it is destroyed (BR-256)."
   },
   "deckMoveAction": "Di chuyển",
   "@deckMoveAction": {
@@ -1290,22 +1290,22 @@
     },
     "description": "Title of the bulk delete confirmation. Names the number rather than asking a generic 'are you sure' (UC-04 A6)."
   },
-  "cardBulkDeleteMessage": "Lịch sử học của chúng cũng bị xoá. Không thể hoàn tác.",
+  "cardBulkDeleteMessage": "Lịch sử học đi cùng chúng và quay lại nếu bạn khôi phục. Trash giữ trong 30 ngày.",
   "@cardBulkDeleteMessage": {
-    "description": "Body of the bulk delete confirmation: what is lost beyond the cards themselves."
+    "description": "Body of the bulk delete confirmation: what happens to the history, and for how long it can be undone (BR-256, BR-259)."
   },
-  "cardBulkDeleteConfirmAction": "Xoá thẻ",
+  "cardBulkDeleteConfirmAction": "Chuyển vào Trash",
   "@cardBulkDeleteConfirmAction": {
-    "description": "Destructive confirm button of the bulk delete dialog."
+    "description": "Confirm button of the bulk delete dialog (BR-256)."
   },
-  "cardBulkDeletedMessage": "Đã xoá {count} thẻ",
+  "cardBulkDeletedMessage": "{count, plural, =1{Đã chuyển 1 thẻ vào Trash} other{Đã chuyển {count} thẻ vào Trash}}",
   "@cardBulkDeletedMessage": {
     "placeholders": {
       "count": {
         "type": "int"
       }
     },
-    "description": "Result message after a bulk delete commits. A statement of what happened, deliberately not an Undo: this build cannot restore the study history it cascaded."
+    "description": "Result message after a bulk delete commits. It reports where the cards went, because they are recoverable from there (BR-256); Undo is offered for a single deletion only (BR-263)."
   },
   "cardBulkMovedMessage": "Đã chuyển {count} thẻ",
   "@cardBulkMovedMessage": {
@@ -1365,13 +1365,13 @@
   "@cardDeleteConfirmTitle": {
     "description": "Title of the card delete confirmation dialog (UC-04 A5)."
   },
-  "cardDeleteConfirmMessage": "Thẻ và lịch sử học của nó sẽ bị xóa. Không thể hoàn tác.",
+  "cardDeleteConfirmMessage": "Thẻ và lịch sử học của nó vào Trash. Bạn khôi phục được trong 30 ngày.",
   "@cardDeleteConfirmMessage": {
-    "description": "Body of the card delete confirmation. Deleting the last card also returns the deck to unset (BR-163)."
+    "description": "Body of the card delete confirmation. Deleting the last active card also returns the deck to unset (BR-260)."
   },
-  "cardDeleteConfirmAction": "Xóa",
+  "cardDeleteConfirmAction": "Chuyển vào Trash",
   "@cardDeleteConfirmAction": {
-    "description": "Confirm button on the card delete dialog."
+    "description": "Confirm button on the card delete dialog (BR-256)."
   },
   "cardDeleteFailed": "Không xóa được thẻ này. Hãy thử lại.",
   "@cardDeleteFailed": {
@@ -3854,5 +3854,210 @@
         "type": "String"
       }
     }
+  },
+  "studySummaryStoppedByDeletion": "Deck hoặc thẻ bạn đang học đã được chuyển vào Trash.",
+  "@studySummaryStoppedByDeletion": {
+    "description": "Explains a session invalidated because its material was deleted (BR-259)."
+  },
+  "trashTitle": "Trash",
+  "@trashTitle": {
+    "description": "Title of the Trash screen (UC-21)."
+  },
+  "trashEntryLabel": "Trash",
+  "@trashEntryLabel": {
+    "description": "App-bar action on the root deck list that opens Trash. Always visible, even when Trash is empty (wireframe T2)."
+  },
+  "trashRetentionNotice": "Mục ở đây bị xoá vĩnh viễn sau 30 ngày.",
+  "@trashRetentionNotice": {
+    "description": "One-line explanation above the Trash list (BR-264)."
+  },
+  "trashFilterAll": "Tất cả",
+  "@trashFilterAll": {
+    "description": "Trash filter chip: both kinds (wireframe T3)."
+  },
+  "trashFilterCards": "Thẻ",
+  "@trashFilterCards": {
+    "description": "Trash filter chip: cards only."
+  },
+  "trashFilterDecks": "Deck",
+  "@trashFilterDecks": {
+    "description": "Trash filter chip: decks only."
+  },
+  "trashEmptyTitle": "Trash trống",
+  "@trashEmptyTitle": {
+    "description": "Empty state title of the Trash screen (UC-21 A6)."
+  },
+  "trashEmptyMessage": "Deck và thẻ đã xoá nằm ở đây 30 ngày, để bạn lấy lại được.",
+  "@trashEmptyMessage": {
+    "description": "Empty state body of the Trash screen (BR-264)."
+  },
+  "trashEmptyCardsMessage": "Không có thẻ nào trong Trash.",
+  "@trashEmptyCardsMessage": {
+    "description": "Empty state when the Cards filter is on but only decks are in Trash."
+  },
+  "trashEmptyDecksMessage": "Không có deck nào trong Trash.",
+  "@trashEmptyDecksMessage": {
+    "description": "Empty state when the Decks filter is on but only cards are in Trash."
+  },
+  "trashDeletedDaysAgo": "{days, plural, =0{Đã xoá hôm nay} =1{Đã xoá 1 ngày trước} other{Đã xoá {days} ngày trước}}",
+  "@trashDeletedDaysAgo": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    },
+    "description": "When an item was deleted, on the Trash row (wireframe T4)."
+  },
+  "trashDaysLeft": "{days, plural, =0{Bị xoá vĩnh viễn hôm nay} =1{Còn 1 ngày} other{Còn {days} ngày}}",
+  "@trashDaysLeft": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    },
+    "description": "How long until the batch is purged (BR-264). The only urgent number on the row (wireframe T4)."
+  },
+  "trashOriginLabel": "Từ",
+  "@trashOriginLabel": {
+    "description": "Prefix of the original path on a Trash row. Context only, never a promise about where a restore goes (BR-267)."
+  },
+  "trashOriginTopLevel": "Cấp trên cùng",
+  "@trashOriginTopLevel": {
+    "description": "Origin shown for a deleted top-level deck, which has no parent (BR-56)."
+  },
+  "trashBatchContents": "{deckCount, plural, =0{} =1{1 deck, } other{{deckCount} deck, }}{cardCount, plural, =0{không có thẻ} =1{1 thẻ} other{{cardCount} thẻ}}",
+  "@trashBatchContents": {
+    "placeholders": {
+      "deckCount": {
+        "type": "int"
+      },
+      "cardCount": {
+        "type": "int"
+      }
+    },
+    "description": "What a deck batch would bring back. Excludes anything already in Trash under an older batch (BR-258, BR-262)."
+  },
+  "trashRestoreAction": "Khôi phục",
+  "@trashRestoreAction": {
+    "description": "Row action that opens the restore target picker (BR-261)."
+  },
+  "trashPurgeAction": "Xoá vĩnh viễn",
+  "@trashPurgeAction": {
+    "description": "The only destructive action in Trash (BR-266)."
+  },
+  "trashSelectAction": "Chọn",
+  "@trashSelectAction": {
+    "description": "Overflow action that turns on multi-select in Trash (BR-266)."
+  },
+  "trashSelectionCount": "{count, plural, other{Đã chọn {count}}}",
+  "@trashSelectionCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Title of the Trash app bar while selecting."
+  },
+  "trashSelectionCardsOnly": "Thẻ và deck được khôi phục riêng, nên lựa chọn này chỉ gồm thẻ.",
+  "@trashSelectionCardsOnly": {
+    "description": "Explains why deck rows stopped responding once a card was selected (BR-266)."
+  },
+  "trashSelectionDecksOnly": "Thẻ và deck được khôi phục riêng, nên lựa chọn này chỉ gồm deck.",
+  "@trashSelectionDecksOnly": {
+    "description": "Explains why card rows stopped responding once a deck was selected (BR-266)."
+  },
+  "trashRestoreTargetTitle": "Khôi phục vào",
+  "@trashRestoreTargetTitle": {
+    "description": "Title of the restore target picker (BR-261)."
+  },
+  "trashRestoreTargetTopLevel": "Cấp trên cùng",
+  "@trashRestoreTargetTopLevel": {
+    "description": "The single target a deleted top-level deck has (BR-261)."
+  },
+  "trashRestoreTargetEmpty": "Hiện chưa có nơi nào nhận lại được mục này.",
+  "@trashRestoreTargetEmpty": {
+    "description": "Shown when no target qualifies (UC-21 E1). The picker never draws a disabled row (wireframe T8)."
+  },
+  "trashRestoreConfirmAction": "Khôi phục vào đây",
+  "@trashRestoreConfirmAction": {
+    "description": "Primary action of the restore target picker. The user confirms even when a target was preselected (BR-262)."
+  },
+  "trashRestoredMessage": "Đã khôi phục",
+  "@trashRestoredMessage": {
+    "description": "Result message after a restore commits."
+  },
+  "trashPurgeConfirmTitle": "{count, plural, =1{Xoá vĩnh viễn 1 mục?} other{Xoá vĩnh viễn {count} mục?}}",
+  "@trashPurgeConfirmTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Title of the permanent-delete confirmation, naming the exact count (BR-266)."
+  },
+  "trashPurgeConfirmMessage": "Không thể hoàn tác. Lịch sử học của những mục này bị xoá theo.",
+  "@trashPurgeConfirmMessage": {
+    "description": "Body of the permanent-delete confirmation (BR-266)."
+  },
+  "trashPurgeConfirmAction": "Xoá vĩnh viễn",
+  "@trashPurgeConfirmAction": {
+    "description": "Destructive confirm button. The dialog opens with focus on Cancel (wireframe T11)."
+  },
+  "trashPurgeCancelAction": "Huỷ",
+  "@trashPurgeCancelAction": {
+    "description": "Safe default action of the permanent-delete confirmation (BR-266)."
+  },
+  "trashPurgedMessage": "{count, plural, =1{Đã xoá vĩnh viễn 1 mục} other{Đã xoá vĩnh viễn {count} mục}}",
+  "@trashPurgedMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    },
+    "description": "Result message after a purge commits."
+  },
+  "trashLoadFailed": "Không mở được Trash. Thử lại.",
+  "@trashLoadFailed": {
+    "description": "Error state of the Trash list (UC-21 E5)."
+  },
+  "trashRetryAction": "Thử lại",
+  "@trashRetryAction": {
+    "description": "Retry action on the Trash error state."
+  },
+  "trashConflictTargetNoLongerValid": "Deck đó không nhận được mục này nữa. Hãy chọn nơi khác.",
+  "@trashConflictTargetNoLongerValid": {
+    "description": "Copy for TrashConflictReason.targetNoLongerValid (UC-21 E2)."
+  },
+  "trashConflictTargetLevelMismatch": "Mục này không thể vào đó.",
+  "@trashConflictTargetLevelMismatch": {
+    "description": "Copy for TrashConflictReason.targetLevelMismatch (BR-261)."
+  },
+  "trashConflictUndoOriginUnavailable": "Không thể trả về chỗ cũ. Hãy khôi phục từ Trash.",
+  "@trashConflictUndoOriginUnavailable": {
+    "description": "Copy for TrashConflictReason.undoOriginUnavailable (BR-263, UC-21 E3)."
+  },
+  "trashConflictPurgeWouldTakeAnotherBatch": "Trong mục này còn thứ khác đang ở Trash, nên chưa xoá được.",
+  "@trashConflictPurgeWouldTakeAnotherBatch": {
+    "description": "Copy for TrashConflictReason.purgeWouldTakeAnotherBatch (BR-265, UC-21 E4)."
+  },
+  "trashConflictUnknownItemType": "Mục này bị xoá bởi một phiên bản mới hơn của ứng dụng.",
+  "@trashConflictUnknownItemType": {
+    "description": "Copy for TrashConflictReason.unknownItemType."
+  },
+  "trashConflictBatchHeightUnknowable": "Không đọc được cấu trúc của deck này, nên chưa khôi phục được.",
+  "@trashConflictBatchHeightUnknowable": {
+    "description": "Copy for TrashConflictReason.batchHeightUnknowable."
+  },
+  "trashMovedMessage": "Đã chuyển vào Trash",
+  "@trashMovedMessage": {
+    "description": "Snackbar shown after deleting one item, beside Undo (BR-256, wireframe T13)."
+  },
+  "trashUndoAction": "Hoàn tác",
+  "@trashUndoAction": {
+    "description": "Snackbar action that reverses the deletion just made (BR-263)."
+  },
+  "trashUndoFailed": "Không hoàn tác được.",
+  "@trashUndoFailed": {
+    "description": "Shown when Undo is refused (UC-21 E3)."
   }
 }

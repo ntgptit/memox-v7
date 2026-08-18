@@ -7,7 +7,7 @@
 | **Scope** | Must-have của MVP. Ngoài phạm vi: should/nice-to-have, và mọi thứ ở mục "Điều đã cố ý không đặc tả" |
 | **Source of truth for** | UC-xx · main/alternative/error flow · UI state matrix của từng màn |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md` |
-| **Updated by task** | M99.32 — UC-20: tìm kiếm toàn thư viện (deck, hai mặt card, tag); M99.24 — UC-13: xem tiến độ theo deck (cấp thư viện → cấp deck, hai khoảng); trước đó M99.23 — UC-12: xem tiến độ học (streak, hôm nay, bảy ngày) · M99.29 — UC-17: bật nhắc học hằng ngày (opt-in → quyền → lịch → notification → Study Home) · M99.30 — UC-18: quản lý tag (catalog, rename/gộp, xoá) và lọc thẻ theo nhiều tag · M99.31 — UC-19: xem chi tiết một card và lịch sử học của nó |
+| **Updated by task** | M99.33 — UC-21: Trash và khôi phục item đã xoá; M99.32 — UC-20: tìm kiếm toàn thư viện (deck, hai mặt card, tag); M99.24 — UC-13: xem tiến độ theo deck (cấp thư viện → cấp deck, hai khoảng); trước đó M99.23 — UC-12: xem tiến độ học (streak, hôm nay, bảy ngày) · M99.29 — UC-17: bật nhắc học hằng ngày (opt-in → quyền → lịch → notification → Study Home) · M99.30 — UC-18: quản lý tag (catalog, rename/gộp, xoá) và lọc thẻ theo nhiều tag · M99.31 — UC-19: xem chi tiết một card và lịch sử học của nó |
 | **Last updated** | 2026-08-19 |
 
 Chỉ đặc tả must-have. Should-have và nice-to-have viết khi tới lượt — đặc tả
@@ -1444,6 +1444,92 @@ decks-only · cards-only · no results · loading trang sau · lỗi trang sau �
 trang đầu
 
 ---
+
+## UC-21 · Trash và khôi phục item đã xoá
+
+| | |
+|---|---|
+| **Status** | active |
+
+**Actor:** Người dùng
+**Trigger:** Xoá một card hoặc deck (vào Trash), hoặc mở `Trash` từ app bar của
+Library
+**Preconditions:** Không có. Trash mở được kể cả khi rỗng — đó là cách người
+dùng biết nó tồn tại (BR-257 chỉ nói cái gì bị ẩn khỏi *bề mặt active*)
+
+**Main flow:**
+1. Người dùng xoá một card hoặc một deck từ luồng đã có (UC-04, UC-08). Hệ thống
+   chạy một transaction: tạo batch, đánh dấu item root cùng mọi descendant đang
+   active, đưa parent về `unset` nếu nó vừa mất direct child cuối, và đóng phiên
+   `in_progress` nào chạm tới item đó với lý do `content_deleted`
+   (BR-256, BR-258, BR-259, BR-260).
+2. Màn đang đứng báo item đã chuyển vào Trash và hiện Undo trong một khoảng thời
+   gian có hạn (BR-256). Mọi bề mặt active cập nhật ngay — item biến mất khỏi
+   danh sách, khỏi đếm, khỏi search và khỏi study (BR-257).
+3. Người dùng mở `Trash` từ app bar của Library. Hệ thống chạy auto-purge trước
+   khi vẽ, rồi hiển thị các batch còn lại, tách theo loại: Cards và Decks
+   (BR-264, BR-266).
+4. Mỗi hàng nêu tên item, thời điểm đã xoá, đường dẫn gốc **như thông tin**, số
+   ngày còn lại trước khi bị xoá vĩnh viễn, và — với deck — số deck/card đi kèm
+   trong batch (BR-267).
+5. Người dùng chọn `Restore` trên một hàng. Hệ thống mở picker target dựng từ
+   **đúng** eligibility của move: chỉ deck đang active thoả loại nội dung, độ
+   sâu và scheduler/generation mới xuất hiện (BR-261).
+6. Người dùng chọn một target và xác nhận. Hệ thống chạy một transaction: gỡ
+   tombstone của **đúng** batch đó, gắn item root vào target, viết lại
+   `root_deck_id` cho cả subtree kể cả tombstone bên trong, và set `content_type`
+   của target nếu nó đang `unset` (BR-261, BR-262).
+7. Trash bỏ hàng vừa khôi phục; Library hiện item ở vị trí mới với nguyên id,
+   study state, history và tag (BR-262).
+
+**Alternative flows:**
+- **A1 — Undo ngay sau khi xoá:** người dùng bấm Undo trên snackbar. Hệ thống
+  đảo ngược đúng batch đó về **vị trí cũ**, không hỏi target (BR-263).
+- **A2 — Chọn nhiều:** người dùng bật chế độ chọn trong Trash. Thanh hành động
+  hiện `Restore` và `Delete permanently` cho tập đang chọn. Chọn một card làm
+  mọi hàng deck không chọn được và ngược lại; UI nói rõ vì sao (BR-266).
+- **A3 — Purge vĩnh viễn:** người dùng chọn `Delete permanently`. Hộp thoại nêu
+  đúng số item, nói lịch sử học không khôi phục được, đặt focus mặc định ở hành
+  động an toàn, và chỉ hành động phá huỷ mang vai trò màu destructive (BR-266).
+  Xác nhận chạy một transaction xoá cứng batch và cascade (BR-265).
+- **A4 — Batch hết hạn khi Trash đang mở:** auto-purge chạy lại khi màn được
+  focus lại và bỏ các hàng đã hết hạn; danh sách cập nhật tại chỗ, không nhảy vị
+  trí cuộn (BR-264).
+- **A5 — Deck có descendant đã ở Trash từ trước:** restore batch của deck cha
+  chỉ hồi sinh hàng của batch đó; descendant kia vẫn nằm trong Trash như một
+  hàng riêng (BR-258).
+- **A6 — Trash rỗng:** màn hiển thị trạng thái rỗng giải thích item đã xoá sẽ ở
+  đây 30 ngày, không hiện thanh hành động và không hiện filter.
+
+**Error flows:**
+- **E1 — Không có target hợp lệ:** picker mở ra rỗng và giải thích vì sao (cây
+  đã đầy 10 cấp, hoặc không còn deck nhận được loại nội dung này). Hệ thống
+  MUST NOT hiện hàng bị vô hiệu hoá trông như chọn được (BR-261).
+- **E2 — Target hết hợp lệ giữa chừng:** cây đổi sau khi picker mở. Transaction
+  từ chối bằng lý do có kiểu, không ghi gì, và picker tải lại danh sách (BR-261).
+- **E3 — Undo không còn dùng được:** vị trí cũ đã bị xoá, đã thành `card`, hoặc
+  đã đầy. Undo báo lý do có kiểu và chỉ người dùng sang Trash; item vẫn nằm
+  nguyên trong Trash (BR-263).
+- **E4 — Purge bị chặn:** một descendant của batch thuộc batch chưa tới hạn hoặc
+  còn active. Batch đó bị bỏ qua, không purge một phần, và người dùng thấy lý do
+  có kiểu (BR-265).
+- **E5 — Lỗi ghi:** bất kỳ bước nào của xoá, restore hay purge thất bại →
+  transaction rollback toàn bộ, trạng thái cũ giữ nguyên, UI hiện error + Retry.
+- **E6 — Item đã biến mất:** batch được chọn đã bị purge bởi một lần chạy khác.
+  Thao tác báo not-found có kiểu và danh sách tự làm mới, không dừng ở hàng ma.
+
+**Postconditions:** Sau bước 7, item nằm dưới target đã chọn với đúng id cũ, và
+không hàng nào của batch khác bị chạm. Sau A3, các hàng của batch và mọi thứ
+cascade từ chúng không còn trong database, và không batch nào khác mất hàng.
+
+**Business rules:** BR-256…BR-267, và BR-55, BR-63, BR-64, BR-70, BR-71, BR-74,
+BR-163, BR-165, BR-167 qua đường dùng lại eligibility của move.
+
+**UI states:** loading · empty · cards-only · decks-only · mixed · selection
+(card) · selection (deck) · restoring · purging · target picker (rỗng / nhiều /
+không hợp lệ) · validation conflict · expired-live-removal · error + Retry ·
+undo snackbar. Không có state `refreshing` riêng — danh sách là một `watch()`
+stream, nên auto-purge biểu hiện thành hàng biến mất chứ không thành spinner.
 
 ## Điều đã cố ý không đặc tả
 

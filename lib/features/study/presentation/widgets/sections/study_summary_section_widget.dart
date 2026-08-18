@@ -91,6 +91,11 @@ class StudySummarySectionWidget extends StatelessWidget {
     StudySessionEndReason.schedulerReset ||
     StudySessionEndReason.staleGeneration =>
       context.l10n.studySummaryStoppedByReset,
+    // The material went to Trash under the session (BR-259). Its own sentence
+    // rather than the reset one: nothing about the scheduler changed, and
+    // "your deck was reset" would send the user looking for a reset nobody ran.
+    StudySessionEndReason.contentDeleted =>
+      context.l10n.studySummaryStoppedByDeletion,
     StudySessionEndReason.interrupted || null => null,
   };
 }

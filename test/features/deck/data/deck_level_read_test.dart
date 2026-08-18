@@ -18,6 +18,7 @@ import 'package:memox/features/deck/domain/models/deck_summary_model.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
 
 import '../../../database/support/test_database.dart';
+import '../../../support/trash_wiring.dart';
 
 /// `watchDeckList` with a parent — one read interaction for a level inside a
 /// deck (UC-06 step 4).
@@ -56,6 +57,7 @@ void main() {
     idCounter = 0;
     repository = DeckRepositoryImpl(
       DeckDao(db),
+      trash: contentTrashForTest(db, clock: () => testNow),
       study: StudyRepositoryImpl(StudyDao(db)),
       idGenerator: () => 'gen-${++idCounter}',
       clock: () => testNow,

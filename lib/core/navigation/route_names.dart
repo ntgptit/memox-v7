@@ -115,6 +115,15 @@ abstract final class RouteNames {
   /// Back returns to the list with its filter, window and selection intact
   /// (BR-246, M4.15).
   static const String cardDetail = 'cardDetail';
+
+  /// Trash (UC-21). A child of [decks], so it stays in the Library branch and
+  /// Back returns to the list a restored deck reappears in.
+  ///
+  /// **Library, not Settings** (AD-22). Trash holds Library content, and
+  /// Settings is a placeholder branch (AD-19) — putting a data-recovery entry
+  /// two taps deep in an unrelated branch is how a user learns it exists only
+  /// after they needed it.
+  static const String trash = 'trash';
 }
 
 /// Names of the path parameters routes carry.
