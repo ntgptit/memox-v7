@@ -35,7 +35,7 @@ final class TrashDeckCandidate {
 /// that list — every active deck is, by definition, outside it. So the height
 /// arrives here as [sourceSubtreeHeight], measured over the batch's own rows,
 /// and subtree membership is simply false: no active deck can sit under a
-/// tombstone (invariant 32).
+/// tombstone (invariant 34).
 ///
 /// **`alreadyParent` is not a rejection here.** For a move it means "this
 /// changes nothing"; for a restore, putting the item back where it came from is
@@ -93,7 +93,7 @@ DeckMoveRejection? _rejectionFor({
   final rejection = deckMoveRejection(
     source: source,
     target: target,
-    // No active deck can be inside a deleted subtree (invariant 32), so the
+    // No active deck can be inside a deleted subtree (invariant 34), so the
     // cycle guard has nothing to find. Stated rather than assumed: if that
     // invariant ever broke, this would be the line that made it dangerous.
     isTargetInSourceSubtree: false,

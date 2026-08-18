@@ -314,12 +314,16 @@ void main() {
 
       // The compact sheet must not balloon to the whole screen the moment
       // the read fails: the error face shrink-wraps inside a min Column.
-      final Size sheet = tester.getSize(find.byType(MxErrorState));
+      // Measured on the sheet itself, not the error widget: the error face
+      // shrink-wraps whenever its Column parent exists, but only
+      // `mainAxisSize: min` keeps the *sheet* from stretching to the loose
+      // height — so this is the box that must stay small.
+      final Size sheet = tester.getSize(find.byType(BottomSheet));
       final Size screen = tester.getSize(find.byType(MaterialApp));
       expect(
         sheet.height,
-        lessThan(screen.height / 2),
-        reason: 'the error face hugs its content instead of filling the sheet',
+        lessThan(screen.height * 0.6),
+        reason: 'the sheet hugs its content instead of filling the screen',
       );
 
       // Retry re-reads: heal the fake, tap, and the targets arrive.

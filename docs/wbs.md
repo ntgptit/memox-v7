@@ -10652,7 +10652,7 @@ của M2.
 ### M99.33 · Trash và restore v1 — soft-delete thay cho delete cứng
 
 - **Status:** **in review** — phase 1 (docs) xong: BR-256…BR-267, UC-21, AD-22,
-  `delete_batches` + hai cột tombstone + bất biến 35…37 + viết lại bất biến
+  `delete_batches` + hai cột tombstone + bất biến 33…37 + viết lại bất biến
   1…5/15/29, wireframe M99.33, 5Why. Phase 2 (schema) xong: v11 với
   `drift_schema_v11.json`, `_upgradeToV11` (bảng + hai cột + ba index + rebuild
   `study_sessions` cho `content_deleted`), `migration_v11_test`. Phase 3 (query)
@@ -10687,7 +10687,7 @@ của M2.
   accidental loss, soft-delete lifecycle, explicit restore target,
   retention/purge và subtree consistency.
 - **Output:** BR-256…BR-267; UC-21; AD-22; bảng `delete_batches` + hai cột
-  tombstone + bất biến 35…37 và bản viết lại của 1…5/15/29; migration v11 với
+  tombstone + bất biến 33…37 và bản viết lại của 1…5/15/29; migration v11 với
   snapshot `drift_schema_v11.json`; `queries/trash.drift`; feature slice Trash
   đủ domain/data/di/presentation; test SQLite bảng quyết định, migration,
   controller/widget/router và cross-feature leak.

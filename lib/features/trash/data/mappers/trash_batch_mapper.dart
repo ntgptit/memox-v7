@@ -11,7 +11,7 @@ import '../../domain/models/trash_item_type_model.dart';
 ///
 /// **A row that cannot be understood becomes null, not an exception.** Trash is
 /// where a user goes when something has already gone wrong; a batch written by
-/// a newer build, or one whose item root has vanished (invariant 35), must make
+/// a newer build, or one whose item root has vanished (invariant 37), must make
 /// that row unreadable rather than make the screen uncloseable. The repository
 /// drops the nulls.
 TrashBatchEntity? trashBatchFromRow(TrashBatchRowsResult row) {

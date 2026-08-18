@@ -19,7 +19,7 @@ import '../tables/cards.drift';
 --
 -- **The two `LEFT JOIN`s are exclusive by `item_type`**, so exactly one of them
 -- matches and `COALESCE` picks the side that exists. A batch whose item root is
--- gone matches neither and yields NULL names; that is invariant 35's violation
+-- gone matches neither and yields NULL names; that is invariant 37's violation
 -- and the repository drops such a row rather than drawing a ghost.
 --
 -- `deckCount`/`cardCount` count the batch, not the subtree: what a restore
@@ -97,7 +97,7 @@ SELECT * FROM delete_batches WHERE id = :batchId;
 -- `:cutoff` as `now - 30 days` from the injected clock, never SQL's own.
 --
 -- Oldest first because a purge cascade walks *down* the deck tree, and an
--- ancestor is always deleted no earlier than its descendants (invariant 34) —
+-- ancestor is always deleted no earlier than its descendants (invariant 36) —
 -- so sweeping in this order means a descendant's own batch is already gone by
 -- the time its ancestor's turn arrives.
 eligibleBatches:

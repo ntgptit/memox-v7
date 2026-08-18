@@ -57,7 +57,7 @@ mixin _TrashPurgeOperations implements TrashRepository {
   ///
   /// Oldest first. Not required for correctness — every batch row is deleted
   /// explicitly, and a cascade can only reach rows of batches deleted no later
-  /// than this one (invariant 34), which are all inside [allowed] by the check
+  /// than this one (invariant 36), which are all inside [allowed] by the check
   /// above — but it makes the order the same on every run, which is what makes
   /// a failure reproducible.
   Future<int> _purgeAll(

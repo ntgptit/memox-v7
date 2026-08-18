@@ -127,7 +127,7 @@ final class TrashDao {
   /// The count is the caller's proof that the ids it read are the ids it wrote:
   /// the statement refuses a row that is already a tombstone, so a short count
   /// means something went to Trash between the read and the write — and a batch
-  /// short of its item root is invariant 35's violation.
+  /// short of its item root is invariant 37's violation.
   Future<int> markDecksDeleted({
     required List<String> deckIds,
     required String batchId,

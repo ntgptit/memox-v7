@@ -90,7 +90,7 @@ final class ContentTrashRepositoryImpl implements ContentTrashRepository {
     );
     // The ids were read from the active tree inside this transaction, so a
     // short count is not a race — it is a bug, and one that would leave a batch
-    // missing part of what it claims (invariant 35). Throwing rolls everything
+    // missing part of what it claims (invariant 37). Throwing rolls everything
     // back rather than recording a deletion nobody can undo cleanly.
     if (markedDecks != deckIds.length || markedCards != cardIds.length) {
       throw const DatabaseFailure(
@@ -137,7 +137,7 @@ final class ContentTrashRepositoryImpl implements ContentTrashRepository {
           );
           // The statement refuses a card that is already a tombstone, so zero
           // here means the selection named a card that has since gone to Trash.
-          // Committing would leave a batch with no rows (invariant 33) and a
+          // Committing would leave a batch with no rows (invariant 35) and a
           // Trash row the user cannot act on.
           if (marked != 1) {
             throw const NotFoundFailure(message: 'That card no longer exists.');

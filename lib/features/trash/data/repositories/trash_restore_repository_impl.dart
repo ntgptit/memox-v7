@@ -84,7 +84,7 @@ mixin _TrashRestoreOperations implements TrashRepository {
     }
 
     // The batch's rows are all active again, so the batch row owns nothing.
-    // Leaving it would fail invariant 33 and put an empty entry in Trash.
+    // Leaving it would fail invariant 35 and put an empty entry in Trash.
     //
     // Safe *after* the clearing and only after it: this is a `DELETE` on a
     // table two `ON DELETE CASCADE`s point at, so with the rows still carrying
@@ -221,7 +221,7 @@ mixin _TrashRestoreOperations implements TrashRepository {
     final rejection = deckMoveRejection(
       source: source,
       target: trashDeckEntityFromRow(targetRow),
-      // No active deck can sit inside a deleted subtree (invariant 32), and
+      // No active deck can sit inside a deleted subtree (invariant 34), and
       // the target was just read as active.
       isTargetInSourceSubtree: false,
       sourceRootScheduler: sourceRootRow == null

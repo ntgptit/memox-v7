@@ -24,7 +24,7 @@ CREATE TABLE delete_batches (
     root_item_id TEXT NOT NULL,
 
     -- UTC. Retention is 30×24h from here (BR-264), and the ordering between
-    -- two batches is what invariant 34 checks.
+    -- two batches is what invariant 36 checks.
     deleted_at DATETIME NOT NULL,
 
     -- NULL is the local profile. No auth yet, auth-ready (AD-03).
