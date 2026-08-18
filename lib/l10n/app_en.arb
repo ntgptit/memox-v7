@@ -341,57 +341,6 @@
     },
     "description": "Leads a deck row's meta line when the deck has children. Direct children only -- it counts what opening the row will show."
   },
-  "deckSearchHintRoot": "Search your whole library",
-  "@deckSearchHintRoot": {
-    "description": "Placeholder at the root level. Names the scope, not the action -- the user needs to know how wide the search reaches."
-  },
-  "deckSearchHintInDeck": "Search in {name}",
-  "@deckSearchHintInDeck": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    },
-    "description": "The same placeholder inside a deck, naming that deck as the scope."
-  },
-  "deckSearchClearLabel": "Clear search",
-  "@deckSearchClearLabel": {
-    "description": "The button that empties the search field."
-  },
-  "deckSearchMatchCountLabel": "{count, plural, =1{1 match in {scope}} other{{count} matches in {scope}}}",
-  "@deckSearchMatchCountLabel": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "scope": {
-        "type": "String"
-      }
-    },
-    "description": "Heads the result list. Names the scope again because a count without one is a number about nothing."
-  },
-  "deckSearchScopeLibrary": "your library",
-  "@deckSearchScopeLibrary": {
-    "description": "The scope word for a root-level search, used inside the count and the empty state."
-  },
-  "deckSearchEmptyTitle": "No decks match “{query}”",
-  "@deckSearchEmptyTitle": {
-    "placeholders": {
-      "query": {
-        "type": "String"
-      }
-    },
-    "description": "Curly quotes around the user's own words, as everywhere else a user's text appears in a sentence."
-  },
-  "deckSearchEmptyMessage": "Nothing in {scope} has that in its name.",
-  "@deckSearchEmptyMessage": {
-    "placeholders": {
-      "scope": {
-        "type": "String"
-      }
-    },
-    "description": "Says what was searched, so the user can tell an empty result from a search that looked in the wrong place."
-  },
   "deckStarterLibraryAction": "Browse starter library",
   "@deckStarterLibraryAction": {
     "description": "Empty-root CTA that opens the starter template catalog (UC-01)."
@@ -462,14 +411,6 @@
       }
     },
     "description": "Locale line on a starter template row."
-  },
-  "deckSearchOpenLabel": "Search decks",
-  "@deckSearchOpenLabel": {
-    "description": "Opens the search field in the Library subheader. The field is collapsed to this control at rest."
-  },
-  "deckSearchCloseLabel": "Close search",
-  "@deckSearchCloseLabel": {
-    "description": "Collapses the search field; if a query is running it is cleared first, so no result set survives its own input."
   },
   "deckNoCardsLabel": "No cards yet",
   "@deckNoCardsLabel": {
@@ -3803,7 +3744,7 @@
   },
   "librarySearchHint": "Search decks, cards and tags",
   "@librarySearchHint": {
-    "description": "Placeholder of the search field. Names all three things that are matched (BR-182), because a user who does not know cards are searched will not try."
+    "description": "Placeholder of the search field. Names all three things that are matched (BR-247), because a user who does not know cards are searched will not try."
   },
   "librarySearchClearLabel": "Clear search",
   "@librarySearchClearLabel": {
@@ -3811,7 +3752,7 @@
   },
   "librarySearchDecksGroupLabel": "Decks",
   "@librarySearchDecksGroupLabel": {
-    "description": "Header of the deck section of the results. Decks are always listed before cards (BR-186)."
+    "description": "Header of the deck section of the results. Decks are always listed before cards (BR-251)."
   },
   "librarySearchCardsGroupLabel": "Cards",
   "@librarySearchCardsGroupLabel": {
@@ -3819,7 +3760,7 @@
   },
   "librarySearchInitialTitle": "Find anything in your library",
   "@librarySearchInitialTitle": {
-    "description": "Heading of the state before anything is typed. Nothing has been read from the database at this point (BR-184)."
+    "description": "Heading of the state before anything is typed. Nothing has been read from the database at this point (BR-249)."
   },
   "librarySearchInitialMessage": "Type to search deck names, card fronts and backs, and tag names.",
   "@librarySearchInitialMessage": {
@@ -3904,7 +3845,7 @@
   },
   "librarySearchMatchedTagLabel": "Tag: {tag}",
   "@librarySearchMatchedTagLabel": {
-    "description": "Shown on a card result that matched through one of its tags rather than through its own text (BR-187). \"tag\" is the best-ranked matching tag; without it the row appears with no visible reason, which reads as a broken search.",
+    "description": "Shown on a card result that matched through one of its tags rather than through its own text (BR-252). \"tag\" is the best-ranked matching tag; without it the row appears with no visible reason, which reads as a broken search.",
     "placeholders": {
       "tag": {
         "type": "String"

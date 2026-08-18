@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memox/core/error/failure.dart';
@@ -69,7 +71,9 @@ enum SearchScenario {
   longContent('long Korean and Vietnamese content'),
   paged('more results than one page'),
   empty('nothing matched'),
-  error('read fails');
+  error('read fails'),
+  loading('loading (read never lands)'),
+  pageStalls('loading-more holds (Load more, then it hangs)');
 
   const SearchScenario(this.label);
 
@@ -99,7 +103,23 @@ class _CatalogSearchRepository implements LibrarySearchRepository {
       );
     }
 
+    // A stream that never emits, deliberately not `Stream.empty()` — an empty
+    // stream *closes*, which is a different provider state from "still
+    // waiting". Same idiom as the reminder, study and card-detail catalogs:
+    // the only way a reviewer can look at a waiting face is for the wait to
+    // never end.
+    if (scenario == SearchScenario.loading) {
+      return StreamController<LibrarySearchPage>().stream;
+    }
+
     final bool isFirstPage = after == LibrarySearchCursor.start;
+
+    // First page lands normally (with more available); the second stays in
+    // flight forever, so the inline loading-more spinner under the results
+    // holds still long enough to be looked at.
+    if (scenario == SearchScenario.pageStalls && !isFirstPage) {
+      return StreamController<LibrarySearchPage>().stream;
+    }
 
     return Stream<LibrarySearchPage>.value(switch (scenario) {
       SearchScenario.empty => _page(),
@@ -135,8 +155,15 @@ class _CatalogSearchRepository implements LibrarySearchRepository {
                   _card('p2-2', 'and its neighbour', 'và cái kế bên'),
                 ],
               ),
+      SearchScenario.pageStalls => _page(
+        decks: _decks(),
+        cards: _cards(),
+        hasMore: true,
+      ),
       SearchScenario.mixed ||
-      SearchScenario.error => _page(decks: _decks(), cards: _cards()),
+      SearchScenario.error ||
+      // Unreachable: the guard above returned a held-open stream already.
+      SearchScenario.loading => _page(decks: _decks(), cards: _cards()),
     });
   }
 

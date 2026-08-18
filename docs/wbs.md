@@ -10618,8 +10618,13 @@ của M2.
   - [x] Mười trạng thái UI dựng được ở EN/VI, sáng/tối, 320@2.0 / 390 / 412; sáu
         ràng buộc geometry của W5 đo bằng `getRect`; mọi dòng ≥ 48dp và có nhãn
         ngữ nghĩa gộp.
-  - [x] Kết quả deck mở deck; kết quả card báo đúng `CardDestination` và **không
-        bao giờ** mở màn sửa card.
+  - [x] Kết quả deck mở deck; kết quả card mở **chi tiết chỉ đọc** qua router
+        thật (`/decks/<deckId>/cards/<cardId>`, nối dây ở stage 9 tích hợp khi
+        route M99.31 đã có mặt) và **không bao giờ** mở màn sửa card —
+        `library_search_route_test.dart` giữ cả hai đường.
+  - [x] Hai mặt chờ giữ mở được trong Widgetbook — scenario `loading` (stream
+        không bao giờ trả lời) và `pageStalls` (trang hai treo vĩnh viễn) —
+        cùng bài học M99.31: mặt chỉ loé một frame thì không review được.
   - [x] `dart format`, `flutter analyze` (lib + test + widgetbook), `check_docs.py`,
         `check_architecture.py`, guard, generated-code freshness, và toàn bộ host
         suite (2.683 test) xanh qua `dod_check.sh`.

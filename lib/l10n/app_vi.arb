@@ -341,57 +341,6 @@
     },
     "description": "Mở đầu dòng meta của một deck khi nó có deck con. Chỉ đếm con trực tiếp — đúng thứ sẽ thấy khi mở."
   },
-  "deckSearchHintRoot": "Tìm trong toàn bộ thư viện",
-  "@deckSearchHintRoot": {
-    "description": "Placeholder ở cấp gốc. Nêu phạm vi chứ không nêu hành động."
-  },
-  "deckSearchHintInDeck": "Tìm trong {name}",
-  "@deckSearchHintInDeck": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    },
-    "description": "Cùng placeholder đó khi đang ở trong một deck."
-  },
-  "deckSearchClearLabel": "Xoá tìm kiếm",
-  "@deckSearchClearLabel": {
-    "description": "Nút làm trống ô tìm kiếm."
-  },
-  "deckSearchMatchCountLabel": "{count, plural, other{{count} kết quả trong {scope}}}",
-  "@deckSearchMatchCountLabel": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "scope": {
-        "type": "String"
-      }
-    },
-    "description": "Tiêu đề danh sách kết quả, có nhắc lại phạm vi."
-  },
-  "deckSearchScopeLibrary": "thư viện",
-  "@deckSearchScopeLibrary": {
-    "description": "Từ chỉ phạm vi khi tìm ở cấp gốc."
-  },
-  "deckSearchEmptyTitle": "Không deck nào khớp “{query}”",
-  "@deckSearchEmptyTitle": {
-    "placeholders": {
-      "query": {
-        "type": "String"
-      }
-    },
-    "description": "Dùng nháy cong quanh chữ người dùng gõ."
-  },
-  "deckSearchEmptyMessage": "Không có gì trong {scope} mang tên đó.",
-  "@deckSearchEmptyMessage": {
-    "placeholders": {
-      "scope": {
-        "type": "String"
-      }
-    },
-    "description": "Nói rõ đã tìm ở đâu."
-  },
   "deckStarterLibraryAction": "Xem thư viện mẫu",
   "@deckStarterLibraryAction": {
     "description": "Empty-root CTA that opens the starter template catalog (UC-01)."
@@ -462,14 +411,6 @@
         "type": "String"
       }
     }
-  },
-  "deckSearchOpenLabel": "Tìm bộ thẻ",
-  "@deckSearchOpenLabel": {
-    "description": "Opens the search field in the Library subheader. The field is collapsed to this control at rest."
-  },
-  "deckSearchCloseLabel": "Đóng tìm kiếm",
-  "@deckSearchCloseLabel": {
-    "description": "Collapses the search field; if a query is running it is cleared first, so no result set survives its own input."
   },
   "deckNoCardsLabel": "Chưa có thẻ nào",
   "@deckNoCardsLabel": {
@@ -3784,7 +3725,7 @@
   },
   "librarySearchHint": "Tìm deck, thẻ và tag",
   "@librarySearchHint": {
-    "description": "Placeholder of the search field. Names all three things that are matched (BR-182), because a user who does not know cards are searched will not try."
+    "description": "Placeholder of the search field. Names all three things that are matched (BR-247), because a user who does not know cards are searched will not try."
   },
   "librarySearchClearLabel": "Xoá tìm kiếm",
   "@librarySearchClearLabel": {
@@ -3792,7 +3733,7 @@
   },
   "librarySearchDecksGroupLabel": "Deck",
   "@librarySearchDecksGroupLabel": {
-    "description": "Header of the deck section of the results. Decks are always listed before cards (BR-186)."
+    "description": "Header of the deck section of the results. Decks are always listed before cards (BR-251)."
   },
   "librarySearchCardsGroupLabel": "Thẻ",
   "@librarySearchCardsGroupLabel": {
@@ -3800,7 +3741,7 @@
   },
   "librarySearchInitialTitle": "Tìm mọi thứ trong thư viện",
   "@librarySearchInitialTitle": {
-    "description": "Heading of the state before anything is typed. Nothing has been read from the database at this point (BR-184)."
+    "description": "Heading of the state before anything is typed. Nothing has been read from the database at this point (BR-249)."
   },
   "librarySearchInitialMessage": "Nhập để tìm tên deck, mặt trước và mặt sau của thẻ, và tên tag.",
   "@librarySearchInitialMessage": {
@@ -3885,7 +3826,7 @@
   },
   "librarySearchMatchedTagLabel": "Tag: {tag}",
   "@librarySearchMatchedTagLabel": {
-    "description": "Shown on a card result that matched through one of its tags rather than through its own text (BR-187). \"tag\" is the best-ranked matching tag; without it the row appears with no visible reason, which reads as a broken search.",
+    "description": "Shown on a card result that matched through one of its tags rather than through its own text (BR-252). \"tag\" is the best-ranked matching tag; without it the row appears with no visible reason, which reads as a broken search.",
     "placeholders": {
       "tag": {
         "type": "String"

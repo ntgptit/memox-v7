@@ -19,8 +19,9 @@ import 'search_page_footer_widget.dart';
 /// **Not clearance for the bottom bar** — a `Scaffold` with a
 /// `bottomNavigationBar` takes that height out of its body's `MediaQuery`, so
 /// the shell has already reserved it. This is the gap that stops the last row
-/// sitting on the bar's hairline.
-const double _kListBottomInset = AppSpacing.xxl;
+/// sitting on the bar's hairline — `lg`, the same value every other
+/// scrollable list uses for the same reason (D21).
+const double _kListBottomInset = AppSpacing.lg;
 
 /// Every state the search surface can be in, in one place.
 ///
