@@ -1427,8 +1427,10 @@ not-found.
   kết quả của truy vấn cũ nằm dưới một thông báo lỗi là lời nói dối.
 - **E2 — Trang sau đọc lỗi:** giữ nguyên những gì đã tìm được, chỉ dải cuối danh
   sách đổi thành thông báo và nút thử lại.
-- **E3 — Chi tiết card chưa có route:** nói rõ là chưa mở được. MUST NOT mở màn
-  sửa card thay thế (BR-254).
+
+(E3 cũ — "chi tiết card chưa có route" — là tình huống của nhánh nguồn trước khi
+M99.31 tồn tại, đã hết đường xảy ra từ khi tích hợp nối dây điều hướng ở stage 9;
+mệnh đề phòng hờ tương ứng vẫn nằm trong BR-254.)
 
 **Postconditions:** Không đổi gì — use case chỉ đọc, và không mở phiên học nào
 (BR-254).

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -63,10 +65,17 @@ class _LibrarySearchScreenState extends ConsumerState<LibrarySearchScreen> {
     switch (destination) {
       // A `card`-type deck's route forwards into its card list on arrival, so
       // one destination serves both kinds of deck (BR-63).
+      // **Pushed, for the same reason the search itself is pushed (S11).**
+      // `/search` is a sibling of `/decks/:deckId`, so `go` would rebuild the
+      // match list and throw this screen away — Back from the result would
+      // land on the deck list with the query and results gone. Push keeps the
+      // search underneath: Back returns to exactly what was found.
       case DeckDestination(:final String deckId):
-        context.goNamed(
-          RouteNames.deckDetail,
-          pathParameters: <String, String>{RoutePathParams.deckId: deckId},
+        unawaited(
+          context.pushNamed(
+            RouteNames.deckDetail,
+            pathParameters: <String, String>{RoutePathParams.deckId: deckId},
+          ),
         );
 
       // The reading surface, never the editor: a search is a read, and
@@ -76,12 +85,14 @@ class _LibrarySearchScreenState extends ConsumerState<LibrarySearchScreen> {
       // why the destination is a type — the switch, not the rows, learned
       // about it.
       case CardDestination(:final String cardId, :final String deckId):
-        context.goNamed(
-          RouteNames.cardDetail,
-          pathParameters: <String, String>{
-            RoutePathParams.deckId: deckId,
-            RoutePathParams.cardId: cardId,
-          },
+        unawaited(
+          context.pushNamed(
+            RouteNames.cardDetail,
+            pathParameters: <String, String>{
+              RoutePathParams.deckId: deckId,
+              RoutePathParams.cardId: cardId,
+            },
+          ),
         );
     }
   }

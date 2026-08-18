@@ -72,6 +72,11 @@ enum SearchScenario {
   paged('more results than one page'),
   empty('nothing matched'),
   error('read fails'),
+  // The two held-open waiting faces (the M99.31 lesson: a face that flashes
+  // for one frame is not reviewable). Both need something typed first — with
+  // an empty query nothing is read at all (BR-249), so the screen shows its
+  // resting face whatever the scenario. Type anything to reach `loading`;
+  // for `pageStalls`, type, then tap Load more under the results.
   loading('loading (read never lands)'),
   pageStalls('loading-more holds (Load more, then it hangs)');
 

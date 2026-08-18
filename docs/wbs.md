@@ -10620,8 +10620,10 @@ của M2.
         ngữ nghĩa gộp.
   - [x] Kết quả deck mở deck; kết quả card mở **chi tiết chỉ đọc** qua router
         thật (`/decks/<deckId>/cards/<cardId>`, nối dây ở stage 9 tích hợp khi
-        route M99.31 đã có mặt) và **không bao giờ** mở màn sửa card —
-        `library_search_route_test.dart` giữ cả hai đường.
+        route M99.31 đã có mặt) và **không bao giờ** mở màn sửa card.
+        Đích được **push** (đối xứng với lối vào, S11) nên Back quay về đúng
+        màn tìm kiếm với query còn nguyên — `library_search_route_test.dart`
+        giữ cả đường đi lẫn đường về cho hai loại kết quả.
   - [x] Hai mặt chờ giữ mở được trong Widgetbook — scenario `loading` (stream
         không bao giờ trả lời) và `pageStalls` (trang hai treo vĩnh viễn) —
         cùng bài học M99.31: mặt chỉ loé một frame thì không review được.

@@ -1,9 +1,11 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/search/domain/models/search_page_model.dart';
 import 'package:memox/features/search/domain/models/search_result_model.dart';
 import 'package:memox/features/search/presentation/screens/library_search_screen.dart';
 import 'package:memox/features/search/presentation/widgets/items/card_result_tile_widget.dart';
 import 'package:memox/features/search/presentation/widgets/items/deck_result_tile_widget.dart';
+import 'package:memox/features/search/presentation/widgets/sections/search_page_footer_widget.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_empty_state.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
@@ -175,6 +177,47 @@ void main() {
         findsOneWidget,
       );
       expect(find.byType(MxErrorState), findsNothing);
+    });
+
+    testWidgets('loading more holds the footer at the button footprint', (
+      tester,
+    ) async {
+      await pumpSearchScreen(
+        tester,
+        repository: FakeLibrarySearchRepository.paged(
+          first: fakeSearchPage(
+            cards: <CardSearchHit>[fakeCardHit()],
+            hasMore: true,
+          ),
+          // Never delivered, so the loading-more face holds still.
+          next: fakeSearchPage(),
+        ),
+      );
+      await typeSearch(tester, 'noun');
+      await tester.tap(find.text(english.librarySearchLoadMoreAction));
+      // `pump`, not `pumpAndSettle`: the face under test animates forever.
+      await tester.pump();
+
+      expect(
+        find.descendant(
+          of: find.byType(SearchPageFooterWidget),
+          matching: find.byType(CircularProgressIndicator),
+        ),
+        findsOneWidget,
+        reason:
+            'the loading-more face is the button-footprint spinner, for '
+            "card history's documented reason",
+      );
+      expect(
+        find.byType(MxLoadingState),
+        findsNothing,
+        reason: 'nothing balloons to the centered 88dp face mid-list',
+      );
+      expect(
+        find.byType(CardResultTileWidget),
+        findsOneWidget,
+        reason: 'what was already found is still on screen',
+      );
     });
 
     testWidgets('load more appends the next page', (tester) async {

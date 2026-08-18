@@ -210,6 +210,22 @@ void main() {
       '/decks/deck-9',
       reason: 'a deck result opens the deck, never an editor',
     );
+
+    router.pop();
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(LibrarySearchScreen),
+      findsOneWidget,
+      reason:
+          'the result is pushed, so Back returns to the search — not to '
+          'the deck list with the query gone',
+    );
+    expect(
+      find.widgetWithText(TextField, 'japanese'),
+      findsOneWidget,
+      reason: 'the typed query survives the round trip',
+    );
   });
 
   testWidgets('opening a card result opens the read-only card detail', (
@@ -237,6 +253,22 @@ void main() {
       reason:
           'a card result opens the reading surface, never the editor '
           '(BR-254)',
+    );
+
+    router.pop();
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(LibrarySearchScreen),
+      findsOneWidget,
+      reason:
+          'the result is pushed, so Back returns to the search — not to '
+          'the card list with the query gone',
+    );
+    expect(
+      find.widgetWithText(TextField, 'noun'),
+      findsOneWidget,
+      reason: 'the typed query survives the round trip',
     );
   });
 }

@@ -6,7 +6,6 @@ import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/theme_context_extension.dart';
 import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_card.dart';
-import '../../../../../shared/widgets/mx_loading_state.dart';
 import '../../../../../shared/widgets/mx_text_button.dart';
 import '../../states/library_search_state.dart';
 
@@ -16,6 +15,10 @@ import '../../states/library_search_state.dart';
 /// **A page failing never removes what is already listed** — only this band
 /// changes. The results above it are exactly what was found, and an error state
 /// over the whole screen would claim otherwise.
+/// The stroke `MxActionButton`'s inline spinner uses; the loading-more face
+/// borrows the same drawing so the two read as one family.
+const double _kSpinnerStroke = 2;
+
 class SearchPageFooterWidget extends StatelessWidget {
   const SearchPageFooterWidget({
     required this.state,
@@ -32,16 +35,32 @@ class SearchPageFooterWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     if (state.pageError != null) return _failed(context);
     if (state.isLoadingMore) {
-      return Semantics(
-        // Announced, not only drawn — the same `liveRegion` the failure band
-        // below carries, and for the same reason: the list stopping partway is
-        // the one moment it is deliberately incomplete, and a spinner says
-        // nothing at all to a screen reader.
-        liveRegion: true,
-        // The shared loading state, so the spinner's colour comes from the
-        // theme that was measured for contrast rather than from this call site.
-        child: MxLoadingState(
-          semanticsLabel: context.l10n.librarySearchLoadingMoreLabel,
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+        // **Not `MxLoadingState`, for card history's documented reason:** that
+        // widget centres a 36dp indicator inside `EdgeInsets.all(xl)`, so the
+        // footer would balloon from the button's 48dp to ~88dp the moment
+        // Load more is tapped. This is the button's own footprint with the
+        // button's spinner in it — centred, because this footer's button is
+        // centred (unlike the timeline's leading-aligned tail).
+        child: Semantics(
+          // Announced, not only drawn — the same `liveRegion` the failure
+          // band below carries, and for the same reason: the list stopping
+          // partway is the one moment it is deliberately incomplete, and a
+          // spinner says nothing at all to a screen reader.
+          liveRegion: true,
+          child: SizedBox(
+            height: AppSpacing.minimumTouchTarget,
+            child: Center(
+              child: SizedBox.square(
+                dimension: AppIconSize.sm,
+                child: CircularProgressIndicator(
+                  strokeWidth: _kSpinnerStroke,
+                  semanticsLabel: context.l10n.librarySearchLoadingMoreLabel,
+                ),
+              ),
+            ),
+          ),
         ),
       );
     }
@@ -49,6 +68,9 @@ class SearchPageFooterWidget extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+      // Centred where the timeline's tail is leading-aligned: this footer
+      // sits under a full-width two-group list, not a left-edged timeline,
+      // and its own loading face above keeps the same axis.
       child: Center(
         child: MxTextButton(
           label: context.l10n.librarySearchLoadMoreAction,
