@@ -10624,6 +10624,10 @@ của M2.
         Đích được **push** (đối xứng với lối vào, S11) nên Back quay về đúng
         màn tìm kiếm với query còn nguyên — `library_search_route_test.dart`
         giữ cả đường đi lẫn đường về cho hai loại kết quả.
+  - [x] Chuỗi VI nói "nhãn" cho tag — thống nhất với Tag Catalog, chủ dự án
+        chốt ở stage 9 tích hợp. **Nợ đặt tên còn lại, ngoài phạm vi stage
+        này:** "deck" đang là "bộ thẻ" ở màn CRUD deck nhưng "deck" ở
+        reminder/study/search — cần một quyết định app-wide riêng.
   - [x] Hai mặt chờ giữ mở được trong Widgetbook — scenario `loading` (stream
         không bao giờ trả lời) và `pageStalls` (trang hai treo vĩnh viễn) —
         cùng bài học M99.31: mặt chỉ loé một frame thì không review được.

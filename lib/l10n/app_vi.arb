@@ -3723,7 +3723,7 @@
   "@librarySearchOpenLabel": {
     "description": "Semantic label and tooltip of the magnifier in the Library header, which opens the search screen. Names the scope rather than the action: the search covers the whole library, not the level the user is standing on."
   },
-  "librarySearchHint": "Tìm deck, thẻ và tag",
+  "librarySearchHint": "Tìm deck, thẻ và nhãn",
   "@librarySearchHint": {
     "description": "Placeholder of the search field. Names all three things that are matched (BR-247), because a user who does not know cards are searched will not try."
   },
@@ -3743,7 +3743,7 @@
   "@librarySearchInitialTitle": {
     "description": "Heading of the state before anything is typed. Nothing has been read from the database at this point (BR-249)."
   },
-  "librarySearchInitialMessage": "Nhập để tìm tên deck, mặt trước và mặt sau của thẻ, và tên tag.",
+  "librarySearchInitialMessage": "Nhập để tìm tên deck, mặt trước và mặt sau của thẻ, và tên nhãn.",
   "@librarySearchInitialMessage": {
     "description": "Body of the initial state. States the exact scope, so an empty result later reads as it is not there rather than as it does not search that."
   },
@@ -3756,7 +3756,7 @@
       }
     }
   },
-  "librarySearchNoResultsMessage": "Không có tên deck, thẻ hay tag nào trong thư viện chứa nội dung đó.",
+  "librarySearchNoResultsMessage": "Không có tên deck, thẻ hay nhãn nào trong thư viện chứa nội dung đó.",
   "@librarySearchNoResultsMessage": {
     "description": "Body of the empty-result state. Repeats the scope, because the most useful next thought is then it is somewhere else, or then I spelled it differently."
   },
@@ -3824,7 +3824,7 @@
       }
     }
   },
-  "librarySearchMatchedTagLabel": "Tag: {tag}",
+  "librarySearchMatchedTagLabel": "Nhãn: {tag}",
   "@librarySearchMatchedTagLabel": {
     "description": "Shown on a card result that matched through one of its tags rather than through its own text (BR-252). \"tag\" is the best-ranked matching tag; without it the row appears with no visible reason, which reads as a broken search.",
     "placeholders": {
@@ -3837,7 +3837,7 @@
   "@librarySearchPathSeparator": {
     "description": "Joins the deck names of a result path: Korean › Grammar › Nouns. It lives in the ARB because it is user-visible twice over — drawn on screen, and read aloud between every pair of names — so the glyph is a \"translator\" decision rather than a widget one. Keep the surrounding spaces."
   },
-  "librarySearchCardResultTaggedSemantic": "Thẻ {front}, {back}, trong {path}, khớp tag {tag}",
+  "librarySearchCardResultTaggedSemantic": "Thẻ {front}, {back}, trong {path}, khớp nhãn {tag}",
   "@librarySearchCardResultTaggedSemantic": {
     "description": "Screen-reader label of a card result that matched through one of its tags rather than through its own text. \"tag\" is the reason the row is in the list, and with match highlighting deliberately absent it is the only reason a screen-reader user can be given — so it belongs in the label and not only in the visible chip. \"front\", \"back\" and \"path\" carry the same meaning as in librarySearchCardResultSemantic.",
     "placeholders": {
