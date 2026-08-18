@@ -208,6 +208,26 @@ void main() {
       expect(repository.purges, isEmpty);
     });
 
+    testWidgets('a row narrates once: the composed sentence, not every '
+        'fact again (R5)', (tester) async {
+      final handle = tester.ensureSemantics();
+      await pumpTrash(
+        tester,
+        batches: <TrashBatchEntity>[fakeBatch(id: 'b1', name: 'a card')],
+      );
+
+      // Exactly one semantics node carries the name: the row's composed
+      // sentence. Without the body's ExcludeSemantics this finds two — the
+      // sentence and the name's own Text node — which is the double
+      // narration a reader would swipe through.
+      expect(find.bySemanticsLabel(RegExp('a card')), findsOneWidget);
+      // The two per-row controls stay outside the exclusion, independently
+      // findable and actionable.
+      expect(find.bySemanticsLabel(english.trashRestoreAction), findsOneWidget);
+      expect(find.bySemanticsLabel(english.trashRowMenuTitle), findsOneWidget);
+      handle.dispose();
+    });
+
     testWidgets('a row purge costs one tap more than Restore: kebab, menu, '
         'then the dialog (T6)', (tester) async {
       final repository = await pumpMixed(tester);

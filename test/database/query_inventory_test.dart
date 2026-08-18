@@ -46,7 +46,7 @@ void main() {
   // the note that says what else breaks with them:
   //
   //   card.drift  deckContextById.d  — the ancestry walk upward from an active
-  //     deck. An active deck cannot have a deleted parent (invariant 32), so
+  //     deck. An active deck cannot have a deleted parent (invariant 34), so
   //     every row the walk reaches is active.
   //   deck.drift  childDeckLevel.root — read only for `scheduler_type`, joined
   //     from an already-filtered `child`. Same invariant.
@@ -54,7 +54,7 @@ void main() {
   //     name; `d` is filtered, so `p` is active.
   //   study.drift lockRootSchedulerIfUnlocked.d — the deck of an already
   //     filtered card. An active card cannot sit in a deleted deck
-  //     (invariant 31).
+  //     (invariant 33).
   //
   // The two statements that read tombstones on purpose are in `exempt` below,
   // with their reasons.

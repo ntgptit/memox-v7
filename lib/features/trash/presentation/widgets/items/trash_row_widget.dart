@@ -105,8 +105,16 @@ class TrashRowWidget extends StatelessWidget {
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
+                // **Excluded, because the row's label already says all of
+                // it.** Without this a reader hears the composed sentence,
+                // then every fact again one Text at a time — the exact
+                // double narration the card-history rows exclude for. The
+                // Restore and menu buttons stay outside the exclusion: they
+                // are independently actionable and keep their own labels.
                 Expanded(
-                  child: _Body(batch: batch, now: now),
+                  child: ExcludeSemantics(
+                    child: _Body(batch: batch, now: now),
+                  ),
                 ),
                 if (!isSelecting) ...<Widget>[
                   MxIconButton(

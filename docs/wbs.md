@@ -10742,7 +10742,7 @@ của M2.
   dừng giữa chừng vì session limit và không trả finding nào.** Coordinator đã
   tự chạy phần đo được: guard inventory statement-level, một pass alias-level
   thủ công trên toàn bộ `queries/` (ghi lại trong `query_inventory_test.dart` —
-  bốn alias không mang vị từ đều an toàn theo bất biến 33/32), bất biến 22 câu
+  bốn alias không mang vị từ đều an toàn theo bất biến 33/34), bất biến 22 câu
   trên database thật sau delete/restore/purge/sweep, và migration v10 → v11. Cái
   **chưa** có là một cặp mắt độc lập trên đúng những chỗ prompt gọi là rủi ro
   cao: chuỗi lifecycle trông-như-đồng-thời, và độ sâu 10 với batch trộn ngoài

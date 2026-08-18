@@ -270,7 +270,7 @@ Future<List<String>> violations(AppDatabase db, String sql) async {
 /// fixture that does not care about retention need not name a moment.
 ///
 /// Marking rows is left to the caller: a batch that names an item root without
-/// the row carrying it back is invariant 35's own violation, and a helper that
+/// the row carrying it back is invariant 37's own violation, and a helper that
 /// did both would make that violation unconstructible.
 Future<String> insertDeleteBatch(
   AppDatabase db, {
