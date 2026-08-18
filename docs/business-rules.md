@@ -7,8 +7,8 @@
 | **Scope** | Luật nghiệp vụ, validation rule, state machine, edge case của phạm vi MVP. Ngoài phạm vi: quyết định kiến trúc (`architecture.md`), hình dạng dữ liệu (`data-model.md`), luồng người dùng (`use-cases.md`) |
 | **Source of truth for** | BR-xx · validation rule · entity state machine · edge case |
 | **Depends on** | `document-conventions.md`, `product.md`, `architecture.md` |
-| **Updated by task** | M99.28 — BR-210…BR-217: Settings v1 (mặc định học toàn cục, theme, ngôn ngữ); M99.27 — BR-203…BR-209: chiều hỏi của self-assess; M5.26 — BR-200…BR-202: Study Home (đọc thư viện thật, workload toàn subtree, ba trạng thái đã tải); M99.24 — BR-182…BR-189: tiến độ theo deck (phạm vi metric, card-day, hai khoảng, quy-về-vị-trí-hiện-tại, phân hoạch Learning/Reviewing, thứ tự, chỉ-đọc, cập nhật trực tiếp); trước đó M99.23 — BR-190…BR-199: Progress overview v1 (hai khối đã đổi chỗ khi #301 và #302 gộp — số ở bảng dưới là số đúng) · M99.29 — BR-218…BR-229: nhắc học hằng ngày (opt-in, giờ địa phương, due-only, một tóm tắt, riêng tư, thứ tự cấp bách, inexact + idempotent scheduling, permission, capability) · M99.30 — BR-230…BR-238: quản lý tag và lọc theo nhiều tag · M99.31 — BR-239…BR-246: mặt đọc của một thẻ và lịch sử học |
-| **Last updated** | 2026-08-16 |
+| **Updated by task** | M99.32 — BR-247…BR-255: tìm kiếm toàn thư viện (phạm vi trường, chuẩn hoá dùng chung, debounce/zero-I/O, xếp hạng, nhóm, gộp trùng, keyset, chỉ-đọc và ranh giới điều hướng, cấm index không đo); M99.28 — BR-210…BR-217: Settings v1 (mặc định học toàn cục, theme, ngôn ngữ); M99.27 — BR-203…BR-209: chiều hỏi của self-assess; M5.26 — BR-200…BR-202: Study Home (đọc thư viện thật, workload toàn subtree, ba trạng thái đã tải); M99.24 — BR-182…BR-189: tiến độ theo deck (phạm vi metric, card-day, hai khoảng, quy-về-vị-trí-hiện-tại, phân hoạch Learning/Reviewing, thứ tự, chỉ-đọc, cập nhật trực tiếp); trước đó M99.23 — BR-190…BR-199: Progress overview v1 (hai khối đã đổi chỗ khi #301 và #302 gộp — số ở bảng dưới là số đúng) · M99.29 — BR-218…BR-229: nhắc học hằng ngày (opt-in, giờ địa phương, due-only, một tóm tắt, riêng tư, thứ tự cấp bách, inexact + idempotent scheduling, permission, capability) · M99.30 — BR-230…BR-238: quản lý tag và lọc theo nhiều tag · M99.31 — BR-239…BR-246: mặt đọc của một thẻ và lịch sử học |
+| **Last updated** | 2026-08-19 |
 
 Format tuân theo `document-conventions.md` §6.2. Từ khoá MUST / SHOULD / MAY
 theo §3. Prose **không** chứa từ khoá là giải thích, không phải rule (§9).
@@ -27,7 +27,7 @@ khi ai đó đọc và làm theo.
 
 Rule bị thay thế MUST đánh `superseded by BR-yy` ở cột Status và giữ nguyên ID.
 
-Trạng thái hiện tại: **BR-01…BR-238**, không trùng, không thiếu.
+Trạng thái hiện tại: **BR-01…BR-255**, không trùng, không thiếu.
 
 ---
 
@@ -558,6 +558,24 @@ nói phần mà một màn **chỉ đọc** thêm vào.
 | BR-244 | active | Lịch sử rỗng MUST là trạng thái hợp lệ, MUST NOT là lỗi: một thẻ mới tạo chưa có hàng nào, và một thẻ đã đi hết chuỗi learning cũng có thể chưa có hàng `scheduled` nào (BR-144). Nội dung và lịch sử có vòng đời riêng: sửa nội dung (BR-10) MUST NOT làm đổi trạng thái lịch hay thêm/bớt hàng lịch sử, và MUST NOT làm màn chi tiết hiện lịch sử khác đi ngoài phần nội dung. | domain + UI | UC-19, BR-10, BR-144 |
 | BR-245 | active | Thẻ không tồn tại — chưa bao giờ có, hoặc bị xoá từ màn khác trong lúc màn chi tiết đang mở — MUST surface bằng một lý do **có kiểu** — cùng lý do mà editor đã dùng khi thẻ biến mất, không phải một lý do thứ hai — MUST NOT là màn trắng, MUST NOT là thông báo kỹ thuật và MUST NOT lộ id, đường dẫn hay SQL (BR-53). Route chi tiết của thẻ **đang hoạt động** MUST NOT hiển thị thẻ đã nằm trong Trash nếu tính năng đó tồn tại; Trash MAY dùng lại cùng read model qua một capability tường minh và MUST NOT nhân bản màn hình. | repository + UI | UC-19, BR-53, BR-166 |
 | BR-246 | active | Chạm vào một hàng card trong danh sách đang ở chế độ thường MUST mở chi tiết chỉ-đọc của thẻ đó. Trong chế độ chọn nhiều (UC-04 A6), chạm MUST giữ nguyên nghĩa chọn/bỏ chọn và MUST NOT điều hướng. Sửa MUST là một action riêng, tường minh, dẫn tới editor sẵn có; nó MUST NOT là hành động mặc định của một lần chạm và MUST NOT nổi bật hơn phần nội dung đang đọc. Quay lại từ chi tiết MUST giữ nguyên ngữ cảnh của danh sách — filter, search term, sort, cửa sổ đã tải và selection. | UI | UC-19, UC-04, BR-167 |
+
+## Tìm kiếm toàn thư viện
+
+Global Library Search (UC-20). Các rule dưới đây **không** phát biểu lại luật
+nội dung card (BR-07, BR-08, BR-95), luật tag (BR-93) hay luật riêng tư chung
+(BR-51…BR-54) — chúng chỉ nói phần mà việc tìm kiếm thêm vào.
+
+| ID | Status | Rule | Enforced by | Related |
+|---|---|---|---|---|
+| BR-247 | active | Tìm kiếm MUST bao phủ đúng bốn trường: tên deck, mặt trước card, mặt sau card và tên tag. MUST NOT tìm trong `example`, `hint`, `pronunciation`, dữ liệu scheduler, study state hay review history. Deck và card đã bị xoá MUST NOT xuất hiện; khi Trash tồn tại (feature riêng), nội dung soft-deleted MUST bị loại bằng cùng một predicate đặt ở một chỗ duy nhất. | domain + data | UC-20, BR-93 |
+| BR-248 | active | Cả câu truy vấn lẫn dữ liệu được so sánh MUST đi qua **một** hàm chuẩn hoá dùng chung — trim rồi hạ chữ theo Unicode của Dart. SQL MUST NOT dùng `lower()` hay `COLLATE NOCASE` để thay thế: chúng chỉ fold ASCII, nên `CÔNG NGHỆ` sẽ không tìm được bằng `công nghệ`. Chuẩn hoá MUST là case-only; MUST NOT bỏ dấu. | domain + data | UC-20, BR-93 |
+| BR-249 | active | Câu truy vấn chuẩn hoá thành rỗng MUST trả về trạng thái ban đầu và MUST NOT phát sinh bất kỳ statement nào tới database. Truy vấn có nội dung MUST được debounce **250ms** ở seam provider/controller, MUST NOT debounce bên trong widget nhập liệu. Xoá trắng ô tìm kiếm MUST có hiệu lực ngay, không chờ hết cửa sổ debounce. Mỗi lần đọc MUST có định danh riêng; kết quả hoặc lỗi đến sau khi truy vấn đã đổi MUST bị bỏ. Rời màn hình MUST huỷ cửa sổ đang chờ. | controller | UC-20, AD-11 |
+| BR-250 | active | Trong mỗi nhóm, kết quả MUST xếp theo ba bậc khớp: khớp đúng toàn bộ, khớp tiền tố, rồi khớp chứa. Bậc của một card MUST là bậc **tốt nhất** trong các trường nó khớp (front, back, tag). MUST NOT dùng điểm số suy đoán: thứ tự phải giải thích được và phải ổn định giữa hai lần đọc. | domain + data | UC-20 |
+| BR-251 | active | Kết quả MUST được chia hai nhóm và trình bày theo thứ tự **Deck trước, Card sau**. Một trang MUST lấp đầy bằng deck trước; card MUST NOT xuất hiện khi nhóm deck chưa hết. Hai nhóm MUST NOT đan xen nhau ở bất kỳ trang nào. | domain + UI | UC-20 |
+| BR-252 | active | Một card khớp nhiều trường hoặc nhiều tag MUST chỉ sinh **một** kết quả. Việc gộp MUST xảy ra ở tầng truy vấn bằng phép gộp tương quan, MUST NOT dựa vào `DISTINCT` sau một phép JOIN nhân bản hàng. | data | UC-20, BR-93 |
+| BR-253 | active | Phân trang MUST là keyset. Khoá phân trang MUST gồm đúng bốn thành phần theo đúng thứ tự sắp xếp: bậc khớp, văn bản đã fold dùng để sắp, `created_at`, rồi `id` — nên thứ tự là toàn phần và không hai hàng nào bằng nhau. MUST NOT dùng `OFFSET`. Một lần ghi xen giữa hai trang MUST NOT làm lặp hàng hay bỏ sót hàng. | data | UC-20 |
+| BR-254 | active | Kết quả MUST là chỉ-đọc: MUST NOT ghi bất cứ gì và MUST NOT mở phiên học. Đổi tên deck tổ tiên, di chuyển card hoặc deck, đổi tên tag và xoá MUST cập nhật kết quả cùng đường dẫn đang hiển thị mà không cần thao tác thủ công. Mở một kết quả deck MUST đi tới màn deck tương ứng; mở một kết quả card MUST đi tới màn chi tiết card ở chế độ đọc và MUST NOT đi tới màn sửa card. Khi route chi tiết card chưa tồn tại, hệ thống MUST khai báo đích đến bằng một kiểu dữ liệu và nói rõ là chưa mở được, MUST NOT dựng màn chi tiết thứ hai và MUST NOT âm thầm thay bằng màn khác. | repository + UI | UC-20, BR-63 |
+| BR-255 | active | MUST NOT thêm bảng FTS hay index mới cho tìm kiếm khi chưa có `EXPLAIN QUERY PLAN` và số đo trên dữ liệu ở quy mô thực chứng minh là cần. Việc đọc MUST NOT theo kiểu N+1: đường dẫn của mọi kết quả trên một trang MUST dẫn xuất từ một lần đọc cây deck duy nhất, và tag của mọi card trên trang MUST đến từ chính statement đã lấy card. | data | UC-20, AD-02 |
 
 ## StudyMode
 

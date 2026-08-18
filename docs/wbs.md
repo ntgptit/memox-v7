@@ -7,8 +7,8 @@
 | **Scope** | Milestone, task, blocker, technical debt, mục đã descoped |
 | **Source of truth for** | Trạng thái task · blocker · technical debt · quyết định descope |
 | **Depends on** | `document-conventions.md` |
-| **Updated by task** | M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
-| **Last updated** | 2026-08-16 |
+| **Updated by task** | M99.32 (Global Library Search v1); M99.24 (Progress by Deck v1, stage 2 của batch tích hợp #301–#310) · M99.27 (Reverse Self-assess v1, stage 4) · M99.28 (Settings v1 — global study defaults, theme và ngôn ngữ, stage 5) · M99.29 (Daily Reminders v1) · M99.30 (Tag Management v1, stage 7 của batch tích hợp #301–#310) · M99.31 (Card Detail v1, stage 8 của batch tích hợp #301–#310) |
+| **Last updated** | 2026-08-19 |
 
 Single source of truth for project progress. Update it in the same commit as the
 work it describes. A task is `done` only when it meets the Definition of Done in
@@ -10533,6 +10533,106 @@ của M2.
 | ~~Tag~~ | **đã vào MVP** | Màn card cần hiển thị và lọc theo tag; bảng `tags` + `card_tags` không kéo theo lưu trữ file như media | Đã làm ở M4.10at (BR-93, BR-94) |
 | Dải metadata trên card editor — `78% recall` và link `History` | hoãn khỏi M4.11 | Hai nửa của nó chặn bởi hai thứ khác nhau. **`% recall`** cần một BR định nghĩa "nhớ được" cho từng scheduler — `remembered` với `eight_box`, còn `sm2` phải chốt `hard\|good\|easy` có tính là nhớ không — tức cùng hình dạng BR-89…BR-91. **Link `History`** mở một màn study answers, thứ M4.11 đặt thẳng vào out-of-scope | Cùng M5.x, khi study answers có màn của nó. `study_answers.action` đã lưu sẵn đủ dữ liệu (BR-77), nên đây là câu hỏi định nghĩa và UI, không phải câu hỏi schema |
 | Nhập giọng nói (mic) và phát âm bằng TTS (loa) trên card editor | hoãn khỏi M4.11 | Cả hai có trong ảnh tham chiếu. Mỗi cái cần một plugin, một quyền hệ điều hành và một luồng lỗi riêng — gần với media, vốn đã hoãn | Sau MVP, cùng lúc với media |
+
+### M99.32 · Global Library Search v1 — deck, hai mặt card và tag trong một danh sách
+
+- **Status:** **in review** — code, docs và host gate xong; PR mở, **chờ**
+  Card Detail (`docs/prompt/card-detail-history-v1/`) để nối dây điều hướng
+  kết quả card. Emulator IT chưa chạy (xem Acceptance criteria).
+  Review architecture/logic xong — **không có P0/P1**; hai khoảng trống coverage
+  đóng ngay: (P2) guard "chỉ lần đọc mới nhất được emit" trước đó chỉ đúng theo
+  cách đọc code — một database thật không thể cho hai lần đọc hoàn tất ngược thứ
+  tự bắt đầu, nên `search_read_ordering_test.dart` dựng một DAO parked-completer
+  để làm đúng chuyện đó (và `LibrarySearchDao` bỏ `final` **chỉ** vì test này,
+  có ghi lý do tại chỗ); (P3) BR-254 nêu đích danh đổi tên tag, mà
+  `search_live_update_test.dart` chỉ phủ rename tổ tiên / move card / delete —
+  nay có ca đổi tên tag làm card khớp-qua-tag rời khỏi kết quả.
+  Review UI/UX xong — bốn P1 và bốn P2 đóng: (P1) lối vào dùng `go`, mà
+  `/search` là **anh em** của `/decks/:deckId`, nên Back từ tìm kiếm mở ở cấp ba
+  rơi về danh sách gốc — đổi sang `push`, và test cũ không thấy được vì nó mở
+  search từ đúng root; (P1) body hardcode ba `AppSpacing.lg` trong khi ô nhập lấy
+  `mxScreenGutter`, lệch **4dp ở 320dp** và khớp ở 390 — nay body đọc cùng hàm;
+  (P1) harness test dựng `MediaQueryData()` mới, zero cả `size`/`padding`/
+  `viewInsets`, nên `MediaQuery.sizeOf` trả 0 và **bộ ba viewport chạy đúng một
+  layout ba lần** — `copyWith` là fix, và nó mở ra ca bàn phím ở 320×568;
+  (P1) dòng kết quả là `Material` + `InkWell` tự vẽ nên **không có focus ring** —
+  lớp phủ 10% một mình đo ~1.15:1, dưới 3:1 của WCAG 1.4.11 — nay là `MxCard`,
+  vốn mang sẵn ring và `cardOverlay`. (P2) ô nhập in "0" trên mặt lỗi và cạnh
+  spinner; (P2) tên tag đã khớp nằm trong `ExcludeSemantics` nên với screen
+  reader là **tín hiệu duy nhất còn lại** mà không tới được — thêm key ARB
+  `librarySearchCardResultTaggedSemantic`; (P2) spinner tải-thêm thiếu
+  `liveRegion`; (P2) `' › '` là chuỗi hiển thị hardcode, nay là key ARB vì nó
+  vừa được vẽ vừa được đọc lên. Đo tương phản trên token thật: **không cặp
+  text/glyph nào trượt** ở cả sáng lẫn tối (thấp nhất 5.28:1 cho dòng lỗi trang
+  sau, ngưỡng 4.5). Wireframe cập nhật S11, S12, G1 và W6 theo các fix trên.
+- **Goal:** Cho người dùng tìm được một deck, một thẻ hay một tag ở bất kỳ đâu
+  trong thư viện, với thứ tự giải thích được, phân trang không lặp không sót, và
+  không một statement nào chạy trước khi họ thực sự gõ.
+- **Scope:** Feature slice mới `lib/features/search/`, một `.drift` mới cho nửa
+  card, seam chuẩn hoá chuỗi dùng chung trong `core/text/`, seam hẹn giờ trong
+  `core/time/`, route `/search` trong nhánh Library, và việc **thay** ô tìm kiếm
+  theo cấp của Deck bằng lối vào màn mới. Không đổi schema, không thêm index,
+  không đụng scheduler, study state hay review history.
+- **Editable documents:** `docs/business-rules.md`, `docs/use-cases.md`,
+  `docs/wbs.md`, `docs/wireframes/m99-32-global-library-search.md`
+- **5Why:** Người dùng không tìm lại được thứ mình đã lưu vì thư viện là cây mười
+  cấp và tên lặp lại; không tìm được vì tìm kiếm cũ chỉ thấy **tên deck** trong
+  subtree đang đứng, mà thứ họ nhớ thường là mặt thẻ hoặc cái tag; không thấy
+  card vì chưa có bề mặt nào đọc qua cả hai feature; không có bề mặt đó vì cả hai
+  feature đều không được import lẫn nhau (AD-13); nguyên nhân gốc là chưa ai đặt
+  bề mặt tìm kiếm ở chỗ **không thuộc feature nào** — một slice riêng, gắn vào
+  router bằng một tên route trong `core/`. Bốn quyết định theo sau: một hàm fold
+  dùng chung cho cả hai phía so sánh; truy vấn rỗng **không** chạm database;
+  debounce ở seam controller chứ không trong widget; và không thêm FTS/index cho
+  tới khi có số đo (BR-255).
+- **Output:** `core/text/search_fold.dart` (rule fold duy nhất, `CardText`,
+  `TagName` và migration v2→v3 nay uỷ quyền cho nó); `core/time/delay_provider.dart`;
+  `core/database/queries/search.drift` (`searchCardPage` — xếp hạng bằng `instr`,
+  gộp tag tương quan, keyset bốn cột); slice `features/search/` đủ bốn tầng
+  (7 model domain, contract, use case, DAO, mapper, repository impl, 4 provider,
+  screen, 6 widget trong bốn bucket), 21 key ARB EN/VI, route `/search` +
+  `RouteNames.librarySearch`, binding trong `app/di/repository_bindings.dart`,
+  use case Widgetbook `LibrarySearchScreen`, và visual audit companion đầu tiên
+  của repo có **ô nhập đang mở**.
+- **Acceptance criteria:**
+  - [x] Tìm đúng bốn trường (tên deck, front, back, tên tag) và không tìm
+        `example`/`hint`/`pronunciation`, scheduler hay history (BR-247).
+  - [x] Truy vấn rỗng **không** sinh statement nào — đo bằng `QueryLogInterceptor`,
+        không suy ra từ kết quả (BR-249).
+  - [x] Debounce 250ms ở seam controller, có test hai phía 249/250, gõ liên tiếp,
+        xoá trắng tức thì, kết quả/lỗi đến muộn bị bỏ, và dispose huỷ hẹn giờ.
+  - [x] Deck trước Card sau, mỗi nhóm exact → prefix → contains, hoà thì fold-name
+        → `created_at` → `id`; hai nửa Dart và SQL được giữ cùng một câu trả lời
+        bằng `search_rank_parity_test.dart`.
+  - [x] Phân trang keyset: ba trang phủ đúng tập, không lặp không sót, và một hàng
+        ghi thêm phía trên biên không làm lệch trang sau.
+  - [x] Card khớp nhiều tag vẫn là **một** dòng; tag đã khớp hiện ra khi và chỉ
+        khi card khớp *chỉ* qua tag.
+  - [x] Fold Unicode đối xứng — `CÔNG NGHỆ` tìm được bằng `công nghệ`; `%` và `_`
+        là ký tự thường, không phải wildcard.
+  - [x] Đổi tên tổ tiên, chuyển card, xoá card và xoá deck cập nhật kết quả cùng
+        đường dẫn đang hiển thị; huỷ subscription thì ngừng đọc.
+  - [x] Một trang kết quả tốn **hai** statement, không phải một trên mỗi hàng.
+  - [x] Mười trạng thái UI dựng được ở EN/VI, sáng/tối, 320@2.0 / 390 / 412; sáu
+        ràng buộc geometry của W5 đo bằng `getRect`; mọi dòng ≥ 48dp và có nhãn
+        ngữ nghĩa gộp.
+  - [x] Kết quả deck mở deck; kết quả card báo đúng `CardDestination` và **không
+        bao giờ** mở màn sửa card.
+  - [x] `dart format`, `flutter analyze` (lib + test + widgetbook), `check_docs.py`,
+        `check_architecture.py`, guard, generated-code freshness, và toàn bộ host
+        suite (2.683 test) xanh qua `dod_check.sh`.
+  - [ ] `flutter test integration_test/ -d emulator-5554 --flavor development`
+        — **hoãn**, cần emulator. Đây là feature mới dưới `lib/features/`, nên
+        theo `CLAUDE.md` nó **chưa done** cho tới khi suite này chạy xanh trên
+        máy có emulator.
+- **Dependencies:** M4.9a, M4.10at, M4.11, M99.15
+- **Tests required:** domain (chuẩn hoá, ba bậc khớp, hoà, đường dẫn, cycle,
+  cursor, zero-I/O ở use case); data trên SQLite thật (bốn trường, loại trừ, gộp
+  tag, fold Unicode, wildcard, thứ tự, keyset, live update, đếm statement); controller
+  (debounce hai phía, burst, xoá trắng, stale, dispose); widget (mười trạng thái,
+  hai locale, dark, ba viewport, semantics, sáu ràng buộc geometry); router (lối
+  vào, thanh dưới, Back, focus, mở deck); visual audit ba state × sáng/tối.
+- **Checklist phases:** 9, 10, 12, 13, 14, 15
 
 ### Bỏ `riverpod_lint` thì mất chính xác cái gì
 

@@ -15,6 +15,7 @@ import '../../features/progress/presentation/screens/progress_deck_screen.dart';
 import '../../features/progress/presentation/screens/progress_screen.dart';
 import '../../features/reminder/presentation/screens/reminder_settings_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
+import '../../features/search/presentation/screens/library_search_screen.dart';
 import '../../features/study/presentation/screens/study_entry_screen.dart';
 import '../../features/study/presentation/screens/study_home_screen.dart';
 import '../fallback/route_not_found_screen.dart';
@@ -49,15 +50,12 @@ final GoRouter appRouter = createAppRouter();
 /// separate `Navigator` per branch, so each tab keeps its own stack and its own
 /// scroll position while another is on screen. A plain set of top-level
 /// routes would rebuild the destination from scratch on every tab switch, which
-/// before the content is. Settings was one until M99.28, and swapping its
-/// branch ahead of its feature (AD-19): it holds a single presentation-only
-/// deep-link contract and the tab order before the content existed; Progress has
 /// is the "why did my place in the list disappear" bug. Progress and Settings
-/// is the "why did my place in the list disappear" bug. Progress is still a
-/// placeholder route, so the deep-link contract and the tab order are settled
-/// screen for the real one touched nothing in this file but the widget name.
-/// since been filled in by UC-12 and Settings is still a placeholder.
-/// were both branches ahead of their features (AD-19), which is what settled the
+/// were both branches ahead of their features (AD-19), which is what settled
+/// the deep-link contract and the tab order before the content existed;
+/// Progress was filled in by M99.23/M99.24 and Settings by M99.28, and
+/// swapping a placeholder screen for the real one touched nothing in this
+/// file but the widget name.
 GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
   // Declared so the import wizard can mount on the root navigator, above
   // the shell. Created per call: a shared GlobalKey across two routers (as
@@ -84,6 +82,16 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
                 // depth is an argument rather than a different widget.
                 builder: (context, state) => const DeckListScreen(),
                 routes: <RouteBase>[
+                  // Global Library Search (UC-20), a sibling of the deck
+                  // detail: the results span decks and cards, so the surface
+                  // belongs to neither feature's screen, and a child route
+                  // keeps the bottom bar and sends Back to the level the
+                  // search was opened from.
+                  GoRoute(
+                    path: RoutePaths.librarySearchRelative,
+                    name: RouteNames.librarySearch,
+                    builder: (context, state) => const LibrarySearchScreen(),
+                  ),
                   // The starter catalog, a sibling of the deck detail so an
                   // empty library can offer content without leaving the
                   // branch (UC-01).

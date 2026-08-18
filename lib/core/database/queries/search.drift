@@ -1,0 +1,131 @@
+import '../tables/cards.drift';
+import '../tables/tags.drift';
+
+-- Global Library Search (UC-20, BR-247…BR-255).
+--
+-- One statement answers the whole card half of a search: which cards match, how
+-- well they match, and which tag made them match when nothing on the card did.
+--
+-- **Every comparison is against a folded column, and no `lower()` appears
+-- anywhere.** SQLite folds ASCII only, so `lower(front)` leaves `Ô` and `Đ`
+-- alone and a card stored as `CÔNG NGHỆ` becomes unfindable by typing
+-- `công nghệ`. `cards.front_folded`, `cards.back_folded` and `tags.name_folded`
+-- are written by Dart through `foldForSearch`, and `:folded` arrives folded by
+-- the same function — so the two sides of the comparison are byte-for-byte
+-- (BR-248).
+--
+-- **`instr`, never `LIKE`.** `LIKE` reads `%` and `_` in its pattern as
+-- wildcards, so a user searching `100%` would really be searching "100 followed
+-- by anything" and a lone `%` would match the library. `instr(haystack, needle)`
+-- has no pattern language at all: every character is itself, the needle stays a
+-- bound variable, and the same call answers both questions the ranking needs —
+-- `= 1` is a prefix match, `> 0` is a contains match (BR-250).
+--
+-- **`rank_tier` is the MIN over the fields a card can match on** (BR-250): a
+-- card whose Back matches exactly outranks one whose Front merely contains the
+-- term, and a tag match is a match of the card. `9` is "this field does not
+-- match at all"; a row whose MIN is still 9 matched nothing and is filtered out.
+-- The literals are the tiers `SearchMatchRank` declares in the domain — they are
+-- restated here because SQL cannot import an enum, and
+-- `search_rank_parity_test.dart` holds the two to the same numbers.
+--
+-- **The tag subqueries are correlated, so a card appears once** (BR-252). A
+-- `JOIN card_tags` would return one row per matching tag, and a card carrying
+-- `noun` and `nouns` would occupy two rows of one page. Aggregating instead of
+-- joining is what makes de-duplication structural rather than a `DISTINCT` a
+-- later edit can drop.
+--
+-- **The keyset is written out rather than as a row value.** `(a, b, c, d) >
+-- (?, ?, ?, ?)` is valid SQLite and shorter; the expanded form is what drift's
+-- analyzer type-checks reliably, and the four columns are exactly the ORDER BY,
+-- so a page can neither skip nor repeat a row when a write lands between two
+-- pages (BR-253). The first page passes a sentinel below every real row
+-- (`rank_tier = -1`), so there is one statement rather than a first-page copy of
+-- it that could drift from this one.
+--
+-- **`ORDER BY` is the whole tie-break chain and ends in `id`** (BR-251): tier,
+-- then the folded text the row is sorted by, then `created_at`, then the primary
+-- key. Two cards created in the same second with the same front still have one
+-- fixed order, which is what makes the cursor above total.
+--
+-- Still a scan: no index serves "contains", and adding an FTS table is refused
+-- until `EXPLAIN QUERY PLAN` plus a benchmark on realistic data says it is
+-- needed (BR-255). Nothing here changes the schema.
+searchCardPage AS SearchCardRow:
+WITH matched (
+  card_id, deck_id, front, back, created_at, sort_key, rank_tier, matched_tag
+) AS (
+  SELECT
+    c.id,
+    c.deck_id,
+    c.front,
+    c.back,
+    c.created_at,
+    c.front_folded,
+    MIN(
+      CASE
+        WHEN c.front_folded = :folded THEN 0
+        WHEN instr(c.front_folded, :folded) = 1 THEN 1
+        WHEN instr(c.front_folded, :folded) > 0 THEN 2
+        ELSE 9
+      END,
+      CASE
+        WHEN c.back_folded = :folded THEN 0
+        WHEN instr(c.back_folded, :folded) = 1 THEN 1
+        WHEN instr(c.back_folded, :folded) > 0 THEN 2
+        ELSE 9
+      END,
+      COALESCE((
+        SELECT MIN(
+          CASE
+            WHEN t.name_folded = :folded THEN 0
+            WHEN instr(t.name_folded, :folded) = 1 THEN 1
+            WHEN instr(t.name_folded, :folded) > 0 THEN 2
+            ELSE 9
+          END
+        )
+        FROM card_tags ct
+        INNER JOIN tags t ON t.id = ct.tag_id
+        WHERE ct.card_id = c.id
+      ), 9)
+    ),
+    (
+      SELECT t.name
+      FROM card_tags ct
+      INNER JOIN tags t ON t.id = ct.tag_id
+      WHERE ct.card_id = c.id AND instr(t.name_folded, :folded) > 0
+      ORDER BY
+        CASE
+          WHEN t.name_folded = :folded THEN 0
+          WHEN instr(t.name_folded, :folded) = 1 THEN 1
+          ELSE 2
+        END,
+        t.name_folded,
+        t.id
+      LIMIT 1
+    )
+  FROM cards c
+)
+SELECT
+  card_id AS cardId,
+  deck_id AS deckId,
+  front AS front,
+  back AS back,
+  created_at AS createdAt,
+  sort_key AS sortKey,
+  rank_tier AS rankTier,
+  matched_tag AS matchedTag
+FROM matched
+WHERE rank_tier < 9
+  AND (
+    rank_tier > :afterTier
+    OR (rank_tier = :afterTier AND (
+      sort_key > :afterKey
+      OR (sort_key = :afterKey AND (
+        created_at > :afterCreatedAt
+        OR (created_at = :afterCreatedAt AND card_id > :afterId)
+      ))
+    ))
+  )
+ORDER BY rank_tier ASC, sort_key ASC, created_at ASC, card_id ASC
+LIMIT :limit;

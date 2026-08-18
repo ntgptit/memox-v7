@@ -17,6 +17,7 @@ import 'screens/progress_deck_screen_use_case.dart';
 import 'screens/progress_screen_use_case.dart';
 import 'screens/reminder_screen_use_case.dart';
 import 'screens/settings_screen_use_case.dart';
+import 'screens/library_search_screen_use_case.dart';
 import 'screens/study_screens_use_case.dart';
 import 'screens/tag_catalog_screen_use_case.dart';
 import 'screens/tag_filter_sheet_use_case.dart';
@@ -133,6 +134,7 @@ class MemoxWidgetbook extends StatelessWidget {
             reminderSettingsScreenComponent(),
             tagCatalogScreenComponent(),
             tagFilterSheetComponent(),
+            librarySearchScreenComponent(),
             ...studyScreenComponents(),
             progressDeckScreenComponent(),
           ],

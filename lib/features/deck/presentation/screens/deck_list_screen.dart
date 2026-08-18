@@ -23,7 +23,6 @@ import '../widgets/sections/deck_level_error_widget.dart';
 import '../widgets/sections/deck_list_sliver_widget.dart';
 import '../widgets/sections/deck_summary_section_widget.dart';
 import '../widgets/sections/deck_list_toolbar_widget.dart';
-import '../widgets/sections/deck_level_body_widget.dart';
 import '../widgets/sections/deck_subheader_widget.dart';
 import '../widgets/sections/deck_card_handoff_widget.dart';
 
@@ -199,10 +198,7 @@ class _DeckLevel extends StatelessWidget {
       // Above every body state, including the empty ones — "where am I" is most
       // worth answering on a level with nothing in it to recognise.
       subheader: DeckSubheaderWidget(snapshot: snapshot),
-      body: DeckLevelBodyWidget(
-        snapshot: snapshot,
-        buildLevel: () => _body(context, parent),
-      ),
+      body: _body(context, parent),
     );
   }
 

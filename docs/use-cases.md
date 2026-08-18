@@ -7,8 +7,8 @@
 | **Scope** | Must-have của MVP. Ngoài phạm vi: should/nice-to-have, và mọi thứ ở mục "Điều đã cố ý không đặc tả" |
 | **Source of truth for** | UC-xx · main/alternative/error flow · UI state matrix của từng màn |
 | **Depends on** | `document-conventions.md`, `product.md`, `business-rules.md` |
-| **Updated by task** | M99.24 — UC-13: xem tiến độ theo deck (cấp thư viện → cấp deck, hai khoảng); trước đó M99.23 — UC-12: xem tiến độ học (streak, hôm nay, bảy ngày) · M99.29 — UC-17: bật nhắc học hằng ngày (opt-in → quyền → lịch → notification → Study Home) · M99.30 — UC-18: quản lý tag (catalog, rename/gộp, xoá) và lọc thẻ theo nhiều tag · M99.31 — UC-19: xem chi tiết một card và lịch sử học của nó |
-| **Last updated** | 2026-08-16 |
+| **Updated by task** | M99.32 — UC-20: tìm kiếm toàn thư viện (deck, hai mặt card, tag); M99.24 — UC-13: xem tiến độ theo deck (cấp thư viện → cấp deck, hai khoảng); trước đó M99.23 — UC-12: xem tiến độ học (streak, hôm nay, bảy ngày) · M99.29 — UC-17: bật nhắc học hằng ngày (opt-in → quyền → lịch → notification → Study Home) · M99.30 — UC-18: quản lý tag (catalog, rename/gộp, xoá) và lọc thẻ theo nhiều tag · M99.31 — UC-19: xem chi tiết một card và lịch sử học của nó |
+| **Last updated** | 2026-08-19 |
 
 Chỉ đặc tả must-have. Should-have và nice-to-have viết khi tới lượt — đặc tả
 trước những thứ có thể bị cắt là lãng phí.
@@ -1386,12 +1386,69 @@ loaded có lịch sử một trang · loaded nhiều trang · loading-more · pa
 (có `Retry`, giữ nguyên phần đã tải) · end-of-history · error cấp cao nhất ·
 not-found.
 
+## UC-20 · Tìm kiếm toàn thư viện
+
+| | |
+|---|---|
+| **Status** | active |
+
+**Actor:** Người dùng
+**Trigger:** Bấm biểu tượng tìm kiếm ở header của Library, ở bất kỳ cấp nào
+**Preconditions:** Không có. Thư viện rỗng vẫn mở được màn tìm kiếm.
+
+**Main flow:**
+1. Hệ thống mở màn tìm kiếm như một route con của nhánh Library — thanh dưới còn
+   nguyên, Back trả về đúng cấp vừa rời — và đưa con trỏ vào ô nhập ngay.
+2. Trước khi gõ, màn hình nói rõ tìm được những gì: tên deck, mặt trước và mặt
+   sau của card, tên tag. Chưa có statement nào chạy (BR-249).
+3. Người dùng gõ. Sau 250ms im lặng, hệ thống chuẩn hoá câu truy vấn bằng đúng
+   hàm fold mà các cột đã lưu dùng (BR-248) và đọc **một trang** kết quả.
+4. Kết quả hiện thành hai mục — Deck trước, Card sau (BR-251). Mỗi mục xếp theo
+   khớp đúng → khớp tiền tố → khớp chứa, phần bằng nhau phá hoà bằng tên đã fold,
+   `created_at` rồi `id` (BR-250, BR-253).
+5. Một dòng deck hiển thị đường dẫn tổ tiên phía trên tên. Một dòng card hiển thị
+   đường dẫn deck chứa nó, mặt trước, một dòng tóm tắt mặt sau, và tên tag đã làm
+   nó khớp khi card khớp **chỉ** qua tag (BR-252).
+6. Mở một kết quả deck đi tới deck đó. Mở một kết quả card đi tới chi tiết card ở
+   chế độ đọc (BR-254).
+
+**Alternative flows:**
+- **A1 — Còn kết quả phía sau:** cuối danh sách có hành động tải thêm; trang kế
+  tiếp nối bằng keyset nên không lặp và không sót hàng (BR-253).
+- **A2 — Chỉ có deck, hoặc chỉ có card:** mục không có kết quả không được vẽ tiêu
+  đề rỗng.
+- **A3 — Dữ liệu đổi ở màn khác:** đổi tên, di chuyển, xoá hoặc đổi tên tag cập
+  nhật ngay kết quả và đường dẫn đang hiển thị (BR-254).
+- **A4 — Xoá trắng ô nhập:** về trạng thái ban đầu ngay lập tức, không chờ
+  debounce và không đọc gì (BR-249).
+
+**Error flows:**
+- **E1 — Trang đầu đọc lỗi:** màn hình lỗi có nút thử lại; danh sách để trống, vì
+  kết quả của truy vấn cũ nằm dưới một thông báo lỗi là lời nói dối.
+- **E2 — Trang sau đọc lỗi:** giữ nguyên những gì đã tìm được, chỉ dải cuối danh
+  sách đổi thành thông báo và nút thử lại.
+- **E3 — Chi tiết card chưa có route:** nói rõ là chưa mở được. MUST NOT mở màn
+  sửa card thay thế (BR-254).
+
+**Postconditions:** Không đổi gì — use case chỉ đọc, và không mở phiên học nào
+(BR-254).
+
+**Business rules:** BR-247, BR-248, BR-249, BR-250, BR-251, BR-252, BR-253,
+BR-254, BR-255. Ngoài ra BR-55…BR-57 cho đường dẫn, BR-63 cho việc mở một deck
+chứa card, và BR-93 cho danh tính tag.
+
+**UI states:** initial (chưa gõ) · debouncing · loading trang đầu · mixed ·
+decks-only · cards-only · no results · loading trang sau · lỗi trang sau · lỗi
+trang đầu
+
+---
+
 ## Điều đã cố ý không đặc tả
 
 | Thứ | Vì sao |
 |---|---|
 | Đưa deck con lên thành root deck | Cần quyết định scheduler mới; là tính năng riêng, không phải phép di chuyển (UC-09 A2) |
-| Tìm kiếm card (S1) | Should-have, chưa tới lượt |
+| ~~Tìm kiếm card (S1)~~ | **Đã vào MVP ở M99.32** — UC-20 và BR-247…BR-255 phủ tên deck, hai mặt card và tên tag. Ngoài phạm vi v1: fuzzy/semantic search, bỏ dấu, và tìm trong `example`/`hint`/`pronunciation` |
 | ~~Thống kê / streak (S2)~~ | **Đã đặc tả ở M99.23, M99.24 và M5.26** — UC-12 với BR-190…BR-199 chốt đơn vị đếm, partition, streak và phạm vi v1; UC-13 với BR-182…BR-189 chốt tiến độ theo deck; UC-14 với BR-200…BR-202 chốt tab Study đọc thư viện thật |
 | Đảo chiều card (S3) | Should-have — **một nửa đã đóng ở M99.27**: UC-15 và BR-203…BR-209 cho phép hỏi ngược trong một phiên `self_assess` của deck `sm2` mà **không** ghi lại thẻ, nên phần còn mở là đảo chiều ở các mode khác |
 | ~~Export (nửa còn lại của N1)~~ | **Đã đặc tả ở M99.21** — UC-11 và BR-174…BR-181 chốt scope, encoder, filename, share và quyền riêng tư trước khi viết code, đúng điều kiện mà mục này đặt ra. Còn nice-to-have ngoài phạm vi export nội dung: backup/restore, sync và `.apkg`. |

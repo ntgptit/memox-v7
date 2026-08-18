@@ -1,3 +1,4 @@
+import '../../../../core/text/search_fold.dart';
 import '../failures/tag_validation_failure.dart';
 
 /// C0, DEL and C1 — every character that carries no glyph.
@@ -58,7 +59,7 @@ final class TagName {
       );
     }
 
-    return (name: TagName._(trimmed, trimmed.toLowerCase()), problem: null);
+    return (name: TagName._(trimmed, foldForSearch(trimmed)), problem: null);
   }
 
   /// Reads a name that is **already stored**, without BR-93's length limit —
@@ -82,7 +83,7 @@ final class TagName {
       );
     }
 
-    return (name: TagName._(trimmed, trimmed.toLowerCase()), problem: null);
+    return (name: TagName._(trimmed, foldForSearch(trimmed)), problem: null);
   }
 
   /// BR-93's fold, applied to text that is **not** a name being created.

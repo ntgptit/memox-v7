@@ -64,6 +64,14 @@ abstract final class RouteNames {
   /// Settings branch and Back returns to it (UC-17).
   static const String reminderSettings = 'reminderSettings';
 
+  /// Global Library Search (UC-20). A child of [decks], so the bottom bar stays
+  /// and Back returns to the level the user searched from.
+  ///
+  /// **The one name two features speak.** The Library header pushes it and the
+  /// search feature owns the screen; neither may import the other's widgets
+  /// (AD-13), so the route name in `core/` is the whole of the coupling.
+  static const String librarySearch = 'librarySearch';
+
   /// The starter template catalog. A child of [decks], so it stays inside the
   /// Library branch and Back returns to the (possibly empty) list that offered
   /// it (UC-01).

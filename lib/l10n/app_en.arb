@@ -3792,5 +3792,145 @@
   "cardHistoryModeUnknownSemantics": "Unknown mode",
   "@cardHistoryModeUnknownSemantics": {
     "description": "Spoken stand-in for a stored mode this build does not recognise (StudyMode.unknown). The visible line shows the same en dash placeholder an unrecorded column uses; a silent gap in a spoken sentence reads as data that failed to load."
+  },
+  "librarySearchTitle": "Search",
+  "@librarySearchTitle": {
+    "description": "App bar title of Global Library Search (UC-20). One word, because the field directly below it says what is being searched — a longer title would repeat the hint."
+  },
+  "librarySearchOpenLabel": "Search your library",
+  "@librarySearchOpenLabel": {
+    "description": "Semantic label and tooltip of the magnifier in the Library header, which opens the search screen. Names the scope rather than the action: the search covers the whole library, not the level the user is standing on."
+  },
+  "librarySearchHint": "Search decks, cards and tags",
+  "@librarySearchHint": {
+    "description": "Placeholder of the search field. Names all three things that are matched (BR-182), because a user who does not know cards are searched will not try."
+  },
+  "librarySearchClearLabel": "Clear search",
+  "@librarySearchClearLabel": {
+    "description": "Semantic label and tooltip of the clear button inside the search field."
+  },
+  "librarySearchDecksGroupLabel": "Decks",
+  "@librarySearchDecksGroupLabel": {
+    "description": "Header of the deck section of the results. Decks are always listed before cards (BR-186)."
+  },
+  "librarySearchCardsGroupLabel": "Cards",
+  "@librarySearchCardsGroupLabel": {
+    "description": "Header of the card section of the results."
+  },
+  "librarySearchInitialTitle": "Find anything in your library",
+  "@librarySearchInitialTitle": {
+    "description": "Heading of the state before anything is typed. Nothing has been read from the database at this point (BR-184)."
+  },
+  "librarySearchInitialMessage": "Type to search deck names, card fronts and backs, and tag names.",
+  "@librarySearchInitialMessage": {
+    "description": "Body of the initial state. States the exact scope, so an empty result later reads as it is not there rather than as it does not search that."
+  },
+  "librarySearchNoResultsTitle": "No results for “{query}”",
+  "@librarySearchNoResultsTitle": {
+    "description": "Heading when a settled search matched nothing. \"query\" is echoed as typed — not the folded form — so the user can see the spelling that was searched.",
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "librarySearchNoResultsMessage": "Nothing in your library has that in a deck name, a card, or a tag.",
+  "@librarySearchNoResultsMessage": {
+    "description": "Body of the empty-result state. Repeats the scope, because the most useful next thought is then it is somewhere else, or then I spelled it differently."
+  },
+  "librarySearchErrorTitle": "Could not search",
+  "@librarySearchErrorTitle": {
+    "description": "Heading when the first page of a search failed."
+  },
+  "librarySearchErrorMessage": "Something went wrong while reading your library. Please try again.",
+  "@librarySearchErrorMessage": {
+    "description": "Body of the search failure state. Deliberately generic: a database message names tables and can carry card content, and neither belongs on screen."
+  },
+  "librarySearchLoadingLabel": "Searching",
+  "@librarySearchLoadingLabel": {
+    "description": "Screen-reader label of the spinner shown while the first page is being read. A bare spinner announces nothing at all."
+  },
+  "librarySearchLoadingMoreLabel": "Loading more results",
+  "@librarySearchLoadingMoreLabel": {
+    "description": "Screen-reader label of the spinner under the last result while the next page is being read."
+  },
+  "librarySearchLoadMoreAction": "Show more results",
+  "@librarySearchLoadMoreAction": {
+    "description": "Button under the last result that opens the next page. Shown only while more results exist."
+  },
+  "librarySearchLoadMoreErrorMessage": "Could not load more results.",
+  "@librarySearchLoadMoreErrorMessage": {
+    "description": "Message replacing the load-more button when the next page failed. Everything already listed stays on screen — only this band changes."
+  },
+  "librarySearchDeckResultSemantic": "Deck {name}",
+  "@librarySearchDeckResultSemantic": {
+    "description": "Screen-reader label of a deck result that sits at the top of the library, so it has no path above it. \"name\" comes first because the list mixes two kinds and the kind is what disambiguates them.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "librarySearchDeckResultInPathSemantic": "Deck {name}, in {path}",
+  "@librarySearchDeckResultInPathSemantic": {
+    "description": "Screen-reader label of a deck result with ancestors. \"path\" is announced after \"name\" because the name is what the user searched for.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "librarySearchCardResultSemantic": "Card {front}, {back}, in {path}",
+  "@librarySearchCardResultSemantic": {
+    "description": "Screen-reader label of a card result. \"back\" is carried whole although the row clamps it to one line — an ellipsis is a layout decision, not a decision to drop content from the accessibility tree. \"path\" is the deck the card lives in.",
+    "placeholders": {
+      "front": {
+        "type": "String"
+      },
+      "back": {
+        "type": "String"
+      },
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "librarySearchMatchedTagLabel": "Tag: {tag}",
+  "@librarySearchMatchedTagLabel": {
+    "description": "Shown on a card result that matched through one of its tags rather than through its own text (BR-187). \"tag\" is the best-ranked matching tag; without it the row appears with no visible reason, which reads as a broken search.",
+    "placeholders": {
+      "tag": {
+        "type": "String"
+      }
+    }
+  },
+  "librarySearchCardDetailPendingLabel": "Opening a card from search arrives with the card detail screen.",
+  "@librarySearchCardDetailPendingLabel": {
+    "description": "Shown when a card result is tapped on a build where the card detail route does not exist yet (BR-189). Said plainly rather than routing to the card editor, which is a write surface reached from a read."
+  },
+  "librarySearchPathSeparator": " › ",
+  "@librarySearchPathSeparator": {
+    "description": "Joins the deck names of a result path: Korean › Grammar › Nouns. It lives in the ARB because it is user-visible twice over — drawn on screen, and read aloud between every pair of names — so the glyph is a \"translator\" decision rather than a widget one. Keep the surrounding spaces."
+  },
+  "librarySearchCardResultTaggedSemantic": "Card {front}, {back}, in {path}, matched tag {tag}",
+  "@librarySearchCardResultTaggedSemantic": {
+    "description": "Screen-reader label of a card result that matched through one of its tags rather than through its own text. \"tag\" is the reason the row is in the list, and with match highlighting deliberately absent it is the only reason a screen-reader user can be given — so it belongs in the label and not only in the visible chip. \"front\", \"back\" and \"path\" carry the same meaning as in librarySearchCardResultSemantic.",
+    "placeholders": {
+      "front": {
+        "type": "String"
+      },
+      "back": {
+        "type": "String"
+      },
+      "path": {
+        "type": "String"
+      },
+      "tag": {
+        "type": "String"
+      }
+    }
   }
 }
