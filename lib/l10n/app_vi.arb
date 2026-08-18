@@ -3494,7 +3494,7 @@
   "@cardDetailNotFoundTitle": {
     "description": "Not-found face when the card never existed or was deleted while open (UC-19 E1/E2, BR-245)."
   },
-  "cardDetailNotFoundMessage": "Thẻ này không còn tồn tại. Có thể nó đã bị xoá ở màn khác.",
+  "cardDetailNotFoundMessage": "Thẻ này không còn tồn tại. Có thể nó đã bị xoá ở màn hình khác.",
   "@cardDetailNotFoundMessage": {
     "description": "Explains the not-found face without naming the id (BR-53, BR-245)."
   },

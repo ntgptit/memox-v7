@@ -1077,11 +1077,15 @@ def _check_duplicate_headings() -> None:
     Only `##`, which is the level a document's own sections live at; a document
     made of like-shaped entries legitimately repeats a sub-heading under each.
 
-    **Scoped to the contract documents, and `docs/reviews/` is deliberately
-    outside it.** A review report is written a round at a time and repeats
+    **Scoped to the contract documents.** `docs/reviews/` and `docs/prompt/`
+    stay outside it — not by an exclude rule here, but because `_docs_md()`
+    only walks the top level plus `docs/it-scenarios/`. That is the right
+    outcome: a review report is written a round at a time and repeats
     `## Verification` once per round, which is the shape of the thing rather
     than a defect — three copies there mean three rounds, while two copies of
-    a section in `use-cases.md` mean two answers to one question.
+    a section in `use-cases.md` mean two answers to one question. A round
+    report saved as a *top-level* `docs/*.md` would be inside the scope, so
+    keep those under `docs/reviews/`.
     """
     dupes: list[str] = []
     for path in _docs_md():
