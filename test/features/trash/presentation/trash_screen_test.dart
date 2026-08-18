@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memox/shared/widgets/mx_error_state.dart';
 import 'package:memox/core/error/failure.dart';
 import 'package:memox/core/time/clock_provider.dart';
 import 'package:memox/features/trash/di/trash_repository_provider.dart';
@@ -293,6 +294,48 @@ void main() {
       expect(repository.restores, hasLength(1));
       expect(repository.restores.single.batchId, 'b1');
       expect(repository.restores.single.target.deckId, 'origin');
+    });
+
+    testWidgets('a failed targets read shows a compact retryable face', (
+      tester,
+    ) async {
+      final repository = await pumpTrash(
+        tester,
+        batches: <TrashBatchEntity>[fakeBatch(id: 'b1', name: 'a card')],
+      );
+      repository.targetsFailure = const DatabaseFailure(message: 'read lost');
+
+      await tester.tap(find.byTooltip(english.trashRestoreAction));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(MxErrorState), findsOneWidget);
+      expect(find.text(english.retryAction), findsOneWidget);
+      expect(repository.restores, isEmpty);
+
+      // The compact sheet must not balloon to the whole screen the moment
+      // the read fails: the error face shrink-wraps inside a min Column.
+      final Size sheet = tester.getSize(find.byType(MxErrorState));
+      final Size screen = tester.getSize(find.byType(MaterialApp));
+      expect(
+        sheet.height,
+        lessThan(screen.height / 2),
+        reason: 'the error face hugs its content instead of filling the sheet',
+      );
+
+      // Retry re-reads: heal the fake, tap, and the targets arrive.
+      repository.targetsFailure = null;
+      repository.targets = <TrashRestoreTarget>[
+        const TrashDeckTarget(
+          deckId: 'origin',
+          name: 'Origin',
+          parentName: 'Parent',
+        ),
+      ];
+      await tester.tap(find.text(english.retryAction));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(MxErrorState), findsNothing);
+      expect(find.text('Origin'), findsOneWidget);
     });
 
     testWidgets('no eligible target shows why, with nothing to tap', (

@@ -65,13 +65,26 @@ class _TrashRestoreTargetSheetState
           // The app's one full-surface error grammar (C10): a failed read
           // offers Retry where it failed, not a dead face the user can only
           // dismiss. Invalidate re-runs the watch.
-          error: (error, _) => MxErrorState(
-            title: l10n.trashRestoreTargetTitle,
-            message: context.trashCommandError(error),
-            retryLabel: l10n.retryAction,
-            onRetry: () => ref.invalidate(
-              trashRestoreTargetsProvider(widget.batch.batchId),
-            ),
+          //
+          // **Inside a min Column, deliberately.** The sheet hands down a
+          // bounded height and `MxErrorState` centres itself, so bare it
+          // would balloon this compact sheet to full height. A min Column
+          // gives its child unbounded height, which is exactly what makes a
+          // `Center`-based state hug its content. The data face stays outside
+          // the wrap on purpose — its `Flexible(ListView)` needs the bounded
+          // constraint the sheet provides.
+          error: (error, _) => Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              MxErrorState(
+                title: l10n.trashRestoreTargetTitle,
+                message: context.trashCommandError(error),
+                retryLabel: l10n.retryAction,
+                onRetry: () => ref.invalidate(
+                  trashRestoreTargetsProvider(widget.batch.batchId),
+                ),
+              ),
+            ],
           ),
           data: (values) => _Body(
             batch: widget.batch,

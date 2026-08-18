@@ -59,9 +59,19 @@ final class FakeTrashRepository implements TrashRepository {
   Future<TrashBatchEntity> batch(String batchId) async =>
       throw const NotFoundFailure(message: 'not used by these tests');
 
+  /// When set, the targets read fails instead of answering — the sheet's
+  /// own error face (C10), unreachable before this existed.
+  Failure? targetsFailure;
+
   @override
-  Stream<List<TrashRestoreTarget>> watchRestoreTargets(String batchId) =>
-      Stream<List<TrashRestoreTarget>>.value(targets);
+  Stream<List<TrashRestoreTarget>> watchRestoreTargets(String batchId) {
+    final failure = targetsFailure;
+    if (failure != null) {
+      return Stream<List<TrashRestoreTarget>>.error(failure);
+    }
+
+    return Stream<List<TrashRestoreTarget>>.value(targets);
+  }
 
   @override
   Future<void> restore({

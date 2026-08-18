@@ -51,7 +51,9 @@ enum TrashScenario {
   cardsOnly('Cards only'),
   empty('Empty'),
   expiringToday('Expiring today'),
-  restoreRefused('Restore refused');
+  restoreRefused('Restore refused'),
+  // Open Restore on any row to reach it — the face lives in the sheet.
+  targetsFail('Restore targets read fails');
 
   const TrashScenario(this.label);
 
@@ -100,7 +102,10 @@ final class _CatalogTrashRepository implements TrashRepository {
       _card('run out of', daysAgo: 30),
       _deck('Idioms', daysAgo: 29),
     ],
-    TrashScenario.mixed || TrashScenario.restoreRefused => <TrashBatchEntity>[
+    TrashScenario.mixed ||
+    TrashScenario.restoreRefused ||
+    // The list itself is healthy; only the sheet-side read fails.
+    TrashScenario.targetsFail => <TrashBatchEntity>[
       _card('give up', daysAgo: 0),
       _deck('Phrasal verbs', daysAgo: 2, deckCount: 13, cardCount: 340),
       _card('look forward to', daysAgo: 11),
@@ -147,19 +152,28 @@ final class _CatalogTrashRepository implements TrashRepository {
       _batches().firstWhere((batch) => batch.batchId == batchId);
 
   @override
-  Stream<List<TrashRestoreTarget>> watchRestoreTargets(String batchId) =>
-      Stream<List<TrashRestoreTarget>>.value(<TrashRestoreTarget>[
-        const TrashDeckTarget(
-          deckId: 'phrasal',
-          name: 'Phrasal verbs',
-          parentName: 'Grammar',
-        ),
-        const TrashDeckTarget(
-          deckId: 'unit-2',
-          name: 'Unit 2',
-          parentName: 'Beginner',
-        ),
-      ]);
+  Stream<List<TrashRestoreTarget>> watchRestoreTargets(String batchId) {
+    // The sheet's own error face (C10): reachable only when the read fails,
+    // so the catalog fails it on purpose.
+    if (scenario == TrashScenario.targetsFail) {
+      return Stream<List<TrashRestoreTarget>>.error(
+        const DatabaseFailure(message: 'catalog demo failure'),
+      );
+    }
+
+    return Stream<List<TrashRestoreTarget>>.value(<TrashRestoreTarget>[
+      const TrashDeckTarget(
+        deckId: 'phrasal',
+        name: 'Phrasal verbs',
+        parentName: 'Grammar',
+      ),
+      const TrashDeckTarget(
+        deckId: 'unit-2',
+        name: 'Unit 2',
+        parentName: 'Beginner',
+      ),
+    ]);
+  }
 
   @override
   Future<void> restore({

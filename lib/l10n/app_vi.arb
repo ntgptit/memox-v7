@@ -3945,7 +3945,7 @@
   "@trashPurgeAction": {
     "description": "The only destructive action in Trash (BR-266)."
   },
-  "trashRowMenuTitle": "Thao tác với item trong Trash",
+  "trashRowMenuTitle": "Thao tác với mục này trong Trash",
   "@trashRowMenuTitle": {
     "description": "Title of the one-item overflow menu on a Trash row. Purge lives behind it so permanent deletion costs one tap more than Restore (wireframe m99-33 T6)."
   },

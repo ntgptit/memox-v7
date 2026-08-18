@@ -29,5 +29,9 @@ Future<void> showTrashRowMenu(
       ],
     ),
   );
+  // The sheet's await is an async gap and `onPurge` re-enters the caller's
+  // context to open the confirm dialog — the same guard the deck actions
+  // sheet carries for the same shape.
+  if (!context.mounted) return;
   if (purge ?? false) onPurge();
 }

@@ -15,7 +15,7 @@ import 'support/test_database.dart';
 /// firing on its own subject rather than on collateral damage from the seed.
 ///
 /// The five Trash cases live in `invariants_trash_test.dart`; the fixture and
-/// the both-ways helper they share are in `support/invariant_harness.dart`.
+/// the both-ways helper they share are in `support/invariant_fixture.dart`.
 void main() {
   test('every invariant this suite claims to run is present', () {
     // The list itself is a claim. Losing one would leave the rest green and no
