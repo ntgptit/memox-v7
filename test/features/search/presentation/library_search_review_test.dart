@@ -3,6 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/theme/app_semantic_colors.dart';
 import 'package:memox/core/theme/app_stroke.dart';
 import 'package:memox/features/search/domain/models/search_result_model.dart';
+import 'package:memox/features/search/domain/models/search_page_model.dart';
+import 'package:memox/features/search/domain/models/search_query_model.dart';
+import 'package:memox/features/search/domain/models/search_cursor_model.dart';
 import 'package:memox/features/search/presentation/widgets/items/card_result_tile_widget.dart';
 import 'package:memox/features/search/presentation/widgets/items/deck_result_tile_widget.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
@@ -262,13 +265,18 @@ void main() {
     final handle = tester.ensureSemantics();
     await pumpSearchScreen(
       tester,
-      repository: FakeLibrarySearchRepository.paged(
-        first: fakeSearchPage(
-          cards: <CardSearchHit>[fakeCardHit()],
-          hasMore: true,
-        ),
-        // Never answers, so the footer stays in its loading state.
-        next: fakeSearchPage(),
+      repository: FakeLibrarySearchRepository(
+        (SearchQuery _, LibrarySearchCursor after, int _) =>
+            after == LibrarySearchCursor.start
+            ? Stream<LibrarySearchPage>.value(
+                fakeSearchPage(
+                  cards: <CardSearchHit>[fakeCardHit()],
+                  hasMore: true,
+                ),
+              )
+            // Closes without ever emitting, so the page provider stays
+            // loading and the face holds — no dependence on pump timing.
+            : const Stream<LibrarySearchPage>.empty(),
       ),
     );
     await typeSearch(tester, 'noun');

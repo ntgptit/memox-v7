@@ -42,8 +42,8 @@ class CardResultTileWidget extends StatelessWidget {
 
     return SearchResultShellWidget(
       icon: Icons.article_outlined,
-      // **The tag goes into the label, not only onto the chip.** The chip is
-      // inside the row's `ExcludeSemantics`, so a screen-reader user otherwise
+      // **The tag goes into the label, not only onto the visible line.** The
+      // "Nhãn:"/"Tag:" text sits inside the row's `ExcludeSemantics`, so a screen-reader user otherwise
       // hears a front and a back containing nothing they typed and is given no
       // reason at all — and match highlighting, the other possible reason, is
       // deliberately absent (wireframe S6).
