@@ -1,4 +1,4 @@
-import 'support/invariant_harness.dart';
+import 'support/invariant_fixture.dart';
 import 'support/test_database.dart';
 
 /// The five Trash invariants (BR-256…BR-267, AD-22), run against a real
@@ -14,7 +14,7 @@ import 'support/test_database.dart';
 /// deliberately not asserted here; `invariants_test.dart` owns that check for
 /// the whole set.
 void main() {
-  invariant(
+  invariantTest(
     'Q33',
     'an active card sits inside a deleted deck (BR-256, BR-258)',
     breakIt: (db) async {
@@ -35,7 +35,7 @@ void main() {
     expectOffenders: <String>['card-1'],
   );
 
-  invariant(
+  invariantTest(
     'Q34',
     'an active deck sits under a deleted deck (BR-256, BR-258)',
     breakIt: (db) async {
@@ -54,7 +54,7 @@ void main() {
     expectOffenders: <String>['leaf'],
   );
 
-  invariant(
+  invariantTest(
     'Q35',
     'a batch owns no rows at all (BR-265)',
     breakIt: (db) => insertDeleteBatch(
@@ -66,7 +66,7 @@ void main() {
     expectOffenders: <String>['batch-empty'],
   );
 
-  invariant(
+  invariantTest(
     'Q36',
     'a tombstone was deleted after its already-deleted ancestor (BR-258)',
     breakIt: (db) async {
@@ -105,7 +105,7 @@ void main() {
     expectOffenders: <String>['leaf'],
   );
 
-  invariant(
+  invariantTest(
     'Q37',
     'a batch names an item root that does not carry it (BR-256)',
     breakIt: (db) async {

@@ -3,7 +3,7 @@ import 'invariant_queries.dart';
 import 'support/invariant_fixture.dart';
 import 'support/test_database.dart';
 
-/// The 22 data invariants, run against a real database.
+/// The data invariants, run against a real database.
 ///
 /// Each is checked **both ways**. Clean on valid data proves the query does not
 /// cry wolf; firing on its own violation proves it is connected to anything at

@@ -10652,10 +10652,10 @@ của M2.
 ### M99.33 · Trash và restore v1 — soft-delete thay cho delete cứng
 
 - **Status:** **in review** — phase 1 (docs) xong: BR-256…BR-267, UC-21, AD-22,
-  `delete_batches` + hai cột tombstone + bất biến 31…35 + viết lại bất biến
+  `delete_batches` + hai cột tombstone + bất biến 35…37 + viết lại bất biến
   1…5/15/29, wireframe M99.33, 5Why. Phase 2 (schema) xong: v8 với
-  `drift_schema_v8.json`, `_upgradeToV8` (bảng + hai cột + ba index + rebuild
-  `study_sessions` cho `content_deleted`), `migration_v8_test`. Phase 3 (query)
+  `drift_schema_v11.json`, `_upgradeToV11` (bảng + hai cột + ba index + rebuild
+  `study_sessions` cho `content_deleted`), `migration_v11_test`. Phase 3 (query)
   xong: loại trừ tombstone trong toàn bộ `queries/*.drift`, `queries/trash.drift`,
   `query_inventory_test` với allowlist hai statement có lý do và một pass
   alias-level ghi lại trong chính test. Phase 4 (data) xong: soft-delete một
@@ -10669,7 +10669,7 @@ của M2.
 - **Goal:** Thay delete cứng của card/deck bằng soft-delete giữ nguyên nội dung,
   study state và history tới khi purge, cộng một màn Trash cho khôi phục có
   target và xoá vĩnh viễn an toàn.
-- **Scope:** BR-256…BR-267, UC-21, AD-22; schema v8 (`delete_batches`,
+- **Scope:** BR-256…BR-267, UC-21, AD-22; schema v11 (`delete_batches`,
   `decks.delete_batch_id`, `cards.delete_batch_id`, `end_reason =
   content_deleted`); loại trừ tombstone trong mọi query active của
   deck/card/study/tag cộng một guard inventory; transaction soft-delete /
@@ -10687,8 +10687,8 @@ của M2.
   accidental loss, soft-delete lifecycle, explicit restore target,
   retention/purge và subtree consistency.
 - **Output:** BR-256…BR-267; UC-21; AD-22; bảng `delete_batches` + hai cột
-  tombstone + bất biến 31…35 và bản viết lại của 1…5/15/29; migration v8 với
-  snapshot `drift_schema_v8.json`; `queries/trash.drift`; feature slice Trash
+  tombstone + bất biến 35…37 và bản viết lại của 1…5/15/29; migration v8 với
+  snapshot `drift_schema_v11.json`; `queries/trash.drift`; feature slice Trash
   đủ domain/data/di/presentation; test SQLite bảng quyết định, migration,
   controller/widget/router và cross-feature leak.
 - **Acceptance criteria:**
@@ -10719,8 +10719,8 @@ của M2.
         `meetsGuideline` riêng — **chưa có**, xem Known gap.
 - **Dependencies:** M99.15 (BR-163), M99.16 (v7), M4.9a, M4.11
 - **Tests required:** SQLite thật cho bảng quyết định soft-delete/restore/purge
-  gồm depth 10, batch trộn, biên 30 ngày và rollback; migration v7 → v8 với dữ
-  liệu cũ mặc định active; invariant 31…35 hai chiều; controller/widget/router
+  gồm depth 10, batch trộn, biên 30 ngày và rollback; migration v10 → v11 với dữ
+  liệu cũ mặc định active; invariant 33…37 hai chiều; controller/widget/router
   cho mọi state của UC-21; cross-feature chứng minh Progress/Search/Study/Export
   không rò Trash. **Emulator IT hoãn** — không chạy trong task này.
 - **Known gap (không đóng ở task này):** ba mục, tất cả đến từ UI/UX audit và
@@ -10742,8 +10742,8 @@ của M2.
   dừng giữa chừng vì session limit và không trả finding nào.** Coordinator đã
   tự chạy phần đo được: guard inventory statement-level, một pass alias-level
   thủ công trên toàn bộ `queries/` (ghi lại trong `query_inventory_test.dart` —
-  bốn alias không mang vị từ đều an toàn theo bất biến 31/32), bất biến 22 câu
-  trên database thật sau delete/restore/purge/sweep, và migration v7 → v8. Cái
+  bốn alias không mang vị từ đều an toàn theo bất biến 33/32), bất biến 22 câu
+  trên database thật sau delete/restore/purge/sweep, và migration v10 → v11. Cái
   **chưa** có là một cặp mắt độc lập trên đúng những chỗ prompt gọi là rủi ro
   cao: chuỗi lifecycle trông-như-đồng-thời, và độ sâu 10 với batch trộn ngoài
   các case đã viết. Nên chạy lại review đó trước khi coi phase 6 là xong.

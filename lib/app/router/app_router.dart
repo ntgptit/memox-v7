@@ -16,12 +16,12 @@ import '../../features/progress/presentation/screens/progress_screen.dart';
 import '../../features/reminder/presentation/screens/reminder_settings_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/search/presentation/screens/library_search_screen.dart';
+import '../../features/trash/presentation/screens/trash_screen.dart';
 import '../../features/study/presentation/screens/study_entry_screen.dart';
 import '../../features/study/presentation/screens/study_home_screen.dart';
 import '../fallback/route_not_found_screen.dart';
 import '../shell/app_navigation_shell.dart';
 import 'route_paths.dart';
-import '../../features/trash/presentation/screens/trash_screen.dart';
 
 /// Composition of the route table, and nothing else.
 ///

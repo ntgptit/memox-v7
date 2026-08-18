@@ -22,7 +22,7 @@ const Map<String, String> invariantQueries = <String, String>{
   // ---- Deck tree ----------------------------------------------------------
   // Six of the deck-tree queries below say `delete_batch_id IS NULL` from v8.
   // They describe the tree the user can see, and a tombstone is not content: a
-  // deck emptied by BR-186 still holds deleted rows, so an unfiltered
+  // deck emptied by BR-260 still holds deleted rows, so an unfiltered
   // invariant 2 would fire on it and an unfiltered 29 would stay silent for it.
   'Q1': // Root deck holds cards directly (BR-58)
       'SELECT c.id FROM cards c '
@@ -37,7 +37,7 @@ const Map<String, String> invariantQueries = <String, String>{
       'OR EXISTS (SELECT 1 FROM decks s '
       'WHERE s.parent_deck_id = d.id AND s.delete_batch_id IS NULL))',
 
-  'Q29': // A sub-deck kept its type after everything left it (BR-163, BR-186)
+  'Q29': // A sub-deck kept its type after everything left it (BR-163, BR-260)
       'SELECT d.id FROM decks d '
       'WHERE d.parent_deck_id IS NOT NULL '
       'AND d.delete_batch_id IS NULL '
@@ -165,8 +165,8 @@ const Map<String, String> invariantQueries = <String, String>{
       'WHERE l.depth < 64 AND d.delete_batch_id IS NULL) '
       'SELECT id FROM levels WHERE depth > 10',
 
-  // ---- Trash (BR-182…BR-193, AD-21) ---------------------------------------
-  // Q31 and Q32 are the pair the whole one-column exclusion strategy rests on.
+  // ---- Trash (BR-256…BR-267, AD-22) ---------------------------------------
+  // Q33 and Q34 are the pair the whole one-column exclusion strategy rests on.
   // If either fires, `delete_batch_id IS NULL` has stopped meaning "visible"
   // and every active query in the app is quietly lying.
   'Q33': // Active card inside a deleted deck (BR-256, BR-258)

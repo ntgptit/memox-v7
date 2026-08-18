@@ -36,6 +36,7 @@ part 'study_options_repository_impl.dart';
 part 'study_queue_layout_repository_impl.dart';
 part 'study_queue_repository_impl.dart';
 part 'study_lifecycle_repository_impl.dart';
+part 'study_trash_invalidation_repository_impl.dart';
 
 /// How many other cards a forgotten one waits behind (BR-26).
 const int kSelfAssessComebackGap = 3;
@@ -64,7 +65,8 @@ final class StudyRepositoryImpl
         _StudyOptionsOperations,
         _StudyQueueLayoutOperations,
         _StudyQueueOperations,
-        _StudyLifecycleOperations
+        _StudyLifecycleOperations,
+        _StudyTrashInvalidationOperation
     implements StudyRepository {
   StudyRepositoryImpl(
     this._dao, {
@@ -350,42 +352,6 @@ final class StudyRepositoryImpl
 
     return open.length;
   });
-
-  @override
-  Future<int> invalidateSessionsForDeletedContent({
-    required List<String> deckIds,
-    required List<String> cardIds,
-    required DateTime endedAt,
-  }) async {
-    // **No transaction of its own.** This is called from inside the deletion's
-    // transaction (BR-259), and opening a second one here would only be a
-    // savepoint that can commit while the deletion around it rolls back — the
-    // one outcome the rule forbids: a session closed for a deletion that never
-    // happened.
-    final ids = await _dao.openSessionIdsTouching(
-      deckIds: deckIds,
-      cardIds: cardIds,
-    );
-
-    for (final id in ids) {
-      await _dao.updateSession(
-        id,
-        StudySessionsCompanion(
-          status: Value<String>(StudySessionStatus.invalidated.dbValue),
-          // Stored, never inferred (BR-259, AD-11). `scheduler_reset` would be
-          // the nearest existing value and it would be a lie: nothing about the
-          // scheduler changed, the material went to Trash — and only one of
-          // those two is undone by pressing Undo.
-          endReason: Value<String?>(
-            StudySessionEndReason.contentDeleted.dbValue,
-          ),
-          endedAt: Value<DateTime?>(endedAt),
-        ),
-      );
-    }
-
-    return ids.length;
-  }
 
   /// Refuses a write the session cannot accept (BR-79, BR-84).
   ///
