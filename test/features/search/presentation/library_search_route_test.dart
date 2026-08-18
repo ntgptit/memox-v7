@@ -15,10 +15,16 @@ import 'package:memox/features/search/di/library_search_repository_provider.dart
 import 'package:memox/features/search/domain/models/search_result_model.dart';
 import 'package:memox/features/search/presentation/screens/library_search_screen.dart';
 import 'package:memox/features/search/presentation/widgets/items/deck_result_tile_widget.dart';
+import 'package:memox/features/card/di/card_detail_repository_provider.dart';
+import 'package:memox/features/card/di/card_repository_provider.dart';
+import 'package:memox/features/card/domain/models/card_history_page_model.dart';
+import 'package:memox/features/search/presentation/widgets/items/card_result_tile_widget.dart';
 import 'package:memox/l10n/generated/app_localizations_en.dart';
 import 'package:memox/shared/widgets/mx_navigation_bar.dart';
 import 'package:memox/shared/widgets/mx_search_field.dart';
 
+import '../../card/presentation/support/fake_card_detail_repository.dart';
+import '../../card/presentation/support/fake_card_repository.dart';
 import '../../deck/presentation/support/fake_deck_repository.dart';
 import 'support/fake_library_search_repository.dart';
 import 'support/search_screen_harness.dart';
@@ -44,6 +50,8 @@ void main() {
         ? createAppRouter()
         : createAppRouter(initialLocation: initialLocation);
     addTearDown(router.dispose);
+    final FakeCardRepository cardRepository = FakeCardRepository();
+    addTearDown(cardRepository.dispose);
 
     await tester.pumpWidget(
       ProviderScope(
@@ -55,6 +63,12 @@ void main() {
             ]),
           ),
           librarySearchRepositoryProvider.overrideWithValue(search),
+          cardRepositoryProvider.overrideWithValue(cardRepository),
+          cardDetailRepositoryProvider.overrideWithValue(
+            FakeCardDetailRepository()
+              ..seededDetail = fakeCardDetail(front: 'noun')
+              ..pages.add(CardHistoryPageModel.empty),
+          ),
           delaySchedulerProvider.overrideWithValue(immediateScheduler),
           clockProvider.overrideWithValue(() => DateTime.utc(2026, 7, 29, 12)),
         ],
@@ -195,6 +209,36 @@ void main() {
       router.state.uri.path,
       '/decks/deck-9',
       reason: 'a deck result opens the deck, never an editor',
+    );
+  });
+
+  testWidgets('opening a card result opens the read-only card detail', (
+    tester,
+  ) async {
+    final GoRouter router = await pumpApp(
+      tester,
+      search: FakeLibrarySearchRepository.serving(
+        fakeSearchPage(
+          cards: <CardSearchHit>[
+            fakeCardHit(id: 'card-7', deckId: 'deck-9'),
+          ],
+        ),
+      ),
+    );
+    await tester.tap(find.bySemanticsLabel(english.librarySearchOpenLabel));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'noun');
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(CardResultTileWidget));
+    await tester.pumpAndSettle();
+
+    expect(
+      router.state.uri.path,
+      '/decks/deck-9/cards/card-7',
+      reason:
+          'a card result opens the reading surface, never the editor '
+          '(BR-254)',
     );
   });
 }

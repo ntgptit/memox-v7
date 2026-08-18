@@ -2,19 +2,20 @@ import 'search_result_model.dart';
 
 /// Where tapping a result leads, named without naming a route (BR-254).
 ///
-/// **A typed seam rather than a `goNamed` inside a row.** Card Detail does not
-/// exist on this base: it is a separate feature on a separate branch, and this
-/// one must not grow a second detail screen to fill the gap, nor quietly send
-/// the user to the *editor* — a search is a read, and landing in an edit form
-/// from a read is how content gets changed by accident.
+/// **A typed seam rather than a `goNamed` inside a row.** A row reports a
+/// destination and the screen's `_open` decides what to do with it, so what a
+/// row *means* stays assertable without a route table. The card case must
+/// open the read-only detail surface and never the *editor* — a search is a
+/// read, and landing in an edit form from a read is how content gets changed
+/// by accident (BR-254).
 ///
-/// So a row reports a destination and something else decides what to do with
-/// it. `search_navigation_provider.dart` binds the decision; the domain, the
-/// data layer and the widgets compile and are tested without any route existing
-/// for [CardDestination] at all.
+/// The seam earned its keep once already: this feature was authored on a base
+/// where Card Detail did not exist, compiled and was tested without any route
+/// for [CardDestination], and when the route arrived (M99.31) only the
+/// screen's switch had to learn about it.
 ///
-/// Sealed, so the day Card Detail lands the compiler names every place that has
-/// to learn about it.
+/// Sealed, so a new kind of destination makes the compiler name every place
+/// that has to learn about it.
 sealed class SearchDestination {
   const SearchDestination();
 

@@ -17,8 +17,10 @@ import 'support/fake_library_search_repository.dart';
 /// **Asserted against the body widget, not the screen.** The row's whole
 /// contract is the typed [SearchDestination] it hands upward; what the screen
 /// then does with it is navigation, and navigation is asserted through the real
-/// router in `library_search_route_test.dart`. Splitting them is what lets the
-/// card path be proven wired on a build where its route does not exist yet.
+/// router in `library_search_route_test.dart`. The split earned its keep when
+/// this feature was authored on a base without the card-detail route: the rows
+/// were proven correct then, and wiring the route later touched only the
+/// screen's switch.
 void main() {
   Future<void> pumpBody(
     WidgetTester tester, {

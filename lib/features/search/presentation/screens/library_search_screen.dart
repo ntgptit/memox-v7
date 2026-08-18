@@ -55,8 +55,10 @@ class _LibrarySearchScreenState extends ConsumerState<LibrarySearchScreen> {
   /// [SearchDestination] and never a route, so what a row *means* stays
   /// assertable without a route table (BR-254).
   ///
-  /// Sealed and exhaustive: the day Card Detail lands, the compiler names this
-  /// as the one place that has to learn about it.
+  /// Sealed and exhaustive: a third kind of destination makes the compiler
+  /// name this switch as the one place that has to learn about it — which is
+  /// how the card case below got wired the moment Card Detail (M99.31)
+  /// reached this branch.
   void _open(SearchDestination destination) {
     switch (destination) {
       // A `card`-type deck's route forwards into its card list on arrival, so
@@ -67,17 +69,19 @@ class _LibrarySearchScreenState extends ConsumerState<LibrarySearchScreen> {
           pathParameters: <String, String>{RoutePathParams.deckId: deckId},
         );
 
-      // Deliberately not routed. Card Detail is a separate feature on a
-      // separate branch; until its route exists there is nothing to navigate
-      // to, and saying so is the honest answer. The two alternatives are both
-      // worse: a second detail screen here would be a duplicate to delete
-      // later, and the card *editor* is a write surface reached from a read.
-      // `docs/wbs.md` M99.32 records this as the pull-request dependency.
-      case CardDestination():
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.l10n.librarySearchCardDetailPendingLabel),
-          ),
+      // The reading surface, never the editor: a search is a read, and
+      // landing in an edit form from a read is how content gets changed by
+      // accident (BR-254). The route is Card Detail's (UC-19, M99.31); it
+      // did not exist on the branch this feature was authored on, which is
+      // why the destination is a type — the switch, not the rows, learned
+      // about it.
+      case CardDestination(:final String cardId, :final String deckId):
+        context.goNamed(
+          RouteNames.cardDetail,
+          pathParameters: <String, String>{
+            RoutePathParams.deckId: deckId,
+            RoutePathParams.cardId: cardId,
+          },
         );
     }
   }

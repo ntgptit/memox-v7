@@ -10536,9 +10536,11 @@ của M2.
 
 ### M99.32 · Global Library Search v1 — deck, hai mặt card và tag trong một danh sách
 
-- **Status:** **in review** — code, docs và host gate xong; PR mở, **chờ**
-  Card Detail (`docs/prompt/card-detail-history-v1/`) để nối dây điều hướng
-  kết quả card. Emulator IT chưa chạy (xem Acceptance criteria).
+- **Status:** **integrated** — gộp vào nhánh tích hợp ở stage 9; Card
+  Detail (M99.31) đã có mặt từ stage 8 nên điều hướng kết quả card đã được
+  nối dây vào route chi tiết thẻ ngay khi tích hợp (BR-254), thay cho snackbar
+  "chưa mở được" của thời điểm nhánh nguồn chưa có route ấy. Emulator IT chưa
+  chạy (xem Acceptance criteria).
   Review architecture/logic xong — **không có P0/P1**; hai khoảng trống coverage
   đóng ngay: (P2) guard "chỉ lần đọc mới nhất được emit" trước đó chỉ đúng theo
   cách đọc code — một database thật không thể cho hai lần đọc hoàn tất ngược thứ

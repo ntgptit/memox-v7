@@ -3888,10 +3888,6 @@
       }
     }
   },
-  "librarySearchCardDetailPendingLabel": "Mở thẻ từ tìm kiếm sẽ có khi màn hình chi tiết thẻ hoàn thành.",
-  "@librarySearchCardDetailPendingLabel": {
-    "description": "Shown when a card result is tapped on a build where the card detail route does not exist yet (BR-189). Said plainly rather than routing to the card editor, which is a write surface reached from a read."
-  },
   "librarySearchPathSeparator": " › ",
   "@librarySearchPathSeparator": {
     "description": "Joins the deck names of a result path: Korean › Grammar › Nouns. It lives in the ARB because it is user-visible twice over — drawn on screen, and read aloud between every pair of names — so the glyph is a \"translator\" decision rather than a widget one. Keep the surrounding spaces."
