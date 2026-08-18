@@ -105,6 +105,11 @@ class TrashRowWidget extends StatelessWidget {
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
+                // The two leading icons above stay outside this exclusion
+                // on purpose: a bare `Icon` self-excludes its glyph, so they
+                // contribute no narration — but give one a `semanticLabel`
+                // and it must move inside here, or the double narration
+                // returns.
                 // **Excluded, because the row's label already says all of
                 // it.** Without this a reader hears the composed sentence,
                 // then every fact again one Text at a time — the exact

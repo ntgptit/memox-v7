@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/shared/widgets/mx_error_state.dart';
@@ -216,11 +217,22 @@ void main() {
         batches: <TrashBatchEntity>[fakeBatch(id: 'b1', name: 'a card')],
       );
 
-      // Exactly one semantics node carries the name: the row's composed
-      // sentence. Without the body's ExcludeSemantics this finds two — the
-      // sentence and the name's own Text node — which is the double
-      // narration a reader would swipe through.
-      expect(find.bySemanticsLabel(RegExp('a card')), findsOneWidget);
+      // The body's Texts are not semantics boundaries, so without the
+      // ExcludeSemantics they merge INTO the row's container node — the node
+      // count stays one, but its label grows every body line joined with
+      // newlines. The mutation-holding assertion is therefore on the label's
+      // content: the composed single sentence, and nothing appended.
+      final SemanticsNode row = tester.getSemantics(
+        find.bySemanticsLabel(RegExp('a card')),
+      );
+      expect(
+        row.label,
+        isNot(contains('\n')),
+        reason:
+            'the row narrates one composed sentence; a newline means a body '
+            'Text merged in behind it',
+      );
+      expect(row.label, startsWith('a card, '));
       // The two per-row controls stay outside the exclusion, independently
       // findable and actionable.
       expect(find.bySemanticsLabel(english.trashRestoreAction), findsOneWidget);
