@@ -1,6 +1,6 @@
 {
   "generatedBy": "test/design_audit/audit_test.dart",
-  "scannedFiles": 653,
+  "scannedFiles": 655,
   "totalSites": 483,
   "byElementKind": {
     "other": 305,
@@ -4927,7 +4927,7 @@
     },
     {
       "file": "lib/features/trash/presentation/screens/trash_screen.dart",
-      "line": 336,
+      "line": 347,
       "widget_context": "_RetentionNotice",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4938,7 +4938,7 @@
     },
     {
       "file": "lib/features/trash/presentation/widgets/items/trash_row_widget.dart",
-      "line": 92,
+      "line": 95,
       "widget_context": "TrashRowWidget",
       "element_kind": "icon",
       "source_kind": "theme-token",
@@ -4949,7 +4949,7 @@
     },
     {
       "file": "lib/features/trash/presentation/widgets/items/trash_row_widget.dart",
-      "line": 102,
+      "line": 105,
       "widget_context": "TrashRowWidget",
       "element_kind": "icon",
       "source_kind": "theme-token",
@@ -4960,7 +4960,7 @@
     },
     {
       "file": "lib/features/trash/presentation/widgets/items/trash_row_widget.dart",
-      "line": 170,
+      "line": 173,
       "widget_context": "_Body",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4971,7 +4971,7 @@
     },
     {
       "file": "lib/features/trash/presentation/widgets/items/trash_row_widget.dart",
-      "line": 178,
+      "line": 181,
       "widget_context": "_Body",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4982,7 +4982,7 @@
     },
     {
       "file": "lib/features/trash/presentation/widgets/items/trash_row_widget.dart",
-      "line": 187,
+      "line": 190,
       "widget_context": "_Body",
       "element_kind": "text",
       "source_kind": "theme-token",
@@ -4993,7 +4993,7 @@
     },
     {
       "file": "lib/features/trash/presentation/widgets/items/trash_row_widget.dart",
-      "line": 197,
+      "line": 200,
       "widget_context": "_Body",
       "element_kind": "text",
       "source_kind": "theme-token",
