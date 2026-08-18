@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:memox/core/error/failure.dart';
@@ -57,6 +58,15 @@ enum CardDetailScenario {
   notFound('card deleted from another screen'),
   readError('the read failed'),
 
+  /// The read never lands, so the whole-screen spinner holds still — the only
+  /// way a person can actually look at it. The reminder and study catalogs
+  /// hold their loading faces open the same way.
+  loading('loading (read never lands)'),
+
+  /// The second history page never lands, so the inline loading-more spinner
+  /// holds. Scroll down and tap Load more to reach it.
+  pageStalls('loading-more holds (scroll down, then Load more)'),
+
   /// The band at the foot of the timeline, with events already above it
   /// (UC-19 E4). Scroll to the end to reach it — the first page lands, the
   /// second refuses.
@@ -107,6 +117,13 @@ final class _CatalogDetailRepository implements CardDetailRepository {
       );
     }
 
+    // Not `Stream.empty()`: an empty stream closes at once, and a closed
+    // stream with no value is a state Riverpod may render differently from one
+    // still waiting.
+    if (scenario == CardDetailScenario.loading) {
+      return StreamController<CardDetailModel>().stream;
+    }
+
     return Stream<CardDetailModel>.value(_detail());
   }
 
@@ -124,6 +141,11 @@ final class _CatalogDetailRepository implements CardDetailRepository {
     // instead — a different state, already staged.
     if (scenario == CardDetailScenario.pageFails && after != null) {
       throw const DatabaseFailure(message: 'catalog: page refused');
+    }
+    // Held open rather than failed: the face under review is the inline
+    // spinner itself, which only exists while the request is in flight.
+    if (scenario == CardDetailScenario.pageStalls && after != null) {
+      return Completer<CardHistoryPageModel>().future;
     }
     // A first page that says there is more, then a shorter second page — so
     // the catalog shows the load-more tail and the completion line in turn.

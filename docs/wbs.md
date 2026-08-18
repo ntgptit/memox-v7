@@ -10461,7 +10461,10 @@ nên nó **phải** được chạy trước khi ai đó coi Settings v1 là đ�
   - [x] Tám mặt của W3 đều dựng và kiểm được: bốn mặt tĩnh có PNG trong
         `test/demo/` (loaded, no-history, page error, not-found), bốn mặt
         động (loading, loading-more, Load more, lỗi đọc cấp màn) ghim bằng
-        widget test và mở được trong Widgetbook — "render" ở đây nghĩa là
+        widget test và mở được trong Widgetbook — hai mặt chờ được giữ mở
+        bằng scenario `loading`/`pageStalls` (stream không trả lời, cùng
+        mẫu với reminder và study), vì một mặt chỉ loé một frame thì không
+        ai review được — "render" ở đây nghĩa là
         pump và assert, không phải mặt nào cũng có ảnh. EN/VI, light/dark,
         320dp@2.0.
   - [ ] `flutter test integration_test/ -d emulator-5554 --flavor development`
