@@ -3862,6 +3862,10 @@
   "@librarySearchLoadMoreErrorMessage": {
     "description": "Message replacing the load-more button when the next page failed. Everything already listed stays on screen — only this band changes."
   },
+  "librarySearchLoadMoreErrorTitle": "Couldn’t load more",
+  "@librarySearchLoadMoreErrorTitle": {
+    "description": "Title of the error band under the last search result when loading the next page fails (UC-20). Everything already found stays above it; the band names what did not arrive. Same wording as the card-history page-error title because the situation is the same (D24)."
+  },
   "librarySearchDeckResultSemantic": "Deck {name}",
   "@librarySearchDeckResultSemantic": {
     "description": "Screen-reader label of a deck result that sits at the top of the library, so it has no path above it. \"name\" comes first because the list mixes two kinds and the kind is what disambiguates them.",

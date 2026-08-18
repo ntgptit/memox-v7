@@ -167,6 +167,10 @@ void main() {
         reason: 'what was already found is still what was found',
       );
       expect(
+        find.text(english.librarySearchLoadMoreErrorTitle),
+        findsOneWidget,
+      );
+      expect(
         find.text(english.librarySearchLoadMoreErrorMessage),
         findsOneWidget,
       );

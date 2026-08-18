@@ -219,9 +219,7 @@ void main() {
       tester,
       search: FakeLibrarySearchRepository.serving(
         fakeSearchPage(
-          cards: <CardSearchHit>[
-            fakeCardHit(id: 'card-7', deckId: 'deck-9'),
-          ],
+          cards: <CardSearchHit>[fakeCardHit(id: 'card-7', deckId: 'deck-9')],
         ),
       ),
     );
