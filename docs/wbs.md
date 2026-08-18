@@ -10627,7 +10627,9 @@ của M2.
   - [x] Chuỗi VI nói "nhãn" cho tag — thống nhất với Tag Catalog, chủ dự án
         chốt ở stage 9 tích hợp. **Nợ đặt tên còn lại, ngoài phạm vi stage
         này:** "deck" đang là "bộ thẻ" ở màn CRUD deck nhưng "deck" ở
-        reminder/study/search — cần một quyết định app-wide riêng.
+        reminder/study/search — cần một quyết định app-wide riêng. Cùng nhóm:
+        `deckSchedulerChangeBody`, `deckResetProgressKeptBody` và
+        `cardImportInfoTagsHint` (VI) vẫn nói "tag" — chờ chung quyết định đó.
   - [x] Hai mặt chờ giữ mở được trong Widgetbook — scenario `loading` (stream
         không bao giờ trả lời) và `pageStalls` (trang hai treo vĩnh viễn) —
         cùng bài học M99.31: mặt chỉ loé một frame thì không review được.

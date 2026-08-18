@@ -278,6 +278,19 @@ void main() {
       findsNothing,
       reason: 'nothing is loading until the action is used',
     );
+
+    await tester.tap(find.text(english.librarySearchLoadMoreAction));
+    // `pump`, not `pumpAndSettle`: the spinner animates forever by design.
+    await tester.pump();
+
+    expect(
+      find.bySemanticsLabel(english.librarySearchLoadingMoreLabel),
+      findsOneWidget,
+      reason:
+          'the held page is announced — the liveRegion merges with the '
+          "spinner's own semanticsLabel into one node, like card history's "
+          'tail',
+    );
     handle.dispose();
   });
 }
