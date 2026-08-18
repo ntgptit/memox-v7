@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/core/error/failure.dart';
+import 'package:memox/features/card/domain/failures/card_validation_failure.dart';
+import 'package:memox/features/card/domain/models/card_text_model.dart';
 import 'package:memox/features/deck/domain/failures/deck_move_failure.dart';
 import 'package:memox/features/deck/domain/models/deck_name_model.dart';
 import 'package:memox/features/deck/domain/models/scheduler_type_model.dart';
@@ -250,6 +252,43 @@ void main() {
 
       expect(await h.deckBatchOf(tree.root.id), isNull);
       expect(await h.parentOf(tree.root.id), isNull);
+    });
+
+    test('the origin parent that took cards meanwhile refuses the subtree '
+        '(BR-64)', () async {
+      // Delete the branch's last child, so BR-260 flips it to `unset`; give
+      // it a card, so it becomes `card`-typed; then try to put the subtree
+      // back. `alreadyParent` must not outrank `holdsCards` — the restore
+      // path treats "already the parent" as a green light, and reporting it
+      // first waved a live sub-deck into a card deck (invariant Q3).
+      final tree = await h.seedTree();
+      await h.deckRepository.deleteDeck(tree.leaf.id);
+      final batch = await h.onlyBatch();
+      await h.cardRepository.createCard(
+        deckId: tree.branch.id,
+        front: CardText.parse('meanwhile front', side: CardSide.front).text!,
+        back: CardText.parse('meanwhile back', side: CardSide.back).text!,
+      );
+
+      await expectLater(
+        h.trashRepository.restore(
+          batchId: batch.batchId,
+          target: deckTarget(tree.branch.id),
+        ),
+        throwsA(
+          isA<ConflictFailure>().having(
+            (ConflictFailure failure) => failure.reason,
+            'reason',
+            DeckMoveRejection.holdsCards,
+          ),
+        ),
+      );
+      // Undo defaults to the origin parent, so it must refuse the same way.
+      await expectLater(
+        h.trashRepository.undo(batch.batchId),
+        throwsA(isA<ConflictFailure>()),
+      );
+      expect(await h.invariantOffenders(invariantQueries), isEmpty);
     });
 
     test('restoring to the original parent is allowed', () async {
