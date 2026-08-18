@@ -207,6 +207,26 @@ void main() {
       expect(repository.purges, isEmpty);
     });
 
+    testWidgets('a row purge costs one tap more than Restore: kebab, menu, '
+        'then the dialog (T6)', (tester) async {
+      final repository = await pumpMixed(tester);
+
+      // The kebab opens a menu — it never fires the purge directly. The
+      // rescue action stays cheaper than the destructive one.
+      await tester.tap(find.bySemanticsLabel(english.trashRowMenuTitle).first);
+      await tester.pumpAndSettle();
+      expect(repository.purges, isEmpty);
+      expect(find.text(english.trashRowMenuTitle), findsOneWidget);
+
+      await tester.tap(find.text(english.trashPurgeAction).last);
+      await tester.pumpAndSettle();
+      expect(find.text(english.trashPurgeConfirmTitle(1)), findsOneWidget);
+
+      await tester.tap(find.text(english.trashPurgeConfirmAction).last);
+      await tester.pumpAndSettle();
+      expect(repository.purges, hasLength(1));
+    });
+
     testWidgets('confirming the dialog purges exactly the selection', (
       tester,
     ) async {

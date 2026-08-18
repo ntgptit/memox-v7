@@ -3964,6 +3964,10 @@
   "@trashPurgeAction": {
     "description": "The only destructive action in Trash (BR-266)."
   },
+  "trashRowMenuTitle": "Trash item actions",
+  "@trashRowMenuTitle": {
+    "description": "Title of the one-item overflow menu on a Trash row. Purge lives behind it so permanent deletion costs one tap more than Restore (wireframe m99-33 T6)."
+  },
   "trashSelectAction": "Select",
   "@trashSelectAction": {
     "description": "Overflow action that turns on multi-select in Trash (BR-266)."

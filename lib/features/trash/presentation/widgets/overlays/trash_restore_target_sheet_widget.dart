@@ -6,6 +6,7 @@ import '../../../../../l10n/l10n_extension.dart';
 import '../../../../../shared/widgets/mx_action_button.dart';
 import '../../../../../shared/widgets/mx_async_view.dart';
 import '../../../../../shared/widgets/mx_empty_state.dart';
+import '../../../../../shared/widgets/mx_error_state.dart';
 import '../../../../../shared/widgets/mx_list_tile.dart';
 import '../../../domain/entities/trash_batch_entity.dart';
 import '../../../domain/models/trash_restore_target_model.dart';
@@ -61,10 +62,16 @@ class _TrashRestoreTargetSheetState
         child: MxAsyncView<List<TrashRestoreTarget>>(
           value: targets,
           loadingLabel: l10n.trashRestoreTargetTitle,
-          error: (error, _) => MxEmptyState(
-            icon: Icons.error_outline,
+          // The app's one full-surface error grammar (C10): a failed read
+          // offers Retry where it failed, not a dead face the user can only
+          // dismiss. Invalidate re-runs the watch.
+          error: (error, _) => MxErrorState(
             title: l10n.trashRestoreTargetTitle,
             message: context.trashCommandError(error),
+            retryLabel: l10n.retryAction,
+            onRetry: () => ref.invalidate(
+              trashRestoreTargetsProvider(widget.batch.batchId),
+            ),
           ),
           data: (values) => _Body(
             batch: widget.batch,

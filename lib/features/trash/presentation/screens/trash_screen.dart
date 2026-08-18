@@ -15,6 +15,7 @@ import '../controllers/trash_controller.dart';
 import '../states/trash_state.dart';
 import '../widgets/items/trash_row_widget.dart';
 import '../widgets/overlays/trash_purge_dialog_widget.dart';
+import '../widgets/overlays/trash_row_menu_widget.dart';
 import '../widgets/overlays/trash_restore_target_sheet_widget.dart';
 import '../widgets/sections/trash_filter_bar_widget.dart';
 import '../widgets/sections/trash_selection_bar_widget.dart';
@@ -121,7 +122,13 @@ void _toggleSelection(WidgetRef ref, TrashBatchEntity batch) =>
 void _report(BuildContext context, String message) {
   ScaffoldMessenger.of(context)
     ..clearSnackBars()
-    ..showSnackBar(SnackBar(content: Text(message)));
+    ..showSnackBar(
+      SnackBar(
+        // Announced, not only drawn — the same liveRegion every other
+        // dynamically-appearing message in the app carries.
+        content: Semantics(liveRegion: true, child: Text(message)),
+      ),
+    );
 }
 
 class _TrashBody extends ConsumerWidget {
@@ -167,7 +174,8 @@ class _TrashBody extends ConsumerWidget {
       children: <Widget>[
         Expanded(
           child: ListView.builder(
-            padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+            // `lg`, the one number every scrollable list settled on (D21).
+            padding: const EdgeInsets.only(bottom: AppSpacing.lg),
             itemCount: visible.length + 1,
             itemBuilder: (context, index) {
               if (index == 0) return const _RetentionNotice();
@@ -182,7 +190,10 @@ class _TrashBody extends ConsumerWidget {
                 canSelect: selection.admits(batch),
                 onToggleSelection: () => _toggleSelection(ref, batch),
                 onRestore: () => _restore(context, ref, batch),
-                onPurge: () => _purge(context, ref, <String>[batch.batchId]),
+                onMenu: () => showTrashRowMenu(
+                  context,
+                  onPurge: () => _purge(context, ref, <String>[batch.batchId]),
+                ),
               );
             },
           ),

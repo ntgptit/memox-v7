@@ -36,7 +36,9 @@ void showMxUndoSnackBar(
     ..clearSnackBars()
     ..showSnackBar(
       SnackBar(
-        content: Text(message),
+        // Announced, not only drawn — the undo window is short, and a screen
+        // reader user who is not told it opened cannot use it at all.
+        content: Semantics(liveRegion: true, child: Text(message)),
         duration: kMxUndoDuration,
         action: SnackBarAction(
           label: undoLabel,

@@ -22,7 +22,7 @@ import '../support/card_failure_labels_widget.dart';
 /// leaves the user to guess how many rows a selection covers — and after a
 /// Select all that number is the whole filtered deck. The study history goes
 /// with the cards, which is the part nobody predicts from the word "delete",
-/// and this build has no Trash to take it back from.
+/// and the batch goes to Trash and can come back for 30 days (BR-256).
 ///
 /// Returns true only when the user confirmed.
 Future<bool> showCardBulkDeleteConfirm(
@@ -32,6 +32,9 @@ Future<bool> showCardBulkDeleteConfirm(
   final confirmed = await showDialog<bool>(
     context: context,
     builder: (dialogContext) => MxConfirmDialog(
+      // `cautious`, like the single-item deletes this PR relabelled:
+      // the batch is recoverable, but Cancel keeps the default focus.
+      variant: MxConfirmDialogVariant.cautious,
       title: dialogContext.l10n.cardBulkDeleteTitle(count),
       message: dialogContext.l10n.cardBulkDeleteMessage,
       confirmLabel: dialogContext.l10n.cardBulkDeleteConfirmAction,

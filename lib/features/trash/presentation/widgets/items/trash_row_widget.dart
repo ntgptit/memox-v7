@@ -26,7 +26,7 @@ class TrashRowWidget extends StatelessWidget {
     required this.isSelected,
     required this.canSelect,
     required this.onRestore,
-    required this.onPurge,
+    required this.onMenu,
     required this.onToggleSelection,
     super.key,
   });
@@ -45,7 +45,10 @@ class TrashRowWidget extends StatelessWidget {
   final bool canSelect;
 
   final VoidCallback onRestore;
-  final VoidCallback onPurge;
+
+  /// Opens the row's overflow menu; what it holds is the screen's
+  /// business (wireframe T6 keeps purge one tap behind Restore).
+  final VoidCallback onMenu;
   final VoidCallback onToggleSelection;
 
   @override
@@ -114,9 +117,9 @@ class TrashRowWidget extends StatelessWidget {
                   ),
                   MxIconButton(
                     icon: Icons.more_vert,
-                    semanticLabel: l10n.trashPurgeAction,
-                    tooltip: l10n.trashPurgeAction,
-                    onPressed: onPurge,
+                    semanticLabel: l10n.trashRowMenuTitle,
+                    tooltip: l10n.trashRowMenuTitle,
+                    onPressed: onMenu,
                   ),
                 ],
               ],
