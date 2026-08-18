@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/deck/domain/models/deck_name_model.dart';
+import 'package:memox/features/progress/data/datasources/progress_dao.dart';
+import 'package:memox/features/progress/data/repositories/progress_repository_impl.dart';
 import 'package:memox/features/study/data/datasources/study_dao.dart';
 import 'package:memox/features/study/data/repositories/study_repository_impl.dart';
 
@@ -84,6 +86,25 @@ void main() {
     // this is the read a bulk delete acts on.
     final ids = await h.cardRepository.readCardIdsMatching(tree.leaf.id);
     expect(ids, <String>[tree.cardIds.last]);
+  });
+
+  test('progress drops a deck that is in Trash', () async {
+    // The static guard proves `progress.drift` mentions the exclusion; this
+    // drives the production repository and proves the level actually empties.
+    final tree = await h.seedTree();
+    final progress = ProgressRepositoryImpl(ProgressDao(h.db));
+
+    var level = await progress
+        .watchDeckActivity(deckId: null, now: h.now, utcOffset: Duration.zero)
+        .first;
+    expect(level.decks.map((deck) => deck.deckId), contains(tree.root.id));
+
+    await h.deckRepository.deleteDeck(tree.root.id);
+
+    level = await progress
+        .watchDeckActivity(deckId: null, now: h.now, utcOffset: Duration.zero)
+        .first;
+    expect(level.decks, isEmpty);
   });
 
   test('a move picker does not offer a deleted deck', () async {
