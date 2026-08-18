@@ -10458,7 +10458,12 @@ nên nó **phải** được chạy trước khi ai đó coi Settings v1 là đ�
         (BR-244).
   - [x] Thẻ đã xoá → not-found có kiểu, không lộ id/SQL (BR-245).
   - [x] Mở/cuộn/tải thêm không ghi gì vào database (BR-239).
-  - [x] Tám mặt của W3 render được; EN/VI, light/dark, 320dp@2.0.
+  - [x] Tám mặt của W3 đều dựng và kiểm được: bốn mặt tĩnh có PNG trong
+        `test/demo/` (loaded, no-history, page error, not-found), bốn mặt
+        động (loading, loading-more, Load more, lỗi đọc cấp màn) ghim bằng
+        widget test và mở được trong Widgetbook — "render" ở đây nghĩa là
+        pump và assert, không phải mặt nào cũng có ảnh. EN/VI, light/dark,
+        320dp@2.0.
   - [ ] `flutter test integration_test/ -d emulator-5554 --flavor development`
         — **hoãn, chưa chạy**: cần emulator, và CI cố ý không chạy suite này.
         Đây là món nợ thật của task, không phải một mục đã miễn: `lib/app/`
