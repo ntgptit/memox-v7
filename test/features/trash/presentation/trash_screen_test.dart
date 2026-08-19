@@ -154,6 +154,28 @@ void main() {
   });
 
   group('selection (BR-266)', () {
+    testWidgets('Select follows the filter: cards-only trash, Decks filter, '
+        'no dead icon', (tester) async {
+      await pumpTrash(
+        tester,
+        batches: <TrashBatchEntity>[fakeBatch(id: 'b1', name: 'a card')],
+      );
+      expect(find.bySemanticsLabel(english.trashSelectAction), findsOneWidget);
+
+      await tester.tap(find.text(english.trashFilterDecks));
+      await tester.pumpAndSettle();
+
+      // The body shows the filtered emptiness — and the app bar must not
+      // keep offering a Select that would silently do nothing.
+      expect(
+        find.bySemanticsLabel(english.trashSelectAction),
+        findsNothing,
+        reason:
+            'the unfiltered list is non-empty, but nothing under the active '
+            'filter is selectable',
+      );
+    });
+
     Future<FakeTrashRepository> pumpMixed(WidgetTester tester) => pumpTrash(
       tester,
       batches: <TrashBatchEntity>[
