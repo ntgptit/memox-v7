@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memox/features/deck/domain/models/deck_name_model.dart';
+import 'package:memox/features/reminder/data/datasources/reminder_dao.dart';
+import 'package:memox/features/reminder/data/repositories/reminder_workload_repository_impl.dart';
 import 'package:memox/features/progress/data/datasources/progress_dao.dart';
 import 'package:memox/features/progress/data/repositories/progress_repository_impl.dart';
 import 'package:memox/features/study/data/datasources/study_dao.dart';
@@ -105,6 +107,36 @@ void main() {
         .watchDeckActivity(deckId: null, now: h.now, utcOffset: Duration.zero)
         .first;
     expect(level.decks, isEmpty);
+  });
+
+  test('the reminder counts nothing that is in Trash', () async {
+    // `query_inventory_test` proves the statement mentions the exclusion;
+    // this drives the production repository over a tombstone and proves the
+    // due count actually drops — the same two-guard split every other
+    // surface in this file gets.
+    final tree = await h.seedTree(cardCount: 2);
+    await h.db.customStatement(
+      'UPDATE card_study_states SET learned_at = 1, due_at = 1',
+    );
+    final reminder = ReminderWorkloadRepositoryImpl(ReminderDao(h.db));
+
+    var workload = await reminder.readWorkload(
+      now: h.now,
+      utcOffset: Duration.zero,
+    );
+    expect(workload.single.dueTodayCount + workload.single.overdueCount, 2);
+
+    await h.cardRepository.deleteCard(tree.cardIds.first);
+
+    workload = await reminder.readWorkload(
+      now: h.now,
+      utcOffset: Duration.zero,
+    );
+    expect(
+      workload.single.dueTodayCount + workload.single.overdueCount,
+      1,
+      reason: 'a card in Trash is not due anywhere (BR-257)',
+    );
   });
 
   test('a move picker does not offer a deleted deck', () async {

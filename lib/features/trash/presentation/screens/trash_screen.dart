@@ -74,7 +74,10 @@ class TrashScreen extends ConsumerWidget {
         value: batches,
         loadingLabel: l10n.trashTitle,
         error: (error, _) => MxErrorState(
-          title: l10n.trashTitle,
+          // The "Couldn't …" phrase is the headline, like every sibling
+          // screen-level failure; the screen name alone told the user
+          // nothing about what went wrong.
+          title: l10n.trashLoadErrorTitle,
           message: l10n.trashLoadFailed,
           retryLabel: l10n.trashRetryAction,
           onRetry: () => ref.invalidate(trashBatchesProvider),

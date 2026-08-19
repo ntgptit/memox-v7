@@ -9,7 +9,7 @@
 /// would fix a URL shape before the screen exists to argue with it, and a
 /// constant nobody uses reads as a decision that has been made when it has
 /// not. [progress] and [settings] cleared that bar with AD-19: each is a real
-/// shell branch with a screen — a placeholder, but a rendered, navigable one.
+/// shell branch with a screen. Progress and Settings began as rendered, navigable placeholders (AD-19) and have since been filled in.
 abstract final class RoutePaths {
   /// The app's home, and the initial branch of the navigation shell: content
   /// management is what the user opens the app into.
@@ -110,7 +110,7 @@ abstract final class RoutePaths {
   static const String progressDeckRelative = ':deckId';
 
   /// The settings branch. Same contract as [progress]: a real, deep-linkable
-  /// branch whose screen is a placeholder until app settings exist (AD-19).
+  /// branch filled in by M99.28 after starting as an AD-19 placeholder.
   static const String settings = '/settings';
 
   /// The daily-reminder screen, **relative** to [settings] so the full location

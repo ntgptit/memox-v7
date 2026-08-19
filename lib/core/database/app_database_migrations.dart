@@ -159,7 +159,6 @@ extension _AppDatabaseMigrations on AppDatabase {
   }
 
   /// The v7 → v8 upgrade: three nullable columns and one backfill (BR-203).
-  /// The v4 → v5 upgrade.
   ///
   /// **`ALTER TABLE … ADD COLUMN`, not a rebuild.** The three tables gain a
   /// constraint rather than change one, and SQLite allows a `CHECK` on an added

@@ -4024,6 +4024,10 @@
   "@trashLoadFailed": {
     "description": "Error state of the Trash list (UC-21 E5)."
   },
+  "trashLoadErrorTitle": "Chưa mở được Trash",
+  "@trashLoadErrorTitle": {
+    "description": "Title of the full-screen error face when the Trash list itself fails to load. The \"Couldn’t …\" phrase carries the error, like every other screen-level load failure; the message below is the supporting line."
+  },
   "trashRetryAction": "Thử lại",
   "@trashRetryAction": {
     "description": "Retry action on the Trash error state."

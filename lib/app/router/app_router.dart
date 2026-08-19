@@ -256,19 +256,16 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
               ),
             ],
           ),
-          //
-          // Progress is still scaffolded (AD-19): one route, and the screen is
-          // Progress, at two levels (UC-12, UC-13). `/progress` is the one
-          // The branch around it did not move: same path, same name, same
+          // Progress, at two levels (UC-12, UC-13). `/progress` is the
+          // overview the owner settled on — three sections under one header,
+          // then the range selector, the totals and the deck rows.
           // `/progress/:deckId` is one deck's level, nested so drilling in
-          // both features together cost this one `builder` plus one child route.
-          // header, then the range selector, the totals and the deck rows.
-          // index. That is what AD-19 scaffolded the branch early to buy, and
-          // level above, and switching tabs and back finds the deck still open.
-          // no repository, open no session and write nothing.
-          // presentation-only — entering, leaving or switching to it must read
-          // pushes onto this branch — the bottom bar stays, Back returns to the
-          // screen the owner settled on: the overview's three sections as a
+          // pushes onto this branch: the bottom bar stays, Back returns to
+          // the level above, and switching tabs and back finds the deck still
+          // open. The branch around the feature did not move — same path,
+          // same name, same index — which is what AD-19 scaffolded it early
+          // to buy; landing both features cost this one `builder` plus one
+          // child route.
           StatefulShellBranch(
             routes: <RouteBase>[
               GoRoute(
@@ -297,12 +294,10 @@ GoRouter createAppRouter({String initialLocation = RoutePaths.decks}) {
               ),
             ],
           ),
-          // Settings left that state at M99.28 (UC-16). The path, the name and
-          // The one branch still scaffolded ahead of its feature (AD-19). Its
-          // must read no repository and write nothing.
-          // of it, which is what AD-19 was betting on.
-          // screen is presentation-only: entering, leaving or switching to it
-          // the branch order are unchanged — replacing the screen was the whole
+          // Settings was the last branch scaffolded ahead of its feature
+          // (AD-19) and left that state at M99.28 (UC-16). The path, the
+          // name and the branch order are unchanged — replacing the screen
+          // was the whole of it, which is what AD-19 was betting on.
           StatefulShellBranch(
             routes: <RouteBase>[
               GoRoute(

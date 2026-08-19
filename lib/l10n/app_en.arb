@@ -3091,7 +3091,7 @@
   "@studyHomeOpenLibraryAction": {
     "description": "Takes the user to the deck tree, where cards are added."
   },
-  "studyHomeErrorTitle": "Could not load your decks",
+  "studyHomeErrorTitle": "Couldn’t load your decks",
   "@studyHomeErrorTitle": {
     "description": "Failure state of the Study tab. Names no table, no query and no path (AD-04)."
   },
@@ -3779,7 +3779,7 @@
   "@librarySearchNoResultsMessage": {
     "description": "Body of the empty-result state. Repeats the scope, because the most useful next thought is then it is somewhere else, or then I spelled it differently."
   },
-  "librarySearchErrorTitle": "Could not search",
+  "librarySearchErrorTitle": "Couldn’t search",
   "@librarySearchErrorTitle": {
     "description": "Heading when the first page of a search failed."
   },
@@ -4042,6 +4042,10 @@
   "trashLoadFailed": "Trash couldn’t be opened. Try again.",
   "@trashLoadFailed": {
     "description": "Error state of the Trash list (UC-21 E5)."
+  },
+  "trashLoadErrorTitle": "Couldn’t open Trash",
+  "@trashLoadErrorTitle": {
+    "description": "Title of the full-screen error face when the Trash list itself fails to load. The \"Couldn’t …\" phrase carries the error, like every other screen-level load failure; the message below is the supporting line."
   },
   "trashRetryAction": "Try again",
   "@trashRetryAction": {
